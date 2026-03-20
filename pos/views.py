@@ -4308,3 +4308,41 @@ def session_report_json(request, session_id):
             for r in receipts
         ],
     })
+
+
+
+@login_required
+def dsfinvk_export(request):
+    """DSFinV-K Export Download — ZIP fuer Finanzamt."""
+    from datetime import date, timedelta
+    from django.http import HttpResponse
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'Keine Firma'}, status=400)
+
+    # Only for DE companies
+    if company.country not in ('DE', 'AT'):
+        return JsonResponse({'error': 'DSFinV-K ist nur fuer DE/AT Firmen'}, status=400)
+
+    date_from = request.GET.get('from', '')
+    date_to = request.GET.get('to', '')
+
+    if date_from:
+        date_from = date.fromisoformat(date_from)
+    else:
+        today = date.today()
+        date_from = today.replace(day=1) - timedelta(days=1)
+        date_from = date_from.replace(day=1)
+
+    if date_to:
+        date_to = date.fromisoformat(date_to)
+    else:
+        date_to = date.today()
+
+    from pos.dsfinvk_export import generate_dsfinvk_export
+    zip_bytes = generate_dsfinvk_export(company, date_from, date_to)
+
+    filename = 'DSFinV-K_%s_%s_%s.zip' % (company.oib, date_from.isoformat(), date_to.isoformat())
+    response = HttpResponse(zip_bytes, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response

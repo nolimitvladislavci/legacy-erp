@@ -1,59 +1,62 @@
-import csv, io, zipfile, os
-from decimal import Decimal
+"""
+DSFinV-K Export Management Command.
+
+Usage:
+    python manage.py export_dsfinvk <company_uuid> --from 2026-01-01 --to 2026-03-31
+    python manage.py export_dsfinvk <company_uuid>  (default: letzter Monat)
+"""
+from datetime import date, timedelta
 from django.core.management.base import BaseCommand
-from pos.models import POSReceipt, POSSession
+
 
 class Command(BaseCommand):
-    help = 'Generira DSFinV-K export koristeći stvarna polja baze.'
+    help = 'Exportiert DSFinV-K konformen ZIP fuer das Finanzamt.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--company-id', type=str, required=True)
-    
-    def fmt_dec(self, value):
-        if value is None: return "0,00"
-        return str(Decimal(str(value)).quantize(Decimal('0.00'))).replace('.', ',')
+        parser.add_argument('company_id', type=str, help='Company UUID oder OIB')
+        parser.add_argument('--from', dest='date_from', type=str, default='', help='Start (YYYY-MM-DD)')
+        parser.add_argument('--to', dest='date_to', type=str, default='', help='Ende (YYYY-MM-DD)')
+        parser.add_argument('--output', type=str, default='', help='Output Pfad (default: dsfinvk_DATE.zip)')
 
     def handle(self, *args, **options):
-        c_id = options['company_id']
-        sessions = POSSession.objects.filter(terminal__company_id=c_id)
-        if not sessions.exists():
-            self.stdout.write(self.style.WARNING(f"Nema sesija za ID {c_id}"))
-            return
+        from companies.models import Company
+        from pos.dsfinvk_export import generate_dsfinvk_export
 
-        transactions, lines, closing = [], [], []
-        for s in sessions:
-            # Polje opened_at koje smo jučer potvrdili
-            op_at = s.opened_at.isoformat() if s.opened_at else "N/A"
-            closing.append([s.terminal.name, op_at, s.id, op_at[:10]])
-            
-            for r in POSReceipt.objects.filter(session=s):
-                transactions.append([
-                    s.terminal.name, op_at, str(r.uuid), 
-                    r.receipt_number, 'Beleg', 
-                    r.fiscal_datetime.isoformat() if r.fiscal_datetime else '', 
-                    r.zki[:10] if r.zki else ''
-                ])
-                # Jedna testna stavka za svaki račun koristeći polje 'total'
-                lines.append([
-                    s.terminal.name, op_at, str(r.uuid), 
-                    1, 'TEST-ART', 'Testna stavka', '1,00', 
-                    self.fmt_dec(r.total), '1'
-                ])
+        # Find company
+        cid = options['company_id']
+        try:
+            company = Company.objects.get(pk=cid)
+        except Exception:
+            try:
+                company = Company.objects.get(oib=cid)
+            except Company.DoesNotExist:
+                self.stderr.write('Firma nicht gefunden: %s' % cid)
+                return
 
-        zip_buffer = io.BytesIO()
-        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for name, head, data in [
-                ('transactions.csv', ['Z_KASSE_ID', 'Z_ERSTELLUNG', 'BON_ID', 'BON_NR', 'BON_TYP', 'TSE_SIGNATUR_ERSTELLUNG', 'TSE_ZERTIFIKAT_ID'], transactions),
-                ('lines.csv', ['Z_KASSE_ID', 'Z_ERSTELLUNG', 'BON_ID', 'POS_ZEILE', 'ART_NR', 'ART_NAME', 'MENGE', 'PREIS', 'UST_SCHLUESSEL'], lines),
-                ('cashpointclosing.csv', ['Z_KASSE_ID', 'Z_ERSTELLUNG', 'Z_NR', 'Z_BUCHUNGSTAG'], closing)
-            ]:
-                out = io.StringIO()
-                w = csv.writer(out, delimiter=';', lineterminator='\r\n')
-                w.writerow(head)
-                w.writerows(data)
-                zipf.writestr(name, out.getvalue().encode('utf-8'))
+        # Date range
+        if options['date_from']:
+            date_from = date.fromisoformat(options['date_from'])
+        else:
+            today = date.today()
+            date_from = today.replace(day=1) - timedelta(days=1)
+            date_from = date_from.replace(day=1)
 
-        filename = f"DSFinV_K_Export_{c_id[:8]}.zip"
-        with open(filename, 'wb') as f:
-            f.write(zip_buffer.getvalue())
-        self.stdout.write(self.style.SUCCESS(f'[✔] ZIP kreiran: {filename}'))
+        if options['date_to']:
+            date_to = date.fromisoformat(options['date_to'])
+        else:
+            date_to = date.today()
+
+        self.stdout.write('Firma: %s (%s)' % (company.name, company.oib))
+        self.stdout.write('Zeitraum: %s bis %s' % (date_from, date_to))
+
+        zip_bytes = generate_dsfinvk_export(company, date_from, date_to)
+
+        output_path = options['output'] or 'dsfinvk_%s_%s_%s.zip' % (
+            company.oib, date_from.isoformat(), date_to.isoformat()
+        )
+        with open(output_path, 'wb') as f:
+            f.write(zip_bytes)
+
+        self.stdout.write(self.style.SUCCESS(
+            'DSFinV-K Export: %s (%d bytes)' % (output_path, len(zip_bytes))
+        ))

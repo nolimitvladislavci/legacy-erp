@@ -138,4 +138,7 @@ urlpatterns = [
     path('receipt/<int:receipt_id>/public/',       views.receipt_public,       name='receipt_public'),
     path('receipt/<int:receipt_id>/drawer-kick/',  views.receipt_drawer_kick,  name='receipt_drawer_kick'),
     path('api/delivery-settings/',                views.pos_delivery_settings, name='delivery_settings'),
+
+    # DSFinV-K Export (DE Kassenarchiv)
+    path('dsfinvk-export/',                       views.dsfinvk_export,       name='dsfinvk_export'),
 ]
