@@ -5,6 +5,7 @@
 <style>
 .page{padding:1.5rem}.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
 .page-title{font-size:1.25rem;font-weight:700}
+.dsfinvk-btn{display:inline-flex;align-items:center;gap:.4rem;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:.5rem 1rem;border-radius:8px;font-size:.8rem;font-weight:600;text-decoration:none;cursor:pointer}.dsfinvk-btn:hover{background:rgba(201,168,76,.25)}
 .terminals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
 .tc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;transition:border-color .2s}
 .tc:hover{border-color:var(--gold)}
@@ -24,7 +25,13 @@
 {% block content %}
 <div class="page">
   <div class="page-header">
-    <div class="page-title">{% trans "POS Terminali" %}</div>
+    <div class="page-title">{% trans "POS Terminali" %}
+    {% if company.country == 'DE' or company.country == 'AT' %}
+    <a href="{% url 'pos:dsfinvk_export' %}" class="dsfinvk-btn" title="DSFinV-K Kassenarchiv Export">
+      &#128230; DSFinV-K Export
+    </a>
+    {% endif %}
+</div>
     <a href="{% url 'pos:new_terminal' %}" class="btn btn-ghost btn-sm">{% trans "+ Novi terminal" %}</a>
     <a href="{% url 'pos:pos_settings' %}" class="btn btn-ghost btn-sm">{% trans "&#9881; Postavke" %}</a>
     <a href="/inventory/inventura/" class="btn btn-ghost btn-sm" style="color:var(--yellow,#f59e0b)">{% trans "&#128203; Inventura" %}</a>
