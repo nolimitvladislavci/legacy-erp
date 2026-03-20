@@ -255,6 +255,20 @@ def _build_racun(receipt, oib, ozn_pos_pr, ozn_nap_ur, zki, dt) -> etree._Elemen
         nacin = NACIN_PLAC.get(pay.method, 'O')
     sub(racun, 'NacinPlac', nacin)
 
+    # HR Napojnica (od 01.01.2024 — NN 156/2023)
+    tip_items = [i for i in receipt.items.all() if i.is_tip and not i.is_tip_employer]
+    if tip_items:
+        from decimal import Decimal
+        tip_total = sum(i.unit_price * i.quantity for i in tip_items)
+        if tip_total > 0:
+            nap_el = sub(racun, 'Napojnica')
+            sub(nap_el, 'IznosN', f'{tip_total:.2f}')
+            # Nacin placanja napojnice: K=Kartica, G=Gotovina
+            tip_pay = 'G'
+            if pay and pay.method in ('CARD', 'REVOLUT', 'MOBILE'):
+                tip_pay = 'K'
+            sub(nap_el, 'NacinPlacanjaN', tip_pay)
+
     sub(racun, 'OibOper', oib)    # Operator OIB (ideally individual's OIB)
     sub(racun, 'ZastKod', zki)
     sub(racun, 'NakDost', 'false')

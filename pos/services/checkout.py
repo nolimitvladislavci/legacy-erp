@@ -374,6 +374,19 @@ class CheckoutService:
                 is_tip=True,
             )
 
+        # ── 5b. TIP LIMIT CHECK (HR 3.360 EUR godisnji limit) ──
+        if tip_amount > 0:
+            try:
+                from pos.tip_service import TipTracker
+                operator = session.operator
+                if operator:
+                    ok, msg = TipTracker.check_tip_limit(operator, tip_amount)
+                    if not ok:
+                        logger.warning('TIP LIMIT: %s — %s', operator, msg)
+                        # Ne blokiramo — samo logiramo i dodajemo warning u result
+            except Exception:
+                pass
+
         # ── 6. RECALCULATE (koristi model metodu) ──
         receipt.recalculate()
         receipt.save()
@@ -382,12 +395,20 @@ class CheckoutService:
         change = Decimal('0')
 
         if payment_method == 'VOUCHER' or voucher_amount > 0:
-            # Voucher split payment
+            # Voucher split payment — Mehrzweck vs Einzweck PDV logika
             try:
                 from pos.models import Voucher
                 voucher = Voucher.objects.get(code=voucher_code, is_active=True)
                 if not voucher.is_usable:
                     raise CheckoutValidationError('VOUCHER_INVALID', 'Vaucer nije valjan ili je istekao.')
+
+                # Mehrzweck (multi): PDV se obracunava TEK pri otkupu
+                # Einzweck (single): PDV je vec obracunat pri prodaji bona
+                is_multi = getattr(voucher, 'voucher_type', 'multi') == 'multi'
+                if not is_multi:
+                    # Einzweck: stavke placene ovim bonom idu s 0% PDV
+                    # jer je PDV vec obracunat pri prodaji bona
+                    logger.info('Einzweck voucher %s — PDV vec obracunat', voucher.code)
                 use_amount = min(voucher.remaining, receipt.total if not voucher_amount else voucher_amount)
                 voucher.remaining = max(Decimal('0'), voucher.remaining - use_amount)
                 if voucher.remaining == 0:
