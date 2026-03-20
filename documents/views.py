@@ -3016,12 +3016,36 @@ def verfahren_sign(request):
     if not signature_b64 or not signer_name:
         return JsonResponse({'error': 'Potpis i ime su obavezni'}, status=400)
 
-    # Save as ArhivaEntry
+    # Audit trail — pravno neoboriv potpis
+    import hashlib
+    # SHA-256 hash verzije dokumenta u trenutku potpisa
+    doc_path = '/var/www/fina-connect/docs/Verfahrensdokumentation_LIMIT_Connect.md'
+    try:
+        with open(doc_path, 'rb') as df:
+            doc_hash = hashlib.sha256(df.read()).hexdigest()
+    except Exception:
+        doc_hash = 'FILE_NOT_FOUND'
+
+    client_ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
+    user_agent = request.META.get('HTTP_USER_AGENT', '')[:300]
+
     from documents.models import ArhivaEntry
+
+    # Duplicate check
+    existing = ArhivaEntry.objects.filter(
+        company=company, source_type='verfahren_sign',
+    ).first()
+    if existing:
+        return JsonResponse({
+            'ok': True,
+            'message': 'Dokument je vec potpisan (%s).' % existing.doc_date,
+            'already_signed': True,
+        })
+
     entry = ArhivaEntry(
         company=company,
         source_type='verfahren_sign',
-        source_id='verfahren_%s' % request.user.pk,
+        source_id='verfahren_%s_%s' % (request.user.pk, doc_hash[:8]),
         doc_number='VD-%s' % timezone.now().strftime('%Y%m%d'),
         partner_name=signer_name,
         amount=0,
@@ -3029,6 +3053,27 @@ def verfahren_sign(request):
         doc_date=timezone.now().date(),
     )
     entry.save()
+
+    # Store audit trail metadata
+    try:
+        from superadmin_ai.models import PendingAIAction
+        PendingAIAction.objects.create(
+            company=company,
+            module='verfahren_sign',
+            action_type='audit_signature',
+            description='Verfahrensdokumentation potpisan: %s (%s)' % (signer_name, company.name),
+            payload={
+                'signer_name': signer_name,
+                'client_ip': client_ip,
+                'user_agent': user_agent,
+                'document_hash': doc_hash,
+                'timestamp': str(timezone.now()),
+                'entry_id': entry.pk,
+            },
+            status='completed',
+        )
+    except Exception:
+        pass
 
     # Save signature image
     import base64, os

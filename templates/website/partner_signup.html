@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertriebspartner werden — LIMIT Connect</title>
+<meta name="description" content="Werden Sie Vertriebspartner von LIMIT Connect. 20% monatliche Provision, keine Fixkosten, keine Verpflichtungen.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--dark:#0a0a0a;--card:#111214;--border:#1e293b;--text:#e8e8e8;--muted:#94a3b8;--green:#22c55e}
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;justify-content:space-between;align-items:center}
+nav a.logo{color:var(--gold);font-weight:800;font-size:1.1rem;text-decoration:none}
+nav a.logo span{color:var(--text)}
+.hero{padding:7rem 2rem 3rem;text-align:center}
+.hero h1{font-size:2.5rem;font-weight:800;margin-bottom:.5rem}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--muted);font-size:1.05rem;max-width:600px;margin:0 auto 2rem}
+.benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;max-width:900px;margin:0 auto 3rem;padding:0 2rem}
+.ben{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center}
+.ben .num{font-size:2rem;font-weight:800;color:var(--gold)}
+.ben .lbl{font-size:.85rem;color:var(--muted)}
+.form-wrap{max-width:700px;margin:0 auto;padding:0 2rem 4rem}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.form-card h2{font-size:1.3rem;font-weight:700;margin-bottom:1.5rem;color:var(--gold)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.7rem 1rem;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;box-sizing:border-box}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold);outline:none}
+.legal-box{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:1rem;margin:1.5rem 0;font-size:.8rem;color:var(--muted);max-height:200px;overflow-y:auto;line-height:1.5}
+.legal-box h4{color:var(--gold);font-size:.85rem;margin:0 0 .5rem}
+.check-row{display:flex;align-items:flex-start;gap:.5rem;margin:.75rem 0}
+.check-row input{margin-top:3px;accent-color:var(--gold)}
+.check-row label{font-size:.82rem;color:var(--muted)}
+.btn-gold{background:var(--gold);color:#000;font-weight:700;padding:.9rem 2rem;border-radius:10px;border:none;font-size:1rem;cursor:pointer;width:100%;margin-top:1rem;transition:opacity .2s}
+.btn-gold:hover{opacity:.85}
+.btn-gold:disabled{opacity:.4;cursor:not-allowed}
+.success-box{display:none;text-align:center;padding:3rem}
+.success-box .icon{font-size:4rem;margin-bottom:1rem}
+.success-box h2{color:var(--green);margin-bottom:.5rem}
+.lang-switch{display:flex;gap:4px}
+.lang-switch a{padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700;text-decoration:none;border:1px solid var(--border);color:var(--muted)}
+.lang-switch a.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.status-msg{margin-top:1rem;padding:.8rem;border-radius:8px;font-size:.85rem;display:none}
+.status-msg.error{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3);display:block}
+.status-msg.success{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3);display:block}
+footer{padding:2rem;text-align:center;color:#333;font-size:.75rem}
+footer a{color:var(--gold);text-decoration:none}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}.hero h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+
+<nav>
+<a href="/de/" class="logo">LIMIT<span>CONNECT</span></a>
+<div class="lang-switch">
+<a href="?lang=de" class="active" id="lang-de">DE</a>
+<a href="?lang=hr" id="lang-hr">HR</a>
+</div>
+</nav>
+
+<section class="hero">
+<h1 id="t-title">Werden Sie <span>Vertriebspartner</span></h1>
+<p id="t-sub">20% monatliche Provision für jeden vermittelten Kunden. Keine Fixkosten, kein Risiko.</p>
+</section>
+
+<div class="benefits">
+<div class="ben"><div class="num">20%</div><div class="lbl" id="t-b1">Monatliche Provision</div></div>
+<div class="ben"><div class="num">12</div><div class="lbl" id="t-b2">Monate Laufzeit pro Kunde</div></div>
+<div class="ben"><div class="num">0€</div><div class="lbl" id="t-b3">Startkosten</div></div>
+</div>
+
+<div class="form-wrap">
+<div class="form-card" id="signup-form-wrap">
+<h2 id="t-form-title"><i class="fas fa-handshake" style="margin-right:.5rem"></i> Online-Registrierung</h2>
+
+<form id="partnerForm">
+<div class="form-row">
+<div class="form-group">
+<label id="t-vorname">Vorname *</label>
+<input type="text" name="first_name" required>
+</div>
+<div class="form-group">
+<label id="t-nachname">Nachname *</label>
+<input type="text" name="last_name" required>
+</div>
+</div>
+
+<div class="form-group">
+<label>E-Mail *</label>
+<input type="email" name="email" required>
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label id="t-telefon">Telefon / WhatsApp *</label>
+<input type="tel" name="phone" required placeholder="+49 177 ...">
+</div>
+<div class="form-group">
+<label id="t-land">Land *</label>
+<select name="country" id="countrySelect">
+<option value="DE">Deutschland</option>
+<option value="AT">Österreich</option>
+<option value="HR">Hrvatska</option>
+<option value="CH">Schweiz</option>
+</select>
+</div>
+</div>
+
+<div class="form-group">
+<label id="t-adresse">Adresse</label>
+<input type="text" name="address" placeholder="Straße, PLZ, Ort">
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label id="t-steuerid">Steuer-ID / OIB</label>
+<input type="text" name="tax_id" placeholder="Optional">
+</div>
+<div class="form-group">
+<label>IBAN *</label>
+<input type="text" name="iban" required placeholder="DE89 3704 ...">
+</div>
+</div>
+
+<div class="form-group">
+<label id="t-region">Vertriebsgebiet</label>
+<input type="text" name="region" placeholder="z.B. Baden-Württemberg, Paderborn">
+</div>
+
+<!-- Ugovorni tekst -->
+<div class="legal-box" id="legal-text">
+<h4>Tippgeber-Vereinbarung (Zusammenfassung)</h4>
+<p><strong>Auftraggeber:</strong> Konjik d.o.o., OIB: 37590751921</p>
+<p><strong>Gegenstand:</strong> Der Tippgeber vermittelt Kontaktdaten potenzieller Kunden für LIMIT Connect. Er ist nicht befugt, Verträge abzuschließen oder Preise zu verhandeln.</p>
+<p><strong>Provision:</strong> 20% der monatlichen Netto-Kundengebühr, 12 Monate ab Kundenvertrag. Monatliche Abrechnung, Auszahlung innerhalb 14 Tagen.</p>
+<p><strong>Steuer:</strong> Der Tippgeber ist für die Versteuerung selbst verantwortlich (§ 22 Nr. 3 EStG). Einnahmen unter 256€/Jahr sind steuerfrei.</p>
+<p><strong>Kündigung:</strong> Jederzeit mit 4 Wochen Frist zum Monatsende. Bestehende Provisionsansprüche bleiben erhalten.</p>
+<p><strong>Recht:</strong> Es gilt deutsches Recht. Gerichtsstand: Paderborn.</p>
+<p style="margin-top:10px;font-size:.75rem">Vollständiger Vertrag wird nach Registrierung per E-Mail zugestellt. | Gemäß §§ 611 ff. BGB</p>
+</div>
+
+<div class="check-row">
+<input type="checkbox" id="agree1" required>
+<label for="agree1" id="t-agree1">Ich habe die Tippgeber-Vereinbarung gelesen und stimme den Bedingungen zu. *</label>
+</div>
+<div class="check-row">
+<input type="checkbox" id="agree2" required>
+<label for="agree2" id="t-agree2">Ich bestätige, dass ich als unabhängiger Tippgeber handle und nicht als Angestellter des Auftraggebers. *</label>
+</div>
+<div class="check-row">
+<input type="checkbox" id="agree3" required>
+<label for="agree3" id="t-agree3">Ich bin für die Versteuerung meiner Provisionseinnahmen selbst verantwortlich. *</label>
+</div>
+
+<button type="submit" class="btn-gold" id="submitBtn">
+<i class="fas fa-file-signature" style="margin-right:.5rem"></i>
+<span id="t-submit">Vertrag digital unterzeichnen</span>
+</button>
+
+<div class="status-msg" id="statusMsg"></div>
+</form>
+</div>
+
+<!-- Success -->
+<div class="success-box" id="success-box">
+<div class="icon">🎉</div>
+<h2 id="t-success-title">Willkommen im Team!</h2>
+<p id="t-success-text" style="color:var(--muted)">Ihr Partner-Vertrag wurde erstellt. Sie erhalten in Kürze eine E-Mail mit:</p>
+<div style="text-align:left;max-width:400px;margin:1rem auto;font-size:.9rem">
+<div style="padding:.5rem 0;border-bottom:1px solid var(--border)"><i class="fas fa-file-contract" style="color:var(--gold);margin-right:.5rem"></i> Vollständiger Vertrag (PDF)</div>
+<div style="padding:.5rem 0;border-bottom:1px solid var(--border)"><i class="fas fa-id-card" style="color:var(--gold);margin-right:.5rem"></i> Ihre Legitimationskarte</div>
+<div style="padding:.5rem 0;border-bottom:1px solid var(--border)"><i class="fas fa-link" style="color:var(--gold);margin-right:.5rem"></i> Ihr persönlicher Referral-Link</div>
+<div style="padding:.5rem 0"><i class="fas fa-book" style="color:var(--gold);margin-right:.5rem"></i> Verkaufsleitfaden & Materialien</div>
+</div>
+<p style="margin-top:1.5rem"><a href="/de/" style="color:var(--gold)">← Zurück zur Startseite</a></p>
+</div>
+</div>
+
+<!-- Preporuči nas / Empfehlen Sie uns -->
+<section style="padding:3rem 2rem;text-align:center;background:#050508">
+<h2 style="font-size:1.5rem;font-weight:800;margin-bottom:.5rem" id="t-rec-title">Empfehlen Sie uns weiter</h2>
+<p style="color:var(--muted);margin-bottom:1.5rem;font-size:.95rem" id="t-rec-sub">Teilen Sie diesen Link oder QR-Code — jeder kann Partner werden.</p>
+<div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;align-items:center">
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center">
+<div style="background:#fff;padding:12px;border-radius:8px;display:inline-block;margin-bottom:.75rem">
+<img id="partner-qr" src="" alt="QR" style="width:150px;height:150px;image-rendering:pixelated">
+</div>
+<div style="font-size:.8rem;color:var(--muted)">QR-Code scannen</div>
+</div>
+<div style="text-align:left">
+<div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem" id="t-rec-link">Oder Link teilen:</div>
+<div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;display:flex;align-items:center;gap:.5rem">
+<code style="color:var(--gold);font-size:.85rem;flex:1" id="share-url">limit-connect.com/partner/</code>
+<button onclick="copyLink()" style="background:var(--gold);color:#000;border:none;padding:.3rem .8rem;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:700" id="copyBtn">Kopieren</button>
+</div>
+<div style="display:flex;gap:.5rem;margin-top:.75rem">
+<a id="wa-share" href="#" target="_blank" style="background:#25D366;color:#fff;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.8rem;font-weight:600"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+<a id="email-share" href="#" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.8rem"><i class="fas fa-envelope"></i> E-Mail</a>
+</div>
+</div>
+</div>
+</section>
+
+<footer>
+<a href="/de/">Start</a> · <a href="/de/pakete/">Pakete</a> · <a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a><br>
+© 2026 Visković Group · LIMIT Connect · Konjik d.o.o. · OIB: 37590751921
+</footer>
+
+<script>
+// Translations
+const TR = {
+  de: {
+    title:'Werden Sie <span>Vertriebspartner</span>',
+    sub:'20% monatliche Provision für jeden vermittelten Kunden. Keine Fixkosten, kein Risiko.',
+    b1:'Monatliche Provision',b2:'Monate Laufzeit pro Kunde',b3:'Startkosten',
+    formTitle:'<i class="fas fa-handshake" style="margin-right:.5rem"></i> Online-Registrierung',
+    vorname:'Vorname *',nachname:'Nachname *',telefon:'Telefon / WhatsApp *',
+    land:'Land *',adresse:'Adresse',steuerid:'Steuer-ID / OIB',region:'Vertriebsgebiet',
+    agree1:'Ich habe die Tippgeber-Vereinbarung gelesen und stimme den Bedingungen zu. *',
+    agree2:'Ich bestätige, dass ich als unabhängiger Tippgeber handle und nicht als Angestellter des Auftraggebers. *',
+    agree3:'Ich bin für die Versteuerung meiner Provisionseinnahmen selbst verantwortlich. *',
+    submit:'Vertrag digital unterzeichnen',
+    successTitle:'Willkommen im Team!',
+    successText:'Ihr Partner-Vertrag wurde erstellt. Sie erhalten in Kürze eine E-Mail mit:',
+    firma:'Konjik d.o.o.',recht:'deutsches Recht',gericht:'Paderborn',
+    legal:'<h4>Tippgeber-Vereinbarung (Zusammenfassung)</h4><p><strong>Auftraggeber:</strong> Konjik d.o.o., OIB: 37590751921</p><p><strong>Provision:</strong> 20% monatlich, 12 Monate. Auszahlung innerhalb 14 Tagen.</p><p><strong>Recht:</strong> Deutsches Recht. Gerichtsstand: Paderborn.</p>'
+  },
+  hr: {
+    title:'Postanite <span>prodajni partner</span>',
+    sub:'20% mjesečne provizije za svakog preporučenog korisnika. Bez fiksnih troškova, bez rizika.',
+    b1:'Mjesečna provizija',b2:'Mjeseci trajanja po korisniku',b3:'Početni troškovi',
+    formTitle:'<i class="fas fa-handshake" style="margin-right:.5rem"></i> Online registracija',
+    vorname:'Ime *',nachname:'Prezime *',telefon:'Telefon / WhatsApp *',
+    land:'Država *',adresse:'Adresa',steuerid:'OIB',region:'Područje djelovanja',
+    agree1:'Pročitao/la sam Ugovor o posredničkoj proviziji i prihvaćam uvjete. *',
+    agree2:'Potvrđujem da djelujem kao neovisni posrednik, ne kao zaposlenik Nalogodavca. *',
+    agree3:'Sam/a sam odgovoran/na za poreznu prijavu svojih primanja. *',
+    submit:'Digitalno potpisati ugovor',
+    successTitle:'Dobrodošli u tim!',
+    successText:'Vaš partnerski ugovor je kreiran. Uskoro ćete primiti email s:',
+    firma:'Konjik d.o.o.',recht:'hrvatsko pravo',gericht:'Zagreb',
+    legal:'<h4>Ugovor o posredničkoj proviziji (sažetak)</h4><p><strong>Nalogodavac:</strong> Konjik d.o.o., OIB: 37590751921</p><p><strong>Provizija:</strong> 20% mjesečno, 12 mjeseci. Isplata unutar 14 dana.</p><p><strong>Pravo:</strong> Hrvatsko pravo. Nadležnost: Zagreb.</p>'
+  }
+};
+let lang = new URLSearchParams(location.search).get('lang') || 'de';
+function setLang(l){
+  lang=l;
+  const t=TR[l];
+  document.getElementById('t-title').innerHTML=t.title;
+  document.getElementById('t-sub').textContent=t.sub;
+  document.getElementById('t-b1').textContent=t.b1;
+  document.getElementById('t-b2').textContent=t.b2;
+  document.getElementById('t-b3').textContent=t.b3;
+  document.getElementById('t-form-title').innerHTML=t.formTitle;
+  document.getElementById('t-vorname').textContent=t.vorname;
+  document.getElementById('t-nachname').textContent=t.nachname;
+  document.getElementById('t-telefon').textContent=t.telefon;
+  document.getElementById('t-land').textContent=t.land;
+  document.getElementById('t-adresse').textContent=t.adresse;
+  document.getElementById('t-steuerid').textContent=t.steuerid;
+  document.getElementById('t-region').textContent=t.region;
+  document.getElementById('t-agree1').textContent=t.agree1;
+  document.getElementById('t-agree2').textContent=t.agree2;
+  document.getElementById('t-agree3').textContent=t.agree3;
+  document.getElementById('t-submit').textContent=t.submit;
+  document.getElementById('t-success-title').textContent=t.successTitle;
+  document.getElementById('t-success-text').textContent=t.successText;
+  document.getElementById('legal-text').innerHTML=t.legal;
+  document.getElementById('lang-de').classList.toggle('active',l==='de');
+  document.getElementById('lang-hr').classList.toggle('active',l==='hr');
+}
+document.getElementById('lang-de').onclick=function(e){e.preventDefault();setLang('de')};
+document.getElementById('lang-hr').onclick=function(e){e.preventDefault();setLang('hr')};
+if(lang==='hr') setLang('hr');
+
+// QR code + share links
+var shareUrl = 'https://limit-connect.com/partner/';
+var shareText = lang==='hr'
+  ? 'Postani LIMIT Connect partner — 20% provizije mjesečno!'
+  : 'Werden Sie LIMIT Connect Partner — 20% monatliche Provision!';
+document.getElementById('wa-share').href = 'https://wa.me/?text=' + encodeURIComponent(shareText + '\n' + shareUrl);
+document.getElementById('email-share').href = 'mailto:?subject=' + encodeURIComponent('LIMIT Connect Partner') + '&body=' + encodeURIComponent(shareText + '\n\n' + shareUrl);
+// QR via API
+document.getElementById('partner-qr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(shareUrl);
+
+function copyLink(){
+  navigator.clipboard.writeText(shareUrl).then(function(){
+    document.getElementById('copyBtn').textContent='✓ Kopiert!';
+    setTimeout(function(){document.getElementById('copyBtn').textContent='Kopieren';},2000);
+  });
+}
+
+// Form submit
+document.getElementById('partnerForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var btn=document.getElementById('submitBtn');
+  var status=document.getElementById('statusMsg');
+  btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Verarbeitung...';
+  status.className='status-msg';status.style.display='none';
+
+  var fd=new FormData(this);
+  fd.append('lang',lang);
+  fd.append('agree_terms','yes');
+  fd.append('agree_independent','yes');
+  fd.append('agree_tax','yes');
+
+  fetch('/api/partner-signup/', {
+    method:'POST',
+    headers:{'X-CSRFToken':document.cookie.match(/csrftoken=([^;]+)/)?.[1]||''},
+    body:fd
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      document.getElementById('signup-form-wrap').style.display='none';
+      document.getElementById('success-box').style.display='block';
+    } else {
+      status.className='status-msg error';
+      status.textContent=d.error||'Fehler bei der Registrierung.';
+      btn.disabled=false;
+      btn.innerHTML='<i class="fas fa-file-signature" style="margin-right:.5rem"></i>'+TR[lang].submit;
+    }
+  }).catch(function(){
+    status.className='status-msg error';
+    status.textContent='Netzwerkfehler — bitte versuchen Sie es erneut.';
+    btn.disabled=false;
+    btn.innerHTML='<i class="fas fa-file-signature" style="margin-right:.5rem"></i>'+TR[lang].submit;
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In 3 Schritten zum ersten Bon — LIMIT Connect</title>
+<meta name="description" content="So einfach geht's: Registrieren, Artikel anlegen, kassieren. Ihr erstes Kassensystem in unter 5 Minuten.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--dark:#0a0a0a;--card:#111214;--border:#1e293b;--text:#e8e8e8;--muted:#94a3b8}
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.8rem 2rem;display:flex;justify-content:space-between;align-items:center}
+nav a.logo{color:var(--gold);font-weight:800;font-size:1.1rem;text-decoration:none}
+nav a.logo span{color:var(--text)}
+nav .links{display:flex;gap:1rem;align-items:center}
+nav .links a{color:var(--muted);text-decoration:none;font-size:.85rem}
+.btn-gold{background:var(--gold);color:#000;font-weight:700;padding:.5rem 1.2rem;border-radius:8px;border:none;font-size:.85rem;text-decoration:none}
+.hero-sm{padding:8rem 2rem 3rem;text-align:center}
+.hero-sm h1{font-size:2.5rem;font-weight:800}
+.hero-sm h1 span{color:var(--gold)}
+.hero-sm p{color:var(--muted);font-size:1.05rem}
+.steps{max-width:800px;margin:0 auto;padding:0 2rem 4rem}
+.step{display:flex;gap:2rem;margin-bottom:3rem;align-items:flex-start}
+.step-num{flex-shrink:0;width:64px;height:64px;border-radius:50%;background:var(--card);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--gold)}
+.step-content h3{font-size:1.3rem;font-weight:700;margin-bottom:.5rem}
+.step-content p{color:var(--muted);line-height:1.6;font-size:.95rem}
+.step-content code{background:#1a1a2e;color:var(--gold);padding:.2rem .5rem;border-radius:4px;font-size:.85rem}
+.tip{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:1.5rem;margin-top:1rem}
+.tip strong{color:var(--gold)}
+.cta{text-align:center;padding:3rem 2rem;background:linear-gradient(135deg,#1a1025,#0a0a0a)}
+.cta h2{font-size:2rem;font-weight:800;margin-bottom:1rem}
+.cta p{color:var(--muted);margin-bottom:1.5rem}
+footer{background:#050505;padding:2rem;text-align:center;color:#333;font-size:.75rem}
+footer a{color:var(--gold);text-decoration:none}
+@media(max-width:600px){.step{flex-direction:column;gap:1rem}.step-num{width:48px;height:48px;font-size:1.2rem}}
+</style>
+</head>
+<body>
+
+<nav>
+<a href="/de/" class="logo">LIMIT<span>CONNECT</span></a>
+<div class="links">
+<a href="/de/">Start</a>
+<a href="/de/pakete/">Pakete</a>
+<a href="/de/anleitung/" style="color:var(--gold)">Anleitung</a>
+<a href="/register/" class="btn-gold">Kostenlos testen</a>
+</div>
+</nav>
+
+<section class="hero-sm">
+<h1>In <span>3 Schritten</span> zum ersten Bon</h1>
+<p>Kein Techniker nötig. Kein Installateur. Sie brauchen nur Ihr Handy.</p>
+</section>
+
+<div class="steps">
+
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-content">
+<h3>Registrieren & Einrichten</h3>
+<p>Besuchen Sie <code>limit-connect.com/register/</code> und geben Sie Ihren Firmennamen und Ihre Steuernummer ein. Das System erkennt automatisch, ob Sie in Deutschland oder Österreich sind, und konfiguriert TSE, Steuersätze und Belegformat.</p>
+<div class="tip"><strong>Tipp vom Steuerberater:</strong> Halten Sie Ihre Steuernummer und IBAN bereit. Der Setup-Assistent fragt 6 Felder ab — in unter 2 Minuten fertig.</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-content">
+<h3>Artikel anlegen</h3>
+<p>Legen Sie Ihre Produkte an — per Hand, per CSV-Import, oder scannen Sie einfach den Barcode mit der Kamera. Das System erkennt den Artikel automatisch und schlägt Name, Preis und MwSt-Satz vor.</p>
+<div class="tip"><strong>Profi-Tipp:</strong> Nutzen Sie die "Quick Buttons" — die 12 meistverkauften Artikel erscheinen als goldene Schnelltasten auf dem Kassenbildschirm. 3 Klicks bis zur Zahlung.</div>
+</div>
+</div>
+
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-content">
+<h3>Kassieren — fertig!</h3>
+<p>Öffnen Sie die Kasse auf Ihrem Handy oder Tablet. Artikel antippen, Zahlungsmethode wählen (Bar, Karte, Revolut, Crypto), Beleg per WhatsApp senden. Jede Transaktion wird automatisch TSE-signiert und DSFinV-K-konform archiviert.</p>
+<div class="tip"><strong>Bei Betriebsprüfung:</strong> Klicken Sie auf "DSFinV-K Export" in den Einstellungen. Das komplette Kassenarchiv wird als ZIP heruntergeladen — fertig für den Prüfer.</div>
+</div>
+</div>
+
+</div>
+
+<section class="cta">
+<h2>Bereit?</h2>
+<p>30 Tage kostenlos. Keine Kreditkarte. Keine Einrichtungsgebühr.</p>
+<a href="/register/" class="btn-gold" style="padding:1rem 3rem;font-size:1.1rem"><i class="fas fa-rocket" style="margin-right:.5rem"></i>Jetzt starten</a>
+</section>
+
+<footer>
+<a href="/de/">Start</a> · <a href="/de/pakete/">Pakete</a> · <a href="/de/anleitung/">Anleitung</a> · <a href="/impressum/">Impressum</a><br>
+© 2026 Visković Group · LIMIT Connect
+</footer>
+
+</body>
+</html>

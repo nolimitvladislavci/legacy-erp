@@ -1,8 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
+from django.views.decorators.http import require_POST
 
+from django.views.decorators.csrf import csrf_exempt
 from permissions.decorators import require_role
 from .services import get_company_dashboard_stats, get_superadmin_stats
 
@@ -2443,6 +2446,140 @@ def ivan_cockpit(request):
 
 
 @login_required
+@csrf_exempt
+def partner_signup_api(request):
+    """Public API: Online registracija Tippgeber/Posrednik partnera."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST only'}, status=405)
+
+    first_name = request.POST.get('first_name', '').strip()
+    last_name = request.POST.get('last_name', '').strip()
+    email = request.POST.get('email', '').strip()
+    phone = request.POST.get('phone', '').strip()
+    country = request.POST.get('country', 'DE')
+    address = request.POST.get('address', '').strip()
+    tax_id = request.POST.get('tax_id', '').strip()
+    iban = request.POST.get('iban', '').strip()
+    region = request.POST.get('region', '').strip()
+    lang = request.POST.get('lang', 'de')
+
+    if not first_name or not last_name or not email or not phone or not iban:
+        return JsonResponse({'ok': False, 'error': 'Pflichtfelder fehlen / Obavezna polja nedostaju'}, status=400)
+
+    # Provjeri duplikat
+    from partners.models import Partner
+    from companies.models import Company
+    konjik = Company.objects.filter(oib='37590751921').first()
+    if not konjik:
+        konjik = Company.objects.first()
+
+    existing = Partner.objects.filter(company=konjik, email=email).first()
+    if existing:
+        return JsonResponse({'ok': False, 'error': 'E-Mail bereits registriert / Email već registriran'}, status=400)
+
+    # Kreiraj partnera
+    partner = Partner.objects.create(
+        company=konjik,
+        name='%s %s' % (first_name, last_name),
+        email=email,
+        phone=phone,
+        oib=tax_id or ('AGT-%s' % email[:8]),
+        address=address,
+        country=country,
+        partner_type='agent',
+        payment_term=14,
+    )
+
+    # Kreiraj referral kod
+    import hashlib
+    from django.utils import timezone
+    from partners.models import AgentReferral
+    ref_code = 'REF-%s-%s' % (
+        last_name[:5].upper().replace(' ', ''),
+        hashlib.md5(email.encode()).hexdigest()[:4].upper()
+    )
+    AgentReferral.objects.create(
+        agent=partner,
+        referred_company=konjik,  # placeholder — ažurira se kad agent dovede klijenta
+        referral_code=ref_code,
+        status='pending',
+        commission_percent=20,
+        commission_months=12,
+        agent_iban=iban,
+        contract_signed_at=timezone.now(),
+        contract_ip=request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')),
+        contract_user_agent=request.META.get('HTTP_USER_AGENT', '')[:200],
+        expires_at=timezone.now() + timezone.timedelta(days=365),
+    )
+
+    # Spremi metadata
+    import json as _json
+    import os
+    agent_data = {
+        'partner_id': partner.pk,
+        'referral_code': ref_code,
+        'first_name': first_name,
+        'last_name': last_name,
+        'email': email,
+        'phone': phone,
+        'country': country,
+        'iban': iban,
+        'region': region,
+        'lang': lang,
+        'signed_at': timezone.now().isoformat(),
+        'ip': request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')),
+        'user_agent': request.META.get('HTTP_USER_AGENT', '')[:200],
+        'agreed_terms': True,
+        'agreed_independent': True,
+        'agreed_tax': True,
+    }
+
+    agents_dir = '/var/www/fina-connect/media/agents/'
+    os.makedirs(agents_dir, exist_ok=True)
+    with open(os.path.join(agents_dir, '%s_%s.json' % (partner.pk, email.replace('@', '_'))), 'w') as f:
+        _json.dump(agent_data, f, ensure_ascii=False, indent=2)
+
+    # Pošalji WhatsApp potvrdu
+    try:
+        from core.whatsapp import normalize_phone
+        from core.whatsapp_tasks import send_whatsapp_text_task
+        norm_phone = normalize_phone(phone)
+        if norm_phone:
+            wa_msg = (
+                'Willkommen als LIMIT Connect Partner! 🎉\n\n'
+                'Ihr Vertrag wurde digital unterzeichnet.\n'
+                'Partner-ID: %s\n'
+                'Provision: 20%% monatlich, 12 Monate\n\n'
+                'Ihr Verkaufsmaterial:\n'
+                'https://limit-connect.com/de/\n'
+                'https://limit-connect.com/de/pakete/\n\n'
+                '— LIMIT Connect Team'
+            ) % str(partner.pk)[:8] if lang == 'de' else (
+                'Dobrodošli kao LIMIT Connect partner! 🎉\n\n'
+                'Vaš ugovor je digitalno potpisan.\n'
+                'Partner-ID: %s\n'
+                'Provizija: 20%% mjesečno, 12 mjeseci\n\n'
+                '— LIMIT Connect tim'
+            ) % str(partner.pk)[:8]
+            send_whatsapp_text_task.delay(norm_phone, wa_msg)
+    except Exception:
+        pass
+
+    # Notificiraj superadmina
+    try:
+        from superadmin_ai.tasks import _notify_superadmins
+        _notify_superadmins(
+            title='Novi partner: %s %s (%s)' % (first_name, last_name, country),
+            message='Email: %s\nTelefon: %s\nRegija: %s\nIBAN: %s' % (email, phone, region, iban[:8] + '...'),
+            notification_type='system',
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({'ok': True, 'partner_id': str(partner.pk)[:8]})
+
+
+@login_required
 def cockpit_upload_photo(request):
     """API: Upload fotke iz Fenix Cockpit okruglog stola."""
     _cockpit_users = {'superadmin', 'marija.brtan'}
@@ -2627,3 +2764,29 @@ def tim_chat(request):
         author=request.user
     ).order_by('-created_at')[:10]
     return render(request, 'dashboards/tim_chat.html', {'user_messages': qs})
+
+@login_required
+@require_POST  
+def tim_chat_send(request):
+    from django.http import JsonResponse
+    import json as _json
+    try:
+        data = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    desc = data.get('description','').strip()
+    if not desc:
+        return JsonResponse({'error': 'Prazna poruka'}, status=400)
+    from pos.models import ImprovementSuggestion
+    from core.company_utils import get_user_company
+    s = ImprovementSuggestion.objects.create(
+        company=get_user_company(request),
+        author=request.user,
+        source='user',
+        title='Tim Chat: ' + desc[:50],
+        description=desc,
+        category=data.get('module','tim_chat'),
+        priority=int(data.get('priority',2)),
+        status='new',
+    )
+    return JsonResponse({'ok': True, 'id': str(s.id), 'message': 'Poruka primljena ✅'})

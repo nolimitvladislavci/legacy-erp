@@ -258,7 +258,7 @@ function sendMsg() {
   messages[activeSeat].push({text, sent:true, ts});
 
   // Pošalji na backend
-  fetch('/superadmin/ai/api/tim-chat-send/', {
+  fetch('/hr/tim-chat/send/', {
     method: 'POST',
     headers: {'Content-Type':'application/json', 'X-CSRFToken': getCsrf()},
     body: JSON.stringify({
@@ -296,7 +296,7 @@ function sendPublic() {
   if (!text) { status.textContent = '⚠️ Upiši poruku'; return; }
 
   status.textContent = 'Šaljem...';
-  fetch('/superadmin/ai/api/tim-chat-send/', {
+  fetch('/hr/tim-chat/send/', {
     method: 'POST',
     headers: {'Content-Type':'application/json', 'X-CSRFToken': getCsrf()},
     body: JSON.stringify({

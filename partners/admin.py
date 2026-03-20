@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Partner
+from .models import Partner, AgentReferral, AgentPayout
 
 
 @admin.register(Partner)
@@ -46,3 +46,21 @@ class PartnerAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
         }),
     )
+
+
+@admin.register(AgentReferral)
+class AgentReferralAdmin(admin.ModelAdmin):
+    list_display = ('agent', 'referred_company', 'referral_code', 'status',
+                    'commission_percent', 'total_earned', 'total_paid', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('agent__name', 'referred_company__name', 'referral_code')
+    readonly_fields = ('id', 'created_at', 'contract_signed_at', 'contract_ip')
+
+
+@admin.register(AgentPayout)
+class AgentPayoutAdmin(admin.ModelAdmin):
+    list_display = ('agent', 'period_month', 'period_year', 'amount',
+                    'referrals_count', 'status', 'paid_at')
+    list_filter = ('status', 'period_year')
+    list_editable = ('status',)
+    readonly_fields = ('id', 'created_at', 'breakdown')

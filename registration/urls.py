@@ -26,4 +26,8 @@ urlpatterns = [
     path('propter/<int:pk>/regenerate-key/', propter_views.propter_regenerate_api_key, name='propter_regenerate_key'),
     path('propter/<int:pk>/toggle-api/', propter_views.propter_toggle_api, name='propter_toggle_api'),
     path('propter/api/stats/', propter_views.propter_api_stats, name='propter_api_stats'),
+
+    # Sales Wizard
+    path('sales-wizard/', views.sales_wizard, name='sales_wizard'),
+    path('sales-wizard/submit/', views.sales_wizard_submit, name='sales_wizard_submit'),
 ]

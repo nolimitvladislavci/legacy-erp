@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if lang == 'de' %}Verkaufsassistent{% else %}Prodajni carobnjak{% endif %} — LIMIT Connect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--gold-light:#e0c97a;--gold-dark:#a8893a;--black:#0a0a0a;--bg:#111;--card:#1a1a1a;--border:#333;--text:#e0e0e0;--text-muted:#888;--success:#2ecc71;--danger:#e74c3c;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Barlow',sans-serif;background:var(--black);color:var(--text);min-height:100vh}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
+
+.sw-header{background:var(--bg);border-bottom:2px solid var(--gold);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.sw-header .brand{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold);font-weight:700;text-decoration:none}
+.sw-header .actions{display:flex;gap:8px;align-items:center}
+.sw-header .actions a,.sw-header .actions button{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:6px 14px;border-radius:8px;font-size:.85rem;text-decoration:none;cursor:pointer;transition:.2s}
+.sw-header .actions a:hover,.sw-header .actions button:hover{background:var(--gold);color:var(--black)}
+.lang-switch{display:flex;gap:0}
+.lang-switch a{border-radius:0!important;font-weight:600}
+.lang-switch a:first-child{border-radius:8px 0 0 8px!important}
+.lang-switch a:last-child{border-radius:0 8px 8px 0!important}
+.lang-switch a.active{background:var(--gold);color:var(--black)}
+
+.sw-container{max-width:680px;margin:0 auto;padding:20px 16px 80px}
+
+.steps-bar{display:flex;justify-content:center;gap:4px;margin:20px 0 30px}
+.step-dot{width:40px;height:5px;border-radius:3px;background:var(--border);transition:.3s}
+.step-dot.active{background:var(--gold)}
+.step-dot.done{background:var(--gold-dark)}
+.step-label{text-align:center;color:var(--text-muted);font-size:.85rem;margin-bottom:20px}
+
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:.85rem;color:var(--gold);margin-bottom:5px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:1rem;font-family:'Barlow',sans-serif;transition:.2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:500px){.form-row{grid-template-columns:1fr}}
+
+.plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+@media(max-width:500px){.plans-grid{grid-template-columns:1fr}}
+.plan-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:.2s;position:relative}
+.plan-card:hover{border-color:var(--gold-dark)}
+.plan-card.selected{border-color:var(--gold);box-shadow:0 0 15px rgba(201,168,76,.15)}
+.plan-card.recommended::before{content:attr(data-rec);position:absolute;top:-10px;right:14px;background:var(--gold);color:var(--black);font-size:.7rem;padding:2px 10px;border-radius:10px;font-weight:600}
+.plan-card h3{margin-bottom:4px;font-size:1.2rem}
+.plan-card .price{font-size:1.8rem;color:var(--gold);font-weight:700}
+.plan-card .price span{font-size:.9rem;color:var(--text-muted);font-weight:400}
+.plan-card .meta{color:var(--text-muted);font-size:.85rem;margin-top:6px}
+
+.modules-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+@media(max-width:500px){.modules-grid{grid-template-columns:1fr}}
+.module-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:.2s}
+.module-item:hover{border-color:var(--gold-dark)}
+.module-item.checked{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.module-item input[type=checkbox]{display:none}
+.module-check{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;font-size:.8rem}
+.module-item.checked .module-check{background:var(--gold);border-color:var(--gold);color:var(--black)}
+.module-name{font-size:.95rem}
+
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:10px 0}
+.summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.summary-row:last-child{border-bottom:none}
+.summary-label{color:var(--text-muted);font-size:.9rem}
+.summary-value{font-weight:500}
+.summary-price{font-size:1.4rem;color:var(--gold);font-weight:700}
+
+.sig-canvas-wrap{background:var(--card);border:2px dashed var(--border);border-radius:var(--radius);padding:10px;margin:10px 0;text-align:center}
+.sig-canvas-wrap canvas{background:#fff;border-radius:8px;cursor:crosshair;touch-action:none;max-width:100%;width:100%}
+.sig-actions{display:flex;gap:10px;margin-top:8px;justify-content:center}
+.sig-actions button{background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.85rem}
+.sig-actions button:hover{border-color:var(--gold);color:var(--gold)}
+.terms-check{display:flex;align-items:flex-start;gap:10px;margin:16px 0;font-size:.9rem;color:var(--text-muted)}
+.terms-check input[type=checkbox]{width:20px;height:20px;accent-color:var(--gold);flex-shrink:0;margin-top:2px}
+
+.nav-buttons{display:flex;justify-content:space-between;margin-top:30px;gap:12px}
+.btn{padding:14px 28px;border:none;border-radius:var(--radius);font-size:1rem;font-weight:600;cursor:pointer;transition:.2s;font-family:'Barlow',sans-serif}
+.btn-back{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.btn-back:hover{border-color:var(--gold);color:var(--gold)}
+.btn-next{background:var(--gold);color:var(--black)}
+.btn-next:hover{background:var(--gold-light)}
+.btn-next:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed}
+.btn-submit{background:var(--success);color:#fff;width:100%}
+.btn-submit:hover{opacity:.9}
+.btn-submit:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed}
+
+.success-screen{text-align:center;padding:60px 20px}
+.success-screen h2{font-size:2rem;margin:20px 0 10px}
+.success-screen p{color:var(--text-muted);margin:8px 0}
+.success-icon{font-size:4rem;display:block;margin-bottom:10px}
+.btn-new{margin-top:30px;display:inline-block;background:var(--gold);color:var(--black);padding:14px 32px;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:1rem}
+
+.leads-list{margin-top:30px}
+.leads-list h3{font-size:1rem;margin-bottom:10px}
+.lead-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:.9rem}
+.lead-status{padding:2px 10px;border-radius:10px;font-size:.75rem;font-weight:600}
+.lead-status.signed{background:rgba(46,204,113,.15);color:var(--success)}
+.lead-status.draft{background:rgba(201,168,76,.15);color:var(--gold)}
+
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="sw-header">
+  <a href="/" class="brand">LIMIT Connect</a>
+  <div class="actions">
+    <div class="lang-switch">
+      <a href="?lang=hr" class="{% if lang != 'de' %}active{% endif %}">HR</a>
+      <a href="?lang=de" class="{% if lang == 'de' %}active{% endif %}">DE</a>
+    </div>
+    <a href="tel:+385976091655" title="Call">&#128222;</a>
+    <a href="https://wa.me/385976091655" target="_blank" title="WhatsApp">&#128172;</a>
+  </div>
+</div>
+
+<div class="sw-container">
+
+  <div class="steps-bar" id="stepsBar">
+    <div class="step-dot active" data-s="1"></div>
+    <div class="step-dot" data-s="2"></div>
+    <div class="step-dot" data-s="3"></div>
+    <div class="step-dot" data-s="4"></div>
+    <div class="step-dot" data-s="5"></div>
+  </div>
+  <div class="step-label" id="stepLabel"></div>
+
+  <!-- STEP 1: Company -->
+  <div class="step-panel active" data-step="1">
+    <h2 id="s1title"></h2>
+    <div class="form-row" style="margin-top:18px">
+      <div class="form-group">
+        <label id="lbl_country"></label>
+        <select id="f_country" onchange="updateCountry()">
+          <option value="HR">Hrvatska / Kroatien</option>
+          <option value="DE">Deutschland</option>
+          <option value="AT">&Ouml;sterreich</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="lbl_btype"></label>
+        <select id="f_btype"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label id="lbl_company"></label>
+      <input type="text" id="f_company" autocomplete="organization">
+    </div>
+    <div class="form-group">
+      <label id="lbl_oib"></label>
+      <input type="text" id="f_oib" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label id="lbl_contact"></label>
+      <input type="text" id="f_contact" autocomplete="name">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label id="lbl_phone"></label>
+        <input type="tel" id="f_phone" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label id="lbl_email"></label>
+        <input type="email" id="f_email" autocomplete="email">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label id="lbl_address"></label>
+        <input type="text" id="f_address" autocomplete="street-address">
+      </div>
+      <div class="form-group">
+        <label id="lbl_city"></label>
+        <input type="text" id="f_city" autocomplete="address-level2">
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Plan -->
+  <div class="step-panel" data-step="2">
+    <h2 id="s2title"></h2>
+    <div class="plans-grid" id="plansGrid"></div>
+  </div>
+
+  <!-- STEP 3: Modules -->
+  <div class="step-panel" data-step="3">
+    <h2 id="s3title"></h2>
+    <div class="modules-grid" id="modulesGrid"></div>
+  </div>
+
+  <!-- STEP 4: Summary -->
+  <div class="step-panel" data-step="4">
+    <h2 id="s4title"></h2>
+    <div class="summary-card" id="summaryCard"></div>
+  </div>
+
+  <!-- STEP 5: Signature -->
+  <div class="step-panel" data-step="5">
+    <h2 id="s5title"></h2>
+    <div class="sig-canvas-wrap">
+      <canvas id="sigCanvas" width="600" height="200"></canvas>
+      <div class="sig-actions">
+        <button type="button" onclick="clearSig()" id="btnClearSig"></button>
+      </div>
+    </div>
+    <div class="terms-check">
+      <input type="checkbox" id="termsAccept">
+      <label for="termsAccept" id="termsLabel"></label>
+    </div>
+    <div class="form-group">
+      <label id="lbl_notes"></label>
+      <textarea id="f_notes" rows="3"></textarea>
+    </div>
+    <button class="btn btn-submit" id="btnSubmit" disabled onclick="submitWizard()"></button>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="step-panel" data-step="success" id="successPanel">
+    <div class="success-screen">
+      <span class="success-icon">&#127881;</span>
+      <h2 id="successTitle"></h2>
+      <p id="successMsg"></p>
+      <a href="" class="btn-new" id="btnNewWizard"></a>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-buttons" id="navButtons">
+    <button class="btn btn-back hidden" id="btnBack" onclick="goStep(currentStep-1)"></button>
+    <button class="btn btn-next" id="btnNext" onclick="goStep(currentStep+1)"></button>
+  </div>
+
+  {% if leads %}
+  <div class="leads-list" id="leadsList">
+    <h3>{% if lang == 'de' %}Letzte Eintr&auml;ge{% else %}Nedavni klijenti{% endif %}</h3>
+    {% for lead in leads %}
+    <div class="lead-item">
+      <div>
+        <strong>{{ lead.company_name }}</strong>
+        <span style="color:var(--text-muted);font-size:.8rem"> &mdash; {{ lead.created_at|date:"d.m.Y H:i" }}</span>
+      </div>
+      <span class="lead-status {{ lead.status }}">{{ lead.get_status_display }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+const LANG = '{{ lang }}';
+const CSRF = '{{ csrf_token }}';
+let currentStep = 1;
+let selectedPlan = 'professional';
+let selectedModules = [];
+
+const T = {
+  hr: {
+    s1:'Podaci o tvrtki', s2:'Odaberite plan', s3:'Odaberite module',
+    s4:'Pregled podataka', s5:'Potpis i prihvat uvjeta',
+    step:'Korak', of:'od',
+    country:'Država', btype:'Tip tvrtke', company:'Naziv tvrtke',
+    oib:'OIB', contact:'Kontakt osoba', phone:'Telefon', email:'Email',
+    address:'Adresa', city:'Grad',
+    back:'Natrag', next:'Dalje', submit:'Potpiši i registriraj',
+    clear:'Obriši potpis',
+    terms:'Prihvaćam opće uvjete korištenja usluge LIMIT Connect i suglasan/na sam s obradom osobnih podataka.',
+    notes:'Napomene',
+    rec:'Preporučeno',
+    users:'korisnika',
+    monthly:'/mj',
+    sum_company:'Tvrtka', sum_oib:'OIB', sum_contact:'Kontakt',
+    sum_plan:'Plan', sum_price:'Cijena', sum_modules:'Moduli',
+    success_title:'Klijent uspješno registriran!',
+    success_msg:'Podaci su spremljeni. Klijent će dobiti pristup u roku 24 sata.',
+    new_wizard:'Novi klijent',
+    btypes:[['doo','d.o.o.'],['jdoo','j.d.o.o.'],['obrt','Obrt'],['udruga','Udruga'],['dd','d.d.']],
+    modules:[
+      ['invoicing','Fakturiranje'],['pos','POS Blagajna'],['inventory','Zalihe'],
+      ['appointments','Termini'],['worktime','Radni sati'],['partners','Partneri'],
+      ['documents','Dokumenti'],['eracun','eRačun'],['konto','Knjiženje'],
+      ['payroll','Plaće'],['rental','Smještaj'],['gastro','Gastro'],
+    ],
+  },
+  de: {
+    s1:'Unternehmensdaten', s2:'Tarif wählen', s3:'Module wählen',
+    s4:'Zusammenfassung', s5:'Unterschrift und Bedingungen',
+    step:'Schritt', of:'von',
+    country:'Land', btype:'Unternehmensform', company:'Firmenname',
+    oib:'Steuernummer', contact:'Kontaktperson', phone:'Telefon', email:'E-Mail',
+    address:'Adresse', city:'Stadt',
+    back:'Zurück', next:'Weiter', submit:'Unterschreiben & registrieren',
+    clear:'Unterschrift löschen',
+    terms:'Ich akzeptiere die Allgemeinen Geschäftsbedingungen von LIMIT Connect und stimme der Verarbeitung personenbezogener Daten zu.',
+    notes:'Anmerkungen',
+    rec:'Empfohlen',
+    users:'Benutzer',
+    monthly:'/Mo',
+    sum_company:'Firma', sum_oib:'Steuernr.', sum_contact:'Kontakt',
+    sum_plan:'Tarif', sum_price:'Preis', sum_modules:'Module',
+    success_title:'Kunde erfolgreich registriert!',
+    success_msg:'Daten gespeichert. Der Kunde erhält innerhalb von 24 Stunden Zugang.',
+    new_wizard:'Neuer Kunde',
+    btypes:[['gmbh','GmbH'],['ug','UG'],['einzelunternehmen','Einzelunternehmen'],['verein','Verein'],['ag','AG']],
+    modules:[
+      ['invoicing','Rechnungen'],['pos','POS-Kasse'],['inventory','Lager'],
+      ['appointments','Termine'],['worktime','Arbeitszeiten'],['partners','Partner'],
+      ['documents','Dokumente'],['eracun','E-Rechnung'],['konto','Buchhaltung'],
+      ['payroll','Lohnabrechnung'],['rental','Unterkunft'],['gastro','Gastro'],
+    ],
+  }
+};
+const t = T[LANG] || T.hr;
+
+const PLAN_MODULES = {
+  micro: ['invoicing','partners'],
+  starter: ['invoicing','pos','partners','documents'],
+  professional: ['invoicing','pos','inventory','appointments','worktime','partners','documents','eracun'],
+  enterprise: ['invoicing','pos','inventory','appointments','worktime','partners','documents','eracun','konto','payroll','rental','gastro'],
+};
+
+function init() {
+  document.getElementById('s1title').textContent = t.s1;
+  document.getElementById('lbl_country').textContent = t.country;
+  document.getElementById('lbl_btype').textContent = t.btype;
+  document.getElementById('lbl_company').textContent = t.company;
+  document.getElementById('lbl_oib').textContent = t.oib;
+  document.getElementById('lbl_contact').textContent = t.contact;
+  document.getElementById('lbl_phone').textContent = t.phone;
+  document.getElementById('lbl_email').textContent = t.email;
+  document.getElementById('lbl_address').textContent = t.address;
+  document.getElementById('lbl_city').textContent = t.city;
+  document.getElementById('s2title').textContent = t.s2;
+  document.getElementById('s3title').textContent = t.s3;
+  document.getElementById('s4title').textContent = t.s4;
+  document.getElementById('s5title').textContent = t.s5;
+  document.getElementById('btnClearSig').textContent = t.clear;
+  document.getElementById('termsLabel').textContent = t.terms;
+  document.getElementById('lbl_notes').textContent = t.notes;
+  document.getElementById('btnSubmit').textContent = t.submit;
+  document.getElementById('btnBack').textContent = t.back;
+  document.getElementById('btnNext').textContent = t.next;
+  document.getElementById('successTitle').textContent = t.success_title;
+  document.getElementById('successMsg').textContent = t.success_msg;
+  document.getElementById('btnNewWizard').textContent = t.new_wizard;
+  document.getElementById('btnNewWizard').href = '?lang=' + LANG;
+
+  var btSel = document.getElementById('f_btype');
+  btSel.innerHTML = '';
+  t.btypes.forEach(function(bt) {
+    var o = document.createElement('option'); o.value = bt[0]; o.textContent = bt[1]; btSel.appendChild(o);
+  });
+
+  if (LANG === 'de') document.getElementById('f_country').value = 'DE';
+
+  buildPlans();
+  buildModules();
+  updateStepUI();
+  initSignature();
+
+  document.getElementById('termsAccept').addEventListener('change', function() {
+    document.getElementById('btnSubmit').disabled = !this.checked || !hasSig;
+  });
+}
+
+var plans = { micro:{price:8,users:1}, starter:{price:18,users:3}, professional:{price:58,users:10}, enterprise:{price:158,users:50} };
+
+function buildPlans() {
+  var grid = document.getElementById('plansGrid');
+  grid.innerHTML = '';
+  Object.keys(plans).forEach(function(slug) {
+    var p = plans[slug];
+    var div = document.createElement('div');
+    div.className = 'plan-card' + (slug === selectedPlan ? ' selected' : '') + (slug === 'professional' ? ' recommended' : '');
+    if (slug === 'professional') div.setAttribute('data-rec', t.rec);
+    div.innerHTML = '<h3>' + slug.charAt(0).toUpperCase() + slug.slice(1) + '</h3>'
+      + '<div class="price">&euro;' + p.price + '<span>' + t.monthly + '</span></div>'
+      + '<div class="meta">' + p.users + ' ' + t.users + '</div>';
+    div.onclick = function() { selectedPlan = slug; buildPlans(); selectPlanModules(); };
+    grid.appendChild(div);
+  });
+}
+
+function buildModules() {
+  var grid = document.getElementById('modulesGrid');
+  grid.innerHTML = '';
+  t.modules.forEach(function(mod) {
+    var slug = mod[0], name = mod[1];
+    var div = document.createElement('div');
+    var checked = selectedModules.indexOf(slug) > -1;
+    div.className = 'module-item' + (checked ? ' checked' : '');
+    div.innerHTML = '<input type="checkbox" value="' + slug + '"' + (checked ? ' checked' : '') + '>'
+      + '<div class="module-check">' + (checked ? '&#10003;' : '') + '</div>'
+      + '<div class="module-name">' + name + '</div>';
+    div.onclick = function() {
+      var idx = selectedModules.indexOf(slug);
+      if (idx > -1) selectedModules.splice(idx, 1); else selectedModules.push(slug);
+      buildModules();
+    };
+    grid.appendChild(div);
+  });
+}
+
+function selectPlanModules() {
+  selectedModules = (PLAN_MODULES[selectedPlan] || []).slice();
+  buildModules();
+}
+selectPlanModules();
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function buildSummary() {
+  var card = document.getElementById('summaryCard');
+  var modNames = selectedModules.map(function(s) {
+    var m = t.modules.find(function(x) { return x[0] === s; });
+    return m ? m[1] : s;
+  });
+  card.innerHTML =
+    '<div class="summary-row"><span class="summary-label">' + t.sum_company + '</span><span class="summary-value">' + esc(document.getElementById('f_company').value) + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">' + t.sum_oib + '</span><span class="summary-value">' + esc(document.getElementById('f_oib').value || '-') + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">' + t.sum_contact + '</span><span class="summary-value">' + esc(document.getElementById('f_contact').value) + ' / ' + esc(document.getElementById('f_phone').value) + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">' + t.sum_plan + '</span><span class="summary-value">' + selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1) + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">' + t.sum_price + '</span><span class="summary-price">&euro;' + plans[selectedPlan].price + t.monthly + '</span></div>'
+    + '<div class="summary-row"><span class="summary-label">' + t.sum_modules + '</span><span class="summary-value">' + modNames.join(', ') + '</span></div>';
+}
+
+function goStep(n) {
+  if (n < 1 || n > 5) return;
+  if (n > currentStep && !validateStep(currentStep)) return;
+  currentStep = n;
+  if (n === 4) buildSummary();
+  updateStepUI();
+}
+
+function validateStep(s) {
+  if (s === 1) {
+    var comp = document.getElementById('f_company').value.trim();
+    var contact = document.getElementById('f_contact').value.trim();
+    var phone = document.getElementById('f_phone').value.trim();
+    if (!comp || !contact || !phone) {
+      alert(LANG === 'de' ? 'Bitte Firma, Kontaktperson und Telefon ausfüllen.' : 'Unesite naziv tvrtke, kontakt osobu i telefon.');
+      return false;
+    }
+  }
+  return true;
+}
+
+function updateStepUI() {
+  document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('active'); });
+  var panel = document.querySelector('[data-step="' + currentStep + '"]');
+  if (panel) panel.classList.add('active');
+
+  document.querySelectorAll('.step-dot').forEach(function(d) {
+    var s = parseInt(d.dataset.s);
+    d.classList.toggle('active', s === currentStep);
+    d.classList.toggle('done', s < currentStep);
+  });
+
+  document.getElementById('stepLabel').textContent = t.step + ' ' + currentStep + ' ' + t.of + ' 5';
+
+  var btnBack = document.getElementById('btnBack');
+  var btnNext = document.getElementById('btnNext');
+  var nav = document.getElementById('navButtons');
+
+  if (currentStep === 1) { btnBack.classList.add('hidden'); } else { btnBack.classList.remove('hidden'); }
+  if (currentStep >= 5) { btnNext.classList.add('hidden'); } else { btnNext.classList.remove('hidden'); }
+  if (currentStep > 5) { nav.classList.add('hidden'); } else { nav.classList.remove('hidden'); }
+}
+
+var sigCanvas, sigCtx, sigDrawing = false, hasSig = false;
+
+function initSignature() {
+  sigCanvas = document.getElementById('sigCanvas');
+  sigCtx = sigCanvas.getContext('2d');
+  sigCtx.strokeStyle = '#000';
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = 'round';
+
+  function getPos(e) {
+    var r = sigCanvas.getBoundingClientRect();
+    var cx = e.touches ? e.touches[0].clientX : e.clientX;
+    var cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return [( cx - r.left) * (sigCanvas.width / r.width), (cy - r.top) * (sigCanvas.height / r.height)];
+  }
+
+  sigCanvas.addEventListener('mousedown', function(e) { sigDrawing = true; sigCtx.beginPath(); var p = getPos(e); sigCtx.moveTo(p[0], p[1]); });
+  sigCanvas.addEventListener('mousemove', function(e) { if (!sigDrawing) return; var p = getPos(e); sigCtx.lineTo(p[0], p[1]); sigCtx.stroke(); hasSig = true; });
+  sigCanvas.addEventListener('mouseup', function() { sigDrawing = false; updateSubmitBtn(); });
+  sigCanvas.addEventListener('mouseleave', function() { sigDrawing = false; });
+
+  sigCanvas.addEventListener('touchstart', function(e) { e.preventDefault(); sigDrawing = true; sigCtx.beginPath(); var p = getPos(e); sigCtx.moveTo(p[0], p[1]); }, {passive:false});
+  sigCanvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!sigDrawing) return; var p = getPos(e); sigCtx.lineTo(p[0], p[1]); sigCtx.stroke(); hasSig = true; }, {passive:false});
+  sigCanvas.addEventListener('touchend', function() { sigDrawing = false; updateSubmitBtn(); });
+}
+
+function clearSig() {
+  sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+  hasSig = false;
+  updateSubmitBtn();
+}
+
+function updateSubmitBtn() {
+  document.getElementById('btnSubmit').disabled = !(hasSig && document.getElementById('termsAccept').checked);
+}
+
+function updateCountry() {
+  var c = document.getElementById('f_country').value;
+  if (c === 'DE' || c === 'AT') {
+    document.getElementById('lbl_oib').textContent = 'Steuernummer';
+    var btSel = document.getElementById('f_btype');
+    btSel.innerHTML = '';
+    T.de.btypes.forEach(function(bt) { var o = document.createElement('option'); o.value = bt[0]; o.textContent = bt[1]; btSel.appendChild(o); });
+  } else {
+    document.getElementById('lbl_oib').textContent = 'OIB';
+    var btSel2 = document.getElementById('f_btype');
+    btSel2.innerHTML = '';
+    T.hr.btypes.forEach(function(bt) { var o = document.createElement('option'); o.value = bt[0]; o.textContent = bt[1]; btSel2.appendChild(o); });
+  }
+}
+
+function submitWizard() {
+  var btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  var payload = {
+    company_name: document.getElementById('f_company').value.trim(),
+    oib: document.getElementById('f_oib').value.trim(),
+    contact_name: document.getElementById('f_contact').value.trim(),
+    contact_email: document.getElementById('f_email').value.trim(),
+    contact_phone: document.getElementById('f_phone').value.trim(),
+    address: document.getElementById('f_address').value.trim(),
+    city: document.getElementById('f_city').value.trim(),
+    country: document.getElementById('f_country').value,
+    business_type: document.getElementById('f_btype').value,
+    plan: selectedPlan,
+    modules: selectedModules,
+    signature: hasSig ? sigCanvas.toDataURL('image/png') : '',
+    notes: document.getElementById('f_notes').value.trim(),
+  };
+
+  fetch('{% url "registration:sales_wizard_submit" %}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify(payload),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      currentStep = 99;
+      document.querySelectorAll('.step-panel').forEach(function(p) { p.classList.remove('active'); });
+      document.getElementById('successPanel').classList.add('active');
+      document.getElementById('navButtons').classList.add('hidden');
+      document.getElementById('stepsBar').classList.add('hidden');
+      document.getElementById('stepLabel').classList.add('hidden');
+      var ll = document.getElementById('leadsList');
+      if (ll) ll.classList.add('hidden');
+    } else {
+      btn.disabled = false;
+      btn.textContent = t.submit;
+      alert(data.message || 'Error');
+    }
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btn.textContent = t.submit;
+    alert('Network error: ' + err.message);
+  });
+}
+
+init();
+</script>
+</body>
+</html>

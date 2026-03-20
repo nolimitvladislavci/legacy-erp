@@ -636,3 +636,128 @@ def umbrella_invite_manage(request):
         'codes': codes,
         'company': company,
     })
+
+
+# ─── Sales Wizard ───────────────────────────────────────────────────
+
+@login_required
+def sales_wizard(request):
+    """Sales wizard — step-by-step client onboarding."""
+    lang = request.GET.get('lang', 'hr')
+    from registration.models import SalesLead
+    leads = SalesLead.objects.filter(agent=request.user).order_by('-created_at')[:10]
+
+    plans = {
+        'micro': {'name': 'Micro', 'price': 8, 'users': 1},
+        'starter': {'name': 'Starter', 'price': 18, 'users': 3},
+        'professional': {'name': 'Professional', 'price': 58, 'users': 10},
+        'enterprise': {'name': 'Enterprise', 'price': 158, 'users': 50},
+    }
+
+    return render(request, 'registration/sales_wizard.html', {
+        'lang': lang, 'plans': plans, 'leads': leads,
+    })
+
+
+@login_required
+@require_POST
+def sales_wizard_submit(request):
+    """Submit signed sales lead."""
+    import json, base64, os
+    from django.http import JsonResponse
+    from django.utils import timezone as tz
+    from registration.models import SalesLead
+
+    data = json.loads(request.body)
+
+    # ── AI Validation per step ──
+    errors = []
+    company_name = data.get('company_name', '').strip()
+    oib = data.get('oib', '').strip()
+    contact_name = data.get('contact_name', '').strip()
+    contact_phone = data.get('contact_phone', '').strip()
+    country = data.get('country', 'HR')
+
+    if not company_name:
+        errors.append('Naziv tvrtke je obavezan' if country != 'DE' else 'Firmenname ist erforderlich')
+    if not contact_name:
+        errors.append('Ime kontakta je obavezno' if country != 'DE' else 'Kontaktname ist erforderlich')
+    if not contact_phone:
+        errors.append('Telefon je obavezan' if country != 'DE' else 'Telefonnummer ist erforderlich')
+    if country == 'HR' and oib and len(oib) != 11:
+        errors.append('OIB mora imati 11 znamenki')
+    if country == 'DE' and oib and len(oib) < 10:
+        errors.append('Steuernummer ist zu kurz')
+
+    # Duplicate check
+    from registration.models import SalesLead
+    if oib and SalesLead.objects.filter(oib=oib, status__in=['signed', 'active']).exists():
+        errors.append('Klijent s ovim OIB-om vec postoji' if country != 'DE' else 'Kunde mit dieser Steuernummer existiert bereits')
+    if company_name and SalesLead.objects.filter(company_name__iexact=company_name, status__in=['signed', 'active']).exists():
+        errors.append('Tvrtka s ovim imenom vec postoji' if country != 'DE' else 'Firma mit diesem Namen existiert bereits')
+
+    if errors:
+        return JsonResponse({'ok': False, 'errors': errors}, status=400)
+
+    # Audit trail
+    client_ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
+
+    lead = SalesLead.objects.create(
+        company_name=data.get('company_name', ''),
+        oib=data.get('oib', ''),
+        contact_name=data.get('contact_name', ''),
+        contact_email=data.get('contact_email', ''),
+        contact_phone=data.get('contact_phone', ''),
+        address=data.get('address', ''),
+        city=data.get('city', ''),
+        country=data.get('country', 'HR'),
+        business_type=data.get('business_type', 'obrt'),
+        plan=data.get('plan', 'professional'),
+        modules=data.get('modules', []),
+        signature_b64=data.get('signature', ''),
+        signed_at=tz.now() if data.get('signature') else None,
+        signed_by=data.get('contact_name', ''),
+        status='signed' if data.get('signature') else 'draft',
+        agent=request.user,
+        notes=data.get('notes', ''),
+    )
+
+    if data.get('signature'):
+        sig_dir = '/var/www/fina-connect/media/signatures'
+        os.makedirs(sig_dir, exist_ok=True)
+        sig_data = data['signature']
+        if ',' in sig_data:
+            sig_data = sig_data.split(',')[1]
+        with open(os.path.join(sig_dir, f'sales_{lead.pk}.png'), 'wb') as f:
+            f.write(base64.b64decode(sig_data))
+
+    # Audit trail to superdashboard
+    try:
+        from superadmin_ai.models import PendingAIAction
+        PendingAIAction.objects.create(
+            company=None,
+            module='sales_wizard',
+            action_type='new_lead',
+            description='Novi klijent: %s (%s) — plan: %s — agent: %s' % (
+                lead.company_name, lead.country, lead.plan, request.user.username,
+            ),
+            payload={
+                'lead_id': lead.pk,
+                'company': lead.company_name,
+                'oib': lead.oib,
+                'country': lead.country,
+                'plan': lead.plan,
+                'agent': request.user.username,
+                'client_ip': client_ip,
+                'signed': bool(lead.signature_b64),
+            },
+            status='pending',
+        )
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'ok': True,
+        'lead_id': lead.pk,
+        'message': 'Klijent registriran!' if data.get('country') != 'DE' else 'Kunde registriert!',
+    })

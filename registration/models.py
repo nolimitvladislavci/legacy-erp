@@ -436,3 +436,47 @@ class UmbrellaInviteCode(models.Model):
         import random, string
         return 'UC-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
+
+
+class SalesLead(models.Model):
+    """Sales wizard — kompletni onboarding flow za novog klijenta."""
+    STATUS_CHOICES = [
+        ('draft', 'U pripremi'),
+        ('signed', 'Potpisan'),
+        ('active', 'Aktivan'),
+        ('rejected', 'Odbijen'),
+    ]
+
+    # Basic info
+    company_name = models.CharField(max_length=200)
+    oib = models.CharField(max_length=20, blank=True)
+    contact_name = models.CharField(max_length=200)
+    contact_email = models.EmailField(blank=True)
+    contact_phone = models.CharField(max_length=50)
+    address = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    country = models.CharField(max_length=5, default='HR')
+
+    # Business
+    business_type = models.CharField(max_length=30, default='obrt')
+    plan = models.CharField(max_length=30, default='professional')
+    modules = models.JSONField(default=list, blank=True)
+
+    # Signature
+    signature_b64 = models.TextField(blank=True)
+    signed_at = models.DateTimeField(null=True, blank=True)
+    signed_by = models.CharField(max_length=200, blank=True)
+
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    agent = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='sales_leads')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Sales Lead'
+        verbose_name_plural = 'Sales Leads'
+
+    def __str__(self):
+        return f'{self.company_name} ({self.status})'

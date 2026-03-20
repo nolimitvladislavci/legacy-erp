@@ -14,6 +14,7 @@ class Partner(models.Model):
         ('supplier', _('Dobavljač')),
         ('both',     _('Partner (Oboje)')),
         ('employee', _('Zaposlenik')),
+        ('agent',    _('Prodajni agent / Tippgeber')),
     ]
 
     class Country(models.TextChoices):
@@ -124,3 +125,110 @@ class Partner(models.Model):
         outflow = self.transactions.filter(direction='expense').aggregate(Sum('amount'))['amount__sum'] or 0
         self.cached_balance = inflow - outflow
         self.save(update_fields=['cached_balance'])
+
+
+class AgentReferral(models.Model):
+    """
+    Veza: Agent (Tippgeber) → preporučeni korisnik → pretplata → provizija.
+    Prati tko je koga doveo, koliko zarađuje, i kad je isplaćeno.
+    """
+    STATUS_CHOICES = [
+        ('pending', _('Čeka aktivaciju')),
+        ('active', _('Aktivan — provizija teče')),
+        ('expired', _('Istekao (12 mj)')),
+        ('cancelled', _('Otkazan')),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    agent = models.ForeignKey(
+        Partner, on_delete=models.CASCADE,
+        related_name='referrals', verbose_name=_('Agent'),
+        limit_choices_to={'partner_type': 'agent'},
+    )
+    referred_company = models.ForeignKey(
+        Company, on_delete=models.CASCADE,
+        related_name='referred_by', verbose_name=_('Preporučena tvrtka'),
+    )
+    referral_code = models.CharField(
+        max_length=30, unique=True, verbose_name=_('Referral kod'),
+        help_text=_('Jedinstveni kod za praćenje (npr. REF-ANTONIO-001)'),
+    )
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+
+    # Provizija
+    commission_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, default=20,
+        verbose_name=_('Provizija (%)'),
+    )
+    commission_months = models.PositiveSmallIntegerField(
+        default=12, verbose_name=_('Trajanje provizije (mjeseci)'),
+    )
+    total_earned = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name=_('Ukupno zarađeno (EUR)'),
+    )
+    total_paid = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name=_('Ukupno isplaćeno (EUR)'),
+    )
+
+    # Ugovor
+    contract_signed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('Ugovor potpisan'),
+    )
+    contract_ip = models.GenericIPAddressField(null=True, blank=True)
+    contract_user_agent = models.CharField(max_length=200, blank=True)
+
+    # IBAN za isplatu
+    agent_iban = models.CharField(max_length=34, blank=True, verbose_name=_('IBAN agenta'))
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Istječe'))
+
+    class Meta:
+        verbose_name = _('Agent Referral')
+        verbose_name_plural = _('Agent Referrals')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return '%s → %s (%s)' % (self.agent.name, self.referred_company.name, self.status)
+
+    @property
+    def balance_due(self):
+        """Neisplaćeni saldo."""
+        return self.total_earned - self.total_paid
+
+
+class AgentPayout(models.Model):
+    """Mjesečna isplata provizije agentu — audit trail."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    agent = models.ForeignKey(
+        Partner, on_delete=models.CASCADE,
+        related_name='payouts', verbose_name=_('Agent'),
+    )
+    period_month = models.PositiveSmallIntegerField(verbose_name=_('Mjesec'))
+    period_year = models.PositiveSmallIntegerField(verbose_name=_('Godina'))
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Iznos (EUR)'))
+    referrals_count = models.PositiveSmallIntegerField(default=0, verbose_name=_('Broj referrala'))
+
+    # Detalji
+    breakdown = models.JSONField(default=list, verbose_name=_('Razrada po klijentima'))
+    iban = models.CharField(max_length=34, verbose_name=_('IBAN za isplatu'))
+
+    status = models.CharField(max_length=15, choices=[
+        ('calculated', _('Izračunato')),
+        ('approved', _('Odobreno')),
+        ('paid', _('Isplaćeno')),
+    ], default='calculated')
+
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Agent isplata')
+        verbose_name_plural = _('Agent isplate')
+        unique_together = [('agent', 'period_month', 'period_year')]
+        ordering = ['-period_year', '-period_month']
+
+    def __str__(self):
+        return '%s — %02d/%d — %s EUR' % (self.agent.name, self.period_month, self.period_year, self.amount)

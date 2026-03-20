@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+body{font-family:'Segoe UI',sans-serif;margin:0;padding:40px;background:#f5f5f5}
+.card{width:86mm;height:54mm;background:linear-gradient(135deg,#0a0a0a,#1a1025);border-radius:10px;padding:12px 16px;color:#fff;position:relative;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.3);margin:0 auto}
+.card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:rgba(201,168,76,.08);border-radius:50%}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.logo{color:#c9a84c;font-weight:800;font-size:11pt;letter-spacing:1px}
+.logo span{color:#fff}
+.badge{background:rgba(34,197,94,.2);color:#4ade80;font-size:6pt;padding:2px 8px;border-radius:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.name{font-size:13pt;font-weight:700;margin-bottom:2px}
+.role{font-size:7.5pt;color:#c9a84c;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:8px}
+.info{font-size:7pt;color:#94a3b8;line-height:1.5}
+.info strong{color:#e8e8e8}
+.footer-card{position:absolute;bottom:8px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-end}
+.valid{font-size:6pt;color:#475569}
+.qr-placeholder{width:28px;height:28px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:5pt;color:#c9a84c}
+
+/* Back side */
+.card-back{width:86mm;min-height:54mm;background:#fff;border-radius:10px;padding:12px 16px;color:#333;margin:20px auto 0;box-shadow:0 4px 15px rgba(0,0,0,.1);font-size:7pt;line-height:1.5}
+.card-back h3{font-size:8pt;color:#c9a84c;margin:0 0 5px;text-transform:uppercase;letter-spacing:1px}
+.card-back p{margin:0 0 5px}
+.card-back .legal{font-size:6pt;color:#999;border-top:1px solid #eee;padding-top:5px;margin-top:8px}
+.verify{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;padding:4px 8px;font-size:6.5pt;color:#166534;margin-top:5px;text-align:center}
+
+.print-info{text-align:center;margin:30px 0;font-size:9pt;color:#999}
+
+@media print{
+body{background:#fff;padding:10mm}
+.print-info{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="print-info">Isprintajte obje strane na kartici kreditnog formata (86×54mm) i plastificirajte.</div>
+
+<!-- PREDNJA STRANA -->
+<div class="card">
+<div class="card-header">
+<div class="logo">LIMIT<span>CONNECT</span></div>
+<div class="badge">Autorisiert</div>
+</div>
+<div class="name">Antonio Visković</div>
+<div class="role">Autorisierter Vertriebspartner</div>
+<div class="info">
+<strong>Unternehmen:</strong> Visković Group / Konjik d.o.o.<br>
+<strong>Produkt:</strong> LIMIT Connect Cloud-Kassensystem<br>
+<strong>Gebiet:</strong> Baden-Württemberg, Deutschland
+</div>
+<div class="footer-card">
+<div class="valid">Gültig: 01.04.2026 — 31.03.2027<br>ID: LC-AGT-2026-001</div>
+<div class="qr-placeholder">QR</div>
+</div>
+</div>
+
+<!-- RÜCKSEITE -->
+<div class="card-back">
+<h3>Legitimation</h3>
+<p>Der Inhaber dieser Karte ist als <strong>unabhängiger Tippgeber</strong> für LIMIT Connect tätig. Er ist berechtigt, das Produkt vorzustellen und Kontaktdaten von Interessenten zu vermitteln.</p>
+<p><strong>Er ist NICHT befugt</strong>, Verträge abzuschließen, Preise zu verhandeln oder Zahlungen entgegenzunehmen.</p>
+<div class="verify">
+Online-Verifizierung: limit-connect.com/verify/LC-AGT-2026-001<br>
+Kontakt: +49 5251 / info@limit-connect.com
+</div>
+<div class="legal">
+Tippgeber-Vereinbarung gemäß §§ 611 ff. BGB.<br>
+Visković Group · Konjik d.o.o. · OIB: 37590751921
+</div>
+</div>
+
+</body>
+</html>

@@ -93,13 +93,27 @@ urlpatterns += i18n_patterns(
     path('api/cockpit/upload-photo/', views.cockpit_upload_photo, name='cockpit_upload_photo'),
     path('api/cockpit/photos/', views.cockpit_photos, name='cockpit_photos'),
     path('tim-chat/', views.tim_chat, name='tim_chat'),
-    path('tim-chat/', views.tim_chat, name='tim_chat'),
-    path('tim-chat/', views.tim_chat, name='tim_chat'),
+    path('tim-chat/send/', views.tim_chat_send, name='tim_chat_send'),
     path("admin/knjiga/", __import__("core.knjiga_view", fromlist=["knjiga_pristupnih_podataka"]).knjiga_pristupnih_podataka, name="knjiga_pristupnih_podataka"),
     path("knjiga-boljitaka/", __import__("core.knjiga_view", fromlist=["knjiga_boljitaka"]).knjiga_boljitaka, name="knjiga_boljitaka"),
     path("revizorski-paket/", views.audit_package, name="audit_package"),
     path("newsletter/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'core/newsletter_2026.html'), name="newsletter"),
     path("newsletter/de/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'core/newsletter_2026_de.html'), name="newsletter_de"),
+
+    # DE Promotion Pack
+    path("de/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/de_landing.html'), name="de_landing"),
+    path("de/pakete/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/de_pakete.html'), name="de_pakete"),
+    path("de/anleitung/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/de_anleitung.html'), name="de_anleitung"),
+    path("de/ohne-papier/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/de_ohne_papier.html'), name="de_ohne_papier"),
+
+    # Legal — Tippgeber/Posrednik
+    path("legal/tippgeber-vertrag/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/tippgeber_vertrag_de.html'), name="tippgeber_vertrag"),
+    path("legal/tippgeber-ausweis/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/tippgeber_ausweis_de.html'), name="tippgeber_ausweis"),
+    path("legal/posrednicki-ugovor/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/posrednicki_ugovor_hr.html'), name="posrednicki_ugovor"),
+
+    # Partner Signup (public)
+    path("partner/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/partner_signup.html'), name="partner_signup"),
+    path("api/partner-signup/", views.partner_signup_api, name="partner_signup_api"),
 
     # UVIJEK FRIŠKO — landing + letci
     path('frisko/', lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/landing_frisko.html')),
