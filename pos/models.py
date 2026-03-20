@@ -831,6 +831,23 @@ class Voucher(models.Model):
         related_name='vouchers', verbose_name=_('Tvrtka'),
     )
     objects = CompanyManager()
+    # Tip vaucera: odredjuje PDV tretman pri prodaji
+    VOUCHER_TYPE_CHOICES = [
+        ('multi', 'Visenamjenski (Mehrzweck) — bez PDV pri prodaji'),
+        ('single', 'Jednonamjenski (Einzweck) — s PDV pri prodaji'),
+    ]
+    voucher_type = models.CharField(
+        max_length=10, choices=VOUCHER_TYPE_CHOICES, default='multi',
+        verbose_name=_('Tip vaucera'),
+        help_text=_('Visenamjenski = obveza pri prodaji (bez PDV). Jednonamjenski = prihod s PDV.'),
+    )
+    # Konto knjizenje
+    is_sold = models.BooleanField(default=False, verbose_name=_('Prodan'),
+        help_text=_('True = kreiran prodajom na POS-u'))
+    sold_receipt = models.ForeignKey(
+        'pos.POSReceipt', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='sold_vouchers', verbose_name=_('Bon prodaje'),
+    )
     code            = models.CharField(max_length=20, unique=True, verbose_name=_('Kod vaučera'))
     original_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Izvorna vrijednost (€)'))
     remaining       = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Preostalo (€)'))
