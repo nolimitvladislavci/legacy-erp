@@ -246,6 +246,24 @@ class CheckoutService:
         except (InvalidOperation, ValueError):
             voucher_amount = Decimal('0')
 
+        # ── 1b. DE 250 EUR KLEINBETRAGSRECHNUNG LIMIT ──
+        # §33 UStDV: Bon > 250 EUR bruto MORA imati podatke kupca
+        if (company.country in ('DE', 'AT')
+                and not payload.get('buyer_oib', '').strip()
+                and not payload.get('buyer_name', '').strip()):
+            # Izracunaj ukupni iznos iz payloada
+            est_total = sum(
+                float(i.get('unit_price', i.get('price', 0))) *
+                float(i.get('quantity', i.get('qty', 1)))
+                for i in payload.get('items', [])
+            )
+            if est_total > 250:
+                raise CheckoutValidationError(
+                    'DE_BUYER_REQUIRED',
+                    'Rechnungsbetrag ueber 250 EUR: Kaeuferangaben (Name, Adresse, USt-IdNr) '
+                    'sind gemaess Paragraph 14 Abs. 4 UStG erforderlich. Bitte Kaeufer eingeben.'
+                )
+
         # ── 2. VALIDACIJA ──
         if not session_id:
             raise CheckoutValidationError('NO_SESSION', 'session_id je obavezan')
@@ -471,6 +489,35 @@ class CheckoutService:
         }
         if fiscal_error:
             result['fiscal_warning'] = fiscal_error
+
+        # ── 10b. AUTO e-RACUN ZA B2B (R1) ──
+        # Od 01.01.2026. B2B transakcije MORAJU imati e-Racun
+        if receipt.buyer_oib and receipt.buyer_oib.strip():
+            try:
+                from eracun.models import ERacun
+                # Kreiraj e-Racun u pozadini (Celery)
+                from django.db import transaction as db_tx
+                def _create_eracun():
+                    try:
+                        eracun = ERacun.objects.create(
+                            company=company,
+                            invoice_number=result.get('invoice_number', ''),
+                            buyer_name=receipt.buyer_name or '',
+                            buyer_oib=receipt.buyer_oib,
+                            buyer_address=receipt.buyer_address or '',
+                            subtotal=receipt.subtotal,
+                            tax_amount=receipt.tax_amount,
+                            total=receipt.total,
+                            issue_date=tz.now().date(),
+                            status='draft',
+                        )
+                        logger.info('Auto e-Racun kreiran za R1 bon #%s -> eRacun %s',
+                                    receipt.receipt_number, eracun.pk)
+                    except Exception as e:
+                        logger.warning('Auto e-Racun failed za bon #%s: %s', receipt.receipt_number, e)
+                db_tx.on_commit(_create_eracun)
+            except Exception:
+                pass
 
         # ── 11. ACTIVITY EVENT ──
         from worktime.tracker import track
