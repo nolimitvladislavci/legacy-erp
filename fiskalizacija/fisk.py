@@ -200,6 +200,7 @@ def build_signed_soap(
 
 
 def _build_racun(receipt, oib, ozn_pos_pr, ozn_nap_ur, zki, dt) -> etree._Element:
+    from decimal import Decimal
     """Build tns:Racun XML element from POSReceipt."""
     ns = FISK_NS
     nsmap = {'tns': FISK_NS, 'wsu': WSU_NS}

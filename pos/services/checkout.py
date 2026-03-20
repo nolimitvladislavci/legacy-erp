@@ -115,7 +115,7 @@ class CheckoutService:
         # Route 2: DE — KassenSichV / TSE
         fiscal_system = getattr(company, 'fiscal_system', 'hr_fiscal')
         if fiscal_system == 'de_gobd' or getattr(company, 'country', 'HR') == 'DE':
-            return cls._fiscalize_tse(receipt)
+            return CheckoutService._fiscalize_tse(receipt)
 
         # Route 3: HR — FINA CIS (default)
         zki, jir, error = '', '', ''
@@ -359,6 +359,7 @@ class CheckoutService:
                 unit_price=unit_price,
                 tax_rate=tax_rate,
                 is_pfand_return=is_pfand,
+                is_nonprofit_activity=getattr(inv, 'is_nonprofit_activity', False),
             )
 
             # Stock deduction
