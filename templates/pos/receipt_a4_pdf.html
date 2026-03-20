@@ -193,11 +193,36 @@ td   { padding: 3px 5px; vertical-align: top; }
 </div>
 {% endif %}
 
+<!-- ── TSE / KassenSichV §6 (DE) ── -->
+{% if receipt.tse_transaction_number %}
+<div class="fis-box" style="margin-top:10px">
+  <div style="font-weight:bold;margin-bottom:3px">TSE Daten (KassenSichV §6)</div>
+  <table style="font-size:8pt;width:100%">
+    <tr><td style="width:30%;color:#666">TSE Transaktion:</td><td style="font-weight:bold">{{ receipt.tse_transaction_number }}</td></tr>
+    <tr><td style="color:#666">Signaturzähler:</td><td>{{ receipt.tse_signature_counter }}</td></tr>
+    <tr><td style="color:#666">TSE Seriennummer:</td><td style="font-family:monospace;font-size:7pt">{{ receipt.tse_serial_number }}</td></tr>
+    <tr><td style="color:#666">Zeitpunkt Start:</td><td>{{ receipt.tse_start_time|date:"d.m.Y H:i:s" }}</td></tr>
+    <tr><td style="color:#666">Zeitpunkt Ende:</td><td>{{ receipt.tse_end_time|date:"d.m.Y H:i:s" }}</td></tr>
+    <tr><td style="color:#666">Kassen-Seriennummer:</td><td>{{ terminal.terminal_code }}</td></tr>
+  </table>
+  {% if receipt.tse_hash %}
+  <div style="margin-top:5px;font-size:6.5pt;color:#666;word-break:break-all">
+    Prüfwert: {{ receipt.tse_hash }}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
 <!-- ── FOOTER ── -->
-{% for item in items %}{% if item.is_tip %}<div style="font-size:8pt;color:#888;margin-top:4px">* Napojnica (PDV 0%)</div>{% endif %}{% endfor %}
+{% for item in items %}{% if item.is_tip %}<div style="font-size:8pt;color:#888;margin-top:4px">* Napojnica / Trinkgeld (MwSt 0%)</div>{% endif %}{% endfor %}
 <div class="footer">
+  {% if company.country == 'DE' or company.country == 'AT' %}
+  Vielen Dank für Ihren Einkauf! &nbsp;|&nbsp; LIMIT Connect POS &nbsp;|&nbsp; {% now "d.m.Y" %}<br>
+  <span style="font-size:7pt;color:#999">Elektronisches Dokument — gültig ohne Stempel und Unterschrift. Aufbewahrungspflichtig gem. § 147 AO. GoBD-konform (Rz. 50-55).</span>
+  {% else %}
   Hvala na posjetu! &nbsp;|&nbsp; LIMIT Connect POS &nbsp;|&nbsp; {% now "d.m.Y" %}<br>
-  <span style="font-size:7pt;color:#999">Ovaj račun je izrađen elektronički i važeći je bez žiga i potpisa (čl. 9. st. 2. ZOR-a). | Dieser Beleg wurde elektronisch erstellt und ist ohne Stempel und Unterschrift gültig.</span>
+  <span style="font-size:7pt;color:#999">Ovaj račun je izrađen elektronički i važeći je bez žiga i potpisa (čl. 9. st. 2. ZOR-a).</span>
+  {% endif %}
 </div>
 
 </body>

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Steuerberater Portal — LIMIT Connect{% endblock %}
+
+{% block content %}
+<style>
+.stb-wrap{max-width:720px;margin:0 auto;padding:1.5rem 1rem}
+.stb-header{text-align:center;margin-bottom:2rem;padding:2rem 1rem;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);border-radius:16px;border:1px solid rgba(201,168,76,0.2)}
+.stb-header h1{color:#c9a84c;font-size:1.5rem;font-weight:800;letter-spacing:2px;margin:0 0 .5rem}
+.stb-header .sub{color:#94a3b8;font-size:.8rem}
+.stb-company{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.stb-company .icon{font-size:2rem}
+.stb-company .name{font-weight:700;font-size:1rem;color:#e2e8f0}
+.stb-company .detail{font-size:.75rem;color:#64748b}
+.stb-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.stb-card h3{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin:0 0 1rem}
+.stb-form .form-group{margin-bottom:1rem}
+.stb-form label{display:block;font-size:.8rem;font-weight:600;color:var(--text-secondary,#475569);margin-bottom:.35rem}
+.stb-form input[type=file]{width:100%;padding:.6rem;border:2px dashed var(--border,#e2e8f0);border-radius:8px;background:var(--input-bg,#fff);cursor:pointer;font-size:.85rem}
+.stb-form input[type=file]:hover{border-color:#c9a84c}
+.stb-form select,.stb-form textarea{width:100%;padding:.6rem .75rem;border:1px solid var(--border,#e2e8f0);border-radius:8px;background:var(--input-bg,#fff);font-size:.85rem;font-family:inherit;color:var(--text,#0f172a)}
+.stb-form textarea{min-height:80px;resize:vertical}
+.stb-form select:focus,.stb-form textarea:focus,.stb-form input:focus{outline:none;border-color:#c9a84c}
+.btn-upload{width:100%;padding:.75rem;background:#c9a84c;color:#000;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.5px;transition:all .2s}
+.btn-upload:hover{background:#d4a843;transform:translateY(-1px)}
+.btn-upload:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.upload-status{text-align:center;font-size:.8rem;margin-top:.5rem;min-height:1.2rem}
+.stb-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.stb-table th{text-align:left;padding:.5rem .75rem;color:#64748b;font-weight:600;border-bottom:1px solid var(--border,#e2e8f0);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+.stb-table td{padding:.5rem .75rem;border-bottom:1px solid var(--border-light,#f1f5f9);color:var(--text,#0f172a)}
+.stb-table tr:hover td{background:var(--table-row-hover,#f1f5f9)}
+.stb-contact{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+.stb-contact a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.25rem;border-radius:8px;text-decoration:none;font-size:.8rem;font-weight:600;transition:all .2s}
+.stb-contact .call{background:rgba(34,197,94,0.13);color:#22c55e;border:1px solid rgba(34,197,94,0.27)}
+.stb-contact .call:hover{background:#22c55e;color:#fff}
+.stb-contact .wa{background:rgba(37,211,102,0.13);color:#25d366;border:1px solid rgba(37,211,102,0.27)}
+.stb-contact .wa:hover{background:#25d366;color:#fff}
+.stb-contact .mail{background:rgba(59,130,246,0.13);color:#3b82f6;border:1px solid rgba(59,130,246,0.27)}
+.stb-contact .mail:hover{background:#3b82f6;color:#fff}
+.stb-footer{text-align:center;margin-top:2rem;padding:1rem;font-size:.75rem;color:#64748b;border-top:1px solid var(--border,#e2e8f0)}
+</style>
+
+<div class="stb-wrap">
+  <div class="stb-header">
+    <h1>Steuerberater Portal</h1>
+    <div class="sub">LIMIT Connect &mdash; Dokumentenverwaltung</div>
+  </div>
+
+  <div class="stb-company">
+    <div class="icon">&#x1f3e2;</div>
+    <div>
+      <div class="name">{{ company.name }}</div>
+      <div class="detail">{% if company.tax_id %}St.-Nr.: {{ company.tax_id }}{% endif %} {% if company.oib %}OIB: {{ company.oib }}{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- Upload Form -->
+  <div class="stb-card">
+    <h3>&#x1f4e4; Dokument hochladen</h3>
+    <form class="stb-form" id="upload-form" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="file">Datei (PDF, CSV, XLSX)</label>
+        <input type="file" id="file" name="file" accept=".pdf,.csv,.xlsx,.xls,.xml,.zip" required>
+      </div>
+      <div class="form-group">
+        <label for="doc_type">Dokumenttyp</label>
+        <select id="doc_type" name="doc_type">
+          <option value="lohnabrechnung">Lohnabrechnung</option>
+          <option value="datev_export">DATEV Export</option>
+          <option value="steuererklaerung">Steuererkl&auml;rung</option>
+          <option value="sonstiges">Sonstiges</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="notes">Bemerkungen</label>
+        <textarea id="notes" name="notes" placeholder="Optionale Hinweise zum Dokument..."></textarea>
+      </div>
+      <button type="submit" class="btn-upload" id="btn-upload">&#x1f4e4; Hochladen</button>
+      <div class="upload-status" id="upload-status"></div>
+    </form>
+  </div>
+
+  <!-- Recent Uploads -->
+  <div class="stb-card">
+    <h3>&#x1f4c2; Letzte Uploads</h3>
+    {% if recent %}
+    <div style="overflow-x:auto">
+      <table class="stb-table">
+        <thead>
+          <tr><th>Nr.</th><th>Typ</th><th>Datum</th><th>Von</th></tr>
+        </thead>
+        <tbody>
+          {% for entry in recent %}
+          <tr>
+            <td style="font-weight:600">{{ entry.doc_number }}</td>
+            <td>{{ entry.source_id }}</td>
+            <td>{{ entry.archived_at|date:"d.m.Y H:i" }}</td>
+            <td>{{ entry.partner_name|truncatechars:30 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;color:#64748b;padding:2rem;font-size:.85rem">
+      Noch keine Dokumente hochgeladen.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Contact -->
+  <div class="stb-card" style="text-align:center">
+    <h3>&#x1f4de; Kontakt</h3>
+    <p style="font-size:.85rem;color:var(--text-secondary,#475569);margin-bottom:1rem">
+      Bei Fragen erreichen Sie uns jederzeit:
+    </p>
+    <div class="stb-contact">
+      <a href="tel:+385976091655" class="call"><i class="fas fa-phone"></i> Anrufen</a>
+      <a href="https://wa.me/385976091655" target="_blank" class="wa"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+      <a href="mailto:info@limit-connect.com" class="mail"><i class="fas fa-envelope"></i> E-Mail</a>
+    </div>
+  </div>
+
+  <div class="stb-footer">
+    LIMIT Connect &mdash; Ihr digitaler Gesch&auml;ftspartner<br>
+    <a href="https://limit-connect.com" style="color:#c9a84c;text-decoration:none">limit-connect.com</a>
+  </div>
+</div>
+
+<script>
+document.getElementById('upload-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btn-upload');
+  var status = document.getElementById('upload-status');
+  var form = new FormData(this);
+
+  btn.disabled = true;
+  btn.textContent = 'Wird hochgeladen...';
+  status.textContent = '';
+  status.style.color = '';
+
+  fetch('{% url "steuerberater_upload" %}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': form.get('csrfmiddlewaretoken')},
+    body: form
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      status.textContent = 'Datei erfolgreich hochgeladen.';
+      status.style.color = '#22c55e';
+      document.getElementById('file').value = '';
+      document.getElementById('notes').value = '';
+      setTimeout(function() { location.reload(); }, 1500);
+    } else {
+      status.textContent = (d.error || 'Fehler');
+      status.style.color = '#ef4444';
+    }
+  })
+  .catch(function() {
+    status.textContent = 'Upload fehlgeschlagen';
+    status.style.color = '#ef4444';
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = 'Hochladen';
+  });
+});
+</script>
+{% endblock %}

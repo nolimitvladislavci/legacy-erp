@@ -10,6 +10,7 @@ from django.http import FileResponse, Http404
 import os as _os
 from django.contrib.auth import views as auth_views
 from . import views
+from core import steuerberater_views
 
 def _serve_offline(request):
     of_path = _os.path.join(settings.BASE_DIR, 'static', 'offline.html')
@@ -94,10 +95,16 @@ urlpatterns += i18n_patterns(
     path('api/cockpit/photos/', views.cockpit_photos, name='cockpit_photos'),
     path('tim-chat/', views.tim_chat, name='tim_chat'),
     path('tim-chat/send/', views.tim_chat_send, name='tim_chat_send'),
+    path('steuerberater/', steuerberater_views.steuerberater_portal, name='steuerberater_portal'),
+    path('steuerberater/upload/', steuerberater_views.steuerberater_upload, name='steuerberater_upload'),
+
     path("admin/knjiga/", __import__("core.knjiga_view", fromlist=["knjiga_pristupnih_podataka"]).knjiga_pristupnih_podataka, name="knjiga_pristupnih_podataka"),
     path("knjiga-boljitaka/", __import__("core.knjiga_view", fromlist=["knjiga_boljitaka"]).knjiga_boljitaka, name="knjiga_boljitaka"),
     path("revizorski-paket/", views.audit_package, name="audit_package"),
     path("newsletter/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'core/newsletter_2026.html'), name="newsletter"),
+        # Promo landing pages
+    path("promo/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/promo_hr.html'), name='promo_hr'),
+    path("promo/de/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/promo_de.html'), name='promo_de'),
     path("newsletter/de/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'core/newsletter_2026_de.html'), name="newsletter_de"),
 
     # DE Promotion Pack

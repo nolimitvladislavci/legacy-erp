@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LIMIT Connect — Vas poslovni ERP</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--black:#0a0a0a;--gold:#c9a84c;--dark:#111827;--gray:#94a3b8;--white:#e2e8f0}
+body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;line-height:1.6}
+a{color:var(--gold);text-decoration:none}
+
+.hero{text-align:center;padding:5rem 1.5rem 4rem;background:linear-gradient(180deg,#0a0a0a 0%,#111827 100%)}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--gold);letter-spacing:3px;margin-bottom:1rem}
+.hero .subtitle{font-size:clamp(1rem,2.5vw,1.4rem);font-weight:300;color:var(--gray);max-width:600px;margin:0 auto 2.5rem}
+.hero .cta{display:inline-block;padding:.9rem 2.5rem;background:var(--gold);color:#000;font-weight:700;font-size:1rem;border-radius:10px;letter-spacing:1px;transition:all .3s}
+.hero .cta:hover{background:#d4a843;transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.3)}
+
+.features{max-width:960px;margin:0 auto;padding:3rem 1.5rem}
+.features h2{text-align:center;color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:2.5rem;letter-spacing:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1.5rem}
+.card{background:var(--dark);border:1px solid #1e293b;border-radius:14px;padding:1.75rem;transition:all .3s}
+.card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,0.4)}
+.card .icon{font-size:2.2rem;margin-bottom:.75rem}
+.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;color:var(--white)}
+.card p{font-size:.85rem;color:var(--gray);line-height:1.5}
+
+.contact{text-align:center;padding:3rem 1.5rem;border-top:1px solid #1e293b;margin-top:2rem}
+.contact h2{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.5rem;margin-bottom:1.5rem}
+.contact-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+.contact-btns a{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;border-radius:10px;font-weight:600;font-size:.85rem;transition:all .2s}
+.btn-call{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3)}
+.btn-call:hover{background:#22c55e;color:#fff}
+.btn-wa{background:rgba(37,211,102,0.15);color:#25d366;border:1px solid rgba(37,211,102,0.3)}
+.btn-wa:hover{background:#25d366;color:#fff}
+.btn-mail{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)}
+.btn-mail:hover{background:#3b82f6;color:#fff}
+
+footer{text-align:center;padding:2rem 1rem;font-size:.75rem;color:#475569;border-top:1px solid #1e293b}
+footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>LIMIT CONNECT</h1>
+  <div class="subtitle">Bez papira. Za cijenu potrosnog materijala.</div>
+  <div style="font-size:.85rem;color:var(--gray);margin-bottom:2rem">Vas poslovni ERP &mdash; 78 tvrtki, 33.000+ partnera</div>
+  <a href="/register/" class="cta">Zapocnite besplatno &rarr;</a>
+</section>
+
+<section class="features">
+  <h2>Sve sto trebate</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="icon">&#x1f4c2;</div>
+      <h3>Arhiva</h3>
+      <p>Svi dokumenti na jednom mjestu. SHA-256 integritet, automatska klasifikacija, AI pretraga.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1f9fe;</div>
+      <h3>POS</h3>
+      <p>Blagajna na mobitelu. Fiskalizacija, QR racuni, vise terminala, bez papira.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1f4ca;</div>
+      <h3>Izvjestaji</h3>
+      <p>Automatski, za FINA-u. PDV, bilanca, bruto 2, sve iz jednog sustava.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1f465;</div>
+      <h3>Partneri</h3>
+      <p>33.000+ u bazi. CRM, portal za klijente, automatski import iz Synesisa.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1f512;</div>
+      <h3>Sigurnost</h3>
+      <p>SHA-256, TSE, HSTS, CSP. Audit trail, backup svaku noc, DR spremno.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#x1f30d;</div>
+      <h3>HR + DE</h3>
+      <p>Dvojezicni sustav. Hrvatski i njemacki, FINA + DATEV, fiskalizacija + TSE.</p>
+    </div>
+  </div>
+</section>
+
+<section class="contact">
+  <h2>Kontaktirajte nas</h2>
+  <div class="contact-btns">
+    <a href="tel:+385976091655" class="btn-call"><i class="fas fa-phone"></i> Pozovite</a>
+    <a href="https://wa.me/385976091655" target="_blank" class="btn-wa"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+    <a href="mailto:info@limit-connect.com" class="btn-mail"><i class="fas fa-envelope"></i> Email</a>
+  </div>
+</section>
+
+<footer>
+  &copy; 2026 LIMIT Connect &mdash; <a href="https://limit-connect.com">limit-connect.com</a><br>
+  Bez papira. Za cijenu potrosnog materijala.
+</footer>
+
+</body>
+</html>
