@@ -288,7 +288,7 @@ button[disabled]{opacity:.5;cursor:not-allowed}
 </div>
 
 <script type="application/json" id="pos-config">{
-  "inventory": [{% for inv in inventory_items %}{"id":"{{ inv.id }}","name":"{{ inv.name|escapejs }}","sku":"{{ inv.sku|escapejs }}","price":"{{ inv.unit_price|stringformat:.2f }}","tax":"{% if inv.tax_rate %}{{ inv.tax_rate.rate|stringformat:g }}{% else %}25{% endif %}","bc":"{{ inv.barcode|default:|escapejs }}","unit":"{{ inv.unit }}"}{% if not forloop.last %},{% endif %}{% endfor %}],
+  "inventory": [{% for inv in inventory_items %}{"id":"{{ inv.id }}","name":"{{ inv.name|escapejs }}","sku":"{{ inv.sku|escapejs }}","price":"{{ inv.unit_price|floatformat:2 }}","tax":"{% if inv.tax_rate %}{{ inv.tax_rate.rate|floatformat:0 }}{% else %}25{% endif %}","bc":"{{ inv.barcode|default:""|escapejs }}","unit":"{{ inv.unit }}"}{% if not forloop.last %},{% endif %}{% endfor %}],
   "receipt_total": {{ receipt.total|floatformat:2 }}
 }</script>
 <script src="/static/js/pos/pos-receipt.js"></script>
