@@ -32,11 +32,13 @@
         <div style="color:#64748b;font-size:.875rem;margin-bottom:1.5rem">ili odaberite jednu od opcija ispod</div>
 
         <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
-          <label title="Fotografirajte fizicki racun direktno mobilnim uredajem"
-                 style="background:#1e3a5f;color:#60a5fa;border:1px solid #1e40af;border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s">
+          <button type="button" id="btnCameraFenix"
+                  title="Fotografirajte fizicki racun direktno mobilnim uredajem"
+                  style="background:#1e3a5f;color:#60a5fa;border:1px solid #1e40af;border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s"
+                  onclick="fenixCameraCapture()">
             &#128247; Fotografirati mobilom
-            <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
-          </label>
+          </button>
+          <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
 
           <label title="Odaberite PDF, sliku ili XML datoteku s racunala"
                  style="background:#1a1a2e;color:#c9a84c;border:1px solid rgba(201,168,76,.5);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s">
@@ -188,7 +190,33 @@
   </form>
 </div>
 
+<div id="camera-preview" style="display:none"></div>
 <script src="/static/js/arhiva-upload.js"></script>
+<script>
+function fenixCameraCapture() {
+  if (window.FenixCamera) {
+    FenixCamera.quick('camera-preview', {
+      onReady: function(r) { handleFenixResult(r); }
+    });
+  } else {
+    document.getElementById('fileInputCamera').click();
+  }
+}
+
+function handleFenixResult(r) {
+  var byteString = atob(r.b64);
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+  var blob = new Blob([ab], {type: 'image/jpeg'});
+  var file = new File([blob], r.filename || 'fenix-photo.jpg', {type: 'image/jpeg'});
+  var dt = new DataTransfer();
+  dt.items.add(file);
+  var mainInput = document.getElementById('fileInputMain');
+  mainInput.files = dt.files;
+  handleFile(mainInput);
+}
+</script>
 
 <style>
 @keyframes shake {

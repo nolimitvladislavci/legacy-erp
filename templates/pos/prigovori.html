@@ -75,7 +75,7 @@
             <label class="form-label"><i class="fas fa-id-card me-2"></i>{% trans "Slika osobne iskaznice" %}</label>
             <p class="text-muted small mb-2">{% trans "Slikajte prednju stranu osobne iskaznice kamerom" %}</p>
             <div class="d-flex gap-2 mb-2">
-              <button type="button" class="btn btn-sm btn-outline-info" onclick="startIdCamera()">
+              <button type="button" class="btn btn-sm btn-outline-info" onclick="fenixIdCamera()">
                 <i class="fas fa-camera me-1"></i>{% trans "Pokreni kameru" %}
               </button>
               <label class="btn btn-sm btn-outline-secondary mb-0">
@@ -432,5 +432,22 @@ async function saveOdgovor() {
 }
 
 document.addEventListener('DOMContentLoaded', loadData);
+
+// FenixCamera for ID photo capture
+function fenixIdCamera() {
+  if (window.FenixCamera) {
+    FenixCamera.pick({
+      onCapture: function(r) {
+        idPhotoData = r.dataUrl;
+        document.getElementById('idImage').src = r.dataUrl;
+        document.getElementById('idPreview').style.display = 'block';
+        if (idStream) { idStream.getTracks().forEach(function(t){t.stop()}); idStream = null; }
+        document.getElementById('idCameraWrap').style.display = 'none';
+      }
+    });
+  } else {
+    startIdCamera();
+  }
+}
 </script>
 {% endblock %}

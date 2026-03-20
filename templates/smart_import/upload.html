@@ -34,7 +34,7 @@
 
         <!-- Camera button (mobile) -->
         <div id="cameraBtnWrap" class="mb-3 d-none">
-          <button type="button" class="btn btn-outline-success w-100 py-2" onclick="document.getElementById('cameraInput').click()">
+          <button type="button" class="btn btn-outline-success w-100 py-2" onclick="fenixSmartCamera()">
             <i class="fas fa-camera me-2"></i>Slikaj stranicu kamerom
           </button>
           <div class="text-muted small text-center mt-1">
@@ -120,6 +120,25 @@
 </div>
 
 <script>
+// FenixCamera integration
+function fenixSmartCamera() {
+  if (window.FenixCamera) {
+    FenixCamera.pick({
+      onCapture: function(r) {
+        var byteString = atob(r.b64);
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+        for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+        var blob = new Blob([ab], {type: 'image/jpeg'});
+        var file = new File([blob], r.filename || 'fenix-scan.jpg', {type: 'image/jpeg'});
+        addFiles([file]);
+      }
+    });
+  } else {
+    document.getElementById('cameraInput').click();
+  }
+}
+
 let allFiles = [];
 
 // Show camera button on touch devices

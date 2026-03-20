@@ -421,3 +421,44 @@ def patrol_insights_api(request):
         'critical_count': report.critical_count,
         'created_at': report.created_at.isoformat(),
     })
+
+
+
+@login_required
+@require_POST
+def analyze_image(request):
+    """Analyze an image using Claude Haiku vision."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    b64 = data.get('image_b64', '')
+    prompt = data.get('prompt', 'What is in this image?')
+    module = data.get('module', 'general')
+
+    if not b64:
+        return JsonResponse({'error': 'No image'}, status=400)
+
+    if not _ai_rate_check(request.user):
+        return JsonResponse({'error': 'Rate limit exceeded'}, status=429)
+
+    try:
+        import anthropic, os
+        client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
+        response = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=500,
+            messages=[{
+                'role': 'user',
+                'content': [
+                    {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': b64}},
+                    {'type': 'text', 'text': prompt},
+                ],
+            }],
+        )
+        _ai_rate_increment(request.user)
+        return JsonResponse({'response': response.content[0].text})
+    except Exception as e:
+        logger.error(f'analyze_image error: {e}', exc_info=True)
+        return JsonResponse({'error': str(e)}, status=500)

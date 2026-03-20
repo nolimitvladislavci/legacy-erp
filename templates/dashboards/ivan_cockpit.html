@@ -278,10 +278,10 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 
     <!-- Kamera / slika -->
     <div style="margin-top:.5rem;display:flex;gap:.5rem;align-items:center">
-      <label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;background:#111;border:1px solid #333;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;color:#c9a84c">
+      <button type="button" onclick="fenixSeatCamera()" style="display:flex;align-items:center;gap:.3rem;cursor:pointer;background:#111;border:1px solid #333;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;color:#c9a84c">
         <i class="fas fa-camera"></i> Slikaj
-        <input type="file" accept="image/*" capture="environment" id="seat-camera" style="display:none" onchange="previewPhoto(this)">
-      </label>
+      </button>
+      <input type="file" accept="image/*" capture="environment" id="seat-camera" style="display:none" onchange="previewPhoto(this)">
       <label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;background:#111;border:1px solid #333;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;color:#64748b">
         <i class="fas fa-image"></i> Galerija
         <input type="file" accept="image/*" id="seat-gallery" style="display:none" onchange="previewPhoto(this)">
@@ -433,6 +433,30 @@ function ctrlAction(action) {
     }).then(r=>r.json()).then(d=>{
       st.textContent = d.ok ? '✅ WhatsApp poslan' : '⚠️ '+( d.error||'greška');
     }).catch(()=>{ st.textContent='❌ Greška'; });
+  }
+}
+
+// FenixCamera for seat photos
+function fenixSeatCamera() {
+  if (window.FenixCamera) {
+    FenixCamera.pick({
+      onCapture: function(r) {
+        document.getElementById('photo-img').src = r.dataUrl;
+        document.getElementById('photo-preview').style.display = 'block';
+        document.getElementById('photo-name').textContent = r.filename || 'fenix-photo.jpg';
+        var byteString = atob(r.b64);
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+        for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+        var blob = new Blob([ab], {type: 'image/jpeg'});
+        var file = new File([blob], r.filename || 'fenix-photo.jpg', {type: 'image/jpeg'});
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('seat-camera').files = dt.files;
+      }
+    });
+  } else {
+    document.getElementById('seat-camera').click();
   }
 }
 

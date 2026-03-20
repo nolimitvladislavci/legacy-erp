@@ -11,4 +11,5 @@ urlpatterns = [
     path("api/chat/", views.chat_api, name="chat_api"),
     path("api/widget/", views.chat_widget_data, name="chat_widget_data"),
     path("patrol/", views.patrol_page, name="patrol"),
+    path("api/analyze-image/", views.analyze_image, name="analyze_image"),
 ]
