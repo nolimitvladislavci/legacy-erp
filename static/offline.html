@@ -23,6 +23,15 @@
 </head>
 <body>
   <div class="icon">&#9889;</div>
+  <div id="offline-modules" style="margin:20px 0;text-align:left;max-width:300px">
+    <div style="font-size:.75rem;color:var(--gold);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Dostupno offline:</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.8rem">
+      <div style="padding:8px;background:rgba(201,168,76,.1);border-radius:6px;border:1px solid rgba(201,168,76,.2)">&#128722; POS blagajna</div>
+      <div style="padding:8px;background:rgba(201,168,76,.1);border-radius:6px;border:1px solid rgba(201,168,76,.2)">&#9200; Clock-in/out</div>
+      <div style="padding:8px;background:rgba(201,168,76,.1);border-radius:6px;border:1px solid rgba(201,168,76,.2)">&#128196; Inventura</div>
+      <div style="padding:8px;background:rgba(201,168,76,.1);border-radius:6px;border:1px solid rgba(201,168,76,.2)">&#128247; Kamera</div>
+    </div>
+  </div>
   <h1>{% trans "Nema veze s mrežom" %}</h1>
   <p>{% trans "GPS lokacije i statusne promjene bit će spremljene lokalno i automatski sinkronizirane
      čim se veza uspostavi." %}</p>

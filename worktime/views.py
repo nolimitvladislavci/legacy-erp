@@ -400,3 +400,50 @@ def api_auditor_flags(request):
         'total_checked': logs.count(),
         'total_flagged': len(flagged),
     })
+
+
+@login_required
+@require_POST
+def offline_sync(request):
+    """Sync offline worktime entries from IndexedDB."""
+    import json
+    from django.http import JsonResponse
+    from django.utils import timezone as tz
+    from .models import TimeLog
+    from core.company_utils import get_user_company
+
+    data = json.loads(request.body)
+    entries = data.get('entries', [])
+    company = get_user_company(request)
+    synced = 0
+
+    for entry in entries:
+        entry_type = entry.get('type', '')
+        ts = entry.get('timestamp', '')
+
+        if entry_type == 'clock_in':
+            TimeLog.objects.create(
+                user=request.user,
+                company=company,
+                clock_in=ts,
+                source='offline',
+                lat_in=entry.get('lat'),
+                lon_in=entry.get('lon'),
+                note=entry.get('note', '') + ' [OFFLINE SYNC]',
+            )
+            synced += 1
+
+        elif entry_type == 'clock_out':
+            # Find last open TimeLog
+            last = TimeLog.objects.filter(
+                user=request.user, clock_out__isnull=True
+            ).order_by('-clock_in').first()
+            if last:
+                last.clock_out = ts
+                last.duration_hours = entry.get('duration_hours', 0)
+                last.lat_out = entry.get('lat')
+                last.lon_out = entry.get('lon')
+                last.save()
+                synced += 1
+
+    return JsonResponse({'ok': True, 'synced': synced})

@@ -122,6 +122,18 @@ class Company(models.Model):
         help_text=_('Zakonski limit gotovine u blagajni. Za udruge obavezno. Prazno = bez limita.'),
     )
 
+    # PDF predložak
+    PDF_TEMPLATE_CHOICES = [
+        ('viskovic', 'Visković (Gold/Premium)'),
+        ('datev', 'DATEV (Minimalistički)'),
+        ('modern', 'Modern (Plavo/Bijeli)'),
+    ]
+    pdf_template = models.CharField(
+        max_length=20, choices=PDF_TEMPLATE_CHOICES, default='viskovic',
+        verbose_name=_('PDF predložak'),
+        help_text=_('Izgled svih PDF dokumenata (računi, izvještaji, potvrde).'),
+    )
+
     # NKD djelatnost
     nkd_code = models.ForeignKey(
         NKDCode, on_delete=models.SET_NULL,

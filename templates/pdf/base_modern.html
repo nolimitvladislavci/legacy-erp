@@ -1,0 +1,84 @@
+{% comment %}
+LIMIT Connect — PDF Template: MODERN
+Plavo-bijeli, zaobljeni kutovi, gradijenti. Fresh i profesionalan.
+Kombinacija Visković estetike i DATEV preciznosti.
+{% endcomment %}
+<!DOCTYPE html>
+<html lang="{{ lang|default:'hr' }}">
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face{font-family:DejaVu;src:url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf')}
+@font-face{font-family:DejaVu;src:url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf');font-weight:bold}
+@page{size:A4;margin:16mm 18mm 22mm 18mm}
+*{font-family:DejaVu,Helvetica,sans-serif!important;box-sizing:border-box}
+body{font-size:9.5pt;color:#1e293b;margin:0;padding:0}
+
+/* ═══ ZAGLAVLJE — MODERN ═══ */
+.pdf-header{background:linear-gradient(135deg,#1e3a5f,#0f172a);color:#fff;padding:16px 20px;border-radius:10px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.pdf-header .company-name{font-size:15pt;font-weight:bold}
+.pdf-header .company-sub{font-size:8pt;color:#94a3b8;margin-top:3px}
+.pdf-header .doc-type{text-align:right}
+.pdf-header .doc-title{font-size:12pt;font-weight:bold;color:#60a5fa}
+.pdf-header .doc-meta{font-size:8pt;color:#94a3b8;margin-top:3px}
+
+/* ═══ INFO CARDS ═══ */
+.pdf-info{display:flex;gap:10px;margin-bottom:14px}
+.pdf-info-card{flex:1;background:#f1f5f9;border-radius:8px;padding:10px 14px;border-left:3px solid #3b82f6}
+.pdf-info-card .label{font-size:7pt;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.pdf-info-card .value{font-size:10pt;font-weight:bold;color:#0f172a;margin-top:2px}
+
+/* ═══ TABLICA ═══ */
+table.pdf-table{width:100%;border-collapse:collapse;margin:12px 0;border-radius:8px;overflow:hidden}
+table.pdf-table thead th{background:#1e3a5f;color:#fff;padding:7px 10px;text-align:left;font-size:7.5pt;text-transform:uppercase;letter-spacing:.5px}
+table.pdf-table tbody td{padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:9pt}
+table.pdf-table tbody tr:nth-child(even){background:#f8fafc}
+table.pdf-table .r{text-align:right}
+table.pdf-table .accent{color:#2563eb;font-weight:bold}
+table.pdf-table tfoot td{background:#f1f5f9;font-weight:bold;padding:8px 10px;border-top:2px solid #1e3a5f}
+
+/* ═══ TOTALI ═══ */
+.pdf-totals{display:flex;justify-content:flex-end;gap:10px;margin:14px 0}
+.pdf-total-box{background:linear-gradient(135deg,#eff6ff,#f1f5f9);border:1px solid #bfdbfe;border-radius:8px;padding:10px 18px;text-align:center;min-width:110px}
+.pdf-total-box .label{font-size:7pt;color:#64748b;text-transform:uppercase}
+.pdf-total-box .value{font-size:14pt;font-weight:bold;color:#1e40af;margin-top:2px}
+
+/* ═══ PODNOŽJE ═══ */
+.pdf-footer{position:fixed;bottom:0;left:0;right:0;padding:8px 18mm;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:7pt;color:#94a3b8;display:flex;justify-content:space-between}
+.pdf-footer .branding{color:#3b82f6;font-weight:bold}
+
+/* ═══ HELPERS ═══ */
+.section-title{font-size:10pt;font-weight:bold;color:#1e3a5f;border-bottom:2px solid #3b82f6;padding-bottom:4px;margin:16px 0 8px}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:7pt;font-weight:bold}
+.badge-ok{background:#dcfce7;color:#166534}
+.badge-warn{background:#fef3c7;color:#92400e}
+.badge-err{background:#fee2e2;color:#991b1b}
+.badge-info{background:#dbeafe;color:#1e40af}
+.note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px 14px;font-size:8.5pt;color:#1e40af;margin:10px 0}
+.signature-block{display:flex;justify-content:space-between;margin-top:40px}
+.sig{width:40%;text-align:center}
+.sig-line{border-top:1px solid #64748b;margin-top:35px;padding-top:5px;font-size:8pt;color:#64748b}
+</style>
+</head>
+<body>
+
+<div class="pdf-header">
+<div>
+<div class="company-name">{% block company_name %}{{ company.name|default:"LIMIT Connect" }}{% endblock %}</div>
+<div class="company-sub">{% block company_sub %}{{ company.address|default:"" }}{% if company.city %} · {{ company.city }}{% endif %} · OIB: {{ company.oib|default:"" }}{% endblock %}</div>
+</div>
+<div class="doc-type">
+<div class="doc-title">{% block doc_title %}DOKUMENT{% endblock %}</div>
+<div class="doc-meta">{% block doc_meta %}{% now "d.m.Y." %}{% endblock %}</div>
+</div>
+</div>
+
+{% block content %}{% endblock %}
+
+<div class="pdf-footer">
+<div>{% block footer_legal %}{% if company.country == 'DE' %}Elektronisches Dokument — § 147 AO, GoBD-konform{% else %}Elektronički dokument — čl. 9. st. 2. ZOR-a{% endif %}{% endblock %}</div>
+<div class="branding">{% block footer_branding %}LIMIT Connect · {% now "d.m.Y. H:i" %}{% endblock %}</div>
+</div>
+
+</body>
+</html>

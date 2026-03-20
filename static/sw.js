@@ -1,7 +1,7 @@
 // LIMIT Connect Service Worker – v4 (PWA + Offline)
 'use strict';
 
-var CACHE_VERSION = 'fina-v5';
+var CACHE_VERSION = 'fina-v6';
 var STATIC_CACHE  = CACHE_VERSION + '-static';
 var PAGE_CACHE    = CACHE_VERSION + '-pages';
 
@@ -73,6 +73,10 @@ self.addEventListener('fetch', function(event) {
       url.pathname.includes('/track/') ||
       url.pathname.includes('/pos/') ||
       url.pathname.includes('/helpdesk/') ||
+      url.pathname.includes('/worktime/') ||
+      url.pathname.includes('/fitness/') ||
+      url.pathname.includes('/udruge/') ||
+      url.pathname.includes('/hr/') ||
       url.pathname === '/') {
     event.respondWith(
       fetch(req).then(function(resp) {

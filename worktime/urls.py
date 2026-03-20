@@ -46,4 +46,6 @@ urlpatterns = [
     path('api/clock-in/', api_clock_in, name='api_clock_in'),
     path('api/clock-out/', api_clock_out, name='api_clock_out'),
     path('api/auditor/flags/', api_auditor_flags, name='api_auditor_flags'),
+
+    path('api/offline-sync/', views.offline_sync, name='offline_sync'),
 ]

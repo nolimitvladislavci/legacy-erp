@@ -26,6 +26,15 @@ function updateOfflineBar(){
   var bar = document.getElementById('offlineBar');
   var msg = document.getElementById('offlineMsg');
   var qBadge = document.getElementById('offlineQueue');
+  // Also check WorktimeOffline pending
+  if (window.WorktimeOffline) {
+    WorktimeOffline.getPendingCount(function(c) {
+      if (c > 0 && qBadge) {
+        var existing = qBadge.textContent || '';
+        qBadge.textContent = existing + (existing ? ' + ' : '') + c + ' worktime';
+      }
+    });
+  }
   if(!bar) return;
   if(!navigator.onLine){
     bar.style.display = 'block';
