@@ -52,7 +52,10 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <div class="form-check form-check-inline"><input type="checkbox" name="is_internal" class="form-check-input" id="chk-internal"><label for="chk-internal" class="form-check-label">Interno (klijent ne vidi)</label></div>
-                                <input type="file" name="attachment" class="form-control-sm d-inline-block" style="width:auto">
+                                <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('helpdesk-reply-preview',{onReady:function(r){document.getElementById('helpdesk_reply_b64').value=r.b64}})}else{document.getElementById('helpdesk-reply-file').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.3rem .75rem;border-radius:8px;cursor:pointer;margin-right:.5rem;font-size:.82rem">📷 Kamera</button>
+                                <div id="helpdesk-reply-preview" style="display:none;margin:.5rem 0"></div>
+                                <input type="hidden" name="photo_b64" id="helpdesk_reply_b64">
+                                <input type="file" name="attachment" id="helpdesk-reply-file" class="form-control-sm d-inline-block" style="width:auto">
                             </div>
                             <button type="submit" class="btn btn-primary">Posalji</button>
                         </div>

@@ -68,6 +68,33 @@ input[type=file]{display:none}
 <input type="file" id="camInput" accept="image/*" capture="environment">
 
 <script>
+(function(){
+  var origBtn = document.querySelector('.cam-btn');
+  if(origBtn && window.FenixCamera){
+    origBtn.onclick = function(e){
+      e.preventDefault();
+      FenixCamera.quick('fenix-scan-preview',{onReady:function(r){
+        var byteStr = atob(r.b64);
+        var ab = new ArrayBuffer(byteStr.length);
+        var ia = new Uint8Array(ab);
+        for(var i=0;i<byteStr.length;i++) ia[i]=byteStr.charCodeAt(i);
+        _file = new Blob([ab],{type:'image/jpeg'});
+        _file.name = r.filename;
+        document.getElementById('previewImg').src = r.dataUrl;
+        document.getElementById('mainArea').style.display = 'none';
+        document.getElementById('previewArea').style.display = 'block';
+        document.getElementById('statusText').textContent = 'Pregled slike';
+      }});
+    };
+    var pdiv = document.createElement('div');
+    pdiv.id = 'fenix-scan-preview';
+    pdiv.style.display = 'none';
+    document.querySelector('.main').appendChild(pdiv);
+  }
+})();
+</script>
+
+<script>
 var TOKEN = '{{ token }}';
 var _file = null;
 

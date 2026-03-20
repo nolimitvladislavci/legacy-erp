@@ -200,7 +200,10 @@ body { font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; background
             <label>Temperatura (°C)</label>
             <input type="number" name="temp" step="0.1" placeholder="npr. 4.5">
             <label>Foto dokaz</label>
-            <input type="file" name="photo" accept="image/*" capture="environment" style="padding:6px">
+            <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('driver-photo-preview',{onReady:function(r){document.getElementById('driver_photo_b64').value=r.b64}})}else{document.getElementById('driver-photo-file').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
+            <div id="driver-photo-preview" style="display:none;margin:.5rem 0"></div>
+            <input type="hidden" name="photo_b64" id="driver_photo_b64">
+            <input type="file" name="photo" id="driver-photo-file" accept="image/*" capture="environment" style="padding:6px">
             <label>Napomena</label>
             <textarea name="notes" placeholder="Dodatne napomene..."></textarea>
             <div style="display:flex;gap:8px;margin-top:14px">

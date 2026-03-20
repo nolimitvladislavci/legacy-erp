@@ -33,7 +33,11 @@ body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;margin:0;m
       <div class="form-group"><label>Email</label><input type="email" name="contact_email" maxlength="254"></div>
     </div>
     <div class="form-group"><label>Opis *</label><textarea name="description" rows="6" required placeholder="Opisite problem ili zahtjev..."></textarea></div>
-    <div class="form-group"><label>Prilog (opcionalno)</label><input type="file" name="attachment"></div>
+    <div class="form-group"><label>Prilog (opcionalno)</label>
+      <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('helpdesk-new-preview',{onReady:function(r){document.getElementById('helpdesk_photo_b64').value=r.b64}})}else{document.getElementById('helpdesk-file-input').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--accent);padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
+      <div id="helpdesk-new-preview" style="display:none;margin:.5rem 0"></div>
+      <input type="hidden" name="photo_b64" id="helpdesk_photo_b64">
+      <input type="file" name="attachment" id="helpdesk-file-input"></div>
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
       <a href="{% url 'helpdesk_portal' token=token %}" class="btn btn-outline-secondary btn-sm">Odustani</a>
       <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane"></i> Posalji</button>

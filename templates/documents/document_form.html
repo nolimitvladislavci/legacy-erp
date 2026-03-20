@@ -70,7 +70,10 @@
       </div>
       <div class="col-12">
         <label class="form-label fw-bold">{% trans "Datoteka (PDF, DOC...)" %}</label>
-        <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg">
+        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('doc-photo-preview',{onReady:function(r){document.getElementById('doc_photo_b64').value=r.b64}})}else{document.getElementById('doc-file-input').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
+        <div id="doc-photo-preview" style="display:none;margin:.5rem 0"></div>
+        <input type="hidden" name="photo_b64" id="doc_photo_b64">
+        <input type="file" name="file" id="doc-file-input" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg">
       </div>
       <div class="col-12">
         <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>{% trans "Spremi" %}</button>

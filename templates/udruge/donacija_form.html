@@ -60,6 +60,12 @@
             <label>Napomena</label>
             <textarea name="note" placeholder="Dodatne napomene..."></textarea>
         </div>
+        <div style="margin-top:1rem">
+          <label style="color:var(--gold);font-weight:600;font-size:.85rem">Prilog (fotografija računa/potvrde)</label>
+          <div id="donacija-photo-preview" style="display:none;margin:.5rem 0"></div>
+          <button type="button" onclick="if(window.FenixCamera)FenixCamera.quick('donacija-photo-preview',{onReady:function(r){document.getElementById('donacija_photo_b64').value=r.b64}})" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem">📷 Fotografiraj potvrdu</button>
+          <input type="hidden" name="photo_b64" id="donacija_photo_b64">
+        </div>
         <button type="submit" class="btn-gold"><i class="fas fa-save"></i> Spremi donaciju</button>
     </form>
 </div>

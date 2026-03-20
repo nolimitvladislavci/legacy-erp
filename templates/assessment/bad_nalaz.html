@@ -420,10 +420,11 @@ input[type=file]{display:none}
   </div>
   <input type="file" id="foto-input" accept="image/*" capture="environment" multiple onchange="handleFotos(this)">
   <div class="foto-grid" id="foto-grid">
-    <div class="foto-add" onclick="document.getElementById('foto-input').click()">
+    <div class="foto-add" onclick="if(window.FenixCamera){FenixCamera.quick('bad-foto-preview',{onReady:function(r){fetch(r.dataUrl).then(function(res){return res.blob()}).then(function(blob){var f=new File([blob],r.filename,{type:'image/jpeg'});var dt=new DataTransfer();dt.items.add(f);document.getElementById('foto-input').files=dt.files;handleFotos(document.getElementById('foto-input'))})}})}else{document.getElementById('foto-input').click()}">
       <div class="foto-add-icon">📷</div>
       <div class="foto-add-txt">Dodaj foto</div>
     </div>
+    <div id="bad-foto-preview" style="display:none;margin:.5rem 0"></div>
   </div>
   <p style="font-size:.75rem;color:var(--dim);margin-top:.75rem">Fotografi se šalju na server odmah po odabiru.</p>
 </div>

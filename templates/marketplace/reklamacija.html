@@ -116,10 +116,13 @@
 
       <div class="rek-row">
         <label class="rek-label">{% trans "Fotografija dokaza" %}</label>
+        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('rek-photo-preview',{onReady:function(r){document.getElementById('rek_photo_b64').value=r.b64;document.getElementById('photo-label').querySelector('.text').textContent='Fotografirano'}})}else{document.getElementById('rek-file-input').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
+        <div id="rek-photo-preview" style="display:none;margin:.5rem 0"></div>
+        <input type="hidden" name="photo_b64" id="rek_photo_b64">
         <label class="photo-upload" id="photo-label">
           <div class="icon">&#128247;</div>
           <div class="text">{% trans "Kliknite ili slikajte" %}</div>
-          <input type="file" name="photo" accept="image/*" capture="environment" onchange="document.getElementById('photo-label').querySelector('.text').textContent=this.files[0].name">
+          <input type="file" name="photo" id="rek-file-input" accept="image/*" capture="environment" onchange="document.getElementById('photo-label').querySelector('.text').textContent=this.files[0].name">
         </label>
       </div>
     </div>

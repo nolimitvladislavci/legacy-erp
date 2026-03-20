@@ -378,7 +378,8 @@
         <div class="photo-zone-title">
           {% trans "📸 Fotografirajte: sva 4 zida · pod · instalacije · strop" %}
         </div>
-        <button type="button" class="photo-btn" onclick="triggerPhoto(3)">{% trans "📷 Fotografiraj / Odaberi" %}</button>
+        <button type="button" class="photo-btn" onclick="if(window.FenixCamera){FenixCamera.quick('assess-photo-preview-3',{onReady:function(r){fetch(r.dataUrl).then(function(res){return res.blob()}).then(function(blob){var f=new File([blob],r.filename,{type:'image/jpeg'});var dt=new DataTransfer();dt.items.add(f);document.getElementById('photo-input-3').files=dt.files;handlePhotos(document.getElementById('photo-input-3'),3)})}})}else{triggerPhoto(3)}">{% trans "📷 Fotografiraj / Odaberi" %}</button>
+        <div id="assess-photo-preview-3" style="display:none;margin:.5rem 0"></div>
         <input type="file" id="photo-input-3" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotos(this,3)">
         <div class="photo-preview" id="preview-3"></div>
         <div class="upload-status" id="status-3"></div>

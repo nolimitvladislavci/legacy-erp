@@ -70,10 +70,11 @@
 
     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
 
-    <div class="camera-btn" id="openCameraBtn" onclick="document.getElementById('cameraInput').click()">
+    <div class="camera-btn" id="openCameraBtn" onclick="if(window.FenixCamera){FenixCamera.quick('worker-cam-preview',{onReady:function(r){var dt=new DataTransfer();fetch(r.dataUrl).then(function(res){return res.blob()}).then(function(blob){var f=new File([blob],r.filename,{type:'image/jpeg'});dt.items.add(f);document.getElementById('cameraInput').files=dt.files;document.getElementById('cameraInput').dispatchEvent(new Event('change'))})}})}else{document.getElementById('cameraInput').click()}">
         <i class="fas fa-camera"></i>
         <span>Slikaj Radove</span>
     </div>
+    <div id="worker-cam-preview" style="display:none;margin:.5rem 0"></div>
 
     <div id="previewContainer">
         <button class="retake-btn" onclick="document.getElementById('cameraInput').click()"><i class="fas fa-redo"></i> Ponovno slikaj</button>

@@ -62,6 +62,9 @@
       {% csrf_token %}
       <div class="form-group">
         <label for="file">Datei (PDF, CSV, XLSX)</label>
+        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('stb-photo-preview',{onReady:function(r){document.getElementById('stb_photo_b64').value=r.b64}})}else{document.getElementById('file').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
+        <div id="stb-photo-preview" style="display:none;margin:.5rem 0"></div>
+        <input type="hidden" name="photo_b64" id="stb_photo_b64">
         <input type="file" id="file" name="file" accept=".pdf,.csv,.xlsx,.xls,.xml,.zip" required>
       </div>
       <div class="form-group">
