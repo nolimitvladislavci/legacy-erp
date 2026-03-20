@@ -53,6 +53,12 @@ def user_edit(request, pk):
         password = request.POST.get('password')
         if password:
             target_user.set_password(password)
+            # Auto-notify via WhatsApp/email
+            try:
+                from accounts.password_notify import notify_password_change
+                notify_password_change(target_user, password, changed_by=request.user)
+            except Exception:
+                pass
 
         # 3. Ažuriranje Uloge i automatsko mapiranje privilegija
         new_role = request.POST.get('role', 'worker')

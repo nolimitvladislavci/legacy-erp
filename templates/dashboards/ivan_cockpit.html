@@ -234,6 +234,14 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
         <text x="140" y="250" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="bold">SONNET</text>
         <text x="140" y="259" text-anchor="middle" fill="#555" font-size="7">Koordinator</text>
       </g>
+      <!-- Marija - dolje-lijevo -->
+      <line x1="100" y1="190" x2="72" y2="218" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+      <g class="seat" onclick="openSeat('marija')">
+        <circle cx="55" cy="232" r="24" fill="#0d1117" stroke="#ec4899" stroke-width="2"/>
+        <text x="55" y="227" text-anchor="middle" font-size="14">👩‍💼</text>
+        <text x="55" y="240" text-anchor="middle" fill="#ec4899" font-size="8" font-weight="bold">MARIJA</text>
+        <text x="55" y="249" text-anchor="middle" fill="#555" font-size="7">Tenant Admin</text>
+      </g>
     </svg>
   </div>
 
@@ -245,11 +253,35 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
     </div>
     <div id="seat-desc" style="font-size:.72rem;color:#64748b;margin-bottom:.75rem"></div>
     <textarea id="seat-msg" rows="3" placeholder="Upiši poruku ili zadatak..."></textarea>
+
+    <!-- Kamera / slika -->
+    <div style="margin-top:.5rem;display:flex;gap:.5rem;align-items:center">
+      <label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;background:#111;border:1px solid #333;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;color:#c9a84c">
+        <i class="fas fa-camera"></i> Slikaj
+        <input type="file" accept="image/*" capture="environment" id="seat-camera" style="display:none" onchange="previewPhoto(this)">
+      </label>
+      <label style="display:flex;align-items:center;gap:.3rem;cursor:pointer;background:#111;border:1px solid #333;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;color:#64748b">
+        <i class="fas fa-image"></i> Galerija
+        <input type="file" accept="image/*" id="seat-gallery" style="display:none" onchange="previewPhoto(this)">
+      </label>
+      <span id="photo-name" style="font-size:.7rem;color:#475569;flex:1;overflow:hidden;text-overflow:ellipsis"></span>
+    </div>
+    <div id="photo-preview" style="display:none;margin-top:.5rem;position:relative">
+      <img id="photo-img" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #333">
+      <button onclick="clearPhoto()" style="position:absolute;top:4px;right:4px;background:#111;border:1px solid #333;border-radius:50%;width:24px;height:24px;color:#ef4444;cursor:pointer;font-size:.8rem">✕</button>
+    </div>
+
     <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem">
       <button class="btn btn-gold" onclick="sendMsg()">Pošalji</button>
       <span id="seat-status" style="font-size:.75rem;color:#64748b"></span>
     </div>
     <div id="seat-response" class="response-box"></div>
+  </div>
+
+  <!-- Fotke stol feed -->
+  <div id="photo-feed" style="margin-top:1rem">
+    <div style="font-size:.75rem;color:#64748b;margin-bottom:.5rem"><i class="fas fa-images"></i> Zadnje fotke</div>
+    <div id="photo-feed-list" style="display:flex;gap:.5rem;overflow-x:auto;padding:.25rem 0"></div>
   </div>
 </div>
 
@@ -262,7 +294,8 @@ const SEATS = {
   ivan: {name:'🧑‍💼 Ivan Brtan', desc:'Vlasnik projekta. WhatsApp ili bilješka.', color:'#c9a84c', type:'wa'},
   cc:   {name:'🤖 Claude Code', desc:'Executor na serveru. Piše kod, testira, deploya. Submit kao task.', color:'#22c55e', type:'task'},
   gemini:{name:'🔵 Gemini', desc:'Analiza i kontekst. Pripremi mu context dump.', color:'#3b82f6', type:'ctx'},
-  sonnet:{name:'🟡 Sonnet', desc:'Koordinator. Planira, pečati, vodi tim. claude.ai', color:'#f59e0b', type:'claude'}
+  sonnet:{name:'🟡 Sonnet', desc:'Koordinator. Planira, pečati, vodi tim. claude.ai', color:'#f59e0b', type:'claude'},
+  marija:{name:'👩‍💼 Marija Brtan', desc:'Tenant Admin — Konjik d.o.o. WhatsApp direktno.', color:'#ec4899', type:'wa_direct', phone:'385976091655'}
 };
 let cur = null;
 
@@ -318,8 +351,75 @@ function sendMsg() {
     resp.textContent = '💬 Za Soneta — kopiraj i paste u claude.ai:\n\n'+msg;
     st.textContent = '→ Otvaram...';
     setTimeout(()=> window.open('https://claude.ai','_blank'), 600);
+
+  // Ako ima priložena slika, uploadaj je
+  const photoInput = document.getElementById('seat-camera');
+  const galleryInput = document.getElementById('seat-gallery');
+  const hasPhoto = (photoInput && photoInput.files[0]) || (galleryInput && galleryInput.files[0]);
+  if (hasPhoto) {
+    const file = (photoInput && photoInput.files[0]) || galleryInput.files[0];
+    const fd = new FormData();
+    fd.append('photo', file);
+    fd.append('seat', cur);
+    fd.append('message', msg || '(bez poruke)');
+    st.textContent = 'Uploadam sliku...';
+    fetch('/api/cockpit/upload-photo/', {
+      method:'POST', headers:{'X-CSRFToken':getCsrf()}, body: fd
+    }).then(r=>r.json()).then(d=>{
+      if(d.ok){
+        st.textContent = '✅ Slika uploadana';
+        clearPhoto();
+        loadPhotoFeed();
+      } else { st.textContent = '⚠️ '+(d.error||'greška'); }
+    }).catch(()=>{ st.textContent='❌ Upload error'; });
+    return; // Ne šalji tekst ako ima slika
+  }
+
+  if (s.type === 'wa_direct') {
+    st.textContent = 'Šaljem WhatsApp...';
+    fetch('/api/cockpit/send-whatsapp/', {
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+      body: JSON.stringify({phone: s.phone, message: msg, seat: cur})
+    }).then(r=>r.json()).then(d=>{
+      st.textContent = d.ok ? '✅ WhatsApp poslan' : '⚠️ '+( d.error||'greška');
+    }).catch(()=>{ st.textContent='❌ Greška'; });
   }
 }
+
+// Photo preview
+function previewPhoto(input) {
+  if(!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    document.getElementById('photo-img').src = e.target.result;
+    document.getElementById('photo-preview').style.display = 'block';
+    document.getElementById('photo-name').textContent = input.files[0].name;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+function clearPhoto() {
+  document.getElementById('photo-preview').style.display = 'none';
+  document.getElementById('photo-name').textContent = '';
+  document.getElementById('seat-camera').value = '';
+  document.getElementById('seat-gallery').value = '';
+}
+
+// Photo feed
+function loadPhotoFeed() {
+  fetch('/api/cockpit/photos/')
+    .then(r=>r.json())
+    .then(d=>{
+      const list = document.getElementById('photo-feed-list');
+      if(!d.photos||!d.photos.length){ list.innerHTML='<span style="color:#333;font-size:.7rem">Nema fotki</span>'; return; }
+      list.innerHTML = d.photos.map(p=>
+        '<div style="flex-shrink:0;position:relative">' +
+        '<img src="'+p.url+'" style="height:80px;border-radius:6px;border:1px solid #333;cursor:pointer" onclick="window.open(this.src)" title="'+p.seat+': '+p.message+'">' +
+        '<div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.7);color:#fff;font-size:.55rem;padding:1px 4px;border-radius:3px">'+p.seat+' '+p.time+'</div>' +
+        '</div>'
+      ).join('');
+    }).catch(()=>{});
+}
+loadPhotoFeed();
 </script>
 </body>
 </html>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns0:Invoice xmlns:ns0="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:ns1="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ns2="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <ns1:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</ns1:CustomizationID>
+  <ns1:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ns1:ProfileID>
+  <ns1:ID>29564056</ns1:ID>
+  <ns1:IssueDate>2026-02-28</ns1:IssueDate>
+  <ns1:DueDate>2026-03-20</ns1:DueDate>
+  <ns1:InvoiceTypeCode>380</ns1:InvoiceTypeCode>
+  <ns1:DocumentCurrencyCode>EUR</ns1:DocumentCurrencyCode>
+  <ns1:Note>Ako ovaj račun podmirite do naznačenog datuma dospijeća. Za plaćanje nakon navedenog roka, zaračunavamo zakonom određene kamate. Ako imate dug iz prethodnih razdoblja, ovaj račun smatrajte i opomenom. Ako je na računu iskazana pretplata, možemo Vam izvršiti povrat novca ili za iznos preplate umanjiti slijedeći račun. Za sve uplate naknade nije obračunat temeljem čl.33 st.3 i čl.6.st.5 Zakona o PDV-u. U slučaju nepodmirenja novčane obveze po ovom računu, VODOVOD-OSIJEK d.o.o., vjerovnik, može po istom zatražiti određivanje ovrhe na temelju vjerodostojne isprave. Prigovore na ispostavljene račune podnose se pisanim putem na adresu VODOVOD-OSIJEK d.o.o., Poljski put 1, elektroničkom poštom na korisnik@vodovod.com, osobno u Pisarnici društva u uredovno radno vrijeme unutar zakonskog roka. Uloženi prigovor ne odlaže plaćanje računa.</ns1:Note>
+  <ns2:AccountingSupplierParty>
+    <ns2:Party>
+      <ns2:PartyIdentification>
+        <ns1:ID schemeID="0191">43654507669</ns1:ID>
+      </ns2:PartyIdentification>
+      <ns2:PartyName>
+        <ns1:Name>VODOVOD-OSIJEK d.o.o.</ns1:Name>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName>POLJSKI PUT 1</ns1:StreetName>
+        <ns1:CityName>OSIJEK</ns1:CityName>
+        <ns1:PostalZone/>
+        <ns2:Country>
+          <ns1:IdentificationCode>HR</ns1:IdentificationCode>
+        </ns2:Country>
+      </ns2:PostalAddress>
+      <ns2:PartyTaxScheme>
+        <ns1:CompanyID>HR43654507669</ns1:CompanyID>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:PartyTaxScheme>
+    </ns2:Party>
+  </ns2:AccountingSupplierParty>
+  <ns2:AccountingCustomerParty>
+    <ns2:Party>
+      <ns2:PartyIdentification>
+        <ns1:ID schemeID="0191">27961388827</ns1:ID>
+      </ns2:PartyIdentification>
+      <ns2:PartyName>
+        <ns1:Name>BRTAN MARIJA</ns1:Name>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName>HRVATSKE REPUBLIKE 23</ns1:StreetName>
+        <ns1:CityName>OSIJEK</ns1:CityName>
+        <ns1:PostalZone>31000</ns1:PostalZone>
+        <ns2:Country>
+          <ns1:IdentificationCode>HR</ns1:IdentificationCode>
+        </ns2:Country>
+      </ns2:PostalAddress>
+    </ns2:Party>
+  </ns2:AccountingCustomerParty>
+  <ns2:PaymentMeans>
+    <ns1:PaymentMeansCode>30</ns1:PaymentMeansCode>
+    <ns2:PayeeFinancialAccount>
+      <ns1:ID>HR8523600001503050797</ns1:ID>
+    </ns2:PayeeFinancialAccount>
+    <ns1:PaymentID>295640533-950613</ns1:PaymentID>
+  </ns2:PaymentMeans>
+  <ns2:TaxTotal>
+    <ns1:TaxAmount currencyID="EUR">2.64</ns1:TaxAmount>
+    <ns2:TaxSubtotal>
+      <ns1:TaxableAmount currencyID="EUR">20.29</ns1:TaxableAmount>
+      <ns1:TaxAmount currencyID="EUR">2.64</ns1:TaxAmount>
+      <ns2:TaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>13</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:TaxCategory>
+    </ns2:TaxSubtotal>
+    <ns2:TaxSubtotal>
+      <ns1:TaxableAmount currencyID="EUR">4.39</ns1:TaxableAmount>
+      <ns1:TaxAmount currencyID="EUR">0.00</ns1:TaxAmount>
+      <ns2:TaxCategory>
+        <ns1:ID>Z</ns1:ID>
+        <ns1:Percent>0</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:TaxCategory>
+    </ns2:TaxSubtotal>
+  </ns2:TaxTotal>
+  <ns2:LegalMonetaryTotals>
+    <ns1:LineExtensionAmount currencyID="EUR">24.68</ns1:LineExtensionAmount>
+    <ns1:TaxExclusiveAmount currencyID="EUR">24.68</ns1:TaxExclusiveAmount>
+    <ns1:TaxInclusiveAmount currencyID="EUR">27.34</ns1:TaxInclusiveAmount>
+    <ns1:PayableAmount currencyID="EUR">27.34</ns1:PayableAmount>
+  </ns2:LegalMonetaryTotals>
+  <ns2:InvoiceLine>
+    <ns1:ID>1</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">1.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">4.43</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Fiksni dio osnovne cijene vodnih usluga - 02/2026</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>13</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">4.43</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>2</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="MTQ">8.67</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">8.32</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Osnovna cijena vodne usluge javne vodoopskrbe</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>13</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">0.96</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>3</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="MTQ">8.67</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">5.29</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Osnovna cijena vodne usluge javne odvodnje</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>13</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">0.61</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>4</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="MTQ">8.67</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">2.25</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Osnovna cijena usluge pročišćavanja otpadnih voda</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>13</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">0.26</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>5</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="MTQ">8.67</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">2.60</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Naknada za korištenje voda</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>Z</ns1:ID>
+        <ns1:Percent>0</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">0.30</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>6</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="MTQ">8.67</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">0.23</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Naknada za zaštitu voda</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>Z</ns1:ID>
+        <ns1:Percent>0</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">0.03</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>7</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="MTQ">8.67</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">1.56</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Naknada za razvoj</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>Z</ns1:ID>
+        <ns1:Percent>0</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">0.18</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+</ns0:Invoice>

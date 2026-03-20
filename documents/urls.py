@@ -8,6 +8,8 @@ router.register(r"api", views.DocumentViewSet, basename="document")
 
 app_name = "documents"
 urlpatterns = [
+    path("arhiva-upute/", views.arhiva_upute, name="arhiva_upute"),
+    path("arhiva-vodic/", views.arhiva_guide_pdf, name="arhiva_guide_pdf"),
     path("", views.document_list, name="list"),
     path("new/", views.document_create, name="create"),
     path("arhiva/", views.arhiva_list, name="arhiva_list"),

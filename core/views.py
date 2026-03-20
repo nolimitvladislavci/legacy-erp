@@ -625,6 +625,14 @@ def superadmin_edit_user(request, user_id):
 
         target.save()
 
+        # Auto-notify via WhatsApp/email
+        if new_pw:
+            try:
+                from accounts.password_notify import notify_password_change
+                notify_password_change(target, new_pw, changed_by=request.user)
+            except Exception:
+                pass
+
         # Profile fields
         profile.role = request.POST.get('role', 'worker')
         company_id = request.POST.get('company', '')
@@ -2375,7 +2383,8 @@ def audit_package(request):
 
 @login_required
 def ivan_cockpit(request):
-    if not request.user.is_superuser:
+    _cockpit_users = {'superadmin', 'marija.brtan'}
+    if not request.user.is_superuser and request.user.username not in _cockpit_users:
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden()
     from django.db.models import Sum, Count
@@ -2434,8 +2443,111 @@ def ivan_cockpit(request):
 
 
 @login_required
+def cockpit_upload_photo(request):
+    """API: Upload fotke iz Fenix Cockpit okruglog stola."""
+    _cockpit_users = {'superadmin', 'marija.brtan'}
+    if not request.user.is_superuser and request.user.username not in _cockpit_users:
+        return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST only'}, status=405)
+
+    photo = request.FILES.get('photo')
+    if not photo:
+        return JsonResponse({'ok': False, 'error': 'Nema slike'}, status=400)
+
+    seat = request.POST.get('seat', 'unknown')
+    message = request.POST.get('message', '')[:200]
+
+    import os, uuid
+    from django.utils import timezone
+    ext = os.path.splitext(photo.name)[1] or '.jpg'
+    filename = 'cockpit_%s_%s%s' % (seat, uuid.uuid4().hex[:8], ext)
+    save_dir = os.path.join('/var/www/fina-connect/media/cockpit/')
+    os.makedirs(save_dir, exist_ok=True)
+    filepath = os.path.join(save_dir, filename)
+
+    with open(filepath, 'wb') as f:
+        for chunk in photo.chunks():
+            f.write(chunk)
+
+    # Spremi metadata u JSON log
+    import json
+    log_path = os.path.join(save_dir, 'feed.json')
+    try:
+        with open(log_path, 'r') as f:
+            feed = json.load(f)
+    except Exception:
+        feed = []
+
+    feed.insert(0, {
+        'filename': filename,
+        'url': '/media/cockpit/%s' % filename,
+        'seat': seat,
+        'user': request.user.username,
+        'message': message,
+        'time': timezone.now().strftime('%H:%M'),
+        'date': timezone.now().strftime('%d.%m.'),
+        'uploaded_at': timezone.now().isoformat(),
+    })
+    feed = feed[:50]  # Zadrži zadnjih 50
+
+    with open(log_path, 'w') as f:
+        json.dump(feed, f, ensure_ascii=False)
+
+    return JsonResponse({'ok': True, 'url': '/media/cockpit/%s' % filename})
+
+
+@login_required
+def cockpit_photos(request):
+    """API: Dohvati feed fotki iz cockpita."""
+    import json, os
+    log_path = '/var/www/fina-connect/media/cockpit/feed.json'
+    try:
+        with open(log_path, 'r') as f:
+            feed = json.load(f)
+    except Exception:
+        feed = []
+    return JsonResponse({'photos': feed[:20]})
+
+
+@login_required
+def cockpit_send_whatsapp(request):
+    """API: Pošalji WhatsApp iz Fenix Cockpit okruglog stola."""
+    _cockpit_users = {'superadmin', 'marija.brtan'}
+    if not request.user.is_superuser and request.user.username not in _cockpit_users:
+        return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST only'}, status=405)
+    import json as _json
+    try:
+        data = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+    phone = data.get('phone', '').strip()
+    message = data.get('message', '').strip()
+    seat = data.get('seat', '')
+    if not phone or not message:
+        return JsonResponse({'ok': False, 'error': 'phone i message obavezni'}, status=400)
+    try:
+        from core.whatsapp_tasks import send_whatsapp_text_task
+        send_whatsapp_text_task.delay(phone, message)
+        # Log u audit
+        from superadmin_ai.models import PendingAIAction
+        PendingAIAction.objects.create(
+            module='cockpit', action_type='whatsapp_sent',
+            description='[COCKPIT→%s] %s' % (seat.upper(), message[:100]),
+            status='executed',
+            payload={'phone': phone, 'seat': seat},
+        )
+        return JsonResponse({'ok': True})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)[:100]}, status=500)
+
+
+@login_required
 def ivan_cockpit(request):
-    if not request.user.is_superuser:
+    _cockpit_users = {'superadmin', 'marija.brtan'}
+    if not request.user.is_superuser and request.user.username not in _cockpit_users:
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden()
     from django.db.models import Sum, Count

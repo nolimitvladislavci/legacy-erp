@@ -2980,3 +2980,13 @@ def arhiva_delete_entry(request, pk):
         return JsonResponse({'ok': True})
     except ArhivaEntry.DoesNotExist:
         return JsonResponse({'ok': False, 'error': 'Zapis ne postoji'}, status=404)
+
+
+def arhiva_upute(request):
+    """Public guide page for archive module — no login required."""
+    return render(request, "documents/arhiva_upute.html")
+
+
+def arhiva_guide_pdf(request):
+    """Printable A4 guide for archive module."""
+    return render(request, "documents/arhiva_guide_pdf.html")

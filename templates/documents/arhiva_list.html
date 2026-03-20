@@ -1027,4 +1027,33 @@ function deleteEntry(pk, row) {
   });
 }
 </script>
+
+<!-- Onboarding modal -->
+<div id="arhivaOnboarding" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85);align-items:center;justify-content:center">
+  <div style="background:#1a1a1a;border:1px solid var(--gold);border-radius:16px;max-width:480px;width:90%;padding:2.5rem;text-align:center">
+    <div style="font-size:3rem;margin-bottom:1rem">📂</div>
+    <h2 style="color:var(--gold);font-size:1.4rem;margin-bottom:.8rem">Dobrodošli u Arhivu!</h2>
+    <p style="color:#ccc;font-size:1rem;line-height:1.6;margin-bottom:1.5rem">
+      Ovdje se čuvaju svi vaši dokumenti — računi, fakture, e-računi.<br>
+      Sustav ih automatski sortira i indeksira.
+    </p>
+    <div style="display:flex;gap:.8rem;justify-content:center">
+      <a href="/hr/documents/arhiva-upute/" style="padding:.7rem 1.5rem;background:var(--gold);color:#000;border-radius:8px;text-decoration:none;font-weight:700">Pokaži mi kako</a>
+      <button onclick="dismissOnboarding()" style="padding:.7rem 1.5rem;background:rgba(255,255,255,.1);color:#ccc;border:1px solid #444;border-radius:8px;cursor:pointer">Znam, hvala</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var KEY = "arhiva_onboarding_seen";
+  if (!localStorage.getItem(KEY)) {
+    document.getElementById("arhivaOnboarding").style.display = "flex";
+  }
+  window.dismissOnboarding = function() {
+    localStorage.setItem(KEY, "1");
+    document.getElementById("arhivaOnboarding").style.display = "none";
+  };
+})();
+</script>
+
 {% endblock %}

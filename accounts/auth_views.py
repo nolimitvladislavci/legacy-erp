@@ -26,6 +26,86 @@ from .auth_models import LoginAttempt, MagicToken
 logger = logging.getLogger(__name__)
 
 
+def _check_concurrent_login(user, current_ip, current_ua):
+    """
+    Detektira concurrent session — isti user, različit IP u zadnjih 30 min.
+    Šalje WhatsApp/push alert korisniku: "Netko se prijavio s vašim računom."
+    """
+    from datetime import timedelta
+    from django.utils import timezone
+
+    since = timezone.now() - timedelta(minutes=30)
+    recent_logins = LoginAttempt.objects.filter(
+        email__in=[user.email, user.username],
+        success=True,
+        attempted_at__gte=since,
+    ).exclude(ip_address=current_ip).values_list('ip_address', flat=True).distinct()
+
+    if not recent_logins:
+        return  # Nema concurrent sessiona
+
+    other_ips = list(recent_logins)
+    logger.warning(
+        '[SECURITY] Concurrent login: user=%s current_ip=%s other_ips=%s',
+        user.username, current_ip, other_ips
+    )
+
+    # Alert korisniku
+    alert_msg = (
+        'SIGURNOSNO UPOZORENJE: Netko se upravo prijavio na vaš LIMIT Connect račun '
+        's nove lokacije (IP: %s).\n'
+        'Ako to niste bili vi, odmah promijenite lozinku!\n'
+        'https://limit-connect.com/hr/accounts/change-password/'
+    ) % current_ip
+
+    # WhatsApp alert
+    try:
+        phone = ''
+        profile = getattr(user, 'profile', None)
+        if profile and profile.phone:
+            from core.whatsapp import normalize_phone
+            phone = normalize_phone(profile.phone)
+        if phone and getattr(settings, 'WAHA_ENABLED', False):
+            from core.whatsapp_tasks import send_whatsapp_text_task
+            send_whatsapp_text_task.delay(phone, alert_msg)
+    except Exception:
+        pass
+
+    # Push notification
+    try:
+        from push_notifications.push import send_push_to_user
+        send_push_to_user(user, 'Prijava s nove lokacije!', alert_msg[:100])
+    except Exception:
+        pass
+
+    # In-app notification
+    try:
+        from notifications.services import notify
+        notify(
+            recipient=user, notification_type='system',
+            title='Prijava s nove lokacije',
+            message='IP: %s | Ako to niste vi, odmah promijenite lozinku.' % current_ip,
+            url='/accounts/change-password/',
+        )
+    except Exception:
+        pass
+
+    # Audit log
+    try:
+        from core.models import SystemAuditLog
+        SystemAuditLog.objects.create(
+            user=user,
+            action='concurrent_login',
+            model_name='auth.User',
+            object_id=str(user.pk),
+            object_repr='Concurrent login: %s + %s' % (current_ip, ', '.join(other_ips)),
+            changes={'current_ip': current_ip, 'other_ips': other_ips, 'user_agent': current_ua},
+            ip_address=current_ip,
+        )
+    except Exception:
+        pass
+
+
 def get_client_ip(request):
     x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
     return x_forwarded.split(',')[0] if x_forwarded else request.META.get('REMOTE_ADDR')
@@ -76,11 +156,16 @@ def smart_login(request):
             user = authenticate(request, username=email_or_user, password=password)
 
         if user and user.is_active:
+            ua = request.META.get('HTTP_USER_AGENT', '')[:255]
+
             # Log uspješan
             LoginAttempt.objects.create(
                 email=email_or_user, ip_address=ip, success=True,
-                method='password', user_agent=request.META.get('HTTP_USER_AGENT', '')[:255]
+                method='password', user_agent=ua,
             )
+
+            # Concurrent session detection — alert ako je user već prijavljen s drugog IP-a
+            _check_concurrent_login(user, ip, ua)
 
             # Provjeri 2FA za admins
             try:
