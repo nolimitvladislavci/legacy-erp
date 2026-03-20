@@ -173,6 +173,28 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 
 <!-- Logovi -->
 {% if logs %}
+<div class="section-title">⚙️ Kontrole</div>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1rem">
+  <button class="ctrl-btn" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('gunicorn')">
+    🔄 Restart App
+  </button>
+  <button class="ctrl-btn" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('celery')">
+    ⚡ Restart Celery
+  </button>
+  <button class="ctrl-btn" style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);color:#fb923c;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('all')">
+    🚀 Restart SVE
+  </button>
+  <button class="ctrl-btn" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);color:#a78bfa;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="window.location.href='/hr/pos/daily-reports/'">
+    📊 Dnevni Report
+  </button>
+  <button class="ctrl-btn" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:#c9a84c;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="window.location.href='/hr/documents/arhiva/'">
+    📂 Arhiva
+  </button>
+  <button class="ctrl-btn" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;padding:14px;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;min-height:56px" onclick="ctrlAction('backup')">
+    💾 Backup Sad
+  </button>
+</div>
+
 <div class="section-title">📋 Zadnji Logovi</div>
 <div style="background:#0d1117;border-radius:8px;padding:.5rem">
   {% for line in logs %}
@@ -380,6 +402,24 @@ function sendMsg() {
         st.textContent = '✅ Slika uploadana';
         clearPhoto();
         loadPhotoFeed();
+
+// Cockpit controls
+function ctrlAction(action) {
+  if (!confirm('Izvrsiti: ' + action + '?')) return;
+  var endpoints = {
+    'gunicorn': '/superadmin/ai/api/restart/?service=gunicorn',
+    'celery': '/superadmin/ai/api/restart/?service=celery',
+    'all': '/superadmin/ai/api/restart/?service=all',
+    'backup': '/superadmin/ai/api/restart/?service=backup',
+  };
+  var url = endpoints[action];
+  if (!url) return;
+  
+  fetch(url, {method:'POST', headers:{'X-CSRFToken': document.cookie.match('csrftoken=([^;]+)')[1]}})
+    .then(function(r){return r.json()})
+    .then(function(d){alert(d.message || d.ok || 'OK')})
+    .catch(function(e){alert('Error: ' + e.message)});
+}
       } else { st.textContent = '⚠️ '+(d.error||'greška'); }
     }).catch(()=>{ st.textContent='❌ Upload error'; });
     return; // Ne šalji tekst ako ima slika
