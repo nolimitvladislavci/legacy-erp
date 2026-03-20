@@ -269,8 +269,13 @@ def _build_racun(receipt, oib, ozn_pos_pr, ozn_nap_ur, zki, dt) -> etree._Elemen
                 tip_pay = 'K'
             sub(nap_el, 'NacinPlacanjaN', tip_pay)
 
-    sub(racun, 'OibOper', oib)    # Operator OIB (ideally individual's OIB)
+    sub(racun, 'OibOper', oib)
     sub(racun, 'ZastKod', zki)
+
+    # R1: kupac na racunu (za fiskalizaciju, FINA prima OIB kupca)
+    buyer_oib = getattr(receipt, 'buyer_oib', '')
+    if buyer_oib:
+        sub(racun, 'OibKupca', buyer_oib.strip())
     sub(racun, 'NakDost', 'false')
 
     return racun

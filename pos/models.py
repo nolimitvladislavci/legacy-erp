@@ -182,6 +182,14 @@ class POSReceipt(models.Model):
                                      help_text=_('Za ugostiteljstvo: broj stola'))
     note       = models.CharField(max_length=255, blank=True, verbose_name=_('Napomena na bonu'))
 
+    # R1 racun — kupac (B2B poslovna vecera, reprezentacija)
+    buyer_oib  = models.CharField(max_length=20, blank=True, verbose_name=_('OIB kupca (R1)'),
+        help_text=_('Za R1 racun — OIB tvrtke kupca'))
+    buyer_name = models.CharField(max_length=200, blank=True, verbose_name=_('Naziv kupca (R1)'))
+    buyer_address = models.CharField(max_length=255, blank=True, verbose_name=_('Adresa kupca'))
+    is_r1      = models.BooleanField(default=False, verbose_name=_('R1 racun'),
+        help_text=_('Racun s podacima kupca — za knjizenje reprezentacije'))
+
     created_at = models.DateTimeField(auto_now_add=True)
     paid_at        = models.DateTimeField(null=True, blank=True, verbose_name=_('Plaćen u'))
     cancel_reason  = models.CharField(max_length=200, blank=True, verbose_name=_('Razlog storniranja'))

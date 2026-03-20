@@ -285,6 +285,10 @@ class CheckoutService:
             cashier=cashier_obj,
             client_ip=payload.get('client_ip', ''),
             client_ua=str(payload.get('client_ua', ''))[:300],
+            buyer_oib=str(payload.get('buyer_oib', ''))[:20],
+            buyer_name=str(payload.get('buyer_name', ''))[:200],
+            buyer_address=str(payload.get('buyer_address', ''))[:255],
+            is_r1=bool(payload.get('buyer_oib')),
             note=str(note)[:255] if note else (cashier_obj.name if cashier_obj else ''),
         )
 
