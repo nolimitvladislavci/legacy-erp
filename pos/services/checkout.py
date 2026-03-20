@@ -501,15 +501,32 @@ class CheckoutService:
                     try:
                         eracun = ERacun.objects.create(
                             company=company,
+                            source_receipt=receipt,
                             invoice_number=result.get('invoice_number', ''),
-                            buyer_name=receipt.buyer_name or '',
-                            buyer_oib=receipt.buyer_oib,
-                            buyer_address=receipt.buyer_address or '',
+                            # Izdavatelj = nasa firma
+                            issuer_name=company.name,
+                            issuer_oib=company.oib,
+                            issuer_address=company.address or '',
+                            issuer_city=company.city or '',
+                            issuer_postal=company.zip_code or '',
+                            issuer_country=company.country or 'HR',
+                            issuer_iban=company.iban or '',
+                            # Primatelj = kupac s POS-a
+                            recipient_name=receipt.buyer_name or '',
+                            recipient_oib=receipt.buyer_oib,
+                            recipient_address=receipt.buyer_address or '',
+                            # Iznosi
                             subtotal=receipt.subtotal,
                             tax_amount=receipt.tax_amount,
                             total=receipt.total,
                             issue_date=tz.now().date(),
-                            status='draft',
+                            # Fiskalni podaci s POS bona
+                            zki=receipt.zki or result.get('zki', ''),
+                            jir=receipt.jir or result.get('jir', ''),
+                            # Status: vec fiskaliziran kroz POS
+                            status='valid',
+                            payment_means_code='10' if payment_method == 'CASH' else '48',
+                            note='Auto-generirano iz POS R1 bona #%s' % receipt.receipt_number,
                         )
                         logger.info('Auto e-Racun kreiran za R1 bon #%s -> eRacun %s',
                                     receipt.receipt_number, eracun.pk)

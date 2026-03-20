@@ -2446,6 +2446,26 @@ def ivan_cockpit(request):
 
 
 @login_required
+@require_POST
+def cockpit_gemini_task(request):
+    """Pokreni Gemini agenta iz Fenix Cockpit-a."""
+    _cockpit_users = {'superadmin', 'marija.brtan'}
+    if not request.user.is_superuser and request.user.username not in _cockpit_users:
+        return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
+    import json as _json
+    try:
+        data = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+    task_desc = data.get('task', '').strip()
+    if not task_desc:
+        return JsonResponse({'ok': False, 'error': 'Task prazan'}, status=400)
+    max_steps = min(int(data.get('max_steps', 10)), 20)
+    from core.gemini_tasks import run_gemini_task
+    result = run_gemini_task.delay(task_desc, max_steps=max_steps, requested_by=request.user.username)
+    return JsonResponse({'ok': True, 'task_id': str(result.id)})
+
+
 @csrf_exempt
 def partner_signup_api(request):
     """Public API: Online registracija Tippgeber/Posrednik partnera."""

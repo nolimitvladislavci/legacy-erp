@@ -61,6 +61,9 @@ body { font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif; background: var
   <div class="slogan">Vi vodite posao. Mi vodimo sve ostalo.</div>
   <div class="sub-slogan">Potpuno digitalno. Bez papira, bez stresa &mdash; od fakture do fiskalizacije.</div>
   <div class="eco"><i class="fas fa-leaf"></i> Digitalno poslovanje = zdraviji planet. Svaka faktura u oblaku je jedno drvo manje.</div>
+  <div style="margin-top:1rem;display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:8px 20px;color:var(--gold);font-size:0.9rem;font-weight:600">
+    <i class="fas fa-archive"></i> Digitalna arhiva 11 godina &mdash; UKLJUČENA u svaki plan
+  </div>
 </div>
 
 <div class="plans">
@@ -108,7 +111,10 @@ body { font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif; background: var
     </ul>
 
     <a href="/register/?plan={{ plan.slug }}" class="btn-plan {% if plan.is_popular %}primary{% else %}outline{% endif %}">
-      Zapocni besplatno (14 dana)
+      {% if plan.price_monthly == 0 %}Kreni odmah — besplatno zauvijek
+      {% elif plan.slug == 'starter' %}Zapocni odmah
+      {% elif plan.slug == 'enterprise' or plan.slug == 'distributor' %}Kontaktirajte nas
+      {% else %}Odaberi plan{% endif %}
     </a>
   </div>
   {% endfor %}

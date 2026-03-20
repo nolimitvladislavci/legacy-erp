@@ -293,7 +293,7 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 const SEATS = {
   ivan: {name:'🧑‍💼 Ivan Brtan', desc:'Vlasnik projekta. WhatsApp ili bilješka.', color:'#c9a84c', type:'wa'},
   cc:   {name:'🤖 Claude Code', desc:'Executor na serveru. Piše kod, testira, deploya. Submit kao task.', color:'#22c55e', type:'task'},
-  gemini:{name:'🔵 Gemini', desc:'Analiza i kontekst. Pripremi mu context dump.', color:'#3b82f6', type:'ctx'},
+  gemini:{name:'🔵 Gemini', desc:'Autonomni agent — piše kod, čita fajlove, pokreće testove. Direktan pristup serveru.', color:'#3b82f6', type:'gemini_agent'},
   sonnet:{name:'🟡 Sonnet', desc:'Koordinator. Planira, pečati, vodi tim. claude.ai', color:'#f59e0b', type:'claude'},
   marija:{name:'👩‍💼 Marija Brtan', desc:'Tenant Admin — Konjik d.o.o. WhatsApp direktno.', color:'#ec4899', type:'wa_direct', phone:'385976091655'}
 };
@@ -341,10 +341,20 @@ function sendMsg() {
       st.textContent = d.ok||d.id ? '✅ Task kreiran #'+(d.id||'') : '⚠️ '+( d.error||'greška');
     }).catch(()=>{ st.textContent='❌ Greška'; });
 
-  } else if (s.type === 'ctx') {
-    resp.style.display = 'block';
-    resp.textContent = '📋 Context za Gemini — kopiraj i paste:\n\n'+msg;
-    st.textContent = '✅ Kopiraj gore';
+  } else if (s.type === 'gemini_agent') {
+    st.textContent = '🤖 Pokrećem Gemini agenta...';
+    fetch('/api/cockpit/gemini-task/', {
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+      body: JSON.stringify({task: msg, max_steps: 10})
+    }).then(r=>r.json()).then(d=>{
+      if(d.ok){
+        st.textContent = '✅ Gemini agent pokrenut! Task ID: '+(d.task_id||'').substring(0,8);
+        resp.style.display = 'block';
+        resp.textContent = 'Gemini radi autonomno. Rezultat stiže kao notifikacija.\nTask: '+msg;
+      } else {
+        st.textContent = '⚠️ '+(d.error||'Greška');
+      }
+    }).catch(()=>{ st.textContent='❌ Greška'; });
 
   } else if (s.type === 'claude') {
     resp.style.display = 'block';

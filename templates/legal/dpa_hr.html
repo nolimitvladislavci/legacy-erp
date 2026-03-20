@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>Ugovor o obradi podataka (DPA) — LIMIT Connect</title>
+<style>
+body{font-family:'Times New Roman',serif;font-size:10.5pt;color:#000;margin:40px;line-height:1.6}
+h1{font-size:15pt;text-align:center;margin-bottom:5px}
+h2{font-size:11pt;color:#333;margin-top:18px;border-bottom:1px solid #ccc;padding-bottom:3px}
+.header{text-align:center;border-bottom:2px solid #000;padding-bottom:15px;margin-bottom:25px}
+.header .sub{font-size:10pt;color:#555}
+ol{padding-left:20px}ol li{margin-bottom:8px}
+.parties{display:flex;justify-content:space-between;margin:20px 0}
+.party{width:45%;border:1px solid #ccc;padding:12px;border-radius:4px;font-size:10pt}
+.party strong{display:block;margin-bottom:5px}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10pt}
+th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}
+th{background:#f5f5f5;font-size:9pt;text-transform:uppercase}
+.signatures{display:flex;justify-content:space-between;margin-top:50px}
+.sig{width:45%;text-align:center}
+.sig-line{border-top:1px solid #000;margin-top:40px;padding-top:5px;font-size:9pt}
+.footer{margin-top:30px;font-size:8pt;color:#666;text-align:center;border-top:1px solid #ccc;padding-top:10px}
+@media print{body{margin:20mm}@page{size:A4;margin:20mm}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>UGOVOR O OBRADI PODATAKA</h1>
+<div class="sub">Data Processing Agreement (DPA) — sukladno čl. 28 Uredbe (EU) 2016/679 (GDPR)</div>
+<div class="sub">Prilog A Općih uvjeta poslovanja LIMIT Connect</div>
+</div>
+
+<div class="parties">
+<div class="party">
+<strong>Voditelj obrade (Controller):</strong>
+Korisnik platforme LIMIT Connect<br>
+(u daljnjem tekstu: "Voditelj")
+</div>
+<div class="party">
+<strong>Izvršitelj obrade (Processor):</strong>
+Konjik d.o.o.<br>
+OIB: 37590751921<br>
+Sjedište: Paderborn, Njemačka<br>
+(u daljnjem tekstu: "Izvršitelj")
+</div>
+</div>
+
+<h2>Članak 1 — Predmet i trajanje</h2>
+<ol>
+<li>Ovaj Ugovor uređuje obradu osobnih podataka koju Izvršitelj provodi u ime Voditelja putem platforme LIMIT Connect.</li>
+<li>Ugovor traje koliko i korištenje platforme, plus zakonski rok čuvanja arhive (11 godina).</li>
+</ol>
+
+<h2>Članak 2 — Vrsta podataka i kategorije ispitanika</h2>
+<table>
+<tr><th>Kategorija podataka</th><th>Primjeri</th><th>Ispitanici</th></tr>
+<tr><td>Identifikacijski</td><td>Ime, OIB, adresa, IBAN</td><td>Zaposlenici, partneri, klijenti</td></tr>
+<tr><td>Kontaktni</td><td>Email, telefon, WhatsApp</td><td>Zaposlenici, partneri</td></tr>
+<tr><td>Financijski</td><td>Računi, plaće, transakcije</td><td>Zaposlenici, partneri</td></tr>
+<tr><td>Radni</td><td>Radno vrijeme, GPS lokacija</td><td>Zaposlenici</td></tr>
+<tr><td>POS transakcije</td><td>Bonovi, stavke, metode plaćanja</td><td>Krajnji kupci (anonimno)</td></tr>
+</table>
+
+<h2>Članak 3 — Obveze Izvršitelja</h2>
+<ol>
+<li>Obrađivati podatke isključivo prema dokumentiranim uputama Voditelja.</li>
+<li>Osigurati da osobe ovlaštene za obradu imaju obvezu povjerljivosti.</li>
+<li>Poduzeti odgovarajuće tehničke i organizacijske mjere sigurnosti (čl. 32 GDPR):
+  <ul>
+    <li>Enkripcija podataka u prijenosu (TLS 1.3) i u pohrani (AES-256)</li>
+    <li>Redoviti backup (dnevno, 11 godina retencija)</li>
+    <li>Pristup ograničen na autorizirane korisnike (RBAC)</li>
+    <li>Audit log svih pristupa (SystemAuditLog)</li>
+    <li>Integrity hash (SHA-256) na svim dokumentima</li>
+    <li>Rate limiting na API-ju</li>
+  </ul>
+</li>
+<li>Ne angažirati drugog izvršitelja bez prethodnog pisanog odobrenja Voditelja.</li>
+<li>Pomagati Voditelju u ispunjavanju obveza prema ispitanicima (čl. 15-22 GDPR).</li>
+<li>Po prestanku ugovora, izbrisati ili vratiti sve osobne podatke na zahtjev Voditelja, osim zakonski obvezne arhive.</li>
+<li>Staviti Voditelju na raspolaganje sve informacije potrebne za dokazivanje sukladnosti.</li>
+</ol>
+
+<h2>Članak 4 — Podizvršitelji obrade</h2>
+<table>
+<tr><th>Podizvršitelj</th><th>Lokacija</th><th>Svrha</th></tr>
+<tr><td>Hetzner Online GmbH</td><td>Finska / Njemačka (EU)</td><td>Hosting servera</td></tr>
+<tr><td>Backblaze Inc.</td><td>EU (Amsterdam)</td><td>Cloud backup</td></tr>
+<tr><td>FINA</td><td>Hrvatska (EU)</td><td>Fiskalizacija / e-Račun</td></tr>
+<tr><td>Anthropic PBC</td><td>SAD (SCCs)</td><td>AI obrada dokumenata</td></tr>
+<tr><td>WAHA (self-hosted)</td><td>Isti server (EU)</td><td>WhatsApp gateway</td></tr>
+</table>
+
+<h2>Članak 5 — Prijenos podataka izvan EU</h2>
+<ol>
+<li>Podaci se primarno čuvaju unutar EU (Hetzner Finska/Njemačka).</li>
+<li>Za AI obradu (Anthropic), primjenjuju se Standardne ugovorne klauzule (SCCs) sukladno Odluci Komisije 2021/914.</li>
+<li>Nikakvi osobni podaci ne prenose se izvan EU bez odgovarajućih zaštitnih mjera.</li>
+</ol>
+
+<h2>Članak 6 — Povreda osobnih podataka</h2>
+<ol>
+<li>Izvršitelj obavještava Voditelja o povredi podataka <strong>bez nepotrebnog odgađanja</strong>, najkasnije u roku od <strong>24 sata</strong> od saznanja.</li>
+<li>Obavijest sadrži: prirodu povrede, kategorije podataka, procijenjeni broj ispitanika, poduzete mjere.</li>
+<li>Izvršitelj pomaže Voditelju u ispunjavanju obveze obavještavanja nadzornog tijela (AZOP) i ispitanika.</li>
+</ol>
+
+<h2>Članak 7 — Revizija</h2>
+<ol>
+<li>Voditelj ima pravo provesti reviziju sukladnosti Izvršitelja s ovim Ugovorom, uz razumnu najavu od 30 dana.</li>
+<li>Izvršitelj stavlja na raspolaganje sve potrebne informacije i omogućuje pristup relevantnim sustavima.</li>
+</ol>
+
+<h2>Članak 8 — Odgovornost i osiguranje</h2>
+<ol>
+<li>Izvršitelj posjeduje cyber osiguranje koje pokriva gubitak podataka i povredu privatnosti.</li>
+<li>Maksimalna odgovornost Izvršitelja ograničena je na iznos naknade plaćene u zadnjih 12 mjeseci.</li>
+</ol>
+
+<div class="signatures">
+<div class="sig"><div class="sig-line">Voditelj obrade<br>Mjesto, datum</div></div>
+<div class="sig"><div class="sig-line">Izvršitelj obrade (Konjik d.o.o.)<br>Ivan Brtan, direktor</div></div>
+</div>
+
+<div class="footer">
+Ugovor o obradi podataka (DPA) — LIMIT Connect v1.0 — 20.03.2026.<br>
+Sukladno čl. 28 Uredbe (EU) 2016/679 (GDPR)<br>
+Konjik d.o.o. · OIB: 37590751921
+</div>
+
+</body>
+</html>

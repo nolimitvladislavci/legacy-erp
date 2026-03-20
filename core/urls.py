@@ -93,6 +93,7 @@ urlpatterns += i18n_patterns(
     path('api/cockpit/send-whatsapp/', views.cockpit_send_whatsapp, name='cockpit_send_whatsapp'),
     path('api/cockpit/upload-photo/', views.cockpit_upload_photo, name='cockpit_upload_photo'),
     path('api/cockpit/photos/', views.cockpit_photos, name='cockpit_photos'),
+    path('api/cockpit/gemini-task/', views.cockpit_gemini_task, name='cockpit_gemini_task'),
     path('tim-chat/', views.tim_chat, name='tim_chat'),
     path('tim-chat/send/', views.tim_chat_send, name='tim_chat_send'),
     path('steuerberater/', steuerberater_views.steuerberater_portal, name='steuerberater_portal'),
@@ -117,6 +118,8 @@ urlpatterns += i18n_patterns(
     path("legal/tippgeber-vertrag/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/tippgeber_vertrag_de.html'), name="tippgeber_vertrag"),
     path("legal/tippgeber-ausweis/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/tippgeber_ausweis_de.html'), name="tippgeber_ausweis"),
     path("legal/posrednicki-ugovor/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/posrednicki_ugovor_hr.html'), name="posrednicki_ugovor"),
+    path("legal/opci-uvjeti/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/opci_uvjeti_hr.html'), name="opci_uvjeti"),
+    path("legal/dpa/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/dpa_hr.html'), name="dpa"),
 
     # Partner Signup (public)
     path("partner/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/partner_signup.html'), name="partner_signup"),

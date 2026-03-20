@@ -81,6 +81,14 @@ class ERacun(models.Model):
         null=True, blank=True, related_name='eracun'
     )
 
+    # Veza s POS bonom (R1 -> auto e-Racun)
+    source_receipt = models.ForeignKey(
+        'pos.POSReceipt', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='eracuni',
+        verbose_name='POS bon (izvor)',
+        help_text='Ako je e-Racun kreiran iz POS R1 bona',
+    )
+
     # Dokument
     doc_type = models.CharField(max_length=3, choices=DOC_TYPES, default='380')
     invoice_number = models.CharField(max_length=50, verbose_name='Broj racuna')
