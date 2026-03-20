@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Nalog {{ wo.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="mb-0">
+      <i class="fas fa-tools me-2 text-warning"></i>
+      {{ wo.order_number|default:"RN-???" }}
+      <span class="badge ms-2" style="background:{{ wo.status_color }}">{{ wo.get_status_display }}</span>
+      <span class="badge ms-1" style="background:{{ wo.priority_color }}">{{ wo.get_priority_display }}</span>
+    </h4>
+    <div class="d-flex gap-2 flex-wrap">
+      {% if wo.status not in "invoiced,cancelled" %}
+        <a href="{% url 'work_orders:edit' wo.pk %}" class="btn btn-sm btn-outline-warning">
+          <i class="fas fa-edit me-1"></i>Uredi
+        </a>
+      {% endif %}
+      {% if wo.status == 'in_progress' or wo.status == 'draft' %}
+        <form method="post" action="{% url 'work_orders:complete' wo.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-success"
+                  onclick="return confirm('Označiti nalog kao završen?')">
+            <i class="fas fa-check me-1"></i>Završi
+          </button>
+        </form>
+      {% endif %}
+      {% if wo.status == 'completed' and not wo.invoice %}
+        <a href="{% url 'work_orders:to_invoice' wo.pk %}" class="btn btn-sm btn-warning">
+          <i class="fas fa-file-invoice me-1"></i>Fakturiraj
+        </a>
+      {% endif %}
+      {% if wo.status not in "invoiced,cancelled,completed" %}
+        <form method="post" action="{% url 'work_orders:cancel' wo.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-outline-danger"
+                  onclick="return confirm('Otkazati nalog?')">
+            <i class="fas fa-times me-1"></i>Otkaži
+          </button>
+        </form>
+      {% endif %}
+      <a href="{% url 'work_orders:list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Natrag
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- Info card -->
+    <div class="col-lg-4">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-header text-warning fw-bold">Informacije</div>
+        <div class="card-body">
+          <dl class="row mb-0" style="font-size:.9rem">
+            <dt class="col-5 text-muted">Klijent</dt>
+            <dd class="col-7">{{ wo.client.name|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Datum</dt>
+            <dd class="col-7">{{ wo.date }}</dd>
+            <dt class="col-5 text-muted">Zakazano</dt>
+            <dd class="col-7">
+              {% if wo.scheduled_date %}{{ wo.scheduled_date }}{% if wo.scheduled_time %} {{ wo.scheduled_time|time:"H:i" }}{% endif %}
+              {% else %}—{% endif %}
+            </dd>
+            <dt class="col-5 text-muted">Rok</dt>
+            <dd class="col-7">{{ wo.deadline|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Dodijeljen</dt>
+            <dd class="col-7">{{ wo.assigned_to.get_full_name|default:wo.assigned_to.username|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Procij. sati</dt>
+            <dd class="col-7">{{ wo.estimated_hours }}</dd>
+            <dt class="col-5 text-muted">Stvarni sati</dt>
+            <dd class="col-7">{{ wo.actual_hours }}</dd>
+            <dt class="col-5 text-muted">Popust</dt>
+            <dd class="col-7">{{ wo.discount }}%</dd>
+            {% if wo.invoice %}
+            <dt class="col-5 text-muted">Račun</dt>
+            <dd class="col-7"><a href="{% url 'invoicing:invoice_edit' wo.invoice.pk %}" class="text-warning">{{ wo.invoice.number }}</a></dd>
+            {% endif %}
+            {% if wo.completed_date %}
+            <dt class="col-5 text-muted">Završeno</dt>
+            <dd class="col-7">{{ wo.completed_date|date:"d.m.Y H:i" }}</dd>
+            {% endif %}
+          </dl>
+          {% if wo.description %}
+            <hr class="border-secondary">
+            <p class="small text-light mb-1"><strong>Opis radova:</strong></p>
+            <p class="small text-muted">{{ wo.description }}</p>
+          {% endif %}
+          {% if wo.notes %}
+            <p class="small text-light mb-1"><strong>Napomene:</strong></p>
+            <p class="small text-muted">{{ wo.notes }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Items + totals -->
+    <div class="col-lg-8">
+
+      <!-- Labor items -->
+      {% if labor_items %}
+      <div class="card bg-dark border-secondary mb-3">
+        <div class="card-header text-info fw-bold"><i class="fas fa-clock me-2"></i>Rad / Usluge</div>
+        <div class="card-body p-0">
+          <table class="table table-dark table-sm align-middle mb-0">
+            <thead><tr><th>Opis</th><th class="text-end">Kol.</th><th>JMJ</th><th class="text-end">Cijena</th><th class="text-end">Pop%</th><th class="text-end">PDV%</th><th class="text-end">Neto</th><th class="text-end">Bruto</th></tr></thead>
+            <tbody>
+              {% for item in labor_items %}
+              <tr>
+                <td>{{ item.description }}</td>
+                <td class="text-end">{{ item.quantity|floatformat:2 }}</td>
+                <td>{{ item.unit }}</td>
+                <td class="text-end">{{ item.unit_price|floatformat:2 }}</td>
+                <td class="text-end">{{ item.discount_percent|floatformat:2 }}</td>
+                <td class="text-end">{{ item.tax_rate|floatformat:2 }}</td>
+                <td class="text-end">{{ item.total_net|floatformat:2 }}</td>
+                <td class="text-end">{{ item.total_gross|floatformat:2 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Material items -->
+      {% if material_items %}
+      <div class="card bg-dark border-secondary mb-3">
+        <div class="card-header text-warning fw-bold"><i class="fas fa-box me-2"></i>Materijali</div>
+        <div class="card-body p-0">
+          <table class="table table-dark table-sm align-middle mb-0">
+            <thead><tr><th>Opis</th><th>Artikl</th><th class="text-end">Kol.</th><th>JMJ</th><th class="text-end">Cijena</th><th class="text-end">Neto</th><th class="text-end">Bruto</th></tr></thead>
+            <tbody>
+              {% for item in material_items %}
+              <tr>
+                <td>{{ item.description }}</td>
+                <td class="text-muted small">{{ item.article.name|default:"—" }}</td>
+                <td class="text-end">{{ item.quantity|floatformat:2 }}</td>
+                <td>{{ item.unit }}</td>
+                <td class="text-end">{{ item.unit_price|floatformat:2 }}</td>
+                <td class="text-end">{{ item.total_net|floatformat:2 }}</td>
+                <td class="text-end">{{ item.total_gross|floatformat:2 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if not labor_items and not material_items %}
+        <div class="alert alert-secondary">Nema stavki.</div>
+      {% endif %}
+
+      <!-- Totals -->
+      <div class="card bg-dark border-secondary">
+        <div class="card-body">
+          <div class="row justify-content-end">
+            <div class="col-md-5">
+              <table class="table table-dark table-sm mb-0">
+                <tr><td class="text-muted">Rad (neto)</td><td class="text-end">{{ wo.total_labor|floatformat:2 }} €</td></tr>
+                <tr><td class="text-muted">Materijal (neto)</td><td class="text-end">{{ wo.total_materials|floatformat:2 }} €</td></tr>
+                <tr><td class="text-muted">Neto</td><td class="text-end">{{ wo.total_net|floatformat:2 }} €</td></tr>
+                <tr><td class="text-muted">PDV</td><td class="text-end">{{ wo.total_vat|floatformat:2 }} €</td></tr>
+                <tr class="fw-bold">
+                  <td class="text-warning">UKUPNO BRUTO</td>
+                  <td class="text-end text-warning fs-5">{{ wo.total_gross|floatformat:2 }} €</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

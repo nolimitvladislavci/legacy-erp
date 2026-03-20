@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ po.po_number }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ po.po_number }}</h2>
+        <div>
+            {% if po.status == 'draft' %}
+                <a href="{% url 'procurement:edit' po.pk %}" class="btn btn-warning">Uredi</a>
+                <a href="{% url 'procurement:send' po.pk %}" class="btn btn-primary" onclick="return confirm('Poslati dobavljacu?')">Posalji</a>
+            {% endif %}
+            {% if po.status in 'sent,confirmed' %}
+                <a href="{% url 'procurement:receive' po.pk %}" class="btn btn-success">Primi robu</a>
+            {% endif %}
+            {% if po.status not in 'received,invoiced,cancelled' %}
+                <a href="{% url 'procurement:cancel' po.pk %}" class="btn btn-danger" onclick="return confirm('Otkazati?')">Otkazi</a>
+            {% endif %}
+            {% if po.match_status == 'unmatched' %}
+                <a href="{% url 'procurement:match' po.pk %}" class="btn btn-info">Upari s fakturom</a>
+            {% endif %}
+            {% if po.match_status in 'matched,mismatch' %}
+                <a href="{% url 'procurement:approve_match' po.pk %}" class="btn btn-success" onclick="return confirm('Odobriti uparivanje?')">Odobri</a>
+            {% endif %}
+        </div>
+    </div>
+    {% if warnings %}
+    <div class="alert alert-warning"><strong>Upozorenja o cijenama:</strong>
+        <ul class="mb-0">{% for w in warnings %}<li>{{ w.item.description }}: dogovoreno {{ w.agreed }} EUR, naplaceno {{ w.actual }} EUR (+{{ w.diff_pct }}%)</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Stavke</strong></div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>Opis</th><th>Kolicina</th><th>Jed.</th><th>Cijena</th><th>PDV%</th><th>Ukupno</th><th>Primljeno</th></tr></thead>
+                        <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.description }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.unit }}</td>
+                            <td class="text-end">{{ item.unit_price }}</td>
+                            <td>{{ item.tax_rate }}%</td>
+                            <td class="text-end">{{ item.line_total }}</td>
+                            <td>{{ item.quantity_received }}/{{ item.quantity }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr><td colspan="5" class="text-end"><strong>Osnovica:</strong></td><td class="text-end">{{ po.subtotal }} EUR</td><td></td></tr>
+                            <tr><td colspan="5" class="text-end"><strong>PDV:</strong></td><td class="text-end">{{ po.tax_amount }} EUR</td><td></td></tr>
+                            <tr><td colspan="5" class="text-end"><strong>Ukupno:</strong></td><td class="text-end"><strong>{{ po.total }} EUR</strong></td><td></td></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            {% if po.notes %}<div class="card mb-3"><div class="card-body"><strong>Napomena:</strong> {{ po.notes }}</div></div>{% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">Detalji</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Dobavljac:</strong> {{ po.supplier|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Status:</strong> <span class="badge bg-{% if po.status == 'draft' %}secondary{% elif po.status == 'cancelled' %}danger{% elif po.status == 'received' %}success{% else %}primary{% endif %}">{{ po.get_status_display }}</span></li>
+                    <li class="list-group-item"><strong>Prioritet:</strong> {{ po.get_priority_display }}</li>
+                    <li class="list-group-item"><strong>Datum:</strong> {{ po.order_date }}</li>
+                    <li class="list-group-item"><strong>Ocekivana dostava:</strong> {{ po.expected_delivery|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Stvarna dostava:</strong> {{ po.actual_delivery|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Uparivanje:</strong> <span class="badge bg-{% if po.match_status == 'matched' %}success{% elif po.match_status == 'mismatch' %}danger{% elif po.match_status == 'approved' %}info{% else %}secondary{% endif %}">{{ po.get_match_status_display }}</span></li>
+                    {% if po.matched_invoice %}<li class="list-group-item"><strong>Faktura:</strong> {{ po.matched_invoice }}</li>{% endif %}
+                    {% if po.match_diff_amount %}<li class="list-group-item"><strong>Razlika:</strong> {{ po.match_diff_amount }} EUR</li>{% endif %}
+                    <li class="list-group-item"><strong>Kreirao:</strong> {{ po.created_by|default:"-" }}</li>
+                    {% if po.approved_by %}<li class="list-group-item"><strong>Odobrio:</strong> {{ po.approved_by }}</li>{% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

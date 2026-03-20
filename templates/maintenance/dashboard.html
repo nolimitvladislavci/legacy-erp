@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Odrzavanje - Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Odrzavanje - Dashboard</h2>
+        <a href="{% url 'maintenance:asset_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nova imovina</a>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-2"><div class="card text-center"><div class="card-body"><h3>{{ asset_count }}</h3><small class="text-muted">Ukupno imovine</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-success text-white"><div class="card-body"><h3>{{ active_count }}</h3><small>Aktivno</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-warning text-dark"><div class="card-body"><h3>{{ on_service }}</h3><small>Na servisu</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-danger text-white"><div class="card-body"><h3>{{ overdue.count }}</h3><small>Zakasnjelo</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-info text-white"><div class="card-body"><h3>{{ upcoming.count }}</h3><small>Nadolazece (30d)</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center"><div class="card-body"><h3>{{ cost_stats.total_cost|default:"0" }} EUR</h3><small class="text-muted">Troskovi (mj.)</small></div></div></div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            {% if overdue %}
+            <div class="card mb-3 border-danger">
+                <div class="card-header bg-danger text-white"><strong>Zakasnjelo odrzavanje</strong></div>
+                <ul class="list-group list-group-flush">
+                    {% for s in overdue %}<li class="list-group-item d-flex justify-content-between"><span>{{ s.task_name }} - <a href="{% url 'maintenance:asset_detail' s.asset.pk %}">{{ s.asset.name }}</a></span><span class="badge bg-danger">{{ s.next_due }}</span></li>{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% if upcoming %}
+            <div class="card mb-3">
+                <div class="card-header"><strong>Nadolazece odrzavanje (30 dana)</strong></div>
+                <ul class="list-group list-group-flush">
+                    {% for s in upcoming %}<li class="list-group-item d-flex justify-content-between"><span>{{ s.task_name }} - <a href="{% url 'maintenance:asset_detail' s.asset.pk %}">{{ s.asset.name }}</a></span><span class="badge bg-info">{{ s.next_due }}</span></li>{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            {% if expiring_insurance.count > 0 or expiring_registration.count > 0 or expiring_warranty.count > 0 %}
+            <div class="card mb-3 border-warning">
+                <div class="card-header bg-warning text-dark"><strong>Isticu dokumenti (90 dana)</strong></div>
+                <ul class="list-group list-group-flush">
+                    {% for a in expiring_insurance %}<li class="list-group-item"><a href="{% url 'maintenance:asset_detail' a.pk %}">{{ a.name }}</a> - Osiguranje: {{ a.insurance_until }}</li>{% endfor %}
+                    {% for a in expiring_registration %}<li class="list-group-item"><a href="{% url 'maintenance:asset_detail' a.pk %}">{{ a.name }}</a> - Registracija: {{ a.registration_until }}</li>{% endfor %}
+                    {% for a in expiring_warranty %}<li class="list-group-item"><a href="{% url 'maintenance:asset_detail' a.pk %}">{{ a.name }}</a> - Garancija: {{ a.warranty_until }}</li>{% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            <div class="card mb-3">
+                <div class="card-header"><strong>Troskovi ovog mjeseca</strong></div>
+                <div class="card-body">
+                    <p><strong>Rad:</strong> {{ cost_stats.labor|default:"0" }} EUR</p>
+                    <p><strong>Dijelovi:</strong> {{ cost_stats.parts|default:"0" }} EUR</p>
+                    <p><strong>Ukupno:</strong> {{ cost_stats.total_cost|default:"0" }} EUR</p>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <a href="{% url 'maintenance:calendar' %}" class="btn btn-outline-primary">Kalendar odrzavanja</a>
+                <a href="{% url 'maintenance:expiring' %}" class="btn btn-outline-warning">Svi dokumenti koji isticu</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

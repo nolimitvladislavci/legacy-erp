@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Kalkulacije{% endblock %}
+{% block content %}
+<div style="padding:24px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <h2 style="font-size:1.1rem;font-weight:700;color:#0f172a;margin:0">{% trans "Kalkulacije" %}</h2>
+    <a href="{% url 'calculator:public_calculator' %}" style="background:#0f172a;color:#fff;padding:.5rem 1.2rem;border-radius:6px;font-size:.82rem;font-weight:600;text-decoration:none">
+      {% trans "+ Nova kalkulacija" %}
+    </a>
+  </div>
+  {% if calculations %}
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0">
+          <th style="padding:10px 16px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b">{% trans "Projekt" %}</th>
+          <th style="padding:10px 16px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b">{% trans "Datum" %}</th>
+          <th style="padding:10px 16px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b">{% trans "Marža" %}</th>
+          <th style="padding:10px 16px;text-align:right;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b">{% trans "Akcije" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for calc in calculations %}
+        <tr style="border-bottom:1px solid #f1f5f9">
+          <td style="padding:10px 16px;font-weight:600;color:#0f172a">{{ calc.project.name }}</td>
+          <td style="padding:10px 16px;color:#64748b">{{ calc.created_at|date:"d.m.Y" }}</td>
+          <td style="padding:10px 16px;color:#64748b">{{ calc.margin_percentage }}%</td>
+          <td style="padding:10px 16px;text-align:right">
+            <a href="{% url 'calculator:estimate_pdf' calc.pk %}" style="font-size:.75rem;color:#ef4444;text-decoration:none;padding:.3rem .7rem;border:1px solid #fee2e2;border-radius:5px">{% trans "PDF" %}</a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:60px;color:#94a3b8;font-size:.9rem">
+    {% trans "Nema kalkulacija." %} <a href="{% url 'calculator:public_calculator' %}" style="color:#3b82f6">{% trans "Kreirajte novu →" %}</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

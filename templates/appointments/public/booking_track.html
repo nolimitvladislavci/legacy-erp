@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pracenje rezervacije | LIMIT Connect</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh;display:flex;justify-content:center;padding:1.5rem}
+.card{max-width:440px;width:100%}
+.header{text-align:center;margin-bottom:1.5rem}
+.header .icon{font-size:2.5rem;margin-bottom:.5rem}
+.header h1{font-size:1.3rem;font-weight:700;color:#d4a017}
+.header .sub{color:#888;font-size:.85rem;margin-top:.3rem}
+
+.status-badge{display:inline-block;padding:.4rem 1rem;border-radius:20px;font-size:.85rem;font-weight:600;margin:1rem 0}
+.status-scheduled{background:rgba(59,130,246,.12);color:#3b82f6}
+.status-confirmed{background:rgba(16,185,129,.12);color:#10b981}
+.status-completed{background:rgba(168,85,247,.12);color:#a855f7}
+.status-cancelled{background:rgba(239,68,68,.12);color:#ef4444}
+
+.info-card{background:#111;border:1px solid #222;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.info-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1a1a1a;font-size:.9rem}
+.info-row:last-child{border-bottom:none}
+.info-row .label{color:#888}
+.info-row .val{font-weight:600;text-align:right}
+
+.timeline{margin:1rem 0}
+.tl-item{display:flex;gap:.75rem;padding:.5rem 0}
+.tl-dot{width:12px;height:12px;border-radius:50%;border:2px solid #333;flex-shrink:0;margin-top:4px}
+.tl-dot.done{background:#10b981;border-color:#10b981}
+.tl-dot.active{background:#d4a017;border-color:#d4a017;box-shadow:0 0 8px rgba(212,160,23,.4)}
+.tl-dot.pending{background:transparent}
+.tl-content .tl-title{font-size:.85rem;font-weight:600}
+.tl-content .tl-time{font-size:.72rem;color:#666}
+
+.footer{text-align:center;margin-top:2rem;font-size:.78rem;color:#555}
+.footer a{color:#d4a017;text-decoration:none}
+</style>
+</head><body>
+<div class="card">
+
+<div class="header">
+    <div class="icon">📋</div>
+    <h1>Vasa rezervacija</h1>
+    <div class="sub">{{ appointment.company.name }}</div>
+</div>
+
+<div style="text-align:center">
+    <span class="status-badge status-{{ appointment.status }}">
+        {% if appointment.status == 'scheduled' %}Zakazano
+        {% elif appointment.status == 'confirmed' %}Potvrdjeno
+        {% elif appointment.status == 'completed' %}Zavrseno
+        {% elif appointment.status == 'cancelled' %}Otkazano
+        {% else %}{{ appointment.status }}{% endif %}
+    </span>
+</div>
+
+<div class="info-card">
+    <div class="info-row"><span class="label">Usluga</span><span class="val" style="color:#d4a017">{{ appointment.service.name }}</span></div>
+    <div class="info-row"><span class="label">Datum</span><span class="val">{{ appointment.start_time|date:"d.m.Y" }}</span></div>
+    <div class="info-row"><span class="label">Vrijeme</span><span class="val">{{ appointment.start_time|date:"H:i" }} — {{ appointment.end_time|date:"H:i" }}</span></div>
+    {% if appointment.total_price %}<div class="info-row"><span class="label">Cijena</span><span class="val">{{ appointment.total_price }} EUR</span></div>{% endif %}
+    <div class="info-row"><span class="label">Klijent</span><span class="val">{{ appointment.client.name|default:"-" }}</span></div>
+    {% if appointment.resource %}<div class="info-row"><span class="label">Resurs</span><span class="val">{{ appointment.resource.name }}</span></div>{% endif %}
+</div>
+
+<div class="info-card">
+    <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:.75rem;font-weight:600">Pracenje procesa</div>
+    <div class="timeline">
+        <div class="tl-item">
+            <div class="tl-dot done"></div>
+            <div class="tl-content">
+                <div class="tl-title">Rezervacija kreirana</div>
+                <div class="tl-time">{{ appointment.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-dot {% if appointment.intake_at %}done{% elif appointment.status == 'scheduled' %}active{% else %}done{% endif %}"></div>
+            <div class="tl-content">
+                <div class="tl-title">Zaprimljeno{% if appointment.token_number %} — limeni broj {{ appointment.token_number }}{% endif %}</div>
+                <div class="tl-time">{% if appointment.intake_at %}{{ appointment.intake_at|date:"d.m.Y H:i" }}{% if appointment.weight_kg %} · {{ appointment.weight_kg }} kg{% endif %}{% elif appointment.status == 'scheduled' %}Cekamo vas s robom{% else %}Zaprimljeno{% endif %}</div>
+            </div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-dot {% if appointment.status == 'in_progress' %}active{% elif appointment.ready_at or appointment.status == 'completed' %}done{% else %}pending{% endif %}"></div>
+            <div class="tl-content">
+                <div class="tl-title">{% if appointment.status == 'in_progress' %}U PECI{% elif appointment.ready_at %}Ispeceno{% else %}Pecenje{% endif %}</div>
+                <div class="tl-time">{% if appointment.status == 'in_progress' %}Vasa narudzba je u peci!{% elif appointment.ready_at %}{{ appointment.ready_at|date:"H:i" }}{% else %}—{% endif %}</div>
+            </div>
+        </div>
+        <div class="tl-item">
+            <div class="tl-dot {% if appointment.ready_at and not appointment.picked_up_at %}active{% elif appointment.picked_up_at %}done{% else %}pending{% endif %}"></div>
+            <div class="tl-content">
+                <div class="tl-title">{% if appointment.ready_at and not appointment.picked_up_at %}GOTOVO — dodjite po preuzimanje!{% elif appointment.picked_up_at %}Preuzeto{% else %}Gotovo{% endif %}</div>
+                <div class="tl-time">{% if appointment.picked_up_at %}{{ appointment.picked_up_at|date:"d.m.Y H:i" }}{% elif appointment.ready_at %}Limeni broj: {{ appointment.token_number }}{% else %}—{% endif %}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if appointment.status != 'cancelled' and appointment.status != 'completed' %}
+<div style="text-align:center;margin:1rem 0">
+    <a href="https://wa.me/{{ appointment.company.phone|default:'' }}?text=Zelim%20otkazati%20rezervaciju%20{{ appointment.start_time|date:'d.m.Y' }}%20u%20{{ appointment.start_time|date:'H:i' }}"
+       style="display:inline-block;padding:.6rem 1.2rem;border:1px solid #333;border-radius:8px;color:#888;font-size:.82rem;text-decoration:none">
+        Otkazi rezervaciju
+    </a>
+</div>
+{% endif %}
+
+<div class="footer">
+    <a href="/frisko/">{{ appointment.company.name }}</a><br>
+    Powered by LIMIT Connect
+</div>
+
+</div>
+</body></html>

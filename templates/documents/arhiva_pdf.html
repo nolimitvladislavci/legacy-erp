@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<style>
+    @font-face {
+        font-family: "DejaVu";
+        src: url("file:///usr/share/fonts/truetype/dejavu/DejaVuSans.ttf");
+    }
+    @font-face {
+        font-family: "DejaVu";
+        src: url("file:///usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf");
+        font-weight: bold;
+    }
+    @page { size: A4; margin: 2cm 2.5cm; }
+    body { font-family: "DejaVu", Helvetica, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.5; }
+    .header { border-bottom: 3px solid #c9a84c; padding-bottom: 12px; margin-bottom: 20px; }
+    .header h1 { font-size: 14pt; margin: 0 0 4px 0; color: #0a0a0a; }
+    .header .subtitle { font-size: 9pt; color: #666; }
+    .company-info { font-size: 9pt; color: #555; margin-bottom: 20px; }
+    .doc-title { font-size: 16pt; font-weight: bold; color: #0a0a0a; margin: 24px 0 16px 0; text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    table.details { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    table.details td { padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 10pt; }
+    table.details td.label { font-weight: bold; width: 40%; color: #333; background: #f9f9f9; }
+    table.details td.value { color: #1a1a1a; }
+    .amount-row td { font-size: 13pt; font-weight: bold; border-bottom: 2px solid #c9a84c; }
+    .amount-row td.value { color: #c9a84c; }
+    .fiscal-section { margin-top: 20px; padding: 10px; background: #f7f7f7; border-left: 3px solid #c9a84c; }
+    .fiscal-section h3 { margin: 0 0 8px 0; font-size: 11pt; color: #333; }
+    .fiscal-section p { margin: 2px 0; font-size: 9pt; color: #555; }
+    .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 8pt; color: #999; text-align: center; }
+    .hash { font-family: "DejaVu", monospace; font-size: 7pt; color: #aaa; word-break: break-all; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>{{ company.name }}</h1>
+    <div class="subtitle">
+        OIB: {{ company.oib }}
+        {% if company.address %} | {{ company.address }}{% endif %}
+        {% if company.city %}, {{ company.city }}{% endif %}
+    </div>
+</div>
+
+<div class="doc-title">
+    {{ entry.get_source_type_display }} &mdash; {{ entry.doc_number }}
+</div>
+
+<table class="details">
+    <tr>
+        <td class="label">Evidencijski broj</td>
+        <td class="value">{{ entry.archive_number }}</td>
+    </tr>
+    <tr>
+        <td class="label">Broj dokumenta</td>
+        <td class="value">{{ entry.doc_number }}</td>
+    </tr>
+    <tr>
+        <td class="label">Tip dokumenta</td>
+        <td class="value">{{ entry.get_source_type_display }}</td>
+    </tr>
+    <tr>
+        <td class="label">Partner</td>
+        <td class="value">{{ entry.partner_name|default:"-" }}</td>
+    </tr>
+    <tr>
+        <td class="label">Datum dokumenta</td>
+        <td class="value">{{ entry.doc_date }}</td>
+    </tr>
+    <tr>
+        <td class="label">Datum arhiviranja</td>
+        <td class="value">{{ entry.archived_at }}</td>
+    </tr>
+    <tr class="amount-row">
+        <td class="label">Iznos</td>
+        <td class="value">{{ entry.amount }} {{ entry.currency }}</td>
+    </tr>
+</table>
+
+{% if entry.zki or entry.jir %}
+<div class="fiscal-section">
+    <h3>Fiskalni podaci</h3>
+    {% if entry.zki %}<p><strong>ZKI:</strong> {{ entry.zki }}</p>{% endif %}
+    {% if entry.jir %}<p><strong>JIR:</strong> {{ entry.jir }}</p>{% endif %}
+</div>
+{% endif %}
+
+{% if entry.is_booked %}
+<div class="fiscal-section" style="border-left-color: #10b981;">
+    <h3>Status knjizenja</h3>
+    <p>Dokument je proknjizen u sustavu.</p>
+</div>
+{% endif %}
+
+<div class="footer">
+    <p>Generirano iz sustava LIMIT CONNECT | {{ company.name }} | {{ entry.archive_number }}</p>
+    {% if entry.integrity_hash %}
+    <p class="hash">Integritet: {{ entry.integrity_hash }}</p>
+    {% endif %}
+    {% if entry.deletion_protected_until %}
+    <p>Zakonski rok cuvanja do: {{ entry.deletion_protected_until }}</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

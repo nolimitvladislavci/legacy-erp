@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIMIT Connect &mdash; Cijene</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --gold: #c9a84c; --black: #0a0a0a; --dark: #1a1a2e; --gray: #2a2a3e; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif; background: var(--black); color: #e0e0e0; }
+.hero { text-align: center; padding: 4rem 1rem 2rem; }
+.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: var(--gold); margin-bottom: 0.5rem; }
+.hero p { font-size: 1.2rem; color: #999; max-width: 600px; margin: 0 auto; }
+.slogan { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.3rem; margin-top: 1.2rem; }
+.sub-slogan { color: #777; font-size: 0.95rem; margin-top: 0.5rem; }
+.plans { display: flex; justify-content: center; gap: 2rem; padding: 2rem 1rem; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
+.plan-card { background: var(--dark); border: 1px solid #333; border-radius: 16px; padding: 2rem; width: 340px; position: relative; transition: all 0.3s; }
+.plan-card:hover { transform: translateY(-8px); border-color: var(--gold); box-shadow: 0 8px 30px rgba(201,168,76,0.2); }
+.plan-card.popular { border-color: var(--gold); }
+.plan-card.popular::before { content: 'NAJPOPULARNIJI'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--black); padding: 4px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; }
+.plan-name { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 0.5rem; }
+.plan-price { font-size: 3rem; font-weight: 700; color: #fff; }
+.plan-price span { font-size: 1rem; color: #888; font-weight: 400; }
+.plan-yearly { color: #888; font-size: 0.85rem; }
+.plan-features { list-style: none; margin: 1.5rem 0; }
+.plan-features li { padding: 6px 0; color: #bbb; font-size: 0.9rem; }
+.plan-features li i { color: var(--gold); margin-right: 8px; width: 16px; }
+.btn-plan { display: block; width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; text-align: center; transition: all 0.2s; }
+.btn-plan.primary { background: var(--gold); color: var(--black); }
+.btn-plan.primary:hover { background: #d4b55a; }
+.btn-plan.outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
+.btn-plan.outline:hover { background: var(--gold); color: var(--black); }
+
+/* AI Advisor */
+.advisor { max-width: 700px; margin: 3rem auto; padding: 2rem; background: var(--dark); border-radius: 16px; border: 1px solid #333; }
+.advisor h3 { color: var(--gold); margin-bottom: 1rem; font-family: 'Cormorant Garamond', serif; }
+.advisor select, .advisor input { background: var(--gray); border: 1px solid #444; color: #fff; padding: 10px 14px; border-radius: 8px; width: 100%; margin-bottom: 1rem; font-family: 'Barlow', sans-serif; }
+.advisor .needs-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.advisor .need-tag { padding: 6px 14px; border-radius: 20px; border: 1px solid #555; color: #bbb; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+.advisor .need-tag.selected { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+.advisor .result { background: rgba(201,168,76,0.1); border: 1px solid var(--gold); border-radius: 12px; padding: 1.5rem; margin-top: 1rem; display: none; }
+
+/* Connect widget on public page */
+.connect-public { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
+.connect-pill { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 30px; background: linear-gradient(135deg, #c9a84c, #a08030); color: #0a0a0a; font-weight: 600; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 15px rgba(201,168,76,0.4); transition: transform 0.2s; text-decoration: none; }
+.connect-pill:hover { transform: scale(1.05); color: #0a0a0a; }
+
+.footer { text-align: center; padding: 3rem 1rem; color: #666; font-size: 0.85rem; }
+.footer a { color: var(--gold); text-decoration: none; }
+.eco { display: inline-flex; align-items: center; gap: 6px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); border-radius: 20px; padding: 6px 16px; color: #4ade80; font-size: 0.85rem; margin-top: 1.5rem; }
+@media(max-width:768px) { .plans { flex-direction: column; align-items: center; } .hero h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1><i class="fas fa-bolt"></i> LIMIT Connect</h1>
+  <p>ERP platforma za mala i srednja poduzeca &mdash; HR &amp; DE</p>
+  <div class="slogan">Vi vodite posao. Mi vodimo sve ostalo.</div>
+  <div class="sub-slogan">Potpuno digitalno. Bez papira, bez stresa &mdash; od fakture do fiskalizacije.</div>
+  <div class="eco"><i class="fas fa-leaf"></i> Digitalno poslovanje = zdraviji planet. Svaka faktura u oblaku je jedno drvo manje.</div>
+</div>
+
+<div class="plans">
+  {% for plan in plans %}
+  <div class="plan-card {% if plan.is_popular %}popular{% endif %}">
+    <div class="plan-name">{{ plan.name }}</div>
+    <div class="plan-price">{{ plan.price_monthly|floatformat:0 }}&euro; <span>/ mj.</span></div>
+    <div class="plan-yearly">ili {{ plan.price_yearly|floatformat:0 }}&euro;/god. (usteda 17%)</div>
+
+    <ul class="plan-features">
+      {% if plan.slug == 'starter' %}
+      <li><i class="fas fa-check"></i>Fakturiranje i naplata</li>
+      <li><i class="fas fa-check"></i>Upravljanje partnerima</li>
+      <li><i class="fas fa-check"></i>POS blagajna</li>
+      <li><i class="fas fa-check"></i>Radni sati &amp; projekti</li>
+      <li><i class="fas fa-check"></i>Termini</li>
+      <li><i class="fas fa-check"></i>Dokumenti &amp; kalkulator</li>
+      <li><i class="fas fa-check"></i>Do 3 korisnika</li>
+      <li><i class="fas fa-check"></i>Email podrska</li>
+      <li><i class="fas fa-shield-alt" style="color:#4ade80"></i><strong style="color:#4ade80">Cloud backup &amp; arhiva</strong></li>
+      {% elif plan.slug == 'professional' %}
+      <li><i class="fas fa-check"></i>Sve iz Starter paketa</li>
+      <li><i class="fas fa-check"></i>Knjigovodstvo (SKR 03/RRiF)</li>
+      <li><i class="fas fa-check"></i>Izvjestaji &amp; analitika</li>
+      <li><i class="fas fa-check"></i>GPS tracking</li>
+      <li><i class="fas fa-check"></i>CRM / Outreach</li>
+      <li><i class="fas fa-check"></i>Radni nalozi</li>
+      <li><i class="fas fa-check"></i>Grossmarkt &amp; dostava</li>
+      <li><i class="fas fa-check"></i>Gastro meni &amp; payroll</li>
+      <li><i class="fas fa-check"></i>Do 15 korisnika</li>
+      <li><i class="fas fa-check"></i>Prioritetna podrska</li>
+      <li><i class="fas fa-shield-alt" style="color:#4ade80"></i><strong style="color:#4ade80">Cloud backup &amp; arhiva</strong></li>
+      {% elif plan.slug == 'enterprise' %}
+      <li><i class="fas fa-check"></i>Sve iz Professional paketa</li>
+      <li><i class="fas fa-check"></i>Financije &amp; treasury</li>
+      <li><i class="fas fa-check"></i>Skladiste &amp; inventura</li>
+      <li><i class="fas fa-check"></i>Webshop &amp; najam</li>
+      <li><i class="fas fa-check"></i>AI Asistent (Connect)</li>
+      <li><i class="fas fa-check"></i>e-Racun (UBL / FINA CIS)</li>
+      <li><i class="fas fa-check"></i>Helpdesk &amp; nabava</li>
+      <li><i class="fas fa-check"></i>Neogranicen broj korisnika</li>
+      <li><i class="fas fa-check"></i>API pristup &amp; premium podrska</li>
+      <li><i class="fas fa-shield-alt" style="color:#4ade80"></i><strong style="color:#4ade80">Cloud backup &amp; arhiva</strong></li>
+      {% endif %}
+    </ul>
+
+    <a href="/register/?plan={{ plan.slug }}" class="btn-plan {% if plan.is_popular %}primary{% else %}outline{% endif %}">
+      Zapocni besplatno (14 dana)
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+
+<!-- Backup & Digitalna Arhiva — USP sekcija -->
+<section style="max-width:1000px;margin:3rem auto 0;padding:3rem 2rem;background:linear-gradient(135deg,var(--dark) 0%,var(--black) 100%);border:1px solid rgba(201,168,76,0.3);border-radius:16px;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:16px"><i class="fas fa-shield-alt" style="color:var(--gold)"></i></div>
+    <h2 style="color:var(--gold);font-family:Cormorant Garamond,serif;font-size:2rem;margin-bottom:12px">
+        Vasi podaci su sigurni. Zauvijek.
+    </h2>
+    <p style="color:#bbb;font-size:1.05rem;line-height:1.8;margin-bottom:2rem;max-width:700px;margin-left:auto;margin-right:auto">
+        Automatski backup svaku noc na cloud. Digitalna arhiva u skladu sa
+        <strong style="color:var(--gold)">Zakonom o racunovodstvu</strong> &mdash; cuvamo vase podatke
+        <strong style="color:var(--gold)">minimum 11 godina</strong>, kako zakon nalaze.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
+            <div style="margin-bottom:10px"><i class="fas fa-cloud" style="color:var(--gold);font-size:1.5rem"></i></div>
+            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Cloud Backup</h3>
+            <p style="color:#888;font-size:0.85rem">Automatski svaku noc. Backblaze B2 enkripcija.</p>
+        </div>
+        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
+            <div style="margin-bottom:10px"><i class="fas fa-archive" style="color:var(--gold);font-size:1.5rem"></i></div>
+            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Digitalna Arhiva</h3>
+            <p style="color:#888;font-size:0.85rem">Svi racuni, primke, temeljnice &mdash; pretrazivi i dostupni.</p>
+        </div>
+        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
+            <div style="margin-bottom:10px"><i class="fas fa-balance-scale" style="color:var(--gold);font-size:1.5rem"></i></div>
+            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Zakonska uskladenost</h3>
+            <p style="color:#888;font-size:0.85rem">ZOR cl.10 &mdash; cuvanje min. 11 godina. PDV &mdash; min. 10 godina.</p>
+        </div>
+        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
+            <div style="margin-bottom:10px"><i class="fas fa-sync-alt" style="color:var(--gold);font-size:1.5rem"></i></div>
+            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Disaster Recovery</h3>
+            <p style="color:#888;font-size:0.85rem">Vracanje podataka u roku 24h. Nikad vise izgubljeni dokumenti.</p>
+        </div>
+    </div>
+    <p style="color:var(--gold);font-size:1.1rem;margin-top:1.5rem;font-weight:600">
+        <i class="fas fa-check-circle"></i> Ukljuceno u SVAKI plan &mdash; bez dodatne naplate
+    </p>
+</section>
+
+<div class="advisor">
+  <h3><i class="fas fa-robot me-2"></i>Connect savjetnik &mdash; koji plan vam odgovara?</h3>
+  <select id="adv-industry">
+    <option value="">Odaberite industriju...</option>
+    <option value="it">IT &amp; Software</option>
+    <option value="trade">Trgovina</option>
+    <option value="services">Usluge</option>
+    <option value="gastro">Ugostiteljstvo</option>
+    <option value="construction">Gradevina</option>
+    <option value="health">Zdravstvo</option>
+    <option value="other">Ostalo</option>
+  </select>
+  <input type="number" id="adv-employees" placeholder="Broj zaposlenih" min="1" value="1">
+  <p style="color:#999;font-size:0.9rem;margin-bottom:8px">Sto vam treba?</p>
+  <div class="needs-grid">
+    <span class="need-tag" data-need="invoicing" onclick="toggleNeed(this)">Fakturiranje</span>
+    <span class="need-tag" data-need="pos" onclick="toggleNeed(this)">POS Kasa</span>
+    <span class="need-tag" data-need="inventory" onclick="toggleNeed(this)">Zalihe</span>
+    <span class="need-tag" data-need="tracking" onclick="toggleNeed(this)">GPS Tracking</span>
+    <span class="need-tag" data-need="reports" onclick="toggleNeed(this)">Izvjestaji</span>
+    <span class="need-tag" data-need="konto" onclick="toggleNeed(this)">Knjigovodstvo</span>
+    <span class="need-tag" data-need="payroll" onclick="toggleNeed(this)">Payroll</span>
+    <span class="need-tag" data-need="ai" onclick="toggleNeed(this)">AI Asistent</span>
+    <span class="need-tag" data-need="eracun" onclick="toggleNeed(this)">e-Racun</span>
+    <span class="need-tag" data-need="rental" onclick="toggleNeed(this)">Najam</span>
+    <span class="need-tag" data-need="webshop" onclick="toggleNeed(this)">Webshop</span>
+    <span class="need-tag" data-need="delivery" onclick="toggleNeed(this)">Dostava</span>
+    <span class="need-tag" data-need="gastro" onclick="toggleNeed(this)">Gastro</span>
+    <span class="need-tag" data-need="helpdesk" onclick="toggleNeed(this)">Helpdesk</span>
+  </div>
+  <button onclick="getAdvice()" class="btn-plan primary" style="width:auto;padding:10px 30px">
+    <i class="fas fa-magic me-2"></i>Preporuci plan
+  </button>
+  <div class="result" id="adv-result">
+    <h5 style="color:#c9a84c" id="adv-plan"></h5>
+    <p id="adv-reason" style="color:#ccc"></p>
+    <a id="adv-link" href="#" class="btn-plan primary" style="margin-top:1rem;width:auto;display:inline-block;padding:10px 24px">Odaberi ovaj plan</a>
+  </div>
+</div>
+
+<!-- Connect widget on public page -->
+<div class="connect-public">
+  <a href="/register/" class="connect-pill">
+    <i class="fas fa-robot"></i>
+    <span>Connect &mdash; tu sam.</span>
+  </a>
+</div>
+
+<div class="footer">
+  <p>&copy; 2026 LIMIT Connect | <a href="/">Pocetna</a> | <a href="/register/">Registracija</a> | <a href="/login/">Prijava</a></p>
+  <p style="margin-top:0.5rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold)">Bez papira. Bez brige. Bez granica.</p>
+</div>
+
+<script>
+var selectedNeeds = [];
+function toggleNeed(el) {
+  el.classList.toggle('selected');
+  var n = el.dataset.need;
+  var i = selectedNeeds.indexOf(n);
+  if (i >= 0) selectedNeeds.splice(i, 1); else selectedNeeds.push(n);
+}
+function getAdvice() {
+  fetch('/api/pricing/advisor/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      industry: document.getElementById('adv-industry').value,
+      employees: document.getElementById('adv-employees').value,
+      needs: selectedNeeds
+    })
+  }).then(function(r){return r.json()}).then(function(d){
+    var names = {starter: 'Starter (9 EUR/mj)', professional: 'Professional (29 EUR/mj)', enterprise: 'Enterprise (79 EUR/mj)'};
+    document.getElementById('adv-plan').textContent = 'Preporuka: ' + names[d.recommended];
+    document.getElementById('adv-reason').textContent = d.reason;
+    document.getElementById('adv-link').href = '/register/?plan=' + d.recommended;
+    document.getElementById('adv-result').style.display = 'block';
+  });
+}
+</script>
+</body>
+</html>

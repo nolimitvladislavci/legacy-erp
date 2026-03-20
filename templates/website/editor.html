@@ -1,0 +1,444 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Web stranica — {{ site.site_title|default:site.company.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .ws-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+  .ws-badge { display: inline-flex; align-items: center; gap: .4rem; padding: .25rem .75rem; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+  .ws-badge.published { background: #d1fae5; color: #065f46; }
+  .ws-badge.draft { background: #fef3c7; color: #92400e; }
+  .ws-tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
+  .ws-tab { padding: .75rem 1.25rem; font-size: .9rem; font-weight: 600; cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; }
+  .ws-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .ws-pane { display: none; }
+  .ws-pane.active { display: block; }
+  .ws-public-link { display: inline-flex; align-items: center; gap: .4rem; font-size: .875rem; color: var(--primary); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .srv-item, .gal-item, .rev-item { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: .75rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .srv-item-body { flex: 1; }
+  .srv-item-title { font-weight: 600; }
+  .srv-item-meta { font-size: .825rem; color: var(--muted); margin-top: .2rem; }
+  .gal-item img { width: 80px; height: 60px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+  .add-form { background: var(--bg2); border: 1px dashed var(--border); border-radius: 6px; padding: 1.25rem; margin-top: 1rem; }
+  .add-form h4 { font-size: .95rem; font-weight: 700; margin-bottom: 1rem; }
+  .color-preview { width: 32px; height: 32px; border-radius: 4px; border: 1px solid var(--border); display: inline-block; vertical-align: middle; }
+  .msg-row { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: .75rem; }
+  .msg-row.unread { border-left: 3px solid var(--primary); }
+  .msg-meta { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ws-header">
+  <div>
+    <h1 class="page-title">Web stranica</h1>
+    <a href="{{ site.public_url }}" target="_blank" class="ws-public-link" rel="noopener">
+      &#127760; /site/{{ site.slug }}/
+    </a>
+  </div>
+  <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+    {% if site.is_published %}
+      <span class="ws-badge published">&#9679; Objavljeno</span>
+    {% else %}
+      <span class="ws-badge draft">&#9679; Skica</span>
+    {% endif %}
+    {% if messages_count %}
+    <a href="{% url 'website:website_messages' %}" class="btn btn-sm btn-outline-primary">
+      &#9993; {{ messages_count }} nova poruka{% if messages_count > 1 %}e{% endif %}
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="ws-tab-bar">
+  <button class="ws-tab active" onclick="wsTab('osnove')">&#9881; Osnove</button>
+  <button class="ws-tab" onclick="wsTab('teme')">&#127912; Tema</button>
+  <button class="ws-tab" onclick="wsTab('usluge')">&#128196; Usluge ({{ services|length }})</button>
+  <button class="ws-tab" onclick="wsTab('galerija')">&#128247; Galerija ({{ gallery|length }})</button>
+  <button class="ws-tab" onclick="wsTab('recenzije')">&#9733; Recenzije ({{ reviews|length }})</button>
+  <button class="ws-tab" onclick="wsTab('kontakt')">&#9993; Kontakt</button>
+</div>
+
+<!-- ── TAB: OSNOVE ── -->
+<div id="pane-osnove" class="ws-pane active">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="_tab" value="osnove">
+
+    <div class="card">
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Naziv stranice</label>
+            <input type="text" name="site_title" value="{{ site.site_title }}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tagline / slogan</label>
+            <input type="text" name="tagline" value="{{ site.tagline }}" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Hero tekst (ispod tagline)</label>
+          <textarea name="hero_text" class="form-control" rows="3">{{ site.hero_text }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">O nama (tekst)</label>
+          <textarea name="about_text" class="form-control" rows="5">{{ site.about_text }}</textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Logo</label>
+            {% if site.logo %}<img src="{{ site.logo.url }}" style="height:40px;margin-bottom:.5rem" alt="Logo">{% endif %}
+            <input type="file" name="logo" class="form-control" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hero slika</label>
+            {% if site.hero_image %}<img src="{{ site.hero_image.url }}" style="height:40px;margin-bottom:.5rem" alt="Hero">{% endif %}
+            <input type="file" name="hero_image" class="form-control" accept="image/*">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <input type="checkbox" name="is_published" {% if site.is_published %}checked{% endif %}>
+            &nbsp;Objavi stranicu (javno dostupna na /site/{{ site.slug }}/)
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Spremi promjene</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ── TAB: TEMA ── -->
+<div id="pane-teme" class="ws-pane">
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="_tab" value="teme">
+
+    <div class="card">
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tema dizajna</label>
+            <select name="theme" class="form-control">
+              {% for val, label in site.THEME_CHOICES %}
+              <option value="{{ val }}" {% if site.theme == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Primarna boja</label>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <input type="color" name="primary_color" value="{{ site.primary_color }}" class="form-control" style="width:60px;padding:.2rem">
+              <span id="color-val">{{ site.primary_color }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;padding:1rem;background:var(--bg2);border-radius:6px">
+          <p style="font-size:.875rem;margin-bottom:.5rem"><strong>Pregled tema:</strong></p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem">
+            {% for val, label in site.THEME_CHOICES %}
+            <div style="border:2px solid {% if site.theme == val %}var(--primary){% else %}var(--border){% endif %};border-radius:6px;padding:.75rem;text-align:center;cursor:pointer" onclick="document.querySelector('[name=theme]').value='{{ val }}'">
+              <div style="font-weight:600;font-size:.9rem">{{ label }}</div>
+              <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">{{ val }}.html</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div style="margin-top:1rem">
+          <button type="submit" class="btn btn-primary">Spremi temu</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ── TAB: USLUGE ── -->
+<div id="pane-usluge" class="ws-pane">
+  <div class="card">
+    <div class="card-body">
+      <div id="srv-list">
+        {% for svc in services %}
+        <div class="srv-item" id="srv-{{ svc.pk }}">
+          <div class="srv-item-body">
+            <div class="srv-item-title">{{ svc.title }}</div>
+            <div class="srv-item-meta">
+              {% if svc.price_display %}{{ svc.price_display }} &bull; {% endif %}
+              {% if svc.is_active %}Aktivno{% else %}Neaktivno{% endif %}
+            </div>
+          </div>
+          <button class="btn btn-sm btn-outline-danger" onclick="srvDelete({{ svc.pk }})">&#128465;</button>
+        </div>
+        {% empty %}
+        <p class="text-muted" id="srv-empty">Nema usluga. Dodajte prvu!</p>
+        {% endfor %}
+      </div>
+
+      <div class="add-form">
+        <h4>Dodaj uslugu</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Naziv *</label>
+            <input type="text" id="srv-title" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cijena (prikaz)</label>
+            <input type="text" id="srv-price" class="form-control" placeholder="npr. od 50€">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opis</label>
+          <textarea id="srv-desc" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ikona (FA klasa)</label>
+            <input type="text" id="srv-icon" class="form-control" placeholder="fa-wrench">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Redoslijed</label>
+            <input type="number" id="srv-order" class="form-control" value="0" min="0">
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="srvSave()">&#43; Dodaj uslugu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB: GALERIJA ── -->
+<div id="pane-galerija" class="ws-pane">
+  <div class="card">
+    <div class="card-body">
+      <div id="gal-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1rem">
+        {% for img in gallery %}
+        <div class="gal-item" id="gal-{{ img.pk }}" style="position:relative;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+          <img src="{{ img.image.url }}" alt="{{ img.caption }}" style="width:100%;height:140px;object-fit:cover">
+          <div style="padding:.5rem">
+            <div style="font-size:.825rem;color:var(--muted)">{{ img.caption|default:"Bez opisa" }}</div>
+          </div>
+          <button onclick="galDelete({{ img.pk }}, this)" style="position:absolute;top:.4rem;right:.4rem;background:#dc2626;color:#fff;border:none;border-radius:4px;padding:.2rem .5rem;cursor:pointer;font-size:.8rem">&#10005;</button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="add-form">
+        <h4>Dodaj sliku</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Slika *</label>
+            <input type="file" id="gal-file" class="form-control" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Opis</label>
+            <input type="text" id="gal-caption" class="form-control">
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="galUpload()">&#43; Dodaj sliku</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB: RECENZIJE ── -->
+<div id="pane-recenzije" class="ws-pane">
+  <div class="card">
+    <div class="card-body">
+      <div id="rev-list">
+        {% for rev in reviews %}
+        <div class="rev-item" id="rev-{{ rev.pk }}">
+          <div class="srv-item-body">
+            <div class="srv-item-title">{{ rev.author_name }} — {% for i in "12345"|make_list %}{% if forloop.counter <= rev.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</div>
+            <div class="srv-item-meta">"{{ rev.text|truncatechars:100 }}"</div>
+          </div>
+          <button class="btn btn-sm btn-outline-danger" onclick="revDelete({{ rev.pk }})">&#128465;</button>
+        </div>
+        {% empty %}
+        <p class="text-muted" id="rev-empty">Nema recenzija.</p>
+        {% endfor %}
+      </div>
+
+      <div class="add-form">
+        <h4>Dodaj recenziju</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ime autora *</label>
+            <input type="text" id="rev-author" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ocjena (1–5)</label>
+            <select id="rev-rating" class="form-control">
+              <option value="5">&#9733;&#9733;&#9733;&#9733;&#9733; (5)</option>
+              <option value="4">&#9733;&#9733;&#9733;&#9733;&#9734; (4)</option>
+              <option value="3">&#9733;&#9733;&#9733;&#9734;&#9734; (3)</option>
+              <option value="2">&#9733;&#9733;&#9734;&#9734;&#9734; (2)</option>
+              <option value="1">&#9733;&#9734;&#9734;&#9734;&#9734; (1)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tekst recenzije *</label>
+          <textarea id="rev-text" class="form-control" rows="3"></textarea>
+        </div>
+        <button class="btn btn-success" onclick="revSave()">&#43; Dodaj recenziju</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB: KONTAKT ── -->
+<div id="pane-kontakt" class="ws-pane">
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="_tab" value="kontakt">
+
+    <div class="card">
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Telefon</label>
+            <input type="text" name="contact_phone" value="{{ site.contact_phone }}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input type="email" name="contact_email" value="{{ site.contact_email }}" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Adresa</label>
+          <input type="text" name="contact_address" value="{{ site.contact_address }}" class="form-control">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Facebook URL</label>
+            <input type="url" name="facebook_url" value="{{ site.facebook_url }}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Instagram URL</label>
+            <input type="url" name="instagram_url" value="{{ site.instagram_url }}" class="form-control">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Spremi kontakt</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CSRF = '{{ csrf_token }}';
+
+function wsTab(name) {
+  document.querySelectorAll('.ws-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ws-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Services
+function srvSave() {
+  const title = document.getElementById('srv-title').value.trim();
+  if (!title) { alert('Naziv je obavezan'); return; }
+  const data = new FormData();
+  data.append('title', title);
+  data.append('description', document.getElementById('srv-desc').value);
+  data.append('icon', document.getElementById('srv-icon').value);
+  data.append('price_display', document.getElementById('srv-price').value);
+  data.append('order', document.getElementById('srv-order').value);
+  fetch('{% url "website:website_service_save" %}', {method:'POST', headers:{'X-CSRFToken':CSRF}, body:data})
+    .then(r => r.json()).then(d => {
+      if (d.ok) {
+        const empty = document.getElementById('srv-empty');
+        if (empty) empty.remove();
+        const li = document.createElement('div');
+        li.className = 'srv-item'; li.id = 'srv-'+d.pk;
+        li.innerHTML = '<div class="srv-item-body"><div class="srv-item-title">'+d.title+'</div></div><button class="btn btn-sm btn-outline-danger" onclick="srvDelete('+d.pk+')">&#128465;</button>';
+        document.getElementById('srv-list').prepend(li);
+        document.getElementById('srv-title').value = '';
+        document.getElementById('srv-desc').value = '';
+        document.getElementById('srv-icon').value = '';
+        document.getElementById('srv-price').value = '';
+      } else { alert(d.error || 'Greška'); }
+    });
+}
+
+function srvDelete(pk) {
+  if (!confirm('Obrisati uslugu?')) return;
+  fetch('{% url "website:website_service_delete" pk=0 %}'.replace('/0/', '/'+pk+'/'),
+    {method:'POST', headers:{'X-CSRFToken':CSRF}})
+    .then(r => r.json()).then(d => { if (d.ok) document.getElementById('srv-'+pk).remove(); });
+}
+
+// Gallery
+function galUpload() {
+  const file = document.getElementById('gal-file').files[0];
+  if (!file) { alert('Odaberite sliku'); return; }
+  const data = new FormData();
+  data.append('image', file);
+  data.append('caption', document.getElementById('gal-caption').value);
+  fetch('{% url "website:website_gallery_upload" %}', {method:'POST', headers:{'X-CSRFToken':CSRF}, body:data})
+    .then(r => r.json()).then(d => {
+      if (d.ok) {
+        const div = document.createElement('div');
+        div.className = 'gal-item'; div.id = 'gal-'+d.pk;
+        div.style.cssText = 'position:relative;border:1px solid var(--border);border-radius:6px;overflow:hidden';
+        div.innerHTML = '<img src="'+d.url+'" style="width:100%;height:140px;object-fit:cover">'
+          + '<button onclick="galDelete('+d.pk+', this)" style="position:absolute;top:.4rem;right:.4rem;background:#dc2626;color:#fff;border:none;border-radius:4px;padding:.2rem .5rem;cursor:pointer;font-size:.8rem">&#10005;</button>';
+        document.getElementById('gal-list').appendChild(div);
+        document.getElementById('gal-file').value = '';
+        document.getElementById('gal-caption').value = '';
+      } else { alert(d.error || 'Greška'); }
+    });
+}
+
+function galDelete(pk, btn) {
+  if (!confirm('Obrisati sliku?')) return;
+  fetch('{% url "website:website_gallery_delete" pk=0 %}'.replace('/0/', '/'+pk+'/'),
+    {method:'POST', headers:{'X-CSRFToken':CSRF}})
+    .then(r => r.json()).then(d => { if (d.ok) document.getElementById('gal-'+pk).remove(); });
+}
+
+// Reviews
+function revSave() {
+  const author = document.getElementById('rev-author').value.trim();
+  const text = document.getElementById('rev-text').value.trim();
+  if (!author || !text) { alert('Ime i tekst su obavezni'); return; }
+  const data = new FormData();
+  data.append('author_name', author);
+  data.append('rating', document.getElementById('rev-rating').value);
+  data.append('text', text);
+  fetch('{% url "website:website_review_save" %}', {method:'POST', headers:{'X-CSRFToken':CSRF}, body:data})
+    .then(r => r.json()).then(d => {
+      if (d.ok) {
+        const empty = document.getElementById('rev-empty');
+        if (empty) empty.remove();
+        const li = document.createElement('div');
+        li.className = 'rev-item'; li.id = 'rev-'+d.pk;
+        li.innerHTML = '<div class="srv-item-body"><div class="srv-item-title">'+author+'</div><div class="srv-item-meta">"'+text.substring(0,100)+'"</div></div><button class="btn btn-sm btn-outline-danger" onclick="revDelete('+d.pk+')">&#128465;</button>';
+        document.getElementById('rev-list').prepend(li);
+        document.getElementById('rev-author').value = '';
+        document.getElementById('rev-text').value = '';
+      } else { alert(d.error || 'Greška'); }
+    });
+}
+
+function revDelete(pk) {
+  if (!confirm('Obrisati recenziju?')) return;
+  fetch('{% url "website:website_service_delete" pk=0 %}'.replace('/0/', '/'+pk+'/').replace('service', 'review'),
+    {method:'POST', headers:{'X-CSRFToken':CSRF}})
+    .then(r => r.json()).then(d => { if (d.ok) document.getElementById('rev-'+pk).remove(); });
+}
+</script>
+{% endblock %}

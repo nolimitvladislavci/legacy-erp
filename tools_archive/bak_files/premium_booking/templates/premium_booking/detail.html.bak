@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ resource.name }} | Rezervacija</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <style>
+        :root { --black: #0a0a0a; --dark: #111214; --surface: #181a1d; --border: #252830; --gold: #c9a84c; }
+        body { background: var(--black); color: white; font-family: 'Barlow', sans-serif; margin: 0; }
+        .main { display: flex; max-width: 1600px; margin: 60px auto; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 80px 150px rgba(0,0,0,0.8); }
+        .side { width: 45%; padding: 100px; background: linear-gradient(180deg, #111214 0%, #0a0a0a 100%); border-right: 1px solid var(--border); }
+        .form { width: 55%; padding: 100px; }
+        h1 { font-family: 'Cormorant Garamond', serif; font-size: 5rem; font-weight: 300; line-height: 1; margin: 30px 0; }
+        input, select { width: 100%; background: var(--black); border: 1px solid var(--border); padding: 25px 35px; color: white; margin-bottom: 40px; font-family: inherit; font-size: 1.2rem; border-radius: 0; }
+        .btn-submit { width: 100%; padding: 30px; background: var(--gold); color: black; border: none; font-weight: 800; text-transform: uppercase; letter-spacing: 6px; cursor: pointer; transition: 0.6s; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.99); z-index: 2000; align-items: center; justify-content: center; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="main"><div class="side">
+        <span style="color:var(--gold); text-transform:uppercase; letter-spacing:10px; font-size:0.9rem; font-weight:700;">PROFIL RESURSA</span>
+        <h1>{{ resource.name }}</h1>
+        <div style="font-size:4.5rem; color:var(--gold); font-family:'Cormorant Garamond', serif; border-top:1px solid var(--border); padding-top:50px;">{{ resource.base_price }}€</div>
+    </div><div class="form">
+        <form id="bookingForm">
+            <input type="text" id="dt" placeholder="Odaberite termin početka..." required>
+            <input type="text" id="name" placeholder="Puno ime i prezime" required>
+            <input type="email" id="email" placeholder="E-mail adresa" required>
+            <input type="tel" id="phone" placeholder="Kontakt telefon" required>
+            <button type="submit" class="btn-submit" id="btn">Dovrši Rezervaciju</button>
+        </form>
+    </div></div>
+    <div id="modal" class="modal"><div style="background:var(--surface); border:1px solid var(--gold); padding:100px;">
+        <h2 style="font-family:'Cormorant Garamond', serif; font-size:5rem;">USPJEH</h2>
+        <p style="font-size:1.6rem; margin:50px 0;">Broj rezervacije: <strong id="resNo" style="color:white; border-bottom:3px solid var(--gold);"></strong></p>
+        <a href="{% url 'premium_booking:index' %}" class="btn-submit" style="display:block; text-decoration:none;">Zatvori</a>
+    </div></div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#dt", { enableTime: true, dateFormat: "Y-m-d H:i", minDate: "today", theme: "dark", time_24hr: true });
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const b = document.getElementById('btn'); b.disabled = true; b.innerText = "SINKRONIZACIJA...";
+            fetch('/premium/api/submit/', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    resource_id: "{{ resource.id }}", date: document.getElementById('dt').value.split(' ')[0], time: document.getElementById('dt').value.split(' ')[1],
+                    name: document.getElementById('name').value, email: document.getElementById('email').value, phone: document.getElementById('phone').value
+                })
+            }).then(r => r.json()).then(d => {
+                if(d.booking_number) { document.getElementById('resNo').innerText = d.booking_number; document.getElementById('modal').style.display = 'flex'; }
+                else { alert('Arhitektonska greška: ' + d.error); b.disabled = false; b.innerText = "Dovrši Rezervaciju"; }
+            });
+        });
+    </script>
+</body>
+</html>

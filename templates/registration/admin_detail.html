@@ -1,0 +1,96 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ reg.name }} – Registration Review</title>
+<style>
+:root { --black:#0a0a0a; --dark:#111; --card:#1a1a1a; --border:#2a2a2a; --gold:#c9a84c; --text:#e8e8e8; --muted:#888; --error:#e05c5c; --success:#4caf7d; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--black); color:var(--text); font-family:system-ui,sans-serif; padding:2rem; max-width:900px; margin:0 auto; }
+.topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; }
+h1 { font-size:1.5rem; }
+.back { color:var(--muted); font-size:0.875rem; text-decoration:none; }
+.back:hover { color:var(--gold); }
+.card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1.5rem; margin-bottom:1.5rem; }
+.card-title { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:1rem; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.field label { font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:0.3rem; }
+.field span { font-size:0.95rem; }
+.status { display:inline-block; padding:0.3rem 0.75rem; border-radius:20px; font-weight:600; font-size:0.8rem; text-transform:uppercase; }
+.status-pending { background:rgba(201,168,76,0.15); color:var(--gold); }
+.status-approved { background:rgba(76,175,125,0.15); color:var(--success); }
+.status-rejected { background:rgba(224,92,92,0.15); color:var(--error); }
+.doc-link { color:var(--gold); text-decoration:none; font-size:0.875rem; }
+.doc-link:hover { text-decoration:underline; }
+.actions { display:flex; gap:1rem; align-items:flex-start; flex-wrap:wrap; }
+.btn { padding:0.75rem 1.5rem; border-radius:6px; font-size:0.875rem; font-weight:600; border:none; cursor:pointer; font-family:inherit; text-decoration:none; display:inline-block; }
+.btn-approve { background:var(--success); color:#fff; }
+.btn-approve:hover { background:#3d9c68; }
+.btn-reject { background:transparent; border:1px solid var(--error); color:var(--error); }
+.btn-reject:hover { background:rgba(224,92,92,0.1); }
+.reject-form { flex:1; min-width:300px; }
+.reject-form textarea { width:100%; background:var(--dark); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:0.75rem; font-family:inherit; font-size:0.875rem; resize:vertical; margin-bottom:0.5rem; }
+.reject-form textarea:focus { outline:none; border-color:var(--error); }
+.messages { margin-bottom:1.5rem; }
+.msg { padding:0.75rem 1rem; border-radius:6px; margin-bottom:0.5rem; font-size:0.875rem; }
+.msg.success { background:rgba(76,175,125,0.1); border:1px solid var(--success); color:var(--success); }
+.msg.error { background:rgba(224,92,92,0.1); border:1px solid var(--error); color:var(--error); }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>{{ reg.name }}</h1>
+  <a href="{% url 'registration:admin_list' %}" class="back">{% trans "← All registrations" %}</a>
+</div>
+{% if messages %}<div class="messages">{% for msg in messages %}<div class="msg {{ msg.tags }}">{{ msg }}</div>{% endfor %}</div>{% endif %}
+<div class="card">
+  <div class="card-title">{% trans "Company Information" %}</div>
+  <div class="grid">
+    <div class="field"><label>{% trans "Company Name" %}</label><span>{{ reg.name }}</span></div>
+    <div class="field"><label>{% trans "OIB / Tax ID" %}</label><span>{{ reg.oib }}</span></div>
+    <div class="field"><label>{% trans "Business Type" %}</label><span>{{ reg.get_business_type_display }}</span></div>
+    <div class="field"><label>{% trans "Country" %}</label><span>{{ reg.country }}</span></div>
+    <div class="field" style="grid-column:span 2"><label>{% trans "Address" %}</label><span>{{ reg.address }}</span></div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">{% trans "Contact" %}</div>
+  <div class="grid">
+    <div class="field"><label>{% trans "Contact Person" %}</label><span>{{ reg.contact_name }}</span></div>
+    <div class="field"><label>{% trans "Phone" %}</label><span>{{ reg.contact_phone }}</span></div>
+    <div class="field" style="grid-column:span 2"><label>{% trans "Email" %}</label><span>{{ reg.contact_email }}</span></div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">{% trans "Registration Details" %}</div>
+  <div class="grid">
+    <div class="field"><label>{% trans "Selected Plan" %}</label><span style="color:var(--gold);font-weight:600;text-transform:uppercase">{{ reg.selected_plan }}</span></div>
+    <div class="field"><label>{% trans "Status" %}</label><span class="status status-{{ reg.status }}">{{ reg.status }}</span></div>
+    <div class="field"><label>{% trans "Submitted" %}</label><span>{{ reg.created_at|date:"d M Y H:i" }}</span></div>
+    {% if reg.approved_at %}<div class="field"><label>{% trans "Reviewed" %}</label><span>{{ reg.approved_at|date:"d M Y H:i" }}</span></div>{% endif %}
+    {% if reg.document %}<div class="field" style="grid-column:span 2"><label>{% trans "Document" %}</label><a href="{{ reg.document.url }}" target="_blank" class="doc-link">{% trans "📄 View uploaded document" %}</a></div>{% endif %}
+    {% if reg.rejection_reason %}<div class="field" style="grid-column:span 2"><label>{% trans "Rejection Reason" %}</label><span style="color:var(--error)">{{ reg.rejection_reason }}</span></div>{% endif %}
+  </div>
+</div>
+{% if reg.status == 'pending' %}
+<div class="card">
+  <div class="card-title">{% trans "Actions" %}</div>
+  <div class="actions">
+    <form method="post" action="{% url 'registration:admin_approve' reg.pk %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-approve" onclick="return confirm('Approve {{ reg.name }} and create account?')">{% trans "✓ Approve & Create Account" %}</button>
+    </form>
+    <div class="reject-form">
+      <form method="post" action="{% url 'registration:admin_reject' reg.pk %}">
+        {% csrf_token %}
+        <textarea name="rejection_reason" rows="3" placeholder="{% trans "Reason for rejection (optional)..." %}"></textarea>
+        <button type="submit" class="btn btn-reject" onclick="return confirm('Reject this registration?')">{% trans "✗ Reject" %}</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+</body>
+</html>

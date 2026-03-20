@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bon #{{ receipt.receipt_number }} – Thermal</title>
+<style>
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/static/fonts/DejaVuSans.ttf');
+}
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/static/fonts/DejaVuSans-Bold.ttf');
+    font-weight: bold;
+}
+* { font-family: 'DejaVu', sans-serif !important; }
+
+/* ── Screen preview ────────────────────────────────────────── */
+body {
+  font-family: Courier New, Courier, monospace;
+  font-size: 11pt;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  margin: 0;
+}
+.wrap {
+  background: #fff;
+  width: 80mm;
+  padding: 6mm 5mm;
+  box-shadow: 0 2px 12px rgba(0,0,0,.15);
+}
+.ctrl {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+}
+.ctrl button, .ctrl a {
+  background: #1a1a2e;
+  color: #c9a84c;
+  border: 1px solid #c9a84c;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-block;
+}
+.ctrl button:hover, .ctrl a:hover { opacity: .85; }
+
+/* ── Receipt content ────────────────────────────────────────── */
+.center { text-align: center; }
+.right  { text-align: right; }
+.bold   { font-weight: bold; }
+.co     { font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 2px; }
+.adr    { font-size: 8pt; text-align: center; color: #444; margin-bottom: 3px; }
+.div    { border: none; border-top: 1px dashed #888; margin: 5px 0; }
+.bon-t  { font-size: 10pt; font-weight: bold; text-align: center; margin: 4px 0; }
+.meta   { font-size: 8.5pt; margin: 1px 0; }
+table   { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 8.5pt; }
+th      { text-align: left; border-bottom: 1px solid #888; padding: 2px 0; font-size: 8pt; }
+td      { padding: 2px 0; vertical-align: top; }
+.it-nm  { max-width: 42mm; word-break: break-word; }
+.it-tot { text-align: right; min-width: 14mm; }
+.tr     { display: flex; justify-content: space-between; margin: 2px 0; font-size: 8.5pt; }
+.tr.gr  { font-size: 11pt; font-weight: bold; border-top: 1px solid #000; padding-top: 3px; margin-top: 3px; }
+.pay-ln { font-size: 8.5pt; margin: 1px 0; display: flex; justify-content: space-between; }
+.footer { text-align: center; font-size: 7.5pt; color: #666; margin-top: 8px; }
+.fis    { font-size: 7pt; color: #555; margin-top: 6px; word-break: break-all; }
+
+/* ── Print overrides ───────────────────────────────────────── */
+@media print {
+  @page { size: 80mm auto; margin: 0; }
+  body  { background: transparent; display: block; padding: 0; }
+  .wrap { box-shadow: none; padding: 3mm 4mm; width: 72mm; }
+  .ctrl { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Control bar (hidden on print) -->
+<div class="ctrl">
+  <button onclick="window.print()">🖨 Ispiši</button>
+  <a href="javascript:window.close()">✕ Zatvori</a>
+</div>
+
+<div class="wrap">
+  <!-- Header -->
+  <div class="co">{{ company.name }}</div>
+  {% if company.address %}<div class="adr">{{ company.address }}{% if company.city %}, {{ company.city }}{% endif %}</div>{% endif %}
+  {% if company.oib %}<div class="adr">OIB: {{ company.oib }}</div>{% endif %}
+
+  <hr class="div">
+  {% if receipt.status == "cancelled" %}
+  <div class="bon-t" style="color:#c00">*** STORNIRANO ***</div>
+  {% if receipt.cancel_reason %}<div class="meta" style="text-align:center;color:#c00">Razlog: {{ receipt.cancel_reason }}</div>{% endif %}
+  {% else %}
+  <div class="bon-t">RAČUN / BON</div>
+  {% endif %}
+  <hr class="div">
+
+  <div class="meta">Terminal: {{ terminal.name }} ({{ terminal.terminal_code }})</div>
+  <div class="meta">Blagajnik: {{ receipt.session.operator.get_full_name|default:receipt.session.operator.username }}</div>
+  <div class="meta">Bon br.: #{{ receipt.receipt_number }}</div>
+  <div class="meta">Datum: {{ receipt.created_at|date:"d.m.Y H:i" }}</div>
+  {% if receipt.table_number %}<div class="meta">Stol: {{ receipt.table_number }}</div>{% endif %}
+
+  <hr class="div">
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:42mm">Naziv</th>
+        <th style="text-align:center">Kol</th>
+        <th style="text-align:right">Ukupno</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr{% if item.is_tip %} style="font-style:italic"{% elif item.is_pfand_return %} style="color:#c00"{% endif %}>
+        <td class="it-nm">{% if item.is_tip %}* {% endif %}{{ item.description }}</td>
+        <td style="text-align:center">{{ item.quantity|floatformat:"-2" }}</td>
+        <td class="it-tot">&euro;{{ item.total_price|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <td style="font-size:7.5pt;color:#555" colspan="2">
+          &euro;{{ item.unit_price|floatformat:2 }} &times; {{ item.quantity|floatformat:"-2" }} | PDV {{ item.tax_rate|floatformat:0 }}%{% if item.discount_percent %} | Pop. {{ item.discount_percent|floatformat:0 }}%{% endif %}{% if item.is_pfand_return %} | POVRAT{% endif %}
+        </td>
+        <td></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <hr class="div">
+
+  <div class="tr"><span>Neto (bez PDV):</span><span>&euro;{{ receipt.subtotal|floatformat:2 }}</span></div>
+  <div class="tr"><span>PDV:</span><span>&euro;{{ receipt.tax_amount|floatformat:2 }}</span></div>
+  {% if receipt.discount %}<div class="tr"><span>Popust:</span><span>-&euro;{{ receipt.discount|floatformat:2 }}</span></div>{% endif %}
+  <div class="tr gr"><span>UKUPNO:</span><span>&euro;{{ receipt.total|floatformat:2 }}</span></div>
+
+  <hr class="div">
+
+  {% for line in payment_lines %}
+  <div class="pay-ln">
+    <span>{{ line.get_method_display }}{% if line.method == 'VOUCHER' and line.card_reference %} ({{ line.card_reference }}){% endif %}:</span>
+    <span>&euro;{{ line.amount|floatformat:2 }}</span>
+  </div>
+  {% if line.change_given %}
+  <div class="pay-ln" style="color:#777">
+    <span>Kusur:</span><span>&euro;{{ line.change_given|floatformat:2 }}</span>
+  </div>
+  {% endif %}
+  {% endfor %}
+
+  <hr class="div">
+
+  {% if receipt.zki or receipt.jir %}
+  <div class="fis">
+    {% if receipt.zki %}<div>ZKI: {{ receipt.zki }}</div>{% endif %}
+    {% if receipt.jir %}
+    <div>JIR: {{ receipt.jir }}</div>
+    {% else %}
+    <div style="color:#c00;font-weight:bold">JIR: Nije ishođen (Offline)</div>
+    <div style="font-size:6pt;color:#c00">Račun će biti naknadno prijavljen Poreznoj upravi</div>
+    {% endif %}
+    {% if receipt.fiscal_datetime %}<div>Fiskalizirano: {{ receipt.fiscal_datetime|date:"d.m.Y H:i:s" }}</div>{% endif %}
+    {% if business_location %}
+    <div>PP: {{ business_location.location_code }} | OIB: {{ business_location.oib }}</div>
+    {% endif %}
+  </div>
+  {% if fina_qr_b64 %}
+  <div class="center" style="margin:6px 0">
+    <img src="data:image/png;base64,{{ fina_qr_b64 }}" alt="FINA QR"
+         style="display:block;margin:4px auto;width:40mm;height:40mm;image-rendering:pixelated;image-rendering:crisp-edges">
+    <div style="font-size:6pt;color:#888">Skeniraj za provjeru na porezna.gov.hr</div>
+  </div>
+  {% endif %}
+  <hr class="div">
+  {% endif %}
+
+  {% if items|dictsort:"is_tip" %}{% for item in items %}{% if item.is_tip %}
+  <div class="footer" style="border-top:none;margin-top:2px">* Napojnica (PDV 0%)</div>
+  {% endif %}{% endfor %}{% endif %}
+  <div class="footer">
+    Hvala na posjetu!<br>
+    {% if receipt.note %}{{ receipt.note }}<br>{% endif %}
+    LIMIT Connect POS &mdash; {% now "d.m.Y" %}
+  </div>
+</div>
+
+<script>
+// Auto-print when opened in new tab
+window.addEventListener('load', function() {
+  // Small delay so layout renders first
+  setTimeout(function() { window.print(); }, 400);
+});
+</script>
+</body>
+</html>

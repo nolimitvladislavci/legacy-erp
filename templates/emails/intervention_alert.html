@@ -1,0 +1,26 @@
+{% extends "emails/base_email.html" %}
+{% block title %}HITNA INTERVENCIJA{% endblock %}
+{% block content %}
+<div style="background:#c0392b;color:#fff;padding:12px 16px;border-radius:4px;margin-bottom:20px;text-align:center;">
+  <strong style="font-size:16px;">HITNA INTERVENCIJA</strong>
+</div>
+<h2 style="margin:0 0 16px;color:#0a0a0a;font-family:'Cormorant Garamond',Georgia,serif;">{{ vrsta }} — {{ ime }}</h2>
+<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
+  <tr><td style="padding:8px 12px;background:#fdf2f2;border-left:3px solid #c0392b;color:#555;">Ime</td>
+      <td style="padding:8px 12px;background:#fdf2f2;color:#0a0a0a;font-weight:600;">{{ ime }}</td></tr>
+  <tr><td style="padding:8px 12px;color:#555;">Telefon</td>
+      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ telefon }}</td></tr>
+  <tr><td style="padding:8px 12px;background:#fdf2f2;border-left:3px solid #c0392b;color:#555;">Email</td>
+      <td style="padding:8px 12px;background:#fdf2f2;color:#0a0a0a;">{{ email }}</td></tr>
+  <tr><td style="padding:8px 12px;color:#555;">Adresa</td>
+      <td style="padding:8px 12px;color:#0a0a0a;">{{ adresa }}, {{ grad }} ({{ drzava }})</td></tr>
+  <tr><td style="padding:8px 12px;background:#fdf2f2;border-left:3px solid #c0392b;color:#555;">Hitnost</td>
+      <td style="padding:8px 12px;background:#fdf2f2;color:#c0392b;font-weight:700;">{% if hitnost %}HITNO{% else %}Redovito{% endif %}</td></tr>
+</table>
+{% if opis %}
+<div style="margin:16px 0;padding:16px;background:#f4f4f4;border-radius:4px;">
+  <p style="margin:0 0 4px;color:#555;font-weight:600;">Opis:</p>
+  <p style="margin:0;color:#333;">{{ opis }}</p>
+</div>
+{% endif %}
+{% endblock %}

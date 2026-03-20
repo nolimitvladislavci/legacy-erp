@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>Bon #{{ receipt.receipt_number }}</title>
+<style>
+@font-face { font-family: DejaVu; src: url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf'); }
+@font-face { font-family: DejaVu; src: url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf'); font-weight: bold; }
+* { font-family: DejaVu, sans-serif !important; }
+
+@page { size: A4; margin: 18mm 20mm 22mm 20mm; }
+body { font-size: 10pt; color: #1a1a1a; background: #fff; margin: 0; padding: 0; }
+
+table { width: 100%; border-collapse: collapse; }
+td   { padding: 3px 5px; vertical-align: top; }
+
+/* Header */
+.hdr-name  { font-size: 16pt; font-weight: bold; color: #0a0a0a; }
+.hdr-sub   { font-size: 8.5pt; color: #555; }
+.bon-title { font-size: 14pt; font-weight: bold; color: #c9a84c; text-align: right; }
+.bon-meta  { font-size: 8.5pt; color: #444; text-align: right; }
+.bon-paid  { font-size: 8.5pt; font-weight: bold; color: #16a34a; text-align: right; }
+.sep-line  { border-bottom: 2px solid #c9a84c; }
+
+/* Info grid — ALL cells have explicit % widths */
+.info-lbl  { font-size: 9pt; color: #666; width: 15%; }
+.info-val  { font-size: 9pt; font-weight: bold; width: 35%; }
+
+/* Items table */
+.items-hdr { background: #0a0a0a; }
+.items-hdr td { color: #c9a84c; font-size: 8pt; text-transform: uppercase;
+                letter-spacing: .04em; padding: 5px 5px; font-weight: bold; }
+.items-row td { font-size: 9pt; padding: 5px 5px; border-bottom: 1px solid #eee; }
+.r { text-align: right; }
+.gold { color: #b38a20; font-weight: bold; }
+
+/* Totals */
+.tot-lbl { font-size: 9pt; color: #555; width: 25%; }
+.tot-val { font-size: 9pt; text-align: right; width: 17%; }
+.tot-grand-lbl { font-size: 12pt; font-weight: bold; border-top: 2px solid #0a0a0a; padding-top: 5px; width: 25%; }
+.tot-grand-val { font-size: 12pt; font-weight: bold; color: #b38a20; text-align: right;
+                  border-top: 2px solid #0a0a0a; padding-top: 5px; width: 17%; }
+.spacer { width: 58%; }
+
+/* Fiscal */
+.fis-box { border: 1px solid #ddd; padding: 7px 9px; font-size: 7.5pt; color: #555;
+           margin-top: 10px; word-break: break-all; }
+
+/* Footer */
+.footer { text-align: center; font-size: 8pt; color: #888;
+          border-top: 1px solid #e0e0e0; padding-top: 8px; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<table style="margin-bottom:12px">
+  <tr class="sep-line">
+    <td style="width:65%;border-bottom:2px solid #c9a84c;padding-bottom:10px">
+      <div class="hdr-name">{{ company.name }}</div>
+      {% if company.address %}<div class="hdr-sub">{{ company.address }}{% if company.city %}, {{ company.city }}{% endif %}</div>{% endif %}
+      {% if company.oib %}<div class="hdr-sub">OIB/UID: {{ company.oib }}</div>{% endif %}
+    </td>
+    <td style="width:35%;border-bottom:2px solid #c9a84c;padding-bottom:10px">
+      {% if receipt.status == "cancelled" %}
+      <div class="bon-title" style="color:#c00">STORNIRANO</div>
+      {% else %}
+      <div class="bon-title">BON / RACUN</div>
+      {% endif %}
+      <div class="bon-meta">#{{ receipt.receipt_number }}</div>
+      <div class="bon-meta">{{ receipt.created_at|date:"d.m.Y H:i" }}</div>
+      {% if receipt.status == "paid" %}<div class="bon-paid">PLACENO</div>{% endif %}
+      {% if receipt.status == "cancelled" and receipt.cancel_reason %}<div class="bon-meta" style="color:#c00">Razlog: {{ receipt.cancel_reason }}</div>{% endif %}
+    </td>
+  </tr>
+</table>
+
+<!-- ── INFO — all 4 cells get explicit % widths ── -->
+<table style="margin-bottom:12px">
+  <tr>
+    <td class="info-lbl">Terminal:</td>
+    <td class="info-val">{{ terminal.name }} ({{ terminal.terminal_code }})</td>
+    <td class="info-lbl">Blagajnik:</td>
+    <td class="info-val">{{ receipt.session.operator.get_full_name|default:receipt.session.operator.username }}</td>
+  </tr>
+  <tr>
+    <td class="info-lbl">Smjena:</td>
+    <td class="info-val">#{{ receipt.session.session_number }}</td>
+    {% if receipt.table_number %}
+    <td class="info-lbl">Stol/zona:</td>
+    <td class="info-val">{{ receipt.table_number }}</td>
+    {% else %}
+    <td class="info-lbl"></td><td class="info-val"></td>
+    {% endif %}
+  </tr>
+  {% if receipt.note %}
+  <tr>
+    <td class="info-lbl">Napomena:</td>
+    <td style="width:85%" colspan="3">{{ receipt.note }}</td>
+  </tr>
+  {% endif %}
+</table>
+
+<!-- ── ITEMS — 6 fixed columns, widths sum to 100% ── -->
+<table style="margin-bottom:12px">
+  <thead>
+    <tr class="items-hdr">
+      <td style="width:43%">Naziv artikla</td>
+      <td class="r" style="width:10%">Kol.</td>
+      <td style="width:8%">Jed.</td>
+      <td class="r" style="width:14%">Cijena</td>
+      <td class="r" style="width:8%">PDV%</td>
+      <td class="r" style="width:17%">Ukupno</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr class="items-row"{% if item.is_pfand_return %} style="color:#b00"{% elif item.is_tip %} style="font-style:italic;color:#555"{% endif %}>
+      <td>{% if item.is_tip %}<em>* </em>{% endif %}{{ item.description }}{% if item.is_pfand_return %} <span style="font-size:7.5pt;font-weight:bold">[POVRAT]</span>{% endif %}</td>
+      <td class="r">{{ item.quantity|floatformat:"-2" }}</td>
+      <td>{{ item.unit|default:"kom" }}</td>
+      <td class="r">&euro;{{ item.unit_price|floatformat:2 }}</td>
+      <td class="r">{{ item.tax_rate|floatformat:0 }}%</td>
+      <td class="r gold">&euro;{{ item.total_price|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ── TOTALS — spacer 58% + label 25% + value 17% = 100% ── -->
+<table style="margin-bottom:12px">
+  <tr>
+    <td class="spacer"></td>
+    <td class="tot-lbl">Neto (bez PDV):</td>
+    <td class="tot-val">&euro;{{ receipt.subtotal|floatformat:2 }}</td>
+  </tr>
+  <tr>
+    <td class="spacer"></td>
+    <td class="tot-lbl">PDV:</td>
+    <td class="tot-val">&euro;{{ receipt.tax_amount|floatformat:2 }}</td>
+  </tr>
+  {% if receipt.discount %}
+  <tr>
+    <td class="spacer"></td>
+    <td class="tot-lbl" style="color:#c0392b">Popust:</td>
+    <td class="tot-val" style="color:#c0392b">-&euro;{{ receipt.discount|floatformat:2 }}</td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td class="spacer"></td>
+    <td class="tot-grand-lbl">UKUPNO:</td>
+    <td class="tot-grand-val">&euro;{{ receipt.total|floatformat:2 }}</td>
+  </tr>
+</table>
+
+<!-- ── PAYMENT ── -->
+{% if payment_lines %}
+<table style="margin-bottom:12px">
+  {% for line in payment_lines %}
+  <tr>
+    <td class="spacer"></td>
+    <td style="width:25%;font-size:9.5pt">{{ line.get_method_display }}{% if line.method == 'VOUCHER' and line.card_reference %} ({{ line.card_reference }}){% endif %}:</td>
+    <td class="r" style="width:17%;font-size:9.5pt;font-weight:bold">&euro;{{ line.amount|floatformat:2 }}</td>
+  </tr>
+  {% if line.change_given %}
+  <tr>
+    <td class="spacer"></td>
+    <td style="font-size:8.5pt;color:#888">Kusur:</td>
+    <td class="r" style="font-size:8.5pt;color:#888">&euro;{{ line.change_given|floatformat:2 }}</td>
+  </tr>
+  {% endif %}
+  {% endfor %}
+</table>
+{% endif %}
+
+<!-- ── FISCAL ── -->
+{% if receipt.zki or receipt.jir %}
+<div class="fis-box" style="display:flex;gap:12px;align-items:flex-start">
+  <div style="flex:1">
+    <div style="font-weight:bold;margin-bottom:3px">Podaci fiskalizacije</div>
+    {% if receipt.zki %}<div>ZKI: {{ receipt.zki }}</div>{% endif %}
+    {% if receipt.jir %}<div>JIR: {{ receipt.jir }}</div>
+    {% else %}<div style="color:#c00;font-weight:bold">JIR: Nije ishođen (Offline) — naknadno će biti prijavljen</div>{% endif %}
+    {% if receipt.fiscal_datetime %}<div>Fiskalizirano: {{ receipt.fiscal_datetime|date:"d.m.Y H:i:s" }}</div>{% endif %}
+    {% if business_location %}<div>PP: {{ business_location.location_code }} | OIB: {{ business_location.oib }}</div>{% endif %}
+  </div>
+  {% if fina_qr_b64 %}
+  <div style="text-align:center">
+    <img src="data:image/png;base64,{{ fina_qr_b64 }}" alt="FINA QR" style="width:25mm;height:25mm;image-rendering:pixelated;image-rendering:crisp-edges">
+    <div style="font-size:6pt;color:#999">porezna.gov.hr</div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ── FOOTER ── -->
+{% for item in items %}{% if item.is_tip %}<div style="font-size:8pt;color:#888;margin-top:4px">* Napojnica (PDV 0%)</div>{% endif %}{% endfor %}
+<div class="footer">
+  Hvala na posjetu! &nbsp;|&nbsp; LIMIT Connect POS &nbsp;|&nbsp; {% now "d.m.Y" %}<br>
+  <span style="font-size:7pt;color:#999">Ovaj račun je izrađen elektronički i važeći je bez žiga i potpisa (čl. 9. st. 2. ZOR-a). | Dieser Beleg wurde elektronisch erstellt und ist ohne Stempel und Unterschrift gültig.</span>
+</div>
+
+</body>
+</html>

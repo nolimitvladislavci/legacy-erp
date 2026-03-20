@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Dodaj blagajnu{% endblock %}
+{% block page_title %}Dodaj blagajnu{% endblock %}
+{% block content %}
+<style>
+.wizard{max-width:700px;margin:0 auto}
+.step{display:none}.step.active{display:block}
+.step-indicator{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
+.step-dot{width:10px;height:10px;border-radius:50%;background:#2a2f45;transition:.3s}
+.step-dot.active{background:#c9a84c;width:30px;border-radius:10px}
+.step-dot.done{background:#22c55e}
+.type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.type-card{background:var(--card-bg,#1a1a2e);border:2px solid var(--border-color,#2a2f45);border-radius:14px;padding:20px 16px;cursor:pointer;text-align:center;transition:all .2s}
+.type-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.type-card.selected{border-color:#c9a84c;box-shadow:0 0 20px rgba(201,168,76,.2)}
+.type-icon{font-size:2.5rem;margin-bottom:8px}
+.type-label{font-weight:700;font-size:1rem;margin-bottom:4px}
+.type-desc{font-size:.75rem;color:#64748b;line-height:1.4}
+.branch-card{background:var(--card-bg,#1a1a2e);border:2px solid var(--border-color,#2a2f45);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.branch-card:hover{border-color:#3b82f6}
+.branch-card.selected{border-color:#c9a84c;background:rgba(201,168,76,.05)}
+.branch-icon{font-size:1.5rem;width:40px;text-align:center}
+.branch-info{flex:1}
+.branch-name{font-weight:700;font-size:.9rem}
+.branch-addr{font-size:.75rem;color:#64748b}
+.new-branch-form{background:var(--card-bg,#1a1a2e);border:2px dashed #c9a84c;border-radius:12px;padding:16px;margin-top:12px;display:none}
+.new-branch-form.show{display:block}
+.wizard-btn{padding:12px 28px;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;transition:.2s}
+.wizard-btn:hover{opacity:.85}
+.btn-next{background:#c9a84c;color:#000}
+.btn-back{background:transparent;border:1px solid #2a2f45;color:#64748b}
+.summary-table td{padding:6px 12px;font-size:.9rem}
+.summary-table td:first-child{color:#64748b;font-weight:600}
+</style>
+
+<div class="wizard">
+
+  <div class="step-indicator">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+
+  <form method="post" id="wizardForm">
+    {% csrf_token %}
+    <input type="hidden" name="pos_type" id="fPosType" value="">
+    <input type="hidden" name="branch_id" id="fBranchId" value="">
+    <input type="hidden" name="terminal_name" id="fTerminalName" value="">
+
+    <!-- STEP 1: Tip POS-a -->
+    <div class="step active" id="step1">
+      <h3 class="text-center mb-1" style="color:#c9a84c">Kakvu blagajnu trebaš?</h3>
+      <p class="text-center text-muted mb-4" style="font-size:.85rem">Odaberi tip — svaki ima drugačije sučelje prilagođeno tvom poslu</p>
+      <div class="type-grid">
+        {% for t in pos_types %}
+        <div class="type-card" onclick="selectType(this,'{{ t.value }}')" data-type="{{ t.value }}" style="--accent:{{ t.color }}">
+          <div class="type-icon">{{ t.icon }}</div>
+          <div class="type-label" style="color:{{ t.color }}">{{ t.label }}</div>
+          <div class="type-desc">{{ t.desc }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'pos:dashboard' %}" class="wizard-btn btn-back">Odustani</a>
+        <button type="button" class="wizard-btn btn-next" onclick="goStep(2)" id="btnStep2" disabled>Dalje &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Lokacija -->
+    <div class="step" id="step2">
+      <h3 class="text-center mb-1" style="color:#c9a84c">Gdje je blagajna?</h3>
+      <p class="text-center text-muted mb-4" style="font-size:.85rem">Odaberi postojeću poslovnicu ili kreiraj novu</p>
+
+      {% for b in branches %}
+      <div class="branch-card" onclick="selectBranch(this,'{{ b.pk }}')">
+        <div class="branch-icon">
+          {% if b.branch_type == 'optika' %}&#128083;{% elif b.branch_type == 'restaurant' %}&#127860;{% elif b.branch_type == 'accounting' %}&#128202;{% elif b.branch_type == 'fitness' %}&#127947;{% else %}&#127978;{% endif %}
+        </div>
+        <div class="branch-info">
+          <div class="branch-name">{{ b.name }}</div>
+          <div class="branch-addr">{{ b.address }}{% if b.city %}, {{ b.city }}{% endif %}</div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="branch-card" onclick="selectBranch(this,'new')" style="border-style:dashed;border-color:#c9a84c">
+        <div class="branch-icon" style="color:#c9a84c">&#10133;</div>
+        <div class="branch-info">
+          <div class="branch-name" style="color:#c9a84c">Nova poslovnica</div>
+          <div class="branch-addr">Kreiraj novu lokaciju</div>
+        </div>
+      </div>
+
+      <div class="new-branch-form" id="newBranchForm">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label small">Naziv poslovnice</label>
+            <input type="text" name="new_branch_name" class="form-control" placeholder="npr. Optika Oko Čepin">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small">Grad</label>
+            <input type="text" name="new_branch_city" class="form-control" placeholder="npr. Čepin">
+          </div>
+          <div class="col-12">
+            <label class="form-label small">Adresa</label>
+            <input type="text" name="new_branch_address" class="form-control" placeholder="npr. Dobroljubska ul. bb">
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" class="wizard-btn btn-back" onclick="goStep(1)">&larr; Natrag</button>
+        <button type="button" class="wizard-btn btn-next" onclick="goStep(3)" id="btnStep3" disabled>Dalje &rarr;</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Summary -->
+    <div class="step" id="step3">
+      <h3 class="text-center mb-1" style="color:#22c55e">&#10003; Sve spremno!</h3>
+      <p class="text-center text-muted mb-4" style="font-size:.85rem">Provjeri podatke i kreiraj blagajnu</p>
+
+      <div style="background:var(--card-bg,#1a1a2e);border-radius:12px;padding:20px;margin-bottom:16px">
+        <table class="summary-table w-100">
+          <tr><td>Tip blagajne:</td><td id="sumType" class="fw-bold"></td></tr>
+          <tr><td>Poslovnica:</td><td id="sumBranch" class="fw-bold"></td></tr>
+          <tr><td>Tvrtka:</td><td>{{ company.name }}</td></tr>
+        </table>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Naziv blagajne (opcionalno — auto-generirano ako prazno)</label>
+        <input type="text" class="form-control" id="terminalNameInput" placeholder="Auto: Poslovnica — Tip">
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button type="button" class="wizard-btn btn-back" onclick="goStep(2)">&larr; Natrag</button>
+        <button type="submit" class="wizard-btn btn-next" style="background:#22c55e;font-size:1.1rem;padding:14px 36px">
+          &#10003; Kreiraj blagajnu
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+let selectedType = '';
+let selectedBranch = '';
+let selectedBranchName = '';
+
+function selectType(card, type) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedType = type;
+  document.getElementById('fPosType').value = type;
+  document.getElementById('btnStep2').disabled = false;
+}
+
+function selectBranch(card, id) {
+  document.querySelectorAll('.branch-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedBranch = id;
+  document.getElementById('fBranchId').value = id;
+  document.getElementById('btnStep3').disabled = false;
+  selectedBranchName = card.querySelector('.branch-name').textContent;
+  document.getElementById('newBranchForm').classList.toggle('show', id === 'new');
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  for (let i = 1; i <= 3; i++) {
+    let dot = document.getElementById('dot' + i);
+    dot.classList.remove('active', 'done');
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  }
+  if (n === 3) {
+    // Fill summary
+    let typeLabels = {};
+    {% for t in pos_types %}typeLabels['{{ t.value }}'] = '{{ t.icon }} {{ t.label }}';{% endfor %}
+    document.getElementById('sumType').innerHTML = typeLabels[selectedType] || selectedType;
+    document.getElementById('sumBranch').textContent = selectedBranchName || '—';
+  }
+}
+
+document.getElementById('wizardForm').addEventListener('submit', function() {
+  document.getElementById('fTerminalName').value = document.getElementById('terminalNameInput').value;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans "Radno vrijeme" %}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:1000px">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-clock"></i> {% trans "Radno vrijeme — Izvještaj" %}</h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'reports:export_worktime_csv' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-csv"></i> CSV</a>
+      <a href="{% url 'reports:export_worktime_excel' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}" class="btn btn-sm btn-outline-success"><i class="fas fa-file-excel"></i> Excel</a>
+    </div>
+  </div>
+  <form class="row g-2 mb-4" method="get">
+    <div class="col-auto"><input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}" class="form-control form-control-sm"></div>
+    <div class="col-auto"><input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" class="form-control form-control-sm"></div>
+    <div class="col-auto"><button class="btn btn-sm btn-primary">{% trans "Filtriraj" %}</button></div>
+  </form>
+  <div class="mb-3"><strong>{% trans "Ukupno" %}:</strong> <span style="color:#3b82f6;font-weight:700">{{ total_hours|floatformat:1 }}h</span></div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card" style="border-radius:12px">
+        <div class="card-body">
+          <h6>{% trans "Po korisniku" %}</h6>
+          <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+            <thead><tr><th>{% trans "Korisnik" %}</th><th class="text-end">{% trans "Sati" %}</th><th class="text-end">{% trans "Unosa" %}</th></tr></thead>
+            <tbody>
+              {% for u in by_user %}
+              <tr><td>{{ u.user__first_name }} {{ u.user__last_name }}{% if not u.user__first_name %} {{ u.user__username }}{% endif %}</td><td class="text-end">{{ u.total_hours|floatformat:1 }}</td><td class="text-end">{{ u.entries }}</td></tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted">{% trans "Nema podataka" %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card" style="border-radius:12px">
+        <div class="card-body">
+          <h6>{% trans "Po projektu" %}</h6>
+          <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+            <thead><tr><th>{% trans "Projekt" %}</th><th class="text-end">{% trans "Sati" %}</th><th class="text-end">{% trans "Unosa" %}</th></tr></thead>
+            <tbody>
+              {% for p in by_project %}
+              <tr><td>{{ p.project__code }} — {{ p.project__name }}</td><td class="text-end">{{ p.total_hours|floatformat:1 }}</td><td class="text-end">{{ p.entries }}</td></tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted">{% trans "Nema podataka" %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

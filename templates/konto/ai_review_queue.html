@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}AI Pregled knjiženja – LIMIT CONNECT{% endblock %}
+{% block page_title %}AI Pregled knjiženja{% endblock %}
+{% block content %}
+<style>
+.review-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color .2s}
+.review-card:hover{border-color:#c9a84c}
+.review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.review-header h3{font-size:1rem;color:#e2e8f0;margin:0}
+.badge-confidence{padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
+.badge-high{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+.badge-medium{background:rgba(234,179,8,.15);color:#eab308;border:1px solid rgba(234,179,8,.3)}
+.badge-low{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.review-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px}
+.review-meta .item{font-size:.8rem;color:#94a3b8}
+.review-meta .item strong{color:#e2e8f0;display:block;font-size:.9rem}
+.proposal-lines{background:#0f172a;border-radius:8px;padding:12px;margin:12px 0}
+.proposal-lines table{width:100%;border-collapse:collapse;font-size:.8rem}
+.proposal-lines th{color:#64748b;text-align:left;padding:4px 8px;border-bottom:1px solid #334155;text-transform:uppercase;letter-spacing:.5px;font-size:.65rem}
+.proposal-lines td{color:#e2e8f0;padding:6px 8px}
+.proposal-lines .debit{color:#22c55e}
+.proposal-lines .credit{color:#f59e0b}
+.reasoning{font-size:.8rem;color:#94a3b8;font-style:italic;margin:8px 0}
+.review-actions{display:flex;gap:8px;margin-top:12px}
+.btn-confirm{background:#c9a84c;color:#0a0a0a;border:none;padding:8px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.8rem}
+.btn-confirm:hover{background:#d4b85c}
+.btn-edit{background:transparent;color:#c9a84c;border:1px solid #c9a84c;padding:8px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.8rem}
+.btn-edit:hover{background:rgba(201,168,76,.1)}
+.btn-reject{background:transparent;color:#ef4444;border:1px solid #ef4444;padding:7px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.75rem}
+.btn-reject:hover{background:rgba(239,68,68,.1)}
+.stats-bar{display:flex;gap:16px;margin-bottom:24px}
+.stat-box{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px 20px;text-align:center}
+.stat-box .num{font-size:1.5rem;font-weight:800;color:#c9a84c}
+.stat-box .lbl{font-size:.65rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.empty-state{text-align:center;padding:60px 20px;color:#64748b}
+.empty-state h2{color:#c9a84c;font-family:'Cormorant Garamond',serif}
+/* Edit modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-box{background:#1e293b;border:1px solid #c9a84c;border-radius:12px;padding:24px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto}
+.modal-box h3{color:#c9a84c;margin-top:0}
+.modal-box label{display:block;color:#94a3b8;font-size:.75rem;margin-top:10px}
+.modal-box input,.modal-box select{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:8px;border-radius:6px;margin-top:4px}
+.modal-box .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+</style>
+
+<div class="stats-bar">
+    <div class="stat-box">
+        <div class="num">{{ entries|length }}</div>
+        <div class="lbl">Za pregled</div>
+    </div>
+    <div class="stat-box">
+        <div class="num">{{ high_confidence_count }}</div>
+        <div class="lbl">Visoka pouzdanost (&ge;90%)</div>
+    </div>
+    <div class="stat-box">
+        <div class="num">{{ medium_confidence_count }}</div>
+        <div class="lbl">Srednja (70-90%)</div>
+    </div>
+    <div class="stat-box">
+        <div class="num">{{ low_confidence_count }}</div>
+        <div class="lbl">Niska (&lt;70%)</div>
+    </div>
+</div>
+
+{% if entries %}
+{% for entry in entries %}
+<div class="review-card" id="card-{{ entry.pk }}">
+    <div class="review-header">
+        <h3>{{ entry.get_source_type_display }} — {{ entry.doc_number }}</h3>
+        {% with conf=entry.ai_proposal.confidence %}
+        <span class="badge-confidence {% if conf >= 0.9 %}badge-high{% elif conf >= 0.7 %}badge-medium{% else %}badge-low{% endif %}">
+            {{ conf|floatformat:0 }}% pouzdanost
+        </span>
+        {% endwith %}
+    </div>
+
+    <div class="review-meta">
+        <div class="item">
+            <strong>{{ entry.partner_name|default:"—" }}</strong>
+            Partner
+        </div>
+        <div class="item">
+            <strong>{{ entry.amount|floatformat:2 }} {{ entry.currency }}</strong>
+            Iznos
+        </div>
+        <div class="item">
+            <strong>{{ entry.doc_date }}</strong>
+            Datum
+        </div>
+        <div class="item">
+            <strong>{{ entry.archive_number }}</strong>
+            Arhivski br.
+        </div>
+    </div>
+
+    {% if entry.ai_proposal %}
+    <div class="proposal-lines">
+        <table>
+            <thead>
+                <tr><th>Konto</th><th>Opis</th><th>Duguje</th><th>Potražuje</th></tr>
+            </thead>
+            <tbody>
+                {% for line in entry.ai_proposal.debit %}
+                <tr>
+                    <td>{{ line.account }}</td>
+                    <td>{{ line.description|default:"" }}</td>
+                    <td class="debit">{{ line.amount|floatformat:2 }}</td>
+                    <td>—</td>
+                </tr>
+                {% endfor %}
+                {% for line in entry.ai_proposal.credit %}
+                <tr>
+                    <td>{{ line.account }}</td>
+                    <td>{{ line.description|default:"" }}</td>
+                    <td>—</td>
+                    <td class="credit">{{ line.amount|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if entry.ai_proposal.reasoning %}
+    <div class="reasoning">{{ entry.ai_proposal.reasoning }}</div>
+    {% endif %}
+    {% endif %}
+
+    <div class="review-actions">
+        <form method="post" action="{% url 'konto:ai_confirm_booking' entry.pk %}" style="display:inline">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="confirm">
+            <button type="submit" class="btn-confirm">Potvrdi knjiženje</button>
+        </form>
+        <button class="btn-edit" onclick="openEditModal({{ entry.pk }}, {{ entry.ai_proposal|safe }})">Uredi i potvrdi</button>
+        <form method="post" action="{% url 'konto:ai_confirm_booking' entry.pk %}" style="display:inline">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <button type="submit" class="btn-reject">Odbaci</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state">
+    <h2>Sve je proknjiženo!</h2>
+    <p>Nema dokumenata koji čekaju pregled AI prijedloga.</p>
+</div>
+{% endif %}
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <h3>Uredi prijedlog knjiženja</h3>
+        <form method="post" id="editForm">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit_confirm">
+            <div id="editLines"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-reject" onclick="closeEditModal()">Odustani</button>
+                <button type="submit" class="btn-confirm">Potvrdi izmjene</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditModal(entryId, proposal) {
+    const modal = document.getElementById('editModal');
+    const form = document.getElementById('editForm');
+    const linesDiv = document.getElementById('editLines');
+    form.action = '/hr/konto/ai-review/' + entryId + '/confirm/';
+    linesDiv.innerHTML = '';
+
+    let idx = 0;
+    if (proposal && proposal.debit) {
+        proposal.debit.forEach(function(line) {
+            linesDiv.innerHTML += lineRow(idx, 'debit', line.account, line.amount, line.description || '');
+            idx++;
+        });
+    }
+    if (proposal && proposal.credit) {
+        proposal.credit.forEach(function(line) {
+            linesDiv.innerHTML += lineRow(idx, 'credit', line.account, line.amount, line.description || '');
+            idx++;
+        });
+    }
+    modal.classList.add('active');
+}
+
+function lineRow(idx, side, account, amount, desc) {
+    return '<div style="display:grid;grid-template-columns:100px 1fr 120px 120px;gap:8px;margin-bottom:6px">' +
+        '<div><label>Strana</label><select name="side_' + idx + '"><option value="debit"' + (side==='debit'?' selected':'') + '>Duguje</option><option value="credit"' + (side==='credit'?' selected':'') + '>Potražuje</option></select></div>' +
+        '<div><label>Opis</label><input name="desc_' + idx + '" value="' + desc + '"></div>' +
+        '<div><label>Konto</label><input name="account_' + idx + '" value="' + account + '"></div>' +
+        '<div><label>Iznos</label><input name="amount_' + idx + '" type="number" step="0.01" value="' + amount + '"></div>' +
+        '</div>';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+}
+</script>
+{% endblock %}

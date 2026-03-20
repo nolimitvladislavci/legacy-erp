@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Uvoz cjenika" %}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3"><i class="fas fa-file-csv"></i> {% trans "Uvoz cjenika dobavljača" %}</h1>
+        <a href="{% url 'procurement:price_lists' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> {% trans "Natrag" %}
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">{% trans "CSV datoteka" %}</div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">{% trans "Odaberi CSV datoteku" %}</label>
+                            <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> {% trans "Uvezi" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">{% trans "Format CSV datoteke" %}</div>
+                <div class="card-body">
+                    <p class="mb-2">{% trans "CSV mora imati zaglavlja (razdvojeno s ;):" %}</p>
+                    <code>supplier;sku;price;min_qty;valid_from</code>
+                    <hr>
+                    <p class="mb-1"><strong>supplier</strong> — {% trans "Naziv dobavljača (djelomično podudaranje)" %}</p>
+                    <p class="mb-1"><strong>sku</strong> — {% trans "Šifra artikla (točno podudaranje)" %}</p>
+                    <p class="mb-1"><strong>price</strong> — {% trans "Dogovorena cijena (zarez ili točka)" %}</p>
+                    <p class="mb-1"><strong>min_qty</strong> — {% trans "Minimalna količina (opcionalno, default 1)" %}</p>
+                    <p class="mb-0"><strong>valid_from</strong> — {% trans "Datum početka (opcionalno, default danas)" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

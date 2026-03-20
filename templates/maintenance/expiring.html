@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Dokumenti koji isticu{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Dokumenti koji isticu (90 dana)</h2>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Imovina</th><th>Kod</th><th>Dokument</th><th>Datum isteka</th><th>Status</th></tr></thead>
+                <tbody>
+                {% for entry in expiring %}{% for item in entry.items %}
+                <tr class="{% if item.expired %}table-danger{% else %}table-warning{% endif %}">
+                    <td><a href="{% url 'maintenance:asset_detail' entry.asset.pk %}">{{ entry.asset.name }}</a></td>
+                    <td>{{ entry.asset.asset_code }}</td>
+                    <td>{{ item.doc }}</td>
+                    <td>{{ item.date }}</td>
+                    <td>{% if item.expired %}<span class="badge bg-danger">Isteklo</span>{% else %}<span class="badge bg-warning text-dark">Istice uskoro</span>{% endif %}</td>
+                </tr>
+                {% endfor %}{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nema dokumenata koji isticu</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

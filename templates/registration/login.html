@@ -1,0 +1,190 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Prijava - LIMIT CONNECT" %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Segoe UI', system-ui, sans-serif; margin: 0;
+        }
+        .login-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 36px;
+            width: 100%; max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .logo-text {
+            color: white; font-weight: 800; font-size: 1.8rem;
+            text-align: center; margin-bottom: 24px; letter-spacing: 1px;
+        }
+        .logo-text span { color: #c9a84c; }
+        .form-control {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white; padding: 12px 15px; border-radius: 8px;
+        }
+        .form-control:focus {
+            background: rgba(15, 23, 42, 0.8); border-color: #c9a84c;
+            box-shadow: 0 0 0 0.25rem rgba(201, 168, 76, 0.25); color: white;
+        }
+        .form-control.is-invalid { border-color: #ef4444; }
+        .btn-gold {
+            background: #c9a84c; border: none; color: #0f172a;
+            font-weight: 700; padding: 12px; border-radius: 8px;
+            letter-spacing: 0.5px; transition: all 0.3s; width: 100%;
+        }
+        .btn-gold:hover { background: #e8c96a; transform: translateY(-2px); color: #0f172a; }
+        .form-label { color: #94a3b8; font-size: 0.85rem; margin-bottom: 4px; }
+        .error-item { color: #fca5a5; font-size: 0.8rem; margin-top: 4px; }
+        .error-item i { margin-right: 4px; }
+        .link-gold { color: #c9a84c; text-decoration: none; font-weight: 600; }
+        .link-gold:hover { color: #e8c96a; }
+        .link-muted { color: #64748b; text-decoration: none; font-size: 0.85rem; }
+        .link-muted:hover { color: #94a3b8; }
+        .divider { border-top: 1px solid rgba(255,255,255,0.08); margin: 20px 0; }
+        .pwd-wrap { position: relative; }
+        .lang-opt { cursor: pointer; }
+        .lang-opt input { display: none; }
+        .lang-opt span { display: inline-block; padding: 4px 10px; font-size: 0.72rem; font-weight: 700;
+                         color: #64748b; border: 1px solid rgba(255,255,255,0.12); border-radius: 5px;
+                         transition: all 0.15s; letter-spacing: 0.5px; }
+        .lang-opt input:checked + span { background: #c9a84c; color: #0f172a; border-color: #c9a84c; }
+        .lang-opt span:hover { border-color: #c9a84c; color: #c9a84c; }
+        .pwd-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+                   background: none; border: none; cursor: pointer; color: #c9a84c;
+                   font-size: 16px; padding: 0; z-index: 2; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo-text">LIMIT <span>CONNECT</span></div>
+
+        {% if errors %}
+        <div class="alert py-2 px-3 mb-3" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:10px;">
+            {% for e in errors %}
+            <div class="error-item"><i class="fas fa-exclamation-circle"></i>{{ e }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if success_msg %}
+        <div class="alert py-2 px-3 mb-3" style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);border-radius:10px;color:#86efac;font-size:0.85rem;">
+            <i class="fas fa-check-circle me-1"></i>{{ success_msg }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}" id="loginForm" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label"><i class="fas fa-envelope me-1"></i>{% trans "Email" %}</label>
+                <input type="email" name="email" class="form-control" required autofocus
+                       value="{{ email_value|default:'' }}" placeholder="{% trans "ime@firma.com" %}"
+                       autocomplete="email">
+            </div>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0"><i class="fas fa-lock me-1"></i>{% trans "Lozinka" %}</label>
+                    <a href="{% url 'password_reset' %}" class="link-muted" style="font-size:0.78rem;">{% trans "Zaboravljena lozinka?" %}</a>
+                </div>
+                <div class="pwd-wrap mt-1">
+                    <input type="password" name="password" id="pwd_main" class="form-control" required
+                           autocomplete="current-password" placeholder="••••••••">
+                    <button type="button" class="pwd-eye" onclick="togglePwd()">
+                        <i class="fas fa-eye" id="pwdIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" name="remember" id="remember" checked
+                           style="background-color:rgba(15,23,42,0.6);border-color:rgba(255,255,255,0.2);">
+                    <label class="form-check-label" for="remember" style="color:#94a3b8;font-size:0.82rem;">{% trans "Zapamti me" %}</label>
+                </div>
+                {% get_current_language as CUR_LANG %}
+                <div style="display:flex;gap:4px">
+                    <label class="lang-opt" onclick="switchLang('hr')"><input type="radio" name="language" value="hr" {% if CUR_LANG == "hr" %}checked{% endif %}><span>HR</span></label>
+                    <label class="lang-opt" onclick="switchLang('de')"><input type="radio" name="language" value="de" {% if CUR_LANG == "de" %}checked{% endif %}><span>DE</span></label>
+                    <label class="lang-opt" onclick="switchLang('en')"><input type="radio" name="language" value="en" {% if CUR_LANG == "en" %}checked{% endif %}><span>EN</span></label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-gold" id="submitBtn">
+                <i class="fas fa-sign-in-alt me-1"></i>{% trans "Prijava" %}
+            </button>
+        </form>
+
+        <div class="divider"></div>
+
+        <div class="text-center">
+            <span style="color:#94a3b8; font-size:0.85rem;">{% trans "Nemate račun?" %}</span>
+            <a href="/register/" class="link-gold ms-1">
+                {% trans "Registrirajte se" %} <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i>
+            </a>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="/" class="link-muted"><i class="fas fa-arrow-left me-1"></i>{% trans "Naslovnica" %}</a>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="text-align:center;">
+            <div style="color:#64748b; font-size:0.72rem; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; font-weight:600;">
+                <i class="fas fa-globe me-1"></i>{% trans "Naše web stranice" %}
+            </div>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                <a href="https://limit-connect.com" target="_blank" style="display:inline-flex; align-items:center; gap:5px; padding:8px 14px; border-radius:8px; background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2); color:#c9a84c; text-decoration:none; font-size:0.78rem; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(201,168,76,0.15)'; this.style.borderColor='#c9a84c';" onmouseout="this.style.background='rgba(201,168,76,0.08)'; this.style.borderColor='rgba(201,168,76,0.2)';">
+                    <i class="fas fa-link" style="font-size:0.7rem;"></i> LIMIT Connect
+                </a>
+                <a href="https://grosmarkt-online.eu" target="_blank" style="display:inline-flex; align-items:center; gap:5px; padding:8px 14px; border-radius:8px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); color:#22c55e; text-decoration:none; font-size:0.78rem; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(34,197,94,0.15)'; this.style.borderColor='#22c55e';" onmouseout="this.style.background='rgba(34,197,94,0.08)'; this.style.borderColor='rgba(34,197,94,0.2)';">
+                    <i class="fas fa-shopping-cart" style="font-size:0.7rem;"></i> Grosmarkt
+                </a>
+                <a href="https://viskovic-group.de" target="_blank" style="display:inline-flex; align-items:center; gap:5px; padding:8px 14px; border-radius:8px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); color:#3b82f6; text-decoration:none; font-size:0.78rem; font-weight:600; transition:all 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.15)'; this.style.borderColor='#3b82f6';" onmouseout="this.style.background='rgba(59,130,246,0.08)'; this.style.borderColor='rgba(59,130,246,0.2)';">
+                    <i class="fas fa-building" style="font-size:0.7rem;"></i> Višković Group
+                </a>
+            </div>
+        </div>
+    </div>
+
+<script>
+function togglePwd() {
+    var f = document.getElementById('pwd_main');
+    var i = document.getElementById('pwdIcon');
+    if (f.type === 'password') { f.type = 'text'; i.className = 'fas fa-eye-slash'; }
+    else { f.type = 'password'; i.className = 'fas fa-eye'; }
+}
+
+function switchLang(lang) {
+    var cur = document.cookie.match(/django_language=([^;]+)/);
+    if (cur && cur[1] === lang) return;
+    document.cookie = 'django_language=' + lang + ';path=/;max-age=31536000;SameSite=Lax';
+    // i18n_patterns: DE (default) = /login/, HR = /hr/login/, EN = /en/login/
+    var p = window.location.pathname;
+    // Strip existing prefix if present
+    var base = p.replace(/^\/(hr|en)\//, '/');
+    // Add prefix for non-default languages
+    if (lang === 'de') {
+        window.location.href = base;
+    } else {
+        window.location.href = '/' + lang + base;
+    }
+}
+
+document.getElementById('loginForm').addEventListener('submit', function() {
+    var btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{% trans "Prijava" %}...';
+    btn.disabled = true;
+});
+</script>
+</body>
+</html>

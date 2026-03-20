@@ -1,0 +1,9881 @@
+#
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-01 08:57+0100\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Investitor - projekti"
+msgstr "Investor - projects"
+
+msgid "Partner - fakture"
+msgstr "Partner - invoices"
+
+msgid "Radnik - upload slika"
+msgstr "Worker - upload pictures"
+
+msgid "Reset lozinke"
+msgstr "Password reset"
+
+msgid "Verifikacija emaila"
+msgstr "Email verification"
+
+msgid "Magic token"
+msgstr "Magic token"
+
+msgid "Magic tokeni"
+msgstr "Magic tokens"
+
+msgid "Pokušaj prijave"
+msgstr "Login attempt"
+
+msgid "Pokušaji prijave"
+msgstr "Login attempts"
+
+msgid "Previše neuspješnih pokušaja. Pričekajte 15 minuta."
+msgstr "Too many failed attempts. Wait 15 minutes."
+
+msgid "Dobrodošli, {user.first_name or user.username}!"
+msgstr "Welcome, {user.first_name or user.username}!"
+
+msgid "Pogrešni podaci za prijavu."
+msgstr "Incorrect login information."
+
+msgid "Ako email postoji, link je poslan."
+msgstr "If the email exists, the link has been sent."
+
+msgid "Previše zahtjeva. Pričekajte 10 minuta."
+msgstr "Too many requests. Wait 10 minutes."
+
+#, python-brace-format
+msgid "Link za pristup poslan na {email}. Vrijedi 24 sata."
+msgstr "Access link sent to {email}. Valid for 24 hours."
+
+msgid "Link nije valjan ili je istekao."
+msgstr "The link is invalid or has expired."
+
+msgid "Link je istekao ili je već iskorišten. Zatražite novi."
+msgstr "The link has expired or has already been used. Request a new one."
+
+msgid "Korisnički račun nije aktivan."
+msgstr "The user account is not active."
+
+msgid "✓ 2FA aktiviran! Koristite Google Authenticator za prijavu."
+msgstr "✓ 2FA activated! Use Google Authenticator to sign in."
+
+msgid "Pogrešan kod. Pokušajte ponovo."
+msgstr "Wrong code. Try again."
+
+msgid "✓ Uspješna 2FA provjera!"
+msgstr "✓ Successful 2FA verification!"
+
+msgid "Greška provjere."
+msgstr "Verification error."
+
+msgid "Ako email postoji, link za reset je poslan."
+msgstr "If the email exists, the reset link has been sent."
+
+msgid "Lozinke se ne podudaraju."
+msgstr "Passwords do not match."
+
+msgid "Lozinka mora imati najmanje 8 znakova."
+msgstr "Password must have at least 8 characters."
+
+msgid "✓ Lozinka promijenjena! Prijavite se s novom lozinkom."
+msgstr "✓ Password changed! Log in with a new password."
+
+msgid "Google login nije konfiguriran."
+msgstr "Google login is not configured."
+
+msgid "OAuth state mismatch."
+msgstr "OAuth state mismatch."
+
+#, python-brace-format
+msgid "Prijavljeni ste putem Google: {email}"
+msgstr "You are signed in via Google: {email}"
+
+msgid "Greška Google prijave. Pokušajte ponovo."
+msgstr "Google login error. Try again."
+
+msgid "Microsoft login nije konfiguriran."
+msgstr "Microsoft login is not configured."
+
+#, python-brace-format
+msgid "Prijavljeni ste putem Microsoft: {email}"
+msgstr "You are signed in via Microsoft: {email}"
+
+msgid "Greška Microsoft prijave."
+msgstr "Microsoft sign in error."
+
+msgid "Super Administrator"
+msgstr "Super Administrator"
+
+msgid "Admin tvrtke"
+msgstr "Company admin"
+
+msgid "Voditelj projekta"
+msgstr "Project manager"
+
+msgid "Radnik"
+msgstr "Worker"
+
+msgid "Investitor"
+msgstr "Investor"
+
+msgid "Partner / Klijent"
+msgstr "Partner / Client"
+
+msgid "Uloga"
+msgstr "Role"
+
+msgid "Tvrtka"
+msgstr "Company"
+
+msgid "Profilna slika"
+msgstr "Profile picture"
+
+msgid "Telefon"
+msgstr "Phone"
+
+msgid "Odjel"
+msgstr "Department"
+
+msgid "Jezik sučelja"
+msgstr "Interface language"
+
+msgid "Može uploadati slike"
+msgstr "Can upload images"
+
+msgid "Vidi financije"
+msgstr "See finance"
+
+msgid "Odobrava radne sate"
+msgstr "Approval of working hours"
+
+msgid "Podružnica"
+msgstr "Subsidiary"
+
+msgid "Korisnički profil"
+msgstr "User profile"
+
+msgid "Korisnički profili"
+msgstr "User profiles"
+
+msgid "Accounts"
+msgstr "Accounts"
+
+msgid "Pregled i upravljanje - accounts"
+msgstr "Overview and management - accounts"
+
+msgid "Otvori u Adminu"
+msgstr "Open in Admin"
+
+msgid "Accounts Modul"
+msgstr "Accounts Module"
+
+msgid "Koristite Admin panel za upravljanje podacima"
+msgstr "Use the Admin panel to manage data"
+
+#| msgid "CIS Endpoint"
+msgid "ili API endpoint:"
+msgstr "CIS Endpoint"
+
+#| msgid "CIS Endpoint"
+msgid "API Endpoint"
+msgstr "CIS Endpoint"
+
+#| msgid "Nema podataka"
+msgid "Pregled podataka"
+msgstr "No data"
+
+msgid "Prijava - FINA-CONNECT"
+msgstr "Login - FINA-CONNECT"
+
+msgid "FINA-"
+msgstr "FINA-"
+
+msgid "CONNECT"
+msgstr "CONNECT"
+
+msgid "Pogrešno korisničko ime ili lozinka."
+msgstr "Incorrect username or password."
+
+#| msgid "Korisnički profil"
+msgid "Korisničko ime"
+msgstr "Username"
+
+msgid "Lozinka"
+msgstr "Password"
+
+msgid "Prijava u ERP sustav"
+msgstr "Login to the ERP system"
+
+msgid "Povratak na naslovnicu"
+msgstr "Return to front page"
+
+#| msgid "Njemačka"
+msgid "Njemački"
+msgstr "German"
+
+#| msgid "English"
+msgid "Engleski"
+msgstr "English"
+
+msgid "1. Skeniraj kod"
+msgstr "1. Scan the code"
+
+msgid "Svi moduli (Rizično)"
+msgstr "All modules (Risk)"
+
+msgid "2. Prevedi odabrano"
+msgstr "2. Translate selected"
+
+msgid ""
+"Odaberi pojedinačni modul (npr. invoicing) da smanjiš opterećenje na server."
+msgstr ""
+"Choose an individual module (eg invoicing) to reduce the load on the server."
+
+msgid "Pretraži pojmove unutar odabranog modula..."
+msgstr "Search terms within the selected module..."
+
+#| msgid "Opis (HR)"
+msgid "Original (HR)"
+msgstr "Description (HR)"
+
+#| msgid "Akcije"
+msgid "Akcija"
+msgstr "Action"
+
+msgid "Spremi"
+msgstr "Save"
+
+msgid "Email"
+msgstr "E-mail"
+
+msgid "Ime"
+msgstr "Name"
+
+msgid "Prezime"
+msgstr "Surname"
+
+msgid "Nova lozinka (ostavi prazno za zadržati)"
+msgstr "New password (leave blank to keep)"
+
+#| msgid "U sustavu PDV-a"
+msgid "Uloga u sustavu"
+msgstr "In the VAT system"
+
+#| msgid "Interni status"
+msgid "Sistemski Status"
+msgstr "Internal status"
+
+msgid "Korisnik je aktivan (može se prijaviti)"
+msgstr "The user is active (can log in)"
+
+msgid "💾 Spremi promjene"
+msgstr "💾 Save changes"
+
+msgid "Odustani"
+msgstr "Give up"
+
+msgid "Novi Termin / Najam"
+msgstr "New Term / Rent"
+
+#| msgid "Spremi unos"
+msgid "Kreiraj unos"
+msgstr "Save entry"
+
+msgid "Legenda"
+msgstr "Legend"
+
+#| msgid "Predložak usluge"
+msgid "Kratke Usluge"
+msgstr "Service template"
+
+msgid "Dugoročni Najam"
+msgstr "Long-term rental"
+
+msgid "Fešte / Događaji"
+msgstr "Festivities / Events"
+
+msgid "Sastanci"
+msgstr "Meetings"
+
+#| msgid "Kod terminala"
+msgid "Novi termin / najam"
+msgstr "At the terminal"
+
+msgid "Naslov"
+msgstr "Title"
+
+msgid "Klijent"
+msgstr "Client"
+
+#| msgid "Interni ID"
+msgid "--- Interni ---"
+msgstr "Internal ID"
+
+#| msgid "Početna"
+msgid "Početak"
+msgstr "Home"
+
+#| msgid "Opis rada (opcionalno)"
+msgid "Kraj (Opcionalno)"
+msgstr "Job description (optional)"
+
+#| msgid "Terminal"
+msgid "Tip termina"
+msgstr "Terminal"
+
+#| msgid "Predložak usluge"
+msgid "Kratka usluga"
+msgstr "Service template"
+
+msgid "Dugoročni najam"
+msgstr "Long-term rental"
+
+msgid "Događaj"
+msgstr "Event"
+
+msgid "Sastanak"
+msgstr "Meeting"
+
+msgid "Resurs"
+msgstr "Resource"
+
+msgid "--- Bez resursa ---"
+msgstr "--- No resources ---"
+
+msgid "Status"
+msgstr "Status"
+
+#| msgid "Stornirano"
+msgid "Planirano"
+msgstr "Planned"
+
+#| msgid "Prilagođeno"
+msgid "Potvrđeno"
+msgstr "Confirmed"
+
+msgid "Završeno"
+msgstr "Finished"
+
+msgid "Otkazano"
+msgstr "Cancelled"
+
+msgid "Cjelodnevni najam"
+msgstr "Full day rental"
+
+#| msgid "Back to Calendar"
+msgid "Boja u kalendaru"
+msgstr "Back to Calendar"
+
+msgid "Appointments"
+msgstr "Appointments"
+
+msgid "Pregled i upravljanje - appointments"
+msgstr "Overview and management - appointments"
+
+msgid "Appointments Modul"
+msgstr "Appointments Module"
+
+msgid "Trajanje"
+msgstr "Duration"
+
+#| msgid "Smjena"
+msgid "Cijena"
+msgstr "Price"
+
+#| msgid "Upit primljen"
+msgid "Upitajte o cijeni"
+msgstr "Inquiry received"
+
+msgid "Usluga"
+msgstr "Service"
+
+msgid "Datum"
+msgstr "Date"
+
+#| msgid "Vrijeme:"
+msgid "Vrijeme"
+msgstr "Time:"
+
+#| msgid "Podaci tvrtke"
+msgid "Podaci"
+msgstr "Company information"
+
+msgid "Plaćanje"
+msgstr "Payment"
+
+msgid "Potvrda"
+msgstr "Confirmation"
+
+#| msgid "Bon"
+msgid "Pon"
+msgstr "Bon"
+
+msgid "Uto"
+msgstr "Tuesday"
+
+#| msgid "Svi"
+msgid "Sri"
+msgstr "All"
+
+msgid "Čet"
+msgstr "Thu"
+
+#| msgid "Projekt"
+msgid "Pet"
+msgstr "Project"
+
+#| msgid "Sun"
+msgid "Sub"
+msgstr "Sun"
+
+#| msgid "Neu"
+msgid "Ned"
+msgstr "Not"
+
+#| msgid "Odaberite datum"
+msgid "Odaberite datum za nastavak"
+msgstr "Select a date"
+
+msgid "Odaberite termin"
+msgstr "Choose an appointment"
+
+#| msgid "Detalji termina..."
+msgid "Učitavanje termina..."
+msgstr "Appointment details..."
+
+msgid "Tražim slobodne termine..."
+msgstr "I am looking for free appointments..."
+
+msgid "Slobodno"
+msgstr "Free"
+
+#| msgid "Preuzeto"
+msgid "Zauzeto"
+msgstr "Downloaded"
+
+#| msgid "&#8592; Natrag na kalendar"
+msgid "&#8592; Natrag na datum"
+msgstr "&#8592; Back to the calendar"
+
+msgid "Prijava za rezervaciju"
+msgstr "Application for reservation"
+
+#| msgid "Vaši računi i termini"
+msgid "Odabrani termin:"
+msgstr "Your accounts and appointments"
+
+#| msgid ""
+#| "Za rezervaciju termina potrebna je prijava ili registracija. Vaš termin je "
+#| "zapamćen."
+msgid "Za rezervaciju termina potrebna je prijava ili registracija."
+msgstr ""
+"To book an appointment, you need to log in or register. Your appointment has"
+" been saved."
+
+#| msgid "Odjava"
+msgid "Prijava"
+msgstr "Login"
+
+#| msgid "Renovacija"
+msgid "Registracija"
+msgstr "Renovation"
+
+msgid "Prijavi se i nastavi"
+msgstr "Log in and continue"
+
+#| msgid "Lozinka mora imati najmanje 8 znakova."
+msgid "Lozinka (min. 8 znakova)"
+msgstr "Password must have at least 8 characters."
+
+msgid "Registriraj se i nastavi"
+msgstr "Register and continue"
+
+#| msgid "&#8592; Natrag na kalendar"
+msgid "&#8592; Natrag na termine"
+msgstr "&#8592; Back to the calendar"
+
+#| msgid "Bankovni podaci"
+msgid "Vaši podaci"
+msgstr "Bank details"
+
+msgid "Rezervirate kao:"
+msgstr "You book as:"
+
+#| msgid "Vaše ime i prezime"
+msgid "Vaše ime"
+msgstr "Your first and last name"
+
+#| msgid "Vaše ime i prezime"
+msgid "Vaše prezime"
+msgstr "Your first and last name"
+
+msgid "Telefon / WhatsApp"
+msgstr "Phone / WhatsApp"
+
+#| msgid "Način plaćanja"
+msgid "Nastavi na plaćanje"
+msgstr "Method of payment"
+
+msgid "Način plaćanja"
+msgstr "Method of payment"
+
+msgid "Gotovina"
+msgstr "Cash"
+
+msgid "Kartica"
+msgstr "Card"
+
+#| msgid "🏦 Bankovna transakcija"
+msgid "Bankovna transakcija"
+msgstr "Bank Transaction"
+
+#| msgid "Nema računa"
+msgid "Na račun"
+msgstr "No account"
+
+msgid "✉ Nakon rezervacije dobit ćete potvrdu na email."
+msgstr "✉ After booking, you will receive a confirmation by email."
+
+msgid "Potvrdi rezervaciju"
+msgstr "Confirm the reservation"
+
+#| msgid "&#8592; Natrag na kalendar"
+msgid "&#8592; Natrag na podatke"
+msgstr "&#8592; Back to the calendar"
+
+msgid "Hvala Vam."
+msgstr "Thank you."
+
+msgid "Vaš termin je uspješno rezerviran."
+msgstr "Your appointment has been successfully booked."
+
+msgid "Potvrda je poslana na Vaš email."
+msgstr "The confirmation has been sent to your email."
+
+#| msgid "Povrat"
+msgid "Povratak"
+msgstr "Return"
+
+msgid "Online rezervacija – Viskovic Group"
+msgstr "Online reservation – Viskovic Group"
+
+msgid "VISKOVIC"
+msgstr "VISKOVIC"
+
+msgid "GROUP"
+msgstr "GROUP"
+
+#| msgid "Online trgovina"
+msgid "Online rezervacija"
+msgstr "Online store"
+
+msgid "Odaberite uslugu i zakažite termin u nekoliko klikova"
+msgstr "Choose a service and schedule an appointment in a few clicks"
+
+msgid "Trenutno nema dostupnih usluga za online rezervaciju."
+msgstr "There are currently no online booking services available."
+
+#| msgid "Kontaktirat ćemo vas uskoro."
+msgid "Kontaktirajte nas direktno."
+msgstr "We will contact you soon."
+
+msgid "Novi upit"
+msgstr "New query"
+
+msgid "Interna procjena"
+msgstr "Internal assessment"
+
+msgid "Na burzi"
+msgstr "On the stock market"
+
+msgid "Preuzeto"
+msgstr "Downloaded"
+
+msgid "Riješeno"
+msgstr "Solved"
+
+msgid "Kupaonica"
+msgstr "Bathroom"
+
+msgid "Pločice"
+msgstr "Tiles"
+
+msgid "Vodoinstalacije"
+msgstr "Plumbing"
+
+msgid "Elektrika"
+msgstr "Electricity"
+
+msgid "Grijanje"
+msgstr "Heating"
+
+msgid "Renovacija"
+msgstr "Renovation"
+
+msgid "Gradnja"
+msgstr "Construction"
+
+msgid "Fasada"
+msgstr "Facade"
+
+msgid "Ostalo"
+msgstr "The rest"
+
+msgid "🏗️ Zlatni Kanban"
+msgstr "🏗️ Golden Kanban"
+
+msgid "/ Burza"
+msgstr "/ Stock exchange"
+
+msgid "🌐 Javni upit"
+msgstr "🌐 Public inquiry"
+
+msgid "+ Nova kartica"
+msgstr "+ New card"
+
+msgid "👁 Detalji"
+msgstr "👁 Details"
+
+msgid "↕ Pomakni"
+msgstr "↕ Move"
+
+#| msgid "Preuzmi PDF"
+msgid "✅ Preuzmi"
+msgstr "Download the PDF"
+
+#| msgid "Fakture"
+msgid "📄 Faktura"
+msgstr "Invoices"
+
+msgid "📄 Kreiraj fakturu"
+msgstr "📄 Create an invoice"
+
+#| msgid "Nema projekata"
+msgid "Nema kartice"
+msgstr "There are no projects"
+
+msgid "↕ Pomakni karticu u..."
+msgstr "↕ Move the card to..."
+
+#| msgid "Novi upit"
+msgid "📥 Novi upit"
+msgstr "New query"
+
+#| msgid "Interna procjena"
+msgid "🔍 Interna procjena"
+msgstr "Internal assessment"
+
+#| msgid "Na burzi"
+msgid "🏪 Na burzi"
+msgstr "On the stock market"
+
+#| msgid "Preuzeto"
+msgid "✅ Preuzeto"
+msgstr "Downloaded"
+
+#| msgid "Riješeno"
+msgid "🏆 Riješeno"
+msgstr "Solved"
+
+msgid "← Natrag na Kanban"
+msgstr "← Back to Kanban"
+
+msgid "✅ Preuzmi posao"
+msgstr "✅ Take over the job"
+
+#| msgid "Opis problema"
+msgid "📋 Opis posla"
+msgstr "Description of the problem"
+
+msgid "📊 Detalji"
+msgstr "📊 Details"
+
+msgid "Kategorija"
+msgstr "Category"
+
+msgid "Lokacija"
+msgstr "Location"
+
+msgid "Budžet"
+msgstr "Budget"
+
+msgid "Dodijeljeno"
+msgstr "Granted"
+
+#| msgid "Preuzeto"
+msgid "Preuzela"
+msgstr "Downloaded"
+
+#| msgid "Aktivno"
+msgid "🕐 Aktivnosti"
+msgstr "Actively"
+
+#| msgid "Kontakt"
+msgid "👤 Kontakt"
+msgstr "Contact"
+
+#| msgid "Akcije"
+msgid "⚡ Akcije"
+msgstr "Actions"
+
+msgid "Transaction lock – samo prva tvrtka dobiva posao"
+msgstr "Transaction lock – only the first company gets the job"
+
+msgid "⚙️ Admin"
+msgstr "⚙️ Admin"
+
+msgid "↕ Promijeni status"
+msgstr "↕ Change status"
+
+msgid "✏️ Uredi u adminu"
+msgstr "✏️ Edit in admin"
+
+#| msgid "Napomene"
+msgid "📝 Napomene"
+msgstr "Notes"
+
+msgid "↕ Pomakni u..."
+msgstr "↕ Move to..."
+
+#| msgid "Natrag"
+msgid "← Natrag"
+msgstr "Back"
+
+#| msgid "Naslov"
+msgid "Naslov *"
+msgstr "Title"
+
+#| msgid "Lokacija"
+msgid "Lokacija *"
+msgstr "Location"
+
+#| msgid "Opis"
+msgid "Opis *"
+msgstr "Description"
+
+msgid "Budžet od (€)"
+msgstr "Budget of (€)"
+
+msgid "Budžet do (€)"
+msgstr "Budget up to (€)"
+
+#| msgid "Kontakte"
+msgid "Kontakt ime *"
+msgstr "Contacts"
+
+#| msgid "Telefon"
+msgid "Telefon *"
+msgstr "Phone"
+
+msgid "Interne napomene"
+msgstr "Internal notes"
+
+#| msgid "Spremi"
+msgid "Spremi →"
+msgstr "Save"
+
+msgid "Naziv normativa"
+msgstr "Name of the norm"
+
+msgid "Jedinica mjere"
+msgstr "Unit of measure"
+
+msgid "Cijena materijala"
+msgstr "The price of the material"
+
+msgid "Sati rada po jedinici"
+msgstr "Working hours per unit"
+
+msgid "Normativ"
+msgstr "Normative"
+
+msgid "Normativi"
+msgstr "Standards"
+
+msgid "Marža (%)"
+msgstr "Margin (%)"
+
+msgid "PDV (%)"
+msgstr "VAT (%)"
+
+#| msgid "Projekt"
+msgid "Projekt:"
+msgstr "Project"
+
+#| msgid "Marža (%)"
+msgid "Marža:"
+msgstr "Margin (%)"
+
+msgid "PDV:"
+msgstr "VAT:"
+
+#| msgid "Stornirano"
+msgid "Kreirano:"
+msgstr "Cancelled"
+
+msgid "Stavke"
+msgstr "Items"
+
+msgid "Opis"
+msgstr "Description"
+
+msgid "Količina"
+msgstr "Amount"
+
+msgid "Ukupno"
+msgstr "In total"
+
+#| msgid "Nema podataka"
+msgid "Nema stavki."
+msgstr "No data"
+
+msgid "Export PDF"
+msgstr "Export PDF"
+
+#| msgid "Kalkulator"
+msgid "Kalkulacije"
+msgstr "Calculator"
+
+msgid "Projekt"
+msgstr "Project"
+
+msgid "Akcije"
+msgstr "Actions"
+
+msgid "Detalji"
+msgstr "Details"
+
+#| msgid "Procjene i kalkulacije"
+msgid "Nema kalkulacija."
+msgstr "Estimates and calculations"
+
+#| msgid "Procjene i kalkulacije"
+msgid "+ Nova kalkulacija"
+msgstr "Estimates and calculations"
+
+#| msgid "Marža (%)"
+msgid "Marža"
+msgstr "Margin (%)"
+
+#| msgid "PDV"
+msgid "PDF"
+msgstr "VAT"
+
+msgid "Kreirajte novu →"
+msgstr "Create a new one →"
+
+msgid "Kalkulator ponude – FINA-Connect"
+msgstr "Offer calculator – FINA-Connect"
+
+msgid "FC"
+msgstr "FC"
+
+#| msgid "Kalkulator"
+msgid "Kalkulator ponude"
+msgstr "Calculator"
+
+msgid "Radna snaga &middot; Troškovi &middot; Ponuda"
+msgstr "Work force &middot; Costs &middot; Offer"
+
+#| msgid "Početna"
+msgid "&#8592; Početna"
+msgstr "Home"
+
+#| msgid "Radni sati"
+msgid "Radna snaga"
+msgstr "Working hours"
+
+msgid "Troškovi"
+msgstr "Costs"
+
+msgid "Ponuda"
+msgstr "Offer"
+
+msgid "👷 Radnici na projektu"
+msgstr "👷 Project workers"
+
+#, python-format
+msgid "— bruto satnica + doprinosi 17%% + prijevoz + prekovremeni"
+msgstr "— gross hourly rate + contributions 17%% + transportation + overtime"
+
+#| msgid "Dodaj sliku"
+msgid "+ Dodaj radnika"
+msgstr "Add a picture"
+
+#| msgid "Spremi unos"
+msgid "Brzi unos:"
+msgstr "Save entry"
+
+msgid "NK"
+msgstr "NK"
+
+msgid "KV I"
+msgstr "KV I"
+
+msgid "KV III"
+msgstr "KV III"
+
+msgid "Poslovođa"
+msgstr "Manager"
+
+#| msgid "Ukupno fakturirano"
+msgid "Ukupno radnika"
+msgstr "Total invoiced"
+
+msgid "Trošak rada/sat"
+msgstr "Labor cost/hour"
+
+msgid "0,00 €/h"
+msgstr "€0.00/h"
+
+msgid "Trošak rada/dan"
+msgstr "Labor cost/day"
+
+msgid "Trošak prijevoza/dan"
+msgstr "Transportation cost/day"
+
+msgid "Formula obračuna po radniku:"
+msgstr "Calculation formula per worker:"
+
+#, python-format
+msgid ""
+"Stvarni trošak/sat = (Bruto + 17%% doprinos) × (1 + prekovremeni%%) + "
+"prijevoz/sat"
+msgstr ""
+"Actual cost/hour = (Gross + 17%% contribution) × (1 + overtime%%) + "
+"transportation/hour"
+
+msgid "gdje: prijevoz/sat = dnevnica/dan ÷ sati/dan (iz Ponude)"
+msgstr "where: transport/hour = daily wage/day ÷ hours/day (from the Offer)"
+
+msgid "🧱 Materijal i nabava"
+msgstr "🧱 Material and procurement"
+
+#| msgid "Naslov i opis"
+msgid "Naziv / opis"
+msgstr "Title and description"
+
+#| msgid "Iznos"
+msgid "Iznos (€)"
+msgstr "Amount"
+
+#| msgid "Ukupno fakturirano"
+msgid "Ukupno materijal:"
+msgstr "Total invoiced"
+
+#| msgid "Dodaj sliku"
+msgid "+ Dodaj stavku"
+msgstr "Add a picture"
+
+msgid "🏗️ Najam strojeva i opreme"
+msgstr "🏗️ Rental of machines and equipment"
+
+msgid "Stroj / oprema"
+msgstr "Machine / equipment"
+
+msgid "€/dan"
+msgstr "€/day"
+
+#| msgid "Danas"
+msgid "Dana"
+msgstr "Today"
+
+#| msgid "Ukupno / Gesamt"
+msgid "Ukupno najam:"
+msgstr "Total / Gesamt"
+
+msgid "+ Dodaj stroj"
+msgstr "+ Add machine"
+
+msgid "Mini bager €35/dan"
+msgstr "Mini excavator €35/day"
+
+msgid "Bager €65/dan"
+msgstr "Excavator €65/day"
+
+msgid "Dizalica €90/dan"
+msgstr "Crane €90/day"
+
+msgid "Kamion €55/dan"
+msgstr "Truck €55/day"
+
+msgid "⚙️ Režije firme i zarada"
+msgstr "⚙️ Company overheads and earnings"
+
+msgid ""
+"Režije se primjenjuju na ukupni direktni trošak (rad + stroj + materijal)."
+msgstr ""
+"Overheads are applied to the total direct cost (labor + machine + material)."
+
+msgid "Zarada/provizija se primjenjuje na trošak + režije."
+msgstr "Earnings/commission is applied to cost + overhead."
+
+#, python-format
+msgid "⚙️ Režije firme (%%)"
+msgstr "⚙️ Company overheads (%%)"
+
+msgid "Vozila, alati, najam ureda, administracija, osiguranje…"
+msgstr "Vehicles, tools, office rent, administration, insurance..."
+
+#, python-format
+msgid "💰 Provizija / zarada firme (%%)"
+msgstr "💰 Commission / company earnings (%%)"
+
+msgid "Profitna marža / naknada za upravljanje projektom"
+msgstr "Profit margin / project management fee"
+
+msgid "Direktni troškovi (rad + stroj + mat.)"
+msgstr "Direct costs (labor + machine + math.)"
+
+msgid "Režije firme ("
+msgstr "Directed by the company ("
+
+msgid "Trošak + Režije"
+msgstr "Cost + Overhead"
+
+#| msgid "Zarada"
+msgid "Zarada firme ("
+msgstr "Earnings"
+
+msgid "💰 UKUPNO NETO (bez PDV-a)"
+msgstr "💰 TOTAL NET (without VAT)"
+
+msgid "📋 Parametri projekta"
+msgstr "📋 Project parameters"
+
+#| msgid "Broj računa"
+msgid "Broj radnih dana"
+msgstr "Account number"
+
+#| msgid "Sati rada po jedinici"
+msgid "Sati po danu"
+msgstr "Working hours per unit"
+
+#, python-format
+msgid "Režije firme %%"
+msgstr "Directed by the company %%"
+
+#, python-format
+msgid "Zarada firme %%"
+msgstr "Earnings of the company %%"
+
+#, python-format
+msgid "Prikaži obračun s PDV-om (25%%)"
+msgstr "Show calculation with VAT (25%%)"
+
+msgid "Za B2C ispostave"
+msgstr "For B2C branches"
+
+#| msgid "Ukupno / Gesamt"
+msgid "Ukupno sati"
+msgstr "Total / Gesamt"
+
+msgid "0 h"
+msgstr "0 h"
+
+msgid "Trošak rada"
+msgstr "Labor cost"
+
+#| msgid "Materijal"
+msgid "Materijal + Stroj"
+msgstr "Material"
+
+#| msgid "Cijena materijala"
+msgid "Cijena sata"
+msgstr "The price of the material"
+
+#| msgid "Cijena materijala"
+msgid "Cijena dana"
+msgstr "The price of the material"
+
+msgid "0,00 €/dan"
+msgstr "€0.00/day"
+
+#| msgid "Ponuda"
+msgid "Ponuda NETO"
+msgstr "Offer"
+
+msgid "📊 Potpuni obračun"
+msgstr "📊 Full calculation"
+
+msgid "RADNA SNAGA"
+msgstr "WORKFORCE"
+
+msgid "Prijevoz / dnevnice"
+msgstr "Transportation / per diem"
+
+msgid "STROJEVI I OPREMA"
+msgstr "MACHINES AND EQUIPMENT"
+
+msgid "Najam strojeva"
+msgstr "Rental of machines"
+
+msgid "MATERIJAL"
+msgstr "MATERIAL"
+
+#| msgid "Materijal"
+msgid "Materijal i nabava"
+msgstr "Material"
+
+msgid "TROŠKOVI"
+msgstr "COSTS"
+
+msgid "Direktni troškovi ukupno"
+msgstr "Total direct costs"
+
+msgid "+ Režije firme ("
+msgstr "+ Directed by the company ("
+
+msgid "+ Zarada firme ("
+msgstr "+ Earnings of the company ("
+
+msgid "💰 UKUPNO NETO"
+msgstr "💰 TOTAL NET"
+
+#, python-format
+#| msgid "PDV %"
+msgid "+ PDV 25%%"
+msgstr "VAT %"
+
+msgid "💶 UKUPNO BRUTO (s PDV-om)"
+msgstr "💶 TOTAL GROSS (with VAT)"
+
+msgid "SATNICA"
+msgstr "HOURLY"
+
+msgid "Neto cijena sata"
+msgstr "Net price per hour"
+
+msgid "Bruto cijena sata (s PDV-om)"
+msgstr "Gross price of the hour (with VAT)"
+
+msgid "Neto cijena dana"
+msgstr "Net price of the day"
+
+msgid "📤 Pošalji kao projekt upit"
+msgstr "📤 Send as a project inquiry"
+
+msgid "Naziv projekta (npr. Rekonstrukcija kupaone)"
+msgstr "Name of the project (e.g. Reconstruction of the bathroom)"
+
+msgid "Lokacija (grad, adresa)"
+msgstr "Location (city, address)"
+
+msgid "📤 Pošalji kao projekt upit →"
+msgstr "📤 Send as a project inquiry →"
+
+msgid "Otvara obrazac s automatski popunjenim iznosima i opisom kalkulacije."
+msgstr ""
+"Opens a form with automatically filled amounts and a description of the "
+"calculation."
+
+msgid "👷 Rad/sat"
+msgstr "👷 Work/hour"
+
+#| msgid "Materijal"
+msgid "🧱 Materijal"
+msgstr "Material"
+
+msgid "🏗️ Strojevi"
+msgstr "🏗️ Machines"
+
+msgid "📋 Neto ponuda"
+msgstr "📋 Net offer"
+
+msgid "💶 Bruto (s PDV)"
+msgstr "💶 Gross (with VAT)"
+
+#| msgid "Ponuda"
+msgid "Ponuda →"
+msgstr "Offer"
+
+msgid "Osnovni podaci"
+msgstr "Basic data"
+
+msgid "Klasifikacija djelatnosti"
+msgstr "Classification of activities"
+
+msgid "Međunarodne postavke"
+msgstr "International settings"
+
+msgid "PDV i konfiguracija"
+msgstr "VAT and configuration"
+
+msgid "Tvrtka i profil"
+msgstr "Company and profile"
+
+msgid "Aktivni moduli"
+msgstr "Active modules"
+
+msgid "Nazivi dokumenata"
+msgstr "Names of documents"
+
+msgid "Prilagođena polja"
+msgstr "Custom fields"
+
+msgid "Hrvatska"
+msgstr "Croatia"
+
+msgid "Njemačka"
+msgstr "Germany"
+
+msgid "Austrija"
+msgstr "Austria"
+
+msgid "Slovenija"
+msgstr "Slovenia"
+
+msgid "Bosna i Hercegovina"
+msgstr "Bosnia and Herzegovina"
+
+msgid "Srbija"
+msgstr "Serbia"
+
+msgid "d.o.o. (Društvo s ograničenom odgovornošću)"
+msgstr "d.o.o. (Limited Liability Company)"
+
+msgid "j.d.o.o. (Jednostavno d.o.o.)"
+msgstr "j.d.o.o. (Simply d.o.o.)"
+
+msgid "d.d. (Dioničko društvo)"
+msgstr "d.d. (Stock company)"
+
+msgid "Obrt"
+msgstr "craft"
+
+msgid "GmbH"
+msgstr "GmbH"
+
+msgid "AG (Aktiengesellschaft)"
+msgstr "AG (Aktiengesellschaft)"
+
+msgid "Einzelunternehmen"
+msgstr "Einzelunternehmen"
+
+msgid "HR Fiskalizacija (CIS)"
+msgstr "HR Fiscalization (CIS)"
+
+msgid "DE GoBD"
+msgstr "DE GoBD"
+
+msgid "AT RKSV"
+msgstr "AT RKSV"
+
+msgid "Bez fiskalizacije"
+msgstr "Without fiscalization"
+
+msgid "Naziv tvrtke"
+msgstr "Company name"
+
+msgid "Adresa"
+msgstr "Address"
+
+msgid "Grad"
+msgstr "City"
+
+msgid "Poštanski broj"
+msgstr "Zip code"
+
+msgid "Država"
+msgstr "State"
+
+msgid "Tip poslovnog subjekta"
+msgstr "Type of business entity"
+
+msgid "Porezni broj"
+msgstr "Tax number"
+
+msgid "Porezni identifikacijski broj (za strana poduzeća)"
+msgstr "Tax identification number (for foreign companies)"
+
+msgid "PDV ID / VAT ID"
+msgstr "VAT ID / VAT ID"
+
+msgid "EU PDV identifikacijski broj (npr. HR12345678901)"
+msgstr "EU VAT identification number (eg HR12345678901)"
+
+msgid "Valuta"
+msgstr "Currency"
+
+msgid "Fiskalni sustav"
+msgstr "Fiscal system"
+
+msgid "NKD djelatnost"
+msgstr "NKD activity"
+
+msgid "Nacionalna klasifikacija djelatnosti (npr. 56.10 – Restorani)"
+msgstr "National classification of activities (eg 56.10 – Restaurants)"
+
+msgid "U sustavu PDV-a"
+msgstr "In the VAT system"
+
+#| msgid "Booking"
+msgid "Booking Slug"
+msgstr "Booking"
+
+msgid "Tvrtke"
+msgstr "Companies"
+
+msgid "Naziv stope"
+msgstr "Name of the rate"
+
+msgid "Stopa (%)"
+msgstr "Rate (%)"
+
+msgid "Zadana stopa"
+msgstr "Default rate"
+
+msgid "Aktivna"
+msgstr "Active"
+
+msgid "Porezna stopa"
+msgstr "Tax rate"
+
+msgid "Porezne stope"
+msgstr "Tax rates"
+
+msgid "Frizerski salon"
+msgstr "Hairdresser's"
+
+msgid "Auto mehaničar"
+msgstr "Auto mechanic"
+
+msgid "Građevina / Renovacija"
+msgstr "Construction / Renovation"
+
+msgid "Optika"
+msgstr "Optics"
+
+msgid "Restoran / Caffe bar"
+msgstr "Restaurant / Cafe bar"
+
+msgid "Online trgovina"
+msgstr "Online store"
+
+msgid "Konzalting / IT usluge"
+msgstr "Consulting / IT services"
+
+msgid "Prilagođeno"
+msgstr "Customized"
+
+msgid "Tip profila"
+msgstr "Profile type"
+
+msgid "Fakturiranje"
+msgstr "Invoicing"
+
+msgid "POS kasa"
+msgstr "POS cash register"
+
+msgid "Zalihe"
+msgstr "Supplies"
+
+msgid "Termini"
+msgstr "Dates"
+
+msgid "Projekti"
+msgstr "Projects"
+
+msgid "Radni sati"
+msgstr "Working hours"
+
+msgid "Financije"
+msgstr "Finances"
+
+msgid "Partneri"
+msgstr "Partners"
+
+msgid "Dokumenti"
+msgstr "Documents"
+
+msgid "Webshop"
+msgstr "Web shop"
+
+msgid "Najam"
+msgstr "Lease"
+
+msgid "Fitness"
+msgstr "Fitness"
+
+msgid "Samo fakturiranje"
+msgstr "Invoicing only"
+
+msgid "Termini + fakturiranje"
+msgstr "Appointments + invoicing"
+
+msgid "Radni nalozi"
+msgstr "Work orders"
+
+msgid "Projektni rad"
+msgstr "Project work"
+
+msgid "POS kasa (maloprodaja)"
+msgstr "POS cash register (retail)"
+
+msgid "Tip workflowa"
+msgstr "Type of workflow"
+
+msgid "Naziv ponude"
+msgstr "Offer name"
+
+msgid "Naziv računa"
+msgstr "Account name"
+
+msgid "Naziv radnog naloga"
+msgstr "Name of work order"
+
+msgid "Prilagođena polja na fakturi"
+msgstr "Custom fields on the invoice"
+
+msgid "JSON lista polja koja se dodaju na formu računa/ponude"
+msgstr "JSON list of fields to be added to the invoice/offer form"
+
+msgid "Poslovni profil"
+msgstr "Business profile"
+
+msgid "Poslovni profili"
+msgstr "Business profiles"
+
+msgid "Naziv usluge"
+msgstr "The name of the service"
+
+msgid "Jed. mjera"
+msgstr "Eat. measure"
+
+msgid "Zadana cijena (€)"
+msgstr "Default price (€)"
+
+msgid "PDV %"
+msgstr "VAT %"
+
+msgid "Predložak usluge"
+msgstr "Service template"
+
+msgid "Predlošci usluga (cjenik)"
+msgstr "Service templates (price list)"
+
+msgid "Companies"
+msgstr "Companies"
+
+msgid "Pregled i upravljanje - companies"
+msgstr "Overview and management - companies"
+
+msgid "Companies Modul"
+msgstr "Companies Module"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Hrvatski"
+msgstr "Croatian"
+
+msgid "English"
+msgstr "English"
+
+msgid "Türkçe"
+msgstr "Türkçe"
+
+msgid "Ελληνικά"
+msgstr "Ελληνικά"
+
+msgid "Izlazni Račun"
+msgstr "Output Account"
+
+msgid "Ulazni Račun"
+msgstr "Entry Account"
+
+msgid "Ugovor"
+msgstr "Contract"
+
+msgid "Partner"
+msgstr "Partner"
+
+msgid "Tip dokumenta"
+msgstr "Document type"
+
+msgid "Broj dokumenta"
+msgstr "Document number"
+
+msgid "Datum izdavanja"
+msgstr "Date of issue"
+
+msgid "Datum dospijeća"
+msgstr "Maturity date"
+
+msgid "Iznos"
+msgstr "Amount"
+
+msgid "Datoteka"
+msgstr "File"
+
+msgid "Plaćeno"
+msgstr "Paid"
+
+msgid "Dokument"
+msgstr "Document"
+
+#| msgid "Dokument"
+msgid "Documents"
+msgstr "Document"
+
+msgid "Pregled i upravljanje - documents"
+msgstr "Review and management - documents"
+
+#| msgid "Dokument"
+msgid "Documents Modul"
+msgstr "Document"
+
+msgid "Transakcija"
+msgstr "Transaction"
+
+msgid "Opis i referenca"
+msgstr "Description and reference"
+
+msgid "Veze"
+msgstr "Connections"
+
+msgid "Sustav"
+msgstr "Rustling"
+
+msgid "Prihod"
+msgstr "Income"
+
+msgid "Rashod"
+msgstr "Expense"
+
+msgid "Prihod i rashod"
+msgstr "Income and expenditure"
+
+msgid "Naziv kategorije"
+msgstr "Category name"
+
+msgid "Tip"
+msgstr "Type"
+
+msgid "Šifra"
+msgstr "Code"
+
+msgid "Kratka oznaka (npr. SALES, RENT, SALARY)"
+msgstr "Short code (eg SALES, RENT, SALARY)"
+
+msgid "Redoslijed"
+msgstr "Order"
+
+msgid "Kategorija transakcije"
+msgstr "Transaction category"
+
+msgid "Kategorije transakcija"
+msgstr "Categories of transactions"
+
+msgid "Uplata / Prihod"
+msgstr "Payment / Income"
+
+msgid "Isplata / Rashod"
+msgstr "Payment / Expense"
+
+msgid "Vezani dokument"
+msgstr "Related document"
+
+msgid "Vezani račun"
+msgstr "Linked account"
+
+msgid "Iznos PDV-a"
+msgstr "Amount of VAT"
+
+msgid "Smjer"
+msgstr "Direction"
+
+msgid "Datum transakcije"
+msgstr "Transaction date"
+
+msgid "Datum valute"
+msgstr "Currency date"
+
+msgid "Referenca / Poziv na broj"
+msgstr "Reference / Call number"
+
+msgid "Platni račun (IBAN/blagajna)"
+msgstr "Payment account (IBAN/cash register)"
+
+msgid "Rekoncilirano"
+msgstr "Reconciled"
+
+msgid "Transakcije"
+msgstr "Transactions"
+
+#| msgid "Financije"
+msgid "Finance"
+msgstr "Finances"
+
+msgid "Pregled i upravljanje - finance"
+msgstr "Overview and management - finance"
+
+#| msgid "Financije"
+msgid "Finance Modul"
+msgstr "Finances"
+
+msgid "Pregled i upravljanje - fitness"
+msgstr "Overview and management - fitness"
+
+#| msgid "Fitness"
+msgid "Fitness Modul"
+msgstr "Fitness"
+
+#, fuzzy
+#| msgid "Osiguranje"
+msgid "Insurance"
+msgstr "Insurance"
+
+msgid "Pregled i upravljanje - insurance"
+msgstr "Overview and management - insurance"
+
+msgid "Insurance Modul"
+msgstr "Insurance Module"
+
+msgid "Adresa intervencije"
+msgstr "Intervention address"
+
+msgid "Ime klijenta"
+msgstr "Client name"
+
+msgid "Telefon klijenta"
+msgstr "Client's phone number"
+
+#| msgid "Email klijenta"
+msgid "WhatsApp klijenta"
+msgstr "Client email"
+
+msgid "Dodijeljen"
+msgstr "Assigned"
+
+msgid "TTL istjece"
+msgstr "TTL expires"
+
+msgid "Identifikacija"
+msgstr "Identification"
+
+msgid "Cijene i PDV"
+msgstr "Prices and VAT"
+
+msgid "Logistika"
+msgstr "Logistics"
+
+msgid "Zaliha"
+msgstr "Stock"
+
+msgid "Materijal"
+msgstr "Material"
+
+msgid "Alat"
+msgstr "Tools"
+
+msgid "Oprema"
+msgstr "Equipment"
+
+msgid "Potrošni materijal"
+msgstr "Consumables"
+
+msgid "Gotov proizvod"
+msgstr "Finished product"
+
+msgid "Naziv"
+msgstr "Name"
+
+msgid "SKU / Šifra"
+msgstr "SKU / Code"
+
+msgid "Barkod / EAN"
+msgstr "Barcode / EAN"
+
+msgid "Trenutna zaliha"
+msgstr "Current stock"
+
+msgid "Minimalna zaliha"
+msgstr "Minimum stock"
+
+msgid "Maksimalna zaliha"
+msgstr "Maximum stock"
+
+msgid "Nabavna cijena"
+msgstr "Purchase price"
+
+msgid "Prodajna cijena"
+msgstr "Sale price"
+
+msgid "PDV stopa"
+msgstr "VAT rate"
+
+msgid "Lokacija u skladištu"
+msgstr "Location in warehouse"
+
+msgid "Dobavljač"
+msgstr "Supplier"
+
+msgid "Aktivan"
+msgstr "Active"
+
+msgid "Artikl"
+msgstr "Article"
+
+msgid "Artikli"
+msgstr "Articles"
+
+msgid "Ulaz (nabava)"
+msgstr "Entry (procurement)"
+
+msgid "Izlaz (prodaja/upotreba)"
+msgstr "Output (sale/use)"
+
+msgid "Korekcija zalihe"
+msgstr "Stock correction"
+
+msgid "Prijenos na drugu lokaciju"
+msgstr "Transfer to another location"
+
+msgid "Povrat dobavljaču"
+msgstr "Return to supplier"
+
+msgid "Vrsta kretanja"
+msgstr "Type of movement"
+
+msgid "Cijena po jedinici (u trenutku kretanja)"
+msgstr "Price per unit (at the time of movement)"
+
+msgid "Razlog / Napomena"
+msgstr "Reason / Note"
+
+msgid "Izvršio"
+msgstr "Executed"
+
+msgid "Kretanje zalihe"
+msgstr "Stock movement"
+
+msgid "Kretanja zalihe"
+msgstr "Stock movements"
+
+#| msgid "Investitor"
+msgid "Inventory"
+msgstr "Investor"
+
+msgid "Pregled i upravljanje - inventory"
+msgstr "Overview and management - inventory"
+
+msgid "Inventory Modul"
+msgstr "Inventory Module"
+
+msgid "Fisk."
+msgstr "Fisk."
+
+#| msgid "👤 Profil"
+msgid "Profil"
+msgstr "Profile"
+
+#| msgid "Naziv izdavatelja"
+msgid "Podaci izdavatelja"
+msgstr "Name of the issuer"
+
+#| msgid "Fiskalizacija (HR)"
+msgid "Lokalizacija"
+msgstr "Fiscalization (HR)"
+
+msgid "Bankovni podaci"
+msgstr "Bank details"
+
+#| msgid "Numeracija računa"
+msgid "Numeracija"
+msgstr "Account numbering"
+
+#| msgid "Fiskalizacija (HR)"
+msgid "Fiskalizacija"
+msgstr "Fiscalization (HR)"
+
+msgid "Zadane vrijednosti"
+msgstr "Default values"
+
+msgid "Podaci tvrtke"
+msgstr "Company information"
+
+msgid "Certifikat (.p12)"
+msgstr "Certificate (.p12)"
+
+msgid ""
+"Učitajte novi .p12 certifikat putem polja \"Certifikat (.p12)\". Polje "
+"\"Putanja certifikata\" se automatski ažurira pri učitavanju."
+msgstr ""
+"Upload a new .p12 certificate via the \\\"Certificate (.p12)\\\" field. The "
+"\\\"Certificate Path\\\" field is automatically updated on upload."
+
+msgid "CIS / Fiskalizacija"
+msgstr "CIS / Fiscalization"
+
+msgid "Certifikat"
+msgstr "Certificate"
+
+msgid "Info o certifikatu"
+msgstr "Information about the certificate"
+
+msgid "Napomena"
+msgstr "Remark"
+
+msgid "Operater"
+msgstr "Operator"
+
+msgid "Zadano prodajno mjesto"
+msgstr "Default point of sale"
+
+msgid "Stopa"
+msgstr "Rate"
+
+msgid "Numeracija računa"
+msgstr "Account numbering"
+
+msgid "Napomene na računima"
+msgstr "Notes on invoices"
+
+msgid "CIS Endpoint"
+msgstr "CIS Endpoint"
+
+msgid "Oznaka prostora (PP)"
+msgstr "Space mark (PP)"
+
+msgid "OIB tvrtke"
+msgstr "OIB of the company"
+
+msgid "Aktivno"
+msgstr "Actively"
+
+msgid "IBAN za uplatu"
+msgstr "IBAN for payment"
+
+msgid "Poslovni prostor"
+msgstr "Business premises"
+
+msgid "Poslovni prostori"
+msgstr "Business premises"
+
+msgid "Ime i prezime"
+msgstr "Name and surname"
+
+msgid "OIB operatera"
+msgstr "OIB of the operator"
+
+msgid "Zadani poslovni prostor"
+msgstr "Default office space"
+
+msgid "Operateri"
+msgstr "Operators"
+
+msgid "Šifra grupe"
+msgstr "Group code"
+
+msgid "Stopa PDV-a"
+msgstr "VAT rate"
+
+msgid "PDV grupa"
+msgstr "VAT group"
+
+msgid "PDV grupe"
+msgstr "VAT group"
+
+msgid "Lozinka certifikata"
+msgstr "Certificate password"
+
+msgid ""
+"Lozinka .p12 datoteke (ostavite prazno ako se koristi .cert_password "
+"datoteka)"
+msgstr ""
+"Password of the .p12 file (leave blank if a .cert_password file is used)"
+
+msgid "Produkcijski CIS"
+msgstr "Production CIS"
+
+msgid "Konfiguracija fiskalizacije"
+msgstr "Fiscalization configuration"
+
+#| msgid "Naziv artikla"
+msgid "Naziv profila"
+msgstr "Item name"
+
+#| msgid "Tip profila"
+msgid "Zadani profil"
+msgstr "Profile type"
+
+msgid "Zemlja"
+msgstr "Earth"
+
+msgid "OIB"
+msgstr "OIB"
+
+#| msgid "OIB / USt-IdNr"
+msgid "USt-IdNr"
+msgstr "OIB / USt-IdNr"
+
+msgid "Steuernummer"
+msgstr "Tax Number"
+
+#| msgid "Wed"
+msgid "Web"
+msgstr "Wed"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Jezik"
+msgstr "Language"
+
+#| msgid "Zadana stopa"
+msgid "Zadana porezna stopa"
+msgstr "Default rate"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "SWIFT/BIC"
+msgstr "SWIFT/BIC"
+
+#| msgid "Naziv kase"
+msgid "Naziv banke"
+msgstr "Name of the cash register"
+
+#| msgid "Predračun"
+msgid "Prefiks računa"
+msgstr "Estimate"
+
+#| msgid "Sljedeći →"
+msgid "Sljedeći broj"
+msgstr "Next →"
+
+#| msgid "Lozinka certifikata"
+msgid "Putanja certifikata"
+msgstr "Certificate password"
+
+#| msgid "Napomena na bonu"
+msgid "Napomena u podnožju"
+msgstr "Note on the voucher"
+
+#| msgid "Rok plaćanja (dana)"
+msgid "Zadani rok plaćanja (dana)"
+msgstr "Payment term (days)"
+
+#| msgid "Način plaćanja"
+msgid "Zadani način plaćanja"
+msgstr "Method of payment"
+
+#| msgid "Samo fakturiranje"
+msgid "Profil fakturiranja"
+msgstr "Invoicing only"
+
+#| msgid "Termini + fakturiranje"
+msgid "Profili fakturiranja"
+msgstr "Appointments + invoicing"
+
+msgid "Predračun"
+msgstr "Estimate"
+
+msgid "Račun"
+msgstr "Account"
+
+msgid "Avansni račun"
+msgstr "Advance invoice"
+
+msgid "Storno račun"
+msgstr "Cancel account"
+
+msgid "Gutschrift (DE)"
+msgstr "Gutschrift (DE)"
+
+msgid "Nacrt"
+msgstr "Draft"
+
+msgid "Poslano"
+msgstr "Sent"
+
+msgid "Prihvaćeno"
+msgstr "Accepted"
+
+msgid "Odbijeno"
+msgstr "Rejected"
+
+msgid "Isteklo"
+msgstr "Expired"
+
+msgid "Neplaćeno"
+msgstr "Unpaid"
+
+msgid "Dospijelo"
+msgstr "Due"
+
+msgid "Stornirano"
+msgstr "Cancelled"
+
+msgid "Transakcijski račun"
+msgstr "Transaction account"
+
+msgid "Virman"
+msgstr "Virman"
+
+msgid "Überweisung (DE)"
+msgstr "Überweisung (DE)"
+
+msgid "Bar (DE)"
+msgstr "Bar (DE)"
+
+msgid "Vrsta"
+msgstr "Type"
+
+msgid "Broj računa"
+msgstr "Account number"
+
+msgid "Interni ID"
+msgstr "Internal ID"
+
+msgid "Rok plaćanja"
+msgstr "Payment term"
+
+msgid "Datum isporuke"
+msgstr "Delivery date"
+
+msgid "Klijent / Empfänger"
+msgstr "Client / Emfänger"
+
+msgid "Grad / PLZ Stadt"
+msgstr "City / PLZ Stadt"
+
+msgid "OIB / USt-IdNr"
+msgstr "OIB / USt-IdNr"
+
+msgid "Email klijenta"
+msgstr "Client email"
+
+msgid "Poziv na broj"
+msgstr "Call the number"
+
+msgid "Iznos bez PDV/MwSt"
+msgstr "Amount without VAT/MwSt"
+
+msgid "PDV/MwSt %"
+msgstr "VAT/MwSt %"
+
+msgid "PDV/MwSt iznos"
+msgstr "VAT/MwSt amount"
+
+msgid "Ukupno / Gesamt"
+msgstr "Total / Gesamt"
+
+msgid "Fiskalizirano"
+msgstr "Fiscalized"
+
+msgid "Datum fiskalizacije"
+msgstr "Fiscalization date"
+
+msgid "Napomena / Anmerkung"
+msgstr "Note / Anmerkung"
+
+msgid "Interna napomena"
+msgstr "Internal note"
+
+msgid "Storno od računa"
+msgstr "Canceled from the account"
+
+msgid "Naziv izdavatelja"
+msgstr "Name of the issuer"
+
+msgid "Redni broj u prostoru"
+msgstr "Ordinal number in space"
+
+msgid "Tvrtka izdavatelj"
+msgstr "Issuing company"
+
+msgid "Partner (klijent)"
+msgstr "partner (client)"
+
+msgid "Prikazuje se na računu i ponudi"
+msgstr "It is displayed on the invoice and offer"
+
+msgid "Izvorni dokument"
+msgstr "Original document"
+
+msgid "Ponuda ili predračun iz kojeg je kreiran ovaj dokument"
+msgstr "The offer or estimate from which this document was created"
+
+msgid "Rok važnosti"
+msgstr "Validity period"
+
+msgid "Rok do kojeg ponuda / predračun vrijedi"
+msgstr "The deadline until which the offer / estimate is valid"
+
+msgid "Izvor"
+msgstr "Source"
+
+#| msgid "Nema fotografija"
+msgid "Fotografija"
+msgstr "No photos"
+
+#| msgid "Datoteka"
+msgid "PDF datoteka"
+msgstr "File"
+
+msgid "Računi"
+msgstr "Accounts"
+
+msgid "Jed.mjera"
+msgstr "Single measure"
+
+msgid "Jed.cijena"
+msgstr "Unit price"
+
+msgid "Popust %"
+msgstr "discount %"
+
+msgid "Ukupno s PDV"
+msgstr "Total with VAT"
+
+msgid "Veza na poreznu stopu iz registra"
+msgstr "Link to the tax rate from the register"
+
+msgid "Artikl iz zalihe"
+msgstr "Item from stock"
+
+msgid "Stavka računa"
+msgstr "Account item"
+
+msgid "Stavke računa"
+msgstr "Account items"
+
+msgid "Klijentski portal"
+msgstr "Client portal"
+
+msgid "Kol."
+msgstr "Qty."
+
+msgid "Iznos bez PDV-a"
+msgstr "Amount without VAT"
+
+msgid "UKUPNO ZA PLATITI"
+msgstr "TOTAL TO PAY"
+
+msgid "Prihvatam ponudu"
+msgstr "I accept the offer"
+
+msgid "Odbijam"
+msgstr "I refuse"
+
+msgid "Ponuda prihvaćena"
+msgstr "Offer accepted"
+
+msgid "Kontaktirat ćemo vas uskoro."
+msgstr "We will contact you soon."
+
+msgid "Ponuda odbijena."
+msgstr "Offer rejected."
+
+msgid "Preuzmi PDF"
+msgstr "Download the PDF"
+
+msgid "FINA-CONNECT · Powered by Viskovic Group"
+msgstr "FINA-CONNECT · Powered by Viskovic Group"
+
+#| msgid "Račun"
+msgid "📄 Račun"
+msgstr "Account"
+
+#| msgid "Ponuda"
+msgid "📋 Ponuda"
+msgstr "Offer"
+
+msgid "💰 Avansni"
+msgstr "💰 Advance"
+
+msgid "🇩🇪 Gutschrift"
+msgstr "🇩🇪 Gutschrift"
+
+#| msgid "Stornirano"
+msgid "↩ Storno"
+msgstr "Cancelled"
+
+msgid "🇭🇷 HR"
+msgstr "🇭🇷 HR"
+
+msgid "🇩🇪 DE"
+msgstr "🇩🇪 DE"
+
+#| msgid "Tip partnera"
+msgid "Pretraži partnera"
+msgstr "Partner type"
+
+msgid "Ime, OIB ili email..."
+msgstr "Name, OIB or email..."
+
+#| msgid "Naziv / Ime"
+msgid "Naziv / Ime *"
+msgstr "Name / Name"
+
+msgid "Zadani PDV:"
+msgstr "Default VAT:"
+
+msgid "Opis usluge / robe"
+msgstr "Description of service / goods"
+
+msgid "J.mj."
+msgstr "J.mj."
+
+#, python-format
+msgid "PDV%%"
+msgstr "VAT%%"
+
+#, python-format
+msgid "Pop%%"
+msgstr "Pop%%"
+
+#| msgid "Osnovno"
+msgid "Osnovica"
+msgstr "Basic"
+
+#| msgid "PDV/MwSt iznos"
+msgid "PDV iznos"
+msgstr "VAT/MwSt amount"
+
+#| msgid "Iznos bez PDV"
+msgid "Osnovica (bez PDV)"
+msgstr "Amount without VAT"
+
+msgid "PDV"
+msgstr "VAT"
+
+msgid "0,00 EUR"
+msgstr "EUR 0.00"
+
+msgid "Uvoz iz modula"
+msgstr "Import from module"
+
+#| msgid "Radni sati"
+msgid "⏱ Radni sati"
+msgstr "Working hours"
+
+#| msgid "Najam"
+msgid "🏠 Najam"
+msgstr "Lease"
+
+#| msgid "Termini"
+msgid "📅 Termini"
+msgstr "Dates"
+
+#| msgid "Webshop"
+msgid "🛒 Webshop"
+msgstr "Web shop"
+
+#| msgid "Projekti"
+msgid "🏗 Projekti"
+msgstr "Projects"
+
+msgid "Odaberi modul za uvoz stavki na račun"
+msgstr "Select the module to import items to the account"
+
+msgid "Napomene"
+msgstr "Notes"
+
+#| msgid "Na račun (klijent)"
+msgid "Napomena na računu (vidljiva klijentu)"
+msgstr "To the account (client)"
+
+msgid "Hvala na povjerenju! Prigovore izjavite u roku 8 dana..."
+msgstr "Thank you for your trust! Submit objections within 8 days..."
+
+msgid "Interna napomena (nije vidljiva na računu)"
+msgstr "Internal note (not visible on the invoice)"
+
+#| msgid "Interne napomene"
+msgid "Interne napomene..."
+msgstr "Internal notes"
+
+#| msgid "Vezani dokument"
+msgid "💾 Spremi dokument"
+msgstr "Related document"
+
+msgid "📄 Pregled PDF"
+msgstr "📄 Preview PDF"
+
+msgid "⬇ Download PDF"
+msgstr "⬇ Download PDF"
+
+msgid "📧 Pošalji email"
+msgstr "📧 Send an email"
+
+msgid "📋 E-račun XML"
+msgstr "📋 E-invoice XML"
+
+#| msgid "Odobrava radne sate"
+msgid "⏱ Dodaj radne sate"
+msgstr "Approval of working hours"
+
+msgid "📋 Kreiraj kopiju"
+msgstr "📋 Create a copy"
+
+#| msgid "Klijentski portal"
+msgid "🔗 Klijentski portal"
+msgstr "Client portal"
+
+msgid "Broj i datumi"
+msgstr "Number and dates"
+
+#| msgid "Broj dokumenta"
+msgid "Broj dokumenta *"
+msgstr "Document number"
+
+#| msgid "Datum izdavanja"
+msgid "Datum izdavanja *"
+msgstr "Date of issue"
+
+msgid "EUR €"
+msgstr "EUR €"
+
+msgid "HRK kn"
+msgstr "HRK kn"
+
+msgid "USD $"
+msgstr "USD $"
+
+msgid "Fiskalizacija (HR)"
+msgstr "Fiscalization (HR)"
+
+msgid "-- Odaberi --"
+msgstr "-- Choose --"
+
+#| msgid "Fiskalizirano"
+msgid "✓ Fiskalizirano"
+msgstr "Fiscalized"
+
+msgid "Izdavatelj"
+msgstr "Publisher"
+
+msgid "uredi ▾"
+msgstr "edit ▾"
+
+msgid "Ukupno fakturirano"
+msgstr "Total invoiced"
+
+msgid "Neplaćeno / Dospijelo"
+msgstr "Unpaid / Due"
+
+msgid "Dospijelo (broj)"
+msgstr "Due (number)"
+
+msgid "Sve"
+msgstr "All"
+
+#| msgid "Plaćeno"
+msgid "✅ Plaćeno"
+msgstr "Paid"
+
+msgid "Novi račun"
+msgstr "New account"
+
+msgid "Broj"
+msgstr "Number"
+
+msgid "HR"
+msgstr "HR"
+
+msgid "DE"
+msgstr "DE"
+
+#| msgid "Dospijelo"
+msgid "🔴 Dospijelo"
+msgstr "Due"
+
+#| msgid "Stornirano"
+msgid "Storno"
+msgstr "Cancelled"
+
+msgid "Nema računa"
+msgstr "No account"
+
+msgid "Geschäftsdokument · Deutschland"
+msgstr "Geschäftsdokument · Deutschland"
+
+msgid "Rechnungsdatum:"
+msgstr "Rechnungsdatum:"
+
+msgid "Fälligkeitsdatum:"
+msgstr "Fälligkeitsdatum:"
+
+msgid "Leistungsdatum:"
+msgstr "Performance date:"
+
+msgid "Absender / Rechnungssteller"
+msgstr "Absender / Rechnungssteller"
+
+msgid "Empfänger / Rechnungsempfänger"
+msgstr "Emfänger / Rechnungsempfänger"
+
+msgid "Pos."
+msgstr "Pos."
+
+msgid "Beschreibung"
+msgstr "Beschreibung"
+
+msgid "Menge"
+msgstr "Menge"
+
+msgid "Einheit"
+msgstr "Einheit"
+
+msgid "Einzelpreis"
+msgstr "Einzelpreis"
+
+#| msgid "Rabat (%)"
+msgid "Rabatt"
+msgstr "Discount (%)"
+
+#| msgid "Natrag"
+msgid "Betrag"
+msgstr "Back"
+
+msgid "Nettobetrag:"
+msgstr "Net amount:"
+
+msgid "GESAMTBETRAG:"
+msgstr "GESAMTBETRAG:"
+
+msgid "Zahlungsinformationen"
+msgstr "Zahlungsinformationen"
+
+msgid "Zahlungsart:"
+msgstr "Zahlungsart:"
+
+msgid "IBAN:"
+msgstr "IBAN:"
+
+msgid "BIC/SWIFT:"
+msgstr "BIC/SWIFT:"
+
+msgid "Fällig bis:"
+msgstr "Fällig bis:"
+
+msgid "Verwendungszweck:"
+msgstr "Verwendungszweck:"
+
+msgid "Primatelj / Kupac"
+msgstr "Recipient / Customer"
+
+#| msgid "Jed.cijena"
+msgid "Jed. cijena"
+msgstr "Unit price"
+
+#, python-format
+msgid "Pop. %%"
+msgstr "Pop. %%"
+
+#| msgid "Iznos bez PDV"
+msgid "Osnovica (bez PDV):"
+msgstr "Amount without VAT"
+
+#| msgid "UKUPNO ZA PLATITI"
+msgid "UKUPNO ZA PLATITI:"
+msgstr "TOTAL TO PAY"
+
+#| msgid "Poslovni prostor"
+msgid "Poslovni prostor:"
+msgstr "Business premises"
+
+#| msgid "Operater"
+msgid "Operater:"
+msgstr "Operator"
+
+#| msgid "Plaćanje"
+msgid "Podaci za plaćanje"
+msgstr "Payment"
+
+#| msgid "Način plaćanja"
+msgid "Način plaćanja:"
+msgstr "Method of payment"
+
+#| msgid "Poziv na broj"
+msgid "Poziv na broj:"
+msgstr "Call the number"
+
+#| msgid "Rok plaćanja"
+msgid "Rok plaćanja:"
+msgstr "Payment term"
+
+#| msgid "Linija plaćanja"
+msgid "Skeniraj za plaćanje"
+msgstr "Payment line"
+
+#| msgid "Fiskalni račun"
+msgid "✓ Fiskalizirani račun"
+msgstr "Fiscal account"
+
+msgid "ZKI:"
+msgstr "ZKI:"
+
+msgid "JIR:"
+msgstr "JIR:"
+
+#| msgid "Datum"
+msgid "Datum:"
+msgstr "Date"
+
+msgid "Novi račun — Uredski wizard"
+msgstr "New Invoice — Office Wizard"
+
+#| msgid "Email klijenta"
+msgid "Unesite naziv klijenta"
+msgstr "Client email"
+
+#| msgid "Dodaj sliku"
+msgid "Dodajte barem jednu stavku"
+msgstr "Add a picture"
+
+#| msgid "Pregledaj"
+msgid "Pregled"
+msgstr "Check it out"
+
+#| msgid "Završeno"
+msgid "Završi"
+msgstr "Finished"
+
+#| msgid "Tip partnera"
+msgid "Pretraži partnera (ime, OIB)..."
+msgstr "Partner type"
+
+#| msgid "Tvrtka i profil"
+msgid "Tvrtka ili osoba"
+msgstr "Company and profile"
+
+msgid "Ulica i broj"
+msgstr "Street and number"
+
+#| msgid "Poštanski broj"
+msgid "Poštanski broj, grad"
+msgstr "Zip code"
+
+#| msgid "Nema projekata"
+msgid "Nema rezultata"
+msgstr "There are no projects"
+
+#| msgid "CSV Import"
+msgid "Import"
+msgstr "CSV Import"
+
+#| msgid "Pretraži artikal…"
+msgid "Pretraži artikle iz skladišta"
+msgstr "Search for an article..."
+
+#| msgid "Upišite naziv ili SKU artikla..."
+msgid "Naziv ili šifra artikla..."
+msgstr "Enter the item name or SKU..."
+
+#| msgid "Dodaj sliku"
+msgid "Dodaj stavku"
+msgstr "Add a picture"
+
+msgid "UKUPNO"
+msgstr "TOTAL"
+
+msgid "Sati"
+msgstr "Hours"
+
+#| msgid "Odaberite stol"
+msgid "Odaberite modul"
+msgstr "Choose a table"
+
+#| msgid "Broj dokumenta"
+msgid "Vrsta dokumenta"
+msgstr "Document number"
+
+#| msgid "Vezani dokument"
+msgid "Detalji dokumenta"
+msgstr "Related document"
+
+#| msgid "Napomene na računima"
+msgid "Napomena na računu"
+msgstr "Notes on invoices"
+
+#| msgid "Vidljivo tijelo"
+msgid "Vidljivo klijentu..."
+msgstr "Visible body"
+
+#| msgid "Dnevna bilješka"
+msgid "Interna bilješka"
+msgstr "Daily note"
+
+#| msgid "Samo kada"
+msgid "Samo za vas..."
+msgstr "Only when"
+
+#| msgid "Upload i pregled dokumenata"
+msgid "Pregled dokumenta"
+msgstr "Upload and view documents"
+
+#| msgid "Odaberite datum"
+msgid "Odaberite radnju"
+msgstr "Select a date"
+
+#| msgid "Spremi unos"
+msgid "Spremi kao nacrt"
+msgstr "Save entry"
+
+msgid "Za kasniji pregled i doradu"
+msgstr "For later review and editing"
+
+#| msgid "Vezani račun"
+msgid "Izdaj račun"
+msgstr "Linked account"
+
+msgid "Postavi status na Poslano"
+msgstr "Set status to Sent"
+
+#| msgid "📧 Pošalji email"
+msgid "Izdaj i pošalji emailom"
+msgstr "📧 Send an email"
+
+#| msgid "Klijent nema email adresu!"
+msgid "Klijentu na email adresu"
+msgstr "The client does not have an email address!"
+
+#| msgid "Fiskalizirano"
+msgid "Izdaj i fiskaliziraj"
+msgstr "Fiscalized"
+
+#| msgid "Fiskalizacija je dostupna samo za HR račune!"
+msgid "Fiskalizacija putem CIS sustava (samo HR)"
+msgstr "Fiscalization is only available for HR accounts!"
+
+#| msgid "Naplati"
+msgid "Naplati odmah"
+msgstr "Charge"
+
+msgid "Status: Plaćeno, gotovinska naplata"
+msgstr "Status: Paid, cash payment"
+
+msgid "Završi i spremi"
+msgstr "Finish and Save"
+
+#| msgid "Opis rada..."
+msgid "Opis stavke..."
+msgstr "Job description..."
+
+msgid "Spremanje..."
+msgstr "Saving..."
+
+msgid "Generalne Informacije"
+msgstr "General Information"
+
+msgid "Ukupno sati (2025):"
+msgstr "Total hours (2025):"
+
+msgid "Zadnje aktivnosti iz radnih sati"
+msgstr "Last activities from working hours"
+
+msgid "Vidi sve unose"
+msgstr "See all entries"
+
+#| msgid "NKD djelatnost"
+msgid "Djelatnik"
+msgstr "NKD activity"
+
+#| msgid "Opis problema"
+msgid "Opis posla"
+msgstr "Description of the problem"
+
+msgid "Nema povijesnih podataka za ovaj projekt."
+msgstr "There is no historical data for this project."
+
+msgid "Svi projekti"
+msgstr "All projects"
+
+#| msgid "Novi projekt"
+msgid "+ Novi projekt"
+msgstr "New project"
+
+#| msgid "Nema projekata"
+msgid "Nema projekata u bazi."
+msgstr "There are no projects"
+
+#| msgid "Novi račun"
+msgid "Novi račun — Wizard"
+msgstr "New account"
+
+#| msgid "Tip partnera"
+msgid "Pretraži partnere..."
+msgstr "Partner type"
+
+#| msgid "Email klijenta"
+msgid "Naziv klijenta"
+msgstr "Client email"
+
+msgid "TVRTKA d.o.o. ili Ime Prezime"
+msgstr "Company LLC or First Last Name"
+
+msgid "Skladište"
+msgstr "Stock"
+
+#| msgid "Avansni račun"
+msgid "Avans"
+msgstr "Advance invoice"
+
+#| msgid "Hvala na kupnji!"
+msgid "Hvala na povjerenju!..."
+msgstr "Thank you for your purchase!"
+
+#| msgid "Vezani dokument"
+msgid "Spremi dokument"
+msgstr "Related document"
+
+msgid "Dokument se sprema kao nacrt. Možete ga kasnije uređivati i slati."
+msgstr "Document is saved as draft. You can edit and send it later."
+
+#| msgid "Spremi unos"
+msgid "Spremi i pošalji"
+msgstr "Save entry"
+
+msgid "Dokument se sprema sa statusom 'Poslano' i šalje emailom klijentu."
+msgstr "Document is saved with status 'Sent' and emailed to the client."
+
+#| msgid "Email klijenta"
+msgid "Unesite naziv klijenta."
+msgstr "Client email"
+
+#| msgid "Dodajte stavke ispod"
+msgid "Dodajte barem jednu stavku s opisom."
+msgstr "Add items below"
+
+#| msgid "Dodaj sliku"
+msgid "Dodaj kao novu stavku"
+msgstr "Add a picture"
+
+#| msgid "Naziv artikla"
+msgid "Nema artikala za"
+msgstr "Item name"
+
+#| msgid "Greška provjere."
+msgid "Greška pri pretrazi"
+msgstr "Verification error."
+
+msgid "Učitavanje..."
+msgstr "Loading..."
+
+#| msgid "Nema dostupnih projekata"
+msgid "Nema dostupnih stavki"
+msgstr "There are no projects available"
+
+#| msgid "Greška: {e}"
+msgid "Greška"
+msgstr "Error: {e}"
+
+msgid "Klijent nema email adresu!"
+msgstr "The client does not have an email address!"
+
+#, python-brace-format
+msgid "Račun poslan na {invoice.client_email}"
+msgstr "Invoice sent to {invoice.client_email}"
+
+#, python-brace-format
+msgid "Greška pri slanju: {e}"
+msgstr "Error sending: {e}"
+
+msgid "Fiskalizacija je dostupna samo za HR račune!"
+msgstr "Fiscalization is only available for HR accounts!"
+
+msgid "Račun je već fiskaliziran!"
+msgstr "The account is already fiscalized!"
+
+msgid "Fiskalizirati se mogu samo računi (R), ne predračuni!"
+msgstr "Only invoices (R), not pre-invoices, can be fiscalized!"
+
+msgid "Račun fiskaliziran (DEMO - CIS nedostupan)!"
+msgstr "Account fiscalized (DEMO - CIS unavailable)!"
+
+#, python-brace-format
+msgid "ZKI: {invoice.zki} | JIR: {invoice.jir}"
+msgstr "ZKI: {invoice.zki} | JIR: {invoice.jir}"
+
+msgid "✓ Račun uspješno fiskaliziran!"
+msgstr "✓ Account successfully fiscalized!"
+
+msgid "Greška fiskalizacije: {result.get(\"error\")}"
+msgstr "Fiscalization error: {result.get(\\\"error\\\")}"
+
+#, python-brace-format
+msgid "Greška: {e}"
+msgstr "Error: {e}"
+
+msgid "Račun je već storniran!"
+msgstr "The account has already been canceled!"
+
+#, python-brace-format
+msgid "Storno račun {storno_invoice.number} kreiran!"
+msgstr "Cancellation invoice {storno_invoice.number} created!"
+
+msgid "Samo ponude se mogu pretvoriti u predračun!"
+msgstr "Only offers can be converted into a proforma invoice!"
+
+#, python-brace-format
+msgid "Predračun već postoji: {existing.number}"
+msgstr "The invoice already exists: {existing.number}"
+
+#, python-brace-format
+msgid "Predračun {new_doc.number} kreiran iz ponude {source.number}!"
+msgstr "Estimate {new_doc.number} created from offer {source.number}!"
+
+msgid "Samo ponude ili predračuni se mogu pretvoriti u račun!"
+msgstr "Only offers or proforma invoices can be converted into an invoice!"
+
+#, python-brace-format
+msgid "Račun već postoji: {existing.number}"
+msgstr "Account already exists: {existing.number}"
+
+msgid ""
+"Račun {new_doc.number} kreiran iz {source.get_doctype_display()} "
+"{source.number}!"
+msgstr ""
+"Account {new_doc.number} created from {source.get_doctype_display()} "
+"{source.number}!"
+
+msgid "{doc.get_doctype_display()} {doc.number} označen kao poslan."
+msgstr "{doc.get_doctype_display()} {doc.number} marked as sent."
+
+msgid "Dokument nije u statusu Nacrt."
+msgstr "The document is not in Draft status."
+
+msgid "{doc.get_doctype_display()} {doc.number} označen kao prihvaćen."
+msgstr "{doc.get_doctype_display()} {doc.number} marked as accepted."
+
+msgid "Nije moguće označiti kao prihvaćeno."
+msgstr "Unable to mark as accepted."
+
+msgid "{doc.get_doctype_display()} {doc.number} označen kao odbijen."
+msgstr "{doc.get_doctype_display()} {doc.number} marked as rejected."
+
+msgid "Nije moguće označiti kao odbijeno."
+msgstr "Unable to mark as rejected."
+
+msgid "Brze akcije"
+msgstr "Quick actions"
+
+msgid "Predračun / Angebot"
+msgstr "Estimate / Angebot"
+
+msgid "Svi"
+msgstr "All"
+
+#| msgid "&#x1F4D2; Knjigovodstvo"
+msgid "Knjigovodstvo"
+msgstr "Accounting"
+
+#| msgid "Gotovina"
+msgid "Imovina"
+msgstr "Assets"
+
+msgid "Obveze"
+msgstr "Liabilities"
+
+msgid "Kapital"
+msgstr "Equity"
+
+#| msgid "Prihod"
+msgid "Prihodi"
+msgstr "Income"
+
+#| msgid "Rashod"
+msgid "Rashodi"
+msgstr "Expenses"
+
+#| msgid "Šifra"
+msgid "Šifra konta"
+msgstr "Account Code"
+
+#| msgid "Email klijenta"
+msgid "Naziv konta"
+msgstr "Account Name"
+
+#| msgid "Vrsta"
+msgid "Vrsta konta"
+msgstr "Account Type"
+
+msgid "Nadređeni konto"
+msgstr "Parent Account"
+
+#| msgid "Kontakt"
+msgid "Konto"
+msgstr "Account"
+
+msgid "Kontni plan"
+msgstr "Chart of Accounts"
+
+msgid "Banka"
+msgstr "Bank"
+
+#| msgid "Početna"
+msgid "Početni saldo"
+msgstr "Opening Balance"
+
+#| msgid "Trenutna zaliha"
+msgid "Trenutni saldo"
+msgstr "Current Balance"
+
+#| msgid "Fiskalni račun"
+msgid "Primarni račun"
+msgstr "Primary Account"
+
+#| msgid "Broj računa"
+msgid "Žiro račun"
+msgstr "Bank Account"
+
+#| msgid "Vaši računi"
+msgid "Žiro računi"
+msgstr "Bank Accounts"
+
+#| msgid "Zlatna (premium)"
+msgid "Uplata (priljev)"
+msgstr "Inflow (Credit)"
+
+#| msgid "Isplata / Rashod"
+msgid "Isplata (odljev)"
+msgstr "Outflow (Debit)"
+
+#| msgid "Nema ažuriranja"
+msgid "Nepariran"
+msgstr "Unmatched"
+
+#| msgid "Stornirano"
+msgid "Pariran"
+msgstr "Matched"
+
+#| msgid "Stornirano"
+msgid "Ignoriran"
+msgstr "Ignored"
+
+msgid "Platitelj/Primatelj"
+msgstr "Payer/Payee"
+
+msgid "IBAN platitelja/primatelja"
+msgstr "Payer/Payee IBAN"
+
+#| msgid "Rok plaćanja"
+msgid "Opis plaćanja"
+msgstr "Payment Description"
+
+#| msgid "Fiskalni račun"
+msgid "Pariran račun"
+msgstr "Matched Invoice"
+
+msgid "Proknjiženo"
+msgstr "Posted"
+
+#| msgid "🏦 Bankovna transakcija"
+msgid "Bankovne transakcije"
+msgstr "Bank Transactions"
+
+#| msgid "Broj smjene"
+msgid "Broj temeljnice"
+msgstr "Entry Number"
+
+#| msgid "Datum izdavanja"
+msgid "Datum knjiženja"
+msgstr "Posting Date"
+
+#| msgid "Bankovni podaci"
+msgid "Bankovni izvod"
+msgstr "Bank Statement"
+
+msgid "Ručno knjiženje"
+msgstr "Manual Entry"
+
+#| msgid "Način plaćanja"
+msgid "Obračun plaća"
+msgstr "Payroll"
+
+#| msgid "POS postavke"
+msgid "POS promet"
+msgstr "POS Revenue"
+
+#| msgid "Isprazni"
+msgid "Ispravak"
+msgstr "Correction"
+
+msgid "Temeljnica"
+msgstr "Journal Entry"
+
+msgid "Temeljnice"
+msgstr "Journal Entries"
+
+msgid "Duguje"
+msgstr "Debit"
+
+#| msgid "Pretraži"
+msgid "Potražuje"
+msgstr "Credit"
+
+#| msgid "Stavka bona"
+msgid "Stavka knjiženja"
+msgstr "Ledger Line"
+
+#| msgid "Stavke bona"
+msgid "Stavke knjiženja"
+msgstr "Ledger Lines"
+
+msgid "Hausverwaltung"
+msgstr "Hausverwaltung"
+
+msgid "Makler"
+msgstr "Broker"
+
+msgid "Architekt"
+msgstr "Architect"
+
+msgid "Privatperson"
+msgstr "Privatperson"
+
+msgid "Firma"
+msgstr "Firm"
+
+msgid "Neu"
+msgstr "Not"
+
+msgid "Kontaktiert"
+msgstr "Kontaktiert"
+
+msgid "Geantwortet"
+msgstr "Geantwortet"
+
+msgid "Interessiert"
+msgstr "Interessiert"
+
+msgid "Klient"
+msgstr "The client"
+
+msgid "Abgelehnt"
+msgstr "Abgelehnt"
+
+msgid "Manuell"
+msgstr "Manuel"
+
+msgid "CSV Import"
+msgstr "CSV Import"
+
+msgid "Google Maps"
+msgstr "Google Maps"
+
+msgid "Name"
+msgstr "To us"
+
+msgid "Firmenname"
+msgstr "Firmenname"
+
+msgid "E-Mail"
+msgstr "E-mail"
+
+msgid "Adresse"
+msgstr "Addresses"
+
+msgid "Stadt"
+msgstr "Stadt"
+
+msgid "PLZ"
+msgstr "PLEASE"
+
+msgid "Typ"
+msgstr "Typ"
+
+msgid "Quelle"
+msgstr "Quelle"
+
+msgid "Notizen"
+msgstr "Notizen"
+
+msgid "Kontakt"
+msgstr "Contact"
+
+msgid "Kontakte"
+msgstr "Contacts"
+
+msgid "Kampagnenname"
+msgstr "Campaign name"
+
+msgid "Betreff-Vorlage"
+msgstr "Betreff Vorlage"
+
+#, python-brace-format
+msgid "Vars: {ime_firme}, {grad}, {tip_posla}"
+msgstr "Vars: {ime_firme}, {grad}, {tip_posla}"
+
+msgid "Inhalt-Vorlage"
+msgstr "Inhalt-Vorlage"
+
+msgid "Senden pro Tag"
+msgstr "Senden pro Tag"
+
+msgid "Follow-up Tage"
+msgstr "Follow-up Tage"
+
+msgid "Aktiv"
+msgstr "Active"
+
+msgid "Kampagne"
+msgstr "Campaigns"
+
+msgid "Kampagnen"
+msgstr "Campaign"
+
+msgid "Ausstehend"
+msgstr "Ausstehend"
+
+msgid "Gesendet"
+msgstr "Gesendet"
+
+msgid "Follow-up"
+msgstr "Follow-up"
+
+msgid "Kampagnen-Kontakt"
+msgstr "Campaign-Contact"
+
+msgid "Kampagnen-Kontakte"
+msgstr "Campaign-Contacts"
+
+msgid "🏠 Home"
+msgstr "🏠 Home"
+
+msgid "Outreach / CRM"
+msgstr "Outreach / CRM"
+
+#| msgid "Preview"
+msgid "👁 AI Preview"
+msgstr "Preview"
+
+msgid "← Zurück"
+msgstr "← Zurück"
+
+msgid "📋 E-Mail Vorlage"
+msgstr "📋 E-Mail Vorlage"
+
+#| msgid "Betreff-Vorlage"
+msgid "Betreff:"
+msgstr "Betreff Vorlage"
+
+msgid "Hinzufügen"
+msgstr "Adding"
+
+msgid "▶ Senden"
+msgstr "▶ Senden"
+
+#| msgid "Gesendet"
+msgid "✓ Gesendet"
+msgstr "Gesendet"
+
+msgid "↩ Antwort"
+msgstr "↩ Antwort"
+
+msgid "Keine Kontakte."
+msgstr "No contacts."
+
+#| msgid "Kontakte hinzufügen"
+msgid "➕ Kontakte hinzufügen"
+msgstr "Add contacts"
+
+#| msgid "Keine Kontakte verfügbar."
+msgid "Keine weiteren Kontakte verfügbar."
+msgstr "Keine Kontakte verfügbar."
+
+msgid "Schließen"
+msgstr "Schließen"
+
+msgid "Neue Kampagne"
+msgstr "Neue Kampagne"
+
+msgid "z.B. Hausverwaltungen Österreich 2026"
+msgstr "z.B. Hausverwaltungen Österreich 2026"
+
+#, python-brace-format
+#| msgid "Vars: {ime_firme}, {grad}, {tip_posla}"
+msgid ""
+"Variablen: {ime_firme}, {grad}, {tip_posla} – werden von Claude AI "
+"personalisiert"
+msgstr "Vars: {ime_firme}, {grad}, {tip_posla}"
+
+msgid "E-Mail Inhalt"
+msgstr "Email Content"
+
+msgid "Claude AI schreibt für jeden Kontakt eine individuelle Version"
+msgstr "Claude AI schreibt für jeden Kontakt eine individuelle Version"
+
+#| msgid "Follow-up Tage"
+msgid "Follow-up nach (Tage)"
+msgstr "Follow-up Tage"
+
+msgid "Sofort aktivieren"
+msgstr "Sofort aktivieren"
+
+msgid "Kontakte hinzufügen"
+msgstr "Add contacts"
+
+msgid "verfügbar"
+msgstr "verfügbar"
+
+msgid "Keine Kontakte verfügbar."
+msgstr "Keine Kontakte verfügbar."
+
+msgid "Kampagne erstellen"
+msgstr "Campaigns erstellen"
+
+msgid "Abbrechen"
+msgstr "Abbrechen"
+
+#| msgid "Kontakte"
+msgid "Kontakt wählen"
+msgstr "Contacts"
+
+#| msgid "Betreff-Vorlage"
+msgid "Betreff"
+msgstr "Betreff Vorlage"
+
+#| msgid "E-Mail Inhalt"
+msgid "Inhalt"
+msgstr "Email Content"
+
+msgid "Wähle einen Kontakt aus der Liste."
+msgstr "Wähle einen Kontakt aus der Liste."
+
+msgid ""
+"Claude AI generiert für jeden Kontakt eine individuelle, personalisierte "
+"E-Mail basierend auf Firmenname, Stadt und Branche."
+msgstr ""
+"Claude AI generiert für jeden Kontakt eine individuelle, personalisierte "
+"E-Mail based on Firmenname, Stadt und Branche."
+
+msgid "Neuer Kontakt"
+msgstr "Neuer Kontakt"
+
+#| msgid "E-Mail"
+msgid "E-Mail *"
+msgstr "E-mail"
+
+msgid "💾 Speichern"
+msgstr "💾 Speichern"
+
+msgid "➕ Neu"
+msgstr "➕ Not"
+
+msgid "📂 CSV"
+msgstr "📂 CSV"
+
+msgid "Suche..."
+msgstr "Suche..."
+
+msgid "Alle Status"
+msgstr "All Status"
+
+msgid "Alle Typen"
+msgstr "All Typen"
+
+#| msgid "Firmenname"
+msgid "Firma/Name"
+msgstr "Firmenname"
+
+#| msgid "CSV Import"
+msgid "📂 CSV Import"
+msgstr "CSV Import"
+
+msgid ""
+"Spalten: ime/name, firma/Firma, email, telefon, grad/Stadt, plz, tip/Typ"
+msgstr "Spalten: name, company, email, phone, city, plz, type"
+
+msgid "Importieren"
+msgstr "Importieren"
+
+msgid "📧 Outreach / CRM"
+msgstr "📧 Outreach / CRM"
+
+msgid "📥 Posteingang"
+msgstr "📥 Posteingang"
+
+msgid "Kontakte gesamt"
+msgstr "Gesamt contacts"
+
+#| msgid "Klient"
+msgid "Klienten"
+msgstr "The client"
+
+msgid "Aktive Kampagnen"
+msgstr "Active Kampagnen"
+
+#| msgid "Letzte Antworten"
+msgid "Antworten"
+msgstr "Letzte Answeren"
+
+msgid "Keine Kampagnen."
+msgstr "Keine Kampagnen."
+
+msgid "Letzte Antworten"
+msgstr "Letzte Answeren"
+
+msgid "Keine Antworten."
+msgstr "Keine Answeren."
+
+msgid "📥 Posteingang – Antworten"
+msgstr "📥 Postingang - Answeren"
+
+msgid "🔴 Hitno"
+msgstr "🔴 Urgent"
+
+msgid "🟡 Toplo"
+msgstr "🟡 Warm"
+
+msgid "⚪ Hladno"
+msgstr "⚪ Cold"
+
+#| msgid "Keine Antworten."
+msgid "Keine Antworten im Posteingang."
+msgstr "Keine Answeren."
+
+msgid "Osnovno"
+msgstr "Basic"
+
+msgid "Kontakt osoba"
+msgstr "Contact person"
+
+msgid "Uvjeti poslovanja"
+msgstr "Terms of business"
+
+msgid "Financije (automatski)"
+msgstr "Finance (automatic)"
+
+msgid "Klijent (Kupac)"
+msgstr "Client (Buyer)"
+
+msgid "Partner (Oboje)"
+msgstr "Partner (Both)"
+
+msgid "Zaposlenik"
+msgstr "Employee"
+
+msgid "Italija"
+msgstr "Italy"
+
+msgid "Mađarska"
+msgstr "Hungary"
+
+msgid "Vlasnik podataka"
+msgstr "Data owner"
+
+msgid "Naziv / Ime"
+msgstr "Name / Name"
+
+msgid "OIB / Steuer-Nr."
+msgstr "OIB / Steuer-Nr."
+
+msgid "Web stranica"
+msgstr "Website"
+
+msgid "Telefon kontakt osobe"
+msgstr "Phone contact person"
+
+msgid "Email kontakt osobe"
+msgstr "Email contact person"
+
+msgid "Tip partnera"
+msgstr "Partner type"
+
+msgid "Rok plaćanja (dana)"
+msgstr "Payment term (days)"
+
+msgid "Rabat (%)"
+msgstr "Discount (%)"
+
+msgid "Kreditni limit"
+msgstr "Credit limit"
+
+msgid "Saldo"
+msgstr "Balance"
+
+#| msgid "Partner"
+msgid "Partners"
+msgstr "Partner"
+
+msgid "Pregled i upravljanje - partners"
+msgstr "Overview and management - partners"
+
+#| msgid "Partner portal"
+msgid "Partners Modul"
+msgstr "Partner portal"
+
+msgid "Plaćenih bonova"
+msgstr "Paid vouchers"
+
+msgid "Poslovni prostor (za fiskalizaciju)"
+msgstr "Office space (for fiscalization)"
+
+msgid "Naziv kase"
+msgstr "Name of the cash register"
+
+msgid "Kod terminala"
+msgstr "At the terminal"
+
+msgid "Opis / Lokacija"
+msgstr "Description / Location"
+
+msgid "Tip POS sučelja"
+msgstr "Type of POS interface"
+
+msgid "POS terminal (kasa)"
+msgstr "POS terminal (cash register)"
+
+msgid "POS terminali (kase)"
+msgstr "POS terminals (cash registers)"
+
+msgid "Otvorena"
+msgstr "Open"
+
+msgid "Zatvorena"
+msgstr "Closed"
+
+msgid "Z-izvješće generirano"
+msgstr "Z-report generated"
+
+msgid "Terminal"
+msgstr "Terminal"
+
+msgid "Broj smjene"
+msgstr "Shift number"
+
+msgid "Otvorena u"
+msgstr "Opened in"
+
+msgid "Zatvorena u"
+msgstr "Closed in"
+
+msgid "Gotovina pri otvaranju (€)"
+msgstr "Cash at opening (€)"
+
+msgid "Prebrojana gotovina pri zatvaranju (€)"
+msgstr "Cash counted at closing (€)"
+
+msgid "Broj Z-izvješća"
+msgstr "Z-report number"
+
+msgid "POS smjena"
+msgstr "POS shift"
+
+msgid "POS smjene"
+msgstr "POS shifts"
+
+msgid "Otvoreni bon"
+msgstr "Open coupon"
+
+msgid "Plaćen"
+msgstr "Paid"
+
+msgid "Storniran / Otkazan"
+msgstr "Cancelled"
+
+msgid "Povrat"
+msgstr "Return"
+
+msgid "Smjena"
+msgstr "Shift"
+
+msgid "Broj bona"
+msgstr "Voucher number"
+
+msgid "Fiskalni račun"
+msgstr "Fiscal account"
+
+msgid "Iznos bez PDV"
+msgstr "Amount without VAT"
+
+msgid "Popust"
+msgstr "Discount"
+
+msgid "Stol / Zona"
+msgstr "Table / Zone"
+
+msgid "Za ugostiteljstvo: broj stola"
+msgstr "For catering: table number"
+
+msgid "Napomena na bonu"
+msgstr "Note on the voucher"
+
+msgid "Plaćen u"
+msgstr "Paid in"
+
+msgid "POS bon / račun"
+msgstr "POS voucher / receipt"
+
+msgid "POS bonovi / računi"
+msgstr "POS vouchers / invoices"
+
+msgid "Bon"
+msgstr "Bon"
+
+msgid "Artikl (zaliha)"
+msgstr "Item (stock)"
+
+msgid "Barkod"
+msgstr "Barcode"
+
+msgid "Uneseno skeniranjem"
+msgstr "Entered by scanning"
+
+msgid "Naziv artikla"
+msgstr "Item name"
+
+msgid "Cijena bez PDV"
+msgstr "Price without VAT"
+
+msgid "Stavka bona"
+msgstr "Voucher item"
+
+msgid "Stavke bona"
+msgstr "Voucher items"
+
+msgid "Mobilno plaćanje (mPOS)"
+msgstr "Mobile payment (mPOS)"
+
+msgid "Bon / Voucher"
+msgstr "Voucher"
+
+msgid "Na račun (klijent)"
+msgstr "To the account (client)"
+
+msgid "Vraćeno kusur"
+msgstr "Change returned"
+
+msgid "Referenca kartice / autorizacijski kod"
+msgstr "Card reference / authorization code"
+
+msgid "Linija plaćanja"
+msgstr "Payment line"
+
+msgid "Linije plaćanja"
+msgstr "Payment lines"
+
+msgid "Tip pisača"
+msgstr "Printer type"
+
+msgid "IP adresa pisača"
+msgstr "The IP address of the printer"
+
+msgid "Port"
+msgstr "Port"
+
+msgid "Fiskalni certifikat (.p12)"
+msgstr "Fiscal certificate (.p12)"
+
+msgid "Fiskalizacija aktivna"
+msgstr "Fiscalization active"
+
+msgid "POS postavke"
+msgstr "POS settings"
+
+msgid "Ime blagajnika"
+msgstr "Treasurer's name"
+
+msgid "PIN hash"
+msgstr "PIN hash"
+
+msgid "Može stornirati"
+msgstr "Can cancel"
+
+msgid "Može davati popust"
+msgstr "May give a discount"
+
+msgid "Max popust (%)"
+msgstr "Max discount (%)"
+
+msgid "POS blagajnik"
+msgstr "POS cashier"
+
+msgid "POS blagajnici"
+msgstr "POS cashiers"
+
+msgid "Stol"
+msgstr "Table"
+
+msgid "Sank"
+msgstr "Bar"
+
+msgid "Terasa"
+msgstr "Terrace"
+
+msgid "Soba"
+msgstr "Room"
+
+#| msgid "IP"
+msgid "VIP"
+msgstr "IP"
+
+#| msgid "Podružnica"
+msgid "Podruznica"
+msgstr "Subsidiary"
+
+#| msgid "Kapazität"
+msgid "Kapacitet"
+msgstr "Capacity"
+
+msgid "Zauzet"
+msgstr "Busy"
+
+msgid "QR kod"
+msgstr "QR Code"
+
+#| msgid "Stol / Zona"
+msgid "Kat / Zona"
+msgstr "Table / Zone"
+
+msgid "Stolovi"
+msgstr "Tables"
+
+#| msgid "+ Nova"
+msgid "Nova"
+msgstr "+ New"
+
+#| msgid "Potvrda"
+msgid "Potvrdena"
+msgstr "Confirmation"
+
+#| msgid "Spremi"
+msgid "U pripremi"
+msgstr "Save"
+
+#| msgid "Gotovina"
+msgid "Gotovo"
+msgstr "Cash"
+
+msgid "Na putu"
+msgstr "On the way"
+
+#| msgid "Dodijeljeno"
+msgid "Dostavljeno"
+msgstr "Granted"
+
+msgid "Placeno"
+msgstr ""
+
+msgid "POS Bon"
+msgstr ""
+
+#| msgid "Ime i prezime"
+msgid "Ime gosta"
+msgstr "Name and surname"
+
+msgid "Token pracenja"
+msgstr ""
+
+#| msgid "Radno vrijeme"
+msgid "Predvideno vrijeme"
+msgstr "Working hours"
+
+#| msgid "Nova narudžba"
+msgid "Gastro narudzba"
+msgstr "New order"
+
+msgid "Gastro narudzbe"
+msgstr ""
+
+#| msgid "Narudžbe"
+msgid "Narudzba"
+msgstr "Orders"
+
+#| msgid "Količina"
+msgid "Kolicina"
+msgstr "Amount"
+
+#| msgid "Spremi unos"
+msgid "Spremno"
+msgstr "Save entry"
+
+#| msgid "Stavke bona"
+msgid "Stavka narudzbe"
+msgstr "Voucher items"
+
+#| msgid "Stavke bona"
+msgid "Stavke narudzbe"
+msgstr "Voucher items"
+
+#| msgid "Broj smjene"
+msgid "Broj sarze"
+msgstr "Shift number"
+
+#| msgid "Datoteka"
+msgid "Datum isteka"
+msgstr "File"
+
+#| msgid "Upozorenja"
+msgid "Upozorenje dana prije"
+msgstr "Warnings"
+
+#| msgid "Ukloni"
+msgid "Uklonjeno"
+msgstr "Remove it"
+
+#| msgid "Porezni broj"
+msgid "Sarzni rok"
+msgstr "Tax number"
+
+msgid "Sarzni rokovi"
+msgstr ""
+
+msgid "Zurück"
+msgstr "Zurück"
+
+msgid "Gruppe"
+msgstr "Groups"
+
+msgid "Preis"
+msgstr "Preis"
+
+msgid "Kapazität"
+msgstr "Capacity"
+
+#| msgid "Privatperson"
+msgid "Personen"
+msgstr "Privatperson"
+
+msgid "Mindestdauer"
+msgstr "Mindestdauer"
+
+msgid "Zusatzleistungen"
+msgstr "Zusatzleistungen"
+
+#| msgid "Projekt"
+msgid "Objekt"
+msgstr "Project"
+
+#| msgid "Uhrzeit *"
+msgid "Uhrzeit"
+msgstr "time *"
+
+msgid "Daten"
+msgstr ""
+
+#| msgid "Zahlungsart"
+msgid "Zahlung"
+msgstr "Zahlungsart"
+
+#| msgid "Buchung bestätigen"
+msgid "Bestätigung"
+msgstr "Buchungen bechtigung"
+
+#| msgid "Kontakte"
+msgid "Datum wählen"
+msgstr "Contacts"
+
+msgid "Bitte wählen Sie ein Datum"
+msgstr ""
+
+#| msgid "Uhrzeit *"
+msgid "Uhrzeit wählen"
+msgstr "time *"
+
+msgid "Lade verfügbare Zeiten..."
+msgstr ""
+
+msgid "Zurück zum Datum"
+msgstr ""
+
+msgid "Ihre Daten"
+msgstr ""
+
+#| msgid "Name"
+msgid "Name *"
+msgstr "To us"
+
+msgid "Vor- und Nachname"
+msgstr "Vor- und Nachname"
+
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+#| msgid "Weitere Buchung"
+msgid "Weiter zur Zahlung"
+msgstr "Weitere Buchungen"
+
+msgid "Zurück zur Uhrzeit"
+msgstr ""
+
+msgid "Zahlungsart"
+msgstr "Zahlungsart"
+
+msgid "Rechnung"
+msgstr "Rechnung"
+
+msgid "Barzahlung"
+msgstr "Barzahlung"
+
+msgid "Kartenzahlung"
+msgstr "Kartenzahlung"
+
+#| msgid "Überweisung (DE)"
+msgid "Überweisung"
+msgstr "Überweisung (DE)"
+
+msgid "Gesamtpreis"
+msgstr "Gesamtpreis"
+
+msgid "Grundpreis für"
+msgstr ""
+
+msgid "Buchung bestätigen"
+msgstr "Buchungen bechtigung"
+
+msgid "Zurück zu den Daten"
+msgstr ""
+
+msgid "Buchung erfolgreich!"
+msgstr "Buchung erfolrich!"
+
+msgid "Buchungsnummer:"
+msgstr "Buchungsnummer:"
+
+msgid "Weitere Buchung"
+msgstr "Weitere Buchungen"
+
+msgid "Exclusive Rental"
+msgstr "Exclusive Rental"
+
+msgid "VISKOVIĆ"
+msgstr "VISKOVIĆ"
+
+msgid "Architecture of power and luxury"
+msgstr "Architecture of power and luxury"
+
+msgid "BOOKING PROCESS"
+msgstr "BOOKING PROCESS"
+
+msgid "Start Protocol"
+msgstr "Start Protocol"
+
+msgid "Naziv projekta"
+msgstr "Name of the project"
+
+msgid "Voditelj"
+msgstr "Leader"
+
+msgid "Ažuriranja"
+msgstr "Updates"
+
+msgid "Nema ažuriranja"
+msgstr "There are no updates"
+
+msgid "Fotografije projekta"
+msgstr "Photos of the project"
+
+msgid "Nema fotografija"
+msgstr "No photos"
+
+msgid "Novi projekt"
+msgstr "New project"
+
+msgid "Otvori"
+msgstr "Open it"
+
+msgid "Nema projekata"
+msgstr "There are no projects"
+
+msgid "Dodaj prvi projekt"
+msgstr "Add the first project"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "Approved"
+msgstr "Approved"
+
+msgid "Rejected"
+msgstr "Rejected"
+
+msgid "Rental"
+msgstr "Rental"
+
+msgid "Pregled i upravljanje - rental"
+msgstr "Overview and management - rental"
+
+msgid "Rental Modul"
+msgstr "Rental Module"
+
+msgid "Unesite novu lozinku (min. 8 znakova)"
+msgstr "Enter a new password (min. 8 characters)"
+
+#| msgid "Promjena lozinke"
+msgid "Nova lozinka"
+msgstr "Change password"
+
+msgid "Min. 8 znakova"
+msgstr "Min. 8 characters"
+
+#| msgid "Promijeni lozinku"
+msgid "Potvrdi lozinku"
+msgstr "Change password"
+
+#| msgid "Promijeni lozinku"
+msgid "Ponovite lozinku"
+msgstr "Change password"
+
+msgid "🔑 Spremi novu lozinku"
+msgstr "🔑 Save a new password"
+
+#| msgid "Reset lozinke"
+msgid "Reset lozinke – FINA-CONNECT"
+msgstr "Password reset"
+
+#| msgid "Reset lozinke"
+msgid "🔑 Reset lozinke"
+msgstr "Password reset"
+
+msgid ""
+"Unesite email adresu. Ako postoji u sustavu, poslat ćemo link za reset "
+"(vrijedi 2 sata)."
+msgstr ""
+"Enter your email address. If it exists in the system, we will send a reset "
+"link (valid for 2 hours)."
+
+#| msgid "Email Address"
+msgid "Email adresa"
+msgstr "Email Address"
+
+msgid "vaš@email.hr"
+msgstr "your@email.hr"
+
+msgid "Pošalji link za reset →"
+msgstr "Send the reset link →"
+
+msgid "← Povratak na prijavu"
+msgstr "← Back to login"
+
+msgid "Prijava – FINA-CONNECT"
+msgstr "Login – FINA-CONNECT"
+
+msgid "FINA"
+msgstr "FINE"
+
+msgid "Visković Group · Poslovni portal"
+msgstr "Visković Group · Business portal"
+
+#| msgid "Super Administrator"
+msgid "Superadmin"
+msgstr "Super Administrator"
+
+#| msgid "Admini"
+msgid "Admin"
+msgstr "Admins"
+
+msgid "🔑 Lozinka"
+msgstr "🔑 Password"
+
+msgid "✉ Magic link"
+msgstr "✉ Magic link"
+
+msgid "Email ili korisničko ime"
+msgstr "Email or username"
+
+msgid "email@tvrtka.hr"
+msgstr "email@tvrtka.hr"
+
+msgid "Prijava →"
+msgstr "Login →"
+
+#| msgid "Artikli"
+msgid "ili"
+msgstr "Articles"
+
+msgid "Nastavi s Google"
+msgstr "Continue with Google"
+
+msgid "Nastavi s Microsoft"
+msgstr "Continue with Microsoft"
+
+msgid "Zaboravili ste lozinku?"
+msgstr "Forgot your password?"
+
+msgid ""
+"Unesite vaš email i poslat ćemo vam link za pristup bez lozinke. Vrijedi 24 "
+"sata."
+msgstr ""
+"Enter your email and we will send you a password-free access link. Valid for"
+" 24 hours."
+
+msgid "vaš@email.com"
+msgstr "your@email.com"
+
+msgid "Pošalji magic link →"
+msgstr "Send magic link →"
+
+msgid "Za pristup projektima, fakturama ili upload slika –"
+msgstr "To access projects, invoices or upload images -"
+
+#| msgid "Reset lozinke"
+msgid "bez lozinke!"
+msgstr "Password reset"
+
+msgid "viskovic-group.de"
+msgstr "viskovic-group.de"
+
+#| msgid "Promijeni lozinku"
+msgid "Ponovi lozinku"
+msgstr "Change password"
+
+#| msgid "Promijeni lozinku"
+msgid "✓ Spremi novu lozinku"
+msgstr "Change password"
+
+msgid "📱 Google Authenticator"
+msgstr "📱 Google Authenticator"
+
+msgid ""
+"Skenirajte QR kod u aplikaciji Google Authenticator, Microsoft Authenticator"
+" ili sličnoj TOTP aplikaciji."
+msgstr ""
+"Scan the QR code in Google Authenticator, Microsoft Authenticator, or a "
+"similar TOTP app."
+
+msgid "Unesite 6-znamenkasti kod za potvrdu:"
+msgstr "Enter the 6-digit verification code:"
+
+msgid "✓ Aktiviraj 2FA"
+msgstr "✓ Activate 2FA"
+
+#| msgid "Upravljanje korisnicima i rolama"
+msgid "Upravljanje korisnicima"
+msgstr "User and role management"
+
+msgid "Korisnik"
+msgstr "User"
+
+#| msgid "Zadnje prijave"
+msgid "Zadnja prijava"
+msgstr "Last applications"
+
+msgid "Staff"
+msgstr "Staff"
+
+msgid "User"
+msgstr "User"
+
+#| msgid "Aktivan"
+msgid "● Aktivan"
+msgstr "Active"
+
+#| msgid "Aktivan"
+msgid "● Inaktivan"
+msgstr "Active"
+
+msgid "Uredi"
+msgstr "Edit"
+
+msgid "2FA provjera – FINA-CONNECT"
+msgstr "2FA verification – FINA-CONNECT"
+
+msgid "Dvofaktorska provjera"
+msgstr "Two-factor authentication"
+
+msgid "Unesite 6-znamenkasti kod iz vaše autentifikacijske aplikacije"
+msgstr "Enter the 6-digit code from your authentication app"
+
+#| msgid "Potvrda"
+msgid "Potvrdi →"
+msgstr "Confirmation"
+
+msgid "← Odustani i odjavi se"
+msgstr "← Give up and log out"
+
+msgid "Natrag"
+msgstr "Back"
+
+#| msgid "Naziv normativa"
+msgid "Naziv termina *"
+msgstr "Name of the norm"
+
+msgid "Tip *"
+msgstr "Type *"
+
+#| msgid "Početna"
+msgid "Početak *"
+msgstr "Home"
+
+msgid "Kraj *"
+msgstr "End *"
+
+#| msgid "Ime klijenta"
+msgid "-- bez klijenta --"
+msgstr "Client name"
+
+msgid "Resurs / Prostor"
+msgstr "Resource / Space"
+
+msgid "-- bez resursa --"
+msgstr "-- no resources --"
+
+msgid "-- bez usluge --"
+msgstr "-- no service --"
+
+msgid "Boja"
+msgstr "Color"
+
+msgid "Cjelodnevni / višednevni termin"
+msgstr "Full-day / multi-day appointment"
+
+#| msgid "Napomene"
+msgid "Opis / Napomene"
+msgstr "Notes"
+
+msgid "Detalji termina..."
+msgstr "Appointment details..."
+
+#| msgid "Termini"
+msgid "Svi termini"
+msgstr "Dates"
+
+msgid "Kalendar"
+msgstr "Calendar"
+
+#| msgid "Kod terminala"
+msgid "Novi termin"
+msgstr "At the terminal"
+
+#| msgid "Status"
+msgid "Svi statusi"
+msgstr "Status"
+
+msgid "Traži"
+msgstr "Search"
+
+#| msgid "Otkazano"
+msgid "Zakazano"
+msgstr "Cancelled"
+
+#| msgid "Nema računa"
+msgid "Nema termina."
+msgstr "No account"
+
+#| msgid "Dodaj prvi projekt"
+msgid "Dodaj prvi."
+msgstr "Add the first project"
+
+#| msgid "Kod terminala"
+msgid "Kalendar termina"
+msgstr "At the terminal"
+
+msgid "Lista"
+msgstr "List"
+
+msgid "Obriši"
+msgstr "Delete"
+
+#| msgid "Brzi unos iz predloška"
+msgid "Brzi unos termina"
+msgstr "Quick input from a template"
+
+#| msgid "Ime klijenta"
+msgid "-- klijent --"
+msgstr "Client name"
+
+msgid "-- resurs --"
+msgstr "-- resource --"
+
+msgid "📄 PDF"
+msgstr "📄 PDF"
+
+msgid "← Lista"
+msgstr "← List"
+
+#| msgid "Nabavna cijena"
+msgid "Okvirna cijena"
+msgstr "Purchase price"
+
+msgid "📍 Korak 1 – Lokacija i tip objekta"
+msgstr "📍 Step 1 - Location and type of facility"
+
+msgid "E-mail"
+msgstr "E-mail"
+
+#| msgid "Tip poslovnog subjekta"
+msgid "Tip objekta"
+msgstr "Type of business entity"
+
+msgid "Etaža"
+msgstr "Floor"
+
+msgid "Priključak"
+msgstr "Connection"
+
+msgid "Položaj kupaonice"
+msgstr "Location of the bathroom"
+
+msgid "🔧 Korak 2 – Instalacije"
+msgstr "🔧 Step 2 – Installations"
+
+#| msgid "Vodoinstalacije"
+msgid "Instalacija"
+msgstr "Plumbing"
+
+msgid "WC tip"
+msgstr "Toilet type"
+
+msgid "Slavine"
+msgstr "Faucets"
+
+msgid "Cirk. tople vode"
+msgstr "Circus. warm water"
+
+msgid "Cijevi"
+msgstr "Pipes"
+
+msgid "📐 Korak 3 – Dimenzije i stanje"
+msgstr "📐 Step 3 – Dimensions and condition"
+
+#| msgid "Povrat"
+msgid "Površina"
+msgstr "Return"
+
+#| msgid "Zadana stopa"
+msgid "Visina stropa"
+msgstr "Default rate"
+
+msgid "Zidovi"
+msgstr "The walls"
+
+#| msgid "Rok važnosti"
+msgid "Složenost"
+msgstr "Validity period"
+
+msgid "Skriveni rizici"
+msgstr "Hidden risks"
+
+msgid "🛁 Korak 4 – Elementi kupaone"
+msgstr "🛁 Step 4 – Elements of the bathroom"
+
+msgid "Hidroizolacija"
+msgstr "Waterproofing"
+
+msgid "Prozor"
+msgstr "Window"
+
+#| msgid "Identifikacija"
+msgid "Ventilacija"
+msgstr "Identification"
+
+msgid "Rasvjeta"
+msgstr "Lighting"
+
+#| msgid "Kupaonica"
+msgid "Kupanje"
+msgstr "Bathroom"
+
+msgid "Tuš kabina"
+msgstr "Shower cabin"
+
+msgid "Staklo"
+msgstr "Glass"
+
+msgid "SMART razina"
+msgstr "SMART level"
+
+msgid "Smart opcije"
+msgstr "Smart options"
+
+msgid "🧑‍🔧 Korak 5 – Zaključak majstora"
+msgstr "🧑‍🔧 Step 5 - Conclusion of the master"
+
+msgid "Mišljenje stručnjaka"
+msgstr "Expert opinion"
+
+msgid "Rok radova"
+msgstr "Work deadline"
+
+msgid "Ekipa"
+msgstr "Team"
+
+msgid "Cijena (okvirno)"
+msgstr "Price (approximate)"
+
+msgid "Upozorenja"
+msgstr "Warnings"
+
+msgid "Preporuka"
+msgstr "Recommendation"
+
+msgid "🎨 Korak 6 – Klijentovi zahtjevi i stil"
+msgstr "🎨 Step 6 - Client's requirements and style"
+
+msgid "Stil"
+msgstr "Style"
+
+msgid "Format pločica"
+msgstr "Tile format"
+
+msgid "Boja pločica"
+msgstr "Tile color"
+
+msgid "Sanitarija (budget)"
+msgstr "Sanitation (budget)"
+
+msgid "Boja sanitarije"
+msgstr "The color of sanitary ware"
+
+msgid "Posebni zahtjevi klijenta"
+msgstr "Special requirements of the client"
+
+msgid "📋 Terenske procjene / Nalazi"
+msgstr "📋 Field assessments / Findings"
+
+#| msgid "Novi projekt"
+msgid "+ Nova procjena"
+msgstr "New project"
+
+msgid "Skice"
+msgstr "Sketches"
+
+#| msgid "Ponuda prihvaćena"
+msgid "Ponuda poslana"
+msgstr "Offer accepted"
+
+msgid "Pretraži"
+msgstr "Search"
+
+#| msgid "Svi projekti"
+msgid "Svi tipovi"
+msgstr "All projects"
+
+#| msgid "Fakturiranje"
+msgid "Filtriraj"
+msgstr "Invoicing"
+
+msgid "Resetiraj"
+msgstr "Reset"
+
+msgid "Pregled →"
+msgstr "Overview →"
+
+msgid "Nema procjena za odabrane filtre."
+msgstr "There are no ratings for the selected filters."
+
+msgid "📋 Novi nalaz / dijagnoza"
+msgstr "📋 New finding / diagnosis"
+
+msgid "⚡ Offline – lokalno spremanje"
+msgstr "⚡ Offline – local save"
+
+#| msgid "Vodoinstalacije"
+msgid "Instalacije"
+msgstr "Plumbing"
+
+msgid "Dimenzije"
+msgstr "Dimensions"
+
+msgid "Elementi"
+msgstr "Elements"
+
+msgid "Zaključak"
+msgstr "Conclusion"
+
+msgid "🎯 Tip procjene"
+msgstr "🎯 Assessment type"
+
+#| msgid "Kupaonica"
+msgid "Kupaona / Kupaonica"
+msgstr "Bathroom"
+
+#| msgid "Email klijenta"
+msgid "👤 Podaci klijenta"
+msgstr "Client email"
+
+#| msgid "Ime i prezime"
+msgid "Ime i prezime klijenta"
+msgstr "Name and surname"
+
+msgid "npr. Ivan Horvat"
+msgstr "eg Ivan Horvat"
+
+msgid "klijent@email.com"
+msgstr "client@email.com"
+
+#| msgid "Adresa"
+msgid "Adresa objekta"
+msgstr "Address"
+
+msgid "Ulica br., Grad"
+msgstr "Street no., City"
+
+msgid "🏗️ Tip objekta"
+msgstr "🏗️ Object type"
+
+msgid "Stambena zgrada (stan)"
+msgstr "Residential building (apartment)"
+
+msgid "Etaža: ___"
+msgstr "Floor: ___"
+
+msgid "Obiteljska kuća"
+msgstr "Family house"
+
+#| msgid "Poslovni prostori"
+msgid "Poslovni prostor / Svlačionica firme"
+msgstr "Business premises"
+
+msgid "🔧 Vodovodni priključak"
+msgstr "🔧 Water connection"
+
+msgid "Od glavnog ventila (kuća)"
+msgstr "From the main valve (house)"
+
+msgid "Od brojila (stan u zgradi)"
+msgstr "From the meter (apartment in the building)"
+
+msgid "Poseban priključak"
+msgstr "Special connection"
+
+msgid "📍 Položaj kupaonice"
+msgstr "📍 Location of the bathroom"
+
+msgid "Uz vanjski zid"
+msgstr "Along the outer wall"
+
+msgid "Prozor moguć"
+msgstr "Window possible"
+
+msgid "Unutarnja (bez prozora)"
+msgstr "Internal (without window)"
+
+msgid "⚠ Ventilacija obavezna!"
+msgstr "⚠ Ventilation is mandatory!"
+
+msgid "Veza s kuhinjom"
+msgstr "Connection with the kitchen"
+
+msgid "🔩 Tip cijevi (postojeće)"
+msgstr "🔩 Pipe type (existing)"
+
+msgid "Bakar"
+msgstr "Copper"
+
+msgid "PEX"
+msgstr "PEX"
+
+msgid "PP (polipropilen)"
+msgstr "PP (polypropylene)"
+
+#| msgid "Navigacija"
+msgid "Galvanizacija"
+msgstr "Navigation"
+
+msgid "Zamjena obavezna!"
+msgstr "Replacement required!"
+
+msgid "Nepoznato"
+msgstr "Unknown"
+
+#| msgid "Otvori projekt"
+msgid "Otvoriti zid za provjeru"
+msgstr "Open the project"
+
+#| msgid "Vodoinstalacije"
+msgid "🔧 Tip instalacije"
+msgstr "Plumbing"
+
+msgid "Podžbukno (sve u zid)"
+msgstr "Plaster (all in the wall)"
+
+msgid "STANDARD – preporučeno"
+msgstr "STANDARD – recommended"
+
+msgid "Nadžbukno (vidljivo)"
+msgstr "Supersonic (visible)"
+
+msgid "🚰 Slavine – tip i pozicija"
+msgstr "🚰 Faucets - type and position"
+
+msgid "Tip slavine (opći)"
+msgstr "Faucet type (general)"
+
+msgid "Podžbukne"
+msgstr "It's plastered"
+
+msgid "Samo ručka vidljiva – PREPORUČENO"
+msgstr "Only the handle is visible - RECOMMENDED"
+
+msgid "Nadžbukne"
+msgstr "He bursts out"
+
+msgid "Vidljivo tijelo"
+msgstr "Visible body"
+
+msgid "Podni WC"
+msgstr "Floor toilet"
+
+msgid "Klasični"
+msgstr "Classic"
+
+msgid "Viseći WC"
+msgstr "Hanging toilet"
+
+msgid "Samo opeka/gips – NE beton!"
+msgstr "Brick/plaster only – NOT concrete!"
+
+msgid "Umivaonik"
+msgstr "Sink"
+
+msgid "Zidna"
+msgstr "Wall"
+
+msgid "Stojeća"
+msgstr "Standing"
+
+msgid "Tuš"
+msgstr "Shower"
+
+#| msgid "Datum dospijeća"
+msgid "Samostojeća"
+msgstr "Maturity date"
+
+msgid "Kada"
+msgstr "When"
+
+msgid "🌡️ Cirkulacija tople vode"
+msgstr "🌡️ Hot water circulation"
+
+msgid "Postoji"
+msgstr "It exists"
+
+msgid "Nema"
+msgstr "There is none"
+
+msgid "Moguće ugraditi"
+msgstr "Possible to install"
+
+msgid "Nije izvedivo"
+msgstr "It's not feasible"
+
+msgid "📐 Dimenzije prostora"
+msgstr "📐 Space dimensions"
+
+msgid "Površina poda"
+msgstr "Floor area"
+
+msgid "m²"
+msgstr "m²"
+
+msgid "cm"
+msgstr "cm"
+
+#| msgid "Materijal"
+msgid "🧱 Materijal zidova"
+msgstr "Material"
+
+msgid "Beton"
+msgstr "Concrete"
+
+msgid "Opeka"
+msgstr "Brick"
+
+msgid "Gips ploče"
+msgstr "Plasterboard"
+
+#| msgid "Stornirano"
+msgid "Kombinirano"
+msgstr "Cancelled"
+
+msgid "🎯 Procjena stanja (majstor)"
+msgstr "🎯 Condition assessment (master)"
+
+msgid "Jednostavno"
+msgstr "Simply"
+
+msgid "Srednje"
+msgstr "Medium"
+
+msgid "Kompleksno"
+msgstr "Complex"
+
+msgid "Izazovno"
+msgstr "Challenging"
+
+msgid "Zapažanja majstora o potencijalnim problemima..."
+msgstr "A master's observations on potential problems..."
+
+#| msgid "Fotografije projekta"
+msgid "📷 Fotografije (stanje)"
+msgstr "Photos of the project"
+
+msgid "📸 Fotografirajte: sva 4 zida · pod · instalacije · strop"
+msgstr "📸 Photograph: all 4 walls · floor · installations · ceiling"
+
+msgid "📷 Fotografiraj / Odaberi"
+msgstr "📷 Take a photo / Select"
+
+msgid "💧 Hidroizolacija"
+msgstr "💧 Waterproofing"
+
+msgid "Tuš zona + pod"
+msgstr "Shower area + floor"
+
+msgid "MINIMUM standard"
+msgstr "MINIMUM standard"
+
+msgid "Potpuna – svi zidovi"
+msgstr "Complete - all walls"
+
+msgid "Preporučeno za starije objekte"
+msgstr "Recommended for older buildings"
+
+msgid "Napomena o hidroizolaciji"
+msgstr "Note on waterproofing"
+
+#| msgid "Interne napomene"
+msgid "Posebne napomene..."
+msgstr "Internal notes"
+
+msgid "🪟 Prozor / Ventilacija"
+msgstr "🪟 Window / Ventilation"
+
+msgid "Prozor postoji – dobro stanje"
+msgstr "There is a window - good condition"
+
+msgid "Prozor postoji – zamjena potrebna"
+msgstr "Window exists - replacement required"
+
+#| msgid "Nema projekata"
+msgid "Nema prozora"
+msgstr "There are no projects"
+
+msgid "🌀 Ventilacija (bez prozora – obavezno)"
+msgstr "🌀 Ventilation (without windows - mandatory)"
+
+msgid "Postojeći vent. kanal"
+msgstr "Existing vent. channel"
+
+msgid "Provjeri funkcionalnost!"
+msgstr "Check the functionality!"
+
+msgid "Ventilator s timerom"
+msgstr "Fan with timer"
+
+msgid "Ventilator sa senzorom vlage"
+msgstr "Fan with humidity sensor"
+
+#| msgid "Operater"
+msgid "Rekuperator"
+msgstr "Operator"
+
+msgid "Premium opcija"
+msgstr "Premium option"
+
+msgid "💡 Rasvjeta"
+msgstr "💡 Lighting"
+
+#| msgid "Tip pisača"
+msgid "Tip prekidača"
+msgstr "Printer type"
+
+msgid "Senzor pokreta"
+msgstr "Motion sensor"
+
+msgid "Dimer"
+msgstr "Dimmer"
+
+msgid "Izvedba"
+msgstr "Performance"
+
+msgid "Standardne lampe"
+msgstr "Standard lamps"
+
+msgid "LED trake / niše"
+msgstr "LED strips / niches"
+
+msgid "⚠️ Sva rasvjeta u kupaoni mora biti minimum"
+msgstr "⚠️ All lighting in the bathroom must be at a minimum"
+
+msgid "IP44"
+msgstr "IP44"
+
+#| msgid "Grijanje"
+msgid "🔥 Grijanje"
+msgstr "Heating"
+
+msgid "Kupaonski radijator za ručnike"
+msgstr "Bathroom radiator for towels"
+
+msgid "Standardno"
+msgstr "Standard"
+
+msgid "Električno podno grijanje"
+msgstr "Electric floor heating"
+
+msgid "Skuplje u radu"
+msgstr "More expensive in operation"
+
+msgid "Hidro podno grijanje"
+msgstr "Hydro floor heating"
+
+msgid "Ako postoji centralno"
+msgstr "If there is a central"
+
+msgid "Zidno grijanje ispod pločica"
+msgstr "Wall heating under the tiles"
+
+msgid "PREMIUM – nevidljivo, ravnomjerno, najudobnije"
+msgstr "PREMIUM – invisible, even, most comfortable"
+
+msgid "🛁 Tuš / Kada"
+msgstr "🛁 Shower / Bathtub"
+
+#| msgid "Tip partnera"
+msgid "Tip kupanja"
+msgstr "Partner type"
+
+msgid "Samo tuš"
+msgstr "Just a shower"
+
+msgid "Samo kada"
+msgstr "Only when"
+
+msgid "Tuš + kada odvojeno"
+msgstr "Shower + bathtub separately"
+
+msgid "Klasična s vratima"
+msgstr "Classic with doors"
+
+msgid "Walk-in (staklena pregrada)"
+msgstr "Walk-in (glass partition)"
+
+msgid "Utor u zidu (recessed niche)"
+msgstr "Recessed niche"
+
+msgid "PREPORUČENO gdje god moguće"
+msgstr "RECOMMENDED wherever possible"
+
+msgid "Obloga do stropa (bez okvira)"
+msgstr "Covering up to the ceiling (without frame)"
+
+msgid "Staklena pregrada"
+msgstr "Glass partition"
+
+msgid "Klizna vrata"
+msgstr "Sliding door"
+
+msgid "Zaklopna vrata"
+msgstr "Flap door"
+
+msgid "Walk-in bez vrata"
+msgstr "Walk-in without a door"
+
+msgid "Debljina stakla"
+msgstr "Glass thickness"
+
+msgid "6 mm"
+msgstr "6 mm"
+
+msgid "8 mm"
+msgstr "8 mm"
+
+msgid "Preporučeno"
+msgstr "Recommended"
+
+msgid "10 mm"
+msgstr "10 mm"
+
+#| msgid "Spremi"
+msgid "Premium"
+msgstr "Save"
+
+msgid "📱 SMART kupaona"
+msgstr "📱 SMART bathroom"
+
+msgid "Pametno ogledalo"
+msgstr "Smart mirror"
+
+msgid "Smart tuš"
+msgstr "Smart shower"
+
+msgid "Senzori curenja"
+msgstr "Leak sensors"
+
+msgid "Grijanje s termostatom"
+msgstr "Heating with thermostat"
+
+msgid "Glasovna kontrola"
+msgstr "Voice control"
+
+msgid "El. zatamnjivanje"
+msgstr "El. dimming"
+
+msgid "Razina SMART"
+msgstr "Level SMART"
+
+msgid "LED + senzor pokreta"
+msgstr "LED + motion sensor"
+
+msgid "+ smart grijanje + ogledalo"
+msgstr "+ smart heating + mirror"
+
+msgid "Potpuna automatizacija"
+msgstr "Full automation"
+
+msgid "🧑‍🔧 Mišljenje stručnjaka"
+msgstr "🧑‍🔧 Expert opinion"
+
+msgid ""
+"Slobodni tekst – detaljno opišite stanje, preporuke i posebne napomene..."
+msgstr ""
+"Free text - describe the condition, recommendations and special notes in "
+"detail..."
+
+msgid "⚠️ Upozorenja i skriveni troškovi"
+msgstr "⚠️ Warnings and hidden costs"
+
+#| msgid "Otvori projekt"
+msgid "Otvoriti zidove"
+msgstr "Open the project"
+
+msgid "Potreban elektrićar"
+msgstr "Electrician needed"
+
+#| msgid "Opis problema"
+msgid "Statički problem"
+msgstr "Description of the problem"
+
+msgid "Azbest"
+msgstr "Asbestos"
+
+msgid "Specijalno uklanjanje!"
+msgstr "Special removal!"
+
+msgid "Vlaga / plijesan"
+msgstr "Moisture / mold"
+
+msgid "✅ Preporučena rješenja"
+msgstr "✅ Recommended solutions"
+
+msgid "Kompletna rekonstrukcija (ključ u ruke)"
+msgstr "Complete reconstruction (turnkey)"
+
+msgid "Djelomična rekonstrukcija"
+msgstr "Partial reconstruction"
+
+msgid "Samo pločice i sanitarija (instalacije OK)"
+msgstr "Only tiles and sanitary ware (installations OK)"
+
+msgid "Hitna intervencija"
+msgstr "Emergency intervention"
+
+msgid "Kvar koji ne može čekati"
+msgstr "A breakdown that cannot wait"
+
+msgid "📅 Okvirni rok radova"
+msgstr "📅 Framework deadline for works"
+
+msgid "Do 5 radnih dana"
+msgstr "Up to 5 working days"
+
+msgid "Mali zahvat"
+msgstr "Small operation"
+
+msgid "5–10 radnih dana"
+msgstr "5–10 working days"
+
+msgid "Standardna kupaona"
+msgstr "Standard bathroom"
+
+msgid "10–15 radnih dana"
+msgstr "10–15 working days"
+
+msgid "Kompleksna kupaona"
+msgstr "Complex bathroom"
+
+msgid "15–20 radnih dana"
+msgstr "15–20 working days"
+
+msgid "Premium / SMART kupaona"
+msgstr "Premium / SMART bathroom"
+
+msgid "👷 Predviđena ekipa"
+msgstr "👷 Predicted team"
+
+#| msgid "Broj bona"
+msgid "Broj majstora"
+msgstr "Voucher number"
+
+msgid "majstora"
+msgstr "master"
+
+#| msgid "Broj bona"
+msgid "Broj pomoćnika"
+msgstr "Voucher number"
+
+msgid "pomoćnika"
+msgstr "assistant"
+
+#| msgid "Zadana cijena (€)"
+msgid "Okvirna cijena (€)"
+msgstr "Default price (€)"
+
+msgid "npr. 3500"
+msgstr "eg 3500"
+
+msgid "npr. 5000"
+msgstr "eg 5000"
+
+msgid "Okvirna procjena – konačna cijena u ponudi"
+msgstr "Approximate estimate - final price in the offer"
+
+msgid "🎨 Stil kupaone (klijent bira)"
+msgstr "🎨 Bathroom style (client chooses)"
+
+msgid "Moderan / Minimalistički"
+msgstr "Modern / Minimalist"
+
+msgid "Klasičan / Elegantni"
+msgstr "Classic / Elegant"
+
+msgid "Industrijski / Loft"
+msgstr "Industrial / Loft"
+
+msgid "Mediteranski / Rustikalni"
+msgstr "Mediterranean / Rustic"
+
+msgid "SMART / High-tech"
+msgstr "SMART / High-tech"
+
+msgid "Po dogovoru"
+msgstr "By arrangement"
+
+#| msgid "Pločice"
+msgid "🪨 Pločice"
+msgstr "Tiles"
+
+#| msgid "Normativ"
+msgid "Format"
+msgstr "Normative"
+
+msgid "Mali (&lt;30cm)"
+msgstr "Small (<30cm)"
+
+msgid "Srednji (30-60)"
+msgstr "Middle (30-60)"
+
+msgid "Veliki (&gt;60cm)"
+msgstr "Large (&gt;60cm)"
+
+msgid "Bijela"
+msgstr "White"
+
+msgid "Siva"
+msgstr "Gray"
+
+msgid "Bež"
+msgstr "Beige"
+
+msgid "Tamna"
+msgstr "Dark"
+
+#| msgid "Lokacija"
+msgid "Kombinacija"
+msgstr "Location"
+
+msgid "Keramika"
+msgstr "Ceramics"
+
+msgid "Gres"
+msgstr "Sin"
+
+msgid "Mramor"
+msgstr "Marble"
+
+msgid "Beton efekt"
+msgstr "Concrete effect"
+
+msgid "🚿 Sanitarija"
+msgstr "🚿 Sanitation"
+
+msgid "Budget"
+msgstr "Budget"
+
+msgid "Ekonomična linija"
+msgstr "Economy line"
+
+msgid "do €500"
+msgstr "up to €500"
+
+msgid "Srednja klasa"
+msgstr "Middle class"
+
+#| msgid "Klijenti i dobavljači"
+msgid "Klijent sam bira/nabavlja"
+msgstr "Clients and suppliers"
+
+msgid "Bijela (standard)"
+msgstr "White (standard)"
+
+msgid "Crna (trend)"
+msgstr "Black (trend)"
+
+msgid "Zlatna (premium)"
+msgstr "Golden (premium)"
+
+msgid "📝 Posebni zahtjevi klijenta"
+msgstr "📝 Special requirements of the client"
+
+msgid "Posebne želje, napomene ili zahtjevi klijenta..."
+msgstr "Special wishes, notes or requests of the client..."
+
+msgid "Dalje →"
+msgstr "Next →"
+
+msgid "✓ Spremi nalaz"
+msgstr "✓ Save the finding"
+
+msgid "NALAZ"
+msgstr "FINDING"
+
+msgid "&amp; Mišljenje stručnjaka"
+msgstr "&amp; Expert opinion"
+
+#| msgid "Tip partnera"
+msgid "Tip procjene:"
+msgstr "Partner type"
+
+#| msgid "Status"
+msgid "Status:"
+msgstr "Status"
+
+msgid "Majstor:"
+msgstr "Master:"
+
+msgid "Okvirna procjena troškova"
+msgstr "A rough estimate of costs"
+
+msgid "1. Lokacija i tip objekta"
+msgstr "1. Location and type of facility"
+
+msgid "Vodovodni priključak"
+msgstr "Water connection"
+
+#| msgid "Vodoinstalacije"
+msgid "2. Instalacije"
+msgstr "Plumbing"
+
+msgid "Tip cijevi"
+msgstr "Pipe type"
+
+msgid "WC"
+msgstr "toilet"
+
+msgid "Cirkulacija tople vode"
+msgstr "Hot water circulation"
+
+msgid "3. Dimenzije i stanje"
+msgstr "3. Dimensions and condition"
+
+msgid "Složenost zahvata"
+msgstr "The complexity of the procedure"
+
+msgid "4. Elementi kupaone"
+msgstr "4. Bathroom elements"
+
+msgid "Tuš / Kada"
+msgstr "Shower / Tub"
+
+msgid "5. Zaključak i mišljenje stručnjaka"
+msgstr "5. Conclusion and expert's opinion"
+
+msgid "6. Klijentovi zahtjevi i stil"
+msgstr "6. Client's requirements and style"
+
+msgid "Posebni zahtjevi"
+msgstr "Special requirements"
+
+#| msgid "Nema fotografija"
+msgid "Priložene fotografije"
+msgstr "No photos"
+
+msgid "Potpis stručnjaka"
+msgstr "Signature of the expert"
+
+#| msgid "Online trgovina"
+msgid "Online verzija"
+msgstr "Online store"
+
+msgid "Pristupate kao:"
+msgstr "You access as:"
+
+#| msgid "Trajanje"
+msgid "Trajanje:"
+msgstr "Duration"
+
+msgid "✕ Prekini pristup"
+msgstr "✕ Terminate access"
+
+msgid "Navigacija"
+msgstr "Navigation"
+
+msgid "Početna"
+msgstr "Home"
+
+msgid "Radno vrijeme"
+msgstr "Working hours"
+
+msgid "Upravljanje"
+msgstr "Management"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Korisnici"
+msgstr "Users"
+
+msgid "Fakture"
+msgstr "Invoices"
+
+msgid "Izvještaji"
+msgstr "Reports"
+
+msgid "Moduli"
+msgstr "Modules"
+
+msgid "Osiguranje"
+msgstr "Insurance"
+
+msgid "Kalkulator"
+msgstr "Calculator"
+
+msgid "Intervencije"
+msgstr "Interventions"
+
+msgid "POS"
+msgstr "POS"
+
+#| msgid "Otvori"
+msgid "Gastro POS"
+msgstr "Open it"
+
+#| msgid "Rok plaćanja"
+msgid "Rokovi trajanja"
+msgstr "Payment term"
+
+msgid "Tracking"
+msgstr "Tracking"
+
+#| msgid "Procjene i kalkulacije"
+msgid "Procjene / Nalazi"
+msgstr "Estimates and calculations"
+
+msgid "AI Asistent"
+msgstr ""
+
+msgid "Django Admin"
+msgstr "Django Admin"
+
+msgid "Odjava"
+msgstr "Checkout"
+
+msgid "&#x1F4D2; Knjigovodstvo"
+msgstr "&#x1F4D2; Bookkeeping"
+
+msgid "&#x1F4CB; Fakture"
+msgstr "&#x1F4CB; Invoices"
+
+#| msgid "Dokumenti"
+msgid "&#x1F4C4; Dokumenti"
+msgstr "Documents"
+
+msgid "&#x1F464; Klijenti"
+msgstr "&#x1F464; Clients"
+
+msgid "&#x1F4CB;"
+msgstr "&#x1F4CB;"
+
+msgid "Računi ovaj mjesec"
+msgstr "Count this month"
+
+msgid "&#x23F3;"
+msgstr "&#x23F3;"
+
+msgid "Čekaju naplatu"
+msgstr "They are waiting for payment"
+
+msgid "&#x1F4C4;"
+msgstr "&#x1F4C4;"
+
+msgid "&#x2192;"
+msgstr "&#x2192;"
+
+msgid "&#x1F91D;"
+msgstr "&#x1F91D;"
+
+#| msgid "Klijent"
+msgid "Klijenti"
+msgstr "Client"
+
+#| msgid "Kreiraj i upravljaj fakturama"
+msgid "Kreiraj fakturu"
+msgstr "Create and manage invoices"
+
+msgid "&#x1F4B0;"
+msgstr "&#x1F4B0;"
+
+#| msgid "Fakture"
+msgid "Sve fakture"
+msgstr "Invoices"
+
+#| msgid "Pregled vaših projekata"
+msgid "Pregled i naplata"
+msgstr "Overview of your projects"
+
+msgid "Ugovori, ponude"
+msgstr "Contracts, offers"
+
+msgid "&#x1F464;"
+msgstr "&#x1F464;"
+
+#| msgid "Email klijenta"
+msgid "Kartice klijenata"
+msgstr "Client email"
+
+msgid "&#x1F4B3;"
+msgstr "&#x1F4B3;"
+
+#| msgid "Prihod i rashod"
+msgid "Prihodi i rashodi"
+msgstr "Income and expenditure"
+
+msgid "&#x23F1;"
+msgstr "&#x23F1;"
+
+#| msgid "Satnica i fond sati"
+msgid "Satnica osoblja"
+msgstr "Hourly rate and hour fund"
+
+msgid "Status ovaj mjesec"
+msgstr "Status this month"
+
+msgid "&#x1F7E2;"
+msgstr "&#x1F7E2;"
+
+#| msgid "Vezani račun"
+msgid "izdanih računa"
+msgstr "Linked account"
+
+msgid "&#x1F7E1;"
+msgstr "&#x1F7E1;"
+
+msgid "čeka naplatu"
+msgstr "awaiting payment"
+
+#| msgid "Pregled vaših projekata"
+msgid "Pregled svih &rarr;"
+msgstr "Overview of your projects"
+
+msgid "&#x1F3CB; Fitness"
+msgstr "&#x1F3CB; Fitness"
+
+msgid "&#x1F4C5; Termini"
+msgstr "&#x1F4C5; Dates"
+
+msgid "&#x1F4B3; POS"
+msgstr "&#x1F4B3; POS"
+
+msgid "&#x1F464; Članovi"
+msgstr "&#x1F464; Members"
+
+msgid "&#x1F4C5;"
+msgstr "&#x1F4C5;"
+
+#| msgid "Termini"
+msgid "Termini danas"
+msgstr "Dates"
+
+msgid "Termini – 7 dana"
+msgstr "Appointments - 7 days"
+
+msgid "Utržak danas"
+msgstr "A bargain today"
+
+msgid "&#x1F9FE;"
+msgstr "&#x1F9FE;"
+
+#| msgid "Otvoreni bon"
+msgid "Otvoreni bonovi"
+msgstr "Open coupon"
+
+msgid "Grupni / personalni trening"
+msgstr "Group / personal training"
+
+msgid "&#x1F5D3;"
+msgstr "&#x1F5D3;"
+
+msgid "Raspored"
+msgstr "Schedule"
+
+#| msgid "Pregled vaših projekata"
+msgid "Pregled svih termina"
+msgstr "Overview of your projects"
+
+#| msgid "POS blagajnik"
+msgid "POS blagajna"
+msgstr "POS cashier"
+
+msgid "Naplate / članarine"
+msgstr "Billings / membership fees"
+
+msgid "Članovi"
+msgstr "Members"
+
+#| msgid "Kartica"
+msgid "Kartice članova"
+msgstr "Card"
+
+#| msgid "Konzalting / IT usluge"
+msgid "Članarine / usluge"
+msgstr "Consulting / IT services"
+
+msgid "Treneri i osoblje"
+msgstr "Coaches and staff"
+
+msgid "Nadolazeći termini / treninzi"
+msgstr "Upcoming appointments / trainings"
+
+#| msgid "Klijent (Kupac)"
+msgid "Klijent / Grupa"
+msgstr "Client (Buyer)"
+
+msgid "Datum &amp; Vrijeme"
+msgstr "Date &amp; Time"
+
+msgid "Nema nadolazećih termina."
+msgstr "There are no upcoming appointments."
+
+#| msgid "Kod terminala"
+msgid "+ Dodaj termin"
+msgstr "At the terminal"
+
+#| msgid "Fitness"
+msgid "Fitness modul"
+msgstr "Fitness"
+
+msgid "&#x1F3CB; Otvori Fitness &rarr;"
+msgstr "&#x1F3CB; Open Fitness &rarr;"
+
+msgid "&#x1F453; Optika"
+msgstr "&#x1F453; Optics"
+
+msgid "&#x1F4E6; Zalihe"
+msgstr "&#x1F4E6; Supplies"
+
+#| msgid "Pregled investicija"
+msgid "Pregled vida / konzultacija"
+msgstr "Overview of investments"
+
+msgid "&#x1F453;"
+msgstr "&#x1F453;"
+
+msgid "Prodaja naočala / leća"
+msgstr "Sale of glasses / lenses"
+
+msgid "&#x1F4E6;"
+msgstr "&#x1F4E6;"
+
+msgid "Okviri, leće, kontaktne"
+msgstr "Frames, lenses, contacts"
+
+msgid "Kartice pacijenata"
+msgstr "Patient cards"
+
+msgid "&#x1F4DD;"
+msgstr "&#x1F4DD;"
+
+msgid "Nalazi"
+msgstr "Findings"
+
+msgid "Pregled vida / nalaz"
+msgstr "Vision examination / finding"
+
+msgid "Nadolazeći termini"
+msgstr "Upcoming appointments"
+
+msgid "Naočale u izradi"
+msgstr "Glasses in the making"
+
+msgid "Za praćenje narudžbi naočala u izradi koristite modul"
+msgstr "Use the module to track glasses orders under construction"
+
+msgid "&#x1F4C4; Otvori dokumente &rarr;"
+msgstr "&#x1F4C4; Open documents &rarr;"
+
+msgid "&#x2190; Glavni dashboard"
+msgstr "&#x2190; Main dashboard"
+
+msgid "&#x1F374; Restoran"
+msgstr "&#x1F374; Restaurant"
+
+msgid "&#x1F6D2; Trgovina"
+msgstr "&#x1F6D2; Trade"
+
+#| msgid "Partneri"
+msgid "&#x1F91D; Partneri"
+msgstr "Partners"
+
+#| msgid "Dobavljač"
+msgid "Dobavljači / Klijenti"
+msgstr "Supplier"
+
+#| msgid "Zadano prodajno mjesto"
+msgid "Otvori prodajno mjesto"
+msgstr "Default point of sale"
+
+#| msgid "Artikl iz zalihe"
+msgid "Artikli i stanje"
+msgstr "Item from stock"
+
+msgid "&#x2699;"
+msgstr "&#x2699;"
+
+#| msgid "POS postavke"
+msgid "POS Postavke"
+msgstr "POS settings"
+
+msgid "Blagajne i pisači"
+msgstr "Cash registers and printers"
+
+#| msgid "Dobavljač"
+msgid "Dobavljači / klijenti"
+msgstr "Supplier"
+
+msgid "&#x1F4CA;"
+msgstr "&#x1F4CA;"
+
+msgid "Dnevni / tjedni prihodi"
+msgstr "Daily / weekly income"
+
+#| msgid "Interni status"
+msgid "Brzi status"
+msgstr "Internal status"
+
+#| msgid "Otvoreni bon"
+msgid "otvorenih bonova"
+msgstr "Open coupon"
+
+msgid "utržak danas"
+msgstr "today's sale"
+
+msgid "Otvori POS &rarr;"
+msgstr "Open POS &rarr;"
+
+msgid "&#x2702; Salon ljepote"
+msgstr "&#x2702; Beauty salon"
+
+msgid "&#x1F4B3; Blagajna"
+msgstr "&#x1F4B3; Cash register"
+
+msgid "Ovaj tjedan"
+msgstr "This week"
+
+msgid "&#x2702;"
+msgstr "&#x2702;"
+
+#| msgid "Naziv usluge"
+msgid "Rezervacija usluge"
+msgstr "The name of the service"
+
+msgid "Raspored dana"
+msgstr "Schedule of the day"
+
+msgid "Naplata"
+msgstr "Billing"
+
+msgid "&#x1F9F4;"
+msgstr "&#x1F9F4;"
+
+msgid "Kozmetika"
+msgstr "Cosmetics"
+
+#| msgid "Gotov proizvod"
+msgid "Zalihe proizvoda"
+msgstr "Finished product"
+
+#| msgid "Satnica i fond sati"
+msgid "Satnica djelatnika"
+msgstr "Hourly rate and hour fund"
+
+msgid "Nadolazeći termini danas"
+msgstr "Upcoming appointments today"
+
+msgid "Nema zakazanih termina za danas."
+msgstr "There are no scheduled appointments for today."
+
+msgid "Svi termini &rarr;"
+msgstr "All appointments &rarr;"
+
+#| msgid "POS terminal (kasa)"
+msgid "termina danas"
+msgstr "POS terminal (cash register)"
+
+msgid "ovaj tjedan"
+msgstr "this week"
+
+msgid "Novi termin &rarr;"
+msgstr "New appointment &rarr;"
+
+#| msgid "Naziv normativa"
+msgid "Odaberi normativ"
+msgstr "Name of the norm"
+
+#| msgid "Spremi satnicu"
+msgid "Spremi stavku"
+msgstr "Save the time sheet"
+
+msgid "📝 Nova ponuda"
+msgstr "📝 New offer"
+
+#| msgid "Klijent"
+msgid "Klijent *"
+msgstr "Client"
+
+#| msgid "Naziv projekta"
+msgid "Naziv projekta *"
+msgstr "Name of the project"
+
+#| msgid "Radni nalozi"
+msgid "Radnih dana"
+msgstr "Work orders"
+
+#, python-format
+#| msgid "Marža (%)"
+msgid "Marža %%"
+msgstr "Margin (%)"
+
+#, python-format
+#| msgid "PDV %"
+msgid "PDV %%"
+msgstr "VAT %"
+
+#| msgid "Prihvatam ponudu"
+msgid "Kreiraj ponudu"
+msgstr "I accept the offer"
+
+msgid "📋 Kopiraj"
+msgstr "📋 Copy"
+
+#| msgid "Stavke"
+msgid "👷 Stavke"
+msgstr "Items"
+
+#| msgid "Radnik"
+msgid "Radnika"
+msgstr "Worker"
+
+msgid "h/dan"
+msgstr "h/day"
+
+msgid "€/h"
+msgstr "€/h"
+
+msgid "Dodajte stavke ispod"
+msgstr "Add items below"
+
+msgid "OT sati"
+msgstr "OT hours"
+
+msgid "+ Dodaj"
+msgstr "+ Add"
+
+#, python-format
+msgid "Režija %%"
+msgstr "Directed by %%"
+
+#| msgid "Materijal"
+msgid "Materijal €"
+msgstr "Material"
+
+#| msgid "Oprema"
+msgid "Oprema €"
+msgstr "Equipment"
+
+#, python-format
+#| msgid "Popust %"
+msgid "Popust %%"
+msgstr "discount %"
+
+msgid "💾 Spremi i preračunaj"
+msgstr "💾 Save and recalculate"
+
+msgid "📊 Pregled"
+msgstr "📊 Review"
+
+#| msgid "Radnik"
+msgid "Rad"
+msgstr "Worker"
+
+msgid "Režija"
+msgstr "Direction"
+
+msgid "Rizik"
+msgstr "Risk"
+
+msgid "Subtotal"
+msgstr "Subtotal"
+
+msgid "Neto"
+msgstr "Net"
+
+msgid "📝 Skica"
+msgstr "📝 Sketch"
+
+#| msgid "Poslano"
+msgid "📤 Poslano"
+msgstr "Sent"
+
+#| msgid "Prihvaćeno"
+msgid "✅ Prihvaćeno"
+msgstr "Accepted"
+
+#| msgid "Odbijeno"
+msgid "❌ Odbijeno"
+msgstr "Rejected"
+
+msgid "📄 Generiraj fakturu"
+msgstr "📄 Generate an invoice"
+
+#| msgid "Procjene i kalkulacije"
+msgid "📋 Ponude i kalkulacije"
+msgstr "Estimates and calculations"
+
+msgid "Web upiti"
+msgstr "Web queries"
+
+#| msgid "Zadane vrijednosti"
+msgid "Vrijednost"
+msgstr "Default values"
+
+#| msgid "Naziv ponude"
+msgid "+ Nova ponuda"
+msgstr "Offer name"
+
+msgid "🌐 Javni kalkulator"
+msgstr "🌐 Public calculator"
+
+#| msgid "Kategorija"
+msgid "👷 Kategorije"
+msgstr "Category"
+
+#| msgid "Nema podataka"
+msgid "Nema ponuda."
+msgstr "No data"
+
+msgid "Kreirajte prvu →"
+msgstr "Create the first →"
+
+msgid "👷 Kategorije radnika - Troškovi"
+msgstr "👷 Categories of workers - Costs"
+
+#| msgid "Rok plaćanja"
+msgid "Bruto plaća"
+msgstr "Payment term"
+
+msgid "Naknade"
+msgstr "Fees"
+
+#| msgid "Dnevni fond"
+msgid "Dnevnice (22d)"
+msgstr "Daily fund"
+
+msgid "Smještaj (22d)"
+msgstr "Accommodation (22d)"
+
+#| msgid "Ukupno"
+msgid "Ukupno/mj"
+msgstr "In total"
+
+msgid "Produktivnih sati"
+msgstr "Productive hours"
+
+msgid "+ Nova kategorija radnika"
+msgstr "+ New category of workers"
+
+#| msgid "Naziv"
+msgid "Naziv *"
+msgstr "Name"
+
+msgid "Kod *"
+msgstr "Code *"
+
+msgid "Bruto €"
+msgstr "Gross €"
+
+#, python-format
+msgid "Doprinosi %%"
+msgstr "Contributions %%"
+
+#, python-format
+msgid "SOKA %%"
+msgstr "JUICE %%"
+
+#, python-format
+msgid "Socijalno %%"
+msgstr "Social %%"
+
+#, python-format
+msgid "BG %%"
+msgstr "BG %%"
+
+#| msgid "Dnevni fond"
+msgid "Dnevnica €"
+msgstr "Daily fund"
+
+msgid "Smještaj €/dan"
+msgstr "Accommodation €/day"
+
+#, python-format
+msgid "Produktivnost %%"
+msgstr "Productivity %%"
+
+msgid "Kreiraj"
+msgstr "Create"
+
+msgid "Kalkulator trenutno nije dostupan"
+msgstr "The calculator is currently unavailable"
+
+#| msgid "Kontaktirat ćemo vas uskoro."
+msgid "Kontaktirajte nas za ponudu."
+msgstr "We will contact you soon."
+
+#| msgid "Naziv tvrtke"
+msgid "Naziv tvrtke *"
+msgstr "Company name"
+
+msgid "OIB *"
+msgstr "OIB *"
+
+#| msgid "Naziv tvrtke"
+msgid "Nova tvrtka"
+msgstr "Company name"
+
+#| msgid "U sustavu PDV-a"
+msgid "U sustavu PDV"
+msgstr "In the VAT system"
+
+#| msgid "Naziv tvrtke"
+msgid "Nema tvrtki."
+msgstr "Company name"
+
+msgid "Kreiraj prvu."
+msgstr "Create the first one."
+
+#| msgid "Sati tima (tjedan)"
+msgid "Sati (7 dana)"
+msgstr "Team hours (week)"
+
+#| msgid "Fitness"
+msgid "Fitness članova"
+msgstr "Fitness"
+
+msgid "Webshop narudžbi"
+msgstr "Webshop orders"
+
+msgid "Aktivna iznajmljivanja"
+msgstr "Active rentals"
+
+#| msgid "Admin tvrtke"
+msgid "Admin Panel"
+msgstr "Company admin"
+
+msgid "Brzi pristup modulima"
+msgstr "Quick access to modules"
+
+#| msgid "Samo fakturiranje"
+msgid "Nova faktura"
+msgstr "Invoicing only"
+
+#| msgid "Tip partnera"
+msgid "Novi partner"
+msgstr "Partner type"
+
+#| msgid "Novi unos radnog vremena"
+msgid "Unos radnog vremena"
+msgstr "New entry of working hours"
+
+msgid "Nova narudžba"
+msgstr "New order"
+
+msgid "💰 Prihod ovaj mj."
+msgstr "💰 Income this month"
+
+msgid "📄 Neplaćene fakture"
+msgstr "📄 Unpaid invoices"
+
+msgid "👷 Radnici online"
+msgstr "👷 Workers online"
+
+msgid "🚨 Aktivne interv."
+msgstr "🚨 Active interviews."
+
+msgid "👷 Status radnika"
+msgstr "👷 Employee status"
+
+#| msgid "Zadnje prijave"
+msgid "Nije prijavljen"
+msgstr "Last applications"
+
+#| msgid "Tjedan"
+msgid "Tjedan:"
+msgstr "Week"
+
+msgid "Nema registriranih radnika."
+msgstr "There are no registered workers."
+
+msgid "⏳ Radni sati – na odobrenju"
+msgstr "⏳ Working hours - subject to approval"
+
+msgid "Sve →"
+msgstr "Everything →"
+
+msgid "✓ Odobri"
+msgstr "✓ Approve"
+
+#| msgid "Na odobrenju"
+msgid "Nema sati na odobrenju ✓"
+msgstr "On approval"
+
+#| msgid "Hitne intervencije"
+msgid "🚨 Aktivne intervencije"
+msgstr "Emergency interventions"
+
+msgid "Kanban →"
+msgstr "Kanban →"
+
+#| msgid "Hitna intervencija"
+msgid "Nema aktivnih intervencija ✓"
+msgstr "Emergency intervention"
+
+msgid "📄 Nedavne fakture"
+msgstr "📄 Recent invoices"
+
+msgid "Naplati sate →"
+msgstr "Bill hours →"
+
+#| msgid "Nema računa"
+msgid "Nema faktura."
+msgstr "No account"
+
+msgid "📋 Timesheet pregled"
+msgstr "📋 Timesheet overview"
+
+msgid "📊 Analitika"
+msgstr "📊 Analytics"
+
+msgid "💶 Naplati sate"
+msgstr "💶 Charge for hours"
+
+#| msgid "Hitna intervencija"
+msgid "🚨 Nova intervencija"
+msgstr "Emergency intervention"
+
+msgid "💰 Nenaplaćeni sati"
+msgstr "💰 Unpaid hours"
+
+#| msgid "Tvrtke"
+msgid "&#8592; Tvrtke"
+msgstr "Companies"
+
+msgid "&#x1F576; Pristupi"
+msgstr "&#x1F576; Approaches"
+
+msgid "&#x26D4; Deaktivirana"
+msgstr "&#x26D4; Deactivated"
+
+msgid "Nasljeđuje plan matice"
+msgstr "It inherits the plan of the mother"
+
+msgid "&#x1F527; Moduli"
+msgstr "&#x1F527; Modules"
+
+msgid "&#x1F5D1;"
+msgstr "&#x1F5D1;"
+
+msgid "&#x2795; Nova podružnica"
+msgstr "&#x2795; New branch"
+
+msgid "npr. Optika Centar"
+msgstr "eg Optika Centar"
+
+msgid "npr. OPT01"
+msgstr "eg OPT01"
+
+#| msgid "Podružnica"
+msgid "Tip podružnice"
+msgstr "Subsidiary"
+
+msgid "Zagreb"
+msgstr "Zagreb"
+
+#| msgid "Podružnica"
+msgid "podružnica@tvrtka.hr"
+msgstr "Subsidiary"
+
+msgid "Aktivni moduli (prazno = nasljeđuje plan matice)"
+msgstr "Active modules (empty = inherits the parent plan)"
+
+msgid "&#x2795; Kreiraj podružnicu"
+msgstr "&#x2795; Create a branch"
+
+#| msgid "Podružnica"
+msgid "Moduli podružnice"
+msgstr "Subsidiary"
+
+msgid "Prazno = nasljeđuje plan matične tvrtke"
+msgstr "Blank = inherits parent company plan"
+
+msgid "&#9432; Odznačite sve za nasljeđivanje modula s matičnog plana."
+msgstr "&#9432; Uncheck all to inherit modules from parent plan."
+
+#| msgid "Spremi podatke"
+msgid "Spremi module"
+msgstr "Save data"
+
+msgid "Pregled investicija"
+msgstr "Overview of investments"
+
+msgid "Pregled vaših projekata"
+msgstr "Overview of your projects"
+
+msgid "Detalji i fotografije"
+msgstr "Details and photos"
+
+msgid "Nema dostupnih projekata"
+msgstr "There are no projects available"
+
+msgid "Vaši projekti će biti prikazani ovdje čim budu dodijeljeni."
+msgstr "Your projects will be displayed here as soon as they are assigned."
+
+msgid "Moji projekti i tim"
+msgstr "My projects and team"
+
+msgid "Moji projekti"
+msgstr "My projects"
+
+msgid "Sati tima (tjedan)"
+msgstr "Team hours (week)"
+
+msgid "Na odobrenju"
+msgstr "On approval"
+
+msgid "Otvori projekt"
+msgstr "Open the project"
+
+msgid "Aktivne pretplate tvrtki"
+msgstr "Active company subscriptions"
+
+msgid "Plan"
+msgstr "Plan"
+
+msgid "Od"
+msgstr "Of"
+
+#| msgid "Upravljanje tvrtkama"
+msgid "Upravljanje modulima po tvrtki"
+msgstr "Management of companies"
+
+msgid "Potvrdite okvire → Spremi"
+msgstr "Check the boxes → Save"
+
+msgid "* Prilagođeno (klikni Spremi bez oznaka = reset na plan)"
+msgstr "* Customized (click Save without tags = reset to plan)"
+
+msgid "– nema aktivne pretplate"
+msgstr "- no active subscription"
+
+#| msgid "Zadnje prijave"
+msgid "Zadnje registracije"
+msgstr "Last applications"
+
+msgid "Sve &rarr;"
+msgstr "All &rarr;"
+
+msgid "Pregledaj"
+msgstr "Check it out"
+
+msgid "Aktivni"
+msgstr "Active"
+
+msgid "Admini"
+msgstr "Admins"
+
+msgid "Štoperica, unos sati, evidencija"
+msgstr "Stopwatch, entry of hours, records"
+
+msgid "Evidencija sati"
+msgstr "Record of hours"
+
+msgid "Pregled, odobrenje, PDF export"
+msgstr "Review, approval, PDF export"
+
+msgid "Kreiraj i upravljaj fakturama"
+msgstr "Create and manage invoices"
+
+msgid "Aktivni projekti i zadaci"
+msgstr "Active projects and tasks"
+
+msgid "Klijenti i dobavljači"
+msgstr "Clients and suppliers"
+
+msgid "Upravljanje korisnicima i rolama"
+msgstr "User and role management"
+
+msgid "Upravljanje tvrtkama"
+msgstr "Management of companies"
+
+msgid "Upload i pregled dokumenata"
+msgstr "Upload and view documents"
+
+msgid "Procjene i kalkulacije"
+msgstr "Estimates and calculations"
+
+#| msgid "POS kasa"
+msgid "POS Kasa"
+msgstr "POS cash register"
+
+msgid "Terminali, smjene, bonovi"
+msgstr "Terminals, shifts, vouchers"
+
+#| msgid "Nema projekata"
+msgid "Burza projekata"
+msgstr "There are no projects"
+
+msgid "Upiti, kanban, ponude"
+msgstr "Inquiries, kanban, offers"
+
+msgid "Lista, impersonacija, nova tvrtka"
+msgstr "List, impersonation, new company"
+
+msgid "Odobravanje novih tvrtki"
+msgstr "Approval of new companies"
+
+msgid "Napredne postavke sustava"
+msgstr "Advanced system settings"
+
+msgid "Web Portal CMS"
+msgstr ""
+
+msgid "Javni web, galerija, SOS"
+msgstr ""
+
+msgid "Zadnje prijave"
+msgstr "Last applications"
+
+msgid "IP"
+msgstr "IP"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "FAIL"
+msgstr "FAIL"
+
+msgid "Nema podataka"
+msgstr "No data"
+
+msgid "Pregled zahtjeva →"
+msgstr "Request overview →"
+
+msgid "Registracije"
+msgstr "Registrations"
+
+#| msgid "Naziv tvrtke"
+msgid "+ Nova tvrtka"
+msgstr "Company name"
+
+msgid "OIB (11 znakova) *"
+msgstr "OIB (11 characters) *"
+
+msgid "Švicarska"
+msgstr "Switzerland"
+
+msgid "d.o.o."
+msgstr "d.o.o."
+
+msgid "j.d.o.o."
+msgstr "j.d.o.o."
+
+msgid "d.d."
+msgstr "d.d."
+
+msgid "s.p."
+msgstr "s.p."
+
+msgid "EU company"
+msgstr "EU company"
+
+msgid "Bez pretplate"
+msgstr "No subscription"
+
+msgid "Starter – €29/mj"
+msgstr "Starter – €29/month"
+
+msgid "Business – €59/mj"
+msgstr "Business – €59/month"
+
+msgid "Enterprise – €99/mj"
+msgstr "Enterprise – €99/month"
+
+msgid "Kreiraj tvrtku →"
+msgstr "Create a company →"
+
+msgid "BEZ PLANA"
+msgstr "UNMAPPED"
+
+#| msgid "START"
+msgid "STARTER"
+msgstr "START"
+
+msgid "BUSINESS"
+msgstr "BUSINESS"
+
+msgid "ENTERPRISE"
+msgstr "ENTERPRISE"
+
+msgid "Nikad"
+msgstr "Never"
+
+msgid "Pristupi"
+msgstr "Approaches"
+
+msgid "&#x1F3E2; Podru&#382;nice"
+msgstr "&#x1F3E2; Subsidiaries"
+
+msgid "Nema tvrtki u sustavu."
+msgstr "There are no companies in the system."
+
+msgid "Zadnje impersonacije (audit log)"
+msgstr "Last impersonations (audit log)"
+
+#| msgid "Aktivna"
+msgid "● Aktivna"
+msgstr "Active"
+
+msgid "← Natrag na superadmin dashboard"
+msgstr "← Back to superadmin dashboard"
+
+msgid "Odradio si"
+msgstr "You did it"
+
+msgid "· Pauzirano"
+msgstr "· Paused"
+
+msgid "⏹ Zaustavi"
+msgstr "⏹ Stop"
+
+#| msgid "Pauza"
+msgid "⏸ Pauza"
+msgstr "Break"
+
+msgid "▶ Nastavi"
+msgstr "▶ Continue"
+
+msgid "Nisi prijavljen na rad"
+msgstr "You are not registered for work"
+
+msgid "Odaberi projekt i klikni Clock In"
+msgstr "Select the project and click Clock In"
+
+#| msgid "Dodaj prvi projekt"
+msgid "-- odaberi projekt --"
+msgstr "Add the first project"
+
+msgid "▶ Clock In"
+msgstr "▶ Clock In"
+
+msgid "Danas"
+msgstr "Today"
+
+msgid "Ovaj mjesec"
+msgstr "This month"
+
+#| msgid "Hitne intervencije"
+msgid "🚨 Moje aktivne intervencije"
+msgstr "Emergency interventions"
+
+msgid "Terenska karta →"
+msgstr "Field map →"
+
+msgid "📋 Moj timesheet"
+msgstr "📋 My timesheet"
+
+msgid "+ Unesi sate"
+msgstr "+ Enter the hours"
+
+#| msgid "Intervencije"
+msgid "🚨 Intervencije"
+msgstr "Interventions"
+
+#| msgid "Tjedni unos"
+msgid "🕒 Nedavni unosi"
+msgstr "Weekly intake"
+
+msgid "Nema unosa ovaj tjedan."
+msgstr "There are no entries this week."
+
+#| msgid "Dospijelo"
+msgid "Dospijeće"
+msgstr "Due"
+
+msgid "Preuzmi datoteku"
+msgstr "Download the file"
+
+#| msgid "Linija plaćanja"
+msgid "Promijeni status plaćanja"
+msgstr "Payment line"
+
+#| msgid "Broj dokumenta"
+msgid "Vrsta dokumenta *"
+msgstr "Document number"
+
+msgid "DOC-2026-001"
+msgstr "DOC-2026-001"
+
+#| msgid "Tvrtka"
+msgid "Tvrtka *"
+msgstr "Company"
+
+#| msgid "Iznos"
+msgid "Iznos (EUR)"
+msgstr "Amount"
+
+msgid "Datoteka (PDF, DOC...)"
+msgstr "File (PDF, DOC...)"
+
+#| msgid "Nazivi dokumenata"
+msgid "Novi dokument"
+msgstr "Names of documents"
+
+msgid "Sve vrste"
+msgstr "All kinds"
+
+#| msgid "Plaćeno"
+msgid "Plaćeno/Ne"
+msgstr "Paid"
+
+#| msgid "Nazivi dokumenata"
+msgid "Nema dokumenata."
+msgstr "Names of documents"
+
+#| msgid "Smjer"
+msgid "Smjer *"
+msgstr "Direction"
+
+msgid "Iznos (EUR) *"
+msgstr "Amount (EUR) *"
+
+#| msgid "Datum"
+msgid "Datum *"
+msgstr "Date"
+
+#| msgid "Partner"
+msgid "Partner *"
+msgstr "Partner"
+
+msgid "-- odaberi partnera --"
+msgstr "-- choose a partner --"
+
+#| msgid "Transakcije"
+msgid "Opis transakcije"
+msgstr "Transactions"
+
+#| msgid "Kategorija transakcije"
+msgid "Financijske transakcije"
+msgstr "Transaction category"
+
+#| msgid "Transakcija"
+msgid "Nova transakcija"
+msgstr "Transaction"
+
+msgid "Bilanca"
+msgstr "Balance sheet"
+
+msgid "Svi smjerovi"
+msgstr "All directions"
+
+msgid "Prihodi (uplate)"
+msgstr "Income (payments)"
+
+msgid "Rashodi (isplate)"
+msgstr "Expenses (disbursements)"
+
+#| msgid "Naziv tvrtke"
+msgid "Sve tvrtke"
+msgstr "Company name"
+
+#| msgid "Transakcija"
+msgid "Nema transakcija."
+msgstr "Transaction"
+
+#| msgid "Dodaj sliku"
+msgid "Dodaj prvu."
+msgstr "Add a picture"
+
+msgid "🏛 Fiskalizacija – FINA Certifikati"
+msgstr "🏛 Fiscalization - FINA Certificates"
+
+msgid "Upravljanje FINA digitalnim certifikatima i CIS vezom po tvrtki"
+msgstr "Management of FINA digital certificates and CIS connection by company"
+
+msgid "● AKTIVNA"
+msgstr "● ACTIVE"
+
+#| msgid "Aktivna"
+msgid "○ neaktivna"
+msgstr "Active"
+
+msgid "DEMO"
+msgstr "DEMO"
+
+msgid "PRODUKCIJA"
+msgstr "PRODUCTION"
+
+msgid "✓ Test OK"
+msgstr "✓ Test OK"
+
+msgid "✗ Test FAIL"
+msgstr "✗ Test FAIL"
+
+#| msgid "Google login nije konfiguriran."
+msgid "nije konfigurirana"
+msgstr "Google login is not configured."
+
+msgid "na disku"
+msgstr "on disk"
+
+msgid "datoteka nedostaje!"
+msgstr "file is missing!"
+
+msgid "&nbsp;| OznNapUr:"
+msgstr "&nbsp;| Name:"
+
+msgid "⚙ Konfiguriraj"
+msgstr "⚙ Configure"
+
+msgid "🔌 Testiraj vezu"
+msgstr "🔌 Test the connection"
+
+#| msgid "Certifikat (.p12)"
+msgid "FINA certifikat (.p12)"
+msgstr "Certificate (.p12)"
+
+msgid "(ostavi prazno za zadržati)"
+msgstr "(leave blank to retain)"
+
+#| msgid "Oznaka prostora (PP)"
+msgid "Oznaka poslovnog prostora (OznPosPr)"
+msgstr "Space mark (PP)"
+
+msgid "Oznaka naplatnog uređaja (OznNapUr)"
+msgstr "Identification of the payment device (OznNapUr)"
+
+msgid "Demo način (CIS test endpoint – ne šalje na Poreznu)"
+msgstr "Demo mode (CIS test endpoint - does not send to the Tax Office)"
+
+msgid "Fiskalizacija aktivna (automatski pri svakom plaćanju)"
+msgstr "Fiscalization active (automatically with every payment)"
+
+#| msgid "PDV i konfiguracija"
+msgid "💾 Spremi konfiguraciju"
+msgstr "VAT and configuration"
+
+#| msgid "Napomena"
+msgid "Napomena:"
+msgstr "Remark"
+
+msgid "Prijave danas"
+msgstr "Applications today"
+
+msgid "Svi članovi"
+msgstr "All members"
+
+#| msgid "Trenutna zaliha"
+msgid "Trenutno unutra"
+msgstr "Current stock"
+
+#| msgid "Ukupno s PDV"
+msgid "Ukupno danas"
+msgstr "Total with VAT"
+
+msgid "Log danas"
+msgstr "Log today"
+
+msgid "Član"
+msgstr "Member"
+
+msgid "Unutra"
+msgstr "In"
+
+#| msgid "Nema projekata"
+msgid "Nema prijava danas."
+msgstr "There are no projects"
+
+msgid "Tip članstva"
+msgstr "Membership type"
+
+msgid "Istječe"
+msgstr "Expires"
+
+msgid "Posjete ovaj mj."
+msgstr "Visits this month."
+
+msgid "Nije prisutan"
+msgstr "He is not present"
+
+#| msgid "Kartica"
+msgid "RFID kartica"
+msgstr "Card"
+
+#| msgid "Datum izdavanja"
+msgid "Datum učlanjenja"
+msgstr "Date of issue"
+
+#| msgid "Evidencija sati"
+msgid "Evidencija dolazaka"
+msgstr "Record of hours"
+
+#| msgid "Adresa intervencije"
+msgid "Nema evidencije."
+msgstr "Intervention address"
+
+msgid "Ime *"
+msgstr "Name *"
+
+#| msgid "Prezime"
+msgid "Prezime *"
+msgstr "Surname"
+
+msgid "Članstvo istječe"
+msgstr "Membership expires"
+
+msgid "Fitness – Članovi"
+msgstr "Fitness - Members"
+
+#| msgid "Novi račun"
+msgid "Novi član"
+msgstr "New account"
+
+msgid "Istječe (7 dana)"
+msgstr "Expires (7 days)"
+
+msgid "Sva članstva"
+msgstr "All memberships"
+
+msgid "Članstvo"
+msgstr "Membership"
+
+msgid "RFID"
+msgstr "RFID"
+
+msgid "Zamrznut"
+msgstr "Frozen"
+
+#| msgid "Aktivan"
+msgid "Neaktivan"
+msgstr "Active"
+
+#| msgid "Nema računa"
+msgid "Nema članova."
+msgstr "No account"
+
+#| msgid "Dodaj prvi projekt"
+msgid "Dodaj prvog."
+msgstr "Add the first project"
+
+msgid "Broj police *"
+msgstr "Shelf number *"
+
+#| msgid "Vrsta kretanja"
+msgid "Vrsta osiguranja *"
+msgstr "Type of movement"
+
+#| msgid "Osiguranje"
+msgid "Osiguravatelj *"
+msgstr "Insurance"
+
+#| msgid "Osiguranje"
+msgid "Osiguranik (partner)"
+msgstr "Insurance"
+
+#| msgid "Tip partnera"
+msgid "-- bez partnera --"
+msgstr "Partner type"
+
+msgid "Godišnja premija (EUR) *"
+msgstr "Annual premium (EUR) *"
+
+msgid "Iznos pokrića (EUR)"
+msgstr "Coverage amount (EUR)"
+
+#| msgid "Status"
+msgid "Status *"
+msgstr "Status"
+
+msgid "Posebni uvjeti, kontakti..."
+msgstr "Special conditions, contacts..."
+
+#| msgid "PDV i konfiguracija"
+msgid "Police osiguranja"
+msgstr "VAT and configuration"
+
+msgid "Nova polica"
+msgstr "New shelf"
+
+#| msgid "Aktivna"
+msgid "Aktivne"
+msgstr "Active"
+
+msgid "Istječe uskoro"
+msgstr "Expires soon"
+
+msgid "Ukupna premija"
+msgstr "Total premium"
+
+#| msgid "Broj bona"
+msgid "Broj police"
+msgstr "Voucher number"
+
+#| msgid "Osiguranje"
+msgid "Osiguravatelj"
+msgstr "Insurance"
+
+#| msgid "Osiguranje"
+msgid "Osiguranik"
+msgstr "Insurance"
+
+msgid "Kraj"
+msgstr "End"
+
+#| msgid "Spremi"
+msgid "Premija"
+msgstr "Save"
+
+#| msgid "Isteklo"
+msgid "Istekla"
+msgstr "Expired"
+
+#| msgid "Otkazano"
+msgid "Otkazana"
+msgstr "Cancelled"
+
+msgid "Na čekanju"
+msgstr "On hold"
+
+#| msgid "Nema ažuriranja"
+msgid "Nema polica osiguranja."
+msgstr "There are no updates"
+
+msgid "&larr; Kanban"
+msgstr "& larr; Kanban"
+
+#| msgid "Email klijenta"
+msgid "Tracking link za klijenta"
+msgstr "Client email"
+
+msgid "🚗 Krenuo sam"
+msgstr "🚗 I started"
+
+msgid "📍 Na lokaciji sam"
+msgstr "📍 I'm on location"
+
+#| msgid "Riješeno"
+msgid "✅ Riješeno"
+msgstr "Solved"
+
+msgid "↗ Eskaliraj u projekt"
+msgstr "↗ Escalate into a project"
+
+#| msgid "Ukupno fakturirano"
+msgid "🧾 Označi kao fakturirano"
+msgstr "Total invoiced"
+
+msgid "Nema internetske veze"
+msgstr "No internet connection"
+
+msgid "Status je pohranjen lokalno."
+msgstr "The status is stored locally."
+
+msgid "Bit će sinkroniziran čim dobijete signal."
+msgstr "It will be synced as soon as you get a signal."
+
+#| msgid "Otvori"
+msgid "Zatvori"
+msgstr "Open it"
+
+msgid "GPS start"
+msgstr "GPS start"
+
+msgid "GPS iskljuceno"
+msgstr "GPS off"
+
+#| msgid "Hitne intervencije"
+msgid "🚨 Hitne intervencije"
+msgstr "Emergency interventions"
+
+#| msgid "Ukupno"
+msgid "ukupno"
+msgstr "In total"
+
+#| msgid "Aktivni"
+msgid "aktivnih"
+msgstr "Active"
+
+#| msgid "Hitna intervencija"
+msgid "+ Nova intervencija"
+msgstr "Emergency intervention"
+
+msgid "&#128270; GPS RADNICI"
+msgstr "&#128270; GPS WORKERS"
+
+msgid "Terenska karta"
+msgstr "Field map"
+
+#| msgid "Fiskalizirano"
+msgid "Eskaliraj"
+msgstr "Fiscalized"
+
+msgid "-- dodijeli radnika --"
+msgstr "-- assign worker --"
+
+#| msgid "Dodijeljen"
+msgid "Dodijeli"
+msgstr "Assigned"
+
+#| msgid "Hitna intervencija"
+msgid "Nema intervencija"
+msgstr "Emergency intervention"
+
+msgid "&larr; Natrag na kanban"
+msgstr "& larr; Back to kanban"
+
+#| msgid "Hitna intervencija"
+msgid "🚨 Nova hitna intervencija"
+msgstr "Emergency intervention"
+
+msgid "npr. Pukla cijev u kupaonici"
+msgstr "eg A broken pipe in the bathroom"
+
+msgid "Dodjeli radniku"
+msgstr "Assignments to the worker"
+
+msgid "-- dodijeli poslije --"
+msgstr "-- assign after --"
+
+#| msgid "Adresa intervencije"
+msgid "Adresa intervencije *"
+msgstr "Intervention address"
+
+msgid "Ul. sv. Dominika 5, Split"
+msgstr "Ul. St. Dominika 5, Split"
+
+#| msgid "Ime klijenta"
+msgid "Ime klijenta *"
+msgstr "Client name"
+
+msgid "Ivan Horvat"
+msgstr "Ivan Horvat"
+
+#| msgid "Telefon klijenta"
+msgid "Telefon klijenta *"
+msgstr "Client's phone number"
+
+msgid "Opis problema"
+msgstr "Description of the problem"
+
+msgid "Dodatni detalji..."
+msgstr "Additional details..."
+
+#| msgid "Adresa intervencije"
+msgid "Kreiraj intervenciju"
+msgstr "Intervention address"
+
+#| msgid "Hitna intervencija"
+msgid "Hitna intervencija – Prijava"
+msgstr "Emergency intervention"
+
+#| msgid "Opis problema"
+msgid "Brza prijava problema"
+msgstr "Description of the problem"
+
+msgid "🚨 Hitno"
+msgstr "🚨 Urgent"
+
+#| msgid "Hitne intervencije"
+msgid "Prijava hitne intervencije"
+msgstr "Emergency interventions"
+
+msgid "Ispunite formu – odmah šaljemo ekipu."
+msgstr "Fill out the form - we'll send a team right away."
+
+#| msgid "Vaše ime i prezime"
+msgid "Vaše ime *"
+msgstr "Your first and last name"
+
+#| msgid "Opis problema"
+msgid "Vrsta problema"
+msgstr "Description of the problem"
+
+msgid "Kratki opis (neobavezno)"
+msgstr "Short description (optional)"
+
+#| msgid "Opišite problem što detaljnije..."
+msgid "Opišite problem ukratko..."
+msgstr "Describe the problem in as much detail as possible..."
+
+#| msgid "Hitna intervencija"
+msgid "🚨 Prijavi hitnu intervenciju"
+msgstr "Emergency intervention"
+
+msgid ""
+"Nakon prijave dobit ćete link za praćenje statusa vaše intervencije u "
+"stvarnom vremenu."
+msgstr ""
+"After registration, you will receive a link to monitor the status of your "
+"intervention in real time."
+
+#| msgid "Hitne intervencije"
+msgid "Pracenje hitne intervencije"
+msgstr "Emergency interventions"
+
+msgid "Zaprimljeno"
+msgstr "Received"
+
+msgid "Vas poziv je zaprimljen. Dodjeljujemo ekipu."
+msgstr "Your call has been received. We are assigning a team."
+
+#| msgid "Dodijeljen"
+msgid "Ekipa dodijeljena"
+msgstr "Assigned"
+
+msgid "Ekipa je obaviještena. Uskoro krecu prema vama."
+msgstr "The team has been informed. They will be heading towards you soon."
+
+msgid "Ekipa na putu!"
+msgstr "The team is on the way!"
+
+msgid "Nasa ekipa je na putu prema vama."
+msgstr "Our team is on its way to you."
+
+msgid "Ekipa na lokaciji"
+msgstr "The team on location"
+
+msgid "Nasi strucnjaci su stigli i rade na problemu."
+msgstr "Our experts have arrived and are working on the problem."
+
+#| msgid "Riješeno"
+msgid "Riješeno!"
+msgstr "Solved"
+
+msgid "Intervencija je uspješno riješena. Hvala na strpljenju."
+msgstr "The intervention was successfully resolved. Thanks for your patience."
+
+#| msgid "Fakturiranje"
+msgid "Fakturirano"
+msgstr "Invoicing"
+
+msgid "Usluga je fakturirana. Hvala!"
+msgstr "The service is invoiced. Thanks!"
+
+#| msgid "Intervencije"
+msgid "Intervencija"
+msgstr "Interventions"
+
+msgid "Krenuli u"
+msgstr "Headed to"
+
+msgid "Stigli u"
+msgstr "Arrived in"
+
+#| msgid "Riješeno"
+msgid "Riješeno u"
+msgstr "Solved"
+
+msgid "Stranica se automatski osvježava svakih 30 sekundi."
+msgstr "The page is automatically refreshed every 30 seconds."
+
+msgid "Odrediste (GPS radnika jos nije aktivan)"
+msgstr "Destination (the worker's GPS is not yet active)"
+
+msgid "Cijena/jed."
+msgstr "Price/unit."
+
+msgid "Minimum"
+msgstr "Minimum"
+
+#| msgid "Ulaz (nabava)"
+msgid "Ulaz (primka)"
+msgstr "Entry (procurement)"
+
+msgid "Izlaz (izdatnica)"
+msgstr "Exit"
+
+#| msgid "Korekcija zalihe"
+msgid "Korekcija (inventura)"
+msgstr "Stock correction"
+
+#| msgid "Razlog / Napomena"
+msgid "Razlog / napomena"
+msgstr "Reason / Note"
+
+msgid "Zabilježi"
+msgstr "Take notes"
+
+msgid "Razlog"
+msgstr "Reason"
+
+msgid "Ulaz"
+msgstr "Entrance"
+
+msgid "Izlaz"
+msgstr "Exit"
+
+#| msgid "Korekcija zalihe"
+msgid "Korekcija"
+msgstr "Stock correction"
+
+#| msgid "Vrsta kretanja"
+msgid "Nema kretanja."
+msgstr "Type of movement"
+
+#| msgid "SKU / Šifra"
+msgid "SKU / Šifra *"
+msgstr "SKU / Code"
+
+#| msgid "Početna"
+msgid "Početna količina"
+msgstr "Home"
+
+#| msgid "Minimalna zaliha"
+msgid "Minimalna količina"
+msgstr "Minimum stock"
+
+#| msgid "Naziv artikla"
+msgid "Novi artikl"
+msgstr "Item name"
+
+#| msgid "Naziv kategorije"
+msgid "Sve kategorije"
+msgstr "Category name"
+
+msgid "Ispod minimuma"
+msgstr "Below the minimum"
+
+msgid "SKU"
+msgstr "SKU"
+
+msgid "Min."
+msgstr "Min."
+
+#| msgid "Redoslijed"
+msgid "Nedostaje"
+msgstr "Order"
+
+#| msgid "Naziv artikla"
+msgid "Nema artikala."
+msgstr "Item name"
+
+msgid "VODOCOMP d.o.o."
+msgstr "VODOCOMP d.o.o."
+
+#| msgid "Spremi unos"
+msgid "Spremi i nastavi"
+msgstr "Save entry"
+
+#| msgid "Nacrt"
+msgid "Nacrti"
+msgstr "Draft"
+
+msgid "HR + DE"
+msgstr "HR + DE"
+
+#| msgid "Deutsch"
+msgid "Deutschland"
+msgstr "Deutsch"
+
+#| msgid "Avansni račun"
+msgid "Avansni"
+msgstr "Advance invoice"
+
+msgid "Rok"
+msgstr "Deadline"
+
+#| msgid "Fiskalizirano"
+msgid "Nije fiskalizirano"
+msgstr "Fiscalized"
+
+#| msgid "Nema računa"
+msgid "Nema računa."
+msgstr "No account"
+
+msgid "Kreiraj prvi."
+msgstr "Create first."
+
+msgid "Obavijesti"
+msgstr ""
+
+msgid "Označi sve pročitano"
+msgstr ""
+
+#| msgid "Tagovi"
+msgid "ago"
+msgstr "Tags"
+
+msgid "Pročitano"
+msgstr ""
+
+#| msgid "Nema projekata"
+msgid "Nema obavijesti"
+msgstr "There are no projects"
+
+#| msgid "Tip partnera"
+msgid "Obriši partnera"
+msgstr "Partner type"
+
+msgid "Jeste li sigurni da želite obrisati partnera"
+msgstr "Are you sure you want to delete the partner?"
+
+msgid ""
+"Ova radnja je nepovratna. Sve vezane transakcije i dokumenti mogu biti "
+"zahvaćeni."
+msgstr ""
+"This action is irreversible. All related transactions and documents may be "
+"affected."
+
+msgid "Da, obriši"
+msgstr "Yes, delete it"
+
+msgid "Kopiraj portal link"
+msgstr ""
+
+#| msgid "Partner portal"
+msgid "Portal"
+msgstr "Partner portal"
+
+msgid "OIB / VAT"
+msgstr "OIB / VAT"
+
+#| msgid "Rabat (%)"
+msgid "Rabat"
+msgstr "Discount (%)"
+
+#| msgid "Datum transakcije"
+msgid "Zadnje transakcije"
+msgstr "Transaction date"
+
+msgid "Uplata"
+msgstr "Payment"
+
+#| msgid "Isplata / Rashod"
+msgid "Isplata"
+msgstr "Payment / Expense"
+
+#| msgid "Vlasnik podataka"
+msgid "Tvrtka (vlasnik podataka)"
+msgstr "Data owner"
+
+msgid "PTT"
+msgstr "PTT"
+
+msgid "Uvjeti"
+msgstr "Conditions"
+
+#, python-format
+#| msgid "Rabat (%)"
+msgid "Rabat (%%)"
+msgstr "Discount (%)"
+
+msgid "Aktivan/Neaktivan"
+msgstr "Active/Inactive"
+
+#| msgid "Samo fakturiranje"
+msgid "Samo aktivni"
+msgstr "Invoicing only"
+
+#| msgid "Samo fakturiranje"
+msgid "Samo neaktivni"
+msgstr "Invoicing only"
+
+msgid "Reset"
+msgstr "Reset"
+
+#| msgid "Telefon"
+msgid "Email / Telefon"
+msgstr "Phone"
+
+#| msgid "Tip partnera"
+msgid "Nema partnera."
+msgstr "Partner type"
+
+msgid "Kreiraj prvog."
+msgstr "Create the first one."
+
+#| msgid "Nazivi dokumenata"
+msgid "Nema dokumenata"
+msgstr "Names of documents"
+
+msgid "Dobrodosli"
+msgstr ""
+
+#| msgid "Ukupno s PDV"
+msgid "Ukupno placeno"
+msgstr "Total with VAT"
+
+#| msgid "Samo fakturiranje"
+msgid "faktura"
+msgstr "Invoicing only"
+
+#| msgid "Otvorena"
+msgid "Otvoreno"
+msgstr "Open"
+
+#| msgid "Tip dokumenta"
+msgid "dokumenata"
+msgstr "Document type"
+
+#| msgid "Fakture"
+msgid "Zadnje fakture"
+msgstr "Invoices"
+
+#| msgid "Nema računa"
+msgid "Nema faktura"
+msgstr "No account"
+
+msgid "Nazad"
+msgstr ""
+
+#| msgid "Dospijelo"
+msgid "Dospijece"
+msgstr "Due"
+
+#| msgid "Jed.mjera"
+msgid "Jed."
+msgstr "Single measure"
+
+msgid "Prihvatite ili odbijte ovaj dokument"
+msgstr ""
+
+#| msgid "Prihod"
+msgid "Prihvati"
+msgstr "Income"
+
+#| msgid "Odbijam"
+msgid "Odbij"
+msgstr "I refuse"
+
+#| msgid "Ažuriranja"
+msgid "Azuriranja"
+msgstr "Updates"
+
+msgid "-POS"
+msgstr "-POS"
+
+#| msgid "Terminal"
+msgid "Terminali"
+msgstr "Terminal"
+
+msgid "Gastro"
+msgstr ""
+
+msgid "Kuhinja"
+msgstr ""
+
+#| msgid "Troškovi"
+msgid "Rokovi"
+msgstr "Costs"
+
+msgid "&larr; ERP"
+msgstr "& larr; ERP"
+
+#| msgid "Terminal"
+msgid "POS Terminali"
+msgstr "Terminal"
+
+#| msgid "Kod terminala"
+msgid "+ Novi terminal"
+msgstr "At the terminal"
+
+msgid "&#9881; Postavke"
+msgstr "&#9881; Settings"
+
+msgid "AKTIVAN"
+msgstr "ACTIVE"
+
+msgid "ZATVOREN"
+msgstr "CLOSED"
+
+msgid "&#9889; Brza blagajna"
+msgstr "&#9889; Fast checkout"
+
+msgid "&#x1F6D2; Maloprodaja"
+msgstr "&#x1F6D2; Retail"
+
+msgid "Tekuća smjena"
+msgstr "Current shift"
+
+msgid "Nema aktivne smjene"
+msgstr "There is no active shift"
+
+msgid "&#9889; Brza blagajna &rarr;"
+msgstr "&#9889; Quick checkout &rarr;"
+
+msgid "&#x1F374; Restoran &rarr;"
+msgstr "&#x1F374; Restaurant &rarr;"
+
+#| msgid "Pokreni štopericu"
+msgid "Pokreni smjenu"
+msgstr "Start the stopwatch"
+
+msgid "Nema konfiguriranih terminala."
+msgstr "There are no configured terminals."
+
+#| msgid "Kod terminala"
+msgid "+ Dodaj terminal"
+msgstr "At the terminal"
+
+#| msgid "Dodaj prvi projekt"
+msgid "Dodaj sarzni rok"
+msgstr "Add the first project"
+
+#| msgid "Naziv normativa"
+msgid "Odaberi artikl"
+msgstr "Name of the norm"
+
+#| msgid "+ Dodaj"
+msgid "Dodaj"
+msgstr "+ Add"
+
+#| msgid "Prijave danas"
+msgid "Istice danas"
+msgstr "Applications today"
+
+#| msgid "Istječe uskoro"
+msgid "Istice uskoro"
+msgstr "Expires soon"
+
+msgid "U redu"
+msgstr ""
+
+msgid "Slobodan"
+msgstr "Free"
+
+#| msgid "Nema stavki. Dodajte artikle ispod."
+msgid "Nema stolova. Dodajte preko Admin > Stolovi."
+msgstr "There are no items. Add items below."
+
+#| msgid "Aktivna"
+msgid "Aktivne narudzbe"
+msgstr "Active"
+
+#| msgid "Nema narudžbi."
+msgid "Nema aktivnih narudzbi."
+msgstr "There are no orders."
+
+msgid "Kitchen Display"
+msgstr ""
+
+#| msgid "Nova narudžba"
+msgid "Prazna narudzba."
+msgstr "New order"
+
+msgid "Nema aktivne narudzbe za ovaj stol."
+msgstr ""
+
+msgid "Meni"
+msgstr ""
+
+#| msgid "Pretraži artikal…"
+msgid "Pretrazi artikle..."
+msgstr "Search for an article..."
+
+#| msgid "Terminal"
+msgid "Novi POS Terminal"
+msgstr "Terminal"
+
+msgid "Dodajte novu blagajnu / kasu"
+msgstr "Add a new cash register"
+
+#| msgid "Kod terminala"
+msgid "Naziv terminala *"
+msgstr "At the terminal"
+
+msgid "npr. Kasa 1, Šank, Blagajna"
+msgstr "eg Cashier 1, Bar, Cashier"
+
+#| msgid "Kod terminala"
+msgid "Kod terminala *"
+msgstr "At the terminal"
+
+msgid "npr. KS001"
+msgstr "eg KS001"
+
+msgid "Jedinstveni kratki kod (bez razmaka, velikim slovima)"
+msgstr "Unique short code (no spaces, capital letters)"
+
+msgid "npr. Prizemlje, prodajni pult"
+msgstr "eg Ground floor, sales counter"
+
+#| msgid "Tip POS sučelja"
+msgid "Tip POS sučelja *"
+msgstr "Type of POS interface"
+
+msgid "&#x1F6D2;"
+msgstr "&#x1F6D2;"
+
+#| msgid "POS kasa (maloprodaja)"
+msgid "Maloprodaja"
+msgstr "POS cash register (retail)"
+
+msgid "Barkod skener, pretraga artikala, standardna blagajna"
+msgstr "Barcode scanner, article search, standard checkout"
+
+#| msgid "Ime blagajnika"
+msgid "Brza blagajna"
+msgstr "Treasurer's name"
+
+msgid "Veliki gumbi, brzinski odabir artikala, idealno za kiosk/šank"
+msgstr "Large buttons, quick selection of items, ideal for a kiosk/bar"
+
+msgid "&#x1F374;"
+msgstr "&#x1F374;"
+
+msgid "Restoran"
+msgstr "Restaurant"
+
+msgid "Vizualni raspored stolova, bonovi po stolu, upravljanje narudžbama"
+msgstr "Visual arrangement of tables, vouchers per table, order management"
+
+#| msgid "Kod terminala"
+msgid "Kreiraj terminal"
+msgstr "At the terminal"
+
+#| msgid "POS blagajnik"
+msgid "Blagajnik:"
+msgstr "POS cashier"
+
+#| msgid "POS blagajnik"
+msgid "Novi blagajnik"
+msgstr "POS cashier"
+
+msgid "🔍  Pretraži proizvode..."
+msgstr "🔍 Search products..."
+
+msgid "Nema artikala u skladištu. Dodajte u"
+msgstr "There are no items in stock. Add to"
+
+#| msgid "Skladište"
+msgid "Skladištu →"
+msgstr "Stock"
+
+msgid "Nema aktivne smjene."
+msgstr "There is no active shift."
+
+msgid "Pokreni smjenu →"
+msgstr "Start shift →"
+
+msgid "🛒 Košarica"
+msgstr "🛒 Basket"
+
+msgid "Isprazni"
+msgstr "Empty it"
+
+msgid "🗑 Isprazni"
+msgstr "🗑 Empty"
+
+msgid "Dodajte artiklе klikom ↑"
+msgstr "Add items by clicking ↑"
+
+msgid "Neto:"
+msgstr "Net:"
+
+msgid "UKUPNO:"
+msgstr "TOTAL:"
+
+msgid "Primljeno (€):"
+msgstr "Received (€):"
+
+msgid "Točno"
+msgstr "Exactly"
+
+msgid "Kusur"
+msgstr "Change"
+
+msgid "💵 GOTOVINA"
+msgstr "💵 CASH"
+
+msgid "💳 KARTICA"
+msgstr "💳 CARD"
+
+msgid "🖨 Ispis"
+msgstr "🖨 Printing"
+
+#| msgid "Novi projekt"
+msgid "Nova prodaja"
+msgstr "New project"
+
+#| msgid "Smjena"
+msgid "&larr; Smjena"
+msgstr "Shift"
+
+msgid "🖨 Thermal"
+msgstr "🖨 Thermal"
+
+msgid "📄 A4"
+msgstr "📄 A4"
+
+#| msgid "Kol."
+msgid "Kol"
+msgstr "Qty."
+
+msgid "Ukloni"
+msgstr "Remove it"
+
+msgid "&times;"
+msgstr "&times;"
+
+msgid "Nema stavki. Dodajte artikle ispod."
+msgstr "There are no items. Add items below."
+
+msgid "Skenirajte barkod..."
+msgstr "Scan the barcode..."
+
+#| msgid "Artikl iz zalihe"
+msgid "Pretraži iz zalihe"
+msgstr "Item from stock"
+
+msgid "Upišite naziv ili SKU artikla..."
+msgstr "Enter the item name or SKU..."
+
+msgid "Cijena (&euro;)"
+msgstr "Price (&euro;)"
+
+#, python-format
+#| msgid "PDV (%)"
+msgid "PDV (%%)"
+msgstr "VAT (%)"
+
+#, python-format
+#| msgid "Popust %"
+msgid "Popust (%%)"
+msgstr "discount %"
+
+#| msgid "Napomena na bonu"
+msgid "+ Dodaj na bon"
+msgstr "Note on the voucher"
+
+#| msgid "Iznos"
+msgid "Iznosi"
+msgstr "Amount"
+
+#| msgid "Iznos bez PDV"
+msgid "Neto (bez PDV)"
+msgstr "Amount without VAT"
+
+msgid "Primljeno (&euro;)"
+msgstr "Received (&euro;)"
+
+msgid "&euro;0.00"
+msgstr "&euro;0.00"
+
+#| msgid "Stavka bona"
+msgid "Otkaži bon"
+msgstr "Voucher item"
+
+msgid "PLAĆENO"
+msgstr "PAID"
+
+msgid "&#128424; Ispisi (Thermal 80mm)"
+msgstr "&#128424; Prints (Thermal 80mm)"
+
+msgid "&#128196; Preuzmi (A4 PDF)"
+msgstr "&#128196; Download (A4 PDF)"
+
+#| msgid "Smjena"
+msgid "Smjena &rarr;"
+msgstr "Shift"
+
+msgid "&#8592; POS"
+msgstr "&#8592; POS"
+
+#| msgid "Termini + fakturiranje"
+msgid "Terminal nema aktivnu smjenu"
+msgstr "Appointments + invoicing"
+
+msgid "Raspored stolova"
+msgstr "Table arrangement"
+
+#| msgid "Novi unos"
+msgid "+ Novi bon"
+msgstr "New entry"
+
+msgid "stol"
+msgstr "table"
+
+msgid "slobodan"
+msgstr "free"
+
+#| msgid "Plaćanje"
+msgid "Plaća"
+msgstr "Payment"
+
+msgid "Odaberite stol"
+msgstr "Choose a table"
+
+msgid "Kliknite na stol za prikaz narudžbe"
+msgstr "Click on the table to view the order"
+
+msgid "Pretraži artikal…"
+msgstr "Search for an article..."
+
+msgid "Kol:"
+msgstr "Qty:"
+
+#| msgid "Dodaj sliku"
+msgid "Dodaj +"
+msgstr "Add a picture"
+
+msgid "Primljeno…"
+msgstr "Received…"
+
+msgid "Naplati"
+msgstr "Charge"
+
+msgid "Bon #–"
+msgstr "Voucher #–"
+
+msgid "Ispiši"
+msgstr "Print it out"
+
+#| msgid "Novi unos"
+msgid "Novi bon"
+msgstr "New entry"
+
+msgid "Broj stola (ostavite prazno za šank / dostavu)"
+msgstr "Table number (leave blank for bar / delivery)"
+
+msgid "npr. 7"
+msgstr "eg 7"
+
+#| msgid "Otvoreni bon"
+msgid "Otvori bon"
+msgstr "Open coupon"
+
+#| msgid "Otvorena"
+msgid "Otvoreni"
+msgstr "Open"
+
+#| msgid "Neplaćeno"
+msgid "Naplaćeni"
+msgstr "Unpaid"
+
+#| msgid "Opis rada (opcionalno)"
+msgid "Stol / zona (opcionalno)"
+msgstr "Job description (optional)"
+
+msgid "OTVOREN"
+msgstr "OPEN"
+
+#| msgid "Plaćenih bonova"
+msgid "Naplaćeni danas"
+msgstr "Paid vouchers"
+
+#| msgid "Plaćen u"
+msgid "Naplaćen u"
+msgstr "Paid in"
+
+#| msgid "POS smjene"
+msgid "Pregled smjene"
+msgstr "POS shifts"
+
+#| msgid "Početna"
+msgid "Početna gotovina"
+msgstr "Home"
+
+#| msgid "Gotov proizvod"
+msgid "Gotovinska prodaja"
+msgstr "Finished product"
+
+msgid "Očekivana gotovina"
+msgstr "Expected cash"
+
+#| msgid "Uplata / Prihod"
+msgid "Ukupan prihod"
+msgstr "Payment / Income"
+
+msgid "Zatvori smjenu — unesi gotovinu"
+msgstr "Close shift — enter cash"
+
+#| msgid "Prebrojana gotovina pri zatvaranju (€)"
+msgid "Prebrojana gotovina (€)"
+msgstr "Cash counted at closing (€)"
+
+#| msgid "Zatvorena u"
+msgid "Zatvori smjenu"
+msgstr "Closed in"
+
+msgid "Z-IZVJEŠTAJ GENERIRAN"
+msgstr "Z-REPORT GENERATED"
+
+msgid "SMJENA ZATVORENA"
+msgstr "SHIFT CLOSED"
+
+msgid "&#128221; Z-report PDF"
+msgstr "&#128221; Z-report PDF"
+
+#| msgid "Terminal"
+msgid "&larr; Terminal"
+msgstr "Terminal"
+
+#| msgid "POS postavke"
+msgid "⚙ POS Postavke"
+msgstr "POS settings"
+
+#| msgid "Dashboard"
+msgid "&#8592; Dashboard"
+msgstr "Dashboard"
+
+msgid "&#x1F5A8; Pisač"
+msgstr "&#x1F5A8; Writer"
+
+#| msgid "CIS / Fiskalizacija"
+msgid "&#x1F4CB; Fiskalizacija"
+msgstr "CIS / Fiscalization"
+
+#| msgid "Korisnici"
+msgid "&#x1F464; Korisnici"
+msgstr "Users"
+
+msgid "&#x1F4E6; Artikli"
+msgstr "&#x1F4E6; Articles"
+
+msgid "&#x1F4CA; Izvještaji"
+msgstr "&#x1F4CA; Reports"
+
+msgid "&#x1F5A8;"
+msgstr "&#x1F5A8;"
+
+#| msgid "Termini"
+msgid "Termalni USB"
+msgstr "Dates"
+
+msgid "Direktna USB veza, ESC/POS"
+msgstr "Direct USB connection, ESC/POS"
+
+msgid "&#x1F4F6;"
+msgstr "&#x1F4F6;"
+
+#| msgid "Termini"
+msgid "Termalni mrežni"
+msgstr "Dates"
+
+msgid "IP adresa, ESC/POS over TCP"
+msgstr "IP address, ESC/POS over TCP"
+
+#| msgid "Tip pisača"
+msgid "A4 pisač"
+msgstr "Printer type"
+
+msgid "PDF, XPS, mrežni printer"
+msgstr "PDF, XPS, network printer"
+
+#| msgid "Tip pisača"
+msgid "Mrežni pisač"
+msgstr "Printer type"
+
+#| msgid "IP adresa pisača"
+msgid "IP adresa"
+msgstr "The IP address of the printer"
+
+#| msgid "Spremi podatke"
+msgid "Spremi postavke"
+msgstr "Save data"
+
+msgid "&#x1F5A8; Test ispis"
+msgstr "&#x1F5A8; Test print"
+
+#| msgid "Datum fiskalizacije"
+msgid "Status fiskalizacije"
+msgstr "Fiscalization date"
+
+msgid "&#10003; Certifikat učitan"
+msgstr "&#10003; Certificate loaded"
+
+msgid "&#9888; Certifikat nije učitan"
+msgstr "&#9888; Certificate not loaded"
+
+#| msgid "Certifikat (.p12)"
+msgid "Upload certifikata (.p12)"
+msgstr "Certificate (.p12)"
+
+#| msgid "Reset lozinke"
+msgid "Unesite lozinku…"
+msgstr "Password reset"
+
+msgid "Ostavi prazno ako se ne mijenja"
+msgstr "Leave blank if not changing"
+
+msgid "&#x1F50C; Test konekcije"
+msgstr "&#x1F50C; Connection test"
+
+#| msgid "Ime blagajnika"
+msgid "+ Dodaj blagajnika"
+msgstr "Treasurer's name"
+
+msgid "PIN"
+msgstr "PIN"
+
+#| msgid "Max popust (%)"
+msgid "Max popust"
+msgstr "Max discount (%)"
+
+msgid "&#x2022;&#x2022;&#x2022;&#x2022;"
+msgstr "&#x2022;&#x2022;&#x2022;&#x2022;"
+
+msgid "Da"
+msgstr "That"
+
+#| msgid "Neu"
+msgid "Ne"
+msgstr "Not"
+
+#| msgid "Ime blagajnika"
+msgid "Nema blagajnika."
+msgstr "Treasurer's name"
+
+msgid "+ Dodaj prvog blagajnika"
+msgstr "+ Add the first cashier"
+
+#| msgid "Naziv artikla"
+msgid "+ Novi artikal"
+msgstr "Item name"
+
+msgid "&#x1F50D; Pretraži artikle…"
+msgstr "&#x1F50D; Search items..."
+
+msgid "Jmj"
+msgstr "Ymm"
+
+#| msgid "Nabavna cijena"
+msgid "Nab. cijena"
+msgstr "Purchase price"
+
+#| msgid "Prodajna cijena"
+msgid "Prod. cijena"
+msgstr "Sale price"
+
+#| msgid "Naziv artikla"
+msgid "Nema artikala"
+msgstr "Item name"
+
+msgid "Uvoz artikala (CSV)"
+msgstr "Import items (CSV)"
+
+msgid "&#x1F4C2;"
+msgstr "&#x1F4C2;"
+
+msgid "Kliknite ili povucite CSV datoteku ovdje"
+msgstr "Click or drag the CSV file here"
+
+msgid ""
+"Stupci: name, sku, barcode, category, unit, purchase_price, unit_price, "
+"tax_rate"
+msgstr ""
+"Columns: name, sku, barcode, category, unit, purchase_price, unit_price, "
+"tax_rate"
+
+msgid "Uvezi CSV"
+msgstr "Import CSV"
+
+msgid ""
+"Delimiter: točka-zarez (;) ili zarez. Encoding: UTF-8 ili Latin-1. Prva "
+"linija = zaglavlje."
+msgstr ""
+"Delimiter: semicolon (;) or comma. Encoding: UTF-8 or Latin-1. First line = "
+"header."
+
+msgid "Dnevni utržak – zadnjih 30 dana"
+msgstr "Daily income - last 30 days"
+
+msgid "CSV"
+msgstr "CSV"
+
+msgid "Excel"
+msgstr "Excel"
+
+msgid "Top 10 artikala"
+msgstr "Top 10 items"
+
+#| msgid "Artikl"
+msgid "Artikal"
+msgstr "Article"
+
+msgid "Kom"
+msgstr "Com"
+
+#| msgid "Ime blagajnika"
+msgid "Promet po blagajniku"
+msgstr "Treasurer's name"
+
+#| msgid "POS blagajnik"
+msgid "Blagajnik"
+msgstr "POS cashier"
+
+msgid "Bonovi"
+msgstr "Vouchers"
+
+msgid "Export izvještaja"
+msgstr "Export reports"
+
+msgid "Period"
+msgstr "Period"
+
+msgid "Zadnjih 7 dana"
+msgstr "Last 7 days"
+
+msgid "Zadnjih 30 dana"
+msgstr "Last 30 days"
+
+msgid "Zadnjih 90 dana"
+msgstr "Last 90 days"
+
+msgid "Zadnjih 365 dana"
+msgstr "Last 365 days"
+
+msgid "CSV dnevni"
+msgstr "CSV daily"
+
+msgid "Excel dnevni"
+msgstr "Excel daily"
+
+#| msgid "Artikli"
+msgid "CSV artikli"
+msgstr "Articles"
+
+#| msgid "Artikli"
+msgid "Excel artikli"
+msgstr "Articles"
+
+#| msgid "POS blagajnici"
+msgid "CSV blagajnici"
+msgstr "POS cashiers"
+
+msgid "{# /spanel #}"
+msgstr "{# /spanel #}"
+
+#| msgid "Ime blagajnika"
+msgid "Ime blagajnika *"
+msgstr "Treasurer's name"
+
+msgid "npr. Ana Horvat"
+msgstr "eg Ana Horvat"
+
+msgid "PIN (4 znamenke)"
+msgstr "PIN (4 digits)"
+
+msgid "(obavezno za novog)"
+msgstr "(required for new)"
+
+msgid "Dozvole"
+msgstr "Permissions"
+
+#| msgid "Može stornirati"
+msgid "Može stornirati bonove"
+msgstr "Can cancel"
+
+#, python-format
+#| msgid "Max popust (%)"
+msgid "Maksimalni popust (%%)"
+msgstr "Max discount (%)"
+
+#| msgid "Naziv artikla"
+msgid "Novi artikal"
+msgstr "Item name"
+
+msgid "npr. Pivo 0.5L"
+msgstr "eg Beer 0.5L"
+
+msgid "npr. PIV001"
+msgstr "eg PIV001"
+
+msgid "EAN-13"
+msgstr "EAN-13"
+
+msgid "kom / kg / l"
+msgstr "pc / kg / l"
+
+msgid "Kalkulacija cijene"
+msgstr "Price calculation"
+
+#| msgid "Zadana cijena (€)"
+msgid "Nabavna cijena (€)"
+msgstr "Default price (€)"
+
+#, python-format
+msgid "Markup (%%)"
+msgstr "Markup (%%)"
+
+#| msgid "Prodajna cijena"
+msgid "Prodajna cijena bez PDV:"
+msgstr "Sale price"
+
+#| msgid "Zadana cijena (€)"
+msgid "Prodajna cijena bez PDV (€) *"
+msgstr "Default price (€)"
+
+msgid "Možete prihvatiti kalkuliranu cijenu ili upisati ručno"
+msgstr "You can accept the calculated price or enter it manually"
+
+#| msgid "Spremi podatke"
+msgid "Spremi artikal"
+msgstr "Save data"
+
+msgid "Pokreni novu smjenu"
+msgstr "Start a new shift"
+
+msgid "Pocetna gotovina (&euro;)"
+msgstr "Initial cash (&euro;)"
+
+msgid "AKTIVNA SMJENA"
+msgstr "ACTIVE SHIFT"
+
+#| msgid "Otvori"
+msgid "Otvori POS"
+msgstr "Open it"
+
+#| msgid "Broj smjene"
+msgid "Zadnje smjene"
+msgstr "Shift number"
+
+#| msgid "POS smjena"
+msgid "Nema smjena."
+msgstr "POS shift"
+
+msgid "Test ispis"
+msgstr "Test print"
+
+msgid "*** TEST ISPIS ***"
+msgstr "*** TEST PRINT ***"
+
+msgid "Vrijeme:"
+msgstr "Time:"
+
+msgid "Prijenos znakova OK ✓"
+msgstr "Transmission of characters OK ✓"
+
+#| msgid "UKUPNO ZA PLATITI"
+msgid "UKUPNO TEST:"
+msgstr "TOTAL TO PAY"
+
+msgid "Hvala na kupnji!"
+msgstr "Thank you for your purchase!"
+
+msgid "FINA-Connect POS"
+msgstr "FINA-Connect POS"
+
+msgid "&#x1F5A8; Ispiši"
+msgstr "&#x1F5A8; Print it out"
+
+#| msgid "Preis"
+msgid "Live-Preis"
+msgstr "Preis"
+
+msgid "Stunden"
+msgstr ""
+
+msgid "Tage"
+msgstr ""
+
+msgid "Monate"
+msgstr ""
+
+msgid "Premium Buchung – Viskovic Group"
+msgstr "Premium Buchung – Viskovic Group"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Premium Buchungsportal"
+msgstr "Premium Buchungsportal"
+
+msgid "Verfügbare Ressourcen"
+msgstr "Available resources"
+
+msgid "Buchen Sie Maschinen, Wohnräume und Geschäftsräume online"
+msgstr "Buchen Sie Maschinen, Wohnräume und Geschäftsräume online"
+
+msgid "Buchen →"
+msgstr "Buchen →"
+
+#| msgid "Keine Kontakte verfügbar."
+msgid "Keine Ressourcen verfügbar."
+msgstr "Keine Kontakte verfügbar."
+
+#| msgid "Zarada"
+msgid "Sati rada"
+msgstr "Earnings"
+
+msgid "Iskorištenost budžeta"
+msgstr "Budget utilization"
+
+#| msgid "Nema ažuriranja"
+msgid "Dodaj ažuriranje"
+msgstr "There are no updates"
+
+#| msgid "Naslov"
+msgid "Naslov..."
+msgstr "Title"
+
+#| msgid "Nema ažuriranja"
+msgid "Detalji ažuriranja..."
+msgstr "There are no updates"
+
+msgid "Javno"
+msgstr "Publicly"
+
+msgid "Objavi"
+msgstr "Publish"
+
+msgid "Zadnji unosi radnih sati"
+msgstr "Last entries of working hours"
+
+#| msgid "Zadana stopa"
+msgid "Zadatak"
+msgstr "Default rate"
+
+#| msgid "Radni sati"
+msgid "Svi sati"
+msgstr "Working hours"
+
+#| msgid "Ažuriranja"
+msgid "Ažuriranja projekta"
+msgstr "Updates"
+
+#| msgid "Šifra"
+msgid "Šifra *"
+msgstr "Code"
+
+msgid "Status i budžet"
+msgstr "Status and budget"
+
+msgid "Budžet (EUR)"
+msgstr "Budget (EUR)"
+
+msgid "Javno vidljivo"
+msgstr "Publicly visible"
+
+#| msgid "Klijent"
+msgid "Klijent:"
+msgstr "Client"
+
+msgid "Budžet:"
+msgstr "Budget:"
+
+msgid "Start:"
+msgstr "Start:"
+
+msgid "Kraj:"
+msgstr "End:"
+
+#| msgid "Nema projekata"
+msgid "Nema projekata."
+msgstr "There are no projects"
+
+msgid "← All registrations"
+msgstr "← All registrations"
+
+msgid "Company Information"
+msgstr "Company Information"
+
+msgid "Company Name"
+msgstr "Company Name"
+
+msgid "OIB / Tax ID"
+msgstr "OIB / Tax ID"
+
+msgid "Business Type"
+msgstr "Business Type"
+
+msgid "Country"
+msgstr "Country"
+
+#| msgid "Adresse"
+msgid "Address"
+msgstr "Addresses"
+
+#, fuzzy
+#| msgid "Kontakt"
+msgid "Contact"
+msgstr "Contact"
+
+#| msgid "Contact Phone"
+msgid "Contact Person"
+msgstr "Contact phone"
+
+msgid "Phone"
+msgstr "Phone"
+
+#| msgid "Final Details"
+msgid "Registration Details"
+msgstr "Final Details"
+
+msgid "Selected Plan"
+msgstr "Selected Plan"
+
+msgid "Submitted"
+msgstr "Submitted"
+
+#| msgid "Preview"
+msgid "Reviewed"
+msgstr "Preview"
+
+#, fuzzy
+#| msgid "Dokument"
+msgid "Document"
+msgstr "Document"
+
+msgid "📄 View uploaded document"
+msgstr "📄 View uploaded document"
+
+msgid "Rejection Reason"
+msgstr "Rejection Reason"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "✓ Approve & Create Account"
+msgstr "✓ Approve & Create Account"
+
+msgid "Reason for rejection (optional)..."
+msgstr "Reason for rejection (optional)..."
+
+#| msgid "Rejected"
+msgid "✗ Reject"
+msgstr "Rejected"
+
+msgid "Registrations – FINA-Connect Admin"
+msgstr "Registrations – FINA-Connect Admin"
+
+msgid "Company Registrations"
+msgstr "Company Registrations"
+
+#| msgid "Dashboard"
+msgid "← Dashboard"
+msgstr "Dashboard"
+
+msgid "All"
+msgstr "All"
+
+msgid "Company"
+msgstr "Company"
+
+msgid "View →"
+msgstr "View →"
+
+msgid "-Connect"
+msgstr "- Connect"
+
+msgid "← Back to website"
+msgstr "← Back to website"
+
+msgid "Register your company"
+msgstr "Register your company"
+
+msgid ""
+"Enter your company details. All fields are required unless marked optional."
+msgstr ""
+"Enter your company details. All fields are required unless marked optional."
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Continue →"
+msgstr "Continue →"
+
+#| msgid "Upload i pregled dokumenata"
+msgid "Upload company document"
+msgstr "Upload and view documents"
+
+msgid ""
+"Upload your business registration certificate (optional but recommended). "
+"PDF, JPG, PNG — max 10 MB."
+msgstr ""
+"Upload your business registration certificate (optional but recommended). "
+"PDF, JPG, PNG — max 10 MB."
+
+msgid "Click or drag file here"
+msgstr "Click or drag file here"
+
+msgid "PDF, JPG, PNG — max 10 MB"
+msgstr "PDF, JPG, PNG — max 10 MB"
+
+msgid "You can skip this step and upload later if needed."
+msgstr "You can skip this step and upload later if needed."
+
+msgid "← Back"
+msgstr "← Back"
+
+msgid "Choose your plan"
+msgstr "Choose your plan"
+
+msgid ""
+"Select the plan that fits your business. You can upgrade at any time after "
+"approval."
+msgstr ""
+"Select the plan that fits your business. You can upgrade at any time after "
+"approval."
+
+msgid "Submit Registration →"
+msgstr "Submit Registration →"
+
+msgid "Registration submitted!"
+msgstr "Registration submitted!"
+
+msgid "Your company registration has been received. Here's what happens next:"
+msgstr ""
+"Your company registration has been received. Here's what happens next:"
+
+msgid "Review (1–2 business days)"
+msgstr "Review (1–2 business days)"
+
+msgid ""
+"Our team will review your registration and verify your company documents."
+msgstr ""
+"Our team will review your registration and verify your company documents."
+
+#| msgid "Approved"
+msgid "Approval email"
+msgstr "Approved"
+
+msgid "You'll receive an email with login credentials once approved."
+msgstr "You'll receive an email with login credentials once approved."
+
+msgid "Start using FINA-Connect"
+msgstr "Start using FINA-Connect"
+
+msgid "Log in and start managing your business with your selected plan."
+msgstr "Log in and start managing your business with your selected plan."
+
+msgid "← Back to homepage"
+msgstr "← Back to homepage"
+
+msgid "Module not included in your plan"
+msgstr "Module not included in your plan"
+
+#| msgid "Tue"
+msgid "The"
+msgstr "There"
+
+msgid "module is not available on your current plan. Upgrade to access it."
+msgstr "module is not available on your current plan. Upgrade to access it."
+
+msgid "Upgrade your plan to access this feature."
+msgstr "Upgrade your plan to access this feature."
+
+msgid "← Go back"
+msgstr "← Go back"
+
+msgid "Available Plans"
+msgstr "Available Plans"
+
+msgid "Contact support to upgrade your subscription."
+msgstr "Contact support to upgrade your subscription."
+
+msgid "Request Upgrade"
+msgstr "Request Upgrade"
+
+msgid "Objekt *"
+msgstr "Object *"
+
+msgid "-- odaberi objekt --"
+msgstr "-- select an object --"
+
+#| msgid "Ime i prezime"
+msgid "Ime i prezime gosta *"
+msgstr "Name and surname"
+
+msgid "Marko Marković"
+msgstr "Marko Markovic"
+
+#| msgid "Datum dospijeća"
+msgid "Datum dolaska *"
+msgstr "Maturity date"
+
+#| msgid "Datum izdavanja"
+msgid "Datum odlaska *"
+msgstr "Date of issue"
+
+#| msgid "Zadana cijena (€)"
+msgid "Ukupna cijena (EUR)"
+msgstr "Default price (€)"
+
+msgid "Kreiraj rezervaciju"
+msgstr "Create a reservation"
+
+#| msgid "Renovacija"
+msgid "Rezervacije"
+msgstr "Renovation"
+
+msgid "&nbsp;|&nbsp;"
+msgstr "&nbsp;|&nbsp;"
+
+#| msgid "Projekti"
+msgid "Objekti"
+msgstr "Projects"
+
+#| msgid "Navigacija"
+msgid "Nova rezervacija"
+msgstr "Navigation"
+
+msgid "Gost"
+msgstr "Guest"
+
+msgid "Do"
+msgstr "To"
+
+msgid "Kod"
+msgstr "Code"
+
+#| msgid "Nema ažuriranja"
+msgid "Nema rezervacija."
+msgstr "There are no updates"
+
+msgid "po danu"
+msgstr "per day"
+
+msgid "Dostupno"
+msgstr "Available"
+
+#| msgid "Aktivna"
+msgid "Aktivne rez."
+msgstr "Active"
+
+msgid "Smart Lock"
+msgstr "Smart Lock"
+
+msgid "+ Nova"
+msgstr "+ New"
+
+#| msgid "Email"
+msgid "Email / Tel"
+msgstr "E-mail"
+
+msgid "Cijena / dan (EUR) *"
+msgstr "Price / day (EUR) *"
+
+msgid "Smart Lock ID"
+msgstr "Smart Lock ID"
+
+#| msgid "Lokacija"
+msgid "Lokacija / Opis"
+msgstr "Location"
+
+msgid "Trenutno dostupno"
+msgstr "Currently available"
+
+msgid "Nekretnine i oprema"
+msgstr "Real estate and equipment"
+
+#| msgid "Novi projekt"
+msgid "Novi objekt"
+msgstr "New project"
+
+msgid "Dostupnost"
+msgstr "Availability"
+
+#| msgid "Nema projekata"
+msgid "Nema objekata."
+msgstr "There are no projects"
+
+#| msgid "Prihodi (uplate)"
+msgid "Prihod (plaćeno)"
+msgstr "Income (payments)"
+
+#| msgid "Račun"
+msgid "računa"
+msgstr "Account"
+
+#| msgid "Spremi unos"
+msgid "unosa"
+msgstr "Save entry"
+
+msgid "Uskoro"
+msgstr ""
+
+#| msgid "Period"
+msgid "u periodu"
+msgstr "Period"
+
+#| msgid "Radno vrijeme"
+msgid "Radno vrijeme — Izvještaj"
+msgstr "Working hours"
+
+#| msgid "Korisnik"
+msgid "Po korisniku"
+msgstr "User"
+
+#| msgid "Unos"
+msgid "Unosa"
+msgstr "Input"
+
+#| msgid "Projekt"
+msgid "Po projektu"
+msgstr "Project"
+
+msgid "Tracked Items"
+msgstr ""
+
+msgid "Token"
+msgstr ""
+
+#| msgid "Zadnje prijave"
+msgid "Zadnje azurirano"
+msgstr "Last applications"
+
+#| msgid "Nema podataka"
+msgid "Nema tracked stavki."
+msgstr "No data"
+
+#| msgid "Stavke bona"
+msgid "Stavke narudžbe"
+msgstr "Voucher items"
+
+#| msgid "Gotov proizvod"
+msgid "Proizvod"
+msgstr "Finished product"
+
+#| msgid "Kupaonica"
+msgid "Kupac"
+msgstr "Bathroom"
+
+#| msgid "Sustav"
+msgid "Dostava"
+msgstr "Rustling"
+
+#| msgid "Adresse"
+msgid "Adresa dostave"
+msgstr "Addresses"
+
+#| msgid "Promijeni lozinku"
+msgid "Promijeni status"
+msgstr "Change password"
+
+#| msgid "Ažuriranja"
+msgid "Ažuriraj"
+msgstr "Updates"
+
+msgid "-- odaberi proizvod --"
+msgstr "-- select a product --"
+
+msgid "Kupac i dostava"
+msgstr "Buyer and delivery"
+
+#| msgid "Kupaonica"
+msgid "Kupac *"
+msgstr "Bathroom"
+
+msgid "-- odaberi kupca --"
+msgstr "-- select customer --"
+
+msgid "Način dostave"
+msgstr "Delivery method"
+
+msgid "Kreiraj narudžbu"
+msgstr "Create an order"
+
+msgid "Narudžbe"
+msgstr "Orders"
+
+#| msgid "Gotov proizvod"
+msgid "Proizvodi"
+msgstr "Finished product"
+
+msgid "Ukupno narudžbi"
+msgstr "Total orders"
+
+#| msgid "Plaćen"
+msgid "Praćenje"
+msgstr "Paid"
+
+msgid "U obradi"
+msgstr "In processing"
+
+msgid "Nema narudžbi."
+msgstr "There are no orders."
+
+msgid "SKU *"
+msgstr "SKU *"
+
+msgid "Cijena (EUR)"
+msgstr "Price (EUR)"
+
+#| msgid "Zaliha"
+msgid "Zaliha (kom)"
+msgstr "Stock"
+
+msgid "Slika"
+msgstr "Picture"
+
+msgid "Aktivan (vidljiv u shopu)"
+msgstr "Active (visible in the shop)"
+
+msgid "Za iznajmljivanje (ne prodaje se)"
+msgstr ""
+
+msgid "Webshop – Proizvodi"
+msgstr ""
+
+#| msgid "Gotov proizvod"
+msgid "Novi proizvod"
+msgstr "Finished product"
+
+#| msgid "Aktivni"
+msgid "Neaktivni"
+msgstr "Active"
+
+msgid "Iznajmljivanje"
+msgstr ""
+
+#| msgid "Nema podataka"
+msgid "Nema proizvoda."
+msgstr "No data"
+
+msgid "Viskovic Group – Ihr Partner für Bau, Wohnen & Business"
+msgstr ""
+
+msgid "Leistungen"
+msgstr ""
+
+msgid "Über uns"
+msgstr ""
+
+msgid "Online Buchung"
+msgstr ""
+
+msgid "Seit 2015 · Deutschland & Kroatien"
+msgstr ""
+
+msgid "Ihr zuverlässiger Partner für"
+msgstr ""
+
+msgid "Bau · Wohnen · Business"
+msgstr ""
+
+msgid ""
+"Von Bauleistungen über Wohnvermietung bis hin zu Fitness und E-Commerce – "
+"Viskovic Group ist Ihre Komplettlösung."
+msgstr ""
+
+#| msgid "Termini"
+msgid "Termin buchen"
+msgstr "Dates"
+
+msgid "Mehr erfahren"
+msgstr ""
+
+msgid "Abgeschlossene Projekte"
+msgstr ""
+
+msgid "Mitarbeiter"
+msgstr ""
+
+msgid "Jahre Erfahrung"
+msgstr ""
+
+msgid "Geschäftsbereiche"
+msgstr ""
+
+msgid "Unsere Leistungen"
+msgstr ""
+
+msgid "Alles aus einer Hand – professionell und zuverlässig"
+msgstr ""
+
+msgid "Bauleistungen"
+msgstr ""
+
+msgid ""
+"Professionelle Bauleistungen, Renovierungen und Innenausbau in Deutschland "
+"und Kroatien."
+msgstr ""
+
+msgid "Anfragen"
+msgstr ""
+
+msgid "Wohnvermietung"
+msgstr ""
+
+msgid ""
+"Möblierte Zimmer, Apartments und Ferienwohnungen – komfortabel und zu fairen"
+" Preisen."
+msgstr ""
+
+#| msgid "Fitness"
+msgid "Fitnessstudio"
+msgstr "Fitness"
+
+msgid ""
+"Modernes Fitnessstudio mit Top-Geräten, persönlicher Betreuung und flexiblen"
+" Mitgliedschaften."
+msgstr ""
+
+msgid "Mitglied werden"
+msgstr ""
+
+msgid ""
+"Online-Shop mit Baumaterialien, Sportartikeln und Haushaltswaren zu "
+"Großhandelspreisen."
+msgstr ""
+
+msgid "Shop besuchen"
+msgstr ""
+
+msgid "Versicherungen"
+msgstr ""
+
+msgid "Beratung und Vermittlung von Kranken-, Lebens- und Sachversicherungen."
+msgstr ""
+
+msgid "Beratung anfragen"
+msgstr ""
+
+msgid ""
+"Buchen Sie Termine, Dienstleistungen und Ressourcen schnell und einfach "
+"online."
+msgstr ""
+
+msgid "Jetzt buchen"
+msgstr ""
+
+#| msgid "Kontaktiert"
+msgid "Kontaktieren Sie uns"
+msgstr "Kontaktiert"
+
+msgid "Wir stehen Ihnen für alle Fragen zur Verfügung"
+msgstr ""
+
+msgid "Anrufen"
+msgstr ""
+
+msgid "Online buchen"
+msgstr ""
+
+msgid ""
+"Ihr zuverlässiger Partner für Bau, Wohnen & Business in Deutschland und "
+"Kroatien."
+msgstr ""
+
+msgid "info@viskovic-group.de"
+msgstr ""
+
+msgid "Mitarbeiter Login"
+msgstr ""
+
+msgid "&copy; 2026 Viskovic Group. Alle Rechte vorbehalten."
+msgstr ""
+
+msgid "YTD sati"
+msgstr "YTD hours"
+
+#| msgid "Zarada"
+msgid "YTD zarada"
+msgstr "Earnings"
+
+#| msgid "Novi projekt"
+msgid "Po projektu (YTD)"
+msgstr "New project"
+
+msgid "Po radniku (mjesec)"
+msgstr "Per worker (month)"
+
+#| msgid "Nema projekata"
+msgid "📏 Budget projekata"
+msgstr "There are no projects"
+
+msgid "📈 Tjedni trend (12 tjedana)"
+msgstr "📈 Weekly trend (12 weeks)"
+
+#| msgid "unos(a) čeka odobrenje"
+msgid "unosa čeka odobrenje"
+msgstr "entry(s) pending approval"
+
+#| msgid "Odbijam"
+msgid "✗ Odbij"
+msgstr "I refuse"
+
+#| msgid "Na odobrenju"
+msgid "Sve odobreno!"
+msgstr "On approval"
+
+msgid "⚡ Fina Connect"
+msgstr "⚡ Fina Connect"
+
+msgid "⏱ Moji sati"
+msgstr "⏱ My hours"
+
+msgid "📅 Tjedni"
+msgstr "📅 Weeks"
+
+msgid "👔 Manager"
+msgstr "👔 Manager"
+
+msgid "💰 Nenaplaćeni radni sati"
+msgstr "💰 Unpaid working hours"
+
+msgid ""
+"Odobreni sati koji još nisu fakturirani — grupirani po projektu/klijentu"
+msgstr "Approved hours not yet billed — grouped by project/client"
+
+msgid "Od datuma"
+msgstr "From the date"
+
+#| msgid "Datum"
+msgid "Do datuma"
+msgstr "Date"
+
+#| msgid "Sati rada po jedinici"
+msgid "Svi radnici"
+msgstr "Working hours per unit"
+
+msgid "Ukupno € (procjena)"
+msgstr "Total € (estimate)"
+
+#| msgid "Spremi unos"
+msgid "Br. unosa"
+msgstr "Save entry"
+
+#| msgid "Nema projekata"
+msgid "Br. projekata"
+msgstr "There are no projects"
+
+#| msgid "Fakturiranje"
+msgid "📄 Fakturiraj"
+msgstr "Invoicing"
+
+msgid "Nema nenaplaćenih odobrenih sati za odabrani period."
+msgstr "There are no unpaid approved hours for the selected period."
+
+msgid "Odobriti sate →"
+msgstr "Approve hours →"
+
+msgid "✏️ Uredi unos sati"
+msgstr "✏️ Edit hours entry"
+
+#| msgid "Pauza"
+msgid "Pauza (min)"
+msgstr "Break"
+
+#| msgid "Vrsta"
+msgid "Vrsta posla"
+msgstr "Type"
+
+msgid "Tagovi"
+msgstr "Tags"
+
+#| msgid "Spremi"
+msgid "✓ Spremi"
+msgstr "Save"
+
+#| msgid "Tjedni unos"
+msgid "Tjedni unos sati"
+msgstr "Weekly intake"
+
+msgid "← Prethodni"
+msgstr "← Previous"
+
+msgid "Sljedeći →"
+msgstr "Next →"
+
+#| msgid "Spremi podatke"
+msgid "✓ Spremi tjedne sate"
+msgstr "Save data"
+
+msgid "Pregled i upravljanje - webshop"
+msgstr "Overview and management - webshop"
+
+#| msgid "Webshop"
+msgid "Webshop Modul"
+msgstr "Web shop"
+
+msgid "Podnositelj"
+msgstr "The applicant"
+
+msgid "Problem"
+msgstr "Problem"
+
+msgid "Interni status"
+msgstr "Internal status"
+
+msgid "Metapodaci"
+msgstr "Metadata"
+
+msgid "Hitnost"
+msgstr "Urgency"
+
+msgid "Naslov i opis"
+msgstr "Title and description"
+
+msgid "Video izvor"
+msgstr "Video source"
+
+msgid "Unesite YouTube/Vimeo URL ILI uploadajte .mp4 datoteku."
+msgstr "Enter a YouTube/Vimeo URL OR upload an .mp4 file."
+
+msgid "Klasifikacija"
+msgstr "Classification"
+
+msgid "Info"
+msgstr "Info"
+
+msgid "Preview"
+msgstr "Preview"
+
+msgid "Stranica"
+msgstr "Page"
+
+msgid "Stranice"
+msgstr "Pages"
+
+msgid "Pozadinska slika"
+msgstr "Background image"
+
+msgid "Video pozadina"
+msgstr "Video background"
+
+msgid "Hero sekcija"
+msgstr "Hero section"
+
+msgid "Hero sekcije"
+msgstr "Hero section"
+
+msgid "Naziv brenda"
+msgstr "Brand name"
+
+msgid "Emoji ikona"
+msgstr "Emoji icon"
+
+msgid "Brend"
+msgstr "Brand"
+
+msgid "Brendovi"
+msgstr "Brands"
+
+msgid "Galerijska slika"
+msgstr "Gallery image"
+
+msgid "Galerija"
+msgstr "Gallery"
+
+msgid "Info o tvrtki (web)"
+msgstr "Company info (web)"
+
+msgid "Info o tvrtkama (web)"
+msgstr "Company information (web)"
+
+msgid "Vrsta intervencije"
+msgstr "Type of intervention"
+
+msgid "Hitan slučaj (odmah)"
+msgstr "Emergency (immediately)"
+
+msgid "Hitne intervencije"
+msgstr "Emergency interventions"
+
+msgid "Naslov (HR)"
+msgstr "Title (HR)"
+
+msgid "Naslov (DE)"
+msgstr "Title (DE)"
+
+msgid "Naslov (EN)"
+msgstr "Title (EN)"
+
+msgid "Opis (HR)"
+msgstr "Description (HR)"
+
+msgid "Opis (DE)"
+msgstr "Description (DE)"
+
+msgid "Opis (EN)"
+msgstr "Description (EN)"
+
+msgid "YouTube / Vimeo URL"
+msgstr "YouTube / Vimeo URL"
+
+msgid "Npr. https://www.youtube.com/watch?v=..."
+msgstr "For example https://www.youtube.com/watch?v=..."
+
+msgid "Video datoteka (.mp4)"
+msgstr "Video file (.mp4)"
+
+msgid "Thumbnail"
+msgstr "Thumbnail"
+
+msgid "Npr. 2:34"
+msgstr "For example 2:34"
+
+msgid "Istaknuto"
+msgstr "Highlighted"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "Video galerija"
+msgstr "Video gallery"
+
+msgid "VISKOVIĆ GROUP – Snaga koja gradi budućnost"
+msgstr "VISKOVIĆ GROUP – The force that builds the future"
+
+msgid "O nama"
+msgstr "About us"
+
+msgid "ERP Portal →"
+msgstr "ERP Portal →"
+
+msgid "VG"
+msgstr "VG"
+
+msgid "Visković Group · Deutschland · Hrvatska"
+msgstr "Visković Group · Deutschland · Croatia"
+
+msgid "Snaga koja"
+msgstr "The power that"
+
+msgid "gradi"
+msgstr "builds"
+
+msgid "budućnost."
+msgstr "future."
+
+msgid "Rezerviraj termin"
+msgstr "Book an appointment"
+
+#| msgid "Naziv brenda"
+msgid "Naši brendovi"
+msgstr "Brand name"
+
+msgid "Scroll"
+msgstr "Scroll"
+
+msgid "Godina iskustva"
+msgstr "A year of experience"
+
+#| msgid "Naziv brenda"
+msgid "Aktivnih brendova"
+msgstr "Brand name"
+
+msgid "Države prisutnosti"
+msgstr "States of presence"
+
+#| msgid "Projekti"
+msgid "Projekata u tijeku"
+msgstr "Projects"
+
+msgid "Četiri stupa"
+msgstr "Four pillars"
+
+#| msgid "Tjedno"
+msgid "jedne"
+msgstr "Per week"
+
+msgid "vizije."
+msgstr "visions."
+
+msgid "Visković BAU"
+msgstr "Visković BAU"
+
+#| msgid "Građevina / Renovacija"
+msgid "Građevinarstvo · Renovacije · Projekti"
+msgstr "Construction / Renovation"
+
+#| msgid "Gradnja"
+msgid "Visokogradnja"
+msgstr "Construction"
+
+#| msgid "Renovacija"
+msgid "Renovacije"
+msgstr "Renovation"
+
+#| msgid "Projektni rad"
+msgid "Projektni menadžment"
+msgstr "Project work"
+
+msgid "BAU"
+msgstr "BAU"
+
+msgid "VISKOVIC GROUP"
+msgstr "VISKOVIC GROUP"
+
+msgid "Wildberg"
+msgstr "Wildberg"
+
+msgid "Landgasthof · Hotel · Restoran"
+msgstr "Landgasthof · Hotel · Restaurant"
+
+#| msgid "Najam"
+msgid "VG Najam"
+msgstr "Lease"
+
+msgid "Strojevi · Oprema · Radnici"
+msgstr "Machines · Equipment · Workers"
+
+msgid "VG Shop"
+msgstr "VG Shop"
+
+msgid "Online prodaja · Materijali · Oprema"
+msgstr "Online sales · Materials · Equipment"
+
+msgid "O nama · Vizija · Vrijednosti"
+msgstr "About us · Vision · Values"
+
+msgid "Više od posla —"
+msgstr "More than work —"
+
+msgid "naslijeđe"
+msgstr "legacy"
+
+msgid "koje traje."
+msgstr "which lasts."
+
+msgid "Kvaliteta bez kompromisa"
+msgstr "Quality without compromise"
+
+msgid ""
+"Svaki rad koji potpisujemo mora zadovoljiti naše standarde — ne samo "
+"propise. To je naša osnova."
+msgstr ""
+"Every piece of work we sign must meet our standards — not just regulations. "
+"That is our basis."
+
+msgid "II"
+msgstr "II"
+
+msgid "Transparentno poslovanje"
+msgstr "Transparent business"
+
+msgid ""
+"Jasni ugovori, realni rokovi, poštene cijene. Nema skrivenih troškova, nema "
+"iznenađenja."
+msgstr ""
+"Clear contracts, realistic deadlines, fair prices. No hidden costs, no "
+"surprises."
+
+msgid "III"
+msgstr "III"
+
+msgid "Dugoročni odnosi"
+msgstr "Long-term relationships"
+
+msgid ""
+"Naši partneri i klijenti vraćaju se. To je naša najveća nagrada i potvrda da"
+" radimo pravo."
+msgstr ""
+"Our partners and clients keep coming back. This is our biggest award and "
+"confirmation that we do the right thing."
+
+msgid "IV"
+msgstr "IV"
+
+msgid "Inovacija i tradicija"
+msgstr "Innovation and tradition"
+
+msgid ""
+"Digitalizirali smo cjelokupno poslovanje, ali nismo izgubili ono što nas "
+"čini posebnima — ljudski pristup."
+msgstr ""
+"We digitized the entire business, but we did not lose what makes us special "
+"— the human approach."
+
+msgid "Naši"
+msgstr "Ours"
+
+#| msgid "Projekti"
+msgid "projekti"
+msgstr "Projects"
+
+#| msgid "Ugovor"
+msgid "govore."
+msgstr "Contract"
+
+msgid "[ Vaša slika 1 ]"
+msgstr "[ Your picture 1 ]"
+
+msgid "Gradilište / BAU"
+msgstr "Construction site / BAU"
+
+msgid "Visković BAU · 2024"
+msgstr "Visković BAU · 2024"
+
+msgid "[ Vaša slika 2 ]"
+msgstr "[ Your picture 2 ]"
+
+msgid "Wildberg Hotel"
+msgstr "Wildberg Hotel"
+
+msgid "Wildberg · Restoran"
+msgstr "Wildberg · Restaurant"
+
+msgid "[ Vaša slika 3 ]"
+msgstr "[ Your picture 3 ]"
+
+#| msgid "Projektni rad"
+msgid "Projekt renovacije"
+msgstr "Project work"
+
+#| msgid "Renovacija"
+msgid "BAU · Renovacija"
+msgstr "Renovation"
+
+msgid "[ Vaša slika 4 ]"
+msgstr "[ Your picture 4 ]"
+
+#| msgid "Renovacija"
+msgid "Mehanizacija"
+msgstr "Renovation"
+
+msgid "VG Najam · Strojevi"
+msgstr "VG Rental · Machines"
+
+msgid "[ Vaša slika 5 ]"
+msgstr "[ Your picture 5 ]"
+
+msgid "Tim na terenu"
+msgstr "The team on the field"
+
+msgid "VG Group · Tim"
+msgstr "VG Group · Team"
+
+msgid "[ Vaša slika 6 ]"
+msgstr "[ Your picture 6 ]"
+
+#| msgid "Otvori projekt"
+msgid "Završeni objekt"
+msgstr "Open the project"
+
+msgid "BAU · Završeno"
+msgstr "BAU · Completed"
+
+msgid "Razgovarajmo"
+msgstr "Let's talk"
+
+#| msgid "Projekt"
+msgid "projektu."
+msgstr "Project"
+
+msgid "Nikša"
+msgstr "Nikša"
+
+msgid "Dragan"
+msgstr "Sweetheart"
+
+msgid "viskovic.bau@gmail.com"
+msgstr "viskovic.bau@gmail.com"
+
+msgid "FINA-CONNECT ERP"
+msgstr "FINA-CONNECT ERP"
+
+#| msgid "Poslovni profil"
+msgid "Poslovni"
+msgstr "Business profile"
+
+#| msgid "Partner portal"
+msgid "portal"
+msgstr "Partner portal"
+
+msgid "Fakturiranje i financijsko upravljanje"
+msgstr "Invoicing and financial management"
+
+#| msgid "Novi unos radnog vremena"
+msgid "Evidencija radnog vremena"
+msgstr "New entry of working hours"
+
+#| msgid "Vezani dokument"
+msgid "Partneri i dokumenti"
+msgstr "Related document"
+
+msgid "Najam, Webshop, Fitness moduli"
+msgstr "Rent, Webshop, Fitness modules"
+
+#| msgid "Svi projekti"
+msgid "Termini i projekti"
+msgstr "All projects"
+
+msgid "Prijava u ERP sustav →"
+msgstr "Login to the ERP system →"
+
+msgid "Pristup samo za ovlaštene korisnike · fina-connect.online"
+msgstr "Access for authorized users only · fina-connect.online"
+
+msgid "© 2026 Visković Group · Sva prava pridržana"
+msgstr "© 2026 Visković Group · All rights reserved"
+
+msgid "ERP"
+msgstr "ERP"
+
+msgid "Video Galerija — Visković Group"
+msgstr "Video Gallery — Visković Group"
+
+#| msgid "Pregled vaših projekata"
+msgid "Pogledajte naše projekte i radove"
+msgstr "Overview of your projects"
+
+#| msgid "Naziv kategorije"
+msgid "Nema videa u ovoj kategoriji."
+msgstr "Category name"
+
+#| msgid "Istaknuto"
+msgid "★ Istaknuto"
+msgstr "Highlighted"
+
+msgid "Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku."
+msgstr ""
+"Your request has been received. We will contact you as soon as possible."
+
+msgid "YTD Sati"
+msgstr "YTD Hours"
+
+#| msgid "Iznos"
+msgid "YTD Iznos"
+msgstr "Amount"
+
+#| msgid "Projekt"
+msgid "Projekata"
+msgstr "Project"
+
+msgid "Po radniku (ovaj mjesec)"
+msgstr "Per worker (this month)"
+
+msgid "Tjedni trend (zadnjih 12 tjedana)"
+msgstr "Weekly trend (last 12 weeks)"
+
+msgid "Worktime"
+msgstr "Worktime"
+
+msgid "Pregled i upravljanje - worktime"
+msgstr "Review and management - worktime"
+
+msgid "Worktime Modul"
+msgstr "Worktime Module"
+
+#| msgid "Ukupno fakturirano"
+msgid "Ukupno iznos"
+msgstr "Total invoiced"
+
+#| msgid "Na odobrenju"
+msgid "Čeka odobrenje"
+msgstr "On approval"
+
+#| msgid "Na odobrenju"
+msgid "Odobreno"
+msgstr "On approval"
+
+msgid "Čeka"
+msgstr "He's waiting"
+
+msgid "🔍 Filtriraj"
+msgstr "🔍 Filter"
+
+#| msgid "Radnik"
+msgid "Radnici"
+msgstr "Worker"
+
+#| msgid "Tjedan"
+msgid "Nijedan"
+msgstr "Week"
+
+msgid "📄 PDF detaljni"
+msgstr "📄 PDF detailed"
+
+msgid "📄 PDF zbirni"
+msgstr "📄 PDF summary"
+
+msgid "0 odabrano"
+msgstr "0 selected"
+
+msgid "Detaljni"
+msgstr "Detailed"
+
+msgid "Zbirni"
+msgstr "Collective"
+
+#| msgid "Fakturiranje"
+msgid "💶 Fakturiraj"
+msgstr "Invoicing"
+
+msgid "Od–Do"
+msgstr "From–To"
+
+msgid "F."
+msgstr "F."
+
+msgid "Nema unosa za odabrane filtere."
+msgstr "There are no entries for the selected filters."
+
+msgid "Moj radni portal"
+msgstr "My work portal"
+
+#| msgid "Spremi"
+msgid "⏹ Spremi"
+msgstr "Save"
+
+msgid "Pokreni štopericu"
+msgstr "Start the stopwatch"
+
+msgid "Opis rada (opcionalno)"
+msgstr "Job description (optional)"
+
+msgid "START"
+msgstr "START"
+
+msgid "Tjedan"
+msgstr "Week"
+
+msgid "Mjesec"
+msgstr "Month"
+
+msgid "Zarada"
+msgstr "Earnings"
+
+msgid "Unos"
+msgstr "Input"
+
+msgid "Unosi"
+msgstr "Entries"
+
+msgid "Brzo"
+msgstr "Quickly"
+
+msgid "Novi unos radnog vremena"
+msgstr "New entry of working hours"
+
+msgid "Pauza"
+msgstr "Break"
+
+msgid "Što ste radili?"
+msgstr "What have you been doing?"
+
+msgid "Spremi unos"
+msgstr "Save entry"
+
+msgid "Kopiraj jučerašnje"
+msgstr "Copy yesterday's"
+
+msgid "Tjedni unos"
+msgstr "Weekly intake"
+
+msgid "unos(a) čeka odobrenje"
+msgstr "entry(s) pending approval"
+
+msgid "Dupliciraj"
+msgstr "Duplicate it"
+
+msgid "Nema unosa. Pokrenite štopericu ili unesite sate!"
+msgstr "There are no entries. Start the stopwatch or enter the hours!"
+
+msgid "Brzi unos iz predloška"
+msgstr "Quick input from a template"
+
+msgid "Česti projekti"
+msgstr "Frequent projects"
+
+msgid "Predlošci će se pojaviti nakon što počnete koristiti sustav."
+msgstr "Templates will appear after you start using the system."
+
+msgid "Dnevna bilješka"
+msgstr "Daily note"
+
+msgid "Bilješke za danas..."
+msgstr "Notes for today..."
+
+msgid "dana zaredom s unesenim satima"
+msgstr "days in a row with the entered hours"
+
+msgid "Satnica"
+msgstr "Hourly rate"
+
+msgid "Dnevno"
+msgstr "Daily"
+
+msgid "Tjedno"
+msgstr "Per week"
+
+msgid "Streak"
+msgstr "Streak"
+
+msgid "👤 Profil"
+msgstr "👤 Profile"
+
+#| msgid "Projekt"
+msgid "-- Projekt --"
+msgstr "Project"
+
+msgid "-- Burza projekt (opciono) --"
+msgstr "-- Stock market project (optional) --"
+
+msgid "Opis rada..."
+msgstr "Job description..."
+
+#| msgid "START"
+msgid "▶ START"
+msgstr "START"
+
+#| msgid "Unos"
+msgid "➕ Unos"
+msgstr "Input"
+
+#| msgid "Unosi"
+msgid "📋 Unosi"
+msgstr "Entries"
+
+#| msgid "Brzo"
+msgid "⚡ Brzo"
+msgstr "Quickly"
+
+msgid "Novi unos"
+msgstr "New entry"
+
+#| msgid "Opis problema"
+msgid "Opis rada"
+msgstr "Description of the problem"
+
+msgid "Burza projekt (opciono)"
+msgstr "Stock market project (optional)"
+
+msgid "-- bez burza projekta --"
+msgstr "-- without stock market project --"
+
+#| msgid "Spremi"
+msgid "💾 Spremi"
+msgstr "Save"
+
+#| msgid "Kopiraj jučerašnje"
+msgid "📋 Kopiraj jučer"
+msgstr "Copy yesterday's"
+
+#| msgid "unos(a) čeka odobrenje"
+msgid "čeka odobrenje"
+msgstr "entry(s) pending approval"
+
+#| msgid "Nema računa"
+msgid "Nema unosa"
+msgstr "No account"
+
+msgid "⚡ Predlošci"
+msgstr "⚡ Templates"
+
+msgid "🔥 Česti"
+msgstr "🔥 Congratulations"
+
+#| msgid "Dnevna bilješka"
+msgid "📝 Bilješka"
+msgstr "Daily note"
+
+#| msgid "Bilješke za danas..."
+msgid "Bilješke..."
+msgstr "Notes for today..."
+
+#| msgid "Moj profil"
+msgid "👤 Moj profil"
+msgstr "My profile"
+
+#| msgid "Satnica i fond sati"
+msgid "💰 Satnica i fond sati"
+msgstr "Hourly rate and hour fund"
+
+#| msgid "Satnica"
+msgid "Satnica (€)"
+msgstr "Hourly rate"
+
+#| msgid "Dnevno"
+msgid "Dnevno (h)"
+msgstr "Daily"
+
+#| msgid "Tjedno"
+msgid "Tjedno (h)"
+msgstr "Per week"
+
+#| msgid "Spremi satnicu"
+msgid "💾 Spremi satnicu"
+msgstr "Save the time sheet"
+
+msgid "📊 Mjesečni pregled"
+msgstr "📊 Monthly review"
+
+msgid "👤 Uredi profil i lozinku"
+msgstr "👤 Edit profile and password"
+
+msgid "📈 Analitika"
+msgstr "📈 Analytics"
+
+msgid "Moj profil"
+msgstr "My profile"
+
+msgid "Osobni podaci"
+msgstr "Personal data"
+
+msgid "Spremi podatke"
+msgstr "Save data"
+
+msgid "Satnica i fond sati"
+msgstr "Hourly rate and hour fund"
+
+msgid "Prekovremeno"
+msgstr "Overtime"
+
+msgid "Dnevni fond"
+msgstr "Daily fund"
+
+msgid "Tjedni fond"
+msgstr "Weekly fund"
+
+msgid "Spremi satnicu"
+msgstr "Save the time sheet"
+
+msgid "Statistika"
+msgstr "Statistics"
+
+msgid "ID"
+msgstr "ID"
+
+#| msgid "Lokacija"
+msgid "Pozicija"
+msgstr "Location"
+
+msgid "Promjena lozinke"
+msgstr "Change password"
+
+msgid "Promijenite lozinku za vaš korisnički račun."
+msgstr "Change the password for your user account."
+
+msgid "Promijeni lozinku"
+msgstr "Change password"
+
+#, fuzzy
+#~ msgid "Termin"
+#~ msgstr "Dates"
+
+#~ msgid "Kliknite na datum za prikaz termina."
+#~ msgstr "Click on a date to view the appointment."
+
+#, fuzzy
+#~ msgid "Podaci i plaćanje"
+#~ msgstr "Payment"
+
+#, fuzzy
+#~ msgid "💵 Gotovina"
+#~ msgstr "Cash"
+
+#, fuzzy
+#~ msgid "💳 Kartica"
+#~ msgstr "Card"
+
+#, fuzzy
+#~ msgid "📄 Na račun"
+#~ msgstr "No account"
+
+#~ msgid "Online Rezervacije | FINA-CONNECT"
+#~ msgstr "Online Reservations | FINA-CONNECT"
+
+#~ msgid "Odaberite uslugu i rezervirajte svoj termin online."
+#~ msgstr "Choose a service and book your appointment online."
+
+#~ msgid "Trenutno nema aktivnih usluga za online rezervaciju."
+#~ msgstr "There are currently no active online booking services."
+
+#~ msgid "Molimo prijavite se u sustav i kreirajte usluge u Django Adminu."
+#~ msgstr "Please login to the system and create services in Django Admin."
+
+#~ msgid "Pošalji upit – Visković Group"
+#~ msgstr "Send inquiry – Visković Group"
+
+#~ msgid "Zlatni Kanban – Burza poslova"
+#~ msgstr "Golden Kanban – Job Exchange"
+
+#~ msgid "Pošaljite"
+#~ msgstr "Send it"
+
+#, fuzzy
+#~ msgid "upit"
+#~ msgstr "New query"
+
+#~ msgid "za posao."
+#~ msgstr "for work."
+
+#~ msgid "Opišite projekt. Naš tim pregledava upit i javlja se u 24–48h."
+#~ msgstr ""
+#~ "Describe the project. Our team reviews the inquiry and responds within 24-48"
+#~ " hours."
+
+#, fuzzy
+#~ msgid "Kategorija *"
+#~ msgstr "Category"
+
+#, fuzzy
+#~ msgid "Opis posla *"
+#~ msgstr "Description of the problem"
+
+#, fuzzy
+#~ msgid "Opišite što trebate..."
+#~ msgstr "Describe the problem in as much detail as possible..."
+
+#~ msgid "email@primjer.hr"
+#~ msgstr "email@primjer.hr"
+
+#~ msgid "Pošalji upit →"
+#~ msgstr "Send inquiry →"
+
+#~ msgid "Zlatni Kanban"
+#~ msgstr "Golden Kanban"
+
+#~ msgid "Upit"
+#~ msgstr "Query"
+
+#~ msgid "primljen."
+#~ msgstr "received."
+
+#, fuzzy
+#~ msgid "Vaš zahtjev je zaprimljen. Javit ćemo Vam se u roku 24–48h."
+#~ msgstr ""
+#~ "Your request has been received. We will contact you as soon as possible."
+
+#~ msgid "Tim pregledava upit"
+#~ msgstr "The team is reviewing the query"
+
+#~ msgid "Ako preuzimamo – kontaktiramo direktno"
+#~ msgstr "If we take over - contact us directly"
+
+#~ msgid "Ako kapacitet nije slobodan – ide na Burzu"
+#~ msgstr "If the capacity is not free - it goes to the Stock Exchange"
+
+#, fuzzy
+#~ msgid "Natrag →"
+#~ msgstr "Back"
+
+#~ msgid "PREMIUM RESOURCE"
+#~ msgstr "PREMIUM RESOURCE"
+
+#~ msgid "Select your preferred date and time to initiate the booking protocol."
+#~ msgstr "Select your preferred date and time to initiate the booking protocol."
+
+#~ msgid "Mon"
+#~ msgstr "Mon"
+
+#~ msgid "Tue"
+#~ msgstr "There"
+
+#~ msgid "Wed"
+#~ msgstr "Wed"
+
+#~ msgid "Thu"
+#~ msgstr "Thu"
+
+#~ msgid "Fri"
+#~ msgstr "Fri"
+
+#~ msgid "Sat"
+#~ msgstr "Hour"
+
+#~ msgid "Sun"
+#~ msgstr "Sun"
+
+#~ msgid "Back to Calendar"
+#~ msgstr "Back to Calendar"
+
+#~ msgid "Back to Time Selection"
+#~ msgstr "Back to Time Selection"
+
+#~ msgid "Final Details"
+#~ msgstr "Final Details"
+
+#~ msgid "Full Name"
+#~ msgstr "Full Name"
+
+#~ msgid "Email Address"
+#~ msgstr "Email Address"
+
+#~ msgid "Contact Phone"
+#~ msgstr "Contact phone"
+
+#~ msgid "Complete Booking"
+#~ msgstr "Complete Booking"
+
+#~ msgid "SUCCESS"
+#~ msgstr "SUCCESS"
+
+#~ msgid "Booking Reference"
+#~ msgstr "Booking Reference"
+
+#~ msgid "Close"
+#~ msgstr "Close"
+
+#~ msgid "PROCESSING..."
+#~ msgstr "PROCESSING..."
+
+#~ msgid "Error"
+#~ msgstr "Error"
+
+#~ msgid "System Error"
+#~ msgstr "System Error"
+
+#, fuzzy
+#~ msgid "Ime i prezime *"
+#~ msgstr "Name and surname"
+
+#, fuzzy
+#~ msgid "Email adresa *"
+#~ msgstr "Email Address"
+
+#, fuzzy
+#~ msgid "WhatsApp (opcionalno)"
+#~ msgstr "Job description (optional)"
+
+#, fuzzy
+#~ msgid "Predračun / Faktura"
+#~ msgstr "Estimate / Angebot"
+
+#~ msgid "Gotovina na licu mjesta"
+#~ msgstr "Cash on the spot"
+
+#~ msgid "Kartica na licu mjesta"
+#~ msgstr "Card on the spot"
+
+#~ msgid "Sažetak rezervacije:"
+#~ msgstr "Booking summary:"
+
+#~ msgid "Rezervacija potvrđena!"
+#~ msgstr "Reservation confirmed!"
+
+#~ msgid "Partner portal"
+#~ msgstr "Partner portal"
+
+#~ msgid "Vaši računi i termini"
+#~ msgstr "Your accounts and appointments"
+
+#~ msgid "Buchungsdetails"
+#~ msgstr "Buchungsdetails"
+
+#~ msgid "ihre@email.de"
+#~ msgstr "ihre@email.de"
+
+#, fuzzy
+#~ msgid "Website upravljanje"
+#~ msgstr "Website - management"
+
+#, fuzzy
+#~ msgid "Pregledaj web stranicu"
+#~ msgstr "Website management"
+
+#, fuzzy
+#~ msgid "Galerija slika"
+#~ msgstr "Gallery image"
+
+#, fuzzy
+#~ msgid "Online booking portal"
+#~ msgstr "Client portal"
+
+#~ msgid "Javni portal za rezervacije"
+#~ msgstr "Public portal for reservations"
+
+#, fuzzy
+#~ msgid "Aktivni brendovi"
+#~ msgstr "Active modules"
+
+#, fuzzy
+#~ msgid "Nema brendova."
+#~ msgstr "Brand name"
+
+#, fuzzy
+#~ msgid "Brze veze"
+#~ msgstr "Quick actions"
+
+#, fuzzy
+#~ msgid "Javna web stranica"
+#~ msgstr "Website"
+
+#~ msgid "Django Admin – Website"
+#~ msgstr "Django Admin - Website"
+
+#~ msgid "Usluge za booking"
+#~ msgstr "Booking services"
+
+#~ msgid "Resursi za booking"
+#~ msgstr "Resources for booking"
+
+#~ msgid "Grad / PLZ"
+#~ msgstr "City / PLZ"
+
+#~ msgid "Opišite problem što detaljnije..."
+#~ msgstr "Describe the problem in as much detail as possible..."
+
+#~ msgid "Telefon (obavezan)"
+#~ msgstr "Phone (required)"
+
+#~ msgid "Hitno — trebam intervenciju odmah"
+#~ msgstr "Urgent — I need an intervention now"
+
+#~ msgid "Zahtjev zaprimljen — Visković Group"
+#~ msgstr "Request received — Visković Group"
+
+#~ msgid "Zahtjev zaprimljen!"
+#~ msgstr "Request received!"
+
+#~ msgid "Vaš zahtjev je uspješno poslan."
+#~ msgstr "Your request has been successfully sent."
+
+#, fuzzy
+#~ msgid "Kontaktirat ćemo vas u najkraćem mogućem roku."
+#~ msgstr "We will contact you soon."
+
+#~ msgid "Za hitne slučajeve direktno nas pozovite:"
+#~ msgstr "For emergencies, call us directly:"
+
+#~ msgid "Dostupni 24/7"
+#~ msgstr "Available 24/7"
+
+#~ msgid "← Natrag na početnu"
+#~ msgstr "← Back to home page"
+
+#~ msgid "Notfall / Hitna intervencija — Visković Group"
+#~ msgstr "Notfall / Emergency intervention — Visković Group"
+
+#, fuzzy
+#~ msgid "Notfall / Hitna intervencija"
+#~ msgstr "Emergency intervention"
+
+#~ msgid "24/7 dostupni"
+#~ msgstr "24/7 available"
+
+#~ msgid "Direktan poziv — odmah reagiramo:"
+#~ msgstr "Direct call — we respond immediately:"
+
+#~ msgid "Ili ispunite formu i javit ćemo se u roku 15 minuta"
+#~ msgstr "Or fill out the form and we'll get back to you within 15 minutes"
+
+#, fuzzy
+#~ msgid "Zahtjev za intervenciju"
+#~ msgstr "Type of intervention"
+
+#~ msgid "🚨 Pošalji zahtjev"
+#~ msgstr "🚨 Send a request"
+
+#~ msgid "Vaši podaci se koriste isključivo za obradu zahtjeva"
+#~ msgstr "Your data is used exclusively to process the request"
+
+#, fuzzy
+#~ msgid "Brza reakcija"
+#~ msgstr "Quick actions"
+
+#~ msgid "Odgovor u 15 min"
+#~ msgstr "Answer in 15 min"
+
+#~ msgid "24/7 dostupnost"
+#~ msgstr "24/7 availability"
+
+#~ msgid "Vikendi i praznici"
+#~ msgstr "Weekends and holidays"
+
+#, fuzzy
+#~ msgid "Certificirani tim"
+#~ msgstr "Certificate"
+
+#~ msgid "15+ god. iskustva"
+#~ msgstr "15+ years experiences"
+
+#~ msgid "⚡ Reakcija u 15 min"
+#~ msgstr "⚡ Reaction in 15 min"
+
+#~ msgid "🔒 Zaštita podataka"
+#~ msgstr "🔒 Data protection"
+
+#~ msgid "✅ Certifizierter Betrieb"
+#~ msgstr "✅ Certifizierter Betrieb"
+
+#~ msgid "Upravljanje web stranicom"
+#~ msgstr "Website management"
+
+#~ msgid "Web stranica - upravljanje"
+#~ msgstr "Website - management"
+
+#~ msgid "Dodaj sliku"
+#~ msgstr "Add a picture"
+
+#~ msgid "Upravljaj brendovima"
+#~ msgstr "Manage brands"
+
+#, fuzzy
+#~ msgid "Yes"
+#~ msgstr "Exclusive Resources"
+
+#~ msgid "Power"
+#~ msgstr "Power that builds the future."
+
+msgid "Zaboravljena lozinka?"
+msgstr "Forgot password?"
+
+msgid "Zapamti me"
+msgstr "Remember me"
+
+msgid "Nemate račun?"
+msgstr "Don't have an account?"
+
+msgid "Registrirajte se"
+msgstr "Register"
+
+msgid "ime@firma.com"
+msgstr "name@company.com"
+
+msgid "Naslovnica"
+msgstr "Home"
+
+msgid "Najmanje 8 znakova"
+msgstr "At least 8 characters"
+
+msgid "Veliko slovo"
+msgstr "Uppercase letter"
+
+msgid "Malo slovo"
+msgstr "Lowercase letter"
+
+msgid "Poseban znak"
+msgstr "Special character"
+
+msgid "Potvrdite lozinku"
+msgstr "Confirm password"
+
+msgid "Korisnički račun"
+msgstr "User Account"
+
+msgid "Ovo će biti vaš administratorski račun."
+msgstr "This will be your administrator account."
+
+msgid "Nastavi"
+msgstr "Continue"
+
+msgid "Manager"
+msgstr "Manager"
+
+msgid "Usluge"
+msgstr "Services"
+
+msgid "Kartoni klijenata"
+msgstr "Client Records"
+
+msgid "Payroll"
+msgstr "Payroll"
+
+msgid "Zaposlenici"
+msgstr "Employees"
+
+msgid "Promo kodovi"
+msgstr "Promo Codes"
+
+msgid "Uključi obavijesti"
+msgstr "Enable notifications"
+
+msgid "Primajte push obavijesti za odobrenja, fakture i intervencije"
+msgstr "Receive push notifications for approvals, invoices and interventions"
+
+msgid "Uključi"
+msgstr "Enable"

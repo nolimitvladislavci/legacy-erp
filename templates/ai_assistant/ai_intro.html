@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Connect - Uvod{% endblock %}
+{% block page_title %}Connect{% endblock %}
+{% block content %}
+<style>
+.intro-card { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border-radius: 16px; padding: 2.5rem; margin-bottom: 2rem; }
+.intro-card h2 { color: var(--gold, #c9a84c); margin-bottom: 1rem; }
+.intro-step { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; transition: all 0.3s; cursor: pointer; }
+.intro-step:hover { background: rgba(201,168,76,0.15); transform: translateX(5px); }
+.intro-step .step-num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--gold, #c9a84c); color: #0a0a0a; font-weight: 700; margin-right: 1rem; }
+.intro-step h5 { color: var(--gold, #c9a84c); display: inline; }
+.module-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; background: rgba(201,168,76,0.2); color: var(--gold, #c9a84c); font-size: 0.8rem; margin: 3px; }
+</style>
+
+<div class="intro-card">
+  <h2><i class="fas fa-robot me-2"></i>Dobrodosao u Connect. Vodim te kroz sve.</h2>
+  <p class="lead">Tvoj inteligentni poslovni pomocnik koji razumije tvoje podatke i pomaze ti donositi bolje odluke.</p>
+
+  {% if company %}
+  <p class="text-muted mb-4">Tvrtka: <strong style="color:var(--gold)">{{ company.name }}</strong> | Plan: <strong style="color:var(--gold)">{{ plan|title }}</strong></p>
+  {% endif %}
+
+  <div class="intro-step" onclick="document.getElementById('demo-chat').style.display='block'">
+    <span class="step-num">1</span>
+    <h5>Razgovaraj s Connect-om</h5>
+    <p class="text-muted mt-2 mb-0">Pitaj bilo sto o svom poslovanju — promet, fakture, zalihe, partnere. Connect pristupa tvojim podacima u realnom vremenu.</p>
+  </div>
+
+  <div class="intro-step">
+    <span class="step-num">2</span>
+    <h5>Jutarnji Patrol</h5>
+    <p class="text-muted mt-2 mb-0">Svako jutro Connect analizira tvoje podatke i salje izvjestaj — kasne isporuke, niske zalihe, neplacene fakture, anomalije.</p>
+  </div>
+
+  <div class="intro-step">
+    <span class="step-num">3</span>
+    <h5>Kontekstualna pomoc</h5>
+    <p class="text-muted mt-2 mb-0">Na svakoj stranici Connect widget nudi relevantne savjete i odgovore specificne za modul koji koristis.</p>
+  </div>
+
+  {% if modules %}
+  <div class="mt-4">
+    <small class="text-muted">Connect razumije tvoje module:</small><br>
+    {% for mod in modules %}
+    <span class="module-tag">{{ mod }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div id="demo-chat" style="display:none" class="stat-card">
+  <h5><i class="fas fa-comments me-2 text-warning"></i>Probaj Connect chat</h5>
+  <p class="text-muted">Primjeri pitanja:</p>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="/ai/?q=Koliki+mi+je+promet+ovaj+mjesec" class="btn btn-sm btn-outline-warning">Koliki mi je promet ovaj mjesec?</a>
+    <a href="/ai/?q=Koji+partneri+kasne+s+placanjem" class="btn btn-sm btn-outline-warning">Koji partneri kasne s placanjem?</a>
+    <a href="/ai/?q=Daj+mi+pregled+zaliha" class="btn btn-sm btn-outline-warning">Daj mi pregled zaliha</a>
+    <a href="/ai/?q=Preporuci+optimizacije" class="btn btn-sm btn-outline-warning">Preporuci optimizacije</a>
+  </div>
+  <a href="/ai/" class="btn btn-warning"><i class="fas fa-robot me-2"></i>Otvori Connect Chat</a>
+</div>
+
+<div class="text-center mt-4">
+  <button onclick="fetch('/ai/intro/',{method:'POST',headers:{'X-CSRFToken':'{{ csrf_token }}'}}).then(()=>window.location='/dashboard/')" class="btn btn-lg btn-success">
+    <i class="fas fa-check me-2"></i>Razumijem — nastavi na dashboard
+  </button>
+</div>
+{% endblock %}

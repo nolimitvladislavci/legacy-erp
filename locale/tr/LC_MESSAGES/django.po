@@ -1,0 +1,3033 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-20 21:56+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: accounts/auth_models.py:13
+msgid "Investitor - projekti"
+msgstr "Yatırımcı - Projeler"
+
+#: accounts/auth_models.py:14
+msgid "Partner - fakture"
+msgstr "Ortak - fatura"
+
+#: accounts/auth_models.py:15
+msgid "Radnik - upload slika"
+msgstr "Radnik - resim yükle"
+
+#: accounts/auth_models.py:16
+msgid "Reset lozinke"
+msgstr "Lozinke'yi sıfırla"
+
+#: accounts/auth_models.py:17
+msgid "Verifikacija emaila"
+msgstr "E-posta doğrulama"
+
+#: accounts/auth_models.py:30
+msgid "Magic token"
+msgstr "Sihirli jeton"
+
+#: accounts/auth_models.py:31
+msgid "Magic tokeni"
+msgstr "Sihirli jeton"
+
+#: accounts/auth_models.py:69
+msgid "Pokušaj prijave"
+msgstr "Giriş yapmaya çalışın"
+
+#: accounts/auth_models.py:70
+msgid "Pokušaji prijave"
+msgstr "Giriş yapma girişimleri"
+
+#: accounts/auth_views.py:68
+msgid "Previše neuspješnih pokušaja. Pričekajte 15 minuta."
+msgstr "Çok fazla başarısız deneme yapıldı. 15 dakika bekleyin."
+
+#: accounts/auth_views.py:98 accounts/auth_views.py:216
+msgid "Dobrodošli, {user.first_name or user.username}!"
+msgstr "Dobrodošli, {user.first_name or user.username}!"
+
+#: accounts/auth_views.py:105
+msgid "Pogrešni podaci za prijavu."
+msgstr "Yanlış giriş bilgileri."
+
+#: accounts/auth_views.py:125
+msgid "Ako email postoji, link je poslan."
+msgstr "E-posta olarak, link gönderildi."
+
+#: accounts/auth_views.py:130
+msgid "Previše zahtjeva. Pričekajte 10 minuta."
+msgstr "Çok fazla istek var. Lütfen 10 dakika bekleyin."
+
+#: accounts/auth_views.py:179
+#, python-brace-format
+msgid "Link za pristup poslan na {email}. Vrijedi 24 sata."
+msgstr "Erişim bağlantısı {email} adresine gönderildi. Valid for 24 hours."
+
+#: accounts/auth_views.py:193
+msgid "Link nije valjan ili je istekao."
+msgstr "Bağlantı geçersiz veya süresi dolmuş."
+
+#: accounts/auth_views.py:197
+msgid "Link je istekao ili je već iskorišten. Zatražite novi."
+msgstr "Bağlantının süresi dolmuş veya zaten kullanılmış. Request a new one."
+"Bağlantı süresi dolmuş veya zaten kullanılmış. Lütfen yeni bir bağlantı "
+"isteyin."
+
+#: accounts/auth_views.py:205 accounts/auth_views.py:428
+#: accounts/auth_views.py:506
+msgid "Korisnički račun nije aktivan."
+msgstr "Kullanıcı hesabı aktif değildir."
+
+#: accounts/auth_views.py:260
+msgid "✓ 2FA aktiviran! Koristite Google Authenticator za prijavu."
+msgstr "✓ 2FA activated! Oturum açmak için Google Authenticator'ı kullanın."
+"✓ 2FA etkinleştirildi! Giriş yapmak için Google Authenticator'ı kullanın."
+
+#: accounts/auth_views.py:263 accounts/auth_views.py:313
+msgid "Pogrešan kod. Pokušajte ponovo."
+msgstr "Yanlış kod. Tekrar deneyin."
+
+#: accounts/auth_views.py:310
+msgid "✓ Uspješna 2FA provjera!"
+msgstr "✓ 2FA doğrulaması başarıyla tamamlandı!"
+
+#: accounts/auth_views.py:315
+msgid "Greška provjere."
+msgstr "Doğrulama hatası."
+
+#: accounts/auth_views.py:338
+msgid "Ako email postoji, link za reset je poslan."
+msgstr "E-posta gönderildi, sıfırlama bağlantısı gönderildi."
+
+#: accounts/auth_views.py:350
+msgid "Lozinke se ne podudaraju."
+msgstr "Şifreler eşleşmiyor."
+
+#: accounts/auth_views.py:352
+msgid "Lozinka mora imati najmanje 8 znakova."
+msgstr "Şifre en az 8 karakter uzunluğunda olmalıdır."
+
+#: accounts/auth_views.py:356
+msgid "✓ Lozinka promijenjena! Prijavite se s novom lozinkom."
+msgstr "✓ Slogan değiştirildi! Yeni sloganla giriş yapın."
+
+#: accounts/auth_views.py:366
+msgid "Google login nije konfiguriran."
+msgstr "Google girişi yapılandırılmadı."
+
+#: accounts/auth_views.py:393 accounts/auth_views.py:474
+msgid "OAuth state mismatch."
+msgstr "OAuth durumu uyuşmazlığı."
+
+#: accounts/auth_views.py:434
+#, python-brace-format
+msgid "Prijavljeni ste putem Google: {email}"
+msgstr "Google aracılığıyla oturum açtınız: {email}"
+
+#: accounts/auth_views.py:439
+msgid "Greška Google prijave. Pokušajte ponovo."
+msgstr "Google oturum açma hatası. Tekrar deneyin."
+
+#: accounts/auth_views.py:446
+msgid "Microsoft login nije konfiguriran."
+msgstr "Microsoft oturum açma yapılandırılmadı."
+
+#: accounts/auth_views.py:512
+#, python-brace-format
+msgid "Prijavljeni ste putem Microsoft: {email}"
+msgstr "Microsoft aracılığıyla oturum açtınız: {email}"
+
+#: accounts/auth_views.py:517
+msgid "Greška Microsoft prijave."
+msgstr "Microsoft oturum açma hatası."
+
+#: accounts/models.py:8
+msgid "Super Administrator"
+msgstr "Süper Yönetici"
+
+#: accounts/models.py:9 templates/dashboards/company_admin.html:3
+#: templates/dashboards/company_admin.html:4
+msgid "Admin tvrtke"
+msgstr "Şirket yöneticisi"
+
+#: accounts/models.py:10 templates/dashboards/manager.html:3
+msgid "Voditelj projekta"
+msgstr "Proje lideri"
+
+#: accounts/models.py:11
+msgid "Radnik"
+msgstr "İşçi"
+
+#: accounts/models.py:12
+msgid "Investitor"
+msgstr "Yatırımcı"
+
+#: accounts/models.py:13
+msgid "Partner / Klijent"
+msgstr "Ortak / Müşteri"
+
+#: accounts/models.py:17
+msgid "Uloga"
+msgstr "Rol"
+
+#: accounts/models.py:19 companies/models.py:22 documents/models.py:15
+#: finance/models.py:14 invoicing/fiscal_admin.py:70
+#: invoicing_backup_20260219/fiscal_admin.py:70
+msgid "Tvrtka"
+msgstr "Şirket"
+
+#: accounts/models.py:21
+msgid "Profilna slika"
+msgstr "Profil resmi"
+
+#: accounts/models.py:22 worktime/templates/worktime/worker_profile.html:28
+msgid "Telefon"
+msgstr "Telefon"
+
+#: accounts/models.py:23
+msgid "Odjel"
+msgstr "Bölüm"
+
+#: accounts/models.py:31
+msgid "Jezik sučelja"
+msgstr "Arayüz dili"
+
+#: accounts/models.py:33
+msgid "Može uploadati slike"
+msgstr "Resimleri yükleyebilirsiniz"
+
+#: accounts/models.py:34
+msgid "Vidi financije"
+msgstr "Finansmanı gör"
+
+#: accounts/models.py:35
+msgid "Odobrava radne sate"
+msgstr "Çalışma saatlerini onaylar"
+
+#: accounts/models.py:43
+msgid "Korisnički profil"
+msgstr "Kullanıcı profili"
+
+#: accounts/models.py:44
+msgid "Korisnički profili"
+msgstr "Korisnički profili"
+
+#: calculator/models.py:6
+msgid "Naziv normativa"
+msgstr "Naziv normativa"
+
+#: calculator/models.py:7
+msgid "Jedinica mjere"
+msgstr "Ölçü birimi"
+
+#: calculator/models.py:8
+msgid "Cijena materijala"
+msgstr "Malzemelerin fiyatı"
+
+#: calculator/models.py:9
+msgid "Sati rada po jedinici"
+msgstr "Birim başına çalışma saati"
+
+#: calculator/models.py:12
+msgid "Normativ"
+msgstr "Normatif"
+
+#: calculator/models.py:13
+msgid "Normativi"
+msgstr "Yasal düzenlemeler"
+
+#: calculator/models.py:20
+msgid "Marža (%)"
+msgstr "Marj (%)"
+
+#: calculator/models.py:21
+msgid "PDV (%)"
+msgstr "Brüt Kar (%)"
+
+#: companies/models.py:7
+msgid "Naziv tvrtke"
+msgstr "Şirket adı"
+
+#: companies/models.py:9 invoicing/fiscal_admin.py:17
+#: invoicing/fiscal_models.py:14 invoicing/models.py:52
+#: invoicing_backup_20260219/fiscal_admin.py:17
+#: invoicing_backup_20260219/fiscal_models.py:14
+#: invoicing_backup_20260219/models.py:52
+#: worktime/templates/worktime/worker_profile.html:32
+msgid "Adresa"
+msgstr "Adres"
+
+#: companies/models.py:10 invoicing/fiscal_models.py:15
+#: invoicing_backup_20260219/fiscal_models.py:15 partners/models.py:22
+msgid "Grad"
+msgstr "Derece"
+
+#: companies/models.py:11 partners/models.py:23
+msgid "Poštanski broj"
+msgstr "Posta kodu"
+
+#: companies/models.py:15
+msgid "U sustavu PDV-a"
+msgstr "KDV sisteminde"
+
+#: companies/models.py:23 templates/base.html:114
+#: templates/dashboards/superadmin.html:78
+msgid "Tvrtke"
+msgstr "Şirketler"
+
+#: core/settings.py:152
+msgid "Deutsch"
+msgstr "Almanca"
+
+#: core/settings.py:153
+msgid "Hrvatski"
+msgstr "Hırvat"
+
+#: core/settings.py:154
+msgid "English"
+msgstr "İngilizce"
+
+#: core/settings.py:155
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: core/settings.py:156
+msgid "Ελληνικά"
+msgstr "Yunanca"
+
+#: documents/models.py:8
+msgid "Izlazni Račun"
+msgstr "Nihai Hesap"
+
+#: documents/models.py:9
+msgid "Ponuda"
+msgstr "Teklif"
+
+#: documents/models.py:10
+msgid "Ulazni Račun"
+msgstr "Giriş Hesabı"
+
+#: documents/models.py:11
+msgid "Ugovor"
+msgstr "Sözleşme"
+
+#: documents/models.py:12
+msgid "Potvrda"
+msgstr "Onay"
+
+#: documents/models.py:16 finance/models.py:15 partners/models.py:49
+msgid "Partner"
+msgstr "Ortaklar"
+
+#: documents/models.py:18
+msgid "Tip dokumenta"
+msgstr "Belge türü"
+
+#: documents/models.py:19
+msgid "Broj dokumenta"
+msgstr "Belge numarası"
+
+#: documents/models.py:21 invoicing/models.py:46
+#: invoicing_backup_20260219/models.py:46
+msgid "Datum izdavanja"
+msgstr "Çıkış tarihi"
+
+#: documents/models.py:22
+msgid "Datum dospijeća"
+msgstr "Son ödeme tarihi"
+
+#: documents/models.py:24 finance/models.py:18 invoicing/admin.py:49
+#: invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/admin.py:49
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+#: templates/dashboards/company_admin.html:15
+#: templates/dashboards/partner.html:11
+msgid "Iznos"
+msgstr "Miktar"
+
+#: documents/models.py:26
+msgid "Datoteka"
+msgstr "Dosya"
+
+#: documents/models.py:29 invoicing/models.py:19
+#: invoicing/templates/invoicing/index.html:22
+#: invoicing_backup_20260219/models.py:19
+#: invoicing_backup_20260219/templates/invoicing/index.html:22
+msgid "Plaćeno"
+msgstr "Ücretli"
+
+#: documents/models.py:34
+msgid "Dokument"
+msgstr "Belge"
+
+#: documents/models.py:35 templates/base.html:117
+#: templates/dashboards/superadmin.html:82
+msgid "Dokumenti"
+msgstr "Belgeler"
+
+#: finance/models.py:10
+msgid "Uplata / Prihod"
+msgstr "Ödeme / Gelir"
+
+#: finance/models.py:11
+msgid "Isplata / Rashod"
+msgstr "Ödeme / Gider"
+
+#: finance/models.py:16
+msgid "Vezani dokument"
+msgstr "Bağlı belge"
+
+#: finance/models.py:19
+msgid "Smjer"
+msgstr "Yön"
+
+#: finance/models.py:21
+msgid "Datum transakcije"
+msgstr "İşlem tarihi"
+
+#: finance/models.py:22 invoicing/fiscal_models.py:53 invoicing/models.py:140
+#: invoicing_backup_20260219/fiscal_models.py:53
+#: invoicing_backup_20260219/models.py:140 projects/models.py:8
+#: templates/dashboards/worker.html:38
+#: worktime/templates/worktime/worker_dashboard.OLD.html:292
+msgid "Opis"
+msgstr "Açıklama"
+
+#: finance/models.py:27
+msgid "Transakcija"
+msgstr "İşlem"
+
+#: finance/models.py:28
+msgid "Transakcije"
+msgstr "İşlemler"
+
+#: invoicing/admin.py:44 invoicing_backup_20260219/admin.py:44
+#: templates/dashboards/superadmin.html:45
+msgid "Brze akcije"
+msgstr "Hızlı eylemler"
+
+#: invoicing/admin.py:55 invoicing/fiscal_admin.py:32 invoicing/models.py:83
+#: invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/admin.py:55
+#: invoicing_backup_20260219/fiscal_admin.py:32
+#: invoicing_backup_20260219/models.py:83
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+#: templates/dashboards/company_admin.html:15
+#: templates/dashboards/partner.html:11
+#: templates/dashboards/superadmin.html:102
+#: templates/dashboards/worker.html:38
+msgid "Status"
+msgstr "Durum"
+
+#: invoicing/admin.py:61 invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/admin.py:61
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+msgid "Fisk."
+msgstr "Balık."
+
+#: invoicing/fiscal_admin.py:14 invoicing_backup_20260219/fiscal_admin.py:14
+msgid "Osnovni podaci"
+msgstr "Temel bilgiler"
+
+#: invoicing/fiscal_admin.py:20 invoicing/templates/invoicing/create.html:432
+#: invoicing_backup_20260219/fiscal_admin.py:20
+#: invoicing_backup_20260219/templates/invoicing/create.html:432
+msgid "Plaćanje"
+msgstr "Ödeme"
+
+#: invoicing/fiscal_admin.py:23 invoicing/fiscal_models.py:19
+#: invoicing_backup_20260219/fiscal_admin.py:23
+#: invoicing_backup_20260219/fiscal_models.py:19
+msgid "Napomena"
+msgstr "Not"
+
+#: invoicing/fiscal_admin.py:41 invoicing/fiscal_models.py:37
+#: invoicing/models.py:102 invoicing_backup_20260219/fiscal_admin.py:41
+#: invoicing_backup_20260219/fiscal_models.py:37
+#: invoicing_backup_20260219/models.py:102
+msgid "Operater"
+msgstr "Operatör"
+
+#: invoicing/fiscal_admin.py:44 invoicing_backup_20260219/fiscal_admin.py:44
+msgid "Zadano prodajno mjesto"
+msgstr "Varsayılan satış noktası"
+
+#: invoicing/fiscal_admin.py:62 invoicing_backup_20260219/fiscal_admin.py:62
+msgid "Stopa"
+msgstr "Adım"
+
+#: invoicing/fiscal_admin.py:73 invoicing_backup_20260219/fiscal_admin.py:73
+msgid "Certifikat"
+msgstr "Sertifika"
+
+#: invoicing/fiscal_admin.py:77 invoicing_backup_20260219/fiscal_admin.py:77
+msgid "Numeracija računa"
+msgstr "Fatura numaralandırma"
+
+#: invoicing/fiscal_admin.py:80 invoicing_backup_20260219/fiscal_admin.py:80
+msgid "Zadane vrijednosti"
+msgstr "Varsayılan değerler"
+
+#: invoicing/fiscal_admin.py:83 invoicing_backup_20260219/fiscal_admin.py:83
+msgid "Napomene na računima"
+msgstr "Tasarılar hakkında açıklamalar"
+
+#: invoicing/fiscal_admin.py:92 invoicing_backup_20260219/fiscal_admin.py:92
+msgid "CIS Endpoint"
+msgstr "CIS Uç Noktası"
+
+#: invoicing/fiscal_models.py:11 invoicing/fiscal_models.py:51
+#: invoicing_backup_20260219/fiscal_models.py:11
+#: invoicing_backup_20260219/fiscal_models.py:51
+msgid "Naziv"
+msgstr "Başlık"
+
+#: invoicing/fiscal_models.py:12 invoicing_backup_20260219/fiscal_models.py:12
+msgid "Oznaka prostora (PP)"
+msgstr "Alan işareti (PP)"
+
+#: invoicing/fiscal_models.py:16 invoicing_backup_20260219/fiscal_models.py:16
+msgid "OIB tvrtke"
+msgstr "Şirket OIB"
+
+#: invoicing/fiscal_models.py:17 invoicing_backup_20260219/fiscal_models.py:17
+#: website/models.py:12 website/models.py:62
+msgid "Aktivno"
+msgstr "Aktif"
+
+#: invoicing/fiscal_models.py:18 invoicing/models.py:62
+#: invoicing_backup_20260219/fiscal_models.py:18
+#: invoicing_backup_20260219/models.py:62
+msgid "IBAN za uplatu"
+msgstr "Ödeme için IBAN"
+
+#: invoicing/fiscal_models.py:22 invoicing/models.py:99
+#: invoicing_backup_20260219/fiscal_models.py:22
+#: invoicing_backup_20260219/models.py:99
+msgid "Poslovni prostor"
+msgstr "İş yeri"
+
+#: invoicing/fiscal_models.py:23 invoicing_backup_20260219/fiscal_models.py:23
+msgid "Poslovni prostori"
+msgstr "İş yerleri"
+
+#: invoicing/fiscal_models.py:31 invoicing_backup_20260219/fiscal_models.py:31
+msgid "Ime i prezime"
+msgstr "Ad ve soyad"
+
+#: invoicing/fiscal_models.py:32 invoicing/models.py:76
+#: invoicing_backup_20260219/fiscal_models.py:32
+#: invoicing_backup_20260219/models.py:76
+msgid "OIB operatera"
+msgstr "Operatörün Çalıştırma Talimatları"
+
+#: invoicing/fiscal_models.py:33 invoicing_backup_20260219/fiscal_models.py:33
+msgid "Zadani poslovni prostor"
+msgstr "Verilen iş yeri"
+
+#: invoicing/fiscal_models.py:38 invoicing_backup_20260219/fiscal_models.py:38
+msgid "Operateri"
+msgstr "Operatörler"
+
+#: invoicing/fiscal_models.py:50 invoicing_backup_20260219/fiscal_models.py:50
+msgid "Šifra grupe"
+msgstr "Şifre grubu"
+
+#: invoicing/fiscal_models.py:52 invoicing_backup_20260219/fiscal_models.py:52
+msgid "Stopa PDV-a"
+msgstr "KDV oranı"
+
+#: invoicing/fiscal_models.py:57 invoicing_backup_20260219/fiscal_models.py:57
+msgid "PDV grupa"
+msgstr "PDV Grubu"
+
+#: invoicing/fiscal_models.py:58 invoicing_backup_20260219/fiscal_models.py:58
+msgid "PDV grupe"
+msgstr "PDV Grubu"
+
+#: invoicing/fiscal_models.py:78 invoicing/fiscal_models.py:79
+#: invoicing_backup_20260219/fiscal_models.py:78
+#: invoicing_backup_20260219/fiscal_models.py:79
+msgid "Konfiguracija fiskalizacije"
+msgstr "Fiscalization configuration"
+
+#: invoicing/models.py:10 invoicing/models.py:114 invoicing/models.py:139
+#: invoicing_backup_20260219/models.py:10
+#: invoicing_backup_20260219/models.py:114
+#: invoicing_backup_20260219/models.py:139
+msgid "Račun"
+msgstr "Hesap"
+
+#: invoicing/models.py:11 invoicing_backup_20260219/models.py:11
+msgid "Predračun / Angebot"
+msgstr "Tahmini / Teklif"
+
+#: invoicing/models.py:12 invoicing_backup_20260219/models.py:12
+msgid "Avansni račun"
+msgstr "Avans hesabı"
+
+#: invoicing/models.py:13 invoicing_backup_20260219/models.py:13
+msgid "Storno račun"
+msgstr "İptal hesabı"
+
+#: invoicing/models.py:14 invoicing_backup_20260219/models.py:14
+msgid "Gutschrift (DE)"
+msgstr "Kredi (DE)"
+
+#: invoicing/models.py:17 invoicing_backup_20260219/models.py:17
+#: templates/dashboards/worker.html:47
+msgid "Nacrt"
+msgstr "Taslak"
+
+#: invoicing/models.py:18 invoicing_backup_20260219/models.py:18
+msgid "Poslano"
+msgstr "Gönderildi"
+
+#: invoicing/models.py:20 invoicing/templates/invoicing/index.html:16
+#: invoicing_backup_20260219/models.py:20
+#: invoicing_backup_20260219/templates/invoicing/index.html:16
+#: templates/dashboards/company_admin.html:8
+#: templates/dashboards/partner.html:7
+msgid "Neplaćeno"
+msgstr "Ödenmemiş"
+
+#: invoicing/models.py:21 invoicing_backup_20260219/models.py:21
+msgid "Dospijelo"
+msgstr "Vadesinde"
+
+#: invoicing/models.py:22 invoicing_backup_20260219/models.py:22
+msgid "Otkazano"
+msgstr "İptal edildi"
+
+#: invoicing/models.py:23 invoicing_backup_20260219/models.py:23
+msgid "Stornirano"
+msgstr "İptal edildi"
+
+#: invoicing/models.py:26 invoicing_backup_20260219/models.py:26
+msgid "Transakcijski račun"
+msgstr "İşlem hesabı"
+
+#: invoicing/models.py:27 invoicing_backup_20260219/models.py:27
+msgid "Gotovina"
+msgstr "Gotovina"
+
+#: invoicing/models.py:28 invoicing_backup_20260219/models.py:28
+msgid "Kartica"
+msgstr "Kart"
+
+#: invoicing/models.py:29 invoicing_backup_20260219/models.py:29
+msgid "Virman"
+msgstr "Aşağıda en sık karşılaşılan hataların listesi bulunmaktadır."
+
+#: invoicing/models.py:30 invoicing_backup_20260219/models.py:30
+msgid "Überweisung (DE)"
+msgstr "Banka havalesi (DE)"
+
+#: invoicing/models.py:31 invoicing_backup_20260219/models.py:31
+msgid "Bar (DE)"
+msgstr "Bar (DE)"
+
+#: invoicing/models.py:39 invoicing_backup_20260219/models.py:39
+msgid "Vrsta"
+msgstr "Tür"
+
+#: invoicing/models.py:40 invoicing/templates/invoicing/index.html:40
+#: invoicing_backup_20260219/models.py:40
+#: invoicing_backup_20260219/templates/invoicing/index.html:40
+msgid "Zemlja"
+msgstr "Arazi"
+
+#: invoicing/models.py:42 invoicing_backup_20260219/models.py:42
+msgid "Broj računa"
+msgstr "Hesap numarası"
+
+#: invoicing/models.py:43 invoicing_backup_20260219/models.py:43
+msgid "Interni ID"
+msgstr "Dahili kimlik numarası"
+
+#: invoicing/models.py:47 invoicing_backup_20260219/models.py:47
+msgid "Rok plaćanja"
+msgstr "Ödeme son tarihi"
+
+#: invoicing/models.py:48 invoicing_backup_20260219/models.py:48
+msgid "Datum isporuke"
+msgstr "Teslim tarihi"
+
+#: invoicing/models.py:51 invoicing/templates/invoicing/create.html:182
+#: invoicing_backup_20260219/models.py:51
+#: invoicing_backup_20260219/templates/invoicing/create.html:182
+msgid "Klijent / Empfänger"
+msgstr "Müşteri / Alıcı"
+
+#: invoicing/models.py:53 invoicing_backup_20260219/models.py:53
+msgid "Grad / PLZ Stadt"
+msgstr "Derece / Posta kodu Şehir"
+
+#: invoicing/models.py:54 invoicing_backup_20260219/models.py:54
+#: partners/models.py:24
+msgid "Država"
+msgstr "Eyalet"
+
+#: invoicing/models.py:55 invoicing_backup_20260219/models.py:55
+msgid "OIB / USt-IdNr"
+msgstr "OIB / KDV Kimlik Numarası"
+
+#: invoicing/models.py:56 invoicing_backup_20260219/models.py:56
+msgid "Email klijenta"
+msgstr "E-posta istemcisi"
+
+#: invoicing/models.py:60 invoicing_backup_20260219/models.py:60
+msgid "Način plaćanja"
+msgstr "Ödeme yöntemi"
+
+#: invoicing/models.py:61 invoicing_backup_20260219/models.py:61
+msgid "Valuta"
+msgstr "Para birimi"
+
+#: invoicing/models.py:63 invoicing_backup_20260219/models.py:63
+msgid "SWIFT/BIC"
+msgstr "SWIFT/BIC"
+
+#: invoicing/models.py:64 invoicing_backup_20260219/models.py:64
+msgid "Poziv na broj"
+msgstr "Çağrı numarası"
+
+#: invoicing/models.py:67 invoicing_backup_20260219/models.py:67
+msgid "Iznos bez PDV/MwSt"
+msgstr "KDV hariç tutar/MwSt"
+
+#: invoicing/models.py:68 invoicing_backup_20260219/models.py:68
+msgid "PDV/MwSt %"
+msgstr "PDV/KDV %"
+
+#: invoicing/models.py:69 invoicing_backup_20260219/models.py:69
+msgid "PDV/MwSt iznos"
+msgstr "KDV/MwSt tutarı"
+
+#: invoicing/models.py:70 invoicing_backup_20260219/models.py:70
+msgid "Ukupno / Gesamt"
+msgstr "Ukupno / Toplam"
+
+#: invoicing/models.py:73 invoicing_backup_20260219/models.py:73
+msgid "Fiskalizirano"
+msgstr "Fiskalize"
+
+#: invoicing/models.py:77 invoicing_backup_20260219/models.py:77
+msgid "Datum fiskalizacije"
+msgstr "Vergilendirme tarihi"
+
+#: invoicing/models.py:80 invoicing_backup_20260219/models.py:80
+msgid "Napomena / Anmerkung"
+msgstr "Napomena / Not"
+
+#: invoicing/models.py:81 invoicing_backup_20260219/models.py:81
+msgid "Interna napomena"
+msgstr "Dahili not"
+
+#: invoicing/models.py:85 invoicing_backup_20260219/models.py:85
+msgid "Storno od računa"
+msgstr "Hesaptan iptal"
+
+#: invoicing/models.py:88 invoicing_backup_20260219/models.py:88
+msgid "Naziv izdavatelja"
+msgstr "Yayıncının adı"
+
+#: invoicing/models.py:104 invoicing_backup_20260219/models.py:104
+msgid "Redni broj u prostoru"
+msgstr "Düzenli sayı alanında"
+
+#: invoicing/models.py:115 invoicing/templates/invoicing/index.html:30
+#: invoicing_backup_20260219/models.py:115
+#: invoicing_backup_20260219/templates/invoicing/index.html:30
+msgid "Računi"
+msgstr "Faturalar"
+
+#: invoicing/models.py:141 invoicing_backup_20260219/models.py:141
+msgid "Količina"
+msgstr "Miktar"
+
+#: invoicing/models.py:142 invoicing_backup_20260219/models.py:142
+msgid "Jed.mjera"
+msgstr "Ölçü birimi"
+
+#: invoicing/models.py:143 invoicing_backup_20260219/models.py:143
+msgid "Jed.cijena"
+msgstr "Birim fiyat"
+
+#: invoicing/models.py:144 invoicing_backup_20260219/models.py:144
+msgid "Popust %"
+msgstr "İndirim %"
+
+#: invoicing/models.py:145 invoicing_backup_20260219/models.py:145
+#: worktime/templates/worktime/worker_profile.html:85
+msgid "Ukupno"
+msgstr "Toplam"
+
+#: invoicing/models.py:146 invoicing_backup_20260219/models.py:146
+msgid "PDV %"
+msgstr "KDV %"
+
+#: invoicing/models.py:150 invoicing_backup_20260219/models.py:150
+msgid "Stavka računa"
+msgstr "Hesap satırları"
+
+#: invoicing/models.py:151 invoicing_backup_20260219/models.py:151
+msgid "Stavke računa"
+msgstr "Hesap satırları"
+
+#: invoicing/templates/invoicing/create.html:229
+#: invoicing_backup_20260219/templates/invoicing/create.html:229
+msgid "Stavke"
+msgstr "Grevler"
+
+#: invoicing/templates/invoicing/create.html:314
+#: invoicing_backup_20260219/templates/invoicing/create.html:314
+msgid "Uvoz iz modula"
+msgstr "Modülden içe aktarma"
+
+#: invoicing/templates/invoicing/create.html:334
+#: invoicing_backup_20260219/templates/invoicing/create.html:334
+msgid "Napomene"
+msgstr "Notlar"
+
+#: invoicing/templates/invoicing/create.html:356
+#: invoicing_backup_20260219/templates/invoicing/create.html:356
+msgid "Akcije"
+msgstr "Promosyonlar"
+
+#: invoicing/templates/invoicing/create.html:407
+#: invoicing_backup_20260219/templates/invoicing/create.html:407
+msgid "Broj i datumi"
+msgstr "Yavru ve tarih"
+
+#: invoicing/templates/invoicing/create.html:469
+#: invoicing_backup_20260219/templates/invoicing/create.html:469
+msgid "Fiskalizacija (HR)"
+msgstr "Fiscalizasyon (HR)"
+
+#: invoicing/templates/invoicing/create.html:510
+#: invoicing_backup_20260219/templates/invoicing/create.html:510
+msgid "Izdavatelj"
+msgstr "Yayıncı"
+
+#: invoicing/templates/invoicing/index.html:3
+#: invoicing/templates/invoicing/index.html:4
+#: invoicing_backup_20260219/templates/invoicing/index.html:3
+#: invoicing_backup_20260219/templates/invoicing/index.html:4
+#: templates/dashboards/superadmin.html:60
+msgid "Fakturiranje"
+msgstr "Faturalandırma"
+
+#: invoicing/templates/invoicing/index.html:10
+#: invoicing_backup_20260219/templates/invoicing/index.html:10
+msgid "Ukupno fakturirano"
+msgstr "Toplam fatura tutarı"
+
+#: invoicing/templates/invoicing/index.html:34
+#: invoicing_backup_20260219/templates/invoicing/index.html:34
+msgid "Svi"
+msgstr "Tüm"
+
+#: invoicing/templates/invoicing/index.html:35
+#: invoicing_backup_20260219/templates/invoicing/index.html:35
+msgid "Novi račun"
+msgstr "Yeni hesap"
+
+#: invoicing/templates/invoicing/index.html:40
+#: invoicing_backup_20260219/templates/invoicing/index.html:40
+#: templates/dashboards/company_admin.html:15
+#: templates/dashboards/partner.html:11
+msgid "Broj"
+msgstr "Sayı"
+
+#: invoicing/templates/invoicing/index.html:40
+#: invoicing_backup_20260219/templates/invoicing/index.html:40
+#: projects/templates/projects/detail.html:17
+#: templates/dashboards/company_admin.html:15
+msgid "Klijent"
+msgstr "Müşteri"
+
+#: invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+#: templates/dashboards/partner.html:11 templates/dashboards/worker.html:38
+#: worktime/templates/worktime/worker_dashboard.OLD.html:276
+msgid "Datum"
+msgstr "Tarih"
+
+#: invoicing/templates/invoicing/index.html:60
+#: invoicing_backup_20260219/templates/invoicing/index.html:60
+#: templates/dashboards/partner.html:12
+msgid "Nema računa"
+msgstr "Hesap yok"
+
+#: invoicing/views.py:178 invoicing_backup_20260219/views.py:178
+msgid "Klijent nema email adresu!"
+msgstr "Müşteri e-posta adresi yok!"
+
+#: invoicing/views.py:222 invoicing_backup_20260219/views.py:222
+#, python-brace-format
+msgid "Račun poslan na {invoice.client_email}"
+msgstr "Fatura {invoice.client_email} adresine gönderildi"
+
+#: invoicing/views.py:224 invoicing_backup_20260219/views.py:224
+#, python-brace-format
+msgid "Greška pri slanju: {e}"
+msgstr "Greška pri slanju: {e}"
+
+#: invoicing/views.py:317 invoicing_backup_20260219/views.py:317
+msgid "Fiskalizacija je dostupna samo za HR račune!"
+msgstr "Fiscalization is only available for HR accounts!"
+
+#: invoicing/views.py:321 invoicing_backup_20260219/views.py:321
+msgid "Račun je već fiskaliziran!"
+msgstr "Hesap zaten vergilendirildi!"
+
+#: invoicing/views.py:325 invoicing_backup_20260219/views.py:325
+msgid "Fiskalizirati se mogu samo računi (R), ne predračuni!"
+msgstr "Sadece faturalar (R) vergilendirilebilir, ön faturalar değil!"
+
+#: invoicing/views.py:358 invoicing_backup_20260219/views.py:358
+msgid "Račun fiskaliziran (DEMO - CIS nedostupan)!"
+msgstr "Fiscalized account (DEMO - CIS unavailable)!"
+
+#: invoicing/views.py:359 invoicing/views.py:362
+#: invoicing_backup_20260219/views.py:359
+#: invoicing_backup_20260219/views.py:362
+#, python-brace-format
+msgid "ZKI: {invoice.zki} | JIR: {invoice.jir}"
+msgstr "ZKI: {invoice.zki} | JIR: {invoice.jir}"
+
+#: invoicing/views.py:361 invoicing_backup_20260219/views.py:361
+msgid "✓ Račun uspješno fiskaliziran!"
+msgstr "✓ Fatura mali kayıt işlemleri başarıyla tamamlandı!"
+
+#: invoicing/views.py:364 invoicing_backup_20260219/views.py:364
+msgid "Greška fiskalizacije: {result.get(\"error\")}"
+msgstr "Malileştirme hatası: {result.get(\\\"error\\\")}"
+
+#: invoicing/views.py:367 invoicing_backup_20260219/views.py:367
+#, python-brace-format
+msgid "Greška: {e}"
+msgstr "Greška: {e}"
+
+#: invoicing/views.py:378 invoicing_backup_20260219/views.py:378
+msgid "Račun je već storniran!"
+msgstr "Fatura zaten iptal edildi!"
+
+#: invoicing/views.py:420 invoicing_backup_20260219/views.py:420
+#, python-brace-format
+msgid "Storno račun {storno_invoice.number} kreiran!"
+msgstr "{storno_invoice.number} iptal faturası oluşturuldu!"
+
+#: partners/models.py:8
+msgid "Klijent (Kupac)"
+msgstr "Müşteri (Alıcı)"
+
+#: partners/models.py:9
+msgid "Dobavljač"
+msgstr "Tedarikçi"
+
+#: partners/models.py:10
+msgid "Partner (Oboje)"
+msgstr "Partner (Her ikisi)"
+
+#: partners/models.py:11
+msgid "Zaposlenik"
+msgstr "Çalışan"
+
+#: partners/models.py:14
+msgid "Vlasnik podataka"
+msgstr "Veri sahibi"
+
+#: partners/models.py:17
+msgid "Naziv / Ime"
+msgstr "Unvan / Adı"
+
+#: partners/models.py:21
+msgid "Ulica i broj"
+msgstr "Sokak ve numara"
+
+#: partners/models.py:32
+msgid "Tip partnera"
+msgstr "Ortak tavsiyesi"
+
+#: partners/models.py:33
+msgid "Rok plaćanja (dana)"
+msgstr "Ödeme süresi (gün)"
+
+#: partners/models.py:34
+msgid "Rabat (%)"
+msgstr "İndirim (%)"
+
+#: partners/models.py:37
+msgid "Interne napomene"
+msgstr "Dahili notlar"
+
+#: partners/models.py:38
+msgid "Aktivan"
+msgstr "Aktif"
+
+#: partners/models.py:41
+msgid "Saldo"
+msgstr "Denge"
+
+#: partners/models.py:50 templates/base.html:115
+#: templates/dashboards/company_admin.html:10
+#: templates/dashboards/superadmin.html:68
+msgid "Partneri"
+msgstr "Ortaklar"
+
+#: premium_booking/templates/premium_booking/detail.html:9
+msgid "Booking"
+msgstr "Rezervasyon"
+
+#: premium_booking/templates/premium_booking/detail.html:104
+msgid "PREMIUM RESOURCE"
+msgstr "PREMIUM KAYNAK"
+
+#: premium_booking/templates/premium_booking/detail.html:106
+msgid "Select your preferred date and time to initiate the booking protocol."
+msgstr "Rezervasyon protokolünü başlatmak için tercih ettiğiniz tarih ve saati seçin."
+"Rezervasyon protokolünü başlatmak için tercih ettiğiniz tarih ve saati "
+"seçin."
+
+#: premium_booking/templates/premium_booking/detail.html:119
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:16
+msgid "Mon"
+msgstr "Benim"
+
+#: premium_booking/templates/premium_booking/detail.html:119
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr "Salı"
+
+#: premium_booking/templates/premium_booking/detail.html:119
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr "Bahis"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr "Sonbahar"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr "Özgür"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:21
+msgid "Sat"
+msgstr "O dedi ki"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr "Onlar"
+
+#: premium_booking/templates/premium_booking/detail.html:126
+msgid "Back to Calendar"
+msgstr "Takvime geri dön"
+
+#: premium_booking/templates/premium_booking/detail.html:138
+msgid "Back to Time Selection"
+msgstr "Zaman Seçimi'ne geri dön"
+
+#: premium_booking/templates/premium_booking/detail.html:139
+msgid "Final Details"
+msgstr "Son Detaylar"
+
+#: premium_booking/templates/premium_booking/detail.html:143
+msgid "Full Name"
+msgstr "Tam Adı"
+
+#: premium_booking/templates/premium_booking/detail.html:144
+msgid "Email Address"
+msgstr "E-posta Adresi"
+
+#: premium_booking/templates/premium_booking/detail.html:145
+msgid "Contact Phone"
+msgstr "İletişim Telefonu"
+
+#: premium_booking/templates/premium_booking/detail.html:146
+#: premium_booking/templates/premium_booking/detail.html:253
+#: premium_booking/templates/premium_booking/detail.html:259
+msgid "Complete Booking"
+msgstr "Rezervasyonu Tamamla"
+
+#: premium_booking/templates/premium_booking/detail.html:156
+msgid "SUCCESS"
+msgstr "BAŞARI"
+
+#: premium_booking/templates/premium_booking/detail.html:157
+msgid "Booking Reference"
+msgstr "Rezervasyon Referansı"
+
+#: premium_booking/templates/premium_booking/detail.html:158
+msgid "Close"
+msgstr "Kapat"
+
+#: premium_booking/templates/premium_booking/detail.html:231
+msgid "PROCESSING..."
+msgstr "İŞLENİYOR..."
+
+#: premium_booking/templates/premium_booking/detail.html:251
+msgid "Error"
+msgstr "Hata"
+
+#: premium_booking/templates/premium_booking/detail.html:257
+msgid "System Error"
+msgstr "Sistem Hatası"
+
+#: premium_booking/templates/premium_booking/index.html:8
+#: premium_booking/templates/premium_booking/index.html:69
+msgid "Exclusive Rental"
+msgstr "Özel Kiralama"
+
+#: premium_booking/templates/premium_booking/index.html:70
+msgid "Architecture of power and luxury"
+msgstr "Güç ve lüksün mimarisi"
+
+#: premium_booking/templates/premium_booking/index.html:76
+msgid "BOOKING PROCESS"
+msgstr "REZERVASYON SÜRECİ"
+
+#: premium_booking/templates/premium_booking/index.html:79
+msgid "Start Protocol"
+msgstr "Protokolü Başlat"
+
+#: projects/models.py:6
+msgid "Naziv projekta"
+msgstr "Proje adı"
+
+#: projects/models.py:7
+msgid "Šifra"
+msgstr "Şifre"
+
+#: projects/models.py:9 projects/templates/projects/detail.html:15
+#: templates/dashboards/investor.html:22
+msgid "Lokacija"
+msgstr "Konum"
+
+#: projects/models.py:27 templates/dashboards/worker.html:38
+#: worktime/templates/worktime/worker_dashboard.OLD.html:188
+#: worktime/templates/worktime/worker_dashboard.OLD.html:267
+msgid "Projekt"
+msgstr "Proje"
+
+#: projects/models.py:28 projects/templates/projects/index.html:3
+#: projects/templates/projects/index.html:4 templates/base.html:107
+#: templates/dashboards/superadmin.html:64
+msgid "Projekti"
+msgstr "Proje"
+
+#: projects/templates/projects/detail.html:16
+#: templates/dashboards/investor.html:26
+msgid "Voditelj"
+msgstr "Sunucu"
+
+#: projects/templates/projects/detail.html:23
+msgid "Ažuriranja"
+msgstr "Güncellemeler"
+
+#: projects/templates/projects/detail.html:24
+msgid "Nema ažuriranja"
+msgstr "Güncelleme yok"
+
+#: projects/templates/projects/detail.html:30
+msgid "Fotografije projekta"
+msgstr "Proje fotoğrafları"
+
+#: projects/templates/projects/detail.html:40
+msgid "Nema fotografija"
+msgstr "Sessiz fotoğraf"
+
+#: projects/templates/projects/index.html:7
+msgid "Svi projekti"
+msgstr "Tüm projeler"
+
+#: projects/templates/projects/index.html:8
+msgid "Novi projekt"
+msgstr "Yeni proje"
+
+#: projects/templates/projects/index.html:22
+msgid "Otvori"
+msgstr "Açık"
+
+#: projects/templates/projects/index.html:30
+#: templates/dashboards/company_admin.html:21
+#: templates/dashboards/manager.html:21
+msgid "Nema projekata"
+msgstr "Proje yok"
+
+#: projects/templates/projects/index.html:31
+msgid "Dodaj prvi projekt"
+msgstr "İlk projeyi ekle"
+
+#: templates/base.html:104
+msgid "Navigacija"
+msgstr "Navigasyon"
+
+#: templates/base.html:105
+msgid "Početna"
+msgstr "Başlangıç"
+
+#: templates/base.html:106 templates/dashboards/superadmin.html:52
+#: worktime/templates/worktime/worker_dashboard.OLD.html:5
+#: worktime/templates/worktime/worker_dashboard.html:4
+msgid "Radno vrijeme"
+msgstr "Çalışma saatleri"
+
+#: templates/base.html:108
+msgid "Termini"
+msgstr "Şartlar"
+
+#: templates/base.html:111
+msgid "Upravljanje"
+msgstr "Yönetim"
+
+#: templates/base.html:112
+msgid "Dashboard"
+msgstr "Gösterge paneli"
+
+#: templates/base.html:113 templates/dashboards/superadmin.html:12
+#: templates/dashboards/superadmin.html:74
+msgid "Korisnici"
+msgstr "Kullanıcılar"
+
+#: templates/base.html:116
+msgid "Fakture"
+msgstr "Fakture"
+
+#: templates/base.html:118
+msgid "Financije"
+msgstr "Finans"
+
+#: templates/base.html:122
+msgid "Moduli"
+msgstr "Modüller"
+
+#: templates/base.html:123
+msgid "Skladište"
+msgstr "Depo"
+
+#: templates/base.html:124
+msgid "Webshop"
+msgstr "Çevrimiçi mağaza"
+
+#: templates/base.html:125
+msgid "Najam"
+msgstr "Cildim"
+
+#: templates/base.html:126
+msgid "Fitness"
+msgstr "Fitness"
+
+#: templates/base.html:127
+msgid "Osiguranje"
+msgstr "Sigorta"
+
+#: templates/base.html:128 templates/dashboards/superadmin.html:86
+msgid "Kalkulator"
+msgstr "Hesap makinesi"
+
+#: templates/base.html:130
+msgid "Sustav"
+msgstr "Sistem"
+
+#: templates/base.html:132 website/models.py:60
+msgid "Web stranica"
+msgstr "Web sitesi"
+
+#: templates/base.html:136
+msgid "Odjava"
+msgstr "Çıkış"
+
+#: templates/dashboards/company_admin.html:7
+msgid "Fakturirano"
+msgstr "Faturalandırıldı"
+
+#: templates/dashboards/company_admin.html:9
+msgid "Sati (tjedan)"
+msgstr "Saat (haftalık)"
+
+#: templates/dashboards/company_admin.html:14
+msgid "Zadnje fakture"
+msgstr "Son faturalar"
+
+#: templates/dashboards/company_admin.html:16
+msgid "Nema faktura"
+msgstr "Nema fatura"
+
+#: templates/dashboards/company_admin.html:20
+#: templates/dashboards/worker.html:22
+msgid "Aktivni projekti"
+msgstr "Aktif projeler"
+
+#: templates/dashboards/investor.html:3
+msgid "Pregled investicija"
+msgstr "Yatırımın gözden geçirilmesi"
+
+#: templates/dashboards/investor.html:4
+msgid "Pregled vaših projekata"
+msgstr "Projecatelor tale"
+
+#: templates/dashboards/investor.html:31
+msgid "Detalji i fotografije"
+msgstr "Ayrıntılar ve fotoğraflar"
+
+#: templates/dashboards/investor.html:39
+msgid "Nema dostupnih projekata"
+msgstr "Mevcut proje yok"
+
+#: templates/dashboards/investor.html:40
+msgid "Vaši projekti će biti prikazani ovdje čim budu dodijeljeni."
+msgstr "Projeleriniz atandıkları anda burada görüntülenecektir."
+
+#: templates/dashboards/manager.html:4
+msgid "Moji projekti i tim"
+msgstr "Projelerim ve ekibim"
+
+#: templates/dashboards/manager.html:7
+msgid "Moji projekti"
+msgstr "Projeclerim"
+
+#: templates/dashboards/manager.html:8
+msgid "Sati tima (tjedan)"
+msgstr "Takım çalışma saatleri (haftalık)"
+
+#: templates/dashboards/manager.html:9
+msgid "Na odobrenju"
+msgstr "Onaylandı"
+
+#: templates/dashboards/manager.html:19
+msgid "Otvori projekt"
+msgstr "Projeyi aç"
+
+#: templates/dashboards/partner.html:3
+msgid "Partner portal"
+msgstr "Ortak portalı"
+
+#: templates/dashboards/partner.html:4
+msgid "Vaši računi i termini"
+msgstr "Hesaplarınız ve ödeme tarihleriniz"
+
+#: templates/dashboards/partner.html:10
+msgid "Vaši računi"
+msgstr "Hesaplarınız"
+
+#: templates/dashboards/superadmin.html:20
+msgid "Aktivni"
+msgstr "Aktif"
+
+#: templates/dashboards/superadmin.html:28
+msgid "Staff"
+msgstr "Personel"
+
+#: templates/dashboards/superadmin.html:36
+msgid "Admini"
+msgstr "Admini"
+
+#: templates/dashboards/superadmin.html:52
+msgid "Štoperica, unos sati, evidencija"
+msgstr "Kronometre, saat kaydı, kayıt tutma"
+
+#: templates/dashboards/superadmin.html:56
+msgid "Evidencija sati"
+msgstr "Çalışma saatleri kaydı"
+
+#: templates/dashboards/superadmin.html:56
+msgid "Pregled, odobrenje, PDF export"
+msgstr "Genel bakış, onay, PDF dışa aktarma"
+
+#: templates/dashboards/superadmin.html:60
+msgid "Kreiraj i upravljaj fakturama"
+msgstr "Fatura oluştur ve yönet"
+
+#: templates/dashboards/superadmin.html:64
+msgid "Aktivni projekti i zadaci"
+msgstr "Aktif projeler ve görevler"
+
+#: templates/dashboards/superadmin.html:68
+msgid "Klijenti i dobavljači"
+msgstr "Müşteriler ve tedarikçiler"
+
+#: templates/dashboards/superadmin.html:74
+msgid "Upravljanje korisnicima i rolama"
+msgstr "Kullanıcıları ve rolleri yönetme"
+
+#: templates/dashboards/superadmin.html:78
+msgid "Upravljanje tvrtkama"
+msgstr "İşletme yönetimi"
+
+#: templates/dashboards/superadmin.html:82
+msgid "Upload i pregled dokumenata"
+msgstr "Belgeleri yükleyin ve görüntüleyin"
+
+#: templates/dashboards/superadmin.html:86
+msgid "Procjene i kalkulacije"
+msgstr "Tahminler ve hesaplamalar"
+
+#: templates/dashboards/superadmin.html:90
+msgid "Napredne postavke sustava"
+msgstr "Gelişmiş sistem ayarları"
+
+#: templates/dashboards/superadmin.html:98
+msgid "Zadnje prijave"
+msgstr "Son başvurular"
+
+#: templates/dashboards/superadmin.html:102
+msgid "Korisnik"
+msgstr "Kullanıcı"
+
+#: templates/dashboards/superadmin.html:102
+msgid "Kada"
+msgstr "Ne zaman"
+
+#: templates/dashboards/superadmin.html:112
+msgid "Nema podataka"
+msgstr "Veri yok"
+
+#: templates/dashboards/worker.html:3 templates/dashboards/worker.html:4
+#: worktime/templates/worktime/worker_dashboard.OLD.html:4
+#: worktime/templates/worktime/worker_dashboard.html:3
+msgid "Moj radni portal"
+msgstr "İş portalım"
+
+#: templates/dashboards/worker.html:10
+msgid "Moji sati (7 dana)"
+msgstr "Benim saatlerim (7 gün)"
+
+#: templates/dashboards/worker.html:16
+msgid "Čekaju odobrenje"
+msgstr "Onay bekliyorlar."
+
+#: templates/dashboards/worker.html:32
+msgid "Moji unosi radnog vremena"
+msgstr "Çalışma süresi girişlerim"
+
+#: templates/dashboards/worker.html:34
+#: worktime/templates/worktime/worker_dashboard.html:133
+msgid "Novi unos"
+msgstr "Novi unos"
+
+#: templates/dashboards/worker.html:38
+msgid "Sati"
+msgstr "Cumartesi"
+
+#: templates/dashboards/worker.html:48
+msgid "Predano"
+msgstr "Özel"
+
+#: templates/dashboards/worker.html:49
+msgid "Odobreno"
+msgstr "Onaylandı"
+
+#: templates/dashboards/worker.html:53
+msgid "Nema unosa"
+msgstr "Giriş yok"
+
+#: templates/dashboards/worker.html:62
+msgid "Upload slika s terena"
+msgstr "Sahadan resim yükle"
+
+#: templates/dashboards/worker.html:68
+msgid "Odaberi projekt"
+msgstr "Odaberi projesi"
+
+#: templates/dashboards/worker.html:76
+msgid "Opis (opcionalno)"
+msgstr "Açıklama (isteğe bağlı)"
+
+#: templates/dashboards/worker.html:79
+msgid "Uploadaj slike"
+msgstr "Resimleri yükle"
+
+#: templates/dashboards/worker.html:83
+msgid "Nisi dodijeljen ni jednom aktivnom projektu."
+msgstr "Aktif bir projeye atanmamışsınız."
+
+#: templates/dashboards/worker.html:88
+msgid "Nadolazeći termini"
+msgstr "Şartları kabul etmek"
+
+#: templates/dashboards/worker.html:100
+msgid "Nema nadolazećih termina"
+msgstr "Yaklaşan randevu yoktur."
+
+#: venv/lib/python3.12/site-packages/django/contrib/messages/apps.py:16
+msgid "Messages"
+msgstr "Mesajlar"
+
+#: venv/lib/python3.12/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr "Site Haritaları"
+
+#: venv/lib/python3.12/site-packages/django/contrib/staticfiles/apps.py:9
+msgid "Static Files"
+msgstr "Statik Dosyalar"
+
+#: venv/lib/python3.12/site-packages/django/contrib/syndication/apps.py:7
+msgid "Syndication"
+msgstr "Sendikasyon"
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr "…"
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr "Bu sayfa numarası tam sayı değil"
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr "Bu sayfa numarası 1'den küçük."
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr "Bu sayfada sonuç bulunamadı."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:22
+msgid "Enter a valid value."
+msgstr "Geçerli bir değer girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:70
+msgid "Enter a valid domain name."
+msgstr "Geçerli bir alan adı girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:155
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:768
+msgid "Enter a valid URL."
+msgstr "Geçerli bir URL girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:216
+msgid "Enter a valid integer."
+msgstr "Geçerli bir tamsayı girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:227
+msgid "Enter a valid email address."
+msgstr "Geçerli bir e-posta adresi girin."
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/lib/python3.12/site-packages/django/core/validators.py:310
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr "Harf, rakam, alt çizgi veya tire içeren geçerli bir “slug” girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:318
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or"
+" hyphens."
+msgstr ""
+"Unicode harf, rakam, alt çizgi veya tire içeren geçerli bir “slug” girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:330
+#: venv/lib/python3.12/site-packages/django/core/validators.py:339
+#: venv/lib/python3.12/site-packages/django/core/validators.py:353
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2215
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr "Geçerli bir %(protocol)s adresi girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:332
+msgid "IPv4"
+msgstr "İnternet Protokolü sürüm 4"
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:341
+#: venv/lib/python3.12/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr "İnternet Protokolü sürüm 6"
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:355
+msgid "IPv4 or IPv6"
+msgstr "IPv4 veya IPv6"
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:396
+msgid "Enter only digits separated by commas."
+msgstr "Yalnızca virgülle ayrılmış rakamları girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:402
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr "Bu değerin %(limit_value)s olduğundan emin olun (bu %(show_value)s)."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:437
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr "Bu değerin %(limit_value)s değerinden küçük veya ona eşit olduğundan emin olun."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:446
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr "Bu değerin %(limit_value)s değerinden büyük veya ona eşit olduğundan emin olun."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:455
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr "Bu değerin %(limit_value)s adım boyutunun katı olduğundan emin olun."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:462
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:494
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:512
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:535
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:359
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:398
+msgid "Enter a number."
+msgstr "Bir sayı girin."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:537
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:542
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:547
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:618
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:680
+msgid "Null characters are not allowed."
+msgstr "Boş karakterler kullanılamaz."
+
+#: venv/lib/python3.12/site-packages/django/db/models/base.py:1572
+#: venv/lib/python3.12/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr "ve"
+
+#: venv/lib/python3.12/site-packages/django/db/models/base.py:1574
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr "Bu %(field_labels)s ile %(model_name)s zaten mevcut."
+
+#: venv/lib/python3.12/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr "\"%(name)s\" kısıtlaması ihlal edildi."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr "Değer %(değer)r geçerli bir seçim değil."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr "Bu alan boş bırakılamaz."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr "Bu alan boş bırakılamaz."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr "Bu %(field_label)s ile %(model_name)s zaten mevcut."
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr "Tür alanı: %(field_type)s"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1156
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr "\"%(value)s\" değeri Doğru veya Yanlış olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1157
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr "\"%(value)s\" değeri Doğru, Yanlış veya Yok olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1159
+msgid "Boolean (Either True or False)"
+msgstr "Boolean (Doğru veya Yanlış)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1209
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr "Dize (%(max_length)s'ye kadar)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1211
+msgid "String (unlimited)"
+msgstr "Dize (sınırsız)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1320
+msgid "Comma-separated integers"
+msgstr "Virgülle ayrılmış tamsayılar"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1421
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1425
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1560
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1429
+msgid "Date (without time)"
+msgstr "Tarih (saat olmadan)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1556
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1564
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1569
+msgid "Date (with time)"
+msgstr "Tarih (saat ile birlikte)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1696
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr "\"%(value)s\" değeri ondalık sayı olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1698
+msgid "Decimal number"
+msgstr "Ondalık sayı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1859
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1863
+msgid "Duration"
+msgstr "Süre"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1915
+msgid "Email address"
+msgstr "E-posta adresi"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1940
+msgid "File path"
+msgstr "Dosya yolu"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2018
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr "\"%(value)s\" değeri bir kayan nokta olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2020
+msgid "Floating point number"
+msgstr "Kayan nokta sayısı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2060
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr "\"%(value)s\" değeri bir tamsayı olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2062
+msgid "Integer"
+msgstr "Bütün"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2158
+msgid "Big (8 byte) integer"
+msgstr "Büyük (8 bayt) tamsayı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2175
+msgid "Small integer"
+msgstr "Küçük tamsayı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2183
+msgid "IPv4 address"
+msgstr "IPv4 adresi"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2214
+msgid "IP address"
+msgstr "IP adresi"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2305
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2306
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr "\"%(value)s\" değeri Yok, Doğru veya Yanlış olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2308
+msgid "Boolean (Either True, False or None)"
+msgstr "Boolean (Doğru, Yanlış veya Yok)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2359
+msgid "Positive big integer"
+msgstr "Pozitif büyük tamsayı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2374
+msgid "Positive integer"
+msgstr "Pozitif tamsayı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2389
+msgid "Positive small integer"
+msgstr "Pozitif küçük tamsayı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2405
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr "Sümüklü böcek (%(max_length)s'e kadar)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2441
+msgid "Text"
+msgstr "Metin"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2521
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2525
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2529
+msgid "Time"
+msgstr "Zaman"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2637
+msgid "URL"
+msgstr "Web adresi"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2661
+msgid "Raw binary data"
+msgstr "Ham ikili veri"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2726
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr "\"%(value)s\" geçerli bir UUID değil."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2728
+msgid "Universally unique identifier"
+msgstr "Evrensel benzersiz tanımlayıcı"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/files.py:244
+msgid "File"
+msgstr "Dosya"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr "Resim"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/json.py:24
+msgid "A JSON object"
+msgstr "Ve JSON nesnesi"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr "Değer geçerli JSON olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:932
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r does not exist."
+msgstr "%(field)s %(value)r ile %(model)s örneği mevcut değil."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:934
+msgid "Foreign Key (type determined by related field)"
+msgstr "Yabancı Anahtar (tipi ilgili alan tarafından belirlenir)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1228
+msgid "One-to-one relationship"
+msgstr "Bire bir ilişki"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1285
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr "%(from)s-%(to)s ilişkisi"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1287
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr "%(from)s-%(to)s ilişkileri"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1335
+msgid "Many-to-many relationship"
+msgstr "Çok-çok ilişkisi"
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the
+#. label
+#: venv/lib/python3.12/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ":?.!"
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:95
+msgid "This field is required."
+msgstr "Bu alan zorunludur."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:308
+msgid "Enter a whole number."
+msgstr "Tam sayı girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:479
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1260
+msgid "Enter a valid date."
+msgstr "Geçerli bir tarih girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:502
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1261
+msgid "Enter a valid time."
+msgstr "Geçerli bir saat girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:529
+msgid "Enter a valid date/time."
+msgstr "Geçerli bir tarih/saat girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:563
+msgid "Enter a valid duration."
+msgstr "Geçerli bir süre girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:564
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr "Gün sayısı {min_days} ile {max_days} arasında olmalıdır."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:633
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr "Hiçbir dosya gönderilmedi. Formdaki kodlama türünü kontrol edin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:634
+msgid "No file was submitted."
+msgstr "Hiçbir dosya gönderilmedi."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:635
+msgid "The submitted file is empty."
+msgstr "Gönderilen dosya boş."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:637
+#, python-format
+msgid ""
+"Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:642
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr "Lütfen ya bir dosya gönderin ya da temizle onay kutusunu işaretleyin, ikisini birden değil."
+"Lütfen bir dosya gönderin veya onay kutusunu işaretleyin, ikisini birden "
+"yapmayın."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:710
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+"Geçerli bir resim yükleyin. Yüklenen dosya bir resim değil veya bozuk bir "
+"resimdi."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:882
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:968
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr "Geçerli bir seçim seçin. %(value)s mevcut seçeneklerden biri değil."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:970
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1089
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1590
+msgid "Enter a list of values."
+msgstr "Değerlerin listesini girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1090
+msgid "Enter a complete value."
+msgstr "Tam bir değer girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1332
+msgid "Enter a valid UUID."
+msgstr "Geçerli bir UUID girin."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1362
+msgid "Enter a valid JSON."
+msgstr "Geçerli bir JSON girin."
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/lib/python3.12/site-packages/django/forms/forms.py:94
+msgid ":"
+msgstr ":"
+
+#: venv/lib/python3.12/site-packages/django/forms/forms.py:230
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr "(Hidden field %(name)s) %(error)s"
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:491
+msgid "Order"
+msgstr "Sipariş"
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:499
+msgid "Delete"
+msgstr "Sil"
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr "Lütfen %(field)s için yinelenen verileri düzeltin."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr "Lütfen %(field)s için benzersiz olması gereken yinelenen verileri düzeltin."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:922
+msgid "Please correct the duplicate values below."
+msgstr "Lütfen aşağıdaki yinelenen değerleri düzeltin."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr "Satır içi değer üst öğe örneğiyle eşleşmedi."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1450
+msgid ""
+"Select a valid choice. That choice is not one of the available choices."
+msgstr "Geçerli bir seçenek seçin. Bu seçenek mevcut seçenekler arasında yok."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr "\"%(pk)s\" geçerli bir değer değil."
+
+#: venv/lib/python3.12/site-packages/django/forms/utils.py:227
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:461
+msgid "Clear"
+msgstr "Temizle"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:462
+msgid "Currently"
+msgstr "Şu anda"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:463
+msgid "Change"
+msgstr "Değişiklik"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:800
+msgid "Unknown"
+msgstr "Bilinmiyor"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:801
+msgid "Yes"
+msgstr "Özel Kaynaklar"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:802
+msgid "No"
+msgstr "No"
+
+#. Translators: Please do not add spaces around commas.
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr "evet, hayır, belki"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:903
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr "%s KB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr "%s MB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr "%s GB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr "%s TB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr "%s PB"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr "p.m."
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr "sabah"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr "Başbakan"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr "Şu anda"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr "gece yarısı"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr "sonra"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr "Pazartesi"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr "Salı"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr "Çarşamba"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr "Perşembe"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr "Cuma"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:12
+msgid "Saturday"
+msgstr "Cumartesi"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr "Pazar"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:25
+msgid "January"
+msgstr "Ocak"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:26
+msgid "February"
+msgstr "Şubat"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:27
+msgid "March"
+msgstr "Mart"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:28
+msgid "April"
+msgstr "Nisan"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:29
+msgid "May"
+msgstr "Var"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:30
+msgid "June"
+msgstr "Haziran"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:31
+msgid "July"
+msgstr "Temmuz"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:32
+msgid "August"
+msgstr "Ağustos"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:33
+msgid "September"
+msgstr "Eylül"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:34
+msgid "October"
+msgstr "Ekim"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:35
+msgid "November"
+msgstr "Kasım"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:36
+msgid "December"
+msgstr "Aralık"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr "hayır"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr "Şubat"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:41
+msgid "mar"
+msgstr "olarak"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:42
+msgid "apr"
+msgstr "Nisan"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:43
+msgid "may"
+msgstr "var"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr "Haziran"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr "Temmuz"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:46
+msgid "aug"
+msgstr "aug"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr "yedi"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:48
+msgid "oct"
+msgstr "ekim"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr "yeni"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr "Aralık"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr "Hayır."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr "Şubat"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:55
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Mart"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr "Nisan"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "Var"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr "Haziran"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr "Temmuz"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr "Ağustos."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr "Eylül."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr "Ekim"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr "Kasım."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr "Aralık"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr "Ocak"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr "Şubat"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:69
+msgctxt "alt. month"
+msgid "March"
+msgstr "Mart"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr "Nisan"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr "Var"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr "Haziran"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr "Temmuz"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr "Ağustos"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr "Eylül"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr "Ekim"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr "Kasım"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr "Aralık"
+
+#: venv/lib/python3.12/site-packages/django/utils/ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr "Bu geçerli bir IPv6 adresi değildir."
+
+#: venv/lib/python3.12/site-packages/django/utils/text.py:75
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr "%(truncated_text)s…"
+
+#: venv/lib/python3.12/site-packages/django/utils/text.py:286
+msgid "or"
+msgstr "veya"
+
+#. Translators: This string is used as a separator between list elements
+#: venv/lib/python3.12/site-packages/django/utils/text.py:305
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ", "
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr "Yasak"
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr "CSRF doğrulaması başarısız oldu. İstek iptal edildi."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+"Bu mesajı görüyorsunuz çünkü bu HTTPS sitesi tarayıcınızın bir \"Referer\" "
+"başlığı göndermesini gerektiriyor, ancak gönderilmedi. Bu başlık güvenlik "
+"nedeniyle zorunludur."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+"Tarayıcınızda \"Referer\" başlıkları devre dışıysa, en azından bu site için "
+"yeniden etkinleştirin."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or"
+" including the “Referrer-Policy: no-referrer” header, please remove them. "
+"The CSRF protection requires the “Referer” header to do strict referer "
+"checking. If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+"<meta name=\"referrer\" content=\"no-referrer\"> etiketi veya “Referrer-"
+"Policy: no-referrer” başlığı kullanıyorsanız lütfen kaldırın. CSRF koruması "
+"“Referer” başlığına ihtiyaç duyar."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+"Bu mesajı görüyorsunuz çünkü bu site form gönderirken CSRF çerezi "
+"gerektiriyor. Bu çerez güvenlik nedeniyle zorunludur."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+"Tarayıcınızda çerezler devre dışıysa, en azından bu site için yeniden "
+"etkinleştirin."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr "DEBUG=True ile daha fazla bilgi elde edilebilir."
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:44
+msgid "No year specified"
+msgstr "Yıl belirtilmemiş"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:64
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:115
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr "Tarih aralığı dışında"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:94
+msgid "No month specified"
+msgstr "Belirtilen ay yok"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:147
+msgid "No day specified"
+msgstr "Belirtilen gün yok"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:194
+msgid "No week specified"
+msgstr "Belirtilen hafta yok"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:349
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:380
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr "%(verbose_name_plural)s mevcut değil"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:652
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:692
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr "Geçersiz tarih dizesi \"%(datestr)s\", \"%(format)s\" biçimine verildi"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr "Sorguyla eşleşen %(verbose_name)s bulunamadı"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr "Sayfa "
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr "Geçersiz sayfa (%(page_number)s): %(message)s"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:169
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr "Boş liste ve \"%(class_name)s.allow_empty\" Yanlış."
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr "Burada dizin indeksleri kullanılamaz."
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr "“%(path)s” does not exist"
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:68
+#: venv/lib/python3.12/site-packages/django/views/templates/directory_index.html:8
+#: venv/lib/python3.12/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr "%(directory)s dizini"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr "Yükleme başarıyla tamamlandı! Tebrikler!"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a "
+"href=\"https://docs.djangoproject.com/en/%(version)s/ref/settings/#debug\" "
+"target=\"_blank\" rel=\"noopener\">DEBUG=True</a> is in your settings file "
+"and you have not configured any URLs."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr "Django Belgeleri"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr "Konular, referanslar ve nasıl yapılır kılavuzları"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr "Öğretici: Bir Anket Uygulaması"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr "Django ile başlayın"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr "Django Topluluğu"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr "Bağlanın, yardım alın veya katkıda bulunun"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:14
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:54
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:62
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:72
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:82
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:86
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:118
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:137
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:364
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:369
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:379
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:399
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:416
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:435
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:441
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:458
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:470
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:478
+msgid "title"
+msgstr "Başlık"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:18
+msgid "password"
+msgstr "şifre"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:245
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:264
+msgid "title a"
+msgstr "Başlık A"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:249
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:275
+msgid "title b"
+msgstr "Başlık B"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:253
+msgid "title c"
+msgstr "Başlık C"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:257
+msgid "title d"
+msgstr "Başlık D"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:380
+msgid "visits"
+msgstr "ziyaretler"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/translation.py:62
+msgid "Sorry, translation is not available."
+msgstr "Üzgünüz, çeviri mevcut değildir."
+
+#: venv/lib/python3.12/site-packages/modeltranslation/widgets.py:32
+msgid "None"
+msgstr "Yok"
+
+#: website/models.py:16
+msgid "Stranica"
+msgstr "Sayfa"
+
+#: website/models.py:17
+msgid "Stranice"
+msgstr "Sayfalar"
+
+#: website/models.py:32
+msgid "Pozadinska slika"
+msgstr "Arka plan görüntüsü"
+
+#: website/models.py:34
+msgid "Video pozadina"
+msgstr "Video arka planı"
+
+#: website/models.py:41
+msgid "Hero sekcija"
+msgstr "Kahraman bölümü"
+
+#: website/models.py:42
+msgid "Hero sekcije"
+msgstr "Kahraman bölümleri"
+
+#: website/models.py:49
+msgid "Naziv brenda"
+msgstr "Marka adı"
+
+#: website/models.py:51
+msgid "Emoji ikona"
+msgstr "Emoji simgesi"
+
+#: website/models.py:53
+msgid "Logo"
+msgstr "Logo"
+
+#: website/models.py:61
+msgid "Redoslijed"
+msgstr "Sipariş"
+
+#: website/models.py:65
+msgid "Brend"
+msgstr "Brend"
+
+#: website/models.py:66 website/templates/website/index.html:18
+msgid "Brendovi"
+msgstr "Markalar"
+
+#: website/models.py:82
+msgid "Slika"
+msgstr "Resim"
+
+#: website/models.py:91
+msgid "Galerijska slika"
+msgstr "Galeri resmi"
+
+#: website/models.py:92 website/templates/website/index.html:9
+msgid "Galerija"
+msgstr "Galeri"
+
+#: website/models.py:112
+msgid "Info o tvrtki (web)"
+msgstr "Şirket bilgileri (web)"
+
+#: website/models.py:113
+msgid "Info o tvrtkama (web)"
+msgstr "Şirket bilgileri (web)"
+
+#: website/templates/website/index.html:3
+msgid "Upravljanje web stranicom"
+msgstr "Web sitesi yönetimi"
+
+#: website/templates/website/index.html:4
+msgid "Web stranica - upravljanje"
+msgstr "Web sitesi - yönetim"
+
+#: website/templates/website/index.html:10
+msgid "Dodaj sliku"
+msgstr "Resmi ekle"
+
+#: website/templates/website/index.html:19
+msgid "Upravljaj brendovima"
+msgstr "Markaları yönet"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:180
+#: worktime/templates/worktime/worker_dashboard.html:98
+msgid "Pokreni štopericu"
+msgstr "Stoperi çalıştır"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:203
+msgid "Opis rada (opcionalno)"
+msgstr "İş tanımı (isteğe bağlı)"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:208
+msgid "START"
+msgstr "BAŞLAT"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:219
+#: worktime/templates/worktime/worker_dashboard.html:113
+msgid "Danas"
+msgstr "Bugün"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:226
+#: worktime/templates/worktime/worker_dashboard.html:114
+msgid "Tjedan"
+msgstr "Hafta"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:233
+#: worktime/templates/worktime/worker_dashboard.html:115
+#: worktime/templates/worktime/worker_profile.html:93
+msgid "Mjesec"
+msgstr "Ay"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:237
+#: worktime/templates/worktime/worker_dashboard.html:116
+#: worktime/templates/worktime/worker_profile.html:89
+msgid "Zarada"
+msgstr "Kazançlar"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:254
+msgid "Unos"
+msgstr "Bazıları"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:255
+msgid "Unosi"
+msgstr "Unosi"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:256
+msgid "Brzo"
+msgstr "Hızlıca"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:262
+msgid "Novi unos radnog vremena"
+msgstr "Yeni çalışma süresi girişi"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:280
+msgid "Od"
+msgstr "Od"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:284
+msgid "Do"
+msgstr "Do"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:288
+msgid "Pauza"
+msgstr "Ara"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:293
+msgid "Što ste radili?"
+msgstr "Ne yapıyordun?"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:296
+msgid "Tip"
+msgstr "Tip"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:305
+msgid "Spremi unos"
+msgstr "Spremi unos"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:317
+msgid "Kopiraj jučerašnje"
+msgstr "Dünün kopyasını al"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:321
+msgid "Tjedni unos"
+msgstr "Haftalık alım"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:331
+msgid "unos(a) čeka odobrenje"
+msgstr "onay bekliyor"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:367
+msgid "Nema unosa. Pokrenite štopericu ili unesite sate!"
+msgstr "Giriş yok. Kronometreyi başlatın veya saatleri girin!"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:375
+msgid "Brzi unos iz predloška"
+msgstr "Şablondan hızlı giriş"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:388
+msgid "Česti projekti"
+msgstr "Önemli projeler"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:407
+msgid "Predlošci će se pojaviti nakon što počnete koristiti sustav."
+msgstr "Sistemi kullanmaya başladığınızda şablonlar görünecektir."
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:413
+msgid "Dnevna bilješka"
+msgstr "Günlük not"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:418
+msgid "Bilješke za danas..."
+msgstr "Bugün için notlar..."
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:420
+msgid "Spremi"
+msgstr "Spremi"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:428
+msgid "dana zaredom s unesenim satima"
+msgstr "kayıtlı saatlerle arka arkaya günler"
+
+#: worktime/templates/worktime/worker_dashboard.html:74
+#: worktime/templates/worktime/worker_profile.html:55
+msgid "Satnica"
+msgstr "Satnica"
+
+#: worktime/templates/worktime/worker_dashboard.html:75
+msgid "Dnevno"
+msgstr "Günlük"
+
+#: worktime/templates/worktime/worker_dashboard.html:76
+msgid "Tjedno"
+msgstr "Haftalık"
+
+#: worktime/templates/worktime/worker_profile.html:3
+#: worktime/templates/worktime/worker_profile.html:4
+msgid "Moj profil"
+msgstr "Profilim"
+
+#: worktime/templates/worktime/worker_profile.html:11
+msgid "Osobni podaci"
+msgstr "Kişisel veriler"
+
+#: worktime/templates/worktime/worker_profile.html:16
+msgid "Ime"
+msgstr "Yapılacaklar"
+
+#: worktime/templates/worktime/worker_profile.html:20
+msgid "Prezime"
+msgstr "Soyadı"
+
+#: worktime/templates/worktime/worker_profile.html:24
+msgid "Email"
+msgstr "E-posta"
+
+#: worktime/templates/worktime/worker_profile.html:40
+msgid "Spremi podatke"
+msgstr "Verileri gönder"
+
+#: worktime/templates/worktime/worker_profile.html:49
+msgid "Satnica i fond sati"
+msgstr "Saatlik ücret ve yıllık çalışma saati"
+
+#: worktime/templates/worktime/worker_profile.html:59
+msgid "Prekovremeno"
+msgstr "Fazla mesai"
+
+#: worktime/templates/worktime/worker_profile.html:63
+msgid "Dnevni fond"
+msgstr "Günlük fon"
+
+#: worktime/templates/worktime/worker_profile.html:67
+msgid "Tjedni fond"
+msgstr "Haftalık fon"
+
+#: worktime/templates/worktime/worker_profile.html:72
+msgid "Spremi satnicu"
+msgstr "Satnicu'yu kabul et"
+
+#: worktime/templates/worktime/worker_profile.html:81
+msgid "Statistika"
+msgstr "İstatistik"
+
+#: worktime/templates/worktime/worker_profile.html:109
+msgid "Promjena lozinke"
+msgstr "Şifreyi değiştir"
+
+#: worktime/templates/worktime/worker_profile.html:114
+msgid "Stara lozinka"
+msgstr "Eski slogan"
+
+#: worktime/templates/worktime/worker_profile.html:118
+msgid "Nova lozinka"
+msgstr "Yeni şifre"
+
+#: worktime/templates/worktime/worker_profile.html:122
+msgid "Ponovite"
+msgstr "Tekrarla"
+
+#: worktime/templates/worktime/worker_profile.html:125
+msgid "Promijeni lozinku"
+msgstr "Şifreyi değiştir"
+
+#: worktime/templates/worktime/worker_profile.html:132
+msgid "Natrag"
+msgstr "Natrag"

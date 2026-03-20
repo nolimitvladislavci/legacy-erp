@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="stat-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🌍 Prevoditelj: {{ lang_code|upper }}</h2>
+        <div class="btn-group">
+            <a href="?lang_code=de" class="btn btn-outline-primary {% if lang_code == 'de' %}active{% endif %}">{% trans "Njemački" %}</a>
+            <a href="?lang_code=en" class="btn btn-outline-primary {% if lang_code == 'en' %}active{% endif %}">{% trans "Engleski" %}</a>
+        </div>
+    </div>
+
+    <div class="card bg-white mb-4 border-0 shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0 !important;">
+        <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+            <form method="post" class="m-0">
+                {% csrf_token %}
+                <button type="submit" name="action" value="scan" class="btn btn-outline-primary" style="font-weight: 600;" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin me-1\'></i> Skeniram...';">
+                    <i class="fas fa-search me-1"></i> {% trans "1. Skeniraj kod" %}
+                </button>
+            </form>
+            
+            <div class="d-flex align-items-center gap-2 ms-md-4 p-2 bg-light rounded border">
+                <i class="fas fa-filter text-muted ms-2"></i>
+                <select id="moduleSelect" class="form-select form-select-sm border-0 bg-transparent" style="width: 160px; font-weight: bold; cursor: pointer;">
+                    <option value="ALL">{% trans "Svi moduli (Rizično)" %}</option>
+                    {% for mod in modules %}
+                    <option value="{{ mod }}">{{ mod|upper }}</option>
+                    {% endfor %}
+                </select>
+                
+                <form method="post" class="m-0" id="autoTranslateForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="target_module" id="targetModuleInput" value="ALL">
+                    <button type="submit" name="action" value="auto_translate_module" class="btn btn-warning btn-sm" style="font-weight: 600;" onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin me-1\'></i> Prevodim...';">
+                        <i class="fas fa-magic me-1"></i> {% trans "2. Prevedi odabrano" %}
+                    </button>
+                </form>
+            </div>
+            
+            <small class="text-muted ms-auto mt-2 mt-md-0" style="font-size: 0.75rem;">
+                {% trans "Odaberi pojedinačni modul (npr. invoicing) da smanjiš opterećenje na server." %}
+            </small>
+        </div>
+    </div>
+
+    <input type="text" id="translationSearch" class="form-control mb-3" placeholder="{% trans "Pretraži pojmove unutar odabranog modula..." %}">
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 45%;">{% trans "Original (HR)" %}</th>
+                    <th style="width: 45%;">Prijevod ({{ lang_code|upper }})</th>
+                    <th>{% trans "Akcija" %}</th>
+                </tr>
+            </thead>
+            <tbody id="translationTable">
+                {% for entry in entries %}
+                <tr class="translation-row" data-module="{{ entry.module_name }}">
+                    <form method="post">
+                        {% csrf_token %}
+                        <td>
+                            <span class="badge bg-secondary mb-1" style="font-size: 0.6rem;">{{ entry.module_name|upper }}</span>
+                            <small class="text-muted d-block" style="font-size: 0.7rem;">{{ entry.occurrences.0.0 }}</small>
+                            <strong>{{ entry.msgid }}</strong>
+                            <input type="hidden" name="msgid" value="{{ entry.msgid }}">
+                        </td>
+                        <td>
+                            <textarea name="msgstr" class="form-control form-control-sm" rows="1">{{ entry.msgstr }}</textarea>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn btn-success btn-sm">{% trans "Spremi" %}</button>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.getElementById('moduleSelect').addEventListener('change', function() {
+    let selected = this.value;
+    document.getElementById('targetModuleInput').value = selected;
+    
+    let rows = document.querySelectorAll('.translation-row');
+    rows.forEach(row => {
+        if (selected === 'ALL' || row.getAttribute('data-module') === selected) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    document.getElementById('translationSearch').value = '';
+});
+
+document.getElementById('translationSearch').addEventListener('keyup', function() {
+    let filter = this.value.toLowerCase();
+    let selectedModule = document.getElementById('moduleSelect').value;
+    let rows = document.querySelectorAll('.translation-row');
+    
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        let matchesModule = (selectedModule === 'ALL' || row.getAttribute('data-module') === selectedModule);
+        let matchesText = text.includes(filter);
+        row.style.display = (matchesModule && matchesText) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

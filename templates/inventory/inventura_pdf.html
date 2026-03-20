@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4 landscape; margin: 15mm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9px; color: #222; }
+  h1 { font-size: 16px; margin-bottom: 4px; }
+  h2 { font-size: 12px; margin-bottom: 2px; color: #555; }
+  .header { border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
+  .meta { font-size: 8px; color: #666; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { border: 1px solid #999; padding: 3px 5px; font-size: 8px; }
+  th { background: #e8e8e8; font-weight: bold; text-align: center; }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+  .shortage { color: #dc2626; font-weight: bold; }
+  .surplus { color: #16a34a; font-weight: bold; }
+  .totals td { font-weight: bold; background: #f0f0f0; }
+  .footer { margin-top: 20px; font-size: 8px; }
+  .signatures { margin-top: 30px; }
+  .sig-line { display: inline-block; width: 200px; border-bottom: 1px solid #333; text-align: center; margin-right: 30px; padding-top: 40px; }
+  .legal { font-size: 7px; color: #888; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <table style="border:none; margin:0">
+    <tr>
+      <td style="border:none; width:60%">
+        <h1>INVENTURNI LIST / POPISNA LISTA</h1>
+        <h2>{{ inv.inventura_number }} — {{ inv.get_inventura_type_display }}</h2>
+      </td>
+      <td style="border:none; text-align:right; vertical-align:top">
+        <strong>{{ company.name }}</strong><br>
+        OIB: {{ company.oib|default:"—" }}<br>
+        {{ company.address|default:"" }}<br>
+        {{ company.city|default:"" }} {{ company.postal_code|default:"" }}
+      </td>
+    </tr>
+  </table>
+  <div class="meta">
+    Datum stanja (reference date): <strong>{{ inv.reference_date|date:"d.m.Y" }}</strong> |
+    Datum početka: {{ inv.date_started|date:"d.m.Y" }}
+    {% if inv.date_completed %} | Datum završetka: {{ inv.date_completed|date:"d.m.Y" }}{% endif %}
+    {% if inv.warehouse %} | Skladište: {{ inv.warehouse.name }}{% endif %}
+    | Status: {{ inv.get_status_display }}
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:25px">R.br.</th>
+      <th style="width:60px">Šifra</th>
+      <th style="width:70px">Barcode</th>
+      <th>Naziv artikla</th>
+      <th style="width:30px">JMJ</th>
+      <th style="width:55px">Kategorija</th>
+      <th style="width:65px" class="text-right">Knjižno stanje</th>
+      <th style="width:65px" class="text-right">Stvarno stanje</th>
+      <th style="width:60px" class="text-right">Razlika kol.</th>
+      <th style="width:60px" class="text-right">Jed. cijena</th>
+      <th style="width:70px" class="text-right">Razlika iznos</th>
+      <th style="width:60px">Prebrojao</th>
+      <th style="width:50px">Napomena</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td class="text-center">{{ forloop.counter }}</td>
+      <td>{{ item.inventory_item.sku }}</td>
+      <td style="font-size:7px">{{ item.inventory_item.barcode|default:"" }}</td>
+      <td>{{ item.inventory_item.name }}</td>
+      <td class="text-center">{{ item.unit }}</td>
+      <td style="font-size:7px">{{ item.inventory_item.get_category_display }}</td>
+      <td class="text-right">{{ item.expected_qty|floatformat:2 }}</td>
+      <td class="text-right">{% if item.counted_qty != None %}{{ item.counted_qty|floatformat:2 }}{% endif %}</td>
+      <td class="text-right {% if item.difference_qty < 0 %}shortage{% elif item.difference_qty > 0 %}surplus{% endif %}">
+        {% if item.counted_at %}{{ item.difference_qty|floatformat:2 }}{% endif %}
+      </td>
+      <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+      <td class="text-right {% if item.difference_value < 0 %}shortage{% elif item.difference_value > 0 %}surplus{% endif %}">
+        {% if item.counted_at and item.difference_qty %}{{ item.difference_value|floatformat:2 }}{% endif %}
+      </td>
+      <td style="font-size:7px">{% if item.counted_by %}{{ item.counted_by.get_full_name|default:item.counted_by.username }}{% endif %}</td>
+      <td style="font-size:7px">{{ item.note }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="totals">
+      <td colspan="7" class="text-right">UKUPNO ({{ items|length }} stavki):</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td class="text-right">{{ inv.total_difference_value|floatformat:2 }}</td>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
+
+{% if inv.notes %}
+<div class="footer">
+  <strong>Napomene:</strong> {{ inv.notes }}
+</div>
+{% endif %}
+
+<div class="signatures">
+  <strong>Popisna komisija:</strong><br><br>
+  {% for m in commission %}
+  <div class="sig-line">
+    {{ m.user.get_full_name|default:m.user.username }}<br>
+    <small>{{ m.get_role_display }}</small>
+  </div>
+  {% endfor %}
+  <br><br>
+  <div class="sig-line">Odgovorna osoba<br><small>Potpis i pečat</small></div>
+</div>
+
+<div class="legal">
+  <strong>Pravni temelj:</strong>
+  HR: Zakon o računovodstvu (NN 78/15, 134/15, 120/16, 116/18, 42/20, 47/20) čl. 11 — Popis imovine i obveza;
+  Pravilnik o provedbi popisa (NN 61/16).
+  DE: HGB §240 Inventur, §241 Vereinfachungen bei der Inventur.
+  Rok čuvanja: 11 godina od kraja poslovne godine (HR čl. 10 st. 3; DE §257 HGB Abs. 4).
+  <br>
+  Generirano: {% now "d.m.Y H:i" %} | {{ inv.inventura_number }} | {{ company.name }}
+</div>
+
+</body>
+</html>

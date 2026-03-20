@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Obracunska razdoblja{% endblock %}
+
+{% block content %}
+<style>
+.period-wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+.period-title { color: #c9a84c; font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.period-table { width: 100%; border-collapse: collapse; }
+.period-table th {
+    color: #c9a84c; text-transform: uppercase; font-size: 0.75em;
+    letter-spacing: 1px; padding: 12px 10px; text-align: left;
+    border-bottom: 2px solid #333;
+}
+.period-table td { padding: 10px; border-bottom: 1px solid #1a1a1a; vertical-align: middle; }
+.period-table tr:hover { background: rgba(201,168,76,0.04); }
+.locked-row { background: rgba(239,68,68,0.05); }
+.badge-locked {
+    background: #ef4444; color: #fff; padding: 2px 10px;
+    border-radius: 10px; font-size: 0.75em; font-weight: 700;
+}
+.badge-open {
+    background: #10b981; color: #fff; padding: 2px 10px;
+    border-radius: 10px; font-size: 0.75em; font-weight: 700;
+}
+.btn-lock {
+    background: #ef4444; color: #fff; border: none; padding: 5px 14px;
+    border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+}
+.btn-lock:hover { opacity: 0.85; }
+.btn-unlock {
+    background: transparent; color: #c9a84c; border: 1px solid #c9a84c;
+    padding: 5px 14px; border-radius: 6px; cursor: pointer;
+    font-size: 0.78rem; font-weight: 600;
+}
+.btn-unlock:hover { background: rgba(201,168,76,0.1); }
+.info-text { font-size: 0.72rem; color: #666; }
+</style>
+
+<div class="period-wrap">
+    <div class="period-title">
+        <i class="fas fa-lock"></i> {% trans "Obracunska razdoblja" %}
+    </div>
+
+    <p style="color:#999; font-size:0.85rem; margin-bottom:20px;">
+        Zakljucano razdoblje sprecava knjizenje novih temeljnica u tom mjesecu.
+    </p>
+
+    <table class="period-table">
+        <thead>
+            <tr>
+                <th>Razdoblje</th>
+                <th>Temeljnice</th>
+                <th>Status</th>
+                <th>Zakljucao</th>
+                <th style="text-align:right;">Akcija</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in periods %}
+            <tr class="{% if p.is_locked %}locked-row{% endif %}">
+                <td style="font-weight:600;">{{ p.month_name }}</td>
+                <td>{{ p.entry_count }}</td>
+                <td>
+                    {% if p.is_locked %}
+                    <span class="badge-locked"><i class="fas fa-lock"></i> Zakljucano</span>
+                    {% else %}
+                    <span class="badge-open"><i class="fas fa-lock-open"></i> Otvoreno</span>
+                    {% endif %}
+                </td>
+                <td class="info-text">
+                    {% if p.locked_by %}{{ p.locked_by.get_full_name|default:p.locked_by.username }}
+                    <br>{{ p.locked_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}
+                </td>
+                <td style="text-align:right;">
+                    <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="year" value="{{ p.year }}">
+                        <input type="hidden" name="month" value="{{ p.month }}">
+                        {% if p.is_locked %}
+                        <input type="hidden" name="action" value="unlock">
+                        <button type="submit" class="btn-unlock"
+                            onclick="return confirm('Otvoriti razdoblje {{ p.month_name }}?')">
+                            <i class="fas fa-lock-open"></i> Otkljucaj
+                        </button>
+                        {% else %}
+                        <input type="hidden" name="action" value="lock">
+                        <button type="submit" class="btn-lock"
+                            onclick="return confirm('Zakljucati razdoblje {{ p.month_name }}? Knjizenje vise nece biti moguce.')">
+                            <i class="fas fa-lock"></i> Zakljucaj
+                        </button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

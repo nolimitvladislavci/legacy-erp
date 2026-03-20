@@ -1,0 +1,13 @@
+{% extends "website/themes/base_site.html" %}
+
+{% block extra_css %}
+  :root {
+    --primary: #d97706;
+  }
+
+  .hero { background: linear-gradient(135deg, #d97706 0%, #92400e 100%); }
+  .service-card { border-top: 3px solid var(--primary); }
+  body { font-family: 'Segoe UI', 'Roboto', sans-serif; }
+{% endblock %}
+
+{% block services_title %}Naše usluge i radovi{% endblock %}

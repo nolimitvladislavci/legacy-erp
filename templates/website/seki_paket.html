@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<title>UVIJEK FRIŠKO — Paket za Šekija</title>
+<style>
+@page { size: A4; margin: 15mm; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.6; }
+a { color: #7c3aed; text-decoration: underline; }
+
+.header {
+    background: #0a0a0a; color: #fff; padding: 12mm; border-radius: 8pt; margin-bottom: 8mm;
+    text-align: center;
+}
+.header h1 { font-size: 22pt; font-weight: 900; margin-bottom: 2mm; }
+.header h1 span { color: #d4a017; }
+.header .sub { font-size: 10pt; color: #94a3b8; }
+.header .date { font-size: 8pt; color: #475569; margin-top: 3mm; }
+
+.section {
+    background: #fff; border: 1pt solid #e2e8f0; border-radius: 8pt;
+    padding: 6mm 8mm; margin-bottom: 6mm;
+}
+.section h2 {
+    font-size: 13pt; font-weight: 700; color: #0f172a; margin-bottom: 3mm;
+    padding-bottom: 2mm; border-bottom: 1pt solid #e2e8f0;
+}
+.section h2 .icon { color: #d4a017; margin-right: 2mm; }
+
+.login-box {
+    background: #f8fafc; border: 1pt solid #e2e8f0; border-left: 3pt solid #d4a017;
+    border-radius: 4pt; padding: 5mm 6mm; margin: 4mm 0;
+    font-family: 'Courier New', monospace; font-size: 10pt;
+}
+.login-box .label { font-family: 'Segoe UI', sans-serif; font-size: 8pt; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+.login-box .value { font-size: 12pt; font-weight: 700; color: #0f172a; }
+
+.link-card {
+    display: flex; align-items: center; gap: 4mm; padding: 3mm 4mm;
+    border-bottom: 0.5pt solid #f1f5f9;
+}
+.link-card:last-child { border-bottom: none; }
+.link-card .num {
+    width: 7mm; height: 7mm; line-height: 7mm; border-radius: 50%;
+    background: #d4a017; color: #fff; font-size: 8pt; font-weight: 800;
+    text-align: center; flex-shrink: 0;
+}
+.link-card .info { flex: 1; }
+.link-card .title { font-weight: 600; font-size: 10pt; }
+.link-card .url { font-size: 8.5pt; color: #7c3aed; word-break: break-all; }
+.link-card .desc { font-size: 8pt; color: #64748b; }
+
+.steps { margin: 4mm 0; }
+.step { display: flex; gap: 3mm; margin-bottom: 3mm; }
+.step .snum {
+    width: 6mm; height: 6mm; line-height: 6mm; border-radius: 50%;
+    background: #e8e0c8; color: #92400e; font-size: 7pt; font-weight: 800;
+    text-align: center; flex-shrink: 0; margin-top: 1mm;
+}
+.step .stxt { font-size: 9.5pt; }
+
+.note {
+    background: #fffbeb; border-left: 3pt solid #d4a017;
+    padding: 4mm 5mm; margin: 4mm 0; font-size: 9pt;
+    border-radius: 0 4pt 4pt 0;
+}
+.note strong { color: #92400e; }
+
+.footer {
+    text-align: center; margin-top: 8mm; padding-top: 4mm;
+    border-top: 0.5pt solid #e2e8f0; font-size: 8pt; color: #94a3b8;
+}
+
+@media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    a { color: #7c3aed !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <h1>UVIJEK <span>FRIŠKO</span></h1>
+    <div class="sub">LIMIT Connect — Tvoj poslovni sustav</div>
+    <div class="date">Pripremio: Ivan Brtan · 16. ozujka 2026.</div>
+</div>
+
+<!-- Pristupni podaci -->
+<div class="section">
+    <h2><span class="icon">🔑</span> Pristupni podaci</h2>
+    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Ovim podacima se prijavujes na sustav. Sacuvaj ih na sigurnom mjestu.</p>
+
+    <div class="login-box">
+        <div class="label">Web adresa</div>
+        <div class="value"><a href="https://limit-connect.com">https://limit-connect.com</a></div>
+    </div>
+    <div class="login-box">
+        <div class="label">Korisnicko ime</div>
+        <div class="value">shevqet</div>
+    </div>
+    <div class="login-box">
+        <div class="label">Lozinka</div>
+        <div class="value">UvijekFrisko2026!</div>
+    </div>
+    <div class="login-box">
+        <div class="label">Email u sustavu</div>
+        <div class="value">pekara.uvijekfrisko@gmail.com</div>
+    </div>
+
+    <div class="note">
+        <strong>Vazno:</strong> Nakon prve prijave preporucamo promjenu lozinke. Imas administratorski pristup — mozes upravljati artiklima, cijenama, zaposlenicima i svim modulima.
+    </div>
+</div>
+
+<!-- Linkovi -->
+<div class="section">
+    <h2><span class="icon">🔗</span> Tvoji linkovi — klikni za otvaranje</h2>
+
+    <div class="link-card">
+        <div class="num">1</div>
+        <div class="info">
+            <div class="title">Web stranica pekare</div>
+            <div class="url"><a href="https://limit-connect.com/frisko/">https://limit-connect.com/frisko/</a></div>
+            <div class="desc">Tvoja javna stranica — asortiman, lokacije, QR kodovi, galerija slika</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">2</div>
+        <div class="info">
+            <div class="title">Webshop — online prodaja</div>
+            <div class="url"><a href="https://limit-connect.com/pos/webshop/pekara-uvijek-frisko/">https://limit-connect.com/pos/webshop/pekara-uvijek-frisko/</a></div>
+            <div class="desc">Kupci vide artikle i cijene. Kategorija "Roba od jucer" za snizene proizvode.</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">3</div>
+        <div class="info">
+            <div class="title">Naruci i pokupi (QR za kupce)</div>
+            <div class="url"><a href="https://limit-connect.com/pos/pickup/pekara-uvijek-frisko/">https://limit-connect.com/pos/pickup/pekara-uvijek-frisko/</a></div>
+            <div class="desc">Kupac skenira QR → odabere proizvode → pokupiti svjeze. Printaj QR na letak!</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">4</div>
+        <div class="info">
+            <div class="title">Usluzno pecenje — rezervacija termina</div>
+            <div class="url"><a href="https://limit-connect.com/appointments/booking/c/pekara-uvijek-frisko/">https://limit-connect.com/appointments/booking/c/pekara-uvijek-frisko/</a></div>
+            <div class="desc">Kupac rezervira termin za janjetinu, odojak, pite, pizzu... Automatska potvrda.</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">5</div>
+        <div class="info">
+            <div class="title">POS blagajna</div>
+            <div class="url"><a href="https://limit-connect.com/pos/quick/">https://limit-connect.com/pos/quick/</a></div>
+            <div class="desc">Otvori na mobitelu ili tabletu → skeniraj barkod → naplati. Radi bez interneta.</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">6</div>
+        <div class="info">
+            <div class="title">Roba od jucer — upravljanje</div>
+            <div class="url"><a href="https://limit-connect.com/pos/yesterday/">https://limit-connect.com/pos/yesterday/</a></div>
+            <div class="desc">Dodaj jucerasnje artikle po snizennoj cijeni. Automatski rok i oznacavanje.</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">7</div>
+        <div class="info">
+            <div class="title">Galerija slika</div>
+            <div class="url"><a href="https://limit-connect.com/website/gallery/">https://limit-connect.com/website/gallery/</a></div>
+            <div class="desc">Uploadaj slike proizvoda, pekare, tima — pojavljuju se na web stranici i webshopu.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Letci -->
+<div class="section">
+    <h2><span class="icon">🖨️</span> Letci za print — otvori i printaj</h2>
+    <p style="font-size:9pt;color:#475569;margin-bottom:3mm">Pripremili smo 3 verzije letka. Otvori link → Ctrl+P → Print u boji.</p>
+
+    <div class="link-card">
+        <div class="num">A3</div>
+        <div class="info">
+            <div class="title">Veliki letak za ulazna vrata</div>
+            <div class="url"><a href="https://limit-connect.com/frisko/letak/a3/">https://limit-connect.com/frisko/letak/a3/</a></div>
+            <div class="desc">A3 format — QR kodovi, usluge s cijenama, lokacije, slike pekare. Za vrata ili izlog.</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">A4</div>
+        <div class="info">
+            <div class="title">Interijer letak (bijela pozadina)</div>
+            <div class="url"><a href="https://limit-connect.com/frisko/letak/a4/">https://limit-connect.com/frisko/letak/a4/</a></div>
+            <div class="desc">A4 u boji — za unutar pekare, pored blagajne, na zidu. Koraci 1-2-3.</div>
+        </div>
+    </div>
+
+    <div class="link-card">
+        <div class="num">PM</div>
+        <div class="info">
+            <div class="title">Letak za prodajna mjesta</div>
+            <div class="url"><a href="https://limit-connect.com/frisko/letak/pm/">https://limit-connect.com/frisko/letak/pm/</a></div>
+            <div class="desc">A4 tamna pozadina — za PM Ivanovac, Vladislavci, Cepin. Promijeni ime lokacije na dnu!</div>
+        </div>
+    </div>
+</div>
+
+<!-- Kako poceti -->
+<div class="section">
+    <h2><span class="icon">🚀</span> Kako poceti — 5 koraka</h2>
+
+    <div class="steps">
+        <div class="step"><div class="snum">1</div><div class="stxt"><strong>Prijavi se</strong> na limit-connect.com s podacima iznad</div></div>
+        <div class="step"><div class="snum">2</div><div class="stxt"><strong>Uploadaj slike</strong> u Galeriju — proizvodi, pekara, tim (pojavljuju se na webu)</div></div>
+        <div class="step"><div class="snum">3</div><div class="stxt"><strong>Printaj letke</strong> — A3 za vrata, A4 za svaku lokaciju</div></div>
+        <div class="step"><div class="snum">4</div><div class="stxt"><strong>Otvori POS</strong> na mobitelu — skeniraj barkod proizvoda, dodaj u bazu</div></div>
+        <div class="step"><div class="snum">5</div><div class="stxt"><strong>Dodaj "Roba od jucer"</strong> — svako jutro oznaci jucerasnje proizvode po snizennoj cijeni</div></div>
+    </div>
+
+    <div class="note">
+        <strong>Podrska:</strong> Ako trebas pomoc, otvori AI Upravljanje u sidebaru i posalji upit. AI odgovara odmah. Za slozzenije stvari — javi se Ivanu.
+    </div>
+</div>
+
+<!-- Skladišta -->
+<div class="section">
+    <h2><span class="icon">📦</span> Tvoja skladista u sustavu</h2>
+    <p style="font-size:9.5pt;margin-bottom:3mm">Evo tvojih 5 lokacija — medjuskladisnica (izdatnica) za prijenos robe:</p>
+
+    <table style="width:100%;border-collapse:collapse;font-size:9.5pt">
+        <tr style="background:#f8fafc">
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">CENTRALA</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Proizvodnja</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Kalnicka 30, Cepin</td>
+        </tr>
+        <tr>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">PM Ivanovac</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Prodajno mjesto</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Ivanovac</td>
+        </tr>
+        <tr style="background:#f8fafc">
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">PM Vladislavci</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Prodajno mjesto</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Vladislavci</td>
+        </tr>
+        <tr>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">PM Cepin</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Prodajno mjesto</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Cepin</td>
+        </tr>
+        <tr style="background:#f8fafc">
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">TEREN-1</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Vozilo</td>
+            <td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0">Kombi dostava</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    LIMIT Connect · limit-connect.com · Powered by AI<br>
+    Za pitanja: Ivan Brtan · Sve u sustavu je 100% uskladjeno s hrvatskim propisima
+</div>
+
+</body></html>

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nova Futures ponuda{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'marketplace:futures_catalog' %}">Futures</a></li>
+        <li class="breadcrumb-item active">Nova ponuda</li>
+    </ol>
+</nav>
+
+<div class="row">
+<div class="col-md-8">
+    <div class="card">
+        <div class="card-header"><i class="fas fa-seedling"></i> Kreiraj Futures ponudu</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Naziv proizvoda *</label>
+                        <input type="text" name="name" class="form-control" required placeholder="npr. Kukuruz secerac Slavonija 2026">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Kategorija</label>
+                        <select name="category" class="form-select">
+                            <option value="">—</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.pk }}">{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Opis</label>
+                    <textarea name="description" class="form-control" rows="3" placeholder="Detalji o proizvodu, kvaliteti, sorti..."></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Cijena po jedinici (EUR) *</label>
+                        <input type="number" name="unit_price" class="form-control" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Jedinica</label>
+                        <select name="unit" class="form-select">
+                            <option value="kg">Kilogram</option>
+                            <option value="kom">Komad</option>
+                            <option value="l">Litra</option>
+                            <option value="kutija">Kutija</option>
+                            <option value="vreca">Vreca</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Ukupni kapacitet *</label>
+                        <input type="number" name="total_capacity" class="form-control" step="0.01" min="1" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Min. narudzba</label>
+                        <input type="number" name="min_order_qty" class="form-control" step="0.01" value="1">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Dostupno od *</label>
+                        <input type="date" name="available_from" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Dostupno do *</label>
+                        <input type="date" name="available_until" class="form-control" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Rok za rezervaciju *</label>
+                        <input type="date" name="booking_deadline" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Avans (%)</label>
+                        <input type="number" name="deposit_percent" class="form-control" value="20" min="0" max="100" step="1">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Regija porijekla</label>
+                        <input type="text" name="origin_region" class="form-control" placeholder="npr. Slavonija, HR">
+                    </div>
+                    <div class="col-md-4 mb-3 pt-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_organic" id="organic">
+                            <label class="form-check-label" for="organic">Bio / Ekoloski</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="requires_cold_chain" id="cold">
+                            <label class="form-check-label" for="cold">Zahtijeva hladni lanac</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Objavi ponudu</button>
+                <a href="{% url 'marketplace:futures_my' %}" class="btn btn-outline-secondary">Odustani</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-4">
+    <div class="card bg-light">
+        <div class="card-body">
+            <h6><i class="fas fa-info-circle text-info"></i> Kako funkcionira?</h6>
+            <ol class="small">
+                <li>Objavite sto cete imati dostupno i kada</li>
+                <li>Kupci rezerviraju unaprijed i plate avans</li>
+                <li>Kad roba bude spremna, isporucujete prema rezervacijama</li>
+                <li>Kupac placa ostatak po isporuci</li>
+            </ol>
+            <hr>
+            <h6><i class="fas fa-lightbulb text-warning"></i> Savjeti</h6>
+            <ul class="small">
+                <li>Postavite realisticnu cijenu — kupci usporeduju</li>
+                <li>Rok za rezervaciju stavite 2-4 tjedna prije dostupnosti</li>
+                <li>Avans 15-25% je standard</li>
+                <li>Partnerski rabati se automatski primjenjuju</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

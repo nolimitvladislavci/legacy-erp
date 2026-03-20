@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Karton: {{ card }}{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width:750px">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">
+      <i class="fas fa-id-card me-2 text-info"></i>{{ card }}
+    </h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'work_orders:client_card_edit' card.pk %}" class="btn btn-sm btn-outline-warning">
+        <i class="fas fa-edit me-1"></i>Uredi
+      </a>
+      <a href="{% url 'work_orders:client_card_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Natrag
+      </a>
+    </div>
+  </div>
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-header d-flex justify-content-between">
+      <span class="text-info fw-bold">{{ card.client.name }}</span>
+      <span class="badge bg-secondary">{{ card.get_card_type_display }}</span>
+    </div>
+    <div class="card-body">
+
+      <!-- Optics -->
+      {% if card.card_type == 'optics' %}
+      <h6 class="text-warning mb-3">Dioptrija</h6>
+      <div class="table-responsive mb-4">
+        <table class="table table-dark table-bordered table-sm text-center" style="max-width:500px">
+          <thead><tr><th></th><th>Sfero (sph)</th><th>Cilindar (cyl)</th><th>Os (axis)</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="text-muted fw-bold">D (desno)</td>
+              <td>{{ card.sphere_right|default:"—" }}</td>
+              <td>{{ card.cylinder_right|default:"—" }}</td>
+              <td>{{ card.axis_right|default:"—" }}</td>
+            </tr>
+            <tr>
+              <td class="text-muted fw-bold">L (lijevo)</td>
+              <td>{{ card.sphere_left|default:"—" }}</td>
+              <td>{{ card.cylinder_left|default:"—" }}</td>
+              <td>{{ card.axis_left|default:"—" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <dl class="row mb-3">
+        <dt class="col-4 text-muted">PD (mm)</dt>
+        <dd class="col-8">{{ card.pd|default:"—" }}</dd>
+        <dt class="col-4 text-muted">ADD</dt>
+        <dd class="col-8">{{ card.add_power|default:"—" }}</dd>
+      </dl>
+      {% endif %}
+
+      <!-- Hair/Cosmetics -->
+      {% if card.card_type == 'hair' or card.card_type == 'cosmetics' %}
+      <dl class="row mb-3">
+        <dt class="col-4 text-muted">Tip kose</dt>
+        <dd class="col-8">{{ card.hair_type|default:"—" }}</dd>
+        <dt class="col-4 text-muted">Alergije</dt>
+        <dd class="col-8">{{ card.allergies|default:"—" }}</dd>
+      </dl>
+      {% endif %}
+
+      <!-- General -->
+      <dl class="row">
+        <dt class="col-4 text-muted">Zadnji posjet</dt>
+        <dd class="col-8">{{ card.last_visit|default:"—" }}</dd>
+        <dt class="col-4 text-muted">GDPR suglasnost</dt>
+        <dd class="col-8">
+          {% if card.gdpr_consent %}
+            <i class="fas fa-check-circle text-success"></i> Da
+          {% else %}
+            <i class="fas fa-times-circle text-danger"></i> Ne
+          {% endif %}
+        </dd>
+      </dl>
+      {% if card.notes %}
+      <hr class="border-secondary">
+      <p class="text-muted small">{{ card.notes }}</p>
+      {% endif %}
+
+    </div>
+    <div class="card-footer text-muted small">
+      Kreiran: {{ card.created_at|date:"d.m.Y H:i" }} | Ažuriran: {{ card.updated_at|date:"d.m.Y H:i" }}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}e-Racuni
+<!-- Upload & AI Inbox shortcut -->
+<div id="upload-shortcut" style="margin-top:1.5rem;padding:1rem;background:#111827;border:1px solid rgba(201,168,76,.2);border-radius:12px;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+  <span style="color:#94a3b8;font-size:.85rem">Brze akcije:</span>
+  <a href="/hr/documents/arhiva/upload/" style="background:linear-gradient(135deg,#c9a84c,#b8963c);color:#0a0a0a;font-weight:700;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-cloud-upload-alt"></i> Upload racuna
+  </a>
+  <a href="/hr/documents/ai-inbox/" style="background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-robot"></i> AI Inbox
+  </a>
+  <a href="/hr/documents/" style="background:#1f2937;color:#94a3b8;border:1px solid #334155;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-archive"></i> Arhiva
+  </a>
+</div>
+
+{% endblock %}
+{% block page_title %}e-Racuni{% endblock %}
+{% block content %}
+<style>
+.er-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.er-stat{background:#fff;border-radius:10px;padding:14px;text-align:center;border:1px solid #f1f5f9}
+.er-stat .val{font-size:1.6rem;font-weight:700;color:#0f172a}
+.er-stat .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-top:2px}
+.er-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.er-badge.accepted{background:#dcfce7;color:#166534}
+.er-badge.rejected{background:#fef2f2;color:#991b1b}
+.er-badge.error{background:#fef2f2;color:#991b1b}
+.er-badge.draft{background:#f1f5f9;color:#475569}
+.er-badge.sending,.er-badge.validating,.er-badge.signing,.er-badge.sent{background:#fef3c7;color:#92400e}
+.er-badge.invalid{background:#fce4ec;color:#880e4f}
+.er-badge.archived{background:#e8eaf6;color:#283593}
+.er-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.er-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;color:#64748b}
+.er-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
+.er-table tr:hover{background:#f8fafc}
+.er-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+</style>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+  <img src="/static/eracun/propter_icon.png" alt="Propter" style="height:36px;border-radius:6px">
+  <div>
+    <div style="font-weight:700;font-size:1.1rem;color:#0f172a">e-Racuni <span style="color:#c9a84c">Propter</span></div>
+    <div style="font-size:.7rem;color:#94a3b8">EN 16931 / PEPPOL BIS 3.0 / FINA CIS</div>
+  </div>
+</div>
+
+<div class="er-actions">
+  <a href="{% url 'eracun:settings' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-cog"></i> Postavke</a>
+  {% if config and config.api_enabled %}
+  <span class="btn btn-sm" style="background:#dcfce7;color:#166534;cursor:default"><i class="fas fa-plug"></i> API aktivan</span>
+  {% endif %}
+</div>
+
+<div class="er-grid">
+  <div class="er-stat"><div class="val">{{ stats.total_count|default:"0" }}</div><div class="lbl">Ukupno</div></div>
+  <div class="er-stat"><div class="val" style="color:#166534">{{ stats.accepted|default:"0" }}</div><div class="lbl">Prihvaceno</div></div>
+  <div class="er-stat"><div class="val" style="color:#92400e">{{ stats.pending|default:"0" }}</div><div class="lbl">U obradi</div></div>
+  <div class="er-stat"><div class="val" style="color:#991b1b">{{ stats.rejected|default:"0" }}</div><div class="lbl">Odbijeno</div></div>
+  <div class="er-stat"><div class="val" style="color:#991b1b">{{ stats.errors|default:"0" }}</div><div class="lbl">Greske</div></div>
+  <div class="er-stat"><div class="val">&euro;{{ stats.accepted_amount|floatformat:2|default:"0.00" }}</div><div class="lbl">Prihvaceni iznos</div></div>
+</div>
+
+{% if eracuni %}
+<div class="stat-card">
+  <table class="er-table">
+    <thead>
+      <tr>
+        <th>Broj</th>
+        <th>Primatelj</th>
+        <th>Iznos</th>
+        <th>Status</th>
+        <th>Datum</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for er in eracuni %}
+      <tr>
+        <td><strong>{{ er.invoice_number }}</strong></td>
+        <td>{{ er.recipient_name }}<br><span style="font-size:.7rem;color:#94a3b8">{{ er.recipient_oib }}</span></td>
+        <td>&euro;{{ er.total|floatformat:2 }}</td>
+        <td><span class="er-badge {{ er.status }}">{{ er.get_status_display }}</span></td>
+        <td>{{ er.created_at|date:"d.m.Y H:i" }}</td>
+        <td><a href="{% url 'eracun:detail' er.pk %}" class="btn btn-sm btn-outline-primary" style="font-size:.7rem">Detalji</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="stat-card text-center py-5">
+  <div style="font-size:2.5rem;margin-bottom:10px">&#128196;</div>
+  <h5>Nema e-Racuna</h5>
+  <p style="color:#64748b;font-size:.85rem">Kreirajte e-Racun iz postojece fakture ili koristite API.</p>
+</div>
+{% endif %}
+{% endblock %}

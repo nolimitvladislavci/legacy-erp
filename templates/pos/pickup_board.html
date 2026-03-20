@@ -1,0 +1,49 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}Narudzbe — {{ company.name }}{% endblock %}
+{% block content %}
+<div style="padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h4 style="color:var(--gold);font-weight:800">Pickup narudzbe</h4>
+        <span style="color:var(--muted);font-size:.8rem">Danas zavrseno: {{ completed_today }}</span>
+    </div>
+    {% for order in orders %}
+    <div style="background:var(--card);border:1px solid {% if order.status == 'ready' %}#22c55e{% elif order.status == 'preparing' %}#f59e0b{% else %}var(--border){% endif %};border-radius:10px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong style="font-size:1rem">{{ order.guest_name }}</strong>
+            <span style="font-size:.7rem;color:var(--muted)">{{ order.created_at|date:"H:i" }}</span>
+        </div>
+        <div style="font-size:.82rem;margin-bottom:8px">
+            {% for item in order.items.all %}
+            <span style="background:var(--dark);padding:2px 8px;border-radius:4px;margin-right:4px">{{ item.quantity }}x {{ item.inventory_item.name }}</span>
+            {% endfor %}
+        </div>
+        <div style="display:flex;gap:6px">
+            {% if order.status == 'confirmed' %}
+            <button onclick="updateStatus({{ order.pk }}, 'preparing')" style="flex:1;padding:8px;background:#f59e0b;color:#000;border:none;border-radius:6px;font-weight:700;cursor:pointer">U PRIPREMU</button>
+            {% elif order.status == 'preparing' %}
+            <button onclick="updateStatus({{ order.pk }}, 'ready')" style="flex:1;padding:8px;background:#22c55e;color:#000;border:none;border-radius:6px;font-weight:700;cursor:pointer">SPREMNO</button>
+            {% elif order.status == 'ready' %}
+            <button onclick="updateStatus({{ order.pk }}, 'paid')" style="flex:1;padding:8px;background:var(--gold);color:#000;border:none;border-radius:6px;font-weight:700;cursor:pointer">PREUZETO</button>
+            {% elif order.status == 'new' %}
+            <button onclick="updateStatus({{ order.pk }}, 'confirmed')" style="flex:1;padding:8px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer">POTVRDI</button>
+            {% endif %}
+            <button onclick="updateStatus({{ order.pk }}, 'cancelled')" style="padding:8px 12px;background:none;border:1px solid #ef4444;color:#ef4444;border-radius:6px;cursor:pointer;font-size:.75rem">X</button>
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align:center;padding:40px;color:var(--muted)">Nema aktivnih narudzbi</div>
+    {% endfor %}
+</div>
+<script>
+function updateStatus(id, status) {
+    fetch('/pos/pickup/status/' + id + '/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''},
+        body: JSON.stringify({status: status})
+    }).then(function() { location.reload(); });
+}
+// Auto refresh every 10 seconds
+setInterval(function() { location.reload(); }, 10000);
+</script>
+{% endblock %}

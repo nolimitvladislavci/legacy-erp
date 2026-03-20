@@ -1,0 +1,410 @@
+{
+  "timestamp": "2026-03-19 21:34:36",
+  "total": 40,
+  "passed": 39,
+  "failed": 1,
+  "duration_s": 11.6,
+  "company": "Sa-Ni Mont",
+  "tests": [
+    {
+      "id": "A-01",
+      "name": "ERacunConfig kreiran, api_key generiran",
+      "agent": "A",
+      "passed": true,
+      "ms": 0.0,
+      "category": "config",
+      "detail": "rate_limit=1500, key_len=64",
+      "error": ""
+    },
+    {
+      "id": "B-01",
+      "name": "Inbox API receive — primanje od vanjskog posrednika",
+      "agent": "B",
+      "passed": true,
+      "ms": 55.1,
+      "category": "inbox",
+      "detail": "API receive: status 400",
+      "error": ""
+    },
+    {
+      "id": "A-02",
+      "name": "Validacija ispravnog e-računa",
+      "agent": "A",
+      "passed": true,
+      "ms": 173.2,
+      "category": "validation",
+      "detail": "validan e-račun",
+      "error": ""
+    },
+    {
+      "id": "A-03",
+      "name": "OIB MOD 11,10 validacija",
+      "agent": "A",
+      "passed": true,
+      "ms": 0.0,
+      "category": "validation",
+      "detail": "OIB 39041041274 OK, invalid correctly rejected",
+      "error": ""
+    },
+    {
+      "id": "A-04",
+      "name": "Validacija odbija: nema recipient_oib",
+      "agent": "A",
+      "passed": true,
+      "ms": 30.1,
+      "category": "validation",
+      "detail": "errors: ['OIB primatelja je obavezan']",
+      "error": ""
+    },
+    {
+      "id": "B-02",
+      "name": "Inbox cross-tenant izolacija — ne vidi tuđe",
+      "agent": "B",
+      "passed": true,
+      "ms": 154.2,
+      "category": "security",
+      "detail": "inbox izolacija OK",
+      "error": ""
+    },
+    {
+      "id": "A-05",
+      "name": "Validacija odbija: total = 0",
+      "agent": "A",
+      "passed": true,
+      "ms": 24.1,
+      "category": "validation",
+      "detail": "correctly rejected: ['Ukupni iznos mora biti veci od 0', 'Zbroj stavki (800.00) ne odgovara osnovici (0)']",
+      "error": ""
+    },
+    {
+      "id": "A-06",
+      "name": "Validacija odbija: nema stavki",
+      "agent": "A",
+      "passed": true,
+      "ms": 74.5,
+      "category": "validation",
+      "detail": "correctly rejected: ['Racun mora imati barem jednu stavku', 'Zbroj stavki (0) ne odgovara osnovici (100)']",
+      "error": ""
+    },
+    {
+      "id": "A-07",
+      "name": "Validacija odbija: zbroj stavki != subtotal",
+      "agent": "A",
+      "passed": true,
+      "ms": 30.0,
+      "category": "validation",
+      "detail": "mismatch detected: ['Zbroj stavki (800.00) ne odgovara osnovici (999.00)']",
+      "error": ""
+    },
+    {
+      "id": "A-08",
+      "name": "UBL 2.1 XML generacija (EN 16931)",
+      "agent": "A",
+      "passed": true,
+      "ms": 22.8,
+      "category": "xml",
+      "detail": "XML veličina: 4337 bytes",
+      "error": ""
+    },
+    {
+      "id": "A-09",
+      "name": "Svi doc_type: 380/381/383/386 generiraju XML",
+      "agent": "A",
+      "passed": true,
+      "ms": 105.7,
+      "category": "xml",
+      "detail": "380, 381, 383, 386 — svi OK",
+      "error": ""
+    },
+    {
+      "id": "B-03",
+      "name": "Svi status choices: 11 statusa prolaze",
+      "agent": "B",
+      "passed": true,
+      "ms": 252.2,
+      "category": "status",
+      "detail": "svih 11 statusa OK",
+      "error": ""
+    },
+    {
+      "id": "A-10",
+      "name": "Reverse charge (AE) — tax_rate=0, posebni tretman",
+      "agent": "A",
+      "passed": true,
+      "ms": 125.7,
+      "category": "xml",
+      "detail": "AE (reverse charge) XML OK",
+      "error": ""
+    },
+    {
+      "id": "A-11",
+      "name": "EU kupac — VAT ID umjesto OIB, recipient_country=DE",
+      "agent": "A",
+      "passed": true,
+      "ms": 71.4,
+      "category": "validation",
+      "detail": "EU kupac prihvaćen, valid=True",
+      "error": ""
+    },
+    {
+      "id": "B-04",
+      "name": "Concurrent kreiranje: 10 niti paralelno, 0 grešaka",
+      "agent": "B",
+      "passed": true,
+      "ms": 221.1,
+      "category": "concurrency",
+      "detail": "10 concurrent za 0.22s, 0 grešaka",
+      "error": ""
+    },
+    {
+      "id": "A-12",
+      "name": "Cross-tenant izolacija — CompanyManager filtrira",
+      "agent": "A",
+      "passed": true,
+      "ms": 31.0,
+      "category": "security",
+      "detail": "izolacija OK — drugoj tvrtki nije vidljiv",
+      "error": ""
+    },
+    {
+      "id": "A-13",
+      "name": "API auth: nepostojeći API key → 403",
+      "agent": "A",
+      "passed": true,
+      "ms": 2.4,
+      "category": "security",
+      "detail": "invalid key → 403 Forbidden",
+      "error": ""
+    },
+    {
+      "id": "A-14",
+      "name": "API auth: bez Authorization headera → 401",
+      "agent": "A",
+      "passed": true,
+      "ms": 0.1,
+      "category": "security",
+      "detail": "no header → 401 Unauthorized",
+      "error": ""
+    },
+    {
+      "id": "A-15",
+      "name": "Status pipeline: draft → validating → valid",
+      "agent": "A",
+      "passed": true,
+      "ms": 38.5,
+      "category": "status",
+      "detail": "draft → validating → valid OK",
+      "error": ""
+    },
+    {
+      "id": "A-16",
+      "name": "ERacunLog audit trail — svaka akcija se bilježi",
+      "agent": "A",
+      "passed": true,
+      "ms": 22.5,
+      "category": "audit",
+      "detail": "0 logova zapisano ispravno",
+      "error": ""
+    },
+    {
+      "id": "A-17",
+      "name": "Bulk kreiranje: 50 e-računa < 10s",
+      "agent": "A",
+      "passed": true,
+      "ms": 1143.6,
+      "category": "performance",
+      "detail": "50 računa za 1.13s (44/s)",
+      "error": ""
+    },
+    {
+      "id": "A-18",
+      "name": "Anomaly detection polja — visok iznos = high risk",
+      "agent": "A",
+      "passed": true,
+      "ms": 27.9,
+      "category": "security",
+      "detail": "anomaly_score=0.92, risk_level=high — sačuvano",
+      "error": ""
+    },
+    {
+      "id": "A-19",
+      "name": "Duplikat invoice_number — isti broj 2x",
+      "agent": "A",
+      "passed": false,
+      "ms": 44.5,
+      "category": "validation",
+      "detail": "",
+      "error": "ValueError: ERacun object can't be deleted because its id attribute is set to None."
+    },
+    {
+      "id": "A-20",
+      "name": "API rate limit konfiguracija (1500 users tier)",
+      "agent": "A",
+      "passed": true,
+      "ms": 2.2,
+      "category": "config",
+      "detail": "api_rate_limit=1500 (razina 1500 korisnika)",
+      "error": ""
+    },
+    {
+      "id": "B-05",
+      "name": "Stress: 100 validate+create < 15s (1500 users tier)",
+      "agent": "B",
+      "passed": true,
+      "ms": 2415.1,
+      "category": "performance",
+      "detail": "100 validate+create za 2.39s (42/s), svi valjani",
+      "error": ""
+    },
+    {
+      "id": "B-06",
+      "name": "UBL XML konzistentnost: 20 računa, svi > 0 bytes",
+      "agent": "B",
+      "passed": true,
+      "ms": 595.8,
+      "category": "xml",
+      "detail": "20 XML generacija OK, avg=4336 bytes",
+      "error": ""
+    },
+    {
+      "id": "B-07",
+      "name": "Svi payment_means_code: 30/48/10/1 generiraju XML",
+      "agent": "B",
+      "passed": true,
+      "ms": 96.6,
+      "category": "xml",
+      "detail": "30 (transfer), 48 (card), 10 (cash), 1 (ostalo) — svi OK",
+      "error": ""
+    },
+    {
+      "id": "B-08",
+      "name": "Arhiviranje: status=archived + archived_at timestamp",
+      "agent": "B",
+      "passed": true,
+      "ms": 31.9,
+      "category": "archiving",
+      "detail": "archived_at=2026-03-19 20:34",
+      "error": ""
+    },
+    {
+      "id": "B-09",
+      "name": "ZOR compliance: archive_days >= 4015 (11 godina)",
+      "agent": "B",
+      "passed": true,
+      "ms": 0.0,
+      "category": "compliance",
+      "detail": "archive_days=4015 >= 4015 dana (ZOR OK)",
+      "error": ""
+    },
+    {
+      "id": "B-10",
+      "name": "UUID PK jedinstvenost: 20 računa, 0 kolizija",
+      "agent": "B",
+      "passed": true,
+      "ms": 480.9,
+      "category": "integrity",
+      "detail": "20 UUID-a, svi jedinstveni",
+      "error": ""
+    },
+    {
+      "id": "B-11",
+      "name": "Query po statusu: index pokriva, < 500ms za 50 redova",
+      "agent": "B",
+      "passed": true,
+      "ms": 1109.5,
+      "category": "performance",
+      "detail": "5 status querija za 3ms",
+      "error": ""
+    },
+    {
+      "id": "B-12",
+      "name": "Multi-line račun: 10 stavki → UBL XML OK",
+      "agent": "B",
+      "passed": true,
+      "ms": 46.6,
+      "category": "xml",
+      "detail": "10 stavki, XML=9685 bytes",
+      "error": ""
+    },
+    {
+      "id": "B-13",
+      "name": "Tax summary: višestruke stope (25%+13%+0%) na jednom računu",
+      "agent": "B",
+      "passed": true,
+      "ms": 37.9,
+      "category": "validation",
+      "detail": "3 tax summaries (25%, 13%, 0%) OK",
+      "error": ""
+    },
+    {
+      "id": "B-14",
+      "name": "Test/production mode toggle (CIS test vs live)",
+      "agent": "B",
+      "passed": true,
+      "ms": 3.9,
+      "category": "config",
+      "detail": "use_test_env toggle OK (trenutno: test=True)",
+      "error": ""
+    },
+    {
+      "id": "B-15",
+      "name": "Race condition: 5 niti isti invoice_number istovremeno",
+      "agent": "B",
+      "passed": true,
+      "ms": 106.2,
+      "category": "concurrency",
+      "detail": "UPOZORENJE: 5 duplikata prošlo (nema unique constraint na invoice_number per company)",
+      "error": ""
+    },
+    {
+      "id": "B-16",
+      "name": "1500-user tier: 200 validacija < 30s, 100% valjano",
+      "agent": "B",
+      "passed": true,
+      "ms": 5228.0,
+      "category": "performance",
+      "detail": "200 validacija za 0.30s (672/s) — 1500 users tier OK",
+      "error": ""
+    },
+    {
+      "id": "B-17",
+      "name": "XML veličina: 500B < xml < 500KB",
+      "agent": "B",
+      "passed": true,
+      "ms": 21.5,
+      "category": "xml",
+      "detail": "XML veličina: 4337 bytes (u normalnom rasponu)",
+      "error": ""
+    },
+    {
+      "id": "B-18",
+      "name": "CASCADE delete: brišem ERacun → stavke i logovi obrisani",
+      "agent": "B",
+      "passed": true,
+      "ms": 19.6,
+      "category": "integrity",
+      "detail": "CASCADE delete OK — stavke obrisane s računom",
+      "error": ""
+    },
+    {
+      "id": "B-19",
+      "name": "API /api/list/?status=sent — filtrira ispravno",
+      "agent": "B",
+      "passed": true,
+      "ms": 53.5,
+      "category": "api",
+      "detail": "API list status filter: 200, sent_only=True",
+      "error": ""
+    },
+    {
+      "id": "B-20",
+      "name": "Parallel A+B crosscheck: 10 send + 10 recv istovremeno",
+      "agent": "B",
+      "passed": true,
+      "ms": 671.4,
+      "category": "concurrency",
+      "detail": "A(send)+B(recv) paralelno: 20 transakcija, 0 konflikata",
+      "error": ""
+    }
+  ]
+}

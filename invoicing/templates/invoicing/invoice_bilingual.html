@@ -1,0 +1,286 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { margin: 12mm 10mm 18mm 10mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 9pt; color: #1a1a1a; }
+
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16pt; border-bottom:2pt solid #0f172a; padding-bottom:12pt; }
+  .logo-area h1 { font-size:16pt; font-weight:700; color:#0f172a; letter-spacing:1px; }
+  .logo-area .subtitle { font-size:7pt; color:#64748b; letter-spacing:1.5px; text-transform:uppercase; margin-top:2pt; }
+  .issuer-info { text-align:right; font-size:8pt; color:#475569; line-height:1.5; }
+  .issuer-info strong { color:#0f172a; font-size:8.5pt; }
+
+  .bi-cols { display:flex; gap:8pt; }
+  .bi-left { flex:1; }
+  .bi-right { flex:1; }
+  .bi-sep { width:1pt; background:#e2e8f0; margin:0 4pt; }
+
+  .invoice-meta { display:flex; justify-content:space-between; margin-bottom:14pt; }
+  .invoice-title h2 { font-size:14pt; font-weight:700; color:#0f172a; }
+  .invoice-title .number { font-size:10pt; color:#c9a84c; font-weight:600; margin-top:3pt; }
+
+  .dates-box { text-align:right; }
+  .date-row { display:flex; gap:8pt; justify-content:flex-end; margin-bottom:3pt; }
+  .date-label { font-size:7.5pt; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; }
+  .date-val { font-size:8pt; font-weight:600; color:#0f172a; width:60pt; text-align:right; }
+
+  .parties { display:flex; gap:12pt; margin-bottom:14pt; }
+  .party-box { flex:1; background:#f8fafc; padding:10pt; border-left:2.5pt solid #c9a84c; }
+  .party-box.issuer { border-left-color:#0f172a; }
+  .party-label { font-size:6.5pt; text-transform:uppercase; letter-spacing:0.8px; color:#64748b; margin-bottom:4pt; }
+  .party-name { font-size:9.5pt; font-weight:700; color:#0f172a; margin-bottom:3pt; }
+  .party-detail { font-size:8pt; color:#475569; line-height:1.5; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:12pt; }
+  thead tr { background:#0f172a; color:white; }
+  thead th { padding:5pt 6pt; font-size:7pt; text-transform:uppercase; letter-spacing:0.4px; text-align:left; }
+  thead th:last-child, thead th:nth-child(3), thead th:nth-child(4) { text-align:right; }
+  tbody tr { border-bottom:0.5pt solid #e2e8f0; }
+  tbody tr:nth-child(even) { background:#f8fafc; }
+  tbody td { padding:5pt 6pt; font-size:8pt; color:#374151; }
+  tbody td:last-child, tbody td:nth-child(3), tbody td:nth-child(4) { text-align:right; }
+
+  .totals { display:flex; justify-content:flex-end; margin-bottom:14pt; }
+  .totals-table { width:180pt; }
+  .totals-table tr td { padding:3pt 5pt; font-size:8.5pt; }
+  .totals-table tr td:last-child { text-align:right; font-weight:600; }
+  .totals-table .total-row td { background:#0f172a; color:white; font-size:10pt; font-weight:700; padding:5pt 5pt; }
+
+  .payment-section { display:flex; gap:12pt; margin-bottom:14pt; }
+  .payment-box { flex:1; background:#f8fafc; padding:8pt; border:0.5pt solid #e2e8f0; }
+  .payment-box h4 { font-size:7pt; text-transform:uppercase; letter-spacing:0.8px; color:#64748b; margin-bottom:6pt; }
+  .payment-row { display:flex; justify-content:space-between; margin-bottom:2pt; }
+  .payment-label { font-size:7.5pt; color:#64748b; }
+  .payment-val { font-size:8pt; font-weight:600; color:#0f172a; }
+
+  .fiscal-box { background:#f0fdf4; border:0.5pt solid #86efac; padding:6pt 10pt; margin-bottom:12pt; }
+  .fiscal-box h4 { font-size:7pt; text-transform:uppercase; letter-spacing:0.8px; color:#16a34a; margin-bottom:3pt; }
+  .fiscal-codes { display:flex; gap:12pt; }
+  .fiscal-code { font-size:7.5pt; }
+  .fiscal-code span { font-weight:600; color:#0f172a; font-family:monospace; }
+
+  .qr-section { display:flex; justify-content:flex-end; margin-bottom:12pt; }
+  .qr-box { text-align:center; }
+  .qr-box p { font-size:6.5pt; color:#64748b; margin-top:3pt; }
+
+  .note-box { background:#fffbeb; border-left:2.5pt solid #f59e0b; padding:6pt 10pt; margin-bottom:12pt; font-size:8pt; color:#374151; }
+  .legal-box { font-size:7pt; color:#64748b; line-height:1.5; margin-bottom:12pt; }
+
+  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:7pt; color:#94a3b8; border-top:0.5pt solid #e2e8f0; padding:5pt 10mm; background:white; }
+  .footer strong { color:#0f172a; }
+
+  .lang-tag { display:inline-block; font-size:6pt; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:1pt 5pt; border-radius:3pt; margin-bottom:3pt; }
+  .lang-tag.primary { background:#0f172a; color:white; }
+  .lang-tag.secondary { background:#e2e8f0; color:#475569; }
+</style>
+</head>
+<body>
+
+{# ═══ HEADER ═══ #}
+<div class="header">
+  <div class="logo-area">
+    {% if invoice.profile and invoice.profile.logo %}
+    <img src="{{ invoice.profile.logo.url }}" style="height:40pt;width:auto;object-fit:contain;margin-bottom:3pt"><br>
+    {% endif %}
+    <h1>{{ invoice.issuer_name|default:invoice.company.name }}</h1>
+    <div class="subtitle">{{ labels.primary.subtitle }} · {{ invoice.get_country_display }}</div>
+  </div>
+  <div class="issuer-info">
+    <strong>{{ invoice.issuer_name }}</strong><br>
+    {{ invoice.issuer_address }}<br>
+    {{ labels.primary.tax_id_label }}: {{ invoice.issuer_oib }}<br>
+    IBAN: {{ invoice.issuer_iban }}<br>
+    {{ invoice.issuer_email }}
+  </div>
+</div>
+
+{# ═══ BILINGUAL INVOICE TITLE ═══ #}
+<div class="invoice-meta">
+  <div class="invoice-title">
+    <div class="bi-cols">
+      <div class="bi-left">
+        <span class="lang-tag primary">{{ primary_lang|upper }}</span>
+        <h2>{{ labels.primary.doc_title }}</h2>
+      </div>
+      <div class="bi-right">
+        <span class="lang-tag secondary">{{ secondary_lang|upper }}</span>
+        <h2 style="color:#64748b">{{ labels.secondary.doc_title }}</h2>
+      </div>
+    </div>
+    <div class="number">{{ labels.primary.number_label }}: {{ invoice.number }}</div>
+  </div>
+  <div class="dates-box">
+    <div class="date-row">
+      <div class="date-label">{{ labels.primary.date_issued }} / {{ labels.secondary.date_issued }}</div>
+      <div class="date-val">{{ invoice.date_issued|date:"d.m.Y" }}</div>
+    </div>
+    {% if invoice.date_due %}
+    <div class="date-row">
+      <div class="date-label">{{ labels.primary.date_due }} / {{ labels.secondary.date_due }}</div>
+      <div class="date-val">{{ invoice.date_due|date:"d.m.Y" }}</div>
+    </div>
+    {% endif %}
+    {% if invoice.date_delivery %}
+    <div class="date-row">
+      <div class="date-label">{{ labels.primary.date_delivery }} / {{ labels.secondary.date_delivery }}</div>
+      <div class="date-val">{{ invoice.date_delivery|date:"d.m.Y" }}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ═══ PARTIES (bilingual labels) ═══ #}
+<div class="parties">
+  <div class="party-box issuer">
+    <div class="party-label">{{ labels.primary.issuer_label }} / {{ labels.secondary.issuer_label }}</div>
+    <div class="party-name">{{ invoice.issuer_name }}</div>
+    <div class="party-detail">
+      {{ invoice.issuer_address }}<br>
+      {{ labels.primary.tax_id_label }}: {{ invoice.issuer_oib }}<br>
+      IBAN: {{ invoice.issuer_iban }}<br>
+      {% if invoice.issuer_phone %}Tel: {{ invoice.issuer_phone }}{% endif %}
+    </div>
+  </div>
+  <div class="party-box">
+    <div class="party-label">{{ labels.primary.client_label }} / {{ labels.secondary.client_label }}</div>
+    <div class="party-name">{{ invoice.client_name }}</div>
+    <div class="party-detail">
+      {{ invoice.client_address }}<br>
+      {% if invoice.client_city %}{{ invoice.client_city }}<br>{% endif %}
+      {% if invoice.client_oib %}{{ labels.primary.tax_id_label }}: {{ invoice.client_oib }}{% endif %}
+    </div>
+  </div>
+</div>
+
+{# ═══ ITEMS TABLE (bilingual headers) ═══ #}
+<table>
+  <thead>
+    <tr>
+      <th style="width:4%">#</th>
+      <th style="width:38%">{{ labels.primary.description }} / {{ labels.secondary.description }}</th>
+      <th style="width:8%">{{ labels.primary.qty }} / {{ labels.secondary.qty }}</th>
+      <th style="width:7%">{{ labels.primary.unit }}</th>
+      <th style="width:14%">{{ labels.primary.unit_price }} / {{ labels.secondary.unit_price }}</th>
+      <th style="width:7%">{{ labels.primary.discount }}</th>
+      <th style="width:12%">{{ labels.primary.amount }} / {{ labels.secondary.amount }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in invoice.items.all %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ item.description }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>{{ item.unit }}</td>
+      <td>{{ item.unit_price|floatformat:2 }} {{ invoice.currency }}</td>
+      <td>{% if item.discount_percent %}{{ item.discount_percent }}%{% else %}–{% endif %}</td>
+      <td>{{ item.total_price|floatformat:2 }} {{ invoice.currency }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{# ═══ TAX RECAP (bilingual) ═══ #}
+{% if tax_groups %}
+<div style="margin-bottom:12pt">
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="background:#f1f5f9">
+        <th style="padding:4pt 6pt;font-size:7pt;text-align:left;text-transform:uppercase;letter-spacing:0.4px;color:#64748b;border:0.5pt solid #e2e8f0">{{ labels.primary.tax_rate }} / {{ labels.secondary.tax_rate }}</th>
+        <th style="padding:4pt 6pt;font-size:7pt;text-align:right;text-transform:uppercase;letter-spacing:0.4px;color:#64748b;border:0.5pt solid #e2e8f0">{{ labels.primary.tax_base }} / {{ labels.secondary.tax_base }}</th>
+        <th style="padding:4pt 6pt;font-size:7pt;text-align:right;text-transform:uppercase;letter-spacing:0.4px;color:#64748b;border:0.5pt solid #e2e8f0">{{ labels.primary.tax_amount }} / {{ labels.secondary.tax_amount }}</th>
+        <th style="padding:4pt 6pt;font-size:7pt;text-align:right;text-transform:uppercase;letter-spacing:0.4px;color:#64748b;border:0.5pt solid #e2e8f0">{{ labels.primary.total }} / {{ labels.secondary.total }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in tax_groups %}
+      {% if group.base > 0 %}
+      <tr>
+        <td style="padding:4pt 6pt;font-size:8pt;border:0.5pt solid #e2e8f0">{{ group.rate }}% – {{ group.name }}</td>
+        <td style="padding:4pt 6pt;font-size:8pt;text-align:right;border:0.5pt solid #e2e8f0">{{ group.base|floatformat:2 }} {{ invoice.currency }}</td>
+        <td style="padding:4pt 6pt;font-size:8pt;text-align:right;border:0.5pt solid #e2e8f0">{{ group.tax|floatformat:2 }} {{ invoice.currency }}</td>
+        <td style="padding:4pt 6pt;font-size:8pt;text-align:right;font-weight:600;border:0.5pt solid #e2e8f0">{{ group.total|floatformat:2 }} {{ invoice.currency }}</td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{# ═══ TOTALS (bilingual) ═══ #}
+<div class="totals">
+  <table class="totals-table">
+    <tr><td>{{ labels.primary.subtotal }}:</td><td>{{ invoice.subtotal|floatformat:2 }} {{ invoice.currency }}</td></tr>
+    <tr><td>{{ labels.primary.tax_label }} {{ invoice.tax_percent }}%:</td><td>{{ invoice.tax_amount|floatformat:2 }} {{ invoice.currency }}</td></tr>
+    <tr class="total-row">
+      <td>{{ labels.primary.grand_total }}:<br><span style="font-size:7pt;font-weight:400;opacity:.7">{{ labels.secondary.grand_total }}</span></td>
+      <td>{{ invoice.total|floatformat:2 }} {{ invoice.currency }}</td>
+    </tr>
+  </table>
+</div>
+
+{# ═══ OPERATOR / LOCATION ═══ #}
+<div style="display:flex;gap:14pt;margin-bottom:12pt;font-size:8pt;color:#475569">
+  <div style="flex:1">
+    {% if invoice.business_location %}
+    <strong style="color:#0f172a">{{ labels.primary.business_location }} / {{ labels.secondary.business_location }}:</strong>
+    {{ invoice.business_location.name }} ({{ invoice.business_location.location_code }})<br>
+    {{ invoice.business_location.address }}, {{ invoice.business_location.city }}
+    {% endif %}
+  </div>
+  <div style="flex:1;text-align:right">
+    {% if invoice.operator %}
+    <strong style="color:#0f172a">{{ labels.primary.operator }} / {{ labels.secondary.operator }}:</strong>
+    {{ invoice.operator.name }}<br>
+    OIB: {{ invoice.operator.oib }}
+    {% endif %}
+  </div>
+</div>
+
+{# ═══ PAYMENT (bilingual) ═══ #}
+<div class="payment-section">
+  <div class="payment-box">
+    <h4>{{ labels.primary.payment_title }} / {{ labels.secondary.payment_title }}</h4>
+    <div class="payment-row"><span class="payment-label">{{ labels.primary.payment_method }} / {{ labels.secondary.payment_method }}:</span><span class="payment-val">{{ invoice.get_payment_method_display }}</span></div>
+    <div class="payment-row"><span class="payment-label">IBAN:</span><span class="payment-val">{{ invoice.issuer_iban }}</span></div>
+    {% if invoice.reference_number %}<div class="payment-row"><span class="payment-label">{{ labels.primary.reference }} / {{ labels.secondary.reference }}:</span><span class="payment-val">{{ invoice.reference_number }}</span></div>{% endif %}
+    <div class="payment-row"><span class="payment-label">{{ labels.primary.due_date }} / {{ labels.secondary.due_date }}:</span><span class="payment-val">{{ invoice.date_due|date:"d.m.Y"|default:"-" }}</span></div>
+  </div>
+  {% if invoice.qr_code_base64 %}
+  <div class="qr-box">
+    <img src="data:image/png;base64,{{ invoice.qr_code_base64 }}" style="width:70pt;height:70pt">
+    <p>{{ labels.primary.scan_to_pay }} / {{ labels.secondary.scan_to_pay }}</p>
+  </div>
+  {% endif %}
+</div>
+
+{# ═══ FISCAL ═══ #}
+{% if invoice.is_fiscalized %}
+<div class="fiscal-box">
+  <h4>✓ {{ labels.primary.fiscalized }} / {{ labels.secondary.fiscalized }}</h4>
+  <div class="fiscal-codes">
+    <div class="fiscal-code">ZKI: <span>{{ invoice.zki }}</span></div>
+    <div class="fiscal-code">JIR: <span>{{ invoice.jir }}</span></div>
+    <div class="fiscal-code">{{ labels.primary.date_label }}: <span>{{ invoice.fiscal_datetime|date:"d.m.Y H:i" }}</span></div>
+  </div>
+</div>
+{% endif %}
+
+{# ═══ NOTE ═══ #}
+{% if invoice.note %}
+<div class="note-box">{{ invoice.note }}</div>
+{% endif %}
+
+{# ═══ FOOTER ═══ #}
+<div class="footer">
+  <strong>{{ invoice.issuer_name }}</strong> · {{ labels.primary.tax_id_label }}: {{ invoice.issuer_oib }} · IBAN: {{ invoice.issuer_iban }} · {{ invoice.issuer_email }}
+  <br>{{ labels.primary.generated }}: {{ now|date:"d.m.Y H:i" }} · UUID: {{ invoice.uuid }}
+</div>
+
+</body>
+</html>

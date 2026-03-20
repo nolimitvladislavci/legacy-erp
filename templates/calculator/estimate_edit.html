@@ -1,0 +1,111 @@
+{% extends "worktime/base_worktime.html" %}
+{% load i18n l10n %}
+{% block title %}Ponuda {{ estimate.number }}{% endblock %}
+{% block page_title %}
+<div class="flex items-center justify-between">
+    <h1 class="text-xl font-bold">📝 {{ estimate.number }}</h1>
+    <div class="flex gap-2">
+        <a href="{% url 'estimate_pdf' estimate.pk %}" class="px-3 py-1.5 bg-slate-100 rounded-lg text-sm">{% trans "📄 PDF" %}</a>
+        <a href="{% url 'estimate_duplicate' estimate.pk %}" class="px-3 py-1.5 bg-slate-100 rounded-lg text-sm">{% trans "📋 Kopiraj" %}</a>
+        <span class="px-3 py-1.5 rounded-lg text-sm font-bold {% if estimate.status == 'ACCEPTED' %}bg-green-100 text-green-700{% elif estimate.status == 'DRAFT' %}bg-slate-100{% else %}bg-blue-100 text-blue-700{% endif %}">{{ estimate.get_status_display }}</span>
+    </div>
+</div>
+{% endblock %}
+{% block worktime_content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div class="px-6 py-4 border-b"><h3 class="font-bold">{% trans "👷 Stavke" %}</h3></div>
+            <table class="w-full">
+                <thead class="bg-slate-50"><tr>
+                    <th class="px-4 py-2 text-left text-xs">{% trans "Opis" %}</th>
+                    <th class="px-4 py-2 text-center text-xs">{% trans "Radnika" %}</th>
+                    <th class="px-4 py-2 text-center text-xs">{% trans "Dana" %}</th>
+                    <th class="px-4 py-2 text-center text-xs">{% trans "h/dan" %}</th>
+                    <th class="px-4 py-2 text-center text-xs">{% trans "€/h" %}</th>
+                    <th class="px-4 py-2 text-right text-xs">{% trans "Iznos" %}</th>
+                    <th class="px-4 py-2 w-10"></th>
+                </tr></thead>
+                <tbody class="divide-y">
+                    {% for item in line_items %}
+                    <tr>
+                        <td class="px-4 py-2 text-sm">{{ item.description }}</td>
+                        <td class="px-4 py-2 text-center text-sm">{{ item.worker_count }}</td>
+                        <td class="px-4 py-2 text-center text-sm">{{ item.days }}</td>
+                        <td class="px-4 py-2 text-center text-sm">{{ item.hours_per_day }}</td>
+                        <td class="px-4 py-2 text-center text-sm">€{{ item.cost_per_hour }}</td>
+                        <td class="px-4 py-2 text-right text-sm font-bold">€{{ item.total_cost|floatformat:0 }}</td>
+                        <td class="px-4 py-2"><form method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="remove_item"><input type="hidden" name="item_id" value="{{ item.pk }}"><button class="text-red-400 hover:text-red-600 text-xs">✕</button></form></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="px-4 py-4 text-center text-slate-400 text-sm">{% trans "Dodajte stavke ispod" %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <form method="post" class="px-4 py-3 bg-slate-50 border-t">{% csrf_token %}
+                <input type="hidden" name="action" value="add_item">
+                <div class="grid grid-cols-5 gap-2 items-end">
+                    <select name="category_id" class="px-2 py-1.5 border rounded-lg text-sm">
+                        {% for c in categories %}<option value="{{ c.pk }}">{{ c.name }} (€{{ c.cost_per_hour }}/h)</option>{% endfor %}
+                    </select>
+                    <input type="number" name="item_workers" value="1" min="1" class="px-2 py-1.5 border rounded-lg text-sm" placeholder="{% trans "Radnika" %}">
+                    <input type="number" name="item_days" value="{{ estimate.duration_days|unlocalize }}" class="px-2 py-1.5 border rounded-lg text-sm" placeholder="Dana">
+                    <input type="number" name="item_overtime" value="0" class="px-2 py-1.5 border rounded-lg text-sm" placeholder="{% trans "OT sati" %}">
+                    <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-semibold">{% trans "+ Dodaj" %}</button>
+                </div>
+            </form>
+        </div>
+        <form method="post" class="bg-white rounded-xl shadow-sm border p-6 space-y-4">{% csrf_token %}
+            <input type="hidden" name="action" value="save">
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs font-medium mb-1">{% trans "Klijent" %}</label><input type="text" name="client_name" value="{{ estimate.client_name }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "Tvrtka" %}</label><input type="text" name="client_company" value="{{ estimate.client_company }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "Projekt" %}</label><input type="text" name="project_name" value="{{ estimate.project_name }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "Lokacija" %}</label><input type="text" name="project_location" value="{{ estimate.project_location }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+            </div>
+            <div class="grid grid-cols-4 gap-4">
+                <div><label class="block text-xs font-medium mb-1">{% trans "Dana" %}</label><input type="number" name="duration_days" value="{{ estimate.duration_days|unlocalize }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "Marža %" %}</label><input type="number" name="margin_pct" value="{{ estimate.margin_pct|unlocalize }}" step="0.1" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "Režija %" %}</label><input type="number" name="overhead_pct" value="{{ estimate.overhead_pct|unlocalize }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "PDV %" %}</label><input type="number" name="tax_rate" value="{{ estimate.tax_rate|unlocalize }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div><label class="block text-xs font-medium mb-1">{% trans "Materijal €" %}</label><input type="number" name="material_cost" value="{{ estimate.material_cost|unlocalize }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "Oprema €" %}</label><input type="number" name="equipment_cost" value="{{ estimate.equipment_cost|unlocalize }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-medium mb-1">{% trans "Popust %" %}</label><input type="number" name="discount_pct" value="{{ estimate.discount_pct|unlocalize }}" class="w-full px-3 py-2 border rounded-lg text-sm"></div>
+            </div>
+            <div><label class="block text-xs font-medium mb-1">{% trans "Napomene" %}</label><textarea name="notes" rows="2" class="w-full px-3 py-2 border rounded-lg text-sm">{{ estimate.notes }}</textarea></div>
+            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold text-sm">{% trans "💾 Spremi i preračunaj" %}</button>
+        </form>
+    </div>
+    <div class="space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border p-6 space-y-3">
+            <h3 class="font-bold text-lg mb-4">{% trans "📊 Pregled" %}</h3>
+            <div class="flex justify-between text-sm"><span>{% trans "Rad" %}</span><span class="font-medium">€{{ estimate.labor_cost|floatformat:0 }}</span></div>
+            {% if estimate.material_cost %}<div class="flex justify-between text-sm"><span>{% trans "Materijal" %}</span><span>€{{ estimate.material_cost|floatformat:0 }}</span></div>{% endif %}
+            {% if estimate.equipment_cost %}<div class="flex justify-between text-sm"><span>{% trans "Oprema" %}</span><span>€{{ estimate.equipment_cost|floatformat:0 }}</span></div>{% endif %}
+            <div class="flex justify-between text-sm"><span>{% trans "Režija" %}</span><span>€{{ estimate.overhead_amount|floatformat:0 }}</span></div>
+            <div class="flex justify-between text-sm"><span>{% trans "Rizik" %}</span><span>€{{ estimate.risk_amount|floatformat:0 }}</span></div>
+            <div class="flex justify-between text-sm font-bold border-t pt-2"><span>{% trans "Subtotal" %}</span><span>€{{ estimate.subtotal|floatformat:0 }}</span></div>
+            <div class="flex justify-between text-sm"><span>Marža ({{ estimate.margin_pct }}%)</span><span>€{{ estimate.margin_amount|floatformat:0 }}</span></div>
+            {% if estimate.discount_amount %}<div class="flex justify-between text-sm text-red-600"><span>{% trans "Popust" %}</span><span>-€{{ estimate.discount_amount|floatformat:0 }}</span></div>{% endif %}
+            <div class="flex justify-between text-sm font-bold border-t pt-2"><span>{% trans "Neto" %}</span><span>€{{ estimate.net_total|floatformat:2 }}</span></div>
+            <div class="flex justify-between text-sm"><span>PDV ({{ estimate.tax_rate }}%)</span><span>€{{ estimate.tax_amount|floatformat:2 }}</span></div>
+            <div class="flex justify-between text-xl font-bold text-blue-600 border-t pt-3"><span>{% trans "UKUPNO" %}</span><span>€{{ estimate.gross_total|floatformat:2 }}</span></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border p-4 space-y-2">
+            <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status">
+                <select name="new_status" onchange="this.form.submit()" class="w-full px-3 py-2 border rounded-lg text-sm">
+                    <option value="DRAFT" {% if estimate.status == 'DRAFT' %}selected{% endif %}>{% trans "📝 Skica" %}</option>
+                    <option value="SENT" {% if estimate.status == 'SENT' %}selected{% endif %}>{% trans "📤 Poslano" %}</option>
+                    <option value="ACCEPTED" {% if estimate.status == 'ACCEPTED' %}selected{% endif %}>{% trans "✅ Prihvaćeno" %}</option>
+                    <option value="REJECTED" {% if estimate.status == 'REJECTED' %}selected{% endif %}>{% trans "❌ Odbijeno" %}</option>
+                </select>
+            </form>
+            <form method="post">{% csrf_token %}<input type="hidden" name="action" value="generate_invoice">
+                <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold" onclick="return confirm('Generirati fakturu?')">{% trans "📄 Generiraj fakturu" %}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+# Plan definitions and module access control
+
+PLAN_PRICES = {
+    'starter': '29.00',
+    'business': '59.00',
+    'enterprise': '99.00',
+}
+
+PLAN_FEATURES = {
+    'starter': {
+        'name': 'Starter',
+        'price': 29,
+        'currency': '€',
+        'period': 'mo',
+        'modules': ['invoicing', 'partners', 'documents'],
+        'features': [
+            'Invoicing & billing',
+            'Partner/client management',
+            'Document management',
+            'Up to 3 users',
+            'Email support',
+        ],
+        'highlight': False,
+    },
+    'business': {
+        'name': 'Business',
+        'price': 59,
+        'currency': '€',
+        'period': 'mo',
+        'modules': ['invoicing', 'partners', 'documents', 'worktime', 'projects', 'calculator', 'appointments', 'pos'],
+        'features': [
+            'Everything in Starter',
+            'Work time tracking',
+            'Project management',
+            'Price calculator',
+            'Appointment scheduling',
+            'Point of Sale (POS)',
+            'Up to 15 users',
+            'Priority email support',
+        ],
+        'highlight': True,
+    },
+    'enterprise': {
+        'name': 'Enterprise',
+        'price': 99,
+        'currency': '€',
+        'period': 'mo',
+        'modules': ['invoicing', 'partners', 'documents', 'worktime', 'projects', 'calculator', 'appointments', 'pos', 'finance', 'inventory', 'insurance', 'webshop', 'rental', 'fitness', 'interventions', 'tracking', 'assessment', 'outreach', 'ai_assistant', 'reports', 'konto'],
+        'features': [
+            'Everything in Business',
+            'Finance & accounting',
+            'Inventory management',
+            'Insurance policies',
+            'Webshop',
+            'Rental management',
+            'Fitness center module',
+            'Multi-location support',
+            'API access',
+            'Unlimited users',
+            'Priority phone & email support',
+            'Dedicated account manager',
+        ],
+        'highlight': False,
+    },
+}
+
+PLAN_MODULES = {
+    plan: set(data['modules'])
+    for plan, data in PLAN_FEATURES.items()
+}
+
+# Map URL prefixes to module names
+MODULE_URL_MAP = {
+    '/invoicing/': 'invoicing',
+    '/partners/': 'partners',
+    '/documents/': 'documents',
+    '/worktime/': 'worktime',
+    '/projects/': 'projects',
+    '/calculator/': 'calculator',
+    '/appointments/': 'appointments',
+    '/pos/': 'pos',
+    '/finance/': 'finance',
+    '/inventory/': 'inventory',
+    '/insurance/': 'insurance',
+    '/webshop/': 'webshop',
+    '/rental/': 'rental',
+    '/fitness/': 'fitness',
+    '/interventions/': 'interventions',
+    '/tracking/': 'tracking',
+    '/assessment/': 'assessment',
+    '/outreach/': 'outreach',
+    '/ai/': 'ai_assistant',
+    '/reports/': 'reports',
+    '/konto/': 'konto',
+}

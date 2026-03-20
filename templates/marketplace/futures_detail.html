@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ listing.name }} — Futures{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'marketplace:futures_catalog' %}">Futures</a></li>
+        <li class="breadcrumb-item active">{{ listing.name }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+<div class="col-md-8">
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <span class="badge bg-success">{{ listing.category }}</span>
+                    {% if listing.is_organic %}<span class="badge bg-info">BIO</span>{% endif %}
+                    {% if listing.requires_cold_chain %}<span class="badge bg-primary"><i class="fas fa-snowflake"></i> Hladni lanac</span>{% endif %}
+                </div>
+                <span class="badge bg-secondary">{{ listing.get_status_display }}</span>
+            </div>
+            <h3 class="mt-2">{{ listing.name }}</h3>
+            <p class="text-muted"><i class="fas fa-store"></i> {{ listing.seller_company.name }} &bull; <i class="fas fa-map-marker-alt"></i> {{ listing.origin_region }}</p>
+            {% if listing.description %}<p>{{ listing.description }}</p>{% endif %}
+
+            <hr>
+            <div class="row text-center">
+                <div class="col-3">
+                    <div class="fs-4 fw-bold text-success">{{ listing.unit_price }} EUR</div>
+                    <small class="text-muted">po {{ listing.unit }}</small>
+                </div>
+                <div class="col-3">
+                    <div class="fs-4 fw-bold">{{ listing.total_capacity }}</div>
+                    <small class="text-muted">{{ listing.unit }} kapacitet</small>
+                </div>
+                <div class="col-3">
+                    <div class="fs-4 fw-bold text-warning">{{ listing.percent_reserved }}%</div>
+                    <small class="text-muted">rezervirano</small>
+                </div>
+                <div class="col-3">
+                    <div class="fs-4 fw-bold text-primary">{{ listing.deposit_percent }}%</div>
+                    <small class="text-muted">avans</small>
+                </div>
+            </div>
+            <div class="progress mt-2" style="height:12px">
+                <div class="progress-bar bg-success" style="width:{{ listing.percent_reserved }}%"></div>
+            </div>
+
+            <hr>
+            <div class="row">
+                <div class="col-4"><strong>Dostupno od:</strong><br>{{ listing.available_from|date:"d.m.Y" }}</div>
+                <div class="col-4"><strong>Dostupno do:</strong><br>{{ listing.available_until|date:"d.m.Y" }}</div>
+                <div class="col-4"><strong>Rok za rezervaciju:</strong><br><span class="text-danger fw-bold">{{ listing.booking_deadline|date:"d.m.Y" }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    {% if discount_info and discount_info.total_percent > 0 %}
+    <div class="alert alert-success">
+        <i class="fas fa-tag"></i> Vas partnerski rabat: <strong>-{{ discount_info.total_percent }}%</strong>
+        ({{ discount_info.tier }}) &rarr; Vasa cijena: <strong>{{ discount_info.discounted_price }} EUR/{{ listing.unit }}</strong>
+        <del class="text-muted">{{ listing.unit_price }} EUR</del>
+    </div>
+    {% endif %}
+
+    {% if reservations %}
+    <div class="card">
+        <div class="card-header"><i class="fas fa-users"></i> Rezervacije ({{ listing.reservations.count }})</div>
+        <div class="card-body p-0">
+            <table class="table table-sm mb-0">
+                <thead><tr><th>Kupac</th><th>Kolicina</th><th>Avans</th><th>Status</th></tr></thead>
+                <tbody>
+                {% for r in reservations %}
+                <tr>
+                    <td>{{ r.buyer_company.name }}</td>
+                    <td>{{ r.quantity }} {{ listing.unit }}</td>
+                    <td>{{ r.deposit_amount|floatformat:2 }} EUR {% if r.deposit_paid %}<span class="badge bg-success">Placen</span>{% endif %}</td>
+                    <td><span class="badge bg-info">{{ r.get_status_display }}</span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="col-md-4">
+    {% if my_reservation %}
+    <div class="card border-success">
+        <div class="card-header bg-success text-white"><i class="fas fa-check-circle"></i> Vasa rezervacija</div>
+        <div class="card-body">
+            <p><strong>Kolicina:</strong> {{ my_reservation.quantity }} {{ listing.unit }}</p>
+            <p><strong>Cijena:</strong> {{ my_reservation.unit_price }} EUR/{{ listing.unit }}</p>
+            {% if my_reservation.discount_percent > 0 %}<p><strong>Rabat:</strong> -{{ my_reservation.discount_percent }}%</p>{% endif %}
+            <p><strong>Ukupno:</strong> {{ my_reservation.total_price|floatformat:2 }} EUR</p>
+            <p><strong>Avans:</strong> {{ my_reservation.deposit_amount|floatformat:2 }} EUR
+                {% if my_reservation.deposit_paid %}<span class="badge bg-success">Placen</span>{% else %}<span class="badge bg-warning">Nije placen</span>{% endif %}
+            </p>
+            <p><strong>Dostava:</strong> {{ my_reservation.get_delivery_preference_display }}</p>
+            <p><strong>Status:</strong> <span class="badge bg-info">{{ my_reservation.get_status_display }}</span></p>
+            {% if my_reservation.recurring_weekly %}<p><span class="badge bg-primary">Tjedna isporuka</span> ({{ my_reservation.delivery_slots.count }} slotova)</p>{% endif %}
+        </div>
+    </div>
+    {% elif listing.is_bookable %}
+    <div class="card border-success">
+        <div class="card-header bg-success text-white"><i class="fas fa-hand-holding-seedling"></i> Rezerviraj</div>
+        <div class="card-body">
+            <form method="post" action="{% url 'marketplace:futures_reserve' listing.pk %}">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <label class="form-label">Kolicina ({{ listing.unit }})</label>
+                    <input type="number" name="quantity" class="form-control" min="{{ listing.min_order_qty }}" max="{{ listing.available_qty }}" step="0.01" required>
+                    <small class="text-muted">Min: {{ listing.min_order_qty }}, dostupno: {{ listing.available_qty }} {{ listing.unit }}</small>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Nacin dostave</label>
+                    <select name="delivery_preference" class="form-select">
+                        <option value="delivery">Dostava</option>
+                        <option value="pickup">Osobno preuzimanje</option>
+                        <option value="bus">Bus linija</option>
+                        <option value="courier">Kurir</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Adresa dostave</label>
+                    <input type="text" name="delivery_address" class="form-control">
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="recurring_weekly" id="recurring">
+                    <label class="form-check-label" for="recurring">Podijeli na tjedne isporuke</label>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Napomena</label>
+                    <textarea name="notes" class="form-control" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success w-100"><i class="fas fa-check"></i> Potvrdi rezervaciju</button>
+                <small class="text-muted d-block mt-1">Avans ({{ listing.deposit_percent }}%) se obracunava pri potvrdi.</small>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center text-muted">
+            <i class="fas fa-lock fa-2x mb-2"></i>
+            <p>Rezervacija nije moguca — rok istekao ili popunjeno.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

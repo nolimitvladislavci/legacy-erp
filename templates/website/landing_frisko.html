@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UVIJEK FRIŠKO — Pekara Čepin</title>
+<meta name="description" content="Pekara i slastičarna u Čepinu. Svježi kruh, peciva, kolači. Naručite online, pokupite bez čekanja.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e8e8e8}
+a{color:#d4a017;text-decoration:none}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2rem;
+  background:linear-gradient(180deg,rgba(10,10,10,.85) 0%,rgba(26,21,16,.9) 50%,rgba(10,10,10,.95) 100%),url(/static/img/frisko/cover.webp) center/cover no-repeat;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-20%;right:-20%;width:60vw;height:60vw;border-radius:50%;background:radial-gradient(circle,rgba(212,160,23,.06),transparent 70%)}
+.hero .badge{background:rgba(212,160,23,.15);border:1px solid rgba(212,160,23,.3);padding:.4rem 1.2rem;border-radius:20px;font-size:.75rem;color:#d4a017;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
+.hero h1{font-size:clamp(2.5rem,8vw,5rem);font-weight:900;line-height:1;margin-bottom:.5rem}
+.hero h1 span{color:#d4a017}
+.hero .tagline{font-size:1.1rem;color:#888;margin-bottom:2rem}
+.hero .cta-row{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+.btn-gold{background:#d4a017;color:#0a0a0a;font-weight:700;padding:.75rem 1.5rem;border-radius:10px;font-size:.95rem;display:inline-flex;align-items:center;gap:.5rem;transition:opacity .2s}
+.btn-gold:hover{opacity:.85;color:#0a0a0a}
+.btn-ghost{background:transparent;border:1px solid #333;color:#ccc;padding:.75rem 1.5rem;border-radius:10px;font-size:.95rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s}
+.btn-ghost:hover{border-color:#d4a017;color:#d4a017}
+
+/* Sections */
+section{padding:4rem 1.5rem;max-width:960px;margin:0 auto}
+.section-title{font-size:1.8rem;font-weight:800;margin-bottom:.5rem}
+.section-title i{color:#d4a017;margin-right:.5rem}
+.section-sub{color:#888;font-size:.95rem;margin-bottom:2rem}
+
+/* QR Cards */
+.qr-section{background:#111;padding:4rem 1.5rem}
+.qr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;max-width:700px;margin:0 auto}
+.qr-card{background:#1a1a1a;border:1px solid #252525;border-radius:16px;padding:2rem;text-align:center;transition:border-color .2s}
+.qr-card:hover{border-color:#d4a017}
+.qr-card .icon{font-size:2.5rem;margin-bottom:1rem}
+.qr-card h3{color:#d4a017;font-size:1.1rem;margin-bottom:.5rem}
+.qr-card img{width:160px;height:160px;margin:1rem auto;display:block;border-radius:8px}
+.qr-card p{color:#888;font-size:.85rem;line-height:1.5}
+
+/* Services */
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.svc-card{background:#111;border:1px solid #222;border-radius:12px;padding:1.5rem;text-align:center;transition:border-color .2s}
+.svc-card:hover{border-color:#d4a017}
+.svc-card .svc-icon{font-size:2rem;margin-bottom:.75rem}
+.svc-card h3{font-size:1rem;margin-bottom:.3rem}
+.svc-card p{color:#888;font-size:.82rem;line-height:1.4}
+
+/* Baking */
+.bake-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem}
+.bake-card{background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:10px;padding:1rem;text-align:center}
+.bake-card .name{font-size:.9rem;font-weight:600;margin-bottom:.3rem}
+.bake-card .price{font-size:1.5rem;font-weight:800;color:#d4a017}
+
+/* Locations */
+.loc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.loc-card{background:#111;border:1px solid #222;border-radius:12px;padding:1.25rem;display:flex;align-items:center;gap:1rem}
+.loc-card .loc-icon{font-size:1.5rem;color:#d4a017}
+.loc-card h3{font-size:.95rem;margin-bottom:.15rem}
+.loc-card p{color:#888;font-size:.78rem}
+
+/* Steps */
+.steps{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
+.step{text-align:center;flex:1;min-width:120px}
+.step .num{width:40px;height:40px;line-height:40px;border-radius:50%;background:#d4a017;color:#0a0a0a;font-weight:800;font-size:1.1rem;display:inline-block;margin-bottom:.5rem}
+.step .txt{font-size:.85rem;color:#ccc;line-height:1.3}
+
+/* Footer */
+footer{background:#050505;padding:2rem 1.5rem;text-align:center;border-top:1px solid #1a1a1a}
+footer .brand{font-size:1.2rem;font-weight:800;margin-bottom:.5rem}
+footer .brand span{color:#d4a017}
+footer .info{color:#666;font-size:.8rem;line-height:1.6}
+footer .slogan{color:#d4a017;font-weight:700;font-size:1rem;margin-top:1rem}
+
+/* Print link */
+.print-links{text-align:center;margin:2rem 0}
+.print-links a{display:inline-block;margin:.25rem .5rem;padding:.5rem 1rem;border:1px solid #333;border-radius:8px;font-size:.82rem;color:#888;transition:all .2s}
+.print-links a:hover{border-color:#d4a017;color:#d4a017}
+
+@media(max-width:600px){
+  .hero h1{font-size:2.5rem}
+  .qr-card img{width:120px;height:120px}
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="badge">Pekara · Slastičarna · Čepin</div>
+  <h1>UVIJEK <span>FRIŠKO</span></h1>
+  <div class="tagline">Svježi kruh, peciva i kolači — svaki dan iz naše pekare</div>
+  <div class="cta-row">
+    <a href="/pos/webshop/pekara-uvijek-frisko/" class="btn-gold"><i class="fas fa-shopping-bag"></i> Webshop</a>
+    <a href="/appointments/booking/c/pekara-uvijek-frisko/" class="btn-ghost"><i class="fas fa-fire"></i> Uslužno pečenje</a>
+  </div>
+</div>
+
+<!-- Kako radi -->
+<section>
+  <div class="section-title"><i class="fas fa-mobile-alt"></i> Kako naručiti?</div>
+  <div class="section-sub">Tri koraka do svježih proizvoda</div>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><div class="txt">Skenirajte<br>QR kod</div></div>
+    <div class="step"><div class="num">2</div><div class="txt">Odaberite<br>proizvode</div></div>
+    <div class="step"><div class="num">3</div><div class="txt">Pokupite<br>svježe!</div></div>
+  </div>
+</section>
+
+<!-- QR kodovi -->
+<div class="qr-section">
+  <div style="max-width:700px;margin:0 auto;text-align:center">
+    <div class="section-title" style="color:#fff"><i class="fas fa-qrcode"></i> Skenirajte mobitelom</div>
+    <div class="section-sub">Otvorite kameru i usmjerite na QR kod</div>
+    <div class="qr-grid">
+      <div class="qr-card">
+        <div class="icon">🛒</div>
+        <h3>Naruči i pokupi</h3>
+        <img src="/static/qr_pickup_frisko.png" alt="QR narudžba">
+        <p>Kruh, peciva, kolači, torte<br>Pokupite gotovo — svježe i toplo</p>
+      </div>
+      <div class="qr-card">
+        <div class="icon">🔥</div>
+        <h3>Uslužno pečenje</h3>
+        <img src="/static/qr_booking_frisko.png" alt="QR rezervacija">
+        <p>Janjetina, odojak, pite, pizza<br>Rezervirajte željeni termin</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Asortiman -->
+<section>
+  <div class="section-title"><i class="fas fa-bread-slice"></i> Naš asortiman</div>
+  <div class="section-sub">Svaki dan svježe iz naše pekare</div>
+  <div class="svc-grid">
+    <div class="svc-card"><div class="svc-icon">🍞</div><h3>Kruh</h3><p>Polubijeli, raženi, integralni, kukuruzni</p></div>
+    <div class="svc-card"><div class="svc-icon">🥐</div><h3>Peciva</h3><p>Kifle, štangle, kroasani, pereci</p></div>
+    <div class="svc-card"><div class="svc-icon">🥧</div><h3>Bureci i pite</h3><p>Sir, meso, zeljanica, krompirača</p></div>
+    <div class="svc-card"><div class="svc-icon">🍰</div><h3>Kolači</h3><p>Krempite, šampite, štrudle, krafne</p></div>
+    <div class="svc-card"><div class="svc-icon">🎂</div><h3>Torte</h3><p>Po narudžbi za sve prilike</p></div>
+    <div class="svc-card"><div class="svc-icon">🍕</div><h3>Pizza</h3><p>Svježe pečena, razni okusi</p></div>
+  </div>
+</section>
+
+<!-- Uslužno pečenje -->
+<section style="background:#111;padding:3rem 1.5rem;max-width:100%;margin:0">
+  <div style="max-width:960px;margin:0 auto">
+    <div class="section-title" style="color:#fff;text-align:center"><i class="fas fa-fire"></i> Uslužno pečenje</div>
+    <div class="section-sub" style="text-align:center">Dostavite sirovinu — mi ispečemo. Rezervirajte termin.</div>
+    <div class="bake-grid">
+      <div class="bake-card"><div class="name">Janjetina</div><div class="price">25 €</div></div>
+      <div class="bake-card"><div class="name">Odojak</div><div class="price">30 €</div></div>
+      <div class="bake-card"><div class="name">Pite</div><div class="price">12 €</div></div>
+      <div class="bake-card"><div class="name">Pizza</div><div class="price">15 €</div></div>
+      <div class="bake-card"><div class="name">Kolači</div><div class="price">10 €</div></div>
+      <div class="bake-card"><div class="name">Kruh</div><div class="price">8 €</div></div>
+    </div>
+    <div style="text-align:center;margin-top:1.5rem">
+      <a href="/appointments/booking/c/pekara-uvijek-frisko/" class="btn-gold"><i class="fas fa-calendar-check"></i> Rezerviraj termin</a>
+    </div>
+  </div>
+</section>
+
+<!-- Lokacije -->
+<section>
+  <div class="section-title"><i class="fas fa-map-marker-alt"></i> Naša prodajna mjesta</div>
+  <div class="section-sub">Svježe iz pekare na 4 lokacije</div>
+  <div class="loc-grid">
+    <div class="loc-card"><div class="loc-icon"><i class="fas fa-store"></i></div><div><h3>Pekara Čepin</h3><p>Kalnička 30 — centrala i proizvodnja</p></div></div>
+    <div class="loc-card"><div class="loc-icon"><i class="fas fa-shopping-cart"></i></div><div><h3>PM Ivanovac</h3><p>Prodajno mjesto</p></div></div>
+    <div class="loc-card"><div class="loc-icon"><i class="fas fa-shopping-cart"></i></div><div><h3>PM Vladislavci</h3><p>Prodajno mjesto</p></div></div>
+    <div class="loc-card"><div class="loc-icon"><i class="fas fa-shopping-cart"></i></div><div><h3>PM Čepin</h3><p>Prodajno mjesto</p></div></div>
+  </div>
+</section>
+
+
+
+
+<!-- Dostava -->
+<section>
+  <div class="section-title"><i class="fas fa-truck"></i> Dostava na kućnu adresu</div>
+  <div class="section-sub">Svježe iz pekare — direktno do vaših vrata</div>
+  <div style="background:#111;border:1px solid #222;border-radius:16px;padding:2rem;margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem">
+      <div style="background:rgba(212,160,23,.15);width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center">
+        <i class="fas fa-clock" style="color:#d4a017;font-size:1.2rem"></i>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:1.1rem">Dostava svaki dan 13:00 — 14:00</div>
+        <div style="color:#888;font-size:.85rem">Ponedjeljak — Subota</div>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+      <thead>
+        <tr style="border-bottom:1px solid #333">
+          <th style="text-align:left;padding:.6rem .5rem;color:#d4a017;font-weight:600">Zona</th>
+          <th style="text-align:center;padding:.6rem .5rem;color:#d4a017;font-weight:600">Udaljenost</th>
+          <th style="text-align:center;padding:.6rem .5rem;color:#d4a017;font-weight:600">Cijena</th>
+          <th style="text-align:center;padding:.6rem .5rem;color:#d4a017;font-weight:600">Besplatno iznad</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #1a1a1a">
+          <td style="padding:.6rem .5rem"><i class="fas fa-map-pin" style="color:#d4a017;margin-right:.4rem"></i>Čepin centar</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#aaa">do 3 km</td>
+          <td style="text-align:center;padding:.6rem .5rem;font-weight:700">2,50 &euro;</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#4caf50">15 &euro;</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1a1a1a">
+          <td style="padding:.6rem .5rem"><i class="fas fa-map-pin" style="color:#d4a017;margin-right:.4rem"></i>Čepin šire</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#aaa">3 — 6 km</td>
+          <td style="text-align:center;padding:.6rem .5rem;font-weight:700">3,00 &euro;</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#4caf50">20 &euro;</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1a1a1a">
+          <td style="padding:.6rem .5rem"><i class="fas fa-map-pin" style="color:#d4a017;margin-right:.4rem"></i>Okolna sela</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#aaa">6 — 10 km</td>
+          <td style="text-align:center;padding:.6rem .5rem;font-weight:700">3,50 &euro;</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#4caf50">25 &euro;</td>
+        </tr>
+        <tr>
+          <td style="padding:.6rem .5rem"><i class="fas fa-map-pin" style="color:#d4a017;margin-right:.4rem"></i>Udaljena sela</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#aaa">10 — 15 km</td>
+          <td style="text-align:center;padding:.6rem .5rem;font-weight:700">4,50 &euro;</td>
+          <td style="text-align:center;padding:.6rem .5rem;color:#4caf50">30 &euro;</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:1.2rem;padding:.8rem 1rem;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:10px;text-align:center">
+      <i class="fas fa-gift" style="color:#4caf50;margin-right:.4rem"></i>
+      <span style="color:#4caf50;font-weight:600">Besplatna dostava</span>
+      <span style="color:#aaa"> za narudžbe iznad navedenog iznosa!</span>
+    </div>
+  </div>
+  <div style="text-align:center">
+    <p style="color:#888;font-size:.85rem"><i class="fas fa-info-circle" style="color:#d4a017;margin-right:.3rem"></i> Područje dostave: Čepin, Ivanovac, Vladislavci, Čeminac i okolica</p>
+  </div>
+</section>
+
+<!-- Galerija -->
+<section>
+  <div class="section-title"><i class="fas fa-camera"></i> Iz naše pekare</div>
+  <div class="section-sub">Svježe, ručno, s ljubavlju</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem">
+    <div style="border-radius:10px;overflow:hidden"><img src="/static/img/frisko/pekara2.webp" alt="Pekara" style="width:100%;height:180px;object-fit:cover;display:block"></div>
+    <div style="border-radius:10px;overflow:hidden"><img src="/static/img/frisko/pekara3.webp" alt="Proizvodi" style="width:100%;height:180px;object-fit:cover;display:block"></div>
+    <div style="border-radius:10px;overflow:hidden"><img src="/static/img/frisko/pekara4.webp" alt="Pekara" style="width:100%;height:180px;object-fit:cover;display:block"></div>
+    <div style="border-radius:10px;overflow:hidden"><img src="/static/img/frisko/kruh2.webp" alt="Kruh" style="width:100%;height:180px;object-fit:cover;display:block"></div>
+  </div>
+</section>
+
+<!-- Print linkovi -->
+<div class="print-links">
+  <p style="color:#666;font-size:.82rem;margin-bottom:.5rem">Materijali za print:</p>
+  <a href="/frisko/letak/a3/" target="_blank"><i class="fas fa-print"></i> A3 Letak (vrata)</a>
+  <a href="/frisko/letak/a4/" target="_blank"><i class="fas fa-print"></i> A4 Interijer</a>
+  <a href="/frisko/letak/pm/" target="_blank"><i class="fas fa-print"></i> A4 Prodajno mjesto</a>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="brand">UVIJEK <span>FRIŠKO</span></div>
+  <div class="info">
+    Obrt za pekarsku proizvodnju<br>
+    Kalnička 30, 31431 Čepin<br>
+    Vlasnik: Shevqet Temaj<br>
+    Pon — Sub: 6:00 — 18:00
+  </div>
+  <div class="slogan">Svježe. Domaće. Uvijek.</div>
+</footer>
+
+</body></html>

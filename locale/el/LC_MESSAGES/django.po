@@ -1,0 +1,3041 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-20 21:56+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: accounts/auth_models.py:13
+msgid "Investitor - projekti"
+msgstr "Επενδυτής - Έργα"
+
+#: accounts/auth_models.py:14
+msgid "Partner - fakture"
+msgstr "Συνεργάτες - τιμολόγηση"
+
+#: accounts/auth_models.py:15
+msgid "Radnik - upload slika"
+msgstr "Radnik - upload image"
+
+#: accounts/auth_models.py:16
+msgid "Reset lozinke"
+msgstr "Επαναφορά lozinke"
+
+#: accounts/auth_models.py:17
+msgid "Verifikacija emaila"
+msgstr "Επαλήθευση email"
+
+#: accounts/auth_models.py:30
+msgid "Magic token"
+msgstr "Μαγικό σύμβολο"
+
+#: accounts/auth_models.py:31
+msgid "Magic tokeni"
+msgstr "Μαγικά tokeni"
+
+#: accounts/auth_models.py:69
+msgid "Pokušaj prijave"
+msgstr "Προσπάθεια σύνδεσης"
+
+#: accounts/auth_models.py:70
+msgid "Pokušaji prijave"
+msgstr "Προσπάθειες σύνδεσης"
+
+#: accounts/auth_views.py:68
+msgid "Previše neuspješnih pokušaja. Pričekajte 15 minuta."
+msgstr "Πάρα πολλές αποτυχημένες προσπάθειες. Περιμένετε 15 λεπτά."
+
+#: accounts/auth_views.py:98 accounts/auth_views.py:216
+msgid "Dobrodošli, {user.first_name or user.username}!"
+msgstr "Dobrodošli, {user.first_name or user.username}!"
+
+#: accounts/auth_views.py:105
+msgid "Pogrešni podaci za prijavu."
+msgstr "Λανθασμένα στοιχεία σύνδεσης."
+
+#: accounts/auth_views.py:125
+msgid "Ako email postoji, link je poslan."
+msgstr "Όπως αναφέρεται στο email, ο σύνδεσμος έχει σταλεί."
+
+#: accounts/auth_views.py:130
+msgid "Previše zahtjeva. Pričekajte 10 minuta."
+msgstr "Πάρα πολλές αιτήσεις. Παρακαλώ περιμένετε 10 λεπτά."
+
+#: accounts/auth_views.py:179
+#, python-brace-format
+msgid "Link za pristup poslan na {email}. Vrijedi 24 sata."
+msgstr "Σύνδεσμος πρόσβασης που εστάλη στη διεύθυνση {email}. Ισχύει για 24 ώρες."
+
+#: accounts/auth_views.py:193
+msgid "Link nije valjan ili je istekao."
+msgstr "Ο σύνδεσμος δεν είναι έγκυρος ή έχει λήξει."
+
+#: accounts/auth_views.py:197
+msgid "Link je istekao ili je već iskorišten. Zatražite novi."
+msgstr "Ο σύνδεσμος έχει λήξει ή έχει ήδη χρησιμοποιηθεί. Ζητήστε έναν νέο."
+
+#: accounts/auth_views.py:205 accounts/auth_views.py:428
+#: accounts/auth_views.py:506
+msgid "Korisnički račun nije aktivan."
+msgstr "Ο λογαριασμός χρήστη δεν είναι ενεργός."
+
+#: accounts/auth_views.py:260
+msgid "✓ 2FA aktiviran! Koristite Google Authenticator za prijavu."
+msgstr "✓ 2FA ενεργοποιημένο! Χρησιμοποιήστε το Google Authenticator για να συνδεθείτε."
+"✓ 2FA ενεργοποιημένο! Χρησιμοποιήστε το Google Authenticator για να "
+"συνδεθείτε."
+
+#: accounts/auth_views.py:263 accounts/auth_views.py:313
+msgid "Pogrešan kod. Pokušajte ponovo."
+msgstr "Λανθασμένος κωδικός. Δοκιμάστε ξανά."
+
+#: accounts/auth_views.py:310
+msgid "✓ Uspješna 2FA provjera!"
+msgstr "✓ Επιτυχής επαλήθευση 2FA!"
+
+#: accounts/auth_views.py:315
+msgid "Greška provjere."
+msgstr "Σφάλμα επαλήθευσης."
+
+#: accounts/auth_views.py:338
+msgid "Ako email postoji, link za reset je poslan."
+msgstr "Όπως αναφέρεται στο email, ο σύνδεσμος για την επαναφορά έχει σταλεί."
+
+#: accounts/auth_views.py:350
+msgid "Lozinke se ne podudaraju."
+msgstr "Οι κωδικοί πρόσβασης δεν ταιριάζουν."
+
+#: accounts/auth_views.py:352
+msgid "Lozinka mora imati najmanje 8 znakova."
+msgstr "Ο κωδικός πρόσβασης πρέπει να έχει μήκος τουλάχιστον 8 χαρακτήρες."
+
+#: accounts/auth_views.py:356
+msgid "✓ Lozinka promijenjena! Prijavite se s novom lozinkom."
+msgstr "✓ Το σύνθημα άλλαξε! Συνδεθείτε με το νέο σύνθημα."
+
+#: accounts/auth_views.py:366
+msgid "Google login nije konfiguriran."
+msgstr "Η σύνδεση στο Google δεν έχει ρυθμιστεί."
+
+#: accounts/auth_views.py:393 accounts/auth_views.py:474
+msgid "OAuth state mismatch."
+msgstr "Αναντιστοιχία κατάστασης OAuth."
+
+#: accounts/auth_views.py:434
+#, python-brace-format
+msgid "Prijavljeni ste putem Google: {email}"
+msgstr "Έχετε συνδεθεί μέσω Google: {email}"
+
+#: accounts/auth_views.py:439
+msgid "Greška Google prijave. Pokušajte ponovo."
+msgstr "Σφάλμα στην εγγραφή Google. Δοκιμάστε ξανά."
+
+#: accounts/auth_views.py:446
+msgid "Microsoft login nije konfiguriran."
+msgstr "Η σύνδεση Microsoft δεν έχει ρυθμιστεί."
+
+#: accounts/auth_views.py:512
+#, python-brace-format
+msgid "Prijavljeni ste putem Microsoft: {email}"
+msgstr "Έχετε συνδεθεί μέσω Microsoft: {email}"
+
+#: accounts/auth_views.py:517
+msgid "Greška Microsoft prijave."
+msgstr "Σφάλμα στις συνδέσεις της Microsoft."
+
+#: accounts/models.py:8
+msgid "Super Administrator"
+msgstr "Σούπερ διαχειριστής"
+
+#: accounts/models.py:9 templates/dashboards/company_admin.html:3
+#: templates/dashboards/company_admin.html:4
+msgid "Admin tvrtke"
+msgstr "Διαχειριστής εταιρείας"
+
+#: accounts/models.py:10 templates/dashboards/manager.html:3
+msgid "Voditelj projekta"
+msgstr "Υπεύθυνος έργου"
+
+#: accounts/models.py:11
+msgid "Radnik"
+msgstr "Εργαζόμενος"
+
+#: accounts/models.py:12
+msgid "Investitor"
+msgstr "Επενδυτής"
+
+#: accounts/models.py:13
+msgid "Partner / Klijent"
+msgstr "Συνεργάτης / Πελάτης"
+
+#: accounts/models.py:17
+msgid "Uloga"
+msgstr "Ρόλος"
+
+#: accounts/models.py:19 companies/models.py:22 documents/models.py:15
+#: finance/models.py:14 invoicing/fiscal_admin.py:70
+#: invoicing_backup_20260219/fiscal_admin.py:70
+msgid "Tvrtka"
+msgstr "Εταιρεία"
+
+#: accounts/models.py:21
+msgid "Profilna slika"
+msgstr "Προφίλ εικόνα"
+
+#: accounts/models.py:22 worktime/templates/worktime/worker_profile.html:28
+msgid "Telefon"
+msgstr "Τηλέφωνο"
+
+#: accounts/models.py:23
+msgid "Odjel"
+msgstr "Τμήμα"
+
+#: accounts/models.py:31
+msgid "Jezik sučelja"
+msgstr "Γλώσσα διεπαφής"
+
+#: accounts/models.py:33
+msgid "Može uploadati slike"
+msgstr "Μπορείτε να ανεβάσετε φωτογραφίες"
+
+#: accounts/models.py:34
+msgid "Vidi financije"
+msgstr "Δείτε τα οικονομικά"
+
+#: accounts/models.py:35
+msgid "Odobrava radne sate"
+msgstr "Εγκρίνει τις ώρες εργασίας"
+
+#: accounts/models.py:43
+msgid "Korisnički profil"
+msgstr "Προφίλ χρήστη"
+
+#: accounts/models.py:44
+msgid "Korisnički profili"
+msgstr "Προφίλ χρήστη"
+
+#: calculator/models.py:6
+msgid "Naziv normativa"
+msgstr "Ονομασία κανονισμού"
+
+#: calculator/models.py:7
+msgid "Jedinica mjere"
+msgstr "Μονάδα μέτρησης"
+
+#: calculator/models.py:8
+msgid "Cijena materijala"
+msgstr "Τιμή υλικών"
+
+#: calculator/models.py:9
+msgid "Sati rada po jedinici"
+msgstr "Ώρες εργασίας ανά μονάδα"
+
+#: calculator/models.py:12
+msgid "Normativ"
+msgstr "Κανονιστικό"
+
+#: calculator/models.py:13
+msgid "Normativi"
+msgstr "Κανονισμοί"
+
+#: calculator/models.py:20
+msgid "Marža (%)"
+msgstr "Περιθώριο (%)"
+
+#: calculator/models.py:21
+msgid "PDV (%)"
+msgstr "Μικτό κέρδος (%)"
+
+#: companies/models.py:7
+msgid "Naziv tvrtke"
+msgstr "Όνομα εταιρείας"
+
+#: companies/models.py:9 invoicing/fiscal_admin.py:17
+#: invoicing/fiscal_models.py:14 invoicing/models.py:52
+#: invoicing_backup_20260219/fiscal_admin.py:17
+#: invoicing_backup_20260219/fiscal_models.py:14
+#: invoicing_backup_20260219/models.py:52
+#: worktime/templates/worktime/worker_profile.html:32
+msgid "Adresa"
+msgstr "Διεύθυνση"
+
+#: companies/models.py:10 invoicing/fiscal_models.py:15
+#: invoicing_backup_20260219/fiscal_models.py:15 partners/models.py:22
+msgid "Grad"
+msgstr "Πτυχίο"
+
+#: companies/models.py:11 partners/models.py:23
+msgid "Poštanski broj"
+msgstr "Ταχυδρομικός κώδικας"
+
+#: companies/models.py:15
+msgid "U sustavu PDV-a"
+msgstr "Στο σύστημα ΦΠΑ"
+
+#: companies/models.py:23 templates/base.html:114
+#: templates/dashboards/superadmin.html:78
+msgid "Tvrtke"
+msgstr "Εταιρείες"
+
+#: core/settings.py:152
+msgid "Deutsch"
+msgstr "Γερμανικά"
+
+#: core/settings.py:153
+msgid "Hrvatski"
+msgstr "Κροατικός"
+
+#: core/settings.py:154
+msgid "English"
+msgstr "Αγγλικά"
+
+#: core/settings.py:155
+msgid "Türkçe"
+msgstr "Τουρκικά"
+
+#: core/settings.py:156
+msgid "Ελληνικά"
+msgstr "Ελληνικά"
+
+#: documents/models.py:8
+msgid "Izlazni Račun"
+msgstr "Τελικός απολογισμός"
+
+#: documents/models.py:9
+msgid "Ponuda"
+msgstr "Προσφορά"
+
+#: documents/models.py:10
+msgid "Ulazni Račun"
+msgstr "Λογαριασμός εισόδου"
+
+#: documents/models.py:11
+msgid "Ugovor"
+msgstr "Σύμβαση"
+
+#: documents/models.py:12
+msgid "Potvrda"
+msgstr "Επιβεβαίωση"
+
+#: documents/models.py:16 finance/models.py:15 partners/models.py:49
+msgid "Partner"
+msgstr "Συνεργάτες"
+
+#: documents/models.py:18
+msgid "Tip dokumenta"
+msgstr "Τύπος εγγράφου"
+
+#: documents/models.py:19
+msgid "Broj dokumenta"
+msgstr "Αριθμός εγγράφου"
+
+#: documents/models.py:21 invoicing/models.py:46
+#: invoicing_backup_20260219/models.py:46
+msgid "Datum izdavanja"
+msgstr "Ημερομηνία κυκλοφορίας"
+
+#: documents/models.py:22
+msgid "Datum dospijeća"
+msgstr "Ημερομηνία λήξης"
+
+#: documents/models.py:24 finance/models.py:18 invoicing/admin.py:49
+#: invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/admin.py:49
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+#: templates/dashboards/company_admin.html:15
+#: templates/dashboards/partner.html:11
+msgid "Iznos"
+msgstr "Ποσό"
+
+#: documents/models.py:26
+msgid "Datoteka"
+msgstr "Αρχείο"
+
+#: documents/models.py:29 invoicing/models.py:19
+#: invoicing/templates/invoicing/index.html:22
+#: invoicing_backup_20260219/models.py:19
+#: invoicing_backup_20260219/templates/invoicing/index.html:22
+msgid "Plaćeno"
+msgstr "Πληρωμένο"
+
+#: documents/models.py:34
+msgid "Dokument"
+msgstr "Έγγραφο"
+
+#: documents/models.py:35 templates/base.html:117
+#: templates/dashboards/superadmin.html:82
+msgid "Dokumenti"
+msgstr "Έγγραφα"
+
+#: finance/models.py:10
+msgid "Uplata / Prihod"
+msgstr "Πληρωμή / Εισόδημα"
+
+#: finance/models.py:11
+msgid "Isplata / Rashod"
+msgstr "Πληρωμή / Έξοδα"
+
+#: finance/models.py:16
+msgid "Vezani dokument"
+msgstr "Συνημμένο έγγραφο"
+
+#: finance/models.py:19
+msgid "Smjer"
+msgstr "Κατεύθυνση"
+
+#: finance/models.py:21
+msgid "Datum transakcije"
+msgstr "Ημερομηνία συναλλαγής"
+
+#: finance/models.py:22 invoicing/fiscal_models.py:53 invoicing/models.py:140
+#: invoicing_backup_20260219/fiscal_models.py:53
+#: invoicing_backup_20260219/models.py:140 projects/models.py:8
+#: templates/dashboards/worker.html:38
+#: worktime/templates/worktime/worker_dashboard.OLD.html:292
+msgid "Opis"
+msgstr "Περιγραφή"
+
+#: finance/models.py:27
+msgid "Transakcija"
+msgstr "Συναλλαγή"
+
+#: finance/models.py:28
+msgid "Transakcije"
+msgstr "Συναλλαγές"
+
+#: invoicing/admin.py:44 invoicing_backup_20260219/admin.py:44
+#: templates/dashboards/superadmin.html:45
+msgid "Brze akcije"
+msgstr "Γρήγορες ενέργειες"
+
+#: invoicing/admin.py:55 invoicing/fiscal_admin.py:32 invoicing/models.py:83
+#: invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/admin.py:55
+#: invoicing_backup_20260219/fiscal_admin.py:32
+#: invoicing_backup_20260219/models.py:83
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+#: templates/dashboards/company_admin.html:15
+#: templates/dashboards/partner.html:11
+#: templates/dashboards/superadmin.html:102
+#: templates/dashboards/worker.html:38
+msgid "Status"
+msgstr "Κατάσταση"
+
+#: invoicing/admin.py:61 invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/admin.py:61
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+msgid "Fisk."
+msgstr "Ψάρια."
+
+#: invoicing/fiscal_admin.py:14 invoicing_backup_20260219/fiscal_admin.py:14
+msgid "Osnovni podaci"
+msgstr "Βασικές πληροφορίες"
+
+#: invoicing/fiscal_admin.py:20 invoicing/templates/invoicing/create.html:432
+#: invoicing_backup_20260219/fiscal_admin.py:20
+#: invoicing_backup_20260219/templates/invoicing/create.html:432
+msgid "Plaćanje"
+msgstr "Πληρωμή"
+
+#: invoicing/fiscal_admin.py:23 invoicing/fiscal_models.py:19
+#: invoicing_backup_20260219/fiscal_admin.py:23
+#: invoicing_backup_20260219/fiscal_models.py:19
+msgid "Napomena"
+msgstr "Σημείωση"
+
+#: invoicing/fiscal_admin.py:41 invoicing/fiscal_models.py:37
+#: invoicing/models.py:102 invoicing_backup_20260219/fiscal_admin.py:41
+#: invoicing_backup_20260219/fiscal_models.py:37
+#: invoicing_backup_20260219/models.py:102
+msgid "Operater"
+msgstr "Χειριστής"
+
+#: invoicing/fiscal_admin.py:44 invoicing_backup_20260219/fiscal_admin.py:44
+msgid "Zadano prodajno mjesto"
+msgstr "Προεπιλεγμένο σημείο πώλησης"
+
+#: invoicing/fiscal_admin.py:62 invoicing_backup_20260219/fiscal_admin.py:62
+msgid "Stopa"
+msgstr "Βήμα"
+
+#: invoicing/fiscal_admin.py:73 invoicing_backup_20260219/fiscal_admin.py:73
+msgid "Certifikat"
+msgstr "Πιστοποιητικό"
+
+#: invoicing/fiscal_admin.py:77 invoicing_backup_20260219/fiscal_admin.py:77
+msgid "Numeracija računa"
+msgstr "Αρίθμηση λογαριασμού"
+
+#: invoicing/fiscal_admin.py:80 invoicing_backup_20260219/fiscal_admin.py:80
+msgid "Zadane vrijednosti"
+msgstr "Προεπιλεγμένες τιμές"
+
+#: invoicing/fiscal_admin.py:83 invoicing_backup_20260219/fiscal_admin.py:83
+msgid "Napomene na računima"
+msgstr "Παρατηρήσεις σχετικά με τα νομοσχέδια"
+
+#: invoicing/fiscal_admin.py:92 invoicing_backup_20260219/fiscal_admin.py:92
+msgid "CIS Endpoint"
+msgstr "Τερματικό CIS"
+
+#: invoicing/fiscal_models.py:11 invoicing/fiscal_models.py:51
+#: invoicing_backup_20260219/fiscal_models.py:11
+#: invoicing_backup_20260219/fiscal_models.py:51
+msgid "Naziv"
+msgstr "Τίτλος"
+
+#: invoicing/fiscal_models.py:12 invoicing_backup_20260219/fiscal_models.py:12
+msgid "Oznaka prostora (PP)"
+msgstr "Σήμανση χώρου (PP)"
+
+#: invoicing/fiscal_models.py:16 invoicing_backup_20260219/fiscal_models.py:16
+msgid "OIB tvrtke"
+msgstr "Εταιρεία OIB"
+
+#: invoicing/fiscal_models.py:17 invoicing_backup_20260219/fiscal_models.py:17
+#: website/models.py:12 website/models.py:62
+msgid "Aktivno"
+msgstr "Ενεργό"
+
+#: invoicing/fiscal_models.py:18 invoicing/models.py:62
+#: invoicing_backup_20260219/fiscal_models.py:18
+#: invoicing_backup_20260219/models.py:62
+msgid "IBAN za uplatu"
+msgstr "IBAN για πληρωμή"
+
+#: invoicing/fiscal_models.py:22 invoicing/models.py:99
+#: invoicing_backup_20260219/fiscal_models.py:22
+#: invoicing_backup_20260219/models.py:99
+msgid "Poslovni prostor"
+msgstr "Επαγγελματικός χώρος"
+
+#: invoicing/fiscal_models.py:23 invoicing_backup_20260219/fiscal_models.py:23
+msgid "Poslovni prostori"
+msgstr "Επαγγελματικοί χώροι"
+
+#: invoicing/fiscal_models.py:31 invoicing_backup_20260219/fiscal_models.py:31
+msgid "Ime i prezime"
+msgstr "Όνομα και επώνυμο"
+
+#: invoicing/fiscal_models.py:32 invoicing/models.py:76
+#: invoicing_backup_20260219/fiscal_models.py:32
+#: invoicing_backup_20260219/models.py:76
+msgid "OIB operatera"
+msgstr "Οδηγίες χειρισμού για τον χειριστή"
+
+#: invoicing/fiscal_models.py:33 invoicing_backup_20260219/fiscal_models.py:33
+msgid "Zadani poslovni prostor"
+msgstr "Δοκιμασμένος επαγγελματικός χώρος"
+
+#: invoicing/fiscal_models.py:38 invoicing_backup_20260219/fiscal_models.py:38
+msgid "Operateri"
+msgstr "Χειριστές"
+
+#: invoicing/fiscal_models.py:50 invoicing_backup_20260219/fiscal_models.py:50
+msgid "Šifra grupe"
+msgstr "Ομάδα κρυπτογράφησης"
+
+#: invoicing/fiscal_models.py:52 invoicing_backup_20260219/fiscal_models.py:52
+msgid "Stopa PDV-a"
+msgstr "συντελεστής ΦΠΑ"
+
+#: invoicing/fiscal_models.py:57 invoicing_backup_20260219/fiscal_models.py:57
+msgid "PDV grupa"
+msgstr "Ομάδα PDV"
+
+#: invoicing/fiscal_models.py:58 invoicing_backup_20260219/fiscal_models.py:58
+msgid "PDV grupe"
+msgstr "Ομάδα PDV"
+
+#: invoicing/fiscal_models.py:78 invoicing/fiscal_models.py:79
+#: invoicing_backup_20260219/fiscal_models.py:78
+#: invoicing_backup_20260219/fiscal_models.py:79
+msgid "Konfiguracija fiskalizacije"
+msgstr "Διαμόρφωση της φορολογικής πολιτικής"
+
+#: invoicing/models.py:10 invoicing/models.py:114 invoicing/models.py:139
+#: invoicing_backup_20260219/models.py:10
+#: invoicing_backup_20260219/models.py:114
+#: invoicing_backup_20260219/models.py:139
+msgid "Račun"
+msgstr "Λογαριασμός"
+
+#: invoicing/models.py:11 invoicing_backup_20260219/models.py:11
+msgid "Predračun / Angebot"
+msgstr "Προσφορά / Προσφορά"
+
+#: invoicing/models.py:12 invoicing_backup_20260219/models.py:12
+msgid "Avansni račun"
+msgstr "Προκαταβολή"
+
+#: invoicing/models.py:13 invoicing_backup_20260219/models.py:13
+msgid "Storno račun"
+msgstr "Ακύρωση λογαριασμού"
+
+#: invoicing/models.py:14 invoicing_backup_20260219/models.py:14
+msgid "Gutschrift (DE)"
+msgstr "Πίστωση (DE)"
+
+#: invoicing/models.py:17 invoicing_backup_20260219/models.py:17
+#: templates/dashboards/worker.html:47
+msgid "Nacrt"
+msgstr "Σχέδιο"
+
+#: invoicing/models.py:18 invoicing_backup_20260219/models.py:18
+msgid "Poslano"
+msgstr "Αποστολή"
+
+#: invoicing/models.py:20 invoicing/templates/invoicing/index.html:16
+#: invoicing_backup_20260219/models.py:20
+#: invoicing_backup_20260219/templates/invoicing/index.html:16
+#: templates/dashboards/company_admin.html:8
+#: templates/dashboards/partner.html:7
+msgid "Neplaćeno"
+msgstr "Μη πληρωμένος"
+
+#: invoicing/models.py:21 invoicing_backup_20260219/models.py:21
+msgid "Dospijelo"
+msgstr "Λήξη"
+
+#: invoicing/models.py:22 invoicing_backup_20260219/models.py:22
+msgid "Otkazano"
+msgstr "Ακυρώθηκε"
+
+#: invoicing/models.py:23 invoicing_backup_20260219/models.py:23
+msgid "Stornirano"
+msgstr "Ακύρωση"
+
+#: invoicing/models.py:26 invoicing_backup_20260219/models.py:26
+msgid "Transakcijski račun"
+msgstr "Λογαριασμός συναλλαγών"
+
+#: invoicing/models.py:27 invoicing_backup_20260219/models.py:27
+msgid "Gotovina"
+msgstr "Gotovina"
+
+#: invoicing/models.py:28 invoicing_backup_20260219/models.py:28
+msgid "Kartica"
+msgstr "Κάρτα"
+
+#: invoicing/models.py:29 invoicing_backup_20260219/models.py:29
+msgid "Virman"
+msgstr "Ακολουθεί η μετάφραση του κειμένου:  Virman"
+
+#: invoicing/models.py:30 invoicing_backup_20260219/models.py:30
+msgid "Überweisung (DE)"
+msgstr "Μεταφορά χρημάτων (DE)"
+
+#: invoicing/models.py:31 invoicing_backup_20260219/models.py:31
+msgid "Bar (DE)"
+msgstr "Μπαρ (DE)"
+
+#: invoicing/models.py:39 invoicing_backup_20260219/models.py:39
+msgid "Vrsta"
+msgstr "Τύπος"
+
+#: invoicing/models.py:40 invoicing/templates/invoicing/index.html:40
+#: invoicing_backup_20260219/models.py:40
+#: invoicing_backup_20260219/templates/invoicing/index.html:40
+msgid "Zemlja"
+msgstr "Γη"
+
+#: invoicing/models.py:42 invoicing_backup_20260219/models.py:42
+msgid "Broj računa"
+msgstr "Αριθμός λογαριασμού"
+
+#: invoicing/models.py:43 invoicing_backup_20260219/models.py:43
+msgid "Interni ID"
+msgstr "Εσωτερικός αριθμός αναγνώρισης"
+
+#: invoicing/models.py:47 invoicing_backup_20260219/models.py:47
+msgid "Rok plaćanja"
+msgstr "Προθεσμία πληρωμής"
+
+#: invoicing/models.py:48 invoicing_backup_20260219/models.py:48
+msgid "Datum isporuke"
+msgstr "Ημερομηνία παράδοσης"
+
+#: invoicing/models.py:51 invoicing/templates/invoicing/create.html:182
+#: invoicing_backup_20260219/models.py:51
+#: invoicing_backup_20260219/templates/invoicing/create.html:182
+msgid "Klijent / Empfänger"
+msgstr "Πελάτης / Παραλήπτης"
+
+#: invoicing/models.py:53 invoicing_backup_20260219/models.py:53
+msgid "Grad / PLZ Stadt"
+msgstr "Βαθμός / Ταχυδρομικός κώδικας Πόλη"
+
+#: invoicing/models.py:54 invoicing_backup_20260219/models.py:54
+#: partners/models.py:24
+msgid "Država"
+msgstr "Κράτος"
+
+#: invoicing/models.py:55 invoicing_backup_20260219/models.py:55
+msgid "OIB / USt-IdNr"
+msgstr "Αριθμός OIB / ΑΦΜ"
+
+#: invoicing/models.py:56 invoicing_backup_20260219/models.py:56
+msgid "Email klijenta"
+msgstr "Πρόγραμμα ηλεκτρονικού ταχυδρομείου"
+
+#: invoicing/models.py:60 invoicing_backup_20260219/models.py:60
+msgid "Način plaćanja"
+msgstr "Τρόπος πληρωμής"
+
+#: invoicing/models.py:61 invoicing_backup_20260219/models.py:61
+msgid "Valuta"
+msgstr "Νόμισμα"
+
+#: invoicing/models.py:63 invoicing_backup_20260219/models.py:63
+msgid "SWIFT/BIC"
+msgstr "SWIFT/BIC"
+
+#: invoicing/models.py:64 invoicing_backup_20260219/models.py:64
+msgid "Poziv na broj"
+msgstr "Αριθμός κλήσης"
+
+#: invoicing/models.py:67 invoicing_backup_20260219/models.py:67
+msgid "Iznos bez PDV/MwSt"
+msgstr "Ποσό χωρίς ΦΠΑ/MwSt"
+
+#: invoicing/models.py:68 invoicing_backup_20260219/models.py:68
+msgid "PDV/MwSt %"
+msgstr "PDV/ΦΠΑ %"
+
+#: invoicing/models.py:69 invoicing_backup_20260219/models.py:69
+msgid "PDV/MwSt iznos"
+msgstr "Ποσό ΦΠΑ/MwSt"
+
+#: invoicing/models.py:70 invoicing_backup_20260219/models.py:70
+msgid "Ukupno / Gesamt"
+msgstr "Σύνολο"
+
+#: invoicing/models.py:73 invoicing_backup_20260219/models.py:73
+msgid "Fiskalizirano"
+msgstr "Φορολογημένο"
+
+#: invoicing/models.py:77 invoicing_backup_20260219/models.py:77
+msgid "Datum fiskalizacije"
+msgstr "Ημερομηνία φορολόγησης"
+
+#: invoicing/models.py:80 invoicing_backup_20260219/models.py:80
+msgid "Napomena / Anmerkung"
+msgstr "Napomena / Σημείωση"
+
+#: invoicing/models.py:81 invoicing_backup_20260219/models.py:81
+msgid "Interna napomena"
+msgstr "Εσωτερική σημείωση"
+
+#: invoicing/models.py:85 invoicing_backup_20260219/models.py:85
+msgid "Storno od računa"
+msgstr "Ακύρωση λογαριασμού"
+
+#: invoicing/models.py:88 invoicing_backup_20260219/models.py:88
+msgid "Naziv izdavatelja"
+msgstr "Όνομα εκδότη"
+
+#: invoicing/models.py:104 invoicing_backup_20260219/models.py:104
+msgid "Redni broj u prostoru"
+msgstr "Τακτικός αριθμός στο χώρο"
+
+#: invoicing/models.py:115 invoicing/templates/invoicing/index.html:30
+#: invoicing_backup_20260219/models.py:115
+#: invoicing_backup_20260219/templates/invoicing/index.html:30
+msgid "Računi"
+msgstr "Λογαριασμοί"
+
+#: invoicing/models.py:141 invoicing_backup_20260219/models.py:141
+msgid "Količina"
+msgstr "Ποσότητα"
+
+#: invoicing/models.py:142 invoicing_backup_20260219/models.py:142
+msgid "Jed.mjera"
+msgstr "Μονάδα μέτρησης"
+
+#: invoicing/models.py:143 invoicing_backup_20260219/models.py:143
+msgid "Jed.cijena"
+msgstr "Τιμή μονάδας"
+
+#: invoicing/models.py:144 invoicing_backup_20260219/models.py:144
+msgid "Popust %"
+msgstr "Έκπτωση %"
+
+#: invoicing/models.py:145 invoicing_backup_20260219/models.py:145
+#: worktime/templates/worktime/worker_profile.html:85
+msgid "Ukupno"
+msgstr "Σύνολο"
+
+#: invoicing/models.py:146 invoicing_backup_20260219/models.py:146
+msgid "PDV %"
+msgstr "ΦΠΑ %"
+
+#: invoicing/models.py:150 invoicing_backup_20260219/models.py:150
+msgid "Stavka računa"
+msgstr "Στίγμα λογαριασμού"
+
+#: invoicing/models.py:151 invoicing_backup_20260219/models.py:151
+msgid "Stavke računa"
+msgstr "Στοιχεία λογαριασμού"
+
+#: invoicing/templates/invoicing/create.html:229
+#: invoicing_backup_20260219/templates/invoicing/create.html:229
+msgid "Stavke"
+msgstr "Απεργίες"
+
+#: invoicing/templates/invoicing/create.html:314
+#: invoicing_backup_20260219/templates/invoicing/create.html:314
+msgid "Uvoz iz modula"
+msgstr "Εισαγωγή από το module"
+
+#: invoicing/templates/invoicing/create.html:334
+#: invoicing_backup_20260219/templates/invoicing/create.html:334
+msgid "Napomene"
+msgstr "Σημειώσεις"
+
+#: invoicing/templates/invoicing/create.html:356
+#: invoicing_backup_20260219/templates/invoicing/create.html:356
+msgid "Akcije"
+msgstr "Προσφορές"
+
+#: invoicing/templates/invoicing/create.html:407
+#: invoicing_backup_20260219/templates/invoicing/create.html:407
+msgid "Broj i datumi"
+msgstr "Γέννηση και ημερομηνία"
+
+#: invoicing/templates/invoicing/create.html:469
+#: invoicing_backup_20260219/templates/invoicing/create.html:469
+msgid "Fiskalizacija (HR)"
+msgstr "Φορολογία (HR)"
+
+#: invoicing/templates/invoicing/create.html:510
+#: invoicing_backup_20260219/templates/invoicing/create.html:510
+msgid "Izdavatelj"
+msgstr "Εκδότης"
+
+#: invoicing/templates/invoicing/index.html:3
+#: invoicing/templates/invoicing/index.html:4
+#: invoicing_backup_20260219/templates/invoicing/index.html:3
+#: invoicing_backup_20260219/templates/invoicing/index.html:4
+#: templates/dashboards/superadmin.html:60
+msgid "Fakturiranje"
+msgstr "Τιμολόγηση"
+
+#: invoicing/templates/invoicing/index.html:10
+#: invoicing_backup_20260219/templates/invoicing/index.html:10
+msgid "Ukupno fakturirano"
+msgstr "Συνολικό τιμολογηθέν ποσό"
+
+#: invoicing/templates/invoicing/index.html:34
+#: invoicing_backup_20260219/templates/invoicing/index.html:34
+msgid "Svi"
+msgstr "Όλα"
+
+#: invoicing/templates/invoicing/index.html:35
+#: invoicing_backup_20260219/templates/invoicing/index.html:35
+msgid "Novi račun"
+msgstr "Νέος λογαριασμός"
+
+#: invoicing/templates/invoicing/index.html:40
+#: invoicing_backup_20260219/templates/invoicing/index.html:40
+#: templates/dashboards/company_admin.html:15
+#: templates/dashboards/partner.html:11
+msgid "Broj"
+msgstr "Αριθμός"
+
+#: invoicing/templates/invoicing/index.html:40
+#: invoicing_backup_20260219/templates/invoicing/index.html:40
+#: projects/templates/projects/detail.html:17
+#: templates/dashboards/company_admin.html:15
+msgid "Klijent"
+msgstr "Πελάτης"
+
+#: invoicing/templates/invoicing/index.html:41
+#: invoicing_backup_20260219/templates/invoicing/index.html:41
+#: templates/dashboards/partner.html:11 templates/dashboards/worker.html:38
+#: worktime/templates/worktime/worker_dashboard.OLD.html:276
+msgid "Datum"
+msgstr "Ημερομηνία"
+
+#: invoicing/templates/invoicing/index.html:60
+#: invoicing_backup_20260219/templates/invoicing/index.html:60
+#: templates/dashboards/partner.html:12
+msgid "Nema računa"
+msgstr "Δεν υπάρχει λογαριασμός"
+
+#: invoicing/views.py:178 invoicing_backup_20260219/views.py:178
+msgid "Klijent nema email adresu!"
+msgstr "Ο πελάτης δεν έχει διεύθυνση ηλεκτρονικού ταχυδρομείου!"
+
+#: invoicing/views.py:222 invoicing_backup_20260219/views.py:222
+#, python-brace-format
+msgid "Račun poslan na {invoice.client_email}"
+msgstr "Το τιμολόγιο στάλθηκε στο {invoice.client_email}"
+
+#: invoicing/views.py:224 invoicing_backup_20260219/views.py:224
+#, python-brace-format
+msgid "Greška pri slanju: {e}"
+msgstr "Σφάλμα αποστολής: {e}"
+
+#: invoicing/views.py:317 invoicing_backup_20260219/views.py:317
+msgid "Fiskalizacija je dostupna samo za HR račune!"
+msgstr "Η φορολόγηση είναι διαθέσιμη μόνο για λογαριασμούς HR!"
+
+#: invoicing/views.py:321 invoicing_backup_20260219/views.py:321
+msgid "Račun je već fiskaliziran!"
+msgstr "Ο λογαριασμός έχει ήδη φορολογηθεί!"
+
+#: invoicing/views.py:325 invoicing_backup_20260219/views.py:325
+msgid "Fiskalizirati se mogu samo računi (R), ne predračuni!"
+msgstr "Μπορούν να φορολογηθούν μόνο οι λογαριασμοί (R), όχι οι προπληρωμές!"
+
+#: invoicing/views.py:358 invoicing_backup_20260219/views.py:358
+msgid "Račun fiskaliziran (DEMO - CIS nedostupan)!"
+msgstr "Λογαριασμός φορολογημένος (DEMO - CIS μη διαθέσιμος)!"
+
+#: invoicing/views.py:359 invoicing/views.py:362
+#: invoicing_backup_20260219/views.py:359
+#: invoicing_backup_20260219/views.py:362
+#, python-brace-format
+msgid "ZKI: {invoice.zki} | JIR: {invoice.jir}"
+msgstr "ZKI: {invoice.zki} | JIR: {invoice.jir}"
+
+#: invoicing/views.py:361 invoicing_backup_20260219/views.py:361
+msgid "✓ Račun uspješno fiskaliziran!"
+msgstr "✓ Το τιμολόγιο καταχωρήθηκε επιτυχώς στο φορολογικό μητρώο!"
+
+#: invoicing/views.py:364 invoicing_backup_20260219/views.py:364
+msgid "Greška fiskalizacije: {result.get(\"error\")}"
+msgstr "Σφάλμα φορολογικής προσαρμογής: {result.get(\\\"error\\\")}"
+
+#: invoicing/views.py:367 invoicing_backup_20260219/views.py:367
+#, python-brace-format
+msgid "Greška: {e}"
+msgstr "Σφάλμα: {e}"
+
+#: invoicing/views.py:378 invoicing_backup_20260219/views.py:378
+msgid "Račun je već storniran!"
+msgstr "Ο λογαριασμός έχει ήδη ακυρωθεί!"
+
+#: invoicing/views.py:420 invoicing_backup_20260219/views.py:420
+#, python-brace-format
+msgid "Storno račun {storno_invoice.number} kreiran!"
+msgstr "Δημιουργήθηκε το τιμολόγιο ακύρωσης {storno_invoice.number}!"
+
+#: partners/models.py:8
+msgid "Klijent (Kupac)"
+msgstr "Πελάτης (Αγοραστής)"
+
+#: partners/models.py:9
+msgid "Dobavljač"
+msgstr "Προμηθευτής"
+
+#: partners/models.py:10
+msgid "Partner (Oboje)"
+msgstr "Συνεργάτης (Και τα δύο)"
+
+#: partners/models.py:11
+msgid "Zaposlenik"
+msgstr "Υπάλληλος"
+
+#: partners/models.py:14
+msgid "Vlasnik podataka"
+msgstr "Ιδιοκτήτης δεδομένων"
+
+#: partners/models.py:17
+msgid "Naziv / Ime"
+msgstr "Τίτλος / Όνομα"
+
+#: partners/models.py:21
+msgid "Ulica i broj"
+msgstr "Οδός και αριθμός"
+
+#: partners/models.py:32
+msgid "Tip partnera"
+msgstr "Συμβουλή συνεργάτη"
+
+#: partners/models.py:33
+msgid "Rok plaćanja (dana)"
+msgstr "Περίοδος πληρωμής (ημέρες)"
+
+#: partners/models.py:34
+msgid "Rabat (%)"
+msgstr "Έκπτωση (%)"
+
+#: partners/models.py:37
+msgid "Interne napomene"
+msgstr "Εσωτερικές σημειώσεις"
+
+#: partners/models.py:38
+msgid "Aktivan"
+msgstr "Ενεργός"
+
+#: partners/models.py:41
+msgid "Saldo"
+msgstr "Ισορροπία"
+
+#: partners/models.py:50 templates/base.html:115
+#: templates/dashboards/company_admin.html:10
+#: templates/dashboards/superadmin.html:68
+msgid "Partneri"
+msgstr "Συνεργάτες"
+
+#: premium_booking/templates/premium_booking/detail.html:9
+msgid "Booking"
+msgstr "Κράτηση"
+
+#: premium_booking/templates/premium_booking/detail.html:104
+msgid "PREMIUM RESOURCE"
+msgstr "ΠΡΕΜΙΟΥΜ ΠΟΡΟΣ"
+
+#: premium_booking/templates/premium_booking/detail.html:106
+msgid "Select your preferred date and time to initiate the booking protocol."
+msgstr "Επιλέξτε την προτιμώμενη ημερομηνία και ώρα για την έναρξη του πρωτοκόλλου κράτησης."
+"Επιλέξτε την ημερομηνία και την ώρα που προτιμάτε για να ξεκινήσετε τη "
+"διαδικασία κράτησης."
+
+#: premium_booking/templates/premium_booking/detail.html:119
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:16
+msgid "Mon"
+msgstr "Μου"
+
+#: premium_booking/templates/premium_booking/detail.html:119
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:17
+msgid "Tue"
+msgstr "Τρίτη"
+
+#: premium_booking/templates/premium_booking/detail.html:119
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:18
+msgid "Wed"
+msgstr "Στοίχημα"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:19
+msgid "Thu"
+msgstr "Φθινόπωρο"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:20
+msgid "Fri"
+msgstr "Δωρεάν"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:21
+msgid "Sat"
+msgstr "Είπε"
+
+#: premium_booking/templates/premium_booking/detail.html:120
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:22
+msgid "Sun"
+msgstr "Αυτοί"
+
+#: premium_booking/templates/premium_booking/detail.html:126
+msgid "Back to Calendar"
+msgstr "Επιστροφή στο ημερολόγιο"
+
+#: premium_booking/templates/premium_booking/detail.html:138
+msgid "Back to Time Selection"
+msgstr "Επιστροφή στην επιλογή χρόνου"
+
+#: premium_booking/templates/premium_booking/detail.html:139
+msgid "Final Details"
+msgstr "Τελικές λεπτομέρειες"
+
+#: premium_booking/templates/premium_booking/detail.html:143
+msgid "Full Name"
+msgstr "Πλήρες όνομα"
+
+#: premium_booking/templates/premium_booking/detail.html:144
+msgid "Email Address"
+msgstr "Διεύθυνση ηλεκτρονικού ταχυδρομείου"
+
+#: premium_booking/templates/premium_booking/detail.html:145
+msgid "Contact Phone"
+msgstr "Τηλέφωνο επικοινωνίας"
+
+#: premium_booking/templates/premium_booking/detail.html:146
+#: premium_booking/templates/premium_booking/detail.html:253
+#: premium_booking/templates/premium_booking/detail.html:259
+msgid "Complete Booking"
+msgstr "Ολοκλήρωση κράτησης"
+
+#: premium_booking/templates/premium_booking/detail.html:156
+msgid "SUCCESS"
+msgstr "ΕΠΙΤΥΧΙΑ"
+
+#: premium_booking/templates/premium_booking/detail.html:157
+msgid "Booking Reference"
+msgstr "Αριθμός κράτησης"
+
+#: premium_booking/templates/premium_booking/detail.html:158
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: premium_booking/templates/premium_booking/detail.html:231
+msgid "PROCESSING..."
+msgstr "ΕΠΕΞΕΡΓΑΣΙΑ..."
+
+#: premium_booking/templates/premium_booking/detail.html:251
+msgid "Error"
+msgstr "Σφάλμα"
+
+#: premium_booking/templates/premium_booking/detail.html:257
+msgid "System Error"
+msgstr "Σφάλμα συστήματος"
+
+#: premium_booking/templates/premium_booking/index.html:8
+#: premium_booking/templates/premium_booking/index.html:69
+msgid "Exclusive Rental"
+msgstr "Αποκλειστική ενοικίαση"
+
+#: premium_booking/templates/premium_booking/index.html:70
+msgid "Architecture of power and luxury"
+msgstr "Αρχιτεκτονική της εξουσίας και της πολυτέλειας"
+
+#: premium_booking/templates/premium_booking/index.html:76
+msgid "BOOKING PROCESS"
+msgstr "ΔΙΑΔΙΚΑΣΙΑ ΚΡΑΤΗΣΗΣ"
+
+#: premium_booking/templates/premium_booking/index.html:79
+msgid "Start Protocol"
+msgstr "Έναρξη πρωτοκόλλου"
+
+#: projects/models.py:6
+msgid "Naziv projekta"
+msgstr "Τίτλος του έργου"
+
+#: projects/models.py:7
+msgid "Šifra"
+msgstr "Κωδικός"
+
+#: projects/models.py:9 projects/templates/projects/detail.html:15
+#: templates/dashboards/investor.html:22
+msgid "Lokacija"
+msgstr "Τοποθεσία"
+
+#: projects/models.py:27 templates/dashboards/worker.html:38
+#: worktime/templates/worktime/worker_dashboard.OLD.html:188
+#: worktime/templates/worktime/worker_dashboard.OLD.html:267
+msgid "Projekt"
+msgstr "Σχέδιο"
+
+#: projects/models.py:28 projects/templates/projects/index.html:3
+#: projects/templates/projects/index.html:4 templates/base.html:107
+#: templates/dashboards/superadmin.html:64
+msgid "Projekti"
+msgstr "Έργο"
+
+#: projects/templates/projects/detail.html:16
+#: templates/dashboards/investor.html:26
+msgid "Voditelj"
+msgstr "Παρουσιαστής"
+
+#: projects/templates/projects/detail.html:23
+msgid "Ažuriranja"
+msgstr "Ενημερώσεις"
+
+#: projects/templates/projects/detail.html:24
+msgid "Nema ažuriranja"
+msgstr "Δεν υπάρχουν ενημερώσεις"
+
+#: projects/templates/projects/detail.html:30
+msgid "Fotografije projekta"
+msgstr "Φωτογραφίες του έργου"
+
+#: projects/templates/projects/detail.html:40
+msgid "Nema fotografija"
+msgstr "Απαράδεκτη φωτογραφία"
+
+#: projects/templates/projects/index.html:7
+msgid "Svi projekti"
+msgstr "Όλα τα έργα"
+
+#: projects/templates/projects/index.html:8
+msgid "Novi projekt"
+msgstr "Νέο έργο"
+
+#: projects/templates/projects/index.html:22
+msgid "Otvori"
+msgstr "Ανοιχτό"
+
+#: projects/templates/projects/index.html:30
+#: templates/dashboards/company_admin.html:21
+#: templates/dashboards/manager.html:21
+msgid "Nema projekata"
+msgstr "Δεν υπάρχουν έργα"
+
+#: projects/templates/projects/index.html:31
+msgid "Dodaj prvi projekt"
+msgstr "Προσθέστε το πρώτο έργο"
+
+#: templates/base.html:104
+msgid "Navigacija"
+msgstr "Πλοήγηση"
+
+#: templates/base.html:105
+msgid "Početna"
+msgstr "Αρχική"
+
+#: templates/base.html:106 templates/dashboards/superadmin.html:52
+#: worktime/templates/worktime/worker_dashboard.OLD.html:5
+#: worktime/templates/worktime/worker_dashboard.html:4
+msgid "Radno vrijeme"
+msgstr "Ώρες λειτουργίας"
+
+#: templates/base.html:108
+msgid "Termini"
+msgstr "Όροι"
+
+#: templates/base.html:111
+msgid "Upravljanje"
+msgstr "Διαχείριση"
+
+#: templates/base.html:112
+msgid "Dashboard"
+msgstr "Πίνακας ελέγχου"
+
+#: templates/base.html:113 templates/dashboards/superadmin.html:12
+#: templates/dashboards/superadmin.html:74
+msgid "Korisnici"
+msgstr "Χρήστες"
+
+#: templates/base.html:116
+msgid "Fakture"
+msgstr "Τιμολόγιο"
+
+#: templates/base.html:118
+msgid "Financije"
+msgstr "Χρηματοοικονομικά"
+
+#: templates/base.html:122
+msgid "Moduli"
+msgstr "Φόρμες"
+
+#: templates/base.html:123
+msgid "Skladište"
+msgstr "Αποθήκη"
+
+#: templates/base.html:124
+msgid "Webshop"
+msgstr "Ηλεκτρονικό κατάστημα"
+
+#: templates/base.html:125
+msgid "Najam"
+msgstr "Το δέρμα μου"
+
+#: templates/base.html:126
+msgid "Fitness"
+msgstr "Φυσική κατάσταση"
+
+#: templates/base.html:127
+msgid "Osiguranje"
+msgstr "Ασφάλιση"
+
+#: templates/base.html:128 templates/dashboards/superadmin.html:86
+msgid "Kalkulator"
+msgstr "Υπολογιστής"
+
+#: templates/base.html:130
+msgid "Sustav"
+msgstr "Σύστημα"
+
+#: templates/base.html:132 website/models.py:60
+msgid "Web stranica"
+msgstr "Ιστοσελίδα"
+
+#: templates/base.html:136
+msgid "Odjava"
+msgstr "Αποσύνδεση"
+
+#: templates/dashboards/company_admin.html:7
+msgid "Fakturirano"
+msgstr "Τιμολογημένο"
+
+#: templates/dashboards/company_admin.html:9
+msgid "Sati (tjedan)"
+msgstr "Ώρες (ανά εβδομάδα)"
+
+#: templates/dashboards/company_admin.html:14
+msgid "Zadnje fakture"
+msgstr "Τελευταίες τιμολογίες"
+
+#: templates/dashboards/company_admin.html:16
+msgid "Nema faktura"
+msgstr "Τιμολόγιο Nema"
+
+#: templates/dashboards/company_admin.html:20
+#: templates/dashboards/worker.html:22
+msgid "Aktivni projekti"
+msgstr "Ενεργά έργα"
+
+#: templates/dashboards/investor.html:3
+msgid "Pregled investicija"
+msgstr "Επισκόπηση επένδυσης"
+
+#: templates/dashboards/investor.html:4
+msgid "Pregled vaših projekata"
+msgstr "Επισκόπηση των έργων σας"
+
+#: templates/dashboards/investor.html:31
+msgid "Detalji i fotografije"
+msgstr "Λεπτομέρειες και φωτογραφίες"
+
+#: templates/dashboards/investor.html:39
+msgid "Nema dostupnih projekata"
+msgstr "Δεν υπάρχουν διαθέσιμα έργα"
+
+#: templates/dashboards/investor.html:40
+msgid "Vaši projekti će biti prikazani ovdje čim budu dodijeljeni."
+msgstr "Τα έργα σας θα εμφανίζονται εδώ μόλις σας ανατεθούν."
+
+#: templates/dashboards/manager.html:4
+msgid "Moji projekti i tim"
+msgstr "Τα έργα και η ομάδα μου"
+
+#: templates/dashboards/manager.html:7
+msgid "Moji projekti"
+msgstr "Τα έργα μου"
+
+#: templates/dashboards/manager.html:8
+msgid "Sati tima (tjedan)"
+msgstr "Ώρες ομάδας (ανά εβδομάδα)"
+
+#: templates/dashboards/manager.html:9
+msgid "Na odobrenju"
+msgstr "Εγκρίθηκε"
+
+#: templates/dashboards/manager.html:19
+msgid "Otvori projekt"
+msgstr "Ανοιχτό έργο"
+
+#: templates/dashboards/partner.html:3
+msgid "Partner portal"
+msgstr "Πύλη συνεργατών"
+
+#: templates/dashboards/partner.html:4
+msgid "Vaši računi i termini"
+msgstr "Οι λογαριασμοί και οι προθεσμίες σας"
+
+#: templates/dashboards/partner.html:10
+msgid "Vaši računi"
+msgstr "Οι λογαριασμοί σας"
+
+#: templates/dashboards/superadmin.html:20
+msgid "Aktivni"
+msgstr "Ενεργοί"
+
+#: templates/dashboards/superadmin.html:28
+msgid "Staff"
+msgstr "Προσωπικό"
+
+#: templates/dashboards/superadmin.html:36
+msgid "Admini"
+msgstr "Διαχειριστής"
+
+#: templates/dashboards/superadmin.html:52
+msgid "Štoperica, unos sati, evidencija"
+msgstr "Χρονόμετρο, καταγραφή ώρας, τήρηση αρχείων"
+
+#: templates/dashboards/superadmin.html:56
+msgid "Evidencija sati"
+msgstr "Καταγραφή ωρών"
+
+#: templates/dashboards/superadmin.html:56
+msgid "Pregled, odobrenje, PDF export"
+msgstr "Επισκόπηση, έγκριση, εξαγωγή PDF"
+
+#: templates/dashboards/superadmin.html:60
+msgid "Kreiraj i upravljaj fakturama"
+msgstr "Δημιουργήστε και διαχειριστείτε τις τιμολογίες σας"
+
+#: templates/dashboards/superadmin.html:64
+msgid "Aktivni projekti i zadaci"
+msgstr "Ενεργά έργα και εργασίες"
+
+#: templates/dashboards/superadmin.html:68
+msgid "Klijenti i dobavljači"
+msgstr "Πελάτες και προμηθευτές"
+
+#: templates/dashboards/superadmin.html:74
+msgid "Upravljanje korisnicima i rolama"
+msgstr "Διαχείριση χρηστών και ρόλων"
+
+#: templates/dashboards/superadmin.html:78
+msgid "Upravljanje tvrtkama"
+msgstr "Διοίκηση επιχειρήσεων"
+
+#: templates/dashboards/superadmin.html:82
+msgid "Upload i pregled dokumenata"
+msgstr "Ανεβάστε και προβάλετε έγγραφα"
+
+#: templates/dashboards/superadmin.html:86
+msgid "Procjene i kalkulacije"
+msgstr "Εκτιμήσεις και υπολογισμοί"
+
+#: templates/dashboards/superadmin.html:90
+msgid "Napredne postavke sustava"
+msgstr "Προηγμένες ρυθμίσεις συστήματος"
+
+#: templates/dashboards/superadmin.html:98
+msgid "Zadnje prijave"
+msgstr "Τελευταίες εγγραφές"
+
+#: templates/dashboards/superadmin.html:102
+msgid "Korisnik"
+msgstr "Χρήστης"
+
+#: templates/dashboards/superadmin.html:102
+msgid "Kada"
+msgstr "Όταν"
+
+#: templates/dashboards/superadmin.html:112
+msgid "Nema podataka"
+msgstr "Δεν υπάρχουν δεδομένα"
+
+#: templates/dashboards/worker.html:3 templates/dashboards/worker.html:4
+#: worktime/templates/worktime/worker_dashboard.OLD.html:4
+#: worktime/templates/worktime/worker_dashboard.html:3
+msgid "Moj radni portal"
+msgstr "Η πύλη εργασίας μου"
+
+#: templates/dashboards/worker.html:10
+msgid "Moji sati (7 dana)"
+msgstr "Οι μέρες μου (7 ημέρες)"
+
+#: templates/dashboards/worker.html:16
+msgid "Čekaju odobrenje"
+msgstr "Περιμένουν έγκριση."
+
+#: templates/dashboards/worker.html:32
+msgid "Moji unosi radnog vremena"
+msgstr "Οι καταχωρήσεις του χρόνου εργασίας μου"
+
+#: templates/dashboards/worker.html:34
+#: worktime/templates/worktime/worker_dashboard.html:133
+msgid "Novi unos"
+msgstr "Νόβι Ούνος"
+
+#: templates/dashboards/worker.html:38
+msgid "Sati"
+msgstr "Σάββατο"
+
+#: templates/dashboards/worker.html:48
+msgid "Predano"
+msgstr "Αφοσιωμένος"
+
+#: templates/dashboards/worker.html:49
+msgid "Odobreno"
+msgstr "Εγκρίθηκε"
+
+#: templates/dashboards/worker.html:53
+msgid "Nema unosa"
+msgstr "Δεν υπάρχουν καταχωρήσεις"
+
+#: templates/dashboards/worker.html:62
+msgid "Upload slika s terena"
+msgstr "Ανεβάστε φωτογραφία από το πεδίο"
+
+#: templates/dashboards/worker.html:68
+msgid "Odaberi projekt"
+msgstr "Σχέδιο Odaberi"
+
+#: templates/dashboards/worker.html:76
+msgid "Opis (opcionalno)"
+msgstr "Περιγραφή (προαιρετικό)"
+
+#: templates/dashboards/worker.html:79
+msgid "Uploadaj slike"
+msgstr "Ανεβάστε φωτογραφίες"
+
+#: templates/dashboards/worker.html:83
+msgid "Nisi dodijeljen ni jednom aktivnom projektu."
+msgstr "Δεν έχετε ανατεθεί σε κανένα ενεργό έργο."
+
+#: templates/dashboards/worker.html:88
+msgid "Nadolazeći termini"
+msgstr "Όροι Nadolazeći"
+
+#: templates/dashboards/worker.html:100
+msgid "Nema nadolazećih termina"
+msgstr "Δεν υπάρχουν επικείμενες συναντήσεις."
+
+#: venv/lib/python3.12/site-packages/django/contrib/messages/apps.py:16
+msgid "Messages"
+msgstr "Μηνύματα"
+
+#: venv/lib/python3.12/site-packages/django/contrib/sitemaps/apps.py:8
+msgid "Site Maps"
+msgstr "Χάρτες ιστότοπου"
+
+#: venv/lib/python3.12/site-packages/django/contrib/staticfiles/apps.py:9
+msgid "Static Files"
+msgstr "Στατικά αρχεία"
+
+#: venv/lib/python3.12/site-packages/django/contrib/syndication/apps.py:7
+msgid "Syndication"
+msgstr "Συνδικαλισμός"
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:30
+msgid "…"
+msgstr "…"
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:32
+msgid "That page number is not an integer"
+msgstr "Ο αριθμός της σελίδας δεν είναι ακέραιος."
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:33
+msgid "That page number is less than 1"
+msgstr "Ο αριθμός της σελίδας είναι μικρότερος από 1"
+
+#: venv/lib/python3.12/site-packages/django/core/paginator.py:34
+msgid "That page contains no results"
+msgstr "Αυτή η σελίδα δεν περιέχει αποτελέσματα."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:22
+msgid "Enter a valid value."
+msgstr "Εισάγετε μια έγκυρη τιμή."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:70
+msgid "Enter a valid domain name."
+msgstr "Εισαγάγετε ένα έγκυρο όνομα τομέα."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:155
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:768
+msgid "Enter a valid URL."
+msgstr "Εισάγετε μια έγκυρη διεύθυνση URL."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:216
+msgid "Enter a valid integer."
+msgstr "Εισάγετε έναν έγκυρο ακέραιο αριθμό."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:227
+msgid "Enter a valid email address."
+msgstr "Εισάγετε μια έγκυρη διεύθυνση ηλεκτρονικού ταχυδρομείου."
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: venv/lib/python3.12/site-packages/django/core/validators.py:310
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+"Εισάγετε έγκυρο “slug” αποτελούμενο από γράμματα, αριθμούς, κάτω παύλες ή "
+"παύλες."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:318
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or"
+" hyphens."
+msgstr ""
+"Εισάγετε έγκυρο “slug” αποτελούμενο από Unicode γράμματα, αριθμούς, κάτω "
+"παύλες ή παύλες."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:330
+#: venv/lib/python3.12/site-packages/django/core/validators.py:339
+#: venv/lib/python3.12/site-packages/django/core/validators.py:353
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2215
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr "Εισαγάγετε μια έγκυρη διεύθυνση %(protocol)s."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:332
+msgid "IPv4"
+msgstr "Πρωτόκολλο Διαδικτύου έκδοση 4"
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:341
+#: venv/lib/python3.12/site-packages/django/utils/ipv6.py:43
+msgid "IPv6"
+msgstr "Πρωτόκολλο Διαδικτύου έκδοση 6"
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:355
+msgid "IPv4 or IPv6"
+msgstr "IPv4 ή IPv6"
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:396
+msgid "Enter only digits separated by commas."
+msgstr "Εισάγετε μόνο ψηφία διαχωρισμένα με κόμματα."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:402
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr "Βεβαιωθείτε ότι αυτή η τιμή είναι %(limit_value)s (είναι %(show_value)s)."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:437
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr "Βεβαιωθείτε ότι αυτή η τιμή είναι μικρότερη ή ίση με %(limit_value)s."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:446
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr "Βεβαιωθείτε ότι αυτή η τιμή είναι μεγαλύτερη ή ίση με %(limit_value)s."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:455
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr "Βεβαιωθείτε ότι αυτή η τιμή είναι πολλαπλάσιο του μεγέθους βήματος %(limit_value)s."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:462
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:494
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:512
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:535
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:359
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:398
+msgid "Enter a number."
+msgstr "Εισάγετε έναν αριθμό."
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:537
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:542
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:547
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:618
+#, python-format
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/core/validators.py:680
+msgid "Null characters are not allowed."
+msgstr "Δεν επιτρέπονται κενά χαρακτήρες."
+
+#: venv/lib/python3.12/site-packages/django/db/models/base.py:1572
+#: venv/lib/python3.12/site-packages/django/forms/models.py:908
+msgid "and"
+msgstr "και"
+
+#: venv/lib/python3.12/site-packages/django/db/models/base.py:1574
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr "Το %(model_name)s με αυτό το %(field_labels)s υπάρχει ήδη."
+
+#: venv/lib/python3.12/site-packages/django/db/models/constraints.py:22
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr "Ο περιορισμός \"%(name)s\" έχει παραβιαστεί."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr "Η τιμή %(value)r δεν είναι έγκυρη επιλογή."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:135
+msgid "This field cannot be null."
+msgstr "Αυτό το πεδίο δεν μπορεί να είναι κενό."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:136
+msgid "This field cannot be blank."
+msgstr "Αυτό το πεδίο δεν μπορεί να μείνει κενό."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr "Το %(model_name)s με αυτό το %(field_label)s υπάρχει ήδη."
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr "Πεδίο τύπου: %(field_type)s"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1156
+#, python-format
+msgid "“%(value)s” value must be either True or False."
+msgstr "Η τιμή \"%(value)s\" πρέπει να είναι είτε True είτε False."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1157
+#, python-format
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr "Η τιμή \"%(value)s\" πρέπει να είναι είτε True είτε False είτε None."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1159
+msgid "Boolean (Either True or False)"
+msgstr "Boolean (Είτε Αληθές είτε Ψευδές)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1209
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr "Συμβολοσειρά (έως %(max_length)s)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1211
+msgid "String (unlimited)"
+msgstr "Συρματόσχοινο (απεριόριστο)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1320
+msgid "Comma-separated integers"
+msgstr "Ακέραιοι αριθμοί διαχωρισμένοι με κόμματα"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1421
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1425
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1560
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1429
+msgid "Date (without time)"
+msgstr "Ημερομηνία (χωρίς ώρα)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1556
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1564
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1569
+msgid "Date (with time)"
+msgstr "Ημερομηνία (με ώρα)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1696
+#, python-format
+msgid "“%(value)s” value must be a decimal number."
+msgstr "Η τιμή \"%(value)s\" πρέπει να είναι δεκαδικός αριθμός."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1698
+msgid "Decimal number"
+msgstr "Δεκαδικός αριθμός"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1859
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1863
+msgid "Duration"
+msgstr "Διάρκεια"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1915
+msgid "Email address"
+msgstr "Διεύθυνση ηλεκτρονικού ταχυδρομείου"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1940
+msgid "File path"
+msgstr "Διαδρομή αρχείου"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2018
+#, python-format
+msgid "“%(value)s” value must be a float."
+msgstr "Η τιμή \"%(value)s\" πρέπει να είναι float."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2020
+msgid "Floating point number"
+msgstr "Αριθμός κινητής υποδιαστολής"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2060
+#, python-format
+msgid "“%(value)s” value must be an integer."
+msgstr "Η τιμή \"%(value)s\" πρέπει να είναι ακέραιος."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2062
+msgid "Integer"
+msgstr "Ολόκληρο"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2158
+msgid "Big (8 byte) integer"
+msgstr "Μεγάλος (8 byte) ακέραιος αριθμός"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2175
+msgid "Small integer"
+msgstr "Μικρός ακέραιος αριθμός"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2183
+msgid "IPv4 address"
+msgstr "διεύθυνση IPv4"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2214
+msgid "IP address"
+msgstr "διεύθυνση IP"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2305
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2306
+#, python-format
+msgid "“%(value)s” value must be either None, True or False."
+msgstr "Η τιμή \"%(value)s\" πρέπει να είναι είτε None, True ή False."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2308
+msgid "Boolean (Either True, False or None)"
+msgstr "Boolean (Είτε True, False είτε None)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2359
+msgid "Positive big integer"
+msgstr "Θετικός μεγάλος ακέραιος αριθμός"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2374
+msgid "Positive integer"
+msgstr "Θετικός ακέραιος αριθμός"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2389
+msgid "Positive small integer"
+msgstr "Θετικός μικρός ακέραιος αριθμός"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2405
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr "Slug (έως %(max_length)s)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2441
+msgid "Text"
+msgstr "Κείμενο"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2521
+#, python-format
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2525
+#, python-format
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2529
+msgid "Time"
+msgstr "Χρόνος"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2637
+msgid "URL"
+msgstr "Διεύθυνση ιστού"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2661
+msgid "Raw binary data"
+msgstr "Ακατέργαστα δυαδικά δεδομένα"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2726
+#, python-format
+msgid "“%(value)s” is not a valid UUID."
+msgstr "Το \"%(value)s\" δεν είναι έγκυρο UUID."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:2728
+msgid "Universally unique identifier"
+msgstr "Παγκόσμια μοναδικός αναγνωριστικός κωδικός"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/files.py:244
+msgid "File"
+msgstr "Αρχείο"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/files.py:420
+msgid "Image"
+msgstr "Εικόνα"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/json.py:24
+msgid "A JSON object"
+msgstr "Ένα αντικείμενο JSON"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/json.py:26
+msgid "Value must be valid JSON."
+msgstr "Η τιμή πρέπει να είναι έγκυρη JSON."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:932
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r does not exist."
+msgstr "Η παρουσία %(model)s με %(field)s %(value)r δεν υπάρχει."
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:934
+msgid "Foreign Key (type determined by related field)"
+msgstr "Ξένο κλειδί (τύπος που καθορίζεται από σχετικό πεδίο)"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1228
+msgid "One-to-one relationship"
+msgstr "Μία προς μία σχέση"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1285
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr "Σχέση %(from)s-%(to)s"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1287
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr "%(from)s-%(to)s σχέσεις"
+
+#: venv/lib/python3.12/site-packages/django/db/models/fields/related.py:1335
+msgid "Many-to-many relationship"
+msgstr "Πολλαπλή σχέση"
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the
+#. label
+#: venv/lib/python3.12/site-packages/django/forms/boundfield.py:185
+msgid ":?.!"
+msgstr ":?.!"
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:95
+msgid "This field is required."
+msgstr "Αυτό το πεδίο είναι υποχρεωτικό."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:308
+msgid "Enter a whole number."
+msgstr "Εισάγετε έναν ακέραιο αριθμό."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:479
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1260
+msgid "Enter a valid date."
+msgstr "Εισάγετε μια έγκυρη ημερομηνία."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:502
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1261
+msgid "Enter a valid time."
+msgstr "Εισάγετε μια έγκυρη ώρα."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:529
+msgid "Enter a valid date/time."
+msgstr "Εισαγάγετε μια έγκυρη ημερομηνία/ώρα."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:563
+msgid "Enter a valid duration."
+msgstr "Εισάγετε μια έγκυρη διάρκεια."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:564
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr "Ο αριθμός των ημερών πρέπει να είναι μεταξύ {min_days} και {max_days}."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:633
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr "Δεν υποβλήθηκε αρχείο. Ελέγξτε τον τύπο κωδικοποίησης στη φόρμα."
+"Δεν υποβλήθηκε κανένα αρχείο. Ελέγξτε τον τύπο κωδικοποίησης στη φόρμα."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:634
+msgid "No file was submitted."
+msgstr "Δεν υποβλήθηκε κανένα αρχείο."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:635
+msgid "The submitted file is empty."
+msgstr "Το υποβληθέν αρχείο είναι κενό."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:637
+#, python-format
+msgid ""
+"Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:642
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr "Υποβάλετε ένα αρχείο ή επιλέξτε το καθαρό πλαίσιο ελέγχου, όχι και τα δύο."
+"Παρακαλώ υποβάλετε ένα αρχείο ή επιλέξτε το πλαίσιο ελέγχου, όχι και τα δύο."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:710
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+"Ανεβάστε έγκυρη εικόνα. Το αρχείο που ανεβάσατε δεν ήταν εικόνα ή ήταν "
+"κατεστραμμένο."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:882
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:968
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr "Επιλέξτε μια έγκυρη επιλογή. Το %(value)s δεν είναι μία από τις διαθέσιμες επιλογές."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:970
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1089
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1590
+msgid "Enter a list of values."
+msgstr "Εισάγετε μια λίστα τιμών."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1090
+msgid "Enter a complete value."
+msgstr "Εισάγετε μια πλήρη τιμή."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1332
+msgid "Enter a valid UUID."
+msgstr "Εισάγετε ένα έγκυρο UUID."
+
+#: venv/lib/python3.12/site-packages/django/forms/fields.py:1362
+msgid "Enter a valid JSON."
+msgstr "Εισάγετε ένα έγκυρο JSON."
+
+#. Translators: This is the default suffix added to form field labels
+#: venv/lib/python3.12/site-packages/django/forms/forms.py:94
+msgid ":"
+msgstr ":"
+
+#: venv/lib/python3.12/site-packages/django/forms/forms.py:230
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr "(Κρυφό πεδίο %(name)s) %(error)s"
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:484
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:491
+msgid "Order"
+msgstr "Παραγγελία"
+
+#: venv/lib/python3.12/site-packages/django/forms/formsets.py:499
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr "Διορθώστε τα διπλότυπα δεδομένα για %(field)s."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr "Διορθώστε τα διπλότυπα δεδομένα για %(field)s, τα οποία πρέπει να είναι μοναδικά."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:922
+msgid "Please correct the duplicate values below."
+msgstr "Διορθώστε τις διπλές τιμές παρακάτω."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr "Η ενσωματωμένη τιμή δεν ταιριάζει με την γονική παρουσία."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1450
+msgid ""
+"Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+"Επιλέξτε μια έγκυρη επιλογή. Αυτή η επιλογή δεν είναι μία από τις διαθέσιμες"
+" επιλογές."
+
+#: venv/lib/python3.12/site-packages/django/forms/models.py:1594
+#, python-format
+msgid "“%(pk)s” is not a valid value."
+msgstr "Το \"%(pk)s\" δεν είναι έγκυρη τιμή."
+
+#: venv/lib/python3.12/site-packages/django/forms/utils.py:227
+#, python-format
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:461
+msgid "Clear"
+msgstr "Καθαρό"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:462
+msgid "Currently"
+msgstr "Επί του παρόντος"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:463
+msgid "Change"
+msgstr "Αλλαγή"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:800
+msgid "Unknown"
+msgstr "Άγνωστο"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:801
+msgid "Yes"
+msgstr "Αποκλειστικοί Πόροι"
+
+#: venv/lib/python3.12/site-packages/django/forms/widgets.py:802
+msgid "No"
+msgstr "Από"
+
+#. Translators: Please do not add spaces around commas.
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr "ναι, όχι, ίσως"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:903
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr "%s KB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr "%s MB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr "%s GB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr "%s TB"
+
+#: venv/lib/python3.12/site-packages/django/template/defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr "%s PB"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:74
+msgid "p.m."
+msgstr "μ.μ."
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:75
+msgid "a.m."
+msgstr "το πρωί"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:80
+msgid "PM"
+msgstr "Πρωθυπουργός"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:81
+msgid "AM"
+msgstr "Προς το παρόν"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:153
+msgid "midnight"
+msgstr "μεσάνυχτα"
+
+#: venv/lib/python3.12/site-packages/django/utils/dateformat.py:155
+msgid "noon"
+msgstr "τότε"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:7
+msgid "Monday"
+msgstr "Δευτέρα"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:8
+msgid "Tuesday"
+msgstr "Τρίτη"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:9
+msgid "Wednesday"
+msgstr "Τετάρτη"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:10
+msgid "Thursday"
+msgstr "Πέμπτη"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:11
+msgid "Friday"
+msgstr "Παρασκευή"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:12
+msgid "Saturday"
+msgstr "Σάββατο"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:13
+msgid "Sunday"
+msgstr "Κυριακή"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:25
+msgid "January"
+msgstr "Ιανουάριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:26
+msgid "February"
+msgstr "Φεβρουάριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:27
+msgid "March"
+msgstr "Μάρτιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:28
+msgid "April"
+msgstr "Απρίλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:29
+msgid "May"
+msgstr "Υπάρχει"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:30
+msgid "June"
+msgstr "Ιούνιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:31
+msgid "July"
+msgstr "Ιούλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:32
+msgid "August"
+msgstr "Αύγουστος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:33
+msgid "September"
+msgstr "Σεπτέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:34
+msgid "October"
+msgstr "Οκτώβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:35
+msgid "November"
+msgstr "Νοέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:36
+msgid "December"
+msgstr "Δεκέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:39
+msgid "jan"
+msgstr "όχι"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:40
+msgid "feb"
+msgstr "Φεβρουάριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:41
+msgid "mar"
+msgstr "ως"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:42
+msgid "apr"
+msgstr "Απρίλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:43
+msgid "may"
+msgstr "έχει"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:44
+msgid "jun"
+msgstr "Ιούνιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:45
+msgid "jul"
+msgstr "Ιούλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:46
+msgid "aug"
+msgstr "αύγ"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:47
+msgid "sep"
+msgstr "επτά"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:48
+msgid "oct"
+msgstr "οκτώ"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:49
+msgid "nov"
+msgstr "νέος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:50
+msgid "dec"
+msgstr "Δεκέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr "Όχι."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr "Φεβ."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:55
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Μάρτιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr "Απρίλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "Υπάρχει"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr "Ιούνιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr "Ιούλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr "Αύγ."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr "Επτά."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr "Οκτ."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr "Νοέμβριος."
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr "Δεκέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr "Ιανουάριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr "Φεβρουάριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:69
+msgctxt "alt. month"
+msgid "March"
+msgstr "Μάρτιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr "Απρίλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr "Υπάρχει"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr "Ιούνιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr "Ιούλιος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr "Αύγουστος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr "Σεπτέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr "Οκτώβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr "Νοέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr "Δεκέμβριος"
+
+#: venv/lib/python3.12/site-packages/django/utils/ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr "Αυτή δεν είναι έγκυρη διεύθυνση IPv6."
+
+#: venv/lib/python3.12/site-packages/django/utils/text.py:75
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr "%(truncated_text)s…"
+
+#: venv/lib/python3.12/site-packages/django/utils/text.py:286
+msgid "or"
+msgstr "ή"
+
+#. Translators: This string is used as a separator between list elements
+#: venv/lib/python3.12/site-packages/django/utils/text.py:305
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:135
+msgid ", "
+msgstr ", "
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:29
+msgid "Forbidden"
+msgstr "Απαγορεύεται"
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr "Η επαλήθευση CSRF απέτυχε. Η αίτηση ακυρώθηκε."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:34
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+"Βλέπετε αυτό το μήνυμα επειδή αυτός ο ιστότοπος HTTPS απαιτεί κεφαλίδα "
+"\"Referer\" από τον περιηγητή σας, αλλά δεν εστάλη. Απαιτείται για λόγους "
+"ασφαλείας."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:40
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+"Εάν ο περιηγητής σας έχει απενεργοποιήσει τις κεφαλίδες \"Referer\", "
+"ενεργοποιήστε τες ξανά τουλάχιστον για αυτόν τον ιστότοπο."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:45
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or"
+" including the “Referrer-Policy: no-referrer” header, please remove them. "
+"The CSRF protection requires the “Referer” header to do strict referer "
+"checking. If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+"Εάν χρησιμοποιείτε την ετικέτα <meta name=\"referrer\" content=\"no-"
+"referrer\"> ή την κεφαλίδα “Referrer-Policy: no-referrer”, αφαιρέστε τα. Η "
+"προστασία CSRF χρειάζεται την κεφαλίδα “Referer”."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+"Βλέπετε αυτό το μήνυμα επειδή αυτός ο ιστότοπος απαιτεί cookie CSRF κατά την"
+" υποβολή φορμών. Απαιτείται για λόγους ασφαλείας."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:60
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+"Εάν ο περιηγητής σας έχει απενεργοποιήσει τα cookies, ενεργοποιήστε τα ξανά "
+"τουλάχιστον για αυτόν τον ιστότοπο."
+
+#: venv/lib/python3.12/site-packages/django/views/csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr "Περισσότερες πληροφορίες είναι διαθέσιμες με DEBUG=True."
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:44
+msgid "No year specified"
+msgstr "Δεν προσδιορίζεται έτος"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:64
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:115
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:214
+msgid "Date out of range"
+msgstr "Ημερομηνία εκτός εύρους"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:94
+msgid "No month specified"
+msgstr "Δεν έχει καθοριστεί μήνας"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:147
+msgid "No day specified"
+msgstr "Δεν έχει καθοριστεί ημέρα"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:194
+msgid "No week specified"
+msgstr "Δεν έχει καθοριστεί εβδομάδα"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:349
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:380
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr "Δεν υπάρχουν %(verbose_name_plural)s διαθέσιμα"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:652
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/dates.py:692
+#, python-format
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr "Μη έγκυρη συμβολοσειρά ημερομηνίας \"%(datestr)s\" δεδομένης μορφής \"%(format)s\""
+
+#: venv/lib/python3.12/site-packages/django/views/generic/detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr "Δεν βρέθηκαν %(verbose_name)s που να ταιριάζουν με το ερώτημα"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:70
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr "Η σελίδα δεν είναι \"τελευταία\", ούτε μπορεί να μετατραπεί σε int."
+"Η σελίδα δεν είναι «τελευταία» και δεν μπορεί να μετατραπεί σε ακέραιο "
+"αριθμό."
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr "Μη έγκυρη σελίδα (%(page_number)s): %(message)s"
+
+#: venv/lib/python3.12/site-packages/django/views/generic/list.py:169
+#, python-format
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr "Κενή λίστα και το \"%(class_name)s.allow_empty\" είναι False."
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr "Οι δείκτες καταλόγου δεν επιτρέπονται εδώ."
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:51
+#, python-format
+msgid "“%(path)s” does not exist"
+msgstr "Το \"%(path)s\" δεν υπάρχει"
+
+#: venv/lib/python3.12/site-packages/django/views/static.py:68
+#: venv/lib/python3.12/site-packages/django/views/templates/directory_index.html:8
+#: venv/lib/python3.12/site-packages/django/views/templates/directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr "Index of %(directory)s"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:7
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr "Η εγκατάσταση ολοκληρώθηκε με επιτυχία! Συγχαρητήρια!"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a "
+"href=\"https://docs.djangoproject.com/en/%(version)s/ref/settings/#debug\" "
+"target=\"_blank\" rel=\"noopener\">DEBUG=True</a> is in your settings file "
+"and you have not configured any URLs."
+msgstr ""
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:217
+msgid "Django Documentation"
+msgstr "Τεκμηρίωση Django"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:218
+msgid "Topics, references, &amp; how-to’s"
+msgstr "Θέματα, αναφορές και οδηγίες χρήσης"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr "Εκπαιδευτικό πρόγραμμα: Μια εφαρμογή δημοσκόπησης"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:227
+msgid "Get started with Django"
+msgstr "Ξεκινήστε με το Django"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:235
+msgid "Django Community"
+msgstr "Κοινότητα Django"
+
+#: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr "Συνδεθείτε, λάβετε βοήθεια ή συνεισφέρετε"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:14
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:54
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:62
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:72
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:82
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:86
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:118
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:137
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:364
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:369
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:379
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:399
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:416
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:435
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:441
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:458
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:470
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:478
+msgid "title"
+msgstr "Τίτλος"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:18
+msgid "password"
+msgstr "κωδικός πρόσβασης"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:245
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:264
+msgid "title a"
+msgstr "Τίτλος Α"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:249
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:275
+msgid "title b"
+msgstr "Τίτλος Β"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:253
+msgid "title c"
+msgstr "Τίτλος C"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:257
+msgid "title d"
+msgstr "Τίτλος Δ"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/models.py:380
+msgid "visits"
+msgstr "επισκέψεις"
+
+#: venv/lib/python3.12/site-packages/modeltranslation/tests/translation.py:62
+msgid "Sorry, translation is not available."
+msgstr "Συγγνώμη, η μετάφραση δεν είναι διαθέσιμη."
+
+#: venv/lib/python3.12/site-packages/modeltranslation/widgets.py:32
+msgid "None"
+msgstr "Κανένα"
+
+#: website/models.py:16
+msgid "Stranica"
+msgstr "Σελίδα"
+
+#: website/models.py:17
+msgid "Stranice"
+msgstr "Σελίδες"
+
+#: website/models.py:32
+msgid "Pozadinska slika"
+msgstr "Εικόνα φόντου"
+
+#: website/models.py:34
+msgid "Video pozadina"
+msgstr "Φόντο βίντεο"
+
+#: website/models.py:41
+msgid "Hero sekcija"
+msgstr "Ενότητα ήρωας"
+
+#: website/models.py:42
+msgid "Hero sekcije"
+msgstr "Ήρωας της ενότητας"
+
+#: website/models.py:49
+msgid "Naziv brenda"
+msgstr "Εμπορική ονομασία"
+
+#: website/models.py:51
+msgid "Emoji ikona"
+msgstr "Εικονίδιο Emoji"
+
+#: website/models.py:53
+msgid "Logo"
+msgstr "Σύντομα"
+
+#: website/models.py:61
+msgid "Redoslijed"
+msgstr "Παραγγελία"
+
+#: website/models.py:65
+msgid "Brend"
+msgstr "Brend"
+
+#: website/models.py:66 website/templates/website/index.html:18
+msgid "Brendovi"
+msgstr "Μάρκες"
+
+#: website/models.py:82
+msgid "Slika"
+msgstr "Εικόνα"
+
+#: website/models.py:91
+msgid "Galerijska slika"
+msgstr "Γκαλερί φωτογραφία"
+
+#: website/models.py:92 website/templates/website/index.html:9
+msgid "Galerija"
+msgstr "Γκαλερί"
+
+#: website/models.py:112
+msgid "Info o tvrtki (web)"
+msgstr "Πληροφορίες εταιρείας (ιστότοπος)"
+
+#: website/models.py:113
+msgid "Info o tvrtkama (web)"
+msgstr "Πληροφορίες για την εταιρεία (ιστότοπος)"
+
+#: website/templates/website/index.html:3
+msgid "Upravljanje web stranicom"
+msgstr "Διαχείριση ιστοσελίδων"
+
+#: website/templates/website/index.html:4
+msgid "Web stranica - upravljanje"
+msgstr "Ιστοσελίδα - διαχείριση"
+
+#: website/templates/website/index.html:10
+msgid "Dodaj sliku"
+msgstr "Προσθέστε εικόνα"
+
+#: website/templates/website/index.html:19
+msgid "Upravljaj brendovima"
+msgstr "Διαχειριστείτε τα εμπορικά σήματα"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:180
+#: worktime/templates/worktime/worker_dashboard.html:98
+msgid "Pokreni štopericu"
+msgstr "Εκκινήστε το χρονόμετρο"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:203
+msgid "Opis rada (opcionalno)"
+msgstr "Περιγραφή εργασίας (προαιρετικό)"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:208
+msgid "START"
+msgstr "ΕΝΑΡΞΗ"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:219
+#: worktime/templates/worktime/worker_dashboard.html:113
+msgid "Danas"
+msgstr "Σήμερα"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:226
+#: worktime/templates/worktime/worker_dashboard.html:114
+msgid "Tjedan"
+msgstr "Εβδομάδα"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:233
+#: worktime/templates/worktime/worker_dashboard.html:115
+#: worktime/templates/worktime/worker_profile.html:93
+msgid "Mjesec"
+msgstr "Μήνας"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:237
+#: worktime/templates/worktime/worker_dashboard.html:116
+#: worktime/templates/worktime/worker_profile.html:89
+msgid "Zarada"
+msgstr "Κέρδη"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:254
+msgid "Unos"
+msgstr "Μερικοί"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:255
+msgid "Unosi"
+msgstr "Unosi"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:256
+msgid "Brzo"
+msgstr "Γρήγορα"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:262
+msgid "Novi unos radnog vremena"
+msgstr "Νέα καταχώριση χρόνου εργασίας"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:280
+msgid "Od"
+msgstr "Από"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:284
+msgid "Do"
+msgstr "Από"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:288
+msgid "Pauza"
+msgstr "Διάλειμμα"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:293
+msgid "Što ste radili?"
+msgstr "Τι έκανες;"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:296
+msgid "Tip"
+msgstr "Τύπος"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:305
+msgid "Spremi unos"
+msgstr "Spremi unos"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:317
+msgid "Kopiraj jučerašnje"
+msgstr "Αντιγράψτε χθες"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:321
+msgid "Tjedni unos"
+msgstr "Εβδομαδιαία πρόσληψη"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:331
+msgid "unos(a) čeka odobrenje"
+msgstr "σε αναμονή έγκρισης"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:367
+msgid "Nema unosa. Pokrenite štopericu ili unesite sate!"
+msgstr "Δεν υπάρχουν καταχωρήσεις. Ξεκινήστε το χρονόμετρο ή εισάγετε τις ώρες!"
+"Δεν υπάρχουν καταχωρήσεις. Ξεκινήστε το χρονόμετρο ή εισάγετε τις ώρες!"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:375
+msgid "Brzi unos iz predloška"
+msgstr "Γρήγορη εισαγωγή από πρότυπο"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:388
+msgid "Česti projekti"
+msgstr "Συχνές έργα"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:407
+msgid "Predlošci će se pojaviti nakon što počnete koristiti sustav."
+msgstr "Τα πρότυπα θα εμφανιστούν αφού αρχίσετε να χρησιμοποιείτε το σύστημα."
+"Τα πρότυπα θα εμφανιστούν μόλις αρχίσετε να χρησιμοποιείτε το σύστημα."
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:413
+msgid "Dnevna bilješka"
+msgstr "Καθημερινή σημείωση"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:418
+msgid "Bilješke za danas..."
+msgstr "Σημειώσεις για σήμερα..."
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:420
+msgid "Spremi"
+msgstr "Αποδέχομαι"
+
+#: worktime/templates/worktime/worker_dashboard.OLD.html:428
+msgid "dana zaredom s unesenim satima"
+msgstr "ημέρες στη σειρά με καταγεγραμμένες ώρες"
+
+#: worktime/templates/worktime/worker_dashboard.html:74
+#: worktime/templates/worktime/worker_profile.html:55
+msgid "Satnica"
+msgstr "Σάτνικα"
+
+#: worktime/templates/worktime/worker_dashboard.html:75
+msgid "Dnevno"
+msgstr "Καθημερινά"
+
+#: worktime/templates/worktime/worker_dashboard.html:76
+msgid "Tjedno"
+msgstr "Εβδομαδιαία"
+
+#: worktime/templates/worktime/worker_profile.html:3
+#: worktime/templates/worktime/worker_profile.html:4
+msgid "Moj profil"
+msgstr "Το προφίλ μου"
+
+#: worktime/templates/worktime/worker_profile.html:11
+msgid "Osobni podaci"
+msgstr "Προσωπικά δεδομένα"
+
+#: worktime/templates/worktime/worker_profile.html:16
+msgid "Ime"
+msgstr "Να κάνουμε"
+
+#: worktime/templates/worktime/worker_profile.html:20
+msgid "Prezime"
+msgstr "Επώνυμο"
+
+#: worktime/templates/worktime/worker_profile.html:24
+msgid "Email"
+msgstr "Ηλεκτρονικό ταχυδρομείο"
+
+#: worktime/templates/worktime/worker_profile.html:40
+msgid "Spremi podatke"
+msgstr "Αποδοχή δεδομένων"
+
+#: worktime/templates/worktime/worker_profile.html:49
+msgid "Satnica i fond sati"
+msgstr "Ωρομίσθιο και ετήσιες ώρες εργασίας"
+
+#: worktime/templates/worktime/worker_profile.html:59
+msgid "Prekovremeno"
+msgstr "Υπερωρίες"
+
+#: worktime/templates/worktime/worker_profile.html:63
+msgid "Dnevni fond"
+msgstr "Καθημερινό ταμείο"
+
+#: worktime/templates/worktime/worker_profile.html:67
+msgid "Tjedni fond"
+msgstr "Εβδομαδιαίο ταμείο"
+
+#: worktime/templates/worktime/worker_profile.html:72
+msgid "Spremi satnicu"
+msgstr "Συνόδευσε τη σακούλα"
+
+#: worktime/templates/worktime/worker_profile.html:81
+msgid "Statistika"
+msgstr "Στατιστικά στοιχεία"
+
+#: worktime/templates/worktime/worker_profile.html:109
+msgid "Promjena lozinke"
+msgstr "Αλλαγή κωδικού πρόσβασης"
+
+#: worktime/templates/worktime/worker_profile.html:114
+msgid "Stara lozinka"
+msgstr "Το παλιό σλόγκαν"
+
+#: worktime/templates/worktime/worker_profile.html:118
+msgid "Nova lozinka"
+msgstr "Νέος κωδικός πρόσβασης"
+
+#: worktime/templates/worktime/worker_profile.html:122
+msgid "Ponovite"
+msgstr "Επαναλάβετε"
+
+#: worktime/templates/worktime/worker_profile.html:125
+msgid "Promijeni lozinku"
+msgstr "Αλλαγή κωδικού πρόσβασης"
+
+#: worktime/templates/worktime/worker_profile.html:132
+msgid "Natrag"
+msgstr "Natrag"

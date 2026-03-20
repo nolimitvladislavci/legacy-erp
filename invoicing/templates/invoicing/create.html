@@ -1,0 +1,1291 @@
+{% extends 'base.html' %}
+{% load i18n l10n %}
+{% block title %}{{ title }} – LIMIT CONNECT
+{# ═══ LOCKED FORM JS ═══ #}
+{% if invoice.is_locked %}
+<script>
+(function(){
+  var REASON = '{% if invoice.is_fiscalized %}Račun je fiskaliziran i zakonski nepromjenjiv (ZOR čl. 9). Za ispravak koristite Storno.{% elif invoice.synesis_id %}Uvezeno iz Synesis arhive — samo za čitanje.{% else %}Račun je zaključan.{% endif %}';
+  document.addEventListener('DOMContentLoaded', function(){
+    var form = document.getElementById('invoiceForm');
+    if(form){
+      form.querySelectorAll('input:not([type=hidden]),select,textarea').forEach(function(el){
+        el.disabled = true; el.style.cursor = 'not-allowed'; el.style.opacity = '0.7';
+      });
+      ['quickBarWrap','aiTextInput','aiParseBtn','articleSearch','aiThinking'].forEach(function(id){
+        var el = document.getElementById(id); if(el) el.style.display = 'none';
+      });
+      var addBtn = form.querySelector('.btn-add-item'); if(addBtn) addBtn.style.display = 'none';
+      var copyBtn = form.querySelector('.btn-copy-invoice'); if(copyBtn) copyBtn.style.display = 'none';
+      form.querySelectorAll('.btn-del-item').forEach(function(b){ b.style.display='none'; });
+    }
+    document.querySelectorAll('[disabled]').forEach(function(el){
+      if(!el.title) el.title = REASON; el.style.cursor = 'not-allowed';
+    });
+    if(typeof bootstrap !== 'undefined' && bootstrap.Tooltip){
+      document.querySelectorAll('[data-bs-toggle="tooltip"],[title][disabled]').forEach(function(el){
+        if(!el.getAttribute('data-bs-toggle')) el.setAttribute('data-bs-toggle','tooltip');
+        try{ new bootstrap.Tooltip(el); }catch(e){}
+      });
+    }
+    if(form){
+      form.addEventListener('click', function(e){
+        if(e.target.closest('a[href],button:not([disabled])')) return;
+        var banner = document.getElementById('locked-banner'); if(!banner) return;
+        banner.style.transition = 'box-shadow .15s';
+        banner.style.boxShadow = '0 0 0 3px #f59e0b';
+        setTimeout(function(){ banner.style.boxShadow = ''; }, 900);
+      });
+    }
+    console.log('[FINA] Invoice locked — form disabled');
+  });
+})();
+</script>
+{% endif %}
+
+{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0f1e; --paper: #f8f7f4; --gold: #c9a84c;
+  --blue: #1d4ed8; --red: #dc2626; --green: #15803d;
+  --border: #e2e0da; --muted: #6b7280; --surface: #ffffff;
+  --accent-r: #1d4ed8; --accent-p: #7c3aed; --accent-a: #b45309; --accent-s: #dc2626; --accent-g: #0f766e;
+}
+body { background: var(--paper); }
+.inv-wrap { max-width: 1200px; margin: 0 auto; }
+
+/* DOC TYPE TABS */
+.doc-tabs { display: flex; gap: 0; margin-bottom: 24px; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); background: var(--surface); }
+.doc-tab { flex: 1; padding: 12px 8px; text-align: center; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; border: none; background: none; transition: all 0.2s; color: var(--muted); border-right: 1px solid var(--border); }
+.doc-tab:last-child { border-right: none; }
+.doc-tab.active[data-type="R"] { background: var(--accent-r); color: white; }
+.doc-tab.active[data-type="P"] { background: var(--accent-p); color: white; }
+.doc-tab.active[data-type="A"] { background: var(--accent-a); color: white; }
+.doc-tab.active[data-type="S"] { background: var(--accent-s); color: white; }
+.doc-tab.active[data-type="GS"] { background: var(--accent-g); color: white; }
+.doc-tab:hover:not(.active) { background: #f1f5f9; }
+
+/* LAYOUT */
+.inv-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+.inv-main { display: flex; flex-direction: column; gap: 16px; }
+.inv-side { display: flex; flex-direction: column; gap: 16px; }
+
+/* CARDS */
+.inv-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.inv-card-head { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.inv-card-head h3 { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 0; }
+.inv-card-body { padding: 16px; }
+
+/* FORM ELEMENTS */
+.field-group { display: grid; gap: 12px; }
+.field-group.cols-2 { grid-template-columns: 1fr 1fr; }
+.field-group.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.field input, .field select, .field textarea {
+  padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 6px;
+  font-size: 0.875rem; color: var(--ink); background: var(--paper);
+  transition: border-color 0.15s; outline: none; font-family: inherit;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); background: white; }
+.field textarea { resize: vertical; min-height: 60px; }
+.field .mono { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; }
+
+/* PARTNER SEARCH */
+.partner-search-wrap { position: relative; }
+.partner-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1.5px solid var(--blue); border-top: none; border-radius: 0 0 8px 8px; z-index: 100; max-height: 200px; overflow-y: auto; display: none; }
+.partner-option { padding: 10px 12px; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f1f5f9; }
+.partner-option:hover { background: #eff6ff; }
+.partner-option .p-name { font-weight: 600; color: var(--ink); }
+.partner-option .p-detail { font-size: 0.75rem; color: var(--muted); }
+
+
+/* STICKY SAVE BAR */
+.sticky-save-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+  background: linear-gradient(180deg, transparent 0%, rgba(15,23,42,0.95) 20%);
+  padding: 16px 24px 20px; display: flex; justify-content: center; gap: 12px;
+  pointer-events: none;
+}
+.sticky-save-bar > * { pointer-events: all; }
+.btn-sticky-save {
+  background: var(--blue); color: white; border: none; padding: 12px 32px;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem;
+  letter-spacing: 1px; text-transform: uppercase; border-radius: 8px;
+  cursor: pointer; box-shadow: 0 4px 20px rgba(29,78,216,.4);
+  transition: all 0.2s;
+}
+.btn-sticky-save:hover { background: #1e40af; transform: translateY(-1px); }
+.btn-sticky-save.green { background: var(--green); box-shadow: 0 4px 20px rgba(21,128,61,.4); }
+.btn-sticky-save.green:hover { background: #166534; }
+.btn-sticky-preview {
+  background: var(--surface); color: var(--ink); border: 1.5px solid var(--border);
+  padding: 12px 24px; font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase;
+  border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block;
+  transition: all 0.2s;
+}
+.btn-sticky-preview:hover { border-color: var(--blue); color: var(--blue); }
+
+/* ARTICLE SEARCH */
+.article-search-wrap { position: relative; margin-bottom: 8px; }
+.article-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: white; border: 1.5px solid var(--green); border-top: none;
+  border-radius: 0 0 8px 8px; z-index: 100; max-height: 250px;
+  overflow-y: auto; display: none; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+.article-option { padding: 10px 12px; cursor: pointer; font-size: 0.82rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+.article-option:hover { background: #f0fdf4; }
+.article-option .a-name { font-weight: 600; color: var(--ink); }
+.article-option .a-detail { font-size: 0.72rem; color: var(--muted); }
+.article-option .a-price { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--green); }
+
+/* Company indicator */
+.company-indicator {
+  background: var(--gold); color: #0f172a; padding: 3px 10px;
+  border-radius: 5px; font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.5px; margin-right: 8px;
+}
+
+/* Extra bottom padding for sticky bar */
+.inv-wrap { padding-bottom: 80px; }
+
+/* STAVKE */
+.items-table { width: 100%; border-collapse: collapse; }
+.items-table th { font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 8px 6px; border-bottom: 1.5px solid var(--border); text-align: left; }
+.items-table th.right { text-align: right; }
+.items-table td { padding: 4px 4px; vertical-align: middle; }
+.items-table input, .items-table select {
+  width: 100%; padding: 7px 8px; border: 1.5px solid transparent;
+  border-radius: 5px; font-size: 0.82rem; background: var(--paper);
+  transition: all 0.15s; font-family: inherit;
+}
+.items-table input:focus, .items-table select:focus { border-color: var(--blue); background: white; outline: none; }
+.items-table .col-opis { width: 35%; }
+.items-table .col-qty { width: 8%; }
+.items-table .col-unit { width: 7%; }
+.items-table .col-price { width: 13%; }
+.items-table .col-pdv { width: 9%; }
+.items-table .col-disc { width: 8%; }
+.items-table .col-total { width: 13%; }
+.items-table .col-del { width: 4%; }
+.item-total { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--ink); text-align: right; padding: 7px 8px; background: #f8fafc; border-radius: 5px; }
+.btn-del-item { background: none; border: none; color: #fca5a5; cursor: pointer; font-size: 1.1rem; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; }
+.btn-del-item:hover { background: #fef2f2; color: var(--red); }
+.btn-add-item { border: 1.5px dashed var(--border); background: none; color: var(--muted); padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-family: 'Syne', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 100%; margin-top: 8px; transition: all 0.2s; }
+.btn-add-item:hover { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+/* QUICK-BAR */
+.quick-bar{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 6px}
+.qbtn{background:#f0fdf4;border:1.5px solid var(--green);color:#166534;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
+.qbtn:hover{background:var(--green);color:white;transform:translateY(-1px);box-shadow:0 3px 10px rgba(22,163,74,.25)}
+.qbtn-manage{background:none;border:1.5px dashed var(--border);color:var(--muted)}
+.qbtn-manage:hover{border-color:var(--blue);color:var(--blue);background:#eff6ff}
+.ai-input-wrap{margin:8px 0}
+.ai-input-row{display:flex;gap:6px;align-items:center}
+.ai-textarea{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;resize:none;background:var(--paper);transition:border-color .15s;min-height:38px;max-height:80px}
+.ai-textarea:focus{border-color:#8b5cf6;outline:none;background:white}
+.ai-textarea::placeholder{color:#a0aec0;font-style:italic}
+.btn-ai-parse{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit}
+.btn-ai-parse:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(124,58,237,.4)}
+.btn-ai-parse:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.ai-thinking{display:none;align-items:center;gap:8px;font-size:.78rem;color:#7c3aed;padding:4px 0}
+.ai-dot{width:6px;height:6px;background:#7c3aed;border-radius:50%;animation:aiP 1s infinite}
+.ai-dot:nth-child(2){animation-delay:.2s}.ai-dot:nth-child(3){animation-delay:.4s}
+@keyframes aiP{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+.btn-copy-invoice{background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px}
+.btn-copy-invoice:hover{border-color:#f59e0b;color:#92400e;background:#fffbeb}
+.copy-dropdown{position:absolute;left:0;top:100%;z-index:200;background:white;border:1.5px solid var(--border);border-radius:10px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.15);display:none;margin-top:4px;overflow:hidden}
+.copy-dropdown.open{display:block}
+.copy-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background .1s}
+.copy-item:hover{background:#fffbeb}
+.copy-num{font-weight:700;font-size:.82rem;color:var(--ink)}
+.copy-meta{font-size:.72rem;color:var(--muted);margin-top:2px}
+.copy-wrap-pos{position:relative;display:inline-block;margin-bottom:8px}
+.item-row.kb-active td{background:#f0f9ff}
+
+
+/* TOTALS */
+.totals-block { border-top: 1.5px solid var(--border); padding-top: 12px; margin-top: 4px; }
+.total-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.875rem; }
+.total-row .label { color: var(--muted); }
+.total-row .val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+.total-grand { background: var(--ink); color: white; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.total-grand .label { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+.total-grand .val { font-family: 'IBM Plex Mono', monospace; font-size: 1.3rem; font-weight: 600; }
+
+/* PDV REKAPITULACIJA */
+.pdv-recap { margin-top: 12px; }
+.pdv-recap table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.pdv-recap th { font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 4px 8px; text-align: right; font-weight: 700; }
+.pdv-recap th:first-child { text-align: left; }
+.pdv-recap td { padding: 4px 8px; font-family: 'IBM Plex Mono', monospace; text-align: right; border-top: 1px solid var(--border); }
+.pdv-recap td:first-child { text-align: left; font-family: inherit; font-size: 0.8rem; }
+.pdv-rate-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 700; }
+
+/* SIDE CARDS */
+.number-display { font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--gold); letter-spacing: 1px; }
+.status-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.status-btn { padding: 4px 10px; border-radius: 4px; border: 1.5px solid var(--border); background: none; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase; transition: all 0.15s; }
+.status-btn.active { border-color: transparent; }
+
+/* ACTION BUTTONS */
+.action-bar { display: flex; flex-direction: column; gap: 8px; }
+.btn-action { padding: 12px 16px; border-radius: 8px; border: none; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-save { background: var(--ink); color: white; }
+.btn-save:hover { background: #1e293b; transform: translateY(-1px); }
+.btn-pdf { background: var(--blue); color: white; }
+.btn-pdf:hover { background: #1e40af; }
+.btn-email { background: var(--accent-p); color: white; }
+.btn-email:hover { background: #6d28d9; }
+.btn-fiscal { background: var(--green); color: white; }
+.btn-fiscal:hover { background: #166534; }
+.btn-xml { background: var(--accent-a); color: white; }
+.btn-xml:hover { background: #92400e; }
+.btn-outline { background: none; border: 1.5px solid var(--border); color: var(--ink); }
+.btn-outline:hover { border-color: var(--ink); }
+
+/* IMPORT MODULI */
+.import-section { }
+.import-tab { padding: 6px 12px; border-radius: 5px; border: 1px solid var(--border); background: none; font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--muted); }
+.import-tab:hover, .import-tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+.import-list { margin-top: 10px; max-height: 200px; overflow-y: auto; }
+.import-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; }
+.import-item:hover { border-color: var(--blue); background: #eff6ff; }
+.import-item .i-info { }
+.import-item .i-title { font-weight: 600; color: var(--ink); }
+.import-item .i-sub { font-size: 0.72rem; color: var(--muted); }
+.import-item .i-amount { font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: var(--green); font-size: 0.85rem; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .inv-grid { grid-template-columns: 1fr; }
+  .field-group.cols-3 { grid-template-columns: 1fr 1fr; }
+}
+
+/* AJAX SAVE INDICATOR */
+.save-indicator {
+  position: fixed; top: 12px; right: 20px; z-index: 9999;
+  padding: 8px 18px; border-radius: 8px; font-size: 0.78rem; font-weight: 700;
+  font-family: 'Syne', sans-serif; letter-spacing: 1px; text-transform: uppercase;
+  transition: all 0.3s ease; pointer-events: none; opacity: 0;
+}
+.save-indicator.saving { background: #1e40af; color: #fff; opacity: 1; }
+.save-indicator.saved { background: #166534; color: #fff; opacity: 1; }
+.save-indicator.error { background: #dc2626; color: #fff; opacity: 1; cursor: pointer; pointer-events: auto; }
+.save-indicator.hidden { opacity: 0; }
+
+/* Toast notifications */
+.ajax-toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9998;
+  padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.85rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: all 0.3s ease;
+  animation: toastIn 0.3s ease;
+}
+@keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+.ajax-toast.success { background: #166534; color: #fff; }
+.ajax-toast.error { background: #dc2626; color: #fff; }
+.ajax-toast.info { background: #1e40af; color: #fff; }
+
+/* Inline edit highlight */
+.item-row.saving { opacity: 0.7; }
+.item-row.saved td input, .item-row.saved td select { border-color: #166534 !important; }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- AJAX Save Indicator -->
+
+{# ═══ LOCKED BANNER ═══ #}
+{% if invoice.is_locked %}
+<div class="alert d-flex align-items-start gap-3 mb-3" id="locked-banner" role="alert"
+     style="border-left:4px solid #f59e0b;background:#fffbeb;border-radius:10px;padding:14px 18px;margin-bottom:20px">
+  <div style="font-size:1.6rem;flex-shrink:0;line-height:1.1">🔒</div>
+  <div style="flex:1">
+    <div style="font-weight:700;color:#92400e;font-size:1rem;margin-bottom:4px">
+      Račun je zaključan &mdash; samo za čitanje
+    </div>
+    <div style="font-size:.85rem;color:#78350f">
+      {% if invoice.is_fiscalized %}
+        Račun <strong>{{ invoice.number }}</strong> je fiskaliziran
+        {% if invoice.jir %}— JIR: <code style="font-size:.78rem;background:#fef3c7;padding:1px 5px;border-radius:3px">{{ invoice.jir }}</code>{% endif %}
+        i zakonski je nepromjenjiv (<strong>ZOR čl. 9</strong>).
+        Za ispravak izaberite <strong>↩ Storno</strong> u desnom izborniku.
+      {% elif invoice.synesis_id %}
+        Račun je uvezen iz Synesis arhive — samo za čitanje.
+      {% else %}
+        Račun je administrativno zaključan.
+      {% endif %}
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;align-items:center;font-size:.78rem;color:#92400e">
+      {% if invoice.deletion_protected_until %}
+      <span><i class="fas fa-shield-alt me-1"></i>Čuva se do: <strong>{{ invoice.deletion_protected_until|date:"d.m.Y" }}</strong></span>
+      {% endif %}
+      {% if invoice.fiscal_datetime %}
+      <span><i class="fas fa-stamp me-1"></i>Fiskalizirano: {{ invoice.fiscal_datetime|date:"d.m.Y H:i" }}</span>
+      {% endif %}
+      {% if invoice.zki %}
+      <span style="font-family:monospace;font-size:.72rem;opacity:.7">ZKI: {{ invoice.zki|truncatechars:20 }}</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div id="saveIndicator" class="save-indicator hidden"></div>
+
+<form method="post" id="invoiceForm" action="{% url 'invoicing:invoice_save' %}" onsubmit="return validateInvoiceForm()">
+{% csrf_token %}
+<input type="hidden" name="invoice_id" value="{{ invoice.pk|default:'' }}">
+<input type="hidden" name="doctype" id="doctypeInput" value="{{ invoice.doctype|default:'R' }}">
+<input type="hidden" name="status" id="statusInput" value="{{ invoice.status|default:'DRAFT' }}">
+
+<div class="inv-wrap">
+
+  <!-- DOC TYPE TABS -->
+  <div class="doc-tabs">
+    <button type="button" class="doc-tab {% if invoice.doctype == 'R' or not invoice.doctype %}active{% endif %}" data-type="R" onclick="setDocType('R')">
+      {% trans "📄 Račun" %}
+    </button>
+    <button type="button" class="doc-tab {% if invoice.doctype == 'P' %}active{% endif %}" data-type="P" onclick="setDocType('P')">
+      {% trans "📋 Ponuda" %}
+    </button>
+    <button type="button" class="doc-tab {% if invoice.doctype == 'A' %}active{% endif %}" data-type="A" onclick="setDocType('A')">
+      {% trans "💰 Avansni" %}
+    </button>
+    <button type="button" class="doc-tab {% if invoice.doctype == 'GS' %}active{% endif %}" data-type="GS" onclick="setDocType('GS')">
+      {% trans "🇩🇪 Gutschrift" %}
+    </button>
+    <button type="button" class="doc-tab {% if invoice.doctype == 'S' %}active{% endif %}" data-type="S" onclick="setDocType('S')">
+      {% trans "↩ Storno" %}
+    </button>
+  </div>
+
+  <div class="inv-grid">
+    <!-- LIJEVA STRANA - GLAVNI SADRŽAJ -->
+    <div class="inv-main">
+
+      
+      <!-- PORUKE -->
+      {% if messages %}
+      <div style="margin-bottom:16px">
+        {% for message in messages %}
+        <div class="alert-msg alert-{{ message.tags }}" style="
+          padding:12px 16px; border-radius:8px; margin-bottom:8px;
+          font-size:0.85rem; font-weight:500; display:flex; align-items:center; gap:8px;
+          {% if message.tags == 'success' %}background:#f0fdf4; color:#166534; border:1px solid #bbf7d0;
+          {% elif message.tags == 'error' %}background:#fef2f2; color:#991b1b; border:1px solid #fecaca;
+          {% elif message.tags == 'warning' %}background:#fffbeb; color:#92400e; border:1px solid #fed7aa;
+          {% else %}background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe;{% endif %}
+        ">
+          {{ message }}
+          <button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:.5">×</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      
+      <!-- AKTIVNA FIRMA -->
+      {% if active_company %}
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 16px;background:var(--surface);border:1.5px solid var(--gold);border-radius:8px">
+        <div style="background:var(--gold);color:#0f172a;padding:4px 10px;border-radius:5px;font-size:0.7rem;font-weight:700;letter-spacing:0.5px">FIRMA</div>
+        <div style="font-weight:700;font-size:0.9rem;color:var(--ink)">{{ active_company.name }}</div>
+        {% if profile %}
+        <div style="font-size:0.75rem;color:var(--muted);margin-left:auto">{{ profile.address }}, {{ profile.zip_code }} {{ profile.city }}</div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- KLIJENT -->
+      <div class="inv-card">
+        <div class="inv-card-head">
+          <h3>{% trans "Klijent / Empfänger" %}</h3>
+          <div style="display:flex;gap:6px">
+            <select id="countrySelect" name="country" onchange="setCountry(this.value)" style="font-size:0.75rem;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--paper)">
+              <option value="HR" {% if invoice.country == 'HR' or not invoice.country %}selected{% endif %}>{% trans "🇭🇷 HR" %}</option>
+              <option value="DE" {% if invoice.country == 'DE' %}selected{% endif %}>{% trans "🇩🇪 DE" %}</option>
+            </select>
+          </div>
+        </div>
+        <div class="inv-card-body">
+          <!-- Partner search -->
+          <div class="field partner-search-wrap" style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label style="margin:0">{% trans "Pretraži partnera" %}</label>
+              <button type="button"
+                onclick="openQuickAdd('partner','/partners/api/quick-create/',function(r){document.querySelector('[name=client_name]').value=r.name||'';document.querySelector('[name=client_oib]').value=r.oib||'';document.querySelector('[name=client_email]').value=r.email||'';document.querySelector('[name=client_address]').value=r.address||'';document.querySelector('[name=client_city]').value=r.city||'';})" 
+                style="background:none;border:1.5px solid var(--gold);color:var(--gold);border-radius:5px;padding:2px 10px;font-size:0.75rem;font-weight:700;cursor:pointer">
+                <i class="fas fa-plus"></i> {% trans "Novi partner" %}
+              </button>
+            </div>
+            <input type="text" id="partnerSearch" placeholder="{% trans "Ime, OIB ili email..." %}" autocomplete="off">
+            <div class="partner-dropdown" id="partnerDropdown"></div>
+          </div>
+          <div class="field-group cols-2">
+            <div class="field" style="grid-column:1/-1">
+              <label>{% trans "Naziv / Ime *" %}</label>
+              <input type="text" name="client_name" value="{{ invoice.client_name|default:'' }}" required placeholder="TVRTKA d.o.o. ili Ime Prezime">
+            </div>
+            <div class="field">
+              <label data-lc-help="HR: 11-znamenkasti porezni broj (npr. 12345678901).
+DE/EU: USt-IdNr format (npr. DE123456789).
+Sustav automatski provjerava ispravnost.">{% trans "OIB / USt-IdNr" %}</label>
+              <input type="text" name="client_oib" value="{{ invoice.client_oib|default:'' }}" class="mono" placeholder="12345678901" maxlength="30" id="clientOib">
+            </div>
+            <div class="field">
+              <label data-lc-help="Na ovu adresu šalje se PDF račun klikom na 📧 Pošalji email. Nije obavezno polje.">{% trans "Email" %}</label>
+              <input type="email" name="client_email" value="{{ invoice.client_email|default:'' }}" placeholder="klijent@email.com">
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label>{% trans "Adresa" %}</label>
+              <input type="text" name="client_address" value="{{ invoice.client_address|default:'' }}" placeholder="Ulica i broj">
+            </div>
+            <div class="field">
+              <label>{% trans "Grad / PLZ Stadt" %}</label>
+              <input type="text" name="client_city" value="{{ invoice.client_city|default:'' }}" placeholder="10000 Zagreb">
+            </div>
+            <div class="field">
+              <label>{% trans "Država" %}</label>
+              <input type="text" name="client_country" value="{{ invoice.client_country|default:'Hrvatska' }}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAVKE -->
+      <div class="inv-card">
+        <div class="inv-card-head">
+          <h3>{% trans "Stavke" %}</h3>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:0.72rem;color:var(--muted)">{% trans "Zadani PDV:" %}</span>
+            <select id="defaultPdv" onchange="updateDefaultPdv(this.value)" style="font-size:0.75rem;padding:4px 8px;border:1px solid var(--border);border-radius:5px">
+              <option value="25">25%</option>
+              <option value="19">19%</option>
+              <option value="13">13%</option>
+              <option value="5">5%</option>
+              <option value="0">0%</option>
+            </select>
+          </div>
+        </div>
+        <div class="inv-card-body" style="padding:12px">
+          
+
+          <div class="copy-wrap-pos">
+            <button type="button" class="btn-copy-invoice" onclick="toggleCopyDropdown()">
+              📋 Kopiraj stavke s prošlog računa
+            </button>
+            <div class="copy-dropdown" id="copyDropdown">
+              <div style="padding:10px 14px;font-size:.65rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid #f1f5f9">Zadnjih 10 računa / ponuda</div>
+              <div id="copyList"><div style="padding:14px;text-align:center;color:var(--muted);font-size:.8rem">Učitavam...</div></div>
+            </div>
+          </div>
+          <div class="ai-input-wrap">
+            <div style="font-size:.65rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#7c3aed;margin-bottom:5px">✶ AI unos — napiši slobodnim tekstom</div>
+            <div class="ai-input-row">
+              <textarea class="ai-textarea" id="aiTextInput" placeholder="npr: 3 sata montaže 85eur, 2 kom vijci 2.50eur, paušal čišćenje 50eur..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();parseAiText();}"></textarea>
+              <button type="button" class="btn-ai-parse" id="aiParseBtn" onclick="parseAiText()">✶ Parsiraj</button>
+            </div>
+            <div class="ai-thinking" id="aiThinking">
+              <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+              <span>AI parsira stavke...</span>
+            </div>
+          </div>
+          <div id="quickBarWrap">
+            <div style="font-size:.65rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:4px">⚡ Brzi unos — najčešći artikli</div>
+            <div class="quick-bar" id="quickBar"><span style="font-size:.75rem;color:var(--muted)">Učitavam...</span></div>
+          </div>
+          <!-- PRETRAGA ARTIKALA IZ SKLADIŠTA -->
+          <div class="article-search-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <span style="font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green)">🔍 {% trans "Dodaj artikl iz skladišta" %}</span>
+              <button type="button"
+                onclick="openQuickAdd('article','/pos/api/articles/quick-create/',function(r){const pdv=parseFloat((r._form&&r._form.tax_pct)||r.tax_rate||25);addItem(r.name,1,r.unit||'kom',parseFloat(r.unit_price||0),pdv);})"
+                style="background:none;border:1.5px solid var(--green);color:var(--green);border-radius:5px;padding:2px 10px;font-size:0.75rem;font-weight:700;cursor:pointer">
+                <i class="fas fa-plus"></i> {% trans "Novi artikl" %}
+              </button>
+            </div>
+            <input type="text" id="articleSearch" placeholder="{% trans "Pretraži artikle (naziv ili šifra)..." %}" autocomplete="off"
+                   style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:0.85rem;background:var(--paper)">
+            <div class="article-dropdown" id="articleDropdown"></div>
+          </div>
+
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th class="col-opis">{% trans "Opis usluge / robe" %}</th>
+                <th class="col-qty right">{% trans "Kol." %}</th>
+                <th class="col-unit">{% trans "J.mj." %}</th>
+                <th class="col-price right">{% trans "Jed.cijena" %}</th>
+                <th class="col-pdv right">{% trans "PDV%" %}</th>
+                <th class="col-disc right">{% trans "Pop%" %}</th>
+                <th class="col-total right">{% trans "Iznos" %}</th>
+                <th class="col-del"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              {% for item in items %}
+              <tr class="item-row" data-id="{{ item.pk|default:'' }}">
+                <td class="col-opis"><input type="text" name="item_desc[]" value="{{ item.description }}" placeholder="Opis stavke..." required></td>
+                <td class="col-qty"><input type="number" name="item_qty[]" value="{{ item.quantity|unlocalize }}" min="0.01" step="0.01" onchange="calcRow(this)" class="mono" style="text-align:right"></td>
+                <td class="col-unit"><input type="text" name="item_unit[]" value="{{ item.unit }}" placeholder="kom"></td>
+                <td class="col-price"><input type="number" name="item_price[]" value="{{ item.unit_price|unlocalize }}" min="0" step="0.01" onchange="calcRow(this)" class="mono" style="text-align:right"></td>
+                <td class="col-pdv">
+                  <select name="item_pdv[]" onchange="calcRow(this)" class="mono" style="text-align:right">
+                    <option value="25" {% if item.tax_rate == 25 %}selected{% endif %}>25%</option>
+                    <option value="19" {% if item.tax_rate == 19 %}selected{% endif %}>19%</option>
+                    <option value="13" {% if item.tax_rate == 13 %}selected{% endif %}>13%</option>
+                    <option value="5" {% if item.tax_rate == 5 %}selected{% endif %}>5%</option>
+                    <option value="0" {% if item.tax_rate == 0 %}selected{% endif %}>0%</option>
+                  </select>
+                </td>
+                <td class="col-disc"><input type="number" name="item_disc[]" value="{{ item.discount_percent|default:0|unlocalize }}" min="0" max="100" step="0.01" onchange="calcRow(this)" class="mono" style="text-align:right"></td>
+                <td class="col-total"><div class="item-total" id="total-{{ forloop.counter }}">{{ item.total_price|floatformat:2 }}</div></td>
+                <td><button type="button" class="btn-del-item" onclick="delItem(this)">×</button></td>
+              </tr>
+              {% empty %}
+              <!-- Prazna početna stavka -->
+              {% endfor %}
+            </tbody>
+          </table>
+          <button type="button" class="btn-add-item" onclick="addItem()">{% trans "+ Dodaj stavku" %}</button>
+
+          <!-- PDV REKAPITULACIJA -->
+          <div class="pdv-recap" id="pdvRecap">
+            <table>
+              <thead><tr>
+                <th>{% trans "PDV stopa" %}</th>
+                <th>{% trans "Osnovica" %}</th>
+                <th>{% trans "PDV iznos" %}</th>
+                <th>{% trans "Ukupno" %}</th>
+              </tr></thead>
+              <tbody id="pdvRecapBody"></tbody>
+            </table>
+          </div>
+
+          <!-- UKUPNO -->
+          <div class="totals-block">
+            <div class="total-row">
+              <span class="label">{% trans "Osnovica (bez PDV)" %}</span>
+              <span class="val" id="subtotalDisp">0,00</span>
+            </div>
+            <div class="total-row">
+              <span class="label">{% trans "PDV" %}</span>
+              <span class="val" id="taxDisp">0,00</span>
+            </div>
+            <div class="total-grand">
+              <span class="label" id="totalLabel">{% trans "UKUPNO ZA PLATITI" %}</span>
+              <span class="val" id="grandTotal">{% trans "0,00 EUR" %}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UVOZ IZ MODULA -->
+      <div class="inv-card">
+        <div class="inv-card-head">
+          <h3>{% trans "Uvoz iz modula" %}</h3>
+        </div>
+        <div class="inv-card-body">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+            <button type="button" class="import-tab active" onclick="loadImport('worktime', this)">{% trans "⏱ Radni sati" %}</button>
+            <button type="button" class="import-tab" onclick="loadImport('rental', this)">{% trans "🏠 Najam" %}</button>
+            <button type="button" class="import-tab" onclick="loadImport('appointments', this)">{% trans "📅 Termini" %}</button>
+            <button type="button" class="import-tab" onclick="loadImport('webshop', this)">{% trans "🛒 Webshop" %}</button>
+            <button type="button" class="import-tab" onclick="loadImport('projects', this)">{% trans "🏗 Projekti" %}</button>
+          </div>
+          <div class="import-list" id="importList">
+            <div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:20px">
+              {% trans "Odaberi modul za uvoz stavki na račun" %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAPOMENA -->
+      <div class="inv-card">
+        <div class="inv-card-head"><h3>{% trans "Napomene" %}</h3></div>
+        <div class="inv-card-body">
+          <div class="field-group">
+            <div class="field">
+              <label>{% trans "Napomena na računu (vidljiva klijentu)" %}</label>
+              <textarea name="note" rows="3" placeholder="{% trans "Hvala na povjerenju! Prigovore izjavite u roku 8 dana..." %}">{{ invoice.note|default:'' }}</textarea>
+            </div>
+            <div class="field">
+              <label>{% trans "Interna napomena (nije vidljiva na računu)" %}</label>
+              <textarea name="internal_note" rows="2" placeholder="{% trans "Interne napomene..." %}">{{ invoice.internal_note|default:'' }}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /inv-main -->
+
+    <!-- DESNA STRANA -->
+    <div class="inv-side">
+
+      <!-- TIMELINE -->
+      {% if invoice.pk %}
+      <div class="inv-card" style="margin-bottom:12px">
+        <div class="inv-card-body" style="padding:14px 16px">
+          <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:10px">{% trans "Status" %}: {{ invoice.get_status_display }} · {{ invoice.get_doctype_display }}</div>
+          <div style="display:flex;align-items:center;gap:0">
+            {% for sid,slbl,sc in invoice_timeline %}
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto">
+              <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;background:{{ sc }};color:{% if sc == '#c9a84c' %}#0f172a{% else %}#fff{% endif %}">{{ slbl|first }}</div>
+              <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.5px;color:{{ sc }}">{{ slbl }}</div>
+            </div>
+            {% if not forloop.last %}<div style="flex:1;height:2px;min-width:12px;max-width:30px;margin:0 2px;margin-bottom:18px;background:{{ sc }}"></div>{% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- AKCIJE -->
+      <div class="inv-card">
+        <div class="inv-card-head"><h3>{% trans "Akcije" %}</h3></div>
+        <div class="inv-card-body">
+          <div class="action-bar">
+            <button type="submit" name="action" value="save" class="btn-action btn-save"
+              {% if invoice.is_locked %}
+                disabled
+                title="{% if invoice.is_fiscalized %}Fiskaliziran račun je zakonski nepromjenjiv (ZOR čl. 9) — koristite Storno za ispravak{% else %}Račun je zaključan{% endif %}"
+                style="opacity:0.5;cursor:not-allowed"
+              {% endif %}>
+              {% trans "💾 Spremi dokument" %}
+            </button>
+            {% if invoice.pk %}
+            <a href="/invoicing/{{ invoice.pk }}/pdf/" target="_blank" class="btn-action btn-pdf">
+              {% trans "📄 Pregled PDF" %}
+            </a>
+            <a href="/invoicing/{{ invoice.pk }}/download/" class="btn-action btn-pdf" style="background:#1e40af">
+              {% trans "⬇ Download PDF" %}
+            </a>
+            <a href="/invoicing/{{ invoice.pk }}/email/" class="btn-action btn-email">
+              {% trans "📧 Pošalji email" %}
+            </a>
+            {% if invoice.is_hr %}
+            {% if invoice.is_fiscalized %}
+            <div class="btn-action btn-fiscal"
+                 style="background:#166534;opacity:0.65;cursor:not-allowed;user-select:none"
+                 title="Račun je već fiskaliziran — JIR: {{ invoice.jir|default:'dodijeljen' }}"
+                 data-bs-toggle="tooltip" data-bs-placement="left">
+              ✓ Fiskalizirano
+            </div>
+            {% else %}
+            <a href="/invoicing/{{ invoice.pk }}/fiscalize/" class="btn-action btn-fiscal" id="fiscalBtn" data-lc-tip="Šalje račun FINA CIS servisu. Nakon fiskalizacije račun je nepromjenjiv (ZOR čl. 9). Dobivate ZKI i JIR kodove.">
+              ⚡ Fiskaliziraj
+            </a>
+            {% endif %}
+            {% endif %}
+            <a href="/invoicing/{{ invoice.pk }}/xml/" class="btn-action btn-xml" data-lc-tip="Generira eRačun u UBL 2.1 XML formatu (EN 16931 / PEPPOL BIS 3.0). Obvezno za B2B od 1.1.2026.">
+              {% trans "📋 E-račun XML" %}
+            </a>
+            {% if invoice.doctype == 'PO' %}
+            <a href="/invoicing/{{ invoice.pk }}/to-predracun/"
+               class="btn-action" style="background:#7c3aed;color:#fff"
+               onclick="return confirm('Kreirati predračun iz ove ponude?')">
+              📋 {% trans "→ Predračun" %}
+            </a>
+            <a href="/invoicing/{{ invoice.pk }}/to-invoice/"
+               class="btn-action" style="background:#15803d;color:#fff"
+               onclick="return confirm('Kreirati račun iz ove ponude?')">
+              ⚡ {% trans "→ Račun" %}
+            </a>
+            {% elif invoice.doctype == 'P' %}
+            <a href="/invoicing/{{ invoice.pk }}/to-invoice/"
+               class="btn-action" style="background:#15803d;color:#fff"
+               onclick="return confirm('Kreirati račun iz ovog predračuna?')">
+              ⚡ {% trans "→ Račun" %}
+            </a>
+            {% endif %}
+            <a href="/invoicing/{{ invoice.pk }}/storno/" class="btn-action btn-outline"
+               onclick="return confirm('Kreirati storno račun?')">
+              {% trans "↩ Storno" %}
+            </a>
+            <button type="button" class="btn-action" style="background:#0f766e;color:#fff" onclick="openHoursModal({{ invoice.pk }})">
+              {% trans "⏱ Dodaj radne sate" %}
+            </button>
+            <a href="/invoicing/{{ invoice.pk }}/clone/" class="btn-action btn-outline" style="background:#334155;color:#e2e8f0">
+              {% trans "📋 Kreiraj kopiju" %}
+            </a>
+            <a href="/invoicing/{{ invoice.pk }}/whatsapp/"
+               class="btn-action" style="background:#25d366;color:#fff"
+               onclick="return confirm('Poslati {{ invoice.get_doctype_display }} {{ invoice.number }} via WhatsApp?')"
+               title="Pošalji klijentu via WhatsApp">
+              💬 {% trans "WhatsApp" %}
+            </a>
+            <a href="/invoicing/client/{{ invoice.client_token }}/" target="_blank" class="btn-action btn-outline" style="background:#0f172a;color:#94a3b8;border:1px solid #334155">
+              {% trans "🔗 Klijentski portal" %}
+            </a>
+            {% endif %}
+          </div>
+
+          <!-- STATUS -->
+          <div style="margin-top:16px">
+            <div style="font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">{% trans "Status" %}</div>
+            <div class="status-selector">
+              {% for val, label in status_choices %}
+              <button type="button" class="status-btn {% if invoice.status == val or not invoice.status and val == 'DRAFT' %}active{% endif %}"
+                      data-status="{{ val }}"
+                      onclick="setStatus('{{ val }}', this)"
+                      style="{% if invoice.status == val or not invoice.status and val == 'DRAFT' %}background:var(--ink);color:white;border-color:var(--ink){% endif %}">
+                {{ label }}
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BROJ I DATUMI -->
+      <div class="inv-card">
+        <div class="inv-card-head"><h3>{% trans "Broj i datumi" %}</h3></div>
+        <div class="inv-card-body">
+          <div class="field-group">
+            <div class="field">
+              <label>{% trans "Broj dokumenta *" %}</label>
+              <input type="text" name="number" value="{{ invoice.number|default:next_number }}" required class="mono number-display" style="font-size:1rem;color:var(--gold)">
+            </div>
+            <div class="field">
+              <label>{% trans "Datum izdavanja *" %}</label>
+              <input type="datetime-local" name="date_issued" value="{{ invoice.date_issued|date:'Y-m-d\TH:i'|default:now_datetime }}" required>
+            </div>
+            <div class="field">
+              <label>{% trans "Rok plaćanja" %}</label>
+              <input type="date" name="date_due" value="{{ invoice.date_due|date:'Y-m-d'|default:'' }}">
+            </div>
+            <div class="field">
+              <label>{% trans "Datum isporuke" %}</label>
+              <input type="date" name="date_delivery" value="{{ invoice.date_delivery|date:'Y-m-d'|default:'' }}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAĆANJE -->
+      <div class="inv-card">
+        <div class="inv-card-head"><h3>{% trans "Plaćanje" %}</h3></div>
+        <div class="inv-card-body">
+          <div class="field-group">
+            <div class="field">
+              <label>{% trans "Način plaćanja" %}</label>
+              <select name="payment_method">
+                {% for val, label in payment_choices %}
+                <option value="{{ val }}" {% if invoice.payment_method == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label>{% trans "Valuta" %}</label>
+              <select name="currency">
+                <option value="EUR" {% if invoice.currency == 'EUR' or not invoice.currency %}selected{% endif %}>{% trans "EUR €" %}</option>
+                <option value="HRK" {% if invoice.currency == 'HRK' %}selected{% endif %}>{% trans "HRK kn" %}</option>
+                <option value="USD" {% if invoice.currency == 'USD' %}selected{% endif %}>{% trans "USD $" %}</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>{% trans "IBAN" %}</label>
+              <input type="text" name="iban" value="{{ invoice.issuer_iban|default:default_iban }}" class="mono" placeholder="HR...">
+            </div>
+            <div class="field">
+              <label>{% trans "SWIFT/BIC" %}</label>
+              <input type="text" name="swift" value="{{ invoice.swift|default:'' }}" class="mono" placeholder="XXXXHRXX">
+            </div>
+            <div class="field">
+              <label>{% trans "Poziv na broj" %}</label>
+              <input type="text" name="reference_number" value="{{ invoice.reference_number|default:'' }}" class="mono">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FISKALIZACIJA -->
+      <div class="inv-card" id="fiscalCard">
+        <div class="inv-card-head"><h3>{% trans "Fiskalizacija (HR)" %}</h3></div>
+        <div class="inv-card-body">
+          <div class="field-group">
+            <div class="field">
+              <label>{% trans "Poslovni prostor" %}</label>
+              <select name="business_location">
+                <option value="">{% trans "-- Odaberi --" %}</option>
+                {% for loc in locations %}
+                <option value="{{ loc.pk }}" {% if invoice.business_location_id == loc.pk %}selected{% endif %}>
+                  {{ loc.name }} ({{ loc.location_code }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label>{% trans "Operater" %}</label>
+              <select name="operator">
+                <option value="">{% trans "-- Odaberi --" %}</option>
+                {% for op in operators %}
+                <option value="{{ op.pk }}" {% if invoice.operator_id == op.pk %}selected{% endif %}>
+                  {{ op.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if invoice.is_fiscalized %}
+            <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:10px;font-size:0.78rem">
+              <div style="color:#16a34a;font-weight:700;margin-bottom:4px">{% trans "✓ Fiskalizirano" %}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;color:#374151;font-size:0.72rem">
+                ZKI: {{ invoice.zki|truncatechars:16 }}...<br>
+                JIR: {{ invoice.jir|truncatechars:16 }}...
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- IZDAVATELJ -->
+      <div class="inv-card">
+        <div class="inv-card-head">
+          <h3>{% trans "Izdavatelj" %}</h3>
+          <button type="button" onclick="toggleIssuer()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.75rem">{% trans "uredi ▾" %}</button>
+        </div>
+        <div class="inv-card-body" id="issuerBody" style="display:none">
+          <div class="field-group">
+            <div class="field">
+              <label>{% trans "Naziv tvrtke" %}</label>
+              <input type="text" name="issuer_name" value="Fiskalizacija">
+            </div>
+            <div class="field">
+              <label>{% trans "Adresa" %}</label>
+              <input type="text" name="issuer_address" value="{{ invoice.issuer_address|default:default_issuer.address }}">
+            </div>
+            <div class="field">
+              <label>{% trans "OIB" %}</label>
+              <input type="text" name="issuer_oib" value="{{ invoice.issuer_oib|default:default_issuer.oib }}" class="mono" maxlength="30" id="issuerOib">
+            </div>
+            <div class="field">
+              <label>{% trans "IBAN" %}</label>
+              <input type="text" name="issuer_iban" value="{{ invoice.issuer_iban|default:default_issuer.default_iban }}" class="mono">
+            </div>
+            <div class="field">
+              <label data-lc-help="Na ovu adresu šalje se PDF račun klikom na 📧 Pošalji email. Nije obavezno polje.">{% trans "Email" %}</label>
+              <input type="email" name="issuer_email" value="{{ invoice.issuer_email|default:default_issuer.email_from }}">
+            </div>
+          </div>
+        </div>
+        <div class="inv-card-body" id="issuerPreview" style="font-size:0.82rem;color:var(--muted)">
+          {% trans "Fiskalizacija" %}<br>
+          OIB: {{ invoice.issuer_oib|default:default_issuer.oib }}
+        </div>
+      </div>
+
+    </div><!-- /inv-side -->
+  </div><!-- /inv-grid -->
+</div>
+
+      <!-- STICKY SAVE BAR -->
+      <div class="sticky-save-bar">
+        <button type="submit" name="action" value="save" class="btn-sticky-save green"
+          {% if invoice.is_locked %}
+            disabled
+            title="{% if invoice.is_fiscalized %}Fiskaliziran — koristite Storno{% else %}Zaključano{% endif %}"
+            style="opacity:0.5;cursor:not-allowed;background:#6b7280"
+          {% endif %}>
+          {% if invoice.is_locked %}🔒 Zaključano{% else %}💾 {% trans "Spremi" %}{% endif %}
+        </button>
+        {% if invoice.pk %}
+        <a href="/invoicing/{{ invoice.pk }}/pdf/" target="_blank" class="btn-sticky-preview">
+          📄 {% trans "PDF" %}
+        </a>
+        {% endif %}
+      </div>
+
+</form>
+
+{% include "components/quick_add_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── STATE
+let itemCount = {{ items|length|default:0 }};
+const currency = () => document.querySelector('[name="currency"]').value;
+const country = () => document.getElementById('countrySelect').value;
+
+// ── DOC TYPE
+function setDocType(type) {
+  document.getElementById('doctypeInput').value = type;
+  document.querySelectorAll('.doc-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === type);
+  });
+  // HR/DE specifično
+  const fiscalCard = document.getElementById('fiscalCard');
+  if (fiscalCard) fiscalCard.style.display = (type === 'GS' || country() === 'DE') ? 'none' : '';
+  // Label za ukupno
+  const labels = {R: 'UKUPNO ZA PLATITI', PO: 'UKUPNO PONUDE', P: 'UKUPNO PREDRAČUNA', A: 'AVANSNI IZNOS', S: 'STORNO IZNOS', GS: 'GUTSCHRIFT BETRAG'};
+  document.getElementById('totalLabel').textContent = labels[type] || 'UKUPNO';
+}
+
+// ── COUNTRY
+function setCountry(val) {
+  const fiscalCard = document.getElementById('fiscalCard');
+  if (fiscalCard) fiscalCard.style.display = val === 'DE' ? 'none' : '';
+  // Auto-set default MwSt
+  const pdvSelect = document.getElementById('defaultPdv');
+  if (val === 'DE') {
+    pdvSelect.value = '19';
+    // Update payment method to Überweisung for DE
+    const payMethod = document.querySelector('[name="payment_method"]');
+    if (payMethod && payMethod.value === 'TRANSAKCIJSKI') payMethod.value = 'ÜBERWEISUNG';
+    // Update client country
+    const clientCountry = document.querySelector('[name="client_country"]');
+    if (clientCountry && (clientCountry.value === 'Hrvatska' || !clientCountry.value)) clientCountry.value = 'Deutschland';
+  } else {
+    pdvSelect.value = '25';
+  }
+}
+
+// ── STATUS
+function setStatus(val, btn) {
+  document.getElementById('statusInput').value = val;
+  document.querySelectorAll('.status-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
+    b.style.borderColor = '';
+  });
+  btn.classList.add('active');
+  btn.style.background = 'var(--ink)';
+  btn.style.color = 'white';
+  btn.style.borderColor = 'var(--ink)';
+}
+
+// ── DODAJ STAVKU
+function addItem(desc='', qty=1, unit='kom', price=0, pdv=null, disc=0, total=0) {
+  itemCount++;
+  const defaultPdv = pdv !== null ? pdv : document.getElementById('defaultPdv').value;
+  const id = itemCount;
+  const row = document.createElement('tr');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <td class="col-opis"><input type="text" name="item_desc[]" value="${desc}" placeholder="Opis stavke..." required></td>
+    <td class="col-qty"><input type="number" name="item_qty[]" value="${qty}" min="0.01" step="0.01" onchange="calcRow(this)" class="mono" style="text-align:right"></td>
+    <td class="col-unit"><input type="text" name="item_unit[]" value="${unit}" placeholder="kom"></td>
+    <td class="col-price"><input type="number" name="item_price[]" value="${price}" min="0" step="0.01" onchange="calcRow(this)" class="mono" style="text-align:right"></td>
+    <td class="col-pdv">
+      <select name="item_pdv[]" onchange="calcRow(this)" class="mono" style="text-align:right">
+        <option value="25" ${defaultPdv==25?'selected':''}>25%</option>
+        <option value="19" ${defaultPdv==19?'selected':''}>19%</option>
+        <option value="13" ${defaultPdv==13?'selected':''}>13%</option>
+        <option value="5" ${defaultPdv==5?'selected':''}>5%</option>
+        <option value="0" ${defaultPdv==0?'selected':''}>0%</option>
+      </select>
+    </td>
+    <td class="col-disc"><input type="number" name="item_disc[]" value="${disc}" min="0" max="100" step="0.01" onchange="calcRow(this)" class="mono" style="text-align:right"></td>
+    <td class="col-total"><div class="item-total" id="total-${id}">${total ? fmtNum(total) : '0,00'}</div></td>
+    <td><button type="button" class="btn-del-item" onclick="delItem(this)">×</button></td>
+  `;
+  document.getElementById('itemsBody').appendChild(row);
+  calcAll();
+  // Focus na opis
+  row.querySelector('input[name="item_desc[]"]').focus();
+}
+
+function delItem(btn) {
+  btn.closest('tr').remove();
+  calcAll();
+}
+
+// ── IZRAČUN
+function calcRow(el) {
+  const row = el.closest('tr');
+  const qty = parseFloat(row.querySelector('[name="item_qty[]"]').value) || 0;
+  const price = parseFloat(row.querySelector('[name="item_price[]"]').value) || 0;
+  const disc = parseFloat(row.querySelector('[name="item_disc[]"]').value) || 0;
+  const total = qty * price * (1 - disc/100);
+  const totalEl = row.querySelector('.item-total');
+  if (totalEl) totalEl.textContent = fmtNum(total);
+  calcAll();
+}
+
+function calcAll() {
+  const rows = document.querySelectorAll('.item-row');
+  let subtotal = 0;
+  let taxGroups = {0: {base:0,tax:0}, 5: {base:0,tax:0}, 13: {base:0,tax:0}, 19: {base:0,tax:0}, 25: {base:0,tax:0}};
+
+  rows.forEach(row => {
+    const qty = parseFloat(row.querySelector('[name="item_qty[]"]').value) || 0;
+    const price = parseFloat(row.querySelector('[name="item_price[]"]').value) || 0;
+    const disc = parseFloat(row.querySelector('[name="item_disc[]"]').value) || 0;
+    const pdv = parseInt(row.querySelector('[name="item_pdv[]"]').value) || 25;
+    const base = qty * price * (1 - disc/100);
+    const tax = base * pdv / 100;
+    subtotal += base;
+    if (taxGroups[pdv] !== undefined) {
+      taxGroups[pdv].base += base;
+      taxGroups[pdv].tax += tax;
+    }
+  });
+
+  const totalTax = Object.values(taxGroups).reduce((s,g) => s + g.tax, 0);
+  const grand = subtotal + totalTax;
+  const cur = currency();
+
+  document.getElementById('subtotalDisp').textContent = fmtNum(subtotal) + ' ' + cur;
+  document.getElementById('taxDisp').textContent = fmtNum(totalTax) + ' ' + cur;
+  document.getElementById('grandTotal').textContent = fmtNum(grand) + ' ' + cur;
+
+  // PDV rekapitulacija
+  const rateNames = {0:'Oslobođeno', 5:'Snižena (hrana/knj.)', 13:'Snižena (ugost.)', 19:'MwSt. (DE)', 25:'Standardna (HR)'};
+  const rateColors = {0:'#64748b', 5:'#3b82f6', 13:'#f59e0b', 19:'#8b5cf6', 25:'#ef4444'};
+  let recapHtml = '';
+  [0,5,13,19,25].forEach(rate => {
+    const g = taxGroups[rate];
+    if (g.base > 0.001) {
+      recapHtml += `<tr>
+        <td><span class="pdv-rate-badge" style="background:${rateColors[rate]};color:white">${rate}%</span> ${rateNames[rate]}</td>
+        <td>${fmtNum(g.base)} ${cur}</td>
+        <td>${fmtNum(g.tax)} ${cur}</td>
+        <td>${fmtNum(g.base+g.tax)} ${cur}</td>
+      </tr>`;
+    }
+  });
+  document.getElementById('pdvRecapBody').innerHTML = recapHtml;
+}
+
+function fmtNum(n) {
+  return n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function updateDefaultPdv(val) {
+  // Ne mijenja postojeće stavke
+}
+
+// ── PARTNER PRETRAGA
+let searchTimeout;
+document.getElementById('partnerSearch').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  const q = this.value.trim();
+  if (q.length < 2) { document.getElementById('partnerDropdown').style.display = 'none'; return; }
+  searchTimeout = setTimeout(() => searchPartners(q), 300);
+});
+
+function searchPartners(q) {
+  fetch(`/invoicing/api/partners/?q=${encodeURIComponent(q)}`)
+    .then(r => r.json())
+    .then(data => {
+      const dd = document.getElementById('partnerDropdown');
+      if (!data.length) { dd.style.display = 'none'; return; }
+      dd.innerHTML = data.map(p => `
+        <div class="partner-option" onclick='fillPartner(${JSON.stringify(p)})'>
+          <div class="p-name">${p.name}</div>
+          <div class="p-detail">${p.oib || ''} ${p.city || ''} · ${p.email || ''}</div>
+        </div>`).join('');
+      dd.style.display = 'block';
+    }).catch(() => {});
+}
+
+function fillPartner(p) {
+  document.querySelector('[name="client_name"]').value = p.name || '';
+  document.querySelector('[name="client_oib"]').value = p.oib || '';
+  document.querySelector('[name="client_email"]').value = p.email || '';
+  document.querySelector('[name="client_address"]').value = p.address || '';
+  document.querySelector('[name="client_city"]').value = p.city || '';
+  document.getElementById('partnerSearch').value = '';
+  document.getElementById('partnerDropdown').style.display = 'none';
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.partner-search-wrap'))
+    document.getElementById('partnerDropdown').style.display = 'none';
+});
+
+// ── UVOZ IZ MODULA
+function loadImport(module, btn) {
+  document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const list = document.getElementById('importList');
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Učitavanje...</div>';
+  fetch(`/invoicing/api/import/${module}/`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Nema stavki</div>'; return; }
+      list.innerHTML = data.map(item => `<div style="padding:8px;border-bottom:1px solid var(--border);cursor:pointer"><b>${item.name || item.description}</b></div>`).join('');
+    })
+    .catch(() => { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Greška</div>'; });
+}
+
+// ── OIB VALIDACIJA ──
+function validateOib(oib, country) {
+  if (!oib || !oib.trim()) return true;
+  oib = oib.trim();
+  if (country === 'HR' || country === 'Hrvatska') {
+    if (!/^\d{11}$/.test(oib)) return false;
+    let a = 10;
+    for (let i = 0; i < 10; i++) {
+      a = (a + parseInt(oib[i])) % 10;
+      if (a === 0) a = 10;
+      a = (a * 2) % 11;
+    }
+    return (11 - a) % 10 === parseInt(oib[10]);
+  }
+  if (country === 'DE' || country === 'Njemačka' || country === 'Deutschland') {
+    if (/^DE\d{9}$/.test(oib)) return true;
+    if (/^\d{2,3}\/\d{3}\/\d{4,5}$/.test(oib)) return true;
+    if (/^\d{10,13}$/.test(oib)) return true;
+    return oib.length >= 5;
+  }
+  return oib.length >= 3;
+}
+
+function showOibErr(el, msg) {
+  el.style.borderColor = '#dc2626';
+  el.style.boxShadow = '0 0 0 2px rgba(220,38,38,.15)';
+  let x = el.parentNode.querySelector('.oib-error');
+  if (x) x.remove();
+  let d = document.createElement('div');
+  d.className = 'oib-error';
+  d.style.cssText = 'color:#dc2626;font-size:.72rem;font-weight:600;margin-top:3px';
+  d.textContent = msg;
+  el.parentNode.appendChild(d);
+}
+
+function clearOibErr(el) {
+  el.style.borderColor = '';
+  el.style.boxShadow = '';
+  let x = el.parentNode.querySelector('.oib-error');
+  if (x) x.remove();
+}
+
+function validateInvoiceForm() {
+  let ok = true;
+  const co = document.getElementById('clientOib');
+  if (co) {
+    clearOibErr(co);
+    if (co.value.trim() && !validateOib(co.value.trim(), (document.querySelector('[name="client_country"]')||{}).value||'')) {
+      const c = (document.querySelector('[name="client_country"]')||{}).value||'';
+      showOibErr(co, c==='HR'||c==='Hrvatska' ? 'HR OIB mora imati točno 11 znamenki' : 'Neispravan format OIB-a');
+      co.focus(); ok = false;
+    }
+  }
+  const io = document.getElementById('issuerOib');
+  if (io) {
+    clearOibErr(io);
+    if (io.value.trim() && !validateOib(io.value.trim(), (document.querySelector('[name="country"]')||{}).value||'')) {
+      const c = (document.querySelector('[name="country"]')||{}).value||'';
+      showOibErr(io, c==='HR'||c==='Hrvatska' ? 'HR OIB mora imati točno 11 znamenki' : 'Neispravan format');
+      if (ok) io.focus(); ok = false;
+    }
+  }
+  if (!ok) {
+    const ind = document.getElementById('saveIndicator');
+    if (ind) { ind.className='save-indicator error'; ind.textContent='⚠ Ispravite greške u formi'; setTimeout(()=>{ind.className='save-indicator hidden'},4000); }
+  }
+  return ok;
+}
+
+// Live blur validation
+['clientOib','issuerOib'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('blur', function() {
+    clearOibErr(el);
+    if (!el.value.trim()) return;
+    let c = '';
+    if (id==='clientOib') c=(document.querySelector('[name="client_country"]')||{}).value||'';
+    else c=(document.querySelector('[name="country"]')||{}).value||'';
+    if (!validateOib(el.value.trim(), c)) showOibErr(el, c==='HR'||c==='Hrvatska'?'OIB: točno 11 znamenki':'Neispravan format');
+  });
+});
+
+// ── KB NAV ──
+document.addEventListener('keydown',function(e){
+  const a=document.activeElement; if(!a) return;
+  const row=a.closest('.item-row'); if(!row) return;
+  const f=Array.from(row.querySelectorAll('input,select')); const i=f.indexOf(a);
+  if(e.key==='Tab'&&!e.shiftKey&&i===f.length-1){
+    e.preventDefault();
+    const rows=Array.from(document.querySelectorAll('.item-row'));
+    rows[rows.length-1]===row ? addItem() : rows[rows.indexOf(row)+1].querySelector('input[name="item_desc[]"]').focus();
+  } else if(e.key==='Enter'){
+    if(a.name==='item_desc[]'){e.preventDefault();const q=row.querySelector('[name="item_qty[]"]');if(q){q.focus();q.select();}}
+    else if(a.name==='item_price[]'){
+      e.preventDefault();
+      const rows=Array.from(document.querySelectorAll('.item-row'));
+      rows[rows.length-1]===row ? addItem() : rows[rows.indexOf(row)+1].querySelector('input[name="item_desc[]"]').focus();
+    }
+  }
+  document.querySelectorAll('.item-row').forEach(r=>r.classList.remove('kb-active'));
+  row.classList.add('kb-active');
+});
+
+// ── QUICK BUTTONS ──
+async function loadQuickButtons(){
+  try{
+    const r=await fetch('/invoicing/api/articles/?q=&limit=10');
+    const items=await r.json();
+    const bar=document.getElementById('quickBar');
+    if(!items||!items.length){bar.innerHTML='<span style="font-size:.75rem;color:var(--muted)">Nema artikala u skladi\u0161tu</span>';return;}
+    bar.innerHTML=items.slice(0,10).map(it=>`<button type="button" class="qbtn" onclick="addItem(${JSON.stringify(it.name)},1,${JSON.stringify(it.unit||'kom')},${it.unit_price},${it.tax_rate})">${it.name} <span style="opacity:.6;margin-left:4px">${parseFloat(it.unit_price).toFixed(2).replace('.',',')} \u20ac</span></button>`).join('')
+    +'<button type="button" class="qbtn qbtn-manage" onclick="document.getElementById(\'articleSearch\').focus()">+ Pretra\u017ei sve</button>';
+  }catch(e){console.warn('qbtns',e);}
+}
+
+// ── AI PARSER ──
+async function parseAiText(){
+  const ta=document.getElementById('aiTextInput');
+  const txt=ta.value.trim(); if(!txt)return;
+  const btn=document.getElementById('aiParseBtn');
+  const th=document.getElementById('aiThinking');
+  btn.disabled=true; th.style.display='flex';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
+        messages:[{role:'user',content:'Izvuci stavke racuna iz teksta. Vrati SAMO JSON array bez markdown backtickova i bez ikakvog teksta prije ili poslije. Format: [{"desc":"opis","qty":1,"unit":"kom","price":10.00}]. Tekst: '+JSON.stringify(txt)}]})
+    });
+    const data=await res.json();
+    const raw=(data.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    if(Array.isArray(parsed)&&parsed.length){
+      parsed.forEach(it=>addItem(it.desc||'',parseFloat(it.qty)||1,it.unit||'kom',parseFloat(it.price)||0));
+      ta.value=''; ta.style.borderColor='var(--green)'; setTimeout(()=>ta.style.borderColor='',1000);
+    }
+  }catch(err){console.error(err);ta.style.borderColor='var(--red)';setTimeout(()=>ta.style.borderColor='',1200);}
+  finally{btn.disabled=false;th.style.display='none';}
+}
+
+// ── COPY RACUN ──
+let _co=false;
+async function toggleCopyDropdown(){
+  const dd=document.getElementById('copyDropdown');
+  _co=!_co; dd.classList.toggle('open',_co);
+  if(_co){
+    try{
+      const r=await fetch('/invoicing/api/recent-for-copy/');
+      const inv=await r.json();
+      const list=document.getElementById('copyList');
+      if(!inv.length){list.innerHTML='<div style="padding:14px;text-align:center;color:var(--muted);font-size:.8rem">Nema prethodnih ra\u010duna</div>';return;}
+      list.innerHTML=inv.map(i=>`<div class="copy-item" onclick="copyInvoiceItems(${i.id})"><div class="copy-num">${i.number} \u2014 ${i.client_name}</div><div class="copy-meta">${i.date_issued} \u00b7 ${i.item_count} stavki \u00b7 ${i.total} \u20ac</div></div>`).join('');
+    }catch(e){document.getElementById('copyList').innerHTML='<div style="padding:14px;color:var(--red);font-size:.8rem">Gre\u0161ka</div>';}
+  }
+}
+async function copyInvoiceItems(id){
+  try{
+    const r=await fetch(`/invoicing/api/invoice/${id}/items/`);
+    const items=await r.json();
+    items.forEach(it=>addItem(it.description,parseFloat(it.quantity),it.unit,parseFloat(it.unit_price),parseFloat(it.tax_rate)));
+    document.getElementById('copyDropdown').classList.remove('open'); _co=false;
+    const btn=document.querySelector('.btn-copy-invoice');
+    btn.style.borderColor='var(--green)';btn.style.color='#166534';
+    btn.innerHTML='\u2713 '+items.length+' stavki kopirano';
+    setTimeout(()=>{btn.style.borderColor='';btn.style.color='';btn.innerHTML='\U0001f4cb Kopiraj stavke s pro\u0161log ra\u010duna';},2000);
+  }catch(e){alert('Gre\u0161ka pri kopiranju');}
+}
+document.addEventListener('click',function(e){if(!e.target.closest('.copy-wrap-pos')){document.getElementById('copyDropdown').classList.remove('open');_co=false;}});
+document.addEventListener('DOMContentLoaded',function(){loadQuickButtons();});
+
+</script>
+{% endblock %}

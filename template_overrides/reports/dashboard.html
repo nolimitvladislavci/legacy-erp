@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans "Izvještaji" %}{% endblock %}
+{% load project_tags %}
+{% block content %}
+<div class="container-fluid" style="max-width:1000px">
+  <h4 class="mb-3"><i class="fas fa-chart-bar"></i> {% trans "Izvještaji" %}</h4>
+  <form class="row g-2 mb-4" method="get">
+    <div class="col-auto"><label class="form-label mb-0" style="font-size:.8rem">{% trans "Od" %}</label><input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}" class="form-control form-control-sm"></div>
+    <div class="col-auto"><label class="form-label mb-0" style="font-size:.8rem">{% trans "Do" %}</label><input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" class="form-control form-control-sm"></div>
+    <div class="col-auto d-flex align-items-end"><button class="btn btn-sm btn-primary">{% trans "Filtriraj" %}</button></div>
+  </form>
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-3">
+      <a href="{% url 'reports:revenue' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}" class="text-decoration-none">
+        <div class="card h-100" style="border-radius:12px;border-left:4px solid #10b981">
+          <div class="card-body"><div class="text-muted" style="font-size:.75rem">{% trans "Prihod (plaćeno)" %}</div><div style="font-size:1.5rem;font-weight:700;color:#10b981">{{ revenue|floatformat:2 }} EUR</div><div class="text-muted" style="font-size:.75rem">{{ inv_count }} {% trans "računa" %}</div></div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a href="{% url 'reports:worktime' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}" class="text-decoration-none">
+        <div class="card h-100" style="border-radius:12px;border-left:4px solid #3b82f6">
+          <div class="card-body"><div class="text-muted" style="font-size:.75rem">{% trans "Radno vrijeme" %}</div><div style="font-size:1.5rem;font-weight:700;color:#3b82f6">{{ total_hours|floatformat:1 }}h</div><div class="text-muted" style="font-size:.75rem">{{ te_count }} {% trans "unosa" %}</div></div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a href="{% url 'projects_index' %}" class="text-decoration-none">
+      <div class="card h-100" style="border-radius:12px;border-left:4px solid #f59e0b">
+        <div class="card-body"><div class="text-muted" style="font-size:.75rem">{% trans "Projekti" %}</div><div style="font-size:1.5rem;font-weight:700;color:#f59e0b">{% project_count as pc %}{{ pc }}</div><div class="text-muted" style="font-size:.75rem">{% active_project_count as apc %}{{ apc }} {% trans "aktivnih" %}</div></div>
+      </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100" style="border-radius:12px;border-left:4px solid #8b5cf6">
+        <div class="card-body"><div class="text-muted" style="font-size:.75rem">{% trans "Fakture" %}</div><div style="font-size:1.5rem;font-weight:700;color:#8b5cf6">{{ inv_count }}</div><div class="text-muted" style="font-size:.75rem">{% trans "u periodu" %}</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

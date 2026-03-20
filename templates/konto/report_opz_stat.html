@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}OPZ-STAT-1{% endblock %}
+
+{% block content %}
+<style>
+.opz-wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+.opz-title { color: #c9a84c; font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+.opz-sub { color: #999; font-size: 0.85rem; margin-bottom: 20px; }
+.opz-controls { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+.opz-select {
+    background: #0a0a0a; color: #e0e0e0; border: 1px solid #444;
+    padding: 8px 14px; border-radius: 6px; font-size: 0.9rem;
+}
+.opz-btn {
+    background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 18px;
+    border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;
+    text-decoration: none;
+}
+.opz-btn:hover { background: #e0c068; }
+.opz-btn-csv {
+    background: transparent; color: #c9a84c; border: 1px solid #c9a84c;
+    padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;
+    font-size: 0.85rem; text-decoration: none;
+}
+.opz-stats { display: flex; gap: 16px; margin-bottom: 24px; }
+.opz-stat {
+    background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 14px 20px; flex: 1; text-align: center;
+}
+.opz-stat .val { font-size: 1.5rem; font-weight: 800; color: #c9a84c; }
+.opz-stat .lbl { font-size: 0.72rem; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+.opz-section { margin-bottom: 24px; }
+.opz-section-title {
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px;
+    color: #c9a84c; font-weight: 700; margin-bottom: 8px; padding-bottom: 6px;
+    border-bottom: 1px solid #333;
+}
+.opz-table { width: 100%; border-collapse: collapse; }
+.opz-table th {
+    color: #999; text-transform: uppercase; font-size: 0.7em;
+    letter-spacing: 1px; padding: 8px 10px; text-align: left;
+    border-bottom: 1px solid #333;
+}
+.opz-table td { padding: 8px 10px; border-bottom: 1px solid #1a1a1a; font-size: 0.88rem; }
+.opz-table tr:hover { background: rgba(201,168,76,0.04); }
+.opz-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.opz-table .total-row { font-weight: 700; border-top: 2px solid #c9a84c; color: #c9a84c; }
+.oib-badge {
+    background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 6px;
+    border-radius: 4px; font-size: 0.75em; font-family: monospace;
+}
+</style>
+
+<div class="opz-wrap">
+    <div class="opz-title"><i class="fas fa-file-alt"></i> OPZ-STAT-1</div>
+    <div class="opz-sub">Statisticki izvjestaj o poslovnim transakcijama za FINA-u</div>
+
+    <div class="opz-controls">
+        <form method="get" style="display:flex; gap:10px; align-items:center;">
+            <select name="year" class="opz-select" onchange="this.form.submit()">
+                {% for y in years %}
+                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <a href="?year={{ year }}&format=csv" class="opz-btn-csv">
+            <i class="fas fa-download"></i> CSV Export
+        </a>
+    </div>
+
+    <div class="opz-stats">
+        <div class="opz-stat">
+            <div class="val">{{ totals.grand_count }}</div>
+            <div class="lbl">Ukupno racuna</div>
+        </div>
+        <div class="opz-stat">
+            <div class="val">{{ totals.grand_amount|floatformat:2 }} &euro;</div>
+            <div class="lbl">Ukupan promet</div>
+        </div>
+        <div class="opz-stat">
+            <div class="val">{{ totals.grand_vat|floatformat:2 }} &euro;</div>
+            <div class="lbl">Ukupan PDV</div>
+        </div>
+        <div class="opz-stat">
+            <div class="val">{{ domestic|length }} / {{ foreign|length }}</div>
+            <div class="lbl">Domaci / Inozemni</div>
+        </div>
+    </div>
+
+    {% if domestic %}
+    <div class="opz-section">
+        <div class="opz-section-title"><i class="fas fa-flag"></i> Domaci partneri (HR OIB)</div>
+        <table class="opz-table">
+            <thead>
+                <tr>
+                    <th>Partner</th>
+                    <th>OIB</th>
+                    <th class="num">Br. racuna</th>
+                    <th class="num">Ukupan iznos</th>
+                    <th class="num">PDV</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in domestic %}
+                <tr>
+                    <td>{{ p.name }}</td>
+                    <td><span class="oib-badge">{{ p.oib }}</span></td>
+                    <td class="num">{{ p.invoice_count }}</td>
+                    <td class="num">{{ p.total_amount|floatformat:2 }} &euro;</td>
+                    <td class="num">{{ p.total_vat|floatformat:2 }} &euro;</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td colspan="2">UKUPNO DOMACI</td>
+                    <td class="num">{{ totals.domestic_count }}</td>
+                    <td class="num">{{ totals.domestic_amount|floatformat:2 }} &euro;</td>
+                    <td class="num">{{ totals.domestic_vat|floatformat:2 }} &euro;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if foreign %}
+    <div class="opz-section">
+        <div class="opz-section-title"><i class="fas fa-globe"></i> Inozemni partneri</div>
+        <table class="opz-table">
+            <thead>
+                <tr>
+                    <th>Partner</th>
+                    <th>OIB/ID</th>
+                    <th class="num">Br. racuna</th>
+                    <th class="num">Ukupan iznos</th>
+                    <th class="num">PDV</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in foreign %}
+                <tr>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.oib|default:"-" }}</td>
+                    <td class="num">{{ p.invoice_count }}</td>
+                    <td class="num">{{ p.total_amount|floatformat:2 }} &euro;</td>
+                    <td class="num">{{ p.total_vat|floatformat:2 }} &euro;</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td colspan="2">UKUPNO INOZEMNI</td>
+                    <td class="num">{{ totals.foreign_count }}</td>
+                    <td class="num">{{ totals.foreign_amount|floatformat:2 }} &euro;</td>
+                    <td class="num">{{ totals.foreign_vat|floatformat:2 }} &euro;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if not domestic and not foreign %}
+    <div style="text-align:center; padding:40px; color:#666;">
+        Nema podataka za odabranu godinu.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

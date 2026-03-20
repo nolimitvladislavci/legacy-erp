@@ -1,0 +1,78 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Register – LIMIT Connect{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a; --dark: #111111; --card: #1a1a1a; --border: #2a2a2a;
+    --gold: #c9a84c; --gold-light: #e8c96a; --text: #e8e8e8; --muted: #888;
+    --error: #e05c5c; --success: #4caf7d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+  .reg-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .reg-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.1em; color: var(--gold); text-decoration: none; }
+  .reg-logo span { color: var(--text); }
+  .reg-back { color: var(--muted); font-size: 0.875rem; text-decoration: none; }
+  .reg-back:hover { color: var(--gold); }
+  .reg-main { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 3rem 1rem; }
+  .reg-container { width: 100%; max-width: 680px; }
+  .step-indicator { display: flex; align-items: center; justify-content: center; margin-bottom: 2.5rem; }
+  .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+  .step-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 600; color: var(--muted); background: var(--dark); transition: all 0.3s; }
+  .step-circle.active { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
+  .step-circle.done { border-color: var(--gold); background: var(--gold); color: var(--black); }
+  .step-label { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+  .step-label.active { color: var(--gold); }
+  .step-line { width: 80px; height: 2px; background: var(--border); margin: 0 0.25rem 1.2rem; flex-shrink: 0; }
+  .step-line.done { background: var(--gold); }
+  .reg-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2.5rem; }
+  .reg-card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+  .reg-card-subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; line-height: 1.5; }
+  .reg-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .reg-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+  .reg-field label { font-size: 0.8rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .reg-input { background: var(--dark); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 0.75rem 1rem; font-size: 0.95rem; font-family: 'Barlow', sans-serif; width: 100%; transition: border-color 0.2s; outline: none; }
+  .reg-input:focus { border-color: var(--gold); }
+  .reg-input option { background: var(--dark); }
+  .error-msg { color: var(--error); font-size: 0.8rem; margin-top: 0.25rem; }
+  .non-field-errors { background: rgba(224,92,92,0.1); border: 1px solid var(--error); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem; color: var(--error); font-size: 0.875rem; }
+  .reg-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 2rem; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-family: 'Barlow', sans-serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.1s; }
+  .reg-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .reg-btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 0.875rem 1.5rem; font-family: 'Barlow', sans-serif; font-size: 0.9rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .reg-btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .reg-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; gap: 1rem; }
+  .reg-messages { margin-bottom: 1.5rem; }
+  .reg-msg { padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.875rem; margin-bottom: 0.5rem; }
+  .reg-msg.success { background: rgba(76,175,125,0.1); border: 1px solid var(--success); color: var(--success); }
+  .reg-msg.error { background: rgba(224,92,92,0.1); border: 1px solid var(--error); color: var(--error); }
+  .reg-msg.warning { background: rgba(201,168,76,0.1); border: 1px solid var(--gold); color: var(--gold); }
+  @media (max-width: 600px) { .reg-form-row { grid-template-columns: 1fr; } .reg-card { padding: 1.5rem; } .step-line { width: 40px; } }
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<header class="reg-header">
+  <a href="/" class="reg-logo">{% trans "FINA" %}<span>{% trans "-Connect" %}</span></a>
+  <a href="/" class="reg-back">{% trans "← Natrag na stranicu" %}</a>
+</header>
+<main class="reg-main">
+  <div class="reg-container">
+    {% if messages %}
+    <div class="reg-messages">
+      {% for msg in messages %}
+      <div class="reg-msg {{ msg.tags }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+</body>
+</html>

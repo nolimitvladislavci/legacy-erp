@@ -1,0 +1,1009 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Novi nalaz – LIMIT Connect{% endblock %}
+{% block extra_css %}
+<style>
+:root{--gold:#c9a84c;--gold-dim:rgba(201,168,76,.12);--gold-border:rgba(201,168,76,.28);--surface:#0f172a;--surface2:#1e293b;--border:rgba(255,255,255,.08);--text:#e2e8f0;--muted:#94a3b8;--green:#10b981;--red:#ef4444;--amber:#f59e0b}
+.wz-wrap{max-width:760px;margin:0 auto;padding:1.25rem 1rem 4rem}
+.wz-header{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.wz-title{font-size:1.05rem;font-weight:700;color:var(--gold)}
+.wz-type-badge{font-size:.72rem;padding:.2rem .65rem;border-radius:8px;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold)}
+
+/* Progress steps */
+.wz-steps{display:flex;gap:0;margin-bottom:1.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.wz-step{flex:1;padding:.6rem .3rem;text-align:center;font-size:.62rem;color:var(--muted);cursor:pointer;transition:all .2s;border-right:1px solid var(--border);position:relative}
+.wz-step:last-child{border-right:none}
+.wz-step.active{background:var(--gold-dim);color:var(--gold);font-weight:700}
+.wz-step.done{background:rgba(16,185,129,.08);color:var(--green)}
+.wz-step .sn{display:block;font-size:.9rem;font-weight:700;margin-bottom:1px}
+
+/* Step panels */
+.wz-panel{display:none}
+.wz-panel.active{display:block}
+
+/* Cards */
+.wz-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:.875rem}
+.wz-card-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;margin-bottom:.875rem}
+.wz-label{font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:.375rem;display:block}
+.wz-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.6rem .8rem;font-size:.9rem;width:100%;font-family:inherit;box-sizing:border-box}
+.wz-input:focus{outline:none;border-color:var(--gold)}
+.wz-input::placeholder{color:var(--muted)}
+.wz-textarea{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.6rem .8rem;font-size:.9rem;width:100%;font-family:inherit;box-sizing:border-box;min-height:90px;resize:vertical}
+.wz-textarea:focus{outline:none;border-color:var(--gold)}
+.wz-grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.wz-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
+
+/* Radio / Checkbox options */
+.opt-group{display:flex;flex-direction:column;gap:.3rem}
+.opt{display:flex;align-items:center;gap:.6rem;padding:.65rem .875rem;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:border-color .15s;user-select:none}
+.opt:hover{border-color:rgba(201,168,76,.4)}
+.opt input{display:none}
+.opt.checked{border-color:var(--gold);background:var(--gold-dim)}
+.opt-icon{font-size:1rem;flex-shrink:0}
+.opt-text{font-size:.85rem;font-weight:500;color:var(--text)}
+.opt-sub{font-size:.72rem;color:var(--muted);margin-top:.1rem}
+.opt-warn{font-size:.7rem;color:var(--amber);margin-top:.1rem;font-weight:600}
+.opt-wrap{display:flex;flex-direction:column;flex:1}
+
+/* Check options (two-column) */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+
+/* Section divider */
+.wz-divider{border:none;border-top:1px solid var(--border);margin:1rem 0}
+
+/* Photo zone */
+.photo-zone{border:2px dashed rgba(201,168,76,.25);border-radius:8px;padding:1rem;text-align:center;background:rgba(0,0,0,.1)}
+.photo-zone-title{font-size:.75rem;color:var(--muted);margin-bottom:.75rem}
+.photo-btn{background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:7px;padding:.6rem 1.1rem;font-size:.82rem;cursor:pointer;font-weight:600;font-family:inherit;min-height:44px}
+.photo-preview{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;justify-content:center}
+.photo-thumb{position:relative;width:72px;height:72px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:3px;width:18px;height:18px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.upload-status{font-size:.72rem;color:var(--muted);margin-top:.4rem}
+.upload-status.ok{color:var(--green)}
+.upload-status.err{color:var(--red)}
+
+/* Navigation */
+.wz-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface2);border-top:1px solid var(--border);padding:.875rem 1rem;display:flex;gap:.6rem;z-index:100;max-width:760px;margin:0 auto;left:50%;transform:translateX(-50%)}
+.btn-prev{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;cursor:pointer;font-family:inherit;min-height:48px}
+.btn-next{flex:1;background:var(--gold);color:#0a0a0a;border:none;border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
+.btn-submit{flex:1;background:var(--green);color:#fff;border:none;border-radius:8px;padding:.7rem 1.25rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;min-height:48px}
+
+/* Save indicator */
+.save-ind{position:fixed;top:54px;right:12px;font-size:.72rem;padding:.3rem .65rem;border-radius:6px;transition:opacity .4s;z-index:200}
+.save-ind.saving{background:rgba(245,158,11,.15);border:1px solid var(--amber);color:var(--amber);opacity:1}
+.save-ind.saved{background:rgba(16,185,129,.1);border:1px solid var(--green);color:var(--green);opacity:0}
+
+/* Required star */
+.req{color:var(--red);margin-left:.2rem}
+
+/* Warning box */
+.warn-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:7px;padding:.65rem .875rem;font-size:.78rem;color:var(--amber);margin-top:.5rem}
+
+/* Number input row */
+.num-row{display:flex;align-items:center;gap:.5rem}
+.num-row .wz-input{text-align:right}
+.num-unit{font-size:.8rem;color:var(--muted);white-space:nowrap}
+
+/* Price range row */
+.price-row{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center}
+.price-dash{color:var(--muted);font-size:1.2rem}
+
+/* Offline badge */
+.offline-badge{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red);font-size:.7rem;padding:.2rem .5rem;border-radius:5px;display:none}
+.offline-badge.show{display:inline-block}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+
+@media(max-width:500px){
+  .wz-grid2,.wz-grid3{grid-template-columns:1fr}
+  .check-grid{grid-template-columns:1fr}
+  .wz-step .sn{font-size:.75rem}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="wz-wrap">
+  <div class="wz-header">
+    <div class="wz-title">{% trans "📋 Novi nalaz / dijagnoza" %}</div>
+    <span class="offline-badge" id="offlineBadge">{% trans "⚡ Offline – lokalno spremanje" %}</span>
+    <div id="saveIndicator" class="save-ind"></div>
+  </div>
+
+  <!-- Step progress -->
+  <div class="wz-steps" id="stepBar">
+    <div class="wz-step active" data-step="1" onclick="goToStep(1)"><span class="sn">1</span>{% trans "Lokacija" %}</div>
+    <div class="wz-step" data-step="2" onclick="goToStep(2)"><span class="sn">2</span>{% trans "Instalacije" %}</div>
+    <div class="wz-step" data-step="3" onclick="goToStep(3)"><span class="sn">3</span>{% trans "Dimenzije" %}</div>
+    <div class="wz-step" data-step="4" onclick="goToStep(4)"><span class="sn">4</span>{% trans "Elementi" %}</div>
+    <div class="wz-step" data-step="5" onclick="goToStep(5)"><span class="sn">5</span>{% trans "Zaključak" %}</div>
+    <div class="wz-step" data-step="6" onclick="goToStep(6)"><span class="sn">6</span>{% trans "Stil" %}</div>
+  </div>
+
+  <!-- ─────────────── STEP 1 ─────────────── -->
+  <div class="wz-panel active" id="panel-1">
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🎯 Tip procjene" %}</div>
+      <div class="opt-group" id="opt-assessment_type">
+        <label class="opt checked"><input type="radio" name="assessment_type" value="bathroom" checked>
+          <span class="opt-icon">🚿</span><div class="opt-wrap"><span class="opt-text">{% trans "Kupaona / Kupaonica" %}</span></div></label>
+        <label class="opt"><input type="radio" name="assessment_type" value="optical">
+          <span class="opt-icon">👓</span><div class="opt-wrap"><span class="opt-text">{% trans "Optika" %}</span></div></label>
+        <label class="opt"><input type="radio" name="assessment_type" value="mechanic">
+          <span class="opt-icon">🔧</span><div class="opt-wrap"><span class="opt-text">{% trans "Auto mehaničar" %}</span></div></label>
+        <label class="opt"><input type="radio" name="assessment_type" value="other">
+          <span class="opt-icon">📝</span><div class="opt-wrap"><span class="opt-text">{% trans "Ostalo" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "👤 Podaci klijenta" %}</div>
+      <div style="margin-bottom:.65rem">
+        <label class="wz-label">{% trans "Ime i prezime klijenta" %}<span class="req">*</span></label>
+        <input class="wz-input" name="client_name" id="f_client_name" placeholder="{% trans "npr. Ivan Horvat" %}" required>
+      </div>
+      <div class="wz-grid2">
+        <div>
+          <label class="wz-label">{% trans "Telefon" %}</label>
+          <input class="wz-input" name="client_phone" id="f_client_phone" type="tel" placeholder="+385 91...">
+        </div>
+        <div>
+          <label class="wz-label">{% trans "E-mail" %}</label>
+          <input class="wz-input" name="client_email" id="f_client_email" type="email" placeholder="{% trans "klijent@email.com" %}">
+        </div>
+      </div>
+      <div style="margin-top:.65rem">
+        <label class="wz-label">{% trans "Adresa objekta" %}</label>
+        <input class="wz-input" name="client_address" id="f_client_address" placeholder="{% trans "Ulica br., Grad" %}">
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🏗️ Tip objekta" %}</div>
+      <div class="opt-group" id="opt-object_type">
+        <label class="opt"><input type="radio" name="object_type" value="apartment">
+          <span class="opt-icon">🏢</span><div class="opt-wrap"><span class="opt-text">{% trans "Stambena zgrada (stan)" %}</span>
+            <span class="opt-sub"><input class="wz-input" name="floor" id="f_floor" placeholder="{% trans "Etaža: ___" %}" style="display:inline;width:100px;margin-top:.3rem;padding:.3rem .5rem;font-size:.8rem" onclick="event.stopPropagation()"></span>
+          </div></label>
+        <label class="opt"><input type="radio" name="object_type" value="house">
+          <span class="opt-icon">🏠</span><div class="opt-wrap"><span class="opt-text">{% trans "Obiteljska kuća" %}</span></div></label>
+        <label class="opt"><input type="radio" name="object_type" value="commercial">
+          <span class="opt-icon">🏪</span><div class="opt-wrap"><span class="opt-text">{% trans "Poslovni prostor / Svlačionica firme" %}</span></div></label>
+        <label class="opt"><input type="radio" name="object_type" value="other">
+          <span class="opt-icon">📋</span><div class="opt-wrap"><span class="opt-text">{% trans "Ostalo" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🔧 Vodovodni priključak" %}</div>
+      <div class="opt-group" id="opt-water_connection">
+        <label class="opt"><input type="radio" name="water_connection" value="main_valve">
+          <span class="opt-icon">🏠</span><div class="opt-wrap"><span class="opt-text">{% trans "Od glavnog ventila (kuća)" %}</span></div></label>
+        <label class="opt"><input type="radio" name="water_connection" value="building_meter">
+          <span class="opt-icon">🏢</span><div class="opt-wrap"><span class="opt-text">{% trans "Od brojila (stan u zgradi)" %}</span></div></label>
+        <label class="opt"><input type="radio" name="water_connection" value="separate">
+          <span class="opt-icon">⚙️</span><div class="opt-wrap"><span class="opt-text">{% trans "Poseban priključak" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "📍 Položaj kupaonice" %}</div>
+      <div class="opt-group" id="opt-bathroom_position">
+        <label class="opt"><input type="radio" name="bathroom_position" value="external">
+          <span class="opt-icon">🪟</span><div class="opt-wrap"><span class="opt-text">{% trans "Uz vanjski zid" %}</span><span class="opt-sub">{% trans "Prozor moguć" %}</span></div></label>
+        <label class="opt"><input type="radio" name="bathroom_position" value="internal">
+          <span class="opt-icon">🌬️</span><div class="opt-wrap"><span class="opt-text">{% trans "Unutarnja (bez prozora)" %}</span>
+            <span class="opt-warn">{% trans "⚠ Ventilacija obavezna!" %}</span></div></label>
+        <label class="opt"><input type="radio" name="bathroom_position" value="kitchen_adjacent">
+          <span class="opt-icon">🍳</span><div class="opt-wrap"><span class="opt-text">{% trans "Veza s kuhinjom" %}</span></div></label>
+      </div>
+    </div>
+
+  </div><!-- /panel-1 -->
+
+  <!-- ─────────────── STEP 2 ─────────────── -->
+  <div class="wz-panel" id="panel-2">
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🔩 Tip cijevi (postojeće)" %}</div>
+      <div class="opt-group" id="opt-pipe_type">
+        <label class="opt"><input type="checkbox" name="pipe_type" value="copper">
+          <span class="opt-icon">🟤</span><div class="opt-wrap"><span class="opt-text">{% trans "Bakar" %}</span></div></label>
+        <label class="opt"><input type="checkbox" name="pipe_type" value="pex">
+          <span class="opt-icon">🔵</span><div class="opt-wrap"><span class="opt-text">{% trans "PEX" %}</span></div></label>
+        <label class="opt"><input type="checkbox" name="pipe_type" value="pp">
+          <span class="opt-icon">⚪</span><div class="opt-wrap"><span class="opt-text">{% trans "PP (polipropilen)" %}</span></div></label>
+        <label class="opt"><input type="checkbox" name="pipe_type" value="galvanized">
+          <span class="opt-icon">⚠️</span><div class="opt-wrap"><span class="opt-text">{% trans "Galvanizacija" %}</span>
+            <span class="opt-warn">{% trans "Zamjena obavezna!" %}</span></div></label>
+        <label class="opt"><input type="checkbox" name="pipe_type" value="unknown">
+          <span class="opt-icon">❓</span><div class="opt-wrap"><span class="opt-text">{% trans "Nepoznato" %}</span>
+            <span class="opt-sub">{% trans "Otvoriti zid za provjeru" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🔧 Tip instalacije" %}</div>
+      <div class="opt-group" id="opt-installation_type">
+        <label class="opt"><input type="radio" name="installation_type" value="concealed">
+          <span class="opt-icon">✅</span><div class="opt-wrap"><span class="opt-text">{% trans "Podžbukno (sve u zid)" %}</span>
+            <span class="opt-sub">{% trans "STANDARD – preporučeno" %}</span></div></label>
+        <label class="opt"><input type="radio" name="installation_type" value="surface">
+          <span class="opt-icon">📦</span><div class="opt-wrap"><span class="opt-text">{% trans "Nadžbukno (vidljivo)" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🚰 Slavine – tip i pozicija" %}</div>
+      <div class="wz-grid2" style="margin-bottom:.65rem">
+        <div>
+          <label class="wz-label">{% trans "Tip slavine (opći)" %}</label>
+          <div class="opt-group" id="opt-faucet_type">
+            <label class="opt"><input type="radio" name="faucet_type" value="concealed">
+              <div class="opt-wrap"><span class="opt-text">{% trans "Podžbukne" %}</span><span class="opt-sub">{% trans "Samo ručka vidljiva – PREPORUČENO" %}</span></div></label>
+            <label class="opt"><input type="radio" name="faucet_type" value="surface">
+              <div class="opt-wrap"><span class="opt-text">{% trans "Nadžbukne" %}</span><span class="opt-sub">{% trans "Vidljivo tijelo" %}</span></div></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "WC tip" %}</label>
+          <div class="opt-group" id="opt-toilet_type">
+            <label class="opt"><input type="radio" name="toilet_type" value="floor">
+              <div class="opt-wrap"><span class="opt-text">{% trans "Podni WC" %}</span><span class="opt-sub">{% trans "Klasični" %}</span></div></label>
+            <label class="opt"><input type="radio" name="toilet_type" value="wall_mounted">
+              <div class="opt-wrap"><span class="opt-text">{% trans "Viseći WC" %}</span>
+                <span class="opt-warn">{% trans "Samo opeka/gips – NE beton!" %}</span></div></label>
+          </div>
+        </div>
+      </div>
+      <hr class="wz-divider">
+      <div class="wz-grid3">
+        <div>
+          <label class="wz-label">{% trans "Umivaonik" %}</label>
+          <div class="opt-group" id="opt-faucet_sink">
+            <label class="opt"><input type="radio" name="faucet_sink" value="wall"><span class="opt-text">{% trans "Zidna" %}</span></label>
+            <label class="opt"><input type="radio" name="faucet_sink" value="standing"><span class="opt-text">{% trans "Stojeća" %}</span></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Tuš" %}</label>
+          <div class="opt-group" id="opt-faucet_shower">
+            <label class="opt"><input type="radio" name="faucet_shower" value="wall"><span class="opt-text">{% trans "Zidna" %}</span></label>
+            <label class="opt"><input type="radio" name="faucet_shower" value="standalone"><span class="opt-text">{% trans "Samostojeća" %}</span></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Kada" %}</label>
+          <div class="opt-group" id="opt-faucet_bath">
+            <label class="opt"><input type="radio" name="faucet_bath" value="wall"><span class="opt-text">{% trans "Zidna" %}</span></label>
+            <label class="opt"><input type="radio" name="faucet_bath" value="standalone"><span class="opt-text">{% trans "Samostojeća" %}</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🌡️ Cirkulacija tople vode" %}</div>
+      <div class="opt-group" id="opt-hot_water_circ">
+        <label class="opt"><input type="radio" name="hot_water_circ" value="exists">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Postoji" %}</span></div></label>
+        <label class="opt"><input type="radio" name="hot_water_circ" value="none">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Nema" %}</span></div></label>
+        <label class="opt"><input type="radio" name="hot_water_circ" value="possible">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Moguće ugraditi" %}</span></div></label>
+        <label class="opt"><input type="radio" name="hot_water_circ" value="not_feasible">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Nije izvedivo" %}</span></div></label>
+      </div>
+    </div>
+
+  </div><!-- /panel-2 -->
+
+  <!-- ─────────────── STEP 3 ─────────────── -->
+  <div class="wz-panel" id="panel-3">
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "📐 Dimenzije prostora" %}</div>
+      <div class="wz-grid2">
+        <div>
+          <label class="wz-label">{% trans "Površina poda" %}</label>
+          <div class="num-row">
+            <input class="wz-input" name="floor_area" id="f_floor_area" type="number" step="0.1" min="0" placeholder="0.0">
+            <span class="num-unit">{% trans "m²" %}</span>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Visina stropa" %}</label>
+          <div class="num-row">
+            <input class="wz-input" name="ceiling_height" id="f_ceiling_height" type="number" step="1" min="0" placeholder="240">
+            <span class="num-unit">{% trans "cm" %}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🧱 Materijal zidova" %}</div>
+      <div class="opt-group" id="opt-wall_material">
+        <label class="opt"><input type="radio" name="wall_material" value="concrete">
+          <span class="opt-icon">🏗️</span><span class="opt-text">{% trans "Beton" %}</span></label>
+        <label class="opt"><input type="radio" name="wall_material" value="brick">
+          <span class="opt-icon">🧱</span><span class="opt-text">{% trans "Opeka" %}</span></label>
+        <label class="opt"><input type="radio" name="wall_material" value="gypsum">
+          <span class="opt-icon">⬜</span><span class="opt-text">{% trans "Gips ploče" %}</span></label>
+        <label class="opt"><input type="radio" name="wall_material" value="mixed">
+          <span class="opt-icon">🔀</span><span class="opt-text">{% trans "Kombinirano" %}</span></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🎯 Procjena stanja (majstor)" %}</div>
+      <div class="opt-group" id="opt-complexity">
+        <label class="opt"><input type="radio" name="complexity" value="simple">
+          <span class="opt-icon">🟢</span><div class="opt-wrap"><span class="opt-text">{% trans "Jednostavno" %}</span></div></label>
+        <label class="opt"><input type="radio" name="complexity" value="standard">
+          <span class="opt-icon">🟡</span><div class="opt-wrap"><span class="opt-text">{% trans "Srednje" %}</span></div></label>
+        <label class="opt"><input type="radio" name="complexity" value="complex">
+          <span class="opt-icon">🟠</span><div class="opt-wrap"><span class="opt-text">{% trans "Kompleksno" %}</span></div></label>
+        <label class="opt"><input type="radio" name="complexity" value="challenging">
+          <span class="opt-icon">🔴</span><div class="opt-wrap"><span class="opt-text">{% trans "Izazovno" %}</span></div></label>
+      </div>
+      <div style="margin-top:.75rem">
+        <label class="wz-label">{% trans "Skriveni rizici" %}</label>
+        <textarea class="wz-textarea" name="hidden_risks" id="f_hidden_risks" placeholder="{% trans "Zapažanja majstora o potencijalnim problemima..." %}"></textarea>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "📷 Fotografije (stanje)" %}</div>
+      <div class="photo-zone" id="zone-3">
+        <div class="photo-zone-title">
+          {% trans "📸 Fotografirajte: sva 4 zida · pod · instalacije · strop" %}
+        </div>
+        <button type="button" class="photo-btn" onclick="triggerPhoto(3)">{% trans "📷 Fotografiraj / Odaberi" %}</button>
+        <input type="file" id="photo-input-3" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotos(this,3)">
+        <div class="photo-preview" id="preview-3"></div>
+        <div class="upload-status" id="status-3"></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-3 -->
+
+  <!-- ─────────────── STEP 4 ─────────────── -->
+  <div class="wz-panel" id="panel-4">
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "💧 Hidroizolacija" %}</div>
+      <div class="opt-group" id="opt-waterproofing">
+        <label class="opt"><input type="radio" name="waterproofing" value="shower_floor">
+          <span class="opt-icon">🚿</span><div class="opt-wrap"><span class="opt-text">{% trans "Tuš zona + pod" %}</span>
+            <span class="opt-sub">{% trans "MINIMUM standard" %}</span></div></label>
+        <label class="opt"><input type="radio" name="waterproofing" value="full">
+          <span class="opt-icon">✅</span><div class="opt-wrap"><span class="opt-text">{% trans "Potpuna – svi zidovi" %}</span>
+            <span class="opt-sub">{% trans "Preporučeno za starije objekte" %}</span></div></label>
+      </div>
+      <div style="margin-top:.65rem">
+        <label class="wz-label">{% trans "Napomena o hidroizolaciji" %}</label>
+        <textarea class="wz-textarea" name="waterproofing_note" id="f_waterproofing_note" placeholder="{% trans "Posebne napomene..." %}" style="min-height:60px"></textarea>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🪟 Prozor / Ventilacija" %}</div>
+      <div class="opt-group" id="opt-window" style="margin-bottom:.75rem">
+        <label class="opt"><input type="radio" name="window" value="good">
+          <span class="opt-icon">✅</span><span class="opt-text">{% trans "Prozor postoji – dobro stanje" %}</span></label>
+        <label class="opt"><input type="radio" name="window" value="replace">
+          <span class="opt-icon">🔄</span><span class="opt-text">{% trans "Prozor postoji – zamjena potrebna" %}</span></label>
+        <label class="opt"><input type="radio" name="window" value="none">
+          <span class="opt-icon">🚫</span><span class="opt-text">{% trans "Nema prozora" %}</span></label>
+      </div>
+      <hr class="wz-divider">
+      <div class="wz-card-title" style="margin-bottom:.6rem">{% trans "🌀 Ventilacija (bez prozora – obavezno)" %}</div>
+      <div class="opt-group" id="opt-ventilation">
+        <label class="opt"><input type="radio" name="ventilation" value="existing_channel">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Postojeći vent. kanal" %}</span>
+            <span class="opt-sub">{% trans "Provjeri funkcionalnost!" %}</span></div></label>
+        <label class="opt"><input type="radio" name="ventilation" value="timer_fan">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Ventilator s timerom" %}</span></div></label>
+        <label class="opt"><input type="radio" name="ventilation" value="humidity_fan">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Ventilator sa senzorom vlage" %}</span></div></label>
+        <label class="opt"><input type="radio" name="ventilation" value="recuperator">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Rekuperator" %}</span>
+            <span class="opt-sub">{% trans "Premium opcija" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "💡 Rasvjeta" %}</div>
+      <div class="wz-grid2">
+        <div>
+          <label class="wz-label">{% trans "Tip prekidača" %}</label>
+          <div class="opt-group" id="opt-lighting_type">
+            <label class="opt"><input type="radio" name="lighting_type" value="classic"><span class="opt-text">{% trans "Klasični" %}</span></label>
+            <label class="opt"><input type="radio" name="lighting_type" value="motion"><span class="opt-text">{% trans "Senzor pokreta" %}</span></label>
+            <label class="opt"><input type="radio" name="lighting_type" value="dimmer"><span class="opt-text">{% trans "Dimer" %}</span></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Izvedba" %}</label>
+          <div class="opt-group">
+            <label class="opt"><input type="checkbox" name="lighting_exec" value="standard"><span class="opt-text">{% trans "Standardne lampe" %}</span></label>
+            <label class="opt"><input type="checkbox" name="lighting_exec" value="led_strips"><span class="opt-text">{% trans "LED trake / niše" %}</span></label>
+            <label class="opt"><input type="checkbox" name="lighting_exec" value="combined"><span class="opt-text">{% trans "Kombinirano" %}</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="warn-box">{% trans "⚠️ Sva rasvjeta u kupaoni mora biti minimum" %} <strong>{% trans "IP44" %}</strong>!</div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🔥 Grijanje" %}</div>
+      <div class="opt-group" id="opt-heating">
+        <label class="opt"><input type="radio" name="heating" value="radiator">
+          <span class="opt-icon">🏠</span><div class="opt-wrap"><span class="opt-text">{% trans "Kupaonski radijator za ručnike" %}</span><span class="opt-sub">{% trans "Standardno" %}</span></div></label>
+        <label class="opt"><input type="radio" name="heating" value="electric_underfloor">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Električno podno grijanje" %}</span><span class="opt-sub">{% trans "Skuplje u radu" %}</span></div></label>
+        <label class="opt"><input type="radio" name="heating" value="hydro_underfloor">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Hidro podno grijanje" %}</span><span class="opt-sub">{% trans "Ako postoji centralno" %}</span></div></label>
+        <label class="opt"><input type="radio" name="heating" value="wall_heating">
+          <span class="opt-icon">⭐</span><div class="opt-wrap"><span class="opt-text">{% trans "Zidno grijanje ispod pločica" %}</span>
+            <span class="opt-sub">{% trans "PREMIUM – nevidljivo, ravnomjerno, najudobnije" %}</span></div></label>
+        <label class="opt"><input type="radio" name="heating" value="combined">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Kombinirano" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🛁 Tuš / Kada" %}</div>
+      <div style="margin-bottom:.65rem">
+        <label class="wz-label">{% trans "Tip kupanja" %}</label>
+        <div class="opt-group" id="opt-bathing_type">
+          <label class="opt"><input type="radio" name="bathing_type" value="shower_only"><span class="opt-text">{% trans "Samo tuš" %}</span></label>
+          <label class="opt"><input type="radio" name="bathing_type" value="bath_only"><span class="opt-text">{% trans "Samo kada" %}</span></label>
+          <label class="opt"><input type="radio" name="bathing_type" value="both"><span class="opt-text">{% trans "Tuš + kada odvojeno" %}</span></label>
+        </div>
+      </div>
+      <div style="margin-bottom:.65rem">
+        <label class="wz-label">{% trans "Tuš kabina" %}</label>
+        <div class="opt-group" id="opt-shower_type">
+          <label class="opt"><input type="radio" name="shower_type" value="classic"><span class="opt-text">{% trans "Klasična s vratima" %}</span></label>
+          <label class="opt"><input type="radio" name="shower_type" value="walk_in">
+            <div class="opt-wrap"><span class="opt-text">{% trans "Walk-in (staklena pregrada)" %}</span></div></label>
+          <label class="opt"><input type="radio" name="shower_type" value="niche">
+            <div class="opt-wrap"><span class="opt-text">{% trans "Utor u zidu (recessed niche)" %}</span>
+              <span class="opt-sub">{% trans "PREPORUČENO gdje god moguće" %}</span></div></label>
+          <label class="opt"><input type="radio" name="shower_type" value="full_height"><span class="opt-text">{% trans "Obloga do stropa (bez okvira)" %}</span></label>
+        </div>
+      </div>
+      <div class="wz-grid2">
+        <div>
+          <label class="wz-label">{% trans "Staklena pregrada" %}</label>
+          <div class="opt-group" id="opt-glass_door">
+            <label class="opt"><input type="radio" name="glass_door" value="sliding"><span class="opt-text">{% trans "Klizna vrata" %}</span></label>
+            <label class="opt"><input type="radio" name="glass_door" value="hinged"><span class="opt-text">{% trans "Zaklopna vrata" %}</span></label>
+            <label class="opt"><input type="radio" name="glass_door" value="walk_in_open"><span class="opt-text">{% trans "Walk-in bez vrata" %}</span></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Debljina stakla" %}</label>
+          <div class="opt-group" id="opt-glass_thickness">
+            <label class="opt"><input type="radio" name="glass_thickness" value="6mm"><span class="opt-text">{% trans "6 mm" %}</span></label>
+            <label class="opt"><input type="radio" name="glass_thickness" value="8mm">
+              <div class="opt-wrap"><span class="opt-text">{% trans "8 mm" %}</span><span class="opt-sub">{% trans "Preporučeno" %}</span></div></label>
+            <label class="opt"><input type="radio" name="glass_thickness" value="10mm">
+              <div class="opt-wrap"><span class="opt-text">{% trans "10 mm" %}</span><span class="opt-sub">{% trans "Premium" %}</span></div></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "📱 SMART kupaona" %}</div>
+      <div class="check-grid" style="margin-bottom:.75rem">
+        <label class="opt"><input type="checkbox" name="smart" value="smart_mirror"><span class="opt-text">{% trans "Pametno ogledalo" %}</span></label>
+        <label class="opt"><input type="checkbox" name="smart" value="smart_shower"><span class="opt-text">{% trans "Smart tuš" %}</span></label>
+        <label class="opt"><input type="checkbox" name="smart" value="leak_sensor"><span class="opt-text">{% trans "Senzori curenja" %}</span></label>
+        <label class="opt"><input type="checkbox" name="smart" value="thermostat"><span class="opt-text">{% trans "Grijanje s termostatom" %}</span></label>
+        <label class="opt"><input type="checkbox" name="smart" value="voice_control"><span class="opt-text">{% trans "Glasovna kontrola" %}</span></label>
+        <label class="opt"><input type="checkbox" name="smart" value="electric_window"><span class="opt-text">{% trans "El. zatamnjivanje" %}</span></label>
+      </div>
+      <label class="wz-label">{% trans "Razina SMART" %}</label>
+      <div class="opt-group" id="opt-smart_level">
+        <label class="opt"><input type="radio" name="smart_level" value="basic"><div class="opt-wrap"><span class="opt-text">{% trans "Osnovno" %}</span><span class="opt-sub">{% trans "LED + senzor pokreta" %}</span></div></label>
+        <label class="opt"><input type="radio" name="smart_level" value="medium"><div class="opt-wrap"><span class="opt-text">{% trans "Srednje" %}</span><span class="opt-sub">{% trans "+ smart grijanje + ogledalo" %}</span></div></label>
+        <label class="opt"><input type="radio" name="smart_level" value="premium"><div class="opt-wrap"><span class="opt-text">{% trans "Premium" %}</span><span class="opt-sub">{% trans "Potpuna automatizacija" %}</span></div></label>
+      </div>
+    </div>
+
+  </div><!-- /panel-4 -->
+
+  <!-- ─────────────── STEP 5 ─────────────── -->
+  <div class="wz-panel" id="panel-5">
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🧑‍🔧 Mišljenje stručnjaka" %}<span class="req">*</span></div>
+      <textarea class="wz-textarea" name="expert_opinion" id="f_expert_opinion" style="min-height:130px"
+        placeholder="{% trans "Slobodni tekst – detaljno opišite stanje, preporuke i posebne napomene..." %}"></textarea>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "⚠️ Upozorenja i skriveni troškovi" %}</div>
+      <div class="check-grid">
+        <label class="opt"><input type="checkbox" name="warnings" value="open_walls"><span class="opt-text">{% trans "Otvoriti zidove" %}</span></label>
+        <label class="opt"><input type="checkbox" name="warnings" value="electrician"><span class="opt-text">{% trans "Potreban elektrićar" %}</span></label>
+        <label class="opt"><input type="checkbox" name="warnings" value="static_issue"><span class="opt-text">{% trans "Statički problem" %}</span></label>
+        <label class="opt"><input type="checkbox" name="warnings" value="asbestos">
+          <div class="opt-wrap"><span class="opt-text">{% trans "Azbest" %}</span><span class="opt-warn">{% trans "Specijalno uklanjanje!" %}</span></div></label>
+        <label class="opt"><input type="checkbox" name="warnings" value="mold"><span class="opt-text">{% trans "Vlaga / plijesan" %}</span></label>
+        <label class="opt"><input type="checkbox" name="warnings" value="other_risk"><span class="opt-text">{% trans "Ostalo" %}</span></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "✅ Preporučena rješenja" %}</div>
+      <div class="opt-group">
+        <label class="opt"><input type="checkbox" name="solution" value="full_recon"><span class="opt-text">{% trans "Kompletna rekonstrukcija (ključ u ruke)" %}</span></label>
+        <label class="opt"><input type="checkbox" name="solution" value="partial_recon"><span class="opt-text">{% trans "Djelomična rekonstrukcija" %}</span></label>
+        <label class="opt"><input type="checkbox" name="solution" value="tiles_only"><span class="opt-text">{% trans "Samo pločice i sanitarija (instalacije OK)" %}</span></label>
+        <label class="opt"><input type="checkbox" name="solution" value="urgent"><div class="opt-wrap"><span class="opt-text">{% trans "Hitna intervencija" %}</span><span class="opt-warn">{% trans "Kvar koji ne može čekati" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "📅 Okvirni rok radova" %}</div>
+      <div class="opt-group" id="opt-duration">
+        <label class="opt"><input type="radio" name="duration" value="5days"><div class="opt-wrap"><span class="opt-text">{% trans "Do 5 radnih dana" %}</span><span class="opt-sub">{% trans "Mali zahvat" %}</span></div></label>
+        <label class="opt"><input type="radio" name="duration" value="5_10days"><div class="opt-wrap"><span class="opt-text">{% trans "5–10 radnih dana" %}</span><span class="opt-sub">{% trans "Standardna kupaona" %}</span></div></label>
+        <label class="opt"><input type="radio" name="duration" value="10_15days"><div class="opt-wrap"><span class="opt-text">{% trans "10–15 radnih dana" %}</span><span class="opt-sub">{% trans "Kompleksna kupaona" %}</span></div></label>
+        <label class="opt"><input type="radio" name="duration" value="15_20days"><div class="opt-wrap"><span class="opt-text">{% trans "15–20 radnih dana" %}</span><span class="opt-sub">{% trans "Premium / SMART kupaona" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "👷 Predviđena ekipa" %}</div>
+      <div class="wz-grid2">
+        <div>
+          <label class="wz-label">{% trans "Broj majstora" %}</label>
+          <div class="num-row">
+            <input class="wz-input" name="workers_count" id="f_workers_count" type="number" min="1" max="20" placeholder="2">
+            <span class="num-unit">{% trans "majstora" %}</span>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Broj pomoćnika" %}</label>
+          <div class="num-row">
+            <input class="wz-input" name="helpers_count" id="f_helpers_count" type="number" min="0" max="20" placeholder="1">
+            <span class="num-unit">{% trans "pomoćnika" %}</span>
+          </div>
+        </div>
+      </div>
+      <hr class="wz-divider">
+      <label class="wz-label">{% trans "Okvirna cijena (€)" %}</label>
+      <div class="price-row">
+        <div>
+          <input class="wz-input" name="price_from" id="f_price_from" type="number" min="0" step="100" placeholder="{% trans "npr. 3500" %}">
+        </div>
+        <div class="price-dash">—</div>
+        <div>
+          <input class="wz-input" name="price_to" id="f_price_to" type="number" min="0" step="100" placeholder="{% trans "npr. 5000" %}">
+        </div>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.4rem">{% trans "Okvirna procjena – konačna cijena u ponudi" %}</div>
+    </div>
+
+  </div><!-- /panel-5 -->
+
+  <!-- ─────────────── STEP 6 ─────────────── -->
+  <div class="wz-panel" id="panel-6">
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🎨 Stil kupaone (klijent bira)" %}</div>
+      <div class="opt-group" id="opt-style">
+        <label class="opt"><input type="radio" name="style" value="modern">
+          <span class="opt-icon">⬛</span><div class="opt-wrap"><span class="opt-text">{% trans "Moderan / Minimalistički" %}</span></div></label>
+        <label class="opt"><input type="radio" name="style" value="classic">
+          <span class="opt-icon">🏛️</span><div class="opt-wrap"><span class="opt-text">{% trans "Klasičan / Elegantni" %}</span></div></label>
+        <label class="opt"><input type="radio" name="style" value="industrial">
+          <span class="opt-icon">🔩</span><div class="opt-wrap"><span class="opt-text">{% trans "Industrijski / Loft" %}</span></div></label>
+        <label class="opt"><input type="radio" name="style" value="mediterranean">
+          <span class="opt-icon">☀️</span><div class="opt-wrap"><span class="opt-text">{% trans "Mediteranski / Rustikalni" %}</span></div></label>
+        <label class="opt"><input type="radio" name="style" value="smart">
+          <span class="opt-icon">📱</span><div class="opt-wrap"><span class="opt-text">{% trans "SMART / High-tech" %}</span></div></label>
+        <label class="opt"><input type="radio" name="style" value="custom">
+          <span class="opt-icon">✏️</span><div class="opt-wrap"><span class="opt-text">{% trans "Po dogovoru" %}</span></div></label>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🪨 Pločice" %}</div>
+      <div class="wz-grid3">
+        <div>
+          <label class="wz-label">{% trans "Format" %}</label>
+          <div class="opt-group" id="opt-tile_size">
+            <label class="opt"><input type="radio" name="tile_size" value="small"><span class="opt-text">{% trans "Mali (&lt;30cm)" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_size" value="medium"><span class="opt-text">{% trans "Srednji (30-60)" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_size" value="large"><span class="opt-text">{% trans "Veliki (&gt;60cm)" %}</span></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Boja" %}</label>
+          <div class="opt-group" id="opt-tile_color">
+            <label class="opt"><input type="radio" name="tile_color" value="white"><span class="opt-text">{% trans "Bijela" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_color" value="grey"><span class="opt-text">{% trans "Siva" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_color" value="beige"><span class="opt-text">{% trans "Bež" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_color" value="dark"><span class="opt-text">{% trans "Tamna" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_color" value="mixed"><span class="opt-text">{% trans "Kombinacija" %}</span></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Materijal" %}</label>
+          <div class="opt-group" id="opt-tile_mat">
+            <label class="opt"><input type="radio" name="tile_mat" value="ceramic"><span class="opt-text">{% trans "Keramika" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_mat" value="gres"><span class="opt-text">{% trans "Gres" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_mat" value="marble"><span class="opt-text">{% trans "Mramor" %}</span></label>
+            <label class="opt"><input type="radio" name="tile_mat" value="concrete"><span class="opt-text">{% trans "Beton efekt" %}</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "🚿 Sanitarija" %}</div>
+      <div class="wz-grid2">
+        <div>
+          <label class="wz-label">{% trans "Budget" %}</label>
+          <div class="opt-group" id="opt-sanitarija_budget">
+            <label class="opt"><input type="radio" name="sanitarija_budget" value="economy"><div class="opt-wrap"><span class="opt-text">{% trans "Ekonomična linija" %}</span><span class="opt-sub">{% trans "do €500" %}</span></div></label>
+            <label class="opt"><input type="radio" name="sanitarija_budget" value="mid"><div class="opt-wrap"><span class="opt-text">{% trans "Srednja klasa" %}</span><span class="opt-sub">€500–1500</span></div></label>
+            <label class="opt"><input type="radio" name="sanitarija_budget" value="premium"><div class="opt-wrap"><span class="opt-text">{% trans "Premium" %}</span><span class="opt-sub">€1500+</span></div></label>
+            <label class="opt"><input type="radio" name="sanitarija_budget" value="client_supplies"><span class="opt-text">{% trans "Klijent sam bira/nabavlja" %}</span></label>
+          </div>
+        </div>
+        <div>
+          <label class="wz-label">{% trans "Boja sanitarije" %}</label>
+          <div class="opt-group" id="opt-sanitarija_color">
+            <label class="opt"><input type="radio" name="sanitarija_color" value="white"><span class="opt-text">{% trans "Bijela (standard)" %}</span></label>
+            <label class="opt"><input type="radio" name="sanitarija_color" value="black"><span class="opt-text">{% trans "Crna (trend)" %}</span></label>
+            <label class="opt"><input type="radio" name="sanitarija_color" value="gold"><div class="opt-wrap"><span class="opt-text">{% trans "Zlatna (premium)" %}</span></div></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wz-card">
+      <div class="wz-card-title">{% trans "📝 Posebni zahtjevi klijenta" %}</div>
+      <textarea class="wz-textarea" name="client_notes" id="f_client_notes"
+        placeholder="{% trans "Posebne želje, napomene ili zahtjevi klijenta..." %}"></textarea>
+    </div>
+
+  </div><!-- /panel-6 -->
+
+  <!-- Navigation buttons (fixed bottom) -->
+  <div class="wz-nav">
+    <button type="button" class="btn-prev" id="prevBtn" onclick="prevStep()" style="display:none">{% trans "← Natrag" %}</button>
+    <button type="button" class="btn-next" id="nextBtn" onclick="nextStep()">{% trans "Dalje →" %}</button>
+    <button type="button" class="btn-submit" id="submitBtn" onclick="submitWizard()" style="display:none">{% trans "✓ Spremi nalaz" %}</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'fina_assessment_v1';
+const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+let currentStep = 1;
+let totalSteps  = 6;
+let assessmentId = null;
+let isSaving = false;
+
+// ── Offline detection ─────────────────────────────────────────────────────────
+function checkOnline() {
+  const badge = document.getElementById('offlineBadge');
+  badge.classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online',  checkOnline);
+window.addEventListener('offline', checkOnline);
+checkOnline();
+
+// ── Option click highlighting ─────────────────────────────────────────────────
+document.querySelectorAll('.opt').forEach(opt => {
+  const inp = opt.querySelector('input');
+  if (!inp) return;
+  if (inp.type === 'radio') {
+    inp.addEventListener('change', () => {
+      document.querySelectorAll(`[name="${inp.name}"]`).forEach(r => {
+        r.closest('.opt').classList.toggle('checked', r.checked);
+      });
+      saveDraft();
+    });
+    // init
+    if (inp.checked) opt.classList.add('checked');
+  } else if (inp.type === 'checkbox') {
+    inp.addEventListener('change', () => {
+      opt.classList.toggle('checked', inp.checked);
+      saveDraft();
+    });
+  }
+  // touch: clicking the label triggers the input
+  opt.addEventListener('click', () => {
+    if (inp.type === 'radio')    { inp.checked = true; inp.dispatchEvent(new Event('change')); }
+    else if (inp.type === 'checkbox') { inp.checked = !inp.checked; inp.dispatchEvent(new Event('change')); }
+  });
+});
+
+// Auto-save on text inputs
+document.querySelectorAll('.wz-input, .wz-textarea').forEach(el => {
+  el.addEventListener('input', () => saveDraft());
+});
+
+// ── Data gathering ────────────────────────────────────────────────────────────
+function gatherStep(n) {
+  const panel = document.getElementById(`panel-${n}`);
+  if (!panel) return {};
+  const d = {};
+  panel.querySelectorAll('input[name], textarea[name]').forEach(el => {
+    const k = el.name;
+    if (!k) return;
+    if (el.type === 'radio') {
+      if (el.checked) d[k] = el.value;
+    } else if (el.type === 'checkbox') {
+      if (el.checked) {
+        if (!d[k]) d[k] = [];
+        d[k].push(el.value);
+      }
+    } else if (el.type !== 'file') {
+      if (el.value) d[k] = el.value;
+    }
+  });
+  return d;
+}
+
+function gatherAll() {
+  const out = { assessment_type: document.querySelector('[name="assessment_type"]:checked')?.value || 'bathroom' };
+  for (let i = 1; i <= 6; i++) out[`step${i}`] = gatherStep(i);
+  if (assessmentId) out.assessment_id = assessmentId;
+  return out;
+}
+
+// ── Step data restore ─────────────────────────────────────────────────────────
+function restoreStep(n, data) {
+  const panel = document.getElementById(`panel-${n}`);
+  if (!panel || !data) return;
+  Object.entries(data).forEach(([k, v]) => {
+    if (Array.isArray(v)) {
+      v.forEach(val => {
+        const el = panel.querySelector(`input[name="${k}"][value="${val}"]`);
+        if (el) { el.checked = true; el.closest('.opt')?.classList.add('checked'); }
+      });
+    } else {
+      const radio = panel.querySelector(`input[name="${k}"][value="${v}"]`);
+      if (radio) { radio.checked = true; radio.closest('.opt')?.classList.add('checked'); }
+      const text = panel.querySelector(`input[name="${k}"]:not([type="radio"]):not([type="checkbox"]), textarea[name="${k}"]`);
+      if (text && text.type !== 'radio' && text.type !== 'checkbox') text.value = v;
+    }
+  });
+}
+
+// ── LocalStorage ──────────────────────────────────────────────────────────────
+function saveDraft() {
+  const draft = { ...gatherAll(), saved_at: new Date().toISOString() };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(draft)); } catch (e) {}
+  showSaveInd('saving');
+  clearTimeout(saveDraft._t);
+  saveDraft._t = setTimeout(() => { showSaveInd('saved'); autoSaveServer(); }, 1200);
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const draft = JSON.parse(raw);
+    if (draft.assessment_id) assessmentId = draft.assessment_id;
+    if (draft.assessment_type) {
+      const el = document.querySelector(`[name="assessment_type"][value="${draft.assessment_type}"]`);
+      if (el) { el.checked = true; el.closest('.opt')?.classList.add('checked'); }
+    }
+    for (let i = 1; i <= 6; i++) {
+      if (draft[`step${i}`]) restoreStep(i, draft[`step${i}`]);
+    }
+  } catch (e) {}
+}
+
+function showSaveInd(state) {
+  const el = document.getElementById('saveIndicator');
+  el.className = `save-ind ${state}`;
+  el.textContent = state === 'saving' ? '💾 Sprema...' : '✓ Spremljeno';
+}
+
+// ── Server AJAX save ───────────────────────────────────────────────────────────
+async function autoSaveServer() {
+  if (!navigator.onLine || isSaving) return;
+  const s1 = gatherStep(1);
+  if (!s1.client_name) return; // need at least a name
+  isSaving = true;
+  try {
+    const payload = { ...gatherAll(), assessment_id: assessmentId };
+    const res = await fetch('/assessment/save/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.ok && data.assessment_id) {
+      assessmentId = data.assessment_id;
+      // store updated ID in draft
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const draft = JSON.parse(raw);
+          draft.assessment_id = assessmentId;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+        }
+      } catch (e) {}
+    }
+  } catch (e) {} finally {
+    isSaving = false;
+  }
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function goToStep(n) {
+  if (n < 1 || n > totalSteps) return;
+  document.getElementById(`panel-${currentStep}`)?.classList.remove('active');
+  document.querySelector(`.wz-step[data-step="${currentStep}"]`)?.classList.remove('active');
+  currentStep = n;
+  document.getElementById(`panel-${n}`)?.classList.add('active');
+  document.querySelectorAll('.wz-step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (sn === n) s.classList.add('active');
+    else if (sn < n) s.classList.add('done');
+  });
+  document.getElementById('prevBtn').style.display = n > 1 ? 'block' : 'none';
+  document.getElementById('nextBtn').style.display = n < totalSteps ? 'block' : 'none';
+  document.getElementById('submitBtn').style.display = n === totalSteps ? 'block' : 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextStep() {
+  if (currentStep === 1) {
+    const name = document.getElementById('f_client_name')?.value.trim();
+    if (!name) { alert('Unesite ime klijenta!'); document.getElementById('f_client_name').focus(); return; }
+  }
+  saveDraft();
+  autoSaveServer();
+  goToStep(currentStep + 1);
+}
+
+function prevStep() {
+  saveDraft();
+  goToStep(currentStep - 1);
+}
+
+// ── Final submit ──────────────────────────────────────────────────────────────
+async function submitWizard() {
+  const btn = document.getElementById('submitBtn');
+  if (btn.dataset.submitting === '1') return;
+
+  const s1 = gatherStep(1);
+  if (!s1.client_name) { alert('Unesite ime klijenta (Korak 1)!'); goToStep(1); return; }
+  const s5 = gatherStep(5);
+  if (!s5.expert_opinion) { alert('Unesite mišljenje stručnjaka (Korak 5)!'); return; }
+
+  btn.dataset.submitting = '1';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;Sprema se...';
+
+  const payload = { ...gatherAll(), assessment_id: assessmentId, final_submit: true };
+  try {
+    const res = await fetch('/assessment/save/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.href = data.redirect_url || '/assessment/';
+    } else {
+      alert('Greška pri spremanju. Pokušajte ponovo.');
+      btn.dataset.submitting = '';
+      btn.disabled = false;
+      btn.innerHTML = '✓ Spremi nalaz';
+    }
+  } catch (e) {
+    alert('Nema veze sa serverom. Pokušajte ponovo.');
+    btn.dataset.submitting = '';
+    btn.disabled = false;
+    btn.innerHTML = '✓ Spremi nalaz';
+  }
+}
+
+// ── Photo upload ──────────────────────────────────────────────────────────────
+function triggerPhoto(step) { document.getElementById(`photo-input-${step}`).click(); }
+
+async function handlePhotos(input, step) {
+  const files = Array.from(input.files);
+  const statusEl = document.getElementById(`status-${step}`);
+  statusEl.className = 'upload-status';
+  statusEl.textContent = `Uploadam ${files.length} foto...`;
+
+  for (const file of files) {
+    if (!assessmentId) {
+      // save first
+      const s1 = gatherStep(1);
+      if (s1.client_name) await autoSaveServer();
+    }
+    if (assessmentId && navigator.onLine) {
+      try {
+        const fd = new FormData();
+        fd.append('photo', file);
+        fd.append('step', step);
+        fd.append('csrfmiddlewaretoken', CSRF);
+        const res = await fetch(`/assessment/${assessmentId}/photos/`, { method: 'POST', body: fd });
+        const d = await res.json();
+        if (d.ok) addThumb(d.url, d.photo_id, step);
+      } catch (e) {
+        queuePhoto(file, step);
+      }
+    } else {
+      queuePhoto(file, step);
+    }
+  }
+  statusEl.className = 'upload-status ok';
+  statusEl.textContent = `${files.length} foto dodano ✓`;
+}
+
+function addThumb(url, photoId, step) {
+  const prev = document.getElementById(`preview-${step}`);
+  if (!prev) return;
+  const div = document.createElement('div');
+  div.className = 'photo-thumb';
+  div.innerHTML = `<img src="${url}" alt="foto"><button class="photo-del" onclick="delPhoto(${photoId},'${step}',this.parentNode)" title="Ukloni">✕</button>`;
+  prev.appendChild(div);
+}
+
+async function delPhoto(photoId, step, el) {
+  if (!assessmentId) return;
+  try {
+    await fetch(`/assessment/${assessmentId}/photos/${photoId}/delete/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF },
+    });
+    el.remove();
+  } catch (e) {}
+}
+
+function queuePhoto(file, step) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const q = JSON.parse(localStorage.getItem('fina_photo_queue') || '[]');
+    q.push({ data: e.target.result, name: file.name, type: file.type, step });
+    localStorage.setItem('fina_photo_queue', JSON.stringify(q));
+    addThumb(e.target.result, 'q_' + Date.now(), step);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadDraft();
+goToStep(1);
+</script>
+{% endblock %}

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+@page { margin: 15mm; size: A4; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:10pt; color:#1a1a1a; line-height:1.4; }
+
+/* Header */
+.header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2.5pt solid #0f172a; padding-bottom:14pt; margin-bottom:18pt; }
+.header-left { max-width:55%; }
+.header-left img.logo { max-height:50pt; max-width:160pt; margin-bottom:6pt; display:block; }
+.header-left .company-name { font-size:14pt; font-weight:700; color:#0f172a; }
+.header-left .company-detail { font-size:8pt; color:#475569; line-height:1.5; margin-top:3pt; }
+.header-right { text-align:right; }
+.header-right .doc-type { font-size:9pt; text-transform:uppercase; letter-spacing:2px; color:#c9a84c; font-weight:700; }
+.header-right .doc-number { font-size:16pt; font-weight:700; color:#0f172a; margin:2pt 0; }
+.header-right .doc-meta { font-size:8pt; color:#475569; }
+.receipt-type-badge { display:inline-block; background:#c9a84c; color:#0f172a; font-size:7pt; font-weight:700; padding:2pt 8pt; border-radius:3pt; text-transform:uppercase; letter-spacing:.5px; margin-top:4pt; }
+
+/* Parties */
+.parties { display:flex; gap:16pt; margin-bottom:18pt; }
+.party { flex:1; padding:10pt 12pt; border-left:3pt solid #c9a84c; background:#f8fafc; }
+.party h3 { font-size:7pt; text-transform:uppercase; letter-spacing:1.5px; color:#94a3b8; margin-bottom:4pt; font-weight:600; }
+.party .name { font-size:11pt; font-weight:700; color:#0f172a; }
+.party .detail { font-size:8pt; color:#475569; margin-top:2pt; line-height:1.5; }
+
+/* Info grid */
+.info-grid { display:flex; gap:12pt; margin-bottom:16pt; }
+.info-box { flex:1; padding:8pt; background:#f1f5f9; border-radius:4pt; text-align:center; }
+.info-box .lbl { font-size:7pt; text-transform:uppercase; letter-spacing:1px; color:#94a3b8; }
+.info-box .val { font-size:10pt; font-weight:700; color:#0f172a; margin-top:2pt; }
+
+/* Table */
+table { width:100%; border-collapse:collapse; margin-bottom:14pt; }
+thead tr { background:#0f172a; color:white; }
+th { padding:6pt 8pt; font-size:7.5pt; text-transform:uppercase; letter-spacing:.5px; text-align:left; }
+th.r { text-align:right; }
+td { padding:6pt 8pt; font-size:9pt; border-bottom:.5pt solid #e2e8f0; }
+td.r { text-align:right; font-variant-numeric: tabular-nums; }
+tr:nth-child(even) td { background:#fafafa; }
+.total-section { margin-bottom:14pt; }
+.total-row { display:flex; justify-content:flex-end; gap:20pt; padding:4pt 8pt; font-size:9pt; }
+.total-row.grand { background:#0f172a; color:white; font-weight:700; font-size:11pt; padding:8pt; border-radius:4pt; }
+.total-row .label { color:#64748b; }
+.total-row.grand .label { color:#c9a84c; }
+
+/* Notes */
+.notes { padding:10pt 12pt; background:#fffbeb; border-left:3pt solid #c9a84c; font-size:9pt; margin-bottom:16pt; border-radius:0 4pt 4pt 0; }
+.notes strong { color:#92400e; }
+.warning { padding:8pt 12pt; background:#fef2f2; border-left:3pt solid #ef4444; font-size:8pt; color:#991b1b; margin-bottom:12pt; border-radius:0 4pt 4pt 0; }
+
+/* Signatures */
+.signatures { display:flex; justify-content:space-between; margin-top:40pt; }
+.sig-box { width:38%; text-align:center; }
+.sig-line { border-top:1pt solid #1a1a1a; padding-top:4pt; font-size:8pt; color:#475569; }
+.sig-name { font-size:9pt; font-weight:600; margin-top:2pt; }
+
+/* Footer */
+.footer { position:fixed; bottom:8mm; left:15mm; right:15mm; text-align:center; font-size:7pt; color:#94a3b8; border-top:.5pt solid #e2e8f0; padding-top:4pt; }
+</style></head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    {% if receipt.company.logo %}
+    <img class="logo" src="{{ receipt.company.logo.path }}" alt="logo">
+    {% endif %}
+    <div class="company-name">{{ receipt.company.name }}</div>
+    <div class="company-detail">
+      {% if receipt.company.oib %}OIB: {{ receipt.company.oib }}<br>{% endif %}
+      {% if receipt.company.address %}{{ receipt.company.address }}{% endif %}
+      {% if receipt.company.zip_code or receipt.company.city %}, {{ receipt.company.zip_code }} {{ receipt.company.city }}{% endif %}
+      {% if receipt.company.iban %}<br>IBAN: {{ receipt.company.iban }}{% endif %}
+      {% if receipt.company.swift %} &middot; BIC: {{ receipt.company.swift }}{% endif %}
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="doc-type">Primka</div>
+    <div class="doc-number">{{ receipt.receipt_number }}</div>
+    <div class="doc-meta">
+      Datum: {{ receipt.date|date:"d.m.Y" }}<br>
+      {% if receipt.linked_invoice_number %}Ul. racun: {{ receipt.linked_invoice_number }}<br>{% endif %}
+      Status: {{ receipt.get_status_display }}
+    </div>
+    <div class="receipt-type-badge">{{ receipt.get_receipt_type_display }}</div>
+  </div>
+</div>
+
+<!-- Strane -->
+<div class="parties">
+  <div class="party">
+    <h3>Primatelj (kupac)</h3>
+    <div class="name">{{ receipt.company.name }}</div>
+    <div class="detail">
+      {% if receipt.company.oib %}OIB: {{ receipt.company.oib }}<br>{% endif %}
+      {{ receipt.company.address|default:"" }}
+      {% if receipt.company.city %}, {{ receipt.company.zip_code }} {{ receipt.company.city }}{% endif %}
+    </div>
+  </div>
+  <div class="party">
+    <h3>Dobavljac (prodavatelj)</h3>
+    {% if receipt.supplier %}
+    <div class="name">{{ receipt.supplier.name }}</div>
+    <div class="detail">
+      {% if receipt.supplier.oib %}OIB: {{ receipt.supplier.oib }}<br>{% endif %}
+      {{ receipt.supplier.address|default:"" }}
+      {% if receipt.supplier.city %}, {{ receipt.supplier.zip_code|default:"" }} {{ receipt.supplier.city }}{% endif %}
+      {% if receipt.supplier.iban %}<br>IBAN: {{ receipt.supplier.iban }}{% endif %}
+    </div>
+    {% else %}
+    <div class="name" style="color:#94a3b8">Nije odredjen</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Info grid -->
+<div class="info-grid">
+  <div class="info-box">
+    <div class="lbl">Datum primke</div>
+    <div class="val">{{ receipt.date|date:"d.m.Y" }}</div>
+  </div>
+  <div class="info-box">
+    <div class="lbl">Vrsta</div>
+    <div class="val">{{ receipt.get_receipt_type_display }}</div>
+  </div>
+  <div class="info-box">
+    <div class="lbl">Skladiste</div>
+    <div class="val">{{ receipt.warehouse|default:"Glavno" }}</div>
+  </div>
+  <div class="info-box">
+    <div class="lbl">Broj stavki</div>
+    <div class="val">{{ items|length }}</div>
+  </div>
+</div>
+
+<!-- Stavke -->
+{% if items %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">#</th>
+      <th style="width:35%">Naziv artikla</th>
+      <th class="r" style="width:10%">Kolicina</th>
+      <th class="r" style="width:12%">Nab. cijena</th>
+      <th class="r" style="width:8%">PDV %</th>
+      <th class="r" style="width:12%">MPC</th>
+      <th class="r" style="width:13%">Uk. nabavna</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ item.inventory_item.name }}</td>
+      <td class="r">{{ item.quantity|floatformat:2 }}</td>
+      <td class="r">{{ item.purchase_price_unit|floatformat:2 }} &euro;</td>
+      <td class="r">{{ item.tax_rate|floatformat:0 }}%</td>
+      <td class="r">{{ item.selling_price_gross|floatformat:2 }} &euro;</td>
+      <td class="r"><strong>{{ item.total_purchase_price|floatformat:2 }} &euro;</strong></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="total-section">
+  <div class="total-row"><span class="label">Ukupno nabavna:</span> <strong>{{ receipt.total_purchase|floatformat:2 }} &euro;</strong></div>
+  <div class="total-row"><span class="label">Ukupno prodajna (MPC):</span> <strong>{{ receipt.total_selling|floatformat:2 }} &euro;</strong></div>
+  {% if receipt.total_selling and receipt.total_purchase %}
+  <div class="total-row grand"><span class="label">Marza:</span> {{ margin_pct|floatformat:1 }}%</div>
+  {% endif %}
+</div>
+{% else %}
+<div class="warning"><strong>Napomena:</strong> Primka nema stavki. Stavke se mogu dodati rucno u sustavu.</div>
+{% endif %}
+
+<!-- Napomene -->
+{% if receipt.notes %}
+<div class="notes"><strong>Napomena:</strong><br>{{ receipt.notes|linebreaksbr }}</div>
+{% endif %}
+
+{% if missing_invoice %}
+<div class="warning"><strong>Upozorenje:</strong> Broj ulaznog racuna nije unesen. Potrebno je rucno provjeriti i unijeti broj racuna dobavljaca.</div>
+{% endif %}
+
+<!-- Potpisi -->
+<div class="signatures">
+  <div class="sig-box">
+    <div class="sig-line">Primio/la</div>
+    {% if receipt.received_by %}<div class="sig-name">{{ receipt.received_by.get_full_name|default:receipt.received_by.username }}</div>{% endif %}
+  </div>
+  <div class="sig-box">
+    <div class="sig-line">Kreirao/la</div>
+    {% if receipt.created_by %}<div class="sig-name">{{ receipt.created_by.get_full_name|default:receipt.created_by.username }}</div>{% endif %}
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  {{ receipt.company.name }}
+  {% if receipt.company.oib %} &middot; OIB: {{ receipt.company.oib }}{% endif %}
+  {% if receipt.company.address %} &middot; {{ receipt.company.address }}{% endif %}
+  {% if receipt.company.iban %} &middot; IBAN: {{ receipt.company.iban }}{% endif %}
+  &middot; Generirano: {% now "d.m.Y H:i" %}
+</div>
+
+</body></html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face { font-family:'DejaVu'; src:url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf'); }
+@font-face { font-family:'DejaVu'; src:url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf'); font-weight:bold; }
+* { font-family:'DejaVu',sans-serif!important; box-sizing:border-box; }
+@page { size:A4; margin:18mm 16mm 16mm 16mm;
+  @bottom-right { content:"Seite " counter(page) " / " counter(pages); font-size:7pt; color:#94a3b8; } }
+body { color:#1a1a1a; font-size:9.5pt; line-height:1.5; }
+
+.hdr { display:table; width:100%; border-bottom:3px solid #e8a020; padding-bottom:8px; margin-bottom:14px; }
+.hl  { display:table-cell; width:60%; vertical-align:middle; }
+.hr  { display:table-cell; width:40%; text-align:right; vertical-align:middle; }
+.co  { font-size:14pt; font-weight:bold; color:#0d0f12; }
+.co span { color:#e8a020; }
+.doc-type { font-size:13pt; font-weight:bold; color:#e8a020; }
+.doc-ref  { font-size:8pt; color:#64748b; margin-top:2px; }
+.doc-date { font-size:8.5pt; color:#0d0f12; }
+
+.info-table { width:100%; border-collapse:collapse; margin-bottom:12px; border:1px solid #e2e8f0; }
+.info-table td { padding:6px 10px; border:1px solid #e2e8f0; font-size:9pt; }
+.lbl { background:#f8fafc; color:#64748b; width:35%; font-size:8.5pt; font-weight:bold; }
+
+.sec { font-size:7pt; font-weight:bold; letter-spacing:2px; text-transform:uppercase;
+  color:#e8a020; background:rgba(232,160,32,.08);
+  padding:4px 8px; border-left:3px solid #e8a020; margin:12px 0 6px; }
+
+.check-table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+.check-table td { padding:5px 8px; font-size:9pt; border-bottom:1px solid #f1f5f9; }
+.check-table .tick { width:20px; color:#e8a020; font-weight:bold; text-align:center; }
+.check-table tr:nth-child(even) td { background:#f8fafc; }
+
+.notes-box { border:1px solid #e2e8f0; padding:10px 12px; font-size:9pt; line-height:1.7;
+  white-space:pre-wrap; margin-bottom:10px; background:#fafbfc; }
+
+.rooms-table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+.rooms-table th { background:#0d0f12; color:#fff; padding:6px 10px; font-size:8pt; text-align:left; }
+.rooms-table td { padding:5px 10px; font-size:9pt; border-bottom:1px solid #f1f5f9; }
+
+.sign { display:table; width:100%; margin-top:30px; }
+.sign-l { display:table-cell; width:50%; padding-right:20px; }
+.sign-r { display:table-cell; width:50%; padding-left:20px; }
+.sign-line { border-top:1px solid #0d0f12; padding-top:5px; font-size:7.5pt; color:#64748b; }
+
+.badge { display:inline-block; background:rgba(232,160,32,.12); border:1px solid rgba(232,160,32,.3);
+  color:#b8760a; padding:2px 8px; border-radius:3px; font-size:7.5pt; font-weight:bold;
+  text-transform:uppercase; letter-spacing:1px; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hl">
+    <img src="/var/www/fina-connect/static/brand/viskovic_logo.jpg" alt="VG" style="height:38px;width:auto;display:block;margin-bottom:4px">
+    <div style="font-size:7pt;color:#64748b;letter-spacing:1.5px;text-transform:uppercase">Bau · Renovierung · viskovic-group.de</div>
+  </div>
+  <div class="hr">
+    <div class="doc-type">AUFNAHMEPROTOKOLL</div>
+    <div class="doc-ref">Ref. {{ ref }}</div>
+    <div class="doc-date">{{ datum }}</div>
+    <div style="margin-top:4px"><span class="badge">Intern · Kein Angebot</span></div>
+  </div>
+</div>
+
+<!-- KUNDENINFO -->
+<div class="sec">Kundeninformation</div>
+<table class="info-table">
+  <tr><td class="lbl">Name</td><td>{{ name|default:"—" }}</td>
+      <td class="lbl">Telefon</td><td>{{ phone|default:"—" }}</td></tr>
+  <tr><td class="lbl">Adresse / Objekt</td><td colspan="3">{{ location|default:"—" }}</td></tr>
+  <tr><td class="lbl">Art der Maßnahme</td><td colspan="3">{{ category }}</td></tr>
+</table>
+
+<!-- MASSE -->
+{% if rooms %}
+<div class="sec">Maße &amp; Räume</div>
+<table class="rooms-table">
+  <thead><tr><th>Raum</th><th>Länge × Breite × Höhe</th></tr></thead>
+  <tbody>
+    {% for r in rooms %}
+    <tr><td>{{ r }}</td><td></td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- LEISTUNGEN -->
+{% if leistungen_list %}
+<div class="sec">Vereinbarte Leistungen</div>
+<table class="check-table">
+  {% for l in leistungen_list %}
+  <tr><td class="tick">✓</td><td>{{ l }}</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<!-- NOTIZEN -->
+{% if notes %}
+<div class="sec">Notizen &amp; Vereinbarungen</div>
+<div class="notes-box">{{ notes }}</div>
+{% endif %}
+
+<!-- NÄCHSTER SCHRITT -->
+{% if next_step %}
+<div class="sec">Nächster Schritt</div>
+<div class="notes-box">{{ next_step }}</div>
+{% endif %}
+
+<!-- UNTERSCHRIFTEN -->
+<div class="sign">
+  <div class="sign-l">
+    <div class="sign-line">Aufgenommen von (Visković Group)<br><br><strong>Ivan Visković</strong></div>
+  </div>
+  <div class="sign-r">
+    <div class="sign-line">Bestätigt (Kunde)<br><br><strong>{{ name|default:"____________________" }}</strong></div>
+  </div>
+</div>
+
+</body>
+</html>

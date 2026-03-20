@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nova faktura{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:960px">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-gold mb-0"><i class="fas fa-file-invoice me-2"></i>Nova faktura</h2>
+    <div>
+      <a href="{% url 'invoicing:invoice_wizard' %}" class="btn btn-outline-gold btn-sm me-2">
+        <i class="fas fa-magic me-1"></i>Wizard
+      </a>
+      <a href="{% url 'invoicing:index' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Natrag
+      </a>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+        {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" action="{% url 'invoicing:invoice_save' %}" id="invoiceForm">
+    {% csrf_token %}
+    <input type="hidden" name="doctype"    value="R">
+    <input type="hidden" name="country"    value="{{ country }}">
+    <input type="hidden" name="currency"   id="fCurrency"  value="{{ currency }}">
+    <input type="hidden" name="tax_status" id="fTaxStatus" value="standard">
+
+    <!-- ── Profil / Predložak ────────────────────────────────────── -->
+    {% if profiles %}
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header text-gold"><i class="fas fa-building me-2"></i>Profil fakture</div>
+      <div class="card-body">
+        <select name="profile_id" id="fProfileId" class="form-select bg-dark text-light border-secondary">
+          <option value="">— bez profila —</option>
+          {% for p in profiles %}
+            <option value="{{ p.pk }}" data-name="{{ p.company_name }}" data-addr="{{ p.address }}, {{ p.zip_code }} {{ p.city }}" data-oib="{{ p.oib|default:p.vat_id }}" data-email="{{ p.email }}" data-iban="{{ p.iban }}" data-swift="{{ p.swift }}">
+              {{ p.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── PDV Status ─────────────────────────────────────────────── -->
+    {% if company.pdv_status and company.pdv_status != 'none' %}
+    <div class="alert alert-info py-2 small mb-3" id="pdvStatusBanner">
+      <i class="fas fa-info-circle me-1"></i>
+      {% if company.pdv_status == 'kleinunternehmer' %}Kleinunternehmer §19 UStG — faktura bez PDV-a
+      {% elif company.pdv_status == 'pausalic' %}Paušalni obrtnik — nije u sustavu PDV-a
+      {% elif company.pdv_status == 'obveznik' %}Obveznik PDV-a
+      {% endif %}
+    </div>
+    {% endif %}
+    <div class="alert alert-warning py-2 small mb-3 d-none" id="reverseChargeNotice">
+      <i class="fas fa-exchange-alt me-1"></i>
+      Reverse Charge — porezna obveza prelazi na primatelja (čl. 196 Direktive 2006/112/EZ)
+    </div>
+
+    <!-- ── Klijent ────────────────────────────────────────────────── -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header text-gold"><i class="fas fa-user me-2"></i>Klijent</div>
+      <div class="card-body">
+        {% if partners %}
+        <div class="mb-3">
+          <label class="form-label small text-muted">Brzi odabir partnera</label>
+          <select id="fPartnerSelect" class="form-select form-select-sm bg-dark text-light border-secondary">
+            <option value="">— upiši ručno ili odaberi —</option>
+            {% for partner in partners %}
+              <option value="{{ partner.pk }}"
+                data-name="{{ partner.name }}"
+                data-oib="{{ partner.oib|default:partner.vat_id }}"
+                data-address="{{ partner.address }}"
+                data-city="{{ partner.city }}"
+                data-country="{{ partner.country }}"
+                data-email="{{ partner.email }}">
+                {{ partner.name }}{% if partner.city %} – {{ partner.city }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Naziv klijenta <span class="text-danger">*</span></label>
+            <input type="text" name="client_name" id="fClientName" class="form-control bg-dark text-light border-secondary" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">OIB / USt-IdNr</label>
+            <input type="text" name="client_oib" id="fClientOib" class="form-control bg-dark text-light border-secondary font-monospace" oninput="checkRC()">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">Adresa</label>
+            <input type="text" name="client_address" id="fClientAddress" class="form-control bg-dark text-light border-secondary">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Grad</label>
+            <input type="text" name="client_city" id="fClientCity" class="form-control bg-dark text-light border-secondary">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Država</label>
+            <input type="text" name="client_country" id="fClientCountry" class="form-control bg-dark text-light border-secondary" value="{{ country }}" oninput="checkRC()">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Email</label>
+            <input type="email" name="client_email" id="fClientEmail" class="form-control bg-dark text-light border-secondary">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Podaci računa ──────────────────────────────────────────── -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header text-gold"><i class="fas fa-info-circle me-2"></i>Podaci računa</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Datum izdavanja <span class="text-danger">*</span></label>
+            <input type="date" name="date_issued" class="form-control bg-dark text-light border-secondary"
+                   value="{% now 'Y-m-d' %}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Rok plaćanja</label>
+            <input type="date" name="date_due" id="fDateDue" class="form-control bg-dark text-light border-secondary">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Valuta</label>
+            <select name="currency" class="form-select bg-dark text-light border-secondary" onchange="document.getElementById('fCurrency').value=this.value">
+              <option value="EUR" {% if currency == 'EUR' %}selected{% endif %}>EUR</option>
+              <option value="USD" {% if currency == 'USD' %}selected{% endif %}>USD</option>
+              <option value="GBP" {% if currency == 'GBP' %}selected{% endif %}>GBP</option>
+              <option value="HRK" {% if currency == 'HRK' %}selected{% endif %}>HRK</option>
+            </select>
+          </div>
+          {% if locations %}
+          <div class="col-md-6">
+            <label class="form-label">Poslovni prostor</label>
+            <select name="business_location" class="form-select bg-dark text-light border-secondary">
+              <option value="">—</option>
+              {% for loc in locations %}
+                <option value="{{ loc.pk }}">{{ loc.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <div class="col-12">
+            <label class="form-label">Napomena</label>
+            <textarea name="note" rows="2" class="form-control bg-dark text-light border-secondary"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Stavke ─────────────────────────────────────────────────── -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header text-gold d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-list me-2"></i>Stavke</span>
+        <button type="button" class="btn btn-sm btn-outline-gold" id="addItemBtn">
+          <i class="fas fa-plus me-1"></i>Dodaj stavku
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-dark mb-0" id="itemsTable">
+            <thead>
+              <tr>
+                <th>Opis</th>
+                <th style="width:8%">Kol.</th>
+                <th style="width:8%">J.mj.</th>
+                <th style="width:12%">Cijena</th>
+                <th style="width:10%">Disk%</th>
+                <th style="width:11%">PDV %</th>
+                <th style="width:12%">Ukupno</th>
+                <th style="width:4%"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer text-end">
+        <span class="text-muted me-4">Bez PDV-a: <strong id="subtotalDisplay">0,00</strong></span>
+        <span class="text-muted me-4">PDV: <strong id="taxDisplay">0,00</strong></span>
+        <span class="text-gold fs-5">Ukupno: <strong id="totalDisplay">0,00</strong></span>
+      </div>
+    </div>
+
+    <div class="text-end mb-4">
+      <button type="button" class="btn btn-outline-secondary me-2" onclick="setDateDue(15)">+15 dana</button>
+      <button type="button" class="btn btn-outline-secondary me-2" onclick="setDateDue(30)">+30 dana</button>
+      <button type="submit" class="btn btn-gold px-5">
+        <i class="fas fa-save me-1"></i>Spremi fakturu
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function() {
+  var COMPANY_PDV   = '{{ company.pdv_status|default:"none" }}';
+  var COMPANY_CC    = '{{ country }}';
+  var TAX_RATES     = [{% for tr in tax_rates %}{"rate":"{{ tr.rate }}","status":"{{ tr.status }}","label":"{{ tr.label }}"},{% endfor %}];
+  var DEFAULT_RATE  = TAX_RATES.length ? TAX_RATES[0].rate : 25;
+
+  // Set due date helper
+  window.setDateDue = function(days) {
+    var d = new Date();
+    d.setDate(d.getDate() + days);
+    document.getElementById('fDateDue').value = d.toISOString().split('T')[0];
+  };
+
+  // Reverse charge check
+  window.checkRC = function() {
+    var oib = (document.getElementById('fClientOib') || {}).value || '';
+    var cc  = (document.getElementById('fClientCountry') || {}).value || '';
+    var rc  = oib.trim() && cc.trim().toUpperCase() !== COMPANY_CC.toUpperCase();
+    var notice = document.getElementById('reverseChargeNotice');
+    if (notice) notice.classList.toggle('d-none', !rc);
+    document.getElementById('fTaxStatus').value = rc ? 'reverse_charge'
+      : (COMPANY_PDV === 'pausalic' ? 'pausalac'
+      : (COMPANY_PDV === 'kleinunternehmer' ? 'kleinunternehmer' : 'standard'));
+    if (rc || COMPANY_PDV === 'pausalic' || COMPANY_PDV === 'kleinunternehmer') {
+      document.querySelectorAll('[name="item_pdv[]"]').forEach(function(s) {
+        s.value = '0'; recalcRow(s.closest('tr'));
+      });
+    }
+    recalcTotal();
+  };
+
+  // Build PDV options
+  function buildPdvOpts(sel) {
+    var out = '';
+    TAX_RATES.forEach(function(tr) {
+      out += '<option value="' + tr.rate + '"' + (String(tr.rate) === String(sel) ? ' selected' : '') + '>'
+           + tr.rate + '% — ' + tr.label + '</option>';
+    });
+    if (!TAX_RATES.find(function(t) { return String(t.rate) === '0'; })) {
+      out = '<option value="0"' + (String(sel) === '0' ? ' selected' : '') + '>0% — Nulta stopa</option>' + out;
+    }
+    return out;
+  }
+
+  function addItem(desc, qty, unit, price, pdv, disc) {
+    desc = desc || ''; qty = qty || 1; unit = unit || 'kom';
+    price = price || 0; disc = disc !== undefined ? disc : 0;
+    if (COMPANY_PDV === 'pausalic' || COMPANY_PDV === 'kleinunternehmer') pdv = 0;
+    else pdv = pdv !== undefined ? pdv : DEFAULT_RATE;
+
+    var row = document.createElement('tr');
+    row.innerHTML =
+      '<td><input type="text" name="item_desc[]" class="form-control form-control-sm bg-dark text-light border-secondary" value="' + desc + '" required></td>' +
+      '<td><input type="number" name="item_qty[]"   class="form-control form-control-sm bg-dark text-light border-secondary text-end" value="' + qty   + '" step="any" oninput="recalcRow(this.closest(\'tr\'))"></td>' +
+      '<td><input type="text"   name="item_unit[]"  class="form-control form-control-sm bg-dark text-light border-secondary" value="' + unit  + '"></td>' +
+      '<td><input type="number" name="item_price[]" class="form-control form-control-sm bg-dark text-light border-secondary text-end" value="' + price + '" step="any" oninput="recalcRow(this.closest(\'tr\'))"></td>' +
+      '<td><input type="number" name="item_disc[]"  class="form-control form-control-sm bg-dark text-light border-secondary text-end" value="' + disc  + '" step="any" oninput="recalcRow(this.closest(\'tr\'))"></td>' +
+      '<td><select name="item_pdv[]" class="form-select form-select-sm bg-dark text-light border-secondary" onchange="recalcRow(this.closest(\'tr\'))">' + buildPdvOpts(pdv) + '</select></td>' +
+      '<td class="text-end fw-bold text-gold row-total">0,00</td>' +
+      '<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest(\'tr\').remove();recalcTotal()">&times;</button></td>';
+    document.getElementById('itemsBody').appendChild(row);
+    recalcRow(row);
+  }
+
+  window.recalcRow = function(row) {
+    var qty   = parseFloat(row.querySelector('[name="item_qty[]"]').value)   || 0;
+    var price = parseFloat(row.querySelector('[name="item_price[]"]').value) || 0;
+    var disc  = parseFloat(row.querySelector('[name="item_disc[]"]').value)  || 0;
+    var pdv   = parseFloat(row.querySelector('[name="item_pdv[]"]').value)   || 0;
+    var base  = qty * price * (1 - disc / 100);
+    var total = base + base * pdv / 100;
+    row.querySelector('.row-total').textContent = fmt(total);
+    recalcTotal();
+  };
+
+  window.recalcTotal = function() {
+    var sub = 0, tax = 0;
+    document.querySelectorAll('#itemsBody tr').forEach(function(row) {
+      var qty   = parseFloat((row.querySelector('[name="item_qty[]"]')   || {}).value) || 0;
+      var price = parseFloat((row.querySelector('[name="item_price[]"]') || {}).value) || 0;
+      var disc  = parseFloat((row.querySelector('[name="item_disc[]"]')  || {}).value) || 0;
+      var pdv   = parseFloat((row.querySelector('[name="item_pdv[]"]')   || {}).value) || 0;
+      var base  = qty * price * (1 - disc / 100);
+      sub += base; tax += base * pdv / 100;
+    });
+    document.getElementById('subtotalDisplay').textContent = fmt(sub);
+    document.getElementById('taxDisplay').textContent      = fmt(tax);
+    document.getElementById('totalDisplay').textContent    = fmt(sub + tax);
+  };
+
+  function fmt(n) {
+    return n.toLocaleString('hr-HR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  // Partner quick select
+  var partnerSel = document.getElementById('fPartnerSelect');
+  if (partnerSel) {
+    partnerSel.addEventListener('change', function() {
+      var opt = this.options[this.selectedIndex];
+      if (!opt.value) return;
+      document.getElementById('fClientName').value    = opt.dataset.name    || '';
+      document.getElementById('fClientOib').value     = opt.dataset.oib     || '';
+      document.getElementById('fClientAddress').value = opt.dataset.address || '';
+      document.getElementById('fClientCity').value    = opt.dataset.city    || '';
+      document.getElementById('fClientCountry').value = opt.dataset.country || '';
+      document.getElementById('fClientEmail').value   = opt.dataset.email   || '';
+      checkRC();
+    });
+  }
+
+  document.getElementById('addItemBtn').addEventListener('click', function() { addItem(); });
+  addItem();
+  checkRC();
+})();
+</script>
+{% endblock %}

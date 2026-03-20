@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Helpdesk - Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Helpdesk - Dashboard</h2>
+        <a href="{% url 'helpdesk:create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Novi tiket</a>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-2"><div class="card text-center bg-danger text-white"><div class="card-body"><h3>{{ stats.open }}</h3><small>Otvoreno</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-primary text-white"><div class="card-body"><h3>{{ stats.in_progress }}</h3><small>U obradi</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-warning text-dark"><div class="card-body"><h3>{{ stats.waiting }}</h3><small>Ceka</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-success text-white"><div class="card-body"><h3>{{ stats.resolved }}</h3><small>Rijeseno</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-dark text-white"><div class="card-body"><h3>{{ stats.overdue }}</h3><small>Prekoracen SLA</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center"><div class="card-body"><h3>{{ stats.unassigned }}</h3><small class="text-muted">Nedodijeljeno</small></div></div></div>
+    </div>
+    {% if stats.avg_satisfaction %}
+    <div class="row mb-4">
+        <div class="col-md-3"><div class="card text-center"><div class="card-body"><h3>{{ stats.avg_satisfaction|floatformat:1 }} / 5</h3><small class="text-muted">Prosjecna ocjena</small></div></div></div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Po prioritetu</strong></div>
+                <ul class="list-group list-group-flush">
+                    {% for bp in by_priority %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span class="badge bg-{% if bp.priority == 'critical' %}dark{% elif bp.priority == 'urgent' %}danger{% elif bp.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ bp.priority }}</span>
+                        <span>{{ bp.cnt }}</span>
+                    </li>
+                    {% empty %}<li class="list-group-item text-muted">Nema otvorenih tiketa</li>{% endfor %}
+                </ul>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header"><strong>Po kategoriji</strong></div>
+                <ul class="list-group list-group-flush">
+                    {% for bc in by_category %}
+                    <li class="list-group-item d-flex justify-content-between"><span>{{ bc.category }}</span><span class="badge bg-primary">{{ bc.cnt }}</span></li>
+                    {% empty %}<li class="list-group-item text-muted">Nema podataka</li>{% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Nedavni tiketi</strong></div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>Broj</th><th>Predmet</th><th>Prioritet</th><th>Status</th></tr></thead>
+                        <tbody>
+                        {% for t in recent %}
+                        <tr>
+                            <td><a href="{% url 'helpdesk:detail' t.pk %}">{{ t.ticket_number }}</a></td>
+                            <td>{{ t.subject|truncatewords:8 }}</td>
+                            <td><span class="badge bg-{% if t.priority == 'critical' %}dark{% elif t.priority == 'urgent' %}danger{% elif t.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ t.get_priority_display }}</span></td>
+                            <td><span class="badge bg-{% if t.status == 'open' %}danger{% elif t.status == 'in_progress' %}primary{% elif t.status == 'resolved' %}success{% elif t.status == 'closed' %}secondary{% else %}warning{% endif %}">{{ t.get_status_display }}</span></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

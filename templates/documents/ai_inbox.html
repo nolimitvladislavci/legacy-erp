@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}AI Inbox — Knjizenje{% endblock %}
+{% block page_title %}AI Inbox{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width:1200px">
+
+  <!-- HERO BANNER -->
+  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:1.5rem 2rem;margin-bottom:1.5rem;border:1px solid rgba(201,168,76,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <h2 style="color:#c9a84c;margin:0;font-size:1.5rem">&#129302; AI Inbox — Automatsko knjizenje</h2>
+        <p style="color:#94a3b8;margin:.25rem 0 0;font-size:.9rem">AI je predlozio knjizenja — jedan klik do zavrsetka</p>
+      </div>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+        <button onclick="sendEmailSummary()" title="Posalji email sazetak svim odgovornim osobama za ovu firmu"
+                style="background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:flex;align-items:center;gap:.4rem">
+          &#9993; Posalji email sazetak
+        </button>
+        <button onclick="bulkAcceptAll()" title="Automatski prihvaca sve prijedloge. Preporuceno samo za visoku AI sigurnost."
+                class="btn btn-lg" style="background:#c9a84c;color:#000;font-weight:700;border:none;border-radius:10px;padding:.65rem 1.5rem;cursor:pointer;font-size:.95rem">
+          &#10003; Prihvati SVE ({{ stats.total_pending }})
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
+      <div style="background:rgba(201,168,76,.1);border-radius:10px;padding:.75rem 1.25rem;min-width:120px;text-align:center">
+        <div style="font-size:1.75rem;font-weight:700;color:#c9a84c">{{ stats.total_pending }}</div>
+        <div style="color:#94a3b8;font-size:.75rem">dokumenata ceka</div>
+      </div>
+      <div style="background:rgba(74,222,128,.08);border-radius:10px;padding:.75rem 1.25rem;min-width:120px;text-align:center">
+        <div style="font-size:1.75rem;font-weight:700;color:#4ade80">{{ stats.company_count }}</div>
+        <div style="color:#94a3b8;font-size:.75rem">firmi</div>
+      </div>
+      <div style="background:rgba(59,130,246,.08);border-radius:10px;padding:.75rem 1.25rem;min-width:120px;text-align:center">
+        <div style="font-size:1.75rem;font-weight:700;color:#60a5fa">{{ stats.total_amount|floatformat:2 }} EUR</div>
+        <div style="color:#94a3b8;font-size:.75rem">ukupni iznos</div>
+      </div>
+    </div>
+  </div>
+
+  {% if entries %}
+
+  <!-- Per-company cards -->
+  {% if stats.by_company %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin-bottom:1.5rem">
+    {% for grp in stats.by_company %}
+    <div style="background:#111827;border-radius:12px;padding:1rem 1.25rem;border-left:3px solid #c9a84c" id="company-card-{{ grp.company__id }}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700;color:#fff;font-size:.95rem">&#127970; {{ grp.company__name }}</div>
+          <div style="color:#64748b;font-size:.82rem;margin-top:.15rem">{{ grp.cnt }} dok. | {{ grp.total_amt|floatformat:2 }} EUR</div>
+        </div>
+        <button onclick="bulkAcceptCompany('{{ grp.company__id }}', this)"
+                title="Prihvati sve AI prijedloge za ovu firmu"
+                style="background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:8px;padding:.4rem .8rem;cursor:pointer;font-weight:600;font-size:.8rem">
+          &#10003; Sve ({{ grp.cnt }})
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Entries -->
+  <div style="background:#111827;border-radius:12px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="border-bottom:2px solid #c9a84c;text-align:left">
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase">Firma</th>
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase">Dokument</th>
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase">Partner</th>
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase;text-align:right">Iznos</th>
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase">AI Prijedlog (D/K)</th>
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase;text-align:center" title="AI sigurnost: zeleno >85% = gotovo sigurno, zuto 60-85% = preporucena provjera, crveno <60% = obavezno rucno">AI %</th>
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase;text-align:center">Akcija</th>
+        </tr>
+      </thead>
+      <tbody id="inboxBody">
+        {% for e in entries %}
+        <tr id="row-{{ e.pk }}" style="border-bottom:1px solid #1f2937;transition:all .3s">
+          <td style="padding:.6rem .75rem;color:#94a3b8;font-size:.82rem">{{ e.company }}</td>
+          <td style="padding:.6rem .75rem">
+            <span style="color:#fff;font-weight:600">{{ e.doc_number|default:"—" }}</span>
+            <div style="color:#475569;font-size:.72rem">{{ e.get_source_type_display }} | {{ e.doc_date|date:"d.m.Y" }}</div>
+          </td>
+          <td style="padding:.6rem .75rem;color:#cbd5e1;font-size:.85rem">{{ e.partner_name|truncatechars:30 }}</td>
+          <td style="padding:.6rem .75rem;text-align:right;color:#4ade80;font-weight:600;font-size:.9rem">{{ e.amount|floatformat:2 }} {{ e.currency }}</td>
+          <td style="padding:.6rem .75rem;font-size:.78rem;max-width:240px">
+            {% if e.ai_proposal.debit %}
+              {% for d in e.ai_proposal.debit %}
+              <div style="color:#f59e0b;margin-bottom:2px">D: {{ d.account }} {{ d.description|truncatechars:30 }} <span style="color:#94a3b8">{{ d.amount|floatformat:2 }}</span></div>
+              {% endfor %}
+            {% endif %}
+            {% if e.ai_proposal.credit %}
+              {% for c in e.ai_proposal.credit %}
+              <div style="color:#3b82f6;margin-bottom:2px">K: {{ c.account }} {{ c.description|truncatechars:30 }} <span style="color:#94a3b8">{{ c.amount|floatformat:2 }}</span></div>
+              {% endfor %}
+            {% endif %}
+            {% if e.ai_proposal.note %}
+            <div style="color:#64748b;font-size:.7rem;font-style:italic;margin-top:2px">{{ e.ai_proposal.note|truncatechars:60 }}</div>
+            {% endif %}
+          </td>
+          <td style="padding:.6rem .75rem;text-align:center">
+            {% with conf=e.ai_proposal.confidence %}
+            {% if conf == "high" %}
+              <span title="Visoka sigurnost (>85%) - gotovo sigurno tocno" style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">HIGH</span>
+            {% elif conf == "medium" %}
+              <span title="Srednja sigurnost (60-85%) - preporucena provjera" style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">MED</span>
+            {% elif conf == "low" %}
+              <span title="Niska sigurnost (<60%) - obavezno rucno provjeriti" style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">LOW</span>
+            {% else %}
+              <span style="color:#475569;font-size:.72rem">—</span>
+            {% endif %}
+            {% endwith %}
+          </td>
+          <td style="padding:.6rem .75rem;text-align:center">
+            <div style="display:flex;gap:.4rem;justify-content:center">
+              <button onclick="acceptOne({{ e.pk }}, this)"
+                      title="Klikom potvrdujete ovo knjizenje. Mozete ponistiti unutar 24 sata."
+                      style="background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-weight:600;font-size:.75rem">
+                &#10003; Prihvati
+              </button>
+              {% if e.has_pdf or e.has_image %}
+              <a href="{% url 'documents:arhiva_preview' e.pk %}" target="_blank"
+                 title="Pregledaj originalni dokument"
+                 style="background:rgba(99,102,241,.1);color:#818cf8;border:1px solid rgba(99,102,241,.2);border-radius:6px;padding:.3rem .5rem;text-decoration:none;font-size:.75rem">
+                &#128065;
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if has_next %}
+  <div style="text-align:center;padding:1.5rem">
+    <button id="loadMoreBtn" onclick="loadMore()" style="background:#1f2937;color:#c9a84c;border:1px solid #c9a84c;border-radius:10px;padding:.6rem 2rem;cursor:pointer;font-weight:600">
+      Ucitaj jos...
+    </button>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- EMPTY STATE -->
+  <div style="text-align:center;padding:4rem 2rem;background:#111827;border-radius:16px;border:1px solid #1f2937">
+    <div style="font-size:4rem;margin-bottom:1rem">&#10004;&#65039;</div>
+    <h3 style="color:#4ade80;margin:0 0 .5rem;font-size:1.5rem">Sve je proknjizeno!</h3>
+    <p style="color:#64748b;margin:0 0 1.5rem;font-size:.95rem">Nema dokumenata koji cekaju. Svaka cast!</p>
+    <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+      <a href="{% url 'documents:arhiva_upload' %}" style="background:#c9a84c;color:#0a0a0a;font-weight:700;border-radius:10px;padding:.75rem 1.5rem;text-decoration:none;font-size:.9rem">
+        &#128196; Upload novog dokumenta
+      </a>
+      <a href="{% url 'documents:arhiva_list' %}" style="background:#1f2937;color:#94a3b8;border:1px solid #334155;border-radius:10px;padding:.75rem 1.5rem;text-decoration:none;font-size:.9rem">
+        &#128202; Pregledaj arhivu
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+var currentPage = {{ page }};
+var CSRF = document.querySelector('[name=csrfmiddlewaretoken]');
+CSRF = CSRF ? CSRF.value : (document.cookie.match(/csrftoken=([^;]+)/)||['',''])[1];
+
+function acceptOne(id, btn) {
+  btn.disabled = true; btn.textContent = '...';
+  fetch('/hr/documents/ai-inbox/' + id + '/accept/', {
+    method: 'POST', headers: {'X-CSRFToken': CSRF}
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    if (d.ok) {
+      var row = document.getElementById('row-' + id);
+      row.style.background = 'rgba(74,222,128,.08)';
+      btn.innerHTML = '&#10003; OK';
+      btn.style.color = '#4ade80';
+      btn.style.background = 'rgba(74,222,128,.25)';
+      setTimeout(function(){ row.style.opacity = '.3'; }, 800);
+    } else {
+      btn.textContent = 'Greska'; btn.disabled = false;
+    }
+  }).catch(function(){ btn.textContent = 'Greska'; btn.disabled = false; });
+}
+
+function bulkAcceptCompany(companyId, btn) {
+  if (!confirm('Prihvatiti SVE AI prijedloge za ovu firmu?')) return;
+  btn.disabled = true; btn.textContent = 'Knjizim...';
+  fetch('/hr/documents/ai-inbox/bulk-accept/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    body: JSON.stringify({company_id: companyId})
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    if (d.ok) {
+      btn.textContent = d.count + ' proknjizeno!';
+      btn.style.background = 'rgba(74,222,128,.3)';
+      var card = document.getElementById('company-card-' + companyId);
+      if (card) card.style.borderLeftColor = '#4ade80';
+    } else {
+      btn.textContent = d.error || 'Greska'; btn.disabled = false;
+    }
+  }).catch(function(){ btn.textContent = 'Greska'; btn.disabled = false; });
+}
+
+function bulkAcceptAll() {
+  if (!confirm('Prihvatiti SVE AI prijedloge za SVE firme?\nOvo ce proknjiziti {{ stats.total_pending }} dokumenata.')) return;
+  {% for grp in stats.by_company %}
+  bulkAcceptCompany('{{ grp.company__id }}', document.querySelector('#company-card-{{ grp.company__id }} button'));
+  {% endfor %}
+}
+
+function sendEmailSummary() {
+  fetch('/hr/documents/ai-inbox/send-email/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': CSRF}
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    if (d.ok) {
+      alert('Email sazetak je poslan!');
+    } else {
+      alert('Greska: ' + (d.error || 'Nepoznata greska'));
+    }
+  }).catch(function(){ alert('Greska pri slanju emaila'); });
+}
+
+function loadMore() {
+  currentPage++;
+  var btn = document.getElementById('loadMoreBtn');
+  btn.textContent = 'Ucitavam...'; btn.disabled = true;
+  fetch('/hr/documents/ai-inbox/?page=' + currentPage + '&format=json')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var tbody = document.getElementById('inboxBody');
+      d.entries.forEach(function(e) {
+        var proposal = e.ai_proposal || {};
+        var debit = proposal.debit && proposal.debit[0] ? proposal.debit[0] : {};
+        var credit = proposal.credit && proposal.credit[0] ? proposal.credit[0] : {};
+        var conf = proposal.confidence || '';
+        var confHtml = '';
+        if (conf === 'high') confHtml = '<span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">HIGH</span>';
+        else if (conf === 'medium') confHtml = '<span style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">MED</span>';
+        else if (conf === 'low') confHtml = '<span style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">LOW</span>';
+        else confHtml = '<span style="color:#475569;font-size:.72rem">&mdash;</span>';
+
+        var tr = document.createElement('tr');
+        tr.id = 'row-' + e.id;
+        tr.style.borderBottom = '1px solid #1f2937';
+        tr.innerHTML = '<td style="padding:.6rem .75rem;color:#94a3b8;font-size:.82rem">' + (e.company||'') + '</td>' +
+          '<td style="padding:.6rem .75rem"><span style="color:#fff;font-weight:600">' + (e.doc_number||'&mdash;') + '</span><div style="color:#475569;font-size:.72rem">' + (e.source_type||'') + ' | ' + (e.doc_date||'') + '</div></td>' +
+          '<td style="padding:.6rem .75rem;color:#cbd5e1;font-size:.85rem">' + (e.partner_name||'').substring(0,30) + '</td>' +
+          '<td style="padding:.6rem .75rem;text-align:right;color:#4ade80;font-weight:600">' + (e.amount||0).toFixed(2) + ' ' + (e.currency||'EUR') + '</td>' +
+          '<td style="padding:.6rem .75rem;font-size:.78rem">' +
+            (debit.account ? '<div style="color:#f59e0b">D: ' + debit.account + ' ' + (debit.description||'').substring(0,30) + '</div>' : '') +
+            (credit.account ? '<div style="color:#3b82f6">K: ' + credit.account + ' ' + (credit.description||'').substring(0,30) + '</div>' : '') +
+          '</td>' +
+          '<td style="padding:.6rem .75rem;text-align:center">' + confHtml + '</td>' +
+          '<td style="padding:.6rem .75rem;text-align:center"><button onclick="acceptOne(' + e.id + ', this)" style="background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-weight:600;font-size:.75rem">&#10003; Prihvati</button></td>';
+        tbody.appendChild(tr);
+      });
+      if (!d.has_next) {
+        btn.parentElement.style.display = 'none';
+      } else {
+        btn.textContent = 'Ucitaj jos...'; btn.disabled = false;
+      }
+    });
+}
+</script>
+{% endblock %}

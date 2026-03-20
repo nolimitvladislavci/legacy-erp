@@ -1,0 +1,56 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+{% block title %}Portal - {{ partner.name }}{% endblock %}
+{% block content %}
+<h5 class="mb-4">{% trans "Dobrodosli" %}, {{ partner.name }}</h5>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card" style="border-left:4px solid #10b981">
+            <div class="label">{% trans "Ukupno placeno" %}</div>
+            <div class="value" style="color:#10b981">{{ inv_total|floatformat:2 }} EUR</div>
+            <div style="font-size:.75rem;color:#64748b">{{ invoices_count }} {% trans "faktura" %}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="border-left:4px solid #f59e0b">
+            <div class="label">{% trans "Otvoreno" %}</div>
+            <div class="value" style="color:#f59e0b">{{ inv_open|floatformat:2 }} EUR</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="border-left:4px solid #3b82f6">
+            <div class="label">{% trans "Projekti" %}</div>
+            <div class="value" style="color:#3b82f6">{{ projects_count }}</div>
+            <div style="font-size:.75rem;color:#64748b">{{ documents_count }} {% trans "dokumenata" %}</div>
+        </div>
+    </div>
+</div>
+
+<h6 class="mb-2"><i class="fas fa-file-invoice"></i> {% trans "Zadnje fakture" %}</h6>
+<div class="card" style="border-radius:12px">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+            <thead><tr><th>{% trans "Broj" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Status" %}</th><th class="text-end">{% trans "Iznos" %}</th><th></th></tr></thead>
+            <tbody>
+                {% for inv in invoices_recent %}
+                <tr>
+                    <td>{{ inv.number }}</td>
+                    <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
+                    <td>
+                        {% if inv.status == 'PAID' %}<span class="badge bg-success">Paid</span>
+                        {% elif inv.status == 'SENT' %}<span class="badge bg-primary">Sent</span>
+                        {% elif inv.status == 'DRAFT' %}<span class="badge bg-secondary">Draft</span>
+                        {% elif inv.status == 'ACCEPTED' %}<span class="badge bg-info">Accepted</span>
+                        {% else %}<span class="badge bg-warning text-dark">{{ inv.status }}</span>{% endif %}
+                    </td>
+                    <td class="text-end">{{ inv.total|floatformat:2 }} {{ inv.currency }}</td>
+                    <td><a href="{% url 'portal_invoice_detail' token inv.pk %}" class="btn btn-sm btn-outline-primary" style="font-size:.7rem">{% trans "Detalji" %}</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-3">{% trans "Nema faktura" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

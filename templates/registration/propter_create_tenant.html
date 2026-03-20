@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Propter — Novi tenant{% endblock %}
+{% block page_title %}Propter — Novi tenant{% endblock %}
+{% block content %}
+<style>
+.ct-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px;max-width:600px}
+.ct-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 12px}
+.ct-field{margin-bottom:12px}
+.ct-field label{display:block;font-size:.78rem;font-weight:600;color:#334155;margin-bottom:4px}
+.ct-field input,.ct-field select{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.82rem}
+</style>
+
+<a href="{% url 'registration:propter_dashboard' %}" class="btn btn-outline-secondary btn-sm mb-3">&larr; Dashboard</a>
+
+<form method="post">
+{% csrf_token %}
+<div class="ct-card">
+  <h6>Novi Propter tenant</h6>
+  <div class="ct-field">
+    <label>Tvrtka</label>
+    <select name="company_id" required>
+      <option value="">— Odaberite tvrtku —</option>
+      {% for c in available_companies %}
+      <option value="{{ c.pk }}">{{ c.name }} ({{ c.oib }})</option>
+      {% endfor %}
+    </select>
+    {% if not available_companies %}
+    <div style="color:#64748b;font-size:.8rem;margin-top:4px">Sve tvrtke vec imaju Propter pretplatu.</div>
+    {% endif %}
+  </div>
+  <div class="ct-field">
+    <label>Tip pretplate</label>
+    <select name="tier" id="tier-select" onchange="updateFee()">
+      <option value="client">Direktni klijent (30-80 EUR/mj)</option>
+      <option value="bookkeeper">Knjigovodstveni servis (150-200 EUR/mj)</option>
+    </select>
+  </div>
+  <div class="ct-field">
+    <label>Operator / servis naziv</label>
+    <input type="text" name="operator_name" placeholder="npr. KS Limit d.o.o.">
+  </div>
+  <div class="ct-field">
+    <label>Mjesecna naknada (EUR)</label>
+    <input type="number" name="monthly_fee" id="fee-input" value="50.00" step="0.01" min="0">
+  </div>
+  <div class="ct-field">
+    <label>Max tvrtki (za bookkeepere)</label>
+    <input type="number" name="max_companies" value="1" min="1">
+  </div>
+</div>
+<button type="submit" class="btn btn-primary" {% if not available_companies %}disabled{% endif %}>Kreiraj tenant</button>
+</form>
+
+<script>
+function updateFee(){
+  var tier=document.getElementById('tier-select').value;
+  document.getElementById('fee-input').value=tier==='bookkeeper'?'175.00':'50.00';
+}
+</script>
+{% endblock %}

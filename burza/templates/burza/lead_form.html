@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nova kartica{% endblock %}
+{% block extra_css %}
+<style>:root{--gold:#c9a84c;--gold2:#e8c96a}.fc{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:32px;max-width:700px}.fc h2{font-size:1.3rem;font-weight:700;color:#f1f5f9;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #334155}.fg{margin-bottom:16px}.fg label{display:block;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:#64748b;margin-bottom:6px}.fg input,.fg select,.fg textarea{width:100%;background:#0f172a;border:1px solid #334155;padding:12px 14px;color:#f1f5f9;font-family:inherit;font-size:.88rem;outline:none;transition:border-color .2s;border-radius:6px}.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold)}.fg input::placeholder,.fg textarea::placeholder{color:#475569}.fg select option{background:#0f172a}.fg textarea{resize:vertical;min-height:90px}.r2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sbtn{padding:13px 28px;background:var(--gold);color:#0f172a;border:none;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .2s}.sbtn:hover{background:var(--gold2)}a.cbtn{padding:13px 28px;background:none;border:1px solid #334155;color:#94a3b8;border-radius:8px;font-size:.85rem;text-decoration:none;display:inline-block;transition:all .2s}a.cbtn:hover{border-color:#94a3b8;color:#f1f5f9}</style>
+{% endblock %}
+{% block content %}
+<a href="{% url 'burza:kanban' %}" style="display:inline-flex;align-items:center;gap:6px;color:#64748b;font-size:.82rem;text-decoration:none;margin-bottom:20px" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#64748b'">{% trans "← Natrag" %}</a>
+<div class="fc"><h2>{% trans "+ Nova kartica" %}</h2>
+{% if messages %}{% for m in messages %}<div style="padding:12px 16px;margin-bottom:16px;border-radius:6px;font-size:.85rem;background:{% if m.tags == 'error' %}rgba(239,68,68,.1){% else %}rgba(16,185,129,.1){% endif %};border:1px solid {% if m.tags == 'error' %}rgba(239,68,68,.3){% else %}rgba(16,185,129,.3){% endif %};color:{% if m.tags == 'error' %}#fca5a5{% else %}#6ee7b7{% endif %}">{{ m }}</div>{% endfor %}{% endif %}
+<form method="POST">{% csrf_token %}
+<div class="fg"><label>{% trans "Naslov *" %}</label><input type="text" name="title" required></div>
+<div class="r2"><div class="fg"><label>{% trans "Kategorija" %}</label><select name="category">{% for v,l in categories %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div><div class="fg"><label>{% trans "Lokacija *" %}</label><input type="text" name="location" required></div></div>
+<div class="fg"><label>{% trans "Opis *" %}</label><textarea name="description" required></textarea></div>
+<div class="r2"><div class="fg"><label>{% trans "Budžet od (€)" %}</label><input type="number" name="budget_from" min="0"></div><div class="fg"><label>{% trans "Budžet do (€)" %}</label><input type="number" name="budget_to" min="0"></div></div>
+<div style="height:1px;background:#334155;margin:20px 0"></div>
+<div class="r2"><div class="fg"><label>{% trans "Kontakt ime *" %}</label><input type="text" name="contact_name" required></div><div class="fg"><label>{% trans "Telefon *" %}</label><input type="tel" name="contact_phone" required></div></div>
+<div class="fg"><label>{% trans "Email" %}</label><input type="email" name="contact_email"></div>
+{% if is_superadmin %}<div class="fg"><label>{% trans "Interne napomene" %}</label><textarea name="internal_notes"></textarea></div>{% endif %}
+<div style="display:flex;gap:12px;margin-top:8px"><button type="submit" class="sbtn">{% trans "Spremi →" %}</button><a href="{% url 'burza:kanban' %}" class="cbtn">{% trans "Odustani" %}</a></div>
+</form></div>
+{% endblock %}

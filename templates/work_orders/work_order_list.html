@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Radni nalozi{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-tools me-2 text-warning"></i>Radni nalozi</h4>
+    <a href="{% url 'work_orders:create' %}" class="btn btn-warning btn-sm">
+      <i class="fas fa-plus me-1"></i> Novi nalog
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm"
+             placeholder="Pretraži (br. naloga, klijent, opis)…">
+    </div>
+    <div class="col-md-2">
+      <select name="status" class="form-select form-select-sm">
+        <option value="">— Status —</option>
+        {% for val,label in STATUS_CHOICES %}
+          <option value="{{ val }}" {% if val == status_filter %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="priority" class="form-select form-select-sm">
+        <option value="">— Prioritet —</option>
+        {% for val,label in PRIORITY_CHOICES %}
+          <option value="{{ val }}" {% if val == priority_filter %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-secondary btn-sm w-100" type="submit"><i class="fas fa-search me-1"></i>Filtriraj</button>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'work_orders:list' %}" class="btn btn-outline-secondary btn-sm w-100">Resetiraj</a>
+    </div>
+  </form>
+
+  <!-- Sub-nav -->
+  <div class="mb-3 d-flex gap-2 flex-wrap">
+    <a href="{% url 'work_orders:vehicle_list' %}" class="btn btn-outline-info btn-sm">
+      <i class="fas fa-car me-1"></i>Kartoni vozila
+    </a>
+    <a href="{% url 'work_orders:client_card_list' %}" class="btn btn-outline-info btn-sm">
+      <i class="fas fa-id-card me-1"></i>Kartoni klijenata
+    </a>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-dark table-hover table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Broj</th>
+          <th>Datum</th>
+          <th>Klijent</th>
+          <th>Status</th>
+          <th>Prioritet</th>
+          <th>Dodijeljen</th>
+          <th>Zakazano</th>
+          <th class="text-end">Bruto (€)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for wo in work_orders %}
+        <tr>
+          <td><a href="{% url 'work_orders:detail' wo.pk %}" class="text-warning fw-bold">{{ wo.order_number|default:"???" }}</a></td>
+          <td>{{ wo.date }}</td>
+          <td>{{ wo.client.name|default:"—" }}</td>
+          <td>
+            <span class="badge" style="background:{{ wo.status_color }}">
+              {{ wo.get_status_display }}
+            </span>
+          </td>
+          <td>
+            <span class="badge" style="background:{{ wo.priority_color }}">
+              {{ wo.get_priority_display }}
+            </span>
+          </td>
+          <td>{{ wo.assigned_to.get_full_name|default:wo.assigned_to.username|default:"—" }}</td>
+          <td>
+            {% if wo.scheduled_date %}{{ wo.scheduled_date }}{% if wo.scheduled_time %} {{ wo.scheduled_time|time:"H:i" }}{% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-end">{{ wo.total_gross|floatformat:2 }}</td>
+          <td class="text-end">
+            <a href="{% url 'work_orders:detail' wo.pk %}" class="btn btn-xs btn-outline-secondary" title="Detalji">
+              <i class="fas fa-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center py-5">
+          {% include "includes/empty_state.html" with
+              icon="fas fa-tools"
+              title="Nema radnih naloga"
+              message="Kreirajte prvi radni nalog za praćenje servisa i popravaka."
+              action_url="/work-orders/new/"
+              action_text="Kreiraj radni nalog"
+          %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

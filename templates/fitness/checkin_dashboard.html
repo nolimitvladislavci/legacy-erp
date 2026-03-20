@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Fitness – Prijave{% endblock %}
+{% block page_title %}Fitness – Prijave danas{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-door-open me-2 text-success"></i>{% trans "Prijave danas" %}</h2>
+    <small class="text-muted">{{ today|date:"d.m.Y" }}</small>
+  </div>
+  <a href="{% url 'fitness:list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>{% trans "Svi članovi" %}
+  </a>
+</div>
+
+<div class="row g-2 mb-3">
+  <div class="col-md-4"><div class="stat-card text-center">
+    <div class="label">{% trans "Trenutno unutra" %}</div>
+    <div class="value text-success" style="font-size:2.5rem">{{ present_count }}</div>
+  </div></div>
+  <div class="col-md-4"><div class="stat-card text-center">
+    <div class="label">{% trans "Ukupno danas" %}</div>
+    <div class="value text-primary" style="font-size:2.5rem">{{ today_total }}</div>
+  </div></div>
+  <div class="col-md-4"><div class="stat-card text-center">
+    <div class="label">{% trans "Datum" %}</div>
+    <div class="fw-bold mt-2" style="font-size:1.1rem">{{ today|date:"l, d.m.Y" }}</div>
+  </div></div>
+</div>
+
+{% if present %}
+<div class="stat-card mb-3">
+  <h6 class="fw-bold mb-3 text-success"><i class="fas fa-user-check me-2"></i>Trenutno prisutni ({{ present_count }})</h6>
+  <div class="row g-2">
+    {% for c in present %}
+    <div class="col-md-4 col-6">
+      <div class="d-flex align-items-center gap-2 p-2 rounded border border-success bg-light">
+        <div class="rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold"
+             style="width:36px;height:36px;font-size:0.8rem;flex-shrink:0">
+          {{ c.member.first_name|first }}{{ c.member.last_name|first }}
+        </div>
+        <div>
+          <div class="fw-semibold small">{{ c.member.first_name }} {{ c.member.last_name }}</div>
+          <small class="text-muted">od {{ c.check_in|date:"H:i" }}</small>
+        </div>
+        <a href="{% url 'fitness:checkin' c.member.pk %}" class="btn btn-sm btn-outline-warning ms-auto"
+           title="Odjavi">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="stat-card">
+  <h6 class="fw-bold mb-3"><i class="fas fa-list me-2 text-info"></i>{% trans "Log danas" %}</h6>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead class="table-light"><tr><th>{% trans "Član" %}</th><th>{% trans "Prijava" %}</th><th>{% trans "Odjava" %}</th><th>{% trans "Tip" %}</th></tr></thead>
+      <tbody>
+        {% for c in today_log %}
+        <tr>
+          <td>
+            <a href="{% url 'fitness:member_detail' c.member.pk %}" class="text-decoration-none fw-semibold">
+              {{ c.member.first_name }} {{ c.member.last_name }}
+            </a>
+          </td>
+          <td>{{ c.check_in|date:"H:i" }}</td>
+          <td>{% if c.check_out %}{{ c.check_out|date:"H:i" }}{% else %}<span class="badge bg-success">{% trans "Unutra" %}</span>{% endif %}</td>
+          <td><span class="badge
+            {% if c.member.membership_type == 'vip' %}bg-warning text-dark
+            {% elif c.member.membership_type == 'premium' %}bg-danger
+            {% elif c.member.membership_type == 'standard' %}bg-primary
+            {% else %}bg-secondary{% endif %}">
+            {{ c.member.get_membership_type_display }}
+          </span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted py-3">{% trans "Nema prijava danas." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

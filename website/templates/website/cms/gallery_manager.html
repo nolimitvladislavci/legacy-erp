@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Galerie Manager | Visković CMS{% endblock %}
+{% block page_title %}Upravljanje Galerijom{% endblock %}
+{% block content %}
+<style>
+    .cms-container { padding: 10px; color: var(--text); }
+    .cms-header { border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center;}
+    .cms-title { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; color: var(--gold); text-transform: uppercase; margin: 0; }
+    
+    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 30px; }
+    .form-label { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; display: block; }
+    .custom-input { width: 100%; background: var(--black); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+    .custom-input:focus { border-color: var(--gold); outline: none; }
+    
+    .lang-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; margin-right: 8px; }
+    .bg-de { background: #3b82f6; color: white; }
+    .bg-hr { background: #ef4444; color: white; }
+
+    .submit-btn { background: var(--gold); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 700; text-transform: uppercase; width: 100%; transition: 0.3s; }
+    .submit-btn:hover { background: var(--gold-dim); }
+
+    .table-custom { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .table-custom th { background: var(--surface2); color: var(--text-dim); padding: 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; }
+    .table-custom td { padding: 16px; border-top: 1px solid var(--border); vertical-align: middle; }
+    .table-custom img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+    
+    .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--surface2); border: 1px solid var(--border); border-radius: 20px; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: var(--text-dim); border-radius: 50%; transition: .4s; }
+    input:checked + .slider { background-color: rgba(34, 197, 94, 0.2); border-color: #22c55e; }
+    input:checked + .slider:before { transform: translateX(20px); background-color: #22c55e; }
+    .status-active { color: #22c55e; font-weight: 700; font-size: 0.8rem; margin-left: 10px; }
+    .status-inactive { color: var(--text-dim); font-weight: 700; font-size: 0.8rem; margin-left: 10px; }
+</style>
+
+<div class="cms-container">
+    <div class="cms-header">
+        <h1 class="cms-title"><i class="fas fa-images"></i> Enterprise Galerija</h1>
+        <a href="{% url 'website:admin_panel' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Natrag na CMS Hub</a>
+    </div>
+
+    {% if messages %}{% for msg in messages %}<div style="background:rgba(34,197,94,0.1); border:1px solid #22c55e; color:#22c55e; padding:12px; border-radius:8px; margin-bottom:20px; font-weight:600;"><i class="fas fa-check-circle"></i> {{ msg }}</div>{% endfor %}{% endif %}
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="form-card">
+                <h3 style="color:var(--text); font-size:1.1rem; margin-bottom:20px; font-weight:700; border-bottom:1px dashed var(--border); padding-bottom:10px;"><i class="fas fa-plus-circle text-warning"></i> Dodaj Referencu</h3>
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    <label class="form-label">Odaberi sliku *</label>
+                    <input type="file" name="image" class="custom-input" required accept="image/*">
+                    <label class="form-label">Kategorija</label>
+                    <select name="category" class="custom-input">
+                        <option value="bau">Visković BAU</option>
+                        <option value="najam">VG Najam</option>
+                    </select>
+                    <div style="height:10px;"></div>
+                    <label class="form-label"><span class="lang-badge bg-de">DE</span> Naslov (Njemački) *</label>
+                    <input type="text" name="caption_de" class="custom-input" required placeholder="npr. Badezimmer Stuttgart">
+                    <label class="form-label"><span class="lang-badge bg-hr">HR</span> Naslov (Hrvatski)</label>
+                    <input type="text" name="caption_hr" class="custom-input" placeholder="npr. Kupaonica Stuttgart">
+                    <button type="submit" class="submit-btn" id="submitBtn"><i class="fas fa-cloud-upload-alt"></i> Spremi i Objavi</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div style="overflow-x:auto;">
+                <table class="table-custom">
+                    <thead><tr><th width="80">Slika</th><th>Naslov</th><th>Kategorija</th><th class="text-center">Javno Vidljivo</th></tr></thead>
+                    <tbody>
+                        {% for img in images %}
+                        <tr>
+                            <td>{% if img.image %}<img src="{{ img.image.url }}">{% endif %}</td>
+                            <td>
+                                <div style="font-weight:700;">{{ img.caption_de|default:"-" }}</div>
+                                <div style="font-size:0.8rem; color:var(--text-dim);">{{ img.caption_hr|default:"-" }}</div>
+                            </td>
+                            <td><span style="color:var(--gold);">{{ img.get_category_display|default:img.category|upper }}</span></td>
+                            <td class="text-center">
+                                <label class="switch">
+                                    <input type="checkbox" onchange="toggleStatus(this, {{ img.id }})" {% if img.is_active %}checked{% endif %}>
+                                    <span class="slider"></span>
+                                </label>
+                                <span class="{% if img.is_active %}status-active{% else %}status-inactive{% endif %}" id="status-text-{{ img.id }}">
+                                    {% if img.is_active %}Aktivno{% else %}Skriveno{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center" style="padding:40px; color:var(--text-dim);">Baza je prazna.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', function() {
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Zapisivanje...';
+    });
+    function toggleStatus(checkbox, imgId) {
+        const textSpan = document.getElementById('status-text-' + imgId);
+        textSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        checkbox.disabled = true;
+        const fd = new FormData(); fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        fetch(`/website/cms/gallery/toggle/${imgId}/`, { method: 'POST', body: fd })
+        .then(r => r.json()).then(d => {
+            checkbox.disabled = false;
+            if(d.ok) {
+                textSpan.innerHTML = d.is_active ? 'Aktivno' : 'Skriveno';
+                textSpan.className = d.is_active ? 'status-active' : 'status-inactive';
+            }
+        });
+    }
+</script>
+{% endblock %}

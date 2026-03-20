@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}e-Racun {{ eracun.invoice_number }}{% endblock %}
+{% block page_title %}e-Racun: {{ eracun.invoice_number }}{% endblock %}
+{% block content %}
+<style>
+.er-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.75rem;font-weight:700}
+.er-badge.accepted{background:#dcfce7;color:#166534}
+.er-badge.rejected,.er-badge.error{background:#fef2f2;color:#991b1b}
+.er-badge.draft{background:#f1f5f9;color:#475569}
+.er-badge.sending,.er-badge.validating,.er-badge.signing,.er-badge.sent{background:#fef3c7;color:#92400e}
+.er-badge.invalid{background:#fce4ec;color:#880e4f}
+.er-badge.archived{background:#e8eaf6;color:#283593}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:768px){.detail-grid{grid-template-columns:1fr}}
+.detail-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9}
+.detail-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 10px}
+.detail-row{display:flex;justify-content:space-between;padding:4px 0;font-size:.82rem;border-bottom:1px solid #f8fafc}
+.detail-row .label{color:#64748b}
+.detail-row .value{font-weight:600}
+.log-item{padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:.82rem}
+.log-item .time{color:#94a3b8;font-size:.7rem}
+.xml-box{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px;font-family:monospace;font-size:.72rem;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+</style>
+
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+  <a href="{% url 'eracun:dashboard' %}" class="btn btn-outline-secondary btn-sm">&larr; Natrag</a>
+  <span class="er-badge {{ eracun.status }}" style="font-size:.85rem;padding:5px 14px">{{ eracun.get_status_display }}</span>
+
+  {% if eracun.status == 'draft' or eracun.status == 'valid' or eracun.status == 'invalid' or eracun.status == 'error' or eracun.status == 'rejected' %}
+  <form method="post" action="{% url 'eracun:send' eracun.pk %}" style="display:inline">
+    {% csrf_token %}
+    <button class="btn btn-primary btn-sm" onclick="return confirm('Poslati e-Racun na FINA?')"><i class="fas fa-paper-plane"></i> Posalji na FINA</button>
+  </form>
+  {% endif %}
+
+  <a href="{% url 'eracun:download_xml' eracun.pk %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-code"></i> UBL XML</a>
+
+  {% if eracun.xml_request %}
+  <a href="{% url 'eracun:download_fina_xml' eracun.pk %}?type=request" class="btn btn-outline-secondary btn-sm" style="font-size:.7rem">FINA Request</a>
+  {% endif %}
+  {% if eracun.xml_response %}
+  <a href="{% url 'eracun:download_fina_xml' eracun.pk %}?type=response" class="btn btn-outline-secondary btn-sm" style="font-size:.7rem">FINA Response</a>
+  {% endif %}
+</div>
+
+{% if eracun.error_message %}
+<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;margin-bottom:16px;color:#991b1b;font-size:.85rem">
+  <strong>Greska:</strong> {{ eracun.error_message }}
+  {% if eracun.error_code %}<br><small>Kod: {{ eracun.error_code }}</small>{% endif %}
+</div>
+{% endif %}
+
+<div class="detail-grid">
+  <!-- Izdavatelj -->
+  <div class="detail-card">
+    <h6>Izdavatelj</h6>
+    <div class="detail-row"><span class="label">Naziv</span><span class="value">{{ eracun.issuer_name }}</span></div>
+    <div class="detail-row"><span class="label">OIB</span><span class="value">{{ eracun.issuer_oib }}</span></div>
+    <div class="detail-row"><span class="label">Adresa</span><span class="value">{{ eracun.issuer_address }}</span></div>
+    <div class="detail-row"><span class="label">IBAN</span><span class="value">{{ eracun.issuer_iban }}</span></div>
+  </div>
+
+  <!-- Primatelj -->
+  <div class="detail-card">
+    <h6>Primatelj</h6>
+    <div class="detail-row"><span class="label">Naziv</span><span class="value">{{ eracun.recipient_name }}</span></div>
+    <div class="detail-row"><span class="label">OIB</span><span class="value">{{ eracun.recipient_oib }}</span></div>
+    <div class="detail-row"><span class="label">Adresa</span><span class="value">{{ eracun.recipient_address }}</span></div>
+    <div class="detail-row"><span class="label">Grad</span><span class="value">{{ eracun.recipient_city }}</span></div>
+  </div>
+
+  <!-- Dokument -->
+  <div class="detail-card">
+    <h6>Dokument</h6>
+    <div class="detail-row"><span class="label">Broj</span><span class="value">{{ eracun.invoice_number }}</span></div>
+    <div class="detail-row"><span class="label">Tip</span><span class="value">{{ eracun.get_doc_type_display }}</span></div>
+    <div class="detail-row"><span class="label">Izdano</span><span class="value">{{ eracun.issue_date|date:"d.m.Y" }}</span></div>
+    <div class="detail-row"><span class="label">Dospiijece</span><span class="value">{{ eracun.due_date|date:"d.m.Y"|default:"-" }}</span></div>
+    <div class="detail-row"><span class="label">Isporuka</span><span class="value">{{ eracun.delivery_date|date:"d.m.Y"|default:"-" }}</span></div>
+    <div class="detail-row"><span class="label">Placanje</span><span class="value">{{ eracun.payment_model }} {{ eracun.payment_reference }}</span></div>
+  </div>
+
+  <!-- Iznosi -->
+  <div class="detail-card">
+    <h6>Iznosi</h6>
+    <div class="detail-row"><span class="label">Osnovica</span><span class="value">&euro;{{ eracun.subtotal|floatformat:2 }}</span></div>
+    <div class="detail-row"><span class="label">PDV</span><span class="value">&euro;{{ eracun.tax_amount|floatformat:2 }}</span></div>
+    <div class="detail-row" style="font-size:.95rem"><span class="label"><strong>Ukupno</strong></span><span class="value" style="color:#166534">&euro;{{ eracun.total|floatformat:2 }}</span></div>
+    {% if eracun.zki %}<div class="detail-row"><span class="label">ZKI</span><span class="value" style="font-size:.7rem">{{ eracun.zki }}</span></div>{% endif %}
+    {% if eracun.jir %}<div class="detail-row"><span class="label">JIR</span><span class="value" style="font-size:.7rem">{{ eracun.jir }}</span></div>{% endif %}
+    {% if eracun.fina_uuid %}<div class="detail-row"><span class="label">FINA UUID</span><span class="value" style="font-size:.7rem">{{ eracun.fina_uuid }}</span></div>{% endif %}
+  </div>
+</div>
+
+<!-- Stavke -->
+{% if items %}
+<div class="detail-card" style="margin-bottom:16px">
+  <h6>Stavke</h6>
+  <table style="width:100%;font-size:.82rem;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid #e2e8f0">
+      <th style="text-align:left;padding:6px">#</th>
+      <th style="text-align:left;padding:6px">Opis</th>
+      <th style="text-align:right;padding:6px">Kol.</th>
+      <th style="text-align:right;padding:6px">Cijena</th>
+      <th style="text-align:center;padding:6px">PDV</th>
+      <th style="text-align:right;padding:6px">Ukupno</th>
+    </tr></thead>
+    <tbody>
+    {% for item in items %}
+    <tr style="border-bottom:1px solid #f1f5f9">
+      <td style="padding:6px">{{ item.line_number }}</td>
+      <td style="padding:6px">{{ item.description }}</td>
+      <td style="padding:6px;text-align:right">{{ item.quantity|floatformat:2 }} {{ item.unit_code }}</td>
+      <td style="padding:6px;text-align:right">&euro;{{ item.unit_price|floatformat:2 }}</td>
+      <td style="padding:6px;text-align:center">{{ item.tax_rate|floatformat:0 }}% ({{ item.tax_category }})</td>
+      <td style="padding:6px;text-align:right">&euro;{{ item.line_total|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- PDV raspodjela -->
+{% if tax_summaries %}
+<div class="detail-card" style="margin-bottom:16px">
+  <h6>PDV Raspodjela</h6>
+  <table style="width:100%;font-size:.82rem;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid #e2e8f0">
+      <th style="text-align:left;padding:6px">Kategorija</th>
+      <th style="text-align:right;padding:6px">Stopa</th>
+      <th style="text-align:right;padding:6px">Osnovica</th>
+      <th style="text-align:right;padding:6px">PDV</th>
+    </tr></thead>
+    <tbody>
+    {% for ts in tax_summaries %}
+    <tr style="border-bottom:1px solid #f1f5f9">
+      <td style="padding:6px">{{ ts.tax_category }}</td>
+      <td style="padding:6px;text-align:right">{{ ts.tax_rate|floatformat:0 }}%</td>
+      <td style="padding:6px;text-align:right">&euro;{{ ts.taxable_amount|floatformat:2 }}</td>
+      <td style="padding:6px;text-align:right">&euro;{{ ts.tax_amount|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- Log -->
+{% if logs %}
+<div class="detail-card">
+  <h6>Tijek obrade</h6>
+  {% for log in logs %}
+  <div class="log-item">
+    <span class="er-badge {{ log.status }}" style="font-size:.65rem">{{ log.status }}</span>
+    <strong>{{ log.action }}</strong>: {{ log.message }}
+    <div class="time">{{ log.created_at|date:"d.m.Y H:i:s" }}{% if log.user %} &middot; {{ log.user.get_full_name|default:log.user.username }}{% endif %}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Tvrtke – LIMIT CONNECT{% endblock %}
+{% block page_title %}🏢 Upravljanje tvrtkama{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{--black:#0a0a0a;--dark:#111214;--surface:#181a1d;--border:#252830;--muted:#4a5060;--light:#9aa0b0;--white:#f0ede8;--gold:#c9a84c;--gold2:#e8c96a}
+.sa-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;margin-bottom:20px;overflow:hidden}
+.sa-card-head{background:var(--dark);padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sa-card-head h6{margin:0;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+.co-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #1a1c20;flex-wrap:wrap}
+.co-row:last-child{border-bottom:none}
+.co-row:hover{background:rgba(201,168,76,.03)}
+.co-name{font-size:.9rem;color:var(--white);font-weight:600;min-width:180px}
+.co-oib{font-size:.72rem;color:var(--muted);font-family:monospace}
+.badge-plan{font-size:.62rem;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:2px}
+.badge-starter{background:rgba(71,85,105,.3);color:#94a3b8;border:1px solid #334155}
+.badge-business{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+.badge-enterprise{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.badge-none{background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.btn-imp{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);color:var(--gold);padding:5px 14px;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;text-decoration:none;white-space:nowrap;transition:background .15s;font-family:'Barlow Condensed',sans-serif;font-weight:600}
+.btn-imp:hover{background:rgba(201,168,76,.25);color:var(--gold2)}
+.btn-outline-g{background:transparent;border:1px solid var(--border);color:var(--light);padding:5px 14px;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;text-decoration:none;white-space:nowrap;transition:all .15s;font-family:'Barlow Condensed',sans-serif}
+.btn-outline-g:hover{border-color:var(--gold);color:var(--gold)}
+.form-dark input,
+.form-dark select{background:var(--dark);border:1px solid var(--border);color:var(--white);padding:9px 12px;font-size:.82rem;width:100%;outline:none;border-radius:0;transition:border-color .2s}
+.form-dark input:focus,
+.form-dark select:focus{border-color:var(--gold)}
+.form-dark input::placeholder{color:var(--muted)}
+.form-dark select option{background:var(--dark)}
+.btn-gold-fill{background:var(--gold);color:var(--black);border:none;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-weight:700;transition:background .2s}
+.btn-gold-fill:hover{background:var(--gold2)}
+.log-row{font-size:.75rem;color:var(--light);padding:8px 20px;border-bottom:1px solid #1a1c20;display:flex;gap:12px;flex-wrap:wrap}
+.log-row:last-child{border-bottom:none}
+.plan-form{display:flex;align-items:center;gap:6px}
+.plan-select{background:var(--dark);border:1px solid var(--border);color:var(--white);padding:3px 6px;font-size:.72rem;border-radius:0;cursor:pointer;min-width:110px}
+.plan-select:focus{outline:none;border-color:var(--gold)}
+.btn-plan-save{background:transparent;border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:3px 10px;font-size:.68rem;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn-plan-save:hover{background:rgba(201,168,76,.15)}
+.meta-pill{font-size:.68rem;color:var(--muted);white-space:nowrap}
+.reg-alert{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+{% if error %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:12px 16px;margin-bottom:16px;font-size:.85rem">
+  ⚠ {{ error }}
+</div>
+{% endif %}
+
+<!-- ── Company table ─────────────────────────────────────────── -->
+<div class="sa-card">
+  {% if pending_reg_count %}
+  <div class="reg-alert">
+    <span style="color:var(--gold);font-size:.82rem;font-weight:600">
+      ⏳ {{ pending_reg_count }} zahtjev{% if pending_reg_count != 1 %}a{% endif %} za registraciju čeka odobrenje
+    </span>
+    <a href="/register/superadmin/registrations/" class="btn-imp" style="font-size:.68rem">{% trans "Pregled zahtjeva →" %}</a>
+  </div>
+  {% endif %}
+  <div class="sa-card-head">
+    <h6>Sve tvrtke ({{ rows|length }})</h6>
+    <div style="display:flex;gap:8px">
+      <a href="/register/superadmin/registrations/" class="btn-outline-g" style="font-size:.68rem;padding:5px 12px">{% trans "Registracije" %}</a>
+      <button onclick="document.getElementById('new-form').style.display=document.getElementById('new-form').style.display==='none'?'block':'none'"
+              class="btn-gold-fill" style="font-size:.7rem;padding:7px 16px">
+        {% trans "+ Nova tvrtka" %}
+      </button>
+    </div>
+  </div>
+
+  <!-- New company form (hidden by default) -->
+  <div id="new-form" style="display:none;padding:20px;background:#0d0f11;border-bottom:1px solid var(--border)">
+    <form method="POST" class="form-dark">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px">
+        <input name="name"     placeholder="{% trans "Naziv tvrtke *" %}" required>
+        <input name="oib"      placeholder="{% trans "OIB (11 znakova) *" %}" required maxlength="11">
+        <input name="address"  placeholder="{% trans "Adresa" %}">
+        <input name="city"     placeholder="{% trans "Grad" %}">
+        <input name="zip_code" placeholder="{% trans "Poštanski broj" %}">
+        <select name="country">
+          <option value="HR">{% trans "Hrvatska" %}</option>
+          <option value="DE">{% trans "Njemačka" %}</option>
+          <option value="AT">{% trans "Austrija" %}</option>
+          <option value="CH">{% trans "Švicarska" %}</option>
+        </select>
+        <select name="business_type">
+          <option value="doo">{% trans "d.o.o." %}</option>
+          <option value="jdoo">{% trans "j.d.o.o." %}</option>
+          <option value="obrt">{% trans "Obrt" %}</option>
+          <option value="dd">{% trans "d.d." %}</option>
+          <option value="sp">{% trans "s.p." %}</option>
+          <option value="eu">{% trans "EU company" %}</option>
+        </select>
+        <select name="plan">
+          <option value="">{% trans "Bez pretplate" %}</option>
+          <option value="starter">{% trans "Starter – €29/mj" %}</option>
+          <option value="business">{% trans "Business – €59/mj" %}</option>
+          <option value="enterprise">{% trans "Enterprise – €99/mj" %}</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-gold-fill">{% trans "Kreiraj tvrtku →" %}</button>
+    </form>
+  </div>
+
+  <!-- Table -->
+  {% for row in rows %}
+  <div class="co-row">
+    <!-- Company name + OIB -->
+    <div style="flex:1;min-width:180px">
+      <div class="co-name">{{ row.company.name }}</div>
+      <div class="co-oib">OIB: {{ row.company.oib }} · {{ row.company.city }}{% if row.company.city and row.company.country %}, {% endif %}{{ row.company.country }}</div>
+    </div>
+
+    <!-- Inline plan change form -->
+    <div>
+      <form method="POST" class="plan-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="change_plan">
+        <input type="hidden" name="company_id" value="{{ row.company.id }}">
+        <select name="plan" class="plan-select">
+          <option value=""{% if not row.sub %} selected{% endif %}>{% trans "BEZ PLANA" %}</option>
+          <option value="starter"{% if row.sub.plan == 'starter' %} selected{% endif %}>{% trans "STARTER" %}</option>
+          <option value="business"{% if row.sub.plan == 'business' %} selected{% endif %}>{% trans "BUSINESS" %}</option>
+          <option value="enterprise"{% if row.sub.plan == 'enterprise' %} selected{% endif %}>{% trans "ENTERPRISE" %}</option>
+        </select>
+        <button type="submit" class="btn-plan-save">{% trans "Spremi" %}</button>
+      </form>
+      {% if row.valid_until %}
+      <div class="meta-pill" style="margin-top:3px">Do: {{ row.valid_until|date:"d.m.Y" }}</div>
+      {% endif %}
+    </div>
+
+    <!-- Stats -->
+    <div style="text-align:right">
+      <div class="meta-pill"><i class="fas fa-users" style="font-size:.6rem"></i> {{ row.user_count }} kor.</div>
+      {% if row.last_login %}
+      <div class="meta-pill">Zadnji: {{ row.last_login|date:"d.m H:i" }}</div>
+      {% else %}
+      <div class="meta-pill" style="color:#2a2e38">{% trans "Nikad" %}</div>
+      {% endif %}
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:8px;align-items:center">
+      <a href="/superadmin/impersonate/{{ row.company.id }}/"
+         class="btn-imp"
+         title="Pristupite sustavu kao ova tvrtka"
+         onclick="return confirm('Pristupit cete kao: {{ row.company.name }}. Nastaviti?')">
+        <i class="fas fa-user-secret" style="margin-right:4px"></i> {% trans "Pristupi" %}
+      </a>
+            <a href="/superadmin/companies/{{ row.company.id }}/branches/" class="btn-outline-g">{% trans "&#x1F3E2; Podru&#382;nice" %}</a>
+      {% if row.sub %}
+      <a href="/superadmin/modules/{{ row.sub.id }}/" class="btn-outline-g">{% trans "Moduli" %}</a>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div style="padding:40px;text-align:center;color:var(--muted);font-size:.85rem">
+    {% trans "Nema tvrtki u sustavu." %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ── Impersonation audit log ───────────────────────────────── -->
+{% if recent_logs %}
+<div class="sa-card">
+  <div class="sa-card-head">
+    <h6>{% trans "Zadnje impersonacije (audit log)" %}</h6>
+  </div>
+  {% for log in recent_logs %}
+  <div class="log-row">
+    <span style="color:var(--gold);font-weight:600">{{ log.superadmin.username }}</span>
+    <span style="color:var(--muted)">→</span>
+    <span style="color:var(--white)">{{ log.company.name }}</span>
+    <span style="color:var(--muted)">|</span>
+    <span>{{ log.started_at|date:"d.m.Y H:i" }}</span>
+    {% if log.ended_at %}
+    <span style="color:#34d399">Trajanje: {{ log.duration_display }}</span>
+    {% else %}
+    <span style="color:var(--gold)">{% trans "● Aktivna" %}</span>
+    {% endif %}
+    <span style="color:var(--muted)">{{ log.actions_count }} akcija</span>
+    <span style="color:var(--muted);font-family:monospace;font-size:.68rem">{{ log.ip_address }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div style="margin-top:8px">
+  <a href="/superadmin/" style="font-size:.78rem;color:var(--muted);text-decoration:none">
+    {% trans "← Natrag na superadmin dashboard" %}
+  </a>
+</div>
+{% endblock %}

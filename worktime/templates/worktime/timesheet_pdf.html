@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="{% if is_de %}de{% else %}hr{% endif %}">
+<head>
+<meta charset="UTF-8">
+<style>
+@page { margin:14mm 12mm; size:A4; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DejaVu Sans',Arial,sans-serif; font-size:8pt; color:#1a1a1a; }
+.header { display:flex; justify-content:space-between; border-bottom:2pt solid #0f172a; padding-bottom:9pt; margin-bottom:11pt; }
+.co h1 { font-size:13pt; font-weight:700; color:#0f172a; }
+.co p  { font-size:7pt; color:#64748b; margin-top:2pt; }
+.di { text-align:right; font-size:7pt; color:#475569; }
+.di .t { font-size:11pt; font-weight:700; color:#0f172a; letter-spacing:.5pt; }
+.pbar { background:#0f172a; color:white; padding:6pt 9pt; border-radius:4pt; margin-bottom:10pt;
+        display:flex; justify-content:space-between; }
+.pbar span { font-size:6pt; opacity:0.65; display:block; }
+.pbar strong { font-size:8pt; }
+.legal { font-size:5.5pt; color:#94a3b8; margin-bottom:9pt; padding:3.5pt 6pt;
+         border-left:2pt solid #e2e8f0; line-height:1.5; }
+.ws { margin-bottom:13pt; page-break-inside:avoid; }
+.wh { background:#f1f5f9; padding:6pt 8pt; border-left:3pt solid #c9a84c;
+      margin-bottom:4pt; display:flex; justify-content:space-between; align-items:center; }
+.wn { font-weight:700; font-size:9pt; }
+.wd { font-size:6.5pt; color:#64748b; margin-top:1pt; }
+.wt { text-align:right; font-weight:700; white-space:nowrap; }
+table { width:100%; border-collapse:collapse; }
+thead tr { background:#0f172a; color:white; }
+thead th { padding:3pt 3.5pt; font-size:6pt; text-align:left; white-space:nowrap; }
+th.r,td.r { text-align:right; }
+th.c,td.c { text-align:center; }
+tbody tr { border-bottom:0.4pt solid #e2e8f0; }
+tbody tr:nth-child(even) { background:#f8fafc; }
+tbody td { padding:2.5pt 3.5pt; font-size:7pt; }
+td.abs { color:#dc2626; font-style:italic; font-size:6.5pt; }
+.badge { display:inline-block; padding:1pt 3pt; border-radius:2pt; font-size:5.5pt; font-weight:700; }
+.b-pend { background:#fef3c7; color:#92400e; }
+.b-appr { background:#d1fae5; color:#065f46; }
+.b-rej  { background:#fee2e2; color:#991b1b; }
+.b-draft{ background:#f1f5f9; color:#475569; }
+.sr td  { background:#dde3ec; font-weight:700; font-size:7pt; }
+.sum-row { display:flex; gap:5pt; margin-top:4pt; flex-wrap:wrap; }
+.sum-cell { background:#f8fafc; border:0.5pt solid #e2e8f0; border-radius:2pt;
+            padding:3pt 5pt; font-size:6pt; }
+.sum-cell strong { font-size:7.5pt; display:block; color:#0f172a; }
+.sum-cell span { color:#64748b; }
+.gt { background:#0f172a; color:white; padding:7pt 9pt; margin-top:11pt;
+      display:flex; justify-content:space-between; border-radius:4pt; font-size:8.5pt; }
+.sig { margin-top:20pt; display:flex; justify-content:space-between; font-size:7pt; color:#475569; }
+.sig-line { text-align:center; width:38%; }
+.sig-line .line { border-top:0.5pt solid #94a3b8; padding-top:3pt; margin-top:16pt; }
+.ft { position:fixed; bottom:0; left:0; right:0; font-size:5.5pt; color:#94a3b8;
+      border-top:0.5pt solid #e2e8f0; padding:2.5pt 12mm; display:flex; justify-content:space-between; }
+</style>
+</head>
+<body>
+
+<!-- ZAGLAVLJE -->
+<div class="header">
+  <div class="co">
+    <h1>{{ company.name|default:"LIMIT Connect" }}</h1>
+    <p>
+      {% if is_de %}
+        {% if company.tax_number %}St.-Nr.: {{ company.tax_number }}{% endif %}
+        {% if company.oib %} &middot; USt-IdNr.: DE{{ company.oib }}{% endif %}
+      {% else %}
+        OIB: {{ company.oib|default:"" }}
+      {% endif %}
+      {% if company.address %} &middot; {{ company.address }}{% if company.city %}, {{ company.city }}{% endif %}{% endif %}
+    </p>
+  </div>
+  <div class="di">
+    <div class="t">{% if is_de %}ARBEITSZEITNACHWEIS{% else %}EVIDENCIJA RADNIH SATI{% endif %}</div>
+    <p style="margin-top:3pt;">
+      {% if project %}
+        {% if is_de %}Projekt{% else %}Projekt{% endif %}: {{ project.name }}
+      {% else %}
+        {% if is_de %}Alle Projekte{% else %}Svi projekti{% endif %}
+      {% endif %}
+    </p>
+    <p style="font-size:6pt;color:#94a3b8;margin-top:2pt;">
+      {% if is_de %}Erstellt{% else %}Generirano{% endif %}: {{ generated_at|date:"d.m.Y H:i" }}
+    </p>
+  </div>
+</div>
+
+<!-- SUMMARY BAR -->
+<div class="pbar">
+  <div><span>{% if is_de %}Zeitraum{% else %}Period{% endif %}</span>
+       <strong>{{ date_from|date:"d.m.Y" }} &ndash; {{ date_to|date:"d.m.Y" }}</strong></div>
+  <div><span>{% if is_de %}Mitarbeiter{% else %}Radnika{% endif %}</span>
+       <strong>{{ workers_data|length }}</strong></div>
+  <div><span>{% if is_de %}Gesamtstunden{% else %}Ukupno sati{% endif %}</span>
+       <strong>{{ total_hours|floatformat:2 }}h</strong></div>
+  <div style="text-align:right">
+       <span>{% if is_de %}Gesamtbetrag{% else %}Ukupno iznos{% endif %}</span>
+       <strong>{{ total_amount|floatformat:2 }} EUR</strong></div>
+</div>
+
+<!-- PRAVNA NAPOMENA -->
+{% if is_de %}
+<div class="legal">
+  Arbeitszeitnachweis gem. &sect;3 Abs.2 Nr.1 ArbSchG i.V.m. BAG-Beschluss 13.09.2022 (1 ABR 22/21)
+  &nbsp;&middot;&nbsp; &sect;16 Abs.2 ArbZG (Mehrarbeit, Sonn- und Feiertagsarbeit)
+  &nbsp;&middot;&nbsp; Aufbewahrung: mind. 2 Jahre (&sect;16 Abs.2 ArbZG), l&auml;ngstens bis Beendigung des Arbeitsverh&auml;ltnisses
+</div>
+{% else %}
+<div class="legal">
+  Evidencija sukladno &ccaron;l.&nbsp;5. Zakona o radu (NN 93/14, 151/22) i Pravilniku o sadr&zcaron;aju i na&ccaron;inu vo&dj;enja evidencije o radnicima (NN 55/24), na snazi od 1.10.2024.
+  &nbsp;&middot;&nbsp; Rok &ccaron;uvanja: do isteka god. prestanka radnog odnosa (ugovor o radu: 6 god.)
+</div>
+{% endif %}
+
+<!-- PO RADNIKU -->
+{% for uid, wd in workers_data.items %}
+<div class="ws">
+  <div class="wh">
+    <div>
+      <div class="wn">{{ wd.user.get_full_name|default:wd.user.username }}</div>
+      <div class="wd">
+        {% if wd.emp %}{{ wd.emp.position }} &middot; {% endif %}
+        {{ wd.hourly_rate }}&nbsp;&euro;/h
+        {% if is_de %}
+          {% if wd.oib %}&nbsp;&middot;&nbsp;SV-Nr./St.: {{ wd.oib }}{% endif %}
+        {% else %}
+          {% if wd.oib %}&nbsp;&middot;&nbsp;OIB: {{ wd.oib }}{% endif %}
+        {% endif %}
+        {% if wd.iban %}&nbsp;&middot;&nbsp;IBAN: {{ wd.iban }}{% endif %}
+      </div>
+    </div>
+    <div class="wt">{{ wd.total_hours|floatformat:2 }}h &middot; {{ wd.total_amount|floatformat:2 }}&nbsp;EUR</div>
+  </div>
+
+  {% if mode == 'detailed' %}
+  <table>
+    <thead><tr>
+      <th>{% if is_de %}Datum{% else %}Datum{% endif %}</th>
+      <th>{% if is_de %}Projekt{% else %}Projekt{% endif %}</th>
+      <th>{% if is_de %}T&auml;tigkeit{% else %}Tip rada{% endif %}</th>
+      <th class="c">{% if is_de %}Beginn{% else %}Od{% endif %}</th>
+      <th class="c">{% if is_de %}Ende{% else %}Do{% endif %}</th>
+      <th class="c">{% if is_de %}Pause<br>(Min){% else %}Pauza<br>(min){% endif %}</th>
+      <th class="r">{% if is_de %}Stunden{% else %}Sati{% endif %}</th>
+      <th class="c">{% if is_de %}Nacht{% else %}No&cacute;ni{% endif %}</th>
+      <th class="c">{% if is_de %}&Uuml;berstd.{% else %}Prekov.{% endif %}</th>
+      <th class="c">{% if is_de %}Feiertag{% else %}Blagdan{% endif %}</th>
+      <th class="r">&euro;/h</th>
+      <th class="r">{% if is_de %}Betrag{% else %}Iznos{% endif %}</th>
+      <th>{% if is_de %}Abwesenheit{% else %}Odsutnost{% endif %}</th>
+      <th class="c">{% if is_de %}Ruhezeit{% else %}Dn.odmor{% endif %}</th>
+      <th>{% if is_de %}Bemerkung{% else %}Opis{% endif %}</th>
+      <th>{% if is_de %}Status{% else %}Status{% endif %}</th>
+    </tr></thead>
+    <tbody>
+    {% for te in wd.entries %}
+    <tr>
+      <td>{{ te.date|date:"d.m.Y" }}</td>
+      <td style="font-size:6.5pt;">{{ te.project.code }}</td>
+      <td style="font-size:6pt;">{{ te.get_task_type_display }}</td>
+      <td class="c">{% if te.start_time %}{{ te.start_time|time:"H:i" }}{% else %}&mdash;{% endif %}</td>
+      <td class="c">{% if te.end_time %}{{ te.end_time|time:"H:i" }}{% else %}&mdash;{% endif %}</td>
+      <td class="c">{% if te.break_minutes %}{{ te.break_minutes }}'{% else %}&mdash;{% endif %}</td>
+      <td class="r">{% if te.absence_type %}&mdash;{% else %}{{ te.duration|floatformat:2 }}{% endif %}</td>
+      <td class="c">{% if te.is_night_work %}<strong>&#9679;</strong>{% else %}&mdash;{% endif %}</td>
+      <td class="c">{% if te.is_overtime %}<strong>&#9679;</strong>{% else %}&mdash;{% endif %}</td>
+      <td class="c">{% if te.is_holiday_work %}<strong>&#9679;</strong>{% else %}&mdash;{% endif %}</td>
+      <td class="r">{{ wd.hourly_rate }}</td>
+      <td class="r">{% if te.absence_type %}&mdash;{% else %}{{ te.billing_amount|floatformat:2 }}{% endif %}</td>
+      <td class="abs">
+        {% if te.absence_type %}
+          {% if is_de %}
+            {% if te.absence_type == "ANNUAL" %}Jahresurlaub
+            {% elif te.absence_type == "SICK" %}Krankheit
+            {% elif te.absence_type == "PAID" %}Bezahlter Urlaub
+            {% elif te.absence_type == "UNPAID" %}Unbezahlter Urlaub
+            {% elif te.absence_type == "HOLIDAY" %}Feiertag
+            {% elif te.absence_type == "PATERNITY" %}Vaterschaftsurlaub
+            {% elif te.absence_type == "CARE" %}Pflegeurlaub
+            {% elif te.absence_type == "MILITARY" %}Wehrdienst
+            {% elif te.absence_type == "ELECTION" %}Wahlkampf
+            {% elif te.absence_type == "STRIKE" %}Streik
+            {% elif te.absence_type == "LOCKOUT" %}Aussperrung
+            {% elif te.absence_type == "UNJUSTIFIED" %}Unentsch. Fehlen
+            {% elif te.absence_type == "STOPPAGE" %}Betriebsst&ouml;rung
+            {% else %}{{ te.absence_type }}{% endif %}
+          {% else %}
+            {% if te.absence_type == "ANNUAL" %}Godi&scaron;nji odmor
+            {% elif te.absence_type == "SICK" %}Bolovanje
+            {% elif te.absence_type == "PAID" %}Pla&cacute;eni dopust
+            {% elif te.absence_type == "UNPAID" %}Nepla&cacute;eni dopust
+            {% elif te.absence_type == "HOLIDAY" %}Blagdan
+            {% elif te.absence_type == "PATERNITY" %}O&ccaron;inski dopust
+            {% elif te.absence_type == "CARE" %}Dopust za njegu
+            {% elif te.absence_type == "MILITARY" %}Vojna obveza
+            {% elif te.absence_type == "ELECTION" %}Izborna odsutnost
+            {% elif te.absence_type == "STRIKE" %}&Scaron;trajk
+            {% elif te.absence_type == "LOCKOUT" %}Isklju&ccaron;enje
+            {% elif te.absence_type == "UNJUSTIFIED" %}Neopravdani izost.
+            {% elif te.absence_type == "STOPPAGE" %}Zastoj/krivnja posl.
+            {% else %}{{ te.absence_type }}{% endif %}
+          {% endif %}
+        {% else %}&mdash;{% endif %}
+      </td>
+      <td class="c" style="font-size:6.5pt;">
+        {% if te.daily_rest_hours %}{{ te.daily_rest_hours }}h{% else %}&mdash;{% endif %}
+      </td>
+      <td style="font-size:6pt;">{{ te.description|truncatechars:20 }}</td>
+      <td>
+        {% if te.status == "APPROVED" %}<span class="badge b-appr">{% if is_de %}OK{% else %}OK{% endif %}</span>
+        {% elif te.status == "PENDING" %}<span class="badge b-pend">{% if is_de %}Ausstehend{% else %}Na &ccaron;ekanju{% endif %}</span>
+        {% elif te.status == "REJECTED" %}<span class="badge b-rej">{% if is_de %}Abgelehnt{% else %}Odbijeno{% endif %}</span>
+        {% else %}<span class="badge b-draft">{% if is_de %}Entwurf{% else %}Skica{% endif %}</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    <tr class="sr">
+      <td colspan="6">{% if is_de %}GESAMT{% else %}UKUPNO{% endif %} &ndash; {{ wd.user.get_full_name|default:wd.user.username }}</td>
+      <td class="r">{{ wd.total_hours|floatformat:2 }}</td>
+      <td></td><td></td><td></td>
+      <td></td>
+      <td class="r">{{ wd.total_amount|floatformat:2 }}</td>
+      <td colspan="4"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- Mini summary ispod tablice -->
+  <div class="sum-row">
+    <div class="sum-cell">
+      <strong>
+        {% for te in wd.entries %}{% if te.is_night_work %}&#9679;{% endif %}{% endfor %}
+        {% if not wd.entries %}0{% endif %}
+      </strong>
+      <span>{% if is_de %}Nachtstunden{% else %}No&cacute;ni rad{% endif %}</span>
+    </div>
+    <div class="sum-cell">
+      <strong>
+        {% for te in wd.entries %}{% if te.is_overtime %}&#9679;{% endif %}{% endfor %}
+      </strong>
+      <span>{% if is_de %}&Uuml;berstunden{% else %}Prekovremeni{% endif %}</span>
+    </div>
+    <div class="sum-cell">
+      <strong>
+        {% for te in wd.entries %}{% if te.absence_type %}&bull;{% endif %}{% endfor %}
+      </strong>
+      <span>{% if is_de %}Abwesenheit{% else %}Odsutnost{% endif %}</span>
+    </div>
+    <div class="sum-cell">
+      <strong>{{ wd.total_hours|floatformat:2 }}h</strong>
+      <span>{% if is_de %}Nettostunden{% else %}Neto sati{% endif %}</span>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- SUMMARY MODE -->
+  <table>
+    <thead><tr>
+      <th>{% if is_de %}Mitarbeiter{% else %}Radnik{% endif %}</th>
+      <th>{% if is_de %}Projekt{% else %}Projekt{% endif %}</th>
+      <th class="r">{% if is_de %}Stunden{% else %}Sati{% endif %}</th>
+      <th class="r">&euro;/h</th>
+      <th class="r">EUR</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td>{{ wd.user.get_full_name|default:wd.user.username }}</td>
+      <td>{% if project %}{{ project.name }}{% else %}{% if is_de %}Mehrere Projekte{% else %}Vi&scaron;e projekata{% endif %}{% endif %}</td>
+      <td class="r">{{ wd.total_hours|floatformat:2 }}</td>
+      <td class="r">{{ wd.hourly_rate }}</td>
+      <td class="r">{{ wd.total_amount|floatformat:2 }}</td>
+    </tr>
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- GRAND TOTAL -->
+<div class="gt">
+  <span>{% if is_de %}GESAMT{% else %}UKUPNO{% endif %} &ndash;
+    {{ date_from|date:"d.m.Y" }} {% if is_de %}bis{% else %}do{% endif %} {{ date_to|date:"d.m.Y" }}
+  </span>
+  <span>{{ total_hours|floatformat:2 }}h &middot; {{ total_amount|floatformat:2 }} EUR</span>
+</div>
+
+<!-- POTPIS -->
+<div class="sig">
+  <div class="sig-line">
+    <div class="line">{% if is_de %}Arbeitgeber / Unterschrift + Stempel{% else %}Poslodavac / Potpis i pe&ccaron;at{% endif %}</div>
+  </div>
+  <div class="sig-line">
+    <div class="line">{% if is_de %}Arbeitnehmer / Unterschrift{% else %}Radnik / Potpis{% endif %}</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="ft">
+  <span>{{ company.name|default:"LIMIT Connect" }}
+    &nbsp;&middot;&nbsp;
+    {% if is_de %}St.-Nr.: {{ company.tax_number|default:"" }}{% else %}OIB: {{ company.oib|default:"" }}{% endif %}
+    &nbsp;&middot;&nbsp; {{ company.address|default:"" }}
+  </span>
+  <span>{% if is_de %}Erstellt{% else %}Generirano{% endif %}: {{ generated_at|date:"d.m.Y H:i" }} &nbsp;&middot;&nbsp; LIMIT Connect ERP</span>
+</div>
+
+</body>
+</html>

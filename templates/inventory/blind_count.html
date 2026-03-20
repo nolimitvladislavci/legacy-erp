@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Slijepa Inventura{% endblock %}
+{% block page_title %}Slijepa Inventura{% endblock %}
+
+{% block extra_css %}
+<style>
+    .si-wrap { max-width: 600px; margin: 0 auto; }
+    .si-card {
+        background: #fff; border-radius: 12px; padding: 28px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+    .si-header {
+        font-size: 1.15rem; font-weight: 700; color: #0f172a;
+        border-bottom: 2px solid var(--gold); padding-bottom: 12px;
+        margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+        text-transform: uppercase; letter-spacing: 1px;
+    }
+    .si-header i { color: var(--gold); font-size: 1.2rem; }
+    .si-label {
+        font-size: 0.75rem; font-weight: 700; color: #64748b;
+        text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .si-label .step {
+        background: var(--gold); color: #0f172a; width: 22px; height: 22px;
+        border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+        font-size: 0.7rem; font-weight: 800;
+    }
+
+    /* Massive inputs — warehouse tablet, gloved hands */
+    .si-input-big {
+        width: 100%; background: #f8fafc; border: 2px solid #e2e8f0;
+        border-radius: 10px; padding: 18px 16px; font-size: 1.6rem;
+        font-weight: 700; color: #0f172a; text-align: center;
+        transition: border-color 0.2s;
+        margin-bottom: 20px;
+    }
+    .si-input-big:focus {
+        border-color: var(--gold); outline: none;
+        box-shadow: 0 0 0 4px rgba(201,168,76,0.15);
+    }
+    .si-input-big::placeholder { color: #cbd5e1; font-size: 1.1rem; font-weight: 400; }
+
+    /* Submit button — large touch target */
+    .si-btn {
+        width: 100%; padding: 18px; border-radius: 10px;
+        font-size: 1.1rem; font-weight: 700; border: 2px solid var(--gold);
+        background: var(--gold); color: #0f172a;
+        cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        text-transform: uppercase; letter-spacing: 1px;
+        margin-top: 8px;
+    }
+    .si-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+    .si-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .si-spinner {
+        display: none; width: 22px; height: 22px;
+        border: 3px solid rgba(0,0,0,0.15); border-top-color: #0f172a;
+        border-radius: 50%; animation: sispin 0.7s linear infinite;
+    }
+    @keyframes sispin { to { transform: rotate(360deg); } }
+
+    /* Alert area */
+    .si-alert {
+        display: none; margin-top: 20px; padding: 18px 20px; border-radius: 10px;
+        font-weight: 600; font-size: 0.95rem; text-align: center;
+        border-left: 5px solid;
+    }
+    .si-alert i { display: block; font-size: 1.8rem; margin-bottom: 8px; }
+    .si-alert-ok { background: #f0fdf4; color: #166534; border-color: #22c55e; }
+    .si-alert-ok i { color: #22c55e; }
+    .si-alert-kalo { background: #fefce8; color: #854d0e; border-color: #eab308; }
+    .si-alert-kalo i { color: #eab308; }
+    .si-alert-theft { background: #fef2f2; color: #991b1b; border-color: #ef4444; }
+    .si-alert-theft i { color: #ef4444; }
+    .si-alert-quarantine { background: #fef2f2; color: #9a3412; border-color: #f97316; }
+    .si-alert-quarantine i { color: #f97316; }
+    .si-alert-info { background: #f0f9ff; color: #075985; border-color: #0ea5e9; }
+
+    /* Batch info preview */
+    .si-batch-info {
+        display: none; background: #f8fafc; border: 1px solid #e2e8f0;
+        border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+        font-size: 0.85rem; color: #64748b;
+    }
+    .si-batch-info strong { color: #0f172a; }
+    .si-batch-info .tag {
+        display: inline-block; padding: 2px 8px; border-radius: 4px;
+        font-size: 0.72rem; font-weight: 600;
+    }
+    .tag-active { background: #dcfce7; color: #166534; }
+    .tag-expired { background: #fef2f2; color: #991b1b; }
+    .tag-quarantine { background: #fff7ed; color: #9a3412; }
+
+    /* History card */
+    .si-history { margin-top: 8px; }
+    .si-history-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 14px; border-bottom: 1px solid #f1f5f9;
+        font-size: 0.82rem; color: #64748b;
+    }
+    .si-history-row:last-child { border-bottom: none; }
+    .si-history-row strong { color: #0f172a; }
+    .si-result-ok { color: #22c55e; }
+    .si-result-kalo { color: #eab308; }
+    .si-result-theft { color: #ef4444; }
+
+    @media (max-width: 768px) {
+        .si-input-big { font-size: 1.3rem; padding: 14px; }
+        .si-btn { font-size: 1rem; padding: 16px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="si-wrap">
+    <div class="si-card">
+        <div class="si-header">
+            <i class="fa-solid fa-barcode"></i> Slijepa Inventura
+        </div>
+
+        <form id="siForm" onsubmit="event.preventDefault(); siSubmit();">
+            <div class="si-label">
+                <span class="step">1</span> Skeniraj ili unesi ID sarze
+            </div>
+            <input type="text" id="siBatchId" class="si-input-big"
+                   placeholder="LOT-2026-03 ili skeniraj barkod"
+                   autocomplete="off" autofocus
+                   onchange="siLookupBatch()">
+
+            <div id="siBatchInfo" class="si-batch-info"></div>
+
+            <div class="si-label">
+                <span class="step">2</span> Unos s vage (kg)
+            </div>
+            <input type="number" id="siWeight" class="si-input-big"
+                   placeholder="0.000" step="0.001" min="0"
+                   autocomplete="off">
+
+            <button type="submit" id="siBtn" class="si-btn">
+                <div id="siSpinner" class="si-spinner"></div>
+                <i class="fa-solid fa-scale-balanced" id="siBtnIcon"></i>
+                <span id="siBtnText">Potvrdi Stanje</span>
+            </button>
+        </form>
+
+        <div id="siAlert" class="si-alert"></div>
+    </div>
+
+    <!-- Recent counts -->
+    <div class="si-card" id="siHistoryCard" style="display:none;">
+        <div class="si-header" style="font-size:0.9rem;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Zadnja Brojanja
+        </div>
+        <div id="siHistory" class="si-history"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/blind-count.js"></script>
+{% endblock %}

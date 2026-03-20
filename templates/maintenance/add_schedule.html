@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Raspored odrzavanja - {{ asset.name }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Novi raspored: {{ asset.asset_code }} - {{ asset.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5"><label class="form-label">Naziv zadatka</label><input type="text" name="task_name" class="form-control" required></div>
+                    <div class="col-md-3"><label class="form-label">Ucestalost</label>
+                        <select name="frequency" class="form-select">{% for val, label in frequencies %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select>
+                    </div>
+                    <div class="col-md-4"><label class="form-label">Sljedeci rok</label><input type="date" name="next_due" class="form-control" required></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12"><label class="form-label">Opis</label><textarea name="description" class="form-control" rows="2"></textarea></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3"><label class="form-label">Procijenjeni trosak (EUR)</label><input type="number" name="estimated_cost" class="form-control" step="0.01" value="0"></div>
+                    <div class="col-md-3"><label class="form-label">Serviser</label><input type="text" name="service_provider" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label">Interval km</label><input type="number" name="mileage_interval" class="form-control" value="0"></div>
+                    <div class="col-md-3"><label class="form-label">Obavijest dana prije</label><input type="number" name="notify_days_before" class="form-control" value="7"></div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-info btn-lg">Dodaj raspored</button>
+        <a href="{% url 'maintenance:asset_detail' asset.pk %}" class="btn btn-secondary btn-lg">Odustani</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { margin: 15mm 15mm 20mm 15mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24pt; border-bottom:2pt solid #0f172a; padding-bottom:16pt; }
+  .logo-area h1 { font-size:18pt; font-weight:700; color:#0f172a; letter-spacing:1px; }
+  .logo-area .subtitle { font-size:7.5pt; color:#64748b; letter-spacing:2px; text-transform:uppercase; margin-top:2pt; }
+  .issuer-info { text-align:right; font-size:8.5pt; color:#475569; line-height:1.6; }
+  .issuer-info strong { color:#0f172a; font-size:9pt; }
+
+  .invoice-meta { display:flex; justify-content:space-between; margin-bottom:20pt; }
+  .invoice-title { }
+  .invoice-title h2 { font-size:20pt; font-weight:700; color:#0f172a; }
+  .invoice-title .number { font-size:11pt; color:#c9a84c; font-weight:600; margin-top:4pt; }
+  .invoice-title .status { display:inline-block; margin-top:6pt; padding:2pt 8pt; background:#0f172a; color:white; font-size:7pt; letter-spacing:1px; text-transform:uppercase; }
+  
+  .dates-box { text-align:right; }
+  .date-row { display:flex; gap:12pt; justify-content:flex-end; margin-bottom:4pt; }
+  .date-label { font-size:8pt; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; width:90pt; text-align:right; }
+  .date-val { font-size:8.5pt; font-weight:600; color:#0f172a; width:70pt; text-align:right; }
+
+  .parties { display:flex; gap:20pt; margin-bottom:20pt; }
+  .party-box { flex:1; background:#f8fafc; padding:12pt; border-left:3pt solid #c9a84c; }
+  .party-box.issuer { border-left-color:#0f172a; }
+  .party-label { font-size:7pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:6pt; }
+  .party-name { font-size:10.5pt; font-weight:700; color:#0f172a; margin-bottom:4pt; }
+  .party-detail { font-size:8.5pt; color:#475569; line-height:1.6; }
+
+  table { width:100%; border-collapse:collapse; margin-bottom:16pt; }
+  thead tr { background:#0f172a; color:white; }
+  thead th { padding:7pt 8pt; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; text-align:left; }
+  thead th:last-child, thead th:nth-child(3), thead th:nth-child(4) { text-align:right; }
+  tbody tr { border-bottom:0.5pt solid #e2e8f0; }
+  tbody tr:nth-child(even) { background:#f8fafc; }
+  tbody td { padding:7pt 8pt; font-size:9pt; color:#374151; }
+  tbody td:last-child, tbody td:nth-child(3), tbody td:nth-child(4) { text-align:right; }
+  tfoot td { padding:5pt 8pt; font-size:9pt; }
+
+  .totals { display:flex; justify-content:flex-end; margin-bottom:20pt; }
+  .totals-table { width:200pt; }
+  .totals-table tr td { padding:4pt 6pt; font-size:9pt; }
+  .totals-table tr td:last-child { text-align:right; font-weight:600; }
+  .totals-table .total-row td { background:#0f172a; color:white; font-size:11pt; font-weight:700; padding:7pt 6pt; }
+  .totals-table .total-row td:first-child { border-radius:0; }
+
+  .payment-section { display:flex; gap:20pt; margin-bottom:20pt; }
+  .payment-box { flex:1; background:#f8fafc; padding:10pt; border:0.5pt solid #e2e8f0; }
+  .payment-box h4 { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:8pt; }
+  .payment-row { display:flex; justify-content:space-between; margin-bottom:3pt; }
+  .payment-label { font-size:8pt; color:#64748b; }
+  .payment-val { font-size:8.5pt; font-weight:600; color:#0f172a; }
+
+  .fiscal-box { background:#f0fdf4; border:0.5pt solid #86efac; padding:8pt 12pt; margin-bottom:16pt; }
+  .fiscal-box h4 { font-size:7.5pt; text-transform:uppercase; letter-spacing:1px; color:#16a34a; margin-bottom:4pt; }
+  .fiscal-codes { display:flex; gap:16pt; }
+  .fiscal-code { font-size:8pt; }
+  .fiscal-code span { font-weight:600; color:#0f172a; font-family: monospace; }
+
+  .qr-section { display:flex; justify-content:flex-end; margin-bottom:16pt; }
+  .qr-box { text-align:center; }
+  .qr-box p { font-size:7pt; color:#64748b; margin-top:4pt; }
+
+  .note-box { background:#fffbeb; border-left:3pt solid #f59e0b; padding:8pt 12pt; margin-bottom:16pt; font-size:8.5pt; color:#374151; }
+  
+  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:7.5pt; color:#94a3b8; border-top:0.5pt solid #e2e8f0; padding:6pt 15mm; background:white; }
+  .footer strong { color:#0f172a; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-area">
+    <h1>Fast</h1>
+    <div class="subtitle">Poslovna dokumentacija · Hrvatska</div>
+  </div>
+  <div class="issuer-info">
+    <strong>Fast</strong><br>
+    <br>
+    OIB: <br>
+    IBAN: <br>
+    
+  </div>
+</div>
+
+<div class="invoice-meta">
+  <div class="invoice-title">
+    <h2>RAČUN</h2>
+    <div class="number">Broj: 144-6</div>
+    <div class="status">Plaćeno</div>
+  </div>
+  <div class="dates-box">
+    <div class="date-row">
+      <div class="date-label">Datum izdavanja</div>
+      <div class="date-val">29.01.2025</div>
+    </div>
+    
+    <div class="date-row">
+      <div class="date-label">Rok plaćanja</div>
+      <div class="date-val">13.02.2025</div>
+    </div>
+    
+    
+  </div>
+</div>
+
+<div class="parties">
+  <div class="party-box issuer">
+    <div class="party-label">Izdavatelj</div>
+    <div class="party-name"></div>
+    <div class="party-detail">
+      <br>
+      OIB: <br>
+      IBAN: <br>
+      
+    </div>
+  </div>
+  <div class="party-box">
+    <div class="party-label">Primatelj / Kupac</div>
+    <div class="party-name">ZDRAVKO HAJDUKOVIĆ</div>
+    <div class="party-detail">
+      UMAŠKA 10<br>
+      OSIJEK<br>
+      OIB: 81376170330
+    </div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">#</th>
+      <th style="width:45%">Opis usluge / robe</th>
+      <th style="width:8%">Kol.</th>
+      <th style="width:8%">J.mj.</th>
+      <th style="width:14%">Jed.cijena</th>
+      <th style="width:8%">Pop. %</th>
+      <th style="width:12%">Iznos</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>1</td>
+      <td>Servis pl. protočnog bojlera</td>
+      <td>1,00</td>
+      <td>KOM</td>
+      <td>40,00 EUR</td>
+      <td>–</td>
+      <td>40,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>2</td>
+      <td>Izmjena termoelementa</td>
+      <td>1,00</td>
+      <td>KOM</td>
+      <td>90,00 EUR</td>
+      <td>–</td>
+      <td>90,00 EUR</td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
+  <!-- REKAPITULACIJA PDV-a -->
+  <div style="margin-bottom:16pt">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#f1f5f9">
+          <th style="padding:5pt 8pt;font-size:8pt;text-align:left;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">PDV stopa</th>
+          <th style="padding:5pt 8pt;font-size:8pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">Osnovno</th>
+          <th style="padding:5pt 8pt;font-size:8pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">PDV/MwSt iznos</th>
+          <th style="padding:5pt 8pt;font-size:8pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">Ukupno</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        
+        <tr>
+          <td style="padding:5pt 8pt;font-size:9pt;border:0.5pt solid #e2e8f0">25% – Standardna</td>
+          <td style="padding:5pt 8pt;font-size:9pt;text-align:right;border:0.5pt solid #e2e8f0">130,00 EUR</td>
+          <td style="padding:5pt 8pt;font-size:9pt;text-align:right;border:0.5pt solid #e2e8f0">32,50 EUR</td>
+          <td style="padding:5pt 8pt;font-size:9pt;text-align:right;font-weight:600;border:0.5pt solid #e2e8f0">162,50 EUR</td>
+        </tr>
+        
+        
+      </tbody>
+    </table>
+  </div>
+
+<div class="totals">
+  <table class="totals-table">
+    <tr><td>Iznos bez PDV</td><td>78,00 EUR</td></tr>
+    <tr><td>PDV 25,00%:</td><td>26,00 EUR</td></tr>
+    <tr class="total-row"><td>UKUPNO ZA PLATITI</td><td>104,00 EUR</td></tr>
+  </table>
+</div>
+
+
+  <!-- OPERATER I PRODAJNO MJESTO -->
+  <div style="display:flex;gap:20pt;margin-bottom:16pt;font-size:8.5pt;color:#475569">
+    <div style="flex:1">
+      
+    </div>
+    <div style="flex:1;text-align:right">
+      
+      
+    </div>
+  </div>
+
+<div class="payment-section">
+  <div class="payment-box">
+    <h4>Plaćanje</h4>
+    <div class="payment-row"><span class="payment-label">Način plaćanja</span><span class="payment-val">Transakcijski račun</span></div>
+    <div class="payment-row"><span class="payment-label">IBAN:</span><span class="payment-val"></span></div>
+    
+    <div class="payment-row"><span class="payment-label">Rok plaćanja</span><span class="payment-val">13.02.2025</span></div>
+  </div>
+  
+  <div class="qr-box">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALkAAAC5AQAAAABc1qPxAAACJElEQVR4nOWYMa7cOBBEX48EUJnmBhxggz3Fit/Jpj6PAdmj+Zqb7C2c7FD/ItIBDIgZBcgqB7PhB5x4Gewy7A4Kxe6qbtLEu+d2ej8O/51ENLNmSgMN3BemZGanUuAmCbhDPPdsX7hKjzLgNaSzp2NYsKXem698N/e1GDhA/Pjtt/Tn1F/o0i/H+FkiLDXulfuSp38N491EqxnoF/ugcW46KuVi4DIzJvDukbbAxM3spQw4kiQ96D20u8/hGRjKMJ9Svdh1rebccad9TcOyFdJ5zR8ngkgsv2fu0UPtm6OcyexYON8uWbaFzWy7MJWqedQ4K66VsklzDmtPtlI11xlv4Qzt3zbQ3rxT05Vi/mg166DHHYCkHRdLMe9SjX1Q7bOt0EQbPIWYn3hbvwe9pn3ZXrjOOaxVLNdwB73HtOMkKYcVr0LXzrPRacfZRQ3exbWnHLjWq9xBNefwpD/KFbNXnW+XTLv7RudqzrJ9SYXsFR3tKDquyrSjnLQXq/mJtxU0ql4a0udLekkD5UxGGnBaKxHWnhzWai5lr+igmnNHTw7aPUE7peY5ihrlonZ0ABlK6lySFNen6GbFp94KNVw0swauMxO3AGnw20upTcYEDW3tLTz22uwY/nKPYsvEincH1eykHQBPsWUCgLf104UpDejRjrEU838SOt/99gU8YaXYPEdRknuqrJUyrVTOXp8vlnagPbhDlz5fStmr/W+/RX4AfkJWmzwymcYAAAAASUVORK5CYII=" style="width:80pt;height:80pt">
+    <p>Linija plaćanja</p>
+  </div>
+  
+</div>
+
+
+
+
+<div class="note-box">Uvezeno iz Synesis arhive (2025)</div>
+
+
+<div class="footer">
+  <strong></strong> · OIB:  · IBAN:  · 
+  <br>Račun generiran: 18.03.2026 22:54 · UUID: 39bdf999-7d8d-4491-b56a-3431e93425ac
+</div>
+
+</body>
+</html>

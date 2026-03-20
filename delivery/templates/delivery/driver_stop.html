@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Stop {{ stop.stop_order }} — {{ stop.company.name }}{% endblock %}
+{% block content %}
+<style>
+.driver-wrap { max-width: 600px; margin: 0 auto; padding: 16px; }
+.driver-header { background: var(--bg-card, #141414); border-left: 5px solid #c9a84c; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.driver-header h2 { font-size: 1.3rem; font-weight: 900; margin-bottom: 4px; }
+.driver-header .meta { color: var(--text-muted, #94a3b8); font-size: .85rem; }
+.driver-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+.driver-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 16px; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; font-size: .8rem; }
+.big-input { width: 100%; background: var(--bg-main, #0a0a0a); border: 2px solid var(--border, #333); color: #c9a84c; font-size: 2.2rem; font-weight: 900; text-align: center; border-radius: 12px; padding: 16px; margin-top: 8px; -webkit-appearance: none; }
+.big-input:focus { border-color: #c9a84c; outline: none; }
+.input-label { color: var(--text-muted, #94a3b8); font-size: .85rem; font-weight: 600; display: block; margin-top: 16px; }
+.btn-massive { display: block; width: 100%; padding: 22px; font-size: 1.2rem; font-weight: 900; text-align: center; text-transform: uppercase; border-radius: 14px; border: none; cursor: pointer; text-decoration: none; letter-spacing: 1px; }
+.btn-gold { background: #c9a84c; color: #000; margin-top: 16px; }
+.btn-nav { background: #4285F4; color: #fff; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-complete { background: #22c55e; color: #fff; margin-top: 12px; }
+.btn-scan { background: #8b5cf6; color: #fff; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.rw-list { list-style: none; padding: 0; margin: 0; }
+.rw-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border: 1px solid var(--border, #222); border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+.rw-item.loaded { border-color: #22c55e; background: rgba(34,197,94,0.08); }
+.rw-badge { font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+.rw-loaded { background: rgba(34,197,94,0.15); color: #22c55e; }
+.rw-pending { background: rgba(255,255,255,0.05); color: var(--text-muted, #94a3b8); }
+.exchange-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border, #222); font-size: .9rem; }
+.balance-pos { color: #ef4444; font-weight: 700; }
+.balance-zero { color: #22c55e; font-weight: 700; }
+#offline-banner { display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#ef4444;color:#fff;text-align:center;padding:10px 16px;font-weight:700;font-size:.85rem; }
+#queue-badge { display:none;position:fixed;top:50px;right:12px;z-index:9997;background:#eab308;color:#000;padding:6px 14px;border-radius:20px;font-weight:900;font-size:.8rem; }
+.toast { position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9998;color:#fff;padding:14px 24px;border-radius:12px;font-weight:700;font-size:.95rem;box-shadow:0 4px 20px rgba(0,0,0,0.4);transition:opacity .3s;max-width:90vw;text-align:center; }
+</style>
+
+<div id="offline-banner">
+  <i class="fas fa-exclamation-triangle"></i> OFFLINE — {% trans "podaci se spremaju lokalno" %}
+</div>
+<div id="queue-badge"></div>
+
+<div class="driver-wrap">
+
+  <!-- Header -->
+  <div class="driver-header">
+    <h2>{{ stop.company.name }}</h2>
+    <div class="meta">
+      Stop {{ stop.stop_order }} &middot; {{ stop.get_stop_type_display }} &middot; {{ stop.address|truncatechars:50 }}
+      {% if stop.contact_phone %}<br><i class="fas fa-phone"></i> <a href="tel:{{ stop.contact_phone }}" style="color:#c9a84c;">{{ stop.contact_phone }}</a>{% endif %}
+    </div>
+  </div>
+
+  <!-- Rollwagen -->
+  {% if rollwagens %}
+  <div class="driver-card">
+    <h3><i class="fas fa-boxes-stacked"></i> Rollwagen ({{ rollwagens.count }})</h3>
+    <ul class="rw-list" id="rw-list">
+      {% for rw in rollwagens %}
+      <li class="rw-item {% if rw.is_loaded %}loaded{% endif %}" id="rw-{{ rw.id }}" data-qr="{{ rw.qr_code }}">
+        <div>
+          <strong>{{ rw.qr_code }}</strong>
+          <span style="color:var(--text-muted);font-size:.8rem;margin-left:8px;">#{{ rw.load_order }}</span>
+        </div>
+        <span class="rw-badge {% if rw.is_loaded %}rw-loaded{% else %}rw-pending{% endif %}">
+          {% if rw.is_loaded %}&check; Geladen{% else %}Warten{% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+    <button type="button" id="btn-scan-qr" class="btn-massive btn-scan">
+      <i class="fas fa-qrcode"></i> {% trans "SKENIRAJ QR" %}
+    </button>
+  </div>
+  {% endif %}
+
+  <!-- Ambalaza -->
+  <div class="driver-card">
+    <h3><i class="fas fa-pallet"></i> {% trans "Ambalaza" %} (Leergut)</h3>
+
+    {% if exchanges %}
+    <div id="exchanges-list" style="margin-bottom:16px;">
+      {% for ex in exchanges %}
+      <div class="exchange-row">
+        <span>{{ ex.get_packaging_type_display }}</span>
+        <span>{{ ex.delivered_qty }}&darr; {{ ex.returned_qty }}&uarr;</span>
+        <span class="{% if ex.balance > 0 %}balance-pos{% else %}balance-zero{% endif %}">
+          {% if ex.balance > 0 %}+{{ ex.balance }}{% elif ex.balance == 0 %}&check; 0{% else %}{{ ex.balance }}{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div id="exchanges-list"></div>
+    {% endif %}
+
+    <form method="post" action="{% url 'delivery:driver_packaging_save' stop_pk=stop.pk %}" enctype="multipart/form-data" data-offline="true">
+      {% csrf_token %}
+      <select name="packaging_type" class="big-input" style="font-size:1rem;text-align:left;padding:12px;">
+        <option value="ifco">IFCO Gajba</option>
+        <option value="euro_pallet">Europaleta</option>
+        <option value="chep">CHEP Paleta</option>
+        <option value="crate_plastic">Plasticna gajba</option>
+        <option value="crate_wood">Drvena gajba</option>
+        <option value="other">Ostalo</option>
+      </select>
+
+      <label class="input-label">{% trans "Dostavljeno punih" %}</label>
+      <input type="number" inputmode="numeric" name="delivered_qty" class="big-input pkg-input" value="0" min="0">
+
+      <label class="input-label">{% trans "Vraceno praznih" %}</label>
+      <input type="number" inputmode="numeric" name="returned_qty" class="big-input pkg-input" value="0" min="0">
+
+      <button type="submit" class="btn-massive btn-gold">
+        <i class="fas fa-check"></i> {% trans "Spremi ambalazu" %}
+      </button>
+    </form>
+  </div>
+
+  <!-- HACCP Primopredaja -->
+  <div class="driver-card">
+    <h3><i class="fas fa-clipboard-check"></i> {% trans "Primopredaja" %} (HACCP)</h3>
+    <form method="post" action="{% url 'delivery:driver_handoff' stop_pk=stop.pk %}" enctype="multipart/form-data" data-offline="true">
+      {% csrf_token %}
+
+      <label class="input-label">{% trans "Temperatura robe" %} (&deg;C)</label>
+      <input type="number" step="0.1" name="temperature" class="big-input" placeholder="4.2" style="font-size:1.8rem;">
+
+      <label class="input-label">{% trans "Preuzeo/la" %}</label>
+      <input type="text" name="recipient_name" class="big-input" placeholder="Ime i prezime" style="font-size:1rem;text-align:left;">
+
+      <div style="margin-top:20px;">
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.95rem;cursor:pointer;">
+          <input type="checkbox" name="packaging_intact" checked style="width:22px;height:22px;">
+          {% trans "Ambalaza neostecena" %}
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.95rem;cursor:pointer;">
+          <input type="checkbox" name="temp_in_range" checked style="width:22px;height:22px;">
+          {% trans "Temperatura u opsegu" %}
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.95rem;cursor:pointer;">
+          <input type="checkbox" name="vehicle_clean" checked style="width:22px;height:22px;">
+          {% trans "Vozilo cisto" %}
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.95rem;cursor:pointer;">
+          <input type="checkbox" name="no_cross_contamination" checked style="width:22px;height:22px;">
+          {% trans "Bez krizne kontaminacije" %}
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.95rem;cursor:pointer;">
+          <input type="checkbox" name="delivery_time_ok" checked style="width:22px;height:22px;">
+          {% trans "Dostava unutar 2h" %}
+        </label>
+      </div>
+
+      <label class="input-label">{% trans "Foto dokaz" %}</label>
+      <input type="file" name="photo" accept="image/*" capture="environment" style="margin-top:8px;color:var(--text-muted);">
+
+      <button type="submit" class="btn-massive btn-complete">
+        <i class="fas fa-check-double"></i> {% trans "POTVRDI PRIMOPREDAJU" %}
+      </button>
+    </form>
+  </div>
+
+  <!-- Navigacija -->
+  {% if stop.latitude and stop.longitude %}
+  <a href="https://www.google.com/maps/dir/?api=1&destination={{ stop.latitude }},{{ stop.longitude }}" target="_blank" class="btn-massive btn-nav">
+    <i class="fas fa-location-arrow"></i> NAVIGATION STARTEN
+  </a>
+  {% endif %}
+
+</div>
+
+<script>
+(function(){
+  /* ── Helpers ── */
+  var QUEUE_KEY = 'fina_offline_queue';
+  var banner = document.getElementById('offline-banner');
+  var badge = document.getElementById('queue-badge');
+
+  function getQueue(){ try{ return JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]'); }catch(e){ return []; } }
+  function saveQueue(q){ localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); updateBadge(); }
+  function getCsrf(){
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    if(m) return m[1];
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+  }
+
+  function showBanner(show){ banner.style.display = show ? 'block' : 'none'; }
+  if(!navigator.onLine) showBanner(true);
+  window.addEventListener('offline', function(){ showBanner(true); });
+  window.addEventListener('online', function(){ showBanner(false); });
+
+  function updateBadge(){
+    var q = getQueue();
+    var n = q.filter(function(i){ return i._driver; }).length;
+    badge.textContent = n + ' offline';
+    badge.style.display = n > 0 ? 'block' : 'none';
+  }
+  updateBadge();
+
+  function toast(msg, type){
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    t.style.background = type === 'ok' ? '#22c55e' : type === 'warn' ? '#eab308' : '#ef4444';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity = '0'; setTimeout(function(){ t.remove(); }, 300); }, 3000);
+  }
+
+  /* ── Serialize form to JSON (skip file, csrf) ── */
+  function formToJson(form){
+    var data = {};
+    for(var i = 0; i < form.elements.length; i++){
+      var el = form.elements[i];
+      if(!el.name || el.name === 'csrfmiddlewaretoken' || el.type === 'file') continue;
+      data[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+    }
+    return data;
+  }
+
+  /* ── Queue offline request ── */
+  function queueOffline(url, data){
+    var q = getQueue();
+    q.push({ url: url, method: 'POST', body: data, ts: Date.now(), _driver: true });
+    saveQueue(q);
+    var n = q.filter(function(i){ return i._driver; }).length;
+    toast('Spremljeno offline (' + n + ')', 'warn');
+  }
+
+  /* ── AJAX send ── */
+  function sendForm(url, data, hasFile, form, btn, origHTML){
+    if(hasFile){
+      var fd = new FormData(form);
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCsrf() },
+        body: fd,
+        credentials: 'same-origin'
+      });
+    }
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': getCsrf()
+      },
+      body: JSON.stringify(data),
+      credentials: 'same-origin'
+    });
+  }
+
+  /* ── Intercept all offline-enabled forms ── */
+  document.querySelectorAll('form[data-offline]').forEach(function(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var url = form.action;
+      var data = formToJson(form);
+      var fileInput = form.querySelector('input[type=file]');
+      var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+      var btn = form.querySelector('button[type=submit]');
+      var origHTML = btn.innerHTML;
+
+      if(!navigator.onLine){
+        if(hasFile) toast('Foto se ne moze poslati offline', 'warn');
+        queueOffline(url, data);
+        form.reset();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      sendForm(url, data, hasFile, form, btn, origHTML)
+        .then(function(r){
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+          if(r.ok){
+            r.json().then(function(j){
+              toast('Spremljeno!', 'ok');
+              form.reset();
+            });
+          } else {
+            toast('Greska: ' + r.status, 'err');
+          }
+        })
+        .catch(function(){
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+          queueOffline(url, data);
+          if(hasFile) toast('Foto nije poslan — sprema se bez slike', 'warn');
+        });
+    });
+  });
+
+  /* ── QR Scan button ── */
+  var scanBtn = document.getElementById('btn-scan-qr');
+  if(scanBtn){
+    scanBtn.addEventListener('click', function(){
+      var qr = prompt('QR kod rollwagena:');
+      if(!qr || !qr.trim()) return;
+      qr = qr.trim();
+
+      var scanUrl = form.action.replace(/packaging\/$/, 'scan/');
+      /* Build scan URL from current page */
+      var loc = window.location.pathname; /* e.g. /delivery/stop/5/ */
+      scanUrl = loc + (loc.endsWith('/') ? '' : '/') + 'scan/';
+
+      var payload = { qr_code: qr };
+
+      if(!navigator.onLine){
+        queueOffline(scanUrl, payload);
+        return;
+      }
+
+      fetch(scanUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCsrf()
+        },
+        body: JSON.stringify(payload),
+        credentials: 'same-origin'
+      }).then(function(r){ return r.json(); })
+        .then(function(j){
+          if(j.ok){
+            toast(qr + (j.loaded ? ' geladen' : ' entladen'), 'ok');
+            /* Update UI */
+            var items = document.querySelectorAll('.rw-item');
+            items.forEach(function(li){
+              if(li.dataset.qr === qr){
+                li.classList.toggle('loaded', j.loaded);
+                var bdg = li.querySelector('.rw-badge');
+                bdg.className = 'rw-badge ' + (j.loaded ? 'rw-loaded' : 'rw-pending');
+                bdg.innerHTML = j.loaded ? '&check; Geladen' : 'Warten';
+              }
+            });
+          } else {
+            toast(j.error || 'Nicht gefunden', 'err');
+          }
+        })
+        .catch(function(){ queueOffline(scanUrl, payload); });
+    });
+  }
+
+  /* ── Flush driver queue when back online ── */
+  function flushDriverQueue(){
+    var q = getQueue();
+    var driver = [], other = [];
+    q.forEach(function(item){ (item._driver ? driver : other).push(item); });
+    if(!driver.length) return;
+
+    toast('Saljem ' + driver.length + ' offline unos(a)...', 'warn');
+
+    var failed = [];
+    var chain = Promise.resolve();
+    driver.forEach(function(item){
+      chain = chain.then(function(){
+        return fetch(item.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCsrf()
+          },
+          body: JSON.stringify(item.body),
+          credentials: 'same-origin'
+        }).then(function(r){ if(!r.ok) failed.push(item); })
+          .catch(function(){ failed.push(item); });
+      });
+    });
+
+    chain.then(function(){
+      var sent = driver.length - failed.length;
+      saveQueue(other.concat(failed));
+      if(sent > 0) toast(sent + ' poslano!', 'ok');
+      if(failed.length) toast(failed.length + ' neuspjesno', 'err');
+      if(sent > 0) setTimeout(function(){ location.reload(); }, 1500);
+    });
+  }
+
+  window.addEventListener('online', function(){ setTimeout(flushDriverQueue, 1500); });
+  if(navigator.onLine) setTimeout(flushDriverQueue, 2000);
+
+  /* ── Enter key navigation ── */
+  var pkgInputs = document.querySelectorAll('.pkg-input');
+  pkgInputs.forEach(function(inp, i){
+    inp.addEventListener('focus', function(){ this.select(); });
+    inp.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        if(i < pkgInputs.length - 1) pkgInputs[i+1].focus();
+        else inp.closest('form').querySelector('button[type=submit]').click();
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ member.first_name }} {{ member.last_name }}{% endblock %}
+{% block page_title %}Profil člana{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0">{{ member.first_name }} {{ member.last_name }}</h2>
+    <small class="text-muted">{{ member.get_membership_type_display }} &middot; {{ member.get_status_display }}</small>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'fitness:checkin' member.pk %}" class="btn {% if is_checked_in %}btn-warning{% else %}btn-success{% endif %}">
+      <i class="fas fa-sign-{% if is_checked_in %}out{% else %}in{% endif %}-alt me-2"></i>
+      {% if is_checked_in %}Odjavi{% else %}Prijavi{% endif %}
+    </a>
+    <a href="{% url 'fitness:edit' member.pk %}" class="btn btn-outline-warning">
+      <i class="fas fa-edit me-2"></i>{% trans "Uredi" %}
+    </a>
+    <a href="{% url 'fitness:list' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
+    </a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="stat-card text-center">
+    <div class="label">{% trans "Tip članstva" %}</div>
+    <div class="fw-bold mt-1">
+      <span class="badge fs-6
+        {% if member.membership_type == 'vip' %}bg-warning text-dark
+        {% elif member.membership_type == 'premium' %}bg-danger
+        {% elif member.membership_type == 'standard' %}bg-primary
+        {% else %}bg-secondary{% endif %}">
+        {{ member.get_membership_type_display }}
+      </span>
+    </div>
+  </div></div>
+  <div class="col-md-3"><div class="stat-card text-center">
+    <div class="label">{% trans "Istječe" %}</div>
+    <div class="fw-bold mt-1 {% if member.membership_expires and member.membership_expires < today %}text-danger{% endif %}">
+      {{ member.membership_expires|date:"d.m.Y"|default:"—" }}
+    </div>
+  </div></div>
+  <div class="col-md-3"><div class="stat-card text-center">
+    <div class="label">{% trans "Posjete ovaj mj." %}</div>
+    <div class="value">{{ checkins_this_month }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="stat-card text-center">
+    <div class="label">{% trans "Status" %}</div>
+    <div class="mt-1">
+      {% if is_checked_in %}<span class="badge bg-success">{% trans "Unutra" %}</span>
+      {% else %}<span class="badge bg-secondary">{% trans "Nije prisutan" %}</span>{% endif %}
+    </div>
+  </div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="stat-card">
+      <h6 class="fw-bold mb-3">{% trans "Podaci" %}</h6>
+      <div class="row g-2 small">
+        <div class="col-6"><div class="label">{% trans "Email" %}</div><div>{% if member.email %}<a href="mailto:{{ member.email }}">{{ member.email }}</a>{% else %}—{% endif %}</div></div>
+        <div class="col-6"><div class="label">{% trans "Telefon" %}</div><div>{{ member.phone|default:"—" }}</div></div>
+        <div class="col-6"><div class="label">{% trans "RFID kartica" %}</div><div><code>{{ member.rfid_card|default:"—" }}</code></div></div>
+        <div class="col-6"><div class="label">{% trans "Datum učlanjenja" %}</div><div>{{ member.date_joined|date:"d.m.Y" }}</div></div>
+        {% if member.notes %}
+        <div class="col-12"><div class="label">{% trans "Napomene" %}</div><div class="text-muted">{{ member.notes }}</div></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="stat-card">
+      <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-info"></i>{% trans "Evidencija dolazaka" %}</h6>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead class="table-light"><tr><th>{% trans "Datum" %}</th><th>{% trans "Prijava" %}</th><th>{% trans "Odjava" %}</th><th>{% trans "Trajanje" %}</th></tr></thead>
+          <tbody>
+            {% for c in checkins %}
+            <tr>
+              <td>{{ c.check_in|date:"d.m.Y" }}</td>
+              <td>{{ c.check_in|date:"H:i" }}</td>
+              <td>{% if c.check_out %}{{ c.check_out|date:"H:i" }}{% else %}<span class="badge bg-success">{% trans "Unutra" %}</span>{% endif %}</td>
+              <td>
+                {% if c.check_out %}
+                  {% with dur=c.check_out|timeuntil:c.check_in %}{% endwith %}
+                  <small class="text-muted">—</small>
+                {% else %}—{% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">{% trans "Nema evidencije." %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

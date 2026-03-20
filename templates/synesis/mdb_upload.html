@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Synesis Online Import{% endblock %}
+
+{% block content %}
+<style>
+.mdb-wrap { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+.mdb-title { color: #c9a84c; font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+.mdb-sub { color: #999; font-size: 0.85rem; margin-bottom: 30px; }
+.upload-zone {
+    border: 2px dashed #333; border-radius: 12px; padding: 50px 30px;
+    text-align: center; background: rgba(201,168,76,0.03);
+    transition: all 0.3s; cursor: pointer; position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: #c9a84c; background: rgba(201,168,76,0.08);
+}
+.upload-zone.uploading { pointer-events: none; opacity: 0.7; }
+.upload-zone i.upload-icon { font-size: 2.5rem; color: #c9a84c; margin-bottom: 14px; display: block; }
+.upload-zone h3 { color: #e0e0e0; margin: 0 0 8px; font-size: 1rem; }
+.upload-zone p { color: #666; font-size: 0.82rem; margin: 0; }
+.upload-zone input[type="file"] {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0; cursor: pointer;
+}
+.mdb-btn {
+    background: #c9a84c; color: #0a0a0a; border: none; padding: 10px 28px;
+    border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem;
+    margin-top: 20px; display: none;
+}
+.mdb-btn:hover { background: #e0c068; }
+.mdb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.file-info {
+    background: #0f172a; border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px; padding: 12px 16px; margin-top: 16px;
+    display: none; align-items: center; gap: 12px;
+}
+.file-info .fname { color: #c9a84c; font-weight: 600; font-size: 0.9rem; }
+.file-info .fsize { color: #666; font-size: 0.78rem; }
+.file-info .fcheck { color: #10b981; font-size: 1.1rem; }
+.progress-wrap {
+    display: none; margin-top: 20px; background: #0f172a;
+    border: 1px solid rgba(201,168,76,0.2); border-radius: 10px; padding: 16px 20px;
+}
+.progress-bar-outer {
+    background: #1a1a2e; border-radius: 6px; height: 8px; overflow: hidden; margin: 10px 0;
+}
+.progress-bar-inner {
+    background: linear-gradient(90deg, #c9a84c, #e0c068);
+    height: 100%; width: 0%; transition: width 0.3s; border-radius: 6px;
+}
+.progress-text { color: #999; font-size: 0.8rem; display: flex; justify-content: space-between; }
+.progress-status { color: #c9a84c; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+.status-msg {
+    margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; display: none;
+}
+.status-msg.error { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+.status-msg.success { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.help-box {
+    background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 18px 22px; margin-top: 30px;
+}
+.help-box h4 { color: #c9a84c; font-size: 0.85rem; margin: 0 0 10px; }
+.help-box ul { margin: 0; padding-left: 18px; }
+.help-box li { color: #999; font-size: 0.8rem; margin-bottom: 6px; }
+.help-box code { background: #1a1a2e; padding: 1px 6px; border-radius: 3px; color: #c9a84c; font-size: 0.78rem; }
+</style>
+
+<div class="mdb-wrap">
+    <div class="mdb-title"><i class="fas fa-database"></i> Synesis Online Import</div>
+    <div class="mdb-sub">Uploadajte Storage.mdb iz Synesis programa za pregled i uvoz podataka u ERP</div>
+
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+        {% csrf_token %}
+        <div class="upload-zone" id="dropZone">
+            <input type="file" name="mdb_file" id="mdbFile" accept=".mdb,.accdb,.json">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <h3>Povucite Storage.mdb ili JSON export ovdje</h3>
+            <p>ili kliknite za odabir datoteke (.mdb, .json — max 200 MB)</p>
+        </div>
+
+        <div class="file-info" id="fileInfo">
+            <span class="fcheck"><i class="fas fa-check-circle"></i></span>
+            <div>
+                <div class="fname" id="fileName"></div>
+                <div class="fsize" id="fileSize"></div>
+            </div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-status" id="progressStatus">Ucitavanje...</div>
+            <div class="progress-bar-outer">
+                <div class="progress-bar-inner" id="progressBar"></div>
+            </div>
+            <div class="progress-text">
+                <span id="progressPct">0%</span>
+                <span id="progressSize">0 / 0 MB</span>
+            </div>
+        </div>
+
+        <div class="status-msg" id="statusMsg"></div>
+
+        <button type="submit" class="mdb-btn" id="uploadBtn">
+            <i class="fas fa-upload"></i> Analiziraj MDB
+        </button>
+    </form>
+
+    <div class="help-box">
+        <h4><i class="fas fa-info-circle"></i> Kako do Storage.mdb?</h4>
+        <ul>
+            <li>Otvorite Synesis mapu na racunalu klijenta</li>
+            <li>Pronadite <code>Storage.mdb</code> u mapi firme</li>
+            <li>Uploadajte datoteku ovdje za pregled partnera, artikala i dokumenata</li>
+            <li>Nakon pregleda mozete uvesti odabrane podatke u ERP</li>
+            <li>Maksimalna velicina: <strong>200 MB</strong></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+(function(){
+var dropZone = document.getElementById("dropZone");
+var fileInput = document.getElementById("mdbFile");
+var fileInfo = document.getElementById("fileInfo");
+var fileName = document.getElementById("fileName");
+var fileSize = document.getElementById("fileSize");
+var uploadBtn = document.getElementById("uploadBtn");
+var progressWrap = document.getElementById("progressWrap");
+var progressBar = document.getElementById("progressBar");
+var progressPct = document.getElementById("progressPct");
+var progressSize = document.getElementById("progressSize");
+var progressStatus = document.getElementById("progressStatus");
+var statusMsg = document.getElementById("statusMsg");
+var uploadForm = document.getElementById("uploadForm");
+var MAX_SIZE = 200 * 1024 * 1024;
+
+function fmt(b) {
+    if (b < 1024) return b + " B";
+    if (b < 1048576) return (b/1024).toFixed(1) + " KB";
+    return (b/1048576).toFixed(1) + " MB";
+}
+
+fileInput.addEventListener("change", function(){ if(this.files.length) pick(this.files[0]); });
+dropZone.addEventListener("dragover", function(e){ e.preventDefault(); dropZone.classList.add("dragover"); });
+dropZone.addEventListener("dragleave", function(){ dropZone.classList.remove("dragover"); });
+dropZone.addEventListener("drop", function(e){
+    e.preventDefault(); dropZone.classList.remove("dragover");
+    if(e.dataTransfer.files.length){ fileInput.files=e.dataTransfer.files; pick(e.dataTransfer.files[0]); }
+});
+
+function pick(f){
+    statusMsg.style.display="none";
+    if(f.size > MAX_SIZE){
+        statusMsg.className="status-msg error";
+        statusMsg.innerHTML="<i class=\"fas fa-exclamation-triangle\"></i> Datoteka prevelika! Max 200 MB, vasa: "+fmt(f.size);
+        statusMsg.style.display="block"; uploadBtn.style.display="none"; return;
+    }
+    var ext=f.name.toLowerCase();
+    if(!ext.endsWith(".mdb") && !ext.endsWith(".accdb") && !ext.endsWith(".json")){
+        statusMsg.className="status-msg error";
+        statusMsg.innerHTML="<i class=\"fas fa-exclamation-triangle\"></i> Samo .mdb, .accdb i .json datoteke.";
+        statusMsg.style.display="block"; uploadBtn.style.display="none"; return;
+    }
+    fileName.textContent=f.name; fileSize.textContent=fmt(f.size);
+    fileInfo.style.display="flex"; uploadBtn.style.display="inline-block";
+}
+
+uploadForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(!fileInput.files[0]) return;
+    uploadBtn.disabled=true;
+    uploadBtn.innerHTML="<i class=\"fas fa-spinner fa-spin\"></i> Ucitavanje...";
+    dropZone.classList.add("uploading");
+    progressWrap.style.display="block";
+    statusMsg.style.display="none";
+
+    var fd=new FormData(uploadForm);
+    var xhr=new XMLHttpRequest();
+
+    xhr.upload.addEventListener("progress", function(ev){
+        if(!ev.lengthComputable) return;
+        var pct=Math.round(ev.loaded/ev.total*100);
+        progressBar.style.width=pct+"%";
+        progressPct.textContent=pct+"%";
+        progressSize.textContent=fmt(ev.loaded)+" / "+fmt(ev.total);
+        progressStatus.textContent = pct<100 ? "Ucitavanje datoteke..." : "Obrada MDB baze — molimo pricekajte...";
+    });
+
+    xhr.addEventListener("load", function(){
+        if(xhr.status>=200 && xhr.status<400){
+            progressStatus.textContent="Gotovo! Preusmjeravanje na pregled...";
+            progressBar.style.width="100%";
+            progressBar.style.background="linear-gradient(90deg, #10b981, #34d399)";
+            setTimeout(function(){
+                window.location.href = xhr.responseURL || window.location.href.replace("upload/","preview/");
+            }, 500);
+        } else {
+            fail("Greska "+xhr.status+": "+(xhr.statusText||"Upload nije uspio"));
+        }
+    });
+    xhr.addEventListener("error", function(){ fail("Mrezna greska — provjerite vezu i pokusajte ponovo."); });
+    xhr.addEventListener("timeout", function(){ fail("Timeout — datoteka prevelika ili spori server."); });
+
+    function fail(msg){
+        progressWrap.style.display="none";
+        statusMsg.className="status-msg error";
+        statusMsg.innerHTML="<i class=\"fas fa-exclamation-triangle\"></i> "+msg;
+        statusMsg.style.display="block";
+        uploadBtn.disabled=false;
+        uploadBtn.innerHTML="<i class=\"fas fa-upload\"></i> Analiziraj MDB";
+        dropZone.classList.remove("uploading");
+    }
+
+    xhr.open("POST", uploadForm.action||window.location.href);
+    xhr.timeout=300000;
+    xhr.send(fd);
+});
+})();
+</script>
+{% endblock %}

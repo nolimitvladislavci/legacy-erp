@@ -1,0 +1,58 @@
+/* ==========================================================================
+   VISKOVIĆ GROUP ERP - GLOBAL THEMES
+   Ova datoteka sadrži sve CSS varijable za teme. Ne definirajte ih u HTML-u!
+   ========================================================================== */
+
+/* 1. DEFAULT THEME (Dark / Gold - Visković Premium) */
+:root {
+    --gold: #c9a84c;
+    --gold2: #e8c96a; /* Svjetlija varijanta za hover */
+    --gold-dim: rgba(201, 168, 76, 0.12);
+    --gold-border: rgba(201, 168, 76, 0.28);
+    
+    --black: #0a0a0a;
+    --white: #f0ede8;
+    --dark: #111214;
+    --surface: #181a1d;
+    --surface2: #1e293b;
+    --surface3: #22222c;
+    
+    --border: #252830;
+    --border-light: rgba(255, 255, 255, 0.08);
+    
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --muted: #4a5060;
+    
+    --green: #10b981;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+    
+    /* Fontovi */
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-body: 'Barlow', sans-serif;
+    --font-ui: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* 2. PRIPREMA ZA BUDUĆE TEME (Može se aktivirati dodavanjem data-theme="light" na <html>) */
+html[data-theme="light"] {
+    --gold: #b8962e;
+    --gold-dim: rgba(184, 150, 46, 0.1);
+    
+    --black: #f8fafc;
+    --dark: #f1f5f9;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --surface3: #e2e8f0;
+    
+    --border: #cbd5e1;
+    --border-light: rgba(0, 0, 0, 0.1);
+    
+    --text: #0f172a;
+    --text-dim: #475569;
+    --muted: #94a3b8;
+}

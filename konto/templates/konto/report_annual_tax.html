@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Godišnji porez – LIMIT CONNECT{% endblock %}
+{% block page_title %}Godišnji porez na dohodak / Jahressteuererklärung{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover,.k-nav a.active{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace}
+.k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end}
+.k-filter .fld{display:flex;flex-direction:column;gap:3px}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
+.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.tax-row{display:flex;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(51,65,85,.4)}
+.tax-row:last-child{border-bottom:none}
+.tax-row .label{color:#94a3b8;font-size:.85rem}
+.tax-row .val{font-family:'IBM Plex Mono',monospace;font-weight:700}
+.tax-total{display:flex;justify-content:space-between;padding:14px 16px;background:#0f172a;border-top:2px solid #c9a84c}
+.tax-total .label{font-weight:700;font-size:.9rem}
+.tax-total .val{font-family:'IBM Plex Mono',monospace;font-size:1.3rem;font-weight:800;color:#c9a84c}
+</style>
+
+<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">← Dashboard</a></div>
+
+<div class="k-nav">
+  <a href="{% url 'konto:report_pnl' %}">P&amp;L</a>
+  <a href="{% url 'konto:report_balance_sheet' %}">Bilanca</a>
+  <a href="{% url 'konto:report_receivables' %}">Potraživanja</a>
+  <a href="{% url 'konto:report_vat' %}">PDV Prijava</a>
+  <a href="{% url 'konto:report_annual_tax' %}" class="active">Godišnji porez</a>
+  <a href="{% url 'konto:report_euer' %}">EÜR</a>
+</div>
+
+{% if error %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#ef4444;font-size:.85rem">{{ error }}</div>
+{% endif %}
+
+<form method="get" class="k-filter">
+  <div class="fld">
+    <label>Godina</label>
+    <select name="year">{% for y in years %}<option {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+  </div>
+  <input type="hidden" name="calc" value="1">
+  <button type="submit" class="k-btn k-btn-gold" style="align-self:flex-end">Izračunaj</button>
+</form>
+
+{% if summary %}
+<!-- SUMMARY STATS -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+  <div class="k-stat">
+    <div><div class="lbl">Bruto prihod</div><div class="num" style="color:#22c55e">{{ summary.gross_revenue|floatformat:2 }} €</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Ukupni rashodi</div><div class="num" style="color:#ef4444">{{ summary.total_expenses|floatformat:2 }} €</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Oporezivi dohodak</div><div class="num" style="color:#c9a84c">{{ summary.taxable_income|floatformat:2 }} €</div></div>
+  </div>
+</div>
+
+<div class="k-card">
+  <div class="k-card-head"><h3>{{ summary.country }} — Obračun poreza {{ year }}</h3></div>
+
+  {% if summary.country == 'HR' %}
+  <div class="tax-row"><span class="label">Porezna osnovica (dohodak)</span><span class="val">{{ summary.taxable_income|floatformat:2 }} €</span></div>
+  <div class="tax-row"><span class="label">Porez na dohodak (20%/30%)</span><span class="val" style="color:#f59e0b">{{ summary.income_tax_base|floatformat:2 }} €</span></div>
+  <div class="tax-row"><span class="label">Prirez ({{ summary.prirez_rate_pct|floatformat:0 }}%)</span><span class="val" style="color:#f59e0b">{{ summary.prirez|floatformat:2 }} €</span></div>
+  {% else %}
+  <div class="tax-row"><span class="label">Grundfreibetrag</span><span class="val">{{ summary.grundfreibetrag|floatformat:2 }} €</span></div>
+  <div class="tax-row"><span class="label">Einkommensteuer</span><span class="val" style="color:#f59e0b">{{ summary.einkommensteuer|floatformat:2 }} €</span></div>
+  <div class="tax-row"><span class="label">Solidaritätszuschlag (5.5%)</span><span class="val" style="color:#f59e0b">{{ summary.solidaritaetszuschlag|floatformat:2 }} €</span></div>
+  <div class="tax-row"><span class="label">Gewerbesteuer ({{ summary.hebesatz_pct|floatformat:0 }}% Hebesatz)</span><span class="val" style="color:#f59e0b">{{ summary.gewerbesteuer|floatformat:2 }} €</span></div>
+  {% endif %}
+
+  <div class="tax-total">
+    <span class="label">UKUPAN POREZ ZA UPLATU</span>
+    <span class="val">{{ summary.total_tax_due|floatformat:2 }} €</span>
+  </div>
+</div>
+
+<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:12px 16px;font-size:.82rem;color:#64748b">
+  <strong style="color:#94a3b8">Napomena:</strong>
+  Ovaj izračun je <em>procjena</em> temeljena na računima i konto knjiženjima.
+  Za konačnu poreznu prijavu obratite se ovlaštenom računovodstvenom uredu.
+  {% if summary.country == 'DE' %}
+  Efektivna stopa: {{ summary.effective_rate_pct|floatformat:1 }}%.
+  Gewerbesteuer Hebesatz: {{ summary.hebesatz_pct|floatformat:0 }}%.
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

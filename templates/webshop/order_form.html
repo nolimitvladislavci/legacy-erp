@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-shopping-cart me-2 text-primary"></i>{{ action }}</h2>
+  <a href="{% url 'webshop:order_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
+  </a>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="stat-card mb-3">
+        <h6 class="fw-bold mb-3">{% trans "Stavke narudžbe" %}</h6>
+        <div id="items-container">
+          <div class="row g-2 mb-2 item-row">
+            <div class="col-md-7">
+              <select name="product_id" class="form-select form-select-sm">
+                <option value="">{% trans "-- odaberi proizvod --" %}</option>
+                {% for p in products %}
+                <option value="{{ p.pk }}" data-price="{{ p.price }}">{{ p.name }} – {{ p.price|floatformat:2 }} €</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="number" name="quantity" class="form-control form-control-sm" placeholder="{% trans "Kol." %}" value="1" min="1">
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="removeRow(this)">✕</button>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addRow()">
+          <i class="fas fa-plus me-1"></i>{% trans "Dodaj stavku" %}
+        </button>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card mb-3">
+        <h6 class="fw-bold mb-3">{% trans "Kupac i dostava" %}</h6>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Kupac *" %}</label>
+          <select name="customer" class="form-select" required>
+            <option value="">{% trans "-- odaberi kupca --" %}</option>
+            {% for c in customers %}
+            <option value="{{ c.pk }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Status" %}</label>
+          <select name="status" class="form-select">
+            {% for val,label in status_choices %}
+            <option value="{{ val }}" {% if val == "confirmed" %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Način dostave" %}</label>
+          <select name="shipping_method" class="form-select">
+            {% for val,label in shipping_choices %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Adresa dostave" %}</label>
+          <textarea name="shipping_address" class="form-control form-control-sm" rows="2"></textarea>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Napomene" %}</label>
+          <textarea name="notes" class="form-control form-control-sm" rows="2"></textarea>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 py-2">
+        <i class="fas fa-check me-2"></i>{% trans "Kreiraj narudžbu" %}
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+{% block extra_js %}
+<script>
+function addRow() {
+  var template = document.querySelector('.item-row').cloneNode(true);
+  template.querySelectorAll('select, input[type=number]').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '1';
+  });
+  document.getElementById('items-container').appendChild(template);
+}
+function removeRow(btn) {
+  var rows = document.querySelectorAll('.item-row');
+  if (rows.length > 1) btn.closest('.item-row').remove();
+}
+</script>
+{% endblock %}

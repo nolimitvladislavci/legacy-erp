@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ prop.name }}{% endblock %}
+{% block page_title %}{{ prop.name }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0">{{ prop.name }}</h2>
+    <small class="text-muted">{{ prop.get_type_display }}
+      {% if prop.location %} &middot; {{ prop.location }}{% endif %}
+    </small>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'rental:booking_create_for' prop.pk %}" class="btn btn-success">
+      <i class="fas fa-calendar-plus me-2"></i>{% trans "Nova rezervacija" %}
+    </a>
+    <a href="{% url 'rental:property_edit' prop.pk %}" class="btn btn-warning">
+      <i class="fas fa-edit me-2"></i>{% trans "Uredi" %}
+    </a>
+    <a href="{% url 'rental:property_list' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
+    </a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3">
+    <div class="stat-card text-center">
+      <div class="label">{% trans "Cijena" %}</div>
+      <div class="value text-primary">{{ prop.price_per_day|floatformat:2 }} €</div>
+      <small class="text-muted">{% trans "po danu" %}</small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card text-center">
+      <div class="label">{% trans "Status" %}</div>
+      {% if prop.is_available %}
+        <div class="value text-success" style="font-size:1.2rem">{% trans "Dostupno" %}</div>
+      {% else %}
+        <div class="value text-danger" style="font-size:1.2rem">{% trans "Zauzeto" %}</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card text-center">
+      <div class="label">{% trans "Aktivne rez." %}</div>
+      <div class="value">{{ active_bookings.count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card text-center">
+      <div class="label">{% trans "Smart Lock" %}</div>
+      <div style="font-size:0.9rem;font-weight:600">{{ prop.smart_lock_id|default:"—" }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="stat-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold mb-0"><i class="fas fa-calendar me-2 text-primary"></i>{% trans "Rezervacije" %}</h6>
+    <a href="{% url 'rental:booking_create_for' prop.pk %}" class="btn btn-sm btn-primary">{% trans "+ Nova" %}</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>{% trans "Gost" %}</th><th>{% trans "Email / Tel" %}</th><th>{% trans "Od" %}</th><th>{% trans "Do" %}</th><th class="text-end">{% trans "Cijena" %}</th><th>{% trans "Kod" %}</th><th>{% trans "Status" %}</th></tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+        <tr>
+          <td class="fw-semibold">{{ b.guest_name }}</td>
+          <td class="small text-muted">
+            {% if b.guest_email %}{{ b.guest_email }}<br>{% endif %}
+            {{ b.guest_phone|default:"" }}
+          </td>
+          <td>{{ b.start_date|date:"d.m.Y" }}</td>
+          <td>{{ b.end_date|date:"d.m.Y" }}</td>
+          <td class="text-end fw-bold">{{ b.total_price|floatformat:2 }} €</td>
+          <td><code class="small">{{ b.access_code|default:"—" }}</code></td>
+          <td>
+            {% if b.status == "active" %}<span class="badge bg-success">{% trans "Aktivan" %}</span>
+            {% elif b.status == "confirmed" %}<span class="badge bg-primary">{% trans "Potvrđeno" %}</span>
+            {% elif b.status == "pending" %}<span class="badge bg-warning text-dark">{% trans "Na čekanju" %}</span>
+            {% elif b.status == "completed" %}<span class="badge bg-secondary">{% trans "Završeno" %}</span>
+            {% else %}<span class="badge bg-danger">{% trans "Otkazano" %}</span>{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-3">{% trans "Nema rezervacija." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

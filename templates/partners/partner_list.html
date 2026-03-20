@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Partneri{% endblock %}
+{% block page_title %}Partneri{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-handshake me-2 text-primary"></i>{% trans "Partneri" %}</h2>
+    <small class="text-muted">{{ total }} ukupno</small>
+  </div>
+  <a href="{% url 'partners:create' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>{% trans "Novi partner" %}</a>
+</div>
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, email, OIB, grad...">
+    </div>
+    <div class="col-md-2">
+      <select name="type" class="form-select">
+        <option value="">{% trans "Svi tipovi" %}</option>
+        {% for val,label in type_choices %}
+        <option value="{{ val }}" {% if ptype == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="active" class="form-select">
+        <option value="">{% trans "Aktivan/Neaktivan" %}</option>
+        <option value="1" {% if active == "1" %}selected{% endif %}>{% trans "Samo aktivni" %}</option>
+        <option value="0" {% if active == "0" %}selected{% endif %}>{% trans "Samo neaktivni" %}</option>
+      </select>
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
+      <a href="{% url 'partners:list' %}" class="btn btn-outline-secondary">{% trans "Reset" %}</a>
+    </div>
+  </form>
+</div>
+
+<div class="stat-card p-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>{% trans "Naziv" %}</th><th>{% trans "Tip" %}</th><th>{% trans "Grad" %}</th><th>{% trans "Email / Telefon" %}</th>
+          <th class="text-end">{% trans "Saldo" %}</th><th>{% trans "Status" %}</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in page_obj %}
+        <tr>
+          <td>
+            <a href="{% url 'partners:detail' p.pk %}" class="fw-bold text-decoration-none text-dark">{{ p.name }}</a>
+            {% if not p.is_complete %}<span class="badge bg-warning text-dark ms-1" style="font-size:.6rem">Nepotpun</span>{% endif %}
+            {% if p.oib %}<br><small class="text-muted">OIB: {{ p.oib }}</small>{% endif %}
+          </td>
+          <td>
+            {% if p.partner_type == 'client' %}<span class="badge bg-primary">{{ p.get_partner_type_display }}</span>
+            {% elif p.partner_type == 'supplier' %}<span class="badge bg-warning text-dark">{{ p.get_partner_type_display }}</span>
+            {% elif p.partner_type == 'employee' %}<span class="badge bg-info text-dark">{{ p.get_partner_type_display }}</span>
+            {% else %}<span class="badge bg-secondary">{{ p.get_partner_type_display }}</span>{% endif %}
+          </td>
+          <td>{{ p.city|default:"-" }}</td>
+          <td>
+            {% if p.email %}<div><a href="mailto:{{ p.email }}" class="text-muted small">{{ p.email }}</a></div>{% endif %}
+            {% if p.phone %}<div class="small text-muted">{{ p.phone }}</div>{% endif %}
+          </td>
+          <td class="text-end fw-bold {% if p.cached_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+            {{ p.cached_balance|floatformat:2 }} €
+          </td>
+          <td>{% if p.is_active %}<span class="badge bg-success">{% trans "Aktivan" %}</span>
+          {% else %}<span class="badge bg-danger">{% trans "Neaktivan" %}</span>{% endif %}</td>
+          <td>
+            <a href="{% url 'partners:edit' p.pk %}" class="btn btn-sm btn-outline-warning me-1"><i class="fas fa-edit"></i></a>
+            <a href="{% url 'partners:delete' p.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center py-5">
+          {% include "includes/empty_state.html" with
+              icon="fas fa-handshake"
+              title="Nemate partnera"
+              message="Dodajte poslovne partnere — klijente i dobavljače."
+              action_url="/partners/create/"
+              action_text="Dodaj prvog partnera"
+          %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3"><ul class="pagination pagination-sm">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&type={{ ptype }}">«</a></li>{% endif %}
+  <li class="page-item active"><a class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&type={{ ptype }}">»</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

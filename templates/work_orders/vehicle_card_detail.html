@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ vehicle }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="mb-0">
+      <i class="fas fa-car me-2 text-info"></i>
+      {{ vehicle.make }} {{ vehicle.model }}
+      <span class="badge bg-secondary ms-2">{{ vehicle.registration_plate }}</span>
+    </h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'work_orders:vehicle_edit' vehicle.pk %}" class="btn btn-sm btn-outline-warning">
+        <i class="fas fa-edit me-1"></i>Uredi
+      </a>
+      <a href="{% url 'work_orders:create' %}?client={{ vehicle.client_id }}" class="btn btn-sm btn-warning">
+        <i class="fas fa-plus me-1"></i>Novi nalog
+      </a>
+      <a href="{% url 'work_orders:vehicle_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Natrag
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-5">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-info fw-bold">Podaci vozila</div>
+        <div class="card-body">
+          <dl class="row mb-0" style="font-size:.9rem">
+            <dt class="col-5 text-muted">Vlasnik</dt>
+            <dd class="col-7">{{ vehicle.client.name }}</dd>
+            <dt class="col-5 text-muted">Marka/Model</dt>
+            <dd class="col-7">{{ vehicle.make }} {{ vehicle.model }}</dd>
+            <dt class="col-5 text-muted">Godište</dt>
+            <dd class="col-7">{{ vehicle.year|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Registracija</dt>
+            <dd class="col-7">{{ vehicle.registration_plate }}</dd>
+            <dt class="col-5 text-muted">VIN</dt>
+            <dd class="col-7">{{ vehicle.vin|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Motor</dt>
+            <dd class="col-7">{{ vehicle.engine_type|default:"—" }}</dd>
+            <dt class="col-5 text-muted">Kilometraža</dt>
+            <dd class="col-7">{{ vehicle.mileage }} km</dd>
+            <dt class="col-5 text-muted">Boja</dt>
+            <dd class="col-7">{{ vehicle.color|default:"—" }}</dd>
+          </dl>
+          {% if vehicle.notes %}
+          <hr class="border-secondary">
+          <p class="small text-muted">{{ vehicle.notes }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-7">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-warning fw-bold">Radni nalozi (posljednjih 10)</div>
+        <div class="card-body p-0">
+          <table class="table table-dark table-hover table-sm align-middle mb-0">
+            <thead><tr><th>Broj</th><th>Datum</th><th>Status</th><th class="text-end">Bruto</th></tr></thead>
+            <tbody>
+              {% for wo in work_orders %}
+              <tr>
+                <td><a href="{% url 'work_orders:detail' wo.pk %}" class="text-warning">{{ wo.order_number }}</a></td>
+                <td>{{ wo.date }}</td>
+                <td><span class="badge" style="background:{{ wo.status_color }}">{{ wo.get_status_display }}</span></td>
+                <td class="text-end">{{ wo.total_gross|floatformat:2 }} €</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-2">Nema naloga.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

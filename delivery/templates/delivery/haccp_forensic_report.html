@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HACCP Schadensprotokoll #{{ incident.id }}</title>
+<style>
+@page { size: A4 portrait; margin: 15mm; }
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #1a1a1a; background: #fff; line-height: 1.5; }
+
+.toolbar { padding: 12px 20px; background: #0a0a0a; display: flex; gap: 12px; align-items: center; }
+.toolbar button { padding: 10px 20px; font-size: 13px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; }
+.btn-print { background: #c9a84c; color: #000; }
+.btn-back { background: #333; color: #fff; }
+
+.report { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+.header { border: 3px solid #dc3545; padding: 20px; margin-bottom: 20px; }
+.header h1 { font-size: 18px; color: #dc3545; margin-bottom: 8px; letter-spacing: 1px; }
+.header .subtitle { font-size: 12px; color: #666; }
+.severity-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+.severity-blocked { background: #dc3545; color: #fff; }
+.severity-critical { background: #f59e0b; color: #000; }
+.severity-warning { background: #3b82f6; color: #fff; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.info-box { border: 1px solid #ddd; padding: 12px; border-radius: 4px; }
+.info-box .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; }
+.info-box .value { font-size: 14px; font-weight: 700; margin-top: 2px; }
+
+.section { margin-bottom: 20px; }
+.section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 6px; margin-bottom: 12px; }
+
+table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: center; font-size: 10px; }
+th { background: #f8f8f8; font-weight: 700; font-size: 9px; text-transform: uppercase; letter-spacing: .5px; }
+.temp-alert { color: #dc3545; font-weight: 700; }
+.temp-ok { color: #22c55e; }
+
+.seal-box { background: #f4f4f4; padding: 15px; border-left: 5px solid #6c757d; font-family: 'Courier New', monospace; font-size: 10px; word-break: break-all; margin-bottom: 20px; }
+.seal-box strong { font-size: 11px; display: block; margin-bottom: 6px; }
+
+.timeline { position: relative; padding-left: 24px; }
+.timeline-item { position: relative; padding-bottom: 16px; padding-left: 16px; border-left: 2px solid #ddd; }
+.timeline-item:last-child { border-left: 2px solid transparent; }
+.timeline-item::before { content: ''; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; }
+.timeline-item.alert::before { background: #dc3545; }
+.timeline-item.ok::before { background: #22c55e; }
+.timeline-item .time { font-size: 10px; font-weight: 700; color: #555; }
+.timeline-item .temp { font-size: 13px; font-weight: 900; }
+
+.resolution { border: 2px solid #22c55e; padding: 16px; border-radius: 4px; background: #f0fdf4; }
+.resolution h4 { color: #22c55e; margin-bottom: 8px; }
+
+.legal { margin-top: 20px; font-size: 8px; color: #999; border-top: 1px solid #eee; padding-top: 8px; }
+
+.sig-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-top: 40px; }
+.sig-line { border-top: 1px solid #000; text-align: center; padding-top: 4px; font-size: 9px; }
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <button class="btn-back" onclick="history.back()">&#8592; Natrag</button>
+  <button class="btn-print" onclick="window.print()">&#128424; Drucken / Ispis</button>
+  <span style="color:#c9a84c;font-weight:700;margin-left:auto;">HACCP FORENSIC REPORT #{{ incident.id }}</span>
+</div>
+
+<div class="report">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>&#9888; HACCP SCHADENSPROTOKOLL / PROTOKOL O PREKIDU HLADNOG LANCA</h1>
+    <div class="subtitle">
+      EU 852/2004 | HR NN 81/13 | Automatski generirano: {{ generated_at|date:"d.m.Y H:i:s" }}
+    </div>
+    <div style="margin-top:12px;">
+      <span class="severity-badge severity-{{ incident.severity }}">{{ incident.get_severity_display }}</span>
+      <span class="severity-badge" style="background:#333;color:#fff;margin-left:8px;">{{ incident.get_incident_type_display }}</span>
+    </div>
+  </div>
+
+  <!-- Info Grid -->
+  <div class="info-grid">
+    <div class="info-box">
+      <div class="label">SmartBox ID</div>
+      <div class="value">{{ box.box_id|default:"N/A" }}</div>
+    </div>
+    <div class="info-box">
+      <div class="label">Tvrtka / Unternehmen</div>
+      <div class="value">{{ company_name }}</div>
+    </div>
+    <div class="info-box">
+      <div class="label">Pocetak prekrsaja / Beginn</div>
+      <div class="value">{{ incident.breach_start|date:"d.m.Y H:i" }}</div>
+    </div>
+    <div class="info-box">
+      <div class="label">Kraj prekrsaja / Ende</div>
+      <div class="value">{% if incident.breach_end %}{{ incident.breach_end|date:"d.m.Y H:i" }}{% else %}JOS TRAJE{% endif %}</div>
+    </div>
+    <div class="info-box">
+      <div class="label">Max temperatura</div>
+      <div class="value temp-alert">{{ incident.max_temperature }} &deg;C</div>
+    </div>
+    <div class="info-box">
+      <div class="label">Trajanje / Dauer</div>
+      <div class="value">{{ incident.duration_minutes }} min</div>
+    </div>
+    <div class="info-box">
+      <div class="label">Dozvoljeni opseg / Zulassig</div>
+      <div class="value">{% if box %}{{ box.target_min_temp }}&deg;C — {{ box.target_max_temp }}&deg;C{% else %}2&deg;C — 8&deg;C{% endif %}</div>
+    </div>
+    <div class="info-box">
+      <div class="label">Vozac / Fahrer</div>
+      <div class="value">{{ driver_name|default:"Nije dodijeljen" }}</div>
+    </div>
+  </div>
+
+  <!-- Sensor Timeline -->
+  <div class="section">
+    <h3>Senzorski zapis / Sensorprotokoll ({{ total_readings }} ocitanja)</h3>
+    {% if readings %}
+    <table>
+      <thead>
+        <tr>
+          <th>Vrijeme / Zeit</th>
+          <th>Temperatura (&deg;C)</th>
+          <th>GPS</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in readings %}
+        <tr>
+          <td>{{ r.timestamp|date:"d.m.Y H:i:s" }}</td>
+          <td class="{% if r.temperature > box.target_max_temp %}temp-alert{% else %}temp-ok{% endif %}" style="font-weight:700;">
+            {{ r.temperature }} &deg;C
+          </td>
+          <td>{% if r.latitude %}{{ r.latitude }}, {{ r.longitude }}{% else %}—{% endif %}</td>
+          <td>{% if r.temperature > box.target_max_temp %}&#9888; ALARM{% else %}&#10003; OK{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#888;">Nema dostupnih ocitanja za ovaj incident.</p>
+    {% endif %}
+  </div>
+
+  <!-- Opis incidenta -->
+  <div class="section">
+    <h3>Opis incidenta / Vorfallbeschreibung</h3>
+    <p style="font-size:12px;line-height:1.6;">{{ incident.description }}</p>
+  </div>
+
+  <!-- Resolution -->
+  {% if incident.is_resolved %}
+  <div class="resolution">
+    <h4>&#10003; RAZRIJESENO / GEL&Ouml;ST</h4>
+    <p><strong>Razrijesio/la:</strong> {{ incident.resolved_by.get_full_name|default:incident.resolved_by.username }}</p>
+    <p><strong>Datum:</strong> {{ incident.resolved_at|date:"d.m.Y H:i" }}</p>
+    <p><strong>Poduzete mjere / Ma&szlig;nahmen:</strong></p>
+    <p style="font-size:12px;margin-top:4px;">{{ incident.resolution_note }}</p>
+  </div>
+  {% else %}
+  <div style="border:2px solid #dc3545;padding:16px;border-radius:4px;background:#fef2f2;">
+    <h4 style="color:#dc3545;">&#9888; NERAZRIJESENO — CEKA AKCIJU DISPATCHERA</h4>
+  </div>
+  {% endif %}
+
+  <!-- Digital Seal -->
+  <div class="section" style="margin-top:20px;">
+    <h3>Kriptografski pecat / Digitale Signatur (SHA-256)</h3>
+    <div class="seal-box">
+      <strong>INTEGRITETNI HASH:</strong>
+      {{ digital_seal }}
+    </div>
+    <p style="font-size:9px;color:#888;">
+      Ovaj hash garantira da senzorski podaci nisu naknadno mijenjani u bazi podataka.
+      Za verifikaciju: SHA-256(senzor_podaci + incident_id + box_id + breach_start + max_temp).
+    </p>
+  </div>
+
+  <!-- Potpisi -->
+  <div class="sig-grid">
+    <div>
+      <div class="sig-line">Vozac / Fahrer</div>
+    </div>
+    <div>
+      <div class="sig-line">Dispatcher / Leitung</div>
+    </div>
+    <div>
+      <div class="sig-line">Inspektor / Pr&uuml;fer</div>
+    </div>
+  </div>
+
+  <!-- Legal -->
+  <div class="legal">
+    <strong>Pravna osnova / Rechtsgrundlage:</strong>
+    EU Uredba 852/2004 o higijeni hrane, Poglavlje IX — Transport;
+    HR Pravilnik NN 81/13 o higijeni hrane;
+    DE LMHV &sect;3 Allgemeine Hygieneanforderungen.
+    Ovaj dokument je automatski generiran iz LIMIT Connect ERP sustava i sluzi kao dokazni materijal za inspekciju i osiguravajuce kuce.
+  </div>
+
+</div>
+</body>
+</html>

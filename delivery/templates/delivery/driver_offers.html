@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Dostupne voznje" %}{% endblock %}
+{% block content %}
+<style>
+.offers-wrap { max-width: 600px; margin: 0 auto; padding: 16px; }
+.offer-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.offer-card.active { border-left: 4px solid #22c55e; }
+.offer-price { font-size: 2rem; font-weight: 900; color: #c9a84c; }
+.offer-meta { color: var(--text-muted, #94a3b8); font-size: .85rem; margin-top: 8px; }
+.offer-badges { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.badge-cold { background: rgba(59,130,246,0.15); color: #3b82f6; padding: 4px 10px; border-radius: 8px; font-size: .75rem; font-weight: 700; }
+.badge-stops { background: rgba(201,168,76,0.15); color: #c9a84c; padding: 4px 10px; border-radius: 8px; font-size: .75rem; font-weight: 700; }
+.badge-km { background: rgba(255,255,255,0.05); color: var(--text-muted); padding: 4px 10px; border-radius: 8px; font-size: .75rem; font-weight: 700; }
+.btn-accept { display: block; width: 100%; padding: 16px; background: #22c55e; color: #fff; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 900; text-transform: uppercase; cursor: pointer; margin-top: 16px; }
+.btn-accept:disabled { opacity: 0.5; }
+.section-title { font-size: .8rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 12px; }
+#offline-banner { display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#ef4444;color:#fff;text-align:center;padding:10px 16px;font-weight:700;font-size:.85rem; }
+.toast { position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9998;color:#fff;padding:14px 24px;border-radius:12px;font-weight:700;font-size:.95rem;box-shadow:0 4px 20px rgba(0,0,0,0.4);transition:opacity .3s;max-width:90vw;text-align:center; }
+</style>
+
+<div id="offline-banner">
+  <i class="fas fa-exclamation-triangle"></i> OFFLINE
+</div>
+
+<div class="offers-wrap">
+  <h2 style="font-weight:900;margin-bottom:4px;">&#x1F695; {% trans "Dostupne voznje" %}</h2>
+  <p style="color:var(--text-muted);font-size:.9rem;">{% trans "Prihvatite ponudu i pokupite robu na hub-u" %}</p>
+
+  {% if my_active %}
+  <div class="section-title">{% trans "Vase aktivne voznje" %}</div>
+  {% for offer in my_active %}
+  <div class="offer-card active">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <strong>{{ offer.consolidated_delivery.hub_company.name }}</strong>
+        <div class="offer-meta">{{ offer.pickup_address|truncatechars:40 }}</div>
+      </div>
+      <div class="offer-price">{{ offer.driver_earnings }}&euro;</div>
+    </div>
+    <div class="offer-badges">
+      <span class="badge-stops">{{ offer.estimated_stops }} {% trans "stanica" %}</span>
+      <span class="badge-km">~{{ offer.estimated_km }}km</span>
+      {% if offer.requires_cold_chain %}<span class="badge-cold">&#10052; {% trans "Hladni lanac" %}</span>{% endif %}
+    </div>
+    <a href="{% url 'delivery:consolidated_detail' pk=offer.consolidated_delivery.pk %}" class="btn-accept" style="background:#c9a84c;color:#000;text-align:center;text-decoration:none;">{% trans "Otvori rutu" %} &rarr;</a>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if available %}
+  <div class="section-title">{% trans "Nove ponude" %}</div>
+  {% for offer in available %}
+  <div class="offer-card" id="offer-{{ offer.pk }}">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <strong>{{ offer.consolidated_delivery.hub_company.name }}</strong>
+        <div class="offer-meta">{{ offer.pickup_address|truncatechars:40 }}</div>
+        {% if offer.expires_at %}<div style="color:#ef4444;font-size:.78rem;margin-top:4px;">&#9200; {% trans "Istjece" %}: {{ offer.expires_at|date:"H:i" }}</div>{% endif %}
+      </div>
+      <div class="offer-price">{{ offer.driver_earnings }}&euro;</div>
+    </div>
+    <div class="offer-badges">
+      <span class="badge-stops">{{ offer.estimated_stops }} {% trans "stanica" %}</span>
+      <span class="badge-km">~{{ offer.estimated_km }}km</span>
+      {% if offer.requires_cold_chain %}<span class="badge-cold">&#10052; {% trans "Hladni lanac" %}</span>{% endif %}
+    </div>
+    <button type="button" class="btn-accept btn-accept-offer"
+            data-url="{% url 'delivery:driver_accept_offer' pk=offer.pk %}"
+            data-id="{{ offer.pk }}"
+            data-price="{{ offer.driver_earnings }}">
+      {% trans "PRIHVATI" %} &mdash; {{ offer.driver_earnings }}&euro;
+    </button>
+  </div>
+  {% empty %}
+  <div style="text-align:center;padding:40px;color:var(--text-muted);">{% trans "Trenutno nema dostupnih ponuda." %}</div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<script>
+(function(){
+  var banner = document.getElementById('offline-banner');
+  if(!navigator.onLine) banner.style.display = 'block';
+  window.addEventListener('offline', function(){ banner.style.display = 'block'; });
+  window.addEventListener('online', function(){ banner.style.display = 'none'; });
+
+  function getCsrf(){
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    if(m) return m[1];
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+  }
+
+  function toast(msg, type){
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    t.style.background = type === 'ok' ? '#22c55e' : type === 'warn' ? '#eab308' : '#ef4444';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity = '0'; setTimeout(function(){ t.remove(); }, 300); }, 3000);
+  }
+
+  document.querySelectorAll('.btn-accept-offer').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var url = btn.dataset.url;
+      var id = btn.dataset.id;
+
+      if(!navigator.onLine){
+        toast('Morate biti online za prihvat ponude', 'err');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCsrf()
+        },
+        body: '{}',
+        credentials: 'same-origin'
+      }).then(function(r){
+        if(r.ok){
+          toast('Ponuda prihvacena!', 'ok');
+          var card = document.getElementById('offer-' + id);
+          if(card){
+            card.classList.add('active');
+            btn.textContent = 'PRIHVACENO';
+            btn.style.background = '#c9a84c';
+            btn.style.color = '#000';
+          }
+          setTimeout(function(){ location.reload(); }, 1500);
+        } else {
+          r.json().then(function(j){
+            toast(j.detail || 'Greska', 'err');
+            btn.disabled = false;
+            btn.innerHTML = 'PRIHVATI';
+          });
+        }
+      }).catch(function(){
+        toast('Mrezna greska', 'err');
+        btn.disabled = false;
+        btn.innerHTML = 'PRIHVATI';
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}

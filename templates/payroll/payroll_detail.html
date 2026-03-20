@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans "Obracun" %} {{ run.month|stringformat:"02d" }}/{{ run.year }}{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px;margin:0 auto">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+            <h2 style="margin:0;color:var(--gold)">
+                <i class="fas fa-file-invoice-dollar"></i>
+                {{ run.month|stringformat:"02d" }}/{{ run.year }}
+            </h2>
+            <span style="padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;
+                {% if run.status == 'DRAFT' %}background:#fef3c7;color:#92400e
+                {% elif run.status == 'LOCKED' %}background:#dbeafe;color:#1e40af
+                {% elif run.status == 'FINALIZED' %}background:#d1fae5;color:#065f46
+                {% elif run.status == 'PAID' %}background:#e0e7ff;color:#3730a3
+                {% endif %}">{{ run.get_status_display }}</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            {% if can_run %}
+            <form method="post" action="{% url 'payroll:run' run.pk %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" style="padding:8px 16px;background:#059669;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600"
+                        onclick="return confirm('Pokrenuti obracun za sve radnike?')">
+                    <i class="fas fa-play"></i> {% trans "Pokreni obracun" %}
+                </button>
+            </form>
+            {% endif %}
+
+            {% if can_book %}
+            <form method="post" action="{% url 'payroll:book' run.pk %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" style="padding:8px 16px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600"
+                        onclick="return confirm('Proknjiziti obracun u konto?')">
+                    <i class="fas fa-book"></i> {% trans "Proknjizi" %}
+                </button>
+            </form>
+            {% endif %}
+
+            {% if can_pay %}
+            <form method="post" action="{% url 'payroll:pain001' run.pk %}" style="display:inline">
+                {% csrf_token %}
+                <select name="bank_account" required style="padding:8px;border:1px solid #e2e8f0;border-radius:8px">
+                    <option value="">-- {% trans "Banka" %} --</option>
+                    {% for bank in banks %}
+                    <option value="{{ bank.pk }}">{{ bank.bank_name }} ({{ bank.iban|truncatechars:20 }})</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" style="padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">
+                    <i class="fas fa-file-export"></i> pain.001
+                </button>
+            </form>
+            {% endif %}
+
+            {% if is_de and run.status != 'DRAFT' %}
+            <a href="{% url 'payroll:datev' run.pk %}" style="padding:8px 16px;background:#0f766e;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">
+                <i class="fas fa-download"></i> DATEV
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    {% if run.status != 'DRAFT' %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px">
+        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Bruto ukupno" %}</div>
+            <div style="font-size:1.5rem;font-weight:700;color:#0f172a">{{ run.total_gross|floatformat:2 }} &euro;</div>
+        </div>
+        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Neto ukupno" %}</div>
+            <div style="font-size:1.5rem;font-weight:700;color:#059669">{{ run.total_net|floatformat:2 }} &euro;</div>
+        </div>
+        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Porez + doprinosi" %}</div>
+            <div style="font-size:1.5rem;font-weight:700;color:#dc2626">{{ run.total_tax|floatformat:2 }} &euro;</div>
+        </div>
+        <div style="background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+            <div style="font-size:0.75rem;text-transform:uppercase;color:#64748b;letter-spacing:1px">{% trans "Radnika" %}</div>
+            <div style="font-size:1.5rem;font-weight:700;color:#0f172a">{{ payslips|length }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Payslips Table -->
+    {% if payslips %}
+    <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+        <thead>
+            <tr style="background:#f8f9fa;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:#64748b">
+                <th style="padding:12px 16px;text-align:left">{% trans "Radnik" %}</th>
+                <th style="padding:12px 8px;text-align:right">{% trans "Sati" %}</th>
+                <th style="padding:12px 8px;text-align:right">{% trans "Prekovr." %}</th>
+                <th style="padding:12px 8px;text-align:right">{% trans "Bruto" %}</th>
+                <th style="padding:12px 8px;text-align:right">{% trans "Neto" %}</th>
+                <th style="padding:12px 8px;text-align:center">{% trans "Placeno" %}</th>
+                <th style="padding:12px 8px;text-align:center"></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ps in payslips %}
+            <tr style="border-top:1px solid #f1f5f9">
+                <td style="padding:10px 16px;font-weight:600">{{ ps.employee_name }}</td>
+                <td style="padding:10px 8px;text-align:right">{{ ps.regular_hours|floatformat:1 }}</td>
+                <td style="padding:10px 8px;text-align:right">{{ ps.overtime_hours|floatformat:1 }}</td>
+                <td style="padding:10px 8px;text-align:right">{{ ps.gross_amount|floatformat:2 }}</td>
+                <td style="padding:10px 8px;text-align:right;font-weight:600;color:#059669">{{ ps.net_amount|floatformat:2 }}</td>
+                <td style="padding:10px 8px;text-align:center">
+                    {% if ps.is_paid %}
+                        <i class="fas fa-check-circle" style="color:#059669"></i>
+                    {% else %}
+                        <i class="fas fa-clock" style="color:#f59e0b"></i>
+                    {% endif %}
+                </td>
+                <td style="padding:10px 8px;text-align:center">
+                    <a href="{% url 'payroll:payslip_pdf' run.pk ps.user_id %}" style="color:var(--gold);text-decoration:none" title="{% trans 'Isplatna lista' %}">
+                        <i class="fas fa-print"></i>
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align:center;padding:40px;background:#fff;border-radius:10px;color:#94a3b8">
+        <p>{% trans "Pokrenite obracun da biste generirali listicce." %}</p>
+    </div>
+    {% endif %}
+
+    <div style="text-align:center;margin-top:20px">
+        <a href="{% url 'payroll:list' %}" style="color:#64748b;text-decoration:none">
+            <i class="fas fa-arrow-left"></i> {% trans "Svi obracuni" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

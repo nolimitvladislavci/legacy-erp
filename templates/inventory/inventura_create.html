@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nova inventura{% endblock %}
+{% block page_title %}Nova inventura{% endblock %}
+{% block content %}
+
+<div class="mb-3">
+  <h2><i class="fas fa-clipboard-check me-2 text-warning"></i>{% trans "Nova inventura" %}</h2>
+  <small class="text-muted">{% trans "Pokreni godišnji ili izvanredni popis imovine" %}</small>
+</div>
+
+<form method="post" class="stat-card">
+  {% csrf_token %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <label class="form-label fw-bold">{% trans "Vrsta popisa" %} *</label>
+      <select name="inventura_type" class="form-select" required>
+        {% for val, label in type_choices %}
+        <option value="{{ val }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label fw-bold">{% trans "Datum stanja" %} *</label>
+      <input type="date" name="reference_date" class="form-control" required>
+      <small class="text-muted">{% trans "Obično 31.12. za godišnji popis" %}</small>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label fw-bold">{% trans "Skladište" %}</label>
+      <select name="warehouse" class="form-select">
+        <option value="">{% trans "Sva skladišta" %}</option>
+        {% for wh in warehouses %}
+        <option value="{{ wh.pk }}">{{ wh.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <label class="form-label fw-bold">{% trans "Filtar kategorije" %}</label>
+      <select name="category_filter" class="form-select">
+        <option value="">{% trans "Sve kategorije" %}</option>
+        {% for val, label in category_choices %}
+        <option value="{{ val }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-8">
+      <label class="form-label fw-bold">{% trans "Napomene" %}</label>
+      <textarea name="notes" class="form-control" rows="2" placeholder="{% trans 'Razlog popisa, posebne napomene...' %}"></textarea>
+    </div>
+  </div>
+
+  <hr>
+  <h5 class="mb-3"><i class="fas fa-users me-2"></i>{% trans "Popisna komisija" %}</h5>
+  <p class="text-muted small mb-3">{% trans "Zakonski obavezno: predsjednik + najmanje 2 člana (HR Pravilnik o popisu)" %}</p>
+
+  <div id="commission-members">
+    {% for i in "012" %}
+    <div class="row g-2 mb-2 commission-row">
+      <div class="col-md-5">
+        <select name="commission_user_{{ forloop.counter0 }}" class="form-select">
+          <option value="">— {% trans "Odaberi osobu" %} —</option>
+          {% for u in users %}
+          <option value="{{ u.pk }}">{{ u.get_full_name|default:u.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select name="commission_role_{{ forloop.counter0 }}" class="form-select">
+          {% if forloop.first %}
+          <option value="predsjednik">{% trans "Predsjednik komisije" %}</option>
+          {% else %}
+          <option value="clan">{% trans "Član komisije" %}</option>
+          {% endif %}
+          <option value="predsjednik">{% trans "Predsjednik komisije" %}</option>
+          <option value="clan">{% trans "Član komisije" %}</option>
+          <option value="zapisnicar">{% trans "Zapisničar" %}</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        {% if not forloop.first %}
+        <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.commission-row').remove()">
+          <i class="fas fa-trash"></i>
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <button type="button" class="btn btn-sm btn-outline-secondary mb-4" onclick="addCommissionMember()">
+    <i class="fas fa-plus me-1"></i>{% trans "Dodaj člana" %}
+  </button>
+
+  <hr>
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="fas fa-play me-2"></i>{% trans "Pokreni inventuru" %}
+    </button>
+    <a href="{% url 'inventory:inventura_list' %}" class="btn btn-outline-secondary btn-lg">{% trans "Odustani" %}</a>
+  </div>
+</form>
+
+<script>
+let memberIdx = 3;
+function addCommissionMember() {
+  const html = `<div class="row g-2 mb-2 commission-row">
+    <div class="col-md-5">
+      <select name="commission_user_${memberIdx}" class="form-select">
+        <option value="">— Odaberi osobu —</option>
+        {% for u in users %}<option value="{{ u.pk }}">{{ u.get_full_name|default:u.username }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select name="commission_role_${memberIdx}" class="form-select">
+        <option value="clan">Član komisije</option>
+        <option value="predsjednik">Predsjednik komisije</option>
+        <option value="zapisnicar">Zapisničar</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.commission-row').remove()"><i class="fas fa-trash"></i></button>
+    </div>
+  </div>`;
+  document.getElementById('commission-members').insertAdjacentHTML('beforeend', html);
+  memberIdx++;
+}
+</script>
+
+{% endblock %}

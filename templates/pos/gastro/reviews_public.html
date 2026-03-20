@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recenzije - {{ company.name }}</title>
+<style>
+:root{--bg:#faf7f2;--accent:#c9a84c;--card:#fff;--text:#2d2d2d;--muted:#888;--star-on:#fbbf24;--star-off:#d1d5db;--shadow:0 2px 12px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:2rem 1rem;overflow-x:hidden}
+body.tv{background:#0a0a0a;color:#e8e8e8;--bg:#0a0a0a;--card:#1a1a1a;--text:#e8e8e8;--muted:#666}
+.wrap{max-width:600px;margin:0 auto}
+body.tv .wrap{max-width:900px}
+.company-header{text-align:center;margin-bottom:2rem}
+.company-header h1{font-size:1.6rem;color:var(--accent)}
+body.tv .company-header h1{font-size:2.5rem}
+.big-rating{text-align:center;margin-bottom:1.5rem}
+.big-number{font-size:3.5rem;font-weight:800;color:var(--accent);line-height:1}
+body.tv .big-number{font-size:5rem}
+.big-stars{font-size:1.8rem;color:var(--star-on);margin:.3rem 0}
+body.tv .big-stars{font-size:2.5rem}
+.total-count{font-size:.85rem;color:var(--muted)}
+body.tv .total-count{font-size:1.2rem}
+.stats-bar{display:flex;justify-content:center;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.2rem}
+body.tv .stat-label{font-size:.95rem}
+.stat-val{font-size:1.1rem;font-weight:700;color:var(--accent)}
+body.tv .stat-val{font-size:1.6rem}
+.reviews-container{position:relative;overflow:hidden}
+body.tv .reviews-container{height:calc(100vh - 280px)}
+.reviews-scroll{display:flex;flex-direction:column;gap:1rem}
+body.tv .reviews-scroll{animation:scroll-up 30s linear infinite}
+body.tv .reviews-scroll:hover{animation-play-state:paused}
+@keyframes scroll-up{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+.review-card{background:var(--card);border-radius:10px;box-shadow:var(--shadow);padding:1.2rem}
+body.tv .review-card{padding:1.5rem}
+.review-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.review-name{font-weight:700;font-size:.95rem}
+body.tv .review-name{font-size:1.3rem}
+.review-date{font-size:.75rem;color:var(--muted)}
+body.tv .review-date{font-size:1rem}
+.review-stars{color:var(--star-on);font-size:1rem;margin-bottom:.4rem}
+body.tv .review-stars{font-size:1.4rem}
+.review-stars .off{color:var(--star-off)}
+.review-comment{font-size:.9rem;line-height:1.5;color:var(--text)}
+body.tv .review-comment{font-size:1.2rem}
+.footer{text-align:center;margin-top:2rem;font-size:.7rem;color:var(--muted);padding:1rem 0}
+body.tv .footer{display:none}
+.no-reviews{text-align:center;padding:3rem 1rem;color:var(--muted)}
+</style>
+</head>
+<body{% if tv_mode %} class="tv"{% endif %}>
+<div class="wrap">
+  <div class="company-header">
+    <h1>{{ company.name }}</h1>
+  </div>
+
+  {% if total > 0 %}
+  <div class="big-rating">
+    <div class="big-number">{{ stats.avg_rating|floatformat:1 }}</div>
+    <div class="big-stars">
+      {% with avg=stats.avg_rating|floatformat:0 %}
+      {% for i in "12345" %}{% if forloop.counter <= avg|add:"0" %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}
+      {% endwith %}
+    </div>
+    <div class="total-count">{{ total }} recenzij{{ total|pluralize:"a,e,a" }}</div>
+  </div>
+
+  <div class="stats-bar">
+    {% if stats.avg_food %}
+    <div class="stat-item"><div class="stat-label">Hrana</div><div class="stat-val">{{ stats.avg_food|floatformat:1 }}</div></div>
+    {% endif %}
+    {% if stats.avg_service %}
+    <div class="stat-item"><div class="stat-label">Usluga</div><div class="stat-val">{{ stats.avg_service|floatformat:1 }}</div></div>
+    {% endif %}
+    {% if stats.avg_ambience %}
+    <div class="stat-item"><div class="stat-label">Ambijent</div><div class="stat-val">{{ stats.avg_ambience|floatformat:1 }}</div></div>
+    {% endif %}
+  </div>
+
+  <div class="reviews-container">
+    <div class="reviews-scroll" id="reviewsScroll">
+      {% for r in reviews %}
+      <div class="review-card">
+        <div class="review-top">
+          <span class="review-name">{{ r.guest_name }}</span>
+          <span class="review-date">{{ r.created_at|date:"d.m.Y" }}</span>
+        </div>
+        <div class="review-stars">
+          {% for i in "12345" %}{% if forloop.counter <= r.rating %}&#9733;{% else %}<span class="off">&#9733;</span>{% endif %}{% endfor %}
+        </div>
+        {% if r.comment %}<div class="review-comment">&ldquo;{{ r.comment }}&rdquo;</div>{% endif %}
+      </div>
+      {% endfor %}
+      {% if tv_mode %}
+      <!-- Duplicate for seamless scroll loop -->
+      {% for r in reviews %}
+      <div class="review-card">
+        <div class="review-top">
+          <span class="review-name">{{ r.guest_name }}</span>
+          <span class="review-date">{{ r.created_at|date:"d.m.Y" }}</span>
+        </div>
+        <div class="review-stars">
+          {% for i in "12345" %}{% if forloop.counter <= r.rating %}&#9733;{% else %}<span class="off">&#9733;</span>{% endif %}{% endfor %}
+        </div>
+        {% if r.comment %}<div class="review-comment">&ldquo;{{ r.comment }}&rdquo;</div>{% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="no-reviews">
+    <p style="font-size:2rem;margin-bottom:.5rem">&#9734;</p>
+    <p>Jos nema recenzija.</p>
+  </div>
+  {% endif %}
+
+  <div class="footer">Powered by LIMIT Connect</div>
+</div>
+{% if tv_mode %}
+<script>
+// Adjust scroll speed based on content height
+var el=document.getElementById('reviewsScroll');
+if(el){
+  var h=el.scrollHeight/2;
+  var speed=h/30; // pixels per second ratio
+  var duration=h/20; // ~20px/s
+  el.style.animationDuration=Math.max(15,duration)+'s';
+}
+</script>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 11pt; color: #1a1a1a; margin: 0; padding: 40px; }
+.header { text-align: center; border-bottom: 3px solid #c9a84c; padding-bottom: 20px; margin-bottom: 30px; }
+.header h1 { font-size: 18pt; color: #c9a84c; margin: 0 0 5px; letter-spacing: 2px; text-transform: uppercase; }
+.header h2 { font-size: 13pt; color: #333; margin: 0; font-weight: normal; }
+.header .subtitle { font-size: 9pt; color: #888; margin-top: 5px; }
+.cert-number { text-align: right; font-size: 10pt; color: #666; margin-bottom: 20px; }
+.section { margin-bottom: 20px; }
+.section-title { font-size: 10pt; font-weight: bold; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; margin-bottom: 10px; }
+.row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 10pt; }
+.row .label { color: #666; }
+.row .value { font-weight: bold; text-align: right; }
+.amount-box { background: #fafaf5; border: 2px solid #c9a84c; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0; }
+.amount-box .amount { font-size: 22pt; font-weight: bold; color: #c9a84c; }
+.amount-box .amount-text { font-size: 9pt; color: #666; margin-top: 4px; }
+.legal { font-size: 8.5pt; color: #555; line-height: 1.5; margin: 20px 0; padding: 12px; background: #f8f8f8; border-left: 3px solid #c9a84c; }
+.legal-de { color: #888; font-style: italic; }
+.signatures { display: flex; justify-content: space-between; margin-top: 50px; }
+.sig-block { text-align: center; width: 45%; }
+.sig-line { border-top: 1px solid #333; margin-top: 40px; padding-top: 5px; font-size: 9pt; }
+.sig-role { font-size: 8pt; color: #888; }
+.footer { text-align: center; margin-top: 30px; font-size: 7pt; color: #999; border-top: 1px solid #e0e0e0; padding-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Potvrda o primljenoj donaciji</h1>
+    <h2>Spendenbestätigung</h2>
+    <div class="subtitle">{{ company.name }} | OIB: {{ company.oib }}</div>
+</div>
+
+<div class="cert-number">Broj potvrde: {{ certificate_number }}</div>
+
+<div class="section">
+    <div class="section-title">Primatelj donacije / Spendenempfänger</div>
+    <div class="row"><span class="label">Naziv:</span><span class="value">{{ company.name }}</span></div>
+    <div class="row"><span class="label">OIB:</span><span class="value">{{ company.oib }}</span></div>
+    <div class="row"><span class="label">Adresa:</span><span class="value">{{ company.address|default:"—" }}, {{ company.city|default:"" }}</span></div>
+    <div class="row"><span class="label">IBAN:</span><span class="value">{{ company.iban|default:"—" }}</span></div>
+</div>
+
+<div class="section">
+    <div class="section-title">Donator / Spender</div>
+    <div class="row"><span class="label">Naziv/Ime:</span><span class="value">{{ donor_name }}</span></div>
+    <div class="row"><span class="label">OIB:</span><span class="value">{{ donor_oib }}</span></div>
+</div>
+
+<div class="amount-box">
+    <div class="amount">{{ amount|floatformat:2 }} EUR</div>
+    <div class="amount-text">(slovima: {{ amount_text }})</div>
+</div>
+
+<div class="section">
+    <div class="section-title">Podaci o donaciji / Spendendetails</div>
+    <div class="row"><span class="label">Svrha:</span><span class="value">{{ purpose }}</span></div>
+    <div class="row"><span class="label">Datum primitka:</span><span class="value">{{ donation_date|date:"d.m.Y." }}</span></div>
+</div>
+
+<div class="legal">
+    {{ legal_text_hr }}<br><br>
+    {{ nonprofit_statement_hr }}<br><br>
+    <span class="legal-de">{{ legal_text_de }}</span>
+</div>
+
+<div class="signatures">
+    <div class="sig-block">
+        <div class="sig-line">Odgovorna osoba / Verantwortliche Person</div>
+        <div class="sig-role">Predsjednik/ica udruge</div>
+    </div>
+    <div class="sig-block">
+        <div class="sig-line">Datum i mjesto / Datum und Ort</div>
+        <div class="sig-role">{{ donation_date|date:"d.m.Y." }}, {{ company.city|default:"" }}</div>
+    </div>
+</div>
+
+<div class="footer">
+    {{ electronic_notice }}<br>
+    Generirano: {{ generated_at|date:"d.m.Y. H:i" }} | LIMIT Connect v2026.03 | Ref: {{ certificate_number }}
+</div>
+
+</body>
+</html>

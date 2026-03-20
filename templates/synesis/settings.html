@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Synesis integracija — LIMIT Connect{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h5 class="mb-0"><i class="fas fa-database me-2 text-primary"></i>Synesis integracija</h5>
+    <small class="text-muted">Uvoz partnera i artikala iz Synesis baze podataka</small>
+  </div>
+  <a href="{% url 'synesis:mdb_upload' %}" class="btn btn-warning me-2"><i class="fas fa-cloud-upload-alt me-2"></i>Online Import (MDB)</a>
+  <a href="{% url 'synesis:download_setup' %}" class="btn btn-success">
+    <i class="fas fa-rocket me-2"></i>Preuzmi Setup (.bat)
+  </a>
+</div>
+
+{% if messages %}
+<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+{% endif %}
+
+<div class="row g-4">
+
+  <!-- Lijevo: statistika + API token -->
+  <div class="col-lg-4">
+
+    <!-- Statusne kartice -->
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <div class="stat-card p-3 text-center" style="border-left:3px solid var(--color-success)">
+      <div class="text-muted small mb-1"><i class="fas fa-shield-alt me-1"></i>Backup</div>
+      <div class="fw-bold">{% if cfg.last_backup_at %}{{ cfg.last_backup_at|date:"d.m H:i" }}{% else %}—{% endif %}</div>
+      <div class="text-muted" style="font-size:.72rem">zadnji backup</div>
+    </div>
+    <div class="stat-card p-3 text-center">
+          <div class="fw-bold" style="font-size:1.8rem;color:var(--accent)">{{ cfg.partners_total|default:"0" }}</div>
+          <div class="text-muted" style="font-size:.78rem"><i class="fas fa-handshake me-1"></i>Partneri uvezeni</div>
+          {% if cfg.last_sync_partners %}
+          <div class="text-muted mt-1" style="font-size:.72rem">{{ cfg.last_sync_partners|date:"d.m.Y H:i" }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="stat-card p-3 text-center">
+          <div class="fw-bold" style="font-size:1.8rem;color:var(--accent)">{{ cfg.items_total|default:"0" }}</div>
+          <div class="text-muted" style="font-size:.78rem"><i class="fas fa-boxes me-1"></i>Artikli uvezeni</div>
+          {% if cfg.last_sync_items %}
+          <div class="text-muted mt-1" style="font-size:.72rem">{{ cfg.last_sync_items|date:"d.m.Y H:i" }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- API Token -->
+    <div class="stat-card p-4 mb-3">
+      <h6 class="fw-bold mb-3"><i class="fas fa-key me-2 text-warning"></i>API Token</h6>
+      <p class="text-muted small mb-2">Ovaj token se upisuje u sync skriptu. Čuvajte ga kao lozinku.</p>
+      <div class="input-group input-group-sm mb-2">
+        <input type="text" id="apiToken" class="form-control font-monospace" value="{{ cfg.api_token }}" readonly style="font-size:.75rem">
+        <button class="btn btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('apiToken').value);this.innerHTML='<i class=\'fas fa-check\'></i>'" title="Kopiraj">
+          <i class="fas fa-copy"></i>
+        </button>
+      </div>
+      <form method="post" action="{% url 'synesis:regenerate_token' %}" onsubmit="return confirm('Stari token prestaje raditi! Jeste li sigurni?')">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+          <i class="fas fa-sync-alt me-1"></i>Regeneriraj token
+        </button>
+      </form>
+    </div>
+
+    <!-- Upute -->
+    <div class="stat-card p-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-info"></i>Kako koristiti</h6>
+      <ol class="small text-muted ps-3 mb-0" style="line-height:1.8">
+        <li>Unesite putanje do Synesis baza ispod</li>
+        <li>Kliknite <strong>Preuzmi sync skriptu</strong></li>
+        <li>Na Windows računalu pokrenite:<br>
+          <code style="font-size:.75rem">python synesis_sync.py</code>
+        </li>
+        <li>Ili automatski svake noći:<br>
+          <code style="font-size:.75rem">schtasks /create /tn "SynesisSync" /tr "python C:\synesis_sync.py" /sc daily /st 02:00</code>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Desno: Konfiguracija + log -->
+  <div class="col-lg-8">
+
+    <!-- Konfiguracija putanja -->
+    <div class="stat-card p-4 mb-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-folder-open me-2 text-secondary"></i>Putanje do Synesis baza</h6>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold small mb-1">
+            Storage.mdb
+            <span class="text-muted fw-normal">(partneri, artikli, zaliha)</span>
+          </label>
+          <input type="text" name="storage_db_path" class="form-control font-monospace"
+                 value="{{ cfg.storage_db_path }}"
+                 placeholder="C:\Synesis\KONJIK2025\Storage.mdb"
+                 style="font-size:.85rem">
+          <div class="form-text">Putanja na Windows računalu gdje je instaliran Synesis</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold small mb-1">
+            Journal.mdb
+            <span class="text-muted fw-normal">(knjiga transakcija)</span>
+          </label>
+          <input type="text" name="journal_db_path" class="form-control font-monospace"
+                 value="{{ cfg.journal_db_path }}"
+                 placeholder="C:\Synesis\KONJIK2025\Journal.mdb"
+                 style="font-size:.85rem">
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-semibold small mb-1">
+            SynesisPOS baza (kasa)
+          </label>
+          <div class="row g-2">
+            <div class="col-8">
+              <input type="text" name="pos_db_path" class="form-control font-monospace"
+                     value="{{ cfg.pos_db_path }}"
+                     placeholder="C:\SynesisPOS\Kasa2025-01.mdb"
+                     style="font-size:.85rem">
+              <div class="form-text">Npr. C:\SynesisPOS\Kasa2025-01.mdb — ostavite prazno ako ne koristite</div>
+            </div>
+            <div class="col-4">
+              <input type="password" name="pos_db_password" class="form-control font-monospace"
+                     value="{{ cfg.pos_db_password }}"
+                     placeholder="lozinka baze"
+                     style="font-size:.85rem"
+                     autocomplete="new-password">
+              <div class="form-text">Lozinka .mdb baze</div>
+            </div>
+          </div>
+        </div>
+        <!-- ── Connect folder sekcija ── -->
+        <hr class="my-3">
+        <h6 class="fw-bold mb-2"><i class="fas fa-shield-alt me-2 text-success"></i>Izolacija i zaštita podataka</h6>
+        <div class="alert alert-success py-2 mb-3" style="font-size:.82rem">
+          <strong>Originalni Synesis fajlovi se nikada ne diraju direktno.</strong>
+          Connect uvijek radi s radnom kopijom — sve promjene idu kroz backup → work → original.
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold small mb-1">
+            Connect bazni folder
+            <span class="text-muted fw-normal">(automatski se kreira na Windows računalu)</span>
+          </label>
+          <input type="text" name="connect_base_path" class="form-control font-monospace"
+                 value="{{ cfg.connect_base_path|default:'C:\SynesisConnect' }}"
+                 placeholder="C:\SynesisConnect"
+                 style="font-size:.85rem">
+          <div class="form-text">
+            Connect kreira: <code>backup\</code> <code>work\</code> <code>export\</code> podfoldere i <code>connect_log.txt</code>
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <label class="form-label fw-semibold small mb-1">Čuvanje backupa (dana)</label>
+            <input type="number" name="backup_retention_days" class="form-control"
+                   value="{{ cfg.backup_retention_days|default:30 }}" min="7" max="365">
+            <div class="form-text">Backupi stariji od ovog broja dana se automatski brišu</div>
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold small mb-1">Automatski backup</label>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" name="auto_backup_enabled" id="autoBackup"
+                     {% if cfg.auto_backup_enabled %}checked{% endif %}>
+              <label class="form-check-label small" for="autoBackup">Backup prije svakog sync-a (preporučeno)</label>
+            </div>
+          </div>
+        </div>
+        {% if cfg.last_backup_at %}
+        <div class="d-flex gap-3 mb-3" style="font-size:.82rem">
+          <span class="text-success"><i class="fas fa-check-circle me-1"></i>Zadnji backup: <strong>{{ cfg.last_backup_at|date:"d.m.Y H:i" }}</strong></span>
+          {% if cfg.last_backup_path %}<span class="text-muted font-monospace">{{ cfg.last_backup_path|truncatechars:50 }}</span>{% endif %}
+        </div>
+        {% endif %}
+        <hr class="my-3">
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>Spremi konfiguraciju
+          </button>
+          <a href="{% url 'synesis:download_setup' %}" class="btn btn-success btn-lg">
+            <i class="fas fa-rocket me-2"></i>Preuzmi Setup (jednom pokreni!)
+          </a>
+          <a href="{% url 'synesis:download_script' %}" class="btn btn-outline-secondary btn-sm align-self-center">
+            <i class="fas fa-download me-1"></i>Samo .py skripta
+          </a>
+          <a href="{% url 'synesis:download_schema_probe' %}" class="btn btn-outline-warning btn-sm align-self-center" title="Pokrenite na Windows PC-u da pošaljete strukturu Synesis baze">
+            <i class="fas fa-search me-1"></i>Schema Probe (.py)
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Sync log -->
+    {% if logs %}
+    <div class="stat-card p-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-secondary"></i>Povijest sinkronizacija</h6>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle" style="font-size:.82rem">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Tip</th>
+              <th class="text-center">Primljeno</th>
+              <th class="text-center text-success">Kreirano</th>
+              <th class="text-center text-primary">Ažurirano</th>
+              <th class="text-center text-danger">Greške</th>
+              <th class="text-end">Trajanje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs %}
+            <tr>
+              <td>{{ log.synced_at|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if log.sync_type == 'partners' %}<span class="badge bg-primary">Partneri</span>
+                {% elif log.sync_type == 'items' %}<span class="badge bg-success">Artikli</span>
+                {% else %}<span class="badge bg-secondary">{{ log.sync_type }}</span>{% endif %}
+              </td>
+              <td class="text-center">{{ log.records_received }}</td>
+              <td class="text-center text-success fw-bold">{{ log.records_created }}</td>
+              <td class="text-center text-primary">{{ log.records_updated }}</td>
+              <td class="text-center {% if log.errors %}text-danger fw-bold{% endif %}">{{ log.errors }}</td>
+              <td class="text-end text-muted">{{ log.duration_seconds|floatformat:1 }}s</td>
+            </tr>
+            {% if log.error_detail %}
+            <tr>
+              <td colspan="7" class="text-danger small py-1 ps-4"><i class="fas fa-exclamation-triangle me-1"></i>{{ log.error_detail|truncatechars:150 }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="stat-card p-4 text-center text-muted">
+      <i class="fas fa-clock" style="font-size:2rem;opacity:.3"></i>
+      <p class="mt-2 mb-0 small">Nema sinkronizacija. Preuzmite skriptu i pokrenite ju na Windows računalu.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

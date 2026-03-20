@@ -1,0 +1,394 @@
+{% load i18n %}
+{% extends 'booking_base.html' %}
+
+{% block title %}{% trans "Rezervacija" %} | {{ service.name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Page-specific CSS — shared styles are in booking-theme.css */
+body { display: flex; flex-direction: column; align-items: center; padding: 0; }
+
+.booking-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    width: 100%;
+    max-width: 960px;
+    margin: 28px auto 60px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,.4);
+}
+
+.bk-header {
+    background: var(--dark);
+    padding: 32px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+.bk-header h1 { font-family: "Cormorant Garamond", serif; font-size: 2.2rem; font-weight: 300; margin: 0; color: var(--gold); }
+.bk-header p { color: var(--muted); font-size: .85rem; letter-spacing: 2px; text-transform: uppercase; margin-top: 8px; }
+
+.calendar-wrap { padding: 36px 40px; }
+.calendar-wrap .month-nav { max-width: 360px; margin: 0 auto 18px; }
+.calendar-wrap .weekdays  { max-width: 360px; margin: 0 auto 8px; letter-spacing: 1px; }
+.calendar-wrap .days-grid { max-width: 360px; margin: 0 auto; gap: 4px; }
+
+.slots-wrap { padding: 36px 40px; }
+.slots-title { font-size: .75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; text-align: center; }
+.slots-grid  { max-width: 560px; margin: 0 auto; }
+.slot-unavail { background: var(--dark); border: 1px solid var(--border); color: var(--border); padding: 11px 0; font-family: Barlow, sans-serif; font-size: .9rem; text-align: center; cursor: not-allowed; text-decoration: line-through; }
+.loader { display: none; text-align: center; color: var(--gold); font-size: .75rem; letter-spacing: 2px; text-transform: uppercase; padding: 20px 0; }
+.slot-legend { display: flex; gap: 16px; margin-top: 14px; font-size: .7rem; color: var(--muted); justify-content: center; }
+.legend-dot { width: 10px; height: 10px; border-radius: 1px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+.btn-back-link { display: block; text-align: center; margin-top: 14px; color: var(--muted); cursor: pointer; font-size: .8rem; text-decoration: underline; }
+
+.form-wrap { padding: 40px; }
+.form-wrap h2 { font-family: "Cormorant Garamond", serif; font-size: 1.8rem; color: var(--gold); margin-top: 0; }
+.booking-summary-bar { background: var(--dark); border: 1px solid var(--border); padding: 14px 18px; margin-bottom: 28px; font-size: .9rem; color: var(--muted); }
+.booking-summary-bar strong { color: var(--text); }
+.user-greeting { background: var(--dark); border: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 10px 14px; margin-bottom: 20px; font-size: .9rem; color: var(--muted); }
+.user-greeting strong { color: var(--gold); }
+
+/* Login gate */
+.login-gate-wrap { padding: 40px; }
+.login-gate-wrap h2 { font-family: "Cormorant Garamond", serif; font-size: 1.8rem; color: var(--gold); margin-top: 0; margin-bottom: .5rem; }
+.tabs { display: flex; gap: 0; margin-bottom: 24px; }
+.tab-btn { flex: 1; background: none; border: 1px solid var(--border); color: var(--muted); padding: 10px; font-family: Barlow, sans-serif; font-size: .85rem; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: .2s; }
+.tab-btn.active { background: var(--gold); border-color: var(--gold); color: #0a0a0a; font-weight: 700; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.auth-form-group { margin-bottom: 16px; }
+.auth-form-group label { display: block; font-size: .7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.auth-form-group input { width: 100%; background: var(--dark); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; font-family: Barlow, sans-serif; font-size: .95rem; outline: none; }
+.auth-form-group input:focus { border-color: var(--gold); }
+.auth-error { color: #ef4444; font-size: .85rem; margin-bottom: 12px; display: none; }
+.btn-gold { display: block; width: 100%; background: var(--gold); color: #0a0a0a; padding: 14px; border: none; font-family: Barlow, sans-serif; font-weight: 700; font-size: .9rem; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: .2s; margin-top: 8px; }
+.btn-gold:hover { background: #e8c96a; }
+
+.success-section { display: none; padding: 60px 40px; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="width:100%;padding:0 16px;max-width:960px;margin:0 auto">
+<div class="booking-container">
+    <div class="bk-header">
+        <h1>{{ service.name }}</h1>
+        <p>{% trans "Trajanje" %}: {{ service.duration }} &nbsp;|&nbsp; {% if service.price %}{% trans "Cijena" %}: {{ service.price }} €{% else %}{% trans "Upitajte o cijeni" %}{% endif %}</p>
+    </div>
+
+    <div class="step-indicator">
+        <div class="si-step done" id="si1"><div class="si-dot">&#10003;</div><div class="si-lbl">{% trans "Usluga" %}</div></div>
+        <div class="si-line" id="siLine1"></div>
+        <div class="si-step active" id="si2"><div class="si-dot">2</div><div class="si-lbl">{% trans "Datum" %}</div></div>
+        <div class="si-line" id="siLine2"></div>
+        <div class="si-step" id="si3"><div class="si-dot">3</div><div class="si-lbl">{% trans "Vrijeme" %}</div></div>
+        <div class="si-line" id="siLine3"></div>
+        <div class="si-step" id="si4"><div class="si-dot">4</div><div class="si-lbl">{% trans "Podaci" %}</div></div>
+        <div class="si-line" id="siLine4"></div>
+        <div class="si-step" id="si5"><div class="si-dot">5</div><div class="si-lbl">{% trans "Plaćanje" %}</div></div>
+        <div class="si-line" id="siLine5"></div>
+        <div class="si-step" id="si6"><div class="si-dot">6</div><div class="si-lbl">{% trans "Potvrda" %}</div></div>
+    </div>
+
+    <!-- KORAK 2: DATUM -->
+    <div id="stepDatum" class="calendar-wrap">
+        <div class="month-nav">
+            <button onclick="changeMonth(-1)">&#8592;</button>
+            <span id="monthDisplay"></span>
+            <button onclick="changeMonth(1)">&#8594;</button>
+        </div>
+        <div class="weekdays">
+            <div>{% trans "Pon" %}</div><div>{% trans "Uto" %}</div><div>{% trans "Sri" %}</div>
+            <div>{% trans "Čet" %}</div><div>{% trans "Pet" %}</div><div>{% trans "Sub" %}</div><div>{% trans "Ned" %}</div>
+        </div>
+        <div class="days-grid" id="daysGrid"></div>
+        <p class="step-hint" style="text-align:center">{% trans "Odaberite datum za nastavak" %}</p>
+    </div>
+
+    <!-- KORAK 3: VRIJEME -->
+    <div id="stepVrijeme" class="slots-wrap hidden">
+        <div class="slots-title" id="slotsTitle">{% trans "Odaberite termin" %}</div>
+        <div class="slots-grid" id="slotsGrid"><div class="no-slots">{% trans "Učitavanje termina..." %}</div></div>
+        <div class="loader" id="slotsLoader">{% trans "Tražim slobodne termine..." %}</div>
+        <div class="slot-legend" id="slotLegend" style="display:none">
+            <span><span class="legend-dot" style="background:var(--gold)"></span> {% trans "Slobodno" %}</span>
+            <span><span class="legend-dot" style="background:var(--border)"></span> {% trans "Zauzeto" %}</span>
+        </div>
+        <div class="btn-back-link" style="margin-top:20px" onclick="goToStep(2)">{% trans "&#8592; Natrag na datum" %}</div>
+    </div>
+
+    <!-- LOGIN GATE -->
+    <div id="stepLoginGate" class="login-gate-wrap hidden">
+        <h2>{% trans "Prijava za rezervaciju" %}</h2>
+        <div class="booking-summary-bar">
+            {% trans "Odabrani termin:" %} <strong id="loginSummaryDate"></strong> u <strong id="loginSummaryTime"></strong> &nbsp;—&nbsp; {{ service.name }}
+        </div>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">{% trans "Za rezervaciju termina potrebna je prijava ili registracija." %}</p>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">{% trans "Prijava" %}</button>
+            <button class="tab-btn" onclick="switchTab('register')">{% trans "Registracija" %}</button>
+        </div>
+        <div class="tab-panel active" id="panel-login">
+            <div class="auth-error" id="loginError"></div>
+            <form id="loginForm" onsubmit="submitLogin(event)">
+                {% csrf_token %}
+                <div class="auth-form-group"><label>{% trans "Korisničko ime" %}</label><input type="text" id="loginUsername" name="username" required autocomplete="username"></div>
+                <div class="auth-form-group"><label>{% trans "Lozinka" %}</label><input type="password" id="loginPassword" name="password" required autocomplete="current-password"></div>
+                <button type="submit" class="btn-gold">{% trans "Prijavi se i nastavi" %}</button>
+            </form>
+        </div>
+        <div class="tab-panel" id="panel-register">
+            <div class="auth-error" id="registerError"></div>
+            <form id="registerForm" onsubmit="submitRegister(event)">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="auth-form-group"><label>{% trans "Ime" %}</label><input type="text" id="regFirst" required></div>
+                    <div class="auth-form-group"><label>{% trans "Prezime" %}</label><input type="text" id="regLast" required></div>
+                </div>
+                <div class="auth-form-group"><label>{% trans "Email" %}</label><input type="email" id="regEmail" required autocomplete="email"></div>
+                <div class="auth-form-group"><label>{% trans "Korisničko ime" %}</label><input type="text" id="regUsername" required autocomplete="username"></div>
+                <div class="auth-form-group"><label>{% trans "Lozinka (min. 8 znakova)" %}</label><input type="password" id="regPassword" required autocomplete="new-password" minlength="8"></div>
+                <button type="submit" class="btn-gold">{% trans "Registriraj se i nastavi" %}</button>
+            </form>
+        </div>
+        <div class="btn-back-link" onclick="goToStep(3)">{% trans "&#8592; Natrag na termine" %}</div>
+    </div>
+
+    <!-- KORAK 4: PODACI -->
+    <div id="stepPodaci" class="form-wrap hidden">
+        <h2>{% trans "Vaši podaci" %}</h2>
+        <div class="booking-summary-bar" id="summaryBar4">{{ service.name }} &nbsp;|&nbsp; <strong id="summaryDate4"></strong> u <strong id="summaryTime4"></strong></div>
+        {% if user.is_authenticated %}
+        <div class="user-greeting">{% trans "Rezervirate kao:" %} <strong>{{ user.get_full_name|default:user.username }}</strong>{% if user.email %} ({{ user.email }}){% endif %}</div>
+        {% endif %}
+        <div class="form-grid">
+            <div class="form-group"><label>{% trans "Ime" %}</label><input type="text" id="clientFirst" value="{{ user.first_name|default:'' }}" required placeholder="{% trans 'Vaše ime' %}"></div>
+            <div class="form-group"><label>{% trans "Prezime" %}</label><input type="text" id="clientLast" value="{{ user.last_name|default:'' }}" required placeholder="{% trans 'Vaše prezime' %}"></div>
+        </div>
+        <div class="form-grid">
+            <div class="form-group"><label>{% trans "Telefon / WhatsApp" %}</label><input type="tel" id="clientPhone" required placeholder="+385 91 234 5678"></div>
+            <div class="form-group"><label>{% trans "Email" %}</label><input type="email" id="clientEmail" value="{{ user.email|default:'' }}" required></div>
+        </div>
+        <button class="btn-next" onclick="goFromPodaciToPlacanje()">{% trans "Nastavi na plaćanje" %} &#8594;</button>
+        <div class="btn-back-link" onclick="goToStep(3)">{% trans "&#8592; Natrag na termine" %}</div>
+    </div>
+
+    <!-- KORAK 5: PLAĆANJE -->
+    <div id="stepPlacanje" class="form-wrap hidden">
+        <h2>{% trans "Način plaćanja" %}</h2>
+        <div class="booking-summary-bar" id="summaryBar5">{{ service.name }} &nbsp;|&nbsp; <strong id="summaryDate5"></strong> u <strong id="summaryTime5"></strong>{% if service.price %} &nbsp;|&nbsp; <strong>{{ service.price }} €</strong>{% endif %}</div>
+        <div class="payment-options">
+            <div class="payment-opt selected" data-value="cash" onclick="selectPayment(this)"><div class="pay-icon">&#128181;</div><div class="pay-label">{% trans "Gotovina" %}</div></div>
+            <div class="payment-opt" data-value="card" onclick="selectPayment(this)"><div class="pay-icon">&#128179;</div><div class="pay-label">{% trans "Kartica" %}</div></div>
+            <div class="payment-opt" data-value="transfer" onclick="selectPayment(this)"><div class="pay-icon">&#127974;</div><div class="pay-label">{% trans "Bankovna transakcija" %}</div></div>
+            <div class="payment-opt" data-value="invoice" onclick="selectPayment(this)"><div class="pay-icon">&#128196;</div><div class="pay-label">{% trans "Na račun" %}</div></div>
+        </div>
+        <input type="hidden" id="selectedPayment" value="cash">
+        <div style="color:var(--muted);font-size:.8rem;margin-bottom:16px">{% trans "✉ Nakon rezervacije dobit ćete potvrdu na email." %}</div>
+        <div class="error-msg" id="errorMsg"></div>
+        <button class="btn-next" id="submitBtn" onclick="submitBooking()">{% trans "Potvrdi rezervaciju" %}</button>
+        <div class="btn-back-link" onclick="goToStep(4)">{% trans "&#8592; Natrag na podatke" %}</div>
+    </div>
+
+    <!-- KORAK 6: POTVRDA -->
+    <div id="stepSuccess" class="success-section">
+        <div style="font-size:3rem">&#9989;</div>
+        <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);font-size:2.5rem;margin-bottom:10px">{% trans "Hvala Vam." %}</h2>
+        <p style="color:var(--muted);font-size:1rem">{% trans "Vaš termin je uspješno rezerviran." %}<br>{% trans "Potvrda je poslana na Vaš email." %}</p>
+        <a href="/" style="display:inline-block;margin-top:28px;color:var(--gold);border:1px solid var(--gold);padding:10px 22px;text-decoration:none;text-transform:uppercase;letter-spacing:2px;font-size:.8rem">{% trans "Povratak" %}</a>
+    </div>
+
+    <input type="hidden" id="serviceId" value="{{ service.id }}">
+    <input type="hidden" id="selectedDate">
+    <input type="hidden" id="selectedTime">
+</div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var IS_AUTH = {{ user.is_authenticated|yesno:"true,false" }};
+var SERVICE_ID   = "{{ service.id }}";
+var SLOTS_API    = "{% url 'appointments:api_available_slots' %}";
+var SUBMIT_API   = "{% url 'appointments:api_submit_public_booking' %}";
+var AUTH_API     = "{% url 'appointments:api_booking_auth_check' %}";
+var REGISTER_API = "{% url 'appointments:api_booking_register' %}";
+
+var _cal = new Date();
+var selectedDateStr = null, selectedTimeStr = null;
+var monthsHR = ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj','Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'];
+
+var stepIds = {2:'stepDatum', 3:'stepVrijeme', 'login':'stepLoginGate', 4:'stepPodaci', 5:'stepPlacanje', 6:'stepSuccess'};
+
+function showStep(step) {
+    Object.values(stepIds).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    var target = stepIds[step];
+    if (target) {
+        var el = document.getElementById(target);
+        if (el) { el.classList.remove('hidden'); if (step === 6) el.style.display = 'block'; }
+    }
+    var num = (step === 'login') ? 3 : step;
+    for (var i = 1; i <= 6; i++) {
+        var el = document.getElementById('si' + i), line = document.getElementById('siLine' + i);
+        if (!el) continue;
+        el.classList.remove('active','done');
+        var dot = el.querySelector('.si-dot');
+        if (i === 1) { el.classList.add('done'); }
+        else if (i < num) { el.classList.add('done'); if (dot) dot.textContent = '✓'; }
+        else if (i === num) { el.classList.add('active'); if (dot && step !== 6) dot.textContent = i; }
+        else { if (dot) dot.textContent = i; }
+        if (line) line.style.background = i < num ? 'var(--green)' : 'var(--border)';
+    }
+}
+function goToStep(s) { showStep(s); }
+
+function renderCalendar() {
+    var grid = document.getElementById('daysGrid');
+    var year = _cal.getFullYear(), month = _cal.getMonth();
+    document.getElementById('monthDisplay').textContent = monthsHR[month] + ' ' + year;
+    var firstDay = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+    var offset = firstDay === 0 ? 6 : firstDay - 1;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var html = '';
+    for (var i = 0; i < offset; i++) html += '<div class="day empty"></div>';
+    for (var d = 1; d <= daysInMonth; d++) {
+        var dt = new Date(year, month, d);
+        var ds = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        var cls = 'day';
+        if (dt < today) cls += ' disabled';
+        if (dt.toDateString() === today.toDateString()) cls += ' today';
+        if (ds === selectedDateStr) cls += ' selected';
+        var oc = dt < today ? '' : 'onclick="selectDate(\'' + ds + '\')"';
+        html += '<div class="' + cls + '" ' + oc + '>' + d + '</div>';
+    }
+    grid.innerHTML = html;
+}
+function changeMonth(offset) { _cal = new Date(_cal.getFullYear(), _cal.getMonth() + offset, 1); renderCalendar(); }
+
+function selectDate(ds) {
+    selectedDateStr = ds; renderCalendar();
+    document.getElementById('selectedDate').value = ds;
+    showStep(3);
+    var parts = ds.split('-');
+    document.getElementById('slotsTitle').textContent = 'Termini: ' + parts[2] + '.' + parts[1] + '.' + parts[0] + '.';
+    fetchSlots(ds);
+}
+
+function fetchSlots(ds) {
+    var grid = document.getElementById('slotsGrid'), loader = document.getElementById('slotsLoader'), legend = document.getElementById('slotLegend');
+    grid.innerHTML = ''; legend.style.display = 'none'; loader.style.display = 'block';
+    fetch(SLOTS_API + '?date=' + ds + '&service_id=' + SERVICE_ID)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            loader.style.display = 'none';
+            var available = data.available || data.slots || [], unavailable = data.unavailable || [];
+            var all = available.concat(unavailable).filter(function(v,i,a) { return a.indexOf(v)===i; }).sort();
+            if (!all.length) { grid.innerHTML = '<div class="no-slots">Nema radnog vremena za ovaj dan.</div>'; return; }
+            legend.style.display = 'flex';
+            var html = '';
+            all.forEach(function(t) {
+                if (available.indexOf(t) >= 0) html += '<button class="slot-btn' + (t===selectedTimeStr?' selected':'') + '" onclick="selectTime(\'' + t + '\')">' + t + '</button>';
+                else html += '<div class="slot-unavail">' + t + '</div>';
+            });
+            grid.innerHTML = html;
+        })
+        .catch(function() { loader.style.display = 'none'; grid.innerHTML = '<div class="no-slots">Greška pri dohvatu termina.</div>'; });
+}
+
+function selectTime(t) {
+    selectedTimeStr = t; document.getElementById('selectedTime').value = t;
+    document.querySelectorAll('.slot-btn').forEach(function(b) { b.classList.toggle('selected', b.textContent.trim() === t); });
+    var parts = selectedDateStr.split('-'), fmt = parts[2] + '.' + parts[1] + '.' + parts[0] + '.';
+    if (IS_AUTH) { goToPodaci(fmt, t); }
+    else { document.getElementById('loginSummaryDate').textContent = fmt; document.getElementById('loginSummaryTime').textContent = t; showStep('login'); }
+}
+
+function goToPodaci(dateFormatted, t) {
+    document.getElementById('summaryDate4').textContent = dateFormatted;
+    document.getElementById('summaryTime4').textContent = t;
+    showStep(4);
+}
+
+function goFromPodaciToPlacanje() {
+    var first = document.getElementById('clientFirst').value.trim(), last = document.getElementById('clientLast').value.trim();
+    var phone = document.getElementById('clientPhone').value.trim(), email = document.getElementById('clientEmail').value.trim();
+    if (!first || !last || !phone || !email) { alert('Molimo popunite sva polja.'); return; }
+    var parts = selectedDateStr.split('-'), fmt = parts[2] + '.' + parts[1] + '.' + parts[0] + '.';
+    document.getElementById('summaryDate5').textContent = fmt; document.getElementById('summaryTime5').textContent = selectedTimeStr;
+    showStep(5);
+}
+
+function selectPayment(el) {
+    document.querySelectorAll('.payment-opt').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected'); document.getElementById('selectedPayment').value = el.dataset.value;
+}
+
+function submitBooking() {
+    var btn = document.getElementById('submitBtn'); btn.textContent = 'OBRADA...'; btn.disabled = true;
+    var errEl = document.getElementById('errorMsg'); errEl.style.display = 'none';
+    var first = document.getElementById('clientFirst').value.trim(), last = document.getElementById('clientLast').value.trim();
+    fetch(SUBMIT_API, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify({
+            service_id: SERVICE_ID, date: document.getElementById('selectedDate').value,
+            time: document.getElementById('selectedTime').value, name: (first + ' ' + last).trim(),
+            email: document.getElementById('clientEmail').value, phone: document.getElementById('clientPhone').value,
+            whatsapp: document.getElementById('clientPhone').value, payment_method: document.getElementById('selectedPayment').value,
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.status === 'success') { showStep(6); }
+        else if (data.error === 'auth_required') { var parts = selectedDateStr.split('-'); document.getElementById('loginSummaryDate').textContent = parts[2]+'.'+parts[1]+'.'+parts[0]+'.'; document.getElementById('loginSummaryTime').textContent = selectedTimeStr; showStep('login'); btn.textContent = '{% trans "Potvrdi rezervaciju" %}'; btn.disabled = false; }
+        else { errEl.textContent = data.error || 'Pokušajte ponovno.'; errEl.style.display = 'block'; btn.textContent = '{% trans "Potvrdi rezervaciju" %}'; btn.disabled = false; }
+    })
+    .catch(function() { errEl.textContent = 'Greška. Pokušajte ponovo.'; errEl.style.display = 'block'; btn.textContent = '{% trans "Potvrdi rezervaciju" %}'; btn.disabled = false; });
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(function(b,i) { b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')); });
+    document.getElementById('panel-login').classList.toggle('active', tab==='login');
+    document.getElementById('panel-register').classList.toggle('active', tab==='register');
+}
+
+function submitLogin(e) {
+    e.preventDefault(); var err = document.getElementById('loginError'); err.style.display = 'none';
+    var btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = 'Prijava...';
+    var fd = new FormData(); fd.append('username', document.getElementById('loginUsername').value); fd.append('password', document.getElementById('loginPassword').value); fd.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    fetch('/accounts/login/', {method:'POST', body:fd, redirect:'manual'})
+        .then(function(r) { if (r.type==='opaqueredirect'||r.ok||r.status===302) return fetch(AUTH_API).then(function(ar) { return ar.json(); }); throw new Error('Pogrešno korisničko ime ili lozinka.'); })
+        .then(function(authData) {
+            if (authData && authData.authenticated) {
+                IS_AUTH = true;
+                if (authData.email) document.getElementById('clientEmail').value = authData.email;
+                if (authData.full_name) { var parts = authData.full_name.trim().split(' '); document.getElementById('clientFirst').value = parts[0]||''; document.getElementById('clientLast').value = parts.slice(1).join(' ')||''; }
+                var dp = selectedDateStr.split('-'); goToPodaci(dp[2]+'.'+dp[1]+'.'+dp[0]+'.', selectedTimeStr);
+            } else { err.textContent = 'Pogrešno korisničko ime ili lozinka.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Prijavi se i nastavi'; }
+        })
+        .catch(function(ex) { err.textContent = ex.message||'Greška pri prijavi.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Prijavi se i nastavi'; });
+}
+
+function submitRegister(e) {
+    e.preventDefault(); var err = document.getElementById('registerError'); err.style.display = 'none';
+    var btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = 'Registracija...';
+    fetch(REGISTER_API, {method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')}, body: JSON.stringify({first_name:document.getElementById('regFirst').value, last_name:document.getElementById('regLast').value, email:document.getElementById('regEmail').value, username:document.getElementById('regUsername').value, password:document.getElementById('regPassword').value})})
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) { IS_AUTH = true; var parts = (data.full_name||'').trim().split(' '); document.getElementById('clientFirst').value = parts[0]||''; document.getElementById('clientLast').value = parts.slice(1).join(' ')||''; document.getElementById('clientEmail').value = data.email||''; var dp = selectedDateStr.split('-'); goToPodaci(dp[2]+'.'+dp[1]+'.'+dp[0]+'.', selectedTimeStr); }
+            else { err.textContent = data.error||'Greška pri registraciji.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Registriraj se i nastavi'; }
+        })
+        .catch(function() { err.textContent = 'Greška. Pokušajte ponovo.'; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Registriraj se i nastavi'; });
+}
+
+/* pw-toggle */
+(function(){var EO='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';var EC='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';function addToggle(inp){if(inp._pwDone)return;inp._pwDone=true;var w=document.createElement('div');w.style.cssText='position:relative;display:block;';inp.parentNode.insertBefore(w,inp);w.appendChild(inp);inp.style.paddingRight='40px';var b=document.createElement('button');b.type='button';b.tabIndex=-1;b.title='Prikaži/sakrij lozinku';b.style.cssText='position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:#888;line-height:0;z-index:2;';b.innerHTML=EO;b.onclick=function(e){e.preventDefault();if(inp.type==='password'){inp.type='text';b.innerHTML=EC;}else{inp.type='password';b.innerHTML=EO;}};w.appendChild(b);}function init(){document.querySelectorAll('input[type="password"]').forEach(addToggle);}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();
+
+renderCalendar();
+showStep(2);
+</script>
+{% endblock %}

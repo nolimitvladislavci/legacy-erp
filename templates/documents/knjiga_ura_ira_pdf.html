@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+@page { margin: 10mm; size: A4 landscape; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:8pt; color:#1a1a1a; }
+
+.header { border-bottom:2pt solid #0f172a; padding-bottom:10pt; margin-bottom:12pt; }
+.header h1 { font-size:14pt; color:#0f172a; margin-bottom:2pt; }
+.header .sub { font-size:9pt; color:#475569; }
+.header .company { font-size:8pt; color:#475569; margin-top:4pt; }
+.header .period { float:right; font-size:10pt; font-weight:700; color:#c9a84c; margin-top:-20pt; }
+
+table { width:100%; border-collapse:collapse; margin-bottom:10pt; }
+thead tr { background:#0f172a; color:white; }
+th { padding:4pt 4pt; font-size:6.5pt; text-transform:uppercase; letter-spacing:.3px; text-align:left; }
+th.r { text-align:right; }
+td { padding:3pt 4pt; font-size:7.5pt; border-bottom:.3pt solid #e2e8f0; }
+td.r { text-align:right; font-variant-numeric:tabular-nums; }
+tr:nth-child(even) td { background:#fafafa; }
+tfoot td { font-weight:700; border-top:1.5pt solid #0f172a; padding:5pt 4pt; font-size:8pt; }
+
+.footer { position:fixed; bottom:5mm; left:10mm; right:10mm; text-align:center; font-size:6pt; color:#94a3b8; border-top:.5pt solid #e2e8f0; padding-top:3pt; }
+</style></head>
+<body>
+
+<div class="header">
+  <h1>KNJIGA {{ book_type }}</h1>
+  <div class="sub">{% if book_type == 'URA' %}Knjiga primljenih (ulaznih) racuna{% else %}Knjiga izdanih (izlaznih) racuna{% endif %}</div>
+  <div class="company">
+    {{ company.name }}
+    {% if company.oib %} · OIB: {{ company.oib }}{% endif %}
+    {% if company.address %} · {{ company.address }}{% endif %}
+    {% if company.city %}, {{ company.city }}{% endif %}
+  </div>
+  <div class="period">{{ date_from|date:"d.m.Y" }} — {{ date_to|date:"d.m.Y" }}</div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:3%">R.br.</th>
+      <th style="width:8%">Broj racuna</th>
+      <th style="width:6%">Datum</th>
+      <th style="width:16%">{% if book_type == 'URA' %}Dobavljac{% else %}Kupac{% endif %}</th>
+      <th style="width:8%">OIB/PDV-ID</th>
+      <th class="r" style="width:6%">Osn. 0%</th>
+      <th class="r" style="width:6%">Osn. 5%</th>
+      <th class="r" style="width:5%">{% if book_type == 'URA' %}Pretp.{% else %}PDV{% endif %} 5%</th>
+      <th class="r" style="width:6%">Osn. 13%</th>
+      <th class="r" style="width:5%">{% if book_type == 'URA' %}Pretp.{% else %}PDV{% endif %} 13%</th>
+      <th class="r" style="width:6%">Osn. 25%</th>
+      <th class="r" style="width:5%">{% if book_type == 'URA' %}Pretp.{% else %}PDV{% endif %} 25%</th>
+      <th class="r" style="width:6%">Uk. {% if book_type == 'URA' %}pretp.{% else %}PDV{% endif %}</th>
+      <th class="r" style="width:8%">Ukupno s PDV</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in entries %}
+    <tr>
+      <td>{{ e.seq }}</td>
+      <td>{{ e.doc_number }}</td>
+      <td>{{ e.doc_date|date:"d.m.Y" }}</td>
+      <td>{{ e.partner_name|truncatechars:35 }}</td>
+      <td style="font-size:6.5pt">{{ e.partner_oib|default:"-" }}</td>
+      <td class="r">{% if e.base_0 %}{{ e.base_0|floatformat:2 }}{% endif %}</td>
+      <td class="r">{% if e.base_5 %}{{ e.base_5|floatformat:2 }}{% endif %}</td>
+      <td class="r">{% if e.vat_5 %}{{ e.vat_5|floatformat:2 }}{% endif %}</td>
+      <td class="r">{% if e.base_13 %}{{ e.base_13|floatformat:2 }}{% endif %}</td>
+      <td class="r">{% if e.vat_13 %}{{ e.vat_13|floatformat:2 }}{% endif %}</td>
+      <td class="r">{% if e.base_25 %}{{ e.base_25|floatformat:2 }}{% endif %}</td>
+      <td class="r">{% if e.vat_25 %}{{ e.vat_25|floatformat:2 }}{% endif %}</td>
+      <td class="r"><strong>{{ e.total_vat|floatformat:2 }}</strong></td>
+      <td class="r"><strong>{{ e.total_with_vat|floatformat:2 }}</strong></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="5">UKUPNO ({{ totals.count }} racuna)</td>
+      <td class="r">{{ totals.base_0|floatformat:2 }}</td>
+      <td class="r">{{ totals.base_5|floatformat:2 }}</td>
+      <td class="r">{{ totals.vat_5|floatformat:2 }}</td>
+      <td class="r">{{ totals.base_13|floatformat:2 }}</td>
+      <td class="r">{{ totals.vat_13|floatformat:2 }}</td>
+      <td class="r">{{ totals.base_25|floatformat:2 }}</td>
+      <td class="r">{{ totals.vat_25|floatformat:2 }}</td>
+      <td class="r">{{ totals.total_vat|floatformat:2 }}</td>
+      <td class="r">{{ totals.total_with_vat|floatformat:2 }}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<div style="margin-top:16pt;font-size:7pt;color:#475569">
+  Sastavio/la: __________________________________ &nbsp;&nbsp;&nbsp; Potpis: __________________________________ &nbsp;&nbsp;&nbsp; Datum: {% now "d.m.Y" %}
+</div>
+
+<div class="footer">
+  {{ company.name }}{% if company.oib %} · OIB: {{ company.oib }}{% endif %}{% if company.address %} · {{ company.address }}{% endif %} · Generirano: {% now "d.m.Y H:i" %} · LIMIT Connect ERP
+</div>
+
+</body></html>

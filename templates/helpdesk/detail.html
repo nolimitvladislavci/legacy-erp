@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ ticket.ticket_number }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ ticket.ticket_number }} - {{ ticket.subject }}</h2>
+        <div>
+            {% if ticket.status != 'closed' %}
+            <a href="{% url 'helpdesk:close' ticket.pk %}" class="btn btn-dark" onclick="return confirm('Zatvoriti tiket?')">Zatvori tiket</a>
+            {% endif %}
+        </div>
+    </div>
+    {% if ticket.is_overdue %}<div class="alert alert-danger"><strong>SLA prekoracen!</strong> Rok: {{ ticket.sla_deadline }}</div>{% endif %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Opis</strong></div>
+                <div class="card-body">{{ ticket.description|linebreaks }}</div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between"><strong>Poruke ({{ messages|length }})</strong></div>
+                <div class="card-body">
+                    {% for msg in messages %}
+                    <div class="border rounded p-3 mb-2 {% if msg.is_internal %}bg-light border-warning{% elif msg.is_from_client %}bg-white{% else %}bg-light{% endif %}">
+                        <div class="d-flex justify-content-between mb-1">
+                            <strong>{{ msg.sender_name|default:msg.sender|default:"Sustav" }}</strong>
+                            <small class="text-muted">{{ msg.created_at|date:"d.m.Y H:i" }}{% if msg.is_internal %} <span class="badge bg-warning text-dark">Interno</span>{% endif %}</small>
+                        </div>
+                        <div>{{ msg.body|linebreaks }}</div>
+                        {% if msg.attachment %}<div class="mt-1"><a href="{{ msg.attachment.url }}" class="btn btn-sm btn-outline-secondary">Prilog</a></div>{% endif %}
+                    </div>
+                    {% empty %}<p class="text-muted">Nema poruka</p>{% endfor %}
+                </div>
+            </div>
+            {% if ticket.status != 'closed' %}
+            <div class="card mb-3">
+                <div class="card-header"><strong>Odgovori</strong></div>
+                <div class="card-body">
+                    {% if templates %}
+                    <div class="mb-3">
+                        <label class="form-label">Brzi predlozak:</label>
+                        <select class="form-select" id="template-select" onchange="document.getElementById('reply-body').value=this.options[this.selectedIndex].dataset.body || ''">
+                            <option value="">-- Odaberi predlozak --</option>
+                            {% for tpl in templates %}<option data-body="{{ tpl.body }}">{{ tpl.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    <form method="post" action="{% url 'helpdesk:reply' ticket.pk %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <textarea name="body" id="reply-body" class="form-control mb-2" rows="4" required placeholder="Upisite odgovor..."></textarea>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="form-check form-check-inline"><input type="checkbox" name="is_internal" class="form-check-input" id="chk-internal"><label for="chk-internal" class="form-check-label">Interno (klijent ne vidi)</label></div>
+                                <input type="file" name="attachment" class="form-control-sm d-inline-block" style="width:auto">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Posalji</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">Detalji tiketa</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Status:</strong> <span class="badge bg-{% if ticket.status == 'open' %}danger{% elif ticket.status == 'in_progress' %}primary{% elif ticket.status == 'resolved' %}success{% elif ticket.status == 'closed' %}secondary{% else %}warning{% endif %}">{{ ticket.get_status_display }}</span></li>
+                    <li class="list-group-item"><strong>Prioritet:</strong> <span class="badge bg-{% if ticket.priority == 'critical' %}dark{% elif ticket.priority == 'urgent' %}danger{% elif ticket.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ ticket.get_priority_display }}</span></li>
+                    <li class="list-group-item"><strong>Kategorija:</strong> {{ ticket.get_category_display }}</li>
+                    <li class="list-group-item"><strong>Izvor:</strong> {{ ticket.get_source_display }}</li>
+                    <li class="list-group-item"><strong>Klijent:</strong> {{ ticket.client|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Kontakt:</strong> {{ ticket.contact_name|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ ticket.contact_email|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Telefon:</strong> {{ ticket.contact_phone|default:"-" }}</li>
+                    <li class="list-group-item"><strong>SLA rok:</strong> {{ ticket.sla_deadline|date:"d.m.Y H:i"|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Kreiran:</strong> {{ ticket.created_at|date:"d.m.Y H:i" }}</li>
+                    {% if ticket.first_response_at %}<li class="list-group-item"><strong>Prvi odgovor:</strong> {{ ticket.first_response_at|date:"d.m.Y H:i" }}</li>{% endif %}
+                    {% if ticket.resolved_at %}<li class="list-group-item"><strong>Rijesen:</strong> {{ ticket.resolved_at|date:"d.m.Y H:i" }}</li>{% endif %}
+                    {% if ticket.satisfaction_rating %}<li class="list-group-item"><strong>Ocjena:</strong> {{ ticket.satisfaction_rating }}/5</li>{% endif %}
+                    {% if ticket.tags %}<li class="list-group-item"><strong>Tagovi:</strong> {{ ticket.tags }}</li>{% endif %}
+                </ul>
+            </div>
+            {% if ticket.status != 'closed' %}
+            <div class="card mb-3">
+                <div class="card-header">Akcije</div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'helpdesk:assign' ticket.pk %}" class="mb-2">
+                        {% csrf_token %}
+                        <label class="form-label">Dodijeli:</label>
+                        <div class="input-group">
+                            <select name="assigned_to" class="form-select">
+                                <option value="">-- Nitko --</option>
+                                {% for u in users %}<option value="{{ u.id }}" {% if ticket.assigned_to_id == u.id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-outline-primary">Spremi</button>
+                        </div>
+                    </form>
+                    <form method="post" action="{% url 'helpdesk:status' ticket.pk %}">
+                        {% csrf_token %}
+                        <label class="form-label">Promijeni status:</label>
+                        <div class="input-group">
+                            <select name="status" class="form-select">
+                                {% for val, label in statuses %}<option value="{{ val }}" {% if ticket.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-outline-success">Spremi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Prediktivna analitika{% endblock %}
+{% block page_title %}Prediktivna analitika{% endblock %}
+{% block content %}
+<style>
+.pa-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
+.pa-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 12px}
+.pa-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.pa-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;color:#64748b;white-space:nowrap}
+.pa-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
+.badge-critical{background:#fef2f2;color:#dc2626;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.badge-warning{background:#fffbeb;color:#d97706;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.badge-ok{background:#f0fdf4;color:#16a34a;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.pa-info{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px;margin-bottom:16px;font-size:.85rem;color:#0c4a6e}
+.pa-stockout{color:#dc2626;font-weight:600;font-size:.78rem}
+.pa-safe{color:#16a34a;font-size:.78rem}
+.stat-num{font-size:1.8rem;font-weight:700}
+.btn-auto-po{background:var(--gold,#c9a84c);color:#000;border:none;padding:6px 14px;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-auto-po:hover{opacity:.85;transform:translateY(-1px)}
+.btn-auto-po:disabled{opacity:.5;cursor:not-allowed}
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h2 class="mb-0">
+    <i class="fas fa-chart-line me-2" style="color:var(--gold)"></i>
+    Prediktivna analitika
+  </h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'inventory:reorder_predictions' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-redo me-1"></i>Osnovna predikcija
+    </a>
+    <a href="{% url 'inventory:stock_overview' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-warehouse me-1"></i>Pregled zalihe
+    </a>
+  </div>
+</div>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card text-center">
+      <div class="stat-num" style="color:#dc2626">{{ critical_count }}</div>
+      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Kriticnih artikala</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card text-center">
+      <div class="stat-num" style="color:#d97706">{{ warning_count }}</div>
+      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Upozorenja</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card text-center">
+      <div class="stat-num" style="color:var(--gold)">{{ total_items }}</div>
+      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Ukupno artikala</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card text-center">
+      <div class="stat-num" style="color:#64748b">{{ insufficient_count }}</div>
+      <div style="color:#94a3b8;font-size:.78rem;margin-top:4px">Bez dovoljno podataka</div>
+    </div>
+  </div>
+</div>
+
+{% if not has_enough_data %}
+<div class="pa-info">
+  <strong>Nedovoljno podataka za prediktivnu analizu.</strong><br>
+  Sustav treba minimalno 90 dana izlaznih kretanja zalihe da bi mogao izracunati prosjecnu dnevnu potrosnju.<br><br>
+  <strong>Status:</strong> {{ total_items }} artikala u sustavu, {{ insufficient_count }} bez dovoljno podataka.
+</div>
+{% endif %}
+
+{% if items %}
+<!-- Auto-PO button -->
+<div class="pa-card">
+  <div class="d-flex justify-content-between align-items-center">
+    <h6 class="mb-0">Automatska narudzbenica</h6>
+    <div>
+      <button id="btn-auto-po-all" class="btn-auto-po" onclick="generatePO()">
+        <i class="fas fa-magic me-1"></i>Generiraj narudzbenice za sve kriticne artikle
+      </button>
+    </div>
+  </div>
+  <div id="po-result" style="display:none;margin-top:12px;padding:10px;border-radius:6px;font-size:.85rem"></div>
+</div>
+
+<!-- Items table -->
+<div class="pa-card">
+  <h6>Artikli koji trebaju narudzbu ({{ items|length }})</h6>
+  <div style="overflow-x:auto">
+    <table class="pa-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="select-all" checked></th>
+          <th>Artikl</th>
+          <th>SKU</th>
+          <th>Trenutna zaliha</th>
+          <th>Prosj. dnevna</th>
+          <th>Dana do nestanka</th>
+          <th>Tjedna potraznja</th>
+          <th>Datum nestanka</th>
+          <th>Predlozena kol.</th>
+          <th>Dobavljac</th>
+          <th>Hitnost</th>
+          <th>Akcija</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for r in items %}
+        <tr>
+          <td><input type="checkbox" class="item-check" value="{{ r.item.pk }}" checked></td>
+          <td><strong>{{ r.item.name }}</strong></td>
+          <td style="color:#64748b">{{ r.item.sku|default:"-" }}</td>
+          <td>{{ r.item.quantity }} {{ r.item.unit }}</td>
+          <td>{{ r.avg_daily }} {{ r.item.unit }}/dan</td>
+          <td>
+            {% if r.days_left is not None %}
+              {% if r.days_left <= 3 %}
+                <span class="pa-stockout">{{ r.days_left }} dana</span>
+              {% else %}
+                {{ r.days_left }} dana
+              {% endif %}
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+          <td>
+            {% if r.weekly_prediction %}
+              {{ r.weekly_prediction.weekly_demand }} {{ r.item.unit }}
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+          <td>
+            {% if r.weekly_prediction and r.weekly_prediction.stockout_date %}
+              <span class="{% if r.weekly_prediction.will_stockout %}pa-stockout{% else %}pa-safe{% endif %}">
+                {{ r.weekly_prediction.stockout_date|date:"d.m.Y" }}
+              </span>
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+          <td><strong>{{ r.suggested_qty }} {{ r.item.unit }}</strong></td>
+          <td>{{ r.item.supplier.name|default:"-" }}</td>
+          <td>
+            {% if r.urgency == 'critical' %}<span class="badge-critical">KRITICNO</span>
+            {% elif r.urgency == 'warning' %}<span class="badge-warning">UPOZORENJE</span>
+            {% else %}<span class="badge-ok">OK</span>
+            {% endif %}
+          </td>
+          <td>
+            <button class="btn-auto-po" style="font-size:.7rem;padding:4px 10px" onclick="generatePO('{{ r.item.pk }}')">
+              <i class="fas fa-file-invoice me-1"></i>PO
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% elif has_enough_data %}
+<div class="pa-card">
+  <h6>Prediktivna analitika</h6>
+  <p style="color:#64748b;text-align:center;padding:20px 0">
+    <i class="fas fa-check-circle" style="color:#16a34a;font-size:1.5rem"></i><br>
+    Svi artikli imaju dovoljno zalihe. Nema potrebe za narudzbu.
+  </p>
+</div>
+{% endif %}
+
+<!-- Info card -->
+<div class="pa-card">
+  <h6>O prediktivnoj analitici</h6>
+  <div style="font-size:.82rem;color:#475569">
+    <p>Napredni sustav koristi <strong>tezinski prosjek</strong> koji daje 2x veci utjecaj podatcima iz zadnjih 45 dana:</p>
+    <ul style="margin:8px 0;padding-left:20px">
+      <li><strong>Prosjecna dnevna potrosnja</strong> = tezinski prosjek izlaza (recentni dani = 2x tezina)</li>
+      <li><strong>Tjedna potraznja</strong> = prosj. dnevna &times; 7</li>
+      <li><strong>Datum nestanka</strong> = danas + (trenutna zaliha / prosj. dnevna)</li>
+      <li><strong>Automatska narudzbenica</strong> = grupira artikle po dobavljacu, koristi dogovorene cijene</li>
+    </ul>
+    <p><strong>Celery task:</strong> Svaki dan u 06:30 sustav automatski provjerava kriticne artikle i generira nacrt narudzbenica.</p>
+  </div>
+</div>
+
+<script>
+function generatePO(singleItemId) {
+    const btn = document.getElementById('btn-auto-po-all');
+    const resultDiv = document.getElementById('po-result');
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    if (singleItemId) {
+        formData.append('item_ids', singleItemId);
+    } else {
+        document.querySelectorAll('.item-check:checked').forEach(cb => {
+            formData.append('item_ids', cb.value);
+        });
+    }
+
+    if (btn) btn.disabled = true;
+
+    fetch('{% url "inventory:auto_generate_po" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+    })
+    .then(r => r.json())
+    .then(data => {
+        resultDiv.style.display = 'block';
+        if (data.success && data.po_count > 0) {
+            resultDiv.style.background = '#f0fdf4';
+            resultDiv.style.border = '1px solid #bbf7d0';
+            resultDiv.style.color = '#166534';
+            resultDiv.innerHTML = '<i class="fas fa-check-circle me-1"></i>' + data.message +
+                ' <a href="/procurement/" style="color:#166534;font-weight:600;margin-left:8px">Pregledaj narudzbenice &rarr;</a>';
+        } else if (data.success) {
+            resultDiv.style.background = '#fffbeb';
+            resultDiv.style.border = '1px solid #fde68a';
+            resultDiv.style.color = '#92400e';
+            resultDiv.innerHTML = '<i class="fas fa-info-circle me-1"></i>Nema artikala s dodijeljenim dobavljacem za automatsku narudzbenicu.';
+        } else {
+            resultDiv.style.background = '#fef2f2';
+            resultDiv.style.border = '1px solid #fecaca';
+            resultDiv.style.color = '#991b1b';
+            resultDiv.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>' + (data.error || 'Greska pri generiranju.');
+        }
+        if (btn) btn.disabled = false;
+    })
+    .catch(err => {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fef2f2';
+        resultDiv.style.border = '1px solid #fecaca';
+        resultDiv.style.color = '#991b1b';
+        resultDiv.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>Greska: ' + err;
+        if (btn) btn.disabled = false;
+    });
+}
+
+// Select all checkbox
+document.getElementById('select-all')?.addEventListener('change', function() {
+    document.querySelectorAll('.item-check').forEach(cb => cb.checked = this.checked);
+});
+</script>
+{% endblock %}

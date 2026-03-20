@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face { font-family:'DejaVu'; src:url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf'); }
+@font-face { font-family:'DejaVu'; src:url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf'); font-weight:bold; }
+* { font-family:'DejaVu',sans-serif!important; box-sizing:border-box; }
+@page { size:A4; margin:20mm 16mm 18mm 16mm;
+  @bottom-right { content:"Seite " counter(page) " von " counter(pages); font-size:7pt; color:#94a3b8; } }
+body { color:#1a1a1a; font-size:9.5pt; line-height:1.5; }
+
+.hdr { display:table; width:100%; border-bottom:3px solid #c9a84c; padding-bottom:10px; margin-bottom:18px; }
+.hl  { display:table-cell; width:60%; vertical-align:bottom; }
+.hr  { display:table-cell; width:40%; vertical-align:bottom; text-align:right; }
+.co  { font-size:16pt; font-weight:bold; color:#0f172a; letter-spacing:.5px; }
+.co span { color:#c9a84c; }
+.sub { font-size:7pt; color:#64748b; letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+.doc-type { font-size:14pt; font-weight:bold; color:#c9a84c; }
+.doc-ref  { font-size:8pt; color:#64748b; margin-top:3px; }
+.doc-date { font-size:8.5pt; color:#0f172a; margin-top:3px; }
+
+.addr { display:table; width:100%; margin-bottom:16px; border:1px solid #e2e8f0; }
+.a-l  { display:table-cell; width:50%; padding:12px 14px; border-right:1px solid #e2e8f0; vertical-align:top; }
+.a-r  { display:table-cell; width:50%; padding:12px 14px; vertical-align:top; }
+.al   { font-size:6.5pt; color:#94a3b8; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:3px; }
+.an   { font-size:10pt; font-weight:bold; color:#0f172a; }
+.ad   { font-size:8pt; color:#374151; margin-top:2px; line-height:1.5; }
+
+.section { font-size:7pt; font-weight:bold; letter-spacing:2px; text-transform:uppercase;
+  color:#c9a84c; background:rgba(201,168,76,.07); padding:4px 8px;
+  border-left:3px solid #c9a84c; margin:14px 0 6px; }
+
+.info-table { width:100%; border-collapse:collapse; margin-bottom:14px; }
+.info-table td { padding:6px 10px; border:1px solid #e2e8f0; font-size:9pt; }
+.info-table .lbl { background:#f8fafc; color:#64748b; width:40%; font-size:8.5pt; }
+.info-table .val { font-weight:bold; }
+
+.svc-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
+.svc-table th { background:#0f172a; color:#fff; padding:7px 10px; font-size:8pt; text-align:left; }
+.svc-table td { padding:6px 10px; border-bottom:1px solid #f1f5f9; font-size:8.5pt; }
+.svc-table tr:nth-child(even) td { background:#f8fafc; }
+.pos { width:8%; text-align:center; color:#94a3b8; }
+
+.price-box { float:right; width:260px; border:2px solid #c9a84c; margin-bottom:20px; }
+.pb-row { display:table; width:100%; padding:5px 12px; border-bottom:1px solid rgba(201,168,76,.2); }
+.pb-l   { display:table-cell; font-size:8.5pt; color:#64748b; }
+.pb-r   { display:table-cell; text-align:right; font-size:8.5pt; font-weight:bold; }
+.pb-total { background:#c9a84c; }
+.pb-total .pb-l { color:#0f172a; font-weight:bold; font-size:9pt; }
+.pb-total .pb-r { color:#0f172a; font-size:10pt; font-weight:bold; }
+.clearfix { clear:both; }
+
+.notes { border:1px solid #e2e8f0; padding:12px 14px; font-size:8.5pt; line-height:1.7; margin-top:10px; }
+.notes strong { color:#0f172a; }
+
+.sign { display:table; width:100%; margin-top:28px; }
+.sign-l { display:table-cell; width:50%; padding-right:20px; }
+.sign-r { display:table-cell; width:50%; padding-left:20px; }
+.sign-line { border-top:1px solid #0f172a; padding-top:5px; font-size:7.5pt; color:#64748b; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hl">
+    <img src="/var/www/fina-connect/static/brand/viskovic_logo.jpg" alt="VG" style="height:44px;width:auto;margin-bottom:4px;display:block">
+    <div class="sub">Bau &middot; Immobilien &middot; Handel &middot; viskovic-group.de</div>
+  </div>
+  <div class="hr">
+    <div class="doc-type">ANGEBOT</div>
+    <div class="doc-ref">Ref.-Nr. {{ ref }}</div>
+    <div class="doc-date">Datum: {{ date|date:"d.m.Y" }}</div>
+  </div>
+</div>
+
+<!-- ADDRESS -->
+<div class="addr">
+  <div class="a-l">
+    <div class="al">Auftragnehmer</div>
+    <div class="an">Viš&#269;ović Group</div>
+    <div class="ad">viskovic-group.de<br>info@viskovic-group.de<br>Stuttgart &amp; Region</div>
+  </div>
+  <div class="a-r">
+    <div class="al">Auftraggeber</div>
+    <div class="an">{{ name|default:"Interessent" }}</div>
+    <div class="ad">
+      {% if phone %}Tel: {{ phone }}<br>{% endif %}
+      {% if email %}{{ email }}<br>{% endif %}
+      {% if location %}{{ location }}{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- PROJEKT INFO -->
+<div class="section">Projektinformationen</div>
+<table class="info-table">
+  <tr><td class="lbl">Leistungsart</td><td class="val">Badsanierung Premium</td></tr>
+  <tr><td class="lbl">Grundfl&auml;che</td><td class="val">ca. {{ sqm }} m&sup2;</td></tr>
+  <tr><td class="lbl">Qualit&auml;tsstufe</td><td class="val">{{ quality|capfirst }}</td></tr>
+  <tr><td class="lbl">Standort</td><td class="val">{{ location|default:"Nach Vereinbarung" }}</td></tr>
+  <tr><td class="lbl">Ausf&uuml;hrungsteam</td><td class="val">3 Fachhandwerker + 1 Helfer (Fliesenleger, Sanit&auml;r, Elektro)</td></tr>
+  <tr><td class="lbl">Stundens&auml;tze</td><td class="val">Fliesenleger 65 &euro;/h &nbsp;&middot;&nbsp; Sanit&auml;r 72 &euro;/h &nbsp;&middot;&nbsp; Elektro 78 &euro;/h</td></tr>
+</table>
+
+<!-- LEISTUNGEN -->
+<div class="section">Enthaltene Leistungen</div>
+<table class="svc-table">
+  <thead><tr><th class="pos">Pos.</th><th>Leistungsbeschreibung</th></tr></thead>
+  <tbody>
+    {% for svc in services_list %}
+    <tr><td class="pos">{{ forloop.counter }}</td><td>{{ svc }}</td></tr>
+    {% empty %}
+    <tr><td colspan="2" style="color:#94a3b8;font-style:italic">Leistungen gem&auml;&szlig; Kalkulator-Auswahl</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- PREIS -->
+<div class="price-box">
+  <div class="pb-row"><div class="pb-l">Richtpreis netto (von)</div><div class="pb-r">{{ budget_from }} &euro;</div></div>
+  <div class="pb-row"><div class="pb-l">Richtpreis netto (bis)</div><div class="pb-r">{{ budget_to }} &euro;</div></div>
+  <div class="pb-row"><div class="pb-l">+ MwSt. 19%</div><div class="pb-r">zzgl.</div></div>
+  <div class="pb-row pb-total"><div class="pb-l">FESTPREIS nach Aufma&szlig;</div><div class="pb-r">auf Anfrage</div></div>
+</div>
+<div class="clearfix"></div>
+
+<!-- HINWEISE -->
+<div class="notes">
+  <strong>Hinweise zum Angebot:</strong><br>
+  Dieser Richtpreis basiert auf Kalkulator-Eingaben ohne Vor-Ort-Besichtigung. Ein verbindlicher Festpreis
+  erfolgt nach kostenloser Aufma&szlig;nahme vor Ort. Preisabweichungen bei unvorhergesehenen Gegebenheiten
+  (z.B. alte Leitungen, Feuchtigkeitssch&auml;den, Betonw&auml;nde) werden vorab abgestimmt.<br><br>
+  <strong>Materialkosten:</strong> Material wird vom Kunden direkt bezahlt (Einkaufspreis, kein Aufschlag).
+  Wir koordinieren Beschaffung und Lieferung auf Wunsch kostenlos.<br><br>
+  <strong>Zahlungsbedingungen:</strong> 40% Anzahlung bei Auftragserteilung &middot;
+  40% bei Beginn der Fliesenarbeiten &middot; 20% bei Abnahme.<br>
+  <strong>Garantie:</strong> 2 Jahre auf Verarbeitungsqualit&auml;t gem&auml;&szlig; VOB/B.<br>
+  <strong>Angebot g&uuml;ltig:</strong> 30 Tage ab Ausstellungsdatum.
+</div>
+
+<!-- UNTERSCHRIFTEN -->
+<div class="sign">
+  <div class="sign-l">
+    <div class="sign-line">
+      Datum, Unterschrift Auftragnehmer<br>
+      <strong>Vi&scaron;ković Group</strong>
+    </div>
+  </div>
+  <div class="sign-r">
+    <div class="sign-line">
+      Datum, Unterschrift Auftraggeber<br>
+      <strong>{{ name|default:"___________________________" }}</strong>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

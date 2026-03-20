@@ -1,0 +1,21 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Potvrda rezervacije{% endblock %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#0a0a0a;font-family:'Cormorant Garamond',Georgia,serif;">Potvrda rezervacije</h2>
+<p style="color:#333;line-height:1.6;">Poštovani/a {{ client_name }},</p>
+<p style="color:#333;line-height:1.6;">Vaša rezervacija je uspješno kreirana.</p>
+<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
+  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Usluga</td>
+      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;font-weight:600;">{{ service_name }}</td></tr>
+  <tr><td style="padding:8px 12px;color:#555;">Termin</td>
+      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ datetime }}</td></tr>
+  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Trajanje</td>
+      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;">{{ duration }} min</td></tr>
+  {% if price %}
+  <tr><td style="padding:8px 12px;color:#555;">Cijena</td>
+      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ price }} EUR</td></tr>
+  {% endif %}
+</table>
+<p style="color:#333;line-height:1.6;">Ako trebate otkazati ili promijeniti termin, kontaktirajte nas.</p>
+<p style="color:#555;">Hvala na povjerenju!</p>
+{% endblock %}

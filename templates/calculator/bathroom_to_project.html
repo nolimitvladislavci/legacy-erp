@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Izradi ponudu — {{ lead.title }}{% endblock %}
+{% block content %}
+<style>
+/* ─── Theme variables ─────────────────────────────── */
+:root {
+  --gold:#c9a84c; --gold2:#b8962e; --gold-dim:rgba(201,168,76,.12); --gold-border:rgba(201,168,76,.3);
+}
+
+/* DARK (default) */
+[data-theme="dark"] {
+  --bg-page:#0f172a; --bg-card:#111827; --bg-input:#1a2535; --bg-row:#111827;
+  --bg-row-sel:rgba(201,168,76,.07); --bg-preview:#0a1628;
+  --text:#e2e8f0; --text-dim:#94a3b8; --text-label:#cbd5e1;
+  --border:rgba(255,255,255,.08); --border-row:rgba(255,255,255,.06);
+  --divider:rgba(255,255,255,.05);
+}
+/* LIGHT */
+[data-theme="light"] {
+  --bg-page:#f1f5f9; --bg-card:#ffffff; --bg-input:#f8fafc; --bg-row:#f8fafc;
+  --bg-row-sel:rgba(201,168,76,.08); --bg-preview:#fff8ee;
+  --text:#1e293b; --text-dim:#64748b; --text-label:#374151;
+  --border:#e2e8f0; --border-row:#e2e8f0;
+  --divider:#e9edf2;
+}
+
+body { background: var(--bg-page) !important; color: var(--text) !important; }
+
+/* Cards override Bootstrap */
+.bath-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px;
+  color: var(--text) !important;
+}
+.bath-card .card-body { color: var(--text) !important; }
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed; top: 70px; right: 16px; z-index: 999;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px; cursor: pointer;
+  font-size: .78rem; color: var(--text-dim); display: flex; align-items: center; gap: 6px;
+  transition: .2s; box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.theme-toggle:hover { border-color: var(--gold-border); color: var(--gold); }
+
+/* Form controls */
+.bath-input {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 6px; padding: 7px 10px; width: 100%;
+  font-size: .85rem; transition: .15s;
+}
+.bath-input:focus { outline: none; border-color: var(--gold-border) !important; }
+.bath-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-dim); font-weight: 600; margin-bottom: 5px; display: block; }
+
+/* Normative rows */
+.norm-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  background: var(--bg-row);
+  border: 1px solid var(--border-row);
+  border-radius: 8px; margin-bottom: 5px;
+  cursor: pointer; transition: .15s;
+  color: var(--text);
+}
+.norm-row:hover { border-color: rgba(201,168,76,.3); }
+.norm-row.selected { border-color: var(--gold); background: var(--bg-row-sel); }
+.norm-row input[type=checkbox] { accent-color: var(--gold); width: 16px; height: 16px; flex-shrink: 0; }
+.norm-label { flex: 1; font-size: .83rem; color: var(--text); }
+.norm-mat { font-size: .72rem; color: var(--gold); min-width: 80px; text-align: right; }
+.norm-hrs { font-size: .72rem; color: var(--text-dim); min-width: 50px; text-align: right; }
+.norm-qty {
+  width: 68px; background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); padding: 4px 8px;
+  font-size: .82rem; text-align: right;
+}
+.norm-unit { font-size: .72rem; color: var(--text-dim); min-width: 26px; }
+
+.section-head {
+  font-size: .64rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold); padding: 10px 0 5px;
+  border-top: 1px solid var(--divider); margin-top: 8px;
+}
+.section-head:first-child { border-top: none; margin-top: 0; }
+
+/* Preview panel */
+.calc-preview {
+  background: var(--bg-preview);
+  border: 1px solid var(--gold-border);
+  border-radius: 12px; padding: 20px;
+}
+.calc-row {
+  display: flex; justify-content: space-between; font-size: .85rem;
+  padding: 5px 0; border-bottom: 1px solid var(--divider); color: var(--text);
+}
+.calc-row:last-child { border: none; }
+.calc-dim { color: var(--text-dim); }
+.calc-total {
+  font-size: 1.05rem; font-weight: 700; color: var(--gold);
+  border-top: 2px solid var(--gold-border) !important;
+  padding-top: 10px !important; margin-top: 4px; border-bottom: none !important;
+}
+.calc-grand {
+  font-size: 1.25rem; font-weight: 800;
+  background: var(--gold-dim); border-radius: 8px;
+  padding: 10px 12px; margin-top: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Badge pills */
+.info-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 600;
+}
+.pill-gold { background: rgba(201,168,76,.15); color: var(--gold); }
+.pill-gray { background: var(--bg-row); border: 1px solid var(--border); color: var(--text-dim); }
+.pill-green { background: rgba(34,197,94,.1); color: #22c55e; }
+
+/* Submit button */
+.btn-submit {
+  width: 100%; background: var(--gold); color: #0f172a;
+  font-weight: 700; font-size: .9rem; padding: 13px;
+  border: none; border-radius: 8px; cursor: pointer; transition: .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-submit:hover { background: var(--gold2); transform: translateY(-1px); }
+
+/* Description text */
+.lead-desc {
+  font-size: .82rem; color: var(--text-label); line-height: 1.6;
+  max-height: 120px; overflow-y: auto;
+  background: var(--bg-input); border-radius: 6px; padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+
+/* Headings inside cards */
+.card-section-title {
+  font-size: .68rem; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 14px;
+}
+
+/* Back link */
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--text-dim); font-size: .82rem; text-decoration: none;
+  padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: .15s;
+}
+.back-link:hover { color: var(--gold); border-color: var(--gold-border); }
+</style>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+  <span id="theme-icon">☀️</span><span id="theme-label">Svijetli dizajn</span>
+</button>
+
+<div class="container-fluid" style="max-width:980px" id="bath-wrapper" data-theme="dark">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4 pt-2">
+    <a href="{% url 'burza:lead_detail' lead.pk %}" class="back-link">← Natrag</a>
+    <div>
+      <h4 class="mb-0 fw-bold" style="color:var(--gold)">Izradi ponudu</h4>
+      <small style="color:var(--text-dim)">Lead #{{ lead.pk }} · {{ lead.contact_name }} · {{ lead.location }}</small>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- ─── LEFT COLUMN ─────────────────────────────── -->
+    <div class="col-lg-7">
+
+      <!-- Lead summary -->
+      <div class="bath-card card mb-3">
+        <div class="card-body">
+          <div class="card-section-title">Upit klijenta</div>
+          <p class="fw-bold mb-2" style="color:var(--text)">{{ lead.title }}</p>
+          <div class="lead-desc">{{ lead.description }}</div>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="info-pill pill-gold">👤 {{ lead.contact_name }}</span>
+            {% if lead.contact_phone %}<span class="info-pill pill-gray">📞 {{ lead.contact_phone }}</span>{% endif %}
+            <span class="info-pill pill-gray">📍 {{ lead.location }}</span>
+            {% if lead.budget_from %}<span class="info-pill pill-green">💰 {{ lead.budget_display }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <form method="post" id="bathForm">
+        {% csrf_token %}
+
+        <!-- Project settings -->
+        <div class="bath-card card mb-3">
+          <div class="card-body">
+            <div class="card-section-title">Detalji projekta</div>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="bath-label">Naziv projekta</label>
+                <input name="proj_name" class="bath-input" value="{{ lead.title }}">
+              </div>
+              <div class="col-6">
+                <label class="bath-label">Marža (%)</label>
+                <input name="margin" type="number" step="0.5" class="bath-input" value="20" id="inp-margin">
+              </div>
+              <div class="col-6">
+                <label class="bath-label">PDV (%)</label>
+                <select name="vat" class="bath-input" id="inp-vat">
+                  <option value="19" selected>19% (DE)</option>
+                  <option value="25">25% (HR)</option>
+                  <option value="0">0% (netto)</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="bath-label">Klijent (opcionalno)</label>
+                <select name="client_id" class="bath-input">
+                  <option value="">— Nema povezanog klijenta —</option>
+                  {% for p in partners %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Normative selector -->
+        <div class="bath-card card mb-3">
+          <div class="card-body">
+            <div class="card-section-title">
+              Popis radova
+              <span style="font-weight:400;color:var(--text-dim);font-size:.65rem;letter-spacing:0;text-transform:none">
+                — Vorschlag aus Upit klijenta
+              </span>
+            </div>
+
+            {% regroup normatives by unit as unit_groups %}
+            {% for ug in unit_groups %}
+              <div class="section-head">
+                {% if ug.grouper == "m2" %}🔲 Površinski radovi
+                {% elif ug.grouper == "kom" %}🚿 Oprema
+                {% elif ug.grouper == "pau" %}📋 Paušalne usluge
+                {% else %}{{ ug.grouper }}{% endif %}
+              </div>
+              {% for n in ug.list %}
+              <div class="norm-row {% if n.pk in suggested_ids %}selected{% endif %}" onclick="toggleNorm(this)">
+                <input type="checkbox" name="norm_ids" value="{{ n.pk }}"
+                  {% if n.pk in suggested_ids %}checked{% endif %}
+                  onclick="event.stopPropagation()">
+                <span class="norm-label">{{ n.name }}</span>
+                <span class="norm-mat">{{ n.base_material_cost }} €</span>
+                <span class="norm-hrs">{{ n.estimated_hours_per_unit }}h</span>
+                <input type="number" name="norm_qty" step="0.1" min="0.1"
+                  value="{% if n.unit == 'm2' %}{{ floor_m2 }}{% else %}1{% endif %}"
+                  class="norm-qty" onclick="event.stopPropagation()" oninput="updatePreview()">
+                <span class="norm-unit">/{{ n.unit }}</span>
+              </div>
+              {% endfor %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          📄 Kreiraj projekt i generiraj PDF
+        </button>
+      </form>
+    </div>
+
+    <!-- ─── RIGHT: Live preview ──────────────────────── -->
+    <div class="col-lg-5">
+      <div style="position:sticky;top:76px">
+        <div class="calc-preview">
+          <div class="card-section-title mb-3">📊 Procjena troškova uživo</div>
+          <div id="preview-lines" style="min-height:40px"></div>
+          <div style="margin-top:12px">
+            <div class="calc-row"><span class="calc-dim">Materijal</span><span id="p-mat">—</span></div>
+            <div class="calc-row"><span class="calc-dim">Troškovi rada (55€/h)</span><span id="p-lab">—</span></div>
+            <div class="calc-row"><span class="calc-dim">Neto cijena</span><span id="p-net">—</span></div>
+            <div class="calc-row"><span class="calc-dim">+ Marža <span id="p-marg-pct">20</span>%</span><span id="p-marg">—</span></div>
+            <div class="calc-row calc-total"><span>Cijena ponude neto</span><span id="p-offer-net">—</span></div>
+            <div class="calc-row"><span class="calc-dim">+ PDV <span id="p-vat-pct">19</span>%</span><span id="p-vat-amt">—</span></div>
+          </div>
+          <div class="calc-grand">
+            <span style="color:var(--text);font-weight:700">UKUPNO bruto</span>
+            <span id="p-total" style="color:var(--gold)">—</span>
+          </div>
+          <div class="mt-3" style="font-size:.7rem;color:var(--text-dim)">
+            Satnica: 55 €/h · Sve cijene neto + PDV<br>
+            Konačna cijena nakon izmjere na licu mjesta
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /row -->
+</div><!-- /wrapper -->
+
+<script>
+var LABOR_RATE = 55;
+var currentTheme = localStorage.getItem('bath_theme') || 'dark';
+
+function applyTheme(t) {
+  document.getElementById('bath-wrapper').setAttribute('data-theme', t);
+  document.getElementById('theme-icon').textContent  = t === 'dark' ? '☀️' : '🌙';
+  document.getElementById('theme-label').textContent = t === 'dark' ? 'Svijetli dizajn' : 'Tamni dizajn';
+  currentTheme = t;
+  localStorage.setItem('bath_theme', t);
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+}
+
+applyTheme(currentTheme);
+
+function fmt(n) {
+  return n.toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+}
+
+function toggleNorm(row) {
+  var cb = row.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  row.classList.toggle('selected', cb.checked);
+  updatePreview();
+}
+
+function updatePreview() {
+  var rows = document.querySelectorAll('.norm-row');
+  var mat = 0, lab = 0, lines = [];
+
+  rows.forEach(function(row) {
+    var cb  = row.querySelector('input[type=checkbox]');
+    if (!cb || !cb.checked) return;
+    var qty    = parseFloat(row.querySelector('.norm-qty').value) || 1;
+    var label  = row.querySelector('.norm-label').textContent.trim();
+    var matTxt = row.querySelector('.norm-mat').textContent.replace('€','').replace('.','').replace(',','.').trim();
+    var hrsTxt = row.querySelector('.norm-hrs').textContent.replace('h','').trim();
+    var matVal = parseFloat(matTxt) || 0;
+    var hrsVal = parseFloat(hrsTxt) || 0;
+    var lm = matVal * qty, ll = hrsVal * LABOR_RATE * qty;
+    mat += lm; lab += ll;
+    lines.push({label: label, total: lm + ll});
+  });
+
+  var net     = mat + lab;
+  var margPct = parseFloat(document.getElementById('inp-margin').value) || 20;
+  var offerNet = net * (1 + margPct / 100);
+  var vatPct  = parseFloat(document.getElementById('inp-vat').value) || 19;
+  var vatAmt  = offerNet * vatPct / 100;
+  var total   = offerNet + vatAmt;
+
+  var html = '';
+  lines.forEach(function(l) {
+    html += '<div class="calc-row" style="font-size:.78rem">'
+      + '<span class="calc-dim" style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:190px">' + l.label + '</span>'
+      + '<span style="flex-shrink:0">' + fmt(l.total) + '</span></div>';
+  });
+  if (!lines.length) html = '<p style="color:var(--text-dim);font-size:.8rem;text-align:center;padding:8px 0">Nema odabranih usluga</p>';
+  document.getElementById('preview-lines').innerHTML = html;
+
+  document.getElementById('p-mat').textContent       = fmt(mat);
+  document.getElementById('p-lab').textContent       = fmt(lab);
+  document.getElementById('p-net').textContent       = fmt(net);
+  document.getElementById('p-marg-pct').textContent  = margPct;
+  document.getElementById('p-marg').textContent      = fmt(offerNet - net);
+  document.getElementById('p-offer-net').textContent = fmt(offerNet);
+  document.getElementById('p-vat-pct').textContent   = vatPct;
+  document.getElementById('p-vat-amt').textContent   = fmt(vatAmt);
+  document.getElementById('p-total').textContent     = fmt(total);
+}
+
+document.getElementById('inp-margin').addEventListener('input', updatePreview);
+document.getElementById('inp-vat').addEventListener('change', updatePreview);
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('norm-qty')) updatePreview();
+});
+
+updatePreview();
+</script>
+{% endblock %}

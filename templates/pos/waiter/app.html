@@ -1,0 +1,274 @@
+{% extends "pos/base_pos.html" %}
+{% block topbar_nav %}{% endblock %}
+{% load i18n %}
+{% block title %}Konobar — {{ request.user.get_full_name|default:request.user.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Waiter app — sve boje iz base_pos.html varijabli */
+.wa-wrap{max-width:600px;margin:0 auto}
+
+/* Shift banner */
+.shift-banner{padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.shift-banner.active{background:rgba(34,197,94,.06);border-bottom-color:rgba(34,197,94,.2)}
+.shift-banner.inactive{background:rgba(239,68,68,.06);border-bottom-color:rgba(239,68,68,.2)}
+.shift-info{font-size:.78rem;color:var(--text)}
+.shift-info .status{font-weight:700}
+.shift-info .status.on{color:var(--green,#22c55e)}
+.shift-info .status.off{color:var(--red,#ef4444)}
+.shift-info .timer{color:var(--muted);font-size:.68rem}
+.shift-btn{padding:.4rem .9rem;border-radius:8px;border:none;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit}
+.shift-btn.start{background:var(--green,#22c55e);color:#000}
+.shift-btn.end{background:var(--red,#ef4444);color:#fff}
+
+/* Heartbeat */
+.hb-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.hb-dot.alive{background:var(--green,#22c55e);animation:pulse 2s infinite}
+.hb-dot.dead{background:var(--red,#ef4444)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Stats */
+.stats-bar{display:flex;gap:1px;padding:.4rem .7rem;background:var(--dark,#111)}
+.stat{flex:1;background:var(--card,#1a1a1a);padding:.45rem;text-align:center;border-radius:6px}
+.stat .val{font-size:1.05rem;font-weight:800;color:var(--gold)}
+.stat .lbl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+
+/* Tabs */
+.wa-tabs{display:flex;border-bottom:2px solid var(--border);background:var(--dark,#111);flex-shrink:0}
+.wa-tab{flex:1;padding:.55rem;text-align:center;font-size:.72rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;text-transform:uppercase;letter-spacing:.04em;transition:all .15s}
+.wa-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.wa-tab-content{display:none}
+.wa-tab-content.active{display:block}
+
+/* Section title */
+.sec-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);padding:.6rem 1rem .3rem;font-weight:700}
+
+/* Order cards */
+.order-card{margin:.3rem .7rem;background:var(--card,#1a1a1a);border:1px solid var(--border);border-radius:10px;padding:.65rem .8rem;transition:all .2s}
+.order-card.ready{border-color:var(--green,#22c55e);border-width:2px}
+.order-card.mine{border-color:var(--gold);border-width:2px}
+.oc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.oc-table{font-weight:700;font-size:.9rem;color:var(--text)}
+.oc-guest{font-size:.72rem;color:var(--muted);margin-bottom:.2rem}
+.oc-items{font-size:.78rem;line-height:1.6;color:var(--text)}
+.oc-items span{color:var(--gold);font-weight:600;margin-right:2px}
+.oc-status{display:inline-block;font-size:.62rem;padding:2px 8px;border-radius:10px;font-weight:700;text-transform:uppercase}
+.oc-status.new{background:rgba(201,168,76,.12);color:var(--gold)}
+.oc-status.preparing{background:rgba(245,158,11,.12);color:#f59e0b}
+.oc-status.ready{background:rgba(34,197,94,.12);color:var(--green,#22c55e)}
+.oc-status.delivering{background:rgba(59,130,246,.12);color:#3b82f6}
+.oc-actions{display:flex;gap:.4rem;margin-top:.5rem}
+.act-btn{flex:1;padding:.5rem;border-radius:8px;border:none;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit;transition:all .15s}
+.act-btn.claim{background:var(--green,#22c55e);color:#000}
+.act-btn.deliver{background:var(--gold);color:#000}
+.act-btn:active{opacity:.7}
+.act-btn:disabled{opacity:.3;cursor:not-allowed}
+.wa-empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:.88rem}
+
+/* Table grid */
+.table-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem;padding:.5rem .7rem}
+.table-card{background:var(--card,#1a1a1a);border:1px solid var(--border);border-radius:10px;padding:.65rem;text-align:center;cursor:pointer;transition:all .2s}
+.table-card:active{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.table-card .t-name{font-weight:700;font-size:.88rem;margin-bottom:.1rem;color:var(--text)}
+.table-card .t-zone{font-size:.62rem;color:var(--muted)}
+.table-card .t-type{font-size:.75rem;margin-bottom:.1rem}
+.table-card.occupied{border-color:var(--red,#ef4444)}
+
+/* QR overlay */
+.qr-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;text-align:center}
+.qr-overlay.show{display:flex}
+.qr-overlay h2{color:var(--gold);font-size:1.1rem;margin-bottom:.3rem}
+.qr-overlay .qr-table-name{font-size:.82rem;color:var(--muted);margin-bottom:1rem}
+.qr-overlay .qr-box{background:#fff;padding:1rem;border-radius:12px;margin-bottom:1rem}
+.qr-overlay .qr-hint{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.5}
+.qr-overlay .qr-close{background:var(--card,#1a1a1a);border:1px solid var(--border);color:var(--text);padding:.6rem 2rem;border-radius:8px;font-size:.88rem;cursor:pointer;font-family:inherit}
+.qr-overlay .qr-close:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wa-wrap">
+
+{% if error %}
+  <div class="wa-empty">{{ error }}</div>
+{% else %}
+
+<!-- Shift banner -->
+<div class="shift-banner {% if active_shift %}active{% else %}inactive{% endif %}">
+  <div class="shift-info">
+    {% if active_shift %}
+      <span class="hb-dot alive" id="hbDot"></span>
+      <span class="status on">{% trans "NA SMJENI" %}</span>
+      <div class="timer">{{ active_shift.duration_display }}</div>
+    {% else %}
+      <span class="hb-dot dead"></span>
+      <span class="status off">{% trans "NIJE NA SMJENI" %}</span>
+    {% endif %}
+  </div>
+  <button class="shift-btn {% if active_shift %}end{% else %}start{% endif %}" onclick="toggleShift()">
+    {% if active_shift %}{% trans "Završi smjenu" %}{% else %}{% trans "Počni smjenu" %}{% endif %}
+  </button>
+</div>
+
+{% if active_shift %}
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat"><div class="val" id="claimedCount">{{ active_shift.total_orders_claimed }}</div><div class="lbl">{% trans "Preuzeto" %}</div></div>
+  <div class="stat"><div class="val" id="deliveredCount">{{ active_shift.total_orders_delivered }}</div><div class="lbl">{% trans "Dostavljeno" %}</div></div>
+  <div class="stat"><div class="val" id="hbCount">{{ active_shift.heartbeat_count }}</div><div class="lbl">{% trans "Pingova" %}</div></div>
+</div>
+
+<!-- Tabs -->
+<div class="wa-tabs">
+  <div class="wa-tab active" onclick="switchTab('orders',this)">{% trans "Narudžbe" %}</div>
+  <div class="wa-tab" onclick="switchTab('tables',this)">{% trans "Stolovi / QR" %}</div>
+</div>
+
+<!-- Tab: Narudžbe -->
+<div class="wa-tab-content active" id="tab-orders">
+
+  {% if my_orders %}
+  <div class="sec-title">&#128587; {% trans "Moje narudžbe" %}</div>
+  {% for o in my_orders %}
+  <div class="order-card mine">
+    <div class="oc-header">
+      <span class="oc-table">{{ o.table.name|default:"?" }}{% if o.table.floor %} <small style="color:var(--muted)">{{ o.table.floor }}</small>{% endif %}</span>
+      <span class="oc-status delivering">{% trans "Nosim" %}</span>
+    </div>
+    {% if o.guest_name %}<div class="oc-guest">{{ o.guest_name }}</div>{% endif %}
+    <div class="oc-items">{% for i in o.items.all %}<span>{{ i.quantity|floatformat:0 }}x</span> {{ i.inventory_item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+    <div class="oc-actions">
+      <button class="act-btn deliver" onclick="deliverOrder({{ o.pk }},this)">&#9989; {% trans "Dostavljeno" %}</button>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if available_orders %}
+  <div class="sec-title">&#9989; {% trans "Gotovo — preuzmi" %}</div>
+  {% for o in available_orders %}
+  <div class="order-card ready">
+    <div class="oc-header">
+      <span class="oc-table">{{ o.table.name|default:"?" }}{% if o.table.floor %} <small style="color:var(--muted)">{{ o.table.floor }}</small>{% endif %}</span>
+      <span class="oc-status ready">{% trans "Gotovo" %}</span>
+    </div>
+    {% if o.guest_name %}<div class="oc-guest">{{ o.guest_name }}</div>{% endif %}
+    <div class="oc-items">{% for i in o.items.all %}<span>{{ i.quantity|floatformat:0 }}x</span> {{ i.inventory_item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+    <div class="oc-actions">
+      <button class="act-btn claim" onclick="claimOrder({{ o.pk }},this)">&#128400; {% trans "Preuzimam" %}</button>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if kitchen_orders %}
+  <div class="sec-title">&#127859; {% trans "U kuhinji" %}</div>
+  {% for o in kitchen_orders %}
+  <div class="order-card">
+    <div class="oc-header">
+      <span class="oc-table">{{ o.table.name|default:"?" }}</span>
+      <span class="oc-status {{ o.status }}">{{ o.get_status_display }}</span>
+    </div>
+    {% if o.guest_name %}<div class="oc-guest">{{ o.guest_name }}</div>{% endif %}
+    <div class="oc-items">{% for i in o.items.all %}<span>{{ i.quantity|floatformat:0 }}x</span> {{ i.inventory_item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if not my_orders and not available_orders and not kitchen_orders %}
+  <div class="wa-empty">{% trans "Nema aktivnih narudžbi" %} &#127881;</div>
+  {% endif %}
+
+</div>
+
+<!-- Tab: Stolovi -->
+<div class="wa-tab-content" id="tab-tables">
+  <div class="sec-title">{% trans "Odaberite stol za prikaz QR koda gostu" %}</div>
+  {% regroup tables by floor as zones %}
+  {% for zone in zones %}
+  <div class="sec-title" style="color:var(--muted)">{{ zone.grouper|default:"Bez zone" }}</div>
+  <div class="table-grid">
+    {% for t in zone.list %}
+    <div class="table-card {% if t.is_occupied %}occupied{% endif %}" onclick="showQR('{{ t.qr_code }}','{{ t.name|escapejs }}','{{ t.floor|escapejs }}')">
+      <div class="t-type">{% if t.table_type == 'bar' %}&#127866;{% elif t.table_type == 'terrace' %}&#9728;{% else %}&#127869;{% endif %}</div>
+      <div class="t-name">{{ t.name }}</div>
+      <div class="t-zone">{% if t.is_occupied %}{% trans "Zauzet" %}{% else %}{% trans "Slobodan" %}{% endif %}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %}{# active_shift #}
+{% endif %}{# error #}
+
+</div>{# wa-wrap #}
+
+<!-- QR overlay -->
+<div class="qr-overlay" id="qrOverlay">
+  <h2>&#128241; {% trans "Skenirajte za meni" %}</h2>
+  <div class="qr-table-name" id="qrTableName"></div>
+  <div class="qr-box" id="qrCanvas"></div>
+  <div class="qr-hint">{% trans "Usmjerite kameru mobitela na QR kod. Otvorit će se digitalni meni." %}</div>
+  <button class="qr-close" onclick="hideQR()">{% trans "Zatvori" %}</button>
+</div>
+
+{% csrf_token %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+var csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+const LANG = (window.location.pathname.match(/^\/([a-z]{2})\//) || ['',''])[1];
+const API  = LANG ? '/' + LANG : '';
+
+function switchTab(name, el) {
+  document.querySelectorAll('.wa-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.wa-tab-content').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function showQR(code, name, floor) {
+  var url = window.location.origin + '/pos/gastro/qr/' + code + '/';
+  var qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  document.getElementById('qrCanvas').innerHTML = qr.createSvgTag(6, 0);
+  document.getElementById('qrTableName').textContent = name + (floor ? ' \u00b7 ' + floor : '');
+  document.getElementById('qrOverlay').classList.add('show');
+}
+function hideQR() { document.getElementById('qrOverlay').classList.remove('show'); }
+
+function toggleShift() {
+  fetch(API + '/pos/waiter/shift/', { method: 'POST', headers: { 'X-CSRFToken': csrf } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (d.ok) location.reload(); });
+}
+
+function claimOrder(id, btn) {
+  btn.disabled = true; btn.textContent = '...';
+  fetch(API + '/pos/waiter/claim/' + id + '/', { method: 'POST', headers: { 'X-CSRFToken': csrf } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (d.ok) location.reload(); else { alert(d.error); btn.disabled = false; } });
+}
+
+function deliverOrder(id, btn) {
+  btn.disabled = true; btn.textContent = '...';
+  fetch(API + '/pos/waiter/deliver/' + id + '/', { method: 'POST', headers: { 'X-CSRFToken': csrf } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (d.ok) location.reload(); else { alert(d.error); btn.disabled = false; } });
+}
+
+{% if active_shift %}
+setInterval(function(){
+  fetch(API + '/pos/waiter/heartbeat/', { method: 'POST', headers: { 'X-CSRFToken': csrf } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (d.ok) { var el = document.getElementById('hbCount'); if (el) el.textContent = d.count; } });
+}, 300000);
+setInterval(function(){ location.reload(); }, 30000);
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Webshop – Proizvodi{% endblock %}
+{% block page_title %}Webshop{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-shopping-cart me-2 text-primary"></i>{% trans "Webshop – Proizvodi" %}</h2>
+    <small class="text-muted">{{ total }} proizvoda
+      {% if low_stock_count > 0 %}
+      &nbsp;<span class="badge bg-warning text-dark">{{ low_stock_count }} niska zaliha</span>
+      {% endif %}
+    </small>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'webshop:order_list' %}" class="btn btn-outline-primary">
+      <i class="fas fa-box me-2"></i>{% trans "Narudžbe" %}
+    </a>
+    <a href="{% url 'webshop:product_create' %}" class="btn btn-primary">
+      <i class="fas fa-plus me-2"></i>{% trans "Novi proizvod" %}
+    </a>
+  </div>
+</div>
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, SKU...">
+    </div>
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        <option value="">{% trans "Sve kategorije" %}</option>
+        {% for val,label in category_choices %}
+        <option value="{{ val }}" {% if category == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="active" class="form-select">
+        <option value="">{% trans "Svi" %}</option>
+        <option value="1" {% if active == "1" %}selected{% endif %}>{% trans "Aktivni" %}</option>
+        <option value="0" {% if active == "0" %}selected{% endif %}>{% trans "Neaktivni" %}</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
+      <a href="{% url 'webshop:product_list' %}" class="btn btn-outline-secondary">✕</a>
+    </div>
+  </form>
+</div>
+
+<div class="stat-card p-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>{% trans "Proizvod" %}</th><th>{% trans "SKU" %}</th><th>{% trans "Kategorija" %}</th><th class="text-end">{% trans "Cijena" %}</th><th class="text-end">{% trans "Zaliha" %}</th><th>{% trans "Status" %}</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr {% if p.stock <= 3 and not p.is_rental %}class="table-warning"{% endif %}>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              {% if p.image %}<img src="{{ p.image.url }}" style="width:36px;height:36px;object-fit:cover;border-radius:6px">{% endif %}
+              <div>
+                <div class="fw-semibold">{{ p.name }}</div>
+                {% if p.description %}<small class="text-muted">{{ p.description|truncatechars:40 }}</small>{% endif %}
+              </div>
+            </div>
+          </td>
+          <td><code class="small">{{ p.sku }}</code></td>
+          <td><span class="badge bg-secondary">{{ p.get_category_display }}</span></td>
+          <td class="text-end fw-bold">{{ p.price|floatformat:2 }} €</td>
+          <td class="text-end fw-bold {% if p.stock <= 3 and not p.is_rental %}text-danger{% endif %}">
+            {% if p.is_rental %}
+              <span class="badge bg-info text-dark">{% trans "Iznajmljivanje" %}</span>
+            {% else %}
+              {{ p.stock }} kom
+            {% endif %}
+          </td>
+          <td>{% if p.is_active %}<span class="badge bg-success">{% trans "Aktivan" %}</span>
+          {% else %}<span class="badge bg-secondary">{% trans "Neaktivan" %}</span>{% endif %}</td>
+          <td>
+            <a href="{% url 'webshop:product_edit' p.pk %}" class="btn btn-sm btn-outline-warning">
+              <i class="fas fa-edit"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-5">
+          {% trans "Nema proizvoda." %} <a href="{% url 'webshop:product_create' %}">{% trans "Dodaj prvi." %}</a>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

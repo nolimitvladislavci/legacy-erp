@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}AI Čekajuće akcije — LIMIT CONNECT{% endblock %}
+{% block page_title %}📋 AI Čekajuće akcije{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="{% url 'superadmin_ai:dashboard' %}" class="btn btn-sm btn-outline-dark">
+        <i class="fas fa-arrow-left"></i> Natrag
+    </a>
+    <span class="badge bg-warning text-dark" style="font-size:0.78rem">{{ actions|length }} čeka odobrenje</span>
+</div>
+
+{% if actions %}
+{% for a in actions %}
+<div class="stat-card mb-2">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <div>
+            <h6 style="margin:0;font-size:0.88rem;font-weight:700">
+                <span class="badge bg-dark" style="font-size:0.65rem">{{ a.module }}</span>
+                {{ a.action_type }}
+            </h6>
+            <small class="text-muted">{{ a.company.name }} · {{ a.created_at|date:"d.m.Y H:i" }}</small>
+        </div>
+        <span class="badge bg-warning text-dark">Čeka</span>
+    </div>
+    <p style="font-size:0.82rem;margin-bottom:10px;color:#334155">{{ a.description }}</p>
+    {% if a.payload %}
+    <details style="margin-bottom:10px">
+        <summary style="font-size:0.72rem;cursor:pointer;color:#64748b">Prikaži payload</summary>
+        <pre style="font-size:0.7rem;background:#f8fafc;padding:8px;border-radius:8px;overflow-x:auto;margin-top:4px">{{ a.payload|pprint }}</pre>
+    </details>
+    {% endif %}
+    <form method="post" action="{% url 'superadmin_ai:review_action' a.id %}" class="d-flex gap-2 align-items-end">
+        {% csrf_token %}
+        <input type="text" name="note" placeholder="Komentar (opcijski)" class="form-control form-control-sm" style="max-width:300px;font-size:0.78rem">
+        <button type="submit" name="decision" value="approve" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Odobri</button>
+        <button type="submit" name="decision" value="reject" class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Odbij</button>
+    </form>
+</div>
+{% endfor %}
+{% else %}
+<div class="stat-card text-center py-4">
+    <i class="fas fa-check-circle text-success" style="font-size:2rem"></i>
+    <p class="mt-2 mb-0" style="font-size:0.85rem;color:#64748b">Nema čekajućih akcija — sve čisto!</p>
+</div>
+{% endif %}
+
+{% if history %}
+<h6 style="font-weight:700;font-size:0.85rem;margin:20px 0 12px"><i class="fas fa-history"></i> Prethodne odluke</h6>
+<div class="stat-card">
+    <div class="table-responsive">
+        <table class="table table-sm mb-0" style="font-size:0.78rem">
+            <thead><tr><th>Modul</th><th>Akcija</th><th>Firma</th><th>Status</th><th>Pregledao</th><th>Kada</th></tr></thead>
+            <tbody>
+            {% for h in history %}
+            <tr>
+                <td><code>{{ h.module }}</code></td>
+                <td>{{ h.action_type }}</td>
+                <td>{{ h.company.name }}</td>
+                <td>
+                    {% if h.status == 'approved' %}<span class="badge bg-success" style="font-size:0.6rem">Odobreno</span>
+                    {% elif h.status == 'rejected' %}<span class="badge bg-danger" style="font-size:0.6rem">Odbijeno</span>
+                    {% else %}<span class="badge bg-secondary" style="font-size:0.6rem">{{ h.status }}</span>{% endif %}
+                </td>
+                <td>{{ h.reviewed_by|default:"-" }}</td>
+                <td>{{ h.reviewed_at|date:"d.m H:i" }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

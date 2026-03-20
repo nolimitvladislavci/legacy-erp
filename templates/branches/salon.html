@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block extra_css %}
+<style>
+.bpage{padding:1.5rem}
+.bpage-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
+.bpage-title{font-size:1.3rem;font-weight:800}
+.bpage-sub{font-size:.8rem;color:#888;margin-top:.15rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.kpi-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:12px;padding:1.25rem 1.5rem;transition:border-color .2s}
+.kpi-card:hover{border-color:#f472b6}
+.kpi-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:.5rem;font-weight:600}
+.kpi-val{font-size:2rem;font-weight:900;line-height:1;margin-bottom:.25rem}
+.kpi-icon{font-size:1.6rem;margin-bottom:.5rem;opacity:.75}
+.action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.action-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:var(--text,#fff);transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.action-card:hover{border-color:#f472b6;background:rgba(244,114,182,.06);transform:translateY(-2px)}
+.action-icon{font-size:1.8rem;opacity:.85}
+.action-lbl{font-size:.8rem;font-weight:600}
+.action-sub{font-size:.68rem;color:#888}
+.sec-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:10px;padding:1.1rem;margin-bottom:1rem}
+.sec-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#888;font-weight:700;margin-bottom:.75rem}
+.appt-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border,#2a2a2a);font-size:.82rem}
+.appt-row:last-child{border-bottom:none}
+.appt-time{font-family:monospace;font-size:.78rem;color:#f472b6;min-width:3.5rem}
+.appt-name{flex:1;font-weight:600}
+.appt-svc{color:#888;font-size:.75rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="bpage">
+  <div class="bpage-hdr">
+    <div>
+      <div style="margin-bottom:.35rem">
+        <span style="background:rgba(244,114,182,.12);color:#f472b6;border:1px solid rgba(244,114,182,.3);border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.07em;padding:.2rem .7rem;text-transform:uppercase">{% trans "&#x2702; Salon ljepote" %}</span>
+      </div>
+      <div class="bpage-title">{{ branch.name|default:page_title }}</div>
+      <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <a href="/appointments/" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
+      <a href="/pos/" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; Blagajna" %}</a>
+      <a href="/partners/" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Klijenti" %}</a>
+    </div>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x1F4C5;" %}</div>
+      <div class="kpi-lbl">{% trans "Termini danas" %}</div>
+      <div class="kpi-val" style="color:#f472b6">{{ today_appts }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x23F3;" %}</div>
+      <div class="kpi-lbl">{% trans "Ovaj tjedan" %}</div>
+      <div class="kpi-val" style="color:#a78bfa">{{ week_appts }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x1F4B0;" %}</div>
+      <div class="kpi-lbl">{% trans "Utržak danas" %}</div>
+      <div class="kpi-val" style="color:#c9a84c">&euro;{{ pos_revenue_today|floatformat:2 }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x1F464;" %}</div>
+      <div class="kpi-lbl">{% trans "Klijenti" %}</div>
+      <div class="kpi-val"><a href="/partners/" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="sec-title">{% trans "Brze akcije" %}</div>
+  <div class="action-grid">
+    <a class="action-card" href="/appointments/new/">
+      <div class="action-icon">{% trans "&#x2702;" %}</div>
+      <div class="action-lbl">{% trans "Novi termin" %}</div>
+      <div class="action-sub">{% trans "Rezervacija usluge" %}</div>
+    </a>
+    <a class="action-card" href="/appointments/">
+      <div class="action-icon">{% trans "&#x1F4C5;" %}</div>
+      <div class="action-lbl">{% trans "Svi termini" %}</div>
+      <div class="action-sub">{% trans "Raspored dana" %}</div>
+    </a>
+    <a class="action-card" href="/pos/">
+      <div class="action-icon">{% trans "&#x1F4B3;" %}</div>
+      <div class="action-lbl">{% trans "Naplata" %}</div>
+      <div class="action-sub">{% trans "POS blagajna" %}</div>
+    </a>
+    <a class="action-card" href="/partners/">
+      <div class="action-icon">{% trans "&#x1F464;" %}</div>
+      <div class="action-lbl">{% trans "Klijenti" %}</div>
+      <div class="action-sub">{% trans "Kartice klijenata" %}</div>
+    </a>
+    <a class="action-card" href="/inventory/">
+      <div class="action-icon">{% trans "&#x1F9F4;" %}</div>
+      <div class="action-lbl">{% trans "Kozmetika" %}</div>
+      <div class="action-sub">{% trans "Zalihe proizvoda" %}</div>
+    </a>
+    <a class="action-card" href="/worktime/">
+      <div class="action-icon">{% trans "&#x23F1;" %}</div>
+      <div class="action-lbl">{% trans "Radni sati" %}</div>
+      <div class="action-sub">{% trans "Satnica djelatnika" %}</div>
+    </a>
+  </div>
+
+  <!-- Upcoming appointments -->
+  <div class="sec-card" style="border-color:rgba(244,114,182,.2)">
+    <div class="sec-title">{% trans "Nadolazeći termini danas" %}</div>
+    {% if recent_appts %}
+      {% for appt in recent_appts %}
+      <div class="appt-row">
+        <span class="appt-time">{{ appt.start_time|time:"H:i" }}</span>
+        <span class="appt-name">{{ appt.client_name|default:appt.client }}</span>
+        <span class="appt-svc">{{ appt.service_name|default:appt.service }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div style="color:#888;font-size:.82rem;padding:.5rem 0">{% trans "Nema zakazanih termina za danas." %}</div>
+    {% endif %}
+    <div style="margin-top:.75rem">
+      <a href="/appointments/" style="color:#f472b6;font-size:.8rem">{% trans "Svi termini &rarr;" %}</a>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="sec-card">
+    <div class="sec-title">{% trans "Brzi status" %}</div>
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:.85rem">
+      <div>{% trans "&#x1F7E2;" %} <strong>{{ today_appts }}</strong> {% trans "termina danas" %}</div>
+      <div>{% trans "&#x1F4C5;" %} <strong>{{ week_appts }}</strong> {% trans "ovaj tjedan" %}</div>
+      <div>{% trans "&#x1F4B0;" %} <strong>&euro;{{ pos_revenue_today|floatformat:2 }}</strong> {% trans "utržak danas" %}</div>
+      <div><a href="/appointments/new/" style="color:#f472b6">{% trans "Novi termin &rarr;" %}</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

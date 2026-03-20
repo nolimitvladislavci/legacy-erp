@@ -1,0 +1,80 @@
+<!-- POS Quick Keys Bar -->
+<style>
+.pos-quick-keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--dark, #111);
+    border-bottom: 1px solid var(--border, #222);
+}
+.qk-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: var(--card, #1a1a1a);
+    border: 1px solid var(--border, #333);
+    border-radius: 10px;
+    color: var(--gold, #c9a84c);
+    padding: 10px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 60px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.1s;
+    text-decoration: none;
+}
+.qk-btn i { font-size: 20px; }
+.qk-btn:active { transform: scale(0.95); background: var(--nav-hover, #2a2a1a); }
+.qk-btn:hover { background: var(--nav-hover, #252520); border-color: var(--gold, #c9a84c); }
+@media (max-width: 900px) {
+    .pos-quick-keys { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 500px) {
+    .pos-quick-keys { grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px; }
+    .qk-btn { min-height: 52px; padding: 8px 4px; font-size: 10px; }
+    .qk-btn i { font-size: 18px; }
+}
+</style>
+<div class="pos-quick-keys">
+    <a class="qk-btn" href="/pos/" title="Blagajna">
+        <i class="fas fa-cash-register"></i><span>Blagajna</span>
+    </a>
+    <a class="qk-btn" href="/pos/restaurant/" title="Restoran">
+        <i class="fas fa-utensils"></i><span>Restoran</span>
+    </a>
+    <a class="qk-btn" href="/pos/gastro/" title="Gastro">
+        <i class="fas fa-hamburger"></i><span>Gastro</span>
+    </a>
+    <a class="qk-btn" href="/pos/waiter/" title="Konobar">
+        <i class="fas fa-concierge-bell"></i><span>Konobar</span>
+    </a>
+    <a class="qk-btn" href="/invoicing/create/" title="Novi račun">
+        <i class="fas fa-plus-circle"></i><span>Novi račun</span>
+    </a>
+    <a class="qk-btn" href="/pos/vouchers/" title="Vučeri">
+        <i class="fas fa-ticket-alt"></i><span>Vučeri</span>
+    </a>
+    <a class="qk-btn" href="/pos/expiry/" title="Rokovi">
+        <i class="fas fa-clock"></i><span>Rokovi</span>
+    </a>
+    <a class="qk-btn" href="/inventory/" title="Skladište">
+        <i class="fas fa-warehouse"></i><span>Skladište</span>
+    </a>
+    <a class="qk-btn" href="/partners/" title="Partneri">
+        <i class="fas fa-users"></i><span>Partneri</span>
+    </a>
+    <a class="qk-btn" href="/appointments/" title="Termini">
+        <i class="fas fa-calendar-check"></i><span>Termini</span>
+    </a>
+    <a class="qk-btn" href="/ai/" title="AI Asistent">
+        <i class="fas fa-robot"></i><span>AI Asistent</span>
+    </a>
+    <a class="qk-btn" href="/dashboard/" title="Dashboard">
+        <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+    </a>
+</div>

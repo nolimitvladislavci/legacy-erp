@@ -1,0 +1,14 @@
+{% extends "website/themes/base_site.html" %}
+
+{% block extra_css %}
+  :root {
+    --primary: #059669;
+  }
+
+  .hero { background: linear-gradient(135deg, #059669 0%, #064e3b 100%); }
+  .service-card { display: flex; gap: 1rem; text-align: left; align-items: flex-start; }
+  .service-icon { flex-shrink: 0; }
+  .section-header h2::after { content: ""; display: block; width: 60px; height: 3px; background: var(--primary); margin: .75rem auto 0; }
+{% endblock %}
+
+{% block services_title %}Što nudimo{% endblock %}

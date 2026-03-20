@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Reklamacija — {{ order.order_number }}{% endblock %}
+{% block content %}
+<style>
+.rek-wrap { max-width: 700px; margin: 0 auto; padding: 16px; }
+.rek-header { margin-bottom: 24px; }
+.rek-header h2 { font-weight: 900; font-size: 1.3rem; }
+.rek-order { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+.rek-order .num { font-weight: 900; font-size: 1.1rem; color: #c9a84c; }
+.rek-order .meta { font-size: .82rem; color: var(--text-muted, #94a3b8); margin-top: 4px; }
+
+.rek-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; }
+.rek-card h3 { font-size: .82rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+
+.rek-label { font-size: .78rem; font-weight: 600; color: var(--text-muted, #94a3b8); margin-bottom: 4px; display: block; }
+.rek-input { background: var(--bg-main, #0a0a0a); border: 1px solid var(--border, #333); color: #e2e8f0; padding: 10px 14px; border-radius: 8px; font-size: .9rem; width: 100%; }
+.rek-input::placeholder { color: var(--text-muted, #666); }
+.rek-row { margin-bottom: 14px; }
+
+/* Item selector */
+.item-option { position: relative; margin-bottom: 8px; }
+.item-option input[type=radio] { position: absolute; opacity: 0; }
+.item-option label { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border: 2px solid var(--border, rgba(255,255,255,0.1)); border-radius: 10px; cursor: pointer; transition: border-color .2s; }
+.item-option input:checked + label { border-color: #dc3545; background: rgba(220,53,69,0.06); }
+.item-name { font-weight: 600; font-size: .9rem; }
+.item-qty { font-size: .8rem; color: var(--text-muted); }
+
+/* Reason pills */
+.reason-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.reason-pill { position: relative; }
+.reason-pill input { position: absolute; opacity: 0; }
+.reason-pill label { display: block; padding: 8px 14px; border: 1px solid var(--border, rgba(255,255,255,0.1)); border-radius: 20px; cursor: pointer; font-size: .8rem; font-weight: 600; transition: all .2s; }
+.reason-pill input:checked + label { border-color: #dc3545; background: rgba(220,53,69,0.12); color: #dc3545; }
+
+/* Photo upload */
+.photo-upload { border: 2px dashed var(--border, #333); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: border-color .2s; }
+.photo-upload:hover { border-color: #c9a84c; }
+.photo-upload input { display: none; }
+.photo-upload .icon { font-size: 2rem; margin-bottom: 8px; }
+.photo-upload .text { font-size: .82rem; color: var(--text-muted); }
+
+.btn-submit { background: #dc3545; color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 16px; }
+.btn-submit:hover { background: #b91c2c; }
+</style>
+
+<div class="rek-wrap">
+  <div class="rek-header">
+    <h2>&#9888; {% trans "Reklamacija" %}</h2>
+  </div>
+
+  <div class="rek-order">
+    <div class="num">{{ order.order_number }}</div>
+    <div class="meta">
+      {{ order.created_at|date:"d.m.Y H:i" }} &middot;
+      {{ order.buyer_company.name }} &middot;
+      {{ order.total|floatformat:2 }}&euro;
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="rek-card">
+      <h3>{% trans "Koja stavka?" %}</h3>
+      {% for item in items %}
+      <div class="item-option">
+        <input type="radio" name="item_id" value="{{ item.pk }}" id="item-{{ item.pk }}" {% if forloop.first %}checked{% endif %}>
+        <label for="item-{{ item.pk }}">
+          <div>
+            <span class="item-name">{{ item.product.name }}</span>
+            <span class="item-qty">x{{ item.quantity }} {{ item.product.unit|default:"kg" }}</span>
+          </div>
+          <span style="font-weight:700;color:#c9a84c;">{{ item.total|floatformat:2 }}&euro;</span>
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="rek-card" style="margin-top:16px;">
+      <h3>{% trans "Razlog reklamacije" %}</h3>
+      <div class="reason-grid">
+        <div class="reason-pill">
+          <input type="radio" name="reason" value="damaged" id="r-damaged" checked>
+          <label for="r-damaged">&#128465; {% trans "Osteceno" %}</label>
+        </div>
+        <div class="reason-pill">
+          <input type="radio" name="reason" value="wrong_item" id="r-wrong">
+          <label for="r-wrong">&#10060; {% trans "Krivi artikl" %}</label>
+        </div>
+        <div class="reason-pill">
+          <input type="radio" name="reason" value="wrong_qty" id="r-qty">
+          <label for="r-qty">&#9878; {% trans "Kriva kolicina" %}</label>
+        </div>
+        <div class="reason-pill">
+          <input type="radio" name="reason" value="expired" id="r-expired">
+          <label for="r-expired">&#128197; {% trans "Istekao rok" %}</label>
+        </div>
+        <div class="reason-pill">
+          <input type="radio" name="reason" value="temp_breach" id="r-temp">
+          <label for="r-temp">&#127777; {% trans "Hladni lanac" %}</label>
+        </div>
+        <div class="reason-pill">
+          <input type="radio" name="reason" value="quality" id="r-quality">
+          <label for="r-quality">&#128078; {% trans "Losa kvaliteta" %}</label>
+        </div>
+        <div class="reason-pill">
+          <input type="radio" name="reason" value="other" id="r-other">
+          <label for="r-other">&#8230; {% trans "Ostalo" %}</label>
+        </div>
+      </div>
+
+      <div class="rek-row">
+        <label class="rek-label">{% trans "Opis problema" %}</label>
+        <textarea name="description" class="rek-input" rows="3" placeholder="{% trans 'Opisite sto nije u redu...' %}"></textarea>
+      </div>
+
+      <div class="rek-row">
+        <label class="rek-label">{% trans "Fotografija dokaza" %}</label>
+        <label class="photo-upload" id="photo-label">
+          <div class="icon">&#128247;</div>
+          <div class="text">{% trans "Kliknite ili slikajte" %}</div>
+          <input type="file" name="photo" accept="image/*" capture="environment" onchange="document.getElementById('photo-label').querySelector('.text').textContent=this.files[0].name">
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit">&#9888; {% trans "POSALJI REKLAMACIJU" %}</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "portal/base_b2b.html" %}
+{% block title %}Dokumenti{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-2">
+  <h1 style="font-family:var(--font-heading);font-size:1.4rem;font-weight:700;color:var(--gold)">
+    <i class="fas fa-file-invoice" style="margin-right:8px;opacity:.6"></i>Dokumenti
+  </h1>
+  <span style="font-size:.82rem;color:var(--text-muted)">{{ invoices|length }} dokumenata</span>
+</div>
+
+<!-- Filters -->
+<div class="b2b-filters">
+  <a href="{% url 'b2b_invoices' token %}"
+     class="b2b-filter-pill {% if not filter_status %}active{% endif %}">Svi</a>
+  <a href="{% url 'b2b_invoices' token %}?status=SENT"
+     class="b2b-filter-pill {% if filter_status == 'SENT' %}active{% endif %}">Poslano</a>
+  <a href="{% url 'b2b_invoices' token %}?status=ACCEPTED"
+     class="b2b-filter-pill {% if filter_status == 'ACCEPTED' %}active{% endif %}">Prihvaceno</a>
+  <a href="{% url 'b2b_invoices' token %}?status=PAID"
+     class="b2b-filter-pill {% if filter_status == 'PAID' %}active{% endif %}">Placeno</a>
+  <a href="{% url 'b2b_invoices' token %}?status=OVERDUE"
+     class="b2b-filter-pill {% if filter_status == 'OVERDUE' %}active{% endif %}">Dospjelo</a>
+  <a href="{% url 'b2b_invoices' token %}?status=REJECTED"
+     class="b2b-filter-pill {% if filter_status == 'REJECTED' %}active{% endif %}">Odbijeno</a>
+  <a href="{% url 'b2b_invoices' token %}?status=DRAFT"
+     class="b2b-filter-pill {% if filter_status == 'DRAFT' %}active{% endif %}">Nacrt</a>
+</div>
+
+<!-- Table -->
+{% if invoices %}
+<div class="b2b-card" style="padding:0;overflow:hidden">
+  <div class="b2b-table-wrap">
+    <table class="b2b-table">
+      <thead>
+        <tr>
+          <th>Broj dokumenta</th>
+          <th>Tip</th>
+          <th>Datum izdavanja</th>
+          <th>Dospijece</th>
+          <th>Nacin placanja</th>
+          <th class="text-right">Iznos</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td>
+            <a href="{% url 'b2b_invoice_detail' token inv.pk %}" class="text-mono" style="color:var(--gold);font-weight:600">
+              {{ inv.number|default:"—" }}
+            </a>
+          </td>
+          <td>{{ inv.get_doctype_display }}</td>
+          <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
+          <td>{% if inv.date_due %}{{ inv.date_due|date:"d.m.Y" }}{% else %}—{% endif %}</td>
+          <td style="font-size:.82rem">{{ inv.get_payment_method_display|default:"—" }}</td>
+          <td class="text-right text-mono" style="font-weight:600">
+            {{ inv.currency|default:"EUR" }} {{ inv.total|floatformat:2 }}
+          </td>
+          <td><span class="badge badge-{{ inv.status|lower }}">{{ inv.get_status_display }}</span></td>
+          <td>
+            <a href="{% url 'b2b_invoice_detail' token inv.pk %}" class="btn btn-ghost btn-sm">
+              <i class="fas fa-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="b2b-card">
+  <div class="b2b-empty">
+    <i class="fas fa-filter"></i>
+    <p>Nema dokumenata{% if filter_status %} sa statusom "{{ filter_status }}"{% endif %}.</p>
+    {% if filter_status %}
+    <a href="{% url 'b2b_invoices' token %}" class="btn btn-outline btn-sm mt-2">
+      <i class="fas fa-times"></i> Ukloni filter
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

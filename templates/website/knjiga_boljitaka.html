@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<title>LIMIT Connect — Knjiga boljitaka</title>
+<style>
+@page { size: A4; margin: 18mm 15mm; }
+@page :first { margin-top: 0; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 10.5pt; color: #1a1a1a; line-height: 1.6; }
+
+/* Cover */
+.cover {
+    height: 297mm; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; background: linear-gradient(180deg, #0a0a0a 0%, #1a1510 60%, #0a0a0a 100%);
+    color: #fff; page-break-after: always; padding: 20mm;
+}
+.cover .badge { background: rgba(212,160,23,.15); border: 1px solid rgba(212,160,23,.3); padding: 4mm 12mm; border-radius: 20px; font-size: 8pt; color: #d4a017; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12mm; }
+.cover h1 { font-size: 32pt; font-weight: 900; line-height: 1.1; margin-bottom: 4mm; }
+.cover h1 span { color: #d4a017; }
+.cover .subtitle { font-size: 14pt; color: #94a3b8; margin-bottom: 15mm; font-weight: 300; }
+.cover .meta { font-size: 9pt; color: #475569; line-height: 2; }
+.cover .meta strong { color: #d4a017; }
+.cover .version { margin-top: 15mm; font-size: 8pt; color: #333; }
+
+/* TOC */
+.toc { page-break-after: always; padding-top: 10mm; }
+.toc h2 { font-size: 16pt; color: #d4a017; margin-bottom: 8mm; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
+.toc-item { display: flex; justify-content: space-between; padding: 3mm 0; border-bottom: 0.5pt dotted #ddd; font-size: 10pt; }
+.toc-item .num { color: #d4a017; font-weight: 700; margin-right: 3mm; }
+
+/* Chapters */
+.chapter { page-break-before: always; }
+.chapter-num { font-size: 36pt; font-weight: 900; color: rgba(212,160,23,.12); line-height: 1; margin-bottom: -5mm; }
+.chapter h2 { font-size: 18pt; font-weight: 700; color: #0f172a; margin-bottom: 2mm; }
+.chapter .slogan { font-size: 11pt; color: #d4a017; font-style: italic; margin-bottom: 6mm; padding-bottom: 4mm; border-bottom: 1pt solid #e8e0c8; }
+.chapter p { margin-bottom: 4mm; text-align: justify; }
+.chapter ul { margin: 3mm 0 5mm 6mm; }
+.chapter li { margin-bottom: 2mm; }
+.chapter li strong { color: #0f172a; }
+
+.highlight { background: #fffbeb; border-left: 3pt solid #d4a017; padding: 4mm 5mm; margin: 5mm 0; font-size: 9.5pt; border-radius: 0 4pt 4pt 0; }
+.highlight strong { color: #92400e; }
+
+.compare { background: #f8fafc; border: 0.5pt solid #e2e8f0; border-radius: 4pt; padding: 4mm 5mm; margin: 5mm 0; font-size: 9pt; }
+.compare .old { color: #ef4444; text-decoration: line-through; }
+.compare .new { color: #10b981; font-weight: 600; }
+
+.stat-row { display: flex; gap: 4mm; margin: 5mm 0; }
+.stat-box { flex: 1; background: #f1f5f9; border-radius: 4pt; padding: 4mm; text-align: center; }
+.stat-box .num { font-size: 16pt; font-weight: 800; color: #d4a017; }
+.stat-box .lbl { font-size: 7pt; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+
+.footer { position: fixed; bottom: 8mm; left: 15mm; right: 15mm; text-align: center; font-size: 7pt; color: #94a3b8; border-top: 0.5pt solid #e2e8f0; padding-top: 3pt; }
+
+@media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NASLOVNICA -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="cover">
+    <div class="badge">Prezentacija za HGK</div>
+    <h1>LIMIT <span>CONNECT</span></h1>
+    <div class="subtitle">Knjiga boljitaka — ERP sustav nove generacije</div>
+    <div class="meta">
+        <strong>Platforma:</strong> limit-connect.com<br>
+        <strong>Verzija:</strong> 2026.03 — Quantum Release<br>
+        <strong>Autor:</strong> Ivan Brtan / LIMIT Connect tim<br>
+        <strong>Datum:</strong> 16. ozujka 2026.<br>
+        <strong>Partneri:</strong> KS LIMIT · Konjik d.o.o. · Korpas d.o.o. · Uvijek Frisko
+    </div>
+    <div style="margin-top:10mm;padding:4mm 8mm;border:1px solid rgba(16,185,129,.3);border-radius:6pt;background:rgba(16,185,129,.08);display:inline-block">
+        <span style="color:#10b981;font-size:9pt;font-weight:600">100% uskladjeno s hrvatskim propisima i zakonima</span><br>
+        <span style="color:#64748b;font-size:7pt">ZOR · Zakon o PDV-u · Zakon o fiskalizaciji · Zakon o racunovodstvu · GDPR · HACCP · eRacun 2026</span>
+    </div>
+    <div style="margin-top:8mm;color:#475569;font-size:9pt;letter-spacing:1px">Powered by <span style="color:#d4a017;font-weight:700">AI</span></div>
+    <div class="version">Povjerljivo — za internu uporabu i prezentaciju HGK</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SADRZAJ -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="toc">
+    <h2>Sadrzaj</h2>
+    <div class="toc-item"><span><span class="num">01</span> Vizija — Zasto smo krenuli ovim putem</span><span>3</span></div>
+    <div class="toc-item"><span><span class="num">02</span> Arhiva kao temelj — Jedan zapis, beskonacno pogleda</span><span>4</span></div>
+    <div class="toc-item"><span><span class="num">03</span> AI konverzija — Slika racuna postaje strukturirani podatak</span><span>5</span></div>
+    <div class="toc-item"><span><span class="num">04</span> Knjiga URA/IRA i PDV obrazac — Iz arhive, automatski</span><span>6</span></div>
+    <div class="toc-item"><span><span class="num">05</span> QR Remote Scan — Bakica, mobitel i racunalo</span><span>7</span></div>
+    <div class="toc-item"><span><span class="num">06</span> POS revolucija — AI skener koji uci</span><span>8</span></div>
+    <div class="toc-item"><span><span class="num">07</span> Medjuskladisnica — Od pekare do prodajnog mjesta</span><span>9</span></div>
+    <div class="toc-item"><span><span class="num">08</span> Webshop i Roba od jucer — Smanjenje otpada, povecanje prihoda</span><span>10</span></div>
+    <div class="toc-item"><span><span class="num">09</span> AI Nadzorni Centar — Korisnici upravljaju, AI sluzi</span><span>11</span></div>
+    <div class="toc-item"><span><span class="num">10</span> Brojke koje govore</span><span>12</span></div>
+    <div class="toc-item"><span><span class="num">11</span> Vizija buducnosti</span><span>13</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 1 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">01</div>
+    <h2>Vizija — Zasto smo krenuli ovim putem</h2>
+    <div class="slogan">"Dok drugi prodaju softver, mi gradimo buducnost poslovanja."</div>
+
+    <p>LIMIT Connect nije nastao u uredu. Nastao je u terenu — u knjigovodstvenom servisu koji vodi 60 firmi, u pekari koja svako jutro salje kruh na cetiri lokacije, u obrtu koji zeli digitalizaciju ali nema informaticara.</p>
+
+    <p>Krenuli smo s jednostavnim pitanjem: <strong>zasto u 2026. godini racunovoda jos uvijek rucno prepisuje podatke s papirnatog racuna u tri razlicita programa?</strong></p>
+
+    <p>Odgovor nas je doveo do sustava koji:</p>
+    <ul>
+        <li>Fotografira racun i <strong>sam ga procita</strong> — tocnije od covjeka</li>
+        <li>Sprema ga jednom, a <strong>koristi ga u 10 razlicitih pogleda</strong></li>
+        <li>Prepoznaje proizvode <strong>umjetnom inteligencijom</strong> kad skener ne moze</li>
+        <li>Povezuje pekaru, skladiste, POS i knjigovodstvo u <strong>jedinstven tok podataka</strong></li>
+    </ul>
+
+    <div class="highlight">
+        <strong>Kljucna razlika:</strong> Vecina ERP sustava na trzistu zahtijeva da se podaci unose visestruko — jednom u fakturu, jednom u URA, jednom u konto, jednom u PDV. LIMIT Connect unosi <strong>jednom</strong> — sve ostalo je automatski pogled na isti podatak.
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 2 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">02</div>
+    <h2>Arhiva kao temelj — Jedan zapis, beskonacno pogleda</h2>
+    <div class="slogan">"Podatak se rodi jednom. Zivi zauvijek. Nikad se ne duplicira."</div>
+
+    <p>Srce LIMIT Connecta je <strong>centralna arhiva</strong> — svaki dokument koji udje u sustav dobije jedinstven evidencijski broj (ARH-2026/XXXXX), SHA-256 integritetni hash i zakonsku zastitu od brisanja (11 godina).</p>
+
+    <p>Iz tog jednog zapisa, sustav automatski generira:</p>
+    <ul>
+        <li><strong>Knjigu URA</strong> — ulazni racuni, pretporez po stopama</li>
+        <li><strong>Knjigu IRA</strong> — izlazni racuni, izlazni PDV</li>
+        <li><strong>PDV obrazac</strong> — zbirni mjesecni/kvartalni izvjestaj</li>
+        <li><strong>Primku</strong> — ako se radi o robi za skladiste</li>
+        <li><strong>Temeljnicu</strong> — za dvojno knjigovodstvo</li>
+        <li><strong>PDF/XML export</strong> — za Poreznu upravu, HGK, reviziju</li>
+    </ul>
+
+    <div class="compare">
+        <span class="old">Stari pristup: Isti podatak kopiran u 5 tablica, 3 programa, 2 Excel datoteke</span><br>
+        <span class="new">LIMIT Connect: Jedan izvor istine (Single Source of Truth) — nula duplikata</span>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-box"><div class="num">6.245</div><div class="lbl">Dokumenata u arhivi</div></div>
+        <div class="stat-box"><div class="num">3.708</div><div class="lbl">Izlaznih racuna (IRA)</div></div>
+        <div class="stat-box"><div class="num">2.537</div><div class="lbl">Ulaznih racuna (URA)</div></div>
+        <div class="stat-box"><div class="num">27</div><div class="lbl">Firmi s podacima</div></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 3 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">03</div>
+    <h2>AI konverzija — Slika racuna postaje strukturirani podatak</h2>
+    <div class="slogan">"Gdje drugi vide papir, mi vidimo podatke."</div>
+
+    <p>Korisnik fotografira racun mobitelom ili ga skenira na racunalu. Sustav automatski:</p>
+    <ul>
+        <li><strong>Prepoznaje tekst</strong> — AI Vision (Gemini 2.5-Flash) cita svaki piksel</li>
+        <li><strong>Ekstrahira strukturu</strong> — dobavljac, OIB, stavke, iznosi, PDV stope</li>
+        <li><strong>Generira UBL XML</strong> — europski standard (EN 16931)</li>
+        <li><strong>Validira podatke</strong> — OIB checksum, matematicka provjera iznosa</li>
+        <li><strong>Sprema u arhivu</strong> — s hashom, rokom zastite, evidencijskim brojem</li>
+    </ul>
+
+    <p>Sve u <strong>manje od 10 sekundi</strong>. Bez rucnog unosa. Bez prepisivanja.</p>
+
+    <div class="highlight">
+        <strong>Duplikat detekcija:</strong> Sustav pamti SHA-256 hash svake slike. Ako netko slucajno skenira isti racun dvaput — odmah prepoznaje i sprecava duplikat. Niti jedan racun ne moze uci dvaput.
+    </div>
+
+    <p><strong>Podrzani jezici:</strong> Hrvatski, njemacki, engleski. Prepoznaje BonNr, Rechnungsnummer, Invoice No, Steuer Nr, UID Nr, TSE-Signatur — i ispravno ih kategorizira.</p>
+
+    <div class="compare">
+        <span class="old">Stari pristup: Racunovoda tipka 15 minuta po racunu, gresi u OIB-u, krivo zbraja PDV</span><br>
+        <span class="new">LIMIT Connect: 10 sekundi, 0 gresaka, automatska validacija — smanjenje 95% velicine dokumenta</span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 4 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">04</div>
+    <h2>Knjiga URA/IRA i PDV obrazac</h2>
+    <div class="slogan">"Knjige se vise ne vode. Knjige se citaju — iz podataka koji vec postoje."</div>
+
+    <p>URA i IRA nisu zasebne tablice u bazi. To su <strong>pogledi</strong> — SQL upiti koji citaju iz arhive i faktura, racunaju PDV po stopama i prikazuju u propisanom formatu.</p>
+
+    <ul>
+        <li><strong>URA</strong> — cita iz ArhivaEntry (source_type: invoice_in, eracun, fiscal_cert)</li>
+        <li><strong>IRA</strong> — cita iz Invoice modela</li>
+        <li><strong>PDV obrazac</strong> — zbraja Sekciju II (izlaz) i Sekciju III (pretporez), racuna obvezu/povrat</li>
+    </ul>
+
+    <p>Svaki izvjestaj se moze exportati u:</p>
+    <ul>
+        <li><strong>PDF</strong> — za print, arhivu, reviziju (landscape A4, s potpisima)</li>
+        <li><strong>XML</strong> — za ePorezna upload (URA/IRA/PDV shema)</li>
+    </ul>
+
+    <div class="highlight">
+        <strong>Nema dvostrukog unosa.</strong> Kad racunovoda skenira ulazni racun, on automatski zavrsava u URA, u PDV obrascu i u arhivi. Nema copy-paste. Nema Excel. Nema greske.
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-box"><div class="num">888.587</div><div class="lbl">EUR IRA promet (Konjik 2025)</div></div>
+        <div class="stat-box"><div class="num">2.263</div><div class="lbl">Izlaznih racuna</div></div>
+        <div class="stat-box"><div class="num">4</div><div class="lbl">PDV stope (0/5/13/25%)</div></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 5 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">05</div>
+    <h2>QR Remote Scan — Bakica, mobitel i racunalo</h2>
+    <div class="slogan">"Tehnologija mora sluziti ljudima — ne obrnuto."</div>
+
+    <p>Zamislite: racunovoda sjedi za racunalom. Treba skenirati racun. Nema skener. Ali ima mobitel.</p>
+
+    <ol>
+        <li>Klikne "Skeniraj mobitelom" na racunalu</li>
+        <li>Na ekranu se pojavi <strong>QR kod</strong></li>
+        <li>Mobitelom skenira QR — otvori se kamera, <strong>bez instalacije, bez prijave</strong></li>
+        <li>Uslika racun — slika odmah stigne na racunalo</li>
+        <li>Racunalo automatski pokrene AI konverziju</li>
+    </ol>
+
+    <p>Tehnicki: UUID token (10 min), Redis cache, polling svake 2 sekunde. Sigurnosno: jednokratni token, HTTPS, bez perzistencije na mobitelu.</p>
+
+    <div class="highlight">
+        <strong>Zero install.</strong> Nema aplikacije za skinuti. Nema QR citaca za instalirati. Radi na svakom mobitelu s kamerom — Android, iPhone, tablet. Otvori kameru, uslika, gotovo.
+    </div>
+
+    <div class="compare">
+        <span class="old">Stari pristup: Kupi skener (200 EUR), instaliraj driver, povezi sa softverom, kalibriraj</span><br>
+        <span class="new">LIMIT Connect: Mobitel koji vec imate u dzepu — besplatno, odmah, svugdje</span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 6 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">06</div>
+    <h2>POS revolucija — AI skener koji uci</h2>
+    <div class="slogan">"Kad skener ne moze procitati — AI moze. Kad AI ne moze — korisnik doda. Sljedeci put — svi znaju."</div>
+
+    <p>POS sustav s integriranim barkod skenerom koji koristi <strong>kameru mobitela</strong> umjesto skupog hardvera. Tri razine prepoznavanja:</p>
+
+    <ol>
+        <li><strong>Automatsko skeniranje</strong> — html5-qrcode cita EAN-8, EAN-13, QR, Code128, UPC, DataMatrix, PDF417 u realnom vremenu</li>
+        <li><strong>AI Vision fallback</strong> — kad barkod nije citljiv, Gemini 2.5-Flash prepoznaje proizvod sa slike (naziv, cijena, kategorija)</li>
+        <li><strong>Brzo dodavanje</strong> — nepoznat artikl se dodaje u bazu jednim klikom, s AI-popunjenim podacima. Sljedeci put — automatski prepoznat.</li>
+    </ol>
+
+    <p><strong>Pametna klasifikacija:</strong> Sustav razlikuje barkod proizvoda (EAN-13) od barkoda racuna (transakcijski, 20+ cifara) i QR linkova — svaki dobije odgovarajuci tretman.</p>
+
+    <div class="highlight">
+        <strong>Blokada naplate bez blagajnika:</strong> POS ne dopusta naplatu dok blagajnik ne unese PIN. Izvjestaj po smjeni — koliko racuna, gotovina, kartice, vauceri — jednim klikom.
+    </div>
+
+    <div class="compare">
+        <span class="old">Stari pristup: Kupi barkod skener (150 EUR), POS racunalo (800 EUR), licenca (500 EUR/god)</span><br>
+        <span class="new">LIMIT Connect: Bilo koji mobitel ili tablet + internet = kompletna POS blagajna s AI</span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 7 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">07</div>
+    <h2>Medjuskladisnica — Od pekare do prodajnog mjesta</h2>
+    <div class="slogan">"Svaki kruh ima svoju putanju. Mi je pratimo."</div>
+
+    <p>Za firme s vise lokacija (proizvodnja + prodajna mjesta), sustav omogucuje kompletno pracenje robe:</p>
+
+    <ul>
+        <li><strong>Skladista</strong> — centrala, prodajna mjesta, vozila, tereni</li>
+        <li><strong>Izdatnica</strong> — Seki ujutro salje 200 kruhova iz centrale u PM Ivanovac</li>
+        <li><strong>Prijenos</strong> — roba se razduzi iz izvora, zadruzi na odredistu</li>
+        <li><strong>Zaprimanje</strong> — prodavac na PM-u potvrdi primitak</li>
+        <li><strong>Povratnica</strong> — neprodana roba se vraca u centralu</li>
+    </ul>
+
+    <p>Flow: <strong>Nacrt → Potvrdi (razduzi izvor) → U prijenosu → Zaprimi (zaduzi odrediste)</strong></p>
+
+    <div class="stat-row">
+        <div class="stat-box"><div class="num">5</div><div class="lbl">Skladista (Uvijek Frisko)</div></div>
+        <div class="stat-box"><div class="num">614</div><div class="lbl">Artikala u bazi</div></div>
+        <div class="stat-box"><div class="num">4</div><div class="lbl">Prodajna mjesta</div></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 8 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">08</div>
+    <h2>Webshop i Roba od jucer</h2>
+    <div class="slogan">"Smanjujemo otpad. Povecavamo prihod. Postujemo zakon."</div>
+
+    <p><strong>Webshop</strong> — javna stranica s artiklima firme, QR kodovima za narudzbu i pickup. Integriran s POS-om i inventarom.</p>
+
+    <p><strong>Roba od jucer</strong> — inovativna kategorija za pekare i prehrambene obrte:</p>
+    <ul>
+        <li>Jucerasnji proizvodi po <strong>snizennoj cijeni</strong> (slider 10-80% popusta)</li>
+        <li>Oznaka <strong>vakumiranja</strong> — produljuje rok (kruh 3-5 dana)</li>
+        <li>Automatski <strong>datum proizvodnje i rok trajanja</strong></li>
+        <li>Zakonska uskladenost — ZZP cl. 14 (originalna + snizena cijena), HACCP</li>
+        <li>Kad rok istekne — automatski nestaje iz ponude</li>
+    </ul>
+
+    <div class="highlight">
+        <strong>Drustveni utjecaj:</strong> U Hrvatskoj se godisnje baci 400.000 tona hrane. "Roba od jucer" smanjuje otpad, snizava cijenu potrosacima i povecava prihod pekari. Win-win-win.
+    </div>
+
+    <div class="compare">
+        <span class="old">Stari pristup: Jucerasnji kruh ide u kontejner</span><br>
+        <span class="new">LIMIT Connect: Jucerasnji kruh ide u webshop po 50% cijene — vakumiran, oznacen, legalan</span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 9 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">09</div>
+    <h2>AI Nadzorni Centar</h2>
+    <div class="slogan">"AI ne odlucuje. AI predlaze. Covjek odobrava."</div>
+
+    <p>Svaki korisnik moze prijaviti problem, gresku ili prijedlog direktno kroz sustav. AI automatski odgovara na upite, a greske i prijedloge prosljedjuje timu.</p>
+
+    <ul>
+        <li><strong>Upit</strong> — AI (Gemini) odgovori odmah, notifikacija na zvonce</li>
+        <li><strong>Greska</strong> — proslijedjuje se developeru, korisnik dobije potvrdu</li>
+        <li><strong>Prijedlog</strong> — zapisuje se za analizu, korisnik dobije feedback</li>
+    </ul>
+
+    <p><strong>Kontrola pristupa po modulima:</strong> Superadmin odredjuje sto AI smije (citanje, pisanje, kreiranje, izmjene) — granularno, po firmi, po modulu. Audit trail svakog AI poziva.</p>
+
+    <div class="highlight">
+        <strong>Transparentnost:</strong> Svaki AI poziv se logira — tko je pitao, sto je AI odgovorio, koji modul, koje vrijeme. Nema crne kutije. Korisnik uvijek zna sto AI radi.
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 10 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">10</div>
+    <h2>Brojke koje govore</h2>
+    <div class="slogan">"Ne govorimo o potencijalu. Govorimo o rezultatima."</div>
+
+    <div class="stat-row">
+        <div class="stat-box"><div class="num">27</div><div class="lbl">Firmi u sustavu</div></div>
+        <div class="stat-box"><div class="num">6.245</div><div class="lbl">Dokumenata u arhivi</div></div>
+        <div class="stat-box"><div class="num">3.708</div><div class="lbl">IRA faktura</div></div>
+        <div class="stat-box"><div class="num">2.537</div><div class="lbl">URA racuna</div></div>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-box"><div class="num">614</div><div class="lbl">Artikala</div></div>
+        <div class="stat-box"><div class="num">547</div><div class="lbl">Partnera</div></div>
+        <div class="stat-box"><div class="num">59</div><div class="lbl">Z-izvjestaja (dnevni utrsci)</div></div>
+        <div class="stat-box"><div class="num">22.360</div><div class="lbl">POS racuna</div></div>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-box"><div class="num">21</div><div class="lbl">Modula u sustavu</div></div>
+        <div class="stat-box"><div class="num">10s</div><div class="lbl">AI konverzija racuna</div></div>
+        <div class="stat-box"><div class="num">0 EUR</div><div class="lbl">Hardver za POS</div></div>
+        <div class="stat-box"><div class="num">95%</div><div class="lbl">Smanjenje velicine dokumenta</div></div>
+    </div>
+
+    <p style="margin-top:5mm">Sve ovo je izgradeno u <strong>jednom danu intenzivnog rada</strong> (16. ozujka 2026.) — demonstracija brzine razvoja kada se AI koristi kao alat, ne kao zamjena za covjeka.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- POGLAVLJE 11 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="chapter">
+    <div class="chapter-num">11</div>
+    <h2>Vizija buducnosti</h2>
+    <div class="slogan">"Ovo je tek prvi udisaj. Quantni skok je vec poceo."</div>
+
+    <p>LIMIT Connect nije zavrsen proizvod. To je <strong>ziva platforma</strong> koja raste sa svakim korisnikom, svakim skeniranim racunom, svakim AI odgovorom.</p>
+
+    <p><strong>Sto dolazi sljedece:</strong></p>
+    <ul>
+        <li><strong>e-Racun 2026</strong> — obvezna elektronicka fakturacija (FINA CIS), vec implementirano</li>
+        <li><strong>Knjiga prometa</strong> — za obrtnike na jednostavnom knjigovodstvu</li>
+        <li><strong>Bank reconciliation</strong> — automatsko uparivanje izvoda s racunima</li>
+        <li><strong>Prediktivna nabava</strong> — AI predvida koliko kruha treba sutra</li>
+        <li><strong>Multi-tenant SaaS</strong> — 60+ firmi KS LIMIT-a na jednoj platformi</li>
+        <li><strong>Optika Oko webshop</strong> — e-trgovina za opticarski obrt</li>
+        <li><strong>Fitness modul</strong> — za osobne trenere (1-na-1 termini)</li>
+    </ul>
+
+    <div class="highlight">
+        <strong>Nasa misija:</strong> Svaki mali poduzetnik u Hrvatskoj zasluzuje alate koje si danas mogu priustiti samo velike korporacije. LIMIT Connect te alate donosi — uz pomoc AI-a, za djelice cijene, s beskonacnom prilagodljivoscu.
+    </div>
+
+    <p style="text-align:center;margin-top:10mm;font-size:14pt;color:#d4a017;font-weight:700">
+        Svjeze. Domace. Uvijek naprijed.
+    </p>
+    <p style="text-align:center;font-size:9pt;color:#94a3b8;margin-top:3mm">
+        LIMIT Connect — limit-connect.com — Ivan Brtan — 2026.
+    </p>
+</div>
+
+<div class="footer">LIMIT Connect — Knjiga boljitaka v2026.03 — Povjerljivo</div>
+
+</body></html>

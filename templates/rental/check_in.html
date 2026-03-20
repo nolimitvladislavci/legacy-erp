@@ -1,0 +1,18 @@
+{% extends "pos/base_pos.html" %}
+{% block title %}Check-in{% endblock %}
+{% block content %}
+<div style="padding:2rem;max-width:400px;margin:0 auto;text-align:center">
+  <div style="font-size:3rem;margin-bottom:1rem">{% if 'in' in 'check_in.html' %}&#128272;{% else %}&#128587;{% endif %}</div>
+  <h2 style="color:var(--gold);margin-bottom:.5rem">Check-in</h2>
+  <div style="color:var(--muted);margin-bottom:1.5rem">Prijavite gosta</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:left;margin-bottom:1rem">
+    <div style="margin-bottom:.3rem"><strong>{{ booking.guest_name }}</strong></div>
+    <div style="font-size:.85rem;color:var(--muted)">{{ booking.rental_property.name }} &middot; {{ booking.check_in|date:"d.m" }} - {{ booking.check_out|date:"d.m" }}</div>
+    <div style="font-size:.85rem;color:var(--green);font-weight:600;margin-top:.3rem">&euro;{{ booking.total_price|floatformat:2 }}</div>
+  </div>
+  <form method="post">{% csrf_token %}
+    <button type="submit" class="btn btn-green" style="width:100%">Potvrdi Check-in</button>
+  </form>
+  <a href="{% url 'rental:dashboard' %}" style="display:block;margin-top:.8rem;color:var(--muted);font-size:.85rem">Odustani</a>
+</div>
+{% endblock %}

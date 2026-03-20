@@ -1,0 +1,165 @@
+{
+  "timestamp": "2026-03-14 15:59:40",
+  "passed": 24,
+  "failed": 1,
+  "errors": 1,
+  "total": 26,
+  "tests": [
+    {
+      "category": "Celery",
+      "name": "ACKS_LATE = True",
+      "status": "PASS",
+      "detail": "Vrijednost: True"
+    },
+    {
+      "category": "Celery",
+      "name": "REJECT_ON_WORKER_LOST = True",
+      "status": "PASS",
+      "detail": "Vrijednost: True"
+    },
+    {
+      "category": "Celery",
+      "name": "SOFT_TIME_LIMIT postoji",
+      "status": "PASS",
+      "detail": "300s"
+    },
+    {
+      "category": "Celery",
+      "name": "TIME_LIMIT > SOFT_TIME_LIMIT",
+      "status": "PASS",
+      "detail": "Hard=600s > Soft=300s"
+    },
+    {
+      "category": "Celery",
+      "name": "Stale batch detekcija u Beat schedule",
+      "status": "PASS",
+      "detail": "Svakih 10 min"
+    },
+    {
+      "category": "Redis",
+      "name": "Redis ping + memorija",
+      "status": "PASS",
+      "detail": "PONG, memorija: 2.7MB"
+    },
+    {
+      "category": "IMAP",
+      "name": "BODY.PEEK[] umjesto RFC822",
+      "status": "PASS",
+      "detail": "PEEK + explicit Seen"
+    },
+    {
+      "category": "IMAP",
+      "name": "FailedImport model za izgubljene privitke",
+      "status": "PASS",
+      "detail": "Model postoji, 0 zapisa"
+    },
+    {
+      "category": "Konto",
+      "name": "Balance validation (clean method)",
+      "status": "PASS",
+      "detail": "clean() s ValidationError"
+    },
+    {
+      "category": "Konto",
+      "name": "Unique entry_number per company",
+      "status": "PASS",
+      "detail": "unique_together: (('company', 'entry_number'),)"
+    },
+    {
+      "category": "Konto",
+      "name": "Enforcement test (0.01 EUR razlika)",
+      "status": "ERROR",
+      "detail": "'str' object has no attribute 'year'"
+    },
+    {
+      "category": "Konto",
+      "name": "Enforcement test (duplikat entry_number)",
+      "status": "PASS",
+      "detail": "Duplikat BLOKIRAN na DB razini"
+    },
+    {
+      "category": "Import",
+      "name": "Batch status pregled",
+      "status": "PASS",
+      "detail": "Ukupno: 16 | ready=2 | error=14"
+    },
+    {
+      "category": "Domena",
+      "name": "limit-connect.com u ALLOWED_HOSTS",
+      "status": "PASS",
+      "detail": "ALLOWED_HOSTS: ['limit-connect.com', 'www.limit-connect.com', 'viskovic-group.de']..."
+    },
+    {
+      "category": "Domena",
+      "name": "CSRF_TRUSTED_ORIGINS ima limit-connect.com",
+      "status": "PASS",
+      "detail": "['https://limit-connect.com', 'https://www.limit-connect.com']..."
+    },
+    {
+      "category": "Domena",
+      "name": "fina-connect.online NIJE u ALLOWED_HOSTS",
+      "status": "PASS",
+      "detail": "Uklonjeno"
+    },
+    {
+      "category": "Domena",
+      "name": "FINA-CONNECT branding uklonjen iz templateova",
+      "status": "PASS",
+      "detail": "Cisto - sve LIMIT CONNECT"
+    },
+    {
+      "category": "DB",
+      "name": "Statistika baze",
+      "status": "PASS",
+      "detail": "Firme=10 | Korisnici=10 | Partneri=798 | Artikli=1062 | Racuni=451"
+    },
+    {
+      "category": "DB",
+      "name": "Firme bez korisnika",
+      "status": "FAIL",
+      "detail": "Bez korisnika: KUD Dukat Vladislavci, Furdi, obrt za građevinske radove, Dubinsko Čišćenje Čizo, Udruga Uniwerzum, Dado Haustechnik und Verwaltung"
+    },
+    {
+      "category": "Email",
+      "name": "CompanyMailbox status",
+      "status": "PASS",
+      "detail": "3 aktivnih"
+    },
+    {
+      "category": "Server",
+      "name": "Disk (<80%)",
+      "status": "PASS",
+      "detail": "Zauzeto: 36%, Slobodno: 35.2GB"
+    },
+    {
+      "category": "Server",
+      "name": "RAM (>500MB dostupno)",
+      "status": "PASS",
+      "detail": "Dostupno: 2023MB / 3868MB"
+    },
+    {
+      "category": "Server",
+      "name": "Supervisor procesi",
+      "status": "PASS",
+      "detail": "3 procesa RUNNING"
+    },
+    {
+      "category": "SSL",
+      "name": "limit-connect.com",
+      "status": "PASS",
+      "detail": "Istice: Jun 10 17:25:48 2026 GMT"
+    },
+    {
+      "category": "SSL",
+      "name": "viskovic-group.de",
+      "status": "PASS",
+      "detail": "Istice: May 14 06:49:26 2026 GMT"
+    },
+    {
+      "category": "SSL",
+      "name": "fina-connect.online",
+      "status": "PASS",
+      "detail": "Istice: May  6 21:08:06 2026 GMT"
+    }
+  ]
+}

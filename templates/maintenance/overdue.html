@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Zakasnjeli servisi" %}{% endblock %}
+{% block page_title %}{% trans "Zakasnjeli servisi" %}{% endblock %}
+{% block content %}
+<style>
+.stat-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
+.mt-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.mt-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;color:#64748b}
+.mt-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
+.mt-table tr:hover{background:#f8fafc}
+</style>
+<div style="margin-bottom:16px"><a href="{% url 'maintenance:dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Dashboard</a></div>
+<div class="stat-card">
+{% if overdue %}
+<table class="mt-table">
+  <thead><tr><th>{% trans "Zadatak" %}</th><th>{% trans "Imovina" %}</th><th>{% trans "Rok" %}</th><th>{% trans "Kasni dana" %}</th><th>{% trans "Serviser" %}</th><th></th></tr></thead>
+  <tbody>
+    {% for sched in overdue %}
+    <tr style="background:#fef2f2">
+      <td><strong>{{ sched.task_name }}</strong></td>
+      <td><a href="{% url 'maintenance:asset_detail' sched.asset.pk %}">{{ sched.asset.name }}</a><br><span style="font-size:.7rem;color:#94a3b8">{{ sched.asset.asset_code }}</span></td>
+      <td>{{ sched.next_due|date:"d.m.Y" }}</td>
+      <td style="color:#dc2626;font-weight:700">{{ sched.days_remaining|cut:"-" }} dana</td>
+      <td>{{ sched.service_provider|default:"-" }}</td>
+      <td><a href="{% url 'maintenance:add_log' sched.asset.pk %}" class="btn btn-sm btn-success" style="font-size:.7rem"><i class="fas fa-check"></i> {% trans "Obavi" %}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="text-center py-5"><h5 style="color:#22c55e">{% trans "Nema zakasnjenja" %}</h5><p style="color:#64748b;font-size:.85rem">{% trans "Svi servisi su na vrijeme!" %}</p></div>
+{% endif %}
+</div>
+{% endblock %}

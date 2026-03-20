@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf');
+}
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf');
+    font-weight: bold;
+}
+* { font-family: 'DejaVu', sans-serif !important; }
+
+  @page { size: 80mm 200mm; margin: 4mm 5mm; }
+  body { font-family: Courier, monospace; font-size: 8pt; color: #000; background: #fff; width: 70mm; }
+  .center { text-align: center; }
+  .right { text-align: right; }
+  .bold { font-weight: bold; }
+  .company { font-size: 10pt; font-weight: bold; text-align: center; margin-bottom: 2px; }
+  .address { font-size: 7pt; text-align: center; color: #333; margin-bottom: 4px; }
+  .divider { border: none; border-top: 1px dashed #333; margin: 4px 0; }
+  .bon-title { font-size: 9pt; font-weight: bold; text-align: center; margin: 4px 0; }
+  .meta-line { font-size: 7.5pt; margin: 1px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  th { font-size: 7pt; text-align: left; border-bottom: 1px solid #333; padding: 1px 0; }
+  td { font-size: 7.5pt; padding: 1px 0; vertical-align: top; }
+  .item-name { max-width: 42mm; word-break: break-word; }
+  .item-total { text-align: right; min-width: 14mm; }
+  .totals-row { display: flex; justify-content: space-between; margin: 1px 0; font-size: 8pt; }
+  .totals-row.grand { font-size: 10pt; font-weight: bold; border-top: 1px solid #000; padding-top: 3px; margin-top: 2px; }
+  .payment-row { font-size: 8pt; margin: 1px 0; display: flex; justify-content: space-between; }
+  .footer { text-align: center; font-size: 7pt; color: #555; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="company">{{ company.name }}</div>
+{% if company.address %}
+<div class="address">{{ company.address }}, {{ company.city }}</div>
+{% endif %}
+{% if company.oib %}
+<div class="address">OIB: {{ company.oib }}</div>
+{% endif %}
+
+<hr class="divider">
+{% if receipt.status == "cancelled" %}
+<div class="bon-title" style="color:#c00">*** STORNIRANO ***</div>
+{% if receipt.cancel_reason %}<div class="meta-line" style="text-align:center;color:#c00">Razlog: {{ receipt.cancel_reason }}</div>{% endif %}
+{% else %}
+<div class="bon-title">RAČUN / BON</div>
+{% endif %}
+<hr class="divider">
+
+<div class="meta-line">Terminal: {{ terminal.name }} ({{ terminal.terminal_code }})</div>
+<div class="meta-line">Blagajnik: {{ receipt.session.operator.get_full_name|default:receipt.session.operator.username }}</div>
+<div class="meta-line">Bon br.: #{{ receipt.receipt_number }}</div>
+<div class="meta-line">Datum: {{ receipt.created_at|date:"d.m.Y H:i" }}</div>
+{% if receipt.table_number %}<div class="meta-line">Stol: {{ receipt.table_number }}</div>{% endif %}
+
+<hr class="divider">
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:42mm">Naziv</th>
+      <th style="text-align:center">Kol</th>
+      <th style="text-align:right">Ukupno</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr{% if item.is_tip %} style="font-style:italic"{% elif item.is_pfand_return %} style="color:#c00"{% endif %}>
+      <td class="item-name">{% if item.is_tip %}* {% endif %}{{ item.description }}</td>
+      <td style="text-align:center">{{ item.quantity|floatformat:"-2" }}</td>
+      <td class="item-total">€{{ item.total_price|floatformat:2 }}</td>
+    </tr>
+    <tr>
+      <td style="font-size:7pt;color:#555" colspan="2">
+        €{{ item.unit_price|floatformat:2 }} x {{ item.quantity|floatformat:"-2" }} | PDV {{ item.tax_rate|floatformat:0 }}%
+        {% if item.discount_percent %} | Pop. {{ item.discount_percent|floatformat:0 }}%{% endif %}{% if item.is_pfand_return %} | POVRAT{% endif %}
+      </td>
+      <td></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr class="divider">
+
+<div class="totals-row"><span>Neto (bez PDV):</span><span>€{{ receipt.subtotal|floatformat:2 }}</span></div>
+<div class="totals-row"><span>PDV:</span><span>€{{ receipt.tax_amount|floatformat:2 }}</span></div>
+{% if receipt.discount %}
+<div class="totals-row"><span>Popust:</span><span>-€{{ receipt.discount|floatformat:2 }}</span></div>
+{% endif %}
+<div class="totals-row grand"><span>UKUPNO:</span><span>€{{ receipt.total|floatformat:2 }}</span></div>
+
+<hr class="divider">
+
+{% for line in payment_lines %}
+<div class="payment-row">
+  <span>{{ line.get_method_display }}{% if line.method == 'VOUCHER' and line.card_reference %} ({{ line.card_reference }}){% endif %}:</span>
+  <span>€{{ line.amount|floatformat:2 }}</span>
+</div>
+{% if line.change_given %}
+<div class="payment-row" style="color:#555">
+  <span>Kusur:</span>
+  <span>€{{ line.change_given|floatformat:2 }}</span>
+</div>
+{% endif %}
+{% endfor %}
+
+<hr class="divider">
+
+{% if receipt.jir %}
+<hr class="divider">
+<div style="font-size:6.5pt;color:#333;margin-top:4px">
+  <div>ZKI: {{ receipt.zki }}</div>
+  <div>JIR: {{ receipt.jir }}</div>
+  <div style="margin-top:2px">Fiskalizirano: {{ receipt.fiscal_datetime|date:"d.m.Y H:i:s" }}</div>
+  {% if business_location %}<div>PP: {{ business_location.location_code }} | OIB: {{ business_location.oib }}</div>{% endif %}
+</div>
+{% if fina_qr_b64 %}
+<div style="text-align:center;margin:4px 0">
+  <img src="data:image/png;base64,{{ fina_qr_b64 }}" style="width:30mm;height:30mm;image-rendering:pixelated;image-rendering:crisp-edges">
+</div>
+{% endif %}
+{% endif %}
+
+{% for item in items %}{% if item.is_tip %}<div class="footer" style="border-top:none">* Napojnica (PDV 0%)</div>{% endif %}{% endfor %}
+<div class="footer">
+  Hvala na posjetu!<br>
+  {% if receipt.note %}{{ receipt.note }}<br>{% endif %}
+  LIMIT Connect POS &mdash; {% now "d.m.Y" %}<br>
+  <span style="font-size:5pt;color:#999">Ovaj račun je izrađen elektronički i važeći je bez žiga i potpisa (čl. 9. st. 2. ZOR-a).</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 15mm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9px; color: #222; }
+  h1 { font-size: 16px; margin-bottom: 4px; }
+  h2 { font-size: 11px; color: #555; margin: 15px 0 5px; }
+  .header { border-bottom: 2px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th, td { border: 1px solid #999; padding: 3px 6px; font-size: 8.5px; }
+  th { background: #e8e8e8; font-weight: bold; text-align: center; }
+  .text-right { text-align: right; }
+  .shortage { color: #dc2626; }
+  .surplus { color: #16a34a; }
+  .totals td { font-weight: bold; background: #f0f0f0; font-size: 10px; }
+  .summary { background: #f8f8f8; border: 1px solid #ccc; padding: 12px; margin-top: 15px; border-radius: 4px; }
+  .summary h3 { font-size: 13px; margin: 0 0 8px; }
+  .summary td { border: none; padding: 2px 8px; font-size: 10px; }
+  .sig-line { display: inline-block; width: 180px; border-bottom: 1px solid #333; text-align: center; margin-right: 25px; padding-top: 35px; }
+  .legal { font-size: 7px; color: #888; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <table style="border:none; margin:0">
+    <tr>
+      <td style="border:none; width:60%">
+        <h1>INVENTURNA RAZLIKA</h1>
+        <small>Izvještaj o manjkovima i viškovima</small><br>
+        <strong>{{ inv.inventura_number }}</strong> — {{ inv.get_inventura_type_display }}
+      </td>
+      <td style="border:none; text-align:right; vertical-align:top">
+        <strong>{{ company.name }}</strong><br>
+        OIB: {{ company.oib|default:"—" }}<br>
+        {{ company.address|default:"" }}
+      </td>
+    </tr>
+  </table>
+</div>
+
+{% if shortages %}
+<h2 class="shortage">MANJKOVI ({{ shortages|length }} stavki)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>Šifra</th><th>Naziv</th><th>JMJ</th>
+      <th class="text-right">Knjižno</th><th class="text-right">Stvarno</th>
+      <th class="text-right">Manjak kol.</th><th class="text-right">Jed. cijena</th>
+      <th class="text-right">Manjak iznos</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in shortages %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ item.inventory_item.sku }}</td>
+      <td>{{ item.inventory_item.name }}</td>
+      <td>{{ item.unit }}</td>
+      <td class="text-right">{{ item.expected_qty|floatformat:2 }}</td>
+      <td class="text-right">{{ item.counted_qty|floatformat:2 }}</td>
+      <td class="text-right shortage">{{ item.difference_qty|floatformat:2 }}</td>
+      <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+      <td class="text-right shortage">{{ item.difference_value|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="totals">
+      <td colspan="8" class="text-right">UKUPNO MANJAK:</td>
+      <td class="text-right shortage">-{{ total_shortage|floatformat:2 }}</td>
+    </tr>
+  </tfoot>
+</table>
+{% endif %}
+
+{% if surpluses %}
+<h2 class="surplus">VIŠKOVI ({{ surpluses|length }} stavki)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>#</th><th>Šifra</th><th>Naziv</th><th>JMJ</th>
+      <th class="text-right">Knjižno</th><th class="text-right">Stvarno</th>
+      <th class="text-right">Višak kol.</th><th class="text-right">Jed. cijena</th>
+      <th class="text-right">Višak iznos</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in surpluses %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ item.inventory_item.sku }}</td>
+      <td>{{ item.inventory_item.name }}</td>
+      <td>{{ item.unit }}</td>
+      <td class="text-right">{{ item.expected_qty|floatformat:2 }}</td>
+      <td class="text-right">{{ item.counted_qty|floatformat:2 }}</td>
+      <td class="text-right surplus">+{{ item.difference_qty|floatformat:2 }}</td>
+      <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+      <td class="text-right surplus">+{{ item.difference_value|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="totals">
+      <td colspan="8" class="text-right">UKUPNO VIŠAK:</td>
+      <td class="text-right surplus">+{{ total_surplus|floatformat:2 }}</td>
+    </tr>
+  </tfoot>
+</table>
+{% endif %}
+
+{% if not shortages and not surpluses %}
+<div class="summary" style="text-align:center; padding:30px">
+  <h3 style="color:#16a34a">Nema razlika — knjižno stanje odgovara stvarnom stanju.</h3>
+</div>
+{% endif %}
+
+<div class="summary">
+  <h3>Rekapitulacija</h3>
+  <table style="border:none; width:auto">
+    <tr><td style="font-weight:bold">Ukupno stavki s razlikom:</td><td>{{ shortages|length|add:surpluses|length }}</td></tr>
+    <tr><td style="font-weight:bold">Manjkovi:</td><td class="shortage">{{ shortages|length }} stavki — {{ total_shortage|floatformat:2 }} EUR</td></tr>
+    <tr><td style="font-weight:bold">Viškovi:</td><td class="surplus">{{ surpluses|length }} stavki — +{{ total_surplus|floatformat:2 }} EUR</td></tr>
+    <tr><td style="font-weight:bold">Neto razlika:</td><td style="font-weight:bold">{{ inv.total_difference_value|floatformat:2 }} EUR</td></tr>
+  </table>
+  <br>
+  <small>
+    <strong>Knjiženje:</strong><br>
+    Manjak: D 4911 (Manjkovi na zalihama) / P 3000 (Zalihe robe) — ili ako je kalo: D 4912 (Kalo, lom, rastep)<br>
+    Višak: D 3000 (Zalihe robe) / P 7900 (Ostali prihodi — inventurni višak)<br>
+    <em>Konta su orijentacijska — prilagoditi kontnom planu tvrtke.</em>
+  </small>
+</div>
+
+<div style="margin-top:25px">
+  <strong>Popisna komisija:</strong><br><br>
+  {% for m in commission %}
+  <div class="sig-line">{{ m.user.get_full_name|default:m.user.username }}<br><small>{{ m.get_role_display }}</small></div>
+  {% endfor %}
+  <br><br>
+  <div class="sig-line">Odgovorna osoba<br><small>Potpis i pečat</small></div>
+</div>
+
+<div class="legal">
+  HR: Zakon o računovodstvu čl. 11, Pravilnik o popisu (NN 61/16).
+  DE: HGB §240, §241. Rok čuvanja: 11 godina.
+  Manjkovi iznad kalo normativa podliježu PDV-u sukladno čl. 7 st. 3 Zakona o PDV-u.
+  <br>Generirano: {% now "d.m.Y H:i" %} | {{ inv.inventura_number }} | {{ company.name }}
+</div>
+
+</body>
+</html>

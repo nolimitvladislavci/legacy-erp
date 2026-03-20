@@ -1,0 +1,72 @@
+{% load i18n %}{% get_current_language as CURRENT_LANG %}<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans "Exclusive Rental" %} | VISKOVIĆ GROUP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root { --black: #0a0a0a; --dark: #111214; --surface: #181a1d; --border: #252830; --gold: #c9a84c; --white: #f0ede8; }
+        body { background: var(--black); color: var(--white); font-family: 'Barlow', sans-serif; margin: 0; line-height: 1.6; }
+        header { position: fixed; top: 0; width: 100%; padding: 30px 60px; background: rgba(10,10,10,0.95); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: white; text-decoration: none; letter-spacing: 4px; }
+        .lang-switcher { display: flex; gap: 15px; align-items: center; }
+        .lang-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; transition: 0.3s; padding: 5px; }
+        .lang-btn.active { color: var(--gold); }
+        .hero { height: 55vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600'); background-size: cover; border-bottom: 3px solid var(--gold); text-align: center; }
+        .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 5rem; font-weight: 300; letter-spacing: 8px; margin: 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 60px; padding: 100px 40px; max-width: 1500px; margin: 0 auto; }
+        .res-card { background: var(--surface); border: 1px solid var(--border); transition: 0.7s; text-decoration: none; color: inherit; display: flex; flex-direction: column; overflow: hidden; }
+        .res-card:hover { transform: translateY(-20px); border-color: var(--gold); box-shadow: 0 40px 80px rgba(0,0,0,0.8); }
+        .res-content { padding: 60px; }
+        .btn-vg { display: inline-block; padding: 20px 50px; border: 1px solid var(--gold); color: white; text-transform: uppercase; letter-spacing: 5px; margin-top: 40px; transition: 0.5s; font-weight: 700; text-align: center; width: 100%; }
+        .res-card:hover .btn-vg { background: var(--gold); color: black; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">VISKOVIĆ <span style="color:var(--gold)">GROUP</span></a>
+        <div class="lang-switcher">
+            {% for code, name in LANGUAGES %}
+            <form action="/i18n/setlang/" method="post" style="display:inline;">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                <input name="language" type="hidden" value="{{ code }}">
+                <button type="submit" class="lang-btn {% if CURRENT_LANG == code %}active{% endif %}">{{ code }}</button>
+            </form>
+            {% endfor %}
+        </div>
+    
+    <div style="display:inline-flex; gap:10px; align-items:center; margin-left:auto; padding:0 20px; z-index:9999;">
+        <form action="/i18n/setlang/" method="post" style="margin:0; display:flex; gap:10px;">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}">
+            {% get_current_language as CURRENT_LANG %}
+            {% for lang in LANGUAGES %}
+                <button type="submit" name="language" value="{{ lang.0 }}" 
+                style="background:none; border:none; padding:0; cursor:pointer; font-family:'Barlow', sans-serif; font-size:14px; font-weight:bold; text-transform:uppercase; transition:0.3s; color:{% if CURRENT_LANG == lang.0 %}#c9a84c{% else %}#888{% endif %};">
+                {{ lang.0 }}
+                </button>
+            {% endfor %}
+        </form>
+    </div>
+
+</header>
+    <div class="hero">
+        <h1>{% trans "Exclusive Rental" %}</h1>
+        <p style="color:var(--gold); letter-spacing:10px; text-transform:uppercase; font-size:0.9rem; margin-top:20px;">{% trans "Architecture of power and luxury" %}</p>
+    </div>
+    <div class="grid">
+        {% for res in resources %}
+        <a href="{% url 'premium_booking:detail' res.id %}" class="res-card">
+            <div class="res-content">
+                <span style="color:var(--gold); text-transform:uppercase; letter-spacing:8px; font-size:0.75rem; font-weight:700;">{% trans "BOOKING PROCESS" %}</span>
+                <h2 style="font-family:'Cormorant Garamond', serif; font-size:3rem; margin:25px 0; font-weight:300;">{{ res.name }}</h2>
+                <div style="font-size:2.5rem; color:var(--gold); font-family:'Cormorant Garamond', serif; border-top:1px solid var(--border); padding-top:30px;">{{ res.base_price }}€</div>
+                <div class="btn-vg">{% trans "Start Protocol" %}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</body>
+</html>

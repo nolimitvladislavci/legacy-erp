@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Skladište{% endblock %}
+{% block page_title %}Skladište{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-boxes me-2 text-info"></i>{% trans "Skladište" %}</h2>
+    <small class="text-muted">{{ total }} artikala
+      {% if low_stock_count > 0 %}
+      &nbsp;<span class="badge bg-danger">{{ low_stock_count }} ispod minimuma</span>
+      {% endif %}
+    </small>
+  </div>
+  <a href="{% url 'inventory:create' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>{% trans "Novi artikl" %}</a>
+</div>
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, SKU...">
+    </div>
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        <option value="">{% trans "Sve kategorije" %}</option>
+        {% for val,label in category_choices %}
+        <option value="{{ val }}" {% if category == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="low_stock" class="form-select">
+        <option value="">{% trans "Svi" %}</option>
+        <option value="1" {% if low_stock == "1" %}selected{% endif %}>{% trans "Ispod minimuma" %}</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
+      <a href="{% url 'inventory:list' %}" class="btn btn-outline-secondary">✕</a>
+    </div>
+  </form>
+</div>
+
+<div class="stat-card p-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>{% trans "Naziv" %}</th><th>{% trans "SKU" %}</th><th>{% trans "Kategorija" %}</th><th>{% trans "Lokacija" %}</th><th class="text-end">{% trans "Kol." %}</th><th class="text-end">{% trans "Min." %}</th><th class="text-end">{% trans "Cijena" %}</th><th>{% trans "Status" %}</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for item in page_obj %}
+        <tr {% if item.is_low_stock %}class="table-warning"{% endif %}>
+          <td><a href="{% url 'inventory:detail' item.pk %}" class="fw-bold text-decoration-none text-dark">{{ item.name }}</a>{% if item.webshop_visible %}<span class="badge bg-success ms-1" title="Vidljiv u webshopu"><i class="fas fa-store"></i></span>{% endif %}</td>
+          <td><code class="small">{{ item.sku }}</code></td>
+          <td><span class="badge bg-secondary small">{{ item.get_category_display }}</span></td>
+          <td class="small text-muted">{{ item.location|default:"-" }}</td>
+          <td class="text-end fw-bold {% if item.is_low_stock %}text-danger{% endif %}">{{ item.quantity }} {{ item.unit }}</td>
+          <td class="text-end text-muted">{{ item.min_quantity }} {{ item.unit }}</td>
+          <td class="text-end">{{ item.unit_price|floatformat:2 }} €</td>
+          <td>
+            {% if item.is_low_stock %}<span class="badge bg-danger">{% trans "Nedostaje" %}</span>
+            {% else %}<span class="badge bg-success">{% trans "OK" %}</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'inventory:edit' item.pk %}" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center py-5">
+          {% include "includes/empty_state.html" with
+              icon="fas fa-boxes"
+              title="Nema artikala"
+              message="Dodajte prvi artikl u skladište."
+              action_url="/inventory/items/create/"
+              action_text="Dodaj artikl"
+          %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

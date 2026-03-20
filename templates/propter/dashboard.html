@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}Propter Digitalna Soba
+<!-- Upload & AI Inbox shortcut -->
+<div id="upload-shortcut" style="margin-top:1.5rem;padding:1rem;background:#111827;border:1px solid rgba(201,168,76,.2);border-radius:12px;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+  <span style="color:#94a3b8;font-size:.85rem">Brze akcije:</span>
+  <a href="/hr/documents/arhiva/upload/" style="background:linear-gradient(135deg,#c9a84c,#b8963c);color:#0a0a0a;font-weight:700;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-cloud-upload-alt"></i> Upload racuna
+  </a>
+  <a href="/hr/documents/ai-inbox/" style="background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-robot"></i> AI Inbox
+  </a>
+  <a href="/hr/documents/" style="background:#1f2937;color:#94a3b8;border:1px solid #334155;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-archive"></i> Arhiva
+  </a>
+</div>
+
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-4" style="background-color: #0a0a0a; min-height: 100vh; color: #e0e0e0;">
+
+  <!-- ZAGLAVLJE -->
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+      <h2 class="fw-bold mb-1" style="color: #c9a84c; letter-spacing: 1px;">
+        <i class="fas fa-layer-group me-2"></i> PROPTER DIGITALNA SOBA
+      </h2>
+      <p class="text-muted mb-0" style="font-size:.95rem;">
+        Pristupna tocka prije pristupne tocke &bull;
+        Zbirna obrada otpremnica (Sammelrechnung)
+        {% if current_period %}
+        &bull; Period: <strong class="text-white">{{ current_period.month }}/{{ current_period.year }}</strong>
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-md-5 text-end">
+      <a href="{% url 'propter:otpremnica_create' %}" class="btn btn-outline-light me-2">
+        <i class="fas fa-plus me-1"></i> Nova otpremnica
+      </a>
+      {% if current_period and current_period.status == 'open' %}
+      <button id="btn-close-period"
+              class="btn btn-warning me-2"
+              onclick="closePeriod({{ current_period.pk }})">
+        <i class="fas fa-lock me-1"></i> Zatvori period
+      </button>
+      {% endif %}
+      {% if current_period and current_period.status == 'closed' %}
+      <button id="btn-kuhaj"
+              class="btn btn-lg px-4 fw-bold"
+              style="background: linear-gradient(135deg, #c9a84c 0%, #a08530 100%); color: #000; border: none; box-shadow: 0 4px 15px rgba(201,168,76,0.3);"
+              onclick="kuhajRacun({{ current_period.pk }})">
+        <i class="fas fa-fire me-2"></i> KUHAJ ZBIRNI RACUN
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  {% if current_period %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="p-3 rounded" style="background: linear-gradient(90deg, #1a1a1a 0%, #252525 100%); border: 1px solid #333;">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted">Status:</span>
+            <span class="badge ms-2 fs-6
+              {% if current_period.status == 'open' %}bg-success
+              {% elif current_period.status == 'closed' %}bg-warning text-dark
+              {% elif current_period.status == 'invoiced' %}bg-info
+              {% else %}bg-secondary{% endif %}">
+              {{ current_period.get_status_display|upper }}
+            </span>
+          </div>
+          <div class="text-end">
+            {% if current_period.status == 'open' %}
+            <small class="text-muted">Otpremnice se skupljaju... Kupus juha se kuha.</small>
+            {% elif current_period.status == 'closed' %}
+            <small class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i> Period zatvoren - spreman za agregaciju u zbirni racun</small>
+            {% elif current_period.status == 'invoiced' %}
+            <small class="text-info"><i class="fas fa-check-circle me-1"></i> Zbirni racun: {{ current_period.zbirni_invoice_number }}</small>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- STATISTIKA KARTICE -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-3">
+      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333;">
+        <div class="card-body text-center">
+          <i class="fas fa-file-alt fa-2x mb-2" style="color: #c9a84c;"></i>
+          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">Otpremnice u baferu</h6>
+          <h2 class="mb-0" style="color: #c9a84c;">
+            {% if current_period %}{{ current_period.otpremnica_count }}{% else %}0{% endif %}
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333;">
+        <div class="card-body text-center">
+          <i class="fas fa-euro-sign fa-2x mb-2 text-white"></i>
+          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">Ukupna vrijednost</h6>
+          <h2 class="mb-0 text-white">
+            {% if current_period %}{{ current_period.total_with_tax }}{% else %}0.00{% endif %}
+            <small class="text-muted" style="font-size:.5em;">EUR</small>
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333; border-left: 3px solid #22c55e;">
+        <div class="card-body text-center">
+          <i class="fas fa-leaf fa-2x mb-2 text-success"></i>
+          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">CO2 usteda (YTD)</h6>
+          <h2 class="mb-0 text-success">
+            {% if eko %}{{ eko.co2_saved_ytd|floatformat:0 }}g{% else %}&mdash;{% endif %}
+          </h2>
+          {% if eko and eko.badge_level %}
+          <span class="badge bg-success mt-1">{{ eko.badge_level|capfirst }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333;">
+        <div class="card-body text-center">
+          <i class="fas fa-certificate fa-2x mb-2 text-warning"></i>
+          <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">Pretplata</h6>
+          {% if tenant %}
+          <h5 class="mb-0 text-white">{{ tenant.get_tier_display }}</h5>
+          <small class="text-muted">{{ tenant.monthly_fee }} EUR/mj</small>
+          {% else %}
+          <p class="text-muted mb-0">Nije konfigurirano</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIJEK PROCESA (Pipeline vizualizacija) -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card" style="background-color: #1e1e1e; border: 1px solid #333;">
+        <div class="card-header py-3" style="background-color: #1a1a1a; border-bottom: 1px solid #333;">
+          <h5 class="mb-0 text-white"><i class="fas fa-project-diagram me-2" style="color:#c9a84c;"></i> Tijek procesa</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div class="text-center px-3">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#22c55e33;border:2px solid #22c55e;">
+                <i class="fas fa-cash-register fa-lg text-success"></i>
+              </div>
+              <div class="small text-muted">POS / Faktura</div>
+              <div class="small text-white">Izvor</div>
+            </div>
+            <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
+            <div class="text-center px-3">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#3b82f633;border:2px solid #3b82f6;">
+                <i class="fas fa-file-alt fa-lg text-primary"></i>
+              </div>
+              <div class="small text-muted">Otpremnica</div>
+              <div class="small text-white">Dokument</div>
+            </div>
+            <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
+            <div class="text-center px-3">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#c9a84c33;border:2px solid #c9a84c;">
+                <i class="fas fa-layer-group fa-lg" style="color:#c9a84c;"></i>
+              </div>
+              <div class="small text-muted">Propter Soba</div>
+              <div class="small" style="color:#c9a84c;">Bafer (30 dana)</div>
+            </div>
+            <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
+            <div class="text-center px-3">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#f5922033;border:2px solid #f59220;">
+                <i class="fas fa-fire fa-lg" style="color:#f59220;"></i>
+              </div>
+              <div class="small text-muted">Agregacija</div>
+              <div class="small text-warning">Kuhaj!</div>
+            </div>
+            <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
+            <div class="text-center px-3">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#ef444433;border:2px solid #ef4444;">
+                <i class="fas fa-file-invoice fa-lg text-danger"></i>
+              </div>
+              <div class="small text-muted">Zbirni e-Racun</div>
+              <div class="small text-danger">FINA CIS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLICA OTPREMNICA -->
+  <div class="card" style="background-color: #1e1e1e; border: 1px solid #333;">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center" style="background-color: #1a1a1a; border-bottom: 1px solid #333;">
+      <h5 class="mb-0 text-white"><i class="fas fa-list me-2"></i> Otpremnice u baferu</h5>
+      <a href="{% url 'propter:otpremnica_list' %}" class="btn btn-sm btn-outline-light">Sve otpremnice</a>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0" style="background-color: transparent;">
+          <thead style="background-color: #252525;">
+            <tr>
+              <th class="text-muted">Broj</th>
+              <th class="text-muted">Datum</th>
+              <th class="text-muted">Primatelj</th>
+              <th class="text-muted">OIB</th>
+              <th class="text-muted">Izvor</th>
+              <th class="text-muted text-end">Iznos (EUR)</th>
+              <th class="text-muted text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for otp in recent_otpremnice %}
+            <tr>
+              <td class="align-middle">
+                <a href="{% url 'propter:otpremnica_detail' otp.pk %}" class="fw-bold" style="color:#c9a84c;">
+                  OTP-{{ otp.number }}
+                </a>
+              </td>
+              <td class="align-middle">{{ otp.issue_date|date:"d.m.Y" }}</td>
+              <td class="align-middle">{{ otp.recipient_name }}</td>
+              <td class="align-middle">{{ otp.recipient_oib|default:"-" }}</td>
+              <td class="align-middle">
+                <span class="badge bg-secondary">{{ otp.get_source_display }}</span>
+              </td>
+              <td class="align-middle text-end fw-bold text-white">{{ otp.total }}</td>
+              <td class="align-middle text-center">
+                {% if otp.status == 'draft' %}
+                <span class="badge bg-secondary">Nacrt</span>
+                {% elif otp.status == 'issued' %}
+                <span class="badge bg-primary">Spremno</span>
+                {% elif otp.status == 'aggregated' %}
+                <span class="badge bg-success">Fakturirano</span>
+                {% elif otp.status == 'cancelled' %}
+                <span class="badge bg-danger">Stornirano</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                <h5>Soba je prazna. Nema otpremnica u ovom periodu.</h5>
+                <p class="small">Otpremnice se automatski kreiraju iz POS-a, faktura i Synesisa.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARHIVA PERIODA -->
+  {% if recent_periods %}
+  <div class="card mt-4" style="background-color: #1e1e1e; border: 1px solid #333;">
+    <div class="card-header py-3" style="background-color: #1a1a1a; border-bottom: 1px solid #333;">
+      <h5 class="mb-0 text-white"><i class="fas fa-archive me-2"></i> Arhiva perioda</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-dark table-hover mb-0" style="background-color: transparent;">
+        <thead style="background-color: #252525;">
+          <tr>
+            <th class="text-muted">Period</th>
+            <th class="text-muted">Otpremnica</th>
+            <th class="text-muted text-end">Ukupno (EUR)</th>
+            <th class="text-muted">Zbirni racun</th>
+            <th class="text-muted text-center">Status</th>
+            <th class="text-muted"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in recent_periods %}
+          <tr>
+            <td class="align-middle fw-bold">{{ p.month }}/{{ p.year }}</td>
+            <td class="align-middle">{{ p.otpremnica_count }}</td>
+            <td class="align-middle text-end text-white">{{ p.total_with_tax }}</td>
+            <td class="align-middle">{{ p.zbirni_invoice_number|default:"-" }}</td>
+            <td class="align-middle text-center">
+              <span class="badge bg-{% if p.status == 'open' %}success{% elif p.status == 'closed' %}warning{% elif p.status == 'invoiced' %}info{% else %}secondary{% endif %}">
+                {{ p.get_status_display }}
+              </span>
+            </td>
+            <td class="align-middle text-end">
+              <a href="{% url 'propter:period_detail' p.pk %}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- BRZI LINKOVI -->
+  <div class="row mt-4 g-3">
+    <div class="col-md-3">
+      <a href="{% url 'propter:period_list' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#333'">
+        <div class="card-body text-center py-4">
+          <i class="fas fa-calendar fa-2x mb-2" style="color:#c9a84c;"></i>
+          <div class="text-white">Svi periodi</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="{% url 'propter:eko_dashboard' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#22c55e'" onmouseout="this.style.borderColor='#333'">
+        <div class="card-body text-center py-4">
+          <i class="fas fa-leaf fa-2x mb-2 text-success"></i>
+          <div class="text-white">Eko izvjestaj</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="{% url 'propter:tenant_settings' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#333'">
+        <div class="card-body text-center py-4">
+          <i class="fas fa-cog fa-2x mb-2 text-primary"></i>
+          <div class="text-white">Postavke</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-3">
+      <a href="{% url 'propter:landing' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#ef4444'" onmouseout="this.style.borderColor='#333'">
+        <div class="card-body text-center py-4">
+          <i class="fas fa-rocket fa-2x mb-2 text-danger"></i>
+          <div class="text-white">SaaS Landing</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- STRICT UI SCRIPT -->
+<script>
+{% csrf_token %}
+var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+function showToast(message, type) {
+  var t = document.createElement("div");
+  t.style.position = "fixed";
+  t.style.bottom = "30px";
+  t.style.right = "30px";
+  t.style.padding = "16px 24px";
+  t.style.borderRadius = "8px";
+  t.style.color = "#fff";
+  t.style.fontWeight = "600";
+  t.style.zIndex = "99999";
+  t.style.boxShadow = "0 10px 25px rgba(0,0,0,0.5)";
+  t.style.transition = "all 0.3s ease";
+  t.style.fontFamily = "system-ui, -apple-system, sans-serif";
+  if (type === "error") {
+    t.style.backgroundColor = "#dc3545";
+    t.style.borderLeft = "6px solid #8b0000";
+  } else {
+    t.style.backgroundColor = "#1e1e1e";
+    t.style.border = "1px solid #c9a84c";
+    t.style.borderLeft = "6px solid #c9a84c";
+  }
+  t.innerHTML = message;
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.opacity="0"; t.style.transform="translateY(20px)"; setTimeout(function() { t.remove(); }, 300); }, 5000);
+}
+
+function closePeriod(periodId) {
+  var btn = document.getElementById('btn-close-period');
+  if (!confirm('Zatvori period? Nakon zatvaranja mozete generirati zbirni racun.')) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Zatvaranje...';
+  var form = new FormData();
+  form.append('csrfmiddlewaretoken', csrfToken);
+  fetch('/propter/periods/' + periodId + '/close/', {method:"POST", body:form})
+    .then(function(r) { if (r.redirected) { window.location.href = r.url; } else { window.location.reload(); } })
+    .catch(function(e) {
+      showToast('<i class="fas fa-times-circle me-2"></i> Greska: ' + e.message, "error");
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock me-1"></i> Zatvori period';
+    });
+}
+
+function kuhajRacun(periodId) {
+  var btn = document.getElementById('btn-kuhaj');
+  if (!confirm('Pokreni agregaciju? Sve otpremnice ce biti spojene u jedan zbirni e-Racun.')) return;
+  var orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Agregacija u tijeku...';
+  btn.style.opacity = "0.7";
+  var form = new FormData();
+  form.append('csrfmiddlewaretoken', csrfToken);
+  fetch('/propter/periods/' + periodId + '/aggregate/', {method:"POST", body:form})
+    .then(function(r) { if (r.redirected) { window.location.href = r.url; } else { showToast('<i class="fas fa-check-circle me-2"></i> Zbirni racun uspjesno kreiran!', "success"); setTimeout(function() { window.location.reload(); }, 2000); } })
+    .catch(function(e) {
+      showToast('<i class="fas fa-times-circle me-2"></i> Greska: ' + e.message, "error");
+      btn.disabled = false;
+      btn.innerHTML = orig;
+      btn.style.opacity = "1";
+    });
+}
+</script>
+{% endblock %}

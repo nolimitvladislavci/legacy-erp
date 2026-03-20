@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Imovina{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Imovina</h2>
+        <a href="{% url 'maintenance:asset_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nova imovina</a>
+    </div>
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-3">
+                    <select name="category" class="form-select">
+                        <option value="">-- Kategorija --</option>
+                        {% for val, label in categories %}<option value="{{ val }}" {% if current_category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">-- Status --</option>
+                        {% for val, label in statuses %}<option value="{{ val }}" {% if current_status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Pretrazi..."></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-outline-primary w-100">Filtriraj</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Kod</th><th>Naziv</th><th>Kategorija</th><th>Status</th><th>Lokacija</th><th>Dodijeljeno</th><th></th></tr></thead>
+                <tbody>
+                {% for asset in assets %}
+                <tr>
+                    <td><a href="{% url 'maintenance:asset_detail' asset.pk %}">{{ asset.asset_code }}</a></td>
+                    <td>{{ asset.name }}</td>
+                    <td>{{ asset.get_category_display }}</td>
+                    <td><span class="badge bg-{% if asset.status == 'active' %}success{% elif asset.status == 'maintenance' %}warning{% elif asset.status == 'retired' %}secondary{% else %}info{% endif %}">{{ asset.get_status_display }}</span></td>
+                    <td>{{ asset.location|default:"-" }}</td>
+                    <td>{{ asset.assigned_to|default:"-" }}</td>
+                    <td><a href="{% url 'maintenance:asset_detail' asset.pk %}" class="btn btn-sm btn-outline-primary">Detalji</a></td>
+                </tr>
+                {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">Nema imovine</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

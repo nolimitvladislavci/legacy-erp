@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ clan.full_name }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div>
+    <h4 style="margin:0">{{ clan.full_name }}</h4>
+    <small style="color:var(--muted)">{{ clan.get_membership_type_display }} | {{ clan.get_status_display }}</small>
+  </div>
+  <a href="{% url 'udruge:clan_list' %}" class="btn btn-ghost btn-sm">&larr; Lista</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+  <div class="card" style="padding:1rem">
+    <div style="font-size:.72rem;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;letter-spacing:.05em">Osobni podaci</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.85rem">
+      <div><span style="color:var(--muted)">OIB:</span> <strong>{{ clan.oib|default:"-" }}</strong></div>
+      <div><span style="color:var(--muted)">Telefon:</span> {{ clan.phone|default:"-" }}</div>
+      <div><span style="color:var(--muted)">Email:</span> {{ clan.email|default:"-" }}</div>
+      <div><span style="color:var(--muted)">Grad:</span> {{ clan.city|default:"-" }}</div>
+    </div>
+    {% if clan.oib %}
+    <button onclick="oibLookup()" class="btn btn-ghost btn-sm" style="margin-top:.75rem;width:100%">OIB Lookup</button>
+    <div id="oibResult" style="margin-top:.5rem;font-size:.82rem"></div>
+    {% endif %}
+  </div>
+
+  <div class="card" style="padding:1rem">
+    <div style="font-size:.72rem;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;letter-spacing:.05em">Clanstvo</div>
+    <div style="font-size:.85rem">
+      <div><span style="color:var(--muted)">Tip:</span> {{ clan.get_membership_type_display }}</div>
+      <div><span style="color:var(--muted)">Uclanjenje:</span> {{ clan.date_joined|date:"d.m.Y" }}</div>
+      <div><span style="color:var(--muted)">Istice:</span> {% if clan.membership_expires %}{{ clan.membership_expires|date:"d.m.Y" }}{% if clan.is_expired %} <span style="color:#ef4444">ISTEKLO</span>{% endif %}{% else %}-{% endif %}</div>
+      <div><span style="color:var(--muted)">OPG:</span> {% if clan.has_opg %}Da{% else %}Ne{% endif %}</div>
+    </div>
+    <div style="display:flex;gap:.4rem;margin-top:.75rem">
+      <button onclick="aiAnalyze()" class="btn btn-gold btn-sm" style="flex:1">AI Analiza</button>
+      {% if clan.whatsapp_opt_in %}<button onclick="sendWA()" class="btn btn-sm" style="flex:1;background:#25d366;color:#fff;border:none">WhatsApp</button>{% endif %}
+    </div>
+    <div id="aiResult" style="margin-top:.5rem;font-size:.82rem"></div>
+  </div>
+</div>
+
+{% if clan.ai_profile %}
+<div class="card" style="padding:1rem;margin-top:1rem">
+  <div style="font-size:.72rem;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem">AI Profil</div>
+  <div style="font-size:.85rem">
+    {% if clan.ai_profile.profil %}<div><strong>Profil:</strong> {{ clan.ai_profile.profil }}</div>{% endif %}
+    {% if clan.ai_profile.preporuka %}<div><strong>Preporuka:</strong> {{ clan.ai_profile.preporuka }}</div>{% endif %}
+    {% if clan.ai_profile.modul %}<div><strong>Modul:</strong> {{ clan.ai_profile.modul }}</div>{% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if biljeske %}
+<div class="card" style="padding:1rem;margin-top:1rem">
+  <div style="font-size:.72rem;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Biljeske</div>
+  {% for b in biljeske %}
+  <div style="padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem">
+    <span style="color:var(--muted);font-size:.7rem">{{ b.created_at|date:"d.m.Y H:i" }} | {{ b.tip }}</span><br>
+    {{ b.text }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<script>
+var CSRF = document.cookie.match(/csrftoken=([^;]+)/)[1];
+function oibLookup(){
+  var el=document.getElementById("oibResult");
+  el.textContent="Pretrazujem...";
+  fetch("{% url 'udruge:oib_lookup' clan.pk %}",{method:"POST",headers:{"X-CSRFToken":CSRF}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.ok){el.innerHTML="<span style='color:var(--green)'>OIB validan</span>";}
+    else{el.innerHTML="<span style='color:#ef4444'>"+d.error+"</span>";}
+  });
+}
+function aiAnalyze(){
+  var el=document.getElementById("aiResult");
+  el.textContent="AI analizira...";
+  fetch("{% url 'udruge:ai_analyze' clan.pk %}",{method:"POST",headers:{"X-CSRFToken":CSRF}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.ok){el.innerHTML="<div style='color:var(--gold)'>"+d.ai_profile.preporuka+"</div>";setTimeout(function(){location.reload();},2000);}
+    else{el.innerHTML="<span style='color:#ef4444'>"+d.error+"</span>";}
+  });
+}
+function sendWA(){
+  var msg=prompt("Poruka:");
+  if(!msg)return;
+  fetch("{% url 'udruge:send_whatsapp' clan.pk %}",{method:"POST",headers:{"X-CSRFToken":CSRF,"Content-Type":"application/x-www-form-urlencoded"},body:"type=custom&message="+encodeURIComponent(msg)})
+  .then(function(r){return r.json();}).then(function(d){alert(d.ok?"Poslano!":d.error);});
+}
+</script>
+{% endblock %}

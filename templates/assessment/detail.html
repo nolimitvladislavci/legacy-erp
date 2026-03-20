@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nalaz #{{ assessment.pk }} – {{ assessment.client_name }}{% endblock %}
+{% block extra_css %}
+<style>
+:root{--gold:#c9a84c;--gold-dim:rgba(201,168,76,.12);--gold-border:rgba(201,168,76,.28);--surface:#0f172a;--surface2:#1e293b;--border:rgba(255,255,255,.08);--text:#e2e8f0;--muted:#94a3b8;--green:#10b981;--red:#ef4444;--amber:#f59e0b}
+.ad-wrap{max-width:900px;margin:0 auto;padding:1.25rem 1rem 3rem}
+.ad-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.ad-client{font-size:1.2rem;font-weight:800;color:var(--text)}
+.ad-sub{font-size:.8rem;color:var(--muted);margin-top:.25rem}
+.ad-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* Status select */
+.status-form{display:flex;gap:.4rem;align-items:center}
+.status-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.4rem .65rem;font-size:.82rem;outline:none}
+.status-select:focus{border-color:var(--gold)}
+.btn-status{background:var(--gold);color:#0a0a0a;border:none;border-radius:6px;padding:.4rem .875rem;font-size:.78rem;font-weight:700;cursor:pointer;min-height:36px}
+
+/* Section cards */
+.s-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:.875rem;overflow:hidden}
+.s-card-header{padding:.875rem 1rem;border-bottom:1px solid var(--border);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.s-card-body{padding:.875rem 1rem}
+
+/* Key-value grid */
+.kv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.65rem}
+.kv{background:var(--surface);border-radius:7px;padding:.65rem .875rem}
+.kv-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem}
+.kv-val{font-size:.88rem;font-weight:600;color:var(--text)}
+.kv-val.gold{color:var(--gold)}
+.kv-val.green{color:var(--green)}
+.kv-val.amber{color:var(--amber)}
+
+/* Tags (list of values) */
+.tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.25rem}
+.tag{background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);font-size:.7rem;padding:.15rem .5rem;border-radius:5px;font-weight:600}
+.tag.red{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--red)}
+.tag.amber{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3);color:var(--amber)}
+
+/* Expert notes */
+.expert-box{background:var(--surface);border-left:3px solid var(--gold);border-radius:0 7px 7px 0;padding:.875rem 1rem;font-size:.88rem;color:var(--text);line-height:1.6;white-space:pre-wrap}
+
+/* Photo gallery */
+.photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.6rem}
+.photo-item{border-radius:7px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;cursor:pointer;transition:border-color .2s}
+.photo-item:hover{border-color:var(--gold)}
+.photo-item img{width:100%;height:100%;object-fit:cover}
+
+/* Price badge */
+.price-badge{background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:8px;padding:.75rem 1rem;text-align:center;display:inline-block}
+.price-range{font-size:1.3rem;font-weight:800;color:var(--gold)}
+.price-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+
+@media(max-width:600px){.ad-header{flex-direction:column}.ad-actions{width:100%}.ad-actions .btn,.ad-actions a{flex:1;text-align:center;justify-content:center}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="ad-wrap">
+  <div class="ad-header">
+    <div>
+      <div class="ad-client">{{ assessment.client_name }}</div>
+      <div class="ad-sub">
+        Nalaz #{{ assessment.pk }} &nbsp;·&nbsp;
+        {{ assessment.get_assessment_type_display }} &nbsp;·&nbsp;
+        {{ assessment.created_at|date:"d.m.Y H:i" }}
+        {% if assessment.created_by %}&nbsp;·&nbsp; {{ assessment.created_by.get_full_name|default:assessment.created_by.username }}{% endif %}
+      </div>
+    </div>
+    <div class="ad-actions">
+      <form method="post" action="{% url 'assessment:status_update' assessment.pk %}" class="status-form">
+        {% csrf_token %}
+        <select name="status" class="status-select">
+          {% for val, lbl in assessment.STATUS_CHOICES %}
+          <option value="{{ val }}" {% if val == assessment.status %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn-status">{% trans "Spremi" %}</button>
+      </form>
+      <a href="{% url 'assessment:pdf' assessment.pk %}" class="btn btn-gold" target="_blank" style="min-height:44px;display:flex;align-items:center">{% trans "📄 PDF" %}</a>
+      <a href="{% url 'assessment:list' %}" class="btn btn-ghost" style="min-height:44px;display:flex;align-items:center">{% trans "← Lista" %}</a>
+    </div>
+  </div>
+
+  {% if assessment.calculated_price_from %}
+  <div style="margin-bottom:1rem">
+    <div class="price-badge">
+      <div class="price-lbl">{% trans "Okvirna cijena" %}</div>
+      <div class="price-range">{{ assessment.calculated_price_from|floatformat:0 }} – {{ assessment.calculated_price_to|floatformat:0 }} €</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- STEP 1 – Lokacija -->
+  {% with s=data.step1 %}
+  {% if s %}
+  <div class="s-card">
+    <div class="s-card-header">{% trans "📍 Korak 1 – Lokacija i tip objekta" %}</div>
+    <div class="s-card-body">
+      <div class="kv-grid">
+        {% if s.client_phone %}<div class="kv"><div class="kv-lbl">{% trans "Telefon" %}</div><div class="kv-val">{{ s.client_phone }}</div></div>{% endif %}
+        {% if s.client_email %}<div class="kv"><div class="kv-lbl">{% trans "E-mail" %}</div><div class="kv-val">{{ s.client_email }}</div></div>{% endif %}
+        {% if s.client_address %}<div class="kv"><div class="kv-lbl">{% trans "Adresa" %}</div><div class="kv-val">{{ s.client_address }}</div></div>{% endif %}
+        {% if s.object_type %}<div class="kv"><div class="kv-lbl">{% trans "Tip objekta" %}</div><div class="kv-val">{{ s.object_type }}</div></div>{% endif %}
+        {% if s.floor %}<div class="kv"><div class="kv-lbl">{% trans "Etaža" %}</div><div class="kv-val">{{ s.floor }}</div></div>{% endif %}
+        {% if s.water_connection %}<div class="kv"><div class="kv-lbl">{% trans "Priključak" %}</div><div class="kv-val">{{ s.water_connection }}</div></div>{% endif %}
+        {% if s.bathroom_position %}<div class="kv"><div class="kv-lbl">{% trans "Položaj kupaonice" %}</div><div class="kv-val">{{ s.bathroom_position }}</div></div>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- STEP 2 – Instalacije -->
+  {% with s=data.step2 %}
+  {% if s %}
+  <div class="s-card">
+    <div class="s-card-header">{% trans "🔧 Korak 2 – Instalacije" %}</div>
+    <div class="s-card-body">
+      <div class="kv-grid">
+        {% if s.installation_type %}<div class="kv"><div class="kv-lbl">{% trans "Instalacija" %}</div><div class="kv-val">{{ s.installation_type }}</div></div>{% endif %}
+        {% if s.toilet_type %}<div class="kv"><div class="kv-lbl">{% trans "WC tip" %}</div><div class="kv-val">{{ s.toilet_type }}</div></div>{% endif %}
+        {% if s.faucet_type %}<div class="kv"><div class="kv-lbl">{% trans "Slavine" %}</div><div class="kv-val">{{ s.faucet_type }}</div></div>{% endif %}
+        {% if s.hot_water_circ %}<div class="kv"><div class="kv-lbl">{% trans "Cirk. tople vode" %}</div><div class="kv-val">{{ s.hot_water_circ }}</div></div>{% endif %}
+      </div>
+      {% if s.pipe_type %}
+      <div style="margin-top:.65rem">
+        <div class="kv-lbl" style="margin-bottom:.35rem">{% trans "Cijevi" %}</div>
+        <div class="tags">
+          {% for p in s.pipe_type %}<span class="tag {% if p == 'galvanized' %}red{% endif %}">{{ p }}</span>{% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- STEP 3 – Dimenzije + Photos -->
+  {% with s=data.step3 %}
+  {% if s %}
+  <div class="s-card">
+    <div class="s-card-header">{% trans "📐 Korak 3 – Dimenzije i stanje" %}</div>
+    <div class="s-card-body">
+      <div class="kv-grid">
+        {% if s.floor_area %}<div class="kv"><div class="kv-lbl">{% trans "Površina" %}</div><div class="kv-val gold">{{ s.floor_area }} m²</div></div>{% endif %}
+        {% if s.ceiling_height %}<div class="kv"><div class="kv-lbl">{% trans "Visina stropa" %}</div><div class="kv-val">{{ s.ceiling_height }} cm</div></div>{% endif %}
+        {% if s.wall_material %}<div class="kv"><div class="kv-lbl">{% trans "Zidovi" %}</div><div class="kv-val">{{ s.wall_material }}</div></div>{% endif %}
+        {% if s.complexity %}<div class="kv"><div class="kv-lbl">{% trans "Složenost" %}</div><div class="kv-val {% if s.complexity == 'challenging' %}red{% elif s.complexity == 'complex' %}amber{% else %}green{% endif %}">{{ s.complexity }}</div></div>{% endif %}
+      </div>
+      {% if s.hidden_risks %}
+      <div style="margin-top:.75rem">
+        <div class="kv-lbl" style="margin-bottom:.3rem">{% trans "Skriveni rizici" %}</div>
+        <div class="expert-box" style="border-left-color:var(--amber)">{{ s.hidden_risks }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- Photos by step -->
+  {% for step_num, step_photos in photos_by_step.items %}
+  <div class="s-card">
+    <div class="s-card-header">📷 Fotografije – Korak {{ step_num }}
+      <span style="font-size:.72rem;color:var(--muted)">{{ step_photos|length }} foto</span>
+    </div>
+    <div class="s-card-body">
+      <div class="photo-gallery">
+        {% for p in step_photos %}
+        <div class="photo-item" onclick="window.open('{{ p.photo.url }}','_blank')">
+          <img src="{{ p.photo.url }}" alt="{{ p.caption|default:'Fotografija' }}" loading="lazy">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- STEP 4 – Elementi -->
+  {% with s=data.step4 %}
+  {% if s %}
+  <div class="s-card">
+    <div class="s-card-header">{% trans "🛁 Korak 4 – Elementi kupaone" %}</div>
+    <div class="s-card-body">
+      <div class="kv-grid">
+        {% if s.waterproofing %}<div class="kv"><div class="kv-lbl">{% trans "Hidroizolacija" %}</div><div class="kv-val">{{ s.waterproofing }}</div></div>{% endif %}
+        {% if s.window %}<div class="kv"><div class="kv-lbl">{% trans "Prozor" %}</div><div class="kv-val">{{ s.window }}</div></div>{% endif %}
+        {% if s.ventilation %}<div class="kv"><div class="kv-lbl">{% trans "Ventilacija" %}</div><div class="kv-val">{{ s.ventilation }}</div></div>{% endif %}
+        {% if s.lighting_type %}<div class="kv"><div class="kv-lbl">{% trans "Rasvjeta" %}</div><div class="kv-val">{{ s.lighting_type }}</div></div>{% endif %}
+        {% if s.heating %}<div class="kv"><div class="kv-lbl">{% trans "Grijanje" %}</div><div class="kv-val">{{ s.heating }}</div></div>{% endif %}
+        {% if s.bathing_type %}<div class="kv"><div class="kv-lbl">{% trans "Kupanje" %}</div><div class="kv-val">{{ s.bathing_type }}</div></div>{% endif %}
+        {% if s.shower_type %}<div class="kv"><div class="kv-lbl">{% trans "Tuš kabina" %}</div><div class="kv-val">{{ s.shower_type }}</div></div>{% endif %}
+        {% if s.glass_thickness %}<div class="kv"><div class="kv-lbl">{% trans "Staklo" %}</div><div class="kv-val">{{ s.glass_thickness }}</div></div>{% endif %}
+        {% if s.smart_level %}<div class="kv"><div class="kv-lbl">{% trans "SMART razina" %}</div><div class="kv-val gold">{{ s.smart_level }}</div></div>{% endif %}
+      </div>
+      {% if s.smart %}
+      <div style="margin-top:.65rem">
+        <div class="kv-lbl" style="margin-bottom:.35rem">{% trans "Smart opcije" %}</div>
+        <div class="tags">{% for sv in s.smart %}<span class="tag">{{ sv }}</span>{% endfor %}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- STEP 5 – Zaključak -->
+  {% with s=data.step5 %}
+  {% if s %}
+  <div class="s-card">
+    <div class="s-card-header">{% trans "🧑‍🔧 Korak 5 – Zaključak majstora" %}</div>
+    <div class="s-card-body">
+      {% if assessment.notes %}
+      <div style="margin-bottom:.875rem">
+        <div class="kv-lbl" style="margin-bottom:.35rem">{% trans "Mišljenje stručnjaka" %}</div>
+        <div class="expert-box">{{ assessment.notes }}</div>
+      </div>
+      {% endif %}
+      <div class="kv-grid">
+        {% if s.duration %}<div class="kv"><div class="kv-lbl">{% trans "Rok radova" %}</div><div class="kv-val">{{ s.duration }}</div></div>{% endif %}
+        {% if s.workers_count %}<div class="kv"><div class="kv-lbl">{% trans "Ekipa" %}</div><div class="kv-val">{{ s.workers_count }} maj. + {{ s.helpers_count|default:"0" }} pom.</div></div>{% endif %}
+        {% if s.price_from %}<div class="kv"><div class="kv-lbl">{% trans "Cijena (okvirno)" %}</div><div class="kv-val gold">{{ s.price_from }} – {{ s.price_to }} €</div></div>{% endif %}
+      </div>
+      {% if s.warnings %}
+      <div style="margin-top:.65rem">
+        <div class="kv-lbl" style="margin-bottom:.35rem">{% trans "Upozorenja" %}</div>
+        <div class="tags">{% for w in s.warnings %}<span class="tag red">⚠ {{ w }}</span>{% endfor %}</div>
+      </div>
+      {% endif %}
+      {% if s.solution %}
+      <div style="margin-top:.65rem">
+        <div class="kv-lbl" style="margin-bottom:.35rem">{% trans "Preporuka" %}</div>
+        <div class="tags">{% for sol in s.solution %}<span class="tag">{{ sol }}</span>{% endfor %}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- STEP 6 – Stil -->
+  {% with s=data.step6 %}
+  {% if s %}
+  <div class="s-card">
+    <div class="s-card-header">{% trans "🎨 Korak 6 – Klijentovi zahtjevi i stil" %}</div>
+    <div class="s-card-body">
+      <div class="kv-grid">
+        {% if s.style %}<div class="kv"><div class="kv-lbl">{% trans "Stil" %}</div><div class="kv-val">{{ s.style }}</div></div>{% endif %}
+        {% if s.tile_size %}<div class="kv"><div class="kv-lbl">{% trans "Format pločica" %}</div><div class="kv-val">{{ s.tile_size }}</div></div>{% endif %}
+        {% if s.tile_color %}<div class="kv"><div class="kv-lbl">{% trans "Boja pločica" %}</div><div class="kv-val">{{ s.tile_color }}</div></div>{% endif %}
+        {% if s.tile_mat %}<div class="kv"><div class="kv-lbl">{% trans "Materijal" %}</div><div class="kv-val">{{ s.tile_mat }}</div></div>{% endif %}
+        {% if s.sanitarija_budget %}<div class="kv"><div class="kv-lbl">{% trans "Sanitarija (budget)" %}</div><div class="kv-val">{{ s.sanitarija_budget }}</div></div>{% endif %}
+        {% if s.sanitarija_color %}<div class="kv"><div class="kv-lbl">{% trans "Boja sanitarije" %}</div><div class="kv-val">{{ s.sanitarija_color }}</div></div>{% endif %}
+      </div>
+      {% if s.client_notes %}
+      <div style="margin-top:.75rem">
+        <div class="kv-lbl" style="margin-bottom:.3rem">{% trans "Posebni zahtjevi klijenta" %}</div>
+        <div class="expert-box" style="border-left-color:var(--blue,#3b82f6)">{{ s.client_notes }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+</div>
+{% endblock %}

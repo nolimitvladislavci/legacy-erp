@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Warehouse Terminal{% endblock %}
+{% block content %}
+<style>
+.wh-wrap { max-width: 900px; margin: 0 auto; padding: 16px; }
+.wh-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.wh-header h2 { font-weight: 900; font-size: 1.3rem; }
+.wh-stat { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 14px; padding: 16px; text-align: center; }
+.wh-stat .num { font-size: 2rem; font-weight: 900; color: #c9a84c; }
+.wh-stat .label { font-size: .72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.wh-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.wh-card h3 { font-size: .82rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.wh-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border, rgba(255,255,255,0.06)); }
+.wh-item:last-child { border-bottom: none; }
+.badge { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+.b-open { background: rgba(234,179,8,0.15); color: #eab308; }
+.b-picking { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.b-picked { background: rgba(34,197,94,0.15); color: #22c55e; }
+.b-packed { background: rgba(148,163,184,0.15); color: #94a3b8; }
+.btn-wh { background: #c9a84c; color: #000; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: .85rem; cursor: pointer; text-decoration: none; display: inline-block; }
+.btn-wh:hover { background: #b8963c; }
+.empty-msg { color: var(--text-muted); font-size: .88rem; padding: 20px 0; text-align: center; }
+</style>
+
+<div class="wh-wrap">
+  <div class="wh-header">
+    <div>
+      <h2>&#128230; {% trans "Warehouse Terminal" %}</h2>
+      <span style="color:var(--text-muted);font-size:.82rem;">{% trans "Pick & Pack upravljacka ploca" %}</span>
+    </div>
+    <div class="wh-stat">
+      <div class="num">{{ packed_today }}</div>
+      <div class="label">{% trans "Zapakirano danas" %}</div>
+    </div>
+  </div>
+
+  <!-- Open Waves -->
+  <div class="wh-card">
+    <h3>&#127754; {% trans "Aktivni Wave-ovi" %}</h3>
+    {% for wave in open_waves %}
+    <div class="wh-item">
+      <div>
+        <strong>{{ wave.wave_number }}</strong>
+        <div style="font-size:.78rem;color:var(--text-muted);">
+          {{ wave.tasks.count }} {% trans "zadataka" %}
+          {% if wave.picker %} | {{ wave.picker.get_full_name }}{% endif %}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="badge b-{{ wave.status }}">{{ wave.get_status_display }}</span>
+        <a href="{% url 'delivery:wave_pick' wave_pk=wave.pk %}" class="btn-wh">{% trans "OTVORI" %}</a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-msg">{% trans "Nema aktivnih wave-ova" %}</div>
+    {% endfor %}
+  </div>
+
+  <!-- Pending Orders — create wave -->
+  <div class="wh-card">
+    <h3>&#128203; {% trans "Narudzbe za pakiranje" %}</h3>
+    <form method="post" action="{% url 'delivery:create_wave' %}">
+      {% csrf_token %}
+      {% for order in pending_orders %}
+      <div class="wh-item">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="checkbox" name="order_pks" value="{{ order.pk }}" style="width:20px;height:20px;">
+          <div>
+            <strong>{{ order.order_number }}</strong>
+            <div style="font-size:.78rem;color:var(--text-muted);">
+              {{ order.buyer_company.name }} | {{ order.items.count }} {% trans "stavki" %} | {{ order.total }}&euro;
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'delivery:pack_station' order_pk=order.pk %}" class="btn-wh" style="font-size:.75rem;">PACK</a>
+      </div>
+      {% empty %}
+      <div class="empty-msg">{% trans "Nema narudzbi za pakiranje" %}</div>
+      {% endfor %}
+      {% if pending_orders %}
+      <div style="margin-top:16px;text-align:right;">
+        <button type="submit" class="btn-wh">&#127754; {% trans "KREIRAJ WAVE" %}</button>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Badsanierung Premium-Kalkulator – Visković Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#c9a84c; --gold2:#b8962e; --gold-light:#e8d5a0;
+  --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.25);
+  --navy:#0a0f1e; --navy2:#111827; --navy3:#1a2235; --navy4:#243050;
+  --text:#e8eaf0; --text-dim:#8892aa; --text-muted:#4a5568;
+  --border:rgba(255,255,255,.07); --green:#22c55e; --red:#ef4444;
+  --r:10px; --shadow:0 8px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;line-height:1.6;min-height:100vh}
+
+/* ── HEADER ──────────────────────────────── */
+.hdr{background:rgba(10,15,30,.95);border-bottom:1px solid var(--gold-border);
+  padding:14px 24px;display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:200;backdrop-filter:blur(12px)}
+.hlogo{width:38px;height:38px;border-radius:8px;background:var(--gold-dim);
+  border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hlogo img{width:28px;height:28px;object-fit:contain;filter:brightness(0) invert(1)}
+.htitle{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--gold);line-height:1}
+.hsub{font-size:.68rem;color:var(--text-dim);letter-spacing:.5px;margin-top:2px}
+.hnav{display:flex;gap:6px;margin-left:auto}
+.hnav a{font-size:.72rem;padding:6px 12px;border-radius:6px;color:var(--text-dim);
+  text-decoration:none;border:1px solid var(--border);transition:.2s}
+.hnav a:hover{color:var(--gold);border-color:var(--gold-border)}
+.hnav a.act{color:var(--gold);border-color:var(--gold-border);background:var(--gold-dim)}
+
+/* ── HERO ────────────────────────────────── */
+.hero{padding:48px 24px 32px;max-width:900px;margin:0 auto;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--gold-dim);
+  border:1px solid var(--gold-border);border-radius:20px;padding:5px 14px;
+  font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:700;
+  color:#fff;line-height:1.15;margin-bottom:12px}
+.hero h1 span{color:var(--gold)}
+.hero p{font-size:.9rem;color:var(--text-dim);max-width:560px;margin:0 auto 24px}
+.quality-pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.q-pill{padding:6px 18px;border-radius:20px;border:2px solid var(--border);
+  font-size:.78rem;font-weight:600;cursor:pointer;transition:.2s;color:var(--text-dim)}
+.q-pill:hover{border-color:rgba(201,168,76,.4)}
+.q-pill.act{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
+.q-note{font-size:.7rem;color:var(--text-muted);text-align:center}
+
+/* ── MAIN GRID ───────────────────────────── */
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px;display:grid;
+  grid-template-columns:1fr 380px;gap:24px;align-items:start}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+
+/* ── CARDS ───────────────────────────────── */
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px}
+.card-icon{width:28px;height:28px;border-radius:6px;background:var(--gold-dim);
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--gold)}
+.card-body{padding:16px 18px}
+
+/* ── DIMENSIONS ──────────────────────────── */
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--text-dim);margin-bottom:5px;font-weight:500}
+.field input,.field select{width:100%;background:var(--navy3);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;color:var(--text);font-size:.88rem;padding:9px 11px;
+  font-family:'Barlow',sans-serif;transition:.15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold-border);background:var(--navy4)}
+.dim-info{margin-top:10px;font-size:.75rem;color:var(--text-dim);
+  background:var(--navy3);padding:8px 12px;border-radius:6px;border-left:2px solid var(--gold)}
+
+/* ── LEISTUNGEN (service items) ──────────── */
+.leist-item{position:relative;display:flex;align-items:flex-start;gap:10px;
+  padding:11px 14px;background:var(--navy3);border:1px solid var(--border);
+  border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.15s;user-select:none}
+.leist-item:hover{border-color:rgba(201,168,76,.2)}
+.leist-item.on{border-color:var(--gold);background:var(--gold-dim)}
+.leist-cb{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);
+  flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;color:transparent;background:transparent;transition:.15s}
+.leist-item.on .leist-cb{border-color:var(--gold);background:var(--gold);color:#0a0f1e}
+.leist-body{flex:1;min-width:0}
+.leist-name{font-size:.85rem;font-weight:600;color:var(--text);line-height:1.3}
+.leist-item.on .leist-name{color:var(--gold-light)}
+.leist-desc{font-size:.72rem;color:var(--text-dim);margin-top:2px;line-height:1.4}
+.leist-price{font-size:.75rem;color:var(--text-dim);flex-shrink:0;text-align:right}
+.leist-item.on .leist-price{color:var(--gold)}
+
+/* Tooltip */
+.info-btn{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);font-size:.65rem;color:var(--text-dim);
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  margin-top:1px;transition:.15s;position:relative}
+.info-btn:hover{background:var(--gold-dim);border-color:var(--gold-border);color:var(--gold)}
+.tooltip{display:none;position:absolute;right:0;top:26px;width:280px;
+  background:#1e2d45;border:1px solid var(--gold-border);border-radius:8px;
+  padding:12px 14px;font-size:.75rem;color:var(--text);line-height:1.6;
+  z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.tooltip strong{color:var(--gold);display:block;margin-bottom:4px}
+.tooltip .norms{font-size:.68rem;color:var(--text-dim);margin-top:6px;
+  padding-top:6px;border-top:1px solid var(--border)}
+.info-btn:hover .tooltip,.info-btn:focus .tooltip{display:block}
+
+/* Section label */
+.section-lbl{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);padding:12px 0 6px;border-top:1px solid var(--border);margin-top:4px}
+.section-lbl:first-child{border-top:none;padding-top:0}
+
+/* Qty input inline */
+.qty-wrap{display:flex;align-items:center;gap:4px;margin-top:5px}
+.qty-wrap label{font-size:.68rem;color:var(--text-dim)}
+.qty-inp{width:64px;background:var(--navy4);border:1px solid rgba(255,255,255,.12);
+  border-radius:5px;color:var(--text);font-size:.82rem;padding:3px 7px;text-align:right}
+
+/* ── RESULT PANEL ────────────────────────── */
+.result-panel{position:sticky;top:72px}
+.rbox{background:linear-gradient(160deg,var(--navy2) 0%,var(--navy3) 100%);
+  border:1px solid var(--gold-border);border-radius:12px;padding:20px;margin-bottom:14px}
+.rbox-label{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);margin-bottom:4px}
+.rbox-range{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;
+  color:var(--gold);line-height:1}
+.rbox-note{font-size:.72rem;color:var(--text-dim);margin-top:6px}
+
+.breakdown{margin-top:14px}
+.bd-row{display:flex;justify-content:space-between;padding:5px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem}
+.bd-row:last-child{border:none}
+.bd-label{color:var(--text-dim)}
+.bd-val{font-weight:600;font-variant-numeric:tabular-nums}
+.bd-total{font-size:.95rem;font-weight:700;color:var(--gold);
+  border-top:2px solid var(--gold-border)!important;padding-top:8px!important;margin-top:4px}
+.bd-brutto{font-size:1.1rem;font-weight:800;
+  background:var(--gold-dim);border-radius:6px;padding:8px 10px;margin-top:6px;
+  display:flex;justify-content:space-between;align-items:center}
+.bd-brutto span:last-child{color:var(--gold)}
+
+/* Team badge */
+.team-badge{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tbadge{background:var(--navy3);border:1px solid var(--border);border-radius:6px;
+  padding:4px 10px;font-size:.7rem;color:var(--text-dim);display:flex;align-items:center;gap:5px}
+.tbadge span{color:var(--gold)}
+
+/* Duration */
+.duration{display:flex;gap:12px;margin-top:10px}
+.dur-item{flex:1;background:var(--navy3);border:1px solid var(--border);border-radius:8px;
+  padding:10px;text-align:center}
+.dur-val{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold)}
+.dur-label{font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px}
+
+/* CTA */
+.cta-card{background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));
+  border:1px solid var(--gold-border);border-radius:10px;padding:18px}
+.cta-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:12px}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cta-input{width:100%;background:var(--navy3);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;color:var(--text);padding:9px 11px;font-size:.85rem;
+  font-family:'Barlow',sans-serif}
+.cta-input:focus{outline:none;border-color:var(--gold-border)}
+.btn-gold{width:100%;background:var(--gold);color:#0a0f1e;font-weight:700;
+  font-size:.88rem;padding:13px;border:none;border-radius:8px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.5px;
+  font-size:.95rem;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(201,168,76,.3)}
+.disclaimer{font-size:.68rem;color:var(--text-muted);text-align:center;margin-top:10px;line-height:1.6}
+.extra-card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px}
+.extra-head{padding:12px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+  font-family:"Barlow Condensed",sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--gold)}
+.extra-body{padding:14px 18px;display:grid;gap:8px}
+.ex-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;
+  padding:10px 12px;background:var(--navy3);border-radius:8px;border:1px solid var(--border)}
+.ex-row.active{border-color:rgba(201,168,76,.3);background:var(--gold-dim)}
+.ex-name{font-size:.83rem;font-weight:600;color:var(--text)}
+.ex-desc{font-size:.7rem;color:var(--text-dim);margin-top:2px}
+.ex-toggle{position:relative;width:38px;height:20px;flex-shrink:0}
+.ex-toggle input{opacity:0;width:0;height:0;position:absolute}
+.ex-slider{position:absolute;inset:0;background:var(--navy4);border-radius:20px;
+  cursor:pointer;border:1px solid rgba(255,255,255,.12);transition:.2s}
+.ex-slider:before{content:"";position:absolute;width:14px;height:14px;
+  border-radius:50%;background:#64748b;left:2px;top:2px;transition:.2s}
+.ex-toggle input:checked + .ex-slider{background:var(--gold-dim);border-color:var(--gold)}
+.ex-toggle input:checked + .ex-slider:before{background:var(--gold);transform:translateX(18px)}
+.ex-price{font-size:.82rem;font-weight:600;color:var(--text-dim);white-space:nowrap;min-width:90px;text-align:right}
+.ex-row.active .ex-price{color:var(--gold)}
+.res-split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.rs-box{background:var(--navy3);border-radius:8px;padding:10px 12px;border:1px solid var(--border)}
+.rs-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);margin-bottom:3px}
+.rs-val{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums}
+.rs-note{font-size:.62rem;color:var(--text-muted);margin-top:2px}
+.rs-lohn{border-color:var(--gold-border)}.rs-lohn .rs-val{color:var(--gold)}
+.rs-mat{border-color:rgba(34,197,94,.25)}.rs-mat .rs-val{color:#22c55e}
+
+/* Norm indicator bar */
+.norm-bar{height:3px;background:var(--navy3);border-radius:2px;margin-top:16px;overflow:hidden}
+.norm-fill{height:100%;background:linear-gradient(90deg,var(--gold2),var(--gold));
+  border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+@media(max-width:600px){
+  .hero h1{font-size:1.8rem}
+  .dim-grid{grid-template-columns:1fr}
+  .inp-row{grid-template-columns:1fr}
+  .hnav{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <a href="https://viskovic-group.de" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
+  <div class="hlogo">
+    <img src="/static/images/viskovic_logo.jpg" alt="VG" onerror="this.parentElement.innerHTML='<span style=\'font-weight:900;color:var(--gold);font-size:.8rem\'>VG</span>'">
+  </div>
+  <div>
+    <div class="htitle">Visković Group</div>
+    <div class="hsub">Badsanierung · Stuttgart &amp; Region</div>
+  </div>
+  </a>
+  <nav class="hnav">
+    <a href="/calculator/">Kalkulator</a>
+    <a href="/calculator/salary/">Gehaltsrechner</a>
+    <a href="/calculator/bathroom/" class="act">Badsanierung</a>
+  </nav>
+</div>
+
+<div class="hero">
+  <div class="hero-badge">⭐ Premium Handwerksqualität Stuttgart</div>
+  <h1>Smart &amp; Modern.<br><span>Zum fairen Preis.</span></h1>
+  <p>Transparente Kalkulation für Ihre Badsanierung — von einfach bis Luxus. Kein Versteckspiel bei Preisen.</p>
+
+  <div class="quality-pills">
+    <div class="q-pill" onclick="setQuality('basis',this)" data-q="basis">Basis</div>
+    <div class="q-pill act" onclick="setQuality('premium',this)" data-q="premium">Premium ★</div>
+    <div class="q-pill" onclick="setQuality('luxus',this)" data-q="luxus">Luxus</div>
+  </div>
+  <div class="q-note" id="q-desc">Premium: Hochwertige Markenware · Smart-Home ready · Alles aus einer Hand</div>
+</div>
+
+<div class="wrap">
+<!-- ─── LEFT: Konfiguration ──────────────────── -->
+<div>
+
+  <!-- Abmessungen -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon">📐</div>
+      <div class="card-title">Raummaße</div>
+    </div>
+    <div class="card-body">
+      <div class="dim-grid">
+        <div class="field">
+          <label>Grundfläche (m²)</label>
+          <input type="number" id="f-flaeche" value="8" min="2" max="60" step="0.5" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Raumhöhe (m)</label>
+          <input type="number" id="f-hoehe" value="2.5" min="2" max="3.5" step="0.1" oninput="calc()">
+        </div>
+      </div>
+      <div class="dim-info" id="dim-info">Fliesenfläche wird berechnet…</div>
+    </div>
+  </div>
+
+  <!-- Keramik -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon">🔲</div>
+      <div class="card-title">Fliesen &amp; Oberflächen</div>
+    </div>
+    <div class="card-body">
+      <div class="section-lbl">Fliesenarbeiten</div>
+
+      <div class="leist-item on" data-key="fliesen" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Keramikarbeiten (Boden + Wand)</div>
+          <div class="leist-desc">Verfugung, Silikonfugen, Sockel, Formteile</div>
+          <div class="qty-wrap" onclick="event.stopPropagation()">
+            <label>m²:</label>
+            <input type="number" class="qty-inp" id="qty-fliesen" value="40" min="1" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="leist-price" id="pr-fliesen">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Was ist enthalten?</strong>
+            Verlegen von Boden- und Wandfliesen inkl. Untergrundvorbereitung, Klebermörtel, Verfugung (Epoxidfuge auf Wunsch), Silikonfugen, Außeneckenleisten (Edelstahl).
+            <div class="norms">📋 Norm: DIN 18157 (Keramische Bekleidungen) · DIN 18352 (Fliesenarbeiten VOB/C) · Herstellerrichtlinien Schomburg/Mapei</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="abdichtung" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Abdichtung (Verbundabdichtung)</div>
+          <div class="leist-desc">Bodenablauf, Wandanschlüsse, Duschbereich</div>
+          <div class="qty-wrap" onclick="event.stopPropagation()">
+            <label>m²:</label>
+            <input type="number" class="qty-inp" id="qty-abdichtung" value="8" min="1" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="leist-price" id="pr-abdichtung">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Verbundabdichtung nach DIN 18534</strong>
+            Flüssigfolie 2-lagig + Dichtband an allen Anschlüssen. Pflicht im Nassbereich. Verhindert Feuchtigkeitsschäden am Mauerwerk.
+            <div class="norms">📋 DIN 18534 · Merkblatt ZDB · EnEV §10 (Feuchtigkeitsschutz)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item" data-key="estrich" onclick="toggle(this)">
+        <div class="leist-cb"></div>
+        <div class="leist-body">
+          <div class="leist-name">Bodenausgleich / Estrich</div>
+          <div class="leist-desc">Gefälleestrich für Bodenablauf, Niveauausgleich</div>
+          <div class="qty-wrap" onclick="event.stopPropagation()">
+            <label>m²:</label>
+            <input type="number" class="qty-inp" id="qty-estrich" value="6" min="1" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="leist-price" id="pr-estrich">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Gefälleestrich für Bodenablauf</strong>
+            Notwendig bei Bodenmontage der Duschrinne. Mindestgefälle 1,5% zur Ablaufrinne. Trockenestrich oder Zementestrich.
+            <div class="norms">📋 DIN 18560 (Estriche) · DIN 18195 (Abdichtung)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-lbl">Neuer Trennwand</div>
+      <div class="leist-item on" data-key="trockenbau" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Trockenbau — Neuer Installationswand (10 cm)</div>
+          <div class="leist-desc">GK-Feuerschutzplatten, 3× Nischen für Accessoires, LED-Nischenbeleuchtung (12V)</div>
+          <div class="qty-wrap" onclick="event.stopPropagation()">
+            <label>m²:</label>
+            <input type="number" class="qty-inp" id="qty-trockenbau" value="6" min="1" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="leist-price" id="pr-trockenbau">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Installationswand mit Nischen</strong>
+            CW/UW Metallständerwerk, GKF-Feuerschutzplatten (Typ F), 3 eingelassene Nischen (z.B. Shampoo-Nischen) mit LED-Streifen 12V DC — erfüllt Feuchtraumvorschrift. Alle Leitungen (Dusche, Waschmaschine) in der Wandkonstruktion geführt.
+            <div class="norms">📋 DIN 18183 (Trockenbau) · VDE 0100-701 (Räume mit Badewanne/Dusche, 12V Schutzkleinspannung SELV) · DGUV (Absturzsicherung)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sanitär -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon">🚿</div>
+      <div class="card-title">Sanitär &amp; Ausstattung</div>
+    </div>
+    <div class="card-body">
+      <div class="section-lbl">Dusche</div>
+
+      <div class="leist-item on" data-key="duschrinne" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Duschrinne (Bodenablauf, bodenbündig)</div>
+          <div class="leist-desc">Schlitzrinne Edelstahl 800mm + Gefälleestrich + Anschluss an Abwasser. Sichert auch Waschmaschinen-Ablauf.</div>
+        </div>
+        <div class="leist-price" id="pr-duschrinne">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Duschrinne als Sicherheitssystem</strong>
+            Bodenbündige Duschrinne mit Wandablauf. Fängt auch Überlauf der Waschmaschine ab — kein Wasserschaden im Stockwerk darunter. Einbau nach Gefälleestrich (Gefälle 1,5%).
+            <div class="norms">📋 DIN EN 1253 (Abläufe für Gebäude) · DIN 18534 · Herstellerrichtlinie ACO/Geberit</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="dusche_armatur" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Dusche — Unterputz-Armatur + Regendusche</div>
+          <div class="leist-desc">UP-Thermostatarmatur + 300mm Regenbrause + Handbrause</div>
+        </div>
+        <div class="leist-price" id="pr-dusche_armatur">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Unterputz-Thermostat (Grohe/Hansgrohe)</strong>
+            Montage in neuem Installationswand. Thermostat verhindert Verbrühung (EN 806-2 Temperaturschutz). Regendusche 300mm Deckenbrause + seitliche Handbrause.
+            <div class="norms">📋 DIN EN 806 (Trinkwasser) · DVGW W553 (Legionellenschutz) · CE-Kennzeichnung Armatur</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-lbl">WC &amp; Hygieneausstattung</div>
+      <div class="leist-item on" data-key="wc" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">WC — Wand-WC mit Unterputzspülkasten</div>
+          <div class="leist-desc">WC hängend + UP-Spülkasten Geberit/Grohe + Betätigungsplatte</div>
+        </div>
+        <div class="leist-price" id="pr-wc">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Wand-WC mit UP-Spülkasten</strong>
+            Montagewand Geberit Duofix + hängendes WC. Spülvolumen 3/6L (Wasserspar-Spülung nach EU-Verordnung 305/2011). Einfachere Reinigung, höhenverstellbar.
+            <div class="norms">📋 DIN EN 997 (WC-Becken) · EU-Bauproduktenverordnung 305/2011 · TRWI (Trinkwasser-Installation)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="hygiene_dusche" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Hygienische Dusche / Bidet-Funktion am WC</div>
+          <div class="leist-desc">Kalt- UND Warmwasseranschluss am WC für Dusch-WC oder Bidet-Aufsatz</div>
+        </div>
+        <div class="leist-price" id="pr-hygiene_dusche">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Warmwasser-Anschluss am WC</strong>
+            Separate Warm- und Kaltwasserleitung zum WC. Ermöglicht Dusch-WC (z.B. Geberit AquaClean) oder Bidet-Aufsatz. Zukunftssicher — einfaches Upgrade später.
+            <div class="norms">📋 DIN 1988 (TRWI Trinkwasser) · DVGW W553 (Legionellenprophylaxe: Zirkulationsleitung empfohlen)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="waschbecken" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Waschtisch + Unterschrank + Armatur</div>
+          <div class="leist-desc">Hänge-Waschtisch mit Softclose-Unterschrank, Einhebelmischer</div>
+        </div>
+        <div class="leist-price" id="pr-waschbecken">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Komplette Waschtischanlage</strong>
+            Keramik-Waschtisch hängend + Softclose-Unterschrank (IKEA Godmorgon-Niveau oder höher) + Einhebelmischer. Alle Anschlüsse (Flexschläuche, Siphon, Eckventile) inklusive.
+            <div class="norms">📋 DIN EN 31 (Waschtische) · DIN 1988-200 (TRWI)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-lbl">Waschmaschinenanschluss</div>
+      <div class="leist-item on" data-key="waschmaschine" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Waschmaschinen-Anschluss im neuen Wand</div>
+          <div class="leist-desc">Kaltwasser, Ablauf (zur Duschrinne), 16A-Steckdose mit FI-Schutz</div>
+        </div>
+        <div class="leist-price" id="pr-waschmaschine">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Vollständiger WM-Anschluss</strong>
+            Kaltwasserzulauf DN 15 + Ablaufschlauch in Duschrinne geführt (kein separater Geruchsverschluss nötig) + geerdete 16A Schuko-Steckdose mit FI-Schutzschalter (30mA).
+            <div class="norms">📋 VDE 0100-701 (Steckdosen im Bad min. 60cm vom Wasserstrahl) · DIN 1988 · EN 60335 (Haushaltsgeräte)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Elektro -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Elektroinstallation</div>
+    </div>
+    <div class="card-body">
+
+      <div class="leist-item on" data-key="fi_kasten" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Unterverteiler mit FI-Schutzschalter + Erdung</div>
+          <div class="leist-desc">Kleiner Aufputz-Verteiler: LS-Schalter, FI 30mA, Potentialausgleich Bad</div>
+        </div>
+        <div class="leist-price" id="pr-fi_kasten">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>FI-Schutz ist Pflicht (seit 2009)</strong>
+            Alle Steckdosen und Lichtkreise im Bad müssen über FI-Schutzschalter (RCD) 30mA abgesichert sein. Potentialausgleich verbindet alle leitfähigen Teile (Rohre, Wannen, Heizkörper).
+            <div class="norms">📋 VDE 0100-701:2008 (Räume m. Badewanne/Dusche) · DIN VDE 0100-410 (FI-Pflicht) · §49 EnWG (Technische Sicherheit)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="led_nischen" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">LED-Nischenbeleuchtung 12V (3× Nischen)</div>
+          <div class="leist-desc">LED-Strip 12V DC in jeder Accessoire-Nische + Trafo (IP67)</div>
+        </div>
+        <div class="leist-price" id="pr-led_nischen">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Warum 12V im Nassbereich?</strong>
+            In Zone 1 (Dusche) ist nur Schutzkleinspannung ≤12V DC erlaubt (SELV). LED-Strips 12V IP67 + Trafo außerhalb der Schutzzone. Warmweißes Licht 2700K je Nische.
+            <div class="norms">📋 VDE 0100-701 Zone 1 (max. 12V SELV) · EN 60598 (Leuchten) · IP67 Schutzart Pflicht Zone 1</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="led_umlauf" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">LED-Ambientband h=120cm (Umlauf)</div>
+          <div class="leist-desc">Indirekte Beleuchtung rundum auf 120cm Höhe, dimmbar, RGB-fähig</div>
+          <div class="qty-wrap" onclick="event.stopPropagation()">
+            <label>Laufmeter:</label>
+            <input type="number" class="qty-inp" id="qty-led_umlauf" value="10" min="1" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="leist-price" id="pr-led_umlauf">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Indirekte Ambientbeleuchtung</strong>
+            LED-Profil auf 120cm Höhe eingelassene, umlaufende indirekte Beleuchtung. Dimmbar per Schalter oder Smart-Home (optional). Zone 2 erlaubt: 12V oder Normspannung mit IP44 min.
+            <div class="norms">📋 VDE 0100-701 Zone 2 (IP44 Mindestschutz) · EN 55015 (EMV LED) · EnEV (Energieeffizienzklasse LED A+)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item" data-key="smarthome" onclick="toggle(this)">
+        <div class="leist-cb"></div>
+        <div class="leist-body">
+          <div class="leist-name">Smart-Home Vorbereitung (optional)</div>
+          <div class="leist-desc">Busleitung + Smart-Dimmer für LED, Vorbereitung App-Steuerung</div>
+        </div>
+        <div class="leist-price" id="pr-smarthome">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Smart-Home ready</strong>
+            KNX- oder DALI-Bus-Vorbereitung für spätere Automatisierung. Aktuell: Schalterdimmer. Upgrade auf App-Steuerung (Philips Hue, KNX) jederzeit nachrüstbar.
+            <div class="norms">📋 KNX EN 50090 · DIN EN 60669-2-1 (Dimmer)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sanitär Leitungen + Heizung -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-icon">🔧</div>
+      <div class="card-title">Leitungen, Heizung &amp; Rohbau</div>
+    </div>
+    <div class="card-body">
+
+      <div class="leist-item on" data-key="leitungen" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Sanitärleitungen neu — durch Boden geführt</div>
+          <div class="leist-desc">Wasser + Abwasser durch Betonboden (Kernbohrung), neue Steigstränge im Wand</div>
+        </div>
+        <div class="leist-price" id="pr-leitungen">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Leitungsführung durch Boden (Betondecke)</strong>
+            Kernbohrung DN 60-100 durch Betonboden für Abwasserleitungen. Alle Installationen laufen im neuen 10cm Trockenbau-Wand. Druckprüfung nach DIN 1988 nach Montage.
+            <div class="norms">📋 DIN 1988-200 (TRWI) · DIN EN 1057 (Kupfer) oder DIN 4726 (PE-X) · DVGW W544 (Druckprüfung)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="abbruch" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Abbruch, Demontage + Entsorgung</div>
+          <div class="leist-desc">Fliesen, Sanitärobjekte, Bodenbelag, Entsorgungskosten</div>
+          <div class="qty-wrap" onclick="event.stopPropagation()">
+            <label>m²:</label>
+            <input type="number" class="qty-inp" id="qty-abbruch" value="8" min="1" step="0.5" oninput="calc()">
+          </div>
+        </div>
+        <div class="leist-price" id="pr-abbruch">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Komplett-Abbruch + Entsorgung</strong>
+            Demontage aller Sanitärobjekte, Fliesenabschlagen, Bodenbelag entfernen. Entsorgung auf zertifiziertem Wertstoffhof (Entsorgungsnachweis auf Anfrage).
+            <div class="norms">📋 KrWG §7 (Abfallvermeidung) · AVV (Abfallverzeichnis) · LAGA (Mineralische Abfälle)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item on" data-key="heizkoerper" onclick="toggle(this)">
+        <div class="leist-cb">✓</div>
+        <div class="leist-body">
+          <div class="leist-name">Heizkörper versetzen (Wand zu Wand)</div>
+          <div class="leist-desc">Demontage + Montage an neuer Position, neue Anschlüsse durch Boden</div>
+        </div>
+        <div class="leist-price" id="pr-heizkoerper">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Heizkörper-Versetzung</strong>
+            Demontage am alten Standort, neue Rohrleitungen durch Fußboden (Betonboden: Kernbohrung), Montage an neuer Wand. Spülung und Entlüftung nach Montage. System hydraulisch abgleichen.
+            <div class="norms">📋 DIN EN 442 (Heizkörper) · DIN 18380 (Heizungsanlagen) · VOB/C ATV (Abrechnung) · EnEV §14 (hydraulischer Abgleich)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="leist-item" data-key="kernbohrung_extra" onclick="toggle(this)">
+        <div class="leist-cb"></div>
+        <div class="leist-body">
+          <div class="leist-name">Kernbohrung Betonwand (optional extra)</div>
+          <div class="leist-desc">Für Durchführungen durch tragende Betonwand (nicht Beton-Boden)</div>
+        </div>
+        <div class="leist-price" id="pr-kernbohrung_extra">–</div>
+        <div class="info-btn" tabindex="0">i
+          <div class="tooltip">
+            <strong>Betonwand Kernbohrung</strong>
+            Diamantbohrung durch tragende Betonwand. Statische Prüfung vorab notwendig (Tragwerksplaner). Bohrdurchmesser je nach Leitungspaket DN 60-160.
+            <div class="norms">📋 DIN EN 13791 (Betonbewertung) · §17 BauO NRW / LBO (statische Genehmigung) · Arbeitsstättenverordnung (Lärm)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kontakt -->
+  <div class="extra-card">
+  <div class="extra-head">&#128667; Zusatzleistungen &#8212; auf Kundenrechnung</div>
+  <div class="extra-body">
+
+    <div class="ex-row active" id="ex-entsorgung">
+      <div>
+        <div class="ex-name">&#9851; Entsorgung / Zbrinjavanje otpada</div>
+        <div class="ex-desc">Abtransport auf zertifiziertem Wertstoffhof &#183; Entsorgungsnachweis inklusive &#183; KrWG §7</div>
+      </div>
+      <label class="ex-toggle"><input type="checkbox" id="tog-entsorgung" checked onchange="toggleExtra('entsorgung',this)"><span class="ex-slider"></span></label>
+      <div class="ex-price" id="ep-entsorgung">&#8211;</div>
+    </div>
+
+    <div class="ex-row active" id="ex-lieferung">
+      <div>
+        <div class="ex-name">&#128652; Materialtransport / Dovoz materijala</div>
+        <div class="ex-desc">Abholung beim Händler + Anlieferung Baustelle &#183; Pauschalpreis</div>
+      </div>
+      <label class="ex-toggle"><input type="checkbox" id="tog-lieferung" checked onchange="toggleExtra('lieferung',this)"><span class="ex-slider"></span></label>
+      <div class="ex-price" id="ep-lieferung">&#8211;</div>
+    </div>
+
+    <div class="ex-row" id="ex-material">
+      <div>
+        <div class="ex-name">&#127978; Materialbeschaffung (optional)</div>
+        <div class="ex-desc">Wir kaufen für Sie ein &#183; Kunde zahlt Einkaufspreis direkt &#183; kein Aufschlag</div>
+      </div>
+      <label class="ex-toggle"><input type="checkbox" id="tog-material" onchange="toggleExtra('material',this)"><span class="ex-slider"></span></label>
+      <div class="ex-price" id="ep-material" style="color:var(--text-muted);font-size:.72rem">0 &#8364; (auf Anfrage)</div>
+    </div>
+
+    <div class="ex-row" id="ex-bauleitung">
+      <div>
+        <div class="ex-name">&#128203; Bauleitung / Koordination</div>
+        <div class="ex-desc">Wöchentliche Reports, Lieferantenkoordination, Protokolle</div>
+      </div>
+      <label class="ex-toggle"><input type="checkbox" id="tog-bauleitung" onchange="toggleExtra('bauleitung',this)"><span class="ex-slider"></span></label>
+      <div class="ex-price" id="ep-bauleitung">&#8211;</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="cta-card">
+    <div class="cta-title">Jetzt Richtpreis-Angebot anfordern</div>
+    <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:14px;line-height:1.5">
+      Kalkulation wird als Angebot archiviert · Wir melden uns innerhalb 24h · Kostenlose Besichtigung
+    </p>
+    <form id="anfrage-form" method="POST" action="/calculator/bathroom/anfrage/" onsubmit="return prepareAnfrage()">
+      {% csrf_token %}
+      <input type="hidden" name="services"     id="hid-services">
+      <input type="hidden" name="quality"      id="hid-quality"  value="premium">
+      <input type="hidden" name="sqm"          id="hid-sqm">
+      <input type="hidden" name="budget_from"  id="hid-bfrom">
+      <input type="hidden" name="budget_to"    id="hid-bto">
+      <input type="hidden" name="description"  id="hid-desc">
+      <input type="text"   class="cta-input" name="location"      id="cta-loc"   placeholder="Adresse / Ort (Stadt, PLZ)" style="margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <input type="text" class="cta-input" name="contact_name"  id="cta-name"  placeholder="Vor- und Nachname *" required>
+        <input type="tel"  class="cta-input" name="contact_phone" id="cta-phone" placeholder="Telefon / WhatsApp *" required>
+      </div>
+      <input type="email" class="cta-input" name="contact_email" id="cta-email" placeholder="E-Mail (optional)" style="margin-bottom:10px">
+      <button type="submit" class="btn-gold">📩 Angebot anfordern →</button>
+    </form>
+    <div class="disclaimer">Kein Spam &middot; Antwort innerhalb 24h &middot; Kostenlose Vor-Ort-Besichtigung</div>
+  </div>
+
+</div><!-- /left -->
+
+<!-- ─── RIGHT: Ergebnis ──────────────────── -->
+<div class="result-panel">
+
+  <div class="rbox">
+    <div class="rbox-label">Geschätzte Gesamtkosten</div>
+    <div class="rbox-range" id="res-range">wird berechnet…</div>
+    <div class="rbox-note" id="res-note">Netto · inkl. Material, Arbeit &amp; Entsorgung</div>
+
+    <div class="norm-bar"><div class="norm-fill" id="norm-fill" style="width:0%"></div></div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="bd-brutto" id="res-brutto" style="display:none">
+      <span>GESAMT brutto (19% MwSt.)</span>
+      <span id="res-brutto-val">–</span>
+    </div>
+  </div>
+
+  <div class="duration" id="duration-box" style="display:none">
+    <div class="dur-item">
+      <div class="dur-val" id="dur-days">–</div>
+      <div class="dur-label">Arbeitstage</div>
+    </div>
+    <div class="dur-item">
+      <div class="dur-val" id="dur-team">3+1</div>
+      <div class="dur-label">Fachleute</div>
+    </div>
+    <div class="dur-item">
+      <div class="dur-val" id="dur-sqm">–</div>
+      <div class="dur-label">€/m² netto</div>
+    </div>
+  </div>
+
+  <div class="team-badge">
+    <div class="tbadge">👷 <span>Fliesenleger</span> 65€/h</div>
+    <div class="tbadge">🔧 <span>Sanitär/Heizung</span> 72€/h</div>
+    <div class="tbadge">⚡ <span>Elektriker</span> 78€/h</div>
+    <div class="tbadge">🏗 <span>Helfer</span> 42€/h</div>
+    <div class="tbadge">🏢 <span>Firma</span> anteil 15%</div>
+  </div>
+
+</div><!-- /right -->
+</div><!-- /wrap -->
+
+<script>
+// ── Preisdaten ────────────────────────────────────────────────────────────────
+// Preise = { key: { mat_min, mat_max, h_min, h_max, rate, fixed, label } }
+// Finale Formel: (mat + lohn) × (1 + firmenanteil)
+// Drei Majstori + Helfer: lohn = sati × rate
+// Stundensätze: Fliesen 65, Sanitär 72, Elektro 78, Helfer 42
+
+var FIRMA_ANTEIL = 0.15;
+var EXTRA = {
+  entsorgung: { base_m2: 18, min_eur: 280, on: true },
+  lieferung:  { lo: 180, hi: 320, on: true },
+  bauleitung: { pct: 0.05, on: false },
+  material:   { on: false },
+};
+function toggleExtra(key, el) {
+  EXTRA[key].on = el.checked;
+  var row = document.getElementById('ex-' + key);
+  if (row) row.classList.toggle('active', el.checked);
+  calc();
+}
+var VAT = 0.19;
+
+var PREISE = {
+  // key: [mat_lo, mat_hi, h_lo, h_hi, rate, label, per_unit]
+  // per_unit: 'm2', 'pau' (pauschal), 'lm' (Laufmeter)
+
+  // FLIESEN (m2)
+  fliesen:       { mat:[18,95],  h:[1.0,1.5], rate:65, unit:'m2',  label:'Keramikarbeiten',           qty_id:'qty-fliesen' },
+  abdichtung:    { mat:[8,15],   h:[0.3,0.5], rate:65, unit:'m2',  label:'Abdichtung',                qty_id:'qty-abdichtung' },
+  estrich:       { mat:[12,22],  h:[0.4,0.6], rate:65, unit:'m2',  label:'Gefälleestrich',             qty_id:'qty-estrich' },
+  // TROCKENBAU (m2)
+  trockenbau:    { mat:[35,65],  h:[0.8,1.2], rate:65, unit:'m2',  label:'Trockenbau Wand',            qty_id:'qty-trockenbau' },
+  // SANITÄR PAUSCHAL
+  duschrinne:    { mat:[380,680],h:[5,8],     rate:72, unit:'pau', label:'Duschrinne komplett' },
+  dusche_armatur:{ mat:[420,950],h:[5,7],     rate:72, unit:'pau', label:'Unterputz-Armatur Dusche' },
+  wc:            { mat:[480,890],h:[5,7],     rate:72, unit:'pau', label:'Wand-WC komplett' },
+  hygiene_dusche:{ mat:[90,250], h:[2,3],     rate:72, unit:'pau', label:'Bidet-Anschluss WC' },
+  waschbecken:   { mat:[380,850],h:[3,5],     rate:72, unit:'pau', label:'Waschtisch komplett' },
+  waschmaschine: { mat:[80,160], h:[3,4],     rate:72, unit:'pau', label:'Waschmaschinen-Anschluss' },
+  // ELEKTRO
+  fi_kasten:     { mat:[220,380],h:[4,6],     rate:78, unit:'pau', label:'Unterverteiler FI+Erdung' },
+  led_nischen:   { mat:[180,320],h:[4,6],     rate:78, unit:'pau', label:'LED-Nischen 12V (3×)' },
+  led_umlauf:    { mat:[12,22],  h:[0.25,0.4],rate:78, unit:'lm',  label:'LED-Ambientband',            qty_id:'qty-led_umlauf' },
+  smarthome:     { mat:[280,520],h:[4,6],     rate:78, unit:'pau', label:'Smart-Home Vorbereitung' },
+  // LEITUNGEN + ROHBAU
+  leitungen:     { mat:[650,1400],h:[16,24],  rate:72, unit:'pau', label:'Sanitärleitungen durch Boden' },
+  abbruch:       { mat:[8,18],   h:[0.8,1.2], rate:42, unit:'m2',  label:'Abbruch + Entsorgung',       qty_id:'qty-abbruch' },
+  heizkoerper:   { mat:[180,380],h:[6,10],    rate:72, unit:'pau', label:'Heizkörper versetzen' },
+  kernbohrung_extra: { mat:[280,480],h:[4,6], rate:72, unit:'pau', label:'Kernbohrung Betonwand' },
+};
+
+var Q_FACTOR = { basis:0.7, premium:1.0, luxus:1.4 };
+var Q_DESC = {
+  basis:   'Basis: Solide Qualität · Standardfliesen · Markenarmatur Einstieg',
+  premium: 'Premium: Hochwertige Markenware · Smart-Home ready · Alles aus einer Hand',
+  luxus:   'Luxus: Exklusive Materialien · Alles Markenware Premium · Showroom-Niveau'
+};
+var currentQ = 'premium';
+
+function setQuality(q, el) {
+  currentQ = q;
+  document.querySelectorAll('.q-pill').forEach(function(p){ p.classList.remove('act'); });
+  el.classList.add('act');
+  document.getElementById('q-desc').textContent = Q_DESC[q];
+  calc();
+}
+
+function toggle(el) {
+  el.classList.toggle('on');
+  var cb = el.querySelector('.leist-cb');
+  cb.textContent = el.classList.contains('on') ? '✓' : '';
+  calc();
+}
+
+function getQty(key) {
+  var p = PREISE[key];
+  if (!p.qty_id) return 1;
+  var el = document.getElementById(p.qty_id);
+  return el ? (parseFloat(el.value) || 1) : 1;
+}
+
+function fmt(n) {
+  return n.toLocaleString('de-DE', {minimumFractionDigits:0, maximumFractionDigits:0}) + ' €';
+}
+
+function calc() {
+  var flaeche   = parseFloat(document.getElementById('f-flaeche').value) || 8;
+  var hoehe     = parseFloat(document.getElementById('f-hoehe').value)   || 2.5;
+  var umfang    = Math.sqrt(flaeche) * 4;
+  var wandfl    = umfang * hoehe * 0.88;
+  var gesamtfl  = Math.round(flaeche + wandfl);
+  var qf        = Q_FACTOR[currentQ];
+
+  // Update qty defaults for m2 items
+  var fq = document.getElementById('qty-fliesen');
+  if (fq && fq === document.activeElement === false) fq.value = gesamtfl;
+  var aq = document.getElementById('qty-abdichtung');
+  if (aq && document.activeElement !== aq) aq.value = Math.round(flaeche * 1.2);
+  var eq = document.getElementById('qty-estrich');
+  if (eq && document.activeElement !== eq) eq.value = Math.round(flaeche * 0.9);
+  var tq = document.getElementById('qty-trockenbau');
+  if (tq && document.activeElement !== tq) tq.value = Math.round(hoehe * Math.sqrt(flaeche) * 1.5);
+  var bq = document.getElementById('qty-abbruch');
+  if (bq && document.activeElement !== bq) bq.value = Math.round(flaeche * 1.1);
+
+  document.getElementById('dim-info').innerHTML =
+    'Fliesenfläche ca. <strong>' + gesamtfl + ' m²</strong> (Boden ' + flaeche + ' + Wand ' + Math.round(wandfl) + ') &nbsp;|&nbsp; Wandumfang ca. ' + Math.round(umfang) + ' m';
+
+  var totalMin = 0, totalMax = 0;
+  var totalH = 0;
+  var lines = [];
+
+  document.querySelectorAll('.leist-item').forEach(function(el) {
+    var key = el.dataset.key;
+    var p = PREISE[key];
+    if (!p) return;
+    var on = el.classList.contains('on');
+    var qty = getQty(key);
+    var matMin = p.mat[0] * qty * qf;
+    var matMax = p.mat[1] * qty * qf;
+    var lohnMin = p.h[0] * p.rate * qty;
+    var lohnMax = p.h[1] * p.rate * qty;
+    var lineMin = matMin + lohnMin;
+    var lineMax = matMax + lohnMax;
+
+    // Price display on item
+    var pr = document.getElementById('pr-' + key);
+    if (pr) {
+      if (p.unit === 'pau') {
+        pr.textContent = fmt(Math.round(lineMin * qf)) + ' – ' + fmt(Math.round(lineMax * qf));
+      } else {
+        pr.textContent = fmt(Math.round(lineMin / qty)) + '/'+p.unit;
+      }
+    }
+
+    if (!on) return;
+    totalMin += lineMin;
+    totalMax += lineMax;
+    totalH   += p.h[0] * qty;
+    lines.push({ label: p.label, min: Math.round(lineMin), max: Math.round(lineMax) });
+  });
+
+  // Split lohn vs mat
+  var lohnMin2 = 0, lohnMax2 = 0, matMin2 = 0, matMax2 = 0;
+  document.querySelectorAll('.leist-item').forEach(function(el2){
+    var k2 = el2.dataset.key; var p2 = PREISE[k2];
+    if (!p2 || !el2.classList.contains('on')) return;
+    var q2 = getQty(k2);
+    lohnMin2 += p2.h[0] * p2.rate * q2;
+    lohnMax2 += p2.h[1] * p2.rate * q2;
+    matMin2  += p2.mat[0] * q2 * qf;
+    matMax2  += p2.mat[1] * q2 * qf;
+  });
+  // Add firma anteil
+  var firmaMin = Math.round(lohnMin2 * FIRMA_ANTEIL);
+  var firmaMax = Math.round(lohnMax2 * FIRMA_ANTEIL);
+  totalMin += firmaMin;
+  totalMax += firmaMax;
+  lines.push({ label: 'Unternehmen (Org., Gewähr., Versich.)', min: firmaMin, max: firmaMax });
+
+  // Extra services
+  var abQ = parseFloat((document.getElementById('qty-abbruch')||{value:'8'}).value)||8;
+  var entMin = Math.max(EXTRA.entsorgung.min_eur, Math.round(abQ * EXTRA.entsorgung.base_m2));
+  var entMax = Math.round(entMin * 1.45);
+  var ep1 = document.getElementById('ep-entsorgung');
+  if (ep1) ep1.textContent = fmt(entMin) + ' – ' + fmt(entMax);
+  var livMin = EXTRA.lieferung.lo, livMax = EXTRA.lieferung.hi;
+  var ep2 = document.getElementById('ep-lieferung');
+  if (ep2) ep2.textContent = fmt(livMin) + ' – ' + fmt(livMax);
+  var bauMin = Math.round(totalMin * EXTRA.bauleitung.pct);
+  var bauMax = Math.round(totalMax * EXTRA.bauleitung.pct);
+  var ep3 = document.getElementById('ep-bauleitung');
+  if (ep3) ep3.textContent = fmt(bauMin) + ' – ' + fmt(bauMax);
+  var exMin = (EXTRA.entsorgung.on ? entMin : 0) + (EXTRA.lieferung.on ? livMin : 0) + (EXTRA.bauleitung.on ? bauMin : 0);
+  var exMax = (EXTRA.entsorgung.on ? entMax : 0) + (EXTRA.lieferung.on ? livMax : 0) + (EXTRA.bauleitung.on ? bauMax : 0);
+  var grandMin = totalMin + exMin;
+  var grandMax = totalMax + exMax;
+  var vatMin = Math.round(grandMin * VAT);
+  var vatMax = Math.round(grandMax * VAT);
+  var bruttoMin = grandMin + vatMin;
+  var bruttoMax = grandMax + vatMax;
+  var daysMin = Math.ceil(totalH / (4 * 8));
+  var daysMax = Math.ceil(daysMin * 1.3);
+  var sqmPrice = Math.round((grandMin + grandMax) / 2 / flaeche);
+  // update split display
+  var rsL = document.getElementById('rs-lohn-val');
+  var rsM = document.getElementById('rs-mat-val');
+  if (rsL) rsL.textContent = fmt(Math.round(totalMin)) + ' – ' + fmt(Math.round(totalMax));
+  if (rsM) rsM.textContent = fmt(Math.round(matMin2)) + ' – ' + fmt(Math.round(matMax2));
+  document.getElementById('res-range').textContent = fmt(grandMin) + ' – ' + fmt(grandMax);
+  document.getElementById('res-brutto').style.display = 'flex';
+  document.getElementById('res-brutto-val').textContent = fmt(bruttoMin) + ' – ' + fmt(bruttoMax);
+  document.getElementById('duration-box').style.display = 'flex';
+  document.getElementById('dur-days').textContent = daysMin + '–' + daysMax;
+  document.getElementById('dur-sqm').textContent = sqmPrice;
+  var pct = Math.min(100, Math.round((grandMax / (28000 * qf)) * 100));
+  document.getElementById('norm-fill').style.width = pct + '%';
+  var html = '<div style="font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);padding:4px 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px">Arbeitsleistung Viscovic Group</div>';
+  lines.forEach(function(l) {
+    html += '<div class="bd-row"><span class="bd-label">' + l.label + '</span><span class="bd-val">' + fmt(l.min) + ' – ' + fmt(l.max) + '</span></div>';
+  });
+  html += '<div class="bd-row bd-total"><span>Arbeit netto</span><span>' + fmt(totalMin) + ' – ' + fmt(totalMax) + '</span></div>';
+  if (exMin > 0 || exMax > 0) {
+    html += '<div style="font-size:.63rem;text-transform:uppercase;letter-spacing:1.5px;color:#22c55e;padding:6px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px">Zusatzleistungen (auf Kundenrechnung)</div>';
+    if (EXTRA.entsorgung.on) html += '<div class="bd-row"><span class="bd-label">Entsorgung</span><span class="bd-val">' + fmt(entMin) + ' – ' + fmt(entMax) + '</span></div>';
+    if (EXTRA.lieferung.on)  html += '<div class="bd-row"><span class="bd-label">Materialtransport</span><span class="bd-val">' + fmt(livMin) + ' – ' + fmt(livMax) + '</span></div>';
+    if (EXTRA.bauleitung.on) html += '<div class="bd-row"><span class="bd-label">Bauleitung</span><span class="bd-val">' + fmt(bauMin) + ' – ' + fmt(bauMax) + '</span></div>';
+    html += '<div class="bd-row bd-total"><span>Gesamt netto</span><span>' + fmt(grandMin) + ' – ' + fmt(grandMax) + '</span></div>';
+  }
+  html += '<div class="bd-row"><span class="bd-label">+ MwSt. 19%</span><span class="bd-val">' + fmt(vatMin) + ' – ' + fmt(vatMax) + '</span></div>';
+  document.getElementById('breakdown').innerHTML = html;
+}
+
+function prepareAnfrage() {
+  var svcs = [];
+  document.querySelectorAll('.leist-item.on .leist-name').forEach(function(n){ svcs.push(n.textContent.trim()); });
+  var hidS = document.getElementById('hid-services');
+  var hidQ = document.getElementById('hid-quality');
+  var hidSqm = document.getElementById('hid-sqm');
+  var hidBF = document.getElementById('hid-bfrom');
+  var hidBT = document.getElementById('hid-bto');
+  var hidD  = document.getElementById('hid-desc');
+  if (hidS)   hidS.value   = svcs.join('|');
+  if (hidQ)   hidQ.value   = currentQ;
+  if (hidSqm) hidSqm.value = document.getElementById('f-flaeche').value;
+  var rngTxt = document.getElementById('res-range').textContent;
+  var nums = rngTxt.replace(/[^0-9\s\-]/g,'').trim().split(/\s*[\-–]\s*/);
+  if (hidBF) hidBF.value = nums[0] ? nums[0].replace(/\s/g,'') : '';
+  if (hidBT) hidBT.value = nums[1] ? nums[1].replace(/\s/g,'') : '';
+  var desc = 'Kosten: ' + rngTxt + ' | Qualitaet: ' + currentQ + ' | Leistungen: ' + svcs.join(', ');
+  if (hidD) hidD.value = desc;
+  return true;
+}
+
+// Init
+calc();
+</script>
+</body>
+</html>

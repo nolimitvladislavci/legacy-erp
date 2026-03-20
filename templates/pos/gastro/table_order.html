@@ -1,0 +1,85 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}{{ table.name }}{% endblock %}
+{% block extra_css %}<style>
+.to-layout{display:flex;gap:1rem;padding:1rem;flex:1;overflow:hidden}
+.to-order{flex:1;overflow-y:auto}
+.to-menu{width:320px;overflow-y:auto;flex-shrink:0}
+.to-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.to-title{font-size:1.3rem;font-weight:800;color:var(--gold)}
+.to-items{margin-bottom:1rem}
+.to-item{display:flex;justify-content:space-between;align-items:center;padding:.5rem .75rem;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:.3rem}
+.to-item-name{font-weight:600}
+.to-item-notes{font-size:.72rem;color:var(--muted)}
+.to-item-qty{color:var(--gold);font-weight:700}
+.menu-item{padding:.5rem .75rem;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:.3rem;cursor:pointer;display:flex;justify-content:space-between;transition:all .15s}
+.menu-item:hover{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.menu-item .mi-name{font-weight:600;font-size:.85rem}
+.menu-item .mi-price{color:var(--gold);font-weight:700;font-size:.85rem}
+.search-box{width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.5rem .75rem;color:var(--text);font-size:.85rem;margin-bottom:.6rem;font-family:inherit}
+.search-box:focus{outline:none;border-color:var(--gold)}
+@media(max-width:768px){.to-layout{flex-direction:column}.to-menu{width:100%}}
+</style>{% endblock %}
+{% block content %}
+<div class="to-layout">
+  <div class="to-order">
+    <div class="to-header">
+      <div>
+        <div class="to-title">{{ table.name }}</div>
+        <div style="font-size:.8rem;color:var(--muted)">{{ table.get_table_type_display }} &middot; {{ table.capacity }} os.{% if table.floor %} &middot; {{ table.floor }}{% endif %}</div>
+      </div>
+      <a href="{% url 'pos:gastro_dashboard' %}" class="btn btn-ghost btn-sm">&larr; {% trans "Nazad" %}</a>
+    </div>
+    {% if order %}
+    <div style="margin-bottom:.6rem;font-size:.85rem;color:var(--muted)">
+      {% trans "Narudzba" %} #{{ order.pk }} &middot; <span class="badge badge-open">{{ order.get_status_display }}</span>
+      {% if order.guest_name %} &middot; {{ order.guest_name }}{% endif %}
+    </div>
+    <div class="to-items" id="order-items">
+      {% for i in order.items.all %}
+      <div class="to-item">
+        <div><span class="to-item-name">{{ i.inventory_item.name|default:"?" }}</span>{% if i.notes %}<div class="to-item-notes">{{ i.notes }}</div>{% endif %}</div>
+        <div class="to-item-qty">{{ i.quantity|floatformat:0 }}x</div>
+      </div>
+      {% empty %}
+      <p style="color:var(--muted);font-size:.85rem">{% trans "Prazna narudzba." %}</p>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">{% trans "Nema aktivne narudzbe za ovaj stol." %}</p>
+    {% endif %}
+  </div>
+  <div class="to-menu">
+    <h3 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:.5rem">{% trans "Meni" %}</h3>
+    <input type="text" class="search-box" id="menu-search" placeholder="{% trans 'Pretrazi artikle...' %}" oninput="filterMenu()">
+    <div id="menu-list">
+      {% for item in inventory_items %}
+      <div class="menu-item" data-id="{{ item.pk }}" data-name="{{ item.name|lower }}" onclick="addToOrder({{ item.pk }},'{{ item.name|escapejs }}')">
+        <span class="mi-name">{{ item.name }}</span>
+        <span class="mi-price">{{ item.unit_price }} &euro;</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+function filterMenu(){
+  var q=document.getElementById('menu-search').value.toLowerCase();
+  document.querySelectorAll('.menu-item').forEach(function(el){
+    el.style.display=el.dataset.name.indexOf(q)>=0?'flex':'none';
+  });
+}
+function addToOrder(itemId, itemName){
+  {% if order %}
+  fetch('{% url "pos:gastro_order_add_item" order.pk %}',{
+    method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+    body:JSON.stringify({inventory_item_id:itemId,quantity:1})
+  }).then(r=>r.json()).then(function(d){
+    if(d.ok) location.reload();
+  });
+  {% else %}
+  alert('Kreirajte narudzbu prvo.');
+  {% endif %}
+}
+</script>
+{% endblock %}

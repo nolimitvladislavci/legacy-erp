@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n l10n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-shield-alt me-2 text-primary"></i>{{ action }}</h2>
+  <a href="{% url 'insurance:list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+</div>
+<div class="stat-card" style="max-width:800px">
+  <form method="post">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Broj police *" %}</label>
+        <input type="text" name="policy_number" class="form-control" required value="{{ policy.policy_number|default:'' }}" placeholder="HR-2026-001">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Vrsta osiguranja *" %}</label>
+        <select name="insurance_type" class="form-select" required>
+          {% for val, label in type_choices %}
+          <option value="{{ val }}" {% if policy.insurance_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Osiguravatelj *" %}</label>
+        <input type="text" name="insurer" class="form-control" required value="{{ policy.insurer|default:'' }}" placeholder="Allianz, Euroherc...">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Osiguranik (partner)" %}</label>
+        <select name="partner" class="form-select">
+          <option value="">{% trans "-- bez partnera --" %}</option>
+          {% for p in partners %}
+          <option value="{{ p.pk }}" {% if policy.partner_id == p.pk %}selected{% endif %}>{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Početak *" %}</label>
+        <input type="date" name="start_date" class="form-control" required value="{{ policy.start_date|date:'Y-m-d'|default:'' }}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Kraj *" %}</label>
+        <input type="date" name="end_date" class="form-control" required value="{{ policy.end_date|date:'Y-m-d'|default:'' }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">{% trans "Godišnja premija (EUR) *" %}</label>
+        <input type="number" step="0.01" name="premium" class="form-control" required value="{{ policy.premium|default:''|unlocalize }}" placeholder="0.00">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">{% trans "Iznos pokrića (EUR)" %}</label>
+        <input type="number" step="0.01" name="coverage_amount" class="form-control" value="{{ policy.coverage_amount|default:''|unlocalize }}" placeholder="0.00">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">{% trans "Status *" %}</label>
+        <select name="status" class="form-select" required>
+          {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if policy.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-bold">{% trans "Napomene" %}</label>
+        <textarea name="notes" class="form-control" rows="3" placeholder="{% trans "Posebni uvjeti, kontakti..." %}">{{ policy.notes|default:'' }}</textarea>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>{% trans "Spremi" %}</button>
+        <a href="{% url 'insurance:list' %}" class="btn btn-outline-secondary ms-2">{% trans "Odustani" %}</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

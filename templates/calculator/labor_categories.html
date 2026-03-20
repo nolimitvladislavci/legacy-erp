@@ -1,0 +1,46 @@
+{% extends "worktime/base_worktime.html" %}
+{% load i18n %}
+{% block title %}Kategorije radnika{% endblock %}
+{% block page_title %}<h1 class="text-xl font-bold">{% trans "👷 Kategorije radnika - Troškovi" %}</h1>{% endblock %}
+{% block worktime_content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    {% for cat in categories %}
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="flex items-center justify-between mb-3">
+            <div><div class="font-bold">{{ cat.name }}</div><div class="text-xs text-slate-400">{{ cat.code }} | {{ cat.get_country_display }}</div></div>
+            <div class="text-2xl font-bold text-blue-600">€{{ cat.cost_per_hour }}/h</div>
+        </div>
+        <div class="space-y-1 text-xs">
+            <div class="flex justify-between"><span class="text-slate-500">{% trans "Bruto plaća" %}</span><span>€{{ cat.gross_salary_monthly }}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Doprinosi ({{ cat.employer_contributions_pct }}%)</span><span>€{{ cat.cost_breakdown.employer_contributions }}</span></div>
+            {% if cat.soka_bau_pct %}<div class="flex justify-between"><span class="text-slate-500">SOKA-BAU ({{ cat.soka_bau_pct }}%)</span><span>€{{ cat.cost_breakdown.soka_bau }}</span></div>{% endif %}
+            {% if cat.social_insurance_pct %}<div class="flex justify-between"><span class="text-slate-500">Socijalno ({{ cat.social_insurance_pct }}%)</span><span>€{{ cat.cost_breakdown.social_insurance }}</span></div>{% endif %}
+            {% if cat.accident_insurance_pct %}<div class="flex justify-between"><span class="text-slate-500">BG ({{ cat.accident_insurance_pct }}%)</span><span>€{{ cat.cost_breakdown.accident_insurance }}</span></div>{% endif %}
+            <div class="flex justify-between"><span class="text-slate-500">{% trans "Naknade" %}</span><span>€{{ cat.additional_benefits_monthly }}</span></div>
+            {% if cat.per_diem_daily %}<div class="flex justify-between"><span class="text-slate-500">{% trans "Dnevnice (22d)" %}</span><span>€{{ cat.cost_breakdown.per_diem }}</span></div>{% endif %}
+            {% if cat.accommodation_daily %}<div class="flex justify-between"><span class="text-slate-500">{% trans "Smještaj (22d)" %}</span><span>€{{ cat.cost_breakdown.accommodation }}</span></div>{% endif %}
+            <div class="flex justify-between font-bold border-t pt-1 mt-1"><span>{% trans "Ukupno/mj" %}</span><span>€{{ cat.total_employer_cost_monthly|floatformat:0 }}</span></div>
+            <div class="flex justify-between text-slate-400"><span>{% trans "Produktivnih sati" %}</span><span>{{ cat.cost_breakdown.productive_hours }}h</span></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<details class="bg-white rounded-xl shadow-sm border p-6">
+    <summary class="font-bold cursor-pointer">{% trans "+ Nova kategorija radnika" %}</summary>
+    <form method="post" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">{% csrf_token %}
+        <input type="hidden" name="action" value="create">
+        <input type="text" name="name" placeholder="{% trans "Naziv *" %}" required class="px-3 py-2 border rounded-lg text-sm">
+        <input type="text" name="code" placeholder="{% trans "Kod *" %}" required class="px-3 py-2 border rounded-lg text-sm">
+        <select name="country" class="px-3 py-2 border rounded-lg text-sm"><option value="DE">{% trans "Njemačka" %}</option><option value="HR">{% trans "Hrvatska" %}</option><option value="AT">{% trans "Austrija" %}</option></select>
+        <input type="number" name="gross_salary" value="1200" placeholder="{% trans "Bruto €" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <input type="number" name="contributions" value="17" step="0.1" placeholder="{% trans "Doprinosi %" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <input type="number" name="soka_bau" value="15.40" step="0.1" placeholder="{% trans "SOKA %" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <input type="number" name="social" value="20" step="0.1" placeholder="{% trans "Socijalno %" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <input type="number" name="accident" value="3.5" step="0.1" placeholder="{% trans "BG %" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <input type="number" name="per_diem" value="28" placeholder="{% trans "Dnevnica €" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <input type="number" name="accommodation" value="15" placeholder="{% trans "Smještaj €/dan" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <input type="number" name="productivity" value="85" placeholder="{% trans "Produktivnost %" %}" class="px-3 py-2 border rounded-lg text-sm">
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">{% trans "Kreiraj" %}</button>
+    </form>
+</details>
+{% endblock %}

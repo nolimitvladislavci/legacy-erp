@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ project.name }}{% endblock %}
+{% block page_title %}{{ project.name }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <span class="badge bg-dark me-2">{{ project.code }}</span>
+    <h2 class="d-inline mb-0">{{ project.name }}</h2>
+    <span class="badge ms-2
+      {% if project.status == 'active' %}bg-success
+      {% elif project.status == 'planning' %}bg-secondary
+      {% elif project.status == 'on_hold' %}bg-warning text-dark
+      {% elif project.status == 'completed' %}bg-primary
+      {% else %}bg-danger{% endif %}">
+      {{ project.status }}
+    </span>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'project_edit' project.pk %}" class="btn btn-warning"><i class="fas fa-edit me-2"></i>{% trans "Uredi" %}</a>
+    <a href="{% url 'projects_index' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- Info card -->
+  <div class="col-md-5">
+    <div class="stat-card mb-3">
+      <div class="row g-2 small">
+        {% if project.client %}<div class="col-6"><div class="label">{% trans "Klijent" %}</div><div>{{ project.client.name }}</div></div>{% endif %}
+        {% if project.company %}<div class="col-6"><div class="label">{% trans "Tvrtka" %}</div><div>{{ project.company.name }}</div></div>{% endif %}
+        {% if project.manager %}<div class="col-6"><div class="label">{% trans "Voditelj" %}</div><div>{{ project.manager.get_full_name }}</div></div>{% endif %}
+        {% if project.location %}<div class="col-6"><div class="label">{% trans "Lokacija" %}</div><div>{{ project.location }}</div></div>{% endif %}
+        {% if project.start_date %}<div class="col-6"><div class="label">{% trans "Početak" %}</div><div>{{ project.start_date|date:"d.m.Y" }}</div></div>{% endif %}
+        {% if project.end_date %}<div class="col-6"><div class="label">{% trans "Rok" %}</div><div>{{ project.end_date|date:"d.m.Y" }}</div></div>{% endif %}
+        <div class="col-6"><div class="label">{% trans "Budžet" %}</div><div class="fw-bold">{{ project.budget|floatformat:2 }} €</div></div>
+        <div class="col-6"><div class="label">{% trans "Sati rada" %}</div><div class="fw-bold">{{ total_hours|floatformat:1 }} h</div></div>
+      </div>
+      {% if project.budget and budget_used_pct %}
+      <div class="mt-3">
+        <div class="d-flex justify-content-between small mb-1">
+          <span class="text-muted">{% trans "Iskorištenost budžeta" %}</span>
+          <span class="fw-bold {% if budget_used_pct > 90 %}text-danger{% elif budget_used_pct > 70 %}text-warning{% else %}text-success{% endif %}">{{ budget_used_pct }}%</span>
+        </div>
+        <div class="progress" style="height:6px">
+          <div class="progress-bar {% if budget_used_pct > 90 %}bg-danger{% elif budget_used_pct > 70 %}bg-warning{% else %}bg-success{% endif %}"
+               style="width:{{ budget_used_pct }}%"></div>
+        </div>
+      </div>
+      {% endif %}
+      {% if project.description %}
+      <div class="mt-3"><div class="label">{% trans "Opis" %}</div><div class="text-muted small">{{ project.description }}</div></div>
+      {% endif %}
+    </div>
+
+    <!-- Add update -->
+    <div class="stat-card">
+      <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle me-2 text-primary"></i>{% trans "Dodaj ažuriranje" %}</h6>
+      <form method="post" action="{% url 'project_update_add' project.pk %}">
+        {% csrf_token %}
+        <div class="mb-2">
+          <input type="text" name="title" class="form-control form-control-sm" placeholder="{% trans "Naslov..." %}">
+        </div>
+        <div class="mb-2">
+          <textarea name="content" class="form-control form-control-sm" rows="3" placeholder="{% trans "Detalji ažuriranja..." %}" required></textarea>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="form-check form-check-inline">
+            <input type="checkbox" name="is_public" class="form-check-input" id="isPublic">
+            <label class="form-check-label small" for="isPublic">{% trans "Javno" %}</label>
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary">{% trans "Objavi" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+
+    <!-- Team members -->
+    <div class="stat-card mb-3">
+      <h6 class="fw-bold mb-3"><i class="fas fa-users me-2 text-primary"></i>{% trans "Tim projekta" %} <span class="badge bg-secondary" style="font-size:.7rem">{{ team_members.count }}</span></h6>
+      {% if team_members %}
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for member in team_members %}
+        <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:8px;font-size:.82rem">
+          <span style="color:#e2e8f0">{{ member.get_full_name|default:member.username }}</span>
+          <form method="post" action="{% url 'project_team_remove' project.pk %}" style="display:inline">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ member.pk }}">
+            <button type="submit" style="background:none;border:none;color:#f87171;cursor:pointer;padding:0;font-size:.75rem;line-height:1" title="Ukloni">✕</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted small mb-3">{% trans "Tim je prazan." %}</p>
+      {% endif %}
+      {% if all_workers %}
+      <form method="post" action="{% url 'project_team_add' project.pk %}" class="d-flex gap-2">
+        {% csrf_token %}
+        <select name="user_id" class="form-select form-select-sm" style="flex:1">
+          <option value="">{% trans "— Odaberi radnika —" %}</option>
+          {% for w in all_workers %}
+          <option value="{{ w.pk }}">{{ w.get_full_name|default:w.username }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary" style="white-space:nowrap"><i class="fas fa-plus me-1"></i>{% trans "Dodaj" %}</button>
+      </form>
+      {% endif %}
+    </div>
+      <!-- Work entries -->
+    {% if work_entries %}
+    <div class="stat-card mb-3">
+      <h6 class="fw-bold mb-3"><i class="fas fa-clock me-2 text-info"></i>{% trans "Zadnji unosi radnih sati" %}</h6>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead class="table-light"><tr><th>{% trans "Datum" %}</th><th>{% trans "Radnik" %}</th><th>{% trans "Zadatak" %}</th><th class="text-end">{% trans "Sati" %}</th></tr></thead>
+          <tbody>
+            {% for e in work_entries %}
+            <tr>
+              <td>{{ e.date|date:"d.m" }}</td>
+              <td>{{ e.user.get_full_name|default:e.user.username }}</td>
+              <td class="small text-muted">{{ e.task_description|default:e.task_type|truncatechars:30 }}</td>
+              <td class="text-end fw-bold">{{ e.duration|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="text-end mt-2">
+        <a href="/worktime/manager/?project={{ project.code }}" class="btn btn-sm btn-outline-info">{% trans "Svi sati" %}</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Updates -->
+    {% if updates %}
+    <div class="stat-card mb-3">
+      <h6 class="fw-bold mb-3"><i class="fas fa-list me-2 text-success"></i>{% trans "Ažuriranja projekta" %}</h6>
+      {% for upd in updates %}
+      <div class="border-start border-3 border-primary ps-3 mb-3">
+        <div class="d-flex justify-content-between">
+          <strong class="small">{{ upd.title }}</strong>
+          <small class="text-muted">{{ upd.created_at|date:"d.m.Y" }} &middot; {{ upd.author.get_full_name|default:upd.author.username }}</small>
+        </div>
+        <p class="small text-muted mb-0 mt-1">{{ upd.content }}</p>
+        {% if upd.is_public %}<span class="badge bg-success" style="font-size:0.6rem">{% trans "Javno" %}</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Photos -->
+    {% if photos %}
+    <div class="stat-card">
+      <h6 class="fw-bold mb-3"><i class="fas fa-images me-2 text-warning"></i>Fotografije ({{ photos.count }})</h6>
+      <div class="row g-2">
+        {% for photo in photos %}
+        <div class="col-4">
+          <a href="{{ photo.image.url }}" target="_blank">
+            <img src="{{ photo.image.url }}" class="img-fluid rounded" style="height:80px;width:100%;object-fit:cover" alt="{{ photo.caption }}">
+          </a>
+          {% if photo.caption %}<div class="small text-muted mt-1">{{ photo.caption|truncatechars:20 }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

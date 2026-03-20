@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load l10n %}
+
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'marketplace:catalog' %}" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
+<div class="row g-4">
+  <div class="col-md-5">
+    <div class="stat-card" style="height:300px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+      {% if product.image_main %}<img src="{{ product.image_main.url }}" style="max-width:100%;max-height:100%;object-fit:contain">
+      {% else %}<span style="font-size:5rem">&#x1f96c;</span>{% endif %}
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="stat-card p-4">
+      <h3>{{ product.name }}</h3>
+      <p class="text-muted"><i class="fas fa-tractor me-1"></i>{{ product.seller_company.name }}{% if product.origin_region %} &mdash; {{ product.origin_region }}{% endif %}</p>
+      {% if product.is_organic %}<span class="badge bg-success">Ekoloski</span>{% endif %}
+      {% if product.requires_cold_chain %}<span class="badge bg-info">Hladni lanac</span>{% endif %}
+      <h2 class="mt-3" style="color:#c9a84c">{{ product.unit_price }}&euro; <small class="text-muted">/{{ product.unit }}</small></h2>
+      <p>{{ product.description }}</p>
+      <form method="post" action="{% url 'marketplace:cart_add' %}" class="d-flex gap-2 mt-3">{% csrf_token %}
+        <input type="hidden" name="product_id" value="{{ product.pk }}">
+        <input type="number" name="qty" value="{{ product.min_order_qty|unlocalize }}" min="{{ product.min_order_qty|unlocalize }}" step="0.5" class="form-control" style="width:100px">
+        <button type="submit" class="btn btn-warning btn-lg"><i class="fas fa-cart-plus me-1"></i>Dodaj u kosaricu</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% if related %}
+<h5 class="mt-4">Slicni proizvodi</h5>
+<div class="row g-3">
+  {% for p in related %}
+  <div class="col-md-3"><div class="stat-card p-3"><a href="{% url 'marketplace:product_detail' p.slug %}" style="color:#c9a84c">{{ p.name }}</a><div>{{ p.unit_price }}&euro;/{{ p.unit }}</div></div></div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

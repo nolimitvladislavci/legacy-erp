@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Računi{% endblock %}
+{% block page_title %}Računi{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-file-invoice-dollar me-2 text-warning"></i>{% trans "Računi" %}</h2>
+    <small class="text-muted">{{ invoices.count }} ukupno</small>
+  </div>
+  <a href="{% url "invoicing:invoice_create" %}" class="btn btn-primary">
+    <i class="fas fa-plus me-2"></i>{% trans "Novi račun" %}
+  </a>
+</div>
+
+<div class="row g-2 mb-3">
+  <div class="col-6 col-md-3"><div class="stat-card">
+    <div class="label">{% trans "Ukupno" %}</div><div class="value">{{ total_eur|floatformat:2 }} €</div>
+  </div></div>
+  <div class="col-6 col-md-3"><div class="stat-card">
+    <div class="label">{% trans "Plaćeno" %}</div><div class="value text-success">{{ paid_eur|floatformat:2 }} €</div>
+  </div></div>
+  <div class="col-6 col-md-3"><div class="stat-card">
+    <div class="label">{% trans "Neplaćeno" %}</div><div class="value text-danger">{{ unpaid_eur|floatformat:2 }} €</div>
+  </div></div>
+  <div class="col-6 col-md-3"><div class="stat-card">
+    <div class="label">{% trans "Nacrti" %}</div><div class="value text-muted">{{ draft_count }}</div>
+  </div></div>
+</div>
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Klijent, broj računa...">
+    </div>
+    <div class="col-md-2">
+      <select name="status" class="form-select">
+        <option value="">{% trans "Svi statusi" %}</option>
+        <option value="DRAFT" {% if status == "DRAFT" %}selected{% endif %}>{% trans "Nacrt" %}</option>
+        <option value="SENT" {% if status == "SENT" %}selected{% endif %}>{% trans "Poslano" %}</option>
+        <option value="PAID" {% if status == "PAID" %}selected{% endif %}>{% trans "Plaćeno" %}</option>
+        <option value="UNPAID" {% if status == "UNPAID" %}selected{% endif %}>{% trans "Neplaćeno" %}</option>
+        <option value="OVERDUE" {% if status == "OVERDUE" %}selected{% endif %}>{% trans "Dospijelo" %}</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="country" class="form-select">
+        <option value="">{% trans "HR + DE" %}</option>
+        <option value="HR" {% if country == "HR" %}selected{% endif %}>{% trans "Hrvatska" %}</option>
+        <option value="DE" {% if country == "DE" %}selected{% endif %}>{% trans "Deutschland" %}</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="doctype" class="form-select">
+        <option value="">{% trans "Sve vrste" %}</option>
+        <option value="R">{% trans "Račun" %}</option>
+        <option value="P">{% trans "Predračun" %}</option>
+        <option value="A">{% trans "Avansni" %}</option>
+        <option value="S">{% trans "Storno" %}</option>
+      </select>
+    </div>
+    {% if synesis_years %}
+    <div class="col-md-2">
+      <select name="year" class="form-select">
+        <option value="">Synesis - sve god.</option>
+        {% for y in synesis_years %}<option value="{{ y }}" {% if year_filter == y %}selected{% endif %}>Synesis {{ y }}</option>{% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
+      <a href="{% url "invoicing:index" %}" class="btn btn-outline-secondary">✕</a>
+    </div>
+  </form>
+</div>
+
+<div class="stat-card p-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>{% trans "Broj" %}</th><th>{% trans "Klijent" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Rok" %}</th>
+          <th>{% trans "Vrsta" %}</th><th class="text-end">{% trans "Iznos" %}</th><th>{% trans "Status" %}</th><th>{% trans "Fisk." %}</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td><a href="{% url "invoicing:invoice_edit" inv.pk %}" class="fw-bold text-decoration-none">{{ inv.number }}</a>{% if inv.is_locked %} <i class="fas fa-lock text-warning" title="Synesis arhiva {{ inv.synesis_year }}"></i>{% endif %}</td>
+          <td>
+            <div class="fw-semibold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ inv.client_name }}</div>
+            <small class="text-muted">{{ inv.country }}</small>
+          </td>
+          <td style="white-space:nowrap">{{ inv.date_issued|date:"d.m.Y" }}</td>
+          <td style="white-space:nowrap">
+            {% if inv.date_due %}
+              {% if inv.status == "OVERDUE" %}<span class="text-danger">{{ inv.date_due|date:"d.m.Y" }}</span>
+              {% else %}{{ inv.date_due|date:"d.m.Y" }}{% endif %}
+            {% else %}-{% endif %}
+          </td>
+          <td><span class="badge bg-secondary">{{ inv.get_doctype_display }}</span></td>
+          <td class="text-end fw-bold">{{ inv.total|floatformat:2 }} {{ inv.currency }}</td>
+          <td>
+            {% if inv.status == "PAID" %}<span class="badge bg-success">{% trans "Plaćeno" %}</span>
+            {% elif inv.status == "OVERDUE" %}<span class="badge bg-danger">{% trans "Dospijelo" %}</span>
+            {% elif inv.status == "SENT" %}<span class="badge bg-info text-dark">{% trans "Poslano" %}</span>
+            {% elif inv.status == "UNPAID" %}<span class="badge bg-warning text-dark">{% trans "Neplaćeno" %}</span>
+            {% elif inv.status == "STORNO" %}<span class="badge bg-dark">{% trans "Storno" %}</span>
+            {% else %}<span class="badge bg-light text-dark">{% trans "Nacrt" %}</span>{% endif %}
+          </td>
+          <td class="text-center">
+            {% if inv.is_fiscalized %}<i class="fas fa-check-circle text-success" title="{{ inv.jir }}"></i>
+            {% elif inv.country == "HR" %}<i class="fas fa-circle text-muted" title="{% trans "Nije fiskalizirano" %}"></i>
+            {% else %}<span class="text-muted">-</span>{% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url "invoicing:generate_pdf" inv.pk %}" class="btn btn-sm btn-outline-secondary" title="PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
+              <a href="/eracun/from-invoice/{{ inv.pk }}/" class="btn btn-sm btn-outline-primary" title="e-Racun" onclick="return confirm('Kreirati e-Racun?')"><i class="fas fa-file-invoice"></i></a>
+              <a href="{% url "invoicing:invoice_edit" inv.pk %}" class="btn btn-sm btn-outline-primary" title="Uredi"><i class="fas fa-edit"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center py-5">
+          {% include "includes/empty_state.html" with
+              icon="fas fa-file-invoice"
+              title="Nemate još računa"
+              message="Kreirajte prvi račun i počnite fakturirati."
+              action_url="/invoicing/wizard/"
+              action_text="Kreiraj račun"
+          %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

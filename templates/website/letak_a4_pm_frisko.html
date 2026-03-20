@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<title>UVIJEK FRIŠKO — A4 Prodajno mjesto</title>
+<style>
+@page { size: A4 portrait; margin: 0; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; width: 210mm; height: 297mm; }
+
+.card {
+    width: 210mm; height: 297mm; padding: 10mm;
+    background: #1a1a1a; color: #ffffff;
+    display: flex; flex-direction: column; align-items: center;
+}
+
+.badge {
+    background: #d4a017; color: #1a1a1a; padding: 3mm 10mm; border-radius: 15px;
+    font-size: 4mm; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 6mm;
+}
+
+.logo h1 {
+    font-size: 16mm; font-weight: 900; color: #fff; text-align: center;
+    letter-spacing: -0.5px;
+}
+.logo h1 span { color: #d4a017; }
+.logo .sub {
+    text-align: center; font-size: 4.5mm; color: #888; margin-top: 1.5mm;
+}
+
+.sep {
+    width: 50mm; height: 0.5mm; background: linear-gradient(90deg, transparent, #d4a017, transparent);
+    margin: 6mm 0;
+}
+
+.msg {
+    text-align: center; margin-bottom: 6mm;
+}
+.msg h2 {
+    font-size: 11mm; font-weight: 800; color: #fff; line-height: 1.2;
+}
+.msg h2 em { color: #d4a017; font-style: normal; }
+.msg p {
+    font-size: 4.5mm; color: #999; margin-top: 3mm; line-height: 1.4;
+}
+
+.qr-area {
+    background: #ffffff; border-radius: 6mm; padding: 8mm; text-align: center;
+    margin: 4mm 0; width: 80mm;
+}
+.qr-area img { width: 50mm; height: 50mm; display: block; margin: 0 auto 3mm; }
+.qr-area .label {
+    font-size: 5mm; font-weight: 800; color: #1a1a1a;
+}
+.qr-area .hint {
+    font-size: 3.5mm; color: #888; margin-top: 1mm;
+}
+
+.features {
+    display: flex; gap: 5mm; margin: 6mm 0; justify-content: center;
+}
+.feat {
+    text-align: center; width: 50mm;
+}
+.feat .icon { font-size: 8mm; margin-bottom: 1.5mm; }
+.feat .title { font-size: 4mm; font-weight: 700; color: #d4a017; margin-bottom: 1mm; }
+.feat .desc { font-size: 3.2mm; color: #999; line-height: 1.3; }
+
+.services-bar {
+    background: rgba(212,160,23,.1); border: 0.3mm solid rgba(212,160,23,.25);
+    border-radius: 4mm; padding: 4mm 6mm; text-align: center;
+    width: 100%; margin: 4mm 0;
+}
+.services-bar .title {
+    font-size: 4mm; color: #d4a017; font-weight: 700; margin-bottom: 2mm;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.services-bar .items {
+    font-size: 3.8mm; color: #ccc; line-height: 1.6;
+}
+.services-bar .items strong { color: #d4a017; }
+
+.loc-name {
+    margin-top: auto; text-align: center;
+    padding-top: 4mm; border-top: 0.3mm solid #333; width: 100%;
+}
+.loc-name .name {
+    font-size: 7mm; font-weight: 800; color: #d4a017;
+}
+.loc-name .addr {
+    font-size: 3.5mm; color: #666; margin-top: 1mm;
+}
+
+@media print {
+    body { width: 210mm; height: 297mm; }
+    .card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+    <div class="badge">Novo! Online narudžba</div>
+
+    <div class="logo">
+        <h1>UVIJEK <span>FRIŠKO</span></h1>
+        <div class="sub">Pekara &bull; Slastičarna</div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="msg">
+        <h2>Skeniraj QR<br>naruči <em>bez čekanja</em></h2>
+        <p>Odaberite proizvode na mobitelu,<br>pokupite gotovo za 15 minuta</p>
+    </div>
+
+    <div class="qr-area">
+        <img src="/static/qr_pickup_frisko.png" alt="QR narudžba">
+        <div class="label">SKENIRAJ I NARUČI</div>
+        <div class="hint">Otvorite kameru mobitela</div>
+    </div>
+
+    <div class="features">
+        <div class="feat">
+            <div class="icon">&#x1F4F1;</div>
+            <div class="title">Skeniraj</div>
+            <div class="desc">Otvorite kameru<br>i skenirajte QR</div>
+        </div>
+        <div class="feat">
+            <div class="icon">&#x1F6D2;</div>
+            <div class="title">Odaberi</div>
+            <div class="desc">Kruh, peciva,<br>kolači, torte</div>
+        </div>
+        <div class="feat">
+            <div class="icon">&#x2705;</div>
+            <div class="title">Pokupi</div>
+            <div class="desc">Svježe i toplo<br>bez čekanja</div>
+        </div>
+    </div>
+
+    <div class="services-bar">
+        <div class="title">Uslužno pečenje — rezervirajte termin</div>
+        <div class="items">
+            Janjetina <strong>25€</strong> &bull;
+            Odojak <strong>30€</strong> &bull;
+            Pite <strong>12€</strong> &bull;
+            Pizza <strong>15€</strong> &bull;
+            Kolači <strong>10€</strong> &bull;
+            Kruh <strong>8€</strong>
+        </div>
+    </div>
+
+    <!-- PROMIJENI IME LOKACIJE ZA SVAKO PM -->
+    <div class="loc-name">
+        <div class="name">PM IVANOVAC</div>
+        <div class="addr">UVIJEK FRIŠKO &bull; Svježe. Domaće. Uvijek.</div>
+    </div>
+
+</div>
+</body></html>

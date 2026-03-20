@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pracenje posiljke | Viskovic Premium</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{--gold:#c9a84c;--dark:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--green:#22c55e;--red:#ef4444;--blue:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--dark);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;display:flex;justify-content:center;min-height:100vh}
+.wrap{width:100%;max-width:480px;background:#111827;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,.5)}
+.hdr{text-align:center;padding:40px 20px 28px;background:linear-gradient(180deg,rgba(201,168,76,.1) 0%,rgba(17,24,39,1) 100%);border-bottom:1px solid rgba(201,168,76,.15)}
+.brand{font-size:1.4rem;font-weight:300;letter-spacing:3px;text-transform:uppercase}
+.brand b{font-weight:800;color:var(--gold)}
+.sub{color:var(--muted);font-size:.78rem;margin-top:8px;letter-spacing:1.5px;text-transform:uppercase}
+.card{background:var(--card);margin:18px;border-radius:16px;padding:18px;border:1px solid rgba(255,255,255,.05);box-shadow:0 10px 25px rgba(0,0,0,.2)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.row:last-child{border-bottom:none;padding-bottom:0}
+.lbl{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:1px}
+.val{font-weight:600;color:#fff;font-size:.9rem;text-align:right}
+.badge{background:rgba(201,168,76,.15);color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.78rem;font-weight:700;border:1px solid rgba(201,168,76,.3)}
+/* Cold Chain Card */
+.cc-card{background:linear-gradient(145deg,#1e293b,#0f172a);margin:0 18px 18px;border-radius:16px;padding:20px;border:1px solid rgba(34,197,94,.3);box-shadow:0 10px 25px rgba(0,0,0,.2);position:relative;overflow:hidden}
+.cc-card.alert{border-color:rgba(239,68,68,.4)}
+.cc-bg{position:absolute;right:-20px;top:-20px;font-size:8rem;color:rgba(255,255,255,.03);transform:rotate(15deg)}
+.cc-header{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:2}
+.cc-label{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.cc-label i{color:var(--green);font-size:1.2rem}
+.cc-label span{font-size:.85rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600}
+.cc-sub{font-size:.8rem;color:#64748b}
+.cc-badge{padding:5px 12px;border-radius:20px;display:flex;align-items:center;gap:6px}
+.cc-badge.ok{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)}
+.cc-badge.alert{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)}
+.cc-dot{width:8px;height:8px;border-radius:50%;animation:pulse-cc 2s infinite}
+.cc-dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
+.cc-dot.alert{background:var(--red);box-shadow:0 0 8px var(--red)}
+.cc-badge-text{font-size:.75rem;font-weight:800;text-transform:uppercase}
+.cc-badge.ok .cc-badge-text{color:var(--green)}
+.cc-badge.alert .cc-badge-text{color:var(--red)}
+.cc-body{display:flex;align-items:flex-end;gap:20px;margin-top:20px;position:relative;z-index:2}
+.cc-temp{font-size:3.5rem;font-weight:800;color:#fff;line-height:1;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.cc-temp span{font-size:1.5rem;color:var(--gold)}
+.cc-details{flex:1;border-left:1px dashed rgba(255,255,255,.1);padding-left:15px}
+.cc-row{display:flex;justify-content:space-between;margin-bottom:8px}
+.cc-row .l{font-size:.8rem;color:var(--muted)}
+.cc-row .v{font-size:.8rem;color:#fff;font-weight:600}
+.cc-bar{width:100%;background:#0f172a;height:6px;border-radius:3px;overflow:hidden;margin-top:10px}
+.cc-bar-fill{height:100%;border-radius:3px}
+.cc-bar-fill.ok{background:linear-gradient(90deg,var(--green),var(--blue))}
+.cc-bar-fill.alert{background:linear-gradient(90deg,var(--red),#f97316)}
+@keyframes pulse-cc{0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(34,197,94,.7)}70%{transform:scale(1);box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+/* Consolidated info */
+.cons-card{background:var(--card);margin:0 18px 18px;border-radius:16px;padding:18px;border:1px solid rgba(201,168,76,.15)}
+.cons-title{font-size:.8rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.cons-method{display:inline-flex;align-items:center;gap:6px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);padding:4px 10px;border-radius:8px;font-size:.8rem;color:var(--gold);font-weight:600}
+/* Timeline */
+.tl-wrap{padding:28px 18px}
+.tl-title{color:var(--gold);font-size:.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:22px;display:flex;align-items:center;gap:8px}
+.tl{position:relative;padding-left:28px;border-left:2px solid rgba(201,168,76,.2);margin-left:8px}
+.ev{position:relative;margin-bottom:26px}
+.ev:last-child{margin-bottom:0}
+.dot{position:absolute;left:-37px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--muted);z-index:2}
+.ev.active .dot{background:var(--gold);border-color:var(--gold);box-shadow:0 0 14px rgba(201,168,76,.6);animation:pulse 2s infinite}
+@keyframes pulse{0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(201,168,76,.7)}70%{transform:scale(1);box-shadow:0 0 0 8px rgba(201,168,76,0)}100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(201,168,76,0)}}
+.ev-time{font-size:.75rem;color:var(--muted);margin-bottom:3px}
+.ev-name{font-weight:600;color:#fff;font-size:1rem}
+.ev-note{font-size:.82rem;color:var(--muted);margin-top:3px}
+.ev-icon{display:inline-block;width:18px;text-align:center;margin-right:4px}
+.act{padding:0 18px 28px}
+.btn-refresh{width:100%;background:var(--gold);color:#000;border:none;padding:15px;border-radius:12px;font-size:.95rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;display:flex;justify-content:center;align-items:center;gap:10px;transition:.2s}
+.btn-refresh:disabled{opacity:.6;cursor:not-allowed}
+.btn-refresh:hover:not(:disabled){background:#d4b05a}
+.spinner{border:3px solid rgba(0,0,0,.15);border-top:3px solid #000;border-radius:50%;width:17px;height:17px;animation:spin 1s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.share{text-align:center;padding:0 18px 32px}
+.share-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);padding:10px 20px;border-radius:8px;font-size:.8rem;cursor:pointer;font-family:inherit;transition:.15s}
+.share-btn:hover{background:rgba(255,255,255,.1);color:var(--text)}
+#toast{visibility:hidden;min-width:260px;background:var(--card);color:#fff;text-align:center;border-radius:10px;padding:14px 18px;position:fixed;z-index:9999;left:50%;bottom:28px;transform:translateX(-50%);font-size:.85rem;border-left:5px solid var(--gold);box-shadow:0 10px 30px rgba(0,0,0,.6);opacity:0;transition:opacity .3s,bottom .3s}
+#toast.show{visibility:visible;opacity:1;bottom:38px}
+#toast.error{border-left-color:var(--red)}
+#toast.success{border-left-color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hdr">
+    <div class="brand">Viskovic <b>Premium</b></div>
+    <div class="sub">Pracenje posiljke</div>
+  </div>
+
+  <!-- Status & Info Card -->
+  <div class="card">
+    <div class="row">
+      <span class="lbl">Status</span>
+      <span class="badge" id="status-badge">
+        {% if item.current_status %}{{ item.current_status.name }}{% else %}U obradi{% endif %}
+      </span>
+    </div>
+    {% if doc_label %}
+    <div class="row">
+      <span class="lbl">Dokument</span>
+      <span class="val">{{ doc_label }}</span>
+    </div>
+    {% endif %}
+    {% if item.delivery_method %}
+    <div class="row">
+      <span class="lbl">Nacin dostave</span>
+      <span class="val">
+        {% if item.delivery_method == 'internal' %}<i class="fas fa-truck" style="color:var(--gold);margin-right:5px"></i>Vlastito vozilo
+        {% elif item.delivery_method == 'bus' %}<i class="fas fa-bus" style="color:var(--blue);margin-right:5px"></i>Autobusna linija
+        {% elif item.delivery_method == 'taxi' %}<i class="fas fa-taxi" style="color:#eab308;margin-right:5px"></i>Taxi dostava
+        {% elif item.delivery_method == 'crowd' %}<i class="fas fa-users" style="color:var(--green);margin-right:5px"></i>Crowd-shipping
+        {% elif item.delivery_method == 'courier' %}<i class="fas fa-box" style="color:#a78bfa;margin-right:5px"></i>Kurirska sluzba
+        {% elif item.delivery_method == 'pickup' %}<i class="fas fa-store" style="color:var(--muted);margin-right:5px"></i>Osobno preuzimanje
+        {% else %}{{ item.get_delivery_method_display }}
+        {% endif %}
+      </span>
+    </div>
+    {% endif %}
+    {% if item.driver_name %}
+    <div class="row">
+      <span class="lbl">Vozac</span>
+      <span class="val"><i class="fas fa-user" style="color:var(--gold);margin-right:5px"></i>{{ item.driver_name }}</span>
+    </div>
+    {% endif %}
+    {% if item.vehicle_plate %}
+    <div class="row">
+      <span class="lbl">Registracija</span>
+      <span class="val">{{ item.vehicle_plate }}</span>
+    </div>
+    {% endif %}
+    {% if item.dispatched_at %}
+    <div class="row">
+      <span class="lbl">Polazak</span>
+      <span class="val">{{ item.dispatched_at|date:"d.m.Y H:i" }}</span>
+    </div>
+    {% endif %}
+    {% if consolidated.eta %}
+    <div class="row">
+      <span class="lbl">Ocekivani dolazak</span>
+      <span class="val" style="color:var(--gold)">{{ consolidated.eta|date:"d.m.Y H:i" }}</span>
+    </div>
+    {% endif %}
+    {% if item.tracking_url %}
+    <div class="row">
+      <span class="lbl">Vanjski tracking</span>
+      <span class="val"><a href="{{ item.tracking_url }}" target="_blank" style="color:var(--gold)"><i class="fas fa-external-link-alt"></i> Prati</a></span>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Cold Chain Widget -->
+  {% if cold_chain %}
+  <div class="cc-card {% if cold_chain.status == 'alert' %}alert{% endif %}">
+    <i class="fas fa-snowflake cc-bg"></i>
+    <div class="cc-header">
+      <div>
+        <div class="cc-label">
+          <i class="fas fa-temperature-low"></i>
+          <span>Hladni Lanac{% if cold_chain.zone_name %} — {{ cold_chain.zone_name }}{% endif %}</span>
+        </div>
+        <div class="cc-sub">Zadnje ocitanje {{ cold_chain.last_reading|timesince }} prije</div>
+      </div>
+      <div class="cc-badge {% if cold_chain.status == 'ok' %}ok{% else %}alert{% endif %}">
+        <div class="cc-dot {% if cold_chain.status == 'ok' %}ok{% else %}alert{% endif %}"></div>
+        <span class="cc-badge-text">{% if cold_chain.status == 'ok' %}Ocuvan{% else %}Upozorenje{% endif %}</span>
+      </div>
+    </div>
+    <div class="cc-body">
+      <div>
+        <div class="cc-temp">{{ cold_chain.current_temp }}<span>&deg;C</span></div>
+      </div>
+      <div class="cc-details">
+        {% if cold_chain.target_min != None %}
+        <div class="cc-row">
+          <span class="l">Cilj:</span>
+          <span class="v">{{ cold_chain.target_min }}&deg;C do {{ cold_chain.target_max }}&deg;C</span>
+        </div>
+        {% endif %}
+        <div class="cc-row">
+          <span class="l">Min / Max:</span>
+          <span class="v">{{ cold_chain.min_temp }}&deg;C / {{ cold_chain.max_temp }}&deg;C</span>
+        </div>
+        {% if cold_chain.target_min != None and cold_chain.target_max != None %}
+        <div class="cc-bar">
+          <div class="cc-bar-fill {% if cold_chain.status == 'ok' %}ok{% else %}alert{% endif %}" style="width:40%;margin-left:20%"></div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Consolidated Delivery Info -->
+  {% if consolidated %}
+  <div class="cons-card">
+    <div class="cons-title"><i class="fas fa-boxes-stacked"></i> Konsolidirana isporuka</div>
+    <div class="row">
+      <span class="lbl">Broj</span>
+      <span class="val">{{ consolidated.delivery_number }}</span>
+    </div>
+    {% if consolidated.hub_company %}
+    <div class="row">
+      <span class="lbl">Hub</span>
+      <span class="val">{{ consolidated.hub_company.name }}</span>
+    </div>
+    {% endif %}
+    {% if consolidated.delivery_method %}
+    <div class="row">
+      <span class="lbl">Metoda</span>
+      <span class="val">
+        <span class="cons-method">
+          {% if consolidated.delivery_method == 'internal' %}<i class="fas fa-truck"></i>
+          {% elif consolidated.delivery_method == 'bus' %}<i class="fas fa-bus"></i>
+          {% elif consolidated.delivery_method == 'taxi' %}<i class="fas fa-taxi"></i>
+          {% elif consolidated.delivery_method == 'crowd' %}<i class="fas fa-users"></i>
+          {% elif consolidated.delivery_method == 'courier' %}<i class="fas fa-box"></i>
+          {% elif consolidated.delivery_method == 'pickup' %}<i class="fas fa-store"></i>
+          {% endif %}
+          {{ consolidated.get_delivery_method_display }}
+        </span>
+      </span>
+    </div>
+    {% endif %}
+    {% if consolidated.external_carrier_name %}
+    <div class="row">
+      <span class="lbl">Prijevoznik</span>
+      <span class="val">{{ consolidated.external_carrier_name }}</span>
+    </div>
+    {% endif %}
+    {% if consolidated.total_weight_kg %}
+    <div class="row">
+      <span class="lbl">Tezina</span>
+      <span class="val">{{ consolidated.total_weight_kg }} kg ({{ consolidated.package_count }} pak.)</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Timeline -->
+  <div class="tl-wrap">
+    <div class="tl-title"><i class="fas fa-route"></i> Povijest isporuke</div>
+    <div class="tl" id="timeline">
+      {% for event in events reversed %}
+      <div class="ev {% if forloop.first %}active{% endif %}">
+        <div class="dot"></div>
+        <div class="ev-time">{{ event.created_at|date:"d.m.Y. u H:i" }}</div>
+        <div class="ev-name">
+          <i class="{{ event.status.icon|default:'fas fa-circle' }} ev-icon" style="color:{{ event.status.color|default:'#c9a84c' }}"></i>
+          {{ event.status.name }}
+        </div>
+        {% if event.note %}<div class="ev-note">{{ event.note }}</div>{% endif %}
+      </div>
+      {% empty %}
+      <div class="ev active">
+        <div class="dot"></div>
+        <div class="ev-time">&mdash;</div>
+        <div class="ev-name">Posiljka je kreirana i ceka obradu</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="act">
+    <button class="btn-refresh" id="refresh-btn" onclick="refreshStatus()">
+      <div class="spinner" id="spinner"></div>
+      <i class="fas fa-sync-alt" id="btn-icon"></i>
+      <span id="btn-text">Provjeri najnoviji status</span>
+    </button>
+  </div>
+
+  <div class="share">
+    <button class="share-btn" onclick="copyLink()">
+      <i class="fas fa-share-alt" style="margin-right:6px"></i>Kopiraj link za dijeljenje
+    </button>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const TOKEN = '{{ item.public_token }}';
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type || 'success');
+  setTimeout(function(){ t.className = ''; }, 3200);
+}
+
+function refreshStatus() {
+  const btn = document.getElementById('refresh-btn');
+  const spinner = document.getElementById('spinner');
+  const icon = document.getElementById('btn-icon');
+  const txt = document.getElementById('btn-text');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  icon.style.display = 'none';
+  txt.textContent = 'Dohvacam...';
+
+  var fetches = [
+    fetch('/tracking/api/' + TOKEN + '/').then(function(r){ return r.json(); }),
+    fetch('/tracking/api/' + TOKEN + '/events/').then(function(r){ return r.json(); })
+  ];
+
+  // Also refresh cold chain if present
+  var ccCard = document.querySelector('.cc-card');
+  if (ccCard) {
+    fetches.push(
+      fetch('/delivery/api/cold-chain/' + TOKEN + '/').then(function(r){ return r.json(); })
+    );
+  }
+
+  Promise.all(fetches)
+  .then(function(results) {
+    var statusData = results[0];
+    var eventsData = results[1];
+    var ccData = results[2];
+
+    if (statusData.ok && statusData.status) {
+      document.getElementById('status-badge').textContent = statusData.status;
+    }
+
+    if (eventsData.ok && eventsData.events.length) {
+      var tl = document.getElementById('timeline');
+      var evs = eventsData.events.slice().reverse();
+      tl.innerHTML = evs.map(function(e, i) {
+        return '<div class="ev ' + (i === 0 ? 'active' : '') + '">' +
+          '<div class="dot"></div>' +
+          '<div class="ev-time">' + formatDate(e.created_at) + '</div>' +
+          '<div class="ev-name"><i class="' + (e.icon || 'fas fa-circle') + ' ev-icon" style="color:' + (e.color || '#c9a84c') + '"></i> ' + e.status + '</div>' +
+          (e.note ? '<div class="ev-note">' + e.note + '</div>' : '') +
+          '</div>';
+      }).join('');
+    }
+
+    // Update cold chain widget
+    if (ccData && ccData.readings_available) {
+      var tempEl = ccCard.querySelector('.cc-temp');
+      if (tempEl) tempEl.innerHTML = ccData.current_temp + '<span>&deg;C</span>';
+
+      var isOk = ccData.status === 'ok';
+      ccCard.className = 'cc-card ' + (isOk ? '' : 'alert');
+
+      var badge = ccCard.querySelector('.cc-badge');
+      if (badge) {
+        badge.className = 'cc-badge ' + (isOk ? 'ok' : 'alert');
+        var dot = badge.querySelector('.cc-dot');
+        if (dot) dot.className = 'cc-dot ' + (isOk ? 'ok' : 'alert');
+        var badgeText = badge.querySelector('.cc-badge-text');
+        if (badgeText) badgeText.textContent = isOk ? 'Ocuvan' : 'Upozorenje';
+      }
+    }
+
+    showToast('Status osvjezen!', 'success');
+  })
+  .catch(function() {
+    showToast('Nije moguce dohvatiti status. Pokusajte ponovno.', 'error');
+  })
+  .finally(function() {
+    setTimeout(function() {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      icon.style.display = '';
+      txt.textContent = 'Provjeri najnoviji status';
+    }, 600);
+  });
+}
+
+function formatDate(iso) {
+  var d = new Date(iso);
+  return d.toLocaleDateString('hr-HR') + ' u ' + d.toLocaleTimeString('hr-HR', {hour: '2-digit', minute: '2-digit'});
+}
+
+function copyLink() {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(window.location.href)
+      .then(function(){ showToast('Link kopiran!', 'success'); })
+      .catch(function(){ showToast('Kopirajte rucno: ' + window.location.href, 'error'); });
+  } else {
+    showToast('Kopirajte rucno: ' + window.location.href, 'error');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Racun #{{ receipt.receipt_number }} — {{ company.name }}</title>
+<style>
+:root{--bg:#0a0a0a;--card:#111827;--gold:#c9a84c;--text:#e5e7eb;--muted:#6b7280;--green:#4ade80;--border:#1f2937}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:1rem}
+.receipt{max-width:420px;width:100%;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.header{background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));padding:1.5rem;text-align:center;border-bottom:1px solid var(--border)}
+.logo{font-size:1.4rem;font-weight:800;color:var(--gold);letter-spacing:.05em}
+.addr{color:var(--muted);font-size:.8rem;margin-top:.25rem}
+.bon-badge{display:inline-block;background:rgba(74,222,128,.12);color:var(--green);padding:.3rem 1rem;border-radius:20px;font-weight:700;font-size:.85rem;margin-top:.75rem}
+.meta{padding:1rem 1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.82rem;color:var(--muted);border-bottom:1px solid var(--border)}
+.meta b{color:var(--text)}
+.items{padding:0 1.5rem}
+.item{display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.item:last-child{border:none}
+.item-name{font-weight:500;max-width:65%}
+.item-qty{color:var(--muted);font-size:.8rem}
+.item-price{font-weight:600;color:var(--gold);text-align:right}
+.totals{padding:1rem 1.5rem;border-top:2px solid var(--gold)}
+.total-row{display:flex;justify-content:space-between;margin:.3rem 0;font-size:.9rem}
+.total-row.grand{font-size:1.3rem;font-weight:800;color:var(--gold);margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+.payment{padding:.75rem 1.5rem;background:rgba(74,222,128,.06);font-size:.85rem;display:flex;justify-content:space-between}
+.fiscal{padding:1rem 1.5rem;font-size:.7rem;color:var(--muted);word-break:break-all;border-top:1px solid var(--border)}
+.qr-wrap{text-align:center;padding:1rem 1.5rem;border-top:1px solid var(--border)}
+.qr-wrap img{width:120px;height:120px;border-radius:8px}
+.qr-label{font-size:.7rem;color:var(--muted);margin-top:.25rem}
+.footer{text-align:center;padding:1.25rem;color:var(--muted);font-size:.75rem;border-top:1px solid var(--border)}
+.footer .slogan{color:var(--gold);font-weight:700;font-size:.9rem;margin-bottom:.25rem}
+.share-bar{display:flex;gap:.5rem;padding:1rem 1.5rem;border-top:1px solid var(--border)}
+.share-btn{flex:1;padding:.65rem;border:none;border-radius:10px;font-weight:600;font-size:.8rem;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.share-wa{background:#25d366;color:#fff}
+.share-email{background:#3b82f6;color:#fff}
+.share-dl{background:var(--card);border:1px solid var(--border);color:var(--text)}
+</style>
+</head>
+<body>
+<div class="receipt">
+  <div class="header">
+    <div class="logo">{{ company.name }}</div>
+    {% if company.address %}<div class="addr">{{ company.address }}{% if company.city %}, {{ company.city }}{% endif %}</div>{% endif %}
+    {% if company.oib %}<div class="addr">OIB: {{ company.oib }}</div>{% endif %}
+    <div class="bon-badge">{% if receipt.status == "paid" %}Placeno{% elif receipt.status == "cancelled" %}STORNIRANO{% else %}{{ receipt.get_status_display }}{% endif %}</div>
+  </div>
+
+  <div class="meta">
+    <div>Racun: <b>#{{ receipt.receipt_number }}</b></div>
+    <div>Datum: <b>{{ receipt.created_at|date:"d.m.Y H:i" }}</b></div>
+    <div>Terminal: <b>{{ terminal.name }}</b></div>
+    {% if receipt.table_number %}<div>Stol: <b>{{ receipt.table_number }}</b></div>{% endif %}
+  </div>
+
+  <div class="items">
+    {% for item in items %}
+    <div class="item">
+      <div>
+        <div class="item-name">{{ item.description }}</div>
+        <div class="item-qty">{{ item.quantity|floatformat:"-2" }} x EUR{{ item.unit_price|floatformat:2 }} | PDV {{ item.tax_rate|floatformat:0 }}%</div>
+      </div>
+      <div class="item-price">EUR{{ item.total_price|floatformat:2 }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="totals">
+    <div class="total-row"><span>Neto:</span><span>EUR{{ receipt.subtotal|floatformat:2 }}</span></div>
+    <div class="total-row"><span>PDV:</span><span>EUR{{ receipt.tax_amount|floatformat:2 }}</span></div>
+    {% if receipt.discount %}<div class="total-row"><span>Popust:</span><span>-EUR{{ receipt.discount|floatformat:2 }}</span></div>{% endif %}
+    <div class="total-row grand"><span>UKUPNO:</span><span>EUR{{ receipt.total|floatformat:2 }}</span></div>
+  </div>
+
+  {% for line in payment_lines %}
+  <div class="payment">
+    <span>{{ line.get_method_display }}</span>
+    <span>EUR{{ line.amount|floatformat:2 }}{% if line.change_given %} (kusur: EUR{{ line.change_given|floatformat:2 }}){% endif %}</span>
+  </div>
+  {% endfor %}
+
+  {% if receipt.zki or receipt.jir %}
+  <div class="fiscal">
+    {% if receipt.zki %}<div>ZKI: {{ receipt.zki }}</div>{% endif %}
+    {% if receipt.jir %}<div>JIR: {{ receipt.jir }}</div>{% endif %}
+    {% if receipt.fiscal_datetime %}<div>Fiskalizirano: {{ receipt.fiscal_datetime|date:"d.m.Y H:i:s" }}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  {% if fina_qr_b64 %}
+  <div class="qr-wrap">
+    <img src="data:image/png;base64,{{ fina_qr_b64 }}" alt="FINA QR">
+    <div class="qr-label">Skeniraj za provjeru na porezna.gov.hr</div>
+  </div>
+  {% endif %}
+
+  <div class="share-bar">
+    <a class="share-btn share-wa" href="https://wa.me/?text=Racun%20%23{{ receipt.receipt_number }}%20{{ company.name }}%20EUR{{ receipt.total|floatformat:2 }}" target="_blank">WhatsApp</a>
+    <a class="share-btn share-email" href="mailto:?subject=Racun%20%23{{ receipt.receipt_number }}&body=Racun%20iz%20{{ company.name }}%20-%20EUR{{ receipt.total|floatformat:2 }}" >Email</a>
+    <a class="share-btn share-dl" href="/hr/pos/receipt/{{ receipt.pk }}/pdf/?format=a4"  target="_blank">PDF</a>
+  </div>
+
+  <div class="footer">
+    <div class="slogan">BEZ PAPIRA</div>
+    Digitalni racun | {{ company.name }} | LIMIT Connect POS
+  </div>
+</div>
+
+<script>
+function emailPrompt(){
+  var e = prompt('Unesite email adresu:');
+  if(!e) return;
+  fetch('/hr/pos/receipt/{{ receipt.pk }}/email/', {
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':getCookie('csrftoken')},
+    body:'email='+encodeURIComponent(e)
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok) alert('Racun poslan na '+d.sent_to);
+    else alert(d.error||'Greska');
+  }).catch(()=>alert('Greska pri slanju'));
+}
+function getCookie(n){var v=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return v?v.pop():'';}
+</script>
+</body>
+</html>

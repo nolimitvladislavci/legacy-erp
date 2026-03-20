@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { margin: 15mm 15mm 20mm 15mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24pt; border-bottom:2pt solid #1e3a5f; padding-bottom:16pt; }
+  .logo-area h1 { font-size:18pt; font-weight:700; color:#1e3a5f; }
+  .logo-area .subtitle { font-size:7.5pt; color:#64748b; letter-spacing:2px; text-transform:uppercase; margin-top:2pt; }
+  .issuer-info { text-align:right; font-size:8.5pt; color:#475569; line-height:1.6; }
+  .invoice-meta { display:flex; justify-content:space-between; margin-bottom:20pt; }
+  .invoice-title h2 { font-size:20pt; font-weight:700; color:#1e3a5f; }
+  .invoice-title .number { font-size:11pt; color:#c9a84c; font-weight:600; margin-top:4pt; }
+  .dates-box { text-align:right; }
+  .date-row { display:flex; gap:12pt; justify-content:flex-end; margin-bottom:4pt; }
+  .date-label { font-size:8pt; color:#64748b; width:110pt; text-align:right; }
+  .date-val { font-size:8.5pt; font-weight:600; color:#0f172a; width:70pt; text-align:right; }
+  .parties { display:flex; gap:20pt; margin-bottom:20pt; }
+  .party-box { flex:1; background:#f8fafc; padding:12pt; border-left:3pt solid #c9a84c; }
+  .party-label { font-size:7pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:6pt; }
+  .party-name { font-size:10.5pt; font-weight:700; color:#0f172a; margin-bottom:4pt; }
+  .party-detail { font-size:8.5pt; color:#475569; line-height:1.6; }
+  table { width:100%; border-collapse:collapse; margin-bottom:16pt; }
+  thead tr { background:#1e3a5f; color:white; }
+  thead th { padding:7pt 8pt; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; text-align:left; }
+  thead th:last-child, thead th:nth-child(3), thead th:nth-child(4) { text-align:right; }
+  tbody tr { border-bottom:0.5pt solid #e2e8f0; }
+  tbody tr:nth-child(even) { background:#f8fafc; }
+  tbody td { padding:7pt 8pt; font-size:9pt; }
+  tbody td:last-child, tbody td:nth-child(3), tbody td:nth-child(4) { text-align:right; }
+  .totals { display:flex; justify-content:flex-end; margin-bottom:20pt; }
+  .totals-table { width:220pt; }
+  .totals-table tr td { padding:4pt 6pt; font-size:9pt; }
+  .totals-table tr td:last-child { text-align:right; font-weight:600; }
+  .totals-table .netto { background:#f1f5f9; }
+  .totals-table .total-row td { background:#1e3a5f; color:white; font-size:11pt; font-weight:700; padding:7pt 6pt; }
+  .payment-box { background:#f8fafc; padding:10pt; border:0.5pt solid #e2e8f0; margin-bottom:16pt; }
+  .payment-box h4 { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:8pt; }
+  .payment-grid { display:flex; gap:16pt; }
+  .payment-col { flex:1; }
+  .payment-row { display:flex; justify-content:space-between; margin-bottom:3pt; }
+  .payment-label { font-size:8pt; color:#64748b; }
+  .payment-val { font-size:8.5pt; font-weight:600; color:#0f172a; }
+  .legal-box { font-size:7.5pt; color:#64748b; line-height:1.6; margin-bottom:16pt; }
+  .note-box { background:#fffbeb; border-left:3pt solid #f59e0b; padding:8pt 12pt; margin-bottom:16pt; font-size:8.5pt; }
+  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:7.5pt; color:#94a3b8; border-top:0.5pt solid #e2e8f0; padding:6pt 15mm; background:white; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-area">
+    <h1>Viskovic Bau</h1>
+    <div class="subtitle">Geschäftsdokument · Deutschland</div>
+  </div>
+  <div class="issuer-info">
+    <strong></strong><br>
+    <br>
+    
+    Steuer-Nr.: <br>
+    IBAN: <br>
+    
+  </div>
+</div>
+
+<div class="invoice-meta">
+  <div class="invoice-title">
+    <h2>ANGEBOT</h2>
+    <div class="number">Angebotsnr.: VIS-AN-2026-002</div>
+  </div>
+  <div class="dates-box">
+    <div class="date-row">
+      <div class="date-label">Angebotsdatum:</div>
+      <div class="date-val">13.03.2026</div>
+    </div>
+    
+    <div class="date-row">
+      <div class="date-label">Gültig bis:</div>
+      <div class="date-val">12.04.2026</div>
+    </div>
+    
+    
+  </div>
+</div>
+
+<div class="parties">
+  <div class="party-box" style="border-left-color:#1e3a5f">
+    <div class="party-label">Absender / Rechnungssteller</div>
+    <div class="party-name"></div>
+    <div class="party-detail"><br>Steuer-Nr.: </div>
+  </div>
+  <div class="party-box">
+    <div class="party-label">Empfänger / Rechnungsempfänger</div>
+    <div class="party-name">Zlatan Islamovic</div>
+    <div class="party-detail">
+      James-F.-Byrnes-Strasse 12<br>
+      Stuttgart<br>
+      DE<br>
+      
+    </div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">Pos.</th>
+      <th style="width:45%">Beschreibung</th>
+      <th style="width:8%">Menge</th>
+      <th style="width:8%">Einheit</th>
+      <th style="width:14%">Einzelpreis</th>
+      <th style="width:8%">Rabat (%)</th>
+      <th style="width:12%">Natrag</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+    <tr>
+      <td>1</td>
+      <td>ABBRUCH | Demontage Wandfliesen Bad und WC | Abschlagen aller Wandfliesen inkl. Untergrundabriss bis Rohbau, Abtransport und Entsorgung (Bad 24 m2 + WC 14 m2)</td>
+      <td>37,90</td>
+      <td>m2</td>
+      <td>38,00 EUR</td>
+      <td>–</td>
+      <td>1440,20 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>2</td>
+      <td>ABBRUCH | Demontage Bodenfliesen Bad und WC | Aufnehmen Bodenfliesen inkl. Kleberbett, Estrichreinigung, Entsorgung</td>
+      <td>8,24</td>
+      <td>m2</td>
+      <td>34,00 EUR</td>
+      <td>–</td>
+      <td>280,16 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>3</td>
+      <td>ABBRUCH | Demontage Rigipsdecke Bad und WC | Abbau Unterkonstruktion und Beplankung, Abtransport, Entsorgung</td>
+      <td>8,24</td>
+      <td>m2</td>
+      <td>22,00 EUR</td>
+      <td>–</td>
+      <td>181,28 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>4</td>
+      <td>ABBRUCH | Ausbau Sanitaerobjekte komplett | WC-Keramik, Waschtisch, Badewanne, alle Armaturen, Spiegel, Handtuchhalter, Zubehoer - fachgerecht ausbauen, Entsorgung</td>
+      <td>1,00</td>
+      <td>pau</td>
+      <td>420,00 EUR</td>
+      <td>–</td>
+      <td>420,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>5</td>
+      <td>ABBRUCH | Demontage Radiator | Abschiebern, Leitungen verschliessen, Radiator ausbauen, Entsorgung alt</td>
+      <td>1,00</td>
+      <td>Stk</td>
+      <td>180,00 EUR</td>
+      <td>–</td>
+      <td>180,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>6</td>
+      <td>TROCKENBAU | Neue Rigipsdecke Bad und WC | Unterkonstruktion UK 50 feuerverzinkt, Beplankung Rigips RBI 12.5 mm Feuchtraum (GKBI), gespachtelt Q2, inkl. saetmliches Material</td>
+      <td>8,24</td>
+      <td>m2</td>
+      <td>88,00 EUR</td>
+      <td>–</td>
+      <td>725,12 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>7</td>
+      <td>TROCKENBAU | Vorsatzschale 15 cm (290 x 240 cm) | Staenderprofil CW/UW 75, doppelt beplankt Rigips RBI 2x12.5 mm, inkl. 3 Sampon-Nischen (umgekehrte Pyramide 30x30x15 cm) mit LED-Einbau vorbereitet (Leerrohre, Dose je Nische), gespachtelt Q2, inkl. saetmliches Material</td>
+      <td>6,96</td>
+      <td>m2</td>
+      <td>145,00 EUR</td>
+      <td>–</td>
+      <td>1009,20 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>8</td>
+      <td>SANITAER | Trinkwasserinstallation ab Wasserzaehleranschluss | Neue KW- und WW-Leitungen PE-X/AL-PE Verbundrohr, Verlegung in Vorsatzschale und Schlitzen, Anschluesse fuer: WC-Spuelkasten, Waschtisch, Badewanne, Dusche, Absperrventile, Revisionsdeckel, Druckpruefung, Dichtheitsprotokoll</td>
+      <td>1,00</td>
+      <td>pau</td>
+      <td>2200,00 EUR</td>
+      <td>–</td>
+      <td>2200,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>9</td>
+      <td>SANITAER | Abwasserinstallation neu | DN 50 / DN 100 Abflussrohre HT-System, neue Geruchsverschluesse, Bodenablauf DN 50 mit Edelstahl-Designrost, Gefaelleanpassung 2 pct, Druckpruefung</td>
+      <td>1,00</td>
+      <td>pau</td>
+      <td>980,00 EUR</td>
+      <td>–</td>
+      <td>980,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>10</td>
+      <td>SANITAER | Radiator versetzen auf neue Position im Bad | Leitungen verlaengern und anpassen, Radiator an neuer Wandposition montieren, System befuellen und entlueften, neue Wandhalterung</td>
+      <td>1,00</td>
+      <td>pau</td>
+      <td>580,00 EUR</td>
+      <td>–</td>
+      <td>580,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>11</td>
+      <td>ELEKTRO | FI-Schutzschalter RCD Typ A 40A/30mA fuer Bad und WC | Einbau in vorhandenen Verteiler, alle Feuchtraumstromkreise absichern, Messprotokoll nach VDE 0100-701</td>
+      <td>1,00</td>
+      <td>pau</td>
+      <td>320,00 EUR</td>
+      <td>–</td>
+      <td>320,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>12</td>
+      <td>ELEKTRO | LED-Einbaustrahler in Vorsatzschale | 4 Stk Einbaustrahler IP44 schwenkbar, warmweiss 3000K, Unterputzmontage Rigipswand, inkl. Leitungsverlegung, UP-Dose, GU10 7W LED je Stk</td>
+      <td>4,00</td>
+      <td>Stk</td>
+      <td>185,00 EUR</td>
+      <td>–</td>
+      <td>740,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>13</td>
+      <td>ELEKTRO | RGB-Farbwechsel-Wandleuchten Effektbeleuchtung | 2 Stk Design-Wandleuchten IP44 RGB+W LED, steuerbar per App/Fernbedienung, Farbtemperatur und Szenen, inkl. Unterputzmontage und Leitungsverlegung</td>
+      <td>2,00</td>
+      <td>Stk</td>
+      <td>220,00 EUR</td>
+      <td>–</td>
+      <td>440,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>14</td>
+      <td>ELEKTRO | LED-Lichtkanal umlaufend auf H=120 cm | LED-Strip IP44 14.4 W/m neutralweiss/RGB, Aluminium-Einbauprofil blendfrei mit Diffusor (Lichtband in Fliesenfuge), Trafo 60 W Unterputz, Kabelverlegung - Perimeter Bad umlaufend 10.60 lfm</td>
+      <td>10,60</td>
+      <td>lfm</td>
+      <td>68,00 EUR</td>
+      <td>–</td>
+      <td>720,80 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>15</td>
+      <td>FLIESEN | Untergrundvorbereitung Waende Bad und WC | Rohbauflaeche egalisieren, Unebenheiten &gt; 5 mm ausgleichen, Haftgrundierung (Bad 24.04 m2 + WC 13.86 m2 = 37.90 m2)</td>
+      <td>37,90</td>
+      <td>m2</td>
+      <td>22,00 EUR</td>
+      <td>–</td>
+      <td>833,80 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>16</td>
+      <td>FLIESEN | Untergrundvorbereitung Boden Bad und WC | Estrich reinigen, Ausgleichsmasse max. 10 mm, 2K-Abdichtungsschlaemme Wand-Boden-Anschluss umlaufend (Mapei Mapelastic)</td>
+      <td>8,24</td>
+      <td>m2</td>
+      <td>28,00 EUR</td>
+      <td>–</td>
+      <td>230,72 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>17</td>
+      <td>FLIESEN | Lieferung Grossformat 120 x 60 cm | Feinsteinzeug rektifiziert, 1. Wahl, Farbton nach Wahl Auftraggeber (hell / Beton / Marmor-Optik), inkl. 10 pct Verschnitt - Gesamtflaeche 58.41 m2 brutto</td>
+      <td>58,41</td>
+      <td>m2</td>
+      <td>42,00 EUR</td>
+      <td>–</td>
+      <td>2453,22 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>18</td>
+      <td>FLIESEN | Verlegen Wandfliesen 120x60 cm | Bad 24.04 m2 + WC 13.86 m2 + Vorsatzschale 6.96 m2 = 44.86 m2 | Nivelliersystem Raimondi/Litokol, Flexkleber S1 Mapei Granirapid bianco, Kreuzfuge 2 mm, Fugenmasse Mapei Ultracolor Plus grau</td>
+      <td>44,86</td>
+      <td>m2</td>
+      <td>78,00 EUR</td>
+      <td>–</td>
+      <td>3499,08 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>19</td>
+      <td>FLIESEN | Verlegen Bodenfliesen 120x60 cm | Bad 5.95 m2 + WC 2.29 m2 = 8.24 m2 | Grossformat mit Gefaelle 1.5 pct zu Ablauf, Nivelliersystem, Flexkleber S1, Fugenmasse Mapei, Edelstahl-Randabschlussprofil</td>
+      <td>8,24</td>
+      <td>m2</td>
+      <td>85,00 EUR</td>
+      <td>–</td>
+      <td>700,40 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>20</td>
+      <td>FLIESEN | Nischen-Verfliesung 3 Sampon-Nischen | Alle 5 Seiten jeder Nische (30x30x15 cm) verfliesen, Mosaikfliese oder Kleinstformat als Kontrast, Edelstahl-Winkelprofile, inkl. LED-Strip-Einbau in jede Nische</td>
+      <td>3,00</td>
+      <td>Stk</td>
+      <td>195,00 EUR</td>
+      <td>–</td>
+      <td>585,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>21</td>
+      <td>FINISH | Silikonfugen umlaufend | Alle Wand/Boden-Anschluesse, Wannenrand, Dusche, Deckenanschluss, Sanitaersilikon Mapei Mapesil AC weiss, saetmliche Feuchtraum-Anschluesse</td>
+      <td>18,00</td>
+      <td>lfm</td>
+      <td>14,00 EUR</td>
+      <td>–</td>
+      <td>252,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>22</td>
+      <td>FINISH | Uebergangsprofil Fliese/Laminat Tuerbereich | Edelstahl geburstet 40 mm, einpassen und befestigen</td>
+      <td>2,00</td>
+      <td>Stk</td>
+      <td>38,00 EUR</td>
+      <td>–</td>
+      <td>76,00 EUR</td>
+    </tr>
+    
+    <tr>
+      <td>23</td>
+      <td>FINISH | Komplette Bauendreinigung Bad und WC | Fliesenreinigung, Erstversiegelung, Grout-Cleaner, Schutzfolien entfernen, Baustelle besenrein, Abnahmebereit</td>
+      <td>1,00</td>
+      <td>pau</td>
+      <td>380,00 EUR</td>
+      <td>–</td>
+      <td>380,00 EUR</td>
+    </tr>
+    
+  </tbody>
+</table>
+
+<div class="totals">
+  <table class="totals-table">
+    <tr class="netto"><td>Nettobetrag:</td><td>19226,98 EUR</td></tr>
+    <tr><td>MwSt. 19,00%:</td><td>3653,13 EUR</td></tr>
+    <tr class="total-row"><td>GESAMTBETRAG:</td><td>22880,11 EUR</td></tr>
+  </table>
+</div>
+
+<div class="payment-box">
+  <h4>Zahlungsinformationen</h4>
+  <div class="payment-grid">
+    <div class="payment-col">
+      <div class="payment-row"><span class="payment-label">Zahlungsart:</span><span class="payment-val">Transakcijski račun</span></div>
+      <div class="payment-row"><span class="payment-label">IBAN:</span><span class="payment-val"></span></div>
+      
+    </div>
+    <div class="payment-col">
+      <div class="payment-row"><span class="payment-label">Fällig bis:</span><span class="payment-val">12.04.2026</span></div>
+      
+    </div>
+  </div>
+</div>
+
+
+<div class="note-box">Angebot Komplettsanierung Bad + WC - Schlusselfertig
+Objekt: James-F.-Byrnes-Str. 12, 70376 Stuttgart
+Bad ca. 6 m2 + WC ca. 2 m2  /  Raumhoehe H=240 cm
+Leistung: Abbruch, Trockenbau, Sanitaer, Elektro,
+Fliesen 120x60 cm, LED-Beleuchtungskonzept, Finish.
+Alle Preise netto zzgl. 19 % MwSt.
+Zahlungsziel: 14 Tage netto nach Rechnungsstellung.
+Ausfuehrung nach Freigabe Auftraggeber und Versicherung.</div>
+
+
+<div class="legal-box">
+  Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. (falls zutreffend) ·
+  Bitte überweisen Sie den Betrag unter Angabe der Rechnungsnummer. ·
+  Bei Fragen wenden Sie sich bitte an: 
+</div>
+
+<div class="footer">
+  <strong></strong> · Steuer-Nr.:  · IBAN:  · 
+  &nbsp;|&nbsp; Rechnungsdatum: 13.03.2026 · Dok.-Nr.: 33cd6dd7-c80c-4dc0-9dc3-b61e975232a4
+</div>
+</body>
+</html>

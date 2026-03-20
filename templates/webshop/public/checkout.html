@@ -1,0 +1,187 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}" data-theme="{{ company.booking_theme|default:'dark' }}">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Narudžba — {{ company.name }}</title>
+<script>(function(){var t=localStorage.getItem('booking-theme')||'{{ company.booking_theme|default:"dark" }}';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/booking/css/booking-theme.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.co-wrap{max-width:760px;margin:0 auto;padding:1.5rem 1rem}
+.co-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--text);margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.co-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.co-section h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:700;margin-bottom:1rem}
+.co-field{margin-bottom:.75rem}
+.co-field label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em}
+.co-input{width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.5rem .75rem;font-size:.9rem;font-family:inherit}
+.co-input:focus{outline:none;border-color:var(--gold)}
+.co-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.method-grid{display:grid;grid-template-columns:1fr;gap:.5rem}
+.method-opt{display:flex;align-items:center;gap:.75rem;padding:.75rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s}
+.method-opt:hover{border-color:var(--gold)}
+.method-opt input[type=radio]{accent-color:var(--gold);width:16px;height:16px}
+.method-opt.selected{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.method-label{flex:1}
+.method-name{font-size:.9rem;font-weight:600;color:var(--text)}
+.method-desc{font-size:.75rem;color:var(--muted)}
+.method-price{font-size:.88rem;font-weight:700;color:var(--gold)}
+.order-summary{background:var(--dark);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.summary-row{display:flex;justify-content:space-between;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem}
+.summary-row:last-child{border-bottom:none}
+.summary-label{color:var(--muted)}
+.summary-val{font-weight:600;color:var(--text)}
+.summary-total{font-size:1.1rem;font-weight:800;color:var(--gold)}
+.pay-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem}
+.pay-opt{display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.75rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;text-align:center}
+.pay-opt:hover{border-color:var(--gold)}
+.pay-opt.selected{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.pay-opt input{display:none}
+.pay-icon{font-size:1.4rem}
+.pay-name{font-size:.78rem;font-weight:600;color:var(--text)}
+.submit-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:10px;padding:1rem;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:.5rem}
+.submit-btn:hover{background:#b8922e}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed}
+.back-link{display:inline-block;color:var(--muted);font-size:.85rem;text-decoration:none;margin-bottom:1rem}
+.back-link:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+<nav class="booking-nav">
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="brand">{{ company.name }}</a>
+</nav>
+
+<div class="co-wrap">
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/kosara/" class="back-link">← Natrag na košaricu</a>
+  <h2 class="co-title">Završi narudžbu</h2>
+
+  <div class="co-section">
+    <h3>Pregled narudžbe</h3>
+    <div class="order-summary">
+      {% for item in items %}
+      <div class="summary-row">
+        <span class="summary-label">{{ item.product.name }} × {{ item.qty }}</span>
+        <span class="summary-val">€{{ item.subtotal|floatformat:2 }}</span>
+      </div>
+      {% endfor %}
+      <div class="summary-row">
+        <span class="summary-label">Dostava</span>
+        <span class="summary-val" id="deliveryCostDisplay">€0.00</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label"><strong>UKUPNO</strong></span>
+        <span class="summary-total" id="grandTotalDisplay">€{{ total|floatformat:2 }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="co-section">
+    <h3>Vaši podaci</h3>
+    <div class="co-row">
+      <div class="co-field"><label>Ime i prezime *</label><input class="co-input" id="coName" placeholder="Ana Horvat" required></div>
+      <div class="co-field"><label>Email *</label><input class="co-input" id="coEmail" type="email" placeholder="ana@mail.com" required></div>
+    </div>
+    <div class="co-field"><label>Mobitel</label><input class="co-input" id="coPhone" placeholder="091 234 5678"></div>
+  </div>
+
+  <div class="co-section">
+    <h3>Način dostave</h3>
+    <div class="method-grid" id="deliveryGrid">
+      {% for val, label, cost in delivery_methods %}
+      <label class="method-opt {% if forloop.first %}selected{% endif %}">
+        <input type="radio" name="delivery" value="{{ val }}" data-cost="{{ cost }}" {% if forloop.first %}checked{% endif %} onchange="updateDelivery(this)">
+        <div class="method-label">
+          <div class="method-name">{{ label }}</div>
+        </div>
+        <div class="method-price">{% if cost == '0.00' %}Besplatno{% else %}+€{{ cost }}{% endif %}</div>
+      </label>
+      {% endfor %}
+    </div>
+    <div class="co-field" style="margin-top:.75rem" id="addressField" style="display:none">
+      <label>Adresa dostave</label>
+      <input class="co-input" id="coAddress" placeholder="Ulica i broj, Grad, Poštanski broj">
+    </div>
+  </div>
+
+  <div class="co-section">
+    <h3>Način plaćanja</h3>
+    <div class="pay-grid">
+      {% for val, label in payment_methods %}
+      <label class="pay-opt {% if forloop.first %}selected{% endif %}">
+        <input type="radio" name="payment" value="{{ val }}" {% if forloop.first %}checked{% endif %}>
+        <span class="pay-icon">{% if val == 'cash' %}💵{% elif val == 'card' %}💳{% elif val == 'revolut' %}🔵{% elif val == 'paypal' %}🅿️{% elif val == 'crypto' %}₿{% endif %}</span>
+        <span class="pay-name">{{ label }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="co-section">
+    <h3>Napomena (opcionalno)</h3>
+    <textarea class="co-input" id="coNote" rows="3" placeholder="Posebni zahtjevi, korekcija dioptrije..."></textarea>
+  </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="submitOrder()">Naruči → €<span id="btnTotal">{{ total|floatformat:2 }}</span></button>
+</div>
+
+<script>
+var SLUG = '{{ company.booking_slug }}';
+var CSRF = '{{ csrf_token }}';
+var itemsTotal = {{ total }};
+var deliveryCost = 0;
+
+document.querySelectorAll('.pay-opt').forEach(function(opt) {
+  opt.addEventListener('click', function(){
+    document.querySelectorAll('.pay-opt').forEach(function(o){ o.classList.remove('selected'); });
+    opt.classList.add('selected');
+  });
+});
+
+function updateDelivery(el) {
+  deliveryCost = parseFloat(el.dataset.cost || 0);
+  document.getElementById('deliveryCostDisplay').textContent = deliveryCost > 0 ? '€' + deliveryCost.toFixed(2) : 'Besplatno';
+  var grand = itemsTotal + deliveryCost;
+  document.getElementById('grandTotalDisplay').textContent = '€' + grand.toFixed(2);
+  document.getElementById('btnTotal').textContent = grand.toFixed(2);
+  var addrField = document.getElementById('addressField');
+  addrField.style.display = el.value !== 'pickup' ? 'block' : 'none';
+  document.querySelectorAll('.method-opt').forEach(function(o){ o.classList.remove('selected'); });
+  el.closest('.method-opt').classList.add('selected');
+}
+
+function submitOrder() {
+  var name = document.getElementById('coName').value.trim();
+  var email = document.getElementById('coEmail').value.trim();
+  if (!name || !email) { alert('Ime i email su obavezni.'); return; }
+  
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Šaljem...';
+  
+  fetch('/hr/webshop/shop/' + SLUG + '/naruci/potvrdi/', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {'Content-Type':'application/json','X-CSRFToken':CSRF},
+    body: JSON.stringify({
+      name: name, email: email,
+      phone: document.getElementById('coPhone').value,
+      delivery_method: document.querySelector('input[name=delivery]:checked').value,
+      payment_method: document.querySelector('input[name=payment]:checked').value,
+      address: document.getElementById('coAddress').value,
+      note: document.getElementById('coNote').value,
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) {
+      localStorage.setItem('cart_count_' + SLUG, '0');
+      document.body.innerHTML = '<div style="text-align:center;padding:4rem;font-family:Barlow,sans-serif"><h2 style="color:#c9a84c;font-size:1.8rem;margin-bottom:1rem">Narudžba primljena!</h2><p style="color:#888;margin-bottom:2rem">' + d.message + '</p><a href="/hr/webshop/shop/' + SLUG + '/" style="background:#c9a84c;color:#000;padding:.75rem 2rem;border-radius:8px;text-decoration:none;font-weight:700">← Natrag u shop</a></div>';
+    } else {
+      alert(d.error || 'Greška');
+      btn.disabled = false; btn.textContent = 'Pokušaj ponovo';
+    }
+  }).catch(function(){ btn.disabled=false; btn.textContent='Greška veze'; });
+}
+</script>
+</body>
+</html>

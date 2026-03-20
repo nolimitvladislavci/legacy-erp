@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n l10n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ next_url }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-hard-hat me-2 text-warning"></i>{{ action }}</h2>
+  <a href="{% url 'projects_index' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="stat-card">
+        <h6 class="fw-bold mb-3">{% trans "Osnovni podaci" %}</h6>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label fw-bold">{% trans "Naziv projekta *" %}</label>
+            <input type="text" name="name" class="form-control" value="{{ project.name|default:'' }}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">{% trans "Šifra *" %}</label>
+            <input type="text" name="code" class="form-control" value="{{ project.code|default:'' }}" required placeholder="PR-2026-001">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">{% trans "Opis" %}</label>
+            <textarea name="description" class="form-control" rows="3">{{ project.description|default:'' }}</textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">{% trans "Lokacija" %}</label>
+            <input type="text" name="location" class="form-control" value="{{ project.location|default:'' }}" placeholder="Grad, adresa...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card mb-3">
+        <h6 class="fw-bold mb-3">{% trans "Status i budžet" %}</h6>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Status" %}</label>
+          <select name="status" class="form-select">
+            {% for val,label in status_choices %}
+            <option value="{{ val }}" {% if project.status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Budžet (EUR)" %}</label>
+          <input type="number" step="0.01" name="budget" class="form-control" value="{{ project.budget|default:'0'|unlocalize }}">
+        </div>
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label fw-bold">{% trans "Početak" %}</label>
+            <input type="date" name="start_date" class="form-control" value="{{ project.start_date|date:'Y-m-d'|default:'' }}">
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-bold">{% trans "Rok" %}</label>
+            <input type="date" name="end_date" class="form-control" value="{{ project.end_date|date:'Y-m-d'|default:'' }}">
+          </div>
+        </div>
+        <div class="form-check mt-2">
+          <input type="checkbox" name="is_public" class="form-check-input" id="isPublic" {% if project.is_public %}checked{% endif %}>
+          <label class="form-check-label" for="isPublic">{% trans "Javno vidljivo" %}</label>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <h6 class="fw-bold mb-3">{% trans "Veze" %}</h6>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Tvrtka" %}</label>
+          <select name="company" class="form-select">
+            <option value="">--</option>
+            {% for c in companies %}
+            <option value="{{ c.pk }}" {% if project.company_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Klijent" %}</label>
+          <select name="client" class="form-select">
+            <option value="">--</option>
+            {% for c in clients %}
+            <option value="{{ c.pk }}" {% if project.client_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-bold">{% trans "Voditelj" %}</label>
+          <select name="manager" class="form-select">
+            <option value="">--</option>
+            {% for u in managers %}
+            <option value="{{ u.pk }}" {% if project.manager_id == u.pk %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>{% trans "Spremi" %}</button>
+      <a href="{% url 'projects_index' %}" class="btn btn-outline-secondary ms-2">{% trans "Odustani" %}</a>
+    </div>
+  </div>
+</form>
+{% endblock %}

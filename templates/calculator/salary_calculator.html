@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Stundensatz-Kalkulator – Visković Group</title>
+<meta name="theme-color" content="#c9a84c">
+<style>
+:root{
+  --gold:#c9a84c;--gold2:#b8962e;--gold-dim:rgba(201,168,76,.13);--gold-border:rgba(201,168,76,.3);
+  --black:#09090b;--surface:#111118;--surface2:#18181f;--surface3:#22222c;--surface4:#2a2a36;
+  --text:#e4e4ef;--text-dim:#7c7c99;--border:rgba(255,255,255,.07);
+  --red:#ef4444;--green:#22c55e;--blue:#60a5fa;
+  --radius:10px;--shadow:0 4px 24px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;font-size:14px}
+
+.header{background:var(--surface);border-bottom:1px solid var(--gold-border);padding:13px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.hlogo{width:34px;height:34px;border-radius:8px;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--gold);font-size:.9rem;flex-shrink:0}
+.htitle{font-size:1rem;font-weight:800;color:var(--gold);line-height:1.1}
+.hsub{font-size:.7rem;color:var(--text-dim)}
+.hnav{display:flex;gap:4px;margin-left:auto;margin-right:12px}
+.hnav-link{font-size:.72rem;padding:5px 10px;border-radius:6px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);transition:all .15s;white-space:nowrap}
+.hnav-link:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.hnav-link.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-dim)}
+.hback{font-size:.75rem;color:var(--text-dim);text-decoration:none;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;white-space:nowrap}
+.hback:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+
+/* Layout with sidebar */
+.layout{display:flex;min-height:calc(100vh - 60px - 56px)}
+.sidebar{width:156px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;padding:12px 0}
+.tab-btn{width:100%;background:none;border:none;color:var(--text-dim);padding:13px 16px;text-align:left;font-size:.78rem;cursor:pointer;display:flex;align-items:center;gap:9px;border-left:3px solid transparent;transition:all .15s;line-height:1.3;font-family:inherit}
+.tab-btn:hover{background:rgba(255,255,255,.03);color:var(--text)}
+.tab-btn.active{color:var(--gold);background:var(--gold-dim);border-left-color:var(--gold);font-weight:700}
+.tab-icon{font-size:1.05rem;width:20px;text-align:center;flex-shrink:0}
+
+.main{flex:1;max-width:820px;padding:20px;min-width:0}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Country toggle (inner tabs within Gehaltsrechner) */
+.country-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--gold-border);border-radius:8px;overflow:hidden}
+.country-tab{flex:1;padding:14px;text-align:center;cursor:pointer;background:var(--surface2);color:var(--text-dim);font-size:.88rem;font-weight:700;border:none;transition:all .15s;font-family:inherit}
+.country-tab.active{background:var(--gold);color:#000}
+.country-tab:hover:not(.active){background:var(--surface3);color:var(--text)}
+.country-panel{display:none}
+.country-panel.active{display:block}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* Fields */
+.field-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);font-weight:600}
+.field input,.field select{background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--text);font-size:.85rem;padding:8px 10px;font-family:inherit;width:100%}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold-border);background:var(--surface4)}
+input[type=number]::-webkit-inner-spin-button{opacity:.5}
+input[readonly]{cursor:default;opacity:.85}
+
+/* Checkbox toggle */
+.toggle-row{display:flex;align-items:center;gap:10px;padding:8px 0}
+.toggle-row label{font-size:.8rem;color:var(--text);cursor:pointer;user-select:none}
+.toggle-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--gold);cursor:pointer}
+
+/* Breakdown table */
+.bdown{width:100%;border-collapse:collapse;margin-top:8px}
+.bdown th{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);font-weight:600}
+.bdown th:last-child{text-align:right}
+.bdown td{padding:7px 8px;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.bdown td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+.bdown .section-head td{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);padding-top:14px;border-bottom:1px solid var(--gold-border)}
+.bdown .subtotal td{font-weight:700;border-top:1px solid var(--border);color:var(--text)}
+.bdown .total td{font-weight:800;font-size:.95rem;color:var(--gold);border-top:2px solid var(--gold);padding-top:10px;padding-bottom:10px}
+.bdown .employer td{color:var(--blue)}
+.bdown .dim td{color:var(--text-dim);font-size:.78rem}
+.bdown .highlight td{color:var(--gold);font-weight:700;font-size:1.05rem}
+
+/* Bottom bar */
+.bar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--gold-border);padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:24px;z-index:90;flex-wrap:wrap}
+.bar-item{text-align:center}
+.bar-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);display:block}
+.bar-val{font-size:1.1rem;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.bar-val.gold{color:var(--gold);font-size:1.25rem}
+.bar-sep{width:1px;height:32px;background:var(--border)}
+
+/* Disclaimer */
+.disclaimer{font-size:.7rem;color:var(--text-dim);text-align:center;padding:12px;margin-top:8px;border-top:1px solid var(--border)}
+
+/* Visual chart */
+.chart-bar{height:28px;border-radius:4px;display:flex;overflow:hidden;margin:12px 0 8px}
+.chart-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#000;min-width:2px;transition:width .3s}
+.chart-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chart-legend span{font-size:.68rem;display:flex;align-items:center;gap:4px}
+.chart-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* Gold button */
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:#000;font-weight:700;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .15s;font-family:inherit}
+.btn-gold:hover{background:var(--gold2)}
+
+/* Data feed card styling */
+.data-feed{background:var(--surface2);border:1px solid var(--gold-border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.data-feed .card-title{color:var(--gold);opacity:.8}
+.feed-val{font-size:1.1rem;font-weight:800;color:var(--gold);text-align:center;padding:6px 0}
+
+
+/* Country selector in sidebar */
+.country-selector{display:flex;gap:4px;padding:10px 12px;border-bottom:1px solid var(--border);justify-content:center}
+.country-flag{width:40px;height:32px;border-radius:6px;border:2px solid transparent;background:var(--surface2);cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:inherit}
+.country-flag:hover{background:var(--surface3);border-color:rgba(255,255,255,.15)}
+.country-flag.active{border-color:var(--gold);background:var(--gold-dim)}
+.country-flag .flag-label{font-size:.55rem;font-weight:700;margin-left:2px;color:var(--text-dim)}
+.country-flag.active .flag-label{color:var(--gold)}
+
+@media(max-width:680px){
+  .header{padding:10px 14px}
+  .hnav{display:none}
+  .sidebar{width:48px;padding:8px 0}
+  .tab-btn span:not(.tab-icon){display:none}
+  .tab-btn{justify-content:center;padding:14px 0;border-left:none;border-bottom:3px solid transparent}
+  .tab-btn.active{border-bottom-color:var(--gold);border-left-color:transparent}
+  .main{padding:14px}
+  .field-grid{grid-template-columns:1fr}
+  .bar{gap:14px;padding:10px 14px}
+  .bar-val{font-size:.95rem}
+  .bar-val.gold{font-size:1.05rem}
+}
+
+@media print{
+  .header,.sidebar,.bar,button,.btn-gold,.country-tabs{display:none!important}
+  .layout{display:block}
+  .tab-panel{display:block!important;page-break-before:always}
+  .tab-panel:first-child{page-break-before:auto}
+  .country-panel{display:block!important}
+  body{background:#fff;color:#000;font-size:11px}
+  .card,.data-feed{border:1px solid #ccc;break-inside:avoid;background:#fff}
+  .card-title{color:#333}
+  .bdown td{border-bottom:1px solid #eee;color:#000}
+  .bdown .total td{color:#000;border-top:2px solid #000}
+  .bdown .employer td{color:#1d4ed8}
+  .bdown .highlight td{color:#000}
+  .chart-bar,.chart-legend{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hlogo">VG</div>
+  <div>
+    <div class="htitle">Stundensatz-Kalkulator</div>
+    <div class="hsub">Gehaltsrechner &middot; Firmenkosten &middot; Stundensatz</div>
+  </div>
+  <nav class="hnav">
+    <a href="/calculator/" class="hnav-link">Angebotsrechner</a>
+    <a href="/calculator/salary/" class="hnav-link active">Stundensatz</a>
+    <a href="/calculator/bathroom/" class="hnav-link">Badsanierung</a>
+  </nav>
+  <a href="/calculator/" class="hback">&larr; Zur&uuml;ck</a>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="country-selector">
+      <button class="country-flag active" id="flag-de" onclick="switchCountry('de')" title="Deutschland">&#127465;&#127466;</button>
+      <button class="country-flag" id="flag-hr" onclick="switchCountry('hr')" title="Kroatien">&#127469;&#127479;</button>
+    </div>
+    <button class="tab-btn active" onclick="switchMainTab('gehalt',this)">
+      <span class="tab-icon">&#128176;</span><span>Gehalts&shy;rechner</span>
+    </button>
+    <button class="tab-btn" onclick="switchMainTab('firmen',this)">
+      <span class="tab-icon">&#127970;</span><span>Firmen&shy;kosten</span>
+    </button>
+    <button class="tab-btn" onclick="switchMainTab('stunden',this)">
+      <span class="tab-icon">&#9201;</span><span>Stunden&shy;satz</span>
+    </button>
+  </div>
+
+  <div class="main">
+
+    <!-- ════════════════════════════════════════════════
+         TAB 1: GEHALTSRECHNER
+         ════════════════════════════════════════════════ -->
+    <div id="panel-gehalt" class="tab-panel active">
+
+
+
+      <!-- ──── GERMANY ──── -->
+      <div id="panel-de" class="country-panel active">
+        <div class="card">
+          <div class="card-title">Eingabeparameter</div>
+          <div class="field-grid">
+            <div class="field">
+              <label>Stundenlohn (&euro;/h)</label>
+              <input type="number" id="de-stundenlohn" value="" min="0" step="0.50" placeholder="–" oninput="fromStundenlohn()">
+            </div>
+            <div class="field">
+              <label>Stunden / Monat</label>
+              <input type="number" id="de-stunden-monat" value="168" min="1" max="400" oninput="fromStundenlohn()">
+            </div>
+            <div class="field">
+              <label>Monatsbrutto (&euro;)</label>
+              <input type="number" id="de-brutto" value="3500" min="0" step="50" oninput="fromBrutto()">
+            </div>
+            <div class="field">
+              <label>Steuerklasse</label>
+              <select id="de-stklasse" onchange="calcDE()">
+                <option value="1" selected>I &ndash; Ledig</option>
+                <option value="2">II &ndash; Alleinerziehend</option>
+                <option value="3">III &ndash; Verheiratet (Alleinverdiener)</option>
+                <option value="4">IV &ndash; Verheiratet (beide verdienen)</option>
+                <option value="5">V &ndash; Verheiratet (Kombi mit III)</option>
+                <option value="6">VI &ndash; Zweitjob</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Bundesland</label>
+              <select id="de-bundesland" onchange="calcDE()">
+                <option value="NW" selected>Nordrhein-Westfalen</option>
+                <option value="BY">Bayern</option>
+                <option value="BW">Baden-W&uuml;rttemberg</option>
+                <option value="NI">Niedersachsen</option>
+                <option value="HE">Hessen</option>
+                <option value="SN">Sachsen</option>
+                <option value="RP">Rheinland-Pfalz</option>
+                <option value="BE">Berlin</option>
+                <option value="HH">Hamburg</option>
+                <option value="SH">Schleswig-Holstein</option>
+                <option value="BB">Brandenburg</option>
+                <option value="MV">Mecklenburg-Vorpommern</option>
+                <option value="TH">Th&uuml;ringen</option>
+                <option value="ST">Sachsen-Anhalt</option>
+                <option value="HB">Bremen</option>
+                <option value="SL">Saarland</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Kinder (Anzahl)</label>
+              <input type="number" id="de-kinder" value="0" min="0" max="10" oninput="calcDE()">
+            </div>
+            <div class="field">
+              <label>KK-Zusatzbeitrag (%)</label>
+              <input type="number" id="de-zusatz" value="1.7" min="0" max="5" step="0.1" oninput="calcDE()">
+            </div>
+          </div>
+          <div class="toggle-row">
+            <input type="checkbox" id="de-kirche" onchange="calcDE()">
+            <label for="de-kirche">Kirchensteuer</label>
+          </div>
+          <div class="toggle-row">
+            <input type="checkbox" id="de-alter23" checked onchange="calcDE()">
+            <label for="de-alter23">Alter &ge; 23 Jahre</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Arbeitgeber-Nebenkosten</div>
+          <div class="field-grid">
+            <div class="field">
+              <label>BG-Beitrag (%)</label>
+              <input type="number" id="de-bg" value="2.0" min="0" max="10" step="0.1" oninput="calcDE()">
+            </div>
+            <div class="field">
+              <label>Betriebshaftpflicht (%)</label>
+              <input type="number" id="de-haftpflicht" value="0.8" min="0" max="5" step="0.1" oninput="calcDE()">
+            </div>
+            <div class="field">
+              <label>Umlage U1 (%)</label>
+              <input type="number" id="de-u1" value="1.6" min="0" max="5" step="0.1" oninput="calcDE()">
+            </div>
+            <div class="field">
+              <label>Umlage U2 (%)</label>
+              <input type="number" id="de-u2" value="0.44" min="0" max="3" step="0.01" oninput="calcDE()">
+            </div>
+            <div class="field">
+              <label>Insolvenzgeldumlage (%)</label>
+              <input type="number" id="de-insolvenz" value="0.06" min="0" max="1" step="0.01" oninput="calcDE()">
+            </div>
+            <div class="field">
+              <label>Winterbauumlage (%)</label>
+              <input type="number" id="de-winterbau" value="2.0" min="0" max="5" step="0.1" oninput="calcDE()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual chart -->
+        <div class="card">
+          <div class="card-title">Verteilung</div>
+          <div class="chart-bar" id="de-chart"></div>
+          <div class="chart-legend" id="de-legend"></div>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="card">
+          <div class="card-title">Gehaltsabrechnung</div>
+          <table class="bdown" id="de-breakdown"></table>
+        </div>
+      </div>
+
+      <!-- ──── CROATIA ──── -->
+      <div id="panel-hr" class="country-panel">
+        <div class="card">
+          <div class="card-title">Ulazni parametri</div>
+          <div class="field-grid">
+            <div class="field">
+              <label>Satnica (&euro;/h)</label>
+              <input type="number" id="hr-stundenlohn" value="" min="0" step="0.50" placeholder="–" oninput="fromSatnicaHR()">
+            </div>
+            <div class="field">
+              <label>Sati / mjesec</label>
+              <input type="number" id="hr-sati-mjesec" value="168" min="1" max="400" oninput="fromSatnicaHR()">
+            </div>
+            <div class="field">
+              <label>Bruto pla&cacute;a (&euro;/mj)</label>
+              <input type="number" id="hr-brutto" value="1500" min="0" step="50" oninput="fromBrutoHR()">
+            </div>
+            <div class="field">
+              <label>Grad / Op&cacute;ina</label>
+              <select id="hr-grad" onchange="calcHR()">
+                <option value="Zagreb" selected>Zagreb (18%)</option>
+                <option value="Split">Split (15%)</option>
+                <option value="Rijeka">Rijeka (13%)</option>
+                <option value="Osijek">Osijek (13%)</option>
+                <option value="Zadar">Zadar (12%)</option>
+                <option value="Slavonski Brod">Slavonski Brod (12%)</option>
+                <option value="Karlovac">Karlovac (12%)</option>
+                <option value="Dubrovnik">Dubrovnik (10%)</option>
+                <option value="Varazdin">Vara&zcaron;din (10%)</option>
+                <option value="Sisak">Sisak (10%)</option>
+                <option value="Pula">Pula (7,5%)</option>
+                <option value="Ostalo">Ostalo (0%)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Uzdr&zcaron;avana djeca</label>
+              <input type="number" id="hr-djeca" value="0" min="0" max="10" oninput="calcHR()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual chart -->
+        <div class="card">
+          <div class="card-title">Raspodjela</div>
+          <div class="chart-bar" id="hr-chart"></div>
+          <div class="chart-legend" id="hr-legend"></div>
+        </div>
+
+        <!-- Breakdown -->
+        <div class="card">
+          <div class="card-title">Obra&ccaron;un pla&cacute;e</div>
+          <table class="bdown" id="hr-breakdown"></table>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        Alle Angaben ohne Gew&auml;hr. Die Berechnung dient als Orientierung und ersetzt keine professionelle Steuerberatung.<br>
+        Svi podaci su informativnog karaktera. Izra&ccaron;un ne zamjenjuje profesionalni porezni savjet.
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         TAB 2: FIRMENKOSTEN
+         ════════════════════════════════════════════════ -->
+    <div id="panel-firmen" class="tab-panel">
+
+      <div class="card">
+        <div class="card-title">Monatliche Gemeinkosten</div>
+        <div class="field-grid">
+          <div class="field">
+            <label>B&uuml;romiete (&euro;/Monat)</label>
+            <input type="number" id="fk-miete" value="1500" min="0" step="50" oninput="calcFirmen()">
+          </div>
+          <div class="field">
+            <label>Fahrzeuge (&euro;/Monat)</label>
+            <input type="number" id="fk-fahrzeuge" value="2000" min="0" step="50" oninput="calcFirmen()">
+          </div>
+          <div class="field">
+            <label>Werkzeug &amp; Ger&auml;te (&euro;/Monat)</label>
+            <input type="number" id="fk-werkzeug" value="500" min="0" step="50" oninput="calcFirmen()">
+          </div>
+          <div class="field">
+            <label>Versicherungen (&euro;/Monat)</label>
+            <input type="number" id="fk-versicherung" value="400" min="0" step="50" oninput="calcFirmen()">
+          </div>
+          <div class="field">
+            <label>Buchhaltung (&euro;/Monat)</label>
+            <input type="number" id="fk-buchhaltung" value="300" min="0" step="50" oninput="calcFirmen()">
+          </div>
+          <div class="field">
+            <label>Marketing / Akquise (&euro;/Monat)</label>
+            <input type="number" id="fk-marketing" value="200" min="0" step="50" oninput="calcFirmen()">
+          </div>
+          <div class="field">
+            <label>Sonstige Kosten (&euro;/Monat)</label>
+            <input type="number" id="fk-sonstige" value="300" min="0" step="50" oninput="calcFirmen()">
+          </div>
+          <div class="field">
+            <label>Gewinnmarge (%)</label>
+            <input type="number" id="fk-marge" value="15" min="0" max="50" step="1" oninput="calcFirmen()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual chart -->
+      <div class="card">
+        <div class="card-title">Kostenverteilung</div>
+        <div class="chart-bar" id="fk-chart"></div>
+        <div class="chart-legend" id="fk-legend"></div>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="card">
+        <div class="card-title">Kosten&uuml;bersicht</div>
+        <table class="bdown" id="fk-breakdown"></table>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         TAB 3: STUNDENSATZ
+         ════════════════════════════════════════════════ -->
+    <div id="panel-stunden" class="tab-panel">
+
+      <div class="card">
+        <div class="card-title">Kalkulationsparameter</div>
+        <div class="field-grid">
+          <div class="field">
+            <label>Anzahl Mitarbeiter</label>
+            <input type="number" id="st-mitarbeiter" value="5" min="1" max="200" oninput="calcStundensatz()">
+          </div>
+          <div class="field">
+            <label>Arbeitstage / Monat</label>
+            <input type="number" id="st-arbeitstage" value="21" min="1" max="31" oninput="calcStundensatz()">
+          </div>
+          <div class="field">
+            <label>Stunden / Tag</label>
+            <input type="number" id="st-stunden" value="8" min="1" max="16" step="0.5" oninput="calcStundensatz()">
+          </div>
+          <div class="field">
+            <label>&Uuml;berstunden / Monat (pro MA)</label>
+            <input type="number" id="st-ueberstunden" value="0" min="0" max="80" oninput="calcStundensatz()">
+          </div>
+          <div class="field">
+            <label>Urlaubstage / Jahr</label>
+            <input type="number" id="st-urlaub" value="30" min="0" max="60" oninput="calcStundensatz()">
+          </div>
+          <div class="field">
+            <label>Krankheitstage / Jahr</label>
+            <input type="number" id="st-krank" value="10" min="0" max="60" oninput="calcStundensatz()">
+          </div>
+          <div class="field">
+            <label>Produktivit&auml;tsfaktor (%)</label>
+            <input type="number" id="st-produktiv" value="85" min="10" max="100" oninput="calcStundensatz()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Data feeds from other tabs -->
+      <div class="data-feed">
+        <div class="card-title">Daten&uuml;bernahme aus anderen Tabs</div>
+        <div class="field-grid">
+          <div class="field">
+            <label>AG-Gesamtkosten / MA (Tab 1)</label>
+            <div class="feed-val" id="st-feed-ag">&ndash;</div>
+          </div>
+          <div class="field">
+            <label>Gemeinkosten / Monat (Tab 2)</label>
+            <div class="feed-val" id="st-feed-overhead">&ndash;</div>
+          </div>
+          <div class="field">
+            <label>Gewinnmarge (Tab 2)</label>
+            <div class="feed-val" id="st-feed-marge">&ndash;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="card">
+        <div class="card-title">Stundensatz-Berechnung</div>
+        <table class="bdown" id="st-breakdown"></table>
+      </div>
+
+      <!-- Visual chart -->
+      <div class="card">
+        <div class="card-title">Kostenstruktur pro Stunde</div>
+        <div class="chart-bar" id="st-chart"></div>
+        <div class="chart-legend" id="st-legend"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn-gold" onclick="window.print()">&#128424; Drucken / PDF</button>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Bottom bar -->
+<div class="bar">
+  <div class="bar-item">
+    <span class="bar-lbl" id="bar-lbl-1">Bruttolohn</span>
+    <span class="bar-val" id="bar-val-1">&ndash;</span>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-item">
+    <span class="bar-lbl" id="bar-lbl-2">Nettolohn</span>
+    <span class="bar-val gold" id="bar-val-2">&ndash;</span>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-item">
+    <span class="bar-lbl" id="bar-lbl-3">AG-Gesamtkosten</span>
+    <span class="bar-val" id="bar-val-3">&ndash;</span>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   GLOBAL STATE
+   ══════════════════════════════════════════ */
+var currentMainTab = 'gehalt';
+var currentCountry = 'de';
+
+/* Cross-tab data */
+var agGesamtkostenProMA = 0;
+var firmenOverhead = 0;
+var firmenMarge = 15;
+
+/* Bar data store */
+var barData = {
+  brutto:0, netto:0, agGesamt:0,
+  personalKosten:0, overhead:0, gesamtKosten:0,
+  produktivStunden:0, stundensatzNetto:0, stundensatzBrutto:0
+};
+
+/* ══════════════════════════════════════════
+   UTILITY
+   ══════════════════════════════════════════ */
+function fmt(n){ return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac'; }
+function fmtN(n){ return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function r(label, val){ return '<tr><td>'+label+'</td><td>'+fmt(val)+'</td></tr>'; }
+
+function renderChart(chartId, legendId, segments, total){
+  if(total<=0){
+    document.getElementById(chartId).innerHTML='';
+    document.getElementById(legendId).innerHTML='';
+    return;
+  }
+  var html='';
+  segments.forEach(function(s){
+    var w = Math.max(1, (s.val/total)*100);
+    html+='<div class="chart-seg" style="width:'+w.toFixed(1)+'%;background:'+s.color+'"></div>';
+  });
+  document.getElementById(chartId).innerHTML=html;
+  var leg='';
+  segments.forEach(function(s){
+    leg+='<span><span class="chart-dot" style="background:'+s.color+'"></span>'+s.label+': '+fmt(s.val)+'</span>';
+  });
+  document.getElementById(legendId).innerHTML=leg;
+}
+
+/* ══════════════════════════════════════════
+   TAB SWITCHING
+   ══════════════════════════════════════════ */
+function switchMainTab(name, btn){
+  currentMainTab = name;
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='stunden') calcStundensatz();
+  updateBottomBar();
+}
+
+function switchCountry(c){
+  currentCountry = c;
+  /* Update sidebar flags */
+  document.querySelectorAll('.country-flag').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('flag-'+c).classList.add('active');
+  /* Show only selected country panel */
+  document.querySelectorAll('.country-panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+c).classList.add('active');
+  /* Save preference */
+  try{ localStorage.setItem('stundensatz-land', c); }catch(e){}
+  /* Recalc */
+  if(c==='de') calcDE(); else calcHR();
+}
+
+/* ══════════════════════════════════════════
+   BOTTOM BAR
+   ══════════════════════════════════════════ */
+function updateBottomBar(){
+  var lbl1=document.getElementById('bar-lbl-1');
+  var val1=document.getElementById('bar-val-1');
+  var lbl2=document.getElementById('bar-lbl-2');
+  var val2=document.getElementById('bar-val-2');
+  var lbl3=document.getElementById('bar-lbl-3');
+  var val3=document.getElementById('bar-val-3');
+
+  if(currentMainTab==='gehalt'){
+    if(currentCountry==='de'){
+      lbl1.textContent='Bruttolohn'; lbl2.textContent='Nettolohn'; lbl3.textContent='AG-Gesamtkosten';
+    } else {
+      lbl1.textContent='Bruto pla\u0107a'; lbl2.textContent='Neto pla\u0107a'; lbl3.textContent='Tro\u0161ak poslodavca';
+    }
+    val1.innerHTML=fmt(barData.brutto);
+    val2.innerHTML=fmt(barData.netto);
+    val3.innerHTML=fmt(barData.agGesamt);
+  } else if(currentMainTab==='firmen'){
+    lbl1.textContent='Personalkosten';
+    lbl2.textContent='Gemeinkosten';
+    lbl3.textContent='Gesamtkosten';
+    val1.innerHTML=fmt(barData.personalKosten);
+    val2.innerHTML=fmt(barData.overhead);
+    val3.innerHTML=fmt(barData.gesamtKosten);
+  } else if(currentMainTab==='stunden'){
+    lbl1.textContent='Produktivstunden';
+    lbl2.textContent='Stundensatz Netto';
+    lbl3.textContent='Stundensatz Brutto';
+    val1.innerHTML=fmtN(barData.produktivStunden)+' h';
+    val2.innerHTML=fmt(barData.stundensatzNetto)+'/h';
+    val3.innerHTML=fmt(barData.stundensatzBrutto)+'/h';
+  }
+}
+
+/* ══════════════════════════════════════════
+   GERMANY (DE)
+   ══════════════════════════════════════════ */
+
+function estJahrDE(zvE){
+  if(zvE<=0) return 0;
+  if(zvE<=12348) return 0;
+  if(zvE<=17442){
+    var y=(zvE-12348)/10000;
+    return Math.round((932.30*y+1400)*y);
+  }
+  if(zvE<=68480){
+    var z=(zvE-17442)/10000;
+    return Math.round((176.64*z+2397)*z+710.78);
+  }
+  if(zvE<=277825){
+    return Math.round(0.42*zvE-10636.31);
+  }
+  return Math.round(0.45*zvE-18971.56);
+}
+
+function fromStundenlohn(){
+  var sl = parseFloat(document.getElementById('de-stundenlohn').value)||0;
+  var sh = parseFloat(document.getElementById('de-stunden-monat').value)||168;
+  if(sl > 0){
+    document.getElementById('de-brutto').value = (sl * sh).toFixed(0);
+  }
+  calcDE();
+}
+
+function fromBrutto(){
+  var brutto = parseFloat(document.getElementById('de-brutto').value)||0;
+  var sh = parseFloat(document.getElementById('de-stunden-monat').value)||168;
+  if(sh > 0){
+    document.getElementById('de-stundenlohn').value = (brutto / sh).toFixed(2);
+  }
+  calcDE();
+}
+
+function calcDE(){
+  var brutto = parseFloat(document.getElementById('de-brutto').value)||0;
+  var stklasse = parseInt(document.getElementById('de-stklasse').value);
+  var bundesland = document.getElementById('de-bundesland').value;
+  var kinder = parseInt(document.getElementById('de-kinder').value)||0;
+  var zusatz = parseFloat(document.getElementById('de-zusatz').value)||0;
+  var kirche = document.getElementById('de-kirche').checked;
+  var alter23 = document.getElementById('de-alter23').checked;
+
+  var bbgRV = 8450;
+  var bbgKV = 5812.50;
+  var basisRV = Math.min(brutto, bbgRV);
+  var basisKV = Math.min(brutto, bbgKV);
+
+  /* Social insurance - employee share */
+  var rvAN = basisRV * 0.093;
+  var kvAN = basisKV * ((0.146 + zusatz/100) / 2);
+  var avAN = basisRV * 0.013;
+  var pvSatzAN = 0.018;
+  if(kinder===0 && alter23) pvSatzAN = 0.024;
+  else if(kinder>=2) pvSatzAN = 0.018 - (Math.min(kinder-1,4)*0.0025);
+  if(pvSatzAN<0.005) pvSatzAN=0.005;
+  var pvAN = basisKV * pvSatzAN;
+
+  /* Social insurance - employer share */
+  var rvAG = basisRV * 0.093;
+  var kvAG = basisKV * ((0.146 + zusatz/100) / 2);
+  var avAG = basisRV * 0.013;
+  var pvAG = basisKV * 0.018;
+
+  var svAN = rvAN + kvAN + avAN + pvAN;
+  var svAG = rvAG + kvAG + avAG + pvAG;
+
+  /* AG-Nebenkosten */
+  var bgPct = parseFloat(document.getElementById('de-bg').value)||0;
+  var haftPct = parseFloat(document.getElementById('de-haftpflicht').value)||0;
+  var u1Pct = parseFloat(document.getElementById('de-u1').value)||0;
+  var u2Pct = parseFloat(document.getElementById('de-u2').value)||0;
+  var insolvPct = parseFloat(document.getElementById('de-insolvenz').value)||0;
+  var winterPct = parseFloat(document.getElementById('de-winterbau').value)||0;
+
+  var bgBeitrag = brutto * (bgPct/100);
+  var haftpflicht = brutto * (haftPct/100);
+  var umlageU1 = brutto * (u1Pct/100);
+  var umlageU2 = brutto * (u2Pct/100);
+  var insolvenz = brutto * (insolvPct/100);
+  var winterbau = brutto * (winterPct/100);
+  var nebenkosten = bgBeitrag + haftpflicht + umlageU1 + umlageU2 + insolvenz + winterbau;
+
+  /* Income tax */
+  var jahresBrutto = brutto * 12;
+  var jahresSV = svAN * 12;
+  var zvE = jahresBrutto - jahresSV;
+
+  var estJahr = 0;
+  if(stklasse===3){
+    estJahr = estJahrDE(zvE/2) * 2;
+  } else if(stklasse===5 || stklasse===6){
+    estJahr = estJahrDE(zvE) + Math.round(zvE * 0.06);
+  } else {
+    estJahr = estJahrDE(zvE);
+  }
+  var est = Math.max(0, estJahr / 12);
+
+  var soliGrenze = (stklasse===3) ? 40700 : 20350;
+  var soli = (estJahr > soliGrenze) ? est * 0.055 : 0;
+
+  var kircheSatz = (bundesland==='BY' || bundesland==='BW') ? 0.08 : 0.09;
+  var kircheVal = kirche ? est * kircheSatz : 0;
+
+  var netto = brutto - svAN - est - soli - kircheVal;
+  var agGesamt = brutto + svAG + nebenkosten;
+
+  /* Publish to global */
+  agGesamtkostenProMA = agGesamt;
+  barData.brutto = brutto;
+  barData.netto = netto;
+  barData.agGesamt = agGesamt;
+  updateBottomBar();
+
+  /* Trigger Tab 3 recalc */
+  calcStundensatz();
+
+  /* Chart */
+  var segments = [
+    {label:'Netto', val:Math.max(0,netto), color:'var(--gold)'},
+    {label:'Sozialversicherung', val:svAN, color:'#3b82f6'},
+    {label:'Lohnsteuer', val:est, color:'#8b5cf6'},
+    {label:'Soli', val:soli, color:'#64748b'},
+  ];
+  if(kirche) segments.push({label:'Kirchensteuer', val:kircheVal, color:'#a855f7'});
+  renderChart('de-chart','de-legend', segments, brutto);
+
+  /* Breakdown table */
+  var h = '<thead><tr><th>Position</th><th>Betrag</th></tr></thead><tbody>';
+  h += '<tr class="section-head"><td colspan="2">Sozialversicherung (Arbeitnehmer)</td></tr>';
+  h += r('Rentenversicherung (9,3%)', rvAN);
+  h += r('Krankenversicherung ('+ ((0.146+zusatz/100)/2*100).toFixed(2) +'%)', kvAN);
+  h += r('Arbeitslosenversicherung (1,3%)', avAN);
+  h += r('Pflegeversicherung ('+ (pvSatzAN*100).toFixed(2) +'%)', pvAN);
+  h += '<tr class="subtotal"><td>Gesamt SV (AN)</td><td>-'+ fmt(svAN) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Steuern</td></tr>';
+  h += r('Einkommensteuer (Klasse '+stklasse+')', est);
+  h += r('Solidarit\u00e4tszuschlag'+(estJahr<=soliGrenze?' (frei)':''), soli);
+  if(kirche) h += r('Kirchensteuer ('+Math.round(kircheSatz*100)+'%)', kircheVal);
+  var steuerGesamt = est + soli + kircheVal;
+  h += '<tr class="subtotal"><td>Gesamt Steuern</td><td>-'+ fmt(steuerGesamt) +'</td></tr>';
+
+  h += '<tr class="total"><td>NETTOLOHN</td><td>'+ fmt(netto) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Arbeitgeber-Sicht</td></tr>';
+  h += '<tr class="employer"><td>Bruttolohn</td><td>'+ fmt(brutto) +'</td></tr>';
+  h += '<tr class="employer"><td>+ RV Arbeitgeber (9,3%)</td><td>+'+ fmt(rvAG) +'</td></tr>';
+  h += '<tr class="employer"><td>+ KV Arbeitgeber</td><td>+'+ fmt(kvAG) +'</td></tr>';
+  h += '<tr class="employer"><td>+ AV Arbeitgeber (1,3%)</td><td>+'+ fmt(avAG) +'</td></tr>';
+  h += '<tr class="employer"><td>+ PV Arbeitgeber (1,8%)</td><td>+'+ fmt(pvAG) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">AG-Nebenkosten</td></tr>';
+  h += '<tr class="employer"><td>+ BG-Beitrag ('+bgPct+'%)</td><td>+'+ fmt(bgBeitrag) +'</td></tr>';
+  h += '<tr class="employer"><td>+ Betriebshaftpflicht ('+haftPct+'%)</td><td>+'+ fmt(haftpflicht) +'</td></tr>';
+  h += '<tr class="employer"><td>+ Umlage U1 ('+u1Pct+'%)</td><td>+'+ fmt(umlageU1) +'</td></tr>';
+  h += '<tr class="employer"><td>+ Umlage U2 ('+u2Pct+'%)</td><td>+'+ fmt(umlageU2) +'</td></tr>';
+  h += '<tr class="employer"><td>+ Insolvenzgeldumlage ('+insolvPct+'%)</td><td>+'+ fmt(insolvenz) +'</td></tr>';
+  h += '<tr class="employer"><td>+ Winterbauumlage ('+winterPct+'%)</td><td>+'+ fmt(winterbau) +'</td></tr>';
+  h += '<tr class="subtotal employer"><td>Zwischensumme Nebenkosten</td><td>+'+ fmt(nebenkosten) +'</td></tr>';
+
+  h += '<tr class="total"><td>GESAMTKOSTEN ARBEITGEBER</td><td>'+ fmt(agGesamt) +'</td></tr>';
+  h += '</tbody>';
+  document.getElementById('de-breakdown').innerHTML = h;
+}
+
+/* ══════════════════════════════════════════
+   CROATIA (HR)
+   ══════════════════════════════════════════ */
+
+var prirezRates = {
+  'Zagreb':0.18, 'Split':0.15, 'Rijeka':0.13, 'Osijek':0.13,
+  'Zadar':0.12, 'Slavonski Brod':0.12, 'Karlovac':0.12,
+  'Dubrovnik':0.10, 'Varazdin':0.10, 'Sisak':0.10,
+  'Pula':0.075, 'Ostalo':0
+};
+
+function fromSatnicaHR(){
+  var sl = parseFloat(document.getElementById('hr-stundenlohn').value)||0;
+  var sh = parseFloat(document.getElementById('hr-sati-mjesec').value)||168;
+  if(sl > 0){
+    document.getElementById('hr-brutto').value = (sl * sh).toFixed(0);
+  }
+  calcHR();
+}
+
+function fromBrutoHR(){
+  var brutto = parseFloat(document.getElementById('hr-brutto').value)||0;
+  var sh = parseFloat(document.getElementById('hr-sati-mjesec').value)||168;
+  if(sh > 0){
+    document.getElementById('hr-stundenlohn').value = (brutto / sh).toFixed(2);
+  }
+  calcHR();
+}
+
+function calcHR(){
+  var brutto = parseFloat(document.getElementById('hr-brutto').value)||0;
+  var grad = document.getElementById('hr-grad').value;
+  var djeca = parseInt(document.getElementById('hr-djeca').value)||0;
+
+  var mio1 = brutto * 0.15;
+  var mio2 = brutto * 0.05;
+  var doprinosiAN = mio1 + mio2;
+  var dohodak = brutto - doprinosiAN;
+
+  var osobniBase = 600;
+  var childCoeffs = [0, 0.7, 1.0, 1.4, 1.9, 2.5, 3.2, 4.0, 4.9, 5.9, 7.0];
+  var osobniOdbitak = osobniBase;
+  for(var i=1; i<=djeca && i<childCoeffs.length; i++){
+    osobniOdbitak += childCoeffs[i] * osobniBase;
+  }
+
+  var poreznaOsnovica = Math.max(0, dohodak - osobniOdbitak);
+  var porezGranica = 4200;
+  var porez = 0;
+  if(poreznaOsnovica <= porezGranica){
+    porez = poreznaOsnovica * 0.20;
+  } else {
+    porez = porezGranica * 0.20 + (poreznaOsnovica - porezGranica) * 0.30;
+  }
+
+  var prirezRate = prirezRates[grad] || 0;
+  var prirez = porez * prirezRate;
+  var netto = brutto - doprinosiAN - porez - prirez;
+
+  var zdravstveno = brutto * 0.165;
+  var agGesamt = brutto + zdravstveno;
+
+  /* Publish to global */
+  agGesamtkostenProMA = agGesamt;
+  barData.brutto = brutto;
+  barData.netto = netto;
+  barData.agGesamt = agGesamt;
+  updateBottomBar();
+
+  /* Trigger Tab 3 recalc */
+  calcStundensatz();
+
+  /* Chart */
+  var segments = [
+    {label:'Neto', val:Math.max(0,netto), color:'var(--gold)'},
+    {label:'MIO I+II', val:doprinosiAN, color:'#3b82f6'},
+    {label:'Porez', val:porez, color:'#8b5cf6'},
+    {label:'Prirez', val:prirez, color:'#64748b'},
+  ];
+  renderChart('hr-chart','hr-legend', segments, brutto);
+
+  /* Breakdown table */
+  var h = '<thead><tr><th>Stavka</th><th>Iznos</th></tr></thead><tbody>';
+  h += '<tr class="section-head"><td colspan="2">Doprinosi iz pla\u0107e (zaposlenik)</td></tr>';
+  h += r('MIO I. stup (15%)', mio1);
+  h += r('MIO II. stup (5%)', mio2);
+  h += '<tr class="subtotal"><td>Ukupno doprinosi</td><td>-'+ fmt(doprinosiAN) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Porez na dohodak</td></tr>';
+  h += '<tr class="dim"><td>Dohodak (bruto - doprinosi)</td><td>'+ fmt(dohodak) +'</td></tr>';
+  h += '<tr class="dim"><td>Osobni odbitak'+(djeca>0?' ('+djeca+' djece)':'')+'</td><td>-'+ fmt(osobniOdbitak) +'</td></tr>';
+  h += '<tr class="dim"><td>Porezna osnovica</td><td>'+ fmt(poreznaOsnovica) +'</td></tr>';
+  h += r('Porez (20%' + (poreznaOsnovica>porezGranica?'/30%':'') + ')', porez);
+  h += r('Prirez '+grad+' ('+(prirezRate*100).toFixed(1)+'%)', prirez);
+  h += '<tr class="subtotal"><td>Ukupno porez + prirez</td><td>-'+ fmt(porez+prirez) +'</td></tr>';
+
+  h += '<tr class="total"><td>NETO PLA\u0106A</td><td>'+ fmt(netto) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Tro\u0161ak poslodavca</td></tr>';
+  h += '<tr class="employer"><td>Bruto pla\u0107a</td><td>'+ fmt(brutto) +'</td></tr>';
+  h += '<tr class="employer"><td>+ Zdravstveno osiguranje (16,5%)</td><td>+'+ fmt(zdravstveno) +'</td></tr>';
+  h += '<tr class="subtotal employer"><td>UKUPAN TRO\u0160AK POSLODAVCA</td><td>'+ fmt(agGesamt) +'</td></tr>';
+  h += '</tbody>';
+  document.getElementById('hr-breakdown').innerHTML = h;
+}
+
+/* ══════════════════════════════════════════
+   TAB 2: FIRMENKOSTEN
+   ══════════════════════════════════════════ */
+
+function calcFirmen(){
+  var miete = parseFloat(document.getElementById('fk-miete').value)||0;
+  var fahrzeuge = parseFloat(document.getElementById('fk-fahrzeuge').value)||0;
+  var werkzeug = parseFloat(document.getElementById('fk-werkzeug').value)||0;
+  var versicherung = parseFloat(document.getElementById('fk-versicherung').value)||0;
+  var buchhaltung = parseFloat(document.getElementById('fk-buchhaltung').value)||0;
+  var marketing = parseFloat(document.getElementById('fk-marketing').value)||0;
+  var sonstige = parseFloat(document.getElementById('fk-sonstige').value)||0;
+  var marge = parseFloat(document.getElementById('fk-marge').value)||0;
+
+  var overhead = miete + fahrzeuge + werkzeug + versicherung + buchhaltung + marketing + sonstige;
+
+  /* Publish to global */
+  firmenOverhead = overhead;
+  firmenMarge = marge;
+
+  /* Compute personnel cost for bar display (uses worker count from Tab 3) */
+  var mitarbeiter = parseInt(document.getElementById('st-mitarbeiter').value)||1;
+  var personalKosten = agGesamtkostenProMA * mitarbeiter;
+  var gesamtKosten = personalKosten + overhead;
+
+  barData.personalKosten = personalKosten;
+  barData.overhead = overhead;
+  barData.gesamtKosten = gesamtKosten;
+  updateBottomBar();
+
+  /* Trigger Tab 3 recalc */
+  calcStundensatz();
+
+  /* Chart */
+  var segments = [
+    {label:'B\u00fcromiete', val:miete, color:'var(--gold)'},
+    {label:'Fahrzeuge', val:fahrzeuge, color:'#3b82f6'},
+    {label:'Werkzeug', val:werkzeug, color:'#8b5cf6'},
+    {label:'Versicherung', val:versicherung, color:'#22c55e'},
+    {label:'Buchhaltung', val:buchhaltung, color:'#f97316'},
+    {label:'Marketing', val:marketing, color:'#ec4899'},
+    {label:'Sonstige', val:sonstige, color:'#64748b'},
+  ];
+  renderChart('fk-chart','fk-legend', segments, overhead);
+
+  /* Breakdown table */
+  var h = '<thead><tr><th>Position</th><th>Betrag</th></tr></thead><tbody>';
+  h += '<tr class="section-head"><td colspan="2">Monatliche Fixkosten</td></tr>';
+  h += r('B\u00fcromiete', miete);
+  h += r('Fahrzeuge', fahrzeuge);
+  h += r('Werkzeug & Ger\u00e4te', werkzeug);
+  h += r('Versicherungen', versicherung);
+  h += r('Buchhaltung', buchhaltung);
+  h += r('Marketing / Akquise', marketing);
+  h += r('Sonstige Kosten', sonstige);
+  h += '<tr class="subtotal"><td>Gemeinkosten gesamt</td><td>'+ fmt(overhead) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Personalkosten (\u00fcbernommen aus Tab 1)</td></tr>';
+  h += r('AG-Gesamtkosten pro MA', agGesamtkostenProMA);
+  h += '<tr><td>Anzahl Mitarbeiter (Tab 3)</td><td>'+ mitarbeiter +'</td></tr>';
+  h += '<tr class="subtotal"><td>Personalkosten gesamt</td><td>'+ fmt(personalKosten) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Gewinnplanung</td></tr>';
+  h += '<tr><td>Gewinnmarge</td><td>'+ marge.toFixed(1) +' %</td></tr>';
+
+  h += '<tr class="total"><td>GESAMTKOSTEN / MONAT</td><td>'+ fmt(gesamtKosten) +'</td></tr>';
+  h += '</tbody>';
+  document.getElementById('fk-breakdown').innerHTML = h;
+}
+
+/* ══════════════════════════════════════════
+   TAB 3: STUNDENSATZ
+   ══════════════════════════════════════════ */
+
+function calcStundensatz(){
+  var mitarbeiter = parseInt(document.getElementById('st-mitarbeiter').value)||1;
+  var arbeitstage = parseInt(document.getElementById('st-arbeitstage').value)||21;
+  var stundenTag = parseFloat(document.getElementById('st-stunden').value)||8;
+  var ueberstunden = parseFloat(document.getElementById('st-ueberstunden').value)||0;
+  var urlaub = parseInt(document.getElementById('st-urlaub').value)||30;
+  var krank = parseInt(document.getElementById('st-krank').value)||10;
+  var produktiv = parseFloat(document.getElementById('st-produktiv').value)||85;
+
+  /* Update data feed display */
+  document.getElementById('st-feed-ag').innerHTML = fmt(agGesamtkostenProMA);
+  document.getElementById('st-feed-overhead').innerHTML = fmt(firmenOverhead);
+  document.getElementById('st-feed-marge').innerHTML = firmenMarge.toFixed(1) + ' %';
+
+  /* Step 1: Monthly costs */
+  var personalKosten = agGesamtkostenProMA * mitarbeiter;
+  var gesamtKosten = personalKosten + firmenOverhead;
+
+  /* Step 2: Availability factor */
+  var jahresArbeitstage = 260;
+  var effektiveTage = Math.max(1, jahresArbeitstage - urlaub - krank);
+  var verfuegbarkeit = effektiveTage / jahresArbeitstage;
+
+  /* Step 3: Productive hours per month */
+  var bruttoStundenProMA = (arbeitstage * stundenTag) + ueberstunden;
+  var produktivStunden = mitarbeiter * bruttoStundenProMA * verfuegbarkeit * (produktiv / 100);
+
+  /* Step 4: Hourly rates */
+  var selbstkostenSatz = produktivStunden > 0 ? gesamtKosten / produktivStunden : 0;
+  var stundensatzNetto = firmenMarge < 100 ? selbstkostenSatz / (1 - firmenMarge / 100) : 0;
+  var gewinnProStunde = stundensatzNetto - selbstkostenSatz;
+  var stundensatzBrutto = stundensatzNetto * 1.19;
+  var mwstProStunde = stundensatzBrutto - stundensatzNetto;
+
+  /* Publish to bar */
+  barData.produktivStunden = produktivStunden;
+  barData.stundensatzNetto = stundensatzNetto;
+  barData.stundensatzBrutto = stundensatzBrutto;
+
+  /* Also update Tab 2 bar data */
+  barData.personalKosten = personalKosten;
+  barData.overhead = firmenOverhead;
+  barData.gesamtKosten = gesamtKosten;
+
+  updateBottomBar();
+
+  /* Chart - cost structure per hour */
+  var personalProStunde = produktivStunden > 0 ? personalKosten / produktivStunden : 0;
+  var overheadProStunde = produktivStunden > 0 ? firmenOverhead / produktivStunden : 0;
+  var segments = [
+    {label:'Personal', val:personalProStunde, color:'#3b82f6'},
+    {label:'Gemeinkosten', val:overheadProStunde, color:'#8b5cf6'},
+    {label:'Gewinn', val:gewinnProStunde, color:'var(--gold)'},
+    {label:'MwSt.', val:mwstProStunde, color:'#64748b'},
+  ];
+  renderChart('st-chart','st-legend', segments, stundensatzBrutto);
+
+  /* Breakdown table */
+  var h = '<thead><tr><th>Position</th><th>Wert</th></tr></thead><tbody>';
+
+  h += '<tr class="section-head"><td colspan="2">Personalkosten</td></tr>';
+  h += r('AG-Gesamtkosten pro MA', agGesamtkostenProMA);
+  h += '<tr><td>Anzahl Mitarbeiter</td><td>'+ mitarbeiter +'</td></tr>';
+  h += '<tr class="subtotal"><td>Personalkosten / Monat</td><td>'+ fmt(personalKosten) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Gemeinkosten</td></tr>';
+  h += r('Monatliche Gemeinkosten (Tab 2)', firmenOverhead);
+  h += '<tr class="subtotal"><td>Gesamtkosten / Monat</td><td>'+ fmt(gesamtKosten) +'</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Produktive Stunden</td></tr>';
+  h += '<tr><td>Bruttostunden / MA / Monat ('+ arbeitstage +' Tage \u00d7 '+ stundenTag +'h + '+ ueberstunden +'h \u00dcS)</td><td>'+ bruttoStundenProMA.toFixed(1) +' h</td></tr>';
+  h += '<tr><td>Verf\u00fcgbarkeit (260 - '+ urlaub +' Urlaub - '+ krank +' Krank) / 260</td><td>'+ (verfuegbarkeit * 100).toFixed(1) +' %</td></tr>';
+  h += '<tr><td>Produktivit\u00e4tsfaktor</td><td>'+ produktiv +' %</td></tr>';
+  h += '<tr><td>Anzahl Mitarbeiter</td><td>'+ mitarbeiter +'</td></tr>';
+  h += '<tr class="subtotal"><td>Produktivstunden / Monat (gesamt)</td><td>'+ produktivStunden.toFixed(1) +' h</td></tr>';
+
+  h += '<tr class="section-head"><td colspan="2">Stundensatz-Kalkulation</td></tr>';
+  h += r('Selbstkosten pro Stunde', selbstkostenSatz);
+  h += '<tr><td>+ Gewinnmarge ('+ firmenMarge.toFixed(1) +'%)</td><td>+'+ fmt(gewinnProStunde) +'</td></tr>';
+  h += '<tr class="total"><td>STUNDENSATZ NETTO</td><td>'+ fmt(stundensatzNetto) +'/h</td></tr>';
+  h += '<tr><td>+ 19% MwSt.</td><td>+'+ fmt(mwstProStunde) +'</td></tr>';
+  h += '<tr class="highlight"><td>STUNDENSATZ BRUTTO</td><td>'+ fmt(stundensatzBrutto) +'/h</td></tr>';
+
+  h += '</tbody>';
+  document.getElementById('st-breakdown').innerHTML = h;
+}
+
+/* ══════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════ */
+/* Restore country from localStorage */
+(function(){
+  var saved = '';
+  try{ saved = localStorage.getItem('stundensatz-land'); }catch(e){}
+  if(saved === 'hr'){
+    switchCountry('hr');
+  } else {
+    switchCountry('de');
+  }
+})();
+/* Init stundenlohn from default brutto */
+(function(){
+  var b=parseFloat(document.getElementById('de-brutto').value)||0;
+  var h=parseFloat(document.getElementById('de-stunden-monat').value)||168;
+  if(h>0) document.getElementById('de-stundenlohn').value=(b/h).toFixed(2);
+  var bh=parseFloat(document.getElementById('hr-brutto').value)||0;
+  var hh=parseFloat(document.getElementById('hr-sati-mjesec').value)||168;
+  if(hh>0) document.getElementById('hr-stundenlohn').value=(bh/hh).toFixed(2);
+})();
+calcFirmen();
+</script>
+</body>
+</html>

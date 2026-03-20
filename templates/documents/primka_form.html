@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h2 class="mb-3"><i class="fas fa-file-alt text-warning me-2"></i>Nova primka</h2>
+<form method="post">
+{% csrf_token %}
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <label class="form-label">Datum</label>
+    <input type="date" name="date_issued" class="form-control" value="{% now "Y-m-d" %}">
+  </div>
+  <div class="col-md-4"><label class="form-label">Skladište</label><input type="text" name="warehouse" class="form-control"></div><div class="col-md-4"><label class="form-label">Ref. dobavljača</label><input type="text" name="supplier_doc_ref" class="form-control"></div>
+</div>
+<h5 class="mt-4 mb-3">Stavke</h5>
+<div id="items-container">
+  <div class="row g-2 mb-2 item-row">
+    <div class="col-md-4"><input type="text" name="item_name" class="form-control" placeholder="Naziv"></div>
+    <div class="col-md-2"><input type="number" name="item_qty" class="form-control" placeholder="Kol." step="0.01" value="1"></div>
+    <div class="col-md-1"><input type="text" name="item_unit" class="form-control" value="kg"></div>
+    <div class="col-md-2"><input type="number" name="item_price" class="form-control" placeholder="Cijena" step="0.01"></div>
+    <div class="col-md-1"><input type="number" name="item_vat" class="form-control" value="25"></div>
+    <div class="col-md-2"><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.item-row').remove()"><i class="fas fa-trash"></i></button></div>
+  </div>
+</div>
+<button type="button" class="btn btn-outline-secondary btn-sm mb-3" onclick="document.getElementById('items-container').appendChild(document.querySelector('.item-row').cloneNode(true))"><i class="fas fa-plus me-1"></i>Dodaj stavku</button>
+<div class="mb-3"><label class="form-label">Napomena</label><textarea name="notes" class="form-control" rows="2"></textarea></div>
+<button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Spremi</button>
+</form>
+{% endblock %}

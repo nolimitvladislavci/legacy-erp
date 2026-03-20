@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Donacije — LIMIT CONNECT{% endblock %}
+{% block content %}
+<style>
+    .udruge-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .udruge-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, #c9a84c); }
+    .udruge-stat .label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .udruge-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .udruge-table th { background: var(--table-header-bg); padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    .udruge-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .udruge-table tr:hover { background: var(--table-row-hover); }
+    .btn-gold { background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
+    .btn-gold:hover { background: #b8943f; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; text-decoration: none; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-header h1 { font-size: 1.5rem; margin: 0; }
+    .year-select { display: flex; align-items: center; gap: 8px; }
+    .year-select select { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); }
+    @media (max-width: 768px) {
+        .udruge-stats { grid-template-columns: repeat(2, 1fr); }
+        .udruge-table { font-size: 0.8rem; }
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-hand-holding-heart" style="color:var(--gold)"></i> Donacije</h1>
+    <div style="display:flex;gap:12px;align-items:center">
+        <div class="year-select">
+            <label>Godina:</label>
+            <select onchange="location.href='{% url 'udruge:donacija_list' %}?year='+this.value">
+                {% for y in year|add:"-2"|add:"0" %}{% endfor %}
+                <option {% if year == "2024" %}selected{% endif %} value="2024">2024</option>
+                <option {% if year == "2025" %}selected{% endif %} value="2025">2025</option>
+                <option {% if year == "2026" %}selected{% endif %} value="2026">2026</option>
+                <option {% if year == "2027" %}selected{% endif %} value="2027">2027</option>
+            </select>
+        </div>
+        <a href="{% url 'udruge:donacija_create' %}" class="btn-gold"><i class="fas fa-plus"></i> Nova donacija</a>
+    </div>
+</div>
+
+<div class="udruge-stats">
+    <div class="udruge-stat">
+        <div class="value">{{ stats.ukupno_donacija|default:"0" }} &euro;</div>
+        <div class="label">Ukupno donacija</div>
+    </div>
+    <div class="udruge-stat">
+        <div class="value">{{ stats.broj_donatora }}</div>
+        <div class="label">Broj donatora</div>
+    </div>
+    <div class="udruge-stat">
+        <div class="value">{{ stats.bez_potvrde }}</div>
+        <div class="label">Bez potvrde</div>
+    </div>
+</div>
+
+<table class="udruge-table">
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>Donator</th>
+            <th>Tip</th>
+            <th>Namjena</th>
+            <th>Iznos</th>
+            <th>Potvrda</th>
+            <th>Akcija</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in donacije %}
+        <tr>
+            <td>{{ d.date|date:"d.m.Y." }}</td>
+            <td><strong>{{ d.donor_name }}</strong></td>
+            <td>{{ d.get_donor_type_display }}</td>
+            <td>{{ d.purpose|default:"—" }}</td>
+            <td style="font-weight:600">{{ d.amount }} &euro;</td>
+            <td>
+                {% if d.potvrda_issued %}
+                <span style="color:#065f46"><i class="fas fa-check-circle"></i> {{ d.potvrda_number }}</span>
+                {% else %}
+                <span style="color:var(--text-muted)">—</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'udruge:donatorska_potvrda' d.pk %}" class="btn-outline" title="Potvrda">
+                    <i class="fas fa-file-alt"></i>
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Nema donacija za {{ year }}.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n l10n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="mb-0"><i class="fas fa-calendar-plus me-2 text-primary"></i>{{ action }}</h2>
+  <div class="d-flex gap-2">
+    {% if appt and appt.client %}
+    <a href="{% url 'appointments:dossier_detail' appt.client.pk %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-folder-open me-1"></i>Otvori karton</a>
+    {% endif %}
+    <a href="{% url 'appointments:list' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+  </div>
+</div>
+
+<div class="stat-card" style="max-width:900px">
+  <form method="post">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label fw-bold">{% trans "Naziv termina *" %}</label>
+        <input type="text" name="title" class="form-control" required value="{{ appt.title|default:'' }}" placeholder="Npr. Pregled vida, Sastanak...">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">{% trans "Tip *" %}</label>
+        <select name="appointment_type" class="form-select" required>
+          {% for val, label in type_choices %}
+          <option value="{{ val }}" {% if appt.appointment_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Pocetak *" %}</label>
+        <input type="datetime-local" name="start_time" class="form-control" required
+          value="{% if appt.start_time %}{{ appt.start_time|date:'Y-m-d' }}T{{ appt.start_time|time:'H:i' }}{% endif %}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Kraj *" %}</label>
+        <input type="datetime-local" name="end_time" class="form-control" required
+          value="{% if appt.end_time %}{{ appt.end_time|date:'Y-m-d' }}T{{ appt.end_time|time:'H:i' }}{% endif %}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Klijent" %}</label>
+        <select name="client" class="form-select" id="clientSelect" onchange="updateDossierLink()">
+          <option value="">{% trans "-- bez klijenta --" %}</option>
+          {% for c in clients %}
+          <option value="{{ c.pk }}" {% if appt.client_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+        <div id="dossierLink" class="mt-1" style="display:{% if appt.client %};{% else %}none{% endif %}">
+          <a id="dossierLinkEl" href="{% if appt.client %}{% url 'appointments:dossier_detail' appt.client.pk %}{% else %}#{% endif %}" class="text-decoration-none" style="font-size:.82rem;color:var(--gold)"><i class="fas fa-folder-open me-1"></i>Otvori karton klijenta</a>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Resurs / Prostor" %}</label>
+        <select name="resource" class="form-select">
+          <option value="">{% trans "-- bez resursa --" %}</option>
+          {% for r in resources %}
+          <option value="{{ r.pk }}" {% if appt.resource_id == r.pk %}selected{% endif %}>{{ r.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Usluga</label>
+        <select name="service" class="form-select" id="serviceSelect" onchange="autofillFromService()">
+          <option value="">-- bez usluge --</option>
+          {% for s in services %}
+          <option value="{{ s.pk }}" data-price="{{ s.price|default:'0' }}" data-icon="{{ s.icon }}" {% if appt.service_id == s.pk %}selected{% endif %}>
+            {{ s.name }} {% if s.price %}({{ s.price }} EUR){% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Zaposlenik</label>
+        <select name="employee" class="form-select">
+          <option value="">-- bez zaposlenika --</option>
+          {% for u in users %}
+          <option value="{{ u.pk }}" {% if appt.employee_id == u.pk %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Ukupna cijena (EUR)</label>
+        <input type="number" name="total_price" step="0.01" class="form-control" id="totalPrice" value="{{ appt.total_price|default:''|unlocalize }}" placeholder="0.00">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Nacin placanja</label>
+        <select name="payment_method" class="form-select">
+          <option value="invoice" {% if appt.payment_method == 'invoice' %}selected{% endif %}>Faktura / Racun</option>
+          <option value="cash" {% if appt.payment_method == 'cash' %}selected{% endif %}>Gotovina</option>
+          <option value="card" {% if appt.payment_method == 'card' %}selected{% endif %}>Kartica</option>
+          <option value="transfer" {% if appt.payment_method == 'transfer' %}selected{% endif %}>Transakcija</option>
+          <option value="online" {% if appt.payment_method == 'online' %}selected{% endif %}>Online</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">{% trans "Status" %}</label>
+        <select name="status" class="form-select">
+          {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if appt.status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold">{% trans "Boja" %}</label>
+        <input type="color" name="color" class="form-control form-control-color w-100" value="{{ appt.color|default:'#3b82f6' }}">
+      </div>
+      <div class="col-md-9">
+        <div class="form-check mt-4">
+          <input type="checkbox" name="is_all_day" class="form-check-input" id="allDay" {% if appt.is_all_day %}checked{% endif %}>
+          <label class="form-check-label" for="allDay">{% trans "Cjelodnevni / visednevni termin" %}</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-bold">{% trans "Opis / Napomene" %}</label>
+        <textarea name="description" class="form-control" rows="3" placeholder="{% trans "Detalji termina..." %}">{{ appt.description|default:'' }}</textarea>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>{% trans "Spremi" %}</button>
+        <a href="{% url 'appointments:list' %}" class="btn btn-outline-secondary ms-2">{% trans "Odustani" %}</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+const CLIENT_DOSSIER_URLS = {};
+{% for c in clients %}
+CLIENT_DOSSIER_URLS[{{ c.pk }}] = '/appointments/kartoni/{{ c.pk }}/';
+{% endfor %}
+
+function updateDossierLink() {
+  const val = document.getElementById('clientSelect').value;
+  const link = document.getElementById('dossierLink');
+  const el = document.getElementById('dossierLinkEl');
+  if (val && CLIENT_DOSSIER_URLS[val]) {
+    el.href = CLIENT_DOSSIER_URLS[val];
+    link.style.display = 'block';
+  } else {
+    link.style.display = 'none';
+  }
+}
+
+function autofillFromService() {
+  const sel = document.getElementById('serviceSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt && opt.dataset.price) {
+    const priceField = document.getElementById('totalPrice');
+    if (!priceField.value) priceField.value = opt.dataset.price;
+  }
+}
+</script>
+{% endblock %}

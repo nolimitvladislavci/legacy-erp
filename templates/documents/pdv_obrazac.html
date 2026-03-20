@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}PDV obrazac | LIMIT Connect{% endblock %}
+{% block page_title %}PDV obrazac{% endblock %}
+
+{% block extra_css %}
+<style>
+.pdv-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem}
+.pdv-header h2{margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem}
+.pdv-header h2 i{color:var(--gold);margin-right:8px}
+.pdv-header p{color:var(--text-muted);margin:0;font-size:.82rem}
+.pdv-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:7px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:7px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none;transition:all .15s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+.pdv-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.pdv-filters select,.pdv-filters input{background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:.82rem}
+
+.pdv-result{background:var(--bg-card);border:2px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;text-align:center}
+.pdv-result.positive{border-color:#ef4444}
+.pdv-result.negative{border-color:#10b981}
+.pdv-result .label{font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted)}
+.pdv-result .amount{font-size:2.2rem;font-weight:800;margin:.25rem 0}
+.pdv-result .amount.pay{color:#ef4444}
+.pdv-result .amount.refund{color:#10b981}
+.pdv-result .sublabel{font-size:.82rem;color:var(--text-muted)}
+
+.pdv-section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.pdv-section h3{font-size:1rem;font-weight:600;color:var(--text);margin:0 0 1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.pdv-section h3 i{color:var(--gold);margin-right:.4rem}
+.pdv-section h3 .count{font-size:.75rem;color:var(--text-muted);font-weight:400;margin-left:.5rem}
+
+.pdv-grid{display:grid;grid-template-columns:1fr auto auto;gap:0;font-size:.85rem}
+.pdv-row{display:contents}
+.pdv-row > *{padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+.pdv-row .lbl{color:var(--text-secondary)}
+.pdv-row .base{text-align:right;font-variant-numeric:tabular-nums}
+.pdv-row .vat{text-align:right;font-variant-numeric:tabular-nums;color:var(--gold);font-weight:600}
+.pdv-row.total > *{font-weight:700;border-top:2px solid var(--gold);border-bottom:none;padding-top:.75rem}
+.pdv-row.total .lbl{color:var(--text)}
+
+@media(max-width:768px){
+  .pdv-header{flex-direction:column}
+  .pdv-result .amount{font-size:1.6rem}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;margin:0 auto">
+
+  <div class="pdv-header">
+    <div>
+      <h2><i class="fas fa-file-invoice-dollar"></i> PDV obrazac</h2>
+      <p>{% if company %}{{ company.name }} · {% endif %}{{ period_label }} · Izlazni PDV — Pretporez = Obveza/Povrat</p>
+    </div>
+    <div class="pdv-actions">
+      {% if company %}
+      <a href="?company={{ selected_company_id }}&year={{ year }}&month={{ month }}&quarter={{ quarter }}&format=pdf" class="btn-ghost" target="_blank"><i class="fas fa-file-pdf"></i> PDF</a>
+      <a href="?company={{ selected_company_id }}&year={{ year }}&month={{ month }}&quarter={{ quarter }}&format=xml" class="btn-ghost"><i class="fas fa-file-code"></i> XML</a>
+      {% endif %}
+      <a href="{% url 'documents:knjiga_ura_ira' %}" class="btn-ghost"><i class="fas fa-book"></i> URA/IRA</a>
+    </div>
+  </div>
+
+  <!-- Filteri -->
+  <form method="get" class="pdv-filters">
+    {% if all_companies %}
+    <select name="company" style="min-width:160px">
+      <option value="">-- Firma --</option>
+      {% for c in all_companies %}
+      <option value="{{ c.pk }}" {% if selected_company_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name|truncatechars:25 }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+    <select name="year">{% for y in years %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+    <select name="month">
+      <option value="">Cijela god.</option>
+      <option value="1" {% if month == '1' %}selected{% endif %}>Sijecanj</option>
+      <option value="2" {% if month == '2' %}selected{% endif %}>Veljaca</option>
+      <option value="3" {% if month == '3' %}selected{% endif %}>Ozujak</option>
+      <option value="4" {% if month == '4' %}selected{% endif %}>Travanj</option>
+      <option value="5" {% if month == '5' %}selected{% endif %}>Svibanj</option>
+      <option value="6" {% if month == '6' %}selected{% endif %}>Lipanj</option>
+      <option value="7" {% if month == '7' %}selected{% endif %}>Srpanj</option>
+      <option value="8" {% if month == '8' %}selected{% endif %}>Kolovoz</option>
+      <option value="9" {% if month == '9' %}selected{% endif %}>Rujan</option>
+      <option value="10" {% if month == '10' %}selected{% endif %}>Listopad</option>
+      <option value="11" {% if month == '11' %}selected{% endif %}>Studeni</option>
+      <option value="12" {% if month == '12' %}selected{% endif %}>Prosinac</option>
+    </select>
+    <select name="quarter">
+      <option value="">-</option>
+      <option value="1" {% if quarter == '1' %}selected{% endif %}>Q1</option>
+      <option value="2" {% if quarter == '2' %}selected{% endif %}>Q2</option>
+      <option value="3" {% if quarter == '3' %}selected{% endif %}>Q3</option>
+      <option value="4" {% if quarter == '4' %}selected{% endif %}>Q4</option>
+    </select>
+    <button type="submit" class="btn-gold"><i class="fas fa-calculator"></i> Izracunaj</button>
+  </form>
+
+  {% if company and sec2 %}
+
+  <!-- REZULTAT -->
+  <div class="pdv-result {% if vat_payable >= 0 %}positive{% else %}negative{% endif %}">
+    <div class="label">{% if vat_payable >= 0 %}PDV obveza za uplatu{% else %}PDV za povrat{% endif %}</div>
+    <div class="amount {% if vat_payable >= 0 %}pay{% else %}refund{% endif %}">{{ vat_payable|floatformat:2 }} EUR</div>
+    <div class="sublabel">Izlazni PDV {{ sec2.total_vat|floatformat:2 }} — Pretporez {{ sec3.total_vat|floatformat:2 }}</div>
+  </div>
+
+  <!-- SEKCIJA II — Izlazni PDV -->
+  <div class="pdv-section">
+    <h3><i class="fas fa-sign-out-alt"></i> II. Isporuke dobara i usluga (izlaz) <span class="count">{{ sec2.count }} racuna</span></h3>
+    <div class="pdv-grid">
+      <div class="pdv-row"><div class="lbl">Stopa</div><div class="base"><strong>Osnovica</strong></div><div class="vat"><strong>PDV</strong></div></div>
+      {% if sec2.base_25 %}<div class="pdv-row"><div class="lbl">25%</div><div class="base">{{ sec2.base_25|floatformat:2 }}</div><div class="vat">{{ sec2.vat_25|floatformat:2 }}</div></div>{% endif %}
+      {% if sec2.base_13 %}<div class="pdv-row"><div class="lbl">13%</div><div class="base">{{ sec2.base_13|floatformat:2 }}</div><div class="vat">{{ sec2.vat_13|floatformat:2 }}</div></div>{% endif %}
+      {% if sec2.base_5 %}<div class="pdv-row"><div class="lbl">5%</div><div class="base">{{ sec2.base_5|floatformat:2 }}</div><div class="vat">{{ sec2.vat_5|floatformat:2 }}</div></div>{% endif %}
+      {% if sec2.base_0 %}<div class="pdv-row"><div class="lbl">Oslobodeno (0%)</div><div class="base">{{ sec2.base_0|floatformat:2 }}</div><div class="vat">0,00</div></div>{% endif %}
+      <div class="pdv-row total"><div class="lbl">UKUPNO IZLAZ</div><div class="base">{{ sec2.total_base|floatformat:2 }}</div><div class="vat">{{ sec2.total_vat|floatformat:2 }}</div></div>
+    </div>
+  </div>
+
+  <!-- SEKCIJA III — Pretporez -->
+  <div class="pdv-section">
+    <h3><i class="fas fa-sign-in-alt"></i> III. Pretporez (ulaz) <span class="count">{{ sec3.count }} racuna</span></h3>
+    <div class="pdv-grid">
+      <div class="pdv-row"><div class="lbl">Stopa</div><div class="base"><strong>Osnovica</strong></div><div class="vat"><strong>Pretporez</strong></div></div>
+      {% if sec3.base_25 %}<div class="pdv-row"><div class="lbl">25%</div><div class="base">{{ sec3.base_25|floatformat:2 }}</div><div class="vat">{{ sec3.vat_25|floatformat:2 }}</div></div>{% endif %}
+      {% if sec3.base_13 %}<div class="pdv-row"><div class="lbl">13%</div><div class="base">{{ sec3.base_13|floatformat:2 }}</div><div class="vat">{{ sec3.vat_13|floatformat:2 }}</div></div>{% endif %}
+      {% if sec3.base_5 %}<div class="pdv-row"><div class="lbl">5%</div><div class="base">{{ sec3.base_5|floatformat:2 }}</div><div class="vat">{{ sec3.vat_5|floatformat:2 }}</div></div>{% endif %}
+      {% if sec3.base_0 %}<div class="pdv-row"><div class="lbl">Oslobodeno (0%)</div><div class="base">{{ sec3.base_0|floatformat:2 }}</div><div class="vat">0,00</div></div>{% endif %}
+      <div class="pdv-row total"><div class="lbl">UKUPNO PRETPOREZ</div><div class="base">{{ sec3.total_base|floatformat:2 }}</div><div class="vat">{{ sec3.total_vat|floatformat:2 }}</div></div>
+    </div>
+  </div>
+
+  {% elif not company %}
+  <div style="text-align:center;padding:3rem;color:var(--text-muted)">
+    <i class="fas fa-building" style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.3"></i>
+    Odaberite firmu i razdoblje
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

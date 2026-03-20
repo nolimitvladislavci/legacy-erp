@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Novi tiket{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Novi tiket</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8"><label class="form-label">Predmet</label><input type="text" name="subject" class="form-control" required></div>
+                    <div class="col-md-4"><label class="form-label">Kategorija</label>
+                        <select name="category" class="form-select">{% for val, label in categories %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12"><label class="form-label">Opis</label><textarea name="description" class="form-control" rows="5" required></textarea></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3"><label class="form-label">Prioritet</label>
+                        <select name="priority" class="form-select">{% for val, label in priorities %}<option value="{{ val }}" {% if val == 'normal' %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                    </div>
+                    <div class="col-md-3"><label class="form-label">Izvor</label>
+                        <select name="source" class="form-select">
+                            <option value="internal">Interni</option><option value="email">Email</option><option value="phone">Telefon</option><option value="portal">Portal</option><option value="whatsapp">WhatsApp</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3"><label class="form-label">Klijent</label>
+                        <select name="client" class="form-select"><option value="">--</option>{% for c in clients %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+                    </div>
+                    <div class="col-md-3"><label class="form-label">Dodijeli</label>
+                        <select name="assigned_to" class="form-select"><option value="">--</option>{% for u in users %}<option value="{{ u.id }}">{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4"><label class="form-label">Kontakt ime</label><input type="text" name="contact_name" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Kontakt email</label><input type="email" name="contact_email" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Kontakt telefon</label><input type="text" name="contact_phone" class="form-control"></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6"><label class="form-label">Tagovi (zarezom odvojeni)</label><input type="text" name="tags" class="form-control"></div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">Kreiraj tiket</button>
+        <a href="{% url 'helpdesk:list' %}" class="btn btn-secondary btn-lg">Odustani</a>
+    </form>
+</div>
+{% endblock %}

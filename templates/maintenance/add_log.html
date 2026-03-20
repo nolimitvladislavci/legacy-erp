@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Servisni zapis - {{ asset.name }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Novi servisni zapis: {{ asset.asset_code }} - {{ asset.name }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6"><label class="form-label">Naslov</label><input type="text" name="title" class="form-control" required></div>
+                    <div class="col-md-3"><label class="form-label">Tip</label>
+                        <select name="maintenance_type" class="form-select">{% for val, label in types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select>
+                    </div>
+                    <div class="col-md-3"><label class="form-label">Datum</label><input type="date" name="date_performed" class="form-control" required></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12"><label class="form-label">Opis</label><textarea name="description" class="form-control" rows="3"></textarea></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3"><label class="form-label">Trosak rada (EUR)</label><input type="number" name="labor_cost" class="form-control" step="0.01" value="0"></div>
+                    <div class="col-md-3"><label class="form-label">Trosak dijelova (EUR)</label><input type="number" name="parts_cost" class="form-control" step="0.01" value="0"></div>
+                    <div class="col-md-3"><label class="form-label">Kilometraza</label><input type="number" name="mileage_at_service" class="form-control" value="{{ asset.mileage }}"></div>
+                    <div class="col-md-3"><label class="form-label">Raspored</label>
+                        <select name="schedule" class="form-select"><option value="">-- Nije povezano --</option>{% for s in schedules %}<option value="{{ s.id }}">{{ s.task_name }}</option>{% endfor %}</select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4"><label class="form-label">Serviser</label><input type="text" name="service_provider" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label">Broj fakture</label><input type="text" name="invoice_number" class="form-control"></div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success btn-lg">Spremi zapis</button>
+        <a href="{% url 'maintenance:asset_detail' asset.pk %}" class="btn btn-secondary btn-lg">Odustani</a>
+    </form>
+</div>
+{% endblock %}

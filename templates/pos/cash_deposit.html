@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Polozi / Isplate \xe2\x80\x94 Smjena #{{ session.session_number }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.dep-wrap { max-width: 740px; margin: 0 auto; padding: 1.75rem 1rem; }
+
+.dep-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.75rem; flex-wrap: wrap; gap: .75rem;
+}
+.dep-title {
+    font-size: 1.05rem; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+}
+.dep-title i { color: var(--gold); }
+.dep-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px; font-size: .8rem; font-weight: 600;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-muted); text-decoration: none; transition: all .15s;
+}
+.dep-back:hover { border-color: var(--gold); color: var(--gold); text-decoration: none; }
+
+.dep-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 1.25rem; overflow: hidden;
+}
+.dep-card-hdr {
+    padding: .65rem 1.1rem; border-bottom: 1px solid var(--border);
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--gold);
+}
+.dep-card-body { padding: 1.1rem; }
+
+.dep-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .875rem; }
+@media (max-width: 580px) { .dep-grid { grid-template-columns: 1fr; } }
+
+.dep-lbl {
+    font-size: .7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--text-muted); margin-bottom: .35rem;
+}
+.dep-input, .dep-select {
+    width: 100%; background: var(--input-bg); border: 1px solid var(--input-border);
+    border-radius: 7px; color: var(--text); padding: .55rem .8rem;
+    font-size: .88rem; font-family: inherit; transition: border-color .15s;
+    -webkit-appearance: none; appearance: none;
+}
+.dep-input:focus, .dep-select:focus {
+    outline: none; border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,.12);
+}
+.dep-input::placeholder { color: var(--text-muted); }
+.dep-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27 viewBox=%270 0 10 6%27%3E%3Cpath fill=%27%2394a3b8%27 d=%27M0 0l5 6 5-6z%27/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right .8rem center; padding-right: 2rem;
+}
+
+.dep-footer { display: flex; justify-content: flex-end; margin-top: .875rem; }
+.dep-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: .6rem 1.4rem; background: var(--gold); color: #0f172a;
+    border: none; border-radius: 7px; font-size: .85rem; font-weight: 700;
+    cursor: pointer; transition: opacity .15s, transform .1s; font-family: inherit;
+}
+.dep-btn:hover { opacity: .88; transform: translateY(-1px); }
+.dep-btn:active { transform: scale(.97); }
+
+.dep-table-wrap { overflow-x: auto; }
+.dep-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+.dep-table thead th {
+    padding: .6rem .9rem; font-size: .68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.dep-table tbody td {
+    padding: .65rem .9rem; border-bottom: 1px solid var(--border);
+    color: var(--text); vertical-align: middle;
+}
+.dep-table tbody tr:last-child td { border-bottom: none; }
+.dep-table tbody tr:hover td { background: var(--bg-card-hover); }
+.dep-empty { padding: 2.5rem; text-align: center; color: var(--text-muted); font-size: .85rem; }
+
+.badge-polog {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
+    border-radius: 20px; font-size: .72rem; font-weight: 700;
+    background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.25);
+}
+.badge-isplata {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
+    border-radius: 20px; font-size: .72rem; font-weight: 700;
+    background: rgba(239,68,68,.12); color: #ef4444; border: 1px solid rgba(239,68,68,.25);
+}
+.dep-amt-pos { color: #10b981; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dep-amt-neg { color: #ef4444; font-weight: 700; font-variant-numeric: tabular-nums; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dep-wrap">
+
+    <div class="dep-header">
+        <div class="dep-title">
+            <i class="fa-solid fa-coins"></i>
+            {% trans "Polozi / Isplate" %} &mdash; {% trans "Smjena" %} #{{ session.session_number }}
+        </div>
+        <a href="{% url 'pos:session_detail' session.pk %}" class="dep-back">
+            <i class="fa-solid fa-arrow-left"></i> {% trans "Natrag na smjenu" %}
+        </a>
+    </div>
+
+    <div class="dep-card">
+        <div class="dep-card-hdr"><i class="fa-solid fa-plus" style="margin-right:6px"></i>{% trans "Novi unos" %}</div>
+        <div class="dep-card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="dep-grid">
+                    <div>
+                        <div class="dep-lbl">{% trans "Vrsta" %}</div>
+                        <select name="deposit_type" class="dep-select">
+                            <option value="deposit">{% trans "Polog gotovine" %}</option>
+                            <option value="withdrawal">{% trans "Isplata gotovine" %}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="dep-lbl">{% trans "Iznos (\xe2\x82\xac)" %} *</div>
+                        <input type="number" name="amount" class="dep-input" step="0.01" min="0.01" required placeholder="0.00">
+                    </div>
+                    <div>
+                        <div class="dep-lbl">{% trans "Napomena" %}</div>
+                        <input type="text" name="note" class="dep-input" maxlength="200" placeholder="Npr. jutarnji polog">
+                    </div>
+                </div>
+                <div class="dep-footer">
+                    <button type="submit" class="dep-btn">
+                        <i class="fa-solid fa-floppy-disk"></i> {% trans "Evidentiraj" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="dep-card">
+        <div class="dep-card-hdr"><i class="fa-solid fa-list" style="margin-right:6px"></i>{% trans "Evidentirani polozi / isplate" %}</div>
+        <div class="dep-table-wrap">
+            <table class="dep-table">
+                <thead><tr>
+                    <th>{% trans "Datum / Vrijeme" %}</th>
+                    <th>{% trans "Vrsta" %}</th>
+                    <th>{% trans "Operater" %}</th>
+                    <th>{% trans "Napomena" %}</th>
+                    <th style="text-align:right">{% trans "Iznos (\xe2\x82\xac)" %}</th>
+                </tr></thead>
+                <tbody>
+                {% for d in deposits %}
+                <tr>
+                    <td>{{ d.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        {% if d.deposit_type == "deposit" %}
+                            <span class="badge-polog"><i class="fa-solid fa-arrow-down"></i> {{ d.get_deposit_type_display }}</span>
+                        {% else %}
+                            <span class="badge-isplata"><i class="fa-solid fa-arrow-up"></i> {{ d.get_deposit_type_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ d.operator.get_full_name|default:d.operator.username|default:"\xe2\x80\x94" }}</td>
+                    <td style="color:var(--text-muted)">{{ d.note|default:"\xe2\x80\x94" }}</td>
+                    <td style="text-align:right">
+                        {% if d.deposit_type == "deposit" %}
+                            <span class="dep-amt-pos">+{{ d.amount|floatformat:2 }}</span>
+                        {% else %}
+                            <span class="dep-amt-neg">&minus;{{ d.amount|floatformat:2 }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="dep-empty">
+                    <i class="fa-regular fa-folder-open" style="font-size:1.5rem;display:block;margin-bottom:.5rem;opacity:.4"></i>
+                    {% trans "Nema evidentiranih pologa." %}
+                </td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+

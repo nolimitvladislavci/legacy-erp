@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pracenje narudzbe</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh;padding:20px}
+.card{max-width:500px;margin:0 auto;background:#1a1a1a;border:1px solid #c9a84c;border-radius:12px;padding:24px}
+h2{color:#c9a84c;margin-bottom:16px;font-size:1.2rem}
+.status-bar{display:flex;gap:4px;margin-bottom:20px}
+.step{flex:1;height:6px;border-radius:3px;background:#222}
+.step.done{background:#22c55e}
+.step.current{background:#c9a84c;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.status-text{text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:16px}
+.items-list{border-top:1px solid #222;padding-top:12px}
+.item-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem;border-bottom:1px solid #111}
+.meta{color:#94a3b8;font-size:.8rem;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="card">
+    <h2>{{ order.company.name }}</h2>
+
+    {% with s=order.status %}
+    <div class="status-bar">
+        <div class="step {% if s == 'confirmed' %}current{% elif s != 'new' %}done{% endif %}"></div>
+        <div class="step {% if s == 'preparing' %}current{% elif s == 'ready' or s == 'delivered' or s == 'paid' %}done{% endif %}"></div>
+        <div class="step {% if s == 'ready' %}current{% elif s == 'delivered' or s == 'paid' %}done{% endif %}"></div>
+        <div class="step {% if s == 'delivered' or s == 'paid' %}done{% endif %}"></div>
+    </div>
+
+    <div class="status-text">
+        {% if s == 'new' %}Narudzba zaprimljena
+        {% elif s == 'confirmed' %}Potvrdeno — pripremamo
+        {% elif s == 'preparing' %}U pripremi...
+        {% elif s == 'ready' %}SPREMNO — dodite pokupiti!
+        {% elif s == 'delivered' %}Preuzeto
+        {% elif s == 'paid' %}Zavrseno
+        {% elif s == 'cancelled' %}Otkazano
+        {% endif %}
+    </div>
+    {% endwith %}
+
+    <div class="items-list">
+        {% for item in items %}
+        <div class="item-row">
+            <span>{{ item.quantity }}x {{ item.inventory_item.name }}</span>
+            <span style="color:#c9a84c">{{ item.inventory_item.unit_price|floatformat:2 }} EUR</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="meta">
+        <div>Ime: {{ order.guest_name }}</div>
+        <div>Narudzba: {{ order.created_at|date:"d.m.Y H:i" }}</div>
+        <div style="margin-top:8px;font-size:.7rem;color:#475569">#{{ order.tracking_token|truncatechars:12 }}</div>
+    </div>
+</div>
+
+<script>
+// Auto refresh every 15 seconds
+setTimeout(function() { location.reload(); }, 15000);
+</script>
+</body>
+</html>

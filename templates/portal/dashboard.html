@@ -1,0 +1,103 @@
+{% extends "portal/base_b2b.html" %}
+{% block title %}Pregled{% endblock %}
+
+{% block content %}
+<!-- Welcome -->
+<div style="margin-bottom:28px">
+  <h1 style="font-family:var(--font-heading);font-size:1.6rem;font-weight:700;color:var(--gold);margin-bottom:4px">
+    Dobrodosli, {{ partner.contact_person|default:partner.name }}
+  </h1>
+  <p style="font-size:.88rem;color:var(--text-secondary)">
+    B2B portal za uvid u dokumente, stanja i komunikaciju s vasim partnerom.
+  </p>
+</div>
+
+<!-- Stats -->
+<div class="b2b-stats">
+  <div class="b2b-stat">
+    <div class="b2b-stat-value">&euro; {{ stats.open_balance|floatformat:2|default:"0.00" }}</div>
+    <div class="b2b-stat-label">Otvoreni saldo</div>
+  </div>
+  <div class="b2b-stat">
+    <div class="b2b-stat-value">{{ stats.total|default:"0" }}</div>
+    <div class="b2b-stat-label">Ukupno dokumenata</div>
+  </div>
+  <div class="b2b-stat">
+    <div class="b2b-stat-value" style="color:{% if stats.overdue > 0 %}var(--warning){% else %}var(--gold){% endif %}">
+      {{ stats.overdue|default:"0" }}
+    </div>
+    <div class="b2b-stat-label">Dospjelo</div>
+  </div>
+  <div class="b2b-stat">
+    <div class="b2b-stat-value">&euro; {{ stats.paid|floatformat:2|default:"0.00" }}</div>
+    <div class="b2b-stat-label">Ukupno placeno</div>
+  </div>
+</div>
+
+<!-- Recent Invoices -->
+<div class="b2b-card">
+  <div class="b2b-card-header">
+    <i class="fas fa-clock"></i> Posljednji dokumenti
+    <a href="{% url 'b2b_invoices' token %}" style="margin-left:auto;font-size:.8rem;font-family:var(--font-body)">
+      Vidi sve <i class="fas fa-arrow-right" style="font-size:.7rem"></i>
+    </a>
+  </div>
+
+  {% if recent %}
+  <div class="b2b-table-wrap">
+    <table class="b2b-table">
+      <thead>
+        <tr>
+          <th>Broj</th>
+          <th>Tip</th>
+          <th>Datum</th>
+          <th>Dospijece</th>
+          <th class="text-right">Iznos</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in recent %}
+        <tr class="b2b-table-link" onclick="location.href='{% url 'b2b_invoice_detail' token inv.pk %}'">
+          <td class="text-mono">{{ inv.number|default:"—" }}</td>
+          <td>{{ inv.get_doctype_display }}</td>
+          <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
+          <td>{% if inv.date_due %}{{ inv.date_due|date:"d.m.Y" }}{% else %}—{% endif %}</td>
+          <td class="text-right text-mono">&euro; {{ inv.total|floatformat:2 }}</td>
+          <td>
+            <span class="badge badge-{{ inv.status|lower }}">{{ inv.get_status_display }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="b2b-empty">
+    <i class="fas fa-inbox"></i>
+    <p>Nemate jos dokumenata. Kad vas partner izda dokument, pojavit ce se ovdje.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Partner Info -->
+<div class="b2b-card">
+  <div class="b2b-card-header"><i class="fas fa-building"></i> Vasi podaci</div>
+  <div class="b2b-info-grid">
+    <div class="b2b-info-box">
+      <h4>Tvrtka</h4>
+      <div class="b2b-info-row"><span>Naziv</span><span>{{ partner.name }}</span></div>
+      <div class="b2b-info-row"><span>OIB / VAT</span><span>{{ partner.oib|default:"—" }}</span></div>
+      <div class="b2b-info-row"><span>Adresa</span><span>{{ partner.address|default:"—" }}, {{ partner.city|default:"" }}</span></div>
+      <div class="b2b-info-row"><span>Drzava</span><span>{{ partner.get_country_display|default:partner.country }}</span></div>
+    </div>
+    <div class="b2b-info-box">
+      <h4>Kontakt</h4>
+      <div class="b2b-info-row"><span>Email</span><span>{{ partner.email|default:"—" }}</span></div>
+      <div class="b2b-info-row"><span>Telefon</span><span>{{ partner.phone|default:"—" }}</span></div>
+      <div class="b2b-info-row"><span>Kontakt osoba</span><span>{{ partner.contact_person|default:"—" }}</span></div>
+      <div class="b2b-info-row"><span>Uvjeti placanja</span><span>{{ partner.payment_term }} dana</span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans "Obracun placa" %}{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+        <h2 style="margin:0;color:var(--gold)">
+            <i class="fas fa-file-invoice-dollar"></i> {% trans "Obracun placa" %}
+        </h2>
+        <a href="{% url 'payroll:new' %}" class="btn btn-gold" style="padding:8px 20px;border-radius:8px;background:var(--gold);color:#000;text-decoration:none;font-weight:600">
+            <i class="fas fa-plus"></i> {% trans "Novi obracun" %}
+        </a>
+    </div>
+
+    {% if runs %}
+    <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+        <thead>
+            <tr style="background:#f8f9fa;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;color:#64748b">
+                <th style="padding:12px 16px;text-align:left">{% trans "Period" %}</th>
+                <th style="padding:12px 16px;text-align:right">{% trans "Bruto" %}</th>
+                <th style="padding:12px 16px;text-align:right">{% trans "Neto" %}</th>
+                <th style="padding:12px 16px;text-align:center">{% trans "Status" %}</th>
+                <th style="padding:12px 16px;text-align:center"></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for run in runs %}
+            <tr style="border-top:1px solid #f1f5f9">
+                <td style="padding:12px 16px;font-weight:600">{{ run.month|stringformat:"02d" }}/{{ run.year }}</td>
+                <td style="padding:12px 16px;text-align:right">{{ run.total_gross|floatformat:2 }} &euro;</td>
+                <td style="padding:12px 16px;text-align:right">{{ run.total_net|floatformat:2 }} &euro;</td>
+                <td style="padding:12px 16px;text-align:center">
+                    <span style="padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;
+                        {% if run.status == 'DRAFT' %}background:#fef3c7;color:#92400e
+                        {% elif run.status == 'LOCKED' %}background:#dbeafe;color:#1e40af
+                        {% elif run.status == 'FINALIZED' %}background:#d1fae5;color:#065f46
+                        {% elif run.status == 'PAID' %}background:#e0e7ff;color:#3730a3
+                        {% endif %}">{{ run.get_status_display }}</span>
+                </td>
+                <td style="padding:12px 16px;text-align:center">
+                    <a href="{% url 'payroll:detail' run.pk %}" style="color:var(--gold);text-decoration:none;font-weight:600">
+                        <i class="fas fa-eye"></i> {% trans "Detalji" %}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align:center;padding:60px 20px;background:#fff;border-radius:10px;color:#94a3b8">
+        <i class="fas fa-file-invoice-dollar" style="font-size:3rem;margin-bottom:16px;display:block"></i>
+        <p>{% trans "Nema obracuna. Kreirajte prvi!" %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Nova posta{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'virtual_office:dashboard' %}">Virtualni Ured</a></li>
+      <li class="breadcrumb-item active">Nova posta</li>
+    </ol>
+  </nav>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-dark text-gold">
+          <i class="bi bi-envelope-plus"></i> Zaprimanje nove poste
+        </div>
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Datum zaprimanja</label>
+                <input type="date" name="received_date" class="form-control"
+                       value="{{ today|date:'Y-m-d' }}" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Vrsta poste</label>
+                <select name="mail_type" class="form-select">
+                  {% for code, label in mail_types %}
+                  <option value="{{ code }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Posiljatelj</label>
+              <input type="text" name="sender" class="form-control"
+                     placeholder="Naziv posiljatelja (s omotnice)">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Predmet / Opis</label>
+              <input type="text" name="subject" class="form-control"
+                     placeholder="Kratak opis sadrzaja">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Skenirani dokument</label>
+              <input type="file" name="scanned_file" class="form-control"
+                     accept=".pdf,.jpg,.jpeg,.png,.tiff">
+              <small class="text-muted">PDF, JPG, PNG ili TIFF</small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Napomena</label>
+              <textarea name="notes" class="form-control" rows="3"
+                        placeholder="Interne napomene..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-gold">
+                <i class="bi bi-check-lg"></i> Zaprimi postu
+              </button>
+              <a href="{% url 'virtual_office:dashboard' %}" class="btn btn-outline-secondary">
+                Odustani
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

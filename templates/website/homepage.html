@@ -1,0 +1,177 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% trans "Viskovic Group – Ihr Partner für Bau, Wohnen & Business" %}</title>
+<meta name="description" content="Viskovic Group – Bauleistungen, Wohnvermietung, Fitnessstudio und Webshop in Deutschland und Kroatien.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root { --gold: #c9a84c; --dark: #0f172a; --accent: #3b82f6; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; color: #0f172a; }
+  .navbar-brand { font-size: 1.5rem; font-weight: 800; color: var(--dark) !important; }
+  .navbar-brand span { color: var(--gold); }
+  .hero { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%); color: white; padding: 100px 0 80px; position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.2; }
+  .hero-gold { color: var(--gold); }
+  .service-card { border: none; border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; height: 100%; }
+  .service-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+  .service-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px; }
+  .cta-section { background: linear-gradient(135deg, #0f172a, #1e3a5f); color: white; padding: 80px 0; }
+  .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--gold); }
+  footer { background: #0f172a; color: #94a3b8; padding: 40px 0; }
+  .booking-btn { background: var(--gold); color: #0f172a; font-weight: 700; border: none; padding: 14px 32px; border-radius: 50px; font-size: 1rem; text-decoration: none; display: inline-block; transition: all 0.2s; }
+  .booking-btn:hover { background: #b8922f; color: #0f172a; transform: scale(1.05); }
+</style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="/">{% trans "VISKOVIC" %}<span>{% trans "GROUP" %}</span></a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item"><a class="nav-link" href="#services">{% trans "Leistungen" %}</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">{% trans "Über uns" %}</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">{% trans "Kontakt" %}</a></li>
+        <li class="nav-item"><a class="booking-btn" href="/appointments/booking/" style="padding:8px 20px;font-size:0.9rem">{% trans "Online Buchung" %}</a></li>
+        <li class="nav-item"><a class="btn btn-outline-dark btn-sm" href="/login/">{% trans "Login" %}</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container text-center position-relative">
+    <p class="text-white-50 fw-semibold mb-3 text-uppercase letter-spacing-2" style="letter-spacing:3px">{% trans "Seit 2015 · Deutschland & Kroatien" %}</p>
+    <h1 class="hero-title mb-4">{% trans "Ihr zuverlässiger Partner für" %}<br><span class="hero-gold">{% trans "Bau · Wohnen · Business" %}</span></h1>
+    <p class="lead text-white-50 mb-5 mx-auto" style="max-width:600px">
+      {% trans "Von Bauleistungen über Wohnvermietung bis hin zu Fitness und E-Commerce – Viskovic Group ist Ihre Komplettlösung." %}
+    </p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/appointments/booking/" class="booking-btn"><i class="fas fa-calendar-check me-2"></i>{% trans "Termin buchen" %}</a>
+      <a href="#services" class="btn btn-outline-light btn-lg" style="border-radius:50px">{% trans "Mehr erfahren" %}</a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="py-4 bg-white border-bottom">
+  <div class="container">
+    <div class="row text-center g-4">
+      <div class="col-6 col-md-3"><div class="stat-number">200+</div><p class="text-muted small mb-0">{% trans "Abgeschlossene Projekte" %}</p></div>
+      <div class="col-6 col-md-3"><div class="stat-number">50+</div><p class="text-muted small mb-0">{% trans "Mitarbeiter" %}</p></div>
+      <div class="col-6 col-md-3"><div class="stat-number">10+</div><p class="text-muted small mb-0">{% trans "Jahre Erfahrung" %}</p></div>
+      <div class="col-6 col-md-3"><div class="stat-number">5</div><p class="text-muted small mb-0">{% trans "Geschäftsbereiche" %}</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section id="services" class="py-5" style="background:#f8fafc">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-6 fw-bold">{% trans "Unsere Leistungen" %}</h2>
+      <p class="text-muted">{% trans "Alles aus einer Hand – professionell und zuverlässig" %}</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card service-card shadow-sm p-4">
+          <div class="service-icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-hard-hat"></i></div>
+          <h5 class="fw-bold">{% trans "Bauleistungen" %}</h5>
+          <p class="text-muted">{% trans "Professionelle Bauleistungen, Renovierungen und Innenausbau in Deutschland und Kroatien." %}</p>
+          <a href="/appointments/booking/" class="btn btn-outline-primary btn-sm mt-auto">{% trans "Anfragen" %}</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card service-card shadow-sm p-4">
+          <div class="service-icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-home"></i></div>
+          <h5 class="fw-bold">{% trans "Wohnvermietung" %}</h5>
+          <p class="text-muted">{% trans "Möblierte Zimmer, Apartments und Ferienwohnungen – komfortabel und zu fairen Preisen." %}</p>
+          <a href="/appointments/booking/" class="btn btn-outline-success btn-sm mt-auto">{% trans "Anfragen" %}</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card service-card shadow-sm p-4">
+          <div class="service-icon" style="background:#fef9c3;color:#ca8a04"><i class="fas fa-dumbbell"></i></div>
+          <h5 class="fw-bold">{% trans "Fitnessstudio" %}</h5>
+          <p class="text-muted">{% trans "Modernes Fitnessstudio mit Top-Geräten, persönlicher Betreuung und flexiblen Mitgliedschaften." %}</p>
+          <a href="/appointments/booking/" class="btn btn-outline-warning btn-sm mt-auto">{% trans "Mitglied werden" %}</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card service-card shadow-sm p-4">
+          <div class="service-icon" style="background:#ede9fe;color:#7c3aed"><i class="fas fa-shopping-cart"></i></div>
+          <h5 class="fw-bold">{% trans "Webshop" %}</h5>
+          <p class="text-muted">{% trans "Online-Shop mit Baumaterialien, Sportartikeln und Haushaltswaren zu Großhandelspreisen." %}</p>
+          <a href="/webshop/" class="btn btn-outline-purple btn-sm mt-auto" style="color:#7c3aed;border-color:#7c3aed">{% trans "Shop besuchen" %}</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card service-card shadow-sm p-4">
+          <div class="service-icon" style="background:#fee2e2;color:#dc2626"><i class="fas fa-shield-alt"></i></div>
+          <h5 class="fw-bold">{% trans "Versicherungen" %}</h5>
+          <p class="text-muted">{% trans "Beratung und Vermittlung von Kranken-, Lebens- und Sachversicherungen." %}</p>
+          <a href="/appointments/booking/" class="btn btn-outline-danger btn-sm mt-auto">{% trans "Beratung anfragen" %}</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card service-card shadow-sm p-4" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white">
+          <div class="service-icon" style="background:rgba(201,168,76,0.2);color:#c9a84c"><i class="fas fa-calendar-check"></i></div>
+          <h5 class="fw-bold" style="color:white">{% trans "Online Buchung" %}</h5>
+          <p style="color:rgba(255,255,255,0.7)">{% trans "Buchen Sie Termine, Dienstleistungen und Ressourcen schnell und einfach online." %}</p>
+          <a href="/appointments/booking/" class="booking-btn" style="padding:8px 20px;font-size:0.85rem">{% trans "Jetzt buchen" %}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="container text-center">
+    <h2 class="display-6 fw-bold text-white mb-3">{% trans "Kontaktieren Sie uns" %}</h2>
+    <p class="text-white-50 mb-4">{% trans "Wir stehen Ihnen für alle Fragen zur Verfügung" %}</p>
+    <div class="row g-3 justify-content-center">
+      <div class="col-auto"><a href="tel:+4915000000000" class="btn btn-outline-light btn-lg" style="border-radius:50px"><i class="fas fa-phone me-2"></i>{% trans "Anrufen" %}</a></div>
+      <div class="col-auto"><a href="mailto:viskovic.bau@gmail.com" class="btn btn-outline-light btn-lg" style="border-radius:50px"><i class="fas fa-envelope me-2"></i>{% trans "E-Mail" %}</a></div>
+      <div class="col-auto"><a href="/appointments/booking/" class="booking-btn btn-lg"><i class="fas fa-calendar me-2"></i>{% trans "Online buchen" %}</a></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="fw-bold text-white mb-2" style="font-size:1.2rem">{% trans "VISKOVIC" %}<span style="color:#c9a84c">{% trans "GROUP" %}</span></div>
+        <p class="small">{% trans "Ihr zuverlässiger Partner für Bau, Wohnen & Business in Deutschland und Kroatien." %}</p>
+      </div>
+      <div class="col-md-4">
+        <h6 class="text-white fw-bold mb-2">{% trans "Leistungen" %}</h6>
+        <ul class="list-unstyled small">
+          <li><a href="#" class="text-secondary text-decoration-none">{% trans "Bauleistungen" %}</a></li>
+          <li><a href="#" class="text-secondary text-decoration-none">{% trans "Wohnvermietung" %}</a></li>
+          <li><a href="#" class="text-secondary text-decoration-none">{% trans "Fitnessstudio" %}</a></li>
+          <li><a href="#" class="text-secondary text-decoration-none">{% trans "Webshop" %}</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <h6 class="text-white fw-bold mb-2">{% trans "Kontakt" %}</h6>
+        <p class="small"><i class="fas fa-envelope me-2"></i>{% trans "viskovic.bau@gmail.com" %}</p>
+        <p class="small"><i class="fas fa-globe me-2"></i>{% trans "viskovic-group.de" %}</p>
+        <a href="/login/" class="btn btn-outline-secondary btn-sm mt-2">{% trans "Mitarbeiter Login" %}</a>
+      </div>
+    </div>
+    <hr style="border-color:rgba(255,255,255,0.1);margin:24px 0">
+    <p class="small text-center mb-0">{% trans "&copy; 2026 Viskovic Group. Alle Rechte vorbehalten." %}</p>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

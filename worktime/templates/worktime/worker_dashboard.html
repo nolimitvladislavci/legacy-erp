@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Moj radni portal" %}{% endblock %}
+{% block page_title %}{% trans "Radno vrijeme" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.timer-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;padding:20px;color:#fff;border:1px solid #334155;position:relative;overflow:hidden}
+.timer-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent)}
+.timer-display{font-family:'Courier New',monospace;font-size:2.8rem;font-weight:700;text-align:center;letter-spacing:4px;margin:12px 0}
+.timer-display.running{color:#22c55e;animation:tpulse 2s infinite}
+.timer-display.paused{color:#f59e0b}
+.timer-display.idle{color:#64748b}
+@keyframes tpulse{0%,100%{text-shadow:0 0 20px rgba(34,197,94,.3)}50%{text-shadow:0 0 40px rgba(34,197,94,.6)}}
+.timer-project{text-align:center;font-size:.85rem;color:#94a3b8;margin-bottom:8px}
+.timer-project strong{color:#e2e8f0}
+.timer-earnings{text-align:center;font-size:1.1rem;color:#c9a84c;font-weight:600;margin-bottom:16px}
+.timer-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.timer-btns .btn{min-width:80px;font-weight:600;border-radius:10px;padding:10px 16px;font-size:.9rem;border:none}
+.btn-go{background:#22c55e;color:#fff}.btn-go:hover,.btn-go:active{background:#16a34a;color:#fff}
+.btn-pa{background:#f59e0b;color:#fff}.btn-re{background:#3b82f6;color:#fff}
+.btn-st{background:#ef4444;color:#fff}.btn-di{background:transparent;color:#94a3b8;border:1px solid #475569!important}
+
+.rate-card{background:linear-gradient(135deg,#1e293b,#334155);border-radius:12px;padding:12px 16px;color:#fff;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.rate-info{display:flex;gap:16px;flex-wrap:wrap}
+.rate-item{text-align:center}
+.rate-val{font-size:1rem;font-weight:700;color:#c9a84c}
+.rate-lbl{font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8}
+.profile-link{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:600}
+
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+@media(min-width:768px){.stats-row{grid-template-columns:repeat(4,1fr)}}
+.mini-stat{background:#fff;border-radius:12px;padding:14px;border:1px solid #f1f5f9;text-align:center}
+.mini-stat .num{font-size:1.5rem;font-weight:700;color:#0f172a}
+.mini-stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;font-weight:600}
+
+.week-bar{display:flex;gap:4px;margin-bottom:16px}
+.week-day{flex:1;text-align:center;padding:8px 2px;background:#fff;border-radius:8px;border:1px solid #f1f5f9;font-size:.65rem}
+.week-day.today{border-color:#3b82f6;background:#eff6ff}
+.week-day .dn{font-weight:700;color:#374151}
+.week-day .dh{font-size:.8rem;font-weight:700;color:#0f172a;margin-top:2px}
+.week-day .db{height:4px;border-radius:2px;background:#e2e8f0;margin-top:4px}
+.week-day .db .f{height:100%;border-radius:2px;background:#3b82f6}
+
+.qa{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0;margin-bottom:16px}
+.qa h6{font-weight:700;margin-bottom:12px;font-size:.85rem}
+
+.ei{background:#fff;border-radius:10px;padding:12px;border:1px solid #f1f5f9;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.ec{width:4px;height:40px;border-radius:2px;flex-shrink:0}
+.en{flex:1;min-width:0}
+.en .pn{font-weight:700;font-size:.8rem;color:#0f172a}
+.en .ed{font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eh{font-weight:700;font-size:1rem;color:#0f172a;white-space:nowrap}
+
+.tc{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;font-size:.78rem;background:#f8fafc;border:1px solid #e2e8f0;cursor:pointer;font-weight:600;margin:3px}
+
+/* TABS */
+.mtabs{display:flex;background:#f1f5f9;border-radius:10px;padding:3px;margin-bottom:16px;overflow-x:auto}
+.mtab{flex:1;min-width:0;text-align:center;padding:10px 4px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;color:#64748b;border:none;background:none;white-space:nowrap}
+.mtab.on{background:#fff;color:#0f172a;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.tp{display:none}.tp.on{display:block}
+
+.ps{height:6px;border-radius:3px;background:#e2e8f0;margin-top:6px}
+.ps .f{height:100%;border-radius:3px}
+
+#liveCalc{text-align:center;padding:8px;font-size:.85rem;font-weight:700;border-radius:8px;margin:8px 0;display:none}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.7}}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- OVERTIME WARNINGS -->
+{% if overtime_warnings %}
+<div id="overtimeAlert" style="background:#dc2626;color:#fff;padding:14px 20px;border-radius:12px;margin-bottom:12px;animation:alertPulse 1.5s infinite;position:relative;z-index:100">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:1.5rem">&#9888;</span>
+    <div>
+      <strong style="font-size:1rem">UPOZORENJE: Neispravno radno vrijeme!</strong><br>
+      <span style="font-size:.85rem">
+        {% for w in overtime_warnings %}
+          {{ w.date|date:"d.m.Y" }} — {{ w.project.name }} — <strong>{{ w.duration|floatformat:1 }}h</strong>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </span>
+    </div>
+  </div>
+  <div style="margin-top:8px;font-size:.8rem">
+    Korigirajte unose ili kontaktirajte administratora. Ovo upozorenje se ne moze zatvoriti.
+  </div>
+</div>
+{% endif %}
+
+<!-- TIMER OVERTIME WARNING (hidden, shown by JS when >10h) -->
+<div id="timerOvertimeAlert" style="display:none;background:#f59e0b;color:#000;padding:12px 20px;border-radius:12px;margin-bottom:12px;animation:alertPulse 2s infinite">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:1.5rem">&#9200;</span>
+    <div>
+      <strong>Stoperica radi vec vise od <span id="timerHoursWarn">10</span> sati!</strong><br>
+      <span style="font-size:.85rem">Jeste li zaboravili iskljuciti? Provjerite i zaustavite ako je potrebno.</span>
+    </div>
+  </div>
+</div>
+
+<!-- RATE -->
+<div class="rate-card">
+  <div class="rate-info">
+    <div class="rate-item"><div class="rate-val">€{{ hourly_rate|floatformat:2 }}</div><div class="rate-lbl">{% trans "Satnica" %}</div></div>
+    <div class="rate-item"><div class="rate-val">{{ daily_target|floatformat:0 }}h</div><div class="rate-lbl">{% trans "Dnevno" %}</div></div>
+    <div class="rate-item"><div class="rate-val">{{ weekly_target|floatformat:0 }}h</div><div class="rate-lbl">{% trans "Tjedno" %}</div></div>
+    <div class="rate-item"><div class="rate-val">🔥{{ streak }}</div><div class="rate-lbl">{% trans "Streak" %}</div></div>
+  </div>
+  <a href="{% url 'worktime:ts_profile' %}" class="profile-link">{% trans "👤 Profil" %}</a>
+</div>
+
+<!-- TIMER -->
+<div class="timer-card mb-3">
+{% if active_timer %}
+  <div class="timer-project">⏱ <strong>{{ active_timer.project.name }}</strong></div>
+  <div class="timer-display {% if active_timer.status == 'RUNNING' %}running{% else %}paused{% endif %}" id="timerDisplay">{{ active_timer.elapsed_display }}</div>
+  <div class="timer-earnings" id="timerEarnings">€ 0.00</div>
+  <div class="timer-btns">
+    {% if active_timer.status == 'RUNNING' %}
+    <form method="post" action="{% url 'worktime:timer_pause' %}">{% csrf_token %}<button class="btn btn-pa">{% trans "⏸ Pauza" %}</button></form>
+    {% else %}
+    <form method="post" action="{% url 'worktime:timer_resume' %}">{% csrf_token %}<button class="btn btn-re">{% trans "▶ Nastavi" %}</button></form>
+    {% endif %}
+    <form method="post" action="{% url 'worktime:timer_stop' %}">{% csrf_token %}<button class="btn btn-st">{% trans "⏹ Spremi" %}</button></form>
+    <form method="post" action="{% url 'worktime:timer_discard' %}" onsubmit="return confirm('Odbaciti?')">{% csrf_token %}<button class="btn btn-di btn-sm">🗑</button></form>
+  </div>
+{% else %}
+  <div class="timer-project">{% trans "Pokreni štopericu" %}</div>
+  <div class="timer-display idle" id="timerDisplay">00:00:00</div>
+  <form method="post" action="{% url 'worktime:timer_start' %}">{% csrf_token %}
+    <div class="row g-2 mb-3">
+      <div class="col-5"><select name="project" class="form-select form-select-sm" required style="background:rgba(255,255,255,.08);border-color:#475569;color:#fff"><option value="">{% trans "-- Projekt --" %}</option>{% for p in projects %}<option value="{{ p.id }}" style="color:#000">{{ p.code }} – {{ p.name }}</option>{% endfor %}</select></div><div class="col-2"><button type="button" onclick="window.location.href='/projects/new/?next='+encodeURIComponent(window.location.pathname)" style="width:100%;height:31px;background:none;border:1px solid #475569;color:#94a3b8;border-radius:6px;font-weight:700;cursor:pointer" title="Novi projekt">+</button></div>
+      <div class="col-5"><select name="task_type" class="form-select form-select-sm" style="background:rgba(255,255,255,.08);border-color:#475569;color:#fff">{% for v,l in task_types %}<option value="{{ v }}" style="color:#000">{{ l }}</option>{% endfor %}</select></div>
+    </div>
+    {% if burza_leads %}<select name="project_lead" class="form-select form-select-sm mb-2" style="background:rgba(255,255,255,.08);border-color:#475569;color:#fff"><option value="" style="color:#000">{% trans "-- Burza projekt (opciono) --" %}</option>{% for bl in burza_leads %}<option value="{{ bl.pk }}" style="color:#000">[{{ bl.get_status_display }}] {{ bl.title }}</option>{% endfor %}</select>{% endif %}
+    <input type="text" name="description" placeholder="{% trans "Opis rada..." %}" class="form-control form-control-sm mb-3" style="background:rgba(255,255,255,.06);border-color:#475569;color:#fff">
+    <div class="text-center"><button type="submit" class="btn btn-go btn-lg px-5">{% trans "▶ START" %}</button></div>
+  </form>
+{% endif %}
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="mini-stat"><div class="num">{{ hours_today|floatformat:1 }}</div><div class="lbl">{% trans "Danas" %}</div><div class="ps"><div class="f" style="width:{% widthratio hours_today daily_target 100 %}%;background:#3b82f6"></div></div></div>
+  <div class="mini-stat"><div class="num">{{ hours_week|floatformat:1 }}</div><div class="lbl">{% trans "Tjedan" %}</div><div class="ps"><div class="f" style="width:{{ week_progress }}%;background:#22c55e"></div></div></div>
+  <div class="mini-stat"><div class="num">{{ hours_month|floatformat:1 }}</div><div class="lbl">{% trans "Mjesec" %}</div></div>
+  <div class="mini-stat"><div class="num" style="color:#c9a84c">€{{ earnings_month|floatformat:0 }}</div><div class="lbl">{% trans "Zarada" %}</div></div>
+</div>
+
+<!-- WEEK -->
+<div class="week-bar">{% for d in week_days %}<div class="week-day {% if d.is_today %}today{% endif %}"><div class="dn">{{ d.day_name }}</div><div class="dh">{{ d.hours|floatformat:1 }}</div><div class="db"><div class="f" style="width:{{ d.percentage }}%"></div></div></div>{% endfor %}</div>
+
+<!-- TABS -->
+<div class="mtabs">
+  <button class="mtab on" data-t="add">{% trans "➕ Unos" %}</button>
+  <button class="mtab" data-t="entries">{% trans "📋 Unosi" %}</button>
+  <button class="mtab" data-t="quick">{% trans "⚡ Brzo" %}</button>
+  <button class="mtab" data-t="profil">{% trans "👤 Profil" %}</button>
+</div>
+
+<!-- TAB ADD -->
+<div class="tp on" id="t-add">
+  <div class="qa">
+    <h6>➕ {% trans "Novi unos" %}</h6>
+    <form method="post" action="{% url 'worktime:ts_add' %}" id="addForm">{% csrf_token %}
+      <div class="row g-2">
+        <div class="col-5"><label style="font-size:.7rem;font-weight:600">{% trans "Projekt" %}</label><select name="project" class="form-select form-select-sm" required><option value="">--</option>{% for p in projects %}<option value="{{ p.id }}">{{ p.code }} – {{ p.name }}</option>{% endfor %}</select></div><div class="col-1" style="display:flex;align-items:flex-end"><button type="button" onclick="window.location.href='/projects/new/?next='+encodeURIComponent(window.location.pathname)" style="width:100%;height:31px;background:none;border:1px solid #dee2e6;border-radius:6px;font-weight:700;cursor:pointer;color:#64748b" title="Novi projekt">+</button></div>
+        <div class="col-6"><label style="font-size:.7rem;font-weight:600">{% trans "Datum" %}</label><input type="date" name="date" value="{{ today|date:'Y-m-d' }}" class="form-control form-control-sm" id="fDate"></div>
+        <div class="col-4"><label style="font-size:.7rem;font-weight:600">{% trans "Od" %}</label><input type="time" name="start_time" class="form-control form-control-sm" value="07:00" id="fStart"></div>
+        <div class="col-4"><label style="font-size:.7rem;font-weight:600">{% trans "Do" %}</label><input type="time" name="end_time" class="form-control form-control-sm" value="15:30" id="fEnd"></div>
+        <div class="col-4"><label style="font-size:.7rem;font-weight:600">{% trans "Pauza" %}</label><input type="number" name="break_minutes" value="30" class="form-control form-control-sm" id="fBreak"></div>
+        <div class="col-8"><input type="text" name="description" class="form-control form-control-sm" placeholder="{% trans "Opis rada" %}"></div>
+        <div class="col-4"><select name="task_type" class="form-select form-select-sm">{% for v,l in task_types %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
+        {% if burza_leads %}<div class="col-12"><label style="font-size:.7rem;font-weight:600">{% trans "Burza projekt (opciono)" %}</label><select name="project_lead" class="form-select form-select-sm"><option value="">{% trans "-- bez burza projekta --" %}</option>{% for bl in burza_leads %}<option value="{{ bl.pk }}">[{{ bl.get_status_display }}] {{ bl.title }}</option>{% endfor %}</select></div>{% endif %}
+        <div class="col-12"><div id="liveCalc"></div></div>
+        <div class="col-12"><button type="submit" class="btn btn-primary w-100">{% trans "💾 Spremi" %}</button></div>
+      </div>
+    </form>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="post" action="{% url 'worktime:ts_copy_prev' %}" class="flex-fill">{% csrf_token %}<button class="btn btn-outline-secondary btn-sm w-100">{% trans "📋 Kopiraj jučer" %}</button></form>
+    <a href="{% url 'worktime:ts_weekly' %}" class="btn btn-outline-primary btn-sm flex-fill">{% trans "📅 Tjedni" %}</a>
+    <a href="/worktime/export/excel/" class="btn btn-outline-success btn-sm flex-fill">{% trans "📊 Excel" %}</a>
+  </div>
+</div>
+
+<!-- TAB ENTRIES -->
+<div class="tp" id="t-entries">
+  {% if pending_count %}<div class="alert alert-warning py-2 px-3" style="font-size:.8rem;border-radius:10px">⏳ <strong>{{ pending_count }}</strong> {% trans "čeka odobrenje" %}</div>{% endif %}
+  {% for e in recent_entries %}
+  <div class="ei">
+    <div class="ec" style="background:{{ e.project.color }}"></div>
+    <div class="en"><div class="pn">{{ e.project.code }} · {{ e.date|date:"d.m" }}{% if e.from_timer %} ⏱{% endif %}</div><div class="ed">{{ e.description|default:"–" }}</div></div>
+    <div class="text-end"><div class="eh">{{ e.duration }}h</div>{% if e.status == 'PENDING' %}<span class="badge bg-warning text-dark" style="font-size:.6rem">⏳</span>{% elif e.status == 'APPROVED' %}<span class="badge bg-success" style="font-size:.6rem">✓</span>{% elif e.status == 'REJECTED' %}<span class="badge bg-danger" style="font-size:.6rem">✗</span>{% endif %}</div>
+    {% if e.status == 'PENDING' or e.status == 'DRAFT' %}<a href="{% url 'worktime:ts_edit' e.pk %}" class="btn btn-outline-primary" style="padding:4px 8px;font-size:.75rem">✏️</a>{% endif %}
+  </div>
+  {% empty %}<div class="text-center py-4 text-muted"><div style="font-size:2.5rem">📭</div><p class="mt-2">{% trans "Nema unosa" %}</p></div>{% endfor %}
+</div>
+
+<!-- TAB QUICK -->
+<div class="tp" id="t-quick">
+  {% if templates %}<h6 style="font-weight:700;font-size:.82rem;margin-bottom:12px">{% trans "⚡ Predlošci" %}</h6>{% for t in templates %}<form method="post" action="{% url 'worktime:ts_template_use' t.pk %}" class="d-inline">{% csrf_token %}<button type="submit" class="tc"><span style="width:8px;height:8px;border-radius:50%;background:{{ t.project.color }};display:inline-block"></span>{{ t.name }} ({{ t.default_duration }}h)</button></form>{% endfor %}{% endif %}
+  {% if frequent_projects %}<h6 style="font-weight:700;font-size:.82rem;margin:20px 0 12px">{% trans "🔥 Česti" %}</h6>{% for fp in frequent_projects %}<form method="post" action="{% url 'worktime:ts_add' %}" class="d-inline">{% csrf_token %}<input type="hidden" name="project" value="{{ fp.project__id }}"><input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}"><input type="hidden" name="duration" value="8"><input type="hidden" name="task_type" value="DEVELOPMENT"><button type="submit" class="tc" onclick="return confirm('8h danas?')"><span style="width:8px;height:8px;border-radius:50%;background:{{ fp.project__color }};display:inline-block"></span>{{ fp.project__code }} – 8h</button></form>{% endfor %}{% endif %}
+  <div class="qa mt-3"><h6>{% trans "📝 Bilješka" %}</h6><form method="post" action="{% url 'worktime:ts_note_save' %}">{% csrf_token %}<input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}"><textarea name="note" class="form-control form-control-sm mb-2" rows="2" placeholder="{% trans "Bilješke..." %}">{{ daily_note.note|default:"" }}</textarea><button type="submit" class="btn btn-outline-primary btn-sm w-100">{% trans "💾 Spremi" %}</button></form></div>
+</div>
+
+<!-- TAB PROFIL -->
+<div class="tp" id="t-profil">
+  <div class="qa">
+    <h6>{% trans "👤 Moj profil" %}</h6>
+    <table class="table table-sm table-borderless mb-0" style="font-size:.85rem">
+      <tr><td class="text-muted" style="width:40%">{% trans "Ime" %}</td><td><strong>{{ request.user.get_full_name|default:request.user.username }}</strong></td></tr>
+      <tr><td class="text-muted">{% trans "Email" %}</td><td>{{ request.user.email|default:"-" }}</td></tr>
+      <tr><td class="text-muted">{% trans "Zadnja prijava" %}</td><td>{{ request.user.last_login|date:"d.m.Y H:i"|default:"-" }}</td></tr>
+    </table>
+  </div>
+
+  <div class="qa">
+    <h6>{% trans "💰 Satnica i fond sati" %}</h6>
+    <form method="post" action="{% url 'worktime:ts_profile' %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_rate">
+      <div class="row g-2">
+        <div class="col-4">
+          <label style="font-size:.72rem;font-weight:700">{% trans "Satnica (€)" %}</label>
+          <input type="number" name="hourly_rate" value="{{ hourly_rate|default:"0" }}" step="0.50" min="0" class="form-control" style="font-weight:700;color:#c9a84c;font-size:1.1rem;text-align:center">
+        </div>
+        <div class="col-4">
+          <label style="font-size:.72rem;font-weight:700">{% trans "Dnevno (h)" %}</label>
+          <input type="number" name="daily_hours" value="{{ daily_target|default:"0" }}" step="0.5" min="1" max="24" class="form-control" style="font-size:1.1rem;text-align:center">
+        </div>
+        <div class="col-4">
+          <label style="font-size:.72rem;font-weight:700">{% trans "Tjedno (h)" %}</label>
+          <input type="number" name="weekly_hours" value="{{ weekly_target|default:"0" }}" step="1" min="1" max="168" class="form-control" style="font-size:1.1rem;text-align:center">
+        </div>
+        <div class="col-12 mt-2">
+          <button type="submit" class="btn btn-warning w-100" style="font-weight:700;font-size:.9rem">{% trans "💾 Spremi satnicu" %}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="qa">
+    <h6>{% trans "📊 Mjesečni pregled" %}</h6>
+    <div class="row g-2 text-center">
+      <div class="col-4"><div style="font-size:1.3rem;font-weight:700">{{ hours_month|floatformat:1 }}h</div><div style="font-size:.6rem;color:#64748b;text-transform:uppercase">{% trans "Sati" %}</div></div>
+      <div class="col-4"><div style="font-size:1.3rem;font-weight:700;color:#c9a84c">€{{ earnings_month|floatformat:0 }}</div><div style="font-size:.6rem;color:#64748b;text-transform:uppercase">{% trans "Zarada" %}</div></div>
+      <div class="col-4"><div style="font-size:1.3rem;font-weight:700;color:#3b82f6">{{ pending_count }}</div><div style="font-size:.6rem;color:#64748b;text-transform:uppercase">{% trans "Na čekanju" %}</div></div>
+    </div>
+  </div>
+
+  <div class="d-grid gap-2">
+    <a href="{% url 'worktime:ts_profile' %}" class="btn btn-primary">{% trans "👤 Uredi profil i lozinku" %}</a>
+    <a href="{% url 'worktime:ts_analytics' %}" class="btn btn-outline-secondary btn-sm">{% trans "📈 Analitika" %}</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ═══ TABS ═══ */
+document.querySelectorAll('.mtab').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=this.getAttribute('data-t');
+    document.querySelectorAll('.tp').forEach(function(p){p.classList.remove('on')});
+    document.querySelectorAll('.mtab').forEach(function(x){x.classList.remove('on')});
+    document.getElementById('t-'+t).classList.add('on');
+    this.classList.add('on');
+  });
+});
+
+/* ═══ LIVE CALC ═══ */
+var fS=document.getElementById('fStart'),fE=document.getElementById('fEnd'),fB=document.getElementById('fBreak'),lc=document.getElementById('liveCalc');
+function calc(){
+  if(!fS||!fE||!fS.value||!fE.value){if(lc)lc.style.display='none';return;}
+  var s=fS.value.split(':'),e=fE.value.split(':');
+  var sm=parseInt(s[0])*60+parseInt(s[1]),em=parseInt(e[0])*60+parseInt(e[1]);
+  if(em<=sm)em+=1440;
+  var br=parseInt(fB?fB.value:0)||0,h=Math.max(0,(em-sm-br)/60);
+  lc.style.display='block';
+  if(h>16){lc.style.color='#ef4444';lc.style.background='#fef2f2';lc.textContent='❌ '+h.toFixed(1)+'h - MAX 16h!';}
+  else if(h>12){lc.style.color='#f59e0b';lc.style.background='#fffbeb';lc.textContent='⚠️ '+h.toFixed(1)+'h - sigurni?';}
+  else{lc.style.color='#3b82f6';lc.style.background='#eff6ff';lc.textContent='⏱ '+h.toFixed(1)+'h';}
+}
+if(fS){fS.addEventListener('change',calc);fE.addEventListener('change',calc);if(fB)fB.addEventListener('change',calc);calc();}
+
+/* ═══ FORM VALIDATION ═══ */
+var af=document.getElementById('addForm');
+if(af)af.addEventListener('submit',function(ev){
+  if(fS&&fE&&fS.value&&fE.value){
+    var s=fS.value.split(':'),e=fE.value.split(':');
+    var sm=parseInt(s[0])*60+parseInt(s[1]),em=parseInt(e[0])*60+parseInt(e[1]);
+    if(em<=sm)em+=1440;
+    var br=parseInt(fB?fB.value:0)||0,h=(em-sm-br)/60;
+    if(h>16){ev.preventDefault();alert('❌ Max 16h po unosu! ('+h.toFixed(1)+'h)');return;}
+    if(h>12&&!confirm('⚠️ '+h.toFixed(1)+'h - sigurni?')){ev.preventDefault();return;}
+    if(h<=0){ev.preventDefault();alert('❌ Trajanje mora biti pozitivno!');return;}
+  }
+  var fd=document.getElementById('fDate');
+  if(fd&&fd.value){
+    var d=new Date(fd.value),t=new Date();t.setHours(0,0,0,0);
+    if((t-d)/(864e5)>60){ev.preventDefault();alert('❌ Max 60 dana unazad!');return;}
+    if(d>t&&!confirm('⚠️ Budući datum - sigurni?')){ev.preventDefault();return;}
+  }
+});
+
+/* ═══ TIMER ═══ */
+{% if active_timer %}
+(function(){
+  var d=document.getElementById('timerDisplay'),e=document.getElementById('timerEarnings'),r={{ hourly_rate|default:"20" }};
+  {% if active_timer.status == 'RUNNING' %}
+  var T={{ active_timer.elapsed_seconds }},t0=Date.now();
+  function tk(){var t=T+Math.floor((Date.now()-t0)/1e3),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;
+    d.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    e.textContent='€ '+(t/3600*r).toFixed(2);}
+  tk();setInterval(tk,1e3);
+  {% else %}
+  var t={{ active_timer.elapsed_seconds }};e.textContent='€ '+(t/3600*r).toFixed(2);
+  {% endif %}
+})();
+{% endif %}
+
+/* ═══ TIMER OVERTIME CHECK ═══ */
+{% if active_timer %}
+(function(){
+  var MAX_H = 10;
+  var warnEl = document.getElementById('timerOvertimeAlert');
+  var warnHEl = document.getElementById('timerHoursWarn');
+  function checkOvertime() {
+    var txt = document.getElementById('timerDisplay').textContent;
+    var parts = txt.split(':');
+    if (parts.length >= 1) {
+      var h = parseInt(parts[0]);
+      if (h >= MAX_H && warnEl) {
+        warnEl.style.display = 'block';
+        if (warnHEl) warnHEl.textContent = h;
+        if (navigator.vibrate && h >= 12) navigator.vibrate([300, 100, 300]);
+      }
+    }
+  }
+  setInterval(checkOvertime, 30000); // check every 30s
+  setTimeout(checkOvertime, 2000); // initial check after 2s
+})();
+{% endif %}
+
+/* ═══ VIBRATION ═══ */
+document.querySelectorAll('.btn-go,.btn-st,.btn-pa,.btn-re').forEach(function(b){
+  b.addEventListener('click',function(){if(navigator.vibrate)navigator.vibrate(50);});
+});
+</script>
+
+{% include "components/quick_add_modal.html" %}
+{% endblock %}

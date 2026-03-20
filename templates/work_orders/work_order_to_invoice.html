@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Fakturiraj nalog {{ wo.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:600px">
+  <div class="card bg-dark border-warning">
+    <div class="card-header text-warning fw-bold">
+      <i class="fas fa-file-invoice me-2"></i>Kreiraj račun iz radnog naloga
+    </div>
+    <div class="card-body">
+      <p>Kreirati će se novi račun (DRAFT) za nalog <strong class="text-warning">{{ wo.order_number }}</strong>
+        klijenta <strong>{{ wo.client.name|default:"—" }}</strong>.</p>
+      <p>Nalog će biti označen kao <strong>Fakturiran</strong>.</p>
+      <ul class="text-muted small">
+        {% for item in wo.items.all %}
+        <li>{{ item.description }} × {{ item.quantity }} {{ item.unit }} = {{ item.total_gross|floatformat:2 }} €</li>
+        {% endfor %}
+      </ul>
+      <p class="fw-bold text-warning">Ukupno: {{ wo.total_gross|floatformat:2 }} €</p>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+      <a href="{% url 'work_orders:detail' wo.pk %}" class="btn btn-outline-secondary">Odustani</a>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-warning">
+          <i class="fas fa-file-invoice me-1"></i>Kreiraj račun
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

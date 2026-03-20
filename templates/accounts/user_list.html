@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>{% trans "Upravljanje korisnicima" %}</h4>
+    <span class="badge bg-primary">{{ users|length }} korisnika</span>
+</div>
+
+<div class="stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "Korisnik" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th>{% trans "Uloga" %}</th>
+                    <th>{% trans "Zadnja prijava" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th class="text-end">{% trans "Akcije" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm me-2" style="width:32px; height:32px; background:#e2e8f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#475569">
+                                {{ u.username|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ u.get_full_name|default:u.username }}</div>
+                                <small class="text-muted">@{{ u.username }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ u.email }}</td>
+                    <td>
+                        {% if u.is_superuser %}<span class="badge bg-danger">{% trans "Superadmin" %}</span>
+                        {% elif u.is_staff %}<span class="badge bg-warning text-dark">{% trans "Staff" %}</span>
+                        {% else %}<span class="badge bg-light text-dark">{% trans "User" %}</span>{% endif %}
+                    </td>
+                    <td><small>{{ u.last_login|date:"d.m.Y H:i"|default:"Nikad" }}</small></td>
+                    <td>
+                        {% if u.is_active %}<span class="text-success">{% trans "● Aktivan" %}</span>
+                        {% else %}<span class="text-danger">{% trans "● Inaktivan" %}</span>{% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'accounts:user_edit' u.pk %}" class="btn btn-sm btn-outline-primary">{% trans "Uredi" %}</a>
+                        <a href="{% url 'accounts:toggle_status' u.pk %}" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                            {% if u.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

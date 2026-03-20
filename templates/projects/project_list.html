@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Projekti{% endblock %}
+{% block page_title %}Projekti{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-hard-hat me-2 text-warning"></i>{% trans "Projekti" %}</h2>
+    <small class="text-muted">{{ total }} projekata</small>
+  </div>
+  <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>{% trans "Novi projekt" %}</a>
+</div>
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2">
+    <div class="col-md-5">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, šifra, lokacija...">
+    </div>
+    <div class="col-md-4">
+      <select name="status" class="form-select">
+        <option value="">{% trans "Svi statusi" %}</option>
+        {% for val,label in status_choices %}
+        <option value="{{ val }}" {% if status_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
+      <a href="{% url 'projects_index' %}" class="btn btn-outline-secondary">✕</a>
+    </div>
+  </form>
+</div>
+
+<div class="row g-3">
+  {% for p in projects %}
+  <div class="col-md-6 col-xl-4">
+    <div class="stat-card h-100">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div>
+          <span class="badge bg-dark mb-1">{{ p.code }}</span>
+          <h6 class="mb-0 fw-bold">
+            <a href="{% url 'project_detail' p.pk %}" class="text-decoration-none text-dark">{{ p.name }}</a>
+          </h6>
+          {% if p.location %}<small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ p.location }}</small>{% endif %}
+        </div>
+        <span class="badge
+          {% if p.status == 'active' %}bg-success
+          {% elif p.status == 'planning' %}bg-secondary
+          {% elif p.status == 'on_hold' %}bg-warning text-dark
+          {% elif p.status == 'completed' %}bg-primary
+          {% else %}bg-danger{% endif %}">
+          {{ p.status }}
+        </span>
+      </div>
+
+      {% if p.description %}
+      <p class="text-muted small mb-2">{{ p.description|truncatechars:80 }}</p>
+      {% endif %}
+
+      <div class="row g-1 small mb-2">
+        {% if p.client %}
+        <div class="col-6"><span class="text-muted">{% trans "Klijent:" %}</span> {{ p.client.name|truncatechars:20 }}</div>
+        {% endif %}
+        {% if p.budget %}
+        <div class="col-6"><span class="text-muted">{% trans "Budžet:" %}</span> <strong>{{ p.budget|floatformat:0 }} €</strong></div>
+        {% endif %}
+        {% if p.start_date %}
+        <div class="col-6"><span class="text-muted">{% trans "Start:" %}</span> {{ p.start_date|date:"d.m.Y" }}</div>
+        {% endif %}
+        {% if p.end_date %}
+        <div class="col-6"><span class="text-muted">{% trans "Kraj:" %}</span> {{ p.end_date|date:"d.m.Y" }}</div>
+        {% endif %}
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-2">
+        {% if p.manager %}
+        <small class="text-muted"><i class="fas fa-user-tie me-1"></i>{{ p.manager.get_full_name|default:p.manager.username }}</small>
+        {% else %}<span></span>{% endif %}
+        <a href="{% url 'project_edit' p.pk %}" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-edit"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="stat-card text-center py-5">
+      <i class="fas fa-project-diagram" style="font-size:3rem;color:#444;margin-bottom:16px;display:block"></i>
+      <h5 style="color:#ccc;margin-bottom:8px">Nemate projekata</h5>
+      <p class="text-muted mb-3">Pratite radove, timove i napredak kroz projekte</p>
+      <a href="{% url 'project_create' %}" class="btn btn-warning btn-sm">
+        <i class="fas fa-plus me-1"></i> Novi projekt
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

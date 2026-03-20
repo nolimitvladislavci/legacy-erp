@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AI Patrol — Jutarnji izvje\u0161taji{% endblock %}
+
+{% block content %}
+<style>
+    .patrol-header { margin-bottom: 2rem; }
+    .patrol-header h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
+    .patrol-header p { color: #888; font-size: 0.9rem; margin-top: 4px; }
+    .patrol-card {
+        background: #111;
+        border-left: 4px solid var(--gold, #c9a84c);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+    }
+    .patrol-card.has-issues { border-left-color: #ef4444; }
+    .patrol-date { color: #888; font-size: 0.85rem; }
+    .patrol-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+    .patrol-badge.ok { background: #22c55e22; color: #22c55e; }
+    .patrol-badge.alert { background: #ef444422; color: #ef4444; }
+    .patrol-summary {
+        margin-top: 1rem;
+        color: #ddd;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    .patrol-toggle {
+        background: none;
+        border: 1px solid #333;
+        color: #888;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: all 0.15s;
+    }
+    .patrol-toggle:hover { border-color: var(--gold, #c9a84c); color: var(--gold, #c9a84c); }
+    .patrol-raw {
+        display: none;
+        margin-top: 1rem;
+        background: #0a0a0a;
+        border: 1px solid #222;
+        border-radius: 6px;
+        padding: 1rem;
+        overflow-x: auto;
+        font-size: 0.75rem;
+        color: #888;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 400px;
+    }
+    .patrol-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #555;
+        font-size: 1.1rem;
+    }
+    .patrol-empty i { font-size: 3rem; display: block; margin-bottom: 1rem; color: #333; }
+</style>
+
+<div class="patrol-header">
+    <h1>\ud83d\udee1\ufe0f AI Midnight Patrol</h1>
+    <p>Automatski no\u0107ni pregled svih modula. Izvje\u0161taji se generiraju svaki dan u 02:00.</p>
+</div>
+
+{% if reports %}
+    {% for report in reports %}
+    <div class="patrol-card {% if report.has_issues %}has-issues{% endif %}">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <div>
+                <span class="patrol-date">{{ report.created_at|date:"d.m.Y H:i" }}</span>
+                {% if report.has_issues %}
+                    <span class="patrol-badge alert">Ima problema</span>
+                {% else %}
+                    <span class="patrol-badge ok">Sve OK</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="patrol-summary">{{ report.summary }}</div>
+        <button class="patrol-toggle" onclick="toggleRaw(this)">Prika\u017ei sirove podatke</button>
+        <div class="patrol-raw">{{ report.raw_data|safe }}</div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="patrol-empty">
+        <i class="bi bi-shield-check"></i>
+        Jo\u0161 nema patrol izvje\u0161taja.<br>
+        <small>Prvi izvje\u0161taj bit \u0107e generiran sutra u 02:00.</small>
+    </div>
+{% endif %}
+
+<script>
+function toggleRaw(btn) {
+    const raw = btn.nextElementSibling;
+    if (raw.style.display === 'block') {
+        raw.style.display = 'none';
+        btn.textContent = 'Prika\u017ei sirove podatke';
+    } else {
+        raw.style.display = 'block';
+        btn.textContent = 'Sakrij sirove podatke';
+    }
+}
+</script>
+{% endblock %}

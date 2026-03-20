@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Uredi: {{ target.username }} - Superadmin{% endblock %}
+{% block content %}
+<div style="max-width:700px;margin:0 auto;padding:1rem">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+    <div>
+      <h4 style="margin:0;font-weight:700"><i class="fas fa-user-edit" style="color:#c9a84c"></i> Uredi korisnika</h4>
+      <p style="color:#6b7280;font-size:.82rem;margin:4px 0 0">{{ target.username }} (ID: {{ target.pk }})</p>
+    </div>
+    <a href="{% url 'superadmin_users' %}" style="padding:6px 16px;background:#1e293b;color:#94a3b8;border-radius:6px;text-decoration:none;font-size:.82rem"><i class="fas fa-arrow-left"></i> Natrag</a>
+  </div>
+
+  <form method="post" style="display:flex;flex-direction:column;gap:1rem">
+    {% csrf_token %}
+
+    <!-- Osnovni podaci -->
+    <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
+      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-id-card"></i> Osnovni podaci</h6>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+        <div>
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Ime</label>
+          <input type="text" name="first_name" value="{{ target.first_name }}"
+            style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        </div>
+        <div>
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Prezime</label>
+          <input type="text" name="last_name" value="{{ target.last_name }}"
+            style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Email</label>
+          <input type="email" name="email" value="{{ target.email }}"
+            style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        </div>
+        <div>
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Telefon</label>
+          <input type="text" name="phone" value="{{ profile.phone }}"
+            style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        </div>
+        <div>
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Odjel</label>
+          <input type="text" name="department" value="{{ profile.department }}"
+            style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tvrtka i rola -->
+    <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
+      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-building"></i> Tvrtka i rola</h6>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+        <div>
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Tvrtka</label>
+          <select name="company" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+            <option value="">-- Bez tvrtke --</option>
+            {% for c in companies %}
+            <option value="{{ c.id }}" {% if profile.company_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Rola</label>
+          <select name="role" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+            {% for val, label in role_choices %}
+            <option value="{{ val }}" {% if profile.role == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Jezik</label>
+          <select name="preferred_language" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+            <option value="hr" {% if profile.preferred_language == 'hr' %}selected{% endif %}>Hrvatski</option>
+            <option value="de" {% if profile.preferred_language == 'de' %}selected{% endif %}>Deutsch</option>
+            <option value="en" {% if profile.preferred_language == 'en' %}selected{% endif %}>English</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Permisije -->
+    <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
+      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-shield-alt"></i> Permisije i status</h6>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem">
+        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#e8e8e8;cursor:pointer">
+          <input type="hidden" name="is_active" value="0">
+          <input type="checkbox" name="is_active" value="1" {% if target.is_active %}checked{% endif %}
+            style="accent-color:#4caf7d;width:16px;height:16px"> Aktivan
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#e8e8e8;cursor:pointer">
+          <input type="hidden" name="is_staff" value="0">
+          <input type="checkbox" name="is_staff" value="1" {% if target.is_staff %}checked{% endif %}
+            style="accent-color:#2563eb;width:16px;height:16px"> Staff
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#e8e8e8;cursor:pointer">
+          <input type="hidden" name="is_superuser" value="0">
+          <input type="checkbox" name="is_superuser" value="1" {% if target.is_superuser %}checked{% endif %}
+            style="accent-color:#7c3aed;width:16px;height:16px"> Superadmin
+        </label>
+      </div>
+      <hr style="border-color:#252830;margin:1rem 0">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem">
+        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#94a3b8;cursor:pointer">
+          <input type="hidden" name="can_view_financials" value="0">
+          <input type="checkbox" name="can_view_financials" value="1" {% if profile.can_view_financials %}checked{% endif %}
+            style="accent-color:#c9a84c;width:16px;height:16px"> Vidi financije
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#94a3b8;cursor:pointer">
+          <input type="hidden" name="can_approve_timesheets" value="0">
+          <input type="checkbox" name="can_approve_timesheets" value="1" {% if profile.can_approve_timesheets %}checked{% endif %}
+            style="accent-color:#c9a84c;width:16px;height:16px"> Odobrava sate
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#94a3b8;cursor:pointer">
+          <input type="hidden" name="can_upload_photos" value="0">
+          <input type="checkbox" name="can_upload_photos" value="1" {% if profile.can_upload_photos %}checked{% endif %}
+            style="accent-color:#c9a84c;width:16px;height:16px"> Upload slika
+        </label>
+      </div>
+    </div>
+
+    <!-- Nova lozinka -->
+    <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
+      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-key"></i> Promjena lozinke</h6>
+      <div>
+        <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Nova lozinka (ostavite prazno ako ne mijenjate)</label>
+        <input type="password" name="new_password" autocomplete="new-password"
+          style="width:100%;max-width:350px;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div style="background:#0a0a0a;border:1px solid #1e2130;border-radius:8px;padding:1rem;font-size:.75rem;color:#6b7280">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem">
+        <div>Username: <strong style="color:#94a3b8">{{ target.username }}</strong></div>
+        <div>Registriran: <strong style="color:#94a3b8">{{ target.date_joined|date:"d.m.Y H:i" }}</strong></div>
+        <div>Zadnji login: <strong style="color:#94a3b8">{{ target.last_login|date:"d.m.Y H:i"|default:"Nikad" }}</strong></div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display:flex;gap:.8rem;justify-content:flex-end">
+      <a href="{% url 'superadmin_users' %}"
+        style="padding:10px 24px;background:#1e293b;color:#94a3b8;border-radius:6px;text-decoration:none;font-size:.85rem">Odustani</a>
+      <button type="submit"
+        style="padding:10px 24px;background:#c9a84c;color:#000;border:none;border-radius:6px;font-weight:700;font-size:.85rem;cursor:pointer">
+        <i class="fas fa-save"></i> Spremi promjene
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

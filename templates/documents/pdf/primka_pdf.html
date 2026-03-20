@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>@page { margin: 15mm; size: A4; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size:10pt; color:#1a1a1a; }
+.header { display:flex; justify-content:space-between; border-bottom:2pt solid #0f172a; padding-bottom:12pt; margin-bottom:16pt; }
+.header h1 { font-size:16pt; color:#0f172a; }
+.header .number { font-size:12pt; color:#c9a84c; font-weight:600; }
+.parties { display:flex; gap:16pt; margin-bottom:16pt; }
+.party { flex:1; background:#f8fafc; padding:10pt; border-left:3pt solid #c9a84c; }
+.party h3 { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:4pt; }
+.party .name { font-size:10pt; font-weight:700; }
+.party .detail { font-size:8pt; color:#475569; }
+table { width:100%; border-collapse:collapse; margin-bottom:12pt; }
+thead tr { background:#0f172a; color:white; }
+th { padding:6pt 8pt; font-size:8pt; text-transform:uppercase; letter-spacing:.5px; text-align:left; }
+th.r { text-align:right; }
+td { padding:6pt 8pt; font-size:9pt; border-bottom:.5pt solid #e2e8f0; }
+td.r { text-align:right; }
+.total-row { background:#0f172a; color:white; font-weight:700; }
+.notes { margin-top:12pt; padding:8pt; background:#fffbeb; border-left:3pt solid #c9a84c; font-size:9pt; }
+.signatures { display:flex; justify-content:space-between; margin-top:40pt; }
+.sig-box { width:40%; border-top:1pt solid #000; padding-top:4pt; font-size:8pt; text-align:center; }
+.footer { position:fixed; bottom:10mm; left:15mm; right:15mm; text-align:center; font-size:7pt; color:#94a3b8; border-top:.5pt solid #e2e8f0; padding-top:4pt; }</style></head><body>
+<div class="header">
+  <div><h1>{{ doc.company.name }}</h1><div style="font-size:8pt;color:#475569">OIB: {{ doc.company.oib|default:"—" }}<br>{{ doc.company.address|default:"" }}</div></div>
+  <div style="text-align:right"><div class="number">PRIMKA</div><div style="font-size:14pt;font-weight:700">{{ doc.doc_number }}</div><div style="font-size:8pt;color:#475569">Datum: {{ doc.date_issued|date:"d.m.Y" }}</div></div>
+</div>
+<div class="parties">
+  <div class="party"><h3>Izdavatelj</h3><div class="name">{{ doc.company.name }}</div><div class="detail">OIB: {{ doc.company.oib|default:"—" }}<br>{{ doc.company.address|default:"" }}</div></div>
+  <div class="party"><h3>Primatelj</h3><div class="name">{{ doc.partner.name|default:"—" }}</div><div class="detail">{% if doc.partner %}{{ doc.partner.address|default:"" }}{% endif %}</div></div>
+</div>
+<table>
+  <thead><tr><th>#</th><th>Naziv</th><th class="r">Kol.</th><th>Jed.</th><th class="r">Cijena</th><th class="r">PDV</th><th class="r">Ukupno</th></tr></thead>
+  <tbody>
+    {% for item in items %}
+    <tr><td>{{ forloop.counter }}</td><td>{{ item.product_name }}</td><td class="r">{{ item.quantity|floatformat:2 }}</td><td>{{ item.unit }}</td><td class="r">{{ item.unit_price|floatformat:2 }} &euro;</td><td class="r">{{ item.vat_rate|floatformat:0 }}%</td><td class="r"><strong>{{ item.line_total_with_vat|floatformat:2 }} &euro;</strong></td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><td colspan="5"></td><td class="r">Osnovica:</td><td class="r">{{ doc.total|floatformat:2 }} &euro;</td></tr>
+    <tr><td colspan="5"></td><td class="r">PDV:</td><td class="r">{{ doc.total_vat|floatformat:2 }} &euro;</td></tr>
+    <tr class="total-row"><td colspan="5"></td><td class="r">UKUPNO:</td><td class="r">{{ doc.total_with_vat|floatformat:2 }} &euro;</td></tr>
+  </tfoot>
+</table>
+{% if doc.notes %}<div class="notes"><strong>Napomena:</strong> {{ doc.notes }}</div>{% endif %}
+<div class="signatures">
+  <div class="sig-box">Izdao: {{ doc.created_by.get_full_name|default:doc.created_by.username|default:"" }}</div>
+  <div class="sig-box">Preuzeo: _____________________</div>
+</div>
+<div class="footer">{{ doc.company.name }} · OIB: {{ doc.company.oib|default:"" }} · {{ doc.company.address|default:"" }} · Generirano: {% now "d.m.Y H:i" %}</div>
+</body></html>

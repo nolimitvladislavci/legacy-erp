@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if edit %}Uredi imovinu{% else %}Nova imovina{% endif %}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">{% if edit %}Uredi: {{ asset.asset_code }}{% else %}Nova imovina{% endif %}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="card-header">Osnovni podaci</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4"><label class="form-label">Naziv</label><input type="text" name="name" class="form-control" value="{% if edit %}{{ asset.name }}{% endif %}" required></div>
+                    <div class="col-md-3"><label class="form-label">Kategorija</label>
+                        <select name="category" class="form-select">{% for val, label in categories %}<option value="{{ val }}" {% if edit and asset.category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                    </div>
+                    {% if edit %}
+                    <div class="col-md-3"><label class="form-label">Status</label>
+                        <select name="status" class="form-select">{% for val, label in statuses %}<option value="{{ val }}" {% if asset.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3"><label class="form-label">Proizvodjac</label><input type="text" name="make" class="form-control" value="{% if edit %}{{ asset.make }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Model</label><input type="text" name="model_name" class="form-control" value="{% if edit %}{{ asset.model_name }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Serijski broj</label><input type="text" name="serial_number" class="form-control" value="{% if edit %}{{ asset.serial_number }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Lokacija</label><input type="text" name="location" class="form-control" value="{% if edit %}{{ asset.location }}{% endif %}"></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6"><label class="form-label">Opis</label><textarea name="description" class="form-control" rows="2">{% if edit %}{{ asset.description }}{% endif %}</textarea></div>
+                    <div class="col-md-3"><label class="form-label">Dodijeljeno</label>
+                        <select name="assigned_to" class="form-select"><option value="">--</option>{% for u in users %}<option value="{{ u.id }}" {% if edit and asset.assigned_to_id == u.id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select>
+                    </div>
+                    <div class="col-md-3"><label class="form-label">Fotografija</label><input type="file" name="photo" class="form-control"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">Vozilo (opcionalno)</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3"><label class="form-label">Registracija</label><input type="text" name="registration_plate" class="form-control" value="{% if edit %}{{ asset.registration_plate }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">VIN</label><input type="text" name="vin" class="form-control" maxlength="17" value="{% if edit %}{{ asset.vin }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Kilometraza</label><input type="number" name="mileage" class="form-control" value="{% if edit %}{{ asset.mileage }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Gorivo</label><input type="text" name="fuel_type" class="form-control" value="{% if edit %}{{ asset.fuel_type }}{% endif %}"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">Financije & dokumenti</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3"><label class="form-label">Nabavna cijena</label><input type="number" name="purchase_price" class="form-control" step="0.01" value="{% if edit %}{{ asset.purchase_price }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Trenutna vrijednost</label><input type="number" name="current_value" class="form-control" step="0.01" value="{% if edit %}{{ asset.current_value }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Amortizacija %</label><input type="number" name="depreciation_rate" class="form-control" step="0.01" value="{% if edit %}{{ asset.depreciation_rate }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Datum nabave</label><input type="date" name="purchase_date" class="form-control" value="{% if edit %}{{ asset.purchase_date|date:'Y-m-d' }}{% endif %}"></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-3"><label class="form-label">Garancija do</label><input type="date" name="warranty_until" class="form-control" value="{% if edit %}{{ asset.warranty_until|date:'Y-m-d' }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Osiguranje do</label><input type="date" name="insurance_until" class="form-control" value="{% if edit %}{{ asset.insurance_until|date:'Y-m-d' }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Registracija do</label><input type="date" name="registration_until" class="form-control" value="{% if edit %}{{ asset.registration_until|date:'Y-m-d' }}{% endif %}"></div>
+                    <div class="col-md-3"><label class="form-label">Leasing do</label><input type="date" name="leasing_until" class="form-control" value="{% if edit %}{{ asset.leasing_until|date:'Y-m-d' }}{% endif %}"></div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4"><label class="form-label">Polica osiguranja</label><input type="text" name="insurance_policy" class="form-control" value="{% if edit %}{{ asset.insurance_policy }}{% endif %}"></div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">{% if edit %}Spremi{% else %}Kreiraj{% endif %}</button>
+        <a href="{% url 'maintenance:asset_list' %}" class="btn btn-secondary btn-lg">Odustani</a>
+    </form>
+</div>
+{% endblock %}

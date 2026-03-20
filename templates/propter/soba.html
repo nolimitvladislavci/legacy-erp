@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static %}
+
+{% block page_title %}Propter Soba{% endblock %}
+
+{% block content %}
+<style>
+:root { --soba-gold: #c9a84c; --soba-dark: #0a0a0a; --soba-card: #111318; --soba-border: #1e293b; --soba-text: #e2e8f0; --soba-muted: #94a3b8; }
+
+.soba-layout { display: grid; grid-template-columns: 1fr 360px; gap: 20px; padding: 0; }
+.soba-main { min-width: 0; }
+.soba-side { display: flex; flex-direction: column; gap: 16px; }
+
+.soba-upload-zone {
+    border: 2px dashed var(--soba-gold); border-radius: 16px; padding: 40px 24px;
+    text-align: center; cursor: pointer;
+    background: linear-gradient(135deg, rgba(201,168,76,0.03), rgba(201,168,76,0.08));
+    transition: all 0.3s ease; position: relative; overflow: hidden;
+}
+.soba-upload-zone:hover, .soba-upload-zone.dragover {
+    background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(201,168,76,0.15));
+    border-color: #d4b85c; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,168,76,0.15);
+}
+.soba-upload-zone .soba-icon { font-size: 3rem; color: var(--soba-gold); margin-bottom: 12px; }
+.soba-upload-zone h3 { color: var(--soba-text); font-size: 1.15rem; margin-bottom: 6px; font-weight: 600; }
+.soba-upload-zone .soba-or { color: var(--soba-muted); font-size: 0.85rem; margin: 8px 0; }
+.soba-upload-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.soba-formats { color: var(--soba-muted); font-size: 0.75rem; margin-top: 12px; }
+
+.soba-btn-gold {
+    background: linear-gradient(135deg, #c9a84c, #b8963e); color: #0a0a0a; border: none;
+    padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.soba-btn-gold:hover { background: linear-gradient(135deg, #d4b85c, #c9a84c); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.3); }
+.soba-btn-ghost {
+    background: transparent; color: var(--soba-muted); border: 1px solid var(--soba-border);
+    padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.soba-btn-ghost:hover { border-color: var(--soba-gold); color: var(--soba-gold); }
+.soba-btn-camera {
+    background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none;
+    padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+    cursor: pointer; display: none; align-items: center; gap: 8px;
+}
+
+.soba-preview { margin-top: 16px; }
+.soba-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.soba-preview-item { position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden; border: 1px solid var(--soba-border); background: var(--soba-card); }
+.soba-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+.soba-preview-item .soba-file-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.soba-preview-item .soba-file-icon i { font-size: 2rem; }
+.soba-preview-item .soba-num { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+.soba-preview-item .soba-remove { position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.soba-preview-item .soba-fname { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.75); color: white; font-size: 0.6rem; padding: 3px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.soba-preview-actions { display: flex; gap: 10px; align-items: center; }
+
+.soba-card { background: var(--soba-card); border: 1px solid var(--soba-border); border-radius: 12px; padding: 18px; color: var(--soba-text); }
+.soba-card h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.soba-card h4 i { color: var(--soba-gold); font-size: 0.8rem; }
+
+.soba-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.soba-stat { text-align: center; padding: 10px 6px; background: rgba(201,168,76,0.04); border-radius: 8px; border: 1px solid rgba(201,168,76,0.1); }
+.soba-stat-num { font-size: 1.4rem; font-weight: 800; color: var(--soba-gold); line-height: 1; }
+.soba-stat-label { font-size: 0.65rem; color: var(--soba-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.soba-recent { margin-top: 20px; }
+.soba-recent h3 { font-size: 0.95rem; font-weight: 700; color: var(--soba-text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.soba-recent h3 i { color: var(--soba-gold); }
+.soba-batch-list { display: flex; flex-direction: column; gap: 6px; }
+.soba-batch-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--soba-card); border: 1px solid var(--soba-border);
+    border-radius: 8px; text-decoration: none; color: var(--soba-text); transition: all 0.15s; font-size: 0.82rem;
+}
+.soba-batch-item:hover { border-color: var(--soba-gold); background: rgba(201,168,76,0.04); color: var(--soba-text); text-decoration: none; }
+.soba-batch-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.soba-batch-right { color: var(--soba-muted); font-size: 0.72rem; white-space: nowrap; }
+.soba-badge { font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.soba-badge-ready { background: rgba(34,197,94,0.15); color: #22c55e; }
+.soba-badge-confirmed { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.soba-badge-error { background: rgba(239,68,68,0.15); color: #ef4444; }
+.soba-badge-pending, .soba-badge-processing { background: rgba(234,179,8,0.15); color: #eab308; animation: sobaPulse 1.5s infinite; }
+@keyframes sobaPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+.soba-otp-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.78rem; }
+.soba-otp-item:last-child { border-bottom: none; }
+.soba-otp-num { color: var(--soba-gold); font-weight: 600; }
+
+.soba-ai { flex: 1; display: flex; flex-direction: column; min-height: 300px; }
+.soba-ai-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.soba-ai-header h4 { margin-bottom: 0; }
+.soba-ai-messages {
+    flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+    padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; max-height: 320px; min-height: 180px;
+}
+.soba-ai-msg { padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; line-height: 1.45; max-width: 90%; word-wrap: break-word; }
+.soba-ai-msg.assistant { background: rgba(201,168,76,0.1); color: var(--soba-text); align-self: flex-start; border: 1px solid rgba(201,168,76,0.15); }
+.soba-ai-msg.user { background: rgba(59,130,246,0.15); color: var(--soba-text); align-self: flex-end; }
+.soba-ai-input { display: flex; gap: 8px; margin-top: 10px; }
+.soba-ai-input input {
+    flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--soba-border);
+    color: var(--soba-text); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; outline: none;
+}
+.soba-ai-input input:focus { border-color: var(--soba-gold); }
+.soba-ai-input input::placeholder { color: var(--soba-muted); }
+.soba-ai-input button {
+    background: var(--soba-gold); color: #0a0a0a; border: none; width: 36px; height: 36px;
+    border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+}
+
+.soba-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.soba-header h2 { font-size: 1.3rem; font-weight: 800; color: var(--soba-text); margin: 0; display: flex; align-items: center; gap: 10px; }
+.soba-header h2 i { color: var(--soba-gold); }
+.soba-header-links { display: flex; gap: 8px; }
+.soba-header-links a {
+    font-size: 0.75rem; color: var(--soba-muted); text-decoration: none;
+    padding: 6px 12px; border: 1px solid var(--soba-border); border-radius: 6px; transition: all 0.15s;
+}
+.soba-header-links a:hover { border-color: var(--soba-gold); color: var(--soba-gold); }
+
+@media (max-width: 1024px) {
+    .soba-layout { grid-template-columns: 1fr; }
+    .soba-side { flex-direction: row; flex-wrap: wrap; }
+    .soba-side > * { flex: 1; min-width: 280px; }
+}
+@media (max-width: 640px) {
+    .soba-upload-zone { padding: 24px 16px; }
+    .soba-upload-zone .soba-icon { font-size: 2rem; }
+    .soba-btn-camera { display: inline-flex !important; font-size: 1rem; padding: 14px 24px; width: 100%; justify-content: center; }
+    .soba-preview-grid { grid-template-columns: repeat(3, 1fr); }
+    .soba-side { flex-direction: column; }
+    .soba-side > * { min-width: 0; }
+}
+</style>
+
+<div class="container-fluid px-3 py-2" style="max-width:1280px">
+    <div class="soba-header">
+        <h2><i class="fas fa-door-open"></i> Propter Soba</h2>
+        <div class="soba-header-links">
+            <a href="{% url 'propter:dashboard' %}"><i class="fas fa-leaf"></i> Propter Hub</a>
+            <a href="/smart-import/"><i class="fas fa-file-import"></i> Smart Import</a>
+            <a href="{% url 'propter:otpremnica_list' %}"><i class="fas fa-truck"></i> Otpremnice</a>
+        </div>
+    </div>
+
+    <div class="soba-layout">
+        <div class="soba-main">
+            <form method="post" action="/smart-import/" enctype="multipart/form-data" id="sobaUploadForm">
+                {% csrf_token %}
+                <div class="soba-upload-zone" id="dropZone" onclick="document.getElementById('sobaFileInput').click()">
+                    <div class="soba-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <h3>Povucite datoteke ovdje</h3>
+                    <p class="soba-or">ili odaberite opciju</p>
+                    <div class="soba-upload-btns">
+                        <label class="soba-btn-gold" onclick="event.stopPropagation()">
+                            <i class="fas fa-folder-open"></i> Odaberi datoteke
+                            <input type="file" id="sobaFileInput" name="files" multiple
+                                   accept=".pdf,.xml,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                                   style="display:none" onchange="sobaAddFiles(this.files)">
+                        </label>
+                        <button type="button" class="soba-btn-camera" id="cameraBtn" onclick="event.stopPropagation(); document.getElementById('sobaCameraInput').click()">
+                            <i class="fas fa-camera"></i> Slikaj racun
+                        </button>
+                        <input type="file" id="sobaCameraInput" accept="image/*" capture="environment"
+                               style="display:none" onchange="sobaAddFiles(this.files); this.value='';">
+                    </div>
+                    <p class="soba-formats">PDF, XML (e-Racun UBL), JPG, PNG, HEIC</p>
+                </div>
+
+                <div class="soba-preview" id="sobaPreview" style="display:none">
+                    <div class="soba-preview-grid" id="sobaPreviewGrid"></div>
+                    <div class="soba-preview-actions">
+                        <button type="submit" class="soba-btn-gold" id="sobaUploadBtn">
+                            <i class="fas fa-upload"></i> Ucitaj i obradi (<span id="sobaFileCount">0</span>)
+                        </button>
+                        <button type="button" class="soba-btn-ghost" onclick="sobaClearFiles()">
+                            <i class="fas fa-times"></i> Ponisti
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="soba-recent">
+                <h3><i class="fas fa-history"></i> Nedavne obrade</h3>
+                {% if recent_batches %}
+                <div class="soba-batch-list">
+                    {% for b in recent_batches %}
+                    <a href="/smart-import/{{ b.pk }}/" class="soba-batch-item">
+                        <div class="soba-batch-left">
+                            <span class="soba-badge soba-badge-{{ b.status }}">{{ b.status }}</span>
+                            <span style="color:var(--soba-muted);font-size:0.75rem">{{ b.file_type|default:"file"|upper }}</span>
+                            {% if b.items.count %}<span style="color:var(--soba-muted)">({{ b.items.count }} stavki)</span>{% endif %}
+                        </div>
+                        <div class="soba-batch-right">{{ b.created_at|date:"d.m.Y H:i" }}</div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="soba-card" style="text-align:center;padding:30px">
+                    <i class="fas fa-inbox" style="font-size:2rem;color:var(--soba-muted);margin-bottom:8px;display:block"></i>
+                    <p style="color:var(--soba-muted);font-size:0.85rem;margin:0">Nema nedavnih obrada. Ucitajte prvi dokument!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="soba-side">
+            <div class="soba-card">
+                <h4><i class="fas fa-chart-bar"></i> Statistika</h4>
+                <div class="soba-stats-grid">
+                    <div class="soba-stat">
+                        <div class="soba-stat-num">{{ total_batches|default:"0" }}</div>
+                        <div class="soba-stat-label">Ukupno uvoza</div>
+                    </div>
+                    <div class="soba-stat">
+                        <div class="soba-stat-num">{{ confirmed_batches|default:"0" }}</div>
+                        <div class="soba-stat-label">Potvrdeno</div>
+                    </div>
+                    <div class="soba-stat">
+                        <div class="soba-stat-num" style="{% if pending_batches %}color:#eab308{% endif %}">{{ pending_batches|default:"0" }}</div>
+                        <div class="soba-stat-label">Na cekanju</div>
+                    </div>
+                    <div class="soba-stat">
+                        <div class="soba-stat-num">{{ total_otp|default:"0" }}</div>
+                        <div class="soba-stat-label">Otpremnice</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="soba-card">
+                <h4><i class="fas fa-calendar-alt"></i> Tekuci period</h4>
+                {% if current_period %}
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <span style="font-size:0.9rem;font-weight:700">{{ current_period.year }}/{{ current_period.month|stringformat:"02d" }}</span>
+                    <span class="soba-badge {% if current_period.status == 'open' %}soba-badge-ready{% elif current_period.status == 'closed' %}soba-badge-confirmed{% else %}soba-badge-pending{% endif %}">{{ current_period.get_status_display }}</span>
+                </div>
+                <div style="font-size:0.78rem;color:var(--soba-muted)">
+                    <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Otpremnice:</span><span style="color:var(--soba-text)">{{ current_period.otpremnica_count }}</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Ukupno s PDV:</span><span style="color:var(--soba-gold);font-weight:700">{{ current_period.total_with_tax }} EUR</span></div>
+                </div>
+                <a href="{% url 'propter:period_detail' current_period.pk %}" style="display:block;margin-top:8px;font-size:0.75rem;color:var(--soba-gold);text-decoration:none">Detalji perioda <i class="fas fa-arrow-right" style="font-size:0.6rem"></i></a>
+                {% else %}
+                <p style="color:var(--soba-muted);font-size:0.8rem;margin:0">Nema otvorenog perioda za tekuci mjesec.</p>
+                {% endif %}
+            </div>
+
+            {% if recent_otpremnice %}
+            <div class="soba-card">
+                <h4><i class="fas fa-truck"></i> Zadnje otpremnice</h4>
+                {% for otp in recent_otpremnice %}
+                <div class="soba-otp-item">
+                    <span class="soba-otp-num">OTP-{{ otp.number }}</span>
+                    <span style="color:var(--soba-muted);font-size:0.7rem">{{ otp.recipient_name|truncatechars:18 }}</span>
+                    <span>{{ otp.total }} EUR</span>
+                </div>
+                {% endfor %}
+                <a href="{% url 'propter:otpremnica_list' %}" style="display:block;margin-top:8px;font-size:0.75rem;color:var(--soba-gold);text-decoration:none">Sve otpremnice <i class="fas fa-arrow-right" style="font-size:0.6rem"></i></a>
+            </div>
+            {% endif %}
+
+            {% if eko %}
+            <div class="soba-card" style="background:linear-gradient(135deg,rgba(34,197,94,0.05),rgba(34,197,94,0.1));border-color:rgba(34,197,94,0.2)">
+                <h4><i class="fas fa-leaf" style="color:#22c55e"></i> Eko status</h4>
+                <div style="text-align:center">
+                    <div style="font-size:0.78rem;color:var(--soba-muted);margin-top:6px">{{ eko.co2_saved_grams }}g CO2 usteda</div>
+                    <div style="font-size:0.72rem;color:var(--soba-muted)">{{ eko.paper_saved_sheets }} listova papira</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="soba-card soba-ai">
+                <div class="soba-ai-header"><h4><i class="fas fa-robot"></i> AI Asistent</h4></div>
+                <div class="soba-ai-messages" id="sobaAiMessages">
+                    <div class="soba-ai-msg assistant">Bok! Ucitajte dokument ili me pitajte o vasim racunima, otpremnicama ili uvozima.</div>
+                </div>
+                <div class="soba-ai-input">
+                    <input type="text" placeholder="Pitajte nesto..." id="sobaAiInput"
+                           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSobaAi();}">
+                    <button onclick="sendSobaAi()" title="Posalji"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let sobaFiles = [];
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    document.getElementById('cameraBtn').style.display = 'inline-flex';
+}
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', function(e) { e.preventDefault(); this.classList.remove('dragover'); });
+dropZone.addEventListener('drop', function(e) { e.preventDefault(); this.classList.remove('dragover'); if (e.dataTransfer.files.length) sobaAddFiles(e.dataTransfer.files); });
+
+function sobaAddFiles(fileList) { for (let i = 0; i < fileList.length; i++) sobaFiles.push(fileList[i]); sobaRenderFiles(); }
+function sobaRemoveFile(idx) { sobaFiles.splice(idx, 1); sobaRenderFiles(); }
+function sobaClearFiles() { sobaFiles = []; sobaRenderFiles(); }
+
+function sobaRenderFiles() {
+    var preview = document.getElementById('sobaPreview'), grid = document.getElementById('sobaPreviewGrid');
+    if (sobaFiles.length === 0) { preview.style.display = 'none'; return; }
+    preview.style.display = 'block'; grid.innerHTML = '';
+    document.getElementById('sobaFileCount').textContent = sobaFiles.length;
+    sobaFiles.forEach(function(file, idx) {
+        var item = document.createElement('div'); item.className = 'soba-preview-item';
+        var isImage = file.type.startsWith('image/'), isPdf = file.name.toLowerCase().endsWith('.pdf'), isXml = file.name.toLowerCase().endsWith('.xml');
+        var inner = '';
+        if (isImage) inner = '<img src="' + URL.createObjectURL(file) + '">';
+        else if (isPdf) inner = '<div class="soba-file-icon"><i class="fas fa-file-pdf" style="color:#ef4444"></i></div>';
+        else if (isXml) inner = '<div class="soba-file-icon"><i class="fas fa-file-code" style="color:#3b82f6"></i></div>';
+        else inner = '<div class="soba-file-icon"><i class="fas fa-file" style="color:#94a3b8"></i></div>';
+        var sizeMB = (file.size / 1024 / 1024).toFixed(1);
+        item.innerHTML = inner + '<span class="soba-num">' + (idx+1) + '</span><button type="button" class="soba-remove" onclick="sobaRemoveFile(' + idx + ')"><i class="fas fa-times"></i></button><span class="soba-fname">' + file.name.substring(0,20) + ' (' + sizeMB + 'MB)</span>';
+        grid.appendChild(item);
+    });
+    var dt = new DataTransfer(); sobaFiles.forEach(function(f) { dt.items.add(f); });
+    document.getElementById('sobaFileInput').files = dt.files;
+}
+
+document.getElementById('sobaUploadForm').addEventListener('submit', function(e) {
+    if (sobaFiles.length === 0) { e.preventDefault(); alert('Dodajte barem jednu datoteku.'); return; }
+    var btn = document.getElementById('sobaUploadBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obrada...'; btn.disabled = true;
+});
+
+function sendSobaAi() {
+    var input = document.getElementById('sobaAiInput'), msg = input.value.trim();
+    if (!msg) return;
+    var container = document.getElementById('sobaAiMessages');
+    var userDiv = document.createElement('div'); userDiv.className = 'soba-ai-msg user'; userDiv.textContent = msg;
+    container.appendChild(userDiv); input.value = ''; container.scrollTop = container.scrollHeight;
+    var thinkDiv = document.createElement('div'); thinkDiv.className = 'soba-ai-msg assistant'; thinkDiv.id = 'sobaThink';
+    thinkDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Razmisljam...'; container.appendChild(thinkDiv);
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    fetch('/ai/api/chat/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf ? csrf.value : '' },
+        body: JSON.stringify({ message: msg, module_context: 'propter' })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        var t = document.getElementById('sobaThink'); if (t) t.remove();
+        var aiDiv = document.createElement('div'); aiDiv.className = 'soba-ai-msg assistant';
+        var text = data.content || data.reply || data.message || 'Nema odgovora.';
+        text = text.replace(/\[ACTION:.+?\|.+?\]/g, '').trim();
+        aiDiv.innerHTML = text.replace(/\n/g, '<br>');
+        container.appendChild(aiDiv); container.scrollTop = container.scrollHeight;
+    }).catch(function(err) {
+        var t = document.getElementById('sobaThink'); if (t) t.remove();
+        var errDiv = document.createElement('div'); errDiv.className = 'soba-ai-msg assistant';
+        errDiv.style.color = '#ef4444'; errDiv.textContent = 'Greska: ' + err.message;
+        container.appendChild(errDiv);
+    });
+}
+</script>
+{% endblock %}

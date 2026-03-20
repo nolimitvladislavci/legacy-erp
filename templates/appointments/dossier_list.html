@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Kartoni klijenata{% endblock %}
+{% block page_title %}Kartoni klijenata{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="mb-0">
+    <i class="fas fa-folder-open me-2" style="color:var(--gold)"></i>
+    Kartoni klijenata
+  </h2>
+  <a href="{% url 'partners:list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="fas fa-user-plus me-1"></i>Novi klijent
+  </a>
+</div>
+
+<!-- Pretraga -->
+<form method="get" class="mb-3">
+  <div class="input-group input-group-sm" style="max-width:360px">
+    <input type="text" name="q" value="{{ q }}" class="form-control"
+           placeholder="Pretraži klijenta…" style="background:#1a1a1a;border-color:#333;color:#e0e0e0">
+    <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+    {% if q %}<a href="?" class="btn btn-outline-danger"><i class="fas fa-times"></i></a>{% endif %}
+  </div>
+</form>
+
+{% if page_obj.object_list %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle" style="font-size:.9rem">
+    <thead>
+      <tr style="border-bottom:2px solid rgba(201,168,76,.3)">
+        <th>Klijent</th>
+        <th>Tip kartona</th>
+        <th>Posljednji unos</th>
+        <th>Ažurirano</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for dossier in page_obj %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+        <td>
+          <a href="{% url 'appointments:dossier_detail' dossier.client.pk %}"
+             style="color:var(--gold);font-weight:600;text-decoration:none">
+            <i class="fas fa-user me-2" style="opacity:.5"></i>{{ dossier.client.name }}
+          </a>
+        </td>
+        <td>
+          <span class="badge" style="background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3)">
+            <i class="fas fa-{{ dossier.branch_icon }} me-1"></i>{{ dossier.get_branch_type_display }}
+          </span>
+        </td>
+        <td>
+          {% with last=dossier.entries.first %}
+            {% if last %}
+              <span style="color:#aaa">
+                <i class="fas fa-{{ last.entry_icon }} me-1" style="color:{{ last.entry_color }}"></i>
+                {{ last.title|truncatechars:40 }}
+              </span>
+            {% else %}
+              <span style="color:#555;font-style:italic">Nema unosa</span>
+            {% endif %}
+          {% endwith %}
+        </td>
+        <td style="color:#888;font-size:.82rem;white-space:nowrap">{{ dossier.updated_at|date:"d.m.Y H:i" }}</td>
+        <td class="text-end">
+          <a href="{% url 'appointments:dossier_detail' dossier.client.pk %}"
+             class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-folder-open me-1"></i>Otvori
+          </a>
+          <a href="{% url 'appointments:dossier_entry_create' dossier.client.pk %}"
+             class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:700">
+            <i class="fas fa-plus"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Paginacija -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-3">
+  <ul class="pagination pagination-sm justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+      <a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}">{{ num }}</a>
+    </li>
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="stat-card text-center py-5" style="border:1px dashed rgba(201,168,76,.2)">
+  <i class="fas fa-folder-open fa-3x mb-3" style="color:rgba(201,168,76,.3)"></i>
+  <p class="mb-2" style="color:#888">
+    {% if q %}
+      Nema kartona koji odgovaraju pretrazi <strong>{{ q }}</strong>
+    {% else %}
+      Još nema kartona klijenata.
+    {% endif %}
+  </p>
+  <p style="font-size:.85rem;color:#555">
+    Kartoni se kreiraju automatski kad zaposlenik doda prvi unos za klijenta putem
+    <a href="{% url 'partners:list' %}" style="color:var(--gold)">liste partnera</a>.
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

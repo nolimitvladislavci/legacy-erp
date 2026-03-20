@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 15mm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #1a1a1a; }
+  h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
+  .sub { text-align: center; font-size: 9px; color: #666; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { border: 1px solid #333; padding: 5px 6px; font-size: 9px; vertical-align: top; }
+  th { background: #f0f0f0; font-weight: bold; text-align: center; }
+  .expired { color: #dc2626; font-weight: bold; }
+  .answered { color: #16a34a; }
+  .footer { text-align: center; font-size: 7px; color: #888; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
+</style>
+</head>
+<body>
+
+<h1>KNJIGA PRIGOVORA</h1>
+<div class="sub">
+  {{ company.name }} | OIB: {{ company.oib|default:"—" }} | {{ company.address|default:"" }}, {{ company.city|default:"" }}<br>
+  Zakon o zaštiti potrošača (NN 19/22) čl. 10 — Evidencija prigovora
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:30px">R.br.</th>
+      <th style="width:65px">Datum primitka</th>
+      <th style="width:100px">Potrošač</th>
+      <th style="width:80px">Kontakt</th>
+      <th>Opis prigovora</th>
+      <th style="width:65px">Datum odgovora</th>
+      <th>Odgovor</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in prigovori %}
+    <tr>
+      <td style="text-align:center;font-weight:bold">{{ p.redni_broj }}</td>
+      <td>{{ p.datum_primitka|date:"d.m.Y" }}</td>
+      <td>{{ p.ime_potrosaca }}</td>
+      <td style="font-size:8px">{{ p.kontakt }}</td>
+      <td>{{ p.opis_prigovora }}</td>
+      <td>
+        {% if p.datum_odgovora %}
+          <span class="answered">{{ p.datum_odgovora|date:"d.m.Y" }}</span>
+        {% elif p.rok_istekao %}
+          <span class="expired">PROBIJEN ROK!</span>
+        {% else %}
+          <em style="color:#888">Čeka ({{ p.dana_do_roka }}d)</em>
+        {% endif %}
+      </td>
+      <td>{{ p.odgovor|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center;color:#888;padding:20px">Nema evidentiranih prigovora.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="footer">
+  Generirano: {% now "d.m.Y H:i" %} | {{ company.name }} | Rok za odgovor: 15 dana (čl. 10 st. 5 ZZP)<br>
+  Ova evidencija se čuva trajno i mora biti dostupna inspektoru na zahtjev.
+</div>
+
+</body>
+</html>

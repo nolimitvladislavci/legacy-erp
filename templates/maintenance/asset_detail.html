@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ asset.name }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ asset.asset_code }} - {{ asset.name }}</h2>
+        <div>
+            <a href="{% url 'maintenance:asset_edit' asset.pk %}" class="btn btn-warning">Uredi</a>
+            <a href="{% url 'maintenance:add_log' asset.pk %}" class="btn btn-success">+ Servisni zapis</a>
+            <a href="{% url 'maintenance:add_schedule' asset.pk %}" class="btn btn-info">+ Raspored</a>
+        </div>
+    </div>
+    {% for alert in alerts %}
+    <div class="alert alert-{{ alert.type }}">{{ alert.msg }}</div>
+    {% endfor %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">Osnovni podaci</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Kategorija:</strong> {{ asset.get_category_display }}</li>
+                    <li class="list-group-item"><strong>Status:</strong> <span class="badge bg-{% if asset.status == 'active' %}success{% elif asset.status == 'maintenance' %}warning{% else %}secondary{% endif %}">{{ asset.get_status_display }}</span></li>
+                    <li class="list-group-item"><strong>Proizvodjac:</strong> {{ asset.make|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Model:</strong> {{ asset.model_name|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Serijski br.:</strong> {{ asset.serial_number|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Lokacija:</strong> {{ asset.location|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Dodijeljeno:</strong> {{ asset.assigned_to|default:"-" }}</li>
+                </ul>
+            </div>
+            {% if asset.category == 'vehicle' %}
+            <div class="card mb-3">
+                <div class="card-header">Vozilo</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Registracija:</strong> {{ asset.registration_plate|default:"-" }}</li>
+                    <li class="list-group-item"><strong>VIN:</strong> {{ asset.vin|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Kilometraza:</strong> {{ asset.mileage }} km</li>
+                    <li class="list-group-item"><strong>Gorivo:</strong> {{ asset.fuel_type|default:"-" }}</li>
+                </ul>
+            </div>
+            {% endif %}
+            <div class="card mb-3">
+                <div class="card-header">Financije & dokumenti</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Nabavna cijena:</strong> {{ asset.purchase_price }} EUR</li>
+                    <li class="list-group-item"><strong>Trenutna vrijednost:</strong> {{ asset.current_value }} EUR</li>
+                    <li class="list-group-item"><strong>Datum nabave:</strong> {{ asset.purchase_date|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Garancija do:</strong> {{ asset.warranty_until|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Osiguranje do:</strong> {{ asset.insurance_until|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Registracija do:</strong> {{ asset.registration_until|default:"-" }}</li>
+                    <li class="list-group-item"><strong>Leasing do:</strong> {{ asset.leasing_until|default:"-" }}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Rasporedi odrzavanja</strong></div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>Zadatak</th><th>Ucestalost</th><th>Sljedeci rok</th><th>Status</th><th>Proc. trosak</th></tr></thead>
+                        <tbody>
+                        {% for s in schedules %}
+                        <tr class="{% if s.is_overdue %}table-danger{% endif %}">
+                            <td>{{ s.task_name }}</td>
+                            <td>{{ s.get_frequency_display }}</td>
+                            <td>{{ s.next_due }}</td>
+                            <td>{% if s.is_overdue %}<span class="badge bg-danger">Zakasnjelo</span>{% else %}<span class="badge bg-success">Na vrijeme</span>{% endif %}</td>
+                            <td>{{ s.estimated_cost }} EUR</td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" class="text-muted text-center">Nema rasporeda</td></tr>{% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header"><strong>Povijest odrzavanja</strong></div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>Datum</th><th>Naslov</th><th>Tip</th><th>Trosak</th><th>Serviser</th></tr></thead>
+                        <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.date_performed }}</td>
+                            <td>{{ log.title }}</td>
+                            <td><span class="badge bg-secondary">{{ log.get_maintenance_type_display }}</span></td>
+                            <td class="text-end">{{ log.total_cost }} EUR</td>
+                            <td>{{ log.service_provider|default:"-" }}</td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" class="text-muted text-center">Nema zapisa</td></tr>{% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Narudzba {{ order.order_number }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-file-invoice text-warning me-2"></i>{{ order.order_number }}</h2>
+    <small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }} &mdash; {{ order.buyer_company.name }}</small>
+  </div>
+  <div>
+    {% if order.status == "pending" %}<span class="badge bg-warning text-dark fs-6">Ceka</span>
+    {% elif order.status == "confirmed" %}<span class="badge bg-primary fs-6">Potvrdeno</span>
+    {% elif order.status == "in_transit" %}<span class="badge bg-info fs-6">U dostavi</span>
+    {% elif order.status == "delivered" %}<span class="badge bg-success fs-6">Dostavljeno</span>
+    {% endif %}
+  </div>
+</div>
+<div class="stat-card p-4 mb-3">
+  <h6>Stavke</h6>
+  <table class="table table-sm" style="font-size:.85rem">
+    <thead><tr><th>Proizvod</th><th>OPG</th><th>Kolicina</th><th>Cijena</th><th class="text-end">Ukupno</th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr><td>{{ item.product.name }}</td><td>{{ item.seller_company.name }}</td><td>{{ item.quantity }} {{ item.product.unit }}</td><td>{{ item.unit_price }}&euro;</td><td class="text-end fw-bold">{{ item.total }}&euro;</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot><tr><td colspan="4" class="text-end fw-bold">Ukupno:</td><td class="text-end fw-bold" style="color:#c9a84c;font-size:1.1rem">{{ order.total }}&euro;</td></tr></tfoot>
+  </table>
+</div>
+{% if sub_orders %}
+<div class="stat-card p-4">
+  <h6>Sub-narudzbe po OPG-u</h6>
+  {% for sub in sub_orders %}
+  <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid #333">
+    <div><i class="fas fa-tractor text-success me-2"></i>{{ sub.seller_company.name }}</div>
+    <div>{{ sub.subtotal }}&euro; <small class="text-muted">(provizija: {{ sub.commission_amount }}&euro;)</small>
+      {% if sub.status == "pending" %}<span class="badge bg-warning text-dark ms-2">Ceka</span>
+      {% elif sub.status == "confirmed" %}<span class="badge bg-primary ms-2">Potvrdeno</span>
+      {% elif sub.status == "ready" %}<span class="badge bg-info ms-2">Spremno</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# Smart Cart: Reklamacija + Legal Vault #}
+<div class="stat-card p-4 mt-3">
+  <h6>Dokumenti i akcije</h6>
+  <div class="d-flex gap-3 flex-wrap">
+    <a href="{% url 'marketplace:reklamacija' token=order.order_number %}" class="btn btn-outline-danger">
+      <i class="fas fa-exclamation-triangle me-1"></i>Reklamacija (QR)
+    </a>
+    <a href="{% url 'marketplace:legal_vault' pk=order.pk %}" class="btn btn-outline-warning">
+      <i class="fas fa-archive me-1"></i>Legal Vault (ZIP)
+    </a>
+    <a href="{% url 'marketplace:reorder' pk=order.pk %}" class="btn btn-outline-success">
+      <i class="fas fa-redo me-1"></i>Ponovi narudzbu
+    </a>
+  </div>
+</div>
+{% endblock %}

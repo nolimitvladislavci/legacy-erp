@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Sastavnice (BOM){% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-sitemap me-2 text-warning"></i>Sastavnice (BOM / Normativi)</h4>
+    <a href="{% url 'calculator:bom_create' %}" class="btn btn-warning btn-sm">
+      <i class="fas fa-plus me-1"></i>Nova sastavnica
+    </a>
+  </div>
+
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-5">
+      <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm"
+             placeholder="Pretraži (naziv, artikl)…">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-secondary btn-sm w-100" type="submit"><i class="fas fa-search me-1"></i>Traži</button>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'calculator:bom_list' %}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-hover table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Naziv</th>
+          <th>Gotov artikl</th>
+          <th class="text-end">Prinos</th>
+          <th class="text-end">Trošak mat.</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bom in boms %}
+        <tr>
+          <td><a href="{% url 'calculator:bom_detail' bom.pk %}" class="text-warning fw-bold">{{ bom.name|default:bom }}</a></td>
+          <td>{{ bom.article.name }}</td>
+          <td class="text-end">{{ bom.yield_quantity }}</td>
+          <td class="text-end">{{ bom.total_material_cost }} €</td>
+          <td>
+            {% if bom.is_active %}
+              <span class="badge bg-success">Aktivan</span>
+            {% else %}
+              <span class="badge bg-secondary">Neaktivan</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a href="{% url 'calculator:bom_edit' bom.pk %}" class="btn btn-xs btn-outline-warning">
+              <i class="fas fa-edit"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-3">Nema sastavnica.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

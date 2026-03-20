@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Uparivanje - {{ po.po_number }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Upari narudzbenicu {{ po.po_number }} s fakturom</h2>
+    <div class="card mb-3">
+        <div class="card-body">
+            <p><strong>Narudzbenica:</strong> {{ po.po_number }} | <strong>Ukupno:</strong> {{ po.total }} EUR | <strong>Dobavljac:</strong> {{ po.supplier|default:"-" }}</p>
+        </div>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-header"><strong>Odaberi fakturu za uparivanje</strong></div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th></th><th>Broj fakture</th><th>Dobavljac</th><th>Ukupno</th><th>Datum</th></tr></thead>
+                    <tbody>
+                    {% for inv in invoices %}
+                    <tr>
+                        <td><input type="radio" name="invoice_id" value="{{ inv.id }}"></td>
+                        <td>{{ inv.invoice_number|default:inv.pk }}</td>
+                        <td>{{ inv.partner|default:"-" }}</td>
+                        <td class="text-end">{{ inv.total_amount }} EUR</td>
+                        <td>{{ inv.created_at|date:"d.m.Y" }}</td>
+                    </tr>
+                    {% empty %}<tr><td colspan="5" class="text-muted text-center">Nema faktura</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary btn-lg">Upari</button>
+            <a href="{% url 'procurement:detail' po.pk %}" class="btn btn-secondary btn-lg">Odustani</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

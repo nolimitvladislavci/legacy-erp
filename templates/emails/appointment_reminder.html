@@ -1,0 +1,18 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Podsjetnik za termin{% endblock %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#0a0a0a;font-family:'Cormorant Garamond',Georgia,serif;">Podsjetnik za termin</h2>
+<p style="color:#333;line-height:1.6;">Poštovani/a {{ client_name }},</p>
+<p style="color:#333;line-height:1.6;">podsjećamo Vas na zakazani termin sutra:</p>
+<table role="presentation" width="100%" style="margin:20px 0;border-collapse:collapse;">
+  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Termin</td>
+      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;font-weight:600;">{{ title }}</td></tr>
+  <tr><td style="padding:8px 12px;color:#555;">Datum i vrijeme</td>
+      <td style="padding:8px 12px;color:#0a0a0a;font-weight:600;">{{ datetime }}</td></tr>
+  {% if location %}
+  <tr><td style="padding:8px 12px;background:#f9f7f0;border-left:3px solid #c9a84c;color:#555;">Lokacija</td>
+      <td style="padding:8px 12px;background:#f9f7f0;color:#0a0a0a;">{{ location }}</td></tr>
+  {% endif %}
+</table>
+<p style="color:#333;line-height:1.6;">Ako ne možete doći, molimo otkažite termin na vrijeme.</p>
+{% endblock %}

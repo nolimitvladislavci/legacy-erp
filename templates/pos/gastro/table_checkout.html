@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Naplata — Stol {{ table.name }}{% endblock %}
+{% block page_title %}Naplata stola{% endblock %}
+{% block extra_head %}
+<style>
+.checkout-card{background:var(--card-bg,#1a1a2e);border-radius:12px;padding:16px;margin-bottom:12px}
+.item-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.item-row:last-child{border:none}
+.item-name{flex:1;font-weight:600}
+.item-qty{width:40px;text-align:center;color:#c9a84c}
+.item-price{width:80px;text-align:right;font-weight:700}
+.guest-select{width:30px;text-align:center}
+.guest-pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid;margin:0 2px}
+.bill-card{background:#0a1a0a;border:2px solid #22c55e;border-radius:12px;padding:16px;margin-bottom:12px}
+.method-btn{padding:8px 16px;border-radius:8px;border:2px solid;font-weight:700;cursor:pointer;font-size:.85rem;background:transparent}
+.method-btn.active{background:#c9a84c;color:#000;border-color:#c9a84c}
+.grand-total{font-size:1.8rem;font-weight:800;color:#c9a84c}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-receipt me-2"></i>Stol {{ table.name }} — Naplata</h2>
+    <small class="text-muted">{{ orders.count }} narudžbi | {{ all_items|length }} stavki</small>
+  </div>
+  <div>
+    <span class="grand-total">{{ grand_total|floatformat:2 }} EUR</span>
+  </div>
+</div>
+
+<!-- Opcije -->
+<div class="d-flex gap-2 mb-3">
+  <button class="btn btn-success btn-lg" onclick="payAll()">
+    <i class="fas fa-money-bill me-2"></i>{% trans "Naplati sve zajedno" %}
+  </button>
+  <button class="btn btn-warning btn-lg" onclick="startSplit()">
+    <i class="fas fa-divide me-2"></i>{% trans "Podijeli na goste" %}
+  </button>
+  <a href="{% url 'pos:gastro_table_order' table_id=table.pk %}" class="btn btn-outline-secondary btn-lg">
+    <i class="fas fa-arrow-left me-1"></i>{% trans "Natrag" %}
+  </a>
+</div>
+
+<!-- Sve stavke -->
+<div class="checkout-card" id="itemsList">
+  <h5 class="mb-3"><i class="fas fa-list me-2"></i>{% trans "Stavke na stolu" %}</h5>
+  {% for item in all_items %}
+  <div class="item-row" data-item-id="{{ item.order_item_id }}" data-price="{{ item.total }}">
+    <div class="guest-select" style="display:none">
+      <input type="radio" name="assign_{{ item.order_item_id }}" value="" class="guest-radio">
+    </div>
+    <div class="item-qty">{{ item.quantity }}x</div>
+    <div class="item-name">{{ item.name }}{% if item.notes %} <small class="text-warning">({{ item.notes }})</small>{% endif %}</div>
+    <div class="item-price">{{ item.total|floatformat:2 }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Split bills container (hidden initially) -->
+<div id="splitContainer" style="display:none">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5><i class="fas fa-users me-2"></i>{% trans "Računi po gostima" %}</h5>
+    <button class="btn btn-sm btn-outline-info" onclick="addGuest()">
+      <i class="fas fa-plus me-1"></i>{% trans "Dodaj gosta" %}
+    </button>
+  </div>
+  <div id="guestBills"></div>
+  <div class="mt-3">
+    <button class="btn btn-success btn-lg w-100" onclick="submitSplitPayment()">
+      <i class="fas fa-check-double me-2"></i>{% trans "Naplati sve račune" %}
+    </button>
+  </div>
+</div>
+
+<!-- Single payment modal -->
+<div class="modal fade" id="payModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content" style="background:#1a1a2e;border:2px solid #c9a84c">
+      <div class="modal-body text-center p-4">
+        <h4 class="mb-3" id="payModalTitle">Naplata</h4>
+        <h2 class="mb-3" style="color:#c9a84c" id="payModalAmount">0,00 EUR</h2>
+        <div class="d-flex gap-2 justify-content-center mb-3" id="payMethods">
+          <button class="method-btn active" onclick="selectMethod(this,'CASH')">Gotovina</button>
+          <button class="method-btn" onclick="selectMethod(this,'CARD')">Kartica</button>
+          <button class="method-btn" onclick="selectMethod(this,'CRYPTO')">Kripto</button>
+          <button class="method-btn" onclick="selectMethod(this,'REVOLUT')">Revolut</button>
+          <button class="method-btn" onclick="selectMethod(this,'AIRCASH')">Aircash</button>
+          <button class="method-btn" onclick="selectMethod(this,'MOBILE')">Mobitel</button>
+        </div>
+        <button class="btn btn-success btn-lg w-100" onclick="confirmPay()">
+          <i class="fas fa-check me-2"></i>Naplati
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="statusMsg" class="alert d-none mt-3"></div>
+
+<script>
+const CHECKOUT_URL = "{% url 'pos:table_checkout' table_id=table.pk %}";
+const CSRF = "{{ csrf_token }}";
+const ITEMS = {{ all_items|safe }};
+let selectedMethod = 'CASH';
+let guestCount = 0;
+const GUEST_COLORS = ['#3b82f6','#ef4444','#22c55e','#f59e0b','#a855f7','#ec4899','#14b8a6','#f97316'];
+
+function selectMethod(btn, method) {
+  document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedMethod = method;
+}
+
+// Pay all together
+function payAll() {
+  document.getElementById('payModalTitle').textContent = 'Naplata stola {{ table.name }}';
+  document.getElementById('payModalAmount').textContent = '{{ grand_total|floatformat:2 }} EUR';
+  new bootstrap.Modal(document.getElementById('payModal')).show();
+}
+
+function confirmPay() {
+  const allIds = ITEMS.map(i => i.order_item_id);
+  submitPayment([{guest: 'Stol {{ table.name }}', method: selectedMethod, items: allIds}]);
+}
+
+// Split payment
+function startSplit() {
+  document.getElementById('splitContainer').style.display = 'block';
+  document.querySelectorAll('.guest-select').forEach(el => el.style.display = 'block');
+  if (guestCount === 0) { addGuest(); addGuest(); }
+}
+
+function addGuest() {
+  guestCount++;
+  const color = GUEST_COLORS[(guestCount-1) % GUEST_COLORS.length];
+  const html = `<div class="bill-card" id="guest${guestCount}" style="border-color:${color}">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <input type="text" class="form-control form-control-sm d-inline-block" style="width:150px;background:transparent;border:1px solid ${color};color:#fff"
+               value="Gost ${guestCount}" id="guestName${guestCount}">
+        <span class="badge ms-2" style="background:${color}">0,00 EUR</span>
+      </div>
+      <select class="form-select form-select-sm" style="width:120px;background:#1a1a2e;color:#fff;border-color:${color}" id="guestMethod${guestCount}">
+        <option value="CASH">Gotovina</option>
+        <option value="CARD">Kartica</option>
+        <option value="CRYPTO">Kripto</option>
+        <option value="REVOLUT">Revolut</option>
+        <option value="AIRCASH">Aircash</option>
+        <option value="MOBILE">Mobitel</option>
+      </select>
+    </div>
+    <div class="guest-items" id="guestItems${guestCount}"><small class="text-muted">Klikni stavke za dodjelu</small></div>
+  </div>`;
+  document.getElementById('guestBills').insertAdjacentHTML('beforeend', html);
+
+  // Add radio buttons
+  document.querySelectorAll('.guest-select').forEach(el => {
+    const itemId = el.closest('.item-row').dataset.itemId;
+    const existing = el.querySelector(`input[value="${guestCount}"]`);
+    if (!existing) {
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'assign_' + itemId;
+      radio.value = guestCount;
+      radio.className = 'guest-radio';
+      radio.style.accentColor = color;
+      radio.onchange = () => recalcGuests();
+      el.appendChild(radio);
+    }
+  });
+}
+
+function recalcGuests() {
+  for (let g = 1; g <= guestCount; g++) {
+    let total = 0;
+    const items = [];
+    document.querySelectorAll(`input[type="radio"][value="${g}"]:checked`).forEach(r => {
+      const row = r.closest('.item-row');
+      total += parseFloat(row.dataset.price);
+      items.push(row.dataset.itemId);
+    });
+    const badge = document.querySelector(`#guest${g} .badge`);
+    if (badge) badge.textContent = total.toFixed(2) + ' EUR';
+  }
+}
+
+function submitSplitPayment() {
+  const bills = [];
+  for (let g = 1; g <= guestCount; g++) {
+    const items = [];
+    document.querySelectorAll(`input[type="radio"][value="${g}"]:checked`).forEach(r => {
+      items.push(parseInt(r.closest('.item-row').dataset.itemId));
+    });
+    if (items.length === 0) continue;
+    bills.push({
+      guest: document.getElementById('guestName' + g).value,
+      method: document.getElementById('guestMethod' + g).value,
+      items: items,
+    });
+  }
+  if (bills.length === 0) { showStatus('Dodijeli stavke gostima!', 'warning'); return; }
+  submitPayment(bills);
+}
+
+function submitPayment(bills) {
+  fetch(CHECKOUT_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    body: JSON.stringify({bills: bills}),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      let msg = 'Naplaćeno! ' + data.receipts.length + ' račun(a) za stol ' + data.table;
+      data.receipts.forEach(r => {
+        msg += '\n' + r.guest + ': ' + r.total + ' EUR (' + r.method + ')';
+        if (r.jir) msg += ' | JIR: ' + r.jir;
+      });
+      showStatus(msg, 'success');
+      // Print opcija
+      var printDiv = document.createElement('div');
+      printDiv.innerHTML = '<button onclick="printReceipts()" style="margin-top:1rem;padding:.75rem 2rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:1rem">Ispis</button>';
+      document.getElementById('statusMsg').appendChild(printDiv);
+      window._lastReceipts = data.receipts;
+      setTimeout(() => { window.location.href = "{% url 'pos:gastro_dashboard' %}"; }, 5000);
+    } else {
+      showStatus(data.error || 'Greška', 'danger');
+    }
+  })
+  .catch(e => showStatus('Greška: ' + e, 'danger'));
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.className = 'alert alert-' + type + ' mt-3';
+  el.textContent = msg;
+  el.style.whiteSpace = 'pre-line';
+}
+
+function printReceipts() {
+  if (!window._lastReceipts || !window._lastReceipts.length) return;
+  var w = window.open('','','width=380,height=600');
+  var h = '<html><head><style>body{font-family:monospace;font-size:12px;padding:10px}h2{text-align:center;border-bottom:2px solid #000}td{padding:2px}hr{border:1px dashed #000}</style></head><body>';
+  window._lastReceipts.forEach(function(r){
+    h += '<h2>RACUN</h2>';
+    h += '<p>Gost: <b>' + r.guest + '</b></p>';
+    h += '<p>Ukupno: <b>' + r.total + ' EUR</b></p>';
+    h += '<p>Nacin: ' + r.method + '</p>';
+    if (r.jir) h += '<p>JIR: ' + r.jir + '</p>';
+    h += '<hr>';
+  });
+  h += '</body></html>';
+  w.document.write(h);
+  w.document.close();
+  w.print();
+}
+</script>
+
+{% endblock %}

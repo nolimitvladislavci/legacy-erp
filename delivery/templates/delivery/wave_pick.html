@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Wave {{ wave.wave_number }}{% endblock %}
+{% block content %}
+<style>
+.wp-wrap { max-width: 800px; margin: 0 auto; padding: 16px; }
+.wp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.wp-header h2 { font-weight: 900; font-size: 1.2rem; }
+.wp-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; overflow: hidden; }
+.wp-task { padding: 16px 20px; border-bottom: 1px solid var(--border, rgba(255,255,255,0.06)); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.wp-task:last-child { border-bottom: none; }
+.wp-task.picked { opacity: .5; background: rgba(34,197,94,0.04); }
+.wp-product { font-weight: 700; font-size: 1rem; }
+.wp-qty { font-size: 1.3rem; font-weight: 900; color: #c9a84c; }
+.wp-location { font-size: .78rem; color: var(--text-muted); }
+.wp-input { background: var(--bg-main, #0a0a0a); border: 1px solid var(--border, #333); color: #e2e8f0; padding: 10px; border-radius: 8px; width: 90px; font-size: 1rem; font-weight: 700; text-align: center; }
+.btn-pick { background: #22c55e; color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 900; font-size: .9rem; cursor: pointer; min-height: 48px; min-width: 48px; }
+.btn-pick:disabled { opacity: .4; cursor: not-allowed; }
+.badge { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+.b-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+.b-picked { background: rgba(34,197,94,0.15); color: #22c55e; }
+.wp-progress { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 14px; padding: 14px; margin-bottom: 16px; text-align: center; }
+.wp-bar { height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+.wp-bar-fill { height: 100%; background: #22c55e; border-radius: 4px; transition: width .3s; }
+</style>
+
+<div class="wp-wrap">
+  <div class="wp-header">
+    <div>
+      <h2>&#127754; {{ wave.wave_number }}</h2>
+      <span style="color:var(--text-muted);font-size:.82rem;">{{ wave.get_status_display }}</span>
+    </div>
+    <a href="{% url 'delivery:warehouse_terminal' %}" style="color:#c9a84c;text-decoration:none;font-weight:700;">&larr; {% trans "Terminal" %}</a>
+  </div>
+
+  {% with total_tasks=tasks.count picked_tasks=0 %}
+  <div class="wp-progress">
+    <strong style="font-size:.85rem;">{% trans "Napredak" %}</strong>
+    <div class="wp-bar"><div class="wp-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  {% endwith %}
+
+  <div class="wp-card">
+    {% for task in tasks %}
+    <div class="wp-task {% if task.status == 'picked' %}picked{% endif %}" id="task-{{ task.pk }}">
+      <div>
+        <div class="wp-product">{{ task.product.name }}</div>
+        <div class="wp-location">{% if task.location_hint %}&#128205; {{ task.location_hint }}{% endif %}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="wp-qty">{{ task.total_quantity }} {{ task.product.unit|default:"kg" }}</div>
+        {% if task.status == 'pending' %}
+        <form method="post" style="display:flex;gap:8px;align-items:center;" class="pick-form">
+          {% csrf_token %}
+          <input type="hidden" name="task_pk" value="{{ task.pk }}">
+          <input type="number" name="picked_quantity" class="wp-input" inputmode="decimal"
+                 step="0.1" placeholder="{{ task.total_quantity }}" value="{{ task.total_quantity }}">
+          <button type="submit" class="btn-pick">&#10003;</button>
+        </form>
+        {% else %}
+        <span class="badge b-picked">&#10003; {{ task.picked_quantity }}</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+// Update progress bar
+(function(){
+  var tasks = document.querySelectorAll('.wp-task');
+  var picked = document.querySelectorAll('.wp-task.picked');
+  var pct = tasks.length > 0 ? Math.round(picked.length / tasks.length * 100) : 0;
+  var fill = document.getElementById('progress-fill');
+  if (fill) fill.style.width = pct + '%';
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Kalkulacija - {{ calculation.project.name }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Kalkulacija: {{ calculation.project.name }}</h1>
+        <a href="{% url 'calculator:list' %}" class="btn btn-secondary">{% trans "← Natrag" %}</a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <p><strong>{% trans "Projekt:" %}</strong> {{ calculation.project.name }}</p>
+            <p><strong>{% trans "Marža:" %}</strong> {{ calculation.margin_percentage }}%</p>
+            <p><strong>{% trans "PDV:" %}</strong> {{ calculation.vat_percentage }}%</p>
+            <p><strong>{% trans "Kreirano:" %}</strong> {{ calculation.created_at|date:"d.m.Y H:i" }}</p>
+            
+            <hr>
+            
+            <h5>{% trans "Stavke" %}</h5>
+            {% if calculation.items.all %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Opis" %}</th>
+                        <th>{% trans "Količina" %}</th>
+                        <th>{% trans "Cijena" %}</th>
+                        <th>{% trans "Ukupno" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in calculation.items.all %}
+                    <tr>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit_price }} €</td>
+                        <td>{{ item.total_price }} €</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">{% trans "Nema stavki." %}</p>
+            {% endif %}
+            
+            <div class="mt-3">
+                <a href="{% url 'calculator:calculation_pdf' calculation.pk %}" class="btn btn-danger">
+                    <i class="bi bi-file-pdf"></i> {% trans "Export PDF" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

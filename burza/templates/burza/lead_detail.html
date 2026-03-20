@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ lead.title }}{% endblock %}
+{% block extra_css %}
+<style>
+:root{--gold:#c9a84c;--gold2:#e8c96a}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;font-size:.75rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.pill-NOVI_UPIT{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.pill-INTERNA_PROCJENA{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+.pill-NA_BURZI{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+.pill-PREUZETO{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3)}
+.pill-RIJESENO{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+.dg{display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:start}
+.dc{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px;margin-bottom:20px}
+.dc h3{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748b;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #334155}
+.dr{display:flex;gap:12px;margin-bottom:14px;font-size:.88rem}
+.dl{color:#64748b;min-width:120px;flex-shrink:0;font-size:.8rem}
+.dv{color:#f1f5f9}
+.dv.gold{color:var(--gold);font-weight:600}
+.ab{width:100%;padding:12px 16px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;border:none}
+.ab:disabled{opacity:.5;cursor:not-allowed}
+.ab-gold{background:var(--gold);color:#0f172a}
+.ab-gold:hover:not(:disabled){background:var(--gold2)}
+.ab-green{background:#059669;color:#fff}
+.ab-green:hover:not(:disabled){background:#10b981}
+.ab-outline{background:none;border:1px solid #334155;color:#94a3b8}
+.ab-outline:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.ai{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #1e293b;font-size:.82rem}
+.ai:last-child{border-bottom:none}
+.toast-container{position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{padding:14px 20px;border-radius:10px;font-size:.88rem;min-width:280px;display:flex;align-items:center;gap:12px;animation:tIn .3s ease}
+@keyframes tIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.toast-success{background:#064e3b;color:#6ee7b7;border:1px solid rgba(16,185,129,.3)}
+.toast-error{background:#450a0a;color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(201,168,76,.3);border-top-color:var(--gold);animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mm{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center}
+.mm.open{display:flex}
+.mmb{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:28px;min-width:340px}
+.sb{width:100%;padding:12px 16px;margin-bottom:8px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#94a3b8;font-size:.85rem;font-weight:500;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:10px}
+.sb:hover{border-color:var(--gold);color:var(--gold)}
+.mc{width:100%;padding:10px;margin-top:8px;background:none;border:1px solid #334155;border-radius:8px;color:#64748b;cursor:pointer;font-size:.82rem}
+@media(max-width:900px){.dg{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="toast-container" id="tc"></div>
+<a href="{% url 'burza:kanban' %}" style="display:inline-flex;align-items:center;gap:6px;color:#64748b;font-size:.82rem;text-decoration:none;margin-bottom:20px" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#64748b'">{% trans "← Natrag na Kanban" %}</a>
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:32px;flex-wrap:wrap">
+    <div>
+        <div style="margin-bottom:10px">
+            <span class="pill pill-{{ lead.status }}">{{ lead.get_status_display }}</span>
+            <span style="display:inline-block;margin-left:8px;font-size:.72rem;padding:3px 10px;background:rgba(201,168,76,.1);color:var(--gold);border-radius:4px;border:1px solid rgba(201,168,76,.2)">{{ lead.get_category_display }}</span>
+        </div>
+        <h1 style="font-size:1.5rem;font-weight:700;color:#f1f5f9;line-height:1.3">{{ lead.title }}</h1>
+        <div style="color:#64748b;font-size:.82rem;margin-top:8px">📍 {{ lead.location }} · 🕐 {{ lead.created_at|date:"d.m.Y H:i" }}</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+        {% if is_superadmin %}<button onclick="document.getElementById('mm').classList.add('open')" style="padding:10px 20px;background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.35);border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer">{% trans "↕ Pomakni" %}</button>{% endif %}
+        {% if lead.status == 'NA_BURZI' and not is_superadmin and company %}<button id="pb" onclick="preuzmi({{ lead.pk }})" class="ab ab-green" style="width:auto;padding:10px 24px">{% trans "✅ Preuzmi posao" %}</button>{% endif %}
+    </div>
+</div>
+<div class="dg">
+    <div>
+        <div class="dc"><h3>{% trans "📋 Opis posla" %}</h3><p style="color:#cbd5e1;line-height:1.7;font-size:.92rem">{{ lead.description }}</p></div>
+        <div class="dc">
+            <h3>{% trans "📊 Detalji" %}</h3>
+            <div class="dr"><span class="dl">{% trans "Kategorija" %}</span><span class="dv">{{ lead.get_category_display }}</span></div>
+            <div class="dr"><span class="dl">{% trans "Lokacija" %}</span><span class="dv">{{ lead.location }}</span></div>
+            {% if lead.budget_from or lead.budget_to %}<div class="dr"><span class="dl">{% trans "Budžet" %}</span><span class="dv gold">{{ lead.budget_display }}</span></div>{% endif %}
+            {% if lead.assigned_to %}<div class="dr"><span class="dl">{% trans "Dodijeljeno" %}</span><span class="dv">{{ lead.assigned_to.get_full_name }}</span></div>{% endif %}
+            {% if lead.taken_by %}<div class="dr"><span class="dl">{% trans "Preuzela" %}</span><span class="dv gold">{{ lead.taken_by.name }}</span></div>{% endif %}
+        </div>
+        {% if activities %}<div class="dc"><h3>{% trans "🕐 Aktivnosti" %}</h3>{% for a in activities %}<div class="ai"><div style="width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px"></div><div><div style="color:#cbd5e1">{{ a.action }}</div><div style="color:#475569;font-size:.72rem">{{ a.created_at|date:"d.m.Y H:i" }}{% if a.user %} · {{ a.user.get_full_name|default:a.user.username }}{% endif %}</div></div></div>{% endfor %}</div>{% endif %}
+    </div>
+    <div>
+        <div class="dc">
+            <h3>{% trans "👤 Kontakt" %}</h3>
+            <div class="dr"><span class="dl">{% trans "Ime" %}</span><span class="dv">{{ lead.contact_name }}</span></div>
+            <div class="dr"><span class="dl">{% trans "Telefon" %}</span><span class="dv"><a href="tel:{{ lead.contact_phone }}" style="color:var(--gold)">{{ lead.contact_phone }}</a></span></div>
+            {% if lead.contact_email %}<div class="dr"><span class="dl">{% trans "Email" %}</span><span class="dv"><a href="mailto:{{ lead.contact_email }}" style="color:var(--gold)">{{ lead.contact_email }}</a></span></div>{% endif %}
+        </div>
+        {% if lead.status == 'NA_BURZI' and not is_superadmin and company %}
+        <div class="dc"><h3>{% trans "⚡ Akcije" %}</h3>
+            <button id="pb2" onclick="preuzmi({{ lead.pk }})" class="ab ab-green">{% trans "✅ Preuzmi posao" %}</button>
+            <p style="font-size:.72rem;color:#64748b;text-align:center;margin-top:4px">{% trans "Transaction lock – samo prva tvrtka dobiva posao" %}</p>
+        </div>
+        {% endif %}
+        {% if is_superadmin %}<div class="dc"><h3>{% trans "⚙️ Admin" %}</h3>
+            <button onclick="document.getElementById('mm').classList.add('open')" class="ab ab-gold">{% trans "↕ Promijeni status" %}</button>
+            <a href="{% url 'admin:burza_projectlead_change' lead.pk %}" class="ab ab-outline" style="text-decoration:none">{% trans "✏️ Uredi u adminu" %}</a>
+            {% if lead.status == 'PREUZETO' or lead.status == 'RIJESENO' %}<a href="{% url 'burza:invoice_from_lead' lead.pk %}" class="ab ab-gold" style="text-decoration:none;margin-top:8px">{% trans "📄 Kreiraj fakturu" %}</a>{% endif %}
+            <a href="{% url 'burza:bathroom_to_project' lead.pk %}" class="ab ab-outline" style="text-decoration:none;margin-top:8px;border-color:#c9a84c;color:#c9a84c">&#x1F6C1; Angebot Badsanierung</a>
+        </div>{% endif %}
+        {% if lead.internal_notes and is_superadmin %}<div class="dc"><h3>{% trans "📝 Napomene" %}</h3><p style="color:#94a3b8;font-size:.85rem;line-height:1.6">{{ lead.internal_notes }}</p></div>{% endif %}
+    </div>
+</div>
+<div class="mm" id="mm">
+    <div class="mmb">
+        <div style="font-size:1rem;font-weight:700;color:#f1f5f9;margin-bottom:20px">{% trans "↕ Pomakni u..." %}</div>
+        <button class="sb" onclick="doMove('NOVI_UPIT')"><span style="width:8px;height:8px;background:#3b82f6;border-radius:50%;display:inline-block"></span>{% trans "📥 Novi upit" %}</button>
+        <button class="sb" onclick="doMove('INTERNA_PROCJENA')"><span style="width:8px;height:8px;background:#c9a84c;border-radius:50%;display:inline-block"></span>{% trans "🔍 Interna procjena" %}</button>
+        <button class="sb" onclick="doMove('NA_BURZI')"><span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block"></span>{% trans "🏪 Na burzi" %}</button>
+        <button class="sb" onclick="doMove('PREUZETO')"><span style="width:8px;height:8px;background:#8b5cf6;border-radius:50%;display:inline-block"></span>{% trans "✅ Preuzeto" %}</button>
+        <button class="sb" onclick="doMove('RIJESENO')"><span style="width:8px;height:8px;background:#f59e0b;border-radius:50%;display:inline-block"></span>{% trans "🏆 Riješeno" %}</button>
+        <button class="mc" onclick="document.getElementById('mm').classList.remove('open')">{% trans "Odustani" %}</button>
+    </div>
+</div>
+<script>
+const CSRF='{{ csrf_token }}';const LID={{ lead.pk }};
+function toast(msg,type='info'){const c=document.getElementById('tc');const t=document.createElement('div');t.className=`toast toast-${type}`;t.innerHTML=`<span>${type==='success'?'✅':'❌'}</span><span style="flex:1">${msg}</span><span style="cursor:pointer;margin-left:auto" onclick="this.parentElement.remove()">✕</span>`;c.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove()},4000)}
+function preuzmi(id){const btns=[document.getElementById('pb'),document.getElementById('pb2')].filter(Boolean);btns.forEach(b=>{b.disabled=true;b.innerHTML='<span class="spinner"></span> Obrada...'});fetch(`/burza/lead/${id}/preuzmi/`,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},body:'{}'}).then(r=>r.json()).then(d=>{if(d.ok){toast(d.message,'success');setTimeout(()=>window.location.href='{% url "burza:kanban" %}',1500)}else{toast(d.error||'Greška.','error');btns.forEach(b=>{b.disabled=false;b.innerHTML='✅ Preuzmi posao'})}}).catch(()=>{toast('Mrežna greška.','error');btns.forEach(b=>{b.disabled=false;b.innerHTML='✅ Preuzmi posao'})})}
+function doMove(s){document.getElementById('mm').classList.remove('open');fetch(`/burza/lead/${LID}/move/`,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},body:JSON.stringify({status:s})}).then(r=>r.json()).then(d=>{if(d.ok){toast(d.message,'success');setTimeout(()=>location.reload(),800)}else toast(d.error||'Greška.','error')}).catch(()=>toast('Mrežna greška.','error'))}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('mm').classList.remove('open')});
+document.getElementById('mm').addEventListener('click',e=>{if(e.target===e.currentTarget)e.target.classList.remove('open')});
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Opomene (Dunning){% endblock %}
+{% block content %}
+<style>
+    :root { --gold: #c9a84c; --black: #0a0a0a; --dark-bg: #111; --card-bg: #1a1a1a; --border: #222; }
+    .dunning-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .dunning-header h1 { color: var(--gold); font-size: 1.5rem; font-weight: 700; margin: 0; }
+    .btn-gold { background: var(--gold); color: #000; border: none; padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+    .btn-gold:hover { background: #e0be5a; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-align: center; }
+    .stat-card .number { font-size: 2.2rem; font-weight: 800; color: var(--gold); line-height: 1; }
+    .stat-card .label { color: #999; font-size: 0.8rem; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .d-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 10px; overflow: hidden; margin-bottom: 24px; }
+    .d-table th { background: #151515; color: var(--gold); padding: 10px 14px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
+    .d-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: #ccc; }
+    .d-table tr:hover td { background: rgba(201,168,76,0.05); }
+    .badge-step { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .badge-step-0 { background: #333; color: #999; }
+    .badge-step-1 { background: rgba(201,168,76,0.2); color: var(--gold); }
+    .badge-step-2 { background: rgba(245,158,11,0.2); color: #f59e0b; }
+    .badge-step-3 { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .days-badge { padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; }
+    .days-warn { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .days-danger { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .section-title { color: var(--gold); font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; }
+    .status-sent { color: #22c55e; } .status-failed { color: #ef4444; } .status-bounced { color: #f59e0b; }
+    @media (max-width: 768px) { .stats-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="dunning-header">
+    <h1><i class="fas fa-bell"></i> Opomene (Dunning)</h1>
+    <form method="post" style="display:inline">{% csrf_token %}
+        <input type="hidden" name="action" value="run_now">
+        <button type="submit" class="btn-gold"><i class="fas fa-play"></i> Pokreni opomene sada</button>
+    </form>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card"><div class="number">{{ total_overdue }}</div><div class="label">Dospijeli racuni</div></div>
+    <div class="stat-card"><div class="number">{{ total_amount|floatformat:"2" }} &euro;</div><div class="label">Ukupno dospijelo</div></div>
+    <div class="stat-card"><div class="number">{{ reminders_this_month }}</div><div class="label">Opomena ovaj mjesec</div></div>
+</div>
+
+<h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> Dospijeli racuni</h2>
+{% if invoice_data %}
+<table class="d-table">
+    <thead><tr><th>Klijent</th><th>Racun #</th><th>Iznos</th><th>Dospijece</th><th>Dana kasnjenja</th><th>Zadnji korak</th></tr></thead>
+    <tbody>
+    {% for item in invoice_data %}
+    <tr>
+        <td>{{ item.invoice.client_name }}</td>
+        <td><a href="/invoicing/{{ item.invoice.pk }}/edit/" style="color:var(--gold)">{{ item.invoice.number }}</a></td>
+        <td>{{ item.invoice.total|floatformat:"2" }} {{ item.invoice.currency }}</td>
+        <td>{{ item.invoice.date_due|date:"d.m.Y" }}</td>
+        <td><span class="days-badge {% if item.days_overdue > 14 %}days-danger{% else %}days-warn{% endif %}">{{ item.days_overdue }}d</span></td>
+        <td><span class="badge-step badge-step-{{ item.last_step }}">{% if item.last_step == 0 %}Nije poslano{% elif item.last_step == 1 %}Korak 1 (Blagi){% elif item.last_step == 2 %}Korak 2 (Asertivan){% else %}Korak {{ item.last_step }} (Formalno){% endif %}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div style="text-align:center;padding:40px;color:#999"><i class="fas fa-check-circle" style="font-size:2rem;color:#22c55e;margin-bottom:10px"></i><br>Nema dospijelih racuna. Sve je azurno!</div>
+{% endif %}
+
+<h2 class="section-title" style="margin-top:16px"><i class="fas fa-history"></i> Povijest opomena</h2>
+{% if history %}
+<table class="d-table">
+    <thead><tr><th>Datum</th><th>Racun</th><th>Korak</th><th>Kanal</th><th>Predmet</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for h in history %}
+    <tr>
+        <td>{{ h.sent_at|date:"d.m.Y H:i" }}</td>
+        <td>{{ h.invoice.number }}</td>
+        <td><span class="badge-step badge-step-{{ h.step }}">Korak {{ h.step }}</span></td>
+        <td><i class="fas {% if h.channel_used == 'email' %}fa-envelope{% else %}fa-comment-dots{% endif %}"></i> {{ h.get_channel_used_display }}</td>
+        <td title="{{ h.email_subject }}">{{ h.email_subject|truncatechars:50 }}</td>
+        <td><span class="status-{{ h.status }}">{{ h.get_status_display }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div style="text-align:center;padding:20px;color:#999">Jos nema poslanih opomena.</div>
+{% endif %}
+{% endblock %}

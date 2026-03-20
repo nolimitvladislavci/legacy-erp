@@ -1,0 +1,29 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Inventory - LIMIT CONNECT{% endblock %}
+{% block page_title %}Modul: Inventory{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">{% trans "Inventory" %}</h4>
+        <p class="text-muted mb-0">{% trans "Pregled i upravljanje - inventory" %}</p>
+    </div>
+    <a href="/admin/inventory/" class="btn btn-primary">
+        <i class="fas fa-cog me-2"></i>{% trans "Otvori u Adminu" %}
+    </a>
+</div>
+<div class="stat-card">
+    <div class="text-center py-5">
+        <i class="fas fa-database fa-3x text-muted mb-3"></i>
+        <h5>{% trans "Inventory Modul" %}</h5>
+        <p class="text-muted">{% trans "Koristite Admin panel za upravljanje podacima" %}<br>{% trans "ili API endpoint:" %} <code>/inventory/api/</code></p>
+        <a href="/inventory/api/" class="btn btn-outline-secondary btn-sm me-2">
+            <i class="fas fa-code me-1"></i>{% trans "API Endpoint" %}
+        </a>
+        <a href="/admin/inventory/" class="btn btn-primary btn-sm">
+            <i class="fas fa-list me-1"></i>{% trans "Pregled podataka" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

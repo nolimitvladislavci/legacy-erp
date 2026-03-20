@@ -1,0 +1,82 @@
+{% extends "pos/base_pos.html" %}
+{% block title %}{% if prop %}Uredi sobu{% else %}Nova soba{% endif %}{% endblock %}
+{% block extra_css %}
+<style>
+.page{padding:1.5rem;max-width:600px}
+.page-title{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:1rem}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem}
+.field{margin-bottom:.9rem}
+.field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.55rem .7rem;font-size:.85rem;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+.field textarea{resize:vertical;min-height:60px}
+.row{display:flex;gap:.8rem}.row .field{flex:1}
+.section-label{font-size:.75rem;font-weight:700;color:var(--gold);margin:1rem 0 .5rem;text-transform:uppercase;letter-spacing:.04em}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-title">{% if prop %}&#9998; {{ prop.name }}{% else %}+ Nova soba / nekretnina{% endif %}</div>
+  <div class="form-card">
+    <form method="post">{% csrf_token %}
+      <div class="row">
+        <div class="field"><label>Naziv *</label><input name="name" value="{{ prop.name|default:'' }}" required></div>
+        <div class="field"><label>Tip</label>
+          <select name="type">
+            <option value="room" {% if prop.type == 'room' %}selected{% endif %}>Soba</option>
+            <option value="apartment" {% if prop.type == 'apartment' %}selected{% endif %}>Apartman</option>
+            <option value="dorm" {% if prop.type == 'dorm' %}selected{% endif %}>Spavaonica</option>
+            <option value="suite" {% if prop.type == 'suite' %}selected{% endif %}>Suite</option>
+            <option value="house" {% if prop.type == 'house' %}selected{% endif %}>Kuca</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Kat / Zona</label><input name="floor" value="{{ prop.floor|default:'' }}"></div>
+        <div class="field"><label>Kapacitet</label><input name="capacity" type="number" min="1" value="{{ prop.capacity|default:2 }}"></div>
+      </div>
+      <div class="field"><label>Kreveti</label><input name="beds" value="{{ prop.beds|default:'' }}" placeholder="1x bracni, 2x single"></div>
+
+      <div class="section-label">&#128176; Cijene</div>
+      <div class="row">
+        <div class="field"><label>Cijena / noc (&euro;)</label><input name="price_per_night" type="number" step="0.01" value="{{ prop.price_per_night|default:0 }}"></div>
+        <div class="field"><label>Vikend (&euro;)</label><input name="price_weekend" type="number" step="0.01" value="{{ prop.price_weekend|default:'' }}"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Mjesecna (&euro;)</label><input name="price_monthly" type="number" step="0.01" value="{{ prop.price_monthly|default:'' }}"></div>
+        <div class="field"><label>Min. noci</label><input name="min_nights" type="number" min="1" value="{{ prop.min_nights|default:1 }}"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Boravisna pristojba / os / noc</label><input name="tourist_tax" type="number" step="0.01" value="{{ prop.tourist_tax|default:1 }}"></div>
+        <div class="field"><label>Naknada za ciscenje</label><input name="cleaning_fee" type="number" step="0.01" value="{{ prop.cleaning_fee|default:0 }}"></div>
+      </div>
+
+      <div class="section-label">&#128272; Smart Lock / Pristup</div>
+      <div class="row">
+        <div class="field"><label>Smart Lock ID</label><input name="smart_lock_id" value="{{ prop.smart_lock_id|default:'' }}"></div>
+        <div class="field"><label>Tip brave</label>
+          <select name="smart_lock_type">
+            <option value="">Nema</option>
+            <option value="nuki" {% if prop.smart_lock_type == 'nuki' %}selected{% endif %}>Nuki</option>
+            <option value="ttlock" {% if prop.smart_lock_type == 'ttlock' %}selected{% endif %}>TTLock</option>
+            <option value="igloohome" {% if prop.smart_lock_type == 'igloohome' %}selected{% endif %}>Igloohome</option>
+            <option value="yale" {% if prop.smart_lock_type == 'yale' %}selected{% endif %}>Yale</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>WiFi naziv</label><input name="wifi_name" value="{{ prop.wifi_name|default:'' }}"></div>
+        <div class="field"><label>WiFi lozinka</label><input name="wifi_password" value="{{ prop.wifi_password|default:'' }}"></div>
+      </div>
+
+      <div class="field"><label>Lokacija / Adresa</label><input name="location" value="{{ prop.location|default:'' }}"></div>
+      <div class="field"><label>Opis</label><textarea name="description">{{ prop.description|default:'' }}</textarea></div>
+
+      <div style="display:flex;gap:.5rem;margin-top:1rem">
+        <button type="submit" class="btn btn-gold" style="flex:1">Spremi</button>
+        <a href="{% url 'rental:dashboard' %}" class="btn btn-ghost">Odustani</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

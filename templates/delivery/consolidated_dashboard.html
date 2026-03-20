@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Konsolidirane isporuke{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1"><i class="fas fa-boxes-stacked text-gold me-2"></i>Konsolidirane isporuke</h2>
+      <p class="text-muted mb-0">Cross-docking hub — spajanje narudzbi u jednu isporuku</p>
+    </div>
+    <a href="{% url 'delivery:consolidated_create' %}" class="btn btn-gold">
+      <i class="fas fa-plus me-1"></i> Nova isporuka
+    </a>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-gold mb-1">{{ stats.collecting }}</div>
+          <div class="text-muted small text-uppercase">Prikupljanje</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-info mb-1">{{ stats.consolidating }}</div>
+          <div class="text-muted small text-uppercase">Konsolidacija</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-warning mb-1">{{ stats.in_transit }}</div>
+          <div class="text-muted small text-uppercase">U transportu</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-success mb-1">{{ stats.delivered_today }}</div>
+          <div class="text-muted small text-uppercase">Dostavljeno danas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cold Chain Alerts -->
+  {% if cold_chain_alerts %}
+  <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+    <i class="fas fa-temperature-arrow-up fa-2x me-3"></i>
+    <div>
+      <strong>Upozorenje hladnog lanca!</strong>
+      {{ cold_chain_alerts }} zona izvan dozvoljenog raspona temperature.
+      <a href="#" class="alert-link" data-bs-toggle="modal" data-bs-target="#alertsModal">Pogledaj detalje</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Deliveries Table -->
+  <div class="card bg-dark border-secondary">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="text-gold"><i class="fas fa-list me-2"></i>Isporuke</span>
+      <div class="btn-group btn-group-sm" role="group">
+        <a href="?status=all" class="btn btn-outline-secondary {% if current_status == 'all' %}active{% endif %}">Sve</a>
+        <a href="?status=active" class="btn btn-outline-secondary {% if current_status == 'active' %}active{% endif %}">Aktivne</a>
+        <a href="?status=delivered" class="btn btn-outline-secondary {% if current_status == 'delivered' %}active{% endif %}">Zavrsene</a>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Broj</th>
+            <th>Kupac</th>
+            <th>Metoda</th>
+            <th>Status</th>
+            <th>Temp</th>
+            <th>Paketi</th>
+            <th>ETA</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cd in deliveries %}
+          <tr>
+            <td>
+              <strong class="text-gold">{{ cd.delivery_number }}</strong>
+              <br><small class="text-muted">{{ cd.created_at|date:"d.m. H:i" }}</small>
+            </td>
+            <td>{{ cd.buyer_company.name }}</td>
+            <td>
+              {% if cd.delivery_method == 'internal' %}<i class="fas fa-truck text-gold"></i>
+              {% elif cd.delivery_method == 'bus' %}<i class="fas fa-bus text-info"></i>
+              {% elif cd.delivery_method == 'taxi' %}<i class="fas fa-taxi text-warning"></i>
+              {% elif cd.delivery_method == 'crowd' %}<i class="fas fa-users text-success"></i>
+              {% elif cd.delivery_method == 'courier' %}<i class="fas fa-box text-info"></i>
+              {% elif cd.delivery_method == 'pickup' %}<i class="fas fa-store text-muted"></i>
+              {% endif %}
+              <small>{{ cd.get_delivery_method_display }}</small>
+            </td>
+            <td>
+              {% if cd.status == 'collecting' %}<span class="badge bg-secondary">Prikupljanje</span>
+              {% elif cd.status == 'consolidating' %}<span class="badge bg-info">Konsolidacija</span>
+              {% elif cd.status == 'dispatched' %}<span class="badge bg-primary">Otpremljeno</span>
+              {% elif cd.status == 'in_transit' %}<span class="badge bg-warning text-dark">U transportu</span>
+              {% elif cd.status == 'delivered' %}<span class="badge bg-success">Dostavljeno</span>
+              {% elif cd.status == 'cancelled' %}<span class="badge bg-danger">Otkazano</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if cd.latest_temp != None %}
+                {% if cd.temp_ok %}
+                  <span class="text-success"><i class="fas fa-temperature-low"></i> {{ cd.latest_temp }}&deg;C</span>
+                {% else %}
+                  <span class="text-danger"><i class="fas fa-temperature-arrow-up"></i> {{ cd.latest_temp }}&deg;C</span>
+                {% endif %}
+              {% elif cd.requires_cold_chain %}
+                <span class="text-muted"><i class="fas fa-snowflake"></i> —</span>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>{{ cd.package_count }} / {{ cd.total_weight_kg|default:"—" }} kg</td>
+            <td>
+              {% if cd.eta %}
+                <span class="{% if cd.is_late %}text-danger{% else %}text-gold{% endif %}">
+                  {{ cd.eta|date:"H:i" }}
+                </span>
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'delivery:consolidated_detail' cd.pk %}" class="btn btn-sm btn-outline-gold">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">Nema isporuka za prikaz</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

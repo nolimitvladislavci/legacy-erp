@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Prijem robe - {{ po.po_number }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Prijem robe: {{ po.po_number }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Opis</th><th>Naruceno</th><th>Vec primljeno</th><th>Primi sada</th><th>Jed.</th></tr></thead>
+                    <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.quantity_received }}</td>
+                        <td><input type="number" name="qty_{{ item.pk }}" class="form-control" step="0.001" value="{{ item.quantity }}" style="max-width:120px"></td>
+                        <td>{{ item.unit }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success btn-lg">Evidentiraj prijem</button>
+        <a href="{% url 'procurement:detail' po.pk %}" class="btn btn-secondary btn-lg">Odustani</a>
+    </form>
+</div>
+{% endblock %}

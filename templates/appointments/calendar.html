@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Kalendar termina{% endblock %}
+{% block page_title %}Kalendar termina{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<style>
+  #calendar { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .fc-event { cursor: pointer; font-size: 0.78rem; }
+  .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; }
+  #modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1050; }
+  #event-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; border-radius:16px; padding:24px; width:min(500px,95vw); z-index:1060; max-height:90vh; overflow-y:auto; }
+</style>
+{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-calendar-check me-2 text-primary"></i>{% trans "Kalendar termina" %}</h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'appointments:list' %}" class="btn btn-outline-secondary"><i class="fas fa-list me-1"></i>{% trans "Lista" %}</a>
+    <button class="btn btn-primary" onclick="openNewModal()"><i class="fas fa-plus me-1"></i>{% trans "Novi termin" %}</button>
+  </div>
+</div>
+
+<div id="calendar"></div>
+
+<!-- Event detail modal -->
+<div id="modal-backdrop" onclick="closeModal()"></div>
+<div id="event-modal">
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <h5 class="mb-0" id="modal-title"></h5>
+    <button onclick="closeModal()" class="btn-close"></button>
+  </div>
+  <div id="modal-body"></div>
+  <div class="d-flex gap-2 mt-3">
+    <a id="modal-edit-btn" href="#" class="btn btn-primary btn-sm">{% trans "Uredi" %}</a>
+    <form id="modal-delete-form" method="post" onsubmit="return confirm('Obrisati termin?')">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger btn-sm">{% trans "Obriši" %}</button>
+    </form>
+  </div>
+</div>
+
+<!-- New appointment quick form -->
+<div class="stat-card mt-3" style="display:none" id="quick-form-card">
+  <h5 class="mb-3"><i class="fas fa-plus-circle me-2 text-success"></i>{% trans "Brzi unos termina" %}</h5>
+  <form method="post" action="{% url 'appointments:create' %}">
+    {% csrf_token %}
+    <div class="row g-2">
+      <div class="col-md-6"><input type="text" name="title" class="form-control" placeholder="{% trans "Naziv termina *" %}" required id="quick-title"></div>
+      <div class="col-md-6">
+        <select name="client" class="form-select">
+          <option value="">{% trans "-- klijent --" %}</option>
+          {% for c in clients %}<option value="{{ c.pk }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6"><input type="datetime-local" name="start_time" class="form-control" id="quick-start" required></div>
+      <div class="col-md-6"><input type="datetime-local" name="end_time" class="form-control" id="quick-end" required></div>
+      <div class="col-md-4">
+        <select name="appointment_type" class="form-select">
+          {% for val, label in type_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select name="resource" class="form-select">
+          <option value="">{% trans "-- resurs --" %}</option>
+          {% for r in resources %}<option value="{{ r.pk }}">{{ r.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select name="color" class="form-select">
+          {% for hex, name in color_choices %}<option value="{{ hex }}">{{ name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">{% trans "Spremi" %}</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('quick-form-card').style.display='none'">{% trans "Odustani" %}</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+const STATUS_COLORS = { scheduled:'#3b82f6', confirmed:'#10b981', completed:'#6b7280', cancelled:'#ef4444', no_show:'#f59e0b' };
+
+document.addEventListener('DOMContentLoaded', function () {
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: window.innerWidth < 768 ? 'listWeek' : 'dayGridMonth',
+    locale: 'hr',
+    headerToolbar: { left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek,listWeek' },
+    events: '{% url "appointments:api_events" %}',
+    editable: false,
+    selectable: true,
+    height: 'auto',
+    select: function(info) {
+      openNewModal(info.startStr.slice(0,16), info.endStr.slice(0,16));
+    },
+    eventClick: function(info) {
+      showEventModal(info.event);
+    },
+    eventDidMount: function(info) {
+      const s = info.event.extendedProps.status_code;
+      if (STATUS_COLORS[s]) {
+        info.el.style.backgroundColor = STATUS_COLORS[s];
+        info.el.style.borderColor = STATUS_COLORS[s];
+      }
+    }
+  });
+  calendar.render();
+});
+
+function showEventModal(event) {
+  const p = event.extendedProps;
+  document.getElementById('modal-title').textContent = event.title;
+  document.getElementById('modal-body').innerHTML = `
+    <p class="mb-1"><strong>Tip:</strong> ${p.type}</p>
+    <p class="mb-1"><strong>Status:</strong> <span class="badge bg-secondary">${p.status}</span></p>
+    <p class="mb-1"><strong>Klijent:</strong> ${p.client}</p>
+    ${p.description ? '<p class="mb-1"><strong>Opis:</strong> ' + p.description + '</p>' : ''}
+    <p class="mb-0 text-muted small">
+      ${event.start ? event.start.toLocaleString('hr') : ''}
+      ${event.end ? ' – ' + event.end.toLocaleString('hr') : ''}
+    </p>`;
+  document.getElementById('modal-edit-btn').href = '/appointments/' + event.id + '/edit/';
+  document.getElementById('modal-delete-form').action = '/appointments/' + event.id + '/delete/';
+  document.getElementById('modal-backdrop').style.display = 'block';
+  document.getElementById('event-modal').style.display = 'block';
+}
+
+function openNewModal(start, end) {
+  const card = document.getElementById('quick-form-card');
+  card.style.display = 'block';
+  if (start) document.getElementById('quick-start').value = start;
+  if (end) document.getElementById('quick-end').value = end;
+  card.scrollIntoView({behavior:'smooth'});
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').style.display = 'none';
+  document.getElementById('event-modal').style.display = 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}e-Račun Inbox{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-inbox"></i> e-Račun Inbox</h2>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                <i class="bi bi-upload"></i> Upload XML
+            </button>
+            <a href="{% url 'eracun:dashboard' %}" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-arrow-left"></i> Izlazni e-Računi
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ stats.total }}</h3>
+                    <small class="text-muted">Ukupno primljenih</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <h3 class="text-warning">{{ stats.unbooked }}</h3>
+                    <small class="text-muted">Čeka knjiženje</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <h3 class="text-success">{{ stats.booked }}</h3>
+                    <small class="text-muted">Proknjiženo</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ stats.this_month }}</h3>
+                    <small class="text-muted">Ovaj mjesec</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Broj</th>
+                        <th>Dobavljač</th>
+                        <th>OIB</th>
+                        <th>Datum</th>
+                        <th class="text-end">Iznos</th>
+                        <th>Status</th>
+                        <th>Primljeno</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for er in incoming %}
+                    <tr>
+                        <td><a href="{% url 'eracun:inbox_detail' er.pk %}">{{ er.invoice_number }}</a></td>
+                        <td>{{ er.issuer_name }}</td>
+                        <td><small class="text-muted">{{ er.issuer_oib }}</small></td>
+                        <td>{{ er.issue_date|date:"d.m.Y" }}</td>
+                        <td class="text-end fw-bold">{{ er.total }} {{ er.currency }}</td>
+                        <td>
+                            {% if er.is_booked %}
+                                <span class="badge bg-success">Proknjiženo</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Čeka</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ er.received_at|date:"d.m.Y H:i" }}</small></td>
+                        <td>
+                            {% if not er.is_booked %}
+                            <form method="post" action="{% url 'eracun:inbox_book' er.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-outline-success" title="Proknjiži u URA">
+                                    <i class="bi bi-journal-check"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted py-4">Nema primljenih e-računa</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'eracun:inbox_upload' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload e-Račun (UBL XML)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">XML datoteka</label>
+                        <input type="file" class="form-control" name="xml_file" accept=".xml" required>
+                        <div class="form-text">UBL 2.1 Invoice ili CreditNote XML format</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
+                    <button type="submit" class="btn btn-primary">Uvezi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

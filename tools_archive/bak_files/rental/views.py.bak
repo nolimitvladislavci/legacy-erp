@@ -1,0 +1,19 @@
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from rest_framework import viewsets, permissions
+from .models import *
+from .serializers import *
+
+class PropertyViewSet(viewsets.ModelViewSet):
+    queryset = Property.objects.all()
+    serializer_class = PropertySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+@login_required
+def index(request):
+    return render(request, 'rental/index.html', {})

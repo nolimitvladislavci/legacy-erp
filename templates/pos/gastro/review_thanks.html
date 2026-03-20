@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hvala!</title>
+<style>
+:root{--bg:#faf7f2;--accent:#c9a84c;--card:#fff;--text:#2d2d2d;--muted:#888;--star-on:#fbbf24;--shadow:0 2px 12px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:1.5rem 1rem}
+.thanks-wrap{max-width:420px;width:100%;text-align:center}
+.icon{font-size:4rem;margin-bottom:.5rem;animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+h1{font-size:1.5rem;color:var(--accent);margin-bottom:.5rem}
+.subtitle{color:var(--muted);font-size:.9rem;margin-bottom:1.5rem}
+.review-card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.5rem;text-align:left}
+.stars-display{text-align:center;margin-bottom:.8rem}
+.stars-display .star{font-size:1.8rem;color:var(--star-on)}
+.stars-display .star.off{color:#d1d5db}
+.comment-text{font-size:.9rem;color:var(--text);line-height:1.5;font-style:italic;border-left:3px solid var(--accent);padding-left:.8rem;margin-top:.8rem}
+.back-btn{display:inline-block;background:var(--accent);color:#fff;padding:.7rem 1.8rem;border-radius:8px;text-decoration:none;font-weight:700;font-size:.95rem;transition:background .2s}
+.back-btn:hover{background:#b8953e}
+.powered{margin-top:1.5rem;font-size:.7rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="thanks-wrap">
+  <div class="icon">&#10084;&#65039;</div>
+  <h1>Hvala na recenziji!</h1>
+  <p class="subtitle">{{ order.company.name|default:"Restoran" }} cijeni vase misljenje.</p>
+  <div class="review-card">
+    <div class="stars-display">
+      {% for i in "12345" %}
+        {% if forloop.counter <= review.rating %}
+          <span class="star">&#9733;</span>
+        {% else %}
+          <span class="star off">&#9733;</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% if review.comment %}
+    <div class="comment-text">&ldquo;{{ review.comment }}&rdquo;</div>
+    {% endif %}
+  </div>
+  {% if order.table.qr_code %}
+  <a href="{% url 'pos:gastro_qr' order.table.qr_code %}" class="back-btn">Narucite ponovo</a>
+  {% endif %}
+  <div class="powered">Powered by LIMIT Connect</div>
+</div>
+</body>
+</html>

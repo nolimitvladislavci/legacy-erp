@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Revizorski paket{% endblock %}
+{% block page_title %}Revizorski paket{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+
+  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:2rem;border:1px solid rgba(201,168,76,.2)">
+    <h2 style="color:#c9a84c;margin:0 0 .5rem">Revizorski paket</h2>
+    <p style="color:#888;margin:0 0 1.5rem">Generiraj kompletni ZIP za reviziju s INDEX-om, URA, IRA, PDV pregledom i svim PDF fakturama.</p>
+
+    <form method="post" action="{% url 'documents:revizija_export' %}" id="revForm">
+      {% csrf_token %}
+
+      <div style="margin-bottom:1.25rem">
+        <label style="font-weight:600;color:#ccc;font-size:.85rem;display:block;margin-bottom:.4rem">Tvrtka:</label>
+        <select name="company_id" required style="width:100%;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.95rem">
+          <option value="">— Odaberi tvrtku —</option>
+          {% for c in companies %}
+          <option value="{{ c.pk }}">{{ c.name }}{% if c.oib %} ({{ c.oib }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+        <div>
+          <label style="font-weight:600;color:#ccc;font-size:.85rem;display:block;margin-bottom:.4rem">Od:</label>
+          <input type="date" name="date_from" required style="width:100%;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.95rem">
+        </div>
+        <div>
+          <label style="font-weight:600;color:#ccc;font-size:.85rem;display:block;margin-bottom:.4rem">Do:</label>
+          <input type="date" name="date_to" required style="width:100%;padding:.65rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.95rem">
+        </div>
+      </div>
+
+      <div style="background:rgba(201,168,76,.06);border-radius:10px;padding:1rem;margin-bottom:1.5rem;border:1px solid rgba(201,168,76,.15)">
+        <div style="font-weight:600;color:#c9a84c;margin-bottom:.5rem">ZIP paket sadrzi:</div>
+        <ul style="color:#aaa;font-size:.85rem;margin:0;padding-left:1.2rem;line-height:1.8">
+          <li><b>INDEX.csv</b> — kompletni popis svih dokumenata</li>
+          <li><b>KNJIGA_URA.csv</b> — ulazni racuni (dobavljaci)</li>
+          <li><b>KNJIGA_IRA.csv</b> — izlazni racuni (kupci)</li>
+          <li><b>PDV_PREGLED.txt</b> — PDV summary s izracunom</li>
+          <li><b>PDF/</b> — sve dostupne PDF fakture</li>
+          <li><b>README.txt</b> — opis sadrzaja paketa</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:1rem;padding:1rem;background:rgba(59,130,246,.08);border-radius:10px;border:1px solid rgba(59,130,246,.2)">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:#ccc;font-size:.9rem">
+          <input type="checkbox" name="send_email" value="1" id="sendEmailCb" onchange="document.getElementById('emailToRow').style.display=this.checked?'block':'none'">
+          Posalji ZIP i na email
+        </label>
+        <div id="emailToRow" style="display:none;margin-top:.75rem">
+          <input type="email" name="email_to" placeholder="racunovodstvo@firma.hr" style="width:100%;padding:.55rem;border-radius:8px;border:1px solid #333;background:#0d1117;color:#fff;font-size:.9rem">
+        </div>
+      </div>
+
+      <button type="submit" id="genBtn" style="width:100%;padding:.85rem;background:#c9a84c;color:#000;border:none;border-radius:10px;font-weight:700;font-size:1.1rem;cursor:pointer"
+              onclick="this.disabled=true;this.textContent='Generiranje ZIP...';document.getElementById('revForm').submit();">
+        Generiraj revizorski paket
+      </button>
+    </form>
+  </div>
+
+  <div style="margin-top:1.5rem;text-align:center">
+    <a href="{% url 'documents:arhiva_list' %}" style="color:#888;font-size:.85rem">Natrag na arhivu</a>
+    <span style="color:#444;margin:0 .5rem">|</span>
+    <a href="{% url 'documents:ai_inbox' %}" style="color:#c9a84c;font-size:.85rem">AI Inbox ({{ pending_count }} pending)</a>
+  </div>
+
+</div>
+{% endblock %}

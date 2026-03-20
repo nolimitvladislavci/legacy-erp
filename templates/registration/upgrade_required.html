@@ -1,0 +1,52 @@
+{% extends "registration/base_reg.html" %}
+{% load i18n %}
+{% block title %}Nadogradnja potrebna – LIMIT Connect{% endblock %}
+{% block extra_css %}
+<style>
+.plans-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.5rem; }
+.plan-card { border:1px solid var(--border); border-radius:10px; padding:1.5rem; background:var(--dark); position:relative; }
+.plan-card.highlight { border-color:var(--gold); }
+.plan-card.highlight::before { content:'PREPORUČENO'; position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--gold); color:var(--black); font-size:0.65rem; font-weight:700; letter-spacing:0.1em; padding:0.2rem 0.75rem; border-radius:20px; }
+.plan-name { font-size:1.2rem; font-weight:700; margin-bottom:0.5rem; }
+.plan-price .amount { font-size:1.75rem; font-weight:700; color:var(--gold); }
+.plan-price .period { color:var(--muted); font-size:0.8rem; }
+.plan-features { list-style:none; margin-top:1rem; }
+.plan-features li { font-size:0.8rem; color:var(--muted); padding:0.25rem 0; display:flex; gap:0.4rem; align-items:flex-start; }
+.plan-features li::before { content:'✓'; color:var(--gold); font-weight:700; }
+.lock-icon { font-size:3rem; text-align:center; margin-bottom:1rem; }
+@media(max-width:700px) { .plans-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="reg-card" style="text-align:center; margin-bottom:2rem;">
+  <div class="lock-icon">🔒</div>
+  <h1 class="reg-card-title" style="text-align:center">{% trans "Modul nije uključen u vaš plan" %}</h1>
+  {% if module %}
+  <p class="reg-card-subtitle" style="text-align:center">Modul <strong style="color:var(--gold)">{{ module|capfirst }}</strong> nije dostupan na vašem trenutnom planu. Nadogradite za pristup.</p>
+  {% else %}
+  <p class="reg-card-subtitle" style="text-align:center">{% trans "Nadogradite svoj plan za pristup ovoj značajki." %}</p>
+  {% endif %}
+  <a href="javascript:history.back()" class="reg-btn-outline" style="margin-top:1rem; display:inline-block">{% trans "← Natrag" %}</a>
+</div>
+<h2 style="font-family:'Cormorant Garamond',serif; font-size:1.5rem; margin-bottom:0.5rem; text-align:center">{% trans "Dostupni planovi" %}</h2>
+<p style="text-align:center; color:var(--muted); font-size:0.875rem; margin-bottom:1.5rem">{% trans "Kontaktirajte podršku za nadogradnju pretplate." %}</p>
+<div class="plans-grid">
+  {% for plan_key, plan in plans.items %}
+  <div class="plan-card {% if plan.highlight %}highlight{% endif %}">
+    <div class="plan-name">{{ plan.name }}</div>
+    <div class="plan-price">
+      <span class="amount">{{ plan.currency }}{{ plan.price }}</span>
+      <span class="period">/{{ plan.period }}</span>
+    </div>
+    <ul class="plan-features">
+      {% for feature in plan.features %}
+      <li>{{ feature }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</div>
+<div style="text-align:center; margin-top:2rem;">
+  <a href="mailto:info@limit-connect.com?subject=Upgrade request" class="reg-btn">{% trans "Zatraži nadogradnju" %}</a>
+</div>
+{% endblock %}

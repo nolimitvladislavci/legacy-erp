@@ -1,0 +1,789 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kalkulator adaptacije kupatila – LIMIT Connect</title>
+<meta name="theme-color" content="#c9a84c">
+<style>
+:root{
+  --gold:#c9a84c;--gold2:#b8962e;--gold-dim:rgba(201,168,76,.13);--gold-border:rgba(201,168,76,.3);
+  --black:#09090b;--surface:#111118;--surface2:#18181f;--surface3:#22222c;--surface4:#2a2a36;
+  --text:#e4e4ef;--text-dim:#7c7c99;--border:rgba(255,255,255,.07);
+  --red:#ef4444;--green:#22c55e;--blue:#60a5fa;--wa:#25D366;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;font-size:14px}
+
+.header{background:var(--surface);border-bottom:1px solid var(--gold-border);padding:13px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.hlogo{width:34px;height:34px;border-radius:8px;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--gold);font-size:1.1rem;flex-shrink:0}
+.htitle{font-size:1rem;font-weight:800;color:var(--gold)}
+.hsub{font-size:.7rem;color:var(--text-dim)}
+.hback{margin-left:auto;font-size:.75rem;color:var(--text-dim);text-decoration:none;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px}
+.hback:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+
+.container{max-width:960px;margin:0 auto;padding:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-title span{color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;font-size:.75rem}
+
+/* Presets */
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.preset-btn{background:var(--surface3);color:var(--text-dim);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.8rem;cursor:pointer;transition:all .15s;text-align:center;flex:1;min-width:90px}
+.preset-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+.preset-btn.active{background:var(--gold-dim);border-color:var(--gold-border);color:var(--gold);font-weight:700}
+.preset-btn small{display:block;font-size:.65rem;color:var(--text-dim);margin-top:2px}
+
+/* Dims */
+.size-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.size-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.size-card label{font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);font-weight:700;display:block;margin-bottom:4px}
+.size-card input{font-size:1.2rem;font-weight:800;text-align:center;padding:6px;width:100%;background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--text);outline:none}
+.size-card input:focus{border-color:var(--gold-border)}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.kpi-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:3px;font-weight:700}
+.kpi-val{font-size:1.05rem;font-weight:800;color:var(--text)}
+.kpi-val.gold{color:var(--gold)}
+.kpi-val.green{color:var(--green)}
+
+/* Worker section */
+.worker-info{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px}
+.worker-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.worker-row label{font-size:.7rem;color:var(--text-dim);font-weight:700}
+.worker-row select,.worker-row input{background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--text);font-size:.85rem;padding:6px 8px;outline:none}
+.worker-row select:focus,.worker-row input:focus{border-color:var(--gold-border)}
+.worker-rate{font-size:.85rem;font-weight:700;color:var(--gold);white-space:nowrap}
+
+/* Tasks table */
+.task-section{margin-bottom:12px}
+.task-header{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);padding:8px 0 6px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.task-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:5px;transition:all .15s}
+.task-row:hover{border-color:rgba(255,255,255,.15)}
+.task-check{accent-color:var(--gold);width:17px;height:17px;cursor:pointer;flex-shrink:0}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:.83rem;font-weight:600}
+.task-desc{font-size:.68rem;color:var(--text-dim)}
+.task-hours{display:flex;align-items:center;gap:4px}
+.task-hours input{width:55px;background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:5px;color:var(--text);font-size:.82rem;padding:4px 6px;text-align:center;outline:none}
+.task-hours input:focus{border-color:var(--gold-border)}
+.task-hours span{font-size:.7rem;color:var(--text-dim)}
+.task-cost{font-size:.85rem;font-weight:700;color:var(--gold);min-width:75px;text-align:right;white-space:nowrap}
+
+/* Materials */
+.mat-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:5px}
+.mat-check{accent-color:var(--gold);width:17px;height:17px;cursor:pointer;flex-shrink:0}
+.mat-info{flex:1;min-width:0}
+.mat-name{font-size:.83rem;font-weight:600}
+.mat-desc{font-size:.68rem;color:var(--text-dim)}
+.mat-price-input{width:80px;background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:5px;color:var(--text);font-size:.82rem;padding:4px 6px;text-align:right;outline:none}
+.mat-price-input:focus{border-color:var(--gold-border)}
+.mat-unit{font-size:.68rem;color:var(--text-dim);min-width:40px}
+.mat-total{font-size:.85rem;font-weight:700;color:var(--gold);min-width:75px;text-align:right;white-space:nowrap}
+
+/* Sliders */
+.sl-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sl-label{font-size:.8rem;color:var(--text-dim);min-width:170px;flex-shrink:0}
+.sl-val{font-size:.88rem;font-weight:800;color:var(--gold);min-width:52px;text-align:right}
+input[type=range]{accent-color:var(--gold);width:100%;cursor:pointer;height:4px}
+input[type=checkbox]{accent-color:var(--gold)}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+select option{background:var(--surface3)}
+
+/* Result */
+.rbox{background:linear-gradient(135deg,rgba(15,10,2,.8),rgba(9,9,20,.9));border:1px solid var(--gold-border);border-radius:var(--radius);padding:18px 20px;margin-top:14px}
+.rrow{display:flex;align-items:baseline;justify-content:space-between;padding:5px 0;gap:12px}
+.rrow:not(:last-child){border-bottom:1px solid rgba(255,255,255,.04)}
+.rlabel{font-size:.82rem;color:var(--text-dim);flex:1}
+.rval{font-size:.95rem;font-weight:700;color:var(--text);white-space:nowrap}
+.rrow.total{border-top:1px solid var(--gold-border) !important;margin-top:8px;padding-top:12px}
+.rrow.total .rlabel{color:var(--text);font-weight:600;font-size:.9rem}
+.rrow.total .rval{font-size:1.4rem;color:var(--gold)}
+.rrow.sub .rval{color:var(--text-dim);font-size:.85rem}
+.rrow.highlight .rval{color:var(--green);font-size:1.05rem}
+
+/* Actions */
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:var(--gold2)}
+.btn-wa{background:var(--wa);color:#fff}
+.btn-wa:hover{background:#20BA5C}
+.btn-outline{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-border)}
+.btn-outline:hover{background:rgba(201,168,76,.22)}
+
+/* Bar */
+.bar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--gold-border);padding:10px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;z-index:50}
+.bar-item{display:flex;flex-direction:column}
+.bar-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim)}
+.bar-val{font-size:.92rem;font-weight:800}
+.bar-val.gold{color:var(--gold)}
+.bar-sep{width:1px;background:var(--border);height:30px;flex-shrink:0}
+
+/* Toast */
+.toast{position:fixed;top:20px;right:20px;background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;font-size:.85rem;font-weight:600;opacity:0;transform:translateY(-10px);transition:all .3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:680px){
+  .container{padding:10px}
+  .size-grid{grid-template-columns:1fr 1fr}
+  .presets{flex-direction:column}
+  .task-row,.mat-row{flex-wrap:wrap}
+  .task-cost,.mat-total{width:100%;text-align:left;padding-top:4px;border-top:1px solid var(--border)}
+  .worker-row{flex-direction:column;align-items:flex-start}
+  .actions{flex-direction:column}
+  .actions .btn{justify-content:center}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .bar{gap:8px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hlogo">🚿</div>
+  <div>
+    <div class="htitle">Kalkulator adaptacije kupatila</div>
+    <div class="hsub">Troškovi rada + materijal + sanitarije</div>
+  </div>
+  <a href="/calculator/" class="hback">← Opći kalkulator</a>
+</div>
+
+<div class="container">
+
+<!-- ═══ DIMENZIJE ═══ -->
+<div class="card">
+  <div class="card-title">📐 Dimenzije kupatila</div>
+  <div class="presets">
+    <button class="preset-btn" onclick="setSize(2.5,1.5,2.5,this)">Malo<small>≈4 m²</small></button>
+    <button class="preset-btn active" onclick="setSize(3,2,2.5,this)">Srednje<small>≈6 m²</small></button>
+    <button class="preset-btn" onclick="setSize(3.5,2.5,2.6,this)">Veće<small>≈9 m²</small></button>
+    <button class="preset-btn" onclick="setSize(4.5,3,2.7,this)">Luksuz<small>≈14 m²</small></button>
+  </div>
+  <div class="size-grid">
+    <div class="size-card"><label>Dužina (m)</label><input type="number" id="dim-l" value="3" min="1" max="20" step="0.1" oninput="recalc()"></div>
+    <div class="size-card"><label>Širina (m)</label><input type="number" id="dim-w" value="2" min="1" max="20" step="0.1" oninput="recalc()"></div>
+    <div class="size-card"><label>Visina (m)</label><input type="number" id="dim-h" value="2.5" min="2" max="4" step="0.1" oninput="recalc()"></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Pod</div><div class="kpi-val gold" id="kpi-floor">6,00 m²</div></div>
+    <div class="kpi"><div class="kpi-label">Zidovi</div><div class="kpi-val" id="kpi-walls">25,00 m²</div></div>
+    <div class="kpi"><div class="kpi-label">Keramika ukupno</div><div class="kpi-val gold" id="kpi-tile-area">34,10 m²</div></div>
+  </div>
+</div>
+
+<!-- ═══ RADNICI ═══ -->
+<div class="card">
+  <div class="card-title">👷 Radna snaga <span>— satnica se koristi za izračun svih radova</span></div>
+  <div class="worker-info">
+    <div class="worker-row" style="margin-bottom:10px">
+      <label>Kategorija:</label>
+      <select id="w-kat" onchange="updateWorkerRate()">
+        <option value="0">NK – Nekvalificiran (16 €/h)</option>
+        <option value="1">PKV – Polukvalificiran (19 €/h)</option>
+        <option value="2">KV I – Kvalificiran I (23 €/h)</option>
+        <option value="3" selected>KV II – Kvalificiran II (28 €/h)</option>
+        <option value="4">KV III – Majstor (34 €/h)</option>
+        <option value="5">VKV – Visokokvalificirani (42 €/h)</option>
+        <option value="6">Poslovođa / Nadzornik (50 €/h)</option>
+      </select>
+    </div>
+    <div class="worker-row" style="gap:16px">
+      <div>
+        <label>Bruto satnica (€/h):</label>
+        <input type="number" id="w-bruto" value="28" min="5" max="100" step="0.5" style="width:80px;text-align:center" oninput="recalc()">
+      </div>
+      <div>
+        <label>Broj radnika:</label>
+        <input type="number" id="w-count" value="2" min="1" max="10" step="1" style="width:60px;text-align:center" oninput="recalc()">
+      </div>
+      <div>
+        <label>Prijevoz (€/dan):</label>
+        <input type="number" id="w-prijevoz" value="20" min="0" max="200" step="5" style="width:70px;text-align:center" oninput="recalc()">
+      </div>
+      <div class="worker-rate" id="w-rate-display">
+        Trošak/h: 32,76 €/h × 2 = 65,52 €/h
+      </div>
+    </div>
+  </div>
+  <div style="font-size:.72rem;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;line-height:1.7">
+    <strong style="color:var(--text)">Formula:</strong>
+    Trošak/sat = Bruto × 1,17 (doprinos) + prijevoz/8h<br>
+    <strong style="color:var(--text)">Ukupno po satu</strong> = trošak/sat × broj radnika
+  </div>
+</div>
+
+<!-- ═══ RADOVI (sati) ═══ -->
+<div class="card">
+  <div class="card-title">🔨 Radovi <span>— procjena sati po vrsti posla</span></div>
+
+  <div class="task-section">
+    <div class="task-header">Rušenje i priprema</div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-demo" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Rušenje starog kupatila</div><div class="task-desc">Skidanje pločica, estriha, stare opreme</div></div>
+      <div class="task-hours"><input type="number" id="h-demo" value="12" min="0" max="100" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-demo">—</span>
+    </div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-odvoz" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Čišćenje i odvoz šute</div><div class="task-desc">Utovar, kontejner, deponija</div></div>
+      <div class="task-hours"><input type="number" id="h-odvoz" value="6" min="0" max="50" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-odvoz">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Instalacije</div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-vodo" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Vodoinstalacije</div><div class="task-desc">Nove cijevi, ventili, priključci vode</div></div>
+      <div class="task-hours"><input type="number" id="h-vodo" value="16" min="0" max="100" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-vodo">—</span>
+    </div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-kanal" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Kanalizacija / odvod</div><div class="task-desc">Odvodni sistem, sifoni, horizontala</div></div>
+      <div class="task-hours"><input type="number" id="h-kanal" value="10" min="0" max="100" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-kanal">—</span>
+    </div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-elektro" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Elektroinstalacije</div><div class="task-desc">Utičnice, rasvjeta, ventilator, ogledalo</div></div>
+      <div class="task-hours"><input type="number" id="h-elektro" value="10" min="0" max="100" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-elektro">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Priprema podloge</div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-estrich" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Estrih / izravnanje</div><div class="task-desc">Niveliranje poda, priprema zidova</div></div>
+      <div class="task-hours"><input type="number" id="h-estrich" value="10" min="0" max="80" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-estrich">—</span>
+    </div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-hidro" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Hidroizolacija</div><div class="task-desc">Premaz + traka, pod i mokra zona</div></div>
+      <div class="task-hours"><input type="number" id="h-hidro" value="6" min="0" max="50" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-hidro">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Keramičarski radovi</div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-plocice" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Postavljanje pločica (pod + zidovi)</div><div class="task-desc">Ljepljenje, fugiranje, silikoniranje</div></div>
+      <div class="task-hours"><input type="number" id="h-plocice" value="40" min="0" max="200" step="2" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-plocice">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Montaža i završni radovi</div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-montaza" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Montaža sanitarija</div><div class="task-desc">WC, umivaonik, tuš/kada, baterije</div></div>
+      <div class="task-hours"><input type="number" id="h-montaza" value="12" min="0" max="50" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-montaza">—</span>
+    </div>
+    <div class="task-row">
+      <input type="checkbox" class="task-check" id="chk-zavrsni" checked onchange="recalc()">
+      <div class="task-info"><div class="task-name">Završni radovi</div><div class="task-desc">Bojanje stropa, vrata, čišćenje, sitnice</div></div>
+      <div class="task-hours"><input type="number" id="h-zavrsni" value="8" min="0" max="50" step="1" oninput="recalc()"><span>sati</span></div>
+      <span class="task-cost" id="c-zavrsni">—</span>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="margin-top:14px">
+    <div class="kpi"><div class="kpi-label">Ukupno sati</div><div class="kpi-val" id="kpi-total-hours">0 h</div></div>
+    <div class="kpi"><div class="kpi-label">Radnih dana</div><div class="kpi-val" id="kpi-work-days">0 dana</div></div>
+    <div class="kpi"><div class="kpi-label">Trošak rada</div><div class="kpi-val gold" id="kpi-labor-cost">0 €</div></div>
+  </div>
+</div>
+
+<!-- ═══ MATERIJAL ═══ -->
+<div class="card">
+  <div class="card-title">🧱 Materijal i oprema <span>— nabavne cijene</span></div>
+
+  <div class="task-section">
+    <div class="task-header">Keramika i vezivo</div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-plocice" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Pločice (pod + zid)</div><div class="mat-desc">+10% za rezanje i lom</div></div>
+      <input type="number" class="mat-price-input" id="mp-plocice" value="30" min="0" step="1" oninput="recalc()">
+      <span class="mat-unit">€/m²</span>
+      <span class="mat-total" id="mt-plocice">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-ljepilo" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Ljepilo + fuga + silikon</div><div class="mat-desc">Fleksibilno ljepilo, fuga, sanit. silikon</div></div>
+      <input type="number" class="mat-price-input" id="mp-ljepilo" value="10" min="0" step="1" oninput="recalc()">
+      <span class="mat-unit">€/m²</span>
+      <span class="mat-total" id="mt-ljepilo">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Hidroizolacija i priprema</div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-hidro" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Hidroizolacija (premaz + traka)</div></div>
+      <input type="number" class="mat-price-input" id="mp-hidro" value="120" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ paušal</span>
+      <span class="mat-total" id="mt-hidro">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-estrich" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Estrih / izravnavajuća masa</div></div>
+      <input type="number" class="mat-price-input" id="mp-estrich" value="15" min="0" step="1" oninput="recalc()">
+      <span class="mat-unit">€/m²</span>
+      <span class="mat-total" id="mt-estrich">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Instalacijski materijal</div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-vodo" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Vodovodne cijevi + fiting</div><div class="mat-desc">PPR/PEX cijevi, ventili, priključci</div></div>
+      <input type="number" class="mat-price-input" id="mp-vodo" value="280" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ paušal</span>
+      <span class="mat-total" id="mt-vodo">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-kanal" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Kanalizacijske cijevi</div><div class="mat-desc">PVC cijevi, sifoni, koljena</div></div>
+      <input type="number" class="mat-price-input" id="mp-kanal" value="150" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ paušal</span>
+      <span class="mat-total" id="mt-kanal">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-elektro" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Električni materijal</div><div class="mat-desc">Kablovi, utičnice, rasvjeta, ventilator</div></div>
+      <input type="number" class="mat-price-input" id="mp-elektro" value="200" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ paušal</span>
+      <span class="mat-total" id="mt-elektro">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Sanitarije</div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-wc" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">WC školjka + vodokotlić</div><div class="mat-desc">Viseći WC, ugradbeni okvir</div></div>
+      <input type="number" class="mat-price-input" id="mp-wc" value="350" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ kom</span>
+      <span class="mat-total" id="mt-wc">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-umiv" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Umivaonik + ormarić + baterija</div></div>
+      <input type="number" class="mat-price-input" id="mp-umiv" value="400" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ kom</span>
+      <span class="mat-total" id="mt-umiv">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-tus" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Tuš kabina / kada + baterija</div></div>
+      <input type="number" class="mat-price-input" id="mp-tus" value="500" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ kom</span>
+      <span class="mat-total" id="mt-tus">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-dodaci" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Ogledalo + polica + dodaci</div><div class="mat-desc">Držač papira, vješalica, etažer</div></div>
+      <input type="number" class="mat-price-input" id="mp-dodaci" value="180" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ paušal</span>
+      <span class="mat-total" id="mt-dodaci">—</span>
+    </div>
+  </div>
+
+  <div class="task-section">
+    <div class="task-header">Ostalo</div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-odvoz" checked onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Kontejner za šutu</div></div>
+      <input type="number" class="mat-price-input" id="mp-odvoz" value="200" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ paušal</span>
+      <span class="mat-total" id="mt-odvoz">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-boja" onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Boja + glet za strop</div></div>
+      <input type="number" class="mat-price-input" id="mp-boja" value="60" min="0" step="5" oninput="recalc()">
+      <span class="mat-unit">€ paušal</span>
+      <span class="mat-total" id="mt-boja">—</span>
+    </div>
+    <div class="mat-row">
+      <input type="checkbox" class="mat-check" id="chk-m-vrata" onchange="recalc()">
+      <div class="mat-info"><div class="mat-name">Vrata kupatila</div></div>
+      <input type="number" class="mat-price-input" id="mp-vrata" value="200" min="0" step="10" oninput="recalc()">
+      <span class="mat-unit">€ kom</span>
+      <span class="mat-total" id="mt-vrata">—</span>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="margin-top:14px">
+    <div class="kpi"><div class="kpi-label">Materijal ukupno</div><div class="kpi-val gold" id="kpi-mat-total">0 €</div></div>
+  </div>
+</div>
+
+<!-- ═══ PARAMETRI + REZULTAT ═══ -->
+<div class="card" style="border-color:var(--gold-border)">
+  <div class="card-title">💰 Ponuda — parametri i rezultat</div>
+
+  <div class="sl-row">
+    <span class="sl-label">⚙️ Režije firme (%)</span>
+    <input type="range" min="5" max="35" step="1" id="sl-rezije" value="18" oninput="recalc()">
+    <span class="sl-val" id="sv-rezije">18%</span>
+  </div>
+  <div style="font-size:.68rem;color:var(--text-dim);margin:-4px 0 12px 182px">Vozila, alati, ured, osiguranje</div>
+
+  <div class="sl-row">
+    <span class="sl-label">💰 Zarada firme (%)</span>
+    <input type="range" min="15" max="60" step="1" id="sl-zarada" value="35" oninput="recalc()">
+    <span class="sl-val" id="sv-zarada">35%</span>
+  </div>
+  <div style="font-size:.68rem;color:var(--text-dim);margin:-4px 0 12px 182px">Profitna marža — povećajte za veću zaradu</div>
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <input type="checkbox" id="pdv-toggle" onchange="recalc()" checked style="accent-color:var(--gold);width:18px;height:18px">
+    <label for="pdv-toggle" style="font-size:.85rem;cursor:pointer">Prikaži s PDV-om (25%)</label>
+  </div>
+
+  <div class="rbox">
+    <div class="rrow sub"><span class="rlabel">👷 Radna snaga (troškovi + prijevoz)</span><span class="rval" id="r-labor">0 €</span></div>
+    <div class="rrow sub"><span class="rlabel">🧱 Materijal i sanitarije</span><span class="rval" id="r-mat">0 €</span></div>
+    <div class="rrow" style="border-top:1px solid var(--border);padding-top:6px;margin-top:4px">
+      <span class="rlabel" style="font-weight:600">Direktni troškovi</span>
+      <span class="rval" id="r-direktni" style="font-weight:700">0 €</span>
+    </div>
+    <div class="rrow sub"><span class="rlabel">+ Režije (<span id="r-rez-pct">18</span>%)</span><span class="rval" id="r-rezije">0 €</span></div>
+    <div class="rrow sub"><span class="rlabel">+ Zarada (<span id="r-zar-pct">35</span>%)</span><span class="rval" id="r-zarada">0 €</span></div>
+    <div class="rrow highlight"><span class="rlabel" style="font-weight:700">NETO (bez PDV-a)</span><span class="rval" id="r-neto">0 €</span></div>
+    <div class="rrow sub" id="row-pdv"><span class="rlabel">+ PDV 25%</span><span class="rval" id="r-pdv">0 €</span></div>
+    <div class="rrow total" id="row-bruto"><span class="rlabel">UKUPNO S PDV-om</span><span class="rval" id="r-bruto">0 €</span></div>
+    <div class="rrow sub" style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
+      <span class="rlabel" style="color:var(--gold)">📐 Cijena po m² poda</span>
+      <span class="rval" id="r-perm2" style="color:var(--gold);font-size:1.1rem">0 €/m²</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-wa" onclick="shareWhatsApp()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Pošalji na WhatsApp
+    </button>
+    <button class="btn btn-outline" onclick="copyText()">📋 Kopiraj tekst</button>
+    <button class="btn btn-gold" onclick="sendToCalc()">📊 Opći kalkulator →</button>
+  </div>
+</div>
+
+</div>
+
+<!-- Bar -->
+<div class="bar">
+  <div class="bar-item"><span class="bar-lbl">📐 Pod</span><span class="bar-val" id="bar-area">6 m²</span></div>
+  <div class="bar-sep"></div>
+  <div class="bar-item"><span class="bar-lbl">👷 Rad</span><span class="bar-val" id="bar-labor">0 €</span></div>
+  <div class="bar-item"><span class="bar-lbl">🧱 Mat.</span><span class="bar-val" id="bar-mat">0 €</span></div>
+  <div class="bar-sep"></div>
+  <div class="bar-item"><span class="bar-lbl">€/m²</span><span class="bar-val gold" id="bar-perm2">0</span></div>
+  <div class="bar-item"><span class="bar-lbl">UKUPNO</span><span class="bar-val gold" id="bar-total">0 €</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var KATEGORIJE = [
+  {label:'NK – Nekvalificiran',        bruto:16},
+  {label:'PKV – Polukvalificiran',     bruto:19},
+  {label:'KV I – Kvalificiran I',      bruto:23},
+  {label:'KV II – Kvalificiran II',    bruto:28},
+  {label:'KV III – Majstor',           bruto:34},
+  {label:'VKV – Visokokvalificirani',  bruto:42},
+  {label:'Poslovođa / Nadzornik',      bruto:50},
+];
+var DOPRINOS = 0.17;
+
+function setSize(l, w, h, btn) {
+  document.getElementById('dim-l').value = l;
+  document.getElementById('dim-w').value = w;
+  document.getElementById('dim-h').value = h;
+  document.querySelectorAll('.preset-btn').forEach(function(b){b.classList.remove('active')});
+  if (btn) btn.classList.add('active');
+  // Scale hours based on area
+  var floor = l * w;
+  var ratio = floor / 6; // 6m² is base
+  scaleHours(ratio);
+  recalc();
+}
+
+function scaleHours(ratio) {
+  var base = {demo:12, odvoz:6, vodo:16, kanal:10, elektro:10, estrich:10, hidro:6, plocice:40, montaza:12, zavrsni:8};
+  for (var id in base) {
+    var el = document.getElementById('h-' + id);
+    if (el) el.value = Math.max(4, Math.round(base[id] * Math.pow(ratio, 0.7)));
+  }
+}
+
+function updateWorkerRate() {
+  var kat = parseInt(document.getElementById('w-kat').value);
+  document.getElementById('w-bruto').value = KATEGORIJE[kat].bruto;
+  recalc();
+}
+
+function getWorkerCostPerH() {
+  var bruto = parseFloat(document.getElementById('w-bruto').value) || 28;
+  var count = parseInt(document.getElementById('w-count').value) || 2;
+  var prijevoz = parseFloat(document.getElementById('w-prijevoz').value) || 0;
+  var costPerWorkerH = bruto * (1 + DOPRINOS) + prijevoz / 8;
+  return {perWorker: costPerWorkerH, total: costPerWorkerH * count, count: count, prijevoz: prijevoz};
+}
+
+function getDims() {
+  var l = parseFloat(document.getElementById('dim-l').value) || 3;
+  var w = parseFloat(document.getElementById('dim-w').value) || 2;
+  var h = parseFloat(document.getElementById('dim-h').value) || 2.5;
+  var floor = l * w;
+  var walls = 2 * (l + w) * h;
+  return {l:l, w:w, h:h, floor:floor, walls:walls, total: floor + walls, tileArea: (floor + walls) * 1.1};
+}
+
+// Task definitions
+var TASKS = ['demo','odvoz','vodo','kanal','elektro','estrich','hidro','plocice','montaza','zavrsni'];
+
+function recalc() {
+  var d = getDims();
+  var w = getWorkerCostPerH();
+  var rezPct = parseFloat(document.getElementById('sl-rezije').value) || 18;
+  var zarPct = parseFloat(document.getElementById('sl-zarada').value) || 35;
+  var pdvOn = document.getElementById('pdv-toggle').checked;
+
+  // Slider labels
+  document.getElementById('sv-rezije').textContent = rezPct + '%';
+  document.getElementById('sv-zarada').textContent = zarPct + '%';
+
+  // Worker rate display
+  document.getElementById('w-rate-display').textContent =
+    'Trošak/h: ' + fmt(w.perWorker) + ' €/h × ' + w.count + ' = ' + fmt(w.total) + ' €/h';
+
+  // Dimension KPIs
+  setText('kpi-floor', fmt(d.floor) + ' m²');
+  setText('kpi-walls', fmt(d.walls) + ' m²');
+  setText('kpi-tile-area', fmt(d.tileArea) + ' m²');
+
+  // Calculate tasks (labor)
+  var totalHours = 0;
+  var totalLabor = 0;
+  TASKS.forEach(function(id) {
+    var chk = document.getElementById('chk-' + id);
+    var hEl = document.getElementById('h-' + id);
+    var cEl = document.getElementById('c-' + id);
+    if (!chk || !hEl || !cEl) return;
+    var hours = parseFloat(hEl.value) || 0;
+    var cost = 0;
+    if (chk.checked) {
+      cost = hours * w.total;
+      totalHours += hours;
+      totalLabor += cost;
+    }
+    cEl.textContent = chk.checked ? fmt(cost) + ' €' : '—';
+  });
+
+  // Transport cost (separate line)
+  var totalDays = Math.ceil(totalHours / 8);
+  var transportCost = w.prijevoz * w.count * totalDays;
+
+  // KPIs labor
+  setText('kpi-total-hours', totalHours + ' h');
+  setText('kpi-work-days', totalDays + ' dana');
+  setText('kpi-labor-cost', fmt(totalLabor) + ' €');
+
+  // Materials
+  var MATS = [
+    {id:'plocice', type:'m2tile'},
+    {id:'ljepilo', type:'m2tile'},
+    {id:'hidro',   type:'flat'},
+    {id:'estrich', type:'m2floor'},
+    {id:'vodo',    type:'flat'},
+    {id:'kanal',   type:'flat'},
+    {id:'elektro', type:'flat'},
+    {id:'wc',      type:'flat'},
+    {id:'umiv',    type:'flat'},
+    {id:'tus',     type:'flat'},
+    {id:'dodaci',  type:'flat'},
+    {id:'odvoz',   type:'flat'},
+    {id:'boja',    type:'flat'},
+    {id:'vrata',   type:'flat'},
+  ];
+
+  var totalMat = 0;
+  MATS.forEach(function(m) {
+    var chk = document.getElementById('chk-m-' + m.id);
+    var priceEl = document.getElementById('mp-' + m.id);
+    var totalEl = document.getElementById('mt-' + m.id);
+    if (!chk || !priceEl || !totalEl) return;
+    var price = parseFloat(priceEl.value) || 0;
+    var amount = 0;
+    if (chk.checked) {
+      switch(m.type) {
+        case 'm2tile':  amount = price * d.tileArea; break;
+        case 'm2floor': amount = price * d.floor; break;
+        case 'flat':    amount = price; break;
+      }
+      totalMat += amount;
+    }
+    totalEl.textContent = chk.checked ? fmt(amount) + ' €' : '—';
+  });
+
+  setText('kpi-mat-total', fmt(totalMat) + ' €');
+
+  // Final calculation
+  var laborTotal = totalLabor; // includes worker cost (bruto + doprinos already in rate)
+  var direktni = laborTotal + totalMat;
+  var rezije = direktni * (rezPct / 100);
+  var sbRez = direktni + rezije;
+  var zarada = sbRez * (zarPct / 100);
+  var neto = sbRez + zarada;
+  var pdv = neto * 0.25;
+  var bruto = neto + pdv;
+  var finalPrice = pdvOn ? bruto : neto;
+  var perM2 = d.floor > 0 ? finalPrice / d.floor : 0;
+
+  // Result box
+  setText('r-labor', fmt(laborTotal) + ' €');
+  setText('r-mat', fmt(totalMat) + ' €');
+  setText('r-direktni', fmt(direktni) + ' €');
+  setText('r-rez-pct', rezPct);
+  setText('r-rezije', fmt(rezije) + ' €');
+  setText('r-zar-pct', zarPct);
+  setText('r-zarada', fmt(zarada) + ' €');
+  setText('r-neto', fmt(neto) + ' €');
+  setText('r-pdv', fmt(pdv) + ' €');
+  setText('r-bruto', fmt(bruto) + ' €');
+  setText('r-perm2', fmt(perM2) + ' €/m²');
+
+  document.getElementById('row-pdv').style.display = pdvOn ? '' : 'none';
+  document.getElementById('row-bruto').style.display = pdvOn ? '' : 'none';
+
+  // Bar
+  setText('bar-area', fmt(d.floor) + ' m²');
+  setText('bar-labor', fmt(laborTotal) + ' €');
+  setText('bar-mat', fmt(totalMat) + ' €');
+  setText('bar-perm2', fmt(perM2));
+  setText('bar-total', fmt(finalPrice) + ' €');
+}
+
+function buildSummary() {
+  var d = getDims();
+  var w = getWorkerCostPerH();
+  var rezPct = parseFloat(document.getElementById('sl-rezije').value) || 18;
+  var zarPct = parseFloat(document.getElementById('sl-zarada').value) || 35;
+  var pdvOn = document.getElementById('pdv-toggle').checked;
+
+  var lines = [];
+  lines.push('🚿 *PONUDA — Adaptacija kupatila*');
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('📐 Dimenzije: ' + d.l + '×' + d.w + 'm (pod: ' + fmt(d.floor) + 'm²)');
+  lines.push('👷 ' + w.count + ' radnika × ' + fmt(w.perWorker) + ' €/h');
+  lines.push('');
+
+  // Tasks
+  var totalHours = 0, totalLabor = 0;
+  lines.push('*RADOVI:*');
+  TASKS.forEach(function(id) {
+    var chk = document.getElementById('chk-' + id);
+    var hEl = document.getElementById('h-' + id);
+    if (!chk || !chk.checked) return;
+    var hours = parseFloat(hEl.value) || 0;
+    var cost = hours * w.total;
+    totalHours += hours;
+    totalLabor += cost;
+    var nameEl = document.querySelector('#chk-' + id).closest('.task-row').querySelector('.task-name');
+    var name = nameEl ? nameEl.textContent : id;
+    lines.push('  ' + name + ': ' + hours + 'h → ' + fmt(cost) + ' €');
+  });
+  lines.push('  *Rad ukupno: ' + fmt(totalLabor) + ' € (' + totalHours + 'h)*');
+  lines.push('');
+
+  // Materials
+  var totalMat = 0;
+  lines.push('*MATERIJAL:*');
+  var MATS_IDS = ['plocice','ljepilo','hidro','estrich','vodo','kanal','elektro','wc','umiv','tus','dodaci','odvoz','boja','vrata'];
+  MATS_IDS.forEach(function(id) {
+    var chk = document.getElementById('chk-m-' + id);
+    var totalEl = document.getElementById('mt-' + id);
+    if (!chk || !chk.checked) return;
+    var nameEl = chk.closest('.mat-row').querySelector('.mat-name');
+    var name = nameEl ? nameEl.textContent : id;
+    var val = totalEl.textContent.replace('—','').trim();
+    if (val) lines.push('  ' + name + ': ' + val);
+  });
+
+  var matVal = document.getElementById('kpi-mat-total').textContent;
+  lines.push('  *Materijal ukupno: ' + matVal + '*');
+  lines.push('');
+
+  var direktniVal = document.getElementById('r-direktni').textContent;
+  var rezijeVal = document.getElementById('r-rezije').textContent;
+  var zaradaVal = document.getElementById('r-zarada').textContent;
+  var netoVal = document.getElementById('r-neto').textContent;
+  var pdvVal = document.getElementById('r-pdv').textContent;
+  var brutoVal = document.getElementById('r-bruto').textContent;
+  var pm2Val = document.getElementById('r-perm2').textContent;
+
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('Direktni troškovi: ' + direktniVal);
+  lines.push('+ Režije ' + rezPct + '%: ' + rezijeVal);
+  lines.push('+ Zarada ' + zarPct + '%: ' + zaradaVal);
+  lines.push('');
+  lines.push('💰 *NETO: ' + netoVal + '*');
+  if (pdvOn) {
+    lines.push('+ PDV 25%: ' + pdvVal);
+    lines.push('💶 *UKUPNO: ' + brutoVal + '*');
+  }
+  lines.push('📐 *Cijena/m²: ' + pm2Val + '*');
+  lines.push('');
+  lines.push('_LIMIT Connect Kalkulator_');
+  lines.push('🔗 viskovic-group.de/calculator/bathroom/');
+  return lines.join('\n');
+}
+
+function shareWhatsApp() {
+  window.open('https://wa.me/?text=' + encodeURIComponent(buildSummary()), '_blank');
+}
+
+function copyText() {
+  var text = buildSummary();
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function(){ showToast('Kopirano!'); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('Kopirano!');
+  }
+}
+
+function sendToCalc() { window.open('/calculator/', '_blank'); }
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+function fmt(n) { return (Math.round(n*100)/100).toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function setText(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+
+recalc();
+</script>
+</body>
+</html>

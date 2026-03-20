@@ -1,0 +1,97 @@
+{% load i18n %}<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Outreach{% endblock %} – LIMIT CONNECT</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+body{background:#0f172a;color:#e2e8f0;font-family:'Inter',sans-serif}
+.pw{max-width:1200px;margin:0 auto;padding:20px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:20px;margin-bottom:16px}
+.ct{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:12px}
+.sn{font-size:2rem;font-weight:800;color:#c9a84c}
+.sl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.bg{background:#c9a84c;color:#0f172a;border:none;border-radius:10px;padding:8px 18px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;font-size:.85rem}
+.bg:hover{background:#e6c76a;color:#0f172a}
+.bo{background:transparent;border:1.5px solid #334155;color:#94a3b8;border-radius:10px;padding:8px 18px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;font-size:.85rem}
+.bo:hover{border-color:#c9a84c;color:#c9a84c}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl th{color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:1px;font-size:.7rem;padding:8px 10px;border-bottom:1px solid #334155}
+.tbl td{padding:9px 10px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+.tbl tr:hover td{background:#243349}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700}
+.p-neu{background:rgba(100,116,139,.2);color:#94a3b8}
+.p-kontaktiert{background:rgba(59,130,246,.15);color:#60a5fa}
+.p-geantwortet{background:rgba(16,185,129,.15);color:#34d399}
+.p-interessiert{background:rgba(201,168,76,.2);color:#c9a84c}
+.p-klient{background:rgba(34,197,94,.2);color:#22c55e}
+.p-abgelehnt{background:rgba(239,68,68,.15);color:#f87171}
+.p-pending{background:rgba(100,116,139,.2);color:#94a3b8}
+.p-sent{background:rgba(59,130,246,.15);color:#60a5fa}
+.p-follow_up{background:rgba(245,158,11,.15);color:#fbbf24}
+.p-replied{background:rgba(16,185,129,.2);color:#34d399}
+.tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.tb h1{margin:0;font-size:1.3rem;font-weight:800;color:#fff}
+.fb{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.fb select,.fb input{background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:6px 12px;font-size:.82rem}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:.7rem;font-weight:600;color:#94a3b8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:.85rem}
+.fg textarea{min-height:120px;resize:vertical}
+.bc{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#64748b;margin-bottom:18px}
+.bc a{color:#64748b;text-decoration:none}.bc a:hover{color:#c9a84c}
+.ms{margin-bottom:14px}
+.ms .s{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:8px 14px;border-radius:8px;font-size:.84rem;margin-bottom:5px}
+.ms .e{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:8px 14px;border-radius:8px;font-size:.84rem;margin-bottom:5px}
+</style></head>
+<body><div class="pw">
+<div class="bc"><a href="/">{% trans "🏠 Home" %}</a> › <a href="/outreach/">{% trans "Outreach / CRM" %}</a>› {% trans "Kontakte" %}</div>
+{% if messages %}<div class="ms">{% for m in messages %}<div class="{% if 'error' in m.tags %}e{% else %}s{% endif %}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% block content %}
+<div class="tb">
+  <h1>👥 {% trans "Kontakte" %} <span style="color:#64748b;font-weight:400;font-size:1rem">({{ total }})</span></h1>
+  <div style="display:flex;gap:8px">
+    <a href="/outreach/contacts/new/" class="bg">{% trans "➕ Neu" %}</a>
+    <button onclick="document.getElementById('csvModal').style.display='flex'" class="bo">{% trans "📂 CSV" %}</button>
+  </div>
+</div>
+<form method="get" class="fb">
+  <input name="q" placeholder="{% trans "Suche..." %}" value="{{ q }}" style="min-width:180px">
+  <select name="status" onchange="this.form.submit()">
+    <option value="">{% trans "Alle Status" %}</option>
+    {% for v,l in status_choices %}<option value="{{ v }}" {% if v == status_f %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select>
+  <select name="type" onchange="this.form.submit()">
+    <option value="">{% trans "Alle Typen" %}</option>
+    {% for v,l in type_choices %}<option value="{{ v }}" {% if v == type_f %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="bg" style="padding:6px 14px">🔍</button>
+</form>
+<div class="card" style="padding:0;overflow:hidden">
+<table class="tbl"><thead><tr><th>{% trans "Firma/Name" %}</th><th>{% trans "E-Mail" %}</th><th>{% trans "Stadt" %}</th><th>{% trans "Typ" %}</th><th>{% trans "Status" %}</th><th>{% trans "Quelle" %}</th><th></th></tr></thead>
+<tbody>
+{% for c in contacts %}<tr>
+  <td><strong style="color:#fff">{{ c.firm_name|default:c.name|default:"–" }}</strong>{% if c.name and c.firm_name %}<br><span style="color:#64748b;font-size:.74rem">{{ c.name }}</span>{% endif %}</td>
+  <td><a href="mailto:{{ c.email }}" style="color:#60a5fa;text-decoration:none">{{ c.email }}</a></td>
+  <td>{{ c.plz|default:"" }}{% if c.plz %} {% endif %}{{ c.city|default:"–" }}</td>
+  <td><span class="pill p-neu">{{ c.get_contact_type_display }}</span></td>
+  <td><span class="pill p-{{ c.status }}">{{ c.get_status_display }}</span></td>
+  <td style="color:#64748b;font-size:.74rem">{{ c.get_source_display }}</td>
+  <td><a href="/outreach/contacts/{{ c.pk }}/edit/" class="bo" style="padding:4px 10px;font-size:.74rem">✏️</a></td>
+</tr>
+{% empty %}<tr><td colspan="7" style="text-align:center;padding:28px;color:#64748b">{% trans "Keine Kontakte." %}</td></tr>{% endfor %}
+</tbody></table></div>
+<!-- CSV Modal -->
+<div id="csvModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);align-items:center;justify-content:center">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:14px;padding:26px;min-width:380px">
+    <h5 style="color:#fff;margin-bottom:12px">{% trans "📂 CSV Import" %}</h5>
+    <p style="color:#94a3b8;font-size:.82rem;margin-bottom:12px">{% trans "Spalten: ime/name, firma/Firma, email, telefon, grad/Stadt, plz, tip/Typ" %}</p>
+    <form method="post" action="/outreach/contacts/import/" enctype="multipart/form-data">{% csrf_token %}
+      <input type="file" name="csvfile" accept=".csv,.txt" style="background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:8px;width:100%;margin-bottom:12px">
+      <div style="display:flex;gap:8px">
+        <button type="submit" class="bg">{% trans "Importieren" %}</button>
+        <button type="button" onclick="document.getElementById('csvModal').style.display='none'" class="bo">{% trans "Abbrechen" %}</button>
+      </div>
+    </form>
+  </div>
+</div>{% endblock %}
+</div></body></html>

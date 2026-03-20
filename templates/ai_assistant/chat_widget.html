@@ -1,0 +1,255 @@
+{% if request.user.is_authenticated %}
+<style>
+    #aiWidgetBtn {
+        position:fixed; top:80px; right:20px; z-index:9000; cursor:grab; touch-action:none;
+        width:52px; height:52px; border-radius:50%;
+        background:linear-gradient(135deg,#c9a84c,#a8893d); color:#0a0a0a;
+        border:none; cursor:pointer; font-size:1.3rem;
+        box-shadow:0 4px 16px rgba(201,168,76,.35);
+        transition:transform .2s, box-shadow .2s;
+        display:flex; align-items:center; justify-content:center;
+    }
+    #aiWidgetBtn:hover { transform:scale(1.08); box-shadow:0 6px 24px rgba(201,168,76,.5); }
+
+    #aiWidgetPopup {
+        display:none; position:fixed; bottom:140px; right:20px; z-index:9001;
+        width:340px; height:480px; border-radius:14px; overflow:hidden;
+        background:#0a0a0a; border:1px solid #c9a84c33;
+        box-shadow:0 8px 40px rgba(0,0,0,.5);
+        flex-direction:column;
+    }
+    #aiWidgetPopup.open { display:flex; }
+
+    .aiw-header {
+        padding:12px 16px; background:#0f172a; border-bottom:1px solid #1e293b;
+        display:flex; justify-content:space-between; align-items:center;
+    }
+    .aiw-header h4 { margin:0; font-size:.82rem; color:#c9a84c; font-weight:600; }
+    .aiw-close { background:none; border:none; color:#94a3b8; cursor:pointer; font-size:1.1rem; padding:0; }
+
+    .aiw-messages { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
+    .aiw-msg { max-width:85%; padding:8px 12px; border-radius:10px; font-size:.78rem; line-height:1.4; word-wrap:break-word; }
+    .aiw-msg.user { align-self:flex-end; background:#c9a84c; color:#0a0a0a; }
+    .aiw-msg.assistant { align-self:flex-start; background:#1e293b; color:#e2e8f0; }
+
+    .aiw-input-bar { padding:8px 12px; background:#0f172a; border-top:1px solid #1e293b; display:flex; gap:6px; }
+    .aiw-input {
+        flex:1; background:#1e293b; border:1px solid #334155; color:#e2e8f0;
+        padding:8px 10px; border-radius:6px; font-size:.78rem; outline:none;
+    }
+    .aiw-input:focus { border-color:#c9a84c; }
+    .aiw-send { background:#c9a84c; color:#0a0a0a; border:none; padding:0 12px; border-radius:6px; font-weight:600; cursor:pointer; font-size:.78rem; }
+
+    .aiw-typing { color:#c9a84c; font-size:.72rem; padding:2px 12px; }
+
+    .aiw-expand {
+        background:none; border:none; color:#94a3b8; cursor:pointer;
+        font-size:.82rem; padding:0 6px;
+    }
+    .aiw-expand:hover { color:#c9a84c; }
+
+    @media(max-width:480px) {
+        #aiWidgetPopup { width:calc(100vw - 24px); right:12px; bottom:74px; height:60vh; }
+    }
+        .aiw-actions {
+        display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+    }
+    .aiw-action-btn {
+        background: linear-gradient(135deg, #c9a84c, #b8963f);
+        color: #0a0a0a; border: none; padding: 10px 14px;
+        border-radius: 8px; font-size: 12px; font-weight: 600;
+        cursor: pointer; min-height: 44px;
+        touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+        box-shadow: 0 2px 6px rgba(201,168,76,0.3);
+        transition: transform 0.1s, background .15s;
+        flex: 1; min-width: 80px; text-align: center;
+    }
+    .aiw-action-btn:active { transform: scale(0.95); }
+    .aiw-action-btn.confirm {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: #fff;
+    }
+    .aiw-action-btn.dismiss {
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+    }
+    .aiw-action-btn.dismiss:active { background: #1e293b; }
+    /* Mobile optimizacija */
+    @media(max-width:480px) {
+        .aiw-action-btn { min-height: 48px; font-size: 13px; padding: 12px 10px; }
+    }
+</style>
+
+<button id="aiWidgetBtn" onmousedown="startWidgetDrag(event)" ontouchstart="startWidgetDrag(event)" title="AI Asistent"><i class="fas fa-robot"></i></button>
+
+<div id="aiWidgetPopup">
+    <div class="aiw-header">
+        <h4><i class="fas fa-robot"></i> AI Asistent</h4>
+        <div>
+            <a href="/ai/" class="aiw-expand" title="Otvori puni chat"><i class="fas fa-expand-alt"></i></a>
+            <button class="aiw-close" onclick="toggleWidget()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+    <div class="aiw-messages" id="aiwMessages">
+        <div class="aiw-msg assistant">Dobrodošli! Pratim vaše poslovanje i spreman sam pomoći. Što vas zanima danas?<div class="aiw-actions"><button class="aiw-action-btn" onclick="inp.value='Kakvo je stanje u arhivi?';sendWidgetMsg()">📄 Arhiva</button><button class="aiw-action-btn" onclick="inp.value='Što je novo danas?';sendWidgetMsg()">📊 Pregled dana</button><button class="aiw-action-btn" onclick="inp.value='Trebam pomoć';sendWidgetMsg()">💬 Pomoć</button></div></div>
+    </div>
+    <div class="aiw-input-bar">
+        <input class="aiw-input" id="aiwInput" placeholder="Pitajte nesto..."
+               onkeydown="if(event.key==='Enter'){event.preventDefault();sendWidgetMsg()}">
+        <button class="aiw-send" onclick="sendWidgetMsg()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<script>
+(function(){
+    var popup = document.getElementById('aiWidgetPopup');
+    var btn = document.getElementById('aiWidgetBtn');
+    var msgDiv = document.getElementById('aiwMessages');
+    var inp = document.getElementById('aiwInput');
+    var wConvId = null;
+    var wSending = false;
+
+    window.toggleWidget = function(){
+        popup.classList.toggle('open');
+        if(popup.classList.contains('open')) inp.focus();
+    };
+    btn.onclick = toggleWidget;
+
+    function getCsrf(){
+        var m = document.cookie.match('csrftoken=([^;]+)');
+        return m ? m[1] : '';
+    }
+
+    function parseWActions(text) {
+        var regex = /\[ACTION:(.+?)\|(.+?)\]/g;
+        var clean = text; var actions = []; var match;
+        while ((match = regex.exec(text)) !== null) {
+            var label = match[1];
+            var action = match[2];
+            var cls = '';
+            if (action === 'confirm' || label.indexOf('✓') >= 0 || label.indexOf('Da') === 0) cls = 'confirm';
+            else if (action === 'dismiss' || label.indexOf('✗') >= 0 || label.indexOf('Ne') === 0) cls = 'dismiss';
+            actions.push({ label: label, action: action, cls: cls });
+        }
+        clean = clean.replace(/\[ACTION:.+?\|.+?\]/g, '').trim();
+        return { clean: clean, actions: actions };
+    }
+
+    function handleWAction(action) {
+        if (action.startsWith('/') && !action.startsWith('//')) { window.location.href = action; }
+        else if (action === 'confirm') { inp.value = 'Da, nastavi'; sendWidgetMsg(); }
+        else if (action === 'details') { inp.value = 'Pokazi mi vise detalja'; sendWidgetMsg(); }
+        else { inp.value = action; sendWidgetMsg(); }
+    }
+
+    function escapeHtml(t) {
+        var d = document.createElement('div');
+        d.textContent = t;
+        return d.innerHTML;
+    }
+
+    function addWMsg(role, text){
+        var parsed = parseWActions(text);
+        var d = document.createElement('div');
+        d.className = 'aiw-msg ' + role;
+        d.innerHTML = escapeHtml(parsed.clean).replace(/\n/g,'<br>');
+        if (role === 'assistant' && parsed.actions.length > 0) {
+            var actDiv = document.createElement('div');
+            actDiv.className = 'aiw-actions';
+            parsed.actions.forEach(function(a) {
+                var btn = document.createElement('button');
+                btn.className = 'aiw-action-btn' + (a.cls ? ' ' + a.cls : '');
+                btn.textContent = a.label;
+                btn.onclick = function() { handleWAction(a.action); };
+                actDiv.appendChild(btn);
+            });
+            d.appendChild(actDiv);
+        }
+        msgDiv.appendChild(d);
+        msgDiv.scrollTop = msgDiv.scrollHeight;
+    }
+
+    window.sendWidgetMsg = function(){
+        if(wSending) return;
+        var text = inp.value.trim();
+        if(!text) return;
+        wSending = true;
+        inp.value = '';
+        addWMsg('user', text);
+
+        var typing = document.createElement('div');
+        typing.className = 'aiw-typing';
+        typing.id = 'aiwTyping';
+        typing.textContent = 'Razmisljam...';
+        msgDiv.appendChild(typing);
+        msgDiv.scrollTop = msgDiv.scrollHeight;
+
+        // Detect module context from current URL
+        var ctx = '';
+        var path = window.location.pathname;
+        if(path.indexOf('/inventory/')>=0) ctx='inventory';
+        else if(path.indexOf('/pos/')>=0) ctx='pos';
+        else if(path.indexOf('/appointments/')>=0) ctx='appointments';
+        else if(path.indexOf('/worktime/')>=0) ctx='worktime';
+        else if(path.indexOf('/interventions/')>=0) ctx='interventions';
+        else if(path.indexOf('/outreach/')>=0) ctx='outreach';
+        else if(path.indexOf('/tracking/')>=0) ctx='tracking';
+
+        fetch('/ai/api/chat/', {
+            method:'POST',
+            headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+            body:JSON.stringify({message:text, conversation_id:wConvId, module_context:ctx})
+        })
+        .then(function(r){return r.json();})
+        .then(function(data){
+            var t=document.getElementById('aiwTyping'); if(t)t.remove();
+            if(data.error){ addWMsg('assistant','Greska: '+data.error); }
+            else { addWMsg('assistant',data.content); wConvId=data.conversation_id; }
+        })
+        .catch(function(e){
+            var t=document.getElementById('aiwTyping'); if(t)t.remove();
+            addWMsg('assistant','Greska: '+e.message);
+        })
+        .finally(function(){ wSending=false; inp.focus(); });
+    };
+})();
+</script>
+
+<script>
+var wDragEl=null,wOX=0,wOY=0,wMoved=false;
+function startWidgetDrag(e){
+  wDragEl=document.getElementById("aiWidgetBtn");
+  if(!wDragEl)return;
+  wMoved=false;
+  var t=e.touches?e.touches[0]:e;
+  var r=wDragEl.getBoundingClientRect();
+  wOX=t.clientX-r.left;wOY=t.clientY-r.top;
+  document.addEventListener("mousemove",onWDrag);
+  document.addEventListener("mouseup",endWDrag);
+  document.addEventListener("touchmove",onWDrag,{passive:false});
+  document.addEventListener("touchend",endWDrag);
+}
+function onWDrag(e){
+  if(!wDragEl)return;
+  wMoved=true;
+  var t=e.touches?e.touches[0]:e;
+  wDragEl.style.left=(t.clientX-wOX)+"px";
+  wDragEl.style.top=(t.clientY-wOY)+"px";
+  wDragEl.style.right="auto";
+  wDragEl.style.bottom="auto";
+  e.preventDefault();
+}
+function endWDrag(e){
+  // If not moved, it was a click — toggle chat
+  if(!wMoved && wDragEl){
+    toggleChat();
+  }
+  wDragEl=null;
+  document.removeEventListener("mousemove",onWDrag);
+  document.removeEventListener("mouseup",endWDrag);
+  document.removeEventListener("touchmove",onWDrag);
+  document.removeEventListener("touchend",endWDrag);
+}
+</script>
+{% endif %}

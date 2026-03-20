@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Pariraj transakciju{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:700px;">
+    <h2><i class="bi bi-link-45deg"></i> Pariraj transakciju</h2>
+
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">Transakcija</div>
+        <div class="card-body">
+            <table class="table table-sm mb-0">
+                <tr><td class="text-muted" style="width:120px">Datum:</td><td>{{ tx.transaction_date|date:"d.m.Y" }}</td></tr>
+                <tr><td class="text-muted">Iznos:</td><td class="fw-bold {% if tx.transaction_type == 'inflow' %}text-success{% else %}text-danger{% endif %}">
+                    {% if tx.transaction_type == 'inflow' %}+{% else %}-{% endif %}{{ tx.amount|floatformat:2 }} EUR</td></tr>
+                <tr><td class="text-muted">Platitelj:</td><td>{{ tx.counterparty_name }}</td></tr>
+                <tr><td class="text-muted">IBAN:</td><td><small>{{ tx.counterparty_iban }}</small></td></tr>
+                <tr><td class="text-muted">Opis:</td><td><small>{{ tx.description }}</small></td></tr>
+                {% if tx.reference_number %}<tr><td class="text-muted">Referenca:</td><td><strong>{{ tx.reference_number }}</strong></td></tr>{% endif %}
+            </table>
+        </div>
+    </div>
+
+    {% if suggestions %}
+    <h5 class="mb-3">Predlozeni racuni</h5>
+    {% for s in suggestions %}
+    <div class="card mb-2 {% if s.score >= 80 %}border-success{% elif s.score >= 40 %}border-warning{% endif %}">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ s.invoice.number }}</strong> — {{ s.invoice.client_name }}<br>
+                <small class="text-muted">{{ s.invoice.date_issued|date:"d.m.Y" }} | {{ s.invoice.total|floatformat:2 }} EUR | {{ s.invoice.status }}</small>
+                {% if s.score >= 80 %}<span class="badge bg-success ms-2">Visoka podudarnost</span>{% endif %}
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="invoice_id" value="{{ s.invoice.pk }}">
+                <input type="hidden" name="action" value="match">
+                <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check-lg"></i> Pariraj</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-info">Nema automatskih prijedloga. Provjerite rucno.</div>
+    {% endif %}
+
+    <div class="mt-4 d-flex gap-2">
+        <form method="post" class="flex-grow-1">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="ignore">
+            <button type="submit" class="btn btn-outline-secondary w-100">
+                <i class="bi bi-x-circle"></i> Ignoriraj transakciju
+            </button>
+        </form>
+        <a href="{% url 'konto:bank_dashboard' %}" class="btn btn-outline-primary">Nazad</a>
+    </div>
+</div>
+{% endblock %}

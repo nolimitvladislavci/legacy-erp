@@ -1,0 +1,4 @@
+AI backfill initiated by claude_haiku council vote - 2026-03-19 20:00
+Target: ArhivaEntry records with ai_proposal=null and source_type=pos_receipt
+Estimated records: pending count
+Status: COUNCIL_VOTE_1_OF_3

@@ -1,0 +1,63 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}Rokovi trajanja{% endblock %}
+{% block extra_css %}<style>
+.exp-main{padding:1rem;flex:1;overflow-y:auto}
+.exp-section{margin-bottom:1.5rem}
+.exp-section h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;padding:.4rem .75rem;border-radius:6px}
+.exp-section.expired h3{background:rgba(224,92,92,.1);color:var(--red);border:1px solid var(--red)}
+.exp-section.today h3{background:rgba(249,115,22,.12);color:#f97316;border:1px solid #f97316}
+.exp-section.warning h3{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid var(--gold)}
+.exp-section.ok h3{background:rgba(76,175,125,.08);color:var(--green);border:1px solid rgba(76,175,125,.3)}
+.exp-row{display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:.3rem;font-size:.85rem}
+.exp-row .exp-name{flex:1;font-weight:600}
+.exp-row .exp-batch{color:var(--muted);font-size:.78rem;width:100px}
+.exp-row .exp-qty{width:60px;text-align:right}
+.exp-row .exp-date{width:100px;text-align:right}
+.exp-row .exp-days{width:70px;text-align:right;font-weight:700}
+.exp-row .exp-days.expired{color:var(--red)}
+.exp-row .exp-days.warn{color:var(--gold)}
+.exp-row .exp-days.ok{color:var(--green)}
+.exp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.exp-title{font-size:1.1rem;font-weight:800;color:var(--gold)}
+</style>{% endblock %}
+{% block content %}
+<div class="exp-main">
+  <div class="exp-header">
+    <div class="exp-title">&#128197; {% trans "Rokovi trajanja" %}</div>
+    <a href="{% url 'pos:expiry_add' %}" class="btn btn-gold btn-sm">+ {% trans "Dodaj" %}</a>
+  </div>
+  {% if expired %}
+  <div class="exp-section expired">
+    <h3>&#9888; {% trans "Isteklo" %} ({{ expired|length }})</h3>
+    {% for b in expired %}
+    <div class="exp-row"><span class="exp-name">{{ b.inventory_item.name }}</span><span class="exp-batch">{{ b.batch_number }}</span><span class="exp-qty">{{ b.quantity }}</span><span class="exp-date">{{ b.expiry_date }}</span><span class="exp-days expired">{{ b.days_until_expiry }}d</span></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if today_exp %}
+  <div class="exp-section today">
+    <h3>&#128293; {% trans "Istice danas" %} ({{ today_exp|length }})</h3>
+    {% for b in today_exp %}
+    <div class="exp-row"><span class="exp-name">{{ b.inventory_item.name }}</span><span class="exp-batch">{{ b.batch_number }}</span><span class="exp-qty">{{ b.quantity }}</span><span class="exp-date">{{ b.expiry_date }}</span><span class="exp-days warn">0d</span></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if warning %}
+  <div class="exp-section warning">
+    <h3>&#9888; {% trans "Istice uskoro" %} ({{ warning|length }})</h3>
+    {% for b in warning %}
+    <div class="exp-row"><span class="exp-name">{{ b.inventory_item.name }}</span><span class="exp-batch">{{ b.batch_number }}</span><span class="exp-qty">{{ b.quantity }}</span><span class="exp-date">{{ b.expiry_date }}</span><span class="exp-days warn">{{ b.days_until_expiry }}d</span></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if ok_items %}
+  <div class="exp-section ok">
+    <h3>&#9989; {% trans "U redu" %} ({{ ok_items|length }})</h3>
+    {% for b in ok_items %}
+    <div class="exp-row"><span class="exp-name">{{ b.inventory_item.name }}</span><span class="exp-batch">{{ b.batch_number }}</span><span class="exp-qty">{{ b.quantity }}</span><span class="exp-date">{{ b.expiry_date }}</span><span class="exp-days ok">{{ b.days_until_expiry }}d</span></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+from django.contrib import admin
+from .models import Resource, Addon, Booking, BookingAddon, Payment
+admin.site.register(Resource)
+admin.site.register(Addon)
+admin.site.register(Booking)
+admin.site.register(BookingAddon)
+admin.site.register(Payment)

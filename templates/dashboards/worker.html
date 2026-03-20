@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Moj portal – LIMIT Connect{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<style>
+:root{--gold:#c9a84c;--gold-dim:rgba(201,168,76,.12);--gold-border:rgba(201,168,76,.28);--surface:#0f172a;--surface2:#1e293b;--text:#e2e8f0;--text-dim:#94a3b8;--green:#10b981;--red:#ef4444;--amber:#f59e0b}
+.wd-wrap{max-width:920px;margin:0 auto;padding:20px 16px}
+
+/* Clock button */
+.clock-card{background:var(--surface);border:1px solid var(--gold-border);border-radius:14px;padding:28px 24px;margin-bottom:20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.clock-btn{min-width:160px;min-height:72px;border-radius:12px;border:none;font-size:1.1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s;letter-spacing:.02em}
+.clock-btn:active{opacity:.75}
+.clock-in-btn{background:var(--green);color:#fff}
+.clock-out-btn{background:var(--red);color:#fff}
+.clock-info{flex:1}
+.clock-time{font-size:2rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.clock-label{font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.clock-project{font-size:.82rem;color:var(--text-dim);margin-top:4px}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-box{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:16px}
+.stat-box .val{font-size:1.6rem;font-weight:800;color:var(--text)}
+.stat-box .val.gold{color:var(--gold)}
+.stat-box .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:4px}
+.stat-box .sub{font-size:.72rem;color:var(--text-dim);margin-top:2px}
+
+/* Week bars */
+.week-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:16px 20px;margin-bottom:20px}
+.week-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:700;margin-bottom:14px}
+.week-bars{display:flex;gap:8px;align-items:flex-end;height:80px}
+.week-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.week-bar-wrap{width:100%;flex:1;display:flex;align-items:flex-end}
+.week-bar{width:100%;border-radius:4px 4px 0 0;transition:height .3s;min-height:3px}
+.week-day-name{font-size:.65rem;color:var(--text-dim)}
+.week-day-hrs{font-size:.65rem;color:var(--text-dim)}
+.week-day.today .week-day-name{color:var(--gold);font-weight:700}
+.week-day.today .week-bar{background:var(--gold)}
+.week-bar{background:#334155}
+
+/* Section header */
+.section-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:700;margin:0 0 12px}
+
+/* Interventions */
+.iv-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.iv-item{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.iv-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.iv-info{flex:1;min-width:0}
+.iv-title{font-size:.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iv-meta{font-size:.72rem;color:var(--text-dim)}
+.iv-link{font-size:.75rem;color:var(--gold);text-decoration:none;padding:.3rem .8rem;border:1px solid var(--gold-border);border-radius:6px;white-space:nowrap}
+
+/* Recent entries */
+.entries-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.entry-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem}
+.entry-row:last-child{border-bottom:none}
+.entry-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.entry-proj{font-weight:600;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entry-date{color:var(--text-dim);font-size:.72rem;white-space:nowrap}
+.entry-dur{color:var(--gold);font-weight:700;white-space:nowrap}
+.entry-status{font-size:.65rem;padding:.15rem .5rem;border-radius:8px;white-space:nowrap}
+.status-PENDING{background:#fef3c7;color:#92400e}
+.status-APPROVED{background:#d1fae5;color:#065f46}
+.status-DRAFT{background:#f1f5f9;color:#475569}
+
+/* Quick actions */
+.quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.qa-btn{background:var(--surface);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--text-dim);padding:10px 16px;font-size:.82rem;text-decoration:none;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .15s}
+.qa-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+
+/* Project select */
+.timer-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.timer-select{background:var(--surface2);border:1px solid rgba(255,255,255,.12);color:var(--text);border-radius:7px;padding:8px 10px;font-size:.82rem;flex:1;min-width:160px}
+
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .clock-card{padding:18px 16px}
+  .clock-btn{min-height:60px;font-size:1rem}
+  .clock-time{font-size:1.5rem}
+}
+</style>
+
+<div class="wd-wrap">
+
+  <!-- Clock In / Out -->
+  <div class="clock-card">
+    {% if active_timer %}
+      <div class="clock-info">
+        <div class="clock-label">{% trans "Odradio si" %}</div>
+        <div class="clock-time" id="elapsed-display" data-seconds="{{ active_timer.elapsed_seconds }}">{{ active_timer.elapsed_display }}</div>
+        <div class="clock-project">📁 {{ active_timer.project.name }} {% if active_timer.status == 'PAUSED' %}<span style="color:var(--amber)">{% trans "· Pauzirano" %}</span>{% endif %}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <form method="post" action="{% url 'worktime:timer_stop' %}">{% csrf_token %}
+          <button type="submit" class="clock-btn clock-out-btn">{% trans "⏹ Zaustavi" %}</button>
+        </form>
+        {% if active_timer.status == 'RUNNING' %}
+        <form method="post" action="{% url 'worktime:timer_pause' %}">{% csrf_token %}
+          <button type="submit" class="clock-btn" style="background:var(--surface2);color:var(--amber);border:1px solid rgba(245,158,11,.3);font-size:.9rem;min-height:44px">{% trans "⏸ Pauza" %}</button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'worktime:timer_resume' %}">{% csrf_token %}
+          <button type="submit" class="clock-btn" style="background:var(--surface2);color:var(--green);border:1px solid rgba(16,185,129,.3);font-size:.9rem;min-height:44px">{% trans "▶ Nastavi" %}</button>
+        </form>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="clock-info">
+        <div class="clock-label">{% trans "Status" %}</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--text-dim)">{% trans "Nisi prijavljen na rad" %}</div>
+        <div class="clock-project">{% trans "Odaberi projekt i klikni Clock In" %}</div>
+        <form method="post" action="{% url 'worktime:timer_start' %}" class="timer-form">
+          {% csrf_token %}
+          <select name="project" class="timer-select" required>
+            <option value="">{% trans "-- odaberi projekt --" %}</option>
+            {% for p in active_projects %}
+            <option value="{{ p.pk }}">[{{ p.code }}] {{ p.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="task_type" value="OTHER">
+          <button type="submit" class="clock-btn clock-in-btn" style="min-width:130px">{% trans "▶ Clock In" %}</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="lbl">{% trans "Danas" %}</div>
+      <div class="val">{{ hours_today|floatformat:1 }}h</div>
+      <div class="sub">Cilj: {{ daily_target|floatformat:0 }}h</div>
+    </div>
+    <div class="stat-box">
+      <div class="lbl">{% trans "Ovaj tjedan" %}</div>
+      <div class="val gold">{{ hours_week|floatformat:1 }}h</div>
+      <div class="sub">Cilj: {{ weekly_target|floatformat:0 }}h</div>
+    </div>
+    <div class="stat-box">
+      <div class="lbl">{% trans "Ovaj mjesec" %}</div>
+      <div class="val">{{ hours_month|floatformat:1 }}h</div>
+      <div class="sub">≈ {{ earnings_month|floatformat:0 }} €</div>
+    </div>
+  </div>
+
+  <!-- Week bars -->
+  <div class="week-card">
+    <div class="week-title">📊 Tjedan – {{ week_start|date:"d.m." }} – {{ week_end|date:"d.m.Y" }}</div>
+    <div class="week-bars">
+      {% for day in week_days %}
+      <div class="week-day {% if day.is_today %}today{% endif %}">
+        <div class="week-bar-wrap">
+          <div class="week-bar {% if day.is_today %}today{% endif %}"
+               style="height:{{ day.percentage }}%;background:{% if day.is_today %}var(--gold){% elif day.hours > 0 %}#3b82f6{% else %}#1e293b{% endif %}"></div>
+        </div>
+        <div class="week-day-name">{{ day.day_name }}</div>
+        <div class="week-day-hrs">{% if day.hours > 0 %}{{ day.hours|floatformat:1 }}{% else %}—{% endif %}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+      <div style="height:4px;flex:1;background:var(--surface2);border-radius:2px">
+        <div style="height:100%;width:{{ week_progress }}%;background:var(--gold);border-radius:2px;transition:width .4s"></div>
+      </div>
+      <span style="font-size:.75rem;color:var(--text-dim)">{{ week_progress }}%</span>
+    </div>
+  </div>
+
+  <!-- Active Interventions -->
+  {% if my_interventions %}
+  <div class="section-title">{% trans "🚨 Moje aktivne intervencije" %}</div>
+  <div class="iv-list">
+    {% for iv in my_interventions %}
+    <div class="iv-item">
+      <div class="iv-status-dot" style="background:{{ iv.status_color }}"></div>
+      <div class="iv-info">
+        <div class="iv-title">{{ iv.title }}</div>
+        <div class="iv-meta">{{ iv.get_status_display }} · {{ iv.address|default:iv.client_name }}</div>
+      </div>
+      <a href="{% url 'interventions:field' iv.pk %}" class="iv-link">{% trans "Terenska karta →" %}</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Quick actions -->
+  <div class="quick-actions">
+    <a href="{% url 'worktime:ts_worker' %}" class="qa-btn">{% trans "📋 Moj timesheet" %}</a>
+    <a href="{% url 'worktime:ts_add' %}" class="qa-btn">{% trans "+ Unesi sate" %}</a>
+    <a href="{% url 'interventions:kanban' %}" class="qa-btn">{% trans "🚨 Intervencije" %}</a>
+    {% if pending_count %}<a href="{% url 'worktime:ts_worker' %}" class="qa-btn" style="color:var(--amber)">⏳ {{ pending_count }} na čekanju</a>{% endif %}
+  </div>
+
+  <!-- Recent entries -->
+  {% if recent_entries %}
+  <div class="section-title">{% trans "🕒 Nedavni unosi" %}</div>
+  <div class="entries-card">
+    {% for e in recent_entries %}
+    <div class="entry-row">
+      <div class="entry-dot" style="background:{{ e.project.color }}"></div>
+      <div class="entry-proj">{{ e.project.name }}</div>
+      <div class="entry-date">{{ e.date|date:"d.m." }}</div>
+      <div class="entry-dur">{{ e.duration }}h</div>
+      <span class="entry-status status-{{ e.status }}">{{ e.get_status_display }}</span>
+    </div>
+    {% empty %}
+    <div class="entry-row" style="color:var(--text-dim)">{% trans "Nema unosa ovaj tjedan." %}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Live timer update -->
+{% if active_timer %}
+<script>
+(function(){
+  var el = document.getElementById('elapsed-display');
+  var seconds = parseInt(el.getAttribute('data-seconds')) || 0;
+  {% if active_timer.status == 'RUNNING' %}
+  var running = true;
+  {% else %}
+  var running = false;
+  {% endif %}
+  function fmt(s){
+    var h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+    return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
+  }
+  if(running){
+    setInterval(function(){ seconds++; el.textContent=fmt(seconds); }, 1000);
+  }
+})();
+</script>
+{% endif %}
+{% endblock %}

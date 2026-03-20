@@ -1,0 +1,377 @@
+{% extends "worktime/base_worktime.html" %}
+{% load i18n l10n %}
+
+{% block title %}{% trans "Moji sati" %}{% endblock %}
+
+{% block page_title %}
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">⏱</span>
+    <div>
+      <h1 class="text-xl font-bold text-slate-800">{% trans "Moje radno vrijeme" %}</h1>
+      <p class="text-sm text-slate-500">{{ today|date:"l, d. F Y." }}</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 flex-wrap">
+      <a href="{% url 'worktime:ts_add' %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 flex items-center gap-1.5">
+        ➕ {% trans "Novi unos" %}
+      </a>
+      <a href="{% url 'worktime:ts_weekly' %}" class="px-4 py-2 bg-white border rounded-lg text-sm text-slate-600 hover:bg-slate-50">
+        📅 {% trans "Tjedan" %}
+      </a>
+      <div class="relative group">
+        <button class="px-4 py-2 bg-white border rounded-lg text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-1">
+          📋 {% trans "Kopiraj" %} <span class="text-xs">▾</span>
+        </button>
+        <div class="absolute right-0 top-full mt-1 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 hidden group-hover:block">
+          <form method="post" action="{% url 'worktime:ts_copy_prev' %}">
+            {% csrf_token %}
+            <button class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex justify-between">
+              <span>📅 {% trans "Prethodni dan" %}</span><span class="text-slate-400">→ {% trans "danas" %}</span>
+            </button>
+          </form>
+          <form method="post" action="{% url 'worktime:ts_copy_week' %}">
+            {% csrf_token %}
+            <input type="hidden" name="skip_existing" value="1">
+            <button class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex justify-between">
+              <span>📆 {% trans "Prethodni tjedan" %}</span><span class="text-slate-400">→ {% trans "ovaj" %}</span>
+            </button>
+          </form>
+          <form method="post" action="{% url 'worktime:ts_copy_month' %}">
+            {% csrf_token %}
+            <input type="hidden" name="skip_existing" value="1">
+            <button class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex justify-between">
+              <span>🗓 {% trans "Prethodni mjesec" %}</span><span class="text-slate-400">→ {% trans "ovaj" %}</span>
+            </button>
+          </form>
+          <hr class="my-1 border-slate-100">
+          <a href="{% url 'worktime:ts_add' %}" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+            ⚙️ {% trans "Napredno kopiranje..." %}
+          </a>
+        </div>
+      </div>
+      <a href="{% url 'worktime:ts_pdf' %}" class="px-4 py-2 bg-white border rounded-lg text-sm text-slate-600 hover:bg-slate-50">
+        📄 PDF
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block worktime_content %}
+
+{# ── KPI kartice ── #}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Danas" %}</div>
+    <div class="text-3xl font-black text-blue-600">{{ hours_today|floatformat:1 }}<span class="text-lg font-normal text-slate-400">h</span></div>
+    {% if daily_target %}
+    <div class="mt-2">
+      <div class="w-full bg-slate-100 rounded-full h-1.5">
+        <div class="bg-blue-500 h-1.5 rounded-full" style="width:{{ hours_today|floatformat:0 }}%"></div>
+      </div>
+      <div class="text-xs text-slate-400 mt-1">{% trans "cilj" %} {{ daily_target|floatformat:1 }}h</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Ovaj tjedan" %}</div>
+    <div class="text-3xl font-black text-slate-800">{{ hours_week|floatformat:1 }}<span class="text-lg font-normal text-slate-400">h</span></div>
+    {% if weekly_target %}
+    <div class="mt-2">
+      <div class="w-full bg-slate-100 rounded-full h-1.5">
+        <div class="bg-green-500 h-1.5 rounded-full" style="width:{{ week_progress }}%"></div>
+      </div>
+      <div class="text-xs text-slate-400 mt-1">{{ week_progress }}% {% trans "od" %} {{ weekly_target|floatformat:1 }}h</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Ovaj mjesec" %}</div>
+    <div class="text-3xl font-black text-slate-800">{{ hours_month|floatformat:1 }}<span class="text-lg font-normal text-slate-400">h</span></div>
+    {% if hourly_rate %}
+    <div class="text-xs text-slate-400 mt-2">≈ €{{ earnings_month|floatformat:0 }}</div>
+    {% endif %}
+  </div>
+
+  {% if streak > 0 %}
+  <div class="bg-amber-50 border border-amber-200 rounded-xl shadow-sm p-4">
+    <div class="text-xs font-semibold text-amber-500 uppercase tracking-wide mb-1">{% trans "Streak" %}</div>
+    <div class="text-3xl font-black text-amber-600">🔥 {{ streak }}</div>
+    <div class="text-xs text-amber-500 mt-2">{% trans "radnih dana zaredom" %}</div>
+  </div>
+  {% else %}
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Zarada" %}</div>
+    <div class="text-3xl font-black text-green-600">€{{ earnings_month|floatformat:0 }}</div>
+    <div class="text-xs text-slate-400 mt-2">{% trans "ovaj mjesec" %}</div>
+  </div>
+  {% endif %}
+
+</div>
+
+{# ── Tjedni bar chart ── #}
+<div class="bg-white rounded-xl border shadow-sm p-5 mb-6">
+  <div class="text-sm font-semibold text-slate-600 mb-4">📅 {% trans "Ovaj tjedan" %}</div>
+  <div class="flex items-end gap-2 h-20">
+    {% for d in week_days %}
+    <div class="flex-1 flex flex-col items-center gap-1">
+      <div class="text-xs font-bold {% if d.is_today %}text-blue-600{% else %}text-slate-400{% endif %}">
+        {{ d.hours|floatformat:1 }}
+      </div>
+      <div class="w-full rounded-t-md {% if d.is_today %}bg-blue-500{% elif d.hours > 0 %}bg-slate-300{% else %}bg-slate-100{% endif %}"
+           style="height:{{ d.percentage }}%;min-height:4px"></div>
+      <div class="text-xs {% if d.is_today %}text-blue-600 font-bold{% else %}text-slate-400{% endif %}">
+        {{ d.day_name }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+  {# ── Timer ── #}
+  <div class="bg-white rounded-xl border shadow-sm p-5">
+    <div class="text-sm font-semibold text-slate-600 mb-4">⏱ {% trans "Štoperica" %}</div>
+
+    {% if active_timer %}
+      <div class="text-center mb-4">
+        <div class="text-4xl font-mono font-black text-blue-600 mb-1" id="timerDisplay">--:--:--</div>
+        <div class="text-sm text-slate-500">
+          {% if active_timer.project %}
+            <span class="inline-block w-2 h-2 rounded-full mr-1" style="background:{{ active_timer.project.color|default:'#3b82f6' }}"></span>
+            {{ active_timer.project.name }}
+          {% endif %}
+        </div>
+        {% if active_timer.is_paused %}
+        <span class="inline-block mt-1 px-2 py-0.5 bg-amber-100 text-amber-600 text-xs rounded-full">⏸ {% trans "Pauziran" %}</span>
+        {% else %}
+        <span class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-600 text-xs rounded-full animate-pulse">● {% trans "Aktivan" %}</span>
+        {% endif %}
+      </div>
+      <div class="flex gap-2">
+        {% if active_timer.is_paused %}
+        <form method="post" action="{% url 'worktime:timer_resume' %}" class="flex-1">{% csrf_token %}
+          <button class="w-full px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">▶ {% trans "Nastavi" %}</button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'worktime:timer_pause' %}" class="flex-1">{% csrf_token %}
+          <button class="w-full px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-300">⏸ {% trans "Pauza" %}</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'worktime:timer_stop' %}" class="flex-1">{% csrf_token %}
+          <button class="w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">⏹ {% trans "Stop" %}</button>
+        </form>
+      </div>
+      <form method="post" action="{% url 'worktime:timer_discard' %}" class="mt-2">{% csrf_token %}
+        <button class="w-full px-3 py-1.5 text-red-400 text-xs hover:text-red-600">✕ {% trans "Odbaci" %}</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'worktime:timer_start' %}">{% csrf_token %}
+        <div class="space-y-3">
+          <select name="project_id" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" required>
+            <option value="">— {% trans "Odaberi projekt" %} —</option>
+            {% for p in projects %}
+            <option value="{{ p.id }}">{{ p.name }}</option>
+            {% endfor %}
+          </select>
+          <select name="task_type" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            {% for val, lbl in task_types %}
+            <option value="{{ val }}">{{ lbl }}</option>
+            {% endfor %}
+          </select>
+          <button class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
+            ▶ {% trans "Pokreni timer" %}
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+
+  {# ── Brzi unos ── #}
+  <div class="bg-white rounded-xl border shadow-sm p-5">
+    <div class="text-sm font-semibold text-slate-600 mb-4">➕ {% trans "Brzi unos" %}</div>
+    <form method="post" action="{% url 'worktime:ts_add' %}" class="space-y-3">{% csrf_token %}
+      <input type="date" name="date" value="{{ today|date:'Y-m-d' }}"
+             class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+      <select name="project" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        <option value="">— {% trans "Projekt" %} —</option>
+        {% for p in projects %}
+        <option value="{{ p.id }}">{{ p.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="task_type" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        {% for val, lbl in task_types %}
+        <option value="{{ val }}">{{ lbl }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="duration" step="0.25" min="0.25" max="24" placeholder="{% trans 'Sati (npr. 7.5)' %}"
+             class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" required>
+      <textarea name="description" rows="2" placeholder="{% trans 'Opis (nije obavezno)' %}"
+                class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+      <button class="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">
+        ✓ {% trans "Spremi unos" %}
+      </button>
+    </form>
+  </div>
+
+  {# ── Dnevna bilješka + Česti projekti ── #}
+  <div class="flex flex-col gap-4">
+    <div class="bg-white rounded-xl border shadow-sm p-5 flex-1">
+      <div class="text-sm font-semibold text-slate-600 mb-3">📝 {% trans "Bilješka za danas" %}</div>
+      <form method="post" action="{% url 'worktime:ts_note_save' %}">{% csrf_token %}
+        <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
+        <textarea name="content" rows="3" placeholder="{% trans 'Što si danas radio/radila...' %}"
+                  class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none mb-2">{{ daily_note.content|default:'' }}</textarea>
+        <button class="w-full px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200">
+          {% trans "Spremi bilješku" %}
+        </button>
+      </form>
+    </div>
+
+    {% if frequent_projects %}
+    <div class="bg-white rounded-xl border shadow-sm p-5">
+      <div class="text-sm font-semibold text-slate-600 mb-3">⭐ {% trans "Česti projekti" %}</div>
+      <div class="space-y-1">
+        {% for p in frequent_projects %}
+        <div class="flex items-center gap-2 text-sm py-1">
+          <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:{{ p.project__color|default:'#94a3b8' }}"></span>
+          <span class="flex-1 text-slate-600 truncate">{{ p.project__name|default:"—" }}</span>
+          <span class="text-xs text-slate-400">{{ p.cnt }}×</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{# ── Nedavni unosi ── #}
+<div class="bg-white rounded-xl border shadow-sm mb-6">
+  <div class="flex items-center justify-between px-5 py-4 border-b">
+    <div class="text-sm font-semibold text-slate-600">📋 {% trans "Nedavni unosi" %}</div>
+    <div class="flex items-center gap-3">
+      {% if pending_count > 0 %}
+      <span class="px-2.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-semibold">
+        {{ pending_count }} {% trans "na čekanju" %}
+      </span>
+      {% endif %}
+      <a href="{% url 'worktime:ts_add' %}" class="text-xs text-blue-600 hover:underline">+ {% trans "novi" %}</a>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{% trans "Datum" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{% trans "Projekt" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase hidden md:table-cell">{% trans "Tip" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase hidden md:table-cell">{% trans "Opis" %}</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{% trans "Sati" %}</th>
+          <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">{% trans "Status" %}</th>
+          <th class="px-3 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for e in recent_entries %}
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">{{ e.date|date:"d.m." }}</td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              {% if e.project %}
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:{{ e.project.color|default:'#94a3b8' }}"></span>
+              <span class="text-sm font-medium text-slate-700">{{ e.project.name }}</span>
+              {% else %}
+              <span class="text-sm text-slate-400">—</span>
+              {% endif %}
+            </div>
+          </td>
+          <td class="px-4 py-3 text-sm text-slate-500 hidden md:table-cell">{{ e.get_task_type_display }}</td>
+          <td class="px-4 py-3 text-sm text-slate-500 hidden md:table-cell max-w-xs truncate">{{ e.description|default:"" }}</td>
+          <td class="px-4 py-3 text-right">
+            <span class="text-sm font-bold text-slate-800">{{ e.duration|floatformat:2 }}h</span>
+          </td>
+          <td class="px-4 py-3 text-center">
+            {% if e.status == 'APPROVED' %}
+            <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">✓ {% trans "OK" %}</span>
+            {% elif e.status == 'BILLED' %}
+            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">€ {% trans "Napl." %}</span>
+            {% else %}
+            <span class="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">○ {% trans "Čeka" %}</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-3 text-center">
+            <div class="flex items-center gap-1.5 justify-center">
+              <a href="{% url 'worktime:ts_add' %}?date={{ today|date:'Y-m-d' }}&project={{ e.project_id }}" title="Kopiraj na danas"
+                 class="text-slate-300 hover:text-green-600 text-sm" title="Kopiraj">⊕</a>
+              <a href="{% url 'worktime:ts_edit' e.pk %}" class="text-slate-400 hover:text-blue-600 text-sm" title="Uredi">✎</a>
+              <form method="post" action="{% url 'worktime:ts_duplicate' e.pk %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" title="Dupliciraj na danas" class="text-slate-300 hover:text-amber-600 text-sm">⧉</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+            <div class="text-3xl mb-2">📭</div>
+            <p>{% trans "Nema nedavnih unosa." %}</p>
+            <a href="{% url 'worktime:ts_add' %}" class="mt-2 inline-block text-sm text-blue-600 hover:underline">{% trans "Dodaj prvi unos" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{# ── Brzi predlošci ── #}
+{% if templates %}
+<div class="bg-white rounded-xl border shadow-sm p-5">
+  <div class="text-sm font-semibold text-slate-600 mb-3">⚡ {% trans "Brzi predlošci" %}</div>
+  <div class="flex flex-wrap gap-2">
+    {% for t in templates %}
+    <form method="post" action="{% url 'worktime:ts_template_use' t.pk %}">{% csrf_token %}
+      <button class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+        {% if t.project %}<span class="inline-block w-2 h-2 rounded-full mr-1" style="background:{{ t.project.color|default:'#94a3b8' }}"></span>{% endif %}
+        {{ t.name|default:t.project.name|default:"Predložak" }}
+        <span class="text-slate-400 ml-1">{{ t.duration|floatformat:1 }}h</span>
+      </button>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if active_timer and not active_timer.is_paused %}
+<script>
+const _timerStart = new Date("{{ active_timer.started_at.isoformat }}");
+function _updateTimer() {
+  const diff = Math.floor((Date.now() - _timerStart) / 1000);
+  const h = String(Math.floor(diff/3600)).padStart(2,'0');
+  const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+  const s = String(diff%60).padStart(2,'0');
+  const disp = document.getElementById('timerDisplay');
+  if (disp) disp.textContent = h+':'+m+':'+s;
+  // Nav bar timer
+  const nav = document.getElementById('nav-timer');
+  const navDisp = document.getElementById('nav-timer-display');
+  if (nav && navDisp) {
+    nav.classList.remove('hidden');
+    nav.classList.add('flex');
+    navDisp.textContent = h+':'+m+':'+s;
+  }
+}
+_updateTimer();
+setInterval(_updateTimer, 1000);
+</script>
+{% endif %}
+
+{% endblock %}

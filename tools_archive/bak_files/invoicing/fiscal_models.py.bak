@@ -1,0 +1,98 @@
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
+
+
+class BusinessLocation(models.Model):
+    """Poslovni prostor - prijavljeno Poreznoj upravi"""
+    LOCATION_TYPE = [
+        ('P', 'Poslovni prostor (fizički)'),
+        ('K', 'Pokretna naplatna naprava'),
+        ('O', 'Online / Web'),
+    ]
+    name = models.CharField(max_length=100, verbose_name=_('Naziv'))
+    location_code = models.CharField(max_length=20, verbose_name=_('Oznaka prostora (PP)'),
+                                      help_text='Oznaka iz prijave Poreznoj upravi, npr. PP1, CEPIN1')
+    location_type = models.CharField(max_length=1, choices=LOCATION_TYPE, default='P')
+    address = models.CharField(max_length=255, verbose_name=_('Adresa'))
+    city = models.CharField(max_length=100, verbose_name=_('Grad'))
+    oib = models.CharField(max_length=11, default='37590751921', verbose_name=_('OIB tvrtke'))
+    is_active = models.BooleanField(default=True, verbose_name=_('Aktivno'))
+    iban = models.CharField(max_length=34, blank=True, verbose_name=_('IBAN za uplatu'))
+    notes = models.TextField(blank=True, verbose_name=_('Napomena'))
+
+    class Meta:
+        verbose_name = _('Poslovni prostor')
+        verbose_name_plural = _('Poslovni prostori')
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.location_code})"
+
+
+class FiscalOperator(models.Model):
+    """Operater - osoba koja izdaje račune"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE,
+                                 related_name='fiscal_operator',
+                                 null=True, blank=True)
+    name = models.CharField(max_length=100, verbose_name=_('Ime i prezime'))
+    oib = models.CharField(max_length=11, verbose_name=_('OIB operatera'))
+    default_location = models.ForeignKey(BusinessLocation, on_delete=models.SET_NULL,
+                                          null=True, blank=True,
+                                          verbose_name=_('Zadani poslovni prostor'))
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = _('Operater')
+        verbose_name_plural = _('Operateri')
+
+    def __str__(self):
+        return f"{self.name} (OIB: {self.oib})"
+
+
+class TaxGroup(models.Model):
+    """PDV grupa za rekapitulaciju"""
+    RATE_CHOICES = [
+        ('0',  '0% - Oslobođeno PDV-a'),
+        ('5',  '5% - Snižena stopa (knjige, hrana)'),
+        ('13', '13% - Snižena stopa (ugostiteljstvo)'),
+        ('25', '25% - Standardna stopa'),
+    ]
+    code = models.CharField(max_length=5, unique=True, verbose_name=_('Šifra grupe'))
+    name = models.CharField(max_length=100, verbose_name=_('Naziv'))
+    rate = models.CharField(max_length=3, choices=RATE_CHOICES, verbose_name=_('Stopa PDV-a'))
+    description = models.CharField(max_length=255, blank=True, verbose_name=_('Opis'))
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = _('PDV grupa')
+        verbose_name_plural = _('PDV grupe')
+        ordering = ['rate']
+
+    def __str__(self):
+        return f"{self.code} – {self.name} ({self.rate}%)"
+
+
+class FiscalConfig(models.Model):
+        email_from = models.EmailField(max_length=255, blank=True, default='', verbose_name='Službeni Email')
+company_name = models.CharField(max_length=255, default='Tvoja Tvrtka d.o.o.', verbose_name='Naziv tvrtke')
+    address = models.CharField(max_length=255, default='Ulica 1', verbose_name='Adresa')
+    city = models.CharField(max_length=100, default='Zagreb', verbose_name='Grad')
+    oib = models.CharField(max_length=11, default='00000000000', verbose_name='OIB')
+    cert_path = models.CharField(max_length=255, blank=True, null=True, default='/var/www/fina-connect/certs/fina_cert.p12')
+    cert_file = models.FileField(upload_to='certs/', null=True, blank=True, help_text='Učitajte .p12 certifikat direktno')
+    use_production = models.BooleanField(default=False)
+    invoice_prefix_hr = models.CharField(max_length=10, default='KNJ')
+    next_invoice_number = models.IntegerField(default=1)
+    default_iban = models.CharField(max_length=34, blank=True, default='', verbose_name='Zadani IBAN')
+    class Meta:
+        verbose_name = _('Konfiguracija fiskalizacije')
+        verbose_name_plural = _('Konfiguracija fiskalizacije')
+
+    def __str__(self):
+        return "Fiskalizacija"
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

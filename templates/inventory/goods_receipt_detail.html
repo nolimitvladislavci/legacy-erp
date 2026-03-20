@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Primka {{ receipt.receipt_number }}{% endblock %}
+{% block page_title %}Primka {{ receipt.receipt_number }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h2 class="mb-0">
+    <i class="fas fa-file-invoice me-2" style="color:var(--gold)"></i>
+    Primka {{ receipt.receipt_number }}
+  </h2>
+  <div class="d-flex gap-2">
+    {% if receipt.status == 'draft' %}
+    <form method="post" action="{% url 'inventory:receipt_confirm' receipt.pk %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-success"
+              onclick="return confirm('Potvrdi primku? Ovo će ažurirati zalihe i cijene artikala.')">
+        <i class="fas fa-check me-1"></i>Potvrdi primku
+      </button>
+    </form>
+    {% endif %}
+    <a href="{% url 'inventory:receipt_list' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Natrag
+    </a>
+    <a href="{% url 'inventory:receipt_pdf' receipt.pk %}" target="_blank" class="btn btn-sm btn-outline-warning">
+      <i class="fas fa-file-pdf me-1"></i>PDF
+    </a>
+  </div>
+</div>
+
+<!-- Status banner -->
+<div class="stat-card mb-4" style="padding:12px 20px;
+     {% if receipt.status == 'confirmed' %}border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.05)
+     {% elif receipt.status == 'draft' %}border-color:rgba(234,179,8,.3);background:rgba(234,179,8,.05)
+     {% else %}border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05){% endif %}">
+  <div class="row g-3">
+    <div class="col-sm-3">
+      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Status</div>
+      <div style="font-size:1rem;font-weight:700">
+        {% if receipt.status == 'draft' %}
+          <span class="badge bg-warning text-dark fs-6">Nacrt</span>
+        {% elif receipt.status == 'confirmed' %}
+          <span class="badge bg-success fs-6">Potvrđena</span>
+        {% else %}
+          <span class="badge bg-secondary fs-6">Otkazana</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Datum</div>
+      <div style="font-size:.95rem">{{ receipt.date|date:"d.m.Y" }}</div>
+    </div>
+    <div class="col-sm-3">
+      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Dobavljač</div>
+      <div style="font-size:.95rem">{{ receipt.supplier.name|default:"—" }}</div>
+    </div>
+    <div class="col-sm-3">
+      <div style="color:#64748b;font-size:.72rem;text-transform:uppercase;font-weight:700">Dokument br.</div>
+      <div style="font-size:.95rem">{{ receipt.document_number|default:"—" }}</div>
+    </div>
+  </div>
+  {% if receipt.notes %}
+  <div class="mt-2" style="color:#94a3b8;font-size:.85rem">
+    <i class="fas fa-sticky-note me-1"></i>{{ receipt.notes }}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Items table -->
+<div class="stat-card mb-4">
+  <h6 style="color:var(--gold);font-size:.85rem;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">
+    <i class="fas fa-boxes me-2"></i>Stavke primke
+  </h6>
+  <div class="table-responsive">
+    <table class="table table-sm mb-0" style="font-size:.78rem">
+      <thead>
+        <tr style="border-bottom:2px solid rgba(201,168,76,.2)">
+          <th>Artikl</th>
+          <th class="text-end">Kol.</th>
+          <th class="text-end">Nab. cij.</th>
+          <th class="text-end">Zav. troš.</th>
+          <th class="text-end" style="color:var(--gold)">Nab. s troš.</th>
+          <th class="text-end">Marža %</th>
+          <th class="text-end">Prod. bez PDV</th>
+          <th class="text-end">PDV %</th>
+          <th class="text-end" style="color:var(--gold)">MPC</th>
+          <th class="text-end">Uk. nabavna</th>
+          <th class="text-end" style="color:var(--gold)">Uk. MPC</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05)">
+          <td>
+            <a href="{% url 'inventory:detail' item.inventory_item.pk %}"
+               style="color:#e2e8f0;text-decoration:none;font-weight:600">
+              {{ item.inventory_item.name }}
+            </a>
+            <div style="color:#64748b;font-size:.7rem;font-family:monospace">{{ item.inventory_item.sku }}</div>
+          </td>
+          <td class="text-end" style="font-family:monospace">{{ item.quantity }}</td>
+          <td class="text-end" style="font-family:monospace">{{ item.purchase_price_unit }}</td>
+          <td class="text-end" style="font-family:monospace;color:#94a3b8">{{ item.dependent_costs_unit }}</td>
+          <td class="text-end" style="font-family:monospace;color:var(--gold)">{{ item.cost_price_unit }}</td>
+          <td class="text-end" style="font-family:monospace">{{ item.margin_percent }}%</td>
+          <td class="text-end" style="font-family:monospace;color:#3b82f6">{{ item.selling_price_net }}</td>
+          <td class="text-end" style="font-family:monospace">{{ item.tax_rate }}%</td>
+          <td class="text-end" style="font-family:monospace;color:var(--gold);font-weight:700">{{ item.selling_price_gross }}</td>
+          <td class="text-end" style="font-family:monospace;color:#94a3b8">{{ item.total_cost_price }} EUR</td>
+          <td class="text-end" style="font-family:monospace;color:var(--gold);font-weight:700">{{ item.total_selling_gross }} EUR</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="11" class="text-center text-muted py-3">Nema stavki.</td></tr>
+        {% endfor %}
+      </tbody>
+      {% if receipt.status == 'confirmed' %}
+      <tfoot>
+        <tr style="border-top:2px solid rgba(201,168,76,.2);font-weight:700">
+          <td colspan="9" class="text-end" style="color:#94a3b8">UKUPNO:</td>
+          <td class="text-end" style="font-family:monospace;color:#94a3b8">{{ receipt.total_purchase }} EUR</td>
+          <td class="text-end" style="font-family:monospace;color:var(--gold)">{{ receipt.total_selling }} EUR</td>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+</div>
+
+<!-- Meta info -->
+<div style="color:#64748b;font-size:.78rem">
+  Kreirala: {{ receipt.created_by.get_full_name|default:receipt.created_by.username|default:"—" }} ·
+  {{ receipt.created_at|date:"d.m.Y H:i" }}
+</div>
+
+{% endblock %}

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<title>UVIJEK FRIŠKO — Letak A3 Vrata</title>
+<style>
+@page { size: A3 portrait; margin: 0; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #1a1a1a; width: 297mm; min-height: 420mm; }
+
+.poster {
+    width: 297mm; min-height: 420mm; padding: 15mm;
+    background: linear-gradient(180deg, #fff8e7 0%, #ffffff 30%, #ffffff 70%, #fff8e7 100%);
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; overflow: hidden;
+}
+
+/* Dekorativni kruž */
+.poster::before {
+    content: ''; position: absolute; top: -80mm; right: -80mm;
+    width: 200mm; height: 200mm; border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,.08) 0%, transparent 70%);
+}
+.poster::after {
+    content: ''; position: absolute; bottom: -60mm; left: -60mm;
+    width: 160mm; height: 160mm; border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,.06) 0%, transparent 70%);
+}
+
+.top-badge {
+    background: #d4a017; color: #fff; padding: 4mm 12mm; border-radius: 20px;
+    font-size: 5mm; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 8mm;
+}
+
+.logo-area {
+    text-align: center; margin-bottom: 6mm;
+}
+.logo-area h1 {
+    font-size: 22mm; font-weight: 900; color: #1a1a1a;
+    letter-spacing: -1px; line-height: 1;
+}
+.logo-area h1 span { color: #d4a017; }
+.logo-area .tagline {
+    font-size: 6mm; color: #666; font-weight: 400; margin-top: 2mm;
+    font-style: italic;
+}
+
+.divider {
+    width: 60mm; height: 1mm; background: linear-gradient(90deg, transparent, #d4a017, transparent);
+    margin: 6mm 0;
+}
+
+/* Glavni sadržaj */
+.main-message {
+    text-align: center; margin-bottom: 8mm;
+}
+.main-message h2 {
+    font-size: 14mm; font-weight: 800; color: #1a1a1a; line-height: 1.2;
+    margin-bottom: 3mm;
+}
+.main-message p {
+    font-size: 5.5mm; color: #555; line-height: 1.5; max-width: 220mm;
+}
+
+/* QR sekcije */
+.qr-cards {
+    display: flex; gap: 10mm; margin: 6mm 0; width: 100%; justify-content: center;
+    position: relative; z-index: 1;
+}
+.qr-card {
+    background: #fff; border: 0.5mm solid #e8e0c8; border-radius: 6mm;
+    padding: 8mm; text-align: center; flex: 1; max-width: 120mm;
+    box-shadow: 0 2mm 8mm rgba(0,0,0,.06);
+}
+.qr-card .qr-label {
+    font-size: 5mm; font-weight: 700; color: #d4a017; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 3mm;
+}
+.qr-card img {
+    width: 45mm; height: 45mm; display: block; margin: 0 auto 3mm;
+}
+.qr-card .qr-desc {
+    font-size: 4mm; color: #666; line-height: 1.4;
+}
+.qr-card .qr-icon {
+    font-size: 8mm; margin-bottom: 2mm;
+}
+
+/* Usluge */
+.services {
+    background: #1a1a1a; color: #fff; border-radius: 6mm; padding: 8mm 12mm;
+    width: 100%; margin: 6mm 0; position: relative; z-index: 1;
+}
+.services h3 {
+    color: #d4a017; font-size: 7mm; font-weight: 700; text-align: center;
+    margin-bottom: 5mm; letter-spacing: 1px;
+}
+.services-grid {
+    display: flex; flex-wrap: wrap; gap: 3mm; justify-content: center;
+}
+.service-chip {
+    background: rgba(212,160,23,.15); border: 0.3mm solid rgba(212,160,23,.3);
+    border-radius: 4mm; padding: 3mm 6mm; text-align: center;
+}
+.service-chip .s-name { font-size: 4mm; font-weight: 600; color: #fff; }
+.service-chip .s-price { font-size: 5mm; font-weight: 800; color: #d4a017; }
+
+/* Lokacije */
+.locations {
+    text-align: center; margin: 5mm 0; position: relative; z-index: 1;
+}
+.locations h3 {
+    font-size: 5mm; font-weight: 700; color: #1a1a1a; margin-bottom: 3mm;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.loc-chips {
+    display: flex; gap: 3mm; justify-content: center; flex-wrap: wrap;
+}
+.loc-chip {
+    background: #f5f0e3; border-radius: 3mm; padding: 2.5mm 5mm;
+    font-size: 3.8mm; color: #333; font-weight: 500;
+}
+.loc-chip strong { color: #d4a017; }
+
+/* Footer */
+.footer {
+    margin-top: auto; text-align: center; padding-top: 5mm;
+    border-top: 0.3mm solid #e8e0c8; width: 100%;
+    position: relative; z-index: 1;
+}
+.footer .addr { font-size: 4.5mm; color: #666; }
+.footer .slogan {
+    font-size: 6mm; font-weight: 700; color: #d4a017; margin-top: 2mm;
+}
+
+@media print {
+    body { width: 297mm; }
+    .poster { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+    <div class="top-badge">Pekara &bull; Slastičarna &bull; Dostava</div>
+
+    <div class="logo-area">
+        <h1>UVIJEK <span>FRIŠKO</span></h1>
+        <div class="tagline">Obrt za pekarsku proizvodnju &bull; Od 2019.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="main-message">
+        <h2>Naručite unaprijed,<br>pokupite bez čekanja!</h2>
+        <p>Skenirajte QR kod mobitelom — odaberite svoje omiljene proizvode,<br>
+        mi ih pripremimo svježe za vas. Bez reda, bez čekanja.</p>
+    </div>
+
+    <div class="qr-cards">
+        <div class="qr-card">
+            <div class="qr-icon">🛒</div>
+            <div class="qr-label">Naruči &amp; pokupi</div>
+            <img src="/static/qr_pickup_frisko.png" alt="QR narudžba">
+            <div class="qr-desc">
+                Odaberite kruh, peciva, kolače<br>
+                Pokupite gotovo — svježe i toplo
+            </div>
+        </div>
+        <div class="qr-card">
+            <div class="qr-icon">🔥</div>
+            <div class="qr-label">Uslužno pečenje</div>
+            <img src="/static/qr_booking_frisko.png" alt="QR rezervacija">
+            <div class="qr-desc">
+                Rezervirajte termin za pečenje<br>
+                Janjetina, odojak, pite, pizza...
+            </div>
+        </div>
+    </div>
+
+    <div class="services">
+        <h3>&#x1F525; Uslužno pečenje — rezervirajte termin</h3>
+        <div class="services-grid">
+            <div class="service-chip"><div class="s-name">Janjetina</div><div class="s-price">25 €</div></div>
+            <div class="service-chip"><div class="s-name">Odojak</div><div class="s-price">30 €</div></div>
+            <div class="service-chip"><div class="s-name">Kolači</div><div class="s-price">10 €</div></div>
+            <div class="service-chip"><div class="s-name">Kruh</div><div class="s-price">8 €</div></div>
+            <div class="service-chip"><div class="s-name">Pite</div><div class="s-price">12 €</div></div>
+            <div class="service-chip"><div class="s-name">Pizza</div><div class="s-price">15 €</div></div>
+        </div>
+    </div>
+
+    <div class="locations">
+        <h3>Naša prodajna mjesta</h3>
+        <div class="loc-chips">
+            <div class="loc-chip"><strong>&#x1F3E0;</strong> Pekara Čepin — Kalnička 30</div>
+            <div class="loc-chip"><strong>&#x1F6D2;</strong> PM Ivanovac</div>
+            <div class="loc-chip"><strong>&#x1F6D2;</strong> PM Vladislavci</div>
+            <div class="loc-chip"><strong>&#x1F6D2;</strong> PM Čepin</div>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:3mm;margin:4mm 0;justify-content:center;position:relative;z-index:1">
+      <img src="/static/img/frisko/pekara2.webp" style="width:60mm;height:35mm;object-fit:cover;border-radius:3mm">
+      <img src="/static/img/frisko/kruh2.webp" style="width:60mm;height:35mm;object-fit:cover;border-radius:3mm">
+      <img src="/static/img/frisko/pekara3.webp" style="width:60mm;height:35mm;object-fit:cover;border-radius:3mm">
+      <img src="/static/img/frisko/pekara4.webp" style="width:60mm;height:35mm;object-fit:cover;border-radius:3mm">
+    </div>
+    <div class="footer">
+        <div class="addr">UVIJEK FRIŠKO &bull; Kalnička 30, 31431 Čepin &bull; Shevqet Temaj</div>
+        <div class="slogan">Svježe. Domaće. Uvijek.</div>
+    </div>
+
+</div>
+</body></html>

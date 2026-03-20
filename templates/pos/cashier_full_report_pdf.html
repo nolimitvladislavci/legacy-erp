@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 12mm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9px; color: #1a1a1a; }
+  h1 { font-size: 16px; margin: 0 0 2px; color: #1a1a1a; }
+  h2 { font-size: 11px; margin: 12px 0 4px; color: #1d4ed8; border-bottom: 1px solid #1d4ed8; padding-bottom: 2px; }
+  .header { border-bottom: 2px solid #c9a84c; padding-bottom: 8px; margin-bottom: 8px; }
+  .header td { border: none; padding: 1px 4px; font-size: 8.5px; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  th, td { border: 1px solid #ccc; padding: 3px 5px; font-size: 8.5px; }
+  th { background: #f0f4ff; font-weight: 700; text-align: left; }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+  .totals td { font-weight: 700; background: #f8f9fa; }
+  .warn-box { padding: 6px 8px; margin: 3px 0; border-radius: 4px; font-size: 8.5px; }
+  .warn-danger { background: #fef2f2; border-left: 3px solid #dc2626; color: #991b1b; }
+  .warn-warning { background: #fffbeb; border-left: 3px solid #f59e0b; color: #92400e; }
+  .warn-info { background: #eff6ff; border-left: 3px solid #3b82f6; color: #1e40af; }
+  .warn-success { background: #f0fdf4; border-left: 3px solid #22c55e; color: #166534; }
+  .cash-box { background: #f8f9fa; border: 1px solid #ccc; border-radius: 4px; padding: 8px; margin: 4px 0; }
+  .cash-box td { border: none; padding: 2px 6px; font-size: 9px; }
+  .cash-box .big { font-size: 12px; font-weight: 700; }
+  .sig-line { display: inline-block; width: 180px; border-bottom: 1px solid #333; text-align: center; margin: 30px 20px 0; padding-top: 30px; font-size: 8px; }
+  .footer { font-size: 7px; color: #888; margin-top: 12px; border-top: 1px solid #ccc; padding-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ZAGLAVLJE -->
+<table class="header" style="border:none">
+  <tr>
+    <td style="width:60%">
+      <h1>BLAGAJNIČKI IZVJEŠTAJ</h1>
+      <span style="font-size:10px;color:#c9a84c;font-weight:700">Smjena #{{ session.session_number }}</span>
+    </td>
+    <td style="text-align:right">
+      <strong>{{ company.name }}</strong><br>
+      OIB: {{ company.oib|default:"—" }}<br>
+      {{ company.address|default:"" }}, {{ company.city|default:"" }}
+      {% if business_location %}<br>PP: {{ business_location.location_code }}{% endif %}
+      {% if branch %}<br>{{ branch.name }}{% endif %}
+    </td>
+  </tr>
+</table>
+
+<!-- META -->
+<table style="border:none;margin-bottom:8px">
+  <tr>
+    <td style="border:none;width:50%">
+      Terminal: <strong>{{ session.terminal.name }}</strong> ({{ session.terminal.terminal_code }})<br>
+      Operater: <strong>{{ session.operator.get_full_name|default:session.operator.username }}</strong><br>
+      Tip POS-a: {{ session.terminal.get_pos_type_display }}
+    </td>
+    <td style="border:none;text-align:right">
+      Otvorena: <strong>{{ session.opened_at|date:"d.m.Y H:i" }}</strong><br>
+      Zatvorena: <strong>{{ session.closed_at|date:"d.m.Y H:i"|default:"—" }}</strong><br>
+      Status: {{ session.get_status_display }}
+    </td>
+  </tr>
+</table>
+
+<!-- AI KONTROLA -->
+{% if ai_enabled and ai_warnings %}
+<h2>AI Kontrola</h2>
+{% for w in ai_warnings %}
+<div class="warn-box warn-{{ w.level }}">{{ w.message }}</div>
+{% endfor %}
+{% endif %}
+
+<!-- PROMET PO NAČINU PLAĆANJA -->
+<h2>Promet po načinu plaćanja</h2>
+<table>
+  <thead><tr><th>Način plaćanja</th><th class="text-center">Br. transakcija</th><th class="text-right">Iznos (EUR)</th></tr></thead>
+  <tbody>
+    {% for method, data in payment_bd.items %}
+    <tr><td>{{ method }}</td><td class="text-center">{{ data.count }}</td><td class="text-right">{{ data.total|floatformat:2 }}</td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="totals">
+      <td>UKUPNO</td>
+      <td class="text-center">{{ paid_receipts|length }}</td>
+      <td class="text-right">{{ session.total_sales|floatformat:2 }}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- PDV RAZRADA -->
+<h2>PDV razrada</h2>
+<table>
+  <thead><tr><th>Stopa</th><th class="text-right">Osnovica</th><th class="text-right">PDV</th><th class="text-right">Ukupno</th></tr></thead>
+  <tbody>
+    {% for rate, data in tax_bd.items %}
+    <tr><td>{{ rate }}</td><td class="text-right">{{ data.base|floatformat:2 }}</td><td class="text-right">{{ data.tax|floatformat:2 }}</td><td class="text-right">{{ data.total|floatformat:2 }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- GOTOVINSKI PROMET -->
+<h2>Gotovinski promet</h2>
+<div class="cash-box">
+  <table style="border:none;width:auto">
+    <tr><td>Početna gotovina:</td><td class="big">{{ cash_data.opening|floatformat:2 }} EUR</td></tr>
+    <tr><td>+ Gotovinska prodaja:</td><td class="big">{{ cash_data.cash_sales|floatformat:2 }} EUR</td></tr>
+    <tr><td>+ Polozi u blagajnu:</td><td>+{{ cash_data.deposits|floatformat:2 }} EUR</td></tr>
+    <tr><td>- Isplate iz blagajne:</td><td>-{{ cash_data.withdrawals|floatformat:2 }} EUR</td></tr>
+    <tr style="border-top:2px solid #333"><td><strong>= Očekivano:</strong></td><td class="big">{{ cash_data.expected|floatformat:2 }} EUR</td></tr>
+    <tr><td><strong>Prebrojano:</strong></td><td class="big">{{ cash_data.counted|floatformat:2 }} EUR</td></tr>
+    <tr><td><strong>RAZLIKA:</strong></td>
+      <td class="big" style="color:{% if cash_data.difference == 0 %}#22c55e{% else %}#dc2626{% endif %}">
+        {{ cash_data.difference|floatformat:2 }} EUR
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- PO BLAGAJNIKU -->
+<h2>Promet po blagajniku</h2>
+<table>
+  <thead>
+    <tr><th>Blagajnik</th><th class="text-center">Računi</th><th class="text-right">Gotovina</th><th class="text-right">Kartica</th><th class="text-right">Ostalo</th><th class="text-right">Napojnice</th><th class="text-right">UKUPNO</th></tr>
+  </thead>
+  <tbody>
+    {% for name, data in cashier_bd.items %}
+    <tr>
+      <td><strong>{{ name }}</strong></td>
+      <td class="text-center">{{ data.count }}</td>
+      <td class="text-right">{{ data.cash|floatformat:2 }}</td>
+      <td class="text-right">{{ data.card|floatformat:2 }}</td>
+      <td class="text-right">{{ data.other|floatformat:2 }}</td>
+      <td class="text-right">{{ data.tips|floatformat:2 }}</td>
+      <td class="text-right"><strong>{{ data.total|floatformat:2 }}</strong></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- TOP ARTIKLI -->
+{% if top_items %}
+<h2>Top 10 artikala</h2>
+<table>
+  <thead><tr><th>#</th><th>Artikl</th><th class="text-right">Promet (EUR)</th></tr></thead>
+  <tbody>
+    {% for name, total in top_items %}
+    <tr><td>{{ forloop.counter }}</td><td>{{ name }}</td><td class="text-right">{{ total|floatformat:2 }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- NAPOJNICE -->
+{% if total_tips %}
+<h2>Napojnice</h2>
+<p>Ukupno napojnica u smjeni: <strong>{{ total_tips|floatformat:2 }} EUR</strong> (PDV 0% — ne fiskalizira se)</p>
+{% endif %}
+
+<!-- STORNIRANI -->
+{% if cancelled_receipts %}
+<h2>Stornirani računi ({{ cancelled_receipts|length }})</h2>
+<table>
+  <thead><tr><th>Bon #</th><th>Iznos</th><th>Razlog</th></tr></thead>
+  <tbody>
+    {% for r in cancelled_receipts %}
+    <tr><td>#{{ r.receipt_number }}</td><td>{{ r.total|floatformat:2 }} EUR</td><td>{{ r.cancel_reason|default:"—" }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- POVRATI -->
+{% if refunded_receipts %}
+<h2>Povrati ({{ refunded_receipts|length }})</h2>
+<table>
+  <thead><tr><th>Bon #</th><th>Iznos</th><th>Napomena</th></tr></thead>
+  <tbody>
+    {% for r in refunded_receipts %}
+    <tr><td>#{{ r.receipt_number }}</td><td>{{ r.total|floatformat:2 }} EUR</td><td>{{ r.note|default:"—" }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- POLOZI/ISPLATE -->
+{% if deposits %}
+<h2>Gotovinski polozi i isplate</h2>
+<table>
+  <thead><tr><th>Vrijeme</th><th>Tip</th><th class="text-right">Iznos</th><th>Napomena</th><th>Operater</th></tr></thead>
+  <tbody>
+    {% for d in deposits %}
+    <tr>
+      <td>{{ d.created_at|date:"H:i" }}</td>
+      <td>{{ d.get_deposit_type_display }}</td>
+      <td class="text-right">{{ d.amount|floatformat:2 }} EUR</td>
+      <td>{{ d.note }}</td>
+      <td>{{ d.operator.get_full_name|default:d.operator.username }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- POTPISI -->
+<div style="margin-top:20px">
+  <div class="sig-line">Blagajnik<br><small>{{ session.operator.get_full_name|default:session.operator.username }}</small></div>
+  <div class="sig-line">Odgovorna osoba<br><small>Potpis i pečat</small></div>
+</div>
+
+<div class="footer">
+  HR: Zakon o fiskalizaciji (NN 133/12), Pravilnik o fiskalizaciji. Blagajnički izvještaj se čuva 11 godina.
+  <br>Generirano: {% now "d.m.Y H:i" %} | Smjena #{{ session.session_number }} | {{ company.name }}
+  {% if ai_enabled %} | AI kontrola: aktivna{% endif %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Tracking{% endblock %}
+{% block page_title %}{% trans "Tracking" %}{% endblock %}
+{% block content %}
+<style>
+.tk-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+.tk-header h2{font-size:1.1rem;font-weight:700;color:#0f172a;margin:0}
+.tk-table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1px solid #e2e8f0}
+.tk-table th{background:#f8fafc;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;padding:10px 14px;text-align:left;font-weight:600;border-bottom:1px solid #e2e8f0}
+.tk-table td{padding:10px 14px;font-size:.85rem;color:#334155;border-bottom:1px solid #f1f5f9}
+.tk-table tr:last-child td{border-bottom:none}
+.tk-table tr:hover td{background:#f8fafc}
+.tk-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;color:white}
+.tk-token{font-family:monospace;font-size:.75rem;color:#94a3b8;background:#f1f5f9;padding:2px 8px;border-radius:4px}
+.tk-empty{text-align:center;padding:3rem;color:#94a3b8;font-size:.9rem}
+@media(max-width:768px){.tk-table{display:block;overflow-x:auto}}
+</style>
+
+<div class="tk-header">
+  <h2><i class="fas fa-map-marker-alt" style="color:var(--gold);margin-right:6px"></i>{% trans "Tracked Items" %}</h2>
+</div>
+
+{% if items %}
+<table class="tk-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>{% trans "Tip" %}</th>
+      <th>{% trans "Status" %}</th>
+      <th>{% trans "Token" %}</th>
+      <th>{% trans "Zadnje azurirano" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>#{{ item.pk }}</td>
+      <td>{{ item.tracking_type }}</td>
+      <td>
+        {% if item.current_status %}
+        <span class="tk-badge" style="background:{{ item.current_status.color }}">
+          {% if item.current_status.icon %}{{ item.current_status.icon }} {% endif %}{{ item.current_status.name }}
+        </span>
+        {% else %}
+        <span style="color:#94a3b8">—</span>
+        {% endif %}
+      </td>
+      <td><span class="tk-token">{{ item.public_token }}</span></td>
+      <td>{{ item.updated_at|date:"d.m.Y H:i" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+{% include "includes/empty_state.html" with icon="fas fa-map-marker-alt" title="Ništa se ne prati" message="Tracking se automatski pokreće iz intervencija i projekata." %}
+{% endif %}
+{% endblock %}

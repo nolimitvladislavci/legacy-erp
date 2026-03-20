@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Batch Fiskalizacija{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-gold mb-0"><i class="fas fa-paper-plane me-2"></i>Batch Fiskalizacija</h2>
+    <a href="{% url 'invoicing:index' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i>Natrag
+    </a>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs border-gold mb-4" id="fiscalTabs">
+    <li class="nav-item">
+      <button class="nav-link active text-gold" data-bs-toggle="tab" data-bs-target="#unfiscalized">
+        <i class="fas fa-clock me-1"></i>Nefiskalizirani
+        {% if unfiscalized %}<span class="badge bg-warning ms-1">{{ unfiscalized|length }}</span>{% endif %}
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link text-muted" data-bs-toggle="tab" data-bs-target="#history">
+        <i class="fas fa-history me-1"></i>Batch povijest
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- TAB 1: Nefiskalizirani računi -->
+    <div class="tab-pane fade show active" id="unfiscalized">
+      {% if unfiscalized %}
+      <form method="post" action="{% url 'invoicing:fiscal_batch_create' %}">
+        {% csrf_token %}
+        <div class="card bg-dark border-secondary mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="text-gold">Odaberite račune za fiskalizaciju</span>
+            <button type="button" class="btn btn-sm btn-outline-gold" id="selectAll">
+              Odaberi sve
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th style="width:40px"><input type="checkbox" id="checkAll"></th>
+                    <th>Broj</th>
+                    <th>Datum</th>
+                    <th>Klijent</th>
+                    <th class="text-end">Iznos</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for inv in unfiscalized %}
+                  <tr>
+                    <td>
+                      <input type="checkbox" name="invoice_ids" value="{{ inv.pk }}" class="inv-check">
+                    </td>
+                    <td><span class="text-gold font-monospace">{{ inv.number }}</span></td>
+                    <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
+                    <td>{{ inv.client_name|default:"—" }}</td>
+                    <td class="text-end">{{ inv.total|floatformat:2 }} {{ inv.currency|default:"EUR" }}</td>
+                    <td>
+                      <span class="badge bg-secondary">{{ inv.get_status_display }}</span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <button type="submit" class="btn btn-gold px-4" id="submitBatch">
+              <i class="fas fa-paper-plane me-1"></i>Pokretni batch fiskalizaciju
+            </button>
+          </div>
+        </div>
+      </form>
+      {% else %}
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle me-2"></i>Svi računi su fiskalizirani.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- TAB 2: Batch povijest -->
+    <div class="tab-pane fade" id="history">
+      {% if batches %}
+      <div class="table-responsive">
+        <table class="table table-dark table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Datum</th>
+              <th>Status</th>
+              <th class="text-center">Ukupno</th>
+              <th class="text-center">Uspješno</th>
+              <th class="text-center">Greška</th>
+              <th class="text-end">Trajanje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for batch in batches %}
+            <tr>
+              <td class="text-muted">{{ batch.pk }}</td>
+              <td>{{ batch.created_at|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if batch.status == 'completed' %}
+                  <span class="badge bg-success">{{ batch.get_status_display }}</span>
+                {% elif batch.status == 'partial' %}
+                  <span class="badge bg-warning text-dark">{{ batch.get_status_display }}</span>
+                {% elif batch.status == 'failed' %}
+                  <span class="badge bg-danger">{{ batch.get_status_display }}</span>
+                {% elif batch.status == 'processing' %}
+                  <span class="badge bg-info">{{ batch.get_status_display }}</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ batch.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td class="text-center">{{ batch.total_count }}</td>
+              <td class="text-center text-success">{{ batch.success_count }}</td>
+              <td class="text-center text-danger">{{ batch.error_count }}</td>
+              <td class="text-end text-muted small">
+                {% if batch.duration_seconds %}{{ batch.duration_seconds|floatformat:1 }}s{% else %}—{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted py-3">Nema prethodnih batch fiskalizacija.</p>
+      {% endif %}
+    </div>
+
+  </div><!-- /tab-content -->
+</div>
+
+<script>
+document.getElementById('checkAll').addEventListener('change', function() {
+  document.querySelectorAll('.inv-check').forEach(cb => cb.checked = this.checked);
+});
+document.getElementById('selectAll').addEventListener('click', function() {
+  document.querySelectorAll('.inv-check').forEach(cb => cb.checked = true);
+  document.getElementById('checkAll').checked = true;
+});
+document.getElementById('submitBatch').addEventListener('click', function(e) {
+  const checked = document.querySelectorAll('.inv-check:checked').length;
+  if (checked === 0) {
+    e.preventDefault();
+    alert('Odaberite barem jedan račun.');
+  }
+});
+</script>
+{% endblock %}

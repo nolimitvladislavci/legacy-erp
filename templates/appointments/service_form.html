@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <a href="{% url 'appointments:service_list' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Lista usluga</a>
+</div>
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="stat-card">
+      <form method="post" id="svcForm">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label class="form-label fw-bold">Naziv usluge *</label>
+            <input type="text" name="name" class="form-control" required value="{{ form.name.value|default:'' }}" oninput="updatePreview()" placeholder="npr. Pregled vida">
+            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Tip djelatnosti *</label>
+            <select name="branch_type" class="form-select" onchange="updatePreview()">
+              {% for val, label in form.fields.branch_type.choices %}
+              <option value="{{ val }}" {% if form.branch_type.value == val or form.instance.branch_type == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold">Opis</label>
+            <textarea name="description" class="form-control" rows="3" oninput="updatePreview()" placeholder="Kratki opis usluge...">{{ form.description.value|default:'' }}</textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Trajanje (HH:MM:SS) *</label>
+            <input type="text" name="duration" id="durationField" class="form-control" required value="{{ form.duration.value|default:'00:30:00' }}" placeholder="00:30:00">
+            <div class="d-flex gap-1 mt-1 flex-wrap">
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDur('00:15:00')">15min</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDur('00:30:00')">30min</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDur('00:45:00')">45min</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDur('01:00:00')">1h</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDur('01:30:00')">1h30</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDur('02:00:00')">2h</button>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Korak termina</label>
+            <select name="slot_duration_minutes" class="form-select">
+              {% for val, label in form.fields.slot_duration_minutes.choices %}
+              <option value="{{ val }}" {% if form.slot_duration_minutes.value == val|stringformat:'i' %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Cijena (EUR)</label>
+            <input type="number" name="price" step="0.01" class="form-control" value="{{ form.price.value|default:''|unlocalize }}" oninput="updatePreview()" placeholder="0.00">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">FA ikona</label>
+            <div class="input-group">
+              <span class="input-group-text" style="background:#111;border-color:#333"><i id="iconPreviewSmall" class="fas fa-calendar-check" style="color:var(--gold)"></i></span>
+              <input type="text" name="icon" id="iconField" class="form-control" value="{{ form.icon.value|default:'fa-calendar-check' }}" placeholder="fa-calendar-check" oninput="updatePreview()">
+            </div>
+            <small class="text-muted">npr. fa-eye, fa-cut, fa-stethoscope</small>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Boja</label>
+            <div class="d-flex gap-2 align-items-center">
+              <input type="color" name="color" id="colorPicker" class="form-control form-control-color" value="{{ form.color.value|default:'#10b981' }}" oninput="updatePreview()">
+              <input type="text" id="colorText" class="form-control" value="{{ form.color.value|default:'#10b981' }}" placeholder="#10b981" style="font-family:monospace" oninput="syncColor(this.value)">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Tip resursa</label>
+            <select name="resource_type" class="form-select">
+              {% for val, label in form.fields.resource_type.choices %}
+              <option value="{{ val }}" {% if form.resource_type.value == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">WhatsApp broj (opcionalno)</label>
+            <input type="text" name="whatsapp_number" class="form-control" value="{{ form.whatsapp_number.value|default:'' }}" placeholder="+385912345678">
+          </div>
+          <div class="col-md-3">
+            <div class="form-check mt-4">
+              <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if form.is_active.value %}checked{% endif %}>
+              <label class="form-check-label" for="isActive">Aktivno za javnost</label>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-check mt-4">
+              <input type="checkbox" name="requires_dossier" class="form-check-input" id="reqDossier" {% if form.requires_dossier.value %}checked{% endif %}>
+              <label class="form-check-label" for="reqDossier">Potreban karton</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>Spremi uslugu</button>
+            <a href="{% url 'appointments:service_list' %}" class="btn btn-outline-secondary ms-2">Odustani</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="stat-card" style="position:sticky;top:80px">
+      <h6 style="color:var(--gold);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">Pregled kartice</h6>
+      <div id="previewCard" style="background:var(--dark);border:1px solid var(--border);padding:20px;transition:border-color .2s">
+        <div id="prevIcon" style="width:48px;height:48px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:1.3rem;color:var(--gold)">
+          <i id="prevIconEl" class="fas fa-calendar-check"></i>
+        </div>
+        <h5 id="prevName" style="font-size:1rem;font-weight:600;margin:0 0 8px;color:var(--text)">Naziv usluge</h5>
+        <p id="prevDesc" style="color:var(--muted);font-size:.82rem;margin:0 0 14px"></p>
+        <div class="d-flex gap-2 flex-wrap" id="prevBadges">
+          <span id="prevPrice" class="badge" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold)"></span>
+          <span id="prevDur" class="badge" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold)"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setDur(v) {
+  document.getElementById('durationField').value = v;
+  updatePreview();
+}
+function syncColor(val) {
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) document.getElementById('colorPicker').value = val;
+}
+function updatePreview() {
+  const name = document.querySelector('input[name=name]').value || 'Naziv usluge';
+  const desc = document.querySelector('textarea[name=description]').value;
+  const price = document.querySelector('input[name=price]').value;
+  const dur = document.getElementById('durationField').value;
+  const icon = document.getElementById('iconField').value || 'fa-calendar-check';
+  const color = document.getElementById('colorPicker').value;
+  document.getElementById('colorText').value = color;
+  document.getElementById('prevName').textContent = name;
+  document.getElementById('prevDesc').textContent = desc;
+  document.getElementById('prevPrice').textContent = price ? price + ' EUR' : '';
+  document.getElementById('prevDur').textContent = dur;
+  document.getElementById('prevIconEl').className = 'fas ' + icon;
+  document.getElementById('iconPreviewSmall').className = 'fas ' + icon;
+  document.getElementById('previewCard').style.borderColor = color;
+  document.getElementById('prevIcon').style.background = color + '22';
+  document.getElementById('prevIcon').style.borderColor = color + '55';
+  document.getElementById('prevIconEl').style.color = color;
+}
+updatePreview();
+</script>
+{% endblock %}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<title>FRIŠKO — Letak A3 Vrata</title>
+<style>
+@page { size: A3 portrait; margin: 0; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #1a1a1a; width: 297mm; min-height: 420mm; }
+
+.poster {
+    width: 297mm; min-height: 420mm; padding: 15mm;
+    background: linear-gradient(180deg, #fff8e7 0%, #ffffff 30%, #ffffff 70%, #fff8e7 100%);
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; overflow: hidden;
+}
+
+.poster::before {
+    content: ''; position: absolute; top: -80mm; right: -80mm;
+    width: 200mm; height: 200mm; border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,.08) 0%, transparent 70%);
+}
+.poster::after {
+    content: ''; position: absolute; bottom: -60mm; left: -60mm;
+    width: 160mm; height: 160mm; border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,.06) 0%, transparent 70%);
+}
+
+.top-badge {
+    background: #d4a017; color: #fff; padding: 4mm 12mm; border-radius: 20px;
+    font-size: 5mm; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 8mm;
+}
+
+.logo-area {
+    text-align: center; margin-bottom: 6mm;
+}
+.logo-area h1 {
+    font-size: 28mm; font-weight: 900; color: #d4a017;
+    letter-spacing: -1px; line-height: 1;
+}
+.logo-area .tagline {
+    font-size: 6mm; color: #666; font-weight: 400; margin-top: 3mm;
+    font-style: italic;
+}
+
+.divider {
+    width: 60mm; height: 1mm; background: linear-gradient(90deg, transparent, #d4a017, transparent);
+    margin: 6mm 0;
+}
+
+.main-message {
+    text-align: center; margin-bottom: 8mm;
+}
+.main-message h2 {
+    font-size: 14mm; font-weight: 800; color: #1a1a1a; line-height: 1.2;
+    margin-bottom: 3mm;
+}
+.main-message p {
+    font-size: 5.5mm; color: #555; line-height: 1.5; max-width: 220mm;
+}
+
+.qr-cards {
+    display: flex; gap: 10mm; margin: 8mm 0; width: 100%; justify-content: center;
+    position: relative; z-index: 1;
+}
+.qr-card {
+    background: #fff; border: 0.5mm solid #e8e0c8; border-radius: 6mm;
+    padding: 8mm; text-align: center; flex: 1; max-width: 120mm;
+    box-shadow: 0 2mm 8mm rgba(0,0,0,.06);
+}
+.qr-card .qr-label {
+    font-size: 5mm; font-weight: 700; color: #d4a017; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 3mm;
+}
+.qr-card .qr-placeholder {
+    width: 45mm; height: 45mm; margin: 2mm auto 3mm;
+    border: 0.5mm dashed #d4a017; border-radius: 4mm;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4mm; color: #d4a017; font-weight: 600;
+}
+.qr-card .qr-desc {
+    font-size: 4mm; color: #666; line-height: 1.4;
+}
+.qr-card .qr-icon {
+    font-size: 8mm; margin-bottom: 2mm;
+}
+
+.services {
+    background: #1a1a1a; color: #fff; border-radius: 6mm; padding: 8mm 12mm;
+    width: 100%; margin: 8mm 0; position: relative; z-index: 1;
+}
+.services h3 {
+    color: #d4a017; font-size: 7mm; font-weight: 700; text-align: center;
+    margin-bottom: 5mm; letter-spacing: 1px;
+}
+.services-grid {
+    display: flex; flex-wrap: wrap; gap: 4mm; justify-content: center;
+}
+.service-chip {
+    background: rgba(212,160,23,.15); border: 0.3mm solid rgba(212,160,23,.3);
+    border-radius: 4mm; padding: 3mm 6mm; text-align: center;
+}
+.service-chip .s-name { font-size: 4.5mm; font-weight: 600; color: #fff; }
+.service-chip .s-price { font-size: 6mm; font-weight: 800; color: #d4a017; }
+
+.products {
+    text-align: center; margin: 6mm 0; position: relative; z-index: 1;
+}
+.products h3 {
+    font-size: 6mm; font-weight: 700; color: #1a1a1a; margin-bottom: 4mm;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.prod-chips {
+    display: flex; gap: 3mm; justify-content: center; flex-wrap: wrap;
+    max-width: 250mm;
+    margin: 0 auto;
+}
+.prod-chip {
+    background: #f5f0e3; border-radius: 3mm; padding: 2.5mm 5mm;
+    font-size: 4mm; color: #333; font-weight: 500;
+}
+
+.contact-bar {
+    display: flex; gap: 8mm; justify-content: center; margin: 6mm 0;
+    position: relative; z-index: 1;
+}
+.contact-item {
+    text-align: center;
+}
+.contact-item .c-label {
+    font-size: 3.5mm; color: #888; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.contact-item .c-value {
+    font-size: 5mm; font-weight: 700; color: #1a1a1a; margin-top: 1mm;
+}
+
+.footer {
+    margin-top: auto; text-align: center; padding-top: 5mm;
+    border-top: 0.3mm solid #e8e0c8; width: 100%;
+    position: relative; z-index: 1;
+}
+.footer .addr { font-size: 4.5mm; color: #666; }
+.footer .slogan {
+    font-size: 8mm; font-weight: 800; color: #d4a017; margin-top: 3mm;
+}
+
+@media print {
+    body { width: 297mm; }
+    .poster { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+    <div class="top-badge">Obiteljska pekara</div>
+
+    <div class="logo-area">
+        <h1>FRIŠKO</h1>
+        <div class="tagline">Svjež kruh svaki dan &#x2022; Rizo Temaj</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="main-message">
+        <h2>Naručite unaprijed,<br>pokupite bez čekanja!</h2>
+        <p>Skenirajte QR kod mobitelom &#x2014; odaberite svoje omiljene proizvode,<br>
+        mi ih pripremimo svježe za vas. Bez reda, bez čekanja.</p>
+    </div>
+
+    <div class="qr-cards">
+        <div class="qr-card">
+            <div class="qr-icon">&#x1F6D2;</div>
+            <div class="qr-label">Naruči &amp; pokupi</div>
+            <div class="qr-placeholder">QR KOD</div>
+            <div class="qr-desc">
+                Odaberite kruh, peciva, kolače<br>
+                Pokupite gotovo &#x2014; svježe i toplo
+            </div>
+        </div>
+        <div class="qr-card">
+            <div class="qr-icon">&#x1F525;</div>
+            <div class="qr-label">Uslužno pečenje</div>
+            <div class="qr-placeholder">QR KOD</div>
+            <div class="qr-desc">
+                Rezervirajte termin za pečenje<br>
+                Janjetina, odojak, pite, pizza...
+            </div>
+        </div>
+    </div>
+
+    <div class="services">
+        <h3>&#x1F525; Uslužno pečenje &#x2014; rezervirajte termin</h3>
+        <div class="services-grid">
+            <div class="service-chip"><div class="s-name">Janjetina</div><div class="s-price">25 &#8364;</div></div>
+            <div class="service-chip"><div class="s-name">Odojak</div><div class="s-price">30 &#8364;</div></div>
+            <div class="service-chip"><div class="s-name">Kolači</div><div class="s-price">10 &#8364;</div></div>
+            <div class="service-chip"><div class="s-name">Kruh</div><div class="s-price">8 &#8364;</div></div>
+            <div class="service-chip"><div class="s-name">Pite</div><div class="s-price">12 &#8364;</div></div>
+            <div class="service-chip"><div class="s-name">Pizza</div><div class="s-price">15 &#8364;</div></div>
+        </div>
+    </div>
+
+    <div class="products">
+        <h3>Naš asortiman</h3>
+        <div class="prod-chips">
+            <div class="prod-chip">Kruh polubijeli</div>
+            <div class="prod-chip">Kruh raženi</div>
+            <div class="prod-chip">Kruh integralni</div>
+            <div class="prod-chip">Kifle</div>
+            <div class="prod-chip">Kroasani</div>
+            <div class="prod-chip">Štangle</div>
+            <div class="prod-chip">Burek sir</div>
+            <div class="prod-chip">Burek meso</div>
+            <div class="prod-chip">Zeljanica</div>
+            <div class="prod-chip">Krompirača</div>
+            <div class="prod-chip">Krempite</div>
+            <div class="prod-chip">Šampite</div>
+            <div class="prod-chip">Štrudla jabuka</div>
+            <div class="prod-chip">Štrudla višnja</div>
+            <div class="prod-chip">Krafne</div>
+            <div class="prod-chip">Torte po narudžbi</div>
+            <div class="prod-chip">Pizza</div>
+            <div class="prod-chip">Sendviči</div>
+        </div>
+    </div>
+
+    <div class="contact-bar">
+        <div class="contact-item">
+            <div class="c-label">Email</div>
+            <div class="c-value">pekara.frisko@gmail.com</div>
+        </div>
+        <div class="contact-item">
+            <div class="c-label">Radno vrijeme</div>
+            <div class="c-value">Pon &#x2013; Sub: 6:00 &#x2013; 18:00</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="addr">FRIŠKO &#x2022; Obiteljska pekara &#x2022; Rizo Temaj</div>
+        <div class="slogan">Svjež kruh svaki dan.</div>
+    </div>
+
+</div>
+</body></html>

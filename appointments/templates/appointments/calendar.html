@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Kalendar & Najam - LIMIT CONNECT{% endblock %}
+{% block page_title %}UPRAVLJANJE TERMINIMA I NAJMOM{% endblock %}
+
+{% block extra_css %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+<style>
+    .fc-theme-standard td, .fc-theme-standard th { border-color: #e2e8f0; }
+    .fc-col-header-cell { background: #f8fafc; padding: 10px 0; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+    .fc-event { border: none !important; border-radius: 6px; padding: 3px 5px; font-size: 0.75rem; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.1s;}
+    .fc-toolbar-title { font-size: 1.3rem !important; font-weight: 700; color: #0f172a; }
+    .fc-button-primary { background-color: var(--sidebar-bg) !important; border-color: var(--sidebar-bg) !important; font-weight: 600 !important; text-transform: capitalize;}
+    #calendar-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card" style="border-left: 4px solid var(--gold);">
+            <div class="label">{% trans "Novi Termin / Najam" %}</div>
+            <button class="btn btn-sm btn-dark w-100 mt-2" data-bs-toggle="modal" data-bs-target="#appointmentModal" onclick="clearForm()">
+                <i class="fas fa-plus me-1"></i> {% trans "Kreiraj unos" %}
+            </button>
+        </div>
+        <div class="stat-card mt-3">
+            <div class="label">{% trans "Legenda" %}</div>
+            <div class="mt-2" style="font-size:0.8rem; color:#475569;">
+                <div class="d-flex align-items-center mb-1"><span class="badge me-2" style="background:#3b82f6; width:15px; height:15px;"></span> {% trans "Kratke Usluge" %}</div>
+                <div class="d-flex align-items-center mb-1"><span class="badge me-2" style="background:#10b981; width:15px; height:15px;"></span> {% trans "Dugoročni Najam" %}</div>
+                <div class="d-flex align-items-center mb-1"><span class="badge me-2" style="background:#f59e0b; width:15px; height:15px;"></span> {% trans "Fešte / Događaji" %}</div>
+                <div class="d-flex align-items-center"><span class="badge me-2" style="background:#64748b; width:15px; height:15px;"></span> {% trans "Sastanci" %}</div>
+
+        <div class="stat-card mt-3">
+          <div class="label">&#x1F514; Podsjetnici</div>
+          <div style="font-size:.78rem;color:#64748b;margin:6px 0">Automatski: svaki dan u 08:00</div>
+          <a href="/appointments/send-reminders-now/"
+             style="display:block;text-align:center;padding:8px;background:#25d366;color:#fff;
+                    border-radius:8px;text-decoration:none;font-size:.82rem;font-weight:700;margin-top:6px"
+             onclick="return confirm('Poslati podsjetnike za sutrašnje termine?')">
+            &#x1F4F2; Pošalji odmah
+          </a>
+        </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div id="calendar-container">
+            <div id='calendar'></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="appointmentForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="appointmentModalLabel">{% trans "Novi termin / najam" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="formErrors" class="alert alert-danger d-none"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Naslov" %}</label>
+                            <input type="text" class="form-control" name="title" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Klijent" %}</label>
+                            <select class="form-select" name="client">
+                                <option value="">{% trans "--- Interni ---" %}</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}">{{ client.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Početak" %}</label>
+                            <input type="datetime-local" class="form-control" id="id_start_time" name="start_time" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Kraj (Opcionalno)" %}</label>
+                            <input type="datetime-local" class="form-control" id="id_end_time" name="end_time">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Tip termina" %}</label>
+                            <select class="form-select" name="appointment_type">
+                                <option value="service">{% trans "Kratka usluga" %}</option>
+                                <option value="rental">{% trans "Dugoročni najam" %}</option>
+                                <option value="event">{% trans "Događaj" %}</option>
+                                <option value="meeting" selected>{% trans "Sastanak" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{% trans "Resurs" %}</label>
+                            <select class="form-select" name="resource">
+                                <option value="">{% trans "--- Bez resursa ---" %}</option>
+                                {% for res in resources %}
+                                <option value="{{ res.id }}">{{ res.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{% trans "Status" %}</label>
+                            <select class="form-select" name="status">
+                                <option value="scheduled">{% trans "Planirano" %}</option>
+                                <option value="confirmed">{% trans "Potvrđeno" %}</option>
+                                <option value="completed">{% trans "Završeno" %}</option>
+                                <option value="cancelled">{% trans "Otkazano" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3 d-flex align-items-center mt-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="id_is_all_day" name="is_all_day">
+                                <label class="form-check-label ms-2" for="id_is_all_day">{% trans "Cjelodnevni najam" %}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{% trans "Boja u kalendaru" %}</label>
+                            <input type="color" class="form-control form-control-color w-100" name="color" value="#3b82f6">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Odustani" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Spremi" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales-all.global.min.js'></script>
+<script>
+    let calendar;
+    let currentEventId = null;
+
+    function clearForm() {
+        document.getElementById('appointmentForm').reset();
+        currentEventId = null;
+        document.getElementById('formErrors').classList.add('d-none');
+        document.getElementById('appointmentModalLabel').innerText = 'Novi termin / najam';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: '{{ CURRENT_LANG|default:"hr" }}',
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+            navLinks: true, editable: true, selectable: true, dayMaxEvents: true,
+            events: '/appointments/api/events/',
+            select: function(info) {
+                clearForm();
+                document.getElementById('id_start_time').value = info.startStr.slice(0,16);
+                if (info.endStr) { document.getElementById('id_end_time').value = info.endStr.slice(0,16); }
+                var modal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+                modal.show();
+            }
+        });
+        calendar.render();
+    });
+
+    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const url = currentEventId ? `/appointments/api/appointments/${currentEventId}/` : '/appointments/api/appointments/';
+        
+        fetch(url, {
+            method: 'POST', // Django forme najčešće traže klasični POST sa ID-jem
+            body: formData,
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                var modalInstance = bootstrap.Modal.getInstance(document.getElementById('appointmentModal'));
+                modalInstance.hide();
+                calendar.refetchEvents();
+            } else {
+                let errDiv = document.getElementById('formErrors');
+                errDiv.innerHTML = JSON.stringify(data.errors);
+                errDiv.classList.remove('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}

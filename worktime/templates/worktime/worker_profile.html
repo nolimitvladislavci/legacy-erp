@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Moj profil" %}{% endblock %}
+{% block page_title %}👤 {% trans "Moj profil" %}{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <!-- Personal Info -->
+  <div class="col-12 col-md-6">
+    <div class="stat-card" style="padding:20px">
+      <h6 style="font-weight:700;margin-bottom:16px"><i class="fas fa-user text-primary"></i> {% trans "Osobni podaci" %}</h6>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_profile">
+        <div class="mb-3">
+          <label class="form-label" style="font-size:.75rem;font-weight:600">{% trans "OIB" %} <span class="text-muted fw-normal" style="font-weight:400">(auto-popuna iz registra)</span></label>
+          <div class="input-group input-group-sm">
+            <input type="text" id="oibInput" name="tax_id" value="{{ emp.tax_id|default:'' }}"
+                   class="form-control font-monospace" placeholder="11 znamenki" maxlength="11" inputmode="numeric">
+            <button type="button" id="oibInputBtn" class="btn btn-outline-secondary">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+          <div id="oibInputFeedback" class="form-text"></div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label" style="font-size:.75rem;font-weight:600">{% trans "Ime" %}</label>
+          <input type="text" id="fieldFirstName" name="first_name" value="{{ request.user.first_name }}" class="form-control form-control-sm">
+        </div>
+        <div class="mb-2">
+          <label class="form-label" style="font-size:.75rem;font-weight:600">{% trans "Prezime" %}</label>
+          <input type="text" id="fieldLastName" name="last_name" value="{{ request.user.last_name }}" class="form-control form-control-sm">
+        </div>
+        <div class="mb-2">
+          <label class="form-label" style="font-size:.75rem;font-weight:600">{% trans "Email" %}</label>
+          <input type="email" name="email" value="{{ request.user.email }}" class="form-control form-control-sm">
+        </div>
+        <div class="mb-2">
+          <label class="form-label" style="font-size:.75rem;font-weight:600">{% trans "Telefon" %}</label>
+          <input type="tel" name="phone" value="{{ emp.phone|default:'' }}" class="form-control form-control-sm">
+        </div>
+        <div class="mb-2">
+          <label class="form-label" style="font-size:.75rem;font-weight:600">{% trans "Adresa" %}</label>
+          <input type="text" name="address" value="{{ emp.address|default:'' }}" class="form-control form-control-sm">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" style="font-size:.75rem;font-weight:600">{% trans "IBAN" %}</label>
+          <input type="text" name="bank_account" value="{{ emp.bank_account|default:'' }}" class="form-control form-control-sm">
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm w-100">
+          <i class="fas fa-save me-1"></i> {% trans "Spremi podatke" %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-6">
+    <!-- SATNICA -->
+    <div class="stat-card mb-3" style="padding:20px;border:2px solid #c9a84c">
+      <h6 style="font-weight:700;margin-bottom:16px"><i class="fas fa-coins" style="color:#c9a84c"></i> {% trans "Satnica i fond sati" %}</h6>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_rate">
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label" style="font-size:.75rem;font-weight:700">{% trans "Satnica" %} (€/h)</label>
+            <input type="number" name="hourly_rate" value="{{ emp.hourly_rate|default:"20.00"|floatformat:2 }}" step="0.50" min="0" class="form-control" style="font-size:1.3rem;font-weight:700;color:#c9a84c;text-align:center">
+          </div>
+          <div class="col-6">
+            <label class="form-label" style="font-size:.75rem;font-weight:700">{% trans "Prekovremeno" %} (€/h)</label>
+            <input type="number" name="overtime_rate" value="{{ emp.overtime_rate|default:"30.00"|floatformat:2 }}" step="0.50" min="0" class="form-control" style="font-size:1.3rem;font-weight:700;color:#f59e0b;text-align:center">
+          </div>
+          <div class="col-6">
+            <label class="form-label" style="font-size:.75rem;font-weight:700">{% trans "Dnevni fond" %} (h)</label>
+            <input type="number" name="daily_hours" value="{{ emp.daily_hours|default:"8.0"|floatformat:1 }}" step="0.5" min="1" max="24" class="form-control" style="font-size:1.3rem;text-align:center">
+          </div>
+          <div class="col-6">
+            <label class="form-label" style="font-size:.75rem;font-weight:700">{% trans "Tjedni fond" %} (h)</label>
+            <input type="number" name="weekly_hours" value="{{ emp.weekly_hours|default:"40.0"|floatformat:1 }}" step="1" min="1" max="168" class="form-control" style="font-size:1.3rem;text-align:center">
+          </div>
+          <div class="col-12 mt-2">
+            <button type="submit" class="btn btn-warning w-100" style="font-weight:700;font-size:1rem;padding:12px">
+              💰 {% trans "Spremi satnicu" %}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-card mb-3" style="padding:20px">
+      <h6 style="font-weight:700;margin-bottom:16px"><i class="fas fa-chart-bar text-success"></i> {% trans "Statistika" %}</h6>
+      <div class="row g-2 text-center">
+        <div class="col-4">
+          <div style="font-size:1.5rem;font-weight:700">{{ total_hours|floatformat:0 }}h</div>
+          <div style="font-size:.65rem;color:#64748b;text-transform:uppercase">{% trans "Ukupno" %}</div>
+        </div>
+        <div class="col-4">
+          <div style="font-size:1.5rem;font-weight:700;color:#c9a84c">€{{ total_earnings|floatformat:0 }}</div>
+          <div style="font-size:.65rem;color:#64748b;text-transform:uppercase">{% trans "Zarada" %}</div>
+        </div>
+        <div class="col-4">
+          <div style="font-size:1.5rem;font-weight:700;color:#3b82f6">{{ month_hours|floatformat:0 }}h</div>
+          <div style="font-size:.65rem;color:#64748b;text-transform:uppercase">{% trans "Mjesec" %}</div>
+        </div>
+      </div>
+      {% if emp %}
+      <hr>
+      <table class="table table-sm table-borderless mb-0" style="font-size:.82rem">
+        {% if emp.employee_id %}<tr><td class="text-muted">{% trans "ID" %}</td><td>{{ emp.employee_id }}</td></tr>{% endif %}
+        {% if emp.tax_id %}<tr><td class="text-muted">{% trans "OIB" %}</td><td>{{ emp.tax_id }}</td></tr>{% endif %}
+        {% if emp.department %}<tr><td class="text-muted">{% trans "Odjel" %}</td><td>{{ emp.department }}</td></tr>{% endif %}
+        {% if emp.position %}<tr><td class="text-muted">{% trans "Pozicija" %}</td><td>{{ emp.position }}</td></tr>{% endif %}
+      </table>
+      {% endif %}
+    </div>
+
+    <!-- Password -->
+    <div class="stat-card" style="padding:20px">
+      <h6 style="font-weight:700;margin-bottom:12px"><i class="fas fa-lock text-warning"></i> {% trans "Promjena lozinke" %}</h6>
+      <p style="font-size:.82rem;color:#64748b;margin-bottom:1rem">{% trans "Promijenite lozinku za vaš korisnički račun." %}</p>
+      <a href="{% url 'accounts:change_password' %}" class="btn btn-warning btn-sm w-100">🔑 {% trans "Promijeni lozinku" %}</a>
+    </div>
+  </div>
+</div>
+
+<div class="mt-3">
+  <a href="{% url 'worktime:ts_worker' %}" class="btn btn-outline-primary">← {% trans "Natrag" %}</a>
+</div>
+
+<script>
+// OIB validacija za fizičke osobe (MOD 11,10)
+function validateOibHr(oib) {
+  if (!oib || oib.length !== 11 || !/^\d+$/.test(oib)) return false;
+  var total = 10;
+  for (var i = 0; i < 10; i++) {
+    total = (total + parseInt(oib[i])) % 10;
+    if (total === 0) total = 10;
+    total = (total * 2) % 11;
+  }
+  return (11 - total) % 10 === parseInt(oib[10]);
+}
+
+(function() {
+  var inp  = document.getElementById('oibInput');
+  var btn  = document.getElementById('oibInputBtn');
+  var feed = document.getElementById('oibInputFeedback');
+  if (!inp || !btn) return;
+
+  function setFeed(msg, type) {
+    var icons = {success:'check-circle', danger:'exclamation-circle', warning:'exclamation-triangle', info:'spinner fa-spin'};
+    feed.innerHTML = '<span class="text-' + type + '"><i class="fas fa-' + (icons[type]||'info-circle') + '"></i> ' + msg + '</span>';
+  }
+
+  function fillName(fullName) {
+    var parts = fullName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      var last  = parts[parts.length - 1];
+      var first = parts.slice(0, -1).join(' ');
+      var elF = document.getElementById('fieldFirstName');
+      var elL = document.getElementById('fieldLastName');
+      if (elF && !elF.value) elF.value = first;
+      if (elL && !elL.value) elL.value = last;
+    }
+  }
+
+  btn.addEventListener('click', function() {
+    var oib = inp.value.trim();
+    if (!oib) { setFeed('Unesite OIB', 'warning'); return; }
+    if (!validateOibHr(oib)) { setFeed('OIB nije ispravan (krivi format ili kontrolna znamenka)', 'danger'); return; }
+
+    setFeed('Pretraživanje u registru...', 'info');
+    btn.disabled = true;
+
+    fetch('/partners/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=HR', {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      btn.disabled = false;
+      if (data.found) {
+        if (data.name) fillName(data.name);
+        var addrEl = document.querySelector('[name=address]');
+        if (addrEl && !addrEl.value) {
+          var parts = [];
+          if (data.address) parts.push(data.address);
+          if (data.zip_code) parts.push(data.zip_code);
+          if (data.city) parts.push(data.city);
+          if (parts.length) addrEl.value = parts.join(', ');
+        }
+        setFeed('Pronađeno u registru — podaci popunjeni', 'success');
+      } else {
+        setFeed('OIB je ispravan ✓ (fizička osoba — ručno upišite ime i prezime)', 'success');
+      }
+    })
+    .catch(function() {
+      btn.disabled = false;
+      setFeed('OIB je ispravan ✓ (nije moguće dohvatiti registar)', 'success');
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Propter — {{ tenant.company.name }}{% endblock %}
+{% block page_title %}Propter — {{ tenant.company.name }}{% endblock %}
+{% block content %}
+<style>
+.td-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
+.td-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 12px}
+.td-field{margin-bottom:12px}
+.td-field label{display:block;font-size:.78rem;font-weight:600;color:#334155;margin-bottom:4px}
+.td-field input,.td-field select,.td-field textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.82rem;background:#fff}
+.td-field input[type=checkbox]{width:auto;margin-right:6px}
+.td-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:768px){.td-grid{grid-template-columns:1fr}}
+.td-stat{background:#f8fafc;border-radius:8px;padding:12px;text-align:center}
+.td-stat .val{font-size:1.3rem;font-weight:700}
+.td-stat .lbl{font-size:.7rem;color:#64748b}
+.tier-badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.75rem;font-weight:700}
+.tier-badge.bookkeeper{background:#dbeafe;color:#1e40af}
+.tier-badge.client{background:#f0fdf4;color:#166534}
+</style>
+
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+  <a href="{% url 'registration:propter_dashboard' %}" class="btn btn-outline-secondary btn-sm">&larr; Dashboard</a>
+  <span class="tier-badge {{ tenant.tier }}" style="font-size:.85rem;padding:5px 14px">{{ tenant.get_tier_display }}</span>
+  {% if tenant.is_active %}
+  <span style="color:#22c55e;font-weight:700;font-size:.85rem">Aktivan</span>
+  {% else %}
+  <span style="color:#ef4444;font-weight:700;font-size:.85rem">Neaktivan</span>
+  {% endif %}
+  <form method="post" style="display:inline;margin-left:auto">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="toggle_active">
+    {% if tenant.is_active %}
+    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Deaktivirati tenant?')">Deaktiviraj</button>
+    {% else %}
+    <button class="btn btn-sm btn-outline-success">Aktiviraj</button>
+    {% endif %}
+  </form>
+</div>
+
+<!-- e-Racun stats -->
+{% if eracun_stats %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:16px">
+  <div class="td-stat"><div class="val">{{ eracun_stats.total }}</div><div class="lbl">Ukupno</div></div>
+  <div class="td-stat"><div class="val" style="color:#22c55e">{{ eracun_stats.accepted }}</div><div class="lbl">Prihvaceno</div></div>
+  <div class="td-stat"><div class="val" style="color:#ef4444">{{ eracun_stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
+  <div class="td-stat"><div class="val" style="color:#f59e0b">{{ eracun_stats.draft }}</div><div class="lbl">Nacrt</div></div>
+  <div class="td-stat"><div class="val" style="color:#ef4444">{{ eracun_stats.errors }}</div><div class="lbl">Greske</div></div>
+</div>
+{% endif %}
+
+<form method="post">
+{% csrf_token %}
+<input type="hidden" name="action" value="update">
+
+<div class="td-grid">
+  <!-- Osnovni podaci -->
+  <div class="td-card">
+    <h6>Tvrtka</h6>
+    <div class="td-field">
+      <label>Naziv</label>
+      <input type="text" value="{{ tenant.company.name }}" disabled>
+    </div>
+    <div class="td-field">
+      <label>OIB</label>
+      <input type="text" value="{{ tenant.company.oib }}" disabled>
+    </div>
+    <div class="td-field">
+      <label>Operator / servis</label>
+      <input type="text" name="operator_name" value="{{ tenant.operator_name }}">
+    </div>
+  </div>
+
+  <!-- Pretplata -->
+  <div class="td-card">
+    <h6>Pretplata</h6>
+    <div class="td-field">
+      <label>Tip</label>
+      <select name="tier">
+        <option value="client" {% if tenant.tier == 'client' %}selected{% endif %}>Direktni klijent (30-80 EUR)</option>
+        <option value="bookkeeper" {% if tenant.tier == 'bookkeeper' %}selected{% endif %}>Knjigovodstveni servis (150-200 EUR)</option>
+      </select>
+    </div>
+    <div class="td-field">
+      <label>Mjesecna naknada (EUR)</label>
+      <input type="number" name="monthly_fee" value="{{ tenant.monthly_fee }}" step="0.01" min="0">
+    </div>
+    <div class="td-field">
+      <label>Max tvrtki (za bookkeepere)</label>
+      <input type="number" name="max_companies" value="{{ tenant.max_companies }}" min="1">
+    </div>
+    <div class="td-field">
+      <label>Dan fakturiranja</label>
+      <input type="number" name="billing_day" value="{{ tenant.billing_day }}" min="1" max="28">
+    </div>
+    <div style="padding:4px 0">
+      <input type="checkbox" name="is_active" id="is_active" {% if tenant.is_active %}checked{% endif %}>
+      <label for="is_active" style="display:inline;font-weight:600">Aktivna pretplata</label>
+    </div>
+  </div>
+
+  <!-- Certifikat -->
+  <div class="td-card">
+    <h6>FINA certifikat</h6>
+    <div class="td-field">
+      <label>Status certifikata</label>
+      <select name="fina_cert_status">
+        <option value="none" {% if tenant.fina_cert_status == 'none' %}selected{% endif %}>Nema certifikata</option>
+        <option value="pending" {% if tenant.fina_cert_status == 'pending' %}selected{% endif %}>Zahtjev poslan</option>
+        <option value="active" {% if tenant.fina_cert_status == 'active' %}selected{% endif %}>Aktivan</option>
+        <option value="expiring" {% if tenant.fina_cert_status == 'expiring' %}selected{% endif %}>Istice uskoro</option>
+        <option value="expired" {% if tenant.fina_cert_status == 'expired' %}selected{% endif %}>Istekao</option>
+      </select>
+    </div>
+    <div class="td-field">
+      <label>e-Racuna ovaj mjesec</label>
+      <input type="text" value="{{ tenant.eracuni_sent_month }}" disabled>
+    </div>
+    <div class="td-field">
+      <label>e-Racuna ukupno</label>
+      <input type="text" value="{{ tenant.eracuni_sent_total }}" disabled>
+    </div>
+  </div>
+
+  <!-- Knjigovodstveni servis -->
+  <div class="td-card">
+    <h6>Upravljano od (knjigovodstvo)</h6>
+    <div class="td-field">
+      <label>Knjigovodstveni servis</label>
+      <select name="managed_by">
+        <option value="">— Direktan klijent —</option>
+        {% for bk in bookkeepers %}
+        <option value="{{ bk.pk }}" {% if tenant.managed_by_id == bk.pk %}selected{% endif %}>
+          {{ bk.operator_name|default:bk.company.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if tenant.managed_by %}
+    <div style="background:#f1f5f9;border-radius:6px;padding:10px;font-size:.82rem;margin-top:8px">
+      Upravljano od: <strong>{{ tenant.managed_by.operator_name|default:tenant.managed_by.company.name }}</strong>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- API pristup -->{% if eracun_cfg %}<div class="td-card" style="margin-top:16px">  <h6>API pristup</h6>  <div class="td-field">    <label>API kljuc</label>    <div style="display:flex;gap:8px;align-items:center">      <input type="text" value="{{ eracun_cfg.api_key }}" readonly style="font-family:monospace;font-size:.75rem;background:#f8fafc">      <form method="post" action="{% url 'registration:propter_regenerate_key' tenant.pk %}" style="display:inline">        {% csrf_token %}        <button class="btn btn-sm btn-outline-warning" onclick="return confirm('Regenerirati API kljuc?')">Regeneriraj</button>      </form>    </div>  </div>  <div class="td-field">    <label>API status</label>    <div style="display:flex;gap:8px;align-items:center">      {% if eracun_cfg.api_enabled %}      <span style="color:#22c55e;font-weight:700">Aktivan</span>      {% else %}      <span style="color:#ef4444;font-weight:700">Neaktivan</span>      {% endif %}      <form method="post" action="{% url 'registration:propter_toggle_api' tenant.pk %}" style="display:inline">        {% csrf_token %}        {% if eracun_cfg.api_enabled %}        <button class="btn btn-sm btn-outline-danger">Deaktiviraj API</button>        {% else %}        <button class="btn btn-sm btn-outline-success">Aktiviraj API</button>        {% endif %}      </form>    </div>  </div>  <div class="td-field">    <label>Rate limit</label>    <input type="text" value="{{ eracun_cfg.api_rate_limit }} zahtjeva/sat" disabled>  </div>  <div class="td-field">    <label>e-Racun konfiguracija</label>    <div style="font-size:.82rem;color:#64748b">      Testno okruzenje: {% if eracun_cfg.use_test_env %}Da{% else %}Ne (produkcija){% endif %} |      Auto-send: {% if eracun_cfg.auto_send %}Da{% else %}Ne{% endif %} |      Prostor: {{ eracun_cfg.oznaka_prostora }} / Uredaj: {{ eracun_cfg.oznaka_uredjaja }}    </div>  </div></div>{% endif %}
+<!-- Napomene -->
+<div class="td-card">
+  <h6>Napomene</h6>
+  <div class="td-field">
+    <textarea name="notes" rows="3" placeholder="Interne napomene...">{{ tenant.notes }}</textarea>
+  </div>
+</div>
+
+<button type="submit" class="btn btn-primary">Spremi promjene</button>
+</form>
+
+<!-- Managed clients -->
+{% if managed_clients %}
+<div class="td-card" style="margin-top:20px">
+  <h6>Klijenti ovog servisa ({{ managed_clients|length }})</h6>
+  <table style="width:100%;font-size:.82rem;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid #e2e8f0">
+      <th style="text-align:left;padding:6px">Tvrtka</th>
+      <th style="text-align:left;padding:6px">OIB</th>
+      <th style="text-align:center;padding:6px">Certifikat</th>
+      <th style="text-align:right;padding:6px">e-Racuna</th>
+    </tr></thead>
+    <tbody>
+    {% for mc in managed_clients %}
+    <tr style="border-bottom:1px solid #f1f5f9">
+      <td style="padding:6px"><a href="{% url 'registration:propter_tenant_detail' mc.pk %}">{{ mc.company.name }}</a></td>
+      <td style="padding:6px;color:#64748b">{{ mc.company.oib }}</td>
+      <td style="padding:6px;text-align:center"><span class="cert-dot {{ mc.fina_cert_status }}"></span></td>
+      <td style="padding:6px;text-align:right">{{ mc.eracuni_sent_month }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

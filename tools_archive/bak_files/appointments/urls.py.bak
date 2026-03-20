@@ -1,0 +1,21 @@
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from . import views
+
+router = DefaultRouter()
+router.register(r'appointment', views.AppointmentViewSet)
+
+urlpatterns = [
+    # === 1. INTERNI DASHBOARD (Za tebe) ===
+    path('', views.calendar_view, name='calendar'),
+    path('api/events/', views.api_events, name='api_events'),
+    path('api/appointments/', views.api_appointments, name='api_appointments_create'),
+    path('api/appointments/<int:pk>/', views.api_appointments, name='api_appointments_detail'),
+    path('api/', include(router.urls)),
+
+    # === 2. JAVNI BOOKING PORTAL (Za klijente na viskovic-group.de) ===
+    path('booking/', views.public_booking_index, name='public_booking_index'),
+    path('booking/<int:service_id>/', views.public_booking_calendar, name='public_booking_calendar'),
+    path('api/booking/slots/', views.api_available_slots, name='api_available_slots'),
+    path('api/booking/submit/', views.api_submit_public_booking, name='api_submit_public_booking'),
+]

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ cd.delivery_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <a href="{% url 'delivery:consolidated_list' %}" class="text-muted text-decoration-none mb-2 d-inline-block">
+        <i class="fas fa-arrow-left me-1"></i> Natrag
+      </a>
+      <h2 class="mb-1">
+        <i class="fas fa-boxes-stacked text-gold me-2"></i>{{ cd.delivery_number }}
+      </h2>
+      <p class="text-muted mb-0">{{ cd.hub_company.name }} &rarr; {{ cd.buyer_company.name }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      {% if cd.tracked_item %}
+      <a href="{% url 'tracking:public' cd.tracked_item.public_token %}" target="_blank" class="btn btn-outline-gold btn-sm">
+        <i class="fas fa-external-link-alt me-1"></i> Public tracking
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+
+      <!-- Status Card -->
+      <div class="card bg-dark border-secondary mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="text-gold"><i class="fas fa-signal me-2"></i>Status</span>
+          {% if cd.status != 'delivered' and cd.status != 'cancelled' %}
+          <form method="post" action="{% url 'delivery:consolidated_status_update' cd.pk %}" class="d-flex gap-2">
+            {% csrf_token %}
+            <select name="status" class="form-select form-select-sm bg-dark text-white border-secondary" style="width:auto">
+              {% for val, label in cd.STATUS_CHOICES %}
+              <option value="{{ val }}" {% if val == cd.status %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-sm btn-gold">Promijeni</button>
+          </form>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            {% for val, label in cd.STATUS_CHOICES %}
+            {% if val != 'cancelled' %}
+            <div class="col">
+              <div class="{% if val == cd.status %}text-gold{% elif forloop.counter <= current_step %}text-success{% else %}text-muted{% endif %}">
+                <i class="fas fa-{% if val == 'collecting' %}inbox{% elif val == 'consolidating' %}boxes-packing{% elif val == 'dispatched' %}paper-plane{% elif val == 'in_transit' %}truck{% elif val == 'delivered' %}check-circle{% endif %} fa-2x mb-2"></i>
+                <div class="small">{{ label }}</div>
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders in this delivery -->
+      <div class="card bg-dark border-secondary mb-4">
+        <div class="card-header text-gold">
+          <i class="fas fa-shopping-cart me-2"></i>Narudzbe ({{ orders.count }})
+        </div>
+        <div class="table-responsive">
+          <table class="table table-dark table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Broj narudzbe</th>
+                <th>Kupac</th>
+                <th>Stavke</th>
+                <th>Iznos</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              <tr>
+                <td class="text-gold">{{ order.order_number }}</td>
+                <td>{{ order.buyer_company.name }}</td>
+                <td>{{ order.items.count }} artikala</td>
+                <td>{{ order.total }} &euro;</td>
+                <td><span class="badge bg-secondary">{{ order.get_status_display }}</span></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-muted">Nema spojenih narudzbi</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Temperature Readings -->
+      {% if cd.requires_cold_chain %}
+      <div class="card bg-dark border-secondary mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="text-gold"><i class="fas fa-temperature-low me-2"></i>Hladni lanac</span>
+          {% if cd.cold_chain_zone %}
+          <span class="badge bg-secondary">{{ cd.cold_chain_zone.name }} ({{ cd.cold_chain_zone.target_min_temp }}&deg; - {{ cd.cold_chain_zone.target_max_temp }}&deg;C)</span>
+          {% endif %}
+        </div>
+        <div class="table-responsive">
+          <table class="table table-dark table-sm mb-0">
+            <thead>
+              <tr>
+                <th>Vrijeme</th>
+                <th>Temp</th>
+                <th>Vlaznost</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in readings %}
+              <tr class="{% if r.is_alert %}table-danger{% endif %}">
+                <td>{{ r.timestamp|date:"d.m.Y H:i:s" }}</td>
+                <td><strong>{{ r.temperature }}&deg;C</strong></td>
+                <td>{% if r.humidity %}{{ r.humidity }}%{% else %}&mdash;{% endif %}</td>
+                <td>
+                  {% if r.is_alert %}
+                    <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> {{ r.alert_message }}</span>
+                  {% else %}
+                    <span class="text-success"><i class="fas fa-check-circle"></i> OK</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted">Nema ocitanja</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+
+      <!-- Delivery Info -->
+      <div class="card bg-dark border-secondary mb-4">
+        <div class="card-header text-gold"><i class="fas fa-info-circle me-2"></i>Detalji</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Nacin dostave</div>
+            <div>
+              {% if cd.delivery_method == 'internal' %}<i class="fas fa-truck text-gold"></i>
+              {% elif cd.delivery_method == 'bus' %}<i class="fas fa-bus text-info"></i>
+              {% elif cd.delivery_method == 'taxi' %}<i class="fas fa-taxi text-warning"></i>
+              {% elif cd.delivery_method == 'crowd' %}<i class="fas fa-users text-success"></i>
+              {% elif cd.delivery_method == 'courier' %}<i class="fas fa-box text-info"></i>
+              {% elif cd.delivery_method == 'pickup' %}<i class="fas fa-store text-muted"></i>
+              {% endif %}
+              {{ cd.get_delivery_method_display }}
+            </div>
+          </div>
+          {% if cd.vehicle %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Vozilo</div>
+            <div>{{ cd.vehicle.name }} ({{ cd.vehicle.plate_number }})</div>
+          </div>
+          {% endif %}
+          {% if cd.driver %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Vozac</div>
+            <div>{{ cd.driver.get_full_name|default:cd.driver.username }}</div>
+          </div>
+          {% endif %}
+          {% if cd.external_carrier_name %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Prijevoznik</div>
+            <div>{{ cd.external_carrier_name }}</div>
+            {% if cd.external_carrier_contact %}<div class="text-muted small">{{ cd.external_carrier_contact }}</div>{% endif %}
+            {% if cd.external_carrier_ref %}<div class="text-muted small">Ref: {{ cd.external_carrier_ref }}</div>{% endif %}
+          </div>
+          {% endif %}
+          {% if cd.delivery_address %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Adresa</div>
+            <div>{{ cd.delivery_address }}</div>
+          </div>
+          {% endif %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Paketi / Tezina</div>
+            <div>{{ cd.package_count }} paket(a) / {{ cd.total_weight_kg|default:"—" }} kg</div>
+          </div>
+          {% if cd.hub_cutoff_time %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Rok za hub</div>
+            <div>{{ cd.hub_cutoff_time|date:"d.m.Y H:i" }}</div>
+          </div>
+          {% endif %}
+          {% if cd.eta %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">ETA</div>
+            <div class="text-gold">{{ cd.eta|date:"d.m.Y H:i" }}</div>
+          </div>
+          {% endif %}
+          {% if cd.dispatched_at %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Otpremljeno</div>
+            <div>{{ cd.dispatched_at|date:"d.m.Y H:i" }}</div>
+          </div>
+          {% endif %}
+          {% if cd.delivered_at %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Dostavljeno</div>
+            <div class="text-success">{{ cd.delivered_at|date:"d.m.Y H:i" }}</div>
+          </div>
+          {% endif %}
+          {% if cd.delivery_notes %}
+          <div class="mb-3">
+            <div class="text-muted small text-uppercase">Napomene</div>
+            <div>{{ cd.delivery_notes }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Tracking Info -->
+      {% if cd.tracked_item %}
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-gold"><i class="fas fa-qrcode me-2"></i>Tracking</div>
+        <div class="card-body text-center">
+          <div class="mb-2">
+            <code class="text-gold" style="font-size:1.1rem">{{ cd.tracked_item.public_token }}</code>
+          </div>
+          <a href="{% url 'tracking:public' cd.tracked_item.public_token %}" target="_blank" class="btn btn-outline-gold btn-sm">
+            <i class="fas fa-external-link-alt me-1"></i> Otvori javni link
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

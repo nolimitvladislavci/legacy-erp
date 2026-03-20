@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}AI Asistent — LIMIT CONNECT
+    /* AI Action Buttons */
+    .ai-actions {
+        display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+    }
+    .ai-action-btn {
+        background: linear-gradient(135deg, #c9a84c, #b8963f);
+        color: #0a0a0a; border: none; padding: 12px 20px;
+        border-radius: 10px; font-size: 14px; font-weight: 600;
+        cursor: pointer; min-height: 48px; min-width: 100px;
+        touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+        box-shadow: 0 2px 8px rgba(201,168,76,0.3);
+        transition: transform 0.1s, box-shadow 0.1s;
+        text-align: center;
+    }
+    .ai-action-btn:hover {
+        box-shadow: 0 4px 12px rgba(201,168,76,0.5);
+        transform: translateY(-1px);
+    }
+    .ai-action-btn:active {
+        transform: scale(0.95);
+        box-shadow: 0 1px 4px rgba(201,168,76,0.2);
+    }
+    @media(max-width:600px) {
+        .ai-actions { flex-direction: column; }
+        .ai-actions .ai-action-btn { width: 100%; }
+    }
+
+{% endblock %}
+{% block page_title %}AI Asistent{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ai-layout { display:flex; height:calc(100vh - 120px); gap:0; }
+    .ai-sidebar {
+        width:260px; background:#0f172a; border-right:1px solid #1e293b;
+        display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto;
+    }
+    .ai-sidebar-header {
+        padding:14px 16px; border-bottom:1px solid #1e293b;
+        display:flex; justify-content:space-between; align-items:center;
+    }
+    .ai-sidebar-header h3 { margin:0; font-size:.85rem; color:#c9a84c; font-weight:600; }
+    .ai-new-chat {
+        background:#c9a84c; color:#0a0a0a; border:none; padding:4px 10px;
+        border-radius:6px; font-size:.72rem; font-weight:600; cursor:pointer;
+    }
+    .ai-conv-list { flex:1; overflow-y:auto; padding:8px; }
+    .ai-conv-item {
+        display:block; padding:8px 12px; margin-bottom:2px; border-radius:6px;
+        color:#94a3b8; text-decoration:none; font-size:.78rem;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        transition:background .15s;
+    }
+    .ai-conv-item:hover, .ai-conv-item.active { background:#1e293b; color:white; }
+
+    .ai-chat { flex:1; display:flex; flex-direction:column; background:#0a0a0a; min-width:0; }
+    .ai-messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
+    .ai-msg {
+        max-width:75%; padding:12px 16px; border-radius:12px;
+        font-size:.85rem; line-height:1.5; word-wrap:break-word;
+    }
+    .ai-msg.user {
+        align-self:flex-end; background:#c9a84c; color:#0a0a0a;
+        border-bottom-right-radius:4px;
+    }
+    .ai-msg.assistant {
+        align-self:flex-start; background:#1e293b; color:#e2e8f0;
+        border-bottom-left-radius:4px;
+    }
+    .ai-msg.assistant strong { color:#c9a84c; }
+
+    .ai-input-bar {
+        padding:12px 20px; background:#0f172a; border-top:1px solid #1e293b;
+        display:flex; gap:8px;
+    }
+    .ai-input {
+        flex:1; background:#1e293b; border:1px solid #334155; color:#e2e8f0;
+        padding:10px 14px; border-radius:8px; font-size:.85rem; outline:none;
+        resize:none; min-height:42px; max-height:120px;
+    }
+    .ai-input:focus { border-color:#c9a84c; }
+    .ai-input::placeholder { color:#475569; }
+    .ai-send {
+        background:#c9a84c; color:#0a0a0a; border:none; padding:0 18px;
+        border-radius:8px; font-weight:600; cursor:pointer; font-size:.85rem;
+        display:flex; align-items:center; gap:6px;
+    }
+    .ai-send:hover { background:#d4b65e; }
+    .ai-send:disabled { opacity:.5; cursor:not-allowed; }
+
+    .ai-typing { align-self:flex-start; color:#c9a84c; font-size:.78rem; padding:4px 16px; }
+    .ai-typing span { animation:blink 1.2s infinite; }
+    .ai-typing span:nth-child(2) { animation-delay:.2s; }
+    .ai-typing span:nth-child(3) { animation-delay:.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+
+    .ai-empty {
+        flex:1; display:flex; align-items:center; justify-content:center;
+        flex-direction:column; color:#475569;
+    }
+    .ai-empty i { font-size:3rem; margin-bottom:12px; color:#c9a84c33; }
+    .ai-empty p { font-size:.9rem; }
+
+    @media(max-width:768px) {
+        .ai-sidebar { display:none; }
+        .ai-msg { max-width:90%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ai-layout">
+    <!-- Sidebar: conversations -->
+    <div class="ai-sidebar">
+        <div class="ai-sidebar-header">
+            <h3><i class="fas fa-robot"></i> Razgovori</h3>
+            <button class="ai-new-chat" onclick="newChat()">+ Novi</button>
+        </div>
+        <div class="ai-conv-list" id="convList">
+            {% for conv in conversations %}
+            <a href="?conv={{ conv.id }}" class="ai-conv-item {% if conversation and conversation.id == conv.id %}active{% endif %}">
+                {{ conv.title|default:"Razgovor"|truncatechars:40 }}
+            </a>
+            {% empty %}
+            <div style="padding:20px;color:#475569;font-size:.78rem;text-align:center">
+                Nema razgovora. Zapocnite novi!
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Chat area -->
+    <div class="ai-chat">
+        <div class="ai-messages" id="chatMessages">
+            {% if messages %}
+                {% for msg in messages %}
+                <div class="ai-msg {{ msg.role }}">{{ msg.content|linebreaksbr }}</div>
+                {% endfor %}
+            {% else %}
+            <div class="ai-empty">
+                <i class="fas fa-robot"></i>
+                <p>Postavite pitanje o vasem ERP sustavu</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="ai-input-bar">
+            <textarea class="ai-input" id="chatInput" placeholder="Upisite poruku..." rows="1"
+                      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+            <button class="ai-send" id="sendBtn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i> Posalji
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var convId = {{ conversation.id|default:"null" }};
+    var messagesDiv = document.getElementById('chatMessages');
+    var input = document.getElementById('chatInput');
+    var sendBtn = document.getElementById('sendBtn');
+    var sending = false;
+
+    // Auto-scroll to bottom
+    function scrollBottom() {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    scrollBottom();
+
+    // Auto-resize textarea
+    input.addEventListener('input', function(){
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    window.newChat = function(){
+        window.location.href = '{% url "ai_assistant:chat_page" %}';
+    };
+
+    function parseActions(text) {
+        var regex = /\[ACTION:(.+?)\|(.+?)\]/g;
+        var clean = text; var actions = []; var match;
+        while ((match = regex.exec(text)) !== null) {
+            actions.push({ label: match[1], action: match[2] });
+        }
+        clean = clean.replace(/\[ACTION:.+?\|.+?\]/g, '').trim();
+        return { clean: clean, actions: actions };
+    }
+
+    function handleAction(action) {
+        if (action.startsWith('/')) { window.location.href = action; }
+        else if (action === 'confirm') { input.value = 'Da, nastavi'; sendMessage(); }
+        else if (action === 'details') { input.value = 'Pokazi mi vise detalja'; sendMessage(); }
+        else { input.value = action; sendMessage(); }
+    }
+
+    function addMessage(role, content) {
+        var empty = messagesDiv.querySelector('.ai-empty');
+        if (empty) empty.remove();
+        var parsed = parseActions(content);
+        var div = document.createElement('div');
+        div.className = 'ai-msg ' + role;
+        div.innerHTML = parsed.clean.replace(/\n/g, '<br>');
+        if (role === 'assistant' && parsed.actions.length > 0) {
+            var actionsDiv = document.createElement('div');
+            actionsDiv.className = 'ai-actions';
+            parsed.actions.forEach(function(a) {
+                var btn = document.createElement('button');
+                btn.className = 'ai-action-btn';
+                btn.textContent = a.label;
+                btn.onclick = function() { handleAction(a.action); };
+                actionsDiv.appendChild(btn);
+            });
+            div.appendChild(actionsDiv);
+        }
+        messagesDiv.appendChild(div);
+        scrollBottom();
+    }
+
+    function showTyping() {
+        var div = document.createElement('div');
+        div.className = 'ai-typing';
+        div.id = 'typingIndicator';
+        div.innerHTML = '<span>.</span><span>.</span><span>.</span> razmisljam';
+        messagesDiv.appendChild(div);
+        scrollBottom();
+    }
+
+    function hideTyping() {
+        var el = document.getElementById('typingIndicator');
+        if (el) el.remove();
+    }
+
+    function getCsrf() {
+        var m = document.cookie.match('csrftoken=([^;]+)');
+        return m ? m[1] : '';
+    }
+
+    window.sendMessage = function() {
+        if (sending) return;
+        var text = input.value.trim();
+        if (!text) return;
+
+        sending = true;
+        sendBtn.disabled = true;
+        input.value = '';
+        input.style.height = 'auto';
+
+        addMessage('user', text);
+        showTyping();
+
+        fetch('{% url "ai_assistant:chat_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrf()
+            },
+            body: JSON.stringify({
+                message: text,
+                conversation_id: convId,
+                module_context: ''
+            })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            hideTyping();
+            if (data.error) {
+                addMessage('assistant', 'Greska: ' + data.error);
+            } else {
+                addMessage('assistant', data.content);
+                if (!convId && data.conversation_id) {
+                    convId = data.conversation_id;
+                    history.replaceState(null, '', '?conv=' + convId);
+                }
+            }
+        })
+        .catch(function(err){
+            hideTyping();
+            addMessage('assistant', 'Greska pri komunikaciji: ' + err.message);
+        })
+        .finally(function(){
+            sending = false;
+            sendBtn.disabled = false;
+            input.focus();
+        });
+    };
+
+    input.focus();
+})();
+</script>
+{% endblock %}

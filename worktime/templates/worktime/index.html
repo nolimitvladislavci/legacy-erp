@@ -1,0 +1,29 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Worktime - LIMIT CONNECT{% endblock %}
+{% block page_title %}Modul: Worktime{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">{% trans "Worktime" %}</h4>
+        <p class="text-muted mb-0">{% trans "Pregled i upravljanje - worktime" %}</p>
+    </div>
+    <a href="/admin/worktime/" class="btn btn-primary">
+        <i class="fas fa-cog me-2"></i>{% trans "Otvori u Adminu" %}
+    </a>
+</div>
+<div class="stat-card">
+    <div class="text-center py-5">
+        <i class="fas fa-database fa-3x text-muted mb-3"></i>
+        <h5>{% trans "Worktime Modul" %}</h5>
+        <p class="text-muted">{% trans "Koristite Admin panel za upravljanje podacima" %}<br>{% trans "ili API endpoint:" %} <code>/worktime/api/</code></p>
+        <a href="/worktime/api/" class="btn btn-outline-secondary btn-sm me-2">
+            <i class="fas fa-code me-1"></i>{% trans "API Endpoint" %}
+        </a>
+        <a href="/admin/worktime/" class="btn btn-primary btn-sm">
+            <i class="fas fa-list me-1"></i>{% trans "Pregled podataka" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

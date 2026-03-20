@@ -1,0 +1,122 @@
+"""
+documents/signals.py
+Auto-kreiranje ArhivaEntry kad se Invoice ili ERacun spremi.
+"""
+import logging
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+logger = logging.getLogger('documents.signals')
+
+
+@receiver(post_save, sender='invoicing.Invoice')
+def archive_invoice(sender, instance, created, **kwargs):
+    """Kreiraj ili azuriraj ArhivaEntry za svaku fakturu."""
+    from documents.models import ArhivaEntry
+
+    source_type = 'invoice_out'
+    source_id = str(instance.pk)
+
+    defaults = {
+        'company': instance.company,
+        'doc_number': instance.number or '',
+        'partner_name': instance.client_name or '',
+        'amount': instance.total or 0,
+        'currency': getattr(instance, 'currency', 'EUR') or 'EUR',
+        'doc_date': (instance.date_issued.date() if hasattr(instance.date_issued, 'date') else instance.date_issued) if instance.date_issued else None,
+        'zki': getattr(instance, 'zki', '') or '',
+        'jir': getattr(instance, 'jir', '') or '',
+    }
+
+    if not defaults['doc_date']:
+        return
+
+    try:
+        entry, entry_created = ArhivaEntry.objects.update_or_create(
+            source_type=source_type,
+            source_id=source_id,
+            defaults=defaults,
+        )
+        if entry_created:
+            logger.debug(f'ArhivaEntry created for Invoice {instance.number}')
+    except Exception as e:
+        logger.error(f'ArhivaEntry signal failed for Invoice {instance.pk}: {e}')
+
+
+@receiver(post_save, sender='eracun.ERacun')
+def archive_eracun(sender, instance, created, **kwargs):
+    """Kreiraj ili azuriraj ArhivaEntry za svaki e-Racun."""
+    from documents.models import ArhivaEntry
+
+    source_type = 'eracun'
+    source_id = str(instance.pk)
+
+    defaults = {
+        'company': instance.company,
+        'doc_number': getattr(instance, 'invoice_number', '') or str(instance.pk)[:8],
+        'partner_name': getattr(instance, 'recipient_name', '') or '',
+        'amount': getattr(instance, 'total', 0) or 0,
+        'currency': 'EUR',
+        'doc_date': getattr(instance, 'issue_date', None) or getattr(instance, 'created_at', None),
+        'has_xml': True,
+    }
+
+    if hasattr(defaults['doc_date'], 'date'):
+        defaults['doc_date'] = defaults['doc_date'].date()
+
+    if not defaults['doc_date']:
+        return
+
+    try:
+        entry, _ = ArhivaEntry.objects.update_or_create(
+            source_type=source_type,
+            source_id=source_id,
+            defaults=defaults,
+        )
+    except Exception as e:
+        logger.error(f'ArhivaEntry signal failed for ERacun {instance.pk}: {e}')
+
+
+@receiver(post_save, sender='pos.POSReceipt')
+def archive_pos_receipt(sender, instance, created, **kwargs):
+    """Kreiraj ArhivaEntry kad POS bon postane PAID."""
+    if instance.status != 'paid':
+        return
+
+    from documents.models import ArhivaEntry
+
+    source_type = 'pos_receipt'
+    source_id = str(instance.pk)
+
+    try:
+        company = instance.session.terminal.company
+    except Exception:
+        logger.error('archive_pos_receipt: ne mogu dohvatiti company za bon %s', instance.pk)
+        return
+
+    doc_date = instance.created_at
+    if hasattr(doc_date, 'date'):
+        doc_date = doc_date.date()
+
+    if not doc_date:
+        return
+
+    defaults = {
+        'company': company,
+        'doc_number': str(instance.receipt_number),
+        'partner_name': getattr(instance, 'customer_name', '') or 'Gotovinska prodaja',
+        'amount': instance.total or 0,
+        'currency': 'EUR',
+        'doc_date': doc_date,
+        'zki': getattr(instance, 'zki', '') or '',
+        'jir': getattr(instance, 'jir', '') or '',
+    }
+
+    try:
+        entry, _ = ArhivaEntry.objects.update_or_create(
+            source_type=source_type,
+            source_id=source_id,
+            defaults=defaults,
+        )
+    except Exception as e:
+        logger.error('ArhivaEntry signal failed for POSReceipt %s: %s', instance.pk, e)

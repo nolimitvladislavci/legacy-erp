@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.json">
+<title>Driver — LIMIT Connect</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding-bottom: 80px; }
+
+.header { background: linear-gradient(135deg, #0f172a, #1e293b); padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(201,168,76,.2); position: sticky; top: 0; z-index: 100; }
+.header .logo { color: #c9a84c; font-weight: 800; font-size: 1rem; letter-spacing: 1px; }
+.header .user { margin-left: auto; font-size: .75rem; color: #94a3b8; }
+
+.status-bar { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; }
+.stat { flex: 1; min-width: 80px; background: #1e293b; border-radius: 10px; padding: 12px; text-align: center; }
+.stat .val { font-size: 1.4rem; font-weight: 800; }
+.stat .lbl { font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; color: #64748b; margin-top: 2px; }
+
+.section-title { padding: 12px 16px 6px; font-size: .65rem; text-transform: uppercase; letter-spacing: 1.5px; color: #475569; font-weight: 700; }
+
+.route-header { margin: 0 16px; padding: 14px; background: linear-gradient(135deg, #1a2744, #162040); border-radius: 12px; border: 1px solid rgba(201,168,76,.15); }
+.route-header .title { font-size: .9rem; font-weight: 700; color: #c9a84c; }
+.route-header .meta { font-size: .75rem; color: #94a3b8; margin-top: 4px; }
+.route-header .actions { margin-top: 10px; display: flex; gap: 8px; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 8px; font-size: .8rem; font-weight: 700; border: none; cursor: pointer; transition: all .15s; text-decoration: none; }
+.btn-gold { background: #c9a84c; color: #0f172a; }
+.btn-gold:active { transform: scale(.96); }
+.btn-green { background: #22c55e; color: #fff; }
+.btn-red { background: #ef4444; color: #fff; }
+.btn-outline { background: transparent; border: 1px solid #334155; color: #94a3b8; }
+.btn-sm { padding: 6px 12px; font-size: .72rem; }
+
+.stop-list { padding: 8px 16px; }
+.stop-card { background: #1e293b; border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #334155; position: relative; transition: all .2s; }
+.stop-card.pending { border-left-color: #64748b; }
+.stop-card.arrived { border-left-color: #f59e0b; }
+.stop-card.completed { border-left-color: #22c55e; opacity: .7; }
+.stop-card.skipped { border-left-color: #ef4444; opacity: .5; }
+.stop-card .order { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%; background: #0f172a; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 800; color: #c9a84c; }
+.stop-card .type { font-size: .6rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
+.stop-card .type.pickup { color: #60a5fa; }
+.stop-card .type.delivery { color: #22c55e; }
+.stop-card .name { font-size: .88rem; font-weight: 700; }
+.stop-card .addr { font-size: .75rem; color: #94a3b8; margin-top: 2px; }
+.stop-card .contact { font-size: .72rem; color: #64748b; margin-top: 4px; }
+.stop-card .stop-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.stop-card .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.status-badge.pending { background: rgba(100,116,139,.2); color: #94a3b8; }
+.status-badge.arrived { background: rgba(245,158,11,.15); color: #f59e0b; }
+.status-badge.completed { background: rgba(34,197,94,.15); color: #22c55e; }
+.status-badge.skipped { background: rgba(239,68,68,.15); color: #ef4444; }
+
+.nav-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3); border-radius: 8px; color: #60a5fa; font-size: .72rem; font-weight: 600; text-decoration: none; }
+
+/* Complete modal */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; align-items: flex-end; justify-content: center; }
+.modal-bg.active { display: flex; }
+.modal-sheet { background: #1e293b; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+.modal-sheet h3 { font-size: .9rem; font-weight: 700; color: #c9a84c; margin-bottom: 12px; }
+.modal-sheet label { display: block; font-size: .72rem; font-weight: 600; color: #94a3b8; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: .5px; }
+.modal-sheet input, .modal-sheet textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: .85rem; }
+.modal-sheet textarea { height: 60px; resize: none; }
+
+.empty { text-align: center; padding: 60px 20px; color: #475569; }
+.empty i { font-size: 2.5rem; color: #334155; margin-bottom: 12px; display: block; }
+.empty p { font-size: .85rem; }
+
+.upcoming { padding: 0 16px; }
+.upcoming-card { background: #1e293b; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+.upcoming-card .date { font-size: .9rem; font-weight: 800; color: #c9a84c; min-width: 50px; text-align: center; }
+.upcoming-card .info { font-size: .78rem; color: #94a3b8; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid #1e293b; display: flex; padding: 8px 0; z-index: 100; }
+.bottom-nav a { flex: 1; text-align: center; padding: 6px; text-decoration: none; color: #64748b; font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.bottom-nav a i { display: block; font-size: 1.1rem; margin-bottom: 2px; }
+.bottom-nav a.active { color: #c9a84c; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <i class="fas fa-truck" style="color:#c9a84c;font-size:1.2rem"></i>
+    <div class="logo">DRIVER</div>
+    <div class="user"><i class="fas fa-user-circle"></i> {{ request.user.get_full_name|default:request.user.username }}</div>
+</div>
+
+<!-- Stats -->
+<div class="status-bar">
+    <div class="stat">
+        <div class="val" style="color:#c9a84c">{{ completed }}/{{ total }}</div>
+        <div class="lbl">Stopovi</div>
+    </div>
+    <div class="stat">
+        <div class="val" style="color:{% if route and route.status == 'in_progress' %}#22c55e{% else %}#64748b{% endif %}">
+            {% if route %}{{ route.get_status_display }}{% else %}—{% endif %}
+        </div>
+        <div class="lbl">Status</div>
+    </div>
+    <div class="stat">
+        <div class="val">{{ today|date:"d.m." }}</div>
+        <div class="lbl">Danas</div>
+    </div>
+</div>
+
+{% if route %}
+<!-- Today's Route -->
+<div class="section-title">Danasnja ruta</div>
+<div class="route-header">
+    <div class="title"><i class="fas fa-route"></i> {{ route.vehicle }}</div>
+    <div class="meta">{{ route.total_stops }} stopova {% if route.total_distance_km %}· {{ route.total_distance_km }} km{% endif %} {% if route.estimated_duration_hours %}· ~{{ route.estimated_duration_hours }}h{% endif %}</div>
+    <div class="actions">
+        {% if route.status == 'planned' %}
+        <button class="btn btn-gold" onclick="startRoute({{ route.pk }})"><i class="fas fa-play"></i> Pokreni rutu</button>
+        {% elif route.status == 'in_progress' %}
+        <span class="btn btn-outline" style="border-color:#22c55e;color:#22c55e"><i class="fas fa-circle" style="font-size:.5rem"></i> Ruta aktivna</span>
+        {% elif route.status == 'completed' %}
+        <span class="btn btn-outline" style="border-color:#22c55e;color:#22c55e"><i class="fas fa-check"></i> Zavrsena</span>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stops -->
+<div class="section-title">Stopovi ({{ completed }}/{{ total }})</div>
+<div class="stop-list">
+    {% for stop in stops %}
+    <div class="stop-card {{ stop.status }}" id="stop-{{ stop.pk }}">
+        <div class="order">{{ stop.stop_order }}</div>
+        <div class="type {{ stop.stop_type }}">
+            {% if stop.stop_type == 'pickup' %}<i class="fas fa-arrow-up"></i> Preuzimanje{% else %}<i class="fas fa-arrow-down"></i> Dostava{% endif %}
+        </div>
+        <div class="name">{{ stop.company.name }}</div>
+        <div class="addr"><i class="fas fa-map-pin"></i> {{ stop.address }}</div>
+        {% if stop.contact_name %}<div class="contact"><i class="fas fa-phone"></i> {{ stop.contact_name }} {{ stop.contact_phone }}</div>{% endif %}
+
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+            <span class="status-badge {{ stop.status }}">{{ stop.get_status_display }}</span>
+            {% if stop.latitude and stop.longitude %}
+            <a href="https://maps.google.com/?daddr={{ stop.latitude }},{{ stop.longitude }}" target="_blank" class="nav-btn"><i class="fas fa-diamond-turn-right"></i> Navigacija</a>
+            {% elif stop.address %}
+            <a href="https://maps.google.com/?daddr={{ stop.address|urlencode }}" target="_blank" class="nav-btn"><i class="fas fa-diamond-turn-right"></i> Navigacija</a>
+            {% endif %}
+        </div>
+
+        {% if stop.status == 'pending' and route.status == 'in_progress' %}
+        <div class="stop-actions">
+            <button class="btn btn-sm btn-gold" onclick="arriveStop({{ stop.pk }})"><i class="fas fa-map-marker-alt"></i> Stigao sam</button>
+        </div>
+        {% elif stop.status == 'arrived' %}
+        <div class="stop-actions">
+            <button class="btn btn-sm btn-green" onclick="openCompleteModal({{ stop.pk }}, '{{ stop.company.name|escapejs }}')"><i class="fas fa-check"></i> Zavrsi</button>
+            <button class="btn btn-sm btn-red" onclick="skipStop({{ stop.pk }})"><i class="fas fa-forward"></i> Preskoci</button>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- No route today -->
+<div class="empty">
+    <i class="fas fa-calendar-xmark"></i>
+    <p>Nema planirane rute za danas.</p>
+</div>
+{% endif %}
+
+<!-- Upcoming -->
+{% if upcoming %}
+<div class="section-title">Nadolazece rute</div>
+<div class="upcoming">
+    {% for r in upcoming %}
+    <div class="upcoming-card">
+        <div class="date">{{ r.date|date:"d." }}<br><span style="font-size:.55rem;color:#64748b">{{ r.date|date:"M" }}</span></div>
+        <div>
+            <div style="font-weight:700;font-size:.82rem;color:#e2e8f0">{{ r.vehicle }}</div>
+            <div class="info">{{ r.total_stops }} stopova {% if r.total_distance_km %}· {{ r.total_distance_km }} km{% endif %}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Complete Modal -->
+<div class="modal-bg" id="completeModal">
+    <div class="modal-sheet">
+        <h3><i class="fas fa-check-circle"></i> Zavrsi stop</h3>
+        <div id="modalStopName" style="font-size:.85rem;color:#94a3b8;margin-bottom:12px"></div>
+        <form id="completeForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="completed">
+            <input type="hidden" name="stop_pk" id="modalStopPk">
+            <label>Primio/la</label>
+            <input type="text" name="recipient" placeholder="Ime primatelja">
+            <label>Temperatura (°C)</label>
+            <input type="number" name="temp" step="0.1" placeholder="npr. 4.5">
+            <label>Foto dokaz</label>
+            <input type="file" name="photo" accept="image/*" capture="environment" style="padding:6px">
+            <label>Napomena</label>
+            <textarea name="notes" placeholder="Dodatne napomene..."></textarea>
+            <div style="display:flex;gap:8px;margin-top:14px">
+                <button type="submit" class="btn btn-green" style="flex:1"><i class="fas fa-check"></i> Potvrdi</button>
+                <button type="button" class="btn btn-outline" onclick="closeModal()">Odustani</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+    <a href="/delivery/driver/" class="active"><i class="fas fa-route"></i>Ruta</a>
+    <a href="/delivery/offers/"><i class="fas fa-bullhorn"></i>Ponude</a>
+    <a href="/delivery/dispatcher/"><i class="fas fa-map"></i>Mapa</a>
+    <a href="/"><i class="fas fa-home"></i>ERP</a>
+</div>
+
+<script>
+var csrf = '{{ csrf_token }}';
+
+function startRoute(pk) {
+    fetch('/delivery/driver/route/' + pk + '/start/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded'},
+    }).then(r => r.json()).then(d => { if(d.ok) location.reload(); });
+}
+
+function arriveStop(pk) {
+    fetch('/delivery/driver/stop/' + pk + '/update/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=arrived'
+    }).then(r => r.json()).then(d => { if(d.ok) location.reload(); });
+}
+
+function skipStop(pk) {
+    if(!confirm('Preskociti ovaj stop?')) return;
+    fetch('/delivery/driver/stop/' + pk + '/update/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'action=skipped&notes=Preskoceno%20od%20vozaca'
+    }).then(r => r.json()).then(d => { if(d.ok) location.reload(); });
+}
+
+function openCompleteModal(pk, name) {
+    document.getElementById('modalStopPk').value = pk;
+    document.getElementById('modalStopName').textContent = name;
+    document.getElementById('completeModal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('completeModal').classList.remove('active');
+}
+
+document.getElementById('completeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var pk = document.getElementById('modalStopPk').value;
+    var fd = new FormData(this);
+    fetch('/delivery/driver/stop/' + pk + '/update/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrf},
+        body: fd
+    }).then(r => r.json()).then(d => { if(d.ok) location.reload(); });
+});
+
+// GPS tracking (every 30s when route active)
+{% if route and route.status == 'in_progress' %}
+if (navigator.geolocation) {
+    setInterval(function() {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            fetch('/delivery/driver/gps/', {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrf, 'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'lat=' + pos.coords.latitude + '&lng=' + pos.coords.longitude
+            });
+        });
+    }, 30000);
+}
+{% endif %}
+</script>
+</body>
+</html>

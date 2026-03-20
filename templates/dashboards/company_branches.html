@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Podružnice – {{ company.name }}{% endblock %}
+{% block extra_css %}
+<style>
+.page{padding:1.5rem;max-width:1100px}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
+.page-title{font-size:1.2rem;font-weight:800}
+.page-sub{font-size:.8rem;color:#888;margin-top:.15rem}
+
+/* Branch cards */
+.branches-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin-bottom:1.5rem}
+.bcard{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:12px;padding:1.25rem;transition:border-color .2s}
+.bcard.inactive{opacity:.55}
+.bcard-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem}
+.bcard-name{font-size:1rem;font-weight:700}
+.bcard-code{font-size:.72rem;color:#888;margin-top:.1rem;font-family:monospace}
+.bcard-type{display:inline-block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.2rem .6rem;border-radius:20px;margin-bottom:.65rem}
+.bcard-info{font-size:.8rem;color:#888;margin-bottom:.75rem;line-height:1.6}
+.bcard-modules{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.875rem}
+.mod-chip{font-size:.65rem;background:rgba(201,168,76,.12);color:#c9a84c;border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.15rem .5rem}
+.mod-chip.inherited{background:rgba(255,255,255,.05);color:#888;border-color:rgba(255,255,255,.1)}
+.bcard-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+
+/* Add branch form */
+.add-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.add-card-title{font-size:.85rem;font-weight:700;margin-bottom:1.1rem;display:flex;align-items:center;gap:.5rem}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem}
+.sfield{margin-bottom:.65rem}
+.sfield label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:.3rem;font-weight:600}
+.sinput{width:100%;background:var(--dark,#111);border:1px solid var(--border,#2a2a2a);border-radius:6px;color:var(--text,#fff);padding:.55rem .875rem;font-size:.875rem;font-family:inherit}
+.sinput:focus{outline:none;border-color:var(--gold,#c9a84c)}
+select.sinput{cursor:pointer}
+
+/* Module checkboxes */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.35rem;margin-top:.5rem}
+.mod-chk{display:flex;align-items:center;gap:.5rem;font-size:.8rem;cursor:pointer;padding:.25rem 0}
+.mod-chk input{accent-color:var(--gold,#c9a84c)}
+
+/* Type badge colours */
+.type-optika{background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)}
+.type-fitness{background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)}
+.type-retail{background:rgba(249,115,22,.12);color:#f97316;border:1px solid rgba(249,115,22,.3)}
+.type-accounting{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
+.type-restaurant{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.3)}
+.type-salon{background:rgba(244,114,182,.12);color:#f472b6;border:1px solid rgba(244,114,182,.3)}
+.type-other{background:rgba(255,255,255,.06);color:#888;border:1px solid rgba(255,255,255,.15)}
+
+/* Module modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:1500;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.fc-dialog{background:var(--card,#1a1a1a);border:1px solid var(--gold,#c9a84c);border-radius:12px;padding:1.5rem;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.fc-dialog-title{font-weight:700;margin-bottom:1rem}
+.fc-dialog-btns{display:flex;gap:.5rem;margin-top:1.25rem;justify-content:flex-end}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="page">
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">Podružnice – {{ company.name }}</div>
+      <div class="page-sub">OIB: {{ company.oib }} &mdash; {{ branches|length }} podružnic{{ branches|length|pluralize:"a,a,a" }}</div>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <a href="/superadmin/companies/" class="btn btn-ghost btn-sm">{% trans "&#8592; Tvrtke" %}</a>
+      <a href="/superadmin/impersonate/{{ company.id }}/" class="btn btn-ghost btn-sm">{% trans "&#x1F576; Pristupi" %}</a>
+    </div>
+  </div>
+
+  {% if messages %}
+  <div style="margin-bottom:1rem">
+    {% for msg in messages %}
+    <div style="padding:.65rem 1rem;border-radius:7px;font-size:.85rem;margin-bottom:.35rem;
+      {% if msg.tags == 'error' %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444
+      {% else %}background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e{% endif %}">
+      {{ msg }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Existing branches -->
+  {% if branches %}
+  <div class="branches-grid">
+    {% for b in branches %}
+    <div class="bcard {% if not b.is_active %}inactive{% endif %}">
+      <div class="bcard-hdr">
+        <div>
+          <div class="bcard-name">{{ b.name }}</div>
+          {% if b.branch_code %}<div class="bcard-code">{{ b.branch_code }}</div>{% endif %}
+        </div>
+        <span class="bcard-type type-{{ b.branch_type }}">{{ b.get_branch_type_display }}</span>
+      </div>
+      <div class="bcard-info">
+        {% if b.address %}&#x1F4CD; {{ b.address }}{% if b.city %}, {{ b.city }}{% endif %}<br>{% endif %}
+        {% if b.phone %}&#x1F4DE; {{ b.phone }}<br>{% endif %}
+        {% if b.email %}&#x2709; {{ b.email }}<br>{% endif %}
+        {% if not b.is_active %}<span style="color:#ef4444;font-size:.75rem;font-weight:700">{% trans "&#x26D4; Deaktivirana" %}</span>{% endif %}
+      </div>
+
+      <!-- Modules -->
+      <div class="bcard-modules">
+        {% if b.active_modules %}
+          {% for m in b.active_modules %}<span class="mod-chip">{{ m }}</span>{% endfor %}
+        {% else %}
+          <span class="mod-chip inherited">{% trans "Nasljeđuje plan matice" %}</span>
+        {% endif %}
+      </div>
+
+      <!-- Users in this branch -->
+      {% with user_count=b.users.count %}
+      {% if user_count %}<div style="font-size:.72rem;color:#888;margin-bottom:.65rem">&#x1F464; {{ user_count }} korisnik{{ user_count|pluralize:',a' }}</div>{% endif %}
+      {% endwith %}
+
+      <div class="bcard-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openModulesModal({{ b.id }}, '{{ b.name|escapejs }}', [{% for m in b.active_modules %}'{{ m }}'{% if not forloop.last %},{% endif %}{% endfor %}])">{% trans "&#x1F527; Moduli" %}</button>
+        <form method="post" style="display:inline">{% csrf_token %}
+          <input type="hidden" name="action" value="toggle">
+          <input type="hidden" name="branch_id" value="{{ b.id }}">
+          <button class="btn btn-ghost btn-sm">{% if b.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}</button>
+        </form>
+        <form method="post" style="display:inline" onsubmit="return confirm('Obrisati podružnicu {{ b.name|escapejs }}?')">{% csrf_token %}
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="branch_id" value="{{ b.id }}">
+          <button class="btn btn-ghost btn-sm" style="color:#ef4444">{% trans "&#x1F5D1;" %}</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Add new branch -->
+  <div class="add-card">
+    <div class="add-card-title">{% trans "&#x2795; Nova podružnica" %}</div>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add">
+      <div class="form-grid">
+        <div class="sfield">
+          <label>{% trans "Naziv *" %}</label>
+          <input class="sinput" type="text" name="name" placeholder="{% trans "npr. Optika Centar" %}" required autofocus>
+        </div>
+        <div class="sfield">
+          <label>{% trans "Šifra" %}</label>
+          <input class="sinput" type="text" name="branch_code" placeholder="{% trans "npr. OPT01" %}" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="sfield">
+          <label>{% trans "Tip podružnice" %}</label>
+          <select class="sinput" name="branch_type">
+            {% for val, label in branch_types %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="sfield">
+          <label>{% trans "Adresa" %}</label>
+          <input class="sinput" type="text" name="address" placeholder="{% trans "Ulica i broj" %}">
+        </div>
+        <div class="sfield">
+          <label>{% trans "Grad" %}</label>
+          <input class="sinput" type="text" name="city" placeholder="{% trans "Zagreb" %}">
+        </div>
+        <div class="sfield">
+          <label>{% trans "Telefon" %}</label>
+          <input class="sinput" type="text" name="phone" placeholder="+385 1 234 5678">
+        </div>
+        <div class="sfield">
+          <label>{% trans "E-mail" %}</label>
+          <input class="sinput" type="email" name="email" placeholder="{% trans "podružnica@tvrtka.hr" %}">
+        </div>
+      </div>
+
+      <div class="sfield" style="margin-top:.5rem">
+        <label>{% trans "Aktivni moduli (prazno = nasljeđuje plan matice)" %}</label>
+        <div class="modules-grid">
+          {% for val, label in all_modules %}
+          <label class="mod-chk">
+            <input type="checkbox" name="active_modules" value="{{ val }}">
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="margin-top:1rem">
+        <button type="submit" class="btn btn-gold">{% trans "&#x2795; Kreiraj podružnicu" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Module edit modal -->
+<div class="modal-overlay" id="modulesModal">
+  <div class="fc-dialog">
+    <div class="fc-dialog-title" id="modalBranchName">{% trans "Moduli podružnice" %}</div>
+    <div style="font-size:.78rem;color:#888;margin-bottom:1rem">{% trans "Prazno = nasljeđuje plan matične tvrtke" %}</div>
+    <form method="post" id="modulesForm">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_modules">
+      <input type="hidden" name="branch_id" id="modalBranchId">
+      <div class="modules-grid" id="modalModulesGrid">
+        {% for val, label in all_modules %}
+        <label class="mod-chk">
+          <input type="checkbox" name="active_modules" value="{{ val }}" class="modal-mod-chk" data-val="{{ val }}">
+          {{ label }}
+        </label>
+        {% endfor %}
+      </div>
+      <div style="font-size:.72rem;color:#888;margin-top:.75rem">
+        {% trans "&#9432; Odznačite sve za nasljeđivanje modula s matičnog plana." %}
+      </div>
+      <div class="fc-dialog-btns">
+        <button type="button" class="btn btn-ghost" onclick="closeModulesModal()">{% trans "Odustani" %}</button>
+        <button type="submit" class="btn btn-gold">{% trans "Spremi module" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openModulesModal(branchId, branchName, activeModules) {
+  document.getElementById('modalBranchId').value   = branchId;
+  document.getElementById('modalBranchName').textContent = 'Moduli – ' + branchName;
+  document.querySelectorAll('.modal-mod-chk').forEach(chk => {
+    chk.checked = activeModules.includes(chk.dataset.val);
+  });
+  document.getElementById('modulesModal').classList.add('open');
+}
+function closeModulesModal() {
+  document.getElementById('modulesModal').classList.remove('open');
+}
+document.getElementById('modulesModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModulesModal();
+});
+</script>
+{% endblock %}

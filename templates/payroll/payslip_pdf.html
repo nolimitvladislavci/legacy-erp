@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isplatna lista - {{ payslip.employee_name }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', Courier, monospace; font-size: 11pt; padding: 20px; max-width: 700px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .header h1 { font-size: 14pt; }
+        .header h2 { font-size: 11pt; font-weight: normal; }
+        .section { margin-bottom: 12px; }
+        .section-title { font-weight: bold; border-bottom: 1px dashed #000; margin-bottom: 6px; padding-bottom: 2px; }
+        .row { display: flex; justify-content: space-between; padding: 2px 0; }
+        .row-label { }
+        .row-value { font-weight: bold; }
+        .divider { border-top: 1px solid #000; margin: 8px 0; }
+        .total-row { font-size: 13pt; font-weight: bold; }
+        .footer { margin-top: 30px; font-size: 9pt; color: #666; text-align: center; }
+        .no-print { margin-bottom: 20px; text-align: center; }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="window.print()" style="padding:8px 24px;font-size:12pt;cursor:pointer">ISPIS</button>
+        <button onclick="history.back()" style="padding:8px 24px;font-size:12pt;cursor:pointer">NATRAG</button>
+    </div>
+
+    <div class="header">
+        <h1>{{ company.name }}</h1>
+        <h2>ISPLATNA LISTA</h2>
+        <div>{{ run.month|stringformat:"02d" }}/{{ run.year }}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">RADNIK</div>
+        <div class="row"><span class="row-label">Ime i prezime:</span><span class="row-value">{{ payslip.employee_name }}</span></div>
+        <div class="row"><span class="row-label">IBAN:</span><span class="row-value">{{ payslip.employee_iban|default:"—" }}</span></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">SATI</div>
+        <div class="row"><span class="row-label">Redovni sati:</span><span class="row-value">{{ payslip.regular_hours|floatformat:2 }}</span></div>
+        <div class="row"><span class="row-label">Prekovremeni:</span><span class="row-value">{{ payslip.overtime_hours|floatformat:2 }}</span></div>
+        <div class="row"><span class="row-label">Nocni sati:</span><span class="row-value">{{ payslip.night_hours|floatformat:2 }}</span></div>
+        <div class="divider"></div>
+        <div class="row"><span class="row-label">UKUPNO SATI:</span><span class="row-value">{{ payslip.total_hours|floatformat:2 }}</span></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">SATNICE (snapshot)</div>
+        <div class="row"><span class="row-label">Osnovna satnica:</span><span class="row-value">{{ payslip.hourly_rate_snapshot|floatformat:2 }} EUR</span></div>
+        <div class="row"><span class="row-label">Prekovremena:</span><span class="row-value">{{ payslip.overtime_rate_snapshot|floatformat:2 }} EUR</span></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">OBRACUN</div>
+        <div class="row"><span class="row-label">BRUTO:</span><span class="row-value">{{ payslip.gross_amount|floatformat:2 }} EUR</span></div>
+        {% if is_hr %}
+        <div class="row"><span class="row-label">Doprinosi iz (20%):</span><span class="row-value">-{{ payslip.contributions_amount|floatformat:2 }} EUR</span></div>
+        <div class="row"><span class="row-label">Porezna osnovica:</span><span class="row-value">{{ payslip.tax_base|floatformat:2 }} EUR</span></div>
+        <div class="row"><span class="row-label">Porez + prirez:</span><span class="row-value">-{{ payslip.tax_amount|floatformat:2 }} EUR</span></div>
+        {% endif %}
+        <div class="divider"></div>
+        <div class="row total-row"><span class="row-label">NETO ZA ISPLATU:</span><span class="row-value">{{ payslip.net_amount|floatformat:2 }} EUR</span></div>
+    </div>
+
+    {% if payslip.compliance_notes %}
+    <div class="section">
+        <div class="section-title">NAPOMENE (ArbZG/ZOR)</div>
+        <div style="font-size:9pt;color:#666">{{ payslip.compliance_notes }}</div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <div>Poziv na broj: {{ payslip.payment_reference|default:"—" }}</div>
+        <div>Dokument generiran: {% now "d.m.Y H:i" %}</div>
+        <div>{{ company.name }} | OIB: {{ company.oib|default:"—" }}</div>
+    </div>
+</body>
+</html>

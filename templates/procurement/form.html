@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if edit %}Uredi narudzbenicu{% else %}Nova narudzbenica{% endif %}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">{% if edit %}Uredi: {{ po.po_number }}{% else %}Nova narudzbenica{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Dobavljac</label>
+                        <select name="supplier" class="form-select">
+                            <option value="">-- Odaberi --</option>
+                            {% for s in suppliers %}<option value="{{ s.id }}" {% if edit and po.supplier_id == s.id %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Prioritet</label>
+                        <select name="priority" class="form-select">
+                            <option value="low" {% if edit and po.priority == 'low' %}selected{% endif %}>Nizak</option>
+                            <option value="normal" {% if not edit %}selected{% endif %} {% if edit and po.priority == 'normal' %}selected{% endif %}>Normalan</option>
+                            <option value="high" {% if edit and po.priority == 'high' %}selected{% endif %}>Visok</option>
+                            <option value="urgent" {% if edit and po.priority == 'urgent' %}selected{% endif %}>Hitno</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ocekivana dostava</label>
+                        <input type="date" name="expected_delivery" class="form-control" value="{% if edit %}{{ po.expected_delivery|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Napomena</label>
+                        <textarea name="notes" class="form-control" rows="2">{% if edit %}{{ po.notes }}{% endif %}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Interna napomena</label>
+                        <textarea name="internal_note" class="form-control" rows="2">{% if edit %}{{ po.internal_note }}{% endif %}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between"><strong>Stavke</strong> <button type="button" class="btn btn-sm btn-success" onclick="addRow()">+ Dodaj stavku</button></div>
+            <div class="card-body">
+                <table class="table" id="items-table">
+                    <thead><tr><th>Opis</th><th>Kolicina</th><th>Jedinica</th><th>Cijena</th><th>PDV%</th><th></th></tr></thead>
+                    <tbody>
+                    {% if edit %}{% for item in po.items.all %}
+                    <tr>
+                        <td><input type="text" name="item_description" value="{{ item.description }}" class="form-control" required></td>
+                        <td><input type="number" name="item_quantity" value="{{ item.quantity }}" class="form-control" step="0.001" required></td>
+                        <td><input type="text" name="item_unit" value="{{ item.unit }}" class="form-control"></td>
+                        <td><input type="number" name="item_price" value="{{ item.unit_price }}" class="form-control" step="0.0001" required></td>
+                        <td><input type="number" name="item_tax_rate" value="{{ item.tax_rate }}" class="form-control" step="0.01"></td>
+                        <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">X</button></td>
+                    </tr>
+                    {% endfor %}{% else %}
+                    <tr>
+                        <td><input type="text" name="item_description" class="form-control" required></td>
+                        <td><input type="number" name="item_quantity" value="1" class="form-control" step="0.001" required></td>
+                        <td><input type="text" name="item_unit" value="kom" class="form-control"></td>
+                        <td><input type="number" name="item_price" value="0" class="form-control" step="0.0001" required></td>
+                        <td><input type="number" name="item_tax_rate" value="25" class="form-control" step="0.01"></td>
+                        <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">X</button></td>
+                    </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">{% if edit %}Spremi{% else %}Kreiraj narudzbenicu{% endif %}</button>
+        <a href="{% url 'procurement:list' %}" class="btn btn-secondary btn-lg">Odustani</a>
+    </form>
+</div>
+<script>
+function addRow(){
+    const tbody = document.querySelector('#items-table tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="text" name="item_description" class="form-control" required></td><td><input type="number" name="item_quantity" value="1" class="form-control" step="0.001" required></td><td><input type="text" name="item_unit" value="kom" class="form-control"></td><td><input type="number" name="item_price" value="0" class="form-control" step="0.0001" required></td><td><input type="number" name="item_tax_rate" value="25" class="form-control" step="0.01"></td><td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest(\'tr\').remove()">X</button></td>';
+    tbody.appendChild(tr);
+}
+</script>
+{% endblock %}

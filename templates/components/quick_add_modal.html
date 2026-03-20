@@ -1,0 +1,172 @@
+{% comment %}
+Quick-add modal - include in any form that needs inline creation.
+Usage: {% include "components/quick_add_modal.html" %}
+Then in JS: openQuickAdd('partner', '/partners/api/quick-create/', callback)
+{% endcomment %}
+
+<div id="quickAddModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:12px;border:none;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+      <div class="modal-header" style="border-bottom:1px solid #e2e8f0;padding:16px 20px">
+        <h5 class="modal-title" style="font-weight:700;font-size:0.95rem" id="quickAddTitle">Brzo dodavanje</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:20px" id="quickAddBody">
+        <!-- Dynamic form fields inserted here by JS -->
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #e2e8f0;padding:12px 20px">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Odustani</button>
+        <button type="button" class="btn btn-primary btn-sm" id="quickAddSave" onclick="saveQuickAdd()">
+          <i class="fas fa-plus me-1"></i>Spremi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let _quickAddCallback = null;
+let _quickAddUrl = null;
+
+const QUICK_ADD_FORMS = {
+    partner: {
+        title: 'Novi partner',
+        fields: [
+            {name: 'name', label: 'Naziv', type: 'text', required: true},
+            {name: 'email', label: 'Email', type: 'email'},
+            {name: 'oib', label: 'OIB / USt-IdNr', type: 'text'},
+            {name: 'address', label: 'Adresa', type: 'text'},
+            {name: 'city', label: 'Grad', type: 'text'},
+            {name: 'phone', label: 'Telefon', type: 'text'},
+        ]
+    },
+    project: {
+        title: 'Novi projekt',
+        fields: [
+            {name: 'name', label: 'Naziv projekta', type: 'text', required: true},
+            {name: 'code', label: 'Šifra (kratka)', type: 'text'},
+            {name: 'hourly_rate', label: 'Cijena sata (EUR)', type: 'number'},
+            {name: 'description', label: 'Opis', type: 'text'},
+        ]
+    },
+    article: {
+        title: 'Novi artikl',
+        fields: [
+            {name: 'name', label: 'Naziv', type: 'text', required: true},
+            {name: 'sku', label: 'Šifra / SKU', type: 'text'},
+            {name: 'price', label: 'Cijena (EUR)', type: 'number'},
+            {name: 'unit', label: 'Jedinica mjere', type: 'text', placeholder: 'kom'},
+            {name: 'tax_pct', label: 'PDV %', type: 'select',
+             options: [{v:'25',l:'25%'},{v:'13',l:'13%'},{v:'5',l:'5%'},{v:'0',l:'0%'}],
+             default: '25'},
+        ]
+    }
+};
+
+function openQuickAdd(type, url, callback) {
+    const config = QUICK_ADD_FORMS[type];
+    if (!config) return;
+    _quickAddCallback = callback;
+    _quickAddUrl = url;
+    document.getElementById('quickAddTitle').textContent = config.title;
+    let html = '';
+    config.fields.forEach(f => {
+        if (f.type === 'select') {
+            const opts = f.options.map(o =>
+                `<option value="${o.v}" ${o.v === f.default ? 'selected' : ''}>${o.l}</option>`
+            ).join('');
+            html += `<div class="mb-3">
+                <label class="form-label" style="font-weight:600;font-size:0.8rem">${f.label}</label>
+                <select name="${f.name}" class="form-select form-select-sm" style="border-radius:8px">${opts}</select>
+            </div>`;
+        } else {
+            html += `<div class="mb-3">
+                <label class="form-label" style="font-weight:600;font-size:0.8rem">${f.label}${f.required ? ' *' : ''}</label>
+                <input type="${f.type || 'text'}" name="${f.name}" class="form-control form-control-sm"
+                       ${f.required ? 'required' : ''} ${f.placeholder ? 'placeholder="'+f.placeholder+'"' : ''}
+                       style="border-radius:8px">
+            </div>`;
+        }
+    });
+    document.getElementById('quickAddBody').innerHTML = html;
+    new bootstrap.Modal(document.getElementById('quickAddModal')).show();
+    // Focus first field
+    setTimeout(() => {
+        const first = document.querySelector('#quickAddBody input');
+        if (first) first.focus();
+    }, 300);
+}
+
+function saveQuickAdd() {
+    const body = document.getElementById('quickAddBody');
+    const data = {};
+    let valid = true;
+    body.querySelectorAll('input, select').forEach(el => {
+        data[el.name] = el.value;
+        if (el.tagName === 'INPUT' && el.required && !el.value.trim()) {
+            el.classList.add('is-invalid');
+            valid = false;
+        } else {
+            el.classList.remove('is-invalid');
+        }
+    });
+    if (!valid) return;
+
+    const btn = document.getElementById('quickAddSave');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Spremam...';
+
+    fetch(_quickAddUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken()},
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(result => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus me-1"></i>Spremi';
+        if (result.ok || result.id) {
+            result._form = data;
+            bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();
+            if (_quickAddCallback) _quickAddCallback(result);
+            // Show toast
+            showToast('success', result.message || 'Uspješno dodano!');
+        } else {
+            showToast('error', result.error || 'Greška pri spremanju');
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-plus me-1"></i>Spremi';
+        showToast('error', 'Greška: ' + err.message);
+    });
+}
+
+function getCsrfToken() {
+    const cookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : '';
+}
+
+function showToast(type, message) {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style = 'position:fixed;top:60px;right:12px;z-index:9999;width:340px;max-width:90vw';
+        document.body.appendChild(container);
+    }
+    const colors = {
+        success: 'background:rgba(240,253,244,.95);border:1px solid #bbf7d0;color:#166534',
+        error: 'background:rgba(254,242,242,.95);border:1px solid #fecaca;color:#991b1b',
+        warning: 'background:rgba(255,251,235,.95);border:1px solid #fed7aa;color:#92400e',
+    };
+    const el = document.createElement('div');
+    el.className = 'alert shadow py-2 px-3';
+    el.style = `font-size:0.82rem;border-radius:10px;margin-bottom:8px;backdrop-filter:blur(8px);${colors[type] || colors.success}`;
+    el.innerHTML = `${message}<button onclick="this.parentElement.remove()" style="float:right;background:none;border:none;font-size:1rem;opacity:.5;cursor:pointer;line-height:1">×</button>`;
+    container.prepend(el);
+    if (type === 'success') {
+        setTimeout(() => { el.style.transition='all 0.5s'; el.style.opacity='0'; el.style.transform='translateX(20px)'; setTimeout(() => el.remove(), 500); }, 4000);
+    }
+}
+</script>

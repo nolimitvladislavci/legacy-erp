@@ -1,0 +1,273 @@
+======================================================================
+LIMIT CONNECT ERP — KOMPLETNA ARHITEKTURA
+Generirano: 2026-03-08 18:14
+======================================================================
+
+### MODULI (Python fajlovi + linije)
+
+MODUL                            PY   LINIJE  KLJUČNI MODELI/KLASE
+----------------------------------------------------------------------
+accounts                         17     1691  UserProfile, ImpersonationLog, CompanyMembership, MagicToken, LoginAttempt
+ai_assistant                     12     1069  Conversation, Message, AIUsageLog
+appointments                     32     4473  Appointment, BookingResource, BookingService, WorkingHours, ClientDossier +1
+assessment                        9     1000  FieldAssessment, AssessmentPhoto
+branches                          4      229  
+burza                            10      488  ProjectLead, LeadActivity
+calculator                       12     1054  Normative, Calculation, CalculationItem, BOM, BOMItem
+companies                        28     1772  NKDCode, Company, TaxRate, BusinessProfile, ServiceTemplate +2
+core                             71    16738  
+delivery                         24     4655  Vehicle, DeliveryRoute, DeliveryStop, TemperatureLog, DeliveryTracking +12
+documents                        15     1471  Document, GrossmarktDocument, GrossmarktDocItem, DocumentModelTest
+eracun                           13     2113  ERacunConfig, ERacun, ERacunItem, ERacunTaxSummary, ERacunLog
+finance                          13     1866  TransactionCategory, Transaction
+fiscal                           14      918  FiscalConfiguration, FiscalLog
+fiskalizacija                     9      615  FiscalConfig
+fitness                           9      336  Member, MemberCheckIn
+gastro_menu                      10      412  DigitalMenu, MenuCategory, MenuItem, MenuItemIngredient, TableQR +1
+insurance                         9      254  InsurancePolicy
+interventions                    15     1102  HitnaIntervencija
+inventory                        21     2108  InventoryItem, StockMovement, GoodsReceipt, GoodsReceiptItem, PriceChange +2
+invoicing                        70     9687  Invoice, InvoiceItem, InvoiceEvent, DunningRule, BusinessLocation +7
+konto                            21     4266  KontoAccount, BankAccount, BankTransaction, JournalEntry, LedgerLine +2
+marketplace                      24     4093  MarketplaceCategory, MarketplaceProduct, MarketplaceOrder, MarketplaceOrderItem, SellerSubOrder +11
+notifications                     9      176  Notification
+outreach                          8      694  Contact, Campaign, CampaignContact
+partners                         21     1857  Partner
+payments                         11      917  PaymentConfig, Payment
+payroll                           9      908  PayrollRun, Payslip
+permissions                      16     1112  Permission, Role, UserRole, PermissionOverride
+pos                              33     6067  POSTerminal, POSSession, POSReceipt, POSReceiptItem, POSPaymentLine +11
+premium_booking                  17      759  Resource, Addon, Booking, BookingAddon, Payment
+projects                         15      858  Project, ProjectUpdate, ProjectPhoto
+push_notifications                4      119  
+registration                     18     1367  CompanyRegistration, PricingPlan, CompanySubscription, PromoCode
+rental                            9      856  Property, SeasonalPrice, Booking, HousekeepingLog
+reports                           4      227  
+smart_import                      9     1016  ImportBatch, ImportBatchItem, VendorItemMapping
+tests                             4      343  
+traceability                      8      224  ProductTrace, TraceEvent
+tracking                         13      582  TrackingStatus, TrackedItem, TrackingEvent
+webshop                          15     1033  Product, CartItem, Order, OrderItem
+website                          18     1916  SitePage, HeroSection, Brand, GalleryImage, CompanyInfo +9
+work_orders                       9     1165  WorkOrder, WorkOrderItem, VehicleCard, ClientCard
+worktime                         28     5323  WorkGroup, Project, EmployeeProfile, TimeEntry, ActiveTimer +5
+----------------------------------------------------------------------
+UKUPNO                          740    89929
+
+
+### IMPLEMENTIRANI POSLOVNI MODULI
+
+  ✓ Fakturiranje (invoicing)            Fakture, PDF, fiskalizacija HR, e-Račun UBL, wizard, bilingual
+  ✓ Payroll                             HR bruto→neto engine, DATEV CSV, pain.001, GoBD snapshot
+  ✓ Bank integracija                    camt.053 parser, pain.001 generator, discrepancy widget
+  ✓ Dunning Engine                      D+3/D+14/D+30 eskalacija, email+WhatsApp, throttling
+  ✓ POS / Gastro                        Blagajna, Z-report, DSFinV-K, waiter sustav, loyalty, voucher
+  ✓ Kripto plaćanja (payments)          NowPayments API, BTC/ETH/USDT, webhook, PayPal
+  ✓ B2B Portal                          Tenant isolation, legal vault, bulk export, anti-DDoS
+  ✓ Warehouse / Pick&Pack               FEFO, vaga, anti-crush, genesis blokade
+  ✓ Scheduling Engine                   Polymorphic actor/resource, advisory lock, kalendar
+  ✓ Bank camt.053                       XML parser, partial payment, discrepancy
+  ✓ e-Račun                             UBL 2.1 XML, OIB validacija, Propter integracija
+  ✓ Rental                              Upravljanje nekretninama, check-in/out, housekeeping
+  ✓ Worktime / HR                       GPS clock-in/out, ArbZG compliance, overtime, hybrid shift
+  ✓ Delivery / HACCP                    Rute, senzori temperature, HACCP incidenti, Pick&Pack
+  ✓ Marketplace                         B2B/B2C webshop, cart engine, polymorphic proizvodi
+  ✓ Webshop                             GIN indeksi, cart engine, polymorphic
+  ✓ Calculator                          Kalkulacije, Synesis OFFERS export, PDF
+  ✓ Konto                               Dvojno knjigovodstvo, german_accounting, booking engine
+  ✓ Appointments                        Booking, polymorphic scheduling, reminders, public calendar
+  ✓ Synesis integracija                 MDB pristup, RETAIL/OFFERS/INVOICES sync, PKV
+  ✓ i18n                                HR/DE/EN/TR/EL prijevodi, .po/.mo kompajlirani
+  ✓ WhatsApp (WAHA)                     Session WORKING, dunning opomene, is_gateway_healthy()
+  ✓ Smart Import                        AI-powered import, CSV/Excel parser
+  ✓ AI Assistant                        Claude integracija, ERP kontekst
+  ✓ Notifications                       Web Push (VAPID), in-app, polling
+  ✓ Fiskalizacija                       HR fiskalizacija, DSFinV-K DE export, TSE stub
+
+
+### TEST SUITE
+
+    88 testova  core/tests_medium_modules.py
+    73 testova  core/tests_other_views.py
+    55 testova  core/tests_large_modules.py
+    54 testova  core/tests_small_modules.py
+    53 testova  invoicing/tests/test_views_extra3.py
+    46 testova  core/tests_misc_views.py
+    46 testova  core/tests_misc.py
+    44 testova  pos/tests_extra_views.py
+    43 testova  invoicing/tests/test_tax_logic.py
+    42 testova  invoicing/tests/test_views_extra2.py
+    42 testova  invoicing/tests/test_views_extra.py
+    41 testova  konto/tests_data.py
+    41 testova  core/tests_smoke.py
+    40 testova  konto/tests_views.py
+    39 testova  pos/tests/test_views_extra3.py
+    39 testova  core/tests_companies_extra.py
+    36 testova  invoicing/tests_inv_extra.py
+    35 testova  invoicing/tests_core.py
+    35 testova  invoicing/tests/test_fiscal.py
+    35 testova  core/tests_partners_inventory_data.py
+    34 testova  core/tests_work_orders_data.py
+    34 testova  core/tests_companies_wo_extra.py
+    34 testova  assessment/tests_data.py
+    33 testova  worktime/tests_data.py
+    33 testova  core/tests_outreach_data.py
+    32 testova  core/tests_burza_data.py
+    31 testova  core/tests_more_views.py
+    31 testova  appointments/tests_appt_extra.py
+    30 testova  konto/tests_extra.py
+    29 testova  invoicing/tests_fiscal.py
+    29 testova  appointments/tests/test_views2.py
+    28 testova  worktime/tests_extra_views.py
+    28 testova  core/tests_outreach_interventions.py
+    27 testova  worktime/tests_views2.py
+    27 testova  worktime/tests_extra.py
+    27 testova  pos/tests/test_views_extra2.py
+    27 testova  pos/tests/test_views_extra.py
+    26 testova  core/tests_marketplace_data.py
+    25 testova  worktime/tests_views.py
+    25 testova  pos/tests_data.py
+    25 testova  core/tests_documents_data.py
+    25 testova  accounts/tests_views2.py
+    24 testova  core/tests_registration_data.py
+    23 testova  core/tests_accounts_extra.py
+    22 testova  worktime/tests_timesheet.py
+    22 testova  core/tests_extra2.py
+    21 testova  core/tests_companies_settings.py
+    21 testova  core/tests_auth.py
+    20 testova  tests/test_integrations.py
+    20 testova  konto/tests_konto_extra.py
+    20 testova  core/tests_registration_flow.py
+    19 testova  documents/tests/test_process_docs.py
+    19 testova  core/tests_registration_extra.py
+    19 testova  core/tests_documents_extra.py
+    18 testova  interventions/tests.py
+    18 testova  finance/tests_finance_konto.py
+    18 testova  core/tests_rental_data.py
+    18 testova  core/tests_calculator_data.py
+    18 testova  appointments/tests/test_views.py
+    16 testova  pos/tests/test_services.py
+    16 testova  core/tests_webshop_data.py
+    16 testova  core/tests_interventions_data.py
+    16 testova  core/tests_companies_views.py
+    16 testova  core/tests_companies.py
+    15 testova  website/tests.py
+    15 testova  tests/test_e2e_demos.py
+    15 testova  core/tests_projects_data.py
+    14 testova  delivery/tests/test_b2b_portal.py
+    14 testova  core/tests_fitness_data.py
+    14 testova  core/tests.py
+    13 testova  worktime/test_payroll_extended.py
+    13 testova  invoicing/tests/test_services.py
+    13 testova  invoicing/tests/test_pdf_service.py
+    13 testova  invoicing/tests/test_gobd.py
+    13 testova  core/tests_extra.py
+    12 testova  marketplace/tests/test_models.py
+    12 testova  eracun/tests/test_smoke.py
+    12 testova  delivery/tests/test_phase6_warehouse.py
+    12 testova  delivery/test_pick_and_pack.py
+    12 testova  ai_assistant/tests.py
+    11 testova  inventory/tests_primka.py
+    11 testova  appointments/tests/test_services.py
+    10 testova  work_orders/tests.py
+    10 testova  test_payroll.py
+    10 testova  projects/tests.py
+    10 testova  inventory/tests/test_continuous_inventory.py
+     9 testova  worktime/tests/test_hybrid_tracking.py
+     9 testova  tests/test_exceptions.py
+     9 testova  marketplace/tests/test_views.py
+     9 testova  appointments/tests/test_polymorphic_scheduling.py
+     8 testova  webshop/tests/test_polymorphic_webshop.py
+     8 testova  partners/tests_portal.py
+     8 testova  partners/tests.py
+     8 testova  appointments/test_scheduling.py
+     7 testova  test_dunning.py
+     7 testova  test_camt053.py
+     7 testova  marketplace/test_whatsapp_cart.py
+     7 testova  marketplace/test_smart_cart.py
+     7 testova  core/tests_isolation.py
+     7 testova  core/test_services.py
+     6 testova  documents/tests/test_views.py
+     6 testova  delivery/test_haccp.py
+     5 testova  fiscal/tests.py
+     5 testova  documents/tests/test_models.py
+     4 testova  tracking/tests.py
+     3 testova  delivery/test_cart_to_table.py
+     2 testova  worktime/test_payroll.py
+     2 testova  pokreni_testove.py
+     1 testova  test_integracija.py
+     1 testova  test_crud.py
+
+  UKUPNO: 2406 test metoda u 110 fajlova
+
+
+### GIT LOG (zadnjih 15 commitova)
+
+4e05e47 fix: i18n prijevodi HR/DE/EN, login forma, POS Z-report PDF (WeasyPrint), rental select_related, eracun import fix, 12/12 testova PASS
+1e58e0b feat(dunning): Dunning Engine s eskalacijskom sekvencom, 7/7 PASS
+4c6ed5f feat(payroll): Calculation Engine + DATEV + pain.001, 10/10 PASS
+0cb30f9 feat(bank): camt.053 parser + pain.001 + discrepancy widget, 7/7 PASS
+6c0cbe4 feat(scheduling): Matrica loma 9.1/9.2/9.3 — actor_resource FK + advisory lock, 8/8 PASS
+e07de70 feat(b2b-portal): Matrica loma 8.1/8.2/8.3 — tenant isolation, legal vault, anti-DDoS bulk export
+d1abcd9 feat(warehouse): Faza 6 — 4 sigurnosne blokade FEFO/Vaga/AntiCrush/Genesis + test suite
+4e02cd8 feat(core): centralni business_lookup servis — HR/DE/EU OIB lookup + NKD šifarnik
+ce6096b fix(partners): OIB lookup — jasna poruka za firme koje nisu PDV obveznici (nisu u VIES)
+427645c fix(appointments): ukloni company filter iz BookingService querija — model nema company polje
+d8e6500 fix(ui): sidebar prikazuje pravu ulogu (ADMIN/VODITELJ/RADNIK); projekti filtrirani po firmi projekta
+d335905 fix(projects): dodaj radnika — filtriraj po firmi projekta, popravi empty user_id validation
+30f0c88 fix(synesis): PKV ispravljen prema stvarnoj PKVINPUT logici iz baze
+1d75272 feat(synesis): PKV probe skripta — čita TRANCODE/RETAIL_ID iz Storage.mdb
+d13b096 feat(synesis): PKV primka export — kalkulacija marže → Synesis RETAIL tablica
+
+
+### MIGRACIJE PO MODULU
+
+  accounts                  6 migracija
+  ai_assistant              1 migracija
+  appointments              9 migracija
+  assessment                1 migracija
+  burza                     3 migracija
+  calculator                4 migracija
+  companies                 18 migracija
+  delivery                  7 migracija
+  documents                 3 migracija
+  eracun                    1 migracija
+  finance                   2 migracija
+  fiscal                    1 migracija
+  fiskalizacija             1 migracija
+  fitness                   1 migracija
+  gastro_menu               3 migracija
+  insurance                 1 migracija
+  interventions             3 migracija
+  inventory                 9 migracija
+  invoicing                 24 migracija
+  konto                     3 migracija
+  marketplace               9 migracija
+  notifications             1 migracija
+  outreach                  1 migracija
+  partners                  4 migracija
+  payments                  2 migracija
+  payroll                   1 migracija
+  permissions               1 migracija
+  pos                       13 migracija
+  premium_booking           9 migracija
+  projects                  2 migracija
+  registration              4 migracija
+  rental                    1 migracija
+  smart_import              1 migracija
+  synesis                   5 migracija
+  traceability              1 migracija
+  tracking                  4 migracija
+  webshop                   4 migracija
+  website                   6 migracija
+  work_orders               1 migracija
+  worktime                  9 migracija
+
+
+### INFRASTRUKTURA
+
+  ✓ nginx:
+  ✓ postgres
+  ✓ postgres:
+  ✓ python3
+  ✓ redis-server

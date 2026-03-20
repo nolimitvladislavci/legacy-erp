@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Prediktivna nabava{% endblock %}
+{% block page_title %}Prediktivna nabava{% endblock %}
+{% block content %}
+<style>
+.rp-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
+.rp-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin:0 0 12px}
+.rp-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.rp-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;color:#64748b}
+.rp-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
+.badge-critical{background:#fef2f2;color:#dc2626;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.badge-warning{background:#fffbeb;color:#d97706;padding:3px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.rp-info{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px;margin-bottom:16px;font-size:.85rem;color:#0c4a6e}
+.rp-banner{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;border-radius:10px;padding:20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.rp-banner h4{margin:0;font-size:1rem;font-weight:700}
+.rp-banner p{margin:4px 0 0;font-size:.85rem;opacity:.9}
+.rp-banner .stats{display:flex;gap:16px;align-items:center}
+.rp-banner .stat-box{background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;text-align:center}
+.rp-banner .stat-box .num{font-size:1.4rem;font-weight:800;line-height:1}
+.rp-banner .stat-box .lbl{font-size:.65rem;text-transform:uppercase;opacity:.8}
+.btn-trigger{background:#fff;color:#1e3a5f;border:none;border-radius:8px;padding:10px 20px;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .2s}
+.btn-trigger:hover{background:#e0e7ff;transform:translateY(-1px)}
+.btn-po-link{display:inline-block;background:#f0f9ff;color:#2563eb;padding:3px 10px;border-radius:4px;font-size:.75rem;font-weight:600;text-decoration:none;margin-left:6px}
+.btn-po-link:hover{background:#dbeafe}
+</style>
+
+<!-- AUTO-REORDER BANNER -->
+<div class="rp-banner">
+  <div>
+    <h4>Prediktivna analiza zaliha</h4>
+    <p>Automatska provjera pokretanja svaki dan u 05:00. Generira nacrt-narudzbenice za kritične artikle.</p>
+  </div>
+  <div class="stats">
+    {% if auto_po_count %}
+    <div class="stat-box">
+      <div class="num">{{ auto_po_count }}</div>
+      <div class="lbl">Nacrt PO</div>
+    </div>
+    {% endif %}
+    {% if report.items %}
+    <div class="stat-box">
+      <div class="num">{{ report.items|length }}</div>
+      <div class="lbl">Za narudzbu</div>
+    </div>
+    {% endif %}
+    <form method="post" action="{% url 'inventory:reorder_trigger' %}" style="margin:0">
+      {% csrf_token %}
+      <button type="submit" class="btn-trigger">Pokreni analizu</button>
+    </form>
+  </div>
+</div>
+
+{% if auto_po_count %}
+<div class="rp-card">
+  <h6>Automatski generirane nacrt-narudzbenice ({{ auto_po_count }})</h6>
+  <table class="rp-table">
+    <thead>
+      <tr>
+        <th>Broj PO</th>
+        <th>Dobavljac</th>
+        <th>Stavke</th>
+        <th>Ukupno</th>
+        <th>Prioritet</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for po in auto_pos %}
+      <tr>
+        <td><strong>{{ po.po_number }}</strong></td>
+        <td>{{ po.supplier.name|default:"N/A" }}</td>
+        <td>{{ po.items.count }} artikala</td>
+        <td>{{ po.total|floatformat:2 }} EUR</td>
+        <td>
+          {% if po.priority == 'high' %}<span class="badge-critical">VISOK</span>
+          {% elif po.priority == 'urgent' %}<span class="badge-critical">HITNO</span>
+          {% else %}<span class="badge-warning">NORMALAN</span>
+          {% endif %}
+        </td>
+        <td><a href="/procurement/{{ po.pk }}/" class="btn-po-link">Pregledaj</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p style="margin:12px 0 0;font-size:.78rem;color:#64748b">
+    Ove narudzbenice su u statusu NACRT. Pregledajte ih i potvrdite u <a href="/procurement/" style="color:#2563eb">modulu nabave</a>.
+  </p>
+</div>
+{% endif %}
+
+{% if not report.has_enough_data %}
+<div class="rp-info">
+  <strong>Nedovoljno podataka za prediktivnu analizu.</strong><br>
+  Sustav treba minimalno 90 dana izlaznih kretanja zalihe (StockMovement type='out') da bi mogao izracunati prosjecnu dnevnu potrosnju i predvidjeti potrebne narudzbe.<br><br>
+  <strong>Status:</strong> {{ report.total_items }} artikala u sustavu, {{ report.insufficient_count }} bez dovoljno podataka.<br>
+  Nastavite koristiti sustav za evidentiranje izlaza robe, i prediktivna nabava ce automatski postati dostupna.
+</div>
+{% else %}
+
+{% if report.items %}
+<div class="rp-card">
+  <h6>Artikli koji trebaju narudzbu ({{ report.items|length }})</h6>
+  <table class="rp-table">
+    <thead>
+      <tr>
+        <th>Artikl</th>
+        <th>SKU</th>
+        <th>Dobavljac</th>
+        <th>Trenutna zaliha</th>
+        <th>Prosj. dnevna potrosnja</th>
+        <th>Dana do nestanka</th>
+        <th>Reorder point</th>
+        <th>Predlozena kolicina</th>
+        <th>Hitnost</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in report.items %}
+      <tr>
+        <td><strong>{{ r.item.name }}</strong></td>
+        <td style="color:#64748b">{{ r.item.sku }}</td>
+        <td>{{ r.item.supplier.name|default:"—" }}</td>
+        <td>{{ r.item.quantity }} {{ r.item.unit }}</td>
+        <td>{{ r.avg_daily }} {{ r.item.unit }}/dan</td>
+        <td>{% if r.days_left is not None %}{{ r.days_left }} dana{% else %}—{% endif %}</td>
+        <td>{{ r.reorder_point }} {{ r.item.unit }}</td>
+        <td><strong>{{ r.suggested_qty }} {{ r.item.unit }}</strong></td>
+        <td>
+          {% if r.urgency == 'critical' %}<span class="badge-critical">KRITICNO</span>
+          {% elif r.urgency == 'warning' %}<span class="badge-warning">UPOZORENJE</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="rp-card">
+  <h6>Prediktivna nabava</h6>
+  <p style="color:#64748b;text-align:center;padding:20px 0">Svi artikli imaju dovoljno zalihe. Nema potrebe za narudzbu.</p>
+</div>
+{% endif %}
+
+{% endif %}
+
+<div class="rp-card">
+  <h6>O prediktivnoj nabavi</h6>
+  <div style="font-size:.82rem;color:#475569">
+    <p>Sustav analizira izlazna kretanja zalihe zadnjih 90 dana i racuna:</p>
+    <ul style="margin:8px 0;padding-left:20px">
+      <li><strong>Prosjecna dnevna potrosnja</strong> = ukupni izlaz / broj dana</li>
+      <li><strong>Dana do nestanka</strong> = trenutna zaliha / prosjecna potrosnja</li>
+      <li><strong>Reorder point</strong> = prosj. potrosnja x lead time (7 dana) x sigurnosni faktor (1.5x)</li>
+      <li><strong>Predlozena kolicina</strong> = reorder point - trenutna zaliha</li>
+    </ul>
+    <p><strong>Hitnost:</strong> KRITICNO = zaliha za manje od 7 dana, UPOZORENJE = zaliha za manje od 14 dana.</p>
+    <p style="margin-top:8px"><strong>Automatska nabava:</strong> Svaki dan u 05:00 sustav provjerava sve artikle i automatski generira nacrt-narudzbenice za dobavljace ciji artikli imaju kriticnu ili upozorenu razinu zalihe. Narudzbenice se grupiraju po dobavljacu.</p>
+  </div>
+</div>
+{% endblock %}

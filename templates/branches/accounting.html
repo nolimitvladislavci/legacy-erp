@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block extra_css %}
+<style>
+.bpage{padding:1.5rem}
+.bpage-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem}
+.bpage-title{font-size:1.3rem;font-weight:800}
+.bpage-sub{font-size:.8rem;color:#888;margin-top:.15rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.kpi-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:12px;padding:1.25rem 1.5rem;transition:border-color .2s}
+.kpi-card:hover{border-color:#a78bfa}
+.kpi-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:.5rem;font-weight:600}
+.kpi-val{font-size:2rem;font-weight:900;line-height:1;margin-bottom:.25rem}
+.kpi-icon{font-size:1.6rem;margin-bottom:.5rem;opacity:.75}
+.action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.action-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:10px;padding:1rem;text-align:center;text-decoration:none;color:var(--text,#fff);transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.action-card:hover{border-color:#a78bfa;background:rgba(167,139,250,.06);transform:translateY(-2px)}
+.action-icon{font-size:1.8rem;opacity:.85}
+.action-lbl{font-size:.8rem;font-weight:600}
+.action-sub{font-size:.68rem;color:#888}
+.sec-card{background:var(--card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:10px;padding:1.1rem;margin-bottom:1rem}
+.sec-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#888;font-weight:700;margin-bottom:.75rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="bpage">
+  <div class="bpage-hdr">
+    <div>
+      <div style="margin-bottom:.35rem"><span style="background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.3);border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.07em;padding:.2rem .7rem;text-transform:uppercase">{% trans "&#x1F4D2; Knjigovodstvo" %}</span></div>
+      <div class="bpage-title">{{ branch.name|default:"Knjigovodstvo dashboard" }}</div>
+      <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <a href="/invoicing/" class="btn btn-ghost btn-sm">{% trans "&#x1F4CB; Fakture" %}</a>
+      <a href="/documents/" class="btn btn-ghost btn-sm">{% trans "&#x1F4C4; Dokumenti" %}</a>
+      <a href="/partners/" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Klijenti" %}</a>
+    </div>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x1F4CB;" %}</div>
+      <div class="kpi-lbl">{% trans "Računi ovaj mjesec" %}</div>
+      <div class="kpi-val" style="color:#a78bfa">{{ invoice_count }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x23F3;" %}</div>
+      <div class="kpi-lbl">{% trans "Čekaju naplatu" %}</div>
+      <div class="kpi-val" style="color:#facc15">{{ pending_inv }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x1F4C4;" %}</div>
+      <div class="kpi-lbl">{% trans "Dokumenti" %}</div>
+      <div class="kpi-val"><a href="/documents/" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">{% trans "&#x1F91D;" %}</div>
+      <div class="kpi-lbl">{% trans "Klijenti" %}</div>
+      <div class="kpi-val"><a href="/partners/" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="sec-title">{% trans "Brze akcije" %}</div>
+  <div class="action-grid">
+    <a class="action-card" href="/invoicing/new/">
+      <div class="action-icon">{% trans "&#x1F4CB;" %}</div>
+      <div class="action-lbl">{% trans "Novi račun" %}</div>
+      <div class="action-sub">{% trans "Kreiraj fakturu" %}</div>
+    </a>
+    <a class="action-card" href="/invoicing/">
+      <div class="action-icon">{% trans "&#x1F4B0;" %}</div>
+      <div class="action-lbl">{% trans "Sve fakture" %}</div>
+      <div class="action-sub">{% trans "Pregled i naplata" %}</div>
+    </a>
+    <a class="action-card" href="/documents/">
+      <div class="action-icon">{% trans "&#x1F4C4;" %}</div>
+      <div class="action-lbl">{% trans "Dokumenti" %}</div>
+      <div class="action-sub">{% trans "Ugovori, ponude" %}</div>
+    </a>
+    <a class="action-card" href="/partners/">
+      <div class="action-icon">{% trans "&#x1F464;" %}</div>
+      <div class="action-lbl">{% trans "Klijenti" %}</div>
+      <div class="action-sub">{% trans "Kartice klijenata" %}</div>
+    </a>
+    <a class="action-card" href="/finance/">
+      <div class="action-icon">{% trans "&#x1F4B3;" %}</div>
+      <div class="action-lbl">{% trans "Financije" %}</div>
+      <div class="action-sub">{% trans "Prihodi i rashodi" %}</div>
+    </a>
+    <a class="action-card" href="/worktime/">
+      <div class="action-icon">{% trans "&#x23F1;" %}</div>
+      <div class="action-lbl">{% trans "Radni sati" %}</div>
+      <div class="action-sub">{% trans "Satnica osoblja" %}</div>
+    </a>
+  </div>
+
+  <div class="sec-card" style="border-color:rgba(167,139,250,.2)">
+    <div class="sec-title">{% trans "Status ovaj mjesec" %}</div>
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:.85rem">
+      <div>{% trans "&#x1F7E2;" %} <strong>{{ invoice_count }}</strong> {% trans "izdanih računa" %}</div>
+      <div>{% trans "&#x1F7E1;" %} <strong>{{ pending_inv }}</strong> {% trans "čeka naplatu" %}</div>
+      <div><a href="/invoicing/" style="color:#a78bfa">{% trans "Pregled svih &rarr;" %}</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

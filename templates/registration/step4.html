@@ -1,0 +1,80 @@
+{% extends 'registration/base_reg.html' %}
+{% load i18n %}
+{% block title %}{% trans "Potvrda registracije" %} – LIMIT Connect{% endblock %}
+{% block content %}
+<!-- Step indicator -->
+<div class="step-indicator">
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">Plan</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">{% trans "Tvrtka" %}</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">{% trans "Račun" %}</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle active">4</div><div class="step-label active">{% trans "Potvrda" %}</div></div>
+</div>
+
+<div class="reg-card">
+  <div class="reg-card-title">{% trans "Pregled i potvrda" %}</div>
+  <div class="reg-card-subtitle">{% trans "Provjerite unesene podatke prije kreiranja računa." %}</div>
+
+  <!-- Plan summary -->
+  <div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1.5rem">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.25rem">{% trans "Odabrani plan" %}</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--gold)">{{ plan.name }}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:1.4rem;font-weight:700;color:var(--text)">{{ plan.price_monthly|floatformat:0 }}€<span style="font-size:.8rem;color:var(--muted)">/{% trans "mj" %}</span></div>
+        <div style="font-size:.8rem;color:var(--muted)">14 {% trans "dana besplatno" %}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Company summary -->
+  <div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1.5rem">
+    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem">{% trans "Tvrtka" %}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.9rem">
+      <div><span style="color:var(--muted)">{% trans "Naziv" %}:</span> <span style="color:var(--text)">{{ company.name }}</span></div>
+      <div><span style="color:var(--muted)">OIB:</span> <span style="color:var(--text)">{{ company.oib }}</span></div>
+      <div><span style="color:var(--muted)">{% trans "Država" %}:</span> <span style="color:var(--text)">{% if company.country == 'HR' %}🇭🇷 Hrvatska{% else %}🇩🇪 Njemačka{% endif %}</span></div>
+      {% if company.city %}<div><span style="color:var(--muted)">{% trans "Grad" %}:</span> <span style="color:var(--text)">{{ company.zip_code }} {{ company.city }}</span></div>{% endif %}
+    </div>
+  </div>
+
+  <!-- User summary -->
+  <div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:2rem">
+    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem">{% trans "Administrator" %}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.9rem">
+      <div><span style="color:var(--muted)">{% trans "Ime" %}:</span> <span style="color:var(--text)">{{ user.first_name }} {{ user.last_name }}</span></div>
+      <div><span style="color:var(--muted)">Email:</span> <span style="color:var(--text)">{{ user.email }}</span></div>
+      {% if user.phone %}<div><span style="color:var(--muted)">{% trans "Telefon" %}:</span> <span style="color:var(--text)">{{ user.phone }}</span></div>{% endif %}
+    </div>
+  </div>
+
+  <form method="post" id="confirmForm">
+  {% csrf_token %}
+  <div class="reg-actions">
+    <a href="{% url 'registration:register_step3' %}" class="reg-btn-outline">← {% trans "Natrag" %}</a>
+    <button type="submit" class="reg-btn" id="confirmBtn">{% trans "Kreiraj račun" %} ✓</button>
+  </div>
+  </form>
+</div>
+
+<!-- Processing animation -->
+<div id="processing" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,.9);z-index:9999;display:none;align-items:center;justify-content:center">
+  <div style="text-align:center">
+    <div style="width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem"></div>
+    <div style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.3rem">{% trans "Kreiramo vaš račun..." %}</div>
+    <div style="color:var(--muted);font-size:.85rem;margin-top:.5rem">{% trans "Molimo pričekajte" %}</div>
+  </div>
+</div>
+
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+<script>
+document.getElementById('confirmForm').addEventListener('submit', function() {
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('processing').style.display = 'flex';
+});
+</script>
+{% endblock %}

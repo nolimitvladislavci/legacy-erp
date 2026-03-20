@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Payroll — {{ month|stringformat:"02d" }}/{{ year }}{% endblock %}
+{% block content %}
+<style>
+.payroll-wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+.payroll-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.payroll-header h2 { font-size: 1.5rem; font-weight: 800; }
+.payroll-table { width: 100%; border-collapse: collapse; background: var(--bg-card, #fff); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.payroll-table th { background: var(--bg-hover, #f8f9fa); padding: 12px 16px; text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted, #64748b); border-bottom: 2px solid var(--border, #e2e8f0); }
+.payroll-table td { padding: 14px 16px; border-bottom: 1px solid var(--border, #f1f5f9); font-size: .92rem; }
+.payroll-table tr:hover td { background: rgba(201,168,76,0.04); }
+.payroll-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.total-row td { font-weight: 800; background: var(--bg-hover, #f8f9fa) !important; border-top: 2px solid var(--border, #e2e8f0); }
+.warn-badge { display: inline-block; background: #fef2f2; color: #dc2626; font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.month-nav { display: flex; gap: 8px; align-items: center; }
+.month-nav a { padding: 8px 16px; background: var(--bg-card, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: 8px; text-decoration: none; color: var(--text-main, #333); font-weight: 600; font-size: .85rem; }
+.month-nav a:hover { border-color: #c9a84c; color: #c9a84c; }
+.print-btn { padding: 8px 20px; background: #c9a84c; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: .85rem; }
+@media print { .no-print { display: none !important; } }
+</style>
+
+<div class="payroll-wrap">
+  <div class="payroll-header">
+    <h2>Payroll — {{ month|stringformat:"02d" }}/{{ year }}</h2>
+    <div class="month-nav no-print">
+      {% if month == 1 %}
+        <a href="?month=12&year={{ year|add:"-1" }}">← {% trans "Prethodni" %}</a>
+      {% else %}
+        <a href="?month={{ month|add:"-1" }}&year={{ year }}">← {% trans "Prethodni" %}</a>
+      {% endif %}
+      {% if month == 12 %}
+        <a href="?month=1&year={{ year|add:"1" }}">{% trans "Sljedeći" %} →</a>
+      {% else %}
+        <a href="?month={{ month|add:"1" }}&year={{ year }}">{% trans "Sljedeći" %} →</a>
+      {% endif %}
+      <button class="print-btn" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+
+  <table class="payroll-table">
+    <thead>
+      <tr>
+        <th>{% trans "Radnik" %}</th>
+        <th class="num">{% trans "Ukupno" %} (h)</th>
+        <th class="num">{% trans "Redovni" %}</th>
+        <th class="num">{% trans "Prekovr." %}</th>
+        <th class="num">{% trans "Noćni" %}</th>
+        <th class="num">{% trans "Trošak" %} (€)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in payroll_data %}
+      <tr>
+        <td>
+          <strong>{{ row.worker.get_full_name }}</strong>
+          {% if row.has_warnings %}<span class="warn-badge">⚠ ArbZG</span>{% endif %}
+        </td>
+        <td class="num">{{ row.hours|floatformat:1 }}</td>
+        <td class="num">{{ row.regular|floatformat:1 }}</td>
+        <td class="num">{{ row.overtime|floatformat:1 }}</td>
+        <td class="num">{{ row.night|floatformat:1 }}</td>
+        <td class="num"><strong>{{ row.cost|floatformat:2 }}</strong></td>
+        <td class="no-print">
+          <a href="{% url 'worktime:ts_inspector_print' %}?worker={{ row.worker.id }}&month={{ month }}&year={{ year }}" style="color:#c9a84c;font-size:.8rem;font-weight:700;">Ispis ↗</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="padding:30px;text-align:center;color:#999;">{% trans "Nema podataka za ovaj mjesec." %}</td></tr>
+      {% endfor %}
+      {% if payroll_data %}
+      <tr class="total-row">
+        <td>UKUPNO / GESAMT</td>
+        <td class="num">{{ payroll_data|length }} {% trans "radnika" %}</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">{{ grand_total|floatformat:2 }} €</td>
+        <td></td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

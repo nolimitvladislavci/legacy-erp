@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Fiskalni certifikati — LIMIT Connect{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0"><i class="fas fa-certificate text-warning me-2"></i>Fiskalni certifikati</h5>
+</div>
+
+{% if messages %}
+<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+{% endif %}
+
+<!-- Upload forma -->
+<div class="stat-card p-4 mb-4">
+  <h6 class="mb-3"><i class="fas fa-upload me-2"></i>Učitaj novi certifikat (.p12)</h6>
+  <form method="post" action="{% url 'invoicing:fiscal_certificate_upload' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label fw-bold" style="font-size:.8rem">P12 / PFX datoteka</label>
+        <input type="file" name="cert_file" class="form-control" accept=".p12,.pfx" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold" style="font-size:.8rem">Lozinka certifikata</label>
+        <input type="password" name="cert_password" class="form-control" placeholder="Lozinka za .p12" required>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-upload me-1"></i> Učitaj</button>
+      </div>
+    </div>
+    <small class="text-muted mt-2 d-block">Certifikat dobivate od FINA-e. Lozinka se koristi samo za čitanje i ne sprema se u čitljivom obliku.</small>
+  </form>
+</div>
+
+<!-- Lista certifikata -->
+<div class="stat-card p-4">
+  <h6 class="mb-3"><i class="fas fa-list me-2"></i>Učitani certifikati</h6>
+  {% if certs %}
+  <div class="table-responsive">
+    <table class="table table-sm align-middle" style="font-size:.85rem">
+      <thead>
+        <tr>
+          <th>Naziv</th>
+          <th>OIB</th>
+          <th>Vrijedi od</th>
+          <th>Vrijedi do</th>
+          <th>Status</th>
+          <th>Zadnji test</th>
+          <th class="text-end">Akcije</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cert in certs %}
+        <tr>
+          <td>
+            <i class="fas fa-file-signature text-warning me-1"></i>
+            {{ cert.cert_name|default:"Certifikat" }}
+          </td>
+          <td><code>{{ cert.oib|default:"-" }}</code></td>
+          <td>{{ cert.valid_from|date:"d.m.Y"|default:"-" }}</td>
+          <td>
+            {% if cert.valid_until %}
+              <span class="{% if cert.valid_until < now %}text-danger fw-bold{% else %}text-success{% endif %}">
+                {{ cert.valid_until|date:"d.m.Y" }}
+              </span>
+            {% else %}-{% endif %}
+          </td>
+          <td>
+            {% if cert.is_valid and cert.is_active %}
+              <span class="badge bg-success">Aktivan</span>
+            {% elif not cert.is_valid %}
+              <span class="badge bg-danger">Nevažeći</span>
+            {% else %}
+              <span class="badge bg-secondary">Neaktivan</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if cert.last_test %}
+              {% if cert.last_test_result %}
+                <span class="text-success"><i class="fas fa-check-circle"></i> {{ cert.last_test|date:"d.m.Y H:i" }}</span>
+              {% else %}
+                <span class="text-danger"><i class="fas fa-times-circle"></i> {{ cert.last_test|date:"d.m.Y H:i" }}</span>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">Nije testirano</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <form method="post" action="{% url 'invoicing:fiscal_certificate_test' cert.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-warning" title="Test na CIS demo">
+                <i class="fas fa-vial"></i> Test
+              </button>
+            </form>
+            <form method="post" action="{% url 'invoicing:fiscal_certificate_test' cert.pk %}" class="d-inline ms-1">
+              {% csrf_token %}
+              <input type="hidden" name="use_production" value="1">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Test na CIS produkcija">
+                <i class="fas fa-satellite-dish"></i> Prod
+              </button>
+            </form>
+            <form method="post" action="{% url 'invoicing:fiscal_certificate_delete' cert.pk %}" class="d-inline ms-1" onsubmit="return confirm('Sigurno obrisati certifikat?')"> 
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Obriši">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fas fa-certificate" style="font-size:3rem;color:#444"></i>
+    <p class="text-muted mt-3">Nemate učitanih certifikata.</p>
+    <p class="text-muted" style="font-size:.85rem">Učitajte .p12 certifikat od FINA-e kako biste aktivirali fiskalizaciju.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="stat-card p-4 mt-4">
+  <h6><i class="fas fa-info-circle text-info me-2"></i>Kako do certifikata?</h6>
+  <ol style="font-size:.85rem;color:#aaa">
+    <li>Pristupite <a href="https://www.fina.hr" target="_blank" class="text-warning">FINA-inoj web stranici</a></li>
+    <li>Zatražite digitalni certifikat za fiskalizaciju (aplikacijski certifikat)</li>
+    <li>Preuzmite .p12 datoteku i zapamtite lozinku</li>
+    <li>Učitajte .p12 ovdje i kliknite "Test" za provjeru</li>
+    <li>Kad test prođe, vaši računi će se automatski fiskalizirati</li>
+  </ol>
+</div>
+{% endblock %}

@@ -1,0 +1,697 @@
+import os
+import os
+import os
+import io
+import base64
+import hashlib
+import hmac
+import uuid
+import qrcode
+from datetime import datetime
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+from django.conf import settings
+from rest_framework import viewsets, permissions
+from .models import Invoice, InvoiceItem
+from .serializers import InvoiceSerializer, InvoiceItemSerializer
+
+
+# ── REST API
+class InvoiceViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.all()
+    serializer_class = InvoiceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class InvoiceItemViewSet(viewsets.ModelViewSet):
+    queryset = InvoiceItem.objects.all()
+    serializer_class = InvoiceItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+# ── LISTA RAČUNA
+@login_required
+def index(request):
+    invoices = Invoice.objects.select_related().prefetch_related('items').order_by('-date_issued')
+    status_filter = request.GET.get('status')
+    country_filter = request.GET.get('country')
+    if status_filter:
+        invoices = invoices.filter(status=status_filter)
+    if country_filter:
+        invoices = invoices.filter(country=country_filter)
+    from django.db.models import Sum
+    totals = {
+        'total': invoices.aggregate(s=Sum('total'))['s'] or 0,
+        'unpaid': invoices.filter(status='UNPAID').aggregate(s=Sum('total'))['s'] or 0,
+        'paid': invoices.filter(status='PAID').aggregate(s=Sum('total'))['s'] or 0,
+    }
+    return render(request, 'invoicing/index.html', {
+        'invoices': invoices[:50],
+        'totals': totals,
+        'status_filter': status_filter,
+        'country_filter': country_filter,
+    })
+
+
+# ── GENERIRAJ QR KOD
+def generate_qr(invoice):
+    if invoice.is_hr:
+        data = f"BCD\n002\n1\nSCT\n{invoice.swift or ''}\n{invoice.issuer_name}\n{invoice.issuer_iban}\nEUR{invoice.total}\n\n{invoice.reference_number}\n{invoice.number}"
+    else:
+        data = f"BCD\n002\n1\nSCT\n{invoice.swift or ''}\n{invoice.issuer_name}\n{invoice.issuer_iban}\nEUR{invoice.total}\n\n{invoice.reference_number or invoice.number}"
+    
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=8, border=2)
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    return base64.b64encode(buf.getvalue()).decode()
+
+
+# ── ZKI GENERIRANJE (HR Fiskalizacija - simulacija)
+def generate_zki(invoice, cert_key="demo_key"):
+    data = f"{invoice.issuer_oib}{invoice.date_issued.strftime('%d.%m.%YT%H:%M:%S')}{invoice.number}{invoice.issuer_oib}{invoice.total}"
+    zki_hash = hashlib.md5(
+        hmac.new(cert_key.encode(), data.encode(), hashlib.md5).digest()
+    ).hexdigest()
+    return zki_hash[:32]
+
+
+# ── PDF GENERIRANJE
+@login_required
+def generate_pdf(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    
+    # Generiraj QR ako ga nema
+    if not invoice.qr_code_base64:
+        invoice.qr_code_base64 = generate_qr(invoice)
+        invoice.save(update_fields=['qr_code_base64'])
+    
+    # Odaberi predložak
+    template = 'invoicing/invoice_hr.html' if invoice.is_hr else 'invoicing/invoice_de.html'
+    
+    # Izračunaj PDV grupe za rekapitulaciju
+    from decimal import Decimal
+    tax_groups_data = []
+    rate_names = {'0': 'Oslobođeno', '5': 'Snižena (knjige, hrana)', '13': 'Snižena (ugost.)', '25': 'Standardna'}
+    groups = {}
+    for item in invoice.items.all():
+        rate_key = str(int(item.tax_rate))
+        if rate_key not in groups:
+            groups[rate_key] = {'base': Decimal('0'), 'tax': Decimal('0')}
+        groups[rate_key]['base'] += item.total_price
+        groups[rate_key]['tax'] += item.total_price * item.tax_rate / 100
+    for rate in ['0', '5', '13', '25']:
+        if rate in groups and groups[rate]['base'] > 0:
+            tax_groups_data.append({
+                'rate': rate,
+                'name': rate_names.get(rate, ''),
+                'base': groups[rate]['base'],
+                'tax': groups[rate]['tax'],
+                'total': groups[rate]['base'] + groups[rate]['tax'],
+            })
+
+    html_content = render_to_string(template, {
+        'invoice': invoice,
+        'now': timezone.now(),
+        'request': request,
+        'tax_groups': tax_groups_data,
+    })
+    
+    try:
+        from weasyprint import HTML, CSS
+        pdf_file = HTML(string=html_content, base_url=request.build_absolute_uri('/')).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="racun_{invoice.number}.pdf"'
+        return response
+    except ImportError:
+        return HttpResponse(html_content)
+
+
+# ── DOWNLOAD PDF
+@login_required
+def download_pdf(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    if not invoice.qr_code_base64:
+        invoice.qr_code_base64 = generate_qr(invoice)
+        invoice.save(update_fields=['qr_code_base64'])
+    
+    template = 'invoicing/invoice_hr.html' if invoice.is_hr else 'invoicing/invoice_de.html'
+    from decimal import Decimal as _D
+    _rate_names = {'0': 'Oslobođeno', '5': 'Snižena (knjige, hrana)', '13': 'Snižena (ugost.)', '25': 'Standardna'}
+    _groups = {}
+    for _item in invoice.items.all():
+        _rk = str(int(_item.tax_rate))
+        if _rk not in _groups:
+            _groups[_rk] = {'base': _D('0'), 'tax': _D('0')}
+        _groups[_rk]['base'] += _item.total_price
+        _groups[_rk]['tax'] += _item.total_price * _item.tax_rate / 100
+    _tg = [{'rate': r, 'name': _rate_names.get(r,''), 'base': _groups[r]['base'],
+             'tax': _groups[r]['tax'], 'total': _groups[r]['base']+_groups[r]['tax']}
+            for r in ['0','5','13','25'] if r in _groups and _groups[r]['base'] > 0]
+    html_content = render_to_string(template, {'invoice': invoice, 'now': timezone.now(), 'tax_groups': _tg})
+    
+    try:
+        from weasyprint import HTML
+        pdf_file = HTML(string=html_content).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="racun_{invoice.number}.pdf"'
+        return response
+    except ImportError:
+        response = HttpResponse(html_content)
+        return response
+
+
+# ── POŠALJI EMAIL
+@login_required
+def send_email(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    
+    if not invoice.client_email:
+        messages.error(request, _('Klijent nema email adresu!'))
+        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    
+    if not invoice.qr_code_base64:
+        invoice.qr_code_base64 = generate_qr(invoice)
+        invoice.save(update_fields=['qr_code_base64'])
+    
+    template = 'invoicing/invoice_hr.html' if invoice.is_hr else 'invoicing/invoice_de.html'
+    from decimal import Decimal as _D
+    _rate_names = {'0': 'Oslobođeno', '5': 'Snižena (knjige, hrana)', '13': 'Snižena (ugost.)', '25': 'Standardna'}
+    _groups = {}
+    for _item in invoice.items.all():
+        _rk = str(int(_item.tax_rate))
+        if _rk not in _groups:
+            _groups[_rk] = {'base': _D('0'), 'tax': _D('0')}
+        _groups[_rk]['base'] += _item.total_price
+        _groups[_rk]['tax'] += _item.total_price * _item.tax_rate / 100
+    _tg = [{'rate': r, 'name': _rate_names.get(r,''), 'base': _groups[r]['base'],
+             'tax': _groups[r]['tax'], 'total': _groups[r]['base']+_groups[r]['tax']}
+            for r in ['0','5','13','25'] if r in _groups and _groups[r]['base'] > 0]
+    html_content = render_to_string(template, {'invoice': invoice, 'now': timezone.now(), 'tax_groups': _tg})
+    
+    try:
+        from weasyprint import HTML
+        pdf_file = HTML(string=html_content).write_pdf()
+        
+        if invoice.is_hr:
+            subject = f"Račun {invoice.number} - {invoice.issuer_name}"
+            body = f"Poštovani {invoice.client_name},\n\nu privitku se nalazi račun broj {invoice.number} u iznosu {invoice.total} {invoice.currency}.\n\nRok plaćanja: {invoice.date_due or 'Po dogovoru'}\nIBAN: {invoice.issuer_iban}\n\nHvala na povjerenju!\n{invoice.issuer_name}"
+        else:
+            subject = f"Rechnung {invoice.number} - {invoice.issuer_name}"
+            body = f"Sehr geehrte/r {invoice.client_name},\n\nim Anhang finden Sie die Rechnung Nr. {invoice.number} über {invoice.total} {invoice.currency}.\n\nFälligkeitsdatum: {invoice.date_due or 'Sofort'}\nIBAN: {invoice.issuer_iban}\n\nMit freundlichen Grüßen,\n{invoice.issuer_name}"
+        
+        email = EmailMessage(
+            subject=subject,
+            body=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[invoice.client_email],
+        )
+        email.attach(f'racun_{invoice.number}.pdf', pdf_file, 'application/pdf')
+        email.send()
+        
+        invoice.status = 'SENT'
+        invoice.save(update_fields=['status'])
+        messages.success(request, _(f'Račun poslan na {invoice.client_email}'))
+    except Exception as e:
+        messages.error(request, _(f'Greška pri slanju: {e}'))
+    
+    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+
+
+# ── E-RAČUN XML (UBL 2.1 format)
+@login_required
+def generate_eracun(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    
+    xml_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:ID>{invoice.number}</cbc:ID>
+  <cbc:UUID>{invoice.uuid}</cbc:UUID>
+  <cbc:IssueDate>{invoice.date_issued.strftime('%Y-%m-%d')}</cbc:IssueDate>
+  <cbc:DueDate>{invoice.date_due.strftime('%Y-%m-%d') if invoice.date_due else ''}</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>{invoice.currency}</cbc:DocumentCurrencyCode>
+  
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>{invoice.issuer_name}</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>{invoice.issuer_address}</cbc:StreetName>
+        <cbc:CountrySubentity>{invoice.country}</cbc:CountrySubentity>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>{invoice.issuer_oib}</cbc:CompanyID>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:PartyTaxScheme>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>{invoice.client_name}</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>{invoice.client_address}</cbc:StreetName>
+      </cac:PostalAddress>
+      {'<cac:PartyTaxScheme><cbc:CompanyID>' + invoice.client_oib + '</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>' if invoice.client_oib else ''}
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>{invoice.issuer_iban}</cbc:ID>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
+  
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="{invoice.currency}">{invoice.tax_amount}</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="{invoice.currency}">{invoice.subtotal}</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="{invoice.currency}">{invoice.tax_amount}</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:Percent>{invoice.tax_percent}</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="{invoice.currency}">{invoice.subtotal}</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="{invoice.currency}">{invoice.subtotal}</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="{invoice.currency}">{invoice.total}</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="{invoice.currency}">{invoice.total}</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  
+  {''.join([f"""<cac:InvoiceLine>
+    <cbc:ID>{i+1}</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="{item.unit}">{item.quantity}</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="{invoice.currency}">{item.total_price}</cbc:LineExtensionAmount>
+    <cac:Item><cbc:Description>{item.description}</cbc:Description></cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="{invoice.currency}">{item.unit_price}</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>""" for i, item in enumerate(invoice.items.all())])}
+  
+</Invoice>'''
+    
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="eracun_{invoice.number}.xml"'
+    return response
+
+
+# ── FISKALIZACIJA (HR - produkcijska implementacija)
+@login_required
+def fiscalize(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+
+    if not invoice.is_hr:
+        messages.error(request, _('Fiskalizacija je dostupna samo za HR račune!'))
+        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+
+    if invoice.is_fiscalized:
+        messages.warning(request, _('Račun je već fiskaliziran!'))
+        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+
+    if invoice.doctype != 'R':
+        messages.error(request, _('Fiskalizirati se mogu samo računi (R), ne predračuni!'))
+        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+
+    try:
+        from .fiscalization import send_to_cis
+        from .fiscal_models import FiscalConfig
+
+        config = FiscalConfig.get()
+        cert_path = config.cert_path if config.cert_path else None
+        cert_password_file = '/var/www/fina-connect/certs/.cert_password'
+        cert_password = None
+        if cert_path and os.path.exists(cert_password_file):
+            with open(cert_password_file) as f:
+                cert_password = f.read().strip()
+
+        result = send_to_cis(
+            invoice,
+            cert_path=cert_path,
+            cert_password=cert_password,
+            production=config.use_production
+        )
+
+        if result.get('success'):
+            invoice.zki = result.get('zki')
+            invoice.jir = result.get('jir')
+            invoice.is_fiscalized = True
+            invoice.fiscal_datetime = timezone.now()
+            invoice.operator_oib = invoice.operator.oib if invoice.operator else ''
+            if not invoice.qr_code_base64:
+                invoice.qr_code_base64 = generate_qr(invoice)
+            invoice.save()
+
+            if result.get('demo'):
+                messages.success(request, _(f'Račun fiskaliziran (DEMO - CIS nedostupan)!'))
+                messages.warning(request, _(f'ZKI: {invoice.zki} | JIR: {invoice.jir}'))
+            else:
+                messages.success(request, _(f'✓ Račun uspješno fiskaliziran!'))
+                messages.success(request, _(f'ZKI: {invoice.zki} | JIR: {invoice.jir}'))
+        else:
+            messages.error(request, _(f'Greška fiskalizacije: {result.get("error")}'))
+
+    except Exception as e:
+        messages.error(request, _(f'Greška: {e}'))
+
+    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+
+
+# ── STORNO RAČUN
+@login_required
+def storno(request, pk):
+    original = get_object_or_404(Invoice, pk=pk)
+    
+    if original.status == 'STORNO':
+        messages.error(request, _('Račun je već storniran!'))
+        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    
+    storno_invoice = Invoice.objects.create(
+        doctype='S',
+        country=original.country,
+        number=f'S-{original.number}',
+        date_issued=timezone.now(),
+        client_name=original.client_name,
+        client_address=original.client_address,
+        client_oib=original.client_oib,
+        client_email=original.client_email,
+        payment_method=original.payment_method,
+        currency=original.currency,
+        issuer_name=original.issuer_name,
+        issuer_address=original.issuer_address,
+        issuer_oib=original.issuer_oib,
+        issuer_iban=original.issuer_iban,
+        issuer_email=original.issuer_email,
+        subtotal=-original.subtotal,
+        tax_percent=original.tax_percent,
+        tax_amount=-original.tax_amount,
+        total=-original.total,
+        note=f'Storno računa {original.number}',
+        storno_of=original,
+        status='DRAFT',
+        created_by=request.user,
+    )
+    
+    for item in original.items.all():
+        InvoiceItem.objects.create(
+            invoice=storno_invoice,
+            description=f'[STORNO] {item.description}',
+            quantity=-item.quantity,
+            unit=item.unit,
+            unit_price=item.unit_price,
+            total_price=-item.total_price,
+        )
+    
+    original.status = 'STORNO'
+    original.save(update_fields=['status'])
+    
+    messages.success(request, _(f'Storno račun {storno_invoice.number} kreiran!'))
+    return redirect(f'/admin/invoicing/invoice/{storno_invoice.pk}/change/')
+
+
+# ── FORMA ZA NOVI/EDIT RAČUN
+@login_required
+def invoice_create(request):
+    from .models import Invoice, InvoiceItem
+    try:
+        from .fiscal_models import BusinessLocation, FiscalOperator, FiscalConfig
+        locations = BusinessLocation.objects.filter(is_active=True)
+        operators = FiscalOperator.objects.filter(is_active=True)
+        config = FiscalConfig.get()
+    except Exception:
+        locations = []
+        operators = []
+        config = None
+
+    from django.contrib.auth.models import User
+    from django.utils import timezone
+    import datetime
+
+    now = timezone.now()
+    # Sljedeći broj računa
+    last = Invoice.objects.order_by('-id').first()
+    next_num = f"KNJ-{now.year}-{(last.id + 1 if last else 1):04d}"
+
+    ctx = {
+        'title': 'Novi dokument',
+        'invoice': None,
+        'items': [],
+        'locations': locations,
+        'operators': operators,
+        'default_issuer': config,
+        'default_iban': config.default_iban if config else '',
+        'next_number': next_num,
+        'now_datetime': now.strftime('%Y-%m-%dT%H:%M'),
+        'status_choices': Invoice.STATUS_CHOICES,
+        'payment_choices': Invoice.PAYMENT_CHOICES,
+    }
+    return render(request, 'invoicing/create.html', ctx)
+
+
+@login_required
+def invoice_edit(request, pk):
+    from .models import Invoice, InvoiceItem
+    invoice = get_object_or_404(Invoice, pk=pk)
+    try:
+        from .fiscal_models import BusinessLocation, FiscalOperator, FiscalConfig
+        locations = BusinessLocation.objects.filter(is_active=True)
+        operators = FiscalOperator.objects.filter(is_active=True)
+        config = FiscalConfig.get()
+    except Exception:
+        locations = []
+        operators = []
+        config = None
+
+    ctx = {
+        'title': f'Uredi: {invoice.number}',
+        'invoice': invoice,
+        'items': invoice.items.all(),
+        'locations': locations,
+        'operators': operators,
+        'default_issuer': config,
+        'default_iban': config.default_iban if config else '',
+        'next_number': invoice.number,
+        'now_datetime': invoice.date_issued.strftime('%Y-%m-%dT%H:%M') if invoice.date_issued else '',
+        'status_choices': Invoice.STATUS_CHOICES,
+        'payment_choices': Invoice.PAYMENT_CHOICES,
+    }
+    return render(request, 'invoicing/create.html', ctx)
+
+
+@login_required
+def invoice_save(request):
+    if request.method != 'POST':
+        return redirect('invoice_create')
+
+    from .models import Invoice, InvoiceItem
+    from django.utils import timezone
+    import datetime
+
+    invoice_id = request.POST.get('invoice_id')
+    if invoice_id:
+        invoice = get_object_or_404(Invoice, pk=invoice_id)
+    else:
+        invoice = Invoice()
+
+    # Osnovna polja
+    invoice.doctype = request.POST.get('doctype', 'R')
+    invoice.country = request.POST.get('country', 'HR')
+    invoice.number = request.POST.get('number', '')
+    invoice.status = request.POST.get('status', 'DRAFT')
+
+    # Datumi
+    try:
+        dt_str = request.POST.get('date_issued', '')
+        invoice.date_issued = datetime.datetime.strptime(dt_str, '%Y-%m-%dT%H:%M') if dt_str else timezone.now()
+    except Exception:
+        invoice.date_issued = timezone.now()
+
+    due_str = request.POST.get('date_due', '')
+    invoice.date_due = datetime.date.fromisoformat(due_str) if due_str else None
+    del_str = request.POST.get('date_delivery', '')
+    invoice.date_delivery = datetime.date.fromisoformat(del_str) if del_str else None
+
+    # Klijent
+    invoice.client_name = request.POST.get('client_name', '')
+    invoice.client_address = request.POST.get('client_address', '')
+    invoice.client_city = request.POST.get('client_city', '')
+    invoice.client_country = request.POST.get('client_country', 'Hrvatska')
+    invoice.client_oib = request.POST.get('client_oib', '')
+    invoice.client_email = request.POST.get('client_email', '')
+
+    # Plaćanje
+    invoice.payment_method = request.POST.get('payment_method', 'TRANSAKCIJSKI')
+    invoice.currency = request.POST.get('currency', 'EUR')
+    invoice.issuer_iban = request.POST.get('iban', '')
+    invoice.swift = request.POST.get('swift', '')
+    invoice.reference_number = request.POST.get('reference_number', '')
+
+    # Izdavatelj
+    invoice.issuer_name = request.POST.get('issuer_name', 'KONJIK d.o.o.')
+    invoice.issuer_address = request.POST.get('issuer_address', '')
+    invoice.issuer_oib = request.POST.get('issuer_oib', '37590751921')
+    invoice.issuer_email = request.POST.get('issuer_email', '')
+
+    # Napomene
+    invoice.note = request.POST.get('note', '')
+    invoice.internal_note = request.POST.get('internal_note', '')
+
+    # Fiskalizacija
+    try:
+        from .fiscal_models import BusinessLocation, FiscalOperator
+        loc_id = request.POST.get('business_location')
+        if loc_id:
+            invoice.business_location = BusinessLocation.objects.get(pk=loc_id)
+        op_id = request.POST.get('operator')
+        if op_id:
+            invoice.operator = FiscalOperator.objects.get(pk=op_id)
+    except Exception:
+        pass
+
+    invoice.created_by = request.user
+    invoice.save()
+
+    # Stavke - obrisi stare i spremi nove
+    invoice.items.all().delete()
+    descs = request.POST.getlist('item_desc[]')
+    qtys = request.POST.getlist('item_qty[]')
+    units = request.POST.getlist('item_unit[]')
+    prices = request.POST.getlist('item_price[]')
+    pdvs = request.POST.getlist('item_pdv[]')
+    discs = request.POST.getlist('item_disc[]')
+
+    from decimal import Decimal, InvalidOperation
+    for i, desc in enumerate(descs):
+        if not desc.strip():
+            continue
+        try:
+            qty = Decimal(str(qtys[i]).replace(',', '.'))
+            price = Decimal(str(prices[i]).replace(',', '.'))
+            pdv = Decimal(str(pdvs[i]))
+            disc = Decimal(str(discs[i]).replace(',', '.') if discs[i] else '0')
+            total = qty * price * (1 - disc/100)
+            InvoiceItem.objects.create(
+                invoice=invoice,
+                description=desc,
+                quantity=qty,
+                unit=units[i] if i < len(units) else 'kom',
+                unit_price=price,
+                tax_rate=pdv,
+                discount_percent=disc,
+                total_price=round(total, 2)
+            )
+        except (InvalidOperation, IndexError, ValueError):
+            continue
+
+    invoice.recalculate()
+    invoice.save()
+    messages.success(request, f'Dokument {invoice.number} spremljen!')
+    return redirect('invoice_edit', pk=invoice.pk)
+
+
+# ── API ZA PARTNER PRETRAGU
+@login_required
+def api_partners(request):
+    q = request.GET.get('q', '')
+    try:
+        from partners.models import Partner
+        partners = Partner.objects.filter(
+            name__icontains=q
+        ).values('id', 'name', 'oib', 'email', 'address', 'city')[:10]
+        return JsonResponse(list(partners), safe=False)
+    except Exception:
+        return JsonResponse([], safe=False)
+
+
+# ── API ZA UVOZ IZ MODULA
+@login_required
+def api_import(request, module):
+    from django.db.models import Sum
+    data = []
+    try:
+        if module == 'worktime':
+            from worktime.models import TimeEntry
+            entries = TimeEntry.objects.filter(
+                status='approved'
+            ).select_related('user', 'project').order_by('-date')[:30]
+            for e in entries:
+                data.append({
+                    'title': f'Radni sati – {e.project.name if e.project else "Opće"} ({e.user.get_full_name() or e.user.username})',
+                    'subtitle': str(e.date),
+                    'quantity': float(e.duration),
+                    'unit': 'h',
+                    'price': 0,
+                    'pdv': 25,
+                    'client_name': '',
+                })
+        elif module == 'rental':
+            from rental.models import Booking
+            bookings = Booking.objects.filter(
+                status='completed'
+            ).select_related('property', 'guest').order_by('-check_in')[:20]
+            for b in bookings:
+                data.append({
+                    'title': f'Najam – {b.property.name}',
+                    'subtitle': f'{b.check_in} – {b.check_out}',
+                    'quantity': 1,
+                    'unit': 'usl',
+                    'price': float(b.total_price) if hasattr(b, 'total_price') else 0,
+                    'pdv': 13,
+                    'client_name': b.guest.name if hasattr(b, 'guest') and b.guest else '',
+                })
+        elif module == 'appointments':
+            from appointments.models import Appointment
+            apts = Appointment.objects.filter(
+                status='completed'
+            ).order_by('-start_time')[:20]
+            for a in apts:
+                data.append({
+                    'title': f'Termin – {a.title}',
+                    'subtitle': str(a.start_time)[:16] if a.start_time else '',
+                    'quantity': 1,
+                    'unit': 'usl',
+                    'price': float(a.price) if hasattr(a, 'price') else 0,
+                    'pdv': 25,
+                })
+        elif module == 'webshop':
+            from webshop.models import Order
+            orders = Order.objects.filter(
+                status='completed'
+            ).order_by('-created_at')[:20]
+            for o in orders:
+                data.append({
+                    'title': f'Webshop narudžba #{o.id}',
+                    'subtitle': str(o.created_at)[:16] if o.created_at else '',
+                    'quantity': 1,
+                    'unit': 'kom',
+                    'price': float(o.total) if hasattr(o, 'total') else 0,
+                    'pdv': 25,
+                })
+        elif module == 'projects':
+            from projects.models import Project
+            projects = Project.objects.filter(status='active')[:20]
+            for p in projects:
+                data.append({
+                    'title': f'Projekt – {p.name}',
+                    'subtitle': p.code,
+                    'quantity': 1,
+                    'unit': 'usl',
+                    'price': float(p.budget) if p.budget else 0,
+                    'pdv': 25,
+                    'client_name': str(p.client) if p.client else '',
+                })
+    except Exception as e:
+        pass
+    return JsonResponse(data, safe=False)

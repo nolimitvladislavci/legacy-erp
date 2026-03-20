@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf');
+}
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf');
+    font-weight: bold;
+}
+* { font-family: 'DejaVu', sans-serif !important; }
+
+        @page { size: a4; margin: 2cm; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #333; }
+        .header { text-align: right; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+        .title { font-size: 24px; color: #0056b3; margin-top: 20px; }
+        .details { margin-top: 30px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 10px; text-align: left; font-size: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 11px; }
+        .totals { margin-top: 30px; text-align: right; }
+        .total-row { font-size: 14px; font-weight: bold; color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="/var/www/fina-connect/static/brand/viskovic_logo.jpg" style="height:40px;width:auto;display:block;margin-bottom:4px"><br>
+        Datum: {{ calculation.created_at|date:"d.m.Y." }}
+    </div>
+
+    <div class="title">PONUDA / KALKULACIJA #{{ calculation.id }}</div>
+    
+    <div class="details">
+        <strong>Projekt:</strong> {{ calculation.project.name }}<br>
+        <strong>Klijent:</strong> {{ calculation.project.client_name|default:"N/A" }}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Opis normativa</th>
+                <th style="text-align: center;">Kol.</th>
+                <th style="text-align: right;">Materijal</th>
+                <th style="text-align: right;">Rad</th>
+                <th style="text-align: right;">Ukupno</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">{{ item.unit_price_material }} €</td>
+                <td style="text-align: right;">{{ item.labor_rate_applied }} €</td>
+                <td style="text-align: right;"><strong>{{ item.quantity }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <p>Neto trošak: {{ totals.net_cost }} €</p>
+        <p>Marža ({{ calculation.margin_percentage }}%): {{ totals.offer_total_net|floatformat:2 }} €</p>
+        <p class="total-row">UKUPNO S PDV-om: {{ totals.offer_total_vat }} €</p>
+    </div>
+</body>
+</html>

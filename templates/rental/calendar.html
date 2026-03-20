@@ -1,0 +1,37 @@
+{% extends "pos/base_pos.html" %}
+{% block title %}Kalendar{% endblock %}
+{% block extra_css %}<style>
+.page{padding:1rem;overflow-x:auto}
+.cal-table{border-collapse:collapse;min-width:800px}
+.cal-table th,.cal-table td{padding:.3rem .15rem;font-size:.6rem;text-align:center;border:1px solid var(--border);min-width:32px}
+.cal-table th{background:var(--card);color:var(--muted);position:sticky;top:0}
+.cal-table .room-name{text-align:left;font-weight:700;font-size:.7rem;padding-left:.5rem;white-space:nowrap;position:sticky;left:0;background:var(--bg);z-index:1}
+.cal-table .today{border-bottom:2px solid var(--gold)}
+.cal-table .booked{background:rgba(201,168,76,.15);color:var(--gold);font-size:.55rem;font-weight:600;cursor:default}
+.cal-table .free{background:rgba(34,197,94,.05)}
+</style>{% endblock %}
+{% block content %}
+<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <h2 style="color:var(--gold);font-size:1.1rem">&#128197; Kalendar (4 tjedna)</h2>
+    <a href="{% url 'rental:dashboard' %}" class="btn btn-ghost btn-sm">&larr; Dashboard</a>
+  </div>
+  <table class="cal-table">
+    <thead><tr><th class="room-name">Soba</th>
+      {% for d in dates %}<th class="{% if d == today %}today{% endif %}">{{ d|date:"d" }}<br><span style="font-size:.5rem">{{ d|date:"D" }}</span></th>{% endfor %}
+    </tr></thead>
+    <tbody>
+    {% for row in calendar_data %}
+    <tr>
+      <td class="room-name">{{ row.rental_property.name }}</td>
+      {% for day in row.days %}
+      <td class="{% if day.booking %}booked{% else %}free{% endif %} {% if day.date == today %}today{% endif %}" {% if day.booking %}title="{{ day.booking.guest_name }}"{% endif %}>
+        {% if day.booking %}{{ day.booking.guest_name|truncatechars:3 }}{% endif %}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

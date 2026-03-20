@@ -1,0 +1,520 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Aufnahme vor Ort – Visković</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:      #0d0f12;
+  --surface: #161a1f;
+  --card:    #1c2128;
+  --border:  #2a3140;
+  --gold:    #e8a020;
+  --gold2:   #f5b840;
+  --text:    #e8eaf0;
+  --dim:     #6b7585;
+  --green:   #2ecc71;
+  --red:     #e74c3c;
+  --blue:    #3b82f6;
+  --r:       10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position:sticky; top:0; z-index:100;
+  background:rgba(13,15,18,.95); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.topbar-left { display:flex; align-items:center; gap:10px; }
+.vg-logo { font-family:'DM Mono',monospace; font-size:.7rem; font-weight:500;
+  color:var(--gold); letter-spacing:3px; text-transform:uppercase; }
+.topbar-title { font-size:.85rem; font-weight:600; color:var(--text); }
+.save-btn {
+  background:var(--gold); color:#000; border:none;
+  padding:8px 18px; border-radius:6px;
+  font-family:'DM Sans',sans-serif; font-size:.8rem; font-weight:700;
+  cursor:pointer; letter-spacing:.5px;
+  transition:background .15s;
+}
+.save-btn:hover { background:var(--gold2); }
+.save-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ── MAIN ── */
+.main { max-width:560px; margin:0 auto; padding:16px; }
+
+/* ── SECTION ── */
+.section { margin-bottom:20px; }
+.sec-header {
+  display:flex; align-items:center; gap:8px;
+  font-size:.65rem; font-weight:600; letter-spacing:3px;
+  text-transform:uppercase; color:var(--dim);
+  margin-bottom:10px; padding-bottom:6px;
+  border-bottom:1px solid var(--border);
+}
+.sec-icon { font-size:1rem; }
+
+/* ── INPUT ── */
+.field { margin-bottom:12px; }
+label { display:block; font-size:.72rem; font-weight:500; color:var(--dim);
+  margin-bottom:4px; letter-spacing:.5px; }
+input[type=text], input[type=tel], input[type=number], textarea, select {
+  width:100%; background:var(--card); border:1px solid var(--border);
+  color:var(--text); padding:11px 13px;
+  border-radius:var(--r); font-family:'DM Sans',sans-serif; font-size:.92rem;
+  outline:none; transition:border-color .15s;
+  -webkit-appearance:none;
+}
+input:focus, textarea:focus, select:focus { border-color:var(--gold); }
+input::placeholder, textarea::placeholder { color:var(--dim); }
+select option { background:var(--card); }
+textarea { resize:none; min-height:70px; line-height:1.5; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+
+/* ── CHECKLIST ── */
+.checklist { display:flex; flex-direction:column; gap:6px; }
+.check-item {
+  display:flex; align-items:center; gap:12px;
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--r); padding:11px 13px;
+  cursor:pointer; transition:border-color .12s, background .12s;
+  user-select:none;
+}
+.check-item:active { background:#222830; }
+.check-item.on { border-color:var(--gold); background:rgba(232,160,32,.07); }
+.check-item.on .ci-icon { color:var(--gold); }
+.check-item.on .ci-label { color:var(--text); }
+.ci-check {
+  width:20px; height:20px; border-radius:5px;
+  border:1.5px solid var(--border); background:var(--bg);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-size:.7rem; transition:all .12s;
+}
+.check-item.on .ci-check {
+  background:var(--gold); border-color:var(--gold); color:#000; font-weight:700;
+}
+.ci-icon { font-size:1.1rem; width:24px; text-align:center; color:var(--dim); transition:color .12s; }
+.ci-label { font-size:.88rem; font-weight:500; color:var(--dim); flex:1; transition:color .12s; }
+.ci-note { margin-top:6px; margin-left:56px; display:none; }
+.check-item.on + .ci-note { display:block; }
+.ci-note input { font-size:.82rem; padding:8px 11px; }
+
+/* ── PHOTOS ── */
+.photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+.photo-thumb {
+  aspect-ratio:1; border-radius:var(--r); overflow:hidden;
+  background:var(--card); border:1px solid var(--border);
+  position:relative; cursor:pointer;
+}
+.photo-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-thumb .del-ph {
+  position:absolute; top:4px; right:4px;
+  background:rgba(0,0,0,.7); color:#fff; border:none;
+  width:22px; height:22px; border-radius:50%;
+  font-size:.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.add-photo-btn {
+  aspect-ratio:1; border-radius:var(--r);
+  background:var(--card); border:1.5px dashed var(--border);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; cursor:pointer; color:var(--dim); font-size:.75rem;
+  transition:border-color .15s, color .15s;
+}
+.add-photo-btn:hover { border-color:var(--gold); color:var(--gold); }
+.add-photo-btn .ph-icon { font-size:1.5rem; }
+#photo-input { display:none; }
+
+/* ── MJERE ── */
+.room-list { display:flex; flex-direction:column; gap:8px; }
+.room-row {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:10px 12px;
+}
+.room-row-top { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.room-name { flex:1; font-size:.82rem; background:transparent; border:none;
+  color:var(--text); font-family:'DM Sans',sans-serif; outline:none; }
+.room-name::placeholder { color:var(--dim); }
+.del-room { background:none; border:none; color:var(--dim); cursor:pointer; font-size:.9rem;
+  padding:2px 6px; border-radius:4px; }
+.del-room:hover { color:var(--red); }
+.room-dims { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.dim-field { position:relative; }
+.dim-field input { padding-right:30px; font-size:.82rem; text-align:right; }
+.dim-unit { position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  font-size:.7rem; color:var(--dim); pointer-events:none; }
+.m2-display { grid-column:1/-1; text-align:right;
+  font-family:'DM Mono',monospace; font-size:.75rem; color:var(--gold); padding-top:2px; }
+.add-room-btn {
+  width:100%; padding:10px; border-radius:var(--r);
+  background:transparent; border:1.5px dashed var(--border);
+  color:var(--dim); font-family:'DM Sans',sans-serif; font-size:.82rem;
+  cursor:pointer; transition:all .15s; margin-top:4px;
+}
+.add-room-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+/* ── NAPOMENE ── */
+.note-area { position:relative; }
+.note-area textarea { min-height:100px; padding-right:50px; }
+.voice-btn {
+  position:absolute; right:10px; top:10px;
+  background:var(--border); border:none; color:var(--dim);
+  width:32px; height:32px; border-radius:50%;
+  font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .15s;
+}
+.voice-btn.recording { background:var(--red); color:#fff; animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+/* ── SUBMIT FEEDBACK ── */
+.result-card {
+  display:none; background:var(--card); border:1px solid var(--border);
+  border-radius:var(--r); padding:20px; text-align:center; margin-top:20px;
+}
+.result-card.show { display:block; }
+.result-ref { font-family:'DM Mono',monospace; font-size:1.1rem;
+  color:var(--gold); font-weight:500; margin:8px 0; }
+.result-sub { font-size:.82rem; color:var(--dim); line-height:1.6; }
+
+/* ── SPINNER ── */
+.spin { width:16px; height:16px; border-radius:50%; border:2px solid rgba(0,0,0,.3);
+  border-top-color:#000; animation:spin .6s linear infinite; display:inline-block; }
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="vg-logo">VG</span>
+    <span class="topbar-title">Aufnahme vor Ort</span>
+  </div>
+  <button class="save-btn" id="save-btn" onclick="saveNalaz()">Speichern</button>
+</div>
+
+<div class="main">
+<form id="nalaz-form">
+{% csrf_token %}
+
+<!-- ── 1. KUNDE ── -->
+<div class="section">
+  <div class="sec-header"><span class="sec-icon">👤</span> Kundeninfo</div>
+  <div class="field">
+    <label>Name / Firma</label>
+    <input type="text" name="contact_name" placeholder="Vor- und Nachname" autocomplete="name">
+  </div>
+  <div class="row2">
+    <div class="field">
+      <label>Telefon</label>
+      <input type="tel" name="contact_phone" placeholder="+49..." autocomplete="tel">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="text" name="datum" id="datum-field" readonly>
+    </div>
+  </div>
+  <div class="field">
+    <label>Adresse / Objekt</label>
+    <input type="text" name="location" placeholder="Straße, PLZ Ort" autocomplete="street-address">
+  </div>
+  <div class="field">
+    <label>Art der Maßnahme</label>
+    <select name="category">
+      <option value="bad">🛁 Badsanierung</option>
+      <option value="wohnung">🏠 Wohnungsrenovierung</option>
+      <option value="kueche">🍳 Küche</option>
+      <option value="buero">🏢 Büro / Gewerbe</option>
+      <option value="neubau">🏗 Neubau / Rohbau</option>
+      <option value="sonstiges">📋 Sonstiges</option>
+    </select>
+  </div>
+</div>
+
+<!-- ── 2. MJERE ── -->
+<div class="section">
+  <div class="sec-header"><span class="sec-icon">📐</span> Maße &amp; Räume</div>
+  <div class="room-list" id="room-list"></div>
+  <button type="button" class="add-room-btn" onclick="addRoom()">+ Raum hinzufügen</button>
+</div>
+
+<!-- ── 3. CHECKLIST RADOVA ── -->
+<div class="section">
+  <div class="sec-header"><span class="sec-icon">🔧</span> Leistungen — was ist vereinbart</div>
+  <div class="checklist" id="checklist"></div>
+</div>
+
+<!-- ── 4. NAPOMENE ── -->
+<div class="section">
+  <div class="sec-header"><span class="sec-icon">📝</span> Notizen &amp; Vereinbarungen</div>
+  <div class="note-area field">
+    <label>Besonderheiten, Absprachen, Hinweise</label>
+    <textarea name="notes" id="notes-field" placeholder="Z.B.: Wand hinter WC ist Betonwand → Kernbohrung nötig. Kunde möchte Fliesen selbst kaufen..."></textarea>
+    <button type="button" class="voice-btn" id="voice-btn" title="Diktat" onclick="toggleVoice()">🎤</button>
+  </div>
+  <div class="field">
+    <label>Nächster Schritt / Termin</label>
+    <input type="text" name="next_step" placeholder="Z.B.: Angebot bis Freitag, Baubeginn KW15">
+  </div>
+</div>
+
+<!-- ── 5. FOTOS ── -->
+<div class="section">
+  <div class="sec-header"><span class="sec-icon">📸</span> Fotos</div>
+  <div class="photo-grid" id="photo-grid">
+    <label class="add-photo-btn" for="photo-input">
+      <span class="ph-icon">📷</span>
+      <span>Foto</span>
+    </label>
+  </div>
+  <input type="file" id="photo-input" accept="image/*" capture="environment" multiple onchange="addPhotos(this)">
+</div>
+
+<!-- RESULT -->
+<div class="result-card" id="result-card">
+  <div style="font-size:2rem">✅</div>
+  <div style="font-weight:600;margin-top:8px">Aufnahme gespeichert</div>
+  <div class="result-ref" id="result-ref"></div>
+  <div class="result-sub" id="result-sub"></div>
+  <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+    <a id="pdf-link" href="#" target="_blank"
+       style="background:var(--gold);color:#000;padding:9px 20px;border-radius:6px;font-size:.82rem;font-weight:700;text-decoration:none">
+      📄 PDF öffnen
+    </a>
+    <button onclick="resetForm()"
+       style="background:var(--border);color:var(--text);border:none;padding:9px 20px;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer">
+      Neue Aufnahme
+    </button>
+  </div>
+</div>
+
+</form>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const LEISTUNGEN = [
+  { key:'demontage',   icon:'⛏',  label:'Demontage + Abtransport Schutt' },
+  { key:'wasser',      icon:'🔧',  label:'Wasser- und Abwasserleitungen' },
+  { key:'heizung',     icon:'🔥',  label:'Zentralheizung / Heizkörper' },
+  { key:'maurer',      icon:'🧱',  label:'Maurerarbeiten (Wände, Schlitze)' },
+  { key:'fliesen',     icon:'🪟',  label:'Keramik (Vorbereitung + Verlegung)' },
+  { key:'trockenbau',  icon:'📦',  label:'Trockenbau + Verputzen' },
+  { key:'elektro',     icon:'⚡',  label:'Elektroinstallation' },
+  { key:'sanitaer',    icon:'🚿',  label:'Sanitärausstattung (WC, Dusche, WT)' },
+  { key:'tischler',    icon:'🚪',  label:'Tischler (Türen, Fenster)' },
+  { key:'malerarbeit', icon:'🖌',  label:'Malerarbeiten / Kalkputz' },
+  { key:'boden',       icon:'🏠',  label:'Bodenbelag (außer Fliesen)' },
+  { key:'sonstiges',   icon:'➕',  label:'Sonstiges' },
+];
+
+let photos = [];    // {dataUrl, file}
+let roomCount = 0;
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Date
+  const now = new Date();
+  document.getElementById('datum-field').value =
+    now.toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric'});
+
+  // Checklist
+  const cl = document.getElementById('checklist');
+  LEISTUNGEN.forEach(function(l) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<div class="check-item" id="ci-'+l.key+'" onclick="toggleCheck(\''+l.key+'\')">' +
+        '<div class="ci-check" id="chk-'+l.key+'">✓</div>' +
+        '<span class="ci-icon">'+l.icon+'</span>' +
+        '<span class="ci-label">'+l.label+'</span>' +
+      '</div>' +
+      '<div class="ci-note" id="note-'+l.key+'">' +
+        '<input type="text" placeholder="Details / Bemerkung..." name="note_'+l.key+'">' +
+      '</div>';
+    cl.appendChild(wrap);
+  });
+
+  // Default 1 room
+  addRoom('Bad');
+});
+
+function toggleCheck(key) {
+  const el = document.getElementById('ci-'+key);
+  el.classList.toggle('on');
+  const noteEl = document.getElementById('note-'+key);
+  noteEl.style.display = el.classList.contains('on') ? 'block' : 'none';
+}
+
+// ── ROOMS ─────────────────────────────────────────────────────────────────
+function addRoom(defaultName) {
+  roomCount++;
+  const id = 'room-' + roomCount;
+  const div = document.createElement('div');
+  div.className = 'room-row';
+  div.id = id;
+  div.innerHTML =
+    '<div class="room-row-top">' +
+      '<input type="text" class="room-name" name="room_name_'+roomCount+'" placeholder="Raumname (z.B. Bad, WC, Flur)" value="'+(defaultName||'')+'">' +
+      '<button type="button" class="del-room" onclick="document.getElementById(\''+id+'\').remove()">✕</button>' +
+    '</div>' +
+    '<div class="room-dims">' +
+      '<div class="dim-field"><input type="number" step="0.1" min="0" name="room_l_'+roomCount+'" placeholder="0.0" oninput="calcM2('+roomCount+')" id="rl'+roomCount+'"><span class="dim-unit">m L</span></div>' +
+      '<div class="dim-field"><input type="number" step="0.1" min="0" name="room_b_'+roomCount+'" placeholder="0.0" oninput="calcM2('+roomCount+')" id="rb'+roomCount+'"><span class="dim-unit">m B</span></div>' +
+      '<div class="dim-field"><input type="number" step="0.1" min="0" name="room_h_'+roomCount+'" placeholder="0.0" oninput="calcM2('+roomCount+')" id="rh'+roomCount+'" value="2.5"><span class="dim-unit">m H</span></div>' +
+      '<div class="m2-display" id="rm2-'+roomCount+'"></div>' +
+    '</div>';
+  document.getElementById('room-list').appendChild(div);
+}
+
+function calcM2(n) {
+  var l = parseFloat(document.getElementById('rl'+n)?.value)||0;
+  var b = parseFloat(document.getElementById('rb'+n)?.value)||0;
+  var h = parseFloat(document.getElementById('rh'+n)?.value)||0;
+  var el = document.getElementById('rm2-'+n);
+  if (!el) return;
+  if (l && b) {
+    var boden = (l*b).toFixed(2);
+    var wand  = h ? (2*(l+b)*h).toFixed(2) : '—';
+    el.textContent = 'Boden: ' + boden + ' m²' + (h ? '  |  Wand: ' + wand + ' m²' : '');
+  } else { el.textContent = ''; }
+}
+
+// ── FOTOS ─────────────────────────────────────────────────────────────────
+function addPhotos(input) {
+  Array.from(input.files).forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var idx = photos.length;
+      photos.push({dataUrl: e.target.result, file: file});
+      renderPhotos();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderPhotos() {
+  var grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+  photos.forEach(function(p, i) {
+    var div = document.createElement('div');
+    div.className = 'photo-thumb';
+    div.innerHTML = '<img src="'+p.dataUrl+'" alt="Foto '+(i+1)+'">' +
+      '<button type="button" class="del-ph" onclick="removePhoto('+i+')">✕</button>';
+    grid.appendChild(div);
+  });
+  // Add button
+  var lbl = document.createElement('label');
+  lbl.className = 'add-photo-btn';
+  lbl.setAttribute('for','photo-input');
+  lbl.innerHTML = '<span class="ph-icon">📷</span><span>Foto</span>';
+  grid.appendChild(lbl);
+}
+
+function removePhoto(i) { photos.splice(i,1); renderPhotos(); }
+
+// ── VOICE ─────────────────────────────────────────────────────────────────
+var recognition = null;
+var isRecording = false;
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    alert('Diktat nicht unterstützt'); return;
+  }
+  if (isRecording) {
+    recognition && recognition.stop(); return;
+  }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'de-DE';
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.onresult = function(e) {
+    var txt = document.getElementById('notes-field');
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      txt.value += (txt.value ? ' ' : '') + e.results[i][0].transcript;
+    }
+  };
+  recognition.onend = function() {
+    isRecording = false;
+    document.getElementById('voice-btn').classList.remove('recording');
+  };
+  recognition.start();
+  isRecording = true;
+  document.getElementById('voice-btn').classList.add('recording');
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────
+function saveNalaz() {
+  var btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+
+  var form = document.getElementById('nalaz-form');
+  var fd = new FormData(form);
+
+  // Selected leistungen
+  var selected = [];
+  LEISTUNGEN.forEach(function(l) {
+    if (document.getElementById('ci-'+l.key).classList.contains('on')) {
+      var note = form.elements['note_'+l.key]?.value || '';
+      selected.push(l.label + (note ? ' ('+note+')' : ''));
+    }
+  });
+  fd.append('leistungen', selected.join('|'));
+
+  // Photos as base64
+  photos.forEach(function(p, i) {
+    fd.append('photo_'+i, p.dataUrl);
+  });
+  fd.append('photo_count', photos.length);
+
+  fetch('/calculator/aufnahme/save/', {
+    method: 'POST',
+    body: fd,
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      document.getElementById('result-ref').textContent = d.ref;
+      document.getElementById('result-sub').textContent = d.name + ' · ' + d.date;
+      if (d.pdf_url) document.getElementById('pdf-link').href = d.pdf_url;
+      document.getElementById('result-card').classList.add('show');
+      document.getElementById('result-card').scrollIntoView({behavior:'smooth'});
+    } else {
+      alert('Fehler: ' + (d.error || 'Unbekannt'));
+      btn.disabled = false; btn.textContent = 'Speichern';
+    }
+  })
+  .catch(function(e) {
+    alert('Verbindungsfehler'); btn.disabled = false; btn.textContent = 'Speichern';
+  });
+}
+
+function resetForm() {
+  document.getElementById('nalaz-form').reset();
+  photos = [];
+  renderPhotos();
+  document.querySelectorAll('.check-item').forEach(function(el) {
+    el.classList.remove('on');
+  });
+  document.querySelectorAll('.ci-note').forEach(function(el) {
+    el.style.display='none';
+  });
+  document.getElementById('room-list').innerHTML = '';
+  roomCount = 0;
+  addRoom('Bad');
+  document.getElementById('result-card').classList.remove('show');
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('save-btn').textContent = 'Speichern';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

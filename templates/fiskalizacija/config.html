@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<style>
+  .fisk-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);
+             border-radius:8px;padding:24px;margin-bottom:18px;}
+  .fisk-card h3{color:var(--gold);margin:0 0 16px;font-size:1rem;letter-spacing:.05em}
+  .fisk-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fisk-field{display:flex;flex-direction:column;gap:4px}
+  .fisk-field label{font-size:.75rem;color:#aaa;text-transform:uppercase;letter-spacing:.05em}
+  .fisk-field input[type=text],.fisk-field input[type=password],
+  .fisk-field input[type=file],.fisk-field select{
+    background:#1a1a1a;border:1px solid #333;color:#fff;padding:8px 10px;
+    border-radius:4px;font-size:.85rem;width:100%}
+  .badge-ok  {background:rgba(52,211,153,.15);color:#34d399;padding:2px 8px;
+              border-radius:4px;font-size:.75rem}
+  .badge-err {background:rgba(248,113,113,.15);color:#f87171;padding:2px 8px;
+              border-radius:4px;font-size:.75rem}
+  .badge-off {background:rgba(255,255,255,.08);color:#999;padding:2px 8px;
+              border-radius:4px;font-size:.75rem}
+  .toggle-btn{cursor:pointer;font-size:.8rem;color:var(--gold);background:none;
+              border:none;text-decoration:underline;margin-top:8px}
+  .fisk-form-wrap{display:none;}
+  .fisk-form-wrap.open{display:block;}
+  .btn-fisk-save{background:linear-gradient(135deg,#c9a84c,#a07832);color:#000;
+                 font-weight:700;padding:8px 20px;border:none;border-radius:4px;cursor:pointer}
+  .btn-fisk-test{background:rgba(201,168,76,.15);color:var(--gold);
+                 border:1px solid rgba(201,168,76,.4);padding:8px 20px;
+                 border-radius:4px;cursor:pointer;font-size:.85rem}
+</style>
+
+<div class="page-header">
+  <h1 style="color:var(--gold)">{% trans "🏛 Fiskalizacija – FINA Certifikati" %}</h1>
+  <p style="color:#aaa;margin:4px 0 0">{% trans "Upravljanje FINA digitalnim certifikatima i CIS vezom po tvrtki" %}</p>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+  <div class="alert alert-{{ msg.tags }}" style="margin-bottom:12px;padding:10px 16px;
+       border-radius:6px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3)">
+    {{ msg }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% for row in rows %}
+{% with company=row.company config=row.config %}
+<div class="fisk-card">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <h3>{{ company.name }}</h3>
+      <div style="font-size:.8rem;color:#888">OIB: {{ company.oib }}</div>
+    </div>
+    <div style="text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+      {% if config %}
+        {% if config.is_active %}
+          <span class="badge-ok">{% trans "● AKTIVNA" %}</span>
+        {% else %}
+          <span class="badge-off">{% trans "○ neaktivna" %}</span>
+        {% endif %}
+        {% if config.is_demo %}
+          <span class="badge-off">{% trans "DEMO" %}</span>
+        {% else %}
+          <span class="badge-ok">{% trans "PRODUKCIJA" %}</span>
+        {% endif %}
+        {% if config.last_test_at %}
+          {% if config.last_test_ok %}
+            <span class="badge-ok">{% trans "✓ Test OK" %}</span>
+          {% else %}
+            <span class="badge-err">{% trans "✗ Test FAIL" %}</span>
+          {% endif %}
+        {% endif %}
+      {% else %}
+        <span class="badge-off">{% trans "nije konfigurirana" %}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if config and config.cert_filename %}
+  <div style="margin-top:10px;font-size:.8rem;color:#888">
+    📄 Certifikat: {{ config.cert_filename }}
+    {% if config.cert_exists %}
+      <span class="badge-ok" style="margin-left:6px">{% trans "na disku" %}</span>
+    {% else %}
+      <span class="badge-err" style="margin-left:6px">{% trans "datoteka nedostaje!" %}</span>
+    {% endif %}
+    {% if config and config.ozn_pos_pr %}
+    &nbsp;| OznPosPr: <b>{{ config.ozn_pos_pr }}</b>
+    {% trans "&nbsp;| OznNapUr:" %} <b>{{ config.ozn_nap_ur }}</b>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+    <button class="toggle-btn" onclick="toggleForm('form-{{ company.pk }}')">
+      {% trans "⚙ Konfiguriraj" %}
+    </button>
+    {% if config and config.cert_exists %}
+    <form method="post" style="display:inline">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="test">
+      <input type="hidden" name="company_id" value="{{ company.pk }}">
+      <button type="submit" class="btn-fisk-test">{% trans "🔌 Testiraj vezu" %}</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div id="form-{{ company.pk }}" class="fisk-form-wrap">
+    <form method="post" enctype="multipart/form-data" style="margin-top:16px">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save">
+      <input type="hidden" name="company_id" value="{{ company.pk }}">
+
+      <div class="fisk-grid">
+        <div class="fisk-field">
+          <label>{% trans "FINA certifikat (.p12)" %}</label>
+          <input type="file" name="cert_file" accept=".p12,.pfx">
+          {% if config and config.cert_filename %}
+          <span style="font-size:.75rem;color:#888">
+            Trenutno: {{ config.cert_filename }} (ostavi prazno za zadržati)
+          </span>
+          {% endif %}
+        </div>
+        <div class="fisk-field">
+          <label>{% trans "Lozinka certifikata" %}</label>
+          <div class="pwd-wrap"><input type="password" id="pwd_10" name="cert_password" placeholder="{% trans "(ostavi prazno za zadržati)" %}"><button type="button" class="pwd-eye" onclick="togglePwd('pwd_10',this)">👁</button></div>
+        </div>
+        <div class="fisk-field">
+          <label>{% trans "Oznaka poslovnog prostora (OznPosPr)" %}</label>
+          <input type="text" name="ozn_pos_pr"
+                 value="{{ config.ozn_pos_pr|default:'1' }}" maxlength="20">
+        </div>
+        <div class="fisk-field">
+          <label>{% trans "Oznaka naplatnog uređaja (OznNapUr)" %}</label>
+          <input type="text" name="ozn_nap_ur"
+                 value="{{ config.ozn_nap_ur|default:'1' }}" maxlength="20">
+        </div>
+        <div class="fisk-field" style="flex-direction:row;align-items:center;gap:10px;margin-top:8px">
+          <input type="checkbox" name="is_demo" id="demo-{{ company.pk }}"
+                 {% if not config or config.is_demo %}checked{% endif %}>
+          <label for="demo-{{ company.pk }}" style="font-size:.85rem;color:#ccc;text-transform:none;letter-spacing:0">
+            {% trans "Demo način (CIS test endpoint – ne šalje na Poreznu)" %}
+          </label>
+        </div>
+        <div class="fisk-field" style="flex-direction:row;align-items:center;gap:10px;margin-top:8px">
+          <input type="checkbox" name="is_active" id="active-{{ company.pk }}"
+                 {% if config and config.is_active %}checked{% endif %}>
+          <label for="active-{{ company.pk }}" style="font-size:.85rem;color:#ccc;text-transform:none;letter-spacing:0">
+            {% trans "Fiskalizacija aktivna (automatski pri svakom plaćanju)" %}
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-top:16px">
+        <button type="submit" class="btn-fisk-save">{% trans "💾 Spremi konfiguraciju" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endwith %}
+{% endfor %}
+
+<div style="margin-top:24px;padding:16px;background:rgba(255,255,255,.03);
+     border-radius:8px;font-size:.8rem;color:#888;border:1px solid #222">
+  <strong style="color:#aaa">{% trans "Napomena:" %}</strong> {% trans "Demo endpoint: cistest.apis-it.hr:8449 |
+  Produkcija: cis.porezna-uprava.hr:8449 |
+  Certifikati se čuvaju u" %} <code>/var/www/fina-connect/certs/</code>
+</div>
+
+<script>
+function toggleForm(id) {
+  var el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+</script>
+
+<!-- Upload & AI Inbox shortcut -->
+<div id="upload-shortcut" style="margin-top:1.5rem;padding:1rem;background:#111827;border:1px solid rgba(201,168,76,.2);border-radius:12px;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+  <span style="color:#94a3b8;font-size:.85rem">Brze akcije:</span>
+  <a href="/hr/documents/arhiva/upload/" style="background:linear-gradient(135deg,#c9a84c,#b8963c);color:#0a0a0a;font-weight:700;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-cloud-upload-alt"></i> Upload racuna
+  </a>
+  <a href="/hr/documents/ai-inbox/" style="background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-robot"></i> AI Inbox
+  </a>
+  <a href="/hr/documents/" style="background:#1f2937;color:#94a3b8;border:1px solid #334155;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+    <i class="fas fa-archive"></i> Arhiva
+  </a>
+</div>
+
+{% endblock %}
+
+<script>
+function togglePwd(id,btn){
+    var f=document.getElementById(id);
+    if(!f)return;
+    f.type=f.type==='password'?'text':'password';
+    btn.textContent=f.type==='password'?'👁':'🙈';
+}
+</script>

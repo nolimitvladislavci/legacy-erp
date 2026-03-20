@@ -1,0 +1,59 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}Placanja{% endblock %}
+{% block extra_css %}
+<style>
+.page{padding:1.5rem;max-width:900px}
+.page-title{font-size:1.2rem;font-weight:700;margin-bottom:1rem;color:var(--gold);display:flex;align-items:center;justify-content:space-between}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-bottom:1.5rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center}
+.stat-card .val{font-size:1.3rem;font-weight:800;color:var(--gold)}
+.stat-card .lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:.2rem}
+.payments-table{width:100%;border-collapse:collapse}
+.payments-table th{text-align:left;padding:.5rem;font-size:.65rem;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.payments-table td{padding:.55rem .5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.method-icon{font-size:.9rem;margin-right:3px}
+.status-badge{font-size:.6rem;padding:2px 6px;border-radius:8px;font-weight:700}
+.status-badge.completed{background:#0a1a0a;color:var(--green)}
+.status-badge.pending,.status-badge.processing{background:#1a1a00;color:var(--gold)}
+.status-badge.failed,.status-badge.cancelled{background:#1a0a0a;color:var(--red)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-title">
+    <span>&#128179; Placanja (30 dana)</span>
+    <a href="{% url 'payments:settings' %}" class="btn btn-ghost btn-sm">&#9881; Postavke</a>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="val">&euro;{{ stats.total_amount|floatformat:2|default:"0.00" }}</div><div class="lbl">Ukupno</div></div>
+    <div class="stat-card"><div class="val">{{ stats.total_count|default:0 }}</div><div class="lbl">Transakcija</div></div>
+    <div class="stat-card"><div class="val">&euro;{{ stats.stripe_amount|floatformat:2|default:"0.00" }}</div><div class="lbl">&#128179; Stripe</div></div>
+    <div class="stat-card"><div class="val">&euro;{{ stats.paypal_amount|floatformat:2|default:"0.00" }}</div><div class="lbl">&#128176; PayPal</div></div>
+    <div class="stat-card"><div class="val">&euro;{{ stats.btcpay_amount|floatformat:2|default:"0.00" }}</div><div class="lbl">&#8383; Crypto</div></div>
+    <div class="stat-card"><div class="val">&euro;{{ stats.cash_amount|floatformat:2|default:"0.00" }}</div><div class="lbl">&#128181; Gotovina</div></div>
+    <div class="stat-card"><div class="val">{{ stats.pending_count|default:0 }}</div><div class="lbl">Na cekanju</div></div>
+  </div>
+
+  <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem">Zadnje transakcije</div>
+  {% if recent %}
+  <table class="payments-table">
+    <thead><tr><th>Datum</th><th>Izvor</th><th>Kupac</th><th>Nacin</th><th>Iznos</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for p in recent %}
+    <tr>
+      <td>{{ p.created_at|date:"d.m H:i" }}</td>
+      <td>{{ p.get_source_display }}</td>
+      <td style="font-size:.75rem;color:var(--muted)">{{ p.customer_email|default:p.customer_name|default:"-" }}</td>
+      <td>{% if p.method == 'stripe' %}<span class="method-icon">&#128179;</span>{% elif p.method == 'btcpay' %}<span class="method-icon">&#8383;</span>{% else %}<span class="method-icon">&#128181;</span>{% endif %}{{ p.get_method_display }}</td>
+      <td style="color:var(--green);font-weight:600">&euro;{{ p.amount|floatformat:2 }}</td>
+      <td><span class="status-badge {{ p.status }}">{{ p.get_status_display }}</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="text-align:center;padding:2rem;color:var(--muted)">Nema transakcija u zadnjih 30 dana</div>
+  {% endif %}
+</div>
+{% endblock %}

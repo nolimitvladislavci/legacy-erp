@@ -1,0 +1,99 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}Postavke placanja{% endblock %}
+{% block extra_css %}
+<style>
+.page{padding:1.5rem;max-width:700px}
+.page-title{font-size:1.2rem;font-weight:700;margin-bottom:1.5rem;color:var(--gold)}
+.gateway-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.gateway-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.gateway-name{font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.5rem}
+.gateway-badge{font-size:.6rem;padding:2px 8px;border-radius:10px;font-weight:700;text-transform:uppercase}
+.gateway-badge.on{background:#0a1a0a;color:var(--green)}
+.gateway-badge.off{background:#1a0a0a;color:var(--red)}
+.field{margin-bottom:.8rem}
+.field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.25rem}
+.field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.82rem;font-family:monospace}
+.field input:focus{outline:none;border-color:var(--gold)}
+.toggle{display:flex;align-items:center;gap:.5rem;cursor:pointer}
+.toggle input[type=checkbox]{accent-color:var(--gold);width:18px;height:18px}
+.payments-table{width:100%;border-collapse:collapse;margin-top:1rem}
+.payments-table th{text-align:left;padding:.4rem .5rem;font-size:.65rem;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.payments-table td{padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.status-badge{font-size:.6rem;padding:2px 6px;border-radius:8px;font-weight:700}
+.status-badge.completed{background:#0a1a0a;color:var(--green)}
+.status-badge.pending,.status-badge.processing{background:#1a1a00;color:var(--gold)}
+.status-badge.failed,.status-badge.cancelled{background:#1a0a0a;color:var(--red)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-title">&#128179; Postavke placanja</div>
+  <form method="post">{% csrf_token %}
+
+  <!-- Stripe -->
+  <div class="gateway-card">
+    <div class="gateway-head">
+      <div class="gateway-name">&#128179; Stripe <span class="gateway-badge {% if config.stripe_enabled %}on{% else %}off{% endif %}">{% if config.stripe_enabled %}Aktivan{% else %}Neaktivan{% endif %}</span></div>
+      <label class="toggle"><input type="checkbox" name="stripe_enabled" {% if config.stripe_enabled %}checked{% endif %}> Aktiviraj</label>
+    </div>
+    <div class="field"><label>Publishable Key</label><input name="stripe_public_key" value="{{ config.stripe_public_key }}" placeholder="pk_live_..."></div>
+    <div class="field"><label>Secret Key</label><input name="stripe_secret_key" value="{{ config.stripe_secret_key }}" placeholder="sk_live_..." type="password"></div>
+    <div class="field"><label>Webhook Secret</label><input name="stripe_webhook_secret" value="{{ config.stripe_webhook_secret }}" placeholder="whsec_..." type="password"></div>
+  </div>
+
+  <!-- BTCPay -->
+  <div class="gateway-card">
+    <div class="gateway-head">
+      <div class="gateway-name">&#8383; BTCPay Server <span class="gateway-badge {% if config.btcpay_enabled %}on{% else %}off{% endif %}">{% if config.btcpay_enabled %}Aktivan{% else %}Neaktivan{% endif %}</span></div>
+      <label class="toggle"><input type="checkbox" name="btcpay_enabled" {% if config.btcpay_enabled %}checked{% endif %}> Aktiviraj</label>
+    </div>
+    <div class="field"><label>BTCPay Server URL</label><input name="btcpay_url" value="{{ config.btcpay_url }}" placeholder="https://btcpay.example.com"></div>
+    <div class="field"><label>Store ID</label><input name="btcpay_store_id" value="{{ config.btcpay_store_id }}" placeholder="..."></div>
+    <div class="field"><label>API Key</label><input name="btcpay_api_key" value="{{ config.btcpay_api_key }}" placeholder="..." type="password"></div>
+  </div>
+
+  <!-- PayPal -->
+  <div class="gateway-card">
+    <div class="gateway-head">
+      <div class="gateway-name">&#128176; PayPal <span class="gateway-badge {% if config.paypal_enabled %}on{% else %}off{% endif %}">{% if config.paypal_enabled %}Aktivan{% else %}Neaktivan{% endif %}</span></div>
+      <label class="toggle"><input type="checkbox" name="paypal_enabled" {% if config.paypal_enabled %}checked{% endif %}> Aktiviraj</label>
+    </div>
+    <div class="field"><label>Client ID</label><input name="paypal_client_id" value="{{ config.paypal_client_id }}" placeholder="A..."></div>
+    <div class="field"><label>Secret</label><input name="paypal_secret" value="{{ config.paypal_secret }}" placeholder="E..." type="password"></div>
+    <div class="field"><label>Mode</label>
+      <select name="paypal_mode" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:.5rem .7rem;font-size:.82rem">
+        <option value="live" {% if config.paypal_mode == 'live' %}selected{% endif %}>Live</option>
+        <option value="sandbox" {% if config.paypal_mode == 'sandbox' %}selected{% endif %}>Sandbox (Test)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="gateway-card">
+    <div class="field"><label>Zadana valuta</label><input name="default_currency" value="{{ config.default_currency|default:'EUR' }}" style="max-width:100px"></div>
+  </div>
+
+  <button type="submit" class="btn btn-gold" style="width:100%">Spremi postavke</button>
+  </form>
+
+  {% if payments %}
+  <div style="margin-top:2rem">
+    <div style="font-weight:600;font-size:.85rem;margin-bottom:.5rem">Zadnjih 20 transakcija</div>
+    <table class="payments-table">
+      <thead><tr><th>Datum</th><th>Izvor</th><th>Nacin</th><th>Iznos</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for p in payments %}
+      <tr>
+        <td>{{ p.created_at|date:"d.m H:i" }}</td>
+        <td>{{ p.get_source_display }}</td>
+        <td>{{ p.get_method_display }}</td>
+        <td style="color:var(--green);font-weight:600">&euro;{{ p.amount|floatformat:2 }}</td>
+        <td><span class="status-badge {{ p.status }}">{{ p.get_status_display }}</span></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

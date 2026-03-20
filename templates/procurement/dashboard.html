@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nabava - Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Nabava - Dashboard</h2>
+        <a href="{% url 'procurement:create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nova narudzbenica</a>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-2"><div class="card text-center"><div class="card-body"><h3>{{ stats.total }}</h3><small class="text-muted">Ukupno</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-secondary text-white"><div class="card-body"><h3>{{ stats.draft }}</h3><small>Nacrti</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-primary text-white"><div class="card-body"><h3>{{ stats.sent }}</h3><small>Poslano</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-success text-white"><div class="card-body"><h3>{{ stats.received }}</h3><small>Isporuceno</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-danger text-white"><div class="card-body"><h3>{{ stats.overdue }}</h3><small>Zakasnjelo</small></div></div></div>
+        <div class="col-md-2"><div class="card text-center bg-warning text-dark"><div class="card-body"><h3>{{ stats.unmatched }}</h3><small>Neupareno</small></div></div></div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-3"><div class="card"><div class="card-body text-center"><h4>{{ stats.total_value }} EUR</h4><small class="text-muted">Ukupna vrijednost</small></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body text-center"><h4>{{ stats.month_value }} EUR</h4><small class="text-muted">Ovaj mjesec</small></div></div></div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Top dobavljaci</strong></div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>Dobavljac</th><th>Narudzbi</th><th>Ukupno</th></tr></thead>
+                        <tbody>
+                        {% for s in top_suppliers %}
+                        <tr><td>{{ s.supplier__name|default:"-" }}</td><td>{{ s.cnt }}</td><td class="text-end">{{ s.total }} EUR</td></tr>
+                        {% empty %}<tr><td colspan="3" class="text-muted text-center">Nema podataka</td></tr>{% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Nedavne narudzbenice</strong></div>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th>Broj</th><th>Dobavljac</th><th>Status</th><th>Ukupno</th></tr></thead>
+                        <tbody>
+                        {% for po in recent %}
+                        <tr>
+                            <td><a href="{% url 'procurement:detail' po.pk %}">{{ po.po_number }}</a></td>
+                            <td>{{ po.supplier|default:"-" }}</td>
+                            <td><span class="badge bg-{% if po.status == 'draft' %}secondary{% elif po.status == 'cancelled' %}danger{% elif po.status == 'received' %}success{% else %}primary{% endif %}">{{ po.get_status_display }}</span></td>
+                            <td class="text-end">{{ po.total }} EUR</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

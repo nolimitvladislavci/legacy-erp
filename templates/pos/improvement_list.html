@@ -1,0 +1,57 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}Knjiga boljitaka{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:0 auto;padding:1.5rem">
+  <h2 style="color:var(--gold,#c9a84c);margin-bottom:1rem">Knjiga boljitaka</h2>
+
+  <!-- Forma za novi prijedlog -->
+  <form method="post" style="background:#1a1a2e;border-radius:12px;padding:1.5rem;margin-bottom:2rem;border:1px solid #333">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 120px 80px;gap:.75rem;margin-bottom:.75rem">
+      <input name="title" placeholder="Naslov prijedloga..." required
+             style="padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff">
+      <select name="category" style="padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff">
+        <option value="pos">POS</option>
+        <option value="inventory">Skladiste</option>
+        <option value="workflow">Workflow</option>
+        <option value="ux">UX</option>
+        <option value="other">Ostalo</option>
+      </select>
+      <select name="priority" style="padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff">
+        <option value="1">P1</option>
+        <option value="2">P2</option>
+        <option value="3" selected>P3</option>
+        <option value="4">P4</option>
+        <option value="5">P5</option>
+      </select>
+    </div>
+    <textarea name="description" placeholder="Opis poboljsanja..." rows="3" required
+              style="width:100%;padding:.6rem;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff;margin-bottom:.75rem"></textarea>
+    <button type="submit" style="padding:.6rem 2rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Dodaj prijedlog</button>
+  </form>
+
+  <!-- Lista -->
+  {% for s in suggestions %}
+  <div style="background:#0d1117;border-radius:10px;padding:1rem;margin-bottom:.75rem;border-left:4px solid {% if s.status == done %}#4ade80{% elif s.status == accepted %}var(--gold,#c9a84c){% elif s.status == rejected %}#ef4444{% else %}#666{% endif %}">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <span style="color:#888;font-size:.8rem">P{{ s.priority }} | {{ s.get_category_display|default:s.category }}</span>
+        <h4 style="color:#fff;margin:.25rem 0">{{ s.title }}</h4>
+        <p style="color:#aaa;font-size:.9rem;margin:0">{{ s.description|truncatechars:200 }}</p>
+      </div>
+      <span style="padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700;
+        background:{% if s.status == done %}#065f46{% elif s.status == accepted %}#78350f{% elif s.status == rejected %}#7f1d1d{% else %}#1e293b{% endif %};
+        color:{% if s.status == done %}#4ade80{% elif s.status == accepted %}#fbbf24{% elif s.status == rejected %}#f87171{% else %}#94a3b8{% endif %}">
+        {{ s.get_status_display }}
+      </span>
+    </div>
+    {% if s.admin_note %}<p style="color:#fbbf24;font-size:.85rem;margin-top:.5rem">Admin: {{ s.admin_note }}</p>{% endif %}
+    <div style="color:#555;font-size:.75rem;margin-top:.5rem">{{ s.created_at|date:"d.m.Y H:i" }} | {{ s.author.get_full_name|default:s.get_source_display }}</div>
+  </div>
+  {% empty %}
+  <p style="color:#666;text-align:center;padding:2rem">Nema prijedloga. Budite prvi!</p>
+  {% endfor %}
+</div>
+{% endblock %}

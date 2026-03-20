@@ -1,0 +1,1007 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block title %}{% trans "Novi račun — Uredski wizard" %} – LIMIT CONNECT{% endblock %}
+{% block page_title %}{% trans "Novi račun" %}{% endblock %}
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/wizard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div id="wizardRoot"></div>
+
+<form method="post" id="wizardForm" action="{% url 'invoicing:invoice_save' %}" style="display:none">
+  {% csrf_token %}
+</form>
+
+<script src="{% static 'js/wizard.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ═══════════════════════════════════════
+  //  HELPERS
+  // ═══════════════════════════════════════
+  const fmtNum = n => n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const val = id => document.getElementById(id)?.value || '';
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+
+  let itemCount = 0;
+  let wizDoctype = 'R';
+  let wizCurrency = 'EUR';
+  let wizCountry = '{{ default_profile.country|default:"HR" }}';
+
+  const taxRates = {
+    HR: [{rate:25, name:'Standardna (25%)', is_default:true},
+         {rate:13, name:'Snižena ugost. (13%)'},
+         {rate:5,  name:'Snižena (5%)'},
+         {rate:0,  name:'Oslobođeno (0%)'}],
+    DE: [{rate:19, name:'Regelsteuersatz (19%)', is_default:true},
+         {rate:7,  name:'Ermäßigt (7%)'},
+         {rate:0,  name:'Steuerfrei (0%)'}]
+  };
+
+  function loadTaxRates(country) {
+    fetch('/invoicing/api/tax-rates/?country=' + country)
+      .then(r => r.json())
+      .then(data => {
+        if (data.length) {
+          taxRates[country] = data;
+          if (country === wizCountry) refreshAllPdvSelects();
+        }
+      }).catch(() => {});
+  }
+  loadTaxRates(wizCountry);
+
+  function getDefaultRate() {
+    return (taxRates[wizCountry] || taxRates['HR']).find(r => r.is_default)?.rate || 25;
+  }
+
+  function buildPdvOptions(sel) {
+    const rates = taxRates[wizCountry] || taxRates['HR'];
+    return rates.map(r =>
+      `<option value="${r.rate}" ${Number(sel)===r.rate?'selected':''}>${r.rate}% – ${r.name}</option>`
+    ).join('');
+  }
+
+  function refreshAllPdvSelects() {
+    document.querySelectorAll('select[name="item_pdv[]"]').forEach(sel => {
+      const cur = sel.value;
+      sel.innerHTML = buildPdvOptions(cur);
+    });
+  }
+
+  // ═══════════════════════════════════════
+  //  WIZARD INIT
+  // ═══════════════════════════════════════
+  const wizard = new FCWizard({
+    container: '#wizardRoot',
+    steps: [
+      { id: 'client',  title: '{% trans "Klijent" %}',  icon: '👤',
+        validate: () => {
+          const n = val('wClientName');
+          return n ? {valid:true} : {valid:false, message:'{% trans "Unesite naziv klijenta" %}'};
+        },
+        collectData: () => ({
+          client_name: val('wClientName'), client_oib: val('wClientOib'),
+          client_email: val('wClientEmail'), client_address: val('wClientAddr'),
+          client_city: val('wClientCity'), client_country: val('wClientCountry'),
+        }),
+      },
+      { id: 'items', title: '{% trans "Stavke" %}', icon: '📦',
+        validate: () => {
+          const rows = document.querySelectorAll('#wItemsBody tr');
+          if (!rows.length) return {valid:false, message:'{% trans "Dodajte barem jednu stavku" %}'};
+          return {valid:true};
+        },
+        collectData: () => ({}),
+        onEnter: () => { refreshAllPdvSelects(); wCalcAll(); },
+      },
+      { id: 'details', title: '{% trans "Detalji" %}', icon: '⚙️',
+        collectData: () => ({
+          doctype: wizDoctype, number: val('wNumber'),
+          date_issued: val('wDateIssued'), date_due: val('wDateDue'),
+          date_delivery: val('wDateDelivery'),
+          payment_method: val('wPayment'), currency: val('wCurrency'),
+          iban: val('wIban'), swift: val('wSwift'),
+          reference_number: val('wRefNumber'),
+          note: val('wNote'), internal_note: val('wInternalNote'),
+        }),
+      },
+      { id: 'preview', title: '{% trans "Pregled" %}', icon: '👁',
+        onEnter: (data) => { buildPreview(data); },
+      },
+      { id: 'save', title: '{% trans "Završi" %}', icon: '✔',
+        collectData: () => ({ status: document.querySelector('.fcw-save-option.selected')?.dataset?.mode || 'DRAFT' }),
+      },
+    ],
+    onComplete: () => { wSubmit(); },
+    theme: 'dark',
+  });
+
+  // ═══════════════════════════════════════
+  //  STEP 1: KLIJENT
+  // ═══════════════════════════════════════
+  const step1 = document.createElement('div');
+  step1.innerHTML = `
+    <div class="fcw-card">
+      <div class="fcw-card-head">
+        <h3>🏢 {% trans "Profil fakturiranja" %}</h3>
+      </div>
+      <div class="fcw-card-body">
+        <select id="wProfile" class="fcw-field" onchange="applyProfile(this)" style="width:100%;padding:10px;background:var(--fcw-input-bg);border:1.5px solid var(--fcw-input-border);border-radius:8px;color:var(--fcw-text);font-size:.9rem">
+          {% for p in profiles %}
+          <option value="{{ p.id }}" {% if p == default_profile %}selected{% endif %}
+            data-country="{{ p.country }}" data-currency="{{ p.currency }}"
+            data-iban="{{ p.iban }}" data-swift="{{ p.swift }}"
+            data-company="{{ p.company_name }}" data-oib="{{ p.oib|default:p.vat_id }}"
+            data-address="{{ p.address }}, {{ p.zip_code }} {{ p.city }}"
+            data-email="{{ p.email }}" data-due="{{ p.default_due_days }}"
+            data-lang="{{ p.language }}">
+            {{ p.name }} ({{ p.country }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="fcw-card" style="margin-top:14px">
+      <div class="fcw-card-head"><h3>👤 {% trans "Klijent" %}</h3></div>
+      <div class="fcw-card-body">
+        <div class="fcw-search-box" style="margin-bottom:12px">
+          <i class="fas fa-search fcw-search-icon"></i>
+          <input type="text" id="wPartnerSearch" placeholder="{% trans 'Pretraži partnera (ime, OIB)...' %}" class="fcw-no-enter" autocomplete="off">
+          <div id="wPartnerResults" class="fcw-search-results"></div>
+        </div>
+        <div style="margin-top:8px;margin-bottom:4px">
+          <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size:.8rem" onclick="openPartnerQA(document.getElementById('wPartnerSearch').value)">
+            <i class="fas fa-user-plus me-1"></i> Novi partner
+          </button>
+        </div>
+        <div class="fcw-field-group cols-2">
+          <div class="fcw-field"><label>{% trans "Naziv" %} *</label><input id="wClientName" type="text" placeholder="{% trans 'Tvrtka ili osoba' %}"></div>
+          <div class="fcw-field"><label id="lblOib">OIB / USt-IdNr</label><input id="wClientOib" type="text" placeholder="12345678901"></div>
+        </div>
+        <div class="fcw-field-group cols-2" style="margin-top:10px">
+          <div class="fcw-field"><label>Email</label><input id="wClientEmail" type="email" placeholder="email@example.com"></div>
+          <div class="fcw-field"><label>{% trans "Telefon" %}</label><input id="wClientPhone" type="tel" placeholder="+385..."></div>
+        </div>
+        <div class="fcw-field-group cols-2" style="margin-top:10px">
+          <div class="fcw-field"><label>{% trans "Adresa" %}</label><input id="wClientAddr" type="text" placeholder="{% trans 'Ulica i broj' %}"></div>
+          <div class="fcw-field"><label>{% trans "Grad" %}</label><input id="wClientCity" type="text" placeholder="{% trans 'Poštanski broj, grad' %}"></div>
+        </div>
+        <div class="fcw-field" style="margin-top:10px">
+          <label>{% trans "Država" %}</label>
+          <input id="wClientCountry" type="text" value="{{ default_profile.country|default:'HR' }}" placeholder="Hrvatska">
+        </div>
+      </div>
+    </div>`;
+  wizard.addPanel(0, step1);
+
+  // Partner search
+  let pSearchTimeout;
+  document.getElementById('wPartnerSearch').addEventListener('input', function() {
+    clearTimeout(pSearchTimeout);
+    const q = this.value.trim();
+    const res = document.getElementById('wPartnerResults');
+    if (q.length < 2) { res.classList.remove('active'); return; }
+    pSearchTimeout = setTimeout(() => {
+      fetch('/invoicing/api/partners/?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+          if (!data.length) {
+            res.innerHTML = '<div class="fcw-search-result-item" style="color:var(--fcw-text-muted)">{% trans "Nema rezultata" %}</div>';
+          } else {
+            res.innerHTML = data.map(p => `<div class="fcw-search-result-item" onclick="selectPartner(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+              <strong>${p.name}</strong><br><span style="font-size:.8rem;color:var(--fcw-text-muted)">${p.oib||''} · ${p.city||''}</span>
+            </div>`).join('');
+          }
+          res.classList.add('active');
+        });
+    }, 300);
+  });
+
+  window.selectPartner = (p) => {
+    setVal('wClientName', p.name);
+    setVal('wClientOib', p.oib || '');
+    setVal('wClientEmail', p.email || '');
+    setVal('wClientAddr', p.address || '');
+    setVal('wClientCity', p.city || '');
+    document.getElementById('wPartnerResults').classList.remove('active');
+    document.getElementById('wPartnerSearch').value = '';
+  };
+
+  // Profile apply
+  window.applyProfile = (sel) => {
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt) return;
+    wizCountry = opt.dataset.country || 'HR';
+    wizCurrency = opt.dataset.currency || 'EUR';
+    setVal('wIban', opt.dataset.iban || '');
+    setVal('wSwift', opt.dataset.swift || '');
+    setVal('wCurrency', wizCurrency);
+    window.activeProfile = {
+      companyName: opt.dataset.company, oib: opt.dataset.oib,
+      address: opt.dataset.address, email: opt.dataset.email,
+    };
+    loadTaxRates(wizCountry);
+    // Update labels
+    document.getElementById('lblOib').textContent = wizCountry === 'DE' ? 'USt-IdNr' : 'OIB';
+    // Due date
+    const due = parseInt(opt.dataset.due) || 15;
+    const dueDate = new Date(); dueDate.setDate(dueDate.getDate() + due);
+    setVal('wDateDue', dueDate.toISOString().split('T')[0]);
+  };
+  // Apply default on load
+  setTimeout(() => { applyProfile(document.getElementById('wProfile')); }, 100);
+
+  // ═══════════════════════════════════════
+  //  STEP 2: STAVKE
+  // ═══════════════════════════════════════
+  const step2 = document.createElement('div');
+  step2.innerHTML = `
+    <div class="fcw-card">
+      <div class="fcw-card-head">
+        <h3>📦 {% trans "Stavke" %}</h3>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="fcw-import-tab" onclick="toggleArticleSearch()"><i class="fas fa-warehouse"></i> {% trans "Artikl" %}</button>
+          <button type="button" class="fcw-import-tab" onclick="toggleWorktimePanel()"><i class="fas fa-clock"></i> {% trans "Radni sati" %}</button>
+          <button type="button" class="fcw-import-tab" onclick="toggleImportPanel()"><i class="fas fa-file-import"></i> {% trans "Import" %}</button>
+        </div>
+      </div>
+      <div class="fcw-card-body">
+        <!-- Article search -->
+        <div id="wArticleSearch" style="display:none;margin-bottom:14px;padding:12px;background:var(--fcw-surface);border:1.5px solid var(--fcw-gold);border-radius:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--fcw-gold)">{% trans "Pretraži artikle iz skladišta" %}</div>
+            <button type="button" onclick="toggleArticleSearch()" style="background:none;border:none;color:var(--fcw-text-muted);cursor:pointer;font-size:1.1rem;padding:0 4px">×</button>
+          </div>
+          <div class="fcw-search-box">
+            <i class="fas fa-search fcw-search-icon"></i>
+            <input type="text" id="wArticleQuery" placeholder="{% trans 'Naziv ili šifra artikla...' %}" class="fcw-no-enter" autocomplete="off">
+            <div id="wArticleResults" class="fcw-search-results"></div>
+          </div>
+        </div>
+
+        <table class="fcw-items-table">
+          <thead>
+            <tr>
+              <th class="col-opis">{% trans "Opis" %}</th>
+              <th class="col-qty" style="text-align:right">{% trans "Kol." %}</th>
+              <th class="col-unit">{% trans "J.mj." %}</th>
+              <th class="col-price" style="text-align:right">{% trans "Cijena" %}</th>
+              <th class="col-pdv" style="text-align:right" id="thPdv">PDV</th>
+              <th class="col-disc" style="text-align:right">{% trans "Pop%" %}</th>
+              <th class="col-total right">{% trans "Ukupno" %}</th>
+              <th class="col-del"></th>
+            </tr>
+          </thead>
+          <tbody id="wItemsBody"></tbody>
+        </table>
+        <button type="button" class="fcw-btn-add-item" onclick="wAddItem()"><i class="fas fa-plus"></i> {% trans "Dodaj stavku" %}</button>
+        <button type="button" class="btn btn-sm btn-outline-warning ms-2 py-0 px-2" style="font-size:.8rem" onclick="openArticleQA()">
+          <i class="fas fa-plus-circle me-1"></i> {% trans "Novi artikl" %}
+        </button>
+
+        <div class="fcw-totals" style="margin-top:16px">
+          <div class="fcw-total-row"><span class="label" id="lblSubtotal">{% trans "Osnovica" %}</span><span class="val" id="wSubtotal">0,00 EUR</span></div>
+          <div class="fcw-total-row"><span class="label" id="lblTax">PDV</span><span class="val" id="wTaxTotal">0,00 EUR</span></div>
+          <div class="fcw-total-grand"><span class="label" id="wTotalLabel">{% trans "UKUPNO" %}</span><span class="val" id="wGrandTotal">0,00 EUR</span></div>
+        </div>
+
+        <div class="fcw-pdv-recap" style="margin-top:12px">
+          <table><thead><tr><th>{% trans "Stopa" %}</th><th>{% trans "Osnovica" %}</th><th id="thRecapTax">PDV</th><th>{% trans "Ukupno" %}</th></tr></thead>
+          <tbody id="wPdvRecap"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import panel -->
+    <div id="wImportPanel" class="fcw-card" style="display:none;margin-top:12px">
+      <div class="fcw-card-head"><h3>{% trans "Uvoz iz modula" %}</h3></div>
+      <div class="fcw-card-body">
+        <div class="fcw-import-tabs">
+          <button type="button" class="fcw-import-tab" onclick="wLoadImport('worktime',this)">⏱ {% trans "Sati" %}</button>
+          <button type="button" class="fcw-import-tab" onclick="wLoadImport('rental',this)">🏠 {% trans "Najam" %}</button>
+          <button type="button" class="fcw-import-tab" onclick="wLoadImport('appointments',this)">📅 {% trans "Termini" %}</button>
+          <button type="button" class="fcw-import-tab" onclick="wLoadImport('webshop',this)">🛒 Webshop</button>
+          <button type="button" class="fcw-import-tab" onclick="wLoadImport('projects',this)">📁 {% trans "Projekti" %}</button>
+        </div>
+        <div id="wImportList" class="fcw-import-list"><div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">{% trans "Odaberite modul" %}</div></div>
+      </div>
+    </div>
+
+    <!-- Worktime panel -->
+    <div id="wWorktimePanel" class="fcw-card" style="display:none;margin-top:12px">
+      <div class="fcw-card-head">
+        <h3><i class="fas fa-clock"></i> {% trans "Radni sati" %}</h3>
+        <button type="button" onclick="toggleWorktimePanel()" style="background:none;border:none;color:var(--fcw-text-muted);cursor:pointer;font-size:1.1rem;padding:0 4px">&times;</button>
+      </div>
+      <div class="fcw-card-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end">
+          <div style="flex:1;min-width:120px">
+            <label style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--fcw-text-muted);display:block;margin-bottom:2px">Od</label>
+            <input type="date" id="wWtDateFrom" class="fcw-input" style="width:100%">
+          </div>
+          <div style="flex:1;min-width:120px">
+            <label style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--fcw-text-muted);display:block;margin-bottom:2px">Do</label>
+            <input type="date" id="wWtDateTo" class="fcw-input" style="width:100%">
+          </div>
+          <div style="flex:1;min-width:140px">
+            <label style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--fcw-text-muted);display:block;margin-bottom:2px">Radnik</label>
+            <select id="wWtWorker" class="fcw-input" style="width:100%"><option value="">Svi</option></select>
+          </div>
+          <div style="flex:1;min-width:140px">
+            <label style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.5px;color:var(--fcw-text-muted);display:block;margin-bottom:2px">Projekt</label>
+            <select id="wWtProject" class="fcw-input" style="width:100%"><option value="">Svi</option></select>
+          </div>
+          <div><button type="button" class="fcw-import-tab" onclick="wLoadWorktime()" style="height:36px;padding:0 16px;background:var(--fcw-gold);color:#000;font-weight:700;border-radius:6px;border:none;cursor:pointer">Učitaj</button></div>
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:12px">
+          <button type="button" class="fcw-import-tab active" id="wWtModeZbirno" onclick="wSetWorktimeMode('zbirno')" style="flex:1;text-align:center">Zbirno</button>
+          <button type="button" class="fcw-import-tab" id="wWtModePojedinacno" onclick="wSetWorktimeMode('pojedinacno')" style="flex:1;text-align:center">Pojedinačno</button>
+        </div>
+        <div id="wWorktimeResults" style="max-height:340px;overflow-y:auto"><div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">Kliknite "Učitaj"</div></div>
+        <div id="wWorktimeFooter" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--fcw-border)">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <div style="font-size:0.85rem;color:var(--fcw-text-muted)">Ukupno: <strong id="wWtTotalHours">0</strong> h | <strong id="wWtTotalAmount">0,00</strong> EUR</div>
+            <button type="button" onclick="wAddWorktimeItems()" style="padding:8px 20px;background:var(--fcw-gold);color:#000;font-weight:700;border-radius:6px;border:none;cursor:pointer;font-size:0.85rem">Dodaj odabrane</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="wWorktimeEntryIds" value="">`;
+  wizard.addPanel(1, step2);
+
+  // ═══════════════════════════════════════
+  //  STEP 3: DETALJI
+  // ═══════════════════════════════════════
+  const step3 = document.createElement('div');
+  step3.innerHTML = `
+    <div class="fcw-card">
+      <div class="fcw-card-head"><h3>📄 {% trans "Vrsta dokumenta" %}</h3></div>
+      <div class="fcw-card-body">
+        <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1.5px solid var(--fcw-border)">
+          <button type="button" class="fcw-doc-tab active" data-type="R" onclick="wSetDocType('R',this)" style="flex:1;padding:10px;border:none;cursor:pointer;font-weight:700;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;background:var(--fcw-gold);color:#000">Račun</button>
+          <button type="button" class="fcw-doc-tab" data-type="P" onclick="wSetDocType('P',this)" style="flex:1;padding:10px;border:none;border-left:1px solid var(--fcw-border);cursor:pointer;font-weight:700;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;background:var(--fcw-surface);color:var(--fcw-text-muted)">Ponuda</button>
+          <button type="button" class="fcw-doc-tab" data-type="A" onclick="wSetDocType('A',this)" style="flex:1;padding:10px;border:none;border-left:1px solid var(--fcw-border);cursor:pointer;font-weight:700;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;background:var(--fcw-surface);color:var(--fcw-text-muted)">Avans</button>
+          <button type="button" class="fcw-doc-tab" data-type="GS" onclick="wSetDocType('GS',this)" style="flex:1;padding:10px;border:none;border-left:1px solid var(--fcw-border);cursor:pointer;font-weight:700;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;background:var(--fcw-surface);color:var(--fcw-text-muted)">Gutschrift</button>
+        </div>
+      </div>
+    </div>
+    <div class="fcw-card" style="margin-top:14px">
+      <div class="fcw-card-head"><h3>⚙️ {% trans "Detalji dokumenta" %}</h3></div>
+      <div class="fcw-card-body">
+        <div class="fcw-field-group cols-3">
+          <div class="fcw-field"><label>{% trans "Broj" %}</label><input id="wNumber" type="text" value="{{ next_number }}"></div>
+          <div class="fcw-field"><label>{% trans "Datum izdavanja" %}</label><input id="wDateIssued" type="datetime-local" value="{{ now_datetime }}"></div>
+          <div class="fcw-field"><label>{% trans "Rok plaćanja" %}</label><input id="wDateDue" type="date"></div>
+        </div>
+        <div class="fcw-field-group cols-3" style="margin-top:10px">
+          <div class="fcw-field"><label>{% trans "Datum isporuke" %}</label><input id="wDateDelivery" type="date"></div>
+          <div class="fcw-field"><label>{% trans "Način plaćanja" %}</label>
+            <select id="wPayment">
+              {% for val, label in payment_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="fcw-field"><label>{% trans "Valuta" %}</label>
+            <select id="wCurrency" onchange="wizCurrency=this.value;wCalcAll()">
+              <option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="CHF">CHF</option>
+            </select>
+          </div>
+        </div>
+        <div class="fcw-field-group cols-3" style="margin-top:10px">
+          <div class="fcw-field"><label>IBAN</label><input id="wIban" type="text" value="{{ default_iban }}"></div>
+          <div class="fcw-field"><label>SWIFT</label><input id="wSwift" type="text"></div>
+          <div class="fcw-field"><label>{% trans "Poziv na broj" %}</label><input id="wRefNumber" type="text"></div>
+        </div>
+        <div class="fcw-field-group cols-2" style="margin-top:10px">
+          <div class="fcw-field"><label>{% trans "Napomena na računu" %}</label><textarea id="wNote" rows="2" placeholder="{% trans 'Vidljivo klijentu...' %}"></textarea></div>
+          <div class="fcw-field"><label>{% trans "Interna bilješka" %}</label><textarea id="wInternalNote" rows="2" placeholder="{% trans 'Samo za vas...' %}"></textarea></div>
+        </div>
+      </div>
+    </div>`;
+  wizard.addPanel(2, step3);
+
+  // ═══════════════════════════════════════
+  //  STEP 4: PREGLED
+  // ═══════════════════════════════════════
+  const step4 = document.createElement('div');
+  step4.innerHTML = `
+    <div class="fcw-card">
+      <div class="fcw-card-head"><h3>👁 {% trans "Pregled dokumenta" %}</h3></div>
+      <div class="fcw-card-body">
+        <div id="prevIssuer" style="margin-bottom:16px"></div>
+        <div id="prevClient" style="margin-bottom:16px"></div>
+        <div id="prevMeta" style="margin-bottom:16px"></div>
+        <div id="prevItems" style="margin-bottom:16px"></div>
+        <div id="prevTotals" style="margin-bottom:16px"></div>
+        <div id="prevWarnings"></div>
+      </div>
+    </div>`;
+  wizard.addPanel(3, step4);
+
+  // ═══════════════════════════════════════
+  //  STEP 5: ZAVRŠI
+  // ═══════════════════════════════════════
+  const step5 = document.createElement('div');
+  step5.innerHTML = `
+    <div class="fcw-card">
+      <div class="fcw-card-head"><h3>✔ {% trans "Odaberite radnju" %}</h3></div>
+      <div class="fcw-card-body">
+        <div class="fcw-save-option selected" data-mode="DRAFT" onclick="wSelectSave('DRAFT',this)">
+          <div class="fcw-save-icon">📝</div>
+          <div><div class="fcw-save-title">{% trans "Spremi kao nacrt" %}</div><div class="fcw-save-desc">{% trans "Za kasniji pregled i doradu" %}</div></div>
+        </div>
+        <div class="fcw-save-option" data-mode="SENT" onclick="wSelectSave('SENT',this)">
+          <div class="fcw-save-icon">📤</div>
+          <div><div class="fcw-save-title">{% trans "Izdaj račun" %}</div><div class="fcw-save-desc">{% trans "Postavi status na Poslano" %}</div></div>
+        </div>
+        <div class="fcw-save-option" data-mode="EMAIL" onclick="wSelectSave('EMAIL',this)">
+          <div class="fcw-save-icon">📧</div>
+          <div><div class="fcw-save-title">{% trans "Izdaj i pošalji emailom" %}</div><div class="fcw-save-desc">{% trans "Klijentu na email adresu" %}</div></div>
+        </div>
+        <div class="fcw-save-option" data-mode="FISCAL" onclick="wSelectSave('FISCAL',this)" id="optFiscal">
+          <div class="fcw-save-icon">🧾</div>
+          <div><div class="fcw-save-title">{% trans "Izdaj i fiskaliziraj" %}</div><div class="fcw-save-desc">{% trans "Fiskalizacija putem CIS sustava (samo HR)" %}</div></div>
+        </div>
+        <div class="fcw-save-option" data-mode="PAID" onclick="wSelectSave('PAID',this)">
+          <div class="fcw-save-icon">💰</div>
+          <div><div class="fcw-save-title">{% trans "Naplati odmah" %}</div><div class="fcw-save-desc">{% trans "Status: Plaćeno, gotovinska naplata" %}</div></div>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="fcw-btn-submit" id="wSubmitBtn" onclick="wSubmit()" style="margin-top:16px">
+      <i class="fas fa-check-circle"></i> {% trans "Završi i spremi" %}
+    </button>`;
+  wizard.addPanel(4, step5);
+
+  // ═══════════════════════════════════════
+  //  ITEMS: ADD ROW + CALCULATE
+  // ═══════════════════════════════════════
+  window.wAddItem = function(desc, qty, unit, price, pdv, disc) {
+    desc = desc || ''; qty = (qty != null) ? qty : 1; unit = unit || 'kom';
+    price = (price != null) ? price : 0; disc = (disc != null) ? disc : 0;
+    if (pdv == null) pdv = getDefaultRate();
+    itemCount++;
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="col-opis"><input type="text" name="item_desc[]" value="' + desc + '" placeholder="{% trans "Opis stavke..." %}" class="fcw-no-enter"></td>' +
+      '<td class="col-qty"><input type="number" name="item_qty[]" value="' + qty + '" min="0.01" step="0.01" class="mono" style="text-align:right"></td>' +
+      '<td class="col-unit"><input type="text" name="item_unit[]" value="' + unit + '" placeholder="kom"></td>' +
+      '<td class="col-price"><input type="number" name="item_price[]" value="' + price + '" min="0" step="0.01" class="mono" style="text-align:right"></td>' +
+      '<td class="col-pdv"><select name="item_pdv[]" class="mono" style="text-align:right">' + buildPdvOptions(pdv) + '</select></td>' +
+      '<td class="col-disc"><input type="number" name="item_disc[]" value="' + disc + '" min="0" max="100" step="0.01" class="mono" style="text-align:right"></td>' +
+      '<td class="col-total"><div class="fcw-item-total">0,00</div></td>' +
+      '<td><button type="button" class="fcw-btn-del-item" onclick="this.closest(\'tr\').remove();wCalcAll()">×</button></td>';
+    document.getElementById('wItemsBody').appendChild(tr);
+    tr.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', () => calcRow(tr));
+      el.addEventListener('change', () => calcRow(tr));
+    });
+    calcRow(tr);
+    if (!desc) tr.querySelector('input[name="item_desc[]"]').focus();
+  };
+
+  function calcRow(tr) {
+    const q = parseFloat(tr.querySelector('[name="item_qty[]"]').value) || 0;
+    const p = parseFloat(tr.querySelector('[name="item_price[]"]').value) || 0;
+    const d = parseFloat(tr.querySelector('[name="item_disc[]"]').value) || 0;
+    const total = q * p * (1 - d/100);
+    tr.querySelector('.fcw-item-total').textContent = fmtNum(total);
+    wCalcAll();
+  }
+
+  window.wCalcAll = function() {
+    const rows = document.querySelectorAll('#wItemsBody tr');
+    let subtotal = 0; const groups = {};
+    rows.forEach(tr => {
+      const q = parseFloat(tr.querySelector('[name="item_qty[]"]')?.value) || 0;
+      const p = parseFloat(tr.querySelector('[name="item_price[]"]')?.value) || 0;
+      const d = parseFloat(tr.querySelector('[name="item_disc[]"]')?.value) || 0;
+      const r = parseFloat(tr.querySelector('[name="item_pdv[]"]')?.value) || 0;
+      const base = q * p * (1 - d/100);
+      subtotal += base;
+      if (!groups[r]) groups[r] = {base:0, tax:0};
+      groups[r].base += base; groups[r].tax += base * r / 100;
+    });
+    const totalTax = Object.values(groups).reduce((s,g) => s+g.tax, 0);
+    const grand = subtotal + totalTax;
+    document.getElementById('wSubtotal').textContent = fmtNum(subtotal) + ' ' + wizCurrency;
+    document.getElementById('wTaxTotal').textContent = fmtNum(totalTax) + ' ' + wizCurrency;
+    document.getElementById('wGrandTotal').textContent = fmtNum(grand) + ' ' + wizCurrency;
+    const colors = {0:'#64748b',5:'#3b82f6',7:'#3b82f6',13:'#f59e0b',19:'#ef4444',25:'#ef4444'};
+    let rh = '';
+    Object.keys(groups).map(Number).sort((a,b) => b-a).forEach(rate => {
+      const g = groups[rate];
+      if (g.base > 0.001) {
+        rh += '<tr><td><span class="fcw-pdv-rate-badge" style="background:' + (colors[rate]||'#64748b') + ';color:white">' + rate + '%</span></td>' +
+              '<td style="text-align:right">' + fmtNum(g.base) + ' ' + wizCurrency + '</td>' +
+              '<td style="text-align:right">' + fmtNum(g.tax) + ' ' + wizCurrency + '</td>' +
+              '<td style="text-align:right">' + fmtNum(g.base+g.tax) + ' ' + wizCurrency + '</td></tr>';
+      }
+    });
+    document.getElementById('wPdvRecap').innerHTML = rh;
+  };
+
+  wAddItem();
+
+  // ═══════════════════════════════════════
+  //  DOC TYPE + PANELS
+  // ═══════════════════════════════════════
+  window.wSetDocType = (type, btn) => {
+    wizDoctype = type;
+    document.querySelectorAll('.fcw-doc-tab').forEach(t => {
+      const isActive = t.dataset.type === type;
+      t.style.background = isActive ? 'var(--fcw-gold)' : 'var(--fcw-surface)';
+      t.style.color = isActive ? '#000' : 'var(--fcw-text-muted)';
+    });
+    // Hide fiscal option for non-HR
+    const fo = document.getElementById('optFiscal');
+    if (fo) fo.style.display = (wizCountry !== 'HR' || type === 'GS') ? 'none' : '';
+  };
+
+  window.toggleArticleSearch = () => {
+    const el = document.getElementById('wArticleSearch');
+    el.style.display = el.style.display === 'none' ? '' : 'none';
+    if (el.style.display !== 'none') {
+      document.getElementById('wImportPanel').style.display = 'none';
+      document.getElementById('wWorktimePanel').style.display = 'none';
+    }
+  };
+
+  window.toggleImportPanel = () => {
+    const p = document.getElementById('wImportPanel');
+    p.style.display = p.style.display === 'none' ? '' : 'none';
+    if (p.style.display !== 'none') {
+      document.getElementById('wArticleSearch').style.display = 'none';
+      document.getElementById('wWorktimePanel').style.display = 'none';
+    }
+  };
+
+  // Article search
+  let artTimeout;
+  document.getElementById('wArticleQuery')?.addEventListener('input', function() {
+    clearTimeout(artTimeout);
+    const q = this.value.trim();
+    if (q.length < 2) return;
+    artTimeout = setTimeout(() => {
+      fetch('/invoicing/api/articles/?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+          const res = document.getElementById('wArticleResults');
+          res.innerHTML = data.map(a =>
+            '<div class="fcw-search-result-item" style="cursor:pointer;padding:10px;border-bottom:1px solid var(--fcw-border)" onclick=\'wAddItem("' + a.name.replace(/"/g,'\\"') + '",' + (a.quantity||1) + ',"' + (a.unit||'kom') + '",' + (a.unit_price||0) + ',' + (a.tax_rate||25) + ',0)\'>' +
+            '<strong>' + a.name + '</strong> <span style="color:var(--fcw-text-muted);font-size:.8rem">' + (a.sku||'') + '</span>' +
+            '<div style="font-size:.8rem;color:var(--fcw-gold)">' + a.unit_price + ' EUR / ' + (a.unit||'kom') + '</div></div>'
+          ).join('') || '<div style="padding:12px;color:var(--fcw-text-muted)">Nema rezultata</div>';
+          res.classList.add('active');
+        });
+    }, 200);
+  });
+
+  // Import
+  window.wLoadImport = (module, btn) => {
+    document.querySelectorAll('#wImportPanel .fcw-import-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const list = document.getElementById('wImportList');
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">Učitavanje...</div>';
+    fetch('/invoicing/api/import/' + module + '/')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">Nema dostupnih stavki</div>'; return; }
+        list.innerHTML = data.map(item =>
+          '<div class="fcw-import-item" style="padding:12px;border-bottom:1px solid var(--fcw-border);cursor:pointer" data-item=\'' + JSON.stringify(item).replace(/'/g,"&#39;") + '\'>' +
+          '<div><strong>' + item.title + '</strong><div style="font-size:.8rem;color:var(--fcw-text-muted)">' + (item.subtitle||'') + '</div></div>' +
+          '</div>'
+        ).join('');
+        list.querySelectorAll('.fcw-import-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const it = JSON.parse(el.dataset.item);
+            wAddItem(it.title, it.quantity||1, it.unit||'kom', it.price||0, it.pdv, 0);
+            if (it.client_name && !val('wClientName')) setVal('wClientName', it.client_name);
+          });
+        });
+      }).catch(() => { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">Greška</div>'; });
+  };
+
+  // ═══════════════════════════════════════
+  //  WORKTIME PANEL
+  // ═══════════════════════════════════════
+  let _wtData = null, _wtMode = 'zbirno';
+
+  window.toggleWorktimePanel = () => {
+    const p = document.getElementById('wWorktimePanel');
+    if (p.style.display === 'none') {
+      document.getElementById('wImportPanel').style.display = 'none';
+      document.getElementById('wArticleSearch').style.display = 'none';
+      p.style.display = '';
+      const now = new Date(), y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0');
+      if (!val('wWtDateFrom')) setVal('wWtDateFrom', y+'-'+m+'-01');
+      if (!val('wWtDateTo')) { const last = new Date(y,now.getMonth()+1,0).getDate(); setVal('wWtDateTo', y+'-'+m+'-'+String(last).padStart(2,'0')); }
+      wLoadWorktime();
+    } else { p.style.display = 'none'; }
+  };
+
+  window.wLoadWorktime = () => {
+    let url = '/invoicing/api/worktime-entries/?';
+    ['date_from','date_to','worker','project'].forEach(k => { const v = val('wWt' + k.charAt(0).toUpperCase()+k.replace(/_./g,m=>m[1].toUpperCase()).slice(1)); if(v) url += k+'='+v+'&'; });
+    const df = val('wWtDateFrom'), dt = val('wWtDateTo'), wk = val('wWtWorker'), pj = val('wWtProject');
+    url = '/invoicing/api/worktime-entries/?';
+    if(df) url+='date_from='+df+'&'; if(dt) url+='date_to='+dt+'&';
+    if(wk) url+='worker='+wk+'&'; if(pj) url+='project='+pj+'&';
+    document.getElementById('wWorktimeResults').innerHTML = '<div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">Učitavanje...</div>';
+    fetch(url).then(r=>r.json()).then(data => {
+      _wtData = data;
+      const ws = document.getElementById('wWtWorker'), curW = ws.value;
+      ws.innerHTML = '<option value="">Svi</option>';
+      (data.filters.workers||[]).forEach(w => { ws.innerHTML += '<option value="'+w.id+'"'+(String(w.id)===curW?' selected':'')+'>'+w.name+'</option>'; });
+      const ps = document.getElementById('wWtProject'), curP = ps.value;
+      ps.innerHTML = '<option value="">Svi</option>';
+      (data.filters.projects||[]).forEach(p => { ps.innerHTML += '<option value="'+p.id+'"'+(String(p.id)===curP?' selected':'')+'>['+p.code+'] '+p.name+'</option>'; });
+      wRenderWorktime();
+    }).catch(() => { document.getElementById('wWorktimeResults').innerHTML = '<div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">Greška</div>'; });
+  };
+
+  window.wSetWorktimeMode = (mode) => {
+    _wtMode = mode;
+    document.getElementById('wWtModeZbirno').classList.toggle('active', mode==='zbirno');
+    document.getElementById('wWtModePojedinacno').classList.toggle('active', mode==='pojedinacno');
+    if (_wtData) wRenderWorktime();
+  };
+
+  function wRenderWorktime() {
+    const res = document.getElementById('wWorktimeResults'), footer = document.getElementById('wWorktimeFooter');
+    if (!_wtData || (!_wtData.entries.length && !_wtData.summary.by_worker.length)) {
+      res.innerHTML = '<div style="text-align:center;padding:20px;color:var(--fcw-text-muted)">Nema odobrenih nefakturiranih sati</div>';
+      footer.style.display = 'none'; return;
+    }
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem"><thead><tr style="border-bottom:2px solid var(--fcw-border)">';
+    html += '<th style="padding:6px 8px;text-align:left;width:30px"><input type="checkbox" onchange="wToggleAllWt(this)"></th>';
+    if (_wtMode==='zbirno') {
+      html += '<th style="padding:6px 8px;text-align:left">Radnik</th><th style="padding:6px 8px;text-align:right">Sati</th><th style="padding:6px 8px;text-align:right">Satnica</th><th style="padding:6px 8px;text-align:right">Ukupno</th>';
+      html += '</tr></thead><tbody>';
+      _wtData.summary.by_worker.forEach(w => {
+        html += '<tr class="wt-row" data-worker-id="'+w.worker_id+'" data-worker="'+w.worker+'" data-hours="'+w.hours+'" data-rate="'+w.rate+'" data-amount="'+w.amount+'" style="border-bottom:1px solid var(--fcw-border)">';
+        html += '<td style="padding:6px 8px"><input type="checkbox" class="wt-cb"></td><td style="padding:6px 8px">'+w.worker+'</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:monospace">'+w.hours.toFixed(2)+'</td><td style="padding:6px 8px;text-align:right;font-family:monospace">'+w.rate.toFixed(2)+'</td>';
+        html += '<td style="padding:6px 8px;text-align:right;font-family:monospace;font-weight:600">'+w.amount.toFixed(2)+'</td></tr>';
+      });
+    } else {
+      html += '<th style="padding:5px 6px;text-align:left">Datum</th><th style="padding:5px 6px;text-align:left">Radnik</th><th style="padding:5px 6px;text-align:left">Projekt</th><th style="padding:5px 6px;text-align:right">Sati</th><th style="padding:5px 6px;text-align:right">Satnica</th><th style="padding:5px 6px;text-align:right">Ukupno</th>';
+      html += '</tr></thead><tbody>';
+      _wtData.entries.forEach(e => {
+        html += '<tr class="wt-row" data-id="'+e.id+'" data-worker="'+e.worker+'" data-project="'+e.project+'" data-date="'+e.date+'" data-hours="'+e.hours+'" data-rate="'+e.rate+'" data-total="'+e.total+'" style="border-bottom:1px solid var(--fcw-border)">';
+        html += '<td style="padding:5px 6px"><input type="checkbox" class="wt-cb"></td><td style="padding:5px 6px">'+e.date+'</td><td style="padding:5px 6px">'+e.worker+'</td><td style="padding:5px 6px">'+e.project+'</td>';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:monospace">'+e.hours.toFixed(2)+'</td><td style="padding:5px 6px;text-align:right;font-family:monospace">'+e.rate.toFixed(2)+'</td>';
+        html += '<td style="padding:5px 6px;text-align:right;font-family:monospace;font-weight:600">'+e.total.toFixed(2)+'</td></tr>';
+      });
+    }
+    html += '</tbody></table>';
+    res.innerHTML = html;
+    document.getElementById('wWtTotalHours').textContent = _wtData.summary.total_hours.toFixed(2);
+    document.getElementById('wWtTotalAmount').textContent = fmtNum(_wtData.summary.total_amount);
+    footer.style.display = '';
+  }
+
+  window.wToggleAllWt = (m) => { document.querySelectorAll('.wt-cb').forEach(c => c.checked = m.checked); };
+
+  window.wAddWorktimeItems = () => {
+    const checked = []; const entryIds = [];
+    const period = val('wWtDateFrom') && val('wWtDateTo') ? val('wWtDateFrom')+' - '+val('wWtDateTo') : '';
+    document.querySelectorAll('.wt-row').forEach(tr => { if (tr.querySelector('.wt-cb').checked) checked.push(tr); });
+    if (!checked.length) { alert('Odaberite barem jedan redak'); return; }
+    const dp = getDefaultRate();
+    if (_wtMode === 'zbirno') {
+      checked.forEach(tr => {
+        wAddItem('Radni sati - '+tr.dataset.worker+(period?' ('+period+')':''), parseFloat(tr.dataset.hours), 'h', parseFloat(tr.dataset.rate), dp, 0);
+        if (_wtData) _wtData.entries.forEach(e => { if (String(e.worker_id)===String(tr.dataset.workerId)) entryIds.push(e.id); });
+      });
+    } else {
+      checked.forEach(tr => {
+        wAddItem(tr.dataset.worker+' \u00b7 '+tr.dataset.project+' \u00b7 '+tr.dataset.date, parseFloat(tr.dataset.hours), 'h', parseFloat(tr.dataset.rate), dp, 0);
+        entryIds.push(parseInt(tr.dataset.id));
+      });
+    }
+    const existing = val('wWorktimeEntryIds');
+    const allIds = existing ? existing.split(',').map(Number).filter(Boolean) : [];
+    entryIds.forEach(id => { if (!allIds.includes(id)) allIds.push(id); });
+    setVal('wWorktimeEntryIds', allIds.join(','));
+    document.getElementById('wWorktimePanel').style.display = 'none';
+  };
+
+  // ═══════════════════════════════════════
+  //  SAVE OPTION
+  // ═══════════════════════════════════════
+  window.wSelectSave = (mode, el) => {
+    document.querySelectorAll('.fcw-save-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  };
+
+  // ═══════════════════════════════════════
+  //  PREVIEW
+  // ═══════════════════════════════════════
+  function buildPreview(data) {
+    const isDE = wizCountry === 'DE';
+    const profileSel = document.getElementById('wProfile');
+    const opt = profileSel?.options[profileSel.selectedIndex];
+    const issuerName = window.activeProfile?.companyName || opt?.dataset?.company || '{{ default_issuer.company_name|default:"" }}';
+    const issuerAddr = window.activeProfile?.address || opt?.dataset?.address || '';
+    const issuerOib = window.activeProfile?.oib || opt?.dataset?.oib || '';
+
+    document.getElementById('prevIssuer').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div><div style="font-weight:700;font-size:1rem;color:var(--fcw-gold)">${issuerName}</div>
+          <div style="font-size:.8rem;color:var(--fcw-text-muted)">${issuerAddr}<br>${isDE?'USt-IdNr':'OIB'}: ${issuerOib}</div></div>
+        <div style="text-align:right"><div style="font-weight:700">${data.client_name||'-'}</div>
+          <div style="font-size:.8rem;color:var(--fcw-text-muted)">${data.client_address||''} ${data.client_city||''}<br>${data.client_oib?((isDE?'USt-IdNr':'OIB')+': '+data.client_oib):''}</div></div>
+      </div>`;
+
+    const docLabels = {R:isDE?'Rechnung':'Račun',P:isDE?'Angebot':'Ponuda',A:'Avansni račun',GS:'Gutschrift',S:'Storno'};
+    document.getElementById('prevMeta').innerHTML = `
+      <div style="display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--fcw-surface);border-radius:8px;font-size:.85rem">
+        <div><span style="color:var(--fcw-text-muted)">Vrsta:</span> <strong>${docLabels[wizDoctype]||wizDoctype}</strong></div>
+        <div><span style="color:var(--fcw-text-muted)">Broj:</span> <strong>${data.number||'-'}</strong></div>
+        <div><span style="color:var(--fcw-text-muted)">Datum:</span> ${data.date_issued||'-'}</div>
+        <div><span style="color:var(--fcw-text-muted)">Zemlja:</span> ${wizCountry}</div>
+      </div>`;
+
+    // Items
+    const rows = document.querySelectorAll('#wItemsBody tr');
+    let subtotal = 0, taxTotal = 0;
+    let itemsHtml = '<table style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr style="border-bottom:2px solid var(--fcw-border)">' +
+      '<th style="padding:6px;text-align:left">Opis</th><th style="padding:6px;text-align:right">Kol.</th><th style="padding:6px">Jed.</th>' +
+      '<th style="padding:6px;text-align:right">Cijena</th><th style="padding:6px;text-align:right">PDV</th><th style="padding:6px;text-align:right">Ukupno</th></tr></thead><tbody>';
+    rows.forEach(tr => {
+      const desc = tr.querySelector('[name="item_desc[]"]')?.value || '';
+      const q = parseFloat(tr.querySelector('[name="item_qty[]"]')?.value) || 0;
+      const u = tr.querySelector('[name="item_unit[]"]')?.value || 'kom';
+      const p = parseFloat(tr.querySelector('[name="item_price[]"]')?.value) || 0;
+      const r = parseFloat(tr.querySelector('[name="item_pdv[]"]')?.value) || 0;
+      const d = parseFloat(tr.querySelector('[name="item_disc[]"]')?.value) || 0;
+      const net = q * p * (1 - d/100);
+      subtotal += net; taxTotal += net * r / 100;
+      itemsHtml += `<tr style="border-bottom:1px solid var(--fcw-border)"><td style="padding:6px">${desc}</td><td style="padding:6px;text-align:right">${q}</td><td style="padding:6px">${u}</td><td style="padding:6px;text-align:right">${fmtNum(p)}</td><td style="padding:6px;text-align:right">${r}%</td><td style="padding:6px;text-align:right;font-weight:600">${fmtNum(net)}</td></tr>`;
+    });
+    itemsHtml += '</tbody></table>';
+    document.getElementById('prevItems').innerHTML = itemsHtml;
+    document.getElementById('prevTotals').innerHTML = `
+      <div style="text-align:right;font-size:.9rem">
+        <div style="color:var(--fcw-text-muted)">${isDE?'Nettobetrag':'Osnovica'}: ${fmtNum(subtotal)} ${wizCurrency}</div>
+        <div style="color:var(--fcw-text-muted)">${isDE?'MwSt':'PDV'}: ${fmtNum(taxTotal)} ${wizCurrency}</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--fcw-gold);margin-top:8px;padding:10px;background:rgba(201,168,76,0.1);border-radius:8px">${isDE?'GESAMTBETRAG':'UKUPNO'}: ${fmtNum(subtotal+taxTotal)} ${wizCurrency}</div>
+      </div>`;
+
+    let w = [];
+    if (!data.client_oib) w.push(isDE?'Keine USt-IdNr':'Nedostaje OIB');
+    if (!data.iban) w.push(isDE?'Keine IBAN':'Nedostaje IBAN');
+    if (!data.date_due) w.push(isDE?'Kein Zahlungsziel':'Nedostaje rok plaćanja');
+    document.getElementById('prevWarnings').innerHTML = w.map(x => '<div class="fcw-preview-warning">⚠️ ' + x + '</div>').join('');
+  }
+
+  // ═══════════════════════════════════════
+  //  SUBMIT
+  // ═══════════════════════════════════════
+  window.wSubmit = function() {
+    const btn = document.getElementById('wSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Spremanje..." %}';
+
+    const data = wizard.getData();
+    const form = document.getElementById('wizardForm');
+    const csrfInput = form.querySelector('[name="csrfmiddlewaretoken"]');
+    const csrfVal = csrfInput ? csrfInput.value : '';
+    form.innerHTML = '';
+    const ci = document.createElement('input');
+    ci.type = 'hidden'; ci.name = 'csrfmiddlewaretoken'; ci.value = csrfVal;
+    form.appendChild(ci);
+
+    function add(name, value) {
+      const inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = name; inp.value = (value != null) ? value : '';
+      form.appendChild(inp);
+    }
+
+    // Selected save mode
+    const saveMode = document.querySelector('.fcw-save-option.selected')?.dataset?.mode || 'DRAFT';
+    let status = 'DRAFT';
+    if (saveMode === 'SENT' || saveMode === 'EMAIL' || saveMode === 'FISCAL') status = 'SENT';
+    if (saveMode === 'PAID') status = 'PAID';
+
+    add('doctype', data.doctype || wizDoctype || 'R');
+    add('country', data.country || wizCountry);
+    add('status', status);
+    add('number', data.number || '');
+    add('date_issued', data.date_issued || '');
+    add('date_due', data.date_due || '');
+    add('date_delivery', data.date_delivery || '');
+    add('source', 'wizard_office');
+
+    add('client_name', data.client_name || '');
+    add('client_oib', data.client_oib || '');
+    add('client_email', data.client_email || '');
+    add('client_address', data.client_address || '');
+    add('client_city', data.client_city || '');
+    add('client_country', data.client_country || (wizCountry==='DE'?'Deutschland':'Hrvatska'));
+
+    add('payment_method', data.payment_method || 'TRANSAKCIJSKI');
+    add('currency', data.currency || wizCurrency);
+    add('iban', data.iban || '');
+    add('swift', data.swift || '');
+    add('reference_number', data.reference_number || '');
+    add('note', data.note || '');
+    add('internal_note', data.internal_note || '');
+
+    const profileSel = document.getElementById('wProfile');
+    if (profileSel) add('profile_id', profileSel.value);
+
+    if (window.activeProfile) {
+      add('issuer_name', window.activeProfile.companyName || '');
+      add('issuer_address', window.activeProfile.address || '');
+      add('issuer_oib', window.activeProfile.oib || '');
+      add('issuer_email', window.activeProfile.email || '');
+    }
+
+    const rows = document.querySelectorAll('#wItemsBody tr');
+    rows.forEach(tr => {
+      const desc = tr.querySelector('[name="item_desc[]"]')?.value || '';
+      if (!desc.trim()) return;
+      add('item_desc[]', desc);
+      add('item_qty[]', tr.querySelector('[name="item_qty[]"]')?.value || '1');
+      add('item_unit[]', tr.querySelector('[name="item_unit[]"]')?.value || 'kom');
+      add('item_price[]', tr.querySelector('[name="item_price[]"]')?.value || '0');
+      add('item_pdv[]', tr.querySelector('[name="item_pdv[]"]')?.value || String(getDefaultRate()));
+      add('item_disc[]', tr.querySelector('[name="item_disc[]"]')?.value || '0');
+    });
+
+    const wtIds = document.getElementById('wWorktimeEntryIds');
+    if (wtIds && wtIds.value) add('worktime_entry_ids', wtIds.value);
+
+    form.submit();
+  };
+
+
+  // ─── Partner Quick-Add ───────────────────────────────────────────────────
+  let _pqaModal = null;
+  window.openPartnerQA = function(prefillName) {
+    if (!_pqaModal) {
+      _pqaModal = document.createElement('div');
+      _pqaModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+      _pqaModal.innerHTML =
+        '<div style="background:#1a1d21;border:1px solid #c9a84c;border-radius:12px;padding:28px 32px;min-width:340px;max-width:95vw">' +
+        '<h5 style="color:#c9a84c;margin-bottom:18px"><i class="fas fa-user-plus me-2"></i>Novi partner</h5>' +
+        '<div class="mb-2"><label style="font-size:.8rem;font-weight:700">Naziv *</label>' +
+        '<input id="pqaName" type="text" class="form-control form-control-sm" placeholder="Ime / naziv tvrtke"></div>' +
+        '<div class="mb-2"><label style="font-size:.8rem;font-weight:700">OIB / Porezni broj</label>' +
+        '<input id="pqaOib" type="text" class="form-control form-control-sm" placeholder="12345678901"></div>' +
+        '<div class="mb-2"><label style="font-size:.8rem;font-weight:700">Email</label>' +
+        '<input id="pqaEmail" type="email" class="form-control form-control-sm"></div>' +
+        '<div class="mb-3"><label style="font-size:.8rem;font-weight:700">Grad</label>' +
+        '<input id="pqaCity" type="text" class="form-control form-control-sm"></div>' +
+        '<div class="d-flex gap-2">' +
+        '<button class="btn btn-sm btn-secondary" id="pqaCancel">Odustani</button>' +
+        '<button class="btn btn-sm btn-warning" id="pqaSave"><i class="fas fa-save me-1"></i>Spremi</button>' +
+        '</div>' +
+        '<div id="pqaError" style="color:#f87171;font-size:.82rem;margin-top:10px;display:none"></div>' +
+        '</div>';
+      document.body.appendChild(_pqaModal);
+      document.getElementById('pqaCancel').addEventListener('click', () => { _pqaModal.style.display = 'none'; });
+      _pqaModal.addEventListener('click', e => { if (e.target === _pqaModal) _pqaModal.style.display = 'none'; });
+      document.getElementById('pqaSave').addEventListener('click', async () => {
+        const name = document.getElementById('pqaName').value.trim();
+        const errEl = document.getElementById('pqaError');
+        if (!name) { errEl.textContent = 'Naziv je obavezan.'; errEl.style.display = 'block'; return; }
+        errEl.style.display = 'none';
+        const btn = document.getElementById('pqaSave');
+        btn.disabled = true;
+        try {
+          const r = await fetch('/partners/api/quick-create/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
+            body: JSON.stringify({ name, oib: document.getElementById('pqaOib').value.trim(), email: document.getElementById('pqaEmail').value.trim(), city: document.getElementById('pqaCity').value.trim() }),
+          });
+          const d = await r.json();
+          if (d.ok || d.id) {
+            setVal('wClientName', d.name || name);
+            setVal('wClientOib', d.oib || '');
+            setVal('wClientEmail', d.email || '');
+            setVal('wClientCity', d.city || '');
+            _pqaModal.style.display = 'none';
+          } else {
+            errEl.textContent = d.error || 'Greška pri spremanju.';
+            errEl.style.display = 'block';
+          }
+        } catch(e) { errEl.textContent = 'Greška u komunikaciji.'; errEl.style.display = 'block'; }
+        btn.disabled = false;
+      });
+    }
+    document.getElementById('pqaName').value = prefillName || '';
+    document.getElementById('pqaOib').value = '';
+    document.getElementById('pqaEmail').value = '';
+    document.getElementById('pqaCity').value = '';
+    document.getElementById('pqaError').style.display = 'none';
+    _pqaModal.style.display = 'flex';
+    setTimeout(() => document.getElementById('pqaName').focus(), 80);
+  };
+
+  // ─── Article Quick-Add ───────────────────────────────────────────────────
+  let _aqaModal = null;
+  window.openArticleQA = function() {
+    if (!_aqaModal) {
+      _aqaModal = document.createElement('div');
+      _aqaModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+      _aqaModal.innerHTML =
+        '<div style="background:#1a1d21;border:1px solid #c9a84c;border-radius:12px;padding:28px 32px;min-width:340px;max-width:95vw">' +
+        '<h5 style="color:#c9a84c;margin-bottom:18px"><i class="fas fa-box-open me-2"></i>Novi artikl</h5>' +
+        '<div class="mb-2"><label style="font-size:.8rem;font-weight:700">Naziv *</label>' +
+        '<input id="aqaName" type="text" class="form-control form-control-sm" placeholder="Naziv artikla ili usluge"></div>' +
+        '<div class="mb-2"><label style="font-size:.8rem;font-weight:700">Cijena (bez PDV)</label>' +
+        '<input id="aqaPrice" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00"></div>' +
+        '<div class="row mb-3">' +
+        '<div class="col"><label style="font-size:.8rem;font-weight:700">PDV %</label>' +
+        '<input id="aqaPdv" type="number" step="1" min="0" max="100" class="form-control form-control-sm" value="25"></div>' +
+        '<div class="col"><label style="font-size:.8rem;font-weight:700">J.mj.</label>' +
+        '<input id="aqaUnit" type="text" class="form-control form-control-sm" value="kom" placeholder="kom/h/m2"></div>' +
+        '</div>' +
+        '<div class="d-flex gap-2">' +
+        '<button class="btn btn-sm btn-secondary" id="aqaCancel">Odustani</button>' +
+        '<button class="btn btn-sm btn-warning" id="aqaSave"><i class="fas fa-save me-1"></i>Spremi i dodaj</button>' +
+        '</div>' +
+        '<div id="aqaError" style="color:#f87171;font-size:.82rem;margin-top:10px;display:none"></div>' +
+        '</div>';
+      document.body.appendChild(_aqaModal);
+      document.getElementById('aqaCancel').addEventListener('click', () => { _aqaModal.style.display = 'none'; });
+      _aqaModal.addEventListener('click', e => { if (e.target === _aqaModal) _aqaModal.style.display = 'none'; });
+      document.getElementById('aqaSave').addEventListener('click', async () => {
+        const name = document.getElementById('aqaName').value.trim();
+        const errEl = document.getElementById('aqaError');
+        if (!name) { errEl.textContent = 'Naziv je obavezan.'; errEl.style.display = 'block'; return; }
+        errEl.style.display = 'none';
+        const btn = document.getElementById('aqaSave');
+        btn.disabled = true;
+        try {
+          const r = await fetch('/pos/api/articles/quick-create/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
+            body: JSON.stringify({
+              name,
+              price: parseFloat(document.getElementById('aqaPrice').value) || 0,
+              tax_rate: parseInt(document.getElementById('aqaPdv').value) || 25,
+              unit: document.getElementById('aqaUnit').value.trim() || 'kom',
+            }),
+          });
+          const d = await r.json();
+          if (d.ok || d.id) {
+            // Add a row to the invoice items table
+            wAddItem();
+            const rows = document.querySelectorAll('#wItemsBody tr');
+            const lastRow = rows[rows.length - 1];
+            if (lastRow) {
+              const descInput = lastRow.querySelector('[name="item_desc[]"]');
+              const priceInput = lastRow.querySelector('[name="item_price[]"]');
+              const unitInput = lastRow.querySelector('[name="item_unit[]"]');
+              const pdvSel = lastRow.querySelector('[name="item_pdv[]"]');
+              if (descInput) descInput.value = d.name || name;
+              if (priceInput) { priceInput.value = d.price || document.getElementById('aqaPrice').value; priceInput.dispatchEvent(new Event('input')); }
+              if (unitInput) unitInput.value = d.unit || document.getElementById('aqaUnit').value;
+              if (pdvSel) { pdvSel.value = String(d.tax_rate || document.getElementById('aqaPdv').value); pdvSel.dispatchEvent(new Event('change')); }
+            }
+            _aqaModal.style.display = 'none';
+          } else {
+            errEl.textContent = d.error || 'Greška pri spremanju.';
+            errEl.style.display = 'block';
+          }
+        } catch(e) { errEl.textContent = 'Greška u komunikaciji.'; errEl.style.display = 'block'; }
+        btn.disabled = false;
+      });
+    }
+    document.getElementById('aqaName').value = '';
+    document.getElementById('aqaPrice').value = '';
+    document.getElementById('aqaPdv').value = '25';
+    document.getElementById('aqaUnit').value = 'kom';
+    document.getElementById('aqaError').style.display = 'none';
+    _aqaModal.style.display = 'flex';
+    setTimeout(() => document.getElementById('aqaName').focus(), 80);
+  };
+});
+</script>
+{% endblock %}

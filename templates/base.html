@@ -1,0 +1,742 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#c9a84c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LIMIT Connect">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+  <script>
+(function(){var t=localStorage.getItem('fina-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
+</script>
+  <title>{% block title %}LIMIT CONNECT{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg:#0f172a; --sidebar-hover:#1e293b; --accent:#3b82f6; --gold:#c9a84c;
+            /* Light theme (default) */
+            --bg:#f1f5f9; --bg-card:#ffffff; --bg-card-hover:#f8fafc;
+            --text:#0f172a; --text-secondary:#475569; --text-muted:#64748b;
+            --border:#e2e8f0; --border-light:#f1f5f9;
+            --topbar-bg:#ffffff; --topbar-text:#0f172a; --topbar-border:#e2e8f0;
+            --input-bg:#ffffff; --input-border:#e2e8f0;
+            --table-header-bg:#f8fafc; --table-row-hover:#f1f5f9;
+            --badge-bg:#f1f5f9; --shadow:rgba(0,0,0,0.05);
+            --cmd-bg:#ffffff; --cmd-border:#e2e8f0; --cmd-input-color:#0f172a;
+            --cmd-item-hover:#f1f5f9; --cmd-hint-bg:#f1f5f9;
+        }
+        [data-theme="dark"] {
+            --bg:#0a0a0a; --bg-card:#111214; --bg-card-hover:#1a1c20;
+            --text:#e8e8e8; --text-secondary:#94a3b8; --text-muted:#6b7280;
+            --border:#252830; --border-light:#1e2130;
+            --topbar-bg:#111214; --topbar-text:#e8e8e8; --topbar-border:#252830;
+            --sidebar-bg:#0a0a0a; --sidebar-hover:#151720;
+            --input-bg:#0a0a0a; --input-border:#252830;
+            --table-header-bg:#0a0a0a; --table-row-hover:#1a1c20;
+            --badge-bg:#1e2130; --shadow:rgba(0,0,0,0.3);
+            --cmd-bg:#111214; --cmd-border:#252830; --cmd-input-color:#e8e8e8;
+            --cmd-item-hover:#1a1c20; --cmd-hint-bg:#1e2130;
+        }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .3s,color .3s; }
+
+        /* ═══ DESKTOP LAYOUT ═══ */
+        .app-layout { display: flex; min-height: 100vh; }
+
+        /* ═══ SIDEBAR ═══ */
+        .sidebar {
+            width: 260px; background: var(--sidebar-bg); color: #cbd5e1; transition:background .3s;
+            display: flex; flex-direction: column; flex-shrink: 0;
+            position: fixed; top: 0; left: 0; bottom: 0;
+            overflow-y: auto; z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-brand { padding: 20px 16px 14px; border-bottom: 1px solid #1e293b; font-size: 1.1rem; font-weight: 700; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-brand span { color: var(--gold); }
+        .sidebar-close { display: none; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; }
+        .sidebar-role { padding: 6px 16px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; background: #1e293b; color: var(--gold); }
+        .sidebar-section { padding: 8px 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #475569; margin-top: 6px; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin: 1px 8px; font-size: 0.82rem; transition: all 0.15s; }
+        .sidebar a:hover, .sidebar a.active { background: var(--sidebar-hover); color: white; }
+        .sidebar a i { width: 18px; text-align: center; font-size: 0.85rem; }
+        .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid #1e293b; }
+
+        /* ═══ COLLAPSIBLE GROUPS ═══ */
+        .sidebar-group { margin-bottom: 2px; }
+        .sidebar-group-toggle {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 12px; font-size: 0.6rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.5px; color: #475569;
+            margin-top: 6px; cursor: pointer; user-select: none;
+            border: none; background: none; width: 100%;
+            transition: color 0.15s;
+        }
+        .sidebar-group-toggle:hover { color: #94a3b8; }
+        .sidebar-group-toggle i.chevron {
+            font-size: 0.55rem; transition: transform 0.2s; color: #334155;
+        }
+        .sidebar-group-toggle.collapsed i.chevron { transform: rotate(-90deg); }
+        .sidebar-group-links { overflow: hidden; transition: max-height 0.25s ease; }
+        .sidebar-group-links.collapsed { max-height: 0 !important; }
+
+        
+        /* ═══ COMMAND PALETTE (Ctrl+K) ═══ */
+        .cmd-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:10000; backdrop-filter:blur(4px); }
+        .cmd-overlay.open { display:flex; align-items:flex-start; justify-content:center; padding-top:15vh; }
+        .cmd-box { background:var(--cmd-bg); border-radius:16px; width:560px; max-width:90vw; box-shadow:0 25px 60px rgba(0,0,0,.3); overflow:hidden; animation:cmdIn .15s ease; }
+        @keyframes cmdIn { from{opacity:0;transform:translateY(-20px) scale(.97)} to{opacity:1;transform:none} }
+        .cmd-input-wrap { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--cmd-border); }
+        .cmd-input-wrap i { color:#94a3b8; font-size:1.1rem; }
+        .cmd-input { flex:1; border:none; outline:none; font-size:1rem; font-family:inherit; color:var(--cmd-input-color); background:transparent; }
+        .cmd-input::placeholder { color:#94a3b8; }
+        .cmd-hint { font-size:.65rem; color:var(--text-muted); background:var(--cmd-hint-bg); padding:2px 6px; border-radius:4px; font-weight:600; }
+        .cmd-results { max-height:50vh; overflow-y:auto; padding:6px; }
+        .cmd-results:empty::after { content:'Nema rezultata'; display:block; text-align:center; padding:2rem; color:#94a3b8; font-size:.9rem; }
+        .cmd-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; cursor:pointer; transition:background .1s; text-decoration:none; color:var(--text); }
+        .cmd-item:hover, .cmd-item.selected { background:var(--cmd-item-hover); }
+        .cmd-item i { width:20px; text-align:center; color:#64748b; font-size:.9rem; }
+        .cmd-item .cmd-label { flex:1; font-size:.9rem; }
+        .cmd-item .cmd-group { font-size:.65rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; }
+        .cmd-item .cmd-fav { opacity:0; color:#c9a84c; cursor:pointer; font-size:.8rem; transition:opacity .15s; }
+        .cmd-item:hover .cmd-fav { opacity:.5; }
+        .cmd-item .cmd-fav:hover { opacity:1; }
+        .cmd-item .cmd-fav.pinned { opacity:1; }
+
+        /* ═══ SIDEBAR SLIM MODE ═══ */
+        .sidebar.slim { width:60px; }
+        .sidebar.slim .sidebar-brand span, .sidebar.slim .sidebar-role,
+        .sidebar.slim .sidebar-group-toggle span,
+        .sidebar.slim .sidebar-group-toggle .chevron,
+        .sidebar.slim .sidebar-group-links a span,
+        .sidebar.slim .sidebar-footer a span { display:none; }
+        .sidebar.slim .sidebar-brand { padding:16px 0; justify-content:center; }
+        .sidebar.slim .sidebar-group-toggle { justify-content:center; padding:10px 0; }
+        .sidebar.slim .sidebar-group-toggle i:first-child { font-size:.9rem; margin:0; }
+        .sidebar.slim a { justify-content:center; padding:10px 0; margin:1px 4px; }
+        .sidebar.slim a i { width:auto; font-size:.95rem; }
+        .sidebar.slim .sidebar-footer a { justify-content:center; }
+        .sidebar.slim .sidebar-group-links { display:none; }
+        .sidebar.slim:hover { width:260px; }
+        .sidebar.slim:hover .sidebar-brand span, .sidebar.slim:hover .sidebar-role,
+        .sidebar.slim:hover .sidebar-group-toggle span,
+        .sidebar.slim:hover .sidebar-group-toggle .chevron,
+        .sidebar.slim:hover .sidebar-group-links a span,
+        .sidebar.slim:hover .sidebar-footer a span { display:inline; }
+        .sidebar.slim:hover .sidebar-group-toggle { justify-content:space-between; padding:8px 12px; }
+        .sidebar.slim:hover .sidebar-group-toggle i:first-child { font-size:.65rem; margin-right:6px; }
+        .sidebar.slim:hover a { justify-content:flex-start; padding:9px 16px; margin:1px 8px; }
+        .sidebar.slim:hover a i { width:18px; font-size:.85rem; }
+        .sidebar.slim:hover .sidebar-group-links { display:block; }
+        .sidebar.slim:hover .sidebar-footer a { justify-content:flex-start; }
+        .main.slim-main { margin-left:60px; }
+
+        /* ═══ FAVORITES BAR ═══ */
+        .fav-bar { display:flex; gap:6px; overflow-x:auto; padding:6px 12px; background:var(--bg-card-hover); border-bottom:1px solid var(--border); -webkit-overflow-scrolling:touch; }
+        .fav-bar:empty { display:none; }
+        .fav-chip { display:flex; align-items:center; gap:5px; padding:4px 10px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; font-size:.75rem; color:#0f172a; text-decoration:none; white-space:nowrap; transition:all .15s; }
+        .fav-chip:hover { border-color:var(--gold); background:#fefce8; }
+        .fav-chip i { font-size:.7rem; color:#64748b; }
+        .fav-chip .fav-remove { color:#ef4444; opacity:0; margin-left:2px; cursor:pointer; font-size:.65rem; }
+        .fav-chip:hover .fav-remove { opacity:.6; }
+        .fav-chip .fav-remove:hover { opacity:1; }
+
+        /* ═══ SEARCH TRIGGER IN TOPBAR ═══ */
+        .topbar-search { display:flex; align-items:center; gap:8px; padding:6px 14px; background:var(--badge-bg); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:all .15s; color:#94a3b8; font-size:.85rem; }
+        .topbar-search:hover { border-color:var(--text-muted); background:var(--bg-card); }
+        .topbar-search kbd { font-size:.6rem; background:var(--bg-card); border:1px solid var(--border); padding:1px 5px; border-radius:4px; color:#64748b; font-family:inherit; }
+
+        /* ═══ MAIN CONTENT ═══ */
+        .main { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-width: 0; }
+        .topbar {
+            background: var(--topbar-bg); border-bottom: 1px solid var(--topbar-border); padding: 10px 20px; transition:background .3s;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: var(--topbar-text); cursor: pointer; padding: 4px 8px; }
+        .content { padding: 16px; flex: 1; }
+
+        /* ═══ OVERLAY ═══ */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+
+        /* ═══ MOBILE ═══ */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-close { display: block; }
+            .sidebar-overlay.open { display: block; }
+            .main { margin-left: 0; }
+            .hamburger { display: block; }
+            .content { padding: 12px; }
+            .topbar { padding: 8px 12px; }
+            .lang-switcher { display: flex; gap: 3px; transform: scale(0.9); }
+        }
+
+        /* ═══ COMMON COMPONENTS ═══ */
+        .stat-card { background: var(--bg-card); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px var(--shadow); border: 1px solid var(--border-light); transition:background .3s; }
+        .stat-card .label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
+        .stat-card .value { font-size: 1.6rem; font-weight: 700; color: var(--text); }
+        .stat-card .icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .lang-switcher { display: flex; gap: 3px; }
+        .lang-switcher form button { background: none; border: 1px solid var(--border); padding: 2px 7px; font-size: 0.65rem; cursor: pointer; border-radius: 4px; color: var(--text-muted); font-weight: 600; }
+        .lang-switcher form button.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+        /* Mobile action cards */
+        .action-card {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border);
+            text-decoration: none; color: var(--text); margin-bottom: 8px;
+            transition: all 0.15s; font-weight: 600; font-size: 0.88rem;
+        }
+        .action-card:hover { background: var(--bg-card-hover); border-color: #3b82f6; color: var(--text); transform: translateX(4px); }
+        .action-card i { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .action-card .desc { font-size: 0.72rem; font-weight: 400; color: #64748b; }
+        /* EMPTY STATES */
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-state-icon { font-size: 2rem; color: #c9a84c; margin-bottom: 16px; }
+        .empty-state-icon i { background: rgba(201,168,76,0.08); width: 72px; height: 72px; line-height: 72px; border-radius: 50%; display: inline-block; }
+        .empty-state-title { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; margin-bottom: 6px; }
+        .empty-state-message { font-size: 0.85rem; margin-bottom: 20px; max-width: 380px; margin-left: auto; margin-right: auto; }
+        .empty-state-action { display: inline-block; background: #c9a84c; color: #0f172a; padding: 10px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: opacity .2s; }
+        .empty-state-action:hover { opacity: .85; color: #0f172a; }
+        .empty-state-secondary { display: block; margin-top: 10px; color: #c9a84c; font-size: 0.82rem; text-decoration: none; }
+        .empty-state-secondary:hover { text-decoration: underline; }
+
+        /* ═══ DARK THEME BOOTSTRAP OVERRIDES ═══ */
+        [data-theme="dark"] .table { color:var(--text); --bs-table-bg:var(--bg-card); --bs-table-border-color:var(--border); }
+        [data-theme="dark"] .table thead th { background:var(--table-header-bg); color:var(--text-muted); border-color:var(--border); }
+        [data-theme="dark"] .table td { border-color:var(--border); }
+        [data-theme="dark"] .table-hover tbody tr:hover { --bs-table-hover-bg:var(--table-row-hover); }
+        [data-theme="dark"] .card { background:var(--bg-card); border-color:var(--border); color:var(--text); }
+        [data-theme="dark"] .modal-content { background:var(--bg-card); border-color:var(--border); color:var(--text); }
+        [data-theme="dark"] .modal-header { border-color:var(--border); }
+        [data-theme="dark"] .modal-footer { border-color:var(--border); }
+        [data-theme="dark"] .form-control, [data-theme="dark"] .form-select {
+            background:var(--input-bg); border-color:var(--input-border); color:var(--text);
+        }
+        [data-theme="dark"] .form-control:focus, [data-theme="dark"] .form-select:focus {
+            background:var(--input-bg); border-color:var(--gold); color:var(--text);
+            box-shadow:0 0 0 .2rem rgba(201,168,76,.15);
+        }
+        [data-theme="dark"] .btn-outline-secondary { color:var(--text-secondary); border-color:var(--border); }
+        [data-theme="dark"] .btn-outline-secondary:hover { background:var(--bg-card-hover); color:var(--text); }
+        [data-theme="dark"] .btn-outline-primary { color:var(--gold); border-color:var(--gold); }
+        [data-theme="dark"] .btn-outline-primary:hover { background:rgba(201,168,76,.15); color:var(--gold); }
+        [data-theme="dark"] .border-bottom { border-color:var(--border) !important; }
+        [data-theme="dark"] .alert { background:var(--bg-card); border-color:var(--border); color:var(--text); }
+        [data-theme="dark"] .list-group-item { background:var(--bg-card); border-color:var(--border); color:var(--text); }
+        [data-theme="dark"] .dropdown-menu { background:var(--bg-card); border-color:var(--border); }
+        [data-theme="dark"] .dropdown-item { color:var(--text); }
+        [data-theme="dark"] .dropdown-item:hover { background:var(--bg-card-hover); }
+        [data-theme="dark"] a { color:var(--gold); }
+        [data-theme="dark"] .text-muted { color:var(--text-muted) !important; }
+        [data-theme="dark"] .bg-white { background:var(--bg-card) !important; }
+        [data-theme="dark"] .bg-light { background:var(--bg-card-hover) !important; }
+        [data-theme="dark"] h1,h2,h3,h4,h5,h6,[data-theme="dark"] .h1,.h2,.h3,.h4,.h5,.h6 { color:var(--text); }
+        [data-theme="dark"] .breadcrumb-item a { color:var(--gold); }
+        [data-theme="dark"] .page-link { background:var(--bg-card); border-color:var(--border); color:var(--text); }
+        [data-theme="dark"] .page-link:hover { background:var(--bg-card-hover); }
+        [data-theme="dark"] hr { border-color:var(--border); }
+        [data-theme="dark"] .sidebar-overlay { background:rgba(0,0,0,.7); }
+        [data-theme="dark"] .content { color:var(--text); }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Offline indikator -->
+    <div id="offlineBar" style="display:none;background:#dc2626;color:#fff;text-align:center;padding:6px 16px;font-weight:700;font-size:.85rem;position:fixed;top:0;left:0;right:0;z-index:9999">
+      <i class="fas fa-wifi" style="margin-right:6px;opacity:.7"></i>
+      <span id="offlineMsg">Nema internetske veze</span>
+      <span id="offlineQueue" style="margin-left:12px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-size:.75rem"></span>
+    </div>
+    <!-- Offline bar handler now in core.js -->
+
+    {% if request.session.umbrella_as_company %}
+    <div style="background:linear-gradient(90deg,#c9a84c,#e8d48b);color:#0a0a0a;text-align:center;padding:8px 16px;font-weight:600;position:relative;z-index:1050;">
+      <i class="fas fa-building"></i>
+      Gledate firmu: <strong>{{ request.session.umbrella_home_name|default:"Child" }}</strong> → trenutna
+      <a href="{% url 'umbrella_switch_back' %}" class="btn btn-sm btn-dark ms-3">
+        <i class="fas fa-arrow-left"></i> Natrag na umbrella
+      </a>
+    </div>
+    {% endif %}
+
+{% if request.impersonation_active %}
+<div id="imp-banner" style="
+    position:fixed;top:0;left:0;right:0;z-index:9999;
+    background:linear-gradient(90deg,#1a1200,#2a1e00,#1a1200);
+    border-bottom:2px solid #c9a84c;
+    padding:8px 20px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;font-family:'Barlow Condensed','Segoe UI',sans-serif;
+    box-shadow:0 2px 20px rgba(201,168,76,.25);">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="color:#c9a84c;font-size:1rem">⚠</span>
+    <span style="color:#e8c96a;font-size:.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+      {% trans "Pristupate kao:" %}
+    </span>
+    <span style="color:#f0ede8;font-size:.9rem;font-weight:600">
+      {{ request.impersonated_company.name }}
+    </span>
+    <span style="color:#4a5060;font-size:.72rem">|</span>
+    <span style="color:#9aa0b0;font-size:.75rem">
+      {% trans "Trajanje:" %} <code id="imp-timer" style="color:#c9a84c;background:rgba(201,168,76,.1);padding:1px 6px;border-radius:3px">--:--:--</code>
+    </span>
+  </div>
+  <a href="/superadmin/impersonate/stop/"
+     style="background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);
+            color:#fca5a5;padding:5px 14px;font-size:.72rem;letter-spacing:1px;
+            text-transform:uppercase;text-decoration:none;white-space:nowrap;
+            font-weight:600;transition:background .2s"
+     onmouseover="this.style.background='rgba(192,57,43,.35)'"
+     onmouseout="this.style.background='rgba(192,57,43,.15)'">
+    {% trans "✕ Prekini pristup" %}
+  </a>
+</div>
+<div style="height:42px"></div><!-- push content below banner -->
+<!-- Impersonation timer now in core.js via window.FC.impersonationStart -->
+{% endif %}
+<div class="app-layout">
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div>{% trans "LIMIT" %}<span>{% trans "CONNECT" %}</span></div>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <button onclick="toggleSlimSidebar()" title="Smanji sidebar" style="background:none;border:none;color:#475569;cursor:pointer;font-size:.85rem;padding:4px;" class="slim-toggle-btn"><i class="fas fa-compress-arrows-alt"></i></button>
+                <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+            </div>
+        </div>
+        {% if request.user.is_authenticated %}
+        <div class="sidebar-role">
+            {% if request.user.is_superuser %}SUPERADMIN
+            {% elif request.user.is_staff %}STAFF
+            {% elif request.user.profile.role == 'company_admin' %}ADMIN
+            {% elif request.user.profile.role == 'project_manager' %}VODITELJ
+            {% elif request.user.profile.role == 'investor' %}INVESTITOR
+            {% elif request.user.profile.role == 'partner' %}PARTNER
+            {% else %}RADNIK{% endif %}
+            · {{ request.user.get_full_name|default:request.user.username }}
+        </div>
+        {% if request.company %}
+        <div style="padding:8px 12px;background:#0d1526;border-bottom:1px solid #1e293b">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:linear-gradient(135deg,#1a2744,#162040);border-radius:8px;border:1px solid rgba(201,168,76,.15)">
+                <i class="fas fa-building" style="color:#c9a84c;font-size:.75rem"></i>
+                <div style="flex:1;min-width:0">
+                    <div style="font-size:.72rem;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ request.company.name }}</div>
+                    {% if active_plan_name %}
+                    <div style="display:inline-block;margin-top:2px;font-size:.55rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:3px;{% if active_plan_slug == 'enterprise' %}background:rgba(201,168,76,.15);color:#c9a84c{% elif active_plan_slug == 'professional' %}background:rgba(59,130,246,.15);color:#60a5fa{% else %}background:rgba(100,116,139,.15);color:#94a3b8{% endif %}">{{ active_plan_name }}</div>
+                    {% endif %}
+                </div>
+                {% if has_multiple_companies %}
+                <i class="fas fa-chevron-down" style="cursor:pointer;font-size:.55rem;color:#64748b;transition:transform .2s" onclick="var s=document.getElementById('companySwitcher');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.style.transform=open?'':'rotate(180deg)'" title="Promijeni tvrtku"></i>
+                {% endif %}
+            </div>
+        </div>
+        {% if has_multiple_companies %}
+        <div id="companySwitcher" style="display:none;background:#0a1020;border-bottom:1px solid #1e293b;padding:4px 8px;max-height:200px;overflow-y:auto">
+            {% for mem in user_memberships %}
+            <form method="post" action="/accounts/switch-company/" style="margin:0">
+                {% csrf_token %}
+                <input type="hidden" name="membership_id" value="{{ mem.id }}">
+                <button type="submit" style="width:100%;text-align:left;background:{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %};border:none;color:#e2e8f0;padding:5px 10px;font-size:.68rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %}'">
+                    {% if mem.company.id == request.company.id %}<i class="fas fa-check" style="color:#c9a84c;font-size:.5rem"></i>{% else %}<i class="fas fa-building" style="color:#475569;font-size:.5rem"></i>{% endif %}
+                    {{ mem.company.name }}
+                    <span style="margin-left:auto;opacity:0.4;font-size:.5rem">{{ mem.get_role_display }}</span>
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+        <!-- ══ NAVIGACIJA ══ -->
+        <a href="/" onclick="closeSidebar()" style="margin-top:4px"><i class="fas fa-satellite-dish"></i> <span>{% trans "Control Tower" %}</span></a>
+        <a href="/documents/" onclick="closeSidebar()"><i class="fas fa-archive"></i> <span>{% trans "Arhiva" %}</span></a>
+        <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:#c9a84c"><i class="fas fa-cloud-upload-alt"></i> <span>{% trans "Upload Dokumenta" %}</span></a>
+        <a href="/hr/documents/ai-inbox/" onclick="closeSidebar()" style="color:#f59e0b"><i class="fas fa-robot"></i> <span>{% trans "AI Inbox" %}</span></a>
+        <a href="/documents/knjiga/?type=URA" onclick="closeSidebar()"><i class="fas fa-book"></i> <span>{% trans "Knjiga URA/IRA" %}</span></a>
+        <a href="/documents/pdv/" onclick="closeSidebar()"><i class="fas fa-file-invoice-dollar"></i> <span>{% trans "PDV obrazac" %}</span></a>
+        {% if request.user.is_superuser or request.user.is_staff %}<a href="/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-brain"></i> <span>{% trans "AI Upravljanje" %}</span></a>{% endif %}
+        <a href="/website/gallery/" onclick="closeSidebar()"><i class="fas fa-images"></i> <span>{% trans "Galerija" %}</span></a>
+
+        <!-- ══ POSLOVANJE ══ -->
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-briefcase" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Poslovanje" %}</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links">
+                {% if 'projects' in allowed_modules %}<a href="/projects/" onclick="closeSidebar()"><i class="fas fa-hard-hat"></i> {% trans "Projekti" %}</a>{% endif %}
+                {% if 'projects' in allowed_modules or request.user.is_superuser %}<a href="/marketplace/" onclick="closeSidebar()"><i class="fas fa-gavel"></i> {% trans "Burza projekata" %}</a>{% endif %}
+                {% if 'partners' in allowed_modules %}<a href="/partners/" onclick="closeSidebar()"><i class="fas fa-handshake"></i> {% trans "Partneri" %}</a>{% endif %}
+                {% if 'invoicing' in allowed_modules %}<a href="/invoicing/" onclick="closeSidebar()"><i class="fas fa-file-invoice-dollar"></i> {% trans "Fakture" %}</a>{% endif %}
+                {% if "invoicing" in allowed_modules %}<a href="/invoicing/canvas/" onclick="closeSidebar()" style="color:#c9a84c"><i class="fas fa-bolt"></i> {% trans "Nova transakcija" %}</a>{% endif %}
+                {% if "invoicing" in allowed_modules and is_company_admin %}<a href="/invoicing/profiles/" onclick="closeSidebar()"><i class="fas fa-id-card"></i> {% trans "Profili fakturiranja" %}</a>{% endif %}
+                {% if "invoicing" in allowed_modules and is_company_admin %}<a href="/invoicing/dunning/" onclick="closeSidebar()"><i class="fas fa-bell" style="color:#c9a84c"></i> {% trans "Opomene (Dunning)" %}</a>{% endif %}
+                {% if 'documents' in allowed_modules or 'invoicing' in allowed_modules %}<a href="/documents/" onclick="closeSidebar()"><i class="fas fa-folder-open"></i> {% trans "Dokumenti-Arhiva" %}</a>
+                <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:#c9a84c;font-weight:600"><i class="fas fa-cloud-upload-alt"></i> Upload Dokumenta</a>
+                <a href="/hr/documents/ai-inbox/" onclick="closeSidebar()"><i class="fas fa-robot"></i> AI Inbox</a>{% endif %}
+                {% if 'calculator' in allowed_modules %}<a href="/calculator/" onclick="closeSidebar()"><i class="fas fa-calculator"></i> {% trans "Kalkulator" %}</a>{% endif %}
+                {% if 'calculator' in allowed_modules %}<a href="/calculator/bathroom/" onclick="closeSidebar()"><i class="fas fa-bath"></i> {% trans "Bad-Kalkulator" %}</a>{% endif %}
+                {% if 'calculator' in allowed_modules %}<a href="/calculator/bom/" onclick="closeSidebar()"><i class="fas fa-sitemap"></i> {% trans "Sastavnice (BOM)" %}</a>{% endif %}
+                {% if 'work_orders' in allowed_modules %}<a href="/work-orders/" onclick="closeSidebar()"><i class="fas fa-tools"></i> {% trans "Radni nalozi" %}</a>{% endif %}
+                {% if 'assessment' in allowed_modules %}<a href="/assessment/" onclick="closeSidebar()"><i class="fas fa-clipboard-list"></i> {% trans "Procjene / Nalazi" %}</a>
+                <a href="/assessment/bad-nalaz/" onclick="closeSidebar()" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem .45rem 2.4rem;font-size:.82rem;color:#c9a84c;margin:.1rem 0;border-radius:6px;text-decoration:none;background:rgba(201,168,76,.06);border-left:2px solid rgba(201,168,76,.35)"><i class="fas fa-plus-circle" style="font-size:.78rem"></i> Novi terenska procjena</a>{% endif %}
+                {% if 'outreach' in allowed_modules %}<a href="/outreach/" onclick="closeSidebar()"><i class="fas fa-envelope-open-text"></i> {% trans "Outreach / CRM" %}</a>{% endif %}
+            </div>
+        </div>
+
+        <!-- ══ FINANCIJE ══ -->
+        {% if is_company_admin or request.user.is_superuser or request.user.is_staff %}
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-coins" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Financije" %}</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links">
+                {% if 'finance' in allowed_modules %}<a href="/finance/" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> {% trans "Financije" %}</a>{% endif %}
+                {% if "konto" in allowed_modules %}<a href="/konto/" onclick="closeSidebar()"><i class="fas fa-book"></i> {% trans "Knjigovodstvo" %}</a>{% endif %}
+                {% if "konto" in allowed_modules %}<a href="/konto/reconciliation/" onclick="closeSidebar()"><i class="fas fa-exchange-alt"></i> {% trans "Rekoncilijacija" %}</a>{% endif %}
+                {% if 'payroll' in allowed_modules and is_company_admin %}<a href="/payroll/" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> {% trans "Payroll" %}</a>{% endif %}
+                {% if 'invoicing' in allowed_modules or 'finance' in allowed_modules %}<a href="/reports/" onclick="closeSidebar()"><i class="fas fa-chart-bar"></i> {% trans "Izvjestaji" %}</a>{% endif %}
+                {% if 'eracun' in allowed_modules or 'invoicing' in allowed_modules %}<a href="/eracun/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> {% trans "e-Racuni" %}</a>{% endif %}
+                {% if 'eracun' in allowed_modules or 'invoicing' in allowed_modules %}<a href="{% url 'propter:dashboard' %}" onclick="closeSidebar()"><i class="fas fa-leaf" style="color:#22c55e"></i> Propter Hub</a>{% endif %}
+                {% if "eracun" in allowed_modules or "invoicing" in allowed_modules %}<a href="{% url 'propter:propter_soba' %}" onclick="closeSidebar()"><i class="fas fa-door-open" style="color:#c9a84c"></i> Propter Soba</a>{% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ══ ZAPOSLENICI & VRIJEME ══ -->
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-users" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Tim" %}</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links">
+                {% if 'worktime' in allowed_modules %}<a href="/worktime/" onclick="closeSidebar()"><i class="fas fa-clock"></i> {% trans "Radno vrijeme" %}</a>{% endif %}
+                {% if 'worktime' in allowed_modules %}<a href="/worktime/manager/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> {% trans "Manager" %}</a>{% endif %}
+                {% if is_company_admin %}<a href="/companies/settings/" onclick="closeSidebar()"><i class="fas fa-user-cog"></i> {% trans "Zaposlenici" %}</a>{% endif %}
+                {% if 'appointments' in allowed_modules %}<a href="/appointments/" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> {% trans "Termini" %}</a>{% endif %}
+                {% if 'appointments' in allowed_modules %}<a href="{% url 'appointments:service_list' %}" onclick="closeSidebar()"><i class="fas fa-concierge-bell"></i> {% trans "Usluge" %}</a>{% endif %}
+                {% if 'appointments' in allowed_modules %}<a href="{% url 'appointments:dossier_list' %}" onclick="closeSidebar()"><i class="fas fa-folder-open"></i> {% trans "Kartoni klijenata" %}</a>{% endif %}
+                {% if 'tracking' in allowed_modules %}<a href="/tracking/" onclick="closeSidebar()"><i class="fas fa-map-marker-alt"></i> {% trans "Tracking" %}</a>{% endif %}
+                {% if 'interventions' in allowed_modules %}<a href="/interventions/" onclick="closeSidebar()"><i class="fas fa-ambulance"></i> {% trans "Intervencije" %}</a>{% endif %}
+            </div>
+        </div>
+
+        <!-- ══ SKLADISTE & POS ══ -->
+        {% if 'inventory' in allowed_modules or 'pos' in allowed_modules or 'webshop' in allowed_modules %}
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-boxes" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Skladiste & POS" %}</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links">
+                {% if 'inventory' in allowed_modules %}<a href="/inventory/" onclick="closeSidebar()"><i class="fas fa-boxes"></i> {% trans "Skladiste" %}</a>{% endif %}
+                {% if 'inventory' in allowed_modules %}<a href="/inventory/receipts/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> {% trans "Primke" %}</a>{% endif %}
+                {% if 'inventory' in allowed_modules %}<a href="/inventory/overview/" onclick="closeSidebar()"><i class="fas fa-chart-pie"></i> {% trans "Pregled zalihe" %}</a>{% endif %}
+                {% if 'inventory' in allowed_modules %}<a href="/inventory/reorder-predictions/" onclick="closeSidebar()"><i class="fas fa-brain"></i> {% trans "Prediktivna nabava" %}</a>{% endif %}
+                {% if 'inventory' in allowed_modules %}<a href="/inventory/inventura/" onclick="closeSidebar()"><i class="fas fa-clipboard-check"></i> {% trans "Inventura" %}</a>{% endif %}
+                {% if 'pos' in allowed_modules %}<a href="/pos/" onclick="closeSidebar()"><i class="fas fa-cash-register"></i> {% trans "POS" %}</a>{% endif %}
+                {% if 'pos' in allowed_modules %}<a href="/pos/gastro/" onclick="closeSidebar()"><i class="fas fa-utensils"></i> {% trans "Gastro POS" %}</a>{% endif %}
+                {% if 'pos' in allowed_modules %}<a href="/pos/expiry/" onclick="closeSidebar()"><i class="fas fa-hourglass-half"></i> {% trans "Rokovi trajanja" %}</a>{% endif %}
+                {% if 'pos' in allowed_modules %}<a href="/pos/vouchers/" onclick="closeSidebar()"><i class="fas fa-ticket-alt"></i> {% trans "Vauceri" %}</a>{% endif %}
+                {% if 'webshop' in allowed_modules %}<a href="/webshop/" onclick="closeSidebar()"><i class="fas fa-shopping-cart"></i> {% trans "Webshop" %}</a>{% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ══ TRZNICA ══ -->
+        {% if 'documents' in allowed_modules %}
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)" style="color:var(--gold)">
+                <span><i class="fas fa-store" style="margin-right:6px;font-size:0.65rem"></i>Trznica Online</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links collapsed">
+                <a href="/documents/" onclick="closeSidebar()"><i class="fas fa-folder-open"></i> {% trans "Dokumenti-Arhiva" %}</a>
+                <a href="/documents/otpremnica/" onclick="closeSidebar()"><i class="fas fa-truck"></i> Otpremnice</a>
+                <a href="/documents/otkupni/" onclick="closeSidebar()"><i class="fas fa-handshake"></i> Otkupni blokovi</a>
+                <a href="/documents/primka/" onclick="closeSidebar()"><i class="fas fa-clipboard-check"></i> Primke robe</a>
+                <a href="/documents/cmr/" onclick="closeSidebar()"><i class="fas fa-globe"></i> CMR</a>
+                <a href="/inventory/kalo/" onclick="closeSidebar()"><i class="fas fa-cut"></i> Kalo &amp; Otpis</a>
+                <a href="/pos/prigovori/" onclick="closeSidebar()"><i class="fas fa-book"></i> {% trans "Knjiga prigovora" %}</a>
+                <a href="/hr/revizorski-paket/" onclick="closeSidebar()"><i class="fas fa-file-archive"></i> {% trans "Revizorski paket" %}</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ══ SPECIJALNI MODULI ══ -->
+        {% if 'rental' in allowed_modules or 'marketplace' in allowed_modules or 'delivery' in allowed_modules or 'ai_assistant' in allowed_modules or request.user.is_superuser %}
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-puzzle-piece" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Specijalno" %}</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links collapsed">
+                {% if 'rental' in allowed_modules %}<a href="/rental/" onclick="closeSidebar()"><i class="fas fa-key"></i> {% trans "Robot Hotel" %}</a>{% endif %}
+                {% if 'marketplace' in allowed_modules or request.user.is_superuser %}<a href="/marketplace/" onclick="closeSidebar()"><i class="fas fa-store"></i> {% trans "Grossmarkt" %}</a>{% endif %}
+                {% if "marketplace" in allowed_modules or request.user.is_superuser %}<a href="/marketplace/futures/" onclick="closeSidebar()"><i class="fas fa-seedling"></i> {% trans "Futures" %}</a>{% endif %}
+                {% if 'delivery' in allowed_modules or request.user.is_superuser %}<a href="/delivery/consolidated/" onclick="closeSidebar()"><i class="fas fa-boxes-stacked"></i> {% trans "Dostava / Hub" %}</a>{% endif %}
+                {% if 'ai_assistant' in allowed_modules %}<a href="/ai/" onclick="closeSidebar()"><i class="fas fa-robot"></i> {% trans "AI Asistent" %}</a>{% endif %}
+                {% if "maintenance" in allowed_modules or request.user.is_superuser %}<a href="/maintenance/" onclick="closeSidebar()"><i class="fas fa-cogs"></i> {% trans "Odrzavanje" %}</a>{% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        
+        <!-- ══ NABAVA & ODRŽAVANJE ══ -->
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-cogs"></i> Upravljanje</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links">
+                {% if 'procurement' in allowed_modules %}
+                <a href="/procurement/" onclick="closeSidebar()">
+                    <i class="fas fa-file-invoice"></i> Narudžbenice
+                </a>
+                <a href="/procurement/dashboard/" onclick="closeSidebar()">
+                    <i class="fas fa-chart-pie"></i> Nabava Dashboard
+                </a>
+                <a href="/procurement/price-lists/" onclick="closeSidebar()">
+                    <i class="fas fa-tags"></i> Cjenici dobavljača
+                </a>
+                {% endif %}
+                {% if 'maintenance' in allowed_modules %}
+                <a href="/maintenance/" onclick="closeSidebar()">
+                    <i class="fas fa-tools"></i> Održavanje
+                </a>
+                <a href="/maintenance/assets/" onclick="closeSidebar()">
+                    <i class="fas fa-warehouse"></i> Registar imovine
+                </a>
+                <a href="/maintenance/calendar/" onclick="closeSidebar()">
+                    <i class="fas fa-calendar-check"></i> Kalendar servisa
+                </a>
+                <a href="/maintenance/expiring/" onclick="closeSidebar()">
+                    <i class="fas fa-exclamation-triangle"></i> Istječu dokumenti
+                </a>
+                {% endif %}
+                {% if 'helpdesk' in allowed_modules %}
+                <a href="/helpdesk/" onclick="closeSidebar()">
+                    <i class="fas fa-headset"></i> Helpdesk tiketi
+                </a>
+                <a href="/helpdesk/dashboard/" onclick="closeSidebar()">
+                    <i class="fas fa-tachometer-alt"></i> Helpdesk Dashboard
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ══ INTEGRACIJE ══ -->
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-plug" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Integracije" %}</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links collapsed">
+                {% if 'synesis' in allowed_modules or request.user.is_superuser %}<a href="/synesis/" onclick="closeSidebar()"><i class="fas fa-database"></i> Synesis</a>{% endif %}
+                {% if 'synesis' in allowed_modules or request.user.is_superuser %}<a href="/synesis/mdb/upload/" onclick="closeSidebar()" style="font-size:0.78rem;padding-left:28px;"><i class="fas fa-cloud-upload-alt"></i> MDB Import</a>{% endif %}
+                {% if 'smart_import' in allowed_modules or request.user.is_superuser %}<a href="/smart-import/" onclick="closeSidebar()"><i class="fas fa-file-import"></i> Smart Import (AIP)</a>{% endif %}
+                <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:#c9a84c"><i class="fas fa-cloud-upload-alt"></i> Upload Dokumenta</a>
+                <a href="/hr/documents/ai-inbox/" onclick="closeSidebar()"><i class="fas fa-robot"></i> AI Inbox</a>
+                <a href="/helpdesk/dashboard/" onclick="closeSidebar()"><i class="fas fa-headset"></i> Helpdesk</a>
+            </div>
+        </div>
+
+        <!-- ══ SUSTAV (superadmin) ══ -->
+        {% if request.user.is_superuser %}
+        <div class="sidebar-group">
+            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
+                <span><i class="fas fa-cog" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Sustav" %}</span>
+                <i class="fas fa-chevron-down chevron"></i>
+            </button>
+            <div class="sidebar-group-links collapsed">
+                <a href="/accounts/" onclick="closeSidebar()"><i class="fas fa-users"></i> {% trans "Korisnici" %}</a>
+                <a href="/superadmin/companies/" onclick="closeSidebar()"><i class="fas fa-building"></i> {% trans "Tvrtke" %}</a>
+                <a href="/umbrella/" onclick="closeSidebar()"><i class="fas fa-sitemap"></i> {% trans "Umbrella" %}</a>
+                <a href="/superadmin/users/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> {% trans "Korisnici" %}</a>
+                <a href="/superadmin/#promo-kodovi" onclick="closeSidebar()"><i class="fas fa-ticket-alt"></i> {% trans "Promo kodovi" %}</a>
+                <a href="/register/propter/" onclick="closeSidebar()"><i class="fas fa-bolt"></i> Propter SaaS</a>
+                <a href="/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-robot"></i> {% trans "AI Upravljanje" %}</a>
+                <a href="/builder/" onclick="closeSidebar()"><i class="fas fa-magic"></i> {% trans "AI Builder" %}</a>
+                <a href="/admin/" target="_blank" onclick="closeSidebar()"><i class="fas fa-tools"></i> {% trans "Django Admin" %}</a>
+                <a href="{% url 'website:admin_panel' %}" onclick="closeSidebar()"><i class="fas fa-globe"></i> {% trans "Web stranica" %}</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="sidebar-footer">
+            <a href="/hr/companies/modules/" title="Moduli" style="margin-bottom:4px;"><i class="fas fa-cog"></i> <span>{% trans "Moduli" %}</span></a>
+            <a href="/hr/auth/device-tokens/" style="margin-bottom:4px;"><i class="fas fa-mobile-alt"></i> <span>{% trans "Mobilni pristup" %}</span></a>
+            <a href="/logout/"><i class="fas fa-sign-out-alt"></i> <span>{% trans "Odjava" %}</span></a>
+        </div>
+
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <div class="topbar">
+            <div class="d-flex align-items-center gap-2">
+                <button class="hamburger" onclick="openSidebar()">☰</button>
+                <div class="topbar-search" onclick="openCmdPalette()">
+                    <i class="fas fa-search"></i>
+                    <span>Pretrazi...</span>
+                    <kbd>Ctrl+K</kbd>
+                </div>
+                <span style="font-weight:600;color:var(--topbar-text);font-size:0.9rem">{% block page_title %}LIMIT CONNECT{% endblock %}</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button id="theme-toggle" onclick="toggleTheme()" title="Tamna/Svijetla tema"
+                    style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--gold);font-size:.85rem;display:flex;align-items:center;transition:all .2s">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+                <div class="lang-switcher">
+                    {% get_current_language as CURRENT_LANG %}
+                    <span style="font-size:.65rem;font-weight:600;color:var(--text-muted);border:1px solid var(--border);padding:2px 7px;border-radius:4px" title="Jezik se bira na login formi">{{ CURRENT_LANG|upper }}</span>
+                    {% if request.user.is_superuser %}
+                    <a href="/accounts/translations/{{ CURRENT_LANG }}/" 
+                       style="border: 1px solid var(--gold); padding: 2px 7px; font-size: 0.65rem; border-radius: 4px; color: var(--gold); text-decoration: none; font-weight: 600; margin-left: 3px;"
+                       title="Uredi prijevode">
+                       <i class="fas fa-language"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                <!-- Notification Bell -->
+                {% if request.user.is_authenticated %}
+                <div class="position-relative" id="notif-bell-wrap" style="cursor:pointer">
+                    <i class="fas fa-bell" style="font-size:1.1rem;color:#475569" onclick="toggleNotifDropdown()"></i>
+                    <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.6rem;display:none">0</span>
+                    <div id="notif-dropdown" style="display:none;position:absolute;right:0;top:32px;width:320px;max-height:400px;overflow-y:auto;background:var(--bg-card);border-radius:10px;box-shadow:0 4px 20px var(--shadow);z-index:9999">
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                            <strong style="font-size:.85rem">Obavijesti</strong>
+                            <div class="d-flex gap-2 align-items-center">
+                                <a href="#" id="notif-mark-all" onclick="markAllNotifsRead();return false;" style="font-size:.7rem;color:#64748b;display:none">Procitano</a>
+                                <a href="/notifications/" style="font-size:.75rem">Sve</a>
+                            </div>
+                        </div>
+                        <div id="notif-list" style="font-size:.82rem"></div>
+                    </div>
+                </div>
+                {% endif %}
+                <a href="/worktime/profile/" class="text-decoration-none d-flex align-items-center gap-1" style="font-size:0.8rem;color:var(--text-secondary)"><i class="fas fa-user-circle" style="font-size:1.2rem"></i><span class="d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span></a>
+            </div>
+        </div>
+        <div class="fav-bar" id="favBar"></div>
+        <div class="content">
+            {% if messages %}
+            <div id="toast-container" style="position:fixed;top:60px;right:12px;z-index:9999;width:340px;max-width:90vw">
+                {% for msg in messages %}
+                <div class="toast-msg alert alert-{{ msg.tags }} alert-dismissible fade show shadow py-2 px-3" style="font-size:0.82rem;border-radius:10px;margin-bottom:8px;backdrop-filter:blur(8px);
+                    {% if 'success' in msg.tags %}background:rgba(240,253,244,.95);border:1px solid #bbf7d0;color:#166534;
+                    {% elif 'error' in msg.tags %}background:rgba(254,242,242,.95);border:1px solid #fecaca;color:#991b1b;
+                    {% elif 'warning' in msg.tags %}background:rgba(255,251,235,.95);border:1px solid #fed7aa;color:#92400e;
+                    {% else %}background:rgba(239,246,255,.95);border:1px solid #bfdbfe;color:#1e40af;{% endif %}">
+                    {{ msg }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Toast auto-dismiss now in core.js -->
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+window.FC = {
+  impersonationStart: {% if request.impersonation_active %}{{ request.impersonation_started_at_ts }}{% else %}0{% endif %},
+  notifMarkReadUrl: "{% url 'notifications:mark_read' pk=99999 %}",
+  notifMarkAllUrl: "{% url 'notifications:mark_all_read' %}",
+  notifApiUrl: "{% url 'notifications:api' %}"
+};
+</script>
+<script src="{% static 'js/core.js' %}"></script>
+<!-- Smart Input Module — globalni glas, kamera, potpis, AI check -->
+<script src="/static/js/html5-qrcode.min.js" defer></script>
+<script src="/static/js/smart-input.js" defer></script>
+
+{% block extra_js %}{% endblock %}
+
+<!-- VAPID Web Push + push opt-in now in core.js -->
+
+<!-- Offline queue + password toggle now in core.js -->
+{% if 'ai_assistant' in allowed_modules %}{% include "ai_assistant/chat_widget.html" %}{% endif %}
+
+<!-- Notification polling now in core.js -->
+<script src="{% static 'js/fina-utils.js' %}"></script>
+<script src="{% static 'js/quick-add.js' %}"></script>
+
+<!-- ═══ COMMAND PALETTE ═══ -->
+<div class="cmd-overlay" id="cmdOverlay" onclick="if(event.target===this)closeCmdPalette()">
+    <div class="cmd-box">
+        <div class="cmd-input-wrap">
+            <i class="fas fa-search"></i>
+            <input class="cmd-input" id="cmdInput" placeholder="Pretrazi stranice, module, postavke..." autocomplete="off" autofocus>
+            <span class="cmd-hint">ESC</span>
+        </div>
+        <div class="cmd-results" id="cmdResults"></div>
+    </div>
+</div>
+
+<!-- Command palette, favorites, slim sidebar now in core.js -->
+
+<div style="text-align:center; padding:.5rem; font-size:.65rem; color:#64748b;">Projekti: <a href="https://viskovic-group.de" style="color:#3b82f6; text-decoration:none;">Višković Group</a> &middot; <a href="https://sati.grosmarkt-online.eu" target="_blank" style="color:#e91e63; text-decoration:none;">SATI</a></div>
+
+<!-- Theme toggle now in core.js -->
+
+
+<!-- ══ GLOBALNI UPLOAD FAB ══ -->
+<a href="/hr/documents/arhiva/upload/" id="upload-fab"
+   title="Upload dokumenta — fotografirajte ili prevucite racun"
+   style="position:fixed;bottom:28px;right:28px;z-index:9998;
+          display:flex;align-items:center;gap:8px;
+          padding:14px 22px;border-radius:50px;
+          background:linear-gradient(135deg,#1e3a5f,#0f172a);
+          color:#60a5fa;font-weight:700;font-size:0.9rem;
+          text-decoration:none;
+          border:1px solid rgba(96,165,250,0.3);
+          box-shadow:0 4px 20px rgba(0,0,0,0.4);
+          transition:all 0.3s ease"
+   onmouseover="this.style.transform='scale(1.08)';this.style.background='linear-gradient(135deg,#c9a84c,#a08030)';this.style.color='#0a0a0a'"
+   onmouseout="this.style.transform='scale(1)';this.style.background='linear-gradient(135deg,#1e3a5f,#0f172a)';this.style.color='#60a5fa'">
+  <i class="fas fa-camera" style="font-size:1.1rem"></i>
+  <span class="d-none d-md-inline">Upload</span>
+</a>
+
+<!-- Connect AI Widget FAB -->
+<div id="ai-context-fab" style="position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;cursor:grab;touch-action:none" onmousedown="startDrag(event)" ontouchstart="startDrag(event)">
+  <div id="ai-fab-minimized" onclick="toggleAiWidget()" style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:30px;background:linear-gradient(135deg,#c9a84c,#a08030);color:#0a0a0a;font-weight:600;font-size:0.95rem;cursor:pointer;box-shadow:0 4px 15px rgba(201,168,76,0.4);transition:transform 0.2s;user-select:none" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+    <i class="fas fa-robot"></i>
+    <span>Connect &mdash; tu sam.</span>
+  </div>
+  <div id="ai-widget-panel" style="display:none;position:absolute;bottom:55px;right:0;width:340px;background:#1a1a2e;border:1px solid rgba(201,168,76,0.3);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.4);overflow:hidden">
+    <div style="padding:1rem 1.2rem;border-bottom:1px solid rgba(201,168,76,0.15);display:flex;justify-content:space-between;align-items:center">
+      <h6 style="color:#c9a84c;margin:0"><i id="ai-widget-icon" class="fas fa-robot me-2"></i><span id="ai-widget-title">Connect</span></h6>
+      <button onclick="toggleAiWidget()" style="background:none;border:none;color:#888;cursor:pointer;font-size:1.1rem"><i class="fas fa-chevron-down"></i></button>
+    </div>
+    <div id="ai-widget-welcome" style="padding:1rem 1.2rem;color:#ccc;font-size:0.9rem;border-bottom:1px solid rgba(255,255,255,0.05)">
+      Dobrodosao u Connect. Vodim te kroz sve.
+    </div>
+    <div style="padding:1rem 1.2rem;max-height:280px;overflow-y:auto">
+      <div id="ai-widget-tips"></div>
+      <div id="ai-widget-actions" class="mt-3"></div>
+    </div>
+    <div style="padding:0.7rem 1.2rem;border-top:1px solid rgba(201,168,76,0.15);text-align:center">
+      <a href="/ai/" style="color:#c9a84c;text-decoration:none;font-size:0.85rem"><i class="fas fa-comments me-1"></i>Otvori puni Connect Chat</a>
+    </div>
+  </div>
+</div>
+<!-- AI widget + FAB drag now in core.js -->
+<script src="/static/js/lc-ux.js"></script>
+</body>
+</html>

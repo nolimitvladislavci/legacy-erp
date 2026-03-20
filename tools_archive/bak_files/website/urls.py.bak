@@ -1,0 +1,14 @@
+from django.urls import path
+from . import views
+
+app_name = 'website'
+
+urlpatterns = [
+    path('', views.homepage, name='homepage'),
+    path('admin-panel/', views.admin_panel, name='admin_panel'),
+    path('hitna-intervencija/', views.hitna_intervencija, name='hitna_intervencija'),
+    path('hitna-intervencija/hvala/', views.hitna_hvala, name='hitna_hvala'),
+    path('video-galerija/', views.video_galerija, name='video_galerija'),
+
+    path('hr/', views.viskovic_hr, name='viskovic_hr'),
+]

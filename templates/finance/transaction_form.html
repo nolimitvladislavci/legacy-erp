@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-plus-circle me-2 text-success"></i>{{ action }}</h2>
+  <a href="{% url 'finance:list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+</div>
+
+<div class="stat-card" style="max-width:700px">
+  <form method="post">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Smjer *" %}</label>
+        <select name="direction" class="form-select" required>
+          <option value="income">{% trans "Uplata / Prihod" %}</option>
+          <option value="expense">{% trans "Isplata / Rashod" %}</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Iznos (EUR) *" %}</label>
+        <input type="number" step="0.01" name="amount" class="form-control" required placeholder="0.00">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Datum *" %}</label>
+        <input type="date" name="date" class="form-control" required value="{% now 'Y-m-d' %}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Tvrtka *" %}</label>
+        <select name="company" class="form-select" required>
+          {% for c in companies %}
+          <option value="{{ c.pk }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-bold">{% trans "Partner *" %}</label>
+        <select name="partner" class="form-select" required>
+          <option value="">{% trans "-- odaberi partnera --" %}</option>
+          {% for p in partners %}
+          <option value="{{ p.pk }}">{{ p.name }} ({{ p.get_partner_type_display }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-bold">{% trans "Opis *" %}</label>
+        <input type="text" name="description" class="form-control" required placeholder="{% trans "Opis transakcije" %}">
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>{% trans "Spremi" %}</button>
+        <a href="{% url 'finance:list' %}" class="btn btn-outline-secondary ms-2">{% trans "Odustani" %}</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

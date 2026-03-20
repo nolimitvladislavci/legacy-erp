@@ -1,0 +1,732 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Terenska Procjena – Badsanierung{% endblock %}
+{% block extra_css %}
+<style>
+:root{
+  --g:#c9a84c;--gd:rgba(201,168,76,.12);--gb:rgba(201,168,76,.28);
+  --s1:#0d1117;--s2:#161b22;--s3:#21262d;
+  --bd:rgba(255,255,255,.08);--txt:#e6edf3;--dim:#7d8590;
+  --ok:#3fb950;--err:#f85149;--info:#58a6ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--s1);color:var(--txt);font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;min-height:100vh}
+
+/* ── TOP BAR ── */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem}
+.topbar-back{width:36px;height:36px;border-radius:8px;background:var(--s3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--txt);font-size:1.1rem;flex-shrink:0}
+.topbar-info{flex:1;min-width:0}
+.topbar-title{font-size:.9rem;font-weight:700;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-sub{font-size:.7rem;color:var(--dim);margin-top:1px}
+.topbar-save{background:var(--g);color:#000;border:none;border-radius:8px;padding:.45rem .9rem;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.topbar-save:active{opacity:.8}
+
+/* ── PROGRESS ── */
+.progress-bar{height:3px;background:var(--s3)}
+.progress-fill{height:100%;background:var(--g);transition:width .3s}
+
+/* ── SECTION TABS ── */
+.tabs{display:flex;overflow-x:auto;gap:0;border-bottom:1px solid var(--bd);background:var(--s2);scrollbar-width:none;-ms-overflow-style:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:.65rem .9rem;font-size:.72rem;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;letter-spacing:.02em}
+.tab.active{color:var(--g);border-bottom-color:var(--g)}
+.tab .tab-done{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-left:4px;vertical-align:middle}
+
+/* ── PANELS ── */
+.panel{display:none;padding:1rem 1rem 6rem}
+.panel.active{display:block}
+
+/* ── SECTION HEADER ── */
+.sec-head{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.sec-icon{width:36px;height:36px;border-radius:10px;background:var(--gd);border:1px solid var(--gb);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sec-title{font-size:1rem;font-weight:700}
+.sec-sub{font-size:.75rem;color:var(--dim);margin-top:1px}
+
+/* ── INPUT ── */
+.field{margin-bottom:.875rem}
+.label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:.35rem;display:block;font-weight:600}
+.inp{width:100%;background:var(--s3);border:1.5px solid var(--bd);border-radius:10px;color:var(--txt);padding:.75rem .9rem;font-size:.95rem;font-family:inherit;transition:border-color .15s}
+.inp:focus{outline:none;border-color:var(--g)}
+.inp::placeholder{color:var(--dim);opacity:.6}
+textarea.inp{min-height:80px;resize:vertical}
+
+/* ── MJERE GRID ── */
+.mjere-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.mjere-item{background:var(--s3);border:1.5px solid var(--bd);border-radius:10px;padding:.7rem .8rem;position:relative}
+.mjere-item label{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);display:block;margin-bottom:.35rem;font-weight:600}
+.mjere-item .m-inp{width:100%;background:transparent;border:none;color:var(--txt);font-size:1.1rem;font-weight:700;font-family:inherit;outline:none}
+.mjere-item .m-unit{position:absolute;right:.8rem;bottom:.75rem;font-size:.75rem;color:var(--dim)}
+
+/* ── CHECKLIST ── */
+.checklist{display:flex;flex-direction:column;gap:.4rem}
+.chk-item{display:flex;align-items:center;gap:.8rem;background:var(--s3);border:1.5px solid var(--bd);border-radius:10px;padding:.8rem 1rem;cursor:pointer;transition:all .15s;user-select:none;-webkit-user-select:none;position:relative}
+.chk-item.checked{border-color:var(--g);background:rgba(201,168,76,.06)}
+.chk-item.checked .chk-box{background:var(--g);border-color:var(--g)}
+.chk-item.checked .chk-box::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#000;font-size:.75rem;font-weight:900}
+.chk-item.checked .chk-label{color:var(--txt)}
+.chk-box{width:22px;height:22px;border-radius:6px;border:2px solid var(--dim);flex-shrink:0;position:relative;transition:all .15s}
+.chk-label{font-size:.9rem;font-weight:500;color:var(--dim);flex:1;line-height:1.3}
+.chk-note-toggle{font-size:.7rem;color:var(--info);background:none;border:none;cursor:pointer;padding:.15rem .4rem;border-radius:4px;background:rgba(88,166,255,.1);flex-shrink:0}
+.chk-note{display:none;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--bd)}
+.chk-note.open{display:block}
+.chk-note textarea{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--txt);padding:.5rem .7rem;font-size:.82rem;font-family:inherit;resize:none;min-height:50px}
+.chk-note textarea:focus{outline:none;border-color:var(--g)}
+
+/* ── SUBITEM ── */
+.subitems{padding:.2rem 0 .2rem 2.8rem;display:flex;flex-direction:column;gap:.3rem}
+.sub-chk{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-radius:8px;background:var(--s2);cursor:pointer;border:1px solid var(--bd);transition:all .15s}
+.sub-chk.checked{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04)}
+.sub-chk.checked .sub-box{background:var(--g);border-color:var(--g)}
+.sub-chk.checked .sub-box::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#000;font-size:.65rem;font-weight:900}
+.sub-box{width:18px;height:18px;border-radius:5px;border:2px solid var(--dim);flex-shrink:0;position:relative}
+.sub-label{font-size:.82rem;color:var(--dim)}
+.sub-chk.checked .sub-label{color:var(--txt)}
+
+/* ── FOTO UPLOAD ── */
+.foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.5rem}
+.foto-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--s3);border:1.5px solid var(--bd);position:relative;cursor:pointer}
+.foto-thumb img{width:100%;height:100%;object-fit:cover}
+.foto-thumb .del-btn{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(248,81,73,.85);border:none;border-radius:50%;color:#fff;font-size:.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.foto-add{aspect-ratio:1;border-radius:10px;background:var(--s3);border:2px dashed var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s;color:var(--dim)}
+.foto-add:active{border-color:var(--g);background:var(--gd)}
+.foto-add-icon{font-size:1.6rem;margin-bottom:.25rem}
+.foto-add-txt{font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+input[type=file]{display:none}
+
+/* ── TEXTAREA LARGE ── */
+.notes-area{width:100%;background:var(--s3);border:1.5px solid var(--bd);border-radius:12px;color:var(--txt);padding:.9rem 1rem;font-size:.92rem;font-family:inherit;min-height:140px;resize:vertical;line-height:1.6}
+.notes-area:focus{outline:none;border-color:var(--g)}
+.notes-area::placeholder{color:var(--dim);opacity:.6}
+
+/* ── STATUS PILL ── */
+.status-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+.status-pill{padding:.45rem .9rem;border-radius:20px;font-size:.78rem;font-weight:600;border:1.5px solid var(--bd);color:var(--dim);cursor:pointer;transition:all .15s}
+.status-pill.sel{color:#000;font-weight:700}
+.status-pill[data-v="DRAFT"].sel{background:#94a3b8;border-color:#94a3b8;color:#000}
+.status-pill[data-v="COMPLETED"].sel{background:var(--ok);border-color:var(--ok)}
+.status-pill[data-v="OFFER_SENT"].sel{background:var(--info);border-color:var(--info)}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,17,23,.97);backdrop-filter:blur(12px);border-top:1px solid var(--bd);padding:.7rem 1rem;display:flex;gap:.5rem;z-index:100}
+.btn-nav{flex:1;padding:.75rem;border-radius:10px;border:1.5px solid var(--bd);background:var(--s3);color:var(--txt);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-nav:active{opacity:.7}
+.btn-submit{background:var(--g);border-color:var(--g);color:#000;flex:2}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s3);border:1px solid var(--g);color:var(--g);padding:.6rem 1.2rem;border-radius:20px;font-size:.82rem;font-weight:600;opacity:0;transition:all .2s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── CLIENT CARD ── */
+.client-card{background:linear-gradient(135deg,var(--s2),var(--s3));border:1.5px solid var(--gb);border-radius:14px;padding:1.1rem;margin-bottom:1rem}
+.client-name-big{font-size:1.2rem;font-weight:700;color:var(--g);margin-bottom:.25rem}
+.client-meta{font-size:.8rem;color:var(--dim);line-height:1.8}
+
+/* ── SUMMARY ── */
+.summary-block{background:var(--s3);border:1.5px solid var(--gb);border-radius:12px;padding:1rem;margin-bottom:.75rem}
+.summary-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--g);font-weight:700;margin-bottom:.5rem}
+.summary-item{font-size:.85rem;color:var(--txt);padding:.2rem 0;border-bottom:1px solid var(--bd);display:flex;gap:.5rem;align-items:flex-start}
+.summary-item:last-child{border-bottom:none}
+.summary-item .si-icon{flex-shrink:0;color:var(--ok)}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="topbar">
+  <a href="/assessment/" class="topbar-back">←</a>
+  <div class="topbar-info">
+    <div class="topbar-title">🔍 Terenska Procjena</div>
+    <div class="topbar-sub" id="topbar-client">Novi nalaz &middot; Badsanierung</div>
+  </div>
+  <button class="topbar-save" onclick="autoSave(false)">Spremi</button>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs">
+  <div class="tab active" onclick="goTab(0)" id="tab-0">📋 Klijent</div>
+  <div class="tab" onclick="goTab(1)" id="tab-1">📐 Mjere</div>
+  <div class="tab" onclick="goTab(2)" id="tab-2">🔨 Radovi</div>
+  <div class="tab" onclick="goTab(3)" id="tab-3">📸 Foto</div>
+  <div class="tab" onclick="goTab(4)" id="tab-4">📝 Bilješke</div>
+</div>
+
+<!-- ── PANEL 0: KLIJENT ── -->
+<div class="panel active" id="panel-0">
+  <div class="sec-head">
+    <div class="sec-icon">👤</div>
+    <div><div class="sec-title">Podaci o klijentu</div><div class="sec-sub">Ime, adresa, kontakt</div></div>
+  </div>
+  <div class="field"><label class="label">Ime i prezime *</label>
+    <input class="inp" id="c-name" type="text" placeholder="Npr. Hans Müller" oninput="updateTopbar()"></div>
+  <div class="field"><label class="label">Adresa objekta</label>
+    <input class="inp" id="c-addr" type="text" placeholder="Ulica, broj, grad, PLZ"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+    <div class="field"><label class="label">Telefon</label>
+      <input class="inp" id="c-phone" type="tel" placeholder="+49…"></div>
+    <div class="field"><label class="label">E-mail</label>
+      <input class="inp" id="c-email" type="email" placeholder="@…"></div>
+  </div>
+  <div class="field"><label class="label">Datum obilaška</label>
+    <input class="inp" id="c-date" type="date"></div>
+</div>
+
+<!-- ── PANEL 1: MJERE ── -->
+<div class="panel" id="panel-1">
+  <div class="sec-head">
+    <div class="sec-icon">📐</div>
+    <div><div class="sec-title">Mjere prostora</div><div class="sec-sub">Sve ploštine u m²</div></div>
+  </div>
+  <div class="mjere-grid">
+    <div class="mjere-item"><label>Kupaonica ukupno</label>
+      <input class="m-inp" id="m-kup" type="number" step="0.1" placeholder="0.0"><span class="m-unit">m²</span></div>
+    <div class="mjere-item"><label>WC (zasebni)</label>
+      <input class="m-inp" id="m-wc" type="number" step="0.1" placeholder="0.0"><span class="m-unit">m²</span></div>
+    <div class="mjere-item"><label>Tlocrt pod</label>
+      <input class="m-inp" id="m-pod" type="number" step="0.1" placeholder="0.0"><span class="m-unit">m²</span></div>
+    <div class="mjere-item"><label>Površina zidova</label>
+      <input class="m-inp" id="m-zid" type="number" step="0.1" placeholder="0.0"><span class="m-unit">m²</span></div>
+    <div class="mjere-item"><label>Visina prostora</label>
+      <input class="m-inp" id="m-vis" type="number" step="0.01" placeholder="2.50"><span class="m-unit">m</span></div>
+    <div class="mjere-item"><label>Dužina odvoda</label>
+      <input class="m-inp" id="m-odv" type="number" step="0.5" placeholder="0.0"><span class="m-unit">m</span></div>
+  </div>
+  <div class="field" style="margin-top:.875rem"><label class="label">Napomena o mjerama</label>
+    <textarea class="inp" id="m-note" placeholder="Npr. strop kos, nisha 80×40cm…"></textarea></div>
+</div>
+
+<!-- ── PANEL 2: RADOVI ── -->
+<div class="panel" id="panel-2">
+  <div class="sec-head">
+    <div class="sec-icon">🔨</div>
+    <div><div class="sec-title">Dogovoreni radovi</div><div class="sec-sub">Klikni što je dogovoreno</div></div>
+  </div>
+  <div class="checklist" id="checklist">
+
+    <!-- 1. DEMONTAŽA -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="demontaza">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🏗 Demontaža i odvoz šute</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="dem-plocice">
+            <div class="sub-box"></div><span class="sub-label">Demontaža pločica (pod + zid)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="dem-sanitarija">
+            <div class="sub-box"></div><span class="sub-label">Demontaža sanitarije (WC, kada, tuš)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="dem-gips">
+            <div class="sub-box"></div><span class="sub-label">Rušenje gips pregrada</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="odvoz-suta">
+            <div class="sub-box"></div><span class="sub-label">Odvoz šute (container / kombi)</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="demontaza">
+      <textarea placeholder="Napomena o demontaži…"></textarea></div>
+
+    <!-- 2. VODOVODNE INSTALACIJE -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="voda">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🚿 Vodovodne i odvodne instalacije</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="voda-novi-razvod">
+            <div class="sub-box"></div><span class="sub-label">Novi razvod (topla/hladna kroz pod)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="voda-odvod">
+            <div class="sub-box"></div><span class="sub-label">Sifon / odvodna cijev (nova pozicija)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="voda-tus">
+            <div class="sub-box"></div><span class="sub-label">Priključak tuš / kada</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="voda-wc">
+            <div class="sub-box"></div><span class="sub-label">Priključak WC (UP cisterna)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="voda-wm">
+            <div class="sub-box"></div><span class="sub-label">Priključak perilica rublja</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="voda">
+      <textarea placeholder="Npr. razvod ostaje, samo novi priključci…"></textarea></div>
+
+    <!-- 3. CENTRALNO GRIJANJE -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="grijanje">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🌡 Centralno grijanje</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="gr-premjestanje">
+            <div class="sub-box"></div><span class="sub-label">Premještanje radijatora</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="gr-grija-pod">
+            <div class="sub-box"></div><span class="sub-label">Podno grijanje (novo)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="gr-novi-radijator">
+            <div class="sub-box"></div><span class="sub-label">Novi radijator (kupaonski)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="gr-termostat">
+            <div class="sub-box"></div><span class="sub-label">Termostatski ventil</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="grijanje">
+      <textarea placeholder="Napomena o grijanju…"></textarea></div>
+
+    <!-- 4. ZIDARSKI -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="zidar">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🧱 Zidarski radovi</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="zid-pregrada">
+            <div class="sub-box"></div><span class="sub-label">Nova pregradna stijena (zidarska)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="zid-proboj">
+            <div class="sub-box"></div><span class="sub-label">Proboj / jezgrovanje</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="zid-mauer">
+            <div class="sub-box"></div><span class="sub-label">Zazidavanje otvora</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="zid-rav">
+            <div class="sub-box"></div><span class="sub-label">Ravnanje zidova / estrich</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="zidar">
+      <textarea placeholder="Napomena o zidarskim radovima…"></textarea></div>
+
+    <!-- 5. KERAMIČAR -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="keramicar">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🟦 Keramičarski radovi</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="ker-priprema-pod">
+            <div class="sub-box"></div><span class="sub-label">Priprema podloge poda</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="ker-priprema-zid">
+            <div class="sub-box"></div><span class="sub-label">Priprema podloge zidova</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="ker-abdichtung">
+            <div class="sub-box"></div><span class="sub-label">Vodonepropusna brtva (Abdichtung)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="ker-pod">
+            <div class="sub-box"></div><span class="sub-label">Polaganje pločica pod</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="ker-zid">
+            <div class="sub-box"></div><span class="sub-label">Polaganje pločica zid</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="ker-fuga">
+            <div class="sub-box"></div><span class="sub-label">Fugiranje + silikon</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="ker-dekor">
+            <div class="sub-box"></div><span class="sub-label">Dekorativne trake / niše</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="keramicar">
+      <textarea placeholder="Standard / Premium / Luxus, format pločica…"></textarea></div>
+
+    <!-- 6. TROCKENBAU -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="trockenbau">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🪵 Trockenbau i krečenje</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="tb-pregrada">
+            <div class="sub-box"></div><span class="sub-label">GK pregradna stijjena</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="tb-instalacijski">
+            <div class="sub-box"></div><span class="sub-label">Instalacijska stijjena (UP cisterna)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="tb-spust-strop">
+            <div class="sub-box"></div><span class="sub-label">Spušteni strop</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="tb-nisa">
+            <div class="sub-box"></div><span class="sub-label">Niša u zidu</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="tb-krecenje">
+            <div class="sub-box"></div><span class="sub-label">Krečenje (hodnik / rubni prostori)</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="trockenbau">
+      <textarea placeholder="Napomena o suhoj gradnji…"></textarea></div>
+
+    <!-- 7. ELEKTRO -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="elektro">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">⚡ Električarski radovi</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="el-fi">
+            <div class="sub-box"></div><span class="sub-label">FI zaštitni sklop (UP ploča)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="el-utičnice">
+            <div class="sub-box"></div><span class="sub-label">Nove utičnice i prekidači</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="el-led-nisa">
+            <div class="sub-box"></div><span class="sub-label">LED osvjetljenje u niši (12V)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="el-led-ambient">
+            <div class="sub-box"></div><span class="sub-label">LED ambijentalna traka</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="el-smarthome">
+            <div class="sub-box"></div><span class="sub-label">Smart home (Bluetooth / WiFi)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="el-ventilacija">
+            <div class="sub-box"></div><span class="sub-label">Ventilacija (novi odvod)</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="elektro">
+      <textarea placeholder="Napomena o elektro radovima…"></textarea></div>
+
+    <!-- 8. STOLAR -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="stolar">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🚪 Stolarski radovi</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="st-vrata">
+            <div class="sub-box"></div><span class="sub-label">Nova vrata (s okvirom)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="st-prozor">
+            <div class="sub-box"></div><span class="sub-label">Novi prozor</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="st-ormari">
+            <div class="sub-box"></div><span class="sub-label">Ugradbeni ormar / namještaj</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="stolar">
+      <textarea placeholder="Napomena o stolariji…"></textarea></div>
+
+    <!-- 9. SANITARIJA -->
+    <div class="chk-item" onclick="toggleChk(this)" data-key="sanitarija">
+      <div class="chk-box"></div>
+      <div style="flex:1">
+        <div class="chk-label">🚽 Montaža sanitarije</div>
+        <div class="subitems" onclick="event.stopPropagation()">
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="san-wc">
+            <div class="sub-box"></div><span class="sub-label">WC (zidni, UP cisterna)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="san-tus">
+            <div class="sub-box"></div><span class="sub-label">Tuš (kanalica / posuda)</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="san-kada">
+            <div class="sub-box"></div><span class="sub-label">Kada</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="san-umivaonik">
+            <div class="sub-box"></div><span class="sub-label">Umivaonik + armatura</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="san-bidet">
+            <div class="sub-box"></div><span class="sub-label">Bidet / higijenski tuš</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="san-ogledalo">
+            <div class="sub-box"></div><span class="sub-label">Ogledalo / ormarić</span></div>
+          <div class="sub-chk" onclick="toggleSub(this)" data-key="san-drzaci">
+            <div class="sub-box"></div><span class="sub-label">Nosači / držači ručnika</span></div>
+        </div>
+      </div>
+      <button class="chk-note-toggle" onclick="event.stopPropagation();toggleNote(this)">+ napom.</button>
+    </div>
+    <div class="chk-note" data-for="sanitarija">
+      <textarea placeholder="Što kupac nabavlja, što mi…"></textarea></div>
+
+  </div><!-- /checklist -->
+</div>
+
+<!-- ── PANEL 3: FOTO ── -->
+<div class="panel" id="panel-3">
+  <div class="sec-head">
+    <div class="sec-icon">📸</div>
+    <div><div class="sec-title">Fotografije</div><div class="sec-sub">Stanje prije radova</div></div>
+  </div>
+  <input type="file" id="foto-input" accept="image/*" capture="environment" multiple onchange="handleFotos(this)">
+  <div class="foto-grid" id="foto-grid">
+    <div class="foto-add" onclick="document.getElementById('foto-input').click()">
+      <div class="foto-add-icon">📷</div>
+      <div class="foto-add-txt">Dodaj foto</div>
+    </div>
+  </div>
+  <p style="font-size:.75rem;color:var(--dim);margin-top:.75rem">Fotografi se šalju na server odmah po odabiru.</p>
+</div>
+
+<!-- ── PANEL 4: BILJEŠKE ── -->
+<div class="panel" id="panel-4">
+  <div class="sec-head">
+    <div class="sec-icon">📝</div>
+    <div><div class="sec-title">Bilješke i zaključak</div><div class="sec-sub">Sve što nije u checklistu</div></div>
+  </div>
+  <div class="field">
+    <label class="label">Mišljenje / napomena majstora</label>
+    <textarea class="notes-area" id="notes-main" placeholder="Posebnosti prostora, problemi koje treba riješiti, dogovor s klijentom, materijal koji klijent osigurava…"></textarea>
+  </div>
+  <div class="field">
+    <label class="label">Dogovoreni rok početka</label>
+    <input class="inp" id="n-rok" type="date">
+  </div>
+  <div class="field">
+    <label class="label">Status nalaza</label>
+    <div class="status-row">
+      <div class="status-pill sel" data-v="DRAFT" onclick="setStatus(this)">Skica</div>
+      <div class="status-pill" data-v="COMPLETED" onclick="setStatus(this)">✅ Završeno</div>
+      <div class="status-pill" data-v="OFFER_SENT" onclick="setStatus(this)">📤 Ponuda poslana</div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div style="margin-top:1.5rem">
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);font-weight:700;margin-bottom:.75rem">Pregled odabranih radova</div>
+    <div id="summary-list"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="btn-nav" id="btn-prev" onclick="prevTab()" style="display:none">← Nazad</button>
+  <button class="btn-nav" id="btn-next" onclick="nextTab()">Dalje →</button>
+  <button class="btn-nav btn-submit" id="btn-submit" style="display:none" onclick="submitFinal()">💾 Spremi nalaz</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+{% csrf_token %}
+var ASSESSMENT_ID = null;
+var currentTab = 0;
+var totalTabs = 5;
+var currentStatus = 'DRAFT';
+var autoSaveTimer = null;
+
+// ── TAB NAVIGATION ──────────────────────────────────────────────────────────
+function goTab(n) {
+  document.querySelectorAll('.panel').forEach(function(p,i){ p.classList.toggle('active', i===n); });
+  document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active', i===n); });
+  currentTab = n;
+  document.getElementById('btn-prev').style.display = n > 0 ? '' : 'none';
+  document.getElementById('btn-next').style.display = n < totalTabs-1 ? '' : 'none';
+  document.getElementById('btn-submit').style.display = n === totalTabs-1 ? '' : 'none';
+  document.getElementById('progress').style.width = Math.round((n/(totalTabs-1))*100) + '%';
+  if (n === totalTabs-1) buildSummary();
+  window.scrollTo(0,0);
+}
+function nextTab(){ if (currentTab < totalTabs-1) goTab(currentTab+1); }
+function prevTab(){ if (currentTab > 0) goTab(currentTab-1); }
+
+// ── CHECKLIST ───────────────────────────────────────────────────────────────
+function toggleChk(el) {
+  el.classList.toggle('checked');
+  markTabDone(2);
+  scheduleAutoSave();
+}
+function toggleSub(el) {
+  el.classList.toggle('checked');
+  // Auto-check parent
+  var parent = el.closest('.chk-item');
+  if (parent && !parent.classList.contains('checked')) {
+    parent.classList.add('checked');
+  }
+  scheduleAutoSave();
+}
+function toggleNote(btn) {
+  var item = btn.closest('.chk-item');
+  var key = item.dataset.key;
+  var note = document.querySelector('.chk-note[data-for="' + key + '"]');
+  if (note) note.classList.toggle('open');
+}
+
+// ── STATUS ───────────────────────────────────────────────────────────────────
+function setStatus(el) {
+  document.querySelectorAll('.status-pill').forEach(function(p){ p.classList.remove('sel'); });
+  el.classList.add('sel');
+  currentStatus = el.dataset.v;
+}
+
+// ── TOPBAR UPDATE ────────────────────────────────────────────────────────────
+function updateTopbar() {
+  var name = document.getElementById('c-name').value.trim();
+  var addr = document.getElementById('c-addr').value.trim();
+  var sub = name || 'Novi nalaz';
+  if (addr) sub += ' · ' + addr.split(',')[0];
+  document.getElementById('topbar-client').textContent = sub + ' · Badsanierung';
+  markTabDone(0);
+  scheduleAutoSave();
+}
+
+// ── MARK TAB DONE ─────────────────────────────────────────────────────────────
+function markTabDone(i) {
+  var tab = document.getElementById('tab-' + i);
+  if (!tab) return;
+  var existing = tab.querySelector('.tab-done');
+  if (!existing) {
+    var dot = document.createElement('span');
+    dot.className = 'tab-done';
+    tab.appendChild(dot);
+  }
+}
+
+// ── COLLECT DATA ─────────────────────────────────────────────────────────────
+function collectData() {
+  // Step 1: Client
+  var s1 = {
+    client_name:    document.getElementById('c-name').value,
+    client_phone:   document.getElementById('c-phone').value,
+    client_email:   document.getElementById('c-email').value,
+    client_address: document.getElementById('c-addr').value,
+    visit_date:     document.getElementById('c-date').value,
+  };
+
+  // Step 2: Mjere
+  var s2 = {
+    kup: document.getElementById('m-kup').value,
+    wc:  document.getElementById('m-wc').value,
+    pod: document.getElementById('m-pod').value,
+    zid: document.getElementById('m-zid').value,
+    vis: document.getElementById('m-vis').value,
+    odv: document.getElementById('m-odv').value,
+    note: document.getElementById('m-note').value,
+  };
+
+  // Step 3: Radovi (checklist)
+  var s3 = { checked: [], subs: {}, notes: {} };
+  document.querySelectorAll('#checklist .chk-item.checked').forEach(function(el){
+    s3.checked.push(el.dataset.key);
+  });
+  document.querySelectorAll('#checklist .sub-chk.checked').forEach(function(el){
+    s3.subs[el.dataset.key] = true;
+  });
+  document.querySelectorAll('#checklist .chk-note').forEach(function(el){
+    var ta = el.querySelector('textarea');
+    if (ta && ta.value.trim()) s3.notes[el.dataset.for] = ta.value.trim();
+  });
+
+  // Step 5: Notes
+  var s5 = {
+    expert_opinion: document.getElementById('notes-main').value,
+    rok_start:      document.getElementById('n-rok').value,
+  };
+
+  return { step1: s1, step2: s2, step3: s3, step5: s5, assessment_type: 'bathroom' };
+}
+
+// ── AUTO SAVE ─────────────────────────────────────────────────────────────────
+function scheduleAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(function(){ autoSave(false); }, 3000);
+}
+function autoSave(final) {
+  var data = collectData();
+  data.final_submit = final;
+  if (ASSESSMENT_ID) data.assessment_id = ASSESSMENT_ID;
+  fetch('/assessment/save/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify(data)
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.ok) {
+      ASSESSMENT_ID = d.assessment_id;
+      if (!final) showToast('✓ Automatski spremljeno');
+    }
+  }).catch(function(){});
+}
+
+// ── FOTO UPLOAD ───────────────────────────────────────────────────────────────
+function handleFotos(input) {
+  var files = Array.from(input.files);
+  files.forEach(function(file){
+    // Save first if no ID yet
+    if (!ASSESSMENT_ID) {
+      var data = collectData();
+      data.final_submit = false;
+      fetch('/assessment/save/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+        body: JSON.stringify(data)
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.ok) { ASSESSMENT_ID = d.assessment_id; uploadFoto(file); }
+      });
+    } else {
+      uploadFoto(file);
+    }
+  });
+}
+function uploadFoto(file) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var thumb = document.createElement('div');
+    thumb.className = 'foto-thumb';
+    thumb.innerHTML = '<img src="' + e.target.result + '"><button class="del-btn" onclick="this.parentNode.remove()">×</button>';
+    var grid = document.getElementById('foto-grid');
+    grid.insertBefore(thumb, grid.querySelector('.foto-add'));
+    markTabDone(3);
+  };
+  reader.readAsDataURL(file);
+
+  if (!ASSESSMENT_ID) return;
+  var fd = new FormData();
+  fd.append('photo', file);
+  fd.append('step', '3');
+  fd.append('csrfmiddlewaretoken', getCsrf());
+  fetch('/assessment/' + ASSESSMENT_ID + '/photos/', { method: 'POST', body: fd })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (!d.ok) console.warn('Photo upload failed'); });
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+var LABELS = {
+  demontaza:'🏗 Demontaža i odvoz šute', voda:'🚿 Vodovodne instalacije',
+  grijanje:'🌡 Centralno grijanje', zidar:'🧱 Zidarski radovi',
+  keramicar:'🟦 Keramičarski radovi', trockenbau:'🪵 Trockenbau / krečenje',
+  elektro:'⚡ Električni radovi', stolar:'🚪 Stolarski radovi', sanitarija:'🚽 Sanitarija',
+};
+function buildSummary() {
+  var checked = [];
+  document.querySelectorAll('#checklist .chk-item.checked').forEach(function(el){
+    checked.push(LABELS[el.dataset.key] || el.dataset.key);
+  });
+  var html = '';
+  if (checked.length) {
+    html += '<div class="summary-block"><div class="summary-title">Dogovoreni radovi (' + checked.length + ')</div>';
+    checked.forEach(function(l){ html += '<div class="summary-item"><span class="si-icon">✓</span>' + l + '</div>'; });
+    html += '</div>';
+  }
+  var mjere = [];
+  var mFields = [['m-kup','Kupaonica'],['m-wc','WC'],['m-pod','Pod'],['m-zid','Zidovi']];
+  mFields.forEach(function(f){
+    var v = document.getElementById(f[0]).value;
+    if (v) mjere.push(f[1]+': '+v+' m²');
+  });
+  if (mjere.length) {
+    html += '<div class="summary-block"><div class="summary-title">Mjere</div>';
+    mjere.forEach(function(m){ html += '<div class="summary-item"><span class="si-icon">📐</span>'+m+'</div>'; });
+    html += '</div>';
+  }
+  document.getElementById('summary-list').innerHTML = html || '<p style="color:var(--dim);font-size:.85rem">Još nema odabranih radova.</p>';
+}
+
+// ── FINAL SUBMIT ─────────────────────────────────────────────────────────────
+function submitFinal() {
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sprema se…';
+  var data = collectData();
+  data.final_submit = true;
+  data.status_override = currentStatus;
+  if (ASSESSMENT_ID) data.assessment_id = ASSESSMENT_ID;
+  fetch('/assessment/save/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify(data)
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if (d.ok) {
+      showToast('✅ Nalaz spremljen!');
+      setTimeout(function(){
+        window.location.href = d.redirect_url || '/assessment/';
+      }, 1000);
+    } else {
+      btn.disabled = false; btn.textContent = '💾 Spremi nalaz';
+      showToast('❌ Greška pri spremanju');
+    }
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = '💾 Spremi nalaz';
+    showToast('❌ Greška veze');
+  });
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function getCsrf() {
+  var m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2000);
+}
+
+// Init
+document.getElementById('c-date').value = new Date().toISOString().split('T')[0];
+document.querySelectorAll('.inp,.m-inp,.notes-area').forEach(function(el){
+  el.addEventListener('input', scheduleAutoSave);
+});
+goTab(0);
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n l10n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-box me-2 text-primary"></i>{{ action }}</h2>
+  <a href="{% url 'webshop:product_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
+  </a>
+</div>
+<div class="stat-card" style="max-width:700px">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label fw-bold">{% trans "Naziv *" %}</label>
+        <input type="text" name="name" class="form-control" value="{{ product.name|default:'' }}" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">{% trans "SKU *" %}</label>
+        <input type="text" name="sku" class="form-control" value="{{ product.sku|default:'' }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Kategorija" %}</label>
+        <select name="category" class="form-select">
+          {% for val,label in category_choices %}
+          <option value="{{ val }}" {% if product.category == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold">{% trans "Cijena (EUR)" %}</label>
+        <input type="number" step="0.01" name="price" class="form-control" value="{{ product.price|default:''|unlocalize }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold">{% trans "Zaliha (kom)" %}</label>
+        <input type="number" name="stock" class="form-control" value="{{ product.stock|default:'0'|unlocalize }}">
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-bold">{% trans "Opis" %}</label>
+        <textarea name="description" class="form-control" rows="3">{{ product.description|default:'' }}</textarea>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Slika" %}</label>
+        <input type="file" name="image" class="form-control" accept="image/*">
+        {% if product.image %}<img src="{{ product.image.url }}" style="height:60px;margin-top:8px" class="rounded">{% endif %}
+      </div>
+      <div class="col-md-6 d-flex flex-column justify-content-center gap-2 mt-3">
+        <div class="form-check">
+          <input type="checkbox" name="is_active" class="form-check-input" id="isActive"
+                 {% if product.is_active|default:True %}checked{% endif %}>
+          <label class="form-check-label fw-bold" for="isActive">{% trans "Aktivan (vidljiv u shopu)" %}</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="is_rental" class="form-check-input" id="isRental"
+                 {% if product.is_rental %}checked{% endif %}>
+          <label class="form-check-label fw-bold" for="isRental">{% trans "Za iznajmljivanje (ne prodaje se)" %}</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary px-4">
+          <i class="fas fa-save me-2"></i>{% trans "Spremi" %}
+        </button>
+        <a href="{% url 'webshop:product_list' %}" class="btn btn-outline-secondary ms-2">{% trans "Odustani" %}</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

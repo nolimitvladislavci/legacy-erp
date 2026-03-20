@@ -1,0 +1,22 @@
+[project]
+name = "fina-connect"
+version = "1.0.0"
+description = "FINA-Connect ERP — Multi-tenant Business Management Platform"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["core", "companies", "invoicing", "pos", "appointments", "documents", "marketplace", "partners", "inventory", "konto", "calculator", "projects", "work_orders", "worktime", "reports", "notifications", "burza", "delivery", "traceability", "gastro_menu", "fiscal", "permissions"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.settings"
+python_files = "test*.py"
+python_classes = "Test*"
+python_functions = "test_*"

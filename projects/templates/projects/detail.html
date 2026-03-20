@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ project.name }} – LIMIT CONNECT{% endblock %}
+{% block page_title %}{{ project.name }}{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-8">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between mb-3">
+        <div><span class="badge bg-secondary me-2">{{ project.code }}</span><span class="badge bg-{% if project.status == 'active' %}success{% else %}secondary{% endif %}">{{ project.get_status_display }}</span></div>
+        {% if request.user.is_staff %}<a href="/admin/projects/project/{{ project.id }}/change/" class="btn btn-outline-secondary btn-sm"><i class="fas fa-edit"></i></a>{% endif %}
+      </div>
+      <p class="text-muted">{{ project.description }}</p>
+      <div class="row mt-3">
+        <div class="col-4"><div class="small text-muted">{% trans "Lokacija" %}</div><div class="fw-bold">{{ project.location|default:"–" }}</div></div>
+        <div class="col-4"><div class="small text-muted">{% trans "Voditelj" %}</div><div class="fw-bold">{{ project.manager.get_full_name|default:"–" }}</div></div>
+        <div class="col-4"><div class="small text-muted">{% trans "Klijent" %}</div><div class="fw-bold">{{ project.client|default:"–" }}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card h-100">
+      <h6 class="fw-bold mb-3">{% trans "Ažuriranja" %}</h6>
+      {% for u in updates %}<div class="mb-3"><div class="fw-bold small">{{ u.title }}</div><div class="text-muted small">{{ u.content|truncatechars:100 }}</div><div class="text-muted" style="font-size:0.7rem">{{ u.created_at|date:"d.m.Y" }}</div></div>{% empty %}<p class="text-muted small">{% trans "Nema ažuriranja" %}</p>{% endfor %}
+    </div>
+  </div>
+</div>
+<!-- Galerija -->
+<div class="stat-card">
+  <h6 class="fw-bold mb-3"><i class="fas fa-images me-2"></i>{% trans "Fotografije projekta" %} ({{ photos.count }})</h6>
+  <div class="row g-2">
+    {% for photo in photos %}
+    <div class="col-6 col-md-4 col-xl-3">
+      <div style="position:relative">
+        <img src="{{ photo.image.url }}" class="w-100" style="height:160px;object-fit:cover;border-radius:8px">
+        {% if photo.caption %}<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:white;padding:6px;border-radius:0 0 8px 8px;font-size:0.75rem">{{ photo.caption }}</div>{% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-4"><i class="fas fa-camera fa-2x text-muted mb-2"></i><br><span class="text-muted">{% trans "Nema fotografija" %}</span></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

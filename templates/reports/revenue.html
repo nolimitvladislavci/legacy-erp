@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans "Prihod" %}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:1000px">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-euro-sign"></i> {% trans "Prihod" %}</h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'reports:export_revenue_csv' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-csv"></i> CSV</a>
+      <a href="{% url 'reports:export_revenue_excel' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}" class="btn btn-sm btn-outline-success"><i class="fas fa-file-excel"></i> Excel</a>
+    </div>
+  </div>
+  <form class="row g-2 mb-4" method="get">
+    <div class="col-auto"><input type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}" class="form-control form-control-sm"></div>
+    <div class="col-auto"><input type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" class="form-control form-control-sm"></div>
+    <div class="col-auto"><button class="btn btn-sm btn-primary">{% trans "Filtriraj" %}</button></div>
+  </form>
+  <div class="card mb-4" style="border-radius:12px"><div class="card-body"><canvas id="revenueChart" height="120"></canvas></div></div>
+  <div class="card" style="border-radius:12px">
+    <div class="card-body">
+      <div class="d-flex justify-content-between mb-2"><strong>{% trans "Ukupno" %}</strong><strong style="color:#10b981">{{ total|floatformat:2 }} EUR</strong></div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+          <thead><tr><th>{% trans "Broj" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Klijent" %}</th><th class="text-end">{% trans "Iznos" %}</th></tr></thead>
+          <tbody>
+            {% for inv in invoices %}
+            <tr><td>{{ inv.number }}</td><td>{{ inv.date_issued|date:"d.m.Y" }}</td><td>{{ inv.client_name }}</td><td class="text-end">{{ inv.total|floatformat:2 }} {{ inv.currency }}</td></tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">{% trans "Nema podataka" %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('revenueChart'),{
+  type:'bar',
+  data:{labels:{{ labels|safe }},datasets:[{label:'EUR',data:{{ values|safe }},backgroundColor:'#10b981'}]},
+  options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+});
+</script>
+{% endblock %}

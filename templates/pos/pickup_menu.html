@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ company.name }} — Naruci online</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a2e,#0a0a0a);padding:20px;text-align:center;border-bottom:2px solid #c9a84c}
+.header h1{color:#c9a84c;font-size:1.4rem;font-weight:800}
+.header p{color:#94a3b8;font-size:.8rem;margin-top:4px}
+.cats{display:flex;gap:6px;padding:12px;overflow-x:auto;border-bottom:1px solid #222}
+.cat-btn{padding:6px 14px;border-radius:20px;border:1px solid #333;background:none;color:#94a3b8;font-size:.75rem;cursor:pointer;white-space:nowrap}
+.cat-btn.active{background:#c9a84c;color:#000;border-color:#c9a84c;font-weight:700}
+.items{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}
+.item{background:#1a1a1a;border:1px solid #222;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s}
+.item:active{transform:scale(.97)}
+.item.in-cart{border-color:#c9a84c;background:#1a1a0a;box-shadow:0 0 12px rgba(201,168,76,.3)}
+.item.in-cart .item-name{color:#c9a84c}
+.item-badge{display:none;position:absolute;top:-6px;right:-6px;width:22px;height:22px;line-height:22px;border-radius:50%;background:#c9a84c;color:#000;font-size:.7rem;font-weight:800;text-align:center}
+.item.in-cart .item-badge{display:block}
+.item-name{font-size:.85rem;font-weight:600;margin-bottom:4px}
+.item-price{color:#c9a84c;font-weight:800;font-size:1rem}
+.item-qty{display:flex;align-items:center;gap:8px;margin-top:6px}
+.item-qty button{width:28px;height:28px;border-radius:50%;border:1px solid #c9a84c;background:none;color:#c9a84c;font-size:1rem;cursor:pointer;font-weight:700}
+.item-qty span{font-weight:800;min-width:20px;text-align:center}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(0deg,#1a1a2e,#1a1a2eee);border-top:2px solid #c9a84c;padding:14px 16px;display:none;z-index:100;backdrop-filter:blur(10px)}
+.cart-bar.show{display:flex;align-items:center;justify-content:space-between}
+.cart-total{color:#c9a84c;font-size:1.1rem;font-weight:800}
+.cart-btn{background:#c9a84c;color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:800;font-size:.9rem;cursor:pointer}
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.9);padding:20px;overflow-y:auto}
+.modal.show{display:block}
+.modal-box{max-width:400px;margin:40px auto;background:#1a1a1a;border:1px solid #c9a84c;border-radius:12px;padding:24px}
+.modal-box h3{color:#c9a84c;margin-bottom:16px}
+.modal-box input,.modal-box select{width:100%;padding:10px;margin-bottom:10px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#e2e8f0;font-size:.9rem}
+.modal-box button[type=submit]{width:100%;padding:12px;background:#c9a84c;color:#000;border:none;border-radius:8px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:8px}
+.bag-opt{display:flex;align-items:center;gap:8px;padding:8px;background:#111;border-radius:8px;margin-bottom:12px;font-size:.85rem}
+.bag-opt input{width:auto}
+@media(min-width:500px){.items{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>{{ company.name }}</h1>
+    <p>Naruci putem — tvoja vrecica te ceka!</p>
+</div>
+
+<div class="cats" id="cats">
+    <button class="cat-btn active" onclick="filterCat('')">Sve</button>
+    {% for cat in categories %}
+    <button class="cat-btn" onclick="filterCat('{{ cat }}')">{% if cat == 'food' %}Kruh i peciva{% elif cat == 'dessert' %}Kolaci i slatkisi{% elif cat == 'drink' %}Pica{% elif cat == 'special' %}Posebno{% else %}{{ cat }}{% endif %}</button>
+    {% endfor %}
+</div>
+
+<div class="items" id="itemGrid">
+    {% for item in items %}
+    <div class="item" style="position:relative" data-id="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ item.unit_price }}" data-cat="{{ item.category|default:'ostalo' }}" onclick="toggleItem(this)">
+        <div class="item-badge">1</div>
+        <div class="item-name">{{ item.name }}</div>
+        <div class="item-price">&euro;{{ item.unit_price|floatformat:2 }}</div>
+        <div class="item-qty" style="display:none">
+            <button onclick="event.stopPropagation();changeQty(this,-1)">-</button>
+            <span>1</span>
+            <button onclick="event.stopPropagation();changeQty(this,1)">+</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="cart-bar" id="cartBar">
+    <div><span id="cartCount">0</span> stavki &mdash; <span class="cart-total" id="cartTotal">0.00</span> EUR</div>
+    <button class="cart-btn" onclick="openCheckout()">NARUCI &rarr;</button>
+</div>
+
+<div class="modal" id="checkoutModal">
+    <div class="modal-box">
+        <h3>Zavrsi narudzbu</h3>
+        <input type="text" id="custName" placeholder="Tvoje ime *" required>
+        <input type="tel" id="custPhone" placeholder="Mobitel (za WhatsApp obavijest)">
+        <div class="bag-opt">
+            <input type="checkbox" id="addBag" checked>
+            <label for="addBag">Dodaj vrecicu (+{{ bag_price|floatformat:2 }} EUR)</label>
+        </div>
+        <select id="payMethod">
+            <option value="cash">Platim gotovinom u pekari</option>
+            <option value="card">Platim karticom u pekari</option>
+        </select>
+        <button type="submit" onclick="submitOrder()">POTVRDI NARUDZBU</button>
+        <button type="button" onclick="document.getElementById('checkoutModal').classList.remove('show')" style="width:100%;padding:10px;background:none;border:1px solid #333;border-radius:8px;color:#94a3b8;cursor:pointer;margin-top:6px">Odustani</button>
+    </div>
+</div>
+
+<div class="modal" id="successModal">
+    <div class="modal-box" style="text-align:center">
+        <div style="font-size:3rem;margin-bottom:12px">&#10003;</div>
+        <h3>Narudzba primljena!</h3>
+        <p style="color:#94a3b8;margin-bottom:16px" id="successMsg">Vasa vrecica ce biti spremna.</p>
+        <button onclick="location.reload()" style="width:100%;padding:12px;background:#c9a84c;color:#000;border:none;border-radius:8px;font-weight:800;cursor:pointer">Nova narudzba</button>
+    </div>
+</div>
+
+<div style="height:70px"></div>
+
+<script>
+var cart = {};
+var SLUG = "{{ company.booking_slug }}";
+var BAG_PRICE = {{ bag_price }};
+
+function toggleItem(el) {
+    var id = el.dataset.id;
+    var qtyDiv = el.querySelector('.item-qty');
+    if (cart[id]) {
+        delete cart[id];
+        el.classList.remove('in-cart');
+        qtyDiv.style.display = 'none';
+    } else {
+        cart[id] = {id: id, name: el.dataset.name, price: parseFloat(el.dataset.price), qty: 1};
+        el.classList.add('in-cart');
+        qtyDiv.style.display = 'flex';
+        qtyDiv.querySelector('span').textContent = '1';
+        el.querySelector('.item-badge').textContent = '1';
+    }
+    updateCart();
+}
+
+function changeQty(btn, delta) {
+    var item = btn.closest('.item');
+    var id = item.dataset.id;
+    if (!cart[id]) return;
+    cart[id].qty = Math.max(1, cart[id].qty + delta);
+    item.querySelector('.item-qty span').textContent = cart[id].qty;
+    item.querySelector('.item-badge').textContent = cart[id].qty;
+    updateCart();
+}
+
+function updateCart() {
+    var count = 0, total = 0;
+    for (var k in cart) { count += cart[k].qty; total += cart[k].price * cart[k].qty; }
+    document.getElementById('cartCount').textContent = count;
+    document.getElementById('cartTotal').textContent = total.toFixed(2);
+    document.getElementById('cartBar').classList.toggle('show', count > 0);
+}
+
+function filterCat(cat) {
+    document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
+    event.target.classList.add('active');
+    document.querySelectorAll('.item').forEach(function(el) {
+        el.style.display = (!cat || el.dataset.cat === cat) ? '' : 'none';
+    });
+}
+
+function openCheckout() { document.getElementById('checkoutModal').classList.add('show'); }
+
+function submitOrder() {
+    var name = document.getElementById('custName').value.trim();
+    if (!name) { alert('Ime je obavezno'); return; }
+    var items = [];
+    for (var k in cart) items.push({id: parseInt(k), qty: cart[k].qty});
+
+    fetch('/pos/pickup/' + SLUG + '/order/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            items: items,
+            name: name,
+            phone: document.getElementById('custPhone').value.trim(),
+            payment: document.getElementById('payMethod').value,
+            bag: document.getElementById('addBag').checked
+        })
+    }).then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            document.getElementById('checkoutModal').classList.remove('show');
+            document.getElementById('successMsg').textContent = data.message + ' Ukupno: ' + data.total + ' EUR';
+            document.getElementById('successModal').classList.add('show');
+            cart = {};
+        } else {
+            alert(data.error || 'Greska');
+        }
+    }).catch(function() { alert('Greska veze'); });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Narudzba — {{ snapshot.company.name }}{% endblock %}
+{% block content %}
+<style>
+.wa-wrap { max-width: 600px; margin: 0 auto; padding: 16px; }
+.wa-header { text-align: center; margin-bottom: 24px; }
+.wa-header h2 { font-weight: 900; font-size: 1.3rem; }
+.wa-timer { background: rgba(234,179,8,0.12); border: 1px solid rgba(234,179,8,0.3); border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 20px; }
+.wa-timer .countdown { font-size: 1.4rem; font-weight: 900; color: #eab308; }
+.wa-timer .label { font-size: .78rem; color: var(--text-muted, #94a3b8); }
+.wa-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.wa-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border, rgba(255,255,255,0.06)); font-size: .9rem; }
+.wa-item:last-child { border-bottom: none; }
+.wa-total { display: flex; justify-content: space-between; padding: 14px 0; font-size: 1.2rem; font-weight: 900; border-top: 2px solid var(--border, rgba(255,255,255,0.1)); margin-top: 8px; }
+.wa-total .val { color: #c9a84c; }
+.btn-pay { background: #25D366; color: #fff; border: none; padding: 16px; border-radius: 14px; font-weight: 900; font-size: 1.1rem; cursor: pointer; width: 100%; margin-top: 12px; }
+.btn-pay:hover { background: #1da851; }
+.wa-info { font-size: .78rem; color: var(--text-muted); text-align: center; margin-top: 12px; }
+.wa-company { font-size: .85rem; color: var(--text-muted); margin-top: 4px; }
+</style>
+
+<div class="wa-wrap">
+  <div class="wa-header">
+    <h2>&#128722; {% trans "Vasa narudzba" %}</h2>
+    <div class="wa-company">{{ snapshot.company.name }}</div>
+  </div>
+
+  <div class="wa-timer">
+    <div class="countdown" id="wa-countdown">--:--</div>
+    <div class="label">{% trans "Link istice za" %}</div>
+  </div>
+
+  <div class="wa-card">
+    {% for item in items %}
+    <div class="wa-item">
+      <div>
+        <strong>{{ item.name }}</strong>
+        <span style="color:var(--text-muted);font-size:.8rem;">x{{ item.qty }} {{ item.unit }}</span>
+      </div>
+      <span style="font-weight:700;">{{ item.line_total }}&euro;</span>
+    </div>
+    {% endfor %}
+    <div class="wa-total">
+      <span>{% trans "UKUPNO" %}</span>
+      <span class="val">{{ total|floatformat:2 }}&euro;</span>
+    </div>
+  </div>
+
+  {% if snapshot.delivery_address %}
+  <div class="wa-card" style="font-size:.88rem;">
+    <strong>&#128205; {% trans "Dostava" %}:</strong> {{ snapshot.delivery_address }}
+    {% if snapshot.notes %}<br><strong>{% trans "Napomena" %}:</strong> {{ snapshot.notes }}{% endif %}
+  </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn-pay">&#10003; {% trans "POTVRDI NARUDZBU" %}</button>
+  </form>
+
+  <div class="wa-info">
+    {% trans "Racun ce biti kreiran pri isporuci. Sigurna veza." %}
+  </div>
+</div>
+
+<script>
+(function(){
+  var expires = new Date("{{ snapshot.expires_at|date:'c' }}");
+  var el = document.getElementById('wa-countdown');
+  function update() {
+    var now = new Date();
+    var diff = Math.max(0, Math.floor((expires - now) / 1000));
+    var m = Math.floor(diff / 60);
+    var s = diff % 60;
+    el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    if (diff <= 0) {
+      el.textContent = 'ISTEKAO';
+      el.style.color = '#dc3545';
+    }
+  }
+  update();
+  setInterval(update, 1000);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Device tokeni{% endblock %}
+{% block page_title %}Device tokeni{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-mobile-alt me-2 text-info"></i>{% trans "Mobilni pristup — Device tokeni" %}</h2>
+    <small class="text-muted">{% trans "Generiraj barcode za instant login s mobitelom (bez lozinke)" %}</small>
+  </div>
+</div>
+
+<!-- Kreiraj novi token -->
+<div class="stat-card mb-4">
+  <h5><i class="fas fa-plus-circle me-2"></i>{% trans "Novi device token" %}</h5>
+  <form method="post" class="row g-3 align-items-end">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create">
+    <div class="col-md-4">
+      <label class="form-label">{% trans "Naziv uređaja" %}</label>
+      <input type="text" name="device_name" class="form-control" placeholder="npr. Moj iPhone, Tablet blagajna" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">{% trans "POS blagajnik (opcionalno)" %}</label>
+      <select name="cashier_id" class="form-select">
+        <option value="">— {% trans "Bez auto-cashier" %} —</option>
+        {% for c in cashiers %}
+        <option value="{{ c.pk }}">{{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <small class="text-muted">{% trans "Ako odabereš, odmah aktivira ovog blagajnika" %}</small>
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="fas fa-qrcode me-2"></i>{% trans "Generiraj barcode" %}
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Postojeći tokeni -->
+{% if tokens %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>{% trans "Uređaj" %}</th>
+        <th>{% trans "Barcode" %}</th>
+        <th>{% trans "Blagajnik" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th>{% trans "Zadnje korištenje" %}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tokens %}
+      <tr>
+        <td>
+          <i class="fas fa-mobile-alt me-2 text-info"></i>
+          <a href="{% url 'device_token_detail' token_id=t.pk %}" class="fw-bold text-decoration-none">{{ t.device_name|default:"Uređaj" }}</a>
+        </td>
+        <td><code>{{ t.barcode_data }}</code></td>
+        <td>{{ t.cashier.name|default:"—" }}</td>
+        <td>
+          {% if t.is_active %}
+          <span class="badge bg-success">{% trans "Aktivan" %}</span>
+          {% else %}
+          <span class="badge bg-secondary">{% trans "Deaktiviran" %}</span>
+          {% endif %}
+        </td>
+        <td>{{ t.last_used_at|date:"d.m.Y H:i"|default:"—" }}</td>
+        <td class="text-end">
+          <a href="{% url 'device_token_detail' token_id=t.pk %}" class="btn btn-sm btn-outline-info" title="Barcode">
+            <i class="fas fa-qrcode"></i>
+          </a>
+          <form method="post" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="token_id" value="{{ t.pk }}">
+            {% if t.is_active %}
+            <input type="hidden" name="action" value="deactivate">
+            <button class="btn btn-sm btn-outline-danger" title="Deaktiviraj" onclick="return confirm('Deaktivirati token?')">
+              <i class="fas fa-ban"></i>
+            </button>
+            {% else %}
+            <input type="hidden" name="action" value="activate">
+            <button class="btn btn-sm btn-outline-success" title="Aktiviraj">
+              <i class="fas fa-check"></i>
+            </button>
+            {% endif %}
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="fas fa-mobile-alt fa-3x mb-3 d-block"></i>
+  <h5>{% trans "Nemaš device tokena" %}</h5>
+  <p>{% trans "Generiraj barcode iznad — spremi u mobitel i skeniraj za instant POS pristup." %}</p>
+</div>
+{% endif %}
+
+<div class="stat-card mt-4">
+  <h6><i class="fas fa-info-circle me-2"></i>{% trans "Kako radi?" %}</h6>
+  <ol class="mb-0">
+    <li>{% trans "Generiraj token i spremi barcode u mobitel (screenshot, Apple/Google Wallet)" %}</li>
+    <li>{% trans "Na POS terminalu klikni 'Skeniraj za prijavu' i usmjeri kameru na barcode" %}</li>
+    <li>{% trans "Sustav te odmah prijavi — bez upisivanja lozinke" %}</li>
+    <li>{% trans "Ako POS koristiš na mobitelu, otvori link iz tokena — auto-login" %}</li>
+  </ol>
+</div>
+
+{% endblock %}

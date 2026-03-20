@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0a0a">
+<title>Kuhinja / Sank</title>
+<style>
+:root{--bg:#0a0a0a;--card:#141414;--border:#222;--gold:#c9a84c;--text:#e8e8e8;--muted:#555;--green:#22c55e;--red:#ef4444;--orange:#f59e0b;--blue:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,sans-serif;min-height:100vh}
+.top{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--gold);padding:.6rem 1.2rem;display:flex;align-items:center;justify-content:space-between}
+.top h1{color:var(--gold);font-size:1.3rem}
+.top .live{font-size:.7rem;color:var(--green);display:flex;align-items:center;gap:4px}
+.top .live::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.6rem;padding:.8rem}
+.card{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:.7rem .8rem;transition:all .3s}
+.card.new{border-color:var(--gold);animation:glow 2s infinite}
+.card.confirmed{border-color:var(--orange)}
+.card.preparing{border-color:var(--orange);background:#1a1500}
+.card.ready{border-color:var(--green);background:#0a1a0a;animation:ready-pulse 1.5s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 5px rgba(201,168,76,.3)}50%{box-shadow:0 0 20px rgba(201,168,76,.6)}}
+@keyframes ready-pulse{0%,100%{box-shadow:0 0 5px rgba(34,197,94,.3)}50%{box-shadow:0 0 15px rgba(34,197,94,.5)}}
+.c-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem}
+.c-table{font-weight:800;font-size:1.1rem}
+.c-table small{font-weight:400;font-size:.7rem;color:var(--muted)}
+.c-wait{font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:10px;background:#1a0a0a;color:var(--red)}
+.c-wait.ok{background:#0a1a0a;color:var(--green)}
+.c-guest{font-size:.75rem;color:var(--muted);margin-bottom:.3rem}
+.c-items{list-style:none;margin-bottom:.4rem}
+.c-items li{font-size:.85rem;padding:2px 0;border-bottom:1px solid #1a1a1a;display:flex;gap:.3rem}
+.c-items .qty{color:var(--gold);font-weight:700;min-width:28px}
+.c-items .note{font-size:.7rem;color:var(--orange);font-style:italic}
+.c-notes{font-size:.72rem;color:var(--orange);padding:.3rem .5rem;background:#1a1500;border-radius:6px;margin-bottom:.4rem}
+.c-waiter{font-size:.65rem;color:var(--blue);margin-bottom:.3rem}
+.c-actions{display:flex;gap:.3rem}
+.c-btn{flex:1;padding:.5rem;border:none;border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;text-align:center}
+.c-btn:active{opacity:.7}
+.c-btn.confirm{background:var(--gold);color:#000}
+.c-btn.prep{background:var(--orange);color:#000}
+.c-btn.done{background:var(--green);color:#000}
+.c-btn:disabled{opacity:.3}
+.empty{text-align:center;padding:4rem;color:var(--muted);font-size:1.2rem}
+.sound-btn{position:fixed;bottom:1rem;right:1rem;width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--gold);font-size:1.2rem;cursor:pointer;z-index:200}
+</style>
+</head>
+<body>
+
+{% if error %}
+<div class="empty">{{ error }}</div>
+{% else %}
+
+<div class="top">
+  <h1>&#127859; {{ company.name }}</h1>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="cookBadge" style="display:none;background:var(--green);color:#000;font-weight:700;font-size:.75rem;padding:3px 10px;border-radius:20px"></span> <button id="cookLogoutBtn" onclick="cookLogout()" style="display:none;margin-left:.5rem;padding:.25rem .75rem;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.8rem">Odjava</button>
+    <button onclick="showCookScan()" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:20px;font-size:.7rem;cursor:pointer" title="Prijavi se barcodom">&#128100; Prijava</button>
+    <div class="live">LIVE</div>
+  </div>
+</div>
+
+<!-- Cook barcode scan modal -->
+<div id="cookModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center">
+  <div style="background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:24px;max-width:400px;width:90%;text-align:center">
+    <h3 style="color:var(--gold);margin-bottom:12px">&#128100; Prijava kuhara</h3>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:16px">Skeniraj svoj barcode ili upiši kod</p>
+    <input type="text" id="cookBarcodeInput" placeholder="LC-DEV-XXXXXXXX"
+           style="width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:1rem;text-align:center;letter-spacing:2px"
+           autocomplete="off" autofocus>
+    <div id="cookStatus" style="margin-top:10px;font-size:.85rem;min-height:20px"></div>
+    <button onclick="closeCookModal()" style="margin-top:12px;background:none;border:1px solid var(--border);color:var(--muted);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.8rem">Zatvori</button>
+  </div>
+</div>
+
+<div class="grid" id="ordersGrid">
+  <div class="empty">Ucitavanje...</div>
+</div>
+
+<button class="sound-btn" id="soundBtn" onclick="toggleSound()" title="Zvuk">&#128266;</button>
+
+<script>
+var TOKEN = '{{ token }}';
+var soundEnabled = true;
+var lastOrderCount = 0;
+var activeCook = localStorage.getItem('kds_cook_'+TOKEN) || '';
+
+// Cook scan functions
+function showCookScan(){
+  document.getElementById('cookModal').style.display='flex';
+  setTimeout(function(){document.getElementById('cookBarcodeInput').focus()},100);
+}
+function closeCookModal(){document.getElementById('cookModal').style.display='none';}
+
+document.getElementById('cookBarcodeInput').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    var bc=this.value.trim();
+    if(!bc)return;
+    document.getElementById('cookStatus').innerHTML='<span style="color:var(--gold)">Provjera...</span>';
+    fetch('/pos/gastro/kds/'+TOKEN+'/cook-scan/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({barcode_data:bc})
+    })
+    .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d}})})
+    .then(function(res){
+      if(res.data.ok){
+        activeCook=res.data.cook_name;
+        localStorage.setItem('kds_cook_'+TOKEN,activeCook);
+        localStorage.setItem('kds_cook_bc_'+TOKEN,bc);
+        document.getElementById('cookBadge').textContent=activeCook;
+        document.getElementById('cookBadge').style.display='inline-block';
+        document.getElementById('cookLogoutBtn').style.display='inline-block';
+        document.getElementById('cookStatus').innerHTML='<span style="color:var(--green)">'+activeCook+' prijavljen!</span>';
+        setTimeout(closeCookModal,1000);
+      } else {
+        document.getElementById('cookStatus').innerHTML='<span style="color:var(--red)">'+(res.data.error||'Greška')+'</span>';
+      }
+    })
+    .catch(function(e){
+      document.getElementById('cookStatus').innerHTML='<span style="color:var(--red)">'+e+'</span>';
+    });
+  }
+});
+
+// Restore cook on page load
+if(activeCook){
+  document.getElementById('cookBadge').textContent=activeCook;
+  document.getElementById('cookBadge').style.display='inline-block';
+}
+
+// Cook logout
+function cookLogout(){
+  var bc = localStorage.getItem('kds_cook_bc_'+TOKEN);
+  if(!bc){
+    bc = prompt('Skeniraj barcode za odjavu:');
+    if(!bc) return;
+  }
+  fetch('/pos/gastro/kds/'+TOKEN+'/cook-logout/',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({barcode_data:bc})
+  })
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.ok){
+      activeCook=null;
+      localStorage.removeItem('kds_cook_'+TOKEN);
+      localStorage.removeItem('kds_cook_bc_'+TOKEN);
+      document.getElementById('cookBadge').style.display='none';
+      document.getElementById('cookLogoutBtn').style.display='none';
+      alert(d.cook_name+' odjavljen!');
+    } else {
+      alert(d.error||'Greska pri odjavi');
+    }
+  })
+  .catch(function(e){alert('Greska: '+e)});
+}
+
+// Beep sound
+var audioCtx;
+function beep(){
+  if(!soundEnabled) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.frequency.value = 800;
+    gain.gain.value = 0.3;
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    setTimeout(function(){
+      var o2 = audioCtx.createOscillator();
+      var g2 = audioCtx.createGain();
+      o2.connect(g2); g2.connect(audioCtx.destination);
+      o2.frequency.value = 1000;
+      g2.gain.value = 0.3;
+      o2.start(); o2.stop(audioCtx.currentTime + 0.3);
+    }, 350);
+  }catch(e){}
+}
+
+function toggleSound(){
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundBtn').textContent = soundEnabled ? '\u{1F50A}' : '\u{1F507}';
+}
+
+function updateStatus(orderId, status, btn){
+  btn.disabled = true;
+  fetch('/pos/gastro/kds/'+TOKEN+'/action/'+orderId+'/',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status:status, cook_name:activeCook})
+  })
+  .then(function(r){return r.json()})
+  .then(function(d){if(d.ok) loadOrders(); else btn.disabled=false;})
+  .catch(function(){btn.disabled=false;});
+}
+
+function loadOrders(){
+  fetch('/pos/gastro/kds/'+TOKEN+'/api/')
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.ok) return;
+      var orders = d.orders;
+      if(orders.length > lastOrderCount && lastOrderCount > 0) beep();
+      lastOrderCount = orders.length;
+
+      if(!orders.length){
+        document.getElementById('ordersGrid').innerHTML = '<div class="empty">Nema aktivnih narudzbi &#127881;</div>';
+        return;
+      }
+
+      var html = '';
+      orders.forEach(function(o){
+        var waitClass = o.wait_minutes > 15 ? '' : 'ok';
+        html += '<div class="card '+o.status+'">';
+        html += '<div class="c-head">';
+        html += '<span class="c-table">'+o.table+(o.floor?' <small>'+o.floor+'</small>':'')+'</span>';
+        html += '<span class="c-wait '+waitClass+'">'+o.wait_minutes+' min</span>';
+        html += '</div>';
+        if(o.guest_name) html += '<div class="c-guest">'+o.guest_name+'</div>';
+        if(o.waiter) html += '<div class="c-waiter">&#128587; '+o.waiter+'</div>';
+        html += '<ul class="c-items">';
+        o.items.forEach(function(it){
+          html += '<li><span class="qty">'+Math.round(parseFloat(it.qty))+'x</span> '+it.name;
+          if(it.notes) html += ' <span class="note">'+it.notes+'</span>';
+          html += '</li>';
+        });
+        html += '</ul>';
+        if(o.notes) html += '<div class="c-notes">&#128221; '+o.notes+'</div>';
+        html += '<div class="c-actions">';
+        if(o.status==='new'){
+          html += '<button class="c-btn confirm" onclick="updateStatus('+o.id+',\'confirmed\',this)">&#10003; Potvrdi</button>';
+        } else if(o.status==='confirmed'){
+          html += '<button class="c-btn prep" onclick="updateStatus('+o.id+',\'preparing\',this)">&#127859; Priprema</button>';
+        } else if(o.status==='preparing'){
+          html += '<button class="c-btn done" onclick="updateStatus('+o.id+',\'ready\',this)">&#9989; Gotovo</button>';
+        } else if(o.status==='ready'){
+          html += '<button class="c-btn done" disabled>Ceka konobara...</button>';
+        }
+        html += '</div></div>';
+      });
+      document.getElementById('ordersGrid').innerHTML = html;
+    });
+}
+
+// Load immediately, then every 10s
+loadOrders();
+setInterval(loadOrders, 10000);
+
+// Wake lock - keep screen on
+if('wakeLock' in navigator){
+  navigator.wakeLock.request('screen').catch(function(){});
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible') navigator.wakeLock.request('screen').catch(function(){});
+  });
+}
+</script>
+{% endif %}
+</body>
+</html>

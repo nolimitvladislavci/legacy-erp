@@ -1,0 +1,725 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block title %}Terenski račun – LIMIT CONNECT{% endblock %}
+{% block page_title %}Terenski račun{% endblock %}
+
+{% block extra_css %}
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<style>
+:root {
+  --fw-bg: #0a0a0a;
+  --fw-surface: #141414;
+  --fw-card: #1a1a1a;
+  --fw-gold: #c9a84c;
+  --fw-gold-dim: #8a7534;
+  --fw-text: #e8e4dc;
+  --fw-muted: #888;
+  --fw-border: #2a2a2a;
+  --fw-success: #22c55e;
+  --fw-danger: #ef4444;
+  --fw-radius: 14px;
+}
+body { background: var(--fw-bg) !important; }
+.fw-wrap { max-width: 520px; margin: 0 auto; padding: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+/* Step indicator */
+.fw-steps { display: flex; gap: 4px; margin-bottom: 20px; }
+.fw-step-dot { flex: 1; height: 5px; border-radius: 3px; background: var(--fw-border); transition: background 0.3s; }
+.fw-step-dot.active { background: var(--fw-gold); }
+.fw-step-dot.done { background: var(--fw-gold-dim); }
+
+.fw-step-label { text-align: center; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--fw-gold); margin-bottom: 16px; font-weight: 700; }
+
+/* Cards */
+.fw-card { background: var(--fw-card); border: 1px solid var(--fw-border); border-radius: var(--fw-radius); padding: 20px; margin-bottom: 16px; }
+.fw-card h3 { color: var(--fw-gold); font-size: 1rem; margin: 0 0 14px; font-weight: 600; }
+
+/* Inputs */
+.fw-input { width: 100%; padding: 14px 16px; background: var(--fw-surface); border: 1.5px solid var(--fw-border); border-radius: 10px; color: var(--fw-text); font-size: 1rem; box-sizing: border-box; -webkit-appearance: none; }
+.fw-input:focus { border-color: var(--fw-gold); outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+.fw-input::placeholder { color: var(--fw-muted); }
+textarea.fw-input { min-height: 100px; resize: vertical; font-family: inherit; }
+select.fw-input { cursor: pointer; }
+
+.fw-label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--fw-muted); margin-bottom: 6px; font-weight: 600; }
+
+.fw-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.fw-row > div { flex: 1; }
+.fw-mb { margin-bottom: 14px; }
+
+/* Buttons */
+.fw-btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+.fw-btn-gold { background: var(--fw-gold); color: #000; }
+.fw-btn-gold:active { background: #b8973f; transform: scale(0.98); }
+.fw-btn-outline { background: transparent; border: 2px solid var(--fw-border); color: var(--fw-text); }
+.fw-btn-outline:active { border-color: var(--fw-gold); }
+.fw-btn-sm { padding: 10px 16px; font-size: 0.85rem; display: inline-block; width: auto; border-radius: 8px; }
+
+/* Radio pills */
+.fw-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.fw-pill { flex: 1; min-width: 80px; }
+.fw-pill input { display: none; }
+.fw-pill label { display: block; padding: 14px 8px; text-align: center; background: var(--fw-surface); border: 2px solid var(--fw-border); border-radius: 10px; color: var(--fw-text); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.fw-pill input:checked + label { border-color: var(--fw-gold); background: rgba(201,168,76,0.12); color: var(--fw-gold); }
+
+/* Client card */
+.fw-client-card { display: flex; align-items: center; gap: 14px; padding: 14px; background: rgba(201,168,76,0.08); border: 1.5px solid var(--fw-gold-dim); border-radius: 10px; margin-bottom: 14px; }
+.fw-client-card .fw-cc-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--fw-gold); color: #000; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; flex-shrink: 0; }
+.fw-client-card .fw-cc-info { flex: 1; }
+.fw-client-card .fw-cc-name { font-weight: 700; color: var(--fw-text); font-size: 1rem; }
+.fw-client-card .fw-cc-detail { color: var(--fw-muted); font-size: 0.82rem; margin-top: 2px; }
+.fw-client-card .fw-cc-remove { color: var(--fw-muted); cursor: pointer; font-size: 1.3rem; padding: 8px; }
+
+/* Search results */
+.fw-search-results { max-height: 220px; overflow-y: auto; background: var(--fw-card); border: 1px solid var(--fw-border); border-radius: 10px; margin-top: 6px; display: none; }
+.fw-search-item { padding: 14px 16px; border-bottom: 1px solid var(--fw-border); cursor: pointer; }
+.fw-search-item:active { background: rgba(201,168,76,0.1); }
+.fw-search-item:last-child { border-bottom: none; }
+.fw-search-item .si-name { color: var(--fw-text); font-weight: 600; }
+.fw-search-item .si-detail { color: var(--fw-muted); font-size: 0.8rem; margin-top: 2px; }
+
+/* Photo */
+.fw-photo-area { border: 2px dashed var(--fw-border); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+.fw-photo-area:active { border-color: var(--fw-gold); }
+.fw-photo-area i { font-size: 2rem; color: var(--fw-muted); display: block; margin-bottom: 8px; }
+.fw-photo-area span { color: var(--fw-muted); font-size: 0.85rem; }
+.fw-photo-preview { max-width: 100%; border-radius: 10px; margin-top: 10px; display: none; }
+
+/* Totals */
+.fw-totals { padding: 16px; background: var(--fw-surface); border-radius: 10px; margin-top: 14px; }
+.fw-total-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.9rem; color: var(--fw-muted); }
+.fw-total-grand { display: flex; justify-content: space-between; padding: 10px 0 0; margin-top: 8px; border-top: 2px solid var(--fw-gold-dim); font-size: 1.3rem; font-weight: 700; color: var(--fw-gold); }
+
+/* Save options */
+.fw-save-opt { padding: 16px; border: 2px solid var(--fw-border); border-radius: 12px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
+.fw-save-opt:active, .fw-save-opt.selected { border-color: var(--fw-gold); background: rgba(201,168,76,0.08); }
+.fw-save-opt .so-icon { font-size: 1.5rem; }
+.fw-save-opt .so-title { font-weight: 700; color: var(--fw-text); font-size: 1rem; }
+.fw-save-opt .so-desc { color: var(--fw-muted); font-size: 0.8rem; margin-top: 2px; }
+
+/* Preview */
+.fw-preview { background: #fff; color: #333; border-radius: 10px; padding: 20px; font-size: 0.85rem; }
+.fw-preview h4 { margin: 0 0 10px; font-size: 0.95rem; }
+.fw-preview table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.fw-preview th, .fw-preview td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #eee; }
+.fw-preview th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: #888; }
+.fw-preview .pv-total { text-align: right; font-weight: 700; font-size: 1.1rem; margin-top: 10px; }
+
+/* Nav */
+.fw-nav { display: flex; gap: 10px; margin-top: 20px; padding-bottom: 30px; }
+.fw-nav .fw-btn { flex: 1; }
+
+/* Items list */
+.fw-item-row { display: flex; gap: 8px; align-items: flex-start; padding: 12px; background: var(--fw-surface); border-radius: 10px; margin-bottom: 8px; }
+.fw-item-row .ir-info { flex: 1; }
+.fw-item-row .ir-desc { color: var(--fw-text); font-weight: 600; font-size: 0.9rem; }
+.fw-item-row .ir-detail { color: var(--fw-muted); font-size: 0.8rem; margin-top: 2px; }
+.fw-item-row .ir-amount { color: var(--fw-gold); font-weight: 700; font-family: monospace; font-size: 1rem; white-space: nowrap; }
+.fw-item-row .ir-del { color: var(--fw-muted); cursor: pointer; padding: 4px 8px; font-size: 1.2rem; }
+
+/* Success */
+.fw-success { text-align: center; padding: 40px 20px; }
+.fw-success .fs-icon { font-size: 4rem; margin-bottom: 16px; }
+.fw-success h2 { color: var(--fw-gold); margin-bottom: 8px; }
+.fw-success p { color: var(--fw-muted); margin-bottom: 24px; }
+
+/* Animations */
+.fw-panel { display: none; animation: fwSlideIn 0.25s ease; }
+.fw-panel.active { display: block; }
+@keyframes fwSlideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Responsive */
+@media (max-width: 400px) {
+  .fw-pills { gap: 4px; }
+  .fw-pill label { padding: 12px 4px; font-size: 0.8rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fw-wrap">
+  <!-- Step indicator -->
+  <div class="fw-steps">
+    <div class="fw-step-dot active" id="dot0"></div>
+    <div class="fw-step-dot" id="dot1"></div>
+    <div class="fw-step-dot" id="dot2"></div>
+    <div class="fw-step-dot" id="dot3"></div>
+  </div>
+
+  <!-- ═══ STEP 1: KLIJENT ═══ -->
+  <div class="fw-panel active" id="fwStep0">
+    <div class="fw-step-label">1 / 4 &mdash; Klijent</div>
+    <div class="fw-card">
+      <h3><i class="fas fa-user"></i> Kome fakturiramo?</h3>
+      <div id="fwClientSelected" style="display:none"></div>
+      <div id="fwClientSearch">
+        <input type="text" class="fw-input" id="fwClientQuery" placeholder="Pretraži klijenta..." autocomplete="off">
+        <div class="fw-search-results" id="fwClientResults"></div>
+        <div style="text-align:center;margin-top:14px">
+          <button type="button" class="fw-btn-sm fw-btn-outline" onclick="fwToggleNewClient()">
+            <i class="fas fa-plus"></i> Novi klijent
+          </button>
+        </div>
+        <div id="fwNewClient" style="display:none;margin-top:14px">
+          <div class="fw-mb"><label class="fw-label">Naziv *</label><input type="text" class="fw-input" id="fwNewName" placeholder="Ime tvrtke ili osobe"></div>
+          <div class="fw-mb"><label class="fw-label">Adresa</label><input type="text" class="fw-input" id="fwNewAddr" placeholder="Ulica i broj"></div>
+          <div class="fw-row">
+            <div><label class="fw-label">Grad</label><input type="text" class="fw-input" id="fwNewCity" placeholder="Grad"></div>
+            <div><label class="fw-label">Telefon</label><input type="text" class="fw-input" id="fwNewPhone" placeholder="+385..." type="tel"></div>
+          </div>
+          <div class="fw-mb"><label class="fw-label">OIB / USt-IdNr</label><input type="text" class="fw-input" id="fwNewOib" placeholder="Opcionalno"></div>
+          <div class="fw-mb"><label class="fw-label">Email</label><input type="email" class="fw-input" id="fwNewEmail" placeholder="email@example.com"></div>
+          <button type="button" class="fw-btn fw-btn-gold" onclick="fwConfirmNewClient()">Potvrdi klijenta</button>
+        </div>
+      </div>
+    </div>
+    <div class="fw-nav">
+      <button class="fw-btn fw-btn-gold" onclick="fwNext()">Dalje <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2: ŠTO JE ODRAĐENO ═══ -->
+  <div class="fw-panel" id="fwStep1">
+    <div class="fw-step-label">2 / 4 &mdash; Posao</div>
+    <div class="fw-card">
+      <h3><i class="fas fa-tools"></i> Što je odrađeno?</h3>
+      <div class="fw-mb">
+        <label class="fw-label">Kategorija</label>
+        <div class="fw-pills">
+          <div class="fw-pill"><input type="radio" name="fwCat" id="cat1" value="Popravak" checked><label for="cat1">Popravak</label></div>
+          <div class="fw-pill"><input type="radio" name="fwCat" id="cat2" value="Instalacija"><label for="cat2">Instalacija</label></div>
+          <div class="fw-pill"><input type="radio" name="fwCat" id="cat3" value="Servis"><label for="cat3">Servis</label></div>
+          <div class="fw-pill"><input type="radio" name="fwCat" id="cat4" value="Materijal"><label for="cat4">Materijal</label></div>
+          <div class="fw-pill"><input type="radio" name="fwCat" id="cat5" value="Ostalo"><label for="cat5">Ostalo</label></div>
+        </div>
+      </div>
+      <div class="fw-mb">
+        <label class="fw-label">Opis posla *</label>
+        <textarea class="fw-input" id="fwDesc" placeholder="Opišite što je napravljeno..."></textarea>
+      </div>
+      <div class="fw-row">
+        <div>
+          <label class="fw-label">Trajanje (sati)</label>
+          <input type="number" class="fw-input" id="fwHours" value="1" min="0.25" step="0.25" inputmode="decimal">
+        </div>
+        <div>
+          <label class="fw-label">Fotografija</label>
+          <div class="fw-photo-area" onclick="document.getElementById('fwPhotoInput').click()">
+            <i class="fas fa-camera"></i>
+            <span id="fwPhotoLabel">Slikaj / učitaj</span>
+          </div>
+          <input type="file" id="fwPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="fwPhotoSelected(this)">
+          <img id="fwPhotoPreview" class="fw-photo-preview">
+        </div>
+      </div>
+    </div>
+    <div class="fw-nav">
+      <button class="fw-btn fw-btn-outline" onclick="fwPrev()"><i class="fas fa-arrow-left"></i> Natrag</button>
+      <button class="fw-btn fw-btn-gold" onclick="fwNext()">Dalje <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3: CIJENA ═══ -->
+  <div class="fw-panel" id="fwStep2">
+    <div class="fw-step-label">3 / 4 &mdash; Cijena</div>
+    <div class="fw-card">
+      <h3><i class="fas fa-calculator"></i> Stavke</h3>
+      <div id="fwItemsList"></div>
+      <button type="button" class="fw-btn-sm fw-btn-outline" onclick="fwAddItemRow()" style="margin-top:8px">
+        <i class="fas fa-plus"></i> Dodaj stavku
+      </button>
+
+      <!-- Add item form -->
+      <div id="fwItemForm" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--fw-border)">
+        <div class="fw-mb">
+          <label class="fw-label">Opis stavke</label>
+          <input type="text" class="fw-input" id="fwItemDesc" placeholder="Npr. Zamjena ventila, Materijal...">
+        </div>
+        <div class="fw-row">
+          <div>
+            <label class="fw-label">Količina</label>
+            <input type="number" class="fw-input" id="fwItemQty" value="1" min="0.01" step="0.01" inputmode="decimal">
+          </div>
+          <div>
+            <label class="fw-label">Jedinica</label>
+            <select class="fw-input" id="fwItemUnit">
+              <option value="h">sat</option>
+              <option value="kom" selected>kom</option>
+              <option value="m2">m²</option>
+              <option value="kg">kg</option>
+              <option value="pau">paušalno</option>
+            </select>
+          </div>
+        </div>
+        <div class="fw-mb">
+          <label class="fw-label">Cijena (€)</label>
+          <input type="number" class="fw-input" id="fwItemPrice" value="0" min="0" step="0.01" inputmode="decimal" style="font-size:1.3rem;font-weight:700;text-align:center">
+        </div>
+        <div class="fw-mb">
+          <label class="fw-label">PDV stopa</label>
+          <div class="fw-pills" id="fwPdvPills">
+            <!-- Populated by JS based on country -->
+          </div>
+        </div>
+      </div>
+
+      <div class="fw-totals" id="fwTotals">
+        <div class="fw-total-row"><span>Osnovica</span><span id="fwNet">0,00 €</span></div>
+        <div class="fw-total-row"><span>PDV</span><span id="fwTax">0,00 €</span></div>
+        <div class="fw-total-grand"><span>UKUPNO</span><span id="fwGross">0,00 €</span></div>
+      </div>
+    </div>
+    <div class="fw-nav">
+      <button class="fw-btn fw-btn-outline" onclick="fwPrev()"><i class="fas fa-arrow-left"></i> Natrag</button>
+      <button class="fw-btn fw-btn-gold" onclick="fwNext()">Dalje <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: SPREMI ═══ -->
+  <div class="fw-panel" id="fwStep3">
+    <div class="fw-step-label">4 / 4 &mdash; Pregled i spremi</div>
+
+    <div class="fw-card">
+      <h3><i class="fas fa-eye"></i> Pregled</h3>
+      <div class="fw-preview" id="fwPreview"></div>
+    </div>
+
+    <div class="fw-card">
+      <h3><i class="fas fa-save"></i> Što želite?</h3>
+      <div class="fw-save-opt selected" data-action="draft" onclick="fwSelectAction(this)">
+        <div class="so-icon">📝</div>
+        <div><div class="so-title">Spremi kao nacrt</div><div class="so-desc">Šalje se u ured za pregled</div></div>
+      </div>
+      <div class="fw-save-opt" data-action="issued" onclick="fwSelectAction(this)">
+        <div class="so-icon">📤</div>
+        <div><div class="so-title">Izdaj račun</div><div class="so-desc">Status: izdano</div></div>
+      </div>
+      <div class="fw-save-opt" data-action="email" onclick="fwSelectAction(this)">
+        <div class="so-icon">📧</div>
+        <div><div class="so-title">Izdaj i pošalji emailom</div><div class="so-desc">Klijentu na email</div></div>
+      </div>
+      <div class="fw-save-opt" data-action="paid" onclick="fwSelectAction(this)">
+        <div class="so-icon">💰</div>
+        <div><div class="so-title">Naplati odmah</div><div class="so-desc">Gotovinska naplata</div></div>
+      </div>
+    </div>
+
+    <div class="fw-mb">
+      <label class="fw-label">Napomena (opcionalno)</label>
+      <textarea class="fw-input" id="fwNote" placeholder="Napomena na računu..." rows="2"></textarea>
+    </div>
+
+    <div class="fw-nav">
+      <button class="fw-btn fw-btn-outline" onclick="fwPrev()"><i class="fas fa-arrow-left"></i> Natrag</button>
+      <button class="fw-btn fw-btn-gold" id="fwSubmitBtn" onclick="fwSubmit()">
+        <i class="fas fa-check"></i> Završi
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ SUCCESS ═══ -->
+  <div class="fw-panel" id="fwSuccess">
+    <div class="fw-success">
+      <div class="fs-icon">✅</div>
+      <h2>Račun kreiran!</h2>
+      <p id="fwSuccessMsg">Račun je spremljen kao nacrt.</p>
+      <div id="fwSuccessQr" style="margin: 20px auto; max-width: 200px;"></div>
+      <a id="fwSuccessLink" href="/invoicing/" class="fw-btn fw-btn-gold" style="text-decoration:none;margin-bottom:12px">
+        <i class="fas fa-eye"></i> Otvori račun
+      </a>
+      <br>
+      <a href="/invoicing/field/" class="fw-btn fw-btn-outline" style="text-decoration:none;margin-top:10px">
+        <i class="fas fa-plus"></i> Novi terenski račun
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const fmtNum = n => Number(n).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const csrf = '{{ csrf_token }}';
+  const country = '{{ country }}';
+
+  let currentStep = 0;
+  let selectedClient = null;
+  let items = [];
+  let selectedAction = 'draft';
+  let photoFile = null;
+
+  // PDV rates by country
+  const pdvRates = {
+    HR: [{rate: 25, label: '25%', default: true}, {rate: 13, label: '13%'}, {rate: 5, label: '5%'}, {rate: 0, label: '0%'}],
+    DE: [{rate: 19, label: '19%', default: true}, {rate: 7, label: '7%'}, {rate: 0, label: '0%'}],
+  };
+
+  // Init PDV pills
+  function initPdvPills() {
+    const rates = pdvRates[country] || pdvRates['HR'];
+    const container = document.getElementById('fwPdvPills');
+    container.innerHTML = rates.map((r, i) =>
+      `<div class="fw-pill">
+        <input type="radio" name="fwPdv" id="pdv${i}" value="${r.rate}" ${r.default ? 'checked' : ''}>
+        <label for="pdv${i}">${r.label}</label>
+      </div>`
+    ).join('');
+    container.querySelectorAll('input').forEach(inp =>
+      inp.addEventListener('change', fwRecalc)
+    );
+  }
+  initPdvPills();
+
+  // ── STEP NAVIGATION ──
+  function showStep(n) {
+    document.querySelectorAll('.fw-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById(n === 99 ? 'fwSuccess' : `fwStep${n}`);
+    if (panel) panel.classList.add('active');
+    for (let i = 0; i < 4; i++) {
+      const dot = document.getElementById(`dot${i}`);
+      dot.classList.toggle('active', i === n);
+      dot.classList.toggle('done', i < n);
+    }
+    currentStep = n;
+    if (n === 2) fwRecalc();
+    if (n === 3) fwBuildPreview();
+  }
+
+  window.fwNext = () => {
+    if (currentStep === 0 && !selectedClient) {
+      alert('Odaberite ili unesite klijenta');
+      return;
+    }
+    if (currentStep === 1) {
+      const desc = document.getElementById('fwDesc').value.trim();
+      if (!desc) { alert('Unesite opis posla'); return; }
+      // Auto-add first item from work description if no items yet
+      if (items.length === 0) {
+        const cat = document.querySelector('input[name="fwCat"]:checked')?.value || 'Ostalo';
+        const hours = parseFloat(document.getElementById('fwHours').value) || 1;
+        items.push({
+          desc: `${cat} - ${desc.substring(0, 100)}`,
+          qty: hours,
+          unit: 'h',
+          price: 0,
+          pdv: getDefaultPdv(),
+        });
+        renderItems();
+      }
+    }
+    if (currentStep === 2) {
+      syncCurrentItem();
+      if (items.length === 0) { alert('Dodajte barem jednu stavku'); return; }
+      const hasPrice = items.some(it => it.price > 0);
+      if (!hasPrice) { alert('Unesite cijenu za barem jednu stavku'); return; }
+    }
+    showStep(currentStep + 1);
+  };
+  window.fwPrev = () => { if (currentStep > 0) showStep(currentStep - 1); };
+
+  function getDefaultPdv() {
+    return (pdvRates[country] || pdvRates['HR']).find(r => r.default)?.rate || 25;
+  }
+
+  // ── CLIENT SEARCH ──
+  let searchTimeout;
+  const queryInput = document.getElementById('fwClientQuery');
+  const resultsDiv = document.getElementById('fwClientResults');
+
+  queryInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    const q = queryInput.value.trim();
+    if (q.length < 2) { resultsDiv.style.display = 'none'; return; }
+    searchTimeout = setTimeout(() => {
+      fetch(`/invoicing/api/partners/?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.length) {
+            resultsDiv.innerHTML = '<div class="fw-search-item"><div class="si-name" style="color:var(--fw-muted)">Nema rezultata</div></div>';
+          } else {
+            resultsDiv.innerHTML = data.map(p =>
+              `<div class="fw-search-item" onclick='fwSelectClient(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+                <div class="si-name">${p.name}</div>
+                <div class="si-detail">${p.oib || ''} ${p.city || ''}</div>
+              </div>`
+            ).join('');
+          }
+          resultsDiv.style.display = 'block';
+        });
+    }, 300);
+  });
+
+  window.fwSelectClient = (p) => {
+    selectedClient = {
+      name: p.name,
+      address: p.address || '',
+      city: p.city || '',
+      oib: p.oib || '',
+      email: p.email || '',
+      phone: p.phone || '',
+      partner_id: p.id || null,
+    };
+    renderClient();
+  };
+
+  window.fwToggleNewClient = () => {
+    const el = document.getElementById('fwNewClient');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  };
+
+  window.fwConfirmNewClient = () => {
+    const name = document.getElementById('fwNewName').value.trim();
+    if (!name) { alert('Unesite naziv klijenta'); return; }
+    selectedClient = {
+      name: name,
+      address: document.getElementById('fwNewAddr').value.trim(),
+      city: document.getElementById('fwNewCity').value.trim(),
+      oib: document.getElementById('fwNewOib').value.trim(),
+      email: document.getElementById('fwNewEmail').value.trim(),
+      phone: document.getElementById('fwNewPhone').value.trim(),
+      partner_id: null,
+    };
+    renderClient();
+  };
+
+  function renderClient() {
+    const c = selectedClient;
+    const initials = c.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    document.getElementById('fwClientSelected').innerHTML =
+      `<div class="fw-client-card">
+        <div class="fw-cc-icon">${initials}</div>
+        <div class="fw-cc-info">
+          <div class="fw-cc-name">${c.name}</div>
+          <div class="fw-cc-detail">${[c.address, c.city, c.oib].filter(Boolean).join(' · ')}</div>
+        </div>
+        <div class="fw-cc-remove" onclick="fwClearClient()">×</div>
+      </div>`;
+    document.getElementById('fwClientSelected').style.display = 'block';
+    document.getElementById('fwClientSearch').style.display = 'none';
+    resultsDiv.style.display = 'none';
+  }
+
+  window.fwClearClient = () => {
+    selectedClient = null;
+    document.getElementById('fwClientSelected').style.display = 'none';
+    document.getElementById('fwClientSearch').style.display = 'block';
+    queryInput.value = '';
+  };
+
+  // ── PHOTO ──
+  window.fwPhotoSelected = (input) => {
+    if (input.files && input.files[0]) {
+      photoFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('fwPhotoPreview').src = e.target.result;
+        document.getElementById('fwPhotoPreview').style.display = 'block';
+        document.getElementById('fwPhotoLabel').textContent = photoFile.name.substring(0, 20);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  };
+
+  // ── ITEMS ──
+  let editingIndex = -1;
+
+  function renderItems() {
+    const list = document.getElementById('fwItemsList');
+    list.innerHTML = items.map((it, i) =>
+      `<div class="fw-item-row" onclick="fwEditItem(${i})">
+        <div class="ir-info">
+          <div class="ir-desc">${it.desc}</div>
+          <div class="ir-detail">${it.qty} ${it.unit} × ${fmtNum(it.price)} € · PDV ${it.pdv}%</div>
+        </div>
+        <div class="ir-amount">${fmtNum(it.qty * it.price)} €</div>
+        <div class="ir-del" onclick="event.stopPropagation();fwDelItem(${i})">🗑</div>
+      </div>`
+    ).join('');
+    fwRecalc();
+  }
+
+  window.fwEditItem = (i) => {
+    editingIndex = i;
+    const it = items[i];
+    document.getElementById('fwItemDesc').value = it.desc;
+    document.getElementById('fwItemQty').value = it.qty;
+    document.getElementById('fwItemUnit').value = it.unit;
+    document.getElementById('fwItemPrice').value = it.price;
+    document.querySelectorAll('input[name="fwPdv"]').forEach(r => r.checked = (Number(r.value) === it.pdv));
+  };
+
+  window.fwDelItem = (i) => {
+    items.splice(i, 1);
+    if (editingIndex === i) editingIndex = items.length > 0 ? 0 : -1;
+    renderItems();
+    if (items.length > 0) window.fwEditItem(editingIndex >= 0 ? editingIndex : 0);
+  };
+
+  window.fwAddItemRow = () => {
+    syncCurrentItem();
+    items.push({ desc: '', qty: 1, unit: 'kom', price: 0, pdv: getDefaultPdv() });
+    renderItems();
+    editingIndex = items.length - 1;
+    document.getElementById('fwItemDesc').value = '';
+    document.getElementById('fwItemQty').value = 1;
+    document.getElementById('fwItemUnit').value = 'kom';
+    document.getElementById('fwItemPrice').value = 0;
+    document.getElementById('fwItemDesc').focus();
+  };
+
+  function syncCurrentItem() {
+    if (editingIndex < 0 || editingIndex >= items.length) return;
+    const desc = document.getElementById('fwItemDesc').value.trim();
+    if (desc) {
+      items[editingIndex].desc = desc;
+      items[editingIndex].qty = parseFloat(document.getElementById('fwItemQty').value) || 1;
+      items[editingIndex].unit = document.getElementById('fwItemUnit').value;
+      items[editingIndex].price = parseFloat(document.getElementById('fwItemPrice').value) || 0;
+      items[editingIndex].pdv = Number(document.querySelector('input[name="fwPdv"]:checked')?.value ?? getDefaultPdv());
+    }
+    renderItems();
+  }
+
+  // Auto-sync on input change
+  ['fwItemDesc', 'fwItemQty', 'fwItemUnit', 'fwItemPrice'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => {
+      if (editingIndex >= 0) {
+        const el = document.getElementById(id);
+        const key = {fwItemDesc:'desc',fwItemQty:'qty',fwItemUnit:'unit',fwItemPrice:'price'}[id];
+        if (key === 'qty' || key === 'price') items[editingIndex][key] = parseFloat(el.value) || 0;
+        else items[editingIndex][key] = el.value;
+        renderItems();
+      }
+    });
+  });
+
+  // Auto-load first item into form
+  if (items.length > 0) { editingIndex = 0; window.fwEditItem(0); }
+
+  function fwRecalc() {
+    let net = 0, tax = 0;
+    items.forEach(it => {
+      const lineNet = it.qty * it.price;
+      net += lineNet;
+      tax += lineNet * it.pdv / 100;
+    });
+    document.getElementById('fwNet').textContent = fmtNum(net) + ' €';
+    document.getElementById('fwTax').textContent = fmtNum(tax) + ' €';
+    document.getElementById('fwGross').textContent = fmtNum(net + tax) + ' €';
+  }
+
+  // ── PREVIEW ──
+  function fwBuildPreview() {
+    const c = selectedClient || {};
+    let net = 0, tax = 0;
+    const rowsHtml = items.map(it => {
+      const lineNet = it.qty * it.price;
+      const lineTax = lineNet * it.pdv / 100;
+      net += lineNet;
+      tax += lineTax;
+      return `<tr>
+        <td>${it.desc}</td>
+        <td style="text-align:right">${it.qty}</td>
+        <td>${it.unit}</td>
+        <td style="text-align:right">${fmtNum(it.price)}</td>
+        <td style="text-align:right">${it.pdv}%</td>
+        <td style="text-align:right;font-weight:600">${fmtNum(lineNet)}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('fwPreview').innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+        <div><strong>{{ issuer_name }}</strong><br><span style="font-size:0.8rem;color:#888">{{ issuer_address }}</span></div>
+        <div style="text-align:right"><strong>${c.name || '-'}</strong><br><span style="font-size:0.8rem;color:#888">${c.address || ''} ${c.city || ''}</span>
+          ${c.oib ? '<br><span style="font-size:0.8rem">OIB: ' + c.oib + '</span>' : ''}</div>
+      </div>
+      <table>
+        <thead><tr><th>Opis</th><th style="text-align:right">Kol.</th><th>Jed.</th><th style="text-align:right">Cijena</th><th style="text-align:right">PDV</th><th style="text-align:right">Ukupno</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div style="text-align:right;margin-top:12px;font-size:0.85rem;color:#888">
+        Osnovica: ${fmtNum(net)} €<br>
+        PDV: ${fmtNum(tax)} €
+      </div>
+      <div class="pv-total">UKUPNO: ${fmtNum(net + tax)} €</div>
+    `;
+  }
+
+  // ── SAVE ACTION ──
+  window.fwSelectAction = (el) => {
+    document.querySelectorAll('.fw-save-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedAction = el.dataset.action;
+  };
+
+  // ── SUBMIT ──
+  window.fwSubmit = () => {
+    syncCurrentItem();
+    const btn = document.getElementById('fwSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spremanje...';
+
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', csrf);
+    formData.append('action', selectedAction);
+    formData.append('country', country);
+    formData.append('note', document.getElementById('fwNote').value);
+
+    // Client
+    formData.append('client_name', selectedClient.name);
+    formData.append('client_address', selectedClient.address || '');
+    formData.append('client_city', selectedClient.city || '');
+    formData.append('client_oib', selectedClient.oib || '');
+    formData.append('client_email', selectedClient.email || '');
+    if (selectedClient.partner_id) formData.append('partner_id', selectedClient.partner_id);
+
+    // Work description
+    formData.append('work_description', document.getElementById('fwDesc').value);
+    formData.append('work_category', document.querySelector('input[name="fwCat"]:checked')?.value || '');
+    formData.append('work_hours', document.getElementById('fwHours').value);
+
+    // Photo
+    if (photoFile) formData.append('photo', photoFile);
+
+    // Items
+    items.forEach((it, i) => {
+      formData.append('item_desc[]', it.desc);
+      formData.append('item_qty[]', it.qty);
+      formData.append('item_unit[]', it.unit);
+      formData.append('item_price[]', it.price);
+      formData.append('item_pdv[]', it.pdv);
+    });
+
+    fetch('/invoicing/api/field-create/', {
+      method: 'POST',
+      body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        const msgs = {
+          draft: 'Račun je spremljen kao nacrt.',
+          issued: 'Račun je izdan!',
+          email: 'Račun je izdan i poslan emailom.',
+          paid: 'Račun je naplaćen!',
+        };
+        document.getElementById('fwSuccessMsg').textContent = msgs[selectedAction] || 'Račun je spremljen.';
+        document.getElementById('fwSuccessLink').href = '/invoicing/' + data.invoice_id + '/edit/';
+        showStep(99);
+      } else {
+        alert('Greška: ' + (data.error || 'Nepoznata greška'));
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> Završi';
+      }
+    })
+    .catch(err => {
+      alert('Mrežna greška. Provjerite internet vezu.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check"></i> Završi';
+    });
+  };
+
+  // Init: if items is empty, show first item form
+  if (items.length === 0) editingIndex = -1;
+});
+</script>
+{% endblock %}

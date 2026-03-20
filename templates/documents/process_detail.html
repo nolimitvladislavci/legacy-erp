@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-file-alt text-warning me-2"></i>{{ title }} {{ doc.doc_number }}</h2>
+    <small class="text-muted">
+      {% if doc.status == 'draft' %}<span class="badge bg-warning text-dark">Nacrt</span>
+      {% elif doc.status == 'confirmed' %}<span class="badge bg-success">Potvrđeno</span>
+      {% else %}<span class="badge bg-secondary">{{ doc.get_status_display }}</span>{% endif %}
+      · {{ doc.date_issued|date:"d.m.Y" }}
+    </small>
+  </div>
+  <div class="d-flex gap-2">
+    {% if doc.status == 'draft' %}
+      <a href="{% url 'documents:otpremnica_confirm' doc.pk %}" class="btn btn-success" onclick="return confirm('Potvrdi dokument?')"><i class="fas fa-check me-1"></i>Potvrdi</a>
+    {% endif %}
+    <a href="{% url 'documents:otpremnica_pdf' doc.pk %}" class="btn btn-outline-danger" target="_blank"><i class="fas fa-file-pdf me-1"></i>PDF</a>
+    <a href="javascript:window.print()" class="btn btn-outline-secondary"><i class="fas fa-print me-1"></i>Print</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:1px">Izdavatelj</h6>
+        <strong>{{ doc.company.name }}</strong><br>
+        <small class="text-muted">OIB: {{ doc.company.oib|default:"—" }}</small><br>
+        <small class="text-muted">{{ doc.company.address|default:"" }}</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h6 class="text-muted text-uppercase" style="font-size:.7rem;letter-spacing:1px">Partner / Primatelj</h6>
+        {% if doc.partner %}
+          <strong>{{ doc.partner.name }}</strong><br>
+          <small class="text-muted">{{ doc.partner.address|default:"" }}</small>
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>#</th><th>Proizvod</th><th class="text-end">Kol.</th><th>Jed.</th>
+            <th class="text-end">Cijena</th><th class="text-end">PDV</th><th class="text-end">Ukupno</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in doc.items.all %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.product_name }}</td>
+            <td class="text-end">{{ item.quantity|floatformat:2 }}</td>
+            <td>{{ item.unit }}</td>
+            <td class="text-end">{{ item.unit_price|floatformat:2 }} €</td>
+            <td class="text-end">{{ item.vat_rate|floatformat:0 }}%</td>
+            <td class="text-end"><strong>{{ item.line_total_with_vat|floatformat:2 }} €</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="table-light">
+            <td colspan="5"></td>
+            <td class="text-end"><strong>Osnovica:</strong></td>
+            <td class="text-end"><strong>{{ doc.total|floatformat:2 }} €</strong></td>
+          </tr>
+          <tr>
+            <td colspan="5"></td>
+            <td class="text-end">PDV:</td>
+            <td class="text-end">{{ doc.total_vat|floatformat:2 }} €</td>
+          </tr>
+          <tr class="table-dark">
+            <td colspan="5"></td>
+            <td class="text-end"><strong>UKUPNO:</strong></td>
+            <td class="text-end"><strong>{{ doc.total_with_vat|floatformat:2 }} €</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if doc.notes %}
+<div class="card mb-3"><div class="card-body">
+  <h6 class="text-muted">Napomena</h6>
+  <p>{{ doc.notes }}</p>
+</div></div>
+{% endif %}
+
+{% with tracking=doc.tracked_item %}
+{% if doc.status == 'confirmed' and tracking %}
+<div class="card mb-3" style="border:1px solid rgba(201,168,76,.3);background:#0f172a">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 style="color:var(--gold);margin:0"><i class="fas fa-truck me-2"></i>Tracking isporuke</h6>
+      <span class="badge" style="background:{{ tracking.current_status.color|default:'#475569' }};color:#000">
+        <i class="{{ tracking.current_status.icon|default:'fas fa-circle' }} me-1"></i>
+        {{ tracking.current_status.name|default:'Nema statusa' }}
+      </span>
+    </div>
+    <div class="row g-2 mb-3" style="font-size:.82rem">
+      {% if tracking.driver_name %}<div class="col-auto"><i class="fas fa-user me-1" style="color:var(--gold)"></i>{{ tracking.driver_name }}</div>{% endif %}
+      {% if tracking.vehicle_plate %}<div class="col-auto"><i class="fas fa-id-card me-1" style="color:var(--gold)"></i>{{ tracking.vehicle_plate }}</div>{% endif %}
+      {% if tracking.dispatched_at %}<div class="col-auto"><i class="fas fa-clock me-1" style="color:var(--gold)"></i>Polazak: {{ tracking.dispatched_at|date:"d.m.Y H:i" }}</div>{% endif %}
+      {% if tracking.delivered_at %}<div class="col-auto"><i class="fas fa-check-circle me-1" style="color:#22c55e"></i>Isporuceno: {{ tracking.delivered_at|date:"d.m.Y H:i" }}</div>{% endif %}
+      {% if tracking.tracking_url %}<div class="col-auto"><a href="{{ tracking.tracking_url }}" target="_blank" style="color:var(--gold)"><i class="fas fa-external-link-alt me-1"></i>Vanjski tracking</a></div>{% endif %}
+    </div>
+    <details>
+      <summary style="cursor:pointer;font-size:.78rem;color:#64748b">Azuriraj tracking...</summary>
+      <form method="post" action="{% url 'tracking:shipment_update' tracking.pk %}" class="mt-2">
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-md-3"><input type="text" name="driver_name" class="form-control form-control-sm" placeholder="Vozac" value="{{ tracking.driver_name }}"></div>
+          <div class="col-md-2"><input type="text" name="vehicle_plate" class="form-control form-control-sm" placeholder="Registracija" value="{{ tracking.vehicle_plate }}"></div>
+          <div class="col-md-3"><input type="url" name="tracking_url" class="form-control form-control-sm" placeholder="DPD/GLS link" value="{{ tracking.tracking_url }}"></div>
+          <div class="col-md-2"><select name="status_slug" class="form-select form-select-sm">{% for st in shipment_statuses %}<option value="{{ st.slug }}" {% if tracking.current_status.slug == st.slug %}selected{% endif %}>{{ st.name }}</option>{% endfor %}</select></div>
+          <div class="col-md-2"><button type="submit" class="btn btn-sm w-100" style="background:var(--gold);color:#000;font-weight:700">Spremi</button></div>
+        </div>
+      </form>
+    </details>
+  </div>
+</div>
+{% endif %}
+{% endwith %}
+{% endblock %}

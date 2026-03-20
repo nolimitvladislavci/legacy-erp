@@ -1,0 +1,78 @@
+<!-- POS Sidebar Navigation -->
+<style>
+.pos-sidebar-toggle {
+    position: fixed; left: 0; top: 50%; transform: translateY(-50%);
+    z-index: 1001; background: var(--gold, #c9a84c); color: #0a0a0a;
+    border: none; border-radius: 0 8px 8px 0;
+    padding: 14px 10px; cursor: pointer; font-size: 18px;
+    touch-action: manipulation;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+}
+.pos-sidebar-toggle:active { transform: translateY(-50%) scale(0.95); }
+.pos-sidebar {
+    position: fixed; left: -270px; top: 0; bottom: 0; width: 260px;
+    background: var(--dark, #111); border-right: 1px solid rgba(201,168,76,0.2);
+    z-index: 1000; transition: left 0.3s ease;
+    padding: 20px 0; overflow-y: auto;
+}
+.pos-sidebar.open { left: 0 !important; }
+.pos-sidebar .ps-header {
+    padding: 16px 20px; font-size: 18px; font-weight: 700;
+    color: var(--gold, #c9a84c); border-bottom: 1px solid var(--border, #222); margin-bottom: 8px;
+}
+.ps-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 20px; color: var(--text, #ccc); text-decoration: none;
+    font-size: 14px; transition: background 0.15s;
+    touch-action: manipulation;
+}
+.ps-link:hover, .ps-link:active { background: var(--nav-hover, #1a1a1a); color: var(--gold, #c9a84c); }
+.ps-link i { width: 22px; text-align: center; color: var(--gold, #c9a84c); font-size: 16px; }
+.ps-divider { border: none; border-top: 1px solid var(--border, #222); margin: 8px 16px; }
+.pos-sidebar-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 999; display: none;
+}
+.pos-sidebar-overlay.show { display: block; }
+</style>
+
+<button class="pos-sidebar-toggle" onclick="togglePosSidebar()" aria-label="Izbornik">
+    <i class="fas fa-bars"></i>
+</button>
+
+<div class="pos-sidebar-overlay" id="posSidebarOverlay" onclick="togglePosSidebar()"></div>
+
+<nav id="posSidebar" class="pos-sidebar">
+    <div class="ps-header"><i class="fas fa-th"></i> FINA POS</div>
+    <a href="/pos/" class="ps-link"><i class="fas fa-cash-register"></i> POS Terminal</a>
+    <a href="/pos/restaurant/" class="ps-link"><i class="fas fa-utensils"></i> Restoran</a>
+    <a href="/pos/gastro/" class="ps-link"><i class="fas fa-hamburger"></i> Gastro</a>
+    <a href="/pos/waiter/" class="ps-link"><i class="fas fa-concierge-bell"></i> Konobar</a>
+    <a href="/pos/gastro/kds/" class="ps-link"><i class="fas fa-tv"></i> Kuhinja (KDS)</a>
+    <hr class="ps-divider">
+    <a href="/pos/expiry/" class="ps-link"><i class="fas fa-clock"></i> Rokovi trajanja</a>
+    <a href="/pos/vouchers/" class="ps-link"><i class="fas fa-ticket-alt"></i> Vučeri</a>
+    <a href="/pos/settings/" class="ps-link"><i class="fas fa-cog"></i> POS Postavke</a>
+    <hr class="ps-divider">
+    <a href="/invoicing/" class="ps-link"><i class="fas fa-file-invoice"></i> Računi</a>
+    <a href="/invoicing/create/" class="ps-link"><i class="fas fa-plus"></i> Novi račun</a>
+    <a href="/inventory/" class="ps-link"><i class="fas fa-warehouse"></i> Skladište</a>
+    <a href="/partners/" class="ps-link"><i class="fas fa-users"></i> Partneri</a>
+    <a href="/appointments/" class="ps-link"><i class="fas fa-calendar-check"></i> Termini</a>
+    <hr class="ps-divider">
+    <a href="/ai/" class="ps-link"><i class="fas fa-robot"></i> AI Asistent</a>
+    <a href="/dashboard/" class="ps-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+</nav>
+
+<script>
+function togglePosSidebar() {
+    document.getElementById('posSidebar').classList.toggle('open');
+    document.getElementById('posSidebarOverlay').classList.toggle('show');
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.getElementById('posSidebar').classList.remove('open');
+        document.getElementById('posSidebarOverlay').classList.remove('show');
+    }
+});
+</script>

@@ -1,0 +1,63 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}" data-theme="{{ company.booking_theme|default:'dark' }}">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Košarica — {{ company.name }}</title>
+<script>(function(){var t=localStorage.getItem('booking-theme')||'{{ company.booking_theme|default:"dark" }}';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/booking/css/booking-theme.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.cart-wrap{max-width:640px;margin:0 auto;padding:1.5rem 1rem}
+.cart-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--text);margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.cart-item{display:flex;gap:1rem;align-items:center;padding:.85rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem}
+.cart-item-name{flex:1;font-size:.92rem;font-weight:600;color:var(--text)}
+.cart-item-qty{font-size:.85rem;color:var(--muted)}
+.cart-item-price{font-size:.95rem;font-weight:700;color:var(--gold);min-width:60px;text-align:right}
+.remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:.2rem .4rem}
+.remove-btn:hover{color:#ef4444}
+.cart-total{display:flex;justify-content:space-between;padding:1rem;background:var(--dark);border:2px solid var(--gold);border-radius:10px;margin:.75rem 0 1.25rem;font-size:1.1rem;font-weight:800}
+.cart-total .lbl{color:var(--muted)}
+.cart-total .val{color:var(--gold)}
+.checkout-btn{display:block;width:100%;background:var(--gold);color:#000;border:none;border-radius:10px;padding:1rem;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none}
+.back-link{display:inline-block;color:var(--muted);font-size:.85rem;text-decoration:none;margin-bottom:1rem}
+.back-link:hover{color:var(--gold)}
+.empty{text-align:center;padding:3rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav class="booking-nav">
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="brand">{{ company.name }}</a>
+</nav>
+<div class="cart-wrap">
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="back-link">← Nastavi kupovinu</a>
+  <h2 class="cart-title">Košarica</h2>
+  {% if items %}
+    {% for item in items %}
+    <div class="cart-item">
+      <div class="cart-item-name">
+        {{ item.product.name }}
+        <div class="cart-item-qty">{{ item.qty }} × €{{ item.product.price|floatformat:2 }}</div>
+      </div>
+      <div class="cart-item-price">€{{ item.subtotal|floatformat:2 }}</div>
+      <button class="remove-btn" onclick="removeItem({{ item.product.pk }})">✕</button>
+    </div>
+    {% endfor %}
+    <div class="cart-total">
+      <span class="lbl">Ukupno (bez dostave)</span>
+      <span class="val">€{{ total|floatformat:2 }}</span>
+    </div>
+    <a href="/hr/webshop/shop/{{ company.booking_slug }}/naruci/" class="checkout-btn">Naruči →</a>
+  {% else %}
+    <div class="empty"><p style="font-size:2.5rem;margin-bottom:.75rem">🛒</p><p>Košarica je prazna.</p></div>
+  {% endif %}
+</div>
+<script>
+var SLUG='{{ company.booking_slug }}'; var CSRF='{{ csrf_token }}';
+function removeItem(pid){
+  fetch('/hr/webshop/shop/'+SLUG+'/kosara/ukloni/',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({product_id:pid})})
+  .then(function(r){return r.json();}).then(function(d){if(d.ok){localStorage.setItem('cart_count_'+SLUG,d.cart_count);location.reload();}});
+}
+</script>
+</body>
+</html>

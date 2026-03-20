@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}BOM: {{ bom }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="mb-0">
+      <i class="fas fa-sitemap me-2 text-warning"></i>{{ bom }}
+      {% if not bom.is_active %}<span class="badge bg-secondary ms-2">Neaktivan</span>{% endif %}
+    </h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'calculator:bom_edit' bom.pk %}" class="btn btn-sm btn-outline-warning">
+        <i class="fas fa-edit me-1"></i>Uredi
+      </a>
+      <a href="{% url 'calculator:bom_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Natrag
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- Info -->
+    <div class="col-md-4">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-warning fw-bold">Podaci</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-5 text-muted">Gotov artikl</dt>
+            <dd class="col-7"><strong>{{ bom.article.name }}</strong></dd>
+            <dt class="col-5 text-muted">SKU</dt>
+            <dd class="col-7 text-muted">{{ bom.article.sku }}</dd>
+            <dt class="col-5 text-muted">Prinos</dt>
+            <dd class="col-7">{{ bom.yield_quantity }} kom</dd>
+            <dt class="col-5 text-muted">Trošak mat.</dt>
+            <dd class="col-7 text-warning fw-bold">{{ total_cost }} €</dd>
+            <dt class="col-5 text-muted">Cijena/kom</dt>
+            <dd class="col-7">
+              {% if bom.yield_quantity %}
+                {{ total_cost }} / {{ bom.yield_quantity }} = …
+              {% endif %}
+            </dd>
+          </dl>
+          {% if bom.notes %}
+          <hr class="border-secondary">
+          <p class="text-muted small">{{ bom.notes }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Components -->
+    <div class="col-md-8">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header text-warning fw-bold">
+          Komponente ({{ items.count }})
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-dark table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Materijal</th>
+                <th>SKU</th>
+                <th class="text-end">Kol.</th>
+                <th>JMJ</th>
+                <th class="text-end">Otpad %</th>
+                <th class="text-end">Neto kol.</th>
+                <th class="text-end">Nabavna</th>
+                <th class="text-end">Ukupno</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td>{{ item.material.name }}</td>
+                <td class="text-muted small">{{ item.material.sku }}</td>
+                <td class="text-end">{{ item.quantity }}</td>
+                <td>{{ item.unit }}</td>
+                <td class="text-end">{{ item.waste_percent }}</td>
+                <td class="text-end">{{ item.net_quantity|floatformat:4 }}</td>
+                <td class="text-end">{{ item.material.purchase_price|floatformat:4 }}</td>
+                <td class="text-end text-warning">
+                  {% widthratio item.net_quantity 1 item.material.purchase_price %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="8" class="text-center text-muted py-2">Nema komponenti.</td></tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr class="table-secondary fw-bold">
+                <td colspan="7" class="text-end">Ukupni trošak materijala:</td>
+                <td class="text-end text-warning">{{ total_cost }} €</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

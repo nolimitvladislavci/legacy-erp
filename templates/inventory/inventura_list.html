@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Inventura — Popis imovine{% endblock %}
+{% block page_title %}Inventura{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-clipboard-check me-2 text-warning"></i>{% trans "Inventura — Popis imovine" %}</h2>
+    <small class="text-muted">
+      HR: Zakon o računovodstvu čl.11 | DE: HGB §240
+    </small>
+  </div>
+  <a href="{% url 'inventory:inventura_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus me-2"></i>{% trans "Nova inventura" %}
+  </a>
+</div>
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small">{% trans "Status" %}</label>
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="">{% trans "Svi statusi" %}</option>
+        {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>{% trans "Broj" %}</th>
+        <th>{% trans "Vrsta" %}</th>
+        <th>{% trans "Datum stanja" %}</th>
+        <th>{% trans "Skladište" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th class="text-center">{% trans "Napredak" %}</th>
+        <th>{% trans "Razlika" %}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inv in page_obj %}
+      <tr>
+        <td><a href="{% url 'inventory:inventura_detail' pk=inv.pk %}" class="fw-bold text-decoration-none">{{ inv.inventura_number }}</a></td>
+        <td><span class="badge bg-info">{{ inv.get_inventura_type_display }}</span></td>
+        <td>{{ inv.reference_date|date:"d.m.Y" }}</td>
+        <td>{{ inv.warehouse.name|default:"—" }}</td>
+        <td>
+          {% if inv.status == 'draft' %}<span class="badge bg-secondary">{{ inv.get_status_display }}</span>
+          {% elif inv.status == 'counting' %}<span class="badge bg-warning text-dark">{{ inv.get_status_display }}</span>
+          {% elif inv.status == 'completed' %}<span class="badge bg-primary">{{ inv.get_status_display }}</span>
+          {% elif inv.status == 'approved' %}<span class="badge bg-success">{{ inv.get_status_display }}</span>
+          {% elif inv.status == 'cancelled' %}<span class="badge bg-danger">{{ inv.get_status_display }}</span>
+          {% else %}<span class="badge bg-dark">{{ inv.get_status_display }}</span>
+          {% endif %}
+        </td>
+        <td class="text-center">
+          <div class="progress" style="height:20px;min-width:100px">
+            <div class="progress-bar {% if inv.progress_percent == 100 %}bg-success{% elif inv.progress_percent > 50 %}bg-info{% else %}bg-warning{% endif %}"
+                 style="width:{{ inv.progress_percent }}%">
+              {{ inv.counted_items }}/{{ inv.total_items }}
+            </div>
+          </div>
+        </td>
+        <td>
+          {% if inv.status in 'completed,approved' %}
+            {% if inv.total_difference_value > 0 %}
+              <span class="text-success fw-bold">+{{ inv.total_difference_value|floatformat:2 }}</span>
+            {% elif inv.total_difference_value < 0 %}
+              <span class="text-danger fw-bold">{{ inv.total_difference_value|floatformat:2 }}</span>
+            {% else %}
+              <span class="text-muted">0,00</span>
+            {% endif %}
+          {% else %}—{% endif %}
+        </td>
+        <td class="text-end">
+          {% if inv.status == 'counting' %}
+          <a href="{% url 'inventory:inventura_count' pk=inv.pk %}" class="btn btn-sm btn-warning" title="Broji">
+            <i class="fas fa-barcode"></i> {% trans "Broji" %}
+          </a>
+          {% endif %}
+          <a href="{% url 'inventory:inventura_pdf' pk=inv.pk %}" class="btn btn-sm btn-outline-secondary" title="PDF">
+            <i class="fas fa-file-pdf"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8" class="text-center text-muted py-4">
+          <i class="fas fa-clipboard-check fa-2x mb-2 d-block"></i>
+          {% trans "Nema inventura. Kreiraj prvu inventuru za zakonski popis imovine." %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav>
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}">&laquo;</a></li>
+    {% endif %}
+    {% for p in page_obj.paginator.page_range %}
+    <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+      <a class="page-link" href="?page={{ p }}&status={{ status_filter }}">{{ p }}</a>
+    </li>
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}">&raquo;</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

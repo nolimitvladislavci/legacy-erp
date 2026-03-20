@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ branch.name|default:"Podružnica" }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div style="padding:2rem">
+  <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:1rem">{{ branch.name|default:"Podružnica" }}</h2>
+  <p style="color:#888">Tip podružnice: {{ branch.get_branch_type_display|default:"Ostalo" }}</p>
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem">
+    <a href="/dashboard/company/" class="btn btn-ghost">{% trans "&#x2190; Glavni dashboard" %}</a>
+    <a href="/pos/" class="btn btn-ghost">{% trans "POS" %}</a>
+    <a href="/invoicing/" class="btn btn-ghost">{% trans "Fakture" %}</a>
+    <a href="/inventory/" class="btn btn-ghost">{% trans "Zalihe" %}</a>
+  </div>
+</div>
+{% endblock %}

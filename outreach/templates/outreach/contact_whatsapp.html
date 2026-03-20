@@ -1,0 +1,42 @@
+{% load i18n %}<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WhatsApp – {{ contact.display_name }}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<style>
+body{background:#0f172a;color:#e2e8f0;font-family:'Inter',sans-serif}
+.pw{max-width:600px;margin:40px auto;padding:20px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:24px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.72rem;font-weight:700;color:#94a3b8;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg textarea,.fg select{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:9px 13px;font-size:.88rem}
+.fg textarea{min-height:140px;resize:vertical}
+.bg{background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px 22px;font-weight:700;cursor:pointer;font-size:.9rem}
+.bo{background:transparent;border:1.5px solid #334155;color:#94a3b8;border-radius:10px;padding:10px 22px;font-weight:600;cursor:pointer;font-size:.9rem;text-decoration:none;display:inline-block}
+</style></head>
+<body><div class="pw">
+<a href="/outreach/contacts/" class="bo" style="margin-bottom:20px;display:inline-block">← Zurück</a>
+<div class="card">
+  <h4 style="color:#fff;margin-bottom:4px">💬 WhatsApp</h4>
+  <p style="color:#64748b;font-size:.84rem;margin-bottom:20px">{{ contact.display_name }} · {{ contact.phone }}</p>
+
+  {% if messages %}{% for m in messages %}
+    <div style="background:{% if 'error' in m.tags %}rgba(239,68,68,.12){% else %}rgba(16,185,129,.12){% endif %};border:1px solid {% if 'error' in m.tags %}rgba(239,68,68,.3){% else %}rgba(16,185,129,.3){% endif %};color:{% if 'error' in m.tags %}#f87171{% else %}#34d399{% endif %};padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:.84rem">{{ m }}</div>
+  {% endfor %}{% endif %}
+
+  <form method="post">{% csrf_token %}
+    <div class="fg">
+      <label>Poruka</label>
+      <textarea name="message" placeholder="Guten Tag {{ contact.display_name }},&#10;&#10;...">Guten Tag {{ contact.display_name }},
+
+Visković Bau bi se htio predstaviti i ponuditi svoje usluge...
+
+S poštovanjem,
+Visković Bau</textarea>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button type="submit" class="bg">💬 Pošalji WhatsApp</button>
+      <a href="/outreach/contacts/" class="bo">Odustani</a>
+    </div>
+  </form>
+</div>
+</div></body></html>

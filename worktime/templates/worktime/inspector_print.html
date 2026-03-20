@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>ARBEITSZEITNACHWEIS — {{ company.name }}</title>
+<style>
+@page { size: A4 landscape; margin: 12mm; }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .no-print { display: none !important; } }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #1a1a1a; background: #fff; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 10px; }
+.header h1 { font-size: 14px; letter-spacing: 1px; }
+.header .meta { text-align: right; font-size: 10px; line-height: 1.6; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+th, td { border: 1px solid #333; padding: 4px 6px; text-align: center; font-size: 9px; }
+th { background: #f0f0f0; font-weight: 700; font-size: 8px; text-transform: uppercase; letter-spacing: .5px; }
+tr:nth-child(even) { background: #fafafa; }
+.absence td { background: #f1f5f9 !important; }
+.warn { color: #dc2626; font-weight: 700; font-size: 8px; }
+.totals td { font-weight: 800; background: #e8e8e8 !important; border-top: 2px solid #000; }
+.footer { margin-top: 20px; display: flex; justify-content: space-between; font-size: 9px; }
+.sig-line { border-top: 1px solid #000; width: 200px; text-align: center; padding-top: 4px; margin-top: 40px; }
+.legal { margin-top: 15px; font-size: 7.5px; color: #666; font-style: italic; border-top: 1px solid #ccc; padding-top: 6px; }
+.toolbar { padding: 12px 20px; background: #f8f8f8; border-bottom: 1px solid #ddd; display: flex; gap: 12px; align-items: center; }
+.toolbar select, .toolbar button { padding: 6px 12px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; }
+.toolbar button { background: #c9a84c; color: #fff; border: none; cursor: pointer; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  <form method="get" style="display:flex;gap:8px;align-items:center;">
+    <label>Monat:</label>
+    <select name="month">
+      {% for m in "123456789" %}<option value="{{ forloop.counter }}" {% if forloop.counter == month %}selected{% endif %}>{{ forloop.counter }}</option>{% endfor %}
+      <option value="10" {% if month == 10 %}selected{% endif %}>10</option>
+      <option value="11" {% if month == 11 %}selected{% endif %}>11</option>
+      <option value="12" {% if month == 12 %}selected{% endif %}>12</option>
+    </select>
+    <select name="year">
+      <option value="{{ year }}">{{ year }}</option>
+    </select>
+    <input type="hidden" name="worker" value="{{ worker.id }}">
+    <button type="submit">Laden</button>
+  </form>
+  <button onclick="window.print()" style="margin-left:auto;">🖨 Drucken</button>
+</div>
+
+<div style="padding: 15px;">
+<div class="header">
+  <div>
+    <h1>ARBEITSZEITNACHWEIS / EVIDENCIJA RADA</h1>
+    <div style="margin-top:6px;"><strong>Arbeitgeber / Poslodavac:</strong> {{ company.name }} — OIB/St.Nr: {{ company.oib }}</div>
+  </div>
+  <div class="meta">
+    <strong>Arbeitnehmer / Radnik:</strong> {{ worker.get_full_name }}<br>
+    <strong>Zeitraum / Razdoblje:</strong> {{ month|stringformat:"02d" }}/{{ year }}
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2" style="width:60px;">Datum</th>
+      <th colspan="2">Arbeitszeit / Radno vrijeme</th>
+      <th rowspan="2">Pause<br>(min)</th>
+      <th rowspan="2">Gesamt<br>Ukupno</th>
+      <th rowspan="2">Regulär<br>Redovni</th>
+      <th rowspan="2">Überst.<br>Prekovr.</th>
+      <th rowspan="2">Nacht<br>Noćni</th>
+      <th rowspan="2">Feiertag<br>Blagdan</th>
+      <th colspan="3">Abwesenheit / Odsutnost (h)</th>
+      <th rowspan="2" style="width:140px;">Anmerkung / Napomena</th>
+    </tr>
+    <tr>
+      <th>Von / Od</th><th>Bis / Do</th>
+      <th>Urlaub<br>G.O.</th><th>Krank<br>Bolov.</th><th>Sonst.<br>Ostalo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in entries %}
+    <tr class="{% if e.absence_type %}absence{% endif %}">
+      <td>{{ e.date|date:"d.m." }}</td>
+      <td>{{ e.start_time|time:"H:i"|default:"—" }}</td>
+      <td>{{ e.end_time|time:"H:i"|default:"—" }}</td>
+      <td>{{ e.break_minutes|default:"0" }}</td>
+      <td><strong>{{ e.duration }}</strong></td>
+      <td>{{ e.regular_hours|default:"—" }}</td>
+      <td>{% if e.overtime_hours %}{{ e.overtime_hours }}{% else %}—{% endif %}</td>
+      <td>{% if e.night_hours %}{{ e.night_hours }}{% else %}—{% endif %}</td>
+      <td>{% if e.is_holiday_work %}✓{% else %}—{% endif %}</td>
+      <td>{% if e.absence_type == 'ANNUAL' %}{{ e.duration }}{% else %}—{% endif %}</td>
+      <td>{% if e.absence_type == 'SICK' %}{{ e.duration }}{% else %}—{% endif %}</td>
+      <td>{% if e.absence_type and e.absence_type != 'ANNUAL' and e.absence_type != 'SICK' %}{{ e.duration }}{% else %}—{% endif %}</td>
+      <td class="{% if e.compliance_note %}warn{% endif %}" style="text-align:left;font-size:8px;">{{ e.compliance_note|default:e.description|truncatechars:40 }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="13" style="padding:20px;color:#999;">Keine Einträge / Nema unosa</td></tr>
+    {% endfor %}
+    {% if totals.total_hours %}
+    <tr class="totals">
+      <td colspan="4"><strong>SUMME / UKUPNO</strong></td>
+      <td>{{ totals.total_hours|floatformat:1 }}</td>
+      <td>{{ totals.total_regular|floatformat:1|default:"0" }}</td>
+      <td>{{ totals.total_overtime|floatformat:1|default:"0" }}</td>
+      <td>{{ totals.total_night|floatformat:1|default:"0" }}</td>
+      <td colspan="4"></td>
+      <td style="text-align:left;font-size:9px;"><strong>€ {{ totals.total_billing|floatformat:2|default:"0.00" }}</strong></td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<div class="footer">
+  <div>
+    <div class="sig-line">Arbeitnehmer / Radnik</div>
+  </div>
+  <div>
+    <div class="sig-line">Arbeitgeber / Poslodavac</div>
+  </div>
+</div>
+
+<div class="legal">
+  * Erstellt gemäß ArbZG §16 / NN 55/24 čl.8. — Aufbewahrungspflicht 2 Jahre / Obveza čuvanja 2 godine.<br>
+  Generiert von LIMIT Connect ERP — {{ company.name }}
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ company.name }} — Eko izvjestaj</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f0fdf4;color:#0f172a;min-height:100vh}
+.hero{background:linear-gradient(135deg,#065f46,#047857,#059669);color:#fff;padding:60px 20px 50px;text-align:center}
+.hero h1{font-size:2rem;font-weight:700;margin-bottom:8px}
+.hero .sub{font-size:1rem;opacity:.85}
+.badge-circle{display:inline-flex;align-items:center;justify-content:center;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.15);font-size:3rem;margin:20px 0}
+.container{max-width:900px;margin:0 auto;padding:30px 20px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:30px}
+.stat-card{background:#fff;border-radius:12px;padding:24px 16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.stat-card .val{font-size:2rem;font-weight:700;color:#065f46}
+.stat-card .lbl{font-size:.82rem;color:#64748b;margin-top:4px}
+.table-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:30px}
+.table-card h3{font-size:1rem;color:#065f46;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:10px 8px;border-bottom:2px solid #d1fae5;color:#64748b;font-size:.75rem;text-transform:uppercase}
+td{padding:10px 8px;border-bottom:1px solid #f0fdf4}
+.badge-tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700}
+.badge-tag.bronze{background:#fef3c7;color:#92400e}
+.badge-tag.silver{background:#e2e8f0;color:#475569}
+.badge-tag.gold{background:#fef9c3;color:#854d0e}
+.badge-tag.platinum{background:#dbeafe;color:#1e40af}
+.methodology{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:.85rem;color:#64748b}
+.methodology h4{color:#065f46;margin-bottom:8px}
+.footer{text-align:center;padding:30px;font-size:.8rem;color:#94a3b8}
+.footer a{color:#059669;text-decoration:none}
+.propter-badge{display:inline-block;background:linear-gradient(135deg,#065f46,#059669);color:#fff;padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:600;margin-top:16px;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge-circle">
+    {% if best_badge == "platinum" %}&#128142;{% elif best_badge == "gold" %}&#127881;{% elif best_badge == "silver" %}&#129353;{% elif best_badge == "bronze" %}&#129354;{% else %}&#127807;{% endif %}
+  </div>
+  <h1>{{ company.name }}</h1>
+  <div class="sub">Eko izvjestaj {{ year }} — digitalna transformacija poslovanja</div>
+  {% if best_badge %}
+  <div style="margin-top:12px"><span class="badge-tag {{ best_badge }}" style="font-size:1rem;padding:6px 16px">{{ best_badge|capfirst }} razina</span></div>
+  {% endif %}
+</div>
+
+<div class="container">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="val">{{ ytd.eracuni }}</div>
+      <div class="lbl">e-Racuna poslano</div>
+    </div>
+    <div class="stat-card">
+      <div class="val">{{ ytd.paper }}</div>
+      <div class="lbl">listova papira ustedeno</div>
+    </div>
+    <div class="stat-card">
+      <div class="val">{{ ytd.co2 }}g</div>
+      <div class="lbl">CO&#8322; manje u atmosferi</div>
+    </div>
+    <div class="stat-card">
+      <div class="val">{{ ytd.trees|floatformat:3 }}</div>
+      <div class="lbl">ekvivalent stabala</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <h3>Mjesecni pregled {{ year }}</h3>
+    <table>
+      <thead>
+        <tr><th>Mjesec</th><th>e-Racuna</th><th>Papir (listova)</th><th>CO&#8322; (g)</th><th>Bedz</th></tr>
+      </thead>
+      <tbody>
+      {% for e in stats %}
+        <tr>
+          <td><strong>{{ e.year }}/{{ e.month|stringformat:"02d" }}</strong></td>
+          <td>{{ e.eracuni_sent }}</td>
+          <td>{{ e.paper_saved_sheets }}</td>
+          <td>{{ e.co2_saved_grams|floatformat:0 }}</td>
+          <td>
+            {% if e.badge_level %}<span class="badge-tag {{ e.badge_level }}">{{ e.badge_level|capfirst }}</span>{% else %}-{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px">Nema podataka</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="methodology">
+    <h4>Metodologija izracuna</h4>
+    <p>Svaki e-Racun zamjenjuje prosjecno 2 lista A4 papira (original + kopija).
+    Prema IPCC standardima, tiskanje jednog lista oslobada 5g CO&#8322;.
+    Jedno stablo apsorbira 21.700g CO&#8322; godisnje.
+    Badge razine: Bronze 50+, Silver 200+, Gold 500+, Platinum 1000+ e-racuna mjesecno.</p>
+  </div>
+
+  <div style="text-align:center;margin-top:24px">
+    <a href="https://limit-connect.com" class="propter-badge">Powered by Propter e-Racun</a>
+  </div>
+</div>
+
+<div class="footer">
+  <p>&copy; {{ year }} <a href="https://limit-connect.com">Propter by LIMIT Connect</a> — digitalno poslovanje bez papira</p>
+</div>
+</body>
+</html>

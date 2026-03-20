@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Korisnici - Superadmin{% endblock %}
+{% block content %}
+<div style="max-width:1200px;margin:0 auto;padding:1rem">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h4 style="margin:0;font-weight:700"><i class="fas fa-users-cog" style="color:#c9a84c"></i> Svi korisnici</h4>
+      <p style="color:#6b7280;font-size:.82rem;margin:4px 0 0">{{ total_count }} korisnika ukupno</p>
+    </div>
+    <a href="{% url 'superadmin_dashboard' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left"></i> Superadmin</a>
+  </div>
+
+  <!-- Filters -->
+  <form method="get" style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1rem;margin-bottom:1.5rem;display:flex;gap:.8rem;flex-wrap:wrap;align-items:end">
+    <div style="flex:2;min-width:180px">
+      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Pretraga</label>
+      <input type="text" name="q" value="{{ q }}" placeholder="Ime, email, username..."
+        style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+    </div>
+    <div style="flex:1;min-width:150px">
+      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Tvrtka</label>
+      <select name="company" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        <option value="">Sve tvrtke</option>
+        {% for c in companies %}
+        <option value="{{ c.id }}" {% if company_filter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex:1;min-width:120px">
+      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Rola</label>
+      <select name="role" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        <option value="">Sve role</option>
+        <option value="superuser" {% if role_filter == 'superuser' %}selected{% endif %}>Superadmin</option>
+        <option value="staff" {% if role_filter == 'staff' %}selected{% endif %}>Staff</option>
+        <option value="company_admin" {% if role_filter == 'company_admin' %}selected{% endif %}>Company Admin</option>
+        <option value="manager" {% if role_filter == 'manager' %}selected{% endif %}>Manager</option>
+        <option value="worker" {% if role_filter == 'worker' %}selected{% endif %}>Radnik</option>
+      </select>
+    </div>
+    <div style="flex:1;min-width:100px">
+      <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Status</label>
+      <select name="status" style="width:100%;padding:8px 12px;background:#0a0a0a;border:1px solid #252830;border-radius:6px;color:#e8e8e8;font-size:.85rem">
+        <option value="">Svi</option>
+        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktivni</option>
+        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Neaktivni</option>
+      </select>
+    </div>
+    <button type="submit" style="padding:8px 20px;background:#c9a84c;color:#000;border:none;border-radius:6px;font-weight:600;font-size:.85rem;cursor:pointer">
+      <i class="fas fa-search"></i> Filtriraj
+    </button>
+  </form>
+
+  <!-- Users table -->
+  <div style="background:#111214;border:1px solid #252830;border-radius:8px;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+        <thead>
+          <tr style="background:#0a0a0a;color:#6b7280;text-transform:uppercase;font-size:.68rem;letter-spacing:.05em">
+            <th style="padding:10px 14px;text-align:left">Korisnik</th>
+            <th style="padding:10px 14px;text-align:left">Email</th>
+            <th style="padding:10px 14px;text-align:left">Tvrtka</th>
+            <th style="padding:10px 14px;text-align:left">Rola</th>
+            <th style="padding:10px 14px;text-align:center">Status</th>
+            <th style="padding:10px 14px;text-align:left">Registriran</th>
+            <th style="padding:10px 14px;text-align:left">Zadnji login</th>
+            <th style="padding:10px 14px;text-align:center">Akcije</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users_page %}
+          <tr style="border-top:1px solid #1e2130;{% if not u.is_active %}opacity:.5{% endif %}">
+            <td style="padding:10px 14px">
+              <strong style="color:#e8e8e8">{{ u.first_name }} {{ u.last_name }}</strong>
+              <div style="color:#6b7280;font-size:.72rem">{{ u.username }}</div>
+            </td>
+            <td style="padding:10px 14px;color:#94a3b8">{{ u.email|default:"-" }}</td>
+            <td style="padding:10px 14px">
+              {% if u.profile and u.profile.company %}
+                <span style="color:#c9a84c">{{ u.profile.company.name }}</span>
+              {% else %}
+                <span style="color:#4a5060">-</span>
+              {% endif %}
+            </td>
+            <td style="padding:10px 14px">
+              {% if u.is_superuser %}
+                <span style="background:#7c3aed;color:#fff;padding:2px 8px;border-radius:3px;font-size:.7rem">SUPER</span>
+              {% elif u.is_staff %}
+                <span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:3px;font-size:.7rem">STAFF</span>
+              {% elif u.profile %}
+                <span style="background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:3px;font-size:.7rem">{{ u.profile.role|default:"user" }}</span>
+              {% else %}
+                <span style="color:#4a5060">user</span>
+              {% endif %}
+            </td>
+            <td style="padding:10px 14px;text-align:center">
+              {% if u.is_active %}
+                <span style="color:#4caf7d;font-size:.9rem" title="Aktivan">&#9679;</span>
+              {% else %}
+                <span style="color:#ef4444;font-size:.9rem" title="Neaktivan">&#9679;</span>
+              {% endif %}
+            </td>
+            <td style="padding:10px 14px;color:#6b7280;font-size:.75rem">{{ u.date_joined|date:"d.m.Y" }}</td>
+            <td style="padding:10px 14px;color:#6b7280;font-size:.75rem">{{ u.last_login|date:"d.m.Y H:i"|default:"-" }}</td>
+            <td style="padding:10px 14px;text-align:center;white-space:nowrap">
+              <form method="post" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ u.pk }}">
+                <a href="{% url 'superadmin_edit_user' u.pk %}" title="Uredi korisnika"
+                  style="display:inline-block;background:none;border:1px solid #252830;border-radius:4px;padding:4px 8px;color:#3b82f6;font-size:.75rem;text-decoration:none;margin-right:2px">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button name="action" value="toggle_active" title="{% if u.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}"
+                  style="background:none;border:1px solid #252830;border-radius:4px;padding:4px 8px;cursor:pointer;color:{% if u.is_active %}#ef4444{% else %}#4caf7d{% endif %};font-size:.75rem">
+                  <i class="fas {% if u.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                </button>
+                {% if u.profile and u.profile.company and not u.is_superuser %}
+                <button name="action" value="impersonate_company" title="Pristupi kao {{ u.profile.company.name }}"
+                  style="background:none;border:1px solid #252830;border-radius:4px;padding:4px 8px;cursor:pointer;color:#c9a84c;font-size:.75rem">
+                  <i class="fas fa-sign-in-alt"></i>
+                </button>
+                {% endif %}
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" style="padding:2rem;text-align:center;color:#6b7280">Nema korisnika za odabrane filtere.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if users_page.has_other_pages %}
+    <div style="padding:12px 14px;border-top:1px solid #1e2130;display:flex;justify-content:center;gap:4px">
+      {% if users_page.has_previous %}
+      <a href="?page={{ users_page.previous_page_number }}&q={{ q }}&company={{ company_filter }}&role={{ role_filter }}&status={{ status_filter }}"
+         style="padding:6px 12px;background:#1e293b;color:#94a3b8;border-radius:4px;text-decoration:none;font-size:.8rem">&laquo; Prethodna</a>
+      {% endif %}
+      <span style="padding:6px 12px;color:#6b7280;font-size:.8rem">
+        {{ users_page.number }} / {{ users_page.paginator.num_pages }}
+      </span>
+      {% if users_page.has_next %}
+      <a href="?page={{ users_page.next_page_number }}&q={{ q }}&company={{ company_filter }}&role={{ role_filter }}&status={{ status_filter }}"
+         style="padding:6px 12px;background:#1e293b;color:#94a3b8;border-radius:4px;text-decoration:none;font-size:.8rem">Sljedeca &raquo;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

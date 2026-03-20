@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Batch fiskalizacija — LIMIT Connect{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0"><i class="fas fa-bolt text-warning me-2"></i>Batch fiskalizacija</h5>
+  <a href="{% url 'invoicing:fiscal_certificates' %}" class="btn btn-sm btn-outline-secondary">
+    <i class="fas fa-certificate me-1"></i>Certifikati
+  </a>
+</div>
+
+{% if messages %}
+<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+{% endif %}
+
+<!-- Nefiskalizirani računi -->
+<div class="stat-card p-4 mb-4">
+  <h6 class="mb-3"><i class="fas fa-file-invoice me-2"></i>Nefiskalizirani HR računi</h6>
+  {% if pending_invoices %}
+  <form method="post" action="{% url 'invoicing:fiscal_batch_create' %}">
+    {% csrf_token %}
+    <div class="table-responsive mb-3">
+      <table class="table table-sm align-middle" style="font-size:.85rem">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectAll" onclick="document.querySelectorAll('.inv-check').forEach(cb=>cb.checked=this.checked)"></th>
+            <th>Broj</th>
+            <th>Datum</th>
+            <th>Klijent</th>
+            <th class="text-end">Iznos</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in pending_invoices %}
+          <tr>
+            <td><input type="checkbox" name="invoice_ids" value="{{ inv.pk }}" class="inv-check"></td>
+            <td><a href="/invoicing/{{ inv.pk }}/pdf/" class="text-warning">{{ inv.number }}</a></td>
+            <td>{{ inv.date|date:"d.m.Y" }}</td>
+            <td>{{ inv.client_name|default:"-"|truncatechars:30 }}</td>
+            <td class="text-end">{{ inv.total|default:"0.00" }} {{ inv.currency }}</td>
+            <td><span class="badge bg-secondary">{{ inv.get_status_display|default:inv.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <button type="submit" class="btn btn-warning">
+      <i class="fas fa-bolt me-1"></i>Fiskaliziraj odabrane
+    </button>
+  </form>
+  {% else %}
+  <div class="text-center py-4 text-muted" style="font-size:.85rem">
+    <i class="fas fa-check-circle text-success" style="font-size:2rem"></i>
+    <p class="mt-2">Svi HR računi su fiskalizirani.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Prošli batch-ovi -->
+{% if batches %}
+<div class="stat-card p-4">
+  <h6 class="mb-3"><i class="fas fa-history me-2"></i>Prošle batch fiskalizacije</h6>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle" style="font-size:.85rem">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Datum</th>
+          <th>Status</th>
+          <th>Ukupno</th>
+          <th>Uspješno</th>
+          <th>Greške</th>
+          <th>Trajanje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for batch in batches %}
+        <tr>
+          <td>{{ batch.pk }}</td>
+          <td>{{ batch.created_at|date:"d.m.Y H:i" }}</td>
+          <td>
+            {% if batch.status == 'completed' %}<span class="badge bg-success">Završeno</span>
+            {% elif batch.status == 'partial' %}<span class="badge bg-warning text-dark">Djelomično</span>
+            {% elif batch.status == 'failed' %}<span class="badge bg-danger">Neuspješno</span>
+            {% elif batch.status == 'processing' %}<span class="badge bg-info">U tijeku</span>
+            {% else %}<span class="badge bg-secondary">{{ batch.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>{{ batch.total_count }}</td>
+          <td class="text-success">{{ batch.success_count }}</td>
+          <td class="{% if batch.error_count %}text-danger{% endif %}">{{ batch.error_count }}</td>
+          <td>{% if batch.duration_seconds %}{{ batch.duration_seconds|floatformat:1 }}s{% else %}-{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

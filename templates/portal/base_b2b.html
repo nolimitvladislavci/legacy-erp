@@ -1,0 +1,550 @@
+{% load static %}<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}B2B Portal{% endblock %} — LIMIT CONNECT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Reset & Variables ──────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;
+  --surface:#111111;
+  --surface-hover:#1a1a1a;
+  --border:#222222;
+  --border-light:#333333;
+  --text:#e8e8e8;
+  --text-secondary:#999999;
+  --text-muted:#666666;
+  --gold:#c9a84c;
+  --gold-hover:#d4b35a;
+  --gold-muted:#8a7535;
+  --gold-bg:rgba(201,168,76,.08);
+  --success:#2ea043;
+  --error:#da3633;
+  --warning:#d29922;
+  --info:#58a6ff;
+  --radius:12px;
+  --radius-sm:8px;
+  --font-heading:'Cormorant Garamond',Georgia,serif;
+  --font-body:'Barlow',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+html{font-size:15px;-webkit-font-smoothing:antialiased}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+a{color:var(--gold);text-decoration:none;transition:color .2s}
+a:hover{color:var(--gold-hover)}
+
+/* ── Navbar ─────────────────────────────────────────────────────────── */
+.b2b-nav{
+  background:#0c0c0c;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  padding:0 24px;
+  display:flex;align-items:center;
+  height:64px;
+  gap:32px;
+}
+.b2b-nav-brand{
+  font-family:var(--font-heading);
+  font-weight:700;font-size:1.35rem;
+  color:var(--gold);
+  letter-spacing:.5px;
+  white-space:nowrap;
+  display:flex;align-items:center;gap:10px;
+}
+.b2b-nav-brand i{font-size:1.1rem;opacity:.7}
+.b2b-nav-partner{
+  font-size:.82rem;color:var(--text-secondary);
+  border-left:1px solid var(--border);
+  padding-left:20px;
+  white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+  max-width:280px;
+}
+.b2b-nav-links{
+  display:flex;gap:4px;
+  margin-left:auto;
+  list-style:none;
+}
+.b2b-nav-links a{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;
+  border-radius:var(--radius-sm);
+  font-size:.85rem;font-weight:500;
+  color:var(--text-secondary);
+  transition:all .2s;
+}
+.b2b-nav-links a:hover{color:var(--text);background:var(--surface)}
+.b2b-nav-links a.active{
+  color:var(--gold);
+  background:var(--gold-bg);
+  font-weight:700;
+}
+.b2b-hamburger{
+  display:none;
+  background:none;border:none;
+  color:var(--text);font-size:1.3rem;
+  cursor:pointer;margin-left:auto;
+  padding:8px;
+}
+@media(max-width:768px){
+  .b2b-nav{padding:0 16px;gap:12px}
+  .b2b-nav-partner{display:none}
+  .b2b-hamburger{display:block}
+  .b2b-nav-links{
+    display:none;
+    position:absolute;top:64px;left:0;right:0;
+    background:#0c0c0c;
+    border-bottom:1px solid var(--border);
+    flex-direction:column;
+    padding:8px 16px;
+    gap:0;
+  }
+  .b2b-nav-links.open{display:flex}
+  .b2b-nav-links a{padding:12px 16px;border-radius:0;border-bottom:1px solid var(--border)}
+}
+
+/* ── Main Container ─────────────────────────────────────────────────── */
+.b2b-main{
+  flex:1;
+  max-width:1100px;
+  width:100%;
+  margin:0 auto;
+  padding:32px 24px;
+}
+@media(max-width:768px){.b2b-main{padding:20px 16px}}
+
+/* ── Cards ──────────────────────────────────────────────────────────── */
+.b2b-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:24px;
+  margin-bottom:20px;
+}
+.b2b-card-header{
+  font-family:var(--font-heading);
+  font-size:1.2rem;font-weight:700;
+  color:var(--gold);
+  margin-bottom:16px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.b2b-card-header i{font-size:.9rem;opacity:.6}
+
+/* ── Stat Cards ─────────────────────────────────────────────────────── */
+.b2b-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.b2b-stat{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+  text-align:center;
+  transition:border-color .2s;
+}
+.b2b-stat:hover{border-color:var(--gold-muted)}
+.b2b-stat-value{
+  font-family:var(--font-heading);
+  font-size:1.8rem;font-weight:700;
+  color:var(--gold);
+  margin-bottom:4px;
+}
+.b2b-stat-label{font-size:.78rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
+
+/* ── Tables ─────────────────────────────────────────────────────────── */
+.b2b-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.b2b-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.b2b-table thead{border-bottom:2px solid var(--border)}
+.b2b-table th{
+  padding:12px 14px;text-align:left;
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--text-muted);font-weight:600;
+  white-space:nowrap;
+}
+.b2b-table td{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  color:var(--text);
+  vertical-align:middle;
+}
+.b2b-table tbody tr{transition:background .15s}
+.b2b-table tbody tr:hover{background:var(--surface-hover)}
+.b2b-table-link{cursor:pointer}
+
+/* ── Badges ─────────────────────────────────────────────────────────── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:20px;
+  font-size:.72rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.3px;
+}
+.badge-draft{background:#333;color:#aaa}
+.badge-sent{background:rgba(88,166,255,.12);color:var(--info)}
+.badge-accepted{background:rgba(46,160,67,.12);color:var(--success)}
+.badge-paid{background:var(--gold-bg);color:var(--gold)}
+.badge-rejected{background:rgba(218,54,51,.12);color:var(--error)}
+.badge-overdue{background:rgba(210,153,34,.12);color:var(--warning)}
+.badge-cancelled{background:#222;color:#666}
+.badge-storno{background:#222;color:#666}
+.badge-unpaid{background:rgba(210,153,34,.12);color:var(--warning)}
+.badge-expired{background:#222;color:#666}
+
+/* ── Buttons ────────────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:var(--radius-sm);
+  font-family:var(--font-body);font-size:.88rem;font-weight:600;
+  border:none;cursor:pointer;
+  transition:all .2s;
+  text-decoration:none;
+  line-height:1.4;
+}
+.btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:var(--gold-hover);color:#000}
+.btn-outline{background:transparent;border:1.5px solid var(--gold);color:var(--gold)}
+.btn-outline:hover{background:var(--gold-bg)}
+.btn-danger{background:var(--error);color:#fff}
+.btn-danger:hover{background:#c22d2a}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface);color:var(--text)}
+.btn-sm{padding:6px 14px;font-size:.8rem;border-radius:6px}
+
+/* ── Forms ──────────────────────────────────────────────────────────── */
+.b2b-input,.b2b-select,.b2b-textarea{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  padding:10px 14px;
+  font-family:var(--font-body);font-size:.88rem;
+  width:100%;
+  transition:border-color .2s;
+}
+.b2b-input:focus,.b2b-select:focus,.b2b-textarea:focus{
+  outline:none;border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(201,168,76,.1);
+}
+.b2b-textarea{min-height:80px;resize:vertical}
+.b2b-label{
+  display:block;font-size:.78rem;
+  color:var(--text-secondary);font-weight:600;
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;
+}
+
+/* ── Filter Bar ─────────────────────────────────────────────────────── */
+.b2b-filters{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:24px;
+  padding:16px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+}
+.b2b-filter-pill{
+  padding:6px 16px;border-radius:20px;
+  font-size:.8rem;font-weight:500;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text-secondary);
+  cursor:pointer;transition:all .2s;
+  text-decoration:none;
+}
+.b2b-filter-pill:hover{border-color:var(--gold-muted);color:var(--text)}
+.b2b-filter-pill.active{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:#000;font-weight:700;
+}
+
+/* ── Timeline ───────────────────────────────────────────────────────── */
+.b2b-timeline{position:relative;padding-left:28px}
+.b2b-timeline::before{
+  content:'';position:absolute;left:8px;top:4px;bottom:4px;
+  width:2px;background:var(--border);
+}
+.b2b-timeline-item{
+  position:relative;
+  margin-bottom:20px;
+  padding-bottom:4px;
+}
+.b2b-timeline-dot{
+  position:absolute;left:-24px;top:3px;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--border-light);
+  border:2px solid var(--bg);
+}
+.b2b-timeline-dot.gold{background:var(--gold)}
+.b2b-timeline-dot.green{background:var(--success)}
+.b2b-timeline-dot.red{background:var(--error)}
+.b2b-timeline-time{font-size:.72rem;color:var(--text-muted);margin-bottom:2px}
+.b2b-timeline-title{font-size:.85rem;color:var(--text)}
+.b2b-timeline-detail{font-size:.78rem;color:var(--text-secondary);margin-top:2px}
+
+/* ── Info Grid ──────────────────────────────────────────────────────── */
+.b2b-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.b2b-info-grid{grid-template-columns:1fr}}
+.b2b-info-box{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:18px;
+}
+.b2b-info-box h4{
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--text-muted);margin-bottom:10px;font-weight:600;
+}
+.b2b-info-row{
+  display:flex;justify-content:space-between;
+  padding:4px 0;font-size:.85rem;
+}
+.b2b-info-row span:first-child{color:var(--text-secondary)}
+.b2b-info-row span:last-child{color:var(--text);font-weight:500}
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+.b2b-footer{
+  text-align:center;
+  padding:24px;
+  border-top:1px solid var(--border);
+  font-size:.75rem;
+  color:var(--text-muted);
+  margin-top:auto;
+}
+.b2b-footer a{color:var(--gold-muted);font-weight:500}
+
+/* ── Toast System ───────────────────────────────────────────────────── */
+#fc-toasts{
+  position:fixed;top:16px;right:16px;
+  z-index:10000;width:380px;max-width:calc(100vw - 32px);
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+}
+.fc-toast{
+  pointer-events:auto;
+  display:flex;align-items:flex-start;gap:10px;
+  padding:14px 18px;
+  border-radius:var(--radius-sm);
+  border-left:3px solid;
+  font-size:.85rem;line-height:1.4;
+  cursor:pointer;
+  transform:translateX(120%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .3s;
+  backdrop-filter:blur(12px);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.fc-toast.show{transform:translateX(0)}
+.fc-toast-icon{font-weight:900;font-size:.95rem;flex-shrink:0;margin-top:1px}
+.fc-toast-success{background:rgba(10,46,26,.92);border-color:var(--success);color:#7ee2a8}
+.fc-toast-success .fc-toast-icon{color:var(--success)}
+.fc-toast-error{background:rgba(46,10,10,.92);border-color:var(--error);color:#f5a3a1}
+.fc-toast-error .fc-toast-icon{color:var(--error)}
+.fc-toast-warning{background:rgba(46,42,10,.92);border-color:var(--warning);color:#f0d56e}
+.fc-toast-warning .fc-toast-icon{color:var(--warning)}
+.fc-toast-info{background:rgba(10,26,46,.92);border-color:var(--info);color:#a3c9f5}
+.fc-toast-info .fc-toast-icon{color:var(--info)}
+
+/* ── Spinner ────────────────────────────────────────────────────────── */
+.fc-spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid currentColor;border-top-color:transparent;
+  border-radius:50%;
+  animation:fc-spin .6s linear infinite;
+}
+@keyframes fc-spin{to{transform:rotate(360deg)}}
+
+/* ── Modal ──────────────────────────────────────────────────────────── */
+.fc-modal-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
+.fc-modal-overlay.open{display:flex}
+.fc-modal{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:28px;
+  width:100%;max-width:480px;
+  box-shadow:0 16px 48px rgba(0,0,0,.5);
+}
+.fc-modal h3{font-family:var(--font-heading);font-size:1.15rem;color:var(--gold);margin-bottom:16px}
+.fc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+/* ── Empty State ────────────────────────────────────────────────────── */
+.b2b-empty{
+  text-align:center;padding:48px 20px;
+  color:var(--text-muted);
+}
+.b2b-empty i{font-size:2.5rem;margin-bottom:12px;display:block;color:var(--border-light)}
+.b2b-empty p{font-size:.9rem;max-width:320px;margin:0 auto}
+
+/* ── Utility ────────────────────────────────────────────────────────── */
+.text-gold{color:var(--gold)}.text-muted{color:var(--text-secondary)}
+.text-right{text-align:right}.text-center{text-align:center}
+.text-mono{font-family:'JetBrains Mono','Fira Code',monospace;font-size:.82rem}
+.mt-1{margin-top:8px}.mt-2{margin-top:16px}.mt-3{margin-top:24px}
+.mb-1{margin-bottom:8px}.mb-2{margin-bottom:16px}.mb-3{margin-bottom:24px}
+.flex{display:flex}.flex-between{display:flex;justify-content:space-between;align-items:center}
+.gap-1{gap:8px}.gap-2{gap:16px}
+{% block extra_css %}{% endblock %}
+</style>
+</head>
+<body>
+
+<!-- ── Navbar ───────────────────────────────────────────────────────── -->
+<nav class="b2b-nav">
+  <div class="b2b-nav-brand">
+    <i class="fas fa-link"></i> LIMIT CONNECT
+  </div>
+  <div class="b2b-nav-partner">
+    <i class="fas fa-building" style="margin-right:4px;opacity:.5"></i>
+    {{ partner.name }}
+  </div>
+  <button class="b2b-hamburger" onclick="document.querySelector('.b2b-nav-links').classList.toggle('open')" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+  <ul class="b2b-nav-links">
+    <li><a href="{% url 'b2b_dashboard' token %}" class="{% if active_tab == 'dashboard' %}active{% endif %}">
+      <i class="fas fa-th-large"></i> Pregled
+    </a></li>
+    <li><a href="{% url 'b2b_invoices' token %}" class="{% if active_tab == 'invoices' %}active{% endif %}">
+      <i class="fas fa-file-invoice"></i> Dokumenti
+    </a></li>
+  </ul>
+</nav>
+
+<!-- ── Toast Container ─────────────────────────────────────────────── -->
+<div id="fc-toasts"></div>
+
+<!-- ── CSRF Token ──────────────────────────────────────────────────── -->
+<form id="fc-csrf-form" style="display:none">{% csrf_token %}</form>
+
+<!-- ── Main Content ────────────────────────────────────────────────── -->
+<main class="b2b-main">
+{% block content %}{% endblock %}
+</main>
+
+<!-- ── Footer ──────────────────────────────────────────────────────── -->
+<footer class="b2b-footer">
+  &copy; 2026 <a href="https://viskovic-group.de" target="_blank">Viskovic Group</a>
+  &middot; Powered by LIMIT CONNECT
+</footer>
+
+<!-- ── Reject Modal (reusable) ─────────────────────────────────────── -->
+<div class="fc-modal-overlay" id="rejectModal">
+  <div class="fc-modal">
+    <h3><i class="fas fa-times-circle" style="margin-right:8px"></i>Odbijanje dokumenta</h3>
+    <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:16px">
+      Molimo navedite razlog odbijanja. Ovo ce biti vidljivo izdavacu dokumenta.
+    </p>
+    <label class="b2b-label" for="rejectReason">Razlog odbijanja</label>
+    <textarea class="b2b-textarea" id="rejectReason" placeholder="Npr. neispravna kolicina, krivi artikl..."></textarea>
+    <div class="fc-modal-actions">
+      <button class="btn btn-ghost" onclick="FC.closeModal('rejectModal')">Odustani</button>
+      <button class="btn btn-danger" id="rejectConfirmBtn" onclick="FC._confirmReject()">
+        <i class="fas fa-times"></i> Potvrdi odbijanje
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Core JS ─────────────────────────────────────────────────────── -->
+<script>
+const FC = {
+  /* ── Toast ──────────────────────────────────────────────────────── */
+  toast(message, type) {
+    type = type || 'success';
+    const icons = {success:'\u2713', error:'\u2717', warning:'\u26A0', info:'\u2139'};
+    const el = document.createElement('div');
+    el.className = 'fc-toast fc-toast-' + type;
+    el.innerHTML = '<span class="fc-toast-icon">' + (icons[type]||'') + '</span><span>' + message + '</span>';
+    document.getElementById('fc-toasts').appendChild(el);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add('show'); }); });
+    var dur = type === 'error' ? 8000 : 5000;
+    setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); }, 350); }, dur);
+    el.onclick = function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); }, 350); };
+  },
+
+  /* ── CSRF ───────────────────────────────────────────────────────── */
+  csrf() {
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (el) return el.value;
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  },
+
+  /* ── POST with full feedback ────────────────────────────────────── */
+  async post(url, data, btn) {
+    var origHTML = '';
+    if (btn) {
+      origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="fc-spinner"></span> Obrada...';
+    }
+    try {
+      var resp = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-CSRFToken': FC.csrf()},
+        body: JSON.stringify(data),
+      });
+      var result;
+      try { result = await resp.json(); } catch(e) { result = {error: 'HTTP ' + resp.status}; }
+      if (!resp.ok) {
+        throw new Error(result.error || 'Greska ' + resp.status);
+      }
+      if (result.message) FC.toast(result.message, 'success');
+      return result;
+    } catch(e) {
+      FC.toast(e.message, 'error');
+      throw e;
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = origHTML; }
+    }
+  },
+
+  /* ── Modals ─────────────────────────────────────────────────────── */
+  openModal(id) { document.getElementById(id).classList.add('open'); },
+  closeModal(id) { document.getElementById(id).classList.remove('open'); },
+
+  /* ── Reject flow (set by invoice_detail) ────────────────────────── */
+  _rejectUrl: '',
+  _rejectBtn: null,
+  startReject(url, btn) {
+    FC._rejectUrl = url;
+    FC._rejectBtn = btn;
+    document.getElementById('rejectReason').value = '';
+    FC.openModal('rejectModal');
+  },
+  async _confirmReject() {
+    var reason = document.getElementById('rejectReason').value.trim();
+    var btn = document.getElementById('rejectConfirmBtn');
+    try {
+      var result = await FC.post(FC._rejectUrl, {action:'reject', reason:reason}, btn);
+      FC.closeModal('rejectModal');
+      if (result.ok) setTimeout(function(){ location.reload(); }, 1200);
+    } catch(e) { /* toast already shown */ }
+  },
+};
+
+/* Close modal on overlay click */
+document.querySelectorAll('.fc-modal-overlay').forEach(function(ov){
+  ov.addEventListener('click', function(e){
+    if (e.target === ov) ov.classList.remove('open');
+  });
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

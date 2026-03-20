@@ -1,0 +1,27 @@
+{% extends "pos/base_pos.html" %}
+{% block title %}Transakcije{% endblock %}
+{% block content %}
+<div style="padding:1.5rem;max-width:900px">
+  <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:1rem">Sve transakcije ({{ stats.total }})</h2>
+  <table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Datum</th>
+      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Izvor</th>
+      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Nacin</th>
+      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Iznos</th>
+      <th style="text-align:left;padding:.4rem;font-size:.65rem;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
+    </tr></thead>
+    <tbody>
+    {% for p in payments %}
+    <tr>
+      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.created_at|date:"d.m.Y H:i" }}</td>
+      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.get_source_display }}</td>
+      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.get_method_display }}</td>
+      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04);color:var(--green);font-weight:600">&euro;{{ p.amount|floatformat:2 }}</td>
+      <td style="padding:.5rem;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04)">{{ p.get_status_display }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

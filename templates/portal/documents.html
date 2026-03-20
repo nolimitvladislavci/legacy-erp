@@ -1,0 +1,28 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Dokumenti" %} - {{ partner.name }}{% endblock %}
+{% block content %}
+<h5 class="mb-3"><i class="fas fa-folder-open"></i> {% trans "Dokumenti" %}</h5>
+<div class="card" style="border-radius:12px">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0" style="font-size:.82rem">
+            <thead><tr><th>{% trans "Broj" %}</th><th>{% trans "Tip" %}</th><th>{% trans "Datum" %}</th><th class="text-end">{% trans "Iznos" %}</th><th></th></tr></thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>{{ doc.doc_number }}</td>
+                    <td>{{ doc.get_doc_type_display }}</td>
+                    <td>{{ doc.date_issued|date:"d.m.Y" }}</td>
+                    <td class="text-end">{{ doc.total_amount|floatformat:2 }} EUR</td>
+                    <td>
+                        {% if doc.file %}<a href="{{ doc.file.url }}" class="btn btn-sm btn-outline-secondary" style="font-size:.7rem"><i class="fas fa-download"></i></a>{% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-3">{% trans "Nema dokumenata" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

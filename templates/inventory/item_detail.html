@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ item.name }}{% endblock %}
+{% block page_title %}{{ item.name }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0">{{ item.name }}</h2>
+    <small class="text-muted"><code>{{ item.sku }}</code> &middot; {{ item.get_category_display }}</small>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'inventory:edit' item.pk %}" class="btn btn-warning"><i class="fas fa-edit me-2"></i>{% trans "Uredi" %}</a>
+    <a href="{% url 'inventory:list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+  </div>
+</div>
+
+{% if item.image %}
+<div class="mb-3">
+  <img src="{{ item.image.url }}" alt="{{ item.name }}"
+       style="max-height:200px;border-radius:8px;border:1px solid #444">
+</div>
+{% endif %}
+{% if item.webshop_visible %}
+<span class="badge bg-success mb-2">
+  <i class="fas fa-store me-1"></i>U webshopu
+  {% if item.webshop_product %}
+    &mdash; SKU: {{ item.webshop_product.sku }}
+  {% endif %}
+</span>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="stat-card mb-3 text-center">
+      <div class="label">{% trans "Trenutna zaliha" %}</div>
+      <div class="value {% if item.is_low_stock %}text-danger{% else %}text-success{% endif %}" style="font-size:2.5rem">
+        {{ item.quantity }}
+      </div>
+      <div class="text-muted">{{ item.unit }}</div>
+      {% if item.is_low_stock %}
+      <div class="alert alert-danger mt-2 py-1 small mb-0">Ispod minimuma (min: {{ item.min_quantity }})</div>
+      {% endif %}
+    </div>
+
+    <div class="stat-card mb-3">
+      <div class="row g-2 small">
+        <div class="col-6"><div class="label">{% trans "Cijena/jed." %}</div><div class="fw-bold">{{ item.unit_price|floatformat:2 }} €</div></div>
+        <div class="col-6"><div class="label">{% trans "Vrijednost" %}</div><div class="fw-bold">{{ item.quantity|floatformat:0 }} × {{ item.unit_price|floatformat:2 }} €</div></div>
+        <div class="col-6"><div class="label">{% trans "Minimum" %}</div><div>{{ item.min_quantity }} {{ item.unit }}</div></div>
+        <div class="col-6"><div class="label">{% trans "Lokacija" %}</div><div>{{ item.location|default:"-" }}</div></div>
+        {% if item.supplier %}<div class="col-12"><div class="label">{% trans "Dobavljač" %}</div>
+          <a href="{% url 'partners:detail' item.supplier.pk %}">{{ item.supplier.name }}</a>
+        </div>{% endif %}
+        {% if item.description %}<div class="col-12"><div class="label">{% trans "Opis" %}</div><div class="text-muted">{{ item.description }}</div></div>{% endif %}
+      </div>
+    </div>
+
+    <!-- Quick movement form -->
+    <div class="stat-card">
+      <h6 class="fw-bold mb-3"><i class="fas fa-exchange-alt me-2"></i>{% trans "Kretanje zalihe" %}</h6>
+      <form method="post" action="{% url 'inventory:movement' item.pk %}">
+        {% csrf_token %}
+        <div class="mb-2">
+          <select name="movement_type" class="form-select form-select-sm">
+            <option value="in">{% trans "Ulaz (primka)" %}</option>
+            <option value="out">{% trans "Izlaz (izdatnica)" %}</option>
+            <option value="adjustment">{% trans "Korekcija (inventura)" %}</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <input type="number" step="0.01" name="quantity" class="form-control form-control-sm" placeholder="{% trans "Količina" %}" required>
+        </div>
+        <div class="mb-2">
+          <input type="text" name="reason" class="form-control form-control-sm" placeholder="{% trans "Razlog / napomena" %}">
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary w-100">{% trans "Zabilježi" %}</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="stat-card">
+      <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-info"></i>{% trans "Kretanja zalihe" %}</h6>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead class="table-light"><tr><th>{% trans "Datum" %}</th><th>{% trans "Vrsta" %}</th><th class="text-end">{% trans "Kol." %}</th><th>{% trans "Razlog" %}</th><th>{% trans "Korisnik" %}</th></tr></thead>
+          <tbody>
+            {% for m in movements %}
+            <tr>
+              <td style="white-space:nowrap">{{ m.created_at|date:"d.m.Y H:i" }}</td>
+              <td>
+                {% if m.movement_type == "in" %}<span class="badge bg-success">{% trans "Ulaz" %}</span>
+                {% elif m.movement_type == "out" %}<span class="badge bg-danger">{% trans "Izlaz" %}</span>
+                {% else %}<span class="badge bg-secondary">{% trans "Korekcija" %}</span>{% endif %}
+              </td>
+              <td class="text-end fw-bold {% if m.movement_type == 'in' %}text-success{% elif m.movement_type == 'out' %}text-danger{% endif %}">
+                {% if m.movement_type == "in" %}+{% elif m.movement_type == "out" %}-{% endif %}{{ m.quantity }}
+              </td>
+              <td class="small text-muted">{{ m.reason|default:"-" }}</td>
+              <td class="small">{{ m.performed_by.get_full_name|default:m.performed_by.username|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">{% trans "Nema kretanja." %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

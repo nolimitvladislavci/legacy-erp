@@ -1,0 +1,79 @@
+{% extends 'booking_base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Premium rezervacija – Viskovic Group" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.hero { padding: 56px 28px 40px; text-align: center; border-bottom: 1px solid var(--border); }
+.hero-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--gold); margin-bottom: 10px; }
+.hero h1 { font-family: "Cormorant Garamond", serif; font-size: 2.4rem; font-weight: 300; color: var(--text); margin: 0 0 10px; }
+.hero p { color: var(--muted); font-size: .9rem; }
+
+.resources-wrap { max-width: 1060px; margin: 40px auto; padding: 0 24px 60px; }
+.group-title { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--muted); margin: 40px 0 16px; }
+.resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 20px; }
+
+.res-card { background: var(--surface); border: 1px solid var(--border); display: block; text-decoration: none; color: var(--text); transition: border-color .2s, transform .2s; }
+.res-card:hover { border-color: var(--gold); transform: translateY(-4px); color: var(--text); }
+.res-card img { width: 100%; height: 180px; object-fit: cover; }
+.res-card-img-placeholder { height: 180px; background: var(--dark); display: flex; align-items: center; justify-content: center; }
+.res-card-img-placeholder svg { width: 48px; height: 48px; fill: var(--border); }
+.res-card-body { padding: 18px; }
+.res-card-body h5 { font-size: 1.05rem; font-weight: 600; margin: 0 0 6px; }
+.res-card-body p { color: var(--muted); font-size: .82rem; margin: 0 0 14px; line-height: 1.5; }
+.res-card-footer { display: flex; justify-content: space-between; align-items: center; }
+.price-tag { font-size: 1.3rem; font-weight: 700; color: var(--gold); }
+.price-unit { font-size: .75rem; color: var(--muted); }
+.btn-book { background: var(--gold); color: #0a0a0a; border: none; padding: 7px 18px; font-weight: 700; font-size: .82rem; letter-spacing: 1px; cursor: pointer; }
+.group-badge { display: inline-block; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.35); color: var(--gold); padding: 2px 10px; font-size: .7rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+
+.empty-res { text-align: center; padding: 80px 0; color: var(--muted); }
+.empty-res p { font-size: 1rem; margin-top: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-label">{% trans "Premium portal za rezervacije" %}</div>
+    <h1>{% trans "Dostupni resursi" %}</h1>
+    <p>{% trans "Rezervirajte strojeve, stanove i poslovne prostore online" %}</p>
+</div>
+
+<div class="resources-wrap">
+    {% regroup resources by get_group_display as grouped %}
+    {% for group in grouped %}
+    <p class="group-title">{{ group.grouper }}</p>
+    <div class="resource-grid">
+        {% for resource in group.list %}
+        <a href="/premium/{{ resource.id }}/" class="res-card">
+            {% if resource.image %}
+            <img src="{{ resource.image.url }}" alt="{{ resource.name }}">
+            {% else %}
+            <div class="res-card-img-placeholder">
+                <svg viewBox="0 0 24 24"><path d="M3 21h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V7H3v2zm0-6v2h18V3H3z"/></svg>
+            </div>
+            {% endif %}
+            <div class="res-card-body">
+                <span class="group-badge">{{ resource.get_group_display }}</span>
+                <h5>{{ resource.name }}</h5>
+                <p>{{ resource.description|truncatechars:80 }}</p>
+                <div class="res-card-footer">
+                    <div>
+                        <span class="price-tag">{{ resource.base_price }} €</span>
+                        <span class="price-unit"> / {{ resource.get_unit_display }}</span>
+                    </div>
+                    <span class="btn-book">{% trans "Rezerviraj →" %}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div class="empty-res">
+        <svg viewBox="0 0 24 24" style="width:48px;height:48px;fill:var(--muted)"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.35C18 2.53 15.5.04 12.5 0c-1.74 0-3.26.84-4.26 2.13L7 3.82l-1.24-1.69C4.76.84 3.24 0 1.5 0H0v2h1.5c.86 0 1.61.42 2.09 1.06L5 4.5 3.59 6.06C3.11 5.42 2.36 5 1.5 5H0v2h1.5c.86 0 1.61.42 2.09 1.06L5 9.82V18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-8.18l1.41-1.76C20.89 7.42 21.64 7 22.5 7H24V5h-2.5c-.74 0-1.41.3-1.9.78z"/></svg>
+        <p>{% trans "Nema dostupnih resursa." %}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

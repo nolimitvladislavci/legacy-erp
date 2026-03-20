@@ -1,0 +1,1084 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+{% block title %}Transakcijski Canvas – LIMIT CONNECT{% endblock %}
+{% block page_title %}Nova Transakcija{% endblock %}
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/wizard.css' %}">
+<style>
+/* ═══ CANVAS LAYOUT ═══ */
+.canvas-wrap{display:flex;gap:0;min-height:calc(100vh - 80px);position:relative}
+.canvas-main{flex:1;min-width:0;padding:0 16px 40px}
+.canvas-timeline{width:320px;min-width:280px;border-left:2px solid rgba(201,168,76,.15);
+  background:linear-gradient(180deg,rgba(10,10,10,.95),rgba(15,23,42,.95));
+  position:sticky;top:60px;height:calc(100vh - 80px);overflow-y:auto;
+  padding:20px 16px;transition:width .3s}
+.canvas-timeline.collapsed{width:48px;min-width:48px;overflow:hidden;padding:20px 8px}
+.canvas-timeline.collapsed .tl-content{display:none}
+.canvas-timeline.collapsed .tl-toggle{transform:rotate(180deg)}
+
+/* ═══ SMART COMMAND BAR ═══ */
+.smart-bar{position:relative;max-width:100%;margin:0 auto 24px}
+.smart-bar-input{
+  width:100%;padding:18px 24px 18px 56px;
+  background:linear-gradient(135deg,#0f172a,#1a1400);
+  border:2px solid rgba(201,168,76,.3);border-radius:16px;
+  color:#f1f5f9;font-size:1.1rem;font-weight:500;
+  outline:none;transition:all .25s;
+  font-family:'IBM Plex Mono',monospace}
+.smart-bar-input:focus{border-color:#c9a84c;box-shadow:0 0 30px rgba(201,168,76,.15)}
+.smart-bar-input::placeholder{color:#475569;font-weight:400;font-family:inherit}
+.smart-bar-icon{position:absolute;left:20px;top:50%;transform:translateY(-50%);
+  color:#c9a84c;font-size:1.2rem;pointer-events:none;transition:all .3s}
+.smart-bar-icon.searching{animation:pulse-gold .8s infinite}
+@keyframes pulse-gold{0%,100%{opacity:1}50%{opacity:.3}}
+.smart-bar-badge{position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  display:flex;gap:6px;align-items:center}
+.sb-badge{padding:3px 10px;border-radius:6px;font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px}
+.sb-vies{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+.sb-rc{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.sb-db{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+
+/* ═══ SMART RESULTS DROPDOWN ═══ */
+.smart-results{position:absolute;top:calc(100% + 6px);left:0;right:0;
+  background:#0f172a;border:1.5px solid rgba(201,168,76,.25);border-radius:12px;
+  max-height:380px;overflow-y:auto;z-index:100;display:none;
+  box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.smart-results.active{display:block}
+.sr-item{padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;
+  border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+.sr-item:hover{background:rgba(201,168,76,.08)}
+.sr-item:last-child{border-bottom:none}
+.sr-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sr-icon.registry{background:rgba(34,197,94,.12);color:#22c55e}
+.sr-icon.database{background:rgba(59,130,246,.12);color:#60a5fa}
+.sr-info{flex:1;min-width:0}
+.sr-name{color:#e2e8f0;font-weight:600;font-size:.92rem}
+.sr-detail{color:#64748b;font-size:.78rem;margin-top:2px}
+.sr-source{font-size:.68rem;padding:2px 8px;border-radius:4px;font-weight:600}
+
+/* ═══ TAX ENGINEERING BANNER ═══ */
+.tax-banner{margin:0 auto 20px;padding:16px 20px;border-radius:12px;
+  display:none;align-items:center;gap:14px;font-size:.88rem;
+  animation:slideDown .3s ease}
+.tax-banner.active{display:flex}
+.tax-banner.reverse-charge{
+  background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(245,158,11,.04));
+  border:1.5px solid rgba(251,191,36,.25);color:#fbbf24}
+.tax-banner.vies-confirmed{
+  background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(16,185,129,.04));
+  border:1.5px solid rgba(34,197,94,.25);color:#22c55e}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ DOCUMENT STATE MACHINE ═══ */
+.state-machine{display:flex;align-items:center;gap:0;margin:0 auto 24px;
+  padding:8px;background:rgba(15,23,42,.6);border-radius:14px;
+  border:1px solid rgba(255,255,255,.06);overflow-x:auto}
+.sm-state{position:relative;padding:10px 20px;border-radius:10px;cursor:pointer;
+  text-align:center;font-size:.82rem;font-weight:600;color:#475569;
+  transition:all .25s;white-space:nowrap;flex:1;min-width:0}
+.sm-state:hover{color:#94a3b8}
+.sm-state.active{color:#0a0a0a;font-weight:800}
+.sm-state.active.draft{background:linear-gradient(135deg,#64748b,#475569)}
+.sm-state.active.quote{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.sm-state.active.dispatch{background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a0a}
+.sm-state.active.invoice{background:linear-gradient(135deg,#22c55e,#16a34a)}
+.sm-state.active.storno{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.sm-state.completed{color:#22c55e}
+.sm-state.completed::after{content:'';position:absolute;bottom:3px;left:50%;
+  transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#22c55e}
+.sm-arrow{color:#334155;font-size:.8rem;padding:0 2px;flex-shrink:0}
+.sm-state .sm-label{font-size:.68rem;display:block;margin-top:2px;font-weight:400;opacity:.7}
+
+/* ═══ TIMELINE ═══ */
+.tl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.tl-title{color:#c9a84c;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+.tl-toggle{background:none;border:none;color:#64748b;cursor:pointer;font-size:1rem;
+  padding:4px;transition:transform .3s}
+.tl-event{position:relative;padding:0 0 24px 28px}
+.tl-event::before{content:'';position:absolute;left:8px;top:6px;bottom:0;
+  width:1px;background:rgba(201,168,76,.15)}
+.tl-event:last-child::before{display:none}
+.tl-dot{position:absolute;left:2px;top:4px;width:14px;height:14px;border-radius:50%;
+  border:2px solid;display:flex;align-items:center;justify-content:center;font-size:.5rem}
+.tl-dot.lookup{border-color:#3b82f6;color:#3b82f6}
+.tl-dot.vies{border-color:#22c55e;color:#22c55e}
+.tl-dot.tax{border-color:#fbbf24;color:#fbbf24}
+.tl-dot.morph{border-color:#c9a84c;color:#c9a84c}
+.tl-dot.fiscal{border-color:#a78bfa;color:#a78bfa}
+.tl-dot.create{border-color:#64748b;color:#64748b}
+.tl-dot.error{border-color:#ef4444;color:#ef4444}
+.tl-time{color:#475569;font-size:.68rem;font-family:'IBM Plex Mono',monospace}
+.tl-text{color:#cbd5e1;font-size:.8rem;margin-top:2px;line-height:1.4}
+.tl-detail{color:#475569;font-size:.72rem;margin-top:2px}
+.tl-empty{color:#334155;font-size:.78rem;text-align:center;padding:40px 10px;
+  font-style:italic}
+
+/* ═══ CLIENT CARD (post-selection) ═══ */
+.client-card{padding:16px 20px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(15,23,42,.8),rgba(10,10,10,.9));
+  border:1px solid rgba(255,255,255,.08);margin-bottom:20px;display:none}
+.client-card.active{display:block;animation:slideDown .3s ease}
+.client-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.client-card .cc-name{color:#f1f5f9;font-size:1.05rem;font-weight:700}
+.client-card .cc-detail{color:#64748b;font-size:.82rem;line-height:1.5}
+.client-card .cc-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.client-card .cc-edit{background:none;border:1px solid #334155;color:#64748b;
+  padding:4px 12px;border-radius:6px;font-size:.75rem;cursor:pointer}
+.client-card .cc-edit:hover{border-color:#c9a84c;color:#c9a84c}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .canvas-wrap{flex-direction:column}
+  .canvas-timeline{width:100%;min-width:0;position:relative;top:0;height:auto;
+    border-left:none;border-top:2px solid rgba(201,168,76,.15)}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="canvas-wrap">
+  <!-- ═══ MAIN CANVAS ═══ -->
+  <div class="canvas-main">
+
+    <!-- Profile selector -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <select id="cProfile" style="font-size:.78rem;padding:5px 10px;border:1px solid var(--fcw-border);border-radius:6px;background:var(--fcw-input-bg);color:var(--fcw-text);font-weight:600" onchange="canvasApplyProfile(this)">
+        {% for p in profiles %}
+        <option value="{{ p.id }}"
+          data-country="{{ p.country }}" data-currency="{{ p.currency }}"
+          data-iban="{{ p.iban }}" data-swift="{{ p.swift }}"
+          data-company-name="{{ p.company_name }}" data-oib="{{ p.oib }}"
+          data-vat-id="{{ p.vat_id }}" data-address="{{ p.address }}"
+          data-city="{{ p.city }}" data-email="{{ p.email }}"
+          data-due-days="{{ p.default_due_days }}" data-prefix="{{ p.invoice_prefix }}"
+          data-payment="{{ p.default_payment_method }}"
+          {% if p.is_default %}selected{% endif %}>
+          {% if p.country == "HR" %}&#127469;&#127479;{% else %}&#127465;&#127466;{% endif %} {{ p.name }}
+        </option>
+        {% endfor %}
+      </select>
+      <a href="{% url 'invoicing:invoice_wizard' %}" style="color:#475569;font-size:.75rem;text-decoration:none">
+        <i class="fas fa-exchange-alt"></i> Klasicni wizard
+      </a>
+    </div>
+
+    <!-- ═══ SMART COMMAND BAR ═══ -->
+    <div class="smart-bar" id="smartBar">
+      <i class="fas fa-bolt smart-bar-icon" id="smartBarIcon"></i>
+      <input type="text" class="smart-bar-input" id="smartBarInput"
+             placeholder="Upisite naziv firme, OIB, USt-IdNr ili ime kontakta..."
+             autocomplete="off" spellcheck="false">
+      <div class="smart-bar-badge" id="smartBarBadges"></div>
+      <div class="smart-results" id="smartResults"></div>
+    </div>
+
+    <!-- Tax Engineering Banner -->
+    <div class="tax-banner" id="taxBanner">
+      <i class="fas fa-exchange-alt" style="font-size:1.4rem;flex-shrink:0"></i>
+      <div>
+        <div style="font-weight:700;font-size:.9rem" id="taxBannerTitle"></div>
+        <div style="font-size:.78rem;opacity:.8;margin-top:2px" id="taxBannerDetail"></div>
+      </div>
+    </div>
+
+    <!-- Client Card (shows after selection) -->
+    <div class="client-card" id="clientCard">
+      <div class="client-card-header">
+        <div>
+          <div class="cc-name" id="ccName"></div>
+          <div class="cc-detail" id="ccDetail"></div>
+        </div>
+        <button class="cc-edit" onclick="resetSmartBar()"><i class="fas fa-pen"></i> Promijeni</button>
+      </div>
+      <div class="cc-badges" id="ccBadges"></div>
+      <!-- Hidden fields -->
+      <input type="hidden" id="wClientName">
+      <input type="hidden" id="wClientOib">
+      <input type="hidden" id="wClientEmail">
+      <input type="hidden" id="wClientAddress">
+      <input type="hidden" id="wClientCity">
+      <input type="hidden" id="wClientCountry">
+    </div>
+
+    <!-- ═══ DOCUMENT STATE MACHINE ═══ -->
+    <div class="state-machine" id="stateMachine">
+      <div class="sm-state active draft" data-type="PO" onclick="morphState('PO',this)">
+        <i class="fas fa-file-alt"></i>
+        <span class="sm-label">Nacrt</span>
+      </div>
+      <span class="sm-arrow"><i class="fas fa-chevron-right"></i></span>
+      <div class="sm-state" data-type="P" onclick="morphState('P',this)">
+        <i class="fas fa-file-invoice"></i>
+        <span class="sm-label">Ponuda</span>
+      </div>
+      <span class="sm-arrow"><i class="fas fa-chevron-right"></i></span>
+      <div class="sm-state" data-type="dispatch" onclick="morphState('dispatch',this)">
+        <i class="fas fa-truck-loading"></i>
+        <span class="sm-label">Otpremnica</span>
+      </div>
+      <span class="sm-arrow"><i class="fas fa-chevron-right"></i></span>
+      <div class="sm-state" data-type="R" onclick="morphState('R',this)">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <span class="sm-label">Racun</span>
+      </div>
+      <span class="sm-arrow"><i class="fas fa-chevron-right"></i></span>
+      <div class="sm-state" data-type="S" onclick="morphState('S',this)">
+        <i class="fas fa-cut"></i>
+        <span class="sm-label">Storno</span>
+      </div>
+    </div>
+
+    <!-- ═══ ITEMS TABLE (reuses wizard CSS) ═══ -->
+    <div class="fcw-card">
+      <div class="fcw-card-head">
+        <h3><i class="fas fa-cubes" style="color:#c9a84c;margin-right:6px"></i> Stavke</h3>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="fcw-import-tab" onclick="openLagerModal()"><i class="fas fa-warehouse"></i> Skladiste</button>
+          <button type="button" class="fcw-import-tab" onclick="openArticleQuickAdd()" style="color:var(--fcw-gold)"><i class="fas fa-plus-circle"></i> Novi artikl</button>
+        </div>
+      </div>
+      <div class="fcw-card-body">
+        <table class="fcw-items-table">
+          <thead>
+            <tr>
+              <th class="col-opis">Opis</th>
+              <th class="col-qty" style="text-align:right">Kol.</th>
+              <th class="col-unit">J.mj.</th>
+              <th class="col-price" style="text-align:right">Cijena</th>
+              <th class="col-pdv" style="text-align:right" id="thPdv">PDV</th>
+              <th class="col-disc" style="text-align:right">Pop%</th>
+              <th class="col-total right">Ukupno</th>
+              <th class="col-del"></th>
+            </tr>
+          </thead>
+          <tbody id="wItemsBody"></tbody>
+        </table>
+        <button type="button" class="fcw-btn-add-item" onclick="wAddItem()"><i class="fas fa-plus"></i> Dodaj stavku</button>
+
+        <div class="fcw-totals" style="margin-top:16px">
+          <div class="fcw-total-row"><span class="label" id="lblSubtotal">Osnovica</span><span class="val" id="wSubtotal">0,00 EUR</span></div>
+          <div class="fcw-total-row"><span class="label" id="lblTax">PDV</span><span class="val" id="wTaxTotal">0,00 EUR</span></div>
+          <div class="fcw-total-grand">
+            <span class="label" id="wTotalLabel">UKUPNO</span>
+            <span class="val" id="wGrandTotal">0,00 EUR</span>
+          </div>
+        </div>
+        <div class="fcw-pdv-recap" style="margin-top:12px">
+          <table>
+            <thead><tr><th>Stopa</th><th>Osnovica</th><th id="thRecapTax">PDV</th><th>Ukupno</th></tr></thead>
+            <tbody id="wPdvRecap"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DOCUMENT DETAILS (collapsible) ═══ -->
+    <details class="fcw-card" style="margin-top:16px" open>
+      <summary class="fcw-card-head" style="cursor:pointer;list-style:none">
+        <h3><i class="fas fa-cog" style="color:#c9a84c;margin-right:6px"></i> Detalji dokumenta</h3>
+        <i class="fas fa-chevron-down" style="color:#64748b;font-size:.8rem"></i>
+      </summary>
+      <div class="fcw-card-body">
+        <div class="fcw-field-group cols-2">
+          <div class="fcw-field">
+            <label>Broj dokumenta</label>
+            <input type="text" id="wNumber" value="{{ next_number }}" class="mono" style="color:var(--fcw-gold);font-size:1rem;font-weight:600">
+          </div>
+          <div class="fcw-field">
+            <label>Datum izdavanja</label>
+            <input type="datetime-local" id="wDateIssued" value="{{ now_datetime }}">
+          </div>
+        </div>
+        <div class="fcw-field-group cols-3" style="margin-top:12px">
+          <div class="fcw-field">
+            <label>Rok placanja</label>
+            <input type="date" id="wDateDue">
+          </div>
+          <div class="fcw-field">
+            <label>Datum isporuke</label>
+            <input type="date" id="wDateDelivery">
+          </div>
+          <div class="fcw-field">
+            <label>Nacin placanja</label>
+            <select id="wPaymentMethod">
+              {% for val, label in payment_choices %}
+              <option value="{{ val }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="fcw-field-group cols-3" style="margin-top:12px">
+          <div class="fcw-field">
+            <label>Valuta</label>
+            <select id="wCurrency" onchange="cCurrency=this.value;wCalcAll()">
+              <option value="EUR" selected>EUR</option>
+              <option value="HRK">HRK</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
+          <div class="fcw-field">
+            <label>IBAN</label>
+            <input type="text" id="wIban" value="{{ default_iban }}" class="mono">
+          </div>
+          <div class="fcw-field">
+            <label>SWIFT</label>
+            <input type="text" id="wSwift" class="mono">
+          </div>
+        </div>
+        <div class="fcw-field-group" style="margin-top:12px">
+          <div class="fcw-field">
+            <label>Napomena</label>
+            <textarea id="wNote" rows="2" placeholder="Hvala na povjerenju!"></textarea>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ═══ ACTION BAR ═══ -->
+    <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <button type="button" class="fcw-btn-submit" id="canvasSubmitBtn" onclick="canvasSubmit('DRAFT')"
+              style="flex:1;max-width:300px;padding:16px 32px">
+        <i class="fas fa-save"></i> Spremi nacrt
+      </button>
+      <button type="button" onclick="canvasSubmit('SENT')"
+              style="flex:1;max-width:300px;padding:16px 32px;background:transparent;
+                     border:2px solid #c9a84c;color:#c9a84c;border-radius:12px;
+                     font-weight:700;font-size:1rem;cursor:pointer">
+        <i class="fas fa-paper-plane"></i> Spremi i posalji
+      </button>
+    </div>
+
+  </div><!-- /canvas-main -->
+
+  <!-- ═══ TIMELINE SIDEBAR ═══ -->
+  <div class="canvas-timeline" id="canvasTimeline">
+    <div class="tl-header">
+      <span class="tl-title">Vremenska crta</span>
+      <button class="tl-toggle" onclick="toggleTimeline()" title="Sakrij/pokazi">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+    <div class="tl-content" id="tlContent">
+      <div class="tl-empty" id="tlEmpty">
+        Pocnite kucati u command bar.<br>
+        Svaka akcija se bilježi ovdje.
+      </div>
+      <div id="tlEvents"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form for submit -->
+<form method="post" id="canvasForm" action="{% url 'invoicing:invoice_save' %}" style="display:none">
+  {% csrf_token %}
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+// ═══════════════════════════════════════
+//  GLOBALS
+// ═══════════════════════════════════════
+const fmtNum = n => n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const val = id => document.getElementById(id)?.value || '';
+const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+let cDoctype = 'PO';
+let cCurrency = 'EUR';
+let cCountry = '{{ default_profile.country|default:"HR" }}';
+let cReverseCharge = false;
+let itemCount = 0;
+let _activeProfile = null;
+const _companyPdvStatus = '{{ company.pdv_status|default:"none" }}';
+
+// Timeline events (local until invoice is saved)
+let tlEvents = [];
+
+const taxRates = {
+  HR: [{rate:25,name:'25%',is_default:true},{rate:13,name:'13%'},{rate:5,name:'5%'},{rate:0,name:'0%'}],
+  DE: [{rate:19,name:'19%',is_default:true},{rate:7,name:'7%'},{rate:0,name:'0%'}]
+};
+
+function getDefaultRate() {
+  const rates = taxRates[cCountry] || taxRates['HR'];
+  const d = rates.find(r => r.is_default);
+  return d ? d.rate : rates[0]?.rate || 25;
+}
+
+function buildPdvOptions(sel) {
+  const rates = taxRates[cCountry] || taxRates['HR'];
+  if (sel === undefined) sel = getDefaultRate();
+  return rates.map(r =>
+    '<option value="'+r.rate+'"'+(Number(r.rate)===Number(sel)?' selected':'')+'>'+r.rate+'%</option>'
+  ).join('');
+}
+
+// ═══════════════════════════════════════
+//  TIMELINE
+// ═══════════════════════════════════════
+function addTimelineEvent(type, title, detail, dotClass) {
+  const now = new Date();
+  const time = now.toLocaleTimeString('hr-HR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  tlEvents.push({type, title, detail, dotClass: dotClass||'create', time, ts: now});
+  renderTimeline();
+}
+
+function renderTimeline() {
+  const el = document.getElementById('tlEvents');
+  const empty = document.getElementById('tlEmpty');
+  if (!tlEvents.length) { empty.style.display = ''; el.innerHTML = ''; return; }
+  empty.style.display = 'none';
+
+  el.innerHTML = tlEvents.slice().reverse().map(e => `
+    <div class="tl-event">
+      <div class="tl-dot ${e.dotClass}"></div>
+      <div class="tl-time">${e.time}</div>
+      <div class="tl-text">${e.title}</div>
+      ${e.detail ? '<div class="tl-detail">'+e.detail+'</div>' : ''}
+    </div>
+  `).join('');
+}
+
+window.toggleTimeline = () => {
+  document.getElementById('canvasTimeline').classList.toggle('collapsed');
+};
+
+// ═══════════════════════════════════════
+//  SMART COMMAND BAR
+// ═══════════════════════════════════════
+let _sbTimer = null;
+const sbInput = document.getElementById('smartBarInput');
+const sbResults = document.getElementById('smartResults');
+const sbIcon = document.getElementById('smartBarIcon');
+const sbBadges = document.getElementById('smartBarBadges');
+
+sbInput.addEventListener('input', function() {
+  clearTimeout(_sbTimer);
+  const q = this.value.trim();
+  if (q.length < 2) {
+    sbResults.classList.remove('active');
+    sbIcon.className = 'fas fa-bolt smart-bar-icon';
+    sbBadges.innerHTML = '';
+    return;
+  }
+
+  sbIcon.className = 'fas fa-circle-notch fa-spin smart-bar-icon searching';
+
+  _sbTimer = setTimeout(() => {
+    fetch('/invoicing/api/smart-lookup/?q=' + encodeURIComponent(q))
+      .then(r => r.json())
+      .then(data => {
+        sbIcon.className = 'fas fa-bolt smart-bar-icon';
+        renderSmartResults(data);
+      })
+      .catch(() => {
+        sbIcon.className = 'fas fa-bolt smart-bar-icon';
+      });
+  }, 300);
+});
+
+// Close on click outside
+document.addEventListener('click', e => {
+  if (!e.target.closest('.smart-bar')) sbResults.classList.remove('active');
+});
+
+function renderSmartResults(data) {
+  const {results, lookup, tax_config} = data;
+
+  // Badges
+  let badges = '';
+  if (lookup && lookup.found && lookup.source === 'vies') {
+    badges += '<span class="sb-badge sb-vies"><i class="fas fa-check-circle"></i> VIES</span>';
+  }
+  if (tax_config && tax_config.reverse_charge) {
+    badges += '<span class="sb-badge sb-rc"><i class="fas fa-exchange-alt"></i> RC</span>';
+  }
+  if (results.length && results[0].source === 'database') {
+    badges += '<span class="sb-badge sb-db"><i class="fas fa-database"></i> Baza</span>';
+  }
+  sbBadges.innerHTML = badges;
+
+  // Results dropdown
+  if (!results.length && (!lookup || !lookup.found)) {
+    if (lookup && lookup.error) {
+      sbResults.innerHTML = `
+        <div class="sr-item" style="cursor:default">
+          <div class="sr-icon" style="background:rgba(245,158,11,.12);color:#f59e0b">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="sr-info">
+            <div class="sr-name" style="color:#f59e0b">Nije pronadeno</div>
+            <div class="sr-detail">${lookup.error}</div>
+          </div>
+        </div>
+        <div class="sr-item" onclick="manualEntry()">
+          <div class="sr-icon" style="background:rgba(201,168,76,.12);color:#c9a84c">
+            <i class="fas fa-pen"></i>
+          </div>
+          <div class="sr-info">
+            <div class="sr-name" style="color:#c9a84c">Unesi rucno</div>
+            <div class="sr-detail">Otvorite formu za rucni unos podataka partnera</div>
+          </div>
+        </div>`;
+    } else {
+      sbResults.innerHTML = `
+        <div class="sr-item" onclick="manualEntry()">
+          <div class="sr-icon" style="background:rgba(201,168,76,.12);color:#c9a84c">
+            <i class="fas fa-pen"></i>
+          </div>
+          <div class="sr-info">
+            <div class="sr-name" style="color:#c9a84c">Unesi rucno</div>
+          </div>
+        </div>`;
+    }
+    sbResults.classList.add('active');
+
+    // Log timeline event
+    if (lookup && !lookup.found) {
+      addTimelineEvent('lookup', 'Pretraga: "' + data.query + '"',
+        lookup.error || 'Nema rezultata', 'error');
+    }
+    return;
+  }
+
+  let html = '';
+  results.forEach((r, i) => {
+    const iconClass = r.source === 'database' ? 'database' : 'registry';
+    const sourceLabel = r.source === 'vies' ? 'VIES' :
+                        r.source === 'database' ? 'Baza' :
+                        r.source === 'fina_infobiz' ? 'FINA' : r.source;
+    html += `
+      <div class="sr-item" onclick='selectPartner(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+        <div class="sr-icon ${iconClass}">
+          <i class="fas ${r.source === 'database' ? 'fa-user' : 'fa-building'}"></i>
+        </div>
+        <div class="sr-info">
+          <div class="sr-name">${_esc(r.name)}</div>
+          <div class="sr-detail">
+            ${r.oib ? r.oib + ' &middot; ' : ''}${_esc(r.city || r.address || '')}
+          </div>
+        </div>
+        <span class="sr-source" style="color:#64748b">${sourceLabel}</span>
+      </div>`;
+  });
+
+  // Always add manual entry option
+  html += `
+    <div class="sr-item" onclick="manualEntry()" style="border-top:2px solid rgba(255,255,255,.06)">
+      <div class="sr-icon" style="background:rgba(201,168,76,.12);color:#c9a84c">
+        <i class="fas fa-plus-circle"></i>
+      </div>
+      <div class="sr-info">
+        <div class="sr-name" style="color:#c9a84c">Novi partner / Rucni unos</div>
+      </div>
+    </div>`;
+
+  sbResults.innerHTML = html;
+  sbResults.classList.add('active');
+
+  // Apply tax config automatically
+  if (tax_config) {
+    applyTaxConfig(tax_config, lookup);
+  }
+
+  // Timeline
+  if (lookup && lookup.found) {
+    addTimelineEvent('lookup',
+      (lookup.source === 'vies' ? 'VIES potvrda' : 'Pronadeno u bazi') + ': ' + lookup.name,
+      'Izvor: ' + lookup.source + (lookup.country ? ' (' + lookup.country + ')' : ''),
+      lookup.source === 'vies' ? 'vies' : 'lookup');
+  }
+}
+
+function selectPartner(p) {
+  setVal('wClientName', p.name || '');
+  setVal('wClientOib', p.oib || '');
+  setVal('wClientEmail', p.email || '');
+  setVal('wClientAddress', p.address || '');
+  setVal('wClientCity', p.city || '');
+  setVal('wClientCountry', p.country || (cCountry === 'DE' ? 'Deutschland' : 'Hrvatska'));
+
+  // Show client card
+  const card = document.getElementById('clientCard');
+  document.getElementById('ccName').textContent = p.name;
+  let detail = [p.address, p.city].filter(Boolean).join(', ');
+  if (p.oib) detail += '\n' + (p.country === 'DE' ? 'USt-IdNr: ' : 'OIB: ') + p.oib;
+  if (p.email) detail += '\n' + p.email;
+  document.getElementById('ccDetail').innerHTML = detail.replace(/\n/g, '<br>');
+
+  // Badges
+  let badges = '';
+  if (p.source === 'vies') badges += '<span class="sb-badge sb-vies">VIES Potvrden</span>';
+  if (p.source === 'database') badges += '<span class="sb-badge sb-db">Postojeci partner</span>';
+  if (p.vat_id) badges += '<span class="sb-badge" style="background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.3)">VAT: '+_esc(p.vat_id)+'</span>';
+  document.getElementById('ccBadges').innerHTML = badges;
+
+  card.classList.add('active');
+  sbResults.classList.remove('active');
+  sbInput.style.display = 'none';
+  sbBadges.innerHTML = '';
+
+  addTimelineEvent('lookup', 'Partner odabran: ' + p.name,
+    p.oib ? 'ID: ' + p.oib : '', 'vies');
+}
+
+window.resetSmartBar = function() {
+  document.getElementById('clientCard').classList.remove('active');
+  sbInput.style.display = '';
+  sbInput.value = '';
+  sbInput.focus();
+
+  // Reset tax config
+  cReverseCharge = false;
+  const tb = document.getElementById('taxBanner');
+  tb.classList.remove('active', 'reverse-charge', 'vies-confirmed');
+
+  addTimelineEvent('edit', 'Partner resetiran', 'Korisnik promijenio partnera', 'create');
+};
+
+window.manualEntry = function() {
+  sbResults.classList.remove('active');
+  // Show inline form
+  const card = document.getElementById('clientCard');
+  card.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="fcw-field"><label>Naziv *</label>
+        <input type="text" id="wClientName" placeholder="Naziv firme ili ime" autofocus></div>
+      <div class="fcw-field"><label>OIB / USt-IdNr</label>
+        <input type="text" id="wClientOib" placeholder="12345678901" class="mono"></div>
+      <div class="fcw-field"><label>Email</label>
+        <input type="email" id="wClientEmail" placeholder="email@firma.hr"></div>
+      <div class="fcw-field"><label>Adresa</label>
+        <input type="text" id="wClientAddress" placeholder="Ulica i broj"></div>
+      <div class="fcw-field"><label>Grad</label>
+        <input type="text" id="wClientCity" placeholder="10000 Zagreb"></div>
+      <div class="fcw-field"><label>Država</label>
+        <input type="text" id="wClientCountry" value="${cCountry==='DE'?'Deutschland':'Hrvatska'}"></div>
+    </div>`;
+  card.classList.add('active');
+  sbInput.style.display = 'none';
+  addTimelineEvent('edit', 'Rucni unos partnera', '', 'create');
+};
+
+function applyTaxConfig(config, lookup) {
+  const tb = document.getElementById('taxBanner');
+  tb.classList.remove('active', 'reverse-charge', 'vies-confirmed');
+
+  if (config.reverse_charge) {
+    cReverseCharge = true;
+    tb.classList.add('active', 'reverse-charge');
+    document.getElementById('taxBannerTitle').textContent =
+      'Reverse Charge — Prijenos porezne obveze';
+    document.getElementById('taxBannerDetail').textContent = config.clause;
+
+    // Set all items to 0% PDV
+    document.querySelectorAll('[name="item_pdv[]"]').forEach(sel => {
+      sel.value = '0';
+    });
+    wCalcAll();
+
+    // Update note
+    const noteEl = document.getElementById('wNote');
+    if (noteEl && !noteEl.value.includes('Reverse Charge')) {
+      noteEl.value = (noteEl.value ? noteEl.value + '\n' : '') + config.clause;
+    }
+
+    addTimelineEvent('tax', 'Reverse Charge primijenjen',
+      'PDV 25% uklonjen. Porezna obveza na primatelju (' + config.client_country + ').',
+      'tax');
+
+  } else if (config.vat_valid) {
+    tb.classList.add('active', 'vies-confirmed');
+    document.getElementById('taxBannerTitle').textContent =
+      'VIES Potvrden — Standardni PDV';
+    document.getElementById('taxBannerDetail').textContent =
+      'Kupac je potvrden PDV obveznik u ' + config.client_country +
+      '. Primjenjuje se standardna stopa.';
+
+    addTimelineEvent('vies', 'VIES potvrda',
+      lookup ? lookup.name + ' — validan PDV broj' : '', 'vies');
+  }
+}
+
+// ═══════════════════════════════════════
+//  STATE MACHINE
+// ═══════════════════════════════════════
+window.morphState = function(type, el) {
+  cDoctype = type === 'dispatch' ? 'R' : type;  // dispatch is special R state
+  document.querySelectorAll('.sm-state').forEach(s => {
+    s.classList.remove('active');
+    // Mark completed for states before active
+    const stateOrder = ['PO','P','dispatch','R','S'];
+    const activeIdx = stateOrder.indexOf(type);
+    const thisIdx = stateOrder.indexOf(s.dataset.type);
+    s.classList.toggle('completed', thisIdx < activeIdx);
+  });
+  el.classList.add('active');
+
+  // Update labels based on state
+  const labels = {
+    'PO': {label:'Spremi nacrt', icon:'fa-save', color:''},
+    'P': {label:'Spremi ponudu', icon:'fa-file-invoice', color:''},
+    'dispatch': {label:'Otpremi', icon:'fa-truck', color:'background:#f59e0b;color:#000'},
+    'R': {label:'Fiskaliziraj i spremi', icon:'fa-stamp', color:'background:#22c55e'},
+    'S': {label:'Storniraj', icon:'fa-cut', color:'background:#ef4444'},
+  };
+  const cfg = labels[type] || labels['PO'];
+  const btn = document.getElementById('canvasSubmitBtn');
+  btn.innerHTML = '<i class="fas ' + cfg.icon + '"></i> ' + cfg.label;
+  if (cfg.color) btn.style.cssText += ';' + cfg.color;
+
+  addTimelineEvent('morph', 'Faza: ' + el.querySelector('.sm-label').textContent,
+    'Dokument prelazi u novu fazu', 'morph');
+};
+
+// ═══════════════════════════════════════
+//  ITEMS (same logic as wizard)
+// ═══════════════════════════════════════
+window.wAddItem = function(desc, qty, unit, price, pdv, disc) {
+  desc = desc || ''; qty = qty ?? 1; unit = unit || 'kom';
+  price = price ?? 0; disc = disc ?? 0;
+  if (pdv === undefined || pdv === null) pdv = cReverseCharge ? 0 : getDefaultRate();
+  itemCount++;
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td class="col-opis"><input type="text" name="item_desc[]" value="'+_esc(desc)+'" placeholder="Opis stavke..." class="fcw-no-enter"></td>'+
+    '<td class="col-qty"><input type="number" name="item_qty[]" value="'+qty+'" min="0.01" step="0.01" class="mono" style="text-align:right" inputmode="decimal"></td>'+
+    '<td class="col-unit"><input type="text" name="item_unit[]" value="'+unit+'" placeholder="kom"></td>'+
+    '<td class="col-price"><input type="number" name="item_price[]" value="'+price+'" min="0" step="0.01" class="mono" style="text-align:right" inputmode="decimal"></td>'+
+    '<td class="col-pdv"><select name="item_pdv[]" class="mono" style="text-align:right">'+buildPdvOptions(pdv)+'</select></td>'+
+    '<td class="col-disc"><input type="number" name="item_disc[]" value="'+disc+'" min="0" max="100" step="0.01" class="mono" style="text-align:right" inputmode="decimal"></td>'+
+    '<td class="col-total"><div class="fcw-item-total">0,00</div></td>'+
+    '<td><button type="button" class="fcw-btn-del-item" onclick="this.closest(\'tr\').remove();wCalcAll()">x</button><input type="hidden" name="item_inventory_id[]" class="item-inv-id" value=""></td>';
+  document.getElementById('wItemsBody').appendChild(tr);
+  tr.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', () => calcRow(tr));
+    el.addEventListener('change', () => calcRow(tr));
+  });
+  calcRow(tr);
+  if (!desc) tr.querySelector('input[name="item_desc[]"]').focus();
+  if (desc) addTimelineEvent('item', 'Stavka: ' + desc, price ? fmtNum(price)+' x '+qty : '', 'create');
+};
+
+function calcRow(tr) {
+  const q = parseFloat(tr.querySelector('[name="item_qty[]"]').value)||0;
+  const p = parseFloat(tr.querySelector('[name="item_price[]"]').value)||0;
+  const d = parseFloat(tr.querySelector('[name="item_disc[]"]').value)||0;
+  tr.querySelector('.fcw-item-total').textContent = fmtNum(q*p*(1-d/100));
+  wCalcAll();
+}
+
+window.wCalcAll = function() {
+  const rows = document.querySelectorAll('#wItemsBody tr');
+  let subtotal = 0; const groups = {};
+  rows.forEach(tr => {
+    const q = parseFloat(tr.querySelector('[name="item_qty[]"]')?.value)||0;
+    const p = parseFloat(tr.querySelector('[name="item_price[]"]')?.value)||0;
+    const d = parseFloat(tr.querySelector('[name="item_disc[]"]')?.value)||0;
+    const r = parseFloat(tr.querySelector('[name="item_pdv[]"]')?.value)||0;
+    const base = q*p*(1-d/100);
+    subtotal += base;
+    if(!groups[r]) groups[r]={base:0,tax:0};
+    groups[r].base += base;
+    groups[r].tax += base*r/100;
+  });
+  const totalTax = Object.values(groups).reduce((s,g)=>s+g.tax,0);
+  document.getElementById('wSubtotal').textContent = fmtNum(subtotal)+' '+cCurrency;
+  document.getElementById('wTaxTotal').textContent = fmtNum(totalTax)+' '+cCurrency;
+  document.getElementById('wGrandTotal').textContent = fmtNum(subtotal+totalTax)+' '+cCurrency;
+
+  const colors={0:'#64748b',5:'#3b82f6',7:'#3b82f6',13:'#f59e0b',19:'#ef4444',25:'#ef4444'};
+  let rh='';
+  Object.keys(groups).map(Number).sort((a,b)=>b-a).forEach(rate=>{
+    const g=groups[rate];
+    if(g.base>0.001){
+      rh+='<tr><td><span class="fcw-pdv-rate-badge" style="background:'+(colors[rate]||'#64748b')+';color:white">'+rate+'%</span></td>'+
+        '<td style="text-align:right">'+fmtNum(g.base)+' '+cCurrency+'</td>'+
+        '<td style="text-align:right">'+fmtNum(g.tax)+' '+cCurrency+'</td>'+
+        '<td style="text-align:right">'+fmtNum(g.base+g.tax)+' '+cCurrency+'</td></tr>';
+    }
+  });
+  document.getElementById('wPdvRecap').innerHTML=rh;
+};
+
+wAddItem(); // Start with one empty row
+
+// ═══════════════════════════════════════
+//  PROFILE
+// ═══════════════════════════════════════
+window.canvasApplyProfile = function(sel) {
+  const opt = sel.options[sel.selectedIndex]; if (!opt) return;
+  const country = opt.dataset.country || 'HR';
+  cCountry = country;
+  _activeProfile = {
+    companyName: opt.dataset.companyName||'',
+    oib: opt.dataset.oib||'', vatId: opt.dataset.vatId||'',
+    address: opt.dataset.address||'', city: opt.dataset.city||'',
+    email: opt.dataset.email||'', iban: opt.dataset.iban||'',
+    swift: opt.dataset.swift||'', prefix: opt.dataset.prefix||'',
+    dueDays: parseInt(opt.dataset.dueDays)||15,
+    payment: opt.dataset.payment||'TRANSAKCIJSKI',
+  };
+  setVal('wIban', _activeProfile.iban);
+  setVal('wSwift', _activeProfile.swift);
+  if (_activeProfile.dueDays) {
+    const d = new Date(); d.setDate(d.getDate()+_activeProfile.dueDays);
+    setVal('wDateDue', d.toISOString().split('T')[0]);
+  }
+  const taxLabel = country==='DE'?'MwSt':'PDV';
+  document.getElementById('thPdv').textContent = taxLabel;
+  document.getElementById('lblTax').textContent = taxLabel;
+  document.getElementById('thRecapTax').textContent = taxLabel;
+  addTimelineEvent('edit', 'Profil: '+opt.textContent.trim(), 'Zemlja: '+country, 'create');
+};
+setTimeout(()=>{ const ps=document.getElementById('cProfile'); if(ps) canvasApplyProfile(ps); },50);
+
+// Set default due date
+setTimeout(()=>{
+  const due = new Date(Date.now()+15*24*60*60*1000).toISOString().split('T')[0];
+  setVal('wDateDue', due);
+},50);
+
+// ═══════════════════════════════════════
+//  SUBMIT
+// ═══════════════════════════════════════
+window.canvasSubmit = function(status) {
+  const btn = document.getElementById('canvasSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spremanje...';
+
+  const form = document.getElementById('canvasForm');
+  const csrfInput = form.querySelector('[name="csrfmiddlewaretoken"]');
+  const csrfVal = csrfInput ? csrfInput.value : '';
+  form.innerHTML = '';
+  const ci = document.createElement('input');
+  ci.type='hidden'; ci.name='csrfmiddlewaretoken'; ci.value=csrfVal;
+  form.appendChild(ci);
+
+  function add(n,v){const i=document.createElement('input');i.type='hidden';i.name=n;i.value=v!=null?v:'';form.appendChild(i)}
+
+  add('doctype', cDoctype);
+  add('country', cCountry);
+  add('status', status || 'DRAFT');
+  add('number', val('wNumber'));
+  add('date_issued', val('wDateIssued'));
+  add('date_due', val('wDateDue'));
+  add('date_delivery', val('wDateDelivery'));
+  add('client_name', val('wClientName'));
+  add('client_oib', val('wClientOib'));
+  add('client_email', val('wClientEmail'));
+  add('client_address', val('wClientAddress'));
+  add('client_city', val('wClientCity'));
+  add('client_country', val('wClientCountry') || (cCountry==='DE'?'Deutschland':'Hrvatska'));
+  add('payment_method', val('wPaymentMethod'));
+  add('currency', val('wCurrency'));
+  add('iban', val('wIban'));
+  add('swift', val('wSwift'));
+  add('note', val('wNote'));
+
+  if (_activeProfile) {
+    add('issuer_name', _activeProfile.companyName);
+    add('issuer_address', _activeProfile.address);
+    add('issuer_oib', _activeProfile.oib || _activeProfile.vatId);
+    add('issuer_email', _activeProfile.email);
+  }
+
+  let _taxStatus = 'standard';
+  if (cReverseCharge) _taxStatus = 'reverse_charge';
+  else if (_companyPdvStatus==='pausalic') _taxStatus = 'pausalac';
+  else if (_companyPdvStatus==='kleinunternehmer') _taxStatus = 'kleinunternehmer';
+  add('tax_status', _taxStatus);
+
+  document.querySelectorAll('#wItemsBody tr').forEach(tr => {
+    const desc = tr.querySelector('[name="item_desc[]"]')?.value || '';
+    if (!desc.trim()) return;
+    add('item_desc[]', desc);
+    add('item_qty[]', tr.querySelector('[name="item_qty[]"]')?.value || '1');
+    add('item_unit[]', tr.querySelector('[name="item_unit[]"]')?.value || 'kom');
+    add('item_price[]', tr.querySelector('[name="item_price[]"]')?.value || '0');
+    add('item_pdv[]', tr.querySelector('[name="item_pdv[]"]')?.value || String(getDefaultRate()));
+    add('item_disc[]', tr.querySelector('[name="item_disc[]"]')?.value || '0');
+  });
+
+  // Store timeline events as JSON for backend
+  add('_timeline_events', JSON.stringify(tlEvents.map(e=>({type:e.type,title:e.title,detail:e.detail}))));
+
+  form.submit();
+};
+
+// ═══════════════════════════════════════
+//  LAGER MODAL (reuse from wizard)
+// ═══════════════════════════════════════
+var _hasItems = {% if has_items %}true{% else %}false{% endif %};
+
+window.openLagerModal = function() {
+  if (!_hasItems) { openArticleQuickAdd(); return; }
+  // Create inline lager modal
+  let modal = document.getElementById('lager-modal-c');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'lager-modal-c';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);padding:8px;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center';
+    modal.innerHTML = `
+      <div style="background:#0f172a;border:1.5px solid #c9a84c;border-radius:12px;width:min(95vw,860px);margin-top:40px;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(201,168,76,.2)">
+          <div style="color:#c9a84c;font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:1px">
+            <i class="fas fa-warehouse"></i> Odaberi artikl
+          </div>
+          <button type="button" onclick="document.getElementById('lager-modal-c').style.display='none'"
+            style="background:none;border:none;color:#64748b;font-size:1.3rem;cursor:pointer">x</button>
+        </div>
+        <div style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.06)">
+          <input type="text" id="lagerQueryC" placeholder="Naziv, SKU ili barkod..." autocomplete="off"
+            style="width:100%;padding:10px 14px;background:#1e293b;border:1.5px solid #334155;border-radius:8px;color:#e2e8f0;font-size:16px;outline:none">
+        </div>
+        <div style="overflow-x:auto;max-height:55vh">
+          <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+            <thead><tr style="background:#0a0f1a;position:sticky;top:0;z-index:1">
+              <th style="padding:8px 14px;text-align:left;color:#64748b">Naziv</th>
+              <th style="padding:8px 12px;text-align:left;color:#64748b">SKU</th>
+              <th style="padding:8px 12px;text-align:right;color:#64748b">Cijena</th>
+              <th style="padding:8px 12px;text-align:right;color:#64748b">PDV</th>
+              <th style="padding:8px 12px;text-align:right;color:#64748b">Zaliha</th>
+              <th style="padding:8px 12px"></th>
+            </tr></thead>
+            <tbody id="lagerResultsC"><tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b">Unesite pojam...</td></tr></tbody>
+          </table>
+        </div>
+        <div style="padding:10px 18px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between">
+          <button type="button" onclick="openArticleQuickAdd()" style="padding:7px 16px;background:transparent;border:1px solid #c9a84c;border-radius:6px;color:#c9a84c;cursor:pointer;font-size:.82rem">
+            <i class="fas fa-plus-circle"></i> Kreiraj novi
+          </button>
+          <button type="button" onclick="document.getElementById('lager-modal-c').style.display='none'" style="padding:7px 18px;background:transparent;border:1px solid #334155;border-radius:6px;color:#94a3b8;cursor:pointer;font-size:.82rem">Zatvori</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if(e.target===modal) modal.style.display='none'; });
+    document.getElementById('lagerQueryC').addEventListener('input', function(){
+      clearTimeout(this._t);
+      const q=this.value.trim();
+      const tb=document.getElementById('lagerResultsC');
+      if(q.length<1){tb.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b">Unesite pojam...</td></tr>';return;}
+      tb.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+      this._t=setTimeout(()=>{
+        fetch('/pos/api/articles/search/?q='+encodeURIComponent(q)).then(r=>r.json()).then(data=>{
+          if(!data.articles||!data.articles.length){
+            tb.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#64748b">Nema rezultata</td></tr>';return;}
+          tb.innerHTML=data.articles.map(a=>{
+            const sc=parseFloat(a.stock_qty)<=0?'#ef4444':parseFloat(a.stock_qty)<5?'#f59e0b':'#22c55e';
+            return '<tr style="border-top:1px solid rgba(255,255,255,.05);cursor:pointer" onclick=\'_lgrSelect('+JSON.stringify(a).replace(/'/g,"&#39;")+')\'>' +
+              '<td style="padding:10px 14px;font-weight:600;color:#e2e8f0">'+_esc(a.name)+'</td>'+
+              '<td style="padding:10px 12px;font-family:monospace;color:#64748b;font-size:.78rem">'+_esc(a.sku)+'</td>'+
+              '<td style="padding:10px 12px;text-align:right;color:#c9a84c;font-family:monospace">'+parseFloat(a.price).toFixed(2)+'</td>'+
+              '<td style="padding:10px 12px;text-align:right;color:#94a3b8">'+a.tax_rate+'%</td>'+
+              '<td style="padding:10px 12px;text-align:right;font-family:monospace;font-weight:700;color:'+sc+'">'+parseFloat(a.stock_qty).toFixed(2)+'</td>'+
+              '<td style="padding:10px 12px"><button type="button" onclick="event.stopPropagation();_lgrSelect('+JSON.stringify(a).replace(/'/g,"&#39;")+')" style="padding:5px 12px;background:#c9a84c;color:#000;border:none;border-radius:5px;font-weight:700;font-size:.72rem;cursor:pointer;min-height:44px">+</button></td></tr>';
+          }).join('');
+        }).catch(()=>{tb.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#ef4444">Greska</td></tr>';});
+      },200);
+    });
+  }
+  modal.style.display = 'flex';
+  document.getElementById('lagerQueryC').value = '';
+  document.getElementById('lagerQueryC').focus();
+};
+
+window._lgrSelect = function(a) {
+  wAddItem(a.name, 1, a.unit, a.unit_price||a.price, a.tax_rate, 0);
+  const lastRow = document.querySelector('#wItemsBody tr:last-child');
+  if (lastRow) lastRow.querySelector('.item-inv-id').value = a.id || '';
+  document.getElementById('lager-modal-c').style.display = 'none';
+};
+
+// ═══════════════════════════════════════
+//  ARTICLE QUICK-ADD
+// ═══════════════════════════════════════
+window.openArticleQuickAdd = function() {
+  let m = document.getElementById('aqa-modal-c');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'aqa-modal-c';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center';
+    m.innerHTML = `
+      <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:28px;min-width:380px;max-width:480px;width:90%">
+        <h5 style="color:#c9a84c;margin-bottom:18px"><i class="fas fa-plus-circle"></i> Novi artikl</h5>
+        <div class="mb-3"><label style="color:#ccc;font-size:.85rem">Naziv *</label>
+          <input id="aqaNameC" type="text" class="form-control form-control-sm" placeholder="Naziv artikla"></div>
+        <div class="mb-3"><label style="color:#ccc;font-size:.85rem">Cijena (EUR)</label>
+          <input id="aqaPriceC" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00"></div>
+        <div class="row mb-3"><div class="col-6"><label style="color:#ccc;font-size:.85rem">PDV %</label>
+          <input id="aqaPdvC" type="number" step="1" min="0" max="100" class="form-control form-control-sm" value="25"></div>
+          <div class="col-6"><label style="color:#ccc;font-size:.85rem">J.mj.</label>
+          <input id="aqaUnitC" type="text" class="form-control form-control-sm" value="kom"></div></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-sm btn-secondary" onclick="document.getElementById('aqa-modal-c').style.display='none'">Odustani</button>
+          <button class="btn btn-sm btn-warning" onclick="saveQuickArticle()"><i class="fas fa-save"></i> Spremi i dodaj</button>
+        </div>
+        <div id="aqaErrC" style="color:#f87171;font-size:.82rem;margin-top:10px;display:none"></div>
+      </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if(e.target===m) m.style.display='none'; });
+  }
+  document.getElementById('aqaNameC').value = '';
+  document.getElementById('aqaPriceC').value = '';
+  document.getElementById('aqaPdvC').value = cReverseCharge ? '0' : String(getDefaultRate());
+  document.getElementById('aqaUnitC').value = 'kom';
+  document.getElementById('aqaErrC').style.display = 'none';
+  m.style.display = 'flex';
+  setTimeout(()=>document.getElementById('aqaNameC').focus(), 80);
+};
+
+window.saveQuickArticle = async function() {
+  const name = document.getElementById('aqaNameC').value.trim();
+  const errEl = document.getElementById('aqaErrC');
+  if (!name) { errEl.textContent='Naziv obavezan'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  const price = document.getElementById('aqaPriceC').value.trim() || '0';
+  const pdv = document.getElementById('aqaPdvC').value.trim() || '25';
+  const unit = document.getElementById('aqaUnitC').value.trim() || 'kom';
+  const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  try {
+    const resp = await fetch('/pos/api/quick-create/', {
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf},
+      body:JSON.stringify({name,price,unit}),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      wAddItem(data.name, 1, unit, parseFloat(price)||0, parseFloat(pdv), 0);
+      document.getElementById('aqa-modal-c').style.display = 'none';
+      _hasItems = true;
+      const t = document.createElement('div');
+      t.style.cssText='position:fixed;bottom:24px;right:24px;background:#166534;color:#fff;padding:12px 20px;border-radius:8px;z-index:99999;font-size:.9rem';
+      t.innerHTML='<i class="fas fa-check"></i> Artikl kreiran: <strong>'+_esc(name)+'</strong>';
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(),3500);
+    } else { errEl.textContent=data.error||'Greska'; errEl.style.display='block'; }
+  } catch(e) { errEl.textContent='Mrezna greska'; errEl.style.display='block'; }
+};
+
+// ═══════════════════════════════════════
+//  ESCAPE handler
+// ═══════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const lm = document.getElementById('lager-modal-c');
+    const am = document.getElementById('aqa-modal-c');
+    if (am && am.style.display === 'flex') am.style.display = 'none';
+    else if (lm && lm.style.display === 'flex') lm.style.display = 'none';
+    else sbResults.classList.remove('active');
+  }
+});
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+function _esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// Initial timeline event
+addTimelineEvent('create', 'Canvas otvoren', 'Nova transakcija zapoceta', 'create');
+
+}); // DOMContentLoaded
+</script>
+{% endblock %}

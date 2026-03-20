@@ -1,0 +1,240 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% trans "Video Galerija — Visković Group" %}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+  .page-header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 50px 0 30px;
+    border-bottom: 1px solid #334155;
+  }
+  .filter-btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 6px 18px;
+    border-radius: 99px;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+  }
+  .video-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .video-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+  .video-thumb {
+    position: relative;
+    padding-top: 56.25%;
+    background: #0f172a;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .video-thumb img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .video-thumb video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.3);
+    transition: background .2s;
+  }
+  .play-overlay:hover { background: rgba(0,0,0,.15); }
+  .play-btn {
+    width: 60px; height: 60px;
+    background: rgba(239,68,68,.9);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    transition: transform .2s;
+  }
+  .play-overlay:hover .play-btn { transform: scale(1.1); }
+  .duration-badge {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,.75);
+    color: white; font-size: .75rem; padding: 2px 7px; border-radius: 4px;
+  }
+  .featured-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: #f59e0b; color: #0f172a;
+    font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  }
+  .video-info { padding: 1rem; }
+  .video-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: .25rem; }
+  .video-info .cat-tag {
+    font-size: .75rem; color: #64748b;
+    background: #0f172a; padding: 2px 8px; border-radius: 4px;
+    display: inline-block;
+  }
+  .video-info p { font-size: .85rem; color: #94a3b8; margin-top: .5rem; }
+
+  /* Modal */
+  .video-modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-modal-backdrop.open { display: flex; }
+  .video-modal {
+    background: #1e293b;
+    border-radius: 12px;
+    width: min(90vw, 900px);
+    overflow: hidden;
+    position: relative;
+  }
+  .modal-video-wrap { position: relative; padding-top: 56.25%; }
+  .modal-video-wrap iframe,
+  .modal-video-wrap video {
+    position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+  }
+  .modal-close {
+    position: absolute; top: -40px; right: 0;
+    background: none; border: none; color: white;
+    font-size: 1.8rem; cursor: pointer; line-height: 1;
+  }
+  nav-back { color: #94a3b8; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="container">
+    <a href="{% url 'website:homepage' %}" style="color:#94a3b8;text-decoration:none;font-size:.9rem">{% trans "← Natrag" %}</a>
+    <h1 class="mt-3 fw-bold">{% trans "Video galerija" %}</h1>
+    <p style="color:#94a3b8">{% trans "Pogledajte naše projekte i radove" %}</p>
+  </div>
+</div>
+
+<div class="container py-5">
+
+  <!-- Filteri -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{% url 'website:video_galerija' %}" class="filter-btn {% if not aktivna_kategorija %}active{% endif %}">
+      {% trans "Sve kategorije" %}
+    </a>
+    {% for k_val, k_label in kategorije %}
+      <a href="?k={{ k_val }}" class="filter-btn {% if aktivna_kategorija == k_val %}active{% endif %}">
+        {{ k_label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if not videos %}
+    <div class="text-center py-5" style="color:#64748b">
+      <div style="font-size:3rem">🎬</div>
+      <p class="mt-3">{% trans "Nema videa u ovoj kategoriji." %}</p>
+    </div>
+  {% else %}
+    <div class="row g-4">
+      {% for video in videos %}
+      <div class="col-md-6 col-lg-4">
+        <div class="video-card">
+          <div class="video-thumb" onclick="openVideo('{{ video.id }}', '{{ video.embed_src|default:'' }}', '{{ video.video_file.url|default:'' }}')">
+            {% if video.thumbnail %}
+              <img src="{{ video.thumbnail.url }}" alt="{{ video.naslov_hr }}" loading="lazy">
+            {% elif video.is_youtube and video.embed_id %}
+              <img src="https://img.youtube.com/vi/{{ video.embed_id }}/mqdefault.jpg" alt="{{ video.naslov_hr }}" loading="lazy">
+            {% else %}
+              <div style="position:absolute;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;color:#334155;font-size:3rem">🎬</div>
+            {% endif %}
+            <div class="play-overlay">
+              <div class="play-btn">▶</div>
+            </div>
+            {% if video.trajanje %}
+              <span class="duration-badge">{{ video.trajanje }}</span>
+            {% endif %}
+            {% if video.is_featured %}
+              <span class="featured-badge">{% trans "★ Istaknuto" %}</span>
+            {% endif %}
+          </div>
+          <div class="video-info">
+            <h3>{{ video.naslov_hr }}</h3>
+            <span class="cat-tag">{{ video.get_kategorija_display }}</span>
+            {% if video.opis_hr %}
+              <p>{{ video.opis_hr|truncatechars:80 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden data za modal -->
+      <div id="vdata-{{ video.id }}" style="display:none"
+           data-embed="{{ video.embed_src|default:'' }}"
+           data-file="{{ video.video_file.url|default:'' }}"
+           data-title="{{ video.naslov_hr }}">
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<!-- Video Modal -->
+<div class="video-modal-backdrop" id="videoModal" onclick="closeModal(event)">
+  <div class="video-modal">
+    <button class="modal-close" onclick="closeVideoModal()">✕</button>
+    <div class="modal-video-wrap" id="modalContent"></div>
+    <div style="padding:.75rem 1rem;color:#94a3b8;font-size:.9rem" id="modalTitle"></div>
+  </div>
+</div>
+
+<script>
+function openVideo(id, embedSrc, fileUrl) {
+  const modal = document.getElementById('videoModal');
+  const content = document.getElementById('modalContent');
+  const titleEl = document.getElementById('modalTitle');
+  const data = document.getElementById('vdata-' + id);
+
+  content.innerHTML = '';
+  if (embedSrc) {
+    const iframe = document.createElement('iframe');
+    iframe.src = embedSrc + '?autoplay=1';
+    iframe.allow = 'autoplay; encrypted-media; fullscreen';
+    content.appendChild(iframe);
+  } else if (fileUrl) {
+    const video = document.createElement('video');
+    video.src = fileUrl;
+    video.controls = true;
+    video.autoplay = true;
+    content.appendChild(video);
+  }
+  titleEl.textContent = data ? data.dataset.title : '';
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('videoModal')) closeVideoModal();
+}
+
+function closeVideoModal() {
+  const modal = document.getElementById('videoModal');
+  modal.classList.remove('open');
+  document.getElementById('modalContent').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeVideoModal();
+});
+</script>
+</body>
+</html>

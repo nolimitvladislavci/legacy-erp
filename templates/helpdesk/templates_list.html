@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Predlosci odgovora{% endblock %}
+{% block page_title %}Predlosci odgovora{% endblock %}
+{% block content %}
+<style>
+.stat-card{background:#fff;border-radius:10px;padding:16px;border:1px solid #f1f5f9;margin-bottom:16px}
+.hd-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.hd-table th{text-align:left;padding:8px 10px;border-bottom:2px solid #e2e8f0;font-size:.7rem;text-transform:uppercase;color:#64748b}
+.hd-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9}.hd-table tr:hover{background:#f8fafc}
+</style>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+  <div>
+    <a href="{% url 'helpdesk:dashboard' %}" style="font-size:.8rem;color:#64748b;text-decoration:none"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    <div style="font-weight:700;font-size:1.1rem;color:#0f172a;margin-top:4px"><i class="fas fa-file-alt" style="color:#c9a84c"></i> Predlosci odgovora</div>
+  </div>
+  <a href="{% url 'helpdesk:template_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Novi predlozak</a>
+</div>
+<div class="stat-card">
+  <table class="hd-table">
+    <thead><tr><th>Naziv</th><th>Kategorija</th><th>Tekst</th><th>Aktivan</th></tr></thead>
+    <tbody>
+    {% for tpl in templates %}<tr><td><strong>{{ tpl.name }}</strong></td><td>{{ tpl.get_category_display }}</td><td>{{ tpl.body|truncatechars:80 }}</td><td>{% if tpl.is_active %}<span style="color:#166534"><i class="fas fa-check-circle"></i></span>{% else %}<span style="color:#94a3b8"><i class="fas fa-minus-circle"></i></span>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4" class="text-center py-4" style="color:#94a3b8">Nema predlozaka.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

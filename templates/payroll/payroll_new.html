@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans "Novi obracun placa" %}{% endblock %}
+
+{% block content %}
+<div style="max-width:500px;margin:0 auto">
+    <h2 style="color:var(--gold);margin-bottom:24px">
+        <i class="fas fa-plus-circle"></i> {% trans "Novi obracun placa" %}
+    </h2>
+
+    <form method="post" style="background:#fff;padding:32px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+        {% csrf_token %}
+        <div style="margin-bottom:20px">
+            <label style="display:block;font-weight:600;margin-bottom:6px;color:#334155">{% trans "Godina" %}</label>
+            <select name="year" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:1rem">
+                {% for y in years %}
+                <option value="{{ y }}" {% if y == default_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="margin-bottom:24px">
+            <label style="display:block;font-weight:600;margin-bottom:6px;color:#334155">{% trans "Mjesec" %}</label>
+            <select name="month" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:1rem">
+                {% for m in months %}
+                <option value="{{ m }}" {% if m == default_month %}selected{% endif %}>{{ m|stringformat:"02d" }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" style="width:100%;padding:12px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer">
+            <i class="fas fa-calculator"></i> {% trans "Kreiraj obracun" %}
+        </button>
+    </form>
+
+    <div style="text-align:center;margin-top:16px">
+        <a href="{% url 'payroll:list' %}" style="color:#64748b;text-decoration:none">
+            <i class="fas fa-arrow-left"></i> {% trans "Natrag" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

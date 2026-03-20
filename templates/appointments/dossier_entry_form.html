@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if entry %}Uredi unos{% else %}Novi unos — {{ client.name }}{% endif %}{% endblock %}
+{% block page_title %}{% if entry %}Uredi unos{% else %}Novi unos u kartonu{% endif %}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <a href="{% url 'appointments:dossier_detail' client.pk %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Karton: {{ client.name }}</a>
+  </div>
+</div>
+<div class="stat-card" style="max-width:760px">
+  <form method="post" enctype="multipart/form-data" id="entryForm">
+    {% csrf_token %}
+    <input type="hidden" name="structured_data" id="structuredDataInput" value="{{ sd_json|default:'{}' }}">
+    {% if appointment_id %}<input type="hidden" name="appointment_id" value="{{ appointment_id }}">{% endif %}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Tip unosa</label>
+        <select name="entry_type" id="entryType" class="form-select" onchange="switchType(this.value)">
+          {% for val, label in entry_types %}
+          <option value="{{ val }}" {% if prefill_type == val or entry.entry_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Naslov</label>
+        <input type="text" name="title" class="form-control" value="{{ entry.title|default:'' }}" placeholder="Kratki opis unosa">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Vezani termin (opcionalno)</label>
+        <select name="appointment_id" class="form-select">
+          <option value="">-- bez termina --</option>
+          {% for a in appointments %}
+          <option value="{{ a.pk }}" {% if appointment_id == a.pk|stringformat:'i' %}selected{% endif %}>{{ a.start_time|date:"d.m.Y H:i" }} — {{ a.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- NOTE -->
+      <div id="fields-note" class="col-12 type-fields">
+        <label class="form-label fw-bold">Biljeska</label>
+        <textarea name="content" class="form-control" rows="5" placeholder="Unesite biljesku...">{{ entry.content|default:'' }}</textarea>
+      </div>
+
+      <!-- FINDING -->
+      <div id="fields-finding" class="col-12 type-fields" style="display:none">
+        <label class="form-label fw-bold">Nalaz / Opis</label>
+        <textarea name="content" class="form-control" rows="5" placeholder="Opis nalaza, klinicka slika...">{{ entry.content|default:'' }}</textarea>
+      </div>
+
+      <!-- PRESCRIPTION OPTIC -->
+      <div id="fields-prescription-optic" class="col-12 type-fields" style="display:none">
+        <h6 style="color:var(--gold);margin-bottom:12px"><i class="fas fa-eye me-2"></i>Dioptrijski recept</h6>
+        <table class="table table-dark table-sm mb-3">
+          <thead><tr><th></th><th>Sfera</th><th>Cilindar</th><th>Os (&deg;)</th><th>Adicija</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>OD (desno)</strong></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm" id="od_sphere" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm" id="od_cylinder" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+              <td><input type="number" step="1" min="0" max="180" class="form-control form-control-sm" id="od_axis" style="background:#111;border-color:#333;color:var(--text)" placeholder="0"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm" id="od_addition" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+            </tr>
+            <tr>
+              <td><strong>OS (lijevo)</strong></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm" id="os_sphere" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm" id="os_cylinder" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+              <td><input type="number" step="1" min="0" max="180" class="form-control form-control-sm" id="os_axis" style="background:#111;border-color:#333;color:var(--text)" placeholder="0"></td>
+              <td><input type="number" step="0.25" class="form-control form-control-sm" id="os_addition" style="background:#111;border-color:#333;color:var(--text)" placeholder="0.00"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="row g-2 mb-3">
+          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">PD (mm)</label><input type="number" step="0.5" id="pd_val" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="64"></div>
+          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Vidna ostrina OD</label><input type="text" id="va_od" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="1.0"></div>
+          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Vidna ostrina OS</label><input type="text" id="va_os" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="1.0"></div>
+          <div class="col-3"><label class="form-label" style="font-size:.8rem;color:var(--muted)">IOP (mmHg)</label><input type="number" step="0.5" id="iop" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="16"></div>
+        </div>
+        <label class="form-label" style="font-size:.8rem;color:var(--muted)">Napomene uz recept</label>
+        <textarea class="form-control" id="presc_notes" rows="3" style="background:#111;border-color:#333;color:var(--text)"></textarea>
+      </div>
+
+      <!-- PRESCRIPTION HAIR/BEAUTY -->
+      <div id="fields-prescription-hair" class="col-12 type-fields" style="display:none">
+        <h6 style="color:var(--gold);margin-bottom:12px"><i class="fas fa-cut me-2"></i>Recept / Tretman formula</h6>
+        <div class="row g-2">
+          <div class="col-md-4"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Tip kose</label><input type="text" id="hair_type" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="suha, masna, obicna..."></div>
+          <div class="col-md-4"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Baza boje</label><input type="text" id="hair_base" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="6.3, 7.0..."></div>
+          <div class="col-md-4"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Formula boje</label><input type="text" id="hair_formula" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="npr. Wella 7/0 + 7/43"></div>
+          <div class="col-12"><label class="form-label" style="font-size:.8rem;color:var(--muted)">Opis tretmana</label><textarea class="form-control" id="hair_treatment" rows="3" style="background:#111;border-color:#333;color:var(--text)"></textarea></div>
+        </div>
+      </div>
+
+      <!-- MEASUREMENT -->
+      <div id="fields-measurement" class="col-12 type-fields" style="display:none">
+        <h6 style="color:var(--gold);margin-bottom:12px"><i class="fas fa-ruler me-2"></i>Mjerenja</h6>
+        <div id="measureRows">
+          <div class="row g-2 mb-2 measure-row">
+            <div class="col-5"><input type="text" class="form-control meas-key" style="background:#111;border-color:#333;color:var(--text)" placeholder="Naziv (npr. tezina)"></div>
+            <div class="col-5"><input type="text" class="form-control meas-val" style="background:#111;border-color:#333;color:var(--text)" placeholder="Vrijednost (npr. 82 kg)"></div>
+            <div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest('.measure-row').remove()"><i class="fas fa-times"></i></button></div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addMeasRow()"><i class="fas fa-plus me-1"></i>Dodaj mjerenje</button>
+      </div>
+
+      <!-- DOCUMENT / IMAGE -->
+      <div id="fields-file" class="col-12 type-fields" style="display:none">
+        <label class="form-label fw-bold">Datoteka</label>
+        <input type="file" name="file" class="form-control" style="background:#111;border-color:#333;color:var(--text)">
+        {% if entry and entry.file %}
+        <small class="text-muted">Trenutna datoteka: <a href="{{ entry.file.url }}" target="_blank">{{ entry.file.name }}</a></small>
+        {% endif %}
+        <label class="form-label fw-bold mt-3">Opis (opcionalno)</label>
+        <textarea name="content" class="form-control" rows="3">{{ entry.content|default:'' }}</textarea>
+      </div>
+
+      <!-- TREATMENT -->
+      <div id="fields-treatment" class="col-12 type-fields" style="display:none">
+        <label class="form-label fw-bold">Opis tretmana</label>
+        <textarea name="content" class="form-control" rows="5" placeholder="Detalji tretmana...">{{ entry.content|default:'' }}</textarea>
+        <label class="form-label fw-bold mt-3">Kori&#353;teni proizvodi</label>
+        <input type="text" id="products_used" class="form-control" style="background:#111;border-color:#333;color:var(--text)" placeholder="npr. Olaplex 3, Wella SP...">
+      </div>
+
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary px-4" onclick="serializeStructured()"><i class="fas fa-save me-2"></i>Spremi</button>
+        <a href="{% url 'appointments:dossier_detail' client.pk %}" class="btn btn-outline-secondary ms-2">Odustani</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+const BRANCH_TYPE = "{{ dossier.branch_type }}";
+const SD_INIT = {{ sd_json|default:'{}' }};
+
+function switchType(val) {
+  document.querySelectorAll('.type-fields').forEach(el => el.style.display = 'none');
+  if (val === 'note') document.getElementById('fields-note').style.display = 'block';
+  else if (val === 'finding') document.getElementById('fields-finding').style.display = 'block';
+  else if (val === 'prescription') {
+    if (BRANCH_TYPE === 'optic') document.getElementById('fields-prescription-optic').style.display = 'block';
+    else document.getElementById('fields-prescription-hair').style.display = 'block';
+  } else if (val === 'measurement') document.getElementById('fields-measurement').style.display = 'block';
+  else if (val === 'document' || val === 'image') document.getElementById('fields-file').style.display = 'block';
+  else if (val === 'treatment') document.getElementById('fields-treatment').style.display = 'block';
+}
+
+function addMeasRow() {
+  const row = document.createElement('div');
+  row.className = 'row g-2 mb-2 measure-row';
+  row.innerHTML = '<div class="col-5"><input type="text" class="form-control meas-key" style="background:#111;border-color:#333;color:var(--text)" placeholder="Naziv"></div><div class="col-5"><input type="text" class="form-control meas-val" style="background:#111;border-color:#333;color:var(--text)" placeholder="Vrijednost"></div><div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest(\'.measure-row\').remove()"><i class="fas fa-times"></i></button></div>';
+  document.getElementById('measureRows').appendChild(row);
+}
+
+function serializeStructured() {
+  const et = document.getElementById('entryType').value;
+  let sd = {};
+  if (et === 'prescription' && BRANCH_TYPE === 'optic') {
+    sd = {
+      od_sphere: document.getElementById('od_sphere').value,
+      od_cylinder: document.getElementById('od_cylinder').value,
+      od_axis: document.getElementById('od_axis').value,
+      od_addition: document.getElementById('od_addition').value,
+      os_sphere: document.getElementById('os_sphere').value,
+      os_cylinder: document.getElementById('os_cylinder').value,
+      os_axis: document.getElementById('os_axis').value,
+      os_addition: document.getElementById('os_addition').value,
+      pd: document.getElementById('pd_val').value,
+      va_od: document.getElementById('va_od').value,
+      va_os: document.getElementById('va_os').value,
+      iop: document.getElementById('iop').value,
+      notes: document.getElementById('presc_notes').value,
+    };
+  } else if (et === 'prescription') {
+    sd = {
+      hair_type: document.getElementById('hair_type').value,
+      hair_base: document.getElementById('hair_base').value,
+      hair_formula: document.getElementById('hair_formula').value,
+      hair_treatment: document.getElementById('hair_treatment').value,
+    };
+  } else if (et === 'measurement') {
+    document.querySelectorAll('.measure-row').forEach(row => {
+      const k = row.querySelector('.meas-key').value.trim();
+      const v = row.querySelector('.meas-val').value.trim();
+      if (k) sd[k] = v;
+    });
+  } else if (et === 'treatment') {
+    sd = { products: document.getElementById('products_used').value };
+  }
+  document.getElementById('structuredDataInput').value = JSON.stringify(sd);
+}
+
+// Init
+switchType(document.getElementById('entryType').value);
+
+// Pre-fill from existing data
+if (Object.keys(SD_INIT).length) {
+  const et = document.getElementById('entryType').value;
+  if (et === 'prescription' && BRANCH_TYPE === 'optic') {
+    ['od_sphere','od_cylinder','od_axis','od_addition','os_sphere','os_cylinder','os_axis','os_addition','pd_val','va_od','va_os','iop'].forEach(id => {
+      const key = id === 'pd_val' ? 'pd' : id;
+      if (SD_INIT[key] !== undefined && document.getElementById(id)) document.getElementById(id).value = SD_INIT[key];
+    });
+    if (SD_INIT.notes && document.getElementById('presc_notes')) document.getElementById('presc_notes').value = SD_INIT.notes;
+  } else if (et === 'measurement') {
+    const rows = document.getElementById('measureRows');
+    rows.innerHTML = '';
+    Object.entries(SD_INIT).forEach(([k, v]) => {
+      const row = document.createElement('div');
+      row.className = 'row g-2 mb-2 measure-row';
+      row.innerHTML = '<div class="col-5"><input type="text" class="form-control meas-key" style="background:#111;border-color:#333;color:var(--text)" value="'+k+'"></div><div class="col-5"><input type="text" class="form-control meas-val" style="background:#111;border-color:#333;color:var(--text)" value="'+v+'"></div><div class="col-2"><button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest(\'.measure-row\').remove()"><i class="fas fa-times"></i></button></div>';
+      rows.appendChild(row);
+    });
+  }
+}
+</script>
+{% endblock %}

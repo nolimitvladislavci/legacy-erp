@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns0:Invoice xmlns:ns0="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:ns1="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ns2="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <ns1:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</ns1:CustomizationID>
+  <ns1:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ns1:ProfileID>
+  <ns1:ID>R26004787/1/1</ns1:ID>
+  <ns1:IssueDate>2026-03-16</ns1:IssueDate>
+  <ns1:DueDate>2026-03-31</ns1:DueDate>
+  <ns1:InvoiceTypeCode>380</ns1:InvoiceTypeCode>
+  <ns1:DocumentCurrencyCode>EUR</ns1:DocumentCurrencyCode>
+  <ns1:Note>MJESTO ISPORUKE: Optika OKO Osijek</ns1:Note>
+  <ns2:AccountingSupplierParty>
+    <ns2:Party>
+      <ns2:PartyIdentification>
+        <ns1:ID schemeID="0191">37590751921</ns1:ID>
+      </ns2:PartyIdentification>
+      <ns2:PartyName>
+        <ns1:Name>Diagonal d.o.o.</ns1:Name>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName>Kopilica 62</ns1:StreetName>
+        <ns1:CityName>Split</ns1:CityName>
+        <ns1:PostalZone>21000</ns1:PostalZone>
+        <ns2:Country>
+          <ns1:IdentificationCode>HR</ns1:IdentificationCode>
+        </ns2:Country>
+      </ns2:PostalAddress>
+      <ns2:PartyTaxScheme>
+        <ns1:CompanyID>HR37590751921</ns1:CompanyID>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:PartyTaxScheme>
+    </ns2:Party>
+  </ns2:AccountingSupplierParty>
+  <ns2:AccountingCustomerParty>
+    <ns2:Party>
+      <ns2:PartyIdentification>
+        <ns1:ID schemeID="0191">37590751921</ns1:ID>
+      </ns2:PartyIdentification>
+      <ns2:PartyName>
+        <ns1:Name>KONJIK D.O.O.</ns1:Name>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName>KRALJA TOMISLAVA 1a</ns1:StreetName>
+        <ns1:CityName>CEPIN</ns1:CityName>
+        <ns1:PostalZone>31431</ns1:PostalZone>
+        <ns2:Country>
+          <ns1:IdentificationCode>HR</ns1:IdentificationCode>
+        </ns2:Country>
+      </ns2:PostalAddress>
+    </ns2:Party>
+  </ns2:AccountingCustomerParty>
+  <ns2:PaymentMeans>
+    <ns1:PaymentMeansCode>30</ns1:PaymentMeansCode>
+    <ns1:PaymentID>00 R26004787-1-1</ns1:PaymentID>
+  </ns2:PaymentMeans>
+  <ns2:TaxTotal>
+    <ns1:TaxAmount currencyID="EUR">2.44</ns1:TaxAmount>
+    <ns2:TaxSubtotal>
+      <ns1:TaxableAmount currencyID="EUR">48.78</ns1:TaxableAmount>
+      <ns1:TaxAmount currencyID="EUR">2.44</ns1:TaxAmount>
+      <ns2:TaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>5</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:TaxCategory>
+    </ns2:TaxSubtotal>
+  </ns2:TaxTotal>
+  <ns2:LegalMonetaryTotals>
+    <ns1:LineExtensionAmount currencyID="EUR">48.78</ns1:LineExtensionAmount>
+    <ns1:TaxExclusiveAmount currencyID="EUR">48.78</ns1:TaxExclusiveAmount>
+    <ns1:TaxInclusiveAmount currencyID="EUR">51.22</ns1:TaxInclusiveAmount>
+    <ns1:PayableAmount currencyID="EUR">51.22</ns1:PayableAmount>
+  </ns2:LegalMonetaryTotals>
+  <ns2:InvoiceLine>
+    <ns1:ID>1</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">1.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">11.25</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PR15BP Prime 1.50 Blue PROtect 70/5 Sph +2.00 Cyl +0.25 Axis 065</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>5</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">12.50</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>2</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">1.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">11.25</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PR15BP Prime 1.50 Blue PROtect 70/5 Sph +2.25 Cyl +0.25 Axis 105</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>5</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">12.50</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>3</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">1.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">6.57</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PR15C Prime 1.50 Crome 70/5 Sph +3.50</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>5</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">7.30</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>4</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">1.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">6.57</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PR15C Prime 1.50 Crome 70/5 Sph +3.50</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>5</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">7.30</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>5</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">1.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">6.57</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PR15C Prime 1.50 Crome 70/5 Sph +0.75 Cyl +0.75 Axis 005</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>5</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">7.30</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>6</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">1.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">6.57</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PR15C Prime 1.50 Crome 70/5 Sph 0.00 Cyl +0.50 Axis 170</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>5</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">7.30</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+</ns0:Invoice>

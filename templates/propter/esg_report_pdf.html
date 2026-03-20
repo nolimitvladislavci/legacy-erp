@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<style>
+@page{size:A4;margin:2cm}
+body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:11pt;color:#1e293b;line-height:1.5}
+h1{font-size:22pt;color:#065f46;margin:0 0 4px}
+h2{font-size:14pt;color:#065f46;border-bottom:2px solid #d1fae5;padding-bottom:4px;margin:24px 0 12px}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px;border-bottom:3px solid #065f46;padding-bottom:16px}
+.header .company{font-size:10pt;color:#64748b}
+.hero-stats{display:flex;gap:20px;margin:20px 0;flex-wrap:wrap}
+.hero-stat{flex:1;min-width:140px;background:#f0fdf4;border-radius:8px;padding:16px;text-align:center;border:1px solid #d1fae5}
+.hero-stat .val{font-size:24pt;font-weight:700;color:#065f46}
+.hero-stat .lbl{font-size:8pt;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:10pt}
+th{background:#f0fdf4;padding:8px;text-align:left;border-bottom:2px solid #d1fae5;font-size:9pt;text-transform:uppercase;color:#065f46}
+td{padding:8px;border-bottom:1px solid #e2e8f0}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:8pt;font-weight:700}
+.badge.bronze{background:#fef3c7;color:#92400e}
+.badge.silver{background:#e2e8f0;color:#475569}
+.badge.gold{background:#fef9c3;color:#854d0e}
+.badge.platinum{background:#dbeafe;color:#1e40af}
+.methodology{background:#f8fafc;border-radius:8px;padding:14px;font-size:9pt;color:#64748b;margin-top:20px;border:1px solid #e2e8f0}
+.footer{margin-top:40px;text-align:center;font-size:8pt;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:12px}
+.badge-hero{text-align:center;margin:16px 0}
+.badge-hero .icon{font-size:48pt}
+.badge-hero .level{font-size:14pt;font-weight:700;color:#065f46}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>ESG Eko izvjestaj {{ year }}</h1>
+    <div class="company">{{ company.name }}{% if company.oib %} | OIB: {{ company.oib }}{% endif %}</div>
+  </div>
+  <div style="text-align:right;font-size:9pt;color:#94a3b8">
+    Generirano: {{ generated_at|date:"d.m.Y H:i" }}<br>
+    Propter by LIMIT Connect
+  </div>
+</div>
+
+{% if best_badge %}
+<div class="badge-hero">
+  <div class="icon">{% if best_badge == "platinum" %}&#128142;{% elif best_badge == "gold" %}&#127881;{% elif best_badge == "silver" %}&#129353;{% elif best_badge == "bronze" %}&#129354;{% else %}&#127807;{% endif %}</div>
+  <div class="level">{{ best_badge|capfirst }} razina</div>
+</div>
+{% endif %}
+
+<h2>Godisnji pregled</h2>
+<div class="hero-stats">
+  <div class="hero-stat">
+    <div class="val">{{ total_eracuni }}</div>
+    <div class="lbl">e-Racuna</div>
+  </div>
+  <div class="hero-stat">
+    <div class="val">{{ total_paper }}</div>
+    <div class="lbl">Listova papira</div>
+  </div>
+  <div class="hero-stat">
+    <div class="val">{{ total_co2 }}g</div>
+    <div class="lbl">CO2 usteda</div>
+  </div>
+  <div class="hero-stat">
+    <div class="val">{{ total_trees|floatformat:3 }}</div>
+    <div class="lbl">Ekvivalent stabala</div>
+  </div>
+</div>
+
+<h2>Mjesecna razrada</h2>
+<table>
+  <thead>
+    <tr><th>Mjesec</th><th>e-Racuna</th><th>Papir (listova)</th><th>CO2 usteda (g)</th><th>Stabla</th><th>Bedz</th></tr>
+  </thead>
+  <tbody>
+  {% for e in stats %}
+    <tr>
+      <td>{{ e.year }}/{{ e.month|stringformat:"02d" }}</td>
+      <td>{{ e.eracuni_sent }}</td>
+      <td>{{ e.paper_saved_sheets }}</td>
+      <td>{{ e.co2_saved_grams|floatformat:0 }}</td>
+      <td>{{ e.trees_equivalent|floatformat:4 }}</td>
+      <td>{% if e.badge_level %}<span class="badge {{ e.badge_level }}">{{ e.badge_level|capfirst }}</span>{% else %}-{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr style="font-weight:700;border-top:2px solid #065f46">
+      <td>UKUPNO</td>
+      <td>{{ total_eracuni }}</td>
+      <td>{{ total_paper }}</td>
+      <td>{{ total_co2 }}g</td>
+      <td>{{ total_trees|floatformat:4 }}</td>
+      <td>{% if best_badge %}<span class="badge {{ best_badge }}">{{ best_badge|capfirst }}</span>{% endif %}</td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="methodology">
+  <strong>Metodologija izracuna (IPCC standard)</strong><br>
+  Svaki e-Racun zamjenjuje prosjecno 2 lista A4 papira (original + kopija).
+  Tiskanje jednog lista oslobada 5g CO2 (izvor: IPCC, Environmental Paper Network).
+  Jedno stablo apsorbira ~21.700g CO2 godisnje (izvor: European Environment Agency).
+  Badge razine odreduju se prema mjesecnom volumenu: Bronze 50+, Silver 200+, Gold 500+, Platinum 1000+ e-racuna.
+</div>
+
+<div class="footer">
+  &copy; {{ year }} Propter by LIMIT Connect | limit-connect.com | Digitalno poslovanje bez papira
+</div>
+</body>
+</html>

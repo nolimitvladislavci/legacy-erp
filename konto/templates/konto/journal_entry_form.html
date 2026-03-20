@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Ručno knjiženje" %} – LIMIT CONNECT{% endblock %}
+{% block page_title %}{% trans "Ručno knjiženje" %}{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a;border-color:#c9a84c}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table tr:hover{background:rgba(59,130,246,.05)}
+.k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.k-table .right{text-align:right}
+.k-badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700;display:inline-block}
+.k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.k-filter .fld{display:flex;flex-direction:column;gap:3px}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.k-filter .fld input,.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
+.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.k-btn-blue{background:#1e40af;color:#fff}.k-btn-blue:hover{background:#2563eb}
+.k-btn-outline{background:transparent;border:1.5px solid #334155;color:#94a3b8}.k-btn-outline:hover{border-color:#c9a84c;color:#c9a84c}
+.qf{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:600;border:1.5px solid transparent;transition:all .15s}
+.qf.active{background:#c9a84c;color:#0f172a;border-color:#c9a84c}
+.qf:not(.active){background:transparent;border-color:#334155;color:#94a3b8}
+.qf:not(.active):hover{border-color:#c9a84c;color:#c9a84c}
+</style>
+
+<div style="margin-bottom:14px"><a href="{% url 'konto:journal_entries' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">← {% trans "Temeljnice" %}</a></div>
+
+<form method="post" action="{% url 'konto:journal_entry_create' %}">
+  {% csrf_token %}
+  <div class="k-card" style="margin-bottom:16px">
+    <div class="k-card-head"><h3>{% trans "Zaglavlje" %}</h3></div>
+    <div style="padding:14px 16px;display:flex;gap:12px;flex-wrap:wrap">
+      <div class="fld" style="flex:1;min-width:200px"><label style="font-size:.65rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px">{% trans "Opis" %}</label><input type="text" name="description" required style="width:100%;padding:8px 12px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.85rem" placeholder="{% trans 'Opis knjiženja...' %}"></div>
+      <div class="fld"><label style="font-size:.65rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px">{% trans "Datum" %}</label><input type="date" name="date" required style="padding:8px 12px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.85rem"></div>
+    </div>
+  </div>
+
+  <div class="k-card">
+    <div class="k-card-head"><h3>{% trans "Stavke" %}</h3><button type="button" onclick="addLine()" class="k-btn k-btn-outline" style="padding:4px 12px;font-size:.75rem"><i class="fas fa-plus"></i> {% trans "Dodaj red" %}</button></div>
+    <table class="k-table" id="linesTable">
+      <thead><tr><th>{% trans "Konto" %}</th><th>{% trans "Strana" %}</th><th class="right">{% trans "Iznos" %}</th><th>{% trans "Opis" %}</th><th></th></tr></thead>
+      <tbody id="linesBody">
+        <tr class="je-line"><td><select name="line_account[]" style="width:100%;padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem">{% for a in accounts %}<option value="{{ a.pk }}">{{ a.code }} - {{ a.name }}</option>{% endfor %}</select></td><td><select name="line_side[]" style="padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem"><option value="debit">{% trans "Duguje" %}</option><option value="credit">{% trans "Potražuje" %}</option></select></td><td><input type="text" name="line_amount[]" style="width:100px;padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem;text-align:right" placeholder="0.00"></td><td><input type="text" name="line_desc[]" style="width:100%;padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem" placeholder="{% trans 'Opis...' %}"></td><td><button type="button" onclick="this.closest('tr').remove()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:1rem">✕</button></td></tr>
+        <tr class="je-line"><td><select name="line_account[]" style="width:100%;padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem">{% for a in accounts %}<option value="{{ a.pk }}">{{ a.code }} - {{ a.name }}</option>{% endfor %}</select></td><td><select name="line_side[]" style="padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem"><option value="debit">{% trans "Duguje" %}</option><option value="credit" selected>{% trans "Potražuje" %}</option></select></td><td><input type="text" name="line_amount[]" style="width:100px;padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem;text-align:right" placeholder="0.00"></td><td><input type="text" name="line_desc[]" style="width:100%;padding:6px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem" placeholder="{% trans 'Opis...' %}"></td><td><button type="button" onclick="this.closest('tr').remove()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:1rem">✕</button></td></tr>
+      </tbody>
+    </table>
+    <div style="padding:14px 16px"><button type="submit" class="k-btn k-btn-gold"><i class="fas fa-save"></i> {% trans "Spremi temeljnicu" %}</button></div>
+  </div>
+</form>
+
+<script>
+function addLine(){
+  var row=document.querySelector('.je-line').cloneNode(true);
+  row.querySelectorAll('input').forEach(function(i){i.value='';});
+  document.getElementById('linesBody').appendChild(row);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,581 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Konverzija računa" %} | LIMIT Connect{% endblock %}
+{% block page_title %}{% trans "Konverzija ulaznog računa" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Navigacija i gumbi — usklađeno s arhiva_list.html ──────────────────── */
+.btn-gold {
+    background: var(--gold); color: #0a0a0a; font-weight: 700; border: none;
+    padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
+    transition: opacity .2s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.btn-gold:hover { opacity: .85; color: #0a0a0a; }
+.btn-ghost {
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    cursor: pointer; transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-danger {
+    background: transparent; border: 1px solid #ef4444; color: #ef4444;
+    padding: 8px 16px; border-radius: 8px; font-size: 0.85rem;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+}
+.btn-danger:hover { background: rgba(239,68,68,.08); }
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+.cv-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 1.5rem;
+}
+.cv-header h2 {
+    margin: 0 0 .25rem; font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700; color: var(--text); font-size: 1.5rem;
+}
+.cv-header h2 i { color: var(--gold); margin-right: 8px; }
+.cv-header p { color: var(--text-muted); margin: 0; font-size: .85rem; }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Faze ───────────────────────────────────────────────────────────────── */
+.stages {
+    display: flex; border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border); margin-bottom: 1.5rem;
+}
+.stage {
+    flex: 1; padding: .55rem .4rem; text-align: center;
+    font-size: .72rem; font-weight: 600; color: var(--text-muted);
+    background: var(--bg-card); border-right: 1px solid var(--border);
+    transition: all .3s;
+}
+.stage:last-child { border-right: none; }
+.stage .si { display: block; font-size: .95rem; margin-bottom: .15rem; }
+.stage.active { background: rgba(201,168,76,.1); color: var(--gold); }
+.stage.done { background: rgba(16,185,129,.08); color: #10b981; }
+
+/* ── Upload zona ────────────────────────────────────────────────────────── */
+.upload-zone {
+    border: 2px dashed var(--border); border-radius: 12px;
+    padding: 3rem 2rem; text-align: center;
+    background: var(--bg-card); transition: all .3s; cursor: pointer;
+    position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--gold); background: rgba(201,168,76,.04);
+}
+.upload-zone .dz-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
+.upload-zone h3 { color: var(--text); margin: 0 0 .4rem; font-size: 1.05rem; font-weight: 600; }
+.upload-zone p { color: var(--text-muted); margin: .2rem 0; font-size: .83rem; }
+.upload-zone input[type=file] {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0; cursor: pointer;
+}
+
+/* ── Preview ─────────────────────────────────────────────────────────────── */
+.img-preview {
+    display: none; margin-top: 1rem;
+    padding: 1.25rem; background: var(--bg-card);
+    border: 1px solid var(--border); border-radius: 12px; text-align: center;
+}
+.img-preview img {
+    max-height: 220px; max-width: 100%; border-radius: 8px;
+    border: 1px solid var(--border); margin-bottom: .75rem;
+}
+.img-preview .file-info {
+    font-size: .78rem; color: var(--text-muted); margin-bottom: .75rem;
+}
+.preview-actions { display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap; }
+
+/* ── Progress ────────────────────────────────────────────────────────────── */
+.cv-progress {
+    display: none; margin-top: 1rem; padding: 1.25rem;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+}
+.progress-bar-wrap {
+    background: var(--input-bg); border-radius: 8px; height: 7px;
+    overflow: hidden; margin: .75rem 0;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #e8c84a);
+    border-radius: 8px; width: 0%; transition: width .5s ease;
+}
+.progress-label { color: var(--text); font-size: .88rem; font-weight: 500; }
+.progress-detail { color: var(--text-muted); font-size: .78rem; margin-top: .25rem; }
+
+/* ── Rezultat ────────────────────────────────────────────────────────────── */
+.cv-result {
+    display: none; margin-top: 1rem; padding: 1.5rem;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+}
+.cv-result.ok  { border-color: #10b981; }
+.cv-result.warn { border-color: #f59e0b; }
+.cv-result.err  { border-color: #ef4444; }
+.result-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.badge { padding: .3rem .75rem; border-radius: 20px; font-size: .78rem; font-weight: 600; }
+.badge-ok   { background: rgba(16,185,129,.12);  color: #10b981; }
+.badge-warn { background: rgba(245,158,11,.12);  color: #f59e0b; }
+.badge-err  { background: rgba(239,68,68,.12);   color: #ef4444; }
+.result-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: .75rem; margin-bottom: 1rem;
+}
+.result-stat {
+    padding: .75rem; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; text-align: center;
+}
+.result-stat .lbl {
+    color: var(--text-muted); font-size: .68rem; display: block;
+    margin-bottom: .2rem; text-transform: uppercase; letter-spacing: .5px;
+}
+.result-stat .val { color: var(--gold); font-size: 1.1rem; font-weight: 700; }
+.result-extras { margin-top: .75rem; }
+.result-extras details summary {
+    cursor: pointer; color: var(--gold); font-size: .85rem;
+    padding: .35rem 0; user-select: none;
+}
+.result-extras details pre {
+    background: var(--input-bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: .75rem; font-size: .75rem; overflow-x: auto;
+    max-height: 280px; margin: .4rem 0 0;
+}
+.result-actions {
+    display: flex; gap: .5rem; flex-wrap: wrap;
+    margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);
+}
+
+/* ── Nedavne konverzije ─────────────────────────────────────────────────── */
+.recent-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: .75rem;
+}
+.recent-header h3 {
+    margin: 0; font-size: 1rem; font-weight: 600; color: var(--text);
+}
+.recent-header h3 i { color: var(--gold); margin-right: .4rem; }
+.tbl { width: 100%; border-collapse: collapse; font-size: .83rem; }
+.tbl th {
+    text-align: left; padding: .5rem .75rem; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); font-weight: 500;
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .5px;
+    background: var(--table-header-bg);
+}
+.tbl td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); color: var(--text); }
+.tbl tbody tr:hover td { background: var(--table-row-hover); cursor: pointer; }
+.st-badge { padding: .2rem .5rem; border-radius: 10px; font-size: .72rem; font-weight: 500; }
+.st-validated { background: rgba(16,185,129,.12); color: #10b981; }
+.st-failed    { background: rgba(239,68,68,.12);  color: #ef4444; }
+.st-pending, .st-extracted, .st-xml_generated { background: rgba(245,158,11,.12); color: #f59e0b; }
+.cbar { display: inline-block; width: 44px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-right: .3rem; }
+.cbar-fill { height: 100%; border-radius: 3px; }
+.cbar-h { background: #10b981; } .cbar-m { background: #f59e0b; } .cbar-l { background: #ef4444; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .stages { flex-wrap: wrap; }
+    .stage { flex: 1 1 45%; }
+    .cv-header { flex-direction: column; }
+    .tbl th:nth-child(n+4), .tbl td:nth-child(n+4) { display: none; }
+    .result-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:960px;margin:0 auto">
+
+  <!-- Header s navigacijom -->
+  <div class="cv-header">
+    <div>
+      <h2><i class="fas fa-file-invoice"></i> {% trans "Konverzija ulaznog računa" %}</h2>
+      <p>{% trans "Slika računa → UBL XML (EN 16931) · Smanjenje ~95% · AI validacija" %}</p>
+    </div>
+    <div class="header-actions">
+      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost">
+        <i class="fas fa-arrow-left"></i> {% trans "Arhiva" %}
+      </a>
+      <a href="{% url 'documents:arhiva_upload' %}" class="btn-ghost">
+        <i class="fas fa-upload"></i> {% trans "Upload" %}
+      </a>
+      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost" id="btnOdustani">
+        <i class="fas fa-times"></i> {% trans "Odustani" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Faze -->
+  <div class="stages" id="stages">
+    <div class="stage active" id="st1"><span class="si">📤</span>{% trans "Odabir" %}</div>
+    <div class="stage" id="st2"><span class="si">🤖</span>{% trans "AI analiza" %}</div>
+    <div class="stage" id="st3"><span class="si">📄</span>{% trans "XML" %}</div>
+    <div class="stage" id="st4"><span class="si">✅</span>{% trans "Validacija" %}</div>
+    <div class="stage" id="st5"><span class="si">💾</span>{% trans "Spremi" %}</div>
+  </div>
+
+  <!-- Upload zona -->
+  <div class="upload-zone" id="uploadZone">
+    <div class="dz-icon">📷</div>
+    <h3>{% trans "Učitajte sliku računa" %}</h3>
+    <p style="font-size:.78rem;color:var(--text-muted)">JPG, PNG, WebP — {% trans "maks" %} 10MB</p>
+    <!-- Skriveni file inputi -->
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+    <!-- Gumbi za odabir -->
+    <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;position:relative;z-index:2">
+      <button type="button"
+              onclick="event.stopPropagation();document.getElementById('fileInput').click()"
+              style="background:var(--gold);color:#0a0a0a;border:none;border-radius:8px;padding:.55rem 1.1rem;font-size:.85rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem">
+        🖼️ {% trans "Iz galerije" %}
+      </button>
+      <button type="button"
+              onclick="event.stopPropagation();document.getElementById('cameraInput').click()"
+              style="background:transparent;border:2px solid var(--gold);color:var(--gold);border-radius:8px;padding:.55rem 1.1rem;font-size:.85rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem">
+        📷 {% trans "Slikaj kamerom" %}
+      </button>
+    </div>
+    <p style="font-size:.72rem;color:var(--text-muted);margin-top:.6rem">{% trans "ili povucite datoteku ovdje" %}</p>
+  </div>
+
+  <!-- Preview slike -->
+  <div class="img-preview" id="imgPreview">
+    <img id="previewImg" alt="preview">
+    <div class="file-info" id="previewName"></div>
+    <div class="preview-actions">
+      <button onclick="startConvert()" class="btn-gold" id="btnConvert">
+        <i class="fas fa-magic"></i> {% trans "Konvertiraj" %}
+      </button>
+      <button onclick="resetForm()" class="btn-ghost">
+        <i class="fas fa-times"></i> {% trans "Odustani" %}
+      </button>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="cv-progress" id="cvProgress">
+    <div style="display:flex;align-items:center;gap:.6rem">
+      <div style="width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;flex-shrink:0"></div>
+      <span class="progress-label" id="progressLabel">{% trans "Obrada u tijeku..." %}</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+    <div class="progress-detail" id="progressDetail">{% trans "Slanje slike..." %}</div>
+  </div>
+
+  <!-- Rezultat -->
+  <div class="cv-result" id="cvResult">
+    <div class="result-header">
+      <span id="resultBadge" class="badge"></span>
+      <span id="resultMsg" style="font-size:.92rem;color:var(--text)"></span>
+    </div>
+    <div class="result-grid" id="resultGrid"></div>
+    <div class="result-extras" id="resultExtras"></div>
+    <div class="result-actions" id="resultActions">
+      <button onclick="resetForm()" class="btn-gold">
+        <i class="fas fa-redo"></i> {% trans "Nova konverzija" %}
+      </button>
+      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost">
+        <i class="fas fa-list"></i> {% trans "Na arhivu" %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Nedavne konverzije -->
+  {% if recent_conversions %}
+  <div class="stat-card" style="padding:1.25rem;margin-top:1.5rem">
+    <div class="recent-header">
+      <h3><i class="fas fa-history"></i>{% trans "Nedavne konverzije" %}</h3>
+      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost" style="padding:5px 12px;font-size:.78rem">
+        {% trans "Sve" %} →
+      </a>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>{% trans "Datoteka" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Pouzdanost" %}</th>
+            <th>{% trans "Ušteda" %}</th>
+            <th>{% trans "Datum" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in recent_conversions %}
+          <tr onclick="showDetail('{{ c.id }}')">
+            <td>
+              <i class="fas fa-file-image" style="color:var(--gold);margin-right:.4rem"></i>
+              {{ c.original_filename|truncatechars:32 }}
+            </td>
+            <td><span class="st-badge st-{{ c.status }}">{{ c.get_status_display }}</span></td>
+            <td>
+              <span class="cbar"><span class="cbar-fill cbar-h" style="width:{{ c.ai_confidence_score|floatformat:0 }}%"></span></span>
+              {{ c.ai_confidence_score|floatformat:0 }}%
+            </td>
+            <td>{{ c.savings_display }}</td>
+            <td style="color:var(--text-muted)">{{ c.created_at|date:"d.m.Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+// URL-ovi direktno iz Django - bez duplog language prefixa
+const CONVERT_URL     = '{% url "documents:arhiva_convert" %}';
+const CONVERSION_BASE = '{% url "documents:arhiva_convert" %}'.replace('convert/', 'conversion/');
+let _file  = null;
+
+// ── Upload zona ──────────────────────────────────────────────────────────────
+const zone = document.getElementById('uploadZone');
+const fin  = document.getElementById('fileInput');
+
+['dragenter','dragover'].forEach(e => zone.addEventListener(e, ev => {
+  ev.preventDefault(); zone.classList.add('dragover');
+}));
+['dragleave','drop'].forEach(e => zone.addEventListener(e, ev => {
+  ev.preventDefault(); zone.classList.remove('dragover');
+}));
+zone.addEventListener('drop', ev => { if (ev.dataTransfer.files[0]) pickFile(ev.dataTransfer.files[0]); });
+fin.addEventListener('change', function() { if (this.files[0]) pickFile(this.files[0]); });
+document.getElementById('cameraInput').addEventListener('change', function() { if (this.files[0]) pickFile(this.files[0]); });
+
+function pickFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['jpg','jpeg','png','webp','gif'].includes(ext)) {
+    alert('Samo slike (JPG, PNG, WebP). Za PDF koristite Smart Import.');
+    return;
+  }
+  if (file.size > 10*1024*1024) { alert('Datoteka prevelika (maks 10MB).'); return; }
+  _file = file;
+  const r = new FileReader();
+  r.onload = e => {
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('previewName').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+    zone.style.display = 'none';
+    document.getElementById('imgPreview').style.display = 'block';
+    setStage(1);
+  };
+  r.readAsDataURL(file);
+}
+
+// ── Konverzija ───────────────────────────────────────────────────────────────
+function startConvert() {
+  if (!_file) return;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('cvProgress').style.display = 'block';
+  document.getElementById('cvResult').style.display = 'none';
+
+  const stages = [
+    {p:20, l:'Slanje slike...', d:'Upload: '+_file.name+' ('+(_file.size/1024).toFixed(0)+'KB)', s:2},
+    {p:40, l:'AI analiza...', d:'Gemini Vision: ekstrakcija teksta i strukture', s:2},
+    {p:62, l:'Generiranje XML-a...', d:'UBL 2.1 / EN 16931 format', s:3},
+    {p:82, l:'Validacija...', d:'Provjera OIB-a, iznosa, PDV-a', s:4},
+  ];
+  let i = 0;
+  const iv = setInterval(() => {
+    if (i < stages.length) {
+      document.getElementById('progressBar').style.width = stages[i].p + '%';
+      document.getElementById('progressLabel').textContent = stages[i].l;
+      document.getElementById('progressDetail').textContent = stages[i].d;
+      setStage(stages[i].s);
+      i++;
+    }
+  }, 900);
+
+  const fd = new FormData();
+  fd.append('file', _file);
+  fd.append('csrfmiddlewaretoken', CSRF);
+
+  fetch(CONVERT_URL, {
+    method: 'POST', credentials: 'same-origin',
+    headers: {'X-Requested-With': 'XMLHttpRequest'},
+    body: fd,
+  })
+  .then(r => r.json())
+  .then(data => {
+    clearInterval(iv);
+    document.getElementById('progressBar').style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('cvProgress').style.display = 'none';
+      setStage(5, true);
+      showResult(data);
+    }, 350);
+  })
+  .catch(err => {
+    clearInterval(iv);
+    document.getElementById('cvProgress').style.display = 'none';
+    showResult({error: 'Greška veze: ' + err.message});
+  });
+}
+
+// ── Rezultat ─────────────────────────────────────────────────────────────────
+function showResult(data) {
+  const el    = document.getElementById('cvResult');
+  const badge = document.getElementById('resultBadge');
+  const msg   = document.getElementById('resultMsg');
+  const grid  = document.getElementById('resultGrid');
+  const ext   = document.getElementById('resultExtras');
+  const acts  = document.getElementById('resultActions');
+
+  el.style.display = 'block';
+  el.className = 'cv-result';
+
+  if (data.error) {
+    el.classList.add('err');
+    badge.className = 'badge badge-err';
+    badge.textContent = 'Greška';
+    msg.textContent = data.error;
+    grid.innerHTML = ext.innerHTML = '';
+    return;
+  }
+
+  el.classList.add(data.is_valid ? 'ok' : 'warn');
+  badge.className = 'badge ' + (data.is_valid ? 'badge-ok' : 'badge-warn');
+  badge.textContent = data.is_valid ? 'Uspješno' : 'Upozorenja';
+  msg.textContent = data.message || 'Konverzija završena';
+
+  const conf = data.confidence_score != null
+    ? (parseFloat(data.confidence_score) > 1
+        ? parseFloat(data.confidence_score).toFixed(0)
+        : (parseFloat(data.confidence_score) * 100).toFixed(0))
+    : 0;
+
+  grid.innerHTML = `
+    <div class="result-stat"><span class="lbl">Pouzdanost</span><span class="val">${conf}%</span></div>
+    <div class="result-stat"><span class="lbl">Ušteda</span><span class="val">${data.savings||'-'}</span></div>
+    <div class="result-stat"><span class="lbl">Polja</span><span class="val">${data.fields_extracted||0}</span></div>
+    <div class="result-stat"><span class="lbl">Stavke</span><span class="val">${data.items_extracted||0}</span></div>
+    <div class="result-stat"><span class="lbl">Smanjenje</span><span class="val">${data.size_reduction_pct||0}%</span></div>
+    <div class="result-stat"><span class="lbl">Status</span><span class="val" style="font-size:.85rem">${data.status||'-'}</span></div>
+  `;
+
+  let html = '';
+  if (data.validation_errors && data.validation_errors.length) {
+    html += `<details><summary>⚠️ Upozorenja validacije (${data.validation_errors.length})</summary>
+      <pre>${data.validation_errors.join('\n')}</pre></details>`;
+  }
+  if (data.extracted_data) {
+    html += `<details><summary>📋 Ekstrahirani podaci (JSON)</summary>
+      <pre>${JSON.stringify(data.extracted_data, null, 2)}</pre></details>`;
+  }
+  ext.innerHTML = html;
+
+  // Akcijski gumbi
+  let actHtml = `
+    <button onclick="resetForm()" class="btn-gold">
+      <i class="fas fa-redo"></i> Nova konverzija
+    </button>
+    <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost">
+      <i class="fas fa-list"></i> Na arhivu
+    </a>`;
+  if (data.record_id) {
+    actHtml += `
+    <button onclick="createPrimka('${data.record_id}')" class="btn-ghost">
+      <i class="fas fa-boxes"></i> Napravi primku
+    </button>`;
+  }
+  acts.innerHTML = actHtml;
+}
+
+// ── Detalj konverzije iz tablice ─────────────────────────────────────────────
+function showDetail(id) {
+  fetch(CONVERSION_BASE + id + '/', {
+    credentials: 'same-origin',
+    headers: {'X-Requested-With': 'XMLHttpRequest'}
+  })
+  .then(r => r.json())
+  .then(data => {
+    const el    = document.getElementById('cvResult');
+    const conf  = data.ai_confidence_score != null
+      ? (parseFloat(data.ai_confidence_score) > 1
+          ? parseFloat(data.ai_confidence_score).toFixed(0)
+          : (parseFloat(data.ai_confidence_score)*100).toFixed(0)) : 0;
+
+    el.style.display = 'block';
+    el.className = 'cv-result ' + (data.is_valid ? 'ok' : 'warn');
+    document.getElementById('resultBadge').className = 'badge ' + (data.is_valid ? 'badge-ok' : 'badge-warn');
+    document.getElementById('resultBadge').textContent = data.status_display || data.status;
+    document.getElementById('resultMsg').textContent = data.original_filename;
+    document.getElementById('resultGrid').innerHTML = `
+      <div class="result-stat"><span class="lbl">Pouzdanost</span><span class="val">${conf}%</span></div>
+      <div class="result-stat"><span class="lbl">Ušteda</span><span class="val">${data.savings||'-'}</span></div>
+      <div class="result-stat"><span class="lbl">Polja</span><span class="val">${data.fields_extracted||0}</span></div>
+      <div class="result-stat"><span class="lbl">Stavke</span><span class="val">${data.items_extracted||0}</span></div>
+      <div class="result-stat"><span class="lbl">AI Model</span><span class="val" style="font-size:.78rem">${(data.ai_model||'-').replace('models/','')}</span></div>
+      <div class="result-stat"><span class="lbl">Trošak</span><span class="val">€${data.ai_cost_eur||'0'}</span></div>
+    `;
+    let html = '';
+    if (data.created_at) html += `<p style="color:var(--text-muted);font-size:.78rem;margin-bottom:.4rem">📅 ${data.created_at}${data.completed_at?' → '+data.completed_at:''}</p>`;
+    if (data.validation_errors && data.validation_errors.length)
+      html += `<details><summary>⚠️ Upozorenja (${data.validation_errors.length})</summary><pre>${data.validation_errors.join('\n')}</pre></details>`;
+    if (data.extracted_data)
+      html += `<details><summary>📋 Podaci</summary><pre>${JSON.stringify(data.extracted_data, null, 2)}</pre></details>`;
+    document.getElementById('resultExtras').innerHTML = html;
+
+    let actHtml = `
+      <button onclick="resetForm()" class="btn-gold"><i class="fas fa-redo"></i> Nova konverzija</button>
+      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost"><i class="fas fa-list"></i> Na arhivu</a>`;
+    if (data.id)
+      actHtml += `<button onclick="createPrimka('${data.id}')" class="btn-ghost"><i class="fas fa-boxes"></i> Napravi primku</button>`;
+    document.getElementById('resultActions').innerHTML = actHtml;
+
+    el.scrollIntoView({behavior: 'smooth', block: 'start'});
+  })
+  .catch(err => alert('Greška: ' + err.message));
+}
+
+// ── Primka ───────────────────────────────────────────────────────────────────
+async function createPrimka(recordId) {
+  const btn = event.target.closest('button');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite"></span> Kreiram...'; }
+  try {
+    const res = await fetch(CONVERSION_BASE + recordId + '/create-primka/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'},
+    });
+    const data = await res.json();
+    if (data.ok) {
+      if (confirm('✅ ' + data.message + '\n\nOtvori primku?'))
+        window.location.href = data.primka_url;
+    } else {
+      alert('Greška: ' + (data.error || 'nepoznato'));
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-boxes"></i> Napravi primku'; }
+    }
+  } catch(e) {
+    alert('Greška veze: ' + e.message);
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-boxes"></i> Napravi primku'; }
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function setStage(active, allDone) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('st' + i);
+    el.className = 'stage';
+    if (allDone) el.classList.add('done');
+    else if (i < active) el.classList.add('done');
+    else if (i === active) el.classList.add('active');
+  }
+}
+
+function resetForm() {
+  _file = null;
+  fin.value = '';
+  zone.style.display = '';
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('cvProgress').style.display = 'none';
+  document.getElementById('cvResult').style.display = 'none';
+  setStage(1);
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+{% endblock %}

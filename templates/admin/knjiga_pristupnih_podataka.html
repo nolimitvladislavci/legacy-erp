@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knjiga pristupnih podataka - LIMIT CONNECT</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; text-align: center; margin-bottom: 5px; color: #0a0a0a; border-bottom: 3px solid #c9a84c; padding-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 12px; }
+        h2 { font-size: 17px; color: #0a0a0a; margin: 30px 0 12px 0; padding: 8px 12px; background: #f8f5ec; border-left: 4px solid #c9a84c; }
+        h3 { font-size: 14px; color: #333; margin: 15px 0 8px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+        th { background: #f0ead6; font-weight: 600; color: #333; white-space: nowrap; }
+        tr:nth-child(even) { background: #fafafa; }
+        tr:hover { background: #fffde7; }
+        .info-grid { display: grid; grid-template-columns: 180px 1fr; gap: 4px 15px; margin-bottom: 12px; }
+        .info-grid dt { font-weight: 600; color: #555; }
+        .info-grid dd { color: #1a1a1a; word-break: break-all; }
+        .badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+        .badge-green { background: #d4edda; color: #155724; }
+        .badge-red { background: #f8d7da; color: #721c24; }
+        .badge-blue { background: #cce5ff; color: #004085; }
+        .badge-yellow { background: #fff3cd; color: #856404; }
+        .badge-gray { background: #e2e3e5; color: #383d41; }
+        .mono { font-family: Consolas, "Courier New", monospace; font-size: 12px; background: #f4f4f4; padding: 1px 4px; border-radius: 2px; }
+        .warn { color: #856404; background: #fff3cd; padding: 8px 12px; border-radius: 4px; margin-bottom: 15px; }
+        .section-note { color: #666; font-size: 11px; font-style: italic; margin-bottom: 10px; }
+        .toc { background: #fafafa; border: 1px solid #eee; padding: 15px 20px; margin-bottom: 25px; border-radius: 4px; }
+        .toc a { color: #004085; text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        .toc ol { padding-left: 20px; }
+        .toc li { margin: 3px 0; }
+        .generated { text-align: center; color: #999; font-size: 11px; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px; }
+        @media print {
+            body { background: #fff; padding: 0; font-size: 11px; }
+            .container { box-shadow: none; padding: 15px; }
+            h2 { break-after: avoid; }
+            table { font-size: 10px; page-break-inside: auto; }
+            tr { page-break-inside: avoid; }
+            .no-print { display: none; }
+            .warn { border: 1px solid #856404; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Knjiga pristupnih podataka</h1>
+    <p class="subtitle">LIMIT CONNECT ERP &mdash; INTERNO &mdash; Generirano: {{ generated_at|date:"d.m.Y. H:i" }}</p>
+
+    <div class="warn">POVJERLJIVO &mdash; Ovaj dokument sadrzi sve pristupne podatke sustava. Cuvati na sigurnom!</div>
+
+    <div class="toc">
+        <strong>Sadrzaj:</strong>
+        <ol>
+            <li><a href="#server">Server i infrastruktura</a></li>
+            <li><a href="#domene">Domene i SSL</a></li>
+            <li><a href="#firme">Firme ({{ companies|length }})</a></li>
+            <li><a href="#korisnici">Korisnici ({{ users|length }})</a></li>
+            <li><a href="#synesis">Synesis tokeni ({{ synesis_configs|length }})</a></li>
+            <li><a href="#pos">POS terminali i blagajnici</a></li>
+            <li><a href="#fiskalizacija">Fiskalizacija</a></li>
+            <li><a href="#email">Email konfiguracija</a></li>
+            <li><a href="#backup">Backup i DR</a></li>
+            <li><a href="#api">API kljucevi</a></li>
+            <li><a href="#urls">Vazni URL-ovi</a></li>
+        </ol>
+    </div>
+
+    <!-- 1. SERVER -->
+    <h2 id="server">1. Server i infrastruktura</h2>
+    <dl class="info-grid">
+        <dt>IP adresa</dt>          <dd class="mono">85.9.201.204</dd>
+        <dt>SSH pristup</dt>        <dd class="mono">ssh root@85.9.201.204</dd>
+        <dt>OS</dt>                 <dd>Debian/Ubuntu Linux</dd>
+        <dt>App root</dt>           <dd class="mono">/var/www/fina-connect</dd>
+        <dt>Virtualenv</dt>         <dd class="mono">/var/www/fina-connect/venv</dd>
+        <dt>Python</dt>             <dd class="mono">python3.12</dd>
+        <dt>Framework</dt>          <dd>Django + Celery</dd>
+        <dt>Gunicorn</dt>           <dd class="mono">127.0.0.1:8000 (systemd: gunicorn-fina)</dd>
+        <dt>Celery Worker</dt>      <dd class="mono">systemctl restart celery-worker</dd>
+        <dt>Celery Beat</dt>        <dd class="mono">systemctl restart celery-beat</dd>
+        <dt>Nginx config</dt>       <dd class="mono">/etc/nginx/sites-enabled/limit-connect</dd>
+        <dt>Restart sve</dt>        <dd class="mono">systemctl restart gunicorn-fina celery-worker celery-beat</dd>
+    </dl>
+
+    <h3>Baza podataka</h3>
+    <dl class="info-grid">
+        <dt>Engine</dt>             <dd>PostgreSQL</dd>
+        <dt>Host</dt>               <dd class="mono">localhost:5432</dd>
+        <dt>Database</dt>           <dd class="mono">postgres</dd>
+        <dt>User</dt>               <dd class="mono">viskovic_user</dd>
+        <dt>Password</dt>           <dd class="mono">Viskovic123!</dd>
+    </dl>
+
+    <h3>Django Secret Key</h3>
+    <p class="mono" style="word-break:break-all;">{{ secret_key }}</p>
+
+    <!-- 2. DOMENE -->
+    <h2 id="domene">2. Domene i SSL</h2>
+    <table>
+        <tr><th>Domena</th><th>Tip</th><th>SSL</th><th>Napomena</th></tr>
+        <tr><td class="mono">limit-connect.com</td><td><span class="badge badge-green">PRIMARY</span></td><td>Let's Encrypt</td><td>Glavna domena</td></tr>
+        <tr><td class="mono">fina-connect.online</td><td><span class="badge badge-yellow">301</span></td><td>Let's Encrypt</td><td>Redirect na limit-connect.com</td></tr>
+        <tr><td class="mono">viskovic-group.de</td><td><span class="badge badge-yellow">301</span></td><td>Let's Encrypt</td><td>Redirect na limit-connect.com</td></tr>
+        <tr><td class="mono">grosmarkt-online.eu</td><td><span class="badge badge-blue">STATIC</span></td><td>Let's Encrypt</td><td>Staticni site</td></tr>
+        <tr><td class="mono">sati.grosmarkt-online.eu</td><td><span class="badge badge-blue">STATIC</span></td><td>Let's Encrypt (do 2026-06-06)</td><td>App platforma placeholder</td></tr>
+        <tr><td class="mono">sati.ink</td><td><span class="badge badge-blue">LARAVEL</span></td><td>Let's Encrypt (do 2026-06-09)</td><td>Dating portal, PHP 8.3 FPM</td></tr>
+    </table>
+
+    <!-- 3. FIRME -->
+    <h2 id="firme">3. Firme ({{ companies|length }})</h2>
+    <p class="section-note">Aktivne firme s korisnicima i pretplatama. SYN- prefix na OIB-u = uvezeno iz Synesis (nije pravi OIB).</p>
+
+    <h3>Glavne firme (s korisnicima)</h3>
+    <table>
+        <tr><th>#</th><th>Firma</th><th>OIB</th><th>Slug</th><th>Email</th><th>Grad</th></tr>
+        {% for c in main_companies %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><strong>{{ c.name }}</strong></td>
+            <td class="mono">{{ c.oib|default:"-" }}</td>
+            <td class="mono">{{ c.booking_slug }}</td>
+            <td>{{ c.email|default:"-" }}</td>
+            <td>{{ c.city|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Synesis firme (uvezene iz KS LIMIT &mdash; {{ syn_companies|length }})</h3>
+    <details>
+        <summary class="no-print" style="cursor:pointer;color:#004085;font-size:12px;">Prikazi/sakrij {{ syn_companies|length }} SYN firmi</summary>
+        <table>
+            <tr><th>#</th><th>Firma</th><th>OIB (Synesis)</th><th>Slug</th></tr>
+            {% for c in syn_companies %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ c.name }}</td>
+                <td class="mono">{{ c.oib }}</td>
+                <td class="mono">{{ c.booking_slug }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </details>
+
+    <!-- 4. KORISNICI -->
+    <h2 id="korisnici">4. Korisnici ({{ users|length }})</h2>
+
+    <h3>Aktivni korisnici s firmom</h3>
+    <table>
+        <tr><th>#</th><th>Username</th><th>Ime i prezime</th><th>Email</th><th>Firma</th><th>Rola</th><th>Staff</th><th>Super</th></tr>
+        {% for u in active_users %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td class="mono"><strong>{{ u.username }}</strong></td>
+            <td>{{ u.full_name }}</td>
+            <td>{{ u.email|default:"-" }}</td>
+            <td>{{ u.company }}</td>
+            <td><span class="badge {% if u.role == 'superadmin' %}badge-red{% elif u.role == 'tenant_admin' %}badge-blue{% elif u.role == 'company_admin' %}badge-green{% else %}badge-gray{% endif %}">{{ u.role }}</span></td>
+            <td>{% if u.is_staff %}<span class="badge badge-green">Da</span>{% else %}-{% endif %}</td>
+            <td>{% if u.is_superuser %}<span class="badge badge-red">Da</span>{% else %}-{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Poznate lozinke</h3>
+    <div class="warn">Ove lozinke su postavljene prilikom kreiranja korisnika. Korisnici ih mogu promijeniti.</div>
+    <table>
+        <tr><th>Username</th><th>Lozinka</th><th>Firma</th><th>Napomena</th></tr>
+        <tr><td class="mono">superadmin</td><td class="mono">*** (poznata adminu)</td><td>Viskovic Bau</td><td>Glavni superadmin</td></tr>
+        <tr><td class="mono">shevqet</td><td class="mono">UvijekFrisko2026!</td><td>UVIJEK FRISKO</td><td>Vlasnik</td></tr>
+        <tr><td class="mono">rizo</td><td class="mono">Frisko2026!</td><td>FRISKO</td><td>Tenant admin</td></tr>
+        <tr><td class="mono">fidan</td><td class="mono">Frisko2026!</td><td>FRISKO</td><td>Tenant admin</td></tr>
+        <tr><td class="mono">marija.brtan</td><td class="mono">*** (poznata adminu)</td><td>Konjik d.o.o.</td><td>Vlasnica/direktorica</td></tr>
+        <tr><td class="mono">antonio.brtan</td><td class="mono">*** (poznata adminu)</td><td>Viskovic Bau</td><td>Superadmin</td></tr>
+    </table>
+
+    <h3>Synesis korisnici (automatski uvezeni &mdash; {{ syn_users|length }})</h3>
+    <details>
+        <summary class="no-print" style="cursor:pointer;color:#004085;font-size:12px;">Prikazi/sakrij {{ syn_users|length }} SYN korisnika</summary>
+        <table>
+            <tr><th>#</th><th>Username</th><th>Ime</th><th>Email</th></tr>
+            {% for u in syn_users %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="mono">{{ u.username }}</td>
+                <td>{{ u.full_name }}</td>
+                <td>{{ u.email|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </details>
+
+    <!-- 5. SYNESIS -->
+    <h2 id="synesis">5. Synesis tokeni ({{ synesis_configs|length }})</h2>
+    <table>
+        <tr><th>#</th><th>Firma</th><th>API Token</th><th>Status</th></tr>
+        {% for sc in synesis_configs %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><strong>{{ sc.company }}</strong></td>
+            <td class="mono" style="word-break:break-all;">{{ sc.token }}</td>
+            <td>{% if sc.is_active %}<span class="badge badge-green">Aktivan</span>{% else %}<span class="badge badge-red">Neaktivan</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- 6. POS -->
+    <h2 id="pos">6. POS terminali i blagajnici</h2>
+
+    <h3>Terminali</h3>
+    <table>
+        <tr><th>#</th><th>Firma</th><th>Terminal</th><th>ID</th><th>Tip</th><th>Status</th></tr>
+        {% for t in terminals %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ t.company }}</td>
+            <td><strong>{{ t.name }}</strong></td>
+            <td class="mono">{{ t.id }}</td>
+            <td><span class="badge badge-blue">{{ t.pos_type }}</span></td>
+            <td>{% if t.is_active %}<span class="badge badge-green">Aktivan</span>{% else %}<span class="badge badge-red">Neaktivan</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Blagajnici</h3>
+    <table>
+        <tr><th>#</th><th>Firma</th><th>Ime</th><th>Status</th></tr>
+        {% for c in cashiers %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ c.company }}</td>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>{% if c.is_active %}<span class="badge badge-green">Aktivan</span>{% else %}<span class="badge badge-red">Neaktivan</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- 7. FISKALIZACIJA -->
+    <h2 id="fiskalizacija">7. Fiskalizacija</h2>
+    <table>
+        <tr><th>Firma</th><th>Certifikat</th><th>Lokacija</th><th>Mod</th><th>Status</th></tr>
+        {% for fc in fiscal_configs %}
+        <tr>
+            <td><strong>{{ fc.company }}</strong></td>
+            <td class="mono">{{ fc.cert_filename }}</td>
+            <td class="mono">/var/www/fina-connect/certs/{{ fc.cert_filename }}</td>
+            <td>{% if fc.is_demo %}<span class="badge badge-yellow">DEMO</span>{% else %}<span class="badge badge-green">PRODUKCIJA</span>{% endif %}</td>
+            <td>{% if fc.is_active %}<span class="badge badge-green">Aktivan</span>{% else %}<span class="badge badge-red">Neaktivan</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% if not fiscal_configs %}
+    <p class="section-note">Trenutno konfiguriran: Konjik d.o.o. (FINA Demo cert, fina_cert.p12)</p>
+    {% endif %}
+
+    <!-- 8. EMAIL -->
+    <h2 id="email">8. Email konfiguracija</h2>
+
+    <h3>SMTP (slanje)</h3>
+    <dl class="info-grid">
+        <dt>Backend</dt>            <dd>django.core.mail.backends.smtp.EmailBackend</dd>
+        <dt>Host</dt>               <dd class="mono">smtp.gmail.com:587 (TLS)</dd>
+        <dt>User</dt>               <dd class="mono">fina.connect.online@gmail.com</dd>
+        <dt>Password</dt>           <dd class="mono">wztokpojabifijmv</dd>
+        <dt>From</dt>               <dd class="mono">fina.connect.online@gmail.com</dd>
+        <dt>Admin email</dt>        <dd class="mono">admin@limit-connect.com</dd>
+    </dl>
+
+    <h3>IMAP Mailboxovi (primanje)</h3>
+    <table>
+        <tr><th>#</th><th>Firma</th><th>Email adresa</th><th>IMAP server</th><th>Status</th></tr>
+        {% for m in mailboxes %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ m.company }}</td>
+            <td class="mono">{{ m.email }}</td>
+            <td class="mono">{{ m.server }}</td>
+            <td>{% if m.is_active %}<span class="badge badge-green">Aktivan</span>{% else %}<span class="badge badge-red">Neaktivan</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p class="section-note">Superadmin osobni: grosmarkt.online@gmail.com (NIJE u CompanyMailbox)</p>
+
+    <!-- 9. BACKUP -->
+    <h2 id="backup">9. Backup i DR</h2>
+    <dl class="info-grid">
+        <dt>Provider</dt>           <dd>Backblaze B2</dd>
+        <dt>Bucket</dt>             <dd class="mono">limit-connect-arhiva</dd>
+        <dt>Raspored</dt>           <dd>Svaku noc u 04:00 (cron)</dd>
+        <dt>DR skripta</dt>         <dd class="mono">Spremna</dd>
+        <dt>Health check</dt>       <dd class="mono">/usr/local/bin/health_check.sh (cron */5min)</dd>
+    </dl>
+
+    <!-- 10. API -->
+    <h2 id="api">10. API kljucevi</h2>
+    <table>
+        <tr><th>Servis</th><th>Kljuc / Token</th><th>Napomena</th></tr>
+        <tr>
+            <td>Dev API (remote exec)</td>
+            <td class="mono" style="word-break:break-all;">{{ dev_api_token }}</td>
+            <td>POST /_dev/exec/, /_dev/read/, /_dev/write/ - Bearer header</td>
+        </tr>
+        <tr>
+            <td>Anthropic (Claude AI)</td>
+            <td class="mono" style="word-break:break-all;">{{ anthropic_key }}</td>
+            <td>AI asistent, Smart Import (Haiku)</td>
+        </tr>
+        <tr>
+            <td>Django SECRET_KEY</td>
+            <td class="mono" style="word-break:break-all;">{{ secret_key }}</td>
+            <td>NE MIJENJATI bez migracije sesija!</td>
+        </tr>
+    </table>
+
+    <!-- 11. URL-ovi -->
+    <h2 id="urls">11. Vazni URL-ovi</h2>
+
+    <h3>Admin i sustav</h3>
+    <table>
+        <tr><th>URL</th><th>Opis</th></tr>
+        <tr><td class="mono">https://limit-connect.com/admin/</td><td>Django Admin</td></tr>
+        <tr><td class="mono">https://limit-connect.com/superadmin/</td><td>Superadmin dashboard</td></tr>
+        <tr><td class="mono">https://limit-connect.com/_dev/exec/</td><td>Dev remote API (Bearer token)</td></tr>
+        <tr><td class="mono">https://limit-connect.com/hr/konto/ai-review/</td><td>AI Konto pregled</td></tr>
+        <tr><td class="mono">https://limit-connect.com/hr/admin/knjiga/</td><td>Ova stranica</td></tr>
+    </table>
+
+    <h3>UVIJEK FRISKO</h3>
+    <table>
+        <tr><th>URL</th><th>Opis</th></tr>
+        <tr><td class="mono">/hr/pos/quick/</td><td>Quick POS</td></tr>
+        <tr><td class="mono">/hr/webshop/</td><td>Webshop admin</td></tr>
+        <tr><td class="mono">/appointments/booking/c/pekara-uvijek-frisko/</td><td>Booking (usluzno pecenje)</td></tr>
+        <tr><td class="mono">/pos/pickup/pekara-uvijek-frisko/</td><td>Pickup QR</td></tr>
+        <tr><td class="mono">/site/pekara-uvijek-frisko/</td><td>Landing page</td></tr>
+    </table>
+
+    <h3>FRISKO</h3>
+    <table>
+        <tr><th>URL</th><th>Opis</th></tr>
+        <tr><td class="mono">/appointments/booking/c/pekara-frisko/</td><td>Booking</td></tr>
+        <tr><td class="mono">/site/pekara-frisko/</td><td>Landing page</td></tr>
+    </table>
+
+    <h3>Konjik d.o.o.</h3>
+    <table>
+        <tr><th>URL</th><th>Opis</th></tr>
+        <tr><td class="mono">/appointments/booking/c/konjik-doo/</td><td>Booking</td></tr>
+        <tr><td class="mono">/site/konjik-doo/</td><td>Landing page</td></tr>
+        <tr><td class="mono">/hr/synesis/</td><td>Synesis settings</td></tr>
+        <tr><td class="mono">/hr/eracun/</td><td>e-Racun modul</td></tr>
+    </table>
+
+    <h3>Ostale firme</h3>
+    <table>
+        <tr><th>URL</th><th>Opis</th></tr>
+        <tr><td class="mono">/site/korpas-doo/</td><td>Korpas d.o.o. landing</td></tr>
+        <tr><td class="mono">/site/viskovic-niksa/</td><td>Viskovic Bau landing</td></tr>
+        <tr><td class="mono">/site/vodocomp-doo/</td><td>VODOCOMP landing</td></tr>
+    </table>
+
+    <h3>Vanjski servisi</h3>
+    <table>
+        <tr><th>URL</th><th>Opis</th></tr>
+        <tr><td class="mono">https://grosmarkt-online.eu</td><td>Grosmarkt staticni site</td></tr>
+        <tr><td class="mono">https://sati.ink</td><td>Dating portal (Laravel)</td></tr>
+        <tr><td class="mono">https://sati.grosmarkt-online.eu</td><td>App platforma</td></tr>
+    </table>
+
+    <h3>Kontakti</h3>
+    <table>
+        <tr><th>Osoba</th><th>Uloga</th><th>Telefon</th><th>Email</th></tr>
+        <tr><td>Marija Brtan</td><td>Vlasnica, ovl. racunovodja</td><td class="mono">097-609-1655</td><td class="mono">marija.limit@gmail.com</td></tr>
+        <tr><td>Ljilja</td><td>Sefica KS LIMIT</td><td class="mono">092-1104-615</td><td class="mono">-</td></tr>
+        <tr><td>Shevqet Temaj</td><td>Vlasnik UVIJEK FRISKO</td><td class="mono">+38598383192</td><td class="mono">pekara.uvijekfrisko@gmail.com</td></tr>
+    </table>
+
+    <div class="generated">
+        Generirano: {{ generated_at|date:"d.m.Y. H:i:s" }} &mdash; LIMIT CONNECT ERP &mdash; Samo za internu upotrebu
+        <br>
+        <button class="no-print" onclick="window.print()" style="margin-top:10px;padding:8px 20px;cursor:pointer;border:1px solid #c9a84c;background:#f8f5ec;border-radius:4px;">Ispisi (Print)</button>
+    </div>
+</div>
+</body>
+</html>

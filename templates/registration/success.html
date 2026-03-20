@@ -1,0 +1,64 @@
+{% extends "registration/base_reg.html" %}
+{% load i18n %}
+{% block title %}Registracija uspjesna – LIMIT Connect{% endblock %}
+{% block extra_css %}
+<style>
+.success-icon { font-size: 4rem; text-align: center; margin-bottom: 1.5rem; }
+.success-steps { display: flex; flex-direction: column; gap: 0.75rem; margin: 1.5rem 0; }
+.success-step { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--dark); border-radius: 8px; border: 1px solid var(--border); }
+.success-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--gold); color: var(--black); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+.success-step-text strong { display: block; margin-bottom: 0.25rem; }
+.success-step-text { font-size: 0.875rem; color: var(--muted); }
+.access-card { background: #1a1a1a; border: 1px solid rgba(201,168,76,0.2); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: left; }
+.access-card h3 { color: #c9a84c; margin: 0 0 16px 0; font-size: 1.1rem; }
+.access-card p { margin: 8px 0; color: #ccc; font-size: 0.9rem; }
+.access-card a { color: #c9a84c; text-decoration: underline; }
+.access-card code { background: #0a0a0a; padding: 4px 10px; border-radius: 4px; color: #c9a84c; font-size: 0.85rem; word-break: break-all; }
+.access-card .hint { color: #888; font-size: 0.8rem; margin-top: 12px; }
+.plan-badge { display: inline-block; background: rgba(201,168,76,0.15); color: #c9a84c; padding: 2px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="reg-card" style="text-align: center;">
+  <div class="success-icon">&#127881;</div>
+  <h1 class="reg-card-title" style="text-align:center">{% trans "Registracija uspjesna!" %}</h1>
+  {% if company_name %}
+  <p class="reg-card-subtitle" style="text-align:center">
+    <strong>{{ company_name }}</strong>
+    {% if plan_name %}<span class="plan-badge">{{ plan_name }}</span>{% endif %}
+    {% if trial_end %}<br><small style="color:#888">Trial do: {{ trial_end }}</small>{% endif %}
+  </p>
+  {% else %}
+  <p class="reg-card-subtitle" style="text-align:center">{% trans "Vasa registracija tvrtke je zaprimljena." %}</p>
+  {% endif %}
+
+  {% if website_url or company_email %}
+  <div class="access-card">
+    <h3>Vasi pristupni podaci</h3>
+    {% if website_url %}
+    <p><strong>Web stranica:</strong> <a href="{{ website_url }}" target="_blank">{{ website_url }}</a></p>
+    {% endif %}
+    {% if company_email %}
+    <p><strong>Email za racune:</strong> <code>{{ company_email }}</code></p>
+    <p class="hint">Preusmjerite email racune na gornju adresu — sustav ce ih automatski obraditi.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="success-steps" style="text-align:left">
+    <div class="success-step">
+      <div class="success-step-num">1</div>
+      <div class="success-step-text"><strong>{% trans "Prilagodite profil" %}</strong>{% trans "Otvorite postavke tvrtke i dopunite podatke." %}</div>
+    </div>
+    <div class="success-step">
+      <div class="success-step-num">2</div>
+      <div class="success-step-text"><strong>{% trans "Uredite web stranicu" %}</strong>{% trans "Posjetite CMS editor i prilagodite izgled vase stranice." %}</div>
+    </div>
+    <div class="success-step">
+      <div class="success-step-num">3</div>
+      <div class="success-step-text"><strong>{% trans "Pocnite koristiti LIMIT Connect" %}</strong>{% trans "Istrazite module — fakturiranje, POS, inventuru i ostalo." %}</div>
+    </div>
+  </div>
+  <a href="/dashboard/" class="reg-btn" style="margin-top: 1rem; display: inline-flex;">{% trans "Otvori nadzornu plocu" %} &#8594;</a>
+</div>
+{% endblock %}

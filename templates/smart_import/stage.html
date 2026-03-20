@@ -1,0 +1,625 @@
+{% extends 'base.html' %}
+{% load i18n %}{% load static %}
+
+{% block page_title %}Smart Import – Pregled{% endblock %}
+
+{% block content %}
+<style>
+  @media (max-width: 767px) {
+    .desktop-table { display: none !important; }
+    .mobile-cards { display: block !important; }
+  }
+  @media (min-width: 768px) {
+    .mobile-cards { display: none !important; }
+  }
+  .mobile-card { border-left: 4px solid #198754; margin-bottom: 0.5rem; }
+  .mobile-card.score-low { border-left-color: #dc3545; }
+  .mobile-card.score-med { border-left-color: #ffc107; }
+  .mobile-card .form-control-sm { font-size: 0.85rem; }
+  .progress-step { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; }
+  .progress-step.active { background: #fff3cd; color: #856404; font-weight: 600; }
+  .progress-step.done { background: #d1e7dd; color: #0f5132; }
+  .progress-step.error { background: #f8d7da; color: #842029; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .pulse { animation: pulse 1.5s ease-in-out infinite; }
+</style>
+
+<div class="container-fluid px-2 py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Smart Import</h5>
+    <div class="d-flex gap-2">
+      {% if batch.file %}
+      <a href="{{ batch.file.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+        <i class="fas fa-eye me-1"></i>Pogledaj dokument
+      </a>
+      {% endif %}
+      <a href="{% url 'smart_import:upload' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-camera me-1"></i>Novi sken
+      </a>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <!-- Document Preview -->
+  {% if batch.file and batch.file_type == "image" %}
+  <div class="mb-3 text-center">
+    <img src="{{ batch.file.url }}" alt="Skenirana slika" class="img-fluid rounded shadow-sm" style="max-height: 400px; cursor: pointer;" onclick="window.open(this.src, '_blank')">
+  </div>
+  {% elif batch.file and batch.file_type == "pdf" %}
+  <div class="mb-3">
+    <iframe src="{{ batch.file.url }}" style="width: 100%; height: 400px; border: 1px solid #dee2e6; border-radius: 8px;"></iframe>
+  </div>
+  {% endif %}
+
+  <!-- Status Banner -->
+  <div id="statusBanner" class="alert
+    {% if batch.status == 'pending' or batch.status == 'processing' %}alert-warning
+    {% elif batch.status == 'ready' %}alert-success
+    {% elif batch.status == 'error' %}alert-danger
+    {% elif batch.status == 'confirmed' %}alert-info
+    {% else %}alert-secondary{% endif %} mb-3 py-2">
+
+    {% if batch.status == 'pending' or batch.status == 'processing' %}
+      <div class="d-flex align-items-center gap-2">
+        <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+        <span id="statusText" class="fw-semibold">{{ batch.status_message|default:"Obrada u tijeku..." }}</span>
+      </div>
+      <!-- Progress steps -->
+      <div class="mt-2 d-flex flex-wrap gap-2" id="progressSteps">
+        <span class="progress-step active" id="step1">
+          <i class="fas fa-upload"></i> Ucitano
+        </span>
+        <span class="progress-step" id="step2">
+          <i class="fas fa-brain"></i> AI obrada
+        </span>
+        <span class="progress-step" id="step3">
+          <i class="fas fa-database"></i> Spremanje
+        </span>
+        <span class="progress-step" id="step4">
+          <i class="fas fa-check"></i> Gotovo
+        </span>
+      </div>
+    {% elif batch.status == 'ready' %}
+      <div class="d-flex align-items-center gap-2">
+        <i class="fas fa-check-circle text-success"></i>
+        <span class="fw-semibold">{{ batch.status_message|default:"Spremno za pregled" }} - <strong>{{ batch.items.count }}</strong> stavki</span>
+      </div>
+    {% elif batch.status == 'error' %}
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span class="fw-semibold">{{ batch.status_message|default:"Greska pri obradi" }}</span>
+        </div>
+        {% if batch.error_msg %}
+        <div class="small text-muted mb-2">{{ batch.error_msg }}</div>
+        {% endif %}
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" class="btn btn-warning btn-sm" onclick="retryBatch()">
+            <i class="fas fa-redo me-1"></i>Pokusaj ponovo
+          </button>
+          <a href="{% url 'smart_import:manual_entry' batch.pk %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-keyboard me-1"></i>Rucni unos
+          </a>
+          {% if batch.file %}
+          <a href="{{ batch.file.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+            <i class="fas fa-eye me-1"></i>Pogledaj dokument
+          </a>
+          {% endif %}
+          <a href="{% url 'smart_import:upload' %}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-camera me-1"></i>Novi sken
+          </a>
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="showReportModal()">
+            <i class="fas fa-flag me-1"></i>Prijavi problem
+          </button>
+        </div>
+      </div>
+    {% elif batch.status == 'confirmed' %}
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="fas fa-check-double text-info"></i>
+        <span class="fw-semibold">Primka kreirana!</span>
+        {% if batch.goods_receipt %}
+          <a href="{% url 'inventory:receipt_detail' batch.goods_receipt.pk %}" class="btn btn-outline-info btn-sm ms-2">
+            Otvori primku <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        {% endif %}
+      </div>
+      <a href="{% url 'smart_import:upload' %}" class="btn btn-success btn-sm">
+        <i class="fas fa-camera me-1"></i>Skeniraj sljedeci
+      </a>
+    {% endif %}
+  </div>
+
+  {% if control_amount %}
+  <div class="alert alert-warning mb-3 py-2" id="controlBar">
+    <i class="fas fa-balance-scale me-1"></i>
+    Faktura: <strong>{{ control_amount }}</strong> | Stavke: <strong><span id="itemsTotal">—</span></strong> EUR
+    <span class="badge bg-warning text-dark ms-2" id="diffBadge">
+      <span id="diffAmount">—</span> EUR
+    </span>
+  </div>
+  {% endif %}
+
+  {% if batch.status == 'ready' %}
+  <form method="post" action="{% url 'smart_import:confirm' batch.pk %}" id="confirmForm">
+    {% csrf_token %}
+
+    <!-- Toolbar -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-body py-2">
+        <div class="row g-2 align-items-end">
+          <div class="col-6 col-md-3">
+            <label class="form-label mb-0 small fw-semibold">Dobavljac</label>
+            <select id="supplierSelect" class="form-select form-select-sm" onchange="updateSupplier()">
+              <option value="">— Nepoznat —</option>
+              {% for s in suppliers %}
+              <option value="{{ s.pk }}" {% if batch.supplier_id == s.pk %}selected{% endif %}>{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label mb-0 small fw-semibold">Br. dok.</label>
+            <input type="text" name="document_number" class="form-control form-control-sm" placeholder="2025-001234">
+          </div>
+          <div class="col-4 col-md-2">
+            <label class="form-label mb-0 small fw-semibold">Marza %</label>
+            <div class="input-group input-group-sm">
+              <input type="number" name="global_margin" id="globalMargin" class="form-control" value="30" min="0" max="500" step="0.1">
+              <button type="button" class="btn btn-outline-primary" onclick="recalcAll()" title="Primijeni">
+                <i class="fas fa-calculator"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-8 col-md-5 d-flex gap-2 justify-content-end flex-wrap">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="showReportModal()">
+              <i class="fas fa-flag"></i><span class="d-none d-md-inline ms-1">Problem</span>
+            </button>
+            <a href="{% url 'smart_import:upload' %}" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-times"></i><span class="d-none d-md-inline ms-1">Odustani</span>
+            </a>
+            <button type="submit" class="btn btn-success btn-sm fw-bold" id="confirmBtn">
+              <i class="fas fa-check-circle me-1"></i>Spremi Primku
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESKTOP TABLE -->
+    <div class="card shadow-sm desktop-table">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0" id="itemsTable">
+            <thead class="table-dark">
+              <tr>
+                <th style="width:30px">#</th>
+                <th>Naziv</th>
+                <th>Nas artikl</th>
+                <th style="width:85px">Kol.</th>
+                <th class="text-end" style="width:100px">Nabavna</th>
+                <th class="text-end" style="width:85px">Ukupno</th>
+                <th class="text-center" style="width:70px">Marza</th>
+                <th class="text-end" style="width:90px">MPC</th>
+                <th style="width:40px"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+            {% for item in batch.items.all %}
+              {% if item.match_score >= 0.8 %}
+              <tr class="table-success" data-item-id="{{ item.pk }}">
+              {% elif item.match_score >= 0.6 %}
+              <tr class="table-warning" data-item-id="{{ item.pk }}">
+              {% else %}
+              <tr class="table-danger" data-item-id="{{ item.pk }}">
+              {% endif %}
+                <td class="text-muted small">{{ forloop.counter }}</td>
+                <td>
+                  <input type="text" class="form-control form-control-sm border-0 bg-transparent fw-semibold item-name"
+                         value="{{ item.vendor_name }}" data-item-id="{{ item.pk }}"
+                         onchange="saveField({{ item.pk }}, 'vendor_name', this.value)">
+                </td>
+                <td>
+                  <select class="form-select form-select-sm item-match" data-item-id="{{ item.pk }}" style="min-width:150px"
+                          onchange="updateMapping(this, {{ item.pk }})">
+                    <option value="">—</option>
+                    {% for inv in inv_items %}
+                    <option value="{{ inv.pk }}" {% if item.matched_item_id == inv.pk %}selected{% endif %}>{{ inv.name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                  <input type="number" class="form-control form-control-sm item-qty" value="{{ item.quantity }}"
+                         step="0.001" min="0" data-item-id="{{ item.pk }}"
+                         onchange="saveField({{ item.pk }}, 'quantity', this.value); recalcRow({{ item.pk }})">
+                </td>
+                <td>
+                  <input type="number" class="form-control form-control-sm item-pp text-end" value="{{ item.purchase_price }}"
+                         step="0.0001" min="0" data-item-id="{{ item.pk }}"
+                         onchange="saveField({{ item.pk }}, 'purchase_price', this.value); recalcRow({{ item.pk }})">
+                </td>
+                <td class="text-end small line-total" id="total_{{ item.pk }}">—</td>
+                <td>
+                  <input type="number" class="form-control form-control-sm item-margin text-center"
+                         value="{{ item.margin_override|default:'' }}" placeholder="—" step="0.1" min="0"
+                         data-item-id="{{ item.pk }}"
+                         onchange="saveField({{ item.pk }}, 'margin_override', this.value); recalcRow({{ item.pk }})">
+                </td>
+                <td class="text-end fw-semibold mpc-cell" id="mpc_{{ item.pk }}">—</td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-outline-danger px-1 py-0"
+                          onclick="deleteItem({{ item.pk }})"><i class="fas fa-trash-alt"></i></button>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <td colspan="5" class="text-end fw-bold">UKUPNO:</td>
+                <td class="text-end fw-bold" id="grandTotal">—</td>
+                <td colspan="3"></td>
+              </tr>
+              <tr class="bg-light">
+                <td class="text-center text-success"><i class="fas fa-plus"></i></td>
+                <td><input type="text" id="newNameD" class="form-control form-control-sm" placeholder="Novi artikl"></td>
+                <td></td>
+                <td><input type="number" id="newQtyD" class="form-control form-control-sm" value="1" step="0.001"></td>
+                <td><input type="number" id="newPPD" class="form-control form-control-sm text-end" value="0" step="0.01"></td>
+                <td colspan="3"></td>
+                <td><button type="button" class="btn btn-sm btn-success" onclick="addItem('D')"><i class="fas fa-plus"></i></button></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILE CARDS -->
+    <div class="mobile-cards">
+      <div id="mobileItemsContainer">
+      {% for item in batch.items.all %}
+        <div class="card mobile-card mb-2 {% if item.match_score < 0.6 %}score-low{% elif item.match_score < 0.8 %}score-med{% endif %}"
+             data-item-id="{{ item.pk }}" id="mcard_{{ item.pk }}">
+          <div class="card-body py-2 px-3">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <strong class="small">{{ forloop.counter }}.</strong>
+              <button type="button" class="btn btn-sm btn-outline-danger px-1 py-0"
+                      onclick="deleteItem({{ item.pk }})"><i class="fas fa-trash-alt" style="font-size:0.7rem"></i></button>
+            </div>
+            <input type="text" class="form-control form-control-sm mb-1 fw-semibold item-name"
+                   value="{{ item.vendor_name }}" data-item-id="{{ item.pk }}"
+                   onchange="saveField({{ item.pk }}, 'vendor_name', this.value)">
+            <select class="form-select form-select-sm mb-1 item-match" data-item-id="{{ item.pk }}"
+                    onchange="updateMapping(this, {{ item.pk }})">
+              <option value="">— Spoji s artiklom —</option>
+              {% for inv in inv_items %}
+              <option value="{{ inv.pk }}" {% if item.matched_item_id == inv.pk %}selected{% endif %}>{{ inv.name }}</option>
+              {% endfor %}
+            </select>
+            <div class="row g-1">
+              <div class="col-4">
+                <label class="form-label mb-0" style="font-size:0.65rem">Kolicina</label>
+                <input type="number" class="form-control form-control-sm item-qty" value="{{ item.quantity }}"
+                       step="0.001" data-item-id="{{ item.pk }}"
+                       onchange="saveField({{ item.pk }}, 'quantity', this.value); recalcRow({{ item.pk }})">
+              </div>
+              <div class="col-4">
+                <label class="form-label mb-0" style="font-size:0.65rem">Nabavna</label>
+                <input type="number" class="form-control form-control-sm item-pp text-end" value="{{ item.purchase_price }}"
+                       step="0.01" data-item-id="{{ item.pk }}"
+                       onchange="saveField({{ item.pk }}, 'purchase_price', this.value); recalcRow({{ item.pk }})">
+              </div>
+              <div class="col-4">
+                <label class="form-label mb-0" style="font-size:0.65rem">Marza %</label>
+                <input type="number" class="form-control form-control-sm item-margin text-center"
+                       value="{{ item.margin_override|default:'' }}" placeholder="—" step="0.1"
+                       data-item-id="{{ item.pk }}"
+                       onchange="saveField({{ item.pk }}, 'margin_override', this.value); recalcRow({{ item.pk }})">
+              </div>
+            </div>
+            <div class="d-flex justify-content-between mt-1 small">
+              <span class="text-muted">Ukupno: <span class="line-total" id="total_{{ item.pk }}">—</span></span>
+              <span class="fw-bold">MPC: <span class="mpc-cell" id="mpc_{{ item.pk }}">—</span></span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+
+      <div class="card border-success mb-2">
+        <div class="card-body py-2 px-3">
+          <div class="fw-semibold small text-success mb-1"><i class="fas fa-plus me-1"></i>Dodaj stavku</div>
+          <input type="text" id="newNameM" class="form-control form-control-sm mb-1" placeholder="Naziv artikla">
+          <div class="row g-1 mb-1">
+            <div class="col-5">
+              <input type="number" id="newQtyM" class="form-control form-control-sm" value="1" placeholder="Kol." step="0.001">
+            </div>
+            <div class="col-5">
+              <input type="number" id="newPPM" class="form-control form-control-sm" value="0" placeholder="Cijena" step="0.01">
+            </div>
+            <div class="col-2">
+              <button type="button" class="btn btn-success btn-sm w-100" onclick="addItem('M')"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-dark text-white mb-2">
+        <div class="card-body py-2 d-flex justify-content-between">
+          <span>UKUPNO nabavna:</span>
+          <strong id="grandTotalM">—</strong>
+        </div>
+      </div>
+    </div>
+
+  </form>
+  {% endif %}
+
+  {% if batch.status == 'error' %}
+  <!-- Error state already handled in status banner above -->
+  {% endif %}
+</div>
+
+<!-- Problem Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h6 class="modal-title"><i class="fas fa-flag me-2"></i>Prijavi problem</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted">Opisi problem s ovim uvozom. Nas tim ce pregledati i ispraviti.</p>
+        <textarea id="reportDescription" class="form-control" rows="3"
+                  placeholder="Npr. Slika je citljiva ali sustav ne prepoznaje stavke..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Odustani</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="submitReport()">
+          <i class="fas fa-paper-plane me-1"></i>Posalji prijavu
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BATCH_ID = {{ batch.pk }};
+const STATUS = "{{ batch.status }}";
+const CONTROL_AMOUNT = {{ control_amount|default:"null" }};
+const CSRF = "{{ csrf_token }}";
+
+// -- Polling for pending/processing status --
+if (STATUS === "pending" || STATUS === "processing") {
+  let pollCount = 0;
+  const MAX_POLLS = 90; // 3 minutes max at 2s intervals
+
+  const stepMap = {
+    "Ucitavanje": 1,
+    "AI cita": 2,
+    "Ekstrakcija": 2,
+    "Ponovni pokusaj": 2,
+    "Spremanje": 3,
+    "Spajanje": 3,
+    "Gotovo": 4,
+  };
+
+  function updateSteps(msg) {
+    let activeStep = 1;
+    for (const [keyword, step] of Object.entries(stepMap)) {
+      if (msg && msg.includes(keyword)) {
+        activeStep = step;
+        break;
+      }
+    }
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById("step" + i);
+      if (!el) continue;
+      el.classList.remove("active", "done");
+      if (i < activeStep) el.classList.add("done");
+      else if (i === activeStep) el.classList.add("active");
+    }
+  }
+
+  const poll = setInterval(async () => {
+    pollCount++;
+    if (pollCount > MAX_POLLS) {
+      clearInterval(poll);
+      document.getElementById("statusText").textContent = "Obrada traje duze nego obicno...";
+      return;
+    }
+    try {
+      const r = await fetch("/smart-import/" + BATCH_ID + "/status/");
+      const d = await r.json();
+
+      // Update status text
+      const statusEl = document.getElementById("statusText");
+      if (statusEl && d.status_message) {
+        statusEl.textContent = d.status_message;
+      }
+
+      // Update progress steps
+      updateSteps(d.status_message);
+
+      if (d.status !== "pending" && d.status !== "processing") {
+        clearInterval(poll);
+        window.location.reload();
+      }
+    } catch (e) {
+      console.warn("Poll error:", e);
+    }
+  }, 2000);
+}
+
+// -- Retry batch --
+function retryBatch() {
+  fetch("/smart-import/" + BATCH_ID + "/retry/", {
+    method: "POST",
+    headers: {"X-CSRFToken": CSRF},
+  }).then(r => r.json()).then(d => {
+    if (d.ok) window.location.reload();
+    else alert("Greska: " + (d.error || "Nepoznata greska"));
+  }).catch(e => alert("Greska komunikacije: " + e));
+}
+
+// -- Report problem --
+function showReportModal() {
+  var modal = new bootstrap.Modal(document.getElementById("reportModal"));
+  modal.show();
+}
+
+function submitReport() {
+  const desc = document.getElementById("reportDescription").value.trim();
+  const fd = new FormData();
+  fd.append("csrfmiddlewaretoken", CSRF);
+  fd.append("description", desc || "Problem prijavljen bez opisa");
+
+  fetch("/smart-import/" + BATCH_ID + "/report-problem/", {
+    method: "POST",
+    body: fd,
+  }).then(r => r.json()).then(d => {
+    if (d.ok) {
+      bootstrap.Modal.getInstance(document.getElementById("reportModal")).hide();
+      // Show success toast
+      const toast = document.createElement("div");
+      toast.className = "alert alert-success position-fixed bottom-0 end-0 m-3";
+      toast.style.zIndex = "99999";
+      toast.innerHTML = '<i class="fas fa-check me-2"></i>Problem prijavljen! Hvala na povratnoj informaciji.';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  }).catch(e => alert("Greska: " + e));
+}
+
+// -- CRUD functions --
+function postData(url, data) {
+  const fd = new FormData();
+  fd.append("csrfmiddlewaretoken", CSRF);
+  for (const [k, v] of Object.entries(data)) fd.append(k, v);
+  return fetch(url, { method: "POST", body: fd }).then(r => r.json());
+}
+
+function saveField(itemId, field, value) {
+  postData("/smart-import/" + BATCH_ID + "/update-item/", { item_id: itemId, [field]: value });
+}
+
+function deleteItem(itemId) {
+  if (!confirm("Obrisati stavku?")) return;
+  postData("/smart-import/" + BATCH_ID + "/delete-item/", { item_id: itemId }).then(d => {
+    if (d.ok) {
+      document.querySelectorAll("[data-item-id='" + itemId + "']").forEach(el => {
+        if (el.tagName === "TR" || el.classList.contains("mobile-card")) el.remove();
+      });
+      updateGrandTotal();
+    }
+  });
+}
+
+function addItem(suffix) {
+  const name = document.getElementById("newName" + suffix).value.trim();
+  if (!name) { alert("Unesite naziv."); return; }
+  const qty = document.getElementById("newQty" + suffix).value || "1";
+  const pp = document.getElementById("newPP" + suffix).value || "0";
+  postData("/smart-import/" + BATCH_ID + "/add-item/", {
+    vendor_name: name, quantity: qty, purchase_price: pp
+  }).then(d => { if (d.ok) window.location.reload(); });
+}
+
+function updateSupplier() {
+  postData("/smart-import/" + BATCH_ID + "/update-supplier/", {
+    supplier_id: document.getElementById("supplierSelect").value
+  });
+}
+
+function updateMapping(sel, itemId) {
+  if (!sel.value) return;
+  postData("/smart-import/" + BATCH_ID + "/save-mapping/", {
+    batch_item_id: itemId, inventory_item_id: sel.value
+  }).then(d => {
+    if (d.ok) {
+      const row = document.querySelector("tr[data-item-id='" + itemId + "']");
+      if (row) { row.classList.remove("table-danger","table-warning"); row.classList.add("table-success"); }
+      const card = document.getElementById("mcard_" + itemId);
+      if (card) { card.classList.remove("score-low","score-med"); card.style.borderLeftColor = "#198754"; }
+    }
+  });
+}
+
+function recalcRow(itemId) {
+  const ppEls = document.querySelectorAll("input.item-pp[data-item-id='" + itemId + "']");
+  const qtyEls = document.querySelectorAll("input.item-qty[data-item-id='" + itemId + "']");
+  if (!ppEls.length) return;
+
+  const pp = parseFloat(ppEls[0].value) || 0;
+  const qty = parseFloat(qtyEls[0].value) || 0;
+  const lineTotal = pp * qty;
+
+  ppEls.forEach(el => el.value = pp);
+  qtyEls.forEach(el => el.value = qty);
+
+  document.querySelectorAll("#total_" + itemId).forEach(el => {
+    el.textContent = lineTotal > 0 ? lineTotal.toFixed(2) : "—";
+  });
+
+  const mEls = document.querySelectorAll("input.item-margin[data-item-id='" + itemId + "']");
+  const marginVal = mEls[0] && mEls[0].value !== "" ? parseFloat(mEls[0].value) :
+    (parseFloat(document.getElementById("globalMargin").value) || 30);
+  const mpc = pp * (1 + marginVal / 100);
+
+  document.querySelectorAll("#mpc_" + itemId).forEach(el => {
+    el.textContent = mpc > 0 ? mpc.toFixed(2) + " EUR" : "—";
+  });
+
+  updateGrandTotal();
+}
+
+function recalcAll() {
+  const seen = new Set();
+  document.querySelectorAll("input.item-pp").forEach(el => {
+    const id = el.dataset.itemId;
+    if (!seen.has(id)) { seen.add(id); recalcRow(id); }
+  });
+}
+
+function updateGrandTotal() {
+  let sum = 0;
+  const seen = new Set();
+  document.querySelectorAll(".line-total").forEach(el => {
+    const id = el.id;
+    if (seen.has(id)) return;
+    seen.add(id);
+    const v = parseFloat(el.textContent);
+    if (!isNaN(v)) sum += v;
+  });
+
+  const gt = document.getElementById("grandTotal");
+  if (gt) gt.textContent = sum.toFixed(2) + " EUR";
+  const gtm = document.getElementById("grandTotalM");
+  if (gtm) gtm.textContent = sum.toFixed(2) + " EUR";
+  const it = document.getElementById("itemsTotal");
+  if (it) it.textContent = sum.toFixed(2);
+
+  if (CONTROL_AMOUNT !== null) {
+    const diff = sum - CONTROL_AMOUNT;
+    const badge = document.getElementById("diffBadge");
+    const diffEl = document.getElementById("diffAmount");
+    if (Math.abs(diff) < 0.02) {
+      if (badge) { badge.className = "badge bg-success ms-2"; badge.innerHTML = '<i class="fas fa-check me-1"></i>Tocno'; }
+    } else {
+      if (diffEl) diffEl.textContent = (diff >= 0 ? "+" : "") + diff.toFixed(2);
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", recalcAll);
+
+const cf = document.getElementById("confirmForm");
+if (cf) cf.addEventListener("submit", function() {
+  const btn = document.getElementById("confirmBtn");
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Kreiranje primke...';
+  btn.disabled = true;
+});
+</script>
+<script src="{% static 'js/smart_import_strict_ui.js' %}"></script>
+{% endblock %}

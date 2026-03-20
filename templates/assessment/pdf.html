@@ -1,0 +1,254 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>Nalaz #{{ assessment.pk }} – {{ assessment.client_name }}</title>
+<style>
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf');
+}
+@font-face {
+    font-family: 'DejaVu';
+    src: url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf');
+    font-weight: bold;
+}
+* { font-family: 'DejaVu', sans-serif !important; }
+
+@page { size: A4; margin: 18mm 18mm 22mm 18mm; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a1a; background: #fff; margin: 0; padding: 0; }
+
+/* Header */
+.hdr { display: table; width: 100%; border-bottom: 2px solid #c9a84c; padding-bottom: 10px; margin-bottom: 14px; }
+.hdr-left  { display: table-cell; vertical-align: top; }
+.hdr-right { display: table-cell; vertical-align: top; text-align: right; width: 150px; }
+.co-name   { font-size: 16pt; font-weight: bold; color: #0a0a0a; }
+.co-sub    { font-size: 8pt; color: #555; margin-top: 2px; }
+.doc-title { font-size: 13pt; font-weight: bold; color: #c9a84c; }
+.doc-sub   { font-size: 8.5pt; color: #444; margin-top: 3px; }
+
+/* Client box */
+.client-box { background: #f8f4e8; border: 1px solid #e8d9a0; border-radius: 4px; padding: 8px 10px; margin-bottom: 12px; display: table; width: 100%; box-sizing: border-box; }
+.cl-left { display: table-cell; vertical-align: top; }
+.cl-right { display: table-cell; vertical-align: top; text-align: right; width: 160px; }
+.cl-name { font-size: 12pt; font-weight: bold; color: #0a0a0a; }
+.cl-sub  { font-size: 8.5pt; color: #555; margin-top: 3px; }
+
+/* Section */
+.sec { margin-bottom: 10px; }
+.sec-title { font-size: 9pt; font-weight: bold; text-transform: uppercase; letter-spacing: .05em; color: #c9a84c; border-bottom: 1px solid #e8d9a0; padding-bottom: 3px; margin-bottom: 6px; }
+
+/* KV table */
+.kv-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+.kv-table td { padding: 3px 6px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+.kv-table .lbl { color: #666; width: 38%; font-weight: bold; }
+.kv-table .val { color: #1a1a1a; }
+.kv-table .val.gold { color: #b38a20; font-weight: bold; }
+.kv-table .val.red  { color: #c0392b; }
+.kv-table .val.grn  { color: #16a34a; }
+
+/* Expert box */
+.expert { background: #fffbf0; border-left: 3px solid #c9a84c; padding: 8px 10px; font-size: 9pt; color: #1a1a1a; margin: 6px 0 10px; border-radius: 0 4px 4px 0; }
+
+/* Tags inline */
+.tags { font-size: 8pt; color: #555; }
+.tag-item { display: inline-block; background: #f8f4e8; border: 1px solid #e8d9a0; color: #6b5a1e; border-radius: 3px; padding: 1px 5px; margin: 1px 2px 1px 0; font-size: 7.5pt; }
+.tag-warn { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+
+/* Price block */
+.price-block { background: #fffbf0; border: 1px solid #e8d9a0; border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; text-align: center; }
+.price-range { font-size: 15pt; font-weight: bold; color: #b38a20; }
+.price-lbl   { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .05em; color: #888; }
+
+/* Photos grid (max 3 per row for A4) */
+.photo-grid { display: table; width: 100%; border-collapse: collapse; margin-top: 6px; }
+.photo-cell { display: table-cell; width: 31%; padding: 3px; vertical-align: top; }
+.photo-cell img { width: 100%; border-radius: 3px; border: 1px solid #ddd; }
+.photo-cap  { font-size: 7pt; color: #888; text-align: center; margin-top: 2px; }
+
+/* Footer */
+.footer { border-top: 1px solid #ddd; padding-top: 8px; margin-top: 16px; display: table; width: 100%; }
+.footer-left  { display: table-cell; font-size: 8pt; color: #888; vertical-align: bottom; }
+.footer-right { display: table-cell; text-align: right; vertical-align: bottom; width: 100px; }
+.qr-img { width: 72px; height: 72px; }
+
+/* Signature */
+.sig-line { border-top: 1px solid #aaa; margin-top: 24px; width: 180px; padding-top: 4px; font-size: 8pt; color: #555; }
+
+/* Page break */
+.pb { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-left">
+    {% if logo_b64 %}
+    <img src="data:{{ logo_mime }};base64,{{ logo_b64 }}" style="height:40px;margin-bottom:4px;display:block">
+    {% endif %}
+    <div class="co-name">{{ company.name }}</div>
+    {% if company.address %}<div class="co-sub">{{ company.address }}{% if company.city %}, {{ company.city }}{% endif %}</div>{% endif %}
+    {% if company.oib %}<div class="co-sub">OIB: {{ company.oib }}</div>{% endif %}
+  </div>
+  <div class="hdr-right">
+    <div class="doc-title">{% trans "NALAZ" %}</div>
+    <div class="doc-sub">{% trans "&amp; Mišljenje stručnjaka" %}</div>
+    <div class="doc-sub">#{{ assessment.pk }}</div>
+    <div class="doc-sub">{{ assessment.created_at|date:"d.m.Y" }}</div>
+  </div>
+</div>
+
+<!-- Client box -->
+<div class="client-box">
+  <div class="cl-left">
+    <div class="cl-name">{{ assessment.client_name }}</div>
+    <div class="cl-sub">
+      {% if assessment.client_phone %}Tel: {{ assessment.client_phone }}&nbsp;&nbsp;{% endif %}
+      {% if assessment.client_email %}{{ assessment.client_email }}{% endif %}
+    </div>
+    {% if assessment.client_address %}<div class="cl-sub">📍 {{ assessment.client_address }}</div>{% endif %}
+  </div>
+  <div class="cl-right">
+    <div class="cl-sub"><strong>{% trans "Tip procjene:" %}</strong><br>{{ assessment.get_assessment_type_display }}</div>
+    <div class="cl-sub"><strong>{% trans "Status:" %}</strong> {{ assessment.get_status_display }}</div>
+    {% if assessment.created_by %}<div class="cl-sub"><strong>{% trans "Majstor:" %}</strong> {{ assessment.created_by.get_full_name|default:assessment.created_by.username }}</div>{% endif %}
+  </div>
+</div>
+
+<!-- Price (if set) -->
+{% if assessment.calculated_price_from %}
+<div class="price-block">
+  <div class="price-lbl">{% trans "Okvirna procjena troškova" %}</div>
+  <div class="price-range">{{ assessment.calculated_price_from|floatformat:0 }} – {{ assessment.calculated_price_to|floatformat:0 }} €</div>
+</div>
+{% endif %}
+
+<!-- STEP 1 -->
+{% with s=data.step1 %}{% if s %}
+<div class="sec">
+  <div class="sec-title">{% trans "1. Lokacija i tip objekta" %}</div>
+  <table class="kv-table">
+    {% if s.object_type %}<tr><td class="lbl">{% trans "Tip objekta" %}</td><td class="val">{{ s.object_type }}{% if s.floor %} – etaža: {{ s.floor }}{% endif %}</td></tr>{% endif %}
+    {% if s.water_connection %}<tr><td class="lbl">{% trans "Vodovodni priključak" %}</td><td class="val">{{ s.water_connection }}</td></tr>{% endif %}
+    {% if s.bathroom_position %}<tr><td class="lbl">{% trans "Položaj kupaonice" %}</td><td class="val {% if s.bathroom_position == 'internal' %}red{% endif %}">{{ s.bathroom_position }}</td></tr>{% endif %}
+  </table>
+</div>
+{% endif %}{% endwith %}
+
+<!-- STEP 2 -->
+{% with s=data.step2 %}{% if s %}
+<div class="sec">
+  <div class="sec-title">{% trans "2. Instalacije" %}</div>
+  <table class="kv-table">
+    {% if s.pipe_type %}<tr><td class="lbl">{% trans "Tip cijevi" %}</td><td class="val {% if 'galvanized' in s.pipe_type %}red{% endif %}">
+      {% for p in s.pipe_type %}<span class="tag-item {% if p == 'galvanized' %}tag-warn{% endif %}">{{ p }}</span>{% endfor %}
+    </td></tr>{% endif %}
+    {% if s.installation_type %}<tr><td class="lbl">{% trans "Instalacija" %}</td><td class="val">{{ s.installation_type }}</td></tr>{% endif %}
+    {% if s.faucet_type %}<tr><td class="lbl">{% trans "Slavine" %}</td><td class="val">{{ s.faucet_type }}</td></tr>{% endif %}
+    {% if s.toilet_type %}<tr><td class="lbl">{% trans "WC" %}</td><td class="val">{{ s.toilet_type }}</td></tr>{% endif %}
+    {% if s.hot_water_circ %}<tr><td class="lbl">{% trans "Cirkulacija tople vode" %}</td><td class="val">{{ s.hot_water_circ }}</td></tr>{% endif %}
+  </table>
+</div>
+{% endif %}{% endwith %}
+
+<!-- STEP 3 -->
+{% with s=data.step3 %}{% if s %}
+<div class="sec">
+  <div class="sec-title">{% trans "3. Dimenzije i stanje" %}</div>
+  <table class="kv-table">
+    {% if s.floor_area %}<tr><td class="lbl">{% trans "Površina poda" %}</td><td class="val gold">{{ s.floor_area }} m²</td></tr>{% endif %}
+    {% if s.ceiling_height %}<tr><td class="lbl">{% trans "Visina stropa" %}</td><td class="val">{{ s.ceiling_height }} cm</td></tr>{% endif %}
+    {% if s.wall_material %}<tr><td class="lbl">{% trans "Zidovi" %}</td><td class="val">{{ s.wall_material }}</td></tr>{% endif %}
+    {% if s.complexity %}<tr><td class="lbl">{% trans "Složenost zahvata" %}</td><td class="val">{{ s.complexity }}</td></tr>{% endif %}
+    {% if s.hidden_risks %}<tr><td class="lbl">{% trans "Skriveni rizici" %}</td><td class="val red">{{ s.hidden_risks }}</td></tr>{% endif %}
+  </table>
+</div>
+{% endif %}{% endwith %}
+
+<!-- STEP 4 -->
+{% with s=data.step4 %}{% if s %}
+<div class="sec">
+  <div class="sec-title">{% trans "4. Elementi kupaone" %}</div>
+  <table class="kv-table">
+    {% if s.waterproofing %}<tr><td class="lbl">{% trans "Hidroizolacija" %}</td><td class="val">{{ s.waterproofing }}</td></tr>{% endif %}
+    {% if s.window %}<tr><td class="lbl">{% trans "Prozor" %}</td><td class="val">{{ s.window }}</td></tr>{% endif %}
+    {% if s.ventilation %}<tr><td class="lbl">{% trans "Ventilacija" %}</td><td class="val">{{ s.ventilation }}</td></tr>{% endif %}
+    {% if s.heating %}<tr><td class="lbl">{% trans "Grijanje" %}</td><td class="val">{{ s.heating }}</td></tr>{% endif %}
+    {% if s.bathing_type %}<tr><td class="lbl">{% trans "Tuš / Kada" %}</td><td class="val">{{ s.bathing_type }}</td></tr>{% endif %}
+    {% if s.shower_type %}<tr><td class="lbl">{% trans "Tuš kabina" %}</td><td class="val">{{ s.shower_type }}</td></tr>{% endif %}
+    {% if s.glass_thickness %}<tr><td class="lbl">{% trans "Staklo" %}</td><td class="val">{{ s.glass_thickness }}</td></tr>{% endif %}
+    {% if s.smart_level %}<tr><td class="lbl">{% trans "SMART razina" %}</td><td class="val gold">{{ s.smart_level }}</td></tr>{% endif %}
+    {% if s.smart %}<tr><td class="lbl">{% trans "Smart opcije" %}</td><td class="val">{% for sv in s.smart %}<span class="tag-item">{{ sv }}</span>{% endfor %}</td></tr>{% endif %}
+  </table>
+</div>
+{% endif %}{% endwith %}
+
+<!-- STEP 5 – Expert opinion + warnings -->
+{% with s=data.step5 %}{% if s %}
+<div class="sec">
+  <div class="sec-title">{% trans "5. Zaključak i mišljenje stručnjaka" %}</div>
+  {% if assessment.notes %}
+  <div class="expert">{{ assessment.notes }}</div>
+  {% endif %}
+  <table class="kv-table">
+    {% if s.solution %}<tr><td class="lbl">{% trans "Preporuka" %}</td><td class="val">{% for sol in s.solution %}<span class="tag-item">{{ sol }}</span>{% endfor %}</td></tr>{% endif %}
+    {% if s.warnings %}<tr><td class="lbl">{% trans "Upozorenja" %}</td><td class="val">{% for w in s.warnings %}<span class="tag-item tag-warn">⚠ {{ w }}</span>{% endfor %}</td></tr>{% endif %}
+    {% if s.duration %}<tr><td class="lbl">{% trans "Rok radova" %}</td><td class="val">{{ s.duration }}</td></tr>{% endif %}
+    {% if s.workers_count %}<tr><td class="lbl">{% trans "Ekipa" %}</td><td class="val">{{ s.workers_count }} majstora + {{ s.helpers_count|default:"0" }} pomoćnika</td></tr>{% endif %}
+  </table>
+</div>
+{% endif %}{% endwith %}
+
+<!-- STEP 6 – Client style -->
+{% with s=data.step6 %}{% if s %}
+<div class="sec">
+  <div class="sec-title">{% trans "6. Klijentovi zahtjevi i stil" %}</div>
+  <table class="kv-table">
+    {% if s.style %}<tr><td class="lbl">{% trans "Stil" %}</td><td class="val">{{ s.style }}</td></tr>{% endif %}
+    {% if s.tile_size %}<tr><td class="lbl">{% trans "Format pločica" %}</td><td class="val">{{ s.tile_size }}</td></tr>{% endif %}
+    {% if s.tile_color %}<tr><td class="lbl">{% trans "Boja pločica" %}</td><td class="val">{{ s.tile_color }}</td></tr>{% endif %}
+    {% if s.tile_mat %}<tr><td class="lbl">{% trans "Materijal" %}</td><td class="val">{{ s.tile_mat }}</td></tr>{% endif %}
+    {% if s.sanitarija_budget %}<tr><td class="lbl">{% trans "Sanitarija (budget)" %}</td><td class="val">{{ s.sanitarija_budget }}</td></tr>{% endif %}
+    {% if s.sanitarija_color %}<tr><td class="lbl">{% trans "Boja sanitarije" %}</td><td class="val">{{ s.sanitarija_color }}</td></tr>{% endif %}
+    {% if s.client_notes %}<tr><td class="lbl">{% trans "Posebni zahtjevi" %}</td><td class="val">{{ s.client_notes }}</td></tr>{% endif %}
+  </table>
+</div>
+{% endif %}{% endwith %}
+
+<!-- Photos -->
+{% if photos %}
+<div class="sec pb">
+  <div class="sec-title">{% trans "Priložene fotografije" %}</div>
+  <table class="photo-grid">
+    <tr>
+    {% for p in photos %}
+    <td class="photo-cell" style="{% if forloop.counter|divisibleby:3 %}padding-right:0{% endif %}">
+      <img src="data:{{ p.mime }};base64,{{ p.b64 }}" alt="">
+      <div class="photo-cap">Korak {{ p.obj.step }}{% if p.obj.caption %}: {{ p.obj.caption }}{% endif %}</div>
+    </td>
+    {% if forloop.counter|divisibleby:3 and not forloop.last %}</tr><tr>{% endif %}
+    {% endfor %}
+    </tr>
+  </table>
+</div>
+{% endif %}
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-left">
+    <div>Generirano: {{ generated_at|date:"d.m.Y H:i" }}</div>
+    <div>LIMIT Connect ERP – {{ company.name }}</div>
+    <div style="margin-top:20px"><div class="sig-line">{% trans "Potpis stručnjaka" %}</div></div>
+  </div>
+  <div class="footer-right">
+    {% if qr_b64 %}
+    <img class="qr-img" src="data:image/png;base64,{{ qr_b64 }}" alt="QR online">
+    <div style="font-size:7pt;color:#888;text-align:center;margin-top:2px">{% trans "Online verzija" %}</div>
+    {% endif %}
+  </div>
+</div>
+
+</body>
+</html>

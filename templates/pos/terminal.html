@@ -1,0 +1,78 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}{{ terminal.name }}{% endblock %}
+{% block extra_css %}
+<style>
+.page{padding:1.5rem;max-width:900px}
+.breadcrumb{font-size:.8rem;color:var(--muted);margin-bottom:1rem}
+.breadcrumb a{color:var(--muted)}.breadcrumb a:hover{color:var(--gold)}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.page-title{font-size:1.25rem;font-weight:700}
+.open-form{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1.5rem}
+.open-form label{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:.35rem}
+.open-form input{background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:.5rem .75rem;font-size:.9rem;width:180px}
+.open-form input:focus{outline:none;border-color:var(--gold)}
+.form-row{display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.55rem .7rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border)}
+td{padding:.65rem .7rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem;vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="breadcrumb"><a href="{% url 'pos:dashboard' %}">{% trans "Terminali" %}</a> / {{ terminal.name }}</div>
+  <div class="page-header">
+    <div>
+      <div class="page-title">{{ terminal.name }} <span style="color:var(--muted);font-weight:400;font-size:.85rem">({{ terminal.terminal_code }})</span></div>
+      {% if terminal.description %}<div style="color:var(--muted);font-size:.875rem;margin-top:.25rem">{{ terminal.description }}</div>{% endif %}
+    </div>
+    {% if active_session %}
+      {% if terminal.pos_type == "quick" %}
+      <a href="{% url 'pos:quick_pos' terminal.id %}" class="btn btn-gold">&#9889; {% trans "Brza blagajna &rarr;" %}</a>
+      {% elif terminal.pos_type == "restaurant" %}
+      <a href="{% url 'pos:restaurant_pos' terminal.id %}" class="btn btn-gold">&#x1F374; {% trans "Restoran &rarr;" %}</a>
+      {% else %}
+      <a href="{% url 'pos:session_detail' active_session.id %}" class="btn btn-gold">{% trans "Otvori POS &rarr;" %}</a>
+      {% endif %}
+    {% endif %}
+  </div>
+  {% if not active_session %}
+  <div class="open-form">
+    <div style="font-weight:600;margin-bottom:.875rem">{% trans "Pokreni novu smjenu" %}</div>
+    <form method="post" action="{% url 'pos:open_session' terminal.id %}">{% csrf_token %}
+      <div class="form-row">
+        <div><label>{% trans "Pocetna gotovina (&euro;)" %}</label><input type="number" name="opening_cash" value="0" min="0" step="0.01"></div>
+        <button type="submit" class="btn btn-green">{% trans "Pokreni smjenu" %}</button>
+      </div>
+    </form>
+  </div>
+  {% else %}
+  <div style="background:rgba(76,175,125,.08);border:1px solid var(--green);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between">
+    <div><span class="badge badge-open" style="margin-right:.5rem">{% trans "AKTIVNA SMJENA" %}</span>
+    #{{ active_session.session_number }} &mdash; {{ active_session.opened_at|date:"d.m.Y H:i" }} &mdash; <strong style="color:var(--green)">&euro;{{ active_session.total_sales|floatformat:2 }}</strong></div>
+    <a href="{% url 'pos:session_detail' active_session.id %}" class="btn btn-gold btn-sm">{% trans "Otvori POS" %}</a>
+  </div>
+  {% endif %}
+  <div class="card" style="padding:1rem">
+    <div style="font-weight:600;margin-bottom:.75rem;font-size:.875rem">{% trans "Zadnje smjene" %}</div>
+    {% if recent_sessions %}
+    <table>
+      <thead><tr><th>#</th><th>{% trans "Otvorena" %}</th><th>{% trans "Zatvorena" %}</th><th>{% trans "Prihod" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
+      <tbody>
+      {% for s in recent_sessions %}
+      <tr>
+        <td><strong>#{{ s.session_number }}</strong></td>
+        <td>{{ s.opened_at|date:"d.m H:i" }}</td>
+        <td>{{ s.closed_at|date:"d.m H:i"|default:"--" }}</td>
+        <td style="color:var(--green)">&euro;{{ s.total_sales|floatformat:2 }}</td>
+        <td><span class="badge badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
+        <td><a href="{% url 'pos:session_detail' s.id %}" class="btn btn-ghost btn-sm">{% trans "Pregledaj" %}</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div style="color:var(--muted);text-align:center;padding:1.5rem">{% trans "Nema smjena." %}</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

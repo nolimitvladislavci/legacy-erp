@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ transfer.transfer_number }} | LIMIT Connect{% endblock %}
+{% block page_title %}{{ transfer.transfer_number }}{% endblock %}
+{% block content %}
+<div style="max-width:800px;margin:0 auto">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem">
+    <div>
+      <h2 style="margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem">
+        <i class="fas fa-exchange-alt" style="color:var(--gold);margin-right:8px"></i>{{ transfer.transfer_number }}
+      </h2>
+      <p style="color:var(--text-muted);margin:0;font-size:.82rem">
+        {{ transfer.source_warehouse.name }} → {{ transfer.destination_warehouse.name }} · {{ transfer.date|date:"d.m.Y" }}
+      </p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      {% if transfer.status == 'draft' %}
+      <form method="post" action="{% url 'inventory:transfer_confirm' transfer.pk %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" onclick="return confirm('Potvrditi izdatnicu? Roba ce biti razduzena iz {{ transfer.source_warehouse.name }}.')"
+                style="background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer">
+          <i class="fas fa-check"></i> Potvrdi izdatnicu
+        </button>
+      </form>
+      {% elif transfer.status == 'in_transit' %}
+      <form method="post" action="{% url 'inventory:transfer_receive' transfer.pk %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" onclick="return confirm('Zaprimiti robu u {{ transfer.destination_warehouse.name }}?')"
+                style="background:#10b981;color:#fff;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer">
+          <i class="fas fa-box-open"></i> Zaprimi
+        </button>
+      </form>
+      {% endif %}
+      <a href="{% url 'inventory:transfer_list' %}" style="background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:8px 16px;border-radius:8px;font-size:.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+        <i class="fas fa-arrow-left"></i> Natrag
+      </a>
+    </div>
+  </div>
+
+  <!-- Status banner -->
+  {% if transfer.status == 'draft' %}
+  <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.85rem;color:#f59e0b">
+    <i class="fas fa-edit"></i> Nacrt — izdatnica jos nije potvrdjena. Roba nije razduzena.
+  </div>
+  {% elif transfer.status == 'in_transit' %}
+  <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.85rem;color:#3b82f6">
+    <i class="fas fa-truck"></i> U prijenosu — roba je razduzena iz {{ transfer.source_warehouse.name }}. Ceka zaprimanje u {{ transfer.destination_warehouse.name }}.
+  </div>
+  {% elif transfer.status == 'received' %}
+  <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.85rem;color:#10b981">
+    <i class="fas fa-check-circle"></i> Zaprimljeno — roba je u {{ transfer.destination_warehouse.name }}.
+    {% if transfer.received_by %} Zaprimio: {{ transfer.received_by.get_full_name|default:transfer.received_by.username }}{% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Info -->
+  <div class="stat-card" style="padding:1.25rem;margin-bottom:1rem">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem">
+      <div><span style="font-size:.68rem;text-transform:uppercase;color:var(--text-muted);display:block">Iz</span><strong>{{ transfer.source_warehouse.name }}</strong></div>
+      <div><span style="font-size:.68rem;text-transform:uppercase;color:var(--text-muted);display:block">U</span><strong>{{ transfer.destination_warehouse.name }}</strong></div>
+      <div><span style="font-size:.68rem;text-transform:uppercase;color:var(--text-muted);display:block">Datum</span><strong>{{ transfer.date|date:"d.m.Y" }}</strong></div>
+      <div><span style="font-size:.68rem;text-transform:uppercase;color:var(--text-muted);display:block">Kreirao</span><strong>{{ transfer.created_by.get_full_name|default:transfer.created_by.username|default:"-" }}</strong></div>
+    </div>
+    {% if transfer.notes %}<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);font-size:.85rem;color:var(--text-secondary)"><i class="fas fa-sticky-note" style="color:var(--gold);margin-right:.4rem"></i>{{ transfer.notes }}</div>{% endif %}
+  </div>
+
+  <!-- Stavke -->
+  <div class="stat-card" style="padding:1.25rem">
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:0 0 .75rem"><i class="fas fa-boxes" style="color:var(--gold);margin-right:.4rem"></i>Stavke ({{ items|length }})</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:.4rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">#</th>
+          <th style="text-align:left;padding:.4rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Artikl</th>
+          <th style="text-align:right;padding:.4rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Kolicina</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td style="padding:.4rem .75rem;border-bottom:1px solid var(--border)">{{ forloop.counter }}</td>
+          <td style="padding:.4rem .75rem;border-bottom:1px solid var(--border);font-weight:500">{{ item.inventory_item.name }}</td>
+          <td style="padding:.4rem .75rem;border-bottom:1px solid var(--border);text-align:right;color:var(--gold);font-weight:600">{{ item.quantity|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="text-align:center;padding:1.5rem;color:var(--text-muted)">Nema stavki</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

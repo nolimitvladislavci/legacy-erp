@@ -1,0 +1,320 @@
+{% extends 'booking_base.html' %}
+{% load i18n %}
+
+{% block title %}{{ resource.name }} – Viskovic Group Rezervacija{% endblock %}
+
+{% block nav_back %}<a href="/premium/" class="back-link">&#8592; {% trans "Natrag" %}</a>{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Page-specific layout — shared component CSS is in booking-theme.css */
+.page-wrap { max-width: 1000px; margin: 28px auto; padding: 0 16px 60px; display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+@media (max-width: 720px) { .page-wrap { grid-template-columns: 1fr; } }
+
+.resource-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; }
+.resource-card img { width: 100%; height: 180px; object-fit: cover; margin-bottom: 16px; }
+.resource-card h3 { font-family: "Cormorant Garamond", serif; font-size: 1.6rem; font-weight: 300; color: var(--gold); margin: 0 0 8px; }
+.resource-card > p { color: var(--muted); font-size: .85rem; margin-bottom: 16px; }
+.resource-meta { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--border); font-size: .85rem; }
+.resource-meta .label { color: var(--muted); }
+.resource-meta .value { color: var(--gold); font-weight: 600; }
+
+.addons-section { margin-top: 16px; }
+.addons-section h6 { font-size: .75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.addon-card { background: var(--dark); border: 1px solid var(--border); padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: .2s; display: flex; justify-content: space-between; align-items: center; }
+.addon-card:hover, .addon-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.addon-name { font-size: .9rem; }
+.addon-price { color: var(--gold); font-weight: 700; font-size: .9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="page-wrap">
+    <!-- LEFT: Resource info -->
+    <div>
+        <div class="resource-card">
+            {% if resource.image %}<img src="{{ resource.image.url }}" alt="{{ resource.name }}">{% endif %}
+            <h3>{{ resource.name }}</h3>
+            <p>{{ resource.description }}</p>
+            <div class="resource-meta"><span class="label">{% trans "Grupa" %}</span><span class="value">{{ resource.get_group_display }}</span></div>
+            <div class="resource-meta"><span class="label">{% trans "Cijena" %}</span><span class="value">{{ resource.base_price }} € / {{ resource.get_unit_display }}</span></div>
+            {% if resource.capacity %}<div class="resource-meta"><span class="label">{% trans "Kapacitet" %}</span><span class="value">{{ resource.capacity }} {% trans "Osoba" %}</span></div>{% endif %}
+            <div class="resource-meta"><span class="label">{% trans "Minimalno trajanje" %}</span><span class="value">{{ resource.min_duration }} {{ resource.get_unit_display }}</span></div>
+            <div class="resource-meta" style="border-top:1px solid var(--border);padding-top:12px;margin-top:8px">
+                <span class="label" id="qtyLabel">{% trans "Količina" %}</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <button onclick="changeQty(-1)" style="background:none;border:1px solid var(--border);color:var(--gold);width:26px;height:26px;cursor:pointer;font-size:1.1rem;line-height:1">&#8722;</button>
+                    <span id="qtyValue" style="color:var(--text);font-weight:700;min-width:24px;text-align:center">{{ resource.min_duration }}</span>
+                    <button onclick="changeQty(1)" style="background:none;border:1px solid var(--border);color:var(--gold);width:26px;height:26px;cursor:pointer;font-size:1.1rem;line-height:1">+</button>
+                </div>
+            </div>
+            <div class="resource-meta">
+                <span class="label">{% trans "Cijena uživo" %}</span>
+                <span class="value" id="liveTotalCard">{{ resource.base_price }} €</span>
+            </div>
+        </div>
+
+        {% if addons %}
+        <div class="resource-card addons-section" style="margin-top:16px">
+            <h6>{% trans "Dodatne usluge" %}</h6>
+            {% for addon in addons %}
+            <div class="addon-card" onclick="toggleAddon({{ addon.id }}, {{ addon.price }}, this)">
+                <span class="addon-name">{{ addon.name }}</span>
+                <span class="addon-price">+ {{ addon.price }} €</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT: Booking wizard -->
+    <div class="booking-wizard">
+        <div class="step-indicator">
+            <div class="si-step done" id="si1"><div class="si-dot">&#10003;</div><div class="si-lbl">{% trans "Objekt" %}</div></div>
+            <div class="si-line" id="siLine1"></div>
+            <div class="si-step active" id="si2"><div class="si-dot">2</div><div class="si-lbl">{% trans "Datum" %}</div></div>
+            <div class="si-line" id="siLine2"></div>
+            <div class="si-step" id="si3"><div class="si-dot">3</div><div class="si-lbl">{% trans "Vrijeme" %}</div></div>
+            <div class="si-line" id="siLine3"></div>
+            <div class="si-step" id="si4"><div class="si-dot">4</div><div class="si-lbl">{% trans "Podaci" %}</div></div>
+            <div class="si-line" id="siLine4"></div>
+            <div class="si-step" id="si5"><div class="si-dot">5</div><div class="si-lbl">{% trans "Plaćanje" %}</div></div>
+            <div class="si-line" id="siLine5"></div>
+            <div class="si-step" id="si6"><div class="si-dot">6</div><div class="si-lbl">{% trans "Potvrda" %}</div></div>
+        </div>
+
+        <!-- Step 2: Datum -->
+        <div class="step-panel active" id="stepDatum">
+            <h2>{% trans "Odaberite datum" %}</h2>
+            <div class="month-nav">
+                <button onclick="changeMonth(-1)">&#8592;</button>
+                <span id="monthDisplay"></span>
+                <button onclick="changeMonth(1)">&#8594;</button>
+            </div>
+            <div class="weekdays"><div>Po</div><div>Ut</div><div>Sr</div><div>Če</div><div>Pe</div><div>Su</div><div>Ne</div></div>
+            <div class="days-grid" id="daysGrid"></div>
+            <p class="step-hint">{% trans "Molimo odaberite datum" %}</p>
+        </div>
+
+        <!-- Step 3: Uhrzeit -->
+        <div class="step-panel hidden" id="stepUhrzeit">
+            <h2>{% trans "Odaberite vrijeme" %}</h2>
+            <div class="summary-bar" id="summaryBar3"></div>
+            <div class="slots-grid" id="slotsGrid"><div class="no-slots">{% trans "Učitavanje dostupnih termina..." %}</div></div>
+            <div class="btn-back" onclick="goToStep(2)">&#8592; {% trans "Natrag na datum" %}</div>
+        </div>
+
+        <!-- Step 4: Daten -->
+        <div class="step-panel hidden" id="stepDaten">
+            <h2>{% trans "Vaši podaci" %}</h2>
+            <div class="summary-bar" id="summaryBar4"></div>
+            <div class="form-grid">
+                <div class="form-group" style="grid-column:1/-1"><label>{% trans "Ime *" %}</label><input type="text" id="name" placeholder="{% trans "Ime i prezime" %}" required></div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>{% trans "E-mail *" %}</label><input type="email" id="email" placeholder="vas@email.hr" required></div>
+                <div class="form-group"><label>{% trans "Telefon" %}</label><input type="tel" id="phone" placeholder="+385 ..."></div>
+            </div>
+            <div class="form-group"><label>{% trans "WhatsApp" %}</label><input type="tel" id="whatsapp" placeholder="+385 ..."></div>
+            <button class="btn-next" onclick="goFromDatenToZahlung()">{% trans "Nastavi na plaćanje" %} &#8594;</button>
+            <div class="btn-back" onclick="goToStep(3)">&#8592; {% trans "Natrag na vrijeme" %}</div>
+        </div>
+
+        <!-- Step 5: Zahlung -->
+        <div class="step-panel hidden" id="stepZahlung">
+            <h2>{% trans "Način plaćanja" %}</h2>
+            <div class="summary-bar" id="summaryBar5"></div>
+            <div class="payment-options">
+                <div class="payment-opt selected" data-value="invoice" onclick="selectPayment(this)"><div class="pay-icon">&#128196;</div><div class="pay-label">{% trans "Račun" %}</div></div>
+                <div class="payment-opt" data-value="cash" onclick="selectPayment(this)"><div class="pay-icon">&#128181;</div><div class="pay-label">{% trans "Gotovina" %}</div></div>
+                <div class="payment-opt" data-value="card" onclick="selectPayment(this)"><div class="pay-icon">&#128179;</div><div class="pay-label">{% trans "Kartica" %}</div></div>
+                <div class="payment-opt" data-value="transfer" onclick="selectPayment(this)"><div class="pay-icon">&#127974;</div><div class="pay-label">{% trans "Prijenos" %}</div></div>
+            </div>
+            <input type="hidden" id="selectedPayment" value="invoice">
+            <div class="price-summary">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="color:var(--muted);font-size:.85rem">{% trans "Ukupna cijena" %}</span>
+                    <span class="price-total" id="totalPrice">{{ resource.base_price }} €</span>
+                </div>
+                <p class="price-note" id="priceNote">{% trans "Osnovna cijena za" %} {{ resource.min_duration }} {{ resource.get_unit_display }}</p>
+            </div>
+            <div class="error-msg" id="errorMsg"></div>
+            <button class="btn-next" id="submitBtn" onclick="submitBooking()">{% trans "Potvrdi rezervaciju" %}</button>
+            <div class="btn-back" onclick="goToStep(4)">&#8592; {% trans "Natrag na podatke" %}</div>
+        </div>
+
+        <!-- Step 6: Bestätigung -->
+        <div class="step-panel hidden" id="stepBestatigung">
+            <div style="text-align:center;padding:28px 16px">
+                <div style="font-size:3.5rem;margin-bottom:16px">&#9989;</div>
+                <h2>{% trans "Rezervacija uspješna!" %}</h2>
+                <div class="summary-bar" style="text-align:left;margin:20px auto;max-width:420px" id="confirmSummary"></div>
+                <p style="color:var(--muted);font-size:.85rem;margin-top:8px">{% trans "Broj rezervacije:" %} <strong id="confirmBookingNumber" style="color:var(--gold)"></strong></p>
+                <a href="/premium/" style="display:inline-block;margin-top:24px;color:var(--gold);border:1px solid var(--gold);padding:10px 22px;text-decoration:none;text-transform:uppercase;letter-spacing:2px;font-size:.8rem">{% trans "Nova rezervacija" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var RESOURCE_ID = {{ resource.id }};
+var BASE_PRICE  = parseFloat("{{ resource.base_price }}");
+var addonTotal = 0, selectedAddons = [], qty = {{ resource.min_duration }};
+var MIN_QTY = {{ resource.min_duration }}, UNIT = "{{ resource.unit }}";
+var _cal = new Date();
+var selectedDateStr = null, selectedTimeStr = null;
+var monthsHR = ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj','Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'];
+
+function toggleAddon(id, price, el) {
+    var idx = selectedAddons.indexOf(id);
+    if (idx === -1) { selectedAddons.push(id); addonTotal += parseFloat(price); el.classList.add('selected'); }
+    else { selectedAddons.splice(idx,1); addonTotal -= parseFloat(price); el.classList.remove('selected'); }
+    updateLivePrice();
+}
+function updateLivePrice() {
+    var total = (BASE_PRICE * qty + addonTotal).toFixed(2);
+    var el1 = document.getElementById('liveTotalCard'), el2 = document.getElementById('totalPrice');
+    if (el1) el1.textContent = total + ' €';
+    if (el2) el2.textContent = total + ' €';
+    var note = document.getElementById('priceNote');
+    if (note) note.textContent = qty + ' × ' + BASE_PRICE + ' €/' + UNIT;
+    var ql = document.getElementById('qtyLabel');
+    if (ql) ql.textContent = UNIT;
+}
+function changeQty(delta) {
+    qty = Math.max(MIN_QTY, qty + delta);
+    var el = document.getElementById('qtyValue');
+    if (el) el.textContent = qty;
+    updateLivePrice();
+}
+
+var stepMap = { 2:'stepDatum', 3:'stepUhrzeit', 4:'stepDaten', 5:'stepZahlung', 6:'stepBestatigung' };
+function goToStep(step) {
+    Object.values(stepMap).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.classList.remove('active'); el.classList.add('hidden'); }
+    });
+    var t = document.getElementById(stepMap[step]);
+    if (t) { t.classList.remove('hidden'); t.classList.add('active'); }
+    updateIndicator(step);
+}
+function updateIndicator(step) {
+    for (var i = 1; i <= 6; i++) {
+        var el = document.getElementById('si' + i), line = document.getElementById('siLine' + i);
+        if (!el) continue;
+        el.classList.remove('active','done');
+        var dot = el.querySelector('.si-dot');
+        if (i === 1 || i < step) { el.classList.add('done'); if (dot) dot.textContent = '✓'; }
+        else if (i === step) {
+            if (step === 6) { el.classList.add('done'); if (dot) dot.textContent = '✓'; }
+            else { el.classList.add('active'); if (dot) dot.textContent = i; }
+        } else { if (dot) dot.textContent = i; }
+        if (line) line.style.background = (i < step) ? 'var(--green)' : 'var(--border)';
+    }
+}
+
+function renderCalendar() {
+    var grid = document.getElementById('daysGrid');
+    var year = _cal.getFullYear(), month = _cal.getMonth();
+    document.getElementById('monthDisplay').textContent = monthsHR[month] + ' ' + year;
+    var firstDay = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+    var offset = firstDay === 0 ? 6 : firstDay - 1;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var html = '';
+    for (var i = 0; i < offset; i++) html += '<div class="day empty"></div>';
+    for (var d = 1; d <= daysInMonth; d++) {
+        var dt = new Date(year, month, d);
+        var ds = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        var cls = 'day';
+        if (dt < today) cls += ' disabled';
+        if (dt.toDateString() === today.toDateString()) cls += ' today';
+        if (ds === selectedDateStr) cls += ' selected';
+        var oc = dt < today ? '' : 'onclick="selectDate(\'' + ds + '\')"';
+        html += '<div class="' + cls + '" ' + oc + '>' + d + '</div>';
+    }
+    grid.innerHTML = html;
+}
+function changeMonth(offset) { _cal = new Date(_cal.getFullYear(), _cal.getMonth() + offset, 1); renderCalendar(); }
+
+function selectDate(ds) {
+    selectedDateStr = ds;
+    renderCalendar();
+    var parts = ds.split('-');
+    var formatted = parts[2] + '.' + parts[1] + '.' + parts[0];
+    var grid = document.getElementById('slotsGrid');
+    grid.innerHTML = '';
+    for (var h = 8; h < 20; h++) {
+        ['00','30'].forEach(function(min) {
+            var t = String(h).padStart(2,'0') + ':' + min;
+            var sel = t === selectedTimeStr ? ' selected' : '';
+            grid.innerHTML += '<button class="slot-btn' + sel + '" onclick="selectTime(\'' + t + '\')">' + t + '</button>';
+        });
+    }
+    document.getElementById('summaryBar3').innerHTML = '<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; ' + formatted;
+    goToStep(3);
+}
+function selectTime(t) {
+    selectedTimeStr = t;
+    document.querySelectorAll('.slot-btn').forEach(function(b) { b.classList.toggle('selected', b.textContent.trim() === t); });
+    var parts = selectedDateStr.split('-');
+    var formatted = parts[2] + '.' + parts[1] + '.' + parts[0];
+    document.getElementById('summaryBar4').innerHTML = '<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; <strong>' + formatted + '</strong> u <strong>' + t + '</strong>';
+    goToStep(4);
+}
+function goFromDatenToZahlung() {
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    if (!name || !email) { alert('Molimo ispunite sva obavezna polja.'); return; }
+    var parts = selectedDateStr.split('-');
+    document.getElementById('summaryBar5').innerHTML = '<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; <strong>' + parts[2] + '.' + parts[1] + '.' + parts[0] + '</strong> u <strong>' + selectedTimeStr + '</strong>';
+    goToStep(5);
+}
+function selectPayment(el) {
+    document.querySelectorAll('.payment-opt').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected');
+    document.getElementById('selectedPayment').value = el.dataset.value;
+}
+function submitBooking() {
+    var btn = document.getElementById('submitBtn');
+    btn.textContent = 'OBRADA...'; btn.disabled = true;
+    var errEl = document.getElementById('errorMsg'); errEl.style.display = 'none';
+    fetch('/premium/api/submit/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify({
+            resource_id: RESOURCE_ID, name: document.getElementById('name').value,
+            email: document.getElementById('email').value, phone: document.getElementById('phone').value,
+            whatsapp_number: document.getElementById('whatsapp').value,
+            payment_method: document.getElementById('selectedPayment').value,
+            date: selectedDateStr, time: selectedTimeStr, addons: selectedAddons, quantity: qty,
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.status === 'success') {
+            var parts = selectedDateStr.split('-');
+            document.getElementById('confirmSummary').innerHTML = '<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; <strong>' + parts[2] + '.' + parts[1] + '.' + parts[0] + '</strong> u <strong>' + selectedTimeStr + '</strong> &nbsp;|&nbsp; ' + qty + ' ' + UNIT;
+            document.getElementById('confirmBookingNumber').textContent = data.booking_number || '';
+            goToStep(6);
+        } else {
+            errEl.textContent = data.error || 'Greška pri rezervaciji. Molimo pokušajte ponovno.';
+            errEl.style.display = 'block';
+            btn.textContent = '{% trans "Potvrdi rezervaciju" %}'; btn.disabled = false;
+        }
+    })
+    .catch(function() {
+        errEl.textContent = 'Greška u povezivanju. Molimo pokušajte ponovno.';
+        errEl.style.display = 'block';
+        btn.textContent = '{% trans "Potvrdi rezervaciju" %}'; btn.disabled = false;
+    });
+}
+
+renderCalendar();
+updateIndicator(2);
+updateLivePrice();
+</script>
+{% endblock %}

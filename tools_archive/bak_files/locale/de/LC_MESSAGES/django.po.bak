@@ -1,0 +1,1842 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Investitor - projekti"
+msgstr "Investor – Projekte"
+
+msgid "Partner - fakture"
+msgstr "Partner – Rechnung"
+
+msgid "Radnik - upload slika"
+msgstr "Radnik – Bild hochladen"
+
+msgid "Reset lozinke"
+msgstr "Lozinke zurücksetzen"
+
+msgid "Verifikacija emaila"
+msgstr "E-Mail-Verifizierung"
+
+msgid "Magic token"
+msgstr "Magischer Token"
+
+msgid "Magic tokeni"
+msgstr "Magischer Token"
+
+msgid "Pokušaj prijave"
+msgstr "Anmelden"
+
+msgid "Pokušaji prijave"
+msgstr "Anmeldeversuche"
+
+msgid "Previše neuspješnih pokušaja. Pričekajte 15 minuta."
+msgstr "Zu viele fehlgeschlagene Versuche. Bitte 15 Minuten warten."
+
+msgid "Dobrodošli, {user.first_name or user.username}!"
+msgstr "Willkommen, {user.first_name or user.username}!"
+
+msgid "Pogrešni podaci za prijavu."
+msgstr "Falsche Anmeldedaten."
+
+msgid "Ako email postoji, link je poslan."
+msgstr "Wie in der E-Mail angegeben, wurde der Link gesendet."
+
+msgid "Previše zahtjeva. Pričekajte 10 minuta."
+msgstr "Zu viele Anfragen. Bitte warten Sie 10 Minuten."
+
+msgid "Link za pristup poslan na {email}. Vrijedi 24 sata."
+msgstr "Der Zugangs-Link wurde an {E-Mail-Adresse} gesendet. Er ist 24 Stunden lang gültig."
+
+msgid "Link nije valjan ili je istekao."
+msgstr "Der Link ist ungültig oder abgelaufen."
+
+msgid "Link je istekao ili je već iskorišten. Zatražite novi."
+msgstr "Der Link ist abgelaufen oder wurde bereits verwendet. Bitte fordern Sie einen neuen an."
+
+msgid "Korisnički račun nije aktivan."
+msgstr "Das Benutzerkonto ist nicht aktiv."
+
+msgid "✓ 2FA aktiviran! Koristite Google Authenticator za prijavu."
+msgstr "✓ 2FA aktiviert! Verwenden Sie Google Authenticator für die Anmeldung."
+
+msgid "Pogrešan kod. Pokušajte ponovo."
+msgstr "Falscher Code. Versuchen Sie es erneut."
+
+msgid "✓ Uspješna 2FA provjera!"
+msgstr "✓ Erfolgreiche 2FA-Verifizierung!"
+
+msgid "Greška provjere."
+msgstr "Verifizierungsfehler."
+
+msgid "Ako email postoji, link za reset je poslan."
+msgstr "Wie in der E-Mail angegeben, wurde der Link zum Zurücksetzen gesendet."
+
+msgid "Lozinke se ne podudaraju."
+msgstr "Die Passwörter stimmen nicht überein."
+
+msgid "Lozinka mora imati najmanje 8 znakova."
+msgstr "Das Passwort muss mindestens 8 Zeichen lang sein."
+
+msgid "✓ Lozinka promijenjena! Prijavite se s novom lozinkom."
+msgstr "✓ Slogan geändert! Melden Sie sich mit dem neuen Slogan an."
+
+msgid "Google login nije konfiguriran."
+msgstr "Google-Login ist nicht konfiguriert."
+
+msgid "OAuth state mismatch."
+msgstr "OAuth-Status stimmt nicht überein."
+
+msgid "Prijavljeni ste putem Google: {email}"
+msgstr "Sie sind über Google angemeldet: {E-Mail}"
+
+msgid "Greška Google prijave. Pokušajte ponovo."
+msgstr "Fehler bei der Google-Anmeldung. Versuchen Sie es erneut."
+
+msgid "Microsoft login nije konfiguriran."
+msgstr "Microsoft-Anmeldung ist nicht konfiguriert."
+
+msgid "Prijavljeni ste putem Microsoft: {email}"
+msgstr "Sie sind über Microsoft angemeldet: {E-Mail}"
+
+msgid "Greška Microsoft prijave."
+msgstr "Fehler bei der Microsoft-Anmeldung."
+
+msgid "Super Administrator"
+msgstr "Superadministrator"
+
+msgid "Admin tvrtke"
+msgstr "Unternehmensverwalter"
+
+msgid "Voditelj projekta"
+msgstr "Projektleiter"
+
+msgid "Radnik"
+msgstr "Arbeiter"
+
+msgid "Investitor"
+msgstr "Investor"
+
+msgid "Partner / Klijent"
+msgstr "Partner / Kunde"
+
+msgid "Uloga"
+msgstr "Rolle"
+
+msgid "Tvrtka"
+msgstr "Unternehmen"
+
+msgid "Profilna slika"
+msgstr "Profilbild"
+
+msgid "Telefon"
+msgstr "Telefon"
+
+msgid "Odjel"
+msgstr "Abteilung"
+
+msgid "Jezik sučelja"
+msgstr "Sprache der Benutzeroberfläche"
+
+msgid "Može uploadati slike"
+msgstr "Bilder hochladen"
+
+msgid "Vidi financije"
+msgstr "Siehe Finanzen"
+
+msgid "Odobrava radne sate"
+msgstr "Genehmigt Arbeitszeiten"
+
+msgid "Korisnički profil"
+msgstr "Benutzerprofil"
+
+msgid "Korisnički profili"
+msgstr "Korisnički-Profil"
+
+msgid "Naziv normativa"
+msgstr "Bezeichnung der Rechtsvorschrift"
+
+msgid "Jedinica mjere"
+msgstr "Maßeinheit"
+
+msgid "Cijena materijala"
+msgstr "Materialpreis"
+
+msgid "Sati rada po jedinici"
+msgstr "Arbeitsstunden pro Einheit"
+
+msgid "Normativ"
+msgstr "Normativ"
+
+msgid "Normativi"
+msgstr "Normativ"
+
+msgid "Marža (%)"
+msgstr "Marge (%)"
+
+msgid "PDV (%)"
+msgstr "Bruttogewinn (%)"
+
+msgid "Naziv tvrtke"
+msgstr "Firmenname"
+
+msgid "Adresa"
+msgstr "Adresse"
+
+msgid "Grad"
+msgstr "Grad"
+
+msgid "Poštanski broj"
+msgstr "Postleitzahl"
+
+msgid "U sustavu PDV-a"
+msgstr "Im Mehrwertsteuersystem"
+
+msgid "Tvrtke"
+msgstr "Unternehmen"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Hrvatski"
+msgstr "Kroatisch"
+
+msgid "English"
+msgstr "Englisch"
+
+msgid "Türkçe"
+msgstr "Türkisch"
+
+msgid "Ελληνικά"
+msgstr "Griechisch"
+
+msgid "Izlazni Račun"
+msgstr "Abschlussrechnung"
+
+msgid "Ponuda"
+msgstr "Angebot"
+
+msgid "Ulazni Račun"
+msgstr "Eingabekonto"
+
+msgid "Ugovor"
+msgstr "Vertrag"
+
+msgid "Potvrda"
+msgstr ""
+
+msgid "Partner"
+msgstr "Partner"
+
+msgid "Tip dokumenta"
+msgstr "Dokumenttyp"
+
+msgid "Broj dokumenta"
+msgstr "Dokumentennummer"
+
+msgid "Datum izdavanja"
+msgstr "Erscheinungsdatum"
+
+msgid "Datum dospijeća"
+msgstr "Fälligkeitsdatum"
+
+msgid "Iznos"
+msgstr "Betrag"
+
+msgid "Datoteka"
+msgstr "Datei"
+
+msgid "Plaćeno"
+msgstr "Bezahlt"
+
+msgid "Dokument"
+msgstr "Dokument"
+
+msgid "Dokumenti"
+msgstr "Dokumente"
+
+msgid "Uplata / Prihod"
+msgstr "Zahlung / Einkommen"
+
+msgid "Isplata / Rashod"
+msgstr "Zahlung / Ausgabe"
+
+msgid "Vezani dokument"
+msgstr "Verbundener Dokument"
+
+msgid "Smjer"
+msgstr "Richtung"
+
+msgid "Datum transakcije"
+msgstr "Transaktionsdatum"
+
+msgid "Opis"
+msgstr "Beschreibung"
+
+msgid "Transakcija"
+msgstr "Transaktion"
+
+msgid "Transakcije"
+msgstr "Transaktionen"
+
+msgid "Brze akcije"
+msgstr "Schnelle Aktionen"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Fisk."
+msgstr "Fisch."
+
+msgid "Osnovni podaci"
+msgstr "Grundlegende Informationen"
+
+msgid "Plaćanje"
+msgstr "Zahlung"
+
+msgid "Napomena"
+msgstr "Hinweis"
+
+msgid "Operater"
+msgstr "Betreiber"
+
+msgid "Zadano prodajno mjesto"
+msgstr "Standard-Verkaufsstelle"
+
+msgid "Stopa"
+msgstr "Fuß"
+
+msgid "Certifikat"
+msgstr "Zertifikat"
+
+msgid "Numeracija računa"
+msgstr "Rechnungsnummerierung"
+
+msgid "Zadane vrijednosti"
+msgstr "Standardwerte"
+
+msgid "Napomene na računima"
+msgstr "Anmerkungen zu den Gesetzesentwürfen"
+
+msgid "CIS Endpoint"
+msgstr "CIS-Endpunkt"
+
+msgid "Naziv"
+msgstr "Titel"
+
+msgid "Oznaka prostora (PP)"
+msgstr "Raumkennzeichnung (PP)"
+
+msgid "OIB tvrtke"
+msgstr "Unternehmen OIB"
+
+msgid "Aktivno"
+msgstr "Aktiv"
+
+msgid "IBAN za uplatu"
+msgstr "IBAN für die Zahlung"
+
+msgid "Poslovni prostor"
+msgstr "Geschäftsräume"
+
+msgid "Poslovni prostori"
+msgstr "Geschäftsräume"
+
+msgid "Ime i prezime"
+msgstr "Vorname und Nachname"
+
+msgid "OIB operatera"
+msgstr "Bedienungsanleitung für den Betreiber"
+
+msgid "Zadani poslovni prostor"
+msgstr "Beauftragte Geschäftsräume"
+
+msgid "Operateri"
+msgstr "Betreiber"
+
+msgid "Šifra grupe"
+msgstr "Chiffre Gruppe"
+
+msgid "Stopa PDV-a"
+msgstr "Mehrwertsteuersatz"
+
+msgid "PDV grupa"
+msgstr "PDV-Gruppe"
+
+msgid "PDV grupe"
+msgstr "PDV-Gruppe"
+
+msgid "Konfiguracija fiskalizacije"
+msgstr "Konfiguration der Fiskalisierung"
+
+msgid "Račun"
+msgstr "Rechnung"
+
+msgid "Predračun / Angebot"
+msgstr "Predračun / Angebot"
+
+msgid "Avansni račun"
+msgstr "Vorausrechnung"
+
+msgid "Storno račun"
+msgstr "Stornierung des Kontos"
+
+msgid "Gutschrift (DE)"
+msgstr "Gutschrift (DE)"
+
+msgid "Nacrt"
+msgstr "Entwurf"
+
+msgid "Poslano"
+msgstr "Gesendet"
+
+msgid "Neplaćeno"
+msgstr "Unbezahlt"
+
+msgid "Dospijelo"
+msgstr "Fällig"
+
+msgid "Otkazano"
+msgstr "Abgebrochen"
+
+msgid "Stornirano"
+msgstr "Storniert"
+
+msgid "Transakcijski račun"
+msgstr "Transaktionskonto"
+
+msgid "Gotovina"
+msgstr "Gotovina"
+
+msgid "Kartica"
+msgstr "Karte"
+
+msgid "Virman"
+msgstr "Im Folgenden finden Sie eine Liste der häufigsten Fehler."
+
+msgid "Überweisung (DE)"
+msgstr "Überweisung (DE)"
+
+msgid "Bar (DE)"
+msgstr "Bar (DE)"
+
+msgid "Vrsta"
+msgstr "Art"
+
+msgid "Zemlja"
+msgstr "Land"
+
+msgid "Broj računa"
+msgstr "Kontonummer"
+
+msgid "Interni ID"
+msgstr "Interne ID"
+
+msgid "Rok plaćanja"
+msgstr "Zahlungsfrist"
+
+msgid "Datum isporuke"
+msgstr "Liefertermin"
+
+msgid "Klijent / Empfänger"
+msgstr "Klijent / Empfänger"
+
+msgid "Grad / PLZ Stadt"
+msgstr "Grad / PLZ Stadt"
+
+msgid "Država"
+msgstr "Bundesstaat"
+
+msgid "OIB / USt-IdNr"
+msgstr "OIB / Umsatzsteuer-Identifikationsnummer"
+
+msgid "Email klijenta"
+msgstr "E-Mail-Client"
+
+msgid "Način plaćanja"
+msgstr "Zahlungsweise"
+
+msgid "Valuta"
+msgstr "Währung"
+
+msgid "SWIFT/BIC"
+msgstr "SWIFT/BIC"
+
+msgid "Poziv na broj"
+msgstr "Signatur"
+
+msgid "Iznos bez PDV/MwSt"
+msgstr "Betrag ohne Mehrwertsteuer/MwSt"
+
+msgid "PDV/MwSt %"
+msgstr "PDV/MwSt %"
+
+msgid "PDV/MwSt iznos"
+msgstr "Mehrwertsteuerbetrag"
+
+msgid "Ukupno / Gesamt"
+msgstr "Ukupno / Gesamt"
+
+msgid "Fiskalizirano"
+msgstr "Fiskalisiert"
+
+msgid "Datum fiskalizacije"
+msgstr "Datum der Fiskalisierung"
+
+msgid "Napomena / Anmerkung"
+msgstr "Napomena / Anmerkung"
+
+msgid "Interna napomena"
+msgstr "Interne Notiz"
+
+msgid "Storno od računa"
+msgstr "Stornierung von der Rechnung"
+
+msgid "Naziv izdavatelja"
+msgstr "Name des Verlags"
+
+msgid "Redni broj u prostoru"
+msgstr "Regelmäßige Ausgabe im Raum"
+
+msgid "Računi"
+msgstr "Rechnungen"
+
+msgid "Količina"
+msgstr "Menge"
+
+msgid "Jed.mjera"
+msgstr "Maßeinheit"
+
+msgid "Jed.cijena"
+msgstr "Stückpreis"
+
+msgid "Popust %"
+msgstr "Rabatt %"
+
+msgid "Ukupno"
+msgstr "Gesamt"
+
+msgid "PDV %"
+msgstr "Mehrwertsteuer %"
+
+msgid "Stavka računa"
+msgstr "Rechnungssatz"
+
+msgid "Stavke računa"
+msgstr "Rechnungssätze"
+
+msgid "Stavke"
+msgstr "Streiks"
+
+msgid "Uvoz iz modula"
+msgstr "Import aus Modul"
+
+msgid "Napomene"
+msgstr "Anmerkungen"
+
+msgid "Akcije"
+msgstr "Aktionen"
+
+msgid "Broj i datumi"
+msgstr "Grillen und Datteln"
+
+msgid "Fiskalizacija (HR)"
+msgstr "Fiskalisierung (HR)"
+
+msgid "Izdavatelj"
+msgstr "Verlag"
+
+msgid "Fakturiranje"
+msgstr "Rechnungsstellung"
+
+msgid "Ukupno fakturirano"
+msgstr "Gesamtbetrag der Rechnung"
+
+msgid "Svi"
+msgstr "Alle"
+
+msgid "Novi račun"
+msgstr "Neues Konto"
+
+msgid "Broj"
+msgstr "Anzahl"
+
+msgid "Klijent"
+msgstr "Kunde"
+
+msgid "Datum"
+msgstr "Datum"
+
+msgid "Nema računa"
+msgstr "Keine Rechnung"
+
+msgid "Klijent nema email adresu!"
+msgstr "Der Kunde hat keine E-Mail-Adresse!"
+
+msgid "Račun poslan na {invoice.client_email}"
+msgstr "Rechnung gesendet an {invoice.client_email}"
+
+msgid "Greška pri slanju: {e}"
+msgstr "Fehler beim Speichern: {e}"
+
+msgid "Fiskalizacija je dostupna samo za HR račune!"
+msgstr "Die Fiskalisierung ist nur für HR-Konten verfügbar!"
+
+msgid "Račun je već fiskaliziran!"
+msgstr "Die Rechnung ist bereits fiskalisiert!"
+
+msgid "Fiskalizirati se mogu samo računi (R), ne predračuni!"
+msgstr "Nur Rechnungen (R) können fiskalisiert werden, keine Vorausrechnungen!"
+
+msgid "Račun fiskaliziran (DEMO - CIS nedostupan)!"
+msgstr "Fiskalisierter Account (DEMO - CIS nicht verfügbar)!"
+
+msgid "ZKI: {invoice.zki} | JIR: {invoice.jir}"
+msgstr "ZKI: {Rechnung.zki} | JIR: {Rechnung.jir}"
+
+msgid "✓ Račun uspješno fiskaliziran!"
+msgstr "✓ Rechnung erfolgreich fiskalisiert!"
+
+msgid "Greška fiskalizacije: {result.get(\"error\")}"
+msgstr "Fiskalisierungsfehler: {result.get(\"
+
+#: invoicing/views.py:367 invoicing_backup_20260219/views.py:367
+#, python-brace-format
+msgid "
+
+msgid "Račun je već storniran!"
+msgstr "Die Rechnung wurde bereits storniert!"
+
+msgid "Storno račun {storno_invoice.number} kreiran!"
+msgstr "Stornorechnung {storno_invoice.number} erstellt!"
+
+msgid "Klijent (Kupac)"
+msgstr "Kunde (Käufer)"
+
+msgid "Dobavljač"
+msgstr "Lieferant"
+
+msgid "Partner (Oboje)"
+msgstr "Partner (Beide)"
+
+msgid "Zaposlenik"
+msgstr "Mitarbeiter"
+
+msgid "Vlasnik podataka"
+msgstr "Dateninhaber"
+
+msgid "Naziv / Ime"
+msgstr "Bezeichnung / Name"
+
+msgid "Ulica i broj"
+msgstr "Straße und Hausnummer"
+
+msgid "Tip partnera"
+msgstr "Partner-Tipp"
+
+msgid "Rok plaćanja (dana)"
+msgstr "Zahlungsfrist (Tage)"
+
+msgid "Rabat (%)"
+msgstr "Rabatt (%)"
+
+msgid "Interne napomene"
+msgstr "Interne Notizen"
+
+msgid "Aktivan"
+msgstr "Aktiv"
+
+msgid "Saldo"
+msgstr "Saldo"
+
+msgid "Partneri"
+msgstr "Partner"
+
+msgid "Booking"
+msgstr "Buchung"
+
+msgid "PREMIUM RESOURCE"
+msgstr "PREMIUM-RESSOURCE"
+
+msgid "Select your preferred date and time to initiate the booking protocol."
+msgstr "Wählen Sie Ihr bevorzugtes Datum und Ihre bevorzugte Uhrzeit aus, um den Buchungsvorgang zu starten."
+
+msgid "Mon"
+msgstr "Mein"
+
+msgid "Tue"
+msgstr "Dienstag"
+
+msgid "Wed"
+msgstr "Wette"
+
+msgid "Thu"
+msgstr "Herbst"
+
+msgid "Fri"
+msgstr "Frei"
+
+msgid "Sat"
+msgstr "Er sagte"
+
+msgid "Sun"
+msgstr "Sie"
+
+msgid "Back to Calendar"
+msgstr "Zurück zum Kalender"
+
+msgid "Back to Time Selection"
+msgstr "Zurück zur Zeitauswahl"
+
+msgid "Final Details"
+msgstr "Letzte Details"
+
+msgid "Full Name"
+msgstr "Vollständiger Name"
+
+msgid "Email Address"
+msgstr "E-Mail-Adresse"
+
+msgid "Contact Phone"
+msgstr "Kontakt Telefon"
+
+msgid "Complete Booking"
+msgstr "Buchung abschließen"
+
+msgid "SUCCESS"
+msgstr "ERFOLG"
+
+msgid "Booking Reference"
+msgstr "Buchungsnummer"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "PROCESSING..."
+msgstr "WIRD VERARBEITET..."
+
+msgid "Error"
+msgstr "Fehler"
+
+msgid "System Error"
+msgstr "Systemfehler"
+
+msgid "Exclusive Rental"
+msgstr "Exklusive Vermietung"
+
+msgid "Architecture of power and luxury"
+msgstr "Architektur der Macht und des Luxus"
+
+msgid "BOOKING PROCESS"
+msgstr "BUCHUNGSVORGANG"
+
+msgid "Start Protocol"
+msgstr "Protokoll starten"
+
+msgid "Naziv projekta"
+msgstr "Projektname"
+
+msgid "Šifra"
+msgstr "Code"
+
+msgid "Lokacija"
+msgstr "Standort"
+
+msgid "Projekt"
+msgstr "Projekt"
+
+msgid "Projekti"
+msgstr "Projekt"
+
+msgid "Voditelj"
+msgstr "Moderator"
+
+msgid "Ažuriranja"
+msgstr "Aktualisierungen"
+
+msgid "Nema ažuriranja"
+msgstr "Keine Aktualisierungen"
+
+msgid "Fotografije projekta"
+msgstr "Fotos des Projekts"
+
+msgid "Nema fotografija"
+msgstr "Stilles Foto"
+
+msgid "Svi projekti"
+msgstr "Alle Projekte"
+
+msgid "Novi projekt"
+msgstr "Neues Projekt"
+
+msgid "Otvori"
+msgstr "Öffnen"
+
+msgid "Nema projekata"
+msgstr "Keine Projekte"
+
+msgid "Dodaj prvi projekt"
+msgstr "Erstes Projekt hinzufügen"
+
+msgid "Navigacija"
+msgstr "Navigation"
+
+msgid "Početna"
+msgstr "Startseite"
+
+msgid "Radno vrijeme"
+msgstr "Öffnungszeiten"
+
+msgid "Termini"
+msgstr "Begriffe"
+
+msgid "Upravljanje"
+msgstr "Verwaltung"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Korisnici"
+msgstr "Benutzer"
+
+msgid "Fakture"
+msgstr "Fakture"
+
+msgid "Financije"
+msgstr "Finanzen"
+
+msgid "Moduli"
+msgstr "Module"
+
+msgid "Skladište"
+msgstr "Lager"
+
+msgid "Webshop"
+msgstr "Webshop"
+
+msgid "Najam"
+msgstr "Meine Haut"
+
+msgid "Fitness"
+msgstr "Fitness"
+
+msgid "Osiguranje"
+msgstr "Versicherung"
+
+msgid "Kalkulator"
+msgstr "Rechner"
+
+msgid "Sustav"
+msgstr "System"
+
+msgid "Web stranica"
+msgstr "Website"
+
+msgid "Odjava"
+msgstr "Abmeldung"
+
+msgid "Fakturirano"
+msgstr "In Rechnung gestellt"
+
+msgid "Sati (tjedan)"
+msgstr "Stunden (pro Woche)"
+
+msgid "Zadnje fakture"
+msgstr "Letzte Rechnungen"
+
+msgid "Nema faktura"
+msgstr "Nema-Rechnung"
+
+msgid "Aktivni projekti"
+msgstr "Aktuelle Projekte"
+
+msgid "Pregled investicija"
+msgstr "Übersicht Investition"
+
+msgid "Pregled vaših projekata"
+msgstr "Überblick über Ihre Projekte"
+
+msgid "Detalji i fotografije"
+msgstr "Details und Fotos"
+
+msgid "Nema dostupnih projekata"
+msgstr "Keine Projekte verfügbar"
+
+msgid "Vaši projekti će biti prikazani ovdje čim budu dodijeljeni."
+msgstr "Ihre Projekte werden hier angezeigt, sobald sie zugewiesen wurden."
+
+msgid "Moji projekti i tim"
+msgstr "Meine Projekte und mein Team"
+
+msgid "Moji projekti"
+msgstr "Meine Projekte"
+
+msgid "Sati tima (tjedan)"
+msgstr "Teamstunden (pro Woche)"
+
+msgid "Na odobrenju"
+msgstr "Genehmigt"
+
+msgid "Otvori projekt"
+msgstr "Projekt öffnen"
+
+msgid "Partner portal"
+msgstr "Partner portal"
+
+msgid "Vaši računi i termini"
+msgstr "Ihre Rechnungen und Termine"
+
+msgid "Vaši računi"
+msgstr "Ihre Rechnungen"
+
+msgid "Aktivni"
+msgstr "Aktiv"
+
+msgid "Staff"
+msgstr "Mitarbeiter"
+
+msgid "Admini"
+msgstr "Admini"
+
+msgid "Štoperica, unos sati, evidencija"
+msgstr "Stoppuhr, Stundenerfassung, Aufzeichnungen"
+
+msgid "Evidencija sati"
+msgstr "Stundenzettel"
+
+msgid "Pregled, odobrenje, PDF export"
+msgstr "Übersicht, Genehmigung, PDF-Export"
+
+msgid "Kreiraj i upravljaj fakturama"
+msgstr "Erstellen und verwalten Sie Rechnungen"
+
+msgid "Aktivni projekti i zadaci"
+msgstr "Aktive Projekte und Aufgaben"
+
+msgid "Klijenti i dobavljači"
+msgstr "Kunden und Lieferanten"
+
+msgid "Upravljanje korisnicima i rolama"
+msgstr "Benutzer und Rollen verwalten"
+
+msgid "Upravljanje tvrtkama"
+msgstr "Unternehmensführung"
+
+msgid "Upload i pregled dokumenata"
+msgstr "Dokumente hochladen und anzeigen"
+
+msgid "Procjene i kalkulacije"
+msgstr "Schätzungen und Berechnungen"
+
+msgid "Napredne postavke sustava"
+msgstr "Erweiterte Systemeinstellungen"
+
+msgid "Zadnje prijave"
+msgstr "Letzte Anmeldungen"
+
+msgid "Korisnik"
+msgstr "Benutzer"
+
+msgid "Kada"
+msgstr "Wann"
+
+msgid "Nema podataka"
+msgstr "Keine Daten"
+
+msgid "Moj radni portal"
+msgstr "Mein Arbeitsportal"
+
+msgid "Moji sati (7 dana)"
+msgstr "Meine Sati (7 Tage)"
+
+msgid "Čekaju odobrenje"
+msgstr "Sie warten auf die Genehmigung."
+
+msgid "Moji unosi radnog vremena"
+msgstr "Meine Arbeitszeiteinträge"
+
+msgid "Novi unos"
+msgstr "Novi unos"
+
+msgid "Sati"
+msgstr "Samstag"
+
+msgid "Predano"
+msgstr "Engagiert"
+
+msgid "Odobreno"
+msgstr "Genehmigt"
+
+msgid "Nema unosa"
+msgstr "Keine Einträge"
+
+msgid "Upload slika s terena"
+msgstr "Bild vom Gelände hochladen"
+
+msgid "Odaberi projekt"
+msgstr "Odaberi-Projekt"
+
+msgid "Opis (opcionalno)"
+msgstr "Beschreibung (optional)"
+
+msgid "Uploadaj slike"
+msgstr "Bilder hochladen"
+
+msgid "Nisi dodijeljen ni jednom aktivnom projektu."
+msgstr "Sie sind keinem aktiven Projekt zugewiesen."
+
+msgid "Nadolazeći termini"
+msgstr "Begriffe nachschlagen"
+
+msgid "Nema nadolazećih termina"
+msgstr "Es gibt keine bevorstehenden Termine."
+
+msgid "Messages"
+msgstr "Nachrichten"
+
+msgid "Site Maps"
+msgstr "Sitemaps"
+
+msgid "Static Files"
+msgstr "Statische Dateien"
+
+msgid "Syndication"
+msgstr "Syndizierung"
+
+msgid "…"
+msgstr "…"
+
+msgid "That page number is not an integer"
+msgstr "Diese Seitenzahl ist keine ganze Zahl."
+
+msgid "That page number is less than 1"
+msgstr "Diese Seitenzahl ist kleiner als 1."
+
+msgid "That page contains no results"
+msgstr "Diese Seite enthält keine Ergebnisse."
+
+msgid "Enter a valid value."
+msgstr "Geben Sie einen gültigen Wert ein."
+
+msgid "Enter a valid domain name."
+msgstr "Geben Sie einen gültigen Domainnamen ein."
+
+msgid "Enter a valid URL."
+msgstr "Geben Sie eine gültige URL ein."
+
+msgid "Enter a valid integer."
+msgstr "Geben Sie eine gültige ganze Zahl ein."
+
+msgid "Enter a valid email address."
+msgstr "Geben Sie eine gültige E-Mail-Adresse ein."
+
+msgid "Enter a valid %(protocol)s address."
+msgstr "Geben Sie eine gültige %(protocol)s-Adresse ein."
+
+msgid "IPv4"
+msgstr "Internetprotokoll Version 4"
+
+msgid "IPv6"
+msgstr "Internetprotokoll Version 6"
+
+msgid "IPv4 or IPv6"
+msgstr "IPv4 oder IPv6"
+
+msgid "Enter only digits separated by commas."
+msgstr "Geben Sie nur durch Kommas getrennte Ziffern ein."
+
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr "Stellen Sie sicher, dass dieser Wert %(limit_value)s ist (er ist %(show_value)s)."
+
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr "Stellen Sie sicher, dass dieser Wert kleiner oder gleich %(limit_value)s ist."
+
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr "Stellen Sie sicher, dass dieser Wert größer oder gleich %(limit_value)s ist."
+
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr "Stellen Sie sicher, dass dieser Wert ein Vielfaches der Schrittweite %(limit_value)s ist."
+
+msgid "Enter a number."
+msgstr "Geben Sie eine Zahl ein."
+
+msgid "Null characters are not allowed."
+msgstr "Nullzeichen sind nicht zulässig."
+
+msgid "and"
+msgstr "und"
+
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr "%(model_name)s mit diesem %(field_labels)s existiert bereits."
+
+msgid "Constraint “%(name)s” is violated."
+msgstr "Die Einschränkung „%(name)s“ wurde verletzt."
+
+msgid "Value %(value)r is not a valid choice."
+msgstr "Der Wert %(value)r ist keine gültige Auswahl."
+
+msgid "This field cannot be null."
+msgstr "Dieses Feld darf nicht leer sein."
+
+msgid "This field cannot be blank."
+msgstr "Dieses Feld darf nicht leer bleiben."
+
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr "%(model_name)s mit diesem %(field_label)s existiert bereits."
+
+msgid "Field of type: %(field_type)s"
+msgstr "Feldtyp: %(field_type)s"
+
+msgid "“%(value)s” value must be either True or False."
+msgstr "Der Wert „%(value)s“ muss entweder „True“ oder „False“ sein."
+
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr "Der Wert „%(value)s“ muss entweder „True“, „False“ oder „None“ sein."
+
+msgid "Boolean (Either True or False)"
+msgstr "Boolesch (entweder wahr oder falsch)"
+
+msgid "String (up to %(max_length)s)"
+msgstr "Zeichenfolge (bis zu %(max_length)s)"
+
+msgid "String (unlimited)"
+msgstr "Zeichenfolge (unbegrenzt)"
+
+msgid "Comma-separated integers"
+msgstr "Durch Kommas getrennte Ganzzahlen"
+
+msgid "Date (without time)"
+msgstr "Datum (ohne Uhrzeit)"
+
+msgid "Date (with time)"
+msgstr "Datum (mit Uhrzeit)"
+
+msgid "“%(value)s” value must be a decimal number."
+msgstr "Der Wert „%(value)s“ muss eine Dezimalzahl sein."
+
+msgid "Decimal number"
+msgstr "Dezimalzahl"
+
+msgid "Duration"
+msgstr "Dauer"
+
+msgid "Email address"
+msgstr "E-Mail-Adresse"
+
+msgid "File path"
+msgstr "Dateipfad"
+
+msgid "“%(value)s” value must be a float."
+msgstr "Der Wert „%(value)s“ muss ein Fließkommawert sein."
+
+msgid "Floating point number"
+msgstr "Gleitkommazahl"
+
+msgid "“%(value)s” value must be an integer."
+msgstr "Der Wert „%(value)s“ muss eine ganze Zahl sein."
+
+msgid "Integer"
+msgstr "Ganzes"
+
+msgid "Big (8 byte) integer"
+msgstr "Große (8 Byte) Ganzzahl"
+
+msgid "Small integer"
+msgstr "Kleine ganze Zahl"
+
+msgid "IPv4 address"
+msgstr "IPv4-Adresse"
+
+msgid "IP address"
+msgstr "IP-Adresse"
+
+msgid "“%(value)s” value must be either None, True or False."
+msgstr "Der Wert „%(value)s“ muss entweder None, True oder False sein."
+
+msgid "Boolean (Either True, False or None)"
+msgstr "Boolesch (entweder wahr, falsch oder keine Angabe)"
+
+msgid "Positive big integer"
+msgstr "Positive große ganze Zahl"
+
+msgid "Positive integer"
+msgstr "Positive ganze Zahl"
+
+msgid "Positive small integer"
+msgstr "Positive kleine ganze Zahl"
+
+msgid "Slug (up to %(max_length)s)"
+msgstr "Slug (bis zu %(max_length)s)"
+
+msgid "Text"
+msgstr "Text"
+
+msgid "Time"
+msgstr "Zeit"
+
+msgid "URL"
+msgstr "Webadresse"
+
+msgid "Raw binary data"
+msgstr "Rohdaten"
+
+msgid "“%(value)s” is not a valid UUID."
+msgstr "„%(Wert)s“ ist keine gültige UUID."
+
+msgid "Universally unique identifier"
+msgstr "Universell eindeutige Kennung"
+
+msgid "File"
+msgstr "Datei"
+
+msgid "Image"
+msgstr "Bild"
+
+msgid "A JSON object"
+msgstr "Ein JSON-Objekt"
+
+msgid "Value must be valid JSON."
+msgstr "Der Wert muss gültiges JSON sein."
+
+msgid "%(model)s instance with %(field)s %(value)r does not exist."
+msgstr "Die Instanz %(model)s mit %(field)s %(value)r existiert nicht."
+
+msgid "Foreign Key (type determined by related field)"
+msgstr "Fremdschlüssel (Typ wird durch das zugehörige Feld bestimmt)"
+
+msgid "One-to-one relationship"
+msgstr "Eins-zu-eins-Beziehung"
+
+msgid "%(from)s-%(to)s relationship"
+msgstr "%(von)s-%(bis)s-Beziehung"
+
+msgid "%(from)s-%(to)s relationships"
+msgstr "%(von)s-%(bis)s-Beziehungen"
+
+msgid "Many-to-many relationship"
+msgstr "Viele-zu-viele-Beziehung"
+
+msgid ":?.!"
+msgstr "?"
+
+msgid "This field is required."
+msgstr "Dieses Feld ist erforderlich."
+
+msgid "Enter a whole number."
+msgstr "Geben Sie eine ganze Zahl ein."
+
+msgid "Enter a valid date."
+msgstr "Geben Sie ein gültiges Datum ein."
+
+msgid "Enter a valid time."
+msgstr "Geben Sie eine gültige Zeit ein."
+
+msgid "Enter a valid date/time."
+msgstr "Geben Sie ein gültiges Datum/eine gültige Uhrzeit ein."
+
+msgid "Enter a valid duration."
+msgstr "Geben Sie eine gültige Dauer ein."
+
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr "Die Anzahl der Tage muss zwischen {min_days} und {max_days} liegen."
+
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr "Es wurde keine Datei übermittelt. Überprüfen Sie den Kodierungstyp auf dem Formular."
+
+msgid "No file was submitted."
+msgstr "Es wurde keine Datei übermittelt."
+
+msgid "The submitted file is empty."
+msgstr "Die übermittelte Datei ist leer."
+
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr "Bitte entweder eine Datei einreichen oder das Kontrollkästchen aktivieren, nicht beides."
+
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr "Wählen Sie eine gültige Option aus. %(value)s ist keine der verfügbaren Optionen."
+
+msgid "Enter a list of values."
+msgstr "Geben Sie eine Liste von Werten ein."
+
+msgid "Enter a complete value."
+msgstr "Geben Sie einen vollständigen Wert ein."
+
+msgid "Enter a valid UUID."
+msgstr "Geben Sie eine gültige UUID ein."
+
+msgid "Enter a valid JSON."
+msgstr "Geben Sie eine gültige JSON-Datei ein."
+
+msgid ":"
+msgstr ":"
+
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr "(Verstecktes Feld %(name)s) %(error)s"
+
+msgid "Order"
+msgstr "Bestellung"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Please correct the duplicate data for %(field)s."
+msgstr "Bitte korrigieren Sie die doppelten Daten für %(field)s."
+
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr "Bitte korrigieren Sie die doppelten Daten für %(field)s, die eindeutig sein müssen."
+
+msgid "Please correct the duplicate values below."
+msgstr "Bitte korrigieren Sie die doppelten Werte unten."
+
+msgid "The inline value did not match the parent instance."
+msgstr "Der Inline-Wert stimmte nicht mit der übergeordneten Instanz überein."
+
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr "Wählen Sie eine gültige Option aus. Diese Option ist nicht unter den verfügbaren Optionen enthalten."
+
+msgid "“%(pk)s” is not a valid value."
+msgstr "„%(pk)s“ ist kein gültiger Wert."
+
+msgid "Clear"
+msgstr "Klar"
+
+msgid "Currently"
+msgstr "Derzeit"
+
+msgid "Change"
+msgstr "Änderung"
+
+msgid "Unknown"
+msgstr "Unbekannt"
+
+msgid "Yes"
+msgstr "Exklusive Ressourcen"
+
+msgid "No"
+msgstr "Von"
+
+msgid "yes,no,maybe"
+msgstr "Ja, nein, vielleicht"
+
+msgid "%s KB"
+msgstr "%s KB"
+
+msgid "%s MB"
+msgstr "%s MB"
+
+msgid "%s GB"
+msgstr "%s GB"
+
+msgid "%s TB"
+msgstr "%s TB"
+
+msgid "%s PB"
+msgstr "%s PB"
+
+msgid "p.m."
+msgstr "p.m."
+
+msgid "a.m."
+msgstr "morgens"
+
+msgid "PM"
+msgstr "Premierminister"
+
+msgid "AM"
+msgstr "Im Moment"
+
+msgid "midnight"
+msgstr "Mitternacht"
+
+msgid "noon"
+msgstr "dann"
+
+msgid "Monday"
+msgstr "Montag"
+
+msgid "Tuesday"
+msgstr "Dienstag"
+
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+msgid "Thursday"
+msgstr "Donnerstag"
+
+msgid "Friday"
+msgstr "Freitag"
+
+msgid "Saturday"
+msgstr "Samstag"
+
+msgid "Sunday"
+msgstr "Sonntag"
+
+msgid "January"
+msgstr "Januar"
+
+msgid "February"
+msgstr "Februar"
+
+msgid "March"
+msgstr "März"
+
+msgid "April"
+msgstr "April"
+
+msgid "May"
+msgstr "Es gibt"
+
+msgid "June"
+msgstr "Juni"
+
+msgid "July"
+msgstr "Juli"
+
+msgid "August"
+msgstr "August"
+
+msgid "September"
+msgstr "September"
+
+msgid "October"
+msgstr "Oktober"
+
+msgid "November"
+msgstr "November"
+
+msgid "December"
+msgstr "Dezember"
+
+msgid "jan"
+msgstr "nein"
+
+msgid "feb"
+msgstr "Februar"
+
+msgid "mar"
+msgstr "als"
+
+msgid "apr"
+msgstr "April"
+
+msgid "may"
+msgstr "hat"
+
+msgid "jun"
+msgstr "Juni"
+
+msgid "jul"
+msgstr "Juli"
+
+msgid "aug"
+msgstr "aug"
+
+msgid "sep"
+msgstr "sieben"
+
+msgid "oct"
+msgstr "Okt"
+
+msgid "nov"
+msgstr "neu"
+
+msgid "dec"
+msgstr "Dezember"
+
+msgid "Jan."
+msgstr "Nein."
+
+msgid "Feb."
+msgstr "Februar"
+
+msgid "March"
+msgstr "März"
+
+msgid "April"
+msgstr "April"
+
+msgid "May"
+msgstr "Es gibt"
+
+msgid "June"
+msgstr "Juni"
+
+msgid "July"
+msgstr "Juli"
+
+msgid "Aug."
+msgstr "Aug."
+
+msgid "Sept."
+msgstr "Sept."
+
+msgid "Oct."
+msgstr "Okt."
+
+msgid "Nov."
+msgstr "Nov."
+
+msgid "Dec."
+msgstr "Dezember"
+
+msgid "January"
+msgstr "Januar"
+
+msgid "February"
+msgstr "Februar"
+
+msgid "March"
+msgstr "März"
+
+msgid "April"
+msgstr "April"
+
+msgid "May"
+msgstr "Es gibt"
+
+msgid "June"
+msgstr "Juni"
+
+msgid "July"
+msgstr "Juli"
+
+msgid "August"
+msgstr "August"
+
+msgid "September"
+msgstr "September"
+
+msgid "October"
+msgstr "Oktober"
+
+msgid "November"
+msgstr "November"
+
+msgid "December"
+msgstr "Dezember"
+
+msgid "This is not a valid IPv6 address."
+msgstr "Dies ist keine gültige IPv6-Adresse."
+
+msgid "%(truncated_text)s…"
+msgstr "(abgeschnittener Text)s…"
+
+msgid "or"
+msgstr "oder"
+
+msgid ", "
+msgstr ", "
+
+msgid "Forbidden"
+msgstr "Verboten"
+
+msgid "CSRF verification failed. Request aborted."
+msgstr "CSRF-Überprüfung fehlgeschlagen. Anfrage abgebrochen."
+
+msgid "More information is available with DEBUG=True."
+msgstr "Weitere Informationen sind mit DEBUG=True verfügbar."
+
+msgid "No year specified"
+msgstr "Kein Jahr angegeben"
+
+msgid "Date out of range"
+msgstr "Datum außerhalb des Bereichs"
+
+msgid "No month specified"
+msgstr "Kein Monat angegeben"
+
+msgid "No day specified"
+msgstr "Kein Tag angegeben"
+
+msgid "No week specified"
+msgstr "Keine Woche angegeben"
+
+msgid "No %(verbose_name_plural)s available"
+msgstr "Keine %(verbose_name_plural)s verfügbar"
+
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr "Ungültige Datumszeichenfolge „%(datestr)s“ im angegebenen Format „%(format)s“"
+
+msgid "No %(verbose_name)s found matching the query"
+msgstr "Keine %(verbose_name)s gefunden, die der Abfrage entsprechen"
+
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr "Die Seite ist nicht „die letzte“ und kann auch nicht in eine Ganzzahl umgewandelt werden."
+
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr "Ungültige Seite (%(Seitenzahl)s): %(Meldung)s"
+
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr "Leere Liste und „%(class_name)s.allow_empty” ist False."
+
+msgid "Directory indexes are not allowed here."
+msgstr "Verzeichnisindizes sind hier nicht zulässig."
+
+msgid "“%(path)s” does not exist"
+msgstr "„%(Pfad)s“ existiert nicht."
+
+msgid "Index of %(directory)s"
+msgstr "Index von %(Verzeichnis)s"
+
+msgid "The install worked successfully! Congratulations!"
+msgstr "Die Installation war erfolgreich! Herzlichen Glückwunsch!"
+
+msgid "Django Documentation"
+msgstr "Django-Dokumentation"
+
+msgid "Topics, references, &amp; how-to’s"
+msgstr "Themen, Referenzen und Anleitungen"
+
+msgid "Tutorial: A Polling App"
+msgstr "Tutorial: Eine Umfrage-App"
+
+msgid "Get started with Django"
+msgstr "Erste Schritte mit Django"
+
+msgid "Django Community"
+msgstr "Django-Community"
+
+msgid "Connect, get help, or contribute"
+msgstr "Verbinden, Hilfe erhalten oder beitragen"
+
+msgid "title"
+msgstr "Titel"
+
+msgid "password"
+msgstr "Passwort"
+
+msgid "title a"
+msgstr "Titel A"
+
+msgid "title b"
+msgstr "Titel B"
+
+msgid "title c"
+msgstr "Titel C"
+
+msgid "title d"
+msgstr "Titel D"
+
+msgid "visits"
+msgstr "Besuche"
+
+msgid "Sorry, translation is not available."
+msgstr "Leider ist keine Übersetzung verfügbar."
+
+msgid "None"
+msgstr "Keine"
+
+msgid "Stranica"
+msgstr "Seite"
+
+msgid "Stranice"
+msgstr "Seiten"
+
+msgid "Pozadinska slika"
+msgstr "Hintergrundbild"
+
+msgid "Video pozadina"
+msgstr "Video-Hintergrund"
+
+msgid "Hero sekcija"
+msgstr "Hero-Sektion"
+
+msgid "Hero sekcije"
+msgstr "Hero-Sektion"
+
+msgid "Naziv brenda"
+msgstr "Markenname"
+
+msgid "Emoji ikona"
+msgstr "Emoji-Symbol"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Redoslijed"
+msgstr "Bestellung"
+
+msgid "Brend"
+msgstr "Brend"
+
+msgid "Brendovi"
+msgstr "Marken"
+
+msgid "Slika"
+msgstr "Bild"
+
+msgid "Galerijska slika"
+msgstr "Galeriebild"
+
+msgid "Galerija"
+msgstr "Galerie"
+
+msgid "Info o tvrtki (web)"
+msgstr "Unternehmensinformationen (Web)"
+
+msgid "Info o tvrtkama (web)"
+msgstr "Unternehmensinformationen (Web)"
+
+msgid "Upravljanje web stranicom"
+msgstr "Verwaltung von Websites"
+
+msgid "Web stranica - upravljanje"
+msgstr "Website – Verwaltung"
+
+msgid "Dodaj sliku"
+msgstr "Bild hinzufügen"
+
+msgid "Upravljaj brendovima"
+msgstr "Verwalte deine Marken"
+
+msgid "Pokreni štopericu"
+msgstr "Starten Sie den Stopper"
+
+msgid "Opis rada (opcionalno)"
+msgstr "Beschreibung der Arbeit (optional)"
+
+msgid "START"
+msgstr "START"
+
+msgid "Danas"
+msgstr "Heute"
+
+msgid "Tjedan"
+msgstr "Woche"
+
+msgid "Mjesec"
+msgstr "Monat"
+
+msgid "Zarada"
+msgstr "Erträge"
+
+msgid "Unos"
+msgstr "Einige"
+
+msgid "Unosi"
+msgstr "Unosi"
+
+msgid "Brzo"
+msgstr "Schnell"
+
+msgid "Novi unos radnog vremena"
+msgstr "Neue Arbeitszeiterfassung"
+
+msgid "Od"
+msgstr "Von"
+
+msgid "Do"
+msgstr "Von"
+
+msgid "Pauza"
+msgstr "Pause"
+
+msgid "Što ste radili?"
+msgstr "Was hast du gemacht?"
+
+msgid "Tip"
+msgstr "Typ"
+
+msgid "Spremi unos"
+msgstr "Spremi unos"
+
+msgid "Kopiraj jučerašnje"
+msgstr "Kopiere gestern"
+
+msgid "Tjedni unos"
+msgstr "Wöchentliche Aufnahme"
+
+msgid "unos(a) čeka odobrenje"
+msgstr "zur Genehmigung vorgelegt"
+
+msgid "Nema unosa. Pokrenite štopericu ili unesite sate!"
+msgstr "Keine Einträge. Starten Sie die Stoppuhr oder geben Sie die Stunden ein!"
+
+msgid "Brzi unos iz predloška"
+msgstr "Schnelleingabe aus Vorlage"
+
+msgid "Česti projekti"
+msgstr "Häufige Projekte"
+
+msgid "Predlošci će se pojaviti nakon što počnete koristiti sustav."
+msgstr "Die Vorlagen werden angezeigt, sobald Sie das System verwenden."
+
+msgid "Dnevna bilješka"
+msgstr "Tägliche Notiz"
+
+msgid "Bilješke za danas..."
+msgstr "Notizen für heute..."
+
+msgid "Spremi"
+msgstr "Spremi"
+
+msgid "dana zaredom s unesenim satima"
+msgstr "Tage hintereinander mit protokollierten Stunden"
+
+msgid "Satnica"
+msgstr "Satnica"
+
+msgid "Dnevno"
+msgstr "Täglich"
+
+msgid "Tjedno"
+msgstr "Wöchentlich"
+
+msgid "Moj profil"
+msgstr "Mein Profil"
+
+msgid "Osobni podaci"
+msgstr "Personenbezogene Daten"
+
+msgid "Ime"
+msgstr "Zu tun"
+
+msgid "Prezime"
+msgstr "Nachname"
+
+msgid "Email"
+msgstr "E-Mail"
+
+msgid "Spremi podatke"
+msgstr "Daten übertragen"
+
+msgid "Satnica i fond sati"
+msgstr "Stundensatz und Jahresstunden"
+
+msgid "Prekovremeno"
+msgstr "Überstunden"
+
+msgid "Dnevni fond"
+msgstr "Täglicher Fonds"
+
+msgid "Tjedni fond"
+msgstr "Wöchentlicher Fonds"
+
+msgid "Spremi satnicu"
+msgstr "Spremi satnicu"
+
+msgid "Statistika"
+msgstr "Statistik"
+
+msgid "Promjena lozinke"
+msgstr "Passwort ändern"
+
+msgid "Stara lozinka"
+msgstr "Altes Sprichwort"
+
+msgid "Nova lozinka"
+msgstr "Neues Passwort"
+
+msgid "Ponovite"
+msgstr "Wiederholen"
+
+msgid "Promijeni lozinku"
+msgstr "Passwort ändern"
+
+msgid "Natrag"
+msgstr "Natrag"
+

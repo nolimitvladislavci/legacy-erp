@@ -1,0 +1,85 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}Kitchen Display{% endblock %}
+{% block extra_css %}<style>
+body{font-size:16px}
+.kds{padding:1rem;flex:1;overflow-y:auto}
+.kds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem}
+.kds-card{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:1rem;transition:all .2s}
+.kds-card.new{border-color:var(--gold)}
+.kds-card.preparing{border-color:#f97316}
+.kds-card .kc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem}
+.kds-card .kc-table{font-size:1.3rem;font-weight:800;color:var(--gold)}
+.kds-card .kc-time{font-size:.9rem;color:var(--muted);font-weight:600}
+.kds-card .kc-time.warn{color:var(--red);font-weight:800}
+.kds-card .kc-items{margin-bottom:.6rem}
+.kds-card .kc-item{padding:.25rem 0;font-size:1rem;font-weight:600;border-bottom:1px solid rgba(255,255,255,.05)}
+.kds-card .kc-item .qty{color:var(--gold);margin-right:.3rem}
+.kds-card .kc-item .notes{font-size:.8rem;color:var(--muted);font-weight:400}
+.kds-card .kc-notes{font-size:.85rem;color:var(--muted);font-style:italic;margin-bottom:.5rem}
+.kds-btns{display:flex;gap:.4rem;flex-wrap:wrap}
+.kds-btn{padding:.5rem 1rem;border-radius:6px;border:none;cursor:pointer;font-weight:700;font-size:.85rem;font-family:inherit;transition:all .15s}
+.kds-btn.confirm{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid #60a5fa}
+.kds-btn.prepare{background:rgba(249,115,22,.15);color:#f97316;border:1px solid #f97316}
+.kds-btn.ready{background:rgba(76,175,125,.15);color:var(--green);border:1px solid var(--green)}
+.kds-btn:hover{opacity:.8}
+.kds-empty{text-align:center;padding:3rem;color:var(--muted);font-size:1.2rem}
+.kds-header{display:flex;justify-content:space-between;align-items:center;padding:0 0 .8rem;border-bottom:1px solid var(--border);margin-bottom:.8rem}
+.kds-title{font-size:1.1rem;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
+.kds-count{font-size:.9rem;color:var(--muted)}
+</style>{% endblock %}
+{% block content %}
+<div class="kds">
+  <div class="kds-header">
+    <div class="kds-title">&#127859; Kitchen Display</div>
+    <div class="kds-count" id="kds-count">...</div>
+  </div>
+  <div class="kds-grid" id="kds-grid"></div>
+</div>
+<script>
+var prevCount=0;
+function loadOrders(){
+  fetch('{% url "pos:gastro_kitchen_api" %}').then(function(r){return r.json()}).then(function(d){
+    if(!d.ok)return;
+    var grid=document.getElementById('kds-grid');
+    document.getElementById('kds-count').textContent=d.orders.length+' narudzbi';
+    if(d.orders.length>prevCount && prevCount>0){
+      try{new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB/f39/').play();}catch(e){}
+    }
+    prevCount=d.orders.length;
+    if(!d.orders.length){grid.innerHTML='<div class="kds-empty">Nema aktivnih narudzbi &#127881;</div>';return;}
+    var html='';
+    d.orders.forEach(function(o){
+      var cls=o.status==='new'?'new':o.status==='preparing'?'preparing':'';
+      var timeClass=o.wait_minutes>15?'warn':'';
+      html+='<div class="kds-card '+cls+'">';
+      html+='<div class="kc-head"><span class="kc-table">'+o.table+'</span>';
+      html+='<span class="kc-time '+timeClass+'">'+o.wait_minutes+' min</span></div>';
+      if(o.guest_name) html+='<div style="font-size:.8rem;color:var(--muted);margin-bottom:.3rem">'+o.guest_name+'</div>';
+      html+='<div class="kc-items">';
+      o.items.forEach(function(i){
+        html+='<div class="kc-item"><span class="qty">'+i.quantity+'x</span>'+i.name;
+        if(i.notes) html+=' <span class="notes">('+i.notes+')</span>';
+        html+='</div>';
+      });
+      html+='</div>';
+      if(o.notes) html+='<div class="kc-notes">'+o.notes+'</div>';
+      html+='<div class="kds-btns">';
+      if(o.status==='new') html+='<button class="kds-btn confirm" onclick="updateOrder('+o.id+',\'confirmed\')">&#10004; Potvrdi</button>';
+      if(o.status==='new'||o.status==='confirmed') html+='<button class="kds-btn prepare" onclick="updateOrder('+o.id+',\'preparing\')">&#127859; Priprema</button>';
+      html+='<button class="kds-btn ready" onclick="updateOrder('+o.id+',\'ready\')">&#9989; Gotovo</button>';
+      html+='</div></div>';
+    });
+    grid.innerHTML=html;
+  }).catch(function(){});
+}
+function updateOrder(id,status){
+  fetch('/pos/gastro/order/'+id+'/update/',{
+    method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
+    body:JSON.stringify({status:status})
+  }).then(function(){loadOrders();});
+}
+loadOrders();
+setInterval(loadOrders,15000);
+</script>
+{% endblock %}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OPG KORPA&#352; &#8212; Letak A4</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+@page{size:A4;margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#2d5016;--green-light:#4a7c28;--green-dark:#1e3a0e;--cream:#fdf8ef;--cream-dark:#f0e8d4;--gold:#c9a84c;--text:#2c2c2c;--muted:#6b6b6b}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;width:210mm;min-height:297mm;margin:0 auto;background:#fff;color:var(--text);print-color-adjust:exact;-webkit-print-color-adjust:exact}
+
+.page{width:210mm;min-height:297mm;position:relative;overflow:hidden;display:flex;flex-direction:column}
+
+/* Header band */
+.header{background:linear-gradient(135deg,var(--green-dark),var(--green),var(--green-light));padding:18mm 12mm 14mm;color:#fff;text-align:center;position:relative}
+.header::before{content:'';position:absolute;top:-30%;right:-15%;width:50%;height:100%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.05),transparent 65%)}
+.header .badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:2mm 6mm;border-radius:10px;font-size:7pt;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4mm}
+.header h1{font-size:36pt;font-weight:900;line-height:1;margin-bottom:2mm;letter-spacing:-0.5px}
+.header .sub{font-size:13pt;color:var(--gold);font-weight:700;margin-bottom:1mm}
+.header .tagline{font-size:10pt;color:rgba(255,255,255,.7);font-style:italic}
+
+/* Body content */
+.body{flex:1;padding:8mm 12mm;display:flex;flex-direction:column;gap:5mm;background:var(--cream)}
+
+/* Intro text */
+.intro{text-align:center;font-size:9pt;color:var(--muted);line-height:1.5;padding:0 10mm}
+.intro strong{color:var(--green)}
+
+/* Product categories */
+.cat-header{font-size:10pt;font-weight:800;color:var(--green);border-bottom:1.5px solid var(--cream-dark);padding-bottom:1.5mm;margin-bottom:2mm}
+.cat-header i{margin-right:1.5mm}
+
+.prod-row{display:grid;grid-template-columns:repeat(5,1fr);gap:2mm;margin-bottom:3mm}
+.prod-row.wide{grid-template-columns:repeat(4,1fr)}
+.prod-row.narrow{grid-template-columns:repeat(3,1fr)}
+
+.prod{background:#fff;border:0.5px solid #e0d8c8;border-radius:4mm;padding:3mm;text-align:center;display:flex;flex-direction:column;align-items:center}
+.prod .icon{font-size:16pt;margin-bottom:1mm}
+.prod .name{font-size:7.5pt;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:1mm}
+.prod .weight{font-size:6pt;color:var(--muted)}
+.prod .price{font-size:12pt;font-weight:900;color:var(--green);margin-top:auto}
+
+/* Delivery section */
+.delivery{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin-top:auto}
+.del-box{background:#fff;border:0.5px solid #e0d8c8;border-radius:4mm;padding:3mm;text-align:center}
+.del-box h4{font-size:9pt;color:var(--green-dark);margin-bottom:1mm}
+.del-box .dp{font-size:14pt;font-weight:900;color:var(--green)}
+.del-box .df{font-size:6.5pt;color:var(--green);margin-top:.5mm}
+.del-box .dd{font-size:6pt;color:var(--muted);margin-top:.5mm}
+
+/* Footer band */
+.footer{background:var(--green-dark);padding:6mm 12mm;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:5mm}
+.footer .left{font-size:8pt;line-height:1.6}
+.footer .left strong{color:var(--gold)}
+.footer .center{text-align:center}
+.footer .center .brand{font-size:16pt;font-weight:900}
+.footer .center .slogan{font-size:7pt;color:var(--gold);font-weight:600}
+.footer .right{text-align:right;font-size:7.5pt;line-height:1.6}
+.footer .right a{color:var(--gold)}
+
+/* QR placeholder */
+.qr-box{display:inline-block;width:18mm;height:18mm;border:1px solid rgba(255,255,255,.3);border-radius:3mm;background:rgba(255,255,255,.1);text-align:center;line-height:18mm;font-size:6pt;color:rgba(255,255,255,.5)}
+
+@media screen{
+  body{box-shadow:0 0 30px rgba(0,0,0,.1);margin:10mm auto}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="header">
+  <div class="badge"><i class="fas fa-leaf"></i> Obiteljsko gospodarstvo</div>
+  <h1>KORPA&#352;</h1>
+  <div class="sub">Doma&#263;i sirevi &amp; mlije&#269;ni proizvodi</div>
+  <div class="tagline">Svje&#382;e s na&#353;e farme u Vladislavcima &#8212; do va&#353;eg stola</div>
+</div>
+
+<div class="body">
+
+  <div class="intro">
+    <strong>OPG Korpa&#353;</strong> &#8212; obiteljsko gospodarstvo iz Vladislavaca. Doma&#263;i sirevi, mlijeko, jogurt i maslac od svje&#382;eg kravljeg mlijeka. Bez konzervansa. Tradicionalne recepture.
+  </div>
+
+  <div class="cat-header"><i class="fas fa-cheese"></i> Sirevi</div>
+  <div class="prod-row">
+    <div class="prod"><div class="icon">&#x1F9C0;</div><div class="name">Svje&#382;i sir</div><div class="weight">500g</div><div class="price">&#8364;6</div></div>
+    <div class="prod"><div class="icon">&#x1F525;</div><div class="name">Dimljeni sir</div><div class="weight">400g</div><div class="price">&#8364;8,50</div></div>
+    <div class="prod"><div class="icon">&#x1F9C0;</div><div class="name">Polutvrdi sir</div><div class="weight">500g</div><div class="price">&#8364;7,50</div></div>
+    <div class="prod"><div class="icon">&#x1F9C0;</div><div class="name">Tvrdi sir</div><div class="weight">400g</div><div class="price">&#8364;9</div></div>
+    <div class="prod"><div class="icon">&#x1FAD2;</div><div class="name">Sir u ulju</div><div class="weight">350g</div><div class="price">&#8364;10</div></div>
+  </div>
+  <div class="prod-row">
+    <div class="prod"><div class="icon">&#x1F336;</div><div class="name">Sir s paprikom</div><div class="weight">400g</div><div class="price">&#8364;7</div></div>
+    <div class="prod"><div class="icon">&#x1F33F;</div><div class="name">Sir s vlascem</div><div class="weight">400g</div><div class="price">&#8364;7</div></div>
+    <div class="prod"><div class="icon">&#x1F9C4;</div><div class="name">Sir s &#269;e&#353;njakom</div><div class="weight">400g</div><div class="price">&#8364;7</div></div>
+    <div class="prod"><div class="icon">&#x1F9C0;</div><div class="name">&#352;kripavac</div><div class="weight">500g</div><div class="price">&#8364;8</div></div>
+    <div class="prod"><div class="icon">&#x1F963;</div><div class="name">Cottage sir</div><div class="weight">300g</div><div class="price">&#8364;5,50</div></div>
+  </div>
+
+  <div class="cat-header"><i class="fas fa-glass-water"></i> Mlijeko, vrhnje &amp; jogurt</div>
+  <div class="prod-row">
+    <div class="prod"><div class="icon">&#x1F95B;</div><div class="name">Svje&#382;e mlijeko</div><div class="weight">1L</div><div class="price">&#8364;1,80</div></div>
+    <div class="prod"><div class="icon">&#x1F95B;</div><div class="name">Gusto vrhnje</div><div class="weight">500ml</div><div class="price">&#8364;3,50</div></div>
+    <div class="prod"><div class="icon">&#x1F95B;</div><div class="name">Kiselo vrhnje</div><div class="weight">400g</div><div class="price">&#8364;2,50</div></div>
+    <div class="prod"><div class="icon">&#x1F95B;</div><div class="name">Mla&#263;enica</div><div class="weight">500ml</div><div class="price">&#8364;2</div></div>
+    <div class="prod"><div class="icon">&#x1F95B;</div><div class="name">Doma&#263;i jogurt</div><div class="weight">500ml</div><div class="price">&#8364;2,50</div></div>
+  </div>
+  <div class="prod-row">
+    <div class="prod"><div class="icon">&#x1F95B;</div><div class="name">Kiselo mlijeko</div><div class="weight">500ml</div><div class="price">&#8364;2</div></div>
+    <div class="prod"><div class="icon">&#x1F353;</div><div class="name">Jogurt s vo&#263;em</div><div class="weight">400ml</div><div class="price">&#8364;3</div></div>
+    <div class="prod"><div class="icon">&#x1F9EA;</div><div class="name">Kefir</div><div class="weight">500ml</div><div class="price">&#8364;3</div></div>
+    <div class="prod"><div class="icon">&#x1F9C8;</div><div class="name">Doma&#263;i maslac</div><div class="weight">250g</div><div class="price">&#8364;4,50</div></div>
+    <div class="prod"><div class="icon">&#x1F336;</div><div class="name">Ajvar-sir namaz</div><div class="weight">200g</div><div class="price">&#8364;4,50</div></div>
+  </div>
+
+  <div class="cat-header"><i class="fas fa-gift"></i> Poklon paketi</div>
+  <div class="prod-row narrow">
+    <div class="prod"><div class="icon">&#x1F95A;</div><div class="name">Uskrsni sir</div><div class="weight">600g</div><div class="price">&#8364;8</div></div>
+    <div class="prod"><div class="icon">&#x1F381;</div><div class="name">Kulen-sir paket</div><div class="weight">800g</div><div class="price">&#8364;15</div></div>
+    <div class="prod"><div class="icon">&#x1F37D;</div><div class="name">Degustacijski paket</div><div class="weight">5 sireva / 1kg</div><div class="price">&#8364;20</div></div>
+  </div>
+
+  <div class="cat-header"><i class="fas fa-truck"></i> Dostava</div>
+  <div class="delivery">
+    <div class="del-box">
+      <h4><i class="fas fa-home"></i> Vladislavci</h4>
+      <div class="dp">&#8364;2</div>
+      <div class="df">Besplatno iznad &#8364;12</div>
+      <div class="dd">Uto / &#268;et / Sub &#8226; 9-12h</div>
+    </div>
+    <div class="del-box">
+      <h4><i class="fas fa-map-marker-alt"></i> &#268;epin i okolica</h4>
+      <div class="dp">&#8364;3</div>
+      <div class="df">Besplatno iznad &#8364;18</div>
+      <div class="dd">Uto / &#268;et / Sub &#8226; 9-12h</div>
+    </div>
+    <div class="del-box">
+      <h4><i class="fas fa-city"></i> Osijek</h4>
+      <div class="dp">&#8364;4,50</div>
+      <div class="df">Besplatno iznad &#8364;25</div>
+      <div class="dd">&#268;et / Sub &#8226; 9-12h</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="left">
+    <i class="fas fa-phone"></i> <strong>091 603 5734</strong><br>
+    <i class="fas fa-envelope"></i> kruljacmarija1@gmail.com<br>
+    <i class="fas fa-map-pin"></i> Kr. Tomislava 291, 31404 Vladislavci
+  </div>
+  <div class="center">
+    <div class="brand">KORPA&#352;</div>
+    <div class="slogan">Doma&#263;i sirevi &amp; mlije&#269;ni proizvodi</div>
+  </div>
+  <div class="right">
+    <i class="fab fa-facebook"></i> facebook.com/OPGKorpas<br>
+    <i class="fas fa-globe"></i> <a href="https://limit-connect.com/hr/korpas/">limit-connect.com/hr/korpas/</a><br>
+    OIB: 92922919857
+  </div>
+</div>
+
+</div>
+</body></html>

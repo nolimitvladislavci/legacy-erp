@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Knjiga {{ book_type }} | LIMIT Connect{% endblock %}
+{% block page_title %}Knjiga {{ book_type }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.k-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem}
+.k-header h2{margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem}
+.k-header h2 i{color:var(--gold);margin-right:8px}
+.k-header p{color:var(--text-muted);margin:0;font-size:.82rem}
+.k-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.k-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.k-toggle a{flex:1;text-align:center;padding:10px 16px;font-size:.85rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .15s}
+.k-toggle a:hover{background:rgba(201,168,76,.05)}
+.k-toggle a.active{background:var(--gold);color:#0a0a0a}
+
+.k-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.k-filters select,.k-filters input{background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:.82rem}
+.k-filters select{min-width:80px}
+
+.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:7px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none}
+.btn-gold:hover{opacity:.85;color:#0a0a0a}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:7px 14px;border-radius:8px;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none;transition:all .15s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+.k-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.25rem}
+.k-stat{padding:.75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;text-align:center}
+.k-stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)}
+.k-stat .val{font-size:1.1rem;font-weight:700;color:var(--gold);margin-top:.15rem}
+
+.k-table-wrap{overflow-x:auto;margin-bottom:1rem}
+.k-tbl{width:100%;border-collapse:collapse;font-size:.78rem;white-space:nowrap}
+.k-tbl th{text-align:left;padding:.45rem .5rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-weight:500;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;background:var(--bg)}
+.k-tbl th.r,.k-tbl td.r{text-align:right}
+.k-tbl td{padding:.4rem .5rem;border-bottom:1px solid var(--border);color:var(--text);font-variant-numeric:tabular-nums}
+.k-tbl tbody tr:hover td{background:rgba(201,168,76,.03)}
+.k-tbl tfoot td{font-weight:700;border-top:2px solid var(--gold);color:var(--gold);padding:.5rem}
+
+@media(max-width:768px){
+  .k-header{flex-direction:column}
+  .k-stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:1200px;margin:0 auto">
+
+  <div class="k-header">
+    <div>
+      <h2><i class="fas fa-book"></i> Knjiga {{ book_type }}</h2>
+      <p>{% if book_type == 'URA' %}Knjiga primljenih (ulaznih) racuna — pretporez{% else %}Knjiga izdanih (izlaznih) racuna — izlazni PDV{% endif %} · {{ period_label }} · {{ company.name }}</p>
+    </div>
+    <div class="k-actions">
+      <a href="?type={{ book_type }}&year={{ year }}&month={{ month }}&quarter={{ quarter }}&partner={{ partner_q }}&format=pdf" class="btn-ghost" target="_blank"><i class="fas fa-file-pdf"></i> PDF</a>
+      <a href="?type={{ book_type }}&year={{ year }}&month={{ month }}&quarter={{ quarter }}&partner={{ partner_q }}&format=xml" class="btn-ghost"><i class="fas fa-file-code"></i> XML</a>
+      <a href="{% url 'documents:arhiva_list' %}" class="btn-ghost"><i class="fas fa-archive"></i> Arhiva</a>
+    </div>
+  </div>
+
+  <!-- URA / IRA toggle -->
+  <div class="k-toggle">
+    <a href="?type=URA&year={{ year }}&month={{ month }}&quarter={{ quarter }}" class="{% if book_type == 'URA' %}active{% endif %}"><i class="fas fa-sign-in-alt"></i> URA (ulazni)</a>
+    <a href="?type=IRA&year={{ year }}&month={{ month }}&quarter={{ quarter }}" class="{% if book_type == 'IRA' %}active{% endif %}"><i class="fas fa-sign-out-alt"></i> IRA (izlazni)</a>
+  </div>
+
+  <!-- Filteri -->
+  <form method="get" class="k-filters">
+    <input type="hidden" name="type" value="{{ book_type }}">
+    {% if all_companies %}
+    <select name="company" style="min-width:160px">
+      <option value="">-- Firma --</option>
+      {% for c in all_companies %}
+      <option value="{{ c.pk }}" {% if selected_company_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name|truncatechars:25 }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+    <select name="year">{% for y in years %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+    <select name="month">
+      <option value="">Cijela god.</option>
+      <option value="1" {% if month == '1' %}selected{% endif %}>Sijecanj</option>
+      <option value="2" {% if month == '2' %}selected{% endif %}>Veljaca</option>
+      <option value="3" {% if month == '3' %}selected{% endif %}>Ozujak</option>
+      <option value="4" {% if month == '4' %}selected{% endif %}>Travanj</option>
+      <option value="5" {% if month == '5' %}selected{% endif %}>Svibanj</option>
+      <option value="6" {% if month == '6' %}selected{% endif %}>Lipanj</option>
+      <option value="7" {% if month == '7' %}selected{% endif %}>Srpanj</option>
+      <option value="8" {% if month == '8' %}selected{% endif %}>Kolovoz</option>
+      <option value="9" {% if month == '9' %}selected{% endif %}>Rujan</option>
+      <option value="10" {% if month == '10' %}selected{% endif %}>Listopad</option>
+      <option value="11" {% if month == '11' %}selected{% endif %}>Studeni</option>
+      <option value="12" {% if month == '12' %}selected{% endif %}>Prosinac</option>
+    </select>
+    <select name="quarter">
+      <option value="">-</option>
+      <option value="1" {% if quarter == '1' %}selected{% endif %}>Q1</option>
+      <option value="2" {% if quarter == '2' %}selected{% endif %}>Q2</option>
+      <option value="3" {% if quarter == '3' %}selected{% endif %}>Q3</option>
+      <option value="4" {% if quarter == '4' %}selected{% endif %}>Q4</option>
+    </select>
+    <input type="text" name="partner" value="{{ partner_q }}" placeholder="Partner..." style="min-width:140px">
+    <button type="submit" class="btn-gold"><i class="fas fa-filter"></i> Filtriraj</button>
+  </form>
+
+  <!-- Stats -->
+  <div class="k-stats">
+    <div class="k-stat"><div class="lbl">Racuna</div><div class="val">{{ totals.count }}</div></div>
+    <div class="k-stat"><div class="lbl">Osnovica</div><div class="val">{{ totals.total_base|floatformat:2 }}</div></div>
+    <div class="k-stat"><div class="lbl">{% if book_type == 'URA' %}Pretporez{% else %}PDV{% endif %}</div><div class="val">{{ totals.total_vat|floatformat:2 }}</div></div>
+    <div class="k-stat"><div class="lbl">Ukupno s PDV</div><div class="val">{{ totals.total_with_vat|floatformat:2}}</div></div>
+    <div class="k-stat"><div class="lbl">Osn. 25%</div><div class="val">{{ totals.base_25|floatformat:2 }}</div></div>
+    <div class="k-stat"><div class="lbl">Osn. 13%</div><div class="val">{{ totals.base_13|floatformat:2 }}</div></div>
+  </div>
+
+  <!-- Tablica -->
+  <div class="k-table-wrap">
+    <table class="k-tbl">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Broj</th>
+          <th>Datum</th>
+          <th>{% if book_type == 'URA' %}Dobavljac{% else %}Kupac{% endif %}</th>
+          <th>OIB/PDV-ID</th>
+          <th class="r">Osn. 0%</th>
+          <th class="r">Osn. 5%</th>
+          <th class="r">{% if book_type == 'URA' %}Pretp.{% else %}PDV{% endif %} 5%</th>
+          <th class="r">Osn. 13%</th>
+          <th class="r">{% if book_type == 'URA' %}Pretp.{% else %}PDV{% endif %} 13%</th>
+          <th class="r">Osn. 25%</th>
+          <th class="r">{% if book_type == 'URA' %}Pretp.{% else %}PDV{% endif %} 25%</th>
+          <th class="r">Uk. {% if book_type == 'URA' %}pretp.{% else %}PDV{% endif %}</th>
+          <th class="r">Ukupno s PDV</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in entries %}
+        <tr>
+          <td>{{ e.seq }}</td>
+          <td style="color:var(--gold)">{{ e.doc_number }}</td>
+          <td>{{ e.doc_date|date:"d.m.Y" }}</td>
+          <td>{{ e.partner_name|truncatechars:30 }}</td>
+          <td style="font-size:.72rem">{{ e.partner_oib|default:"-" }}</td>
+          <td class="r">{% if e.base_0 %}{{ e.base_0|floatformat:2 }}{% endif %}</td>
+          <td class="r">{% if e.base_5 %}{{ e.base_5|floatformat:2 }}{% endif %}</td>
+          <td class="r">{% if e.vat_5 %}{{ e.vat_5|floatformat:2 }}{% endif %}</td>
+          <td class="r">{% if e.base_13 %}{{ e.base_13|floatformat:2 }}{% endif %}</td>
+          <td class="r">{% if e.vat_13 %}{{ e.vat_13|floatformat:2 }}{% endif %}</td>
+          <td class="r">{% if e.base_25 %}{{ e.base_25|floatformat:2 }}{% endif %}</td>
+          <td class="r">{% if e.vat_25 %}{{ e.vat_25|floatformat:2 }}{% endif %}</td>
+          <td class="r" style="font-weight:600">{{ e.total_vat|floatformat:2 }}</td>
+          <td class="r" style="font-weight:700;color:var(--gold)">{{ e.total_with_vat|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="14" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema racuna za odabrano razdoblje</td></tr>
+        {% endfor %}
+      </tbody>
+      {% if entries %}
+      <tfoot>
+        <tr>
+          <td colspan="5">UKUPNO ({{ totals.count }})</td>
+          <td class="r">{{ totals.base_0|floatformat:2 }}</td>
+          <td class="r">{{ totals.base_5|floatformat:2 }}</td>
+          <td class="r">{{ totals.vat_5|floatformat:2 }}</td>
+          <td class="r">{{ totals.base_13|floatformat:2 }}</td>
+          <td class="r">{{ totals.vat_13|floatformat:2 }}</td>
+          <td class="r">{{ totals.base_25|floatformat:2 }}</td>
+          <td class="r">{{ totals.vat_25|floatformat:2 }}</td>
+          <td class="r">{{ totals.total_vat|floatformat:2 }}</td>
+          <td class="r">{{ totals.total_with_vat|floatformat:2 }}</td>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+
+</div>
+{% endblock %}

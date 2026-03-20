@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if vehicle %}Uredi vozilo{% else %}Novo vozilo{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width:700px">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-car me-2 text-info"></i>
+      {% if vehicle %}Uredi: {{ vehicle }}{% else %}Novo vozilo{% endif %}
+    </h4>
+    <a href="{% url 'work_orders:vehicle_list' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Natrag
+    </a>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="card bg-dark border-secondary">
+      <div class="card-body">
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Vlasnik *</label>
+            <select name="client" class="form-select form-select-sm" required>
+              <option value="">— Odaberi —</option>
+              {% for c in clients %}
+                <option value="{{ c.pk }}" {% if vehicle and vehicle.client_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Marka *</label>
+            <input type="text" name="make" class="form-control form-control-sm"
+                   value="{{ vehicle.make|default:'' }}" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Model *</label>
+            <input type="text" name="model" class="form-control form-control-sm"
+                   value="{{ vehicle.model|default:'' }}" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Godište</label>
+            <input type="number" name="year" class="form-control form-control-sm"
+                   value="{{ vehicle.year|default:'' }}" min="1900" max="2100">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Registracija *</label>
+            <input type="text" name="registration_plate" class="form-control form-control-sm"
+                   value="{{ vehicle.registration_plate|default:'' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">VIN broj</label>
+            <input type="text" name="vin" class="form-control form-control-sm"
+                   value="{{ vehicle.vin|default:'' }}" maxlength="17">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Motor</label>
+            <input type="text" name="engine_type" class="form-control form-control-sm"
+                   value="{{ vehicle.engine_type|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Kilometraža</label>
+            <input type="number" name="mileage" class="form-control form-control-sm"
+                   value="{{ vehicle.mileage|default:'0' }}" min="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Boja</label>
+            <input type="text" name="color" class="form-control form-control-sm"
+                   value="{{ vehicle.color|default:'' }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Napomene</label>
+            <textarea name="notes" class="form-control form-control-sm" rows="2">{{ vehicle.notes|default:'' }}</textarea>
+          </div>
+        </div>
+
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{% url 'work_orders:vehicle_list' %}" class="btn btn-secondary btn-sm">Odustani</a>
+        <button type="submit" class="btn btn-info btn-sm">
+          <i class="fas fa-save me-1"></i>{% if vehicle %}Spremi{% else %}Kreiraj{% endif %}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

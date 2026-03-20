@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Karton: {{ client.name }}{% endblock %}
+{% block page_title %}Karton: {{ client.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 class="mb-0">
+    <i class="fas fa-{{ dossier.branch_icon }} me-2" style="color:var(--gold)"></i>
+    {{ client.name }}
+    <span class="badge ms-2" style="background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3);font-size:.7rem;vertical-align:middle">{{ dossier.get_branch_type_display }}</span>
+  </h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'partners:detail' client.pk %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-user me-1"></i>Klijent</a>
+    <a href="{% url 'appointments:dossier_entry_create' client.pk %}" class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:700"><i class="fas fa-plus me-1"></i>Novi unos</a>
+  </div>
+</div>
+
+{% if dossier.notes %}
+<div class="stat-card mb-3" style="border-left:3px solid var(--gold)">
+  <small style="color:var(--muted);text-transform:uppercase;font-size:.72rem;letter-spacing:.5px">Opce napomene</small>
+  <p class="mb-0 mt-1">{{ dossier.notes }}</p>
+</div>
+{% endif %}
+
+<!-- Entry type filter tabs -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="{% url 'appointments:dossier_detail' client.pk %}" class="btn btn-sm {% if not entry_type_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">Sve</a>
+  {% for val, label in entry_types %}
+  <a href="?type={{ val }}" class="btn btn-sm {% if entry_type_filter == val %}btn-primary{% else %}btn-outline-secondary{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    {% if entries %}
+    <div class="d-flex flex-column gap-3">
+    {% for e in entries %}
+    <div class="stat-card" style="border-left:3px solid {{ e.entry_type_color }}">
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex gap-3 align-items-start">
+          <div style="width:38px;height:38px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="fas {{ e.entry_type_icon }}" style="color:var(--gold)"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <strong>{{ e.title }}</strong>
+              <span class="badge" style="background:rgba(201,168,76,.1);color:var(--gold);font-size:.7rem">{{ e.get_entry_type_display }}</span>
+            </div>
+            {% if e.content %}
+            <p class="mb-1 text-muted" style="font-size:.88rem">{{ e.content|truncatechars:200 }}</p>
+            {% endif %}
+            {% if e.structured_data %}
+            <div class="mt-2">
+              {% if e.entry_type == "prescription" and dossier.branch_type == "optic" %}
+              <table class="table table-sm table-dark mb-0" style="font-size:.8rem;max-width:420px">
+                <thead><tr><th></th><th>Sfera</th><th>Cilindar</th><th>Os</th><th>Adicija</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>OD</strong></td><td>{{ e.structured_data.od_sphere|default:"-" }}</td><td>{{ e.structured_data.od_cylinder|default:"-" }}</td><td>{{ e.structured_data.od_axis|default:"-" }}</td><td>{{ e.structured_data.od_addition|default:"-" }}</td></tr>
+                  <tr><td><strong>OS</strong></td><td>{{ e.structured_data.os_sphere|default:"-" }}</td><td>{{ e.structured_data.os_cylinder|default:"-" }}</td><td>{{ e.structured_data.os_axis|default:"-" }}</td><td>{{ e.structured_data.os_addition|default:"-" }}</td></tr>
+                </tbody>
+              </table>
+              {% if e.structured_data.pd %}<small class="text-muted">PD: {{ e.structured_data.pd }}</small>{% endif %}
+              {% elif e.entry_type == "measurement" %}
+              <div class="d-flex gap-2 flex-wrap">
+                {% for k, v in e.structured_data.items %}
+                <span class="badge" style="background:#1a1a1a;border:1px solid #333;color:#ccc;font-weight:400">{{ k }}: {{ v }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+            {% if e.file %}
+            <a href="{{ e.file.url }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-1" style="font-size:.75rem"><i class="fas fa-paperclip me-1"></i>Prilog</a>
+            {% endif %}
+            <div class="mt-1" style="font-size:.75rem;color:var(--muted)">
+              <i class="fas fa-clock me-1"></i>{{ e.created_at|date:"d.m.Y H:i" }}
+              {% if e.created_by %} &bull; {{ e.created_by.get_full_name|default:e.created_by.username }}{% endif %}
+              {% if e.appointment %} &bull; <a href="{% url 'appointments:edit' e.appointment.pk %}">Termin {{ e.appointment.start_time|date:"d.m." }}</a>{% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-1">
+          <a href="{% url 'appointments:dossier_entry_edit' client.pk e.pk %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></a>
+          <form method="post" action="{% url 'appointments:dossier_entry_delete' client.pk e.pk %}" onsubmit="return confirm('Obrisati unos?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <div class="stat-card text-center py-5">
+      <i class="fas fa-folder-open" style="font-size:2.5rem;color:var(--muted)"></i>
+      <p class="mt-3 text-muted">Nema unosa u kartonu.</p>
+      <a href="{% url 'appointments:dossier_entry_create' client.pk %}" class="btn btn-sm" style="background:var(--gold);color:#000">Dodaj prvi unos</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-4">
+    <div class="stat-card mb-3">
+      <h6 style="color:var(--gold);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px"><i class="fas fa-calendar-alt me-2"></i>Nedavni termini</h6>
+      {% for appt in recent_appointments %}
+      <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'appointments:edit' appt.pk %}">{{ appt.title }}</a>
+          <span class="badge {% if appt.status == 'completed' %}bg-secondary{% elif appt.status == 'confirmed' %}bg-success{% else %}bg-primary{% endif %}" style="font-size:.65rem">{{ appt.get_status_display }}</span>
+        </div>
+        <small class="text-muted">{{ appt.start_time|date:"d.m.Y H:i" }}</small>
+      </div>
+      {% empty %}
+      <p class="text-muted mb-0" style="font-size:.85rem">Nema termina.</p>
+      {% endfor %}
+    </div>
+    <div class="stat-card">
+      <h6 style="color:var(--gold);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px"><i class="fas fa-info-circle me-2"></i>Brzi unosi</h6>
+      {% for val, label in entry_types %}
+      <a href="{% url 'appointments:dossier_entry_create' client.pk %}?type={{ val }}" class="btn btn-sm btn-outline-secondary w-100 mb-1 text-start">
+        <i class="fas fa-plus me-2"></i>{{ label }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

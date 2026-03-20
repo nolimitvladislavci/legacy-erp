@@ -1,0 +1,57 @@
+{% extends 'booking_base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Online rezervacija – Viskovic Group" %}{% endblock %}
+
+{% block extra_head %}
+<style>
+.hero { padding: 56px 28px 40px; text-align: center; border-bottom: 1px solid var(--border); }
+.hero h1 { font-family: "Cormorant Garamond", serif; font-size: 2.4rem; font-weight: 300; color: var(--text); margin: 0 0 10px; }
+.hero p { color: var(--muted); font-size: .9rem; }
+
+.services-wrap { max-width: 960px; margin: 40px auto; padding: 0 24px 60px; }
+.services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; }
+
+.svc-card { background: var(--surface); border: 1px solid var(--border); padding: 22px; display: block; text-decoration: none; color: var(--text); transition: border-color .2s, transform .2s; }
+.svc-card:hover { border-color: var(--gold); transform: translateY(-3px); color: var(--text); }
+.svc-icon { width: 48px; height: 48px; background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 1.4rem; color: var(--gold); }
+.svc-card h5 { font-size: 1rem; font-weight: 600; margin: 0 0 8px; }
+.svc-card p { color: var(--muted); font-size: .82rem; margin: 0 0 14px; line-height: 1.5; }
+.svc-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.svc-badge { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); padding: 2px 10px; font-size: .72rem; font-weight: 600; }
+
+.empty-svc { text-align: center; padding: 80px 0; color: var(--muted); }
+.empty-svc p { margin-top: 12px; font-size: .95rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>{% if company %}{{ company.name }}{% else %}{% trans "Online rezervacija" %}{% endif %}</h1>
+    <p>{% if company and company.description %}{{ company.description }}{% else %}{% trans "Odaberite uslugu i zakažite termin u nekoliko klikova" %}{% endif %}</p>
+</div>
+
+<div class="services-wrap">
+{% if services %}
+<div class="services-grid">
+    {% for s in services %}
+    <a href="/appointments/booking/{{ s.id }}/wizard/" class="svc-card">
+        <div class="svc-icon">&#x1F4C5;</div>
+        <h5>{{ s.name }}</h5>
+        <p>{{ s.description|truncatechars:80 }}</p>
+        <div class="svc-badges">
+            {% if s.price %}<span class="svc-badge">{{ s.price }} EUR</span>{% endif %}
+            <span class="svc-badge">{{ s.duration }}</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-svc">
+    <div style="font-size:3rem;color:var(--muted)">&#x1F4C5;</div>
+    <p>{% trans "Trenutno nema dostupnih usluga za online rezervaciju." %}</p>
+    <p style="font-size:.85rem;color:var(--muted)">{% trans "Kontaktirajte nas direktno." %}</p>
+</div>
+{% endif %}
+</div>
+{% endblock %}

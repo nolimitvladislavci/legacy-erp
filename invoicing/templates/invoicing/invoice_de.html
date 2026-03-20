@@ -1,0 +1,177 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { margin: 15mm 15mm 20mm 15mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24pt; border-bottom:2pt solid #1e3a5f; padding-bottom:16pt; }
+  .logo-area h1 { font-size:18pt; font-weight:700; color:#1e3a5f; }
+  .logo-area .subtitle { font-size:7.5pt; color:#64748b; letter-spacing:2px; text-transform:uppercase; margin-top:2pt; }
+  .issuer-info { text-align:right; font-size:8.5pt; color:#475569; line-height:1.6; }
+  .invoice-meta { display:flex; justify-content:space-between; margin-bottom:20pt; }
+  .invoice-title h2 { font-size:20pt; font-weight:700; color:#1e3a5f; }
+  .invoice-title .number { font-size:11pt; color:#c9a84c; font-weight:600; margin-top:4pt; }
+  .dates-box { text-align:right; }
+  .date-row { display:flex; gap:12pt; justify-content:flex-end; margin-bottom:4pt; }
+  .date-label { font-size:8pt; color:#64748b; width:110pt; text-align:right; }
+  .date-val { font-size:8.5pt; font-weight:600; color:#0f172a; width:70pt; text-align:right; }
+  .parties { display:flex; gap:20pt; margin-bottom:20pt; }
+  .party-box { flex:1; background:#f8fafc; padding:12pt; border-left:3pt solid #c9a84c; }
+  .party-label { font-size:7pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:6pt; }
+  .party-name { font-size:10.5pt; font-weight:700; color:#0f172a; margin-bottom:4pt; }
+  .party-detail { font-size:8.5pt; color:#475569; line-height:1.6; }
+  table { width:100%; border-collapse:collapse; margin-bottom:16pt; }
+  thead tr { background:#1e3a5f; color:white; }
+  thead th { padding:7pt 8pt; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; text-align:left; }
+  thead th:last-child, thead th:nth-child(3), thead th:nth-child(4) { text-align:right; }
+  tbody tr { border-bottom:0.5pt solid #e2e8f0; }
+  tbody tr:nth-child(even) { background:#f8fafc; }
+  tbody td { padding:7pt 8pt; font-size:9pt; }
+  tbody td:last-child, tbody td:nth-child(3), tbody td:nth-child(4) { text-align:right; }
+  .totals { display:flex; justify-content:flex-end; margin-bottom:20pt; }
+  .totals-table { width:220pt; }
+  .totals-table tr td { padding:4pt 6pt; font-size:9pt; }
+  .totals-table tr td:last-child { text-align:right; font-weight:600; }
+  .totals-table .netto { background:#f1f5f9; }
+  .totals-table .total-row td { background:#1e3a5f; color:white; font-size:11pt; font-weight:700; padding:7pt 6pt; }
+  .payment-box { background:#f8fafc; padding:10pt; border:0.5pt solid #e2e8f0; margin-bottom:16pt; }
+  .payment-box h4 { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:8pt; }
+  .payment-grid { display:flex; gap:16pt; }
+  .payment-col { flex:1; }
+  .payment-row { display:flex; justify-content:space-between; margin-bottom:3pt; }
+  .payment-label { font-size:8pt; color:#64748b; }
+  .payment-val { font-size:8.5pt; font-weight:600; color:#0f172a; }
+  .legal-box { font-size:7.5pt; color:#64748b; line-height:1.6; margin-bottom:16pt; }
+  .note-box { background:#fffbeb; border-left:3pt solid #f59e0b; padding:8pt 12pt; margin-bottom:16pt; font-size:8.5pt; }
+  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:7.5pt; color:#94a3b8; border-top:0.5pt solid #e2e8f0; padding:6pt 15mm; background:white; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-area">
+    <h1>{{ invoice.issuer_name|default:invoice.company.name }}</h1>
+    <div class="subtitle">{% trans "Geschäftsdokument · Deutschland" %}</div>
+  </div>
+  <div class="issuer-info">
+    <strong>{{ invoice.issuer_name }}</strong><br>
+    {{ invoice.issuer_address }}<br>
+    {% if invoice.issuer_phone %}Tel.: {{ invoice.issuer_phone }}<br>{% endif %}
+    Steuer-Nr.: {{ invoice.issuer_oib }}<br>
+    IBAN: {{ invoice.issuer_iban }}{% if invoice.swift %} · BIC: {{ invoice.swift }}{% endif %}<br>
+    {{ invoice.issuer_email }}
+  </div>
+</div>
+
+<div class="invoice-meta">
+  <div class="invoice-title">
+    <h2>{% if invoice.doctype == 'R' %}RECHNUNG{% elif invoice.doctype == 'PO' %}ANGEBOT{% elif invoice.doctype == 'P' %}KOSTENVORANSCHLAG{% elif invoice.doctype == 'A' %}ABSCHLAGSRECHNUNG{% elif invoice.doctype == 'GS' %}GUTSCHRIFT{% elif invoice.doctype == 'S' %}STORNORECHNUNG{% else %}{{ invoice.get_doctype_display|upper }}{% endif %}</h2>
+    <div class="number">{% if invoice.doctype == "R" %}Rechnungsnr.{% elif invoice.doctype == "PO" or invoice.doctype == "P" %}Angebotsnr.{% elif invoice.doctype == "GS" %}Gutschriftnr.{% elif invoice.doctype == "S" %}Stornonr.{% else %}Dok.-Nr.{% endif %}: {{ invoice.number }}</div>
+  </div>
+  <div class="dates-box">
+    <div class="date-row">
+      <div class="date-label">{% if invoice.doctype == "PO" or invoice.doctype == "P" %}{% trans "Angebotsdatum:" %}{% else %}{% trans "Rechnungsdatum:" %}{% endif %}</div>
+      <div class="date-val">{{ invoice.date_issued|date:"d.m.Y" }}</div>
+    </div>
+    {% if invoice.date_due %}
+    <div class="date-row">
+      <div class="date-label">{% if invoice.doctype == "PO" or invoice.doctype == "P" %}{% trans "Gültig bis:" %}{% else %}{% trans "Fälligkeitsdatum:" %}{% endif %}</div>
+      <div class="date-val">{{ invoice.date_due|date:"d.m.Y" }}</div>
+    </div>
+    {% endif %}
+    {% if invoice.date_delivery %}
+    <div class="date-row">
+      <div class="date-label">{% trans "Leistungsdatum:" %}</div>
+      <div class="date-val">{{ invoice.date_delivery|date:"d.m.Y" }}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="parties">
+  <div class="party-box" style="border-left-color:#1e3a5f">
+    <div class="party-label">{% trans "Absender / Rechnungssteller" %}</div>
+    <div class="party-name">{{ invoice.issuer_name }}</div>
+    <div class="party-detail">{{ invoice.issuer_address }}<br>{% if invoice.issuer_phone %}Tel.: {{ invoice.issuer_phone }}<br>{% endif %}Steuer-Nr.: {{ invoice.issuer_oib }}</div>
+  </div>
+  <div class="party-box">
+    <div class="party-label">{% trans "Empfänger / Rechnungsempfänger" %}</div>
+    <div class="party-name">{{ invoice.client_name }}</div>
+    <div class="party-detail">
+      {{ invoice.client_address }}<br>
+      {% if invoice.client_city %}{{ invoice.client_city }}<br>{% endif %}
+      {{ invoice.client_country }}<br>
+      {% if invoice.client_oib %}USt-IdNr.: {{ invoice.client_oib }}{% endif %}
+    </div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:5%">{% trans "Pos." %}</th>
+      <th style="width:45%">{% trans "Beschreibung" %}</th>
+      <th style="width:8%">{% trans "Menge" %}</th>
+      <th style="width:8%">{% trans "Einheit" %}</th>
+      <th style="width:14%">{% trans "Einzelpreis" %}</th>
+      <th style="width:8%">{% trans "Rabatt" %}</th>
+      <th style="width:12%">{% trans "Betrag" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in invoice.items.all %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ item.description }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>{{ item.unit }}</td>
+      <td>{{ item.unit_price|floatformat:2 }} {{ invoice.currency }}</td>
+      <td>{% if item.discount_percent %}{{ item.discount_percent }}%{% else %}–{% endif %}</td>
+      <td>{{ item.total_price|floatformat:2 }} {{ invoice.currency }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="totals">
+  <table class="totals-table">
+    <tr class="netto"><td>{% trans "Nettobetrag:" %}</td><td>{{ invoice.subtotal|floatformat:2 }} {{ invoice.currency }}</td></tr>
+    <tr><td>MwSt. {{ invoice.tax_percent }}%:</td><td>{{ invoice.tax_amount|floatformat:2 }} {{ invoice.currency }}</td></tr>
+    <tr class="total-row"><td>{% trans "GESAMTBETRAG:" %}</td><td>{{ invoice.total|floatformat:2 }} {{ invoice.currency }}</td></tr>
+  </table>
+</div>
+
+<div class="payment-box">
+  <h4>{% trans "Zahlungsinformationen" %}</h4>
+  <div class="payment-grid">
+    <div class="payment-col">
+      <div class="payment-row"><span class="payment-label">{% trans "Zahlungsart:" %}</span><span class="payment-val">{{ invoice.get_payment_method_display }}</span></div>
+      <div class="payment-row"><span class="payment-label">{% trans "IBAN:" %}</span><span class="payment-val">{{ invoice.issuer_iban }}</span></div>
+      {% if invoice.swift %}<div class="payment-row"><span class="payment-label">{% trans "BIC/SWIFT:" %}</span><span class="payment-val">{{ invoice.swift }}</span></div>{% endif %}
+    </div>
+    <div class="payment-col">
+      <div class="payment-row"><span class="payment-label">{% trans "Fällig bis:" %}</span><span class="payment-val">{{ invoice.date_due|date:"d.m.Y"|default:"Sofort" }}</span></div>
+      {% if invoice.reference_number %}<div class="payment-row"><span class="payment-label">{% trans "Verwendungszweck:" %}</span><span class="payment-val">{{ invoice.reference_number }}</span></div>{% endif %}
+    </div>
+  </div>
+</div>
+
+{% if invoice.note %}
+<div class="note-box">{{ invoice.note }}</div>
+{% endif %}
+
+<div class="legal-box">
+  Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. (falls zutreffend) ·
+  Bitte überweisen Sie den Betrag unter Angabe der Rechnungsnummer. ·
+  Bei Fragen wenden Sie sich bitte an: {{ invoice.issuer_email }}
+</div>
+
+<div class="footer">
+  <strong>{{ invoice.issuer_name }}</strong> · Steuer-Nr.: {{ invoice.issuer_oib }} · IBAN: {{ invoice.issuer_iban }}{% if invoice.swift %} · BIC: {{ invoice.swift }}{% endif %} · {{ invoice.issuer_email }}{% if invoice.issuer_phone %} · Tel.: {{ invoice.issuer_phone }}{% endif %}
+  &nbsp;|&nbsp; Rechnungsdatum: {{ invoice.date_issued|date:"d.m.Y" }} · Dok.-Nr.: {{ invoice.uuid }}
+</div>
+</body>
+</html>

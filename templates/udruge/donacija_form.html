@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Nova donacija — LIMIT CONNECT{% endblock %}
+{% block content %}
+<style>
+    .form-card { max-width: 640px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px; }
+    .form-card h1 { font-size: 1.3rem; margin: 0 0 24px; color: var(--gold, #c9a84c); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); font-size: 0.9rem; }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .btn-gold { background: #c9a84c; color: #0a0a0a; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; width: 100%; }
+    .btn-gold:hover { background: #b8943f; }
+    .btn-back { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; }
+    @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="form-card">
+    <a href="{% url 'udruge:donacija_list' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Natrag na donacije</a>
+    <h1><i class="fas fa-hand-holding-heart"></i> Nova donacija</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label>Ime donatora *</label>
+                <input type="text" name="donor_name" required placeholder="Ivan Horvat">
+            </div>
+            <div class="form-group">
+                <label>OIB donatora</label>
+                <input type="text" name="donor_oib" maxlength="11" placeholder="12345678901">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Tip donatora</label>
+                <select name="donor_type">
+                    {% for val, label in donor_types %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Iznos (EUR) *</label>
+                <input type="number" name="amount" step="0.01" min="0.01" required placeholder="100.00">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Adresa donatora</label>
+            <input type="text" name="donor_address" placeholder="Ulica i kucni broj, Grad">
+        </div>
+        <div class="form-group">
+            <label>Namjena donacije</label>
+            <input type="text" name="purpose" placeholder="Opca namjena / za projekt XY">
+        </div>
+        <div class="form-group">
+            <label>Datum donacije</label>
+            <input type="date" name="date">
+        </div>
+        <div class="form-group">
+            <label>Napomena</label>
+            <textarea name="note" placeholder="Dodatne napomene..."></textarea>
+        </div>
+        <button type="submit" class="btn-gold"><i class="fas fa-save"></i> Spremi donaciju</button>
+    </form>
+</div>
+
+{% endblock %}

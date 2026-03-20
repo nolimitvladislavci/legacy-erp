@@ -1,0 +1,90 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n %}
+{% block title %}Vaučeri{% endblock %}
+{% block extra_css %}
+<style>
+.voucher-wrap{max-width:900px;margin:2rem auto;padding:0 1rem}
+.voucher-title{font-size:1.4rem;font-weight:700;color:var(--gold);margin-bottom:1.5rem}
+.voucher-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:2rem}
+.voucher-form h3{font-size:1rem;font-weight:600;margin-bottom:1rem;color:var(--gold)}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.75rem;align-items:end}
+.form-group label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.3rem}
+.form-group input{width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.5rem .75rem;font-size:.9rem}
+.btn-create{background:var(--gold);color:#000;border:none;border-radius:6px;padding:.55rem 1.2rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn-create:hover{background:var(--gold2)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:.75rem;color:var(--muted);padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+td{padding:.6rem .75rem;border-bottom:1px solid var(--border);font-size:.875rem}
+tr:hover td{background:var(--card)}
+.badge{display:inline-block;padding:.2rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700}
+.badge-ok{background:#1d3a25;color:#4caf7d}
+.badge-no{background:#3a1d1d;color:#e05c5c}
+.badge-exp{background:#3a2f1d;color:#c9a84c}
+.back-link{display:inline-block;margin-bottom:1rem;color:var(--muted);text-decoration:none;font-size:.875rem}
+.back-link:hover{color:var(--text)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="voucher-wrap">
+  <a href="/pos/" class="back-link">← POS Dashboard</a>
+  <div class="voucher-title">🎫 Vaučeri / Bonovi</div>
+
+  <div class="voucher-form">
+    <h3>Novi vaučer</h3>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group">
+          <label>Iznos (€) *</label>
+          <input type="number" name="amount" step="0.01" min="0.01" placeholder="50.00" required>
+        </div>
+        <div class="form-group">
+          <label>Rok valjanosti</label>
+          <input type="date" name="expiry_date">
+        </div>
+        <div class="form-group">
+          <label>Napomena</label>
+          <input type="text" name="notes" maxlength="200" placeholder="Npr. Božićni bon">
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn-create">+ Kreiraj vaučer</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Kod</th>
+        <th>Izvorno</th>
+        <th>Preostalo</th>
+        <th>Rok</th>
+        <th>Napomena</th>
+        <th>Status</th>
+        <th>Kreiran</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in vouchers %}
+      <tr>
+        <td><strong style="color:var(--gold)">{{ v.code }}</strong></td>
+        <td>{{ v.original_amount }} €</td>
+        <td>{{ v.remaining }} €</td>
+        <td>{% if v.expiry_date %}{{ v.expiry_date }}{% else %}<span style="color:var(--muted)">—</span>{% endif %}</td>
+        <td>{{ v.notes|default:"—" }}</td>
+        <td>
+          {% if not v.is_active %}<span class="badge badge-no">Iskorišten</span>
+          {% elif v.is_expired %}<span class="badge badge-exp">Istekao</span>
+          {% else %}<span class="badge badge-ok">Aktivan</span>{% endif %}
+        </td>
+        <td style="color:var(--muted);font-size:.8rem">{{ v.created_at|date:"d.m.Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Nema vaučera</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

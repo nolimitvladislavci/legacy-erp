@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Galerija slika | LIMIT Connect{% endblock %}
+{% block page_title %}Galerija slika{% endblock %}
+
+{% block extra_css %}
+<style>
+.gal-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem}
+.gal-header h2{margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem}
+.gal-header h2 i{color:var(--gold);margin-right:8px}
+.gal-header p{color:var(--text-muted);margin:0;font-size:.82rem}
+
+.upload-area{background:var(--bg-card);border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;margin-bottom:1.5rem;transition:all .2s;cursor:pointer;position:relative}
+.upload-area:hover,.upload-area.dragover{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.cat-select{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap}
+.cat-btn{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:6px 14px;border-radius:8px;font-size:.78rem;cursor:pointer;transition:all .15s}
+.cat-btn:hover,.cat-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem}
+.img-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;position:relative;transition:border-color .2s}
+.img-card:hover{border-color:var(--gold)}
+.img-card img{width:100%;height:120px;object-fit:cover;display:block}
+.img-card .info{padding:.5rem}
+.img-card .info .title{font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.img-card .info .cat{font-size:.65rem;color:var(--text-muted);text-transform:uppercase}
+.img-card .del{position:absolute;top:4px;right:4px;background:rgba(239,68,68,.9);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:none;align-items:center;justify-content:center}
+.img-card:hover .del{display:flex}
+
+.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:all .15s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:960px;margin:0 auto">
+
+  <div class="gal-header">
+    <div>
+      <h2><i class="fas fa-images"></i> Galerija — {{ company.name }}</h2>
+      <p>Uploadajte slike za web stranicu. Proizvodi, interijer, logo, tim.</p>
+    </div>
+    <a href="/" class="btn-ghost"><i class="fas fa-arrow-left"></i> Natrag</a>
+  </div>
+
+  <!-- Upload -->
+  <div class="upload-area" id="uploadArea">
+    <div style="font-size:2rem;opacity:.3;margin-bottom:.5rem">📷</div>
+    <div style="font-size:.95rem;font-weight:600;color:var(--text)">Povucite slike ovdje ili kliknite</div>
+    <div style="font-size:.78rem;color:var(--text-muted);margin-top:.3rem">JPG, PNG, WebP — maks 10MB po slici</div>
+    <input type="file" id="fileInput" accept="image/*" multiple>
+  </div>
+
+  <div class="cat-select" id="catSelect">
+    <button type="button" class="cat-btn active" data-cat="product" onclick="setCat(this)"><i class="fas fa-box"></i> Proizvod</button>
+    <button type="button" class="cat-btn" data-cat="hero" onclick="setCat(this)"><i class="fas fa-image"></i> Naslovna</button>
+    <button type="button" class="cat-btn" data-cat="interior" onclick="setCat(this)"><i class="fas fa-store"></i> Interijer</button>
+    <button type="button" class="cat-btn" data-cat="team" onclick="setCat(this)"><i class="fas fa-users"></i> Tim</button>
+    <button type="button" class="cat-btn" data-cat="logo" onclick="setCat(this)"><i class="fas fa-palette"></i> Logo</button>
+    <button type="button" class="cat-btn" data-cat="promo" onclick="setCat(this)"><i class="fas fa-bullhorn"></i> Promo</button>
+  </div>
+
+  <!-- Existing images -->
+  <div class="img-grid" id="imgGrid">
+    {% for img in images %}
+    <div class="img-card" id="img-{{ img.pk }}">
+      <img src="{{ img.image.url }}" alt="{{ img.title }}" loading="lazy">
+      <div class="info">
+        <div class="title">{{ img.title|default:"-" }}</div>
+        <div class="cat">{{ img.get_category_display }}</div>
+      </div>
+      <button class="del" onclick="deleteImg({{ img.pk }})" title="Obriši">&times;</button>
+    </div>
+    {% empty %}
+    <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-muted)">
+      <i class="fas fa-image" style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.3"></i>
+      Nema slika — uploadajte prvu!
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<script>
+var CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+var _cat = 'product';
+
+function setCat(btn) {
+  document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  _cat = btn.dataset.cat;
+}
+
+// Upload
+var area = document.getElementById('uploadArea');
+var fin = document.getElementById('fileInput');
+
+['dragenter','dragover'].forEach(function(e) { area.addEventListener(e, function(ev) { ev.preventDefault(); area.classList.add('dragover'); }); });
+['dragleave','drop'].forEach(function(e) { area.addEventListener(e, function(ev) { ev.preventDefault(); area.classList.remove('dragover'); }); });
+area.addEventListener('drop', function(ev) { if (ev.dataTransfer.files.length) uploadFiles(ev.dataTransfer.files); });
+fin.addEventListener('change', function() { if (this.files.length) uploadFiles(this.files); });
+
+function uploadFiles(files) {
+  var fd = new FormData();
+  Array.from(files).forEach(function(f) { fd.append('images', f); });
+  fd.append('category', _cat);
+  fd.append('csrfmiddlewaretoken', CSRF);
+
+  area.innerHTML = '<div style="padding:1rem;color:var(--gold)"><i class="fas fa-spinner fa-spin"></i> Uploadam ' + files.length + ' slika...</div>';
+
+  fetch('/website/gallery/upload/', {
+    method: 'POST', credentials: 'same-origin',
+    headers: {'X-Requested-With': 'XMLHttpRequest'},
+    body: fd
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      location.reload();
+    } else {
+      alert(data.error || 'Greska');
+      location.reload();
+    }
+  })
+  .catch(function(e) { alert('Greska: ' + e.message); location.reload(); });
+}
+
+function deleteImg(pk) {
+  if (!confirm('Obrisati sliku?')) return;
+  fetch('/website/gallery/' + pk + '/delete/', {
+    method: 'POST', credentials: 'same-origin',
+    headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      var el = document.getElementById('img-' + pk);
+      if (el) el.remove();
+    }
+  });
+}
+</script>
+{% endblock %}

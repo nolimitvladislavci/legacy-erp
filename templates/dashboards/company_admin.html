@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Admin dashboard – LIMIT Connect{% endblock %}
+{% block content %}
+{% if onboarding %}
+<div id="onboarding-widget" style="background:linear-gradient(135deg,#1a1a1a 0%,#111 100%);border:1px solid #c9a84c44;border-radius:12px;padding:20px 24px;margin-bottom:24px;position:relative">
+  <button onclick="dismissOnboarding()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#666;font-size:1.1rem;cursor:pointer" title="Zatvori">&times;</button>
+  <h6 style="color:#c9a84c;margin-bottom:4px"><i class="fas fa-rocket me-2"></i>Dobrodosli u LIMIT Connect!</h6>
+  <p style="color:#999;font-size:.85rem;margin-bottom:14px">Pratedite postavljanje da biste izvukli maksimum iz sustava.</p>
+  <div style="background:#0a0a0a;border-radius:8px;height:6px;margin-bottom:16px;overflow:hidden">
+    <div style="background:#c9a84c;height:100%;width:{{ onboarding.percent }}%;transition:width .5s ease"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.profile_completed %}#c9a84c55{% else %}#222{% endif %}">
+      <i class="fas {% if onboarding.profile_completed %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.profile_completed %}#c9a84c{% else %}#555{% endif %}"></i>
+      <div>
+        <div style="font-size:.8rem;color:#ccc">Profil tvrtke</div>
+        <div style="font-size:.7rem;color:#777">Popunite naziv, adresu i OIB</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.first_partner_added %}#c9a84c55{% else %}#222{% endif %}">
+      <i class="fas {% if onboarding.first_partner_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_partner_added %}#c9a84c{% else %}#555{% endif %}"></i>
+      <div>
+        <div style="font-size:.8rem;color:#ccc">Dodaj partnera</div>
+        <div style="font-size:.7rem;color:#777"><a href="/partners/new/" style="color:#c9a84c88">Dodaj prvog klijenta</a></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.first_invoice_created %}#c9a84c55{% else %}#222{% endif %}">
+      <i class="fas {% if onboarding.first_invoice_created %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_invoice_created %}#c9a84c{% else %}#555{% endif %}"></i>
+      <div>
+        <div style="font-size:.8rem;color:#ccc">Kreiraj racun</div>
+        <div style="font-size:.7rem;color:#777"><a href="/invoicing/wizard/" style="color:#c9a84c88">Novi racun</a></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.bank_account_added %}#c9a84c55{% else %}#222{% endif %}">
+      <i class="fas {% if onboarding.bank_account_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.bank_account_added %}#c9a84c{% else %}#555{% endif %}"></i>
+      <div>
+        <div style="font-size:.8rem;color:#ccc">Bankovni racun</div>
+        <div style="font-size:.7rem;color:#777"><a href="/konto/" style="color:#c9a84c88">Dodaj IBAN</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function dismissOnboarding() {
+  var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+  var token = csrf ? csrf.value : '';
+  fetch('/companies/onboarding/dismiss/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': token }
+  }).then(function() {
+    var w = document.getElementById('onboarding-widget');
+    if (w) { w.style.transition = 'opacity .4s'; w.style.opacity = '0'; setTimeout(function() { w.remove(); }, 400); }
+  });
+}
+</script>
+{% endif %}
+
+<!-- Push notification opt-in -->
+<div id="push-banner" style="display:none;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid var(--gold-border);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:none">
+  <div style="display:flex;align-items:center;gap:12px">
+    <i class="fas fa-bell" style="color:var(--gold);font-size:1.3rem"></i>
+    <div style="flex:1">
+      <div style="font-size:.85rem;font-weight:600;color:var(--text)">{% trans "Uključi obavijesti" %}</div>
+      <div style="font-size:.75rem;color:var(--text-dim)">{% trans "Primajte push obavijesti za odobrenja, fakture i intervencije" %}</div>
+    </div>
+    <button onclick="enablePush()" style="background:var(--gold);color:#000;border:none;border-radius:6px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer">{% trans "Uključi" %}</button>
+    <button onclick="dismissPushBanner()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem">&times;</button>
+  </div>
+</div>
+<script>
+(function(){
+  if(!('PushManager' in window) || !('Notification' in window)) return;
+  if(Notification.permission === 'granted') return;
+  if(Notification.permission === 'denied') return;
+  if(localStorage.getItem('push-banner-dismissed')) return;
+  var b = document.getElementById('push-banner');
+  if(b) b.style.display = 'block';
+})();
+function enablePush(){
+  if(window.requestPushPermission){
+    requestPushPermission(function(ok){
+      var b = document.getElementById('push-banner');
+      if(b) b.style.display = 'none';
+    });
+  }
+}
+function dismissPushBanner(){
+  localStorage.setItem('push-banner-dismissed','1');
+  var b = document.getElementById('push-banner');
+  if(b) b.style.display = 'none';
+}
+</script>
+
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<style>
+:root{--gold:#c9a84c;--gold-dim:rgba(201,168,76,.12);--gold-border:rgba(201,168,76,.28);--surface:#0f172a;--surface2:#1e293b;--text:#e2e8f0;--text-dim:#94a3b8;--green:#10b981;--red:#ef4444;--amber:#f59e0b}
+.cd-wrap{padding:20px 24px;max-width:1200px;margin:0 auto}
+.cd-title{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+
+/* KPI row */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:16px 18px}
+.kpi-val{font-size:1.7rem;font-weight:800;color:var(--text);line-height:1.1}
+.kpi-val.gold{color:var(--gold)}
+.kpi-val.green{color:var(--green)}
+.kpi-val.red{color:var(--red)}
+.kpi-val.amber{color:var(--amber)}
+.kpi-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:6px}
+.kpi-sub{font-size:.72rem;color:var(--text-dim);margin-top:4px}
+.kpi:hover{border-color:var(--gold-border);transition:border-color .2s}
+.t-row:hover{background:rgba(255,255,255,.03)}
+
+/* Workers grid */
+.workers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px}
+.worker-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.worker-card.clocked-in{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.04)}
+.worker-avatar{width:40px;height:40px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:var(--gold);flex-shrink:0}
+.worker-info{flex:1;min-width:0}
+.worker-name{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.worker-status{font-size:.7rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;margin-top:2px}
+.worker-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.worker-hours{font-size:.8rem;font-weight:700;color:var(--gold);white-space:nowrap}
+
+/* Two-col layout */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.panel{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden}
+.panel-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.panel-header a{font-size:.72rem;color:var(--text-dim);text-decoration:none}
+.panel-header a:hover{color:var(--gold)}
+
+/* Table rows */
+.t-row{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem;align-items:center}
+.t-row:last-child{border-bottom:none}
+.t-main{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;color:var(--text)}
+.t-sub{font-size:.72rem;color:var(--text-dim)}
+.t-val{font-weight:700;color:var(--gold);white-space:nowrap}
+.t-badge{font-size:.65rem;padding:.15rem .5rem;border-radius:8px;white-space:nowrap}
+.badge-paid{background:#d1fae5;color:#065f46}
+.badge-unpaid{background:#fee2e2;color:#991b1b}
+.badge-draft{background:#f1f5f9;color:#475569}
+.badge-sent{background:#dbeafe;color:#1e40af}
+.empty-row{padding:20px 16px;text-align:center;color:var(--text-dim);font-size:.82rem}
+
+/* Interventions */
+.iv-pill{font-size:.68rem;padding:.2rem .6rem;border-radius:8px;white-space:nowrap;font-weight:600}
+
+/* Pending approvals */
+.approve-row{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem;align-items:center}
+.approve-row:last-child{border-bottom:none}
+.approve-btn{background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:.72rem;cursor:pointer;font-weight:700}
+.approve-btn:hover{opacity:.85}
+
+/* Section title standalone */
+.s-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;margin:0 0 10px}
+
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .cd-wrap{padding:14px}
+}
+</style>
+
+<div class="cd-wrap">
+  <div class="cd-title">🏢 Admin nadzorna ploča
+    {% if company %}<span style="font-size:.8rem;color:var(--text-dim);font-weight:400">— {{ company.name }}</span>
+    <a href="/companies/settings/" style="margin-left:auto;font-size:.75rem;color:var(--gold);text-decoration:none;font-weight:600;background:var(--gold-dim);border:1px solid var(--gold-border);padding:5px 12px;border-radius:6px"><i class="fas fa-cog me-1"></i>Postavke tvrtke</a>{% endif %}
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <a href="/invoicing/" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+      <div class="kpi-lbl">{% trans "💰 Prihod ovaj mj." %}</div>
+      <div class="kpi-val green">{{ paid_month|floatformat:0 }} €</div>
+      <div class="kpi-sub">Ukupno: {{ total_invoiced|floatformat:0 }} €</div>
+    </div></a>
+    <a href="/invoicing/?status=sent" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+      <div class="kpi-lbl">{% trans "📄 Neplaćene fakture" %}</div>
+      <div class="kpi-val {% if unpaid > 0 %}red{% else %}green{% endif %}">{{ unpaid|floatformat:0 }} €</div>
+      <div class="kpi-sub">{{ pending_offers }} ponuda u toku</div>
+    </div></a>
+    <a href="{% url 'worktime:ts_manager' %}" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+      <div class="kpi-lbl">{% trans "👷 Radnici online" %}</div>
+      <div class="kpi-val gold">{{ workers_online }}/{{ workers_total }}</div>
+      <div class="kpi-sub">{{ pending_approvals }} sati čeka odobr.</div>
+    </div></a>
+    <a href="{% url 'interventions:kanban' %}" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+      <div class="kpi-lbl">{% trans "🚨 Aktivne interv." %}</div>
+      <div class="kpi-val {% if active_interventions > 0 %}amber{% else %}green{% endif %}">{{ active_interventions }}</div>
+      <div class="kpi-sub">{{ total_projects }} aktivnih proj.</div>
+    </div></a>
+  </div>
+
+  <!-- Worker status grid -->
+  <div class="s-title">{% trans "👷 Status radnika" %}</div>
+  <div class="workers-grid" style="margin-bottom:24px">
+    {% for w in worker_status %}
+    <div class="worker-card {% if w.is_clocked_in %}clocked-in{% endif %}">
+      <div class="worker-avatar">{{ w.initials }}</div>
+      <div class="worker-info">
+        <div class="worker-name"><a href="{% url 'worktime:ts_manager' %}?workers={{ w.user_id }}" style="color:inherit;text-decoration:none">{{ w.name }}</a></div>
+        <div class="worker-status">
+          <div class="worker-dot" style="background:{% if w.is_clocked_in %}var(--green){% else %}#374151{% endif %}"></div>
+          {% if w.is_clocked_in %}
+            <span style="color:var(--green)">{{ w.timer_elapsed }} · {{ w.timer_project }}</span>
+          {% else %}
+            <span>{% trans "Nije prijavljen" %}</span>
+          {% endif %}
+        </div>
+        <div class="worker-status" style="margin-top:2px">
+          <span>{% trans "Tjedan:" %} </span><span class="worker-hours">{{ w.hours_week|floatformat:1 }}h</span>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div style="color:var(--text-dim);font-size:.85rem;grid-column:1/-1;padding:12px 0">
+      {% trans "Nema registriranih radnika." %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="two-col">
+
+    <!-- Pending approvals -->
+    <div class="panel">
+      <div class="panel-header">
+        {% trans "⏳ Radni sati – na odobrenju" %}
+        <a href="{% url 'worktime:ts_approve' %}">{% trans "Sve →" %}</a>
+      </div>
+      {% if pending_entries %}
+        {% for e in pending_entries %}
+        <div class="approve-row">
+          <div style="flex:1;min-width:0">
+            <div class="t-main">{{ e.user.get_full_name|default:e.user.username }}</div>
+            <div class="t-sub">{{ e.project.name }} · {{ e.date|date:"d.m." }} · {{ e.duration }}h</div>
+          </div>
+          <form method="post" action="{% url 'worktime:ts_approve' %}">
+            {% csrf_token %}<input type="hidden" name="entry_ids" value="{{ e.pk }}">
+            <input type="hidden" name="action" value="approve">
+            <button type="submit" class="approve-btn">{% trans "✓ Odobri" %}</button>
+          </form>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-row">{% trans "Nema sati na odobrenju ✓" %}</div>
+      {% endif %}
+    </div>
+
+    <!-- Active interventions -->
+    <div class="panel">
+      <div class="panel-header">
+        {% trans "🚨 Aktivne intervencije" %}
+        <a href="{% url 'interventions:kanban' %}">{% trans "Kanban →" %}</a>
+      </div>
+      {% if active_iv_list %}
+        {% for iv in active_iv_list %}
+        <a href="{% url 'interventions:detail' iv.pk %}" style="text-decoration:none"><div class="t-row" style="cursor:pointer">
+          <div style="flex:1;min-width:0">
+            <div class="t-main">{{ iv.title }}</div>
+            <div class="t-sub">{{ iv.address|default:iv.client_name }} · {% if iv.assigned_to %}{{ iv.assigned_to.get_full_name|default:iv.assigned_to.username }}{% else %}Nedodijeljena{% endif %}</div>
+          </div>
+          <span class="iv-pill" style="background:rgba(201,168,76,.15);color:var(--gold)">{{ iv.get_status_display }}</span>
+        </div></a>
+        {% endfor %}
+      {% else %}
+        <div class="empty-row">{% trans "Nema aktivnih intervencija ✓" %}</div>
+      {% endif %}
+    </div>
+
+  </div><!-- /two-col -->
+
+  <!-- Recent invoices -->
+  <div class="panel" style="margin-bottom:24px">
+    <div class="panel-header">
+      {% trans "📄 Nedavne fakture" %}
+      <a href="{% url 'worktime:ts_bill' %}" onclick="return confirm('Otvoriti fakturiranje radnih sati?')">{% trans "Naplati sate →" %}</a>
+    </div>
+    {% if recent_invoices %}
+      {% for inv in recent_invoices %}
+      <div class="t-row">
+        <a href="/invoicing/{{ inv.pk }}/" style="width:120px;font-size:.75rem;color:var(--gold);text-decoration:none;font-weight:600">{{ inv.number }}</a>
+        <div class="t-main"><a href="/invoicing/{{ inv.pk }}/" style="color:inherit;text-decoration:none">{{ inv.client_name|default:"—" }}</a></div>
+        <div class="t-sub" style="white-space:nowrap">{{ inv.date_issued|date:"d.m.Y" }}</div>
+        <div class="t-val">{{ inv.total|floatformat:2 }} €</div>
+        <a href="/invoicing/{{ inv.pk }}/" style="text-decoration:none"><span class="t-badge badge-{{ inv.status|lower }}">{{ inv.get_status_display }}</span></a>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-row">{% trans "Nema faktura." %}</div>
+    {% endif %}
+  </div>
+
+  <!-- Bank Reconciliation widget -->
+  <div class="panel" style="margin-bottom:24px">
+    <div class="panel-header">
+      <span style="color:#03dac6">{% trans "Bankovna rekoncilijacija" %}</span>
+      <a href="/konto/reconciliation/">{% trans "Otvori" %} &rarr;</a>
+    </div>
+    {% if unmatched_bank_count > 0 %}
+    <div class="t-row">
+      <div style="flex:1">
+        <div class="t-main">{{ unmatched_bank_count }} nesravnjenih uplata</div>
+        <div class="t-sub">Ukupno: {{ unmatched_bank_amount|floatformat:2 }} EUR</div>
+      </div>
+      <a href="/konto/reconciliation/" class="approve-btn" style="background:#03dac6;text-decoration:none">Sravni</a>
+    </div>
+    {% else %}
+    <div class="empty-row" style="color:#03dac6">{% trans "Sve transakcije su parirane" %} &#10003;</div>
+    {% endif %}
+  </div>
+
+
+
+{% if synesis_cfg %}
+<!-- SYNESIS widget -->
+<div style="background:var(--surface);border:1px solid #3b82f622;border-radius:12px;padding:18px;margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span style="color:#3b82f6;font-weight:600"><i class="fas fa-database me-2"></i>Synesis integracija</span>
+    <a href="/synesis/" style="color:#3b82f6;font-size:.78rem;font-weight:600;text-decoration:none">Postavke <i class="fas fa-cog ms-1"></i></a>
+  </div>
+
+  <!-- ERP: Partners + Items -->
+  <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:#475569;margin-bottom:6px">ERP — Synesis</div>
+  <div style="display:flex;gap:8px;text-align:center;margin-bottom:12px">
+    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+      <div style="font-size:1.4rem;font-weight:700;color:#3b82f6">{{ synesis_cfg.partners_total }}</div>
+      <div style="color:#888;font-size:.72rem"><i class="fas fa-handshake me-1"></i>Partneri</div>
+    </div>
+    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+      <div style="font-size:1.4rem;font-weight:700;color:#3b82f6">{{ synesis_cfg.items_total }}</div>
+      <div style="color:#888;font-size:.72rem"><i class="fas fa-boxes me-1"></i>Artikli</div>
+    </div>
+    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+      {% if synesis_cfg.last_sync_partners %}
+        <div style="font-size:.8rem;font-weight:600;color:#4ade80"><i class="fas fa-check-circle"></i></div>
+        <div style="color:#888;font-size:.7rem">{{ synesis_cfg.last_sync_partners|date:"d.m H:i" }}</div>
+      {% else %}
+        <div style="font-size:.8rem;color:#f87171"><i class="fas fa-exclamation-circle"></i></div>
+        <div style="color:#888;font-size:.7rem">Nije sync</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- POS: Cash register stats -->
+  {% if synesis_cfg.pos_db_path %}
+  <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.8px;color:#475569;margin-bottom:6px">{{ synesis_cfg.pos_name }} — SynesisPOS</div>
+  <div style="display:flex;gap:8px;text-align:center;margin-bottom:12px">
+    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+      <div style="font-size:1.1rem;font-weight:700;color:#10b981">{{ synesis_cfg.pos_revenue_today }} €</div>
+      <div style="color:#888;font-size:.72rem">Danas</div>
+    </div>
+    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+      <div style="font-size:1.1rem;font-weight:700;color:#10b981">{{ synesis_cfg.pos_revenue_week }} €</div>
+      <div style="color:#888;font-size:.72rem">Ovaj tjedan</div>
+    </div>
+    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+      <div style="font-size:1.1rem;font-weight:700;color:#10b981">{{ synesis_cfg.pos_revenue_month }} €</div>
+      <div style="color:#888;font-size:.72rem">Ovaj mjesec</div>
+    </div>
+    <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:10px">
+      <div style="font-size:1.1rem;font-weight:700;color:#64748b">{{ synesis_cfg.pos_receipts_total }}</div>
+      <div style="color:#888;font-size:.72rem">Racuna</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <a href="/synesis/download-setup/" style="display:block;background:#3b82f622;border:1px solid #3b82f655;color:#3b82f6;padding:8px;border-radius:8px;text-align:center;text-decoration:none;font-size:.82rem;font-weight:600">
+    <i class="fas fa-rocket me-1"></i>Preuzmi Setup (.bat) &mdash; jednom pokreni, automatski svaki dan
+  </a>
+</div>
+{% endif %}
+
+  <!-- Fiskalizacija Summary -->
+  <div style="background:var(--surface);border:1px solid #c9a84c44;border-radius:12px;padding:18px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="color:var(--gold);font-weight:600"><i class="fas fa-receipt me-2"></i>Fiskalizacija</span>
+      <a href="{% url 'invoicing:fiscal_certificates' %}" style="color:var(--gold);font-size:.78rem;font-weight:600;text-decoration:none">Certifikati</a>
+    </div>
+    <div style="display:flex;gap:12px;text-align:center">
+      <a href="{% url 'invoicing:fiscal_batch_list' %}" style="flex:1;text-decoration:none"><div style="background:#0d0d0d;border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:1.5rem;font-weight:700;color:#e8994d">{{ fiscal_stats.unfiscalized_count }}</div>
+        <div style="color:#888;font-size:.75rem">Nefiskaliziranih</div>
+      </div></a>
+      <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:12px">
+        <div style="font-size:1.5rem;font-weight:700">{% if fiscal_stats.cert_valid %}<span style="color:#4ade80">OK</span>{% else %}<span style="color:#f87171">—</span>{% endif %}</div>
+        <div style="color:#888;font-size:.75rem">Certifikat</div>
+      </div>
+      <div style="flex:1;background:#0d0d0d;border-radius:8px;padding:12px">
+        {% if fiscal_stats.cert_expiring_soon %}
+        <div style="font-size:1.5rem;font-weight:700;color:#fbbf24">{{ fiscal_stats.days_until_expiry }}</div>
+        <div style="color:#888;font-size:.75rem">Dana do isteka</div>
+        {% else %}
+        <div style="font-size:1.5rem;font-weight:700;color:#555">—</div>
+        <div style="color:#888;font-size:.75rem">Upozorenja</div>
+        {% endif %}
+      </div>
+    </div>
+    {% if fiscal_stats.unfiscalized_count > 0 %}
+    <a href="{% url 'invoicing:fiscal_batch_list' %}" style="display:block;margin-top:12px;background:#c9a84c22;border:1px solid #c9a84c77;color:var(--gold);padding:8px;border-radius:8px;text-align:center;text-decoration:none;font-size:.83rem;font-weight:600">
+      <i class="fas fa-paper-plane me-1"></i>Pokretni batch fiskalizaciju
+    </a>
+    {% endif %}
+  </div>
+  <!-- Quick links -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <a href="{% url 'worktime:ts_manager' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "📋 Timesheet pregled" %}</a>
+    <a href="{% url 'worktime:ts_analytics' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "📊 Analitika" %}</a>
+    <a href="{% url 'worktime:ts_bill' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "💶 Naplati sate" %}</a>
+    <a href="{% url 'interventions:new' %}" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none">{% trans "🚨 Nova intervencija" %}</a>
+    <a href="{% url 'worktime:billable' %}" style="background:rgba(201,168,76,.12);border:1px solid var(--gold-border);color:var(--gold);padding:10px 16px;border-radius:8px;font-size:.82rem;text-decoration:none;font-weight:600">{% trans "💰 Nenaplaćeni sati" %}</a>
+  </div>
+
+</div>
+
+{% if inventory_stats.total_items %}
+<!-- SKLADIŠTE card -->
+<div class="stat-card mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 style="font-weight:700;font-size:.85rem;margin:0">
+      <i class="fas fa-warehouse" style="color:var(--gold)"></i>
+      &nbsp;{% trans "Skladište" %}
+      {% if inventory_stats.low_stock_count > 0 %}
+        <span class="badge bg-warning text-dark ms-1" style="font-size:.65rem">
+          {{ inventory_stats.low_stock_count }} nisko
+        </span>
+      {% endif %}
+    </h6>
+    <a href="/inventory/overview/" class="btn btn-outline-secondary btn-sm" style="font-size:.72rem">Pregled &rarr;</a>
+  </div>
+  <div class="row g-2">
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:var(--gold);font-size:1.4rem;font-weight:700">{{ inventory_stats.total_items }}</div>
+        <div style="color:#64748b;font-size:.72rem">Artikala</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:#f59e0b;font-size:1.1rem;font-weight:700">{{ inventory_stats.low_stock_count }}</div>
+        <div style="color:#64748b;font-size:.72rem">Ispod min.</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:#94a3b8;font-size:.85rem;font-weight:700">{{ inventory_stats.stock_value|floatformat:2 }} EUR</div>
+        <div style="color:#64748b;font-size:.72rem">Vr. (nabavna)</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:var(--gold);font-size:.85rem;font-weight:700">{{ inventory_stats.selling_value|floatformat:2 }} EUR</div>
+        <div style="color:#64748b;font-size:.72rem">Vr. (MPC)</div>
+      </div>
+    </div>
+  </div>
+  <div class="mt-2 d-flex gap-2" style="font-size:.78rem">
+    <a href="/inventory/receipts/new/" style="color:var(--gold)"><i class="fas fa-plus me-1"></i>Nova primka</a>
+    <span style="color:#334155">|</span>
+    <a href="/inventory/receipts/" style="color:#94a3b8">Sve primke</a>
+  </div>
+</div>
+{% endif %}
+
+{% if wo_stats.total %}
+<!-- RADNI NALOZI card -->
+<div class="stat-card mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 style="font-weight:700;font-size:.85rem;margin:0">
+      <i class="fas fa-tools" style="color:var(--gold)"></i>
+      &nbsp;Radni nalozi
+      {% if wo_stats.in_progress > 0 %}
+        <span class="badge ms-1" style="background:#3b82f6;font-size:.65rem">
+          {{ wo_stats.in_progress }} u tijeku
+        </span>
+      {% endif %}
+      {% if wo_stats.today > 0 %}
+        <span class="badge bg-warning text-dark ms-1" style="font-size:.65rem">
+          {{ wo_stats.today }} danas
+        </span>
+      {% endif %}
+    </h6>
+    <a href="/work-orders/" class="btn btn-outline-secondary btn-sm" style="font-size:.72rem">Svi nalozi &rarr;</a>
+  </div>
+  <div class="row g-2">
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(201,168,76,.06);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:var(--gold);font-size:1.4rem;font-weight:700">{{ wo_stats.total }}</div>
+        <div style="color:#64748b;font-size:.72rem">Ukupno</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(59,130,246,.08);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:#3b82f6;font-size:1.4rem;font-weight:700">{{ wo_stats.in_progress }}</div>
+        <div style="color:#64748b;font-size:.72rem">U tijeku</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(34,197,94,.08);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:#22c55e;font-size:1.4rem;font-weight:700">{{ wo_stats.completed }}</div>
+        <div style="color:#64748b;font-size:.72rem">Završeno</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:rgba(100,116,139,.08);border-radius:8px;padding:10px;text-align:center">
+        <div style="color:#94a3b8;font-size:1.4rem;font-weight:700">{{ wo_stats.today }}</div>
+        <div style="color:#64748b;font-size:.72rem">Danas</div>
+      </div>
+    </div>
+  </div>
+  <div class="mt-2 d-flex gap-2" style="font-size:.78rem">
+    <a href="/work-orders/new/" style="color:var(--gold)"><i class="fas fa-plus me-1"></i>Novi nalog</a>
+    <span style="color:#334155">|</span>
+    <a href="/work-orders/?status=in_progress" style="color:#3b82f6">U tijeku</a>
+    <span style="color:#334155">|</span>
+    <a href="/work-orders/vehicles/" style="color:#94a3b8">Vozila</a>
+  </div>
+</div>
+{% endif %}
+
+
+{% if grosmarkt_stats.otpremnice_count or grosmarkt_stats.otkupni_count %}
+<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <div style="font-weight:700;font-size:.95rem">📦 Grosmarkt dokumenti</div>
+    <a href="/documents/otpremnica/" style="font-size:.78rem;color:var(--gold);text-decoration:none">Svi dokumenti →</a>
+  </div>
+
+  <!-- Brojevi -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+    <a href="/documents/otpremnica/" style="text-decoration:none">
+      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:.875rem;text-align:center">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--gold)">{{ grosmarkt_stats.otpremnice_count }}</div>
+        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Otpremnice</div>
+      </div>
+    </a>
+    <a href="/documents/otkupni/" style="text-decoration:none">
+      <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);border-radius:10px;padding:.875rem;text-align:center">
+        <div style="font-size:1.8rem;font-weight:800;color:#22c55e">{{ grosmarkt_stats.otkupni_count }}</div>
+        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Otkupni blokovi</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Zadnje otpremnice -->
+  {% if grosmarkt_stats.recent_otpremnice %}
+  <div style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em">Zadnje otpremnice</div>
+  {% for o in grosmarkt_stats.recent_otpremnice %}
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.82rem">
+    <a href="/documents/otpremnica/{{ o.pk }}/" style="color:var(--gold);text-decoration:none;font-weight:600">OTP-{{ o.doc_number }}</a>
+    <span style="color:var(--muted);font-size:.75rem">{{ o.date_issued|date:"d.m.Y" }}</span>
+    <span style="font-size:.72rem;padding:.15rem .5rem;border-radius:4px;
+      {% if o.status == 'confirmed' %}background:#14532d;color:#4ade80
+      {% elif o.status == 'cancelled' %}background:#450a0a;color:#f87171
+      {% else %}background:#1c1917;color:#a8a29e{% endif %}">
+      {{ o.get_status_display }}
+    </span>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- Zadnji otkupni blokovi -->
+  {% if grosmarkt_stats.recent_otkupni %}
+  <div style="font-size:.75rem;color:var(--muted);margin:.75rem 0 .4rem;text-transform:uppercase;letter-spacing:.05em">Zadnji otkupni blokovi</div>
+  {% for b in grosmarkt_stats.recent_otkupni %}
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.82rem">
+    <a href="/documents/otkupni/{{ b.pk }}/" style="color:#22c55e;text-decoration:none;font-weight:600">OTK-{{ b.doc_number }}</a>
+    <span style="color:var(--muted);font-size:.75rem">{{ b.date_issued|date:"d.m.Y" }} &mdash; {{ b.farmer_name|truncatechars:20 }}</span>
+    <span style="font-size:.72rem;padding:.15rem .5rem;border-radius:4px;
+      {% if b.status == 'confirmed' %}background:#14532d;color:#4ade80
+      {% elif b.status == 'cancelled' %}background:#450a0a;color:#f87171
+      {% else %}background:#1c1917;color:#a8a29e{% endif %}">
+      {{ b.get_status_display }}
+    </span>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <div style="display:flex;gap:.5rem;margin-top:.875rem">
+    <a href="/documents/otpremnica/nova/" style="flex:1;text-align:center;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);color:var(--gold);padding:.45rem;border-radius:7px;font-size:.78rem;font-weight:600;text-decoration:none">+ Nova otpremnica</a>
+    <a href="/documents/otkupni/novi/" style="flex:1;text-align:center;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:#22c55e;padding:.45rem;border-radius:7px;font-size:.78rem;font-weight:600;text-decoration:none">+ Novi otkupni blok</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,201 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}FINA-CONNECT{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --sidebar-bg:#0f172a; --sidebar-hover:#1e293b; --accent:#3b82f6; --gold:#c9a84c; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family:'Segoe UI',system-ui,sans-serif; background:#f1f5f9; min-height:100vh; }
+
+        /* ═══ DESKTOP LAYOUT ═══ */
+        .app-layout { display: flex; min-height: 100vh; }
+
+        /* ═══ SIDEBAR ═══ */
+        .sidebar {
+            width: 260px; background: var(--sidebar-bg); color: #cbd5e1;
+            display: flex; flex-direction: column; flex-shrink: 0;
+            position: fixed; top: 0; left: 0; bottom: 0;
+            overflow-y: auto; z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+        .sidebar-brand { padding: 20px 16px 14px; border-bottom: 1px solid #1e293b; font-size: 1.1rem; font-weight: 700; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-brand span { color: var(--gold); }
+        .sidebar-close { display: none; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; }
+        .sidebar-role { padding: 6px 16px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; background: #1e293b; color: var(--gold); }
+        .sidebar-section { padding: 8px 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #475569; margin-top: 6px; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: #94a3b8; text-decoration: none; border-radius: 8px; margin: 1px 8px; font-size: 0.82rem; transition: all 0.15s; }
+        .sidebar a:hover, .sidebar a.active { background: var(--sidebar-hover); color: white; }
+        .sidebar a i { width: 18px; text-align: center; font-size: 0.85rem; }
+        .sidebar-footer { margin-top: auto; padding: 12px; border-top: 1px solid #1e293b; }
+
+        /* ═══ MAIN CONTENT ═══ */
+        .main { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-width: 0; }
+        .topbar {
+            background: white; border-bottom: 1px solid #e2e8f0; padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: #0f172a; cursor: pointer; padding: 4px 8px; }
+        .content { padding: 16px; flex: 1; }
+
+        /* ═══ OVERLAY ═══ */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+
+        /* ═══ MOBILE ═══ */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-close { display: block; }
+            .sidebar-overlay.open { display: block; }
+            .main { margin-left: 0; }
+            .hamburger { display: block; }
+            .content { padding: 12px; }
+            .topbar { padding: 8px 12px; }
+            .lang-switcher { display: none; }
+        }
+
+        /* ═══ COMMON COMPONENTS ═══ */
+        .stat-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
+        .stat-card .label { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 6px; }
+        .stat-card .value { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
+        .stat-card .icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .lang-switcher { display: flex; gap: 3px; }
+        .lang-switcher form button { background: none; border: 1px solid #e2e8f0; padding: 2px 7px; font-size: 0.65rem; cursor: pointer; border-radius: 4px; color: #64748b; font-weight: 600; }
+        .lang-switcher form button.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+        /* Mobile action cards */
+        .action-card {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            background: white; border-radius: 12px; border: 1px solid #e2e8f0;
+            text-decoration: none; color: #0f172a; margin-bottom: 8px;
+            transition: all 0.15s; font-weight: 600; font-size: 0.88rem;
+        }
+        .action-card:hover { background: #f8fafc; border-color: #3b82f6; color: #0f172a; transform: translateX(4px); }
+        .action-card i { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .action-card .desc { font-size: 0.72rem; font-weight: 400; color: #64748b; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="app-layout">
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div>FINA-<span>CONNECT</span></div>
+            <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+        </div>
+        {% if request.user.is_authenticated %}
+        <div class="sidebar-role">
+            {% if request.user.is_superuser %}SUPERADMIN
+            {% elif request.user.is_staff %}STAFF
+            {% else %}RADNIK{% endif %}
+            · {{ request.user.get_full_name|default:request.user.username }}
+        </div>
+        {% endif %}
+
+        <div class="sidebar-section">{% trans "Navigacija" %}</div>
+        <a href="/" onclick="closeSidebar()"><i class="fas fa-home"></i> {% trans "Početna" %}</a>
+        <a href="/worktime/" onclick="closeSidebar()"><i class="fas fa-clock"></i> {% trans "Radno vrijeme" %}</a>
+        <a href="/projects/" onclick="closeSidebar()"><i class="fas fa-hard-hat"></i> {% trans "Projekti" %}</a>
+        <a href="/appointments/" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> {% trans "Termini" %}</a>
+
+        {% if request.user.is_superuser or request.user.is_staff %}
+        <div class="sidebar-section">{% trans "Upravljanje" %}</div>
+        <a href="/superadmin/" onclick="closeSidebar()"><i class="fas fa-crown"></i> {% trans "Dashboard" %}</a>
+        <a href="/accounts/" onclick="closeSidebar()"><i class="fas fa-users"></i> {% trans "Korisnici" %}</a>
+        <a href="/companies/" onclick="closeSidebar()"><i class="fas fa-building"></i> {% trans "Tvrtke" %}</a>
+        <a href="/partners/" onclick="closeSidebar()"><i class="fas fa-handshake"></i> {% trans "Partneri" %}</a>
+        <a href="/invoicing/" onclick="closeSidebar()"><i class="fas fa-file-invoice-dollar"></i> {% trans "Fakture" %}</a>
+        <a href="/documents/" onclick="closeSidebar()"><i class="fas fa-folder-open"></i> {% trans "Dokumenti" %}</a>
+        <a href="/finance/" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> {% trans "Financije" %}</a>
+        {% endif %}
+
+        {% if request.user.is_superuser %}
+        <div class="sidebar-section">{% trans "Moduli" %}</div>
+        <a href="/inventory/" onclick="closeSidebar()"><i class="fas fa-boxes"></i> {% trans "Skladište" %}</a>
+        <a href="/webshop/" onclick="closeSidebar()"><i class="fas fa-shopping-cart"></i> {% trans "Webshop" %}</a>
+        <a href="/rental/" onclick="closeSidebar()"><i class="fas fa-key"></i> {% trans "Najam" %}</a>
+        <a href="/fitness/" onclick="closeSidebar()"><i class="fas fa-dumbbell"></i> {% trans "Fitness" %}</a>
+        <a href="/insurance/" onclick="closeSidebar()"><i class="fas fa-shield-alt"></i> {% trans "Osiguranje" %}</a>
+        <a href="/calculator/" onclick="closeSidebar()"><i class="fas fa-calculator"></i> {% trans "Kalkulator" %}</a>
+
+        <div class="sidebar-section">{% trans "Sustav" %}</div>
+        <a href="/admin/" target="_blank" onclick="closeSidebar()"><i class="fas fa-tools"></i> Django Admin</a>
+        <a href="/website/" onclick="closeSidebar()"><i class="fas fa-globe"></i> {% trans "Web stranica" %}</a>
+        {% endif %}
+
+        <div class="sidebar-footer">
+            <a href="/logout/"><i class="fas fa-sign-out-alt"></i> {% trans "Odjava" %}</a>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+        <div class="topbar">
+            <div class="d-flex align-items-center gap-2">
+                <button class="hamburger" onclick="openSidebar()">☰</button>
+                <span style="font-weight:600;color:#0f172a;font-size:0.9rem">{% block page_title %}FINA-CONNECT{% endblock %}</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="lang-switcher">
+                    {% get_current_language as CURRENT_LANG %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% for lang_code, lang_name in LANGUAGES %}
+                    <form action="/i18n/setlang/" method="post">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ request.path }}">
+                        <input name="language" type="hidden" value="{{ lang_code }}">
+                        <button type="submit" class="{% if lang_code == CURRENT_LANG %}active{% endif %}">{{ lang_code|upper }}</button>
+                    </form>
+                    {% endfor %}
+                </div>
+                <a href="/worktime/profile/" class="text-decoration-none d-flex align-items-center gap-1" style="font-size:0.8rem;color:#475569"><i class="fas fa-user-circle" style="font-size:1.2rem"></i><span class="d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span></a>
+            </div>
+        </div>
+        <div class="content">
+            {% if messages %}
+            <div style="position:fixed;top:60px;right:12px;z-index:9999;width:300px;max-width:90vw">
+                {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }} alert-dismissible fade show shadow-sm py-2 px-3" style="font-size:0.82rem;border-radius:10px">
+                    {{ msg }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebarOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+// Swipe to open sidebar
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].clientX - touchStartX;
+    if (touchStartX < 30 && diff > 60) openSidebar();
+    if (diff < -60 && document.getElementById('sidebar').classList.contains('open')) closeSidebar();
+});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

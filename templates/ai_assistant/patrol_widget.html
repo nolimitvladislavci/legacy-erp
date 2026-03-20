@@ -1,0 +1,30 @@
+<!-- Patrol Widget for Dashboard -->
+{% if latest_patrol %}
+<div class="card" style="border-left: 4px solid {% if latest_patrol.critical_count > 0 %}#ef4444{% elif latest_patrol.finding_count > 0 %}#f59e0b{% else %}#22c55e{% endif %}">
+    <div class="card-body">
+        <h5 class="card-title">
+            <i class="fas fa-robot"></i> Noćna Patrola
+            <small class="text-muted">{{ latest_patrol.created_at|date:"d.m.Y H:i" }}</small>
+        </h5>
+        {% if latest_patrol.finding_count == 0 %}
+            <p class="text-success"><i class="fas fa-check-circle"></i> Sve u redu. Nema anomalija.</p>
+        {% else %}
+            <p>
+                {% if latest_patrol.critical_count > 0 %}
+                    <span class="badge bg-danger">{{ latest_patrol.critical_count }} kritično</span>
+                {% endif %}
+                <span class="badge bg-warning text-dark">{{ latest_patrol.finding_count }} ukupno nalaza</span>
+            </p>
+            <div style="max-height:200px;overflow-y:auto;font-size:0.9em;">
+                {% for f in latest_patrol.findings %}
+                <div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.1);">
+                    {% if f.severity == 'critical' %}🔴{% elif f.severity == 'warning' %}🟡{% else %}ℹ️{% endif %}
+                    <strong>[{{ f.module|upper }}]</strong> {{ f.title }}
+                    <br><small class="text-muted">{{ f.detail|truncatewords:20 }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

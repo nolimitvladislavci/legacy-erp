@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Control Tower{% endblock %}
+{% block content %}
+<style>
+.ct-wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+.ct-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.ct-header h2 { font-weight: 900; font-size: 1.4rem; }
+.ct-live { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--text-muted, #94a3b8); }
+.ct-live .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse-dot 2s infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+/* HACCP Panic Banner */
+.haccp-panic { background: linear-gradient(135deg, rgba(220,53,69,0.15), rgba(220,53,69,0.05)); border: 2px solid #dc3545; border-radius: 16px; padding: 16px 20px; margin-bottom: 20px; }
+.haccp-panic.hidden { display: none; }
+.haccp-panic h3 { color: #dc3545; font-size: .9rem; font-weight: 900; margin-bottom: 10px; letter-spacing: 1px; }
+.haccp-panic .inc-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(220,53,69,0.15); flex-wrap: wrap; gap: 8px; }
+.haccp-panic .inc-row:last-child { border-bottom: none; }
+.haccp-panic .temp { font-size: 1.3rem; font-weight: 900; color: #dc3545; }
+.haccp-panic .box-id { font-weight: 700; color: #f8fafc; }
+.haccp-panic .inc-type { font-size: .78rem; color: var(--text-muted, #94a3b8); }
+
+/* Metric cards */
+.ct-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+@media (max-width: 768px) { .ct-metrics { grid-template-columns: repeat(2, 1fr); } }
+.metric-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 14px; padding: 16px; text-align: center; }
+.metric-card .num { font-size: 2rem; font-weight: 900; line-height: 1; }
+.metric-card .label { font-size: .72rem; color: var(--text-muted, #94a3b8); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-weight: 600; }
+.num-gold { color: #c9a84c; }
+.num-red { color: #dc3545; }
+.num-green { color: #22c55e; }
+.num-blue { color: #3b82f6; }
+
+/* Grid layout */
+.ct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 768px) { .ct-grid { grid-template-columns: 1fr; } }
+.ct-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; }
+.ct-card h3 { font-size: .8rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.ct-item { padding: 10px 0; border-bottom: 1px solid var(--border, rgba(255,255,255,0.06)); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+.ct-item:last-child { border-bottom: none; }
+
+/* Badges */
+.badge { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+.b-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+.b-accepted { background: rgba(34,197,94,0.15); color: #22c55e; }
+.b-transit { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.b-completed { background: rgba(148,163,184,0.15); color: #94a3b8; }
+.b-blocked { background: rgba(220,53,69,0.15); color: #dc3545; }
+
+/* Quick dispatch button */
+.btn-dispatch { background: #c9a84c; color: #000; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: .78rem; cursor: pointer; white-space: nowrap; }
+.btn-dispatch:hover { background: #b8963c; }
+.btn-haccp { background: rgba(220,53,69,0.15); color: #dc3545; border: 1px solid #dc3545; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: .75rem; cursor: pointer; text-decoration: none; }
+
+/* Packaging radar */
+.pkg-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+.pkg-type { font-size: .85rem; font-weight: 600; }
+.pkg-nums { font-size: .8rem; color: var(--text-muted); }
+.pkg-balance { font-weight: 900; font-size: 1rem; }
+.pkg-balance.positive { color: #eab308; }
+.pkg-balance.zero { color: #22c55e; }
+.pkg-balance.negative { color: #3b82f6; }
+
+/* Full-width card */
+.ct-full { grid-column: 1 / -1; }
+.empty-msg { color: var(--text-muted, #94a3b8); font-size: .85rem; padding: 16px 0; text-align: center; }
+</style>
+
+<div class="ct-wrap">
+  <!-- Header -->
+  <div class="ct-header">
+    <div>
+      <h2>&#128752; CONTROL TOWER</h2>
+      <span style="color:var(--text-muted);font-size:.82rem;">{% trans "Dispatcherska upravljacka ploca" %}</span>
+    </div>
+    <div class="ct-live">
+      <span class="dot"></span>
+      <span>LIVE — <span id="ct-timer">15</span>s</span>
+    </div>
+  </div>
+
+  <!-- HACCP PANIC ROOM -->
+  <div class="haccp-panic {% if not haccp_open %}hidden{% endif %}" id="haccp-panic">
+    <h3>&#9888; HACCP PANIC ROOM — <span id="haccp-count">{{ haccp_open.count }}</span> {% trans "otvorenih incidenata" %}</h3>
+    <div id="haccp-list">
+    {% for inc in haccp_open %}
+    <div class="inc-row">
+      <div>
+        <span class="box-id">{{ inc.smart_box.box_id|default:"?" }}</span>
+        <span class="inc-type">{{ inc.get_incident_type_display }} — {{ inc.breach_start|date:"H:i" }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="temp">{{ inc.max_temperature }}&deg;C</span>
+        <span class="badge b-blocked">{{ inc.get_severity_display }}</span>
+        <a href="{% url 'delivery:haccp_incidents' %}" class="btn-haccp">{% trans "RAZRIJESI" %}</a>
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+  </div>
+
+  <!-- Metric Cards -->
+  <div class="ct-metrics">
+    <div class="metric-card">
+      <div class="num num-gold" id="m-pending">{{ pending_deliveries.count }}</div>
+      <div class="label">{% trans "Ceka vozaca" %}</div>
+    </div>
+    <div class="metric-card">
+      <div class="num num-blue" id="m-transit">{{ in_transit.count }}</div>
+      <div class="label">{% trans "U transportu" %}</div>
+    </div>
+    <div class="metric-card">
+      <div class="num num-green" id="m-completed">{{ completed_count }}</div>
+      <div class="label">{% trans "Zavrseno danas" %}</div>
+    </div>
+    <div class="metric-card">
+      <div class="num {% if blocked_boxes.count > 0 %}num-red{% else %}num-green{% endif %}" id="m-blocked">{{ blocked_boxes.count }}</div>
+      <div class="label">{% trans "Blokirani boxevi" %}</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="ct-grid">
+
+    <!-- Pending — need driver -->
+    <div class="ct-card">
+      <h3><i class="fas fa-clock"></i> {% trans "Cekaju raspodjelu" %}</h3>
+      {% for cd in pending_deliveries %}
+      <div class="ct-item">
+        <div>
+          <strong>{{ cd.delivery_number }}</strong>
+          <div style="font-size:.78rem;color:var(--text-muted);">&#8594; {{ cd.buyer_company.name }}</div>
+        </div>
+        <span class="badge b-pending">{{ cd.package_count }} pkg</span>
+      </div>
+      {% empty %}
+      <div class="empty-msg">&#10003; {% trans "Sve je rasporedeno" %}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Active offers -->
+    <div class="ct-card">
+      <h3><i class="fas fa-bullhorn"></i> {% trans "Aktivne ponude" %}</h3>
+      <div id="offers-list">
+      {% for offer in active_offers %}
+      <div class="ct-item">
+        <div>
+          <strong>{{ offer.consolidated_delivery.delivery_number }}</strong>
+          <div style="font-size:.78rem;color:var(--text-muted);">
+            {% if offer.driver %}{{ offer.driver.get_full_name }}{% else %}{% trans "Ceka prihvat" %}{% endif %}
+          </div>
+        </div>
+        <span class="badge {% if offer.status == 'accepted' %}b-accepted{% else %}b-pending{% endif %}">
+          {{ offer.offered_price }}&euro;
+        </span>
+      </div>
+      {% empty %}
+      <div class="empty-msg">{% trans "Nema aktivnih ponuda" %}</div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <!-- In Transit -->
+    <div class="ct-card">
+      <h3><i class="fas fa-truck"></i> {% trans "U transportu" %}</h3>
+      <div id="transit-list">
+      {% for cd in in_transit %}
+      <div class="ct-item">
+        <div>
+          <strong>{{ cd.delivery_number }}</strong>
+          <div style="font-size:.78rem;color:var(--text-muted);">
+            &#8594; {{ cd.buyer_company.name }}
+            {% if cd.driver %} | {{ cd.driver.get_full_name }}{% endif %}
+          </div>
+        </div>
+        <span class="badge b-transit">
+          {% if cd.dispatched_at %}{{ cd.dispatched_at|timesince }}{% endif %}
+        </span>
+      </div>
+      {% empty %}
+      <div class="empty-msg">{% trans "Nema aktivnih transporta" %}</div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <!-- Packaging Radar -->
+    <div class="ct-card">
+      <h3><i class="fas fa-boxes-stacked"></i> {% trans "Ambalaza — saldo" %}</h3>
+      {% for pkg in packaging_balance %}
+      <div class="pkg-row">
+        <span class="pkg-type">{{ pkg.packaging_type|upper }}</span>
+        <span class="pkg-nums">{{ pkg.total_delivered }}&darr; {{ pkg.total_returned }}&uarr;</span>
+        <span class="pkg-balance {% if pkg.total_balance > 0 %}positive{% elif pkg.total_balance == 0 %}zero{% else %}negative{% endif %}">
+          {% if pkg.total_balance > 0 %}+{% endif %}{{ pkg.total_balance }}
+        </span>
+      </div>
+      {% empty %}
+      <div class="empty-msg">{% trans "Nema podataka o ambalazi" %}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Completed Today -->
+    {% if completed_today %}
+    <div class="ct-card ct-full">
+      <h3><i class="fas fa-check-circle"></i> {% trans "Zavrseno danas" %} ({{ completed_count }})</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;">
+      {% for offer in completed_today %}
+      <div class="ct-item">
+        <span style="font-size:.85rem;">{{ offer.consolidated_delivery.delivery_number }} &#8594; {{ offer.driver.get_full_name|default:"?" }}</span>
+        <span class="badge b-completed">{{ offer.driver_earnings }}&euro;</span>
+      </div>
+      {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var REFRESH = 15;
+  var countdown = REFRESH;
+  var timerEl = document.getElementById('ct-timer');
+  var dataUrl = "{% url 'delivery:dispatcher_board_data' %}";
+  var haccpUrl = "{% url 'delivery:haccp_incidents' %}";
+
+  function tick() {
+    countdown--;
+    if (timerEl) timerEl.textContent = countdown;
+    if (countdown <= 0) {
+      fetchData();
+      countdown = REFRESH;
+    }
+  }
+  setInterval(tick, 1000);
+
+  function fetchData() {
+    fetch(dataUrl, {
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+      credentials: 'same-origin',
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      // Metrics
+      var mp = document.getElementById('m-pending');
+      var mt = document.getElementById('m-transit');
+      var mc = document.getElementById('m-completed');
+      var mb = document.getElementById('m-blocked');
+      if (mp) mp.textContent = data.pending_count;
+      if (mt) mt.textContent = data.in_transit.length;
+      if (mc) mc.textContent = data.completed_count;
+      if (mb) {
+        mb.textContent = data.blocked_count;
+        mb.className = 'num ' + (data.blocked_count > 0 ? 'num-red' : 'num-green');
+      }
+
+      // HACCP Panic Room
+      var panic = document.getElementById('haccp-panic');
+      var hCount = document.getElementById('haccp-count');
+      var hList = document.getElementById('haccp-list');
+      if (data.haccp.length > 0) {
+        panic.classList.remove('hidden');
+        if (hCount) hCount.textContent = data.haccp.length;
+        if (hList) {
+          var html = '';
+          for (var i = 0; i < data.haccp.length; i++) {
+            var inc = data.haccp[i];
+            var t = inc.start ? new Date(inc.start).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) : '';
+            html += '<div class="inc-row"><div>'
+              + '<span class="box-id">' + inc.box_id + '</span> '
+              + '<span class="inc-type">' + inc.type + ' — ' + t + '</span>'
+              + '</div><div style="display:flex;align-items:center;gap:10px;">'
+              + '<span class="temp">' + inc.max_temp + '&deg;C</span>'
+              + '<span class="badge b-blocked">' + inc.severity.toUpperCase() + '</span>'
+              + '<a href="' + haccpUrl + '" class="btn-haccp">RAZRIJESI</a>'
+              + '</div></div>';
+          }
+          hList.innerHTML = html;
+        }
+      } else {
+        panic.classList.add('hidden');
+      }
+
+      // In Transit
+      var tList = document.getElementById('transit-list');
+      if (tList) {
+        if (data.in_transit.length === 0) {
+          tList.innerHTML = '<div class="empty-msg">Nema aktivnih transporta</div>';
+        } else {
+          var h = '';
+          for (var j = 0; j < data.in_transit.length; j++) {
+            var cd = data.in_transit[j];
+            h += '<div class="ct-item"><div><strong>' + cd.number + '</strong>'
+              + '<div style="font-size:.78rem;color:var(--text-muted);">&#8594; ' + cd.buyer
+              + (cd.driver ? ' | ' + cd.driver : '') + '</div></div>'
+              + '<span class="badge b-transit">in transit</span></div>';
+          }
+          tList.innerHTML = h;
+        }
+      }
+
+      // Active Offers
+      var oList = document.getElementById('offers-list');
+      if (oList) {
+        if (data.active_offers.length === 0) {
+          oList.innerHTML = '<div class="empty-msg">Nema aktivnih ponuda</div>';
+        } else {
+          var oh = '';
+          for (var k = 0; k < data.active_offers.length; k++) {
+            var o = data.active_offers[k];
+            oh += '<div class="ct-item"><div><strong>' + o.number + '</strong>'
+              + '<div style="font-size:.78rem;color:var(--text-muted);">' + (o.driver || 'Ceka prihvat') + '</div></div>'
+              + '<span class="badge ' + (o.status==='accepted'?'b-accepted':'b-pending') + '">' + o.price + '&euro;</span></div>';
+          }
+          oList.innerHTML = oh;
+        }
+      }
+    })
+    .catch(function(err) { console.warn('CT refresh error:', err); });
+  }
+})();
+</script>
+{% endblock %}

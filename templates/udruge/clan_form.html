@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Novi clan{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <h4 style="margin:0;color:var(--gold)">Novi clan udruge</h4>
+  <a href="{% url 'udruge:clan_list' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
+</div>
+
+<form method="post" class="card" style="padding:1.25rem;max-width:700px">
+  {% csrf_token %}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Ime *</label>
+      <input type="text" name="first_name" required class="form-input" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Prezime *</label>
+      <input type="text" name="last_name" required style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">OIB</label>
+      <input type="text" name="oib" maxlength="11" pattern="\d{11}" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Telefon</label>
+      <input type="tel" name="phone" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Email</label>
+      <input type="email" name="email" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Grad</label>
+      <input type="text" name="city" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Tip clanstva</label>
+      <select name="membership_type" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        {% for val, lbl in membership_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Datum uclanjenja</label>
+      <input type="date" name="date_joined" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Clanstvo vrijedi do</label>
+      <input type="date" name="membership_expires" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <div>
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Poslovni interes</label>
+      <select name="business_interest" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        {% for val, lbl in interest_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <div style="margin-top:.75rem;display:flex;gap:1rem;font-size:.82rem">
+    <label><input type="checkbox" name="has_opg"> Ima OPG</label>
+    <label><input type="checkbox" name="whatsapp_opt_in"> WhatsApp pristanak</label>
+  </div>
+  <div style="margin-top:.75rem">
+    <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.2rem">Napomene</label>
+    <textarea name="notes" rows="2" style="width:100%;padding:.45rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem"></textarea>
+  </div>
+  <button type="submit" class="btn btn-gold" style="margin-top:1rem;width:100%">Spremi clana</button>
+</form>
+{% endblock %}

@@ -1,0 +1,141 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Dashboard - LIMIT CONNECT{% endblock %}
+{% block page_title %}Operativni Centar{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card d-flex justify-content-between align-items-start">
+            <div>
+                <div class="label">{% trans "Ukupno fakturirano" %}</div>
+                <div class="value">{{ ukupno_fakturirano|floatformat:2 }} €</div>
+            </div>
+            <div class="icon" style="background:#dbeafe;color:#3b82f6"><i class="fas fa-file-invoice-dollar"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card d-flex justify-content-between align-items-start">
+            <div>
+                <div class="label">{% trans "Neplaćeno" %}</div>
+                <div class="value text-danger">{{ neplaceno|floatformat:2 }} €</div>
+            </div>
+            <div class="icon" style="background:#fee2e2;color:#ef4444"><i class="fas fa-exclamation-triangle"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card d-flex justify-content-between align-items-start">
+            <div>
+                <div class="label">{% trans "Partneri" %}</div>
+                <div class="value">{{ broj_partnera }}</div>
+            </div>
+            <div class="icon" style="background:#dcfce7;color:#22c55e"><i class="fas fa-handshake"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card d-flex justify-content-between align-items-start">
+            <div>
+                <div class="label">{% trans "Sati (7 dana)" %}</div>
+                <div class="value">{{ sati_ovaj_tjedan|floatformat:1 }} h</div>
+            </div>
+            <div class="icon" style="background:#fef3c7;color:#f59e0b"><i class="fas fa-clock"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card d-flex justify-content-between align-items-start">
+            <div>
+                <div class="label">{% trans "Fitness članova" %}</div>
+                <div class="value">{{ fitness_clanova }}</div>
+            </div>
+            <div class="icon" style="background:#ede9fe;color:#8b5cf6"><i class="fas fa-dumbbell"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card d-flex justify-content-between align-items-start">
+            <div>
+                <div class="label">{% trans "Webshop narudžbi" %}</div>
+                <div class="value">{{ webshop_narudžbi }}</div>
+            </div>
+            <div class="icon" style="background:#ffedd5;color:#f97316"><i class="fas fa-shopping-cart"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card d-flex justify-content-between align-items-start">
+            <div>
+                <div class="label">{% trans "Aktivna iznajmljivanja" %}</div>
+                <div class="value">{{ aktivnih_iznajmljivanja }}</div>
+            </div>
+            <div class="icon" style="background:#cffafe;color:#06b6d4"><i class="fas fa-key"></i></div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <a href="/admin/" target="_blank" class="stat-card d-flex justify-content-between align-items-start text-decoration-none" style="background:#0f172a">
+            <div>
+                <div class="label text-slate-400" style="color:#94a3b8">{% trans "Admin Panel" %}</div>
+                <div class="value" style="color:white;font-size:1.2rem">{% trans "Upravljanje" %}</div>
+            </div>
+            <div class="icon" style="background:#1e293b;color:#3b82f6"><i class="fas fa-tools"></i></div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="stat-card">
+            <h6 class="fw-bold mb-3">{% trans "Brzi pristup modulima" %}</h6>
+            <div class="row g-2">
+                {% for module, icon, color in modules_list %}
+                <div class="col-4 col-md-3">
+                    <a href="/{{ module }}/" class="btn btn-light w-100 d-flex flex-column align-items-center py-3 text-decoration-none border">
+                        <i class="{{ icon }} mb-1" style="color:{{ color }}"></i>
+                        <small>{{ module|capfirst }}</small>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="stat-card">
+            <h6 class="fw-bold mb-3">{% trans "Brze akcije" %}</h6>
+            <div class="d-grid gap-2">
+                <a href="/admin/invoicing/invoicinginvoice/add/" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-plus me-2"></i>{% trans "Nova faktura" %}
+                </a>
+                <a href="/admin/partners/partnerspartner/add/" class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-plus me-2"></i>{% trans "Novi partner" %}
+                </a>
+                <a href="/worktime/add/" class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-plus me-2"></i>{% trans "Unos radnog vremena" %}
+                </a>
+                <a href="/admin/appointments/appointmentsappointment/add/" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-plus me-2"></i>{% trans "Novi termin" %}
+                </a>
+                <a href="/admin/webshop/webshoporder/add/" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-plus me-2"></i>{% trans "Nova narudžba" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'registration/base_reg.html' %}
+{% load i18n %}
+{% block title %}{% trans "Odaberite plan" %} – LIMIT Connect{% endblock %}
+{% block content %}
+<!-- Step indicator -->
+<div class="step-indicator">
+  <div class="step-item"><div class="step-circle active">1</div><div class="step-label active">Plan</div></div>
+  <div class="step-line"></div>
+  <div class="step-item"><div class="step-circle">2</div><div class="step-label">{% trans "Tvrtka" %}</div></div>
+  <div class="step-line"></div>
+  <div class="step-item"><div class="step-circle">3</div><div class="step-label">{% trans "Račun" %}</div></div>
+  <div class="step-line"></div>
+  <div class="step-item"><div class="step-circle">4</div><div class="step-label">{% trans "Potvrda" %}</div></div>
+</div>
+
+<div style="text-align:center;margin-bottom:2rem">
+  <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--text);margin-bottom:.5rem">{% trans "Odaberite plan" %}</h1>
+  <p style="color:var(--muted);font-size:.95rem">{% trans "14 dana besplatnog trial perioda. Bez kreditne kartice." %}</p>
+</div>
+
+<form method="post">
+{% csrf_token %}
+    <div class="mb-3 mt-3">
+      <label class="form-label text-muted"><i class="fas fa-ticket-alt me-1"></i>Imate pozivni kod?</label>
+      <input type="text" name="invite_code" class="form-control" placeholder="UC-XXXXXXXX">
+    </div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;max-width:900px;margin:0 auto">
+{% for plan in plans %}
+  <label style="cursor:pointer;display:block">
+    <input type="radio" name="plan" value="{{ plan.slug }}" {% if plan.is_popular %}checked{% elif forloop.first %}checked{% endif %} style="display:none" class="plan-radio-input">
+    <div class="plan-card" style="background:var(--card);border:2px solid {% if plan.is_popular %}var(--gold){% else %}var(--border){% endif %};border-radius:12px;padding:2rem 1.5rem;text-align:center;transition:all .2s;position:relative">
+      {% if plan.is_popular %}
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);font-size:.7rem;font-weight:700;padding:3px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:1px">{% trans "Popularno" %}</div>
+      {% endif %}
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text);margin-bottom:.25rem">{{ plan.name }}</h3>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:1rem">{{ plan.tagline }}</p>
+      <div style="margin-bottom:1.25rem">
+        <span style="font-size:2.2rem;font-weight:700;color:var(--gold)">{{ plan.price_monthly|floatformat:0 }}€</span>
+        <span style="color:var(--muted);font-size:.85rem">/{% trans "mj" %}</span>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">
+        {% trans "ili" %} {{ plan.price_yearly|floatformat:0 }}€/{% trans "god" %}
+      </div>
+      <ul style="text-align:left;list-style:none;padding:0;font-size:.85rem;color:var(--text);line-height:2">
+        <li>✓ {{ plan.max_users }} {% trans "korisnika" %}</li>
+        <li>✓ {{ plan.max_locations }} {% trans "lokacija" %}</li>
+        <li>✓ {{ plan.max_invoices_per_month }} {% trans "računa/mj" %}</li>
+        {% if plan.has_fiscalization %}<li>✓ {% trans "Fiskalizacija" %}</li>{% endif %}
+        {% if plan.has_whatsapp %}<li>✓ {% trans "WhatsApp" %}</li>{% endif %}
+        {% if plan.has_api_access %}<li>✓ {% trans "API pristup" %}</li>{% endif %}
+        {% if plan.has_premium_support %}<li>✓ {% trans "Premium podrška" %}</li>{% endif %}
+      </ul>
+    </div>
+  </label>
+{% endfor %}
+</div>
+
+<!-- Promo kod -->
+<div style="margin:2rem auto 0;max-width:500px;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.08)">
+  <label style="color:#94a3b8;font-size:.82rem;font-weight:600;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">
+    Promotivni kod <span style="font-weight:400;text-transform:none">(opcionalno)</span>
+  </label>
+  <div style="display:flex;gap:8px">
+    <input type="text" name="promo_code" id="promoCode"
+           placeholder="npr. TRIAL30 ili FINA-MASTER-2026"
+           value="{{ request.session.reg_promo_code|default:'' }}"
+           style="flex:1;padding:10px 14px;background:#0f172a;border:1px solid #334155;
+                  border-radius:8px;color:#e2e8f0;font-size:.9rem;font-family:monospace;
+                  text-transform:uppercase;outline:none"
+           oninput="this.value=this.value.toUpperCase()">
+    <button type="button" onclick="checkPromoCode()"
+            style="padding:10px 18px;background:transparent;border:1.5px solid var(--gold);
+                   border-radius:8px;color:var(--gold);font-weight:700;cursor:pointer;
+                   font-size:.82rem;white-space:nowrap;transition:all .2s"
+            onmouseover="this.style.background='rgba(201,168,76,.12)'"
+            onmouseout="this.style.background='transparent'">
+      Provjeri
+    </button>
+  </div>
+  <div id="promoStatus" style="font-size:.78rem;margin-top:6px;min-height:18px"></div>
+</div>
+
+<div style="text-align:center;margin-top:2rem">
+  <button type="submit" class="reg-btn">{% trans "Nastavi" %} →</button>
+</div>
+</form>
+
+<script>
+async function checkPromoCode() {
+  const code = document.getElementById('promoCode').value.trim().toUpperCase();
+  const status = document.getElementById('promoStatus');
+  if (!code) { status.innerHTML = ''; return; }
+  status.innerHTML = '<span style="color:#94a3b8">Provjera...</span>';
+  try {
+    const resp = await fetch('/register/api/check-promo/?code=' + encodeURIComponent(code));
+    const data = await resp.json();
+    if (data.valid) {
+      status.innerHTML = '<span style="color:#22c55e">✓ ' + data.description + '</span>';
+    } else {
+      status.innerHTML = '<span style="color:#ef4444">✗ ' + (data.error || 'Nevažeći kod') + '</span>';
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:#ef4444">Greška pri provjeri</span>';
+  }
+}
+// Auto-check if pre-filled
+const prefilled = document.getElementById('promoCode').value.trim();
+if (prefilled) checkPromoCode();
+</script>
+
+<style>
+.plan-radio-input:checked + .plan-card { border-color: var(--gold) !important; background: rgba(201,168,76,.06) !important; }
+.plan-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+</style>
+{% endblock %}

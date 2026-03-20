@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Fakturiranje" %} – LIMIT CONNECT{% endblock %}
+{% block page_title %}{% trans "Fakturiranje" %}{% endblock %}
+{% block content %}
+<style>
+.inv-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.inv-stat .num{font-size:1.6rem;font-weight:800}
+.inv-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.qf{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:600;border:1.5px solid transparent;transition:all .15s}
+.qf.active{background:#c9a84c;color:#0f172a;border-color:#c9a84c}
+.qf:not(.active){background:transparent;border-color:#334155;color:#94a3b8}
+.qf:not(.active):hover{border-color:#c9a84c;color:#c9a84c}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.inv-row:hover{background:#1e293b}
+</style>
+
+<!-- Stats -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
+  <div class="inv-stat">
+    <div><div class="num">{{ totals.total|floatformat:0 }} €</div><div class="lbl">{% trans "Ukupno fakturirano" %}</div></div>
+    <div style="width:40px;height:40px;background:#dbeafe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">💰</div>
+  </div>
+  <div class="inv-stat">
+    <div><div class="num" style="color:#ef4444">{{ totals.unpaid|floatformat:0 }} €</div><div class="lbl">{% trans "Neplaćeno / Dospijelo" %}</div></div>
+    <div style="width:40px;height:40px;background:#fee2e2;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">⚠️</div>
+  </div>
+  <div class="inv-stat">
+    <div><div class="num" style="color:#22c55e">{{ totals.paid|floatformat:0 }} €</div><div class="lbl">{% trans "Plaćeno" %}</div></div>
+    <div style="width:40px;height:40px;background:#dcfce7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">✅</div>
+  </div>
+  {% if totals.overdue %}<div class="inv-stat" style="border-color:#ef4444">
+    <div><div class="num" style="color:#ef4444">{{ totals.overdue }}</div><div class="lbl">{% trans "Dospijelo (broj)" %}</div></div>
+    <div style="width:40px;height:40px;background:#fee2e2;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🔴</div>
+  </div>{% endif %}
+</div>
+
+<!-- Filter + actions bar -->
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <a href="?" class="qf {% if not status_filter and not country_filter %}active{% endif %}">{% trans "Sve" %}</a>
+    <a href="?status=DRAFT" class="qf {% if status_filter == 'DRAFT' %}active{% endif %}">📝 Nacrti ({{ totals.draft }})</a>
+    <a href="?status=SENT" class="qf {% if status_filter == 'SENT' %}active{% endif %}">📤 Poslano ({{ totals.sent }})</a>
+    <a href="?status=PAID" class="qf {% if status_filter == 'PAID' %}active{% endif %}">{% trans "✅ Plaćeno" %}</a>
+    <a href="?status=OVERDUE" class="qf {% if status_filter == 'OVERDUE' %}active{% endif %}" style="{% if totals.overdue %}border-color:#ef4444;{% endif %}">🔴 Dospijelo ({{ totals.overdue }})</a>
+    <a href="?country=HR" class="qf {% if country_filter == 'HR' %}active{% endif %}">{% trans "🇭🇷 HR" %}</a>
+    <a href="?country=DE" class="qf {% if country_filter == 'DE' %}active{% endif %}">{% trans "🇩🇪 DE" %}</a>
+  </div>
+  {# READONLY: create buttons hidden #}
+</div>
+<!-- Search bar -->
+<form method="GET" action="" style="margin-bottom:14px">
+  {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+  {% if country_filter %}<input type="hidden" name="country" value="{{ country_filter }}">{% endif %}
+  {% if doctype_filter %}<input type="hidden" name="doctype" value="{{ doctype_filter }}">{% endif %}
+  {% if sort_by and sort_by != '-date_issued' %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
+  <div style="display:flex;gap:8px;align-items:center">
+    <div style="flex:1;position:relative">
+      <input type="text" name="q" value="{{ search_q }}" placeholder="Pretraži po broju, klijentu, OIB-u, napomeni..."
+        style="width:100%;background:#1e293b;border:1.5px solid {% if search_q %}#c9a84c{% else %}#334155{% endif %};border-radius:8px;padding:8px 12px 8px 36px;color:#e2e8f0;font-size:.83rem;outline:none"
+        onfocus="this.style.borderColor='#c9a84c'" onblur="this.style.borderColor=this.value?'#c9a84c':'#334155'">
+      <i class="fas fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#64748b;font-size:.78rem;pointer-events:none"></i>
+    </div>
+    {% if search_q %}<a href="?{% if status_filter %}status={{ status_filter }}&{% endif %}{% if country_filter %}country={{ country_filter }}&{% endif %}{% if doctype_filter %}doctype={{ doctype_filter }}&{% endif %}" style="color:#94a3b8;text-decoration:none;font-size:.78rem;white-space:nowrap;padding:8px 10px;border:1.5px solid #334155;border-radius:8px" title="Očisti pretragu">✕ Očisti</a>{% endif %}
+    <button type="submit" style="background:#334155;color:#e2e8f0;border:1.5px solid #334155;border-radius:8px;padding:8px 16px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap">{% trans "Traži" %}</button>
+  </div>
+  {% if search_q %}<div style="margin-top:6px;font-size:.75rem;color:#64748b">{% trans "Pronađeno" %}: <strong style="color:#c9a84c">{{ invoices|length }}</strong> {% trans "rezultata za" %} „<em>{{ search_q }}</em>"</div>{% endif %}
+</form>
+
+<!-- Doctype tabs -->
+<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+  <a href="?{% if search_q %}q={{ search_q }}&{% endif %}" class="qf {% if not doctype_filter %}active{% endif %}">{% trans "Sve" %}</a>
+  <a href="?{% if search_q %}q={{ search_q }}&{% endif %}doctype=R" class="qf {% if doctype_filter == 'R' %}active{% endif %}">📄 {% trans "Računi" %}</a>
+  <a href="?{% if search_q %}q={{ search_q }}&{% endif %}doctype=PO" class="qf {% if doctype_filter == 'PO' %}active{% endif %}">📋 {% trans "Ponude" %} ({{ totals.quotes_total }})</a>
+  <a href="?{% if search_q %}q={{ search_q }}&{% endif %}doctype=P" class="qf {% if doctype_filter == 'P' %}active{% endif %}">📑 {% trans "Predračuni" %}</a>
+</div>
+
+<!-- Table -->
+<div class="stat-card" style="padding:0;overflow-x:auto">
+<table class="table table-sm mb-0" style="font-size:.84rem">
+  <thead style="background:#1e293b">
+    <tr>
+      <th style="padding:10px 14px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px">
+        <a href="?{% if search_q %}q={{ search_q }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if country_filter %}country={{ country_filter }}&{% endif %}{% if doctype_filter %}doctype={{ doctype_filter }}&{% endif %}sort={% if sort_by == 'number' %}-number{% else %}number{% endif %}" style="color:inherit;text-decoration:none">{% trans "Broj" %} {% if sort_by == 'number' %}▲{% elif sort_by == '-number' %}▼{% endif %}</a>
+      </th>
+      <th style="padding:10px 8px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px">{% trans "Vrsta" %}</th>
+      <th style="padding:10px 8px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px">
+        <a href="?{% if search_q %}q={{ search_q }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if country_filter %}country={{ country_filter }}&{% endif %}{% if doctype_filter %}doctype={{ doctype_filter }}&{% endif %}sort={% if sort_by == 'client_name' %}-client_name{% else %}client_name{% endif %}" style="color:inherit;text-decoration:none">{% trans "Klijent" %} {% if sort_by == 'client_name' %}▲{% elif sort_by == '-client_name' %}▼{% endif %}</a>
+      </th>
+      <th style="padding:10px 8px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px">
+        <a href="?{% if search_q %}q={{ search_q }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if country_filter %}country={{ country_filter }}&{% endif %}{% if doctype_filter %}doctype={{ doctype_filter }}&{% endif %}sort={% if sort_by == 'date_issued' %}-date_issued{% else %}date_issued{% endif %}" style="color:inherit;text-decoration:none">{% trans "Datum" %} {% if sort_by == 'date_issued' %}▲{% elif sort_by == '-date_issued' %}▼{% endif %}</a>
+      </th>
+      <th style="padding:10px 8px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px">{% trans "Rok plaćanja" %}</th>
+      <th style="padding:10px 8px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px;text-align:right">
+        <a href="?{% if search_q %}q={{ search_q }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if country_filter %}country={{ country_filter }}&{% endif %}{% if doctype_filter %}doctype={{ doctype_filter }}&{% endif %}sort={% if sort_by == 'total' %}-total{% else %}total{% endif %}" style="color:inherit;text-decoration:none">{% trans "Iznos" %} {% if sort_by == 'total' %}▲{% elif sort_by == '-total' %}▼{% endif %}</a>
+      </th>
+      <th style="padding:10px 8px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px">{% trans "Status" %}</th>
+      <th style="padding:10px 8px;border-bottom:1px solid #334155;color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:1px"></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for inv in invoices %}
+  <tr class="inv-row" style="border-bottom:1px solid #1e293b;{% if inv.status == 'OVERDUE' %}background:rgba(239,68,68,.04);{% endif %}">
+    <td style="padding:10px 14px">
+      <span style="color:#c9a84c;font-weight:700">{{ inv.number }}</span>
+      {% if inv.country == 'HR' %}<span style="background:#fee2e2;color:#ef4444;font-size:.65rem;border-radius:4px;padding:1px 5px;margin-left:4px">{% trans "HR" %}</span>
+      {% else %}<span style="background:#dbeafe;color:#3b82f6;font-size:.65rem;border-radius:4px;padding:1px 5px;margin-left:4px">{% trans "DE" %}</span>{% endif %}
+    </td>
+    <td style="padding:10px 8px;color:#94a3b8;font-size:.78rem">{{ inv.get_doctype_display }}</td>
+    <td style="padding:10px 8px"><span style="color:#e2e8f0">{{ inv.client_name|truncatechars:28 }}</span></td>
+    <td style="padding:10px 8px;color:#64748b;font-size:.8rem">{{ inv.date_issued|date:"d.m.Y" }}</td>
+    <td style="padding:10px 8px;font-size:.8rem;{% if inv.status == 'OVERDUE' %}color:#ef4444;font-weight:600{% else %}color:#64748b{% endif %}">
+      {% if inv.date_due %}{{ inv.date_due|date:"d.m.Y" }}{% if inv.status == 'OVERDUE' %} ⚠️{% endif %}{% else %}–{% endif %}
+    </td>
+    <td style="padding:10px 8px;text-align:right;font-weight:700;{% if inv.status == 'PAID' %}color:#22c55e{% elif inv.status == 'OVERDUE' %}color:#ef4444{% else %}color:#e2e8f0{% endif %}">
+      {{ inv.total|floatformat:2 }} {{ inv.currency }}
+    </td>
+    <td style="padding:10px 8px">
+      {% if inv.status == 'DRAFT' %}<span style="background:rgba(100,116,139,.2);color:#94a3b8;padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700">{% trans "Nacrt" %}</span>
+      {% elif inv.status == 'SENT' %}<span style="background:rgba(59,130,246,.15);color:#60a5fa;padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700">{% trans "Poslano" %}</span>
+      {% elif inv.status == 'PAID' %}<span style="background:rgba(34,197,94,.15);color:#22c55e;padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700">{% trans "Plaćeno" %}</span>
+      {% elif inv.status == 'OVERDUE' %}<span style="background:rgba(239,68,68,.15);color:#f87171;padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700">{% trans "🔴 Dospijelo" %}</span>
+      {% elif inv.status == 'ACCEPTED' %}<span style="background:rgba(16,185,129,.15);color:#34d399;padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700">{% trans "Prihvaćeno" %}</span>
+      {% elif inv.status == 'STORNO' %}<span style="background:rgba(239,68,68,.1);color:#f87171;padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700">{% trans "Storno" %}</span>
+      {% else %}<span style="background:rgba(100,116,139,.15);color:#94a3b8;padding:3px 9px;border-radius:12px;font-size:.7rem;font-weight:700">{{ inv.get_status_display }}</span>{% endif %}
+    </td>
+    <td style="padding:10px 8px;white-space:nowrap">
+      <a href="/invoicing/{{ inv.pk }}/pdf/" target="_blank" title="PDF" style="color:#94a3b8;text-decoration:none;margin-right:6px">📄</a>
+      <a href="/invoicing/client/{{ inv.client_token }}/" target="_blank" title="Klijentski portal" style="color:#94a3b8;text-decoration:none">🔗</a>
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="8" class="p-0">
+    {% include "includes/empty_state.html" with icon="fas fa-file-invoice" title="Nema računa" message="Kreirajte prvi račun pomoću wizarda ili terenskog unosa." action_url="/invoicing/wizard/" action_text="Kreiraj račun" secondary_url="/invoicing/wizard/?doctype=PO" secondary_text="Nova ponuda" %}
+  </td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

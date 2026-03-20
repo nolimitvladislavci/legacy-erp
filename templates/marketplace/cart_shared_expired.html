@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Link istekao{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:80px auto;text-align:center;padding:20px;">
+  <div style="font-size:4rem;margin-bottom:16px;">&#128274;</div>
+  <h2 style="font-weight:900;color:#dc3545;margin-bottom:12px;">{% trans "Link je istekao" %}</h2>
+  <p style="color:var(--text-muted, #94a3b8);font-size:.95rem;margin-bottom:8px;">
+    {% trans "Ovaj link za naplatu je istekao radi vase sigurnosti." %}
+  </p>
+  <p style="color:var(--text-muted, #94a3b8);font-size:.88rem;">
+    {% trans "Kontaktirajte dispecera za novi link." %}
+  </p>
+  <div style="margin-top:24px;padding:16px;background:rgba(220,53,69,0.08);border-radius:12px;font-size:.82rem;color:var(--text-muted);">
+    {% trans "Kreiran" %}: {{ snapshot.created_at|date:"d.m.Y H:i" }}<br>
+    {% trans "Istekao" %}: {{ snapshot.expires_at|date:"d.m.Y H:i" }}
+  </div>
+</div>
+{% endblock %}

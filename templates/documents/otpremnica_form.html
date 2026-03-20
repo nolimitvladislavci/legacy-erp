@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h2 class="mb-3"><i class="fas fa-truck text-warning me-2"></i>{{ title }}</h2>
+<div method="post" id="docForm">
+{% csrf_token %}
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <label class="form-label">Broj</label>
+    <input type="text" name="doc_number" value="{{ next_number }}" class="form-control" readonly>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Datum</label>
+    <input type="date" name="date_issued" class="form-control" value="{% now 'Y-m-d' %}">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Partner</label>
+    <select name="partner" class="form-select">
+      <option value="">—</option>
+      {% for p in partners %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
+    </select>
+  </div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <label class="form-label">Adresa dostave</label>
+    <textarea name="delivery_address" class="form-control" rows="2"></textarea>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Reg. vozila</label>
+    <input type="text" name="vehicle_plate" class="form-control" placeholder="ZG-1234-AB">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Vozač</label>
+    <input type="text" name="driver_name" class="form-control">
+  </div>
+</div>
+
+<h5 class="mt-4 mb-3">Stavke</h5>
+<div id="items-container">
+  <div class="row g-2 mb-2 item-row">
+    <div class="col-md-3"><input type="text" name="item_name" class="form-control" placeholder="Naziv proizvoda"></div>
+    <div class="col-md-1"><input type="number" name="item_qty" class="form-control" placeholder="Kol." step="0.001" value="1"></div>
+    <div class="col-md-1"><input type="text" name="item_unit" class="form-control" placeholder="Jed." value="kg"></div>
+    <div class="col-md-2"><input type="number" name="item_price" class="form-control" placeholder="Cijena" step="0.01"></div>
+    <div class="col-md-1"><input type="number" name="item_vat" class="form-control" placeholder="PDV%" value="25"></div>
+    <div class="col-md-3">
+      <select name="item_expiry_batch" class="form-select form-select-sm" onchange="onLotSelect(this)">
+        <option value="">— LOT (opcionalno) —</option>
+        {% for lot in available_lots %}
+        <option value="{{ lot.pk }}" data-batch="{{ lot.batch_number }}" data-name="{{ lot.inventory_item.name }}" data-qty="{{ lot.quantity }}">
+          {{ lot.batch_number|default:"LOT" }} | {{ lot.inventory_item.name }} | {{ lot.quantity }} {{ lot.inventory_item.unit }} | exp: {{ lot.expiry_date }}
+        </option>
+        {% endfor %}
+      </select>
+      <input type="text" name="item_batch" class="form-control form-control-sm mt-1" placeholder="LOT broj (ručno)" style="font-size:.78rem">
+    </div>
+    <div class="col-md-1"><button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.item-row').remove()"><i class="fas fa-trash"></i></button></div>
+  </div>
+</div>
+<button type="button" class="btn btn-outline-secondary btn-sm mb-3" onclick="addItem()"><i class="fas fa-plus me-1"></i>Dodaj stavku</button>
+
+<div class="mb-3">
+  <label class="form-label">Napomena</label>
+  <textarea name="notes" class="form-control" rows="2"></textarea>
+</div>
+
+<button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Spremi</button>
+<a href="{% url 'documents:otpremnica_list' %}" class="btn btn-outline-secondary ms-2">Odustani</a>
+</div>
+
+<script>
+function addItem() {
+  const c = document.getElementById('items-container');
+  const row = c.querySelector('.item-row').cloneNode(true);
+  row.querySelectorAll('input').forEach(i => {
+    if(i.name !== 'item_unit' && i.name !== 'item_vat') i.value = '';
+  });
+  row.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+  c.appendChild(row);
+}
+// Wrap in real form
+document.addEventListener('DOMContentLoaded', function() {
+  const div = document.getElementById('docForm');
+  const form = document.createElement('form');
+  form.method = 'post';
+  div.parentNode.insertBefore(form, div);
+  form.appendChild(div);
+});
+
+function onLotSelect(sel) {
+  const row = sel.closest('.item-row');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt.value) return;
+  const batchInput = row.querySelector('input[name="item_batch"]');
+  const nameInput  = row.querySelector('input[name="item_name"]');
+  if (batchInput && opt.dataset.batch) batchInput.value = opt.dataset.batch;
+  if (nameInput && !nameInput.value && opt.dataset.name) nameInput.value = opt.dataset.name;
+}
+</script>
+{% endblock %}

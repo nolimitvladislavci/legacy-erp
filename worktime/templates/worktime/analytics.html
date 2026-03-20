@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Analitika{% endblock %}
+{% block page_title %}📊 Analitika {{ year }}{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "YTD Sati" %}</div><div class="value">{{ ytd_hours|floatformat:0 }}h</div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "YTD Iznos" %}</div><div class="value text-success">{{ ytd_amount|floatformat:0 }} €</div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "Projekata" %}</div><div class="value">{{ by_project|length }}</div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "Radnika" %}</div><div class="value">{{ by_worker|length }}</div></div></div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="stat-card h-100">
+      <h6 class="fw-bold mb-3">Po projektu ({{ year }})</h6>
+      {% for p in by_project %}
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div><span class="badge bg-primary me-1" style="font-size:0.65rem">{{ p.project__code }}</span><span style="font-size:0.85rem">{{ p.project__name }}</span></div>
+        <div><strong>{{ p.total_hours|floatformat:0 }}h</strong><span class="text-success ms-2" style="font-size:0.82rem">{{ p.total_amount|floatformat:0 }} €</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="stat-card h-100">
+      <h6 class="fw-bold mb-3">{% trans "Po radniku (ovaj mjesec)" %}</h6>
+      <table class="table table-sm">
+        <thead><tr><th>{% trans "Radnik" %}</th><th class="text-end">{% trans "Sati" %}</th><th class="text-end">{% trans "Iznos" %}</th></tr></thead>
+        <tbody>
+          {% for w in by_worker %}
+          <tr>
+            <td style="font-size:0.85rem">{{ w.user__first_name }} {{ w.user__last_name|default:w.user__username }}</td>
+            <td class="text-end fw-bold" style="font-family:monospace">{{ w.total_hours|floatformat:1 }}</td>
+            <td class="text-end text-success" style="font-family:monospace">{{ w.total_amount|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="stat-card">
+  <h6 class="fw-bold mb-3">{% trans "Tjedni trend (zadnjih 12 tjedana)" %}</h6>
+  <div style="display:flex;align-items:flex-end;gap:6px;height:140px;padding-bottom:20px">
+    {% for w in weekly %}
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%">
+      <div style="font-size:0.62rem;color:#64748b">{{ w.hours|floatformat:0 }}h</div>
+      <div style="flex:1;width:100%;display:flex;align-items:flex-end">
+        <div style="width:100%;background:#1d4ed8;border-radius:3px 3px 0 0;min-height:2px" data-h="{{ w.hours }}"></div>
+      </div>
+      <div style="font-size:0.6rem;color:#94a3b8;white-space:nowrap">{{ w.week }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<script>
+const bars=document.querySelectorAll('[data-h]');
+const mx=Math.max(...[...bars].map(b=>parseFloat(b.dataset.h)||0))||1;
+bars.forEach(b=>b.style.height=(parseFloat(b.dataset.h)/mx*80)+'px');
+</script>
+{% endblock %}

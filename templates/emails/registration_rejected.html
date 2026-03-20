@@ -1,0 +1,13 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Registration Update{% endblock %}
+{% block content %}
+<h2 style="margin:0 0 16px;color:#0a0a0a;font-family:'Cormorant Garamond',Georgia,serif;">Registration Update</h2>
+<p style="color:#333;line-height:1.6;">Dear {{ contact_name }},</p>
+<p style="color:#333;line-height:1.6;">Your registration for <strong>{{ company_name }}</strong> could not be approved at this time.</p>
+{% if reason %}
+<div style="margin:20px 0;padding:16px;background:#fdf2f2;border-left:3px solid #c0392b;border-radius:4px;">
+  <p style="margin:0;color:#333;"><strong>Reason:</strong> {{ reason }}</p>
+</div>
+{% endif %}
+<p style="color:#333;line-height:1.6;">If you have questions, please contact us at <a href="mailto:info@limit-connect.com" style="color:#c9a84c;">info@limit-connect.com</a>.</p>
+{% endblock %}

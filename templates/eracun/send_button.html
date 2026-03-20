@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Posalji e-Racun{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 600px;">
+
+    {% if step == 1 %}
+    <!-- STEP 1: Preview -->
+    <div class="card">
+        <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0"><i class="bi bi-envelope-paper"></i> Posalji e-Racun</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <tr><td class="text-muted">Broj:</td><td><strong>{{ invoice.number }}</strong></td></tr>
+                <tr><td class="text-muted">Kupac:</td><td>{{ invoice.client_name }}</td></tr>
+                <tr><td class="text-muted">OIB:</td><td>{{ invoice.client_oib }}</td></tr>
+                <tr><td class="text-muted">Datum:</td><td>{{ invoice.date_issued|date:"d.m.Y" }}</td></tr>
+                <tr><td class="text-muted">Iznos:</td><td><strong>{{ invoice.total }} EUR</strong></td></tr>
+                <tr><td class="text-muted">Posrednik:</td><td>{{ config.get_posrednik_type_display|default:"Nije odabran" }}</td></tr>
+            </table>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="confirm" value="1">
+                <button type="submit" class="btn btn-primary btn-lg w-100 py-3">
+                    <i class="bi bi-arrow-right-circle"></i> Nastavi na potvrdu
+                </button>
+            </form>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary w-100 mt-2">Odustani</a>
+        </div>
+    </div>
+
+    {% elif step == 2 %}
+    <!-- STEP 2: Confirm -->
+    <div class="card border-warning">
+        <div class="card-header bg-warning text-dark text-center">
+            <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Potvrda slanja</h4>
+        </div>
+        <div class="card-body text-center">
+            <p class="fs-5 mb-3">Jeste li sigurni da zelite poslati</p>
+            <p class="fs-3 fw-bold text-primary">{{ invoice.number }}</p>
+            <p class="fs-5">u iznosu od <strong>{{ invoice.total }} EUR</strong></p>
+            <p class="text-muted">kupcu <strong>{{ invoice.client_name }}</strong></p>
+            <p class="text-muted mb-4">putem <strong>{{ config.get_posrednik_type_display|default:"posrednika" }}</strong>?</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="confirm" value="2">
+                <button type="submit" class="btn btn-success btn-lg w-100 py-3 mb-2"
+                        onclick="this.disabled=true; this.innerHTML='<i class=\'bi bi-hourglass-split\'></i> Saljem...'; this.form.submit();">
+                    <i class="bi bi-send-check"></i> DA — POSALJI E-RACUN
+                </button>
+            </form>
+            <a href="javascript:history.back()" class="btn btn-outline-danger w-100">NE — Vrati me nazad</a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

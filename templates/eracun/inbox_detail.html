@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}e-Račun {{ eracun.invoice_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-envelope-open"></i>
+            {{ eracun.invoice_number }}
+            {% if eracun.is_booked %}
+                <span class="badge bg-success">Proknjiženo</span>
+            {% else %}
+                <span class="badge bg-warning text-dark">Čeka knjiženje</span>
+            {% endif %}
+        </h2>
+        <div>
+            {% if not eracun.is_booked %}
+            <form method="post" action="{% url 'eracun:inbox_book' eracun.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-success"><i class="bi bi-journal-check"></i> Proknjiži u URA</button>
+            </form>
+            {% endif %}
+            <a href="{% url 'eracun:inbox' %}" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-arrow-left"></i> Inbox
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Supplier info -->
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Dobavljač (izdavatelj)</strong></div>
+                <div class="card-body">
+                    <p class="fw-bold mb-1">{{ eracun.issuer_name }}</p>
+                    <p class="mb-1">OIB: {{ eracun.issuer_oib }}</p>
+                    <p class="mb-1">{{ eracun.issuer_address }}, {{ eracun.issuer_postal }} {{ eracun.issuer_city }}</p>
+                    {% if eracun.issuer_iban %}<p class="mb-0">IBAN: {{ eracun.issuer_iban }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Document info -->
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Dokument</strong></div>
+                <div class="card-body">
+                    <p class="mb-1">Broj: <strong>{{ eracun.invoice_number }}</strong></p>
+                    <p class="mb-1">Datum izdavanja: {{ eracun.issue_date|date:"d.m.Y" }}</p>
+                    {% if eracun.due_date %}<p class="mb-1">Rok plaćanja: {{ eracun.due_date|date:"d.m.Y" }}</p>{% endif %}
+                    <p class="mb-1">Primljeno: {{ eracun.received_at|date:"d.m.Y H:i" }} ({{ eracun.received_via }})</p>
+                    {% if eracun.note %}<p class="mb-0 text-muted">{{ eracun.note }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items -->
+    <div class="card mb-3">
+        <div class="card-header"><strong>Stavke</strong></div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Opis</th>
+                        <th class="text-end">Količina</th>
+                        <th class="text-end">Jed. cijena</th>
+                        <th class="text-end">PDV %</th>
+                        <th class="text-end">Ukupno</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.line_number }}</td>
+                        <td>{{ item.description }}</td>
+                        <td class="text-end">{{ item.quantity }} {{ item.unit_code }}</td>
+                        <td class="text-end">{{ item.unit_price }}</td>
+                        <td class="text-end">{{ item.tax_rate }}%</td>
+                        <td class="text-end fw-bold">{{ item.line_total }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <td colspan="5" class="text-end">Osnovica:</td>
+                        <td class="text-end">{{ eracun.subtotal }} {{ eracun.currency }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-end">PDV:</td>
+                        <td class="text-end">{{ eracun.tax_amount }} {{ eracun.currency }}</td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td colspan="5" class="text-end">UKUPNO:</td>
+                        <td class="text-end">{{ eracun.total }} {{ eracun.currency }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Audit log -->
+    <div class="card">
+        <div class="card-header"><strong>Povijest</strong></div>
+        <div class="card-body p-0">
+            <table class="table table-sm mb-0">
+                {% for log in logs %}
+                <tr>
+                    <td><small class="text-muted">{{ log.created_at|date:"d.m.Y H:i" }}</small></td>
+                    <td><span class="badge bg-secondary">{{ log.action }}</span></td>
+                    <td>{{ log.message }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

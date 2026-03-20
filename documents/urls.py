@@ -1,0 +1,77 @@
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from . import views
+
+router = DefaultRouter()
+router.register(r"api", views.DocumentViewSet, basename="document")
+
+app_name = "documents"
+urlpatterns = [
+    path("", views.document_list, name="list"),
+    path("new/", views.document_create, name="create"),
+    path("arhiva/", views.arhiva_list, name="arhiva_list"),
+    # AI Inbox
+    path("ai-inbox/", views.ai_inbox, name="ai_inbox"),
+    path("revizija/", views.revizija_page, name="revizija"),
+    path("arhiva/autocomplete/", views.arhiva_autocomplete, name="arhiva_autocomplete"),
+    path("revizija/export/", views.revizija_export, name="revizija_export"),
+
+    path("ai-inbox/<int:entry_id>/accept/", views.ai_inbox_accept, name="ai_inbox_accept"),
+    path("ai-inbox/bulk-accept/", views.ai_inbox_bulk_accept, name="ai_inbox_bulk_accept"),
+    path("ai-inbox/send-email/", views.ai_inbox_send_email, name="ai_inbox_send_email"),
+    path("arhiva/api/list/", views.arhiva_list_json, name="arhiva_list_json"),
+
+    path("arhiva/upload/", views.arhiva_upload, name="arhiva_upload"),
+    path("upload/", views.arhiva_upload, name="upload_shortcut"),  # alias
+    path("arhiva/export/", views.arhiva_export, name="arhiva_export"),
+    path("arhiva/bulk-download/", views.arhiva_bulk_download, name="arhiva_bulk_download"),
+    path("arhiva/<int:pk>/download/", views.arhiva_download, name="arhiva_download"),
+    path("arhiva/<int:pk>/pdf/", views.arhiva_download_pdf, name="arhiva_pdf"),
+    path("arhiva/<int:pk>/xml/", views.arhiva_download_xml, name="arhiva_xml"),
+    path("arhiva/convert/", views.arhiva_convert, name="arhiva_convert"),
+    path("knjiga/", views.knjiga_ura_ira, name="knjiga_ura_ira"),
+    path("pdv/", views.pdv_obrazac, name="pdv_obrazac"),
+    path("scan/create-token/", views.scan_create_token, name="scan_create_token"),
+    path("scan/<str:token>/poll/", views.scan_poll, name="scan_poll"),
+    path("arhiva/conversion/<uuid:pk>/", views.conversion_detail, name="conversion_detail"),
+    path("arhiva/conversion/<uuid:pk>/create-primka/", views.conversion_create_primka, name="conversion_create_primka"),
+    path("arhiva/<int:pk>/detail/", views.arhiva_detail_ajax, name="arhiva_detail_ajax"),
+    path("arhiva/<int:pk>/preview/", views.arhiva_preview, name="arhiva_preview"),
+    path("arhiva/<int:pk>/thumbnail/", views.arhiva_thumbnail, name="arhiva_thumbnail"),
+    path("arhiva/<int:pk>/preview-info/", views.arhiva_preview_info, name="arhiva_preview_info"),
+    path("arhiva/<int:pk>/barcode.png", views.arhiva_barcode_png, name="arhiva_barcode"),
+    path("arhiva/<int:pk>/bookmark/", views.arhiva_toggle_bookmark, name="arhiva_toggle_bookmark"),
+    path("arhiva/file/<path:file_path>/", views.arhiva_file_serve, name="arhiva_file_serve"),
+    path("blob/<uuid:blob_id>/", views.blob_serve, name="blob_serve"),
+    path("<int:pk>/", views.document_detail, name="detail"),
+    path("<int:pk>/paid/", views.document_toggle_paid, name="toggle_paid"),
+
+    # Process documents
+    path("otpremnica/", views.otpremnica_list, name="otpremnica_list"),
+    path("otpremnica/nova/", views.otpremnica_create, name="otpremnica_create"),
+    path("otpremnica/<uuid:pk>/", views.otpremnica_detail, name="otpremnica_detail"),
+    path("otpremnica/<uuid:pk>/pdf/", views.otpremnica_pdf, name="otpremnica_pdf"),
+    path("otpremnica/<uuid:pk>/confirm/", views.doc_confirm, name="otpremnica_confirm"),
+
+    # LEGACY redirecti — ne brisati, stari bookmarkovi i emailovi ih koriste
+    path("primka/", views.primka_list, name="primka_list"),
+    path("primka/nova/", views.primka_create, name="primka_create"),
+    path("primka/<uuid:pk>/", views.primka_detail, name="primka_detail"),
+    path("primka/<uuid:pk>/pdf/", views.primka_pdf, name="primka_pdf"),
+    path("primka/<uuid:pk>/confirm/", views.doc_confirm, name="primka_confirm"),
+
+    path("otkupni/", views.otkupni_list, name="otkupni_list"),
+    path("otkupni/novi/", views.otkupni_create, name="otkupni_create"),
+    path("otkupni/<uuid:pk>/", views.otkupni_detail, name="otkupni_detail"),
+    path("otkupni/<uuid:pk>/pdf/", views.otkupni_pdf, name="otkupni_pdf"),
+    path("otkupni/<uuid:pk>/confirm/", views.doc_confirm, name="otkupni_confirm"),
+
+    path("cmr/", views.cmr_list, name="cmr_list"),
+    path("cmr/novi/", views.cmr_create, name="cmr_create"),
+    path("cmr/<uuid:pk>/", views.cmr_detail, name="cmr_detail"),
+    path("cmr/<uuid:pk>/pdf/", views.cmr_pdf, name="cmr_pdf"),
+    path("cmr/<uuid:pk>/confirm/", views.doc_confirm, name="cmr_confirm"),
+
+    path("", include(router.urls)),
+]

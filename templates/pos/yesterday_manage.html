@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Roba od jučer | LIMIT Connect{% endblock %}
+{% block page_title %}Roba od jučer{% endblock %}
+
+{% block extra_css %}
+<style>
+.ym-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem}
+.ym-header h2{margin:0 0 .25rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem}
+.ym-header h2 i{color:var(--gold);margin-right:8px}
+.ym-header p{color:var(--text-muted);margin:0;font-size:.82rem}
+.btn-gold{background:var(--gold);color:#0a0a0a;font-weight:700;border:none;padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:8px 16px;border-radius:8px;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;transition:all .15s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:transparent;border:1px solid #ef4444;color:#ef4444;padding:5px 10px;border-radius:6px;font-size:.75rem;cursor:pointer}
+
+.add-form{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem}
+.add-form h3{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:1rem}
+.add-form h3 i{color:var(--gold);margin-right:.4rem}
+.form-row{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap}
+.form-row select,.form-row input{background:var(--input-bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:.85rem}
+.form-row select{flex:2;min-width:200px}
+.form-row input{flex:0 0 80px}
+.form-options{display:flex;gap:1rem;margin:.75rem 0;align-items:center;flex-wrap:wrap;font-size:.85rem}
+.form-options label{display:flex;align-items:center;gap:.3rem;color:var(--text-secondary)}
+
+.active-table{overflow-x:auto}
+.active-table table{width:100%;border-collapse:collapse;font-size:.83rem}
+.active-table th{text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase}
+.active-table td{padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+.exp-ok{color:#10b981}.exp-warn{color:#f59e0b}.exp-bad{color:#ef4444}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;margin:0 auto">
+
+  <div class="ym-header">
+    <div>
+      <h2><i class="fas fa-fire"></i> Roba od jučer</h2>
+      <p>Dodajte jučerašnje proizvode po sniženoj cijeni. Automatski rok trajanja i označavanje.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="/pos/webshop/pekara-uvijek-frisko/" class="btn-ghost" target="_blank"><i class="fas fa-eye"></i> Webshop</a>
+      <a href="/pos/quick/" class="btn-ghost"><i class="fas fa-cash-register"></i> POS</a>
+    </div>
+  </div>
+
+  <!-- Forma za dodavanje -->
+  <form method="post" class="add-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add">
+    <h3><i class="fas fa-plus-circle"></i> Dodaj artikle</h3>
+
+    <div id="itemRows">
+      <div class="form-row">
+        <select name="item_id">
+          <option value="">-- Odaberi artikl --</option>
+          {% for item in all_items %}
+          <option value="{{ item.pk }}">{{ item.name }} ({{ item.unit_price|floatformat:2 }} €)</option>
+          {% endfor %}
+        </select>
+        <input type="number" name="quantity" value="10" min="1" step="1" placeholder="Kom">
+      </div>
+    </div>
+
+    <button type="button" onclick="addRow()" style="background:transparent;border:1px solid var(--border);color:var(--gold);padding:5px 12px;border-radius:6px;font-size:.78rem;cursor:pointer;margin-bottom:.75rem">
+      <i class="fas fa-plus"></i> Još jedan artikl
+    </button>
+
+    <div class="form-options">
+      <label><input type="range" name="discount_pct" value="50" min="10" max="80" step="5" oninput="this.nextElementSibling.textContent=this.value+'%'"> <span>50%</span> popust</label>
+      <label><input type="checkbox" name="vacuum" checked> Vakumirano</label>
+      <label>Rok: <input type="number" name="shelf_days" value="3" min="1" max="7" style="width:50px;padding:4px 6px;border-radius:4px;background:var(--input-bg);border:1px solid var(--border);color:var(--text)"> dana</label>
+    </div>
+
+    <button type="submit" class="btn-gold"><i class="fas fa-check"></i> Dodaj u ponudu</button>
+  </form>
+
+  <!-- Aktivni artikli -->
+  <div class="stat-card" style="padding:1.25rem">
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:0 0 .75rem"><i class="fas fa-list" style="color:var(--gold);margin-right:.4rem"></i> Trenutno u ponudi</h3>
+    {% if active_items %}
+    <div class="active-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Artikl</th>
+            <th>Cijena</th>
+            <th>Sniženo</th>
+            <th>Kom</th>
+            <th>Proizvedeno</th>
+            <th>Rok</th>
+            <th>Vakuum</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in active_items %}
+          <tr>
+            <td style="font-weight:600">{{ item.name }}</td>
+            <td style="text-decoration:line-through;color:var(--text-muted)">{{ item.original_price|floatformat:2 }} €</td>
+            <td style="color:var(--gold);font-weight:700">{{ item.discount_price|floatformat:2 }} € <span style="font-size:.7rem;color:#ef4444">-{{ item.discount_pct }}%</span></td>
+            <td>{{ item.quantity_available|floatformat:0 }}</td>
+            <td>{{ item.production_date|date:"d.m." }}</td>
+            <td>
+              {% if item.expiry_date >= today %}
+              <span class="exp-ok">{{ item.expiry_date|date:"d.m.Y" }}</span>
+              {% else %}
+              <span class="exp-bad">ISTEKAO {{ item.expiry_date|date:"d.m." }}</span>
+              {% endif %}
+            </td>
+            <td>{% if item.is_vacuum_packed %}<i class="fas fa-check" style="color:#10b981"></i>{% else %}-{% endif %}</td>
+            <td>
+              <form method="post" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="deactivate">
+                <input type="hidden" name="dd_id" value="{{ item.id }}">
+                <button type="submit" class="btn-danger"><i class="fas fa-times"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:2rem;color:var(--text-muted)">
+      <i class="fas fa-box-open" style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.3"></i>
+      Nema artikala u ponudi "Roba od jučer"
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Info box -->
+  <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:1rem;margin-top:1rem;font-size:.78rem;color:var(--text-secondary);line-height:1.5">
+    <strong style="color:var(--gold)"><i class="fas fa-info-circle"></i> Zakonske napomene:</strong><br>
+    Pekarski proizvodi s označenim rokom trajanja smiju se prodavati po sniženoj cijeni.<br>
+    Obavezno: naziv, datum proizvodnje, rok trajanja, uvjeti čuvanja, neto količina, proizvođač.<br>
+    Vakuumiranje produljuje rok (kruh 3-5 dana, peciva 2-3 dana). Mora biti u HACCP planu.<br>
+    Originalna i snižena cijena moraju biti jasno vidljive (Zakon o zaštiti potrošača, čl. 14).
+  </div>
+
+</div>
+
+<script>
+function addRow() {
+  var container = document.getElementById('itemRows');
+  var row = container.querySelector('.form-row').cloneNode(true);
+  row.querySelector('select').value = '';
+  row.querySelector('input').value = '10';
+  container.appendChild(row);
+}
+</script>
+{% endblock %}

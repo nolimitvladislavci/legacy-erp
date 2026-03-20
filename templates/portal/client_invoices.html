@@ -1,0 +1,66 @@
+{% extends "portal/base_b2b.html" %}
+
+{% block title %}Fakture — Klijentski Portal{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-3">
+  <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);font-weight:700">
+    <i class="fas fa-file-invoice-dollar" style="font-size:1rem;opacity:.6;margin-right:8px"></i>
+    Fakture
+  </h1>
+  <a href="{% url 'client_portal:dashboard' token %}" class="btn btn-ghost btn-sm">
+    <i class="fas fa-arrow-left"></i> Natrag
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="b2b-filters">
+  <a href="{% url 'client_portal:invoices' token %}" class="b2b-filter-pill {% if not filter_status %}active{% endif %}">Sve</a>
+  <a href="?status=SENT" class="b2b-filter-pill {% if filter_status == 'SENT' %}active{% endif %}">Poslane</a>
+  <a href="?status=UNPAID" class="b2b-filter-pill {% if filter_status == 'UNPAID' %}active{% endif %}">Neplacene</a>
+  <a href="?status=OVERDUE" class="b2b-filter-pill {% if filter_status == 'OVERDUE' %}active{% endif %}">Dospjele</a>
+  <a href="?status=PAID" class="b2b-filter-pill {% if filter_status == 'PAID' %}active{% endif %}">Placene</a>
+</div>
+
+{% if invoices %}
+<div class="b2b-table-wrap">
+  <table class="b2b-table">
+    <thead>
+      <tr>
+        <th>Broj</th>
+        <th>Datum</th>
+        <th>Dospijeće</th>
+        <th>Iznos</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inv in invoices %}
+      <tr>
+        <td class="text-mono text-gold">{{ inv.number }}</td>
+        <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
+        <td>{{ inv.date_due|date:"d.m.Y"|default:"-" }}</td>
+        <td style="font-weight:600">{{ inv.total|floatformat:2 }} &euro;</td>
+        <td>
+          <span class="badge badge-{% if inv.status == 'PAID' %}paid{% elif inv.status == 'OVERDUE' %}overdue{% elif inv.status == 'SENT' or inv.status == 'UNPAID' %}unpaid{% elif inv.status == 'ACCEPTED' %}accepted{% elif inv.status == 'REJECTED' %}rejected{% else %}draft{% endif %}">
+            {{ inv.get_status_display }}
+          </span>
+        </td>
+        <td>
+          <a href="{% url 'b2b_invoice_pdf' token inv.pk %}" target="_blank" class="btn btn-ghost btn-sm" title="Preuzmi PDF">
+            <i class="fas fa-file-pdf"></i>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <div class="b2b-empty">
+    <i class="fas fa-file-invoice"></i>
+    <p>Nema faktura za prikaz.</p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Uvoz izvoda{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:600px;">
+    <h2><i class="bi bi-upload"></i> Uvoz bankovnog izvoda</h2>
+    <p class="text-muted">Podrzani formati: camt.053 XML (standard za HR banke)</p>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if accounts %}
+                <div class="mb-3">
+                    <label class="form-label">Bankovni racun (opcija)</label>
+                    <select name="account_id" class="form-select">
+                        <option value="">Automatski prepoznaj iz XML-a</option>
+                        {% for acc in accounts %}
+                        <option value="{{ acc.pk }}">{{ acc.name }} ({{ acc.iban }})</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Ako ne odaberete, sustav ce prepoznati racun iz IBAN-a u izvodu.</div>
+                </div>
+                {% endif %}
+                <div class="mb-4">
+                    <label class="form-label">XML datoteka</label>
+                    <input type="file" name="xml_file" class="form-control form-control-lg" accept=".xml" required>
+                    <div class="form-text">
+                        Preuzmite izvod iz internet bankarstva u camt.053 formatu.<br>
+                        PBZ, ZABA, RBA, OTP — svi podrzavaju camt.053 XML export.
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-cloud-upload"></i> Uvezi i pariraj
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">Kako preuzeti izvod?</div>
+        <div class="card-body">
+            <ol class="mb-0">
+                <li>Prijavite se u internet bankarstvo</li>
+                <li>Idite na Izvodi / Promet po racunu</li>
+                <li>Odaberite period (npr. prosli mjesec)</li>
+                <li>Kliknite "Izvoz" ili "Download" u <strong>XML (camt.053)</strong> formatu</li>
+                <li>Spremite datoteku i uploadajte ovdje</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

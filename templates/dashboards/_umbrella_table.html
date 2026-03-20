@@ -1,0 +1,65 @@
+<div style="background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:8px;overflow:hidden">
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead>
+        <tr style="background:var(--table-header-bg,#f8fafc);color:var(--text-muted,#64748b);text-transform:uppercase;font-size:.65rem;letter-spacing:.05em">
+          <th style="padding:8px 12px;text-align:left">Tvrtka</th>
+          <th style="padding:8px 12px;text-align:left">OIB</th>
+          <th style="padding:8px 12px;text-align:center">Plan</th>
+          <th style="padding:8px 12px;text-align:center">Korisnici</th>
+          <th style="padding:8px 12px;text-align:right">Fakture</th>
+          <th style="padding:8px 12px;text-align:right">POS</th>
+          <th style="padding:8px 12px;text-align:center">Synesis</th>
+          <th style="padding:8px 12px;text-align:center">Tip</th>
+          <th style="padding:8px 12px;text-align:center">Akcije</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cd in items %}
+        <tr style="border-top:1px solid var(--border,#e2e8f0)">
+          <td style="padding:8px 12px">
+            <strong style="color:var(--text,#0f172a)">{{ cd.company.name }}</strong>
+            {% if cd.company.city %}<div style="color:var(--text-muted,#64748b);font-size:.7rem">{{ cd.company.city }}</div>{% endif %}
+          </td>
+          <td style="padding:8px 12px;color:var(--text-muted,#64748b);font-size:.75rem">{{ cd.company.oib }}</td>
+          <td style="padding:8px 12px;text-align:center">
+            <span style="background:rgba(201,168,76,.1);color:var(--gold,#c9a84c);padding:2px 6px;border-radius:3px;font-size:.65rem;font-weight:700">{{ cd.plan }}</span>
+          </td>
+          <td style="padding:8px 12px;text-align:center;color:var(--text-muted,#64748b)">{{ cd.user_count }}</td>
+          <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--text,#0f172a)">
+            {% if cd.inv_revenue %}&euro;{{ cd.inv_revenue|floatformat:0 }}{% else %}-{% endif %}
+          </td>
+          <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--text,#0f172a)">
+            {% if cd.pos_revenue %}&euro;{{ cd.pos_revenue|floatformat:0 }}{% else %}-{% endif %}
+          </td>
+          <td style="padding:8px 12px;text-align:center">
+            {% if cd.synesis %}<span style="color:#4caf7d" title="Aktivan">&#9679;</span>
+            {% else %}<span style="color:var(--text-muted,#64748b)">-</span>{% endif %}
+          </td>
+          <td style="padding:8px 12px;text-align:center">
+            {% if cd.company.umbrella_relation == 'subsidiary' %}
+              <span style="background:rgba(168,85,247,.1);color:#a855f7;padding:2px 6px;border-radius:3px;font-size:.62rem;font-weight:700">PODR.</span>
+            {% else %}
+              <span style="background:rgba(59,130,246,.1);color:#3b82f6;padding:2px 6px;border-radius:3px;font-size:.62rem;font-weight:700">KLIJENT</span>
+            {% endif %}
+          </td>
+          <td style="padding:8px 12px;text-align:center;white-space:nowrap">
+            <a href="{% url 'umbrella_switch_company' cd.company.pk %}" title="Uđi u firmu"
+              style="display:inline-block;border:1px solid var(--border,#e2e8f0);border-radius:4px;padding:3px 7px;color:var(--gold,#c9a84c);font-size:.7rem;text-decoration:none;margin-right:2px">
+              <i class="fas fa-sign-in-alt"></i>
+            </a>
+            <form method="post" style="display:inline">{% csrf_token %}
+              <input type="hidden" name="action" value="remove_child">
+              <input type="hidden" name="company_id" value="{{ cd.company.pk }}">
+              <button type="submit" title="Odvezi" onclick="return confirm('Odvezati {{ cd.company.name }}?')"
+                style="background:none;border:1px solid var(--border,#e2e8f0);border-radius:4px;padding:3px 7px;color:#ef4444;font-size:.7rem;cursor:pointer">
+                <i class="fas fa-unlink"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

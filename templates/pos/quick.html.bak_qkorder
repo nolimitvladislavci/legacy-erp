@@ -1,0 +1,1140 @@
+{% extends "pos/base_pos.html" %}
+{% block topbar_nav %}{% endblock %}
+{% block quick_nav %}{% endblock %}
+{% load i18n %}
+{% block title %}Brza blagajna – {{ terminal.name }}{% endblock %}
+{% block extra_css %}
+<style>
+/* ── Layout ────────────────────────────────────────────────────────────────── */
+.qp{display:grid;grid-template-columns:1fr 360px;height:calc(100vh - 44px);overflow:hidden}
+.qp-left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+.qp-right{display:flex;flex-direction:column;overflow:hidden}
+
+/* ── Status bar ─────────────────────────────────────────────────────────────── */
+.qp-status{padding:.5rem 1rem;background:var(--dark);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-shrink:0;font-size:.8rem}
+.qp-status-name{font-weight:700;color:var(--gold)}
+.cashier-select{display:flex;gap:.35rem;flex-wrap:wrap}
+.cashier-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:.3rem .7rem;font-size:.75rem;cursor:pointer;font-family:inherit;transition:all .15s}
+.cashier-btn.active{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);font-weight:700}
+.cashier-add{background:none;border:1px dashed var(--border);color:var(--muted);border-radius:5px;padding:.3rem .55rem;font-size:.75rem;cursor:pointer;font-family:inherit}
+
+/* ── Category tabs ──────────────────────────────────────────────────────────── */
+.cat-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;background:var(--dark)}
+.cat-tab{padding:.55rem .875rem;font-size:.78rem;cursor:pointer;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.cat-tab:hover{color:var(--text)}
+.cat-tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:700}
+
+/* ── Product grid ───────────────────────────────────────────────────────────── */
+.prod-scroll{flex:1;overflow-y:auto;padding:.75rem}
+.prod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+
+/* ── Quick keys zone ──────────────────────────────────────────────────────────── */
+.qk-zone{flex-shrink:0;background:var(--dark);border-bottom:2px solid var(--border);padding:.5rem .75rem .4rem}
+.qk-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem}
+.qk-label span{flex:1}
+.qk-label a{font-size:.65rem;color:var(--muted);text-decoration:none;padding:.1rem .4rem;border:1px solid var(--border);border-radius:4px;white-space:nowrap}
+.qk-label a:hover{color:var(--gold);border-color:var(--gold)}
+.qk-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.35rem}
+.qk-btn{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:.45rem .3rem;cursor:pointer;text-align:center;font-family:inherit;user-select:none;-webkit-tap-highlight-color:transparent;transition:all .12s;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;position:relative;overflow:hidden}
+.qk-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.qk-btn:active{transform:scale(.93);background:rgba(201,168,76,.14)}
+.qk-name{font-size:.7rem;font-weight:600;color:var(--text);line-height:1.2;word-break:break-word;max-width:100%}
+.qk-price{font-size:.72rem;font-weight:700;color:var(--gold)}
+.qk-badge{position:absolute;top:2px;right:2px;background:var(--gold);color:#000;font-size:.58rem;font-weight:800;border-radius:50%;width:15px;height:15px;display:none;align-items:center;justify-content:center}
+.qk-badge.show{display:flex}
+@media(max-width:900px){.qk-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:500px){.qk-grid{grid-template-columns:repeat(3,1fr);gap:.25rem}.qk-btn{min-height:46px;padding:.35rem .2rem}.qk-name{font-size:.65rem}.qk-price{font-size:.68rem}}
+.prod-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.7rem .5rem;cursor:pointer;text-align:center;transition:all .12s;min-height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;font-family:inherit;user-select:none;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.prod-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.prod-btn:active{transform:scale(.94);background:rgba(201,168,76,.12)}
+.prod-name{font-size:.78rem;font-weight:600;color:var(--text);line-height:1.2;word-break:break-word;max-width:100%}
+.prod-price{font-size:.82rem;font-weight:700;color:var(--gold)}
+.prod-sku{font-size:.62rem;color:var(--muted)}
+/* Qty badge on button */
+.prod-qty-badge{position:absolute;top:3px;right:3px;background:var(--gold);color:#000;font-size:.65rem;font-weight:800;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center}
+.prod-qty-badge.show{display:flex}
+
+/* Ripple animation */
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+.ripple{position:absolute;border-radius:50%;background:rgba(201,168,76,.35);width:40px;height:40px;margin:-20px;pointer-events:none;animation:ripple .4s ease-out forwards}
+
+/* ── Search ─────────────────────────────────────────────────────────────────── */
+.prod-search{padding:.5rem .75rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.prod-search input{background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.45rem .7rem;font-size:.85rem;width:100%;outline:none}
+.prod-search input:focus{border-color:var(--gold)}
+
+/* ── Basket ─────────────────────────────────────────────────────────────────── */
+.basket-head{padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
+.basket-items{flex:1;overflow-y:auto;padding:.5rem 0}
+.b-row{display:flex;align-items:center;gap:.5rem;padding:.45rem .875rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.b-row:last-child{border-bottom:none}
+.b-name{flex:1;font-size:.82rem;font-weight:500;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.b-qty-ctrl{display:flex;align-items:center;gap:3px}
+.bq-btn{background:var(--dark);border:1px solid var(--border);color:var(--muted);border-radius:4px;width:24px;height:24px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;transition:all .12s}
+.bq-btn:hover{border-color:var(--gold);color:var(--gold)}
+.b-qty{font-size:.85rem;font-weight:700;min-width:22px;text-align:center;color:var(--text)}
+.b-price{font-size:.82rem;font-weight:700;color:var(--gold);white-space:nowrap;width:54px;text-align:right}
+.b-del{background:none;border:none;color:var(--muted);cursor:pointer;padding:.2rem .3rem;font-size:.9rem;opacity:.6}
+.b-del:hover{color:var(--red);opacity:1}
+.basket-empty{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
+
+/* ── Totals ─────────────────────────────────────────────────────────────────── */
+.basket-totals{padding:.75rem 1rem;border-top:1px solid var(--border);flex-shrink:0}
+.tot-row{display:flex;justify-content:space-between;font-size:.82rem;padding:.2rem 0;color:var(--muted)}
+.tot-row.grand{border-top:1px solid var(--border);margin-top:.35rem;padding-top:.5rem;font-size:1.15rem;font-weight:800;color:var(--text)}
+.tot-row.grand .tv{color:var(--gold)}
+
+/* ── Payment ────────────────────────────────────────────────────────────────── */
+.pay-zone{padding:.75rem 1rem;border-top:1px solid var(--border);flex-shrink:0}
+.cash-input-row{display:flex;gap:.4rem;align-items:center;margin-bottom:.5rem}
+.cash-input{background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.55rem .7rem;font-size:1rem;font-weight:700;flex:1;outline:none;text-align:right;font-family:inherit}
+.cash-input:focus{border-color:var(--gold)}
+.cash-quick{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.6rem}
+.cash-q-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:5px;padding:.4rem .6rem;font-size:.75rem;cursor:pointer;font-weight:600;min-height:36px;font-family:inherit;transition:all .12s}
+.cash-q-btn:hover{border-color:var(--gold);color:var(--gold)}
+.change-row{background:rgba(76,175,125,.1);border:1px solid var(--green);border-radius:6px;padding:.5rem .75rem;text-align:center;margin-bottom:.5rem;display:none}
+.change-row.show{display:block}
+.change-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.change-val{font-size:1.2rem;font-weight:800;color:var(--green)}
+.pay-btns{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.pay-cash,.pay-card{border:none;border-radius:8px;padding:1rem;font-size:1rem;font-weight:800;cursor:pointer;min-height:64px;font-family:inherit;transition:all .15s}
+.pay-cash{background:var(--green);color:#fff}
+.pay-cash:hover{background:#3d9c68}
+.pay-card{background:#2563eb;color:#fff}
+.pay-card:hover{background:#1d4ed8}
+.pay-cash:disabled,.pay-card:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Success overlay ────────────────────────────────────────────────────────── */
+.success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;display:none}
+.success-overlay.show{display:flex}
+.success-icon{font-size:5rem;margin-bottom:1rem;animation:popIn .3s ease}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.success-total{font-size:2rem;font-weight:800;color:var(--gold);margin-bottom:.35rem}
+.success-change{font-size:1.2rem;color:var(--green);margin-bottom:1.5rem}
+.success-num{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem}
+.success-close{background:var(--gold);color:#000;border:none;border-radius:8px;padding:.875rem 2rem;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* ── Spinner ────────────────────────────────────────────────────────────────── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+
+/* ── Toolbar extras (tip / pfand / bon) ─────────────────────────────────────── */
+.extras-bar{padding:.4rem 1rem;border-top:1px solid var(--border);display:flex;gap:.4rem;flex-wrap:wrap;flex-shrink:0;background:rgba(255,255,255,.02)}
+.ex-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:5px;padding:.35rem .7rem;font-size:.73rem;cursor:pointer;font-weight:600;font-family:inherit;transition:all .12s}
+.ex-btn:hover{border-color:var(--gold);color:var(--gold)}
+.ex-btn.active{background:rgba(201,168,76,.2);border-color:var(--gold);color:var(--gold)}
+
+/* ── Tip row ─────────────────────────────────────────────────────────────────── */
+.tip-row{display:flex;gap:.35rem;align-items:center;padding:.4rem .5rem;background:rgba(76,175,125,.05);border:1px solid rgba(76,175,125,.2);border-radius:6px;flex-wrap:wrap}
+.tip-row.hidden{display:none}
+.tip-lbl{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.tip-pct-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:4px;padding:.25rem .55rem;font-size:.72rem;cursor:pointer;font-family:inherit;transition:all .12s}
+.tip-pct-btn:hover,.tip-pct-btn.active{background:rgba(76,175,125,.2);border-color:var(--green);color:var(--green)}
+.tip-custom{background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:.25rem .5rem;font-size:.75rem;width:72px;outline:none}
+.tip-custom:focus{border-color:var(--green)}
+.tip-clear{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:.1rem .3rem}
+.tip-clear:hover{color:var(--red)}
+.tip-val{font-size:.78rem;color:var(--green);font-weight:700;white-space:nowrap}
+
+/* ── Pfand modal ─────────────────────────────────────────────────────────────── */
+.pfand-item-row{display:flex;align-items:center;gap:.5rem;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.pfand-item-row:last-child{border-bottom:none}
+
+/* ── Voucher pay btn ─────────────────────────────────────────────────────────── */
+.pay-btns-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+.pay-bon{border:2px solid var(--gold);border-radius:8px;padding:.875rem;font-size:.9rem;font-weight:800;cursor:pointer;min-height:64px;font-family:inherit;background:rgba(201,168,76,.1);color:var(--gold);transition:all .15s}
+.pay-bon:hover{background:rgba(201,168,76,.25)}
+.pay-bon:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Voucher / Pfand modal styles ─────────────────────────────────────────────── */
+.qmodal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;display:none;align-items:center;justify-content:center}
+.qmodal.show{display:flex}
+.qmodal-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;width:340px;max-width:95vw}
+.qmodal-title{font-size:1rem;font-weight:700;color:var(--gold);margin-bottom:1rem}
+.qmodal-input{width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.6rem .8rem;font-size:1rem;outline:none;margin-bottom:.75rem}
+.qmodal-input:focus{border-color:var(--gold)}
+.qmodal-info{font-size:.8rem;color:var(--muted);margin-bottom:1rem;min-height:1.2em}
+.qmodal-btns{display:flex;gap:.5rem}
+.qmodal-btn{flex:1;border:none;border-radius:6px;padding:.6rem;font-size:.875rem;font-weight:700;cursor:pointer;font-family:inherit}
+.qmodal-btn-ok{background:var(--gold);color:#000}
+.qmodal-btn-ok:hover{background:var(--gold2)}
+.qmodal-btn-cancel{background:rgba(255,255,255,.08);color:var(--text)}
+.qmodal-btn-cancel:hover{background:rgba(255,255,255,.14)}
+
+/* ── Weight input modal ─────────────────────────────────────────────────────── */
+.weight-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:none;align-items:center;justify-content:center}
+.weight-modal.show{display:flex}
+.weight-box{background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:1.75rem;width:320px;max-width:95vw;text-align:center}
+.weight-title{font-size:.85rem;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.06em}
+.weight-product{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1.25rem}
+.weight-input{background:var(--dark);border:2px solid var(--gold);color:var(--gold);border-radius:8px;padding:.75rem;font-size:2rem;font-weight:800;width:100%;text-align:center;outline:none;font-family:inherit}
+.weight-unit{font-size:.85rem;color:var(--muted);margin:.5rem 0 1.25rem}
+.weight-btns{display:flex;gap:.5rem}
+.weight-btn-ok{flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:.75rem;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit}
+.weight-btn-ok:hover{background:var(--gold2)}
+.weight-btn-cancel{flex:1;background:rgba(255,255,255,.08);color:var(--text);border:none;border-radius:8px;padding:.75rem;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* ── Session warning ────────────────────────────────────────────────────────── */
+.no-session{text-align:center;padding:3rem;color:var(--muted)}
+
+@media(max-width:900px){
+  .qp{grid-template-columns:1fr}
+  .qp-right{height:45vh;border-top:1px solid var(--border)}
+  .prod-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:500px){
+  .qp{grid-template-columns:1fr}
+  .prod-grid{grid-template-columns:repeat(2,1fr)}
+  .qp-right{height:42vh}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="qp">
+
+  <!-- LEFT: Products -->
+  <div class="qp-left">
+
+    <!-- Status bar + cashier selector -->
+    <div class="qp-status">
+      <div>
+        <span class="qp-status-name">⚡ {{ terminal.name }}</span>
+        <span style="color:var(--muted);margin-left:.5rem">{% trans "Brza blagajna" %}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        <span style="font-size:.72rem;color:var(--muted)">{% trans "Blagajnik:" %}</span>
+        <div class="cashier-select" id="cashierBtns"></div>
+        <button class="cashier-add" onclick="addCashier()" title="{% trans "Novi blagajnik" %}">+</button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="prod-search" style="display:flex;gap:6px;align-items:center">
+      <input type="text" id="prodSearch" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1">
+    </div>
+
+
+    <!-- Quick keys zone: top 12 per category -->
+    <div class="qk-zone" id="qkZone">
+      <div class="qk-label">
+        <span>⚡ BRZI ODABIR — <span id="qkCatLabel">Sve kategorije</span></span>
+        <a href="#" onclick="document.getElementById('prodSearch').focus();return false">🔍 Traži sve</a>
+        <button type="button" onclick="openScanner()" style="background:var(--gold);color:#000;border:none;border-radius:5px;padding:.15rem .5rem;font-size:.75rem;cursor:pointer;font-weight:700;margin-left:.2rem" title="Skeniraj barkod">📷</button>
+      </div>
+      <div class="qk-grid" id="qkGrid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+    <!-- Category tabs -->
+    <div class="cat-tabs" id="catTabs">
+      <div class="cat-tab active" data-cat="" onclick="filterCat(this,'')">{% trans "Sve" %}</div>
+      {% for cat in categories %}
+      <div class="cat-tab" data-cat="{{ cat|escapejs }}" onclick="filterCat(this,'{{ cat|escapejs }}')">{{ cat }}</div>
+      {% endfor %}
+    </div>
+
+    <!-- Product grid -->
+    <div class="prod-scroll">
+      {% if session %}
+      <div class="prod-grid" id="prodGrid">
+        {% for item in inventory_items %}
+        <button class="prod-btn" id="pb-{{ item.id }}"
+                data-id="{{ item.id }}"
+                data-name="{{ item.name|escapejs }}"
+                data-price="{{ item.unit_price|stringformat:".2f" }}"
+                data-tax="{% if item.tax_rate %}{{ item.tax_rate.rate }}{% else %}25{% endif %}"
+                data-cat="{{ item.category|default:''|escapejs }}"
+                onclick="addProduct(this)"
+                data-weighable="{% if item.is_weighable %}1{% else %}0{% endif %}"
+                data-unit="{{ item.unit }}"
+                title="{{ item.name }} – €{{ item.unit_price }}">
+          <div class="prod-name">{{ item.name }}</div>
+          <div class="prod-price">&euro;{{ item.unit_price|floatformat:2 }}</div>
+          {% if item.sku %}<div class="prod-sku">{{ item.sku }}</div>{% endif %}
+          <div class="prod-qty-badge" id="qb-{{ item.id }}">0</div>
+        </button>
+        {% empty %}
+        <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">
+          {% trans "Nema artikala u skladištu. Dodajte u" %} <a href="/inventory/" style="color:var(--gold)">{% trans "Skladištu →" %}</a>
+        </div>
+        {% endfor %}
+      </div>
+<script>
+// Cache articles for offline use
+(function(){
+  var btns = document.querySelectorAll('.prod-btn');
+  var items = [];
+  btns.forEach(function(b){
+    items.push({
+      id: b.dataset.id,
+      name: b.dataset.name,
+      price: b.dataset.price,
+      tax: b.dataset.tax,
+      cat: b.dataset.cat,
+      weighable: b.dataset.weighable,
+      unit: b.dataset.unit
+    });
+  });
+  if(items.length && window.cacheArticlesForOffline){
+    window.cacheArticlesForOffline(items);
+  }
+})();
+</script>
+
+      {% else %}
+      <div class="no-session">
+        <div style="font-size:2.5rem;margin-bottom:.75rem">⏸</div>
+        <p>{% trans "Nema aktivne smjene." %}</p>
+        <a href="{% url 'pos:terminal_detail' terminal.id %}" class="btn btn-gold" style="margin-top:1rem;display:inline-flex">{% trans "Pokreni smjenu →" %}</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: Basket + Payment -->
+  <div class="qp-right">
+    <div class="basket-head">
+      {% trans "🛒 Košarica" %}
+      <button onclick="clearBasket()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.72rem" title="{% trans "Isprazni" %}">{% trans "🗑 Isprazni" %}</button>
+    </div>
+    <div class="basket-items" id="basketList">
+      <div class="basket-empty" id="basketEmpty">{% trans "Dodajte artiklе klikom ↑" %}</div>
+    </div>
+
+    <div class="basket-totals">
+      <div class="tot-row"><span>{% trans "Neto:" %}</span><span class="tv" id="tNeto">€0.00</span></div>
+      <div class="tot-row"><span>{% trans "PDV:" %}</span><span class="tv" id="tPdv">€0.00</span></div>
+      <div class="tot-row grand"><span>{% trans "UKUPNO:" %}</span><span class="tv" id="tTotal">€0.00</span></div>
+    </div>
+
+    <!-- Extras toolbar: Napojnica + Pfand -->
+    <div class="extras-bar" id="extrasBar">
+      <button class="ex-btn" id="tipToggleBtn" onclick="toggleTip()" disabled>💰 Napojnica</button>
+      <button class="ex-btn" onclick="openPfandModal()" id="pfandBtn" disabled>↩ Ambalaža</button>
+      <a href="/pos/vouchers/" class="ex-btn" target="_blank" title="Upravljanje vaučerima" style="text-decoration:none">🎫 Vaučeri ↗</a>
+    </div>
+    <!-- Tip row -->
+    <div class="tip-row hidden" id="tipRow">
+      <span class="tip-lbl">Napojnica:</span>
+      <button class="tip-pct-btn" onclick="setTipPct(5)">5%</button>
+      <button class="tip-pct-btn" onclick="setTipPct(10)">10%</button>
+      <button class="tip-pct-btn" onclick="setTipPct(15)">15%</button>
+      <input type="number" class="tip-custom" id="tipCustom" placeholder="€" min="0" step="0.01" oninput="setTipCustom(this.value)">
+      <span class="tip-val" id="tipVal"></span>
+      <button class="tip-clear" onclick="clearTip()" title="Ukloni">✕</button>
+    </div>
+
+    <div class="pay-zone" id="payZone">
+      <!-- Cash amount input (visible only for CASH) -->
+      <div id="cashSection">
+        <div class="cash-input-row">
+          <span style="font-size:.75rem;color:var(--muted);white-space:nowrap">{% trans "Primljeno (€):" %}</span>
+          <input type="number" class="cash-input" id="cashAmt" min="0" step="0.01" placeholder="0.00" oninput="calcChange()">
+        </div>
+        <div class="cash-quick">
+          <button class="cash-q-btn" onclick="setExact()">{% trans "Točno" %}</button>
+          <button class="cash-q-btn" onclick="addCash(5)">+5</button>
+          <button class="cash-q-btn" onclick="addCash(10)">+10</button>
+          <button class="cash-q-btn" onclick="addCash(20)">+20</button>
+          <button class="cash-q-btn" onclick="addCash(50)">+50</button>
+        </div>
+        <div class="change-row" id="changeRow">
+          <div class="change-lbl">{% trans "Kusur" %}</div>
+          <div class="change-val" id="changeVal">€0.00</div>
+        </div>
+      </div>
+      <div class="pay-btns-3">
+        <button class="pay-cash" id="payCash" onclick="pay('CASH')" disabled>
+          💵 GOTOVINA
+        </button>
+        <button class="pay-card" id="payCard" onclick="pay('CARD')" disabled>
+          💳 KARTICA
+        </button>
+        <button class="pay-bon" id="payBon" onclick="openVoucherModal()" disabled>
+          🎫 BON
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pfand Modal -->
+<div class="qmodal" id="pfandModal">
+  <div class="qmodal-box">
+    <div class="qmodal-title">↩ Povrat ambalaže (Pfand)</div>
+    <div id="pfandList" style="max-height:240px;overflow-y:auto;margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem">Učitavanje...</div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="closePfandModal()">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- Voucher Modal -->
+<div class="qmodal" id="voucherModal">
+  <div class="qmodal-box">
+    <div class="qmodal-title">🎫 Plaćanje vaučerom</div>
+    <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Kod vaučera</label>
+    <input type="text" class="qmodal-input" id="voucherCodeInput" placeholder="BON-2026-XXXXXX"
+           oninput="this.value=this.value.toUpperCase()" onkeyup="if(event.key==='Enter')checkVoucher()">
+    <div class="qmodal-info" id="voucherInfo"></div>
+    <div style="margin-bottom:.75rem" id="voucherSplitSection" style="display:none">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">
+        Iznos vaučera (ostatak gotovinom):
+      </label>
+      <input type="number" class="qmodal-input" id="voucherAmountInput" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="closeVoucherModal()">Odustani</button>
+      <button class="qmodal-btn" id="voucherCheckBtn" onclick="checkVoucher()"
+              style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Provjeri</button>
+      <button class="qmodal-btn qmodal-btn-ok" id="voucherPayBtn" onclick="payWithVoucher()" style="display:none">Plati</button>
+    </div>
+  </div>
+</div>
+
+<!-- Weight modal -->
+<div class="weight-modal" id="weightModal">
+  <div class="weight-box">
+    <div class="weight-title">Unos težine / količine</div>
+    <div class="weight-product" id="weightProductName"></div>
+    <input type="number" class="weight-input" id="weightInput" step="0.001" min="0.001" placeholder="0.000" inputmode="decimal">
+    <div class="weight-unit" id="weightUnit">kg</div>
+    <div class="weight-btns">
+      <button class="weight-btn-cancel" onclick="cancelWeight()">✕ Odustani</button>
+      <button class="weight-btn-ok" onclick="confirmWeight()">✓ Dodaj</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-icon">✅</div>
+  <div class="success-total" id="sucTotal"></div>
+  <div class="success-change" id="sucChange"></div>
+  <div class="success-num" id="sucNum"></div>
+  <div style="display:flex;gap:.75rem">
+    <button class="success-close" id="sucPrint" onclick="printLast()" style="background:var(--card);border:1px solid var(--border);color:var(--text)">{% trans "🖨 Ispis" %}</button>
+    <button class="success-close" onclick="closeSuccess()">{% trans "Nova prodaja" %}</button>
+  </div>
+</div>
+
+<script>
+const SESSION_ID = {% if session %}{{ session.id }}{% else %}null{% endif %};
+const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+// ── Products ───────────────────────────────────────────────────────────────────
+let currentCat = '';
+let currentQ   = '';
+
+
+// ── Quick Keys ────────────────────────────────────────────────────────────────
+// Collect all products from DOM once rendered
+const ALL_PRODUCTS = [];
+(function(){
+  document.querySelectorAll('.prod-btn').forEach(function(b){
+    ALL_PRODUCTS.push({
+      id: b.dataset.id, name: b.dataset.name,
+      price: b.dataset.price, tax: b.dataset.tax,
+      cat: b.dataset.cat, weighable: b.dataset.weighable,
+      unit: b.dataset.unit
+    });
+  });
+  // Sort alphabetically
+  ALL_PRODUCTS.sort(function(a,b){ return a.name.localeCompare(b.name, 'hr'); });
+})();
+
+function buildQuickKeys(cat) {
+  const grid = document.getElementById('qkGrid');
+  const label = document.getElementById('qkCatLabel');
+  if (!grid) return;
+
+  // Filter by category, then take first 12 alphabetically
+  const filtered = cat
+    ? ALL_PRODUCTS.filter(function(p){ return p.cat === cat; })
+    : ALL_PRODUCTS;
+
+  const top12 = filtered.slice(0, 12);
+
+  label.textContent = cat ? cat : 'Sve kategorije';
+
+  if (!top12.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.78rem;padding:.5rem">Nema artikala</div>';
+    return;
+  }
+
+  grid.innerHTML = top12.map(function(p){
+    const price = parseFloat(p.price).toFixed(2);
+    return '<button class="qk-btn" id="qk-'+p.id+'" '+
+      'data-id="'+p.id+'" data-name="'+p.name.replace(/"/g,'&quot;')+'" '+
+      'data-price="'+p.price+'" data-tax="'+p.tax+'" '+
+      'data-cat="'+p.cat+'" data-weighable="'+p.weighable+'" data-unit="'+p.unit+'" '+
+      'onclick="qkAdd(this)">'+
+      '<div class="qk-name">'+p.name+'</div>'+
+      '<div class="qk-price">€'+price+'</div>'+
+      '<div class="qk-badge" id="qkb-'+p.id+'">0</div>'+
+      '</button>';
+  }).join('');
+}
+
+function qkAdd(btn) {
+  // Ripple
+  const rip = document.createElement('div');
+  rip.className = 'ripple';
+  rip.style.left = '50%'; rip.style.top = '50%';
+  btn.appendChild(rip);
+  setTimeout(function(){ rip.remove(); }, 400);
+
+  if (btn.dataset.weighable === '1') {
+    // delegate to prod-btn in grid if exists, else use btn directly
+    const pb = document.getElementById('pb-'+btn.dataset.id);
+    if (pb) { addProduct(pb); } else { _weighBtn = btn; document.getElementById('weightProductName').textContent = btn.dataset.name; document.getElementById('weightUnit').textContent = btn.dataset.unit||'kg'; const wi=document.getElementById('weightInput'); wi.value=''; document.getElementById('weightModal').classList.add('show'); setTimeout(function(){wi.focus();},80); }
+    return;
+  }
+
+  const id = btn.dataset.id, name = btn.dataset.name;
+  const price = parseFloat(btn.dataset.price), tax = parseFloat(btn.dataset.tax);
+  if (basket[id]) { basket[id].qty += 1; }
+  else { basket[id] = { name, price, tax, qty: 1 }; }
+
+  updateQtyBadge(id);
+  updateQkBadge(id);
+  renderBasket();
+}
+
+function updateQkBadge(id) {
+  const b = document.getElementById('qkb-'+id);
+  if (!b) return;
+  const qty = basket[id]?.qty || 0;
+  b.textContent = qty;
+  b.classList.toggle('show', qty > 0);
+}
+
+// Patch clearBasket to also clear qk badges
+const _origClearBasket = clearBasket;
+clearBasket = function() {
+  _origClearBasket();
+  document.querySelectorAll('.qk-badge').forEach(function(b){ b.textContent='0'; b.classList.remove('show'); });
+};
+
+// Patch removeItem to also update qk badge
+const _origRemoveItem = removeItem;
+removeItem = function(id) {
+  _origRemoveItem(id);
+  updateQkBadge(id);
+};
+
+// Patch changeQty to also update qk badge
+const _origChangeQty = changeQty;
+changeQty = function(id, delta) {
+  _origChangeQty(id, delta);
+  updateQkBadge(id);
+};
+
+// Init quick keys on load
+document.addEventListener('DOMContentLoaded', function(){
+  buildQuickKeys('');
+});
+// fallback if DOMContentLoaded already fired
+if (document.readyState !== 'loading') buildQuickKeys('');
+
+function filterCat(el, cat) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  buildQuickKeys(cat);
+  applyFilter();
+}
+
+function filterProducts(q) {
+  currentQ = q.toLowerCase();
+  applyFilter();
+}
+
+function applyFilter() {
+  document.querySelectorAll('.prod-btn').forEach(btn => {
+    const name = btn.dataset.name.toLowerCase();
+    const cat  = btn.dataset.cat;
+    const matchCat = !currentCat || cat === currentCat;
+    const matchQ   = !currentQ   || name.includes(currentQ);
+    btn.style.display = (matchCat && matchQ) ? '' : 'none';
+  });
+}
+
+// ── Basket ─────────────────────────────────────────────────────────────────────
+let basket = {};   // { id: {name, price, tax, qty} }
+let lastReceiptUrl = '';
+
+let _weighBtn = null;
+
+function addProduct(btn) {
+  // Ripple effect
+  const rect = btn.getBoundingClientRect();
+  const rip  = document.createElement('div');
+  rip.className = 'ripple';
+  rip.style.left = (event.clientX - rect.left) + 'px';
+  rip.style.top  = (event.clientY - rect.top)  + 'px';
+  btn.appendChild(rip);
+  setTimeout(() => rip.remove(), 400);
+
+  // Weighable item → show weight modal
+  if (btn.dataset.weighable === '1') {
+    _weighBtn = btn;
+    document.getElementById('weightProductName').textContent = btn.dataset.name;
+    document.getElementById('weightUnit').textContent = btn.dataset.unit || 'kg';
+    const wi = document.getElementById('weightInput');
+    wi.value = '';
+    document.getElementById('weightModal').classList.add('show');
+    setTimeout(() => wi.focus(), 80);
+    return;
+  }
+
+  const id    = btn.dataset.id;
+  const name  = btn.dataset.name;
+  const price = parseFloat(btn.dataset.price);
+  const tax   = parseFloat(btn.dataset.tax);
+
+  if (basket[id]) {
+    basket[id].qty += 1;
+  } else {
+    basket[id] = { name, price, tax, qty: 1 };
+  }
+  updateQtyBadge(id);
+  renderBasket();
+}
+
+function confirmWeight() {
+  const qty = parseFloat(document.getElementById('weightInput').value);
+  if (!qty || qty <= 0) { alert('Unesite ispravnu količinu'); return; }
+  const btn   = _weighBtn;
+  const id    = btn.dataset.id;
+  const name  = btn.dataset.name;
+  const price = parseFloat(btn.dataset.price);
+  const tax   = parseFloat(btn.dataset.tax);
+  // For weighable items always create a new line with unique key (timestamp suffix)
+  const key = id + '_w' + Date.now();
+  basket[key] = { name, price, tax, qty: parseFloat(qty.toFixed(3)), item_id: id };
+  document.getElementById('weightModal').classList.remove('show');
+  _weighBtn = null;
+  renderBasket();
+}
+
+function cancelWeight() {
+  document.getElementById('weightModal').classList.remove('show');
+  _weighBtn = null;
+}
+
+function updateQtyBadge(id) {
+  const badge = document.getElementById('qb-' + id);
+  if (!badge) return;
+  const qty = basket[id]?.qty || 0;
+  badge.textContent = qty;
+  badge.classList.toggle('show', qty > 0);
+}
+
+function changeQty(id, delta) {
+  if (!basket[id]) return;
+  basket[id].qty += delta;
+  if (basket[id].qty <= 0) delete basket[id];
+  updateQtyBadge(id);
+  renderBasket();
+}
+
+function removeItem(id) {
+  delete basket[id];
+  updateQtyBadge(id);
+  renderBasket();
+}
+
+function renderBasket() {
+  const list  = document.getElementById('basketList');
+  const empty = document.getElementById('basketEmpty');
+  const ids   = Object.keys(basket);
+
+  if (!ids.length) {
+    list.innerHTML = '<div class="basket-empty" id="basketEmpty">Dodajte artiklе klikom ↑</div>';
+    setTotals(0, 0, 0);
+    setPayEnabled(false);
+    return;
+  }
+
+  empty?.remove();
+  let subtotal = 0, tax = 0;
+  list.innerHTML = ids.map(id => {
+    const item  = basket[id];
+    const line  = item.price * item.qty;
+    const taxAmt = line * item.tax / 100;
+    subtotal += line;
+    tax      += taxAmt;
+    return `<div class="b-row">
+      <div class="b-name" title="${item.name}">${item.name}</div>
+      <div class="b-qty-ctrl">
+        <button class="bq-btn" onclick="changeQty('${id}',-1)">−</button>
+        <span class="b-qty">${item.qty}</span>
+        <button class="bq-btn" onclick="changeQty('${id}',1)">+</button>
+      </div>
+      <div class="b-price">€${(item.price * item.qty).toFixed(2)}</div>
+      <button class="b-del" onclick="removeItem('${id}')">✕</button>
+    </div>`;
+  }).join('');
+
+  setTotals(subtotal, tax, subtotal + tax);
+  setPayEnabled(true);
+  calcChange();
+}
+
+function setTotals(neto, pdv, total) {
+  document.getElementById('tNeto').textContent  = '€' + neto.toFixed(2);
+  document.getElementById('tPdv').textContent   = '€' + pdv.toFixed(2);
+  document.getElementById('tTotal').textContent = '€' + total.toFixed(2);
+  window._total = total;
+}
+
+function setPayEnabled(en) {
+  document.getElementById('payCash').disabled = !en;
+  document.getElementById('payCard').disabled = !en;
+  document.getElementById('payBon').disabled = !en;
+  document.getElementById('tipToggleBtn').disabled = !en;
+  document.getElementById('pfandBtn').disabled = !en;
+}
+
+function clearBasket() {
+  Object.keys(basket).forEach(id => updateQtyBadge(id));
+  basket = {};
+  renderBasket();
+}
+
+// ── Cash calculation ──────────────────────────────────────────────────────────
+function setExact() {
+  document.getElementById('cashAmt').value = (window._total || 0).toFixed(2);
+  calcChange();
+}
+function addCash(n) {
+  const cur = parseFloat(document.getElementById('cashAmt').value) || 0;
+  document.getElementById('cashAmt').value = (cur + n).toFixed(2);
+  calcChange();
+}
+function calcChange() {
+  const paid  = parseFloat(document.getElementById('cashAmt').value) || 0;
+  const total = window._total || 0;
+  const change = Math.max(0, paid - total);
+  const row   = document.getElementById('changeRow');
+  document.getElementById('changeVal').textContent = '€' + change.toFixed(2);
+  row.classList.toggle('show', paid > total + 0.001);
+}
+
+// ── Payment ────────────────────────────────────────────────────────────────────
+async function pay(method) {
+  if (!SESSION_ID) { alert('Nema aktivne smjene!'); return; }
+  const ids = Object.keys(basket);
+  if (!ids.length) return;
+
+  const btn = document.getElementById(method === 'CASH' ? 'payCash' : 'payCard');
+  if (btn.dataset.submitting === '1') return;
+  btn.dataset.submitting = '1';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const amtPaid = method === 'CASH'
+    ? (parseFloat(document.getElementById('cashAmt').value) || window._total)
+    : window._total;
+
+  const items = buildItemsPayload();
+
+  try {
+    const res = await fetch(`/pos/session/${SESSION_ID}/quick-pay/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({
+        items, method,
+        amount_paid: amtPaid,
+        tip_amount: window._tip || 0,
+        cashier: window._currentCashier || '',
+      }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      lastReceiptUrl = data.print_url || '';
+      const change = method === 'CASH' ? Math.max(0, amtPaid - parseFloat(data.total)) : 0;
+      showSuccess(data.receipt_number, data.total, change);
+      clearBasket();
+    } else {
+      alert('Greška: ' + (data.error || 'nepoznata'));
+    }
+  } catch (e) {
+    // Offline fallback — spremi lokalno
+    if (!navigator.onLine && window.queueOfflineSale) {
+      var saleData = {
+        _url: '/pos/session/' + SESSION_ID + '/quick-pay/',
+        items: items, method: method,
+        amount_paid: amtPaid,
+        tip_amount: window._tip || 0,
+        cashier: window._currentCashier || '',
+        cashier_id: window._currentCashierId || '',
+      };
+      var offId = window.queueOfflineSale(saleData);
+      showSuccess('OFF', parseFloat(window._total).toFixed(2), 0);
+      clearBasket();
+    } else {
+      alert('Greška veze. Pokušajte ponovo.');
+    }
+  } finally {
+    btn.dataset.submitting = '';
+    btn.disabled = false;
+    btn.innerHTML = method === 'CASH' ? '💵 GOTOVINA' : '💳 KARTICA';
+  }
+}
+
+// ── Success overlay ────────────────────────────────────────────────────────────
+function showSuccess(num, total, change) {
+  document.getElementById('sucTotal').textContent  = '€' + parseFloat(total).toFixed(2);
+  document.getElementById('sucChange').textContent = change > 0.001 ? 'Kusur: €' + change.toFixed(2) : '';
+  document.getElementById('sucNum').textContent    = 'Bon #' + num;
+  document.getElementById('successOverlay').classList.add('show');
+  setTimeout(closeSuccess, 4000);
+}
+
+function closeSuccess() {
+  document.getElementById('successOverlay').classList.remove('show');
+  document.getElementById('cashAmt').value = '';
+  document.getElementById('changeRow').classList.remove('show');
+}
+
+function printLast() {
+  if (lastReceiptUrl) window.open(lastReceiptUrl, '_blank');
+}
+
+// ── Cashier profiles ───────────────────────────────────────────────────────────
+// tip/pfand/voucher injected
+window._tip = 0;
+
+function toggleTip() {
+  const row = document.getElementById("tipRow");
+  const btn = document.getElementById("tipToggleBtn");
+  const hidden = row.classList.toggle("hidden");
+  btn.classList.toggle("active", !hidden);
+  if (hidden) clearTip();
+}
+
+function setTipPct(pct) {
+  document.querySelectorAll(".tip-pct-btn").forEach(b => b.classList.remove("active"));
+  if (event && event.target) event.target.classList.add("active");
+  document.getElementById("tipCustom").value = "";
+  window._tip = Math.round((window._total || 0) * pct / 100 * 100) / 100;
+  updateTipDisplay();
+}
+
+function setTipCustom(val) {
+  document.querySelectorAll(".tip-pct-btn").forEach(b => b.classList.remove("active"));
+  window._tip = Math.max(0, parseFloat(val) || 0);
+  updateTipDisplay();
+}
+
+function updateTipDisplay() {
+  const el = document.getElementById("tipVal");
+  if (window._tip > 0) { el.textContent = "+ €" + window._tip.toFixed(2); }
+  else { el.textContent = ""; }
+}
+
+function clearTip() {
+  window._tip = 0;
+  document.querySelectorAll(".tip-pct-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tipCustom").value = "";
+  updateTipDisplay();
+}
+
+let _pfandItems = null;
+
+async function openPfandModal() {
+  document.getElementById("pfandModal").classList.add("show");
+  if (_pfandItems === null) {
+    const res = await fetch("/pos/api/pfand-items/");
+    const data = await res.json();
+    _pfandItems = data.items || [];
+  }
+  renderPfandList();
+}
+
+function closePfandModal() {
+  document.getElementById("pfandModal").classList.remove("show");
+}
+
+function renderPfandList() {
+  const el = document.getElementById("pfandList");
+  if (!_pfandItems.length) {
+    el.innerHTML = "<div style=\"color:var(--muted);font-size:.85rem;text-align:center;padding:1rem\">Nema pfand artikala.</div>";
+    return;
+  }
+  el.innerHTML = _pfandItems.map(it => "<div class=\"pfand-item-row\">" +
+    "<div style=\"flex:1;font-size:.85rem\">" + it.name + "</div>" +
+    "<div style=\"color:var(--red);font-size:.82rem;margin-right:.5rem\">-€" + parseFloat(it.unit_price).toFixed(2) + "</div>" +
+    "<button class=\"ex-btn\" onclick=\"addPfandReturn(" + it.id + ",'" + it.name.replace(/'/g, "\'") + "'," + it.unit_price + ")\">Dodaj</button>" +
+    "</div>").join("");
+}
+
+function addPfandReturn(id, name, price) {
+  const key = "pfand_" + id;
+  if (basket[key]) { basket[key].qty++; }
+  else {
+    basket[key] = { id: String(id), name: "↩ POVRAT: " + name,
+      price: -Math.abs(parseFloat(price)), tax: 0, qty: 1, is_pfand_return: true };
+  }
+  renderBasket();
+  closePfandModal();
+}
+
+let _voucherData = null;
+
+function openVoucherModal() {
+  document.getElementById("voucherModal").classList.add("show");
+  document.getElementById("voucherCodeInput").value = "";
+  document.getElementById("voucherInfo").textContent = "";
+  const splitEl = document.getElementById("voucherAmountInput");
+  if (splitEl) splitEl.value = "";
+  document.getElementById("voucherPayBtn").style.display = "none";
+  document.getElementById("voucherCheckBtn").style.display = "";
+  document.getElementById("voucherSplitSection").style.display = "none";
+  _voucherData = null;
+  setTimeout(() => document.getElementById("voucherCodeInput").focus(), 100);
+}
+
+function closeVoucherModal() {
+  document.getElementById("voucherModal").classList.remove("show");
+}
+
+async function checkVoucher() {
+  const code = document.getElementById("voucherCodeInput").value.trim();
+  if (!code) return;
+  const info = document.getElementById("voucherInfo");
+  info.textContent = "Provjera...";
+  try {
+    const res = await fetch("/pos/api/voucher/check/?code=" + encodeURIComponent(code));
+    const data = await res.json();
+    if (data.ok && data.is_usable) {
+      const rem = parseFloat(data.remaining);
+      const total = window._total || 0;
+      _voucherData = data;
+      info.style.color = "var(--green)";
+      info.textContent = "Vaucer " + data.code + ": " + rem.toFixed(2) + " € preostalo";
+      document.getElementById("voucherPayBtn").style.display = "";
+      document.getElementById("voucherCheckBtn").style.display = "none";
+      if (rem < total - 0.001) {
+        document.getElementById("voucherSplitSection").style.display = "";
+        document.getElementById("voucherAmountInput").value = rem.toFixed(2);
+      } else {
+        document.getElementById("voucherSplitSection").style.display = "none";
+      }
+    } else {
+      _voucherData = null;
+      info.style.color = "var(--red)";
+      if (data.is_expired) info.textContent = "Vaucer je istekao.";
+      else if (!data.is_active) info.textContent = "Vaucer je vec iskoristen.";
+      else info.textContent = data.error || "Vaucer nije pronaden.";
+    }
+  } catch (e) {
+    info.style.color = "var(--red)";
+    info.textContent = "Greska veze.";
+  }
+}
+
+function buildItemsPayload() {
+  return Object.entries(basket).map(([id, item]) => {
+    const obj = { id: item.id, name: item.name, price: item.price, tax: item.tax, qty: item.qty };
+    if (item.is_pfand_return) obj.is_pfand_return = true;
+    return obj;
+  });
+}
+
+async function payWithVoucher() {
+  if (!_voucherData) return;
+  const code = _voucherData.code;
+  const rem = parseFloat(_voucherData.remaining);
+  const total = window._total || 0;
+  const splitSection = document.getElementById("voucherSplitSection");
+  const splitEl = document.getElementById("voucherAmountInput");
+  const voucherAmt = (splitSection.style.display !== "none" && splitEl)
+    ? (parseFloat(splitEl.value) || rem) : Math.min(rem, total);
+  closeVoucherModal();
+  const btn = document.getElementById("payBon");
+  if (btn.dataset.submitting === "1") return;
+  btn.dataset.submitting = "1";
+  btn.disabled = true;
+  btn.innerHTML = "<span class=\"spinner\"></span>";
+  const items = buildItemsPayload();
+  try {
+    const res = await fetch("/pos/session/" + SESSION_ID + "/quick-pay/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+      body: JSON.stringify({ items, method: "VOUCHER", amount_paid: total,
+        voucher_code: code, voucher_amount: voucherAmt, remainder_method: "CASH",
+        tip_amount: window._tip || 0, cashier: window._currentCashier || "" }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      lastReceiptUrl = data.print_url || "";
+      showSuccess(data.receipt_number, data.total, 0);
+      clearBasket(); clearTip();
+    } else { alert("Greska: " + (data.error || "nepoznata")); }
+  } catch (e) { alert("Greska veze."); }
+  finally {
+    btn.dataset.submitting = "";
+    btn.disabled = false;
+    btn.innerHTML = "🎫 BON";
+  }
+}
+
+window._currentCashier = '';
+const CASHIER_KEY = 'fina_cashiers_{{ terminal.id }}';
+
+function loadCashiers() {
+  const saved = JSON.parse(localStorage.getItem(CASHIER_KEY) || '["Blagajnik 1"]');
+  const btns = document.getElementById('cashierBtns');
+  btns.innerHTML = saved.map((name, i) =>
+    `<button class="cashier-btn ${i===0?'active':''}" onclick="selectCashier(this,'${name.replace(/'/g,"\\'")}')">${name}</button>`
+  ).join('');
+  if (saved[0]) selectCashier(btns.querySelector('.cashier-btn.active'), saved[0]);
+}
+
+function selectCashier(el, name) {
+  document.querySelectorAll('.cashier-btn').forEach(b => b.classList.remove('active'));
+  el?.classList.add('active');
+  window._currentCashier = name;
+}
+
+function addCashier() {
+  const name = prompt('Ime novog blagajnika:');
+  if (!name?.trim()) return;
+  const saved = JSON.parse(localStorage.getItem(CASHIER_KEY) || '["Blagajnik 1"]');
+  if (!saved.includes(name.trim())) {
+    saved.push(name.trim());
+    localStorage.setItem(CASHIER_KEY, JSON.stringify(saved));
+  }
+  loadCashiers();
+}
+
+loadCashiers();
+</script>
+
+<!-- ── Fiscal Shield Widget ────────────────────────────────────────────────── -->
+<div id="fiscal-shield" style="position:fixed;bottom:20px;right:20px;z-index:9999;cursor:pointer"
+     onclick="window.location.href='/pos/fiscal/room/'" title="Fiskalna soba">
+  <div id="shield-ring" style="width:48px;height:48px;background:#1a1a1a;border:2px solid #c9a84c;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(201,168,76,.35);transition:all .3s">
+    <span id="shield-dot" style="width:10px;height:10px;background:#c9a84c;border-radius:50%;display:block"></span>
+  </div>
+  <div id="shield-badge" style="position:absolute;right:54px;bottom:12px;background:#c9a84c;color:#000;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:800;white-space:nowrap;display:none;box-shadow:0 2px 6px rgba(0,0,0,.4)">0 ČEKA</div>
+</div>
+<style>
+@keyframes pulse-gold{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes pulse-red{0%,100%{opacity:.6}50%{opacity:1}}
+.shield-ok{animation:pulse-gold 3s infinite}
+.shield-warn{animation:pulse-red .6s infinite;background:#ef4444 !important;box-shadow:0 0 16px rgba(239,68,68,.6) !important}
+</style>
+<script>
+(function shieldInit(){
+  function updateShield(){
+    fetch('/pos/fiscal/status-api/')
+      .then(r=>r.json())
+      .then(d=>{
+        const dot=document.getElementById('shield-dot');
+        const ring=document.getElementById('shield-ring');
+        const badge=document.getElementById('shield-badge');
+        if(!dot) return;
+        if(d.pending>0){
+          dot.className='shield-warn';
+          ring.style.borderColor='#ef4444';
+          badge.textContent=d.pending+' ČEKA';
+          badge.style.background='#ef4444';
+          badge.style.display='block';
+        } else {
+          dot.className='shield-ok';
+          ring.style.borderColor='#c9a84c';
+          badge.style.display='none';
+        }
+      }).catch(()=>{});
+  }
+  updateShield();
+  setInterval(updateShield, 15000);
+})();
+</script>
+
+
+<!-- Barcode Scanner Overlay -->
+<div id="scannerOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95)">
+  <div style="max-width:500px;margin:0 auto;padding:20px;text-align:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="color:#c9a84c;font-weight:800;font-size:1.1rem">Skeniraj barkod</span>
+      <button onclick="closeScanner()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer">&times;</button>
+    </div>
+    <div id="scannerVideo" style="width:100%;border-radius:12px;overflow:hidden;border:3px solid #c9a84c"></div>
+    <div id="scannerResult" style="margin-top:12px;color:#22c55e;font-weight:700;font-size:1rem"></div>
+    <div style="margin-top:8px;color:#94a3b8;font-size:.8rem">Usmjeri kameru na barkod artikla</div>
+    <div style="margin-top:16px;display:flex;gap:6px">
+      <input type="text" id="manualBarcode" placeholder="Ili unesi barkod rucno..." style="flex:1;padding:10px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:1rem;text-align:center" onkeydown="if(event.key==='Enter')manualLookup()">
+      <button onclick="manualLookup()" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer">OK</button>
+    </div>
+  </div>
+</div>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>
+<script>
+var html5Scanner = null;
+function openScanner() {
+  document.getElementById("scannerOverlay").style.display = "block";
+  document.getElementById("scannerResult").textContent = "";
+  document.getElementById("manualBarcode").value = "";
+  html5Scanner = new Html5Qrcode("scannerVideo");
+  html5Scanner.start(
+    { facingMode: "environment" },
+    { fps: 15, qrbox: { width: 280, height: 150 }, aspectRatio: 1.5,
+      formatsToSupport: [0,1,2,3,6,7] },
+    function(code) { onBarcodeScanned(code); },
+    function() {}
+  ).catch(function(e) {
+    document.getElementById("scannerResult").textContent = "Kamera: " + e;
+    document.getElementById("scannerResult").style.color = "#ef4444";
+  });
+}
+function closeScanner() {
+  document.getElementById("scannerOverlay").style.display = "none";
+  if (html5Scanner) { html5Scanner.stop().catch(function(){}); html5Scanner = null; }
+}
+function onBarcodeScanned(code) {
+  document.getElementById("scannerResult").textContent = "Skenirano: " + code;
+  if (html5Scanner) html5Scanner.stop().catch(function(){});
+  fetch("/pos/api/barcode/?barcode=" + encodeURIComponent(code))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.id) {
+        var btn = document.getElementById("pb-" + data.id);
+        if (btn) { addProduct(btn); }
+        document.getElementById("scannerResult").textContent = "Dodano: " + (data.name || code);
+        document.getElementById("scannerResult").style.color = "#22c55e";
+        setTimeout(function() { resumeScan(); }, 1200);
+      } else {
+        document.getElementById("scannerResult").textContent = "Nepoznat barkod: " + code;
+        document.getElementById("scannerResult").style.color = "#ef4444";
+        setTimeout(function() { resumeScan(); }, 2000);
+      }
+    }).catch(function() {
+      document.getElementById("scannerResult").textContent = "Greska: " + code;
+      document.getElementById("scannerResult").style.color = "#ef4444";
+    });
+}
+function resumeScan() {
+  if (!document.getElementById("scannerOverlay").style.display || document.getElementById("scannerOverlay").style.display === "none") return;
+  document.getElementById("scannerResult").textContent = "";
+  html5Scanner = new Html5Qrcode("scannerVideo");
+  html5Scanner.start({ facingMode: "environment" },
+    { fps: 15, qrbox: { width: 280, height: 150 }, aspectRatio: 1.5, formatsToSupport: [0,1,2,3,6,7] },
+    function(c) { onBarcodeScanned(c); }, function() {}
+  ).catch(function(){});
+}
+function manualLookup() {
+  var code = document.getElementById("manualBarcode").value.trim();
+  if (code) onBarcodeScanned(code);
+}
+document.addEventListener("keydown", function(e) { if (e.key === "F2") { e.preventDefault(); openScanner(); } });
+<\/script>
+
+{% endblock %}

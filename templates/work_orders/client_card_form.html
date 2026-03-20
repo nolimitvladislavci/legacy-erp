@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if card %}Uredi karton{% else %}Novi karton klijenta{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width:750px">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-id-card me-2 text-info"></i>
+      {% if card %}Uredi: {{ card }}{% else %}Novi karton klijenta{% endif %}
+    </h4>
+    <a href="{% url 'work_orders:client_card_list' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Natrag
+    </a>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="card bg-dark border-secondary">
+      <div class="card-body">
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Klijent *</label>
+            <select name="client" class="form-select form-select-sm" required>
+              <option value="">— Odaberi —</option>
+              {% for c in clients %}
+                <option value="{{ c.pk }}" {% if card and card.client_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Vrsta kartona</label>
+            <select name="card_type" class="form-select form-select-sm" id="card-type-sel"
+                    onchange="showCardSection(this.value)">
+              {% for val,label in CARD_TYPES %}
+                <option value="{{ val }}" {% if card and card.card_type == val %}selected{% elif not card and val == 'general' %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Optics section -->
+        <div id="section-optics" class="card bg-dark border-secondary mb-3 d-none">
+          <div class="card-header text-info fw-bold small">Optičarski podaci — dioptrija</div>
+          <div class="card-body">
+            <div class="row g-2">
+              <div class="col-12"><strong class="text-muted small">DESNO OKO</strong></div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">Sfero (sph)</label>
+                <input type="number" name="sphere_right" class="form-control form-control-sm"
+                       value="{{ card.sphere_right|default:'' }}" step="0.25">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">Cilindar (cyl)</label>
+                <input type="number" name="cylinder_right" class="form-control form-control-sm"
+                       value="{{ card.cylinder_right|default:'' }}" step="0.25">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">Os (axis)</label>
+                <input type="number" name="axis_right" class="form-control form-control-sm"
+                       value="{{ card.axis_right|default:'' }}" min="0" max="180">
+              </div>
+              <div class="col-12 mt-2"><strong class="text-muted small">LIJEVO OKO</strong></div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">Sfero (sph)</label>
+                <input type="number" name="sphere_left" class="form-control form-control-sm"
+                       value="{{ card.sphere_left|default:'' }}" step="0.25">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">Cilindar (cyl)</label>
+                <input type="number" name="cylinder_left" class="form-control form-control-sm"
+                       value="{{ card.cylinder_left|default:'' }}" step="0.25">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">Os (axis)</label>
+                <input type="number" name="axis_left" class="form-control form-control-sm"
+                       value="{{ card.axis_left|default:'' }}" min="0" max="180">
+              </div>
+              <div class="col-12 mt-2"><strong class="text-muted small">OSTALO</strong></div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">PD (mm)</label>
+                <input type="number" name="pd" class="form-control form-control-sm"
+                       value="{{ card.pd|default:'' }}" step="0.5">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label form-label-sm">ADD</label>
+                <input type="number" name="add_power" class="form-control form-control-sm"
+                       value="{{ card.add_power|default:'' }}" step="0.25">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hair/cosmetics section -->
+        <div id="section-hair" class="card bg-dark border-secondary mb-3 d-none">
+          <div class="card-header text-info fw-bold small">Frizerski/kozmetički podaci</div>
+          <div class="card-body">
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="form-label">Tip kose</label>
+                <input type="text" name="hair_type" class="form-control form-control-sm"
+                       value="{{ card.hair_type|default:'' }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Alergije</label>
+                <textarea name="allergies" class="form-control form-control-sm" rows="2">{{ card.allergies|default:'' }}</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- General -->
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Zadnji posjet</label>
+            <input type="date" name="last_visit" class="form-control form-control-sm"
+                   value="{{ card.last_visit|date:'Y-m-d'|default:'' }}">
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="gdpr_consent" id="gdpr"
+                     {% if card and card.gdpr_consent %}checked{% endif %}>
+              <label class="form-check-label" for="gdpr">GDPR suglasnost</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Napomene</label>
+            <textarea name="notes" class="form-control form-control-sm" rows="2">{{ card.notes|default:'' }}</textarea>
+          </div>
+        </div>
+
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{% url 'work_orders:client_card_list' %}" class="btn btn-secondary btn-sm">Odustani</a>
+        <button type="submit" class="btn btn-info btn-sm">
+          <i class="fas fa-save me-1"></i>{% if card %}Spremi{% else %}Kreiraj{% endif %}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+function showCardSection(val) {
+  document.getElementById('section-optics').classList.add('d-none');
+  document.getElementById('section-hair').classList.add('d-none');
+  if (val === 'optics') document.getElementById('section-optics').classList.remove('d-none');
+  if (val === 'hair' || val === 'cosmetics') document.getElementById('section-hair').classList.remove('d-none');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('card-type-sel');
+  if (sel) showCardSection(sel.value);
+});
+</script>
+{% endblock %}

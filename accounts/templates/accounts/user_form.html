@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if target_user.pk %}Uredi{% else %}Novi{% endif %} korisnik{% endblock %}
+{% block page_title %}👤 {% if target_user.pk %}Uredi korisnika: {{ target_user.username }}{% else %}Novi korisnik{% endif %}{% endblock %}
+
+{% block content %}
+<div class="stat-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">{% trans "Korisničko ime" %}</label>
+                <input type="text" name="username" class="form-control" value="{{ target_user.username }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">{% trans "Email" %}</label>
+                <input type="email" name="email" class="form-control" value="{{ target_user.email }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">{% trans "Ime" %}</label>
+                <input type="text" name="first_name" class="form-control" value="{{ target_user.first_name }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">{% trans "Prezime" %}</label>
+                <input type="text" name="last_name" class="form-control" value="{{ target_user.last_name }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">{% trans "Nova lozinka (ostavi prazno za zadržati)" %}</label>
+                <div style="position:relative">
+                    <input type="password" name="password" id="pwdField" class="form-control" style="padding-right:40px">
+                    <button type="button" onclick="var f=document.getElementById('pwdField'),i=document.getElementById('pwdIcon');if(f.type==='password'){f.type='text';i.className='fas fa-eye-slash'}else{f.type='password';i.className='fas fa-eye'}" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#6c757d;font-size:16px;padding:0">
+                        <i class="fas fa-eye" id="pwdIcon"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-primary">{% trans "Uloga u sustavu" %}</label>
+                <select name="role" class="form-control border-primary shadow-sm">
+                    <option value="worker" {% if target_user.profile.role == 'worker' %}selected{% endif %}>{% trans "Radnik" %}</option>
+                    <option value="project_manager" {% if target_user.profile.role == 'project_manager' %}selected{% endif %}>{% trans "Voditelj projekta" %}</option>
+                    <option value="company_admin" {% if target_user.profile.role == 'company_admin' %}selected{% endif %}>{% trans "Admin tvrtke" %}</option>
+                    <option value="superadmin" {% if target_user.profile.role == 'superadmin' %}selected{% endif %}>{% trans "Super Administrator" %}</option>
+                    <option value="investor" {% if target_user.profile.role == 'investor' %}selected{% endif %}>{% trans "Investitor" %}</option>
+                    <option value="partner" {% if target_user.profile.role == 'partner' %}selected{% endif %}>{% trans "Partner / Klijent" %}</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">{% trans "Sistemski Status" %}</label>
+                <div class="d-flex gap-3 mt-2">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" name="is_active" class="form-check-input" {% if target_user.is_active %}checked{% endif %}>
+                        <label class="form-check-label">{% trans "Korisnik je aktivan (može se prijaviti)" %}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">{% trans "💾 Spremi promjene" %}</button>
+            <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary">{% trans "Odustani" %}</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

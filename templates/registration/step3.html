@@ -1,0 +1,105 @@
+{% extends 'registration/base_reg.html' %}
+{% load i18n %}
+{% block title %}{% trans "Korisnički račun" %} – LIMIT Connect{% endblock %}
+{% block content %}
+<!-- Step indicator -->
+<div class="step-indicator">
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">Plan</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">{% trans "Tvrtka" %}</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle active">3</div><div class="step-label active">{% trans "Račun" %}</div></div>
+  <div class="step-line"></div>
+  <div class="step-item"><div class="step-circle">4</div><div class="step-label">{% trans "Potvrda" %}</div></div>
+</div>
+
+<div class="reg-card">
+  <div class="reg-card-title">{% trans "Korisnički račun" %}</div>
+  <div class="reg-card-subtitle">{% trans "Ovo će biti vaš administratorski račun." %}</div>
+
+  <form method="post">
+  {% csrf_token %}
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "Ime" %} *</label>
+      <input type="text" name="first_name" value="{{ data.first_name }}" class="reg-input" required>
+      {% if errors.first_name %}<div class="error-msg">{{ errors.first_name }}</div>{% endif %}
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Prezime" %}</label>
+      <input type="text" name="last_name" value="{{ data.last_name }}" class="reg-input">
+    </div>
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "Email" %} *</label>
+      <input type="email" name="email" value="{{ data.email }}" class="reg-input" placeholder="vas@email.com" required>
+      {% if errors.email %}<div class="error-msg">{{ errors.email }}</div>{% endif %}
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Telefon" %}</label>
+      <input type="tel" name="phone" value="{{ data.phone }}" class="reg-input" placeholder="+385 91 1234567">
+    </div>
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "Lozinka" %} *</label>
+      <input type="password" name="password1" id="pw1" class="reg-input" minlength="8" required>
+      {% if errors.password1 %}<div class="error-msg">{{ errors.password1 }}</div>{% endif %}
+      <div id="pw-strength" style="height:4px;border-radius:2px;margin-top:4px;background:var(--border);overflow:hidden">
+        <div id="pw-bar" style="height:100%;width:0;transition:all .3s;border-radius:2px"></div>
+      </div>
+      <div style="margin-top:6px;font-size:.7rem;color:#94a3b8;line-height:1.5">
+        <div id="reqLen" style="color:#94a3b8">&#x2022; {% trans "Najmanje 8 znakova" %}</div>
+        <div id="reqUpper" style="color:#94a3b8">&#x2022; {% trans "Veliko slovo" %} (A-Z)</div>
+        <div id="reqLower" style="color:#94a3b8">&#x2022; {% trans "Malo slovo" %} (a-z)</div>
+        <div id="reqDigit" style="color:#94a3b8">&#x2022; {% trans "Broj" %} (0-9)</div>
+        <div id="reqSpec" style="color:#94a3b8">&#x2022; {% trans "Poseban znak" %} (!@#$%...)</div>
+      </div>
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Potvrdite lozinku" %} *</label>
+      <input type="password" name="password2" id="pw2" class="reg-input" minlength="8" required>
+      {% if errors.password2 %}<div class="error-msg">{{ errors.password2 }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="reg-actions">
+    <a href="{% url 'registration:register_step2' %}" class="reg-btn-outline">← {% trans "Natrag" %}</a>
+    <button type="submit" class="reg-btn">{% trans "Nastavi" %} →</button>
+  </div>
+  </form>
+</div>
+
+<script>
+document.getElementById('pw1').addEventListener('input', function() {
+  var pw = this.value, score = 0;
+  var ok = '#22c55e', no = '#94a3b8';
+
+  var hasLen = pw.length >= 8;
+  var hasUpper = /[A-Z]/.test(pw);
+  var hasLower = /[a-z]/.test(pw);
+  var hasDigit = /[0-9]/.test(pw);
+  var hasSpec = /[^A-Za-z0-9]/.test(pw);
+
+  document.getElementById('reqLen').style.color = hasLen ? ok : no;
+  document.getElementById('reqUpper').style.color = hasUpper ? ok : no;
+  document.getElementById('reqLower').style.color = hasLower ? ok : no;
+  document.getElementById('reqDigit').style.color = hasDigit ? ok : no;
+  document.getElementById('reqSpec').style.color = hasSpec ? ok : no;
+
+  if (hasLen) score++;
+  if (pw.length >= 12) score++;
+  if (hasUpper) score++;
+  if (hasDigit) score++;
+  if (hasSpec) score++;
+  var bar = document.getElementById('pw-bar');
+  var pct = Math.min(score * 20, 100);
+  bar.style.width = pct + '%';
+  bar.style.background = pct < 40 ? '#ef4444' : pct < 70 ? '#f59e0b' : '#22c55e';
+});
+</script>
+{% endblock %}

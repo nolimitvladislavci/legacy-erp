@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Narudzbenice{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Narudzbenice</h2>
+        <a href="{% url 'procurement:create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nova narudzbenica</a>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body"><h5>{{ stats.total }}</h5><small>Ukupno</small></div></div></div>
+        <div class="col-md-3"><div class="card bg-warning text-dark"><div class="card-body"><h5>{{ stats.draft }}</h5><small>Nacrti</small></div></div></div>
+        <div class="col-md-3"><div class="card bg-info text-white"><div class="card-body"><h5>{{ stats.sent }}</h5><small>Poslano</small></div></div></div>
+        <div class="col-md-3"><div class="card bg-danger text-white"><div class="card-body"><h5>{{ stats.unmatched }}</h5><small>Neupareno</small></div></div></div>
+    </div>
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-3">
+                    <select name="status" class="form-select"><option value="">-- Status --</option>
+                        <option value="draft" {% if current_status == 'draft' %}selected{% endif %}>Nacrt</option>
+                        <option value="sent" {% if current_status == 'sent' %}selected{% endif %}>Poslano</option>
+                        <option value="confirmed" {% if current_status == 'confirmed' %}selected{% endif %}>Potvrdjeno</option>
+                        <option value="received" {% if current_status == 'received' %}selected{% endif %}>Isporuceno</option>
+                        <option value="invoiced" {% if current_status == 'invoiced' %}selected{% endif %}>Fakturirano</option>
+                        <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>Otkazano</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="match_status" class="form-select"><option value="">-- Uparivanje --</option>
+                        <option value="unmatched" {% if current_match == 'unmatched' %}selected{% endif %}>Neupareno</option>
+                        <option value="matched" {% if current_match == 'matched' %}selected{% endif %}>Upareno</option>
+                        <option value="mismatch" {% if current_match == 'mismatch' %}selected{% endif %}>Nepodudaranje</option>
+                        <option value="approved" {% if current_match == 'approved' %}selected{% endif %}>Odobreno</option>
+                    </select>
+                </div>
+                <div class="col-md-4"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Pretrazi..."></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-outline-primary w-100">Filtriraj</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Broj</th><th>Dobavljac</th><th>Status</th><th>Prioritet</th><th>Datum</th><th>Ukupno</th><th>Uparivanje</th><th></th></tr></thead>
+                <tbody>
+                {% for po in orders %}
+                <tr>
+                    <td><a href="{% url 'procurement:detail' po.pk %}">{{ po.po_number }}</a></td>
+                    <td>{{ po.supplier|default:"-" }}</td>
+                    <td><span class="badge bg-{% if po.status == 'draft' %}secondary{% elif po.status == 'sent' %}primary{% elif po.status == 'received' %}success{% elif po.status == 'cancelled' %}danger{% else %}info{% endif %}">{{ po.get_status_display }}</span></td>
+                    <td><span class="badge bg-{% if po.priority == 'urgent' %}danger{% elif po.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ po.get_priority_display }}</span></td>
+                    <td>{{ po.order_date }}</td>
+                    <td class="text-end">{{ po.total }} EUR</td>
+                    <td><span class="badge bg-{% if po.match_status == 'matched' %}success{% elif po.match_status == 'mismatch' %}danger{% elif po.match_status == 'approved' %}info{% else %}secondary{% endif %}">{{ po.get_match_status_display }}</span></td>
+                    <td><a href="{% url 'procurement:detail' po.pk %}" class="btn btn-sm btn-outline-primary">Detalji</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted py-4">Nema narudzbenica</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

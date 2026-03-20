@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% block title %}{{ action }}{% endblock %}
+{% block page_title %}{{ action }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n l10n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-boxes me-2 text-info"></i>{{ action }}</h2>
+  <a href="{% url 'inventory:list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+</div>
+<div class="stat-card" style="max-width:700px">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label fw-bold">{% trans "Naziv *" %}</label>
+        <input type="text" name="name" class="form-control" value="{{ item.name|default:'' }}" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">{% trans "SKU / Šifra *" %}</label>
+        <input type="text" name="sku" class="form-control" value="{{ item.sku|default:'' }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Kategorija" %}</label>
+        <select name="category" class="form-select">
+          {% for val,label in category_choices %}
+          <option value="{{ val }}" {% if item.category == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold">{% trans "Jedinica mjere" %}</label>
+        <input type="text" name="unit" class="form-control" value="{{ item.unit|default:'kom' }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold">{% trans "Cijena/jed." %}</label>
+        <input type="number" step="0.01" name="unit_price" class="form-control" value="{{ item.unit_price|default:'0'|unlocalize }}">
+      </div>
+      {% if not item %}
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Početna količina" %}</label>
+        <input type="number" step="0.01" name="quantity" class="form-control" value="0">
+      </div>
+      {% endif %}
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Minimalna količina" %}</label>
+        <input type="number" step="0.01" name="min_quantity" class="form-control" value="{{ item.min_quantity|default:'0'|unlocalize }}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Lokacija" %}</label>
+        <input type="text" name="location" class="form-control" value="{{ item.location|default:'' }}" placeholder="Polica A3, Skladište 2...">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">{% trans "Dobavljač" %}</label>
+        <select name="supplier" class="form-select">
+          <option value="">--</option>
+          {% for s in suppliers %}
+          <option value="{{ s.pk }}" {% if item.supplier_id == s.pk %}selected{% endif %}>{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-bold">{% trans "Opis" %}</label>
+        <textarea name="description" class="form-control" rows="2">{{ item.description|default:'' }}</textarea>
+      </div>
+      <!-- Slika artikla -->
+      <div class="col-12 mb-3">
+        <label class="form-label">Slika artikla</label>
+        {% if item.image %}
+        <div class="mb-2">
+          <img src="{{ item.image.url }}" alt="{{ item.name }}"
+               style="max-height:120px;border-radius:6px;border:1px solid #444">
+        </div>
+        {% endif %}
+        <input type="file" name="image" class="form-control" accept="image/*">
+      </div>
+      <!-- Webshop -->
+      <div class="col-12 mb-3">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" name="webshop_visible"
+                 id="webshopVisible" {% if item.webshop_visible %}checked{% endif %}>
+          <label class="form-check-label" for="webshopVisible">
+            <i class="fas fa-store me-1"></i>Vidljiv u webshopu
+          </label>
+        </div>
+        <small class="text-muted">Automatski kreira/ažurira webshop proizvod</small>
+      </div>
+      <!-- Vaga (vaganje) -->
+      <div class="col-12 mb-3">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" name="is_weighable"
+                 id="isWeighable" {% if item.is_weighable %}checked{% endif %}>
+          <label class="form-check-label" for="isWeighable">
+            <i class="fas fa-balance-scale me-1"></i>Prodaja na vagu (unos kg/kom)
+          </label>
+        </div>
+        <small class="text-muted">POS ce traziti unos tezine/kolicine pri svakom dodavanju u kosaricu</small>
+      </div>
+      <!-- Kalo -->
+      <div class="col-md-4 mb-3">
+        <label class="form-label fw-semibold">Kalo % <small class="text-muted">(prirodni rastur)</small></label>
+        <div class="input-group">
+          <input type="number" name="kalo_percent" class="form-control"
+                 value="{{ item.kalo_percent|default:'0' }}" min="0" max="100" step="0.01"
+                 placeholder="0.00">
+          <span class="input-group-text">%</span>
+        </div>
+        <small class="text-muted">npr. 2.5% za prirodno sušenje/kalo</small>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>{% trans "Spremi" %}</button>
+        <a href="{% url 'inventory:list' %}" class="btn btn-outline-secondary ms-2">{% trans "Odustani" %}</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

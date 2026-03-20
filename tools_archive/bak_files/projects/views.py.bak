@@ -1,0 +1,51 @@
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Project
+from worktime.models import TimeEntry
+from django.db.models import Sum
+
+@login_required
+def index(request):
+    projects = Project.objects.all().order_by('-created_at')
+    return render(request, 'invoicing/projects_index.html', {'projects': projects})
+
+@login_required
+def project_detail(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    
+    # Profesionalno povlačenje sati iz drugog modula (worktime)
+    # Tražimo po kodu projekta jer su podaci tamo povezani sa starim Project modelom
+    work_entries = TimeEntry.objects.filter(project__code=project.code).order_by('-date')
+    total_hours = work_entries.aggregate(Sum('duration'))['duration__sum'] or 0
+    
+    context = {
+        'project': project,
+        'work_entries': work_entries[:10],  # Zadnjih 10 unosa radi brzine
+        'total_hours': total_hours,
+    }
+    return render(request, 'invoicing/project_detail.html', context)
+
+# API ViewSets ostaju za mobilnu aplikaciju/JS
+from rest_framework import viewsets
+from .serializers import ProjectSerializer, ProjectPhotoSerializer
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+
+
+class ProjectPhotoViewSet(viewsets.ModelViewSet):
+    # Pretpostavljamo da model ima polje 'image' ili 'file'
+    # Koristimo dynamic import unutar metode da izbjegnemo circular dependency
+    def get_queryset(self):
+        from .models import ProjectPhoto
+        return ProjectPhoto.objects.all()
+    
+    def get_serializer_class(self):
+        from .serializers import ProjectPhotoSerializer
+        return ProjectPhotoSerializer
+
+@login_required
+def upload_photo(request):
+    # Privremeni placeholder koji omogućuje sustavu da se podigne
+    from django.http import JsonResponse
+    return JsonResponse({'status': 'Function pending restoration'})

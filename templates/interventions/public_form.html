@@ -1,0 +1,95 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% trans "Hitna intervencija – Prijava" %}</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#0f172a;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem}
+.header-brand{font-weight:700;font-size:1.1rem;color:#c9a84c}
+.header-sub{font-size:.8rem;color:#94a3b8}
+.container{max-width:560px;margin:2rem auto;padding:0 1rem;width:100%}
+.card{background:#fff;border-radius:12px;padding:2rem;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card-title{font-size:1.2rem;font-weight:700;margin-bottom:.25rem;color:#0f172a}
+.card-sub{font-size:.85rem;color:#64748b;margin-bottom:1.5rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#64748b;margin-bottom:.4rem}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.65rem .9rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.95rem;font-family:inherit;background:#fff;color:#0f172a;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#c9a84c;box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.btn-submit{width:100%;padding:.9rem;background:#c9a84c;color:#0f172a;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:background .15s;margin-top:.5rem}
+.btn-submit:hover{background:#e8c96a}
+.error-box{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:.75rem 1rem;color:#b91c1c;font-size:.88rem;margin-bottom:1rem}
+.urgent-badge{display:inline-flex;align-items:center;gap:.4rem;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:.4rem .8rem;font-size:.78rem;font-weight:600;margin-bottom:1.25rem}
+.track-note{font-size:.75rem;color:#64748b;margin-top:1rem;text-align:center;line-height:1.5}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="header-brand">{% trans "Hitna intervencija" %}</div>
+    <div class="header-sub">{% trans "Brza prijava problema" %}</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="urgent-badge">{% trans "🚨 Hitno" %}</div>
+    <div class="card-title">{% trans "Prijava hitne intervencije" %}</div>
+    <div class="card-sub">{% trans "Ispunite formu – odmah šaljemo ekipu." %}</div>
+
+    {% if error %}
+    <div class="error-box">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="">
+      {% csrf_token %}
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>{% trans "Vaše ime *" %}</label>
+          <input type="text" name="client_name" placeholder="Ime i prezime"
+                 value="{{ post.client_name|default:'' }}" required maxlength="200">
+        </div>
+        <div class="form-group">
+          <label>{% trans "Telefon *" %}</label>
+          <input type="tel" name="client_phone" placeholder="+385 91 ..."
+                 value="{{ post.client_phone|default:'' }}" required maxlength="50">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>{% trans "Adresa intervencije *" %}</label>
+        <input type="text" name="address" placeholder="Ulica, kućni broj, grad"
+               value="{{ post.address|default:'' }}" required maxlength="255">
+      </div>
+
+      <div class="form-group">
+        <label>{% trans "Vrsta problema" %}</label>
+        <select name="category">
+          {% for val, lbl in categories %}
+          <option value="{{ val }}" {% if post.category == val %}selected{% endif %}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>{% trans "Kratki opis (neobavezno)" %}</label>
+        <textarea name="description" placeholder="{% trans "Opišite problem ukratko..." %}">{{ post.description|default:'' }}</textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">{% trans "🚨 Prijavi hitnu intervenciju" %}</button>
+    </form>
+
+    <p class="track-note">
+      {% trans "Nakon prijave dobit ćete link za praćenje statusa vaše intervencije u stvarnom vremenu." %}
+    </p>
+  </div>
+</div>
+</body>
+</html>

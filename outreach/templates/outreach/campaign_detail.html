@@ -1,0 +1,131 @@
+{% load i18n %}<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Outreach{% endblock %} – LIMIT CONNECT</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+body{background:#0f172a;color:#e2e8f0;font-family:'Inter',sans-serif}
+.pw{max-width:1200px;margin:0 auto;padding:20px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:20px;margin-bottom:16px}
+.ct{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:12px}
+.sn{font-size:2rem;font-weight:800;color:#c9a84c}
+.sl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.bg{background:#c9a84c;color:#0f172a;border:none;border-radius:10px;padding:8px 18px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;font-size:.85rem}
+.bg:hover{background:#e6c76a;color:#0f172a}
+.bo{background:transparent;border:1.5px solid #334155;color:#94a3b8;border-radius:10px;padding:8px 18px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;font-size:.85rem}
+.bo:hover{border-color:#c9a84c;color:#c9a84c}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl th{color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:1px;font-size:.7rem;padding:8px 10px;border-bottom:1px solid #334155}
+.tbl td{padding:9px 10px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+.tbl tr:hover td{background:#243349}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700}
+.p-neu{background:rgba(100,116,139,.2);color:#94a3b8}
+.p-kontaktiert{background:rgba(59,130,246,.15);color:#60a5fa}
+.p-geantwortet{background:rgba(16,185,129,.15);color:#34d399}
+.p-interessiert{background:rgba(201,168,76,.2);color:#c9a84c}
+.p-klient{background:rgba(34,197,94,.2);color:#22c55e}
+.p-abgelehnt{background:rgba(239,68,68,.15);color:#f87171}
+.p-pending{background:rgba(100,116,139,.2);color:#94a3b8}
+.p-sent{background:rgba(59,130,246,.15);color:#60a5fa}
+.p-follow_up{background:rgba(245,158,11,.15);color:#fbbf24}
+.p-replied{background:rgba(16,185,129,.2);color:#34d399}
+.tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.tb h1{margin:0;font-size:1.3rem;font-weight:800;color:#fff}
+.fb{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.fb select,.fb input{background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:6px 12px;font-size:.82rem}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:.7rem;font-weight:600;color:#94a3b8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:.85rem}
+.fg textarea{min-height:120px;resize:vertical}
+.bc{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#64748b;margin-bottom:18px}
+.bc a{color:#64748b;text-decoration:none}.bc a:hover{color:#c9a84c}
+.ms{margin-bottom:14px}
+.ms .s{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:8px 14px;border-radius:8px;font-size:.84rem;margin-bottom:5px}
+.ms .e{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:8px 14px;border-radius:8px;font-size:.84rem;margin-bottom:5px}
+</style></head>
+<body><div class="pw">
+<div class="bc"><a href="/">{% trans "🏠 Home" %}</a> › <a href="/outreach/">{% trans "Outreach / CRM" %}</a></div>
+{% if messages %}<div class="ms">{% for m in messages %}<div class="{% if 'error' in m.tags %}e{% else %}s{% endif %}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% block bc %} › {{ campaign.name }}{% endblock %}
+{% block content %}
+<div class="tb">
+  <h1>📣 {{ campaign.name }}</h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/outreach/campaign/{{ campaign.pk }}/preview/" class="bo">👁 {% trans "AI Preview" %}</a>
+    <button onclick="document.getElementById('bulkModal').style.display='flex'" class="bg" style="background:#3b82f6">
+      ⚡ {% trans "Bulk Send" %}
+    </button>
+    <a href="/outreach/" class="bo">← {% trans "Zurück" %}</a>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+  <div class="card" style="text-align:center;padding:14px"><div class="sn">{{ campaign.stat_sent }}</div><div class="sl">{% trans "Gesendet" %}</div></div>
+  <div class="card" style="text-align:center;padding:14px"><div class="sn" style="color:#34d399">{{ campaign.stat_replied }}</div><div class="sl">{% trans "Geantwortet" %}</div></div>
+  <div class="card" style="text-align:center;padding:14px"><div class="sn" style="color:#c9a84c">{{ campaign.stat_interested }}</div><div class="sl">{% trans "Interessiert" %}</div></div>
+  <div class="card" style="text-align:center;padding:14px"><div class="sn" style="color:{% if campaign.active %}#22c55e{% else %}#64748b{% endif %}">{% if campaign.active %}✓{% else %}–{% endif %}</div><div class="sl">{% trans "Aktiv" %}</div></div>
+</div>
+<div class="card" style="margin-bottom:14px">
+  <div class="ct">{% trans "📋 E-Mail Vorlage" %}</div>
+  <div style="font-size:.82rem;color:#94a3b8;margin-bottom:8px"><strong>{% trans "Betreff:" %}</strong> {{ campaign.subject_template }}</div>
+  <pre style="font-size:.8rem;color:#cbd5e1;white-space:pre-wrap;background:#0f172a;padding:12px;border-radius:8px;margin:0">{{ campaign.body_template }}</pre>
+</div>
+<div class="card" style="padding:0;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #334155">
+    <div class="ct" style="margin:0">Kontakte ({{ cc_list|length }})</div>
+    <button onclick="document.getElementById('addModal').style.display='flex'" class="bg" style="padding:5px 12px;font-size:.78rem">➕ {% trans "Hinzufügen" %}</button>
+  </div>
+  <table class="tbl"><thead><tr><th>{% trans "Kontakt" %}</th><th>{% trans "E-Mail" %}</th><th>{% trans "Status" %}</th><th>{% trans "Gesendet" %}</th><th></th></tr></thead>
+  <tbody>{% for cc in cc_list %}<tr id="row-{{ cc.pk }}">
+    <td><strong style="color:#fff">{{ cc.contact.display_name }}</strong></td>
+    <td><a href="mailto:{{ cc.contact.email }}" style="color:#60a5fa;text-decoration:none;font-size:.8rem">{{ cc.contact.email }}</a></td>
+    <td><span class="pill p-{{ cc.status }}">{{ cc.get_status_display }}</span></td>
+    <td style="color:#64748b;font-size:.75rem">{{ cc.sent_at|date:"d.m.Y H:i"|default:"–" }}</td>
+    <td>{% if cc.status == 'pending' %}
+      <div style="display:flex;gap:4px;align-items:center">
+        <button onclick="sendOne({{ cc.pk }},this,'email')" class="bg" style="padding:4px 9px;font-size:.72rem" title="Email">📧</button>
+        {% if cc.contact.phone %}<button onclick="sendOne({{ cc.pk }},this,'whatsapp')" class="bg" style="padding:4px 9px;font-size:.72rem;background:#25d366" title="WhatsApp">💬</button>{% endif %}
+      </div>
+    {% elif cc.status == 'sent' %}<span style="color:#64748b;font-size:.74rem">{% trans "✓ Gesendet" %}</span>
+    {% elif cc.status == 'replied' %}<span style="color:#34d399;font-size:.74rem">{% trans "↩ Antwort" %}</span>{% endif %}</td>
+  </tr>{% empty %}
+  <tr><td colspan="5" style="text-align:center;padding:28px;color:#64748b">{% trans "Keine Kontakte." %}</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+<!-- Add contacts modal -->
+<div id="addModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);align-items:center;justify-content:center">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:14px;padding:26px;min-width:440px;max-height:80vh;overflow-y:auto">
+    <h5 style="color:#fff;margin-bottom:14px">{% trans "➕ Kontakte hinzufügen" %}</h5>
+    <form method="post" action="/outreach/campaign/{{ campaign.pk }}/add-contacts/">{% csrf_token %}
+      <div style="max-height:300px;overflow-y:auto;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px;margin-bottom:12px">
+        {% for c in available_contacts %}
+        <label style="display:flex;align-items:center;gap:8px;padding:5px 8px;cursor:pointer;border-radius:6px" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background=''">
+          <input type="checkbox" name="contacts" value="{{ c.pk }}" style="width:auto">
+          <span style="font-size:.82rem">{{ c.firm_name|default:c.name|default:c.email }}{% if c.city %} <span style="color:#64748b">· {{ c.city }}</span>{% endif %}</span>
+        </label>
+        {% empty %}<p style="color:#64748b;font-size:.82rem;padding:6px">{% trans "Keine weiteren Kontakte verfügbar." %}</p>{% endfor %}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="submit" class="bg">{% trans "Hinzufügen" %}</button>
+        <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="bo">{% trans "Schließen" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function getCsrf(){ var c=document.cookie.match(/csrftoken=([^;]+)/); return c?c[1]:''; }
+function sendOne(ccId, btn){
+  btn.disabled=true; btn.textContent='...';
+  fetch('/outreach/campaign/{{ campaign.pk }}/send/',{
+    method:'POST',
+    headers:{'X-CSRFToken':getCsrf(),'Content-Type':'application/x-www-form-urlencoded'},
+    body:'cc_id='+ccId
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      var row=document.getElementById('row-'+ccId);
+      row.cells[2].innerHTML='<span class="pill p-sent">Gesendet</span>';
+      row.cells[4].innerHTML='<span style="color:#64748b;font-size:.74rem">✓ Gesendet</span>';
+    }else{ btn.disabled=false; btn.textContent='▶ Senden'; alert(d.error||'Fehler'); }
+  }).catch(()=>{ btn.disabled=false; btn.textContent='▶ Senden'; });
+}
+</script>{% endblock %}
+</div></body></html>

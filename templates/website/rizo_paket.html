@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<title>FRIŠKO PEKARNICA — Paket za Riza</title>
+<style>
+@page { size: A4; margin: 15mm; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.6; }
+a { color: #7c3aed; text-decoration: underline; }
+
+.header {
+    background: #0a0a0a; color: #fff; padding: 12mm; border-radius: 8pt; margin-bottom: 8mm;
+    text-align: center;
+}
+.header h1 { font-size: 22pt; font-weight: 900; margin-bottom: 2mm; color: #d4a017; }
+.header .sub { font-size: 10pt; color: #94a3b8; }
+.header .date { font-size: 8pt; color: #475569; margin-top: 3mm; }
+
+.section {
+    background: #fff; border: 1pt solid #e2e8f0; border-radius: 8pt;
+    padding: 6mm 8mm; margin-bottom: 6mm;
+}
+.section h2 {
+    font-size: 13pt; font-weight: 700; color: #0f172a; margin-bottom: 3mm;
+    padding-bottom: 2mm; border-bottom: 1pt solid #e2e8f0;
+}
+.section h2 .icon { color: #d4a017; margin-right: 2mm; }
+
+.login-box {
+    background: #f8fafc; border: 1pt solid #e2e8f0; border-left: 3pt solid #d4a017;
+    border-radius: 4pt; padding: 5mm 6mm; margin: 4mm 0;
+    font-family: 'Courier New', monospace; font-size: 10pt;
+}
+.login-box .label { font-family: 'Segoe UI', sans-serif; font-size: 8pt; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+.login-box .value { font-size: 12pt; font-weight: 700; color: #0f172a; }
+
+.link-card {
+    display: flex; align-items: center; gap: 4mm; padding: 3mm 4mm;
+    border-bottom: 0.5pt solid #f1f5f9;
+}
+.link-card:last-child { border-bottom: none; }
+.link-card .num {
+    width: 7mm; height: 7mm; line-height: 7mm; border-radius: 50%;
+    background: #d4a017; color: #fff; font-size: 8pt; font-weight: 800;
+    text-align: center; flex-shrink: 0;
+}
+.link-card .info { flex: 1; }
+.link-card .title { font-weight: 600; font-size: 10pt; }
+.link-card .url { font-size: 8.5pt; color: #7c3aed; word-break: break-all; }
+.link-card .desc { font-size: 8pt; color: #64748b; }
+
+.steps { margin: 4mm 0; }
+.step { display: flex; gap: 3mm; margin-bottom: 3mm; }
+.step .snum {
+    width: 6mm; height: 6mm; line-height: 6mm; border-radius: 50%;
+    background: #e8e0c8; color: #92400e; font-size: 7pt; font-weight: 800;
+    text-align: center; flex-shrink: 0; margin-top: 1mm;
+}
+.step .stxt { font-size: 9.5pt; }
+
+.note {
+    background: #fffbeb; border-left: 3pt solid #d4a017;
+    padding: 4mm 5mm; margin: 4mm 0; font-size: 9pt;
+    border-radius: 0 4pt 4pt 0;
+}
+.note strong { color: #92400e; }
+
+.info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin: 4mm 0;
+}
+.info-item {
+    background: #f8fafc; border: 0.5pt solid #e2e8f0; border-radius: 4pt;
+    padding: 3mm 4mm;
+}
+.info-item .i-label { font-size: 7pt; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+.info-item .i-value { font-size: 10pt; font-weight: 600; color: #0f172a; }
+
+.footer {
+    text-align: center; margin-top: 8mm; padding-top: 4mm;
+    border-top: 0.5pt solid #e2e8f0; font-size: 8pt; color: #94a3b8;
+}
+
+@media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    a { color: #7c3aed !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>FRIŠKO PEKARNICA</h1>
+    <div class="sub">LIMIT Connect &#8212; Tvoj poslovni sustav</div>
+    <div class="date">Pripremio: Ivan Brtan &#183; 17. ožujka 2026.</div>
+</div>
+
+<div class="section">
+    <h2><span class="icon">&#x1F3EA;</span> Podaci o obrtu</h2>
+    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Službeni podaci iz registra &#8212; FRIŠKO PEKARNICA, pekarski obrt, vl. Riz Temaj</p>
+    <div class="info-grid">
+        <div class="info-item"><div class="i-label">Vlasnik</div><div class="i-value">Riz Temaj</div></div>
+        <div class="info-item"><div class="i-label">OIB</div><div class="i-value">05823287665</div></div>
+        <div class="info-item"><div class="i-label">MBS</div><div class="i-value">90454006</div></div>
+        <div class="info-item"><div class="i-label">Djelatnost</div><div class="i-value">C10710 &#8212; Kruh i peciva</div></div>
+        <div class="info-item"><div class="i-label">Adresa</div><div class="i-value">Kralja Zvonimira 94, 31431 Čepin</div></div>
+        <div class="info-item"><div class="i-label">Osnovano</div><div class="i-value">04.03.1999.</div></div>
+        <div class="info-item"><div class="i-label">Telefon</div><div class="i-value">031/381-966</div></div>
+        <div class="info-item"><div class="i-label">Email</div><div class="i-value">pekara.frisko@gmail.com</div></div>
+    </div>
+</div>
+
+<div class="section">
+    <h2><span class="icon">&#x1F511;</span> Pristupni podaci</h2>
+    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Ovim podacima se prijavuješ na sustav. Sačuvaj ih na sigurnom mjestu.</p>
+    <div class="login-box"><div class="label">Web adresa</div><div class="value"><a href="https://limit-connect.com">https://limit-connect.com</a></div></div>
+    <div class="login-box"><div class="label">Korisničko ime</div><div class="value">rizo</div></div>
+    <div class="login-box"><div class="label">Lozinka</div><div class="value">(dogovoreno osobno)</div></div>
+    <div class="login-box"><div class="label">Email u sustavu</div><div class="value">pekara.frisko@gmail.com</div></div>
+    <div class="note"><strong>Važno:</strong> Nakon prve prijave preporučamo promjenu lozinke. Imaš administratorski pristup &#8212; možeš upravljati artiklima, cijenama, zaposlenicima i svim modulima.</div>
+</div>
+
+<div class="section">
+    <h2><span class="icon">&#x1F517;</span> Tvoji linkovi &#8212; klikni za otvaranje</h2>
+    <div class="link-card"><div class="num">1</div><div class="info"><div class="title">Web stranica pekare</div><div class="url"><a href="https://limit-connect.com/frisko-rizo/">https://limit-connect.com/frisko-rizo/</a></div><div class="desc">Tvoja javna stranica &#8212; asortiman, usluge, kontakt, QR kodovi</div></div></div>
+    <div class="link-card"><div class="num">2</div><div class="info"><div class="title">Naruči i pokupi (QR za kupce)</div><div class="url"><a href="https://limit-connect.com/pos/pickup/pekara-frisko/">https://limit-connect.com/pos/pickup/pekara-frisko/</a></div><div class="desc">Kupac skenira QR &#8594; odabere proizvode &#8594; pokupiti svježe. Printaj QR na letak!</div></div></div>
+    <div class="link-card"><div class="num">3</div><div class="info"><div class="title">Uslužno pečenje &#8212; rezervacija termina</div><div class="url"><a href="https://limit-connect.com/appointments/booking/c/pekara-frisko/">https://limit-connect.com/appointments/booking/c/pekara-frisko/</a></div><div class="desc">Kupac rezervira termin za janjetinu, odojak, pite, pizzu... Automatska potvrda.</div></div></div>
+    <div class="link-card"><div class="num">4</div><div class="info"><div class="title">POS blagajna</div><div class="url"><a href="https://limit-connect.com/pos/quick/">https://limit-connect.com/pos/quick/</a></div><div class="desc">Otvori na mobitelu ili tabletu &#8594; skeniraj barkod &#8594; naplati.</div></div></div>
+    <div class="link-card"><div class="num">5</div><div class="info"><div class="title">Webshop &#8212; online prodaja</div><div class="url"><a href="https://limit-connect.com/pos/webshop/pekara-frisko/">https://limit-connect.com/pos/webshop/pekara-frisko/</a></div><div class="desc">Kupci vide artikle i cijene online.</div></div></div>
+</div>
+
+<div class="section">
+    <h2><span class="icon">&#x1F5A8;</span> Letci za print &#8212; otvori i printaj</h2>
+    <p style="font-size:9pt;color:#475569;margin-bottom:3mm">Pripremili smo letke za tvoju pekaru. Otvori link &#8594; Ctrl+P &#8594; Print u boji.</p>
+    <div class="link-card"><div class="num">A3</div><div class="info"><div class="title">Veliki letak za ulazna vrata</div><div class="url"><a href="https://limit-connect.com/frisko-rizo/letak-a3/">https://limit-connect.com/frisko-rizo/letak-a3/</a></div><div class="desc">A3 format &#8212; QR kodovi, usluge s cijenama, asortiman. Za vrata ili izlog.</div></div></div>
+    <div class="link-card"><div class="num">A4</div><div class="info"><div class="title">Interijer letak (bijela pozadina)</div><div class="url"><a href="https://limit-connect.com/frisko-rizo/letak-a4/">https://limit-connect.com/frisko-rizo/letak-a4/</a></div><div class="desc">A4 u boji &#8212; za unutar pekare, pored blagajne, na zidu. Koraci 1-2-3.</div></div></div>
+</div>
+
+<div class="section">
+    <h2><span class="icon">&#x1F680;</span> Kako početi &#8212; 5 koraka</h2>
+    <div class="steps">
+        <div class="step"><div class="snum">1</div><div class="stxt"><strong>Prijavi se</strong> na limit-connect.com s podacima iznad</div></div>
+        <div class="step"><div class="snum">2</div><div class="stxt"><strong>Uploadaj slike</strong> u Galeriju &#8212; proizvodi, pekara, tim (pojavljuju se na webu)</div></div>
+        <div class="step"><div class="snum">3</div><div class="stxt"><strong>Printaj letke</strong> &#8212; A3 za vrata, A4 za svaku lokaciju</div></div>
+        <div class="step"><div class="snum">4</div><div class="stxt"><strong>Otvori POS</strong> na mobitelu &#8212; skeniraj barkod proizvoda, dodaj u bazu</div></div>
+        <div class="step"><div class="snum">5</div><div class="stxt"><strong>Testiraj narudžbu</strong> &#8212; otvori QR link za narudžbu i naruči nešto za probu</div></div>
+    </div>
+    <div class="note"><strong>Podrška:</strong> Ako trebaš pomoć, otvori AI Upravljanje u sidebaru i pošalji upit. AI odgovara odmah. Za složenije stvari &#8212; javi se Ivanu.</div>
+</div>
+
+<div class="section">
+    <h2><span class="icon">&#x1F525;</span> Uslužno pečenje &#8212; cjenik</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:10pt">
+        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Janjetina</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">25 &#8364;</td></tr>
+        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Odojak</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">30 &#8364;</td></tr>
+        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Kolači</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">10 &#8364;</td></tr>
+        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Kruh</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">8 &#8364;</td></tr>
+        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Pite</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">12 &#8364;</td></tr>
+        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Pizza</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;color:#d4a017;font-weight:800;font-size:12pt">15 &#8364;</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2><span class="icon">&#x1F69A;</span> Dostava &#8212; zone i cijene</h2>
+    <p style="font-size:9.5pt;color:#475569;margin-bottom:3mm">Dostava svaki dan 13:00 &#8212; 14:00h</p>
+    <table style="width:100%;border-collapse:collapse;font-size:10pt">
+        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Čepin centar</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">2,50 &#8364;</td></tr>
+        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Šire područje Čepina</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">3,00 &#8364;</td></tr>
+        <tr style="background:#f8fafc"><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Okolna sela</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">3,50 &#8364;</td></tr>
+        <tr><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;font-weight:700">Udaljena sela</td><td style="padding:2mm 3mm;border:0.5pt solid #e2e8f0;text-align:right;font-weight:700">4,50 &#8364;</td></tr>
+    </table>
+    <div class="note" style="margin-top:4mm"><strong>Besplatna dostava iznad 15 &#8364;!</strong> Naručite online i mi vam donesemo svježe na kućnu adresu.</div>
+</div>
+
+<div class="footer">
+    FRIŠKO PEKARNICA &#183; Kralja Zvonimira 94, 31431 Čepin &#183; OIB: 05823287665<br>
+    LIMIT Connect &#183; limit-connect.com &#183; Powered by AI<br>
+    Za pitanja: Ivan Brtan &#183; Sve u sustavu je 100% usklađeno s hrvatskim propisima
+</div>
+
+</body></html>

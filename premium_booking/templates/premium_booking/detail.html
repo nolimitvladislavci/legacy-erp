@@ -1,0 +1,448 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ resource.name }} – Viskovic Group Buchung</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+        --black: #0a0a0a; --dark: #0f172a; --surface: #181a1d;
+        --border: #252830; --gold: #c9a84c; --white: #f0ede8;
+        --muted: #4a5060; --green: #4caf7d;
+    }
+    body { background: var(--black); color: var(--white); font-family: 'Barlow', sans-serif; margin: 0; min-height: 100vh; padding: 20px; }
+
+    /* Navbar */
+    .navbar { background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; margin: -20px -20px 30px -20px; }
+    .brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1px; }
+    .brand span { color: var(--gold); }
+    .back-link { color: var(--muted); text-decoration: none; font-size: .85rem; }
+    .back-link:hover { color: var(--gold); }
+
+    /* Layout */
+    .page-wrap { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+    @media (max-width: 720px) { .page-wrap { grid-template-columns: 1fr; } }
+
+    /* Resource card */
+    .resource-card { background: var(--surface); border: 1px solid var(--border); padding: 24px; }
+    .resource-card img { width: 100%; height: 180px; object-fit: cover; margin-bottom: 16px; }
+    .resource-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; color: var(--gold); margin: 0 0 8px; }
+    .resource-card p { color: var(--muted); font-size: .85rem; margin-bottom: 16px; }
+    .resource-meta { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--border); font-size: .85rem; }
+    .resource-meta .label { color: var(--muted); }
+    .resource-meta .value { color: var(--gold); font-weight: 600; }
+
+    /* Addons */
+    .addons-section { margin-top: 16px; }
+    .addons-section h6 { font-size: .75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .addon-card { background: var(--dark); border: 1px solid var(--border); padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: .2s; display: flex; justify-content: space-between; align-items: center; }
+    .addon-card:hover, .addon-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+    .addon-name { font-size: .9rem; }
+    .addon-price { color: var(--gold); font-weight: 700; font-size: .9rem; }
+
+    /* Booking wizard */
+    .booking-wizard { background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+
+    /* Step indicator */
+    .step-indicator { display: flex; align-items: center; justify-content: center; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--dark); overflow-x: auto; }
+    .si-step { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 0 0 auto; }
+    .si-dot { width: 26px; height: 26px; border-radius: 50%; background: #252830; color: #4a5060; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 700; transition: .3s; }
+    .si-lbl { font-size: .58rem; text-transform: uppercase; letter-spacing: 1px; color: #4a5060; white-space: nowrap; }
+    .si-line { flex: 1; height: 2px; background: #252830; min-width: 16px; max-width: 50px; margin: 0 4px 18px; transition: .3s; }
+    .si-step.active .si-dot { background: var(--gold); color: #0a0a0a; }
+    .si-step.active .si-lbl { color: var(--gold); font-weight: 600; }
+    .si-step.done .si-dot { background: var(--green); color: #fff; }
+    .si-step.done .si-lbl { color: var(--green); }
+    .si-step.done + .si-line { background: var(--green); }
+
+    /* Step panels */
+    .step-panel { padding: 32px; display: none; }
+    .step-panel.active { display: block; }
+    .step-panel h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--gold); margin: 0 0 20px; }
+
+    /* Calendar */
+    .month-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; max-width: 320px; }
+    .month-nav button { background: none; border: 1px solid var(--border); color: var(--gold); padding: 5px 12px; cursor: pointer; font-family: 'Barlow', sans-serif; transition: .2s; }
+    .month-nav button:hover { background: var(--gold); color: var(--black); }
+    .month-nav span { font-size: .9rem; text-transform: uppercase; letter-spacing: 2px; }
+    .weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: .65rem; color: var(--muted); margin-bottom: 6px; }
+    .days-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: .85rem; cursor: pointer; border: 1px solid transparent; border-radius: 2px; transition: .15s; }
+    .day:hover:not(.disabled):not(.empty) { border-color: var(--gold); color: var(--gold); }
+    .day.selected { background: var(--gold); color: var(--black); font-weight: 700; }
+    .day.disabled { color: #2d3040; cursor: not-allowed; }
+    .day.empty { cursor: default; }
+    .day.today { border-color: var(--muted); }
+    .step-hint { color: var(--muted); font-size: .85rem; margin-top: 16px; }
+
+    /* Time slots */
+    .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap: 8px; max-width: 480px; }
+    .slot-btn { background: var(--dark); border: 1px solid var(--border); color: var(--white); padding: 11px 0; font-family: 'Barlow', sans-serif; font-size: .9rem; cursor: pointer; transition: .2s; text-align: center; }
+    .slot-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .slot-btn.selected { background: var(--gold); color: var(--black); border-color: var(--gold); font-weight: 700; }
+    .no-slots { color: var(--muted); font-style: italic; font-size: .9rem; padding: 20px 0; }
+
+    /* Form */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: .7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .form-group input, .form-group select { width: 100%; background: var(--dark); border: 1px solid var(--border); color: var(--white); padding: 13px; font-family: 'Barlow', sans-serif; font-size: .95rem; outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+
+    /* Payment options */
+    .payment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .payment-opt { background: var(--dark); border: 2px solid var(--border); padding: 16px; cursor: pointer; text-align: center; transition: .2s; }
+    .payment-opt:hover { border-color: var(--gold); }
+    .payment-opt.selected { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+    .pay-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .pay-label { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .payment-opt.selected .pay-label { color: var(--gold); }
+
+    /* Price summary */
+    .price-summary { background: var(--dark); border: 1px solid rgba(201,168,76,0.3); padding: 16px; margin-bottom: 20px; }
+    .price-total { font-size: 1.8rem; font-weight: 700; color: var(--gold); }
+    .price-note { color: var(--muted); font-size: .8rem; margin: 4px 0 0; }
+
+    /* Summary bar */
+    .summary-bar { background: var(--dark); border: 1px solid var(--border); padding: 12px 16px; margin-bottom: 24px; font-size: .9rem; color: var(--muted); }
+    .summary-bar strong { color: var(--white); }
+
+    /* Buttons */
+    .btn-next { display: block; width: 100%; background: var(--gold); color: var(--black); padding: 15px; border: none; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: .2s; margin-top: 8px; }
+    .btn-next:hover { background: #e8c96a; }
+    .btn-next:disabled { background: var(--muted); cursor: wait; }
+    .btn-back { display: block; text-align: center; margin-top: 12px; color: var(--muted); cursor: pointer; font-size: .8rem; text-decoration: underline; }
+
+    /* Success */
+    .success-panel { padding: 60px 32px; text-align: center; display: none; }
+    .error-msg { background: rgba(239,68,68,0.15); border: 1px solid #ef4444; padding: 12px 16px; color: #f87171; font-size: .9rem; margin-bottom: 16px; display: none; }
+
+    .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+    <span class="brand">VISKOVIC<span>GROUP</span></span>
+    <a href="/premium/" class="back-link">&#8592; {% trans "Zurück" %}</a>
+</nav>
+
+<div class="page-wrap">
+    <!-- LEFT: Resource info -->
+    <div>
+        <div class="resource-card">
+            {% if resource.image %}
+            <img src="{{ resource.image.url }}" alt="{{ resource.name }}">
+            {% endif %}
+            <h3>{{ resource.name }}</h3>
+            <p>{{ resource.description }}</p>
+            <div class="resource-meta"><span class="label">{% trans "Gruppe" %}</span><span class="value">{{ resource.get_group_display }}</span></div>
+            <div class="resource-meta"><span class="label">{% trans "Preis" %}</span><span class="value">{{ resource.base_price }} € / {{ resource.get_unit_display }}</span></div>
+            {% if resource.capacity %}<div class="resource-meta"><span class="label">{% trans "Kapazität" %}</span><span class="value">{{ resource.capacity }} {% trans "Personen" %}</span></div>{% endif %}
+            <div class="resource-meta"><span class="label">{% trans "Mindestdauer" %}</span><span class="value">{{ resource.min_duration }} {{ resource.get_unit_display }}</span></div>
+        </div>
+
+        {% if addons %}
+        <div class="resource-card mt-3 addons-section">
+            <h6>{% trans "Zusatzleistungen" %}</h6>
+            {% for addon in addons %}
+            <div class="addon-card" onclick="toggleAddon({{ addon.id }}, {{ addon.price }}, this)">
+                <span class="addon-name">{{ addon.name }}</span>
+                <span class="addon-price">+ {{ addon.price }} €</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT: Booking wizard -->
+    <div class="booking-wizard">
+        <!-- Step indicator -->
+        <div class="step-indicator">
+            <div class="si-step done" id="si1"><div class="si-dot">✓</div><div class="si-lbl">{% trans "Objekt" %}</div></div>
+            <div class="si-line" id="siLine1"></div>
+            <div class="si-step active" id="si2"><div class="si-dot">2</div><div class="si-lbl">{% trans "Datum" %}</div></div>
+            <div class="si-line" id="siLine2"></div>
+            <div class="si-step" id="si3"><div class="si-dot">3</div><div class="si-lbl">{% trans "Uhrzeit" %}</div></div>
+            <div class="si-line" id="siLine3"></div>
+            <div class="si-step" id="si4"><div class="si-dot">4</div><div class="si-lbl">{% trans "Daten" %}</div></div>
+            <div class="si-line" id="siLine4"></div>
+            <div class="si-step" id="si5"><div class="si-dot">5</div><div class="si-lbl">{% trans "Zahlung" %}</div></div>
+            <div class="si-line" id="siLine5"></div>
+            <div class="si-step" id="si6"><div class="si-dot">6</div><div class="si-lbl">{% trans "Bestätigung" %}</div></div>
+        </div>
+
+        <!-- KORAK 2: DATUM -->
+        <div class="step-panel active" id="stepDatum">
+            <h2>{% trans "Datum wählen" %}</h2>
+            <div class="month-nav">
+                <button onclick="changeMonth(-1)">&#8592;</button>
+                <span id="monthDisplay"></span>
+                <button onclick="changeMonth(1)">&#8594;</button>
+            </div>
+            <div class="weekdays">
+                <div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div><div>So</div>
+            </div>
+            <div class="days-grid" id="daysGrid"></div>
+            <p class="step-hint">{% trans "Bitte wählen Sie ein Datum" %}</p>
+        </div>
+
+        <!-- KORAK 3: UHRZEIT -->
+        <div class="step-panel hidden" id="stepUhrzeit">
+            <h2>{% trans "Uhrzeit wählen" %}</h2>
+            <div class="summary-bar" id="summaryBar3"></div>
+            <div class="slots-grid" id="slotsGrid">
+                <div class="no-slots">{% trans "Lade verfügbare Zeiten..." %}</div>
+            </div>
+            <div class="btn-back" onclick="goToStep(2)">&#8592; {% trans "Zurück zum Datum" %}</div>
+        </div>
+
+        <!-- KORAK 4: DATEN -->
+        <div class="step-panel hidden" id="stepDaten">
+            <h2>{% trans "Ihre Daten" %}</h2>
+            <div class="summary-bar" id="summaryBar4"></div>
+            <div class="form-grid">
+                <div class="form-group" style="grid-column:1/-1">
+                    <label>{% trans "Name *" %}</label>
+                    <input type="text" id="name" placeholder="{% trans "Vor- und Nachname" %}" required>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>{% trans "E-Mail *" %}</label>
+                    <input type="email" id="email" placeholder="ihre@email.de" required>
+                </div>
+                <div class="form-group">
+                    <label>{% trans "Telefon" %}</label>
+                    <input type="tel" id="phone" placeholder="+49 ...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>{% trans "WhatsApp" %}</label>
+                <input type="tel" id="whatsapp" placeholder="+49 ...">
+            </div>
+            <button class="btn-next" onclick="goFromDatenToZahlung()">{% trans "Weiter zur Zahlung" %} &#8594;</button>
+            <div class="btn-back" onclick="goToStep(3)">&#8592; {% trans "Zurück zur Uhrzeit" %}</div>
+        </div>
+
+        <!-- KORAK 5: ZAHLUNG -->
+        <div class="step-panel hidden" id="stepZahlung">
+            <h2>{% trans "Zahlungsart" %}</h2>
+            <div class="summary-bar" id="summaryBar5"></div>
+            <div class="payment-options">
+                <div class="payment-opt selected" data-value="invoice" onclick="selectPayment(this)">
+                    <div class="pay-icon">📄</div>
+                    <div class="pay-label">{% trans "Rechnung" %}</div>
+                </div>
+                <div class="payment-opt" data-value="cash" onclick="selectPayment(this)">
+                    <div class="pay-icon">💵</div>
+                    <div class="pay-label">{% trans "Barzahlung" %}</div>
+                </div>
+                <div class="payment-opt" data-value="card" onclick="selectPayment(this)">
+                    <div class="pay-icon">💳</div>
+                    <div class="pay-label">{% trans "Kartenzahlung" %}</div>
+                </div>
+                <div class="payment-opt" data-value="transfer" onclick="selectPayment(this)">
+                    <div class="pay-icon">🏦</div>
+                    <div class="pay-label">{% trans "Überweisung" %}</div>
+                </div>
+            </div>
+            <input type="hidden" id="selectedPayment" value="invoice">
+
+            <div class="price-summary">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="color:var(--muted);font-size:.85rem">{% trans "Gesamtpreis" %}</span>
+                    <span class="price-total" id="totalPrice">{{ resource.base_price }} €</span>
+                </div>
+                <p class="price-note" id="priceNote">{% trans "Grundpreis für" %} {{ resource.min_duration }} {{ resource.get_unit_display }}</p>
+            </div>
+
+            <div class="error-msg" id="errorMsg"></div>
+            <button class="btn-next" id="submitBtn" onclick="submitBooking()">{% trans "Buchung bestätigen" %}</button>
+            <div class="btn-back" onclick="goToStep(4)">&#8592; {% trans "Zurück zu den Daten" %}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Success -->
+<div class="success-panel" id="stepSuccess">
+    <div style="font-size:3rem">✅</div>
+    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--gold);font-size:2.2rem;margin:16px 0 8px">{% trans "Buchung erfolgreich!" %}</h2>
+    <p style="color:var(--muted)" id="resultDetail"></p>
+    <p style="color:var(--muted);font-size:.85rem">{% trans "Buchungsnummer:" %} <strong id="resultBookingNumber" style="color:var(--gold)"></strong></p>
+    <a href="/premium/" style="display:inline-block;margin-top:24px;color:var(--gold);border:1px solid var(--gold);padding:10px 22px;text-decoration:none;text-transform:uppercase;letter-spacing:2px;font-size:.8rem">{% trans "Weitere Buchung" %}</a>
+</div>
+
+<script>
+const RESOURCE_ID = {{ resource.id }};
+const BASE_PRICE  = {{ resource.base_price }};
+let addonTotal = 0;
+let selectedAddons = [];
+let currentDate = new Date();
+let selectedDateStr = null;
+let selectedTimeStr = null;
+
+// ── Addons ────────────────────────────────────────────────────────────────────
+function toggleAddon(id, price, el) {
+    const idx = selectedAddons.indexOf(id);
+    if (idx === -1) { selectedAddons.push(id); addonTotal += parseFloat(price); el.classList.add('selected'); }
+    else { selectedAddons.splice(idx,1); addonTotal -= parseFloat(price); el.classList.remove('selected'); }
+    document.getElementById('totalPrice').textContent = (BASE_PRICE + addonTotal).toFixed(2) + ' €';
+}
+
+// ── Step management ───────────────────────────────────────────────────────────
+const stepMap = { 2:'stepDatum', 3:'stepUhrzeit', 4:'stepDaten', 5:'stepZahlung' };
+
+function showStep(step) {
+    Object.values(stepMap).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('active'); el.classList.add('hidden'); }
+    });
+    const target = stepMap[step];
+    if (target) { document.getElementById(target).classList.remove('hidden'); document.getElementById(target).classList.add('active'); }
+    updateIndicator(step);
+}
+
+function goToStep(step) { showStep(step); }
+
+function updateIndicator(step) {
+    for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById('si' + i);
+        const line = document.getElementById('siLine' + i);
+        if (!el) continue;
+        el.classList.remove('active', 'done');
+        if (i === 1) { el.classList.add('done'); }
+        else if (i < step) { el.classList.add('done'); el.querySelector('.si-dot').textContent = '✓'; }
+        else if (i === step) { el.classList.add('active'); el.querySelector('.si-dot').textContent = i; }
+        else { el.querySelector('.si-dot').textContent = i; }
+    }
+}
+
+// ── Kalendar ──────────────────────────────────────────────────────────────────
+const monthsDE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+function renderCalendar() {
+    const grid = document.getElementById('daysGrid');
+    grid.innerHTML = '';
+    const year = currentDate.getFullYear(), month = currentDate.getMonth();
+    document.getElementById('monthDisplay').textContent = monthsDE[month] + ' ' + year;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    let startOffset = firstDay === 0 ? 6 : firstDay - 1;
+    const today = new Date(); today.setHours(0,0,0,0);
+    for (let i = 0; i < startOffset; i++) grid.innerHTML += '<div class="day empty"></div>';
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dt = new Date(year, month, d);
+        const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        let cls = 'day';
+        if (dt < today) cls += ' disabled';
+        if (dt.toDateString() === today.toDateString()) cls += ' today';
+        if (ds === selectedDateStr) cls += ' selected';
+        const onclick = dt < today ? '' : `onclick="selectDate('${ds}')"`;
+        grid.innerHTML += `<div class="${cls}" ${onclick}>${d}</div>`;
+    }
+}
+
+function changeMonth(offset) { 
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1); 
+    renderCalendar(); 
+}
+
+function selectDate(ds) {
+    selectedDateStr = ds;
+    renderCalendar();
+    const [y,m,d] = ds.split('-');
+    const formatted = `${d}.${m}.${y}`;
+    // Generiraj vremenske slotove (svakih 30 min od 8:00 do 20:00)
+    const grid = document.getElementById('slotsGrid');
+    grid.innerHTML = '';
+    for (let h = 8; h < 20; h++) {
+        for (let min of ['00', '30']) {
+            const t = `${String(h).padStart(2,'0')}:${min}`;
+            grid.innerHTML += `<button class="slot-btn${t===selectedTimeStr?' selected':''}" onclick="selectTime('${t}')">${t}</button>`;
+        }
+    }
+    document.getElementById('summaryBar3').innerHTML = `<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; ${formatted}`;
+    showStep(3);
+}
+
+function selectTime(t) {
+    selectedTimeStr = t;
+    document.querySelectorAll('.slot-btn').forEach(b => b.classList.toggle('selected', b.textContent.trim() === t));
+    const [y,m,d] = selectedDateStr.split('-');
+    const formatted = `${d}.${m}.${y}`;
+    document.getElementById('summaryBar4').innerHTML = `<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; <strong>${formatted}</strong> um <strong>${t} Uhr</strong>`;
+    showStep(4);
+}
+
+// ── Daten → Zahlung ───────────────────────────────────────────────────────────
+function goFromDatenToZahlung() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!name || !email) { alert('Bitte füllen Sie alle Pflichtfelder aus.'); return; }
+    const [y,m,d] = selectedDateStr.split('-');
+    document.getElementById('summaryBar5').innerHTML = `<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; <strong>${d}.${m}.${y}</strong> um <strong>${selectedTimeStr} Uhr</strong>`;
+    showStep(5);
+}
+
+// ── Payment ───────────────────────────────────────────────────────────────────
+function selectPayment(el) {
+    document.querySelectorAll('.payment-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('selectedPayment').value = el.dataset.value;
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function submitBooking() {
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = 'VERARBEITUNG...'; btn.disabled = true;
+    const errEl = document.getElementById('errorMsg');
+    errEl.style.display = 'none';
+
+    fetch('/premium/api/submit/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            resource_id: RESOURCE_ID,
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            whatsapp_number: document.getElementById('whatsapp').value,
+            payment_method: document.getElementById('selectedPayment').value,
+            date: selectedDateStr,
+            time: selectedTimeStr,
+            addons: selectedAddons,
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.querySelector('.page-wrap').style.display = 'none';
+            const s = document.getElementById('stepSuccess');
+            s.style.display = 'block'; s.style.maxWidth = '600px'; s.style.margin = '40px auto';
+            const [y,m,d] = selectedDateStr.split('-');
+            document.getElementById('resultDetail').textContent = `{{ resource.name }} am ${d}.${m}.${y} um ${selectedTimeStr} Uhr.`;
+            document.getElementById('resultBookingNumber').textContent = data.booking_number || '';
+        } else {
+            errEl.textContent = data.error || 'Buchungsfehler. Bitte versuchen Sie es erneut.';
+            errEl.style.display = 'block';
+            btn.textContent = 'Buchung bestätigen'; btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        errEl.textContent = 'Verbindungsfehler. Bitte versuchen Sie es erneut.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Buchung bestätigen'; btn.disabled = false;
+    });
+}
+
+// Init
+renderCalendar();
+updateIndicator(2);
+</script>
+</body>
+</html>

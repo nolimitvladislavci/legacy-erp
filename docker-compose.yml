@@ -1,0 +1,153 @@
+# LIMIT Connect — Full Stack Docker Compose
+# Usage: docker compose -f docker-compose.yml up -d
+# Note: For development/staging. Production uses systemd + bare metal.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: fina_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fina_erp}
+      POSTGRES_USER: ${DB_USER:-viskovic_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-viskovic_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: fina_redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: fina_web
+    restart: unless-stopped
+    command: >
+      gunicorn core.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 3
+      --timeout 120
+      --access-logfile -
+    env_file: .env
+    environment:
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/2
+      - CELERY_RESULT_BACKEND=redis://redis:6379/3
+    volumes:
+      - .:/app
+      - static_files:/app/static
+      - media_files:/app/media
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-worker:
+    build: .
+    container_name: fina_celery_worker
+    restart: unless-stopped
+    command: >
+      celery -A core worker
+      --loglevel=info
+      --concurrency=2
+      --max-tasks-per-child=100
+    env_file: .env
+    environment:
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/2
+      - CELERY_RESULT_BACKEND=redis://redis:6379/3
+    volumes:
+      - .:/app
+      - media_files:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    build: .
+    container_name: fina_celery_beat
+    restart: unless-stopped
+    command: >
+      celery -A core beat
+      --loglevel=info
+      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file: .env
+    environment:
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/2
+      - CELERY_RESULT_BACKEND=redis://redis:6379/3
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: fina_waha
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file: .env.waha
+    environment:
+      - WHATSAPP_DEFAULT_ENGINE=NOWEB
+      - WAHA_DASHBOARD_ENABLED=true
+      - WHATSAPP_RESTART_ALL_SESSIONS=true
+      - WAHA_LOG_LEVEL=info
+      - WHATSAPP_HOOK_URL=http://web:8000/api/whatsapp/webhook/
+      - WHATSAPP_HOOK_EVENTS=message
+    volumes:
+      - waha_sessions:/app/.sessions
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  nginx:
+    image: nginx:alpine
+    container_name: fina_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_files:/var/www/static:ro
+      - media_files:/var/www/media:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  redisdata:
+  static_files:
+  media_files:
+  waha_sessions:

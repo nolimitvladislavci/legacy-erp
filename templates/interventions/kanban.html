@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+{% endblock %}
+
+{% block page_title %}Hitne intervencije{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<style>
+.iv-wrap{display:flex;flex-direction:column;height:calc(100vh - 60px);overflow:hidden}
+.iv-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:#fff;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.iv-title{font-size:1.1rem;font-weight:700;color:#0f172a}
+.iv-stats{display:flex;gap:1.5rem;font-size:.8rem;color:#64748b}
+.iv-stat-val{font-weight:700;color:#0f172a}
+.iv-board{display:flex;gap:0;overflow-x:auto;flex:1;background:#f1f5f9}
+.iv-col{min-width:280px;max-width:280px;display:flex;flex-direction:column;border-right:1px solid #e2e8f0;background:#f8fafc}
+.iv-col-header{padding:.75rem 1rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:.5rem;background:#fff;border-bottom:1px solid #e2e8f0}
+.iv-col-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.iv-col-count{margin-left:auto;background:#e2e8f0;color:#64748b;padding:.1rem .45rem;border-radius:10px;font-size:.65rem}
+.iv-col-body{flex:1;overflow-y:auto;padding:.5rem}
+.iv-card{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:.875rem;margin-bottom:.5rem;transition:box-shadow .15s}
+.iv-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.iv-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.4rem}
+.iv-card-title{font-weight:600;font-size:.875rem;color:#0f172a;line-height:1.3}
+.iv-card-cat{font-size:.65rem;padding:.15rem .45rem;border-radius:10px;background:#f1f5f9;color:#64748b;white-space:nowrap}
+.iv-card-addr{font-size:.775rem;color:#64748b;margin-bottom:.35rem}
+.iv-card-client{font-size:.775rem;display:flex;align-items:center;gap:.35rem;margin-bottom:.5rem}
+.iv-card-client a{color:#3b82f6;text-decoration:none}
+.iv-card-footer{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.iv-card-time{font-size:.7rem;color:#94a3b8}
+.iv-card-assigned{font-size:.72rem;padding:.15rem .5rem;border-radius:10px;background:#fef3c7;color:#92400e;font-weight:600}
+.iv-assign-form{display:flex;gap:.35rem;margin-top:.5rem;flex-wrap:wrap}
+.iv-assign-form select{font-size:.72rem;padding:.2rem .4rem;border:1px solid #e2e8f0;border-radius:4px;flex:1;min-width:120px}
+.iv-btn-field{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#0f172a;color:#fff;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem}
+.iv-btn-assign{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#c9a84c;color:#000;border:none;cursor:pointer;font-weight:700}
+.iv-btn-escalate{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#ec4899;color:#fff;border:none;cursor:pointer}
+.iv-empty{text-align:center;padding:2rem .5rem;color:#cbd5e1;font-size:.8rem}
+.csrf-token-val{display:none}
+</style>
+
+<div class="iv-wrap">
+  <!-- Header -->
+  <div class="iv-header">
+    <div>
+      <div class="iv-title">{% trans "🚨 Hitne intervencije" %}</div>
+    </div>
+    <div class="iv-stats">
+      <div><span class="iv-stat-val">{{ total }}</span> {% trans "ukupno" %}</div>
+      <div><span class="iv-stat-val">{{ active }}</span> {% trans "aktivnih" %}</div>
+    </div>
+    <a href="{% url 'interventions:new' %}" style="background:#0f172a;color:#fff;padding:.5rem 1.25rem;border-radius:6px;font-size:.82rem;font-weight:600;text-decoration:none">{% trans "+ Nova intervencija" %}</a>
+  </div>
+
+
+<!-- GPS Map Widget – active workers -->
+<div id="kanban-gps-wrap" style="display:none;margin:0 0 16px;padding:0 1.5rem">
+  <div style="background:#0f172a;border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:12px 16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:.8rem;font-weight:700;color:#c9a84c;letter-spacing:.05em">{% trans "&#128270; GPS RADNICI" %}</span>
+      <span id="kanban-gps-count" style="font-size:.72rem;color:#94a3b8;background:rgba(255,255,255,.06);padding:.1rem .5rem;border-radius:8px"></span>
+    </div>
+    <div id="kanban-map" style="height:240px;border-radius:8px;overflow:hidden;border:1px solid rgba(201,168,76,.15)"></div>
+  </div>
+</div>
+
+  <!-- Kanban board -->
+  <div class="iv-board">
+    
+{% for col in columns %}
+    <div class="iv-col">
+      <div class="iv-col-header">
+        <div class="iv-col-dot" style="background:{{ col.color }}"></div>
+        {{ col.label }}
+        <span class="iv-col-count">{{ col.items|length }}</span>
+      </div>
+      <div class="iv-col-body">
+        {% if col.items %}
+          {% for interv in col.items %}
+          <div class="iv-card" id="card-{{ interv.pk }}">
+            <div class="iv-card-top">
+              <div class="iv-card-title">{{ interv.title }}</div>
+              <span class="iv-card-cat">{{ interv.get_category_display }}</span>
+            </div>
+            <div class="iv-card-addr">📍 {{ interv.address }}</div>
+            <div class="iv-card-client">
+              👤 {{ interv.client_name }}
+              &nbsp;·&nbsp;
+              <a href="tel:{{ interv.client_phone }}">{{ interv.client_phone }}</a>
+            </div>
+            <div class="iv-card-footer">
+              <span class="iv-card-time">{{ interv.elapsed_minutes }}m</span>
+              {% if interv.assigned_to %}
+              <span class="iv-card-assigned">{{ interv.assigned_to.get_full_name|default:interv.assigned_to.username }}</span>
+              {% endif %}
+            </div>
+            <!-- Actions -->
+            <div style="display:flex;gap:.35rem;margin-top:.6rem;flex-wrap:wrap">
+              <a href="{% url 'interventions:field' interv.pk %}" class="iv-btn-field">{% trans "Terenska karta" %}</a>
+              {% if col.status in 'RIJESENO,NA_LOKACIJI' %}
+              <button class="iv-btn-escalate" onclick="doEscalate({{ interv.pk }})">{% trans "Eskaliraj" %}</button>
+              {% endif %}
+            </div>
+            {% if col.status == 'NOVO' %}
+            <div class="iv-assign-form">
+              <select id="wsel-{{ interv.pk }}">
+                <option value="">{% trans "-- dodijeli radnika --" %}</option>
+                {% for w in workers %}
+                <option value="{{ w.pk }}">{{ w.get_full_name|default:w.username }}</option>
+                {% endfor %}
+              </select>
+              <button class="iv-btn-assign" onclick="doAssign({{ interv.pk }})">{% trans "Dodijeli" %}</button>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="iv-empty">{% trans "Nema intervencija" %}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+
+async function doAssign(pk) {
+  const sel = document.getElementById('wsel-' + pk);
+  const workerId = sel ? sel.value : '';
+  if (!workerId) { alert('Odaberite radnika.'); return; }
+  try {
+    const r = await fetch(`/interventions/${pk}/assign/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'},
+      body: JSON.stringify({worker_id: parseInt(workerId)}),
+    });
+    const d = await r.json();
+    if (d.ok) { location.reload(); }
+    else { alert(d.error || 'Greška'); }
+  } catch(e) { alert('Mrežna greška'); }
+}
+
+async function doEscalate(pk) {
+  const title = prompt('Naslov projekta (ostavite prazno za auto):');
+  if (title === null) return; // cancelled
+  try {
+    const r = await fetch(`/interventions/${pk}/escalate/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'},
+      body: JSON.stringify({title: title || ''}),
+    });
+    const d = await r.json();
+    if (d.ok) { alert(d.message); location.reload(); }
+    else { alert(d.error || 'Greška'); }
+  } catch(e) { alert('Mrežna greška'); }
+}
+</script>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+(function(){
+  // Collect workers with GPS from template context
+  var workers = [
+    {% for col in columns %}{% for interv in col.items %}{% if interv.last_lat %}
+    {
+      lat:     {{ interv.last_lat }},
+      lng:     {{ interv.last_lng }},
+      name:    "{% if interv.assigned_to %}{{ interv.assigned_to.get_full_name|default:interv.assigned_to.username|escapejs }}{% else %}Radnik{% endif %}",
+      title:   "{{ interv.title|escapejs }}",
+      status:  "{{ interv.get_status_display|escapejs }}",
+      updated: "{% if interv.last_gps_update %}{{ interv.last_gps_update|date:'H:i' }}{% endif %}"
+    },
+    {% endif %}{% endfor %}{% endfor %}
+  ];
+
+  if (!workers.length) return;
+
+  // Show the widget
+  var wrap = document.getElementById('kanban-gps-wrap');
+  if (wrap) wrap.style.display = 'block';
+
+  var countEl = document.getElementById('kanban-gps-count');
+  if (countEl) countEl.textContent = workers.length + ' radnik' + (workers.length === 1 ? '' : 'a') + ' s GPS-om';
+
+  // Init Leaflet map
+  var map = L.map('kanban-map', {
+    zoomControl: true,
+    attributionControl: false
+  }).setView([workers[0].lat, workers[0].lng], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  var bounds = [];
+  workers.forEach(function(w) {
+    var icon = L.divIcon({
+      html: '<div style="font-size:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))">&#128295;</div>',
+      className: '',
+      iconSize: [28, 28],
+      iconAnchor: [14, 28]
+    });
+    L.marker([w.lat, w.lng], { icon: icon })
+      .addTo(map)
+      .bindPopup(
+        '<b>' + w.name + '</b><br>' +
+        '<span style="color:#64748b;font-size:.8rem">' + w.title + '</span><br>' +
+        '<span style="color:#94a3b8;font-size:.75rem">' + w.status +
+        (w.updated ? ' · ' + w.updated : '') + '</span>'
+      );
+    bounds.push([w.lat, w.lng]);
+  });
+
+  if (bounds.length > 1) {
+    map.fitBounds(bounds, { padding: [24, 24] });
+  }
+})();
+</script>
+{% endblock %}

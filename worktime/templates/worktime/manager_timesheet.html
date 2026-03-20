@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Evidencija sati
+<!-- Reject modal -->
+<div id="rejectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:28px;min-width:380px;max-width:480px">
+    <h6 class="fw-bold mb-3" style="color:#f87171"><i class="fas fa-times-circle me-2"></i>{% trans "Odbij unose" %}</h6>
+    <form method="post" action="{% url 'worktime:ts_approve' %}" id="rejectForm">
+      {% csrf_token %}
+      <div id="rejectEntryIds"></div>
+      <input type="hidden" name="action" value="reject">
+      <div class="mb-3">
+        <label class="form-label fw-bold small">{% trans "Razlog odbijanja" %} <span class="text-muted fw-normal">({% trans "opcionalno" %})</span></label>
+        <textarea name="rejection_reason" class="form-control form-control-sm" rows="3" placeholder="{% trans "Npr. Nedostaje opis zadatka, prijavi ispočetka..." %}"></textarea>
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="closeRejectModal()">{% trans "Odustani" %}</button>
+        <button type="submit" class="btn btn-sm btn-danger">✕ {% trans "Odbij odabrane" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function openRejectModal() {
+  // Collect checked entry IDs
+  const checked = document.querySelectorAll('input[name="entry_ids"]:checked');
+  if (!checked.length) {
+    alert('Odaberi unose za odbijanje.');
+    return;
+  }
+  const container = document.getElementById('rejectEntryIds');
+  container.innerHTML = '';
+  checked.forEach(cb => {
+    const h = document.createElement('input');
+    h.type = 'hidden'; h.name = 'entry_ids'; h.value = cb.value;
+    container.appendChild(h);
+  });
+  document.getElementById('rejectModal').style.display = 'flex';
+}
+function closeRejectModal() {
+  document.getElementById('rejectModal').style.display = 'none';
+}
+document.getElementById('rejectModal').addEventListener('click', function(e) {
+  if (e.target === this) closeRejectModal();
+});
+</script>
+
+{% endblock %}
+{% block page_title %}📋 Evidencija radnih sati{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "Ukupno sati" %}</div><div class="value">{{ total_hours|floatformat:1 }}h</div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "Ukupno iznos" %}</div><div class="value text-success">{{ total_amount|floatformat:2 }} €</div></div></div>
+  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "Radnika" %}</div><div class="value">{{ workers_data|length }}</div></div></div>
+  <div class="col-md-3"><a href="{% url 'worktime:ts_approve' %}?status=pending" class="text-decoration-none"><div class="stat-card {% if pending_count > 0 %}border-warning{% endif %}" style="cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"><div class="label">{% trans "Čeka odobrenje" %}</div><div class="value {% if pending_count > 0 %}text-warning{% endif %}">{{ pending_count }}</div></div></a></div>
+</div>
+<div class="stat-card mb-4">
+  <form method="get">
+    <div class="row g-2 align-items-end mb-3">
+      <div class="col-md-2"><label class="form-label" style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280">{% trans "Od datuma" %}</label><input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}"></div>
+      <div class="col-md-2"><label class="form-label" style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280">{% trans "Do datuma" %}</label><input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}"></div>
+      <div class="col-md-2"><label class="form-label" style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280">{% trans "Projekt" %}</label>
+        <select name="project" class="form-select form-select-sm"><option value="">{% trans "Svi projekti" %}</option>{% for p in all_projects %}<option value="{{ p.pk }}" {% if selected_project == p.pk|stringformat:'s' %}selected{% endif %}>{{ p.name }}</option>{% endfor %}</select></div>
+      <div class="col-md-2"><label class="form-label" style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280">{% trans "Status" %}</label>
+        <select name="status" class="form-select form-select-sm"><option value="">{% trans "Svi" %}</option><option value="APPROVED" {% if status_filter == 'APPROVED' %}selected{% endif %}>{% trans "Odobreno" %}</option><option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>{% trans "Čeka" %}</option></select></div>
+      <div class="col-md-2"><label class="form-label" style="font-size:0.65rem"> </label><button type="submit" class="btn btn-primary btn-sm w-100">{% trans "🔍 Filtriraj" %}</button></div>
+      <div class="col-md-2"><label class="form-label" style="font-size:0.65rem"> </label><a href="{% url 'worktime:ts_analytics' %}" class="btn btn-outline-secondary btn-sm w-100">{% trans "📊 Analitika" %}</a></div>
+    </div>
+    <div>
+      <label class="form-label" style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280">
+        {% trans "Radnici" %}
+        <button type="button" onclick="toggleAll(true)" class="btn btn-link btn-sm p-0 ms-2" style="font-size:0.7rem">{% trans "Svi" %}</button>
+        <button type="button" onclick="toggleAll(false)" class="btn btn-link btn-sm p-0" style="font-size:0.7rem">{% trans "Nijedan" %}</button>
+      </label>
+      <div class="d-flex flex-wrap gap-2">
+        {% for w in all_workers %}
+        <div class="form-check form-check-inline" style="border:1px solid #e2e8f0;border-radius:6px;padding:4px 10px;margin:0">
+          <input class="form-check-input worker-cb" type="checkbox" name="workers" value="{{ w.pk }}" id="w{{ w.pk }}" {% if not selected_workers or w.pk|stringformat:'s' in selected_workers %}checked{% endif %}>
+          <label class="form-check-label" style="font-size:0.82rem;cursor:pointer" for="w{{ w.pk }}">{{ w.get_full_name|default:w.username }}</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </form>
+</div>
+<form method="post" action="{% url 'worktime:ts_bill' %}">
+{% csrf_token %}
+<input type="hidden" name="date_from" value="{{ date_from }}">
+<input type="hidden" name="date_to" value="{{ date_to }}">
+<input type="hidden" name="project" value="{{ selected_project }}">
+<div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+  <a href="{% url 'worktime:ts_pdf' %}?date_from={{ date_from }}&date_to={{ date_to }}&project={{ selected_project }}&mode=detailed{% for w in selected_workers %}&workers={{ w }}{% endfor %}" target="_blank" class="btn btn-outline-primary btn-sm">{% trans "📄 PDF detaljni" %}</a>
+  <a href="{% url 'worktime:ts_pdf' %}?date_from={{ date_from }}&date_to={{ date_to }}&project={{ selected_project }}&mode=summary{% for w in selected_workers %}&workers={{ w }}{% endfor %}" target="_blank" class="btn btn-outline-secondary btn-sm">{% trans "📄 PDF zbirni" %}</a>
+  {% if pending_count > 0 %}
+  <form method="post" action="{% url 'worktime:ts_approve' %}" style="display:inline">{% csrf_token %}
+    {% for uid, wd in workers_data.items %}{% for te in wd.entries %}{% if te.status == 'PENDING' %}<input type="hidden" name="entry_ids" value="{{ te.pk }}">{% endif %}{% endfor %}{% endfor %}
+    <input type="hidden" name="action" value="approve">
+    <button type="submit" class="btn btn-warning btn-sm">✓ {% trans "Odobri sve" %} ({{ pending_count }})</button>
+  </form>
+  <button type="button" class="btn btn-danger btn-sm" onclick="openRejectModal()">✕ {% trans "Odbij odabrane" %}</button>
+  {% endif %}
+  <div class="ms-auto d-flex gap-2 align-items-center">
+    <span id="si" style="font-size:0.78rem;color:#64748b">{% trans "0 odabrano" %}</span>
+    <select name="bill_mode" class="form-select form-select-sm" style="width:auto"><option value="detailed">{% trans "Detaljni" %}</option><option value="summary">{% trans "Zbirni" %}</option></select>
+    <button type="submit" class="btn btn-success btn-sm" onclick="return cb()">{% trans "💶 Fakturiraj" %}</button>
+  </div>
+</div>
+{% for uid, wd in workers_data.items %}
+<div class="stat-card mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid #e2e8f0">
+    <div class="d-flex align-items-center gap-3">
+      <input type="checkbox" onchange="toggleW('{{ uid }}',this.checked)" style="width:18px;height:18px;cursor:pointer" checked>
+      <div><strong>{{ wd.user.get_full_name|default:wd.user.username }}</strong>
+      <span class="text-muted small ms-2">{{ wd.user.username }}</span>
+      {% if wd.emp %}<span class="badge bg-light text-dark ms-1" style="font-size:0.7rem">{{ wd.emp.position }}</span>{% endif %}</div>
+    </div>
+    <div class="d-flex gap-3">
+      <span class="text-muted small">{{ wd.hourly_rate }} €/h</span>
+      <strong>{{ wd.total_hours|floatformat:2 }}h</strong>
+      <strong class="text-success">{{ wd.total_amount|floatformat:2 }} €</strong>
+      <input type="hidden" name="bill_workers" value="{{ uid }}">
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+      <thead class="table-light"><tr><th style="width:30px"><input type="checkbox" onchange="toggleW('{{ uid }}',this.checked)" checked style="cursor:pointer"></th><th>{% trans "Datum" %}</th><th>{% trans "Projekt" %}</th><th>{% trans "Od–Do" %}</th><th class="text-end">{% trans "Sati" %}</th><th class="text-end">{% trans "Iznos" %}</th><th>{% trans "Opis" %}</th><th>{% trans "Status" %}</th><th>{% trans "F." %}</th></tr></thead>
+      <tbody>
+        {% for te in wd.entries %}
+        <tr {% if te.is_billed %}class="table-secondary"{% endif %}>
+          <td><input type="checkbox" name="entry_ids" value="{{ te.pk }}" class="ecb ecb-{{ uid }}" {% if te.is_billed %}disabled{% else %}checked{% endif %}></td>
+          <td style="white-space:nowrap">{{ te.date|date:"d.m.Y" }}</td>
+          <td><span class="badge bg-primary" style="font-size:0.7rem">{{ te.project.code }}</span></td>
+          <td style="font-family:monospace;font-size:0.78rem">{{ te.start_time|time:"H:i" }}{% if te.end_time %}–{{ te.end_time|time:"H:i" }}{% endif %}</td>
+          <td class="text-end fw-bold" style="font-family:monospace">{{ te.duration|floatformat:2 }}</td>
+          <td class="text-end text-success" style="font-family:monospace">{{ te.billing_amount|floatformat:2 }}</td>
+          <td><small class="text-muted">{{ te.description|truncatechars:30 }}</small></td>
+          <td>{% if te.status == 'APPROVED' %}<span class="badge bg-success" style="font-size:0.65rem">✓</span>{% elif te.status == 'PENDING' %}<span class="badge bg-warning text-dark" style="font-size:0.65rem">⏳</span>{% else %}<span class="badge bg-danger" style="font-size:0.65rem">✗</span>{% if te.rejection_reason %}<br><small class="text-muted" style="font-size:.6rem" title="{{ te.rejection_reason }}">{{ te.rejection_reason|truncatechars:35 }}</small>{% endif %}{% endif %}</td>
+          <td>{% if te.is_billed %}💶{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% empty %}<div class="stat-card text-center text-muted py-5">{% trans "Nema unosa za odabrane filtere." %}</div>
+{% endfor %}
+</form>
+<script>
+function toggleAll(c){document.querySelectorAll('.worker-cb,.ecb').forEach(cb=>{if(!cb.disabled)cb.checked=c;});upd();}
+function toggleW(uid,c){document.querySelectorAll(`.ecb-${uid}`).forEach(cb=>{if(!cb.disabled)cb.checked=c;});upd();}
+function upd(){const n=document.querySelectorAll('.ecb:checked:not(:disabled)').length;document.getElementById('si').textContent=`${n} odabrano`;}
+function cb(){const n=document.querySelectorAll('.ecb:checked:not(:disabled)').length;if(!n){alert('Niste odabrali unose!');return false;}return confirm(`Fakturirati ${n} unosa?`);}
+document.querySelectorAll('.ecb').forEach(cb=>cb.addEventListener('change',upd));upd();
+</script>
+{% endblock %}

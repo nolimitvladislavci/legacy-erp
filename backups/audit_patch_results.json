@@ -1,0 +1,119 @@
+{
+  "timestamp": "2026-03-19T10:07:13.858449",
+  "results": [
+    {
+      "status": "OK",
+      "desc": "#1 Uklonjen remote_api.py iz URL-ova (RCE rizik)",
+      "detail": "/var/www/fina-connect/core/urls.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#2 API ključ čita iz env varijable prioritetno",
+      "detail": "/var/www/fina-connect/ai_assistant/claude_client.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#2b Dodan import os u claude_client.py",
+      "detail": "/var/www/fina-connect/ai_assistant/claude_client.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#3 Uklonjen str(e) leak u error response",
+      "detail": "/var/www/fina-connect/ai_assistant/views.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#4 Rate limiting prebačen na Redis cache",
+      "detail": "/var/www/fina-connect/ai_assistant/views.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#5 AUDITED_MODELS proširen sa 11 na 27 modela",
+      "detail": "/var/www/fina-connect/core/audit.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#6 Password policy — dodana 3 nova validatora",
+      "detail": "/var/www/fina-connect/core/settings.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#7 Agent gateway exec: whitelist + shlex.split umjesto shell=True",
+      "detail": "/var/www/fina-connect/superadmin_ai/views.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#8 HTML escaping za chat widget poruke (XSS zaštita)",
+      "detail": "/var/www/fina-connect/templates/ai_assistant/chat_widget.html"
+    },
+    {
+      "status": "OK",
+      "desc": "#8b Blokiran open redirect (//) u action handler",
+      "detail": "/var/www/fina-connect/templates/ai_assistant/chat_widget.html"
+    },
+    {
+      "status": "OK",
+      "desc": "#9 CSP + Permissions-Policy headers dodani",
+      "detail": "/var/www/fina-connect/core/middleware/__init__.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#10 Sanitizirane error poruke u agent gateway query",
+      "detail": "/var/www/fina-connect/superadmin_ai/views.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#10b Sanitizirane error poruke u agent gateway read",
+      "detail": "/var/www/fina-connect/superadmin_ai/views.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#10c Sanitizirane error poruke u agent gateway write",
+      "detail": "/var/www/fina-connect/superadmin_ai/views.py"
+    }
+  ],
+  "summary": {
+    "ok": 14,
+    "fail": 0,
+    "skip": 0
+  },
+  "phase2_timestamp": "2026-03-19T10:27:25.872614",
+  "phase2_results": [
+    {
+      "status": "OK",
+      "desc": "#11a Fix duplicate @login_required na umbrella_dashboard",
+      "detail": "/var/www/fina-connect/core/views.py"
+    },
+    {
+      "status": "SKIP",
+      "desc": "#11b Import services",
+      "detail": "No suitable import location found"
+    },
+    {
+      "status": "OK",
+      "desc": "#11c Dodan _time_periods() helper za DRY",
+      "detail": "/var/www/fina-connect/core/views.py"
+    },
+    {
+      "status": "SKIP",
+      "desc": "#12a WhatsApp per-company + per-phone rate limiting",
+      "detail": "Pattern not found in whatsapp.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#12b WhatsApp rate increment nakon uspješnog slanja",
+      "detail": "/var/www/fina-connect/core/whatsapp.py"
+    },
+    {
+      "status": "OK",
+      "desc": "#13 Superadmin AI test suite — 30 testova",
+      "detail": "/var/www/fina-connect/superadmin_ai/tests.py"
+    }
+  ],
+  "phase2_summary": {
+    "ok": 4,
+    "fail": 0,
+    "skip": 2
+  },
+  "total_patches": 18
+}

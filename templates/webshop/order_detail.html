@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Narudžba #{{ order.order_number }}{% endblock %}
+{% block page_title %}Narudžba #{{ order.order_number }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0">#{{ order.order_number }}</h2>
+    <small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }} &middot;
+      <a href="{% url 'partners:detail' order.customer.pk %}">{{ order.customer.name }}</a>
+    </small>
+  </div>
+  <a href="{% url 'webshop:order_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}
+  </a>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-8">
+    <div class="stat-card mb-3">
+      <h6 class="fw-bold mb-3"><i class="fas fa-list me-2"></i>{% trans "Stavke narudžbe" %}</h6>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead class="table-light"><tr><th>{% trans "Proizvod" %}</th><th class="text-center">{% trans "Kol." %}</th><th class="text-end">{% trans "Jed. cijena" %}</th><th class="text-end">{% trans "Ukupno" %}</th></tr></thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td>
+                <div class="fw-semibold">{{ item.product.name }}</div>
+                <small class="text-muted">{{ item.product.sku }}</small>
+              </td>
+              <td class="text-center fw-bold">{{ item.quantity }}</td>
+              <td class="text-end">{{ item.unit_price|floatformat:2 }} €</td>
+              <td class="text-end fw-bold">{{ item.total_price|floatformat:2 }} €</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">{% trans "Nema stavki." %}</td></tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-light">
+            <tr>
+              <td colspan="3" class="text-end fw-bold">{% trans "UKUPNO:" %}</td>
+              <td class="text-end fw-bold text-success" style="font-size:1.1rem">{{ order.total_amount|floatformat:2 }} €</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    {% if order.notes %}
+    <div class="stat-card">
+      <h6 class="fw-bold mb-2">{% trans "Napomene" %}</h6>
+      <p class="text-muted mb-0">{{ order.notes }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-4">
+    <div class="stat-card mb-3">
+      <h6 class="fw-bold mb-3">{% trans "Detalji" %}</h6>
+      <div class="row g-2 small">
+        <div class="col-6"><div class="label">{% trans "Kupac" %}</div>
+          <a href="{% url 'partners:detail' order.customer.pk %}">{{ order.customer.name }}</a>
+        </div>
+        <div class="col-6"><div class="label">{% trans "Dostava" %}</div><div>{{ order.get_shipping_method_display }}</div></div>
+        <div class="col-12"><div class="label">{% trans "Adresa dostave" %}</div><div>{{ order.shipping_address|default:"—" }}</div></div>
+        {% if order.tracking_number %}
+        <div class="col-12"><div class="label">{% trans "Tracking" %}</div><div><code>{{ order.tracking_number }}</code></div></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h6 class="fw-bold mb-3">{% trans "Promijeni status" %}</h6>
+      <form method="post" action="{% url 'webshop:order_status' order.pk %}">
+        {% csrf_token %}
+        <div class="mb-2">
+          <select name="status" class="form-select">
+            {% for val,label in status_choices %}
+            <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-2">
+          <input type="text" name="tracking_number" class="form-control" placeholder="Tracking broj..."
+                 value="{{ order.tracking_number|default:'' }}">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="fas fa-sync me-2"></i>{% trans "Ažuriraj" %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

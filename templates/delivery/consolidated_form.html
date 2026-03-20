@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Nova konsolidirana isporuka{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <a href="{% url 'delivery:consolidated_list' %}" class="text-muted text-decoration-none mb-3 d-inline-block">
+    <i class="fas fa-arrow-left me-1"></i> Natrag
+  </a>
+  <h2 class="mb-4"><i class="fas fa-plus-circle text-gold me-2"></i>Nova konsolidirana isporuka</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="row g-4">
+
+      <!-- Left -->
+      <div class="col-lg-8">
+
+        <!-- Osnovni podaci -->
+        <div class="card bg-dark border-secondary mb-4">
+          <div class="card-header text-gold"><i class="fas fa-info-circle me-2"></i>Osnovni podaci</div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-muted">Kupac (restoran/trgovina) *</label>
+                <select name="buyer_company" class="form-select bg-dark text-white border-secondary" required>
+                  <option value="">— Odaberi —</option>
+                  {% for buyer in buyers %}
+                  <option value="{{ buyer.pk }}">{{ buyer.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted">Nacin dostave *</label>
+                <select name="delivery_method" id="delivery_method" class="form-select bg-dark text-white border-secondary" required onchange="toggleCarrierFields()">
+                  {% for val, label in method_choices %}
+                  <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label text-muted">Adresa dostave</label>
+                <input type="text" name="delivery_address" class="form-control bg-dark text-white border-secondary" placeholder="Ulica, grad, postanski broj">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vanjski prijevoznik -->
+        <div class="card bg-dark border-secondary mb-4" id="carrier-card" style="display:none">
+          <div class="card-header text-gold"><i class="fas fa-id-card me-2"></i>Vanjski prijevoznik</div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label text-muted">Naziv / Ime vozaca</label>
+                <input type="text" name="carrier_name" class="form-control bg-dark text-white border-secondary" placeholder="Promet Makarska / Ivan Ivic">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted">Kontakt</label>
+                <input type="text" name="carrier_contact" class="form-control bg-dark text-white border-secondary" placeholder="+385 91 234 5678">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted">Referenca</label>
+                <input type="text" name="carrier_ref" class="form-control bg-dark text-white border-secondary" placeholder="Linija / Reg.oznaka / Profil link">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Narudzbe za spojiti -->
+        <div class="card bg-dark border-secondary mb-4">
+          <div class="card-header text-gold"><i class="fas fa-shopping-cart me-2"></i>Narudzbe za konsolidaciju</div>
+          <div class="card-body">
+            {% if pending_orders %}
+            <div class="table-responsive">
+              <table class="table table-dark table-hover table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th style="width:40px"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+                    <th>Broj</th>
+                    <th>Kupac</th>
+                    <th>Stavke</th>
+                    <th>Iznos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in pending_orders %}
+                  <tr>
+                    <td><input type="checkbox" name="orders" value="{{ order.pk }}" class="order-cb"></td>
+                    <td class="text-gold">{{ order.order_number }}</td>
+                    <td>{{ order.buyer_company.name }}</td>
+                    <td>{{ order.items.count }}</td>
+                    <td>{{ order.total }} &euro;</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">Nema pending narudzbi za konsolidaciju.</p>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right -->
+      <div class="col-lg-4">
+
+        <!-- Hladni lanac -->
+        <div class="card bg-dark border-secondary mb-4">
+          <div class="card-header text-gold"><i class="fas fa-snowflake me-2"></i>Hladni lanac</div>
+          <div class="card-body">
+            <label class="form-label text-muted">Zona hladnjace</label>
+            <select name="cold_chain_zone" class="form-select bg-dark text-white border-secondary">
+              <option value="">Nije potrebno</option>
+              {% for zone in zones %}
+              <option value="{{ zone.pk }}">{{ zone.name }} ({{ zone.target_min_temp }}&deg; - {{ zone.target_max_temp }}&deg;C)</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Logistika -->
+        <div class="card bg-dark border-secondary mb-4">
+          <div class="card-header text-gold"><i class="fas fa-box me-2"></i>Logistika</div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label text-muted">Rok dostave u hub</label>
+              <input type="datetime-local" name="hub_cutoff_time" class="form-control bg-dark text-white border-secondary">
+            </div>
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label text-muted">Broj paketa</label>
+                <input type="number" name="package_count" value="1" min="1" class="form-control bg-dark text-white border-secondary">
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted">Tezina (kg)</label>
+                <input type="number" name="total_weight_kg" step="0.1" class="form-control bg-dark text-white border-secondary">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Napomene -->
+        <div class="card bg-dark border-secondary mb-4">
+          <div class="card-header text-gold"><i class="fas fa-sticky-note me-2"></i>Napomene</div>
+          <div class="card-body">
+            <textarea name="notes" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Posebne upute za pakiranje, dostavu..."></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-gold w-100 py-3">
+          <i class="fas fa-check me-2"></i>Kreiraj isporuku
+        </button>
+
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<script>
+function toggleCarrierFields() {
+  var method = document.getElementById('delivery_method').value;
+  var card = document.getElementById('carrier-card');
+  card.style.display = (method === 'bus' || method === 'taxi' || method === 'crowd' || method === 'courier') ? 'block' : 'none';
+}
+
+function toggleAll(source) {
+  var checkboxes = document.querySelectorAll('.order-cb');
+  checkboxes.forEach(function(cb) { cb.checked = source.checked; });
+}
+</script>
+{% endblock %}

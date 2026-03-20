@@ -1,0 +1,172 @@
+{
+  "test_name": "Chaos Monkey Phase 3",
+  "timestamp": "2026-03-12 22:45:53",
+  "passed": 26,
+  "failed": 1,
+  "errors": 0,
+  "total": 27,
+  "tests": [
+    {
+      "category": "OOM Kill",
+      "name": "Batch prezivljava smrt workera",
+      "status": "PASS",
+      "detail": "Batch #32 prezivio 'smrt workera' — status=pending, vidljiv u bazi"
+    },
+    {
+      "category": "OOM Kill",
+      "name": "Celery task ima retry mehanizam",
+      "status": "PASS",
+      "detail": "max_retries=2, self.retry(countdown=10) — automatski ponovi 2x"
+    },
+    {
+      "category": "OOM Kill",
+      "name": "Redis ne gubi task pri OOM kill",
+      "status": "PASS",
+      "detail": "ACKS_LATE=True + REJECT_ON_WORKER_LOST=True — task se vraca u queue ako worker umre"
+    },
+    {
+      "category": "OOM Kill",
+      "name": "Stale batch detekcija (>30 min)",
+      "status": "PASS",
+      "detail": "Batch #33 (45 min star) detektiran kao zaostali"
+    },
+    {
+      "category": "IMAP",
+      "name": "BODY.PEEK[] u kodu",
+      "status": "PASS",
+      "detail": "BODY.PEEK[] — email ostaje neprocitan dok se ne obradi"
+    },
+    {
+      "category": "IMAP",
+      "name": "Seen flag tek NAKON obrade",
+      "status": "PASS",
+      "detail": "store(Seen) poziva se NAKON uspjesne obrade privitaka"
+    },
+    {
+      "category": "IMAP",
+      "name": "FailedImport log za preskocene privitke",
+      "status": "PASS",
+      "detail": "FailedImport se kreira u except bloku — svaki preskoceni privitak je logiran"
+    },
+    {
+      "category": "IMAP",
+      "name": "DB pad -> FailedImport se kreira",
+      "status": "PASS",
+      "detail": "DB pad simuliran: 0 novih batcheva, 1 FailedImport zapisan"
+    },
+    {
+      "category": "IMAP",
+      "name": "Email bez privitaka se ignorira",
+      "status": "PASS",
+      "detail": "Filtrira po Content-Disposition + ALLOWED_EXTS (.xml,.pdf,.jpg,.png...)"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: 0.01 EUR asimetrija",
+      "status": "PASS",
+      "detail": "Blokirana: razlika 0.01 EUR — Temeljnica nije uravnotežena: duguje=1000.00, potražuje=999.99, razlika=0.01"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: 500 EUR asimetrija",
+      "status": "PASS",
+      "detail": "Blokirana: razlika 500.00 EUR"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: samo duguje, bez potrazuje",
+      "status": "PASS",
+      "detail": "Blokirana: 1000.00 duguje, 0.00 potrazuje"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: duplikat broja temeljnice",
+      "status": "PASS",
+      "detail": "Blokiran: unique_together(company, entry_number)"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: negativan iznos bez full_clean()",
+      "status": "PASS",
+      "detail": "Negativan iznos blokiran: {'amount': ['Ensure this value is greater than or equal to 0.01.']}"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: bulk_create bypass",
+      "status": "PASS",
+      "detail": "bulk_create bypass blokiran — clean() na entry uhvatio razliku"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: decimal rounding (PG tihi round)",
+      "status": "PASS",
+      "detail": "Blokiran: full_clean() ne dozvoljava >2 decimale — sprijecen tihi PG round"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: case sensitivity entry_number",
+      "status": "FAIL",
+      "detail": "UPOZORENJE: Case-insensitive duplikat prihvacen (CHAOS-CASE vs chaos-case)"
+    },
+    {
+      "category": "Konto",
+      "name": "Napad: prazan integrity_hash (GoBD)",
+      "status": "PASS",
+      "detail": "integrity_hash popunjen"
+    },
+    {
+      "category": "AI Parse",
+      "name": "Gemini timeout -> batch=error",
+      "status": "PASS",
+      "detail": "Gemini timeout → status=error, msg='Nema stavki – datoteka je prazna ili format nije prepoznat.'"
+    },
+    {
+      "category": "AI Parse",
+      "name": "Gemini garbage JSON -> sigurno parsiran",
+      "status": "PASS",
+      "detail": "Svih 6 garbage inputa sigurno obradjeno"
+    },
+    {
+      "category": "AI Parse",
+      "name": "SQL/XSS injection u fakturi",
+      "status": "PASS",
+      "detail": "2 stavke parsirane — Django ORM escapira SQL, XSS se ne izvrsava u backendu"
+    },
+    {
+      "category": "Race",
+      "name": "Dvostruka potvrda batch-a",
+      "status": "PASS",
+      "detail": "Drugi korisnik vidi status=confirmed — ne moze ponovo potvrditi"
+    },
+    {
+      "category": "Race",
+      "name": "Invoice fiskalizacija polja",
+      "status": "PASS",
+      "detail": "Fiskalizacijska polja: fiscal_logs, fiscal_batches, is_fiscalized, zki, jir, fiscal_datetime"
+    },
+    {
+      "category": "Integritet",
+      "name": "Orphaned ImportBatchItem",
+      "status": "PASS",
+      "detail": "0 orphaned stavki — sve imaju parent batch"
+    },
+    {
+      "category": "Integritet",
+      "name": "Orphaned InvoiceItem",
+      "status": "PASS",
+      "detail": "0 orphaned stavki faktura"
+    },
+    {
+      "category": "Integritet",
+      "name": "Orphaned LedgerLine",
+      "status": "PASS",
+      "detail": "0 orphaned stavki knjizenja"
+    },
+    {
+      "category": "Integritet",
+      "name": "Sve firme imaju subscription",
+      "status": "PASS",
+      "detail": "Sve 10 firme imaju subscription"
+    }
+  ]
+}

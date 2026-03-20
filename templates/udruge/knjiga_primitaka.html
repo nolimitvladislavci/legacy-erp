@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Knjiga primitaka i izdataka — LIMIT CONNECT{% endblock %}
+{% block content %}
+<style>
+    .udruge-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .udruge-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, #c9a84c); }
+    .udruge-stat .label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .udruge-stat.saldo-positive .value { color: #065f46; }
+    .udruge-stat.saldo-negative .value { color: #dc2626; }
+    .udruge-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .udruge-table th { background: var(--table-header-bg); padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    .udruge-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .udruge-table tr:hover { background: var(--table-row-hover); }
+    .badge-primitak { background: #065f4620; color: #065f46; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-izdatak { background: #dc262620; color: #dc2626; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .btn-gold { background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
+    .btn-gold:hover { background: #b8943f; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-header h1 { font-size: 1.5rem; margin: 0; }
+    .year-select select { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); }
+    @media (max-width: 768px) {
+        .udruge-stats { grid-template-columns: repeat(2, 1fr); }
+        .udruge-table { font-size: 0.8rem; }
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-book" style="color:var(--gold)"></i> Knjiga primitaka i izdataka</h1>
+    <div style="display:flex;gap:12px;align-items:center">
+        <select class="year-select" onchange="location.href='{% url 'udruge:knjiga_primitaka' %}?year='+this.value" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text)">
+            <option {% if year == "2024" %}selected{% endif %} value="2024">2024</option>
+            <option {% if year == "2025" %}selected{% endif %} value="2025">2025</option>
+            <option {% if year == "2026" %}selected{% endif %} value="2026">2026</option>
+            <option {% if year == "2027" %}selected{% endif %} value="2027">2027</option>
+        </select>
+        <a href="{% url 'udruge:knjiga_primitaka_create' %}" class="btn-gold"><i class="fas fa-plus"></i> Nova stavka</a>
+    </div>
+</div>
+
+<div class="udruge-stats">
+    <div class="udruge-stat">
+        <div class="value">{{ stats.primici|default:"0" }} &euro;</div>
+        <div class="label">Primici</div>
+    </div>
+    <div class="udruge-stat">
+        <div class="value">{{ stats.izdaci|default:"0" }} &euro;</div>
+        <div class="label">Izdaci</div>
+    </div>
+    <div class="udruge-stat {% if stats.saldo >= 0 %}saldo-positive{% else %}saldo-negative{% endif %}">
+        <div class="value">{{ stats.saldo|default:"0" }} &euro;</div>
+        <div class="label">Saldo</div>
+    </div>
+    <div class="udruge-stat">
+        <div class="value">{{ stats.unosa }}</div>
+        <div class="label">Unosa</div>
+    </div>
+</div>
+
+<table class="udruge-table">
+    <thead>
+        <tr>
+            <th>R.br.</th>
+            <th>Datum</th>
+            <th>Opis</th>
+            <th>Vrsta</th>
+            <th>Izvor</th>
+            <th>Iznos</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in stavke %}
+        <tr>
+            <td>{{ s.redni_broj }}</td>
+            <td>{{ s.datum|date:"d.m.Y." }}</td>
+            <td>{{ s.opis }}</td>
+            <td>
+                <span class="badge-{{ s.vrsta }}">{{ s.get_vrsta_display }}</span>
+            </td>
+            <td>{{ s.get_izvor_display }}</td>
+            <td style="font-weight:600;{% if s.vrsta == 'izdatak' %}color:#dc2626{% else %}color:#065f46{% endif %}">
+                {% if s.vrsta == 'izdatak' %}-{% endif %}{{ s.iznos }} &euro;
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">Nema stavki za {{ year }}.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

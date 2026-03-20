@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Nova faktura{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:900px">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-gold mb-0"><i class="fas fa-file-invoice me-2"></i>Nova faktura</h2>
+    <div>
+      <a href="{% url 'invoicing:invoice_wizard' %}" class="btn btn-outline-gold btn-sm me-2"><i class="fas fa-magic me-1"></i>Wizard</a>
+      <a href="{% url 'invoicing:index' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
+    </div>
+  </div>
+  <form method="post" action="{% url 'invoicing:invoice_save' %}">
+    {% csrf_token %}
+    <input type="hidden" name="doctype" value="invoice">
+    <input type="hidden" name="country" value="{{ company.country|default:'HR' }}">
+    <input type="hidden" name="currency" value="{{ company.currency|default:'EUR' }}">
+
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header text-gold"><i class="fas fa-user me-2"></i>Klijent</div>
+      <div class="card-body"><div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Naziv klijenta <span class="text-danger">*</span></label><input type="text" name="client_name" class="form-control bg-dark text-light border-secondary" required></div>
+        <div class="col-md-6"><label class="form-label">OIB / USt-IdNr</label><input type="text" name="client_oib" class="form-control bg-dark text-light border-secondary"></div>
+        <div class="col-md-8"><label class="form-label">Adresa</label><input type="text" name="client_address" class="form-control bg-dark text-light border-secondary"></div>
+        <div class="col-md-4"><label class="form-label">Grad</label><input type="text" name="client_city" class="form-control bg-dark text-light border-secondary"></div>
+        <div class="col-md-4"><label class="form-label">Drzava</label><input type="text" name="client_country" class="form-control bg-dark text-light border-secondary" value="Hrvatska"></div>
+        <div class="col-md-4"><label class="form-label">Email</label><input type="email" name="client_email" class="form-control bg-dark text-light border-secondary"></div>
+      </div></div>
+    </div>
+
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header text-gold"><i class="fas fa-info-circle me-2"></i>Podaci racuna</div>
+      <div class="card-body"><div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Datum <span class="text-danger">*</span></label><input type="date" name="date_issued" class="form-control bg-dark text-light border-secondary" value="{% now 'Y-m-d' %}" required></div>
+        <div class="col-md-4"><label class="form-label">Rok placanja</label><input type="date" name="date_due" class="form-control bg-dark text-light border-secondary"></div>
+        <div class="col-md-4"><label class="form-label">Valuta</label><select name="currency" class="form-select bg-dark text-light border-secondary"><option>EUR</option><option>USD</option><option>GBP</option></select></div>
+        <div class="col-12"><label class="form-label">Napomena</label><textarea name="note" rows="2" class="form-control bg-dark text-light border-secondary"></textarea></div>
+      </div></div>
+    </div>
+
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header text-gold d-flex justify-content-between">
+        <span><i class="fas fa-list me-2"></i>Stavke</span>
+        <button type="button" class="btn btn-sm btn-outline-gold" id="addItemBtn"><i class="fas fa-plus me-1"></i>Dodaj stavku</button>
+      </div>
+      <div class="card-body p-0"><div class="table-responsive"><table class="table table-dark mb-0">
+        <thead><tr><th>Opis</th><th style="width:9%">Kol.</th><th style="width:9%">J.mj.</th><th style="width:13%">Cijena</th><th style="width:11%">PDV%</th><th style="width:12%">Ukupno</th><th style="width:5%"></th></tr></thead>
+        <tbody id="itemsBody"></tbody>
+      </table></div></div>
+      <div class="card-footer text-end">
+        <span class="text-muted me-4">Bez PDV-a: <strong id="subtotalDisplay">0,00</strong></span>
+        <span class="text-muted me-4">PDV: <strong id="taxDisplay">0,00</strong></span>
+        <span class="text-gold fs-5">Ukupno: <strong id="totalDisplay">0,00</strong></span>
+      </div>
+    </div>
+
+    <div class="text-end"><button type="submit" class="btn btn-gold px-5"><i class="fas fa-save me-1"></i>Spremi fakturu</button></div>
+  </form>
+</div>
+
+<script>
+(function(){
+  var TR=[{% for tr in tax_rates %}{r:{{ tr.rate }},n:"{{ tr.name }}"},{% endfor %}];
+  var DEF=TR.length?TR[0].r:25;
+  function fmtN(n){return n.toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function opts(sel){
+    var o="";
+    TR.forEach(function(tx){o+="<option value="+tx.r+(parseFloat(tx.r)===parseFloat(sel)?" selected":"")+">"+tx.r+"%</option>";});
+    return o;
+  }
+  function sfT(){
+    var sub=0,tax=0;
+    document.querySelectorAll("#itemsBody tr").forEach(function(row){
+      var qty=parseFloat(row.querySelector("[name='item_qty[]']").value)||0;
+      var prc=parseFloat(row.querySelector("[name='item_price[]']").value)||0;
+      var vat=parseFloat(row.querySelector("[name='item_pdv[]']").value)||0;
+      var s=qty*prc; sub+=s; tax+=s*vat/100;
+    });
+    document.getElementById("subtotalDisplay").textContent=fmtN(sub);
+    document.getElementById("taxDisplay").textContent=fmtN(tax);
+    document.getElementById("totalDisplay").textContent=fmtN(sub+tax);
+  }
+  window._sfC=function(el){
+    var row=el.closest("tr");
+    var qty=parseFloat(row.querySelector("[name='item_qty[]']").value)||0;
+    var prc=parseFloat(row.querySelector("[name='item_price[]']").value)||0;
+    var vat=parseFloat(row.querySelector("[name='item_pdv[]']").value)||0;
+    var s=qty*prc;
+    row.querySelector(".row-total").textContent=fmtN(s+s*vat/100);
+    sfT();
+  };
+  window._sfT=sfT;
+  function addRow(){
+    var row=document.createElement("tr");
+    var esc="\"";
+    row.innerHTML=
+      "<td><input type=text name="+esc+"item_desc[]"+esc+" class="+esc+"form-control form-control-sm bg-dark text-light border-secondary"+esc+" required></td>"
+      +"<td><input type=number name="+esc+"item_qty[]"+esc+" class="+esc+"form-control form-control-sm bg-dark text-light border-secondary text-end"+esc+" value=1 step=any oninput=_sfC(this)></td>"
+      +"<td><input type=text name="+esc+"item_unit[]"+esc+" class="+esc+"form-control form-control-sm bg-dark text-light border-secondary"+esc+" value=kom></td>"
+      +"<td><input type=number name="+esc+"item_price[]"+esc+" class="+esc+"form-control form-control-sm bg-dark text-light border-secondary text-end"+esc+" value=0 step=any oninput=_sfC(this)></td>"
+      +"<td><select name="+esc+"item_pdv[]"+esc+" class="+esc+"form-select form-select-sm bg-dark text-light border-secondary"+esc+" onchange=_sfC(this)>"+opts(DEF)+"</select></td>"
+      +"<td class="+esc+"text-end row-total fw-bold text-gold"+esc+">0,00</td>"
+      +"<td class=text-center><button type=button class="+esc+"btn btn-sm btn-outline-danger"+esc+" onclick="+esc+"this.closest("+esc+esc+"tr"+esc+esc+").remove();_sfT()"+esc+">x</button></td>";
+    document.getElementById("itemsBody").appendChild(row);
+    _sfC(row.querySelector("[name='item_qty[]']"));
+  }
+  document.getElementById("addItemBtn").addEventListener("click",addRow);
+  addRow();
+}());
+</script>
+{% endblock %}

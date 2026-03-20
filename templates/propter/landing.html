@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propter e-Racun — Digitalno poslovanje bez papira</title>
+<meta name="description" content="Propter e-Racun SaaS platforma. FINA CIS integracija, UBL 2.1, arhiva 11+ godina.">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0a0a0a;--gold:#c9a84c;--gold-light:#e8d48b;--white:#f5f5f0;--gray:#94a3b8;--green:#22c55e;--blue:#3b82f6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Barlow',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden}
+h1,h2,h3{font-family:'Cormorant Garamond',serif}
+.hero{min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:60px 20px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 50% 50%,rgba(201,168,76,.08) 0%,transparent 50%);animation:pulse 8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.hero-content{position:relative;z-index:1;max-width:800px}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:16px}
+.hero h1 span{color:var(--gold)}
+.hero .sub{font-size:1.2rem;font-weight:300;color:var(--gray);margin-bottom:32px;line-height:1.6}
+.hero .stats{display:flex;gap:40px;justify-content:center;margin-bottom:40px}
+.hero .stat-val{font-size:2rem;font-weight:700;color:var(--gold)}
+.hero .stat-lbl{font-size:.75rem;color:var(--gray);text-transform:uppercase;letter-spacing:1px}
+.cta-btn{display:inline-block;padding:14px 36px;background:var(--gold);color:var(--black);font-weight:700;font-size:1rem;border-radius:8px;text-decoration:none;transition:all .3s;border:2px solid var(--gold)}
+.cta-btn:hover{background:transparent;color:var(--gold)}
+.cta-btn.outline{background:transparent;color:var(--gold);margin-left:12px}
+.cta-btn.outline:hover{background:var(--gold);color:var(--black)}
+.features{padding:80px 20px;max-width:1100px;margin:0 auto}
+.features h2{text-align:center;font-size:2.5rem;margin-bottom:48px}
+.features h2 span{color:var(--gold)}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.feat-card{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.15);border-radius:12px;padding:28px;transition:border-color .3s}
+.feat-card:hover{border-color:var(--gold)}
+.feat-card .icon{font-size:1.8rem;color:var(--gold);margin-bottom:12px}
+.feat-card h3{font-size:1.1rem;font-family:'Barlow',sans-serif;font-weight:600;margin-bottom:8px}
+.feat-card p{font-size:.88rem;color:var(--gray);line-height:1.5}
+.pricing{padding:80px 20px;background:rgba(201,168,76,.03)}
+.pricing h2{text-align:center;font-size:2.5rem;margin-bottom:12px}
+.pricing h2 span{color:var(--gold)}
+.pricing .sub{text-align:center;color:var(--gray);margin-bottom:48px;font-size:1rem}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;max-width:900px;margin:0 auto}
+.price-card{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.15);border-radius:16px;padding:36px;text-align:center;position:relative;transition:transform .3s,border-color .3s}
+.price-card:hover{transform:translateY(-4px);border-color:var(--gold)}
+.price-card.featured{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.price-card.featured::before{content:'POPULARAN';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);padding:4px 16px;border-radius:12px;font-size:.7rem;font-weight:700;letter-spacing:1px}
+.price-card .tier{font-size:.8rem;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:8px}
+.price-card .price{font-size:2.5rem;font-weight:700;margin-bottom:4px}
+.price-card .price span{font-size:1rem;font-weight:400;color:var(--gray)}
+.price-card .range{font-size:.85rem;color:var(--gray);margin-bottom:20px}
+.price-card ul{list-style:none;text-align:left;margin-bottom:28px}
+.price-card li{padding:8px 0;font-size:.88rem;color:var(--gray);border-bottom:1px solid rgba(255,255,255,.05)}
+.price-card li i{color:var(--gold);margin-right:8px;width:16px}
+.process{padding:80px 20px;max-width:900px;margin:0 auto}
+.process h2{text-align:center;font-size:2.5rem;margin-bottom:48px}
+.process h2 span{color:var(--gold)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;text-align:center}
+.step .num{width:48px;height:48px;border-radius:50%;border:2px solid var(--gold);display:inline-flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:12px}
+.step h3{font-family:'Barlow',sans-serif;font-size:1rem;font-weight:600;margin-bottom:8px}
+.step p{font-size:.85rem;color:var(--gray);line-height:1.5}
+.esg{padding:60px 20px;text-align:center}
+.esg-card{max-width:700px;margin:0 auto;background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(201,168,76,.1));border:1px solid rgba(34,197,94,.2);border-radius:16px;padding:40px}
+.esg-card h2{font-size:2rem;margin-bottom:12px}
+.esg-card h2 span{color:var(--green)}
+.esg-card p{color:var(--gray);line-height:1.6;margin-bottom:20px}
+.esg-stats{display:flex;gap:30px;justify-content:center;flex-wrap:wrap}
+.esg-stat .val{font-size:1.5rem;font-weight:700;color:var(--green)}
+.esg-stat .lbl{font-size:.72rem;color:var(--gray);text-transform:uppercase}
+.final-cta{padding:80px 20px;text-align:center}
+.final-cta h2{font-size:2.5rem;margin-bottom:16px}
+.final-cta h2 span{color:var(--gold)}
+.final-cta p{color:var(--gray);margin-bottom:32px;font-size:1.05rem}
+.landing-footer{padding:30px 20px;text-align:center;border-top:1px solid rgba(201,168,76,.1);font-size:.8rem;color:var(--gray)}
+.landing-footer a{color:var(--gold);text-decoration:none}
+@media(max-width:600px){.hero .stats{flex-direction:column;gap:16px}.cta-btn.outline{margin-left:0;margin-top:12px}}
+</style>
+</head>
+<body>
+<nav style="position:fixed;top:0;width:100%;z-index:100;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,10,.9);backdrop-filter:blur(10px);border-bottom:1px solid rgba(201,168,76,.1)">
+  <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--gold)">Propter</div>
+  <div style="display:flex;gap:24px;align-items:center">
+    <a href="#features" style="color:var(--gray);text-decoration:none;font-size:.88rem">Mogucnosti</a>
+    <a href="#pricing" style="color:var(--gray);text-decoration:none;font-size:.88rem">Cijene</a>
+    <a href="#process" style="color:var(--gray);text-decoration:none;font-size:.88rem">Kako radi</a>
+    <a href="/login/" class="cta-btn" style="padding:8px 20px;font-size:.85rem">Prijava</a>
+  </div>
+</nav>
+<section class="hero">
+  <div class="hero-content">
+    <h1>e-Racun bez <span>papira</span></h1>
+    <p class="sub">Propter je SaaS platforma za slanje e-Racuna putem FINA CIS sustava. UBL 2.1, digitalni potpis, arhiva 11+ godina — sve u oblaku.</p>
+    <div class="stats">
+      <div><div class="stat-val">{{ active_tenants }}</div><div class="stat-lbl">Aktivnih korisnika</div></div>
+      <div><div class="stat-val">{{ total_eracuni }}</div><div class="stat-lbl">Poslanih e-Racuna</div></div>
+      <div><div class="stat-val">100%</div><div class="stat-lbl">FINA CIS Compliance</div></div>
+    </div>
+    <a href="#pricing" class="cta-btn">Odaberite plan</a>
+    <a href="/login/" class="cta-btn outline">Prijava</a>
+  </div>
+</section>
+<section class="features" id="features">
+  <h2>Sve sto vam <span>treba</span></h2>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="icon"><i class="fas fa-file-invoice"></i></div><h3>UBL 2.1 e-Racun</h3><p>Automatsko generiranje XML-a prema EN 16931 standardu. Kompatibilno sa svim EU sustavima.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-shield-alt"></i></div><h3>FINA CIS integracija</h3><p>Direktna veza s FINA sustavom. Digitalni potpis, slanje i potvrda — sve automatizirano.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-archive"></i></div><h3>Arhiva 11+ godina</h3><p>Zakonski rok cuvanja osiguran. Svi dokumenti dostupni i pretrazivi u svakom trenutku.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-truck"></i></div><h3>Otpremnice + zbirni racun</h3><p>Mjesecno prikupljanje otpremnica i automatska agregacija u jedan zbirni e-Racun.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-users-cog"></i></div><h3>Multi-tenant za servise</h3><p>Knjigovodstveni servisi mogu voditi N klijenata iz jednog operatorskog dashboarda.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-leaf"></i></div><h3>ESG izvjestaj</h3><p>Automatski izracun CO2 ustede, badge sustav i javna eko stranica za vasu firmu.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-plug"></i></div><h3>API + Synesis</h3><p>REST API za integraciju s postojecim sustavima. Gotova Synesis veza za POS i skladiste.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-chart-bar"></i></div><h3>Konto knjizenje</h3><p>Automatsko knjizenje pri prihvacanju e-Racuna. Potrazivanja, prihodi i PDV — bez rucnog rada.</p></div>
+    <div class="feat-card"><div class="icon"><i class="fas fa-lock"></i></div><h3>GDPR + GoBD</h3><p>Potpuno uskladeno s EU regulativom. Svaki certifikat je per-firma — zakonski ispravno.</p></div>
+  </div>
+</section>
+<section class="pricing" id="pricing">
+  <h2>Jednostavne <span>cijene</span></h2>
+  <p class="sub">Bez skrivenih troskova. Bez ugovorne obveze. Otkaz u bilo kojem trenutku.</p>
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="tier">Direktni klijent</div>
+      <div class="price">30 - 80 <span>EUR/mj</span></div>
+      <div class="range">Ovisno o volumenu e-racuna</div>
+      <ul>
+        <li><i class="fas fa-check"></i> 1 tvrtka</li>
+        <li><i class="fas fa-check"></i> e-Racun slanje (UBL 2.1)</li>
+        <li><i class="fas fa-check"></i> FINA CIS integracija</li>
+        <li><i class="fas fa-check"></i> Digitalni potpis</li>
+        <li><i class="fas fa-check"></i> Arhiva 11+ godina</li>
+        <li><i class="fas fa-check"></i> Otpremnice + zbirni racun</li>
+        <li><i class="fas fa-check"></i> ESG eko izvjestaj</li>
+        <li><i class="fas fa-check"></i> Email podrska</li>
+      </ul>
+      <a href="mailto:info@limit-connect.com?subject=Propter%20-%20Direktni%20klijent" class="cta-btn" style="width:100%;text-align:center">Kontaktirajte nas</a>
+    </div>
+    <div class="price-card featured">
+      <div class="tier">Knjigovodstveni servis</div>
+      <div class="price">150 - 200 <span>EUR/mj</span></div>
+      <div class="range">Do N klijenata (konfigurirajuce)</div>
+      <ul>
+        <li><i class="fas fa-check"></i> Sve iz klijentskog plana</li>
+        <li><i class="fas fa-check"></i> Operator dashboard</li>
+        <li><i class="fas fa-check"></i> Upravljanje N klijenata</li>
+        <li><i class="fas fa-check"></i> Batch e-Racun obrada</li>
+        <li><i class="fas fa-check"></i> API pristup za sve klijente</li>
+        <li><i class="fas fa-check"></i> Prioritetna podrska</li>
+        <li><i class="fas fa-check"></i> ESG/Eko izvjesca svih klijenata</li>
+        <li><i class="fas fa-check"></i> White-label mogucnost</li>
+      </ul>
+      <a href="mailto:info@limit-connect.com?subject=Propter%20-%20Knjigovodstveni%20servis" class="cta-btn" style="width:100%;text-align:center">Kontaktirajte nas</a>
+    </div>
+  </div>
+</section>
+<section class="process" id="process">
+  <h2>Kako <span>poceti</span></h2>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><h3>Registracija</h3><p>Kreirajte racun i unesite podatke vase tvrtke.</p></div>
+    <div class="step"><div class="num">2</div><h3>FINA certifikat</h3><p>Podnesemo zahtjev za FINA certifikat u vase ime. Obicno 3-5 radnih dana.</p></div>
+    <div class="step"><div class="num">3</div><h3>Konfiguracija</h3><p>Postavljamo vase podatke, partnere i predloske racuna.</p></div>
+    <div class="step"><div class="num">4</div><h3>Slanje</h3><p>Saljete e-Racune jednim klikom. Mi brinemo o svemu ostalom.</p></div>
+  </div>
+</section>
+<section class="esg">
+  <div class="esg-card">
+    <h2>Digitalno = <span>Zeleno</span></h2>
+    <p>Svaki e-Racun znaci 2 lista papira manje i 10g CO2 manje u atmosferi. Dobijte badge i javnu eko stranicu za vasu firmu.</p>
+    <div class="esg-stats">
+      <div class="esg-stat"><div class="val">5g</div><div class="lbl">CO2 po listu (IPCC)</div></div>
+      <div class="esg-stat"><div class="val">21.700g</div><div class="lbl">CO2 / stablo / god</div></div>
+      <div class="esg-stat"><div class="val">4 razine</div><div class="lbl">Bronze Silver Gold Platinum</div></div>
+    </div>
+  </div>
+</section>
+<section class="final-cta">
+  <h2>Spremni za <span>digitalizaciju</span>?</h2>
+  <p>Javite nam se i krecemo. Bez ugovorne obveze, bez rucnog rada.</p>
+  <a href="mailto:info@limit-connect.com?subject=Propter%20-%20Upit" class="cta-btn">Zatrazite ponudu</a>
+  <a href="/login/" class="cta-btn outline">Vec imate racun? Prijava</a>
+</section>
+<footer class="landing-footer">
+  <p>&copy; 2026 <a href="https://limit-connect.com">LIMIT Connect</a> — Propter e-Racun platforma | <a href="/impressum/">Impressum</a> | <a href="/privatnost/">Privatnost</a></p>
+</footer>
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>

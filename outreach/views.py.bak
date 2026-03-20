@@ -1,0 +1,439 @@
+
+import csv
+import io
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from .models import Campaign, CampaignContact, Contact
+
+
+# ── AI personalization ────────────────────────────────────────────────────────
+def _personalize(subject_tpl, body_tpl, contact):
+    """Call Claude API to personalize the email for this contact."""
+    ctx = {
+        'ime_firme': contact.firm_name or contact.name or 'Ihr Unternehmen',
+        'grad':      contact.city or 'Ihrer Stadt',
+        'tip_posla': contact.get_contact_type_display(),
+    }
+    try:
+        import anthropic
+        api_key = getattr(settings, 'ANTHROPIC_API_KEY', None)
+        if not api_key:
+            raise ValueError('ANTHROPIC_API_KEY not configured')
+        client = anthropic.Anthropic(api_key=api_key)
+        prompt = (
+            f"Personalize this email for: firm={ctx['ime_firme']}, city={ctx['grad']}, "
+            f"type={ctx['tip_posla']}.\n"
+            f"Subject template: {subject_tpl}\nBody template: {body_tpl}\n\n"
+            "Replace {ime_firme}, {grad}, {tip_posla} naturally. Keep same language.\n"
+            'Return ONLY valid JSON: {"subject":"...","body":"..."}'
+        )
+        resp = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=800,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        import json as _json
+        return _json.loads(resp.content[0].text)
+    except Exception:
+        return {
+            'subject': subject_tpl.format(**ctx),
+            'body':    body_tpl.format(**ctx),
+        }
+
+
+def _categorize(text):
+    if not text:
+        return 'hladno'
+    t = text.lower()
+    if any(k in t for k in ['sofort','dringend','hitno','asap','heute','morgen','interessiert','angebot']):
+        return 'hitno'
+    if any(k in t for k in ['vielleicht','moglicherweise','spater','infos','information','mehr erfahren']):
+        return 'toplo'
+    return 'hladno'
+
+
+# ── dashboard ─────────────────────────────────────────────────────────────────
+@login_required
+def dashboard(request):
+    return render(request, 'outreach/dashboard.html', {
+        'contacts':      Contact.objects.count(),
+        'new_contacts':  Contact.objects.select_related("company").filter(status='neu').count(),
+        'interested':    Contact.objects.select_related("company").filter(status='interessiert').count(),
+        'clients':       Contact.objects.select_related("company").filter(status='klient').count(),
+        'campaigns':     Campaign.objects.order_by('-created_at')[:5],
+        'recent_replies': CampaignContact.objects.select_related("company").filter(status='replied')
+                          .select_related('contact','campaign').order_by('-replied_at')[:10],
+    })
+
+
+# ── contacts ──────────────────────────────────────────────────────────────────
+@login_required
+def contacts_list(request):
+    qs       = Contact.objects.all()
+    status_f = request.GET.get('status', '')
+    type_f   = request.GET.get('type', '')
+    q        = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(firm_name__icontains=q) | qs.filter(name__icontains=q) | \
+             Contact.objects.select_related("company").filter(email__icontains=q) | Contact.objects.select_related("company").filter(city__icontains=q)
+    if status_f:
+        qs = qs.filter(status=status_f)
+    if type_f:
+        qs = qs.filter(contact_type=type_f)
+    return render(request, 'outreach/contacts.html', {
+        'contacts': qs.distinct()[:200],
+        'status_choices': Contact.Status.choices,
+        'type_choices':   Contact.ContactType.choices,
+        'status_f': status_f, 'type_f': type_f, 'q': q,
+        'total': qs.distinct().count(),
+    })
+
+
+@login_required
+def contact_new(request):
+    if request.method == 'POST':
+        c = Contact(
+            name=request.POST.get('name','').strip(),
+            firm_name=request.POST.get('firm_name','').strip(),
+            email=request.POST.get('email','').strip(),
+            phone=request.POST.get('phone','').strip(),
+            address=request.POST.get('address','').strip(),
+            city=request.POST.get('city','').strip(),
+            plz=request.POST.get('plz','').strip(),
+            contact_type=request.POST.get('contact_type','firma'),
+            source='manual',
+            notes=request.POST.get('notes','').strip(),
+        )
+        c.save()
+        messages.success(request, f'Kontakt {c.display_name} gespeichert.')
+        return redirect('outreach:contacts')
+    return render(request, 'outreach/contact_form.html', {
+        'type_choices': Contact.ContactType.choices,
+    })
+
+
+@login_required
+def contact_edit(request, pk):
+    c = get_object_or_404(Contact, pk=pk)
+    if request.method == 'POST':
+        c.name         = request.POST.get('name','').strip()
+        c.firm_name    = request.POST.get('firm_name','').strip()
+        c.email        = request.POST.get('email','').strip()
+        c.phone        = request.POST.get('phone','').strip()
+        c.address      = request.POST.get('address','').strip()
+        c.city         = request.POST.get('city','').strip()
+        c.plz          = request.POST.get('plz','').strip()
+        c.contact_type = request.POST.get('contact_type','firma')
+        c.status       = request.POST.get('status','neu')
+        c.notes        = request.POST.get('notes','').strip()
+        c.save()
+        messages.success(request, 'Gespeichert.')
+        return redirect('outreach:contacts')
+    return render(request, 'outreach/contact_form.html', {
+        'contact': c,
+        'type_choices':   Contact.ContactType.choices,
+        'status_choices': Contact.Status.choices,
+    })
+
+
+# ── CSV import ────────────────────────────────────────────────────────────────
+@login_required
+def csv_import(request):
+    if request.method != 'POST':
+        return redirect('outreach:contacts')
+    f = request.FILES.get('csvfile')
+    if not f:
+        messages.error(request, 'Keine Datei gewaehlt.')
+        return redirect('outreach:contacts')
+    content = f.read().decode('utf-8-sig', errors='replace')
+    delim   = ',' if content.count(',') >= content.count(';') else ';'
+    reader  = csv.DictReader(io.StringIO(content), delimiter=delim)
+
+    def col(row, *keys):
+        for k in keys:
+            for rk in row:
+                if rk.strip().lower() == k.lower():
+                    return (row[rk] or '').strip()
+        return ''
+
+    created = skipped = 0
+    for row in reader:
+        email = col(row, 'email', 'e-mail', 'Email', 'E-Mail')
+        if not email:
+            continue
+        if Contact.objects.select_related("company").filter(email__iexact=email).exists():
+            skipped += 1
+            continue
+        Contact.objects.create(
+            name=col(row,'ime','name','Name','Vorname'),
+            firm_name=col(row,'firma','firm_name','Firma','Firmenname','company'),
+            email=email,
+            phone=col(row,'telefon','phone','Telefon','tel'),
+            city=col(row,'grad','city','Stadt','Ort'),
+            plz=col(row,'plz','PLZ','zip'),
+            contact_type=col(row,'tip','type','Typ') or 'firma',
+            source='csv',
+        )
+        created += 1
+    messages.success(request, f'{created} importiert, {skipped} Duplikate.')
+    return redirect('outreach:contacts')
+
+
+# ── campaigns ─────────────────────────────────────────────────────────────────
+@login_required
+def campaign_new(request):
+    if request.method == 'POST':
+        c = Campaign(
+            name=request.POST.get('name','').strip(),
+            subject_template=request.POST.get('subject_template','').strip(),
+            body_template=request.POST.get('body_template','').strip(),
+            send_per_day=int(request.POST.get('send_per_day',50) or 50),
+            follow_up_days=int(request.POST.get('follow_up_days',3) or 3),
+            active=bool(request.POST.get('active')),
+        )
+        c.save()
+        for cid in request.POST.getlist('contacts'):
+            try:
+                CampaignContact.objects.get_or_create(
+                    campaign=c, contact=Contact.objects.get(pk=cid))
+            except Contact.DoesNotExist:
+                pass
+        messages.success(request, f'Kampagne "{c.name}" erstellt.')
+        return redirect('outreach:campaign_detail', pk=c.pk)
+    return render(request, 'outreach/campaign_form.html', {
+        'contacts': Contact.objects.select_related("company").filter(status__in=['neu','kontaktiert']).order_by('firm_name'),
+    })
+
+
+@login_required
+def campaign_detail(request, pk):
+    campaign = get_object_or_404(Campaign, pk=pk)
+    all_contacts = Contact.objects.select_related("company").filter(status__in=['neu','kontaktiert']).order_by('firm_name')
+    existing_ids = set(campaign.contacts.values_list('contact_id', flat=True))
+    available = all_contacts.exclude(pk__in=existing_ids)
+    return render(request, 'outreach/campaign_detail.html', {
+        'campaign': campaign,
+        'cc_list':  campaign.contacts.select_related('contact').order_by('-id')[:100],
+        'available_contacts': available,
+    })
+
+
+@login_required
+def campaign_preview(request, pk):
+    campaign   = get_object_or_404(Campaign, pk=pk)
+    contact_id = request.GET.get('contact')
+    contact = preview = None
+    if contact_id:
+        contact = get_object_or_404(Contact, pk=contact_id)
+        preview = _personalize(campaign.subject_template, campaign.body_template, contact)
+    return render(request, 'outreach/campaign_preview.html', {
+        'campaign': campaign,
+        'contacts': Contact.objects.select_related("company").filter(status__in=['neu','kontaktiert'])[:20],
+        'contact':  contact,
+        'preview':  preview,
+    })
+
+
+@login_required
+@require_POST
+def campaign_send(request, pk):
+    campaign = get_object_or_404(Campaign, pk=pk)
+    cc_id    = request.POST.get('cc_id')
+    cc       = get_object_or_404(CampaignContact, pk=cc_id, campaign=campaign)
+    channel  = request.POST.get('channel', 'email')  # 'email' or 'whatsapp'
+
+    result = _personalize(campaign.subject_template, campaign.body_template, cc.contact)
+    cc.personalized_subject = result['subject']
+    cc.personalized_body    = result['body']
+
+    error = None
+
+    if channel == 'whatsapp':
+        from core.whatsapp import send_text, normalize_phone, is_gateway_healthy
+        phone = cc.contact.phone or ''
+        if not phone or not normalize_phone(phone):
+            return JsonResponse({'ok': False, 'error': f'Nema WhatsApp broja za {cc.contact.display_name}'})
+        if not is_gateway_healthy():
+            return JsonResponse({'ok': False, 'error': 'WhatsApp gateway nije dostupan'})
+        wa_msg = f"{result['subject']}\n\n{result['body']}"
+        wa_result = send_text(phone, wa_msg)
+        if not wa_result['success']:
+            return JsonResponse({'ok': False, 'error': wa_result['error']})
+        cc.status  = 'sent'
+        cc.sent_at = timezone.now()
+        cc.save()
+    else:
+        # Email slanje
+        from django.core.mail import EmailMessage
+        try:
+            msg = EmailMessage(
+                subject=result['subject'],
+                body=result['body'],
+                from_email='viskovic.bau@gmail.com',
+                to=[cc.contact.email],
+            )
+            msg.send(fail_silently=False)
+            cc.status  = 'sent'
+            cc.sent_at = timezone.now()
+            cc.save()
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)})
+
+    if cc.contact.status == 'neu':
+        cc.contact.status = 'kontaktiert'
+        cc.contact.save(update_fields=['status'])
+    campaign.refresh_stats()
+    return JsonResponse({'ok': True, 'subject': result['subject'], 'channel': channel})
+
+
+@login_required
+@require_POST
+def campaign_add_contacts(request, pk):
+    campaign = get_object_or_404(Campaign, pk=pk)
+    added = 0
+    for cid in request.POST.getlist('contacts'):
+        try:
+            ct = Contact.objects.get(pk=cid)
+            _, created = CampaignContact.objects.get_or_create(campaign=campaign, contact=ct)
+            if created:
+                added += 1
+        except Contact.DoesNotExist:
+            pass
+    messages.success(request, f'{added} Kontakte hinzugefuegt.')
+    return redirect('outreach:campaign_detail', pk=pk)
+
+
+# ── inbox ─────────────────────────────────────────────────────────────────────
+@login_required
+def inbox(request):
+    replies = CampaignContact.objects.select_related("company").filter(status='replied') \
+        .select_related('contact','campaign').order_by('-replied_at')[:50]
+    categorized = [{'cc': r, 'category': _categorize(r.reply_text)} for r in replies]
+    return render(request, 'outreach/inbox.html', {'categorized': categorized})
+
+
+@login_required
+@require_POST
+def mark_replied(request, cc_pk):
+    cc = get_object_or_404(CampaignContact, pk=cc_pk)
+    cc.status     = 'replied'
+    cc.replied_at = timezone.now()
+    cc.reply_text = request.POST.get('reply_text','').strip()
+    cc.save()
+    if cc.contact.status not in ('interessiert','klient'):
+        cc.contact.status = 'geantwortet'
+        cc.contact.save(update_fields=['status'])
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_POST
+def campaign_bulk_send(request, pk):
+    """Send to ALL pending contacts in campaign (email or whatsapp)."""
+    campaign = get_object_or_404(Campaign, pk=pk)
+    channel  = request.POST.get('channel', 'email')
+    pending  = campaign.contacts.filter(status='pending').select_related('contact')
+    sent = failed = 0
+
+    for cc in pending:
+        result = _personalize(campaign.subject_template, campaign.body_template, cc.contact)
+        cc.personalized_subject = result['subject']
+        cc.personalized_body    = result['body']
+
+        if channel == 'whatsapp':
+            from core.whatsapp import send_text, normalize_phone, is_gateway_healthy
+            phone = cc.contact.phone or ''
+            if not phone or not normalize_phone(phone):
+                failed += 1
+                continue
+            wa_result = send_text(phone, f"{result['subject']}\n\n{result['body']}")
+            if wa_result['success']:
+                cc.status = 'sent'
+                cc.sent_at = timezone.now()
+                cc.save()
+                sent += 1
+            else:
+                failed += 1
+        else:
+            from django.core.mail import EmailMessage
+            try:
+                EmailMessage(
+                    subject=result['subject'],
+                    body=result['body'],
+                    from_email='viskovic.bau@gmail.com',
+                    to=[cc.contact.email],
+                ).send(fail_silently=False)
+                cc.status = 'sent'
+                cc.sent_at = timezone.now()
+                cc.save()
+                sent += 1
+            except Exception:
+                failed += 1
+
+        if cc.contact.status == 'neu':
+            cc.contact.status = 'kontaktiert'
+            cc.contact.save(update_fields=['status'])
+
+    campaign.refresh_stats()
+    messages.success(request, f'✅ Poslano: {sent}  |  ❌ Greška: {failed}')
+    return redirect('outreach:campaign_detail', pk=pk)
+
+
+@login_required
+@require_POST
+def import_from_partners(request):
+    """Import contacts from Partners module into Outreach."""
+    from partners.models import Partner
+    created = skipped = 0
+    for p in Partner.objects.filter(email__isnull=False).exclude(email=''):
+        if Contact.objects.select_related("company").filter(email__iexact=p.email).exists():
+            skipped += 1
+            continue
+        Contact.objects.create(
+            name=p.name,
+            firm_name=getattr(p, 'company_name', '') or '',
+            email=p.email,
+            phone=getattr(p, 'phone', '') or getattr(p, 'contact_phone', '') or '',
+            city=getattr(p, 'city', '') or '',
+            contact_type='firma',
+            source='manual',
+            notes=f'Importiran iz Partners modul',
+            company=request.user.profile.company if hasattr(request.user, 'profile') else None,
+        )
+        created += 1
+    messages.success(request, f'✅ Importirano {created} kontakata iz Partnera  |  {skipped} duplikata preskočeno')
+    return redirect('outreach:contacts')
+
+
+@login_required
+def contact_whatsapp(request, pk):
+    """Send a quick WhatsApp message to a single contact."""
+    c = get_object_or_404(Contact, pk=pk)
+    if request.method == 'POST':
+        from core.whatsapp import send_text, normalize_phone, is_gateway_healthy
+        msg = request.POST.get('message', '').strip()
+        phone = c.phone or ''
+        if not phone or not normalize_phone(phone):
+            messages.error(request, f'Kontakt nema validan WhatsApp broj.')
+        elif not is_gateway_healthy():
+            messages.error(request, 'WhatsApp gateway nije dostupan.')
+        elif not msg:
+            messages.error(request, 'Poruka ne može biti prazna.')
+        else:
+            result = send_text(phone, msg)
+            if result['success']:
+                messages.success(request, f'✅ WhatsApp poslan na {phone}')
+                if c.status == 'neu':
+                    c.status = 'kontaktiert'
+                    c.save(update_fields=['status'])
+            else:
+                messages.error(request, f'Greška: {result["error"]}')
+        return redirect('outreach:contacts')
+    return render(request, 'outreach/contact_whatsapp.html', {'contact': c})

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Self Check-in</title>
+<style>
+:root{--bg:#0a0a0a;--card:#141414;--border:#222;--gold:#c9a84c;--text:#e8e8e8;--muted:#666;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;max-width:400px;width:100%;text-align:center}
+.icon{font-size:3rem;margin-bottom:.8rem}
+h1{color:var(--gold);font-size:1.3rem;margin-bottom:.3rem}
+.sub{color:var(--muted);font-size:.85rem;margin-bottom:1.5rem}
+.info-row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.info-row .label{color:var(--muted)}
+.form{margin-top:1.5rem;text-align:left}
+.field{margin-bottom:.8rem}
+.field label{display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.25rem}
+.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.6rem .8rem;font-size:.9rem}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
+.btn-checkin{width:100%;background:var(--green);color:#000;border:none;padding:.8rem;border-radius:10px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:.5rem}
+.btn-checkin:active{opacity:.8}
+</style>
+</head><body>
+<div class="card">
+  <div class="icon">&#127968;</div>
+  <h1>Dobro dosli!</h1>
+  <div class="sub">Self Check-in</div>
+
+  <div class="info-row"><span class="label">Soba</span><span>{{ booking.rental_property.name }}</span></div>
+  <div class="info-row"><span class="label">Gost</span><span>{{ booking.guest_name }}</span></div>
+  <div class="info-row"><span class="label">Check-in</span><span>{{ booking.check_in|date:"d.m.Y" }}</span></div>
+  <div class="info-row"><span class="label">Check-out</span><span>{{ booking.check_out|date:"d.m.Y" }}</span></div>
+  <div class="info-row"><span class="label">Noci</span><span>{{ booking.total_nights }}</span></div>
+
+  <form method="post" class="form">{% csrf_token %}
+    <div class="field">
+      <label>Broj putovnice / osobne</label>
+      <input name="id_number" placeholder="HR12345678" required>
+    </div>
+    <div class="field">
+      <label>Drzava</label>
+      <select name="country">
+        <option value="HR">Hrvatska</option>
+        <option value="DE">Njemacka</option>
+        <option value="AT">Austrija</option>
+        <option value="SI">Slovenija</option>
+        <option value="IT">Italija</option>
+        <option value="HU">Madarska</option>
+        <option value="CZ">Ceska</option>
+        <option value="PL">Poljska</option>
+        <option value="GB">UK</option>
+        <option value="US">SAD</option>
+        <option value="OTHER">Ostalo</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Broj gostiju</label>
+      <input name="guest_count" type="number" min="1" max="{{ booking.rental_property.capacity }}" value="{{ booking.guest_count }}">
+    </div>
+    <button type="submit" class="btn-checkin">&#9989; Prijavi se</button>
+  </form>
+</div>
+</body></html>

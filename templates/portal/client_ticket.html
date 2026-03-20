@@ -1,0 +1,130 @@
+{% extends "portal/base_b2b.html" %}
+
+{% block title %}Tiket {{ ticket.ticket_number }} — Klijentski Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+.msg-bubble{
+  max-width:80%;padding:14px 18px;
+  border-radius:var(--radius);margin-bottom:12px;
+  font-size:.88rem;line-height:1.5;
+}
+.msg-client{
+  background:var(--gold-bg);border:1px solid rgba(201,168,76,.2);
+  margin-left:auto;
+}
+.msg-agent{
+  background:var(--surface);border:1px solid var(--border);
+}
+.msg-meta{
+  font-size:.7rem;color:var(--text-muted);margin-top:6px;
+  display:flex;align-items:center;gap:8px;
+}
+.msg-sender{font-weight:600;color:var(--text-secondary)}
+.msg-list{
+  max-height:500px;overflow-y:auto;
+  padding:16px 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-3">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);font-weight:700">
+      <i class="fas fa-ticket-alt" style="font-size:1rem;opacity:.6;margin-right:8px"></i>
+      {{ ticket.ticket_number }}
+    </h1>
+    <p class="text-muted" style="font-size:.85rem;margin-top:4px">{{ ticket.subject }}</p>
+  </div>
+  <a href="{% url 'client_portal:dashboard' token %}" class="btn btn-ghost btn-sm">
+    <i class="fas fa-arrow-left"></i> Natrag
+  </a>
+</div>
+
+<!-- Ticket Info -->
+<div class="b2b-info-grid mb-3">
+  <div class="b2b-info-box">
+    <h4>Detalji tiketa</h4>
+    <div class="b2b-info-row"><span>Status</span>
+      <span>
+        <span class="badge badge-{% if ticket.status == 'open' %}sent{% elif ticket.status == 'in_progress' %}accepted{% elif ticket.status == 'waiting_client' %}overdue{% elif ticket.status == 'resolved' or ticket.status == 'closed' %}paid{% else %}draft{% endif %}">
+          {{ ticket.status }}
+        </span>
+      </span>
+    </div>
+    <div class="b2b-info-row"><span>Kategorija</span><span>{{ ticket.category }}</span></div>
+    <div class="b2b-info-row"><span>Prioritet</span><span>{{ ticket.priority }}</span></div>
+    <div class="b2b-info-row"><span>Izvor</span><span>{{ ticket.source }}</span></div>
+  </div>
+  <div class="b2b-info-box">
+    <h4>Vrijeme</h4>
+    <div class="b2b-info-row"><span>Otvoreno</span><span>{{ ticket.created_at|date:"d.m.Y H:i" }}</span></div>
+    {% if ticket.sla_deadline %}
+    <div class="b2b-info-row"><span>SLA rok</span><span>{{ ticket.sla_deadline|date:"d.m.Y H:i" }}</span></div>
+    {% endif %}
+    {% if ticket.first_response_at %}
+    <div class="b2b-info-row"><span>Prvi odgovor</span><span>{{ ticket.first_response_at|date:"d.m.Y H:i" }}</span></div>
+    {% endif %}
+    {% if ticket.resolved_at %}
+    <div class="b2b-info-row"><span>Riješeno</span><span>{{ ticket.resolved_at|date:"d.m.Y H:i" }}</span></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Original Description -->
+<div class="b2b-card">
+  <div class="b2b-card-header"><i class="fas fa-align-left"></i> Opis problema</div>
+  <div style="font-size:.88rem;line-height:1.6;white-space:pre-wrap">{{ ticket.description }}</div>
+</div>
+
+<!-- Messages -->
+<div class="b2b-card">
+  <div class="b2b-card-header"><i class="fas fa-comments"></i> Razgovor</div>
+
+  <div class="msg-list" id="msgList">
+    {% if messages %}
+      {% for m in messages %}
+      <div class="msg-bubble {% if m.is_from_client %}msg-client{% else %}msg-agent{% endif %}">
+        <div style="white-space:pre-wrap">{{ m.body }}</div>
+        <div class="msg-meta">
+          <span class="msg-sender">
+            {% if m.is_from_client %}{{ partner.name }}{% else %}{{ m.sender_name|default:"Podrška" }}{% endif %}
+          </span>
+          <span>{{ m.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted" style="text-align:center;font-size:.85rem">Još nema poruka u ovom tiketu.</p>
+    {% endif %}
+  </div>
+
+  {% if ticket.status != 'closed' and ticket.status != 'resolved' %}
+  <form method="post" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+    {% csrf_token %}
+    <label class="b2b-label" for="message">Vaša poruka</label>
+    <textarea name="message" id="message" class="b2b-textarea" required
+              placeholder="Upišite odgovor..." style="min-height:100px"></textarea>
+    <div style="margin-top:12px">
+      <button type="submit" class="btn btn-gold">
+        <i class="fas fa-paper-plane"></i> Pošalji
+      </button>
+    </div>
+  </form>
+  {% else %}
+  <div style="margin-top:16px;text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem;border-top:1px solid var(--border)">
+    <i class="fas fa-check-circle" style="color:var(--success);margin-right:6px"></i>
+    Ovaj tiket je zatvoren.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Scroll to bottom of messages
+var ml = document.getElementById('msgList');
+if (ml) ml.scrollTop = ml.scrollHeight;
+</script>
+{% endblock %}

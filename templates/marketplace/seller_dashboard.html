@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}OPG Panel{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-tractor text-success me-2"></i>OPG Panel</h2>
+    <small class="text-muted">{{ company.name }}</small>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'marketplace:seller_product_new' %}" class="btn btn-success"><i class="fas fa-plus me-1"></i>Novi proizvod</a>
+    <a href="{% url 'marketplace:catalog' %}" class="btn btn-outline-warning"><i class="fas fa-store me-1"></i>Trznica</a>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#c9a84c">{{ stats.total_products }}</div><small class="text-muted">Ukupno proizvoda</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#28a745">{{ stats.active_products }}</div><small class="text-muted">Aktivnih</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#ffc107">{{ stats.pending_orders }}</div><small class="text-muted">Ceka potvrdu</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#28a745">{{ stats.this_month_revenue }}&euro;</div><small class="text-muted">Zarada ovaj mj.</small></div></div>
+</div>
+{% if sub_orders %}
+<div class="stat-card p-4 mb-4">
+  <h6 class="mb-3"><i class="fas fa-bell text-warning me-2"></i>Narudzbe</h6>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0" style="font-size:.85rem">
+      <thead><tr><th>Narudzba</th><th>Kupac</th><th>Datum</th><th>Iznos</th><th>Status</th><th>Akcije</th></tr></thead>
+      <tbody>
+        {% for sub in sub_orders %}
+        <tr>
+          <td><a href="{% url 'marketplace:order_detail' sub.marketplace_order.pk %}" style="color:#c9a84c">{{ sub.marketplace_order.order_number }}</a></td>
+          <td>{{ sub.marketplace_order.buyer_company.name }}</td>
+          <td>{{ sub.created_at|date:"d.m.Y H:i" }}</td>
+          <td class="fw-bold">{{ sub.seller_payout }}&euro;</td>
+          <td>
+            {% if sub.status == "pending" %}<span class="badge bg-warning text-dark">Ceka</span>
+            {% elif sub.status == "confirmed" %}<span class="badge bg-primary">Potvrdeno</span>
+            {% elif sub.status == "ready" %}<span class="badge bg-info">Spremno</span>
+            {% elif sub.status == "delivered" %}<span class="badge bg-success">Dostavljeno</span>
+            {% elif sub.status == "rejected" %}<span class="badge bg-danger">Odbijeno</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if sub.status == "pending" %}
+            <form method="post" action="{% url 'marketplace:seller_order_action' sub.pk %}" class="d-inline">{% csrf_token %}
+              <button name="action" value="confirm" class="btn btn-sm btn-success py-0"><i class="fas fa-check"></i></button>
+              <button name="action" value="reject" class="btn btn-sm btn-outline-danger py-0"><i class="fas fa-times"></i></button>
+            </form>
+            {% elif sub.status == "confirmed" %}
+            <form method="post" action="{% url 'marketplace:seller_order_action' sub.pk %}" class="d-inline">{% csrf_token %}
+              <button name="action" value="ready" class="btn btn-sm btn-info py-0"><i class="fas fa-box"></i> Spremno</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+<div class="stat-card p-4">
+  <h6 class="mb-3"><i class="fas fa-box-open text-success me-2"></i>Moji proizvodi</h6>
+  {% if products %}
+  <div class="row g-3">
+    {% for p in products %}
+    <div class="col-md-4 col-lg-3">
+      <div class="stat-card h-100 p-3">
+        <div class="d-flex justify-content-between mb-2">
+          <span style="font-size:1.5rem">&#x1f96c;</span>
+          {% if p.is_available %}<span class="badge bg-success" style="font-size:.6rem">Dostupno</span>
+          {% else %}<span class="badge bg-danger" style="font-size:.6rem">Nedostupno</span>{% endif %}
+        </div>
+        <h6 class="mb-1">{{ p.name }}</h6>
+        <div class="fw-bold" style="color:#c9a84c">{{ p.unit_price }}&euro;/{{ p.unit }}</div>
+        <small class="text-muted">Skladiste: {{ p.available_qty }} {{ p.unit }}</small>
+        {% if p.is_organic %}<br><small class="text-success">Ekoloski</small>{% endif %}
+        <div class="mt-2"><a href="{% url 'marketplace:seller_product_edit' p.pk %}" class="btn btn-sm btn-outline-warning w-100"><i class="fas fa-edit me-1"></i>Uredi</a></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-4">
+    <i class="fas fa-seedling" style="font-size:2.5rem;color:#444"></i>
+    <p class="text-muted mt-2">Nemate proizvoda. Dodajte prvi!</p>
+    <a href="{% url 'marketplace:seller_product_new' %}" class="btn btn-success"><i class="fas fa-plus me-1"></i>Dodaj proizvod</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

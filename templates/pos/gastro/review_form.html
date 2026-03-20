@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocijenite nas</title>
+<style>
+:root{--bg:#faf7f2;--accent:#c9a84c;--card:#fff;--text:#2d2d2d;--muted:#888;--star-on:#fbbf24;--star-off:#d1d5db;--shadow:0 2px 12px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:1.5rem 1rem}
+.review-wrap{max-width:440px;width:100%}
+.header{text-align:center;margin-bottom:1.5rem}
+.header h1{font-size:1.4rem;color:var(--accent);margin-bottom:.3rem}
+.header p{font-size:.85rem;color:var(--muted)}
+.card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1rem}
+.card h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:.8rem}
+.star-rating{display:flex;gap:.3rem;justify-content:center;margin-bottom:.5rem}
+.star{font-size:2.2rem;cursor:pointer;color:var(--star-off);transition:color .15s,transform .15s;user-select:none;-webkit-tap-highlight-color:transparent}
+.star.active{color:var(--star-on)}
+.star:hover{transform:scale(1.15)}
+.sub-section{margin-top:1rem;padding-top:1rem;border-top:1px solid #eee}
+.sub-label{font-size:.8rem;color:var(--muted);margin-bottom:.3rem;text-align:center}
+.sub-stars .star{font-size:1.4rem}
+.sub-stars{display:flex;gap:.2rem;justify-content:center;margin-bottom:.8rem}
+textarea{width:100%;border:1px solid #ddd;border-radius:8px;padding:.8rem;font-size:.95rem;font-family:inherit;resize:vertical;min-height:80px;transition:border-color .2s}
+textarea:focus{outline:none;border-color:var(--accent)}
+.submit-btn{display:block;width:100%;background:var(--accent);color:#fff;border:none;padding:.9rem;border-radius:8px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:background .2s,transform .1s;margin-top:1rem}
+.submit-btn:hover{background:#b8953e}
+.submit-btn:active{transform:scale(.98)}
+.powered{text-align:center;margin-top:1.5rem;font-size:.7rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="review-wrap">
+  <div class="header">
+    <h1>{{ order.company.name|default:"Restoran" }}</h1>
+    <p>Kako ste zadovoljni narudzbom?</p>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="card">
+      <h3>Ukupna ocjena</h3>
+      <div class="star-rating" data-target="rating">
+        <input type="hidden" name="rating" value="5">
+        <span class="star" data-value="1">&#9733;</span>
+        <span class="star" data-value="2">&#9733;</span>
+        <span class="star" data-value="3">&#9733;</span>
+        <span class="star" data-value="4">&#9733;</span>
+        <span class="star" data-value="5">&#9733;</span>
+      </div>
+      <div class="sub-section">
+        <div class="sub-label">Hrana</div>
+        <div class="star-rating sub-stars" data-target="food_rating">
+          <input type="hidden" name="food_rating" value="0">
+          <span class="star" data-value="1">&#9733;</span>
+          <span class="star" data-value="2">&#9733;</span>
+          <span class="star" data-value="3">&#9733;</span>
+          <span class="star" data-value="4">&#9733;</span>
+          <span class="star" data-value="5">&#9733;</span>
+        </div>
+        <div class="sub-label">Usluga</div>
+        <div class="star-rating sub-stars" data-target="service_rating">
+          <input type="hidden" name="service_rating" value="0">
+          <span class="star" data-value="1">&#9733;</span>
+          <span class="star" data-value="2">&#9733;</span>
+          <span class="star" data-value="3">&#9733;</span>
+          <span class="star" data-value="4">&#9733;</span>
+          <span class="star" data-value="5">&#9733;</span>
+        </div>
+        <div class="sub-label">Ambijent</div>
+        <div class="star-rating sub-stars" data-target="ambience_rating">
+          <input type="hidden" name="ambience_rating" value="0">
+          <span class="star" data-value="1">&#9733;</span>
+          <span class="star" data-value="2">&#9733;</span>
+          <span class="star" data-value="3">&#9733;</span>
+          <span class="star" data-value="4">&#9733;</span>
+          <span class="star" data-value="5">&#9733;</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Komentar (opcionalno)</h3>
+      <textarea name="comment" placeholder="Recite nam sto mislite..."></textarea>
+    </div>
+    <button type="submit" class="submit-btn">Posalji ocjenu</button>
+  </form>
+  <div class="powered">Powered by LIMIT Connect</div>
+</div>
+<script>
+document.querySelectorAll('.star-rating').forEach(function(group){
+  var stars=group.querySelectorAll('.star');
+  var input=group.querySelector('input[type=hidden]');
+  var isMain=!group.classList.contains('sub-stars');
+  stars.forEach(function(star){
+    star.addEventListener('click',function(){
+      var val=star.dataset.value;
+      input.value=val;
+      stars.forEach(function(s){
+        if(parseInt(s.dataset.value)<=parseInt(val)){s.classList.add('active')}else{s.classList.remove('active')}
+      });
+    });
+  });
+  // Default: main rating all active, sub-ratings none
+  if(isMain){stars.forEach(function(s){s.classList.add('active')})}
+});
+</script>
+</body>
+</html>

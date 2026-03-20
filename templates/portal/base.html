@@ -1,0 +1,47 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}LIMIT CONNECT Portal{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --dark: #0f172a; --gold: #c9a84c; --gray: #64748b; }
+        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; color: #1e293b; }
+        .portal-header { background: var(--dark); color: white; padding: 16px 0; }
+        .portal-header .brand { font-weight: 700; font-size: 1.1rem; }
+        .portal-header .brand span { color: var(--gold); }
+        .portal-nav a { color: #94a3b8; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: .85rem; transition: all .15s; }
+        .portal-nav a:hover, .portal-nav a.active { color: white; background: rgba(255,255,255,.1); }
+        .portal-footer { text-align: center; padding: 24px; color: var(--gray); font-size: .75rem; margin-top: 40px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .stat-card .label { font-size: .75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="portal-header">
+        <div class="container-fluid" style="max-width:1000px">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="brand">LIMIT <span>CONNECT</span> <small style="color:#64748b;font-size:.7rem;margin-left:8px">Portal</small></div>
+                <div class="text-end" style="font-size:.8rem;color:#94a3b8">
+                    <i class="fas fa-user-circle"></i> {{ partner.name }}
+                </div>
+            </div>
+            <div class="portal-nav d-flex gap-1 mt-2">
+                <a href="{% url 'portal_home' token %}" class="{% if active_tab == 'home' %}active{% endif %}"><i class="fas fa-home"></i> {% trans "Pregled" %}</a>
+                <a href="{% url 'portal_invoices' token %}" class="{% if active_tab == 'invoices' %}active{% endif %}"><i class="fas fa-file-invoice"></i> {% trans "Fakture" %}</a>
+                <a href="{% url 'portal_projects' token %}" class="{% if active_tab == 'projects' %}active{% endif %}"><i class="fas fa-hard-hat"></i> {% trans "Projekti" %}</a>
+                <a href="{% url 'portal_documents' token %}" class="{% if active_tab == 'documents' %}active{% endif %}"><i class="fas fa-folder-open"></i> {% trans "Dokumenti" %}</a>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="max-width:1000px;padding-top:24px">
+        {% block content %}{% endblock %}
+    </div>
+    <div class="portal-footer">LIMIT CONNECT &middot; Powered by Viskovic Group</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

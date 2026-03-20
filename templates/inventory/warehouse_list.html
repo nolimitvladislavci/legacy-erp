@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Skladista | LIMIT Connect{% endblock %}
+{% block page_title %}Skladista{% endblock %}
+{% block content %}
+<div style="max-width:700px;margin:0 auto">
+  <h2 style="margin:0 0 1rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;color:var(--text);font-size:1.4rem">
+    <i class="fas fa-warehouse" style="color:var(--gold);margin-right:8px"></i>Skladista
+  </h2>
+  <div class="stat-card" style="padding:1.25rem">
+    <table style="width:100%;border-collapse:collapse;font-size:.85rem">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Naziv</th>
+          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Sifra</th>
+          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Tip</th>
+          <th style="text-align:left;padding:.5rem .75rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:.7rem;text-transform:uppercase">Adresa</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in warehouses %}
+        <tr>
+          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border);font-weight:600">
+            {{ w.name }}{% if w.is_default %} <span style="color:var(--gold);font-size:.72rem">★</span>{% endif %}
+          </td>
+          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border);color:var(--text-muted)">{{ w.code }}</td>
+          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border)">{{ w.get_warehouse_type_display }}</td>
+          <td style="padding:.5rem .75rem;border-bottom:1px solid var(--border);color:var(--text-muted);font-size:.82rem">{{ w.address }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema skladista za ovu firmu</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns0:Invoice xmlns:ns0="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:ns1="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ns2="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <ns1:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</ns1:CustomizationID>
+  <ns1:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ns1:ProfileID>
+  <ns1:ID/>
+  <ns1:IssueDate>2026-03-19</ns1:IssueDate>
+  <ns1:InvoiceTypeCode>380</ns1:InvoiceTypeCode>
+  <ns1:DocumentCurrencyCode/>
+  <ns2:AccountingSupplierParty>
+    <ns2:Party>
+      <ns2:PartyName>
+        <ns1:Name/>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName/>
+        <ns1:CityName/>
+        <ns1:PostalZone/>
+        <ns2:Country>
+          <ns1:IdentificationCode/>
+        </ns2:Country>
+      </ns2:PostalAddress>
+    </ns2:Party>
+  </ns2:AccountingSupplierParty>
+  <ns2:AccountingCustomerParty>
+    <ns2:Party>
+      <ns2:PartyName>
+        <ns1:Name/>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName/>
+        <ns1:CityName/>
+        <ns1:PostalZone/>
+        <ns2:Country>
+          <ns1:IdentificationCode/>
+        </ns2:Country>
+      </ns2:PostalAddress>
+    </ns2:Party>
+  </ns2:AccountingCustomerParty>
+  <ns2:PaymentMeans>
+    <ns1:PaymentMeansCode>30</ns1:PaymentMeansCode>
+  </ns2:PaymentMeans>
+  <ns2:TaxTotal>
+    <ns1:TaxAmount currencyID="">0.00</ns1:TaxAmount>
+  </ns2:TaxTotal>
+  <ns2:LegalMonetaryTotals>
+    <ns1:LineExtensionAmount currencyID="">0.00</ns1:LineExtensionAmount>
+    <ns1:TaxExclusiveAmount currencyID="">0.00</ns1:TaxExclusiveAmount>
+    <ns1:TaxInclusiveAmount currencyID="">0.00</ns1:TaxInclusiveAmount>
+    <ns1:PayableAmount currencyID="">0.00</ns1:PayableAmount>
+  </ns2:LegalMonetaryTotals>
+</ns0:Invoice>

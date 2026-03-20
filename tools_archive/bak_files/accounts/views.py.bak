@@ -1,0 +1,146 @@
+import os
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.generic import ListView
+from django.contrib import messages
+from django.contrib.auth.forms import PasswordResetForm
+from .models import UserProfile
+
+class UserListView(ListView):
+    model = User
+    template_name = 'accounts/user_list.html'
+    context_object_name = 'users'
+    def get_queryset(self):
+        return User.objects.select_related('profile').order_by('-last_login')
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def user_edit(request, pk):
+    target_user = get_object_or_404(User, pk=pk)
+    
+    if request.method == 'POST':
+        # 1. Ažuriranje standardnih Django polja
+        target_user.username = request.POST.get('username', target_user.username)
+        target_user.first_name = request.POST.get('first_name', target_user.first_name)
+        target_user.last_name = request.POST.get('last_name', target_user.last_name)
+        target_user.email = request.POST.get('email', target_user.email)
+        target_user.is_active = request.POST.get('is_active') == 'on'
+        
+        # 2. Promjena lozinke ako je upisana
+        password = request.POST.get('password')
+        if password:
+            target_user.set_password(password)
+            
+        # 3. Ažuriranje Uloge i automatsko mapiranje privilegija
+        new_role = request.POST.get('role', 'worker')
+        profile, _ = UserProfile.objects.get_or_create(user=target_user)
+        profile.role = new_role
+        profile.save()
+        
+        if new_role == 'superadmin':
+            target_user.is_superuser = True
+            target_user.is_staff = True
+        elif new_role in ['company_admin', 'project_manager']:
+            target_user.is_superuser = False
+            target_user.is_staff = True
+        else:
+            target_user.is_superuser = False
+            target_user.is_staff = False
+            
+        target_user.save()
+        messages.success(request, f'Korisnik {target_user.username} je uspješno ažuriran s ulogom {profile.get_role_display()}.')
+        return redirect('accounts:user_list')
+        
+    return render(request, 'accounts/user_form.html', {'target_user': target_user})
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def reset_password_request(request, pk):
+    target_user = get_object_or_404(User, pk=pk)
+    form = PasswordResetForm({'email': target_user.email})
+    if form.is_valid():
+        form.save(request=request, use_https=request.is_secure())
+        messages.success(request, f'Reset lozinke poslan na {target_user.email}')
+    return redirect('accounts:user_list')
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def toggle_user_status(request, pk):
+    u = get_object_or_404(User, pk=pk)
+    u.is_active = not u.is_active
+    u.save()
+    return redirect('accounts:user_list')
+
+
+import polib
+from django.conf import settings
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def translation_manager(request, lang_code='de'):
+    import polib
+    import os
+    from django.conf import settings
+    
+    po_path = os.path.join(settings.BASE_DIR, 'locale', lang_code, 'LC_MESSAGES', 'django.po')
+    
+    if not os.path.exists(po_path):
+        messages.warning(request, f'Pojmovi su u bazi već na Hrvatskom. Preusmjereno na Njemački rječnik.')
+        return redirect('accounts:translation_manager', lang_code='de')
+        
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        # 🟢 AKCIJA 1: Skeniraj portal
+        if action == 'scan':
+            os.system(f"cd {settings.BASE_DIR} && {settings.BASE_DIR}/venv/bin/python manage.py makemessages -l {lang_code} -e html,py --no-wrap")
+            messages.success(request, f'✅ Portal uspješno skeniran. Svi novi pojmovi su izvučeni za {lang_code.upper()}.')
+            return redirect('accounts:translation_manager', lang_code=lang_code)
+            
+        # 🟢 AKCIJA 2: Automatski prevedi sve
+        elif action == 'auto_translate':
+            try:
+                from deep_translator import GoogleTranslator
+                po = polib.pofile(po_path)
+                translator = GoogleTranslator(source='hr', target=lang_code)
+                count = 0
+                for entry in po:
+                    # Prevodimo samo ono što je prazno da ne rušimo tvoje ručne izmjene
+                    if not entry.msgstr and entry.msgid:
+                        try:
+                            entry.msgstr = translator.translate(entry.msgid)
+                            count += 1
+                        except Exception:
+                            pass
+                po.save()
+                os.system(f"cd {settings.BASE_DIR} && {settings.BASE_DIR}/venv/bin/python manage.py compilemessages")
+                messages.success(request, f'✨ Uspješno prevedeno {count} novih pojmova u {lang_code.upper()} rječnik.')
+            except ImportError:
+                messages.error(request, 'Modul deep_translator nije instaliran.')
+            except Exception as e:
+                messages.error(request, f'Greška pri prevođenju: {str(e)}')
+            return redirect('accounts:translation_manager', lang_code=lang_code)
+            
+        # 🟢 AKCIJA 3: Ručno spremanje jednog pojma (postojeća logika)
+        else:
+            msgid = request.POST.get('msgid')
+            msgstr = request.POST.get('msgstr')
+            if msgid:
+                po = polib.pofile(po_path)
+                entry = po.find(msgid)
+                if entry:
+                    entry.msgstr = msgstr
+                    po.save()
+                    os.system(f"cd {settings.BASE_DIR} && {settings.BASE_DIR}/venv/bin/python manage.py compilemessages")
+                    messages.success(request, f'Prijevod za "{msgid}" spremljen.')
+            return redirect('accounts:translation_manager', lang_code=lang_code)
+
+    po = polib.pofile(po_path)
+    entries = [e for e in po if e.msgid]
+    
+    return render(request, 'accounts/translation_manager.html', {
+        'entries': entries,
+        'lang_code': lang_code,
+        'languages': ['de', 'en']
+    })

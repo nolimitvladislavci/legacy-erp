@@ -1,0 +1,88 @@
+{% load i18n %}<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Outreach{% endblock %} – LIMIT CONNECT</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+body{background:#0f172a;color:#e2e8f0;font-family:'Inter',sans-serif}
+.pw{max-width:1200px;margin:0 auto;padding:20px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:20px;margin-bottom:16px}
+.ct{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:12px}
+.sn{font-size:2rem;font-weight:800;color:#c9a84c}
+.sl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.bg{background:#c9a84c;color:#0f172a;border:none;border-radius:10px;padding:8px 18px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;font-size:.85rem}
+.bg:hover{background:#e6c76a;color:#0f172a}
+.bo{background:transparent;border:1.5px solid #334155;color:#94a3b8;border-radius:10px;padding:8px 18px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;font-size:.85rem}
+.bo:hover{border-color:#c9a84c;color:#c9a84c}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl th{color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:1px;font-size:.7rem;padding:8px 10px;border-bottom:1px solid #334155}
+.tbl td{padding:9px 10px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+.tbl tr:hover td{background:#243349}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700}
+.p-neu{background:rgba(100,116,139,.2);color:#94a3b8}
+.p-kontaktiert{background:rgba(59,130,246,.15);color:#60a5fa}
+.p-geantwortet{background:rgba(16,185,129,.15);color:#34d399}
+.p-interessiert{background:rgba(201,168,76,.2);color:#c9a84c}
+.p-klient{background:rgba(34,197,94,.2);color:#22c55e}
+.p-abgelehnt{background:rgba(239,68,68,.15);color:#f87171}
+.p-pending{background:rgba(100,116,139,.2);color:#94a3b8}
+.p-sent{background:rgba(59,130,246,.15);color:#60a5fa}
+.p-follow_up{background:rgba(245,158,11,.15);color:#fbbf24}
+.p-replied{background:rgba(16,185,129,.2);color:#34d399}
+.tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.tb h1{margin:0;font-size:1.3rem;font-weight:800;color:#fff}
+.fb{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.fb select,.fb input{background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:6px 12px;font-size:.82rem}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:.7rem;font-weight:600;color:#94a3b8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:.85rem}
+.fg textarea{min-height:120px;resize:vertical}
+.bc{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#64748b;margin-bottom:18px}
+.bc a{color:#64748b;text-decoration:none}.bc a:hover{color:#c9a84c}
+.ms{margin-bottom:14px}
+.ms .s{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:8px 14px;border-radius:8px;font-size:.84rem;margin-bottom:5px}
+.ms .e{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:8px 14px;border-radius:8px;font-size:.84rem;margin-bottom:5px}
+</style></head>
+<body><div class="pw">
+<div class="bc"><a href="/">{% trans "🏠 Home" %}</a> › <a href="/outreach/">{% trans "Outreach / CRM" %}</a>{% block bc %}{% endblock %}</div>
+{% if messages %}<div class="ms">{% for m in messages %}<div class="{% if 'error' in m.tags %}e{% else %}s{% endif %}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% block content %}
+<div class="tb">
+  <h1>{% trans "📧 Outreach / CRM" %}</h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/outreach/contacts/new/" class="bg">➕ {% trans "Neuer Kontakt" %}</a>
+    <a href="/outreach/campaign/new/" class="bo">📣 {% trans "Neue Kampagne" %}</a>
+    <a href="/outreach/inbox/" class="bo">{% trans "📥 Posteingang" %}</a>
+    <a href="/outreach/contacts/" class="bo">👥 {% trans "Kontakte" %}</a>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px">
+  <div class="card" style="text-align:center;padding:16px"><div class="sn">{{ contacts }}</div><div class="sl">{% trans "Kontakte gesamt" %}</div></div>
+  <div class="card" style="text-align:center;padding:16px"><div class="sn" style="color:#60a5fa">{{ new_contacts }}</div><div class="sl">{% trans "Neu" %}</div></div>
+  <div class="card" style="text-align:center;padding:16px"><div class="sn" style="color:#34d399">{{ interested }}</div><div class="sl">{% trans "Interessiert" %}</div></div>
+  <div class="card" style="text-align:center;padding:16px"><div class="sn" style="color:#22c55e">{{ clients }}</div><div class="sl">{% trans "Klienten" %}</div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="card">
+    <div class="ct">📣 {% trans "Aktive Kampagnen" %}</div>
+    {% if campaigns %}<table class="tbl"><thead><tr><th>{% trans "Name" %}</th><th>{% trans "Gesendet" %}</th><th>{% trans "Antworten" %}</th><th></th></tr></thead><tbody>
+    {% for c in campaigns %}<tr>
+      <td><a href="/outreach/campaign/{{ c.pk }}/" style="color:#c9a84c;text-decoration:none">{{ c.name }}</a></td>
+      <td>{{ c.stat_sent }}</td><td>{{ c.stat_replied }}</td>
+      <td><span class="pill {% if c.active %}p-klient{% else %}p-neu{% endif %}">{% if c.active %}Aktiv{% else %}Inaktiv{% endif %}</span></td>
+    </tr>{% endfor %}
+    </tbody></table>{% else %}<p style="color:#64748b;font-size:.84rem">{% trans "Keine Kampagnen." %}</p>{% endif %}
+    <a href="/outreach/campaign/new/" class="bo" style="margin-top:12px;font-size:.8rem">{% trans "Neue Kampagne" %}</a>
+  </div>
+  <div class="card">
+    <div class="ct">📥 {% trans "Letzte Antworten" %}</div>
+    {% if recent_replies %}<table class="tbl"><thead><tr><th>{% trans "Kontakt" %}</th><th>{% trans "Kampagne" %}</th><th>{% trans "Datum" %}</th></tr></thead><tbody>
+    {% for r in recent_replies %}<tr>
+      <td>{{ r.contact.display_name }}</td>
+      <td style="color:#94a3b8;font-size:.75rem">{{ r.campaign.name }}</td>
+      <td style="color:#64748b;font-size:.75rem">{{ r.replied_at|date:"d.m.Y" }}</td>
+    </tr>{% endfor %}</tbody></table>
+    {% else %}<p style="color:#64748b;font-size:.84rem">{% trans "Keine Antworten." %}</p>{% endif %}
+  </div>
+</div>{% endblock %}
+</div></body></html>

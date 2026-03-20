@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}AI Log — LIMIT CONNECT{% endblock %}
+{% block page_title %}📊 AI Action Log{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="{% url 'superadmin_ai:dashboard' %}" class="btn btn-sm btn-outline-dark">
+        <i class="fas fa-arrow-left"></i> Natrag
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="stat-card mb-3">
+    <form method="get" class="d-flex gap-2 flex-wrap align-items-end">
+        <div>
+            <label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#64748b">Modul</label>
+            <select name="module" class="form-select form-select-sm" style="font-size:0.78rem;min-width:150px">
+                <option value="">Svi moduli</option>
+                {% for code, label in module_choices %}
+                <option value="{{ code }}" {% if module_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#64748b">Ishod</label>
+            <select name="outcome" class="form-select form-select-sm" style="font-size:0.78rem;min-width:150px">
+                <option value="">Svi ishodi</option>
+                {% for code, label in outcome_choices %}
+                <option value="{{ code }}" {% if outcome_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-sm btn-dark"><i class="fas fa-filter"></i> Filtriraj</button>
+    </form>
+</div>
+
+<div class="stat-card">
+    <div class="table-responsive">
+        <table class="table table-sm mb-0" style="font-size:0.76rem">
+            <thead>
+                <tr>
+                    <th>Vrijeme</th>
+                    <th>Modul</th>
+                    <th>Akcija</th>
+                    <th>Razina</th>
+                    <th>Ishod</th>
+                    <th class="d-none d-md-table-cell">Firma</th>
+                    <th class="d-none d-md-table-cell">Korisnik</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+            <tr>
+                <td style="white-space:nowrap">{{ log.timestamp|date:"d.m H:i:s" }}</td>
+                <td><code>{{ log.module }}</code></td>
+                <td>{{ log.action_type }}</td>
+                <td>
+                    {% if log.access_level == 0 %}<span class="badge" style="background:#f1f5f9;color:#64748b;font-size:0.6rem">OFF</span>
+                    {% elif log.access_level == 1 %}<span class="badge" style="background:#dbeafe;color:#1d4ed8;font-size:0.6rem">READ</span>
+                    {% elif log.access_level == 2 %}<span class="badge" style="background:#fef3c7;color:#b45309;font-size:0.6rem">ASSIST</span>
+                    {% elif log.access_level == 3 %}<span class="badge" style="background:#d1fae5;color:#047857;font-size:0.6rem">AUTO</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.outcome == 'allowed' %}<span class="badge bg-success" style="font-size:0.6rem">✓</span>
+                    {% elif log.outcome == 'blocked' %}<span class="badge bg-danger" style="font-size:0.6rem">✕</span>
+                    {% elif log.outcome == 'queued' %}<span class="badge bg-warning text-dark" style="font-size:0.6rem">⏳</span>
+                    {% else %}<span class="badge bg-secondary" style="font-size:0.6rem">{{ log.outcome }}</span>{% endif %}
+                </td>
+                <td class="d-none d-md-table-cell">{{ log.company.name|default:"-" }}</td>
+                <td class="d-none d-md-table-cell">{{ log.user|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+            {% if not logs %}
+            <tr><td colspan="7" class="text-center text-muted py-3">Nema logova</td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
+from .models import Brand, GalleryImage, HitnaIntervencija, VideoGallery
+from .forms import HitnaIntervencijaForm
+
+
+def homepage(request):
+    """Javna web stranica (viskovic_group_index.html)"""
+    return render(request, "viskovic_group_index.html")
+
+
+def hitna_intervencija(request):
+    """Javna forma za hitnu intervenciju"""
+    if request.method == 'POST':
+        form = HitnaIntervencijaForm(request.POST)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            # Spremi IP adresu
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                obj.ip_adresa = x_forwarded_for.split(',')[0].strip()
+            else:
+                obj.ip_adresa = request.META.get('REMOTE_ADDR')
+            # Jezik iz Accept-Language headera
+            lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'de')
+            obj.jezik = lang[:2].lower()
+            obj.save()
+
+            # Slanje email notifikacije (ako postoji email backend)
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                subject = f"[HITNO] Nova intervencija: {obj.get_vrsta_display()} — {obj.ime}"
+                body = (
+                    f"Novi zahtjev za hitnu intervenciju\n\n"
+                    f"Ime: {obj.ime}\n"
+                    f"Telefon: {obj.telefon}\n"
+                    f"Email: {obj.email}\n"
+                    f"Adresa: {obj.adresa}, {obj.grad} ({obj.drzava})\n"
+                    f"Vrsta: {obj.get_vrsta_display()}\n"
+                    f"Hitnost: {'HITNO' if obj.hitnost else 'Redovito'}\n\n"
+                    f"Opis:\n{obj.opis}\n"
+                )
+                notify_email = getattr(settings, 'HITNA_NOTIFY_EMAIL', None)
+                if notify_email:
+                    send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [notify_email], fail_silently=True)
+            except Exception:
+                pass
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'ok': True, 'id': obj.id})
+            messages.success(request, _('Vaš zahtjev je zaprimljen. Kontaktirat ćemo vas u najkraćem roku.'))
+            return redirect('website:hitna_hvala')
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'ok': False, 'errors': form.errors}, status=400)
+    else:
+        form = HitnaIntervencijaForm()
+
+    return render(request, 'website/hitna_intervencija.html', {'form': form})
+
+
+def hitna_hvala(request):
+    """Stranica zahvale nakon slanja forme"""
+    return render(request, 'website/hitna_hvala.html')
+
+
+def video_galerija(request):
+    """Javna video galerija"""
+    kategorija = request.GET.get('k', '')
+    videos = VideoGallery.objects.filter(is_active=True)
+    if kategorija:
+        videos = videos.filter(kategorija=kategorija)
+    kategorije = VideoGallery.KATEGORIJA_CHOICES
+    return render(request, 'website/video_galerija.html', {
+        'videos': videos,
+        'kategorije': kategorije,
+        'aktivna_kategorija': kategorija,
+    })
+
+
+@login_required
+def admin_panel(request):
+    """Admin panel za upravljanje web stranicom"""
+    brands    = Brand.objects.filter(is_active=True)
+    gallery   = GalleryImage.objects.filter(is_active=True)
+    hitne     = HitnaIntervencija.objects.filter(status='novo')[:10]
+    videos    = VideoGallery.objects.filter(is_active=True)[:10]
+    return render(request, 'website/index.html', {
+        'brands': brands,
+        'gallery': gallery,
+        'hitne': hitne,
+        'videos': videos,
+    })
+
+
+def viskovic_hr(request):
+    from django.shortcuts import render
+    return render(request, 'viskovic_group_index_hr.html')

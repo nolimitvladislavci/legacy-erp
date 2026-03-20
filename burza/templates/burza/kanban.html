@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Zlatni Kanban – Burza{% endblock %}
+{% block extra_css %}
+<style>
+:root{--gold:#c9a84c;--gold2:#e8c96a}
+.burza-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.burza-title{font-size:1.6rem;font-weight:700;color:#f1f5f9;display:flex;align-items:center;gap:12px}
+.burza-title span{color:var(--gold)}
+.kanban-wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;align-items:start;min-height:calc(100vh - 220px)}
+.kanban-col{background:#1e293b;border-radius:12px;border:1px solid #334155;overflow:hidden}
+.kanban-col-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155}
+.kanban-col-title{display:flex;align-items:center;gap:8px;font-size:0.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#94a3b8}
+.kanban-col-title .dot{width:8px;height:8px;border-radius:50%}
+.kanban-badge{background:#0f172a;color:#94a3b8;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid #334155}
+.kanban-cards{padding:12px;min-height:80px}
+.kanban-card{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,transform .15s,box-shadow .2s}
+.kanban-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 20px rgba(201,168,76,.15)}
+.card-title{font-size:.88rem;font-weight:600;color:#f1f5f9;margin-bottom:6px;line-height:1.4}
+.card-meta{font-size:.72rem;color:#64748b;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.card-budget{font-size:.78rem;font-weight:600;color:var(--gold);margin-bottom:10px}
+.card-cat{display:inline-block;font-size:.65rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.card-actions{display:flex;gap:6px;margin-top:10px}
+.card-btn{flex:1;padding:6px 10px;border:none;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.card-btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-blue{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.btn-blue:hover:not(:disabled){background:#3b82f6;color:#fff}
+.btn-gold{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.35)}
+.btn-gold:hover:not(:disabled){background:var(--gold);color:#0f172a}
+.btn-green{background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.btn-green:hover:not(:disabled){background:#10b981;color:#fff}
+.col-empty{text-align:center;padding:32px 16px;color:#334155;font-size:.8rem}
+.toast-container{position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{padding:14px 20px;border-radius:10px;font-size:.88rem;font-weight:500;min-width:280px;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.4);display:flex;align-items:flex-start;gap:12px;pointer-events:all;animation:tIn .3s ease;border:1px solid rgba(255,255,255,.08)}
+@keyframes tIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.toast-success{background:#064e3b;color:#6ee7b7;border-color:rgba(16,185,129,.3)}
+.toast-error{background:#450a0a;color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(201,168,76,.3);border-top-color:var(--gold);animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.move-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9990;align-items:center;justify-content:center}
+.move-modal.open{display:flex}
+.move-modal-box{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:28px;min-width:340px}
+.status-btn{width:100%;padding:12px 16px;margin-bottom:8px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#94a3b8;font-size:.85rem;font-weight:500;cursor:pointer;text-align:left;transition:all .2s;display:flex;align-items:center;gap:10px}
+.status-btn:hover{border-color:var(--gold);color:var(--gold)}
+.modal-cancel{width:100%;padding:10px;margin-top:8px;background:none;border:1px solid #334155;border-radius:8px;color:#64748b;cursor:pointer;font-size:.82rem}
+@media(max-width:1200px){.kanban-wrap{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.kanban-wrap{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="toast-container" id="tc"></div>
+<div class="burza-header">
+    <div class="burza-title">{% trans "🏗️ Zlatni Kanban" %} <span>{% trans "/ Burza" %}</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="{% url 'burza:upit' %}" style="padding:8px 16px;background:none;border:1px solid #334155;color:#94a3b8;border-radius:8px;font-size:.82rem;text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='#c9a84c';this.style.color='#c9a84c'" onmouseout="this.style.borderColor='#334155';this.style.color='#94a3b8'">{% trans "🌐 Javni upit" %}</a>
+        {% if is_superadmin or company %}
+        <a href="{% url 'burza:lead_new' %}" style="padding:8px 18px;background:var(--gold);color:#0f172a;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none">{% trans "+ Nova kartica" %}</a>
+        {% endif %}
+    </div>
+</div>
+<div class="kanban-wrap">
+{% for col in columns %}
+<div class="kanban-col">
+    <div class="kanban-col-header">
+        <div class="kanban-col-title"><span class="dot" style="background:{{ col.color }}"></span>{{ col.icon }} {{ col.label }}</div>
+        <span class="kanban-badge">{{ col.leads|length }}</span>
+    </div>
+    <div class="kanban-cards">
+        {% for lead in col.leads %}
+        <div class="kanban-card" id="card-{{ lead.pk }}">
+            <div class="card-cat">{{ lead.get_category_display }}</div>
+            <div class="card-title" style="margin-top:8px">{{ lead.title }}</div>
+            <div class="card-meta">
+                <span>📍 {{ lead.location }}</span>
+                <span>👤 {{ lead.contact_name }}</span>
+                <span>🕐 {{ lead.created_at|date:"d.m.Y" }}</span>
+            </div>
+            {% if lead.budget_from or lead.budget_to %}<div class="card-budget">💰 {{ lead.budget_display }}</div>{% endif %}
+            <div class="card-actions">
+                <button class="card-btn btn-blue" onclick="window.location='{% url 'burza:lead_detail' lead.pk %}'">{% trans "👁 Detalji" %}</button>
+                {% if is_superadmin or lead.company == company %}<button class="card-btn btn-gold" onclick="openMove({{ lead.pk }},'{{ col.id }}')">{% trans "↕ Pomakni" %}</button>{% endif %}
+                {% if col.id == 'NA_BURZI' and not is_superadmin and company %}
+                <button class="card-btn btn-green" id="p-{{ lead.pk }}" onclick="preuzmi({{ lead.pk }},this)">{% trans "✅ Preuzmi" %}</button>
+                {% endif %}
+                {% if col.id == 'PREUZETO' and is_superadmin %}
+                <a href="{% url 'burza:invoice_from_lead' lead.pk %}" class="card-btn btn-gold" style="text-decoration:none">{% trans "📄 Faktura" %}</a>
+                {% endif %}
+                {% if col.id == 'RIJESENO' %}
+                <a href="{% url 'burza:invoice_from_lead' lead.pk %}" class="card-btn btn-gold" style="text-decoration:none;flex:2">{% trans "📄 Kreiraj fakturu" %}</a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-empty"><div style="font-size:2rem;margin-bottom:8px;opacity:.3">{{ col.icon }}</div>{% trans "Nema kartice" %}</div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+</div>
+<div class="move-modal" id="mm">
+    <div class="move-modal-box">
+        <div style="font-size:1rem;font-weight:700;color:#f1f5f9;margin-bottom:20px">{% trans "↕ Pomakni karticu u..." %}</div>
+        <button class="status-btn" onclick="doMove('NOVI_UPIT')"><span style="width:8px;height:8px;background:#3b82f6;border-radius:50%;display:inline-block"></span>{% trans "📥 Novi upit" %}</button>
+        <button class="status-btn" onclick="doMove('INTERNA_PROCJENA')"><span style="width:8px;height:8px;background:#c9a84c;border-radius:50%;display:inline-block"></span>{% trans "🔍 Interna procjena" %}</button>
+        <button class="status-btn" onclick="doMove('NA_BURZI')"><span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block"></span>{% trans "🏪 Na burzi" %}</button>
+        <button class="status-btn" onclick="doMove('PREUZETO')"><span style="width:8px;height:8px;background:#8b5cf6;border-radius:50%;display:inline-block"></span>{% trans "✅ Preuzeto" %}</button>
+        <button class="status-btn" onclick="doMove('RIJESENO')"><span style="width:8px;height:8px;background:#f59e0b;border-radius:50%;display:inline-block"></span>{% trans "🏆 Riješeno" %}</button>
+        <button class="modal-cancel" onclick="closeMove()">{% trans "Odustani" %}</button>
+    </div>
+</div>
+<script>
+const CSRF='{{ csrf_token }}';
+let mId=null;
+function toast(msg,type='info'){
+    const icons={success:'✅',error:'❌',info:'ℹ️'};
+    const c=document.getElementById('tc');
+    const t=document.createElement('div');
+    t.className=`toast toast-${type}`;
+    t.innerHTML=`<span>${icons[type]||'ℹ️'}</span><span style="flex:1">${msg}</span><span style="cursor:pointer;margin-left:auto" onclick="this.parentElement.remove()">✕</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{if(t.parentNode)t.remove()},4500);
+}
+function preuzmi(id,btn){
+    const orig=btn.innerHTML;
+    btn.disabled=true;
+    btn.innerHTML='<span class="spinner"></span> Obrada...';
+    fetch(`/burza/lead/${id}/preuzmi/`,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},body:'{}'})
+    .then(r=>r.json())
+    .then(d=>{
+        if(d.ok){toast(d.message,'success');setTimeout(()=>{const c=document.getElementById('card-'+id);if(c){c.style.opacity='0';c.style.transition='all .3s';setTimeout(()=>c.remove(),300)}},700)}
+        else{toast(d.error||'Greška.','error');btn.disabled=false;btn.innerHTML=orig}
+    })
+    .catch(()=>{toast('Mrežna greška.','error');btn.disabled=false;btn.innerHTML=orig});
+}
+function openMove(id,status){mId=id;document.getElementById('mm').classList.add('open')}
+function closeMove(){document.getElementById('mm').classList.remove('open');mId=null}
+document.getElementById('mm').addEventListener('click',e=>{if(e.target===e.currentTarget)closeMove()});
+function doMove(s){
+    if(!mId)return;
+    const id=mId;closeMove();
+    fetch(`/burza/lead/${id}/move/`,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},body:JSON.stringify({status:s})})
+    .then(r=>r.json())
+    .then(d=>{if(d.ok){toast(d.message,'success');setTimeout(()=>location.reload(),800)}else toast(d.error||'Greška.','error')})
+    .catch(()=>toast('Mrežna greška.','error'));
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMove()});
+</script>
+{% endblock %}

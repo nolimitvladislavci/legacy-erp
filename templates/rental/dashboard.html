@@ -1,0 +1,138 @@
+{% extends "pos/base_pos.html" %}
+{% block title %}Robot Hotel{% endblock %}
+{% block extra_css %}
+<style>
+.page{padding:1rem;max-width:1000px}
+.page-title{font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.5rem;margin-bottom:1.5rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem;text-align:center}
+.stat .val{font-size:1.4rem;font-weight:800;color:var(--gold)}
+.stat .lbl{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:.2rem}
+.section{margin-bottom:1.5rem}
+.section-title{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.4rem}
+.room-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;font-size:.8rem}
+.room-card.available{border-color:var(--green)}
+.room-card.occupied{border-color:var(--red);background:#1a0a0a}
+.room-card.cleaning{border-color:var(--orange);background:#1a1500}
+.room-card .r-name{font-weight:700;font-size:.85rem}
+.room-card .r-status{font-size:.6rem;text-transform:uppercase;font-weight:700;margin-top:.2rem}
+.room-card .r-status.available{color:var(--green)}
+.room-card .r-status.occupied{color:var(--red)}
+.room-card .r-status.cleaning{color:var(--orange)}
+.booking-row{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;margin-bottom:.3rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.b-guest{font-weight:600;font-size:.85rem}
+.b-room{font-size:.75rem;color:var(--gold)}
+.b-dates{font-size:.7rem;color:var(--muted)}
+.b-status{font-size:.6rem;padding:2px 8px;border-radius:8px;font-weight:700;text-transform:uppercase}
+.b-status.pending{background:#1a1a00;color:var(--gold)}
+.b-status.confirmed{background:#0a1a0a;color:var(--green)}
+.b-status.checked_in{background:#0a0a1a;color:var(--blue)}
+.quick-actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-title">
+    <span>&#127968; Robot Hotel</span>
+    <div style="display:flex;gap:.4rem">
+      <a href="{% url 'rental:property_create' %}" class="btn btn-gold btn-sm">+ Soba</a>
+      <a href="{% url 'rental:booking_create' %}" class="btn btn-green btn-sm">+ Rezervacija</a>
+      <a href="{% url 'rental:calendar' %}" class="btn btn-ghost btn-sm">&#128197; Kalendar</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="val">{{ total_rooms }}</div><div class="lbl">Ukupno soba</div></div>
+    <div class="stat"><div class="val" style="color:var(--green)">{{ available }}</div><div class="lbl">Slobodne</div></div>
+    <div class="stat"><div class="val" style="color:var(--red)">{{ occupied }}</div><div class="lbl">Zauzete</div></div>
+    <div class="stat"><div class="val" style="color:var(--orange)">{{ cleaning }}</div><div class="lbl">Ciscenje</div></div>
+    <div class="stat"><div class="val">&euro;{{ month_revenue|floatformat:0 }}</div><div class="lbl">Prihod (mjesec)</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">&#127968; Sobe</div>
+    <div class="room-grid">
+      {% for p in properties %}
+      <div class="room-card {{ p.status }}">
+        <div>{% if p.type == 'room' %}&#128719;{% elif p.type == 'apartment' %}&#127969;{% elif p.type == 'dorm' %}&#128716;{% else %}&#127968;{% endif %}</div>
+        <div class="r-name">{{ p.name }}</div>
+        <div class="r-status {{ p.status }}">{{ p.get_status_display }}</div>
+        <div style="font-size:.6rem;color:var(--muted)">&euro;{{ p.price_per_night }}/noc</div>
+      </div>
+      {% empty %}
+      <div style="color:var(--muted);padding:1rem">Nema soba. Dodajte prvu!</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if arrivals %}
+  <div class="section">
+    <div class="section-title">&#128205; Dolasci danas ({{ arrivals.count }})</div>
+    {% for b in arrivals %}
+    <div class="booking-row">
+      <div>
+        <div class="b-guest">{{ b.guest_name }}</div>
+        <div class="b-room">{{ b.rental_property.name }} &middot; {{ b.guest_count }} gost{{ b.guest_count|pluralize:"iju,a" }}</div>
+      </div>
+      <div style="display:flex;gap:.3rem;align-items:center">
+        <span class="b-status {{ b.status }}">{{ b.get_status_display }}</span>
+        <a href="{% url 'rental:check_in' b.pk %}" class="btn btn-green btn-sm">Check-in</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if departures %}
+  <div class="section">
+    <div class="section-title">&#128587; Odjave danas ({{ departures.count }})</div>
+    {% for b in departures %}
+    <div class="booking-row">
+      <div>
+        <div class="b-guest">{{ b.guest_name }}</div>
+        <div class="b-room">{{ b.rental_property.name }}</div>
+      </div>
+      <a href="{% url 'rental:check_out' b.pk %}" class="btn btn-gold btn-sm">Check-out</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if active_stays %}
+  <div class="section">
+    <div class="section-title">&#128716; Aktivni boravci ({{ active_stays.count }})</div>
+    {% for b in active_stays %}
+    <div class="booking-row">
+      <div>
+        <div class="b-guest">{{ b.guest_name }}</div>
+        <div class="b-room">{{ b.rental_property.name }} &middot; do {{ b.check_out|date:"d.m" }}</div>
+      </div>
+      <span class="b-status checked_in">U sobi</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if upcoming %}
+  <div class="section">
+    <div class="section-title">&#128197; Nadolazece rezervacije</div>
+    {% for b in upcoming %}
+    <div class="booking-row">
+      <div>
+        <div class="b-guest">{{ b.guest_name }}</div>
+        <div class="b-room">{{ b.rental_property.name }} &middot; {{ b.check_in|date:"d.m" }} - {{ b.check_out|date:"d.m" }}</div>
+      </div>
+      <span class="b-status {{ b.status }}">{{ b.get_status_display }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="quick-actions">
+    <a href="{% url 'rental:property_list' %}" class="btn btn-ghost btn-sm">Sve sobe</a>
+    <a href="{% url 'rental:booking_list' %}" class="btn btn-ghost btn-sm">Sve rezervacije</a>
+    <a href="{% url 'rental:housekeeping' %}" class="btn btn-ghost btn-sm">&#129529; Housekeeping</a>
+  </div>
+</div>
+{% endblock %}

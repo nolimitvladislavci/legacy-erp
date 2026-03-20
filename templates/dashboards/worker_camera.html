@@ -1,0 +1,170 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bautagebuch Kamera - LIMIT Connect</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #0a0a0a; --surface: #181a1d; --gold: #c9a84c; --gold-dim: #b8962e; --text: #f0ede8; --text-dim: #64748b; --border: #252830; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 16px; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        .header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .header h1 { font-size: 1.2rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        .back-btn { color: var(--text-dim); text-decoration: none; font-size: 1.5rem; }
+        
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        select, textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 8px; font-size: 1rem; outline: none; margin-bottom: 20px; }
+        select:focus, textarea:focus { border-color: var(--gold); }
+        
+        /* Gumb za kameru (Native feel) */
+        .camera-btn { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; background: rgba(201, 168, 76, 0.1); border: 2px dashed var(--gold); color: var(--gold);
+            padding: 40px 20px; border-radius: 12px; cursor: pointer; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; transition: all 0.2s;
+        }
+        .camera-btn:active { background: rgba(201, 168, 76, 0.2); transform: scale(0.98); }
+        .camera-btn i { font-size: 2.5rem; }
+        
+        /* Prikaz odabrane slike */
+        #previewContainer { display: none; margin-top: 20px; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+        #previewContainer img { width: 100%; display: block; }
+        .retake-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; border: none; padding: 8px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; }
+        
+        /* Glavni gumb za slanje */
+        .submit-btn {
+            width: 100%; background: var(--gold); color: #000; border: none; padding: 16px;
+            font-size: 1.1rem; font-weight: 800; border-radius: 8px; text-transform: uppercase;
+            letter-spacing: 2px; margin-top: auto; display: none; transition: all 0.2s;
+        }
+        .submit-btn:disabled { background: var(--surface); color: var(--text-dim); border: 1px solid var(--border); }
+        
+        /* Toast poruke (Feedback) */
+        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #22c55e; color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: 600; opacity: 0; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999; text-align: center; width: 90%; }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        #toast.error { background: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="/dashboard/worker/" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <h1>📸 Terenska Kamera</h1>
+        <div style="width:24px"></div> </div>
+
+    <div class="card">
+        <label>Odaberi Projekt (Gradilište)</label>
+        <select id="projectSelect">
+            <option value="">-- Odaberi gradilište --</option>
+            {% for lead in active_leads %}
+                <option value="{{ lead.id }}">{{ lead.title }} ({{ lead.location }})</option>
+            {% endfor %}
+        </select>
+        
+        <label>Kratka bilješka / Status (Opcionalno)</label>
+        <textarea id="noteInput" rows="2" placeholder="Npr. Završeno gletanje prvog zida..."></textarea>
+    </div>
+
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+
+    <div class="camera-btn" id="openCameraBtn" onclick="document.getElementById('cameraInput').click()">
+        <i class="fas fa-camera"></i>
+        <span>Slikaj Radove</span>
+    </div>
+
+    <div id="previewContainer">
+        <button class="retake-btn" onclick="document.getElementById('cameraInput').click()"><i class="fas fa-redo"></i> Ponovno slikaj</button>
+        <img id="imagePreview" src="" alt="Pregled slike">
+    </div>
+
+    <button id="submitBtn" class="submit-btn" onclick="uploadPhoto()">
+        <i class="fas fa-cloud-upload-alt"></i> Pošalji u sustav
+    </button>
+    
+    <div id="toast"></div>
+
+    <script>
+        const cameraInput = document.getElementById('cameraInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        let selectedFile = null;
+
+        // Kad radnik uslika sliku, prikaži preview
+        cameraInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                selectedFile = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    openCameraBtn.style.display = 'none';
+                    submitBtn.style.display = 'block';
+                    
+                    // Skrolaj do dna da radnik vidi gumb
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+                reader.readAsDataURL(selectedFile);
+            }
+        });
+
+        // AJAX Upload - OBAVEZAN SUSTAV POVRATNIH INFORMACIJA
+        function uploadPhoto() {
+            const projectId = document.getElementById('projectSelect').value;
+            const note = document.getElementById('noteInput').value;
+            
+            if (!selectedFile) return;
+            
+            // 1. Loading stanje - Zaključaj gumbe da se spriječi dvostruko slanje
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obrada... Slanje na server';
+            
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            formData.append('lead_id', projectId);
+            formData.append('note', note);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            fetch('{% url "worker_camera_api" %}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.ok) {
+                    // 2. Uspjeh
+                    showToast('✅ ' + data.msg, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/worker/';
+                    }, 2000);
+                } else {
+                    // 3. Greška s backenda
+                    showToast('❌ Greška: ' + data.error, 'error');
+                    resetButton();
+                }
+            })
+            .catch(error => {
+                // 4. Greška s mrežom
+                showToast('❌ Mrežna greška. Provjerite internet.', 'error');
+                resetButton();
+            });
+        }
+        
+        function resetButton() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Pošalji u sustav';
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = type === 'error' ? 'show error' : 'show';
+            setTimeout(() => { toast.classList.remove('show'); }, 4000);
+        }
+    </script>
+</body>
+</html>

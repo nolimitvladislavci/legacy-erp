@@ -1,0 +1,66 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zahtjev zaprimljen – Visković Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600&family=Barlow+Condensed:wght@700&family=Cormorant+Garamond:ital,wght@0,300;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--black:#0a0a0a;--dark:#111214;--surface:#181a1d;--border:#252830;--muted:#4a5060;--white:#f0ede8;--gold:#c9a84c;--green:#22c55e}
+body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.card{background:var(--surface);border:1px solid var(--border);padding:52px;max-width:560px;width:100%;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.icon{font-size:3.2rem;margin-bottom:20px;text-align:center}
+.ey{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;text-align:center}
+.ttl{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--white);margin-bottom:12px;text-align:center;line-height:1.1}
+.ttl em{font-style:italic;color:var(--gold)}
+.sub{font-size:.88rem;color:var(--muted);line-height:1.7;text-align:center;margin-bottom:28px}
+.ref-box{background:var(--dark);border:1px solid rgba(201,168,76,.3);padding:16px 20px;margin-bottom:24px;text-align:center}
+.ref-lbl{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.ref-num{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:2px}
+.steps{background:var(--dark);border:1px solid var(--border);padding:18px 20px;margin-bottom:28px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);font-size:.83rem;color:#94a3b8}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.sn{width:22px;height:22px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--gold);flex-shrink:0;margin-top:1px}
+.pdf-note{font-size:.75rem;color:var(--green);margin-bottom:20px;text-align:center;padding:8px 14px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:4px}
+.btns{display:flex;gap:10px;flex-direction:column}
+a.btn{display:block;padding:14px 24px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:.15s}
+a.btn-gold{background:var(--gold);color:var(--black)}
+a.btn-gold:hover{background:#b8962e}
+a.btn-outline{color:var(--gold);border:1px solid rgba(201,168,76,.3)}
+a.btn-outline:hover{background:rgba(201,168,76,.07)}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">✅</div>
+  <div class="ey">Visković Group · Renovacija kupaonice</div>
+  <h1 class="ttl">Zahtjev <em>zaprimljen.</em></h1>
+  <p class="sub">
+    {% if name %}{{ name }}, Vaš{% else %}Ihre{% endif %}
+    zahtjev je uspješno poslan. Javit ćemo vam se unutar 24 sata.
+  </p>
+
+  <div class="ref-box">
+    <div class="ref-lbl">Vaš referentni broj</div>
+    <div class="ref-num">{{ ref }}</div>
+  </div>
+
+  {% if pdf_saved %}
+  <div class="pdf-note">📄 Ponuda je spremljena u naš arhiv · Ref. {{ ref }}</div>
+  {% endif %}
+
+  <div class="steps">
+    <div class="step"><div class="sn">1</div><div>Naš tim će pregledati vaš zahtjev unutar 24h</div></div>
+    <div class="step"><div class="sn">2</div><div>Besplatni obilazak na licu mjesta – dolazimo k vama</div></div>
+    <div class="step"><div class="sn">3</div><div>Obvezujuća ponuda s fiksnom cijenom nakon izmjere</div></div>
+    <div class="step"><div class="sn">4</div><div>Potvrda narudžbe – vi plaćate materijal izravno, mi ispostavljamo račun za radove</div></div>
+  </div>
+
+  <div class="btns">
+    <a href="/calculator/bathroom/" class="btn btn-outline">← Natrag na kalkulator</a>
+  </div>
+</div>
+</body>
+</html>

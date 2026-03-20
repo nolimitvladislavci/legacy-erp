@@ -1,0 +1,92 @@
+import json
+from datetime import datetime, timedelta
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from django.db import transaction, IntegrityError
+from decimal import Decimal
+
+from .models import Resource, Addon, Booking, BookingAddon, Payment
+from companies.models import Company
+from partners.models import Partner
+from appointments.models import Appointment, BookingResource as ERPResource
+from invoicing.models import Invoice, InvoiceItem
+
+def index(request):
+    resources = Resource.objects.filter(is_active=True)
+    return render(request, 'premium_booking/index.html', {'resources': resources})
+
+def detail(request, resource_id):
+    resource = get_object_or_404(Resource, id=resource_id, is_active=True)
+    addons = Addon.objects.filter(is_active=True)
+    return render(request, 'premium_booking/detail.html', {'resource': resource, 'addons': addons})
+
+@csrf_exempt
+def api_submit(request):
+    if request.method != 'POST': return JsonResponse({'error': 'Invalid'}, status=405)
+    try:
+        data = json.loads(request.body)
+        
+        # 1. PRIPREMA (Izvan atomic bloka da izbjegnemo IntegrityError trovanje)
+        owner_company = Company.objects.first()
+        if not owner_company: return JsonResponse({'error': 'Firma nije definirana'}, status=400)
+
+        email = data.get('email')
+        client = Partner.objects.filter(email=email, company=owner_company).first()
+        
+        if not client:
+            try:
+                client = Partner.objects.create(
+                    company=owner_company, name=data['name'], 
+                    email=email, phone=data['phone'], partner_type='KUPAC'
+                )
+            except IntegrityError:
+                client = Partner.objects.filter(company=owner_company).first()
+
+        # 2. IZVRŠAVANJE REZERVACIJE
+        with transaction.atomic():
+            res = Resource.objects.get(id=data['resource_id'])
+            start = timezone.make_aware(datetime.strptime(f"{data['date']} {data['time']}", '%Y-%m-%d %H:%M'))
+            end = start + timedelta(days=res.min_duration)
+
+            booking = Booking.objects.create(
+                resource=res, guest_name=data['name'], guest_email=email,
+                guest_phone=data['phone'], start_time=start, end_time=end, total_price=res.base_price
+            )
+
+            # ERP SINKRONIZACIJA
+            erp_res, _ = ERPResource.objects.get_or_create(name=res.name, defaults={'company': owner_company})
+            Appointment.objects.create(
+                title=f"PREMIUM: {res.name} - {data['name']}", client=client, resource=erp_res,
+                start_time=start, end_time=end, status='scheduled', color='#c9a84c', company=owner_company
+            )
+            # Generiranje jedinstvenog broja predračuna
+            import time
+            temp_number = f"PR-{int(time.time())}"
+            
+            # 1. Kreiranje zaglavlja fakture
+            invoice = Invoice.objects.create(
+                doctype='P',  # Predračun
+                number=temp_number,
+                client_name=client.name if client else data['name'],
+                client_email=email,
+                date_issued=timezone.now(),
+                subtotal=booking.total_price,
+                total=booking.total_price,
+                status='DRAFT',
+                note=f"Automatska rezervacija: {res.name}"
+            )
+            
+            # 2. Kreiranje stavke računa (InvoiceItem)
+            InvoiceItem.objects.create(
+                invoice=invoice,
+                description=f"Najam: {res.name}",
+                quantity=1,
+                unit_price=booking.total_price,
+                total_price=booking.total_price
+            )
+
+            return JsonResponse({'status': 'success', 'booking_number': booking.booking_number})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=500)

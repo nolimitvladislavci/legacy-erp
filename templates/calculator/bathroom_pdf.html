@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face {
+  font-family: 'DejaVu';
+  src: url('/var/www/fina-connect/static/fonts/DejaVuSans.ttf');
+}
+@font-face {
+  font-family: 'DejaVu';
+  src: url('/var/www/fina-connect/static/fonts/DejaVuSans-Bold.ttf');
+  font-weight: bold;
+}
+* { font-family: 'DejaVu', sans-serif !important; box-sizing: border-box; }
+@page {
+  size: A4;
+  margin: 24mm 16mm 18mm 16mm;
+}
+/* xhtml2pdf: position fixed = repeat on every page */
+#pdf-header {
+  position: fixed;
+  top: -18mm;
+  left: 0; right: 0;
+  width: 100%;
+  border-bottom: 2px solid #c9a84c;
+  padding-bottom: 5px;
+  display: table;
+}
+#pdf-header-left {
+  display: table-cell;
+  vertical-align: middle;
+  width: 60%;
+}
+#pdf-header-right {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: right;
+  width: 40%;
+  font-size: 7.5pt;
+  color: #64748b;
+}
+#pdf-header img { height: 32px; width: auto; }
+#pdf-header .hdr-co { font-size: 9.5pt; font-weight: bold; color: #0f172a; }
+#pdf-header .hdr-co span { color: #c9a84c; }
+#pdf-footer {
+  position: fixed;
+  bottom: -14mm;
+  left: 0; right: 0;
+  width: 100%;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 4px;
+  font-size: 7pt;
+  color: #94a3b8;
+  display: table;
+}
+#pdf-footer-left { display: table-cell; width: 50%; }
+#pdf-footer-right { display: table-cell; width: 50%; text-align: right; }
+
+body { color: #1a1a1a; font-size: 9.5pt; line-height: 1.45; }
+
+/* ── HEADER ─────────────────────────────────────────── */
+.hdr { border-bottom: 3px solid #c9a84c; padding-bottom: 10px; margin-bottom: 16px;
+  display: table; width: 100%; }
+.hdr-left { display: table-cell; width: 55%; vertical-align: bottom; }
+.hdr-right { display: table-cell; width: 45%; vertical-align: bottom; text-align: right; }
+.company-name { font-size: 17pt; font-weight: bold; color: #0f172a; letter-spacing: 1px; }
+.company-name span { color: #c9a84c; }
+.company-sub { font-size: 7.5pt; color: #64748b; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.hdr-right .doc-type { font-size: 14pt; font-weight: bold; color: #c9a84c; }
+.hdr-right .doc-num { font-size: 8pt; color: #64748b; margin-top: 2px; }
+.hdr-right .doc-date { font-size: 8.5pt; color: #0f172a; margin-top: 4px; }
+
+/* ── ADDRESS + OBJECT 2-COL BLOCK ──────────────────── */
+.addr-obj-table { width: 100%; border-collapse: collapse; margin-bottom: 16px;
+  border: 1px solid #e2e8f0; border-radius: 4px; }
+.ao-left  { width: 50%; vertical-align: top; padding: 12px 14px;
+  border-right: 1px solid #e2e8f0; }
+.ao-right { width: 50%; vertical-align: top; padding: 12px 14px; }
+.ao-block { margin-bottom: 2px; }
+.ao-label { font-size: 6.5pt; color: #94a3b8; text-transform: uppercase;
+  letter-spacing: 1.5px; margin-bottom: 2px; }
+.ao-name  { font-size: 10pt; font-weight: bold; color: #0f172a; line-height: 1.3; }
+.ao-val   { font-size: 9pt; font-weight: bold; color: #0f172a; }
+.ao-detail{ font-size: 8pt; color: #374151; line-height: 1.5; }
+
+/* ── SECTION LABEL ──────────────────────────────────── */
+.section-label { font-size: 7pt; font-weight: bold; letter-spacing: 2px;
+  text-transform: uppercase; color: #c9a84c; background: rgba(201,168,76,.08);
+  padding: 4px 8px; margin: 12px 0 4px; border-left: 3px solid #c9a84c; }
+
+/* ── ITEMS TABLE ────────────────────────────────────── */
+.items-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+.items-table thead tr { background: #0f172a; color: white; }
+.items-table thead td { padding: 7px 8px; font-size: 7.5pt; font-weight: bold; letter-spacing: .5px; }
+.items-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+.items-table tbody tr:nth-child(even) { background: #f8fafc; }
+.items-table tbody td { padding: 6px 8px; font-size: 8.5pt; vertical-align: top; }
+.items-table tfoot td { padding: 6px 8px; font-size: 8.5pt; font-weight: bold; }
+.items-table .td-pos { width: 6%; color: #94a3b8; text-align: center; }
+.items-table .td-desc { width: 44%; }
+.items-table .td-qty { width: 8%; text-align: right; }
+.items-table .td-unit { width: 7%; text-align: center; color: #64748b; }
+.items-table .td-mat { width: 12%; text-align: right; }
+.items-table .td-labor { width: 11%; text-align: right; }
+.items-table .td-total { width: 12%; text-align: right; font-weight: bold; }
+.items-table tfoot .tf-label { background: #0f172a; color: white; }
+.items-table tfoot .tf-gold { background: #c9a84c; color: #0f172a; font-size: 10pt; }
+
+/* ── TOTALS BOX ─────────────────────────────────────── */
+.totals-box { float: right; width: 240px; border: 2px solid #c9a84c; border-radius: 4px;
+  overflow: hidden; margin-top: 8px; }
+.tot-row { display: table; width: 100%; border-bottom: 1px solid #f1f5f9; }
+.tot-row:last-child { border: none; }
+.tot-label { display: table-cell; padding: 5px 10px; font-size: 8pt; color: #64748b; }
+.tot-val { display: table-cell; padding: 5px 10px; text-align: right; font-size: 8.5pt; font-weight: bold; }
+.tot-row.total { background: #c9a84c; }
+.tot-row.total .tot-label, .tot-row.total .tot-val { color: #0f172a; font-size: 10.5pt; font-weight: bold; }
+
+/* ── FOOTER NOTES ───────────────────────────────────── */
+.clearfix { clear: both; }
+.notes-box { border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px 12px;
+  margin-top: 16px; font-size: 8pt; color: #374151; line-height: 1.7; }
+.notes-box strong { color: #0f172a; }
+.page-footer { position: fixed; bottom: 0; left: 0; right: 0;
+  border-top: 1px solid #e2e8f0; padding: 5px 16mm;
+  font-size: 7pt; color: #94a3b8; display: table; width: 100%; }
+.pf-left { display: table-cell; }
+.pf-right { display: table-cell; text-align: right; }
+
+</style>
+</head>
+<body>
+
+<!-- FOOTER (fixed) -->
+<div class="page-footer">
+  <div class="pf-left">Visković Group · Badsanierung · {{ project.code }}</div>
+  <div class="pf-right">Angebot gültig 30 Tage · Alle Preise netto zzgl. MwSt.</div>
+</div>
+
+<!-- FIXED HEADER + FOOTER — xhtml2pdf repeats position:fixed on every page -->
+<div id="pdf-header">
+  <div id="pdf-header-left">
+    <img src="/var/www/fina-connect/static/brand/viskovic_logo.jpg" alt="VG">
+    &nbsp;&nbsp;<span class="hdr-co">Vi&#353;<span>kovi&#263;</span> Group &nbsp;&middot;&nbsp; Bau &middot; Immobilien &middot; Handel</span>
+  </div>
+  <div id="pdf-header-right">
+    ANGEBOT Nr. {{ project.code }}<br>
+    {{ calculation.created_at|date:"d.m.Y" }}
+  </div>
+</div>
+<div id="pdf-footer">
+  <div id="pdf-footer-left">viskovic-group.de &nbsp;&middot;&nbsp; info@viskovic-group.de</div>
+  <div id="pdf-footer-right">Alle Preise netto zzgl. {{ calculation.vat_percentage|floatformat:0 }}% MwSt.</div>
+</div>
+
+<!-- ADDRESS + OBJECT — 2-column side by side, each col stacked vertically -->
+<table class="addr-obj-table">
+  <tr>
+    <!-- LEFT: Auftragnehmer + Objekt info -->
+    <td class="ao-left">
+      <div class="ao-block">
+        <div class="ao-label">Auftragnehmer</div>
+        <div class="ao-name">Visković Group</div>
+        <div class="ao-detail">viskovic-group.de</div>
+        <div class="ao-detail">info@viskovic-group.de</div>
+      </div>
+      <div class="ao-block" style="margin-top:10px">
+        <div class="ao-label">Objekt / Maßnahme</div>
+        <div class="ao-val">Badsanierung</div>
+        <div class="ao-detail">{{ project.location|default:project.name }}</div>
+      </div>
+      <div class="ao-block" style="margin-top:8px">
+        <div class="ao-label">Stundensatz Montage</div>
+        <div class="ao-val">65,00 €/h</div>
+      </div>
+    </td>
+    <!-- RIGHT: Auftraggeber + Projekt info -->
+    <td class="ao-right">
+      <div class="ao-block">
+        <div class="ao-label">Auftraggeber</div>
+        <div class="ao-name">
+          {% if project.client %}{{ project.client.name }}{% else %}{{ calculation.project.name }}{% endif %}
+        </div>
+        <div class="ao-detail">{{ project.location }}</div>
+      </div>
+      <div class="ao-block" style="margin-top:10px">
+        <div class="ao-label">Projektcode</div>
+        <div class="ao-val">{{ project.code }}</div>
+      </div>
+      <div class="ao-block" style="margin-top:8px">
+        <div class="ao-label">Marge / Aufschlag</div>
+        <div class="ao-val">{{ calculation.margin_percentage|floatformat:0 }} %</div>
+      </div>
+      <div class="ao-block" style="margin-top:8px">
+        <div class="ao-label">MwSt.</div>
+        <div class="ao-val">{{ calculation.vat_percentage|floatformat:0 }} %</div>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<!-- ITEMS -->
+{% regroup items by obj.normative.unit as unit_groups %}
+{% for ug in unit_groups %}
+  <div class="section-label">
+    {% if ug.grouper == "m2" %}Flächenarbeiten (m²)
+    {% elif ug.grouper == "kom" %}Sanitärausstattung (kom)
+    {% elif ug.grouper == "pau" %}Pauschalleistungen
+    {% elif ug.grouper == "lm" %}Laufmeter-Leistungen
+    {% elif ug.grouper == "None" or ug.grouper == "" %}Allgemeine Leistungen
+    {% else %}{{ ug.grouper }} — Leistungen{% endif %}
+  </div>
+
+  <table class="items-table">
+    <thead>
+      <tr>
+        <td class="td-pos">Pos.</td>
+        <td class="td-desc">Leistungsbeschreibung</td>
+        <td class="td-qty">Menge</td>
+        <td class="td-unit">Einh.</td>
+        <td class="td-mat">Material</td>
+        <td class="td-labor">Lohn</td>
+        <td class="td-total">Gesamt</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in ug.list %}{% with item=row.obj %}
+      <tr>
+        <td class="td-pos">{{ forloop.counter }}</td>
+        <td class="td-desc">{{ item.description }}</td>
+        <td class="td-qty">{{ item.quantity|floatformat:2 }}</td>
+        <td class="td-unit">{{ item.normative.unit|default:"—" }}</td>
+        <td class="td-mat">{{ row.mat_line|floatformat:2 }} €</td>
+        <td class="td-labor">{{ row.labor_line|floatformat:2 }} €</td>
+        <td class="td-total">{{ row.total_line|floatformat:2 }} €</td>
+      </tr>
+      {% endwith %}{% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+
+<!-- TOTALS -->
+<div class="totals-box">
+  <div class="tot-row">
+    <div class="tot-label">Material gesamt</div>
+    <div class="tot-val">{{ totals.material|floatformat:2 }} €</div>
+  </div>
+  <div class="tot-row">
+    <div class="tot-label">Arbeitskosten (65 €/h)</div>
+    <div class="tot-val">{{ totals.labor|floatformat:2 }} €</div>
+  </div>
+  <div class="tot-row" style="border-top:1px solid #e2e8f0;margin-top:2px;padding-top:4px">
+    <div class="tot-label">Netto Kosten</div>
+    <div class="tot-val">{{ totals.net_cost|floatformat:2 }} €</div>
+  </div>
+  <div class="tot-row">
+    <div class="tot-label">+ Marge {{ calculation.margin_percentage|floatformat:0 }}%</div>
+    <div class="tot-val">{{ totals.offer_total_net|floatformat:2 }} €</div>
+  </div>
+  <div class="tot-row">
+    <div class="tot-label">+ MwSt. {{ calculation.vat_percentage|floatformat:0 }}%</div>
+    <div class="tot-val">{{ totals.offer_total_vat|floatformat:2 }} €</div>
+  </div>
+  <div class="tot-row total">
+    <div class="tot-label">GESAMTBETRAG</div>
+    <div class="tot-val">{{ totals.offer_total_vat|floatformat:2 }} €</div>
+  </div>
+</div>
+<div class="clearfix"></div>
+
+<!-- NOTES -->
+<div class="notes-box">
+  <strong>Hinweise zum Angebot:</strong><br>
+  Dieses Angebot basiert auf den angegebenen Abmessungen und Ausstattungsmerkmalen.
+  Ein verbindlicher Festpreis erfolgt nach Aufmaß vor Ort. Preisabweichungen bei
+  unvorhergesehenen baulichen Gegebenheiten (z.B. alte Leitungen, Feuchtigkeitsschäden)
+  werden vorab abgestimmt. Alle Preise netto, zzgl. {{ calculation.vat_percentage|floatformat:0 }}% MwSt.<br><br>
+  <strong>Zahlungsbedingungen:</strong> 40% Anzahlung bei Auftragserteilung · 40% bei Beginn Fliesenarbeiten · 20% bei Abnahme.<br>
+  <strong>Ausführungszeitraum:</strong> nach Vereinbarung · Garantie: 2 Jahre auf Verarbeitungsqualität.
+</div>
+
+<div style="margin-top:24px;display:table;width:100%">
+  <div style="display:table-cell;width:50%;padding-right:20px">
+    <div style="border-top:1px solid #0f172a;padding-top:6px;font-size:8pt;color:#64748b">
+      Datum, Unterschrift Auftragnehmer<br>
+      <strong>Visković Group</strong>
+    </div>
+  </div>
+  <div style="display:table-cell;width:50%;padding-left:20px">
+    <div style="border-top:1px solid #0f172a;padding-top:6px;font-size:8pt;color:#64748b">
+      Datum, Unterschrift Auftraggeber<br>
+      <strong>{{ project.client.name|default:"___________________________" }}</strong>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

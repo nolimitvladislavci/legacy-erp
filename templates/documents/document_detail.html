@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ doc.doc_number }}{% endblock %}
+{% block page_title %}Dokument {{ doc.doc_number }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">{{ doc.doc_number }}</h2>
+  <a href="{% url 'documents:list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>{% trans "Natrag" %}</a>
+</div>
+<div class="stat-card" style="max-width:600px">
+  <div class="row g-3">
+    <div class="col-6"><div class="label">{% trans "Vrsta" %}</div><div>{{ doc.get_doc_type_display }}</div></div>
+    <div class="col-6"><div class="label">{% trans "Broj" %}</div><div class="fw-bold">{{ doc.doc_number }}</div></div>
+    <div class="col-6"><div class="label">{% trans "Datum" %}</div><div>{{ doc.date_issued|date:"d.m.Y" }}</div></div>
+    <div class="col-6"><div class="label">{% trans "Dospijeće" %}</div><div>{{ doc.date_due|date:"d.m.Y"|default:"-" }}</div></div>
+    <div class="col-6"><div class="label">{% trans "Partner" %}</div><div>{{ doc.partner.name|default:"-" }}</div></div>
+    <div class="col-6"><div class="label">{% trans "Iznos" %}</div><div class="fw-bold">{{ doc.total_amount|floatformat:2 }} €</div></div>
+    <div class="col-6"><div class="label">{% trans "Status" %}</div>
+      <div>{% if doc.is_paid %}<span class="badge bg-success">{% trans "Plaćeno" %}</span>{% else %}<span class="badge bg-warning text-dark">{% trans "Neplaćeno" %}</span>{% endif %}</div>
+    </div>
+    {% if doc.file %}
+    <div class="col-12">
+      <a href="{{ doc.file.url }}" class="btn btn-primary" target="_blank"><i class="fas fa-download me-2"></i>{% trans "Preuzmi datoteku" %}</a>
+    </div>
+    {% endif %}
+    <div class="col-12">
+      <a href="{% url 'documents:toggle_paid' doc.pk %}" class="btn btn-outline-secondary btn-sm">{% trans "Promijeni status plaćanja" %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

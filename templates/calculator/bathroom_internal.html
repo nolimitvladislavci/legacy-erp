@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Badsanierung Intern – Visković Group</title>
+<meta name="theme-color" content="#c9a84c">
+<style>
+:root{
+  --gold:#c9a84c;--gold2:#b8962e;--gold-dim:rgba(201,168,76,.13);--gold-border:rgba(201,168,76,.3);
+  --black:#09090b;--surface:#111118;--surface2:#18181f;--surface3:#22222c;--surface4:#2a2a36;
+  --text:#e4e4ef;--text-dim:#7c7c99;--border:rgba(255,255,255,.07);
+  --red:#ef4444;--green:#22c55e;--blue:#60a5fa;
+  --radius:10px;--shadow:0 4px 24px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;font-size:14px}
+
+.header{background:var(--surface);border-bottom:1px solid var(--gold-border);padding:13px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.hlogo{width:34px;height:34px;border-radius:8px;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--gold);font-size:.9rem;flex-shrink:0}
+.htitle{font-size:1rem;font-weight:800;color:var(--gold);line-height:1.1}
+.hsub{font-size:.7rem;color:var(--text-dim)}
+.hnav{display:flex;gap:4px;margin-left:auto;margin-right:12px}
+.hnav-link{font-size:.72rem;padding:5px 10px;border-radius:6px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);transition:all .15s;white-space:nowrap}
+.hnav-link:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.hnav-link.active{color:var(--gold);border-color:var(--gold-border);background:var(--gold-dim)}
+.hback{font-size:.75rem;color:var(--text-dim);text-decoration:none;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;white-space:nowrap}
+.hback:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+
+/* Layout */
+.layout{display:flex;min-height:calc(100vh - 60px - 56px)}
+.sidebar{width:152px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;padding:12px 0}
+.tab-btn{width:100%;background:none;border:none;color:var(--text-dim);padding:12px 16px;text-align:left;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:9px;border-left:3px solid transparent;transition:all .15s;line-height:1.3;font-family:inherit}
+.tab-btn:hover{background:rgba(255,255,255,.03);color:var(--text)}
+.tab-btn.active{color:var(--gold);background:var(--gold-dim);border-left-color:var(--gold);font-weight:700}
+.tab-icon{font-size:1.05rem;width:20px;text-align:center;flex-shrink:0}
+.main{flex:1;padding:20px;max-width:900px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);margin-bottom:14px}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+.tbl th:last-child,.tbl th.r{text-align:right}
+.tbl td{padding:7px 8px;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.tbl td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.tbl tfoot td{font-weight:700;border-top:1px solid var(--gold-border);color:var(--gold)}
+.tbl input{background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--text);font-size:.82rem;padding:4px 6px;width:80px;text-align:right;font-family:inherit}
+.tbl input:focus{outline:none;border-color:var(--gold-border)}
+
+/* Buttons */
+.btn-sm{font-size:.72rem;padding:4px 10px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);cursor:pointer;transition:all .15s;font-family:inherit}
+.btn-sm:hover{color:var(--text);border-color:var(--gold-border)}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:#000;font-weight:700;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .15s;font-family:inherit}
+.btn-gold:hover{background:var(--gold2)}
+.btn-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem;padding:2px 6px;opacity:.5}
+.btn-del:hover{opacity:1}
+
+/* Worker cards */
+.wcard{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.wcard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.wcard-title{font-size:.82rem;font-weight:700;color:var(--text)}
+.wcard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.wcard-field{display:flex;flex-direction:column;gap:3px}
+.wcard-field label{font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)}
+.wcard-field input,.wcard-field select{background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--text);font-size:.82rem;padding:6px 8px;font-family:inherit;width:100%}
+.wcard-field input:focus,.wcard-field select:focus{outline:none;border-color:var(--gold-border)}
+.wcard-result{display:flex;gap:16px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.wcard-kpi{font-size:.75rem}
+.wcard-kpi .kv{color:var(--gold);font-weight:700}
+
+/* Sliders */
+.slider-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.slider-row label{font-size:.78rem;color:var(--text-dim);min-width:130px}
+.slider-row input[type=range]{flex:1;accent-color:var(--gold);height:6px}
+.slider-row .slider-val{font-size:.85rem;font-weight:700;color:var(--gold);min-width:50px;text-align:right}
+
+/* Breakdown */
+.bdown{width:100%;border-collapse:collapse}
+.bdown td{padding:7px 8px;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.bdown td:last-child{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
+.bdown .section-head td{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);padding-top:14px;border-bottom:1px solid var(--gold-border)}
+.bdown .total td{font-weight:800;font-size:.95rem;color:var(--gold);border-top:2px solid var(--gold);padding-top:10px}
+
+/* Bottom bar */
+.bar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--gold-border);padding:12px 20px;display:flex;align-items:center;justify-content:center;gap:24px;z-index:90;flex-wrap:wrap}
+.bar-item{text-align:center}
+.bar-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);display:block}
+.bar-val{font-size:1.1rem;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.bar-val.gold{color:var(--gold);font-size:1.25rem}
+.bar-sep{width:1px;height:32px;background:var(--border)}
+
+@media(max-width:680px){
+  .sidebar{width:48px;padding:8px 0}
+  .tab-btn span:not(.tab-icon){display:none}
+  .tab-btn{justify-content:center;padding:14px 0;border-left:none;border-bottom:3px solid transparent}
+  .tab-btn.active{border-bottom-color:var(--gold);border-left:none}
+  .main{padding:14px}
+  .header{padding:10px 14px}
+  .hnav{display:none}
+  .wcard-grid{grid-template-columns:1fr}
+  .bar{gap:14px;padding:10px 14px}
+  .bar-val{font-size:.95rem}
+}
+
+@media print{
+  .header,.sidebar,.bar,button,.btn-sm,.btn-gold,.btn-del{display:none!important}
+  .layout{display:block}
+  .tab-panel{display:block!important}
+  body{background:#fff;color:#000;font-size:11px}
+  .card{border:1px solid #ccc;break-inside:avoid}
+  .card-title{color:#333}
+  .tbl td,.bdown td{border-bottom:1px solid #eee;color:#000}
+  .bdown .total td{color:#000;border-top:2px solid #000}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hlogo">VG</div>
+  <div>
+    <div class="htitle">Badsanierung Intern</div>
+    <div class="hsub">Detailkalkulation &middot; Nur fur Mitarbeiter</div>
+  </div>
+  <nav class="hnav">
+    <a href="/calculator/" class="hnav-link">Angebotsrechner</a>
+    <a href="/calculator/salary/" class="hnav-link">Gehaltsrechner</a>
+    <a href="/calculator/bathroom/" class="hnav-link">Badsanierung</a>
+    <a href="/calculator/bathroom/internal/" class="hnav-link active">Intern</a>
+  </nav>
+  <a href="/calculator/bathroom/" class="hback">&larr; Offentlich</a>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <button class="tab-btn active" onclick="switchTab('material',this)">
+      <span class="tab-icon">&#129521;</span><span>Materialien</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('arbeit',this)">
+      <span class="tab-icon">&#128119;</span><span>Arbeitskosten</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('kalkulation',this)">
+      <span class="tab-icon">&#128202;</span><span>Kalkulation</span>
+    </button>
+  </div>
+
+  <div class="main">
+
+    <!-- ══════ TAB: Materialien ══════ -->
+    <div id="panel-material" class="tab-panel active">
+      <div class="card">
+        <div class="card-title">Projekt-Parameter</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="wcard-field" style="width:140px">
+            <label>Grundflache (m&sup2;)</label>
+            <input type="number" id="int-flaeche" value="8" min="1" max="50" step="0.5" oninput="recalc()">
+          </div>
+          <div class="wcard-field" style="width:140px">
+            <label>Wandhohe (m)</label>
+            <input type="number" id="int-hoehe" value="2.5" min="1.5" max="4" step="0.1" oninput="recalc()">
+          </div>
+          <div class="wcard-field" style="width:140px">
+            <label>Fliesenflache (m&sup2;)</label>
+            <input type="number" id="int-fliesen-flaeche" value="0" readonly style="color:var(--gold);font-weight:700">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Material &amp; Beschaffung
+          <button class="btn-sm" style="margin-left:auto" onclick="addMaterial()">+ Hinzufugen</button>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Beschreibung</th><th>Menge</th><th>Einheit</th><th class="r">Einzelpreis</th><th class="r">Gesamt</th><th></th></tr></thead>
+          <tbody id="mat-body"></tbody>
+          <tfoot><tr><td colspan="4">Gesamt Material</td><td id="mat-total">0 &euro;</td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════ TAB: Arbeitskosten ══════ -->
+    <div id="panel-arbeit" class="tab-panel">
+      <div class="card">
+        <div class="card-title">Arbeitskrafte
+          <button class="btn-sm" style="margin-left:auto" onclick="addWorker()">+ Hinzufugen</button>
+        </div>
+        <div id="workers-container"></div>
+      </div>
+    </div>
+
+    <!-- ══════ TAB: Kalkulation ══════ -->
+    <div id="panel-kalkulation" class="tab-panel">
+      <div class="card">
+        <div class="card-title">Aufschlag &amp; Marge</div>
+        <div class="slider-row">
+          <label>Regiekosten</label>
+          <input type="range" id="sl-overhead" min="5" max="30" value="15" oninput="recalc();document.getElementById('sv-overhead').textContent=this.value+'%'">
+          <span class="slider-val" id="sv-overhead">15%</span>
+        </div>
+        <div class="slider-row">
+          <label>Gewinnmarge</label>
+          <input type="range" id="sl-margin" min="10" max="40" value="20" oninput="recalc();document.getElementById('sv-margin').textContent=this.value+'%'">
+          <span class="slider-val" id="sv-margin">20%</span>
+        </div>
+        <div class="slider-row">
+          <label>Arbeitstage</label>
+          <input type="range" id="sl-days" min="1" max="30" value="10" oninput="recalc();document.getElementById('sv-days').textContent=this.value">
+          <span class="slider-val" id="sv-days">10</span>
+        </div>
+        <div class="slider-row">
+          <label>Stunden/Tag</label>
+          <input type="range" id="sl-hours" min="4" max="12" value="8" oninput="recalc();document.getElementById('sv-hours').textContent=this.value">
+          <span class="slider-val" id="sv-hours">8</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Kostenaufstellung</div>
+        <table class="bdown" id="int-breakdown"></table>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn-gold" onclick="window.print()">Drucken / PDF</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom bar -->
+<div class="bar">
+  <div class="bar-item">
+    <span class="bar-lbl">Direktkosten</span>
+    <span class="bar-val" id="bar-direkt">0 &euro;</span>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-item">
+    <span class="bar-lbl">Nettoangebot</span>
+    <span class="bar-val gold" id="bar-netto">0 &euro;</span>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-item">
+    <span class="bar-lbl">Brutto (inkl. MwSt)</span>
+    <span class="bar-val" id="bar-brutto">0 &euro;</span>
+  </div>
+</div>
+
+<script>
+function fmt(n){return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac';}
+function fmtN(n){return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+/* ── State ── */
+var materials = [
+  {desc:'Bodenfliesen', qty:8, unit:'m\u00b2', price:35},
+  {desc:'Wandfliesen', qty:20, unit:'m\u00b2', price:28},
+  {desc:'Fliesenkleber', qty:5, unit:'Sack', price:18},
+  {desc:'Fugenmasse', qty:3, unit:'kg', price:8},
+  {desc:'Silikon + Dichtband', qty:1, unit:'Set', price:45},
+  {desc:'Sanitarsilikon', qty:2, unit:'Stk', price:12},
+];
+
+var workers = [
+  {trade:'Fliesenleger', count:1, rate:22, hours:8},
+  {trade:'Installateur', count:1, rate:25, hours:6},
+  {trade:'Elektriker', count:1, rate:24, hours:3},
+  {trade:'Abbruchhelfer', count:1, rate:14, hours:4},
+];
+
+var TRADES = ['Fliesenleger','Installateur','Elektriker','Abbruchhelfer','Maler','Trockenbauer','Helfer'];
+
+function switchTab(name, btn){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+/* ── Materials ── */
+function renderMaterials(){
+  var html='';
+  materials.forEach(function(m,i){
+    var total = m.qty * m.price;
+    html+='<tr>'
+      +'<td><input type="text" value="'+m.desc+'" style="width:160px;text-align:left" onchange="materials['+i+'].desc=this.value"></td>'
+      +'<td><input type="number" value="'+m.qty+'" style="width:60px" min="0" step="0.5" oninput="materials['+i+'].qty=parseFloat(this.value)||0;recalc()"></td>'
+      +'<td><input type="text" value="'+m.unit+'" style="width:50px;text-align:left" onchange="materials['+i+'].unit=this.value"></td>'
+      +'<td><input type="number" value="'+m.price+'" min="0" step="0.5" oninput="materials['+i+'].price=parseFloat(this.value)||0;recalc()"></td>'
+      +'<td>'+fmt(total)+'</td>'
+      +'<td><button class="btn-del" onclick="materials.splice('+i+',1);renderMaterials();recalc()">&times;</button></td>'
+      +'</tr>';
+  });
+  document.getElementById('mat-body').innerHTML=html;
+}
+
+function addMaterial(){
+  materials.push({desc:'Neues Material', qty:1, unit:'Stk', price:0});
+  renderMaterials();
+}
+
+/* ── Workers ── */
+function renderWorkers(){
+  var html='';
+  workers.forEach(function(w,i){
+    var totalH = w.count * w.hours;
+    var totalCost = totalH * w.rate;
+    html+='<div class="wcard">'
+      +'<div class="wcard-head"><div class="wcard-title">'+w.trade+'</div>'
+      +'<button class="btn-del" onclick="workers.splice('+i+',1);renderWorkers();recalc()">&times;</button></div>'
+      +'<div class="wcard-grid">'
+      +'<div class="wcard-field"><label>Beruf</label><select onchange="workers['+i+'].trade=this.value;renderWorkers()">';
+    TRADES.forEach(function(t){
+      html+='<option'+(t===w.trade?' selected':'')+'>'+t+'</option>';
+    });
+    html+='</select></div>'
+      +'<div class="wcard-field"><label>Anzahl</label><input type="number" value="'+w.count+'" min="1" max="20" oninput="workers['+i+'].count=parseInt(this.value)||1;recalc()"></div>'
+      +'<div class="wcard-field"><label>Stundensatz (&euro;/h)</label><input type="number" value="'+w.rate+'" min="0" step="0.5" oninput="workers['+i+'].rate=parseFloat(this.value)||0;recalc()"></div>'
+      +'<div class="wcard-field"><label>Stunden/Tag</label><input type="number" value="'+w.hours+'" min="1" max="12" oninput="workers['+i+'].hours=parseFloat(this.value)||0;recalc()"></div>'
+      +'</div>'
+      +'<div class="wcard-result">'
+      +'<div class="wcard-kpi">Std. gesamt/Tag: <span class="kv">'+totalH+'h</span></div>'
+      +'<div class="wcard-kpi">Kosten/Tag: <span class="kv">'+fmt(totalCost)+'</span></div>'
+      +'</div></div>';
+  });
+  document.getElementById('workers-container').innerHTML=html;
+}
+
+function addWorker(){
+  workers.push({trade:'Helfer', count:1, rate:14, hours:8});
+  renderWorkers();
+  recalc();
+}
+
+/* ── Master recalc ── */
+function recalc(){
+  var flaeche = parseFloat(document.getElementById('int-flaeche').value)||8;
+  var hoehe = parseFloat(document.getElementById('int-hoehe').value)||2.5;
+  var umfang = Math.sqrt(flaeche)*4;
+  var wandfl = umfang*hoehe*0.9;
+  var gesamtFl = flaeche + wandfl;
+  document.getElementById('int-fliesen-flaeche').value = Math.round(gesamtFl);
+
+  var overheadPct = parseInt(document.getElementById('sl-overhead').value)||15;
+  var marginPct = parseInt(document.getElementById('sl-margin').value)||20;
+  var days = parseInt(document.getElementById('sl-days').value)||10;
+  var hpd = parseInt(document.getElementById('sl-hours').value)||8;
+
+  /* Material total */
+  var costMat = 0;
+  materials.forEach(function(m){ costMat += m.qty * m.price; });
+  document.getElementById('mat-total').textContent = fmt(costMat);
+  renderMaterials();
+
+  /* Worker total */
+  var costLabor = 0;
+  workers.forEach(function(w){
+    costLabor += w.count * w.hours * w.rate * days;
+  });
+  renderWorkers();
+
+  /* Totals */
+  var direkt = costMat + costLabor;
+  var overhead = direkt * (overheadPct/100);
+  var sbRegie = direkt + overhead;
+  var zarada = sbRegie * (marginPct/100);
+  var netto = sbRegie + zarada;
+  var pdv = netto * 0.19;
+  var brutto = netto + pdv;
+  var totalStd = 0;
+  workers.forEach(function(w){ totalStd += w.count * w.hours * days; });
+  var csatNetto = totalStd>0 ? netto/totalStd : 0;
+  var cdanNetto = days>0 ? netto/days : 0;
+
+  /* Bottom bar */
+  document.getElementById('bar-direkt').textContent = fmt(direkt);
+  document.getElementById('bar-netto').textContent = fmt(netto);
+  document.getElementById('bar-brutto').textContent = fmt(brutto);
+
+  /* Breakdown */
+  var h = '';
+  h+='<tr class="section-head"><td colspan="2">Personalkosten</td></tr>';
+  workers.forEach(function(w){
+    var c = w.count * w.hours * w.rate * days;
+    h+='<tr><td>'+w.count+'&times; '+w.trade+' ('+w.hours+'h/Tag &times; '+days+' Tage &times; '+fmtN(w.rate)+' &euro;/h)</td><td>'+fmt(c)+'</td></tr>';
+  });
+  h+='<tr style="font-weight:600"><td>Zwischensumme Personal</td><td>'+fmt(costLabor)+'</td></tr>';
+
+  h+='<tr class="section-head"><td colspan="2">Material</td></tr>';
+  materials.forEach(function(m){
+    var c = m.qty * m.price;
+    if(c>0) h+='<tr><td>'+m.desc+' ('+m.qty+' '+m.unit+')</td><td>'+fmt(c)+'</td></tr>';
+  });
+  h+='<tr style="font-weight:600"><td>Zwischensumme Material</td><td>'+fmt(costMat)+'</td></tr>';
+
+  h+='<tr class="section-head"><td colspan="2">Kalkulation</td></tr>';
+  h+='<tr><td>Direktkosten</td><td>'+fmt(direkt)+'</td></tr>';
+  h+='<tr><td>+ Regiekosten ('+overheadPct+'%)</td><td>'+fmt(overhead)+'</td></tr>';
+  h+='<tr><td>= Zwischensumme</td><td>'+fmt(sbRegie)+'</td></tr>';
+  h+='<tr><td>+ Gewinnmarge ('+marginPct+'%)</td><td>'+fmt(zarada)+'</td></tr>';
+  h+='<tr class="total"><td>NETTOANGEBOT</td><td>'+fmt(netto)+'</td></tr>';
+  h+='<tr><td>+ 19% MwSt.</td><td>'+fmt(pdv)+'</td></tr>';
+  h+='<tr class="total"><td>BRUTTOANGEBOT</td><td>'+fmt(brutto)+'</td></tr>';
+
+  h+='<tr class="section-head"><td colspan="2">Kennzahlen</td></tr>';
+  h+='<tr><td>Gesamtstunden</td><td>'+totalStd+' h</td></tr>';
+  h+='<tr><td>Netto-Stundensatz</td><td>'+fmt(csatNetto)+'/h</td></tr>';
+  h+='<tr><td>Netto-Tagessatz</td><td>'+fmt(cdanNetto)+'/Tag</td></tr>';
+
+  document.getElementById('int-breakdown').innerHTML = h;
+}
+
+/* ── Init ── */
+renderMaterials();
+renderWorkers();
+recalc();
+</script>
+</body>
+</html>

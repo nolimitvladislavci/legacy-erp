@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Smart Checkout{% endblock %}
+{% block content %}
+<style>
+.sc-wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
+.sc-header { margin-bottom: 24px; }
+.sc-header h2 { font-weight: 900; font-size: 1.3rem; }
+
+/* Cut-off warning */
+.cutoff-banner { background: rgba(234,179,8,0.12); border: 2px solid #eab308; border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+.cutoff-banner .icon { font-size: 1.5rem; }
+.cutoff-banner .text { font-size: .88rem; color: #eab308; font-weight: 600; }
+
+/* Pfand warning */
+.pfand-banner { background: rgba(220,53,69,0.08); border: 1px solid rgba(220,53,69,0.3); border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; }
+.pfand-banner strong { color: #dc3545; }
+
+/* Temperature zones */
+.zone-section { margin-bottom: 16px; }
+.zone-header { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px 10px 0 0; font-weight: 800; font-size: .82rem; text-transform: uppercase; letter-spacing: 1px; }
+.zone-items { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 0 0  14px 14px; padding: 12px 16px; }
+.zone-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border, rgba(255,255,255,0.06)); font-size: .88rem; }
+.zone-item:last-child { border-bottom: none; }
+.zone-item .name { font-weight: 600; }
+.zone-item .qty { color: var(--text-muted, #94a3b8); font-size: .8rem; }
+.zone-item .price { font-weight: 700; color: #c9a84c; }
+
+/* Form card */
+.sc-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.sc-card h3 { font-size: .8rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+
+/* Delivery method cards */
+.dm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+@media (max-width: 600px) { .dm-grid { grid-template-columns: 1fr; } }
+.dm-option { position: relative; }
+.dm-option input[type=radio] { position: absolute; opacity: 0; }
+.dm-option label { display: block; padding: 14px; border: 2px solid var(--border, rgba(255,255,255,0.1)); border-radius: 12px; cursor: pointer; transition: border-color .2s; }
+.dm-option input:checked + label { border-color: #c9a84c; background: rgba(201,168,76,0.08); }
+.dm-label { font-weight: 700; font-size: .9rem; }
+.dm-desc { font-size: .75rem; color: var(--text-muted, #94a3b8); margin-top: 2px; }
+.dm-price { font-weight: 900; color: #c9a84c; font-size: .85rem; margin-top: 4px; }
+.dm-cold { display: inline-block; font-size: .68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(59,130,246,0.15); color: #3b82f6; margin-top: 4px; }
+
+/* Summary */
+.sc-summary { background: var(--bg-card, #141414); border: 2px solid #c9a84c; border-radius: 16px; padding: 20px; }
+.sc-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: .9rem; }
+.sc-row.total { font-size: 1.2rem; font-weight: 900; border-top: 2px solid var(--border, rgba(255,255,255,0.1)); padding-top: 12px; margin-top: 8px; }
+.sc-row.total .val { color: #c9a84c; }
+.sc-row.savings { color: #22c55e; font-weight: 600; }
+
+/* Submit */
+.btn-order { background: #c9a84c; color: #000; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 16px; }
+.btn-order:hover { background: #b8963c; }
+
+/* Form inputs */
+.sc-input { background: var(--bg-main, #0a0a0a); border: 1px solid var(--border, #333); color: #e2e8f0; padding: 10px 14px; border-radius: 8px; font-size: .9rem; width: 100%; }
+.sc-input::placeholder { color: var(--text-muted, #666); }
+.sc-label { font-size: .78rem; font-weight: 600; color: var(--text-muted, #94a3b8); margin-bottom: 4px; display: block; }
+.sc-row-form { margin-bottom: 12px; }
+.sc-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .sc-grid-2 { grid-template-columns: 1fr; } }
+
+.cutoff-check { display: flex; align-items: center; gap: 8px; padding: 10px; background: rgba(234,179,8,0.08); border-radius: 8px; margin-top: 8px; }
+.cutoff-check input { width: 20px; height: 20px; }
+.cutoff-check label { font-size: .82rem; color: #eab308; font-weight: 600; }
+</style>
+
+<div class="sc-wrap">
+  <div class="sc-header">
+    <h2>&#128722; {% trans "Smart Checkout" %}</h2>
+  </div>
+
+  <!-- Cut-off Warning -->
+  {% if cutoff_warning %}
+  <div class="cutoff-banner">
+    <span class="icon">&#9200;</span>
+    <span class="text">{% trans "Cut-off je prosao! Narudzba ide za sljedeci dan dostave." %}</span>
+  </div>
+  {% endif %}
+
+  <!-- Pfand Warning -->
+  {% if pfand_debt %}
+  <div class="pfand-banner">
+    <strong>&#9888; {% trans "Otvoreni dug ambalaze" %}:</strong>
+    {{ pfand_debt }} {% trans "komada" %}
+    (~{{ pfand_debt|floatformat:0 }}x4 = {{ pfand_debt|floatformat:0 }}0 EUR {% trans "kaucija" %})
+    <div style="font-size:.78rem;color:var(--text-muted);margin-top:4px;">
+      {% trans "Ako ih danas ne predate vozacu, kaucija ce biti naplacena." %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" id="checkout-form">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;">
+      <div>
+        <!-- Temperature Zone Items -->
+        {% for zone_key, zone_items in items_by_zone.items %}
+        {% with meta=zone_meta|dictsort:zone_key %}
+        <div class="zone-section">
+          <div class="zone-header" style="background:{{ zone_items.0.temp_zone_meta.color }}22;color:{{ zone_items.0.temp_zone_meta.color }};">
+            <span>{{ zone_items.0.temp_zone_meta.icon|safe }}</span>
+            {{ zone_items.0.temp_zone_meta.label }}
+            <span style="margin-left:auto;font-size:.72rem;opacity:.7;">{{ zone_items|length }} {% trans "stavki" %}</span>
+          </div>
+          <div class="zone-items">
+            {% for item in zone_items %}
+            <div class="zone-item">
+              <div>
+                <span class="name">{{ item.name }}</span>
+                <span class="qty">x{{ item.qty }} {{ item.unit|default:"kg" }}</span>
+                {% if item.has_discount %}
+                <span style="font-size:.7rem;color:#22c55e;font-weight:700;margin-left:6px;">-{{ item.discount_percent|floatformat:0 }}%</span>
+                {% endif %}
+              </div>
+              <span class="price">{{ item.line_total|floatformat:2 }}&euro;</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+
+        <!-- Delivery Method -->
+        <div class="sc-card">
+          <h3>&#128666; {% trans "Nacin dostave" %}</h3>
+          <div class="dm-grid">
+            <div class="dm-option">
+              <input type="radio" name="delivery_method" value="standard" id="dm-standard" checked>
+              <label for="dm-standard">
+                <div class="dm-label">{% trans "Standardna dostava" %}</div>
+                <div class="dm-desc">{% trans "Sljedeci radni dan" %}</div>
+                <div class="dm-price">5.00&euro;</div>
+              </label>
+            </div>
+            <div class="dm-option">
+              <input type="radio" name="delivery_method" value="express" id="dm-express">
+              <label for="dm-express">
+                <div class="dm-label">{% trans "Express dostava" %}</div>
+                <div class="dm-desc">{% trans "Isti dan (do 14h)" %}</div>
+                <div class="dm-price">10.00&euro;</div>
+              </label>
+            </div>
+            <div class="dm-option">
+              <input type="radio" name="delivery_method" value="gepek_taxi" id="dm-taxi">
+              <label for="dm-taxi">
+                <div class="dm-label">&#128661; {% trans "Gepek / Taxi" %}</div>
+                <div class="dm-desc">{% trans "Za 1-2 sata, hitna dostava" %}</div>
+                <div class="dm-price">15.00&euro;</div>
+                {% if has_cold_chain %}
+                <span class="dm-cold">&#10052; {% trans "Hladni lanac" %}</span>
+                {% endif %}
+              </label>
+            </div>
+            <div class="dm-option">
+              <input type="radio" name="delivery_method" value="pickup" id="dm-pickup">
+              <label for="dm-pickup">
+                <div class="dm-label">{% trans "Osobno preuzimanje" %}</div>
+                <div class="dm-desc">{% trans "Preuzmi na veletrznici" %}</div>
+                <div class="dm-price">0.00&euro;</div>
+              </label>
+            </div>
+          </div>
+          {% if has_cold_chain %}
+          <div style="font-size:.78rem;color:#3b82f6;background:rgba(59,130,246,0.08);padding:8px 12px;border-radius:8px;">
+            &#10052; {% trans "Narudzba sadrzi proizvode koji zahtijevaju hladni lanac. SmartBox ce biti automatski dodijeljen." %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right sidebar -->
+      <div>
+        <!-- Delivery details -->
+        <div class="sc-card">
+          <h3>&#128205; {% trans "Dostava" %}</h3>
+          <div class="sc-row-form">
+            <label class="sc-label">{% trans "Adresa dostave" %}</label>
+            <input type="text" name="delivery_address" class="sc-input" value="{{ company.address }}">
+          </div>
+          <div class="sc-grid-2">
+            <div class="sc-row-form">
+              <label class="sc-label">{% trans "Datum dostave" %}</label>
+              <input type="date" name="delivery_date" class="sc-input" id="delivery-date">
+            </div>
+            <div class="sc-row-form">
+              <label class="sc-label">{% trans "Vremenski prozor" %}</label>
+              <select name="time_window" class="sc-input">
+                <option>06:00-10:00</option>
+                <option>10:00-14:00</option>
+                <option>14:00-18:00</option>
+              </select>
+            </div>
+          </div>
+          <div class="sc-row-form">
+            <label class="sc-label">{% trans "Napomena" %}</label>
+            <textarea name="notes" class="sc-input" rows="2" placeholder="{% trans 'Posebni zahtjevi...' %}"></textarea>
+          </div>
+
+          {% if cutoff_warning %}
+          <div class="cutoff-check">
+            <input type="checkbox" name="cutoff_acknowledged" id="cutoff-ack" required>
+            <label for="cutoff-ack">{% trans "Razumijem da je cut-off prosao i narudzba ide za idući dan" %}</label>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Summary -->
+        <div class="sc-summary">
+          <h3 style="font-size:.8rem;font-weight:800;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">{% trans "Pregled" %}</h3>
+
+          <div class="sc-row">
+            <span>{% trans "Stavke" %} ({{ items|length }})</span>
+            <span>{{ total|floatformat:2 }}&euro;</span>
+          </div>
+          {% if total_savings > 0 %}
+          <div class="sc-row savings">
+            <span>{% trans "Usteda (rabati)" %}</span>
+            <span>-{{ total_savings|floatformat:2 }}&euro;</span>
+          </div>
+          {% endif %}
+          <div class="sc-row">
+            <span>{% trans "Dostava" %}</span>
+            <span id="delivery-fee">5.00&euro;</span>
+          </div>
+          {% if pfand_debt %}
+          <div class="sc-row" style="color:#dc3545;">
+            <span>&#9888; {% trans "Pfand dug" %}</span>
+            <span>{{ pfand_debt }} kom</span>
+          </div>
+          {% endif %}
+          <div class="sc-row total">
+            <span>{% trans "UKUPNO" %}</span>
+            <span class="val" id="grand-total">{{ total|floatformat:2 }}&euro;</span>
+          </div>
+
+          <button type="submit" class="btn-order">
+            &#10003; {% trans "POTVRDI NARUDZBU" %}
+          </button>
+
+          <div style="font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:10px;">
+            {% trans "Racun ce biti kreiran kao nacrt. Fiskalizacija pri primopredaji." %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+(function(){
+  var total = {{ total|floatformat:2 }};
+  var fees = {standard: 5, express: 10, gepek_taxi: 15, pickup: 0};
+  var radios = document.querySelectorAll('input[name=delivery_method]');
+  var feeEl = document.getElementById('delivery-fee');
+  var grandEl = document.getElementById('grand-total');
+
+  radios.forEach(function(r) {
+    r.addEventListener('change', function() {
+      var fee = fees[this.value] || 0;
+      feeEl.textContent = fee.toFixed(2) + '\u20ac';
+      grandEl.textContent = (total + fee).toFixed(2) + '\u20ac';
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Clanarine — LIMIT CONNECT{% endblock %}
+{% block content %}
+<style>
+    .udruge-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .udruge-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, #c9a84c); }
+    .udruge-stat .label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .udruge-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .udruge-table th { background: var(--table-header-bg); padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    .udruge-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .udruge-table tr:hover { background: var(--table-row-hover); }
+    .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-placena { background: #065f4620; color: #065f46; }
+    .badge-ceka { background: #c9a84c20; color: #c9a84c; }
+    .badge-kasni { background: #dc262620; color: #dc2626; }
+    .btn-gold { background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+    .btn-gold:hover { background: #b8943f; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+    .bulk-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .bulk-form h3 { margin: 0 0 16px; font-size: 1rem; color: var(--gold, #c9a84c); }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 0.8rem; color: var(--text-secondary); }
+    .form-group input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); font-size: 0.9rem; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .page-header h1 { font-size: 1.5rem; margin: 0; }
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .filter-bar a { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--border); color: var(--text-secondary); }
+    .filter-bar a.active { background: var(--gold, #c9a84c); color: #0a0a0a; border-color: var(--gold, #c9a84c); }
+    @media (max-width: 768px) {
+        .udruge-stats { grid-template-columns: repeat(2, 1fr); }
+        .udruge-table { font-size: 0.8rem; }
+        .form-row { flex-direction: column; }
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-money-check-alt" style="color:var(--gold)"></i> Clanarine</h1>
+</div>
+
+<div class="udruge-stats">
+    <div class="udruge-stat">
+        <div class="value">{{ stats.ukupno }}</div>
+        <div class="label">Ukupno</div>
+    </div>
+    <div class="udruge-stat">
+        <div class="value">{{ stats.placene|default:"0" }} &euro;</div>
+        <div class="label">Placene</div>
+    </div>
+    <div class="udruge-stat">
+        <div class="value">{{ stats.ceka }}</div>
+        <div class="label">Ceka uplatu</div>
+    </div>
+    <div class="udruge-stat">
+        <div class="value">{{ stats.kasni }}</div>
+        <div class="label">Kasni</div>
+    </div>
+</div>
+
+<div class="bulk-form">
+    <h3><i class="fas fa-plus-circle"></i> Generiraj clanarine za sve aktivne clanove</h3>
+    <form method="post" action="{% url 'udruge:clanarina_bulk_create' %}">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group">
+                <label>Iznos (EUR)</label>
+                <input type="number" name="amount" step="0.01" min="0" required placeholder="50.00">
+            </div>
+            <div class="form-group">
+                <label>Pocetak perioda</label>
+                <input type="date" name="period_start" required>
+            </div>
+            <div class="form-group">
+                <label>Kraj perioda</label>
+                <input type="date" name="period_end" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-gold"><i class="fas fa-magic"></i> Generiraj</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="filter-bar">
+    <a href="{% url 'udruge:clanarina_list' %}" class="{% if not status_f %}active{% endif %}">Sve</a>
+    <a href="{% url 'udruge:clanarina_list' %}?status=ceka" class="{% if status_f == 'ceka' %}active{% endif %}">Ceka</a>
+    <a href="{% url 'udruge:clanarina_list' %}?status=placena" class="{% if status_f == 'placena' %}active{% endif %}">Placene</a>
+    <a href="{% url 'udruge:clanarina_list' %}?status=kasni" class="{% if status_f == 'kasni' %}active{% endif %}">Kasni</a>
+</div>
+
+<table class="udruge-table">
+    <thead>
+        <tr>
+            <th>Clan</th>
+            <th>Period</th>
+            <th>Iznos</th>
+            <th>Status</th>
+            <th>Placeno</th>
+            <th>Akcija</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in page_obj %}
+        <tr>
+            <td><strong>{{ c.clan }}</strong></td>
+            <td>{{ c.period_start|date:"d.m.Y." }} — {{ c.period_end|date:"d.m.Y." }}</td>
+            <td>{{ c.amount }} &euro;</td>
+            <td>
+                <span class="badge-status badge-{{ c.status }}">{{ c.get_status_display }}</span>
+            </td>
+            <td>{% if c.paid_at %}{{ c.paid_at|date:"d.m.Y." }}{% else %}—{% endif %}</td>
+            <td>
+                {% if c.status != 'placena' %}
+                <form method="post" action="{% url 'udruge:clanarina_pay' c.pk %}" style="display:inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="method" value="gotovina">
+                    <button type="submit" class="btn-gold" style="padding:4px 12px;font-size:0.8rem">
+                        <i class="fas fa-check"></i> Plati
+                    </button>
+                </form>
+                {% else %}
+                <span style="color:var(--text-muted)"><i class="fas fa-check-circle"></i></span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">Nema clanarina za prikaz.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if page_obj.has_other_pages %}
+<div style="display:flex;justify-content:center;gap:8px;margin-top:20px">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if status_f %}&status={{ status_f }}{% endif %}" class="btn-outline">&laquo; Prethodna</a>
+    {% endif %}
+    <span style="padding:8px 16px;color:var(--text-secondary)">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if status_f %}&status={{ status_f }}{% endif %}" class="btn-outline">Sljedeca &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

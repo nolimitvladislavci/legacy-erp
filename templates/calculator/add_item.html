@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md border mt-10">
+    <h2 class="text-2xl font-bold text-slate-800 mb-6">Dodaj stavku u kalkulaciju #{{ calculation.id }}</h2>
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">{% trans "Odaberi normativ" %}</label>
+            <select name="normative" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                {% for n in normatives %}
+                    <option value="{{ n.id }}">{{ n.name }} ({{ n.unit }}) - {{ n.base_material_cost }}€/jed</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">{% trans "Količina" %}</label>
+            <input type="number" name="quantity" step="0.1" value="1" class="w-full p-3 border rounded-lg">
+        </div>
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition">{% trans "Spremi stavku" %}</button>
+            <a href="{% url 'calculator:estimate_list' %}" class="flex-1 py-3 bg-slate-100 text-center text-slate-600 rounded-lg font-bold">{% trans "Odustani" %}</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

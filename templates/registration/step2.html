@@ -1,0 +1,151 @@
+{% extends 'registration/base_reg.html' %}
+{% load i18n %}
+{% block title %}{% trans "Podaci o tvrtki" %} – LIMIT Connect
+<script>
+(function(){
+  var radios = document.querySelectorAll('input[name="country"]');
+  var oibLabel = document.querySelector('label[for="id_oib"]');
+  if (!oibLabel) {
+    // Find label by text content
+    var labels = document.querySelectorAll('.reg-field label');
+    for (var i = 0; i < labels.length; i++) {
+      if (labels[i].textContent.indexOf('OIB') !== -1 || labels[i].textContent.indexOf('Porezni broj') !== -1) {
+        oibLabel = labels[i];
+        break;
+      }
+    }
+  }
+  var oibInput = document.querySelector('input[name="oib"]');
+  function update() {
+    var val = document.querySelector('input[name="country"]:checked');
+    if (!val || !oibLabel || !oibInput) return;
+    if (val.value === 'DE') {
+      oibLabel.innerHTML = 'Porezni broj / PDV ID *';
+      oibInput.placeholder = 'DE123456789';
+      oibInput.maxLength = 50;
+    } else {
+      oibLabel.innerHTML = 'OIB *';
+      oibInput.placeholder = '12345678901';
+      oibInput.maxLength = 11;
+    }
+  }
+  for (var i = 0; i < radios.length; i++) {
+    radios[i].addEventListener('change', update);
+  }
+  update();
+})();
+</script>
+{% endblock %}
+{% block content %}
+<!-- Step indicator -->
+<div class="step-indicator">
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">Plan</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle active">2</div><div class="step-label active">{% trans "Tvrtka" %}</div></div>
+  <div class="step-line"></div>
+  <div class="step-item"><div class="step-circle">3</div><div class="step-label">{% trans "Račun" %}</div></div>
+  <div class="step-line"></div>
+  <div class="step-item"><div class="step-circle">4</div><div class="step-label">{% trans "Potvrda" %}</div></div>
+</div>
+
+<div class="reg-card">
+  <div class="reg-card-title">{% trans "Podaci o tvrtki" %}</div>
+  <div class="reg-card-subtitle">{% trans "Unesite osnovne podatke o vašoj tvrtki." %}</div>
+
+  <form method="post">
+  {% csrf_token %}
+
+  <div class="reg-field">
+    <label>{% trans "Naziv tvrtke" %} *</label>
+    <input type="text" name="name" value="{{ data.name }}" class="reg-input" placeholder="Primjer d.o.o." required>
+    {% if errors.name %}<div class="error-msg">{{ errors.name }}</div>{% endif %}
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "OIB / Porezni broj" %} *</label>
+      <input type="text" name="oib" value="{{ data.oib }}" class="reg-input" placeholder="12345678901" required>
+      {% if errors.oib %}<div class="error-msg">{{ errors.oib }}</div>{% endif %}
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Država" %}</label>
+      <div style="display:flex;gap:1rem;padding-top:.5rem">
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.95rem;color:var(--text)">
+          <input type="radio" name="country" value="HR" {% if data.country == 'HR' or not data.country %}checked{% endif %}>
+          🇭🇷 Hrvatska
+        </label>
+        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.95rem;color:var(--text)">
+          <input type="radio" name="country" value="DE" {% if data.country == 'DE' %}checked{% endif %}>
+          🇩🇪 Njemačka
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="reg-field">
+    <label>{% trans "Adresa" %}</label>
+    <input type="text" name="address" value="{{ data.address }}" class="reg-input" placeholder="{% trans 'Ulica i kućni broj' %}">
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "Grad" %}</label>
+      <input type="text" name="city" value="{{ data.city }}" class="reg-input" placeholder="Zagreb">
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Poštanski broj" %}</label>
+      <input type="text" name="zip_code" value="{{ data.zip_code }}" class="reg-input" placeholder="10000">
+    </div>
+  </div>
+
+  <div class="reg-field">
+    <label>{% trans "Djelatnost" %}</label>
+    <select name="industry" class="reg-input">
+      {% for val, label in industries %}
+      <option value="{{ val }}" {% if data.industry == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="reg-actions">
+    <a href="{% url 'registration:register_step1' %}" class="reg-btn-outline">← {% trans "Natrag" %}</a>
+    <button type="submit" class="reg-btn">{% trans "Nastavi" %} →</button>
+  </div>
+  </form>
+</div>
+
+<script>
+(function(){
+  var radios = document.querySelectorAll('input[name="country"]');
+  var oibLabel = document.querySelector('label[for="id_oib"]');
+  if (!oibLabel) {
+    // Find label by text content
+    var labels = document.querySelectorAll('.reg-field label');
+    for (var i = 0; i < labels.length; i++) {
+      if (labels[i].textContent.indexOf('OIB') !== -1 || labels[i].textContent.indexOf('Porezni broj') !== -1) {
+        oibLabel = labels[i];
+        break;
+      }
+    }
+  }
+  var oibInput = document.querySelector('input[name="oib"]');
+  function update() {
+    var val = document.querySelector('input[name="country"]:checked');
+    if (!val || !oibLabel || !oibInput) return;
+    if (val.value === 'DE') {
+      oibLabel.innerHTML = 'Porezni broj / PDV ID *';
+      oibInput.placeholder = 'DE123456789';
+      oibInput.maxLength = 50;
+    } else {
+      oibLabel.innerHTML = 'OIB *';
+      oibInput.placeholder = '12345678901';
+      oibInput.maxLength = 11;
+    }
+  }
+  for (var i = 0; i < radios.length; i++) {
+    radios[i].addEventListener('change', update);
+  }
+  update();
+})();
+</script>
+{% endblock %}

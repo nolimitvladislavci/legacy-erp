@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Pack — {{ order.order_number }}{% endblock %}
+{% block content %}
+<style>
+.ps-wrap { max-width: 800px; margin: 0 auto; padding: 16px; }
+.ps-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.ps-header h2 { font-weight: 900; font-size: 1.2rem; }
+.ps-meta { font-size: .82rem; color: var(--text-muted); }
+.ps-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.ps-card h3 { font-size: .82rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.ps-item { padding: 14px 0; border-bottom: 1px solid var(--border, rgba(255,255,255,0.06)); }
+.ps-item:last-child { border-bottom: none; }
+.ps-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.ps-product { font-weight: 700; font-size: 1rem; }
+.ps-ordered { font-size: .85rem; color: var(--text-muted); }
+.ps-weigh-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ps-input { background: var(--bg-main, #0a0a0a); border: 2px solid #c9a84c; color: #e2e8f0; padding: 12px; border-radius: 10px; font-size: 1.2rem; font-weight: 900; text-align: center; width: 120px; }
+.ps-input::placeholder { color: #555; }
+.ps-price { font-size: .85rem; color: var(--text-muted); }
+.ps-price .actual { color: #c9a84c; font-weight: 700; }
+.ps-diff { font-size: .78rem; font-weight: 700; }
+.ps-diff.plus { color: #22c55e; }
+.ps-diff.minus { color: #dc3545; }
+
+.btn-weigh { background: #c9a84c; color: #000; border: none; padding: 14px 24px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 12px; }
+.btn-weigh:hover { background: #b8963c; }
+
+/* Genesis Scan */
+.gs-card { border: 2px solid #3b82f6; }
+.gs-card h3 { color: #3b82f6; }
+.gs-input { background: var(--bg-main, #0a0a0a); border: 2px solid #3b82f6; color: #e2e8f0; padding: 14px; border-radius: 10px; font-size: 1.1rem; font-weight: 700; text-align: center; width: 100%; }
+.btn-scan { background: #3b82f6; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 12px; }
+.pkg-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+.pkg-item { display: flex; align-items: center; gap: 8px; }
+.pkg-item label { font-size: .82rem; font-weight: 600; flex: 1; }
+.pkg-item input { width: 60px; background: var(--bg-main); border: 1px solid var(--border, #333); color: #e2e8f0; padding: 8px; border-radius: 6px; text-align: center; font-weight: 700; }
+
+/* Bound rollwagens */
+.rw-bound { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(34,197,94,0.08); border-radius: 8px; margin-bottom: 8px; font-size: .88rem; }
+.rw-bound .qr { font-weight: 900; color: #22c55e; }
+
+/* Total */
+.ps-total { background: var(--bg-card, #141414); border: 2px solid #c9a84c; border-radius: 16px; padding: 20px; text-align: center; }
+.ps-total .amount { font-size: 2rem; font-weight: 900; color: #c9a84c; }
+.ps-total .label { font-size: .78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+</style>
+
+<div class="ps-wrap">
+  <div class="ps-header">
+    <div>
+      <h2>&#9878; Pack Station</h2>
+      <div class="ps-meta">{{ order.order_number }} | {{ order.buyer_company.name }}</div>
+    </div>
+    <a href="{% url 'delivery:warehouse_terminal' %}" style="color:#c9a84c;text-decoration:none;font-weight:700;">&larr; Terminal</a>
+  </div>
+
+  <!-- Dynamic Weighing -->
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="weigh">
+    <div class="ps-card">
+      <h3>&#9878; {% trans "Vaganje stavki" %}</h3>
+      {% for item in items %}
+      <div class="ps-item">
+        <div class="ps-item-header">
+          <span class="ps-product">{{ item.product.name }}</span>
+          <span class="ps-ordered">{% trans "Naruceno" %}: {{ item.quantity }} {{ item.product.unit|default:"kg" }}</span>
+        </div>
+        <div class="ps-weigh-row">
+          <div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:2px;">{% trans "STVARNO" %}</div>
+            <input type="number" name="actual_qty_{{ item.pk }}" class="ps-input"
+                   inputmode="decimal" step="0.001" min="0"
+                   placeholder="{{ item.quantity }}"
+                   value="{% if item.actual_quantity %}{{ item.actual_quantity }}{% endif %}"
+                   data-ordered="{{ item.quantity }}" data-price="{{ item.unit_price }}"
+                   data-pk="{{ item.pk }}" onchange="calcDiff(this)">
+          </div>
+          <div class="ps-price">
+            <div>{{ item.unit_price }}&euro;/{{ item.product.unit|default:"kg" }}</div>
+            <div class="actual" id="actual-total-{{ item.pk }}">
+              {% if item.actual_total %}= {{ item.actual_total|floatformat:2 }}&euro;{% endif %}
+            </div>
+          </div>
+          <div class="ps-diff" id="diff-{{ item.pk }}"></div>
+          {% if item.packed_at %}
+          <span style="font-size:.72rem;color:#22c55e;font-weight:700;">&#10003; {{ item.packed_at|date:"H:i" }}</span>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn-weigh">&#9878; {% trans "POTVRDI VAGANJE" %}</button>
+    </div>
+  </form>
+
+  <!-- Genesis Scan — Rollwagen binding -->
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="genesis_scan">
+    <div class="ps-card gs-card">
+      <h3>&#128230; {% trans "Rollwagen — Genesis Scan" %}</h3>
+
+      {% if bound_rollwagens %}
+      <div style="margin-bottom:14px;">
+        {% for rw in bound_rollwagens %}
+        <div class="rw-bound">
+          <span class="qr">RW-{{ rw.qr_code }}</span>
+          <span style="color:var(--text-muted);font-size:.78rem;">
+            {% if rw.packaging_count %}
+              {% for k, v in rw.packaging_count.items %}{{ k }}: {{ v }} {% endfor %}
+            {% endif %}
+            {% if rw.packed_at %}| {{ rw.packed_at|date:"H:i" }}{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <input type="text" name="qr_code" class="gs-input" placeholder="{% trans 'Skeniraj QR kod rollwagena' %}" autofocus>
+
+      <div class="pkg-grid">
+        <div class="pkg-item">
+          <label>IFCO</label>
+          <input type="number" name="pkg_ifco" value="0" min="0" inputmode="numeric">
+        </div>
+        <div class="pkg-item">
+          <label>Europaleta</label>
+          <input type="number" name="pkg_euro_pallet" value="0" min="0" inputmode="numeric">
+        </div>
+        <div class="pkg-item">
+          <label>CHEP</label>
+          <input type="number" name="pkg_chep" value="0" min="0" inputmode="numeric">
+        </div>
+        <div class="pkg-item">
+          <label>SmartBox</label>
+          <input type="number" name="pkg_smartbox" value="0" min="0" inputmode="numeric">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-scan">&#128230; {% trans "VEZI ROLLWAGEN" %}</button>
+    </div>
+  </form>
+
+  <!-- Total -->
+  <div class="ps-total">
+    <div class="label">{% trans "Ukupni iznos narudzbe" %}</div>
+    <div class="amount" id="grand-total">{{ order.total|floatformat:2 }}&euro;</div>
+    <div style="font-size:.78rem;color:var(--text-muted);margin-top:4px;">{% trans "Draft racun se azurira automatski" %}</div>
+  </div>
+</div>
+
+<script>
+function calcDiff(input) {
+  var ordered = parseFloat(input.dataset.ordered);
+  var price = parseFloat(input.dataset.price);
+  var pk = input.dataset.pk;
+  var actual = parseFloat(input.value) || 0;
+  var diff = actual - ordered;
+
+  var diffEl = document.getElementById('diff-' + pk);
+  var totalEl = document.getElementById('actual-total-' + pk);
+
+  if (actual > 0) {
+    totalEl.textContent = '= ' + (actual * price).toFixed(2) + '\u20ac';
+    if (diff > 0.001) {
+      diffEl.textContent = '+' + diff.toFixed(3);
+      diffEl.className = 'ps-diff plus';
+    } else if (diff < -0.001) {
+      diffEl.textContent = diff.toFixed(3);
+      diffEl.className = 'ps-diff minus';
+    } else {
+      diffEl.textContent = '\u2713 tocno';
+      diffEl.className = 'ps-diff plus';
+    }
+  }
+}
+</script>
+{% endblock %}

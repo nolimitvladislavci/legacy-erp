@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}FINA izvjestaji — LIMIT CONNECT{% endblock %}
+{% block content %}
+<style>
+    .reports-header { margin-bottom: 32px; }
+    .reports-header h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    .reports-header p { color: var(--text-secondary); margin: 0; }
+    .year-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+    .year-selector label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; }
+    .year-selector select { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); font-size: 0.9rem; }
+    .report-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .report-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: border-color 0.2s; }
+    .report-card:hover { border-color: var(--gold, #c9a84c); }
+    .report-card .icon { width: 48px; height: 48px; background: #c9a84c15; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .report-card .icon i { font-size: 1.3rem; color: var(--gold, #c9a84c); }
+    .report-card h3 { margin: 0 0 8px; font-size: 1.1rem; }
+    .report-card p { color: var(--text-secondary); font-size: 0.85rem; margin: 0 0 20px; line-height: 1.5; }
+    .report-card .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .badge-dv { background: #3b82f620; color: #3b82f6; }
+    .badge-jv { background: #c9a84c20; color: #c9a84c; }
+    .btn-download { background: #c9a84c; color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-download:hover { background: #b8943f; }
+    .btn-disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; pointer-events: none; }
+    .info-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--gold, #c9a84c); border-radius: 8px; padding: 16px 20px; margin-top: 32px; font-size: 0.85rem; color: var(--text-secondary); }
+    .info-box strong { color: var(--text); }
+    @media (max-width: 768px) { .report-cards { grid-template-columns: 1fr; } }
+</style>
+
+<div class="reports-header">
+    <h1><i class="fas fa-file-excel" style="color:var(--gold)"></i> FINA izvjestaji</h1>
+    <p>Generiraj financijske izvjestaje za neprofitne organizacije prema Pravilniku o izvjestavanju u neprofitnom racunovodstvu.</p>
+</div>
+
+<div class="year-selector">
+    <label><i class="fas fa-calendar"></i> Godina izvjestaja:</label>
+    <select id="report-year">
+        {% for y in years %}
+        <option value="{{ y }}" {% if y == current_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="report-cards">
+    <!-- PR-RAS-NPF -->
+    <div class="report-card">
+        <div class="icon"><i class="fas fa-chart-line"></i></div>
+        <span class="badge badge-dv">Dvojno knjigovodstvo</span>
+        <h3>PR-RAS-NPF</h3>
+        <p>Izvjestaj o prihodima i rashodima neprofitnih organizacija. Prihodi po kontima klase 3, rashodi po kontima klase 4. Obvezno za udruge s dvojnim knjigovodstvom.</p>
+        {% if not is_simplified %}
+        <a href="#" class="btn-download" onclick="downloadReport('pr-ras-npf'); return false;">
+            <i class="fas fa-download"></i> Preuzmi XLSX
+        </a>
+        {% else %}
+        <span class="btn-download btn-disabled"><i class="fas fa-lock"></i> Samo dvojno knjigovodstvo</span>
+        {% endif %}
+    </div>
+
+    <!-- BIL-NPF -->
+    <div class="report-card">
+        <div class="icon"><i class="fas fa-balance-scale"></i></div>
+        <span class="badge badge-dv">Dvojno knjigovodstvo</span>
+        <h3>BIL-NPF</h3>
+        <p>Bilanca neprofitnih organizacija. Stanje imovine, obveza i vlastitih izvora na 1. sijecnja i 31. prosinca. Aktiva = Pasiva.</p>
+        {% if not is_simplified %}
+        <a href="#" class="btn-download" onclick="downloadReport('bil-npf'); return false;">
+            <i class="fas fa-download"></i> Preuzmi XLSX
+        </a>
+        {% else %}
+        <span class="btn-download btn-disabled"><i class="fas fa-lock"></i> Samo dvojno knjigovodstvo</span>
+        {% endif %}
+    </div>
+
+    <!-- G-PR-IZ-NPF -->
+    <div class="report-card">
+        <div class="icon"><i class="fas fa-receipt"></i></div>
+        <span class="badge badge-jv">Jednostavno knjigovodstvo</span>
+        <h3>G-PR-IZ-NPF</h3>
+        <p>Godisnji financijski izvjestaj o primicima i izdacima. Za udruge s jednostavnim racunovodstvom (prihodi &lt; 30.000 EUR godisnje).</p>
+        {% if is_simplified %}
+        <a href="#" class="btn-download" onclick="downloadReport('g-pr-iz-npf'); return false;">
+            <i class="fas fa-download"></i> Preuzmi XLSX
+        </a>
+        {% else %}
+        <span class="btn-download btn-disabled"><i class="fas fa-lock"></i> Samo jednostavno knjigovodstvo</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="info-box">
+    <strong><i class="fas fa-info-circle"></i> Napomena:</strong>
+    {% if is_simplified %}
+    Vasa udruga koristi <strong>jednostavno knjigovodstvo</strong> (prihodi &lt; 30.000 EUR). Dostupan vam je obrazac G-PR-IZ-NPF.
+    Za PR-RAS-NPF i BIL-NPF potrebno je preci na dvojno knjigovodstvo.
+    {% else %}
+    Vasa udruga koristi <strong>dvojno knjigovodstvo</strong>. Dostupni su vam obrasci PR-RAS-NPF i BIL-NPF.
+    Izvjestaji se generiraju na temelju podataka iz kontnog plana.
+    {% endif %}
+</div>
+
+<script>
+function downloadReport(type) {
+    var year = document.getElementById('report-year').value;
+    var url = '{% url "udruge:fina_reports" %}';
+    if (type === 'pr-ras-npf') {
+        url = '{% url "udruge:download_prras_npf" %}?year=' + year;
+    } else if (type === 'bil-npf') {
+        url = '{% url "udruge:download_bil_npf" %}?year=' + year;
+    } else if (type === 'g-pr-iz-npf') {
+        url = '{% url "udruge:download_gpriznpf" %}?year=' + year;
+    }
+    window.location.href = url;
+}
+</script>
+
+{% endblock %}

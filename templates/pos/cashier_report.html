@@ -1,0 +1,85 @@
+{% extends "pos/base_pos.html" %}
+{% block topbar_nav %}{% endblock %}
+{% load i18n %}
+{% block title %}Izvještaj smjene #{{ session.id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.rep-wrap{max-width:700px;margin:1.5rem auto;padding:0 1rem}
+.rep-header{margin-bottom:1.5rem}
+.rep-header h2{color:var(--gold);font-size:1.3rem;font-weight:700;margin-bottom:.25rem}
+.rep-header p{color:var(--muted);font-size:.85rem}
+.rep-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.rep-card-head{padding:.75rem 1rem;background:rgba(201,168,76,.08);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.rep-card-name{font-weight:700;font-size:.95rem;color:var(--text)}
+.rep-card-total{font-weight:800;font-size:1rem;color:var(--gold)}
+.rep-row{display:flex;justify-content:space-between;padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem}
+.rep-row:last-child{border-bottom:none}
+.rep-row .lbl{color:var(--muted)}
+.rep-row .val{font-weight:600;color:var(--text)}
+.rep-row .val.green{color:var(--green,#22c55e)}
+.rep-total{background:var(--dark);border:2px solid var(--gold);border-radius:12px;padding:1rem 1.25rem;margin-top:1.5rem}
+.rep-total-row{display:flex;justify-content:space-between;padding:.35rem 0;font-size:.9rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.rep-total-row:last-child{border-bottom:none;font-size:1.1rem;font-weight:800;padding-top:.5rem;margin-top:.25rem}
+.rep-total-row .lbl{color:var(--muted)}
+.rep-total-row .val{color:var(--gold)}
+.rep-actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.rep-btn{background:var(--gold);color:#000;border:none;border-radius:8px;padding:.6rem 1.25rem;font-weight:700;font-size:.85rem;cursor:pointer;font-family:inherit}
+.rep-btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.6rem 1.25rem;font-size:.85rem;cursor:pointer;font-family:inherit;text-decoration:none}
+.rep-btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.rep-empty{text-align:center;padding:2rem;color:var(--muted)}
+@media print{
+  .rep-actions,.pos-sidebar,.topbar{display:none!important}
+  .rep-wrap{margin:0;padding:0}
+  body{background:white!important}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rep-wrap">
+  <div class="rep-header">
+    <h2>📊 Izvještaj smjene #{{ session.id }}</h2>
+    <p>Terminal: <strong>{{ session.terminal.name }}</strong> &nbsp;·&nbsp; 
+       Otvorena: {{ session.opened_at|date:"d.m.Y H:i" }}
+       {% if session.closed_at %}&nbsp;·&nbsp; Zatvorena: {{ session.closed_at|date:"H:i" }}{% endif %}
+    </p>
+  </div>
+
+  <div class="rep-actions">
+    <button class="rep-btn" onclick="window.print()">🖨️ Isprintaj</button>
+    <a href="javascript:history.back()" class="rep-btn-ghost">← Nazad na POS</a>
+  </div>
+
+  {% if cashiers %}
+    {% for c in cashiers %}
+    <div class="rep-card" style="margin-top:1rem">
+      <div class="rep-card-head">
+        <span class="rep-card-name">👤 {{ c.name }}</span>
+        <span class="rep-card-total">€{{ c.ukupno|floatformat:2 }}</span>
+      </div>
+      <div class="rep-row"><span class="lbl">📄 Broj računa</span><span class="val">{{ c.racuna }}</span></div>
+      <div class="rep-row"><span class="lbl">⏰ Rad od — do</span><span class="val">{{ c.prvi }} — {{ c.zadnji }}</span></div>
+      <div class="rep-row"><span class="lbl">💵 Gotovina</span><span class="val green">€{{ c.gotovina|floatformat:2 }}</span></div>
+      <div class="rep-row"><span class="lbl">💳 Kartica</span><span class="val">€{{ c.kartica|floatformat:2 }}</span></div>
+      {% if c.vavceri > 0 %}
+      <div class="rep-row"><span class="lbl">🎫 Vaučeri</span><span class="val">€{{ c.vavceri|floatformat:2 }}</span></div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="rep-total">
+      <div class="rep-total-row"><span class="lbl">Ukupno gotovina</span><span class="val">€{{ total_gotovina|floatformat:2 }}</span></div>
+      <div class="rep-total-row"><span class="lbl">Ukupno kartica</span><span class="val">€{{ total_kartica|floatformat:2 }}</span></div>
+      <div class="rep-total-row"><span class="lbl"><strong>UKUPNO SMJENA</strong></span><span class="val">€{{ total_ukupno|floatformat:2 }}</span></div>
+    </div>
+  {% else %}
+    <div class="rep-empty">Nema računa u ovoj smjeni.</div>
+  {% endif %}
+
+  <div class="rep-actions" style="margin-top:1rem">
+    <button class="rep-btn" onclick="window.print()">🖨️ Isprintaj</button>
+    <a href="javascript:history.back()" class="rep-btn-ghost">← Nazad na POS</a>
+  </div>
+</div>
+{% endblock %}

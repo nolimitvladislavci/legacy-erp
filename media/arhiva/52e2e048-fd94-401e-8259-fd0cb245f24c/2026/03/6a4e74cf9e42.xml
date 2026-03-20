@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns0:Invoice xmlns:ns0="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:ns1="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ns2="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <ns1:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</ns1:CustomizationID>
+  <ns1:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ns1:ProfileID>
+  <ns1:ID>2600222/MT0250/5</ns1:ID>
+  <ns1:IssueDate>2026-03-09</ns1:IssueDate>
+  <ns1:DueDate>2026-04-08</ns1:DueDate>
+  <ns1:InvoiceTypeCode>380</ns1:InvoiceTypeCode>
+  <ns1:DocumentCurrencyCode>EUR</ns1:DocumentCurrencyCode>
+  <ns2:AccountingSupplierParty>
+    <ns2:Party>
+      <ns2:PartyIdentification>
+        <ns1:ID schemeID="0191">HR64546066176</ns1:ID>
+      </ns2:PartyIdentification>
+      <ns2:PartyName>
+        <ns1:Name/>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName>SAVSKI GAJ XIII. 6</ns1:StreetName>
+        <ns1:CityName>ZAGREB</ns1:CityName>
+        <ns1:PostalZone>10020</ns1:PostalZone>
+        <ns2:Country>
+          <ns1:IdentificationCode>HR</ns1:IdentificationCode>
+        </ns2:Country>
+      </ns2:PostalAddress>
+      <ns2:PartyTaxScheme>
+        <ns1:CompanyID>HRHR64546066176</ns1:CompanyID>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:PartyTaxScheme>
+    </ns2:Party>
+  </ns2:AccountingSupplierParty>
+  <ns2:AccountingCustomerParty>
+    <ns2:Party>
+      <ns2:PartyIdentification>
+        <ns1:ID schemeID="0191">HR37590751921</ns1:ID>
+      </ns2:PartyIdentification>
+      <ns2:PartyName>
+        <ns1:Name>KONJIK DOO</ns1:Name>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName>KRALJA TOMISLAVA 1/A</ns1:StreetName>
+        <ns1:CityName>ČEPIN</ns1:CityName>
+        <ns1:PostalZone>31431</ns1:PostalZone>
+        <ns2:Country>
+          <ns1:IdentificationCode>HR</ns1:IdentificationCode>
+        </ns2:Country>
+      </ns2:PostalAddress>
+    </ns2:Party>
+  </ns2:AccountingCustomerParty>
+  <ns2:PaymentMeans>
+    <ns1:PaymentMeansCode>30</ns1:PaymentMeansCode>
+    <ns2:PayeeFinancialAccount>
+      <ns1:ID>HR0623900011100024480</ns1:ID>
+    </ns2:PayeeFinancialAccount>
+    <ns1:PaymentID>HR01 250056002228</ns1:PaymentID>
+  </ns2:PaymentMeans>
+  <ns2:TaxTotal>
+    <ns1:TaxAmount currencyID="EUR">16.86</ns1:TaxAmount>
+    <ns2:TaxSubtotal>
+      <ns1:TaxableAmount currencyID="EUR">67.42</ns1:TaxableAmount>
+      <ns1:TaxAmount currencyID="EUR">16.86</ns1:TaxAmount>
+      <ns2:TaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>25</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:TaxCategory>
+    </ns2:TaxSubtotal>
+  </ns2:TaxTotal>
+  <ns2:LegalMonetaryTotals>
+    <ns1:LineExtensionAmount currencyID="EUR">67.42</ns1:LineExtensionAmount>
+    <ns1:TaxExclusiveAmount currencyID="EUR">67.42</ns1:TaxExclusiveAmount>
+    <ns1:TaxInclusiveAmount currencyID="EUR">84.28</ns1:TaxInclusiveAmount>
+    <ns1:PayableAmount currencyID="EUR">84.28</ns1:PayableAmount>
+  </ns2:LegalMonetaryTotals>
+  <ns2:InvoiceLine>
+    <ns1:ID>1</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">25.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">65.00</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PAPIR FOTOKOPIRNI A4 80GR BMO 500/1</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>25</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">2.60</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+  <ns2:InvoiceLine>
+    <ns1:ID>2</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="EA">2.00</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">2.42</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>PATRONE ZA NALIVP.PEL.5/1 DUGE PL.</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>25</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">1.21</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+</ns0:Invoice>

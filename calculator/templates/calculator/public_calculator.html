@@ -1,0 +1,1076 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>{% trans "Kalkulator ponude – LIMIT Connect" %}</title>
+<meta name="theme-color" content="#c9a84c">
+<style>
+:root{
+  --gold:#c9a84c;--gold2:#b8962e;--gold-dim:rgba(201,168,76,.13);--gold-border:rgba(201,168,76,.3);
+  --black:#09090b;--surface:#111118;--surface2:#18181f;--surface3:#22222c;--surface4:#2a2a36;
+  --text:#e4e4ef;--text-dim:#7c7c99;--border:rgba(255,255,255,.07);
+  --red:#ef4444;--green:#22c55e;--blue:#60a5fa;--purple:#a78bfa;
+  --radius:10px;--shadow:0 4px 24px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;font-size:14px}
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+.header{background:var(--surface);border-bottom:1px solid var(--gold-border);padding:13px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.hlogo{width:34px;height:34px;border-radius:8px;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--gold);font-size:.9rem;flex-shrink:0}
+.htitle{font-size:1rem;font-weight:800;color:var(--gold);line-height:1.1}
+.hsub{font-size:.7rem;color:var(--text-dim)}
+.hback{margin-left:auto;font-size:.75rem;color:var(--text-dim);text-decoration:none;padding:.3rem .8rem;border:1px solid var(--border);border-radius:6px;white-space:nowrap}
+.hback:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+
+/* ── LAYOUT ─────────────────────────────────────────────────────── */
+.layout{display:flex;min-height:calc(100vh - 60px - 56px)}
+
+/* ── SIDEBAR TABS ───────────────────────────────────────────────── */
+.sidebar{width:152px;background:var(--surface);border-right:1px solid var(--border);flex-shrink:0;padding:12px 0}
+.tab-btn{width:100%;background:none;border:none;color:var(--text-dim);padding:12px 16px;text-align:left;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:9px;border-left:3px solid transparent;transition:all .15s;line-height:1.3}
+.tab-btn:hover{background:rgba(255,255,255,.03);color:var(--text)}
+.tab-btn.active{color:var(--gold);background:var(--gold-dim);border-left-color:var(--gold);font-weight:700}
+.tab-icon{font-size:1.05rem;width:20px;text-align:center;flex-shrink:0}
+.tab-num{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;font-size:.6rem;font-weight:800;margin-left:auto;background:rgba(255,255,255,.1);color:var(--text-dim);flex-shrink:0}
+.tab-btn.active .tab-num{background:var(--gold);color:#000}
+
+/* ── MAIN ───────────────────────────────────────────────────────── */
+.main{flex:1;padding:20px 24px 16px;overflow-y:auto;max-width:1080px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── CARD ───────────────────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.card-title span{color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0;font-size:.75rem}
+
+/* ── TABLE ──────────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);padding:0 6px 9px;text-align:left;font-weight:700;white-space:nowrap;border-bottom:1px solid var(--border)}
+.tbl th.r,.tbl td.r{text-align:right}
+.tbl th.c,.tbl td.c{text-align:center}
+.tbl td{padding:5px 6px;vertical-align:middle;border-bottom:1px solid rgba(255,255,255,.03)}
+.tbl tbody tr:hover td{background:rgba(255,255,255,.015)}
+.tbl tfoot td{border-top:1px solid var(--gold-border);padding-top:10px;font-weight:700}
+
+/* ── COMPUTED CELL ──────────────────────────────────────────────── */
+.comp{font-size:.8rem;font-weight:700;color:var(--gold);text-align:right;white-space:nowrap;background:var(--gold-dim);border-radius:5px;padding:4px 8px;min-width:90px;display:inline-block}
+.comp-dim{font-size:.75rem;color:var(--text-dim);text-align:right;padding:4px 6px;min-width:80px;display:inline-block}
+
+/* ── INPUTS ─────────────────────────────────────────────────────── */
+input[type=number],input[type=text],select{
+  background:var(--surface3);border:1px solid rgba(255,255,255,.1);border-radius:6px;
+  color:var(--text);font-size:.82rem;padding:6px 8px;width:100%;outline:none;
+  transition:border-color .15s;-moz-appearance:textfield;
+}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]:focus,input[type=text]:focus,select:focus{border-color:var(--gold-border);background:var(--surface4)}
+select option{background:var(--surface3)}
+input[type=range]{accent-color:var(--gold);width:100%;cursor:pointer;height:4px}
+input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;cursor:pointer;flex-shrink:0}
+.inp-sm{width:70px}
+.inp-md{width:90px}
+.inp-lg{width:130px}
+
+/* ── BUTTONS ────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.btn-add{background:rgba(255,255,255,.06);color:var(--text-dim);border-color:var(--border)}
+.btn-add:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.btn-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:.95rem;padding:3px 7px;opacity:.5;transition:opacity .15s}
+.btn-del:hover{opacity:1}
+.btn-gold{background:var(--gold);color:#000;font-weight:800;border-color:var(--gold)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-outline{background:var(--gold-dim);color:var(--gold);border-color:var(--gold-border)}
+.btn-outline:hover{background:rgba(201,168,76,.22)}
+.btn-preset{background:var(--surface3);color:var(--text-dim);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.72rem;cursor:pointer;transition:all .15s}
+.btn-preset:hover{border-color:var(--gold-border);color:var(--gold)}
+
+/* ── SLIDER ROW ─────────────────────────────────────────────────── */
+.sl-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sl-label{font-size:.8rem;color:var(--text-dim);min-width:200px;flex-shrink:0}
+.sl-val{font-size:.88rem;font-weight:800;color:var(--gold);min-width:52px;text-align:right;white-space:nowrap}
+
+/* ── RESULT BOX ─────────────────────────────────────────────────── */
+.rbox{background:linear-gradient(135deg,rgba(15,10,2,.8),rgba(9,9,20,.9));border:1px solid var(--gold-border);border-radius:var(--radius);padding:18px 20px;margin-top:14px}
+.rrow{display:flex;align-items:baseline;justify-content:space-between;padding:5px 0;gap:12px}
+.rrow:not(:last-child){border-bottom:1px solid rgba(255,255,255,.04)}
+.rlabel{font-size:.8rem;color:var(--text-dim);flex:1}
+.rval{font-size:.95rem;font-weight:700;color:var(--text);white-space:nowrap}
+.rrow.total{border-top:1px solid var(--gold-border) !important;margin-top:6px;padding-top:12px}
+.rrow.total .rlabel{color:var(--text);font-weight:600}
+.rrow.total .rval{font-size:1.3rem;color:var(--gold)}
+.rrow.sub .rval{color:var(--text-dim);font-size:.85rem}
+.rrow.highlight .rval{color:var(--green);font-size:1.05rem}
+
+/* ── KPI GRID ───────────────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.kpi-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:4px;font-weight:700}
+.kpi-val{font-size:1.1rem;font-weight:800;color:var(--text)}
+.kpi-val.gold{color:var(--gold)}
+.kpi-val.green{color:var(--green)}
+.kpi-val.blue{color:var(--blue)}
+
+/* ── WORKER CARD ────────────────────────────────────────────────── */
+.wcard{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;position:relative}
+.wcard-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.wcard-num{font-size:.65rem;font-weight:800;color:var(--text-dim);background:var(--surface3);border-radius:4px;padding:2px 7px}
+.wcard-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);font-weight:700}
+.wcard-result{display:flex;gap:12px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--border);margin-top:4px}
+.wres{display:flex;flex-direction:column}
+.wres-lbl{font-size:.62rem;color:var(--text-dim)}
+.wres-val{font-size:.88rem;font-weight:700}
+
+/* ── PONUDA PARAMS ──────────────────────────────────────────────── */
+.param-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.param-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.param-card label{font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);font-weight:700;display:block;margin-bottom:6px}
+.param-card input{font-size:1.1rem;font-weight:800;text-align:center;padding:8px}
+
+/* ── BREAKDOWN TABLE ────────────────────────────────────────────── */
+.bdown{width:100%;border-collapse:collapse;margin-top:8px}
+.bdown td{padding:7px 10px;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.bdown td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.bdown .section-hdr td{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);padding-top:14px;padding-bottom:4px;font-weight:800;border-bottom:1px solid var(--border)}
+.bdown .sub-row td{color:var(--text-dim);font-size:.78rem}
+.bdown .sub-row td:last-child{color:var(--text-dim)}
+.bdown .total-row td{border-top:2px solid var(--gold-border) !important;font-size:1rem;font-weight:800;padding-top:12px}
+.bdown .total-row td:last-child{color:var(--gold);font-size:1.1rem}
+.bdown .bruto-row td{background:var(--gold-dim);border-radius:4px;padding-top:10px;padding-bottom:10px}
+.bdown .bruto-row td:last-child{color:var(--gold);font-size:1.2rem}
+
+/* ── TOTALS BAR ─────────────────────────────────────────────────── */
+.bar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--gold-border);padding:8px 20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;z-index:50}
+.bar-item{display:flex;flex-direction:column}
+.bar-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim)}
+.bar-val{font-size:.95rem;font-weight:800;color:var(--text)}
+.bar-val.gold{color:var(--gold)}
+.bar-sep{width:1px;background:var(--border);height:32px;flex-shrink:0}
+
+/* ── PDV TOGGLE ─────────────────────────────────────────────────── */
+.pdv-toggle{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:14px}
+.pdv-toggle label{cursor:pointer;font-size:.82rem}
+
+/* ── MOBILE ─────────────────────────────────────────────────────── */
+@media(max-width:680px){
+  .sidebar{width:48px}
+  .tab-btn span:not(.tab-icon){display:none}
+  .tab-num{display:none}
+  .tab-btn{justify-content:center;padding:14px 0;border-left:none;border-bottom:3px solid transparent}
+  .tab-btn.active{border-bottom-color:var(--gold);border-left:none;background:var(--gold-dim)}
+  .main{padding:12px}
+  .wcard-fields{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .param-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="hlogo">{% trans "FC" %}</div>
+  <div>
+    <div class="htitle">{% trans "Kalkulator ponude" %}</div>
+    <div class="hsub">{% trans "Radna snaga &middot; Troškovi &middot; Ponuda" %}</div>
+  </div>
+  <a href="/calculator/bathroom/" class="hback" style="margin-right:6px;border-color:var(--gold-border);color:var(--gold)">Kupatilo</a>
+  <a href="/" class="hback">{% trans "&#8592; Početna" %}</a>
+</div>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <button class="tab-btn active" onclick="switchTab('radnici',this)">
+      <span class="tab-icon">👷</span>
+      <span>{% trans "Radna snaga" %}</span>
+      <span class="tab-num" id="tn-radnici">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('troskovi',this)">
+      <span class="tab-icon">🧱</span>
+      <span>{% trans "Troškovi" %}</span>
+      <span class="tab-num" id="tn-troskovi">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('ponuda',this)">
+      <span class="tab-icon">📋</span>
+      <span>{% trans "Ponuda" %}</span>
+    </button>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TAB 1 — RADNA SNAGA
+         ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-radnici" class="tab-panel active">
+
+      <div class="card">
+        <div class="card-title">{% trans "👷 Radnici na projektu" %}
+          <span>{% trans "— bruto satnica + doprinosi 17% + prijevoz + prekovremeni" %}</span>
+        </div>
+
+        <!-- Worker cards container -->
+        <div id="workers-container"></div>
+
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+          <button class="btn btn-add" onclick="addWorker()">{% trans "+ Dodaj radnika" %}</button>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto">
+            <span style="font-size:.68rem;color:var(--text-dim);align-self:center">{% trans "Brzi unos:" %}</span>
+            <button class="btn-preset" onclick="addWorkerPreset(0)">{% trans "NK" %}</button>
+            <button class="btn-preset" onclick="addWorkerPreset(2)">{% trans "KV I" %}</button>
+            <button class="btn-preset" onclick="addWorkerPreset(4)">{% trans "KV III" %}</button>
+            <button class="btn-preset" onclick="addWorkerPreset(6)">{% trans "Poslovođa" %}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workers summary KPIs -->
+      <div id="workers-kpis" class="kpi-grid" style="display:none">
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Ukupno radnika" %}</div>
+          <div class="kpi-val" id="kpi-nradnika">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Trošak rada/sat" %}</div>
+          <div class="kpi-val gold" id="kpi-trosak-sat">{% trans "0,00 €/h" %}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Trošak rada/dan" %}</div>
+          <div class="kpi-val gold" id="kpi-trosak-dan">0,00 €</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Trošak prijevoza/dan" %}</div>
+          <div class="kpi-val blue" id="kpi-prijevoz-dan">0,00 €</div>
+        </div>
+      </div>
+
+      <!-- Formula info -->
+      <div style="font-size:.72rem;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.8">
+        <strong style="color:var(--text)">{% trans "Formula obračuna po radniku:" %}</strong><br>
+        {% trans "Stvarni trošak/sat = (Bruto + 17% doprinos) × (1 + prekovremeni%) + prijevoz/sat" %}<br>
+        <span style="color:var(--text-dim)">{% trans "gdje: prijevoz/sat = dnevnica/dan ÷ sati/dan (iz Ponude)" %}</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TAB 2 — TROŠKOVI I MATERIJAL
+         ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-troskovi" class="tab-panel">
+
+      <!-- Materijal -->
+      <div class="card">
+        <div class="card-title">{% trans "🧱 Materijal i nabava" %}</div>
+        <table class="tbl" id="mat-table">
+          <thead>
+            <tr>
+              <th style="width:28px">#</th>
+              <th>{% trans "Naziv / opis" %}</th>
+              <th class="r" style="width:110px">{% trans "Iznos (€)" %}</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="mat-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="font-size:.78rem;color:var(--text-dim)">{% trans "Ukupno materijal:" %}</td>
+              <td class="r"><span class="comp" id="mat-total">0,00 €</span></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div style="margin-top:12px">
+          <button class="btn btn-add" onclick="addMaterial()">{% trans "+ Dodaj stavku" %}</button>
+        </div>
+      </div>
+
+      <!-- Najam strojeva -->
+      <div class="card">
+        <div class="card-title">{% trans "🏗️ Najam strojeva i opreme" %}</div>
+        <table class="tbl" id="stroj-table">
+          <thead>
+            <tr>
+              <th style="width:28px">#</th>
+              <th>{% trans "Stroj / oprema" %}</th>
+              <th class="r" style="width:100px">{% trans "€/dan" %}</th>
+              <th class="r" style="width:80px">{% trans "Dana" %}</th>
+              <th class="r" style="width:110px">{% trans "Ukupno" %}</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="stroj-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" style="font-size:.78rem;color:var(--text-dim)">{% trans "Ukupno najam:" %}</td>
+              <td class="r"><span class="comp" id="stroj-total">0,00 €</span></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-add" onclick="addStroj()">{% trans "+ Dodaj stroj" %}</button>
+          <button class="btn-preset" onclick="addStrojPreset('Mini bager / pila',35)">{% trans "Mini bager €35/dan" %}</button>
+          <button class="btn-preset" onclick="addStrojPreset('Srednji bager',65)">{% trans "Bager €65/dan" %}</button>
+          <button class="btn-preset" onclick="addStrojPreset('Autodizalica',90)">{% trans "Dizalica €90/dan" %}</button>
+          <button class="btn-preset" onclick="addStrojPreset('Kamion / šleper',55)">{% trans "Kamion €55/dan" %}</button>
+        </div>
+      </div>
+
+      <!-- Režije + Provizija -->
+      <div class="card">
+        <div class="card-title">{% trans "⚙️ Režije firme i zarada" %}</div>
+        <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:18px">
+          {% trans "Režije se primjenjuju na ukupni direktni trošak (rad + stroj + materijal)." %}<br>
+          {% trans "Zarada/provizija se primjenjuje na trošak + režije." %}
+        </p>
+
+        <div class="sl-row">
+          <span class="sl-label">{% trans "⚙️ Režije firme (%)" %}</span>
+          <input type="range" min="5" max="40" step="0.5" id="sl-rezije" value="18"
+                 oninput="syncSlider('rezije');recalc()">
+          <span class="sl-val" id="sv-rezije">15%</span>
+        </div>
+        <div style="font-size:.7rem;color:var(--text-dim);margin-bottom:18px;margin-top:-6px;margin-left:212px">
+          {% trans "Vozila, alati, najam ureda, administracija, osiguranje…" %}
+        </div>
+
+        <div class="sl-row">
+          <span class="sl-label">{% trans "💰 Provizija / zarada firme (%)" %}</span>
+          <input type="range" min="10" max="55" step="1" id="sl-zarada" value="25"
+                 oninput="syncSlider('zarada');recalc()">
+          <span class="sl-val" id="sv-zarada">20%</span>
+        </div>
+        <div style="font-size:.7rem;color:var(--text-dim);margin-bottom:8px;margin-top:-6px;margin-left:212px">
+          {% trans "Profitna marža / naknada za upravljanje projektom" %}
+        </div>
+
+        <div class="rbox">
+          <div class="rrow sub">
+            <span class="rlabel">{% trans "Direktni troškovi (rad + stroj + mat.)" %}</span>
+            <span class="rval" id="rez-direktni">0,00 €</span>
+          </div>
+          <div class="rrow sub">
+            <span class="rlabel">{% trans "Režije firme (" %}<span id="rez-pct">15</span>%)</span>
+            <span class="rval" id="rez-iznos">0,00 €</span>
+          </div>
+          <div class="rrow">
+            <span class="rlabel">{% trans "Trošak + Režije" %}</span>
+            <span class="rval" id="rez-sbrez">0,00 €</span>
+          </div>
+          <div class="rrow sub">
+            <span class="rlabel">{% trans "Zarada firme (" %}<span id="rez-zarada-pct">20</span>%)</span>
+            <span class="rval" id="rez-zarada">0,00 €</span>
+          </div>
+          <div class="rrow total">
+            <span class="rlabel">{% trans "💰 UKUPNO NETO (bez PDV-a)" %}</span>
+            <span class="rval" id="rez-neto">0,00 €</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TAB 3 — PONUDA
+         ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-ponuda" class="tab-panel">
+
+      <!-- Parametri -->
+      <div class="card">
+        <div class="card-title">{% trans "📋 Parametri projekta" %}</div>
+        <div class="param-grid">
+          <div class="param-card">
+            <label>{% trans "Broj radnih dana" %}</label>
+            <input type="number" id="p-dani" value="5" min="1" max="999" step="1"
+                   oninput="recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+          </div>
+          <div class="param-card">
+            <label>{% trans "Sati po danu" %}</label>
+            <input type="number" id="p-sati" value="8" min="1" max="24" step="0.5"
+                   oninput="recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+          </div>
+          <div class="param-card">
+            <label>{% trans "Režije firme %" %}</label>
+            <input type="number" id="p-rezije-inp" value="18" min="0" max="100" step="0.5"
+                   oninput="syncFromInput('rezije');recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+          </div>
+          <div class="param-card">
+            <label>{% trans "Zarada firme %" %}</label>
+            <input type="number" id="p-zarada-inp" value="25" min="0" max="100" step="1"
+                   oninput="syncFromInput('zarada');recalc()" style="font-size:1.3rem;font-weight:800;text-align:center">
+          </div>
+        </div>
+
+        <!-- PDV toggle -->
+        <label class="pdv-toggle">
+          <input type="checkbox" id="pdv-toggle" onchange="recalc()">
+          <span>{% trans "Prikaži obračun s PDV-om (25%)" %}</span>
+          <span style="margin-left:auto;font-size:.72rem;color:var(--text-dim)">{% trans "Za B2C ispostave" %}</span>
+        </label>
+      </div>
+
+      <!-- KPI summary -->
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Ukupno sati" %}</div>
+          <div class="kpi-val" id="kpi-total-sati">{% trans "0 h" %}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Trošak rada" %}</div>
+          <div class="kpi-val" id="kpi-trad">0,00 €</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Materijal + Stroj" %}</div>
+          <div class="kpi-val" id="kpi-tmat">0,00 €</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Cijena sata" %}</div>
+          <div class="kpi-val gold" id="kpi-csat">{% trans "0,00 €/h" %}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Cijena dana" %}</div>
+          <div class="kpi-val gold" id="kpi-cdan">{% trans "0,00 €/dan" %}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">{% trans "Ponuda NETO" %}</div>
+          <div class="kpi-val green" id="kpi-ponuda-neto">0,00 €</div>
+        </div>
+      </div>
+
+      <!-- Full breakdown -->
+      <div class="card">
+        <div class="card-title">{% trans "📊 Potpuni obračun" %}</div>
+        <table class="bdown">
+          <tbody>
+            <tr class="section-hdr"><td colspan="2">{% trans "RADNA SNAGA" %}</td></tr>
+            <tr id="brow-radnici" class="sub-row"><td id="bd-rad-desc">—</td><td id="bd-rad">0,00 €</td></tr>
+            <tr id="brow-prijevoz" class="sub-row"><td>{% trans "Prijevoz / dnevnice" %}</td><td id="bd-prijevoz">0,00 €</td></tr>
+
+            <tr class="section-hdr"><td colspan="2">{% trans "STROJEVI I OPREMA" %}</td></tr>
+            <tr id="brow-stroj" class="sub-row"><td>{% trans "Najam strojeva" %}</td><td id="bd-stroj">0,00 €</td></tr>
+
+            <tr class="section-hdr"><td colspan="2">{% trans "MATERIJAL" %}</td></tr>
+            <tr id="brow-mat" class="sub-row"><td>{% trans "Materijal i nabava" %}</td><td id="bd-mat">0,00 €</td></tr>
+
+            <tr class="section-hdr"><td colspan="2">{% trans "TROŠKOVI" %}</td></tr>
+            <tr class="sub-row"><td>{% trans "Direktni troškovi ukupno" %}</td><td id="bd-direktni">0,00 €</td></tr>
+            <tr class="sub-row"><td>{% trans "+ Režije firme (" %}<span id="bd-rezpct">15</span>%)</td><td id="bd-rezije">0,00 €</td></tr>
+            <tr><td style="font-weight:700">{% trans "Trošak + Režije" %}</td><td id="bd-sbrez" style="font-weight:700">0,00 €</td></tr>
+            <tr class="sub-row"><td>{% trans "+ Zarada firme (" %}<span id="bd-zpct">20</span>%)</td><td id="bd-zarada">0,00 €</td></tr>
+
+            <tr class="total-row">
+              <td>{% trans "💰 UKUPNO NETO" %}</td>
+              <td id="bd-neto">0,00 €</td>
+            </tr>
+            <tr id="brow-pdv" class="sub-row" style="display:none">
+              <td>{% trans "+ PDV 25%" %}</td>
+              <td id="bd-pdv">0,00 €</td>
+            </tr>
+            <tr id="brow-bruto" class="bruto-row" style="display:none">
+              <td>{% trans "💶 UKUPNO BRUTO (s PDV-om)" %}</td>
+              <td id="bd-bruto">0,00 €</td>
+            </tr>
+
+            <tr class="section-hdr"><td colspan="2">{% trans "SATNICA" %}</td></tr>
+            <tr class="sub-row"><td>{% trans "Neto cijena sata" %}</td><td id="bd-csat">{% trans "0,00 €/h" %}</td></tr>
+            <tr class="sub-row" id="brow-brutosat" style="display:none"><td>{% trans "Bruto cijena sata (s PDV-om)" %}</td><td id="bd-bsat">{% trans "0,00 €/h" %}</td></tr>
+            <tr class="sub-row"><td>{% trans "Neto cijena dana" %}</td><td id="bd-cdan">{% trans "0,00 €/dan" %}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Send to burza -->
+      <div class="card" style="border-color:var(--gold-border)">
+        <div class="card-title">{% trans "📤 Pošalji kao projekt upit" %}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+          <input type="text" id="upit-title" placeholder="{% trans "Naziv projekta (npr. Rekonstrukcija kupaone)" %}" style="font-size:.88rem">
+          <input type="text" id="upit-location" placeholder="{% trans "Lokacija (grad, adresa)" %}">
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn btn-gold" onclick="sendToUpit()" style="flex:1;justify-content:center;padding:12px">
+          {% trans "📤 Pošalji kao projekt upit →" %}
+        </button>
+        <p style="font-size:.7rem;color:var(--text-dim);margin-top:8px;text-align:center">
+          {% trans "Otvara obrazac ili pošalji ponudu putem WhatsAppa.</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="shareWhatsApp()" style="flex:1;justify-content:center;padding:12px;background:#25D366;color:#fff;font-weight:800;border:none;border-radius:7px;font-size:.78rem;cursor:pointer">WhatsApp ponuda</button>
+          <button class="btn" onclick="copyCalcText()" style="flex:1;justify-content:center;padding:12px;background:rgba(255,255,255,.06);color:var(--text-dim);border:1px solid var(--border);border-radius:7px;font-size:.78rem;cursor:pointer">Kopiraj tekst</button>
+        </div>" %}
+        </p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── STICKY BAR ── -->
+<div class="bar">
+  <div class="bar-item">
+    <span class="bar-lbl">{% trans "👷 Rad/sat" %}</span>
+    <span class="bar-val" id="bar-rsat">{% trans "0,00 €/h" %}</span>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-item">
+    <span class="bar-lbl">{% trans "🧱 Materijal" %}</span>
+    <span class="bar-val" id="bar-mat">0,00 €</span>
+  </div>
+  <div class="bar-item">
+    <span class="bar-lbl">{% trans "🏗️ Strojevi" %}</span>
+    <span class="bar-val" id="bar-stroj">0,00 €</span>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-item">
+    <span class="bar-lbl">{% trans "📋 Neto ponuda" %}</span>
+    <span class="bar-val gold" id="bar-neto">0,00 €</span>
+  </div>
+  <div class="bar-item">
+    <span class="bar-lbl">{% trans "💶 Bruto (s PDV)" %}</span>
+    <span class="bar-val gold" id="bar-bruto" style="color:var(--text-dim)">—</span>
+  </div>
+  <div style="margin-left:auto">
+    <button class="btn btn-outline" onclick="switchTab('ponuda',document.querySelector('.tab-btn:last-child'))">
+      {% trans "Ponuda →" %}
+    </button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  KATEGORIJE RADNIKA — bruto €/h
+// ═══════════════════════════════════════════════════════════════════
+var KATEGORIJE = [
+  {label:'NK – Nekvalificiran',        bruto:16.0},
+  {label:'PKV – Polukvalificiran',     bruto:19.0},
+  {label:'KV I – Kvalificiran I',      bruto:23.0},
+  {label:'KV II – Kvalificiran II',    bruto:28.0},
+  {label:'KV III – Majstor',           bruto:34.0},
+  {label:'VKV – Visokokvalificirani',  bruto:42.0},
+  {label:'Poslovođa / Nadzornik',      bruto:50.0},
+];
+
+var DOPRINOS = 0.17; // poslodavac doprinosi 17%
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+var S = {
+  workers:   [],  // {kat, bruto, count, prijevoz, overtime}
+  materials: [],  // {naziv, iznos}
+  strojevi:  [],  // {naziv, rate_dan, dani}
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  recalc();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  WORKERS
+// ═══════════════════════════════════════════════════════════════════
+function addWorker(kat, bruto, count, prijevoz, overtime) {
+  var k = kat !== undefined ? kat : 2;
+  S.workers.push({
+    kat:      k,
+    bruto:    bruto    !== undefined ? bruto    : KATEGORIJE[k].bruto,
+    count:    count    !== undefined ? count    : 1,
+    prijevoz: prijevoz !== undefined ? prijevoz : 0,
+    overtime: overtime !== undefined ? overtime : 0,
+  });
+  renderWorkers();
+  recalc();
+}
+
+function addWorkerPreset(kat) { addWorker(kat); }
+
+function removeWorker(i) {
+  S.workers.splice(i, 1);
+  renderWorkers();
+  recalc();
+}
+
+function updateWorker(i, field, val) {
+  S.workers[i][field] = val;
+  if (field === 'kat') {
+    // Auto-fill bruto from category
+    S.workers[i].bruto = KATEGORIJE[val].bruto;
+    // Re-render to update bruto input
+    renderWorkers();
+  }
+  recalc();
+}
+
+function workerRealCostPerH(w) {
+  // Sati/dan from ponuda tab
+  var satiDan = parseFloat(document.getElementById('p-sati').value) || 8;
+  var brutoTotal = w.bruto * (1 + DOPRINOS); // bruto + 17% doprinos
+  var otFactor   = 1 + (w.overtime / 100);
+  var transport  = w.prijevoz / satiDan; // dnevnica amortizirana po satu
+  return brutoTotal * otFactor + transport;
+}
+
+function renderWorkers() {
+  var container = document.getElementById('workers-container');
+  var satiDan = parseFloat(document.getElementById('p-sati').value) || 8;
+
+  if (!S.workers.length) {
+    container.innerHTML = '<div style="color:var(--text-dim);font-size:.82rem;padding:10px 4px">Nema radnika — kliknite "+ Dodaj radnika" ili odaberite preset.</div>';
+    document.getElementById('workers-kpis').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('workers-kpis').style.display = 'grid';
+
+  container.innerHTML = S.workers.map(function(w, i) {
+    var doprinos    = w.bruto * DOPRINOS;
+    var brutoPlusDop= w.bruto + doprinos;
+    var otFactor    = 1 + w.overtime / 100;
+    var transport   = w.prijevoz / satiDan;
+    var realH       = brutoPlusDop * otFactor + transport; // €/sat stvarni trošak
+    var realDan     = realH * w.count * satiDan;
+
+    var katOpts = KATEGORIJE.map(function(k, ki) {
+      return '<option value="'+ki+'"'+(w.kat===ki?' selected':'')+'>'+k.label+'</option>';
+    }).join('');
+
+    return '<div class="wcard" id="wcard-'+i+'">' +
+
+      // TOP ROW
+      '<div class="wcard-top">' +
+        '<span class="wcard-num">RADNIK '+(i+1)+'</span>' +
+        '<button class="btn-del" onclick="removeWorker('+i+')" title="Ukloni">✕</button>' +
+      '</div>' +
+
+      // FIELDS GRID
+      '<div class="wcard-fields">' +
+        '<div class="field" style="grid-column:span 2">' +
+          '<label>Kategorija radnika</label>' +
+          '<select onchange="updateWorker('+i+',\'kat\',parseInt(this.value))">' +
+            katOpts +
+          '</select>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label>Bruto satnica (€/h)</label>' +
+          '<input type="number" min="5" max="300" step="0.5" value="'+w.bruto+'"' +
+          ' onchange="updateWorker('+i+',\'bruto\',parseFloat(this.value)||0)">' +
+        '</div>' +
+        '<div class="field">' +
+          '<label>Broj radnika</label>' +
+          '<input type="number" min="1" max="100" step="1" value="'+w.count+'"' +
+          ' onchange="updateWorker('+i+',\'count\',parseInt(this.value)||1)">' +
+        '</div>' +
+        '<div class="field">' +
+          '<label>Prijevoz / dnevnica (€/dan)</label>' +
+          '<input type="number" min="0" max="500" step="0.5" value="'+w.prijevoz+'"' +
+          ' onchange="updateWorker('+i+',\'prijevoz\',parseFloat(this.value)||0)">' +
+        '</div>' +
+        '<div class="field">' +
+          '<label>Prekovremeni rad (%)</label>' +
+          '<input type="number" min="0" max="200" step="5" value="'+w.overtime+'"' +
+          ' onchange="updateWorker('+i+',\'overtime\',parseFloat(this.value)||0)">' +
+        '</div>' +
+      '</div>' +
+
+      // COMPUTED RESULT ROW
+      '<div class="wcard-result">' +
+        '<div class="wres">' +
+          '<span class="wres-lbl">Bruto + doprinos 17%</span>' +
+          '<span class="wres-val" style="color:var(--text-dim)">'+fmt(brutoPlusDop)+' €/h</span>' +
+        '</div>' +
+        (w.overtime > 0 ? '<div class="wres"><span class="wres-lbl">Faktor prekovremenih</span><span class="wres-val" style="color:var(--text-dim)">×'+otFactor.toFixed(2)+'</span></div>' : '') +
+        (w.prijevoz > 0 ? '<div class="wres"><span class="wres-lbl">Prijevoz/sat (amort.)</span><span class="wres-val" style="color:var(--blue)">+'+fmt(transport)+' €/h</span></div>' : '') +
+        '<div class="wres" style="margin-left:auto">' +
+          '<span class="wres-lbl">⭐ Stvarni trošak/sat</span>' +
+          '<span class="wres-val" style="color:var(--gold);font-size:1rem">'+fmt(realH)+' €/h</span>' +
+        '</div>' +
+        '<div class="wres">' +
+          '<span class="wres-lbl">× '+w.count+' radnik(a) × '+satiDan+'h/dan</span>' +
+          '<span class="wres-val" style="color:var(--gold)">'+fmt(realDan)+' €/dan</span>' +
+        '</div>' +
+      '</div>' +
+
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MATERIALS
+// ═══════════════════════════════════════════════════════════════════
+function addMaterial(naziv, iznos) {
+  S.materials.push({naziv: naziv||'', iznos: iznos||0});
+  renderMaterials();
+  recalc();
+}
+
+function removeMaterial(i) {
+  S.materials.splice(i,1);
+  renderMaterials();
+  recalc();
+}
+
+function updateMaterial(i, field, val) {
+  S.materials[i][field] = val;
+  recalc();
+}
+
+function renderMaterials() {
+  var tbody = document.getElementById('mat-body');
+  if (!S.materials.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-dim);font-size:.78rem;padding:10px 6px">Nema stavki materijala — kliknite "+ Dodaj stavku"</td></tr>';
+    return;
+  }
+  tbody.innerHTML = S.materials.map(function(m, i) {
+    return '<tr>'+
+      '<td style="color:var(--text-dim);font-size:.72rem">'+(i+1)+'</td>'+
+      '<td><input type="text" value="'+esc(m.naziv)+'" placeholder="Naziv materijala / usluge"'+
+          ' onchange="updateMaterial('+i+',\'naziv\',this.value)"></td>'+
+      '<td><input type="number" min="0" step="0.01" value="'+m.iznos+'"'+
+          ' onchange="updateMaterial('+i+',\'iznos\',parseFloat(this.value)||0)"'+
+          ' class="inp-md" style="text-align:right"></td>'+
+      '<td><button class="btn-del" onclick="removeMaterial('+i+')">✕</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  STROJEVI
+// ═══════════════════════════════════════════════════════════════════
+function addStroj(naziv, rate, dani) {
+  var d = parseInt(document.getElementById('p-dani').value)||5;
+  S.strojevi.push({naziv: naziv||'', rate: rate||0, dani: dani!==undefined?dani:d});
+  renderStrojevi();
+  recalc();
+}
+
+function addStrojPreset(naziv, rate) { addStroj(naziv, rate); }
+
+function removeStroj(i) {
+  S.strojevi.splice(i,1);
+  renderStrojevi();
+  recalc();
+}
+
+function updateStroj(i, field, val) {
+  S.strojevi[i][field] = val;
+  recalc();
+  // re-render to update total
+  renderStrojevi();
+}
+
+function renderStrojevi() {
+  var tbody = document.getElementById('stroj-body');
+  if (!S.strojevi.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-dim);font-size:.78rem;padding:10px 6px">Nema strojeva — kliknite "+ Dodaj stroj" ili odaberite preset</td></tr>';
+    return;
+  }
+  tbody.innerHTML = S.strojevi.map(function(s, i) {
+    var total = s.rate * s.dani;
+    return '<tr>'+
+      '<td style="color:var(--text-dim);font-size:.72rem">'+(i+1)+'</td>'+
+      '<td><input type="text" value="'+esc(s.naziv)+'" placeholder="Naziv stroja / opreme"'+
+          ' onchange="updateStroj('+i+',\'naziv\',this.value)"></td>'+
+      '<td><input type="number" min="0" step="0.5" value="'+s.rate+'"'+
+          ' onchange="updateStroj('+i+',\'rate\',parseFloat(this.value)||0)"'+
+          ' class="inp-md" style="text-align:right"></td>'+
+      '<td><input type="number" min="1" step="1" value="'+s.dani+'"'+
+          ' onchange="updateStroj('+i+',\'dani\',parseInt(this.value)||1)"'+
+          ' class="inp-sm" style="text-align:right"></td>'+
+      '<td class="r"><span class="comp-dim">'+fmt(total)+' €</span></td>'+
+      '<td><button class="btn-del" onclick="removeStroj('+i+')">✕</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SLIDERS — sync between Tab2 sliders and Tab3 inputs
+// ═══════════════════════════════════════════════════════════════════
+function syncSlider(key) {
+  var sl  = document.getElementById('sl-'+key);
+  var inp = document.getElementById('p-'+key+'-inp');
+  var sv  = document.getElementById('sv-'+key);
+  if (sl && inp) inp.value = sl.value;
+  if (sv) sv.textContent = sl.value + '%';
+}
+
+function syncFromInput(key) {
+  var inp = document.getElementById('p-'+key+'-inp');
+  var sl  = document.getElementById('sl-'+key);
+  var sv  = document.getElementById('sv-'+key);
+  var v = parseFloat(inp.value) || 0;
+  if (sl) sl.value = Math.min(Math.max(v, parseFloat(sl.min)), parseFloat(sl.max));
+  if (sv) sv.textContent = v.toFixed(1) + '%';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  RECALCULATE — master calculation
+// ═══════════════════════════════════════════════════════════════════
+function recalc() {
+  var dani    = parseFloat(document.getElementById('p-dani').value)    || 5;
+  var satiDan = parseFloat(document.getElementById('p-sati').value)    || 8;
+  var rezPct  = parseFloat(document.getElementById('p-rezije-inp').value) || 15;
+  var zarPct  = parseFloat(document.getElementById('p-zarada-inp').value) || 20;
+  var pdvOn   = document.getElementById('pdv-toggle').checked;
+
+  // Sync slider display
+  var sv_rez = document.getElementById('sv-rezije');
+  var sv_zar = document.getElementById('sv-zarada');
+  if (sv_rez) sv_rez.textContent = rezPct.toFixed(1) + '%';
+  if (sv_zar) sv_zar.textContent = zarPct.toFixed(0) + '%';
+
+  // ── WORKERS ──
+  var totalCostRadPerH = 0;   // ukupni trošak radne snage po satu (svi radnici)
+  var totalPrijevoz    = 0;   // ukupni prijevoz/dan
+  var totalRadnici     = 0;
+
+  S.workers.forEach(function(w) {
+    var realH = workerRealCostPerH(w); // €/sat po JEDNOM radniku
+    totalCostRadPerH += realH * w.count;
+    totalPrijevoz    += w.prijevoz * w.count;
+    totalRadnici     += w.count;
+  });
+
+  var totalSati    = dani * satiDan;
+  var costRad      = totalCostRadPerH * totalSati - totalPrijevoz * dani;
+  // transport is baked into realH but we want to show it separately:
+  var costRadNoPrev = S.workers.reduce(function(acc, w) {
+    var brutoTotal = w.bruto * (1 + DOPRINOS) * (1 + w.overtime/100);
+    return acc + brutoTotal * w.count * totalSati;
+  }, 0);
+  var costPrijevoz = totalPrijevoz * dani;
+
+  // ── MATERIJAL ──
+  var costMat = S.materials.reduce(function(s,m){return s+m.iznos;}, 0);
+
+  // ── STROJEVI ──
+  var costStroj = S.strojevi.reduce(function(s,m){return s+m.rate*m.dani;}, 0);
+
+  // ── TROŠKOVI ──
+  var direktni  = costRadNoPrev + costPrijevoz + costStroj + costMat;
+  var rezije    = direktni * (rezPct / 100);
+  var sbRez     = direktni + rezije;
+  var zarada    = sbRez * (zarPct / 100);
+  var neto      = sbRez + zarada;
+  var pdv       = neto * 0.25;
+  var bruto     = neto + pdv;
+
+  var csatNeto  = totalSati > 0 ? neto / totalSati : 0;
+  var csatBruto = totalSati > 0 ? bruto / totalSati : 0;
+  var cdanNeto  = dani > 0 ? neto / dani : 0;
+
+  // ── TAB 1 KPIs ──
+  setText('kpi-nradnika',    totalRadnici);
+  setText('kpi-trosak-sat',  fmt(totalCostRadPerH) + ' €/h');
+  setText('kpi-trosak-dan',  fmt(totalCostRadPerH * satiDan) + ' €');
+  setText('kpi-prijevoz-dan',fmt(totalPrijevoz) + ' €');
+
+  // Tab 1 badge counts
+  setText('tn-radnici', S.workers.length || '');
+  setText('tn-troskovi', (S.materials.length + S.strojevi.length) || '');
+
+  // ── TAB 2 results ──
+  setText('mat-total',   fmt(costMat)   + ' €');
+  setText('stroj-total', fmt(costStroj) + ' €');
+  setText('rez-direktni',fmt(direktni)  + ' €');
+  setText('rez-pct',     rezPct.toFixed(1));
+  setText('rez-iznos',   fmt(rezije)    + ' €');
+  setText('rez-sbrez',   fmt(sbRez)     + ' €');
+  setText('rez-zarada-pct', zarPct.toFixed(0));
+  setText('rez-zarada',  fmt(zarada)    + ' €');
+  setText('rez-neto',    fmt(neto)      + ' €');
+
+  // ── TAB 3 KPIs ──
+  setText('kpi-total-sati', totalSati + ' h');
+  setText('kpi-trad',       fmt(costRadNoPrev + costPrijevoz) + ' €');
+  setText('kpi-tmat',       fmt(costMat + costStroj) + ' €');
+  setText('kpi-csat',       fmt(csatNeto) + ' €/h');
+  setText('kpi-cdan',       fmt(cdanNeto) + ' €/dan');
+  setText('kpi-ponuda-neto',fmt(neto) + ' €');
+
+  // ── BREAKDOWN TABLE ──
+  var radDesc = totalRadnici + ' radnik(a) × ' + satiDan + 'h × ' + dani + ' dana';
+  setText('bd-rad-desc',  radDesc);
+  setText('bd-rad',       fmt(costRadNoPrev) + ' €');
+  setText('bd-prijevoz',  fmt(costPrijevoz)  + ' €');
+  setText('bd-stroj',     fmt(costStroj)     + ' €');
+  setText('bd-mat',       fmt(costMat)       + ' €');
+  setText('bd-direktni',  fmt(direktni)      + ' €');
+  setText('bd-rezpct',    rezPct.toFixed(1));
+  setText('bd-rezije',    fmt(rezije)        + ' €');
+  setText('bd-sbrez',     fmt(sbRez)         + ' €');
+  setText('bd-zpct',      zarPct.toFixed(0));
+  setText('bd-zarada',    fmt(zarada)        + ' €');
+  setText('bd-neto',      fmt(neto)          + ' €');
+  setText('bd-pdv',       fmt(pdv)           + ' €');
+  setText('bd-bruto',     fmt(bruto)         + ' €');
+  setText('bd-csat',      fmt(csatNeto)      + ' €/h');
+  setText('bd-bsat',      fmt(csatBruto)     + ' €/h');
+  setText('bd-cdan',      fmt(cdanNeto)      + ' €/dan');
+
+  // PDV rows visibility
+  show('brow-pdv',    pdvOn);
+  show('brow-bruto',  pdvOn);
+  show('brow-brutosat', pdvOn);
+
+  // ── BOTTOM BAR ──
+  setText('bar-rsat',  fmt(totalCostRadPerH) + ' €/h');
+  setText('bar-mat',   fmt(costMat)   + ' €');
+  setText('bar-stroj', fmt(costStroj) + ' €');
+  setText('bar-neto',  fmt(neto)      + ' €');
+  if (pdvOn) {
+    setText('bar-bruto', fmt(bruto) + ' €');
+    document.getElementById('bar-bruto').style.color = 'var(--gold)';
+  } else {
+    setText('bar-bruto', '—');
+    document.getElementById('bar-bruto').style.color = 'var(--text-dim)';
+  }
+
+  // Re-render workers to update computed cells (sati/dan might have changed)
+  renderWorkers();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SEND TO BURZA
+// ═══════════════════════════════════════════════════════════════════
+
+// WhatsApp Share
+function buildCalcSummary() {
+  var dani=parseFloat(document.getElementById("p-dani").value)||5;
+  var satiDan=parseFloat(document.getElementById("p-sati").value)||8;
+  var rezPct=parseFloat(document.getElementById("p-rezije-inp").value)||18;
+  var zarPct=parseFloat(document.getElementById("p-zarada-inp").value)||25;
+  var pdvOn=document.getElementById("pdv-toggle").checked;
+  var title=(document.getElementById("upit-title").value.trim())||"Projekt ponuda";
+  var loc=document.getElementById("upit-location").value.trim();
+  var totalSati=dani*satiDan;
+  var costRadNoPrev=S.workers.reduce(function(a,w){return a+w.bruto*(1+DOPRINOS)*(1+w.overtime/100)*w.count*totalSati;},0);
+  var costPrijevoz=S.workers.reduce(function(a,w){return a+w.prijevoz*w.count*dani;},0);
+  var costMat=S.materials.reduce(function(s,m){return s+m.iznos;},0);
+  var costStroj=S.strojevi.reduce(function(s,m){return s+m.rate*m.dani;},0);
+  var direktni=costRadNoPrev+costPrijevoz+costStroj+costMat;
+  var sbRez=direktni*(1+rezPct/100);
+  var neto=sbRez*(1+zarPct/100);
+  var pdv=neto*0.25;var bruto=neto+pdv;
+  var L=[];
+  L.push("PONUDA - "+title);
+  if(loc)L.push("Lokacija: "+loc);
+  L.push("---");
+  L.push(dani+" dana x "+satiDan+"h = "+totalSati+"h");
+  L.push("");
+  if(S.workers.length){L.push("RADNA SNAGA:");S.workers.forEach(function(w){var k=KATEGORIJE[w.kat]?KATEGORIJE[w.kat].label:"";var rh=workerRealCostPerH(w);L.push("  "+w.count+"x "+k+" - "+fmt(rh)+" EUR/h");});L.push("  Rad ukupno: "+fmt(costRadNoPrev+costPrijevoz)+" EUR");L.push("");}
+  if(S.materials.length){L.push("MATERIJAL:");S.materials.forEach(function(m){if(m.iznos>0)L.push("  "+(m.naziv||"Stavka")+": "+fmt(m.iznos)+" EUR");});L.push("");}
+  if(S.strojevi.length){L.push("STROJEVI:");S.strojevi.forEach(function(s){L.push("  "+(s.naziv||"Stroj")+": "+fmt(s.rate*s.dani)+" EUR");});L.push("");}
+  L.push("---");
+  L.push("Direktni: "+fmt(direktni)+" EUR");
+  L.push("+ Rezije "+rezPct+"%: "+fmt(direktni*rezPct/100)+" EUR");
+  L.push("+ Zarada "+zarPct+"%: "+fmt(sbRez*zarPct/100)+" EUR");
+  L.push("");
+  L.push("NETO: "+fmt(neto)+" EUR");
+  if(pdvOn){L.push("+ PDV 25%: "+fmt(pdv)+" EUR");L.push("UKUPNO: "+fmt(bruto)+" EUR");}
+  L.push("");
+  L.push("LIMIT Connect Kalkulator");
+  L.push("viskovic-group.de/calculator/");
+  return L.join("
+");
+}
+function shareWhatsApp(){window.open("https://wa.me/?text="+encodeURIComponent(buildCalcSummary()),"_blank");}
+function copyCalcText(){var t=buildCalcSummary();if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){alert("Kopirano!");});}else{var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);alert("Kopirano!");}}
+
+function sendToUpit() {
+  var dani    = parseFloat(document.getElementById('p-dani').value)||5;
+  var satiDan = parseFloat(document.getElementById('p-sati').value)||8;
+  var rezPct  = parseFloat(document.getElementById('p-rezije-inp').value)||15;
+  var zarPct  = parseFloat(document.getElementById('p-zarada-inp').value)||20;
+
+  var totalCostPerH = S.workers.reduce(function(acc,w){return acc+workerRealCostPerH(w)*w.count;},0);
+  var totalSati     = dani * satiDan;
+  var costRadNoPrev = S.workers.reduce(function(acc,w){
+    return acc + w.bruto*(1+DOPRINOS)*(1+w.overtime/100)*w.count*totalSati;
+  },0);
+  var costPrijevoz  = S.workers.reduce(function(acc,w){return acc+w.prijevoz*w.count*dani;},0);
+  var costMat       = S.materials.reduce(function(s,m){return s+m.iznos;},0);
+  var costStroj     = S.strojevi.reduce(function(s,m){return s+m.rate*m.dani;},0);
+  var direktni      = costRadNoPrev + costPrijevoz + costStroj + costMat;
+  var sbRez         = direktni * (1 + rezPct/100);
+  var neto          = sbRez * (1 + zarPct/100);
+
+  var title    = document.getElementById('upit-title').value.trim() || 'Projekt ponuda';
+  var location = document.getElementById('upit-location').value.trim();
+
+  var lines = ['Kalkulacija – LIMIT Connect Kalkulator:', ''];
+  lines.push('Projekt: ' + dani + ' radnih dana × ' + satiDan + 'h = ' + totalSati + 'h ukupno');
+  lines.push('');
+
+  if (S.workers.length) {
+    lines.push('RADNA SNAGA:');
+    S.workers.forEach(function(w){
+      var kat = KATEGORIJE[w.kat] ? KATEGORIJE[w.kat].label : '';
+      var rh = workerRealCostPerH(w);
+      lines.push('  '+w.count+'× '+kat+' | Bruto: '+w.bruto+'€/h | Stvarni trošak: '+fmt(rh)+'€/h'+(w.prijevoz?' | Prijevoz: '+w.prijevoz+'€/dan':'')+(w.overtime?' | OT: +'+w.overtime+'%':''));
+    });
+    lines.push('');
+  }
+  if (S.strojevi.length) {
+    lines.push('STROJEVI:');
+    S.strojevi.forEach(function(s){lines.push('  '+(s.naziv||'Stroj')+': '+s.rate+'€/dan × '+s.dani+' dana = '+fmt(s.rate*s.dani)+'€');});
+    lines.push('');
+  }
+  if (S.materials.length) {
+    lines.push('MATERIJAL:');
+    S.materials.forEach(function(m){lines.push('  '+(m.naziv||'Stavka')+': '+fmt(m.iznos)+'€');});
+    lines.push('');
+  }
+  lines.push('Direktni troškovi: '+fmt(direktni)+'€');
+  lines.push('+ Režije '+rezPct+'%: '+fmt(direktni*rezPct/100)+'€');
+  lines.push('+ Zarada firme '+zarPct+'%: '+fmt(sbRez*zarPct/100)+'€');
+  lines.push('= NETO ponuda: '+fmt(neto)+'€');
+
+  var params = new URLSearchParams({
+    title:       title,
+    description: lines.join('\n'),
+    location:    location,
+    budget_from: Math.round(neto * 0.9),
+    budget_to:   Math.round(neto * 1.15),
+  });
+  window.open('/burza/upit/?' + params.toString(), '_blank');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════════
+function fmt(n) {
+  return (Math.round(n*100)/100).toLocaleString('hr-HR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function setText(id, val) { var el=document.getElementById(id); if(el) el.textContent=val; }
+function show(id, visible) { var el=document.getElementById(id); if(el) el.style.display=visible?'':'none'; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT — default state
+// ═══════════════════════════════════════════════════════════════════
+(function init() {
+  // 2 default workers: 1× KV I + 1× NK
+  addWorker(2, undefined, 2, 15, 0);   // 2× KV I, prijevoz 15€/dan
+  addWorker(0, undefined, 1, 0,  0);   // 1× NK
+
+  // Default material
+  addMaterial('Pijesak / šljunak', 280);
+  addMaterial('Cement i vezivo', 150);
+
+  renderMaterials();
+  renderStrojevi();
+  recalc();
+})();
+</script>
+</body>
+</html>

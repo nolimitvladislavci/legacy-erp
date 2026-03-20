@@ -1,0 +1,215 @@
+{% extends "portal/base_b2b.html" %}
+
+{% block title %}Tracking — {{ delivery.delivery_number|default:"Dostava" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.track-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.track-grid{grid-template-columns:1fr}}
+.track-chart-wrap{position:relative;height:300px}
+.track-map{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);
+  min-height:200px;display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);font-size:.85rem;
+}
+.temp-bar{
+  height:8px;border-radius:4px;background:var(--border);
+  position:relative;overflow:hidden;margin-top:8px;
+}
+.temp-bar-fill{
+  height:100%;border-radius:4px;transition:width .3s;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-3">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);font-weight:700">
+      <i class="fas fa-satellite-dish" style="font-size:1rem;opacity:.6;margin-right:8px"></i>
+      Pracenje dostave
+    </h1>
+    {% if delivery %}
+    <p class="text-muted" style="font-size:.85rem;margin-top:4px">
+      {{ delivery.delivery_number }} &mdash;
+      <span class="badge badge-{% if delivery.status == 'in_transit' %}sent{% elif delivery.status == 'delivered' %}paid{% else %}draft{% endif %}">
+        {{ delivery.status }}
+      </span>
+    </p>
+    {% endif %}
+  </div>
+  <a href="{% url 'client_portal:deliveries' token %}" class="btn btn-ghost btn-sm">
+    <i class="fas fa-arrow-left"></i> Natrag
+  </a>
+</div>
+
+{% if delivery %}
+<!-- Delivery Info -->
+<div class="b2b-info-grid mb-3">
+  <div class="b2b-info-box">
+    <h4>Informacije o dostavi</h4>
+    <div class="b2b-info-row"><span>Broj</span><span class="text-mono">{{ delivery.delivery_number }}</span></div>
+    <div class="b2b-info-row"><span>Status</span><span>{{ delivery.status }}</span></div>
+    <div class="b2b-info-row"><span>Metoda</span><span>{{ delivery.delivery_method|default:"-" }}</span></div>
+    <div class="b2b-info-row"><span>Adresa</span><span>{{ delivery.delivery_address|default:"-" }}</span></div>
+  </div>
+  <div class="b2b-info-box">
+    <h4>Vrijeme</h4>
+    <div class="b2b-info-row"><span>Otpremljeno</span><span>{{ delivery.dispatched_at|date:"d.m.Y H:i"|default:"-" }}</span></div>
+    <div class="b2b-info-row"><span>ETA</span><span>{{ delivery.eta|date:"d.m.Y H:i"|default:"-" }}</span></div>
+    <div class="b2b-info-row"><span>Dostavljeno</span><span>{{ delivery.delivered_at|date:"d.m.Y H:i"|default:"-" }}</span></div>
+    <div class="b2b-info-row"><span>Hladni lanac</span><span>{% if delivery.requires_cold_chain %}<span style="color:var(--info)">Da ({{ delivery.cold_chain_zone }})</span>{% else %}Ne{% endif %}</span></div>
+  </div>
+</div>
+
+<div class="track-grid">
+  <!-- Temperature Chart -->
+  <div class="b2b-card">
+    <div class="b2b-card-header"><i class="fas fa-thermometer-half"></i> Temperatura</div>
+    {% if readings_json %}
+    <div class="track-chart-wrap">
+      <canvas id="tempChart"></canvas>
+    </div>
+    {% else %}
+    <div class="b2b-empty" style="padding:24px">
+      <i class="fas fa-thermometer-empty"></i>
+      <p>Nema senzorskih ocitanja.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Map / Coordinates -->
+  <div class="b2b-card">
+    <div class="b2b-card-header"><i class="fas fa-map-marked-alt"></i> Lokacija</div>
+    <div class="track-map" id="mapArea">
+      <div style="text-align:center">
+        <i class="fas fa-map-marker-alt" style="font-size:2rem;margin-bottom:8px;display:block;color:var(--gold)"></i>
+        <span id="coordsDisplay">Ucitavanje koordinata...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SmartBox Details -->
+{% if boxes %}
+<div class="b2b-card mt-2">
+  <div class="b2b-card-header"><i class="fas fa-box"></i> SmartBox Senzori</div>
+  <div class="b2b-table-wrap">
+    <table class="b2b-table">
+      <thead>
+        <tr>
+          <th>Box ID</th>
+          <th>Temperatura</th>
+          <th>Raspon</th>
+          <th>HACCP</th>
+          <th>Zadnje ocitanje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for box in boxes %}
+        <tr>
+          <td class="text-mono text-gold">{{ box.box_id }}</td>
+          <td>
+            {% if box.last_temp %}
+              <span style="color:{% if box.is_temp_ok %}var(--success){% else %}var(--error){% endif %};font-weight:600">
+                {{ box.last_temp }}&deg;C
+              </span>
+            {% else %}-{% endif %}
+          </td>
+          <td>{{ box.target_min_temp }}&deg;C &ndash; {{ box.target_max_temp }}&deg;C</td>
+          <td>
+            <span class="badge badge-{% if box.haccp_status == 'ok' %}paid{% elif box.haccp_status == 'warning' %}overdue{% else %}rejected{% endif %}">
+              {{ box.haccp_status }}
+            </span>
+          </td>
+          <td>{{ box.last_reading_at|date:"d.m.Y H:i"|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Event Timeline -->
+{% if events %}
+<div class="b2b-card mt-2">
+  <div class="b2b-card-header"><i class="fas fa-history"></i> Dogadaji</div>
+  <div class="b2b-timeline">
+    {% for e in events %}
+    <div class="b2b-timeline-item">
+      <div class="b2b-timeline-dot {% if e.status == 'delivered' %}green{% elif e.status == 'in_transit' %}gold{% else %}{% endif %}"></div>
+      <div class="b2b-timeline-time">{{ e.created_at|date:"d.m.Y H:i" }}</div>
+      <div class="b2b-timeline-title">{{ e.status }}</div>
+      {% if e.note %}<div class="b2b-timeline-detail">{{ e.note }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="b2b-empty">
+  <i class="fas fa-exclamation-triangle"></i>
+  <p>Dostava nije pronadena.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if readings_json %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  var readings = {{ readings_json|safe }};
+  if (!readings || !readings.length) return;
+
+  // Sort by time
+  readings.sort(function(a,b){ return a.time < b.time ? -1 : 1; });
+
+  var labels = readings.map(function(r){ return r.time.substr(11,5); });
+  var temps = readings.map(function(r){ return r.temp; });
+
+  new Chart(document.getElementById('tempChart'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Temperatura (\u00b0C)',
+        data: temps,
+        borderColor: '#c9a84c',
+        backgroundColor: 'rgba(201,168,76,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#999', font: { size: 12 } } }
+      },
+      scales: {
+        x: { ticks: { color: '#666', maxTicksLimit: 12 }, grid: { color: '#222' } },
+        y: { ticks: { color: '#666' }, grid: { color: '#222' } }
+      }
+    }
+  });
+
+  // Show last known coordinates
+  var last = readings.filter(function(r){ return r.lat && r.lng; }).pop();
+  var el = document.getElementById('coordsDisplay');
+  if (last) {
+    el.innerHTML = 'Lat: ' + last.lat.toFixed(5) + ', Lng: ' + last.lng.toFixed(5) +
+      '<br><a href="https://www.google.com/maps?q=' + last.lat + ',' + last.lng +
+      '" target="_blank" style="color:var(--gold);font-size:.82rem">Otvori u Google Maps &rarr;</a>';
+  } else {
+    el.textContent = 'Nema GPS podataka';
+  }
+})();
+</script>
+{% endif %}
+{% endblock %}

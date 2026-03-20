@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ site.site_title|default:site.company.name }}</title>
+<meta name="description" content="{{ site.tagline }}">
+<style>
+  :root {
+    --primary: {{ site.primary_color|default:'#2563eb' }};
+    --primary-dark: color-mix(in srgb, var(--primary) 80%, black);
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --bg: #ffffff;
+    --bg2: #f9fafb;
+    --border: #e5e7eb;
+    --radius: 8px;
+    --shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); background: var(--bg); }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  img { max-width: 100%; display: block; }
+
+  /* NAV */
+  nav { background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-brand { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+  .nav-brand img { height: 40px; width: auto; }
+  .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+  .nav-links a { color: var(--text); font-size: .95rem; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--primary); text-decoration: none; }
+  .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+  .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); }
+
+  /* HERO */
+  .hero { min-height: 480px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); display: flex; align-items: center; justify-content: center; text-align: center; padding: 4rem 1.5rem; position: relative; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; object-fit: cover; width: 100%; height: 100%; opacity: .25; }
+  .hero-content { position: relative; max-width: 720px; }
+  .hero h1 { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 800; color: #fff; line-height: 1.2; }
+  .hero p { margin-top: 1rem; font-size: 1.15rem; color: rgba(255,255,255,.85); }
+  .hero-btn { display: inline-block; margin-top: 2rem; padding: .9rem 2.5rem; background: #fff; color: var(--primary); font-weight: 700; border-radius: 999px; font-size: 1rem; transition: transform .2s, box-shadow .2s; }
+  .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.18); text-decoration: none; }
+
+  /* SECTIONS */
+  .section { padding: 5rem 1.5rem; }
+  .section.alt { background: var(--bg2); }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 3rem; }
+  .section-header h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700; }
+  .section-header p { margin-top: .75rem; color: var(--muted); font-size: 1.05rem; }
+
+  /* ABOUT */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .about-text p { line-height: 1.8; color: #374151; margin-bottom: 1rem; }
+  .about-image img { border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  /* SERVICES */
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; }
+  .service-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; transition: box-shadow .2s, transform .2s; }
+  .service-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.1); transform: translateY(-4px); }
+  .service-icon { font-size: 2.5rem; margin-bottom: 1rem; color: var(--primary); }
+  .service-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; }
+  .service-card p { color: var(--muted); font-size: .95rem; line-height: 1.6; }
+  .service-price { display: inline-block; margin-top: .75rem; font-size: .85rem; font-weight: 600; color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, white); padding: .25rem .75rem; border-radius: 999px; }
+
+  /* GALLERY */
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+  .gallery-item { border-radius: var(--radius); overflow: hidden; aspect-ratio: 4/3; }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+  .gallery-item:hover img { transform: scale(1.05); }
+
+  /* REVIEWS */
+  .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .review-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; }
+  .review-stars { color: #f59e0b; font-size: 1.1rem; margin-bottom: .75rem; }
+  .review-text { color: #374151; line-height: 1.7; font-style: italic; margin-bottom: 1rem; }
+  .review-author { font-weight: 600; font-size: .9rem; color: var(--muted); }
+
+  /* CONTACT */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+  .contact-info h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; }
+  .contact-detail { display: flex; gap: .75rem; align-items: flex-start; margin-bottom: 1rem; }
+  .contact-detail-icon { width: 36px; height: 36px; background: color-mix(in srgb, var(--primary) 10%, white); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: .9rem; flex-shrink: 0; }
+  .contact-detail-text a { color: var(--text); }
+  .contact-social { display: flex; gap: 1rem; margin-top: 1.5rem; }
+  .social-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: .9rem; color: var(--text); transition: background .2s; }
+  .social-btn:hover { background: var(--bg2); text-decoration: none; }
+
+  /* CONTACT FORM */
+  .contact-form h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: .875rem; font-weight: 600; margin-bottom: .4rem; color: #374151; }
+  .form-group input, .form-group textarea {
+    width: 100%; padding: .75rem 1rem; border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: .95rem; font-family: inherit; transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+  .form-group textarea { min-height: 140px; resize: vertical; }
+  .btn-submit { width: 100%; padding: .9rem; background: var(--primary); color: #fff; border: none; border-radius: var(--radius); font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+  .btn-submit:hover { opacity: .9; }
+
+  /* FOOTER */
+  footer { background: #111827; color: #9ca3af; text-align: center; padding: 2rem 1.5rem; font-size: .875rem; }
+  footer a { color: #9ca3af; }
+
+  /* ALERTS */
+  .alert { padding: .9rem 1.25rem; border-radius: var(--radius); margin-bottom: 1rem; }
+  .alert-success { background: #d1fae5; color: #065f46; }
+  .alert-error { background: #fee2e2; color: #991b1b; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .nav-links { display: none; flex-direction: column; position: absolute; top: 64px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; gap: 1rem; }
+    .nav-links.open { display: flex; }
+    .hamburger { display: flex; }
+    .about-grid, .contact-grid { grid-template-columns: 1fr; }
+    .about-image { order: -1; }
+  }
+
+  {% block extra_css %}{% endblock %}
+</style>
+{% block head_extra %}{% endblock %}
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="nav-inner">
+    <a href="#home" class="nav-brand">
+      {% if site.logo %}
+        <img src="{{ site.logo.url }}" alt="{{ site.site_title }}">
+      {% else %}
+        {{ site.site_title|default:site.company.name }}
+      {% endif %}
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#home">Početna</a></li>
+      {% if services %}<li><a href="#services">Usluge</a></li>{% endif %}
+      {% if gallery %}<li><a href="#gallery">Galerija</a></li>{% endif %}
+      {% if reviews %}<li><a href="#reviews">Recenzije</a></li>{% endif %}
+      <li><a href="#contact">Kontakt</a></li>
+    </ul>
+    <button class="hamburger" onclick="document.getElementById('nav-links').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home" class="hero">
+  {% if site.hero_image %}
+    <img src="{{ site.hero_image.url }}" alt="" class="hero-bg">
+  {% endif %}
+  <div class="hero-content">
+    <h1>{% block hero_title %}{{ site.site_title|default:site.company.name }}{% endblock %}</h1>
+    {% if site.tagline %}<p>{{ site.tagline }}</p>{% endif %}
+    {% if site.hero_text %}<p style="margin-top:.5rem">{{ site.hero_text }}</p>{% endif %}
+    <a href="#contact" class="hero-btn">Kontaktirajte nas</a>
+  </div>
+</section>
+
+<!-- ABOUT -->
+{% if site.about_text %}
+<section id="about" class="section">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="section-header" style="text-align:left;margin-bottom:1.5rem">
+          <h2>O nama</h2>
+        </div>
+        <p>{{ site.about_text|linebreaksbr }}</p>
+      </div>
+      {% if site.hero_image %}
+      <div class="about-image">
+        <img src="{{ site.hero_image.url }}" alt="O nama">
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- SERVICES -->
+{% if services %}
+<section id="services" class="section alt">
+  <div class="container">
+    <div class="section-header">
+      <h2>{% block services_title %}Naše usluge{% endblock %}</h2>
+      <p>Pogledajte što nudimo</p>
+    </div>
+    <div class="services-grid">
+      {% for svc in services %}
+      <div class="service-card">
+        <div class="service-icon">
+          {% if svc.icon %}<i class="{{ svc.icon }}"></i>{% else %}&#9679;{% endif %}
+        </div>
+        <h3>{{ svc.title }}</h3>
+        {% if svc.description %}<p>{{ svc.description }}</p>{% endif %}
+        {% if svc.price_display %}<span class="service-price">{{ svc.price_display }}</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- GALLERY -->
+{% if gallery %}
+<section id="gallery" class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Galerija</h2>
+    </div>
+    <div class="gallery-grid">
+      {% for img in gallery %}
+      <div class="gallery-item">
+        <img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy">
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- REVIEWS -->
+{% if reviews %}
+<section id="reviews" class="section alt">
+  <div class="container">
+    <div class="section-header">
+      <h2>Recenzije klijenata</h2>
+    </div>
+    <div class="reviews-grid">
+      {% for rev in reviews %}
+      <div class="review-card">
+        <div class="review-stars">{% for i in "12345"|make_list %}{% if forloop.counter <= rev.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</div>
+        <p class="review-text">"{{ rev.text }}"</p>
+        <span class="review-author">— {{ rev.author_name }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CONTACT -->
+<section id="contact" class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Kontakt</h2>
+    </div>
+
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="alert {% if msg.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">{{ msg }}</div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>Dođite do nas</h3>
+        {% if site.contact_phone %}
+        <div class="contact-detail">
+          <div class="contact-detail-icon">&#9742;</div>
+          <div class="contact-detail-text"><a href="tel:{{ site.contact_phone }}">{{ site.contact_phone }}</a></div>
+        </div>
+        {% endif %}
+        {% if site.contact_email %}
+        <div class="contact-detail">
+          <div class="contact-detail-icon">&#9993;</div>
+          <div class="contact-detail-text"><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></div>
+        </div>
+        {% endif %}
+        {% if site.contact_address %}
+        <div class="contact-detail">
+          <div class="contact-detail-icon">&#9873;</div>
+          <div class="contact-detail-text">{{ site.contact_address }}</div>
+        </div>
+        {% endif %}
+        <div class="contact-social">
+          {% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener" class="social-btn">&#128337; Facebook</a>{% endif %}
+          {% if site.instagram_url %}<a href="{{ site.instagram_url }}" target="_blank" rel="noopener" class="social-btn">&#128247; Instagram</a>{% endif %}
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <h3>Pošaljite poruku</h3>
+        <form method="post" action="/site/{{ site.slug }}/contact/">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="name">Ime i prezime *</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">E-mail *</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Telefon</label>
+            <input type="tel" id="phone" name="phone">
+          </div>
+          <div class="form-group">
+            <label for="message">Poruka *</label>
+            <textarea id="message" name="message" required></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Pošalji poruku</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; {% now "Y" %} {{ site.site_title|default:site.company.name }}. Sva prava pridržana.</p>
+  {% if site.contact_email %}<p style="margin-top:.5rem"><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></p>{% endif %}
+</footer>
+
+</body>
+</html>

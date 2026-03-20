@@ -1,0 +1,14 @@
+{% extends "website/themes/base_site.html" %}
+
+{% block extra_css %}
+  :root {
+    --primary: #dc2626;
+  }
+
+  .hero { background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%); }
+  .services-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .service-card { text-align: left; border-left: 4px solid var(--primary); }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+{% endblock %}
+
+{% block services_title %}Naš jelovnik{% endblock %}

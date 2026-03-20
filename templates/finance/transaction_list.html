@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Financije{% endblock %}
+{% block page_title %}Financije{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0"><i class="fas fa-chart-line me-2 text-success"></i>{% trans "Financijske transakcije" %}</h2>
+  <a href="{% url 'finance:create' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>{% trans "Nova transakcija" %}</a>
+</div>
+
+<div class="row g-2 mb-3">
+  <div class="col-6 col-md-4">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><div class="label">{% trans "Prihodi" %}</div><div class="value text-success">{{ total_in|floatformat:2 }} €</div></div>
+        <div class="icon" style="background:#dcfce7;color:#16a34a"><i class="fas fa-arrow-up"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><div class="label">{% trans "Rashodi" %}</div><div class="value text-danger">{{ total_out|floatformat:2 }} €</div></div>
+        <div class="icon" style="background:#fee2e2;color:#dc2626"><i class="fas fa-arrow-down"></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4">
+    <div class="stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="label">{% trans "Bilanca" %}</div>
+          <div class="value {% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ balance|floatformat:2 }} €</div>
+        </div>
+        <div class="icon" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-balance-scale"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Opis, partner...">
+    </div>
+    <div class="col-md-3">
+      <select name="direction" class="form-select">
+        <option value="">{% trans "Svi smjerovi" %}</option>
+        <option value="income" {% if direction == "income" %}selected{% endif %}>{% trans "Prihodi (uplate)" %}</option>
+        <option value="expense" {% if direction == "expense" %}selected{% endif %}>{% trans "Rashodi (isplate)" %}</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="company" class="form-select">
+        <option value="">{% trans "Sve tvrtke" %}</option>
+        {% for c in companies %}
+        <option value="{{ c.pk }}" {% if company_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
+      <a href="{% url 'finance:list' %}" class="btn btn-outline-secondary">✕</a>
+    </div>
+  </form>
+</div>
+
+<div class="stat-card p-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>{% trans "Datum" %}</th><th>{% trans "Partner" %}</th><th>{% trans "Opis" %}</th><th>{% trans "Tvrtka" %}</th><th>{% trans "Smjer" %}</th><th class="text-end">{% trans "Iznos" %}</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for t in page_obj %}
+        <tr>
+          <td style="white-space:nowrap">{{ t.date|date:"d.m.Y" }}</td>
+          <td>
+            {% if t.partner %}
+            <a href="{% url 'partners:detail' t.partner.pk %}" class="text-decoration-none">{{ t.partner.name }}</a>
+            {% else %}-{% endif %}
+          </td>
+          <td>{{ t.description|truncatechars:50 }}</td>
+          <td class="small text-muted">{{ t.company.name|truncatechars:20 }}</td>
+          <td>
+            {% if t.direction == "income" %}<span class="badge bg-success"><i class="fas fa-arrow-up me-1"></i>{% trans "Prihod" %}</span>
+            {% else %}<span class="badge bg-danger"><i class="fas fa-arrow-down me-1"></i>{% trans "Rashod" %}</span>{% endif %}
+          </td>
+          <td class="text-end fw-bold {% if t.direction == 'income' %}text-success{% else %}text-danger{% endif %}">
+            {% if t.direction == "income" %}+{% else %}-{% endif %}{{ t.amount|floatformat:2 }} €
+          </td>
+          <td>
+            <form method="post" action="{% url 'finance:delete' t.pk %}" onsubmit="return confirm('Obrisati?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-5">
+          {% trans "Nema transakcija." %} <a href="{% url 'finance:create' %}">{% trans "Dodaj prvu." %}</a>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3"><ul class="pagination pagination-sm">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&direction={{ direction }}">«</a></li>{% endif %}
+  <li class="page-item active"><a class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&direction={{ direction }}">»</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

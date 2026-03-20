@@ -1,0 +1,46 @@
+{
+  "name": "LIMIT CONNECT ERP",
+  "short_name": "LIMIT Connect",
+  "description": "Poslovni ERP sustav - Knjigovodstvo, POS, Payroll, Fiskalizacija",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a0a",
+  "theme_color": "#c9a84c",
+  "lang": "hr",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Knjigovodstvo",
+      "short_name": "Konto",
+      "url": "/konto/",
+      "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "POS Terminal",
+      "short_name": "POS",
+      "url": "/pos/",
+      "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Obracun placa",
+      "short_name": "Payroll",
+      "url": "/payroll/",
+      "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}]
+    }
+  ]
+}

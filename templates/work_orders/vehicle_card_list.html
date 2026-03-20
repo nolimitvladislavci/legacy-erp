@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Kartoni vozila{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-car me-2 text-info"></i>Kartoni vozila</h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'work_orders:list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-tools me-1"></i>Radni nalozi
+      </a>
+      <a href="{% url 'work_orders:vehicle_create' %}" class="btn btn-sm btn-info">
+        <i class="fas fa-plus me-1"></i>Novo vozilo
+      </a>
+    </div>
+  </div>
+
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-5">
+      <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm"
+             placeholder="Pretraži (registracija, marka, klijent, VIN)…">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-secondary btn-sm w-100" type="submit"><i class="fas fa-search me-1"></i>Traži</button>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'work_orders:vehicle_list' %}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-dark table-hover table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Vlasnik</th>
+          <th>Marka / Model</th>
+          <th>Godište</th>
+          <th>Registracija</th>
+          <th>VIN</th>
+          <th>Motor</th>
+          <th class="text-end">Km</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vehicles %}
+        <tr>
+          <td>{{ v.client.name }}</td>
+          <td><strong>{{ v.make }} {{ v.model }}</strong></td>
+          <td>{{ v.year|default:"—" }}</td>
+          <td><span class="badge bg-secondary">{{ v.registration_plate }}</span></td>
+          <td class="text-muted small">{{ v.vin|default:"—" }}</td>
+          <td class="text-muted small">{{ v.engine_type|default:"—" }}</td>
+          <td class="text-end">{{ v.mileage|default:"0" }}</td>
+          <td class="text-end">
+            <a href="{% url 'work_orders:vehicle_detail' v.pk %}" class="btn btn-xs btn-outline-info me-1" title="Detalji">
+              <i class="fas fa-eye"></i>
+            </a>
+            <a href="{% url 'work_orders:vehicle_edit' v.pk %}" class="btn btn-xs btn-outline-warning" title="Uredi">
+              <i class="fas fa-edit"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-3">Nema vozila.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

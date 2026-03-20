@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Brojanje — {{ inv.inventura_number }}{% endblock %}
+{% block page_title %}Brojanje — {{ inv.inventura_number }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  .scan-area { max-width: 600px; margin: 0 auto; }
+  #reader { width: 100%; max-width: 500px; margin: 0 auto; border-radius: 12px; overflow: hidden; }
+  .item-card { background: var(--card-bg, #1a1a2e); border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .qty-input { font-size: 2rem; text-align: center; font-weight: 700; width: 150px; }
+  .status-badge { font-size: 0.85rem; padding: 6px 14px; }
+  .flash-success { animation: flashGreen 0.5s; }
+  .flash-error { animation: flashRed 0.5s; }
+  @keyframes flashGreen { 0%,100%{background:transparent} 50%{background:rgba(34,197,94,0.2)} }
+  @keyframes flashRed { 0%,100%{background:transparent} 50%{background:rgba(239,68,68,0.2)} }
+  .scan-btn { width: 100%; padding: 16px; font-size: 1.2rem; border-radius: 12px; }
+  .progress-ring { position: fixed; top: 10px; right: 10px; z-index: 999; background: rgba(0,0,0,0.8); border-radius: 50px; padding: 8px 16px; color: #fff; font-size: 0.85rem; }
+</style>
+
+<!-- Offline inventura (IndexedDB) -->
+<script>
+(function(){
+  var DB_NAME = 'inventura_offline';
+  var DB_VER = 1;
+  var db = null;
+  var INV_PK = '{{ inv.pk }}';
+
+  function openDB(cb){
+    if(db){cb(db);return;}
+    var req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = function(e){
+      var d = e.target.result;
+      if(!d.objectStoreNames.contains('counts')){
+        d.createObjectStore('counts',{keyPath:'key'});
+      }
+    };
+    req.onsuccess = function(e){db=e.target.result;cb(db);};
+    req.onerror = function(){console.warn('IndexedDB not available');};
+  }
+
+  // Save count locally
+  window.saveCountOffline = function(itemId, barcode, qty, counted){
+    openDB(function(d){
+      var tx = d.transaction('counts','readwrite');
+      var store = tx.objectStore('counts');
+      store.put({
+        key: INV_PK + '_' + itemId,
+        inventura_pk: INV_PK,
+        item_id: itemId,
+        barcode: barcode,
+        quantity: qty,
+        counted_at: new Date().toISOString(),
+        synced: false
+      });
+    });
+  };
+
+  // Sync all offline counts
+  window.syncOfflineCounts = function(){
+    openDB(function(d){
+      var tx = d.transaction('counts','readonly');
+      var store = tx.objectStore('counts');
+      var all = store.getAll();
+      all.onsuccess = function(){
+        var items = all.result.filter(function(i){return !i.synced && i.inventura_pk === INV_PK;});
+        if(!items.length){showStatus('Nema offline podataka za sync.','info');return;}
+        var pending = items.length;
+        var ok = 0;
+        items.forEach(function(item){
+          fetch('{% url "inventory:inventura_api_scan" pk=inv.pk %}',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+            body:JSON.stringify({barcode:item.barcode,counted_quantity:item.quantity})
+          })
+          .then(function(r){return r.json()})
+          .then(function(data){
+            if(data.ok||data.item_name){
+              ok++;
+              // Mark synced
+              var tx2 = db.transaction('counts','readwrite');
+              tx2.objectStore('counts').put(Object.assign(item,{synced:true}));
+            }
+            pending--;
+            if(!pending) showStatus('Sync: '+ok+'/'+items.length+' uspjesno.', ok===items.length?'success':'warning');
+          })
+          .catch(function(){
+            pending--;
+            if(!pending) showStatus('Sync: '+ok+'/'+items.length+' uspjesno.', 'warning');
+          });
+        });
+      };
+    });
+  };
+
+  // Count offline items
+  window.getOfflineCount = function(cb){
+    openDB(function(d){
+      var tx = d.transaction('counts','readonly');
+      var all = tx.objectStore('counts').getAll();
+      all.onsuccess = function(){
+        var unsynced = all.result.filter(function(i){return !i.synced && i.inventura_pk === INV_PK;});
+        cb(unsynced.length);
+      };
+    });
+  };
+
+  // Show offline badge
+  function updateOfflineBadge(){
+    getOfflineCount(function(n){
+      var badge = document.getElementById('offlineBadge');
+      if(badge){
+        badge.textContent = n + ' offline';
+        badge.style.display = n > 0 ? 'inline-block' : 'none';
+      }
+    });
+  }
+
+  // Detect offline and hook into save
+  var origSaveCount = window.saveCount;
+  window.saveCount = function(){
+    if(!navigator.onLine){
+      // Offline mode — save to IndexedDB
+      var itemId = document.getElementById('foundItemId') ? document.getElementById('foundItemId').value : '';
+      var bc = document.getElementById('manualBarcode').value;
+      var qty = document.getElementById('countedQty') ? document.getElementById('countedQty').value : '1';
+      if(itemId || bc){
+        saveCountOffline(itemId, bc, qty, true);
+        showStatus('Offline spremljeno! Sync kad bude mreze.', 'warning');
+        updateOfflineBadge();
+      }
+      return;
+    }
+    if(origSaveCount) origSaveCount();
+  };
+
+  // Auto-sync when back online
+  window.addEventListener('online', function(){
+    showStatus('Mreza dostupna — pokrecem sync...', 'info');
+    setTimeout(syncOfflineCounts, 1000);
+  });
+
+  // Init badge
+  setTimeout(updateOfflineBadge, 500);
+})();
+</script>
+
+<div style="position:fixed;bottom:1rem;right:1rem;z-index:999">
+  <span id="offlineBadge" style="display:none;background:#f59e0b;color:#000;padding:.4rem .8rem;border-radius:20px;font-weight:700;font-size:.85rem;cursor:pointer" onclick="syncOfflineCounts()">0 offline</span>
+</div>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="progress-ring" id="progressRing">
+  <i class="fas fa-clipboard-check me-1"></i>
+  <span id="progressText">{{ counted }}/{{ counted|add:uncounted }}</span>
+</div>
+
+<div class="scan-area">
+  <div class="text-center mb-3">
+    <h3><i class="fas fa-barcode me-2"></i>{{ inv.inventura_number }}</h3>
+    <div class="progress mb-2" style="height:8px">
+      <div class="progress-bar bg-success" id="progressBar"
+           style="width:{% widthratio counted counted|add:uncounted 100 %}%"></div>
+    </div>
+    <small class="text-muted">
+      <span id="countedNum">{{ counted }}</span> / {{ counted|add:uncounted }} {% trans "prebrojano" %}
+    </small>
+  </div>
+
+  <!-- Barcode scanner -->
+  <div class="mb-3">
+    <button class="scan-btn btn btn-warning" id="btnStartScan" onclick="startScanner()">
+      <i class="fas fa-camera me-2"></i>{% trans "Pokreni kameru za skeniranje" %}
+    </button>
+    <button class="scan-btn btn btn-secondary d-none" id="btnStopScan" onclick="stopScanner()">
+      <i class="fas fa-stop me-2"></i>{% trans "Zaustavi kameru" %}
+    </button>
+    <div id="reader" class="mt-2"></div>
+  </div>
+
+  <!-- Manual barcode input -->
+  <div class="input-group mb-3">
+    <span class="input-group-text"><i class="fas fa-keyboard"></i></span>
+    <input type="text" id="manualBarcode" class="form-control form-control-lg"
+           placeholder="{% trans 'Upiši ili skeniraj barcode/šifru...' %}"
+           autofocus autocomplete="off">
+    <button class="btn btn-primary" onclick="lookupBarcode(document.getElementById('manualBarcode').value)">
+      <i class="fas fa-search"></i>
+    </button>
+  </div>
+
+  <!-- Status messages -->
+  <div id="statusMsg" class="alert d-none mb-3"></div>
+
+  <!-- Found item card -->
+  <div id="itemCard" class="item-card d-none">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h4 class="mb-1" id="itemName"></h4>
+        <code id="itemSku"></code>
+        <span class="badge bg-info ms-2" id="itemCategory"></span>
+      </div>
+      <span id="itemAlreadyCounted" class="badge bg-warning status-badge d-none">
+        <i class="fas fa-exclamation-triangle me-1"></i>{% trans "Već prebrojano" %}
+      </span>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-6 text-center">
+        <small class="text-muted d-block">{% trans "Knjižno stanje" %}</small>
+        <h3 id="expectedQty" class="mb-0">—</h3>
+        <small id="itemUnit" class="text-muted"></small>
+      </div>
+      <div class="col-6 text-center">
+        <small class="text-muted d-block">{% trans "Stvarno stanje" %}</small>
+        <input type="number" id="countedQty" class="form-control qty-input mx-auto"
+               step="0.01" min="0" placeholder="0">
+        <small class="text-muted" id="itemUnit2"></small>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <input type="text" id="itemNote" class="form-control" placeholder="{% trans 'Napomena (opcionalno)' %}" maxlength="255">
+    </div>
+
+    <button class="btn btn-success btn-lg w-100" id="btnSaveCount" onclick="saveCount()">
+      <i class="fas fa-check me-2"></i>{% trans "Spremi brojanje" %}
+    </button>
+
+    <div id="resultDiff" class="text-center mt-3 d-none">
+      <h5 id="diffText"></h5>
+    </div>
+  </div>
+
+  <!-- Quick list of uncounted -->
+  <div class="mt-4">
+    <a href="{% url 'inventory:inventura_detail' pk=inv.pk %}?show=uncounted" class="btn btn-outline-secondary w-100">
+      <i class="fas fa-list me-2"></i>{% trans "Prikaz svih neprebrojanih stavki" %}
+    </a>
+  </div>
+
+  <div class="text-center mt-3">
+    <a href="{% url 'inventory:inventura_detail' pk=inv.pk %}" class="text-muted">
+      <i class="fas fa-arrow-left me-1"></i>{% trans "Natrag na inventuru" %}
+    </a>
+  </div>
+</div>
+
+<script src="/static/js/html5-qrcode.min.js"></script>
+<script>
+const API_URL = "{% url 'inventory:inventura_api_scan' pk=inv.pk %}";
+const CSRF = "{{ csrf_token }}";
+let scanner = null;
+let currentItemId = null;
+let wasBarcodeScan = false;
+let lastScanTime = 0;
+
+// Manual barcode enter key
+document.getElementById('manualBarcode').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    lookupBarcode(this.value);
+  }
+});
+
+// Focus on quantity after lookup
+function focusQty() {
+  setTimeout(() => document.getElementById('countedQty').focus(), 100);
+}
+
+// Enter on quantity → save
+document.getElementById('countedQty').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); saveCount(); }
+});
+
+function startScanner() {
+  document.getElementById('btnStartScan').classList.add('d-none');
+  document.getElementById('btnStopScan').classList.remove('d-none');
+  scanner = new Html5Qrcode("reader");
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 280, height: 120 },
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+      ]
+    },
+    onScanSuccess,
+    () => {}
+  ).catch(err => {
+    showStatus('Kamera nije dostupna: ' + err, 'danger');
+    stopScanner();
+  });
+}
+
+function stopScanner() {
+  if (scanner) { scanner.stop().catch(() => {}); scanner = null; }
+  document.getElementById('btnStartScan').classList.remove('d-none');
+  document.getElementById('btnStopScan').classList.add('d-none');
+}
+
+function onScanSuccess(decoded) {
+  const now = Date.now();
+  if (now - lastScanTime < 2000) return;
+  lastScanTime = now;
+  wasBarcodeScan = true;
+  document.getElementById('manualBarcode').value = decoded;
+  lookupBarcode(decoded);
+  // Audio beep
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.frequency.value = 1200;
+    osc.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.1);
+  } catch(e) {}
+}
+
+function lookupBarcode(barcode) {
+  barcode = barcode.trim();
+  if (!barcode) return;
+  fetch(API_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    body: JSON.stringify({barcode: barcode}),
+  })
+  .then(r => r.json().then(d => ({ok: r.ok, data: d})))
+  .then(({ok, data}) => {
+    if (data.found) {
+      showItem(data);
+      return;
+    }
+    // Sugestije — ako barcode nije exact match, prikaži slične
+    if (data.suggestions && data.suggestions.length) {
+      var html = '<strong>' + (data.error || 'Slični artikli:') + '</strong><br>';
+      data.suggestions.forEach(function(s) {
+        html += '<a href="#" onclick="selectSuggestion(' + s.item_id + ');return false" '
+          + 'style="display:block;padding:6px 8px;margin:4px 0;background:rgba(201,168,76,.1);border-radius:6px;color:#fff;text-decoration:none">'
+          + '<strong>' + s.name + '</strong> <small style="color:#888">(' + s.sku + ')</small></a>';
+      });
+      showStatus(html, 'info');
+      document.getElementById('statusMsg').innerHTML = html;
+      document.getElementById('statusMsg').classList.remove('d-none');
+      document.getElementById('itemCard').classList.add('d-none');
+      return;
+    }
+    showStatus(data.error || 'Artikl nije pronađen. Probaj upisati ime artikla.', 'warning');
+    document.getElementById('itemCard').classList.add('d-none');
+  })
+  .catch(err => showStatus('Greška: ' + err, 'danger'));
+}
+
+function selectSuggestion(itemId) {
+  // Dohvati artikl po item_id
+  fetch(API_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    body: JSON.stringify({item_id: itemId, counted_qty: null}),
+  })
+  .then(r => r.json())
+  .then(data => {
+    // Reload — traži po item_id direktno
+    fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+      body: JSON.stringify({barcode: data.sku || ''}),
+    })
+    .then(r => r.json().then(d => ({ok: r.ok, data: d})))
+    .then(({ok, data}) => { if (data.found) showItem(data); });
+  });
+}
+
+function showItem(data) {
+  document.getElementById('statusMsg').classList.add('d-none');
+  const card = document.getElementById('itemCard');
+  card.classList.remove('d-none');
+  card.classList.add('flash-success');
+  setTimeout(() => card.classList.remove('flash-success'), 500);
+
+  currentItemId = data.item_id;
+  var nameEl = document.getElementById('itemName');
+  nameEl.textContent = data.name;
+  // AI badge
+  if (data.ai_matched) {
+    nameEl.innerHTML = data.name + ' <span style="background:#a855f7;color:#fff;font-size:.6rem;padding:2px 6px;border-radius:8px;margin-left:6px">AI ' + (data.ai_confidence || '') + '%</span>';
+  }
+  document.getElementById('itemSku').textContent = data.sku + (data.barcode ? ' | ' + data.barcode : '');
+  document.getElementById('itemCategory').textContent = data.category;
+  document.getElementById('expectedQty').textContent = parseFloat(data.expected_qty).toFixed(2);
+  document.getElementById('itemUnit').textContent = data.unit;
+  document.getElementById('itemUnit2').textContent = data.unit;
+  document.getElementById('countedQty').value = data.counted_qty || '';
+  document.getElementById('itemNote').value = '';
+  document.getElementById('resultDiff').classList.add('d-none');
+
+  const badge = document.getElementById('itemAlreadyCounted');
+  if (data.already_counted) {
+    badge.classList.remove('d-none');
+    document.getElementById('countedQty').value = parseFloat(data.counted_qty).toFixed(2);
+  } else {
+    badge.classList.add('d-none');
+  }
+  focusQty();
+}
+
+function saveCount() {
+  const qty = document.getElementById('countedQty').value;
+  if (!currentItemId || qty === '') { showStatus('Unesi količinu.', 'warning'); return; }
+
+  document.getElementById('btnSaveCount').disabled = true;
+  fetch(API_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    body: JSON.stringify({
+      item_id: currentItemId,
+      counted_qty: qty,
+      barcode_scanned: wasBarcodeScan,
+      note: document.getElementById('itemNote').value,
+    }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('btnSaveCount').disabled = false;
+    if (data.ok) {
+      // Show difference
+      const diff = parseFloat(data.difference_qty);
+      const diffEl = document.getElementById('resultDiff');
+      const diffText = document.getElementById('diffText');
+      diffEl.classList.remove('d-none');
+      if (diff > 0) {
+        diffText.innerHTML = '<span class="text-success">+' + diff.toFixed(2) + ' (višak)</span>';
+      } else if (diff < 0) {
+        diffText.innerHTML = '<span class="text-danger">' + diff.toFixed(2) + ' (manjak)</span>';
+      } else {
+        diffText.innerHTML = '<span class="text-success">OK — točno</span>';
+      }
+
+      // Update progress
+      document.getElementById('progressText').textContent = data.counted_total + '/' + data.total_items;
+      document.getElementById('countedNum').textContent = data.counted_total;
+      document.getElementById('progressBar').style.width = data.progress + '%';
+
+      showStatus('Spremljeno! Razlika: ' + data.difference_qty, 'success');
+
+      // Reset for next scan
+      wasBarcodeScan = false;
+      document.getElementById('manualBarcode').value = '';
+      document.getElementById('manualBarcode').focus();
+
+      // Auto-hide after 2s
+      setTimeout(() => {
+        if (scanner) {
+          document.getElementById('itemCard').classList.add('d-none');
+        }
+      }, 2000);
+    } else {
+      showStatus(data.error || 'Greška pri spremanju.', 'danger');
+    }
+  })
+  .catch(err => {
+    document.getElementById('btnSaveCount').disabled = false;
+    showStatus('Greška: ' + err, 'danger');
+  });
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.className = 'alert alert-' + type + ' mb-3';
+  el.textContent = msg;
+  el.classList.remove('d-none');
+  if (type === 'success') setTimeout(() => el.classList.add('d-none'), 3000);
+}
+</script>
+
+
+{% endblock %}

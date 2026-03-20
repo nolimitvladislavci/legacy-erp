@@ -1,0 +1,35 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ BOOKING_CURRENT_LANG|default:'de' }}" data-theme="{{ booking_company.booking_theme|default:'dark' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{% if booking_company %}{{ booking_company.name }}{% else %}Viskovic Group{% endif %} — Online rezervacija{% endblock %}</title>
+<!-- Anti-FOUC: apply saved theme before CSS loads -->
+<script>(function(){var def='{{ booking_company.booking_theme|default:"dark" }}';var t=localStorage.getItem('booking-theme-{{ booking_company.id|default:"global" }}')||def;document.documentElement.setAttribute('data-theme',t);})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/booking/css/booking-theme.css">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="booking-nav">
+    <a href="/" class="brand">
+      {% if booking_company %}
+        {{ booking_company.name }}
+      {% else %}
+        VISKOVIC<span>GROUP</span>
+      {% endif %}
+    </a>
+    <div class="nav-right">
+        {% block nav_back %}{% endblock %}
+        {% include 'partials/_theme_switcher.html' %}
+        {% include 'partials/_lang_switcher.html' %}
+    </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<script src="/static/booking/js/booking-wizard.js"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

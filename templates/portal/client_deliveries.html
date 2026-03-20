@@ -1,0 +1,73 @@
+{% extends "portal/base_b2b.html" %}
+
+{% block title %}Dostave — Klijentski Portal{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-3">
+  <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);font-weight:700">
+    <i class="fas fa-truck" style="font-size:1rem;opacity:.6;margin-right:8px"></i>
+    Dostave
+  </h1>
+  <a href="{% url 'client_portal:dashboard' token %}" class="btn btn-ghost btn-sm">
+    <i class="fas fa-arrow-left"></i> Natrag
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="b2b-filters">
+  <a href="{% url 'client_portal:deliveries' token %}" class="b2b-filter-pill {% if not request.GET.status %}active{% endif %}">Sve</a>
+  <a href="?status=collecting" class="b2b-filter-pill {% if request.GET.status == 'collecting' %}active{% endif %}">Prikupljanje</a>
+  <a href="?status=consolidating" class="b2b-filter-pill {% if request.GET.status == 'consolidating' %}active{% endif %}">Konsolidacija</a>
+  <a href="?status=dispatched" class="b2b-filter-pill {% if request.GET.status == 'dispatched' %}active{% endif %}">Otpremljeno</a>
+  <a href="?status=in_transit" class="b2b-filter-pill {% if request.GET.status == 'in_transit' %}active{% endif %}">U tranzitu</a>
+  <a href="?status=delivered" class="b2b-filter-pill {% if request.GET.status == 'delivered' %}active{% endif %}">Dostavljeno</a>
+</div>
+
+{% if deliveries %}
+<div class="b2b-table-wrap">
+  <table class="b2b-table">
+    <thead>
+      <tr>
+        <th>Br. dostave</th>
+        <th>Status</th>
+        <th>Metoda</th>
+        <th>Adresa</th>
+        <th>ETA</th>
+        <th>Dostavljeno</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in deliveries %}
+      <tr>
+        <td class="text-mono text-gold">{{ d.delivery_number }}</td>
+        <td>
+          <span class="badge badge-{% if d.status == 'delivered' %}paid{% elif d.status == 'in_transit' or d.status == 'dispatched' %}sent{% else %}draft{% endif %}">
+            {{ d.status }}
+          </span>
+        </td>
+        <td>{{ d.delivery_method|default:"-" }}</td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+          {{ d.delivery_address|default:"-" }}
+        </td>
+        <td>{{ d.eta|date:"d.m.Y H:i"|default:"-" }}</td>
+        <td>{{ d.delivered_at|date:"d.m.Y H:i"|default:"-" }}</td>
+        <td>
+          {% if d.status != 'delivered' and d.status != 'cancelled' %}
+          <a href="{% url 'client_portal:track' token d.id %}" class="btn btn-outline btn-sm">
+            <i class="fas fa-map-marker-alt"></i> Prati
+          </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  <div class="b2b-empty">
+    <i class="fas fa-truck"></i>
+    <p>Nema dostava za prikaz.</p>
+  </div>
+{% endif %}
+{% endblock %}

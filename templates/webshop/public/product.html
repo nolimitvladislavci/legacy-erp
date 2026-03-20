@@ -1,0 +1,82 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}" data-theme="{{ company.booking_theme|default:'dark' }}">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ product.name }} — {{ company.name }}</title>
+<script>(function(){var t=localStorage.getItem('booking-theme')||'{{ company.booking_theme|default:"dark" }}';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/booking/css/booking-theme.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.pd-wrap{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin:1.5rem 0}
+@media(max-width:600px){.pd-grid{grid-template-columns:1fr}}
+.pd-img{aspect-ratio:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pd-img img{width:100%;height:100%;object-fit:cover}
+.pd-img .no-img{font-size:5rem;color:var(--muted)}
+.pd-info{}
+.pd-cat{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:700;margin-bottom:.5rem}
+.pd-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:400;color:var(--text);margin-bottom:.75rem;line-height:1.2}
+.pd-desc{color:var(--muted);font-size:.9rem;line-height:1.7;margin-bottom:1.5rem}
+.pd-price{font-size:2rem;font-weight:800;color:var(--gold);margin-bottom:1.25rem}
+.sph-fields{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem}
+.sph-fields h4{font-size:.78rem;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.sph-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:.5rem}
+.sph-input{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.45rem .6rem;font-size:.88rem;font-family:inherit;width:100%}
+.sph-label{font-size:.72rem;color:var(--muted);margin-bottom:.2rem;display:block}
+.add-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:10px;padding:.85rem;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit}
+.add-btn:hover{background:#b8922e}
+.back-link{display:inline-block;color:var(--muted);font-size:.85rem;text-decoration:none;margin-bottom:1rem}
+.back-link:hover{color:var(--gold)}
+.toast{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark);color:var(--text);border:1px solid var(--gold);border-radius:10px;padding:.6rem 1.4rem;font-size:.88rem;font-weight:600;z-index:999;opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<nav class="booking-nav">
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="brand">{{ company.name }}</a>
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/kosara/" style="color:var(--gold);text-decoration:none;font-size:.9rem">Košarica →</a>
+</nav>
+<div class="pd-wrap">
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="back-link">← Natrag</a>
+  <div class="pd-grid">
+    <div class="pd-img">
+      {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">
+      {% else %}<span class="no-img">{% if is_optics %}👓{% else %}📦{% endif %}</span>{% endif %}
+    </div>
+    <div class="pd-info">
+      <div class="pd-cat">{{ product.get_category_display }}</div>
+      <h1 class="pd-name">{{ product.name }}</h1>
+      <p class="pd-desc">{{ product.description }}</p>
+      <div class="pd-price">€{{ product.price|floatformat:2 }}</div>
+      {% if is_optics and requires_sph %}
+      <div class="sph-fields">
+        <h4>Korekcija dioptrije</h4>
+        <div class="sph-row">
+          <div><label class="sph-label">SPH desno</label><input class="sph-input" id="sphR" placeholder="-2.00"></div>
+          <div><label class="sph-label">CYL desno</label><input class="sph-input" id="cylR" placeholder="-0.75"></div>
+          <div><label class="sph-label">AX desno</label><input class="sph-input" id="axR" placeholder="90"></div>
+        </div>
+        <div class="sph-row">
+          <div><label class="sph-label">SPH lijevo</label><input class="sph-input" id="sphL" placeholder="-1.50"></div>
+          <div><label class="sph-label">CYL lijevo</label><input class="sph-input" id="cylL" placeholder="-0.50"></div>
+          <div><label class="sph-label">AX lijevo</label><input class="sph-input" id="axL" placeholder="85"></div>
+        </div>
+      </div>
+      {% endif %}
+      <button class="add-btn" onclick="addToCart()">+ Dodaj u košaricu</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var SLUG='{{ company.booking_slug }}'; var CSRF='{{ csrf_token }}'; var PID={{ product.pk }};
+function addToCart(){
+  fetch('/hr/webshop/shop/'+SLUG+'/kosara/dodaj/',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({product_id:PID,qty:1})})
+  .then(function(r){return r.json();}).then(function(d){if(d.ok){localStorage.setItem('cart_count_'+SLUG,d.cart_count);showToast('Dodano u košaricu!');}});
+}
+var _t;
+function showToast(m){var el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(_t);_t=setTimeout(function(){el.classList.remove('show');},2500);}
+</script>
+</body>
+</html>

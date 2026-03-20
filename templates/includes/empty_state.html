@@ -1,0 +1,31 @@
+{% comment %}
+Reusable empty state component.
+Korištenje:
+  {% include "includes/empty_state.html" with
+      icon="fas fa-file-invoice"
+      title="Nemate još računa"
+      message="Kreirajte prvi račun da započnete."
+      action_url="/invoicing/wizard/"
+      action_text="Kreiraj račun"
+      secondary_url="/invoicing/field/"
+      secondary_text="Terenski unos"
+  %}
+{% endcomment %}
+
+<div class="empty-state">
+  {% if icon %}
+  <div class="empty-state-icon">
+    <i class="{{ icon }}"></i>
+  </div>
+  {% endif %}
+  {% if title %}<h3 class="empty-state-title">{{ title }}</h3>{% endif %}
+  {% if message %}<p class="empty-state-message">{{ message }}</p>{% endif %}
+  {% if action_url %}
+  <a href="{{ action_url }}" class="empty-state-action">
+    <i class="fas fa-plus me-1"></i>{{ action_text|default:"Kreiraj" }}
+  </a>
+  {% endif %}
+  {% if secondary_url %}
+  <a href="{{ secondary_url }}" class="empty-state-secondary">{{ secondary_text }}</a>
+  {% endif %}
+</div>

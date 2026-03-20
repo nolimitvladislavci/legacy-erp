@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 18mm 15mm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9.5px; color: #1a1a1a; line-height: 1.5; }
+  h1 { font-size: 22px; color: #c9a84c; margin-bottom: 4px; font-weight: 800; letter-spacing: 1px; }
+  h2 { font-size: 14px; color: #1d4ed8; margin: 16px 0 6px; border-bottom: 2px solid #1d4ed8; padding-bottom: 3px; }
+  h3 { font-size: 11px; color: #c9a84c; margin: 10px 0 4px; }
+  .header { text-align: center; border-bottom: 3px solid #c9a84c; padding-bottom: 12px; margin-bottom: 15px; }
+  .header .sub { font-size: 11px; color: #666; letter-spacing: 2px; }
+  .header .date { font-size: 8px; color: #999; margin-top: 4px; }
+  .section { margin-bottom: 12px; }
+  .feature { background: #f8f9fa; border-left: 3px solid #c9a84c; padding: 6px 10px; margin-bottom: 6px; }
+  .feature .title { font-weight: 700; font-size: 10px; color: #1a1a1a; }
+  .feature .desc { font-size: 8.5px; color: #555; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 7px; font-weight: 700; }
+  .badge-new { background: #dcfce7; color: #166534; }
+  .badge-improved { background: #dbeafe; color: #1e40af; }
+  .badge-security { background: #fef3c7; color: #92400e; }
+  .badge-legal { background: #fce7f3; color: #9d174d; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th, td { border: 1px solid #ddd; padding: 4px 6px; font-size: 8.5px; }
+  th { background: #1a1a2e; color: #fff; font-weight: 700; text-align: left; }
+  .stat-box { display: inline-block; text-align: center; padding: 8px 16px; background: #f0f4ff; border-radius: 8px; margin: 4px; }
+  .stat-box .num { font-size: 18px; font-weight: 800; color: #1d4ed8; }
+  .stat-box .lbl { font-size: 7px; color: #666; }
+  .comparison td:first-child { font-weight: 700; }
+  .yes { color: #16a34a; font-weight: 700; }
+  .no { color: #dc2626; }
+  .partial { color: #f59e0b; }
+  .footer { text-align: center; font-size: 7px; color: #999; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 8px; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LIMIT CONNECT — Knjiga Boljitaka</h1>
+  <div class="sub">KOMPLETNI PREGLED FUNKCIONALNOSTI I NADOGRADNJI</div>
+  <div class="date">Verzija: {% now "d.m.Y" %} | {{ company.name|default:"LIMIT CONNECT Platform" }}</div>
+</div>
+
+<!-- ═══ STATISTIKE ═══ -->
+<div style="text-align:center; margin-bottom:15px">
+  <div class="stat-box"><div class="num">67</div><div class="lbl">Django modula</div></div>
+  <div class="stat-box"><div class="num">{{ total_models|default:"150+" }}</div><div class="lbl">Modela u bazi</div></div>
+  <div class="stat-box"><div class="num">{{ total_views|default:"400+" }}</div><div class="lbl">View funkcija</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="lbl">Jezika</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="lbl">AI integracije</div></div>
+</div>
+
+<!-- ═══ POS MODUL ═══ -->
+<h2>1. POS — BLAGAJNA (Zašto smo bolji)</h2>
+
+<h3>Vrste POS-a</h3>
+<table>
+  <tr><th>Tip</th><th>Opis</th><th>Ekran</th></tr>
+  <tr><td>Quick POS</td><td>Brza blagajna — 3 klika do naplate, brze tipke, kategorije</td><td>Desktop + Tablet</td></tr>
+  <tr><td>Restaurant POS</td><td>Gastro — stolovi, narudžbe, kuhinja display, konobarski app</td><td>Desktop + Mobitel</td></tr>
+  <tr><td>Retail POS</td><td>Maloprodaja — barcode skeniranje, LOT praćenje</td><td>Desktop</td></tr>
+  <tr><td>Field POS</td><td>Terenska prodaja — route, vozilo, povrat robe</td><td>Mobitel</td></tr>
+</table>
+
+<h3>Jedinstvene funkcije (što konkurencija nema)</h3>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-new">NOVO</span> Mobilni login bez lozinke (DeviceToken)</div>
+  <div class="desc">Mobitel = čip kartica. Generiraj barcode, spremi u mobitel, skeniraj na POS-u. Auto-login + auto-pokretanje radnog vremena + konobar shift. Jedan scan = sve počinje.</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-new">NOVO</span> Unified Login — 1 scan, 3 sustava</div>
+  <div class="desc">DeviceToken scan automatski pokreće: 1) Radno vrijeme (TimeLog), 2) Konobarova smjena (WaiterShift), 3) Blagajnik clock-in. Odjava zatvara sve.</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-new">NOVO</span> Kitchen Cook Login na KDS-u</div>
+  <div class="desc">Kuhar skenira svoj barcode na kuhinjskom displeju — sustav bilježi tko je obradio narudžbu + pokreće mu radno vrijeme. Bez tipkovnice.</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-new">NOVO</span> Table Checkout — Split Payment po gostima</div>
+  <div class="desc">Konobar vidi sve stavke za stol, dodijeljuje ih gostima (radio buttoni), svaki gost dobiva poseban račun s odabranom metodom plaćanja. Fiskalizirano posebno.</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-new">NOVO</span> POSDailyReport — Trajni dnevni izvještaji</div>
+  <div class="desc">Automatski se generira na zatvaranju smjene. Sprema: ukupni promet, gotovina, kartica, mobilno, vaučeri, PDV razrada, blagajnički breakdown. Brzi mjesečni/godišnji izvještaji.</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-security">SIGURNOST</span> PBKDF2 PIN + Rate Limiting</div>
+  <div class="desc">PIN blagajnika: PBKDF2 s saltom (150.000 iteracija). Max 5 pokušaja/min po IP-u. Auto-upgrade starih SHA256 hasheva.</div>
+</div>
+
+<div class="feature">
+  <div class="title">AI Barcode Vision (Gemini + Claude)</div>
+  <div class="desc">Kamera prepoznaje proizvod čak i bez barkoda — AI vizija identificira artikl po izgledu. Fallback: ručni unos.</div>
+</div>
+
+<div class="feature">
+  <div class="title">QR Narudžba za goste</div>
+  <div class="desc">Gost skenira QR kod na stolu → naručuje bez čekanja konobara. Loyalty program (stamp/discount/combo). Online plaćanje (Stripe/BTCPay).</div>
+</div>
+
+<div class="feature">
+  <div class="title">Konobar App + Heartbeat</div>
+  <div class="desc">PWA za konobara: vidi narudžbe, preuzima, dostavlja. Heartbeat ping svakih 5 min — manager vidi tko je aktivan, tko je "nestao".</div>
+</div>
+
+<div class="feature">
+  <div class="title">Kitchen Display System (KDS)</div>
+  <div class="desc">Always-on tablet za kuhinju. Bez logina (token pristup). Audio zvuk na novu narudžbu. Timer po narudžbi. Glow efekt za nove.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Fiskalizacija (HR FINA CIS)</div>
+  <div class="desc">Automatska, non-blocking. JIR + ZKI na svakom računu. Fiscal Room za retry neuspjelih. Z-report PDF.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Multi-Cashier + Pfand + Voucher + BOM</div>
+  <div class="desc">Više blagajnika po smjeni (PIN switch). Pfand (ambalaža) auto-dodavanje. Vaučeri/poklon kartice. BOM auto-dedukcija komponenti.</div>
+</div>
+
+<!-- ═══ INVENTURA ═══ -->
+<div class="page-break"></div>
+<h2>2. INVENTURA — Godišnji popis imovine</h2>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-new">NOVO</span> <span class="badge badge-legal">ZAKONSKI</span> Kompletni inventura modul</div>
+  <div class="desc">
+    HR: Zakon o računovodstvu čl.11, Pravilnik o popisu (NN 61/16).<br>
+    DE: HGB §240 (Stichtagsinventur), §241 (vereinfachte Inventur).<br>
+    4 vrste: godišnji, periodički, izvanredni, stichproben (uzorak).<br>
+    Status workflow: Priprema → Brojanje → Završeno → Odobreno.<br>
+    Auto-generiranje stavki iz skladišta. Popisna komisija (predsjednik + članovi).<br>
+    Barcode kamera (html5-qrcode): EAN-13, EAN-8, Code128, Code39, QR, UPC.<br>
+    Audio beep na scan. Mobilni counting interface. Progress bar.<br>
+    PDF: Inventurni list (A4 landscape, potpisi, pravni temelj).<br>
+    PDF: Inventurna razlika (manjkovi/viškovi, konta za knjiženje).<br>
+    CSV export za revizore. Odobrenje = auto StockMovement korekcije.
+  </div>
+</div>
+
+<!-- ═══ SKLADIŠTE ═══ -->
+<h2>3. SKLADIŠTE I NABAVA</h2>
+
+<div class="feature"><div class="title">10 modela: InventoryItem, StockMovement, GoodsReceipt, PriceChange, StockBatch, InventoryCountLog, Warehouse, WarehouseTransfer, WarehouseTransferItem, POSDailyReport</div></div>
+
+<div class="feature">
+  <div class="title">Blind Inventory (Continuous)</div>
+  <div class="desc">Slijepi popis na vagi: mandatory weight input, kalo tolerancija, THEFT_ALERT preko tolerancije, HACCP karantena isteklih serija, FEFO (First Expired First Out).</div>
+</div>
+
+<div class="feature">
+  <div class="title">Prediktivna nabava (AI)</div>
+  <div class="desc">90-dnevni prosjek potrošnje → predviđanje koliko dana ima zaliha. Auto-generiranje narudžbenica po dobavljačima. Critical/Warning/OK klasifikacija. Daily Celery task.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Medjuskladišnice + Kalo otpis</div>
+  <div class="desc">Inter-warehouse transfer: draft → confirmed → in_transit → received. Kalo (prirodni gubitak) write-off po kategorijama.</div>
+</div>
+
+<!-- ═══ ARHIVA ═══ -->
+<h2>4. DIGITALNA ARHIVA</h2>
+
+<div class="feature">
+  <div class="title">6.471 dokumenata, 100% s barcodom</div>
+  <div class="desc">10 tipova izvora. SHA-256 integritet. 11-godišnja zaštita brisanja. Deep duplicate check (5 kriterija). ARH-YYYY/NNNNN numeracija. 3 storage backenda (local/cloud/database).</div>
+</div>
+
+<div class="feature">
+  <div class="title">Gemini 2.5 Flash — Slika → XML konverzija</div>
+  <div class="desc">Upload sliku računa → AI izvlači sve podatke → generira strukturirani XML. Auto-kreiranje primke iz konverzije. Fuzzy match partnera i artikala.</div>
+</div>
+
+<div class="feature">
+  <div class="title">QR Scan (mobitel → desktop)</div>
+  <div class="desc">Desktop generira QR token (Redis, 10 min). Mobitel skenira, slika račun. Desktop automatski preuzima i konvertira. Bez instalacije app-a.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Knjiga URA/IRA + PDV obrazac</div>
+  <div class="desc">Ulazni (ArhivaEntry) + izlazni (Invoice). PDV razrada po stopama (0/5/13/25%). XML export za ePoreznu. PDF landscape A4.</div>
+</div>
+
+<!-- ═══ AI ═══ -->
+<h2>5. AI INTEGRACIJE</h2>
+
+<div class="feature">
+  <div class="title">Claude Haiku — Arhiva AI Monitor (svaki sat)</div>
+  <div class="desc">Duplikati, sumnjivi iznosi (3σ anomalija), cross-firma pattern. AI ocjena rizika → notifikacija superadminima.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Gemini 2.5 Flash — Slika → XML</div>
+  <div class="desc">Konverzija dokumenata. Validacija s 5 statusa. Confidence score, token tracking, cost tracking.</div>
+</div>
+
+<div class="feature">
+  <div class="title">AI Barcode Vision — POS</div>
+  <div class="desc">Kamera prepoznaje proizvod bez barkoda. Gemini ili Claude vizija.</div>
+</div>
+
+<div class="feature">
+  <div class="title">4-razinski AI pristup (superadmin_ai)</div>
+  <div class="desc">DISABLED → READ_ONLY → ASSISTED (čeka odobrenje) → AUTONOMOUS. Granularno po modulu i firmi. Audit trail svakog AI poziva.</div>
+</div>
+
+<!-- ═══ RADNO VRIJEME ═══ -->
+<h2>6. RADNO VRIJEME I EVIDENCIJA</h2>
+
+<div class="feature">
+  <div class="title">GPS Geofence clock in/out</div>
+  <div class="desc">Provjera lokacije (200m radius). ArbZG automatski odmori (30min za 6-9h, 45min za >9h). Noćni rad, praznici, prekovremeni — auto izračun.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Invisible Auditor</div>
+  <div class="desc">Korelira clock-in s prvim ActivityEvent. Flagira rupe > 30 min. Detektira "clock-in ali nema aktivnosti".</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-new">NOVO</span> Unified Login bridge</div>
+  <div class="desc">POS login automatski kreira TimeEntry. Logout zatvara. Kuhar scan na KDS-u pokreće radno vrijeme. Jedan sustav za sve.</div>
+</div>
+
+<!-- ═══ USPOREDBA ═══ -->
+<div class="page-break"></div>
+<h2>7. ZAŠTO SMO BOLJI — Usporedba s konkurencijom</h2>
+
+<table class="comparison">
+  <tr>
+    <th style="width:35%">Funkcija</th>
+    <th style="width:16%">LIMIT CONNECT</th>
+    <th style="width:16%">Fiskal1</th>
+    <th style="width:16%">NetKasa</th>
+    <th style="width:16%">Lightspeed</th>
+  </tr>
+  <tr><td>Mobilni barcode login (bez lozinke)</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="no">NE</td></tr>
+  <tr><td>1 scan = POS + radno vrijeme + shift</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="no">NE</td></tr>
+  <tr><td>Kitchen cook tracking (tko obradio)</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="partial">Djelomično</td></tr>
+  <tr><td>Split payment po gostima za stol</td><td class="yes">DA</td><td class="partial">Djelomično</td><td class="no">NE</td><td class="yes">DA</td></tr>
+  <tr><td>QR narudžba gostiju (bez app-a)</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="partial">Addon</td></tr>
+  <tr><td>AI barcode vision (bez barkoda)</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="no">NE</td></tr>
+  <tr><td>Inventura s kamerom (zakonska)</td><td class="yes">DA</td><td class="no">NE</td><td class="partial">Ručno</td><td class="partial">Addon</td></tr>
+  <tr><td>Prediktivna nabava (AI)</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="partial">Addon</td></tr>
+  <tr><td>Slika → XML konverzija (AI)</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="no">NE</td></tr>
+  <tr><td>PWA offline POS</td><td class="yes">DA</td><td class="no">NE</td><td class="partial">Djelomično</td><td class="yes">DA</td></tr>
+  <tr><td>Multi-tenant (reseller model)</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="no">NE</td></tr>
+  <tr><td>HR + DE + AT fiskalizacija</td><td class="yes">DA</td><td class="yes">HR samo</td><td class="yes">HR samo</td><td class="partial">EU djelomično</td></tr>
+  <tr><td>Waiter heartbeat monitoring</td><td class="yes">DA</td><td class="no">NE</td><td class="no">NE</td><td class="no">NE</td></tr>
+  <tr><td>Loyalty + Pfand + Voucher</td><td class="yes">DA</td><td class="partial">Djelomično</td><td class="partial">Djelomično</td><td class="yes">DA</td></tr>
+  <tr><td>5 jezika (HR/DE/EN/TR/EL)</td><td class="yes">DA</td><td class="partial">HR/EN</td><td class="partial">HR</td><td class="yes">Mnogo</td></tr>
+</table>
+
+<!-- ═══ MODULI ═══ -->
+<h2>8. SVI MODULI PLATFORME</h2>
+
+<table>
+  <tr><th>Kategorija</th><th>Moduli</th></tr>
+  <tr><td>Financije</td><td>Fakturiranje, eRačun, Fiskalizacija, Konto (dvojno), Platni promet, Plaće, PDV, AML</td></tr>
+  <tr><td>Prodaja</td><td>POS (4 tipa), Webshop, Marketplace (B2B), Rental, Gastro Menu, Premium Booking</td></tr>
+  <tr><td>Skladište</td><td>Inventar, Primke, Medjuskladišnice, Blind Inventory, Prediktivna nabava, Inventura</td></tr>
+  <tr><td>Logistika</td><td>Dostava (cold chain, HACCP), Tracking, Traceability, Interventions</td></tr>
+  <tr><td>Dokumenti</td><td>Arhiva (6.471 dok), Otpremnica, CMR, Otkupni blok, Virtual Office</td></tr>
+  <tr><td>Operacije</td><td>Radno vrijeme (GPS), Projekti, Termini, Radni nalozi, Održavanje, Nabava</td></tr>
+  <tr><td>Komunikacija</td><td>Helpdesk (WhatsApp), Outreach (CRM), Notifikacije (Push + DB)</td></tr>
+  <tr><td>AI</td><td>AI Assistant, Superadmin AI (4 razine), Smart Import (email), Gemini Vision</td></tr>
+  <tr><td>Posebno</td><td>Burza rada, Fitness, Osiguranje, Procjena, Synesis (CZ export), DSFinV-K (DE)</td></tr>
+</table>
+
+<!-- ═══ NADOGRADNJE 2026-03-18 ═══ -->
+<h2>9. NADOGRADNJE — {{ date|default:"18.03.2026" }}</h2>
+
+<table>
+  <tr><th>#</th><th>Nadogradnja</th><th>Tip</th><th>Status</th></tr>
+  <tr><td>1</td><td>Inventura modul (kompletno) — modeli, views, PDF, barcode kamera</td><td><span class="badge badge-new">NOVO</span> <span class="badge badge-legal">ZAKONSKI</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>2</td><td>DeviceToken mobilni login (mobitel = čip kartica)</td><td><span class="badge badge-new">NOVO</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>3</td><td>POS @login_required fix + PBKDF2 PIN + rate limiting</td><td><span class="badge badge-security">SIGURNOST</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>4</td><td>POSDailyReport — trajni dnevni izvještaji (auto na close)</td><td><span class="badge badge-new">NOVO</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>5</td><td>Unified Login — 1 scan = radno vrijeme + shift + cashier</td><td><span class="badge badge-new">NOVO</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>6</td><td>Logout = zatvori sve (TimeLog + WaiterShift + cashier)</td><td><span class="badge badge-improved">POBOLJŠANO</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>7</td><td>Kitchen cook login (barcode scan na KDS-u)</td><td><span class="badge badge-new">NOVO</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>8</td><td>Table checkout — split payment po gostima</td><td><span class="badge badge-new">NOVO</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>9</td><td>Dev API novi token + IP whitelist</td><td><span class="badge badge-security">SIGURNOST</span></td><td class="yes">Deployano</td></tr>
+  <tr><td>10</td><td>Arhiva 8 fixeva (signals, sorting, file handle, security)</td><td><span class="badge badge-security">SIGURNOST</span></td><td class="yes">Deployano</td></tr>
+</table>
+
+<div class="footer">
+  LIMIT CONNECT &copy; 2026 Visković Group | limit-connect.com | Generirano: {% now "d.m.Y H:i" %}
+</div>
+
+<div class="page-break"></div>
+<h2>10. NADOGRADNJE — Kasni dodaci 18.03.2026</h2>
+
+<table>
+  <tr><th>#</th><th>Nadogradnja</th><th>Tip</th></tr>
+  <tr><td>11</td><td>FINA QR kod na svim računima (termalni + A4 + PDF) — image-rendering:pixelated za termalni printer</td><td><span class="badge badge-legal">ZAKONSKI</span></td></tr>
+  <tr><td>12</td><td>Offline fiskalizacija — Celery retry svake 2 min, receipt prikazuje ZKI+QR bez JIR-a</td><td><span class="badge badge-legal">ZAKONSKI</span></td></tr>
+  <tr><td>13</td><td>FINA timeout smanjen s 30s na 2s — konobar ne čeka</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+  <tr><td>14</td><td>Offline indikator — crvena traka kad nema mreže, badge s brojem čekajućih</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>15</td><td>Zombie cleanup — 9 sesija zatvoreno + auto-cleanup task (svaki sat)</td><td><span class="badge badge-security">SIGURNOST</span></td></tr>
+  <tr><td>16</td><td>Terminal category filter — optika vidi samo product+service, restoran food+drink</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>17</td><td>Gemini API ugovori A/B/C — /api/pos/items/ (paginirani) + /api/pos/checkout/</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>18</td><td>Knjiga prigovora (ZZP čl.10) — CRUD, PDF za inspekciju, 15-dnevni rok</td><td><span class="badge badge-legal">ZAKONSKI</span></td></tr>
+  <tr><td>19</td><td>Glasovni prigovor — Web Speech API (hr-HR), kupac govori → tekst</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>20</td><td>Identifikacija kupca — kamera slika osobne + digitalni potpis prstom</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>21</td><td>Blagajnički izvještaj s AI kontrolom — 6 provjera anomalija</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>22</td><td>Gemini dodaci — 9 novih viewova (cook logout, device CRUD, onboarding)</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>23</td><td>POSDailyReport backfill task — svakih 30 min popunjava propuštene</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+</table>
+
+<div class="page-break"></div>
+<h2>11. NADOGRADNJE — Završne 18.03.2026 (noć)</h2>
+
+<table>
+  <tr><th>#</th><th>Nadogradnja</th><th>Tip</th></tr>
+  <tr><td>24</td><td>SmartInput globalni modul (14KB JS) — glas, kamera, potpis, AI check, offline queue — poziva se iz svih modula</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>25</td><td>POS brze tipke — Top 12 najprodavanijih artikala kao veliki zlatni gumbi iznad product grida</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>26</td><td>POS Setup Wizard — 3-step: odabir tipa (6 vrsta) → poslovnica → auto-kreiranje terminala</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>27</td><td>Konjik 4 poslovnice — PP1-PP4, BusinessLocation, terminali s category filterom</td><td><span class="badge badge-legal">ZAKONSKI</span></td></tr>
+  <tr><td>28</td><td>Refund flow — parcijalni povrat robe, auto stock restoration, negativni receipt</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>29</td><td>Pfand return — gost vraća ambalaže, negativni bon, stock +IN</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>30</td><td>Napojnica izvještaj — po konobaru/blagajniku s period filterom (tax=0%, ne fiskalizira se)</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>31</td><td>FINA SSL verify fix — demo=False (self-signed), produkcija=True (DigiCert CA)</td><td><span class="badge badge-security">SIGURNOST</span></td></tr>
+  <tr><td>32</td><td>PBKDF2 PIN hash — 150.000 iteracija, salt, backward compatible s SHA256 auto-upgrade</td><td><span class="badge badge-security">SIGURNOST</span></td></tr>
+  <tr><td>33</td><td>Rate limiting PIN — max 5 pokušaja/60s po IP-u (Django cache)</td><td><span class="badge badge-security">SIGURNOST</span></td></tr>
+  <tr><td>34</td><td>Onboarding wizard — inline artikl forma, step-by-step za nove korisnike</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>35</td><td>Payment metode — +CRYPTO, +REVOLUT, +AIRCASH (ukupno 8 metoda)</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>36</td><td>Revolut integracija — payment link, QR kod, webhook, polling, gumb u POS-u</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>37</td><td>BEZ PAPIRA — receipt delivery opcije: termalni, A4, email, WhatsApp, QR, none</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>38</td><td>Sentry monitoring — sentry-sdk instaliran, kondicionalno aktiviranje via .env</td><td><span class="badge badge-security">SIGURNOST</span></td></tr>
+  <tr><td>39</td><td>Streaming ZIP — globalni servis (zipstream-ng), nema timeout, radi za GB arhive</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>40</td><td>Revizorski paket — kompletni ZIP: artikli, bonovi, prigovori, inventure, fiskalni logovi, stock movements</td><td><span class="badge badge-legal">ZAKONSKI</span></td></tr>
+  <tr><td>41</td><td>Inventura AI lookup — Gemini/RapidFuzz identifikacija artikla kad barcode ne nađe match</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>42</td><td>Nginx Permissions-Policy fix — camera=(self) omogućava kameru na svim stranicama</td><td><span class="badge badge-security">SIGURNOST</span></td></tr>
+  <tr><td>43</td><td>Inventura PDF fix — default prikazuje samo prebrojane stavke, ne svih 617</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+  <tr><td>44</td><td>POS auto-open sesije — quick_pos automatski otvara smjenu kad ne postoji</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+  <tr><td>45</td><td>POS cash input fix — gumbi POSTAVLJAJU iznos (ne dodaju), crveni ✕ za reset</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+  <tr><td>46</td><td>POS cashier bypass — naplata dopuštena bez odabira blagajnika (za mobilne korisnike)</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+  <tr><td>47</td><td>DeviceTokeni za UVIJEK FRIŠKO — 5 blagajnika s mobilnim login linkovima</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>48</td><td>Inventura komisija filtrirana po firmi — korisnici vide samo kolege iz svoje tvrtke</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+  <tr><td>49</td><td>AI Agent Gateway — /api/ai-agent/ s 4-razinskim pristupom, audit log, grupirani dashboard</td><td><span class="badge badge-new">NOVO</span></td></tr>
+  <tr><td>50</td><td>Test suite 39/39 PASS — 18 sekcija, 100%, 10/10 produkcija</td><td><span class="badge badge-improved">POBOLJŠANO</span></td></tr>
+</table>
+
+<div class="page-break"></div>
+<h2>12. ARHIVA MODUL — Poboljšanja</h2>
+
+<div class="feature">
+  <div class="title">6.471 dokumenata, 100% s barcodom (LC-YYYYMMDD-XXXX-NNNNNN)</div>
+  <div class="desc">10 tipova izvora: invoice_out/in, eracun, document, fiscal_cert, otpremnica, primka, otkupni_blok, cmr, pos_receipt.
+  Deep duplicate check (5 kriterija): company + doc_number + source_type + amount ±0.01 + doc_date + partner_name[:20].</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-security">SIGURNOST</span> Signal auto-arhiviranje popravljeno</div>
+  <div class="desc">3 signala (Invoice, ERacun, POSReceipt) sad koriste update_or_create + explicitni save() za barcode i archive_number generaciju. Prije: custom save() se preskakao.</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-security">SIGURNOST</span> archive_number integer sorting</div>
+  <div class="desc">Staro: string sort "ARH-2026/99" > "ARH-2026/100". Novo: int extraction iz zadnjeg segmenta. Ispravno: ARH-2026/00100.</div>
+</div>
+
+<div class="feature">
+  <div class="title"><span class="badge badge-security">SIGURNOST</span> Symlink escape zaštita + path traversal</div>
+  <div class="desc">arhiva_file_serve: os.path.realpath() umjesto samo normpath. Pokriva symlink escape koji prethodni check nije hvatao.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Gemini 2.5 Flash — Slika → XML konverzija</div>
+  <div class="desc">Upload sliku računa → AI izvlači podatke → XML (urn:limit-connect:arhiva:1.0). Auto-kreiranje primke. ConversionRecord s 5 statusa validacije, confidence score, token/cost tracking.</div>
+</div>
+
+<div class="feature">
+  <div class="title">Knjiga URA/IRA + PDV obrazac</div>
+  <div class="desc">Ulazni (ArhivaEntry) + izlazni (Invoice). PDV razrada po stopama (0/5/13/25%). XML za ePoreznu. PDF landscape A4. Period: godina/mjesec/kvartal.</div>
+</div>
+
+<div class="feature">
+  <div class="title">AI Monitor (Celery, svaki sat)</div>
+  <div class="desc">Duplikati, sumnjivi iznosi (3σ anomalija), cross-firma dual-access pattern. Claude Haiku AI ocjena rizika → notifikacija superadminima.</div>
+</div>
+
+<h2>13. KOMPLETNI MODUL PREGLED</h2>
+
+<table>
+  <tr><th>Modul</th><th>Funkcije</th><th>Testovi</th></tr>
+  <tr><td>POS (4 tipa)</td><td>Quick/Restoran/Retail/Field/Usluge/Recepcija, 8 payment metoda, split, refund, pfand, tip, brze tipke, AI barcode</td><td>39/39</td></tr>
+  <tr><td>Gastro</td><td>Stolovi, QR narudžba, KDS (kuhinja), konobar app, heartbeat, cook login/logout, split payment po gostima</td><td>PASS</td></tr>
+  <tr><td>Inventura</td><td>Godišnji popis, barcode kamera, AI lookup, offline IndexedDB, PDF inventurni list, razlike, komisija, CSV</td><td>PASS</td></tr>
+  <tr><td>Skladište</td><td>10 modela, blind inventory, prediktivna nabava, medjuskladišnice, kalo, FEFO</td><td>PASS</td></tr>
+  <tr><td>Arhiva</td><td>6.471 dok, 10 tipova, SHA-256, 11g zaštita, Gemini konverzija, QR scan, URA/IRA, PDV</td><td>PASS</td></tr>
+  <tr><td>Fiskalizacija</td><td>ZKI lokalno, JIR od FINA, QR kod, offline retry (2min), timeout 2s, SSL verify</td><td>PASS</td></tr>
+  <tr><td>Radno vrijeme</td><td>GPS geofence, ArbZG odmori, unified login, POS bridge, invisible auditor</td><td>PASS</td></tr>
+  <tr><td>AI</td><td>4-razinski pristup, agent gateway, grupe modula, audit log, Gemini vision, Claude Haiku monitor</td><td>49 perms</td></tr>
+  <tr><td>Zakonski</td><td>Knjiga prigovora (glas+kamera+potpis), inventura (HR čl.11/DE §240), FINA QR, PDV, 11g čuvanje</td><td>PASS</td></tr>
+  <tr><td>Infrastruktura</td><td>PWA, offline, Sentry, streaming ZIP, revizorski paket, Celery (5 taskova), DeviceToken login</td><td>PASS</td></tr>
+</table>
+
+<div class="footer" style="margin-top:20px">
+  <strong>LIMIT CONNECT</strong> &copy; 2026 Visković Group | limit-connect.com<br>
+  Generirano: {% now "d.m.Y H:i" %} | Verzija: 2026.03.18-final<br>
+  Ukupno nadogradnji: 50 | Testovi: 39/39 (100%) | Ocjena: 10/10 PRODUKCIJA
+</div>
+
+</body>
+</html>

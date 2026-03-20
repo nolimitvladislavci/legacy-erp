@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load i18n %}{% load static %}
+
+{% block page_title %}Smart Import - Rucni unos{% endblock %}
+
+{% block content %}
+<style>
+  .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 991px) { .manual-grid { grid-template-columns: 1fr; } }
+  .preview-pane { background: #f8fafc; border-radius: 12px; border: 1px solid var(--border, #e2e8f0); overflow: hidden; max-height: 80vh; display: flex; flex-direction: column; }
+  [data-theme="dark"] .preview-pane { background: #1e293b; }
+  .preview-pane img { width: 100%; height: auto; object-fit: contain; max-height: 70vh; }
+  .preview-pane iframe { width: 100%; flex: 1; min-height: 500px; border: none; }
+  .preview-header { padding: 10px 16px; border-bottom: 1px solid var(--border, #e2e8f0); font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+  .form-pane .form-label { font-weight: 600; font-size: 0.85rem; }
+</style>
+
+<div class="container-fluid px-3 py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <h5 class="mb-0"><i class="fas fa-keyboard me-2 text-warning"></i>Rucni unos - Batch #{{ batch.pk }}</h5>
+    <a href="{% url 'smart_import:stage' batch.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i>Natrag
+    </a>
+  </div>
+
+  <div class="alert alert-info py-2 mb-3">
+    <i class="fas fa-info-circle me-1"></i>
+    AI nije uspio prepoznati podatke. Unesite podatke rucno gledajuci izvornu sliku/dokument.
+    {% if batch.original_filename %}
+    <br><small class="text-muted">Datoteka: <strong>{{ batch.original_filename }}</strong></small>
+    {% endif %}
+  </div>
+
+  <div class="manual-grid">
+    <!-- Left: Preview -->
+    <div class="preview-pane">
+      <div class="preview-header">
+        <i class="fas fa-eye"></i> Izvorni dokument
+        {% if batch.file %}
+        <a href="{{ batch.file.url }}" target="_blank" class="ms-auto btn btn-sm btn-outline-primary">
+          <i class="fas fa-external-link-alt me-1"></i>Otvori
+        </a>
+        {% endif %}
+      </div>
+      {% if image_url %}
+        <img src="{{ image_url }}" alt="Skenirana slika">
+      {% elif pdf_url %}
+        <iframe src="{{ pdf_url }}"></iframe>
+      {% else %}
+        <div class="p-4 text-center text-muted">
+          <i class="fas fa-file fa-3x mb-2 d-block"></i>
+          <p>Nema dostupnog pregleda datoteke.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Form -->
+    <div class="form-pane">
+      <div class="card shadow-sm">
+        <div class="card-header bg-warning bg-opacity-10">
+          <h6 class="mb-0"><i class="fas fa-edit me-2"></i>Podaci dokumenta</h6>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label">Partner / Dobavljac</label>
+              <input type="text" name="partner_name" class="form-control"
+                     value="{{ prefill.partner_name|default:'' }}"
+                     placeholder="Npr. Metro Cash & Carry d.o.o." required>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">Broj dokumenta</label>
+                <input type="text" name="doc_number" class="form-control"
+                       value="{{ prefill.doc_number|default:'' }}"
+                       placeholder="R-123/2026">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Datum dokumenta</label>
+                <input type="date" name="doc_date" class="form-control" value="" required>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">Iznos (s PDV-om)</label>
+                <div class="input-group">
+                  <input type="number" name="amount" class="form-control" step="0.01" min="0"
+                         value="{{ prefill.amount|default:'' }}"
+                         placeholder="0.00" required>
+                  <span class="input-group-text">EUR</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Tip dokumenta</label>
+                <select name="source_type" class="form-select">
+                  <option value="invoice_in">Ulazna faktura</option>
+                  <option value="invoice_out">Izlazna faktura</option>
+                  <option value="receipt">Blagajnicki racun</option>
+                  <option value="primka">Primka</option>
+                  <option value="otpremnica">Otpremnica</option>
+                  <option value="document">Dokument (ostalo)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Opis / napomena</label>
+              <textarea name="description" class="form-control" rows="2"
+                        placeholder="Opcionalan opis..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-success fw-bold flex-grow-1">
+                <i class="fas fa-save me-1"></i>Spremi u arhivu
+              </button>
+              <a href="{% url 'smart_import:upload' %}" class="btn btn-outline-secondary">
+                Odustani
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-set today's date if empty
+document.addEventListener("DOMContentLoaded", function() {
+  var dateInput = document.querySelector('input[name="doc_date"]');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split("T")[0];
+  }
+});
+</script>
+{% endblock %}

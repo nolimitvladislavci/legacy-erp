@@ -1,0 +1,624 @@
+import uuid
+
+from django.conf import settings
+from django.db import models
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
+
+
+class NKDCode(models.Model):
+    """
+    NKD 2007 (Nacionalna klasifikacija djelatnosti) — HR verzija NACE Rev.2
+    Hijerarhija: Odjeljak (A) → Područje (47) → Razred (47.1) → Podrazred (47.11)
+    """
+
+    class Level(models.TextChoices):
+        SECTION  = 'section',  'Odjeljak (A–U)'
+        DIVISION = 'division', 'Područje (XX)'
+        GROUP    = 'group',    'Razred (XX.X)'
+        CLASS    = 'class',    'Podrazred (XX.XX)'
+
+    code     = models.CharField(max_length=10, unique=True, db_index=True, verbose_name='Šifra NKD',
+                                 help_text='Npr. A, 47, 47.1, 47.11')
+    level    = models.CharField(max_length=10, choices=Level.choices, verbose_name='Razina')
+    section  = models.CharField(max_length=2, db_index=True, verbose_name='Odjeljak (A–U)')
+    name_hr  = models.CharField(max_length=500, verbose_name='Naziv (HR)')
+    name_en  = models.CharField(max_length=500, blank=True, verbose_name='Naziv (EN)')
+    parent   = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE,
+                                  related_name='children', verbose_name='Nadređena kategorija')
+    is_active = models.BooleanField(default=True, verbose_name='Aktivna')
+    allow_negative_stock = models.BooleanField(
+        default=True,
+        verbose_name='Dozvoli negativne zalihe',
+        help_text='Ako je uklju\u010deno, prodaja je mogu\u0107a i kad je stanje 0.',
+    )
+
+    class Meta:
+        verbose_name        = 'NKD šifra'
+        verbose_name_plural = 'NKD šifarnik'
+        ordering            = ['code']
+
+    def __str__(self):
+        return f'{self.code} \u2013 {self.name_hr}'
+
+
+class Company(models.Model):
+
+    class Country(models.TextChoices):
+        HR    = 'HR',    _('Hrvatska')
+        DE    = 'DE',    _('Njemačka')
+        AT    = 'AT',    _('Austrija')
+        SI    = 'SI',    _('Slovenija')
+        BA    = 'BA',    _('Bosna i Hercegovina')
+        RS    = 'RS',    _('Srbija')
+        OTHER = 'OTHER', _('Ostalo')
+
+    class BusinessType(models.TextChoices):
+        DOO              = 'doo',              _('d.o.o. (Društvo s ograničenom odgovornošću)')
+        JDOO             = 'jdoo',             _('j.d.o.o. (Jednostavno d.o.o.)')
+        DD               = 'dd',               _('d.d. (Dioničko društvo)')
+        OBRT             = 'obrt',             _('Obrt')
+        GMBH             = 'gmbh',             _('GmbH')
+        AG               = 'ag',               _('AG (Aktiengesellschaft)')
+        EINZELUNTERNEHMEN = 'einzelunternehmen', _('Einzelunternehmen')
+        OPG              = 'opg',              _('OPG (Obiteljsko poljoprivredno gospodarstvo)')
+        UDRUGA           = 'udruga',           _('Udruga')
+        ZADRUGA          = 'zadruga',          _('Zadruga')
+        USTANOVA         = 'ustanova',         _('Ustanova')
+        OTHER            = 'other',            _('Ostalo')
+
+    class Currency(models.TextChoices):
+        EUR = 'EUR', 'EUR (Euro)'
+        USD = 'USD', 'USD (US Dollar)'
+        GBP = 'GBP', 'GBP (British Pound)'
+        CHF = 'CHF', 'CHF (Swiss Franc)'
+        BAM = 'BAM', 'BAM (Bosanska marka)'
+        RSD = 'RSD', 'RSD (Srpski dinar)'
+
+    class FiscalSystem(models.TextChoices):
+        HR_FISCALIZATION = 'hr_fiscal', _('HR Fiskalizacija (CIS)')
+        DE_GOBD          = 'de_gobd',   _('DE GoBD')
+        AT_RKSV          = 'at_rksv',   _('AT RKSV')
+        NONE             = 'none',      _('Bez fiskalizacije')
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name     = models.CharField(max_length=200, verbose_name=_('Naziv tvrtke'))
+    oib      = models.CharField(max_length=50, unique=True, verbose_name='OIB / Steuernummer')
+    address  = models.CharField(max_length=255, blank=True, verbose_name=_('Adresa'))
+    city     = models.CharField(max_length=100, blank=True, verbose_name=_('Grad'))
+    zip_code = models.CharField(max_length=20, blank=True, verbose_name=_('Poštanski broj'))
+    iban     = models.CharField(max_length=34, blank=True, verbose_name='IBAN')
+    swift    = models.CharField(max_length=11, blank=True, default='', verbose_name='BIC/SWIFT')
+
+    # International fields
+    country       = models.CharField(max_length=10, choices=Country.choices, default=Country.HR, verbose_name=_('Država'))
+    business_type = models.CharField(max_length=30, choices=BusinessType.choices, default=BusinessType.DOO, verbose_name=_('Tip poslovnog subjekta'))
+    tax_number    = models.CharField(max_length=50, blank=True, verbose_name=_('Porezni broj'), help_text=_('Porezni identifikacijski broj (za strana poduzeća)'))
+    vat_id        = models.CharField(max_length=20, blank=True, verbose_name=_('PDV ID / VAT ID'), help_text=_('EU PDV identifikacijski broj (npr. HR12345678901)'))
+    currency      = models.CharField(max_length=3, choices=Currency.choices, default=Currency.EUR, verbose_name=_('Valuta'))
+    fiscal_system = models.CharField(max_length=20, choices=FiscalSystem.choices, default=FiscalSystem.HR_FISCALIZATION, verbose_name=_('Fiskalni sustav'))
+
+    # Jezik UI za firmu — default za nove korisnike
+    UI_LANGUAGE_CHOICES = [
+        ('hr', 'Hrvatski'),
+        ('de', 'Deutsch'),
+        ('en', 'English'),
+        ('tr', 'Turkce'),
+        ('el', 'Ellinika'),
+    ]
+    ui_language = models.CharField(
+        max_length=5, choices=UI_LANGUAGE_CHOICES, default='hr',
+        verbose_name=_('Jezik sucenja'),
+        help_text=_('Zadani jezik za nove korisnike ove tvrtke'),
+    )
+    fiscal_exempt = models.BooleanField(
+        default=False, verbose_name=_('Izuzeto od fiskalizacije'),
+        help_text=_('Samo za neprofitne udruge izvan sustava PDV-a (NN 133/12). '
+                    'Računi se generiraju normalno ali se ne šalju u FINA CIS.'),
+    )
+    cash_register_limit = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        verbose_name=_('Blagajnički maksimum (EUR)'),
+        help_text=_('Zakonski limit gotovine u blagajni. Za udruge obavezno. Prazno = bez limita.'),
+    )
+
+    # NKD djelatnost
+    nkd_code = models.ForeignKey(
+        NKDCode, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name=_('NKD djelatnost'),
+        help_text=_('Nacionalna klasifikacija djelatnosti (npr. 56.10 – Restorani)'),
+    )
+
+    # Konfiguracija
+    is_vat_registered = models.BooleanField(default=True, verbose_name=_('U sustavu PDV-a'))
+    logo = models.ImageField(upload_to='company_logos/', blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, verbose_name=_('Telefon'))
+    email = models.EmailField(blank=True, verbose_name=_('E-mail'))
+    website_url = models.URLField(blank=True, verbose_name=_('Web stranica'))
+    # Grosmarkt partner fields
+    GROSMARKT_ROLE_CHOICES = [
+        ('logistik', 'Logistik-Hub'),
+        ('gaertnerei', 'Gärtnerei / Frischware'),
+        ('haendler', 'Händler / Großhandel'),
+        ('gastro', 'Gastronomie'),
+        ('sonstiges', 'Sonstiges'),
+    ]
+    grosmarkt_partner = models.BooleanField(default=False, verbose_name='Grosmarkt Partner', help_text='Prikazati na grosmarkt-online.eu?')
+    grosmarkt_role = models.CharField(max_length=30, blank=True, choices=GROSMARKT_ROLE_CHOICES, verbose_name='Grosmarkt Rolle')
+    grosmarkt_description = models.TextField(blank=True, max_length=300, verbose_name='Grosmarkt Beschreibung (DE)', help_text='Kratki opis za grosmarkt-online.eu kartice')
+    grosmarkt_show_name = models.BooleanField(default=False, verbose_name='Prikaži naziv firme javno', help_text='Ako False, prikazuje se samo rola (anonimizirano)')
+
+    mobile = models.CharField(max_length=50, blank=True, verbose_name=_('Mobitel'))
+    booking_slug  = models.SlugField(max_length=200, unique=True, null=True, blank=True, verbose_name=_('Booking Slug'))
+    booking_theme = models.CharField(
+        max_length=20,
+        choices=[('dark','Tamna'), ('light','Svijetla'), ('standard','Standard (Navy)')],
+        default='dark',
+        verbose_name=_('Booking tema'),
+        help_text=_('Zadana tema za javnu booking stranicu ove kompanije'),
+    )
+    settings = models.JSONField(default=dict, blank=True, verbose_name=_("Postavke tvrtke"))
+
+    # PDV / USt status
+    PDV_STATUS_CHOICES = [
+        ('none',             'Nije u sustavu PDV-a'),
+        ('obveznik',         'Obveznik PDV-a'),
+        ('pausalic',         'Paušalac (HR §90)'),
+        ('kleinunternehmer', 'Kleinunternehmer (DE §19 UStG)'),
+    ]
+    pdv_status = models.CharField(
+        max_length=20, choices=PDV_STATUS_CHOICES, default='none',
+        verbose_name='PDV status',
+    )
+    is_kleinunternehmer = models.BooleanField(
+        default=False,
+        verbose_name='Kleinunternehmer §19 UStG',
+        help_text='DE: oslobođen PDV-a prema §19 UStG ako god.prihodi < 22.000 EUR',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Geofence / GPS
+    latitude = models.FloatField(null=True, blank=True, verbose_name='GPS Latitude')
+    longitude = models.FloatField(null=True, blank=True, verbose_name='GPS Longitude')
+    geofence_radius = models.PositiveIntegerField(
+        default=200, verbose_name='Geofence radius (m)',
+        help_text='Maksimalna udaljenost za clock-in (metara)')
+    no_show_tolerance_minutes = models.PositiveIntegerField(default=15, verbose_name='Tolerancija kasnjenja (min)')
+
+    is_platform_owner = models.BooleanField(
+        default=False,
+        verbose_name='Platform Owner',
+        help_text='Firma vlasnika platforme – svi moduli otključani bez pretplate',
+    )
+
+    # Parent-Child (B2B2B Umbrella)
+    umbrella_parent = models.ForeignKey(
+        'self', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='umbrella_children',
+        verbose_name='Nadredjena tvrtka (Umbrella)',
+    )
+    UMBRELLA_RELATION_CHOICES = [
+        ('subsidiary', 'Podru\u017enica / Sestrinska firma'),
+        ('client', 'Klijent (knjigovodstvo)'),
+        ('franchise', 'Fran\u0161iza'),
+    ]
+    is_umbrella = models.BooleanField(default=False, verbose_name='Umbrella tvrtka')
+    umbrella_relation = models.CharField(
+        max_length=20, choices=UMBRELLA_RELATION_CHOICES,
+        default='client', blank=True,
+        verbose_name='Tip veze s umbrella',
+    )
+    umbrella_max_children = models.PositiveIntegerField(default=0, verbose_name='Max podtvrtki')
+    umbrella_monthly_fee = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name='Umbrella mj. naknada (EUR)',
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.booking_slug and self.name:
+            base_slug = slugify(self.name)
+            slug = base_slug
+            n = 1
+            while Company.objects.filter(booking_slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{n}"
+                n += 1
+            self.booking_slug = slug
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name        = _('Tvrtka')
+        verbose_name_plural = _('Tvrtke')
+
+    def __str__(self):
+        return f'{self.name} ({self.oib})'
+
+    # ── Nonprofit helpers ────────────────────────────────────────────
+    NONPROFIT_TYPES = {'udruga', 'zadruga', 'ustanova'}
+
+    @property
+    def is_nonprofit(self):
+        return self.business_type in self.NONPROFIT_TYPES
+
+    @property
+    def requires_simplified_accounting(self):
+        if not self.is_nonprofit:
+            return False
+        return self.settings.get('simplified_accounting', True)
+
+    @property
+    def nonprofit_fiscal_mode(self):
+        if not self.is_nonprofit:
+            return 'full'
+        return self.settings.get('nonprofit_fiscal_mode', 'commercial_only')
+
+
+class TaxRate(models.Model):
+
+    class Country(models.TextChoices):
+        HR = 'HR', 'Hrvatska'
+        DE = 'DE', 'Njemačka'
+        AT = 'AT', 'Austrija'
+        SI = 'SI', 'Slovenija'
+
+    country     = models.CharField(max_length=10, choices=Country.choices, verbose_name=_('Država'))
+    name        = models.CharField(max_length=100, verbose_name=_('Naziv stope'))
+    rate        = models.DecimalField(max_digits=5, decimal_places=2, verbose_name=_('Stopa (%)'))
+    description = models.CharField(max_length=255, blank=True, verbose_name=_('Opis'))
+    is_default  = models.BooleanField(default=False, verbose_name=_('Zadana stopa'))
+    is_active   = models.BooleanField(default=True, verbose_name=_('Aktivna'))
+
+    class Meta:
+        verbose_name        = _('Porezna stopa')
+        verbose_name_plural = _('Porezne stope')
+        ordering            = ['country', '-rate']
+        unique_together     = [('country', 'rate')]
+
+    def __str__(self):
+        return f'{self.country} \u2013 {self.name} ({self.rate}%)'
+
+
+class BusinessProfile(models.Model):
+    """
+    Industrijski profil tvrtke — kontrolira module, cjenik i workflow.
+
+    Primjeri: frizer, mehaničar, građevina, optika, restoran, webshop...
+    Vezan 1:1 na Company.
+    """
+    class ProfileType(models.TextChoices):
+        FRIZER        = 'frizer',     _('Frizerski salon')
+        MEHANIČAR     = 'mehaničar',  _('Auto mehaničar')
+        GRAĐEVINA     = 'gradjevina', _('Građevina / Renovacija')
+        OPTIKA        = 'optika',     _('Optika')
+        RESTORAN      = 'restoran',   _('Restoran / Caffe bar')
+        WEBSHOP       = 'webshop',    _('Online trgovina')
+        CONSULTING    = 'consulting', _('Konzalting / IT usluge')
+        CUSTOM        = 'custom',     _('Prilagođeno')
+
+    company = models.OneToOneField(
+        'Company', on_delete=models.CASCADE,
+        related_name='business_profile',
+        verbose_name=_('Tvrtka'),
+    )
+    profile_type = models.CharField(
+        max_length=20, choices=ProfileType.choices,
+        default=ProfileType.CUSTOM,
+        verbose_name=_('Tip profila'),
+    )
+
+    # ── Vidljivost modula (nav) ───────────────────────────────────────────────
+    module_invoicing    = models.BooleanField(default=True,  verbose_name=_('Fakturiranje'))
+    module_pos          = models.BooleanField(default=False, verbose_name=_('POS kasa'))
+    module_inventory    = models.BooleanField(default=False, verbose_name=_('Zalihe'))
+    module_appointments = models.BooleanField(default=False, verbose_name=_('Termini'))
+    module_projects     = models.BooleanField(default=False, verbose_name=_('Projekti'))
+    module_worktime     = models.BooleanField(default=False, verbose_name=_('Radni sati'))
+    module_finance      = models.BooleanField(default=True,  verbose_name=_('Financije'))
+    module_partners     = models.BooleanField(default=True,  verbose_name=_('Partneri'))
+    module_documents    = models.BooleanField(default=False, verbose_name=_('Dokumenti'))
+    module_webshop      = models.BooleanField(default=False, verbose_name=_('Webshop'))
+    module_rental       = models.BooleanField(default=False, verbose_name=_('Najam'))
+    module_fitness      = models.BooleanField(default=False, verbose_name=_('Fitness'))
+
+    # ── Workflow tip ──────────────────────────────────────────────────────────
+    class WorkflowType(models.TextChoices):
+        INVOICE_ONLY  = 'invoice',     _('Samo fakturiranje')
+        APPOINTMENT   = 'appointment', _('Termini + fakturiranje')
+        WORK_ORDER    = 'work_order',  _('Radni nalozi')
+        PROJECT       = 'project',     _('Projektni rad')
+        POS           = 'pos',         _('POS kasa (maloprodaja)')
+
+    workflow_type = models.CharField(
+        max_length=20, choices=WorkflowType.choices,
+        default=WorkflowType.INVOICE_ONLY,
+        verbose_name=_('Tip workflowa'),
+    )
+
+    # ── Prilagođeni nazivi dokumenata ─────────────────────────────────────────
+    offer_label    = models.CharField(max_length=50, default='Ponuda',    verbose_name=_('Naziv ponude'))
+    invoice_label  = models.CharField(max_length=50, default='Račun',     verbose_name=_('Naziv računa'))
+    workorder_label = models.CharField(max_length=50, default='Radni nalog', verbose_name=_('Naziv radnog naloga'))
+
+    # ── Prilagođena polja na dokumentima (JSON) ───────────────────────────────
+    # Format: [{"name": "gradiliste", "label": "Gradilište", "type": "text", "required": false}]
+    custom_invoice_fields = models.JSONField(
+        default=list, blank=True,
+        verbose_name=_('Prilagođena polja na fakturi'),
+        help_text=_('JSON lista polja koja se dodaju na formu računa/ponude'),
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name        = _('Poslovni profil')
+        verbose_name_plural = _('Poslovni profili')
+
+    def __str__(self):
+        return f'{self.company.name} — {self.get_profile_type_display()}'
+
+    @property
+    def enabled_modules(self):
+        """Vraća listu stringova s nazivima aktivnih modula."""
+        return [
+            mod for mod in [
+                'invoicing', 'pos', 'inventory', 'appointments',
+                'projects', 'worktime', 'finance', 'partners',
+                'documents', 'webshop', 'rental', 'fitness',
+            ]
+            if getattr(self, f'module_{mod}', False)
+        ]
+
+
+class ServiceTemplate(models.Model):
+    """
+    Preddefinirani cjenik / usluge za industrijsku vertikalu.
+    Može se kopirati kao startni cjenik za novu tvrtku.
+    """
+    profile_type = models.CharField(
+        max_length=20,
+        choices=BusinessProfile.ProfileType.choices,
+        verbose_name=_('Tip profila'),
+        db_index=True,
+    )
+    name         = models.CharField(max_length=200, verbose_name=_('Naziv usluge'))
+    description  = models.TextField(blank=True, verbose_name=_('Opis'))
+    unit         = models.CharField(max_length=20, default='kom', verbose_name=_('Jed. mjera'))
+    default_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Zadana cijena (€)'))
+    tax_rate     = models.DecimalField(max_digits=5, decimal_places=2, default=25, verbose_name=_('PDV %'))
+    category     = models.CharField(max_length=100, blank=True, verbose_name=_('Kategorija'))
+    sort_order   = models.PositiveSmallIntegerField(default=0)
+    is_active    = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name        = _('Predložak usluge')
+        verbose_name_plural = _('Predlošci usluga (cjenik)')
+        ordering            = ['profile_type', 'sort_order', 'name']
+
+    def __str__(self):
+        return f'[{self.profile_type}] {self.name} — {self.default_price} €'
+
+
+# ── PODRUŽNICE / BRANCH SUSTAV ────────────────────────────────────────────────
+
+class CompanyBranch(models.Model):
+    """Pod-firma / poslovnica unutar matične tvrtke."""
+
+    BRANCH_TYPES = [
+        ('optika',      'Optika'),
+        ('fitness',     'Fitness centar'),
+        ('retail',      'Trgovina'),
+        ('accounting',  'Knjigovodstvo'),
+        ('restaurant',  'Restoran'),
+        ('salon',       'Salon ljepote'),
+        ('other',       'Ostalo'),
+    ]
+
+    parent_company = models.ForeignKey(
+        'Company', on_delete=models.CASCADE,
+        related_name='branches', verbose_name='Matična tvrtka',
+    )
+    name        = models.CharField(max_length=200, verbose_name='Naziv podružnice')
+    branch_code = models.CharField(max_length=20, blank=True, verbose_name='Šifra')
+    branch_type = models.CharField(
+        max_length=20, choices=BRANCH_TYPES, default='other',
+        verbose_name='Tip poslovnice',
+    )
+    address     = models.CharField(max_length=300, blank=True, verbose_name='Adresa')
+    city        = models.CharField(max_length=100, blank=True, verbose_name='Grad')
+    phone       = models.CharField(max_length=50, blank=True, verbose_name='Telefon')
+    email       = models.EmailField(blank=True, verbose_name='E-mail')
+
+    # Module override — empty list = inherit parent company subscription
+    active_modules = models.JSONField(
+        default=list, blank=True,
+        verbose_name='Aktivni moduli (override)',
+        help_text='Prazno = nasljeđuje plan matične tvrtke',
+    )
+
+    is_active  = models.BooleanField(default=True, verbose_name='Aktivna')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name        = 'Podružnica'
+        verbose_name_plural = 'Podružnice'
+        ordering            = ['name']
+        unique_together     = [('parent_company', 'branch_code')]
+
+    def __str__(self):
+        return f'{self.name} ({self.get_branch_type_display()})'
+
+    @property
+    def allowed_modules(self):
+        """Return set of allowed module names. Checks override first, then parent plan."""
+        if self.active_modules:
+            return set(self.active_modules)
+        try:
+            sub = self.parent_company.subscriptions.filter(status='active').first()
+            if sub:
+                return sub.allowed_modules
+        except Exception:
+            pass
+        return set()
+
+    @property
+    def dashboard_url(self):
+        mapping = {
+            'optika':     '/branches/optika/',
+            'fitness':    '/branches/fitness/',
+            'retail':     '/branches/retail/',
+            'accounting': '/branches/accounting/',
+            'restaurant': '/branches/restaurant/',
+            'salon':      '/branches/salon/',
+        }
+        return mapping.get(self.branch_type, '/branches/other/')
+
+    @property
+    def badge_color(self):
+        mapping = {
+            'optika':     '#60a5fa',
+            'fitness':    '#4ade80',
+            'retail':     '#f97316',
+            'accounting': '#a78bfa',
+            'restaurant': '#fb923c',
+            'salon':      '#f472b6',
+        }
+        return mapping.get(self.branch_type, '#888')
+
+
+
+class OnboardingProgress(models.Model):
+    company              = models.OneToOneField(Company, on_delete=models.CASCADE, related_name='onboarding')
+    profile_completed    = models.BooleanField(default=False)
+    first_partner_added  = models.BooleanField(default=False)
+    first_invoice_created = models.BooleanField(default=False)
+    bank_account_added   = models.BooleanField(default=False)
+    first_item_added     = models.BooleanField(default=False)
+    first_employee_added = models.BooleanField(default=False)
+    pos_configured       = models.BooleanField(default=False)
+    ai_intro_completed   = models.BooleanField(default=False)
+    ai_intro_shown       = models.BooleanField(default=False)
+    dismissed            = models.BooleanField(default=False)
+    created_at           = models.DateTimeField(auto_now_add=True)
+    updated_at           = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name        = 'Onboarding napredak'
+        verbose_name_plural = 'Onboarding napredak'
+
+    def __str__(self):
+        return f'Onboarding — {self.company}'
+
+    @property
+    def completed_steps(self):
+        return sum([
+            self.profile_completed,
+            self.first_partner_added,
+            self.first_invoice_created,
+            self.bank_account_added,
+            self.first_item_added,
+            self.first_employee_added,
+            self.ai_intro_completed,
+        ])
+
+    @property
+    def total_steps(self):
+        return 7
+
+    @property
+    def percent(self):
+        return int(self.completed_steps / self.total_steps * 100)
+
+
+
+class CompanyPartnership(models.Model):
+    """
+    Veza između partnera (resellera) i firme kojom upravlja.
+    Partner plaća platformi, firma plaća partneru (ili je uključena u paket).
+    """
+    BILLING_TYPES = [
+        ('included',    'Uključeno u paket'),
+        ('discounted',  'Povlaštena cijena'),
+        ('full',        'Puna cijena'),
+        ('free',        'Besplatno'),
+    ]
+
+    ACCESS_LEVELS = [
+        ('read',  'Samo čitanje'),
+        ('full',  'Puni pristup'),
+        ('admin', 'Admin pristup'),
+    ]
+
+    id               = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    partner_company  = models.ForeignKey(
+        'Company', on_delete=models.PROTECT,
+        related_name='managed_companies',
+        verbose_name='Partner (reseller)'
+    )
+    managed_company  = models.ForeignKey(
+        'Company', on_delete=models.PROTECT,
+        related_name='managing_partners',
+        verbose_name='Upravljana firma'
+    )
+    billing_type     = models.CharField(max_length=20, choices=BILLING_TYPES, default='included')
+    monthly_fee      = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    access_level     = models.CharField(max_length=10, choices=ACCESS_LEVELS, default='full')
+    valid_from       = models.DateField(auto_now_add=True)
+    valid_until      = models.DateField(null=True, blank=True)  # null = aktivan
+    notes            = models.TextField(blank=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+    created_by       = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='created_partnerships'
+    )
+
+    class Meta:
+        unique_together = [('partner_company', 'managed_company')]
+        verbose_name = 'Partnerstvo'
+        verbose_name_plural = 'Partnerstva'
+        ordering = ['managed_company__name']
+
+    def __str__(self):
+        status = 'aktivan' if not self.valid_until else f'završen {self.valid_until}'
+        return f"{self.partner_company.name} → {self.managed_company.name} ({status})"
+
+    @property
+    def is_active(self):
+        from django.utils import timezone
+        return self.valid_until is None or self.valid_until >= timezone.now().date()
+
+
+class CompanyModuleConfig(models.Model):
+    """Per-company module visibility configuration."""
+    company = models.OneToOneField('Company', on_delete=models.CASCADE,
+                                    related_name='module_config')
+    enabled_modules = models.JSONField(default=list, blank=True,
+        verbose_name='Aktivni moduli')
+    sidebar_order = models.JSONField(default=list, blank=True,
+        verbose_name='Redoslijed u sidebaru')
+    ai_recommended = models.JSONField(default=list, blank=True,
+        verbose_name='AI preporuceni moduli')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Konfiguracija modula'
+
+    def __str__(self):
+        return f'{self.company.name}: {len(self.enabled_modules)} modula'
+
+    def is_enabled(self, module_id):
+        return module_id in self.enabled_modules
+
+    def get_sidebar_modules(self):
+        from companies.module_registry import MODULES, get_module
+        result = []
+        order = self.sidebar_order or self.enabled_modules
+        for mid in order:
+            if mid in self.enabled_modules:
+                mod = get_module(mid)
+                if mod:
+                    result.append(mod)
+        return result

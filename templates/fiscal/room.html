@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Fiskalna soba{% endblock %}
+{% block page_title %}Fiskalna soba{% endblock %}
+{% block content %}
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card text-center {% if pending_count > 0 %}border-warning{% else %}border-success{% endif %}">
+      <div class="card-body">
+        <div style="font-size:2.5rem;font-weight:800;color:{% if pending_count > 0 %}#f59e0b{% else %}#22c55e{% endif %}">
+          {{ pending_count }}
+        </div>
+        <div class="text-muted small">Čeka fiskalizaciju</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center {% if critical_count > 0 %}border-danger{% else %}border-success{% endif %}">
+      <div class="card-body">
+        <div style="font-size:2.5rem;font-weight:800;color:{% if critical_count > 0 %}#ef4444{% else %}#22c55e{% endif %}">
+          {{ critical_count }}
+        </div>
+        <div class="text-muted small">Kritično (>36h)</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body d-flex flex-column align-items-center justify-content-center" style="min-height:90px">
+        <button id="syncBtn" class="btn btn-warning fw-bold px-4" onclick="doSync()">
+          🔄 Pokušaj sinkronizaciju
+        </button>
+        <div id="syncResult" class="mt-2 small"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if pending_list %}
+<div class="card mb-4">
+  <div class="card-header"><strong>Nefiskalizirani PAID računi</strong></div>
+  <div class="card-body p-0">
+    <table class="table table-sm table-hover mb-0">
+      <thead class="table-dark">
+        <tr><th>Bon #</th><th>Terminal</th><th>Iznos</th><th>Datum</th><th>Smjena</th></tr>
+      </thead>
+      <tbody>
+        {% for r in pending_list %}
+        <tr>
+          <td><a href="{% url 'pos:receipt_detail' r.id %}">#{{ r.receipt_number }}</a></td>
+          <td>{{ r.session.terminal.name }}</td>
+          <td class="fw-bold">€{{ r.total|floatformat:2 }}</td>
+          <td>{{ r.created_at|date:"d.m.Y H:i" }}</td>
+          <td>#{{ r.session.session_number }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header"><strong>Zadnji fiskalni logovi</strong></div>
+  <div class="card-body p-0">
+    <table class="table table-sm mb-0">
+      <thead class="table-dark">
+        <tr><th>Datum</th><th>Bon</th><th>Status</th><th>JIR</th><th>Greška</th></tr>
+      </thead>
+      <tbody>
+        {% for log in last_logs %}
+        <tr>
+          <td class="text-muted small">{{ log.created_at|date:"d.m.Y H:i:s" }}</td>
+          <td>{{ log.receipt_type }} #{{ log.receipt_id }}</td>
+          <td>
+            {% if log.status == 'success' %}<span class="badge bg-success">OK</span>
+            {% elif log.status == 'error' %}<span class="badge bg-danger">Greška</span>
+            {% elif log.status == 'pending' %}<span class="badge bg-warning text-dark">Na čekanju</span>
+            {% else %}<span class="badge bg-secondary">{{ log.status }}</span>{% endif %}
+          </td>
+          <td class="small text-muted">{{ log.jir|truncatechars:20|default:"—" }}</td>
+          <td class="small text-danger">{{ log.error_message|truncatechars:60|default:"" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-3">Nema logova</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+async function doSync() {
+  const btn = document.getElementById('syncBtn');
+  const res = document.getElementById('syncResult');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sinkronizacija...';
+  res.textContent = '';
+  try {
+    const r = await fetch('{% url "pos:fiscal_room_sync" %}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF },
+    });
+    const data = await r.json();
+    res.innerHTML = data.ok
+      ? '<span class="text-success fw-bold">✔ ' + data.message + '</span>'
+      : '<span class="text-danger">✗ ' + data.message + '</span>';
+    setTimeout(() => location.reload(), 1500);
+  } catch (e) {
+    res.innerHTML = '<span class="text-danger">Greška veze</span>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔄 Pokušaj sinkronizaciju';
+  }
+}
+</script>
+{% endblock %}

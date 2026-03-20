@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nova primka{% endblock %}
+{% block page_title %}Nova primka{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">
+    <i class="fas fa-file-invoice me-2" style="color:var(--gold)"></i>
+    Nova primka robe
+  </h2>
+  <a href="{% url 'inventory:receipt_list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="fas fa-arrow-left me-1"></i>Natrag
+  </a>
+</div>
+
+<form method="post" id="grForm">
+{% csrf_token %}
+
+<!-- Header -->
+<div class="stat-card mb-4">
+  <div class="row g-3">
+    <div class="col-md-2">
+      <label class="form-label" style="color:#94a3b8;font-size:.8rem">Datum primke</label>
+      <input type="date" name="date" value="{{ today }}" class="form-control form-control-sm"
+             style="background:#1a1a1a;border-color:#333;color:#e0e0e0" required>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" style="color:#94a3b8;font-size:.8rem">Dobavljač</label>
+      <select name="supplier_id" class="form-select form-select-sm"
+              style="background:#1a1a1a;border-color:#333;color:#e0e0e0">
+        <option value="">— Odaberite dobavljača —</option>
+        {% for s in suppliers %}
+        <option value="{{ s.pk }}">{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" style="color:#94a3b8;font-size:.8rem">Broj dostavnice / fakture dobavljača</label>
+      <input type="text" name="document_number" class="form-control form-control-sm"
+             placeholder="npr. DF-2026-0123"
+             style="background:#1a1a1a;border-color:#333;color:#e0e0e0">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" style="color:#94a3b8;font-size:.8rem">Napomene</label>
+      <input type="text" name="notes" class="form-control form-control-sm"
+             style="background:#1a1a1a;border-color:#333;color:#e0e0e0">
+    </div>
+  </div>
+</div>
+
+<!-- Article search -->
+<div class="stat-card mb-3" style="padding:10px 14px">
+  <div style="font-size:.75rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
+    <i class="fas fa-search me-1" style="color:var(--gold)"></i>Dodaj artikl
+  </div>
+  <div style="position:relative;max-width:400px">
+    <input type="text" id="grArtSearch" placeholder="Naziv, SKU ili barkod…"
+           class="form-control form-control-sm" autocomplete="off"
+           style="background:#0f172a;border-color:#334155;color:#e2e8f0">
+    <div id="grArtResults" style="display:none;position:absolute;z-index:999;left:0;right:0;top:100%;
+         background:#1e2a3a;border:1.5px solid var(--gold);border-top:none;border-radius:0 0 8px 8px;
+         max-height:280px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- Items table -->
+<div class="stat-card mb-4">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0" style="font-size:.78rem;white-space:nowrap" id="grTable">
+      <thead>
+        <tr style="border-bottom:2px solid rgba(201,168,76,.25)">
+          <th style="min-width:180px">Artikl</th>
+          <th style="min-width:80px">Kol.</th>
+          <th style="min-width:100px">Nab. cij./jed.</th>
+          <th style="min-width:100px">Zav. troš./jed.</th>
+          <th style="min-width:100px;color:var(--gold)">Nab. s troš.</th>
+          <th style="min-width:80px">Marža %</th>
+          <th style="min-width:100px;color:#3b82f6">Prod. bez PDV</th>
+          <th style="min-width:70px">PDV %</th>
+          <th style="min-width:90px;color:#3b82f6">PDV iznos</th>
+          <th style="min-width:100px;color:var(--gold)">MPC (s PDV)</th>
+          <th style="min-width:100px">Uk. MPC</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="grBody">
+        <!-- rows injected by JS -->
+      </tbody>
+      <tfoot>
+        <tr id="grTotRow" style="border-top:2px solid rgba(201,168,76,.25);font-weight:700">
+          <td colspan="10" class="text-end" style="color:#94a3b8">UKUPNO:</td>
+          <td id="grTotMPC" style="color:var(--gold);font-family:monospace">0.00</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <div class="mt-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="grAddRow()">
+      <i class="fas fa-plus me-1"></i>Dodaj artikl ručno
+    </button>
+  </div>
+</div>
+
+<div class="d-flex gap-2">
+  <button type="submit" class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:700;padding:8px 24px">
+    <i class="fas fa-save me-1"></i>Spremi primku (nacrt)
+  </button>
+  <a href="{% url 'inventory:receipt_list' %}" class="btn btn-sm btn-outline-secondary">Odustani</a>
+</div>
+</form>
+
+<script src="/static/js/goods-receipt.js"></script>
+
+{% endblock %}

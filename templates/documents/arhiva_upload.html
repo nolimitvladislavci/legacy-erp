@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Upload Dokumenta — LIMIT CONNECT{% endblock %}
+{% block page_title %}Upload Dokumenta{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px;padding:30px 20px">
+
+  <!-- INFO BANNER -->
+  <div style="background:linear-gradient(135deg,#1a1a2e,#0f172a);border:1px solid rgba(201,168,76,.4);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start">
+    <span style="font-size:2rem;line-height:1">&#129302;</span>
+    <div>
+      <div style="color:#c9a84c;font-weight:700;font-size:1rem;margin-bottom:.25rem">Sustav automatski &#269;ita podatke s ra&#269;una</div>
+      <div style="color:#94a3b8;font-size:.875rem;line-height:1.5">
+        Fotografirajte ili prilo&#382;ite PDF &mdash; AI prepoznaje partnera, iznos i datum. Nema ru&#269;nog tipkanja.
+        Rezultat vidite za 30 sekundi u <a href="{% url 'documents:ai_inbox' %}" style="color:#c9a84c">AI Inboxu</a>.
+      </div>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" id="uploadForm">
+    {% csrf_token %}
+
+    <!-- DRAG & DROP ZONA -->
+    <div id="dropZone"
+         title="Mozete fotografirati zguzvan racun - AI ga automatski ispravlja i cita sve podatke"
+         style="border:2px dashed #334155;border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .3s;background:#0f172a;margin-bottom:1.5rem;position:relative">
+
+      <div id="dropContent">
+        <div style="font-size:3rem;margin-bottom:.75rem">&#128196;</div>
+        <div style="color:#fff;font-size:1.1rem;font-weight:600;margin-bottom:.5rem">Prevucite ra&#269;un ovdje</div>
+        <div style="color:#64748b;font-size:.875rem;margin-bottom:1.5rem">ili odaberite jednu od opcija ispod</div>
+
+        <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+          <label title="Fotografirajte fizicki racun direktno mobilnim uredajem"
+                 style="background:#1e3a5f;color:#60a5fa;border:1px solid #1e40af;border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s">
+            &#128247; Fotografirati mobilom
+            <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
+          </label>
+
+          <label title="Odaberite PDF, sliku ili XML datoteku s racunala"
+                 style="background:#1a1a2e;color:#c9a84c;border:1px solid rgba(201,168,76,.5);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s">
+            &#128193; Odaberi fajl
+            <input type="file" name="file" id="fileInputMain" accept=".pdf,.xml,.jpg,.jpeg,.png,.gif,.webp,.heic,.doc,.docx" style="display:none" onchange="handleFile(this)">
+          </label>
+        </div>
+
+        <div style="color:#475569;font-size:.75rem;margin-top:1rem">
+          Prihvacamo: PDF, JPG, PNG, WebP, XML &middot; Max 20MB
+        </div>
+      </div>
+
+      <!-- Preview nakon odabira -->
+      <div id="filePreview" style="display:none">
+        <div id="previewImage" style="margin-bottom:.75rem"></div>
+        <div id="previewName" style="color:#c9a84c;font-weight:700;font-size:1rem"></div>
+        <div id="previewSize" style="color:#64748b;font-size:.8rem;margin-top:.25rem"></div>
+        <div style="margin-top:.75rem">
+          <button type="button" onclick="clearFile()" style="background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:6px;padding:.3rem .75rem;cursor:pointer;font-size:.8rem">&#10005; Promijeni fajl</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div id="progressSection" style="display:none;margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.75rem">
+        <span id="step1" style="color:#c9a84c;font-size:.8rem;font-weight:600">&#9312; Odabir &#10003;</span>
+        <span id="step2" style="color:#475569;font-size:.8rem;font-weight:600">&#9313; Prijenos...</span>
+        <span id="step3" style="color:#475569;font-size:.8rem;font-weight:600">&#9314; AI cita...</span>
+        <span id="step4" style="color:#475569;font-size:.8rem;font-weight:600">&#9315; Spreman!</span>
+      </div>
+      <div style="height:4px;background:#1e293b;border-radius:2px;overflow:hidden">
+        <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#c9a84c,#f59e0b);width:25%;transition:width .8s ease;border-radius:2px"></div>
+      </div>
+    </div>
+
+    <!-- DETALJI -->
+    <div style="background:#0d1117;border:1px solid #1e293b;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+            Tip dokumenta
+            <span title="Ulazni racun = sto ste Vi platili dobavljacu. Izlazni = sto ste Vi naplatili kupcu."
+                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+          </label>
+          <select name="source_type" class="form-select" style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px">
+            {% for val, label in source_types %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+          <small style="color:#475569;font-size:.72rem;margin-top:.3rem;display:block">
+            Ako ne znate - ostavite "Dokument (rucni upload)"
+          </small>
+        </div>
+        <div class="col-md-6">
+          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+            Broj dokumenta
+            <span title="Broj s racuna. Mozete ostaviti prazno, AI ce ga automatski procitati."
+                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+          </label>
+          <input type="text" name="doc_number" class="form-control"
+                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px"
+                 placeholder="Ostavite prazno - AI cita automatski">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+            Partner (dobavljac / kupac)
+            <span title="Naziv firme koja je izdala ili primila racun. Mozete ostaviti prazno."
+                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+          </label>
+          <input type="text" name="partner_name" class="form-control"
+                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px"
+                 placeholder="Ostavite prazno - AI cita automatski">
+        </div>
+        <div class="col-md-3">
+          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+            Iznos (EUR)
+            <span title="Ukupni iznos s PDV-om. Mozete ostaviti prazno."
+                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+          </label>
+          <input type="number" name="amount" step="0.01" class="form-control"
+                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px"
+                 placeholder="0.00 (auto)">
+        </div>
+        <div class="col-md-3">
+          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+            Datum
+            <span title="Datum s racuna. Ako ostavite prazno, koristit ce se danasnji datum."
+                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+          </label>
+          <input type="date" name="doc_date" class="form-control"
+                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px">
+        </div>
+      </div>
+
+      <details style="margin-top:.5rem">
+        <summary style="color:#475569;font-size:.78rem;cursor:pointer">&#9881; Napredne opcije (pohrana)</summary>
+        <div style="margin-top:.75rem;display:flex;gap:1.5rem;flex-wrap:wrap">
+          <label title="Preporuceno: sustav sam odabire najbrzu i najsigurniju pohranu" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+            <input type="radio" name="backend" value="" checked> Auto (preporuceno)
+          </label>
+          <label title="Pohrana na serveru" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+            <input type="radio" name="backend" value="local"> &#128190; Lokalno
+          </label>
+          <label title="Pohrana u oblaku (Backblaze B2)" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+            <input type="radio" name="backend" value="cloud"> &#9729; Cloud (B2)
+          </label>
+          <label title="Pohrana u bazu podataka" style="color:#94a3b8;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.4rem">
+            <input type="radio" name="backend" value="database"> &#128452; Baza
+          </label>
+        </div>
+      </details>
+    </div>
+
+    <!-- ZAKONSKA NAPOMENA -->
+    <div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:.875rem 1rem;margin-bottom:1.5rem;display:flex;gap:.75rem;align-items:flex-start">
+      <span style="font-size:1.25rem">&#128274;</span>
+      <div style="font-size:.8rem;color:#6ee7b7;line-height:1.5">
+        <strong>Zakonska zastita:</strong> Svi dokumenti automatski se cuvaju <strong>11 godina</strong> prema Zakonu o racunovodstvu (ZOR).
+        Sustav sprjecava brisanje dok traje zakonski rok cuvanja.
+      </div>
+    </div>
+
+    <!-- GUMB ZA SLANJE -->
+    <div style="display:flex;gap:.75rem">
+      <button type="submit" id="submitBtn"
+              title="Klikom se racun sigurno arhivira i AI automatski cita podatke"
+              style="background:linear-gradient(135deg,#c9a84c,#b8963c);color:#0a0a0a;font-weight:700;flex:1;padding:.875rem;border:none;border-radius:12px;font-size:1rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.5rem">
+        <span id="btnIcon">&#128228;</span>
+        <span id="btnText">Spremi i posalji na AI analizu</span>
+      </button>
+      <a href="{% url 'documents:arhiva_list' %}"
+         title="Odustanite bez pohrane"
+         style="border:1px solid #374151;color:#6b7280;border-radius:12px;padding:.875rem 1.25rem;text-decoration:none;display:flex;align-items:center;font-size:.875rem">
+        Odustani
+      </a>
+    </div>
+
+    <div style="text-align:center;margin-top:.875rem;color:#475569;font-size:.78rem">
+      &#9201; AI analiza traje 15-30 sekundi. Vidjet cete je u
+      <a href="{% url 'documents:ai_inbox' %}" style="color:#c9a84c;text-decoration:none">AI Inboxu</a> cim zavrsi.
+    </div>
+
+  </form>
+</div>
+
+<script src="/static/js/arhiva-upload.js"></script>
+
+<style>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+</style>
+{% endblock %}

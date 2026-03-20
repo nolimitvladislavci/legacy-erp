@@ -1,0 +1,739 @@
+{% extends "base.html" %}
+{% load i18n l10n %}
+{% block title %}Postavke tvrtke — LIMIT Connect{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0"><i class="fas fa-cog text-muted me-2"></i>Postavke tvrtke</h5>
+</div>
+
+<ul class="nav nav-tabs mb-3" id="settingsTabs">
+  <li class="nav-item"><a class="nav-link{% if tab == 'info' %} active{% endif %}" href="?tab=info"><i class="fas fa-building me-1"></i> Info</a></li>
+  <li class="nav-item"><a class="nav-link{% if tab == 'employees' %} active{% endif %}" href="?tab=employees"><i class="fas fa-users me-1"></i> Zaposlenici</a></li>
+  <li class="nav-item"><a class="nav-link{% if tab == 'branches' %} active{% endif %}" href="?tab=branches"><i class="fas fa-code-branch me-1"></i> Podruznice</a></li>
+  <li class="nav-item"><a class="nav-link{% if tab == 'subscription' %} active{% endif %}" href="?tab=subscription"><i class="fas fa-crown me-1"></i> Pretplata</a></li>
+  <li class="nav-item"><a class="nav-link{% if tab == 'settings' %} active{% endif %}" href="?tab=settings"><i class="fas fa-sliders-h me-1"></i> Postavke</a></li>
+  <li class="nav-item"><a class="nav-link{% if tab == "fiscal" %} active{% endif %}" href="?tab=fiscal"><i class="fas fa-certificate text-warning me-1"></i> Fiskalizacija</a></li>
+  <li class="nav-item"><a class="nav-link{% if tab == 'integrations' %} active{% endif %}" href="?tab=integrations"><i class="fas fa-plug me-1 text-info"></i> Integracije</a></li>
+</ul>
+
+{% if messages %}
+<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+{% endif %}
+
+{% if tab == "info" %}
+<div class="stat-card p-4">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold" style="font-size:.8rem">Naziv tvrtke</label>
+        <input type="text" name="name" class="form-control" value="{{ company.name }}" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">OIB / Steuernummer</label>
+        <input type="text" name="oib" class="form-control" value="{{ company.oib }}" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">Drzava</label>
+        <select name="country" class="form-select">
+          {% for val, label in country_choices %}<option value="{{ val }}"{% if company.country == val %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold" style="font-size:.8rem">Adresa</label>
+        <input type="text" name="address" class="form-control" value="{{ company.address }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">Grad</label>
+        <input type="text" name="city" class="form-control" value="{{ company.city }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">Postanski broj</label>
+        <input type="text" name="zip_code" class="form-control" value="{{ company.zip_code }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold" style="font-size:.8rem">IBAN</label>
+        <input type="text" name="iban" class="form-control" value="{{ company.iban }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold" style="font-size:.8rem">Porezni broj</label>
+        <input type="text" name="tax_number" class="form-control" value="{{ company.tax_number }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold" style="font-size:.8rem">PDV ID / VAT ID</label>
+        <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">Telefon</label>
+        <input type="text" name="phone" class="form-control" value="{{ company.phone }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">Mobitel</label>
+        <input type="text" name="mobile" class="form-control" value="{{ company.mobile }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">E-mail tvrtke</label>
+        <input type="email" name="company_email" class="form-control" value="{{ company.email }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold" style="font-size:.8rem">Web stranica</label>
+        <input type="url" name="website_url" class="form-control" value="{{ company.website_url }}">
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-bold" style="font-size:.8rem">NKD djelatnost</label>
+        <div class="position-relative">
+          <input type="text" id="nkdSearch" class="form-control"
+            placeholder="Pretrazite po sifri ili opisu (npr. 45.20 Popravak motornih vozila)..."
+            autocomplete="off"
+            value="{% if company.nkd_code %}{{ company.nkd_code.code }} – {{ company.nkd_code.name_hr }}{% endif %}">
+          <input type="hidden" name="nkd_code_id" id="nkdCodeId"
+            value="{% if company.nkd_code %}{{ company.nkd_code.pk }}{% endif %}">
+          <div id="nkdDropdown" class="dropdown-menu w-100" style="display:none;max-height:220px;overflow-y:auto;font-size:.85rem"></div>
+        </div>
+        {% if company.nkd_code %}<small class="text-muted">Trenutna sifra: <strong>{{ company.nkd_code.code }}</strong> – {{ company.nkd_code.name_hr }}</small>{% endif %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold" style="font-size:.8rem">Logo</label>
+        <input type="file" name="logo" class="form-control" accept="image/*">
+        {% if company.logo %}<div class="mt-1"><img src="{{ company.logo.url }}" style="max-height:40px;border-radius:4px"></div>{% endif %}
+      </div>
+    </div>
+    <div class="mt-3"><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Spremi</button></div>
+  </form>
+</div>
+{% endif %}
+
+{% if tab == "employees" %}
+<div class="stat-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0">Zaposlenici ({{ employees.count }})</h6>
+    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal"><i class="fas fa-plus me-1"></i> Novi zaposlenik</button>
+  </div>
+  <div class="table-responsive">
+  <table class="table table-sm" style="font-size:.85rem">
+    <thead><tr><th>Ime</th><th>Email</th><th>Uloga</th><th>Telefon</th><th>Status</th><th>Akcije</th></tr></thead>
+    <tbody>
+    {% for emp in employees %}
+    <tr>
+      <td>{{ emp.user.get_full_name|default:emp.user.username }}</td>
+      <td>{{ emp.user.email }}</td>
+      <td><span class="badge bg-secondary">{{ emp.get_role_display }}</span></td>
+      <td>{{ emp.phone }}</td>
+      <td>{% if emp.user.is_active %}<span class="badge bg-success">Aktivan</span>{% else %}<span class="badge bg-danger">Neaktivan</span>{% endif %}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="editEmployee({{ emp.pk }},'{{ emp.user.first_name }}','{{ emp.user.last_name }}','{{ emp.user.email }}','{{ emp.phone }}','{{ emp.role }}')" title="Uredi"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-sm btn-outline-warning py-0 px-1" onclick="changePassword({{ emp.pk }})" title="Lozinka"><i class="fas fa-key"></i></button>
+        <form method="post" action="{% url 'companies:employee_toggle_active' emp.pk %}" class="d-inline" onsubmit="return ajaxPost(this)">{% csrf_token %}<button class="btn btn-sm btn-outline-{% if emp.user.is_active %}danger{% else %}success{% endif %} py-0 px-1" title="{% if emp.user.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}"><i class="fas fa-{% if emp.user.is_active %}ban{% else %}check{% endif %}"></i></button></form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">{% include "includes/empty_state.html" with icon="fa-users" title="Nema zaposlenika" message="Dodajte prvog zaposlenika." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h6 class="modal-title">Novi zaposlenik</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <form id="addEmployeeForm" method="post" action="{% url 'companies:employee_create' %}" onsubmit="return ajaxPost(this)">
+  {% csrf_token %}
+  <div class="modal-body">
+    <div class="row g-2">
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Ime</label><input type="text" name="first_name" class="form-control" required></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Prezime</label><input type="text" name="last_name" class="form-control" required></div>
+      <div class="col-12"><label class="form-label" style="font-size:.8rem">Email</label><input type="email" name="email" class="form-control" required></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Telefon</label><input type="text" name="phone" class="form-control"></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Uloga</label><select name="role" class="form-select">{% for val, label in role_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Odustani</button><button type="submit" class="btn btn-primary btn-sm">Kreiraj</button></div>
+  </form>
+</div></div></div>
+
+<!-- Edit Employee Modal -->
+<div class="modal fade" id="editEmployeeModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h6 class="modal-title">Uredi zaposlenika</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <form id="editEmployeeForm" method="post" onsubmit="return ajaxPost(this)">
+  {% csrf_token %}
+  <div class="modal-body">
+    <div class="row g-2">
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Ime</label><input type="text" name="first_name" id="editFirstName" class="form-control" required></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Prezime</label><input type="text" name="last_name" id="editLastName" class="form-control" required></div>
+      <div class="col-12"><label class="form-label" style="font-size:.8rem">Email</label><input type="email" name="email" id="editEmail" class="form-control" required></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Telefon</label><input type="text" name="phone" id="editPhone" class="form-control"></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Uloga</label><select name="role" id="editRole" class="form-select">{% for val, label in role_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Odustani</button><button type="submit" class="btn btn-primary btn-sm">Spremi</button></div>
+  </form>
+</div></div></div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePwModal" tabindex="-1"><div class="modal-dialog modal-sm"><div class="modal-content">
+  <div class="modal-header"><h6 class="modal-title">Nova lozinka</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <form id="changePwForm" method="post" onsubmit="return ajaxPost(this)">
+  {% csrf_token %}
+  <div class="modal-body">
+    <label class="form-label" style="font-size:.8rem">Nova lozinka (min 8 znakova)</label>
+    <input type="password" name="password" class="form-control" minlength="8" required>
+  </div>
+  <div class="modal-footer"><button type="submit" class="btn btn-warning btn-sm">Postavi</button></div>
+  </form>
+</div></div></div>
+{% endif %}
+
+{% if tab == "branches" %}
+<div class="stat-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0">Podruznice ({{ branches.count }})</h6>
+    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#branchModal" onclick="clearBranchForm()"><i class="fas fa-plus me-1"></i> Nova podruznica</button>
+  </div>
+  <div class="table-responsive">
+  <table class="table table-sm" style="font-size:.85rem">
+    <thead><tr><th>Naziv</th><th>Tip</th><th>Grad</th><th>Telefon</th><th>Status</th><th>Akcije</th></tr></thead>
+    <tbody>
+    {% for b in branches %}
+    <tr>
+      <td>{{ b.name }}</td>
+      <td><span class="badge" style="background:{{ b.badge_color }}">{{ b.get_branch_type_display }}</span></td>
+      <td>{{ b.city }}</td>
+      <td>{{ b.phone }}</td>
+      <td>{% if b.is_active %}<span class="badge bg-success">Aktivna</span>{% else %}<span class="badge bg-danger">Neaktivna</span>{% endif %}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary py-0 px-1" onclick="editBranch({{ b.pk }},'{{ b.name }}','{{ b.branch_code }}','{{ b.branch_type }}','{{ b.address }}','{{ b.city }}','{{ b.phone }}','{{ b.email }}')" title="Uredi"><i class="fas fa-edit"></i></button>
+        <form method="post" action="{% url 'companies:branch_toggle_active' b.pk %}" class="d-inline" onsubmit="return ajaxPost(this)">{% csrf_token %}<button class="btn btn-sm btn-outline-{% if b.is_active %}danger{% else %}success{% endif %} py-0 px-1"><i class="fas fa-{% if b.is_active %}ban{% else %}check{% endif %}"></i></button></form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">{% include "includes/empty_state.html" with icon="fa-code-branch" title="Nema podruznica" message="Dodajte prvu podruznicu." %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- Branch Modal -->
+<div class="modal fade" id="branchModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h6 class="modal-title" id="branchModalTitle">Nova podruznica</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <form id="branchForm" method="post" action="{% url 'companies:branch_create' %}" onsubmit="return ajaxPost(this)">
+  {% csrf_token %}
+  <div class="modal-body">
+    <div class="row g-2">
+      <div class="col-8"><label class="form-label" style="font-size:.8rem">Naziv</label><input type="text" name="name" id="brName" class="form-control" required></div>
+      <div class="col-4"><label class="form-label" style="font-size:.8rem">Sifra</label><input type="text" name="branch_code" id="brCode" class="form-control"></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Tip</label><select name="branch_type" id="brType" class="form-select">{% for val, label in branch_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Grad</label><input type="text" name="city" id="brCity" class="form-control"></div>
+      <div class="col-12"><label class="form-label" style="font-size:.8rem">Adresa</label><input type="text" name="address" id="brAddr" class="form-control"></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Telefon</label><input type="text" name="phone" id="brPhone" class="form-control"></div>
+      <div class="col-6"><label class="form-label" style="font-size:.8rem">Email</label><input type="email" name="email" id="brEmail" class="form-control"></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Odustani</button><button type="submit" class="btn btn-primary btn-sm">Spremi</button></div>
+  </form>
+</div></div></div>
+{% endif %}
+
+{% if tab == "subscription" %}
+<div class="stat-card p-4">
+  {% if subscription %}
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="p-3 rounded" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2)">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Plan</div>
+        <div style="font-size:1.2rem;font-weight:700;color:var(--gold)">{{ subscription.get_plan_display }}</div>
+        {% if subscription.is_trial %}<span class="badge bg-warning text-dark">Trial do {{ subscription.trial_ends }}</span>{% else %}<span class="badge bg-success">Aktivan</span>{% endif %}
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Korisnici</div>
+        <div style="font-size:1.2rem;font-weight:700">{{ usage.users }}</div>
+        <div class="progress mt-1" style="height:4px"><div class="progress-bar bg-primary" style="width:{% widthratio usage.users 50 100 %}%"></div></div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Lokacije</div>
+        <div style="font-size:1.2rem;font-weight:700">{{ usage.locations }}</div>
+        <div class="progress mt-1" style="height:4px"><div class="progress-bar bg-success" style="width:{% widthratio usage.locations 20 100 %}%"></div></div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Fakture</div>
+        <div style="font-size:1.2rem;font-weight:700">{{ usage.invoices }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Mjesecna naknada</div>
+        <div style="font-size:1.2rem;font-weight:700">{{ subscription.monthly_fee }} EUR</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
+        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Vrijedi do</div>
+        <div style="font-size:1.2rem;font-weight:700">{{ subscription.valid_until|default:"Neograniceno" }}</div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  {% include "includes/empty_state.html" with icon="fa-crown" title="Nema aktivne pretplate" message="Kontaktirajte podrsku za aktivaciju." %}
+  {% endif %}
+</div>
+{% endif %}
+
+{% if tab == "settings" %}
+<form method="post">
+{% csrf_token %}
+
+<!-- ── Opće postavke tvrtke ──────────────────────────────────────────── -->
+<div class="stat-card p-4 mb-4">
+  <h6 class="mb-3"><i class="fas fa-building text-primary me-2"></i>Opće postavke</h6>
+  <div class="row g-3">
+    <div class="col-md-5">
+      <label class="form-label fw-bold" style="font-size:.8rem">Tip poslovnog subjekta</label>
+      <select name="business_type" class="form-select">
+        <option value="doo"{% if company.business_type == "doo" %} selected{% endif %}>d.o.o. (Društvo s ograničenom odgovornošću)</option>
+        <option value="jdoo"{% if company.business_type == "jdoo" %} selected{% endif %}>j.d.o.o. (Jednostavno d.o.o.)</option>
+        <option value="dd"{% if company.business_type == "dd" %} selected{% endif %}>d.d. (Dioničko društvo)</option>
+        <option value="obrt"{% if company.business_type == "obrt" %} selected{% endif %}>Obrt</option>
+        <option value="gmbh"{% if company.business_type == "gmbh" %} selected{% endif %}>GmbH</option>
+        <option value="ag"{% if company.business_type == "ag" %} selected{% endif %}>AG (Aktiengesellschaft)</option>
+        <option value="einzelunternehmen"{% if company.business_type == "einzelunternehmen" %} selected{% endif %}>Einzelunternehmen</option>
+        <option value="other"{% if company.business_type == "other" %} selected{% endif %}>Ostalo</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label fw-bold" style="font-size:.8rem">Valuta</label>
+      <select name="currency" class="form-select">
+        <option value="EUR"{% if company.currency == "EUR" %} selected{% endif %}>EUR (Euro)</option>
+        <option value="USD"{% if company.currency == "USD" %} selected{% endif %}>USD (US Dollar)</option>
+        <option value="GBP"{% if company.currency == "GBP" %} selected{% endif %}>GBP (British Pound)</option>
+        <option value="CHF"{% if company.currency == "CHF" %} selected{% endif %}>CHF (Swiss Franc)</option>
+        <option value="BAM"{% if company.currency == "BAM" %} selected{% endif %}>BAM (Bosanska marka)</option>
+        <option value="RSD"{% if company.currency == "RSD" %} selected{% endif %}>RSD (Srpski dinar)</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label fw-bold" style="font-size:.8rem">Zadani PDV %</label>
+      <input type="number" name="default_tax_pct" class="form-control" value="{{ settings_data.default_tax_pct|default:'25'|unlocalize }}" min="0" max="100" step="0.01">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label fw-bold" style="font-size:.8rem">Radno vrijeme</label>
+      <input type="text" name="working_hours" class="form-control" value="{{ settings_data.working_hours|default:'08:00-16:00' }}" placeholder="08:00-16:00">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label fw-bold" style="font-size:.8rem">Jezik sučelja</label>
+      <select name="ui_language" class="form-select">
+        <option value="hr"{% if settings_data.ui_language == "hr" or not settings_data.ui_language %} selected{% endif %}>Hrvatski</option>
+        <option value="de"{% if settings_data.ui_language == "de" %} selected{% endif %}>Deutsch</option>
+        <option value="en"{% if settings_data.ui_language == "en" %} selected{% endif %}>English</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ── Numeracija dokumenata ─────────────────────────────────────────── -->
+<div class="stat-card p-4 mb-4">
+  <h6 class="mb-3"><i class="fas fa-hashtag text-info me-2"></i>Numeracija dokumenata</h6>
+  <div class="row g-3">
+    <div class="col-md-5">
+      <label class="form-label fw-bold" style="font-size:.8rem">Format broja računa</label>
+      <input type="text" name="invoice_number_format" class="form-control"
+        value="{{ settings_data.invoice_number_format|default:'{YYYY}-{NUM}' }}"
+        placeholder="{YYYY}-{NUM}">
+      <div class="form-text" style="font-size:.72rem;color:#888">{YYYY} = godina &nbsp;·&nbsp; {MM} = mjesec &nbsp;·&nbsp; {NUM} = redni broj</div>
+    </div>
+    <div class="col-md-5">
+      <label class="form-label fw-bold" style="font-size:.8rem">Format broja ponude</label>
+      <input type="text" name="offer_number_format" class="form-control"
+        value="{{ settings_data.offer_number_format|default:'PON-{YYYY}-{NUM}' }}"
+        placeholder="PON-{YYYY}-{NUM}">
+    </div>
+    <div class="col-md-2 d-flex align-items-end pb-1">
+      <small class="text-muted" style="font-size:.75rem">Primjer:<br>
+        <code>{{ settings_data.invoice_number_format|default:'{YYYY}-{NUM}' }}</code>
+      </small>
+    </div>
+  </div>
+</div>
+
+<!-- ── Email postavke ────────────────────────────────────────────────── -->
+<div class="stat-card p-4 mb-4">
+  <h6 class="mb-3"><i class="fas fa-envelope text-warning me-2"></i>Email postavke</h6>
+  <div class="row g-3">
+    <div class="col-md-5">
+      <label class="form-label fw-bold" style="font-size:.8rem">Reply-To adresa</label>
+      <input type="email" name="email_reply_to" class="form-control"
+        value="{{ settings_data.email_reply_to }}"
+        placeholder="racuni@moja-tvrtka.hr">
+      <div class="form-text" style="font-size:.72rem;color:#888">Adresa na koju kupci mogu odgovoriti</div>
+    </div>
+    <div class="col-md-7 d-flex gap-4 align-items-end pb-1">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="send_invoice_email" value="1" id="chkInvMail"{% if settings_data.send_invoice_email %} checked{% endif %}>
+        <label class="form-check-label" for="chkInvMail" style="font-size:.85rem">Automatski slati račune e-mailom</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="send_offer_email" value="1" id="chkOffMail"{% if settings_data.send_offer_email %} checked{% endif %}>
+        <label class="form-check-label" for="chkOffMail" style="font-size:.85rem">Automatski slati ponude e-mailom</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex">
+  <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Spremi postavke</button>
+</div>
+</form>
+{% endif %}
+
+<script>
+function ajaxPost(form){
+  var fd=new FormData(form);
+  fetch(form.action,{method:"POST",body:fd,headers:{"X-Requested-With":"XMLHttpRequest"}})
+  .then(function(r){return r.json()}).then(function(d){
+    if(d.ok){
+      if(d.temp_password){alert("Privremena lozinka: "+d.temp_password+"\nZaposlenik mora promijeniti lozinku pri prvoj prijavi.");}
+      location.reload();
+    } else {alert(d.error||"Greska");}
+  }).catch(function(){alert("Greska u komunikaciji.");});
+  return false;
+}
+function editEmployee(pk,fn,ln,em,ph,role){
+  document.getElementById("editFirstName").value=fn;
+  document.getElementById("editLastName").value=ln;
+  document.getElementById("editEmail").value=em;
+  document.getElementById("editPhone").value=ph;
+  document.getElementById("editRole").value=role;
+  document.getElementById("editEmployeeForm").action="/companies/settings/employee/"+pk+"/edit/";
+  new bootstrap.Modal(document.getElementById("editEmployeeModal")).show();
+}
+function changePassword(pk){
+  document.getElementById("changePwForm").action="/companies/settings/employee/"+pk+"/password/";
+  new bootstrap.Modal(document.getElementById("changePwModal")).show();
+}
+function clearBranchForm(){
+  document.getElementById("branchModalTitle").textContent="Nova podruznica";
+  document.getElementById("branchForm").action="/companies/settings/branch/save/";
+  ["brName","brCode","brType","brAddr","brCity","brPhone","brEmail"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
+}
+function editBranch(pk,name,code,type,addr,city,phone,email){
+  document.getElementById("branchModalTitle").textContent="Uredi podruznicu";
+  document.getElementById("branchForm").action="/companies/settings/branch/"+pk+"/save/";
+  document.getElementById("brName").value=name;
+  document.getElementById("brCode").value=code;
+  document.getElementById("brType").value=type;
+  document.getElementById("brAddr").value=addr;
+  document.getElementById("brCity").value=city;
+  document.getElementById("brPhone").value=phone;
+  document.getElementById("brEmail").value=email;
+  new bootstrap.Modal(document.getElementById("branchModal")).show();
+}
+</script>
+{% if tab == "fiscal" %}
+<!-- ── Fiskalne postavke ───────────────────────────────────────────────── -->
+<div class="stat-card p-4 mb-4">
+  <h6 class="mb-3"><i class="fas fa-cog text-warning me-2"></i>Fiskalne postavke</h6>
+  <form method="post">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold" style="font-size:.8rem">Fiskalni sustav</label>
+        <select name="fiscal_system" class="form-select">
+          <option value="hr_fiscal"{% if company.fiscal_system == "hr_fiscal" %} selected{% endif %}>HR Fiskalizacija (CIS)</option>
+          <option value="de_gobd"{% if company.fiscal_system == "de_gobd" %} selected{% endif %}>DE GoBD</option>
+          <option value="at_rksv"{% if company.fiscal_system == "at_rksv" %} selected{% endif %}>AT RKSV</option>
+          <option value="none"{% if company.fiscal_system == "none" %} selected{% endif %}>Bez fiskalizacije</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold" style="font-size:.8rem">PDV status</label>
+        <select name="pdv_status" class="form-select">
+          <option value="none"{% if company.pdv_status == "none" %} selected{% endif %}>Nije u sustavu PDV-a</option>
+          <option value="obveznik"{% if company.pdv_status == "obveznik" %} selected{% endif %}>Obveznik PDV-a</option>
+          <option value="pausalic"{% if company.pdv_status == "pausalic" %} selected{% endif %}>Paušalac (HR §90)</option>
+          <option value="kleinunternehmer"{% if company.pdv_status == "kleinunternehmer" %} selected{% endif %}>Kleinunternehmer (DE §19 UStG)</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold" style="font-size:.8rem">PDV ID / VAT ID</label>
+        <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}" placeholder="HR12345678901">
+      </div>
+      <div class="col-md-3 d-flex align-items-end pb-1">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="is_vat_registered" value="1" id="chkVat"{% if company.is_vat_registered %} checked{% endif %}>
+          <label class="form-check-label" for="chkVat" style="font-size:.85rem">U sustavu PDV-a</label>
+        </div>
+      </div>
+      <div class="col-md-3 d-flex align-items-end pb-1">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="is_kleinunternehmer" value="1" id="chkKlein"{% if company.is_kleinunternehmer %} checked{% endif %}>
+          <label class="form-check-label" for="chkKlein" style="font-size:.85rem">Kleinunternehmer §19</label>
+        </div>
+      </div>
+    </div>
+    <div class="mt-3">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Spremi postavke</button>
+    </div>
+  </form>
+</div>
+
+<!-- ── Certifikati ─────────────────────────────────────────────────────── -->
+<div class="stat-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0"><i class="fas fa-certificate text-warning me-2"></i>Fiskalni certifikati (.p12)</h6>
+    <a href="/invoicing/fiscal/certificates/" class="btn btn-sm btn-outline-warning">
+      <i class="fas fa-external-link-alt me-1"></i> Upravljanje certifikatima
+    </a>
+  </div>
+  {% if fiscal_certs %}
+  <div class="table-responsive">
+    <table class="table table-sm align-middle" style="font-size:.85rem">
+      <thead>
+        <tr><th>Naziv</th><th>OIB</th><th>Vrijedi do</th><th>Status</th><th>Zadnji test</th></tr>
+      </thead>
+      <tbody>
+        {% for cert in fiscal_certs %}
+        <tr>
+          <td><i class="fas fa-file-signature text-warning me-1"></i>{{ cert.cert_name|default:"Certifikat" }}</td>
+          <td><code>{{ cert.oib|default:"-" }}</code></td>
+          <td>
+            {% if cert.valid_until %}
+              <span class="{% if cert.is_expired %}text-danger fw-bold{% else %}text-success{% endif %}">
+                {{ cert.valid_until|date:"d.m.Y" }}
+              </span>
+            {% else %}<span class="text-muted">-</span>{% endif %}
+          </td>
+          <td>
+            {% if cert.is_valid and cert.is_active and not cert.is_expired %}
+              <span class="badge bg-success">Aktivan</span>
+            {% elif cert.is_expired %}
+              <span class="badge bg-danger">Istekao</span>
+            {% elif not cert.is_valid %}
+              <span class="badge bg-warning text-dark">Nevažeći</span>
+            {% else %}
+              <span class="badge bg-secondary">Neaktivan</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if cert.last_test %}
+              {% if cert.last_test_result %}<span class="text-success"><i class="fas fa-check-circle"></i></span>
+              {% else %}<span class="text-danger"><i class="fas fa-times-circle"></i></span>{% endif %}
+              {{ cert.last_test|date:"d.m.Y" }}
+            {% else %}<span class="text-muted">-</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-4" style="color:#888">
+    <i class="fas fa-certificate fa-2x mb-2 text-muted"></i>
+    <p style="font-size:.85rem">Nema uploadanih certifikata.<br>
+    <a href="/invoicing/fiscal/certificates/" class="btn btn-sm btn-warning mt-2">
+      <i class="fas fa-upload me-1"></i> Učitaj certifikat
+    </a></p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+<script>
+(function(){
+  var searchEl = document.getElementById('nkdSearch');
+  var hiddenEl = document.getElementById('nkdCodeId');
+  var dropEl   = document.getElementById('nkdDropdown');
+  if (!searchEl) return;
+  var timer;
+  searchEl.addEventListener('input', function(){
+    clearTimeout(timer);
+    var q = searchEl.value.trim();
+    if (q.length < 2) { dropEl.style.display='none'; return; }
+    timer = setTimeout(function(){
+      fetch('/companies/api/nkd-search/?q=' + encodeURIComponent(q))
+        .then(function(r){ return r.json(); })
+        .then(function(items){
+          dropEl.innerHTML = '';
+          if (!items.length) {
+            dropEl.innerHTML = '<div class="dropdown-item text-muted">Nema rezultata</div>';
+            dropEl.style.display = 'block'; return;
+          }
+          items.forEach(function(it){
+            var a = document.createElement('a');
+            a.className = 'dropdown-item';
+            a.style.cursor = 'pointer';
+            a.textContent = it.code + ' – ' + it.name_hr;
+            a.addEventListener('click', function(){
+              hiddenEl.value = it.id;
+              searchEl.value = it.code + ' – ' + it.name_hr;
+              dropEl.style.display = 'none';
+            });
+            dropEl.appendChild(a);
+          });
+          dropEl.style.display = 'block';
+        });
+    }, 300);
+  });
+  document.addEventListener('click', function(e){
+    if (!searchEl.contains(e.target) && !dropEl.contains(e.target))
+      dropEl.style.display = 'none';
+  });
+})();
+</script>
+
+{% if tab == "integrations" %}
+<div class="stat-card p-4">
+
+  {# ── FINA Info.BIZ ─────────────────────────────────────────────────────── #}
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div style="width:48px;height:48px;background:linear-gradient(135deg,#003d7a,#0066cc);border-radius:12px;display:flex;align-items:center;justify-content:center">
+      <i class="fas fa-search-dollar" style="color:#fff;font-size:1.3rem"></i>
+    </div>
+    <div>
+      <h6 class="mb-0 fw-bold">FINA Info.BIZ — Automatski OIB lookup</h6>
+      <small class="text-muted">Automatski dohvat podataka firme po OIB-u za sve HR poslovne subjekte</small>
+    </div>
+    {% if has_fina_token %}
+    <span class="badge bg-success ms-auto"><i class="fas fa-check-circle me-1"></i>Aktivno</span>
+    {% else %}
+    <span class="badge bg-secondary ms-auto"><i class="fas fa-times-circle me-1"></i>Nije konfigurirano</span>
+    {% endif %}
+  </div>
+
+  {# Objašnjenje #}
+  <div class="alert alert-info" style="font-size:.85rem;border-left:4px solid #0dcaf0">
+    <strong><i class="fas fa-info-circle me-1"></i>Zašto je ovo korisno?</strong><br>
+    EU VIES registar pronalazi samo firme koje su <strong>PDV obveznici</strong>. Mikro poduzetnici,
+    obrti i OPG-ovi koji <em>nisu</em> u sustavu PDV-a (npr. KORPAŠ d.o.o., OPG Kruljac...) nisu vidljivi
+    u VIES-u — ali jesu u <strong>FINA Info.BIZ</strong> bazi koja obuhvaća <em>sve</em> aktivne
+    poslovne subjekte u Hrvatskoj.<br><br>
+    S aktivnim FINA Info.BIZ tokenom, sustav automatski popunjava naziv, adresu i MB firme
+    pri unosu OIB-a — čak i za ne-PDV subjekte.
+  </div>
+
+  {# Koraci za aktivaciju #}
+  <div class="card mb-4" style="border:1px solid #334155;background:#0f172a">
+    <div class="card-body">
+      <h6 class="fw-bold mb-3"><i class="fas fa-list-ol me-2 text-warning"></i>Kako aktivirati FINA Info.BIZ lookup?</h6>
+      <ol style="font-size:.85rem;line-height:1.8;color:#cbd5e1;padding-left:1.2rem">
+        <li>Otvorite <a href="https://infobiz.fina.hr/Registration" target="_blank" rel="noopener" class="text-info">
+            <i class="fas fa-external-link-alt me-1" style="font-size:.7rem"></i>infobiz.fina.hr/Registration</a>
+            i registrirajte <strong>svoju tvrtku</strong> (besplatno, potreban OIB)</li>
+        <li>Nakon potvrde e-mailom, prijavite se na <a href="https://infobiz.fina.hr" target="_blank" rel="noopener" class="text-info">infobiz.fina.hr</a></li>
+        <li>U korisničkim postavkama pronađite <strong>API ključ / token</strong> i kopirajte ga</li>
+        <li>Zalijepite token u polje ispod i kliknite <strong>Spremi</strong></li>
+      </ol>
+      <div class="alert alert-warning py-2 mb-0" style="font-size:.8rem">
+        <i class="fas fa-shield-alt me-1"></i>
+        <strong>Važno — legalna napomena:</strong> API token koristite isključivo za svoju tvrtku.
+        Token je osoban i vezan za vašu registraciju na FINA Info.BIZ. Svaki korisnik LIMIT Connect sustava
+        mora imati vlastiti token. Dijeljenje tokena između više tvrtki nije u skladu s
+        <a href="https://www.fina.hr/info.biz" target="_blank" rel="noopener" class="text-warning">FINA uvjetima korištenja</a>.
+      </div>
+    </div>
+  </div>
+
+  {# Forma za unos tokena #}
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label fw-bold" style="font-size:.85rem">
+        <i class="fas fa-key me-1 text-warning"></i>FINA Info.BIZ API token
+      </label>
+      {% if has_fina_token %}
+      <div class="input-group mb-2">
+        <span class="input-group-text" style="background:#1e293b;border-color:#334155;color:#64748b">
+          <i class="fas fa-lock"></i>
+        </span>
+        <input type="text" class="form-control" value="{{ fina_token_masked }}" disabled
+               style="background:#0f172a;color:#64748b;border-color:#334155;font-family:monospace">
+        <span class="badge bg-success d-flex align-items-center px-3" style="border-radius:0 6px 6px 0">
+          <i class="fas fa-check me-1"></i>Aktivan
+        </span>
+      </div>
+      <small class="text-muted">Token je aktivan i maskiran zbog sigurnosti. Za promjenu unesite novi token ispod.</small>
+      {% endif %}
+      <div class="input-group mt-2">
+        <span class="input-group-text" style="background:#1e293b;border-color:#334155;color:#94a3b8">
+          <i class="fas fa-key"></i>
+        </span>
+        <input type="password" name="fina_infobiz_token" class="form-control"
+               placeholder="{% if has_fina_token %}Unesite novi token za zamjenu...{% else %}Zalijepite API token s infobiz.fina.hr...{% endif %}"
+               autocomplete="off"
+               style="background:#1e293b;color:#e2e8f0;border-color:#334155">
+        <button type="button" class="btn btn-outline-secondary btn-sm"
+                onclick="var f=this.previousElementSibling;f.type=f.type==='password'?'text':'password';this.innerHTML=f.type==='password'?'<i class=\'fas fa-eye\'></i>':'<i class=\'fas fa-eye-slash\'></i>'"
+                style="border-color:#334155;color:#94a3b8" title="Prikaži/sakrij token">
+          <i class="fas fa-eye"></i>
+        </button>
+      </div>
+      <div class="form-text" style="font-size:.78rem;color:#64748b">
+        Token se šifrira u bazi i nikada se ne prikazuje u potpunosti. Koristite isključivo token
+        registriran za <strong>{{ company.name }}</strong>.
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 align-items-center">
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="fas fa-save me-1"></i>Spremi token
+      </button>
+      {% if has_fina_token %}
+      <button type="submit" name="fina_infobiz_token_clear" value="1"
+              class="btn btn-outline-danger btn-sm"
+              onclick="return confirm('Jeste li sigurni? OIB lookup za ne-PDV subjekte neće raditi bez tokena.')">
+        <i class="fas fa-trash me-1"></i>Ukloni token
+      </button>
+      {% endif %}
+    </div>
+  </form>
+
+  {# Test sekcija - samo ako ima token #}
+  {% if has_fina_token %}
+  <hr style="border-color:#334155;margin:2rem 0">
+  <h6 class="fw-bold mb-3"><i class="fas fa-vial me-2 text-info"></i>Testiraj lookup</h6>
+  <div class="input-group" style="max-width:400px">
+    <input type="text" id="testOibInput" class="form-control" placeholder="Unesite OIB (npr. 92922919857)"
+           maxlength="11" style="background:#1e293b;color:#e2e8f0;border-color:#334155">
+    <button class="btn btn-outline-info btn-sm" onclick="testFinaLookup()">
+      <i class="fas fa-search me-1"></i>Testiraj
+    </button>
+  </div>
+  <div id="testFinaResult" class="mt-2" style="font-size:.82rem"></div>
+  <script>
+  function testFinaLookup() {
+    var oib = document.getElementById('testOibInput').value.trim();
+    if (!oib) return;
+    var res = document.getElementById('testFinaResult');
+    res.innerHTML = '<span class="text-info"><i class="fas fa-spinner fa-spin me-1"></i>Pretraživanje...</span>';
+    fetch('/partners/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=HR', {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.found) {
+        res.innerHTML = '<div class="alert alert-success py-2 mb-0">' +
+          '<strong><i class="fas fa-check-circle me-1"></i>' + d.name + '</strong><br>' +
+          '<small>' + (d.address||'') + (d.city ? ', '+d.city : '') + '</small>' +
+          (d.source==='fina_infobiz' ? ' <span class="badge bg-info ms-1">FINA Info.BIZ</span>' : ' <span class="badge bg-primary ms-1">VIES</span>') +
+          '</div>';
+      } else {
+        res.innerHTML = '<div class="alert alert-warning py-2 mb-0"><i class="fas fa-exclamation-triangle me-1"></i>' +
+          (d.error || 'Firma nije pronađena') + '</div>';
+      }
+    })
+    .catch(function(){ res.innerHTML = '<span class="text-danger">Greška pri spajanju</span>'; });
+  }
+  document.getElementById('testOibInput').addEventListener('keydown', function(e){
+    if(e.key==='Enter') testFinaLookup();
+  });
+  </script>
+  {% endif %}
+
+</div>
+{% endif %}
+
+{% endblock %}

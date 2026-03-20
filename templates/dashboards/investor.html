@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Pregled investicija" %} – LIMIT CONNECT{% endblock %}
+{% block page_title %}{% trans "Pregled vaših projekata" %}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+  {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
+  {% for lang_code, lang_name in LANGUAGES %}
+  <form action="/i18n/setlang/" method="post" style="display:inline">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+    <input name="language" type="hidden" value="{{ lang_code }}">
+    {% if lang_code == CURRENT_LANG %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    {% else %}
+    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    {% endif %}
+  </form>
+  {% endfor %}
+</div>
+
+<div class="row g-3">
+  {% for project in projects %}
+  <div class="col-lg-6">
+    <div class="stat-card">
+      {% if project.cover_image %}
+      <img src="{{ project.cover_image.url }}" class="w-100 mb-3" style="height:180px;object-fit:cover;border-radius:8px">
+      {% endif %}
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h5 class="fw-bold mb-0">{{ project.name }}</h5>
+        <span class="badge bg-{% if project.status == 'active' %}success{% elif project.status == 'completed' %}primary{% else %}secondary{% endif %}">
+          {{ project.get_status_display }}
+        </span>
+      </div>
+      <p class="text-muted small mb-3">{{ project.description|truncatechars:120 }}</p>
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <div class="small text-muted">{% trans "Lokacija" %}</div>
+          <div class="fw-bold small">{{ project.location|default:"–" }}</div>
+        </div>
+        <div class="col-6">
+          <div class="small text-muted">{% trans "Voditelj" %}</div>
+          <div class="fw-bold small">{{ project.manager.get_full_name|default:"–" }}</div>
+        </div>
+      </div>
+      <a href="/projects/{{ project.id }}/" class="btn btn-outline-primary btn-sm w-100">
+        <i class="fas fa-eye me-2"></i>{% trans "Detalji i fotografije" %}
+      </a>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="stat-card text-center py-5">
+      <i class="fas fa-hard-hat fa-3x text-muted mb-3"></i>
+      <h5>{% trans "Nema dostupnih projekata" %}</h5>
+      <p class="text-muted">{% trans "Vaši projekti će biti prikazani ovdje čim budu dodijeljeni." %}</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

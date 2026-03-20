@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Moje Futures rezervacije{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4><i class="fas fa-seedling text-success"></i> Moje Futures</h4>
+    <div>
+        <a href="{% url 'marketplace:futures_catalog' %}" class="btn btn-outline-success btn-sm"><i class="fas fa-search"></i> Pregledaj ponude</a>
+        <a href="{% url 'marketplace:futures_create' %}" class="btn btn-success btn-sm"><i class="fas fa-plus"></i> Nova ponuda</a>
+    </div>
+</div>
+
+{% if my_listings %}
+<h5 class="mt-4 mb-2"><i class="fas fa-store"></i> Moje ponude (prodavac)</h5>
+<div class="table-responsive">
+<table class="table table-hover">
+    <thead><tr><th>Naziv</th><th>Cijena</th><th>Kapacitet</th><th>Rezervirano</th><th>Rok</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for l in my_listings %}
+    <tr>
+        <td><a href="{% url 'marketplace:futures_detail' l.pk %}">{{ l.name }}</a></td>
+        <td>{{ l.unit_price }} EUR/{{ l.unit }}</td>
+        <td>{{ l.total_capacity }} {{ l.unit }}</td>
+        <td>
+            <div class="progress" style="height:6px;width:80px;display:inline-block;vertical-align:middle">
+                <div class="progress-bar bg-success" style="width:{{ l.percent_reserved }}%"></div>
+            </div>
+            {{ l.percent_reserved }}%
+        </td>
+        <td>{{ l.booking_deadline|date:"d.m.Y" }}</td>
+        <td><span class="badge bg-{% if l.status == 'open' %}success{% elif l.status == 'fully_booked' %}warning{% else %}secondary{% endif %}">{{ l.get_status_display }}</span></td>
+        <td><a href="{% url 'marketplace:futures_detail' l.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endif %}
+
+<h5 class="mt-4 mb-2"><i class="fas fa-shopping-basket"></i> Moje rezervacije (kupac)</h5>
+{% if reservations %}
+<div class="table-responsive">
+<table class="table table-hover">
+    <thead><tr><th>Proizvod</th><th>Prodavac</th><th>Kolicina</th><th>Cijena</th><th>Rabat</th><th>Ukupno</th><th>Avans</th><th>Status</th><th>Isporuka</th></tr></thead>
+    <tbody>
+    {% for r in reservations %}
+    <tr>
+        <td><a href="{% url 'marketplace:futures_detail' r.listing.pk %}">{{ r.listing.name }}</a></td>
+        <td>{{ r.listing.seller_company.name }}</td>
+        <td>{{ r.quantity }} {{ r.listing.unit }}</td>
+        <td>{{ r.unit_price }} EUR</td>
+        <td>{% if r.discount_percent > 0 %}<span class="text-success">-{{ r.discount_percent }}%</span>{% else %}-{% endif %}</td>
+        <td><strong>{{ r.total_price|floatformat:2 }} EUR</strong></td>
+        <td>{{ r.deposit_amount|floatformat:2 }} EUR
+            {% if r.deposit_paid %}<span class="badge bg-success">OK</span>{% else %}<span class="badge bg-warning">?</span>{% endif %}
+        </td>
+        <td><span class="badge bg-info">{{ r.get_status_display }}</span></td>
+        <td>{{ r.get_delivery_preference_display }}
+            {% if r.recurring_weekly %}<span class="badge bg-primary">{{ r.delivery_slots.count }}x tjedno</span>{% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<div class="text-center text-muted py-4">
+    <p>Nemate aktivnih rezervacija. <a href="{% url 'marketplace:futures_catalog' %}">Pregledajte ponude</a>.</p>
+</div>
+{% endif %}
+{% endblock %}

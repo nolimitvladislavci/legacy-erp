@@ -1,0 +1,1084 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Control Tower{% endblock %}
+{% block page_title %}Control Tower{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ═══ CONTROL TOWER V2 — HEART OF THE SYSTEM ═══ */
+    .ct-hero {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+    }
+    .ct-hero-left { display: flex; align-items: center; gap: 14px; }
+    .ct-hero-title {
+        font-size: 1.4rem; font-weight: 800; color: #0f172a;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .ct-hero-title i { color: var(--gold, #c9a84c); }
+    .ct-hero-sub { font-size: .78rem; color: #94a3b8; margin-top: 2px; }
+    .ct-hero-right { display: flex; align-items: center; gap: 10px; }
+
+    /* Pulse */
+    .ct-pulse { display: flex; align-items: center; gap: 8px; font-size: .75rem; color: #64748b; }
+    .ct-pulse-dot {
+        width: 10px; height: 10px; border-radius: 50%;
+        background: #22c55e; animation: ctpulse 2s ease-in-out infinite;
+    }
+    @keyframes ctpulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .ct-pulse-dot.ct-offline { background: #ef4444; animation: none; }
+
+    /* Search trigger in Control Tower */
+    .ct-search-trigger {
+        display: flex; align-items: center; gap: 8px;
+        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+        padding: 8px 16px; cursor: pointer; font-size: .85rem; color: #94a3b8;
+        transition: all .15s; min-width: 220px;
+    }
+    .ct-search-trigger:hover { border-color: var(--gold, #c9a84c); background: #fff; }
+    .ct-search-trigger kbd {
+        font-size: .65rem; background: #e2e8f0; padding: 2px 6px;
+        border-radius: 4px; font-weight: 700; color: #64748b; margin-left: auto;
+    }
+
+    /* Quick Actions Bar */
+    .ct-actions {
+        display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+        padding: 12px 16px; background: #f8fafc; border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+    .ct-action-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 14px; border-radius: 8px; font-size: .78rem;
+        font-weight: 600; text-decoration: none; transition: all .15s;
+        border: 1px solid #e2e8f0; background: #fff; color: #334155;
+    }
+    .ct-action-btn:hover { border-color: var(--gold, #c9a84c); color: #0f172a; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.06); text-decoration: none; }
+    .ct-action-btn i { font-size: .8rem; }
+    .ct-action-btn.ct-primary { background: var(--gold, #c9a84c); color: #0f172a; border-color: var(--gold, #c9a84c); }
+    .ct-action-btn.ct-primary:hover { opacity: .85; color: #0f172a; }
+    .ct-action-btn.ct-danger { color: #dc2626; border-color: #fecaca; }
+    .ct-action-btn.ct-danger:hover { background: #fef2f2; border-color: #dc2626; }
+
+    /* Favorites Bar */
+    .ct-favs {
+        display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+        min-height: 36px; align-items: center;
+    }
+    .ct-favs-label { font-size: .7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-right: 4px; }
+    .ct-fav-chip {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 20px; font-size: .75rem;
+        font-weight: 600; text-decoration: none; color: #334155;
+        background: #f1f5f9; border: 1px solid #e2e8f0; transition: all .15s;
+    }
+    .ct-fav-chip:hover { background: #fff; border-color: var(--gold); color: #0f172a; text-decoration: none; }
+    .ct-fav-chip i { font-size: .7rem; color: var(--gold, #c9a84c); }
+
+    /* Alert Banner */
+    .ct-alert-banner {
+        display: none; background: #fef2f2; border: 1px solid #fecaca;
+        border-left: 4px solid #ef4444; border-radius: 8px;
+        padding: 14px 18px; margin-bottom: 16px;
+        font-size: .85rem; color: #991b1b; font-weight: 600;
+    }
+    .ct-alert-banner i { margin-right: 8px; }
+
+    /* KPI Row — top 4 numbers */
+    .ct-kpi-row {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 768px) { .ct-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    .ct-kpi {
+        background: #fff; border-radius: 12px; padding: 18px 20px;
+        border: 1px solid #e2e8f0; text-align: center;
+        transition: border-color .15s;
+    }
+    .ct-kpi:hover { border-color: var(--gold); }
+    .ct-kpi .kpi-num { font-size: 1.8rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+    .ct-kpi .kpi-label { font-size: .7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .8px; font-weight: 600; margin-top: 4px; }
+    .ct-kpi .kpi-sub { font-size: .72rem; color: #64748b; margin-top: 2px; }
+    .kpi-gold { color: var(--gold, #c9a84c); }
+    .kpi-green { color: #16a34a; }
+    .kpi-red { color: #dc2626; }
+    .kpi-blue { color: #2563eb; }
+
+    /* Module Grid */
+    .ct-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px; margin-bottom: 24px;
+    }
+    .ct-card {
+        background: #fff; border-radius: 12px; padding: 20px 22px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0; transition: border-color .2s;
+    }
+    .ct-card:hover { border-color: var(--gold); }
+    .ct-card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: .78rem; font-weight: 700; color: #64748b;
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 14px; padding-bottom: 10px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    .ct-card-header i { color: var(--gold); font-size: 1rem; margin-right: 8px; }
+    .ct-card-header .ct-card-link {
+        font-size: .7rem; color: var(--gold); text-decoration: none;
+        font-weight: 600; text-transform: none; letter-spacing: 0;
+    }
+    .ct-card-header .ct-card-link:hover { text-decoration: underline; }
+    .ct-metric {
+        display: flex; justify-content: space-between;
+        align-items: baseline; padding: 5px 0;
+    }
+    .ct-metric-label { font-size: .82rem; color: #64748b; }
+    .ct-metric-value {
+        font-size: 1.1rem; font-weight: 700; color: #0f172a;
+        font-variant-numeric: tabular-nums;
+    }
+    .ct-metric-value.ct-green { color: #16a34a; }
+    .ct-metric-value.ct-red { color: #dc2626; }
+    .ct-metric-value.ct-amber { color: #d97706; }
+    .ct-metric-value.ct-blue { color: #2563eb; }
+
+    /* Full-width financial radar */
+    .ct-card-full { grid-column: 1 / -1; border-top: 3px solid var(--gold, #c9a84c); }
+    .ct-radar-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    /* System Health Bar */
+    .ct-health {
+        display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+        padding: 10px 16px; background: #f0fdf4; border-radius: 10px;
+        border: 1px solid #bbf7d0; font-size: .78rem; color: #166534;
+        align-items: center;
+    }
+    .ct-health.ct-health-warn { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+    .ct-health.ct-health-danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .ct-health i { font-size: .9rem; }
+    .ct-health-item { display: flex; align-items: center; gap: 4px; }
+    .ct-health-sep { color: #d1d5db; }
+
+    @media (max-width: 768px) {
+        .ct-grid { grid-template-columns: 1fr; }
+        .ct-kpi-row { grid-template-columns: repeat(2, 1fr); }
+        .ct-radar-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ═══ USER/COMPANY INFO BAR ═══ */
+    .ct-identity {
+        display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .ct-id-card {
+        flex: 1; min-width: 280px; background: #fff; border-radius: 12px;
+        padding: 18px 22px; border: 1px solid #e2e8f0;
+        display: flex; align-items: flex-start; gap: 14px;
+    }
+    .ct-id-avatar {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.1rem; color: #fff; flex-shrink: 0;
+    }
+    .ct-id-avatar.user-av { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .ct-id-avatar.company-av { background: linear-gradient(135deg, var(--gold, #c9a84c), #d4a843); color: #0a0a0a; }
+    .ct-id-avatar.system-av { background: linear-gradient(135deg, #059669, #10b981); }
+    .ct-id-info { flex: 1; }
+    .ct-id-name { font-weight: 700; font-size: .95rem; color: #0f172a; }
+    .ct-id-meta { font-size: .75rem; color: #94a3b8; margin-top: 2px; }
+    .ct-id-meta span { display: inline-flex; align-items: center; gap: 4px; }
+    .ct-id-badge {
+        display: inline-block; font-size: .65rem; font-weight: 700;
+        padding: 2px 8px; border-radius: 6px; text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+    .ct-badge-superadmin { background: #fef3c7; color: #92400e; }
+    .ct-badge-admin { background: #dbeafe; color: #1e40af; }
+    .ct-badge-manager { background: #e0e7ff; color: #3730a3; }
+    .ct-badge-worker { background: #f1f5f9; color: #475569; }
+
+    /* Recent Activity */
+    .ct-activity-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: .82rem;
+        gap: 8px;
+    }
+    .ct-activity-item:last-child { border-bottom: none; }
+    .ct-activity-user { font-weight: 600; color: #334155; white-space: nowrap; }
+    .ct-activity-action { color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ct-activity-time { font-size: .72rem; color: #94a3b8; white-space: nowrap; }
+    .ct-action-add { color: #16a34a; }
+    .ct-action-change { color: #2563eb; }
+    .ct-action-delete { color: #dc2626; }
+
+    /* System Info */
+    .ct-sys-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+    .ct-sys-item { text-align: center; }
+    .ct-sys-val { font-size: 1rem; font-weight: 700; color: #0f172a; }
+    .ct-sys-label { font-size: .7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* Disk progress bar */
+    .ct-disk-bar {
+        height: 6px; border-radius: 3px; background: #f1f5f9;
+        margin-top: 4px; overflow: hidden;
+    }
+    .ct-disk-fill {
+        height: 100%; border-radius: 3px; transition: width .3s;
+    }
+</style>
+{% endblock %}
+
+</style><style>
+    /* AI Process Hints */
+    .ct-hints { margin-bottom: 20px; }
+    .ct-hint {
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 12px 16px; border-radius: 10px; margin-bottom: 8px;
+        border: 1px solid #e2e8f0; background: #fff; transition: all 0.15s;
+    }
+    .ct-hint:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); transform: translateY(-1px); }
+    .ct-hint-critical { border-left: 4px solid #ef4444; background: #fef2f2; }
+    .ct-hint-warning { border-left: 4px solid #f59e0b; background: #fffbeb; }
+    .ct-hint-info { border-left: 4px solid #3b82f6; background: #eff6ff; }
+    .ct-hint-success { border-left: 4px solid #22c55e; background: #f0fdf4; }
+    .ct-hint-icon { font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; }
+    .ct-hint-critical .ct-hint-icon { color: #ef4444; }
+    .ct-hint-warning .ct-hint-icon { color: #f59e0b; }
+    .ct-hint-info .ct-hint-icon { color: #3b82f6; }
+    .ct-hint-success .ct-hint-icon { color: #22c55e; }
+    .ct-hint-body { flex: 1; }
+    .ct-hint-title { font-weight: 700; font-size: .85rem; color: #0f172a; }
+    .ct-hint-msg { font-size: .75rem; color: #64748b; margin-top: 2px; }
+    .ct-hint-action {
+        flex-shrink: 0; align-self: center;
+        padding: 5px 12px; border-radius: 6px; font-size: .72rem;
+        font-weight: 600; text-decoration: none; border: 1px solid #e2e8f0;
+        background: #fff; color: #334155; transition: all 0.15s;
+    }
+    .ct-hint-action:hover { border-color: var(--gold); color: #0f172a; text-decoration: none; }
+    .ct-hint-category {
+        font-size: .6rem; text-transform: uppercase; letter-spacing: 1px;
+        color: #94a3b8; font-weight: 600;
+    }
+
+    /* Drill-down Grid */
+    .ct-drill { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .ct-drill-card {
+        flex: 1 1 140px; max-width: 180px;
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+        padding: 16px; text-align: center; text-decoration: none; color: inherit;
+        transition: all 0.15s;
+    }
+    .ct-drill-card:hover { border-color: var(--gold); box-shadow: 0 4px 12px rgba(0,0,0,.08); transform: translateY(-2px); text-decoration: none; color: inherit; }
+    .ct-drill-icon { font-size: 1.8rem; color: var(--gold, #c9a84c); }
+    .ct-drill-count { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 4px 0; }
+    .ct-drill-name { font-size: .72rem; color: #64748b; font-weight: 600; }
+</style>{% block content %}
+
+<!-- HERO -->
+<div class="ct-hero">
+    <div class="ct-hero-left">
+        <div>
+            <div class="ct-hero-title">
+                <i class="fa-solid fa-satellite-dish"></i> Control Tower
+            </div>
+            <div class="ct-hero-sub">{% trans "Središnja upravljačka ploča" %} — {{ request.user.get_full_name|default:request.user.username }}</div>
+        </div>
+    </div>
+    <div class="ct-hero-right">
+        <div class="ct-search-trigger" onclick="if(typeof openCmdPalette==='function')openCmdPalette()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>{% trans "Pretraži module..." %}</span>
+            <kbd>Ctrl+K</kbd>
+        </div>
+        <div class="ct-pulse">
+            <div class="ct-pulse-dot" id="ctPulseDot"></div>
+            <span id="ctPulseText">{% trans "Povezivanje..." %}</span>
+        </div>
+    </div>
+</div>
+
+<!-- SYSTEM HEALTH BAR -->
+<div class="ct-health" id="ctHealth">
+    <i class="fa-solid fa-heart-pulse"></i>
+    <span id="ctHealthText">{% trans "Učitavanje stanja sustava..." %}</span>
+</div>
+
+
+
+<!-- AI PROCESS HINTS -->
+{% if ai_hints %}
+<div class="ct-hints">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#94a3b8;">
+            <i class="bi bi-lightbulb"></i> AI Savjeti
+        </span>
+        <span style="font-size:.65rem; color:#cbd5e1;">{{ ai_hints|length }} preporuka</span>
+    </div>
+    {% for hint in ai_hints %}
+    <div class="ct-hint ct-hint-{{ hint.level }}">
+        <i class="bi {{ hint.icon }} ct-hint-icon"></i>
+        <div class="ct-hint-body">
+            <div class="ct-hint-title">{{ hint.title }}</div>
+            <div class="ct-hint-msg">{{ hint.message }}</div>
+            {% if hint.category %}<div class="ct-hint-category">{{ hint.category }}</div>{% endif %}
+        </div>
+        {% if hint.action_url %}
+        <a href="{{ hint.action_url }}" class="ct-hint-action">{{ hint.action_label|default:"Otvori" }}</a>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- DRILL-DOWN MODULES -->
+{% if drill_down %}
+<div style="font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#94a3b8; margin-bottom:8px;">
+    <i class="bi bi-grid-3x3-gap"></i> Moduli
+</div>
+<div class="ct-drill">
+    {% for key, mod in drill_down.items %}
+    <a href="{{ mod.url }}" class="ct-drill-card">
+        <div class="ct-drill-icon"><i class="bi {{ mod.icon }}"></i></div>
+        <div class="ct-drill-count">{{ mod.count|default:"0" }}</div>
+        <div class="ct-drill-name">{{ mod.name }}</div>
+    </a>
+    {% endfor %}
+    <a href="/hr/companies/modules/" class="ct-drill-card" style="border-style:dashed;">
+        <div class="ct-drill-icon"><i class="bi bi-plus-circle" style="color:#94a3b8;"></i></div>
+        <div class="ct-drill-count" style="font-size:1rem; color:#94a3b8;">+</div>
+        <div class="ct-drill-name">Vise modula</div>
+    </a>
+</div>
+{% endif %}
+
+<!-- IDENTITY — Who's logged in + Company + System -->
+<div class="ct-identity">
+    <!-- User -->
+    <div class="ct-id-card">
+        <div class="ct-id-avatar user-av">
+            {{ ct_user.full_name|make_list|first|default:"?" }}
+        </div>
+        <div class="ct-id-info">
+            <div class="ct-id-name">
+                {{ ct_user.full_name }}
+                {% if ct_user.is_superuser %}
+                    <span class="ct-id-badge ct-badge-superadmin">Superadmin</span>
+                {% elif ct_user.is_staff %}
+                    <span class="ct-id-badge ct-badge-admin">Staff</span>
+                {% elif ct_user.role == 'manager' %}
+                    <span class="ct-id-badge ct-badge-manager">Manager</span>
+                {% else %}
+                    <span class="ct-id-badge ct-badge-worker">{{ ct_user.role|title }}</span>
+                {% endif %}
+            </div>
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-envelope"></i> {{ ct_user.email }}</span>
+            </div>
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-clock"></i> {% trans "Zadnja prijava" %}: {{ ct_user.last_login|date:"d.m.Y H:i"|default:"—" }}</span>
+            </div>
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-calendar"></i> {% trans "Član od" %}: {{ ct_user.date_joined|date:"d.m.Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company -->
+    {% if ct_company %}
+    <div class="ct-id-card">
+        <div class="ct-id-avatar company-av">
+            {{ ct_company.name|make_list|first|default:"C" }}
+        </div>
+        <div class="ct-id-info">
+            <div class="ct-id-name">{{ ct_company.name }}</div>
+            {% if ct_company.oib %}
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-fingerprint"></i> OIB: {{ ct_company.oib }}</span>
+            </div>
+            {% endif %}
+            {% if ct_company.city %}
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-location-dot"></i> {{ ct_company.address }} {{ ct_company.city }}</span>
+            </div>
+            {% endif %}
+            {% if ct_company.total_companies %}
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-building"></i> {{ ct_company.total_companies }} {% trans "registriranih tvrtki" %}</span>
+            </div>
+            {% endif %}
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-gem"></i> {% trans "Plan" %}: <strong>{{ ct_company.plan|upper }}</strong></span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- System -->
+    <div class="ct-id-card">
+        <div class="ct-id-avatar system-av">
+            <i class="fa-solid fa-server" style="font-size:.9rem;"></i>
+        </div>
+        <div class="ct-id-info">
+            <div class="ct-id-name">{% trans "Sustav" %}</div>
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-clock"></i> {{ system_info.server_time|date:"d.m.Y H:i" }}</span>
+            </div>
+            <div class="ct-id-meta">
+                <span><i class="fa-solid fa-arrow-up"></i> Uptime: {{ system_info.uptime }}</span>
+                <span style="margin-left:8px;"><i class="fa-solid fa-database"></i> DB: {{ system_info.db_size }}</span>
+            </div>
+            <div class="ct-id-meta">
+                <span><i class="fa-brands fa-python"></i> Python {{ system_info.python_version }} · Django {{ system_info.django_version }}</span>
+            </div>
+            <div class="ct-id-meta" style="margin-top:4px;">
+                <span><i class="fa-solid fa-hard-drive"></i> Disk: {{ system_info.disk_used }}/{{ system_info.disk_total }} ({{ system_info.disk_pct }}%)</span>
+            </div>
+            <div class="ct-disk-bar">
+                <div class="ct-disk-fill" style="width:{{ system_info.disk_pct }}%;background:{% if system_info.disk_pct > 85 %}#dc2626{% elif system_info.disk_pct > 70 %}#d97706{% else %}#16a34a{% endif %};"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ALERT BANNER -->
+<div id="ctAlertBanner" class="ct-alert-banner">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span id="ctAlertText"></span>
+</div>
+
+<!-- FAVORITES BAR -->
+<div class="ct-favs" id="ctFavBar">
+    <span class="ct-favs-label"><i class="fa-solid fa-star"></i> {% trans "Favoriti" %}:</span>
+    <!-- Populated by JS from localStorage -->
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="ct-actions">
+    <a href="/invoicing/create/" class="ct-action-btn ct-primary"><i class="fa-solid fa-plus"></i> {% trans "Nova faktura" %}</a>
+    <a href="/pos/quick/" class="ct-action-btn"><i class="fa-solid fa-cash-register"></i> {% trans "POS Brzi" %}</a>
+    <a href="/worktime/" class="ct-action-btn"><i class="fa-solid fa-clock"></i> {% trans "Radno vrijeme" %}</a>
+    <a href="/appointments/create/" class="ct-action-btn"><i class="fa-solid fa-calendar-plus"></i> {% trans "Novi termin" %}</a>
+    <a href="/inventory/" class="ct-action-btn"><i class="fa-solid fa-warehouse"></i> {% trans "Skladište" %}</a>
+    <a href="/eracun/" class="ct-action-btn"><i class="fa-solid fa-file-code"></i> {% trans "e-Račun" %}</a>
+    <a href="/smart-import/" class="ct-action-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> AIP</a>
+    {% if request.user.is_superuser %}
+    <a href="/superadmin/" class="ct-action-btn"><i class="fa-solid fa-gauge"></i> {% trans "Klasični SA" %}</a>
+    {% endif %}
+</div>
+
+<!-- KPI ROW — Key Numbers -->
+<div class="ct-kpi-row">
+    <div class="ct-kpi">
+        <div class="kpi-num kpi-green" id="ct-kpi-revenue">-</div>
+        <div class="kpi-label">{% trans "Prihod (mjesec)" %}</div>
+        <div class="kpi-sub" id="ct-kpi-revenue-sub"></div>
+    </div>
+    <div class="ct-kpi">
+        <div class="kpi-num kpi-red" id="ct-kpi-unpaid">-</div>
+        <div class="kpi-label">{% trans "Neplaćeno" %}</div>
+        <div class="kpi-sub" id="ct-kpi-unpaid-sub"></div>
+    </div>
+    <div class="ct-kpi">
+        <div class="kpi-num kpi-blue" id="ct-kpi-users">-</div>
+        <div class="kpi-label">{% trans "Aktivni korisnici" %}</div>
+        <div class="kpi-sub" id="ct-kpi-users-sub"></div>
+    </div>
+    <div class="ct-kpi">
+        <div class="kpi-num kpi-gold" id="ct-kpi-companies">-</div>
+        <div class="kpi-label">{% trans "Tvrtke" %}</div>
+        <div class="kpi-sub" id="ct-kpi-companies-sub"></div>
+    </div>
+</div>
+
+<!-- MODULE GRID -->
+<div class="ct-grid">
+
+    <!-- Financial Radar — full width -->
+    <div class="ct-card ct-card-full">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-tower-broadcast"></i> {% trans "Financijski Radar" %}</span>
+            <a href="/konto/" class="ct-card-link">{% trans "Otvori knjiženja →" %}</a>
+        </div>
+        <div class="ct-radar-grid">
+            <div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Keš (banke)" %}</span>
+                    <span class="ct-metric-value ct-green" id="ct-fr-cash">-</span>
+                </div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Prognoza 7d" %}</span>
+                    <span class="ct-metric-value ct-blue" id="ct-fr-forecast">-</span>
+                </div>
+            </div>
+            <div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Očekivane uplate (7d)" %}</span>
+                    <span class="ct-metric-value ct-green" id="ct-fr-inflows">-</span>
+                </div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Dospjele obveze" %}</span>
+                    <span class="ct-metric-value ct-red" id="ct-fr-overdue">-</span>
+                </div>
+            </div>
+            <div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Odstupanja" %}</span>
+                    <span class="ct-metric-value ct-amber" id="ct-fr-gaps">-</span>
+                </div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Ukupni manjak" %}</span>
+                    <span class="ct-metric-value ct-red" id="ct-fr-gap-total">-</span>
+                </div>
+            </div>
+            <div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Bruto Marža" %}</span>
+                    <span class="ct-metric-value ct-green" id="ct-fr-margin">-</span>
+                </div>
+                <div class="ct-metric">
+                    <span class="ct-metric-label">{% trans "Prihodi (knjiženi)" %}</span>
+                    <span class="ct-metric-value" id="ct-fr-revenue">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fakture -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-file-invoice-dollar"></i> {% trans "Fakture" %}</span>
+            <a href="/invoicing/" class="ct-card-link">{% trans "Sve →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Ukupno izdano" %}</span>
+            <span class="ct-metric-value" id="ct-inv-total">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Prihod (ukupni)" %}</span>
+            <span class="ct-metric-value ct-green" id="ct-inv-revenue">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Neplaćeno" %}</span>
+            <span class="ct-metric-value ct-red" id="ct-inv-unpaid">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Dospijeli" %}</span>
+            <span class="ct-metric-value ct-red" id="ct-inv-overdue">-</span>
+        </div>
+    </div>
+
+    <!-- POS -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-cash-register"></i> POS</span>
+            <a href="/pos/" class="ct-card-link">{% trans "Otvori →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Sesije danas" %}</span>
+            <span class="ct-metric-value" id="ct-pos-today">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Otvorene sada" %}</span>
+            <span class="ct-metric-value ct-green" id="ct-pos-open">-</span>
+        </div>
+    </div>
+
+    <!-- Korisnici -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-users"></i> {% trans "Korisnici" %}</span>
+            <a href="/superadmin/" class="ct-card-link">{% trans "Upravljaj →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Ukupno" %}</span>
+            <span class="ct-metric-value" id="ct-users-total">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Aktivni" %}</span>
+            <span class="ct-metric-value ct-green" id="ct-users-active">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Staff" %}</span>
+            <span class="ct-metric-value" id="ct-users-staff">-</span>
+        </div>
+    </div>
+
+    <!-- Termini -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-calendar-check"></i> {% trans "Termini" %}</span>
+            <a href="/appointments/" class="ct-card-link">{% trans "Sve →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Danas" %}</span>
+            <span class="ct-metric-value ct-blue" id="ct-appt-today">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Ukupno" %}</span>
+            <span class="ct-metric-value" id="ct-appt-total">-</span>
+        </div>
+    </div>
+
+    <!-- Logistika -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-truck"></i> {% trans "Logistika" %}</span>
+            <a href="/delivery/" class="ct-card-link">{% trans "Dispatcher →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "U tranzitu" %}</span>
+            <span class="ct-metric-value ct-blue" id="ct-del-transit">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Ukupno dostava" %}</span>
+            <span class="ct-metric-value" id="ct-del-total">-</span>
+        </div>
+    </div>
+
+    <!-- HACCP -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-shield-halved"></i> HACCP</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Neriješeni" %}</span>
+            <span class="ct-metric-value ct-red" id="ct-haccp-unresolved">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Kritični" %}</span>
+            <span class="ct-metric-value ct-red" id="ct-haccp-critical">-</span>
+        </div>
+    </div>
+
+    <!-- Inventura -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-warehouse"></i> {% trans "Inventura" %}</span>
+            <a href="/inventory/" class="ct-card-link">{% trans "Otvori →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Karantena (šarže)" %}</span>
+            <span class="ct-metric-value ct-amber" id="ct-inv-quarantine">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Brojanja danas" %}</span>
+            <span class="ct-metric-value" id="ct-inv-counts">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Alarmi krađa" %}</span>
+            <span class="ct-metric-value ct-red" id="ct-inv-theft">-</span>
+        </div>
+    </div>
+
+    <!-- Radno Vrijeme -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-clock"></i> {% trans "Radno Vrijeme" %}</span>
+            <a href="/worktime/" class="ct-card-link">{% trans "Otvori →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Unosi danas" %}</span>
+            <span class="ct-metric-value" id="ct-wt-today">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Na čekanju" %}</span>
+            <span class="ct-metric-value ct-amber" id="ct-wt-pending">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Compliance" %}</span>
+            <span class="ct-metric-value ct-red" id="ct-wt-compliance">-</span>
+        </div>
+    </div>
+
+    <!-- Webshop -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-cart-shopping"></i> Webshop</span>
+            <a href="/webshop/" class="ct-card-link">{% trans "Otvori →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Aktivni proizvodi" %}</span>
+            <span class="ct-metric-value ct-green" id="ct-ws-active">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Narudžbe pending" %}</span>
+            <span class="ct-metric-value ct-amber" id="ct-ws-orders">-</span>
+        </div>
+    </div>
+
+    <!-- AI Asistent -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-robot"></i> AI Asistent</span>
+            <a href="/ai/" class="ct-card-link">{% trans "Otvori →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Ukupno poziva" %}</span>
+            <span class="ct-metric-value" id="ct-ai-calls">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Trošak" %}</span>
+            <span class="ct-metric-value ct-amber" id="ct-ai-cost">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Aktivni razgovori" %}</span>
+            <span class="ct-metric-value ct-green" id="ct-ai-convos">-</span>
+        </div>
+    </div>
+
+    <!-- HelpDesk -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-headset"></i> {% trans "Help Desk" %}</span>
+            <a href="/helpdesk/" class="ct-card-link">{% trans "Otvori →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Otvoreni tiketi" %}</span>
+            <span class="ct-metric-value" id="ct-hd-open">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Hitni / Kritični" %}</span>
+            <span class="ct-metric-value ct-red" id="ct-hd-urgent">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "SLA prekoračeni" %}</span>
+            <span class="ct-metric-value ct-amber" id="ct-hd-overdue">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Nenadjeljeni" %}</span>
+            <span class="ct-metric-value ct-amber" id="ct-hd-unassigned">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Riješeni danas" %}</span>
+            <span class="ct-metric-value ct-green" id="ct-hd-resolved">-</span>
+        </div>
+    </div>
+
+    <!-- Burza -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-briefcase"></i> {% trans "Burza Projekata" %}</span>
+            <a href="/burza/" class="ct-card-link">{% trans "Otvori →" %}</a>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Novi upiti" %}</span>
+            <span class="ct-metric-value ct-blue" id="ct-burza-new">-</span>
+        </div>
+    </div>
+
+    <!-- Registracije -->
+    <div class="ct-card">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-building"></i> {% trans "Registracije" %}</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Na čekanju" %}</span>
+            <span class="ct-metric-value ct-amber" id="ct-reg-pending">-</span>
+        </div>
+        <div class="ct-metric">
+            <span class="ct-metric-label">{% trans "Tvrtke ukupno" %}</span>
+            <span class="ct-metric-value" id="ct-companies-total">-</span>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="ct-card ct-card-full">
+        <div class="ct-card-header">
+            <span><i class="fa-solid fa-clock-rotate-left"></i> {% trans "Nedavna aktivnost" %}</span>
+        </div>
+        {% if recent_actions %}
+        {% for action in recent_actions %}
+        <div class="ct-activity-item">
+            <span class="ct-activity-user">{{ action.user }}</span>
+            <span class="ct-activity-action {% if action.action == 'Addition' %}ct-action-add{% elif action.action == 'Deletion' %}ct-action-delete{% else %}ct-action-change{% endif %}">
+                {{ action.action }} — {{ action.object }} <span style="color:#94a3b8;">({{ action.model }})</span>
+            </span>
+            <span class="ct-activity-time">{{ action.time|timesince }} {% trans "prije" %}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div style="text-align:center;padding:16px;color:#94a3b8;font-size:.85rem;">{% trans "Nema nedavne aktivnosti" %}</div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<!-- ═══ Arhiva / AI Inbox Widget ═══════════════════════════════════════ -->
+<div class="ct-card" style="grid-column: span 2">
+  <div class="ct-card-header">
+    <span class="ct-card-icon" style="background:rgba(201,168,76,.12);color:#c9a84c"><i class="fa-solid fa-brain"></i></span>
+    <div>
+      <div class="ct-card-title">AI Inbox — Arhiva</div>
+      <div class="ct-card-subtitle">Dokumenti s AI prijedlogom za knjiženje</div>
+    </div>
+  </div>
+  <div class="ct-metrics">
+    <div class="ct-metric">
+      <div class="ct-metric-value" id="ct-arh-pending" style="color:#f59e0b">0</div>
+      <div class="ct-metric-label">Čeka knjiženje</div>
+    </div>
+    <div class="ct-metric">
+      <div class="ct-metric-value" id="ct-arh-total">0</div>
+      <div class="ct-metric-label">Ukupno dokumenata</div>
+    </div>
+    <div class="ct-metric">
+      <div class="ct-metric-value" id="ct-arh-year-inv" style="color:#4ade80">€0</div>
+      <div class="ct-metric-label">Izlazni računi (godina)</div>
+    </div>
+  </div>
+  <div style="margin-top:.75rem">
+    <div style="font-size:.78rem;color:#888;margin-bottom:.4rem">Zadnjih 5 zapisa:</div>
+    <div id="ct-arh-recent" style="min-height:60px">
+      <div style="color:#555;font-size:.78rem">Učitavam...</div>
+    </div>
+  </div>
+  <div style="margin-top:.75rem;display:flex;gap:.5rem">
+    <a href="/hr/documents/ai-inbox/" class="ct-btn" style="background:#c9a84c;color:#000;font-weight:700">Otvori AI Inbox</a>
+    <a href="/hr/documents/arhiva/" class="ct-btn" style="background:transparent;border:1px solid #333;color:#ccc">Arhiva</a>
+  </div>
+</div>
+
+<script>
+(function() {
+    var POLL_MS = 15000;
+    var API_URL = '{% url "control_tower_api" %}';
+    var _failCount = 0;
+
+    function fmt(n) {
+        if (n === null || n === undefined) return '-';
+        if (typeof n === 'number' && !Number.isInteger(n))
+            return n.toLocaleString('hr-HR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        return n.toLocaleString('hr-HR');
+    }
+    function eur(n) { return fmt(n) + ' EUR'; }
+    function setVal(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+
+    // ── Favorites from localStorage (shared with Command Palette) ──
+    function renderFavorites() {
+        var bar = document.getElementById('ctFavBar');
+        if (!bar) return;
+        var favs = [];
+        try { favs = JSON.parse(localStorage.getItem('fc_favs_data') || '[]'); } catch(e) {}
+        // Keep the label
+        bar.innerHTML = '<span class="ct-favs-label"><i class="fa-solid fa-star"></i> Favoriti:</span>';
+        if (favs.length === 0) {
+            bar.innerHTML += '<span style="font-size:.75rem;color:#94a3b8;">Koristite Ctrl+K → ★ za dodavanje favorita</span>';
+            return;
+        }
+        favs.forEach(function(f) {
+            var chip = document.createElement('a');
+            chip.href = f.href || '#';
+            chip.className = 'ct-fav-chip';
+            chip.innerHTML = '<i class="' + (f.icon || 'fa-solid fa-link') + '"></i> ' + (f.label || f.href);
+            bar.appendChild(chip);
+        });
+    }
+    renderFavorites();
+    // Re-render if another tab changes favorites
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'fc_favs_data') renderFavorites();
+    });
+
+    // ── System Health ──
+    function updateHealth(d) {
+        var el = document.getElementById('ctHealth');
+        var txt = document.getElementById('ctHealthText');
+        if (!el || !txt) return;
+
+        var issues = [];
+        if (d.haccp && d.haccp.critical > 0) issues.push('HACCP: ' + d.haccp.critical + ' kritičnih');
+        if (d.inventory && d.inventory.theft_alerts_month > 0) issues.push('Krađa: ' + d.inventory.theft_alerts_month + ' alarma');
+        if (d.invoices && d.invoices.overdue_count > 5) issues.push('Dospjelo: ' + d.invoices.overdue_count + ' faktura');
+        if (d.helpdesk && d.helpdesk.urgent > 0) issues.push('Help Desk: ' + d.helpdesk.urgent + ' hitnih tiketa');
+        if (d.helpdesk && d.helpdesk.overdue > 0) issues.push('SLA: ' + d.helpdesk.overdue + ' prekoračenih');
+        if (d.worktime && d.worktime.compliance_issues > 0) issues.push('Compliance: ' + d.worktime.compliance_issues);
+
+        if (issues.length === 0) {
+            el.className = 'ct-health';
+            txt.innerHTML = '<i class="fa-solid fa-check-circle" style="color:#16a34a"></i> Sustav radi normalno — svi moduli OK';
+        } else if (issues.some(function(i) { return i.indexOf('HACCP') >= 0 || i.indexOf('Krađa') >= 0; })) {
+            el.className = 'ct-health ct-health-danger';
+            txt.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> ' + issues.join(' · ');
+        } else {
+            el.className = 'ct-health ct-health-warn';
+            txt.innerHTML = '<i class="fa-solid fa-info-circle"></i> ' + issues.join(' · ');
+        }
+    }
+
+    // ── Alerts ──
+    function checkAlerts(d) {
+        var alerts = [];
+        if (d.haccp && d.haccp.critical > 0) alerts.push('HACCP: ' + d.haccp.critical + ' kritičnih incidenata!');
+        if (d.inventory && d.inventory.theft_alerts_month > 0) alerts.push('Inventura: ' + d.inventory.theft_alerts_month + ' alarma krađa');
+        if (d.finance_radar && d.finance_radar.gap_count > 0) alerts.push('Radar: ' + d.finance_radar.gap_count + ' parcijalnih uplata');
+        if (d.invoices && d.invoices.overdue_count > 5) alerts.push('Fakture: ' + d.invoices.overdue_count + ' dospjelih');
+        if (d.helpdesk && d.helpdesk.urgent > 0) alerts.push('Help Desk: ' + d.helpdesk.urgent + ' hitnih tiketa');
+
+        var banner = document.getElementById('ctAlertBanner');
+        var text = document.getElementById('ctAlertText');
+        if (alerts.length > 0) {
+            text.textContent = alerts.join(' | ');
+            banner.style.display = 'block';
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    // ── Update all values ──
+    function update(d) {
+        // KPI Row
+        setVal('ct-kpi-revenue', eur(d.invoices ? d.invoices.month_revenue : 0));
+        setVal('ct-kpi-revenue-sub', 'Ukupno: ' + eur(d.invoices ? d.invoices.paid_revenue : 0));
+        setVal('ct-kpi-unpaid', eur(d.invoices ? d.invoices.unpaid : 0));
+        setVal('ct-kpi-unpaid-sub', (d.invoices ? d.invoices.overdue_count : 0) + ' dospjelih');
+        setVal('ct-kpi-users', fmt(d.users ? d.users.active : 0));
+        setVal('ct-kpi-users-sub', fmt(d.users ? d.users.total : 0) + ' ukupno');
+        setVal('ct-kpi-companies', fmt(d.companies ? d.companies.total : 0));
+        setVal('ct-kpi-companies-sub', (d.registrations ? d.registrations.pending : 0) + ' pending');
+
+        // Users
+        setVal('ct-users-total', fmt(d.users.total));
+        setVal('ct-users-active', fmt(d.users.active));
+        setVal('ct-users-staff', fmt(d.users.staff));
+
+        // Companies
+        setVal('ct-companies-total', fmt(d.companies.total));
+        setVal('ct-reg-pending', fmt(d.registrations.pending));
+
+        // Invoices
+        setVal('ct-inv-total', fmt(d.invoices.total));
+        setVal('ct-inv-revenue', eur(d.invoices.paid_revenue));
+        setVal('ct-inv-unpaid', eur(d.invoices.unpaid));
+        setVal('ct-inv-overdue', fmt(d.invoices.overdue_count));
+
+        // POS
+        setVal('ct-pos-today', fmt(d.pos.today));
+        setVal('ct-pos-open', fmt(d.pos.open_now));
+
+        // Appointments
+        setVal('ct-appt-today', fmt(d.appointments.today));
+        setVal('ct-appt-total', fmt(d.appointments.total));
+
+        // Deliveries
+        setVal('ct-del-transit', fmt(d.deliveries.in_transit));
+        setVal('ct-del-total', fmt(d.deliveries.total));
+
+        // HACCP
+        setVal('ct-haccp-unresolved', fmt(d.haccp.unresolved));
+        setVal('ct-haccp-critical', fmt(d.haccp.critical));
+
+        // Inventory
+        setVal('ct-inv-quarantine', fmt(d.inventory.quarantined_batches));
+        setVal('ct-inv-counts', fmt(d.inventory.counts_today));
+        setVal('ct-inv-theft', fmt(d.inventory.theft_alerts_month));
+
+        // Worktime
+        setVal('ct-wt-today', fmt(d.worktime.today));
+        setVal('ct-wt-pending', fmt(d.worktime.pending));
+        setVal('ct-wt-compliance', fmt(d.worktime.compliance_issues));
+
+        // Webshop
+        setVal('ct-ws-active', fmt(d.webshop.active));
+        setVal('ct-ws-orders', fmt(d.webshop.orders_pending));
+
+        // AI
+        setVal('ct-ai-calls', fmt(d.ai.total_calls));
+        setVal('ct-ai-cost', eur(d.ai.total_cost));
+        setVal('ct-ai-convos', fmt(d.ai.active_conversations));
+
+        // Arhiva / AI Inbox
+        if (d.arhiva) {
+            setVal('ct-arh-total', fmt(d.arhiva.total));
+            setVal('ct-arh-pending', fmt(d.arhiva.ai_pending));
+            setVal('ct-arh-year-inv', eur(d.arhiva.year_invoice_total));
+            // Recent entries
+            var recentEl = document.getElementById('ct-arh-recent');
+            if (recentEl && d.arhiva.recent) {
+                recentEl.innerHTML = d.arhiva.recent.map(function(r){
+                    return '<div style="display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.78rem">' +
+                        '<span style="color:#ccc">' + (r.doc_number||r.partner_name||'—') + '</span>' +
+                        '<span style="color:#4ade80;font-weight:600">' + (r.amount ? r.amount.toFixed(2) + ' EUR' : '') + '</span></div>';
+                }).join('');
+            }
+        }
+
+        // HelpDesk
+        if (d.helpdesk) {
+            setVal('ct-hd-open', fmt(d.helpdesk.open));
+            setVal('ct-hd-urgent', fmt(d.helpdesk.urgent));
+            setVal('ct-hd-overdue', fmt(d.helpdesk.overdue));
+            setVal('ct-hd-unassigned', fmt(d.helpdesk.unassigned));
+            setVal('ct-hd-resolved', fmt(d.helpdesk.resolved_today));
+        }
+
+        // Burza
+        setVal('ct-burza-new', fmt(d.burza.new_leads));
+
+        // Financial Radar
+        if (d.finance_radar) {
+            var fr = d.finance_radar;
+            setVal('ct-fr-cash', eur(fr.cash_now));
+            setVal('ct-fr-forecast', eur(fr.forecast_7d));
+            setVal('ct-fr-inflows', eur(fr.expected_inflows_7d));
+            setVal('ct-fr-overdue', eur(fr.overdue_outflows));
+            setVal('ct-fr-gaps', fmt(fr.gap_count));
+            setVal('ct-fr-gap-total', eur(fr.gap_total));
+            setVal('ct-fr-revenue', eur(fr.revenue_total));
+            setVal('ct-fr-margin', fr.margin_pct + '%');
+            var marginEl = document.getElementById('ct-fr-margin');
+            if (marginEl) {
+                marginEl.className = 'ct-metric-value ' +
+                    (fr.margin_pct >= 20 ? 'ct-green' : fr.margin_pct >= 10 ? 'ct-amber' : 'ct-red');
+            }
+        }
+
+        // Health + Alerts
+        updateHealth(d);
+        checkAlerts(d);
+
+        // Pulse
+        _failCount = 0;
+        var dot = document.getElementById('ctPulseDot');
+        var txt = document.getElementById('ctPulseText');
+        if (dot) dot.className = 'ct-pulse-dot';
+        if (txt) {
+            var ts = d.timestamp ? new Date(d.timestamp).toLocaleTimeString('hr-HR') : '';
+            txt.textContent = 'LIVE ' + ts;
+        }
+    }
+
+    function poll() {
+        fetch(API_URL, {credentials: 'same-origin'})
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(update)
+            .catch(function(err) {
+                _failCount++;
+                var dot = document.getElementById('ctPulseDot');
+                var txt = document.getElementById('ctPulseText');
+                if (dot) dot.className = 'ct-pulse-dot ct-offline';
+                if (txt) txt.textContent = 'OFFLINE (' + _failCount + 'x)';
+            });
+    }
+
+    poll();
+    setInterval(poll, POLL_MS);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'registration/base_reg.html' %}
+{% load i18n %}
+{% block title %}{% trans "Brza registracija" %} – LIMIT Connect{% endblock %}
+{% block content %}
+<div class="reg-card" style="max-width:480px;margin:0 auto">
+  <div class="reg-card-title">{% trans "Kreirajte račun" %}</div>
+  <div class="reg-card-subtitle">{% trans "Brza registracija za klijente." %}</div>
+
+  <form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <input type="hidden" name="company" value="{{ company }}">
+
+  <div class="reg-field">
+    <label>{% trans "Ime i prezime" %} *</label>
+    <input type="text" name="name" value="{{ name }}" class="reg-input" placeholder="Ivan Horvat" required>
+    {% if errors.name %}<div class="error-msg">{{ errors.name }}</div>{% endif %}
+  </div>
+
+  <div class="reg-field">
+    <label>Email *</label>
+    <input type="email" name="email" value="{{ email }}" class="reg-input" placeholder="vas@email.com" required>
+    {% if errors.email %}<div class="error-msg">{{ errors.email }}</div>{% endif %}
+  </div>
+
+  <div class="reg-field">
+    <label>{% trans "Telefon" %}</label>
+    <input type="tel" name="phone" value="{{ phone }}" class="reg-input" placeholder="+385 91 1234567">
+  </div>
+
+  <div class="reg-field">
+    <label>{% trans "Lozinka" %} *</label>
+    <input type="password" name="password" class="reg-input" minlength="8" required>
+    {% if errors.password %}<div class="error-msg">{{ errors.password }}</div>{% endif %}
+  </div>
+
+  <div style="margin-top:1.5rem">
+    <button type="submit" class="reg-btn" style="width:100%;justify-content:center">{% trans "Registriraj se" %}</button>
+  </div>
+
+  <div style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--muted)">
+    {% trans "Već imate račun?" %} <a href="/accounts/login/" style="color:var(--gold)">{% trans "Prijavite se" %}</a>
+  </div>
+  </form>
+</div>
+{% endblock %}

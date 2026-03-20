@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Zakazivanje Termina{% endblock %}
+{% block page_title %}Zakazivanje Termina{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bc-wrap { max-width: 800px; margin: 0 auto; }
+    .bc-card {
+        background: #fff; border-radius: 12px; padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+    .bc-header {
+        font-size: 1.1rem; font-weight: 700; color: #0f172a;
+        border-bottom: 2px solid var(--gold); padding-bottom: 10px;
+        margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .bc-header i { color: var(--gold); }
+    .bc-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .bc-select, .bc-date {
+        width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+        font-size: 0.92rem; color: #0f172a; background: #fff;
+        transition: border-color 0.2s;
+    }
+    .bc-select:focus, .bc-date:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+    .slot-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px; margin-top: 16px;
+    }
+    .slot {
+        padding: 12px 8px; text-align: center; border-radius: 8px;
+        font-weight: 600; font-size: 0.92rem; cursor: pointer;
+        border: 2px solid #e2e8f0; background: #fff; color: #0f172a;
+        transition: all 0.2s;
+    }
+    .slot:hover:not(.slot-taken) { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(201,168,76,0.15); }
+    .slot.selected { background: var(--gold); color: #0f172a; border-color: var(--gold); }
+    .slot-taken { background: #f8fafc; color: #cbd5e1; border-color: #f1f5f9; cursor: not-allowed; text-decoration: line-through; }
+    .slot-reason { display: block; font-size: 0.6rem; font-weight: 400; margin-top: 2px; }
+    .bc-loader { text-align: center; padding: 32px; color: #94a3b8; }
+    .bc-spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: var(--gold); border-radius: 50%; animation: bcspin 0.8s linear infinite; }
+    @keyframes bcspin { to { transform: rotate(360deg); } }
+    .bc-confirm {
+        background: #fefce8; border: 1px solid #fde68a; border-radius: 10px;
+        padding: 20px;
+    }
+    .bc-confirm h4 { color: #92400e; font-size: 0.95rem; margin: 0 0 12px; }
+    .bc-confirm .detail { font-size: 0.85rem; color: #78716c; margin-bottom: 4px; }
+    .bc-confirm .detail strong { color: #0f172a; }
+    .bc-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 24px; border-radius: 8px; font-weight: 600;
+        font-size: 0.9rem; border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .bc-btn-primary { background: var(--gold); color: #0f172a; }
+    .bc-btn-primary:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+    .bc-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .bc-btn-secondary { background: #f1f5f9; color: #64748b; }
+    .bc-btn-secondary:hover { background: #e2e8f0; }
+    .bc-field { margin-bottom: 12px; }
+    .bc-input {
+        width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+        font-size: 0.88rem; color: #0f172a;
+    }
+    .bc-input:focus { border-color: var(--gold); outline: none; }
+    .bc-toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .bc-toast {
+        min-width: 280px; padding: 14px 18px; border-radius: 8px;
+        font-size: 0.88rem; font-weight: 500; color: #fff;
+        display: flex; align-items: center; gap: 10px;
+        opacity: 0; transform: translateX(40px); transition: all 0.3s;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .bc-toast.show { opacity: 1; transform: translateX(0); }
+    .bc-toast-success { background: #166534; }
+    .bc-toast-error { background: #991b1b; }
+    .bc-toast-warning { background: #92400e; }
+    .bc-empty { text-align: center; padding: 40px 20px; color: #94a3b8; }
+    .bc-empty i { font-size: 2rem; color: var(--gold); margin-bottom: 12px; display: block; }
+    .svc-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #f1f5f9; border-radius: 20px; font-size: 0.78rem; color: #64748b; margin-top: 10px; }
+    .svc-badge i { color: var(--gold); }
+    @media (max-width: 768px) {
+        .slot-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+        .slot { padding: 10px 6px; font-size: 0.85rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bc-wrap">
+    <div class="bc-card">
+        <div class="bc-header"><i class="fa-solid fa-calendar-check"></i> Rezervacija Termina</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="bc-label">Vrsta Usluge</div>
+                <select id="bcService" class="bc-select" onchange="bcLoadSlots()">
+                    <option value="">-- Odaberite uslugu --</option>
+                    {% for s in services %}
+                    <option value="{{ s.id }}" data-dur="{{ s.duration_minutes }}" data-price="{{ s.price|default:'0' }}" data-name="{{ s.name }}">
+                        {{ s.name }} ({{ s.duration_minutes }} min{% if s.price %} / {{ s.price }} EUR{% endif %})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <div class="bc-label">Datum</div>
+                <input type="date" id="bcDate" class="bc-date" onchange="bcLoadSlots()">
+            </div>
+        </div>
+        <div id="bcSvcInfo"></div>
+    </div>
+
+    <div class="bc-card" id="bcSlotsCard" style="display:none;">
+        <div class="bc-header"><i class="fa-solid fa-clock"></i> Dostupni Termini</div>
+        <div id="bcLoader" class="bc-loader" style="display:none;"><div class="bc-spinner"></div><p style="margin-top:10px;">Provjera resursa i radnika...</p></div>
+        <div id="bcSlotGrid" class="slot-grid"></div>
+        <div id="bcEmpty" class="bc-empty" style="display:none;"><i class="fa-solid fa-calendar-xmark"></i>Nema dostupnih termina za odabrani datum i uslugu.</div>
+    </div>
+
+    <div class="bc-card" id="bcConfirmCard" style="display:none;">
+        <div class="bc-confirm">
+            <h4><i class="fa-solid fa-check-circle"></i> Potvrda Rezervacije</h4>
+            <div class="detail">Usluga: <strong id="cfService"></strong></div>
+            <div class="detail">Datum: <strong id="cfDate"></strong></div>
+            <div class="detail">Vrijeme: <strong id="cfTime"></strong></div>
+            <div class="detail">Trajanje: <strong id="cfDuration"></strong> min</div>
+            <div class="detail" id="cfPriceRow">Cijena: <strong id="cfPrice"></strong> EUR</div>
+            <hr style="border-color:#fde68a;margin:16px 0;">
+            <div class="bc-field">
+                <div class="bc-label">Ime klijenta</div>
+                <input type="text" id="cfName" class="bc-input" placeholder="Ime i prezime">
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="bc-field">
+                        <div class="bc-label">Email (opciono)</div>
+                        <input type="email" id="cfEmail" class="bc-input" placeholder="email@primjer.hr">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="bc-field">
+                        <div class="bc-label">Telefon (opciono)</div>
+                        <input type="tel" id="cfPhone" class="bc-input" placeholder="+385...">
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button id="bcBookBtn" class="bc-btn bc-btn-primary" onclick="bcBook()">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    <span id="bcBookText">Potvrdi Termin</span>
+                </button>
+                <button class="bc-btn bc-btn-secondary" onclick="bcCancelConfirm()">
+                    <i class="fa-solid fa-xmark"></i> Odustani
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bc-toast-wrap" id="bcToasts"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+    var today = new Date().toISOString().split('T')[0];
+    var dateEl = document.getElementById('bcDate');
+    dateEl.min = today;
+    dateEl.value = today;
+    window._bcState = { service_id: null, date: null, time: null };
+})();
+
+function bcToast(msg, type) {
+    type = type || 'success';
+    var wrap = document.getElementById('bcToasts');
+    var t = document.createElement('div');
+    t.className = 'bc-toast bc-toast-' + type;
+    var icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
+    t.innerHTML = '<i class="fa-solid ' + icon + '"></i> ' + msg;
+    wrap.appendChild(t);
+    setTimeout(function(){ t.classList.add('show'); }, 10);
+    var dur = type === 'error' ? 8000 : 5000;
+    setTimeout(function(){ t.classList.remove('show'); setTimeout(function(){ t.remove(); }, 300); }, dur);
+}
+
+function bcLoadSlots() {
+    var svcEl = document.getElementById('bcService');
+    var dateEl = document.getElementById('bcDate');
+    var serviceId = svcEl.value;
+    var dateStr = dateEl.value;
+
+    document.getElementById('bcConfirmCard').style.display = 'none';
+    var slotsCard = document.getElementById('bcSlotsCard');
+    var grid = document.getElementById('bcSlotGrid');
+    var loader = document.getElementById('bcLoader');
+    var empty = document.getElementById('bcEmpty');
+    var svcInfo = document.getElementById('bcSvcInfo');
+
+    if (!serviceId || !dateStr) {
+        slotsCard.style.display = 'none';
+        svcInfo.innerHTML = '';
+        return;
+    }
+
+    var opt = svcEl.options[svcEl.selectedIndex];
+    var dur = opt.dataset.dur;
+    var price = opt.dataset.price;
+    svcInfo.innerHTML = '<div class="svc-badge"><i class="fa-solid fa-stopwatch"></i> ' + dur + ' min</div>' +
+        (price && price !== '0' ? ' <div class="svc-badge"><i class="fa-solid fa-euro-sign"></i> ' + price + ' EUR</div>' : '');
+
+    _bcState.service_id = serviceId;
+    _bcState.date = dateStr;
+    _bcState.time = null;
+
+    slotsCard.style.display = 'block';
+    grid.innerHTML = '';
+    empty.style.display = 'none';
+    loader.style.display = 'block';
+
+    fetch('/appointments/api/dl-slots/?service_id=' + serviceId + '&date=' + dateStr)
+        .then(function(r) {
+            if (!r.ok) throw new Error('Greska pri dohvatu termina (HTTP ' + r.status + ')');
+            return r.json();
+        })
+        .then(function(data) {
+            loader.style.display = 'none';
+            if (!data.slots || data.slots.length === 0) {
+                empty.style.display = 'block';
+                return;
+            }
+
+            var hasAvail = false;
+            data.slots.forEach(function(slot) {
+                var div = document.createElement('div');
+                div.className = 'slot' + (slot.available ? '' : ' slot-taken');
+                if (!slot.available) {
+                    var reason = slot.reason === 'NO_ACTOR' ? 'Nema radnika' : slot.reason === 'NO_RESOURCE' ? 'Nema resursa' : 'Zauzeto';
+                    div.innerHTML = slot.time + '<span class="slot-reason">' + reason + '</span>';
+                } else {
+                    div.textContent = slot.time;
+                    hasAvail = true;
+                    div.onclick = (function(s, t) { return function() { bcSelectSlot(s, t); }; })(div, slot.time);
+                }
+                grid.appendChild(div);
+            });
+
+            if (!hasAvail) {
+                empty.style.display = 'block';
+                empty.innerHTML = '<i class="fa-solid fa-calendar-xmark"></i>Svi termini su zauzeti za odabrani datum.';
+            }
+        })
+        .catch(function(err) {
+            loader.style.display = 'none';
+            bcToast(err.message, 'error');
+        });
+}
+
+function bcSelectSlot(el, time) {
+    document.querySelectorAll('.slot.selected').forEach(function(s) { s.classList.remove('selected'); });
+    el.classList.add('selected');
+    _bcState.time = time;
+
+    var opt = document.getElementById('bcService').options[document.getElementById('bcService').selectedIndex];
+    document.getElementById('cfService').textContent = opt.dataset.name;
+    document.getElementById('cfDate').textContent = _bcState.date.split('-').reverse().join('.');
+    document.getElementById('cfTime').textContent = time;
+    document.getElementById('cfDuration').textContent = opt.dataset.dur;
+    var price = opt.dataset.price;
+    if (price && price !== '0') {
+        document.getElementById('cfPrice').textContent = price;
+        document.getElementById('cfPriceRow').style.display = '';
+    } else {
+        document.getElementById('cfPriceRow').style.display = 'none';
+    }
+
+    document.getElementById('bcConfirmCard').style.display = 'block';
+    document.getElementById('bcConfirmCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function bcCancelConfirm() {
+    document.getElementById('bcConfirmCard').style.display = 'none';
+    document.querySelectorAll('.slot.selected').forEach(function(s) { s.classList.remove('selected'); });
+    _bcState.time = null;
+}
+
+function bcBook() {
+    var btn = document.getElementById('bcBookBtn');
+    var txt = document.getElementById('bcBookText');
+
+    if (!_bcState.service_id || !_bcState.date || !_bcState.time) {
+        bcToast('Odaberite uslugu, datum i termin.', 'warning');
+        return;
+    }
+
+    btn.disabled = true;
+    txt.textContent = 'Obrada...';
+
+    var body = {
+        service_id: parseInt(_bcState.service_id),
+        date: _bcState.date,
+        time: _bcState.time,
+        name: document.getElementById('cfName').value.trim(),
+        email: document.getElementById('cfEmail').value.trim(),
+        phone: document.getElementById('cfPhone').value.trim()
+    };
+
+    fetch('/appointments/api/book/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': bcGetCookie('csrftoken')
+        },
+        body: JSON.stringify(body)
+    })
+    .then(function(r) {
+        return r.json().then(function(data) { return { ok: r.ok, status: r.status, data: data }; });
+    })
+    .then(function(res) {
+        if (!res.ok) {
+            if (res.status === 409) {
+                var reason = res.data.code === 'NO_ACTOR' ? 'Nema slobodnog radnika za taj termin.' :
+                             res.data.code === 'NO_RESOURCE' ? 'Nema slobodnog resursa za taj termin.' :
+                             res.data.code === 'RACE_CONFLICT' ? 'Termin je upravo zauzet od drugog korisnika.' :
+                             res.data.error;
+                bcToast(reason, 'error');
+                bcLoadSlots();
+            } else {
+                bcToast(res.data.error || 'Greska pri zakazivanju.', 'error');
+            }
+            return;
+        }
+
+        bcToast(res.data.message || 'Termin uspjesno zakazan!', 'success');
+        document.getElementById('bcConfirmCard').style.display = 'none';
+        document.getElementById('cfName').value = '';
+        document.getElementById('cfEmail').value = '';
+        document.getElementById('cfPhone').value = '';
+        bcLoadSlots();
+    })
+    .catch(function(err) {
+        bcToast('Mrezna greska: ' + err.message, 'error');
+    })
+    .finally(function() {
+        btn.disabled = false;
+        txt.textContent = 'Potvrdi Termin';
+    });
+}
+
+function bcGetCookie(name) {
+    var v = null;
+    if (document.cookie) {
+        document.cookie.split(';').forEach(function(c) {
+            c = c.trim();
+            if (c.indexOf(name + '=') === 0) v = decodeURIComponent(c.substring(name.length + 1));
+        });
+    }
+    return v;
+}
+</script>
+{% endblock %}

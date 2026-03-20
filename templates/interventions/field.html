@@ -1,0 +1,305 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Intervencija #{{ interv.pk }} – Terenska karta</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f172a; --card: #1e293b; --border: #334155;
+  --text: #f1f5f9; --muted: #94a3b8;
+  --gold: #c9a84c; --green: #4caf7d; --red: #ef4444; --blue: #3b82f6; --orange: #f97316;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; font-size: 18px; }
+body { display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { background: #0f172a; border-bottom: 1px solid var(--border); padding: .75rem 1rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-title { font-weight: 700; font-size: 1rem; color: var(--gold); }
+.topbar-back { color: var(--muted); font-size: .85rem; text-decoration: none; }
+.content { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+.info-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+.status-badge { display: inline-block; padding: .35rem 1rem; border-radius: 20px; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
+.field { margin-bottom: .75rem; }
+.field-lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: .2rem; }
+.field-val { font-size: 1.1rem; font-weight: 600; }
+.field-val a { color: var(--gold); text-decoration: none; }
+.actions { flex-shrink: 0; padding: 1rem; background: var(--bg); border-top: 1px solid var(--border); }
+.action-btn { width: 100%; height: 64px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-bottom: .75rem; display: flex; align-items: center; justify-content: center; gap: .5rem; transition: opacity .15s; font-family: inherit; }
+.action-btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-go    { background: var(--orange); color: #fff; }
+.btn-here  { background: var(--blue);   color: #fff; }
+.btn-done  { background: var(--green);  color: #fff; }
+.btn-esc   { background: #7c3aed; color: #fff; height: 54px; font-size: .95rem; }
+.btn-grey  { background: var(--border); color: var(--muted); height: 54px; font-size: .9rem; }
+.offline-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 999; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 2rem; }
+.offline-overlay.show { display: flex; }
+.offline-icon { font-size: 4rem; margin-bottom: 1rem; }
+.offline-msg { font-size: 1.1rem; color: var(--red); font-weight: 700; margin-bottom: .5rem; }
+.offline-sub { font-size: .9rem; color: var(--muted); margin-bottom: 1.5rem; }
+.toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid var(--green); color: var(--green); padding: .75rem 1.5rem; border-radius: 8px; font-size: .9rem; z-index: 500; display: none; }
+.toast.show { display: block; }
+.toast.error { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">🚨 Intervencija #{{ interv.pk }}</div>
+  <a href="/interventions/" class="topbar-back">{% trans "&larr; Kanban" %}</a>
+</div>
+
+<div class="content">
+  <div class="info-card">
+    <div class="status-badge" style="background:{{ interv.status_color }}22;color:{{ interv.status_color }};border:1px solid {{ interv.status_color }}55">
+      {{ interv.get_status_display }}
+    </div>
+    <div class="field">
+      <div class="field-lbl">{% trans "Naslov" %}</div>
+      <div class="field-val">{{ interv.title }}</div>
+    </div>
+    <div class="field">
+      <div class="field-lbl">{% trans "Kategorija" %}</div>
+      <div class="field-val">{{ interv.get_category_display }}</div>
+    </div>
+    <div class="field">
+      <div class="field-lbl">{% trans "Adresa" %}</div>
+      <div class="field-val">
+        <a href="https://maps.google.com/?q={{ interv.address|urlencode }}" target="_blank">{{ interv.address }} 📍</a>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-lbl">{% trans "Klijent" %}</div>
+      <div class="field-val">{{ interv.client_name }} · <a href="tel:{{ interv.client_phone }}">{{ interv.client_phone }}</a></div>
+    </div>
+    {% if interv.description %}
+    <div class="field">
+      <div class="field-lbl">{% trans "Opis" %}</div>
+      <div class="field-val" style="font-size:.9rem;font-weight:400">{{ interv.description }}</div>
+    </div>
+    {% endif %}
+    {% if interv.assigned_to %}
+    <div class="field">
+      <div class="field-lbl">{% trans "Dodijeljen" %}</div>
+      <div class="field-val">{{ interv.assigned_to.get_full_name|default:interv.assigned_to.username }}</div>
+    </div>
+    {% endif %}
+    <div style="margin-top:.75rem">
+      <div class="field-lbl">{% trans "Tracking link za klijenta" %}</div>
+      <div style="font-size:.8rem;color:var(--muted);word-break:break-all">{{ interv.tracking_url }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="actions" id="actions">
+  {% if interv.status == 'NOVO' or interv.status == 'DODIJELJENO' %}
+  <button class="action-btn btn-go" id="btnGo" onclick="updateStatus('NA_PUTU', this)">
+    {% trans "🚗 Krenuo sam" %}
+  </button>
+  {% elif interv.status == 'NA_PUTU' %}
+  <button class="action-btn btn-here" id="btnHere" onclick="updateStatus('NA_LOKACIJI', this)">
+    {% trans "📍 Na lokaciji sam" %}
+  </button>
+  {% elif interv.status == 'NA_LOKACIJI' %}
+  <button class="action-btn btn-done" id="btnDone" onclick="updateStatus('RIJESENO', this)">
+    {% trans "✅ Riješeno" %}
+  </button>
+  {% elif interv.status == 'RIJESENO' %}
+  <button class="action-btn btn-esc" onclick="doEscalate()">
+    {% trans "↗ Eskaliraj u projekt" %}
+  </button>
+  <button class="action-btn btn-grey" onclick="updateStatus('FAKTURIRANO', this)">
+    {% trans "🧾 Označi kao fakturirano" %}
+  </button>
+  {% endif %}
+</div>
+
+<!-- Offline overlay -->
+<div class="offline-overlay" id="offlineOverlay">
+  <div class="offline-icon">📡</div>
+  <div class="offline-msg">{% trans "Nema internetske veze" %}</div>
+  <div class="offline-sub">{% trans "Status je pohranjen lokalno." %}<br>{% trans "Bit će sinkroniziran čim dobijete signal." %}</div>
+  <button onclick="hideOverlay()" style="background:#334155;color:#f1f5f9;border:none;padding:.75rem 2rem;border-radius:8px;font-size:1rem;cursor:pointer">{% trans "Zatvori" %}</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const INTERV_ID = {{ interv.pk }};
+const CSRF = '{{ csrf_token }}';
+const QUEUE_KEY = 'interventions_queue';
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function showOverlay(msg) {
+  document.getElementById('offlineOverlay').classList.add('show');
+}
+
+function hideOverlay() {
+  document.getElementById('offlineOverlay').classList.remove('show');
+}
+
+function saveToQueue(intervId, status) {
+  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+  q.push({ id: intervId, status: status, ts: Date.now() });
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+}
+
+async function syncQueue() {
+  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
+  if (!q.length) return;
+  const remaining = [];
+  for (const item of q) {
+    try {
+      const r = await fetch(`/interventions/${item.id}/status/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'},
+        body: JSON.stringify({status: item.status}),
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!r.ok) remaining.push(item);
+    } catch (e) {
+      remaining.push(item);
+    }
+  }
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(remaining));
+  if (remaining.length === 0 && q.length > 0) {
+    showToast('Status sinkroniziran!', false);
+    setTimeout(() => location.reload(), 1500);
+  }
+}
+
+async function updateStatus(newStatus, btn) {
+  const originalText = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Obrada...'; }
+
+  try {
+    const r = await fetch(`/interventions/${INTERV_ID}/status/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'},
+      body: JSON.stringify({status: newStatus}),
+      signal: AbortSignal.timeout(8000),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      showToast(d.message, false);
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      showToast(d.error || 'Greška', true);
+      if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+    }
+  } catch (err) {
+    // Offline or timeout
+    saveToQueue(INTERV_ID, newStatus);
+    if (btn) { btn.innerHTML = '⏳ Na čekanju (offline)'; }
+    showOverlay();
+  }
+}
+
+async function doEscalate() {
+  const title = prompt('Naslov projekta (Enter za auto):');
+  if (title === null) return;
+  try {
+    const r = await fetch(`/interventions/${INTERV_ID}/escalate/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': CSRF, 'Content-Type': 'application/json'},
+      body: JSON.stringify({title: title || ''}),
+      signal: AbortSignal.timeout(10000),
+    });
+    const d = await r.json();
+    if (d.ok) { showToast(d.message, false); setTimeout(() => location.reload(), 1500); }
+    else { showToast(d.error || 'Greška', true); }
+  } catch (e) {
+    showToast('Mrežna greška pri eskalaciji.', true);
+  }
+}
+
+// Auto-sync on coming back online
+window.addEventListener('online', () => {
+  hideOverlay();
+  syncQueue();
+});
+
+// Try to sync any pending queue on load
+window.addEventListener('load', () => {
+  if (navigator.onLine) syncQueue();
+});
+</script>
+
+<!-- GPS Tracking Bar -->
+<div id="gps-bar" style="position:fixed;bottom:0;left:0;right:0;background:#0f172a;border-top:1px solid rgba(201,168,76,.3);padding:10px 16px;display:flex;align-items:center;gap:12px;z-index:100">
+  <button id="gps-btn" onclick="toggleGPS()" style="background:rgba(201,168,76,.15);color:#c9a84c;border:1px solid rgba(201,168,76,.4);border-radius:6px;padding:10px 18px;font-size:.9rem;cursor:pointer;min-height:48px">{% trans "GPS start" %}</button>
+  <div id="gps-status" style="font-size:.8rem;color:#94a3b8;flex:1">{% trans "GPS iskljuceno" %}</div>
+  <div id="gps-dot" style="width:10px;height:10px;border-radius:50%;background:#374151"></div>
+</div>
+<div style="height:68px"></div>
+<script>
+(function(){
+  var watchId=null, intervalId=null, lastPos=null;
+  var IV_PK='{{ interv.pk }}';
+  var GPS_URL='/interventions/'+IV_PK+'/gps/';
+  function getCsrf(){
+    var m=document.cookie.match('csrftoken=([^;]+)');
+    return m?m[1]:'';
+  }
+  function setStatus(txt,color){
+    document.getElementById('gps-status').textContent=txt;
+    if(color) document.getElementById('gps-dot').style.background=color;
+  }
+  function sendGPS(lat,lng){
+    var body = JSON.stringify({lat:lat,lng:lng});
+    if(!navigator.onLine){
+      if(window.finaQueueRequest) finaQueueRequest(GPS_URL,'POST',body);
+      setStatus('GPS u redu (offline)','#f59e0b');
+      return;
+    }
+    fetch(GPS_URL,{method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+      body:body
+    }).then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok) setStatus('GPS: '+lat.toFixed(5)+', '+lng.toFixed(5),'#10b981');
+    }).catch(function(){
+      if(window.finaQueueRequest) finaQueueRequest(GPS_URL,'POST',body);
+      setStatus('GPS u redu (offline)','#f59e0b');
+    });
+  }
+  window.toggleGPS=function(){
+    var btn=document.getElementById('gps-btn');
+    if(watchId!==null){
+      navigator.geolocation.clearWatch(watchId);
+      clearInterval(intervalId);
+      watchId=intervalId=null;
+      btn.textContent='GPS start';
+      setStatus('GPS zaustavljeno','#374151');
+      return;
+    }
+    if(!navigator.geolocation){ setStatus('GPS nije podrzavan'); return; }
+    btn.textContent='Trazim...';
+    navigator.geolocation.getCurrentPosition(
+      function(pos){
+        lastPos=pos;
+        btn.textContent='GPS stop';
+        sendGPS(pos.coords.latitude,pos.coords.longitude);
+        watchId=navigator.geolocation.watchPosition(
+          function(p){lastPos=p;},null,
+          {enableHighAccuracy:true,maximumAge:15000,timeout:30000});
+        intervalId=setInterval(function(){
+          if(lastPos) sendGPS(lastPos.coords.latitude,lastPos.coords.longitude);
+        },30000);
+      },
+      function(err){ btn.textContent='GPS start'; setStatus('GPS greska: '+err.message); },
+      {enableHighAccuracy:true,timeout:15000}
+    );
+  };
+})();
+</script>
+
+</body>
+</html>

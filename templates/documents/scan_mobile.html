@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Skeniraj racun | LIMIT Connect</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.top{padding:12px 16px;background:#111;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between}
+.top .logo{color:#c9a84c;font-weight:700;font-size:.95rem}
+.top .status{font-size:.75rem;color:#666}
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem}
+.cam-btn{background:#c9a84c;color:#0a0a0a;border:none;padding:16px 32px;border-radius:12px;font-size:1.1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.cam-btn i{font-size:1.3rem}
+.hint{color:#666;font-size:.82rem;text-align:center;max-width:280px;line-height:1.4}
+.preview{display:none;text-align:center;width:100%}
+.preview img{max-width:90%;max-height:50vh;border-radius:8px;border:2px solid #c9a84c;margin-bottom:1rem}
+.preview-actions{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+.btn-send{background:#c9a84c;color:#0a0a0a;border:none;padding:14px 28px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer}
+.btn-again{background:transparent;border:1px solid #333;color:#888;padding:14px 28px;border-radius:10px;font-size:1rem;cursor:pointer}
+.done{display:none;text-align:center;padding:2rem}
+.done .check{font-size:3rem;margin-bottom:1rem}
+.done h2{color:#10b981;font-size:1.2rem;margin-bottom:.5rem}
+.done p{color:#888;font-size:.88rem}
+.uploading{display:none;text-align:center;padding:2rem}
+.spinner{width:40px;height:40px;border:3px solid #333;border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+input[type=file]{display:none}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="top">
+  <span class="logo"><i class="fas fa-camera"></i> LIMIT Connect</span>
+  <span class="status" id="statusText">Spremno za skeniranje</span>
+</div>
+
+<div class="main" id="mainArea">
+  <button type="button" class="cam-btn" onclick="document.getElementById('camInput').click()">
+    <i class="fas fa-camera"></i> Slikaj racun
+  </button>
+  <div class="hint">
+    Slikajte racun kamerom. Slika ce se automatski poslati na racunalo.
+  </div>
+</div>
+
+<div class="preview" id="previewArea">
+  <img id="previewImg" alt="preview">
+  <div class="preview-actions">
+    <button type="button" class="btn-send" onclick="sendPhoto()"><i class="fas fa-paper-plane"></i> Posalji</button>
+    <button type="button" class="btn-again" onclick="resetScan()"><i class="fas fa-redo"></i> Ponovi</button>
+  </div>
+</div>
+
+<div class="uploading" id="uploadingArea">
+  <div class="spinner"></div>
+  <div style="color:#c9a84c;font-weight:600">Saljem sliku...</div>
+</div>
+
+<div class="done" id="doneArea">
+  <div class="check">&#10004;</div>
+  <h2>Slika poslana!</h2>
+  <p>Mozete zatvoriti ovu stranicu.<br>Konverzija se odvija na racunalu.</p>
+  <button type="button" class="btn-again" onclick="resetScan()" style="margin-top:1rem"><i class="fas fa-camera"></i> Slikaj jos jedan</button>
+</div>
+
+<input type="file" id="camInput" accept="image/*" capture="environment">
+
+<script>
+var TOKEN = '{{ token }}';
+var _file = null;
+
+document.getElementById('camInput').addEventListener('change', function() {
+  if (!this.files[0]) return;
+  _file = this.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('mainArea').style.display = 'none';
+    document.getElementById('previewArea').style.display = 'block';
+    document.getElementById('statusText').textContent = 'Pregled slike';
+  };
+  reader.readAsDataURL(_file);
+});
+
+// Android fallback
+window.addEventListener('pageshow', function() {
+  var cam = document.getElementById('camInput');
+  if (cam.files && cam.files[0] && !_file) {
+    _file = cam.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('mainArea').style.display = 'none';
+      document.getElementById('previewArea').style.display = 'block';
+    };
+    reader.readAsDataURL(_file);
+  }
+});
+
+function sendPhoto() {
+  if (!_file) return;
+  document.getElementById('previewArea').style.display = 'none';
+  document.getElementById('uploadingArea').style.display = 'block';
+  document.getElementById('statusText').textContent = 'Saljem...';
+
+  var fd = new FormData();
+  fd.append('file', _file);
+
+  var csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
+  if (csrfMatch) fd.append('csrfmiddlewaretoken', csrfMatch[1]);
+
+  fetch('/scan/' + TOKEN + '/upload/', {
+    method: 'POST',
+    body: fd,
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    document.getElementById('uploadingArea').style.display = 'none';
+    if (data.ok) {
+      document.getElementById('doneArea').style.display = 'block';
+      document.getElementById('statusText').textContent = 'Poslano!';
+    } else {
+      alert(data.error || 'Greska pri slanju');
+      resetScan();
+    }
+  })
+  .catch(function(e) {
+    document.getElementById('uploadingArea').style.display = 'none';
+    alert('Greska: ' + e.message);
+    resetScan();
+  });
+}
+
+function resetScan() {
+  _file = null;
+  document.getElementById('camInput').value = '';
+  document.getElementById('mainArea').style.display = 'flex';
+  document.getElementById('previewArea').style.display = 'none';
+  document.getElementById('uploadingArea').style.display = 'none';
+  document.getElementById('doneArea').style.display = 'none';
+  document.getElementById('statusText').textContent = 'Spremno za skeniranje';
+}
+</script>
+</body></html>

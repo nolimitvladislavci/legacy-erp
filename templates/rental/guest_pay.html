@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="hr"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Placanje</title>
+<style>
+:root{--bg:#0a0a0a;--card:#141414;--border:#222;--gold:#c9a84c;--text:#e8e8e8;--muted:#666;--green:#22c55e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;max-width:400px;width:100%;text-align:center}
+h2{color:var(--gold);font-size:1.2rem;margin-bottom:.5rem}
+.amount{font-size:2.5rem;font-weight:800;color:var(--gold);margin:.8rem 0}
+.breakdown{text-align:left;font-size:.8rem;margin-bottom:1.5rem}
+.breakdown div{display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid var(--border)}
+.pay-btn{display:block;width:100%;padding:.7rem;border:none;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;margin-bottom:.5rem;text-align:center}
+.pay-btn.stripe{background:var(--gold);color:#000}
+.pay-btn.btcpay{background:#f7931a;color:#fff}
+.pay-btn.paypal{background:#0070ba;color:#fff}
+</style>
+</head><body>
+<div class="card">
+  <h2>&#128179; Placanje boravka</h2>
+  <div style="font-size:.85rem;color:var(--muted)">{{ booking.rental_property.name }} &middot; {{ booking.booking_number }}</div>
+
+  <div class="amount">&euro;{{ booking.total_price|floatformat:2 }}</div>
+
+  <div class="breakdown">
+    <div><span>{{ booking.total_nights }} noci x &euro;{{ booking.price_per_night }}</span><span>&euro;{{ booking.subtotal|floatformat:2 }}</span></div>
+    {% if booking.tourist_tax_total %}<div><span>Boravisna pristojba</span><span>&euro;{{ booking.tourist_tax_total|floatformat:2 }}</span></div>{% endif %}
+    {% if booking.cleaning_fee %}<div><span>Ciscenje</span><span>&euro;{{ booking.cleaning_fee|floatformat:2 }}</span></div>{% endif %}
+  </div>
+
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="method" value="stripe">
+    <button type="submit" class="pay-btn stripe">&#128179; Plati karticom</button>
+  </form>
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="method" value="paypal">
+    <button type="submit" class="pay-btn paypal">&#128176; PayPal</button>
+  </form>
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="method" value="btcpay">
+    <button type="submit" class="pay-btn btcpay">&#8383; Bitcoin / Crypto</button>
+  </form>
+</div>
+</body></html>

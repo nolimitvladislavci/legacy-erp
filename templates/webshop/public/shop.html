@@ -1,0 +1,185 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'hr' }}" data-theme="{{ company.booking_theme|default:'dark' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ company.name }} — Webshop</title>
+<script>(function(){var t=localStorage.getItem('booking-theme')||'{{ company.booking_theme|default:"dark" }}';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/booking/css/booking-theme.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.shop-wrap{max-width:1200px;margin:0 auto;padding:1.5rem 1rem}
+.shop-hero{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.shop-hero h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--text);margin-bottom:.5rem}
+.shop-hero p{color:var(--muted);font-size:.9rem}
+.shop-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center}
+.shop-filters form{display:flex;gap:.5rem;flex-wrap:wrap;width:100%}
+.filter-input{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.45rem .75rem;font-size:.85rem;font-family:inherit}
+.filter-input:focus{outline:none;border-color:var(--gold)}
+.filter-btn{background:var(--gold);color:#000;border:none;border-radius:6px;padding:.45rem 1rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
+.cat-pills{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.cat-pill{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;text-decoration:none;transition:all .15s}
+.cat-pill:hover,.cat-pill.active{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold)}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem}
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .2s;display:flex;flex-direction:column}
+.prod-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.prod-card-img{aspect-ratio:4/3;background:var(--dark);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.prod-card-img img{width:100%;height:100%;object-fit:cover}
+.prod-card-img .no-img{font-size:3rem;color:var(--muted)}
+.prod-card-body{padding:1rem;flex:1;display:flex;flex-direction:column}
+.prod-card-cat{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);font-weight:700;margin-bottom:.3rem}
+.prod-card-name{font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:.4rem;line-height:1.3}
+.prod-card-desc{font-size:.8rem;color:var(--muted);line-height:1.5;flex:1;margin-bottom:.75rem}
+.prod-card-footer{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.prod-price{font-size:1.05rem;font-weight:800;color:var(--gold)}
+.prod-add-btn{background:var(--gold);color:#000;border:none;border-radius:7px;padding:.4rem .8rem;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
+.prod-add-btn:hover{background:#b8922e}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:var(--dark);border-top:2px solid var(--gold);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;z-index:100;transition:transform .3s}
+.cart-bar.hidden{transform:translateY(100%)}
+.cart-bar-info{font-size:.9rem;color:var(--text)}
+.cart-bar-info strong{color:var(--gold)}
+.cart-btn{background:var(--gold);color:#000;border:none;border-radius:8px;padding:.6rem 1.4rem;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit;text-decoration:none}
+.empty{text-align:center;padding:3rem;color:var(--muted)}
+.pagination{display:flex;gap:.4rem;justify-content:center;margin-top:2rem}
+.page-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.4rem .8rem;font-size:.85rem;cursor:pointer;text-decoration:none}
+.page-btn.active{background:var(--gold);color:#000;border-color:var(--gold)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark);color:var(--text);border:1px solid var(--gold);border-radius:10px;padding:.6rem 1.4rem;font-size:.88rem;font-weight:600;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<nav class="booking-nav">
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/" class="brand">{{ company.name }}</a>
+  <div class="nav-right">
+    {% include 'partials/_theme_switcher.html' %}
+    {% include 'partials/_lang_switcher.html' %}
+    <a href="/hr/webshop/shop/{{ company.booking_slug }}/kosara/" class="cart-btn" id="navCartBtn">
+      Košarica <span id="navCartCount">0</span>
+    </a>
+  </div>
+</nav>
+
+<div class="shop-wrap">
+  <div class="shop-hero">
+    <h1>{{ company.name }}</h1>
+    <p>Odaberite proizvod — dostava ili osobno preuzimanje</p>
+  </div>
+
+  <div class="cat-pills">
+    <a href="?{% if q %}q={{ q }}&{% endif %}sort={{ sort }}" class="cat-pill {% if not cat %}active{% endif %}">Sve</a>
+    {% for c_val, c_label in cats %}
+    <a href="?cat={{ c_val }}{% if q %}&q={{ q }}{% endif %}&sort={{ sort }}" class="cat-pill {% if cat == c_val %}active{% endif %}">{{ c_label }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="shop-filters">
+    <form method="get">
+      <input type="hidden" name="cat" value="{{ cat }}">
+      <input class="filter-input" name="q" value="{{ q }}" placeholder="Pretraži proizvode..." style="flex:1;min-width:200px">
+      <select class="filter-input" name="sort" onchange="this.form.submit()">
+        <option value="name" {% if sort == 'name' %}selected{% endif %}>A-Z</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Cijena ↑</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Cijena ↓</option>
+      </select>
+      <button type="submit" class="filter-btn">Traži</button>
+    </form>
+  </div>
+
+  {% if products %}
+  <div class="prod-grid">
+    {% for p in products %}
+    <div class="prod-card">
+      <div class="prod-card-img">
+        {% if p.image %}
+          <img src="{{ p.image.url }}" alt="{{ p.name }}">
+        {% else %}
+          <span class="no-img">{% if p.category == 'OPTICS' %}👓{% else %}📦{% endif %}</span>
+        {% endif %}
+      </div>
+      <div class="prod-card-body">
+        <div class="prod-card-cat">{{ p.get_category_display }}</div>
+        <div class="prod-card-name">{{ p.name }}</div>
+        <div class="prod-card-desc">{{ p.description|truncatechars:80 }}</div>
+        <div class="prod-card-footer">
+          <span class="prod-price">€{{ p.price|floatformat:2 }}</span>
+          <button class="prod-add-btn" onclick="addToCart({{ p.pk }}, '{{ p.name|escapejs }}')">+ Dodaj</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if products.has_other_pages %}
+  <div class="pagination">
+    {% if products.has_previous %}
+    <a href="?page={{ products.previous_page_number }}&cat={{ cat }}&q={{ q }}&sort={{ sort }}" class="page-btn">←</a>
+    {% endif %}
+    {% for i in products.paginator.page_range %}
+    <a href="?page={{ i }}&cat={{ cat }}&q={{ q }}&sort={{ sort }}" class="page-btn {% if i == products.number %}active{% endif %}">{{ i }}</a>
+    {% endfor %}
+    {% if products.has_next %}
+    <a href="?page={{ products.next_page_number }}&cat={{ cat }}&q={{ q }}&sort={{ sort }}" class="page-btn">→</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty">
+    <p style="font-size:2.5rem;margin-bottom:.5rem">🔍</p>
+    <p>Nema proizvoda za traženi upit.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="cart-bar hidden" id="cartBar">
+  <div class="cart-bar-info">Košarica: <strong id="cartCount">0</strong> art.</div>
+  <a href="/hr/webshop/shop/{{ company.booking_slug }}/kosara/" class="cart-btn">Pregledaj košaricu →</a>
+</div>
+
+<script>
+var SLUG = '{{ company.booking_slug }}';
+var CSRF = '{{ csrf_token }}';
+var cartCount = parseInt(localStorage.getItem('cart_count_' + SLUG) || '0');
+updateCartUI();
+
+function addToCart(pid, name) {
+  fetch('/hr/webshop/shop/' + SLUG + '/kosara/dodaj/', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {'Content-Type':'application/json','X-CSRFToken':CSRF},
+    body: JSON.stringify({product_id: pid, qty: 1})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok) {
+      cartCount = d.cart_count;
+      localStorage.setItem('cart_count_' + SLUG, cartCount);
+      updateCartUI();
+      showToast('Dodano: ' + name);
+    }
+  });
+}
+
+function updateCartUI() {
+  document.getElementById('cartCount').textContent = cartCount;
+  document.getElementById('navCartCount').textContent = cartCount;
+  var bar = document.getElementById('cartBar');
+  if (cartCount > 0) bar.classList.remove('hidden');
+  else bar.classList.add('hidden');
+}
+
+var _t;
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_t);
+  _t = setTimeout(function(){ el.classList.remove('show'); }, 2500);
+}
+{% csrf_token %}
+</script>
+</body>
+</html>
