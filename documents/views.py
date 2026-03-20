@@ -3083,6 +3083,22 @@ def verfahren_sign(request):
     with open(sig_path, 'wb') as f:
         f.write(base64.b64decode(signature_b64.split(',')[1] if ',' in signature_b64 else signature_b64))
 
+    # Save immutable PDF snapshot of document version
+    try:
+        import markdown as md_lib
+        from weasyprint import HTML as WeasyprintHTML
+        doc_md = '/var/www/fina-connect/docs/Verfahrensdokumentation_LIMIT_Connect.md'
+        pdf_path = sig_path.replace('.png', '_document.pdf')
+        html_content = '<html><body style="font-family:Arial;max-width:800px;margin:auto;padding:20px">'
+        with open(doc_md) as md_f:
+            html_content += md_lib.markdown(md_f.read(), extensions=['tables'])
+        html_content += '<hr><p>Unterzeichnet von: %s<br>Datum: %s<br>IP: %s<br>Dokument-Hash: %s</p>' % (
+            signer_name, str(timezone.now()), client_ip, doc_hash)
+        html_content += '</body></html>'
+        WeasyprintHTML(string=html_content).write_pdf(pdf_path)
+    except Exception as e:
+        logging.getLogger('documents').warning('Immutable PDF failed: %s', e)
+
     return JsonResponse({
         'ok': True,
         'message': 'Verfahrensdokumentation erfolgreich unterzeichnet.',

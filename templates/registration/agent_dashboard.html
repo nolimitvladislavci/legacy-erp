@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Agent Dashboard — LIMIT Connect{% endblock %}
+
+{% block content %}
+<style>
+.agent-wrap{max-width:1000px;margin:0 auto;padding:20px}
+.agent-wrap h1{font-family:'Cormorant Garamond',serif;color:#c9a84c;font-size:2rem;margin-bottom:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:20px;text-align:center}
+.stat-card .num{font-size:2.2rem;font-weight:700;color:#c9a84c;font-family:'Cormorant Garamond',serif}
+.stat-card .lbl{color:#888;font-size:.85rem;margin-top:4px}
+.comm-card{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:20px;margin-bottom:24px}
+.comm-card h3{color:#c9a84c;font-family:'Cormorant Garamond',serif;margin-bottom:12px}
+.comm-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #222}
+.comm-row:last-child{border:none}
+.comm-label{color:#888}
+.comm-value{font-weight:600;color:#e0e0e0}
+.comm-value.gold{color:#c9a84c;font-size:1.3rem}
+.qr-section{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:24px;margin-bottom:24px;text-align:center}
+.qr-section h3{color:#c9a84c;font-family:'Cormorant Garamond',serif;margin-bottom:12px}
+.qr-section .ref-code{font-size:1.8rem;color:#c9a84c;font-weight:700;letter-spacing:2px;margin:12px 0}
+.qr-section .wizard-url{color:#888;font-size:.8rem;word-break:break-all;margin:8px 0 16px}
+.qr-section img{border-radius:8px;background:#fff;padding:8px;max-width:200px}
+.qr-actions{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.qr-actions button,.qr-actions a{background:transparent;border:1px solid #c9a84c;color:#c9a84c;padding:8px 20px;border-radius:8px;cursor:pointer;text-decoration:none;font-size:.9rem;transition:.2s}
+.qr-actions button:hover,.qr-actions a:hover{background:#c9a84c;color:#0a0a0a}
+.leads-table{width:100%;border-collapse:collapse;margin-top:10px}
+.leads-table th{text-align:left;color:#c9a84c;font-size:.8rem;text-transform:uppercase;padding:8px 12px;border-bottom:2px solid #333}
+.leads-table td{padding:10px 12px;border-bottom:1px solid #222;font-size:.9rem;color:#e0e0e0}
+.leads-table .status{padding:2px 10px;border-radius:10px;font-size:.75rem;font-weight:600}
+.leads-table .status.signed{background:rgba(46,204,113,.15);color:#2ecc71}
+.leads-table .status.draft{background:rgba(201,168,76,.15);color:#c9a84c}
+.leads-table .status.active{background:rgba(52,152,219,.15);color:#3498db}
+.leads-table .status.rejected{background:rgba(231,76,60,.15);color:#e74c3c}
+@media print{
+  body *{visibility:hidden}
+  .print-card,.print-card *{visibility:visible}
+  .print-card{position:absolute;left:0;top:0;width:100%;background:#fff!important;color:#000!important;padding:40px;text-align:center}
+  .print-card h2{color:#000!important}
+  .print-card .ref-code{color:#333!important}
+}
+</style>
+
+<div class="agent-wrap">
+  <h1>Agent Dashboard</h1>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="num">{{ active }}</div>
+      <div class="lbl">Aktivni</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ signed }}</div>
+      <div class="lbl">Potpisani</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ draft }}</div>
+      <div class="lbl">U pripremi</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ total }}</div>
+      <div class="lbl">Ukupno</div>
+    </div>
+  </div>
+
+  <div class="comm-card">
+    <h3>Provizija</h3>
+    <div class="comm-row">
+      <span class="comm-label">Mjesecni prihod od aktivnih</span>
+      <span class="comm-value">&euro;{{ monthly_revenue }}</span>
+    </div>
+    <div class="comm-row">
+      <span class="comm-label">Provizija</span>
+      <span class="comm-value">15%</span>
+    </div>
+    <div class="comm-row">
+      <span class="comm-label">Mjesecni iznos provizije</span>
+      <span class="comm-value gold">&euro;{{ monthly_commission }}</span>
+    </div>
+  </div>
+
+  <div class="qr-section print-card">
+    <h3>Legitimationskarte / Referral QR</h3>
+    <div class="ref-code">{{ ref_code }}</div>
+    <div class="wizard-url">{{ wizard_url }}</div>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ wizard_url|urlencode }}" alt="QR Code">
+    <div class="qr-actions">
+      <button onclick="navigator.clipboard.writeText('{{ wizard_url }}').then(function(){alert('Link kopiran!')})">Kopiraj link</button>
+      <button onclick="window.print()">Ispis kartice</button>
+      <a href="{% url 'registration:sales_wizard' %}?ref={{ ref_code }}">Otvori wizard</a>
+    </div>
+  </div>
+
+  {% if leads %}
+  <h3 style="color:#c9a84c;font-family:'Cormorant Garamond',serif;margin-bottom:10px">Nedavni klijenti</h3>
+  <div style="overflow-x:auto">
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th>Tvrtka</th>
+          <th>Kontakt</th>
+          <th>Plan</th>
+          <th>Status</th>
+          <th>Datum</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lead in leads %}
+        <tr>
+          <td>{{ lead.company_name }}</td>
+          <td>{{ lead.contact_name }}<br><small style="color:#888">{{ lead.contact_phone }}</small></td>
+          <td>{{ lead.plan|title }}</td>
+          <td><span class="status {{ lead.status }}">{{ lead.get_status_display }}</span></td>
+          <td>{{ lead.created_at|date:"d.m.Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

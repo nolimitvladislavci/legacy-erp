@@ -30,4 +30,7 @@ urlpatterns = [
     # Sales Wizard
     path('sales-wizard/', views.sales_wizard, name='sales_wizard'),
     path('sales-wizard/submit/', views.sales_wizard_submit, name='sales_wizard_submit'),
+
+    # Agent Dashboard
+    path('agent/', views.agent_dashboard, name='agent_dashboard'),
 ]

@@ -471,6 +471,8 @@ class SalesLead(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     agent = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='sales_leads')
     notes = models.TextField(blank=True)
+    ref_code = models.CharField(max_length=50, blank=True, verbose_name='Referral kod')
+    commission_percent = models.DecimalField(max_digits=5, decimal_places=2, default=15, verbose_name='Provizija %')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

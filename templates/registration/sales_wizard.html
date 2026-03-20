@@ -121,6 +121,14 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
 
 <div class="sw-container">
 
+  {% if ref %}
+  <div style="background:rgba(201,168,76,.12);border:1px solid #c9a84c;border-radius:12px;padding:12px 18px;margin-bottom:16px;text-align:center">
+    <span style="color:#c9a84c;font-weight:600;font-size:.95rem">
+      {% if lang == 'de' %}Empfohlen von: {{ ref }}{% else %}Preporuka od: {{ ref }}{% endif %}
+    </span>
+  </div>
+  {% endif %}
+
   <div class="steps-bar" id="stepsBar">
     <div class="step-dot active" data-s="1"></div>
     <div class="step-dot" data-s="2"></div>
@@ -255,6 +263,7 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
 <script>
 const LANG = '{{ lang }}';
 const CSRF = '{{ csrf_token }}';
+const REF_CODE = '{{ ref|escapejs }}';
 let currentStep = 1;
 let selectedPlan = 'professional';
 let selectedModules = [];
@@ -542,6 +551,7 @@ function submitWizard() {
     modules: selectedModules,
     signature: hasSig ? sigCanvas.toDataURL('image/png') : '',
     notes: document.getElementById('f_notes').value.trim(),
+    ref_code: REF_CODE,
   };
 
   fetch('{% url "registration:sales_wizard_submit" %}', {

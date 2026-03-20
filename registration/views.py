@@ -654,8 +654,10 @@ def sales_wizard(request):
         'enterprise': {'name': 'Enterprise', 'price': 158, 'users': 50},
     }
 
+    ref = request.GET.get('ref', '')
+
     return render(request, 'registration/sales_wizard.html', {
-        'lang': lang, 'plans': plans, 'leads': leads,
+        'lang': lang, 'plans': plans, 'leads': leads, 'ref': ref,
     })
 
 
@@ -702,6 +704,12 @@ def sales_wizard_submit(request):
     # Audit trail
     client_ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR', '')
 
+    # Prepare notes with ref code if present
+    notes_text = data.get('notes', '')
+    ref_code_val = data.get('ref_code', '')
+    if ref_code_val:
+        notes_text = 'REF: %s | %s' % (ref_code_val, notes_text)
+
     lead = SalesLead.objects.create(
         company_name=data.get('company_name', ''),
         oib=data.get('oib', ''),
@@ -719,7 +727,8 @@ def sales_wizard_submit(request):
         signed_by=data.get('contact_name', ''),
         status='signed' if data.get('signature') else 'draft',
         agent=request.user,
-        notes=data.get('notes', ''),
+        notes=notes_text,
+        ref_code=ref_code_val,
     )
 
     if data.get('signature'):
@@ -756,8 +765,71 @@ def sales_wizard_submit(request):
     except Exception:
         pass
 
+    # Email to client
+    if lead.contact_email:
+        try:
+            from django.core.mail import send_mail
+            lang_code = data.get('country', 'HR')
+            if lang_code == 'DE':
+                subject = 'Willkommen bei LIMIT Connect!'
+                body = 'Sehr geehrte(r) %s,\n\nIhr LIMIT Connect Konto wird aktiviert.\n\nZugang: https://limit-connect.com\nIhr Berater: %s\n\nBei Fragen: +385 97 609 1655\n\nMit freundlichen Gruessen,\nLIMIT Connect Team' % (lead.contact_name, request.user.get_full_name() or request.user.username)
+            else:
+                subject = 'Dobrodosli u LIMIT Connect!'
+                body = 'Postovani %s,\n\nVas LIMIT Connect racun se aktivira.\n\nPristup: https://limit-connect.com\nVas savjetnik: %s\n\nZa pitanja: +385 97 609 1655\n\nSrdacan pozdrav,\nLIMIT Connect tim' % (lead.contact_name, request.user.get_full_name() or request.user.username)
+            send_mail(subject, body, None, [lead.contact_email], fail_silently=True)
+        except Exception:
+            pass
+
+    # WhatsApp to client
+    if lead.contact_phone:
+        try:
+            from core.whatsapp import send_text
+            lang_code2 = data.get('country', 'HR')
+            if lang_code2 == 'DE':
+                wa_msg = 'Willkommen bei LIMIT Connect, %s! Ihr Konto wird aktiviert. Zugang: limit-connect.com. Berater: %s' % (lead.contact_name, request.user.get_full_name() or request.user.username)
+            else:
+                wa_msg = 'Dobrodosli u LIMIT Connect, %s! Vas racun se aktivira. Pristup: limit-connect.com. Savjetnik: %s' % (lead.contact_name, request.user.get_full_name() or request.user.username)
+            send_text(lead.contact_phone, wa_msg)
+        except Exception:
+            pass
+
     return JsonResponse({
         'ok': True,
         'lead_id': lead.pk,
         'message': 'Klijent registriran!' if data.get('country') != 'DE' else 'Kunde registriert!',
+    })
+
+
+@login_required
+def agent_dashboard(request):
+    """Agent referral dashboard with QR code and commission stats."""
+    from registration.models import SalesLead
+    from decimal import Decimal
+
+    leads = SalesLead.objects.filter(agent=request.user).order_by('-created_at')
+
+    active = leads.filter(status='active').count()
+    signed = leads.filter(status='signed').count()
+    draft = leads.filter(status='draft').count()
+    total = leads.count()
+
+    # Commission calculation
+    plan_prices = {'micro': 8, 'starter': 18, 'professional': 58, 'enterprise': 158}
+    monthly_revenue = sum(
+        plan_prices.get(l.plan, 0) for l in leads.filter(status='active')
+    )
+    commission_rate = Decimal('0.15')
+    monthly_commission = Decimal(str(monthly_revenue)) * commission_rate
+
+    # Generate unique ref code for this agent
+    ref_code = 'REF-%s' % request.user.username.upper()[:8]
+    wizard_url = request.build_absolute_uri('/hr/register/sales-wizard/?ref=%s' % ref_code)
+
+    return render(request, 'registration/agent_dashboard.html', {
+        'leads': leads[:20],
+        'active': active, 'signed': signed, 'draft': draft, 'total': total,
+        'monthly_revenue': monthly_revenue,
+        'monthly_commission': monthly_commission,
+        'ref_code': ref_code,
+        'wizard_url': wizard_url,
     })
