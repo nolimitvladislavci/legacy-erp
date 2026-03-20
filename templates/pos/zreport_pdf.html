@@ -1,3 +1,4 @@
+{% load doc_integrity %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -132,5 +133,7 @@ body { font-family: 'DejaVu', Arial, Helvetica, sans-serif; }
   Generirano: {% now "d.m.Y H:i" %} &nbsp;|&nbsp; LIMIT Connect POS &nbsp;|&nbsp; {{ session.terminal.terminal_code }}
 </div>
 
+
+{% doc_integrity_badge lang="hr" %}
 </body>
 </html>

@@ -1,3 +1,4 @@
+{% load doc_integrity %}
 <!DOCTYPE html>
 <html lang="hr">
 <head>
@@ -82,5 +83,7 @@
         <div>Dokument generiran: {% now "d.m.Y H:i" %}</div>
         <div>{{ company.name }} | OIB: {{ company.oib|default:"—" }}</div>
     </div>
+
+{% doc_integrity_badge lang="hr" %}
 </body>
 </html>

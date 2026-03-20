@@ -1,3 +1,4 @@
+{% load doc_integrity %}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -79,5 +80,7 @@
 <div class="footer">
   {{ company.name }} &bull; USt-IdNr.: {{ company.vat_id|default:"—" }} &bull; Generiert mit LIMIT CONNECT &bull; {{ today }}
 </div>
+
+{% doc_integrity_badge lang="hr" %}
 </body>
 </html>

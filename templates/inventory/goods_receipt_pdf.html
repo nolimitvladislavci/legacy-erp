@@ -1,3 +1,4 @@
+{% load doc_integrity %}
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
 @page { margin: 15mm; size: A4; }
@@ -203,4 +204,6 @@ tr:nth-child(even) td { background:#fafafa; }
   &middot; Generirano: {% now "d.m.Y H:i" %}
 </div>
 
+
+{% doc_integrity_badge lang="hr" %}
 </body></html>

@@ -1,3 +1,4 @@
+{% load doc_integrity %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -66,5 +67,7 @@
         <p>Marža ({{ calculation.margin_percentage }}%): {{ totals.offer_total_net|floatformat:2 }} €</p>
         <p class="total-row">UKUPNO S PDV-om: {{ totals.offer_total_vat }} €</p>
     </div>
+
+{% doc_integrity_badge lang="hr" %}
 </body>
 </html>

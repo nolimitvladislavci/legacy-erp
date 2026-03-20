@@ -1,3 +1,4 @@
+{% load doc_integrity %}
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <style>
@@ -57,4 +58,6 @@ Trajanje: {{ e.duration_days }} radnih dana
 </table>
 {% if e.notes %}<div class="info-box" style="margin-top:20px"><strong>Napomene:</strong><br>{{ e.notes|linebreaksbr }}</div>{% endif %}
 <div class="footer"><p>{{ e.terms|default:"Rok plaćanja: 14 dana. Ponuda vrijedi 30 dana." }}</p></div>
+
+{% doc_integrity_badge lang="hr" %}
 </body></html>
