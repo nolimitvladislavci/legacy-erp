@@ -129,12 +129,33 @@
 {% endif %}
 {% endif %}
 
-{% for item in items %}{% if item.is_tip %}<div class="footer" style="border-top:none">* Napojnica (PDV 0%)</div>{% endif %}{% endfor %}
+{% if receipt.tse_transaction_number %}
+<!-- TSE / KassenSichV §6 Pflichtangaben -->
+<hr class="divider">
+<div style="font-size:6pt;color:#333;margin-top:3px">
+  <div><strong>TSE</strong></div>
+  <div>Transaktion: {{ receipt.tse_transaction_number }}</div>
+  <div>Signaturzähler: {{ receipt.tse_signature_counter }}</div>
+  <div>Seriennummer: {{ receipt.tse_serial_number }}</div>
+  <div>Start: {{ receipt.tse_start_time|date:"d.m.Y H:i:s" }}</div>
+  <div>Ende: {{ receipt.tse_end_time|date:"d.m.Y H:i:s" }}</div>
+  {% if receipt.tse_hash %}<div style="word-break:break-all;font-size:5pt">Prüfwert: {{ receipt.tse_hash|truncatechars:40 }}</div>{% endif %}
+</div>
+{% endif %}
+
+{% for item in items %}{% if item.is_tip %}<div class="footer" style="border-top:none">* Napojnica / Trinkgeld (MwSt 0%)</div>{% endif %}{% endfor %}
 <div class="footer">
+  {% if company.country == 'DE' or company.country == 'AT' %}
+  Vielen Dank für Ihren Einkauf!<br>
+  {% if receipt.note %}{{ receipt.note }}<br>{% endif %}
+  LIMIT Connect POS &mdash; {% now "d.m.Y" %}<br>
+  <span style="font-size:5pt;color:#999">Elektronisches Dokument — gültig ohne Stempel und Unterschrift. Aufbewahrungspflichtig gem. § 147 AO. GoBD-konform.</span>
+  {% else %}
   Hvala na posjetu!<br>
   {% if receipt.note %}{{ receipt.note }}<br>{% endif %}
   LIMIT Connect POS &mdash; {% now "d.m.Y" %}<br>
   <span style="font-size:5pt;color:#999">Ovaj račun je izrađen elektronički i važeći je bez žiga i potpisa (čl. 9. st. 2. ZOR-a).</span>
+  {% endif %}
 </div>
 
 </body>

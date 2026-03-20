@@ -54,7 +54,11 @@ def get_integrity_badge_context(request=None, document_id='', content='', compan
         'integrity_doc_id': document_id,
         'integrity_company': company_name,
         'integrity_oib': company_oib,
-        'integrity_verified_text_hr': 'Elektronicki dokument — vjerodostojan bez pecata i potpisa (cl. 9. st. 2. ZOR-a)',
-        'integrity_verified_text_de': 'Elektronisches Dokument — gueltig ohne Stempel und Unterschrift (§14 UStG)',
+        'integrity_verified_text_hr': 'Elektronički dokument — vjerodostojan bez pečata i potpisa (čl. 9. st. 2. ZOR-a)',
+        'integrity_verified_text_de': (
+            'Elektronisches Dokument — gültig ohne Stempel und Unterschrift. '
+            'Aufbewahrungspflichtig gem. § 147 AO. '
+            'GoBD-konform (Rz. 50-55) erstellt und unveränderbar archiviert.'
+        ),
         'integrity_system': 'LIMIT Connect ERP v2026.03',
     }

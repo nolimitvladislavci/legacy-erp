@@ -635,6 +635,33 @@ def live_metrics(request):
     """Live metrike za dashboard widget — AJAX refresh svakih 30s."""
     from superadmin_ai.models import AICouncilVote
     today = timezone.now().date()
+
+    # Recent actions (zadnjih 10)
+    recent = AIActionLog.objects.select_related('company').order_by('-timestamp')[:10]
+    recent_list = []
+    for a in recent:
+        recent_list.append({
+            'status': a.outcome or 'unknown',
+            'module': a.module or 'general',
+            'description': (a.details or {}).get('description', a.action_type or '')[:60],
+            'time': a.timestamp.strftime('%H:%M') if a.timestamp else '',
+            'id': str(a.id),
+        })
+
+    # Pending actions (cekaju odobrenje)
+    pending = PendingAIAction.objects.filter(status='pending').select_related('company').order_by('-created_at')[:5]
+    pending_list = []
+    for a in pending:
+        pending_list.append({
+            'id': str(a.id),
+            'module': a.module or 'general',
+            'description': a.description[:60] if a.description else '',
+            'time': a.created_at.strftime('%H:%M') if a.created_at else '',
+            'company': a.company.name if a.company else 'N/A',
+        })
+
+    total_today = AIActionLog.objects.filter(timestamp__date=today).count()
+
     return JsonResponse({
         'autonomous_today': AIActionLog.objects.filter(
             timestamp__date=today, access_level__gte=3, outcome='executed'
@@ -646,4 +673,7 @@ def live_metrics(request):
         'council_votes': AICouncilVote.objects.filter(
             voted_at__date=today
         ).count(),
+        'total_today': total_today,
+        'recent_actions': recent_list,
+        'pending_actions': pending_list,
     })

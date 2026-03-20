@@ -487,11 +487,11 @@ def arhiva_list(request):
             companies = managed
             qs = ArhivaEntry.objects.select_related('company').filter(
                 company__in=managed
-            ).exclude(amount=0, source_type='pos_receipt').order_by('-archived_at')
+            ).exclude(amount=0).order_by('-archived_at')
         else:
             # Platform owner - vidi sve
             companies = Company.objects.all().order_by('name')
-            qs = ArhivaEntry.objects.select_related('company').exclude(amount=0, source_type='pos_receipt').order_by('-archived_at')
+            qs = ArhivaEntry.objects.select_related('company').exclude(amount=0).order_by('-archived_at')
 
         company_filter = request.GET.get('company', '')
         year_filter = request.GET.get('year', '')
@@ -503,7 +503,7 @@ def arhiva_list(request):
         company = get_user_company(request)
         if not company:
             return render(request, 'documents/arhiva_list.html', {'entries': [], 'is_superadmin': False})
-        qs = ArhivaEntry.objects.filter(company=company).exclude(amount=0, source_type='pos_receipt').order_by('-doc_date', '-archived_at')
+        qs = ArhivaEntry.objects.filter(company=company).exclude(amount=0).order_by('-doc_date', '-archived_at')
         company_filter = ''
         companies = []
         # Show all company documents by default
