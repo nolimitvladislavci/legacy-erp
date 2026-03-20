@@ -48,12 +48,38 @@ class PosrednikService:
 
     @classmethod
     def get_config(cls, company):
-        """Dohvati posrednik konfiguraciju iz company.settings."""
+        """
+        Dohvati posrednik konfiguraciju.
+        Prvo trazi u ERacunConfig (per-company settings page),
+        fallback na company.settings['posrednik'] (JSON).
+        Svaki komitent moze imati svog posrednika.
+        """
+        # Primarno: ERacunConfig model (settings page)
+        try:
+            from eracun.models import ERacunConfig
+            ec = ERacunConfig.objects.filter(company=company).first()
+            if ec and getattr(ec, 'posrednik_type', ''):
+                return {
+                    'type': ec.posrednik_type or 'moj_eracun',
+                    'api_key': getattr(ec, 'posrednik_api_key', '') or '',
+                    'api_secret': getattr(ec, 'posrednik_api_secret', '') or '',
+                    'api_url': getattr(ec, 'posrednik_api_url', '') or '',
+                    'username': getattr(ec, 'posrednik_username', '') or '',
+                    'password': getattr(ec, 'posrednik_password', '') or '',
+                    'test_mode': getattr(ec, 'posrednik_test_mode', True),
+                    'auto_send': getattr(ec, 'is_active', False),
+                    'company_id': getattr(ec, 'posrednik_company_id', '') or '',
+                }
+        except Exception:
+            pass
+
+        # Fallback: company.settings JSON
         cfg = company.settings.get('posrednik', {}) if company.settings else {}
         return {
             'type': cfg.get('type', 'moj_eracun'),
             'api_key': cfg.get('api_key', ''),
             'api_secret': cfg.get('api_secret', ''),
+            'api_url': cfg.get('api_url', ''),
             'username': cfg.get('username', ''),
             'password': cfg.get('password', ''),
             'test_mode': cfg.get('test_mode', True),
