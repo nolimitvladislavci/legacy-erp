@@ -122,7 +122,14 @@
     </div>
     <div class="aiw-input-bar">
         <input type="file" id="aiwPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="photoSelected(this)">
-        <button class="aiw-photo-btn" onclick="document.getElementById('aiwPhotoInput').click()" title="Uslikaj problem">&#128247;</button>
+        <button class="aiw-photo-btn" onclick="(window.FenixCamera ? FenixCamera.quick('aiwPhotoPreview', {
+        onReady: function(r) {
+          currentPhotoB64 = r.b64;
+          document.getElementById('aiwPhotoThumb').src = r.dataUrl;
+          document.getElementById('aiwPhotoPreview').style.display = 'block';
+        },
+        onClear: function() { currentPhotoB64 = null; }
+      }) : document.getElementById('aiwPhotoInput').click())" title="Uslikaj problem">&#128247;</button>
         <input class="aiw-input" id="aiwInput" placeholder="Pitaj ili uslikaj problem..."
                onkeydown="if(event.key==='Enter'){event.preventDefault();sendWidgetMsg()}">
         <button class="aiw-send" onclick="sendWidgetMsg()"><i class="fas fa-paper-plane"></i></button>

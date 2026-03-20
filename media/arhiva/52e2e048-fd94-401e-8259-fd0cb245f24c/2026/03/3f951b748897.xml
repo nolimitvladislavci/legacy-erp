@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns0:Invoice xmlns:ns0="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:ns1="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ns2="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <ns1:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</ns1:CustomizationID>
+  <ns1:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</ns1:ProfileID>
+  <ns1:ID>9327/002/00001</ns1:ID>
+  <ns1:IssueDate>2020-03-26</ns1:IssueDate>
+  <ns1:InvoiceTypeCode>380</ns1:InvoiceTypeCode>
+  <ns1:DocumentCurrencyCode>EUR</ns1:DocumentCurrencyCode>
+  <ns2:AccountingSupplierParty>
+    <ns2:Party>
+      <ns2:PartyIdentification>
+        <ns1:ID schemeID="0191">DE3339016/7</ns1:ID>
+      </ns2:PartyIdentification>
+      <ns2:PartyName>
+        <ns1:Name>EG Deutschland Retail &amp; Energy GmbH</ns1:Name>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName>Ludwig-Erhard-Str. 22</ns1:StreetName>
+        <ns1:CityName>Hamburg</ns1:CityName>
+        <ns1:PostalZone>20459</ns1:PostalZone>
+        <ns2:Country>
+          <ns1:IdentificationCode>DE</ns1:IdentificationCode>
+        </ns2:Country>
+      </ns2:PostalAddress>
+      <ns2:PartyTaxScheme>
+        <ns1:CompanyID>HRDE3339016/7</ns1:CompanyID>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:PartyTaxScheme>
+    </ns2:Party>
+  </ns2:AccountingSupplierParty>
+  <ns2:AccountingCustomerParty>
+    <ns2:Party>
+      <ns2:PartyName>
+        <ns1:Name/>
+      </ns2:PartyName>
+      <ns2:PostalAddress>
+        <ns1:StreetName/>
+        <ns1:CityName/>
+        <ns1:PostalZone/>
+        <ns2:Country>
+          <ns1:IdentificationCode/>
+        </ns2:Country>
+      </ns2:PostalAddress>
+    </ns2:Party>
+  </ns2:AccountingCustomerParty>
+  <ns2:PaymentMeans>
+    <ns1:PaymentMeansCode>30</ns1:PaymentMeansCode>
+  </ns2:PaymentMeans>
+  <ns2:TaxTotal>
+    <ns1:TaxAmount currencyID="EUR">8.24</ns1:TaxAmount>
+    <ns2:TaxSubtotal>
+      <ns1:TaxableAmount currencyID="EUR">55.02</ns1:TaxableAmount>
+      <ns1:TaxAmount currencyID="EUR">10.45</ns1:TaxAmount>
+      <ns2:TaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>19</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:TaxCategory>
+    </ns2:TaxSubtotal>
+  </ns2:TaxTotal>
+  <ns2:LegalMonetaryTotals>
+    <ns1:LineExtensionAmount currencyID="EUR">46.78</ns1:LineExtensionAmount>
+    <ns1:TaxExclusiveAmount currencyID="EUR">46.78</ns1:TaxExclusiveAmount>
+    <ns1:TaxInclusiveAmount currencyID="EUR">55.02</ns1:TaxInclusiveAmount>
+    <ns1:PayableAmount currencyID="EUR">55.02</ns1:PayableAmount>
+  </ns2:LegalMonetaryTotals>
+  <ns2:InvoiceLine>
+    <ns1:ID>1</ns1:ID>
+    <ns1:InvoicedQuantity unitCode="LTR">25.85</ns1:InvoicedQuantity>
+    <ns1:LineExtensionAmount currencyID="EUR">55.02</ns1:LineExtensionAmount>
+    <ns2:Item>
+      <ns1:Name>Super E10</ns1:Name>
+      <ns2:ClassifiedTaxCategory>
+        <ns1:ID>S</ns1:ID>
+        <ns1:Percent>19</ns1:Percent>
+        <ns2:TaxScheme>
+          <ns1:ID>VAT</ns1:ID>
+        </ns2:TaxScheme>
+      </ns2:ClassifiedTaxCategory>
+    </ns2:Item>
+    <ns2:Price>
+      <ns1:PriceAmount currencyID="EUR">2.05</ns1:PriceAmount>
+    </ns2:Price>
+  </ns2:InvoiceLine>
+</ns0:Invoice>
