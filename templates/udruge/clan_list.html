@@ -71,12 +71,12 @@
       <tbody>
         {% for m in page_obj %}
         <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-          <td style="padding:.5rem .6rem;font-size:.85rem">
+          <td style="padding:.5rem .6rem;font-size:.85rem" data-label="Ime">
             <a href="{% url 'udruge:clan_detail' m.pk %}" style="font-weight:600;color:var(--text);text-decoration:none">{{ m.full_name }}</a>
             {% if m.has_opg %}<span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.6rem;padding:1px 5px;border-radius:8px;margin-left:4px">OPG</span>{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;font-size:.78rem;font-family:monospace">{{ m.oib|default:"-" }}</td>
-          <td style="padding:.5rem .6rem;font-size:.82rem">{{ m.phone|default:"-" }}</td>
+          <td style="padding:.5rem .6rem;font-size:.78rem;font-family:monospace" data-label="OIB">{{ m.oib|default:"-" }}</td>
+          <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Telefon">{{ m.phone|default:"-" }}</td>
           <td style="padding:.5rem .6rem">
             {% if m.status == "aktivan" %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Aktivan</span>
             {% else %}<span style="color:var(--muted);font-size:.78rem">{{ m.get_status_display }}</span>{% endif %}
@@ -88,7 +88,7 @@
               {% else %}{{ m.membership_expires|date:"d.m.Y" }}{% endif %}
             {% else %}-{% endif %}
           </td>
-          <td style="padding:.5rem .6rem;font-size:.78rem">{{ m.get_business_interest_display|default:"-" }}</td>
+          <td style="padding:.5rem .6rem;font-size:.78rem" data-label="Interes">{{ m.get_business_interest_display|default:"-" }}</td>
           <td style="padding:.5rem .6rem"><a href="{% url 'udruge:clan_detail' m.pk %}" style="color:var(--gold);font-size:.8rem">Detalji</a></td>
         </tr>
         {% empty %}
