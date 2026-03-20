@@ -530,6 +530,15 @@ class CheckoutService:
                         )
                         logger.info('Auto e-Racun kreiran za R1 bon #%s -> eRacun %s',
                                     receipt.receipt_number, eracun.pk)
+                        # Auto-send kroz posrednika ako je konfiguriran
+                        try:
+                            from eracun.services.posrednik_service import PosrednikService
+                            if PosrednikService.is_configured(company):
+                                from django.db import transaction as db_tx2
+                                db_tx2.on_commit(lambda: PosrednikService.send(eracun))
+                                logger.info('e-Racun %s queued za slanje kroz posrednika', eracun.pk)
+                        except Exception as pe:
+                            logger.warning('Posrednik auto-send skip: %s', pe)
                     except Exception as e:
                         logger.warning('Auto e-Racun failed za bon #%s: %s', receipt.receipt_number, e)
                 db_tx.on_commit(_create_eracun)

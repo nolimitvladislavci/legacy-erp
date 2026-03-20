@@ -455,6 +455,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "udruge.tasks.send_expiry_reminders",
         "schedule": crontab(hour=9, minute=0, day_of_week=1),
     },
+    "eracun-fetch-inbox": {
+        "task": "eracun.tasks.fetch_posrednik_inbox",
+        "schedule": crontab(hour="*/4", minute=15),
+    },
+    "eracun-retry-unsent": {
+        "task": "eracun.tasks.retry_unsent_eracuni",
+        "schedule": crontab(minute="*/30"),
+    },
     "udruge-evaluate-subscriptions": {
         "task": "udruge.tasks.evaluate_subscriptions",
         "schedule": crontab(hour=2, minute=15),
