@@ -164,9 +164,48 @@
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
 
         /* ═══ MOBILE ═══ */
+        /* ── GLOBAL MOBILE RESPONSIVE ── */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); width: 280px; }
             .sidebar.open { transform: translateX(0); }
+
+            /* Touch targets: min 44px (Apple HIG / WCAG 2.5.5) */
+            button, .btn, a.btn, input[type="submit"], select {
+                min-height: 44px !important;
+            }
+
+            /* Tables: horizontal scroll */
+            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            th, td { white-space: nowrap; padding: 6px 8px !important; font-size: .78rem !important; }
+
+            /* Forms: full width inputs */
+            input[type="text"], input[type="email"], input[type="number"],
+            input[type="tel"], input[type="date"], input[type="password"],
+            select, textarea {
+                width: 100% !important;
+                font-size: 16px !important; /* prevents iOS zoom */
+                padding: 10px !important;
+                box-sizing: border-box;
+            }
+
+            /* Grids: single column */
+            .stats-grid, .grid-2, .grid-3, [style*="grid-template-columns: repeat"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Cards: full width */
+            .card, .section, .vd-section, [style*="max-width:900px"] {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 1rem !important;
+            }
+
+            /* Topbar: compact */
+            .topbar-title { font-size: .8rem !important; }
+            .topbar-actions { gap: 4px !important; }
+
+            /* Hide non-essential on mobile */
+            .hide-mobile, .desktop-only { display: none !important; }
             .sidebar-close { display: block; }
             .sidebar-overlay.open { display: block; }
             .main { margin-left: 0; }

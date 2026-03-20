@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ clan.full_name }}{% endblock %}
+<style>
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr !important}
+  table{font-size:.75rem}
+  td,th{padding:4px 6px !important}
+  .btn,button{width:100%;margin-bottom:6px}
+  form select,form input{width:100% !important;font-size:16px !important}
+}
+</style>
 {% block content %}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
   <div>
