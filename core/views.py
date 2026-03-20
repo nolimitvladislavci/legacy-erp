@@ -2790,3 +2790,10 @@ def tim_chat_send(request):
         status='new',
     )
     return JsonResponse({'ok': True, 'id': str(s.id), 'message': 'Poruka primljena ✅'})
+
+
+def promo_page(request):
+    return render(request, 'website/promo_hr.html')
+
+def promo_page_de(request):
+    return render(request, 'website/promo_de.html')

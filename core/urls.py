@@ -103,8 +103,8 @@ urlpatterns += i18n_patterns(
     path("revizorski-paket/", views.audit_package, name="audit_package"),
     path("newsletter/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'core/newsletter_2026.html'), name="newsletter"),
         # Promo landing pages
-    path("promo/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/promo_hr.html'), name='promo_hr'),
-    path("promo/de/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/promo_de.html'), name='promo_de'),
+    path("promo/", views.promo_page, name="promo_hr"),
+    path("promo/de/", views.promo_page_de, name="promo_de"),
     path("newsletter/de/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'core/newsletter_2026_de.html'), name="newsletter_de"),
 
     # DE Promotion Pack
