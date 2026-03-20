@@ -207,6 +207,43 @@
             /* Hide non-essential on mobile */
             .hide-mobile, .desktop-only { display: none !important; }
             .sidebar-close { display: block; }
+        /* ── TABLE TO CARD VIEW (mobile) ── */
+        @media (max-width: 600px) {
+            .mobile-cards table thead { display: none; }
+            .mobile-cards table tbody tr {
+                display: block;
+                background: var(--card, #1a1a1a);
+                border: 1px solid var(--border, #333);
+                border-radius: 10px;
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            .mobile-cards table tbody td {
+                display: flex;
+                justify-content: space-between;
+                padding: 4px 0 !important;
+                border: none !important;
+                font-size: .82rem !important;
+                white-space: normal !important;
+            }
+            .mobile-cards table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--gold, #c9a84c);
+                font-size: .72rem;
+                margin-right: 8px;
+                flex-shrink: 0;
+            }
+            /* First cell = title, bigger */
+            .mobile-cards table tbody td:first-child {
+                font-weight: 700;
+                font-size: .9rem !important;
+                border-bottom: 1px solid var(--border, #333) !important;
+                padding-bottom: 8px !important;
+                margin-bottom: 4px;
+            }
+        }
+
             .sidebar-overlay.open { display: block; }
             .main { margin-left: 0; }
             .hamburger { display: block; }
@@ -758,5 +795,55 @@ window.FC = {
 <script src="/static/js/fenix-camera.js"></script>
 <script src="/static/js/fenix-permissions.js"></script>
 <script src="/static/js/worktime-offline.js"></script>
+
+<!-- ══ MOBILE BOTTOM NAV ══ -->
+<nav id="mobileBottomNav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:8000;background:#0f172a;border-top:1px solid #1e293b;padding:4px 0 env(safe-area-inset-bottom,4px);box-shadow:0 -2px 10px rgba(0,0,0,.3)">
+  <div style="display:flex;justify-content:space-around;align-items:center;max-width:500px;margin:0 auto">
+    <a href="/hr/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
+      <i class="fas fa-home" style="font-size:1.1rem"></i>
+      <span>Home</span>
+    </a>
+    <a href="/hr/pos/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
+      <i class="fas fa-cash-register" style="font-size:1.1rem"></i>
+      <span>POS</span>
+    </a>
+    <a href="/hr/documents/arhiva/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
+      <i class="fas fa-archive" style="font-size:1.1rem"></i>
+      <span>Arhiva</span>
+    </a>
+    <a href="/hr/partners/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
+      <i class="fas fa-users" style="font-size:1.1rem"></i>
+      <span>Partneri</span>
+    </a>
+    <button onclick="openSidebar()" style="display:flex;flex-direction:column;align-items:center;background:none;border:none;color:#c9a84c;font-size:.6rem;padding:6px 12px;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent" class="bnav-item">
+      <i class="fas fa-bars" style="font-size:1.1rem"></i>
+      <span>Vise</span>
+    </button>
+  </div>
+</nav>
+<script>
+(function(){
+  // Show bottom nav only on mobile
+  function checkMobile(){
+    var bn = document.getElementById('mobileBottomNav');
+    if(!bn) return;
+    bn.style.display = window.innerWidth <= 768 ? 'block' : 'none';
+    // Add padding to body so content doesn't hide behind nav
+    document.body.style.paddingBottom = window.innerWidth <= 768 ? '60px' : '0';
+    // Highlight current page
+    var path = window.location.pathname;
+    var items = bn.querySelectorAll('.bnav-item');
+    items.forEach(function(a){
+      var href = a.getAttribute('href') || '';
+      if(href && path.startsWith(href) && href.length > 4) {
+        a.style.color = '#c9a84c';
+      }
+    });
+  }
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+})();
+</script>
+
 </body>
 </html>
