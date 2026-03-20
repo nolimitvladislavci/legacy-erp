@@ -153,3 +153,36 @@ class RateLimitMiddleware:
             pass
 
         return self.get_response(request)
+
+
+class AdminLangRedirectMiddleware:
+    """Preusmjeri /de/superadmin/ i ostale admin URL-ove na /hr/."""
+    ADMIN_PREFIXES = (
+        "/de/superadmin/",
+        "/de/admin/",
+        "/de/accounts/",
+        "/de/worktime/",
+        "/de/pos/",
+        "/de/invoicing/",
+        "/de/documents/",
+        "/de/tim-chat/",
+        "/de/companies/",
+        "/de/partners/",
+        "/de/inventory/",
+        "/de/konto/",
+        "/de/eracun/",
+    )
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        path = request.path
+        for prefix in self.ADMIN_PREFIXES:
+            if path.startswith(prefix):
+                new_path = "/hr/" + path[len("/de/"):]
+                qs = "?" + request.META.get("QUERY_STRING", "") \
+                    if request.META.get("QUERY_STRING") else ""
+                from django.http import HttpResponsePermanentRedirect
+                return HttpResponsePermanentRedirect(new_path + qs)
+        return self.get_response(request)

@@ -124,10 +124,10 @@ class GeminiAgent:
         if not self.api_key:
             raise GeminiAgentError('GEMINI_API_KEY not set')
 
-        import google.generativeai as genai
-        genai.configure(api_key=self.api_key)
+        from google import genai
+        
 
-        model = genai.GenerativeModel(self.model)
+        client = genai.Client(api_key=self.api_key)
 
         system_prompt = """Ti si Gemini Agent — autonomni AI developer s punim pristupom LIMIT Connect serveru.
 
@@ -155,7 +155,7 @@ Kad završiš, vrati: {"action": "DONE", "summary": "...", "files_changed": [...
         for step_context in self.history[-5:]:
             full_prompt += '\n\nPrethodni korak: ' + json.dumps(step_context, ensure_ascii=False)[:2000]
 
-        response = model.generate_content(full_prompt)
+        response = client.models.generate_content(model=self.model, contents=full_prompt)
         return response.text
 
     # ── Glavni loop ──────────────────────────────────────────
