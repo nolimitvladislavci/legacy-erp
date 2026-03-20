@@ -39,6 +39,11 @@
     }
     .aiw-input:focus { border-color:#c9a84c; }
     .aiw-send { background:#c9a84c; color:#0a0a0a; border:none; padding:0 12px; border-radius:6px; font-weight:600; cursor:pointer; font-size:.78rem; }
+    .aiw-photo-btn { background:#1e293b; color:#c9a84c; border:1px solid #334155; padding:0 10px; border-radius:6px; cursor:pointer; font-size:.9rem; flex-shrink:0; }
+    .aiw-photo-btn:hover { border-color:#c9a84c; }
+    .aiw-photo-preview { display:none; padding:4px 12px 8px; background:#0f172a; }
+    .aiw-photo-preview img { max-width:100%; max-height:70px; border-radius:4px; border:1px solid #334155; }
+    .aiw-photo-clear { float:right; background:none; border:none; color:#888; cursor:pointer; }
 
     .aiw-typing { color:#c9a84c; font-size:.72rem; padding:2px 12px; }
 
@@ -94,8 +99,14 @@
     <div class="aiw-messages" id="aiwMessages">
         <div class="aiw-msg assistant">Dobrodošli! Pratim vaše poslovanje i spreman sam pomoći. Što vas zanima danas?<div class="aiw-actions"><button class="aiw-action-btn" onclick="inp.value='Kakvo je stanje u arhivi?';sendWidgetMsg()">📄 Arhiva</button><button class="aiw-action-btn" onclick="inp.value='Što je novo danas?';sendWidgetMsg()">📊 Pregled dana</button><button class="aiw-action-btn" onclick="inp.value='Trebam pomoć';sendWidgetMsg()">💬 Pomoć</button></div></div>
     </div>
+    <div id="aiwPhotoPreview" style="display:none;padding:4px 12px 6px;background:#0f172a;">
+        <button onclick="clearPhoto()" style="float:right;background:none;border:none;color:#888;cursor:pointer;">&#10005;</button>
+        <img id="aiwPhotoThumb" src="" style="max-width:100%;max-height:60px;border-radius:4px;border:1px solid #334155;">
+    </div>
     <div class="aiw-input-bar">
-        <input class="aiw-input" id="aiwInput" placeholder="Pitajte nesto..."
+        <input type="file" id="aiwPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="photoSelected(this)">
+        <button class="aiw-photo-btn" onclick="document.getElementById('aiwPhotoInput').click()" title="Uslikaj problem">&#128247;</button>
+        <input class="aiw-input" id="aiwInput" placeholder="Pitaj ili uslikaj problem..."
                onkeydown="if(event.key==='Enter'){event.preventDefault();sendWidgetMsg()}">
         <button class="aiw-send" onclick="sendWidgetMsg()"><i class="fas fa-paper-plane"></i></button>
     </div>
@@ -173,7 +184,7 @@
     window.sendWidgetMsg = function(){
         if(wSending) return;
         var text = inp.value.trim();
-        if(!text) return;
+        if(!text){ inp.placeholder="Napišite pitanje..."; inp.style.borderColor="#c9a84c"; setTimeout(function(){inp.style.borderColor=""; inp.placeholder="Pitaj ili uslikaj problem...";},2000); return; }
         wSending = true;
         inp.value = '';
         addWMsg('user', text);
@@ -212,6 +223,59 @@
             addWMsg('assistant','Greska: '+e.message);
         })
         .finally(function(){ wSending=false; inp.focus(); });
+    };
+
+    var currentPhotoB64 = null;
+
+    window.photoSelected = function(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            currentPhotoB64 = e.target.result.split(',')[1];
+            document.getElementById('aiwPhotoThumb').src = e.target.result;
+            document.getElementById('aiwPhotoPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.clearPhoto = function() {
+        currentPhotoB64 = null;
+        document.getElementById('aiwPhotoInput').value = '';
+        document.getElementById('aiwPhotoPreview').style.display = 'none';
+    };
+
+    // Override sendWidgetMsg da uključi sliku
+    var _origSend = window.sendWidgetMsg;
+    window.sendWidgetMsg = function() {
+        if (!currentPhotoB64) { _origSend(); return; }
+        if(wSending) return;
+        var text = inp.value.trim() || 'Imam problem — pogledaj sliku';
+        wSending = true;
+        inp.value = '';
+        addWMsg('user', '📷 ' + text);
+        var preview = document.getElementById('aiwPhotoPreview');
+        if (preview) preview.style.display = 'none';
+        var photoData = currentPhotoB64;
+        currentPhotoB64 = null;
+        document.getElementById('aiwPhotoInput').value = '';
+
+        fetch('/ai/api/widget/', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+            body: JSON.stringify({
+                message: text,
+                image_b64: photoData,
+                conversation_id: wConvId
+            })
+        }).then(r=>r.json()).then(function(data){
+            wSending = false;
+            if(data.conversation_id) wConvId = data.conversation_id;
+            addWMsg('assistant', data.response || data.message || 'Problem primljen. Tim ga pregledava.');
+        }).catch(function(){
+            wSending = false;
+            addWMsg('assistant', '📷 Slika primljena. Tim će je pregledati i kontaktirati vas.');
+        });
     };
 })();
 </script>
