@@ -220,3 +220,199 @@ def send_text(phone, message, company_id=None):
     except Exception as e:
         logger.error('WhatsApp send error: %s', e)
         return {'success': False, 'error': str(e), 'response': None}
+
+
+
+def send_document(phone, file_path, caption='', filename='', company_id=None):
+    """Send a document (PDF, XLSX, etc.) via WAHA gateway.
+
+    Args:
+        phone: Phone number
+        file_path: Absolute path to local file
+        caption: Optional caption text
+        filename: Display filename (default: basename of file_path)
+        company_id: Optional for rate limiting
+
+    Returns:
+        dict: {success, error, response}
+    """
+    import os, base64
+
+    if not getattr(settings, 'WAHA_ENABLED', False):
+        return {'success': False, 'error': 'WhatsApp gateway disabled', 'response': None}
+
+    if not os.path.exists(file_path):
+        return {'success': False, 'error': f'File not found: {file_path}', 'response': None}
+
+    normalized = normalize_phone(phone)
+    if not normalized:
+        return {'success': False, 'error': f'Invalid phone: {phone}', 'response': None}
+
+    if not filename:
+        filename = os.path.basename(file_path)
+
+    chat_id = f"{normalized}@c.us"
+    session_name = getattr(settings, 'WAHA_SESSION_NAME', 'default')
+
+    # Read file and encode to base64
+    with open(file_path, 'rb') as f:
+        file_data = base64.b64encode(f.read()).decode()
+
+    # Detect mimetype
+    ext = os.path.splitext(file_path)[1].lower()
+    mimetypes = {
+        '.pdf': 'application/pdf',
+        '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        '.xls': 'application/vnd.ms-excel',
+        '.csv': 'text/csv',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.zip': 'application/zip',
+        '.xml': 'application/xml',
+    }
+    mimetype = mimetypes.get(ext, 'application/octet-stream')
+
+    try:
+        url = f"{settings.WAHA_API_URL}/api/sendFile"
+        headers = {'Content-Type': 'application/json'}
+        api_key = getattr(settings, 'WAHA_API_KEY', '')
+        if api_key:
+            headers['X-Api-Key'] = api_key
+
+        # Try WAHA v2 format first (base64 in body)
+        payload = {
+            'chatId': chat_id,
+            'session': session_name,
+            'file': {
+                'mimetype': mimetype,
+                'filename': filename,
+                'data': f'data:{mimetype};base64,{file_data}',
+            },
+        }
+        if caption:
+            payload['caption'] = caption
+
+        resp = requests.post(url, json=payload, timeout=30, headers=headers)
+
+        if resp.status_code in (200, 201):
+            logger.info('WhatsApp document sent to %s: %s', normalized, filename)
+            return {'success': True, 'error': None, 'response': resp.json()}
+
+        # Fallback v1: data URL format
+        payload['file']['data'] = file_data
+        resp2 = requests.post(url, json=payload, timeout=30, headers=headers)
+        if resp2.status_code in (200, 201):
+            logger.info('WhatsApp document sent (v1) to %s: %s', normalized, filename)
+            return {'success': True, 'error': None, 'response': resp2.json()}
+
+        # Fallback: multipart upload
+        return _send_document_multipart(chat_id, file_path, filename, caption, session_name, headers)
+
+    except Exception as e:
+        logger.error('WhatsApp send_document error: %s', e)
+        return {'success': False, 'error': str(e), 'response': None}
+
+
+def _send_document_multipart(chat_id, file_path, filename, caption, session_name, headers):
+    """Fallback: multipart file upload for WAHA."""
+    try:
+        url = f"{settings.WAHA_API_URL}/api/sendFile"
+        # Remove content-type for multipart
+        h = {k: v for k, v in headers.items() if k.lower() != 'content-type'}
+
+        with open(file_path, 'rb') as f:
+            files = {'file': (filename, f)}
+            data = {'chatId': chat_id, 'session': session_name, 'caption': caption}
+            resp = requests.post(url, files=files, data=data, timeout=30, headers=h)
+
+        if resp.status_code in (200, 201):
+            logger.info('WhatsApp document (multipart) sent: %s', filename)
+            return {'success': True, 'error': None, 'response': resp.json()}
+        else:
+            error = f'WAHA sendFile error {resp.status_code}: {resp.text[:200]}'
+            logger.error(error)
+            return {'success': False, 'error': error, 'response': None}
+
+    except Exception as e:
+        logger.error('WhatsApp multipart error: %s', e)
+        return {'success': False, 'error': str(e), 'response': None}
+
+
+def send_image(phone, image_path_or_b64, caption='', company_id=None):
+    """Send an image via WAHA gateway.
+
+    Args:
+        phone: Phone number
+        image_path_or_b64: File path OR base64 string
+        caption: Optional caption
+
+    Returns:
+        dict: {success, error, response}
+    """
+    import os, base64
+
+    if not getattr(settings, 'WAHA_ENABLED', False):
+        return {'success': False, 'error': 'WhatsApp gateway disabled', 'response': None}
+
+    normalized = normalize_phone(phone)
+    if not normalized:
+        return {'success': False, 'error': f'Invalid phone: {phone}', 'response': None}
+
+    chat_id = f"{normalized}@c.us"
+    session_name = getattr(settings, 'WAHA_SESSION_NAME', 'default')
+
+    # Get base64 data
+    if os.path.exists(str(image_path_or_b64)):
+        with open(image_path_or_b64, 'rb') as f:
+            b64_data = base64.b64encode(f.read()).decode()
+        mimetype = 'image/jpeg' if image_path_or_b64.lower().endswith(('.jpg','.jpeg')) else 'image/png'
+    else:
+        b64_data = image_path_or_b64
+        if b64_data.startswith('data:'):
+            b64_data = b64_data.split(',')[1]
+        mimetype = 'image/jpeg'
+
+    try:
+        url = f"{settings.WAHA_API_URL}/api/sendImage"
+        headers = {'Content-Type': 'application/json'}
+        api_key = getattr(settings, 'WAHA_API_KEY', '')
+        if api_key:
+            headers['X-Api-Key'] = api_key
+
+        payload = {
+            'chatId': chat_id,
+            'session': session_name,
+            'file': {
+                'mimetype': mimetype,
+                'data': b64_data,
+            },
+            'caption': caption,
+        }
+
+        resp = requests.post(url, json=payload, timeout=15, headers=headers)
+
+        if resp.status_code in (200, 201):
+            logger.info('WhatsApp image sent to %s', normalized)
+            return {'success': True, 'error': None, 'response': resp.json()}
+        else:
+            error = f'WAHA sendImage error {resp.status_code}: {resp.text[:200]}'
+            logger.error(error)
+            return {'success': False, 'error': error, 'response': None}
+
+    except Exception as e:
+        logger.error('WhatsApp send_image error: %s', e)
+        return {'success': False, 'error': str(e), 'response': None}
+
+
+def send_document_link(phone, download_url, title='', caption='', company_id=None):
+    """Fallback: salje tekst s linkom za preuzimanje."""
+    parts = []
+    if title:
+        parts.append(title)
+    if caption:
+        parts.append(caption)
+    parts.append('Preuzmi: ' + download_url)
+    return send_text(phone, chr(10).join(parts), company_id=company_id)
