@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Verfahrensdokumentation{% endblock %}
+{% block content %}
+<style>
+.vd-page{max-width:800px;margin:0 auto;padding:1.5rem}
+.vd-header{text-align:center;margin-bottom:2rem}
+.vd-title{font-size:1.6rem;font-weight:700;color:var(--gold,#c9a84c)}
+.vd-subtitle{color:#888;margin-top:.5rem}
+.vd-section{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:1.5rem;margin-bottom:1.2rem}
+.vd-section h3{color:var(--gold,#c9a84c);margin:0 0 .8rem;font-size:1rem}
+.vd-section p,.vd-section li{color:#ccc;font-size:.88rem;line-height:1.6}
+.vd-section ul{padding-left:1.2rem}
+.vd-table{width:100%;border-collapse:collapse;margin:.8rem 0}
+.vd-table th,.vd-table td{padding:.5rem .8rem;border:1px solid #333;font-size:.82rem;color:#ccc}
+.vd-table th{background:#0f172a;color:var(--gold,#c9a84c);text-align:left}
+.vd-actions{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.5rem 0}
+.vd-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.5rem;border-radius:10px;font-weight:700;font-size:.9rem;text-decoration:none;cursor:pointer;border:none;transition:transform .1s}
+.vd-btn:active{transform:scale(.97)}
+.vd-btn-gold{background:var(--gold,#c9a84c);color:#000}
+.vd-btn-green{background:#16a34a;color:#fff}
+.vd-btn-blue{background:#2563eb;color:#fff}
+.vd-btn-outline{background:transparent;border:1px solid #444;color:#ccc}
+.vd-sign-area{background:#0f172a;border:2px dashed #334155;border-radius:12px;padding:1rem;text-align:center;margin:1rem 0}
+.vd-sign-area canvas{background:#fff;border-radius:8px;cursor:crosshair;touch-action:none;max-width:100%}
+.vd-sign-name{width:100%;padding:.6rem;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;font-size:.9rem;margin-top:.8rem;box-sizing:border-box}
+.vd-status{padding:1rem;border-radius:8px;text-align:center;font-weight:600;margin:1rem 0;display:none}
+.vd-status.show{display:block}
+.vd-status.success{background:rgba(22,163,74,.15);color:#4ade80;border:1px solid rgba(22,163,74,.3)}
+.vd-status.error{background:rgba(220,38,38,.15);color:#f87171;border:1px solid rgba(220,38,38,.3)}
+@media(max-width:600px){.vd-actions{flex-direction:column}.vd-btn{justify-content:center}}
+</style>
+
+<div class="vd-page">
+  <div class="vd-header">
+    <div class="vd-title">Verfahrensdokumentation</div>
+    <div class="vd-subtitle">Kassensystem gem. GoBD, KassenSichV und DSFinV-K</div>
+    <div style="color:#666;font-size:.8rem;margin-top:.3rem">LIMIT Connect ERP - Version 2026.03</div>
+  </div>
+
+  <div class="vd-actions">
+    <a href="tel:+385976091655" class="vd-btn vd-btn-green">&#128222; Anrufen</a>
+    <a href="https://wa.me/385976091655?text=Verfahrensdokumentation%20Frage" class="vd-btn vd-btn-green" target="_blank">&#128172; WhatsApp</a>
+    <a href="mailto:fina.connect.online@gmail.com?subject=Verfahrensdokumentation" class="vd-btn vd-btn-blue">&#9993; E-Mail</a>
+  </div>
+
+  <div class="vd-section">
+    <h3>1. Kassensystem</h3>
+    <table class="vd-table">
+      <tr><th>Komponente</th><th>Beschreibung</th></tr>
+      <tr><td>Frontend</td><td>PWA, HTML5/JavaScript</td></tr>
+      <tr><td>Backend</td><td>Django 5.1, PostgreSQL 16</td></tr>
+      <tr><td>TSE</td><td>Fiskaly Cloud TSE v2 (BSI-zertifiziert)</td></tr>
+      <tr><td>Hosting</td><td>Hetzner Cloud EU, TLS 1.3</td></tr>
+    </table>
+  </div>
+
+  <div class="vd-section">
+    <h3>2. TSE - Technische Sicherheitseinrichtung</h3>
+    <ul>
+      <li>Fiskaly Cloud TSE - BSI-K-TR-0493-2021</li>
+      <li>SHA-256 Signatur auf jedem Beleg</li>
+      <li>Bei Ausfall: "TSE AUSGEFALLEN" Klausel + Nacherfassung</li>
+    </ul>
+  </div>
+
+  <div class="vd-section">
+    <h3>3. DSFinV-K Export</h3>
+    <p>ZIP mit 7 CSV-Dateien auf Knopfdruck. Fur Kassennachschau sofort verfugbar.</p>
+    <div class="vd-actions" style="margin-bottom:0">
+      <a href="{% url 'pos:dsfinvk_export' %}" class="vd-btn vd-btn-outline">&#128230; DSFinV-K Export</a>
+      <a href="{% url 'pos:kassenbuch' %}" class="vd-btn vd-btn-outline">&#128218; Kassenbuch</a>
+    </div>
+  </div>
+
+  <div class="vd-section">
+    <h3>4. Unveranderbarkeit (GoBD)</h3>
+    <ul>
+      <li>TSE-Signaturkette schutzt vor Manipulation</li>
+      <li>Bezahlte Belege nicht loschbar - nur stornierbar</li>
+      <li>Aufbewahrung: 10 Jahre</li>
+    </ul>
+  </div>
+
+  <div class="vd-section">
+    <h3>5. E-Rechnung</h3>
+    <p>XRechnung (CII-XML) und ZUGFeRD 2.2 (Hybrid-PDF) unterstutzt.</p>
+  </div>
+
+  <!-- Digital Signature -->
+  <div class="vd-section" id="signSection">
+    <h3>&#9997; Digitale Unterschrift und Akzeptanz</h3>
+    <p>Mit Ihrer Unterschrift bestatigen Sie, dass Sie die Verfahrensdokumentation gelesen und akzeptiert haben. Keine Papierdokumente notig.</p>
+
+    <div class="vd-sign-area">
+      <canvas id="sigCanvas" width="400" height="150"></canvas>
+      <br>
+      <button onclick="clearSig()" class="vd-btn vd-btn-outline" style="margin-top:.5rem;padding:.4rem 1rem;font-size:.8rem">Unterschrift loschen</button>
+    </div>
+
+    <input type="text" id="signerName" class="vd-sign-name" placeholder="Vor- und Nachname" value="{{ request.user.get_full_name }}">
+
+    <div style="margin-top:1rem">
+      <button onclick="submitSignature()" class="vd-btn vd-btn-gold" id="signBtn" style="width:100%;justify-content:center">
+        &#9989; Unterschreiben und Akzeptieren
+      </button>
+    </div>
+
+    <div class="vd-status" id="signStatus"></div>
+  </div>
+
+  <div class="vd-section" style="text-align:center">
+    <h3>Fragen? Wir helfen gerne!</h3>
+    <div class="vd-actions" style="justify-content:center">
+      <a href="tel:+385976091655" class="vd-btn vd-btn-green">&#128222; +385 97 609 1655</a>
+      <a href="https://wa.me/385976091655" class="vd-btn vd-btn-green" target="_blank">&#128172; WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var canvas = document.getElementById('sigCanvas');
+  var ctx = canvas.getContext('2d');
+  var drawing = false, hasDrawn = false;
+
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 150 * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = '150px';
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+
+  function pos(e){var r=canvas.getBoundingClientRect();var t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top};}
+
+  canvas.addEventListener('mousedown',function(e){drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+  canvas.addEventListener('mousemove',function(e){if(!drawing)return;hasDrawn=true;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+  canvas.addEventListener('mouseup',function(){drawing=false;});
+  canvas.addEventListener('mouseleave',function(){drawing=false;});
+  canvas.addEventListener('touchstart',function(e){e.preventDefault();drawing=true;var p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+  canvas.addEventListener('touchmove',function(e){e.preventDefault();if(!drawing)return;hasDrawn=true;var p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+  canvas.addEventListener('touchend',function(){drawing=false;});
+
+  window.clearSig = function(){ctx.clearRect(0,0,rect.width,150);hasDrawn=false;};
+
+  window.submitSignature = function(){
+    var name = document.getElementById('signerName').value.trim();
+    if(!name){alert('Bitte Name eingeben.');return;}
+    if(!hasDrawn){alert('Bitte unterschreiben.');return;}
+    var btn = document.getElementById('signBtn');
+    btn.disabled=true; btn.textContent='Wird gesendet...';
+    var sigData = canvas.toDataURL('image/png');
+    var csrf = document.cookie.match('csrftoken=([^;]+)');
+    csrf = csrf ? csrf[1] : '';
+    fetch('/hr/documents/verfahren-sign/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':csrf},
+      body:JSON.stringify({signature:sigData,signer_name:name})
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var s=document.getElementById('signStatus');
+      if(d.ok){
+        s.className='vd-status show success';
+        s.textContent='Erfolgreich unterzeichnet! Vielen Dank, '+name+'.';
+        btn.textContent='Unterzeichnet';btn.style.background='#16a34a';btn.style.color='#fff';
+      } else {
+        s.className='vd-status show error';s.textContent=d.error||'Fehler';
+        btn.disabled=false;btn.textContent='Unterschreiben und Akzeptieren';
+      }
+    })
+    .catch(function(){
+      var s=document.getElementById('signStatus');
+      s.className='vd-status show error';s.textContent='Netzwerkfehler.';
+      btn.disabled=false;btn.textContent='Unterschreiben und Akzeptieren';
+    });
+  };
+})();
+</script>
+{% endblock %}

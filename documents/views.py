@@ -2990,3 +2990,57 @@ def arhiva_upute(request):
 def arhiva_guide_pdf(request):
     """Printable A4 guide for archive module."""
     return render(request, "documents/arhiva_guide_pdf.html")
+
+
+@login_required
+def verfahrensdokumentation(request):
+    """Verfahrensdokumentation page — online signature, download, call buttons."""
+    company = get_user_company(request)
+    return render(request, 'documents/verfahrensdokumentation.html', {
+        'company': company,
+    })
+
+
+@login_required
+@require_POST
+def verfahren_sign(request):
+    """Accept digital signature for Verfahrensdokumentation."""
+    from django.http import JsonResponse
+    import json as json_lib
+    company = get_user_company(request)
+    data = json_lib.loads(request.body)
+
+    signature_b64 = data.get('signature', '')
+    signer_name = data.get('signer_name', '')
+
+    if not signature_b64 or not signer_name:
+        return JsonResponse({'error': 'Potpis i ime su obavezni'}, status=400)
+
+    # Save as ArhivaEntry
+    from documents.models import ArhivaEntry
+    entry = ArhivaEntry(
+        company=company,
+        source_type='verfahren_sign',
+        source_id='verfahren_%s' % request.user.pk,
+        doc_number='VD-%s' % timezone.now().strftime('%Y%m%d'),
+        partner_name=signer_name,
+        amount=0,
+        currency='EUR',
+        doc_date=timezone.now().date(),
+    )
+    entry.save()
+
+    # Save signature image
+    import base64, os
+    sig_dir = os.path.join('/var/www/fina-connect/media/signatures')
+    os.makedirs(sig_dir, exist_ok=True)
+    sig_path = os.path.join(sig_dir, 'verfahren_%s_%s.png' % (company.oib, timezone.now().strftime('%Y%m%d_%H%M%S')))
+    with open(sig_path, 'wb') as f:
+        f.write(base64.b64decode(signature_b64.split(',')[1] if ',' in signature_b64 else signature_b64))
+
+    return JsonResponse({
+        'ok': True,
+        'message': 'Verfahrensdokumentation erfolgreich unterzeichnet.',
+        'entry_id': entry.pk,
+    })
+
