@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/bulk-all/', views.bulk_all, name='bulk_all'),
     path('api/resolve-action/', views.resolve_action, name='resolve_action'),
     path('api/submit-request/', views.submit_request, name='submit_request'),
+    path('api/tim-chat-send/', views.tim_chat_send, name='tim_chat_send'),
     path('logs/', views.action_logs, name='logs'),
     path('api/live-metrics/', views.live_metrics, name='live_metrics'),
 ]

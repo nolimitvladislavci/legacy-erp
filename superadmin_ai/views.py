@@ -542,6 +542,47 @@ def submit_request(request):
     return JsonResponse({'ok': True, 'id': str(action.id), 'message': 'Zahtjev poslan (#%s)' % str(action.id)[:8]})
 
 
+
+@login_required
+@require_POST
+def tim_chat_send(request):
+    """Tim chat poruka — svi korisnici, ne samo superadmin."""
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, TypeError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    description = data.get('description', '').strip()
+    if not description:
+        return JsonResponse({'error': 'Poruka je prazna'}, status=400)
+
+    module = data.get('module', 'tim_chat')
+    priority = data.get('priority', 1)
+
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+
+    action = PendingAIAction.objects.create(
+        company=company,
+        module=module,
+        action_type='tim_chat_msg',
+        description=description,
+        payload={
+            'submitted_by': request.user.username,
+            'user_id': request.user.pk,
+            'full_name': request.user.get_full_name() or request.user.username,
+            'company': company.name if company else '',
+            'priority': priority,
+        },
+        status='pending',
+    )
+    return JsonResponse({
+        'ok': True,
+        'id': str(action.id),
+        'message': 'Poruka poslana! Tim je obavijesten.',
+    })
+
+
 @login_required
 @user_passes_test(is_superadmin)
 @require_POST
