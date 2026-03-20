@@ -218,11 +218,25 @@
       } else { alert('Greška: ' + (data.error || 'nepoznata')); }
     })
     .catch(function(e) {
-      if (!navigator.onLine && window.queueOfflineSale) {
+      if (!navigator.onLine && window.queueOfflineReceipt) {
+        var offRec = window.queueOfflineReceipt({
+          session_id: SESSION_ID,
+          items: items,
+          payment_method: method,
+          amount_paid: amtPaid,
+          tip_amount: window._tip || 0,
+          note: window._currentCashier || '',
+          cashier_id: window._currentCashierId || '',
+        });
+        showSuccess('OFF-' + offRec.local_receipt_number, offRec.total.toFixed(2), offRec.change.toFixed(2));
+        clearBasket();
+        // Show printable offline receipt
+        if (window.showOfflineReceipt) window.showOfflineReceipt(offRec);
+      } else if (!navigator.onLine && window.queueOfflineSale) {
         window.queueOfflineSale({ _url: API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', items: items, method: method, amount_paid: amtPaid, tip_amount: window._tip || 0, cashier: window._currentCashier || '', cashier_id: window._currentCashierId || '' });
         showSuccess('OFF', parseFloat(window._total).toFixed(2), 0);
         clearBasket();
-      } else { alert('Greška veze.'); }
+      } else { alert('Nema veze. Pokusajte ponovo.'); }
     })
     .finally(function() { btn.dataset.submitting = ''; btn.disabled = false; btn.innerHTML = method === 'CASH' ? '💵 GOTOVINA' : '💳 KARTICA'; });
   };

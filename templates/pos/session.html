@@ -237,5 +237,23 @@ button[disabled]{opacity:.5;cursor:not-allowed}
 </div>
 
 <script type="application/json" id="pos-config">{"expected_closing_cash": {{ session.expected_closing_cash|floatformat:2 }} }</script>
+<script>
+// Cache session for offline use
+if(window.cacheSessionForOffline){
+  window.cacheSessionForOffline({
+    id: {{ session.pk }},
+    offline_session_id: 'session-{{ session.pk }}',
+    session_number: {{ session.session_number }},
+    terminal_id: {{ session.terminal.pk }},
+    terminal_name: '{{ session.terminal.name|escapejs }}',
+    terminal_code: '{{ session.terminal.terminal_code|escapejs }}',
+    company_name: '{{ session.terminal.company.name|escapejs }}',
+    company_oib: '{{ session.terminal.company.oib|escapejs }}',
+    opening_cash: {{ session.opening_cash|floatformat:2 }},
+    opened_at: '{{ session.opened_at|date:"c" }}',
+    operator: '{{ session.operator.get_full_name|default:session.operator.username|escapejs }}',
+  });
+}
+</script>
 <script src="/static/js/pos/pos-session.js"></script>
 {% endblock %}

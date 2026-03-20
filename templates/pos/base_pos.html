@@ -126,6 +126,7 @@ a{color:inherit;text-decoration:none}
 <!-- theme: pos-core.js -->
 
 <script src="/static/js/pos/pos-core.js"></script>
+<script src="/static/js/pos/pos-offline.js"></script>
 <style>
 .pos-offline::before {
   content: 'OFFLINE MOD';
@@ -145,7 +146,18 @@ a{color:inherit;text-decoration:none}
 .pos-toast-warning { background: #d97706; color: #fff; }
 .pos-toast-info { background: #2563eb; color: #fff; }
 .pos-toast-error { background: #dc2626; color: #fff; }
+#offlineSyncBadge {
+  display: none; background: #f59e0b; color: #000; padding: 4px 12px;
+  border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;
+  position: fixed; bottom: 20px; left: 20px; z-index: 9998;
+}
+#offlineSyncBadge:hover { background: #fbbf24; }
+.pos-toast-warning { background: #d97706; color: #fff; }
+.pos-toast-info { background: #2563eb; color: #fff; }
+.pos-toast-error { background: #dc2626; color: #fff; }
 </style>
 
-{% block extra_js %}{% endblock %}
+{% block extra_js %}
+<div id="offlineSyncBadge" onclick="window.syncOfflineData && window.syncOfflineData()"></div>
+{% endblock %}
 </body></html>
