@@ -4346,3 +4346,36 @@ def dsfinvk_export(request):
     response = HttpResponse(zip_bytes, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
     return response
+
+
+
+@login_required
+def kassenbuch_download(request):
+    """Blagajnicki dnevnik / Kassenbuch XLSX download."""
+    from django.http import HttpResponse
+    from datetime import date, timedelta
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'Nema firme'}, status=400)
+
+    date_from = request.GET.get('from', '')
+    date_to = request.GET.get('to', '')
+
+    if date_from:
+        date_from = date.fromisoformat(date_from)
+    else:
+        date_from = date.today().replace(day=1)
+    if date_to:
+        date_to = date.fromisoformat(date_to)
+    else:
+        date_to = date.today()
+
+    from pos.kassenbuch import generate_kassenbuch
+    xlsx = generate_kassenbuch(company, date_from, date_to)
+
+    is_de = company.country in ('DE', 'AT')
+    prefix = 'Kassenbuch' if is_de else 'Blagajnicki_dnevnik'
+    filename = '%s_%s_%s_%s.xlsx' % (prefix, company.oib, date_from.isoformat(), date_to.isoformat())
+    response = HttpResponse(xlsx, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response

@@ -141,4 +141,5 @@ urlpatterns = [
 
     # DSFinV-K Export (DE Kassenarchiv)
     path('dsfinvk-export/',                       views.dsfinvk_export,       name='dsfinvk_export'),
+    path('kassenbuch/',                            views.kassenbuch_download,  name='kassenbuch'),
 ]
