@@ -138,6 +138,7 @@ MIDDLEWARE = [
     "core.middleware.CompanyMiddleware",
     "core.middleware.ImpersonationMiddleware",
     "core.middleware.CompanyBranchMiddleware",
+    "core.middleware.AdminLangRedirectMiddleware",
     "core.middleware.ForcePasswordChangeMiddleware",
     "registration.middleware.SubscriptionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",

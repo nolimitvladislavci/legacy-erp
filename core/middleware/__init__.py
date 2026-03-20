@@ -244,3 +244,47 @@ class RateLimitMiddleware:
             pass
 
         return self.get_response(request)
+
+
+
+class AdminLangRedirectMiddleware(MiddlewareMixin):
+    """
+    Redirect /admin/ requests to use the company's preferred language.
+    Prevents German users seeing Croatian admin, and vice versa.
+    Also handles /rosetta/ and other admin-like paths.
+    """
+
+    ADMIN_PREFIXES = ('/admin/', '/rosetta/')
+
+    def process_request(self, request):
+        if not request.user.is_authenticated:
+            return None
+        if not request.user.is_staff:
+            return None
+
+        path = request.path
+        is_admin = any(path.startswith(p) for p in self.ADMIN_PREFIXES)
+        if not is_admin:
+            return None
+
+        # Get user's preferred language
+        try:
+            lang = request.user.profile.preferred_language
+        except Exception:
+            lang = None
+
+        if not lang:
+            try:
+                from core.company_utils import get_user_company
+                company = get_user_company(request)
+                if company:
+                    lang = company.ui_language
+            except Exception:
+                pass
+
+        if lang:
+            from django.utils.translation import activate
+            activate(lang)
+            request.LANGUAGE_CODE = lang
+
+        return None
