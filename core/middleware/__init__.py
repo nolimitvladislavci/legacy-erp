@@ -64,6 +64,9 @@ class RequestLoggingMiddleware(MiddlewareMixin):
 class SecurityHeadersMiddleware(MiddlewareMixin):
     """Add security headers to all responses."""
     def process_response(self, request, response):
+        # Skip security headers for MCP endpoint (handled by nginx CORS)
+        if request.path.startswith('/mcp/'):
+            return response
         response['X-Content-Type-Options'] = 'nosniff'
         response['X-Frame-Options'] = 'SAMEORIGIN'
         response['X-XSS-Protection'] = '1; mode=block'
