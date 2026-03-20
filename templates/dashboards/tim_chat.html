@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tim Chat — LIMIT Connect</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;padding:1rem}
+.gold{color:#c9a84c}.muted{color:#64748b}
+h1{font-size:1.3rem;font-weight:800;color:#c9a84c;letter-spacing:2px}
+.sub{font-size:.7rem;color:#64748b;letter-spacing:1px;text-transform:uppercase}
+.card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-gold{border-left:3px solid #c9a84c}
+
+/* Okrugli stol — samo za superadmin */
+.table-wrap{display:flex;justify-content:center;margin:1.5rem 0}
+.seat{cursor:pointer;transition:all .2s}
+.seat:hover circle{filter:brightness(1.4)}
+.seat.active circle{filter:brightness(1.6) drop-shadow(0 0 8px currentColor)}
+
+/* Chat panel */
+.chat-panel{display:none;background:#0d1117;border:1px solid #333;border-radius:12px;padding:1.25rem;margin-top:1rem}
+.chat-panel.open{display:block}
+.chat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.chat-name{font-weight:700;font-size:1rem}
+.chat-role{font-size:.7rem;color:#64748b;margin-top:.2rem}
+.close-btn{background:none;border:none;color:#888;font-size:1.3rem;cursor:pointer;padding:.25rem}
+
+.msg-history{max-height:220px;overflow-y:auto;margin-bottom:.75rem;padding:.5rem;background:#111;border-radius:8px;border:1px solid #1e293b}
+.msg{padding:.4rem .6rem;margin-bottom:.4rem;border-radius:6px;font-size:.8rem;line-height:1.4}
+.msg.sent{background:#1e3a5f;text-align:right;border-right:2px solid #3b82f6}
+.msg.recv{background:#1a2e1a;border-left:2px solid #22c55e}
+.msg .ts{font-size:.65rem;color:#64748b;margin-top:.2rem}
+.msg-empty{color:#64748b;font-size:.8rem;text-align:center;padding:1rem}
+
+textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:8px;padding:.6rem;font-size:.85rem;resize:vertical;font-family:inherit;min-height:70px}
+textarea:focus{outline:none;border-color:#c9a84c}
+.btn-send{background:#c9a84c;color:#000;border:none;border-radius:8px;padding:.5rem 1.25rem;font-weight:700;cursor:pointer;font-size:.85rem;margin-top:.5rem;width:100%}
+.btn-send:hover{background:#d4a843}
+.status-msg{font-size:.75rem;color:#64748b;margin-top:.4rem;text-align:center}
+
+/* Forma za sve (ne-superadmin) */
+.public-form textarea{min-height:100px}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem}
+.team-member{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:.75rem;text-align:center;cursor:pointer;transition:all .2s}
+.team-member:hover,.team-member.selected{border-color:#c9a84c;background:#1a1f2e}
+.team-member .avatar{font-size:2rem;margin-bottom:.3rem}
+.team-member .name{font-size:.8rem;font-weight:700}
+.team-member .role{font-size:.65rem;color:#64748b}
+</style>
+</head>
+<body>
+
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width:680px;margin:0 auto;padding:1rem">
+
+  <!-- Header -->
+  <div style="margin-bottom:1.5rem">
+    <h1>💬 Tim Chat</h1>
+    <div class="sub">Direktna komunikacija s timom</div>
+  </div>
+
+  {% if request.user.is_superuser %}
+  <!-- ══ SUPERADMIN PRIKAZ — Okrugli stol ══ -->
+  <div class="card card-gold">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin-bottom:1rem">
+      ⬡ Okrugli stol — Odaberi s kim pričaš
+    </div>
+
+    <div class="table-wrap">
+    <svg id="stol-svg" width="260" height="260" viewBox="0 0 260 260">
+      <!-- Stol -->
+      <circle cx="130" cy="130" r="55" fill="#1a1a2e" stroke="#c9a84c" stroke-width="1.5"/>
+      <text x="130" y="126" text-anchor="middle" fill="#c9a84c" font-size="10" font-family="monospace" font-weight="700">FENIX</text>
+      <text x="130" y="139" text-anchor="middle" fill="#444" font-size="8" font-family="monospace">tim</text>
+
+      <!-- Ivan — gore -->
+      <g class="seat" id="seat-ivan" onclick="selectSeat('ivan')" data-name="Ivan Brtan" data-role="Vlasnik / Enter tipka" data-color="#c9a84c">
+        <circle cx="130" cy="28" r="26" fill="#1a1a2e" stroke="#c9a84c" stroke-width="2"/>
+        <text x="130" y="23" text-anchor="middle" font-size="15">🧑‍💼</text>
+        <text x="130" y="35" text-anchor="middle" fill="#c9a84c" font-size="8" font-weight="700">IVAN</text>
+        <text x="130" y="44" text-anchor="middle" fill="#555" font-size="7">Vlasnik</text>
+      </g>
+      <line x1="130" y1="54" x2="130" y2="75" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- Šeki — lijevo -->
+      <g class="seat" id="seat-seki" onclick="selectSeat('seki')" data-name="Shevqet Temaj" data-role="Uvijek Friško — POS" data-color="#f59e0b">
+        <circle cx="28" cy="130" r="26" fill="#1a1a2e" stroke="#f59e0b" stroke-width="2"/>
+        <text x="28" y="125" text-anchor="middle" font-size="15">🥐</text>
+        <text x="28" y="137" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="700">ŠEKI</text>
+        <text x="28" y="146" text-anchor="middle" fill="#555" font-size="7">Friško</text>
+      </g>
+      <line x1="54" y1="130" x2="75" y2="130" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- Marija — desno -->
+      <g class="seat" id="seat-marija" onclick="selectSeat('marija')" data-name="Marija Brtan" data-role="Konjik — Knjigovođa" data-color="#22c55e">
+        <circle cx="232" cy="130" r="26" fill="#1a1a2e" stroke="#22c55e" stroke-width="2"/>
+        <text x="232" y="125" text-anchor="middle" font-size="15">📊</text>
+        <text x="232" y="137" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="700">MARIJA</text>
+        <text x="232" y="146" text-anchor="middle" fill="#555" font-size="7">Konjik</text>
+      </g>
+      <line x1="185" y1="130" x2="206" y2="130" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- Claude Code — dolje lijevo -->
+      <g class="seat" id="seat-cc" onclick="selectSeat('cc')" data-name="Claude Code" data-role="Executor — Server agent" data-color="#3b82f6">
+        <circle cx="60" cy="220" r="26" fill="#1a1a2e" stroke="#3b82f6" stroke-width="2"/>
+        <text x="60" y="215" text-anchor="middle" font-size="15">🤖</text>
+        <text x="60" y="227" text-anchor="middle" fill="#3b82f6" font-size="8" font-weight="700">CC</text>
+        <text x="60" y="236" text-anchor="middle" fill="#555" font-size="7">Executor</text>
+      </g>
+      <line x1="83" y1="205" x2="105" y2="180" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- Sonnet — dolje desno -->
+      <g class="seat" id="seat-sonnet" onclick="selectSeat('sonnet')" data-name="Claude Sonnet" data-role="Koordinator tima" data-color="#a855f7">
+        <circle cx="200" cy="220" r="26" fill="#1a1a2e" stroke="#a855f7" stroke-width="2"/>
+        <text x="200" y="215" text-anchor="middle" font-size="15">🟣</text>
+        <text x="200" y="227" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="700">SONNET</text>
+        <text x="200" y="236" text-anchor="middle" fill="#555" font-size="7">Koordinator</text>
+      </g>
+      <line x1="177" y1="205" x2="155" y2="180" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+    </svg>
+    </div>
+
+    <!-- Chat panel za superadmin -->
+    <div id="chat-panel" class="chat-panel">
+      <div class="chat-header">
+        <div>
+          <div class="chat-name" id="chat-name"></div>
+          <div class="chat-role" id="chat-role"></div>
+        </div>
+        <button class="close-btn" onclick="closeChat()">✕</button>
+      </div>
+
+      <div class="msg-history" id="msg-history">
+        <div class="msg-empty">Odaberi osobu za stolom za početak razgovora</div>
+      </div>
+
+      <textarea id="chat-input" placeholder="Upiši poruku..."></textarea>
+      <button class="btn-send" id="send-btn" onclick="sendMsg()">Pošalji</button>
+      <div class="status-msg" id="send-status"></div>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ══ KORISNIČKI PRIKAZ — Forma za sve ══ -->
+  <div class="card card-gold">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin-bottom:1rem">
+      💬 Pošalji poruku timu
+    </div>
+
+    <div style="font-size:.8rem;color:#64748b;margin-bottom:1rem">
+      Imaš pitanje, prijedlog ili problem? Tim je tu. Odaberi kome pišeš:
+    </div>
+
+    <div class="team-grid">
+      <div class="team-member selected" id="tm-podrska" onclick="selectMember('podrska',this)">
+        <div class="avatar">🛠️</div>
+        <div class="name">Podrška</div>
+        <div class="role">Tehnički problemi</div>
+      </div>
+      <div class="team-member" id="tm-ivan" onclick="selectMember('ivan',this)">
+        <div class="avatar">🧑‍💼</div>
+        <div class="name">Ivan</div>
+        <div class="role">Vlasnik / Prijedlozi</div>
+      </div>
+      <div class="team-member" id="tm-prijedlog" onclick="selectMember('prijedlog',this)">
+        <div class="avatar">💡</div>
+        <div class="name">Prijedlog</div>
+        <div class="role">Poboljšanja sustava</div>
+      </div>
+    </div>
+
+    <textarea id="public-msg" placeholder="Opiši problem, prijedlog ili pitanje..."></textarea>
+    <button class="btn-send" onclick="sendPublic()">📨 Pošalji timu</button>
+    <div class="status-msg" id="public-status"></div>
+  </div>
+
+  <!-- Zadnje poslane poruke korisnika -->
+  <div class="card">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:.75rem">
+      Tvoje poruke
+    </div>
+    <div id="my-messages">
+      {% for msg in user_messages %}
+      <div class="msg sent" style="margin-bottom:.5rem">
+        <div>{{ msg.description|truncatechars:100 }}</div>
+        <div class="ts">{{ msg.created_at|date:"d.m.Y H:i" }} · {{ msg.get_status_display }}</div>
+      </div>
+      {% empty %}
+      <div class="msg-empty">Još nisi poslao poruke timu</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+// ── Superadmin: okrugli stol ──────────────────────────────
+let activeSeat = null;
+const messages = {};
+
+function selectSeat(id) {
+  // Dehighlight sve
+  document.querySelectorAll('.seat circle').forEach(c => c.style.filter = 'brightness(0.7)');
+  const seat = document.getElementById('seat-' + id);
+  if (!seat) return;
+  seat.querySelector('circle').style.filter = 'brightness(1.6)';
+
+  const name = seat.dataset.name;
+  const role = seat.dataset.role;
+  const color = seat.dataset.color;
+
+  activeSeat = id;
+  document.getElementById('chat-name').textContent = name;
+  document.getElementById('chat-name').style.color = color;
+  document.getElementById('chat-role').textContent = role;
+  document.getElementById('chat-panel').classList.add('open');
+  loadMessages(id);
+}
+
+function closeChat() {
+  document.getElementById('chat-panel').classList.remove('open');
+  document.querySelectorAll('.seat circle').forEach(c => c.style.filter = '');
+  activeSeat = null;
+}
+
+function loadMessages(id) {
+  const hist = document.getElementById('msg-history');
+  if (messages[id] && messages[id].length) {
+    hist.innerHTML = messages[id].map(m =>
+      `<div class="msg ${m.sent?'sent':'recv'}">
+        <div>${m.text}</div>
+        <div class="ts">${m.ts}</div>
+      </div>`
+    ).join('');
+  } else {
+    hist.innerHTML = '<div class="msg-empty">Nema poruka. Napiši prvu.</div>';
+  }
+  hist.scrollTop = hist.scrollHeight;
+}
+
+function sendMsg() {
+  const text = document.getElementById('chat-input').value.trim();
+  if (!text || !activeSeat) return;
+
+  const btn = document.getElementById('send-btn');
+  const status = document.getElementById('send-status');
+  btn.disabled = true;
+  btn.textContent = 'Šaljem...';
+
+  // Spremi lokalno
+  if (!messages[activeSeat]) messages[activeSeat] = [];
+  const ts = new Date().toLocaleString('hr-HR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  messages[activeSeat].push({text, sent:true, ts});
+
+  // Pošalji na backend
+  fetch('/superadmin/ai/api/submit-request/', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json', 'X-CSRFToken': getCsrf()},
+    body: JSON.stringify({
+      description: `[TIM CHAT → ${activeSeat.toUpperCase()}]\n\n${text}`,
+      module: 'tim_chat',
+      priority: activeSeat === 'cc' ? 2 : 1
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
+    status.textContent = d.ok || d.id ? '✅ Poruka poslana' : '⚠️ ' + (d.error||'greška');
+    loadMessages(activeSeat);
+    document.getElementById('chat-input').value = '';
+  })
+  .catch(() => { status.textContent = '❌ Greška slanja'; })
+  .finally(() => { btn.disabled=false; btn.textContent='Pošalji'; });
+}
+
+document.getElementById('chat-input') && document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') sendMsg();
+});
+
+// ── Javna forma ───────────────────────────────────────────
+let selectedMember = 'podrska';
+
+function selectMember(id, el) {
+  document.querySelectorAll('.team-member').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMember = id;
+}
+
+function sendPublic() {
+  const text = document.getElementById('public-msg').value.trim();
+  const status = document.getElementById('public-status');
+  if (!text) { status.textContent = '⚠️ Upiši poruku'; return; }
+
+  status.textContent = 'Šaljem...';
+  fetch('/superadmin/ai/api/submit-request/', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json', 'X-CSRFToken': getCsrf()},
+    body: JSON.stringify({
+      description: `[${selectedMember.toUpperCase()}]\n\n${text}`,
+      module: 'tim_chat',
+      priority: 2
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok || d.id) {
+      status.textContent = '✅ Poruka primljena — odgovorit ćemo uskoro';
+      document.getElementById('public-msg').value = '';
+    } else {
+      status.textContent = '⚠️ ' + (d.error||'Pokušaj ponovo');
+    }
+  })
+  .catch(() => { status.textContent = '❌ Greška'; });
+}
+
+function getCsrf() {
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
+</script>
+{% endblock %}
+</body>
+</html>

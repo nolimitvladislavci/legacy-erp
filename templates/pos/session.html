@@ -250,6 +250,8 @@ if(window.cacheSessionForOffline){
     company_name: '{{ session.terminal.company.name|escapejs }}',
     company_oib: '{{ session.terminal.company.oib|escapejs }}',
     opening_cash: {{ session.opening_cash|floatformat:2 }},
+    country: '{{ session.terminal.company.country }}',
+    fiscal_system: '{{ session.terminal.company.fiscal_system }}',
     opened_at: '{{ session.opened_at|date:"c" }}',
     operator: '{{ session.operator.get_full_name|default:session.operator.username|escapejs }}',
   });

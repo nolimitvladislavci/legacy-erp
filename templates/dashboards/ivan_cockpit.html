@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="60">
+<title>🔥 Fenix Cockpit</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;padding:1rem}
+.gold{color:#c9a84c}
+.green{color:#22c55e}
+.red{color:#ef4444}
+.blue{color:#3b82f6}
+.amber{color:#f59e0b}
+.muted{color:#64748b}
+h1{font-size:1.4rem;font-weight:800;letter-spacing:2px}
+.sub{font-size:.75rem;color:#64748b;letter-spacing:1px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin:1rem 0}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin:.75rem 0}
+@media(max-width:600px){.grid4{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+.card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:1rem}
+.card-gold{border-left:3px solid #c9a84c}
+.card-green{border-left:3px solid #22c55e}
+.card-blue{border-left:3px solid #3b82f6}
+.card-red{border-left:3px solid #ef4444}
+.stat-num{font-size:1.8rem;font-weight:800;line-height:1}
+.stat-lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:.25rem}
+.section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b;margin:1.25rem 0 .5rem;border-bottom:1px solid #1e293b;padding-bottom:.4rem}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{color:#64748b;font-weight:600;text-align:left;padding:.4rem .5rem;font-size:.7rem;text-transform:uppercase}
+td{padding:.4rem .5rem;border-top:1px solid #1e293b}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:20px;font-size:.65rem;font-weight:700}
+.badge-gold{background:#451a03;color:#c9a84c}
+.badge-green{background:#052e16;color:#22c55e}
+.badge-blue{background:#0f172a;color:#3b82f6}
+.log-line{font-family:monospace;font-size:.68rem;padding:.2rem .4rem;border-radius:4px;margin:.15rem 0}
+.log-err{background:#1c0505;color:#f87171}
+.log-warn{background:#1c1205;color:#fbbf24}
+.log-info{background:#051c0c;color:#4ade80}
+/* Okrugli stol */
+.table-wrap{display:flex;justify-content:center;padding:1rem 0}
+.seat{cursor:pointer;transition:all .2s}
+.seat:hover circle{filter:brightness(1.4)}
+.chat-panel{background:#0d1117;border:1px solid #1e293b;border-radius:10px;padding:1rem;margin-top:.75rem;display:none}
+.chat-panel.open{display:block}
+textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:6px;padding:.5rem;font-size:.8rem;resize:vertical;font-family:inherit}
+.btn{border:none;border-radius:6px;padding:.4rem 1rem;font-weight:700;cursor:pointer;font-size:.8rem}
+.btn-gold{background:#c9a84c;color:#000}
+.btn-ghost{background:#1e293b;color:#94a3b8}
+.response-box{background:#111;border-left:3px solid #c9a84c;padding:.75rem;border-radius:0 6px 6px 0;font-size:.78rem;color:#ccc;white-space:pre-wrap;max-height:180px;overflow-y:auto;margin-top:.75rem;display:none}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+  <div>
+    <h1 class="gold">🔥 FENIX COCKPIT</h1>
+    <div class="sub">{{ now|date:"d.m.Y H:i" }} — Auto-refresh 60s</div>
+  </div>
+  <div style="text-align:right">
+    <div style="font-size:.8rem;font-weight:700">Ivan Brtan</div>
+    <div class="sub">Superadmin</div>
+  </div>
+</div>
+
+<!-- Top stats -->
+<div class="grid4">
+  <div class="card card-gold">
+    <div class="stat-num gold">€{{ mrr|floatformat:0 }}</div>
+    <div class="stat-lbl">MRR</div>
+  </div>
+  <div class="card card-green">
+    <div class="stat-num green">{{ users_week }}</div>
+    <div class="stat-lbl">Aktivni tjedan</div>
+  </div>
+  <div class="card card-blue">
+    <div class="stat-num blue">{{ subs|length }}</div>
+    <div class="stat-lbl">Pretplate</div>
+  </div>
+  <div class="card" style="border-left:3px solid #8b5cf6">
+    <div class="stat-num" style="color:#8b5cf6">{{ companies }}</div>
+    <div class="stat-lbl">Kompanije</div>
+  </div>
+</div>
+
+<!-- POS danas -->
+<div class="section-title">🧾 POS Danas</div>
+<div class="grid4">
+  <div class="card card-green">
+    <div class="stat-num green">€{{ pos_promet|floatformat:2 }}</div>
+    <div class="stat-lbl">Promet danas</div>
+  </div>
+  <div class="card">
+    <div class="stat-num">{{ pos_bonovi }}</div>
+    <div class="stat-lbl">Bonovi danas</div>
+  </div>
+  <div class="card">
+    <div class="stat-num amber">{{ pos_open }}</div>
+    <div class="stat-lbl">Otvorene smjene</div>
+  </div>
+  <div class="card">
+    <div class="stat-num">€{{ pos_week|floatformat:0 }}</div>
+    <div class="stat-lbl">Promet tjedan</div>
+  </div>
+</div>
+
+{% if pos_by_company %}
+<table>
+  <thead><tr><th>Kompanija</th><th>Bonovi</th><th>Promet</th></tr></thead>
+  <tbody>
+  {% for row in pos_by_company %}
+  <tr>
+    <td>{{ row.session__terminal__company__name }}</td>
+    <td>{{ row.b }}</td>
+    <td class="green">€{{ row.p|floatformat:2 }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- Pretplate -->
+<div class="section-title">💶 Aktivne Pretplate ({{ subs|length }})</div>
+<table>
+  <thead><tr><th>Kompanija</th><th>Plan</th><th>MRR</th></tr></thead>
+  <tbody>
+  {% for s in subs %}
+  <tr>
+    <td>{{ s.company.name }}</td>
+    <td><span class="badge badge-gold">{{ s.plan }}</span></td>
+    <td class="gold">€{{ s.monthly_fee }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<!-- Moduli -->
+<div class="section-title">📊 Moduli</div>
+<div class="grid4">
+  <div class="card">
+    <div class="stat-num">{{ inv_count }}</div>
+    <div class="stat-lbl">Fakture</div>
+  </div>
+  <div class="card">
+    <div class="stat-num">{{ arhiva }}</div>
+    <div class="stat-lbl">Arhiva</div>
+  </div>
+  <div class="card">
+    <div class="stat-num">{{ eracun_total }}</div>
+    <div class="stat-lbl">eRačuni</div>
+  </div>
+  <div class="card">
+    <div class="stat-num">{{ users_never }}</div>
+    <div class="stat-lbl">Nikad login</div>
+  </div>
+</div>
+
+<!-- Server -->
+<div class="section-title">🖥️ Server</div>
+<div class="grid2">
+  <div class="card">
+    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">Disk</div>
+    <div style="font-size:1.1rem;font-weight:700">{{ disk_used }} <span class="muted">korišteno</span></div>
+    <div class="muted" style="font-size:.75rem">{{ disk_free }} slobodno</div>
+  </div>
+  <div class="card">
+    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">Memorija</div>
+    <div style="font-size:1.1rem;font-weight:700">{{ mem_used }} <span class="muted">/ {{ mem_total }}</span></div>
+  </div>
+</div>
+
+<!-- Logovi -->
+{% if logs %}
+<div class="section-title">📋 Zadnji Logovi</div>
+<div style="background:#0d1117;border-radius:8px;padding:.5rem">
+  {% for line in logs %}
+  <div class="log-line {% if 'ERROR' in line %}log-err{% elif 'WARNING' in line %}log-warn{% else %}log-info{% endif %}">{{ line|truncatechars:120 }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Feedback -->
+{% if feedback %}
+<div class="section-title">⚠️ Feedback od korisnika</div>
+{% for f in feedback %}
+<div class="card card-gold" style="margin-bottom:.5rem">
+  <div style="font-size:.75rem;color:#64748b">{{ f.created_at|date:"d.m H:i" }} — {{ f.category }}</div>
+  <div style="font-size:.85rem;margin-top:.25rem">{{ f.title }}</div>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- ═══ OKRUGLI STOL ═══ -->
+<div class="section-title">⬡ Okrugli Stol — Tim</div>
+<div class="card">
+  <div class="table-wrap">
+    <svg width="280" height="280" viewBox="0 0 280 280">
+      <!-- Stol -->
+      <circle cx="140" cy="140" r="55" fill="#0d1117" stroke="#c9a84c" stroke-width="1.5"/>
+      <text x="140" y="136" text-anchor="middle" fill="#c9a84c" font-size="11" font-family="monospace" font-weight="bold">FENIX</text>
+      <text x="140" y="151" text-anchor="middle" fill="#444" font-size="8" font-family="monospace">okrugli stol</text>
+      <!-- Linije -->
+      <line x1="140" y1="85" x2="140" y2="62" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="85" y1="140" x2="62" y2="140" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="195" y1="140" x2="218" y2="140" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="140" y1="195" x2="140" y2="218" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
+      <!-- Ivan - gore -->
+      <g class="seat" onclick="openSeat('ivan')">
+        <circle cx="140" cy="38" r="24" fill="#0d1117" stroke="#c9a84c" stroke-width="2"/>
+        <text x="140" y="33" text-anchor="middle" font-size="14">🧑‍💼</text>
+        <text x="140" y="46" text-anchor="middle" fill="#c9a84c" font-size="8" font-weight="bold">IVAN</text>
+        <text x="140" y="55" text-anchor="middle" fill="#555" font-size="7">Vlasnik</text>
+      </g>
+      <!-- Claude Code - lijevo -->
+      <g class="seat" onclick="openSeat('cc')">
+        <circle cx="38" cy="140" r="24" fill="#0d1117" stroke="#22c55e" stroke-width="2"/>
+        <text x="38" y="135" text-anchor="middle" font-size="14">🤖</text>
+        <text x="38" y="148" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="bold">CC</text>
+        <text x="38" y="157" text-anchor="middle" fill="#555" font-size="7">Executor</text>
+      </g>
+      <!-- Gemini - desno -->
+      <g class="seat" onclick="openSeat('gemini')">
+        <circle cx="242" cy="140" r="24" fill="#0d1117" stroke="#3b82f6" stroke-width="2"/>
+        <text x="242" y="135" text-anchor="middle" font-size="14">🔵</text>
+        <text x="242" y="148" text-anchor="middle" fill="#3b82f6" font-size="8" font-weight="bold">GEMINI</text>
+        <text x="242" y="157" text-anchor="middle" fill="#555" font-size="7">Analyst</text>
+      </g>
+      <!-- Sonnet - dolje -->
+      <g class="seat" onclick="openSeat('sonnet')">
+        <circle cx="140" cy="242" r="24" fill="#0d1117" stroke="#f59e0b" stroke-width="2"/>
+        <text x="140" y="237" text-anchor="middle" font-size="14">🟡</text>
+        <text x="140" y="250" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="bold">SONNET</text>
+        <text x="140" y="259" text-anchor="middle" fill="#555" font-size="7">Koordinator</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Chat panel -->
+  <div id="seat-panel" class="chat-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <span id="seat-name" style="font-weight:700;font-size:.9rem"></span>
+      <button class="btn btn-ghost" onclick="closeSeat()" style="padding:.2rem .6rem">✕</button>
+    </div>
+    <div id="seat-desc" style="font-size:.72rem;color:#64748b;margin-bottom:.75rem"></div>
+    <textarea id="seat-msg" rows="3" placeholder="Upiši poruku ili zadatak..."></textarea>
+    <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem">
+      <button class="btn btn-gold" onclick="sendMsg()">Pošalji</button>
+      <span id="seat-status" style="font-size:.75rem;color:#64748b"></span>
+    </div>
+    <div id="seat-response" class="response-box"></div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:1.5rem;font-size:.65rem;color:#1e293b">
+  LIMIT Connect — Fenix Platform — {{ today }}
+</div>
+
+<script>
+const SEATS = {
+  ivan: {name:'🧑‍💼 Ivan Brtan', desc:'Vlasnik projekta. WhatsApp ili bilješka.', color:'#c9a84c', type:'wa'},
+  cc:   {name:'🤖 Claude Code', desc:'Executor na serveru. Piše kod, testira, deploya. Submit kao task.', color:'#22c55e', type:'task'},
+  gemini:{name:'🔵 Gemini', desc:'Analiza i kontekst. Pripremi mu context dump.', color:'#3b82f6', type:'ctx'},
+  sonnet:{name:'🟡 Sonnet', desc:'Koordinator. Planira, pečati, vodi tim. claude.ai', color:'#f59e0b', type:'claude'}
+};
+let cur = null;
+
+function openSeat(id) {
+  cur = id;
+  const s = SEATS[id];
+  document.getElementById('seat-panel').classList.add('open');
+  document.getElementById('seat-name').textContent = s.name;
+  document.getElementById('seat-name').style.color = s.color;
+  document.getElementById('seat-desc').textContent = s.desc;
+  document.getElementById('seat-msg').value = '';
+  document.getElementById('seat-status').textContent = '';
+  document.getElementById('seat-response').style.display = 'none';
+  document.getElementById('seat-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeSeat() {
+  document.getElementById('seat-panel').classList.remove('open');
+}
+function getCsrf() {
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
+function sendMsg() {
+  const msg = document.getElementById('seat-msg').value.trim();
+  if (!msg) return;
+  const s = SEATS[cur];
+  const st = document.getElementById('seat-status');
+  const resp = document.getElementById('seat-response');
+
+  if (s.type === 'wa') {
+    st.textContent = 'Šaljem...';
+    fetch('/superadmin/ai/api/submit-request/', {
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+      body: JSON.stringify({description:'[COCKPIT→IVAN] '+msg, module:'cockpit', priority:1})
+    }).then(()=>{ st.textContent='✅ Zabilježeno'; });
+
+  } else if (s.type === 'task') {
+    st.textContent = 'Kreiram task...';
+    fetch('/superadmin/ai/api/submit-request/', {
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+      body: JSON.stringify({description:'[CC TASK]\n\n'+msg, module:'cockpit', priority:2})
+    }).then(r=>r.json()).then(d=>{
+      st.textContent = d.ok||d.id ? '✅ Task kreiran #'+(d.id||'') : '⚠️ '+( d.error||'greška');
+    }).catch(()=>{ st.textContent='❌ Greška'; });
+
+  } else if (s.type === 'ctx') {
+    resp.style.display = 'block';
+    resp.textContent = '📋 Context za Gemini — kopiraj i paste:\n\n'+msg;
+    st.textContent = '✅ Kopiraj gore';
+
+  } else if (s.type === 'claude') {
+    resp.style.display = 'block';
+    resp.textContent = '💬 Za Soneta — kopiraj i paste u claude.ai:\n\n'+msg;
+    st.textContent = '→ Otvaram...';
+    setTimeout(()=> window.open('https://claude.ai','_blank'), 600);
+  }
+}
+</script>
+</body>
+</html>

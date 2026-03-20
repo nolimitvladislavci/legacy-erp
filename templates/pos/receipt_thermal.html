@@ -161,6 +161,24 @@ td      { padding: 2px 0; vertical-align: top; }
 
   <hr class="div">
 
+  {# ── DE: TSE Ausfall Klausel ── #}
+  {% if receipt.tse_error and 'TSE_AUSFALL' in receipt.tse_error %}
+  <div style="border:2px solid #000;padding:4px;margin:6px 0;text-align:center;font-weight:bold;font-size:8pt">
+    TSE AUSGEFALLEN<br>
+    <span style="font-weight:normal;font-size:6pt">Nacherfassung erfolgt automatisch gem. KassenSichV.<br>
+    Beleg-ID: {{ receipt.uuid }}</span>
+  </div>
+  {% elif receipt.tse_hash %}
+  <div class="fis" style="font-size:6pt;word-break:break-all">
+    <div>TSE-Sig: {{ receipt.tse_hash|truncatechars:40 }}</div>
+    <div>TSE-TxNr: {{ receipt.tse_transaction_number }}</div>
+    <div>TSE-SigZ: {{ receipt.tse_signature_counter }}</div>
+    <div>TSE-SN: {{ receipt.tse_serial_number|truncatechars:20 }}</div>
+    <div>TSE-Start: {{ receipt.tse_start_time|date:"d.m.Y H:i:s" }}</div>
+  </div>
+  {% endif %}
+
+  {# ── HR: FINA fiskalizacija ── #}
   {% if receipt.zki or receipt.jir %}
   <div class="fis">
     {% if receipt.zki %}<div>ZKI: {{ receipt.zki }}</div>{% endif %}

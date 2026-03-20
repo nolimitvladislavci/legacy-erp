@@ -154,7 +154,13 @@
 
     html += '<div style="font-size:10px;color:#888;text-align:center;margin-top:10px">';
     html += record.payment_method + ' | ' + record.offline_id;
-    html += '<br>* Fiskalizacija ce biti izvrsena naknadno *</div>';
+    html += '<br>* Fiskalizacija ce biti izvrsena naknadno *';
+    // DE: TSE Ausfall Klausel
+    var session = window.getOfflineSession();
+    if (session && (session.country === 'DE' || session.fiscal_system === 'de_gobd')) {
+      html += '<br><br><strong style="border:2px solid #000;padding:4px;display:block;text-align:center">TSE AUSGEFALLEN<br>Nacherfassung erfolgt automatisch.</strong>';
+    }
+    html += '</div>';
     html += '</div>';
 
     // Open in new window for printing

@@ -170,7 +170,11 @@ class CheckoutService:
 
     @staticmethod
     def _fiscalize_tse(receipt):
-        """DE Route: Fiskaly Cloud TSE — KassenSichV compliant."""
+        """
+        DE Route: Fiskaly Cloud TSE — KassenSichV compliant.
+        Bei TSE-Ausfall: Bon mit 'TSE ausgefallen' Klausel,
+        Nacherfassung per Celery retry.
+        """
         zki, jir, error = '', '', ''
         try:
             from pos.tse_adapter import FiskalyTSEAdapter
@@ -178,31 +182,32 @@ class CheckoutService:
             adapter = FiskalyTSEAdapter.from_company(company)
             result = adapter.sign_transaction(receipt)
 
-            if result.get('ok'):
-                receipt.tse_transaction_number = str(result.get('transaction_number', ''))
-                receipt.tse_signature_counter = result.get('signature_counter')
-                receipt.tse_hash = result.get('signature_value', '')
-                receipt.tse_serial_number = result.get('tse_serial', '')
-                receipt.tse_start_time = result.get('start_time')
-                receipt.tse_end_time = result.get('end_time')
-                receipt.tse_error = ''
-                receipt.save(update_fields=[
-                    'tse_transaction_number', 'tse_signature_counter',
-                    'tse_hash', 'tse_serial_number',
-                    'tse_start_time', 'tse_end_time', 'tse_error',
-                ])
-                # Za kompatibilnost: ZKI=TSE hash, JIR=transaction number
-                zki = receipt.tse_hash[:32] if receipt.tse_hash else ''
-                jir = receipt.tse_transaction_number or ''
-                logger.info('TSE OK: Bon #%s, TxNr=%s', receipt.receipt_number, jir)
-            else:
-                error = result.get('error', 'TSE signing failed')[:100]
-                receipt.tse_error = error
-                receipt.save(update_fields=['tse_error'])
-                logger.warning('TSE FAIL: Bon #%s: %s', receipt.receipt_number, error)
+            # sign_transaction vraca dict s tse_ prefixed keys
+            receipt.tse_transaction_number = str(result.get('tse_transaction_number', ''))
+            receipt.tse_signature_counter = result.get('tse_signature_counter')
+            receipt.tse_hash = result.get('tse_hash', '')
+            receipt.tse_serial_number = result.get('tse_serial_number', '')
+            receipt.tse_start_time = result.get('tse_start_time')
+            receipt.tse_end_time = result.get('tse_end_time')
+            receipt.tse_error = ''
+            receipt.save(update_fields=[
+                'tse_transaction_number', 'tse_signature_counter',
+                'tse_hash', 'tse_serial_number',
+                'tse_start_time', 'tse_end_time', 'tse_error',
+            ])
+            zki = receipt.tse_hash[:32] if receipt.tse_hash else ''
+            jir = receipt.tse_transaction_number or ''
+            logger.info('TSE OK: Bon #%s, TxNr=%s', receipt.receipt_number, jir)
+
         except Exception as e:
             error = str(e)[:100]
-            logger.warning('TSE exception bon #%s: %s', receipt.receipt_number, e)
+            # TSE Ausfall — KassenSichV erlaubt Offline mit Klausel
+            receipt.tse_error = 'TSE_AUSFALL: %s' % error
+            receipt.save(update_fields=['tse_error'])
+            logger.warning(
+                'TSE AUSFALL Bon #%s: %s — Nacherfassung per retry task',
+                receipt.receipt_number, error,
+            )
         return zki, jir, error
 
     @classmethod
