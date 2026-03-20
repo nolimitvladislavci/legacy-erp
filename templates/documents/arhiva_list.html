@@ -518,7 +518,11 @@
                     </tr>
                     {% empty %}
                     <tr><td colspan="{% if is_superadmin %}12{% else %}11{% endif %}">
-                        <div class="arhiva-empty"><i class="fas fa-archive"></i><p>{% trans "Nema rezultata za odabrane filtere." %}</p></div>
+                        <div class="arhiva-empty">
+                        <i class="fas fa-search"></i>
+                        <p style="font-size:1.1rem;font-weight:600">{% trans "Nema rezultata" %}</p>
+                        <p style="font-size:.85rem;margin-top:8px">{% trans "Pokusajte promijeniti filtere ili pretrazivanje." %}</p>
+                      </div>
                     </td></tr>
                     {% endfor %}
                 </tbody>
@@ -548,7 +552,11 @@
                 </div>
             </div>
             {% empty %}
-            <div class="arhiva-empty"><i class="fas fa-archive"></i><p>{% trans "Nema rezultata." %}</p></div>
+            <div class="arhiva-empty">
+              <i class="fas fa-archive"></i>
+              <p style="font-size:1.1rem;font-weight:600;color:var(--gold)">{% trans "Arhiva je prazna" %}</p>
+              <p style="font-size:.85rem;margin-top:8px">{% trans "Dokumenti ce se automatski pojaviti nakon izdavanja racuna, primanja e-racuna ili uploada." %}</p>
+            </div>
             {% endfor %}
         </div>
 
@@ -988,5 +996,35 @@ document.addEventListener('DOMContentLoaded', function(){
   window.acSelect=function(el){inp.value=el.dataset.value;dd.classList.remove('show');var form=inp.closest('form');if(form)form.submit();};
   inp.addEventListener('keydown',function(e){if(e.key==='Escape')dd.classList.remove('show');});
 });
+</script>
+
+<!-- Fix 2+4: Instant delete + Loading states -->
+<script>
+function deleteEntry(pk, row) {
+  if (!confirm('Obrisati ovaj zapis?')) return;
+  var btn = row.querySelector('.delete-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+  fetch('/hr/documents/arhiva/' + pk + '/delete/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      row.style.transition = 'opacity .3s, transform .3s';
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(30px)';
+      setTimeout(function() { row.remove(); }, 300);
+    } else {
+      alert(d.error || 'Greska');
+      if (btn) { btn.disabled = false; btn.textContent = 'X'; }
+    }
+  })
+  .catch(function() {
+    alert('Greska mreze');
+    if (btn) { btn.disabled = false; btn.textContent = 'X'; }
+  });
+}
 </script>
 {% endblock %}

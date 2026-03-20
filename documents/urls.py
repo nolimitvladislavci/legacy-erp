@@ -26,6 +26,7 @@ urlpatterns = [
     path("upload/", views.arhiva_upload, name="upload_shortcut"),  # alias
     path("arhiva/export/", views.arhiva_export, name="arhiva_export"),
     path("arhiva/bulk-download/", views.arhiva_bulk_download, name="arhiva_bulk_download"),
+    path("arhiva/<int:pk>/delete/", views.arhiva_delete_entry, name="arhiva_delete_entry"),
     path("arhiva/<int:pk>/download/", views.arhiva_download, name="arhiva_download"),
     path("arhiva/<int:pk>/pdf/", views.arhiva_download_pdf, name="arhiva_pdf"),
     path("arhiva/<int:pk>/xml/", views.arhiva_download_xml, name="arhiva_xml"),
