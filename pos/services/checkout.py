@@ -104,7 +104,7 @@ class CheckoutService:
         """
         company = receipt.session.terminal.company
 
-        # Route 1: Nonprofit guard (item-level, ne company-level)
+        # Route 1: Nonprofit guard (item-level)
         if not CheckoutService._should_fiscalize(receipt):
             logger.info(
                 'FISCAL BYPASS: Bon #%d preskocen (nonprofit mode: %s)',
@@ -133,7 +133,6 @@ class CheckoutService:
 
     @staticmethod
     def _should_fiscalize(receipt):
-        """Guard: nonprofit commercial_only mode fiskalizira samo komercijalne stavke."""
         company = receipt.session.terminal.company
         mode = company.nonprofit_fiscal_mode
         if mode == 'none':
@@ -147,7 +146,6 @@ class CheckoutService:
 
     @staticmethod
     def _resolve_member_discount(company, payload):
-        """Provjeri ima li clan aktivnu pretplatu s popustom."""
         from decimal import Decimal
         card_uid = (payload.get('member_card') or '').strip()
         member_id = payload.get('member_id')
@@ -156,9 +154,7 @@ class CheckoutService:
         try:
             from udruge.models import Clan, MemberSubscription
             if card_uid:
-                clan = Clan.objects.get(
-                    access_card_uid=card_uid, company=company, status='aktivan',
-                )
+                clan = Clan.objects.get(access_card_uid=card_uid, company=company, status='aktivan')
             else:
                 clan = Clan.objects.get(pk=member_id, company=company, status='aktivan')
             sub = MemberSubscription.objects.filter(
@@ -170,6 +166,7 @@ class CheckoutService:
             return Decimal('0'), clan.full_name
         except Exception:
             return Decimal('0'), None
+
 
     @staticmethod
     def _fiscalize_tse(receipt):
@@ -274,6 +271,7 @@ class CheckoutService:
 
         # ── 3. PRIPREMA ──
         cashier_obj = cls._resolve_cashier(cashier_id, company, session)
+        member_discount, member_name = cls._resolve_member_discount(company, payload)
         next_number = cls._next_receipt_number(session)
 
         receipt = POSReceipt.objects.create(
