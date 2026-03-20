@@ -123,6 +123,9 @@ def _archive_eracun_inner(instance):
 def archive_pos_receipt(sender, instance, created, **kwargs):
     if instance.status != 'paid':
         return
+    # Ne arhiviraj bonove s 0 iznosom (prazni/cancelled/test)
+    if not instance.total or instance.total <= 0:
+        return
     # Defer to on_commit — avoid breaking outer transaction.atomic() in process_payment
     from django.db import transaction as _tx
     _tx.on_commit(lambda: _archive_pos_receipt_inner(instance))
