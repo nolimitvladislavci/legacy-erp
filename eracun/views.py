@@ -331,3 +331,40 @@ def api_list(request):
             for er in qs
         ]
     })
+
+
+
+@login_required
+def download_zugferd(request, pk):
+    """Download ZUGFeRD 2.2 PDF (hybrid: PDF + embedded factur-x.xml)."""
+    from django.http import HttpResponse
+    from .models import ERacun
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    eracun = get_object_or_404(ERacun, pk=pk, company=company)
+
+    from eracun.services.zugferd import generate_zugferd_pdf
+    pdf_bytes = generate_zugferd_pdf(eracun)
+
+    filename = 'ZUGFeRD_%s.pdf' % (eracun.invoice_number or eracun.pk)
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response
+
+
+@login_required
+def download_xrechnung(request, pk):
+    """Download XRechnung CII XML."""
+    from django.http import HttpResponse
+    from .models import ERacun
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    eracun = get_object_or_404(ERacun, pk=pk, company=company)
+
+    from eracun.services.xrechnung import generate_xrechnung
+    xml_str = generate_xrechnung(eracun)
+
+    filename = 'XRechnung_%s.xml' % (eracun.invoice_number or eracun.pk)
+    response = HttpResponse(xml_str, content_type='application/xml')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response

@@ -36,4 +36,8 @@ urlpatterns = [
     path('send/<int:invoice_pk>/', views_posrednik.send_eracun_button, name='send_button'),
     # API: primanje e-racuna od vanjskih sustava
     path('api/receive/', views_inbox.api_receive, name='api_receive'),
+
+    # DE: ZUGFeRD + XRechnung download
+    path('<uuid:pk>/zugferd/', views.download_zugferd, name='download_zugferd'),
+    path('<uuid:pk>/xrechnung/', views.download_xrechnung, name='download_xrechnung'),
 ]
