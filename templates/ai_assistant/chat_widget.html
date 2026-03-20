@@ -97,7 +97,24 @@
         </div>
     </div>
     <div class="aiw-messages" id="aiwMessages">
-        <div class="aiw-msg assistant">Dobrodošli! Pratim vaše poslovanje i spreman sam pomoći. Što vas zanima danas?<div class="aiw-actions"><button class="aiw-action-btn" onclick="inp.value='Kakvo je stanje u arhivi?';sendWidgetMsg()">📄 Arhiva</button><button class="aiw-action-btn" onclick="inp.value='Što je novo danas?';sendWidgetMsg()">📊 Pregled dana</button><button class="aiw-action-btn" onclick="inp.value='Trebam pomoć';sendWidgetMsg()">💬 Pomoć</button></div></div>
+        <div class="aiw-msg assistant">
+            Bok! Ja sam vaš AI asistent. 👋
+            <br><br>
+            Slobodno me pitajte bilo što — ne možete ništa pokvariti! 😊
+            <br>Ja samo čitam podatke i pomažem s informacijama.
+            <br><br>
+            Znam sve o vašem poslovanju — dokumenti, računi, zalihe, radni sati.
+            <br><br>
+            Možete me pitati bilo što ili koristite gumbe:
+            <div class="aiw-actions" id="aiwWelcomeActions">
+                <button class="aiw-action-btn" onclick="quickAction('arhiva')">📂 Arhiva<br><small style='font-weight:400;font-size:10px'>Pregled dokumenata</small></button>
+                <button class="aiw-action-btn" onclick="quickAction('pregled')">📊 Pregled<br><small style='font-weight:400;font-size:10px'>Stanje poslovanja</small></button>
+                <button class="aiw-action-btn" onclick="quickAction('pomoc')">❓ Pomoć<br><small style='font-weight:400;font-size:10px'>Kako koristiti sustav</small></button>
+                <button class="aiw-action-btn" onclick="quickAction('pos')">🧾 POS<br><small style='font-weight:400;font-size:10px'>Blagajna i prodaja</small></button>
+                <button class="aiw-action-btn" onclick="quickAction('foto')">📷 Uslikaj<br><small style='font-weight:400;font-size:10px'>Pošalji sliku</small></button>
+                <button class="aiw-action-btn" onclick="quickAction('kontakt')">📞 Kontakt<br><small style='font-weight:400;font-size:10px'>Pozovi podršku</small></button>
+            </div>
+        </div>
     </div>
     <div id="aiwPhotoPreview" style="display:none;padding:4px 12px 6px;background:#0f172a;">
         <button onclick="clearPhoto()" style="float:right;background:none;border:none;color:#888;cursor:pointer;">&#10005;</button>
@@ -184,7 +201,13 @@
     window.sendWidgetMsg = function(){
         if(wSending) return;
         var text = inp.value.trim();
-        if(!text){ inp.placeholder="Napišite pitanje..."; inp.style.borderColor="#c9a84c"; setTimeout(function(){inp.style.borderColor=""; inp.placeholder="Pitaj ili uslikaj problem...";},2000); return; }
+        if(!text){
+            addWMsg('assistant', 'Samo naprijed! Ne možete ništa pokvariti. 😊
+
+Napišite pitanje u polje ili koristite gumbe:\n\n\U0001f4f7 \u2014 slikajte dokument ili problem\n\u270f\ufe0f \u2014 opišite što trebate\n\u23ce Enter \u2014 pošaljite poruku');
+            inp.focus();
+            return;
+        }
         wSending = true;
         inp.value = '';
         addWMsg('user', text);
@@ -243,6 +266,88 @@
         currentPhotoB64 = null;
         document.getElementById('aiwPhotoInput').value = '';
         document.getElementById('aiwPhotoPreview').style.display = 'none';
+    };
+
+    // Quick action handlers
+    window.quickAction = function(action) {
+        var wb = document.getElementById('aiwWelcomeActions');
+        if (wb) wb.style.display = 'none';
+
+        var responses = {
+            'arhiva': {
+                user: '\U0001f4c2 Pokaži mi arhivu',
+                bot: 'Vaša arhiva sadrži sve dokumente.\n\n'
+                    + '\u2022 Pretražujte po partneru, datumu ili iznosu\n'
+                    + '\u2022 Preuzmite PDF ili XML\n'
+                    + '\u2022 Fiskalizacijski podaci (ZKI/JIR)\n\n'
+                    + 'Kliknite za pristup:'
+                    + '[ACTION:\U0001f4c2 Otvori arhivu|/hr/documents/arhiva/]'
+                    + '[ACTION:\U0001f4d6 Upute|/hr/documents/arhiva-upute/]'
+            },
+            'pomoc': {
+                user: '\u2753 Trebam pomoć',
+                bot: 'Ne brinite, ne možete ništa pokvariti! Ja samo gledam podatke i dajem informacije.
+
+Evo kako mogu pomoći:\n\n'
+                    + '\U0001f4c2 Arhiva \u2014 dokumenti i računi\n'
+                    + '\U0001f9fe POS \u2014 blagajna i prodaja\n'
+                    + '\U0001f4ca Izvještaji \u2014 Z-report, PDV\n'
+                    + '\U0001f465 Partneri \u2014 kupci i dobavljači\n'
+                    + '\U0001f4e6 Zalihe \u2014 stanje skladišta\n'
+                    + '\u23f0 Radni sati \u2014 evidencija\n\n'
+                    + 'Pitajte konkretno ili kliknite:'
+                    + '[ACTION:\U0001f4c2 Arhiva|/hr/documents/arhiva/]'
+                    + '[ACTION:\U0001f9fe POS|/hr/pos/]'
+                    + '[ACTION:\U0001f465 Partneri|/hr/partners/]'
+            },
+            'pos': {
+                user: '\U0001f9fe POS blagajna',
+                bot: 'POS modul \u2014 vaša blagajna:\n\n'
+                    + '\u2022 Brza prodaja u 3 klika\n'
+                    + '\u2022 Gotovina, kartica, Revolut\n'
+                    + '\u2022 Automatska fiskalizacija\n'
+                    + '\u2022 Z-izvješće na kraju smjene\n\n'
+                    + '[ACTION:\U0001f9fe Otvori POS|/hr/pos/]'
+                    + '[ACTION:\U0001f4ca Izvještaji|/hr/pos/daily-reports/]'
+            },
+            'foto': {
+                user: null,
+                bot: '\U0001f4f7 Uslikajte problem ili dokument!\n\n'
+                    + 'Kliknite gumb \U0001f4f7 lijevo od polja za unos, '
+                    + 'slikajte mobitelom, i AI će analizirati.\n\n'
+                    + 'Možete slikati:\n'
+                    + '\u2022 Račun za prepoznavanje\n'
+                    + '\u2022 Problem na ekranu\n'
+                    + '\u2022 Dokument za arhiviranje'
+            },
+            'kontakt': {
+                user: '\U0001f4de Trebam podršku',
+                bot: '\U0001f4de Podrška:\n\n'
+                    + 'Telefon: 097-609-1655 (Marija)\n'
+                    + 'Email: fina.connect.online@gmail.com\n'
+                    + 'WhatsApp: +385 97 609 1655\n\n'
+                    + 'Ili opišite problem ovdje!'
+            }
+        };
+
+        if (action === 'pregled') {
+            inp.value = 'Daj mi pregled stanja poslovanja za danas';
+            sendWidgetMsg();
+            return;
+        }
+
+        var r = responses[action];
+        if (!r) { inp.value = action; sendWidgetMsg(); return; }
+
+        if (r.user) addWMsg('user', r.user);
+        addWMsg('assistant', r.bot);
+
+        if (action === 'foto') {
+            setTimeout(function() {
+                var pi = document.getElementById('aiwPhotoInput');
+                if (pi) pi.click();
+            }, 1500);
+        }
     };
 
     // Override sendWidgetMsg da uključi sliku
