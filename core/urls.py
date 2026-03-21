@@ -197,6 +197,7 @@ urlpatterns += i18n_patterns(
     path('assessment/', include('assessment.urls', namespace='assessment')),
     path('outreach/', include('outreach.urls', namespace='outreach')),
     path('ai/', include('ai_assistant.urls', namespace='ai_assistant')),
+    path('ai-cockpit/', include('limit_connect_ai.urls', namespace='limit_connect_ai')),
     path('superadmin/fiskalizacija/', include('fiskalizacija.urls', namespace='fiskalizacija')),
     path('push/', include('push_notifications.urls', namespace='push')),
     path('notifications/', include('notifications.urls', namespace='notifications')),

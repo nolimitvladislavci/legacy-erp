@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}AI Misije - {{ company.name|default:"LIMIT CONNECT" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-list-check"></i> AI Misije</h2>
+        <a href="{% url 'limit_connect_ai:ai_cockpit' %}" class="btn btn-outline-primary">
+            <i class="bi bi-speedometer2"></i> Cockpit
+        </a>
+    </div>
+
+    {% if no_company %}
+    <div class="alert alert-warning">Nema povezane tvrtke.</div>
+    {% else %}
+
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} alert-dismissible fade show">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Create Mission -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h6 class="mb-0">Nova misija</h6>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label">Tip</label>
+                        <select name="mission_type" class="form-select form-select-sm">
+                            {% for val, label in mission_types %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Naziv</label>
+                        <input type="text" name="title" class="form-control form-control-sm" required placeholder="npr. Jutarnji izvjestaj">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Frekvencija</label>
+                        <select name="frequency" class="form-select form-select-sm">
+                            {% for val, label in frequency_choices %}
+                            <option value="{{ val }}" {% if val == 'daily' %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Kanal</label>
+                        <select name="notify_channel" class="form-select form-select-sm">
+                            {% for val, label in channel_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Primatelj</label>
+                        <input type="text" name="notify_target" class="form-control form-control-sm" placeholder="+385...">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Missions List -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h6 class="mb-0">Aktivne misije ({{ missions|length }})</h6>
+        </div>
+        <div class="card-body p-0">
+            {% if missions %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tip</th>
+                            <th>Naziv</th>
+                            <th>Frekvencija</th>
+                            <th>Kanal</th>
+                            <th>Primatelj</th>
+                            <th>Zadnje pokretanje</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in missions %}
+                        <tr class="{% if not m.is_active %}table-secondary{% endif %}">
+                            <td>{{ m.get_mission_type_display }}</td>
+                            <td>{{ m.title }}</td>
+                            <td>{{ m.get_frequency_display }}</td>
+                            <td>{{ m.get_notify_channel_display }}</td>
+                            <td><small>{{ m.notify_target|default:"-" }}</small></td>
+                            <td>{% if m.last_run %}{{ m.last_run|date:"d.m.Y H:i" }}{% else %}-{% endif %}</td>
+                            <td>
+                                {% if m.is_active %}
+                                <span class="badge bg-success">Aktivna</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Neaktivna</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="toggle">
+                                    <input type="hidden" name="mission_id" value="{{ m.id }}">
+                                    <button type="submit" class="btn btn-sm {% if m.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                                        {% if m.is_active %}Deaktiviraj{% else %}Aktiviraj{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted p-3 mb-0">Nema kreiranih misija. Kreirajte prvu misiju gore.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

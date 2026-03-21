@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}AI Cockpit - {{ company.name|default:"LIMIT CONNECT" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-robot"></i> AI Cockpit</h2>
+        <div>
+            <a href="{% url 'limit_connect_ai:ai_missions' %}" class="btn btn-outline-primary btn-sm me-1">
+                <i class="bi bi-gear"></i> Misije ({{ missions_count }})
+            </a>
+            <a href="{% url 'limit_connect_ai:ai_reports' %}" class="btn btn-outline-secondary btn-sm me-1">
+                <i class="bi bi-clock-history"></i> Izvje&scaron;taji
+            </a>
+            <a href="{% url 'limit_connect_ai:ai_funds' %}" class="btn btn-outline-info btn-sm">
+                <i class="bi bi-bank"></i> Fondovi
+            </a>
+        </div>
+    </div>
+
+    {% if no_company %}
+    <div class="alert alert-warning">Nema povezane tvrtke. Kontaktirajte administratora.</div>
+    {% else %}
+
+    <div class="row g-3 mb-4">
+        <!-- POS Promet -->
+        <div class="col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 mb-2">&#x1F4CA;</div>
+                    <h6 class="text-muted">POS Promet danas</h6>
+                    <h3 class="{% if pos_revenue > 0 %}text-success{% else %}text-secondary{% endif %}">
+                        {{ pos_revenue|floatformat:2 }} EUR
+                    </h3>
+                    <small class="text-muted">{{ pos_count }} racuna</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zalihe -->
+        <div class="col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 mb-2">&#x1F4E6;</div>
+                    <h6 class="text-muted">Niske zalihe</h6>
+                    <h3 class="{% if low_stock > 0 %}text-warning{% else %}text-success{% endif %}">
+                        {% if low_stock > 0 %}{{ low_stock }} artikala{% else %}OK{% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Otvoreni racuni -->
+        <div class="col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 mb-2">&#x1F4B0;</div>
+                    <h6 class="text-muted">Otvoreni racuni</h6>
+                    <h3 class="{% if inv_count > 5 %}text-danger{% elif inv_count > 0 %}text-warning{% else %}text-success{% endif %}">
+                        {{ inv_count }}
+                    </h3>
+                    <small class="text-muted">{{ inv_total|floatformat:2 }} EUR</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance -->
+        <div class="col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 mb-2">&#x2696;&#xFE0F;</div>
+                    <h6 class="text-muted">Compliance</h6>
+                    <h3 class="{% if compliance_ok %}text-success{% else %}text-warning{% endif %}">
+                        {% if compliance_ok %}OK{% else %}{{ compliance_items|length }} stavki{% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fondovi -->
+        <div class="col-md-4 col-lg">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 mb-2">&#x1F3DB;&#xFE0F;</div>
+                    <h6 class="text-muted">EU Fondovi</h6>
+                    <h3 class="{% if active_funds > 0 %}text-info{% else %}text-secondary{% endif %}">
+                        {{ active_funds }} aktivnih
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- Fund Drafts -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> Prijave na fondove</h6>
+                </div>
+                <div class="card-body">
+                    {% if fund_drafts %}
+                    <ul class="list-group list-group-flush">
+                        {% for d in fund_drafts %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ d.fund_opportunity.naziv|truncatechars:40 }}</span>
+                            <span class="badge bg-{% if d.status == 'submitted' %}success{% elif d.status == 'approved' %}primary{% elif d.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                                {{ d.get_status_display }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0">Nema prijava na fondove.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Reports -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-clock-history"></i> Zadnji izvjestaji</h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_reports %}
+                    <ul class="list-group list-group-flush">
+                        {% for r in recent_reports %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ r.sent_at|date:"d.m.Y H:i" }} &mdash; {{ r.report_type }}</span>
+                            <span class="badge bg-{% if r.status == 'sent' %}success{% elif r.status == 'failed' %}danger{% else %}warning{% endif %}">
+                                {{ r.get_status_display }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted mb-0">Nema poslanih izvjestaja.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

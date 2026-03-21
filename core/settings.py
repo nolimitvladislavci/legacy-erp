@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "udruge",
     "livestock",
     "intelligence",
+    "limit_connect_ai",
 ]
 
 MIDDLEWARE = [
@@ -477,6 +478,23 @@ CELERY_BEAT_SCHEDULE = {
     "check-auto-listings": {
         "task": "intelligence.tasks.check_auto_listings",
         "schedule": crontab(hour=7, minute=0),
+    },
+    # ── LIMIT Connect AI ──
+    "ai-morning-report": {
+        "task": "limit_connect_ai.tasks.morning_report_all",
+        "schedule": crontab(hour=7, minute=30),
+    },
+    "ai-fund-check": {
+        "task": "limit_connect_ai.tasks.fund_check_all",
+        "schedule": crontab(hour=9, minute=0),
+    },
+    "ai-compliance-check": {
+        "task": "limit_connect_ai.tasks.compliance_check_all",
+        "schedule": crontab(hour=8, minute=0, day_of_week=1),
+    },
+    "ai-campaign-suggestions": {
+        "task": "limit_connect_ai.tasks.campaign_suggestions_all",
+        "schedule": crontab(hour=10, minute=0, day_of_week=5),
     },
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────
