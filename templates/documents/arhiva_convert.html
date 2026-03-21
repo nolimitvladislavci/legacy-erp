@@ -219,4 +219,12 @@ function fenixConvertCamera() {
 }
 </script>
 <script src="/static/js/arhiva-convert.js"></script>
+<script>
+// Auto-open camera if linked from arhiva "Skeniraj dokument" button
+if (window.location.search.indexOf('camera=1') !== -1) {
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(fenixConvertCamera, 500);
+  });
+}
+</script>
 {% endblock %}
