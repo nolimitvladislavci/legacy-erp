@@ -1,177 +1,189 @@
 # FENIX STATUS — Koordinacijski fajl
-# Svi agenti čitaju OVO prije svakog taska.
-# Sonnet ažurira nakon svake sesije.
-# CC Code i Gemini čitaju na početku svakog taska.
-#
-# PRAVILO: Ako nešto piše DONE ovdje — NE RADIŠ PONOVO.
-# PRAVILO: Prije nego staviš task u plan — provjeri git log i ovaj fajl.
+# Svi agenti citaju OVO prije svakog taska.
+# PRAVILO: Ako nesto pise DONE ovdje — NE RADIS PONOVO.
+# PRAVILO: Prije nego stavis task u plan — provjeri ovaj fajl.
 
 ---
 
-## Zadnje ažuriranje
-2026-03-21 01:00 — Sonnet (koordinator)
+## Zadnje azuriranje
+2026-03-21 — CC Code (Opus)
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |
 |---------|-------|--------|--------|
-| Šeki Temaj | Uvijek Friškom | POS (3 lokacije, 5 terminala) | LIVE |
-| Marija Brtan | Konjik d.o.o. | Arhiva, eRačun, Invoicing | LIVE |
-| Nikša Visković | Viskovic Bau | DE market, GoBD | ONBOARDING |
+| Seki Temaj | Uvijek Frisko | POS (3 lok, 5 term), Pickup QR, Booking | LIVE |
+| Marija Brtan | Konjik d.o.o. | Arhiva, eRacun, Invoicing, Konto | LIVE |
+| Niksa Viskovic | Viskovic Bau | DE market, GoBD, TSE, DSFinV-K | ONBOARDING |
+| Dragan Jakovljevic | Viskovic Bau | Partner (Strategie), superadmin | ONBOARDING |
 
-## Infrastruktura
-- Server: 37.27.248.86 (limit-connect.com)
-- MCP: https://limit-connect.com/mcp/sse — LIVE, 10 alata
-- Gunicorn + Celery + Nginx — sve active
-- SW: fina-v6
-
----
-
-## ✅ DONE — NE RADITI PONOVO
-
-### POS modul
-- R1 račun: kupac OIB/naziv/adresa na termalnom i A4 ✅
-- PDV tablica po stopama (kompaktna termalni, puna A4) ✅
-- 50/50 testova PASS (R1, nonprofit, multi-terminal, fiscal, offline, Z-report, storno) ✅
-- ZKI/JIR, FINA QR, M.P. klauzula HR+DE ✅
-- POS Offline Engine v2 (IndexedDB, session cache, bulk sync) ✅
-- DSFinV-K export (ZIP, CSV) ✅
-- TSE KassenSichV, offline Klausel DE ✅
-- TipTracker HR (3360 EUR limit), Voucher PDV ✅
-- FINA Napojnica XML (HR NN 156/2023) ✅
-- Kassenbuch/Blagajnički dnevnik HR+DE ✅
-- ZUGFeRD 2.2 + XRechnung DE B2B ✅
-- Nonprofit guard + member discount + audit trail ✅
-- Knjiga prigovora (KnjigaPrigovora model) ✅
-
-### eRačun / Invoicing
-- eRačun auto iz POS R1, source_receipt FK ✅
-- Posrednik Service (Moj-eRačun/FINA/Custom) ✅
-- DE 250 EUR Kleinbetragsrechnung hard-stop ✅
-- Legal compliance HR+DE ✅
-
-### Dokumenti / Arhiva
-- ArhivaEntry SHA-256 integrity_hash ✅
-- Global doc_integrity: SHA-256 badge na 11 PDF templatea ✅
-- core/doc_integrity.py + templatetag ✅
-- Arhiva UX: filter 0-iznos, sort, delete, onboarding modal ✅
-
-### PDF predlošci
-- base_modern.html (HR klijenti, plavo-bijeli) ✅
-- base_datev.html (DE Steuerberater, DATEV-like) ✅
-- base_viskovic.html (gold/dark premium, HR+DE auto-switch) ✅
-- Sva 3 imaju: doc_integrity_badge, čl.9 ZOR (HR), §147 AO (DE) ✅
-- KOPIRANJE DATEV STILA: legalno — stil/layout nije zaštićen autorskim pravom ✅
-
-### Sales / Registracija
-- Sales Wizard HR+DE ✅
-- SalesLead model (ref_code, commission) ✅
-- QR referral tracking, Agent Dashboard ✅
-- Auto email + WhatsApp nakon potpisa ✅
-- AI validacija po koraku, duplicate check OIB+ime ✅
-- Audit trail: IP + SHA-256 + timestamp ✅
-- Verfahrensdokumentation (GoBD/KassenSichV) + online potpis ✅
-- ISMS dokumentacija (ISO 27001 Annex A) ✅
-
-### FenixCamera
-- fenix-camera.js globalni modul (pick, preview, upload, AI analyze, quick) ✅
-- 19 templatea integrirala FenixCamera ✅
-- FAB (plutajuća ikona) SAMO na pos/prigovori.html ✅
-- analyze_image AI endpoint ✅
-- Kontekstualni gumbi: udruge (3), assessment (1+), marketplace, delivery, pos ✅
-
-### PWA / Offline
-- SW fina-v6: worktime/fitness/udruge rute u PAGE_CACHE ✅
-- fenix-permissions.js: storage.persist(), Notification dozvola ✅
-- worktime-offline.js: IndexedDB clock-in/out, auto-sync ✅
-- offline.html: module grid (koje stranice rade offline) ✅
-
-### WhatsApp
-- send_document (WAHA Plus, base64) ✅
-- send_document_link (fallback za WAHA Basic) ✅
-- send_image ✅
-- Udruge: 4 PDF poslana na 385991908089 ✅
-
-### Ivan Cockpit
-- /hr/superadmin/ivan/ live ✅
-- 6 control buttons (restart, daily report, arhiva, backup) ✅
-- Live metrics: POS today, eRačun, pending AI actions ✅
-
-### Udruge modul
-- Clan, Clanarina, Donacija, KnjigaPrimitaka, MembershipPlan, MemberSubscription modeli ✅
-- AML Guard (ZSPNFT) za donacije ✅
-- OIB lookup + AI analiza člana ✅
-- WhatsApp expiry reminders ✅
-- FINA izvještaji (PR-RAS-NPF, G-PR-IZ-NPF, BIL-NPF) ✅
-- EU Fondovi / volonterski izvještaji ✅
-- Mobile responsive: 44px touch, bottom nav, card view ✅
-- FenixCamera u 3 forme (clan, donacija, knjiga) ✅
-- Testovi: 12/12 PASS ✅
-
-### Fitness modul (Gemini — ova sesija)
-- 8 modela: Member, MemberCheckIn, MembershipPlan, MemberSubscription,
-  Payment, WorkoutClass, ClassBooking, Equipment ✅
-- Migracije aplicirane ✅
-
-### MCP Server
-- fenix-mcp.service LIVE na :8765 ✅
-- 10 alata: query_db, django_orm, read_file, write_file, list_files,
-  exec_command, get_logs, system_status, pos_today, restart_service ✅
-- CORS za claude.ai ✅
-- Sonnet se spaja direktno iz chata ✅
-
-### Ostalo
-- Tim Chat (okrugli stol) ✅
-- Bulk invite management command ✅
-- Seki: uklonjen superuser, POS provjeren ✅
-- AdminLangRedirectMiddleware (DE → German admin) ✅
+## Superadmini
+| User | Login | Firma |
+|------|-------|-------|
+| Ivan Brtan | superadmin / antonio.brtan | Platform owner |
+| Marija Brtan | marija.brtan | Konjik d.o.o. |
+| Niksa Viskovic | niksa.viskovic | Viskovic Bau |
+| Dragan Jakovljevic | dragan.jakovljevic | Viskovic Bau |
 
 ---
 
-## ⏳ ČEKA — otvoreni taskovi
+## DONE — NE DIRATI
 
-### CC Code čeka (u redu, pokretati jedan po jedan):
-1. CC_TASK_FITNESS_SIM_TEST.md — testovi + sim + 4 PDF na WhatsApp
-2. CC_TASK_NOTIFICATIONS.md — push/WhatsApp notifikacije za expiry, invoice due, anomalije
-3. CC_TASK_MEGA_SIMULACIJA.md — health check svih modula
-4. CC_TASK_OKRUGLI_STOL_AUDIT.md — provjera PendingAIAction
+### Udruge modul (KOMPLET)
+- is_nonprofit, nonprofit_fiscal_mode, requires_simplified_accounting — DONE
+- InventoryItem.is_nonprofit_activity + POSReceiptItem.is_nonprofit_activity — DONE
+- CheckoutService._should_fiscalize() guard — DONE
+- MIXED_RECEIPT blokada (commercial + nonprofit na istom bonu) — DONE
+- Clanarina + Donacija + KnjigaPrimitaka modeli — DONE
+- MembershipPlan + MemberSubscription state machine — DONE
+- paying_sponsor (kisobran naplata) — DONE
+- _resolve_member_discount u CheckoutService — DONE
+- evaluate_subscriptions Celery (dunning + auto-renew) — DONE
+- Neprofitni kontni plan (144 konta, 4-digit analitika) — DONE
+- Auto-setup signal (apps.py post_save Company) — DONE
+- 10 HTML templatea za udruge — DONE
 
-### Gemini čeka:
-1. GEMINI_TASK_FITNESS_IMPLEMENT.md — testovi i sim za fitness (modeli su napravljeni, testovi nisu)
+### FINA izvjestaji (KOMPLET)
+- PR-RAS-NPF XLSX (145 AOP pozicija iz pravog FINA XLS-a) — DONE
+- BIL-NPF XLSX (aktiva/pasiva) — DONE
+- G-PR-IZ-NPF XLSX (jednostavno racunovodstvo) — DONE
+- Donatorska potvrda HTML — DONE
 
-### Nije ni u planu ali treba:
-- Automatska naplata pretplate (Stripe ili SEPA reminder) — BLOCKER za pravi SaaS
-- Payroll testovi (modul bez testova, dira plaće)
-- Assessment testovi
-- Konto godišnji obračun / GFI-POD automatizacija
-- Onboarding wizard bez Ivana (self-service signup)
+### DE KassenSichV (KOMPLET)
+- Fiskaly Cloud TSE adapter (pos/tse_adapter.py) — DONE
+- Tri-routing u CheckoutService (nonprofit→DE TSE→HR FINA) — DONE
+- TSE Ausfall handling ("TSE AUSGEFALLEN" klauzel) — DONE
+- DSFinV-K Export (7 CSV ZIP) — DONE
+- test_fiskaly_tse management command — DONE
+- XRechnung CII XML generator — DONE
+- ZUGFeRD 2.2 hybrid PDF — DONE
+- Verfahrensdokumentation stranica + online potpis — DONE
+- Kassenbuch/Blagajnicki dnevnik — DONE
+- DE 250 EUR Kleinbetragsrechnung hard-stop — DONE
+
+### EU Fondovi + Volonteri (KOMPLET)
+- is_volunteer, volunteer_hourly_value, volunteer_annual_limit — DONE
+- Payroll giljotina (skip volunteer) — DONE
+- TimeEntry auto-monetizacija — DONE
+- VolunteerTaxGuard (limit check) — DONE
+- EUAuditGuard (double-dipping, monthly fund) — DONE
+- EU Timesheet + In-Kind Report + Godisnje izvjesce — DONE
+
+### AML + Napojnice + Voucheri
+- AML Guard (10k EUR prag, KYC status) — DONE
+- Materijalne donacije (donation_in StockMovement) — DONE
+- TipTracker (HR 3.360 EUR godisnji limit) — DONE
+- FINA <Napojnica> XML cvor — DONE
+- Voucher Mehrzweck/Einzweck PDV logika — DONE
+- R1 racun (buyer_oib, FINA OibKupca) — DONE
+- Auto e-Racun za B2B/R1 transakcije — DONE
+
+### Payments (KOMPLET)
+- 5 gatewaya: cash, stripe, btcpay, paypal, revolut — DONE
+- Posrednik Service (Moj-eRacun.hr API) — DONE
+- Auto-send e-Racun kroz posrednika — DONE
+- fetch_posrednik_inbox Celery task — DONE
+
+### i18n (FAZA 1 KOMPLET)
+- Company.ui_language + middleware fallback — DONE
+- 134 DE prijevoda — DONE
+- LANG_PREFIXES fix (de dodano) — DONE
+- AdminLangRedirectMiddleware — DONE
+
+### POS Offline (KOMPLET)
+- IndexedDB engine (pos-offline.js v2) — DONE
+- Session caching (country, fiscal_system) — DONE
+- Offline receipt print + country-aware footer — DONE
+- Cash ops offline + Shift summary offline — DONE
+- Bulk sync on reconnect — DONE
+- beforeunload warning (B-02) — DONE
+
+### FenixCamera (KOMPLET — 19 templatea)
+- fenix-camera.js (8KB) u base.html — DONE
+- AI Widget, arhiva_upload, arhiva_convert, prigovori — DONE
+- ivan_cockpit, smart_import, helpdesk (x2) — DONE
+- delivery, worker_camera, assessment (x2) — DONE
+- marketplace, steuerberater_portal — DONE
+- 4 udruge templatea (clan_form, donacija_form, knjiga, clan_detail) — DONE
+- /ai/api/analyze-image/ endpoint (Claude Haiku Vision) — DONE
+
+### Knjiga boljitaka (12/21)
+- B-02 beforeunload, B-03 audit IP/UA, B-04 fiscal retry — DONE
+- B-07 QR cart, B-08 stock race condition — DONE
+- B-14 order_source, B-16 company switch audit — DONE
+
+### Infrastruktura (KOMPLET)
+- Git init (720K linija, 3395 fajlova) — DONE
+- Daily backup (lc_backup.sh, 03:00) — DONE
+- Self-heal (lc_self_heal.sh, */10 min) — DONE
+- Health monitor + error monitor (*/5 min) — DONE
+- DR skripta (lc_rebuild.sh) — DONE
+- Synesis email baza (1272 unique, 2828 updatirano) — DONE
+
+### Sales + Onboarding (KOMPLET)
+- Sales Wizard HR + DE (5 koraka) — DONE
+- SalesLead model (ref_code, commission_percent) — DONE
+- Agent Dashboard (/hr/register/agent/) — DONE
+- QR referral (?ref=REF-XXXXX) — DONE
+- Audit trail (IP + SHA-256 + immutable PDF) — DONE
+- Auto email/WhatsApp nakon potpisa — DONE
+- AI validacija + duplikat provjera — DONE
+
+### Dokumenti + PDF (KOMPLET)
+- 3 PDF dizajna (modern, datev, viskovic) — DONE
+- doc_integrity_badge (SHA-256) na 14+ templatea — DONE
+- ISMS dokumentacija (Policy, Risk Assessment, BCP) — DONE
+- Steuerberater portal (/hr/steuerberater/) — DONE
+- Promo stranice HR + DE — DONE
+- Arhiva upute + onboarding modal + A4 vodic — DONE
+
+### Mobile (KOMPLET)
+- Bottom nav bar (5 ikona, <768px) — DONE
+- Table-to-card CSS (.mobile-cards) — DONE
+- Touch targets 44px — DONE
+- Input 16px (no iOS zoom) — DONE
+- Single column grids — DONE
+- PWA permissions (fenix-permissions.js) — DONE
+- Worktime offline (worktime-offline.js) — DONE
+- SW v6 (worktime/fitness/udruge/hr routes) — DONE
+
+### MCP Server (KOMPLET)
+- Fenix MCP Server (11 alata) — DONE
+- Systemd service (fenix-mcp) — DONE
+- Nginx proxy (/mcp/) + CORS za claude.ai — DONE
+- Sonnet spojen — DONE
+
+### WhatsApp (KOMPLET)
+- send_text — DONE
+- send_document (WAHA Plus only) — DONE
+- send_document_link (fallback, sve verzije) — DONE
+- send_image — DONE
+
+### Tim Chat
+- tim_chat_send endpoint (@login_required, ne superadmin) — DONE
+- Okrugli stol: Ivan, Niksa, Dragan, Seki, Marija, CC, Sonnet — DONE
 
 ---
 
-## 🚫 PRAVILA KOORDINACIJE
+## OTVORENO — treba raditi
 
-### Za CC Code:
-- Uvijek čitaj FENIX_STATUS.md NA POČETKU svakog taska
-- Uvijek čitaj models.py stvarnog modula PRIJE pisanja koda
-- Nakon završetka — ažuriraj FENIX_STATUS.md (pomakni iz ČEKA u DONE)
-- Git commit s jasnom porukom
+### DE Compliance
+- Fiskaly sandbox test (treba API kljuceve) — CEKA
+- DATEV SKR03/04 kontni plan — OTVORENO
+- DATEV Buchungsstapel export — OTVORENO
 
-### Za Gemini:
-- Čitaj FENIX_STATUS.md na početku
-- Ako piše DONE — ne opisuj to kao "sljedeći korak"
-- Pišeš plan → odmah implementiraj (ne čekaj potvrdu za svaki korak)
-- Nakon završetka — ažuriraj FENIX_STATUS.md
+### Knjiga boljitaka (preostalo)
+- B-01 Offline cross-device sync — DJELOMICNO
+- B-05 WaiterShift heartbeat — OTVORENO
+- B-06 Konobar race condition — DJELOMICNO
+- B-09 QR error toast — DJELOMICNO
+- B-10 Claim race condition — DJELOMICNO
+- B-11 QR bez emaila loyalty — OTVORENO
+- B-13 Kitchen API rate limit — OTVORENO
+- B-17 OCR confidence — OTVORENO
+- B-21 Print QR label — DJELOMICNO
 
-### Za Sonnet (koordinator):
-- Prije pisanja taska: git log --oneline --since="danas" | grep tema
-- Ako je u DONE — ne pišeš task
-- Ažuriraj ovaj fajl nakon svake sesije
-- Ivan je "moj enter" — finalna odluka je njegova
-
----
-
-## 📊 Brojke (2026-03-21)
-- Firme: 82 | Korisnici: 321 | Aktivne pretplate: 12 | MRR: 1.537 EUR
-- POS bonovi: 76 | Fitness: 0 članova (testni) | Udruge: 10 članova (testni)
-- Git commits danas: 49
-- Python LOC: ~180.000 | Django apps: 47 | DB tables: 296
-
+### Nice-to-have
+- ZUGFeRD PDF/A-3 pravi format (trenutno basic embed) — OTVORENO
+- Vollstandige DE Ubersetzung (~2300 praznih) — OTVORENO
+- Public donation page / widget — OTVORENO
+- Fitness modul audit (GEMINI task) — CEKA GEMINI
