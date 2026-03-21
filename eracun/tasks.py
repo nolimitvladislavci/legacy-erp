@@ -75,3 +75,16 @@ def retry_unsent_eracuni(self):
                 sent += 1
 
     return {'retried': unsent.count(), 'sent': sent}
+
+
+# ── Cert Expiry Monitor — dnevna provjera ──────────────────────────────────
+
+from celery import shared_task
+
+@shared_task(name='eracun.check_cert_expiry')
+def check_cert_expiry():
+    """Dnevna provjera certifikata. Celery beat: svaki dan 08:00."""
+    from eracun.services.cert_monitor import run_daily_check
+    results = run_daily_check()
+    expiring = [r for r in results if r.get('status') not in ('ok', 'ERROR')]
+    return f'{len(results)} certs checked, {len(expiring)} expiring'

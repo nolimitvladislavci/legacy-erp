@@ -172,6 +172,7 @@
 <div class="footer">
   <strong>{{ invoice.issuer_name }}</strong> · Steuer-Nr.: {{ invoice.issuer_oib }} · IBAN: {{ invoice.issuer_iban }}{% if invoice.swift %} · BIC: {{ invoice.swift }}{% endif %} · {{ invoice.issuer_email }}{% if invoice.issuer_phone %} · Tel.: {{ invoice.issuer_phone }}{% endif %}
   &nbsp;|&nbsp; Rechnungsdatum: {{ invoice.date_issued|date:"d.m.Y" }} · Dok.-Nr.: {{ invoice.uuid }}
+  <br><span style="color:#999;font-size:7pt">Erstellt mit LIMIT Connect · limit-connect.com · EU ViDA 2028 konform</span>
 </div>
 </body>
 </html>

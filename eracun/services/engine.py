@@ -369,6 +369,24 @@ def process_eracun(eracun, config=None, user=None):
         message=f'XML potpisan, UUID: {req_uuid}', user=user
     )
 
+    # 3b. PRE-FLIGHT VALIDATION — Rupa 1 zatvorena
+    try:
+        from eracun.services.validator import validate_full
+        v_valid, v_errors, v_warnings = validate_full(xml_payload)
+        if not v_valid:
+            eracun.status = 'invalid'
+            eracun.error_message = 'Pre-flight validacija: ' + '; '.join(v_errors[:5])
+            eracun.save(update_fields=['status', 'error_message'])
+            ERacunLog.objects.create(
+                eracun=eracun, action='validation', status='error',
+                message=eracun.error_message, user=user,
+            )
+            return False, eracun.error_message
+        if v_warnings:
+            logger.info('e-Racun %s validation warnings: %s', eracun.invoice_number, v_warnings[:3])
+    except Exception as val_err:
+        logger.warning('Pre-flight validation skipped: %s', val_err)
+
     # 4. Send to FINA
     eracun.status = 'sending'
     eracun.save(update_fields=['status'])

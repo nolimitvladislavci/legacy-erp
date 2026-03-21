@@ -433,6 +433,7 @@ def otpremnica_pdf(request, pk):
     doc = get_object_or_404(Otpremnica, pk=pk)
     return _render_pdf(request, 'documents/pdf/otpremnica_pdf.html', {
         'doc': doc, 'items': doc.items.all(), 'filename': f'OTP-{doc.doc_number}',
+        'user': request.user,
     })
 
 @login_required

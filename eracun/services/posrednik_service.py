@@ -115,6 +115,15 @@ class PosrednikService:
         from eracun.services.ubl_generator import generate_ubl_xml
         xml_content = generate_ubl_xml(eracun)
 
+        # Pre-flight validacija (Rupa 1)
+        try:
+            from eracun.services.validator import validate_full
+            v_ok, v_err, v_warn = validate_full(xml_content)
+            if not v_ok:
+                return {'ok': False, 'error': 'XML validacija: ' + '; '.join(v_err[:3])}
+        except Exception:
+            pass  # Graceful — ne blokiraj slanje ako validator crashne
+
         # Update status
         eracun.status = 'sending'
         eracun.save(update_fields=['status'])

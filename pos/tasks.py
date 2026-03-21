@@ -265,24 +265,14 @@ def nightly_owner_zreport(self):
 
         # Poruka
         msg = (
-            'Z-Izvjestaj (%s)
-
-'
-            'Promet: %.2f EUR (%d bonova)
-'
-            'Gotovina: %.2f EUR
-'
-            'Kartica: %.2f EUR
-'
-            'Napojnice: %.2f EUR
-'
-            'Top artikl: %s
-'
-            'Smjena: %d
-
-'
-            'Sve je fiskalizirano i sigurno.
-'
+            'Z-Izvjestaj (%s)\n\n'
+            'Promet: %.2f EUR (%d bonova)\n'
+            'Gotovina: %.2f EUR\n'
+            'Kartica: %.2f EUR\n'
+            'Napojnice: %.2f EUR\n'
+            'Top artikl: %s\n'
+            'Smjena: %d\n\n'
+            'Sve je fiskalizirano i sigurno.\n'
             'limit-connect.com'
         ) % (today.strftime('%d.%m.'), total, count, cash, card, tips, top_item, sessions)
 

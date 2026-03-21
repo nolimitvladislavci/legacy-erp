@@ -53,7 +53,20 @@
       "WebFetch(domain:www.melasoft.com)",
       "WebFetch(domain:edicomgroup.com)",
       "WebFetch(domain:sovos.com)",
-      "WebFetch(domain:www.vatupdate.com)"
+      "WebFetch(domain:www.vatupdate.com)",
+      "WebFetch(domain:e-invoicing-compliance.basware.com)",
+      "mcp__claude_ai_Fenix_LIMIT_Connect__django_orm",
+      "Bash(python manage.py collectstatic --noinput)",
+      "Bash(python3 manage.py collectstatic --noinput)",
+      "Bash(ls /var/www/fina-connect/venv/bin/python*)",
+      "Bash(ls /var/www/fina-connect/.venv/bin/python*)",
+      "Bash(./venv/bin/python manage.py collectstatic --noinput)",
+      "Bash(sudo systemctl:*)",
+      "Bash(systemctl list-units:*)",
+      "mcp__claude_ai_Fenix_LIMIT_Connect__system_status",
+      "mcp__claude_ai_Fenix_LIMIT_Connect__get_logs",
+      "WebFetch(domain:limit-connect.com)",
+      "mcp__claude_ai_Fenix_LIMIT_Connect__exec_command"
     ]
   }
 }

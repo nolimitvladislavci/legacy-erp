@@ -192,6 +192,47 @@ Lanac se ne prekida. Mreža raste sama.
 
 ---
 
+## EU ViDA 2028 — ZAKONSKI TURBO ZA VIRALNI RAST
+
+### Što je ViDA?
+VAT in the Digital Age — EU reforma koja uvodi obavezno e-fakturiranje za SVE B2B transakcije.
+Usvojeno 11.03.2025, objavljeno u OJ 25.03.2025, na snazi od 14.04.2025.
+
+### Timeline koji nas se tiče:
+| Datum | Događaj | LIMIT Connect status |
+|-------|---------|---------------------|
+| 01.01.2026 | HR: obavezno B2B e-fakturiranje | ✅ SPREMNI (eRacun LIVE) |
+| 01.01.2027 | HR: i ne-PDV obveznici | ✅ Proširiti |
+| 01.01.2028 | DE: sve firme e-fakturiraju | ✅ XRechnung LIVE |
+| 01.07.2028 | EU: Single VAT Registration | ⚠️ OSS modul potreban |
+| 01.07.2030 | EU: SVE B2B cross-border e-fakture | ⚠️ DRR modul potreban |
+| 01.01.2035 | Potpuna EU harmonizacija EN 16931 | ✅ UBL 2.1 spreman |
+
+### Zašto je ovo turbo za nas:
+1. **Zakon prisiljava SVE firme** na e-fakturiranje → ogroman tržišni pull
+2. **Svaka e-faktura** s "Powered by LIMIT Connect" = obavezna reklama
+3. **HR je najstroži režim** → battle-tested = EU competitive advantage
+4. **Mali poduzetnici** trebaju jeftino rješenje → mi smo jedini s besplatnim planom
+5. **Hash chain audit trail** (deployano 21.03.) = blockchain-grade compliance
+
+### Tehnički zahtjevi (ispunjeni/u planu):
+- EN 16931 e-faktura: ✅ UBL 2.1 + CII
+- ZUGFeRD hibridni PDF: ✅ 2.2
+- XRechnung (DE): ✅ CII XML
+- Peppol: ⚠️ Proširiti (FINA = HR Access Point)
+- Digitalni potpis: ⚠️ Dovršiti
+- Real-time reporting: ✅ Fiskalizacija
+- Arhiva 11 god: ✅ Hash chain
+- Reverse charge auto: ❌ IMPLEMENTIRATI
+- OSS/IOSS: ❌ IMPLEMENTIRATI DO 2028
+
+### Kazne za nepoštivanje (HR):
+- Fakturiranje: 260 - 66.360 EUR
+- Real-time reporting: do 500.000 EUR
+- PDV registracija: 140 - 26.700 EUR
+
+---
+
 ## POVEZANI DOKUMENTI
 
 | Dokument | Sadržaj |
