@@ -28,8 +28,8 @@ def ai_cockpit(request):
     try:
         from pos.models import POSReceipt
         agg = POSReceipt.objects.filter(
-            company=company, created_at__date=today,
-        ).aggregate(total=Sum("total_amount"), count=Count("id"))
+            session__terminal__company=company, status='paid', paid_at__date=today,
+        ).aggregate(total=Sum("total"), count=Count("id"))
         ctx["pos_revenue"] = agg["total"] or 0
         ctx["pos_count"] = agg["count"] or 0
     except Exception:
@@ -40,8 +40,8 @@ def ai_cockpit(request):
     try:
         from invoicing.models import Invoice
         agg = Invoice.objects.filter(
-            company=company, status__in=["sent", "overdue"],
-        ).aggregate(total=Sum("total_amount"), count=Count("id"))
+            company=company, status__in=["SENT", "OVERDUE", "UNPAID"],
+        ).aggregate(total=Sum("total"), count=Count("id"))
         ctx["inv_count"] = agg["count"] or 0
         ctx["inv_total"] = agg["total"] or 0
     except Exception:
@@ -52,8 +52,8 @@ def ai_cockpit(request):
     try:
         from inventory.models import InventoryItem
         ctx["low_stock"] = InventoryItem.objects.filter(
-            company=company, quantity__lte=F("reorder_level"),
-        ).count()
+            company=company, is_active=True, quantity__lte=F("min_quantity"),
+        ).exclude(min_quantity=0).count()
     except Exception:
         ctx["low_stock"] = 0
 
