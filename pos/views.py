@@ -525,13 +525,13 @@ def new_terminal(request):
         branch_id = request.POST.get('branch_id', '')
         if branch_id and branch_id != 'new':
             from companies.models import CompanyBranch
-            branch = CompanyBranch.objects.filter(pk=branch_id, company=company).first()
+            branch = CompanyBranch.objects.filter(pk=branch_id, parent_company=company).first()
         elif branch_id == 'new':
             from companies.models import CompanyBranch
             bn = request.POST.get('new_branch_name', '').strip()
             if bn:
                 branch = CompanyBranch.objects.create(
-                    company=company, name=bn,
+                    parent_company=company, name=bn,
                     city=request.POST.get('new_branch_city', ''),
                     address=request.POST.get('new_branch_address', ''),
                 )
@@ -560,7 +560,7 @@ def new_terminal(request):
     ]
 
     from companies.models import CompanyBranch
-    branches = CompanyBranch.objects.filter(company=company, is_active=True)
+    branches = CompanyBranch.objects.filter(parent_company=company, is_active=True)
 
     return render(request, 'pos/new_terminal.html', {
         'company': company,
