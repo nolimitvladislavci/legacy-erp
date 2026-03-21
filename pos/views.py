@@ -496,34 +496,76 @@ def barcode_lookup(request):
 
 @login_required
 def new_terminal(request):
-    """Create a new POS terminal."""
-    company = get_current_company()
+    """Create a new POS terminal — wizard with type selection."""
+    company = get_user_company(request)
     if not company:
         messages.error(request, 'Nema konteksta tvrtke.')
         return redirect('pos:dashboard')
+
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        terminal_code = request.POST.get('terminal_code', '').strip()
-        description = request.POST.get('description', '').strip()
-        if not name or not terminal_code:
-            messages.error(request, 'Naziv i kod terminala su obavezni.')
-        elif POSTerminal.objects.filter(company=company, terminal_code=terminal_code).exists():
-            messages.error(request, f'Terminal s kodom "{terminal_code}" vec postoji.')
-        else:
-            pos_type = request.POST.get('pos_type', 'retail').strip()
-            if pos_type not in ('quick', 'retail', 'restaurant'):
-                pos_type = 'retail'
-            terminal = POSTerminal.objects.create(
-                company=company,
-                name=name,
-                terminal_code=terminal_code,
-                description=description,
-                pos_type=pos_type,
-                is_active=True,
-            )
-            messages.success(request, f'Terminal "{terminal.name}" uspjesno kreiran.')
-            return redirect('pos:terminal_detail', terminal_id=terminal.pk)
-    return render(request, 'pos/new_terminal.html', {})
+        pos_type = request.POST.get('pos_type', 'quick').strip()
+        if pos_type not in ('quick', 'retail', 'restaurant', 'field', 'service', 'reception'):
+            pos_type = 'quick'
+
+        # Terminal name: user-provided or auto-generated
+        name = request.POST.get('terminal_name', '').strip()
+        if not name:
+            type_labels = {'quick': 'Brza blagajna', 'retail': 'Maloprodaja', 'restaurant': 'Restoran',
+                          'field': 'Terenska', 'service': 'Usluge', 'reception': 'Recepcija'}
+            count = POSTerminal.objects.filter(company=company).count() + 1
+            name = f'{type_labels.get(pos_type, "Blagajna")} {count}'
+
+        # Auto terminal code
+        import secrets
+        terminal_code = f'{pos_type[:3].upper()}{secrets.token_hex(2).upper()}'
+
+        # Branch
+        branch = None
+        branch_id = request.POST.get('branch_id', '')
+        if branch_id and branch_id != 'new':
+            from companies.models import CompanyBranch
+            branch = CompanyBranch.objects.filter(pk=branch_id, company=company).first()
+        elif branch_id == 'new':
+            from companies.models import CompanyBranch
+            bn = request.POST.get('new_branch_name', '').strip()
+            if bn:
+                branch = CompanyBranch.objects.create(
+                    company=company, name=bn,
+                    city=request.POST.get('new_branch_city', ''),
+                    address=request.POST.get('new_branch_address', ''),
+                )
+
+        terminal = POSTerminal.objects.create(
+            company=company, name=name, terminal_code=terminal_code,
+            pos_type=pos_type, branch=branch, is_active=True,
+        )
+        messages.success(request, f'Blagajna "{terminal.name}" kreirana!')
+        return redirect('pos:terminal_detail', terminal_id=terminal.pk)
+
+    # GET — prepare wizard context
+    pos_types = [
+        {'value': 'quick', 'label': 'Brza blagajna', 'icon': '⚡', 'color': '#c9a84c',
+         'desc': 'Najbrzi put do naplate. Idealno za pekare, kioske, market.'},
+        {'value': 'retail', 'label': 'Maloprodaja', 'icon': '🏪', 'color': '#60a5fa',
+         'desc': 'Barkod skener, kategorije, inventura. Za ducane i trgovine.'},
+        {'value': 'restaurant', 'label': 'Restoran', 'icon': '🍽️', 'color': '#f97316',
+         'desc': 'Stolovi, narudzbe, kuhinja (KDS). Za ugostitelje.'},
+        {'value': 'field', 'label': 'Terenska', 'icon': '🚚', 'color': '#22c55e',
+         'desc': 'Utovar, ruta, prodaja na terenu, povratnica.'},
+        {'value': 'service', 'label': 'Usluge', 'icon': '🔧', 'color': '#a78bfa',
+         'desc': 'Za servise, frizere, trenere. Satnica + usluga.'},
+        {'value': 'reception', 'label': 'Recepcija', 'icon': '🏨', 'color': '#f472b6',
+         'desc': 'Za hotele, apartmane, kampove.'},
+    ]
+
+    from companies.models import CompanyBranch
+    branches = CompanyBranch.objects.filter(company=company, is_active=True)
+
+    return render(request, 'pos/new_terminal.html', {
+        'company': company,
+        'pos_types': pos_types,
+        'branches': branches,
+    })
 
 
 @login_required
