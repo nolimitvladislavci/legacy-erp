@@ -12,7 +12,15 @@
       "Bash(grep -r \"food.*waste\\\\|discard.*food\\\\|night.*sale\\\\|vending.*machine\\\\|auto.*sale\" /var/www/fina-connect/*.md)",
       "WebFetch(domain:www.google.com)",
       "WebFetch(domain:search.brave.com)",
-      "WebFetch(domain:porezna-uprava.gov.hr)"
+      "WebFetch(domain:porezna-uprava.gov.hr)",
+      "WebFetch(domain:www.bing.com)",
+      "WebFetch(domain:eur-lex.europa.eu)",
+      "WebFetch(domain:fiskalopedija.hr)",
+      "WebFetch(domain:www.duckduckgo.com)",
+      "WebFetch(domain:html.duckduckgo.com)",
+      "WebFetch(domain:narodne-novine.nn.hr)",
+      "WebFetch(domain:europa.eu)",
+      "WebFetch(domain:www.porezna-uprava.hr)"
     ]
   }
 }

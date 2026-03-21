@@ -22,4 +22,8 @@ urlpatterns = [
     path("staging/<int:pk>/", views.staging_detail, name="staging_detail"),
     path("staging/<int:pk>/start/", views.staging_start, name="staging_start"),
     path("staging/<int:pk>/progress/", views.staging_progress_api, name="staging_progress_api"),
+    # Predkomora: Side-by-Side Review Dashboard
+    path("review/", views.review_dashboard, name="review_dashboard"),
+    path("review/approve/", views.review_approve, name="review_approve"),
+    path("review/discard/", views.review_discard, name="review_discard"),
 ]

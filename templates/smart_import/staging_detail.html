@@ -8,9 +8,14 @@
             <h2><i class="fas fa-layer-group me-2 text-primary"></i>{{ batch.title|default:"Staging Batch" }}</h2>
             <small class="text-muted">{{ batch.total_files }} fajlova — {{ batch.get_status_display }}</small>
         </div>
-        <a href="{% url 'smart_import:staging_upload' %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>Nazad
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'smart_import:review_dashboard' %}" class="btn btn-warning btn-sm">
+                <i class="fas fa-eye me-1"></i>Predkomora (pregled sumnjivih)
+            </a>
+            <a href="{% url 'smart_import:staging_upload' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Nazad
+            </a>
+        </div>
     </div>
 
     <!-- Progress section -->

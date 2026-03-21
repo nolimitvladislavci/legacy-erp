@@ -673,3 +673,185 @@ def staging_progress_api(request, pk):
         ],
         'is_done': batch.status in ('done', 'done_with_errors'),
     })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PREDKOMORA: Side-by-Side Review Dashboard
+# Marija pregleda sumnjive račune — split-screen: slika lijevo, forma desno
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def review_dashboard(request):
+    """Predkomora — svi StagingFileHeader koji trebaju pregled."""
+    company = get_user_company(request)
+    if not company:
+        return redirect('smart_import:staging_upload')
+
+    from .models import StagingFileHeader, StagingFile
+    import json
+
+    # Svi headeri za ovu tvrtku, sortirani: needs_review=True prvi
+    headers = StagingFileHeader.objects.filter(
+        staging_file__staging_batch__company=company,
+    ).select_related(
+        'staging_file', 'matched_partner',
+    ).order_by('-needs_review', '-created_at')[:200]
+
+    items = []
+    items_json = []
+
+    for h in headers:
+        sf = h.staging_file
+        # Detektiraj duplikat (ponovo provjeri za display)
+        is_dup = False
+        if h.supplier_oib and h.invoice_number and h.total_amount:
+            is_dup = StagingFileHeader.objects.filter(
+                staging_file__staging_batch__company=company,
+                supplier_oib=h.supplier_oib,
+                invoice_number=h.invoice_number,
+                total_amount=h.total_amount,
+            ).exclude(pk=h.pk).exists()
+
+        item = {
+            'sf': sf,
+            'header': h,
+            'is_dup': is_dup,
+        }
+        items.append(item)
+
+        items_json.append({
+            'sf_id': sf.pk,
+            'header_id': h.pk,
+            'image_url': sf.file.url if sf.file else '',
+            'supplier_name': h.supplier_name or '',
+            'supplier_oib': h.supplier_oib or '',
+            'invoice_number': h.invoice_number or '',
+            'invoice_date': h.invoice_date.isoformat() if h.invoice_date else '',
+            'total_amount': str(h.total_amount) if h.total_amount else '',
+            'vat_amount': str(h.vat_amount) if h.vat_amount else '',
+            'base_amount': str(h.base_amount) if h.base_amount else '',
+            'currency': h.currency or 'EUR',
+            'confidence': h.confidence or 0,
+            'needs_review': h.needs_review,
+            'is_dup': is_dup,
+            'matched_partner_name': h.matched_partner.name if h.matched_partner else '',
+            'filename': sf.original_filename,
+        })
+
+    pending_count = sum(1 for i in items if i['header'].needs_review)
+    dup_count = sum(1 for i in items if i['is_dup'])
+    low_conf_count = sum(1 for i in items if (i['header'].confidence or 0) < 0.7)
+    resolved_count = sum(1 for i in items if not i['header'].needs_review)
+
+    return render(request, 'smart_import/review_dashboard.html', {
+        'items': items,
+        'items_json': json.dumps(items_json),
+        'pending_count': pending_count,
+        'dup_count': dup_count,
+        'low_conf_count': low_conf_count,
+        'resolved_count': resolved_count,
+    })
+
+
+@login_required
+@require_POST
+def review_approve(request):
+    """
+    Proknjiži i spoji — Marija odobrava zaglavlje, needs_review se gasi,
+    podaci se čiste i BatchSupplier se ažurira.
+    """
+    from .models import StagingFileHeader, StagingFile
+    from decimal import Decimal, InvalidOperation
+
+    company = get_user_company(request)
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+
+    header_id = data.get('header_id')
+    if not header_id:
+        return JsonResponse({'ok': False, 'error': 'Missing header_id'}, status=400)
+
+    try:
+        header = StagingFileHeader.objects.select_related(
+            'staging_file__staging_batch'
+        ).get(pk=header_id, staging_file__staging_batch__company=company)
+    except StagingFileHeader.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Header ne postoji'}, status=404)
+
+    # Update header fields from Marija's corrections
+    header.supplier_name = data.get('supplier_name', header.supplier_name)[:255]
+    header.supplier_oib = data.get('supplier_oib', header.supplier_oib)[:20].strip()
+    header.invoice_number = data.get('invoice_number', header.invoice_number)[:100]
+
+    inv_date = data.get('invoice_date', '')
+    if inv_date:
+        try:
+            from datetime import datetime
+            header.invoice_date = datetime.strptime(inv_date[:10], '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            pass
+
+    for field, key in [('total_amount', 'total_amount'), ('vat_amount', 'vat_amount'), ('base_amount', 'base_amount')]:
+        val = data.get(key)
+        if val:
+            try:
+                setattr(header, field, Decimal(str(val)))
+            except (InvalidOperation, ValueError):
+                pass
+
+    # Re-match partner after OIB correction
+    header.matched_partner = None
+    header.save()
+    header.auto_match_partner()
+
+    # Clear review flag
+    header.needs_review = False
+    header.confidence = max(header.confidence, 0.95)  # Boosted by human review
+    header.save(update_fields=['supplier_name', 'supplier_oib', 'invoice_number',
+                                'invoice_date', 'total_amount', 'vat_amount', 'base_amount',
+                                'needs_review', 'confidence', 'matched_partner'])
+
+    # Update ImportBatch supplier if matched
+    sf = header.staging_file
+    if sf.result_batch and header.matched_partner:
+        sf.result_batch.supplier = header.matched_partner
+        sf.result_batch.save(update_fields=['supplier'])
+
+    return JsonResponse({
+        'ok': True,
+        'header_id': header.pk,
+        'matched_partner': header.matched_partner.name if header.matched_partner else None,
+    })
+
+
+@login_required
+@require_POST
+def review_discard(request):
+    """Odbaci — označi staging fajl kao skipped."""
+    from .models import StagingFile
+
+    company = get_user_company(request)
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+
+    sf_id = data.get('sf_id')
+    try:
+        sf = StagingFile.objects.select_related('staging_batch').get(
+            pk=sf_id, staging_batch__company=company,
+        )
+    except StagingFile.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'File ne postoji'}, status=404)
+
+    sf.status = 'skipped'
+    sf.ai_message = 'Odbačeno u Predkomori'
+    sf.save(update_fields=['status', 'ai_message'])
+
+    # Delete header too
+    if hasattr(sf, 'header'):
+        sf.header.delete()
+
+    return JsonResponse({'ok': True})
