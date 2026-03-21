@@ -593,3 +593,69 @@ Format za vlastite alate: isti pattern kao gore + komentar `# CC Code prijedlog:
 - [ ] CC Code vlastiti prijedlozi — barem 1 dodatni alat
 - [ ] django check: 0 grešaka
 - [ ] /tmp/intelligence_v2_done.txt
+
+---
+
+## ⚠️ ARHITEKTURNE KOREKCIJE (dodano nakon Gemini code review)
+
+### Korekcija 1 — Intelligence noćni scan NE ide u tools.py
+
+`intelligence_nightly_patrol` je Celery task koji se pokreće automatski u 03:30.
+**Nikada ne stavljaj ga u tools.py** — AI widget nije pravo mjesto za pokretanje
+autonomnih agenata. Korisnik ne klika "pokerni scan" — to se dešava samo.
+
+Ako korisnik pita "što si pronašao?" — koristi `get_fund_opportunities` i
+`IntelligenceResult` koji su već u bazi. To je razlika između:
+- Čitanja rezultata (tools.py, OK)
+- Pokretanja scana (Celery, NE u tools.py)
+
+### Korekcija 2 — Livestock alati su READ-ONLY za regularne korisnike
+
+`get_livestock_status` smije samo ČITATI podatke.
+Pisanje (dodavanje grla, zdravstvenih zapisa, muznih listova) ide kroz formular u UI.
+
+U handleru provjeri:
+```python
+def _get_livestock_status(params, user, company):
+    # AIGate READ provjera — ne treba explicitno, ali documentiramo namjeru:
+    # Ovaj handler NIKAD ne piše u bazu — samo Select upiti.
+    # Ako buduća verzija treba pisanje → mora ići kroz AIGate ASSISTED.
+    ...
+```
+
+### Korekcija 3 — Fund opportunities trebaju caching (24h)
+
+Fondovi se ne mijenjaju svakih 5 minuta. Bez cachinga — svaki AI upit
+prouzrokuje DB upit. S 82 firme to postaje problem.
+
+```python
+def _get_fund_opportunities(params, user, company):
+    from django.core.cache import cache
+
+    # Cache key specifičan za firmu i parametre
+    biz_type = getattr(company, 'business_type', 'doo')
+    tip = params.get('tip', 'sve')
+    cache_key = f'fund_opps_{biz_type}_{tip}'
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+
+    # ... normalna logika ...
+
+    result = { ... }  # izgradi rezultat
+
+    # Cache 24h (fondovi se ne mijenjaju češće)
+    cache.set(cache_key, result, timeout=86400)
+    return result
+```
+
+**Iznimka**: `hitno: True` fondovi (ističu za <14 dana) — ne cachirati,
+uvijek svježi podatak jer se rok mijenja svaki dan.
+
+```python
+# Na kraju handlera, prije cache.set():
+if any(f.get('hitno') for f in rezultati):
+    return result  # Ne cachirati — hitni fondovi trebaju svježe podatke
+cache.set(cache_key, result, timeout=86400)
+```
+
