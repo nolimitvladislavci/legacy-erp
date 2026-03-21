@@ -54,6 +54,9 @@
   </form>
 </div>
 
+{% if not page_obj %}
+{% include "partials/empty_state.html" with title="Dodajte prvog klijenta" subtitle="Kreirajte partnera za izdavanje računa i praćenje salda." cta_text="Novi partner" cta_url="/hr/partners/create/" icon="fas fa-handshake" time_estimate="1 min" %}
+{% else %}
 <div class="stat-card p-0">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
@@ -114,5 +117,6 @@
   <li class="page-item active"><a class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
   {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&type={{ ptype }}">»</a></li>{% endif %}
 </ul></nav>
+{% endif %}
 {% endif %}
 {% endblock %}

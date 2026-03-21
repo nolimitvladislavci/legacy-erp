@@ -159,6 +159,52 @@ body { font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif; background: var
     </p>
 </section>
 
+<!-- Pricing Calculator -->
+<div class="advisor" id="pricing-calc">
+  <h3><i class="fas fa-calculator me-2"></i>Izracunajte svoju ustedu</h3>
+  <div style="margin-bottom:1.5rem">
+    <label style="color:#bbb;font-size:0.9rem;display:block;margin-bottom:6px">
+      Broj faktura mjesecno: <strong id="calc-inv-val" style="color:var(--gold)">30</strong>
+    </label>
+    <input type="range" id="calc-invoices" min="0" max="300" step="10" value="30"
+      style="width:100%;accent-color:var(--gold);cursor:pointer">
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem">
+    <label style="display:flex;align-items:center;gap:8px;color:#bbb;cursor:pointer;font-size:0.9rem">
+      <input type="checkbox" id="calc-pos" style="accent-color:var(--gold)"> POS blagajna
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;color:#bbb;cursor:pointer;font-size:0.9rem">
+      <input type="checkbox" id="calc-de" style="accent-color:var(--gold)"> Poslovanje u Njemackoj
+    </label>
+    <label style="display:flex;align-items:center;gap:8px;color:#bbb;cursor:pointer;font-size:0.9rem">
+      <input type="checkbox" id="calc-nonprofit" style="accent-color:var(--gold)"> Udruga / neprofitna
+    </label>
+  </div>
+  <div id="calc-result" style="background:rgba(201,168,76,0.1);border:1px solid var(--gold);border-radius:12px;padding:1.5rem;text-align:center">
+    <div style="font-size:0.85rem;color:#888;margin-bottom:4px">Preporuceni plan</div>
+    <div id="calc-plan" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);font-weight:700">Starter</div>
+    <div id="calc-price" style="font-size:2.5rem;font-weight:700;color:#fff;margin:8px 0">22&euro;<span style="font-size:1rem;color:#888;font-weight:400"> / mj.</span></div>
+    <div style="display:flex;justify-content:center;gap:2rem;margin:1rem 0;flex-wrap:wrap">
+      <div>
+        <div style="color:#888;font-size:0.8rem">Rucno racunovodstvo</div>
+        <div id="calc-manual" style="color:#ef4444;font-size:1.2rem;font-weight:600;text-decoration:line-through">210&euro;/mj</div>
+      </div>
+      <div>
+        <div style="color:#888;font-size:0.8rem">S LIMIT Connect</div>
+        <div id="calc-limit" style="color:#22c55e;font-size:1.2rem;font-weight:600">22&euro;/mj</div>
+      </div>
+    </div>
+    <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:10px;margin-top:8px">
+      <span style="color:#22c55e;font-weight:700;font-size:1.1rem">
+        <i class="fas fa-piggy-bank"></i> Ustedite <span id="calc-saving">2.256</span>&euro; godisnje
+      </span>
+    </div>
+    <a id="calc-cta" href="/register/?plan=starter" class="btn-plan primary" style="margin-top:1rem;display:inline-block;width:auto;padding:10px 30px">
+      Pocnite besplatno 30 dana
+    </a>
+  </div>
+</div>
+
 <div class="advisor">
   <h3><i class="fas fa-robot me-2"></i>Connect savjetnik &mdash; koji plan vam odgovara?</h3>
   <select id="adv-industry">
@@ -213,6 +259,55 @@ body { font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif; background: var
 </div>
 
 <script>
+// Pricing Calculator
+(function(){
+  var slider = document.getElementById('calc-invoices');
+  var valEl = document.getElementById('calc-inv-val');
+  var posCheck = document.getElementById('calc-pos');
+  var deCheck = document.getElementById('calc-de');
+  var npCheck = document.getElementById('calc-nonprofit');
+
+  function update() {
+    var inv = parseInt(slider.value);
+    var pos = posCheck.checked;
+    var de = deCheck.checked;
+    var np = npCheck.checked;
+    valEl.textContent = inv;
+
+    // Determine plan
+    var plan, price;
+    if (de || inv >= 150) {
+      plan = 'Enterprise'; price = 189;
+    } else if (inv >= 30 || pos) {
+      plan = 'Professional'; price = 69;
+    } else {
+      plan = 'Starter'; price = 22;
+    }
+    var slug = plan.toLowerCase();
+
+    // Manual cost estimate: 2 EUR per invoice + 150 EUR base
+    var manual = inv * 2 + 150;
+    if (de) manual += 100; // DE compliance adds cost
+    if (np) manual += 50;  // Nonprofit bookkeeping adds cost
+
+    var yearSaving = (manual - price) * 12;
+    if (yearSaving < 0) yearSaving = 0;
+
+    document.getElementById('calc-plan').textContent = plan;
+    document.getElementById('calc-price').innerHTML = price + '&euro;<span style="font-size:1rem;color:#888;font-weight:400"> / mj.</span>';
+    document.getElementById('calc-manual').textContent = manual + '\u20ac/mj';
+    document.getElementById('calc-limit').textContent = price + '\u20ac/mj';
+    document.getElementById('calc-saving').textContent = yearSaving.toLocaleString('hr');
+    document.getElementById('calc-cta').href = '/register/?plan=' + slug;
+  }
+
+  slider.addEventListener('input', update);
+  posCheck.addEventListener('change', update);
+  deCheck.addEventListener('change', update);
+  npCheck.addEventListener('change', update);
+  update();
+})();
+
 var selectedNeeds = [];
 function toggleNeed(el) {
   el.classList.toggle('selected');

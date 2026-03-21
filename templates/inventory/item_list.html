@@ -57,6 +57,9 @@
   </form>
 </div>
 
+{% if not page_obj %}
+{% include "partials/empty_state.html" with title="Dodajte prvi artikl na zalihu" subtitle="Upravljajte zalihama, pratite stanje i dobivajte upozorenja na niske zalihe." cta_text="Novi artikl" cta_url="/hr/inventory/create/" icon="fas fa-boxes" time_estimate="2 min" %}
+{% else %}
 <div class="stat-card p-0">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
@@ -96,4 +99,5 @@
     </table>
   </div>
 </div>
+{% endif %}
 {% endblock %}

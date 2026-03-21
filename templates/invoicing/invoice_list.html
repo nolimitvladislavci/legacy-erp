@@ -90,6 +90,9 @@
   </form>
 </div>
 
+{% if not invoices %}
+{% include "partials/empty_state.html" with title="Izdajte prvi račun" subtitle="Kreirajte i pošaljite profesionalni račun u samo 3 minute." cta_text="Novi račun" cta_url="/hr/invoicing/create/" icon="fas fa-file-invoice-dollar" time_estimate="3 min" %}
+{% else %}
 <div class="stat-card p-0">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
@@ -152,4 +155,5 @@
     </table>
   </div>
 </div>
+{% endif %}
 {% endblock %}

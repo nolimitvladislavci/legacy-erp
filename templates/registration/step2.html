@@ -64,7 +64,8 @@
   <div class="reg-form-row">
     <div class="reg-field">
       <label>{% trans "OIB / Porezni broj" %} *</label>
-      <input type="text" name="oib" value="{{ data.oib }}" class="reg-input" placeholder="12345678901" required>
+      <input type="text" name="oib" id="oib-input" value="{{ data.oib }}" class="reg-input" placeholder="12345678901" required>
+      <div id="oib-status" style="margin-top:4px;font-size:0.85rem;display:none"></div>
       {% if errors.oib %}<div class="error-msg">{{ errors.oib }}</div>{% endif %}
     </div>
     <div class="reg-field">
@@ -115,16 +116,15 @@
 </div>
 
 <script>
+// Country toggle (OIB label)
 (function(){
   var radios = document.querySelectorAll('input[name="country"]');
   var oibLabel = document.querySelector('label[for="id_oib"]');
   if (!oibLabel) {
-    // Find label by text content
     var labels = document.querySelectorAll('.reg-field label');
     for (var i = 0; i < labels.length; i++) {
       if (labels[i].textContent.indexOf('OIB') !== -1 || labels[i].textContent.indexOf('Porezni broj') !== -1) {
-        oibLabel = labels[i];
-        break;
+        oibLabel = labels[i]; break;
       }
     }
   }
@@ -142,10 +142,65 @@
       oibInput.maxLength = 11;
     }
   }
-  for (var i = 0; i < radios.length; i++) {
-    radios[i].addEventListener('change', update);
-  }
+  for (var i = 0; i < radios.length; i++) radios[i].addEventListener('change', update);
   update();
+})();
+
+// OIB Auto-Lookup
+(function(){
+  var oibInput = document.getElementById('oib-input');
+  var statusEl = document.getElementById('oib-status');
+  var nameInput = document.querySelector('input[name="name"]');
+  var addressInput = document.querySelector('input[name="address"]');
+  var cityInput = document.querySelector('input[name="city"]');
+  var zipInput = document.querySelector('input[name="zip_code"]');
+  var timer;
+
+  if (!oibInput || !statusEl) return;
+
+  oibInput.addEventListener('blur', doLookup);
+  oibInput.addEventListener('input', function() {
+    clearTimeout(timer);
+    var val = oibInput.value.replace(/\s/g, '');
+    var country = (document.querySelector('input[name="country"]:checked') || {}).value || 'HR';
+    if (val.length >= (country === 'HR' ? 11 : 8)) timer = setTimeout(doLookup, 600);
+  });
+
+  function doLookup() {
+    var oib = oibInput.value.replace(/\s/g, '');
+    var country = (document.querySelector('input[name="country"]:checked') || {}).value || 'HR';
+    if (country === 'HR' && oib.length !== 11) return;
+    if (oib.length < 8) return;
+
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Trazim u registru...';
+    statusEl.style.color = '#888';
+
+    fetch('/hr/register/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=' + country)
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.found) {
+          if (d.existing) {
+            statusEl.innerHTML = '<i class="fas fa-info-circle"></i> ' + (d.message || 'Tvrtka vec postoji u sustavu.');
+            statusEl.style.color = '#f59e0b';
+          } else {
+            statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Pronasli smo vasu tvrtku u registru!';
+            statusEl.style.color = '#22c55e';
+          }
+          if (d.name && nameInput && !nameInput.value) nameInput.value = d.name;
+          if (d.address && addressInput && !addressInput.value) addressInput.value = d.address;
+          if (d.city && cityInput && !cityInput.value) cityInput.value = d.city;
+          if (d.zip_code && zipInput && !zipInput.value) zipInput.value = d.zip_code;
+        } else if (d.error) {
+          statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + d.error;
+          statusEl.style.color = '#ef4444';
+        } else {
+          statusEl.innerHTML = '<i class="fas fa-minus-circle"></i> Nije pronadjeno — unesite rucno.';
+          statusEl.style.color = '#888';
+        }
+      })
+      .catch(function() { statusEl.style.display = 'none'; });
+  }
 })();
 </script>
 {% endblock %}

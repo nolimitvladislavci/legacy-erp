@@ -878,3 +878,117 @@ def agent_dashboard(request):
         'ref_code': ref_code,
         'wizard_url': wizard_url,
     })
+
+
+# ── OIB Auto-Lookup API ─────────────────────────────────────────────
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+
+@require_GET
+def api_oib_lookup(request):
+    """AJAX endpoint: lookup company by OIB from internal DB or sudski registar.
+
+    GET /registration/api/oib-lookup/?oib=12345678901&country=HR
+    Returns JSON: {found, name, address, city, zip_code, legal_form}
+    """
+    oib = (request.GET.get('oib') or '').strip()
+    country = (request.GET.get('country') or 'HR').strip().upper()
+
+    if not oib:
+        return JsonResponse({'found': False, 'error': 'OIB prazan'})
+
+    # Validate format
+    if country == 'HR' and (len(oib) != 11 or not oib.isdigit()):
+        return JsonResponse({'found': False, 'error': 'OIB mora imati 11 znamenki'})
+
+    if country == 'DE' and len(oib) < 8:
+        return JsonResponse({'found': False, 'error': 'Porezni broj prekratak'})
+
+    # 1. Check internal database first
+    from companies.models import Company
+    try:
+        company = Company.objects.filter(oib=oib).first()
+        if company:
+            return JsonResponse({
+                'found': True,
+                'source': 'internal',
+                'name': company.name,
+                'address': company.address,
+                'city': company.city,
+                'zip_code': company.zip_code,
+                'legal_form': company.business_type,
+                'message': 'Tvrtka je vec u sustavu — kontaktirajte podrsku za pristup.',
+                'existing': True,
+            })
+    except Exception:
+        pass
+
+    # 2. Try sudski registar (sudreg) for HR companies
+    if country == 'HR':
+        result = _lookup_sudreg(oib)
+        if result:
+            return JsonResponse({
+                'found': True,
+                'source': 'sudreg',
+                'existing': False,
+                **result,
+            })
+
+    return JsonResponse({'found': False})
+
+
+def _lookup_sudreg(oib):
+    """Try to lookup company in Croatian court register via OIB."""
+    import requests as _req
+
+    # Try the open sudski registar API
+    try:
+        url = 'https://sudreg-api.pravosudje.hr/javni/subjekt_detalji'
+        params = {'oib': oib, 'expand_relations': 'false'}
+        headers = {'Accept': 'application/json'}
+        resp = _req.get(url, params=params, headers=headers, timeout=5)
+
+        if resp.status_code == 200:
+            data = resp.json()
+            if isinstance(data, list) and data:
+                subj = data[0]
+                return {
+                    'name': subj.get('tvrtka', subj.get('ime', '')),
+                    'address': subj.get('sjediste_adresa', ''),
+                    'city': subj.get('sjediste_grad', ''),
+                    'zip_code': subj.get('sjediste_posta', ''),
+                    'legal_form': subj.get('pravni_oblik', ''),
+                }
+            elif isinstance(data, dict) and data.get('tvrtka'):
+                return {
+                    'name': data.get('tvrtka', ''),
+                    'address': data.get('sjediste_adresa', ''),
+                    'city': data.get('sjediste_grad', ''),
+                    'zip_code': data.get('sjediste_posta', ''),
+                    'legal_form': data.get('pravni_oblik', ''),
+                }
+    except Exception as e:
+        logger.debug('Sudreg lookup failed for OIB %s: %s', oib[:4], e)
+
+    # Fallback: try FINA / biznet
+    try:
+        url = 'https://api.data.gov.hr/registar-poslovnih-subjekata/v2/subjekti'
+        params = {'oib': oib}
+        resp = _req.get(url, params=params, timeout=5)
+        if resp.status_code == 200:
+            data = resp.json()
+            items = data.get('items', data) if isinstance(data, dict) else data
+            if isinstance(items, list) and items:
+                subj = items[0]
+                return {
+                    'name': subj.get('naziv', subj.get('ime', '')),
+                    'address': subj.get('adresa', ''),
+                    'city': subj.get('mjesto', ''),
+                    'zip_code': subj.get('posta', ''),
+                    'legal_form': subj.get('oblik', ''),
+                }
+    except Exception as e:
+        logger.debug('Data.gov.hr lookup failed for OIB %s: %s', oib[:4], e)
+
+    return None
