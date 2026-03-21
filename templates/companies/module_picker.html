@@ -1,116 +1,155 @@
 {% extends "base.html" %}
 {% block title %}Moduli{% endblock %}
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2><i class="bi bi-grid-3x3-gap"></i> Moduli</h2>
-            <small class="text-muted">Odaberite module koje zelite koristiti</small>
-        </div>
-        <div>
-            <form method="post" class="d-inline">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="ai_recommend">
-                <button type="submit" class="btn btn-outline-warning">
-                    <i class="bi bi-magic"></i> AI Preporuka
-                </button>
-            </form>
-        </div>
-    </div>
+<style>
+.mp-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+.mp-header h2 { margin:0; color:var(--gold,#c9a84c); font-family:'Cormorant Garamond',serif; }
+.mp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; margin-bottom:12px; }
+.mp-card {
+  background:#111; border:2px solid #222; border-radius:10px;
+  padding:16px 12px; text-align:center; cursor:pointer;
+  transition:all .2s; position:relative; user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.mp-card:hover { border-color:#444; }
+.mp-card.on {
+  border-color:var(--gold,#c9a84c); background:rgba(201,168,76,.08);
+}
+.mp-card .mp-icon { font-size:1.8rem; margin-bottom:6px; display:block; }
+.mp-card.on .mp-icon { color:var(--gold,#c9a84c); }
+.mp-card:not(.on) .mp-icon { color:#444; }
+.mp-card .mp-name { font-size:.82rem; font-weight:600; color:#ccc; margin-bottom:2px; }
+.mp-card.on .mp-name { color:#fff; }
+.mp-card .mp-desc { font-size:.65rem; color:#555; line-height:1.3; }
+.mp-card.on .mp-desc { color:#888; }
+/* Checkbox indicator */
+.mp-check {
+  position:absolute; top:8px; right:8px; width:20px; height:20px;
+  border:2px solid #333; border-radius:50%; transition:all .2s;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:transparent;
+}
+.mp-card.on .mp-check {
+  border-color:var(--gold,#c9a84c); background:var(--gold,#c9a84c);
+  color:#000;
+}
+/* Category header */
+.mp-cat { font-size:.75rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin:16px 0 8px; font-weight:600; }
+.mp-cat:first-child { margin-top:0; }
+/* Sticky bottom bar */
+.mp-bottom {
+  position:sticky; bottom:0; z-index:100;
+  background:#0a0a0a; border-top:1px solid #222;
+  padding:12px 0; display:flex; justify-content:center; align-items:center; gap:12px;
+}
+.mp-save {
+  background:var(--gold,#c9a84c); color:#000; border:none;
+  padding:10px 32px; border-radius:8px; font-weight:700;
+  font-size:.95rem; cursor:pointer; transition:all .2s;
+}
+.mp-save:hover { filter:brightness(1.1); }
+.mp-count { font-size:.85rem; color:#888; }
+</style>
 
-    {% if ai_recommendations %}
-    <div class="alert alert-warning border-0" style="background: #fff8e1;">
-        <i class="bi bi-lightbulb"></i> <strong>AI preporuka za vasu firmu:</strong>
-        {% for mid in ai_recommendations %}
-            <span class="badge bg-warning text-dark">{{ mid }}</span>
-        {% endfor %}
-        <form method="post" class="d-inline ms-2">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="save">
-            {% for mid in ai_recommendations %}
-            <input type="hidden" name="modules" value="{{ mid }}">
-            {% endfor %}
-            <button type="submit" class="btn btn-sm btn-warning">Primijeni preporuku</button>
-        </form>
-    </div>
-    {% endif %}
-
-    <form method="post" id="moduleForm">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="save">
-
-        {% for cat_id, cat in categories.items %}
-        <div class="mb-4">
-            <h5 class="text-muted mb-3">
-                <i class="bi {{ cat.info.icon }}"></i> {{ cat.info.name }}
-            </h5>
-            <div class="row g-3">
-                {% for mod in cat.modules %}
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="card h-100 module-card {% if mod.id in config.enabled_modules %}border-primary bg-light{% endif %}"
-                         style="cursor:pointer; transition: all 0.2s;"
-                         onclick="toggleModule(this, '{{ mod.id }}')">
-                        <div class="card-body text-center py-4">
-                            <div class="position-relative">
-                                <i class="bi {{ mod.icon }}" style="font-size: 2.5rem; color: {% if mod.id in config.enabled_modules %}var(--gold, #c9a84c){% else %}#ccc{% endif %};"></i>
-                                {% if counters and mod.id in counters %}
-                                    {% if mod.counter %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size:0.65rem;">
-                                        {{ mod.counter }}
-                                    </span>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                            <h6 class="mt-2 mb-1">{{ mod.name }}</h6>
-                            <small class="text-muted d-block" style="font-size:0.72rem; line-height:1.3;">{{ mod.description }}</small>
-                            <input type="checkbox" name="modules" value="{{ mod.id }}"
-                                   class="module-checkbox d-none"
-                                   {% if mod.id in config.enabled_modules %}checked{% endif %}
-                                   {% if mod.always_visible %}checked disabled{% endif %}>
-                        </div>
-                        {% if mod.id in config.enabled_modules %}
-                        <div class="card-footer bg-primary text-white text-center py-1" style="font-size:0.7rem;">
-                            <i class="bi bi-check-circle"></i> AKTIVNO
-                        </div>
-                        {% else %}
-                        <div class="card-footer bg-light text-muted text-center py-1" style="font-size:0.7rem;">
-                            Klik za aktivaciju
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endfor %}
-
-        <div class="sticky-bottom bg-white border-top py-3 text-center" style="position:sticky; bottom:0;">
-            <button type="submit" class="btn btn-primary btn-lg px-5">
-                <i class="bi bi-save"></i> Spremi odabir
-            </button>
-        </div>
-    </form>
+<div class="mp-header">
+  <div>
+    <h2>Moduli</h2>
+    <small style="color:#666">Klikni za uključi/isključi — promjene se spremaju gumbom ispod</small>
+  </div>
+  <form method="post" style="display:inline">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="ai_recommend">
+    <button type="submit" style="background:none;border:1px solid var(--gold,#c9a84c);color:var(--gold,#c9a84c);padding:6px 16px;border-radius:8px;font-size:.82rem;cursor:pointer">
+      <i class="fas fa-magic me-1"></i> AI Preporuka
+    </button>
+  </form>
 </div>
 
+{% if ai_recommendations %}
+<div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:12px 16px;margin-bottom:16px">
+  <strong style="color:var(--gold,#c9a84c)"><i class="fas fa-lightbulb me-1"></i> AI preporuka:</strong>
+  {% for mid in ai_recommendations %}
+    <span style="background:rgba(201,168,76,.2);color:var(--gold,#c9a84c);padding:2px 8px;border-radius:4px;font-size:.8rem;margin-left:4px">{{ mid }}</span>
+  {% endfor %}
+  <form method="post" style="display:inline;margin-left:10px">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="save">
+    {% for mid in ai_recommendations %}
+    <input type="hidden" name="modules" value="{{ mid }}">
+    {% endfor %}
+    <button type="submit" style="background:var(--gold,#c9a84c);color:#000;border:none;padding:4px 12px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer">Primijeni</button>
+  </form>
+</div>
+{% endif %}
+
+<form method="post" id="moduleForm">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="save">
+
+  {% for cat_id, cat in categories.items %}
+  <div class="mp-cat">
+    {{ cat.info.name }}
+  </div>
+  <div class="mp-grid">
+    {% for mod in cat.modules %}
+    <div class="mp-card {% if mod.id in config.enabled_modules %}on{% endif %}"
+         data-mod="{{ mod.id }}"
+         {% if mod.always_visible %}data-locked="1"{% endif %}>
+      <div class="mp-check">✓</div>
+      <span class="mp-icon"><i class="bi {{ mod.icon }}"></i></span>
+      <div class="mp-name">{{ mod.name }}</div>
+      <div class="mp-desc">{{ mod.description }}</div>
+      <input type="checkbox" name="modules" value="{{ mod.id }}"
+             class="mp-cb" style="display:none"
+             {% if mod.id in config.enabled_modules %}checked{% endif %}
+             {% if mod.always_visible %}checked{% endif %}>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+
+  <div class="mp-bottom">
+    <span class="mp-count" id="modCount">0 odabrano</span>
+    <button type="submit" class="mp-save" id="btnSave">
+      <i class="fas fa-check me-1"></i> Potvrdi odabir
+    </button>
+  </div>
+</form>
+
 <script>
-function toggleModule(card, moduleId) {
-    const cb = card.querySelector('.module-checkbox');
-    if (cb.disabled) return; // core modules can't be toggled
-    cb.checked = !cb.checked;
-    card.classList.toggle('border-primary', cb.checked);
-    card.classList.toggle('bg-light', cb.checked);
-    const icon = card.querySelector('.bi');
-    icon.style.color = cb.checked ? 'var(--gold, #c9a84c)' : '#ccc';
-    const footer = card.querySelector('.card-footer');
-    if (cb.checked) {
-        footer.className = 'card-footer bg-primary text-white text-center py-1';
-        footer.style.fontSize = '0.7rem';
-        footer.innerHTML = '<i class="bi bi-check-circle"></i> AKTIVNO';
-    } else {
-        footer.className = 'card-footer bg-light text-muted text-center py-1';
-        footer.style.fontSize = '0.7rem';
-        footer.innerHTML = 'Klik za aktivaciju';
-    }
-}
+document.addEventListener('DOMContentLoaded', function() {
+  var cards = document.querySelectorAll('.mp-card');
+
+  function updateCount() {
+    var n = document.querySelectorAll('.mp-cb:checked').length;
+    document.getElementById('modCount').textContent = n + ' odabrano';
+  }
+
+  cards.forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (this.dataset.locked) return;
+      var cb = this.querySelector('.mp-cb');
+      cb.checked = !cb.checked;
+      this.classList.toggle('on', cb.checked);
+      updateCount();
+    });
+    card.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      if (this.dataset.locked) return;
+      var cb = this.querySelector('.mp-cb');
+      cb.checked = !cb.checked;
+      this.classList.toggle('on', cb.checked);
+      updateCount();
+    });
+  });
+
+  updateCount();
+
+  document.getElementById('btnSave').addEventListener('click', function() {
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Spremam...';
+  });
+});
 </script>
 {% endblock %}
