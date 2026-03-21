@@ -269,10 +269,12 @@ td   { padding: 3px 5px; vertical-align: top; }
   Vielen Dank für Ihren Einkauf! &nbsp;|&nbsp; LIMIT Connect POS &nbsp;|&nbsp; {% now "d.m.Y" %}<br>
   <span style="font-size:7pt;color:#999">Elektronisches Dokument — gültig ohne Stempel und Unterschrift. Aufbewahrungspflichtig gem. § 147 AO. GoBD-konform (Rz. 50-55).</span>
   {% else %}
-  Hvala na posjetu! &nbsp;|&nbsp; LIMIT Connect POS &nbsp;|&nbsp; {% now "d.m.Y" %}<br>
+  Hvala na posjetu! &nbsp;|&nbsp; {% now "d.m.Y" %}<br>
   <span style="font-size:7pt;color:#999">Ovaj račun je izrađen elektronički i važeći je bez žiga i potpisa (čl. 9. st. 2. ZOR-a).</span>
   {% endif %}
 </div>
+
+{% include "pos/includes/_viral_footer.html" with format="a4" company=company receipt=receipt %}
 
 </body>
 </html>

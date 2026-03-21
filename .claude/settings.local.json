@@ -42,7 +42,18 @@
       "Bash(grep -r \"CompanyPartnership\\\\|managed_companies\\\\|partner_company\" /var/www/fina-connect --include=*.py)",
       "Bash(grep -r \"white.*label\\\\|white-label\\\\|white_label\" /var/www/fina-connect --include=*.py)",
       "Bash(grep -r \"Boniteta\\\\|CEIDP\\\\|Registry\" /var/www/fina-connect --include=*.py)",
-      "Bash(ls -la /var/www/fina-connect/*.md)"
+      "Bash(ls -la /var/www/fina-connect/*.md)",
+      "Bash(find . -name FENIX_STATUS.md -o -name TODO* -o -name *TODO*)",
+      "WebFetch(domain:www.vatcalc.com)",
+      "WebFetch(domain:marosavat.com)",
+      "Bash(ls -lah /var/www/fina-connect/*.md)",
+      "WebFetch(domain:www.nortonrosefulbright.com)",
+      "WebFetch(domain:maventa.com)",
+      "WebFetch(domain:dddinvoices.com)",
+      "WebFetch(domain:www.melasoft.com)",
+      "WebFetch(domain:edicomgroup.com)",
+      "WebFetch(domain:sovos.com)",
+      "WebFetch(domain:www.vatupdate.com)"
     ]
   }
 }

@@ -1,0 +1,66 @@
+{% comment %}
+LIMIT Connect — Viralni footer za sve izlazne dokumente.
+Uključuje Hash Shield badge + PLG poziv na akciju.
+Varijable:
+  - company: Company objekt
+  - receipt: POSReceipt objekt (opcionalno, za chain hash)
+  - format: 'thermal' | 'a4' | 'public' | 'eracun' (default: a4)
+{% endcomment %}
+
+{% if format == 'thermal' %}
+{# ── THERMAL (80mm) — kompaktno, 1 linija ── #}
+<div style="text-align:center;margin-top:6px;padding-top:4px;border-top:1px dashed #ccc">
+  {% if receipt.chain_link_safe %}
+  <div style="font-size:5.5pt;color:#666;font-family:monospace">
+    &#x1F512; SHA-256: {{ receipt.chain_link_safe.chain_hash|truncatechars:20 }}
+  </div>
+  {% endif %}
+  <div style="font-size:6pt;color:#888;margin-top:2px">
+    limit-connect.com
+  </div>
+</div>
+
+{% elif format == 'public' %}
+{# ── PUBLIC (web receipt) — vizualan, klikabilan ── #}
+<div style="margin-top:16px;padding:12px;background:#0a0a0a;border:1px solid #222;border-radius:8px;text-align:center">
+  {% if receipt.chain_link_safe %}
+  <div style="display:inline-flex;align-items:center;gap:6px;background:#0d1a0d;border:1px solid #2ecc71;border-radius:6px;padding:4px 10px;margin-bottom:8px">
+    <span style="color:#2ecc71;font-size:14px">&#x1F6E1;</span>
+    <span style="font-size:11px;color:#2ecc71;font-family:monospace">SHA-256 zaštićen</span>
+    <span style="font-size:9px;color:#555;font-family:monospace">{{ receipt.chain_link_safe.chain_hash|truncatechars:16 }}</span>
+  </div>
+  {% endif %}
+  <div style="font-size:11px;color:#888;margin-top:6px">
+    {% if company.country == 'DE' or company.country == 'AT' %}
+    Erstellt mit <a href="https://limit-connect.com" style="color:#c9a84c;text-decoration:none;font-weight:bold">LIMIT Connect</a>
+    &mdash; SHA-256 Hash Chain &bull; EU ViDA 2028 konform
+    {% else %}
+    Izrađeno u <a href="https://limit-connect.com" style="color:#c9a84c;text-decoration:none;font-weight:bold">LIMIT Connect</a>
+    &mdash; SHA-256 Hash Chain &bull; EU ViDA 2028
+    {% endif %}
+  </div>
+  <div style="font-size:9px;color:#555;margin-top:4px">
+    Besplatna POS blagajna + e-Arhiva za vaš obrt &rarr; limit-connect.com
+  </div>
+</div>
+
+{% else %}
+{# ── A4 / e-RAČUN — profesionalno, pravnički ton ── #}
+<div style="margin-top:12px;padding:8px 12px;border-top:1px solid #ddd;font-size:7.5pt;color:#666;display:flex;justify-content:space-between;align-items:center">
+  <div>
+    {% if company.country == 'DE' or company.country == 'AT' %}
+    Erstellt mit <strong style="color:#333">LIMIT Connect</strong> &mdash; limit-connect.com<br>
+    <span style="font-size:6.5pt">Kryptografisch gesichert (SHA-256 Hash Chain) &bull; EU ViDA 2028 konform &bull; GoBD-konform</span>
+    {% else %}
+    Izrađeno u <strong style="color:#333">LIMIT Connect</strong> &mdash; limit-connect.com<br>
+    <span style="font-size:6.5pt">Kriptografski zaštićeno (SHA-256 Hash Chain) &bull; EU ViDA 2028 &bull; Usklađeno s čl. 9. ZOR-a</span>
+    {% endif %}
+  </div>
+  {% if receipt.chain_link_safe %}
+  <div style="text-align:right;font-family:monospace;font-size:6.5pt">
+    <span style="color:#2ecc71">&#x25CF;</span> Integritet OK<br>
+    {{ receipt.chain_link_safe.chain_hash|truncatechars:24 }}
+  </div>
+  {% endif %}
+</div>
+{% endif %}

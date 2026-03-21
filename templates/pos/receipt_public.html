@@ -172,8 +172,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
   <div class="footer">
     <div class="slogan">BEZ PAPIRA</div>
-    Digitalni racun | {{ company.name }} | LIMIT Connect POS
   </div>
+  {% include "pos/includes/_viral_footer.html" with format="public" company=company receipt=receipt %}
 </div>
 
 <script>

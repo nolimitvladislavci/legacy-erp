@@ -219,8 +219,8 @@ td      { padding: 2px 0; vertical-align: top; }
   <div class="footer">
     Hvala na posjetu!<br>
     {% if receipt.note %}{{ receipt.note }}<br>{% endif %}
-    LIMIT Connect POS &mdash; {% now "d.m.Y" %}
   </div>
+  {% include "pos/includes/_viral_footer.html" with format="thermal" company=company receipt=receipt %}
 </div>
 
 <script>

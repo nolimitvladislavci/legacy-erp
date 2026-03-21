@@ -284,6 +284,14 @@ class POSReceipt(models.Model):
         self.total = self.subtotal + self.tax_amount - self.discount
         return self
 
+    @property
+    def chain_link_safe(self):
+        """Safe accessor za hash chain link — vraca None umjesto DoesNotExist."""
+        try:
+            return self.chain_link
+        except Exception:
+            return None
+
 
 class POSReceiptItem(models.Model):
     """
