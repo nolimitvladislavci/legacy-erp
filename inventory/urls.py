@@ -62,4 +62,6 @@ urlpatterns = [
 
     # DRF API
     path("", include(router.urls)),
+
+    path('ai-menu-scan/', views.ai_menu_scan, name='ai_menu_scan'),
 ]

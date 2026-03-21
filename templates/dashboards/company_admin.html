@@ -4,6 +4,7 @@
 {% block content %}
 {% if onboarding %}
 <div id="onboarding-widget" style="background:linear-gradient(135deg,#1a1a1a 0%,#111 100%);border:1px solid #c9a84c44;border-radius:12px;padding:20px 24px;margin-bottom:24px;position:relative">
+  <a href="{% url 'onboarding_wizard' %}" style="position:absolute;top:12px;right:50px;background:#c9a84c;color:#000;border:none;font-size:.75rem;cursor:pointer;padding:4px 12px;border-radius:6px;font-weight:700;text-decoration:none">Vodic</a>
   <button onclick="dismissOnboarding()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#666;font-size:1.1rem;cursor:pointer" title="Zatvori">&times;</button>
   <h6 style="color:#c9a84c;margin-bottom:4px"><i class="fas fa-rocket me-2"></i>Dobrodosli u LIMIT Connect!</h6>
   <p style="color:#999;font-size:.85rem;margin-bottom:14px">Pratedite postavljanje da biste izvukli maksimum iz sustava.</p>
@@ -55,6 +56,15 @@ function dismissOnboarding() {
 }
 </script>
 {% endif %}
+
+<!-- Compliance badge -->
+<div style="background:#0f2318;border:1px solid #16a34a44;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+  <div style="font-size:1.8rem">&#128737;</div>
+  <div>
+    <div style="color:#4ade80;font-weight:700;font-size:.85rem">Uskladjeno s propisima za 2026.</div>
+    <div style="color:#64748b;font-size:.72rem">FINA fiskalizacija &bull; eRacun &bull; PDV &bull; GoBD</div>
+  </div>
+</div>
 
 <!-- Push notification opt-in -->
 <div id="push-banner" style="display:none;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid var(--gold-border);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:none">

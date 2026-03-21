@@ -57,6 +57,48 @@ def _generate_company_email(company):
     return f"fina.connect.online+{slug}@gmail.com"
 
 
+
+
+def _seed_demo_data(company, user):
+    """Create demo data so new user is not staring at empty screens."""
+    try:
+        from partners.models import Partner
+        from inventory.models import InventoryItem
+
+        # 3 demo partners
+        for name, oib, ptype in [
+            ('Demo Kupac d.o.o.', 'DEMO-001', 'client'),
+            ('Demo Dobavljac j.d.o.o.', 'DEMO-002', 'supplier'),
+            ('Demo Partner', 'DEMO-003', 'both'),
+        ]:
+            Partner.objects.get_or_create(
+                company=company, name=name,
+                defaults={'oib': oib, 'partner_type': ptype}
+            )
+
+        # 3 demo items
+        for name, sku, price, cat in [
+            ('Primjer artikl 1', 'DEMO-A1', 10.00, 'product'),
+            ('Primjer usluga', 'DEMO-U1', 50.00, 'service'),
+            ('Primjer materijal', 'DEMO-M1', 5.00, 'material'),
+        ]:
+            InventoryItem.objects.get_or_create(
+                company=company, sku=sku,
+                defaults={'name': name, 'unit_price': price, 'quantity': 100, 'category': cat}
+            )
+
+        # Mark onboarding steps
+        from companies.models import OnboardingProgress
+        onb, _ = OnboardingProgress.objects.get_or_create(company=company)
+        onb.first_partner_added = True
+        onb.first_item_added = True
+        onb.save(update_fields=['first_partner_added', 'first_item_added', 'updated_at'])
+
+        logger.info("Seeded demo data for %s", company.name)
+    except Exception as e:
+        logger.warning("Demo data seeding failed for %s: %s", company.name, e)
+
+
 def register_step1(request):
     """Step 1: Plan selection (with optional invite code)"""
     # Check for invite code in URL or POST
@@ -343,6 +385,9 @@ def register_step4(request):
 
             # Login and redirect
             login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+            # Seed demo data for new companies
+            _seed_demo_data(company, user)
 
             # Auto-create website and generate company email
             website = _auto_create_website(company)

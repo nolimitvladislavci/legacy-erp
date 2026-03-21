@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Postavljanje sustava - LIMIT Connect{% endblock %}
+
+{% block content %}
+<style>
+  :root { --gold: #c9a84c; --black: #0a0a0a; --dark: #111; --gray: #888; --green: #4ade80; }
+  .ob-container { max-width: 700px; margin: 0 auto; padding: 20px 16px; }
+  .ob-progress { display: flex; gap: 4px; margin-bottom: 32px; }
+  .ob-progress-seg { flex: 1; height: 6px; border-radius: 3px; background: #222; transition: background .3s; }
+  .ob-progress-seg.done { background: var(--gold); }
+  .ob-progress-seg.active { background: linear-gradient(90deg, var(--gold), #e8c84c); }
+  .ob-card { background: linear-gradient(135deg, #1a1a1a, var(--dark)); border: 1px solid #c9a84c33; border-radius: 14px; padding: 32px 28px; margin-bottom: 20px; }
+  .ob-step-num { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--gold); color: #000; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; }
+  .ob-title { color: var(--gold); font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; font-family: "Cormorant Garamond", serif; }
+  .ob-time { color: var(--gray); font-size: .78rem; margin-bottom: 16px; }
+  .ob-desc { color: #ccc; font-size: .92rem; line-height: 1.6; margin-bottom: 20px; }
+  .ob-form-group { margin-bottom: 14px; }
+  .ob-form-group label { display: block; color: var(--gold); font-size: .78rem; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .ob-input { width: 100%; padding: 12px 14px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: .95rem; outline: none; transition: border-color .2s; box-sizing: border-box; }
+  .ob-input:focus { border-color: var(--gold); }
+  .ob-select { width: 100%; padding: 12px 14px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: .95rem; outline: none; box-sizing: border-box; }
+  .ob-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .ob-row > * { flex: 1; min-width: 140px; }
+  .ob-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 28px; border-radius: 10px; font-size: .95rem; font-weight: 700; cursor: pointer; border: none; transition: all .2s; min-height: 56px; text-decoration: none; }
+  .ob-btn-primary { background: var(--gold); color: #000; }
+  .ob-btn-primary:hover { background: #d4b45a; transform: translateY(-1px); }
+  .ob-btn-secondary { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+  .ob-btn-secondary:hover { background: #c9a84c22; }
+  .ob-btn-skip { background: transparent; color: var(--gray); border: 1px solid #333; }
+  .ob-btn-skip:hover { color: #ccc; border-color: #555; }
+  .ob-btn-big { width: 100%; padding: 20px; font-size: 1.1rem; }
+  .ob-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+  .ob-actions > * { flex: 1; min-width: 140px; }
+  .ob-encourage { color: var(--gold); font-size: .85rem; text-align: center; margin-bottom: 20px; opacity: .8; }
+  .ob-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .ob-nav a { color: var(--gray); text-decoration: none; font-size: .85rem; }
+  .ob-nav a:hover { color: var(--gold); }
+  .ob-checklist { list-style: none; padding: 0; margin: 16px 0; }
+  .ob-checklist li { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #0d0d0d; border-radius: 8px; margin-bottom: 6px; color: #ccc; font-size: .9rem; }
+  .ob-checklist li i { font-size: 1rem; }
+  .ob-check-done { color: var(--gold); }
+  .ob-check-pending { color: #444; }
+  .ob-success { text-align: center; padding: 40px 20px; }
+  .ob-success h2 { color: var(--gold); font-size: 2rem; font-family: "Cormorant Garamond", serif; margin-bottom: 12px; }
+  .ob-success p { color: #ccc; font-size: 1rem; margin-bottom: 24px; }
+  .ob-confetti { font-size: 3rem; margin-bottom: 16px; }
+  .ob-badge { background: #0f2318; border: 1px solid #16a34a44; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+  .ob-badge-icon { font-size: 1.8rem; }
+  .ob-badge-title { color: var(--green); font-weight: 700; font-size: .85rem; }
+  .ob-badge-sub { color: #64748b; font-size: .72rem; }
+  .ob-feedback { background: #0d1a0d; border: 1px solid #16a34a33; border-radius: 8px; padding: 12px 16px; margin-top: 16px; display: none; color: var(--green); font-size: .9rem; text-align: center; }
+  @media (max-width: 600px) {
+    .ob-card { padding: 20px 16px; }
+    .ob-row { flex-direction: column; }
+    .ob-actions { flex-direction: column; }
+  }
+</style>
+
+<div class="ob-container">
+  <div class="ob-progress">
+    {% for i in "123456" %}
+    <div class="ob-progress-seg {% if forloop.counter < step %}done{% elif forloop.counter == step %}active{% endif %}"></div>
+    {% endfor %}
+  </div>
+
+  {% if step < 6 %}
+  <div class="ob-encourage">
+    {% if step == 1 %}Pocnimo! 5 koraka do potpuno spremnog sustava.
+    {% elif step == 2 %}Odlicno! Jos samo 4 koraka.
+    {% elif step == 3 %}Super! Pola puta ste prosli.
+    {% elif step == 4 %}Bravo! Jos 2 koraka do cilja.
+    {% elif step == 5 %}Zadnji korak! Skoro ste gotovi.
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if step == 1 %}
+  <div class="ob-card">
+    <div class="ob-step-num">1</div>
+    <div class="ob-title">Profil tvrtke</div>
+    <div class="ob-time"><i class="fas fa-clock me-1"></i> ~2 minute</div>
+    <div class="ob-desc">Provjerite podatke o vasoj tvrtki. Ovi podaci ce se koristiti na racunima, ponudama i dokumentima.</div>
+    <form id="profile-form" onsubmit="return submitProfile(event)">
+      {% csrf_token %}
+      <div class="ob-form-group">
+        <label>Naziv tvrtke</label>
+        <input class="ob-input" name="name" value="{{ company.name }}" required>
+      </div>
+      <div class="ob-row">
+        <div class="ob-form-group">
+          <label>OIB / Steuer-Nr.</label>
+          <input class="ob-input" name="oib" value="{{ company.oib|default:'' }}" placeholder="12345678901">
+        </div>
+        <div class="ob-form-group">
+          <label>Email</label>
+          <input class="ob-input" name="email" type="email" value="{{ company.email|default:'' }}" placeholder="info@firma.hr">
+        </div>
+      </div>
+      <div class="ob-form-group">
+        <label>Adresa</label>
+        <input class="ob-input" name="address" value="{{ company.address|default:'' }}" placeholder="Ulica i broj">
+      </div>
+      <div class="ob-row">
+        <div class="ob-form-group">
+          <label>Grad</label>
+          <input class="ob-input" name="city" value="{{ company.city|default:'' }}" placeholder="Zagreb">
+        </div>
+        <div class="ob-form-group">
+          <label>Postanski broj</label>
+          <input class="ob-input" name="zip_code" value="{{ company.zip_code|default:'' }}" placeholder="10000">
+        </div>
+      </div>
+      <div class="ob-form-group">
+        <label>Telefon</label>
+        <input class="ob-input" name="phone" value="{{ company.phone|default:'' }}" placeholder="+385 91 ...">
+      </div>
+      <div class="ob-actions">
+        <button type="submit" class="ob-btn ob-btn-primary" id="btn-profile"><i class="fas fa-check"></i> Spremi i nastavi</button>
+        <button type="button" class="ob-btn ob-btn-skip" onclick="skipStep(1)">Preskoci</button>
+      </div>
+    </form>
+    <div class="ob-feedback" id="feedback-1"></div>
+  </div>
+  {% endif %}
+
+  {% if step == 2 %}
+  <div class="ob-card">
+    <div class="ob-step-num">2</div>
+    <div class="ob-title">Vas prvi partner</div>
+    <div class="ob-time"><i class="fas fa-clock me-1"></i> ~1 minuta</div>
+    <div class="ob-desc">Dodajte kupca ili dobavljaca. Partneri se koriste kod izdavanja racuna, narudzbi i ponuda.</div>
+    {% if onboarding.first_partner_added %}
+    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+      <i class="fas fa-check-circle me-2"></i> Vec imate dodane partnere!
+    </div>
+    {% endif %}
+    <form id="partner-form" onsubmit="return submitPartner(event)">
+      {% csrf_token %}
+      <div class="ob-form-group">
+        <label>Naziv partnera</label>
+        <input class="ob-input" name="name" placeholder="npr. Horvat d.o.o." required>
+      </div>
+      <div class="ob-row">
+        <div class="ob-form-group">
+          <label>OIB</label>
+          <input class="ob-input" name="oib" placeholder="12345678901">
+        </div>
+        <div class="ob-form-group">
+          <label>Tip</label>
+          <select class="ob-select" name="partner_type">
+            <option value="client">Kupac</option>
+            <option value="supplier">Dobavljac</option>
+            <option value="both">Oboje</option>
+          </select>
+        </div>
+      </div>
+      <div class="ob-form-group">
+        <label>Email</label>
+        <input class="ob-input" name="email" type="email" placeholder="partner@email.com">
+      </div>
+      <div class="ob-actions">
+        <button type="submit" class="ob-btn ob-btn-primary" id="btn-partner"><i class="fas fa-user-plus"></i> Dodaj partnera</button>
+        <button type="button" class="ob-btn ob-btn-skip" onclick="skipStep(2)">Preskoci</button>
+      </div>
+    </form>
+    <div class="ob-feedback" id="feedback-2"></div>
+  </div>
+  {% endif %}
+
+  {% if step == 3 %}
+  <div class="ob-card">
+    <div class="ob-step-num">3</div>
+    <div class="ob-title">Vas prvi artikl</div>
+    <div class="ob-time"><i class="fas fa-clock me-1"></i> ~1 minuta</div>
+    <div class="ob-desc">Dodajte proizvod ili uslugu koju nudite. Artikli se koriste kod izdavanja racuna i u POS blagajni.</div>
+    {% if onboarding.first_item_added %}
+    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+      <i class="fas fa-check-circle me-2"></i> Vec imate artikle!
+    </div>
+    {% endif %}
+    <form id="item-form" onsubmit="return submitItem(event)">
+      {% csrf_token %}
+      <div class="ob-form-group">
+        <label>Naziv artikla / usluge</label>
+        <input class="ob-input" name="name" placeholder="npr. Konzultantske usluge" required>
+      </div>
+      <div class="ob-row">
+        <div class="ob-form-group">
+          <label>Cijena (EUR)</label>
+          <input class="ob-input" name="price" type="number" step="0.01" placeholder="50.00" required>
+        </div>
+        <div class="ob-form-group">
+          <label>Kategorija</label>
+          <select class="ob-select" name="category">
+            <option value="product">Proizvod</option>
+            <option value="service">Usluga</option>
+            <option value="material">Materijal</option>
+            <option value="food">Hrana</option>
+            <option value="drink">Pice</option>
+            <option value="other">Ostalo</option>
+          </select>
+        </div>
+      </div>
+      <div class="ob-actions">
+        <button type="submit" class="ob-btn ob-btn-primary" id="btn-item"><i class="fas fa-box"></i> Dodaj artikl</button>
+        <button type="button" class="ob-btn ob-btn-skip" onclick="skipStep(3)">Preskoci</button>
+      </div>
+    </form>
+    <div class="ob-feedback" id="feedback-3"></div>
+  </div>
+  {% endif %}
+
+  {% if step == 4 %}
+  <div class="ob-card">
+    <div class="ob-step-num">4</div>
+    <div class="ob-title">Izdajte prvi racun!</div>
+    <div class="ob-time"><i class="fas fa-clock me-1"></i> ~2 minute</div>
+    <div class="ob-desc">
+      Sada imate partnera i artikle -- sve je spremno za vas prvi racun!
+      <br><br>
+      <strong style="color:#fff">Kako:</strong> Odaberite partnera, dodajte stavke, kliknite "Spremi". Gotovo!
+    </div>
+    {% if onboarding.first_invoice_created %}
+    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+      <i class="fas fa-check-circle me-2"></i> Vec ste izdali racun! Bravo!
+    </div>
+    {% endif %}
+    <div class="ob-actions" style="flex-direction:column">
+      <a href="{% url 'invoicing:invoice_create' %}" class="ob-btn ob-btn-primary ob-btn-big">
+        <i class="fas fa-file-invoice"></i> Izdaj racun
+      </a>
+      <button type="button" class="ob-btn ob-btn-skip" onclick="skipStep(4)" style="width:100%">
+        Preskoci -- napravit cu to kasnije
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if step == 5 %}
+  <div class="ob-card">
+    <div class="ob-step-num">5</div>
+    <div class="ob-title">POS blagajna</div>
+    <div class="ob-time"><i class="fas fa-clock me-1"></i> ~1 minuta</div>
+    <div class="ob-desc">
+      Aktivirajte POS blagajnu za brzu prodaju. Koristite mobitel, tablet ili racunalo kao blagajnu.
+      <br><br>
+      Ako ne trebate POS (npr. samo fakturirate), slobodno preskocite.
+    </div>
+    {% if onboarding.pos_configured %}
+    <div style="background:#0f2318;border:1px solid #16a34a44;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#4ade80">
+      <i class="fas fa-check-circle me-2"></i> POS je vec aktiviran!
+    </div>
+    {% endif %}
+    <div class="ob-actions">
+      <button type="button" class="ob-btn ob-btn-primary" onclick="activatePOS()" id="btn-pos">
+        <i class="fas fa-cash-register"></i> Aktiviraj POS
+      </button>
+      <button type="button" class="ob-btn ob-btn-skip" onclick="skipStep(5)">Ne trebam POS</button>
+    </div>
+    <div class="ob-feedback" id="feedback-5"></div>
+  </div>
+  {% endif %}
+
+  {% if step == 6 %}
+  <div class="ob-card ob-success">
+    <div class="ob-confetti" id="confetti-display">&#127881; &#127882; &#127881;</div>
+    <h2>Vas sustav je spreman!</h2>
+    <p>Sve je postavljeno. Mozete poceti raditi s LIMIT Connect-om odmah.</p>
+    <div class="ob-badge" style="justify-content:center;margin:20px auto;max-width:400px">
+      <div class="ob-badge-icon">&#128737;</div>
+      <div>
+        <div class="ob-badge-title">Uskladjeno s propisima za 2026.</div>
+        <div class="ob-badge-sub">FINA fiskalizacija &bull; eRacun &bull; PDV &bull; GoBD</div>
+      </div>
+    </div>
+    <ul class="ob-checklist" style="max-width:400px;margin:20px auto">
+      <li><i class="fas fa-check-circle ob-check-{% if onboarding.profile_completed %}done{% else %}pending{% endif %}"></i> Profil tvrtke</li>
+      <li><i class="fas fa-check-circle ob-check-{% if onboarding.first_partner_added %}done{% else %}pending{% endif %}"></i> Partner dodan</li>
+      <li><i class="fas fa-check-circle ob-check-{% if onboarding.first_item_added %}done{% else %}pending{% endif %}"></i> Artikl dodan</li>
+      <li><i class="fas fa-check-circle ob-check-{% if onboarding.first_invoice_created %}done{% else %}pending{% endif %}"></i> Racun izdan</li>
+      <li><i class="fas fa-check-circle ob-check-{% if onboarding.pos_configured %}done{% else %}pending{% endif %}"></i> POS blagajna</li>
+    </ul>
+    <div class="ob-actions" style="flex-direction:column;max-width:400px;margin:0 auto">
+      <a href="{% url 'company_dashboard' %}" class="ob-btn ob-btn-primary ob-btn-big" onclick="completeOnboarding()">
+        <i class="fas fa-tachometer-alt"></i> Idi na dashboard
+      </a>
+      <a href="{% url 'limit_connect_ai:cockpit' %}" class="ob-btn ob-btn-secondary ob-btn-big">
+        <i class="fas fa-robot"></i> AI Cockpit
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if step < 6 %}
+  <div class="ob-nav">
+    {% if step > 1 %}
+    <a href="?step={{ step|add:'-1' }}"><i class="fas fa-arrow-left me-1"></i> Natrag</a>
+    {% else %}<span></span>{% endif %}
+    <span style="color:#666;font-size:.8rem">Korak {{ step }} od 5</span>
+    {% if step < 5 %}
+    <a href="?step={{ step|add:'1' }}">Dalje <i class="fas fa-arrow-right ms-1"></i></a>
+    {% else %}<span></span>{% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<script>
+var csrfToken = '{{ csrf_token }}';
+function showFeedback(n, msg, ok) {
+    var el = document.getElementById('feedback-' + n);
+    if (!el) return;
+    el.style.display = 'block';
+    el.style.background = ok ? '#0d1a0d' : '#1a0d0d';
+    el.style.borderColor = ok ? '#16a34a33' : '#a3161633';
+    el.style.color = ok ? '#4ade80' : '#f87171';
+    el.textContent = msg;
+}
+function goStep(n) { window.location.href = '?step=' + n; }
+function postJSON(url, data) {
+    var params = new URLSearchParams();
+    for (var k in data) { if (data.hasOwnProperty(k)) params.append(k, data[k]); }
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken },
+        body: params.toString(),
+    }).then(function(r) { return r.json(); });
+}
+function submitProfile(e) {
+    e.preventDefault();
+    var fd = new FormData(document.getElementById('profile-form'));
+    var data = {}; fd.forEach(function(v,k){ data[k]=v; });
+    var btn = document.getElementById('btn-profile');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spremam...';
+    postJSON('{% url "onboarding_update_profile" %}', data)
+        .then(function(r) {
+            if (r.ok) { showFeedback(1, 'Profil spremljen!', true); setTimeout(function(){ goStep(r.next_step); }, 600); }
+            else { showFeedback(1, r.error || 'Greska', false); btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Spremi i nastavi'; }
+        }).catch(function(){ showFeedback(1, 'Mrezna greska', false); btn.disabled = false; });
+    return false;
+}
+function submitPartner(e) {
+    e.preventDefault();
+    var fd = new FormData(document.getElementById('partner-form'));
+    var data = {}; fd.forEach(function(v,k){ data[k]=v; });
+    var btn = document.getElementById('btn-partner');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dodajem...';
+    postJSON('{% url "onboarding_add_partner" %}', data)
+        .then(function(r) {
+            if (r.ok) { showFeedback(2, 'Partner dodan!', true); setTimeout(function(){ goStep(r.next_step); }, 600); }
+            else { showFeedback(2, r.error || 'Greska', false); btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Dodaj partnera'; }
+        }).catch(function(){ showFeedback(2, 'Mrezna greska', false); btn.disabled = false; });
+    return false;
+}
+function submitItem(e) {
+    e.preventDefault();
+    var fd = new FormData(document.getElementById('item-form'));
+    var data = {}; fd.forEach(function(v,k){ data[k]=v; });
+    var btn = document.getElementById('btn-item');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dodajem...';
+    postJSON('{% url "onboarding_add_item" %}', data)
+        .then(function(r) {
+            if (r.ok) { showFeedback(3, 'Artikl dodan!', true); setTimeout(function(){ goStep(r.next_step); }, 600); }
+            else { showFeedback(3, r.error || 'Greska', false); btn.disabled = false; btn.innerHTML = '<i class="fas fa-box"></i> Dodaj artikl'; }
+        }).catch(function(){ showFeedback(3, 'Mrezna greska', false); btn.disabled = false; });
+    return false;
+}
+function activatePOS() {
+    var btn = document.getElementById('btn-pos');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aktiviram...';
+    postJSON('{% url "onboarding_activate_pos" %}', {})
+        .then(function(r) {
+            if (r.ok) { showFeedback(5, 'POS aktiviran! Blagajna je spremna.', true); setTimeout(function(){ goStep(r.next_step); }, 600); }
+            else { showFeedback(5, r.error || 'Greska', false); btn.disabled = false; btn.innerHTML = '<i class="fas fa-cash-register"></i> Aktiviraj POS'; }
+        }).catch(function(){ showFeedback(5, 'Mrezna greska', false); btn.disabled = false; });
+}
+function skipStep(n) {
+    postJSON('{% url "onboarding_skip_step" %}', {step: n})
+        .then(function(r) { if (r.ok) goStep(r.next_step); });
+}
+function completeOnboarding() {
+    postJSON('{% url "onboarding_complete" %}', {});
+}
+{% if step == 6 %}
+(function() {
+    var emojis = ['&#127881;', '&#11088;', '&#127882;', '&#127775;', '&#128640;'];
+    var el = document.getElementById('confetti-display');
+    var i = 0;
+    setInterval(function() {
+        i = (i + 1) % emojis.length;
+        el.innerHTML = emojis[i] + ' ' + emojis[(i+2)%emojis.length] + ' ' + emojis[(i+4)%emojis.length];
+    }, 800);
+})();
+{% endif %}
+</script>
+{% endblock %}

@@ -1445,3 +1445,97 @@ def transfer_receive(request, pk):
     except ValueError as e:
         messages.error(request, str(e))
     return redirect('inventory:transfer_detail', pk=pk)
+
+
+@login_required
+@require_POST
+def ai_menu_scan(request):
+    """AI Menu Scanner — fotografiraj cjenik, AI parsira i puni InventoryItem."""
+    import json
+    from django.http import JsonResponse
+    from core.company_utils import get_user_company
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'Nema firme'}, status=400)
+
+    data = json.loads(request.body)
+    b64 = data.get('image_b64', '')
+    if not b64:
+        return JsonResponse({'error': 'Nema slike'}, status=400)
+
+    # AI parsira sliku cjenika
+    try:
+        import anthropic, os
+        client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
+
+        response = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=2000,
+            messages=[{
+                'role': 'user',
+                'content': [
+                    {'type': 'image', 'source': {'type': 'base64', 'media_type': 'image/jpeg', 'data': b64}},
+                    {'type': 'text', 'text': (
+                        'Ovo je fotografija jelovnika/cjenika. Parsiraj SVE artikle. '
+                        'Vrati JSON array: [{"name":"Kava","price":1.80,"category":"drink"}, ...] '
+                        'Kategorije: food, drink, dessert, product, service, other. '
+                        'Cijene u EUR. Samo JSON, nista drugo.'
+                    )},
+                ],
+            }],
+        )
+
+        text = response.content[0].text.strip()
+        # Extract JSON from response
+        if '```' in text:
+            text = text.split('```')[1].strip()
+            if text.startswith('json'):
+                text = text[4:].strip()
+        items = json.loads(text)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'AI nije mogao parsirati cjenik. Pokusajte jasniju sliku.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+    # Kreiraj InventoryItem za svaki parsirani artikl
+    from inventory.models import InventoryItem
+    from decimal import Decimal
+    created = 0
+    skipped = 0
+    results = []
+
+    for item in items:
+        name = item.get('name', '').strip()
+        price = item.get('price', 0)
+        category = item.get('category', 'other')
+        if not name:
+            continue
+
+        # SKU auto-generate
+        import re
+        sku = re.sub(r'[^A-Z0-9]', '', name.upper()[:8]) + '-%d' % (created + 1)
+
+        obj, is_new = InventoryItem.objects.get_or_create(
+            company=company, name=name,
+            defaults={
+                'sku': sku,
+                'unit_price': Decimal(str(price)),
+                'category': category,
+                'quantity': 999,
+            }
+        )
+        if is_new:
+            created += 1
+        else:
+            skipped += 1
+        results.append({'name': name, 'price': float(price), 'category': category, 'new': is_new})
+
+    return JsonResponse({
+        'ok': True,
+        'created': created,
+        'skipped': skipped,
+        'items': results,
+        'message': '%d artikala dodano, %d vec postojalo' % (created, skipped),
+    })
