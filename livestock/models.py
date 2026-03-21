@@ -293,3 +293,96 @@ class CropPlan(models.Model):
             self.procijenjeni_visak_t > 0 and
             self.status in ('berba', 'zavrseno')
         )
+
+
+
+class InstitutionalAccessToken(models.Model):
+    """
+    API token za institucije: HAPIH, sanitarna, JRDZ, VetIS.
+    Farmer kreira token, daje instituciji, moze opozvati.
+    """
+    SCOPE_CHOICES = [
+        ('hapih', 'HAPIH — knjiga lijekova (EU Reg 2019/6)'),
+        ('jrdz', 'JRDZ — kretanje zivotinja'),
+        ('sanitarna', 'Sanitarna — blokade mlijeka'),
+        ('vetis', 'VetIS — veterinarska knjiga'),
+        ('full_read', 'Kompletni citaj pristup'),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='institutional_tokens',
+    )
+    name = models.CharField(max_length=100, verbose_name='Naziv institucije')
+    scope = models.CharField(max_length=20, choices=SCOPE_CHOICES, default='hapih')
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    is_active = models.BooleanField(default=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    max_requests_day = models.PositiveIntegerField(default=1000)
+    requests_today = models.PositiveIntegerField(default=0)
+    last_request_date = models.DateField(null=True, blank=True)
+    last_accessed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+    )
+
+    class Meta:
+        db_table = 'livestock_institutional_token'
+        verbose_name = 'Institucijski pristupni token'
+
+    def __str__(self):
+        return '%s — %s (%s)' % (self.name, self.get_scope_display(), 'aktivan' if self.is_active else 'neaktivan')
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            import secrets
+            self.token = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
+
+    def regenerate(self):
+        import secrets
+        self.token = secrets.token_urlsafe(32)
+        self.save(update_fields=['token'])
+        return self.token
+
+    def record_access(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        if self.last_request_date != today:
+            self.requests_today = 1
+            self.last_request_date = today
+        else:
+            self.requests_today += 1
+        self.last_accessed_at = timezone.now()
+        self.save(update_fields=['requests_today', 'last_request_date', 'last_accessed_at'])
+
+    @property
+    def is_valid(self):
+        if not self.is_active:
+            return False
+        if self.expires_at:
+            from django.utils import timezone
+            if timezone.now() > self.expires_at:
+                return False
+        return True
+
+    @property
+    def rate_ok(self):
+        from django.utils import timezone
+        if self.last_request_date != timezone.now().date():
+            return True
+        return self.requests_today < self.max_requests_day
+
+
+class InstitutionalAccessLog(models.Model):
+    """Audit log za svaki institucijski API poziv."""
+    token = models.ForeignKey(InstitutionalAccessToken, on_delete=models.CASCADE, related_name='access_logs')
+    endpoint = models.CharField(max_length=100)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    response_code = models.PositiveSmallIntegerField(default=200)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'livestock_institutional_log'
+        ordering = ['-timestamp']

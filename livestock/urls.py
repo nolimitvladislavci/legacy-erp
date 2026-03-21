@@ -18,4 +18,7 @@ urlpatterns = [
 
     # Robot API (token auth)
     path("api/identify/", views.robot_identify, name="robot_identify"),
+
+    path('api/institutional/<str:scope>/', views.institutional_api, name='institutional_api'),
+    path('tokens/', views.token_management, name='token_management'),
 ]

@@ -12,6 +12,11 @@ class UserProfile(models.Model):
         ('worker',      _('Radnik')),
         ('investor',    _('Investitor')),
         ('partner',     _('Partner / Klijent')),
+        # Vanjski suradnici (Delegation Pattern)
+        ('veterinar',   _('Veterinar')),
+        ('racunovodja', _('Racunovodja / Steuerberater')),
+        ('inspektor',   _('Inspektor')),
+        ('revizor',     _('Revizor')),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=30, choices=ROLE_CHOICES,

@@ -254,3 +254,153 @@ def robot_identify(request):
         }
 
     return JsonResponse(response)
+
+
+
+# ══════════════════════════════════════════════════════════════
+# INSTITUCIJSKI API (HAPIH, JRDZ, Sanitarna, VetIS)
+# ══════════════════════════════════════════════════════════════
+
+@csrf_exempt
+def institutional_api(request, scope):
+    """API za institucije — token auth, rate limited, audited."""
+    import json
+    from django.http import JsonResponse
+    from .models import InstitutionalAccessToken, InstitutionalAccessLog, Livestock, HealthRecord
+
+    auth = request.META.get('HTTP_AUTHORIZATION', '').replace('Bearer ', '')
+    api_key = request.GET.get('token', '') or auth
+    if not api_key:
+        return JsonResponse({'error': 'Token required'}, status=401)
+
+    try:
+        token_obj = InstitutionalAccessToken.objects.select_related('company').get(
+            token=api_key, scope=scope, is_active=True,
+        )
+    except InstitutionalAccessToken.DoesNotExist:
+        return JsonResponse({'error': 'Invalid or expired token'}, status=403)
+
+    if not token_obj.is_valid:
+        return JsonResponse({'error': 'Token expired'}, status=403)
+    if not token_obj.rate_ok:
+        return JsonResponse({'error': 'Rate limit exceeded'}, status=429)
+
+    token_obj.record_access()
+    company = token_obj.company
+    ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or request.META.get('REMOTE_ADDR', '')
+
+    # Audit log
+    InstitutionalAccessLog.objects.create(
+        token=token_obj, endpoint=scope, ip_address=ip, response_code=200,
+    )
+
+    if scope == 'hapih':
+        # EU Reg 2019/6 — knjiga lijekova
+        records = HealthRecord.objects.filter(
+            animal__company=company,
+        ).select_related('animal').order_by('-datum')[:100]
+        data = [{
+            'ear_tag': r.animal.ear_tag,
+            'animal_type': r.animal.get_vrsta_display(),
+            'date': str(r.datum),
+            'type': r.get_tip_display(),
+            'description': r.opis,
+            'drug': r.lijek,
+            'dose': r.kolicina,
+            'withdrawal_until': str(r.karencija_do) if r.karencija_do else None,
+            'in_withdrawal': r.u_karenciji,
+            'veterinarian': r.veterinar,
+        } for r in records]
+        return JsonResponse({'farm': company.name, 'oib': company.oib, 'records': data, 'count': len(data)})
+
+    elif scope == 'jrdz':
+        # Kretanje zivotinja
+        animals = Livestock.objects.filter(company=company).order_by('ear_tag')
+        data = [{
+            'ear_tag': a.ear_tag,
+            'type': a.get_vrsta_display(),
+            'breed': a.breed,
+            'status': a.get_status_display(),
+            'date_of_birth': str(a.date_of_birth) if a.date_of_birth else None,
+            'weight_kg': float(a.weight_kg) if a.weight_kg else None,
+            'is_organic': a.is_organic,
+        } for a in animals]
+        return JsonResponse({'farm': company.name, 'oib': company.oib, 'animals': data, 'count': len(data)})
+
+    elif scope == 'sanitarna':
+        # Blokade mlijeka u realnom vremenu
+        from django.utils import timezone
+        today = timezone.now().date()
+        blocked = HealthRecord.objects.filter(
+            animal__company=company, karencija_do__gte=today,
+        ).select_related('animal')
+        data = [{
+            'ear_tag': r.animal.ear_tag,
+            'drug': r.lijek,
+            'withdrawal_until': str(r.karencija_do),
+            'days_remaining': (r.karencija_do - today).days,
+            'milk_blocked': True,
+            'meat_blocked': True,
+        } for r in blocked]
+        return JsonResponse({
+            'farm': company.name, 'oib': company.oib,
+            'blocked_animals': data, 'count': len(data),
+            'farm_status': 'BLOCKED' if data else 'CLEAR',
+        })
+
+    elif scope == 'vetis':
+        # Kompletna vet knjiga
+        animals = Livestock.objects.filter(company=company).prefetch_related('health_records')
+        data = []
+        for a in animals:
+            records = [{
+                'date': str(r.datum), 'type': r.get_tip_display(),
+                'drug': r.lijek, 'dose': r.kolicina,
+                'withdrawal': str(r.karencija_do) if r.karencija_do else None,
+                'vet': r.veterinar,
+            } for r in a.health_records.order_by('-datum')[:10]]
+            data.append({
+                'ear_tag': a.ear_tag, 'name': a.name,
+                'type': a.get_vrsta_display(), 'status': a.get_status_display(),
+                'health_records': records,
+            })
+        return JsonResponse({'farm': company.name, 'oib': company.oib, 'animals': data})
+
+    return JsonResponse({'error': 'Unknown scope'}, status=400)
+
+
+@login_required
+def token_management(request):
+    """Farmer manages institutional access tokens."""
+    from core.company_utils import get_user_company
+    from .models import InstitutionalAccessToken
+    company = get_user_company(request)
+    if not company:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'create':
+            InstitutionalAccessToken.objects.create(
+                company=company,
+                name=request.POST.get('name', ''),
+                scope=request.POST.get('scope', 'hapih'),
+                created_by=request.user,
+            )
+            messages.success(request, 'Token kreiran!')
+        elif action == 'revoke':
+            pk = request.POST.get('token_id')
+            InstitutionalAccessToken.objects.filter(pk=pk, company=company).update(is_active=False)
+            messages.success(request, 'Token opozvan.')
+        elif action == 'regenerate':
+            pk = request.POST.get('token_id')
+            t = InstitutionalAccessToken.objects.filter(pk=pk, company=company).first()
+            if t:
+                t.regenerate()
+                messages.success(request, 'Novi token generiran.')
+        return redirect('livestock:token_management')
+
+    tokens = InstitutionalAccessToken.objects.filter(company=company).order_by('-created_at')
+    return render(request, 'livestock/token_management.html', {
+        'tokens': tokens, 'company': company,
+    })
