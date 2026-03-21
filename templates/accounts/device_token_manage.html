@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <h2 class="mb-0"><i class="fas fa-mobile-alt me-2 text-info"></i>{% trans "Mobilni pristup — Device tokeni" %}</h2>
-    <small class="text-muted">{% trans "Generiraj barcode za instant login s mobitelom (bez lozinke)" %}</small>
+    <small class="text-muted">{% trans "Mobitel = pristupna kartica. Skeniraj barcode za instant POS prijavu." %}</small>
   </div>
 </div>
 
@@ -32,7 +32,8 @@
       <small class="text-muted">{% trans "Ako odabereš, odmah aktivira ovog blagajnika" %}</small>
     </div>
     <div class="col-md-4">
-      <button type="submit" class="btn btn-primary w-100">
+      <button type="submit" class="btn btn-primary w-100" id="btnGenerate"
+              onclick="this.disabled=true;this.innerHTML='<i class=\'fas fa-spinner fa-spin me-2\'></i>Generiram...';this.form.submit();">
         <i class="fas fa-qrcode me-2"></i>{% trans "Generiraj barcode" %}
       </button>
     </div>
@@ -99,7 +100,7 @@
 <div class="text-center py-5 text-muted">
   <i class="fas fa-mobile-alt fa-3x mb-3 d-block"></i>
   <h5>{% trans "Nemaš device tokena" %}</h5>
-  <p>{% trans "Generiraj barcode iznad — spremi u mobitel i skeniraj za instant POS pristup." %}</p>
+  <p>{% trans "Generiraj barcode iznad — svaki uređaj dobije svoj token." %}</p>
 </div>
 {% endif %}
 
