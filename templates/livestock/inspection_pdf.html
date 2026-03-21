@@ -1,0 +1,157 @@
+{% load doc_integrity %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Knjiga evidencije liječenja životinja — {{ company.name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+            @bottom-right { content: "Stranica " counter(page) " / " counter(pages); font-size: 8pt; color: #666; }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a2e; line-height: 1.4; }
+        .doc-header { text-align: center; border-bottom: 3px solid #1a1a2e; padding-bottom: 12px; margin-bottom: 16px; }
+        .doc-header h1 { font-size: 14pt; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .doc-header .company-info { font-size: 10pt; color: #334155; }
+        .doc-header .company-info strong { color: #1a1a2e; }
+        .legal-basis { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px 12px; font-size: 8pt; color: #64748b; margin-bottom: 16px; text-align: center; }
+        h2 { font-size: 11pt; padding: 6px 10px; border-radius: 4px; margin-bottom: 8px; margin-top: 16px; }
+        h2.animals { background: #eff6ff; color: #1e40af; }
+        h2.karencija { background: #fef2f2; color: #b91c1c; }
+        h2.health { background: #f0fdf4; color: #166534; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 8.5pt; }
+        th { background: #f1f5f9; padding: 5px 6px; text-align: left; font-weight: 700; border: 1px solid #cbd5e1; font-size: 8pt; }
+        td { padding: 4px 6px; border: 1px solid #e2e8f0; vertical-align: top; }
+        tr:nth-child(even) td { background: #fafbfc; }
+        .karencija-row td { background: #fff5f5 !important; }
+        .badge-blocked { display: inline-block; background: #dc2626; color: #fff; padding: 1px 6px; border-radius: 3px; font-size: 7.5pt; font-weight: 700; }
+        .badge-organic { display: inline-block; background: #16a34a; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 7pt; font-weight: 700; }
+        .empty-notice { text-align: center; padding: 10px; color: #94a3b8; font-style: italic; border: 1px solid #e2e8f0; margin-bottom: 12px; }
+        .doc-footer { margin-top: 20px; border-top: 2px solid #1a1a2e; padding-top: 10px; font-size: 7.5pt; color: #64748b; text-align: center; }
+        .doc-footer .timestamp { font-weight: 700; color: #334155; }
+        .doc-footer .hash { font-family: monospace; font-size: 7pt; word-break: break-all; }
+        .doc-footer .electronic { margin-top: 4px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="doc-header">
+        <h1>Knjiga evidencije liječenja životinja</h1>
+        <div class="company-info">
+            <strong>{{ company.name }}</strong><br>
+            OIB: {{ company.oib|default:"—" }} |
+            {{ company.address|default:"" }} {{ company.city|default:"" }}
+        </div>
+    </div>
+
+    <div class="legal-basis">
+        Prema EU Regulation 2019/6, čl. 108 Zakona o veterinarstvu
+    </div>
+
+    <!-- Table 1: All animals -->
+    <h2 class="animals">1. Popis životinja</h2>
+    {% if animals %}
+    <table>
+        <thead>
+            <tr>
+                <th>R.br.</th>
+                <th>Ušna markica</th>
+                <th>Vrsta</th>
+                <th>Pasmina</th>
+                <th>Status</th>
+                <th>Težina (kg)</th>
+                <th>Ekološki</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for a in animals %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ a.ear_tag }}</strong></td>
+                <td>{{ a.type }}</td>
+                <td>{{ a.breed|default:"—" }}</td>
+                <td>{{ a.status }}</td>
+                <td>{{ a.weight|default:"—" }}</td>
+                <td>{% if a.organic %}<span class="badge-organic">EKO</span>{% else %}—{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-notice">Nema registriranih životinja.</div>
+    {% endif %}
+
+    <!-- Table 2: Karencija -->
+    <h2 class="karencija">2. KARENCIJA — Blokirane životinje</h2>
+    {% if blocked_animals %}
+    <table>
+        <thead>
+            <tr>
+                <th>R.br.</th>
+                <th>Ušna markica</th>
+                <th>Lijek</th>
+                <th>Karencija do</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for a in blocked_animals %}
+            <tr class="karencija-row">
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ a.ear_tag }}</strong> <span class="badge-blocked">BLOKIRAN</span></td>
+                <td>{{ a.drug }}</td>
+                <td>{{ a.withdrawal_until|date:"d.m.Y." }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-notice">Nema životinja u karenciji.</div>
+    {% endif %}
+
+    <!-- Table 3: Health records -->
+    <h2 class="health">3. Zdravstveni zapisi — Povijest liječenja</h2>
+    {% if health_records %}
+    <table>
+        <thead>
+            <tr>
+                <th>R.br.</th>
+                <th>Datum</th>
+                <th>Ušna markica</th>
+                <th>Vrsta</th>
+                <th>Opis</th>
+                <th>Lijek</th>
+                <th>Doza</th>
+                <th>Karencija</th>
+                <th>Veterinar</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in health_records %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ r.date|date:"d.m.Y." }}</td>
+                <td><strong>{{ r.ear_tag }}</strong></td>
+                <td>{{ r.type }}</td>
+                <td>{{ r.description|default:"—" }}</td>
+                <td>{{ r.drug|default:"—" }}</td>
+                <td>{{ r.dose|default:"—" }}</td>
+                <td>{{ r.withdrawal|default:"—" }}</td>
+                <td>{{ r.vet|default:"—" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-notice">Nema zdravstvenih zapisa.</div>
+    {% endif %}
+
+    {% doc_integrity_badge lang="hr" %}
+
+    <div class="doc-footer">
+        <div class="timestamp">Generirano: {{ now|date:"d.m.Y. H:i:s" }}</div>
+        {% if sha256 %}<div class="hash">SHA-256: {{ sha256 }}</div>{% endif %}
+        <div class="electronic">Elektronički dokument — LIMIT Connect</div>
+    </div>
+</body>
+</html>

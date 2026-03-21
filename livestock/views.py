@@ -404,3 +404,154 @@ def token_management(request):
     return render(request, 'livestock/token_management.html', {
         'tokens': tokens, 'company': company,
     })
+
+
+
+# ══════════════════════════════════════════════════════════════
+# INSPEKTORSKI MOD — QR + PDF + Panic Button
+# ══════════════════════════════════════════════════════════════
+
+def inspector_live_view(request, scope, token):
+    """Read-only HTML view za inspektora — skenira QR, vidi podatke."""
+    from .models import InstitutionalAccessToken, Livestock, HealthRecord
+    from django.utils import timezone
+
+    try:
+        tok = InstitutionalAccessToken.objects.select_related('company').get(
+            token=token, scope=scope, is_active=True,
+        )
+    except InstitutionalAccessToken.DoesNotExist:
+        return render(request, 'livestock/inspector_invalid.html')
+
+    if not tok.is_valid:
+        return render(request, 'livestock/inspector_invalid.html')
+
+    tok.record_access()
+    company = tok.company
+    today = timezone.now().date()
+
+    animals = Livestock.objects.filter(company=company, status='aktivno').order_by('ear_tag')
+    blocked = HealthRecord.objects.filter(
+        animal__company=company, karencija_do__gte=today,
+    ).select_related('animal').order_by('-karencija_do')
+    all_records = HealthRecord.objects.filter(
+        animal__company=company,
+    ).select_related('animal').order_by('-datum')[:50]
+
+    return render(request, 'livestock/inspector_live_view.html', {
+        'company': company, 'scope': scope, 'animals': animals,
+        'blocked': blocked, 'all_records': all_records, 'today': today,
+        'total_animals': animals.count(), 'total_blocked': blocked.count(),
+    })
+
+
+@login_required
+def inspector_panic_button(request):
+    """Panic button — farmer generira QR + PDF za inspekciju."""
+    from core.company_utils import get_user_company
+    from .models import InstitutionalAccessToken, Livestock, HealthRecord
+    from django.utils import timezone
+
+    company = get_user_company(request)
+    if not company:
+        return redirect('dashboard')
+
+    today = timezone.now().date()
+
+    if request.method == 'POST':
+        scope = request.POST.get('scope', 'sanitarna')
+
+        # Create temporary token (expires in 24h)
+        tok = InstitutionalAccessToken.objects.create(
+            company=company,
+            name='Inspekcija %s' % today.strftime('%d.%m.%Y'),
+            scope=scope,
+            created_by=request.user,
+            expires_at=timezone.now() + timezone.timedelta(hours=24),
+        )
+
+        qr_url = request.build_absolute_uri(
+            '/livestock/inspect/%s/%s/' % (scope, tok.token)
+        )
+
+        return render(request, 'livestock/panic_qr.html', {
+            'company': company, 'qr_url': qr_url, 'token': tok,
+            'scope': scope,
+        })
+
+    # GET: show panic button options
+    blocked = HealthRecord.objects.filter(
+        animal__company=company, karencija_do__gte=today,
+    ).count()
+
+    return render(request, 'livestock/panic_button.html', {
+        'company': company, 'blocked_count': blocked,
+    })
+
+
+@login_required
+def generate_inspection_pdf(request):
+    """Generira PDF Knjigu lijecenja za inspekciju — WeasyPrint."""
+    from django.http import HttpResponse
+    from core.company_utils import get_user_company
+    from .models import Livestock, HealthRecord
+    from core.doc_integrity import get_integrity_badge_context
+    from django.utils import timezone
+    import io
+
+    company = get_user_company(request)
+    if not company:
+        return redirect('dashboard')
+
+    today = timezone.now().date()
+    scope = request.GET.get('scope', 'sanitarna')
+
+    animals = Livestock.objects.filter(company=company).order_by('ear_tag')
+    records = HealthRecord.objects.filter(
+        animal__company=company,
+    ).select_related('animal').order_by('animal__ear_tag', '-datum')
+
+    blocked = HealthRecord.objects.filter(
+        animal__company=company, karencija_do__gte=today,
+    ).select_related('animal')
+
+    ctx = {
+        'company': company, 'animals': animals, 'records': records,
+        'blocked': blocked, 'today': today, 'scope': scope,
+        'generated_at': timezone.now(),
+    }
+
+    # Add integrity badge
+    from django.template.loader import render_to_string
+    style = request.GET.get('style', 'modern')
+    template_map = {
+        'modern': 'livestock/inspection_pdf_modern.html',
+        'datev': 'livestock/inspection_pdf_datev.html',
+        'viskovic': 'livestock/inspection_pdf_viskovic.html',
+    }
+    pdf_template = template_map.get(style, 'livestock/inspection_pdf_modern.html')
+    html = render_to_string(pdf_template, ctx)
+    ctx.update(get_integrity_badge_context(
+        request=request, document_id='INS-%s-%s' % (company.oib, today),
+        content=html, company=company,
+    ))
+    style = request.GET.get('style', 'modern')
+    template_map = {
+        'modern': 'livestock/inspection_pdf_modern.html',
+        'datev': 'livestock/inspection_pdf_datev.html',
+        'viskovic': 'livestock/inspection_pdf_viskovic.html',
+    }
+    pdf_template = template_map.get(style, 'livestock/inspection_pdf_modern.html')
+    html = render_to_string(pdf_template, ctx)
+
+    # Generate PDF with WeasyPrint
+    try:
+        from weasyprint import HTML
+        pdf = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="Knjiga_lijecenja_%s_%s.pdf"' % (
+            company.oib, today.strftime('%Y%m%d'))
+        return response
+    except Exception:
+        # Fallback: return HTML
+        return HttpResponse(html)

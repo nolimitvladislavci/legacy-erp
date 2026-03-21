@@ -21,4 +21,9 @@ urlpatterns = [
 
     path('api/institutional/<str:scope>/', views.institutional_api, name='institutional_api'),
     path('tokens/', views.token_management, name='token_management'),
+
+    # Inspektorski mod
+    path('inspect/<str:scope>/<str:token>/', views.inspector_live_view, name='inspector_live_view'),
+    path('inspekcija/', views.inspector_panic_button, name='panic_button'),
+    path('inspekcija/pdf/', views.generate_inspection_pdf, name='inspection_pdf'),
 ]

@@ -6,7 +6,11 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-21 09:00 — CC Code (Opus) — Transport tests + Korpa import + memorija sync
+2026-03-21 10:30 — Sonnet (Ivan sesija) — Stvarno stanje servera verificirano, DONE sekcija sinkronizirana s git logom
+
+## Git HEAD
+094162f — Institutional API: HAPIH/JRDZ/Sanitarna/VetIS endpoints + token management + vet/accountant/inspector roles + audit log
+369 migracija aplicirano, 0 čeka.
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |
@@ -41,6 +45,9 @@
 - Neprofitni kontni plan (144 konta, 4-digit analitika) — DONE
 - Auto-setup signal (apps.py post_save Company) — DONE
 - 10 HTML templatea za udruge — DONE
+- Dogadjaji + Kampanje (EU fond tracking) + Email kampanje (AI + Celery) — DONE
+- 10 views, 8 templates, 5 modela (Dogadjaj, Kampanja...) — DONE
+- Email campaign rate limiting (50/batch, 2s delay, bounce skip) — DONE
 
 ### FINA izvjestaji (KOMPLET)
 - PR-RAS-NPF XLSX (145 AOP pozicija iz pravog FINA XLS-a) — DONE
@@ -115,7 +122,8 @@
 - posting_document FK na TransportOrder (Gemini sugestija) — DONE
 - Migration: delivery/0009_transport_module + 0010_posting_document_fk — DONE
 - Testovi: 35/36 PASS (T13 SQLite-specific bug, radi na PostgreSQL) — DONE
-- verify_documents() fix: non-EU attestation za SVE međunarodne, ne samo crosses_eu — DONE
+- verify_documents() fix: non-EU attestation za SVE međunarodne — DONE
+- Views + URLs + 3 templates (order_list, order_detail, fleet_dashboard) — DONE
 
 ### Korpa Synesis Import (KOMPLET — 21.03.)
 - import_korpa management command — DONE
@@ -123,7 +131,7 @@
 - Kruljac: +945 faktura (1032 ukupno) — DONE
 - KUD/Furdi/Dubinsko: Journal nema fakture (samo config) — DONE
 - Ukupno arhiva: 9.304 dokumenata — DONE
-- Korpaš umbrella komuna (5 children) — VEĆ POSTAVLJENO (CC#1)
+- Korpaš umbrella komuna (5 children) — DONE
 
 ### Knjiga boljitaka (12/21)
 - B-02 beforeunload + smart_logout open receipts guard — DONE
@@ -173,28 +181,57 @@
 - Sonnet spojen — DONE
 
 ### WhatsApp (KOMPLET)
-- send_text — DONE
-- send_document (WAHA Plus only) — DONE
-- send_document_link (fallback, sve verzije) — DONE
-- send_image — DONE
+- send_text, send_document, send_document_link, send_image — DONE
 
 ### Tim Chat
-- tim_chat_send endpoint (@login_required, ne superadmin) — DONE
-- Okrugli stol: Ivan, Niksa, Dragan, Seki, Marija, CC, Sonnet — DONE
+- tim_chat_send endpoint + Okrugli stol (Ivan, Niksa, Dragan, Seki, Marija, CC, Sonnet) — DONE
+
+### Country Registry (KOMPLET)
+- Strategy Pattern za multi-country ERP — DONE
+- HR + DE production, AT/SI/RS/BA/IT planned — DONE
+
+### AI Tools v2 (KOMPLET — 26 alata ukupno)
+- get_fund_opportunities, get_livestock_status, create_futures_listing — DONE
+- get_compliance_warnings, get_intelligence_results — DONE
+- Kontekstualni bridge user->company->tools (_build_contextual_system_prompt) — DONE
+
+### Livestock modul (KOMPLET — V1+V2+V3)
+- Livestock, HealthRecord, MilkRecord, Field, CropPlan modeli — DONE
+- auto_listing_ready property — DONE
+- Views: list, detail, create, field_list, crop_list — DONE
+- Templates: 5 HTML — DONE
+- Test podaci za OPG Kruljac (5 grla, 2 parcele, 2 CropPlana) — DONE
+- Karencija POS guard (blokira prodaju mlijeka/mesa od grla pod antibiotikom) — DONE
+- livestock_animal FK na InventoryItem — DONE
+- Livestock offline PWA — DONE
+- JRDŽ osnova — DONE
+- FenixCamera barcode scan za grla — DONE
+
+### Intelligence modul (KOMPLET)
+- IntelligenceSource, IntelligenceJob, IntelligenceResult — DONE
+- FundOpportunity, FundApplication — DONE
+- intelligence_nightly_patrol Celery task (03:30) — DONE
+- check_auto_listings Celery task (07:00) — DONE
+- setup_intelligence_sources management command (6 izvora) — DONE
+- IntelligenceJob kreiran za OPG Kruljac — DONE
+- Views: dashboard, results_list, funds_list, fund_detail + 4 templates — DONE
+- Burza: agro kategorije (kukuruz, stoka, mlijeko_sir, povrce, mehanizacija, eu_fond) — DONE
+
+### VetIS + Vet Portal (KOMPLET — 21.03.)
+- Vet Portal: public vet entry (WhatsApp link) — DONE
+- Vet Dashboard — DONE
+- Milking robot /api/identify/ (MILK/DIVERT decision) — DONE
+- Karencija auto-notify farmer — DONE
+- 3 razine: WhatsApp link (R1), Vet portal (R2), Robot API (R3) — DONE
+- EU Reg 2019/6 compliance — DONE
+
+### Institutional API (KOMPLET — 21.03. — HEAD)
+- InstitutionalAccessToken model — DONE
+- 4 read-only endpointa: HAPIH, JRDZ, Sanitarna, VetIS — DONE
+- Token management + vet/accountant/inspector roles — DONE
+- Audit log za svaki API poziv — DONE
 
 ---
-
-
-### AI Tools proširenje v2 (CC Code, 2026-03-21)
-- get_fund_opportunities (Intelligence -> AI widget, 24h cache) -- DONE
-- get_livestock_status (Livestock -> AI widget, READ-ONLY) -- DONE
-- create_futures_listing (ASSISTED, AIGate) -- DONE
-- get_compliance_warnings (prediktivni, svi moduli) -- DONE
-- get_intelligence_results (CC Code prijedlog, korisnik pita "sto si nasao?") -- DONE
-- Kontekstualni bridge user->company->tools (_build_contextual_system_prompt) -- DONE
-- SYSTEM_PROMPT prosiren za nove alate -- DONE
-- views.py koristi kontekstualni prompt umjesto staticnog -- DONE
-- Ukupno alata: 26 (21 + 5 novih)
 
 ## OTVORENO — treba raditi
 
@@ -203,7 +240,7 @@
 - DATEV SKR03/04 kontni plan — OTVORENO
 - DATEV Buchungsstapel export — OTVORENO
 
-### Knjiga boljitaka (preostalo)
+### Knjiga boljitaka (preostalo — 9/21)
 - B-01 Offline cross-device sync — DJELOMICNO
 - B-05 WaiterShift heartbeat — OTVORENO
 - B-06 Konobar race condition — DJELOMICNO
@@ -215,8 +252,7 @@
 - B-21 Print QR label — DJELOMICNO
 
 ### Transport Faza 2
-- Fleet dashboard (sva vozila, statusi, istekli dokumenti) — OTVORENO
-- Automatski CMR iz TransportOrder — OTVORENO
+- CMR automatski iz TransportOrder — OTVORENO
 - Multi-country routing UI — OTVORENO
 - Kabotaža counter (max 3/7 dana) — OTVORENO
 - Tahograf UI za vozača — OTVORENO
@@ -225,25 +261,7 @@
 - Customer tracking page (real-time + temp) — OTVORENO
 
 ### Nice-to-have
-- ZUGFeRD PDF/A-3 pravi format (trenutno basic embed) — OTVORENO
+- ZUGFeRD PDF/A-3 pravi format — OTVORENO
 - Vollstandige DE Ubersetzung (~2300 praznih) — OTVORENO
 - Public donation page / widget — OTVORENO
 - Fitness modul audit (GEMINI task) — CEKA GEMINI
-
-### Livestock modul (NOVO)
-- Livestock, HealthRecord, MilkRecord, Field, CropPlan modeli -- DONE
-- auto_listing_ready property -- DONE
-- Views: list, detail, create, field_list, crop_list -- DONE
-- Templates: 5 HTML (extends base.html, Bootstrap) -- DONE
-- Test podaci za OPG Kruljac (5 grla, 2 parcele, 2 CropPlana) -- DONE
-
-### Intelligence modul (NOVO)
-- IntelligenceSource, IntelligenceJob, IntelligenceResult -- DONE
-- FundOpportunity, FundApplication -- DONE
-- intelligence_nightly_patrol Celery task (03:30) -- DONE
-- check_auto_listings Celery task (07:00) -- DONE
-- setup_intelligence_sources management command (6 izvora) -- DONE
-- IntelligenceJob kreiran za OPG Kruljac -- DONE
-- Views: dashboard, results_list, funds_list, fund_detail -- DONE
-- Templates: 4 HTML -- DONE
-- Burza: agro kategorije dodane (kukuruz, stoka, mlijeko_sir, povrce, mehanizacija, eu_fond) -- DONE

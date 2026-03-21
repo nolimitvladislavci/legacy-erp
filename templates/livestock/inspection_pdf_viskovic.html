@@ -1,0 +1,78 @@
+{% extends "pdf/base_viskovic.html" %}
+{% load doc_integrity %}
+
+{% block doc_title %}KNJIGA EVIDENCIJE LIJECENJA ZIVOTINJA{% endblock %}
+{% block doc_meta %}{{ today|date:"d.m.Y." }} | {{ company.name }} | OIB: {{ company.oib }}{% endblock %}
+
+{% block content %}
+<div style="font-size:8pt;color:#666;margin-bottom:10pt">
+  Pravni temelj: EU Regulation 2019/6, cl. 108 Zakona o veterinarstvu
+</div>
+
+{% if blocked %}
+<h3 style="color:#dc2626;margin:12pt 0 6pt;font-size:11pt">AKTIVNE KARENCIJE ({{ blocked|length }})</h3>
+<table>
+  <thead>
+    <tr style="background:#fef2f2">
+      <th>Usna markica</th><th>Vrsta</th><th>Lijek</th><th>Karencija do</th><th>Preostalo dana</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in blocked %}
+    <tr style="color:#dc2626">
+      <td>{{ r.animal.ear_tag }}</td>
+      <td>{{ r.animal.get_vrsta_display }}</td>
+      <td><strong>{{ r.lijek }}</strong></td>
+      <td>{{ r.karencija_do|date:"d.m.Y." }}</td>
+      <td>{{ r.karencija_do|timeuntil }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div style="background:#f0fdf4;padding:8pt;border-radius:4pt;color:#16a34a;font-weight:bold;margin:10pt 0">
+  NEMA AKTIVNIH KARENCIJA — sva grla su dozvoljena za prodaju mlijeka/mesa.
+</div>
+{% endif %}
+
+<h3 style="margin:14pt 0 6pt;font-size:11pt">POPIS GRLA ({{ animals|length }})</h3>
+<table>
+  <thead>
+    <tr><th>Usna markica</th><th>Ime</th><th>Vrsta</th><th>Pasmina</th><th>Status</th><th>Tezina</th><th>Bio</th></tr>
+  </thead>
+  <tbody>
+    {% for a in animals %}
+    <tr>
+      <td>{{ a.ear_tag }}</td>
+      <td>{{ a.name|default:"-" }}</td>
+      <td>{{ a.get_vrsta_display }}</td>
+      <td>{{ a.breed|default:"-" }}</td>
+      <td>{{ a.get_status_display }}</td>
+      <td>{{ a.weight_kg|default:"-" }} kg</td>
+      <td>{% if a.is_organic %}DA{% else %}-{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3 style="margin:14pt 0 6pt;font-size:11pt">EVIDENCIJA LIJECENJA (zadnjih 50)</h3>
+<table>
+  <thead>
+    <tr><th>Datum</th><th>Grlo</th><th>Tip</th><th>Opis</th><th>Lijek</th><th>Doza</th><th>Karencija do</th><th>Veterinar</th></tr>
+  </thead>
+  <tbody>
+    {% for r in records %}
+    <tr{% if r.u_karenciji %} style="color:#dc2626;font-weight:bold"{% endif %}>
+      <td>{{ r.datum|date:"d.m.Y." }}</td>
+      <td>{{ r.animal.ear_tag }}</td>
+      <td>{{ r.get_tip_display }}</td>
+      <td>{{ r.opis|truncatewords:10 }}</td>
+      <td>{{ r.lijek|default:"-" }}</td>
+      <td>{{ r.kolicina|default:"-" }}</td>
+      <td>{{ r.karencija_do|date:"d.m.Y."|default:"-" }}</td>
+      <td>{{ r.veterinar|default:"-" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

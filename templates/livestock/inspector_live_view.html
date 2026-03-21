@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspekcija - {{ company.name }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #1a1a2e; line-height: 1.5; padding: 1rem; }
+        .header { background: #fff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+        .header h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .header .oib { color: #64748b; font-size: 0.95rem; }
+        .header .scope-tag { display: inline-block; margin-top: 0.75rem; padding: 0.4rem 1.2rem; border-radius: 20px; font-weight: 700; font-size: 0.85rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        .scope-tag.sanitarna { background: #dc2626; }
+        .scope-tag.hapih { background: #f59e0b; }
+        .scope-tag.jrdz { background: #3b82f6; }
+        .scope-tag.vetis { background: #16a34a; }
+        .header .date { color: #94a3b8; font-size: 0.85rem; margin-top: 0.5rem; }
+        .section { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; overflow: hidden; }
+        .section-header { padding: 1rem 1.25rem; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; }
+        .section-header.red { background: #fef2f2; color: #b91c1c; border-bottom: 2px solid #fecaca; }
+        .section-header.green { background: #f0fdf4; color: #166534; border-bottom: 2px solid #bbf7d0; }
+        .section-header.blue { background: #eff6ff; color: #1e40af; border-bottom: 2px solid #bfdbfe; }
+        .section-header.gray { background: #f8fafc; color: #334155; border-bottom: 2px solid #e2e8f0; }
+        .badge-count { margin-left: auto; background: rgba(0,0,0,0.1); padding: 0.2rem 0.7rem; border-radius: 12px; font-size: 0.85rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #f8fafc; padding: 0.65rem 0.75rem; text-align: left; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+        .tag-red { background: #fef2f2; color: #b91c1c; }
+        .tag-green { background: #f0fdf4; color: #166534; }
+        .tag-yellow { background: #fefce8; color: #854d0e; }
+        .empty-msg { padding: 2rem; text-align: center; color: #94a3b8; font-style: italic; }
+        .footer { text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; margin-top: 1rem; }
+        .print-btn { display: block; width: 100%; max-width: 300px; margin: 1rem auto; padding: 0.75rem; background: #1e293b; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .print-btn:hover { background: #334155; }
+        @media print { .no-print { display: none !important; } body { padding: 0; background: #fff; } .section { break-inside: avoid; } }
+        @media (max-width: 600px) { .header h1 { font-size: 1.2rem; } td, th { padding: 0.4rem 0.5rem; font-size: 0.82rem; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ company.name }}</h1>
+        <div class="oib">OIB: {{ company.oib|default:"—" }}</div>
+        <div><span class="scope-tag {{ scope }}">INSPEKCIJA: {{ scope|upper }}</span></div>
+        <div class="date">{{ today|date:"d.m.Y." }}</div>
+    </div>
+
+    {% if scope == "sanitarna" %}
+    <div class="section">
+        <div class="section-header red">
+            &#9888; KARENCIJA — Blokirane životinje
+            <span class="badge-count">{{ blocked_animals|length }}</span>
+        </div>
+        {% if blocked_animals %}
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Ušna markica</th><th>Lijek</th><th>Karencija do</th><th>Preostalo dana</th></tr></thead>
+                <tbody>
+                {% for a in blocked_animals %}
+                <tr>
+                    <td><strong>{{ a.ear_tag }}</strong></td>
+                    <td>{{ a.drug }}</td>
+                    <td>{{ a.withdrawal_until|date:"d.m.Y." }}</td>
+                    <td><span class="tag tag-red">{{ a.days_remaining }} dana</span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-msg">Nema životinja u karenciji.</div>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-header green">
+            &#10003; CLEAR — Životinje bez ograničenja
+            <span class="badge-count">{{ clear_animals|length }}</span>
+        </div>
+        {% if clear_animals %}
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Ušna markica</th><th>Vrsta</th><th>Status</th></tr></thead>
+                <tbody>
+                {% for a in clear_animals %}
+                <tr>
+                    <td><strong>{{ a.ear_tag }}</strong></td>
+                    <td>{{ a.type }}</td>
+                    <td><span class="tag tag-green">OK</span></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-msg">Nema podataka.</div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-header blue">
+            &#128209; Popis životinja
+            <span class="badge-count">{{ animals|length }}</span>
+        </div>
+        {% if animals %}
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Ušna markica</th><th>Vrsta</th><th>Pasmina</th><th>Status</th><th>Težina (kg)</th></tr></thead>
+                <tbody>
+                {% for a in animals %}
+                <tr>
+                    <td><strong>{{ a.ear_tag }}</strong></td>
+                    <td>{{ a.type }}</td>
+                    <td>{{ a.breed|default:"—" }}</td>
+                    <td>
+                        {% if a.status == "active" %}<span class="tag tag-green">Aktivan</span>
+                        {% elif a.status == "sold" %}<span class="tag tag-yellow">Prodan</span>
+                        {% else %}<span class="tag">{{ a.status }}</span>{% endif %}
+                    </td>
+                    <td>{{ a.weight|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-msg">Nema registriranih životinja.</div>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-header gray">
+            &#128137; Zdravstveni zapisi
+            <span class="badge-count">{{ health_records|length }}</span>
+        </div>
+        {% if health_records %}
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Datum</th><th>Životinja</th><th>Vrsta</th><th>Lijek</th><th>Doza</th><th>Karencija</th><th>Veterinar</th></tr></thead>
+                <tbody>
+                {% for r in health_records %}
+                <tr>
+                    <td>{{ r.date|date:"d.m.Y." }}</td>
+                    <td><strong>{{ r.animal }}</strong></td>
+                    <td>{{ r.type }}</td>
+                    <td>{{ r.drug|default:"—" }}</td>
+                    <td>{{ r.dose|default:"—" }}</td>
+                    <td>{{ r.withdrawal|default:"—" }}</td>
+                    <td>{{ r.vet|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-msg">Nema zdravstvenih zapisa.</div>
+        {% endif %}
+    </div>
+
+    <button class="print-btn no-print" onclick="window.print()">&#128424; Ispiši stranicu</button>
+
+    <div class="footer">
+        LIMIT Connect — Digitalna evidencija | Generirano: {{ now|date:"d.m.Y. H:i:s" }}
+    </div>
+</body>
+</html>
