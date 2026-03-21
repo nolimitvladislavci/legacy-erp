@@ -76,15 +76,15 @@ def _seed_demo_data(company, user):
                 defaults={'oib': oib, 'partner_type': ptype}
             )
 
-        # 3 demo items
+        # 3 demo items — quantity=0, realne cijene, jasno oznaceni
         for name, sku, price, cat in [
-            ('Primjer artikl 1', 'DEMO-A1', 10.00, 'product'),
-            ('Primjer usluga', 'DEMO-U1', 50.00, 'service'),
-            ('Primjer materijal', 'DEMO-M1', 5.00, 'material'),
+            ('(Demo) Artikl - uredite ili obrisite', 'DEMO-A1', 1.00, 'product'),
+            ('(Demo) Usluga - uredite ili obrisite', 'DEMO-U1', 25.00, 'service'),
+            ('(Demo) Materijal - uredite ili obrisite', 'DEMO-M1', 0.50, 'material'),
         ]:
             InventoryItem.objects.get_or_create(
                 company=company, sku=sku,
-                defaults={'name': name, 'unit_price': price, 'quantity': 100, 'category': cat}
+                defaults={'name': name, 'unit_price': price, 'quantity': 0, 'category': cat}
             )
 
         # Mark onboarding steps
