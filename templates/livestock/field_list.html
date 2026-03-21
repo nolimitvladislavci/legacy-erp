@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Parcele - Stado{% endblock %}
+{% block page_title %}Parcele{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="card">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-map me-2"></i>Parcele</h5></div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Naziv</th><th>Povrsina (ha)</th><th>Tip tla</th><th>ARKOD ID</th><th>Bio</th></tr></thead>
+                <tbody>
+                    {% for f in fields %}
+                    <tr>
+                        <td><strong>{{ f.naziv }}</strong></td>
+                        <td>{{ f.povrsina_ha }}</td>
+                        <td>{{ f.tip_tla|default:"-" }}</td>
+                        <td>{{ f.arkod_id|default:"-" }}</td>
+                        <td>{% if f.is_organic %}<i class="fas fa-leaf text-success"></i>{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">Nema parcela</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a href="{% url 'livestock:list' %}" class="btn btn-outline-secondary mt-3"><i class="fas fa-arrow-left"></i> Nazad</a>
+</div>
+{% endblock %}

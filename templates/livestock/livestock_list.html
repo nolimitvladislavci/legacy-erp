@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Stado - LIMIT CONNECT{% endblock %}
+{% block page_title %}Stado{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card" style="border-left:4px solid var(--gold)">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ stats.total }}</h3>
+                    <small class="text-muted">Ukupno grla</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-left:4px solid var(--accent)">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ stats.krave }}</h3>
+                    <small class="text-muted">Krave (muzare)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-left:4px solid #e74c3c">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ stats.gravidne }}</h3>
+                    <small class="text-muted">Gravidne</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 text-end pt-3">
+            <a href="{% url 'livestock:create' %}" class="btn btn-warning">
+                <i class="fas fa-plus"></i> Novo grlo
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-cow me-2"></i>Evidencija stada</h5>
+            <div>
+                <a href="{% url 'livestock:field_list' %}" class="btn btn-sm btn-outline-secondary me-2">
+                    <i class="fas fa-map"></i> Parcele
+                </a>
+                <a href="{% url 'livestock:crop_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-seedling"></i> Usjevi
+                </a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Markica</th>
+                        <th>Ime</th>
+                        <th>Vrsta</th>
+                        <th>Status</th>
+                        <th>Pasmina</th>
+                        <th>Mlijeko (L/dan)</th>
+                        <th>Bio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in animals %}
+                    <tr onclick="window.location='{% url 'livestock:detail' a.pk %}'" style="cursor:pointer">
+                        <td><strong>{{ a.ear_tag }}</strong></td>
+                        <td>{{ a.name|default:"-" }}</td>
+                        <td>{{ a.get_vrsta_display }}</td>
+                        <td>
+                            <span class="badge {% if a.status == 'aktivno' %}bg-success{% elif a.status == 'gravidno' %}bg-warning text-dark{% elif a.status == 'prodano' %}bg-secondary{% else %}bg-info{% endif %}">
+                                {{ a.get_status_display }}
+                            </span>
+                            {% if a.calving_soon %}<span class="badge bg-danger ms-1">Teli uskoro!</span>{% endif %}
+                        </td>
+                        <td>{{ a.breed|default:"-" }}</td>
+                        <td>{{ a.avg_daily_milk_l|default:"-" }}</td>
+                        <td>{% if a.is_organic %}<i class="fas fa-leaf text-success"></i>{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Nema grla u evidenciji. Dodajte prvo grlo.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

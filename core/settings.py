@@ -122,6 +122,8 @@ INSTALLED_APPS = [
     "superadmin_ai",
     "tech_radar",
     "udruge",
+    "livestock",
+    "intelligence",
 ]
 
 MIDDLEWARE = [
@@ -467,6 +469,14 @@ CELERY_BEAT_SCHEDULE = {
     "udruge-evaluate-subscriptions": {
         "task": "udruge.tasks.evaluate_subscriptions",
         "schedule": crontab(hour=2, minute=15),
+    },
+    "intelligence-nightly-patrol": {
+        "task": "intelligence.tasks.intelligence_nightly_patrol",
+        "schedule": crontab(hour=3, minute=30),
+    },
+    "check-auto-listings": {
+        "task": "intelligence.tasks.check_auto_listings",
+        "schedule": crontab(hour=7, minute=0),
     },
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────

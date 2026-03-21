@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Novo grlo - Stado{% endblock %}
+{% block page_title %}Dodaj novo grlo{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="card" style="max-width:700px">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-plus me-2"></i>Novo grlo</h5></div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Broj usne markice *</label>
+                    <input type="text" name="ear_tag" class="form-control" required placeholder="HR12345678901001">
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Ime (opcionalno)</label>
+                        <input type="text" name="name" class="form-control" placeholder="npr. Ronja">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Pasmina</label>
+                        <input type="text" name="breed" class="form-control" placeholder="npr. Simentalac">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Vrsta *</label>
+                        <select name="vrsta" class="form-select">
+                            {% for val, label in vrsta_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Datum rodjenja</label>
+                        <input type="date" name="date_of_birth" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tezina (kg)</label>
+                        <input type="number" name="weight_kg" class="form-control" step="0.1">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Prosj. mlijeko (L/dan)</label>
+                        <input type="number" name="avg_daily_milk_l" class="form-control" step="0.01">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_organic" class="form-check-input" id="organic">
+                            <label class="form-check-label" for="organic">Ekoloski uzgoj</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Biljeske</label>
+                    <textarea name="notes" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-warning"><i class="fas fa-save"></i> Spremi</button>
+                    <a href="{% url 'livestock:list' %}" class="btn btn-outline-secondary">Odustani</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

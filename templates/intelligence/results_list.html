@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Intelligence rezultati{% endblock %}
+{% block page_title %}Intelligence - Rezultati{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="card">
+        <div class="card-header"><h5 class="mb-0">Svi Intelligence pronalasci</h5></div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Rel.</th><th>Naslov</th><th>Sazetak</th><th>Izvor</th><th>Datum</th></tr></thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td><span class="badge {% if r.ai_relevantnost >= 80 %}bg-success{% elif r.ai_relevantnost >= 60 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ r.ai_relevantnost }}%</span></td>
+                        <td><strong>{{ r.naslov|truncatechars:60 }}</strong></td>
+                        <td>{{ r.summary|truncatechars:100 }}</td>
+                        <td>{{ r.source.naziv|default:"-" }}</td>
+                        <td>{{ r.created_at|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">Nema rezultata</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a href="{% url 'intelligence:dashboard' %}" class="btn btn-outline-secondary mt-3"><i class="fas fa-arrow-left"></i> Nazad</a>
+</div>
+{% endblock %}

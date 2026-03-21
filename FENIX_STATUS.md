@@ -207,3 +207,21 @@
 - Vollstandige DE Ubersetzung (~2300 praznih) — OTVORENO
 - Public donation page / widget — OTVORENO
 - Fitness modul audit (GEMINI task) — CEKA GEMINI
+
+### Livestock modul (NOVO)
+- Livestock, HealthRecord, MilkRecord, Field, CropPlan modeli -- DONE
+- auto_listing_ready property -- DONE
+- Views: list, detail, create, field_list, crop_list -- DONE
+- Templates: 5 HTML (extends base.html, Bootstrap) -- DONE
+- Test podaci za OPG Kruljac (5 grla, 2 parcele, 2 CropPlana) -- DONE
+
+### Intelligence modul (NOVO)
+- IntelligenceSource, IntelligenceJob, IntelligenceResult -- DONE
+- FundOpportunity, FundApplication -- DONE
+- intelligence_nightly_patrol Celery task (03:30) -- DONE
+- check_auto_listings Celery task (07:00) -- DONE
+- setup_intelligence_sources management command (6 izvora) -- DONE
+- IntelligenceJob kreiran za OPG Kruljac -- DONE
+- Views: dashboard, results_list, funds_list, fund_detail -- DONE
+- Templates: 4 HTML -- DONE
+- Burza: agro kategorije dodane (kukuruz, stoka, mlijeko_sir, povrce, mehanizacija, eu_fond) -- DONE

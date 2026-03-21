@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Fondovi / Poticaji{% endblock %}
+{% block page_title %}Fondovi / Poticaji{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="card">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Aktivni fondovi i poticaji</h5></div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Naziv</th><th>Tip</th><th>Ciljna skupina</th><th>Rok prijave</th><th>Min EUR</th><th>Max EUR</th><th>Sufin. %</th></tr></thead>
+                <tbody>
+                    {% for f in funds %}
+                    <tr onclick="window.location='{% url 'intelligence:fund_detail' f.pk %}'" style="cursor:pointer">
+                        <td><strong>{{ f.naziv|truncatechars:60 }}</strong>{% if f.hitno %} <span class="badge bg-danger">HITNO</span>{% endif %}</td>
+                        <td>{{ f.get_tip_display }}</td>
+                        <td>{{ f.get_ciljna_skupina_display }}</td>
+                        <td>{{ f.rok_prijave|default:"-" }}</td>
+                        <td>{{ f.iznos_min_eur|default:"-" }}</td>
+                        <td>{{ f.iznos_max_eur|default:"-" }}</td>
+                        <td>{{ f.sufinanciranje_posto }}%</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Nema aktivnih fondova</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <a href="{% url 'intelligence:dashboard' %}" class="btn btn-outline-secondary mt-3"><i class="fas fa-arrow-left"></i> Nazad</a>
+</div>
+{% endblock %}

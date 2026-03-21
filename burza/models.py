@@ -22,6 +22,12 @@ class ProjectLead(models.Model):
         GRADNJA    = 'gradnja',    _('Gradnja')
         FASADA     = 'fasada',     _('Fasada')
         OSTALO     = 'ostalo',     _('Ostalo')
+        KUKURUZ      = 'kukuruz',      _('Kukuruz / Zitarice')
+        STOKA        = 'stoka',        _('Stoka / Zivotinje')
+        MLIJEKO_SIR  = 'mlijeko_sir',  _('Mlijeko / Sir')
+        POVRCE       = 'povrce',       _('Povrce / Voce')
+        MEHANIZACIJA = 'mehanizacija', _('Mehanizacija / Oprema')
+        EU_FOND      = 'eu_fond',      _('EU Fond / Poticaj')
 
     company       = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
                                        related_name='project_leads', null=True, blank=True)

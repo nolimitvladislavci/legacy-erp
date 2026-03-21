@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ fund.naziv|truncatechars:50 }}{% endblock %}
+{% block page_title %}Fond: {{ fund.naziv|truncatechars:50 }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="card" style="max-width:800px">
+        <div class="card-header">
+            <h5 class="mb-0">{{ fund.naziv }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <table class="table table-sm">
+                        <tr><th>Tip</th><td>{{ fund.get_tip_display }}</td></tr>
+                        <tr><th>Status</th><td><span class="badge {% if fund.status == 'aktivan' %}bg-success{% else %}bg-secondary{% endif %}">{{ fund.get_status_display }}</span></td></tr>
+                        <tr><th>Ciljna skupina</th><td>{{ fund.get_ciljna_skupina_display }}</td></tr>
+                        <tr><th>Tijelo</th><td>{{ fund.tijelo }}</td></tr>
+                        <tr><th>Rok prijave</th><td>{{ fund.rok_prijave|default:"-" }}{% if fund.hitno %} <span class="badge bg-danger">{{ fund.days_until_deadline }} dana!</span>{% elif fund.days_until_deadline %} ({{ fund.days_until_deadline }} dana){% endif %}</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-sm">
+                        <tr><th>Min iznos</th><td>{% if fund.iznos_min_eur %}{{ fund.iznos_min_eur }} EUR{% else %}-{% endif %}</td></tr>
+                        <tr><th>Max iznos</th><td>{% if fund.iznos_max_eur %}{{ fund.iznos_max_eur }} EUR{% else %}-{% endif %}</td></tr>
+                        <tr><th>Sufinanciranje</th><td>{{ fund.sufinanciranje_posto }}%</td></tr>
+                        <tr><th>URL</th><td>{% if fund.url %}<a href="{{ fund.url }}" target="_blank">Link</a>{% else %}-{% endif %}</td></tr>
+                        <tr><th>Otkrio AI</th><td>{% if fund.otkrio_intelligence %}<i class="fas fa-robot text-info"></i> Da{% else %}Rucno{% endif %}</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <h6>Opis</h6>
+            <p>{{ fund.opis }}</p>
+
+            {% if fund.uvjeti %}
+            <h6>Uvjeti prihvatljivosti</h6>
+            <p>{{ fund.uvjeti }}</p>
+            {% endif %}
+
+            {% if fund.ai_summary %}
+            <h6>AI sazetak</h6>
+            <p class="text-muted">{{ fund.ai_summary }}</p>
+            {% endif %}
+
+            {% if fund.ai_checklist %}
+            <h6>AI checklist</h6>
+            <ul>
+                {% for item in fund.ai_checklist %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    <a href="{% url 'intelligence:funds_list' %}" class="btn btn-outline-secondary mt-3"><i class="fas fa-arrow-left"></i> Nazad</a>
+</div>
+{% endblock %}

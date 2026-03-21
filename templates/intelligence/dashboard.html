@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Intelligence - LIMIT CONNECT{% endblock %}
+{% block page_title %}Fenix Intelligence{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    {% if job %}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card" style="border-left:4px solid var(--gold)">
+                <div class="card-body">
+                    <h6 class="text-muted">Intelligence Job</h6>
+                    <p class="mb-1"><strong>{{ job.company.name }}</strong></p>
+                    <small class="text-muted">Zadnji run: {{ job.zadnji_run|default:"Nikada" }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="border-left:4px solid var(--accent)">
+                <div class="card-body">
+                    <h6 class="text-muted">Izvori</h6>
+                    <h3 class="mb-0">{{ job.sources.count }}</h3>
+                    <small class="text-muted">aktivnih izvora</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="border-left:4px solid #2ecc71">
+                <div class="card-body">
+                    <h6 class="text-muted">Aktivni fondovi</h6>
+                    <h3 class="mb-0">{{ funds|length }}</h3>
+                    <a href="{% url 'intelligence:funds_list' %}" class="small">Pogledaj sve</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <h5 class="mb-0"><i class="fas fa-radar me-2"></i>Zadnji pronalasci</h5>
+            <a href="{% url 'intelligence:results_list' %}" class="btn btn-sm btn-outline-secondary">Svi rezultati</a>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Relevantnost</th><th>Naslov</th><th>Izvor</th><th>Datum</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for r in recent_results %}
+                    <tr>
+                        <td><span class="badge {% if r.ai_relevantnost >= 80 %}bg-success{% elif r.ai_relevantnost >= 60 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ r.ai_relevantnost }}%</span></td>
+                        <td>{{ r.naslov|truncatechars:80 }}</td>
+                        <td>{{ r.source.naziv|default:"-" }}</td>
+                        <td>{{ r.created_at|date:"d.m.Y" }}</td>
+                        <td>{{ r.get_status_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">Intelligence patrol jos nije pokrenut. Pokrece se svako jutro u 03:30.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if funds %}
+    <div class="card mt-4">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Aktivni fondovi / poticaji</h5></div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Naziv</th><th>Tip</th><th>Rok prijave</th><th>Max iznos</th></tr></thead>
+                <tbody>
+                    {% for f in funds %}
+                    <tr onclick="window.location='{% url 'intelligence:fund_detail' f.pk %}'" style="cursor:pointer">
+                        <td>{{ f.naziv|truncatechars:60 }}{% if f.hitno %} <span class="badge bg-danger">HITNO</span>{% endif %}</td>
+                        <td>{{ f.get_tip_display }}</td>
+                        <td>{{ f.rok_prijave|default:"-" }}</td>
+                        <td>{% if f.iznos_max_eur %}{{ f.iznos_max_eur }} EUR{% else %}-{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

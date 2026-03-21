@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ animal.ear_tag }} - Stado{% endblock %}
+{% block page_title %}Grlo: {{ animal.ear_tag }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Podaci o grlu</h5></div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr><th>Markica</th><td>{{ animal.ear_tag }}</td></tr>
+                        <tr><th>Ime</th><td>{{ animal.name|default:"-" }}</td></tr>
+                        <tr><th>Vrsta</th><td>{{ animal.get_vrsta_display }}</td></tr>
+                        <tr><th>Status</th><td><span class="badge {% if animal.status == 'aktivno' %}bg-success{% elif animal.status == 'gravidno' %}bg-warning text-dark{% else %}bg-info{% endif %}">{{ animal.get_status_display }}</span></td></tr>
+                        <tr><th>Pasmina</th><td>{{ animal.breed|default:"-" }}</td></tr>
+                        <tr><th>Tezina</th><td>{{ animal.weight_kg|default:"-" }} kg</td></tr>
+                        <tr><th>Datum rodjenja</th><td>{{ animal.date_of_birth|default:"-" }}{% if animal.age_months %} ({{ animal.age_months }} mj.){% endif %}</td></tr>
+                        <tr><th>Dnevna mlijecnost</th><td>{{ animal.avg_daily_milk_l|default:"-" }} L</td></tr>
+                        <tr><th>Zadnje teljenje</th><td>{{ animal.last_calving|default:"-" }}</td></tr>
+                        <tr><th>Ocekivano teljenje</th><td>{{ animal.expected_calving|default:"-" }}{% if animal.calving_soon %} <span class="badge bg-danger">Uskoro!</span>{% endif %}</td></tr>
+                        <tr><th>Ekoloski uzgoj</th><td>{% if animal.is_organic %}<i class="fas fa-leaf text-success"></i> Da (od {{ animal.organic_since }}){% else %}Ne{% endif %}</td></tr>
+                    </table>
+                    {% if animal.notes %}<p class="text-muted mt-2">{{ animal.notes }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Zdravstveni zapisi</h5></div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Datum</th><th>Tip</th><th>Opis</th><th>Karencija</th></tr></thead>
+                        <tbody>
+                            {% for h in health_records %}
+                            <tr>
+                                <td>{{ h.datum }}</td>
+                                <td>{{ h.get_tip_display }}</td>
+                                <td>{{ h.opis }}</td>
+                                <td>{% if h.u_karenciji %}<span class="badge bg-danger">Do {{ h.karencija_do }}</span>{% else %}-{% endif %}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-3">Nema zapisa</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-tint me-2"></i>Muzni zapisi (zadnjih 30)</h5></div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Datum</th><th>Jutro (L)</th><th>Vecer (L)</th><th>Ukupno (L)</th></tr></thead>
+                        <tbody>
+                            {% for m in milk_records %}
+                            <tr>
+                                <td>{{ m.datum }}</td>
+                                <td>{{ m.jutarnja_l }}</td>
+                                <td>{{ m.vecernja_l }}</td>
+                                <td><strong>{{ m.ukupno_l }}</strong></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-3">Nema zapisa</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'livestock:list' %}" class="btn btn-outline-secondary mt-3"><i class="fas fa-arrow-left"></i> Nazad na stado</a>
+</div>
+{% endblock %}
