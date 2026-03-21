@@ -52,7 +52,18 @@ class POSTerminal(models.Model):
         max_length=200, blank=True, verbose_name=_('Filter kategorija'),
         help_text=_('Comma-separated: food,drink,dessert ili prazno=sve. Optika: product,service'),
     )
+    access_token  = models.CharField(
+        max_length=32, unique=True, blank=True, null=True,
+        verbose_name="QR pristupni token",
+        help_text="Auto-generiran. QR kod na zidu - skeniraj, blagajna se otvori.",
+    )
     created_at    = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.access_token:
+            import secrets
+            self.access_token = secrets.token_urlsafe(20)
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name        = _('POS terminal (kasa)')

@@ -142,4 +142,8 @@ urlpatterns = [
     # DSFinV-K Export (DE Kassenarchiv)
     path('dsfinvk-export/',                       views.dsfinvk_export,       name='dsfinvk_export'),
     path('kassenbuch/',                            views.kassenbuch_download,  name='kassenbuch'),
+    # -- QR Instant Open (zero-login) --
+    path("qr/<str:token>/", views.pos_qr_open, name="pos_qr_open"),
+    path("qr/session/<int:session_id>/", views.qr_session, name="qr_session"),
+    path("qr/session/<int:session_id>/quick-pay/", views.qr_quick_pay, name="qr_quick_pay"),
 ]

@@ -9,7 +9,7 @@ from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.db import models
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.utils.timezone import now
@@ -795,13 +795,27 @@ def quick_pos(request, terminal_id):
     })
 
 
-@login_required
+@csrf_exempt
 @require_POST
 def quick_pay(request, session_id):
     """AJAX: quick checkout — Thin view, logika u CheckoutService."""
     from pos.services.checkout import CheckoutService, CheckoutValidationError
 
-    company = get_user_company(request)
+    # Support both logged-in users and QR sessions
+    qr_session_id = request.session.get("qr_session_id")
+    is_qr = qr_session_id == session_id
+
+    if not is_qr and not request.user.is_authenticated:
+        return JsonResponse({'ok': False, 'error': 'Login required'}, status=403)
+
+    if is_qr:
+        sess = get_object_or_404(POSSession, pk=session_id, status="open")
+        company = sess.terminal.company
+        user = sess.operator
+    else:
+        company = get_user_company(request)
+        user = request.user
+
     if not company:
         return JsonResponse({'ok': False, 'error': 'Nema konteksta tvrtke'}, status=400)
 
@@ -814,7 +828,7 @@ def quick_pay(request, session_id):
     data['session_id'] = session_id
 
     try:
-        result = CheckoutService.process_receipt(company=company, user=request.user, payload=data)
+        result = CheckoutService.process_receipt(company=company, user=user, payload=data)
         return JsonResponse({
             'ok': True,
             'receipt_id': result['receipt_id'],
@@ -4398,3 +4412,198 @@ def kassenbuch_download(request):
     response = HttpResponse(xlsx, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
     return response
+
+
+# ── QR INSTANT OPEN — zero-login terminal activation ──────────────────────────
+
+@csrf_exempt
+def pos_qr_open(request, token):
+    """
+    QR pristup blagajni — bez logina.
+    Skenira QR, otvara/nastavlja sesiju, redirect na POS.
+    Rate limit: max 10 pokusaja / IP / sat.
+    """
+    from django.core.cache import cache
+
+    terminal = get_object_or_404(POSTerminal, access_token=token, is_active=True)
+    company = terminal.company
+
+    # Rate limit: 10 per IP per hour
+    ip = request.META.get("HTTP_X_REAL_IP", request.META.get("REMOTE_ADDR", ""))
+    cache_key = f"qr_open_{ip}"
+    hits = cache.get(cache_key, 0)
+    if hits >= 10:
+        return HttpResponse("Previse pokusaja. Pokusajte ponovo za sat vremena.", status=429)
+    cache.set(cache_key, hits + 1, 3600)
+
+    # Find or create qr_operator user
+    from django.contrib.auth.models import User
+    qr_user, _ = User.objects.get_or_create(
+        username=f"qr_operator_{company.pk}",
+        defaults={
+            "first_name": "QR",
+            "last_name": "Operator",
+            "is_active": True,
+            "is_staff": False,
+        },
+    )
+
+    # Find open session or create new one
+    session = POSSession.objects.filter(terminal=terminal, status="open").first()
+    if not session:
+        last = terminal.sessions.order_by("-session_number").first()
+        next_num = (last.session_number + 1) if last else 1
+        session = POSSession.objects.create(
+            terminal=terminal,
+            operator=qr_user,
+            session_number=next_num,
+            opening_cash=Decimal("0"),
+            status="open",
+        )
+
+    # Log access
+    try:
+        from superadmin_ai.models import AIActionLog
+        AIActionLog.objects.create(
+            company=company,
+            module="pos",
+            action_type="qr_open",
+            access_level=1,
+            outcome="executed",
+            ip_address=ip if ip else None,
+            details={
+                "terminal": terminal.name,
+                "terminal_id": terminal.pk,
+                "token": token[:8] + "...",
+                "session_id": str(session.pk),
+            },
+        )
+    except Exception:
+        logger.warning("QR open log failed", exc_info=True)
+
+    # Store QR context in Django session
+    request.session["qr_terminal_id"] = terminal.pk
+    request.session["qr_session_id"] = session.pk
+    request.session["qr_company_id"] = str(company.pk)
+
+    return redirect("pos:qr_session", session_id=session.pk)
+
+
+@ensure_csrf_cookie
+def qr_session(request, session_id):
+    """
+    POS sucelje za QR pristup — bez @login_required.
+    Validira da session pripada QR kontekstu.
+    Renderira isti template kao quick_pos.
+    """
+    session = get_object_or_404(POSSession, pk=session_id, status="open")
+    terminal = session.terminal
+
+    # Validate QR context
+    qr_session_id = request.session.get("qr_session_id")
+    if qr_session_id != session.pk:
+        return HttpResponse("Pristup odbijen. Skenirajte QR kod ponovo.", status=403)
+
+    company = terminal.company
+
+    try:
+        qs = InventoryItem.objects.filter(company=company, is_active=True)
+        if terminal.category_filter:
+            cats = [c.strip() for c in terminal.category_filter.split(",") if c.strip()]
+            if cats:
+                qs = qs.filter(category__in=cats)
+        inventory_items = list(qs.select_related("tax_rate").order_by("name")[:300])
+    except Exception:
+        logger.warning("Suppressed error", exc_info=True)
+        inventory_items = []
+
+    cats = sorted(set(getattr(i, "category", "") or "Ostalo" for i in inventory_items))
+
+    from pos.models import POSCashier
+    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).order_by("name"))
+
+    try:
+        from django.urls import reverse
+        report_url = reverse("pos:cashier_report_html", args=[session.id])
+    except Exception:
+        report_url = "#"
+
+    # Top 12 quick items
+    quick_items = []
+    try:
+        from django.db.models import Count
+        top_ids = list(
+            POSReceiptItem.objects
+            .filter(receipt__session__terminal__company=company, receipt__status="paid")
+            .exclude(is_tip=True)
+            .values("inventory_item_id")
+            .annotate(cnt=Count("id"))
+            .order_by("-cnt")
+            .values_list("inventory_item_id", flat=True)[:12]
+        )
+        if top_ids:
+            items_map = {i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related("tax_rate")}
+            quick_items = [items_map[pk] for pk in top_ids if pk in items_map]
+        if len(quick_items) < 12:
+            existing = {i.pk for i in quick_items}
+            filler = list(
+                InventoryItem.objects.filter(company=company, is_active=True)
+                .exclude(pk__in=existing)
+                .select_related("tax_rate")
+                .order_by("name")[: 12 - len(quick_items)]
+            )
+            quick_items.extend(filler)
+    except Exception:
+        pass
+
+    return render(request, "pos/quick.html", {
+        "terminal": terminal,
+        "session": session,
+        "inventory_items": inventory_items,
+        "quick_items": quick_items,
+        "categories": cats,
+        "cashiers": cashiers,
+        "session_report_url": report_url,
+        "qr_mode": True,
+    })
+
+
+@csrf_exempt
+@require_POST
+def qr_quick_pay(request, session_id):
+    """AJAX quick checkout for QR sessions — no login required."""
+    from pos.services.checkout import CheckoutService, CheckoutValidationError
+
+    # Validate QR context
+    qr_session_id = request.session.get("qr_session_id")
+    if qr_session_id != session_id:
+        return JsonResponse({"ok": False, "error": "QR pristup istekao"}, status=403)
+
+    session = get_object_or_404(POSSession, pk=session_id, status="open")
+    company = session.terminal.company
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    data["session_id"] = session_id
+
+    try:
+        result = CheckoutService.process_receipt(
+            company=company, user=session.operator, payload=data
+        )
+        return JsonResponse({
+            "ok": True,
+            "receipt_id": result["receipt_id"],
+            "receipt_number": result["receipt_number"],
+            "total": result["total"],
+            "change": result["change"],
+            "print_url": result.get("print_url", ""),
+            "public_url": receipt_public_url(result["receipt_id"]),
+        })
+    except CheckoutValidationError as e:
+        return JsonResponse({"ok": False, "error": e.message, "code": e.code}, status=400)
+    except Exception as e:
+        logger.error("qr_quick_pay error: %s", e, exc_info=True)
+        return JsonResponse({"ok": False, "error": "Sistemska greska pri naplati"}, status=500)
