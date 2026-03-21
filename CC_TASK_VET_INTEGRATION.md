@@ -720,3 +720,109 @@ Dok čitaš kod, provjeri i predloži:
 - [ ] Robot API curl test prolazi
 - [ ] django check: 0 grešaka
 - [ ] /tmp/vet_integration_done.txt
+
+---
+
+## ⚠️ ARHITEKTURNA KOREKCIJA — nakon analize Gemini + Sonnet
+
+### Što smo otkrili
+
+`CompanyMembership` već postoji u `accounts/models.py` (linija 155):
+```python
+class CompanyMembership(models.Model):
+    user = models.ForeignKey(User, ...)
+    company = models.ForeignKey(Company, ...)
+    role = models.CharField(max_length=30, choices=UserProfile.ROLE_CHOICES)
+    is_default = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+```
+
+`get_user_company()` već ima session switching:
+- `umbrella_as_company` u sesiji
+- `impersonated_company_id` za superadmin
+- Thread-local fallback
+
+**Zaključak: ne trebamo ExternalAccess ni novi VetProfile M2M.**
+Trebamo samo:
+1. Dodati `'vet'` u `ROLE_CHOICES`
+2. Koristiti `CompanyMembership` za vezivanje veta na više farmi
+3. Session switching za "odabir aktivne farme" — isti mehanizam koji umbrella admin već koristi
+
+### Kako CC Code treba implementirati Razinu 2 (korekcija)
+
+**UMJESTO** `VetProfile.farme = ManyToManyField`:
+
+```python
+# Vet se dodaje na farmu ovako:
+CompanyMembership.objects.create(
+    user=vet_user,
+    company=opg_kruljac,
+    role='vet',
+    is_active=True,
+)
+# Vet na više farmi = više CompanyMembership zapisa
+
+# Vet dashboard — dohvat svih farmi:
+memberships = CompanyMembership.objects.filter(
+    user=request.user,
+    role='vet',
+    is_active=True,
+).select_related('company')
+
+# Vet odabere farmu → session switching (isti mehanizam kao umbrella):
+request.session['active_vet_company'] = company_pk
+# get_user_company() treba jedan if blok više:
+vet_company_id = request.session.get('active_vet_company')
+if vet_company_id:
+    membership = CompanyMembership.objects.filter(
+        user=request.user, company_id=vet_company_id,
+        role='vet', is_active=True
+    ).first()
+    if membership:
+        return membership.company
+```
+
+**VetProfile model OSTAJE** ali bez `farme = ManyToManyField`:
+```python
+class VetProfile(models.Model):
+    user = models.OneToOneField(User, ...)  # ostaje
+    ime = models.CharField(...)             # ostaje
+    licenca_broj = models.CharField(...)    # ostaje
+    vet_token = models.UUIDField(...)       # ostaje — za Razinu 1
+    token_aktivan = models.BooleanField()   # ostaje
+
+    # UKLONI:
+    # farme = models.ManyToManyField(...)  ← zamijenjeno s CompanyMembership
+```
+
+`VetProfile.farme` property postaje:
+```python
+@property
+def farme(self):
+    """Sve farme ovog veta — čita iz CompanyMembership."""
+    from accounts.models import CompanyMembership
+    return CompanyMembership.objects.filter(
+        user=self.user, role='vet', is_active=True
+    ).values_list('company', flat=True)
+```
+
+### Što NIJE potrebno graditi iznova
+
+- `get_user_company()` — ne diraj, dodaj samo `active_vet_company` grana
+- `CompanyMembership` — ne diraj, samo dodaj role='vet' zapise
+- Session switching UI — kopija `umbrella_as_company` mehanizma, promijeni samo labele
+
+### Provjera prije implementacije
+
+```bash
+# Potvrdi da CompanyMembership postoji i ima pravo polje
+python manage.py shell -c "
+from accounts.models import CompanyMembership
+print('Fields:', [f.name for f in CompanyMembership._meta.fields])
+print('Count:', CompanyMembership.objects.count())
+"
+
+# Potvrdi da get_user_company podržava session switching
+grep -n 'umbrella_as_company\|active_vet\|session.*company' \
+  /var/www/fina-connect/core/company_utils.py
+```
