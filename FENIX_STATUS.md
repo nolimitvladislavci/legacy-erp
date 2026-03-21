@@ -6,6 +6,7 @@
 ---
 
 ## Zadnje azuriranje
+2026-03-21 14:00 — CC Code (Opus) — Predarhiva Bulk OCR DONE: StagingBatch, drag&drop, rate-limited Celery, live progress
 2026-03-21 13:38 — CC Code (Opus) — POS QR Instant Open DONE: zero-login terminal activation, 5 QR kodova za Seki
 2026-03-21 13:30 — CC Code (Opus) — Invoice Growth Engine: referral footer na PDF/email, 8 AI misija aktivirano, WhatsApp status report
 2026-03-21 13:15 — CC Code (Opus) — GTM Foundation DONE: OIB lookup API, pricing kalkulator, empty states (3 modula)
@@ -334,10 +335,12 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - Auto jutarnji report format definiran (07:15, sve 3 lokacije)
 - Ključni insight: Šeki ne kupuje ERP — kupuje manje posla za sinove
 
-### Predarhiva Bulk OCR (SPREMAN — 2026-03-21)
-- CC_TASK_PREDARHIVA_BULK_OCR.md kreiran — gorući problem Marija Brtan
-- StagingBatch + StagingFile modeli (predkomora za 1000+ slika)
-- Rate-limited Celery task: 8 req/min, rate limit, auto-retry, exponential backoff
-- Live progress polling: svakih 3s, "razmišljanje na glas", zadnjih 5 fajlova
-- DE tržište: alternativni Gemini prompt za njemačke račune
+### Predarhiva Bulk OCR (KOMPLET — 21.03.)
+- StagingBatch + StagingFile modeli — DONE
+- Bulk upload view s drag & drop + file preview — DONE
+- Rate-limited Celery task (8 req/min, backoff, pauza na greške) — DONE
+- Live progress API (polling 3s, "razmišljanje na glas") — DONE
+- 2 templatea (staging.html, staging_detail.html) — DONE
+- URLs: /smart-import/staging/ (upload, detail, start, progress) — DONE
+- Migracija 0006_add_staging_batch — DONE
 - Trošak: 0.15 EUR / 1000 slika, ~2 sata noćne obrade
