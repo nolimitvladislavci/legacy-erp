@@ -87,24 +87,29 @@ def subscription_context(request):
 
     modules = set()
     if company:
+        # SOFT GATE: sidebar shows ALL enabled modules, not just subscription.
+        # Upgrade banner handles upsell, not sidebar visibility.
         try:
+            # 1. Start with subscription modules
             sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
             if sub:
-                modules = sub.allowed_modules
+                modules = set(sub.allowed_modules)
         except Exception:
             pass
 
-        # Module Picker filter: if company has CompanyModuleConfig,
-        # intersect subscription modules with enabled modules
-        if modules:
-            try:
-                from companies.models import CompanyModuleConfig
-                config = CompanyModuleConfig.objects.filter(company=company).first()
-                if config and config.enabled_modules:
-                    picker_set = set(config.enabled_modules)
-                    modules = modules & picker_set
-            except Exception:
-                pass
+        # 2. UNION with Module Picker (not intersection!)
+        # If user enabled 21 modules in picker, show all 21.
+        try:
+            from companies.models import CompanyModuleConfig
+            config = CompanyModuleConfig.objects.filter(company=company).first()
+            if config and config.enabled_modules:
+                picker_set = set(config.enabled_modules)
+                modules = modules | picker_set  # UNION, not intersection
+        except Exception:
+            pass
+
+        # 3. Always include core modules
+        modules |= {'pos', 'partners', 'inventory', 'invoicing', 'documents', 'konto'}
 
     # is_company_admin: superadmin/company_admin role or is_staff
     is_admin = request.user.is_staff
