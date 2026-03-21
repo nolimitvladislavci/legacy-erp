@@ -974,3 +974,55 @@ self.addEventListener('fetch', (e) => {
     response = HttpResponse(sw_js, content_type='application/javascript')
     response['Service-Worker-Allowed'] = '/pos/'
     return response
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# HASH CHAIN — Verify + Anchor endpointi
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def chain_verify(request):
+    """Verificiraj integritet hash lanca za tvrtku."""
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'No company'}, status=400)
+
+    from pos.hashchain import verify_chain, daily_anchor_hash, ChainLink
+
+    is_valid, break_point, total = verify_chain(company, verbose=True)
+    anchor = daily_anchor_hash(company)
+
+    # Zadnjih 10 karika
+    recent = ChainLink.objects.filter(company=company).order_by('-sequence')[:10]
+
+    return JsonResponse({
+        'ok': True,
+        'is_valid': is_valid,
+        'break_point': break_point,
+        'total_links': total,
+        'daily_anchor': anchor,
+        'status': 'INTEGRITET OK' if is_valid else f'LANAC PREKINUT na karici #{break_point}!',
+        'recent': [{
+            'seq': l.sequence,
+            'hash': l.chain_hash[:16] + '…',
+            'prev': l.prev_hash[:8] + '…',
+            'summary': l.payload_summary,
+            'created': l.created_at.isoformat(),
+        } for l in recent],
+    })
+
+
+@login_required
+def chain_receipt_check(request, receipt_id):
+    """Provjeri integritet jednog bona u lancu."""
+    from pos.hashchain import verify_single
+
+    receipt = get_object_or_404(POSReceipt, pk=receipt_id)
+    result = verify_single(receipt)
+
+    if result is None:
+        return JsonResponse({'ok': True, 'status': 'NOT_IN_CHAIN', 'message': 'Bon nije u hash lancu (training ili pre-chain)'})
+    elif result:
+        return JsonResponse({'ok': True, 'status': 'VALID', 'message': 'Bon je nepromijenjen od upisa u lanac'})
+    else:
+        return JsonResponse({'ok': False, 'status': 'TAMPERED', 'message': 'UPOZORENJE: Bon je modificiran nakon upisa u lanac!'})

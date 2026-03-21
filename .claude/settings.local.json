@@ -20,7 +20,29 @@
       "WebFetch(domain:html.duckduckgo.com)",
       "WebFetch(domain:narodne-novine.nn.hr)",
       "WebFetch(domain:europa.eu)",
-      "WebFetch(domain:www.porezna-uprava.hr)"
+      "WebFetch(domain:www.porezna-uprava.hr)",
+      "WebFetch(domain:taxation-customs.ec.europa.eu)",
+      "WebFetch(domain:www.revolut.com)",
+      "WebFetch(domain:www.carwashpro.com)",
+      "WebFetch(domain:www.superoperator.com)",
+      "WebFetch(domain:kromacarwash.com)",
+      "WebFetch(domain:adriateh.hr)",
+      "WebFetch(domain:e-usluga.hr)",
+      "Bash(find /var/www/fina-connect -path */templates/* -name *.txt)",
+      "Bash(find /var/www/fina-connect -path *webshop* -name *.html)",
+      "Bash(grep -r \"reg_source\\\\|referral_code\\\\|ref_code\" /var/www/fina-connect --include=*.py)",
+      "Bash(grep -r \"share\\\\|dijeli\\\\|pozovi\\\\|invite_link\" /var/www/fina-connect --include=*.py)",
+      "Bash(grep -r \"Try LIMIT\\\\|Powered by\\\\|branded\\\\|footer\\\\|branding\" /var/www/fina-connect --include=*.html)",
+      "Bash(find /var/www/fina-connect/templates -name *.html -exec grep -l \"limit-connect\\\\|LIMIT CONNECT\" {})",
+      "Bash(2)",
+      "Bash(grep -r \"invoice.*footer\\\\|receipt.*footer\\\\|Try.*LIMIT\\\\|Powered by\" /var/www/fina-connect/templates --include=*.html)",
+      "Bash(grep -r \"receipt.*share\\\\|share.*receipt\\\\|qr.*receipt\" /var/www/fina-connect --include=*.py)",
+      "Bash(grep -r \"GATEWAY\\\\|channel\\\\|api_key\\\\|webhook\" /var/www/fina-connect/livestock --include=*.py)",
+      "Bash(grep -r \"bulk_invite\\\\|invite.*codes\" /var/www/fina-connect --include=*.py)",
+      "Bash(grep -r \"CompanyPartnership\\\\|managed_companies\\\\|partner_company\" /var/www/fina-connect --include=*.py)",
+      "Bash(grep -r \"white.*label\\\\|white-label\\\\|white_label\" /var/www/fina-connect --include=*.py)",
+      "Bash(grep -r \"Boniteta\\\\|CEIDP\\\\|Registry\" /var/www/fina-connect --include=*.py)",
+      "Bash(ls -la /var/www/fina-connect/*.md)"
     ]
   }
 }

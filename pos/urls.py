@@ -174,4 +174,7 @@ urlpatterns = [
     path('api/pulse/read/',                      views_v2.pulse_mark_read,       name='pulse_mark_read'),
     # B-01: ServiceWorker
     path('sw.js',                                views_v2.pos_service_worker,    name='pos_sw'),
+    # Hash Chain — kriptografski audit trail
+    path('chain/verify/',                        views_v2.chain_verify,          name='chain_verify'),
+    path('chain/receipt/<int:receipt_id>/',       views_v2.chain_receipt_check,   name='chain_receipt_check'),
 ]

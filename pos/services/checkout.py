@@ -612,3 +612,13 @@ class CheckoutService:
             result['training'] = True
             result['fiscal_warning'] = 'TRAINING MODE — bon nije fiskaliziran'
 
+        # ── 14. HASH CHAIN — kriptografski audit trail ──
+        if not receipt.is_training:
+            try:
+                from pos.hashchain import append_receipt
+                chain_link = append_receipt(receipt)
+                result["chain_hash"] = chain_link.chain_hash[:16]
+                result["chain_seq"] = chain_link.sequence
+            except Exception as _chain_err:
+                logger.warning("Hash chain append failed: %s", _chain_err)
+
