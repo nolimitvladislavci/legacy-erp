@@ -73,10 +73,10 @@ class SubscriptionMiddleware:
         # ── SOFT GATE: nikad ne blokiraj, samo označi za banner ──
         # Svi moduli uvijek dostupni. Upgrade poruka se prikazuje u UI-ju.
         # Korisnik vidi vrijednost PRIJE nego što plati.
-        request._upgrade_hint = None
+        request.upgrade_hint = None
         if not subscription:
-            request._upgrade_hint = required_module
+            request.upgrade_hint = required_module
         elif not subscription.has_module(required_module):
-            request._upgrade_hint = required_module
+            request.upgrade_hint = required_module
         # NIKAD redirect — korisnik prolazi, vidi banner
         return None
