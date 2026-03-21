@@ -108,6 +108,7 @@ urlpatterns += i18n_patterns(
         # Promo landing pages
     path("promo/", views.promo_page, name="promo_hr"),
     path("promo/de/", views.promo_page_de, name="promo_de"),
+    path("promo/opg/", views.promo_opg, name="promo_opg"),
     path("newsletter/de/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'core/newsletter_2026_de.html'), name="newsletter_de"),
 
     # DE Promotion Pack

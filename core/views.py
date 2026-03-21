@@ -2817,3 +2817,7 @@ def promo_page(request):
 
 def promo_page_de(request):
     return render(request, 'website/promo_de.html')
+
+
+def promo_opg(request):
+    return render(request, 'website/promo_opg.html')

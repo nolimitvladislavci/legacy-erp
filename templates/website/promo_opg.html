@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LIMIT Connect — Digitalna farma bez papira</title>
+<style>
+:root{--gold:#c9a84c;--black:#0a0a0a;--green:#16a34a;--red:#dc2626}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif}
+.hero{text-align:center;padding:3rem 1.5rem;background:linear-gradient(180deg,#0a0a0a,#1a1200)}
+.hero h1{font-size:2.2rem;color:var(--gold);margin-bottom:.8rem}
+.hero p{font-size:1.1rem;color:#94a3b8;max-width:600px;margin:0 auto}
+.badge{display:inline-block;background:var(--green);color:#fff;padding:.3rem .8rem;border-radius:20px;font-size:.75rem;font-weight:700;margin-top:1rem}
+.features{max-width:900px;margin:0 auto;padding:2rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem}
+.card{background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:1.5rem}
+.card-icon{font-size:2rem;margin-bottom:.8rem}
+.card h3{color:var(--gold);font-size:1rem;margin-bottom:.5rem}
+.card p{color:#94a3b8;font-size:.85rem;line-height:1.6}
+.card ul{color:#94a3b8;font-size:.82rem;line-height:1.8;padding-left:1.2rem}
+.cta{text-align:center;padding:3rem 1.5rem}
+.cta-btn{display:inline-block;background:var(--gold);color:#000;padding:1rem 2.5rem;border-radius:12px;font-size:1.1rem;font-weight:700;text-decoration:none;margin:.5rem}
+.cta-btn:active{transform:scale(.97)}
+.cta-btn.green{background:var(--green);color:#fff}
+.cta-btn.outline{background:transparent;border:2px solid var(--gold);color:var(--gold)}
+.footer{text-align:center;padding:2rem;color:#64748b;font-size:.8rem;border-top:1px solid #1e293b}
+.quote{max-width:700px;margin:2rem auto;padding:1.5rem;background:#0f172a;border-left:4px solid var(--gold);border-radius:0 12px 12px 0;font-style:italic;color:#94a3b8}
+@media(max-width:600px){.hero h1{font-size:1.6rem}.features{grid-template-columns:1fr}.cta-btn{display:block;margin:.5rem 1rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Registratori idu u podrum.</h1>
+  <p>LIMIT Connect — kompletni digitalni sustav za OPG. Farma, veterinar, inspekcija, EU fondovi — sve s mobitela.</p>
+  <div class="badge">BESPLATNO za OPG-ove u probnom periodu</div>
+</div>
+
+<div class="features">
+  <div class="card">
+    <div class="card-icon">&#128004;</div>
+    <h3>Evidencija stada</h3>
+    <ul>
+      <li>Svako grlo s usnom markicom</li>
+      <li>Zdravstveni kartoni</li>
+      <li>Dnevna mlijecnost (jutro/vecer)</li>
+      <li>Teljenja i reprodukcija</li>
+      <li>Tezina i pasmina</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#128137;</div>
+    <h3>Veterinar — bez papira</h3>
+    <ul>
+      <li>Vet dobije WhatsApp link</li>
+      <li>Unosi tretmane s mobitela</li>
+      <li>Karencija se automatski prati</li>
+      <li>Vi dobijete obavijest ODMAH</li>
+      <li>Besplatno za veterinare</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#128721;</div>
+    <h3>Karencija — automatska zastita</h3>
+    <ul>
+      <li>POS BLOKIRA prodaju mlijeka kad je grlo na antibiotiku</li>
+      <li>Nema ljudske greske</li>
+      <li>Robot za muznju zna koju kravu preskociti</li>
+      <li>Zdravlje potrosaca na prvom mjestu</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#128269;</div>
+    <h3>Inspekcija — jedan klik</h3>
+    <ul>
+      <li>Inspektor dolazi? Panic button!</li>
+      <li>QR kod — skenira i vidi sve</li>
+      <li>PDF Knjiga lijecenja automatski</li>
+      <li>EU Regulation 2019/6 compliant</li>
+      <li>SHA-256 hash za neoborivost</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#127466;&#127482;</div>
+    <h3>EU Fondovi — AI trazi za vas</h3>
+    <ul>
+      <li>AI automatski prati natjecaje</li>
+      <li>APPRRR, eKohezija, MINPOL</li>
+      <li>Obavijest kad se otvori novi fond</li>
+      <li>Volonterski sati = novac za EU</li>
+      <li>Prijave i evidencija kampanja</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#127793;</div>
+    <h3>Parcele i usjevi</h3>
+    <ul>
+      <li>Evidencija parcela (ha)</li>
+      <li>Plan sjetve i zalede</li>
+      <li>Bio certifikacija pracenje</li>
+      <li>ARKOD kompatibilno</li>
+      <li>Integracija s burzom</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#128176;</div>
+    <h3>POS blagajna + fiskalizacija</h3>
+    <ul>
+      <li>Prodaja na sajmu s mobitela</li>
+      <li>Automatska FINA fiskalizacija</li>
+      <li>R1 racun za B2B kupce</li>
+      <li>Gotovina, kartica, Revolut</li>
+      <li>Offline rad (nema signala? Nema problema)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#128196;</div>
+    <h3>Arhiva — sve na jednom mjestu</h3>
+    <ul>
+      <li>Racuni, fakture, e-Racuni</li>
+      <li>AI prepoznaje i sortira</li>
+      <li>Pretrazujte po bilo cemu</li>
+      <li>Backup u oblaku — nikad ne gubite</li>
+      <li>FINA izvjestaji automatski</li>
+    </ul>
+  </div>
+</div>
+
+<div class="quote">
+  "Za cijenu jedne kutije papira mjesecno — dobijete kompletni digitalni sustav. Registratori, kemijske, toneri — sve to vise ne trebate."
+</div>
+
+<div class="cta">
+  <h2 style="color:var(--gold);margin-bottom:1.5rem;font-size:1.5rem">Spremni za digitalizaciju?</h2>
+  <a href="tel:+385976091655" class="cta-btn green">&#128222; Nazovite: 097-609-1655</a>
+  <a href="https://wa.me/385976091655?text=Zanima%20me%20LIMIT%20Connect%20za%20OPG" class="cta-btn green">&#128172; WhatsApp</a>
+  <a href="/register/" class="cta-btn">Registrirajte se</a>
+  <a href="/livestock/vet/opg-kruljac-slaana/" class="cta-btn outline">Veterinar? Probajte link</a>
+</div>
+
+<div class="footer">
+  LIMIT Connect — limit-connect.com<br>
+  Konjik d.o.o. | OIB: 37590751921<br>
+  Bez papira. Za cijenu potrosnog materijala.
+</div>
+
+</body>
+</html>

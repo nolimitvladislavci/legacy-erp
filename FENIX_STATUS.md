@@ -6,7 +6,9 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-21 10:30 — Sonnet (Ivan sesija) — Stvarno stanje servera verificirano, DONE sekcija sinkronizirana s git logom
+2026-03-21 11:00 — Sonnet (Ivan sesija) — LIMIT Connect AI Master Plan kreiran i odobren
+2026-03-21 10:30 — CC Code (Opus) — Session end: Transport 35/36, Korpa 1833 faktura, memorija komplet
+SLJEDEĆI TASK: CC_TASK_LIMIT_AI_FOUNDATION.md (limit_connect_ai app — 5 modela, 4 taska, 4 viewa)
 
 ## Git HEAD
 094162f — Institutional API: HAPIH/JRDZ/Sanitarna/VetIS endpoints + token management + vet/accountant/inspector roles + audit log
@@ -265,3 +267,16 @@
 - Vollstandige DE Ubersetzung (~2300 praznih) — OTVORENO
 - Public donation page / widget — OTVORENO
 - Fitness modul audit (GEMINI task) — CEKA GEMINI
+
+### LIMIT Connect AI — Master Plan (ODOBREN — 2026-03-21)
+- LIMIT_CONNECT_AI_PLAN.md kreiran — kompletni roadmap
+- CC_TASK_LIMIT_AI_FOUNDATION.md — spreman za CC Code (Faza 1)
+- GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — spreman za Gemini (Faza 2)
+- Vizija: per-klijent AI asistent, EU fondovi, compliance watchdog, kampanje, WhatsApp/email report
+
+## SLJEDEĆI TASKOVI (po prioritetu)
+1. CC_TASK_LIMIT_AI_FOUNDATION.md — CC Code — limit_connect_ai app (Faza 1) — AKTIVAN
+2. GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — Gemini — ComplianceWatchdog (Faza 2) — CEKA FAZU 1
+3. CC_TASK_LIMIT_AI_FUNDS.md — CC Code — EU fondovi workflow (Faza 2) — CEKA FAZU 1
+4. GEMINI_TASK_LIMIT_AI_CAMPAIGNS.md — Gemini — CampaignPlanner (Faza 3) — CEKA FAZU 2
+5. CC_TASK_LIMIT_AI_COCKPIT.md — CC Code — per-klijent cockpit (Faza 3) — CEKA FAZU 2
