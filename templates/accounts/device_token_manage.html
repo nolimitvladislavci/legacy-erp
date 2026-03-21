@@ -42,59 +42,59 @@
 
 <!-- Postojeći tokeni -->
 {% if tokens %}
-<div class="table-responsive">
-  <table class="table table-hover align-middle">
-    <thead class="table-dark">
-      <tr>
-        <th>{% trans "Uređaj" %}</th>
-        <th>{% trans "Barcode" %}</th>
-        <th>{% trans "Blagajnik" %}</th>
-        <th>{% trans "Status" %}</th>
-        <th>{% trans "Zadnje korištenje" %}</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for t in tokens %}
-      <tr>
-        <td>
-          <i class="fas fa-mobile-alt me-2 text-info"></i>
-          <a href="{% url 'device_token_detail' token_id=t.pk %}" class="fw-bold text-decoration-none">{{ t.device_name|default:"Uređaj" }}</a>
-        </td>
-        <td><code>{{ t.barcode_data }}</code></td>
-        <td>{{ t.cashier.name|default:"—" }}</td>
-        <td>
-          {% if t.is_active %}
-          <span class="badge bg-success">{% trans "Aktivan" %}</span>
-          {% else %}
-          <span class="badge bg-secondary">{% trans "Deaktiviran" %}</span>
-          {% endif %}
-        </td>
-        <td>{{ t.last_used_at|date:"d.m.Y H:i"|default:"—" }}</td>
-        <td class="text-end">
-          <a href="{% url 'device_token_detail' token_id=t.pk %}" class="btn btn-sm btn-outline-info" title="Barcode">
-            <i class="fas fa-qrcode"></i>
-          </a>
-          <form method="post" class="d-inline">
-            {% csrf_token %}
-            <input type="hidden" name="token_id" value="{{ t.pk }}">
-            {% if t.is_active %}
-            <input type="hidden" name="action" value="deactivate">
-            <button class="btn btn-sm btn-outline-danger" title="Deaktiviraj" onclick="return confirm('Deaktivirati token?')">
-              <i class="fas fa-ban"></i>
-            </button>
-            {% else %}
-            <input type="hidden" name="action" value="activate">
-            <button class="btn btn-sm btn-outline-success" title="Aktiviraj">
-              <i class="fas fa-check"></i>
-            </button>
-            {% endif %}
-          </form>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+  {% for t in tokens %}
+  <div style="background:var(--card-bg,#1a1a2e);border:1px solid {% if t.is_active %}var(--gold,#c9a84c){% else %}#333{% endif %};border-radius:12px;padding:20px;text-align:center;{% if not t.is_active %}opacity:0.5{% endif %}">
+    <!-- QR Code inline -->
+    <div style="margin-bottom:12px">
+      <img src="{% url 'device_token_qr_image' token_id=t.pk %}" alt="QR"
+           style="width:160px;height:160px;border-radius:8px;border:2px solid #222"
+           onerror="this.style.display='none'">
+    </div>
+    <!-- Device info -->
+    <div style="font-weight:700;font-size:1rem;color:{% if t.is_active %}var(--gold,#c9a84c){% else %}#666{% endif %};margin-bottom:4px">
+      <i class="fas fa-mobile-alt me-1"></i>{{ t.device_name|default:"Uređaj" }}
+    </div>
+    <div style="font-family:monospace;font-size:.75rem;color:#666;margin-bottom:8px;word-break:break-all">
+      {{ t.barcode_data }}
+    </div>
+    {% if t.cashier %}
+    <div style="font-size:.8rem;color:#888;margin-bottom:4px">
+      <i class="fas fa-user me-1"></i>{{ t.cashier.name }}
+    </div>
+    {% endif %}
+    <div style="font-size:.75rem;color:#555;margin-bottom:12px">
+      {% if t.is_active %}
+        <span style="color:#22c55e">● {% trans "Aktivan" %}</span>
+      {% else %}
+        <span style="color:#666">○ {% trans "Deaktiviran" %}</span>
+      {% endif %}
+      {% if t.last_used_at %} · {{ t.last_used_at|date:"d.m.Y H:i" }}{% endif %}
+    </div>
+    <!-- Actions -->
+    <div style="display:flex;gap:6px;justify-content:center">
+      <a href="{% url 'device_token_detail' token_id=t.pk %}" style="padding:6px 14px;border:1px solid #333;border-radius:6px;color:#aaa;font-size:.8rem;text-decoration:none">
+        <i class="fas fa-expand me-1"></i>{% trans "Puni ekran" %}
+      </a>
+      <form method="post" style="display:inline">
+        {% csrf_token %}
+        <input type="hidden" name="token_id" value="{{ t.pk }}">
+        {% if t.is_active %}
+        <input type="hidden" name="action" value="deactivate">
+        <button style="padding:6px 14px;border:1px solid #e74c3c33;border-radius:6px;background:none;color:#e74c3c;font-size:.8rem;cursor:pointer"
+                onclick="return confirm('Deaktivirati?')">
+          <i class="fas fa-ban me-1"></i>{% trans "Deaktiviraj" %}
+        </button>
+        {% else %}
+        <input type="hidden" name="action" value="activate">
+        <button style="padding:6px 14px;border:1px solid #22c55e33;border-radius:6px;background:none;color:#22c55e;font-size:.8rem;cursor:pointer">
+          <i class="fas fa-check me-1"></i>{% trans "Aktiviraj" %}
+        </button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 {% else %}
 <div class="text-center py-5 text-muted">

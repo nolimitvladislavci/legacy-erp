@@ -71,6 +71,7 @@ urlpatterns += i18n_patterns(
     # Device token (mobilni barcode login)
     path('auth/device-tokens/', __import__('accounts.auth_views', fromlist=['device_token_manage']).device_token_manage, name='device_token_manage'),
     path('auth/device-tokens/<int:token_id>/', __import__('accounts.auth_views', fromlist=['device_token_detail']).device_token_detail, name='device_token_detail'),
+    path("auth/device-tokens/<int:token_id>/qr.png", __import__("accounts.auth_views", fromlist=["device_token_qr_image"]).device_token_qr_image, name="device_token_qr_image"),
     path('auth/device-login/', __import__('accounts.auth_views', fromlist=['device_token_auto_login']).device_token_auto_login, name='device_token_auto_login'),
     path('password-reset/', auth_views.PasswordResetView.as_view(
         template_name='registration/password_reset_form.html',

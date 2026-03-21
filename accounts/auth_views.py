@@ -926,3 +926,25 @@ def device_token_auto_login(request):
     if terminal:
         return redirect('pos:quick_pos', terminal_id=terminal.pk)
     return redirect('pos:dashboard')
+
+
+@login_required
+def device_token_qr_image(request, token_id):
+    """Serve QR code as PNG image for inline display."""
+    from accounts.models import DeviceToken
+    import io
+    token = DeviceToken.objects.filter(pk=token_id, user=request.user).first()
+    if not token:
+        return HttpResponse(status=404)
+    try:
+        import qrcode
+        qr = qrcode.QRCode(box_size=8, border=2)
+        qr.add_data(token.barcode_data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color='#c9a84c', back_color='#0a0a0a')
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        return HttpResponse(buf.getvalue(), content_type='image/png')
+    except Exception:
+        return HttpResponse(status=500)
