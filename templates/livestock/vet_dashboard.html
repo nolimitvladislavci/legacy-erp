@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Vet Dashboard - LIMIT CONNECT{% endblock %}
+{% block page_title %}Veterinarski dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card" style="border-left:4px solid var(--gold)">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ companies|length }}</h3>
+                    <small class="text-muted">Farmi</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-left:4px solid #2ecc71">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ total_animals }}</h3>
+                    <small class="text-muted">Aktivnih grla</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-left:4px solid #e74c3c">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ in_karencija|length }}</h3>
+                    <small class="text-muted">U karenciji</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-left:4px solid #3498db">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ recent_records|length }}</h3>
+                    <small class="text-muted">Zadnjih tretmana</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if in_karencija %}
+    <!-- Karencija warnings -->
+    <div class="card mb-4" style="border: 2px solid #e74c3c;">
+        <div class="card-header" style="background: rgba(231,76,60,0.1);">
+            <h5 class="mb-0" style="color: #e74c3c;">
+                <i class="fas fa-exclamation-triangle me-2"></i>Grla u karenciji
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Markica</th>
+                        <th>Ime</th>
+                        <th>Farma</th>
+                        <th>Lijek</th>
+                        <th>Karencija do</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in in_karencija %}
+                    <tr>
+                        <td><strong>{{ rec.animal.ear_tag }}</strong></td>
+                        <td>{{ rec.animal.name|default:"-" }}</td>
+                        <td>{{ rec.animal.company.name }}</td>
+                        <td>{{ rec.lijek|default:"-" }}</td>
+                        <td><span class="badge bg-danger">{{ rec.karencija_do|date:"d.m.Y." }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent treatments -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Zadnji tretmani</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Markica</th>
+                        <th>Farma</th>
+                        <th>Tip</th>
+                        <th>Opis</th>
+                        <th>Lijek</th>
+                        <th>Veterinar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in recent_records %}
+                    <tr>
+                        <td>{{ rec.datum|date:"d.m.Y." }}</td>
+                        <td><strong>{{ rec.animal.ear_tag }}</strong></td>
+                        <td>{{ rec.animal.company.name }}</td>
+                        <td><span class="badge bg-info">{{ rec.get_tip_display }}</span></td>
+                        <td>{{ rec.opis|truncatewords:8 }}</td>
+                        <td>{{ rec.lijek|default:"-" }}</td>
+                        <td>{{ rec.veterinar|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Nema zapisanih tretmana.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Farm links -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-link me-2"></i>Linkovi za brzi unos</h5>
+        </div>
+        <div class="card-body">
+            {% for c in companies %}
+            <div class="d-flex align-items-center justify-content-between mb-2 p-2" style="background:#1a1a1a; border-radius:8px;">
+                <span><strong>{{ c.name }}</strong></span>
+                <div>
+                    <a href="{% url 'livestock:vet_quick_entry' farm_token=c.booking_slug %}" class="btn btn-sm btn-outline-warning me-1" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> Otvori
+                    </a>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="copyVetLink('{{ c.booking_slug }}')">
+                        <i class="fas fa-copy"></i> Kopiraj
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function copyVetLink(slug){
+    var url = window.location.origin + '/livestock/vet/' + slug + '/';
+    navigator.clipboard.writeText(url).then(function(){
+        alert('Link kopiran: ' + url);
+    });
+}
+</script>
+{% endblock %}

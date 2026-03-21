@@ -6,7 +6,7 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-21 06:30 — CC Code (Opus) — Transport modul + status sync
+2026-03-21 09:00 — CC Code (Opus) — Transport tests + Korpa import + memorija sync
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |
@@ -113,7 +113,17 @@
 - TachographEntry (driving/rest/break evidencija, violation detection) — DONE
 - FuelEntry (liters, price, odometer, photo) — DONE
 - posting_document FK na TransportOrder (Gemini sugestija) — DONE
-- Migration: delivery/0009_transport_module — DONE
+- Migration: delivery/0009_transport_module + 0010_posting_document_fk — DONE
+- Testovi: 35/36 PASS (T13 SQLite-specific bug, radi na PostgreSQL) — DONE
+- verify_documents() fix: non-EU attestation za SVE međunarodne, ne samo crosses_eu — DONE
+
+### Korpa Synesis Import (KOMPLET — 21.03.)
+- import_korpa management command — DONE
+- Korpaš: +885 faktura (1242 ukupno) — DONE
+- Kruljac: +945 faktura (1032 ukupno) — DONE
+- KUD/Furdi/Dubinsko: Journal nema fakture (samo config) — DONE
+- Ukupno arhiva: 9.304 dokumenata — DONE
+- Korpaš umbrella komuna (5 children) — VEĆ POSTAVLJENO (CC#1)
 
 ### Knjiga boljitaka (12/21)
 - B-02 beforeunload + smart_logout open receipts guard — DONE

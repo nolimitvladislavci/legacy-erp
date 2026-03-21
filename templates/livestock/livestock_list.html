@@ -36,10 +36,36 @@
         </div>
     </div>
 
+    <!-- Vet link sharing -->
+    {% if booking_slug %}
+    <div class="card mb-4" style="border: 1px solid var(--gold); background: rgba(201,168,76,0.05);">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between py-3">
+            <div>
+                <h6 class="mb-1" style="color: var(--gold);"><i class="fas fa-syringe me-2"></i>Veterinarski portal</h6>
+                <small class="text-muted" id="vet-link-text">https://limit-connect.com/livestock/vet/{{ booking_slug }}/</small>
+            </div>
+            <div class="mt-2 mt-md-0">
+                <button class="btn btn-sm btn-outline-warning me-1" onclick="copyVetLink()">
+                    <i class="fas fa-copy me-1"></i>Kopiraj link
+                </button>
+                <a href="https://wa.me/?text=Veterinarski%20portal%20za%20unos%20tretmana%3A%20https%3A%2F%2Flimit-connect.com%2Flivestock%2Fvet%2F{{ booking_slug }}%2F" target="_blank" class="btn btn-sm btn-success me-1">
+                    <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                </a>
+                <a href="{% url 'livestock:vet_quick_entry' farm_token=booking_slug %}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-external-link-alt me-1"></i>Otvori
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="fas fa-cow me-2"></i>Evidencija stada</h5>
             <div>
+                <a href="{% url 'livestock:vet_dashboard' %}" class="btn btn-sm btn-outline-warning me-2">
+                    <i class="fas fa-user-md"></i> Vet Dashboard
+                </a>
                 <a href="{% url 'livestock:field_list' %}" class="btn btn-sm btn-outline-secondary me-2">
                     <i class="fas fa-map"></i> Parcele
                 </a>
@@ -85,4 +111,13 @@
         </div>
     </div>
 </div>
+
+<script>
+function copyVetLink(){
+    var url = document.getElementById('vet-link-text').textContent;
+    navigator.clipboard.writeText(url).then(function(){
+        alert('Link kopiran u clipboard!');
+    });
+}
+</script>
 {% endblock %}
