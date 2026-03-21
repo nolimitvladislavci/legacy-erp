@@ -104,6 +104,80 @@
     var previews = document.getElementById('filePreviews');
     var info = document.getElementById('uploadInfo');
 
+    // ── CANVAS KOMPRESIJA ─────────────────────────────────────────────────────
+    // Maksimalna dimenzija: 1500px, kvaliteta: JPEG 82%
+    // PDF, HEIC, HEIF idu originalni (Canvas ne može čitati)
+    var MAX_PX = 1500;
+    var JPEG_Q = 0.82;
+
+    function compressImage(file) {
+        return new Promise(function(resolve) {
+            if (!file.type.startsWith('image/') ||
+                file.type === 'image/heic' ||
+                file.type === 'image/heif') {
+                return resolve(file); // ne komprimiramo
+            }
+            var img = new Image();
+            var url = URL.createObjectURL(file);
+            img.onload = function() {
+                URL.revokeObjectURL(url);
+                var w = img.naturalWidth, h = img.naturalHeight;
+                // Ako je već dovoljno mala — šalji original
+                if (w <= MAX_PX && h <= MAX_PX) return resolve(file);
+                var ratio = Math.min(MAX_PX / w, MAX_PX / h);
+                var nw = Math.round(w * ratio), nh = Math.round(h * ratio);
+                var canvas = document.createElement('canvas');
+                canvas.width = nw; canvas.height = nh;
+                canvas.getContext('2d').drawImage(img, 0, 0, nw, nh);
+                canvas.toBlob(function(blob) {
+                    var name = file.name.replace(/\.[^.]+$/, '.jpg');
+                    resolve(new File([blob], name, {type: 'image/jpeg'}));
+                }, 'image/jpeg', JPEG_Q);
+            };
+            img.onerror = function() { URL.revokeObjectURL(url); resolve(file); };
+            img.src = url;
+        });
+    }
+
+    // Intercept submit → komprimiraj → pošalji kao fetch FormData
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var files = fileInput.files;
+        if (!files.length) return;
+
+        var origMB = Array.from(files).reduce(function(s, f) { return s + f.size; }, 0) / 1024 / 1024;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Komprimiranje...';
+        info.textContent = 'Komprimiranje ' + files.length + ' slika u pregledniku...';
+
+        var compressed = await Promise.all(Array.from(files).map(compressImage));
+
+        var compMB = compressed.reduce(function(s, f) { return s + f.size; }, 0) / 1024 / 1024;
+        var savedPct = Math.round((1 - compMB / origMB) * 100);
+        info.textContent = 'Upload: ' + compMB.toFixed(1) + ' MB'
+            + (savedPct > 5 ? ' (ušteda ' + savedPct + '% — bilo ' + origMB.toFixed(1) + ' MB)' : '')
+            + ' — šaljem na server...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Upload ' + files.length + ' fajlova...';
+
+        var fd = new FormData();
+        fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        var titleEl = document.querySelector('[name=title]');
+        if (titleEl && titleEl.value) fd.append('title', titleEl.value);
+        compressed.forEach(function(f) { fd.append('files', f); });
+
+        try {
+            var resp = await fetch(window.location.href, {method: 'POST', body: fd});
+            if (resp.redirected) { window.location.href = resp.url; return; }
+            if (resp.ok) { window.location.reload(); return; }
+            throw new Error('HTTP ' + resp.status);
+        } catch(err) {
+            info.textContent = 'Greška pri uploadu: ' + err.message + '. Pokušaj ponovo.';
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-upload me-2"></i>Učitaj <span id="submitCount">' + files.length + '</span> fajlova';
+        }
+    });
+    // ─────────────────────────────────────────────────────────────────────────
+
     dropZone.addEventListener('click', function() { fileInput.click(); });
 
     dropZone.addEventListener('dragover', function(e) {
@@ -140,7 +214,7 @@
         for (var i = 0; i < files.length; i++) totalSize += files[i].size;
         var mb = (totalSize / 1024 / 1024).toFixed(1);
         var estMin = Math.max(1, Math.ceil(files.length / 8));
-        info.textContent = mb + ' MB ukupno — procijenjeno vrijeme obrade: ~' + estMin + ' min';
+        info.textContent = mb + ' MB ukupno — procijenjeno AI obrade: ~' + estMin + ' min';
 
         previews.style.display = 'flex';
         previews.innerHTML = '';
@@ -152,7 +226,7 @@
                 var img = document.createElement('img');
                 img.style.cssText = 'width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0';
                 var reader = new FileReader();
-                reader.onload = (function(imgEl) { return function(e) { imgEl.src = e.target.result; }; })(img);
+                reader.onload = (function(imgEl) { return function(ev) { imgEl.src = ev.target.result; }; })(img);
                 reader.readAsDataURL(files[i]);
                 col.appendChild(img);
             } else {
@@ -166,7 +240,7 @@
         }
         if (files.length > shown) {
             var more = document.createElement('div');
-            more.className = 'col-4 col-md-2 d-flex align-items-center justify-content-center';
+            more.className = 'col-4 col-md-2 d-flex align-items-center justify-content:center';
             more.innerHTML = '<span class="text-muted">+' + (files.length - shown) + ' više</span>';
             previews.appendChild(more);
         }
