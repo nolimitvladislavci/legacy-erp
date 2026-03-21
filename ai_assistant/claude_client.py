@@ -64,7 +64,77 @@ Koristi kratke nazive (2-4 riječi).
 - Vidiš rizik koji korisnik nije pitao → proaktivno navedi
 - Nikad "ne mogu" bez alternative — uvijek ponudi sljedeći korak
 - Kompleksan odgovor → jasni numerirani koraci, ne blok teksta
+
+## Novi alati -- kada ih koristiti
+
+**get_fund_opportunities**: Koristi kad korisnik pita o fondovima, poticajima, subvencijama,
+natjecajima, APPRRR, eKohezija, EU novcu. Ne cekaj da te pitaju -- ako vidis da je OPG, proaktivno ponudi.
+
+**get_livestock_status**: Koristi za OPG korisnike kad pitaju o stoci, kravama, mlijeku,
+telenju, usjevima, kukuruzu, djetelini, bio certifikaciji.
+
+**create_futures_listing**: Ponudi kad `get_livestock_status` pokaze `auto_listing_spreman: true`.
+Uvijek pitaj za potvrdu -- ovo mijenja podatke (ASSISTED razina, ceka odobrenje).
+
+**get_compliance_warnings**: Pozovi automatski na pocetku svake jutarnje sesije (if morning hours).
+Ako postoje kriticna upozorenja -- navedi ih odmah, bez cekanja.
+
+**get_intelligence_results**: Koristi kad korisnik pita "sto si nasao?", "ima li novosti?",
+"sto je novo?", "pronalasci", "intelligence". Pokazuje rezultate nocnog scana.
 """
+
+
+
+def _build_contextual_system_prompt(user, company):
+    """Prosiruje SYSTEM_PROMPT s kontekstom korisnika i firme."""
+    if not company:
+        return SYSTEM_PROMPT
+
+    biz_type = getattr(company, 'business_type', '')
+    biz_labels = {
+        'opg': 'OPG (Obiteljsko poljoprivredno gospodarstvo)',
+        'udruga': 'Udruga',
+        'doo': 'd.o.o.',
+        'obrt': 'Obrt',
+    }
+
+    ctx = f"""
+
+## Kontekst trenutnog korisnika
+- Ime: {user.get_full_name() or user.username}
+- Firma: {company.name}
+- Tip: {biz_labels.get(biz_type, biz_type)}
+- OIB: {company.oib}
+- Drzava: {getattr(company, 'country', 'HR')}
+"""
+
+    # OPG context
+    if biz_type == 'opg':
+        try:
+            from livestock.models import Livestock, CropPlan
+            grla = Livestock.objects.filter(company=company).count()
+            planovi = CropPlan.objects.filter(company=company, godina__gte=2026).count()
+            ctx += f"- Farma: {grla} grla goveda, {planovi} aktivnih planova sjetve\n"
+        except Exception:
+            pass
+
+    # Intelligence context
+    try:
+        from intelligence.models import IntelligenceResult, FundOpportunity
+        from django.utils import timezone
+        novi = IntelligenceResult.objects.filter(
+            job__company=company, status='novo'
+        ).count()
+        fondovi = FundOpportunity.objects.filter(
+            status='aktivan',
+            rok_prijave__gte=timezone.now().date()
+        ).count()
+        if novi or fondovi:
+            ctx += f"- Intelligence: {novi} novih pronalazaka, {fondovi} aktivnih natjecaja\n"
+    except Exception:
+        pass
+
+    return SYSTEM_PROMPT + ctx
 
 
 def chat_with_claude(messages, tools=None, system=None, user=None):

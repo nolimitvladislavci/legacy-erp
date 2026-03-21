@@ -174,6 +174,18 @@
 
 ---
 
+
+### AI Tools proširenje v2 (CC Code, 2026-03-21)
+- get_fund_opportunities (Intelligence -> AI widget, 24h cache) -- DONE
+- get_livestock_status (Livestock -> AI widget, READ-ONLY) -- DONE
+- create_futures_listing (ASSISTED, AIGate) -- DONE
+- get_compliance_warnings (prediktivni, svi moduli) -- DONE
+- get_intelligence_results (CC Code prijedlog, korisnik pita "sto si nasao?") -- DONE
+- Kontekstualni bridge user->company->tools (_build_contextual_system_prompt) -- DONE
+- SYSTEM_PROMPT prosiren za nove alate -- DONE
+- views.py koristi kontekstualni prompt umjesto staticnog -- DONE
+- Ukupno alata: 26 (21 + 5 novih)
+
 ## OTVORENO — treba raditi
 
 ### DE Compliance

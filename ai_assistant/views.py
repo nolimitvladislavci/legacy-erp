@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
 
 from .models import Conversation, Message, AIUsageLog
-from .claude_client import chat_with_claude, SYSTEM_PROMPT, estimate_cost
+from .claude_client import chat_with_claude, SYSTEM_PROMPT, estimate_cost, _build_contextual_system_prompt
 from .tools import TOOLS
 from .tool_handlers import handle_tool_call
 
@@ -151,7 +151,7 @@ def _chat_api_inner(request):
         result = chat_with_claude(
             messages=history,
             tools=TOOLS,
-            system=SYSTEM_PROMPT,
+            system=_build_contextual_system_prompt(request.user, company),
             user=request.user,
         )
 
