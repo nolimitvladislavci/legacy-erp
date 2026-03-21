@@ -275,21 +275,22 @@
             <small style="color: var(--text-muted); font-size: 0.78rem;">{% trans "Pregled svih arhiviranih dokumenata" %}</small>
         </div>
         <div class="header-actions">
-            <a href="{% url 'documents:arhiva_convert' %}" class="btn-ghost" title="Konverzija slike u XML" style="color:var(--gold)"><i class="fas fa-camera"></i> Konverzija</a>
+            <a href="{% url 'documents:arhiva_export' %}?{{ request.GET.urlencode }}" class="btn-ghost" title="{% trans 'Exportiraj filtrirane dokumente u CSV' %}">
+                <i class="fas fa-file-csv"></i> CSV
+            </a>
             {% if company.country == 'DE' or company.country == 'AT' %}
             <a href="{% url 'pos:dsfinvk_export' %}" class="btn-ghost" title="DSFinV-K Kassenarchiv" style="color:var(--gold)">
               &#128230; DSFinV-K
             </a>
             {% endif %}
-            <a href="{% url 'documents:arhiva_export' %}?{{ request.GET.urlencode }}" class="btn-ghost" title="{% trans 'Exportiraj filtrirane dokumente u CSV' %}">
-                <i class="fas fa-file-csv"></i> CSV
-            </a>
             <button class="btn-ghost" onclick="bulkDownload()" id="bulkBtn" style="display:none" title="{% trans 'Preuzmi odabrane' %}">
                 <i class="fas fa-download"></i> <span id="bulkCount">0</span>
             </button>
-
-            <a href="{% url 'documents:arhiva_upload' %}" class="btn-gold">
+            <a href="{% url 'documents:arhiva_upload' %}" class="btn-ghost">
                 <i class="fas fa-upload"></i> {% trans "Upload" %}
+            </a>
+            <a href="{% url 'documents:arhiva_convert' %}" class="btn-gold" style="font-size:1rem;padding:10px 24px">
+                <i class="fas fa-camera"></i> {% trans "Skeniraj dokument" %}
             </a>
         </div>
     </div>
