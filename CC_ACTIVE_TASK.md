@@ -1,28 +1,24 @@
 # CC ACTIVE TASK — čitaj ovo prvo
-# Ažurirano: 2026-03-21 12:30 — CC Code (Opus)
+# Ažurirano: 2026-03-21 13:15 — CC Code (Opus)
 
-## ZAVRŠEN TASK
-**CC_TASK_LIMIT_AI_FOUNDATION.md** — DONE
+## ZAVRŠENI TASKOVI (ova sesija)
 
-### Što je napravljeno:
-1. Django app `limit_connect_ai` — kreiran i registriran u INSTALLED_APPS
-2. 5 modela (svi UUID PK): AIAgentMission, AIReportLog, FundApplicationDraft, ComplianceWatchItem, CampaignPlan
-3. 4 Celery taska: morning_report_all (07:30), fund_check_all (09:00), compliance_check_all (pon 08:00), campaign_suggestions_all (pet 10:00)
-4. send_morning_report — dohvati POS/zalihe/račune, Claude Haiku generira tekst, šalje WhatsApp/email
-5. 4 viewa: cockpit, missions (CRUD), reports, funds
-6. 4 HTML templatea: ai_cockpit, ai_missions, ai_reports, ai_funds
-7. Admin: svih 5 modela s list_display + list_filter
-8. CELERY_BEAT_SCHEDULE: 4 nova taska
-9. Migracije aplicirane (0001 + 0002)
-10. URL: /ai-cockpit/ (cockpit, missions, reports, funds)
+### 1. CC_TASK_LIMIT_AI_FOUNDATION.md — DONE
+- 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin
+- Commit: a6663e5 + c93a85e
 
-### Verifikacija:
-- [x] manage.py check — 0 issues
-- [x] Sve migracije aplicirane
-- [x] URL routing radi (/hr/ai-cockpit/cockpit/ etc.)
-- [x] Models + tasks import OK
-- [x] Git commitano
+### 2. CC_TASK_GTM_FOUNDATION.md — DONE
+- OIB Auto-Lookup API (interni DB + sudski registar + data.gov.hr)
+- Pricing kalkulator (slider + toggleovi + godišnja ušteda)
+- Empty states za invoicing, partners, inventory
+- Commit: 60abc28
 
-## SLJEDEĆI TASK
-**CC_TASK_LIMIT_AI_FUNDS.md** — EU fondovi workflow (Faza 2)
-Čeka Sonnet review + odobrenje za nastavak.
+### 3. WhatsApp kampanja "Sjedni, zaslužio si" — DONE
+- CampaignPlan kreiran u draftu
+- Test poruka poslana Ivanu na WhatsApp
+
+## ČEKA SMJER OD IVANA
+Moguci sljedeći taskovi:
+1. CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi workflow (Faza 2)
+2. Onboarding wizard poboljšanja (progress bar, gamification)
+3. Compliance Shield UI na dashboardu

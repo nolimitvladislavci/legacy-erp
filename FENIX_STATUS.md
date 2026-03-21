@@ -6,10 +6,10 @@
 ---
 
 ## Zadnje azuriranje
+2026-03-21 13:15 — CC Code (Opus) — GTM Foundation DONE: OIB lookup API, pricing kalkulator, empty states (3 modula)
 2026-03-21 12:30 — CC Code (Opus) — limit_connect_ai Faza 1 DONE: 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin, migracije
 2026-03-21 11:00 — Sonnet (Ivan sesija) — LIMIT Connect AI Master Plan kreiran i odobren
-2026-03-21 10:30 — CC Code (Opus) — Session end: Transport 35/36, Korpa 1833 faktura, memorija komplet
-SLJEDEĆI TASK: CC_TASK_LIMIT_AI_FUNDS.md (EU fondovi workflow — Faza 2)
+SLJEDEĆI TASK: Po Ivanovom smjeru
 
 ## Git HEAD
 a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatchItem + CampaignPlan
@@ -247,6 +247,13 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - CELERY_BEAT_SCHEDULE: 4 nova taska dodana — DONE
 - Migracije: 0001_initial + 0002_campaignplan_compliancewatchitem — DONE
 - URL: /ai-cockpit/ (cockpit, missions, reports, funds) — DONE
+
+### GTM Foundation (KOMPLET — 21.03.)
+- OIB Auto-Lookup API (/register/api/oib-lookup/) — interni DB + sudski registar — DONE
+- AJAX autofill u step2.html (name, address, city, zip) — DONE
+- Pricing Kalkulator (slider + toggleovi + usteda) na /pricing/ — DONE
+- Empty State partial (partials/empty_state.html) — DONE
+- Empty states: invoicing, partners, inventory — DONE
 
 ---
 
