@@ -397,7 +397,10 @@ def register_step4(request):
             else:
                 website_url = None
 
-            messages.success(request, "Dobrodosli u LIMIT Connect! Vas trial traje do {}.".format(trial_end.strftime("%d.%m.%Y")))
+            if plan.price_monthly > 0:
+                messages.success(request, "Dobrodosli u LIMIT Connect! Vas trial traje do {}.".format(trial_end.strftime("%d.%m.%Y")))
+            else:
+                messages.success(request, "Dobrodosli u LIMIT Connect! Vas besplatni plan je aktiviran.")
 
             # Store info for success page
             request.session["reg_success_website_url"] = website_url or ""

@@ -26,7 +26,7 @@
       </div>
       <div style="text-align:right">
         <div style="font-size:1.4rem;font-weight:700;color:var(--text)">{{ plan.price_monthly|floatformat:0 }}€<span style="font-size:.8rem;color:var(--muted)">/{% trans "mj" %}</span></div>
-        <div style="font-size:.8rem;color:var(--muted)">14 {% trans "dana besplatno" %}</div>
+        {% if plan.price_monthly > 0 %}<div style="font-size:.8rem;color:var(--muted)">14 {% trans "dana besplatno" %}</div>{% else %}<div style="font-size:.8rem;color:#2ecc71">{% trans "Zauvijek besplatno" %}</div>{% endif %}
       </div>
     </div>
   </div>

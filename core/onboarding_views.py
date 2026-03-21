@@ -189,7 +189,7 @@ def onboarding_activate_pos(request):
         POSTerminal.objects.create(
             company=company,
             name="Blagajna 1",
-            terminal_type="quick",
+            pos_type="quick", terminal_code="KASA01",
             is_active=True,
         )
 
