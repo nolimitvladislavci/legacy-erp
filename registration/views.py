@@ -995,26 +995,42 @@ def _lookup_sudreg(oib):
 
 
 def api_name_search(request):
-    """Pretraga tvrtki po nazivu — hint iz internog DB-a za autocomplete."""
+    """
+    Pretraga po nazivu — traži u Company + Partner (Marijini komitenti).
+    Bruno upiše "Valiant" → nađe u Partner tablici → auto-fill.
+    """
     from django.http import JsonResponse
     from companies.models import Company
+    from partners.models import Partner
     from django.db.models import Q
 
     q = request.GET.get('q', '').strip()
     if len(q) < 3:
         return JsonResponse({'results': []})
 
-    results = Company.objects.filter(
-        Q(name__icontains=q)
-    ).values('name', 'oib', 'address', 'city', 'zip_code')[:8]
+    seen = set()
+    results = []
 
-    return JsonResponse({'results': [
-        {
-            'name': r['name'],
-            'oib': r['oib'] or '',
-            'address': r['address'] or '',
-            'city': r['city'] or '',
-            'zip': r['zip_code'] or '',
-        }
-        for r in results
-    ]})
+    # 1. Postojeće firme (Company)
+    for r in Company.objects.filter(name__icontains=q).values('name', 'oib', 'address', 'city', 'zip_code')[:4]:
+        key = (r['name'], r['oib'] or '')
+        if key not in seen:
+            seen.add(key)
+            results.append({
+                'name': r['name'], 'oib': r['oib'] or '',
+                'address': r['address'] or '', 'city': r['city'] or '',
+                'zip': r['zip_code'] or '', 'source': 'company',
+            })
+
+    # 2. Partneri (Marijina baza komitenata) — 33K+ zapisa
+    for p in Partner.objects.filter(name__icontains=q).values('name', 'oib', 'address', 'city', 'zip_code').distinct()[:6]:
+        key = (p['name'], p['oib'] or '')
+        if key not in seen:
+            seen.add(key)
+            results.append({
+                'name': p['name'], 'oib': p['oib'] or '',
+                'address': p['address'] or '', 'city': p['city'] or '',
+                'zip': p['zip_code'] or '', 'source': 'partner',
+            })
+
+    return JsonResponse({'results': results[:8]})
