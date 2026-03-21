@@ -537,6 +537,63 @@ def process_staging_batch(self, staging_batch_id):
                     )
                 match_items(batch)
 
+                # ── HEADER EXTRACTION + AUTO-MATCH (inovacija 21.03.) ────
+                try:
+                    from .services import extract_invoice_header
+                    from .models import StagingFileHeader
+                    from decimal import Decimal as _D
+
+                    header_data = extract_invoice_header(sf.file.path)
+                    if header_data and header_data.get('supplier_name'):
+                        inv_date = None
+                        try:
+                            from datetime import datetime as _dt
+                            ds = header_data.get('invoice_date', '')
+                            if ds and len(ds) >= 8:
+                                inv_date = _dt.strptime(ds[:10], '%Y-%m-%d').date()
+                        except Exception:
+                            pass
+
+                        conf = float(header_data.get('confidence', 0))
+                        hdr = StagingFileHeader.objects.create(
+                            staging_file=sf,
+                            supplier_name=str(header_data.get('supplier_name', ''))[:255],
+                            supplier_oib=str(header_data.get('supplier_oib', ''))[:20].strip(),
+                            invoice_number=str(header_data.get('invoice_number', ''))[:100],
+                            invoice_date=inv_date,
+                            total_amount=_D(str(header_data.get('total_amount') or 0)) if header_data.get('total_amount') else None,
+                            vat_amount=_D(str(header_data.get('vat_amount') or 0)) if header_data.get('vat_amount') else None,
+                            base_amount=_D(str(header_data.get('base_amount') or 0)) if header_data.get('base_amount') else None,
+                            currency=str(header_data.get('currency', 'EUR'))[:5],
+                            confidence=conf,
+                            needs_review=conf < 0.7,
+                            raw_header=header_data,
+                        )
+                        # Auto-match partner po OIB-u
+                        matched = hdr.auto_match_partner()
+                        if matched:
+                            batch.supplier = matched
+                            batch.save(update_fields=['supplier'])
+                            logger.info('Header OIB %s matched -> %s', hdr.supplier_oib, matched.name)
+
+                        # Duplikat detekcija — isti OIB + invoice_number + total
+                        if hdr.supplier_oib and hdr.invoice_number and hdr.total_amount:
+                            dup = StagingFileHeader.objects.filter(
+                                staging_file__staging_batch__company=staging.company,
+                                supplier_oib=hdr.supplier_oib,
+                                invoice_number=hdr.invoice_number,
+                                total_amount=hdr.total_amount,
+                            ).exclude(pk=hdr.pk).exists()
+                            if dup:
+                                hdr.needs_review = True
+                                hdr.save(update_fields=['needs_review'])
+                                sf.ai_message += ' | DUPLIKAT?'
+                                logger.warning('Mogući duplikat: OIB=%s inv=%s total=%s',
+                                    hdr.supplier_oib, hdr.invoice_number, hdr.total_amount)
+                except Exception as _hdr_err:
+                    logger.warning('Header extraction failed for %s: %s', sf.original_filename, _hdr_err)
+                # ── END HEADER ──
+
                 supplier = rows[0].get('vendor_name', '?') if rows else '?'
                 total = sum(
                     float(r.get('purchase_price', 0)) * float(r.get('quantity', 1))

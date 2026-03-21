@@ -625,3 +625,75 @@ def extract_invoice_header(file_path):
     except Exception as e:
         logger.error("extract_invoice_header failed: %s", e)
         return {}
+
+
+# ── UNIFIED OCR — stavke + header u jednom pozivu (cost-efficient) ──────────
+
+def extract_unified(file_path):
+    """
+    Jedan Gemini poziv koji vraća i header i stavke.
+    Inovacija: duplo jeftiniji od split pristupa (1 poziv umjesto 2).
+    Returns: { 'header': {...}, 'items': [...] }
+    """
+    image_b64, media_type = _encode_image(file_path)
+    if not image_b64:
+        return {'header': {}, 'items': []}
+
+    prompt = (
+        "You are an expert invoice OCR system. Extract BOTH the document header AND all line items. "
+        "Return ONLY a single JSON object with exactly two keys: "
+        '"header" and "items". '
+        "header must contain: "
+        '{"supplier_name": "<company>", "supplier_oib": "<OIB/VAT digits only>", '
+        '"invoice_number": "<number>", "invoice_date": "<YYYY-MM-DD or empty>", '
+        '"total_amount": <number or null>, "vat_amount": <number or null>, '
+        '"base_amount": <number or null>, "currency": "<EUR|HRK|USD>", '
+        '"confidence": <0.0-1.0>}. '
+        "items must be an array where each element has: "
+        '{"vendor_name": "<item name>", "quantity": <number>, "purchase_price": <unit price>}. '
+        "Croatian: OIB=tax ID, PDV=VAT, Iznos=Amount, Račun=Invoice, Datum=Date. "
+        "German: USt-IdNr=VAT ID, Rechnungsnr=Invoice number, MwSt=VAT. "
+        "If any field is not visible, use null or empty. Return ONLY valid JSON."
+    )
+
+    try:
+        from google import genai as _genai
+        from django.conf import settings
+        from PIL import Image as PILImage
+        import io
+
+        api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return {'header': {}, 'items': []}
+
+        _client = _genai.Client(api_key=api_key)
+        image_data = base64.standard_b64decode(image_b64)
+        img = PILImage.open(io.BytesIO(image_data))
+
+        response = _client.models.generate_content(model="gemini-2.5-flash", contents=[prompt, img])
+        text = response.text.replace("```json", "").replace("```", "").strip()
+        _log_gemini_usage(response, "smart_import_unified")
+
+        data = json.loads(text)
+        header = data.get('header', {})
+        items = data.get('items', [])
+
+        # Normalize items
+        rows = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get('vendor_name') or item.get('name') or '').strip()
+            if not name:
+                continue
+            rows.append({
+                'vendor_name': name,
+                'quantity': _to_decimal(item.get('quantity'), 1),
+                'purchase_price': _to_decimal(item.get('purchase_price') or item.get('price'), 0),
+            })
+
+        logger.info("Unified OCR: header=%s items=%d", header.get('supplier_name', '?'), len(rows))
+        return {'header': header, 'items': rows}
+    except Exception as e:
+        logger.error("Unified OCR failed: %s", e)
+        return {'header': {}, 'items': []}

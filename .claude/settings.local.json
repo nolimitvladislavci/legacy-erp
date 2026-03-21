@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "mcp__claude_ai_Fenix_LIMIT_Connect__query_db"
+      "mcp__claude_ai_Fenix_LIMIT_Connect__query_db",
+      "Bash(grep -r \"roba od\\\\|jučer\\\\|otpis\\\\|robot\\\\|kiosk\\\\|vending\\\\|night.sales\\\\|waste.*reduc\\\\|discount.*expire\\\\|markdown.*price\\\\|automated.*sales\" /var/www/fina-connect/*.md)",
+      "WebSearch",
+      "Bash(grep -r \"pos_expirybatch\\\\|pos_dailydiscount\\\\|otpis\\\\|expiry\\\\|discount\" /var/www/fina-connect/pos/*.py)",
+      "Bash(grep -n \"roba od jučer\\\\|yesterday\\\\|old stock\\\\|auto.*discount\\\\|markdown\\\\|yesterda\" /var/www/fina-connect/pos/*.py /var/www/fina-connect/webshop/*.py)",
+      "Bash(xargs ls:*)",
+      "Bash(find /var/www/fina-connect -maxdepth 2 -name *TODO* -o -name *todo* -o -name *PLAN*)",
+      "Bash(grep -r \"Marko Pinjuh\\\\|Centar inovatorstva\\\\|hardware.*kiosk\\\\|Šeki\\\\|Čepin\" /var/www/fina-connect/*.md)",
+      "Bash(grep -r \"food.*waste\\\\|discard.*food\\\\|night.*sale\\\\|vending.*machine\\\\|auto.*sale\" /var/www/fina-connect/*.md)",
+      "WebFetch(domain:www.google.com)",
+      "WebFetch(domain:search.brave.com)",
+      "WebFetch(domain:porezna-uprava.gov.hr)"
     ]
   }
 }
