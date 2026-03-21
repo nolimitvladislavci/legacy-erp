@@ -69,8 +69,14 @@ class SubscriptionMiddleware:
             subscription = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
         except Exception:
             return None
+
+        # ── SOFT GATE: nikad ne blokiraj, samo označi za banner ──
+        # Svi moduli uvijek dostupni. Upgrade poruka se prikazuje u UI-ju.
+        # Korisnik vidi vrijednost PRIJE nego što plati.
+        request._upgrade_hint = None
         if not subscription:
-            return redirect('/register/upgrade/?module=' + required_module)
-        if not subscription.has_module(required_module):
-            return redirect('/register/upgrade/?module=' + required_module)
+            request._upgrade_hint = required_module
+        elif not subscription.has_module(required_module):
+            request._upgrade_hint = required_module
+        # NIKAD redirect — korisnik prolazi, vidi banner
         return None
