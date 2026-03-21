@@ -104,9 +104,11 @@ def index(request):
         company=company, synesis_year__isnull=False
     ).values_list('synesis_year', flat=True).distinct().order_by('-synesis_year')
 
-    return render(request, 'invoicing/index.html', {
+    return render(request, 'invoicing/invoice_list.html', {
         'invoices': invoices[:200],
         'totals': totals, 'today': today,
+        'total_eur': totals['total'], 'paid_eur': totals['paid'],
+        'unpaid_eur': totals['unpaid'], 'draft_count': totals['draft'],
         'status_filter': status_filter,
         'country_filter': country_filter,
         'doctype_filter': doctype_filter,

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ company.name }} — Ekran kupca</title>
+<style>
+  :root { --gold: #c9a84c; --black: #0a0a0a; --dark: #1a1a1a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--black); color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--dark), #111);
+    padding: 20px 30px; text-align: center;
+    border-bottom: 3px solid var(--gold);
+  }
+  .header h1 {
+    font-size: 28px; color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 3px; text-transform: uppercase;
+  }
+  .header .terminal { font-size: 13px; color: #888; margin-top: 4px; }
+
+  .content { flex: 1; display: flex; flex-direction: column; padding: 20px 30px; }
+
+  /* IDLE state */
+  .state-idle {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .state-idle .welcome {
+    font-size: 42px; color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .state-idle .sub { font-size: 16px; color: #666; margin-top: 10px; }
+
+  /* ACTIVE state — items flowing in */
+  .items-table { flex: 1; overflow-y: auto; margin: 10px 0; }
+  .items-table table { width: 100%; border-collapse: collapse; }
+  .items-table th {
+    text-align: left; padding: 10px 12px;
+    color: var(--gold); font-size: 14px;
+    border-bottom: 1px solid #333;
+  }
+  .items-table td {
+    padding: 12px; font-size: 18px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .items-table tr { animation: slideIn 0.3s ease; }
+  .items-table tr:last-child td { border-bottom: none; }
+  .items-table .price { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .totals {
+    background: var(--dark); border-radius: 12px;
+    padding: 20px; border: 2px solid var(--gold);
+    margin-top: auto;
+  }
+  .totals .row {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; font-size: 16px; color: #aaa;
+  }
+  .totals .row.grand {
+    font-size: 32px; color: var(--gold);
+    font-weight: bold; padding-top: 12px;
+    border-top: 2px solid var(--gold); margin-top: 8px;
+  }
+
+  /* PAID state */
+  .state-paid {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; animation: fadeIn 0.5s ease;
+  }
+  .state-paid .check {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--gold); display: flex; align-items: center;
+    justify-content: center; font-size: 40px; margin-bottom: 20px;
+    animation: scaleIn 0.5s ease;
+  }
+  .state-paid .thanks {
+    font-size: 36px; color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .state-paid .change { font-size: 20px; color: #aaa; margin-top: 10px; }
+
+  /* TRAINING watermark */
+  .training-badge {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 80px; color: rgba(255,0,0,0.15);
+    font-weight: bold; letter-spacing: 10px;
+    pointer-events: none; z-index: 1000;
+  }
+
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="header">
+  <h1>{{ company.name }}</h1>
+  <div class="terminal">{{ terminal.name }}</div>
+</div>
+
+<div class="content" id="display">
+  <div class="state-idle" id="stateIdle">
+    <div class="welcome">Dobrodošli!</div>
+    <div class="sub">Willkommen! — Welcome!</div>
+  </div>
+</div>
+
+<script>
+const TOKEN = '{{ token }}';
+const API_URL = '/pos/api/display/' + TOKEN + '/';
+let lastState = 'idle';
+let lastItemCount = 0;
+
+function refresh() {
+  fetch(API_URL)
+    .then(r => r.json())
+    .then(data => render(data))
+    .catch(() => {});
+}
+
+function render(data) {
+  const el = document.getElementById('display');
+
+  if (data.status === 'idle') {
+    el.innerHTML = `
+      <div class="state-idle">
+        <div class="welcome">Dobrodošli!</div>
+        <div class="sub">Willkommen! — Welcome!</div>
+      </div>`;
+    lastState = 'idle';
+    lastItemCount = 0;
+    return;
+  }
+
+  if (data.status === 'paid') {
+    el.innerHTML = `
+      <div class="state-paid">
+        <div class="check">✓</div>
+        <div class="thanks">Hvala na kupnji!</div>
+        ${parseFloat(data.change) > 0 ? '<div class="change">Povrat: ' + parseFloat(data.change).toFixed(2) + ' €</div>' : ''}
+      </div>`;
+    lastState = 'paid';
+    return;
+  }
+
+  // ACTIVE — items
+  let rows = '';
+  (data.items || []).forEach((it, idx) => {
+    rows += '<tr><td>' + (idx+1) + '</td><td>' + it.name +
+            '</td><td>' + it.qty + '</td><td class="price">' +
+            parseFloat(it.price).toFixed(2) + ' €</td></tr>';
+  });
+
+  el.innerHTML = `
+    <div class="items-table">
+      <table>
+        <thead><tr><th>#</th><th>Artikl</th><th>Kol.</th><th style="text-align:right">Cijena</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="totals">
+      <div class="row"><span>Stavke:</span><span>${data.item_count}</span></div>
+      <div class="row"><span>Bez PDV:</span><span>${parseFloat(data.subtotal).toFixed(2)} €</span></div>
+      <div class="row"><span>PDV:</span><span>${parseFloat(data.tax).toFixed(2)} €</span></div>
+      <div class="row grand"><span>UKUPNO</span><span>${parseFloat(data.total).toFixed(2)} €</span></div>
+    </div>`;
+  lastState = 'active';
+  lastItemCount = data.item_count;
+}
+
+// Poll every 2s
+setInterval(refresh, 2000);
+refresh();
+</script>
+</body>
+</html>

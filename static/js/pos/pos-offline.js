@@ -396,3 +396,93 @@
   openDB(function() { updateOfflineBadge(); });
 
 })();
+
+// ══════════════════════════════════════════════════════════════════════════
+// B-01 FIX: BroadcastChannel cross-tab sync + ServiceWorker registration
+// ══════════════════════════════════════════════════════════════════════════
+
+(function() {
+  'use strict';
+
+  // ── BroadcastChannel: cross-tab sync ────────────────────────────────
+  var channel = null;
+  try {
+    channel = new BroadcastChannel('pos_offline_sync');
+    channel.onmessage = function(e) {
+      if (e.data && e.data.type === 'RECEIPT_SYNCED') {
+        // Another tab synced a receipt — update our badge
+        updateOfflineBadge();
+        if (window.showPosToast) {
+          showPosToast('Bon #' + (e.data.receipt_number || '?') + ' sinkroniziran iz drugog taba', 'info');
+        }
+      }
+      if (e.data && e.data.type === 'RECEIPT_QUEUED') {
+        updateOfflineBadge();
+      }
+    };
+  } catch(e) {
+    // BroadcastChannel not supported — fallback to localStorage events
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'pos_offline_sync_trigger') {
+        updateOfflineBadge();
+      }
+    });
+  }
+
+  // Enhance queueOfflineReceipt to broadcast
+  var _origQueue = window.queueOfflineReceipt;
+  if (_origQueue) {
+    window.queueOfflineReceipt = function(receiptData) {
+      var result = _origQueue(receiptData);
+      if (channel) channel.postMessage({ type: 'RECEIPT_QUEUED', offline_id: result.offline_id });
+      try { localStorage.setItem('pos_offline_sync_trigger', Date.now()); } catch(e) {}
+      return result;
+    };
+  }
+
+  // Enhance syncOfflineData to broadcast after sync
+  var _origSync = window.syncOfflineData;
+  if (_origSync) {
+    window.syncOfflineData = function() {
+      _origSync();
+      // After sync, notify other tabs
+      setTimeout(function() {
+        if (channel) channel.postMessage({ type: 'RECEIPT_SYNCED' });
+        try { localStorage.setItem('pos_offline_sync_trigger', Date.now()); } catch(e) {}
+      }, 5000);
+    };
+  }
+
+  // ── ServiceWorker Registration ──────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/pos/sw.js', { scope: '/pos/' })
+      .then(function(reg) {
+        console.log('[POS] ServiceWorker registered, scope:', reg.scope);
+
+        // Listen for SW sync messages
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'SYNC_COMPLETE') {
+            updateOfflineBadge();
+            if (window.showPosToast) {
+              showPosToast('Offline bon sinkroniziran putem ServiceWorker-a!', 'success');
+            }
+            if (channel) channel.postMessage({ type: 'RECEIPT_SYNCED', receipt_id: e.data.receipt_id });
+          }
+        });
+      })
+      .catch(function(err) { console.warn('[POS] SW registration failed:', err); });
+
+    // Request background sync when offline receipt is queued
+    window.requestBackgroundSync = function() {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(function(reg) {
+          if (reg.sync) {
+            reg.sync.register('pos-offline-sync')
+              .then(function() { console.log('[POS] Background sync registered'); })
+              .catch(function() { console.log('[POS] Background sync not available'); });
+          }
+        });
+      }
+    };
+  }
+})();

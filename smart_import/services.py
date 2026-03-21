@@ -570,3 +570,58 @@ def _to_decimal(value, default=0):
         return str(Decimal(s))
     except InvalidOperation:
         return str(default)
+
+
+# ── Zaglavlje računa (header OCR) ────────────────────────────────────────────
+
+def extract_invoice_header(file_path):
+    """
+    Izvuci zaglavlje računa (dobavljač, OIB, datum, iznos, PDV) iz slike.
+    Vraća dict ili {} ako AI nije uspio.
+    Inovacija: strukturirani JSON sa svim meta-podacima računa u jednom pozivu.
+    """
+    image_b64, media_type = _encode_image(file_path)
+    if not image_b64:
+        return {}
+
+    prompt = (
+        "You are an expert invoice header extractor. Extract ONLY the document header (not line items). "
+        "Return ONLY a single JSON object with these exact keys: "
+        '{"supplier_name": "<company name>", "supplier_oib": "<OIB/VAT number digits only, no spaces>", '
+        '"invoice_number": "<document number>", "invoice_date": "<YYYY-MM-DD or empty>", '
+        '"total_amount": <total number or null>, "vat_amount": <VAT/PDV number or null>, '
+        '"base_amount": <base/osnovica number or null>, "currency": "<EUR|HRK|USD|...>", '
+        '"confidence": <0.0-1.0 how confident you are>}. '
+        "Croatian: OIB=tax ID, PDV=VAT, Iznos=Amount, Račun br.=Invoice no., Datum=Date. "
+        "German: USt-IdNr=VAT ID, Rechnungsnummer=Invoice number, Betrag=Amount, MwSt=VAT. "
+        "If a field is not visible, use null or empty string. "
+        "IMPORTANT: Return ONLY valid JSON, no other text."
+    )
+
+    try:
+        from google import genai as _genai
+        from django.conf import settings
+        from PIL import Image as PILImage
+        import io, json
+
+        api_key = getattr(settings, "GEMINI_API_KEY", None) or os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return {}
+
+        _client = _genai.Client(api_key=api_key)
+        image_data = base64.standard_b64decode(image_b64)
+        img = PILImage.open(io.BytesIO(image_data))
+
+        response = _client.models.generate_content(model="gemini-2.5-flash", contents=[prompt, img])
+        text = response.text.replace("```json", "").replace("```", "").strip()
+        _log_gemini_usage(response, "smart_import_header")
+
+        header = json.loads(text)
+        logger.info(
+            "Header extracted: supplier=%s OIB=%s total=%s",
+            header.get("supplier_name", "?"), header.get("supplier_oib", "?"), header.get("total_amount")
+        )
+        return header
+    except Exception as e:
+        logger.error("extract_invoice_header failed: %s", e)
+        return {}

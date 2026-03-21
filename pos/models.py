@@ -58,6 +58,13 @@ class POSTerminal(models.Model):
         help_text="Auto-generiran. QR kod na zidu - skeniraj, blagajna se otvori.",
     )
     created_at    = models.DateTimeField(auto_now_add=True)
+    # Training mode (HR-P13)
+    is_training   = models.BooleanField(default=False, verbose_name=_("Training modus"),
+        help_text="Bonovi se NE fiskaliziraju. Watermark OBUKA na svim bonovima.")
+    # Customer Display token (HR-P12)
+    display_token = models.CharField(max_length=32, unique=True, blank=True, null=True,
+        verbose_name="Customer Display token",
+        help_text="Token za pristup ekranu kupca (drugi ekran/tablet).")
 
     def save(self, *args, **kwargs):
         if not self.access_token:
@@ -111,6 +118,8 @@ class POSSession(models.Model):
     loaded_items_json = models.JSONField(null=True, blank=True, verbose_name=_('Utovareni artikli'))
     returned_items_json = models.JSONField(null=True, blank=True, verbose_name=_('Vraceni artikli'))
 
+    # Training mode (HR-P13) — session-level
+    is_training = models.BooleanField(default=False, verbose_name=_("Training smjena"))
     # Multi-operator: blagajnici koji su radili u ovoj smjeni
     active_cashiers = models.ManyToManyField(
         'pos.POSCashier', blank=True,
@@ -216,6 +225,9 @@ class POSReceipt(models.Model):
         verbose_name=_('Kanal narudzbe'),
     )
 
+    # Training bon (HR-P13)
+    is_training    = models.BooleanField(default=False, verbose_name=_("Training bon"),
+        help_text=_("Bon iz obuke — nema fiskalnu vrijednost"))
     # Multi-cashier: tko je izdao ovaj racun (PIN switch unutar smjene)
     cashier        = models.ForeignKey(
         'pos.POSCashier', on_delete=models.SET_NULL,
@@ -1234,3 +1246,60 @@ class KnjigaPrigovora(models.Model):
             return None
         from django.utils import timezone
         return 15 - (timezone.now().date() - self.datum_primitka).days
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# POS PULSE — AI Živčani Sustav (anomaly detection, heartbeat, alerts)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class POSPulseEvent(models.Model):
+    """
+    Real-time POS event log — anomaly detection, heartbeat, milestones.
+    AI živčani sustav: "Sustav koji diše."
+    """
+    EVENT_TYPES = [
+        ('anomaly_cancel', _('Neobičan storno')),
+        ('anomaly_discount', _('Neobičan popust')),
+        ('anomaly_cash', _('Cash manjak')),
+        ('anomaly_void', _('Masovni storno')),
+        ('anomaly_speed', _('Prebrza naplata')),
+        ('anomaly_refund', _('Sumnjivi povrat')),
+        ('heartbeat', _('Terminal heartbeat')),
+        ('alert_stock', _('Kritična zaliha')),
+        ('alert_fiscal', _('Fiskalizacija fail')),
+        ('milestone_100', _('100. bon danas')),
+        ('milestone_revenue', _('Revenue milestone')),
+        ('shift_open', _('Smjena otvorena')),
+        ('shift_close', _('Smjena zatvorena')),
+    ]
+    SEVERITY_CHOICES = [
+        ('info', _('Info')),
+        ('warning', _('Upozorenje')),
+        ('critical', _('Kritično')),
+        ('success', _('Uspjeh')),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='pulse_events',
+    )
+    terminal = models.ForeignKey(
+        'pos.POSTerminal', on_delete=models.CASCADE,
+        related_name='pulse_events', null=True, blank=True,
+    )
+    event_type = models.CharField(max_length=30, choices=EVENT_TYPES, verbose_name=_('Tip'))
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, default='info')
+    title = models.CharField(max_length=200, verbose_name=_('Naslov'))
+    detail = models.TextField(blank=True, verbose_name=_('Detalji'))
+    metadata = models.JSONField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    notified_whatsapp = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('POS Pulse Event')
+        verbose_name_plural = _('POS Pulse Events')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'[{self.severity}] {self.title}'

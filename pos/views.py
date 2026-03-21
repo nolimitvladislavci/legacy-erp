@@ -115,6 +115,12 @@ def close_session(request, session_id):
     except Exception:
         pass
     messages.success(request, f'Session #{session.session_number} closed.')
+    # POS Pulse — analyze session close
+    try:
+        from pos.pulse import analyze_session_close
+        analyze_session_close(session)
+    except Exception:
+        pass
     return redirect('pos:session_detail', session_id=session.pk)
 
 

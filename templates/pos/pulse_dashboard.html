@@ -1,0 +1,188 @@
+{% extends "pos/base_pos.html" %}
+{% block title %}POS Pulse — AI Živčani Sustav{% endblock %}
+
+{% block content %}
+<style>
+  .pulse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin: 20px 0; }
+  .pulse-card {
+    background: var(--dark, #1a1a1a); border: 1px solid #333;
+    border-radius: 12px; padding: 20px; transition: all 0.3s;
+  }
+  .pulse-card:hover { border-color: var(--gold, #c9a84c); transform: translateY(-2px); }
+  .pulse-stat { font-size: 32px; font-weight: bold; color: var(--gold, #c9a84c); }
+  .pulse-label { font-size: 13px; color: #888; margin-top: 4px; }
+
+  .terminal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin: 16px 0; }
+  .terminal-card {
+    background: #111; border: 1px solid #333; border-radius: 10px; padding: 16px;
+    position: relative; overflow: hidden;
+  }
+  .terminal-card.active { border-color: #2ecc71; }
+  .terminal-card.training { border-color: #e74c3c; }
+  .terminal-card .name { font-size: 16px; font-weight: bold; }
+  .terminal-card .operator { font-size: 12px; color: #888; }
+  .terminal-card .stats { display: flex; justify-content: space-between; margin-top: 10px; }
+  .terminal-card .heartbeat {
+    position: absolute; top: 10px; right: 12px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #2ecc71; animation: heartbeat 1.5s infinite;
+  }
+  .terminal-card.training .heartbeat { background: #e74c3c; }
+
+  .event-list { max-height: 500px; overflow-y: auto; }
+  .event-item {
+    display: flex; gap: 12px; padding: 12px; border-bottom: 1px solid #1a1a1a;
+    transition: opacity 0.3s;
+  }
+  .event-item.read { opacity: 0.5; }
+  .event-dot {
+    width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+  }
+  .event-dot.info { background: #3498db; }
+  .event-dot.warning { background: #f39c12; }
+  .event-dot.critical { background: #e74c3c; animation: heartbeat 1s infinite; }
+  .event-dot.success { background: #2ecc71; }
+  .event-title { font-size: 14px; font-weight: 500; }
+  .event-detail { font-size: 12px; color: #888; margin-top: 2px; }
+  .event-time { font-size: 11px; color: #666; }
+
+  .chart-bar-row { display: flex; align-items: flex-end; gap: 4px; height: 100px; margin: 20px 0; }
+  .chart-bar {
+    flex: 1; background: var(--gold, #c9a84c); border-radius: 4px 4px 0 0;
+    min-height: 2px; transition: height 0.5s; position: relative;
+  }
+  .chart-bar:hover { opacity: 0.8; }
+  .chart-bar .label {
+    position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: #666; white-space: nowrap;
+  }
+  .chart-bar .value {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: var(--gold, #c9a84c);
+  }
+
+  @keyframes heartbeat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+
+  .section-title { font-size: 18px; color: var(--gold, #c9a84c); margin: 24px 0 12px; }
+  .badge-critical {
+    background: #e74c3c; color: #fff; padding: 2px 8px;
+    border-radius: 10px; font-size: 11px; margin-left: 8px;
+  }
+  .badge-unread {
+    background: #f39c12; color: #fff; padding: 2px 8px;
+    border-radius: 10px; font-size: 11px; margin-left: 8px;
+  }
+  .btn-mark-read {
+    background: none; border: 1px solid #444; color: #aaa;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer;
+    font-size: 12px;
+  }
+  .btn-mark-read:hover { border-color: var(--gold, #c9a84c); color: var(--gold, #c9a84c); }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:10px">
+  POS Pulse
+  <span style="font-size:14px;color:#888">— AI Živčani Sustav</span>
+  <span id="criticalBadge" class="badge-critical" style="display:none"></span>
+  <span id="unreadBadge" class="badge-unread" style="display:none"></span>
+</h2>
+
+<!-- Stats Cards -->
+<div class="pulse-grid" id="statsGrid">
+  <div class="pulse-card"><div class="pulse-stat" id="todayRevenue">—</div><div class="pulse-label">Dnevni promet (EUR)</div></div>
+  <div class="pulse-card"><div class="pulse-stat" id="todayCount">—</div><div class="pulse-label">Bonova danas</div></div>
+  <div class="pulse-card"><div class="pulse-stat" id="todayAvg">—</div><div class="pulse-label">Prosječan bon (EUR)</div></div>
+  <div class="pulse-card"><div class="pulse-stat" id="activeTerminals">—</div><div class="pulse-label">Aktivnih terminala</div></div>
+</div>
+
+<!-- Hourly Chart -->
+<div class="section-title">Promet po satu (zadnjih 12h)</div>
+<div class="chart-bar-row" id="hourlyChart"></div>
+
+<!-- Active Terminals -->
+<div class="section-title">Aktivni terminali</div>
+<div class="terminal-grid" id="terminalGrid"></div>
+
+<!-- Events -->
+<div style="display:flex;justify-content:space-between;align-items:center">
+  <div class="section-title">Pulse Events (24h)</div>
+  <button class="btn-mark-read" onclick="markAllRead()">Označi sve pročitano</button>
+</div>
+<div class="event-list" id="eventList"></div>
+
+<script>
+function loadPulse() {
+  fetch('/pos/api/pulse/')
+    .then(r => r.json())
+    .then(data => render(data))
+    .catch(e => console.error('Pulse error:', e));
+}
+
+function render(data) {
+  // Stats
+  document.getElementById('todayRevenue').textContent = data.today_revenue.toFixed(2);
+  document.getElementById('todayCount').textContent = data.today_count;
+  document.getElementById('todayAvg').textContent = data.today_avg.toFixed(2);
+  document.getElementById('activeTerminals').textContent = data.terminals.length;
+
+  // Badges
+  const cb = document.getElementById('criticalBadge');
+  const ub = document.getElementById('unreadBadge');
+  if (data.critical_count > 0) { cb.textContent = data.critical_count + ' critical'; cb.style.display = 'inline'; }
+  else { cb.style.display = 'none'; }
+  if (data.unread_count > 0) { ub.textContent = data.unread_count + ' nepročitano'; ub.style.display = 'inline'; }
+  else { ub.style.display = 'none'; }
+
+  // Hourly chart
+  const maxRev = Math.max(...data.hourly.map(h => h.revenue), 1);
+  document.getElementById('hourlyChart').innerHTML = data.hourly.map(h => {
+    const pct = Math.max(2, (h.revenue / maxRev) * 100);
+    return '<div class="chart-bar" style="height:' + pct + '%">' +
+      '<span class="value">' + (h.revenue > 0 ? h.revenue.toFixed(0) : '') + '</span>' +
+      '<span class="label">' + h.hour + '</span></div>';
+  }).join('');
+
+  // Terminals
+  document.getElementById('terminalGrid').innerHTML = data.terminals.map(t => {
+    const cls = t.is_training ? 'training' : 'active';
+    return '<div class="terminal-card ' + cls + '">' +
+      '<div class="heartbeat"></div>' +
+      '<div class="name">' + t.terminal + (t.is_training ? ' 🎓' : '') + '</div>' +
+      '<div class="operator">' + t.operator + ' | Smjena #' + t.session_number + '</div>' +
+      '<div class="stats">' +
+        '<span>' + t.receipt_count + ' bonova</span>' +
+        '<span style="color:var(--gold,#c9a84c);font-weight:bold">' + t.revenue.toFixed(2) + ' €</span>' +
+      '</div></div>';
+  }).join('') || '<div style="color:#666;padding:20px">Nema aktivnih terminala</div>';
+
+  // Events
+  document.getElementById('eventList').innerHTML = data.events.map(e => {
+    const time = new Date(e.created_at).toLocaleTimeString('hr', {hour:'2-digit',minute:'2-digit'});
+    return '<div class="event-item ' + (e.is_read ? 'read' : '') + '">' +
+      '<div class="event-dot ' + e.severity + '"></div>' +
+      '<div style="flex:1">' +
+        '<div class="event-title">' + e.title + '</div>' +
+        '<div class="event-detail">' + (e.detail || '') + '</div>' +
+        '<div class="event-time">' + time + (e.terminal ? ' — ' + e.terminal : '') + '</div>' +
+      '</div></div>';
+  }).join('') || '<div style="color:#666;padding:20px;text-align:center">Nema događaja u zadnjih 24h</div>';
+}
+
+function markAllRead() {
+  fetch('/pos/api/pulse/read/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({})
+  }).then(() => loadPulse());
+}
+
+function getCsrf() {
+  const c = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+  return c ? c.split('=')[1] : '';
+}
+
+// Auto-refresh every 10s
+setInterval(loadPulse, 10000);
+loadPulse();
+</script>
+{% endblock %}

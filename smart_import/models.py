@@ -328,3 +328,58 @@ class StagingFile(models.Model):
 
     def __str__(self):
         return f'{self.original_filename} ({self.get_status_display()})'
+
+
+class StagingFileHeader(models.Model):
+    """
+    Zaglavlje računa izvučeno AI OCR-om iz StagingFile.
+    Sadrži meta-podatke računa (OIB, iznos, datum, broj) — odvojeno od stavki.
+    Inovacija: auto-match Partner po OIB-u, jedan-klik URA kreacija.
+    """
+    staging_file = models.OneToOneField(
+        StagingFile, on_delete=models.CASCADE, related_name='header',
+    )
+    # Dobavljač
+    supplier_name = models.CharField(max_length=255, blank=True, verbose_name='Dobavljač (AI)')
+    supplier_oib  = models.CharField(max_length=20,  blank=True, verbose_name='OIB dobavljača')
+    matched_partner = models.ForeignKey(
+        'partners.Partner', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='staging_headers',
+        verbose_name='Sparen partner (auto-OIB)',
+    )
+    # Dokument
+    invoice_number = models.CharField(max_length=100, blank=True, verbose_name='Broj računa')
+    invoice_date   = models.DateField(null=True, blank=True, verbose_name='Datum računa')
+    # Iznosi
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name='Ukupan iznos')
+    vat_amount   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name='PDV iznos')
+    base_amount  = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name='Osnovica')
+    currency     = models.CharField(max_length=5, default='EUR', blank=True)
+    # AI confidence
+    confidence   = models.FloatField(default=0.0, help_text='AI sigurnost 0.0-1.0')
+    needs_review = models.BooleanField(default=False, verbose_name='Treba provjeru')
+    raw_header   = models.JSONField(default=dict, blank=True, help_text='Sirovi AI output za zaglavlje')
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Zaglavlje staging fajla'
+        verbose_name_plural = 'Zaglavlja staging fajlova'
+
+    def __str__(self):
+        return f'{self.supplier_name} | {self.invoice_number} | {self.total_amount} {self.currency}'
+
+    def auto_match_partner(self):
+        """Pronađi Partner po OIB-u — poziva se iz Celery taska."""
+        if not self.supplier_oib:
+            return None
+        from partners.models import Partner
+        try:
+            p = Partner.objects.get(
+                company=self.staging_file.staging_batch.company,
+                oib=self.supplier_oib,
+            )
+            self.matched_partner = p
+            self.save(update_fields=['matched_partner'])
+            return p
+        except Partner.DoesNotExist:
+            return None

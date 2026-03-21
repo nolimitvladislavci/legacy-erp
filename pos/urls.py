@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 from . import pickup_views
 from . import field_sales_views
+from . import views_v2
 
 app_name = 'pos'
 
@@ -146,4 +147,31 @@ urlpatterns = [
     path("qr/<str:token>/", views.pos_qr_open, name="pos_qr_open"),
     path("qr/session/<int:session_id>/", views.qr_session, name="qr_session"),
     path("qr/session/<int:session_id>/quick-pay/", views.qr_quick_pay, name="qr_quick_pay"),
+    # ══════════════════════════════════════════════════════════════════════════
+    # V2 ENDPOINTS (Session 2026-03-21)
+    # ══════════════════════════════════════════════════════════════════════════
+    # B-13: Kitchen API cached (ETag + throttle)
+    path('gastro/kitchen/api/v2/',              views_v2.kitchen_api_cached,    name='kitchen_api_cached'),
+    # HR-F11: Storno fiskalizacija
+    path('receipt/<int:receipt_id>/storno/',     views_v2.storno_receipt,        name='storno_receipt'),
+    # HR-P12: Customer Display
+    path('display/<str:token>/',                 views_v2.customer_display,      name='customer_display'),
+    path('api/display/<str:token>/',             views_v2.customer_display_api,  name='customer_display_api'),
+    path('terminal/<int:terminal_id>/display-token/', views_v2.generate_display_token, name='generate_display_token'),
+    # HR-P13: Training mode
+    path('terminal/<int:terminal_id>/training/', views_v2.toggle_training,       name='toggle_training'),
+    # HR-C12: Partial payment
+    path('receipt/<int:receipt_id>/partial-pay/', views_v2.partial_payment,      name='partial_payment'),
+    # HR-P11: Split bill
+    path('receipt/<int:receipt_id>/split/',       views_v2.split_bill,           name='split_bill'),
+    # DE-05: ZUGFeRD
+    path('receipt/<int:receipt_id>/zugferd/',     views_v2.zugferd_pdf,          name='zugferd_pdf'),
+    # DE-07: DATEV
+    path('datev/',                               views_v2.datev_export,          name='datev_export'),
+    # POS Pulse
+    path('pulse/',                               views_v2.pulse_dashboard,       name='pulse_dashboard'),
+    path('api/pulse/',                           views_v2.pulse_api,             name='pulse_api'),
+    path('api/pulse/read/',                      views_v2.pulse_mark_read,       name='pulse_mark_read'),
+    # B-01: ServiceWorker
+    path('sw.js',                                views_v2.pos_service_worker,    name='pos_sw'),
 ]

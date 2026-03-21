@@ -134,6 +134,9 @@ class CheckoutService:
     @staticmethod
     def _should_fiscalize(receipt):
         company = receipt.session.terminal.company
+        # Training mode = NIKAD fiskaliziraj
+        if getattr(receipt, "is_training", False):
+            return False
         mode = company.nonprofit_fiscal_mode
         if mode == 'none':
             return False
@@ -332,6 +335,7 @@ class CheckoutService:
             buyer_address=str(payload.get('buyer_address', ''))[:255],
             is_r1=bool(payload.get('buyer_oib')),
             note=str(note)[:255] if note else (cashier_obj.name if cashier_obj else ''),
+            is_training=getattr(session.terminal, 'is_training', False) or session.is_training,
         )
 
         # ── 4. STAVKE ──
@@ -595,3 +599,16 @@ class CheckoutService:
               company=company)
 
         return result
+
+        # ── 12. POS PULSE — AI Anomaly Detection ──
+        try:
+            from pos.pulse import analyze_receipt
+            analyze_receipt(receipt)
+        except Exception as _pulse_err:
+            logger.warning('Pulse analyze failed: %s', _pulse_err)
+
+        # ── 13. TRAINING MODE — skip fiscal if training ──
+        if receipt.is_training:
+            result['training'] = True
+            result['fiscal_warning'] = 'TRAINING MODE — bon nije fiskaliziran'
+
