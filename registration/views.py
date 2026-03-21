@@ -992,3 +992,29 @@ def _lookup_sudreg(oib):
         logger.debug('Data.gov.hr lookup failed for OIB %s: %s', oib[:4], e)
 
     return None
+
+
+def api_name_search(request):
+    """Pretraga tvrtki po nazivu — hint iz internog DB-a za autocomplete."""
+    from django.http import JsonResponse
+    from companies.models import Company
+    from django.db.models import Q
+
+    q = request.GET.get('q', '').strip()
+    if len(q) < 3:
+        return JsonResponse({'results': []})
+
+    results = Company.objects.filter(
+        Q(name__icontains=q)
+    ).values('name', 'oib', 'address', 'city', 'zip_code')[:8]
+
+    return JsonResponse({'results': [
+        {
+            'name': r['name'],
+            'oib': r['oib'] or '',
+            'address': r['address'] or '',
+            'city': r['city'] or '',
+            'zip': r['zip_code'] or '',
+        }
+        for r in results
+    ]})

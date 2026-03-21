@@ -34,4 +34,5 @@ urlpatterns = [
 
     # Agent Dashboard
     path('agent/', views.agent_dashboard, name='agent_dashboard'),
+    path('api/name-search/', views.api_name_search, name='api_name_search'),
 ]

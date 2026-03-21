@@ -6,18 +6,13 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-21 14:00 — CC Code (Opus) — Predarhiva Bulk OCR DONE: StagingBatch, drag&drop, rate-limited Celery, live progress
-2026-03-21 13:38 — CC Code (Opus) — POS QR Instant Open DONE: zero-login terminal activation, 5 QR kodova za Seki
-2026-03-21 16:30 — Sonnet (kraj sesije) — Robot prodavač plan, Šeki QR+kiosk, Predarhiva Bulk OCR, GTM plan, FENIX_ZASTO.md
-Git HEAD: a31f171 — Smart Import frontend kompresija
-2026-03-21 13:15 — CC Code (Opus) — GTM Foundation DONE: OIB lookup API, pricing kalkulator, empty states (3 modula)
-2026-03-21 12:30 — CC Code (Opus) — limit_connect_ai Faza 1 DONE: 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin, migracije
-2026-03-21 11:00 — Sonnet (Ivan sesija) — LIMIT Connect AI Master Plan kreiran i odobren
-SLJEDEĆI TASK: Po Ivanovom smjeru
+2026-03-21 20:45 — Sonnet (kraj sesije) — Predkomora DONE, Hash Chain DONE, PLG Virus DONE, testovi pripremljeni, OIB/Steuernummer analiza
+Git HEAD: 81ee45a — PLG Virus: viralni footer + Hash Shield na svih 5 izlaznih dokumenata
+
+---
 
 ## Git HEAD
-a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatchItem + CampaignPlan
-371 migracija aplicirano, 0 čeka.
+81ee45a — PLG Virus: viralni footer + Hash Shield na svih 5 izlaznih dokumenata
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |
@@ -232,7 +227,7 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - 3 razine: WhatsApp link (R1), Vet portal (R2), Robot API (R3) — DONE
 - EU Reg 2019/6 compliance — DONE
 
-### Institutional API (KOMPLET — 21.03. — HEAD)
+### Institutional API (KOMPLET — 21.03.)
 - InstitutionalAccessToken model — DONE
 - 4 read-only endpointa: HAPIH, JRDZ, Sanitarna, VetIS — DONE
 - Token management + vet/accountant/inspector roles — DONE
@@ -247,10 +242,10 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - Celery tasks: morning_report_all (07:30), fund_check_all (09:00), compliance_check_all (pon 08:00), campaign_suggestions_all (pet 10:00) — DONE
 - Views: cockpit, missions, reports, funds — DONE
 - Templates: 4 HTML (ai_cockpit, ai_missions, ai_reports, ai_funds) — DONE
-- Admin: 5 modela registrirano s list_display + list_filter — DONE
-- CELERY_BEAT_SCHEDULE: 4 nova taska dodana — DONE
+- Admin: 5 modela registrirano — DONE
+- CELERY_BEAT_SCHEDULE: 4 nova taska — DONE
 - Migracije: 0001_initial + 0002_campaignplan_compliancewatchitem — DONE
-- URL: /ai-cockpit/ (cockpit, missions, reports, funds) — DONE
+- URL: /ai-cockpit/ — DONE
 
 ### GTM Foundation (KOMPLET — 21.03.)
 - OIB Auto-Lookup API (/register/api/oib-lookup/) — interni DB + sudski registar — DONE
@@ -262,9 +257,88 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 ### Invoice-Powered Growth Engine (KOMPLET — 21.03.)
 - Referral footer na 3 PDF baze (modern, datev, viskovic) — DONE
 - Referral footer na invoice_hr.html — DONE
-- CTA link na base_email.html (svi emailovi iz sustava) — DONE
-- 8 AI misija aktivirano (daily_report + fund_watch za 4 klijenta) — DONE
+- CTA link na base_email.html — DONE
+- 8 AI misija aktivirano — DONE
 - WhatsApp status report poslan Ivanu — DONE
+
+### Predarhiva Bulk OCR (KOMPLET — 21.03.)
+- StagingBatch + StagingFile modeli + migracija 0006 — DONE
+- Canvas kompresija 5MB→150KB (commit 94658bd) — DONE
+- Bulk upload view s drag & drop + file preview — DONE
+- Rate-limited Celery task (8 req/min, backoff) — DONE
+- Live progress API (polling 3s) — DONE
+- 2 templatea (staging.html, staging_detail.html) — DONE
+
+### Predkomora — Smart Import Review (KOMPLET — 21.03.)
+- StagingFileHeader model (OIB, total, PDV, datum, broj, confidence) — commit 97c6f34 — DONE
+- extract_invoice_header() Gemini poziv (services.py) — DONE
+- extract_unified() — 1 poziv za header + stavke (cost-efficient) — DONE
+- auto_match_partner() — OIB → Partner auto-spajanje — DONE
+- Duplikat detekcija (isti OIB + invoice_number + total_amount → needs_review) — DONE
+- process_staging_batch header integracija (Celery task) — DONE
+- Side-by-Side Review Dashboard (commit 5182bb9) — DONE
+- Predkomora ARMIRANA — 4 zamke neutralizirane (commit 535a00f):
+  - Zamka 1 (PDF): MIME detection, iframe viewer za PDF
+  - Zamka 2 (Matematika): frontend + backend validacija (base+vat=total ±0.02), MATH_MISMATCH
+  - Zamka 3 (Konkurencija): select_for_update + CONFLICT 409 guard
+  - Zamka 4 (Hotkeys): keyboard shortcuts (A=approve, D=discard, N=next)
+- review_approve() + review_discard() views — DONE
+- Migracija 0007 (StagingFileHeader) — DONE
+
+### Fiskalizacija bug fix (KOMPLET — 21.03.)
+- Hard 5s timeout na _fiscalize() (ThreadPoolExecutor) — DONE
+- Instant response bez JIR-a, not_fiscalized flag — DONE
+- Warning toast + Celery retry 2min — DONE
+- Zakonski OK — 48h rok za naknadnu fiskalizaciju — DONE
+
+### Hash Chain — Kriptografski Audit Trail (KOMPLET — 21.03. — commit 73a0701)
+- ChainLink model (migration 0036) — sequence, payload_hash, prev_hash, chain_hash — DONE
+- append_receipt() — dodaje bon u lanac nakon naplate — DONE
+- verify_chain() — O(n) integritet provjera cijelog lanca — DONE
+- verify_single() — brza provjera jednog bona — DONE
+- daily_anchor_hash() — dnevni Merkle anchor (spreman za OpenTimestamps) — DONE
+- Princip: Bitcoin mining bez minanja. Ako se stari bon promijeni, svi kasniji hashevi pucaju — DONE
+
+### PLG Virus — Viralni Footer (KOMPLET — 21.03. — commit 81ee45a)
+- templates/pos/includes/_viral_footer.html — reusable include, 3 formata — DONE
+- Thermal bon (80mm): SHA-256 hash + limit-connect.com — DONE
+- A4 PDF račun: Hash Shield s integritet statusom + EU ViDA 2028 badge — DONE
+- Public web receipt: zeleni vizualni štit + PLG CTA za besplatnu registraciju — DONE
+- e-Račun public: profesionalni footer + EN 16931 badge — DONE
+- POSReceipt.chain_link_safe property (no DoesNotExist crash) — DONE
+- PLG CTA: "Besplatna POS blagajna + e-Arhiva → limit-connect.com" — DONE
+
+### OIB / VAT Validator (KOMPLET)
+- core/oib_validator.py — validate_oib_hr() ISO 7064 MOD 11,10 — DONE
+- validate_vat_id() za HR/DE/AT/SI/IT/EU generički — DONE
+- normalize_oib(), format_oib_display(), strip_vat_prefix() — DONE
+- core/business_lookup.py — centralni lookup servis — DONE
+- BusinessLookupResult dataclass (found, source, name, tax_id, address, nkd, wz...) — DONE
+- lookup_business() — HR: VIES → FINA Info.BIZ → fallback — DONE
+- _lookup_de() — VIES USt-IdNr + Kleinunternehmer poruka — DONE
+- _lookup_vies() — SOAP poziv EU VIES za sve EU države — DONE
+- _lookup_in_database() — interni Partner lookup prvi — DONE
+
+### POS QR Instant Open (KOMPLET — 21.03.)
+- POSTerminal.access_token (secrets.token_urlsafe(20)) — DONE
+- /pos/qr/{token}/ — zero-login terminal aktivacija — DONE
+- generate_pos_qr management command — 5 PDF-ova za Šekijeve terminale — DONE
+- AIActionLog bilježi QR pristup s IP — DONE
+
+### Šeki Robot Prodavač — Plan
+- ROBOT_PRODAVAC_PLAN.md + CC_TASK_ROBOT_PRODAVAC_KOMPLET.md kreiran — DONE
+- ROI analiza: 67.200 EUR/god vs 7.500 EUR hardware = povrat 6 tjedana — DONE
+
+---
+
+## TASKOVI ZA AGENTE
+
+### Pripremljeni taskovi (čekaju izvršenje)
+- CC_TASK_TESTS_PREDKOMORA.md — 15 testova za StagingFileHeader, Predkomora zamke, duplikat — SPREMAN
+- GEMINI_TASK_TESTS_HASHCHAIN.md — 13 testova za Hash Chain + PLG chain_link_safe — SPREMAN
+- GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — ComplianceWatchdog Faza 2 — SPREMAN
+- CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi workflow Faza 2 — SPREMAN
+- CC_TASK_ROBOT_PRODAVAC_KOMPLET.md — 5 zadataka (kiosk, Stripe, QR plakati) — SPREMAN
 
 ---
 
@@ -274,6 +348,7 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - Fiskaly sandbox test (treba API kljuceve) — CEKA
 - DATEV SKR03/04 kontni plan — OTVORENO
 - DATEV Buchungsstapel export — OTVORENO
+- **Steuernummer validacija (10/11 znamenki, Finanzamt format) — NEDOSTAJE** — vidi analizu dolje
 
 ### Knjiga boljitaka (preostalo — 9/21)
 - B-01 Offline cross-device sync — DJELOMICNO
@@ -301,70 +376,8 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - Public donation page / widget — OTVORENO
 - Fitness modul audit (GEMINI task) — CEKA GEMINI
 
-### LIMIT Connect AI — Master Plan (ODOBREN — 2026-03-21)
-- LIMIT_CONNECT_AI_PLAN.md kreiran — kompletni roadmap
-- CC_TASK_LIMIT_AI_FOUNDATION.md — DONE (Faza 1 kompletna)
-- GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — spreman za Gemini (Faza 2)
-- Vizija: per-klijent AI asistent, EU fondovi, compliance watchdog, kampanje, WhatsApp/email report
-
-## SLJEDEĆI TASKOVI (po prioritetu)
-1. CC_TASK_LIMIT_AI_FOUNDATION.md — CC Code — DONE
-2. GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — Gemini — ComplianceWatchdog (Faza 2) — SPREMAN
-3. CC_TASK_LIMIT_AI_FUNDS.md — CC Code — EU fondovi workflow (Faza 2) — SPREMAN
-4. GEMINI_TASK_LIMIT_AI_CAMPAIGNS.md — Gemini — CampaignPlanner (Faza 3) — CEKA FAZU 2
-5. CC_TASK_LIMIT_AI_COCKPIT.md — CC Code — per-klijent cockpit (Faza 3) — CEKA FAZU 2
-
-### GTM Plan V1 (2026-03-21)
-- GTM_PLAN_LIMIT_CONNECT_V1.md kreiran — synthesis Sonnet + Gemini
-- CC_TASK_GTM_FOUNDATION.md — OIB lookup + pricing kalkulator + empty states
-- Marija bug: baza čista, problem UI prikaz arhivskog dokumenta s total=0
-- Šeki: 5 terminala, 4 sesije ukupno — dijagnoza tjedan 1
-
-### POS QR Instant Open (SPREMAN — 2026-03-21)
-- CC_TASK_POS_QR_INSTANT_OPEN.md kreiran — zero-login QR aktivacija terminala
-- POSTerminal.access_token novo polje (secrets.token_urlsafe(20))
-- /pos/qr/{token}/ — otvara blagajnu bez logina, redirect na quick_pos
-- generate_pos_qr management command — 5 PDF-ova za Šekijeve terminale
-- AIActionLog bilježi svaki QR pristup s IP
-- Output: 5 print-ready PDF A6 QR kodova za Uvijek Friško
-
-### Šeki komunikacijska strategija (2026-03-21)
-- SEKI_KOMUNIKACIJA.md kreiran
-- 5 poruka sekvenca za WhatsApp (ne poziv, ne demo)
-- Poruka 1: Ivan šalje DANAS navečer (20:00-22:00)
-- Poruka 2: sutra navečer — QR slika Vladislavci
-- Auto jutarnji report format definiran (07:15, sve 3 lokacije)
-- Ključni insight: Šeki ne kupuje ERP — kupuje manje posla za sinove
-
-### Predarhiva Bulk OCR (KOMPLET — 21.03.)
-- StagingBatch + StagingFile modeli — DONE
-- Bulk upload view s drag & drop + file preview — DONE
-- Rate-limited Celery task (8 req/min, backoff, pauza na greške) — DONE
-- Live progress API (polling 3s, "razmišljanje na glas") — DONE
-- 2 templatea (staging.html, staging_detail.html) — DONE
-- URLs: /smart-import/staging/ (upload, detail, start, progress) — DONE
-- Migracija 0006_add_staging_batch — DONE
-- Trošak: 0.15 EUR / 1000 slika, ~2 sata noćne obrade
-
-### Fiskalizacija bug fix (CC Code — 21.03.)
-- 3 sloja zaštite: hard timeout 5s (ThreadPoolExecutor), instant response bez JIR-a, warning toast + Celery retry 2min
-- Zakonski OK — 48h rok za naknadnu fiskalizaciju
-- Nikad više 504 pred klijentom
-
-### Šeki Robot Prodavač — analiza (21.03.)
-- Kiosk model (apoteka/benzinska): 3x terminali, 2.000-2.500 EUR/kom hardware
-- ROI: 67.200 EUR/god uštede na radnicima vs 7.500 EUR hardware
-- Povrat investicije: 6 tjedana
-- Softver: LIMIT Connect već ima 90% (gastro_qr, webshop_public, QR instant open)
-- Nedostaje: CC_TASK_POS_KIOSK_MODE — kiosk template za kupca (full-screen, touchscreen)
-- SEKI_KOMUNIKACIJA.md ažuriran s kiosk argumentima
-
-### Robot Prodavač Komplet (SPREMAN — 2026-03-21)
-- CC_TASK_ROBOT_PRODAVAC_KOMPLET.md — 5 zadataka
-- Gap analiza: QR OK, pickup OK, fiskalizacija OK — ali 3/617 webshop artikala (kritično)
-- Zadatak 1: activate_kiosk_items mgmt command (5 min)
-- Zadatak 2: kiosk.html touchscreen 15" template
-- Zadatak 3: Stripe prepayment za Šekija
-- Zadatak 4: 5 PDF QR plakata A6 print-ready
-- Zadatak 5: /robot-pekara/ SEO landing stranica
-- Vidljivost na internetu: NULA — limit-connect.com nije indeksirano za robot prodavač
+### LIMIT Connect AI — Faze 2-4
+- GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — ComplianceWatchdog — SPREMAN ZA GEMINI
+- CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi workflow — SPREMAN ZA CC
+- GEMINI_TASK_LIMIT_AI_CAMPAIGNS.md — CampaignPlanner Faza 3 — CEKA FAZU 2
+- CC_TASK_LIMIT_AI_COCKPIT.md — per-klijent cockpit Faza 3 — CEKA FAZU 2

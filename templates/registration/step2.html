@@ -1,41 +1,6 @@
 {% extends 'registration/base_reg.html' %}
 {% load i18n %}
-{% block title %}{% trans "Podaci o tvrtki" %} – LIMIT Connect
-<script>
-(function(){
-  var radios = document.querySelectorAll('input[name="country"]');
-  var oibLabel = document.querySelector('label[for="id_oib"]');
-  if (!oibLabel) {
-    // Find label by text content
-    var labels = document.querySelectorAll('.reg-field label');
-    for (var i = 0; i < labels.length; i++) {
-      if (labels[i].textContent.indexOf('OIB') !== -1 || labels[i].textContent.indexOf('Porezni broj') !== -1) {
-        oibLabel = labels[i];
-        break;
-      }
-    }
-  }
-  var oibInput = document.querySelector('input[name="oib"]');
-  function update() {
-    var val = document.querySelector('input[name="country"]:checked');
-    if (!val || !oibLabel || !oibInput) return;
-    if (val.value === 'DE') {
-      oibLabel.innerHTML = 'Porezni broj / PDV ID *';
-      oibInput.placeholder = 'DE123456789';
-      oibInput.maxLength = 50;
-    } else {
-      oibLabel.innerHTML = 'OIB *';
-      oibInput.placeholder = '12345678901';
-      oibInput.maxLength = 11;
-    }
-  }
-  for (var i = 0; i < radios.length; i++) {
-    radios[i].addEventListener('change', update);
-  }
-  update();
-})();
-</script>
-{% endblock %}
+{% block title %}{% trans "Podaci o tvrtki" %} – LIMIT Connect{% endblock %}
 {% block content %}
 <!-- Step indicator -->
 <div class="step-indicator">
@@ -55,30 +20,83 @@
   <form method="post">
   {% csrf_token %}
 
+  <!-- ═══ DRŽAVA (gornji red, setira jezik sesije) ═══ -->
+  <div class="reg-field">
+    <label>{% trans "Država" %}</label>
+    <div style="display:flex;gap:1rem;padding-top:.5rem;flex-wrap:wrap">
+      <label class="country-opt">
+        <input type="radio" name="country" value="HR" {% if data.country == 'HR' or not data.country %}checked{% endif %}>
+        <span class="country-flag">🇭🇷</span> Hrvatska
+      </label>
+      <label class="country-opt">
+        <input type="radio" name="country" value="DE" {% if data.country == 'DE' %}checked{% endif %}>
+        <span class="country-flag">🇩🇪</span> Deutschland
+      </label>
+      <label class="country-opt">
+        <input type="radio" name="country" value="AT" {% if data.country == 'AT' %}checked{% endif %}>
+        <span class="country-flag">🇦🇹</span> Österreich
+      </label>
+      <label class="country-opt">
+        <input type="radio" name="country" value="SI" {% if data.country == 'SI' %}checked{% endif %}>
+        <span class="country-flag">🇸🇮</span> Slovenija
+      </label>
+    </div>
+  </div>
+
+  <!-- ═══ NAZIV SEARCH — hint, ne requirement ═══ -->
   <div class="reg-field">
     <label>{% trans "Naziv tvrtke" %} *</label>
-    <input type="text" name="name" value="{{ data.name }}" class="reg-input" placeholder="Primjer d.o.o." required>
+    <input type="text" name="name" id="nameInput" value="{{ data.name }}" class="reg-input" placeholder="{% trans 'Primjer d.o.o.' %}" required autocomplete="organization">
+    <div id="nameHints" style="margin-top:4px;display:none;max-height:120px;overflow-y:auto;border:1px solid #333;border-radius:6px;background:#111"></div>
     {% if errors.name %}<div class="error-msg">{{ errors.name }}</div>{% endif %}
   </div>
 
-  <div class="reg-form-row">
-    <div class="reg-field">
-      <label>{% trans "OIB / Porezni broj" %} *</label>
-      <input type="text" name="oib" id="oib-input" value="{{ data.oib }}" class="reg-input" placeholder="12345678901" required>
-      <div id="oib-status" style="margin-top:4px;font-size:0.85rem;display:none"></div>
-      {% if errors.oib %}<div class="error-msg">{{ errors.oib }}</div>{% endif %}
+  <!-- ═══ OIB + "NE ZNAM OIB?" LINK ═══ -->
+  <div class="reg-field">
+    <label id="oibLabel">{% trans "OIB / Porezni broj" %} *</label>
+    <input type="text" name="oib" id="oib-input" value="{{ data.oib }}" class="reg-input" placeholder="12345678901" required>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+      <div id="oib-status" style="font-size:0.85rem;display:none"></div>
+      <a href="#" onclick="showOibHelp();return false" style="font-size:.8rem;color:var(--gold);text-decoration:none">
+        {% trans "Ne znam OIB?" %} →
+      </a>
     </div>
-    <div class="reg-field">
-      <label>{% trans "Država" %}</label>
-      <div style="display:flex;gap:1rem;padding-top:.5rem">
-        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.95rem;color:var(--text)">
-          <input type="radio" name="country" value="HR" {% if data.country == 'HR' or not data.country %}checked{% endif %}>
-          🇭🇷 Hrvatska
-        </label>
-        <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.95rem;color:var(--text)">
-          <input type="radio" name="country" value="DE" {% if data.country == 'DE' %}checked{% endif %}>
-          🇩🇪 Njemačka
-        </label>
+    {% if errors.oib %}<div class="error-msg">{{ errors.oib }}</div>{% endif %}
+  </div>
+
+  <!-- ═══ OIB HELP MODAL ═══ -->
+  <div id="oibModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center">
+    <div style="background:#111;border:1px solid var(--gold);border-radius:12px;padding:24px;max-width:460px;width:90%;position:relative">
+      <button onclick="hideOibHelp()" style="position:absolute;top:10px;right:14px;background:none;border:none;color:#666;font-size:20px;cursor:pointer">&times;</button>
+      <h3 style="color:var(--gold);margin-bottom:12px">{% trans "Kako pronaći OIB?" %}</h3>
+
+      <div id="oibHelpHR" class="oib-help-section">
+        <p style="font-size:.9rem;color:#ccc;line-height:1.6">
+          <strong>Hrvatska:</strong> OIB je Osobni identifikacijski broj (11 znamenki).<br>
+          Možete ga pronaći na:
+        </p>
+        <ul style="font-size:.85rem;color:#aaa;line-height:1.8;padding-left:18px">
+          <li><a href="https://e-porezna.porezna-uprava.hr" target="_blank" rel="noopener" style="color:var(--gold)">ePorezna</a> — unesite naziv tvrtke</li>
+          <li><a href="https://sudreg.pravosudje.hr" target="_blank" rel="noopener" style="color:var(--gold)">Sudski registar</a> — pretraga po nazivu</li>
+          <li>Izvod iz Obrtnog registra</li>
+          <li>Na svakom računu koji ste ikad primili</li>
+        </ul>
+      </div>
+      <div id="oibHelpDE" class="oib-help-section" style="display:none">
+        <p style="font-size:.9rem;color:#ccc;line-height:1.6">
+          <strong>Deutschland/Österreich:</strong> Steuernummer oder USt-IdNr.<br>
+        </p>
+        <ul style="font-size:.85rem;color:#aaa;line-height:1.8;padding-left:18px">
+          <li><a href="https://www.unternehmensregister.de" target="_blank" rel="noopener" style="color:var(--gold)">Unternehmensregister</a></li>
+          <li><a href="https://ec.europa.eu/taxation_customs/vies/" target="_blank" rel="noopener" style="color:var(--gold)">EU VIES</a> — USt-IdNr Prüfung</li>
+          <li>Gewerbeanmeldung / Steuerbescheid</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:16px;text-align:center">
+        <button onclick="hideOibHelp()" style="padding:8px 24px;background:var(--gold);color:#000;border:none;border-radius:8px;font-weight:bold;cursor:pointer">
+          {% trans "Razumijem" %}
+        </button>
       </div>
     </div>
   </div>
@@ -102,9 +120,7 @@
   <div class="reg-field">
     <label>{% trans "Djelatnost" %}</label>
     <select name="industry" class="reg-input">
-      {% for val, label in industries %}
-      <option value="{{ val }}" {% if data.industry == val %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
+      {% for val, label in industries %}<option value="{{ val }}" {% if data.industry == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
 
@@ -115,38 +131,134 @@
   </form>
 </div>
 
+<style>
+.country-opt {
+  display:flex; align-items:center; gap:.5rem; cursor:pointer;
+  font-size:.95rem; color:var(--text); padding:6px 12px;
+  border:1px solid #333; border-radius:8px; transition:all .2s;
+}
+.country-opt:has(input:checked) { border-color:var(--gold); background:rgba(201,168,76,.08); }
+.country-opt input { display:none; }
+.country-flag { font-size:1.2rem; }
+.name-hint-item {
+  padding:8px 12px; cursor:pointer; font-size:.88rem; color:#ccc;
+  border-bottom:1px solid #222; transition: background .15s;
+}
+.name-hint-item:hover { background:#1a1a1a; color:var(--gold); }
+.name-hint-item:last-child { border-bottom:none; }
+</style>
+
 <script>
-// Country toggle (OIB label)
+// ═══ COUNTRY → LANGUAGE SESSION ═══
 (function(){
-  var radios = document.querySelectorAll('input[name="country"]');
-  var oibLabel = document.querySelector('label[for="id_oib"]');
-  if (!oibLabel) {
-    var labels = document.querySelectorAll('.reg-field label');
-    for (var i = 0; i < labels.length; i++) {
-      if (labels[i].textContent.indexOf('OIB') !== -1 || labels[i].textContent.indexOf('Porezni broj') !== -1) {
-        oibLabel = labels[i]; break;
-      }
-    }
-  }
-  var oibInput = document.querySelector('input[name="oib"]');
-  function update() {
-    var val = document.querySelector('input[name="country"]:checked');
-    if (!val || !oibLabel || !oibInput) return;
-    if (val.value === 'DE') {
-      oibLabel.innerHTML = 'Porezni broj / PDV ID *';
-      oibInput.placeholder = 'DE123456789';
-      oibInput.maxLength = 50;
-    } else {
-      oibLabel.innerHTML = 'OIB *';
-      oibInput.placeholder = '12345678901';
-      oibInput.maxLength = 11;
-    }
-  }
-  for (var i = 0; i < radios.length; i++) radios[i].addEventListener('change', update);
-  update();
+  var langMap = {HR:'hr', DE:'de', AT:'de', SI:'sl'};
+  document.querySelectorAll('input[name="country"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      var lang = langMap[this.value] || 'hr';
+      // Set Django session language via AJAX
+      fetch('/i18n/setlang/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+        body: 'language=' + lang + '&next=' + encodeURIComponent(window.location.pathname)
+      });
+      // Update OIB label
+      updateOibLabel(this.value);
+      // Update OIB help modal
+      var hr = document.getElementById('oibHelpHR');
+      var de = document.getElementById('oibHelpDE');
+      if (this.value === 'HR' || this.value === 'SI') { hr.style.display=''; de.style.display='none'; }
+      else { hr.style.display='none'; de.style.display=''; }
+    });
+  });
 })();
 
-// OIB Auto-Lookup
+function updateOibLabel(country) {
+  var label = document.getElementById('oibLabel');
+  var input = document.getElementById('oib-input');
+  if (country === 'DE' || country === 'AT') {
+    label.textContent = 'Steuernummer / USt-IdNr *';
+    input.placeholder = 'DE123456789';
+    input.maxLength = 50;
+  } else if (country === 'SI') {
+    label.textContent = 'Davčna številka *';
+    input.placeholder = '12345678';
+    input.maxLength = 20;
+  } else {
+    label.textContent = 'OIB *';
+    input.placeholder = '12345678901';
+    input.maxLength = 11;
+  }
+}
+// Init
+var initCountry = document.querySelector('input[name="country"]:checked');
+if (initCountry) updateOibLabel(initCountry.value);
+
+// ═══ OIB HELP MODAL ═══
+function showOibHelp() {
+  var m = document.getElementById('oibModal');
+  m.style.display = 'flex';
+}
+function hideOibHelp() {
+  document.getElementById('oibModal').style.display = 'none';
+}
+document.getElementById('oibModal').addEventListener('click', function(e) {
+  if (e.target === this) hideOibHelp();
+});
+
+// ═══ NAME SEARCH — hint iz internog DB-a ═══
+(function(){
+  var nameInput = document.getElementById('nameInput');
+  var hintsEl = document.getElementById('nameHints');
+  var oibInput = document.getElementById('oib-input');
+  var timer;
+
+  nameInput.addEventListener('input', function() {
+    clearTimeout(timer);
+    var q = this.value.trim();
+    if (q.length < 3) { hintsEl.style.display = 'none'; return; }
+    timer = setTimeout(function() {
+      fetch('/hr/register/api/name-search/?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d.results && d.results.length > 0) {
+            hintsEl.innerHTML = d.results.map(function(r) {
+              return '<div class="name-hint-item" data-oib="' + (r.oib||'') + '" data-name="' + r.name + '" data-addr="' + (r.address||'') + '" data-city="' + (r.city||'') + '" data-zip="' + (r.zip||'') + '">'
+                + r.name + (r.oib ? ' <span style="color:#666;font-size:.75rem">(' + r.oib + ')</span>' : '')
+                + '</div>';
+            }).join('');
+            hintsEl.style.display = 'block';
+            // Click handler
+            hintsEl.querySelectorAll('.name-hint-item').forEach(function(el) {
+              el.addEventListener('click', function() {
+                nameInput.value = this.dataset.name;
+                if (this.dataset.oib) oibInput.value = this.dataset.oib;
+                var addr = document.querySelector('input[name="address"]');
+                var city = document.querySelector('input[name="city"]');
+                var zip = document.querySelector('input[name="zip_code"]');
+                if (this.dataset.addr && addr && !addr.value) addr.value = this.dataset.addr;
+                if (this.dataset.city && city && !city.value) city.value = this.dataset.city;
+                if (this.dataset.zip && zip && !zip.value) zip.value = this.dataset.zip;
+                hintsEl.style.display = 'none';
+                oibInput.dispatchEvent(new Event('input')); // trigger OIB lookup
+              });
+            });
+          } else {
+            hintsEl.style.display = 'none';
+          }
+        })
+        .catch(function() { hintsEl.style.display = 'none'; });
+    }, 400);
+  });
+
+  // Hide hints on outside click
+  document.addEventListener('click', function(e) {
+    if (!nameInput.contains(e.target) && !hintsEl.contains(e.target)) {
+      hintsEl.style.display = 'none';
+    }
+  });
+})();
+
+// ═══ OIB AUTO-LOOKUP ═══
 (function(){
   var oibInput = document.getElementById('oib-input');
   var statusEl = document.getElementById('oib-status');
@@ -155,8 +267,6 @@
   var cityInput = document.querySelector('input[name="city"]');
   var zipInput = document.querySelector('input[name="zip_code"]');
   var timer;
-
-  if (!oibInput || !statusEl) return;
 
   oibInput.addEventListener('blur', doLookup);
   oibInput.addEventListener('input', function() {
@@ -173,7 +283,7 @@
     if (oib.length < 8) return;
 
     statusEl.style.display = 'block';
-    statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Trazim u registru...';
+    statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Tražim u registru" %}...';
     statusEl.style.color = '#888';
 
     fetch('/hr/register/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=' + country)
@@ -181,10 +291,10 @@
       .then(function(d) {
         if (d.found) {
           if (d.existing) {
-            statusEl.innerHTML = '<i class="fas fa-info-circle"></i> ' + (d.message || 'Tvrtka vec postoji u sustavu.');
+            statusEl.innerHTML = '<i class="fas fa-info-circle"></i> ' + (d.message || '{% trans "Tvrtka već postoji u sustavu." %}');
             statusEl.style.color = '#f59e0b';
           } else {
-            statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Pronasli smo vasu tvrtku u registru!';
+            statusEl.innerHTML = '<i class="fas fa-check-circle"></i> {% trans "Pronašli smo vašu tvrtku u registru!" %}';
             statusEl.style.color = '#22c55e';
           }
           if (d.name && nameInput && !nameInput.value) nameInput.value = d.name;
@@ -195,7 +305,7 @@
           statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + d.error;
           statusEl.style.color = '#ef4444';
         } else {
-          statusEl.innerHTML = '<i class="fas fa-minus-circle"></i> Nije pronadjeno — unesite rucno.';
+          statusEl.innerHTML = '<i class="fas fa-minus-circle"></i> {% trans "Nije pronađeno — unesite ručno." %}';
           statusEl.style.color = '#888';
         }
       })
