@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # Gemini Task — Fitness modul: audit i plan za 10/10
 
 ## Što postoji (pročitaj sve)

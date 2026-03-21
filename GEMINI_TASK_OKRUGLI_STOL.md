@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # GEMINI TASK — Analiza: Okrugli stol arhitektura i prava pristupa
 
 ## Što je okrugli stol

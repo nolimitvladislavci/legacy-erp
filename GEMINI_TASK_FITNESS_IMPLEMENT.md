@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # Gemini Task — Fitness modul: implementacija 10/10
 
 ## Status

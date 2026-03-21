@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — Provjera i audit okruglog stola
 
 ## Tvoj zadatak

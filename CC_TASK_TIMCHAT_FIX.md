@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — HITNO: Tim Chat endpoint fix (10 minuta)
 
 ## Problem

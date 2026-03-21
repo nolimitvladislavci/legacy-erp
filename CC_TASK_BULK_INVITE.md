@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — bulk_invite management command
 
 Tvoj zadatak je jedan fajl, jedna komanda, jedan cilj.

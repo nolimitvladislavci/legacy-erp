@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # GEMINI TASK — Analiza: bulk_invite sigurnost i edge cases
 
 ## Kontekst projekta

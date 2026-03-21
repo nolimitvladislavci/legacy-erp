@@ -6,7 +6,7 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-21 — CC Code (Opus)
+2026-03-21 06:30 — CC Code (Opus) — Transport modul + status sync
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |

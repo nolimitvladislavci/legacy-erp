@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — HITNO: Arhiva mobile UX + duplicate fix
 
 ## Bugs s terena (Ivan testirao na mobitelu, bez interneta)

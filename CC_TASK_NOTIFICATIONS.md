@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — Notification sustav: ugodna komunikacija
 
 ## Pravila (ne mijenjaj bez razloga)

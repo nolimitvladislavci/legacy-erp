@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — Cockpit: kontrolni gumbi za Ivan (mobitel)
 
 ## Što dodati u ivan_cockpit.html

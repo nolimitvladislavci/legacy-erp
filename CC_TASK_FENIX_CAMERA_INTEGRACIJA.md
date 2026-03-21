@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — FenixCamera: integracija u sve module + knjiga žalbi FAB
 
 ## Filozofija (čitaj prije nego kreneš)

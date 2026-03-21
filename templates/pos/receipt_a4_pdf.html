@@ -75,19 +75,33 @@ td   { padding: 3px 5px; vertical-align: top; }
   </tr>
 </table>
 
+<!-- ── R1 RAČUN (podaci kupca) ── -->
+{% if receipt.is_r1 and receipt.buyer_oib %}
+<table style="margin-bottom:12px;border:1px solid #c9a84c;border-radius:4px">
+  <tr>
+    <td style="padding:8px;background:#fafaf5">
+      <div style="font-size:7pt;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% if company.country == 'DE' %}RECHNUNGSEMPFÄNGER (R1){% else %}KUPAC / R1 RAČUN{% endif %}</div>
+      <div style="font-size:10pt;font-weight:bold">{{ receipt.buyer_name }}</div>
+      <div style="font-size:9pt;color:#555">OIB{% if company.country == 'DE' %}/St.Nr{% endif %}: {{ receipt.buyer_oib }}</div>
+      {% if receipt.buyer_address %}<div style="font-size:9pt;color:#555">{{ receipt.buyer_address }}</div>{% endif %}
+    </td>
+  </tr>
+</table>
+{% endif %}
+
 <!-- ── INFO — all 4 cells get explicit % widths ── -->
 <table style="margin-bottom:12px">
   <tr>
     <td class="info-lbl">Terminal:</td>
     <td class="info-val">{{ terminal.name }} ({{ terminal.terminal_code }})</td>
-    <td class="info-lbl">Blagajnik:</td>
+    <td class="info-lbl">{% if company.country == 'DE' %}Kassierer{% else %}Blagajnik{% endif %}:</td>
     <td class="info-val">{{ receipt.session.operator.get_full_name|default:receipt.session.operator.username }}</td>
   </tr>
   <tr>
-    <td class="info-lbl">Smjena:</td>
+    <td class="info-lbl">{% if company.country == 'DE' %}Schicht{% else %}Smjena{% endif %}:</td>
     <td class="info-val">#{{ receipt.session.session_number }}</td>
     {% if receipt.table_number %}
-    <td class="info-lbl">Stol/zona:</td>
+    <td class="info-lbl">{% if company.country == 'DE' %}Tisch{% else %}Stol/zona{% endif %}:</td>
     <td class="info-val">{{ receipt.table_number }}</td>
     {% else %}
     <td class="info-lbl"></td><td class="info-val"></td>
@@ -152,6 +166,41 @@ td   { padding: 3px 5px; vertical-align: top; }
     <td class="tot-grand-val">&euro;{{ receipt.total|floatformat:2 }}</td>
   </tr>
 </table>
+
+<!-- ── PDV RAZRADA PO STOPAMA (zakonski obavezno) ── -->
+{% if tax_breakdown %}
+<table style="margin-bottom:12px;font-size:8.5pt">
+  <thead>
+    <tr style="background:#f8f8f8">
+      <td style="width:58%"></td>
+      <td style="padding:4px 6px;font-weight:bold;font-size:7pt;text-transform:uppercase;color:#666">{% if company.country == 'DE' %}Steuersatz{% else %}PDV stopa{% endif %}</td>
+      <td style="padding:4px 6px;font-weight:bold;font-size:7pt;text-transform:uppercase;color:#666;text-align:right">{% if company.country == 'DE' %}Nettobetrag{% else %}Osnovica{% endif %}</td>
+      <td style="padding:4px 6px;font-weight:bold;font-size:7pt;text-transform:uppercase;color:#666;text-align:right">{% if company.country == 'DE' %}MwSt{% else %}PDV{% endif %}</td>
+      <td style="padding:4px 6px;font-weight:bold;font-size:7pt;text-transform:uppercase;color:#666;text-align:right">{% if company.country == 'DE' %}Brutto{% else %}Ukupno{% endif %}</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rate, data in tax_breakdown.items %}
+    <tr>
+      <td></td>
+      <td style="padding:3px 6px">{{ rate }}</td>
+      <td style="padding:3px 6px;text-align:right">&euro;{{ data.base|floatformat:2 }}</td>
+      <td style="padding:3px 6px;text-align:right">&euro;{{ data.tax|floatformat:2 }}</td>
+      <td style="padding:3px 6px;text-align:right;font-weight:bold">&euro;{{ data.total|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- ── R1/R2 OZNAKA ── -->
+<div style="font-size:7pt;color:#888;text-align:right;margin-bottom:8px">
+{% if receipt.is_r1 %}
+<strong style="color:#c9a84c">R1</strong> — {% if company.country == 'DE' %}Rechnung mit Empfängerdaten{% else %}Račun s podacima kupca{% endif %}
+{% else %}
+<strong>R2</strong> — {% if company.country == 'DE' %}Kassenbon{% else %}Gotovinski račun{% endif %}
+{% endif %}
+</div>
 
 <!-- ── PAYMENT ── -->
 {% if payment_lines %}

@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — HITNO: Ivan Cockpit URL + View (5 minuta)
 
 ## Problem

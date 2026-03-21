@@ -610,6 +610,24 @@ def receipt_pdf(request, receipt_id):
     # BusinessLocation za PP oznaku
     bl = receipt.session.terminal.business_location
 
+    # PDV razrada po stopama (zakonski obavezna na računu)
+    from decimal import Decimal
+    tax_breakdown = {}
+    for item in items:
+        rate = item.tax_rate if item.tax_rate is not None else Decimal('0')
+        rate_str = '%s%%' % rate
+        if rate_str not in tax_breakdown:
+            tax_breakdown[rate_str] = {'base': Decimal('0'), 'tax': Decimal('0'), 'total': Decimal('0')}
+        if rate > 0:
+            net = item.total_price / (1 + rate / 100)
+            tax_amt = item.total_price - net
+        else:
+            net = item.total_price
+            tax_amt = Decimal('0')
+        tax_breakdown[rate_str]['base'] += net
+        tax_breakdown[rate_str]['tax'] += tax_amt
+        tax_breakdown[rate_str]['total'] += item.total_price
+
     ctx = {
         'receipt': receipt,
         'items': items,
@@ -618,6 +636,7 @@ def receipt_pdf(request, receipt_id):
         'terminal': receipt.session.terminal,
         'fina_qr_b64': fina_qr_b64,
         'business_location': bl,
+        'tax_breakdown': tax_breakdown,
     }
 
     if fmt == 'thermal':

@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — Okrugli stol (AI Tim widget za Ivan Cockpit)
 
 ## Što gradimo

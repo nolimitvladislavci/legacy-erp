@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # CC Task — Faza 3 + Newsletter (sekvencijalno)
 
 Danas radiš dva zadatka REDOM (ne paralelno):

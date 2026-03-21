@@ -1,3 +1,8 @@
+## PRVO PROCITAJ STATUS
+```bash
+cat /var/www/fina-connect/FENIX_STATUS.md
+```
+
 # Gemini Task — Pravni okvir: POS vs e-Račun, DE/HR
 
 ## Kontekst

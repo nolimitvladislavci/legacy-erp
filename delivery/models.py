@@ -1216,3 +1216,426 @@ class DeliveryZone(models.Model):
         }
         days = [d.strip() for d in self.delivery_days.split(',') if d.strip()]
         return ', '.join(day_map.get(d, d) for d in days)
+
+
+# ═══════════════════════════════════════════════════════════════
+# TRANSPORT MODULE — Faza 1
+# ═══════════════════════════════════════════════════════════════
+
+class VehicleDocument(models.Model):
+    """Dokumenti vozila — registracija, ATP, osiguranje, servis, tahograf."""
+    DOC_TYPES = [
+        ('registration', _('Prometna dozvola')),
+        ('atp_certificate', _('ATP certifikat (temp. prijevoz)')),
+        ('insurance', _('Obvezno osiguranje')),
+        ('casco', _('Kasko osiguranje')),
+        ('cmr_insurance', _('CMR osiguranje prijevoznika')),
+        ('technical_inspection', _('Tehnički pregled')),
+        ('tachograph_calibration', _('Baždarenje tahografa')),
+        ('community_licence', _('Licenca Zajednice (EU)')),
+        ('other', _('Ostalo')),
+    ]
+
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='documents')
+    doc_type = models.CharField(max_length=30, choices=DOC_TYPES, verbose_name=_('Tip dokumenta'))
+    doc_number = models.CharField(max_length=50, blank=True, verbose_name=_('Broj dokumenta'))
+    valid_from = models.DateField(verbose_name=_('Vrijedi od'))
+    valid_until = models.DateField(verbose_name=_('Vrijedi do'))
+    file = models.FileField(upload_to='vehicles/docs/%Y/', blank=True, verbose_name=_('Datoteka'))
+    reminder_days = models.PositiveSmallIntegerField(default=30, verbose_name=_('Podsjetnik (dana prije)'))
+    notes = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Dokument vozila')
+        verbose_name_plural = _('Dokumenti vozila')
+        ordering = ['valid_until']
+
+    def __str__(self):
+        return '%s — %s (do %s)' % (self.vehicle.plate_number, self.get_doc_type_display(), self.valid_until)
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return self.valid_until < timezone.now().date()
+
+    @property
+    def days_until_expiry(self):
+        from django.utils import timezone
+        return (self.valid_until - timezone.now().date()).days
+
+    @property
+    def needs_renewal_alert(self):
+        d = self.days_until_expiry
+        return 0 < d <= self.reminder_days
+
+
+class DriverDocument(models.Model):
+    """Dokumenti vozača — vozačka, CPC, ADR, potvrda za non-EU vozače."""
+    DOC_TYPES = [
+        ('driving_licence', _('Vozačka dozvola')),
+        ('cpc_card', _('CPC kartica (kvalifikacija)')),
+        ('adr_cert', _('ADR certifikat (opasne tvari)')),
+        ('driver_attestation', _('Potvrda za vozače (non-EU)')),
+        ('health_cert', _('Liječnička potvrda')),
+        ('tachograph_card', _('Tahograf kartica')),
+        ('id_passport', _('Osobna / Putovnica')),
+        ('work_permit', _('Radna dozvola')),
+        ('posting_declaration', _('Izjava o upućivanju (DE Posting)')),
+        ('other', _('Ostalo')),
+    ]
+
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='driver_documents')
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='driver_documents',
+                                null=True, blank=True)
+    doc_type = models.CharField(max_length=30, choices=DOC_TYPES, verbose_name=_('Tip dokumenta'))
+    doc_number = models.CharField(max_length=50, blank=True, verbose_name=_('Broj dokumenta'))
+    categories = models.CharField(max_length=20, blank=True, verbose_name=_('Kategorije'),
+                                   help_text=_('B, C, CE...'))
+    issuing_country = models.CharField(max_length=5, blank=True, verbose_name=_('Država izdavanja'))
+    valid_from = models.DateField(null=True, blank=True, verbose_name=_('Vrijedi od'))
+    valid_until = models.DateField(verbose_name=_('Vrijedi do'))
+    file = models.FileField(upload_to='drivers/docs/%Y/', blank=True, verbose_name=_('Datoteka'))
+    reminder_days = models.PositiveSmallIntegerField(default=30, verbose_name=_('Podsjetnik (dana prije)'))
+    notes = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Dokument vozača')
+        verbose_name_plural = _('Dokumenti vozača')
+        ordering = ['valid_until']
+
+    def __str__(self):
+        return '%s — %s (do %s)' % (self.driver.get_full_name(), self.get_doc_type_display(), self.valid_until)
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return self.valid_until < timezone.now().date()
+
+    @property
+    def days_until_expiry(self):
+        from django.utils import timezone
+        return (self.valid_until - timezone.now().date()).days
+
+    @property
+    def is_non_eu_driver(self):
+        eu_countries = {'HR','DE','AT','SI','HU','IT','FR','ES','NL','BE','CZ','SK','PL','RO','BG'}
+        return self.issuing_country and self.issuing_country not in eu_countries
+
+
+class TransportOrder(models.Model):
+    """
+    Centralni nalog za prijevoz — spaja vozilo, vozača, rutu, CMR, HACCP.
+    Jedinstven dokument koji pokriva sve scenarije:
+    - Termo kutije (hrana po HR)
+    - Kombi prijevoz (DE↔HR↔BA↔RS)
+    - Terenska prodaja (POS field session)
+    """
+    TRANSPORT_TYPES = [
+        ('food_local', _('Hrana — lokalna dostava')),
+        ('food_regional', _('Hrana — regionalna (do 48h)')),
+        ('food_international', _('Hrana — međunarodni')),
+        ('freight_eu', _('Teret — EU')),
+        ('freight_non_eu', _('Teret — izvan EU (BA/RS/ME)')),
+        ('moving', _('Selidba / kombi prijevoz')),
+        ('field_sales', _('Terenska prodaja')),
+    ]
+    STATUS_CHOICES = [
+        ('draft', _('Nacrt')),
+        ('planned', _('Planirano')),
+        ('docs_check', _('Provjera dokumenata')),
+        ('loading', _('Utovar')),
+        ('in_transit', _('U tranzitu')),
+        ('border_crossing', _('Carinski prijelaz')),
+        ('unloading', _('Istovar')),
+        ('delivered', _('Isporučeno')),
+        ('cancelled', _('Otkazano')),
+    ]
+    COUNTRY_CHOICES = [
+        ('HR', 'Hrvatska'), ('DE', 'Njemačka'), ('AT', 'Austrija'),
+        ('SI', 'Slovenija'), ('HU', 'Mađarska'), ('BA', 'Bosna i Hercegovina'),
+        ('RS', 'Srbija'), ('ME', 'Crna Gora'), ('IT', 'Italija'),
+        ('CZ', 'Češka'), ('SK', 'Slovačka'), ('PL', 'Poljska'),
+    ]
+
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='transport_orders')
+    order_number = models.CharField(max_length=30, unique=True, verbose_name=_('Broj naloga'))
+    transport_type = models.CharField(max_length=25, choices=TRANSPORT_TYPES, verbose_name=_('Tip prijevoza'))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+
+    # Vozilo i vozač
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True, blank=True, related_name='transport_orders')
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name='transport_orders_as_driver')
+
+    # Ruta
+    origin_address = models.CharField(max_length=300, verbose_name=_('Polazište'))
+    origin_country = models.CharField(max_length=5, choices=COUNTRY_CHOICES, default='HR')
+    destination_address = models.CharField(max_length=300, verbose_name=_('Odredište'))
+    destination_country = models.CharField(max_length=5, choices=COUNTRY_CHOICES, default='HR')
+    via_countries = models.JSONField(default=list, blank=True, verbose_name=_('Tranzitne države'),
+                                     help_text=_('["AT","HU"] za rutu kroz Austriju i Mađarsku'))
+    estimated_km = models.DecimalField(max_digits=8, decimal_places=1, null=True, blank=True,
+                                        verbose_name=_('Procjena km'))
+
+    # Datumi
+    planned_departure = models.DateTimeField(verbose_name=_('Planirani polazak'))
+    planned_arrival = models.DateTimeField(verbose_name=_('Planirani dolazak'))
+    actual_departure = models.DateTimeField(null=True, blank=True)
+    actual_arrival = models.DateTimeField(null=True, blank=True)
+
+    # Povezani dokumenti (auto-generirani)
+    cmr = models.ForeignKey('documents.CMR', on_delete=models.SET_NULL, null=True, blank=True,
+                            related_name='transport_orders')
+    otpremnica = models.ForeignKey('documents.Otpremnica', on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name='transport_orders')
+    delivery_route = models.ForeignKey(DeliveryRoute, on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name='transport_orders')
+    consolidated_delivery = models.ForeignKey(ConsolidatedDelivery, on_delete=models.SET_NULL, null=True, blank=True,
+                                               related_name='transport_orders')
+
+    # Temperatura (za hranu)
+    requires_cold_chain = models.BooleanField(default=False, verbose_name=_('Zahtijeva hladni lanac'))
+    temp_min = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
+                                    verbose_name=_('Min temp (°C)'))
+    temp_max = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True,
+                                    verbose_name=_('Max temp (°C)'))
+
+    # Teret
+    cargo_description = models.TextField(blank=True, verbose_name=_('Opis tereta'))
+    total_weight_kg = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
+                                           verbose_name=_('Ukupna težina (kg)'))
+    total_volume_m3 = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                           verbose_name=_('Ukupni volumen (m³)'))
+    package_count = models.PositiveIntegerField(default=1, verbose_name=_('Broj koleta'))
+
+    # Financije
+    fuel_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Trošak goriva'))
+    toll_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Cestarina'))
+    other_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Ostali troškovi'))
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Ukupni trošak'))
+    client_price = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                        verbose_name=_('Cijena za klijenta'))
+
+    # Zakonske provjere (AI kontrola)
+    licence_verified = models.BooleanField(default=False, verbose_name=_('Licenca Zajednice ✓'))
+    driver_cert_verified = models.BooleanField(default=False, verbose_name=_('Potvrda za vozača ✓'))
+    posting_declared = models.BooleanField(default=False, verbose_name=_('Posting declaration ✓'))
+    posting_document = models.ForeignKey(DriverDocument, on_delete=models.SET_NULL, null=True, blank=True,
+                                          related_name='posting_orders', verbose_name=_('Posting Declaration dokument'),
+                                          help_text=_('FK na DriverDocument tipa posting_declaration s IMI referencom'))
+    atp_valid = models.BooleanField(default=False, verbose_name=_('ATP certifikat ✓'))
+    customs_docs_ready = models.BooleanField(default=False, verbose_name=_('Carinski dokumenti ✓'))
+    cabotage_check_passed = models.BooleanField(default=False, verbose_name=_('Kabotaža provjera ✓'))
+
+    # Klijent / naručitelj
+    client_name = models.CharField(max_length=200, blank=True, verbose_name=_('Naručitelj'))
+    client_phone = models.CharField(max_length=30, blank=True)
+    client_reference = models.CharField(max_length=50, blank=True, verbose_name=_('Referenca naručitelja'))
+
+    # Tracking
+    tracking_token = models.CharField(max_length=32, unique=True, blank=True)
+
+    notes = models.TextField(blank=True, verbose_name=_('Napomene'))
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name='created_transport_orders')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Nalog za prijevoz')
+        verbose_name_plural = _('Nalozi za prijevoz')
+        ordering = ['-planned_departure']
+
+    def __str__(self):
+        return '%s %s→%s (%s)' % (self.order_number, self.origin_country, self.destination_country, self.get_status_display())
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            self.order_number = self._generate_number()
+        if not self.tracking_token:
+            import uuid
+            self.tracking_token = uuid.uuid4().hex[:16]
+        # Auto-calculate total cost
+        self.total_cost = self.fuel_cost + self.toll_cost + self.other_cost
+        super().save(*args, **kwargs)
+
+    def _generate_number(self):
+        from django.utils import timezone
+        year = timezone.now().year
+        last = TransportOrder.objects.filter(
+            order_number__startswith='TO-%d-' % year
+        ).order_by('-order_number').first()
+        seq = 1
+        if last:
+            try:
+                seq = int(last.order_number.split('-')[-1]) + 1
+            except (ValueError, IndexError):
+                pass
+        return 'TO-%d-%04d' % (year, seq)
+
+    @property
+    def is_international(self):
+        return self.origin_country != self.destination_country
+
+    @property
+    def crosses_eu_border(self):
+        non_eu = {'BA', 'RS', 'ME'}
+        all_countries = {self.origin_country, self.destination_country} | set(self.via_countries or [])
+        return bool(all_countries & non_eu)
+
+    @property
+    def needs_posting_declaration(self):
+        """DE zahtijeva Posting Declaration za sve upućene radnike."""
+        return 'DE' in {self.origin_country, self.destination_country} | set(self.via_countries or [])
+
+    @property
+    def profit(self):
+        return self.client_price - self.total_cost
+
+    def verify_documents(self):
+        """AI provjera svih dokumenata prije polaska."""
+        from django.utils import timezone
+        today = timezone.now().date()
+        issues = []
+
+        # 1. Vozilo
+        if self.vehicle:
+            # ATP
+            if self.requires_cold_chain:
+                atp = VehicleDocument.objects.filter(
+                    vehicle=self.vehicle, doc_type='atp_certificate',
+                    valid_until__gte=today
+                ).first()
+                self.atp_valid = bool(atp)
+                if not atp:
+                    issues.append('ATP certifikat istekao ili ne postoji')
+
+            # Licenca Zajednice (za međunarodni)
+            if self.is_international:
+                lic = VehicleDocument.objects.filter(
+                    vehicle=self.vehicle, doc_type='community_licence',
+                    valid_until__gte=today
+                ).first()
+                self.licence_verified = bool(lic)
+                if not lic:
+                    issues.append('Licenca Zajednice nije validna')
+
+            # Registracija
+            reg = VehicleDocument.objects.filter(
+                vehicle=self.vehicle, doc_type='registration',
+                valid_until__gte=today
+            ).first()
+            if not reg:
+                issues.append('Prometna dozvola istekla')
+
+        # 2. Vozač
+        if self.driver:
+            # Vozačka dozvola
+            dl = DriverDocument.objects.filter(
+                driver=self.driver, doc_type='driving_licence',
+                valid_until__gte=today
+            ).first()
+            if not dl:
+                issues.append('Vozačka dozvola istekla')
+
+            # Potvrda za non-EU vozače
+            if self.crosses_eu_border:
+                att = DriverDocument.objects.filter(
+                    driver=self.driver, doc_type='driver_attestation',
+                    valid_until__gte=today
+                ).first()
+                if att:
+                    self.driver_cert_verified = True
+                elif dl and dl.is_non_eu_driver:
+                    issues.append('Non-EU vozač nema Potvrdu za vozače')
+
+        # 3. Posting declaration (DE)
+        if self.needs_posting_declaration:
+            if not self.posting_declared:
+                issues.append('Potrebna Posting Declaration za DE')
+
+        # 4. Carinski dokumenti (BA/RS)
+        if self.crosses_eu_border:
+            if not self.customs_docs_ready:
+                issues.append('Carinski dokumenti nisu spremni (T1/T2)')
+
+        self.save(update_fields=[
+            'atp_valid', 'licence_verified', 'driver_cert_verified',
+            'posting_declared', 'customs_docs_ready',
+        ])
+
+        return issues
+
+
+class TachographEntry(models.Model):
+    """Dnevna evidencija tahografa — zakonski obavezno."""
+    driver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tachograph_entries')
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='tachograph_entries')
+    transport_order = models.ForeignKey(TransportOrder, on_delete=models.SET_NULL, null=True, blank=True,
+                                         related_name='tachograph_entries')
+    date = models.DateField(verbose_name=_('Datum'))
+    driving_minutes = models.PositiveIntegerField(default=0, verbose_name=_('Vožnja (min)'))
+    other_work_minutes = models.PositiveIntegerField(default=0, verbose_name=_('Ostali rad (min)'))
+    availability_minutes = models.PositiveIntegerField(default=0, verbose_name=_('Raspoloživost (min)'))
+    rest_minutes = models.PositiveIntegerField(default=0, verbose_name=_('Odmor (min)'))
+    odometer_start = models.PositiveIntegerField(default=0, verbose_name=_('km start'))
+    odometer_end = models.PositiveIntegerField(default=0, verbose_name=_('km kraj'))
+    notes = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Tahograf zapis')
+        verbose_name_plural = _('Tahograf zapisi')
+        unique_together = [('driver', 'date')]
+        ordering = ['-date']
+
+    def __str__(self):
+        return '%s %s — %d min vožnje' % (self.driver.get_full_name(), self.date, self.driving_minutes)
+
+    @property
+    def driving_hours(self):
+        return self.driving_minutes / 60
+
+    @property
+    def km_driven(self):
+        return self.odometer_end - self.odometer_start
+
+    @property
+    def daily_driving_exceeded(self):
+        """Max 9h (540 min), iznimno 10h (600 min) 2x/tjedan."""
+        return self.driving_minutes > 540
+
+    @property
+    def break_violation(self):
+        """Pauza 45 min obavezna nakon 4.5h (270 min) vožnje."""
+        return self.driving_minutes > 270 and self.rest_minutes < 45
+
+
+class FuelEntry(models.Model):
+    """Evidencija goriva po vozilu."""
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='fuel_entries')
+    transport_order = models.ForeignKey(TransportOrder, on_delete=models.SET_NULL, null=True, blank=True,
+                                         related_name='fuel_entries')
+    date = models.DateTimeField(verbose_name=_('Datum'))
+    liters = models.DecimalField(max_digits=8, decimal_places=2, verbose_name=_('Litara'))
+    price_per_liter = models.DecimalField(max_digits=6, decimal_places=3, verbose_name=_('Cijena/L'))
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_('Ukupno'))
+    odometer_km = models.PositiveIntegerField(verbose_name=_('Kilometraža'))
+    fuel_station = models.CharField(max_length=100, blank=True, verbose_name=_('Postaja'))
+    country = models.CharField(max_length=5, default='HR', verbose_name=_('Država'))
+    receipt_photo = models.ImageField(upload_to='fuel/%Y/%m/', blank=True, verbose_name=_('Foto računa'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Gorivo')
+        verbose_name_plural = _('Gorivo')
+        ordering = ['-date']
+
+    def __str__(self):
+        return '%s %s — %.1fL (%.2f EUR)' % (self.vehicle.plate_number, self.date.strftime('%d.%m.'), self.liters, self.total_cost)
+
+    def save(self, *args, **kwargs):
+        self.total_cost = self.liters * self.price_per_liter
+        super().save(*args, **kwargs)

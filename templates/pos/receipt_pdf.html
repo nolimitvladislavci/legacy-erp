@@ -59,6 +59,7 @@
 <div class="meta-line">Bon br.: #{{ receipt.receipt_number }}</div>
 <div class="meta-line">Datum: {{ receipt.created_at|date:"d.m.Y H:i" }}</div>
 {% if receipt.table_number %}<div class="meta-line">Stol: {{ receipt.table_number }}</div>{% endif %}
+{% if receipt.is_r1 %}<div class="meta-line" style="font-weight:bold;color:#b38a20">R1 | {{ receipt.buyer_name }} | OIB: {{ receipt.buyer_oib }}</div>{% endif %}
 
 <hr class="divider">
 
@@ -111,6 +112,17 @@
 </div>
 {% endif %}
 {% endfor %}
+
+{% if tax_breakdown %}
+<hr class="divider">
+<div style="font-size:6.5pt;color:#333">
+{% for rate, data in tax_breakdown.items %}
+<div class="totals-row" style="font-size:7pt"><span>{{ rate }}:</span><span>neto €{{ data.base|floatformat:2 }} | PDV €{{ data.tax|floatformat:2 }}</span></div>
+{% endfor %}
+</div>
+{% endif %}
+
+<div style="text-align:center;font-size:6pt;color:#888;margin:3px 0">{% if receipt.is_r1 %}R1{% else %}R2{% endif %}</div>
 
 <hr class="divider">
 
