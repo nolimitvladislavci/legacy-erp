@@ -523,6 +523,13 @@ class CheckoutService:
         }
         if fiscal_error:
             result['fiscal_warning'] = fiscal_error
+            result['not_fiscalized'] = True
+            result['fiscal_message'] = (
+                'Racun je izdan ali NIJE fiskaliziran. '
+                'Razlog: %s. '
+                'Sustav ce automatski pokusati ponovo u roku 2 minute.'
+            ) % fiscal_error[:80]
+            logger.warning('NOT FISCALIZED: Bon #%s — %s', next_number, fiscal_error)
 
         # ── 10b. AUTO e-RACUN ZA B2B (R1) ──
         # Od 01.01.2026. B2B transakcije MORAJU imati e-Racun
