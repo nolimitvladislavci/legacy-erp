@@ -6,6 +6,7 @@
 ---
 
 ## Zadnje azuriranje
+2026-03-21 13:30 — CC Code (Opus) — Invoice Growth Engine: referral footer na PDF/email, 8 AI misija aktivirano, WhatsApp status report
 2026-03-21 13:15 — CC Code (Opus) — GTM Foundation DONE: OIB lookup API, pricing kalkulator, empty states (3 modula)
 2026-03-21 12:30 — CC Code (Opus) — limit_connect_ai Faza 1 DONE: 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin, migracije
 2026-03-21 11:00 — Sonnet (Ivan sesija) — LIMIT Connect AI Master Plan kreiran i odobren
@@ -254,6 +255,13 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - Pricing Kalkulator (slider + toggleovi + usteda) na /pricing/ — DONE
 - Empty State partial (partials/empty_state.html) — DONE
 - Empty states: invoicing, partners, inventory — DONE
+
+### Invoice-Powered Growth Engine (KOMPLET — 21.03.)
+- Referral footer na 3 PDF baze (modern, datev, viskovic) — DONE
+- Referral footer na invoice_hr.html — DONE
+- CTA link na base_email.html (svi emailovi iz sustava) — DONE
+- 8 AI misija aktivirano (daily_report + fund_watch za 4 klijenta) — DONE
+- WhatsApp status report poslan Ivanu — DONE
 
 ---
 
