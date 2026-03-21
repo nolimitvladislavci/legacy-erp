@@ -124,14 +124,29 @@ class RateLimitMiddleware:
         path = request.path
         ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', 'unknown')
 
+        # Static files, i18n, health — no rate limit
+        if path.startswith('/static/') or path.startswith('/media/') or '/i18n/' in path or path == '/health/':
+            return self.get_response(request)
+
         if '/login/' in path or '/api/token/' in path or '/password/' in path:
-            limit, window = 10, 60
+            limit, window = 30, 60   # Was 10 — too strict for page + assets
         elif path.startswith('/api/') or path.startswith('/_dev/'):
             limit, window = 60, 60
+        elif '/register/' in path:
+            limit, window = 60, 60   # Registration flow needs breathing room
         else:
             limit, window = 300, 60
 
-        key = 'rl:%s:%s' % (ip, path.split('/')[1] if '/' in path[1:] else 'root')
+        # Key: IP + category (not path segment — prevents asset requests eating login quota)
+        if '/login/' in path or '/password/' in path:
+            cat = 'auth'
+        elif '/register/' in path:
+            cat = 'reg'
+        elif path.startswith('/api/') or path.startswith('/_dev/'):
+            cat = 'api'
+        else:
+            cat = 'web'
+        key = 'rl:%s:%s' % (ip, cat)
 
         try:
             import redis
