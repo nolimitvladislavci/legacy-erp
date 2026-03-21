@@ -264,6 +264,30 @@ class CheckoutService:
                     'sind gemaess Paragraph 14 Abs. 4 UStG erforderlich. Bitte Kaeufer eingeben.'
                 )
 
+        # ── 1c. KARENCIJA GUARD (livestock) ──
+        # Blokira prodaju mlijeka/mesa od grla u karenciji (antibiotik/lijek)
+        for item_data in payload.get('items', []):
+            item_id = item_data.get('item_id') or item_data.get('id')
+            if item_id:
+                try:
+                    from inventory.models import InventoryItem
+                    inv_item = InventoryItem.objects.select_related('livestock_animal').get(pk=item_id)
+                    if inv_item.livestock_animal and inv_item.livestock_animal.is_in_karencija:
+                        animal = inv_item.livestock_animal
+                        raise CheckoutValidationError(
+                            'KARENCIJA_BLOCKED',
+                            'BLOKIRANO: %s je u karenciji do %s (%s). '
+                            'Prodaja mlijeka/mesa ovog grla je zakonom zabranjena.' % (
+                                animal.ear_tag, animal.karencija_end, animal.karencija_reason,
+                            )
+                        )
+                except InventoryItem.DoesNotExist:
+                    pass
+                except CheckoutValidationError:
+                    raise
+                except Exception:
+                    pass
+
         # ── 2. VALIDACIJA ──
         if not session_id:
             raise CheckoutValidationError('NO_SESSION', 'session_id je obavezan')

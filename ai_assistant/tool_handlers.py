@@ -35,6 +35,11 @@ def handle_tool_call(tool_name, params, user, company):
         "get_worktime_report": _get_worktime_report,
         "preview_invoice_from_hours": _preview_invoice_from_hours,
         "create_invoice_from_hours": _create_invoice_from_hours,
+        "get_fund_opportunities": _get_fund_opportunities,
+        "get_livestock_status": _get_livestock_status,
+        "create_futures_listing": _create_futures_listing,
+        "get_compliance_warnings": _get_compliance_warnings,
+        "get_intelligence_results": _get_intelligence_results,
     }
     handler = handlers.get(tool_name)
     if not handler:
@@ -1121,3 +1126,335 @@ def _create_invoice_from_hours(params, user, company):
         "due_date": str(invoice.date_due),
         "next_step": f"Racun {invoice_number} je kreiran u statusu DRAFT. Pregledaj i posalji klijentu.",
     }
+
+
+# --- Fenix Intelligence v2 handlers (CC Code) ---
+
+def _get_fund_opportunities(params, user, company):
+    """Dohvati relevantne EU fondove i HR poticaje. READ-ONLY, s 24h cacheom."""
+    try:
+        from intelligence.models import FundOpportunity
+        from django.core.cache import cache
+        from django.utils import timezone as tz
+        today = tz.now().date()
+
+        tip = params.get('tip', 'sve')
+        rok_dana = params.get('rok_dana', 90)
+        samo_aktivni = params.get('samo_aktivni', True)
+
+        biz_type = getattr(company, 'business_type', 'doo') if company else 'doo'
+        cache_key = f'fund_opps_{biz_type}_{tip}_{rok_dana}'
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+
+        qs = FundOpportunity.objects.all()
+        if samo_aktivni:
+            qs = qs.filter(status='aktivan')
+        if tip != 'sve':
+            tip_map = {'eu_fond': 'eu', 'hr_poticaj': 'hr', 'bio_certifikacija': 'bio'}
+            prefix = tip_map.get(tip, tip)
+            if prefix == 'bio':
+                qs = qs.filter(kljucne_rijeci__contains=['bio'])
+            else:
+                qs = qs.filter(tip__startswith=prefix)
+        if rok_dana:
+            qs = qs.filter(rok_prijave__lte=today + timedelta(days=rok_dana))
+
+        if company and biz_type == 'opg':
+            qs = qs.filter(ciljna_skupina__in=['opg', 'svi'])
+        elif company and biz_type in ('udruga', 'kud', 'sport'):
+            qs = qs.filter(ciljna_skupina__in=['udruga', 'svi'])
+
+        rezultati = []
+        for f in qs.order_by('rok_prijave')[:10]:
+            days = f.days_until_deadline
+            rezultati.append({
+                'naziv': f.naziv,
+                'tip': f.get_tip_display(),
+                'tijelo': f.tijelo,
+                'iznos_max_eur': float(f.iznos_max_eur) if f.iznos_max_eur else None,
+                'rok_prijave': str(f.rok_prijave) if f.rok_prijave else None,
+                'preostalo_dana': days,
+                'hitno': f.hitno,
+                'ai_summary': f.ai_summary[:200] if f.ai_summary else '',
+                'checklist': f.ai_checklist[:3] if f.ai_checklist else [],
+                'url': f.url,
+            })
+
+        result = {
+            'ukupno': qs.count(),
+            'prikazano': len(rezultati),
+            'fondovi': rezultati,
+            'napomena': f'Firma: {company.name} ({biz_type})' if company else 'Nema firme',
+        }
+
+        if any(r.get('hitno') for r in rezultati):
+            return result
+        cache.set(cache_key, result, timeout=86400)
+        return result
+    except ImportError:
+        return {
+            'error': 'Intelligence modul jos nije instaliran.',
+            'info': 'Pokrenite CC_TASK_FENIX_INTELLIGENCE.md za aktivaciju.',
+        }
+
+
+def _get_livestock_status(params, user, company):
+    """Status farme goveda za OPG. READ-ONLY -- nikad ne pise u bazu."""
+    try:
+        from livestock.models import Livestock, HealthRecord, MilkRecord, CropPlan
+        from django.db.models import Sum
+        today = timezone.now().date()
+        detalji = params.get('detalji', 'pregled')
+
+        if company and getattr(company, 'business_type', '') != 'opg':
+            return {'info': 'Livestock modul dostupan samo za OPG firme.'}
+
+        if not company:
+            return {'error': 'Nema aktivne firme.'}
+
+        grla = Livestock.objects.filter(company=company)
+
+        if detalji == 'pregled':
+            return {
+                'ukupno_grla': grla.count(),
+                'aktivnih': grla.filter(status='aktivno').count(),
+                'gravidnih': grla.filter(status='gravidno').count(),
+                'teli_uskoro': grla.filter(
+                    expected_calving__lte=today + timedelta(days=21),
+                    expected_calving__gte=today, status='gravidno'
+                ).count(),
+                'u_karenciji': HealthRecord.objects.filter(
+                    animal__company=company,
+                    karencija_do__gte=today
+                ).count(),
+                'bio_grla': grla.filter(is_organic=True).count(),
+            }
+        elif detalji == 'zdravlje':
+            alarmi = HealthRecord.objects.filter(
+                animal__company=company,
+                karencija_do__gte=today
+            ).select_related('animal')[:10]
+            return {
+                'u_karenciji': [
+                    {
+                        'grlo': r.animal.ear_tag,
+                        'lijek': r.lijek,
+                        'karencija_do': str(r.karencija_do),
+                        'preostalo_dana': (r.karencija_do - today).days,
+                    } for r in alarmi
+                ]
+            }
+        elif detalji == 'mlijeko':
+            jucer = today - timedelta(days=1)
+            mr = MilkRecord.objects.filter(animal__company=company, datum=jucer)
+            agg = mr.aggregate(ukupno=Sum('ukupno_l'))
+            return {
+                'datum': str(jucer),
+                'ukupno_litara': float(agg['ukupno'] or 0),
+                'broj_krava': mr.count(),
+                'prosjek_po_kravi': round(float(agg['ukupno'] or 0) / max(mr.count(), 1), 2),
+            }
+        elif detalji == 'usjevi':
+            planovi = CropPlan.objects.filter(company=company).order_by('-godina')[:5]
+            return {
+                'planovi': [
+                    {
+                        'id': p.pk,
+                        'kultura': p.get_kultura_display(),
+                        'godina': p.godina,
+                        'status': p.get_status_display(),
+                        'za_prodaju': p.za_prodaju,
+                        'visak_t': float(p.procijenjeni_visak_t) if p.procijenjeni_visak_t else None,
+                        'auto_listing_spreman': p.auto_listing_ready,
+                    } for p in planovi
+                ]
+            }
+        return {'error': f'Nepoznati detalji: {detalji}'}
+    except ImportError:
+        return {'error': 'Livestock modul jos nije instaliran.'}
+
+
+def _create_futures_listing(params, user, company):
+    """ASSISTED: Objavi visak usjeva na Burzi. Prolazi kroz AIGate."""
+    try:
+        from superadmin_ai.services import AIGate
+        gate = AIGate()
+        crop_plan_id = params.get('crop_plan_id')
+        result = gate.check(
+            company=company,
+            module='marketplace',
+            action_type='create_futures_listing',
+            user=user,
+            description=f'AI zeli kreirati FuturesListing za crop_plan_id={crop_plan_id}',
+        )
+        if result.blocked:
+            return {'error': result.message, 'blocked': True}
+        if result.queued:
+            return {
+                'status': 'QUEUED',
+                'message': 'Zahtjev je poslan na odobrenje. Potvrdi u AI Cockpitu.',
+                'pending_action_id': str(result.pending_action.id) if result.pending_action else None,
+            }
+        try:
+            from livestock.models import CropPlan
+            from intelligence.services import create_futures_listing_from_crop
+            plan = CropPlan.objects.get(pk=params['crop_plan_id'], company=company)
+            if params.get('cijena_eur_t'):
+                plan._override_price = params['cijena_eur_t']
+            created = create_futures_listing_from_crop(plan)
+            return {
+                'status': 'CREATED' if created else 'ALREADY_EXISTS',
+                'kultura': plan.get_kultura_display(),
+                'visak_t': float(plan.procijenjeni_visak_t) if plan.procijenjeni_visak_t else None,
+            }
+        except Exception as e:
+            return {'error': str(e)}
+    except ImportError:
+        return {'error': 'SuperadminAI ili Intelligence modul nije instaliran.'}
+
+
+def _get_compliance_warnings(params, user, company):
+    """Prediktivna compliance provjera. READ-ONLY -- skenira sve module."""
+    today = timezone.now().date()
+    kategorija = params.get('kategorija', 'sve')
+    upozorenja = []
+
+    if not company:
+        return {'error': 'Nema aktivne firme.'}
+
+    if kategorija in ('sve', 'pdv'):
+        try:
+            if getattr(company, 'is_nonprofit', False) or getattr(company, 'business_type', '') in ('udruga',):
+                from invoicing.models import Invoice
+                promet = Invoice.objects.filter(
+                    company=company, date__year=today.year, status='paid'
+                ).aggregate(s=Sum('total_amount'))['s'] or 0
+                if float(promet) > 25000:
+                    upozorenja.append({
+                        'tip': 'pdv_granica',
+                        'razina': 'warning' if float(promet) < 28000 else 'critical',
+                        'poruka': f'Promet {promet:.0f} EUR -- granica za PDV obveznika je 30.000 EUR',
+                        'akcija': 'Konzultirajte poreznog savjetnika',
+                    })
+        except Exception:
+            pass
+
+    if kategorija in ('sve', 'dokumenti'):
+        try:
+            from delivery.models import VehicleDocument
+            vd = VehicleDocument.objects.filter(
+                vehicle__company=company,
+                valid_until__lte=today + timedelta(days=30)
+            ).order_by('valid_until')[:5]
+            for d in vd:
+                upozorenja.append({
+                    'tip': 'dokument_vozila',
+                    'razina': 'critical' if d.is_expired else 'warning',
+                    'poruka': f'{d.vehicle.plate_number}: {d.get_doc_type_display()} istice {d.valid_until}',
+                    'preostalo_dana': d.days_until_expiry,
+                })
+        except Exception:
+            pass
+
+    if kategorija in ('sve', 'clanarine'):
+        try:
+            from udruge.models import Clan
+            uskoro = Clan.objects.filter(
+                company=company, status='aktivan',
+                membership_expires__lte=today + timedelta(days=14),
+                membership_expires__gte=today,
+            ).count()
+            if uskoro:
+                upozorenja.append({
+                    'tip': 'clanstvo_istice',
+                    'razina': 'warning',
+                    'poruka': f'{uskoro} clanova ima clanstvo koje istice za 14 dana',
+                    'akcija': 'Posalji WhatsApp podsjetnik (send_expiry_reminders)',
+                })
+        except Exception:
+            pass
+
+    if kategorija in ('sve', 'livestock'):
+        try:
+            from livestock.models import HealthRecord
+            karencija = HealthRecord.objects.filter(
+                animal__company=company,
+                karencija_do__gte=today,
+            ).count()
+            if karencija:
+                upozorenja.append({
+                    'tip': 'karencija_goveda',
+                    'razina': 'critical',
+                    'poruka': f'{karencija} grla u karenciji -- mlijeko i meso NE smiju u prodaju!',
+                    'akcija': 'Provjeri ear tagove u livestock modulu',
+                })
+        except Exception:
+            pass
+
+    if kategorija in ('sve', 'fondovi'):
+        try:
+            from intelligence.models import FundOpportunity
+            hitni = FundOpportunity.objects.filter(
+                status='aktivan',
+                rok_prijave__lte=today + timedelta(days=14),
+                rok_prijave__gte=today,
+            ).count()
+            if hitni:
+                upozorenja.append({
+                    'tip': 'fond_rok',
+                    'razina': 'warning',
+                    'poruka': f'{hitni} natjecaj/a istice za 14 dana',
+                    'akcija': 'Provjeri get_fund_opportunities za detalje',
+                })
+        except Exception:
+            pass
+
+    return {
+        'ukupno_upozorenja': len(upozorenja),
+        'status': 'CLEAN' if not upozorenja else ('CRITICAL' if any(u['razina'] == 'critical' for u in upozorenja) else 'WARNING'),
+        'upozorenja': upozorenja,
+        'firma': company.name,
+    }
+
+
+# CC Code prijedlog: get_intelligence_results -- korisnik pita "sto si nasao?"
+def _get_intelligence_results(params, user, company):
+    """Dohvati najnovije Intelligence pronalaske za firmu. READ-ONLY."""
+    try:
+        from intelligence.models import IntelligenceResult
+        status_filter = params.get('status', 'novo')
+        limit = params.get('limit', 10)
+
+        if not company:
+            return {'error': 'Nema aktivne firme.'}
+
+        qs = IntelligenceResult.objects.filter(job__company=company)
+        if status_filter != 'sve':
+            qs = qs.filter(status=status_filter)
+
+        rezultati = []
+        for r in qs.order_by('-ai_relevantnost', '-created_at')[:limit]:
+            rezultati.append({
+                'naslov': r.naslov,
+                'summary': r.summary[:300] if r.summary else '',
+                'url': r.url,
+                'relevantnost': r.ai_relevantnost,
+                'status': r.get_status_display(),
+                'izvor': r.source.naziv if r.source else 'Nepoznat',
+                'datum': str(r.created_at.date()),
+                'promo_tekst': r.promo_tekst[:200] if r.promo_tekst else '',
+            })
+
+        return {
+            'ukupno': qs.count(),
+            'prikazano': len(rezultati),
+            'rezultati': rezultati,
+            'firma': company.name,
+        }
+    except ImportError:
+        return {
+            'error': 'Intelligence modul jos nije instaliran.',
+            'info': 'Pokrenite CC_TASK_FENIX_INTELLIGENCE.md za aktivaciju.',
+        }

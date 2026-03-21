@@ -72,6 +72,32 @@ class Livestock(models.Model):
         return delta.days // 30
 
     @property
+    def is_in_karencija(self):
+        """True ako grlo ima aktivnu karenciju — zabrana prodaje mlijeka/mesa."""
+        today = timezone.now().date()
+        return self.health_records.filter(
+            karencija_do__gte=today
+        ).exists()
+
+    @property
+    def karencija_end(self):
+        """Datum isteka karencije (najkasniji)."""
+        today = timezone.now().date()
+        rec = self.health_records.filter(
+            karencija_do__gte=today
+        ).order_by('-karencija_do').first()
+        return rec.karencija_do if rec else None
+
+    @property
+    def karencija_reason(self):
+        """Razlog karencije (zadnji tretman)."""
+        today = timezone.now().date()
+        rec = self.health_records.filter(
+            karencija_do__gte=today
+        ).order_by('-karencija_do').first()
+        return '%s (%s)' % (rec.lijek, rec.opis) if rec else ''
+
+    @property
     def calving_soon(self):
         if not self.expected_calving:
             return False

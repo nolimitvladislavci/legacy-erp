@@ -54,6 +54,14 @@ class InventoryItem(models.Model):
 
 
     # ── DSFinV-K / KassenSichV flags ─────────────────────────────────────
+    # Livestock link — za mlijecne/mesne proizvode
+    livestock_animal = models.ForeignKey(
+        'livestock.Livestock', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='products',
+        verbose_name='Vezano grlo',
+        help_text='Za pracenje karencije — blokira prodaju ako grlo u karenciji',
+    )
+
     is_pfand = models.BooleanField(
         default=False,
         verbose_name=_("Pfand (povratna ambalaza)"),

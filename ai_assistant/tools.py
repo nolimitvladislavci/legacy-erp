@@ -283,4 +283,96 @@ TOOLS = [
             "required": ["project_code"]
         }
     },
+    # --- Fenix Intelligence v2 tools (CC Code) ---
+    {
+        "name": "get_fund_opportunities",
+        "description": "Dohvati relevantne EU fondove i HR poticaje za firmu. Filtrira po tipu firme (OPG, udruga, d.o.o.), roku prijave i iznosu. Koristi Intelligence modul.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "tip": {
+                    "type": "string",
+                    "description": "Tip: eu_fond, hr_poticaj, bio_certifikacija, sve (default: sve)",
+                    "enum": ["eu_fond", "hr_poticaj", "bio_certifikacija", "sve"]
+                },
+                "rok_dana": {
+                    "type": "integer",
+                    "description": "Fondovi koji isticu za N dana (default: 90)"
+                },
+                "samo_aktivni": {
+                    "type": "boolean",
+                    "description": "Samo aktivni natjecaji (default: true)"
+                }
+            }
+        }
+    },
+    {
+        "name": "get_livestock_status",
+        "description": "Status farme goveda za OPG. Broj grla, zdravstveni alarmi, mlijeko danas, krave koje tele uskoro, plan sjetve. Samo za OPG firme.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "detalji": {
+                    "type": "string",
+                    "description": "Sto prikazati: pregled, zdravlje, mlijeko, usjevi (default: pregled)",
+                    "enum": ["pregled", "zdravlje", "mlijeko", "usjevi"]
+                }
+            }
+        }
+    },
+    {
+        "name": "create_futures_listing",
+        "description": "ASSISTED: Objavi visak usjeva ili proizvoda na Burzi kao FuturesListing. Prolazi kroz AIGate ASSISTED razinu -- ceka potvrdu vlasnika. Samo za OPG firme.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "crop_plan_id": {
+                    "type": "integer",
+                    "description": "ID CropPlana ciji visak objavljujemo (iz get_livestock_status usjevi)"
+                },
+                "cijena_eur_t": {
+                    "type": "number",
+                    "description": "Cijena u EUR po toni (OPG postavlja)"
+                },
+                "napomena": {
+                    "type": "string",
+                    "description": "Napomena za listing (opcionalno)"
+                }
+            },
+            "required": ["crop_plan_id"]
+        }
+    },
+    {
+        "name": "get_compliance_warnings",
+        "description": "Prediktivna compliance provjera: PDV granica, istekli dokumenti vozila/vozaca, membership expiry, karencija goveda, EU fond rokovi. AI upozorava PRIJE problema.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "kategorija": {
+                    "type": "string",
+                    "description": "Kategorija: sve, pdv, dokumenti, clanarine, livestock, fondovi (default: sve)",
+                    "enum": ["sve", "pdv", "dokumenti", "clanarine", "livestock", "fondovi"]
+                }
+            }
+        }
+    },
+    # CC Code prijedlog: get_intelligence_results -- korisnik pita "sto si nasao?" / "ima li novih pronalazaka"
+    {
+        "name": "get_intelligence_results",
+        "description": "Dohvati najnovije Intelligence pronalaske (FundOpportunity, trzisne cijene, agro vijesti) za firmu. Koristiti kad korisnik pita 'sto si nasao', 'ima li novih pronalazaka', 'novosti'.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "description": "Filter po statusu: novo, obavljeno, odbaceno, sve (default: novo)",
+                    "enum": ["novo", "obavljeno", "odbaceno", "sve"]
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maksimalan broj rezultata (default: 10)"
+                }
+            }
+        }
+    },
 ]
