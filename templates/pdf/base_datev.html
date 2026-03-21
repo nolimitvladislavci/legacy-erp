@@ -75,7 +75,7 @@ table.pdf-table tfoot td{border-top:2px solid #000;font-weight:bold;padding:6px}
 <div class="pdf-footer">
 <div>{% block footer_legal %}{% if company.country == 'DE' %}Erstellt gem. § 147 AO · GoBD-konform (Rz. 50-55){% else %}Čl. 9. st. 2. ZOR-a{% endif %}{% endblock %}</div>
 <div>{% doc_integrity_badge lang=company.country|default:"hr"|lower %}
-    {% block footer_branding %}{% now "d.m.Y H:i" %}{% endblock %}</div>
+    {% block footer_branding %}LIMIT Connect · {% now "d.m.Y H:i" %} · limit-connect.com{% endblock %}</div>
 </div>
 
 </body>

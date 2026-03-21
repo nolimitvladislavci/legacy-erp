@@ -79,7 +79,7 @@ table.pdf-table tfoot td{background:#f1f5f9;font-weight:bold;padding:8px 10px;bo
 <div class="pdf-footer">
 <div>{% block footer_legal %}{% if company.country == 'DE' %}Elektronisches Dokument — § 147 AO, GoBD-konform{% else %}Elektronički dokument — čl. 9. st. 2. ZOR-a{% endif %}{% endblock %}</div>
 <div class="branding">{% doc_integrity_badge lang=company.country|default:"hr"|lower %}
-    {% block footer_branding %}LIMIT Connect · {% now "d.m.Y. H:i" %}{% endblock %}</div>
+    {% block footer_branding %}LIMIT Connect · {% now "d.m.Y. H:i" %} · limit-connect.com{% endblock %}</div>
 </div>
 
 </body>

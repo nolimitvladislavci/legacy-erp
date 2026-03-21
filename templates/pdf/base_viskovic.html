@@ -79,7 +79,7 @@ table.pdf-table tfoot td{border-top:2px solid #0a0a0a;font-weight:bold;padding:8
 <div class="pdf-footer">
 <div class="legal">{% block footer_legal %}{% if company.country == 'DE' %}Elektronisches Dokument — gültig ohne Stempel und Unterschrift. § 147 AO, GoBD-konform.{% else %}Elektronički dokument — vjerodostojan bez pečata i potpisa (čl. 9. st. 2. ZOR-a).{% endif %}{% endblock %}</div>
 <div class="branding">{% doc_integrity_badge lang=company.country|default:"hr"|lower %}
-    {% block footer_branding %}LIMIT Connect ERP · {% now "d.m.Y. H:i" %}{% endblock %}</div>
+    {% block footer_branding %}LIMIT Connect ERP · {% now "d.m.Y. H:i" %} · limit-connect.com{% endblock %}</div>
 </div>
 
 </body>
