@@ -6,13 +6,14 @@
 ---
 
 ## Zadnje azuriranje
+2026-03-21 12:30 — CC Code (Opus) — limit_connect_ai Faza 1 DONE: 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin, migracije
 2026-03-21 11:00 — Sonnet (Ivan sesija) — LIMIT Connect AI Master Plan kreiran i odobren
 2026-03-21 10:30 — CC Code (Opus) — Session end: Transport 35/36, Korpa 1833 faktura, memorija komplet
-SLJEDEĆI TASK: CC_TASK_LIMIT_AI_FOUNDATION.md (limit_connect_ai app — 5 modela, 4 taska, 4 viewa)
+SLJEDEĆI TASK: CC_TASK_LIMIT_AI_FUNDS.md (EU fondovi workflow — Faza 2)
 
 ## Git HEAD
-094162f — Institutional API: HAPIH/JRDZ/Sanitarna/VetIS endpoints + token management + vet/accountant/inspector roles + audit log
-369 migracija aplicirano, 0 čeka.
+a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatchItem + CampaignPlan
+371 migracija aplicirano, 0 čeka.
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |
@@ -233,6 +234,20 @@ SLJEDEĆI TASK: CC_TASK_LIMIT_AI_FOUNDATION.md (limit_connect_ai app — 5 model
 - Token management + vet/accountant/inspector roles — DONE
 - Audit log za svaki API poziv — DONE
 
+### limit_connect_ai Faza 1 (KOMPLET — 21.03.)
+- AIAgentMission model (UUID PK, mission_type, frequency, notify_channel) — DONE
+- AIReportLog model (content, sent_via, status, ai_tokens_used) — DONE
+- FundApplicationDraft model (eligibility_score, draft_content, FK FundOpportunity) — DONE
+- ComplianceWatchItem model (law_reference, deadline, status, ai_notes) — DONE
+- CampaignPlan model (campaign_type, message_template, ai_suggestion, estimated_reach) — DONE
+- Celery tasks: morning_report_all (07:30), fund_check_all (09:00), compliance_check_all (pon 08:00), campaign_suggestions_all (pet 10:00) — DONE
+- Views: cockpit, missions, reports, funds — DONE
+- Templates: 4 HTML (ai_cockpit, ai_missions, ai_reports, ai_funds) — DONE
+- Admin: 5 modela registrirano s list_display + list_filter — DONE
+- CELERY_BEAT_SCHEDULE: 4 nova taska dodana — DONE
+- Migracije: 0001_initial + 0002_campaignplan_compliancewatchitem — DONE
+- URL: /ai-cockpit/ (cockpit, missions, reports, funds) — DONE
+
 ---
 
 ## OTVORENO — treba raditi
@@ -270,13 +285,13 @@ SLJEDEĆI TASK: CC_TASK_LIMIT_AI_FOUNDATION.md (limit_connect_ai app — 5 model
 
 ### LIMIT Connect AI — Master Plan (ODOBREN — 2026-03-21)
 - LIMIT_CONNECT_AI_PLAN.md kreiran — kompletni roadmap
-- CC_TASK_LIMIT_AI_FOUNDATION.md — spreman za CC Code (Faza 1)
+- CC_TASK_LIMIT_AI_FOUNDATION.md — DONE (Faza 1 kompletna)
 - GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — spreman za Gemini (Faza 2)
 - Vizija: per-klijent AI asistent, EU fondovi, compliance watchdog, kampanje, WhatsApp/email report
 
 ## SLJEDEĆI TASKOVI (po prioritetu)
-1. CC_TASK_LIMIT_AI_FOUNDATION.md — CC Code — limit_connect_ai app (Faza 1) — AKTIVAN
-2. GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — Gemini — ComplianceWatchdog (Faza 2) — CEKA FAZU 1
-3. CC_TASK_LIMIT_AI_FUNDS.md — CC Code — EU fondovi workflow (Faza 2) — CEKA FAZU 1
+1. CC_TASK_LIMIT_AI_FOUNDATION.md — CC Code — DONE
+2. GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — Gemini — ComplianceWatchdog (Faza 2) — SPREMAN
+3. CC_TASK_LIMIT_AI_FUNDS.md — CC Code — EU fondovi workflow (Faza 2) — SPREMAN
 4. GEMINI_TASK_LIMIT_AI_CAMPAIGNS.md — Gemini — CampaignPlanner (Faza 3) — CEKA FAZU 2
 5. CC_TASK_LIMIT_AI_COCKPIT.md — CC Code — per-klijent cockpit (Faza 3) — CEKA FAZU 2
