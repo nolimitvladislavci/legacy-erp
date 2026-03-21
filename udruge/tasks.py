@@ -195,10 +195,18 @@ def check_access_card(self, card_uid, company_id):
 
 @shared_task(bind=True, soft_time_limit=300)
 def send_email_campaign(self, campaign_id):
-    """Send email campaign to all recipients."""
+    """
+    Send email campaign with rate limiting.
+    Batch: 50 emails, 2s pause between batches.
+    Prevents SMTP blacklisting and spam flags.
+    """
+    import time
     from .models import EmailKampanja, EmailLog
     from django.core.mail import send_mail
     from django.utils import timezone as tz
+
+    BATCH_SIZE = 50
+    BATCH_DELAY = 2  # seconds between batches
 
     campaign = EmailKampanja.objects.get(pk=campaign_id)
     if campaign.status != 'scheduled':
@@ -207,11 +215,30 @@ def send_email_campaign(self, campaign_id):
     campaign.status = 'sending'
     campaign.save(update_fields=['status'])
 
-    recipients = campaign.get_recipients()
-    campaign.total_recipients = recipients.count()
-    sent = 0
+    recipients = list(campaign.get_recipients())
+    campaign.total_recipients = len(recipients)
+    campaign.save(update_fields=['total_recipients'])
 
-    for clan in recipients:
+    sent = 0
+    errors = 0
+    bounced_emails = set()
+
+    # Load previously bounced emails (don't resend)
+    bounced_emails = set(
+        EmailLog.objects.filter(
+            kampanja__company=campaign.company, status='bounced',
+        ).values_list('email', flat=True).distinct()
+    )
+
+    for i, clan in enumerate(recipients):
+        # Skip bounced
+        if clan.email.lower() in bounced_emails:
+            EmailLog.objects.create(
+                kampanja=campaign, clan=clan, email=clan.email,
+                status='bounced', error_message='Previously bounced — skipped',
+            )
+            continue
+
         try:
             send_mail(
                 subject=campaign.subject,
@@ -219,7 +246,7 @@ def send_email_campaign(self, campaign_id):
                 html_message=campaign.body_html,
                 from_email=None,
                 recipient_list=[clan.email],
-                fail_silently=True,
+                fail_silently=False,
             )
             EmailLog.objects.create(
                 kampanja=campaign, clan=clan, email=clan.email,
@@ -227,14 +254,28 @@ def send_email_campaign(self, campaign_id):
             )
             sent += 1
         except Exception as e:
+            err_msg = str(e)[:255]
+            status = 'bounced' if 'bounce' in err_msg.lower() or '550' in err_msg else 'error'
             EmailLog.objects.create(
                 kampanja=campaign, clan=clan, email=clan.email,
-                status='error', error_message=str(e)[:255],
+                status=status, error_message=err_msg,
             )
+            errors += 1
+
+        # Rate limit: pause every BATCH_SIZE emails
+        if (i + 1) % BATCH_SIZE == 0 and i < len(recipients) - 1:
+            # Update progress mid-campaign
+            campaign.total_sent = sent
+            campaign.save(update_fields=['total_sent'])
+            time.sleep(BATCH_DELAY)
 
     campaign.total_sent = sent
+    campaign.total_bounced = errors
     campaign.status = 'sent'
     campaign.sent_at = tz.now()
     campaign.save()
 
-    return {'sent': sent, 'total': campaign.total_recipients}
+    logger.info('Email campaign %s: sent=%d, errors=%d, total=%d',
+                campaign.name, sent, errors, len(recipients))
+
+    return {'sent': sent, 'errors': errors, 'total': len(recipients)}
