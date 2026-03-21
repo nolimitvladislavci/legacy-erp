@@ -2764,12 +2764,14 @@ def fiscal_room(request):
     from datetime import timedelta
     from fiscal.models import FiscalLog
 
+    company = get_user_company(request)
     threshold = now() - timedelta(hours=36)
     pending_qs = POSReceipt.objects.filter(
+        session__terminal__company=company,
         status='paid'
     ).filter(Q(jir__isnull=True) | Q(jir=''))
 
-    last_logs = FiscalLog.objects.all().order_by('-created_at')[:20]
+    last_logs = FiscalLog.objects.filter(company=company).order_by('-created_at')[:20] if company else FiscalLog.objects.none()
 
     return render(request, 'fiscal/room.html', {
         'pending_count':  pending_qs.count(),
@@ -2786,7 +2788,9 @@ def fiscal_room_sync(request):
     from django.db.models import Q
     from pos.services import _attempt_fiscalization
 
+    company = get_user_company(request)
     pending = POSReceipt.objects.filter(
+        session__terminal__company=company,
         status='paid'
     ).filter(Q(jir__isnull=True) | Q(jir=''))
 
@@ -2808,9 +2812,11 @@ def fiscal_room_sync(request):
 
 @login_required
 def fiscal_status_api(request):
-    """AJAX: broj PAID računa koji čekaju fiskalizaciju."""
+    """AJAX: broj PAID računa koji čekaju fiskalizaciju — per company."""
     from django.db.models import Q
+    company = get_user_company(request)
     pending = POSReceipt.objects.filter(
+        session__terminal__company=company,
         status='paid'
     ).filter(Q(jir__isnull=True) | Q(jir='')).count()
     return JsonResponse({'pending': pending})
