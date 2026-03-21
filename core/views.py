@@ -1016,6 +1016,9 @@ def company_dashboard(request):
                     ob.save(update_fields=['profile_completed', 'updated_at'])
             if not ob.dismissed:
                 onboarding = ob
+                # Redirect new users to wizard if onboarding < 60% complete
+                if ob.percent < 60 and not request.GET.get('skip_onboarding'):
+                    return redirect('onboarding_wizard')
     except Exception:
         logger.warning("Suppressed error", exc_info=True)
     context['onboarding'] = onboarding
