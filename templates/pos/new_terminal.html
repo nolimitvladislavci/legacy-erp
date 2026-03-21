@@ -54,7 +54,7 @@
       <p class="text-center text-muted mb-4" style="font-size:.85rem">Odaberi tip — svaki ima drugačije sučelje prilagođeno tvom poslu</p>
       <div class="type-grid">
         {% for t in pos_types %}
-        <div class="type-card" onclick="selectType(this,'{{ t.value }}')" data-type="{{ t.value }}" style="--accent:{{ t.color }}">
+        <div class="type-card" data-type="{{ t.value }}" style="--accent:{{ t.color }};cursor:pointer">
           <div class="type-icon">{{ t.icon }}</div>
           <div class="type-label" style="color:{{ t.color }}">{{ t.label }}</div>
           <div class="type-desc">{{ t.desc }}</div>
@@ -73,7 +73,7 @@
       <p class="text-center text-muted mb-4" style="font-size:.85rem">Odaberi postojeću poslovnicu ili kreiraj novu</p>
 
       {% for b in branches %}
-      <div class="branch-card" onclick="selectBranch(this,'{{ b.pk }}')">
+      <div class="branch-card" data-branch="{{ b.pk }}">
         <div class="branch-icon">
           {% if b.branch_type == 'optika' %}&#128083;{% elif b.branch_type == 'restaurant' %}&#127860;{% elif b.branch_type == 'accounting' %}&#128202;{% elif b.branch_type == 'fitness' %}&#127947;{% else %}&#127978;{% endif %}
         </div>
@@ -84,7 +84,7 @@
       </div>
       {% endfor %}
 
-      <div class="branch-card" onclick="selectBranch(this,'new')" style="border-style:dashed;border-color:#c9a84c">
+      <div class="branch-card" data-branch="new" style="border-style:dashed;border-color:#c9a84c">
         <div class="branch-icon" style="color:#c9a84c">&#10133;</div>
         <div class="branch-info">
           <div class="branch-name" style="color:#c9a84c">Nova poslovnica</div>
@@ -187,6 +187,31 @@ function goStep(n) {
 
 document.getElementById('wizardForm').addEventListener('submit', function() {
   document.getElementById('fTerminalName').value = document.getElementById('terminalNameInput').value;
+});
+
+// Delegated click handlers (fix for onclick not firing)
+document.addEventListener('DOMContentLoaded', function() {
+  // Type cards
+  document.querySelectorAll('.type-card[data-type]').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      selectType(this, this.dataset.type);
+    });
+    // Also handle touch
+    card.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      selectType(this, this.dataset.type);
+    });
+  });
+  // Branch cards
+  document.querySelectorAll('.branch-card[data-branch]').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      selectBranch(this, this.dataset.branch);
+    });
+  });
 });
 </script>
 {% endblock %}
