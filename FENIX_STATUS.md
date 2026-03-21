@@ -8,7 +8,8 @@
 ## Zadnje azuriranje
 2026-03-21 14:00 — CC Code (Opus) — Predarhiva Bulk OCR DONE: StagingBatch, drag&drop, rate-limited Celery, live progress
 2026-03-21 13:38 — CC Code (Opus) — POS QR Instant Open DONE: zero-login terminal activation, 5 QR kodova za Seki
-2026-03-21 13:30 — CC Code (Opus) — Invoice Growth Engine: referral footer na PDF/email, 8 AI misija aktivirano, WhatsApp status report
+2026-03-21 16:30 — Sonnet (kraj sesije) — Robot prodavač plan, Šeki QR+kiosk, Predarhiva Bulk OCR, GTM plan, FENIX_ZASTO.md
+Git HEAD: a31f171 — Smart Import frontend kompresija
 2026-03-21 13:15 — CC Code (Opus) — GTM Foundation DONE: OIB lookup API, pricing kalkulator, empty states (3 modula)
 2026-03-21 12:30 — CC Code (Opus) — limit_connect_ai Faza 1 DONE: 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin, migracije
 2026-03-21 11:00 — Sonnet (Ivan sesija) — LIMIT Connect AI Master Plan kreiran i odobren
@@ -357,3 +358,13 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - Softver: LIMIT Connect već ima 90% (gastro_qr, webshop_public, QR instant open)
 - Nedostaje: CC_TASK_POS_KIOSK_MODE — kiosk template za kupca (full-screen, touchscreen)
 - SEKI_KOMUNIKACIJA.md ažuriran s kiosk argumentima
+
+### Robot Prodavač Komplet (SPREMAN — 2026-03-21)
+- CC_TASK_ROBOT_PRODAVAC_KOMPLET.md — 5 zadataka
+- Gap analiza: QR OK, pickup OK, fiskalizacija OK — ali 3/617 webshop artikala (kritično)
+- Zadatak 1: activate_kiosk_items mgmt command (5 min)
+- Zadatak 2: kiosk.html touchscreen 15" template
+- Zadatak 3: Stripe prepayment za Šekija
+- Zadatak 4: 5 PDF QR plakata A6 print-ready
+- Zadatak 5: /robot-pekara/ SEO landing stranica
+- Vidljivost na internetu: NULA — limit-connect.com nije indeksirano za robot prodavač
