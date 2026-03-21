@@ -17,4 +17,9 @@ urlpatterns = [
     path("<int:pk>/confirm/",        views.confirm_view,        name="confirm"),
     path("<int:pk>/manual-entry/",   views.manual_entry_view,   name="manual_entry"),
     path("api/inbound-webhook/<str:secret>/", views.inbound_email_webhook, name="inbound_webhook"),
+    # Predarhiva: Staging bulk OCR
+    path("staging/", views.staging_upload, name="staging_upload"),
+    path("staging/<int:pk>/", views.staging_detail, name="staging_detail"),
+    path("staging/<int:pk>/start/", views.staging_start, name="staging_start"),
+    path("staging/<int:pk>/progress/", views.staging_progress_api, name="staging_progress_api"),
 ]

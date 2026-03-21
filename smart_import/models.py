@@ -238,3 +238,93 @@ class ProblemReport(models.Model):
 
     def __str__(self):
         return f"Problem #{self.pk} - Batch #{self.batch_id}"
+
+
+# ── Predarhiva: StagingBatch za bulk OCR ──────────────────────────────
+
+class StagingBatch(models.Model):
+    """
+    Predkomora — skup slika/fajlova koji čekaju AI obradu.
+    Marija učita 1000 slika, vidi ih u pregledu, klikne "Pokreni".
+    Gemini ih obrađuje redom, s rate limitom, s live progressom.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Čeka pokretanje'),
+        ('queued', 'U redu za obradu'),
+        ('processing', 'AI obrađuje'),
+        ('paused', 'Pauzirano'),
+        ('done', 'Završeno'),
+        ('done_with_errors', 'Završeno s greškama'),
+    ]
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='staging_batches',
+    )
+    objects = CompanyManager()
+    title = models.CharField(max_length=200, blank=True, default='',
+        help_text='Npr. "Računi veljača 2026"')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    total_files = models.IntegerField(default=0)
+    processed_files = models.IntegerField(default=0)
+    failed_files = models.IntegerField(default=0)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    last_message = models.CharField(max_length=500, blank=True, default='',
+        help_text='Zadnja AI poruka — razmišljanje na glas')
+
+    class Meta:
+        verbose_name = 'Staging batch'
+        verbose_name_plural = 'Staging batchevi'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Staging #{self.pk} — {self.title or "Bez naziva"} ({self.get_status_display()})'
+
+    @property
+    def progress_pct(self):
+        if self.total_files == 0:
+            return 0
+        return int((self.processed_files / self.total_files) * 100)
+
+    @property
+    def estimated_minutes_remaining(self):
+        remaining = self.total_files - self.processed_files
+        return max(0, int(remaining / 8))  # 8 req/min
+
+
+class StagingFile(models.Model):
+    """Jedan fajl unutar StagingBatcha."""
+    STATUS_CHOICES = [
+        ('pending', 'Čeka'),
+        ('processing', 'AI čita'),
+        ('done', 'Obrađeno'),
+        ('error', 'Greška'),
+        ('skipped', 'Preskočeno'),
+    ]
+    staging_batch = models.ForeignKey(
+        StagingBatch, on_delete=models.CASCADE, related_name='files',
+    )
+    file = models.FileField(upload_to='staging/%Y/%m/')
+    original_filename = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    result_batch = models.ForeignKey(
+        ImportBatch, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='staging_source',
+    )
+    ai_message = models.CharField(max_length=500, blank=True,
+        help_text='Što je AI rekao za ovaj fajl')
+    error_msg = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Staging fajl'
+        verbose_name_plural = 'Staging fajlovi'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.original_filename} ({self.get_status_display()})'

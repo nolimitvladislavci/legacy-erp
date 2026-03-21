@@ -566,3 +566,110 @@ def inbound_email_webhook(request, secret):
 
     logger.info("Webhook Rampa: primljeno %d privitaka.", saved_count)
     return HttpResponse("OK. Processed %d attachments." % saved_count, status=200)
+
+
+# ── Predarhiva: Staging bulk upload + progress ─────────────────────────
+
+@login_required
+def staging_upload(request):
+    """Bulk upload — Marija učita 1000 slika, AI ih obradi u pozadini."""
+    company = get_user_company(request)
+    if not company:
+        return render(request, 'smart_import/staging.html', {'no_company': True})
+
+    if request.method == 'POST':
+        files = request.FILES.getlist('files')
+        if not files:
+            return render(request, 'smart_import/staging.html', {
+                'company': company, 'error': 'Niste odabrali nijedan fajl.',
+            })
+
+        from .models import StagingBatch, StagingFile
+        title = request.POST.get('title', '').strip() or 'Bulk upload %s' % date.today().strftime('%d.%m.%Y')
+        batch = StagingBatch.objects.create(
+            company=company,
+            title=title,
+            total_files=len(files),
+            created_by=request.user,
+        )
+
+        for f in files:
+            StagingFile.objects.create(
+                staging_batch=batch,
+                file=f,
+                original_filename=f.name,
+            )
+
+        return redirect('smart_import:staging_detail', pk=batch.pk)
+
+    # GET — show upload form + list of existing batches
+    from .models import StagingBatch
+    batches = StagingBatch.objects.filter(company=company).order_by('-created_at')[:20]
+    return render(request, 'smart_import/staging.html', {
+        'company': company,
+        'batches': batches,
+    })
+
+
+@login_required
+def staging_detail(request, pk):
+    """Detail view for a staging batch — preview files, start processing."""
+    company = get_user_company(request)
+    from .models import StagingBatch
+    batch = get_object_or_404(StagingBatch, pk=pk, company=company)
+    files = batch.files.all()
+    return render(request, 'smart_import/staging_detail.html', {
+        'company': company,
+        'batch': batch,
+        'files': files,
+    })
+
+
+@login_required
+@require_POST
+def staging_start(request, pk):
+    """Start AI processing of a staging batch."""
+    company = get_user_company(request)
+    from .models import StagingBatch
+    batch = get_object_or_404(StagingBatch, pk=pk, company=company)
+
+    if batch.status != 'pending':
+        return JsonResponse({'error': 'Batch nije u statusu pending.'}, status=400)
+
+    batch.status = 'queued'
+    batch.save(update_fields=['status'])
+
+    from .tasks import process_staging_batch
+    process_staging_batch.delay(batch.pk)
+
+    return redirect('smart_import:staging_detail', pk=batch.pk)
+
+
+@login_required
+def staging_progress_api(request, pk):
+    """AJAX endpoint — polling svakih 3s za live progress."""
+    company = get_user_company(request)
+    from .models import StagingBatch
+    batch = get_object_or_404(StagingBatch, pk=pk, company=company)
+
+    recent_files = batch.files.filter(
+        status__in=['done', 'error']
+    ).order_by('-processed_at')[:5]
+
+    return JsonResponse({
+        'status': batch.status,
+        'progress_pct': batch.progress_pct,
+        'processed': batch.processed_files,
+        'total': batch.total_files,
+        'failed': batch.failed_files,
+        'last_message': batch.last_message,
+        'estimated_minutes': batch.estimated_minutes_remaining,
+        'recent': [
+            {
+                'filename': f.original_filename,
+                'message': f.ai_message,
+                'status': f.status,
+            } for f in recent_files
+        ],
+        'is_done': batch.status in ('done', 'done_with_errors'),
+    })

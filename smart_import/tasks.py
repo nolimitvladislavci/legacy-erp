@@ -470,3 +470,126 @@ def detect_stale_batches():
         _release_lock(batch.pk)
 
     return "{} zaostalih batcheva oznaceno kao error".format(count)
+
+
+# ── Predarhiva: Rate-limited bulk OCR ──────────────────────────────────
+
+@shared_task(bind=True, soft_time_limit=7200, time_limit=7800)
+def process_staging_batch(self, staging_batch_id):
+    """
+    Obrađuje StagingBatch s rate limitom (8 req/min).
+    Svaki fajl = 1 Gemini request. Live progress u StagingBatch.last_message.
+    """
+    import time as _time
+    from django.utils import timezone
+
+    from .models import StagingBatch, StagingFile, ImportBatch, ImportBatchItem
+    from .services import parse_image, parse_image_enhanced, match_items
+
+    RATE_LIMIT_DELAY = 7.5  # 8 req/min
+    MAX_CONSECUTIVE_ERRORS = 10
+
+    try:
+        staging = StagingBatch.objects.get(pk=staging_batch_id)
+    except StagingBatch.DoesNotExist:
+        return 'Batch not found'
+
+    staging.status = 'processing'
+    staging.started_at = timezone.now()
+    staging.save(update_fields=['status', 'started_at'])
+
+    pending = list(staging.files.filter(status='pending').order_by('created_at'))
+    consecutive_errors = 0
+
+    for idx, sf in enumerate(pending):
+        # Live message
+        staging.last_message = 'Citam sliku {}/{}: {}'.format(
+            staging.processed_files + 1, staging.total_files, sf.original_filename,
+        )
+        staging.save(update_fields=['last_message'])
+
+        sf.status = 'processing'
+        sf.save(update_fields=['status'])
+
+        try:
+            rows = parse_image(sf.file.path)
+
+            if not rows:
+                rows = parse_image_enhanced(sf.file.path)
+
+            if rows:
+                batch = ImportBatch.objects.create(
+                    company=staging.company,
+                    file=sf.file,
+                    file_type='image',
+                    status='ready',
+                    original_filename=sf.original_filename,
+                    raw_json=rows,
+                    created_by=staging.created_by,
+                )
+                for i, row in enumerate(rows):
+                    ImportBatchItem.objects.create(
+                        batch=batch,
+                        row_index=i,
+                        vendor_name=row.get('vendor_name', ''),
+                        quantity=row.get('quantity', 1),
+                        purchase_price=row.get('purchase_price', 0),
+                    )
+                match_items(batch)
+
+                supplier = rows[0].get('vendor_name', '?') if rows else '?'
+                total = sum(
+                    float(r.get('purchase_price', 0)) * float(r.get('quantity', 1))
+                    for r in rows
+                )
+                sf.ai_message = 'Prepoznato: {} stavki, {}, {:.2f} EUR'.format(
+                    len(rows), supplier[:30], total,
+                )
+                sf.result_batch = batch
+                sf.status = 'done'
+                consecutive_errors = 0
+
+                staging.last_message = 'Slika {}/{} — {}'.format(
+                    staging.processed_files + 1, staging.total_files, sf.ai_message,
+                )
+            else:
+                sf.status = 'error'
+                sf.error_msg = 'AI nije prepoznao stavke'
+                sf.ai_message = 'Nije prepoznato — provjeri rucno'
+                staging.failed_files += 1
+                consecutive_errors += 1
+
+        except Exception as e:
+            sf.status = 'error'
+            sf.error_msg = str(e)[:300]
+            sf.ai_message = 'Greska: {}'.format(str(e)[:100])
+            staging.failed_files += 1
+            consecutive_errors += 1
+            logger.error('Staging file %s error: %s', sf.pk, e)
+
+        sf.processed_at = timezone.now()
+        sf.save(update_fields=['status', 'ai_message', 'result_batch', 'error_msg', 'processed_at'])
+
+        staging.processed_files += 1
+        staging.save(update_fields=['processed_files', 'failed_files', 'last_message'])
+
+        # Rate limit
+        if idx < len(pending) - 1:
+            _time.sleep(RATE_LIMIT_DELAY)
+
+        # Pause on too many errors
+        if consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
+            staging.last_message = 'Previse gresaka ({}) — pauza 60s...'.format(consecutive_errors)
+            staging.save(update_fields=['last_message'])
+            _time.sleep(60)
+            consecutive_errors = 0
+
+    # Done
+    staging.status = 'done' if staging.failed_files == 0 else 'done_with_errors'
+    staging.finished_at = timezone.now()
+    ok = staging.processed_files - staging.failed_files
+    staging.last_message = 'Gotovo! {} racuna obradeno, {} nije prepoznato.'.format(ok, staging.failed_files)
+    staging.save(update_fields=['status', 'finished_at', 'last_message'])
+
+    logger.info('Staging batch %s done: %d/%d ok', staging_batch_id, ok, staging.total_files)
+    return 'Done: {}/{}'.format(ok, staging.total_files)

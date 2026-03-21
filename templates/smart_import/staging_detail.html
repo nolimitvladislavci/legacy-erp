@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Staging — {{ batch.title|default:"Batch" }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-layer-group me-2 text-primary"></i>{{ batch.title|default:"Staging Batch" }}</h2>
+            <small class="text-muted">{{ batch.total_files }} fajlova — {{ batch.get_status_display }}</small>
+        </div>
+        <a href="{% url 'smart_import:staging_upload' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    <!-- Progress section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong id="progressText">
+                    {% if batch.status == 'pending' %}Spreman za obradu — {{ batch.total_files }} fajlova
+                    {% elif batch.status == 'done' %}Gotovo! {{ batch.processed_files }}/{{ batch.total_files }} obrađeno
+                    {% else %}{{ batch.last_message|default:"Priprema..." }}{% endif %}
+                </strong>
+                <span class="badge bg-{% if batch.status == 'done' %}success{% elif batch.status == 'processing' %}primary{% elif batch.status == 'done_with_errors' %}warning{% else %}secondary{% endif %}" id="statusBadge">
+                    {{ batch.get_status_display }}
+                </span>
+            </div>
+
+            <div class="progress mb-2" style="height:8px">
+                <div class="progress-bar bg-primary" id="progressBar" style="width:{{ batch.progress_pct }}%;transition:width 0.5s"></div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <small class="text-muted" id="progressCount">{{ batch.processed_files }}/{{ batch.total_files }}</small>
+                <small class="text-muted" id="timeEstimate">
+                    {% if batch.estimated_minutes_remaining > 0 %}~{{ batch.estimated_minutes_remaining }} min preostalo{% endif %}
+                </small>
+            </div>
+
+            {% if batch.status == 'pending' %}
+            <form method="post" action="{% url 'smart_import:staging_start' batch.pk %}" class="mt-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-robot me-2"></i>Pokreni AI obradu ({{ batch.total_files }} fajlova)
+                </button>
+                <small class="text-muted ms-3">Procijenjeno: ~{{ batch.estimated_minutes_remaining }} min | Trošak: ~{{ batch.total_files|divisibleby:1000 }}0.15 EUR</small>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- AI Live Log -->
+    <div class="card border-0 shadow-sm mb-4" id="aiLogCard" {% if batch.status == 'pending' %}style="display:none"{% endif %}>
+        <div class="card-header bg-white">
+            <h6 class="mb-0"><i class="fas fa-terminal me-2"></i>AI Log — razmišljanje na glas</h6>
+        </div>
+        <div class="card-body p-0" style="max-height:300px;overflow-y:auto" id="aiLog">
+            {% if batch.last_message %}
+            <div class="px-3 py-2 border-bottom" style="font-size:0.88rem;color:#64748b">
+                <i class="fas fa-robot me-1 text-primary"></i>{{ batch.last_message }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent processed files -->
+    <div class="card border-0 shadow-sm" id="recentCard">
+        <div class="card-header bg-white">
+            <h6 class="mb-0"><i class="fas fa-list me-2"></i>Fajlovi ({{ batch.total_files }})</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead class="table-light">
+                        <tr><th>#</th><th>Naziv</th><th>Status</th><th>AI poruka</th><th>Obrađeno</th></tr>
+                    </thead>
+                    <tbody id="filesTable">
+                        {% for f in files %}
+                        <tr id="file-{{ f.pk }}" class="{% if f.status == 'done' %}table-success{% elif f.status == 'error' %}table-danger{% elif f.status == 'processing' %}table-info{% endif %}">
+                            <td>{{ forloop.counter }}</td>
+                            <td><small>{{ f.original_filename|truncatechars:40 }}</small></td>
+                            <td>
+                                {% if f.status == 'done' %}<span class="badge bg-success">OK</span>
+                                {% elif f.status == 'error' %}<span class="badge bg-danger">Greška</span>
+                                {% elif f.status == 'processing' %}<span class="badge bg-info">Čita...</span>
+                                {% else %}<span class="badge bg-secondary">Čeka</span>{% endif %}
+                            </td>
+                            <td><small class="text-muted">{{ f.ai_message|default:"-" }}</small></td>
+                            <td><small>{{ f.processed_at|date:"H:i:s"|default:"-" }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if batch.status in 'queued processing' %}
+<script>
+var STAGING_ID = {{ batch.pk }};
+var lastProcessed = {{ batch.processed_files }};
+
+function pollProgress() {
+    fetch('{% url "smart_import:staging_progress_api" batch.pk %}')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            document.getElementById('progressBar').style.width = d.progress_pct + '%';
+            document.getElementById('progressCount').textContent = d.processed + '/' + d.total;
+            document.getElementById('progressText').textContent = d.last_message || 'Obrađuje se...';
+
+            if (d.estimated_minutes > 0) {
+                document.getElementById('timeEstimate').textContent = '~' + d.estimated_minutes + ' min preostalo';
+            } else {
+                document.getElementById('timeEstimate').textContent = '';
+            }
+
+            // Status badge
+            var badge = document.getElementById('statusBadge');
+            if (d.status === 'done') { badge.className = 'badge bg-success'; badge.textContent = 'Završeno'; }
+            else if (d.status === 'done_with_errors') { badge.className = 'badge bg-warning'; badge.textContent = 'S greškama'; }
+            else if (d.status === 'processing') { badge.className = 'badge bg-primary'; badge.textContent = 'Obrađuje se'; }
+
+            // AI log
+            if (d.last_message && d.processed > lastProcessed) {
+                var log = document.getElementById('aiLog');
+                document.getElementById('aiLogCard').style.display = '';
+                var entry = document.createElement('div');
+                entry.className = 'px-3 py-2 border-bottom';
+                entry.style.fontSize = '0.88rem';
+                entry.style.color = '#64748b';
+                entry.innerHTML = '<i class="fas fa-robot me-1 text-primary"></i>' + d.last_message;
+                log.insertBefore(entry, log.firstChild);
+                if (log.children.length > 30) log.lastChild.remove();
+                lastProcessed = d.processed;
+            }
+
+            if (!d.is_done) {
+                setTimeout(pollProgress, 3000);
+            } else {
+                document.getElementById('progressText').innerHTML =
+                    '<i class="fas fa-check-circle text-success me-2"></i>' + d.last_message;
+                setTimeout(function() { location.reload(); }, 2000);
+            }
+        })
+        .catch(function() { setTimeout(pollProgress, 5000); });
+}
+
+document.addEventListener('DOMContentLoaded', function() { pollProgress(); });
+</script>
+{% endif %}
+{% endblock %}
