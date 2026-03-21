@@ -757,11 +757,13 @@ def review_dashboard(request):
 @require_POST
 def review_approve(request):
     """
-    Proknjiži i spoji — Marija odobrava zaglavlje, needs_review se gasi,
-    podaci se čiste i BatchSupplier se ažurira.
+    Proknjiži i spoji — ARMIRANO:
+    - Zamka 2: matematička validacija (osnovica + PDV = ukupno ±0.02)
+    - Zamka 3: atomska provjera stanja (select_for_update + conflict guard)
     """
     from .models import StagingFileHeader, StagingFile
     from decimal import Decimal, InvalidOperation
+    from django.db import transaction
 
     company = get_user_company(request)
     try:
@@ -773,51 +775,86 @@ def review_approve(request):
     if not header_id:
         return JsonResponse({'ok': False, 'error': 'Missing header_id'}, status=400)
 
-    try:
-        header = StagingFileHeader.objects.select_related(
-            'staging_file__staging_batch'
-        ).get(pk=header_id, staging_file__staging_batch__company=company)
-    except StagingFileHeader.DoesNotExist:
-        return JsonResponse({'ok': False, 'error': 'Header ne postoji'}, status=404)
-
-    # Update header fields from Marija's corrections
-    header.supplier_name = data.get('supplier_name', header.supplier_name)[:255]
-    header.supplier_oib = data.get('supplier_oib', header.supplier_oib)[:20].strip()
-    header.invoice_number = data.get('invoice_number', header.invoice_number)[:100]
-
-    inv_date = data.get('invoice_date', '')
-    if inv_date:
+    with transaction.atomic():
+        # ── ZAMKA 3: select_for_update — atomska brava ──
         try:
-            from datetime import datetime
-            header.invoice_date = datetime.strptime(inv_date[:10], '%Y-%m-%d').date()
-        except (ValueError, TypeError):
-            pass
+            header = StagingFileHeader.objects.select_for_update().select_related(
+                'staging_file__staging_batch'
+            ).get(pk=header_id, staging_file__staging_batch__company=company)
+        except StagingFileHeader.DoesNotExist:
+            return JsonResponse({'ok': False, 'error': 'Header ne postoji'}, status=404)
 
-    for field, key in [('total_amount', 'total_amount'), ('vat_amount', 'vat_amount'), ('base_amount', 'base_amount')]:
-        val = data.get(key)
-        if val:
+        # Conflict guard — već proknjiženo?
+        if not header.needs_review:
+            return JsonResponse({
+                'ok': False,
+                'error': 'Ovaj račun je već proknjižen (vjerojatno drugi korisnik).',
+                'code': 'CONFLICT',
+            }, status=409)
+
+        # ── Parse input fields ──
+        header.supplier_name = data.get('supplier_name', header.supplier_name)[:255]
+        header.supplier_oib = data.get('supplier_oib', header.supplier_oib)[:20].strip()
+        header.invoice_number = data.get('invoice_number', header.invoice_number)[:100]
+
+        inv_date = data.get('invoice_date', '')
+        if inv_date:
             try:
-                setattr(header, field, Decimal(str(val)))
-            except (InvalidOperation, ValueError):
+                from datetime import datetime
+                header.invoice_date = datetime.strptime(inv_date[:10], '%Y-%m-%d').date()
+            except (ValueError, TypeError):
                 pass
 
-    # Re-match partner after OIB correction
-    header.matched_partner = None
-    header.save()
-    header.auto_match_partner()
+        for field, key in [('total_amount', 'total_amount'), ('vat_amount', 'vat_amount'), ('base_amount', 'base_amount')]:
+            val = data.get(key)
+            if val:
+                try:
+                    setattr(header, field, Decimal(str(val)))
+                except (InvalidOperation, ValueError):
+                    pass
 
-    # Clear review flag
-    header.needs_review = False
-    header.confidence = max(header.confidence, 0.95)  # Boosted by human review
-    header.save(update_fields=['supplier_name', 'supplier_oib', 'invoice_number',
-                                'invoice_date', 'total_amount', 'vat_amount', 'base_amount',
-                                'needs_review', 'confidence', 'matched_partner'])
+        # ── ZAMKA 2: matematička validacija ──
+        base = header.base_amount or Decimal('0')
+        vat = header.vat_amount or Decimal('0')
+        total = header.total_amount or Decimal('0')
 
-    # Update ImportBatch supplier if matched
-    sf = header.staging_file
-    if sf.result_batch and header.matched_partner:
-        sf.result_batch.supplier = header.matched_partner
-        sf.result_batch.save(update_fields=['supplier'])
+        if base > 0 and vat >= 0 and total > 0:
+            expected = base + vat
+            diff = abs(expected - total)
+            if diff > Decimal('0.02'):
+                return JsonResponse({
+                    'ok': False,
+                    'error': (
+                        'Matematika računa nije ispravna. '
+                        'Osnovica ({base}) + PDV ({vat}) = {expected}, '
+                        'ali Ukupno je {total}. Razlika: {diff}. '
+                        'Ispravite iznose.'
+                    ).format(
+                        base=base, vat=vat, expected=expected,
+                        total=total, diff=diff,
+                    ),
+                    'code': 'MATH_MISMATCH',
+                }, status=400)
+
+        # ── Re-match partner after OIB correction ──
+        header.matched_partner = None
+        header.save()
+        header.auto_match_partner()
+
+        # ── Finalize ──
+        header.needs_review = False
+        header.confidence = max(header.confidence, 0.95)
+        header.save(update_fields=[
+            'supplier_name', 'supplier_oib', 'invoice_number',
+            'invoice_date', 'total_amount', 'vat_amount', 'base_amount',
+            'needs_review', 'confidence', 'matched_partner',
+        ])
+
+        # Update ImportBatch supplier if matched
+        sf = header.staging_file
+        if sf.result_batch and header.matched_partner:
+            sf.result_batch.supplier = header.matched_partner
+            sf.result_batch.save(update_fields=['supplier'])
 
     return JsonResponse({
         'ok': True,
