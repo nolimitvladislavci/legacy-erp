@@ -1457,8 +1457,10 @@ class TransportOrder(models.Model):
         if not self.tracking_token:
             import uuid
             self.tracking_token = uuid.uuid4().hex[:16]
-        # Auto-calculate total cost
-        self.total_cost = self.fuel_cost + self.toll_cost + self.other_cost
+        # Auto-calculate total cost only from sub-costs (ne pregazi ručno setiran total)
+        auto_total = (self.fuel_cost or 0) + (self.toll_cost or 0) + (self.other_cost or 0)
+        if auto_total > 0 or not self.total_cost:
+            self.total_cost = auto_total
         super().save(*args, **kwargs)
 
     def _generate_number(self):
