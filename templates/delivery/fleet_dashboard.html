@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Fleet Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1"><i class="fas fa-tachometer-alt text-gold me-2"></i>Fleet Dashboard</h2>
+      <p class="text-muted mb-0">Pregled flote, dokumenata i aktivnih transporta</p>
+    </div>
+    <a href="{% url 'delivery:transport_list' %}" class="btn btn-outline-gold">
+      <i class="fas fa-list me-1"></i> Transport nalozi
+    </a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-gold mb-1">{{ vehicles|length }}</div>
+          <div class="text-muted small text-uppercase">Vozila</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-success mb-1">{{ active_orders|length }}</div>
+          <div class="text-muted small text-uppercase">Aktivni nalozi</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-warning mb-1">{{ expiring_docs|length }}</div>
+          <div class="text-muted small text-uppercase">Istjecu uskoro</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body text-center">
+          <div class="h2 text-danger mb-1">{{ expired_docs|length }}</div>
+          <div class="text-muted small text-uppercase">Istekli dokumenti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if expired_docs %}
+  <div class="card bg-dark border-danger mb-4">
+    <div class="card-header bg-dark border-danger">
+      <h6 class="mb-0 text-danger"><i class="fas fa-exclamation-circle me-2"></i>Istekli dokumenti</h6>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-sm mb-0">
+        <thead>
+          <tr class="text-uppercase small text-danger">
+            <th>Vozilo</th>
+            <th>Tip dokumenta</th>
+            <th>Istekao</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in expired_docs %}
+          <tr>
+            <td>{{ doc.vehicle }}</td>
+            <td>{{ doc.get_document_type_display|default:doc.document_type }}</td>
+            <td class="text-danger">{{ doc.valid_until|date:"d.m.Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if expiring_docs %}
+  <div class="card bg-dark border-warning mb-4">
+    <div class="card-header bg-dark border-warning">
+      <h6 class="mb-0 text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Istjecu u sljedecih 30 dana</h6>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark table-sm mb-0">
+        <thead>
+          <tr class="text-uppercase small text-warning">
+            <th>Vozilo</th>
+            <th>Tip dokumenta</th>
+            <th>Istjece</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in expiring_docs %}
+          <tr>
+            <td>{{ doc.vehicle }}</td>
+            <td>{{ doc.get_document_type_display|default:doc.document_type }}</td>
+            <td class="text-warning">{{ doc.valid_until|date:"d.m.Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-header bg-dark border-secondary">
+      <h6 class="mb-0 text-gold"><i class="fas fa-shipping-fast me-2"></i>Aktivni transporti</h6>
+    </div>
+    {% if active_orders %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover table-sm mb-0">
+        <thead>
+          <tr class="text-uppercase small text-gold">
+            <th>Nalog</th>
+            <th>Status</th>
+            <th>Ruta</th>
+            <th>Vozilo</th>
+            <th>Polazak</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in active_orders %}
+          <tr style="cursor:pointer" onclick="location.href='{% url 'delivery:transport_detail' o.pk %}'">
+            <td class="fw-bold">{{ o.order_number }}</td>
+            <td>
+              {% if o.status == 'planned' %}
+                <span class="badge bg-primary">Planirano</span>
+              {% elif o.status == 'in_transit' %}
+                <span class="badge bg-success">U tranzitu</span>
+              {% elif o.status == 'loading' %}
+                <span class="badge bg-warning text-dark">Utovar</span>
+              {% elif o.status == 'border_crossing' %}
+                <span class="badge bg-info">Granica</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ o.status }}</span>
+              {% endif %}
+            </td>
+            <td class="small">
+              {{ o.origin_city|default:"?" }} <i class="fas fa-arrow-right text-muted mx-1"></i> {{ o.destination_city|default:"?" }}
+            </td>
+            <td>{{ o.vehicle|default:"-" }}</td>
+            <td class="small text-muted">{{ o.planned_departure|date:"d.m.Y H:i"|default:"-" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card-body text-center py-4">
+      <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+      <p class="text-muted mb-0">Nema aktivnih transporta</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

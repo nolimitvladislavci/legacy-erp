@@ -749,3 +749,60 @@ def api_delivery_zones(request, slug):
             'days': z.days_display,
         })
     return JsonResponse({'zones': data, 'count': len(data)})
+
+
+# ═══════════════════════════════════════════════════════════════
+# TRANSPORT MODULE VIEWS
+# ═══════════════════════════════════════════════════════════════
+@login_required
+def transport_order_list(request):
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    if not company:
+        return redirect('dashboard')
+    from .models import TransportOrder
+    status_f = request.GET.get('status', '')
+    type_f = request.GET.get('type', '')
+    qs = TransportOrder.objects.filter(company=company).select_related('vehicle', 'driver').order_by('-planned_departure')
+    if status_f:
+        qs = qs.filter(status=status_f)
+    if type_f:
+        qs = qs.filter(transport_type=type_f)
+    return render(request, 'delivery/transport_order_list.html', {'orders': qs[:50], 'status_f': status_f, 'type_f': type_f})
+
+
+@login_required
+def transport_order_detail(request, pk):
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    from .models import TransportOrder
+    order = get_object_or_404(TransportOrder, pk=pk, company=company)
+    issues = order.verify_documents() if hasattr(order, 'verify_documents') else []
+    return render(request, 'delivery/transport_order_detail.html', {'order': order, 'issues': issues})
+
+
+@login_required
+def fleet_dashboard(request):
+    from core.company_utils import get_user_company
+    from .models import TransportOrder, Vehicle, VehicleDocument, DriverDocument
+    from django.utils import timezone
+    from datetime import timedelta
+    company = get_user_company(request)
+    if not company:
+        return redirect('dashboard')
+    today = timezone.now().date()
+    warn_date = today + timedelta(days=30)
+    
+    vehicles = Vehicle.objects.filter(company=company, is_active=True) if hasattr(Vehicle, 'objects') else []
+    active_orders = TransportOrder.objects.filter(company=company, status__in=['planned', 'in_transit', 'loading', 'border_crossing']).order_by('-planned_departure')[:20]
+    
+    expiring_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lte=warn_date, valid_until__gte=today).order_by('valid_until')[:20]
+    expired_vehicle_docs = VehicleDocument.objects.filter(vehicle__company=company, valid_until__lt=today).order_by('valid_until')[:10]
+    
+    return render(request, 'delivery/fleet_dashboard.html', {
+        'vehicles': vehicles,
+        'active_orders': active_orders,
+        'expiring_docs': expiring_vehicle_docs,
+        'expired_docs': expired_vehicle_docs,
+        'today': today,
+    })

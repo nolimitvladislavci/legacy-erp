@@ -106,9 +106,19 @@
 - 4 udruge templatea (clan_form, donacija_form, knjiga, clan_detail) — DONE
 - /ai/api/analyze-image/ endpoint (Claude Haiku Vision) — DONE
 
+### Transport modul Faza 1 (KOMPLET — 21.03.)
+- TransportOrder (35+ polja, verify_documents(), auto order_number) — DONE
+- VehicleDocument (ATP, registration, insurance, community_licence, expiry alerts) — DONE
+- DriverDocument (licence, CPC, ADR, posting_declaration, non-EU attestation) — DONE
+- TachographEntry (driving/rest/break evidencija, violation detection) — DONE
+- FuelEntry (liters, price, odometer, photo) — DONE
+- posting_document FK na TransportOrder (Gemini sugestija) — DONE
+- Migration: delivery/0009_transport_module — DONE
+
 ### Knjiga boljitaka (12/21)
-- B-02 beforeunload, B-03 audit IP/UA, B-04 fiscal retry — DONE
-- B-07 QR cart, B-08 stock race condition — DONE
+- B-02 beforeunload + smart_logout open receipts guard — DONE
+- B-03 audit IP/UA, B-04 fiscal retry (48h + backoff + notify) — DONE
+- B-07 QR cart, B-08 stock race condition (select_for_update) — DONE
 - B-14 order_source, B-16 company switch audit — DONE
 
 ### Infrastruktura (KOMPLET)
@@ -181,6 +191,16 @@
 - B-13 Kitchen API rate limit — OTVORENO
 - B-17 OCR confidence — OTVORENO
 - B-21 Print QR label — DJELOMICNO
+
+### Transport Faza 2
+- Fleet dashboard (sva vozila, statusi, istekli dokumenti) — OTVORENO
+- Automatski CMR iz TransportOrder — OTVORENO
+- Multi-country routing UI — OTVORENO
+- Kabotaža counter (max 3/7 dana) — OTVORENO
+- Tahograf UI za vozača — OTVORENO
+- Driver PWA kompletni — OTVORENO
+- Route cost calculator — OTVORENO
+- Customer tracking page (real-time + temp) — OTVORENO
 
 ### Nice-to-have
 - ZUGFeRD PDF/A-3 pravi format (trenutno basic embed) — OTVORENO

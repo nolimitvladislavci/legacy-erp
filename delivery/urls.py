@@ -50,4 +50,8 @@ urlpatterns = [
 
     # Public Delivery Zones API
     path("api/zones/<slug:slug>/", views.api_delivery_zones, name="api_delivery_zones"),
+    # Transport module
+    path("transport/", views.transport_order_list, name="transport_list"),
+    path("transport/<int:pk>/", views.transport_order_detail, name="transport_detail"),
+    path("fleet/", views.fleet_dashboard, name="fleet_dashboard"),
 ]
