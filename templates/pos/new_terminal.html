@@ -4,214 +4,201 @@
 {% block page_title %}Dodaj blagajnu{% endblock %}
 {% block content %}
 <style>
-.wizard{max-width:700px;margin:0 auto}
+.wiz{max-width:600px;margin:0 auto;padding:0 16px}
+.wiz h3{color:var(--gold,#c9a84c);text-align:center;margin:0 0 6px;font-family:'Cormorant Garamond',serif;font-size:1.3rem}
+.wiz .sub{text-align:center;color:#888;font-size:.82rem;margin-bottom:20px}
 .step{display:none}.step.active{display:block}
-.step-indicator{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
-.step-dot{width:10px;height:10px;border-radius:50%;background:#2a2f45;transition:.3s}
-.step-dot.active{background:#c9a84c;width:30px;border-radius:10px}
-.step-dot.done{background:#22c55e}
-.type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-.type-card{background:var(--card-bg,#1a1a2e);border:2px solid var(--border-color,#2a2f45);border-radius:14px;padding:20px 16px;cursor:pointer;text-align:center;transition:all .2s}
-.type-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.3)}
-.type-card.selected{border-color:#c9a84c;box-shadow:0 0 20px rgba(201,168,76,.2)}
-.type-icon{font-size:2.5rem;margin-bottom:8px}
-.type-label{font-weight:700;font-size:1rem;margin-bottom:4px}
-.type-desc{font-size:.75rem;color:#64748b;line-height:1.4}
-.branch-card{background:var(--card-bg,#1a1a2e);border:2px solid var(--border-color,#2a2f45);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.branch-card:hover{border-color:#3b82f6}
-.branch-card.selected{border-color:#c9a84c;background:rgba(201,168,76,.05)}
-.branch-icon{font-size:1.5rem;width:40px;text-align:center}
-.branch-info{flex:1}
-.branch-name{font-weight:700;font-size:.9rem}
-.branch-addr{font-size:.75rem;color:#64748b}
-.new-branch-form{background:var(--card-bg,#1a1a2e);border:2px dashed #c9a84c;border-radius:12px;padding:16px;margin-top:12px;display:none}
+/* Radio list — bulletproof on any device */
+.type-list{display:flex;flex-direction:column;gap:8px}
+.type-opt{display:block;cursor:pointer}
+.type-opt input{display:none}
+.type-opt .card{
+  display:flex;align-items:center;gap:14px;
+  background:#111;border:2px solid #222;border-radius:10px;
+  padding:14px 16px;transition:all .2s;
+}
+.type-opt input:checked + .card{
+  border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.06);
+}
+.type-opt .icon{font-size:1.6rem;width:40px;text-align:center;flex-shrink:0}
+.type-opt .info{flex:1}
+.type-opt .name{font-weight:700;font-size:.95rem;color:#ccc}
+.type-opt input:checked + .card .name{color:var(--gold,#c9a84c)}
+.type-opt .desc{font-size:.75rem;color:#666;line-height:1.3}
+.type-opt .check{width:22px;height:22px;border:2px solid #333;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .2s}
+.type-opt input:checked + .card .check{border-color:var(--gold,#c9a84c);background:var(--gold,#c9a84c);color:#000}
+/* Branch */
+.branch-list{display:flex;flex-direction:column;gap:8px}
+.branch-opt{display:block;cursor:pointer}
+.branch-opt input{display:none}
+.branch-opt .card{display:flex;align-items:center;gap:12px;background:#111;border:2px solid #222;border-radius:10px;padding:12px 16px;transition:all .2s}
+.branch-opt input:checked + .card{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.06)}
+.branch-opt .bicon{font-size:1.3rem;width:36px;text-align:center}
+.branch-opt .bname{font-weight:600;font-size:.9rem;color:#ccc}
+.branch-opt input:checked + .card .bname{color:var(--gold,#c9a84c)}
+.branch-opt .baddr{font-size:.75rem;color:#666}
+.new-branch-form{display:none;padding:12px;background:#111;border:1px dashed var(--gold,#c9a84c);border-radius:8px;margin-top:8px}
 .new-branch-form.show{display:block}
-.wizard-btn{padding:12px 28px;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;border:none;transition:.2s}
-.wizard-btn:hover{opacity:.85}
-.btn-next{background:#c9a84c;color:#000}
-.btn-back{background:transparent;border:1px solid #2a2f45;color:#64748b}
-.summary-table td{padding:6px 12px;font-size:.9rem}
-.summary-table td:first-child{color:#64748b;font-weight:600}
+.new-branch-form input{width:100%;padding:8px;background:#0a0a0a;border:1px solid #333;border-radius:6px;color:#ccc;font-size:.88rem;margin-bottom:6px}
+/* Buttons */
+.wiz-btns{display:flex;justify-content:space-between;margin-top:20px;gap:10px}
+.btn-back{background:none;border:1px solid #333;color:#888;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.9rem}
+.btn-next{background:var(--gold,#c9a84c);color:#000;border:none;padding:10px 24px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem}
+.btn-next:disabled{opacity:.3;cursor:not-allowed}
+.btn-create{background:#22c55e;color:#fff;border:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:1.05rem;cursor:pointer}
+/* Summary */
+.sum-table td{padding:6px 12px;font-size:.9rem}
+.sum-table td:first-child{color:#888;font-weight:600}
+/* Dots */
+.dots{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+.dot{width:10px;height:10px;border-radius:50%;background:#333;transition:.3s}
+.dot.active{background:var(--gold,#c9a84c);width:28px;border-radius:8px}
+.dot.done{background:#22c55e}
 </style>
 
-<div class="wizard">
-
-  <div class="step-indicator">
-    <div class="step-dot active" id="dot1"></div>
-    <div class="step-dot" id="dot2"></div>
-    <div class="step-dot" id="dot3"></div>
+<div class="wiz">
+  <div class="dots">
+    <div class="dot active" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
   </div>
 
-  <form method="post" id="wizardForm">
+  <form method="post" id="wForm">
     {% csrf_token %}
-    <input type="hidden" name="pos_type" id="fPosType" value="">
-    <input type="hidden" name="branch_id" id="fBranchId" value="">
-    <input type="hidden" name="terminal_name" id="fTerminalName" value="">
+    <input type="hidden" name="pos_type" id="fType">
+    <input type="hidden" name="branch_id" id="fBranch">
+    <input type="hidden" name="terminal_name" id="fName">
 
-    <!-- STEP 1: Tip POS-a -->
-    <div class="step active" id="step1">
-      <h3 class="text-center mb-1" style="color:#c9a84c">Kakvu blagajnu trebaš?</h3>
-      <p class="text-center text-muted mb-4" style="font-size:.85rem">Odaberi tip — svaki ima drugačije sučelje prilagođeno tvom poslu</p>
-      <div class="type-grid">
+    <!-- STEP 1: Tip -->
+    <div class="step active" id="s1">
+      <h3>Kakvu blagajnu trebaš?</h3>
+      <div class="sub">Odaberi tip — svaki ima prilagođeno sučelje</div>
+      <div class="type-list">
         {% for t in pos_types %}
-        <div class="type-card" data-type="{{ t.value }}" style="--accent:{{ t.color }};cursor:pointer">
-          <div class="type-icon">{{ t.icon }}</div>
-          <div class="type-label" style="color:{{ t.color }}">{{ t.label }}</div>
-          <div class="type-desc">{{ t.desc }}</div>
-        </div>
+        <label class="type-opt">
+          <input type="radio" name="_type" value="{{ t.value }}">
+          <div class="card">
+            <div class="icon">{{ t.icon }}</div>
+            <div class="info">
+              <div class="name">{{ t.label }}</div>
+              <div class="desc">{{ t.desc }}</div>
+            </div>
+            <div class="check">✓</div>
+          </div>
+        </label>
         {% endfor %}
       </div>
-      <div class="d-flex justify-content-between mt-4">
-        <a href="{% url 'pos:dashboard' %}" class="wizard-btn btn-back">Odustani</a>
-        <button type="button" class="wizard-btn btn-next" onclick="goStep(2)" id="btnStep2" disabled>Dalje &rarr;</button>
+      <div class="wiz-btns">
+        <a href="{% url 'pos:dashboard' %}" class="btn-back">Odustani</a>
+        <button type="button" class="btn-next" id="b2" disabled>Dalje →</button>
       </div>
     </div>
 
     <!-- STEP 2: Lokacija -->
-    <div class="step" id="step2">
-      <h3 class="text-center mb-1" style="color:#c9a84c">Gdje je blagajna?</h3>
-      <p class="text-center text-muted mb-4" style="font-size:.85rem">Odaberi postojeću poslovnicu ili kreiraj novu</p>
-
-      {% for b in branches %}
-      <div class="branch-card" data-branch="{{ b.pk }}">
-        <div class="branch-icon">
-          {% if b.branch_type == 'optika' %}&#128083;{% elif b.branch_type == 'restaurant' %}&#127860;{% elif b.branch_type == 'accounting' %}&#128202;{% elif b.branch_type == 'fitness' %}&#127947;{% else %}&#127978;{% endif %}
-        </div>
-        <div class="branch-info">
-          <div class="branch-name">{{ b.name }}</div>
-          <div class="branch-addr">{{ b.address }}{% if b.city %}, {{ b.city }}{% endif %}</div>
-        </div>
-      </div>
-      {% endfor %}
-
-      <div class="branch-card" data-branch="new" style="border-style:dashed;border-color:#c9a84c">
-        <div class="branch-icon" style="color:#c9a84c">&#10133;</div>
-        <div class="branch-info">
-          <div class="branch-name" style="color:#c9a84c">Nova poslovnica</div>
-          <div class="branch-addr">Kreiraj novu lokaciju</div>
-        </div>
-      </div>
-
-      <div class="new-branch-form" id="newBranchForm">
-        <div class="row g-2">
-          <div class="col-md-6">
-            <label class="form-label small">Naziv poslovnice</label>
-            <input type="text" name="new_branch_name" class="form-control" placeholder="npr. Optika Oko Čepin">
+    <div class="step" id="s2">
+      <h3>Gdje je blagajna?</h3>
+      <div class="sub">Odaberi poslovnicu ili kreiraj novu</div>
+      <div class="branch-list">
+        {% for b in branches %}
+        <label class="branch-opt">
+          <input type="radio" name="_branch" value="{{ b.pk }}">
+          <div class="card">
+            <div class="bicon">🏢</div>
+            <div class="info">
+              <div class="bname">{{ b.name }}</div>
+              <div class="baddr">{{ b.address }}{% if b.city %}, {{ b.city }}{% endif %}</div>
+            </div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label small">Grad</label>
-            <input type="text" name="new_branch_city" class="form-control" placeholder="npr. Čepin">
+        </label>
+        {% endfor %}
+        <label class="branch-opt">
+          <input type="radio" name="_branch" value="new">
+          <div class="card" style="border-style:dashed;border-color:var(--gold,#c9a84c)">
+            <div class="bicon" style="color:var(--gold,#c9a84c)">＋</div>
+            <div class="info">
+              <div class="bname" style="color:var(--gold,#c9a84c)">Nova poslovnica</div>
+              <div class="baddr">Kreiraj novu lokaciju</div>
+            </div>
           </div>
-          <div class="col-12">
-            <label class="form-label small">Adresa</label>
-            <input type="text" name="new_branch_address" class="form-control" placeholder="npr. Dobroljubska ul. bb">
-          </div>
-        </div>
+        </label>
       </div>
-
-      <div class="d-flex justify-content-between mt-4">
-        <button type="button" class="wizard-btn btn-back" onclick="goStep(1)">&larr; Natrag</button>
-        <button type="button" class="wizard-btn btn-next" onclick="goStep(3)" id="btnStep3" disabled>Dalje &rarr;</button>
+      <div class="new-branch-form" id="nbForm">
+        <input type="text" name="new_branch_name" placeholder="Naziv poslovnice">
+        <input type="text" name="new_branch_city" placeholder="Grad">
+        <input type="text" name="new_branch_address" placeholder="Adresa">
+      </div>
+      <div class="wiz-btns">
+        <button type="button" class="btn-back" onclick="go(1)">← Natrag</button>
+        <button type="button" class="btn-next" id="b3" disabled>Dalje →</button>
       </div>
     </div>
 
-    <!-- STEP 3: Summary -->
-    <div class="step" id="step3">
-      <h3 class="text-center mb-1" style="color:#22c55e">&#10003; Sve spremno!</h3>
-      <p class="text-center text-muted mb-4" style="font-size:.85rem">Provjeri podatke i kreiraj blagajnu</p>
-
-      <div style="background:var(--card-bg,#1a1a2e);border-radius:12px;padding:20px;margin-bottom:16px">
-        <table class="summary-table w-100">
-          <tr><td>Tip blagajne:</td><td id="sumType" class="fw-bold"></td></tr>
-          <tr><td>Poslovnica:</td><td id="sumBranch" class="fw-bold"></td></tr>
+    <!-- STEP 3: Potvrda -->
+    <div class="step" id="s3">
+      <h3 style="color:#22c55e">✓ Sve spremno!</h3>
+      <div class="sub">Provjeri i kreiraj blagajnu</div>
+      <div style="background:#111;border-radius:10px;padding:16px;margin-bottom:12px">
+        <table class="sum-table" style="width:100%">
+          <tr><td>Tip:</td><td id="sumT" style="font-weight:700;color:var(--gold,#c9a84c)"></td></tr>
+          <tr><td>Lokacija:</td><td id="sumB" style="font-weight:700"></td></tr>
           <tr><td>Tvrtka:</td><td>{{ company.name }}</td></tr>
         </table>
       </div>
-
-      <div class="mb-3">
-        <label class="form-label">Naziv blagajne (opcionalno — auto-generirano ako prazno)</label>
-        <input type="text" class="form-control" id="terminalNameInput" placeholder="Auto: Poslovnica — Tip">
+      <div style="margin-bottom:16px">
+        <label style="font-size:.82rem;color:#888;display:block;margin-bottom:4px">Naziv blagajne (opcionalno)</label>
+        <input type="text" id="nameIn" placeholder="Auto-generirano ako prazno" style="width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#ccc;font-size:.9rem">
       </div>
-
-      <div class="d-flex justify-content-between">
-        <button type="button" class="wizard-btn btn-back" onclick="goStep(2)">&larr; Natrag</button>
-        <button type="submit" class="wizard-btn btn-next" style="background:#22c55e;font-size:1.1rem;padding:14px 36px">
-          &#10003; Kreiraj blagajnu
-        </button>
+      <div class="wiz-btns">
+        <button type="button" class="btn-back" onclick="go(2)">← Natrag</button>
+        <button type="submit" class="btn-create">✓ Kreiraj blagajnu</button>
       </div>
     </div>
-
   </form>
 </div>
 
 <script>
-let selectedType = '';
-let selectedBranch = '';
-let selectedBranchName = '';
+var typeLabels = {
+  {% for t in pos_types %}'{{ t.value }}': '{{ t.icon }} {{ t.label }}',{% endfor %}
+};
 
-function selectType(card, type) {
-  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected');
-  selectedType = type;
-  document.getElementById('fPosType').value = type;
-  document.getElementById('btnStep2').disabled = false;
-}
-
-function selectBranch(card, id) {
-  document.querySelectorAll('.branch-card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected');
-  selectedBranch = id;
-  document.getElementById('fBranchId').value = id;
-  document.getElementById('btnStep3').disabled = false;
-  selectedBranchName = card.querySelector('.branch-name').textContent;
-  document.getElementById('newBranchForm').classList.toggle('show', id === 'new');
-}
-
-function goStep(n) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step' + n).classList.add('active');
-  for (let i = 1; i <= 3; i++) {
-    let dot = document.getElementById('dot' + i);
-    dot.classList.remove('active', 'done');
-    if (i < n) dot.classList.add('done');
-    else if (i === n) dot.classList.add('active');
-  }
-  if (n === 3) {
-    // Fill summary
-    let typeLabels = {};
-    {% for t in pos_types %}typeLabels['{{ t.value }}'] = '{{ t.icon }} {{ t.label }}';{% endfor %}
-    document.getElementById('sumType').innerHTML = typeLabels[selectedType] || selectedType;
-    document.getElementById('sumBranch').textContent = selectedBranchName || '—';
-  }
-}
-
-document.getElementById('wizardForm').addEventListener('submit', function() {
-  document.getElementById('fTerminalName').value = document.getElementById('terminalNameInput').value;
+// Step 1: type selection
+document.querySelectorAll('input[name="_type"]').forEach(function(r) {
+  r.addEventListener('change', function() {
+    document.getElementById('fType').value = this.value;
+    document.getElementById('b2').disabled = false;
+  });
 });
 
-// Delegated click handlers (fix for onclick not firing)
-document.addEventListener('DOMContentLoaded', function() {
-  // Type cards
-  document.querySelectorAll('.type-card[data-type]').forEach(function(card) {
-    card.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      selectType(this, this.dataset.type);
-    });
-    // Also handle touch
-    card.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      selectType(this, this.dataset.type);
-    });
+// Step 2: branch selection
+document.querySelectorAll('input[name="_branch"]').forEach(function(r) {
+  r.addEventListener('change', function() {
+    document.getElementById('fBranch').value = this.value;
+    document.getElementById('b3').disabled = false;
+    document.getElementById('nbForm').classList.toggle('show', this.value === 'new');
   });
-  // Branch cards
-  document.querySelectorAll('.branch-card[data-branch]').forEach(function(card) {
-    card.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      selectBranch(this, this.dataset.branch);
-    });
-  });
+});
+
+// Navigation
+document.getElementById('b2').addEventListener('click', function() { go(2); });
+document.getElementById('b3').addEventListener('click', function() { go(3); });
+
+function go(n) {
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('s' + n).classList.add('active');
+  for (var i = 1; i <= 3; i++) {
+    var d = document.getElementById('d' + i);
+    d.className = 'dot' + (i < n ? ' done' : i === n ? ' active' : '');
+  }
+  if (n === 3) {
+    document.getElementById('sumT').innerHTML = typeLabels[document.getElementById('fType').value] || '?';
+    var br = document.querySelector('input[name="_branch"]:checked');
+    var brCard = br ? br.closest('.branch-opt').querySelector('.bname') : null;
+    document.getElementById('sumB').textContent = brCard ? brCard.textContent : '—';
+  }
+}
+
+document.getElementById('wForm').addEventListener('submit', function() {
+  document.getElementById('fName').value = document.getElementById('nameIn').value;
 });
 </script>
 {% endblock %}
