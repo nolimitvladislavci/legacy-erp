@@ -189,7 +189,7 @@ function dismissPushBanner(){
 }
 </style>
 
-<div class="cd-wrap">
+<div class="cd-wrap page-enter">
   <div class="cd-title">🏢 Admin nadzorna ploča
     {% if company %}<span style="font-size:.8rem;color:var(--text-dim);font-weight:400">— {{ company.name }}</span>
     <a href="/companies/settings/" style="margin-left:auto;font-size:.75rem;color:var(--gold);text-decoration:none;font-weight:600;background:var(--gold-dim);border:1px solid var(--gold-border);padding:5px 12px;border-radius:6px"><i class="fas fa-cog me-1"></i>Postavke tvrtke</a>{% endif %}
@@ -197,22 +197,22 @@ function dismissPushBanner(){
 
   <!-- KPI Cards -->
   <div class="kpi-grid">
-    <a href="/invoicing/" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+    <a href="/invoicing/" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
       <div class="kpi-lbl">{% trans "💰 Prihod ovaj mj." %}</div>
       <div class="kpi-val green">{{ paid_month|floatformat:0 }} €</div>
       <div class="kpi-sub">Ukupno: {{ total_invoiced|floatformat:0 }} €</div>
     </div></a>
-    <a href="/invoicing/?status=sent" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+    <a href="/invoicing/?status=sent" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
       <div class="kpi-lbl">{% trans "📄 Neplaćene fakture" %}</div>
       <div class="kpi-val {% if unpaid > 0 %}red{% else %}green{% endif %}">{{ unpaid|floatformat:0 }} €</div>
       <div class="kpi-sub">{{ pending_offers }} ponuda u toku</div>
     </div></a>
-    <a href="{% url 'worktime:ts_manager' %}" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+    <a href="{% url 'worktime:ts_manager' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
       <div class="kpi-lbl">{% trans "👷 Radnici online" %}</div>
       <div class="kpi-val gold">{{ workers_online }}/{{ workers_total }}</div>
       <div class="kpi-sub">{{ pending_approvals }} sati čeka odobr.</div>
     </div></a>
-    <a href="{% url 'interventions:kanban' %}" style="text-decoration:none"><div class="kpi" style="cursor:pointer">
+    <a href="{% url 'interventions:kanban' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
       <div class="kpi-lbl">{% trans "🚨 Aktivne interv." %}</div>
       <div class="kpi-val {% if active_interventions > 0 %}amber{% else %}green{% endif %}">{{ active_interventions }}</div>
       <div class="kpi-sub">{{ total_projects }} aktivnih proj.</div>
@@ -250,7 +250,7 @@ function dismissPushBanner(){
   <div class="two-col">
 
     <!-- Pending approvals -->
-    <div class="panel">
+    <div class="panel fenix-card">
       <div class="panel-header">
         {% trans "⏳ Radni sati – na odobrenju" %}
         <a href="{% url 'worktime:ts_approve' %}">{% trans "Sve →" %}</a>
@@ -275,7 +275,7 @@ function dismissPushBanner(){
     </div>
 
     <!-- Active interventions -->
-    <div class="panel">
+    <div class="panel fenix-card">
       <div class="panel-header">
         {% trans "🚨 Aktivne intervencije" %}
         <a href="{% url 'interventions:kanban' %}">{% trans "Kanban →" %}</a>
@@ -298,7 +298,7 @@ function dismissPushBanner(){
   </div><!-- /two-col -->
 
   <!-- Recent invoices -->
-  <div class="panel" style="margin-bottom:24px">
+  <div class="panel fenix-card" style="margin-bottom:24px">
     <div class="panel-header">
       {% trans "📄 Nedavne fakture" %}
       <a href="{% url 'worktime:ts_bill' %}" onclick="return confirm('Otvoriti fakturiranje radnih sati?')">{% trans "Naplati sate →" %}</a>
@@ -319,7 +319,7 @@ function dismissPushBanner(){
   </div>
 
   <!-- Bank Reconciliation widget -->
-  <div class="panel" style="margin-bottom:24px">
+  <div class="panel fenix-card" style="margin-bottom:24px">
     <div class="panel-header">
       <span style="color:#03dac6">{% trans "Bankovna rekoncilijacija" %}</span>
       <a href="/konto/reconciliation/">{% trans "Otvori" %} &rarr;</a>

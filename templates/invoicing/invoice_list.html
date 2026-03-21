@@ -30,21 +30,21 @@
 </div>
 
 <div class="row g-2 mb-3">
-  <div class="col-6 col-md-3"><div class="stat-card">
+  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
     <div class="label">{% trans "Ukupno" %}</div><div class="value">{{ total_eur|floatformat:2 }} €</div>
   </div></div>
-  <div class="col-6 col-md-3"><div class="stat-card">
+  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
     <div class="label">{% trans "Plaćeno" %}</div><div class="value text-success">{{ paid_eur|floatformat:2 }} €</div>
   </div></div>
-  <div class="col-6 col-md-3"><div class="stat-card">
+  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
     <div class="label">{% trans "Neplaćeno" %}</div><div class="value text-danger">{{ unpaid_eur|floatformat:2 }} €</div>
   </div></div>
-  <div class="col-6 col-md-3"><div class="stat-card">
+  <div class="col-6 col-md-3"><div class="stat-card fenix-card">
     <div class="label">{% trans "Nacrti" %}</div><div class="value text-muted">{{ draft_count }}</div>
   </div></div>
 </div>
 
-<div class="stat-card mb-3">
+<div class="stat-card fenix-card mb-3">
   <form method="get" class="row g-2">
     <div class="col-md-4">
       <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Klijent, broj računa...">
@@ -93,7 +93,7 @@
 {% if not invoices %}
 {% include "partials/empty_state.html" with title="Izdajte prvi račun" subtitle="Kreirajte i pošaljite profesionalni račun u samo 3 minute." cta_text="Novi račun" cta_url="/hr/invoicing/create/" icon="fas fa-file-invoice-dollar" time_estimate="3 min" %}
 {% else %}
-<div class="stat-card p-0">
+<div class="stat-card fenix-card p-0">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
       <thead class="table-light">
@@ -120,12 +120,12 @@
           <td><span class="badge bg-secondary">{{ inv.get_doctype_display }}</span></td>
           <td class="text-end fw-bold">{{ inv.total|floatformat:2 }} {{ inv.currency }}</td>
           <td>
-            {% if inv.status == "PAID" %}<span class="badge bg-success">{% trans "Plaćeno" %}</span>
-            {% elif inv.status == "OVERDUE" %}<span class="badge bg-danger">{% trans "Dospijelo" %}</span>
-            {% elif inv.status == "SENT" %}<span class="badge bg-info text-dark">{% trans "Poslano" %}</span>
-            {% elif inv.status == "UNPAID" %}<span class="badge bg-warning text-dark">{% trans "Neplaćeno" %}</span>
-            {% elif inv.status == "STORNO" %}<span class="badge bg-dark">{% trans "Storno" %}</span>
-            {% else %}<span class="badge bg-light text-dark">{% trans "Nacrt" %}</span>{% endif %}
+            {% if inv.status == "PAID" %}<span class="badge-success">{% trans "Plaćeno" %}</span>
+            {% elif inv.status == "OVERDUE" %}<span class="badge-danger">{% trans "Dospijelo" %}</span>
+            {% elif inv.status == "SENT" %}<span class="badge-info">{% trans "Poslano" %}</span>
+            {% elif inv.status == "UNPAID" %}<span class="badge-warning">{% trans "Neplaćeno" %}</span>
+            {% elif inv.status == "STORNO" %}<span class="badge-danger">{% trans "Storno" %}</span>
+            {% else %}<span class="badge-info" style="opacity:.6">{% trans "Nacrt" %}</span>{% endif %}
           </td>
           <td class="text-center">
             {% if inv.is_fiscalized %}<i class="fas fa-check-circle text-success" title="{{ inv.jir }}"></i>
