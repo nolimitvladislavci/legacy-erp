@@ -344,3 +344,16 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - URLs: /smart-import/staging/ (upload, detail, start, progress) — DONE
 - Migracija 0006_add_staging_batch — DONE
 - Trošak: 0.15 EUR / 1000 slika, ~2 sata noćne obrade
+
+### Fiskalizacija bug fix (CC Code — 21.03.)
+- 3 sloja zaštite: hard timeout 5s (ThreadPoolExecutor), instant response bez JIR-a, warning toast + Celery retry 2min
+- Zakonski OK — 48h rok za naknadnu fiskalizaciju
+- Nikad više 504 pred klijentom
+
+### Šeki Robot Prodavač — analiza (21.03.)
+- Kiosk model (apoteka/benzinska): 3x terminali, 2.000-2.500 EUR/kom hardware
+- ROI: 67.200 EUR/god uštede na radnicima vs 7.500 EUR hardware
+- Povrat investicije: 6 tjedana
+- Softver: LIMIT Connect već ima 90% (gastro_qr, webshop_public, QR instant open)
+- Nedostaje: CC_TASK_POS_KIOSK_MODE — kiosk template za kupca (full-screen, touchscreen)
+- SEKI_KOMUNIKACIJA.md ažuriran s kiosk argumentima
