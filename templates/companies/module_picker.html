@@ -49,6 +49,27 @@
 }
 .mp-save:hover { filter:brightness(1.1); }
 .mp-count { font-size:.85rem; color:#888; }
+/* Pending change indicators */
+.mp-card.mp-pending-on {
+  border-color:var(--gold,#c9a84c); border-style:dashed;
+  animation:pendingPulse 1.5s ease infinite;
+}
+.mp-card.mp-pending-off {
+  border-color:#e74c3c; border-style:dashed; opacity:.6;
+}
+.mp-card.mp-pending-on::after, .mp-card.mp-pending-off::after {
+  content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+  padding:1px 8px; border-radius:4px; font-size:.6rem; font-weight:700;
+}
+.mp-card.mp-pending-on::after {
+  content:'+ DODAJ'; background:var(--gold,#c9a84c); color:#000;
+}
+.mp-card.mp-pending-off::after {
+  content:'- UKLONI'; background:#e74c3c; color:#fff;
+}
+.mp-save-pulse { animation:savePulse 1s ease infinite; }
+@keyframes pendingPulse { 0%,100%{border-color:var(--gold,#c9a84c)} 50%{border-color:rgba(201,168,76,.3)} }
+@keyframes savePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
 </style>
 
 <div class="mp-header">
@@ -119,37 +140,82 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var cards = document.querySelectorAll('.mp-card');
+  var dirty = false;
+  var pendingChanges = {};  // mod_id -> true/false (desired state)
 
   function updateCount() {
-    var n = document.querySelectorAll('.mp-cb:checked').length;
+    // Count: current checked + pending adds - pending removes
+    var n = 0;
+    document.querySelectorAll('.mp-cb').forEach(function(cb) {
+      var mod = cb.value;
+      if (mod in pendingChanges) {
+        if (pendingChanges[mod]) n++;
+      } else {
+        if (cb.checked) n++;
+      }
+    });
     document.getElementById('modCount').textContent = n + ' odabrano';
+    var changes = Object.keys(pendingChanges).length;
+    var saveBtn = document.getElementById('btnSave');
+    if (changes > 0) {
+      saveBtn.innerHTML = '<i class="fas fa-check me-1"></i> Potvrdi odabir (' + changes + ')';
+      saveBtn.style.animation = 'nonep';
+      saveBtn.classList.add('mp-save-pulse');
+    } else {
+      saveBtn.innerHTML = '<i class="fas fa-check me-1"></i> Potvrdi odabir';
+      saveBtn.classList.remove('mp-save-pulse');
+    }
   }
 
   cards.forEach(function(card) {
-    card.addEventListener('click', function(e) {
+    function handleToggle(e) {
       e.preventDefault();
-      if (this.dataset.locked) return;
-      var cb = this.querySelector('.mp-cb');
-      cb.checked = !cb.checked;
-      this.classList.toggle('on', cb.checked);
+      e.stopPropagation();
+      if (card.dataset.locked) return;
+
+      var mod = card.dataset.mod;
+      var cb = card.querySelector('.mp-cb');
+      var wasOriginallyOn = cb.defaultChecked;
+
+      // Toggle pending state
+      if (mod in pendingChanges) {
+        // Already pending — toggle back (cancel change)
+        var newState = !pendingChanges[mod];
+        if (newState === wasOriginallyOn) {
+          delete pendingChanges[mod];
+          card.classList.remove('mp-pending-on', 'mp-pending-off');
+        } else {
+          pendingChanges[mod] = newState;
+        }
+      } else {
+        // New change
+        pendingChanges[mod] = !wasOriginallyOn;
+      }
+
+      // Visual: pending state
+      var desired = (mod in pendingChanges) ? pendingChanges[mod] : wasOriginallyOn;
+      card.classList.toggle('on', desired);
+      card.classList.toggle('mp-pending-on', desired && (mod in pendingChanges));
+      card.classList.toggle('mp-pending-off', !desired && (mod in pendingChanges));
+
       updateCount();
-    });
-    card.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      if (this.dataset.locked) return;
-      var cb = this.querySelector('.mp-cb');
-      cb.checked = !cb.checked;
-      this.classList.toggle('on', cb.checked);
-      updateCount();
-    });
+    }
+
+    card.addEventListener('click', handleToggle);
+  });
+
+  // On submit: apply pending changes to checkboxes
+  document.getElementById('moduleForm').addEventListener('submit', function() {
+    for (var mod in pendingChanges) {
+      var cb = document.querySelector('.mp-cb[value="' + mod + '"]');
+      if (cb) cb.checked = pendingChanges[mod];
+    }
+    var btn = document.getElementById('btnSave');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Spremam...';
   });
 
   updateCount();
-
-  document.getElementById('btnSave').addEventListener('click', function() {
-    this.disabled = true;
-    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Spremam...';
-  });
 });
 </script>
 {% endblock %}
