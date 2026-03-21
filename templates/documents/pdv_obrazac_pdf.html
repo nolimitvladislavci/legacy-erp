@@ -88,6 +88,13 @@ tr.total td { font-weight:700; border-top:1.5pt solid #0f172a; }
   <div class="sig">Odgovorna osoba</div>
 </div>
 
-<div class="footer">{{ company.name }} · OIB: {{ company.oib|default:"" }} · Generirano: {% now "d.m.Y H:i" %} · LIMIT Connect ERP</div>
+<div class="footer" style="display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #cbd5e1;padding-top:8pt;margin-top:12pt;font-size:7pt;color:#64748b">
+  <div>
+    {{ company.name }}{% if company.oib %} · OIB: {{ company.oib }}{% endif %} · {% now "d.m.Y H:i" %}
+  </div>
+  <div style="text-align:right;font-family:monospace">
+    <span style="color:#16a34a">&#x25CF;</span> SHA-256 zaštićeno · limit-connect.com
+  </div>
+</div>
 
 </body></html>
