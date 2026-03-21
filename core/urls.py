@@ -11,6 +11,7 @@ import os as _os
 from django.contrib.auth import views as auth_views
 from . import views
 from core import steuerberater_views
+from core import onboarding_views
 
 def _serve_offline(request):
     of_path = _os.path.join(settings.BASE_DIR, 'static', 'offline.html')
@@ -211,6 +212,15 @@ urlpatterns += i18n_patterns(
     
     path('website/', include('website.urls')),
     path('site/', include('website.site_urls')),
+    # Onboarding wizard
+    path('onboarding/', onboarding_views.onboarding_wizard, name='onboarding_wizard'),
+    path('onboarding/update-profile/', onboarding_views.onboarding_update_profile, name='onboarding_update_profile'),
+    path('onboarding/add-partner/', onboarding_views.onboarding_add_partner, name='onboarding_add_partner'),
+    path('onboarding/add-item/', onboarding_views.onboarding_add_item, name='onboarding_add_item'),
+    path('onboarding/activate-pos/', onboarding_views.onboarding_activate_pos, name='onboarding_activate_pos'),
+    path('onboarding/skip-step/', onboarding_views.onboarding_skip_step, name='onboarding_skip_step'),
+    path('onboarding/complete/', onboarding_views.onboarding_complete, name='onboarding_complete'),
+
     path('dashboard/company/', views.company_dashboard, name='company_dashboard'),
     path('dashboard/manager/', views.manager_dashboard, name='manager_dashboard'),
     path('dashboard/worker/', views.worker_dashboard, name='worker_dashboard'),

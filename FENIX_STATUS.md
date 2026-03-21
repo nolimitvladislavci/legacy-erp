@@ -295,3 +295,9 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 3. CC_TASK_LIMIT_AI_FUNDS.md — CC Code — EU fondovi workflow (Faza 2) — SPREMAN
 4. GEMINI_TASK_LIMIT_AI_CAMPAIGNS.md — Gemini — CampaignPlanner (Faza 3) — CEKA FAZU 2
 5. CC_TASK_LIMIT_AI_COCKPIT.md — CC Code — per-klijent cockpit (Faza 3) — CEKA FAZU 2
+
+### GTM Plan V1 (2026-03-21)
+- GTM_PLAN_LIMIT_CONNECT_V1.md kreiran — synthesis Sonnet + Gemini
+- CC_TASK_GTM_FOUNDATION.md — OIB lookup + pricing kalkulator + empty states
+- Marija bug: baza čista, problem UI prikaz arhivskog dokumenta s total=0
+- Šeki: 5 terminala, 4 sesije ukupno — dijagnoza tjedan 1

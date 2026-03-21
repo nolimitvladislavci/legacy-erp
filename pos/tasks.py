@@ -203,3 +203,107 @@ def cleanup_zombie_sessions():
         logger.warning('Zombie sesija #%d auto-zatvorena (otvorena %s)', s.pk, s.opened_at)
 
     return {'status': 'cleaned', 'zombies': count}
+
+
+
+@shared_task(bind=True, soft_time_limit=120)
+def nightly_owner_zreport(self):
+    """
+    Ponocni Z-report na WhatsApp za vlasnike.
+    Svaku vecer u 23:55 — vlasnik dobije dnevni sazetak.
+    Psiholoski: dopaminska ovisnost o poruci = 0% churn.
+    """
+    from companies.models import Company
+    from pos.models import POSSession, POSReceipt, POSReceiptItem, POSPaymentLine
+    from django.db.models import Sum, Count, Q
+    from django.utils import timezone
+    from core.whatsapp import send_text
+    import logging
+
+    logger = logging.getLogger('pos.nightly')
+    today = timezone.now().date()
+    sent = 0
+
+    for company in Company.objects.filter(is_platform_owner=False):
+        # Provjeri ima li POS aktivnost danas
+        receipts = POSReceipt.objects.filter(
+            session__terminal__company=company,
+            status='paid',
+            created_at__date=today,
+        )
+        if not receipts.exists():
+            continue
+
+        # Izracunaj metriku
+        total = receipts.aggregate(s=Sum('total'))['s'] or 0
+        count = receipts.count()
+        cash = POSPaymentLine.objects.filter(
+            receipt__in=receipts, method='CASH'
+        ).aggregate(s=Sum('amount'))['s'] or 0
+        card = POSPaymentLine.objects.filter(
+            receipt__in=receipts, method__in=['CARD', 'REVOLUT']
+        ).aggregate(s=Sum('amount'))['s'] or 0
+
+        # Top artikl
+        top = POSReceiptItem.objects.filter(
+            receipt__in=receipts, is_tip=False,
+        ).values('description').annotate(
+            qty=Sum('quantity'), rev=Sum('total_price')
+        ).order_by('-rev').first()
+        top_item = '%s (%sx)' % (top['description'][:20], int(top['qty'])) if top else 'N/A'
+
+        # Napojnice
+        tips = POSReceiptItem.objects.filter(
+            receipt__in=receipts, is_tip=True,
+        ).aggregate(s=Sum('unit_price'))['s'] or 0
+
+        # Smjene
+        sessions = POSSession.objects.filter(
+            terminal__company=company,
+            opened_at__date=today,
+        ).count()
+
+        # Poruka
+        msg = (
+            'Z-Izvjestaj (%s)
+
+'
+            'Promet: %.2f EUR (%d bonova)
+'
+            'Gotovina: %.2f EUR
+'
+            'Kartica: %.2f EUR
+'
+            'Napojnice: %.2f EUR
+'
+            'Top artikl: %s
+'
+            'Smjena: %d
+
+'
+            'Sve je fiskalizirano i sigurno.
+'
+            'limit-connect.com'
+        ) % (today.strftime('%d.%m.'), total, count, cash, card, tips, top_item, sessions)
+
+        # Posalji vlasniku
+        phone = company.phone or company.mobile
+        if not phone:
+            # Trazi admina firme
+            from accounts.models import CompanyMembership
+            admin = CompanyMembership.objects.filter(
+                company=company, role__in=['owner', 'company_admin'], is_active=True,
+            ).select_related('user__profile').first()
+            if admin and hasattr(admin.user, 'profile'):
+                phone = getattr(admin.user.profile, 'phone', '') or ''
+
+        if phone:
+            try:
+                result = send_text(phone, msg)
+                if result.get('success'):
+                    sent += 1
+                    logger.info('Z-report sent to %s (%s)', company.name, phone)
+            except Exception as e:
+                logger.warning('Z-report failed for %s: %s', company.name, e)
+
+    return {'sent': sent, 'date': str(today)}

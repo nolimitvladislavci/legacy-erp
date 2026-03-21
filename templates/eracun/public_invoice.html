@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>e-Racun {{ eracun.invoice_number }} — {{ company.name }}</title>
+<style>
+:root{--gold:#c9a84c;--black:#0a0a0a;--green:#16a34a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f8fafc;color:#1e293b;font-family:'Segoe UI',system-ui,sans-serif}
+.top-bar{background:var(--black);padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.top-bar .brand{color:var(--gold);font-weight:700;font-size:.9rem}
+.top-bar .cta{background:var(--gold);color:#000;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.82rem}
+.container{max-width:700px;margin:0 auto;padding:2rem 1.5rem}
+.invoice-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:2rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.inv-from h2{font-size:1.2rem;color:#0f172a;margin-bottom:.3rem}
+.inv-from p{font-size:.82rem;color:#64748b}
+.inv-number{text-align:right}
+.inv-number .num{font-size:1.3rem;font-weight:700;color:var(--gold)}
+.inv-number .date{font-size:.82rem;color:#64748b}
+.inv-to{background:#f1f5f9;padding:1rem;border-radius:8px;margin-bottom:1.5rem}
+.inv-to .label{font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
+.inv-to .name{font-size:1rem;font-weight:600}
+.inv-total{text-align:center;padding:1.5rem;background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:10px;margin:1.5rem 0}
+.inv-total .amount{font-size:2rem;font-weight:700;color:var(--gold)}
+.inv-total .label{font-size:.75rem;color:#94a3b8}
+.download-btns{display:flex;gap:.8rem;flex-wrap:wrap;margin:1.5rem 0}
+.dl-btn{flex:1;min-width:120px;padding:12px;border-radius:8px;text-align:center;text-decoration:none;font-weight:700;font-size:.85rem}
+.dl-btn.pdf{background:#dc2626;color:#fff}
+.dl-btn.xml{background:#2563eb;color:#fff}
+.dl-btn.zugferd{background:#7c3aed;color:#fff}
+.viral-box{background:linear-gradient(135deg,#0a0a0a,#1a1200);border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:2rem;text-align:center;margin-top:2rem}
+.viral-box h3{color:var(--gold);font-size:1.1rem;margin-bottom:.5rem}
+.viral-box p{color:#94a3b8;font-size:.88rem;margin-bottom:1rem;line-height:1.6}
+.viral-btn{display:inline-block;background:var(--gold);color:#000;padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;font-size:.95rem}
+.viral-features{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-top:1rem}
+.viral-feat{background:rgba(201,168,76,.1);color:var(--gold);padding:4px 10px;border-radius:20px;font-size:.72rem}
+.footer{text-align:center;padding:1.5rem;color:#94a3b8;font-size:.75rem}
+@media(max-width:600px){.inv-header{flex-direction:column}.inv-number{text-align:left}.dl-btn{min-width:100%}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="brand">LIMIT Connect</div>
+  <a href="/register/" class="cta">Isprobajte besplatno</a>
+</div>
+
+<div class="container">
+  <div class="invoice-card">
+    <div class="inv-header">
+      <div class="inv-from">
+        <h2>{{ company.name }}</h2>
+        <p>OIB: {{ company.oib }}<br>{{ company.address }} {{ company.city }}</p>
+      </div>
+      <div class="inv-number">
+        <div class="num">{{ eracun.invoice_number }}</div>
+        <div class="date">{{ eracun.issue_date|date:"d.m.Y." }}</div>
+      </div>
+    </div>
+
+    <div class="inv-to">
+      <div class="label">Primatelj</div>
+      <div class="name">{{ eracun.recipient_name }}</div>
+      <p style="font-size:.82rem;color:#64748b">OIB: {{ eracun.recipient_oib }}</p>
+    </div>
+
+    <div class="inv-total">
+      <div class="label">UKUPNO</div>
+      <div class="amount">{{ eracun.total|floatformat:2 }} EUR</div>
+      <div class="label" style="margin-top:.3rem">PDV: {{ eracun.tax_amount|floatformat:2 }} EUR</div>
+    </div>
+
+    <div class="download-btns">
+      <a href="{% url 'eracun:download_xml' eracun.pk %}" class="dl-btn xml">XML (UBL)</a>
+      <a href="{% url 'eracun:download_zugferd' eracun.pk %}" class="dl-btn zugferd">ZUGFeRD PDF</a>
+      <a href="{% url 'eracun:download_xrechnung' eracun.pk %}" class="dl-btn pdf">XRechnung</a>
+    </div>
+  </div>
+
+  <!-- VIRALNI CTA -->
+  <div class="viral-box">
+    <h3>{{ company.name }} koristi LIMIT Connect</h3>
+    <p>Digitalni ERP za fakturiranje, POS blagajnu, e-Racune i arhivu.<br>
+    Usklaen sa zakonima za 2026. godinu — bez papira.</p>
+    <a href="/register/" class="viral-btn">Isprobajte besplatno</a>
+    <div class="viral-features">
+      <span class="viral-feat">e-Racun</span>
+      <span class="viral-feat">POS</span>
+      <span class="viral-feat">Fiskalizacija</span>
+      <span class="viral-feat">Arhiva</span>
+      <span class="viral-feat">AI Asistent</span>
+      <span class="viral-feat">Bez papira</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  LIMIT Connect — limit-connect.com | Konjik d.o.o. | Digitalni ERP sustav
+</div>
+
+</body>
+</html>

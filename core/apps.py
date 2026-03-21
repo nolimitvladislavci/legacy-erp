@@ -13,3 +13,5 @@ class CoreConfig(AppConfig):
         # Register DejaVu Sans fonts for Croatian character support in PDFs
         from core.pdf_fonts import register_pdf_fonts
         register_pdf_fonts()
+        # Onboarding auto-completion signals
+        import core.onboarding_signals  # noqa: F401

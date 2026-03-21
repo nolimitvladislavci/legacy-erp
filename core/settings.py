@@ -467,6 +467,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "eracun.tasks.retry_unsent_eracuni",
         "schedule": crontab(minute="*/30"),
     },
+    "nightly-owner-zreport": {
+        "task": "pos.tasks.nightly_owner_zreport",
+        "schedule": crontab(hour=23, minute=55),
+    },
     "udruge-evaluate-subscriptions": {
         "task": "udruge.tasks.evaluate_subscriptions",
         "schedule": crontab(hour=2, minute=15),

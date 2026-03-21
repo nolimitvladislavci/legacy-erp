@@ -368,3 +368,23 @@ def download_xrechnung(request, pk):
     response = HttpResponse(xml_str, content_type='application/xml')
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
     return response
+
+
+
+def public_invoice_download(request, uuid):
+    """
+    Javna stranica za preuzimanje e-Racuna.
+    Primatelj fakture otvara link iz emaila.
+    Vidi CTA: "Isprobajte LIMIT Connect besplatno"
+    Svaka faktura = besplatni oglas.
+    """
+    from .models import ERacun
+    try:
+        eracun = ERacun.objects.select_related('company').get(pk=uuid)
+    except ERacun.DoesNotExist:
+        return render(request, 'eracun/public_404.html')
+
+    return render(request, 'eracun/public_invoice.html', {
+        'eracun': eracun,
+        'company': eracun.company,
+    })
