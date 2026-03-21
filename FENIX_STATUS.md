@@ -6,6 +6,7 @@
 ---
 
 ## Zadnje azuriranje
+2026-03-21 13:38 — CC Code (Opus) — POS QR Instant Open DONE: zero-login terminal activation, 5 QR kodova za Seki
 2026-03-21 13:30 — CC Code (Opus) — Invoice Growth Engine: referral footer na PDF/email, 8 AI misija aktivirano, WhatsApp status report
 2026-03-21 13:15 — CC Code (Opus) — GTM Foundation DONE: OIB lookup API, pricing kalkulator, empty states (3 modula)
 2026-03-21 12:30 — CC Code (Opus) — limit_connect_ai Faza 1 DONE: 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin, migracije
@@ -316,3 +317,27 @@ a6663e5 — LIMIT AI Foundation: models, tasks, views, cockpit + ComplianceWatch
 - CC_TASK_GTM_FOUNDATION.md — OIB lookup + pricing kalkulator + empty states
 - Marija bug: baza čista, problem UI prikaz arhivskog dokumenta s total=0
 - Šeki: 5 terminala, 4 sesije ukupno — dijagnoza tjedan 1
+
+### POS QR Instant Open (SPREMAN — 2026-03-21)
+- CC_TASK_POS_QR_INSTANT_OPEN.md kreiran — zero-login QR aktivacija terminala
+- POSTerminal.access_token novo polje (secrets.token_urlsafe(20))
+- /pos/qr/{token}/ — otvara blagajnu bez logina, redirect na quick_pos
+- generate_pos_qr management command — 5 PDF-ova za Šekijeve terminale
+- AIActionLog bilježi svaki QR pristup s IP
+- Output: 5 print-ready PDF A6 QR kodova za Uvijek Friško
+
+### Šeki komunikacijska strategija (2026-03-21)
+- SEKI_KOMUNIKACIJA.md kreiran
+- 5 poruka sekvenca za WhatsApp (ne poziv, ne demo)
+- Poruka 1: Ivan šalje DANAS navečer (20:00-22:00)
+- Poruka 2: sutra navečer — QR slika Vladislavci
+- Auto jutarnji report format definiran (07:15, sve 3 lokacije)
+- Ključni insight: Šeki ne kupuje ERP — kupuje manje posla za sinove
+
+### Predarhiva Bulk OCR (SPREMAN — 2026-03-21)
+- CC_TASK_PREDARHIVA_BULK_OCR.md kreiran — gorući problem Marija Brtan
+- StagingBatch + StagingFile modeli (predkomora za 1000+ slika)
+- Rate-limited Celery task: 8 req/min, rate limit, auto-retry, exponential backoff
+- Live progress polling: svakih 3s, "razmišljanje na glas", zadnjih 5 fajlova
+- DE tržište: alternativni Gemini prompt za njemačke račune
+- Trošak: 0.15 EUR / 1000 slika, ~2 sata noćne obrade

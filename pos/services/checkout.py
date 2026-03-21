@@ -494,7 +494,17 @@ class CheckoutService:
         receipt.save(update_fields=['status', 'paid_at', 'total', 'subtotal', 'tax_amount'])
 
         # ── 9. FISKALIZACIJA ──
-        zki, jir, fiscal_error = cls._fiscalize(receipt)
+        # Hard timeout: fiskalizacija NIKAD ne smije blokirati vise od 5s
+        import concurrent.futures
+        try:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(cls._fiscalize, receipt)
+                zki, jir, fiscal_error = future.result(timeout=5)
+        except concurrent.futures.TimeoutError:
+            zki, jir, fiscal_error = '', '', 'Fiscal timeout (5s) — retry later'
+            logger.warning('Fiscal HARD TIMEOUT for receipt #%s', receipt.receipt_number)
+        except Exception as e:
+            zki, jir, fiscal_error = '', '', str(e)[:100]
 
         # ── 10. RESULT ──
         terminal_pk = session.terminal.pk

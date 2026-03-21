@@ -1,24 +1,24 @@
 # CC ACTIVE TASK — čitaj ovo prvo
-# Ažurirano: 2026-03-21 13:15 — CC Code (Opus)
+# Ažurirano: 2026-03-21 15:30 — Sonnet
 
-## ZAVRŠENI TASKOVI (ova sesija)
+## AKTIVNI TASKOVI (oba visoki prioritet — odaberi redosljed)
 
-### 1. CC_TASK_LIMIT_AI_FOUNDATION.md — DONE
-- 5 modela, 4 Celery taska, 4 viewa, 4 templatea, admin
-- Commit: a6663e5 + c93a85e
+### TASK A — CC_TASK_POS_QR_INSTANT_OPEN.md
+Šeki — 5 terminala, koristi 1. QR kod na zidu → sin skenira → blagajna otvorena.
+Output: 5 print-ready PDF QR kodova za Uvijek Friško.
 
-### 2. CC_TASK_GTM_FOUNDATION.md — DONE
-- OIB Auto-Lookup API (interni DB + sudski registar + data.gov.hr)
-- Pricing kalkulator (slider + toggleovi + godišnja ušteda)
-- Empty states za invoicing, partners, inventory
-- Commit: 60abc28
+### TASK B — CC_TASK_PREDARHIVA_BULK_OCR.md
+Marija — gorući problem. 1000 slika → predkomora → Gemini queue → live progress → arhiva.
+Output: StagingBatch model + bulk upload UI + rate-limited Celery + live progress.
 
-### 3. WhatsApp kampanja "Sjedni, zaslužio si" — DONE
-- CampaignPlan kreiran u draftu
-- Test poruka poslana Ivanu na WhatsApp
+## PREPORUKA REDOSLJEDA
+QR task je manji (1-2 sata) — napravi ga prvi.
+Predarhiva je veći (4-6 sati) — napravi drugi.
 
-## ČEKA SMJER OD IVANA
-Moguci sljedeći taskovi:
-1. CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi workflow (Faza 2)
-2. Onboarding wizard poboljšanja (progress bar, gamification)
-3. Compliance Shield UI na dashboardu
+## PRETHODNI TASKOVI (DONE)
+- CC_TASK_LIMIT_AI_FOUNDATION.md — DONE
+- CC_TASK_GTM_FOUNDATION.md — DONE
+
+## KAD ZAVRŠIŠ SVE
+Upiši DONE u FENIX_STATUS.md za oba taska.
+Sljedeći: GEMINI_TASK_LIMIT_AI_COMPLIANCE.md (Faza 2)
