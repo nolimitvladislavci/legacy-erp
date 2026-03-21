@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Kampanje{% endblock %}
+<style>
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr !important}
+  .campaigns-grid{grid-template-columns:1fr !important}
+  .btn,button{width:100%;margin-bottom:6px}
+}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+  <div>
+    <h4 style="margin:0;color:var(--gold)">Kampanje</h4>
+    <small style="color:var(--muted)">Fundraising, EU fondovi, donacijske akcije</small>
+  </div>
+  <a href="{% url 'udruge:kampanja_create' %}" class="btn btn-gold btn-sm">+ Nova kampanja</a>
+</div>
+
+<div class="stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem">
+  <div class="card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Ukupno</div>
+  </div>
+  <div class="card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--green)">{{ stats.aktivne }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Aktivne</div>
+  </div>
+  <div class="card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.prikupljeno }} EUR</div>
+    <div style="font-size:.72rem;color:var(--muted)">Prikupljeno</div>
+  </div>
+</div>
+
+<div class="card" style="padding:.75rem;margin-bottom:1rem">
+  <form method="get" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+    <select name="type" style="padding:.4rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <option value="">Svi tipovi</option>
+      {% for val, lbl in type_choices %}<option value="{{ val }}" {% if type_f == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+    </select>
+    <select name="status" style="padding:.4rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <option value="">Svi statusi</option>
+      {% for val, lbl in status_choices %}<option value="{{ val }}" {% if status_f == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-gold btn-sm">Filtriraj</button>
+    {% if type_f or status_f %}<a href="{% url 'udruge:kampanja_list' %}" class="btn btn-ghost btn-sm">Reset</a>{% endif %}
+  </form>
+</div>
+
+<div class="campaigns-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:.75rem">
+  {% for k in page_obj %}
+  <a href="{% url 'udruge:kampanja_detail' k.pk %}" style="text-decoration:none;color:inherit">
+    <div class="card" style="padding:1rem;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.5rem">
+        <h5 style="margin:0;color:var(--gold);font-size:.95rem">{{ k.name }}</h5>
+        {% if k.status == 'active' %}<span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Aktivna</span>
+        {% elif k.status == 'completed' %}<span style="background:rgba(59,130,246,.15);color:#3b82f6;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Zavrsena</span>
+        {% elif k.status == 'draft' %}<span style="background:rgba(156,163,175,.15);color:#9ca3af;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Nacrt</span>
+        {% elif k.status == 'paused' %}<span style="background:rgba(245,158,11,.15);color:#f59e0b;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Pauzirana</span>
+        {% else %}<span style="background:rgba(156,163,175,.15);color:#9ca3af;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">{{ k.get_status_display }}</span>{% endif %}
+      </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap">
+        <span style="background:rgba(201,168,76,.1);color:var(--gold);font-size:.65rem;padding:2px 8px;border-radius:10px">{{ k.get_campaign_type_display }}</span>
+        {% if k.campaign_type == 'eu_fond' and k.eu_status %}
+        <span style="background:rgba(59,130,246,.1);color:#3b82f6;font-size:.65rem;padding:2px 8px;border-radius:10px">EU: {{ k.get_eu_status_display }}</span>
+        {% endif %}
+      </div>
+
+      {% if k.goal_amount %}
+      <div style="margin-bottom:.5rem">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px">
+          <span style="color:var(--muted)">{{ k.raised_amount }} / {{ k.goal_amount }} EUR</span>
+          <span style="color:var(--gold);font-weight:600">{{ k.progress_percent }}%</span>
+        </div>
+        <div style="background:var(--dark);border-radius:4px;height:6px;overflow:hidden">
+          <div style="height:100%;width:{{ k.progress_percent }}%;background:linear-gradient(90deg,var(--gold),#e8c547);border-radius:4px;transition:width .3s"></div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:.5rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted)">
+        <span>{{ k.start_date|date:"d.m.Y" }}</span>
+        {% if k.days_remaining is not None %}
+          {% if k.days_remaining > 0 %}<span>Jos {{ k.days_remaining }} dana</span>
+          {% elif k.days_remaining == 0 %}<span style="color:#f59e0b">Zavrsava danas</span>
+          {% else %}<span style="color:#ef4444">Istekla</span>{% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  <div class="card" style="padding:2rem;text-align:center;color:var(--muted);grid-column:1/-1">
+    Nema kampanja. <a href="{% url 'udruge:kampanja_create' %}" style="color:var(--gold)">Kreirajte prvu!</a>
+  </div>
+  {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<div style="display:flex;justify-content:center;gap:.5rem;margin-top:1rem">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&type={{ type_f }}&status={{ status_f }}" class="btn btn-ghost btn-sm">&laquo; Prethodna</a>{% endif %}
+  <span style="padding:.4rem .8rem;color:var(--muted);font-size:.85rem">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&type={{ type_f }}&status={{ status_f }}" class="btn btn-ghost btn-sm">Sljedeca &raquo;</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

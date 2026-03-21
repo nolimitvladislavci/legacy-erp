@@ -37,4 +37,20 @@ urlpatterns = [
     path('eu/timesheet/', views.download_volunteer_timesheet, name='volunteer_timesheet'),
     path('eu/inkind/', views.download_inkind_report, name='inkind_report'),
     path('eu/godisnje/', views.download_annual_volunteer_report, name='annual_volunteer_report'),
+
+    # Dogadjaji
+    path('dogadjaji/', views.dogadjaj_list, name='dogadjaj_list'),
+    path('dogadjaji/novi/', views.dogadjaj_create, name='dogadjaj_create'),
+    path('dogadjaji/<int:pk>/', views.dogadjaj_detail, name='dogadjaj_detail'),
+    path('dogadjaji/<int:pk>/prijava/', views.dogadjaj_register, name='dogadjaj_register'),
+
+    # Kampanje
+    path('kampanje/', views.kampanja_list, name='kampanja_list'),
+    path('kampanje/nova/', views.kampanja_create, name='kampanja_create'),
+    path('kampanje/<int:pk>/', views.kampanja_detail, name='kampanja_detail'),
+
+    # Email kampanje
+    path('email/', views.email_kampanja_list, name='email_kampanja_list'),
+    path('email/nova/', views.email_kampanja_create, name='email_kampanja_create'),
+    path('email/<int:pk>/send/', views.email_kampanja_send, name='email_kampanja_send'),
 ]

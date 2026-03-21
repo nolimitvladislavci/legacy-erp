@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Nova kampanja{% endblock %}
+{% block content %}
+<div style="margin-bottom:1rem">
+  <a href="{% url 'udruge:kampanja_list' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none">&laquo; Sve kampanje</a>
+</div>
+<h4 style="margin:0 0 1rem;color:var(--gold)">Nova kampanja</h4>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="card" style="padding:1rem;margin-bottom:1rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+      <div style="grid-column:1/-1">
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Naziv *</label>
+        <input type="text" name="name" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Tip kampanje</label>
+        <select name="campaign_type" id="campaign_type" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          {% for val, lbl in type_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Status</label>
+        <select name="status" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          {% for val, lbl in status_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Pocetak *</label>
+        <input type="date" name="start_date" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Kraj</label>
+        <input type="date" name="end_date" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Financijski cilj (EUR)</label>
+        <input type="number" name="goal_amount" value="0" step="0.01" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Cilj clanova</label>
+        <input type="number" name="goal_members" value="0" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+
+      <!-- EU Fond fields (shown/hidden by JS) -->
+      <div id="eu_fields" style="grid-column:1/-1;display:none;border-top:1px solid var(--border);padding-top:.75rem;margin-top:.25rem">
+        <div style="font-size:.82rem;color:#3b82f6;font-weight:600;margin-bottom:.5rem">EU Fond polja</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Sifra EU projekta</label>
+            <input type="text" name="eu_project_code" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          </div>
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">EU program (ESF+, ERDF...)</label>
+            <input type="text" name="eu_program" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          </div>
+        </div>
+      </div>
+
+      <div style="grid-column:1/-1">
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Opis</label>
+        <textarea name="description" rows="4" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      </div>
+      <div style="grid-column:1/-1">
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Napomene</label>
+        <textarea name="notes" rows="2" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <button type="submit" class="btn btn-gold">Spremi kampanju</button>
+    <a href="{% url 'udruge:kampanja_list' %}" class="btn btn-ghost">Odustani</a>
+  </div>
+</form>
+
+<script>
+document.getElementById('campaign_type').addEventListener('change', function(){
+  document.getElementById('eu_fields').style.display = this.value === 'eu_fond' ? 'block' : 'none';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}{{ dogadjaj.name }}{% endblock %}
+{% block content %}
+<div style="margin-bottom:1rem">
+  <a href="{% url 'udruge:dogadjaj_list' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none">&laquo; Svi dogadjaji</a>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+  <div>
+    <h4 style="margin:0;color:var(--gold)">{{ dogadjaj.name }}</h4>
+    <span style="font-size:.78rem;color:var(--muted)">{{ dogadjaj.get_event_type_display }}</span>
+    {% if dogadjaj.status == 'active' %}<span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:8px">Aktivan</span>
+    {% elif dogadjaj.status == 'draft' %}<span style="background:rgba(156,163,175,.15);color:#9ca3af;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:8px">Nacrt</span>
+    {% elif dogadjaj.status == 'completed' %}<span style="background:rgba(59,130,246,.15);color:#3b82f6;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:8px">Zavrsen</span>
+    {% elif dogadjaj.status == 'cancelled' %}<span style="background:rgba(239,68,68,.15);color:#ef4444;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:8px">Otkazan</span>
+    {% endif %}
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem">
+  <!-- Left: Event Info -->
+  <div>
+    <div class="card" style="padding:1rem;margin-bottom:1rem">
+      <h5 style="margin:0 0 .75rem;color:var(--gold);font-size:.85rem">Detalji dogadjaja</h5>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Pocetak</div>
+          <div style="font-size:.88rem">{{ dogadjaj.start_date|date:"d.m.Y H:i" }}</div>
+        </div>
+        {% if dogadjaj.end_date %}
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Kraj</div>
+          <div style="font-size:.88rem">{{ dogadjaj.end_date|date:"d.m.Y H:i" }}</div>
+        </div>
+        {% endif %}
+        {% if dogadjaj.location %}
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Lokacija</div>
+          <div style="font-size:.88rem">{{ dogadjaj.location }}</div>
+        </div>
+        {% endif %}
+        {% if dogadjaj.online_url %}
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Online link</div>
+          <div style="font-size:.88rem"><a href="{{ dogadjaj.online_url }}" target="_blank" style="color:var(--gold)">Pristupi</a></div>
+        </div>
+        {% endif %}
+      </div>
+      {% if dogadjaj.description %}
+      <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--border)">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px">Opis</div>
+        <div style="font-size:.88rem;line-height:1.5;white-space:pre-wrap">{{ dogadjaj.description }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Budget -->
+    <div class="card" style="padding:1rem;margin-bottom:1rem">
+      <h5 style="margin:0 0 .75rem;color:var(--gold);font-size:.85rem">Financije</h5>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem">
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Budzet</div>
+          <div style="font-size:.95rem;font-weight:700">{{ dogadjaj.budget }} EUR</div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Stvarni trosak</div>
+          <div style="font-size:.95rem;font-weight:700">{{ dogadjaj.actual_cost }} EUR</div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:2px">Prihod</div>
+          <div style="font-size:.95rem;font-weight:700;color:var(--green)">{{ dogadjaj.revenue }} EUR</div>
+        </div>
+      </div>
+    </div>
+
+    {% if dogadjaj.kampanja %}
+    <div class="card" style="padding:1rem;margin-bottom:1rem">
+      <h5 style="margin:0 0 .5rem;color:var(--gold);font-size:.85rem">Povezana kampanja</h5>
+      <a href="{% url 'udruge:kampanja_detail' dogadjaj.kampanja.pk %}" style="color:var(--text);text-decoration:none;font-size:.88rem">
+        {{ dogadjaj.kampanja.name }} ({{ dogadjaj.kampanja.get_campaign_type_display }})
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right: Attendees -->
+  <div>
+    <div class="card" style="padding:1rem;margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <h5 style="margin:0;color:var(--gold);font-size:.85rem">Prijavljeni</h5>
+        <span style="font-size:.85rem;font-weight:700">{{ dogadjaj.attendee_count }}{% if dogadjaj.max_attendees %}/{{ dogadjaj.max_attendees }}{% endif %}</span>
+      </div>
+
+      {% if dogadjaj.max_attendees %}
+      <div style="background:var(--dark);border-radius:4px;height:6px;margin-bottom:.75rem;overflow:hidden">
+        {% widthratio dogadjaj.attendee_count dogadjaj.max_attendees 100 as pct %}
+        <div style="height:100%;width:{{ pct }}%;background:var(--gold);border-radius:4px;transition:width .3s"></div>
+      </div>
+      {% endif %}
+
+      {% if user_clan and not user_registered and not dogadjaj.is_full and dogadjaj.status == 'active' %}
+      <form method="post" action="{% url 'udruge:dogadjaj_register' dogadjaj.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-gold" style="width:100%;margin-bottom:.75rem">Prijavi se</button>
+      </form>
+      {% elif user_registered %}
+      <div style="text-align:center;padding:.5rem;background:rgba(34,197,94,.1);border-radius:5px;margin-bottom:.75rem;font-size:.82rem;color:#22c55e">Vec ste prijavljeni</div>
+      {% elif dogadjaj.is_full %}
+      <div style="text-align:center;padding:.5rem;background:rgba(239,68,68,.1);border-radius:5px;margin-bottom:.75rem;font-size:.82rem;color:#ef4444">Popunjeno</div>
+      {% endif %}
+
+      <div style="max-height:300px;overflow-y:auto">
+        {% for p in prijave %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem">
+          <span>{{ p.clan.full_name }}</span>
+          {% if p.status == 'confirmed' %}<span style="color:#22c55e;font-size:.72rem">Potvrdjen</span>
+          {% elif p.status == 'attended' %}<span style="color:#3b82f6;font-size:.72rem">Prisustvovao</span>
+          {% elif p.status == 'cancelled' %}<span style="color:#ef4444;font-size:.72rem">Otkazan</span>
+          {% elif p.status == 'no_show' %}<span style="color:#f59e0b;font-size:.72rem">Nije dosao</span>
+          {% else %}<span style="color:var(--muted);font-size:.72rem">{{ p.get_status_display }}</span>{% endif %}
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:1rem;color:var(--muted);font-size:.82rem">Nema prijava</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -136,7 +136,7 @@ class TransportOrderTests(TestCase):
             valid_from=date.today() - timedelta(days=10),
             valid_until=date.today() + timedelta(days=365),
         )
-        order = self._order(requires_cold_chain=True, is_international=False,
+        order = self._order(requires_cold_chain=True,
                             origin_country='HR', destination_country='HR')
         issues = order.verify_documents()
         # ATP ne smije biti u issues

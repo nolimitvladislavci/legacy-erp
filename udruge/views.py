@@ -664,3 +664,349 @@ def download_annual_volunteer_report(request):
     response = HttpResponse(xlsx, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
     return response
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DOGADJAJI (Events)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def dogadjaj_list(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, "Nema aktivne udruge.")
+        return redirect("dashboard")
+
+    from .models import Dogadjaj
+    status_f = request.GET.get("status", "")
+    type_f = request.GET.get("event_type", "")
+
+    qs = Dogadjaj.objects.filter(company=company)
+    if status_f:
+        qs = qs.filter(status=status_f)
+    if type_f:
+        qs = qs.filter(event_type=type_f)
+
+    today = timezone.now()
+    stats = {
+        "ukupno": Dogadjaj.objects.filter(company=company).count(),
+        "predstojeci": Dogadjaj.objects.filter(company=company, start_date__gte=today).exclude(status="cancelled").count(),
+        "zavrseni": Dogadjaj.objects.filter(company=company, status="completed").count(),
+    }
+
+    paginator = Paginator(qs, 12)
+    page = paginator.get_page(request.GET.get("page"))
+
+    return render(request, "udruge/dogadjaj_list.html", {
+        "page_obj": page,
+        "stats": stats,
+        "status_f": status_f,
+        "type_f": type_f,
+        "status_choices": Dogadjaj.STATUS_CHOICES,
+        "type_choices": Dogadjaj.TYPE_CHOICES,
+    })
+
+
+@login_required
+def dogadjaj_create(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, "Nema aktivne udruge.")
+        return redirect("udruge:dogadjaj_list")
+
+    from .models import Dogadjaj, Kampanja
+
+    if request.method == "POST":
+        from decimal import Decimal
+        dogadjaj = Dogadjaj(
+            company=company,
+            name=request.POST.get("name", ""),
+            event_type=request.POST.get("event_type", "ostalo"),
+            description=request.POST.get("description", ""),
+            start_date=request.POST.get("start_date"),
+            end_date=request.POST.get("end_date") or None,
+            location=request.POST.get("location", ""),
+            online_url=request.POST.get("online_url", ""),
+            max_attendees=int(request.POST.get("max_attendees", 0) or 0),
+            registration_required="registration_required" in request.POST,
+            registration_deadline=request.POST.get("registration_deadline") or None,
+            ticket_price=Decimal(request.POST.get("ticket_price", "0") or "0"),
+            is_free="is_free" in request.POST,
+            status=request.POST.get("status", "draft"),
+            organizer=request.user,
+            budget=Decimal(request.POST.get("budget", "0") or "0"),
+            notes=request.POST.get("notes", ""),
+        )
+        kampanja_id = request.POST.get("kampanja")
+        if kampanja_id:
+            dogadjaj.kampanja_id = int(kampanja_id)
+        dogadjaj.save()
+        messages.success(request, "Dogadjaj '%s' kreiran." % dogadjaj.name)
+        return redirect("udruge:dogadjaj_detail", pk=dogadjaj.pk)
+
+    kampanje = Kampanja.objects.filter(company=company, status__in=["draft", "active"])
+    return render(request, "udruge/dogadjaj_form.html", {
+        "type_choices": Dogadjaj.TYPE_CHOICES,
+        "status_choices": Dogadjaj.STATUS_CHOICES,
+        "kampanje": kampanje,
+    })
+
+
+@login_required
+def dogadjaj_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Dogadjaj, EventPrijava, Clan
+
+    dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
+    prijave = dogadjaj.prijave.select_related("clan").all()
+
+    user_clan = Clan.objects.filter(company=company, email=request.user.email).first()
+    user_registered = False
+    if user_clan:
+        user_registered = prijave.filter(clan=user_clan).exists()
+
+    return render(request, "udruge/dogadjaj_detail.html", {
+        "dogadjaj": dogadjaj,
+        "prijave": prijave,
+        "user_clan": user_clan,
+        "user_registered": user_registered,
+    })
+
+
+@login_required
+@require_POST
+def dogadjaj_register(request, pk):
+    company = get_user_company(request)
+    from .models import Dogadjaj, EventPrijava, Clan
+
+    dogadjaj = get_object_or_404(Dogadjaj, pk=pk, company=company)
+
+    clan = Clan.objects.filter(company=company, email=request.user.email).first()
+    if not clan:
+        messages.error(request, "Nemate clan profil u ovoj udruzi.")
+        return redirect("udruge:dogadjaj_detail", pk=pk)
+
+    if dogadjaj.is_full:
+        messages.error(request, "Nema slobodnih mjesta.")
+        return redirect("udruge:dogadjaj_detail", pk=pk)
+
+    prijava, created = EventPrijava.objects.get_or_create(
+        dogadjaj=dogadjaj, clan=clan,
+        defaults={"status": "confirmed"},
+    )
+    if created:
+        messages.success(request, "Prijava uspjesna!")
+    else:
+        messages.info(request, "Vec ste prijavljeni.")
+
+    return redirect("udruge:dogadjaj_detail", pk=pk)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# KAMPANJE (Campaigns)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def kampanja_list(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, "Nema aktivne udruge.")
+        return redirect("dashboard")
+
+    from .models import Kampanja
+    type_f = request.GET.get("type", "")
+    status_f = request.GET.get("status", "")
+
+    qs = Kampanja.objects.filter(company=company)
+    if type_f:
+        qs = qs.filter(campaign_type=type_f)
+    if status_f:
+        qs = qs.filter(status=status_f)
+
+    from django.db.models import Sum
+    stats = {
+        "ukupno": Kampanja.objects.filter(company=company).count(),
+        "aktivne": Kampanja.objects.filter(company=company, status="active").count(),
+        "prikupljeno": Kampanja.objects.filter(company=company).aggregate(s=Sum("raised_amount"))["s"] or 0,
+    }
+
+    paginator = Paginator(qs, 12)
+    page = paginator.get_page(request.GET.get("page"))
+
+    return render(request, "udruge/kampanja_list.html", {
+        "page_obj": page,
+        "stats": stats,
+        "type_f": type_f,
+        "status_f": status_f,
+        "type_choices": Kampanja.TYPE_CHOICES,
+        "status_choices": Kampanja.STATUS_CHOICES,
+    })
+
+
+@login_required
+def kampanja_create(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, "Nema aktivne udruge.")
+        return redirect("udruge:kampanja_list")
+
+    from .models import Kampanja
+    from decimal import Decimal
+
+    if request.method == "POST":
+        kampanja = Kampanja(
+            company=company,
+            name=request.POST.get("name", ""),
+            campaign_type=request.POST.get("campaign_type", "fundraising"),
+            description=request.POST.get("description", ""),
+            start_date=request.POST.get("start_date"),
+            end_date=request.POST.get("end_date") or None,
+            goal_amount=Decimal(request.POST.get("goal_amount", "0") or "0"),
+            goal_members=int(request.POST.get("goal_members", "0") or 0),
+            status=request.POST.get("status", "draft"),
+            responsible=request.user,
+            eu_project_code=request.POST.get("eu_project_code", ""),
+            eu_program=request.POST.get("eu_program", ""),
+            notes=request.POST.get("notes", ""),
+        )
+        kampanja.save()
+        messages.success(request, "Kampanja '%s' kreirana." % kampanja.name)
+        return redirect("udruge:kampanja_detail", pk=kampanja.pk)
+
+    return render(request, "udruge/kampanja_form.html", {
+        "type_choices": Kampanja.TYPE_CHOICES,
+        "status_choices": Kampanja.STATUS_CHOICES,
+    })
+
+
+@login_required
+def kampanja_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Kampanja, Donacija
+
+    kampanja = get_object_or_404(Kampanja, pk=pk, company=company)
+    events = kampanja.dogadjaji.all()
+
+    donacije = Donacija.objects.filter(company=company)
+    if kampanja.start_date and kampanja.end_date:
+        donacije = donacije.filter(date__gte=kampanja.start_date, date__lte=kampanja.end_date)
+    else:
+        donacije = donacije.none()
+
+    return render(request, "udruge/kampanja_detail.html", {
+        "kampanja": kampanja,
+        "events": events,
+        "donacije": donacije,
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# EMAIL KAMPANJE
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def email_kampanja_list(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, "Nema aktivne udruge.")
+        return redirect("dashboard")
+
+    from .models import EmailKampanja
+    qs = EmailKampanja.objects.filter(company=company)
+
+    paginator = Paginator(qs, 20)
+    page = paginator.get_page(request.GET.get("page"))
+
+    return render(request, "udruge/email_kampanja_list.html", {
+        "page_obj": page,
+    })
+
+
+@login_required
+def email_kampanja_create(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, "Nema aktivne udruge.")
+        return redirect("udruge:email_kampanja_list")
+
+    from .models import EmailKampanja, Kampanja, Dogadjaj, Clan
+
+    if request.method == "POST":
+        ek = EmailKampanja(
+            company=company,
+            name=request.POST.get("name", ""),
+            email_type=request.POST.get("email_type", "newsletter"),
+            subject=request.POST.get("subject", ""),
+            body_html=request.POST.get("body_html", ""),
+            body_text=request.POST.get("body_text", ""),
+            target_all_members="target_all_members" in request.POST,
+            created_by=request.user,
+            status="draft",
+        )
+
+        if "ai_generate" in request.POST:
+            try:
+                import os, anthropic
+                client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+                ai_prompt = "Napisi email za udrugu '%s'. Tip: %s. Predmet: %s. Jezik: hrvatski. Vrati samo HTML body." % (
+                    company.name,
+                    ek.get_email_type_display(),
+                    ek.subject or ek.name,
+                )
+                response = client.messages.create(
+                    model="claude-haiku-4-5-20251001",
+                    max_tokens=1000,
+                    messages=[{"role": "user", "content": ai_prompt}],
+                )
+                ek.body_html = response.content[0].text.strip()
+                ek.ai_generated = True
+                ek.ai_prompt = ai_prompt
+            except Exception as e:
+                logger.error("AI email generate: %s", e)
+                messages.warning(request, "AI generiranje nije uspjelo: %s" % str(e))
+
+        target_kampanja_id = request.POST.get("target_kampanja")
+        if target_kampanja_id:
+            ek.target_kampanja_id = int(target_kampanja_id)
+        target_dogadjaj_id = request.POST.get("target_dogadjaj")
+        if target_dogadjaj_id:
+            ek.target_dogadjaj_id = int(target_dogadjaj_id)
+
+        ek.save()
+        messages.success(request, "Email kampanja '%s' kreirana." % ek.name)
+        return redirect("udruge:email_kampanja_list")
+
+    kampanje = Kampanja.objects.filter(company=company)
+    dogadjaji = Dogadjaj.objects.filter(company=company)
+    member_count = Clan.objects.filter(company=company, status="aktivan").exclude(email="").count()
+
+    return render(request, "udruge/email_kampanja_create.html", {
+        "type_choices": EmailKampanja.TYPE_CHOICES,
+        "kampanje": kampanje,
+        "dogadjaji": dogadjaji,
+        "member_count": member_count,
+    })
+
+
+@login_required
+@require_POST
+def email_kampanja_send(request, pk):
+    company = get_user_company(request)
+    from .models import EmailKampanja
+
+    kampanja = get_object_or_404(EmailKampanja, pk=pk, company=company)
+
+    if kampanja.status not in ("draft", "scheduled"):
+        messages.error(request, "Kampanja se ne moze poslati (status: %s)." % kampanja.get_status_display())
+        return redirect("udruge:email_kampanja_list")
+
+    kampanja.status = "scheduled"
+    kampanja.scheduled_at = timezone.now()
+    kampanja.save(update_fields=["status", "scheduled_at"])
+
+    from .tasks import send_email_campaign
+    send_email_campaign.delay(kampanja.pk)
+
+    messages.success(request, "Email kampanja '%s' zakazana za slanje!" % kampanja.name)
+    return redirect("udruge:email_kampanja_list")

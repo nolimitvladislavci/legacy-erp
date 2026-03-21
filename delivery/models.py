@@ -1542,16 +1542,28 @@ class TransportOrder(models.Model):
             if not dl:
                 issues.append('Vozačka dozvola istekla')
 
-            # Potvrda za non-EU vozače
-            if self.crosses_eu_border:
-                att = DriverDocument.objects.filter(
-                    driver=self.driver, doc_type='driver_attestation',
-                    valid_until__gte=today
-                ).first()
-                if att:
-                    self.driver_cert_verified = True
-                elif dl and dl.is_non_eu_driver:
-                    issues.append('Non-EU vozač nema Potvrdu za vozače')
+            # Potvrda za non-EU vozače — obavezna za SVAKI međunarodni prijevoz
+            if self.is_international or self.crosses_eu_border:
+                # Provjeri je li vozač non-EU (po bilo kojem dokumentu)
+                is_non_eu = False
+                if dl and dl.is_non_eu_driver:
+                    is_non_eu = True
+                else:
+                    any_non_eu = DriverDocument.objects.filter(
+                        driver=self.driver, issuing_country__in=['BA','RS','ME','XK','AL','MK']
+                    ).exists()
+                    if any_non_eu:
+                        is_non_eu = True
+
+                if is_non_eu:
+                    att = DriverDocument.objects.filter(
+                        driver=self.driver, doc_type='driver_attestation',
+                        valid_until__gte=today
+                    ).first()
+                    if att:
+                        self.driver_cert_verified = True
+                    else:
+                        issues.append('Non-EU vozač nema Potvrdu za vozače')
 
         # 3. Posting declaration (DE)
         if self.needs_posting_declaration:

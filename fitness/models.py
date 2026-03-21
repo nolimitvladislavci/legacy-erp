@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from decimal import Decimal
 from datetime import date, timedelta
@@ -45,7 +46,7 @@ class Member(models.Model):
 
 class MemberCheckIn(models.Model):
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='check_ins')
-    check_in_time = models.DateTimeField(auto_now_add=True)
+    check_in_time = models.DateTimeField(default=timezone.now)
     check_out_time = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):

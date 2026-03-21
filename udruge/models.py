@@ -475,3 +475,327 @@ class MemberSubscription(models.Model):
         if not self.valid_until:
             return None
         return (self.valid_until - timezone.now().date()).days
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DOGADJAJI / EVENTI
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Dogadjaj(models.Model):
+    """Dogadjaj udruge — koncert, skupstina, humanitarna akcija, radionica."""
+
+    STATUS_CHOICES = [
+        ('draft', 'Nacrt'),
+        ('planned', 'Planiran'),
+        ('active', 'U tijeku'),
+        ('completed', 'Zavrsen'),
+        ('cancelled', 'Otkazan'),
+    ]
+    TYPE_CHOICES = [
+        ('skupstina', 'Skupstina'),
+        ('koncert', 'Koncert / Nastup'),
+        ('radionica', 'Radionica / Seminar'),
+        ('humanitarna', 'Humanitarna akcija'),
+        ('sportski', 'Sportski dogadjaj'),
+        ('druzenje', 'Druzenje / Teambuilding'),
+        ('fundraising', 'Fundraising event'),
+        ('festival', 'Festival'),
+        ('ostalo', 'Ostalo'),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='dogadjaji',
+    )
+    name = models.CharField(max_length=200, verbose_name='Naziv dogadjaja')
+    event_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='ostalo')
+    description = models.TextField(blank=True, verbose_name='Opis')
+
+    # Kad i gdje
+    start_date = models.DateTimeField(verbose_name='Pocetak')
+    end_date = models.DateTimeField(null=True, blank=True, verbose_name='Kraj')
+    location = models.CharField(max_length=255, blank=True, verbose_name='Lokacija')
+    online_url = models.URLField(blank=True, verbose_name='Online link (Zoom/Teams)')
+
+    # Kapacitet i prijave
+    max_attendees = models.PositiveIntegerField(default=0, verbose_name='Max polaznika (0=neograniceno)')
+    registration_required = models.BooleanField(default=False, verbose_name='Prijava obavezna')
+    registration_deadline = models.DateTimeField(null=True, blank=True)
+    ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Cijena ulaznice (EUR)')
+    is_free = models.BooleanField(default=True, verbose_name='Besplatan')
+
+    # Status i organizacija
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    organizer = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Organizator',
+    )
+    budget = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Budzet (EUR)')
+    actual_cost = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Stvarni trosak (EUR)')
+    revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Prihod (EUR)')
+
+    # Veza s kampanjom
+    kampanja = models.ForeignKey(
+        'Kampanja', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='dogadjaji', verbose_name='Povezana kampanja',
+    )
+
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_dogadjaj'
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return '%s (%s)' % (self.name, self.start_date.strftime('%d.%m.%Y'))
+
+    @property
+    def attendee_count(self):
+        return self.prijave.filter(status='confirmed').count()
+
+    @property
+    def spots_left(self):
+        if not self.max_attendees:
+            return 999
+        return max(0, self.max_attendees - self.attendee_count)
+
+    @property
+    def is_full(self):
+        return self.max_attendees > 0 and self.attendee_count >= self.max_attendees
+
+    @property
+    def profit(self):
+        return self.revenue - self.actual_cost
+
+
+class EventPrijava(models.Model):
+    """Prijava clana na dogadjaj."""
+    STATUS_CHOICES = [
+        ('pending', 'Na cekanju'),
+        ('confirmed', 'Potvrdjen'),
+        ('cancelled', 'Otkazan'),
+        ('attended', 'Prisustvovao'),
+        ('no_show', 'Nije dosao'),
+    ]
+
+    dogadjaj = models.ForeignKey(Dogadjaj, on_delete=models.CASCADE, related_name='prijave')
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='event_prijave')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    registered_at = models.DateTimeField(auto_now_add=True)
+    notes = models.CharField(max_length=255, blank=True)
+    paid = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'udruge_event_prijava'
+        unique_together = [('dogadjaj', 'clan')]
+
+    def __str__(self):
+        return '%s -> %s (%s)' % (self.clan, self.dogadjaj.name, self.status)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# KAMPANJE (Fundraising, EU fondovi, eventi)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Kampanja(models.Model):
+    """Kampanja — fundraising, EU fond prijava, donacijska akcija."""
+
+    TYPE_CHOICES = [
+        ('fundraising', 'Fundraising'),
+        ('eu_fond', 'EU Fond prijava'),
+        ('donacijska', 'Donacijska akcija'),
+        ('clanarinska', 'Clanarinska kampanja'),
+        ('awareness', 'Awareness / PR'),
+        ('event', 'Event kampanja'),
+    ]
+    STATUS_CHOICES = [
+        ('draft', 'Nacrt'),
+        ('active', 'Aktivna'),
+        ('paused', 'Pauzirana'),
+        ('completed', 'Zavrsena'),
+        ('cancelled', 'Otkazana'),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='kampanje',
+    )
+    name = models.CharField(max_length=200, verbose_name='Naziv kampanje')
+    campaign_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='fundraising')
+    description = models.TextField(blank=True)
+
+    # Vremenski okvir
+    start_date = models.DateField(verbose_name='Pocetak')
+    end_date = models.DateField(null=True, blank=True, verbose_name='Kraj')
+
+    # Ciljevi
+    goal_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Cilj (EUR)')
+    raised_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Prikupljeno (EUR)')
+    goal_members = models.PositiveIntegerField(default=0, verbose_name='Cilj clanova')
+    acquired_members = models.PositiveIntegerField(default=0, verbose_name='Dobiveno clanova')
+
+    # EU fond specifika
+    eu_project_code = models.CharField(max_length=100, blank=True, verbose_name='Sifra EU projekta')
+    eu_program = models.CharField(max_length=200, blank=True, verbose_name='EU program (ESF+, ERDF...)')
+    eu_submitted_at = models.DateField(null=True, blank=True, verbose_name='Datum prijave')
+    eu_decision_at = models.DateField(null=True, blank=True, verbose_name='Datum odluke')
+    eu_status = models.CharField(max_length=20, blank=True, choices=[
+        ('preparing', 'U pripremi'),
+        ('submitted', 'Prijavljeno'),
+        ('evaluation', 'Evaluacija'),
+        ('approved', 'Odobreno'),
+        ('rejected', 'Odbijeno'),
+        ('implementation', 'Provedba'),
+        ('reporting', 'Izvjestavanje'),
+        ('closed', 'Zatvoreno'),
+    ], verbose_name='EU status')
+
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    responsible = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Odgovorna osoba',
+    )
+
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_kampanja'
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return '%s (%s)' % (self.name, self.get_campaign_type_display())
+
+    @property
+    def progress_percent(self):
+        if not self.goal_amount:
+            return 0
+        return min(100, int(self.raised_amount / self.goal_amount * 100))
+
+    @property
+    def days_remaining(self):
+        if not self.end_date:
+            return None
+        from django.utils import timezone
+        return (self.end_date - timezone.now().date()).days
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EMAIL KAMPANJE (AI automatizacija)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class EmailKampanja(models.Model):
+    """Email kampanja — masovno slanje clanovima s AI personalizacijom."""
+
+    STATUS_CHOICES = [
+        ('draft', 'Nacrt'),
+        ('scheduled', 'Zakazana'),
+        ('sending', 'Salje se'),
+        ('sent', 'Poslana'),
+        ('cancelled', 'Otkazana'),
+    ]
+    TYPE_CHOICES = [
+        ('newsletter', 'Newsletter'),
+        ('clanarina_reminder', 'Podsjetnik za clanarinu'),
+        ('event_invite', 'Pozivnica na dogadjaj'),
+        ('fundraising', 'Fundraising apel'),
+        ('thank_you', 'Zahvalnica donatorima'),
+        ('report', 'Godisnji izvjestaj'),
+        ('custom', 'Prilagodjeno'),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='email_kampanje',
+    )
+    name = models.CharField(max_length=200, verbose_name='Naziv')
+    email_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='newsletter')
+    subject = models.CharField(max_length=200, verbose_name='Predmet emaila')
+    body_html = models.TextField(blank=True, verbose_name='Sadrzaj (HTML)')
+    body_text = models.TextField(blank=True, verbose_name='Sadrzaj (tekst)')
+
+    # AI personalizacija
+    ai_generated = models.BooleanField(default=False, verbose_name='AI generirao sadrzaj')
+    ai_prompt = models.TextField(blank=True, verbose_name='AI prompt za generiranje')
+
+    # Targeting
+    target_all_members = models.BooleanField(default=True, verbose_name='Svi clanovi')
+    target_membership_types = models.JSONField(default=list, blank=True, verbose_name='Tipovi clanstva')
+    target_statuses = models.JSONField(default=list, blank=True, verbose_name='Statusi')
+    target_kampanja = models.ForeignKey(
+        Kampanja, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Vezana kampanja',
+    )
+    target_dogadjaj = models.ForeignKey(
+        Dogadjaj, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Vezani dogadjaj',
+    )
+
+    # Slanje
+    scheduled_at = models.DateTimeField(null=True, blank=True, verbose_name='Zakazano slanje')
+    sent_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+
+    # Statistike
+    total_recipients = models.PositiveIntegerField(default=0)
+    total_sent = models.PositiveIntegerField(default=0)
+    total_opened = models.PositiveIntegerField(default=0)
+    total_clicked = models.PositiveIntegerField(default=0)
+    total_bounced = models.PositiveIntegerField(default=0)
+
+    created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_email_kampanja'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return '%s (%s)' % (self.name, self.get_status_display())
+
+    @property
+    def open_rate(self):
+        if not self.total_sent:
+            return 0
+        return round(self.total_opened / self.total_sent * 100, 1)
+
+    @property
+    def click_rate(self):
+        if not self.total_sent:
+            return 0
+        return round(self.total_clicked / self.total_sent * 100, 1)
+
+    def get_recipients(self):
+        """Dohvati listu clanova prema targeting pravilima."""
+        qs = Clan.objects.filter(company=self.company, status='aktivan')
+        if not self.target_all_members:
+            if self.target_membership_types:
+                qs = qs.filter(membership_type__in=self.target_membership_types)
+            if self.target_statuses:
+                qs = qs.filter(status__in=self.target_statuses)
+        return qs.exclude(email='').exclude(email__isnull=True)
+
+
+class EmailLog(models.Model):
+    """Log pojedinacnog emaila iz kampanje."""
+    kampanja = models.ForeignKey(EmailKampanja, on_delete=models.CASCADE, related_name='logs')
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE)
+    email = models.EmailField()
+    status = models.CharField(max_length=20, choices=[
+        ('queued', 'U redu'),
+        ('sent', 'Poslan'),
+        ('opened', 'Otvoren'),
+        ('clicked', 'Kliknuo'),
+        ('bounced', 'Odbijen'),
+        ('error', 'Greska'),
+    ], default='queued')
+    sent_at = models.DateTimeField(null=True, blank=True)
+    opened_at = models.DateTimeField(null=True, blank=True)
+    error_message = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = 'udruge_email_log'
+        ordering = ['-sent_at']

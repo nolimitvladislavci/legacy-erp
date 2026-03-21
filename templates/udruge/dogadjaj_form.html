@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Novi dogadjaj{% endblock %}
+{% block content %}
+<div style="margin-bottom:1rem">
+  <a href="{% url 'udruge:dogadjaj_list' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none">&laquo; Svi dogadjaji</a>
+</div>
+<h4 style="margin:0 0 1rem;color:var(--gold)">Novi dogadjaj</h4>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="card" style="padding:1rem;margin-bottom:1rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+      <div style="grid-column:1/-1">
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Naziv *</label>
+        <input type="text" name="name" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Tip</label>
+        <select name="event_type" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          {% for val, lbl in type_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Status</label>
+        <select name="status" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          {% for val, lbl in status_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Pocetak *</label>
+        <input type="datetime-local" name="start_date" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Kraj</label>
+        <input type="datetime-local" name="end_date" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Lokacija</label>
+        <input type="text" name="location" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Online link</label>
+        <input type="url" name="online_url" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Max polaznika (0=neogr.)</label>
+        <input type="number" name="max_attendees" value="0" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Budzet (EUR)</label>
+        <input type="number" name="budget" value="0" step="0.01" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Cijena ulaznice (EUR)</label>
+        <input type="number" name="ticket_price" value="0" step="0.01" min="0" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div style="display:flex;gap:1.5rem;align-items:center;grid-column:1/-1;padding:.5rem 0">
+        <label style="font-size:.85rem;color:var(--text);display:flex;align-items:center;gap:.4rem">
+          <input type="checkbox" name="is_free" checked> Besplatan
+        </label>
+        <label style="font-size:.85rem;color:var(--text);display:flex;align-items:center;gap:.4rem">
+          <input type="checkbox" name="registration_required"> Prijava obavezna
+        </label>
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Rok za prijavu</label>
+        <input type="datetime-local" name="registration_deadline" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+      </div>
+      <div>
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Povezana kampanja</label>
+        <select name="kampanja" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          <option value="">-- Bez kampanje --</option>
+          {% for k in kampanje %}<option value="{{ k.pk }}">{{ k.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div style="grid-column:1/-1">
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Opis</label>
+        <textarea name="description" rows="4" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      </div>
+      <div style="grid-column:1/-1">
+        <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Napomene</label>
+        <textarea name="notes" rows="2" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <button type="submit" class="btn btn-gold">Spremi dogadjaj</button>
+    <a href="{% url 'udruge:dogadjaj_list' %}" class="btn btn-ghost">Odustani</a>
+  </div>
+</form>
+{% endblock %}

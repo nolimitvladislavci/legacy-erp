@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Nova email kampanja{% endblock %}
+{% block content %}
+<div style="margin-bottom:1rem">
+  <a href="{% url 'udruge:email_kampanja_list' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none">&laquo; Sve email kampanje</a>
+</div>
+<h4 style="margin:0 0 1rem;color:var(--gold)">Nova email kampanja</h4>
+
+<form method="post" id="emailForm">
+  {% csrf_token %}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <!-- Left: Form -->
+    <div>
+      <div class="card" style="padding:1rem;margin-bottom:1rem">
+        <h5 style="margin:0 0 .75rem;color:var(--gold);font-size:.85rem">Osnovno</h5>
+        <div style="display:grid;gap:.75rem">
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Naziv kampanje *</label>
+            <input type="text" name="name" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          </div>
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Tip</label>
+            <select name="email_type" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+              {% for val, lbl in type_choices %}<option value="{{ val }}">{{ lbl }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Predmet emaila *</label>
+            <input type="text" name="subject" required style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1rem;margin-bottom:1rem">
+        <h5 style="margin:0 0 .75rem;color:var(--gold);font-size:.85rem">Targeting</h5>
+        <div style="display:grid;gap:.75rem">
+          <label style="font-size:.85rem;color:var(--text);display:flex;align-items:center;gap:.4rem">
+            <input type="checkbox" name="target_all_members" checked> Svi aktivni clanovi s emailom ({{ member_count }})
+          </label>
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Vezana kampanja</label>
+            <select name="target_kampanja" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+              <option value="">-- Bez veze --</option>
+              {% for k in kampanje %}<option value="{{ k.pk }}">{{ k.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Vezani dogadjaj</label>
+            <select name="target_dogadjaj" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem">
+              <option value="">-- Bez veze --</option>
+              {% for d in dogadjaji %}<option value="{{ d.pk }}">{{ d.name }} ({{ d.start_date|date:"d.m.Y" }})</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1rem;margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+          <h5 style="margin:0;color:var(--gold);font-size:.85rem">Sadrzaj</h5>
+          <button type="submit" name="ai_generate" value="1" class="btn btn-ghost btn-sm" style="border-color:var(--gold);color:var(--gold)">AI Generiraj sadrzaj</button>
+        </div>
+        <div style="display:grid;gap:.75rem">
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">HTML sadrzaj</label>
+            <textarea name="body_html" id="body_html" rows="10" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.82rem;font-family:monospace;resize:vertical"></textarea>
+          </div>
+          <div>
+            <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Tekst verzija (fallback)</label>
+            <textarea name="body_text" rows="4" style="width:100%;padding:.5rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.88rem;resize:vertical"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Preview -->
+    <div>
+      <div class="card" style="padding:1rem;position:sticky;top:1rem">
+        <h5 style="margin:0 0 .75rem;color:var(--gold);font-size:.85rem">Pregled</h5>
+        <div id="preview" style="background:#fff;border-radius:5px;padding:1rem;min-height:300px;color:#333;font-size:.88rem">
+          <p style="color:#999;text-align:center;margin-top:3rem">Unesite HTML sadrzaj za pregled...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:.5rem;margin-top:1rem">
+    <button type="submit" class="btn btn-gold">Spremi kao nacrt</button>
+    <a href="{% url 'udruge:email_kampanja_list' %}" class="btn btn-ghost">Odustani</a>
+  </div>
+</form>
+
+<script>
+document.getElementById('body_html').addEventListener('input', function(){
+  document.getElementById('preview').innerHTML = this.value || '<p style="color:#999;text-align:center;margin-top:3rem">Unesite HTML sadrzaj za pregled...</p>';
+});
+</script>
+{% endblock %}

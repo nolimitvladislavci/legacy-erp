@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Email kampanje{% endblock %}
+<style>
+@media(max-width:600px){
+  table{font-size:.75rem}
+  td,th{padding:4px 6px !important}
+  .btn,button{width:100%;margin-bottom:6px}
+}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+  <div>
+    <h4 style="margin:0;color:var(--gold)">Email kampanje</h4>
+    <small style="color:var(--muted)">Newsletter, podsjetnici, pozivnice</small>
+  </div>
+  <a href="{% url 'udruge:email_kampanja_create' %}" class="btn btn-gold btn-sm">+ Nova kampanja</a>
+</div>
+
+<div class="card">
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Naziv</th>
+          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Tip</th>
+          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Primatelja</th>
+          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Poslano</th>
+          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Open rate</th>
+          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Click rate</th>
+          <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
+          <th style="padding:.5rem;border-bottom:1px solid var(--border)"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ek in page_obj %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+          <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600">{{ ek.name }}</td>
+          <td style="padding:.5rem .6rem;font-size:.78rem">{{ ek.get_email_type_display }}</td>
+          <td style="padding:.5rem .6rem;font-size:.85rem;text-align:center">{{ ek.total_recipients }}</td>
+          <td style="padding:.5rem .6rem;font-size:.85rem;text-align:center">{{ ek.total_sent }}</td>
+          <td style="padding:.5rem .6rem;text-align:center">
+            {% if ek.total_sent %}
+            <span style="font-size:.85rem;{% if ek.open_rate >= 30 %}color:#22c55e{% elif ek.open_rate >= 15 %}color:#f59e0b{% else %}color:#ef4444{% endif %}">{{ ek.open_rate }}%</span>
+            {% else %}<span style="color:var(--muted);font-size:.78rem">-</span>{% endif %}
+          </td>
+          <td style="padding:.5rem .6rem;text-align:center">
+            {% if ek.total_sent %}
+            <span style="font-size:.85rem;color:var(--gold)">{{ ek.click_rate }}%</span>
+            {% else %}<span style="color:var(--muted);font-size:.78rem">-</span>{% endif %}
+          </td>
+          <td style="padding:.5rem .6rem;text-align:center">
+            {% if ek.status == 'sent' %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Poslana</span>
+            {% elif ek.status == 'sending' %}<span style="color:#f59e0b;font-size:.78rem;font-weight:600">Salje se...</span>
+            {% elif ek.status == 'scheduled' %}<span style="color:#3b82f6;font-size:.78rem;font-weight:600">Zakazana</span>
+            {% elif ek.status == 'draft' %}<span style="color:var(--muted);font-size:.78rem">Nacrt</span>
+            {% else %}<span style="color:var(--muted);font-size:.78rem">{{ ek.get_status_display }}</span>{% endif %}
+          </td>
+          <td style="padding:.5rem .6rem;text-align:right">
+            {% if ek.status == 'draft' or ek.status == 'scheduled' %}
+            <form method="post" action="{% url 'udruge:email_kampanja_send' ek.pk %}" style="display:inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-gold btn-sm" onclick="return confirm('Poslati email kampanju?')">Posalji</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--muted)">Nema email kampanja</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div style="display:flex;justify-content:center;gap:.5rem;margin-top:1rem">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="btn btn-ghost btn-sm">&laquo; Prethodna</a>{% endif %}
+  <span style="padding:.4rem .8rem;color:var(--muted);font-size:.85rem">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="btn btn-ghost btn-sm">Sljedeca &raquo;</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

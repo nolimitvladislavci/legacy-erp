@@ -190,3 +190,51 @@ def check_access_card(self, card_uid, company_id):
         'status': active_sub.status,
         'expires': str(active_sub.valid_until),
     }
+
+
+
+@shared_task(bind=True, soft_time_limit=300)
+def send_email_campaign(self, campaign_id):
+    """Send email campaign to all recipients."""
+    from .models import EmailKampanja, EmailLog
+    from django.core.mail import send_mail
+    from django.utils import timezone as tz
+
+    campaign = EmailKampanja.objects.get(pk=campaign_id)
+    if campaign.status != 'scheduled':
+        return {'error': 'Not scheduled'}
+
+    campaign.status = 'sending'
+    campaign.save(update_fields=['status'])
+
+    recipients = campaign.get_recipients()
+    campaign.total_recipients = recipients.count()
+    sent = 0
+
+    for clan in recipients:
+        try:
+            send_mail(
+                subject=campaign.subject,
+                message=campaign.body_text or campaign.subject,
+                html_message=campaign.body_html,
+                from_email=None,
+                recipient_list=[clan.email],
+                fail_silently=True,
+            )
+            EmailLog.objects.create(
+                kampanja=campaign, clan=clan, email=clan.email,
+                status='sent', sent_at=tz.now(),
+            )
+            sent += 1
+        except Exception as e:
+            EmailLog.objects.create(
+                kampanja=campaign, clan=clan, email=clan.email,
+                status='error', error_message=str(e)[:255],
+            )
+
+    campaign.total_sent = sent
+    campaign.status = 'sent'
+    campaign.sent_at = tz.now()
+    campaign.save()
+
+    return {'sent': sent, 'total': campaign.total_recipients}

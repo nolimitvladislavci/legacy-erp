@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Dogadjaji{% endblock %}
+<style>
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr !important}
+  .events-grid{grid-template-columns:1fr !important}
+  .btn,button{width:100%;margin-bottom:6px}
+  form select,form input{width:100% !important;font-size:16px !important}
+}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+  <div>
+    <h4 style="margin:0;color:var(--gold)">Dogadjaji</h4>
+    <small style="color:var(--muted)">Skupovi, radionice, natjecanja i festivali</small>
+  </div>
+  <a href="{% url 'udruge:dogadjaj_create' %}" class="btn btn-gold btn-sm">+ Novi dogadjaj</a>
+</div>
+
+<div class="stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem">
+  <div class="card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Ukupno</div>
+  </div>
+  <div class="card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.predstojeci }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Predstojeci</div>
+  </div>
+  <div class="card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--green)">{{ stats.zavrseni }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Zavrseni</div>
+  </div>
+</div>
+
+<div class="card" style="padding:.75rem;margin-bottom:1rem">
+  <form method="get" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+    <select name="status" style="padding:.4rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <option value="">Svi statusi</option>
+      {% for val, lbl in status_choices %}<option value="{{ val }}" {% if status_f == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+    </select>
+    <select name="event_type" style="padding:.4rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+      <option value="">Svi tipovi</option>
+      {% for val, lbl in type_choices %}<option value="{{ val }}" {% if type_f == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-gold btn-sm">Filtriraj</button>
+    {% if status_f or type_f %}<a href="{% url 'udruge:dogadjaj_list' %}" class="btn btn-ghost btn-sm">Reset</a>{% endif %}
+  </form>
+</div>
+
+<div class="events-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem">
+  {% for d in page_obj %}
+  <a href="{% url 'udruge:dogadjaj_detail' d.pk %}" style="text-decoration:none;color:inherit">
+    <div class="card" style="padding:1rem;transition:border-color .2s;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.5rem">
+        <h5 style="margin:0;color:var(--gold);font-size:.95rem">{{ d.name }}</h5>
+        {% if d.status == 'active' %}<span style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Aktivan</span>
+        {% elif d.status == 'draft' %}<span style="background:rgba(156,163,175,.15);color:#9ca3af;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Nacrt</span>
+        {% elif d.status == 'completed' %}<span style="background:rgba(59,130,246,.15);color:#3b82f6;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Zavrsen</span>
+        {% elif d.status == 'cancelled' %}<span style="background:rgba(239,68,68,.15);color:#ef4444;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">Otkazan</span>
+        {% else %}<span style="background:rgba(156,163,175,.15);color:#9ca3af;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:600">{{ d.get_status_display }}</span>{% endif %}
+      </div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">
+        {{ d.get_event_type_display }}
+      </div>
+      <div style="font-size:.82rem;margin-bottom:.3rem">
+        <span style="color:var(--gold)">&#9719;</span> {{ d.start_date|date:"d.m.Y H:i" }}
+      </div>
+      {% if d.location %}
+      <div style="font-size:.82rem;margin-bottom:.3rem">
+        <span style="color:var(--gold)">&#9906;</span> {{ d.location }}
+      </div>
+      {% endif %}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)">
+        <span style="font-size:.78rem;color:var(--muted)">
+          {{ d.attendee_count }}{% if d.max_attendees %}/{{ d.max_attendees }}{% endif %} prijavljenih
+        </span>
+        {% if not d.is_free %}<span style="font-size:.78rem;font-weight:600;color:var(--gold)">{{ d.ticket_price }} EUR</span>{% else %}<span style="font-size:.78rem;color:var(--green)">Besplatno</span>{% endif %}
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  <div class="card" style="padding:2rem;text-align:center;color:var(--muted);grid-column:1/-1">
+    Nema dogadjaja. <a href="{% url 'udruge:dogadjaj_create' %}" style="color:var(--gold)">Kreirajte prvi!</a>
+  </div>
+  {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<div style="display:flex;justify-content:center;gap:.5rem;margin-top:1rem">
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&status={{ status_f }}&event_type={{ type_f }}" class="btn btn-ghost btn-sm">&laquo; Prethodna</a>{% endif %}
+  <span style="padding:.4rem .8rem;color:var(--muted);font-size:.85rem">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&status={{ status_f }}&event_type={{ type_f }}" class="btn btn-ghost btn-sm">Sljedeca &raquo;</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
