@@ -275,7 +275,8 @@ def process_payment(request, receipt_id):
     cashier_id = request.POST.get('cashier_id')
     if cashier_id and not receipt.cashier_id:
         from pos.models import POSCashier
-        cashier_obj = POSCashier.objects.filter(id=cashier_id, is_active=True).first()
+        company = receipt.session.terminal.company
+        cashier_obj = POSCashier.objects.filter(id=cashier_id, company=company, is_active=True).first()
         if cashier_obj:
             receipt.cashier = cashier_obj
             receipt.save(update_fields=['cashier'])

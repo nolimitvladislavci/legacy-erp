@@ -93,7 +93,16 @@ def ticket_create(request):
             from django.contrib.auth.models import User
             ticket.assigned_to = User.objects.filter(id=assigned_id).first()
         ticket.set_sla()
-        ticket.save()
+        # Retry on duplicate ticket number (race condition)
+        for _attempt in range(5):
+            ticket.ticket_number = ticket.generate_ticket_number()
+            try:
+                ticket.save()
+                break
+            except Exception:
+                if _attempt >= 4:
+                    raise
+                continue
         initial_msg = request.POST.get('description', '')
         if initial_msg:
             TicketMessage.objects.create(
@@ -106,7 +115,9 @@ def ticket_create(request):
     from partners.models import Partner
     from django.contrib.auth.models import User
     clients = Partner.objects.filter(company=company)
-    users = User.objects.filter(is_active=True)
+    from accounts.models import UserProfile
+    company_user_ids = UserProfile.objects.filter(company=company).values_list('user_id', flat=True)
+    users = User.objects.filter(pk__in=company_user_ids, is_active=True)
     return render(request, 'helpdesk/form.html', {
         'clients': clients, 'users': users,
         'categories': Ticket.CATEGORY_CHOICES,
