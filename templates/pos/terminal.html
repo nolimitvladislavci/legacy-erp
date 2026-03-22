@@ -21,7 +21,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
 {% endblock %}
 {% block content %}
 <div class="page">
-  <div class="breadcrumb"><a href="{% url 'pos:dashboard' %}">{% trans "Terminali" %}</a> / {{ terminal.name }}</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <div class="breadcrumb" style="margin-bottom:0"><a href="{% url 'pos:dashboard' %}">{% trans "Terminali" %}</a> / {{ terminal.name }}</div>
+    <a href="{% url 'pos:dashboard' %}" style="color:var(--gold);font-size:.85rem;text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:6px">← POS</a>
+  </div>
   <div class="page-header">
     <div>
       <div class="page-title">{{ terminal.name }} <span style="color:var(--muted);font-weight:400;font-size:.85rem">({{ terminal.terminal_code }})</span></div>
