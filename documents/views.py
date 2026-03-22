@@ -1621,23 +1621,21 @@ def _knjiga_pdf(request, book_type, entries, totals, company, date_from, date_to
     from django.http import HttpResponse
     from django.template.loader import render_to_string
 
-    try:
-        from xhtml2pdf import pisa
-    except ImportError:
-        return HttpResponse('xhtml2pdf not installed', status=500)
-
     html = render_to_string('documents/knjiga_ura_ira_pdf.html', {
         'entries': entries, 'totals': totals, 'book_type': book_type,
         'company': company, 'date_from': date_from, 'date_to': date_to,
         'period_label': period_label,
     })
-    result = io.BytesIO()
-    pdf = pisa.pisaDocument(io.BytesIO(html.encode('utf-8')), result)
-    if pdf.err:
-        return HttpResponse('PDF error', status=500)
-    response = HttpResponse(result.getvalue(), content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="%s_%s.pdf"' % (book_type, period_label.replace('/', '-'))
-    return response
+    try:
+        import weasyprint
+        from django.conf import settings as _s
+        pdf_bytes = weasyprint.HTML(string=html, base_url=_s.BASE_DIR).write_pdf()
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="%s_%s.pdf"' % (book_type, period_label.replace('/', '-'))
+        return response
+    except Exception as e:
+        logger.error('URA/IRA PDF error: %s', e)
+        return HttpResponse('PDF error: %s' % str(e)[:100], status=500)
 
 
 
