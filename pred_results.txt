@@ -1,0 +1,50 @@
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/unittest/mock.py", line 1390, in patched
+    return func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/fina-connect/smart_import/tests/test_predkomora.py", line 364, in test_zamka2_math_mismatch
+    self.assertEqual(resp.status_code, 400)
+AssertionError: 301 != 400
+
+======================================================================
+FAIL: test_zamka2_math_ok (smart_import.tests.test_predkomora.TestReviewApprove.test_zamka2_math_ok)
+Test 12: correct math passes (base + vat = total).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/unittest/mock.py", line 1390, in patched
+    return func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/fina-connect/smart_import/tests/test_predkomora.py", line 382, in test_zamka2_math_ok
+    self.assertEqual(resp.status_code, 200)
+AssertionError: 301 != 200
+
+======================================================================
+FAIL: test_zamka3_conflict (smart_import.tests.test_predkomora.TestReviewApprove.test_zamka3_conflict)
+Test 13: conflict guard returns 409 CONFLICT when already approved.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/unittest/mock.py", line 1390, in patched
+    return func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/fina-connect/smart_import/tests/test_predkomora.py", line 396, in test_zamka3_conflict
+    self.assertEqual(resp.status_code, 409)
+AssertionError: 301 != 409
+
+======================================================================
+FAIL: test_only_needs_review_shown (smart_import.tests.test_predkomora.TestReviewDashboard.test_only_needs_review_shown)
+Test 15: review dashboard shows only needs_review headers in pending count.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/unittest/mock.py", line 1390, in patched
+    return func(*newargs, **newkeywargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/fina-connect/smart_import/tests/test_predkomora.py", line 450, in test_only_needs_review_shown
+    self.assertEqual(resp.status_code, 200)
+AssertionError: 301 != 200
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.360s
+
+FAILED (failures=5, errors=7)
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

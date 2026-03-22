@@ -520,3 +520,68 @@
     if(items.length && window.cacheArticlesForOffline){ window.cacheArticlesForOffline(items); }
   })();
 })();
+
+  // ── Shift close 2-step flow ────────────────────────────────────────────────
+  var _shiftExpectedCash = 0;
+
+  window.openShiftModal = function() {
+    document.getElementById('shiftModal').classList.add('show');
+    document.getElementById('shiftStep1').style.display = '';
+    document.getElementById('shiftStep2').style.display = 'none';
+    loadShiftReport();
+    // Load expected cash
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/report/', {credentials:'same-origin', headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        _shiftExpectedCash = parseFloat(d.gotovina || 0);
+        var inp = document.getElementById('shiftCashInput');
+        if (inp) inp.placeholder = _shiftExpectedCash.toFixed(2);
+      }).catch(function(){});
+    // Live diff
+    var inp = document.getElementById('shiftCashInput');
+    if (inp) inp.addEventListener('input', function() {
+      var v = parseFloat(this.value) || 0;
+      var diff = v - _shiftExpectedCash;
+      var el = document.getElementById('shiftCashDiff');
+      if (Math.abs(diff) < 0.01) { el.innerHTML = '<span style="color:#22c55e">✓ Točno</span>'; }
+      else if (diff > 0) { el.innerHTML = '<span style="color:#f59e0b">Višak: +' + diff.toFixed(2) + ' €</span>'; }
+      else { el.innerHTML = '<span style="color:#ef4444">Manjak: ' + diff.toFixed(2) + ' €</span>'; }
+    });
+  };
+
+  window.shiftSkipCash = function() { document.getElementById('shiftCashInput').value = ''; shiftGoStep2(); };
+
+  window.shiftGoStep2 = function() {
+    var cash = document.getElementById('shiftCashInput').value || '0';
+    // POST close session
+    fetch(API_BASE + '/pos/session/' + SESSION_ID + '/close/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'Content-Type':'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF},
+      body: 'closing_cash=' + encodeURIComponent(cash)
+    })
+    .then(function(r) {
+      // Close might redirect (302) — that's ok
+      document.getElementById('shiftStep1').style.display = 'none';
+      document.getElementById('shiftStep2').style.display = '';
+      var diff = (parseFloat(cash) || 0) - _shiftExpectedCash;
+      var diffText = Math.abs(diff) < 0.01 ? 'Gotovina OK' : (diff > 0 ? 'Višak: +' + diff.toFixed(2) + ' €' : 'Manjak: ' + diff.toFixed(2) + ' €');
+      document.getElementById('shiftCloseSummary').textContent = 'Ukupno: €' + _shiftExpectedCash.toFixed(2) + ' | ' + diffText;
+    })
+    .catch(function() {
+      document.getElementById('shiftStep1').style.display = 'none';
+      document.getElementById('shiftStep2').style.display = '';
+      document.getElementById('shiftCloseSummary').textContent = 'Smjena zatvorena';
+    });
+  };
+
+  window.shiftZReport = function() {
+    window.open(API_BASE + '/pos/session/' + SESSION_ID + '/zreport/', '_blank');
+  };
+
+  window.shiftShare = function() {
+    openShare({type:'zreport', id: SESSION_ID, title: 'Z-izvještaj smjene'});
+  };
+
+  window.shiftFinish = function() {
+    window.location.href = API_BASE + '/pos/';
+  };
