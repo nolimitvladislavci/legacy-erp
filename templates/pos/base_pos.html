@@ -36,6 +36,7 @@ a{color:inherit;text-decoration:none}
 .topbar-nav a{padding:.3rem .6rem;border-radius:5px;font-size:.78rem;color:var(--muted);transition:all .2s;white-space:nowrap}
 .topbar-nav a:hover,.topbar-nav a.active{background:var(--nav-hover);color:var(--gold)}
 .topbar-nav .nav-sep{width:1px;height:16px;background:var(--border);margin:0 .25rem}
+.pos-company-menu.show{display:block!important}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:.6rem;font-size:.8rem;color:var(--muted)}
 .theme-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:3px 7px;cursor:pointer;color:var(--gold);font-size:.8rem;transition:all .2s}
 .theme-btn:hover{border-color:var(--gold);background:var(--nav-hover)}
@@ -116,7 +117,28 @@ a{color:inherit;text-decoration:none}
 {% endblock %}
   <div class="topbar-right">
     <button class="theme-btn" onclick="togglePosTheme()" title="Tamna/Svijetla tema" id="pos-theme-btn">&#9790;</button>
+    {% if has_multiple_companies %}
+    <div style="position:relative;display:inline-block">
+      <button onclick="this.nextElementSibling.classList.toggle('show')"
+              style="background:none;border:1px solid #333;color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:inherit">
+        {{ request.user.get_full_name|default:request.user.username }} ▾
+      </button>
+      <div class="pos-company-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#111;border:1px solid #333;border-radius:8px;min-width:200px;z-index:9000;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+        {% for mem in user_memberships %}
+        <form method="post" action="/accounts/switch-company/" style="margin:0">
+          {% csrf_token %}
+          <input type="hidden" name="membership_id" value="{{ mem.id }}">
+          <button type="submit" style="width:100%;text-align:left;background:transparent;border:none;color:#ccc;padding:8px 12px;font-size:.8rem;cursor:pointer;border-radius:6px;font-family:inherit"
+                  onmouseover="this.style.background='rgba(201,168,76,.1)'" onmouseout="this.style.background='transparent'">
+            {{ mem.company.name }}
+          </button>
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
     <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+    {% endif %}
     <a href="/dashboard/" style="color:var(--gold);font-size:.8rem;text-decoration:none;border:1px solid var(--gold);padding:3px 8px;border-radius:5px">&larr; Dashboard</a>
   </div>
 </div>
