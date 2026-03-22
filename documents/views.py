@@ -507,7 +507,9 @@ def arhiva_list(request):
         qs = ArhivaEntry.objects.filter(company=company).exclude(amount=0).order_by('-doc_date', '-archived_at')
         company_filter = ''
         companies = []
-        # Show all company documents by default
+        year_filter = request.GET.get('year', '')
+        if year_filter:
+            qs = qs.filter(doc_date__year=year_filter)
 
     show_all = request.GET.get('all', '') == '1'
 
@@ -592,8 +594,8 @@ def arhiva_list(request):
         'companies': companies,
         'company_filter': company_filter,
         'company_filter_name': next((c.name for c in companies if str(c.id) == str(company_filter)), '') if (company_filter and 'companies' in dir()) else '',
-        'year_filter': year_filter if is_superadmin else '',
-        'year_filter_val': request.GET.get('year', '') if is_superadmin else '',
+        'year_filter': year_filter if is_superadmin else request.GET.get('year', ''),
+        'year_filter_val': request.GET.get('year', ''),
         'stats': stats,
         'sort': sort,
         'order': order,
