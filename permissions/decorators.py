@@ -130,3 +130,33 @@ def require_role(*role_types):
 
         return wrapper
     return decorator
+
+
+def cockpit_required(json_response=False):
+    """
+    Dekorator za Fenix Cockpit viewove.
+    Dozvoljava pristup superuserima i korisnicima u COCKPIT_USERS.
+
+    Koristi:
+        @cockpit_required()
+        def moj_view(request): ...
+
+        @cockpit_required(json_response=True)
+        def moj_api(request): ...
+    """
+    from functools import wraps
+
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                from django.shortcuts import redirect
+                return redirect('login')
+            from core.cockpit_views import _cockpit_allowed
+            if not _cockpit_allowed(request.user):
+                if json_response:
+                    return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
+                return HttpResponseForbidden()
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator

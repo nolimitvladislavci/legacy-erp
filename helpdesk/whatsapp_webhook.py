@@ -22,11 +22,14 @@ def _get_vip(phone):
     return None
 
 
+# Normalizacija telefona — centralizirana u core.whatsapp
+from core.whatsapp import normalize_phone as _normalize_phone_core
+
 def _normalize_phone(raw):
-    """Strip WhatsApp suffix and normalize."""
-    phone = raw.replace('@c.us', '').replace('@s.whatsapp.net', '')
-    phone = phone.replace('+', '').replace(' ', '').replace('-', '')
-    return phone
+    """Strip WhatsApp suffix and normalize. Delegira na core.whatsapp.normalize_phone."""
+    # Ukloni WhatsApp suffixe koje core ne zna
+    raw = raw.replace('@c.us', '').replace('@s.whatsapp.net', '')
+    return _normalize_phone_core(raw)
 
 
 def _find_partner(phone):
