@@ -86,11 +86,11 @@
           {% elif t.pos_type == 'restaurant' %}
           <a href="{% url 'pos:restaurant_pos' t.id %}" class="btn btn-gold btn-sm">{% trans "&#x1F374; Restoran &rarr;" %}</a>
           {% else %}
-          <a href="{% url 'pos:session_detail' t.active_session.id %}" class="btn btn-gold btn-sm">{% trans "Otvori POS &rarr;" %}</a>
+          <a href="{% url 'pos:session_detail' t.active_session.id %}" class="btn btn-gold btn-sm">{% trans "Blagajna &rarr;" %}</a>
           {% endif %}
         {% else %}
         <form method="post" action="{% url 'pos:open_session' t.id %}" style="display:inline">{% csrf_token %}
-          <button class="btn btn-green btn-sm">{% trans "Pokreni smjenu" %}</button></form>
+          <button class="btn btn-green btn-sm">{% trans "Početak rada" %}</button></form>
         {% endif %}
       </div>
     </div>

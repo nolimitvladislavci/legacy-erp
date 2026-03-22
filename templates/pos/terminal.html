@@ -33,17 +33,17 @@ tr:hover td{background:rgba(255,255,255,.02)}
       {% elif terminal.pos_type == "restaurant" %}
       <a href="{% url 'pos:restaurant_pos' terminal.id %}" class="btn btn-gold">&#x1F374; {% trans "Restoran &rarr;" %}</a>
       {% else %}
-      <a href="{% url 'pos:session_detail' active_session.id %}" class="btn btn-gold">{% trans "Otvori POS &rarr;" %}</a>
+      <a href="{% url 'pos:session_detail' active_session.id %}" class="btn btn-gold">{% trans "Blagajna &rarr;" %}</a>
       {% endif %}
     {% endif %}
   </div>
   {% if not active_session %}
   <div class="open-form">
-    <div style="font-weight:600;margin-bottom:.875rem">{% trans "Pokreni novu smjenu" %}</div>
+    <div style="font-weight:600;margin-bottom:.875rem">{% trans "Početak radnog vremena" %}</div>
     <form method="post" action="{% url 'pos:open_session' terminal.id %}">{% csrf_token %}
       <div class="form-row">
         <div><label>{% trans "Pocetna gotovina (&euro;)" %}</label><input type="number" name="opening_cash" value="0" min="0" step="0.01"></div>
-        <button type="submit" class="btn btn-green">{% trans "Pokreni smjenu" %}</button>
+        <button type="submit" class="btn btn-green">{% trans "Početak radnog vremena" %}</button>
       </div>
     </form>
   </div>
@@ -51,7 +51,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div style="background:rgba(76,175,125,.08);border:1px solid var(--green);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between">
     <div><span class="badge badge-open" style="margin-right:.5rem">{% trans "AKTIVNA SMJENA" %}</span>
     #{{ active_session.session_number }} &mdash; {{ active_session.opened_at|date:"d.m.Y H:i" }} &mdash; <strong style="color:var(--green)">&euro;{{ active_session.total_sales|floatformat:2 }}</strong></div>
-    <a href="{% url 'pos:session_detail' active_session.id %}" class="btn btn-gold btn-sm">{% trans "Otvori POS" %}</a>
+    <a href="{% url 'pos:session_detail' active_session.id %}" class="btn btn-gold btn-sm">{% trans "Blagajna" %}</a>
   </div>
   {% endif %}
   <div class="card" style="padding:1rem">
