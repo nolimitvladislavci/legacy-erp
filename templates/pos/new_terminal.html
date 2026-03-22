@@ -13,7 +13,7 @@
 .step-panel.active{display:block}
 .wiz-h2{color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;font-size:1.5rem;margin:0 0 6px}
 .wiz-sub{color:#94a3b8;font-size:.85rem;margin-bottom:20px}
-.wiz-input{width:100%;background:#111;border:1px solid #333;border-radius:8px;padding:12px;color:#e2e8f0;font-size:1rem;font-family:'Barlow',sans-serif;margin-bottom:12px}
+.wiz-input{width:100%;background:#111;border:1px solid #333;border-radius:8px;padding:12px;color:#e2e8f0;font-size:1rem;font-family:'Barlow',sans-serif;margin-bottom:12px;box-sizing:border-box}
 .wiz-input:focus{border-color:var(--gold,#c9a84c);outline:none}
 .wiz-label{display:block;color:#94a3b8;font-size:.8rem;margin-bottom:4px}
 .wiz-row{display:flex;gap:10px}
@@ -23,15 +23,22 @@
 .wiz-btn-outline{background:none;border:1px solid #333;color:#94a3b8;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:.9rem}
 .tax-chip{display:inline-block;background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:6px 14px;margin:4px;color:#e2e8f0;font-size:.85rem}
 .tax-chip b{color:var(--gold,#c9a84c)}
-.type-card{background:#111;border:2px solid #222;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;text-align:center}
-.type-card:hover,.type-card:active{border-color:var(--gold,#c9a84c);transform:scale(.98)}
+/* Native radio type cards — NO JavaScript onclick */
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.type-radio{display:none}
+.type-card{display:block;background:#111;border:2px solid #222;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;text-align:center}
+.type-radio:checked + .type-card{border-color:var(--gold,#c9a84c);background:#1a1a0a}
+.type-radio:focus + .type-card{box-shadow:0 0 0 2px var(--gold,#c9a84c)}
+.type-card:hover{border-color:#444}
 .type-card .icon{font-size:2rem;margin-bottom:6px}
 .type-card .label{color:#e2e8f0;font-weight:700;font-size:.95rem}
 .type-card .desc{color:#666;font-size:.75rem;margin-top:4px}
-.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.wiz-brand{text-align:center;margin-bottom:20px;color:#94a3b8;font-size:.75rem;font-family:'Barlow',sans-serif}
+.wiz-brand b{color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;font-size:.85rem}
 </style>
 
 <div class="wizard">
+  <div class="wiz-brand"><b>LIMIT Connect</b> &mdash; {% trans "Fiskalizacija u džepu" %}</div>
   <div class="steps">
     <div class="step-dot active" id="dot1"></div>
     <div class="step-dot" id="dot2"></div>
@@ -43,80 +50,86 @@
 
     <!-- STEP 1: Porezne stope -->
     <div class="step-panel active" id="step1">
-      <h2 class="wiz-h2">1. Porezne stope</h2>
-      <p class="wiz-sub">Stope su automatski postavljene za {{ country }}. Možete ih urediti u postavkama.</p>
+      <h2 class="wiz-h2">{% trans "1. Porezne stope" %}</h2>
+      <p class="wiz-sub">{% trans "Stope su automatski postavljene za" %} {{ country }}. {% trans "Možete ih urediti u postavkama." %}</p>
 
       <div style="margin-bottom:20px;">
         {% for r in tax_rates %}
         <span class="tax-chip"><b>{{ r.rate }}%</b> {{ r.name }}</span>
         {% empty %}
-        <p style="color:#e74c3c;">Nema poreznih stopa — dodajte ih u <a href="{% url 'companies:tax_rates' %}" style="color:#c9a84c;">postavkama</a>.</p>
+        <p style="color:#e74c3c;">{% trans "Nema poreznih stopa" %} &mdash; <a href="{% url 'companies:tax_rates' %}" style="color:#c9a84c;">{% trans "dodajte ih u postavkama" %}</a>.</p>
         {% endfor %}
       </div>
 
       <a href="{% url 'companies:tax_rates' %}" class="wiz-btn-outline" style="display:inline-block;margin-bottom:16px;">
-        Uredi stope
+        {% trans "Uredi stope" %}
       </a>
 
       <button type="button" class="wiz-btn" onclick="goStep(2)" {% if not tax_rates %}disabled{% endif %}>
-        Dalje →
+        {% trans "Dalje" %} &rarr;
       </button>
     </div>
 
     <!-- STEP 2: Blagajnik -->
     <div class="step-panel" id="step2">
-      <h2 class="wiz-h2">2. Blagajnik</h2>
-      <p class="wiz-sub">Tko će koristiti blagajnu? OIB je zakonski obavezan za fiskalizaciju.</p>
+      <h2 class="wiz-h2">{% trans "2. Blagajnik" %}</h2>
+      <p class="wiz-sub">{% trans "Tko će koristiti blagajnu? OIB je zakonski obavezan za fiskalizaciju." %}</p>
 
       <div class="wiz-row">
         <div>
-          <label class="wiz-label">Ime *</label>
+          <label class="wiz-label" for="cfirst">{% trans "Ime" %} *</label>
           <input type="text" name="cashier_first" class="wiz-input" id="cfirst" required placeholder="Ivan">
         </div>
         <div>
-          <label class="wiz-label">Prezime</label>
-          <input type="text" name="cashier_last" class="wiz-input" placeholder="Horvat">
+          <label class="wiz-label" for="clast">{% trans "Prezime" %}</label>
+          <input type="text" name="cashier_last" class="wiz-input" id="clast" placeholder="Horvat">
         </div>
       </div>
 
-      <label class="wiz-label">OIB operatera (11 znamenki)</label>
-      <input type="text" name="cashier_oib" class="wiz-input" maxlength="20" placeholder="12345678901"
-             pattern="[0-9]{11}" title="OIB mora imati 11 znamenki">
+      <label class="wiz-label" for="coib">{% trans "OIB operatera (11 znamenki)" %}</label>
+      <input type="text" name="cashier_oib" class="wiz-input" id="coib" maxlength="20" placeholder="12345678901"
+             pattern="[0-9]{11}" title="{% trans 'OIB mora imati 11 znamenki' %}">
 
       <div class="wiz-row">
         <div>
-          <label class="wiz-label">PIN (4 znamenke, opcionalno)</label>
-          <input type="text" name="cashier_pin" class="wiz-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="1234">
+          <label class="wiz-label" for="cpin">{% trans "PIN (4 znamenke, opcionalno)" %}</label>
+          <input type="text" name="cashier_pin" class="wiz-input" id="cpin" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="1234">
         </div>
         <div>
-          <label class="wiz-label">Početna gotovina (€)</label>
-          <input type="number" name="opening_cash" class="wiz-input" value="0" min="0" step="0.01">
+          <label class="wiz-label" for="ocash">{% trans "Početna gotovina" %} (&euro;)</label>
+          <input type="number" name="opening_cash" class="wiz-input" id="ocash" value="0" min="0" step="0.01">
         </div>
       </div>
 
       <div style="display:flex;gap:10px;margin-top:8px;">
-        <button type="button" class="wiz-btn-outline" onclick="goStep(1)" style="flex:1;">← Natrag</button>
-        <button type="button" class="wiz-btn" onclick="goStep(3)" id="btn2next" style="flex:2;">Dalje →</button>
+        <button type="button" class="wiz-btn-outline" onclick="goStep(1)" style="flex:1;">&larr; {% trans "Natrag" %}</button>
+        <button type="button" class="wiz-btn" onclick="goStep(3)" id="btn2next" style="flex:2;">{% trans "Dalje" %} &rarr;</button>
       </div>
     </div>
 
-    <!-- STEP 3: Vrsta blagajne -->
+    <!-- STEP 3: Vrsta blagajne — native HTML radio buttons -->
     <div class="step-panel" id="step3">
-      <h2 class="wiz-h2">3. Odaberi tip blagajne</h2>
-      <p class="wiz-sub">Klik otvara POS — odmah ste spremni za rad.</p>
+      <h2 class="wiz-h2">{% trans "3. Odaberi tip blagajne" %}</h2>
+      <p class="wiz-sub">{% trans "Odaberite tip i pritisnite gumb za otvaranje POS-a." %}</p>
 
       <div class="type-grid">
         {% for t in pos_types %}
-        <label class="type-card" onclick="document.getElementById('pt_{{t.value}}').checked=true;document.getElementById('wizardForm').submit();">
-          <input type="radio" name="pos_type" value="{{ t.value }}" id="pt_{{t.value}}" style="display:none;">
-          <div class="icon">{{ t.icon }}</div>
-          <div class="label">{{ t.label }}</div>
-          <div class="desc">{{ t.desc }}</div>
-        </label>
+        <div>
+          <input type="radio" name="pos_type" value="{{ t.value }}" id="pt_{{ t.value }}"
+                 class="type-radio" {% if forloop.first %}checked{% endif %}>
+          <label for="pt_{{ t.value }}" class="type-card">
+            <div class="icon">{{ t.icon }}</div>
+            <div class="label">{{ t.label }}</div>
+            <div class="desc">{{ t.desc }}</div>
+          </label>
+        </div>
         {% endfor %}
       </div>
 
-      <button type="button" class="wiz-btn-outline" onclick="goStep(2)" style="margin-top:16px;width:100%;">← Natrag</button>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="button" class="wiz-btn-outline" onclick="goStep(2)" style="flex:1;">&larr; {% trans "Natrag" %}</button>
+        <button type="submit" class="wiz-btn" style="flex:2;">{% trans "Otvori POS" %} &rarr;</button>
+      </div>
     </div>
   </form>
 </div>

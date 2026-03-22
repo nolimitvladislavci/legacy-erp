@@ -538,7 +538,11 @@ def employee_toggle_redirect(request, pk):
 @login_required
 def tax_rate_list(request):
     from .models import TaxRate
-    company = request.user.profile.company
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Nema konteksta tvrtke.')
+        return redirect('/')
     country = getattr(company, 'country', 'HR') or 'HR'
 
     if request.method == 'POST':

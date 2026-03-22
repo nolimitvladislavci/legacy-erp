@@ -1,6 +1,7 @@
 {# ═══ GLOBAL SMART ITEM CREATE — uključi u bilo koji template ═══ #}
 {# Usage: {% include "inventory/includes/_smart_create_modal.html" %} #}
 {# JS API: openSmartCreate() → modal. onSmartItemCreated(item) callback. #}
+{% load i18n %}
 <style>
 .sci-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20000;display:none;align-items:center;justify-content:center}
 .sci-overlay.show{display:flex}
@@ -23,48 +24,55 @@
 .sci-stock-note{font-size:.72rem;color:#f59e0b;margin-top:4px}
 </style>
 
+{# Django URL tags — language-aware, no hardcoded /hr/ prefix #}
+<script>
+var _SCI_URL_CREATE = '{% url "inventory:api_smart_create" %}';
+var _SCI_URL_TAX_RATES = '{% url "companies:tax_rates" %}';
+var _SCI_URL_AI_PREDICT = '{% url "inventory:api_ai_predict_item" %}';
+</script>
+
 <div class="sci-overlay" id="sciOverlay" onclick="if(event.target===this)closeSmartCreate()">
   <div class="sci-card">
     <button class="sci-close" onclick="closeSmartCreate()">&times;</button>
-    <h2 class="sci-h2">Novi artikl</h2>
+    <h2 class="sci-h2">{% trans "Novi artikl" %}</h2>
 
     <!-- Korak 1: Ime (jedino obavezno polje) -->
-    <label class="sci-label">Naziv *</label>
-    <input type="text" class="sci-input" id="sciName" placeholder="npr. Burek sa sirom" autofocus
+    <label class="sci-label">{% trans "Naziv" %} *</label>
+    <input type="text" class="sci-input" id="sciName" placeholder="{% trans "npr. Burek sa sirom" %}" autofocus
            oninput="_sciPredict(this.value)">
 
     <!-- AI predviđanje — popunjava se automatski -->
     <div class="sci-row">
       <div>
-        <label class="sci-label">Cijena (€) *</label>
+        <label class="sci-label">{% trans "Cijena" %} (&euro;) *</label>
         <input type="number" class="sci-input" id="sciPrice" step="0.01" min="0" placeholder="0.00">
       </div>
       <div>
-        <label class="sci-label">Porez</label>
+        <label class="sci-label">{% trans "Porez" %}</label>
         <select class="sci-select" id="sciTax">
-          <option value="">—</option>
+          <option value="">&mdash;</option>
         </select>
       </div>
     </div>
 
     <div class="sci-row">
       <div>
-        <label class="sci-label">Kategorija</label>
+        <label class="sci-label">{% trans "Kategorija" %}</label>
         <select class="sci-select" id="sciCat">
-          <option value="other">Ostalo</option>
-          <option value="food">Hrana</option>
-          <option value="drink">Piće</option>
-          <option value="dessert">Desert</option>
-          <option value="service">Usluga</option>
-          <option value="product">Proizvod</option>
-          <option value="material">Materijal</option>
-          <option value="consumable">Potrošni</option>
-          <option value="tool">Alat</option>
-          <option value="equipment">Oprema</option>
+          <option value="other">{% trans "Ostalo" %}</option>
+          <option value="food">{% trans "Hrana" %}</option>
+          <option value="drink">{% trans "Piće" %}</option>
+          <option value="dessert">{% trans "Desert" %}</option>
+          <option value="service">{% trans "Usluga" %}</option>
+          <option value="product">{% trans "Proizvod" %}</option>
+          <option value="material">{% trans "Materijal" %}</option>
+          <option value="consumable">{% trans "Potrošni" %}</option>
+          <option value="tool">{% trans "Alat" %}</option>
+          <option value="equipment">{% trans "Oprema" %}</option>
         </select>
       </div>
       <div>
-        <label class="sci-label">Jed. mjere</label>
+        <label class="sci-label">{% trans "Jed. mjere" %}</label>
         <input type="text" class="sci-input" id="sciUnit" value="kom" style="margin-bottom:0">
       </div>
     </div>
@@ -73,10 +81,10 @@
     <div id="sciBarcode" class="sci-barcode" style="display:none"></div>
     <div id="sciStockNote" class="sci-stock-note" style="display:none"></div>
 
-    <button class="sci-btn" id="sciSubmit" onclick="_sciSave()">Spremi artikl</button>
+    <button class="sci-btn" id="sciSubmit" onclick="_sciSave()">{% trans "Spremi artikl" %}</button>
 
     <div class="sci-ai">
-      <b>AI</b> automatski predviđa kategoriju, porez i barkod na osnovu naziva
+      <b>AI</b> {% trans "automatski predviđa kategoriju, porez i barkod na osnovu naziva" %}
     </div>
   </div>
 </div>
@@ -103,11 +111,11 @@ function closeSmartCreate() {
 }
 
 function _sciLoadTaxRates() {
-  fetch('/hr/companies/tax-rates/', {credentials:'same-origin'}).then(function(r){return r.text();}).then(function(html){
+  fetch(_SCI_URL_TAX_RATES, {credentials:'same-origin'}).then(function(r){return r.text();}).then(function(html){
     // Parse tax rates from page (simple regex)
     var sel = document.getElementById('sciTax');
     // Fallback: use common rates
-    sel.innerHTML = '<option value="">—</option>';
+    sel.innerHTML = '<option value="">&mdash;</option>';
     var rates = [
       {id:'', name:'PDV 25%', rate:'25'},
       {id:'', name:'PDV 13%', rate:'13'},
@@ -122,7 +130,7 @@ function _sciPredict(name) {
   clearTimeout(_sciPredictTimer);
   if (name.length < 2) return;
   _sciPredictTimer = setTimeout(function(){
-    fetch('/hr/inventory/api/ai-predict/?name=' + encodeURIComponent(name), {credentials:'same-origin'})
+    fetch(_SCI_URL_AI_PREDICT + '?name=' + encodeURIComponent(name), {credentials:'same-origin'})
     .then(function(r){ return r.json(); })
     .then(function(d){
       document.getElementById('sciCat').value = d.category || 'other';
@@ -158,7 +166,7 @@ function _sciSave() {
 
   var barcode = (document.getElementById('sciBarcode').textContent || '').replace('Barkod: ','').trim();
 
-  fetch('/hr/inventory/api/smart-create/', {
+  fetch(_SCI_URL_CREATE, {
     method: 'POST',
     credentials: 'same-origin',
     headers: {'Content-Type':'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''},
