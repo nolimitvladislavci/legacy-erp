@@ -2445,6 +2445,41 @@ def ivan_cockpit(request):
         'recent_logs':recent_logs,
         'feedback':ImprovementSuggestion.objects.filter(status='new').order_by('-created_at')[:5],
     }
+    # API key + cert health check
+    try:
+        import anthropic, os
+        api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+        if api_key:
+            try:
+                c = anthropic.Anthropic(api_key=api_key)
+                c.messages.create(model='claude-haiku-4-5-20251001', max_tokens=5, messages=[{'role':'user','content':'ok'}])
+                context['api_status'] = 'ok'
+                context['api_key_short'] = api_key[:12] + '...' + api_key[-4:]
+            except anthropic.BadRequestError as e:
+                if 'credit balance' in str(e):
+                    context['api_status'] = 'no_credit'
+                else:
+                    context['api_status'] = 'error'
+                context['api_error'] = str(e)[:100]
+                context['api_key_short'] = api_key[:12] + '...' + api_key[-4:]
+            except Exception as e:
+                context['api_status'] = 'error'
+                context['api_error'] = str(e)[:100]
+        else:
+            context['api_status'] = 'missing'
+    except Exception:
+        context['api_status'] = 'unknown'
+
+    # Cert expiry
+    try:
+        from eracun.services.cert_monitor import check_all_certs
+        certs = check_all_certs()
+        context['certs'] = certs
+        context['certs_expiring'] = [c for c in certs if c.get('status') in ('CRITICAL','WARNING','ATTENTION','EXPIRED')]
+    except Exception:
+        context['certs'] = []
+        context['certs_expiring'] = []
+
     return render(request,'dashboards/ivan_cockpit.html',context)
 
 
@@ -2762,6 +2797,41 @@ def ivan_cockpit(request):
         'recent_logs':recent_logs,
         'feedback':ImprovementSuggestion.objects.filter(status='new').order_by('-created_at')[:5],
     }
+    # API key + cert health check
+    try:
+        import anthropic, os
+        api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+        if api_key:
+            try:
+                c = anthropic.Anthropic(api_key=api_key)
+                c.messages.create(model='claude-haiku-4-5-20251001', max_tokens=5, messages=[{'role':'user','content':'ok'}])
+                context['api_status'] = 'ok'
+                context['api_key_short'] = api_key[:12] + '...' + api_key[-4:]
+            except anthropic.BadRequestError as e:
+                if 'credit balance' in str(e):
+                    context['api_status'] = 'no_credit'
+                else:
+                    context['api_status'] = 'error'
+                context['api_error'] = str(e)[:100]
+                context['api_key_short'] = api_key[:12] + '...' + api_key[-4:]
+            except Exception as e:
+                context['api_status'] = 'error'
+                context['api_error'] = str(e)[:100]
+        else:
+            context['api_status'] = 'missing'
+    except Exception:
+        context['api_status'] = 'unknown'
+
+    # Cert expiry
+    try:
+        from eracun.services.cert_monitor import check_all_certs
+        certs = check_all_certs()
+        context['certs'] = certs
+        context['certs_expiring'] = [c for c in certs if c.get('status') in ('CRITICAL','WARNING','ATTENTION','EXPIRED')]
+    except Exception:
+        context['certs'] = []
+        context['certs_expiring'] = []
+
     return render(request,'dashboards/ivan_cockpit.html',context)
 
 @login_required

@@ -157,6 +157,44 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
   </div>
 </div>
 
+<!-- API & Certifikati -->
+<div class="section-title">🔑 API & Sigurnost</div>
+<div class="grid2">
+  <div class="card" style="{% if api_status == 'ok' %}border-color:#22c55e44{% elif api_status == 'no_credit' %}border-color:#ef444466{% else %}border-color:#f59e0b44{% endif %}">
+    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">Anthropic AI</div>
+    {% if api_status == 'ok' %}
+    <div style="font-size:1rem;font-weight:700;color:#22c55e">● Aktivan</div>
+    <div class="muted" style="font-size:.7rem">{{ api_key_short }}</div>
+    {% elif api_status == 'no_credit' %}
+    <div style="font-size:1rem;font-weight:700;color:#ef4444">● Nema kredita!</div>
+    <a href="https://console.anthropic.com/settings/billing" target="_blank"
+       style="display:inline-block;margin-top:6px;background:#c9a84c;color:#000;padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:700;text-decoration:none">
+      Nadoplati →
+    </a>
+    {% elif api_status == 'missing' %}
+    <div style="font-size:1rem;font-weight:700;color:#f59e0b">● Nema API ključa</div>
+    {% else %}
+    <div style="font-size:1rem;font-weight:700;color:#f59e0b">● Greška</div>
+    <div class="muted" style="font-size:.7rem">{{ api_error|default:"" }}</div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div style="font-size:.75rem;color:#64748b;margin-bottom:.25rem">FINA Certifikati</div>
+    {% if certs_expiring %}
+    {% for c in certs_expiring %}
+    <div style="font-size:.85rem;color:{% if c.status == 'EXPIRED' or c.status == 'CRITICAL' %}#ef4444{% else %}#f59e0b{% endif %};font-weight:700">
+      ● {{ c.cert_type }} — {{ c.days_left }}d
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="font-size:1rem;font-weight:700;color:#22c55e">● Svi OK</div>
+    {% for c in certs %}
+    <div class="muted" style="font-size:.7rem">{{ c.company }}: {{ c.days_left }}d</div>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
 <!-- Server -->
 <div class="section-title">🖥️ Server</div>
 <div class="grid2">

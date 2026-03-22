@@ -1314,3 +1314,8 @@ class POSPulseEvent(models.Model):
 
     def __str__(self):
         return f'[{self.severity}] {self.title}'
+
+
+# Import ChainLink so Django model discovery includes it
+from pos.hashchain import ChainLink  # noqa: F401
+
