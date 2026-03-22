@@ -87,6 +87,13 @@ button[disabled]{opacity:.5;cursor:not-allowed}
         <div class="sh-title">{{ session.terminal.name }} &mdash; Smjena #{{ session.session_number }}</div>
         <div class="sh-meta">Otvorena {{ session.opened_at|date:"d.m.Y H:i" }} &mdash; {{ session.operator.get_full_name|default:session.operator.username }}</div>
       </div>
+      <div style="display:flex;gap:6px">
+        {% if session.terminal.pos_type == 'restaurant' %}
+        <a href="{% url 'pos:restaurant_pos' session.terminal.pk %}" class="btn btn-gold btn-sm" style="white-space:nowrap">🍽 Blagajna</a>
+        {% else %}
+        <a href="{% url 'pos:quick_pos' session.terminal.pk %}" class="btn btn-gold btn-sm" style="white-space:nowrap">⚡ Blagajna</a>
+        {% endif %}
+      </div>
       <div class="sh-stats">
         <div class="sstat"><div class="sstat-val">&euro;{{ session.total_sales|floatformat:2 }}</div><div class="sstat-lbl">{% trans "Prihod" %}</div></div>
         <div class="sstat"><div class="sstat-val">{{ open_receipts.count }}</div><div class="sstat-lbl">{% trans "Otvoreni" %}</div></div>

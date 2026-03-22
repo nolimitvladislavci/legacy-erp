@@ -245,6 +245,24 @@
         }
 
             .sidebar-overlay.open { display: block; }
+            /* Sidebar footer: fixed na dnu vidljivog sidebara na mobitelu */
+            .sidebar .sidebar-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                background: var(--sidebar-bg, #0f172a);
+                z-index: 1001;
+                border-top: 1px solid #1e293b;
+                padding: 10px 12px;
+            }
+            .sidebar.open .sidebar-footer {
+                transform: translateX(0);
+            }
+            /* Padding na dnu sidebara da zadnji link nije ispod footera */
+            .sidebar { padding-bottom: 100px; }
             .main { margin-left: 0; }
             .hamburger { display: block; }
             .content { padding: 12px; }
