@@ -806,3 +806,67 @@ def fleet_dashboard(request):
         'expired_docs': expired_vehicle_docs,
         'today': today,
     })
+
+
+@login_required
+def transport_order_create(request):
+    """Kreiranje novog transportnog naloga."""
+    from core.company_utils import get_user_company
+    from .models import TransportOrder, Vehicle
+    company = get_user_company(request)
+    if not company:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        order = TransportOrder(
+            company=company,
+            transport_type=request.POST.get('transport_type', 'freight_eu'),
+            status='draft',
+            origin_address=request.POST.get('origin_address', ''),
+            origin_country=request.POST.get('origin_country', 'HR'),
+            destination_address=request.POST.get('destination_address', ''),
+            destination_country=request.POST.get('destination_country', 'HR'),
+            planned_departure=request.POST.get('planned_departure') or None,
+            planned_arrival=request.POST.get('planned_arrival') or None,
+            cargo_description=request.POST.get('cargo_description', ''),
+            total_weight_kg=request.POST.get('total_weight_kg') or None,
+            total_volume_m3=request.POST.get('total_volume_m3') or None,
+            package_count=request.POST.get('package_count') or 1,
+            requires_cold_chain=request.POST.get('requires_cold_chain') == 'on',
+            temp_min=request.POST.get('temp_min') or None,
+            temp_max=request.POST.get('temp_max') or None,
+            client_name=request.POST.get('client_name', ''),
+            client_phone=request.POST.get('client_phone', ''),
+            client_reference=request.POST.get('client_reference', ''),
+            client_price=request.POST.get('client_price') or 0,
+            notes=request.POST.get('notes', ''),
+            created_by=request.user,
+        )
+        vehicle_id = request.POST.get('vehicle')
+        if vehicle_id:
+            order.vehicle = Vehicle.objects.filter(pk=vehicle_id, company=company).first()
+        driver_id = request.POST.get('driver')
+        if driver_id:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            order.driver = User.objects.filter(pk=driver_id).first()
+        order.save()
+
+        issues = order.verify_documents()
+        if issues:
+            messages.warning(request, 'Nalog kreiran, ali postoje problemi s dokumentima: ' + '; '.join(issues))
+        else:
+            messages.success(request, f'Transportni nalog {order.order_number} kreiran.')
+        return redirect('delivery:transport_detail', pk=order.pk)
+
+    # GET — form
+    vehicles = Vehicle.objects.filter(company=company, is_active=True)
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    drivers = User.objects.filter(profile__company=company, is_active=True)
+    return render(request, 'delivery/transport_order_create.html', {
+        'vehicles': vehicles,
+        'drivers': drivers,
+        'transport_types': TransportOrder.TRANSPORT_TYPES,
+        'country_choices': TransportOrder.COUNTRY_CHOICES,
+    })

@@ -1663,7 +1663,7 @@ def scan_create_token(request):
     r.setex('scan:%s' % token, 600, data.encode('utf-8'))
 
     # Generiraj QR kod kao base64
-    url = request.build_absolute_uri('/scan/%s/' % token)
+    from django.urls import reverse as _rev; url = request.build_absolute_uri(_rev('documents:scan_mobile_page', args=[token]))
     qr = _qrcode.QRCode(version=1, error_correction=_qrcode.constants.ERROR_CORRECT_M, box_size=8, border=2)
     qr.add_data(url)
     qr.make(fit=True)
@@ -1689,6 +1689,9 @@ def scan_mobile_page(request, token):
     return render(request, 'documents/scan_mobile.html', {'token': token})
 
 
+from django.views.decorators.csrf import csrf_exempt as _csrf_exempt_scan
+
+@_csrf_exempt_scan
 def scan_upload(request, token):
     """Mobitel: prima sliku i sprema u Redis pod tokenom."""
     if request.method != 'POST':

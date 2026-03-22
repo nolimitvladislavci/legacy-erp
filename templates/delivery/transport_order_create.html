@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Novi transportni nalog{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-1"><i class="fas fa-plus-circle text-gold me-2"></i>Novi transportni nalog</h2>
+      <p class="text-muted mb-0">Kreiranje naloga za prijevoz</p>
+    </div>
+    <a href="{% url 'delivery:transport_list' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Natrag
+    </a>
+  </div>
+
+  <form method="post" action="{% url 'delivery:transport_create' %}">
+    {% csrf_token %}
+
+    <div class="row g-4">
+      <!-- Osnovni podaci -->
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-header bg-dark border-secondary">
+            <h6 class="mb-0 text-gold"><i class="fas fa-info-circle me-2"></i>Osnovni podaci</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label small text-muted">Tip prijevoza</label>
+              <select name="transport_type" class="form-select bg-dark text-light border-secondary" required>
+                {% for val, label in transport_types %}
+                <option value="{{ val }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted">Vozilo</label>
+              <select name="vehicle" class="form-select bg-dark text-light border-secondary">
+                <option value="">-- Bez vozila --</option>
+                {% for v in vehicles %}
+                <option value="{{ v.pk }}">{{ v.name }} ({{ v.plate_number }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted">Vozac</label>
+              <select name="driver" class="form-select bg-dark text-light border-secondary">
+                <option value="">-- Bez vozaca --</option>
+                {% for d in drivers %}
+                <option value="{{ d.pk }}">{{ d.get_full_name|default:d.username }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ruta -->
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="card-header bg-dark border-secondary">
+            <h6 class="mb-0 text-gold"><i class="fas fa-route me-2"></i>Ruta</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label small text-muted">Polaziste</label>
+              <input type="text" name="origin_address" class="form-control bg-dark text-light border-secondary" required placeholder="Adresa polazista">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted">Drzava polazista</label>
+              <select name="origin_country" class="form-select bg-dark text-light border-secondary">
+                {% for val, label in country_choices %}
+                <option value="{{ val }}" {% if val == "HR" %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted">Odrediste</label>
+              <input type="text" name="destination_address" class="form-control bg-dark text-light border-secondary" required placeholder="Adresa odredista">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted">Drzava odredista</label>
+              <select name="destination_country" class="form-select bg-dark text-light border-secondary">
+                {% for val, label in country_choices %}
+                <option value="{{ val }}" {% if val == "DE" %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Raspored -->
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-dark border-secondary">
+            <h6 class="mb-0 text-gold"><i class="fas fa-clock me-2"></i>Raspored</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label small text-muted">Planirani polazak</label>
+              <input type="datetime-local" name="planned_departure" class="form-control bg-dark text-light border-secondary" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-muted">Planirani dolazak</label>
+              <input type="datetime-local" name="planned_arrival" class="form-control bg-dark text-light border-secondary" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teret -->
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-dark border-secondary">
+            <h6 class="mb-0 text-gold"><i class="fas fa-boxes me-2"></i>Teret</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label small text-muted">Opis tereta</label>
+              <textarea name="cargo_description" rows="2" class="form-control bg-dark text-light border-secondary" placeholder="Opis robe"></textarea>
+            </div>
+            <div class="row g-2">
+              <div class="col-4">
+                <label class="form-label small text-muted">Tezina (kg)</label>
+                <input type="number" step="0.01" name="total_weight_kg" class="form-control bg-dark text-light border-secondary" placeholder="kg">
+              </div>
+              <div class="col-4">
+                <label class="form-label small text-muted">Volumen (m3)</label>
+                <input type="number" step="0.01" name="total_volume_m3" class="form-control bg-dark text-light border-secondary" placeholder="m3">
+              </div>
+              <div class="col-4">
+                <label class="form-label small text-muted">Br. koleta</label>
+                <input type="number" name="package_count" value="1" class="form-control bg-dark text-light border-secondary">
+              </div>
+            </div>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" name="requires_cold_chain" id="coldChain">
+              <label class="form-check-label small text-muted" for="coldChain">Zahtijeva hladni lanac</label>
+            </div>
+            <div class="row g-2 mt-1">
+              <div class="col-6">
+                <label class="form-label small text-muted">Min temp (C)</label>
+                <input type="number" step="0.1" name="temp_min" class="form-control bg-dark text-light border-secondary" placeholder="npr. 2.0">
+              </div>
+              <div class="col-6">
+                <label class="form-label small text-muted">Max temp (C)</label>
+                <input type="number" step="0.1" name="temp_max" class="form-control bg-dark text-light border-secondary" placeholder="npr. 8.0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Klijent -->
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-dark border-secondary">
+            <h6 class="mb-0 text-gold"><i class="fas fa-user-tie me-2"></i>Narucitelj</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label small text-muted">Naziv narucitelja</label>
+              <input type="text" name="client_name" class="form-control bg-dark text-light border-secondary" placeholder="Naziv firme / osobe">
+            </div>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small text-muted">Telefon</label>
+                <input type="text" name="client_phone" class="form-control bg-dark text-light border-secondary">
+              </div>
+              <div class="col-6">
+                <label class="form-label small text-muted">Referenca</label>
+                <input type="text" name="client_reference" class="form-control bg-dark text-light border-secondary" placeholder="Ref. broj">
+              </div>
+            </div>
+            <div class="mb-3 mt-3">
+              <label class="form-label small text-muted">Cijena za klijenta (EUR)</label>
+              <input type="number" step="0.01" name="client_price" class="form-control bg-dark text-light border-secondary" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Napomene -->
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+          <div class="card-header bg-dark border-secondary">
+            <h6 class="mb-0 text-gold"><i class="fas fa-sticky-note me-2"></i>Napomene</h6>
+          </div>
+          <div class="card-body">
+            <textarea name="notes" rows="5" class="form-control bg-dark text-light border-secondary" placeholder="Dodatne napomene..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 text-end">
+      <a href="{% url 'delivery:transport_list' %}" class="btn btn-outline-secondary me-2">Odustani</a>
+      <button type="submit" class="btn btn-gold btn-lg">
+        <i class="fas fa-save me-1"></i> Spremi nalog
+      </button>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
