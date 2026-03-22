@@ -543,7 +543,7 @@
   <div class="success-change" id="sucChange"></div>
   <div class="success-num" id="sucNum"></div>
   <div style="display:flex;flex-direction:column;gap:.5rem;max-width:300px;width:100%">
-    <button class="success-close" onclick="if(lastReceiptId)openShare({type:'receipt',id:lastReceiptId,title:document.getElementById('sucNum').textContent})" style="background:#c9a84c;border:1px solid #c9a84c;color:#000;padding:.85rem;font-weight:700;font-size:1.05rem;border-radius:10px;width:100%">📤 Podijeli račun</button>
+    <button class="success-close" id="btnShareReceipt" onclick="shareLastReceipt()" style="background:#c9a84c;border:1px solid #c9a84c;color:#000;padding:.85rem;font-weight:700;font-size:1.05rem;border-radius:10px;width:100%">📤 Spremi i podijeli</button>
     <button class="success-close" onclick="closeSuccess()" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:.75rem;font-size:.9rem;border-radius:10px;width:100%">Završi</button>
   </div>
 </div>
@@ -656,5 +656,26 @@
 
 {% include "inventory/includes/_smart_create_modal.html" %}
 {% include "includes/_share_modal.html" %}
+<script>
+function shareLastReceipt() {
+  var rid = window.lastReceiptId;
+  if (rid) {
+    openShare({type:'receipt', id:rid, title:document.getElementById('sucNum').textContent || 'Račun'});
+  } else {
+    // Fallback: retry after 500ms (data might still be loading)
+    var btn = document.getElementById('btnShareReceipt');
+    btn.textContent = '⏳ Spremam...';
+    setTimeout(function() {
+      rid = window.lastReceiptId;
+      if (rid) {
+        openShare({type:'receipt', id:rid, title:document.getElementById('sucNum').textContent || 'Račun'});
+      } else {
+        btn.textContent = '❌ Račun nije pronađen';
+        setTimeout(function() { btn.textContent = '📤 Spremi i podijeli'; }, 2000);
+      }
+    }, 500);
+  }
+}
+</script>
 
 {% endblock %}

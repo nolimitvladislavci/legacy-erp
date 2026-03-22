@@ -40,7 +40,7 @@
 
   var basket = {};
   var lastReceiptUrl = '';
-  var lastReceiptId = null;
+  var lastReceiptId = null; window.lastReceiptId = null;
   var _weighBtn = null;
 
   window.addProduct = function(btn) {
@@ -210,7 +210,7 @@
         return;
       }
       if (data.ok) {
-        lastReceiptUrl = data.print_url || ''; lastReceiptId = data.receipt_id || null;
+        lastReceiptUrl = data.print_url || ''; lastReceiptId = data.receipt_id || null; window.lastReceiptId = lastReceiptId;
         window._publicUrl = data.public_url || null;
         var change = method === 'CASH' ? Math.max(0, amtPaid - parseFloat(data.total)) : 0;
         showSuccess(data.receipt_number, data.total, change);
@@ -371,7 +371,7 @@
     })
     .then(function(r){ return r.text(); }).then(function(vtxt) {
       var data; try { data = JSON.parse(vtxt); } catch(e) { window.location.reload(); return; }
-      if (data.ok) { lastReceiptUrl = data.print_url || ""; lastReceiptId = data.receipt_id || null; window._publicUrl = data.public_url || null; showSuccess(data.receipt_number, data.total, 0); clearBasket(); clearTip(); }
+      if (data.ok) { lastReceiptUrl = data.print_url || ""; lastReceiptId = data.receipt_id || null; window.lastReceiptId = lastReceiptId; window._publicUrl = data.public_url || null; showSuccess(data.receipt_number, data.total, 0); clearBasket(); clearTip(); }
       else { alert("Greska: " + (data.error || "nepoznata")); }
     }).catch(function() { alert("Greska veze."); })
     .finally(function() { btn.dataset.submitting = ""; btn.disabled = false; btn.innerHTML = "🎫 BON"; });

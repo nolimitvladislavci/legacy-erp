@@ -67,7 +67,10 @@
       "mcp__claude_ai_Fenix_LIMIT_Connect__get_logs",
       "WebFetch(domain:limit-connect.com)",
       "mcp__claude_ai_Fenix_LIMIT_Connect__exec_command",
-      "Bash(grep -n \"confirmNewItem\\\\|cancelNewItem\\\\|newItem\\\\|SAVE_URL\\\\|quick-create\\\\|inventory.save\" /var/www/fina-connect/static/js/pos/*.js)"
+      "Bash(grep -n \"confirmNewItem\\\\|cancelNewItem\\\\|newItem\\\\|SAVE_URL\\\\|quick-create\\\\|inventory.save\" /var/www/fina-connect/static/js/pos/*.js)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
