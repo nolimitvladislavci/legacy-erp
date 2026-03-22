@@ -197,8 +197,10 @@
     btn.innerHTML = '<span class="spinner"></span>';
     var amtPaid = method === 'CASH' ? (parseFloat(document.getElementById('cashAmt').value) || window._total) : window._total;
     var items = buildItemsPayload();
+    var _ctrl = new AbortController();
+    var _timeout = setTimeout(function(){ _ctrl.abort(); }, 15000); // 15s timeout
     fetch(API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', {
-      method: 'POST', credentials: 'same-origin',
+      method: 'POST', credentials: 'same-origin', signal: _ctrl.signal,
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
       body: JSON.stringify({ items: items, method: method, amount_paid: amtPaid, tip_amount: window._tip || 0, cashier: window._currentCashier || '', cashier_id: window._currentCashierId || '' }),
     })
@@ -218,6 +220,17 @@
       } else { alert('Greška: ' + (data.error || 'nepoznata')); }
     })
     .catch(function(e) {
+      clearTimeout(_timeout);
+      btn.disabled = false; btn.dataset.submitting = '0'; btn.textContent = _btnLabels[method] || 'Naplati';
+      if (e.name === 'AbortError') {
+        // Server timeout — offer offline mode
+        if (window.showToast) showToast('Server ne odgovara (15s). Pokušajte ponovo ili koristite offline mode.');
+        if (window.queueOfflineReceipt) {
+          var offRec = window.queueOfflineReceipt({session_id:SESSION_ID,items:items,payment_method:method,amount_paid:amtPaid,tip_amount:window._tip||0,note:window._currentCashier||'',cashier_id:window._currentCashierId||''});
+          if (offRec) { showSuccess('OFF-'+offRec.local_receipt_number,offRec.total,offRec.change); clearBasket(); }
+        }
+        return;
+      }
       if (!navigator.onLine && window.queueOfflineReceipt) {
         var offRec = window.queueOfflineReceipt({
           session_id: SESSION_ID,

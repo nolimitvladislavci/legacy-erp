@@ -41,8 +41,9 @@ class CheckoutService:
 
     @staticmethod
     def _next_receipt_number(session):
-        last = session.receipts.order_by('-receipt_number').first()
-        return (last.receipt_number + 1) if last else 1
+        from django.db.models import Max
+        max_num = session.receipts.aggregate(m=Max('receipt_number'))['m'] or 0
+        return max_num + 1
 
     @staticmethod
     def _deduct_stock(item, qty, unit_price, receipt_number, user):
@@ -324,9 +325,13 @@ class CheckoutService:
         member_discount, member_name = cls._resolve_member_discount(company, payload)
         next_number = cls._next_receipt_number(session)
 
-        receipt = POSReceipt.objects.create(
-            session=session,
-            receipt_number=next_number,
+        # Retry on duplicate receipt_number (race condition with multiple devices)
+        for _attempt in range(5):
+            try:
+                next_number = cls._next_receipt_number(session)
+                receipt = POSReceipt.objects.create(
+                    session=session,
+                    receipt_number=next_number,
             cashier=cashier_obj,
             client_ip=payload.get('client_ip', ''),
             client_ua=str(payload.get('client_ua', ''))[:300],
@@ -336,7 +341,12 @@ class CheckoutService:
             is_r1=bool(payload.get('buyer_oib')),
             note=str(note)[:255] if note else (cashier_obj.name if cashier_obj else ''),
             is_training=getattr(session.terminal, 'is_training', False) or session.is_training,
-        )
+                )
+                break  # Success — exit retry loop
+            except Exception as _dup_err:
+                if 'unique' in str(_dup_err).lower() and _attempt < 4:
+                    continue
+                raise
 
         # ── 4. STAVKE ──
         for item_data in items_data:
