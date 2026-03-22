@@ -214,10 +214,12 @@
         .arhiva-header h2 { font-size: 1.2rem; }
         .filter-toggle { display: none; }
         .filter-body { display: block; }
-        .filter-body.open { display: block; }
-        .filter-row { flex-direction: column; }
-        .filter-group { min-width: 100%; }
-        .filter-actions { width: 100%; }
+        .filter-body .stat-card { padding: 8px; }
+        .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .filter-group { min-width: 0; }
+        .filter-group label { font-size: .6rem; margin-bottom: 2px; }
+        .filter-group .form-control, .filter-group .form-select { padding: 5px 8px; font-size: .78rem; }
+        .filter-actions { width: 100%; grid-column: 1 / -1; }
         .filter-actions .btn-search { flex: 1; justify-content: center; }
         .stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
         .desktop-table { display: none !important; }
