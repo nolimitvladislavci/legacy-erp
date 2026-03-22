@@ -125,7 +125,7 @@ a{color:inherit;text-decoration:none}
       </button>
       <div class="pos-company-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#111;border:1px solid #333;border-radius:8px;min-width:200px;z-index:9000;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)">
         {% for mem in user_memberships %}
-        <form method="post" action="/accounts/switch-company/" style="margin:0">
+        <form method="post" action="{% url 'accounts:switch_company' %}" style="margin:0">
           {% csrf_token %}
           <input type="hidden" name="membership_id" value="{{ mem.id }}">
           <button type="submit" style="width:100%;text-align:left;background:transparent;border:none;color:#ccc;padding:8px 12px;font-size:.8rem;cursor:pointer;border-radius:6px;font-family:inherit"
