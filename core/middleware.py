@@ -129,13 +129,13 @@ class RateLimitMiddleware:
             return self.get_response(request)
 
         if '/login/' in path or '/api/token/' in path or '/password/' in path:
-            limit, window = 30, 60   # Was 10 — too strict for page + assets
+            limit, window = 60, 60   # Auth: login + assets — too strict for page + assets
         elif path.startswith('/api/') or path.startswith('/_dev/'):
             limit, window = 60, 60
         elif '/register/' in path:
             limit, window = 60, 60   # Registration flow needs breathing room
         else:
-            limit, window = 300, 60
+            limit, window = 500, 60
 
         # Key: IP + category (not path segment — prevents asset requests eating login quota)
         if '/login/' in path or '/password/' in path:
