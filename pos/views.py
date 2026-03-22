@@ -2804,7 +2804,7 @@ def fiscal_room(request):
         status='paid'
     ).filter(Q(jir__isnull=True) | Q(jir=''))
 
-    last_logs = FiscalLog.objects.filter(company=company).order_by('-created_at')[:20] if company else FiscalLog.objects.none()
+    last_logs = FiscalLog.objects.filter(config__company=company).order_by('-created_at')[:20] if company else FiscalLog.objects.none()
 
     return render(request, 'fiscal/room.html', {
         'pending_count':  pending_qs.count(),
