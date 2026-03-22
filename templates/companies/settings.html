@@ -27,11 +27,19 @@
     <div class="row g-3">
       <div class="col-md-6">
         <label class="form-label fw-bold" style="font-size:.8rem">Naziv tvrtke</label>
-        <input type="text" name="name" class="form-control" value="{{ company.name }}" required>
+        <div style="position:relative">
+          <input type="text" name="name" id="coName" class="form-control" value="{{ company.name }}" required
+                 oninput="searchCompanyName(this.value)" autocomplete="off">
+          <div id="nameHints" style="display:none;position:absolute;z-index:100;width:100%;max-height:180px;overflow-y:auto;background:#111;border:1px solid #333;border-radius:6px;margin-top:2px"></div>
+        </div>
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">OIB / Steuernummer</label>
-        <input type="text" name="oib" class="form-control" value="{{ company.oib }}" required>
+        <div class="input-group">
+          <input type="text" name="oib" id="coOib" class="form-control" value="{{ company.oib }}" required>
+          <button type="button" class="btn btn-outline-warning btn-sm" onclick="lookupOIB()" title="Traži po OIB-u">🔍</button>
+        </div>
+        <div id="oibResult" style="font-size:.78rem;margin-top:3px;min-height:16px"></div>
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">Drzava</label>
@@ -736,4 +744,68 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
 </div>
 {% endif %}
 
+
+<script>
+var _nameTimer;
+function searchCompanyName(q) {
+  clearTimeout(_nameTimer);
+  var hints = document.getElementById('nameHints');
+  if (q.length < 3) { hints.style.display = 'none'; return; }
+  _nameTimer = setTimeout(function() {
+    fetch('/hr/register/api/name-search/?q=' + encodeURIComponent(q))
+      .then(function(r){ return r.json(); })
+      .then(function(d) {
+        if (d.results && d.results.length) {
+          hints.innerHTML = d.results.map(function(r) {
+            return '<div style="padding:8px 12px;cursor:pointer;font-size:.85rem;color:#ccc;border-bottom:1px solid #222" '
+              + 'onmouseover="this.style.background=\'#1a1a1a\'" onmouseout="this.style.background=\'\'" '
+              + 'onclick="fillCompany(\'' + (r.name||'').replace(/'/g,"\\'") + '\',\'' + (r.oib||'') + '\',\'' + (r.address||'').replace(/'/g,"\\'") + '\',\'' + (r.city||'') + '\',\'' + (r.zip||'') + '\')">'
+              + r.name + (r.oib ? ' <span style="color:#666;font-size:.7rem">(' + r.oib + ')</span>' : '')
+              + '</div>';
+          }).join('');
+          hints.style.display = 'block';
+        } else { hints.style.display = 'none'; }
+      }).catch(function(){ hints.style.display = 'none'; });
+  }, 400);
+}
+
+function fillCompany(name, oib, addr, city, zip) {
+  document.getElementById('coName').value = name;
+  if (oib) document.getElementById('coOib').value = oib;
+  var addrF = document.querySelector('[name=address]');
+  var cityF = document.querySelector('[name=city]');
+  var zipF = document.querySelector('[name=zip_code]');
+  if (addr && addrF && !addrF.value) addrF.value = addr;
+  if (city && cityF && !cityF.value) cityF.value = city;
+  if (zip && zipF && !zipF.value) zipF.value = zip;
+  document.getElementById('nameHints').style.display = 'none';
+}
+
+function lookupOIB() {
+  var oib = document.getElementById('coOib').value.trim();
+  var res = document.getElementById('oibResult');
+  if (oib.length < 8) { res.innerHTML = '<span style="color:#f59e0b">Unesite OIB</span>'; return; }
+  res.innerHTML = '<span style="color:#888">Tražim...</span>';
+  var country = document.querySelector('[name=country]').value || 'HR';
+  fetch('/hr/register/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=' + country)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.found) {
+        res.innerHTML = '<span style="color:#22c55e">✓ ' + (d.name || 'Pronađeno') + '</span>';
+        if (d.name) document.getElementById('coName').value = d.name;
+        if (d.address) { var a = document.querySelector('[name=address]'); if (a) a.value = d.address; }
+        if (d.city) { var c = document.querySelector('[name=city]'); if (c) c.value = d.city; }
+        if (d.zip_code) { var z = document.querySelector('[name=zip_code]'); if (z) z.value = d.zip_code; }
+      } else {
+        res.innerHTML = '<span style="color:#f59e0b">' + (d.error || 'Nije pronađeno') + '</span>';
+      }
+    }).catch(function(){ res.innerHTML = '<span style="color:#ef4444">Greška</span>'; });
+}
+
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('coName').contains(e.target) && !document.getElementById('nameHints').contains(e.target)) {
+    document.getElementById('nameHints').style.display = 'none';
+  }
+});
+</script>
 {% endblock %}
