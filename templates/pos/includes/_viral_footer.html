@@ -8,11 +8,13 @@ Varijable:
 {% endcomment %}
 
 {% if format == 'thermal' %}
-{# ── THERMAL (80mm) — kompaktno, 1 linija ── #}
+{# ── THERMAL (80mm) — QR + tekst ── #}
 <div style="text-align:center;margin-top:6px;padding-top:4px;border-top:1px dashed #ccc">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://limit-connect.com/register/%3Fsource%3Dbon&color=000000&bgcolor=ffffff"
+       style="width:20mm;height:20mm;margin:4px auto;display:block" alt="QR">
   {% if receipt.chain_link_safe %}
   <div style="font-size:5.5pt;color:#666;font-family:monospace">
-    &#x1F512; SHA-256: {{ receipt.chain_link_safe.chain_hash|truncatechars:20 }}
+    SHA-256: {{ receipt.chain_link_safe.chain_hash|truncatechars:16 }}
   </div>
   {% endif %}
   <div style="font-size:6pt;color:#888;margin-top:2px">
