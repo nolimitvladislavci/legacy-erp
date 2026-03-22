@@ -685,14 +685,26 @@
 <script>
 function shareLastReceipt() {
   var rid = window.lastReceiptId;
+  var btn = document.getElementById('btnShareReceipt');
+
+  function doShare(receiptId) {
+    // Zatvori success overlay PRIJE otvaranja share modala
+    var sov = document.getElementById('successOverlay');
+    if (sov) sov.classList.remove('show');
+    // Mali delay da se DOM refresha
+    setTimeout(function() {
+      openShare({type:'receipt', id:receiptId, title:document.getElementById('sucNum')?.textContent || 'Račun'});
+    }, 150);
+  }
+
   if (rid) {
-    openShare({type:'receipt', id:rid, title:document.getElementById('sucNum').textContent || 'Račun'});
+    doShare(rid);
     return;
   }
-  // Bon se još sprema — čekaj do 4s (3 pokušaja po 1.5s)
-  var btn = document.getElementById('btnShareReceipt');
+
+  // Bon se još sprema — čekaj do 5s
   btn.disabled = true;
-  btn.textContent = '⏳ Spremam račun...';
+  btn.textContent = '⏳ Spremam...';
   var attempt = 0;
   var check = setInterval(function() {
     attempt++;
@@ -701,13 +713,12 @@ function shareLastReceipt() {
       clearInterval(check);
       btn.disabled = false;
       btn.textContent = '📤 Spremi i podijeli';
-      openShare({type:'receipt', id:rid, title:document.getElementById('sucNum').textContent || 'Račun'});
-    } else if (attempt >= 4) {
+      doShare(rid);
+    } else if (attempt >= 5) {
       clearInterval(check);
       btn.disabled = false;
       btn.textContent = '📤 Spremi i podijeli';
-      // Last resort — try newest receipt from page
-      if (window.showToast) showToast('Račun se sprema, pokušajte za sekundu');
+      if (typeof showToast === 'function') showToast('Pokušajte ponovo za sekundu');
     }
   }, 1000);
 }
