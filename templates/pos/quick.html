@@ -274,6 +274,7 @@
           <div id="pos-date"></div>
         </div>
         <div class="qp-actions">
+          <a href="/hr/pos/receipts/" title="Svi računi" class="qp-action-btn" style="font-weight:900;color:var(--gold);">R</a>
           <a href="/hr/pos/settings/" title="Postavke" class="qp-action-btn">⚙️</a>
           <a href="{{ session_report_url }}" title="Izvještaj smjene" class="qp-action-btn" target="_blank">📊</a>
           <button onclick="togglePosTheme()" title="Tema" class="qp-action-btn">&#9790;</button>
@@ -304,6 +305,7 @@
     <!-- Search + Scanner -->
     <div class="prod-search" style="display:flex;gap:6px;align-items:center">
       <input type="text" id="prodSearch" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1">
+      <a href="/inventory/create/" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;text-decoration:none;font-weight:700;line-height:1.2">+</a>
       <button type="button" onclick="openScanner()" style="background:var(--gold);color:#000;border:none;border-radius:6px;padding:6px 10px;font-size:1rem;cursor:pointer;flex-shrink:0" title="Skeniraj barkod">📷</button>
     </div>
 

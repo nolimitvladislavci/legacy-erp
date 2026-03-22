@@ -2,7 +2,7 @@
 <style>
 .pos-sidebar-toggle {
     position: fixed; left: 0; top: 50%; transform: translateY(-50%);
-    z-index: 1001; background: var(--gold, #c9a84c); color: #0a0a0a;
+    z-index: 10001; background: var(--gold, #c9a84c); color: #0a0a0a;
     border: none; border-radius: 0 8px 8px 0;
     padding: 14px 10px; cursor: pointer; font-size: 18px;
     touch-action: manipulation;
@@ -12,7 +12,7 @@
 .pos-sidebar {
     position: fixed; left: -270px; top: 0; bottom: 0; width: 260px;
     background: var(--dark, #111); border-right: 1px solid rgba(201,168,76,0.2);
-    z-index: 1000; transition: left 0.3s ease;
+    z-index: 10000; transition: left 0.3s ease;
     padding: 20px 0; overflow-y: auto;
 }
 .pos-sidebar.open { left: 0 !important; }
@@ -31,7 +31,7 @@
 .ps-divider { border: none; border-top: 1px solid var(--border, #222); margin: 8px 16px; }
 .pos-sidebar-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-    z-index: 999; display: none;
+    z-index: 9999; display: none;
 }
 .pos-sidebar-overlay.show { display: block; }
 </style>
@@ -62,6 +62,11 @@
     <hr class="ps-divider">
     <a href="/ai/" class="ps-link"><i class="fas fa-robot"></i> AI Asistent</a>
     <a href="/dashboard/" class="ps-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <hr class="ps-divider">
+    <a href="/companies/tax-rates/" class="ps-link"><i class="fas fa-percentage"></i> Porezne stope</a>
+    <a href="/companies/settings/" class="ps-link"><i class="fas fa-building"></i> Postavke firme</a>
+    <hr class="ps-divider">
+    <a href="/logout/" class="ps-link" style="color:#e74c3c;"><i class="fas fa-sign-out-alt" style="color:#e74c3c;"></i> Odjava</a>
 </nav>
 
 <script>

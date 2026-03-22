@@ -1,204 +1,141 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Dodaj blagajnu{% endblock %}
-{% block page_title %}Dodaj blagajnu{% endblock %}
+{% block title %}POS — 3 klika do prvog bona{% endblock %}
+{% block page_title %}Nova blagajna{% endblock %}
 {% block content %}
 <style>
-.wiz{max-width:600px;margin:0 auto;padding:0 16px}
-.wiz h3{color:var(--gold,#c9a84c);text-align:center;margin:0 0 6px;font-family:'Cormorant Garamond',serif;font-size:1.3rem}
-.wiz .sub{text-align:center;color:#888;font-size:.82rem;margin-bottom:20px}
-.step{display:none}.step.active{display:block}
-/* Radio list — bulletproof on any device */
-.type-list{display:flex;flex-direction:column;gap:8px}
-.type-opt{display:block;cursor:pointer}
-.type-opt input{display:none}
-.type-opt .card{
-  display:flex;align-items:center;gap:14px;
-  background:#111;border:2px solid #222;border-radius:10px;
-  padding:14px 16px;transition:all .2s;
-}
-.type-opt input:checked + .card{
-  border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.06);
-}
-.type-opt .icon{font-size:1.6rem;width:40px;text-align:center;flex-shrink:0}
-.type-opt .info{flex:1}
-.type-opt .name{font-weight:700;font-size:.95rem;color:#ccc}
-.type-opt input:checked + .card .name{color:var(--gold,#c9a84c)}
-.type-opt .desc{font-size:.75rem;color:#666;line-height:1.3}
-.type-opt .check{width:22px;height:22px;border:2px solid #333;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .2s}
-.type-opt input:checked + .card .check{border-color:var(--gold,#c9a84c);background:var(--gold,#c9a84c);color:#000}
-/* Branch */
-.branch-list{display:flex;flex-direction:column;gap:8px}
-.branch-opt{display:block;cursor:pointer}
-.branch-opt input{display:none}
-.branch-opt .card{display:flex;align-items:center;gap:12px;background:#111;border:2px solid #222;border-radius:10px;padding:12px 16px;transition:all .2s}
-.branch-opt input:checked + .card{border-color:var(--gold,#c9a84c);background:rgba(201,168,76,.06)}
-.branch-opt .bicon{font-size:1.3rem;width:36px;text-align:center}
-.branch-opt .bname{font-weight:600;font-size:.9rem;color:#ccc}
-.branch-opt input:checked + .card .bname{color:var(--gold,#c9a84c)}
-.branch-opt .baddr{font-size:.75rem;color:#666}
-.new-branch-form{display:none;padding:12px;background:#111;border:1px dashed var(--gold,#c9a84c);border-radius:8px;margin-top:8px}
-.new-branch-form.show{display:block}
-.new-branch-form input{width:100%;padding:8px;background:#0a0a0a;border:1px solid #333;border-radius:6px;color:#ccc;font-size:.88rem;margin-bottom:6px}
-/* Buttons */
-.wiz-btns{display:flex;justify-content:space-between;margin-top:20px;gap:10px}
-.btn-back{background:none;border:1px solid #333;color:#888;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:.9rem}
-.btn-next{background:var(--gold,#c9a84c);color:#000;border:none;padding:10px 24px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem}
-.btn-next:disabled{opacity:.3;cursor:not-allowed}
-.btn-create{background:#22c55e;color:#fff;border:none;padding:14px 36px;border-radius:10px;font-weight:700;font-size:1.05rem;cursor:pointer}
-/* Summary */
-.sum-table td{padding:6px 12px;font-size:.9rem}
-.sum-table td:first-child{color:#888;font-weight:600}
-/* Dots */
-.dots{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
-.dot{width:10px;height:10px;border-radius:50%;background:#333;transition:.3s}
-.dot.active{background:var(--gold,#c9a84c);width:28px;border-radius:8px}
-.dot.done{background:#22c55e}
+.wizard{max-width:640px;margin:0 auto;padding:0 16px}
+.steps{display:flex;gap:4px;margin-bottom:24px}
+.step-dot{flex:1;height:4px;border-radius:2px;background:#222;transition:background .3s}
+.step-dot.active{background:var(--gold,#c9a84c)}
+.step-dot.done{background:#22c55e}
+.step-panel{display:none}
+.step-panel.active{display:block}
+.wiz-h2{color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;font-size:1.5rem;margin:0 0 6px}
+.wiz-sub{color:#94a3b8;font-size:.85rem;margin-bottom:20px}
+.wiz-input{width:100%;background:#111;border:1px solid #333;border-radius:8px;padding:12px;color:#e2e8f0;font-size:1rem;font-family:'Barlow',sans-serif;margin-bottom:12px}
+.wiz-input:focus{border-color:var(--gold,#c9a84c);outline:none}
+.wiz-label{display:block;color:#94a3b8;font-size:.8rem;margin-bottom:4px}
+.wiz-row{display:flex;gap:10px}
+.wiz-row>div{flex:1}
+.wiz-btn{display:inline-block;background:var(--gold,#c9a84c);color:#0a0a0a;border:none;border-radius:8px;padding:14px 32px;font-size:1rem;font-weight:700;cursor:pointer;width:100%;text-align:center;margin-top:8px}
+.wiz-btn:disabled{opacity:.4;cursor:not-allowed}
+.wiz-btn-outline{background:none;border:1px solid #333;color:#94a3b8;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:.9rem}
+.tax-chip{display:inline-block;background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:6px 14px;margin:4px;color:#e2e8f0;font-size:.85rem}
+.tax-chip b{color:var(--gold,#c9a84c)}
+.type-card{background:#111;border:2px solid #222;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;text-align:center}
+.type-card:hover,.type-card:active{border-color:var(--gold,#c9a84c);transform:scale(.98)}
+.type-card .icon{font-size:2rem;margin-bottom:6px}
+.type-card .label{color:#e2e8f0;font-weight:700;font-size:.95rem}
+.type-card .desc{color:#666;font-size:.75rem;margin-top:4px}
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 </style>
 
-<div class="wiz">
-  <div class="dots">
-    <div class="dot active" id="d1"></div>
-    <div class="dot" id="d2"></div>
-    <div class="dot" id="d3"></div>
+<div class="wizard">
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
   </div>
 
-  <form method="post" id="wForm">
+  <form method="post" id="wizardForm">
     {% csrf_token %}
-    <input type="hidden" name="pos_type" id="fType">
-    <input type="hidden" name="branch_id" id="fBranch">
-    <input type="hidden" name="terminal_name" id="fName">
 
-    <!-- STEP 1: Tip -->
-    <div class="step active" id="s1">
-      <h3>Kakvu blagajnu trebaš?</h3>
-      <div class="sub">Odaberi tip — svaki ima prilagođeno sučelje</div>
-      <div class="type-list">
+    <!-- STEP 1: Porezne stope -->
+    <div class="step-panel active" id="step1">
+      <h2 class="wiz-h2">1. Porezne stope</h2>
+      <p class="wiz-sub">Stope su automatski postavljene za {{ country }}. Možete ih urediti u postavkama.</p>
+
+      <div style="margin-bottom:20px;">
+        {% for r in tax_rates %}
+        <span class="tax-chip"><b>{{ r.rate }}%</b> {{ r.name }}</span>
+        {% empty %}
+        <p style="color:#e74c3c;">Nema poreznih stopa — dodajte ih u <a href="{% url 'companies:tax_rates' %}" style="color:#c9a84c;">postavkama</a>.</p>
+        {% endfor %}
+      </div>
+
+      <a href="{% url 'companies:tax_rates' %}" class="wiz-btn-outline" style="display:inline-block;margin-bottom:16px;">
+        Uredi stope
+      </a>
+
+      <button type="button" class="wiz-btn" onclick="goStep(2)" {% if not tax_rates %}disabled{% endif %}>
+        Dalje →
+      </button>
+    </div>
+
+    <!-- STEP 2: Blagajnik -->
+    <div class="step-panel" id="step2">
+      <h2 class="wiz-h2">2. Blagajnik</h2>
+      <p class="wiz-sub">Tko će koristiti blagajnu? OIB je zakonski obavezan za fiskalizaciju.</p>
+
+      <div class="wiz-row">
+        <div>
+          <label class="wiz-label">Ime *</label>
+          <input type="text" name="cashier_first" class="wiz-input" id="cfirst" required placeholder="Ivan">
+        </div>
+        <div>
+          <label class="wiz-label">Prezime</label>
+          <input type="text" name="cashier_last" class="wiz-input" placeholder="Horvat">
+        </div>
+      </div>
+
+      <label class="wiz-label">OIB operatera (11 znamenki)</label>
+      <input type="text" name="cashier_oib" class="wiz-input" maxlength="20" placeholder="12345678901"
+             pattern="[0-9]{11}" title="OIB mora imati 11 znamenki">
+
+      <div class="wiz-row">
+        <div>
+          <label class="wiz-label">PIN (4 znamenke, opcionalno)</label>
+          <input type="text" name="cashier_pin" class="wiz-input" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="1234">
+        </div>
+        <div>
+          <label class="wiz-label">Početna gotovina (€)</label>
+          <input type="number" name="opening_cash" class="wiz-input" value="0" min="0" step="0.01">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="button" class="wiz-btn-outline" onclick="goStep(1)" style="flex:1;">← Natrag</button>
+        <button type="button" class="wiz-btn" onclick="goStep(3)" id="btn2next" style="flex:2;">Dalje →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Vrsta blagajne -->
+    <div class="step-panel" id="step3">
+      <h2 class="wiz-h2">3. Odaberi tip blagajne</h2>
+      <p class="wiz-sub">Klik otvara POS — odmah ste spremni za rad.</p>
+
+      <div class="type-grid">
         {% for t in pos_types %}
-        <label class="type-opt">
-          <input type="radio" name="_type" value="{{ t.value }}">
-          <div class="card">
-            <div class="icon">{{ t.icon }}</div>
-            <div class="info">
-              <div class="name">{{ t.label }}</div>
-              <div class="desc">{{ t.desc }}</div>
-            </div>
-            <div class="check">✓</div>
-          </div>
+        <label class="type-card" onclick="document.getElementById('pt_{{t.value}}').checked=true;document.getElementById('wizardForm').submit();">
+          <input type="radio" name="pos_type" value="{{ t.value }}" id="pt_{{t.value}}" style="display:none;">
+          <div class="icon">{{ t.icon }}</div>
+          <div class="label">{{ t.label }}</div>
+          <div class="desc">{{ t.desc }}</div>
         </label>
         {% endfor %}
       </div>
-      <div class="wiz-btns">
-        <a href="{% url 'pos:dashboard' %}" class="btn-back">Odustani</a>
-        <button type="button" class="btn-next" id="b2" disabled>Dalje →</button>
-      </div>
-    </div>
 
-    <!-- STEP 2: Lokacija -->
-    <div class="step" id="s2">
-      <h3>Gdje je blagajna?</h3>
-      <div class="sub">Odaberi poslovnicu ili kreiraj novu</div>
-      <div class="branch-list">
-        {% for b in branches %}
-        <label class="branch-opt">
-          <input type="radio" name="_branch" value="{{ b.pk }}">
-          <div class="card">
-            <div class="bicon">🏢</div>
-            <div class="info">
-              <div class="bname">{{ b.name }}</div>
-              <div class="baddr">{{ b.address }}{% if b.city %}, {{ b.city }}{% endif %}</div>
-            </div>
-          </div>
-        </label>
-        {% endfor %}
-        <label class="branch-opt">
-          <input type="radio" name="_branch" value="new">
-          <div class="card" style="border-style:dashed;border-color:var(--gold,#c9a84c)">
-            <div class="bicon" style="color:var(--gold,#c9a84c)">＋</div>
-            <div class="info">
-              <div class="bname" style="color:var(--gold,#c9a84c)">Nova poslovnica</div>
-              <div class="baddr">Kreiraj novu lokaciju</div>
-            </div>
-          </div>
-        </label>
-      </div>
-      <div class="new-branch-form" id="nbForm">
-        <input type="text" name="new_branch_name" placeholder="Naziv poslovnice">
-        <input type="text" name="new_branch_city" placeholder="Grad">
-        <input type="text" name="new_branch_address" placeholder="Adresa">
-      </div>
-      <div class="wiz-btns">
-        <button type="button" class="btn-back" onclick="go(1)">← Natrag</button>
-        <button type="button" class="btn-next" id="b3" disabled>Dalje →</button>
-      </div>
-    </div>
-
-    <!-- STEP 3: Potvrda -->
-    <div class="step" id="s3">
-      <h3 style="color:#22c55e">✓ Sve spremno!</h3>
-      <div class="sub">Provjeri i kreiraj blagajnu</div>
-      <div style="background:#111;border-radius:10px;padding:16px;margin-bottom:12px">
-        <table class="sum-table" style="width:100%">
-          <tr><td>Tip:</td><td id="sumT" style="font-weight:700;color:var(--gold,#c9a84c)"></td></tr>
-          <tr><td>Lokacija:</td><td id="sumB" style="font-weight:700"></td></tr>
-          <tr><td>Tvrtka:</td><td>{{ company.name }}</td></tr>
-        </table>
-      </div>
-      <div style="margin-bottom:16px">
-        <label style="font-size:.82rem;color:#888;display:block;margin-bottom:4px">Naziv blagajne (opcionalno)</label>
-        <input type="text" id="nameIn" placeholder="Auto-generirano ako prazno" style="width:100%;padding:10px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#ccc;font-size:.9rem">
-      </div>
-      <div class="wiz-btns">
-        <button type="button" class="btn-back" onclick="go(2)">← Natrag</button>
-        <button type="submit" class="btn-create">✓ Kreiraj blagajnu</button>
-      </div>
+      <button type="button" class="wiz-btn-outline" onclick="goStep(2)" style="margin-top:16px;width:100%;">← Natrag</button>
     </div>
   </form>
 </div>
 
 <script>
-var typeLabels = {
-  {% for t in pos_types %}'{{ t.value }}': '{{ t.icon }} {{ t.label }}',{% endfor %}
-};
-
-// Step 1: type selection
-document.querySelectorAll('input[name="_type"]').forEach(function(r) {
-  r.addEventListener('change', function() {
-    document.getElementById('fType').value = this.value;
-    document.getElementById('b2').disabled = false;
-  });
-});
-
-// Step 2: branch selection
-document.querySelectorAll('input[name="_branch"]').forEach(function(r) {
-  r.addEventListener('change', function() {
-    document.getElementById('fBranch').value = this.value;
-    document.getElementById('b3').disabled = false;
-    document.getElementById('nbForm').classList.toggle('show', this.value === 'new');
-  });
-});
-
-// Navigation
-document.getElementById('b2').addEventListener('click', function() { go(2); });
-document.getElementById('b3').addEventListener('click', function() { go(3); });
-
-function go(n) {
-  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById('s' + n).classList.add('active');
-  for (var i = 1; i <= 3; i++) {
-    var d = document.getElementById('d' + i);
-    d.className = 'dot' + (i < n ? ' done' : i === n ? ' active' : '');
-  }
+function goStep(n) {
   if (n === 3) {
-    document.getElementById('sumT').innerHTML = typeLabels[document.getElementById('fType').value] || '?';
-    var br = document.querySelector('input[name="_branch"]:checked');
-    var brCard = br ? br.closest('.branch-opt').querySelector('.bname') : null;
-    document.getElementById('sumB').textContent = brCard ? brCard.textContent : '—';
+    var f = document.getElementById('cfirst');
+    if (!f.value.trim()) { f.focus(); f.style.borderColor='#e74c3c'; return; }
+    f.style.borderColor='';
   }
+  for (var i=1;i<=3;i++) {
+    document.getElementById('step'+i).classList.remove('active');
+    var d=document.getElementById('dot'+i);
+    d.classList.remove('active');
+    if(i<n) d.classList.add('done'); else d.classList.remove('done');
+  }
+  document.getElementById('step'+n).classList.add('active');
+  document.getElementById('dot'+n).classList.add('active');
 }
-
-document.getElementById('wForm').addEventListener('submit', function() {
-  document.getElementById('fName').value = document.getElementById('nameIn').value;
-});
 </script>
 {% endblock %}

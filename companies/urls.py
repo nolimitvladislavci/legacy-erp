@@ -23,6 +23,7 @@ urlpatterns = [
     path("settings/branch/<int:pk>/save/", views.branch_save_redirect, name="branch_edit"),
     path("settings/branch/<int:pk>/toggle/", views.branch_toggle_redirect, name="branch_toggle_active"),
     path("onboarding/dismiss/", views.onboarding_dismiss, name="onboarding_dismiss"),
+    path("tax-rates/", views.tax_rate_list, name="tax_rates"),
     path("api/nkd-search/", views.nkd_search, name="nkd_search"),
     path("", include(router.urls)),
 

@@ -270,7 +270,11 @@ def _build_racun(receipt, oib, ozn_pos_pr, ozn_nap_ur, zki, dt) -> etree._Elemen
                 tip_pay = 'K'
             sub(nap_el, 'NacinPlacanjaN', tip_pay)
 
-    sub(racun, 'OibOper', oib)
+    # OIB operatera: cashier OIB ako postoji, inače company OIB
+    oper_oib = oib
+    if hasattr(receipt, 'cashier') and receipt.cashier and getattr(receipt.cashier, 'oib', ''):
+        oper_oib = receipt.cashier.oib
+    sub(racun, 'OibOper', oper_oib)
     sub(racun, 'ZastKod', zki)
 
     # R1: kupac na racunu (za fiskalizaciju, FINA prima OIB kupca)

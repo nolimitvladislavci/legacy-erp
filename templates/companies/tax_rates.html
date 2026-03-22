@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Porezne stope" %}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px;margin:30px auto;padding:0 16px;">
+  <h2 style="color:#c9a84c;font-family:'Cormorant Garamond',serif;margin-bottom:20px;">
+    {% trans "Porezne stope" %} ({{ country }})
+  </h2>
+
+  {% if messages %}
+  {% for msg in messages %}
+  <div style="background:#1a2a1a;border:1px solid #2a4a2a;color:#6ddb6d;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:.9rem;">
+    {{ msg }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- Existing rates -->
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
+    {% for r in rates %}
+    <form method="post" style="display:flex;align-items:center;gap:8px;background:#111;border:1px solid #222;border-radius:8px;padding:10px 14px;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="edit">
+      <input type="hidden" name="tax_id" value="{{ r.id }}">
+      <input type="text" name="name" value="{{ r.name }}"
+             style="flex:2;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:8px;color:#e2e8f0;font-family:'Barlow',sans-serif;">
+      <input type="number" name="rate" value="{{ r.rate }}" step="0.01" min="0" max="100"
+             style="width:80px;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:8px;color:#c9a84c;text-align:right;font-weight:700;">
+      <span style="color:#888;font-size:.85rem;">%</span>
+      <button type="submit" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.85rem;">
+        {% trans "Spremi" %}
+      </button>
+    </form>
+    <form method="post" style="margin-top:-4px;margin-bottom:4px;text-align:right;">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="delete">
+      <input type="hidden" name="tax_id" value="{{ r.id }}">
+      <button type="submit" style="background:none;border:none;color:#666;font-size:.75rem;cursor:pointer;"
+              onclick="return confirm('Obrisati stopu {{ r.name }}?')">
+        {% trans "Obriši" %}
+      </button>
+    </form>
+    {% empty %}
+    <p style="color:#666;font-style:italic;padding:20px 0;">{% trans "Nema definiranih poreznih stopa." %}</p>
+    {% endfor %}
+  </div>
+
+  <!-- Add new -->
+  <form method="post" style="background:#0d1117;border:1px solid #c9a84c33;border-radius:10px;padding:16px;">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="add">
+    <h3 style="color:#c9a84c;font-family:'Cormorant Garamond',serif;margin:0 0 12px;font-size:1.1rem;">
+      {% trans "Dodaj novu stopu" %}
+    </h3>
+    <div style="display:flex;gap:8px;align-items:end;">
+      <div style="flex:2;">
+        <label style="color:#94a3b8;font-size:.8rem;display:block;margin-bottom:4px;">{% trans "Naziv" %}</label>
+        <input type="text" name="name" required placeholder="npr. PDV 25%"
+               style="width:100%;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;color:#e2e8f0;">
+      </div>
+      <div style="width:100px;">
+        <label style="color:#94a3b8;font-size:.8rem;display:block;margin-bottom:4px;">{% trans "Stopa %" %}</label>
+        <input type="number" name="rate" value="25" step="0.01" min="0" max="100"
+               style="width:100%;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;color:#c9a84c;text-align:right;font-weight:700;">
+      </div>
+      <button type="submit" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700;white-space:nowrap;">
+        + {% trans "Dodaj" %}
+      </button>
+    </div>
+  </form>
+
+  <div style="margin-top:20px;text-align:center;">
+    <a href="{% url 'companies:settings' %}" style="color:#94a3b8;font-size:.85rem;">← {% trans "Natrag na postavke" %}</a>
+  </div>
+</div>
+{% endblock %}

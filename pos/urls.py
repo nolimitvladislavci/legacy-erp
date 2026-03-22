@@ -133,10 +133,12 @@ urlpatterns = [
     path('improvements/<int:pk>/update/',       views.improvement_update,  name='improvement_update'),
     path('onboarding/',                         views.onboarding_wizard,   name='onboarding_wizard'),
     # ── BEZ PAPIRA — Receipt delivery ────────────────────────────────────────
+    path('receipts/',                                views.receipt_list,         name='receipt_list'),
     path('receipt/<int:receipt_id>/deliver/',      views.receipt_deliver,      name='receipt_deliver'),
     path('receipt/<int:receipt_id>/whatsapp/',     views.receipt_whatsapp,     name='receipt_whatsapp'),
     path('receipt/<int:receipt_id>/email/',        views.receipt_email,        name='receipt_email'),
     path('receipt/<int:receipt_id>/public/',       views.receipt_public,       name='receipt_public'),
+    path('r/<int:receipt_id>/<str:token>/',       views.receipt_public,       name='receipt_public_short'),
     path('receipt/<int:receipt_id>/drawer-kick/',  views.receipt_drawer_kick,  name='receipt_drawer_kick'),
     path('api/delivery-settings/',                views.pos_delivery_settings, name='delivery_settings'),
 

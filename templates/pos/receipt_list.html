@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Računi{% endblock %}
+{% block page_title %}Računi — {{ company.name }}{% endblock %}
+{% block content %}
+<style>
+.rl-wrap{max-width:800px;margin:0 auto;padding:0 12px}
+.rl-card{background:#111;border:1px solid #222;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .15s}
+.rl-card:hover{border-color:var(--gold,#c9a84c)}
+.rl-num{color:var(--gold,#c9a84c);font-weight:800;font-size:1.1rem;min-width:60px}
+.rl-info{flex:1}
+.rl-total{font-weight:700;color:#e2e8f0;font-size:1rem}
+.rl-meta{font-size:.75rem;color:#666;margin-top:2px}
+.rl-actions{display:flex;gap:6px}
+.rl-btn{background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:6px 10px;color:#ccc;font-size:.8rem;cursor:pointer;text-decoration:none;white-space:nowrap}
+.rl-btn:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
+.rl-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.rl-status.paid{background:#1a2a1a;color:#22c55e}
+.rl-status.cancelled{background:#2a1a1a;color:#e74c3c}
+.rl-status.refunded{background:#2a2a1a;color:#f59e0b}
+.rl-fiscal{font-size:.65rem;color:#555;margin-top:2px}
+.rl-search{width:100%;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#e2e8f0;font-size:.9rem;margin-bottom:16px}
+.rl-search:focus{border-color:var(--gold,#c9a84c);outline:none}
+</style>
+
+<div class="rl-wrap">
+  <input type="text" class="rl-search" id="rlSearch" placeholder="Pretraži po broju, iznosu..." oninput="filterReceipts(this.value)">
+
+  <div id="rlList">
+  {% for r in receipts %}
+  <div class="rl-card" data-search="{{ r.receipt_number }} {{ r.total }} {{ r.created_at|date:'d.m.Y' }}">
+    <div class="rl-num">#{{ r.receipt_number }}</div>
+    <div class="rl-info">
+      <div class="rl-total">€{{ r.total|floatformat:2 }}
+        <span class="rl-status {% if r.status == 'paid' %}paid{% elif r.status == 'cancelled' %}cancelled{% elif r.status == 'refunded' %}refunded{% endif %}">
+          {{ r.status }}
+        </span>
+      </div>
+      <div class="rl-meta">
+        {{ r.created_at|date:"d.m.Y H:i" }}
+        · {{ r.session.terminal.name }}
+        {% if r.cashier %} · {{ r.cashier.name }}{% endif %}
+      </div>
+      {% if r.jir %}
+      <div class="rl-fiscal">JIR: {{ r.jir|truncatechars:20 }}</div>
+      {% elif r.status == 'paid' %}
+      <div class="rl-fiscal" style="color:#e74c3c">⚠ Nije fiskalizirano</div>
+      {% endif %}
+    </div>
+    <div class="rl-actions">
+      <a href="{% url 'pos:receipt_public' r.id %}" class="rl-btn" target="_blank" title="Pregled">👁</a>
+      <a href="{% url 'pos:receipt_whatsapp' r.id %}" class="rl-btn" title="WhatsApp" onclick="event.preventDefault();waShare({{ r.id }})">💬</a>
+      <a href="/hr/pos/receipt/{{ r.id }}/deliver/" class="rl-btn" title="Ispis/Email">🖨</a>
+    </div>
+  </div>
+  {% empty %}
+  <div style="text-align:center;padding:40px;color:#666">
+    Nema izdanih računa.
+  </div>
+  {% endfor %}
+  </div>
+
+  <div style="text-align:center;margin:20px 0;">
+    <a href="/pos/" style="color:#94a3b8;font-size:.85rem">← Natrag na POS</a>
+  </div>
+</div>
+
+<script>
+function filterReceipts(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.rl-card').forEach(function(c) {
+    c.style.display = c.dataset.search.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+function waShare(rid) {
+  var phone = prompt('WhatsApp broj (npr. +385917123456):');
+  if (!phone) return;
+  fetch('/hr/pos/receipt/' + rid + '/whatsapp/', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}'},
+    body: 'phone=' + encodeURIComponent(phone)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) { if (d.wa_url) window.open(d.wa_url, '_blank'); else alert(d.error || 'Greška'); })
+  .catch(function() { alert('Greška veze'); });
+}
+</script>
+{% endblock %}

@@ -533,3 +533,35 @@ def employee_toggle_redirect(request, pk):
     name = up.user.get_full_name() or up.user.username
     messages.success(request, f'Korisnik {name} {status_str}.')
     return redirect('/companies/settings/?tab=employees')
+
+
+@login_required
+def tax_rate_list(request):
+    from .models import TaxRate
+    company = request.user.profile.company
+    country = getattr(company, 'country', 'HR') or 'HR'
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            name = request.POST.get('name', '').strip()
+            rate = request.POST.get('rate', '25')
+            if name:
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
+                messages.success(request, f'Stopa "{name}" dodana.')
+        elif action == 'delete':
+            tid = request.POST.get('tax_id')
+            TaxRate.objects.filter(pk=tid, country=country).delete()
+            messages.success(request, 'Stopa obrisana.')
+        elif action == 'edit':
+            tid = request.POST.get('tax_id')
+            t = TaxRate.objects.filter(pk=tid, country=country).first()
+            if t:
+                t.name = request.POST.get('name', t.name)
+                t.rate = request.POST.get('rate', t.rate)
+                t.save()
+                messages.success(request, 'Stopa ažurirana.')
+        return redirect('companies:tax_rates')
+
+    rates = TaxRate.objects.filter(country=country).order_by('-rate')
+    return render(request, 'companies/tax_rates.html', {'rates': rates, 'country': country})

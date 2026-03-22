@@ -499,6 +499,9 @@ class POSCashier(models.Model):
     max_discount_percent = models.DecimalField(
         max_digits=5, decimal_places=2, default=0, verbose_name=_('Max popust (%)'),
     )
+    oib          = models.CharField(max_length=20, blank=True, default='',
+                     verbose_name=_('OIB operatera'),
+                     help_text=_('Zakonski obavezno za fiskalizaciju (čl. 9. Zakona o fiskalizaciji)'))
     is_active    = models.BooleanField(default=True, verbose_name=_('Aktivan'))
     user         = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,

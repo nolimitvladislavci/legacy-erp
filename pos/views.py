@@ -497,53 +497,80 @@ def barcode_lookup(request):
 
 @login_required
 def new_terminal(request):
-    """Create a new POS terminal — wizard with type selection."""
+    """Create a new POS terminal — 3-step wizard: Tax rates → Cashier → Type = GO."""
     company = get_user_company(request)
     if not company:
         messages.error(request, 'Nema konteksta tvrtke.')
         return redirect('pos:dashboard')
 
     if request.method == 'POST':
+        import secrets
+        from decimal import Decimal
+
         pos_type = request.POST.get('pos_type', 'quick').strip()
         if pos_type not in ('quick', 'retail', 'restaurant', 'field', 'service', 'reception'):
             pos_type = 'quick'
 
-        # Terminal name: user-provided or auto-generated
-        name = request.POST.get('terminal_name', '').strip()
-        if not name:
-            type_labels = {'quick': 'Brza blagajna', 'retail': 'Maloprodaja', 'restaurant': 'Restoran',
-                          'field': 'Terenska', 'service': 'Usluge', 'reception': 'Recepcija'}
-            count = POSTerminal.objects.filter(company=company).count() + 1
-            name = f'{type_labels.get(pos_type, "Blagajna")} {count}'
+        # Cashier
+        cashier_first = request.POST.get('cashier_first', '').strip()
+        cashier_last = request.POST.get('cashier_last', '').strip()
+        cashier_name = f'{cashier_first} {cashier_last}'.strip() or 'Blagajnik'
+        cashier_oib = request.POST.get('cashier_oib', '').strip()
+        cashier_pin = request.POST.get('cashier_pin', '').strip()
+        opening_cash = Decimal(request.POST.get('opening_cash', '0') or '0')
 
-        # Auto terminal code
-        import secrets
-        terminal_code = f'{pos_type[:3].upper()}{secrets.token_hex(2).upper()}'
-
-        # Branch
-        branch = None
-        branch_id = request.POST.get('branch_id', '')
-        if branch_id and branch_id != 'new':
-            from companies.models import CompanyBranch
-            branch = CompanyBranch.objects.filter(pk=branch_id, parent_company=company).first()
-        elif branch_id == 'new':
-            from companies.models import CompanyBranch
-            bn = request.POST.get('new_branch_name', '').strip()
-            if bn:
-                branch = CompanyBranch.objects.create(
-                    parent_company=company, name=bn,
-                    city=request.POST.get('new_branch_city', ''),
-                    address=request.POST.get('new_branch_address', ''),
-                )
-
-        terminal = POSTerminal.objects.create(
-            company=company, name=name, terminal_code=terminal_code,
-            pos_type=pos_type, branch=branch, is_active=True,
+        cashier = POSCashier.objects.create(
+            company=company, name=cashier_name, oib=cashier_oib,
         )
-        messages.success(request, f'Blagajna "{terminal.name}" kreirana!')
-        return redirect('pos:terminal_detail', terminal_id=terminal.pk)
+        if cashier_pin and hasattr(cashier, 'set_pin'):
+            cashier.set_pin(cashier_pin)
+            cashier.save()
+
+        # Terminal
+        type_labels = {'quick': 'Brza blagajna', 'retail': 'Maloprodaja', 'restaurant': 'Restoran',
+                      'field': 'Terenska', 'service': 'Usluge', 'reception': 'Recepcija'}
+        terminal_code = f'{pos_type[:3].upper()}{secrets.token_hex(2).upper()}'
+        count = POSTerminal.objects.filter(company=company).count() + 1
+        terminal = POSTerminal.objects.create(
+            company=company,
+            name=f'{type_labels.get(pos_type, "Blagajna")} {count}',
+            terminal_code=terminal_code,
+            pos_type=pos_type, is_active=True,
+        )
+
+        # Open session
+        session = POSSession.objects.create(
+            terminal=terminal, operator=request.user,
+            session_number=1, opening_cash=opening_cash,
+            status='open',
+        )
+        session.active_cashiers.add(cashier)
+
+        messages.success(request, f'POS "{terminal.name}" spreman!')
+
+        if pos_type == 'restaurant':
+            return redirect('pos:restaurant_pos', terminal_id=terminal.pk)
+        else:
+            return redirect('pos:quick_pos', terminal_id=terminal.pk)
 
     # GET — prepare wizard context
+    from companies.models import TaxRate
+    country = getattr(company, 'country', 'HR') or 'HR'
+
+    # Auto-seed tax rates if missing
+    if not TaxRate.objects.filter(country=country).exists():
+        if country in ('DE', 'AT'):
+            for name, rate in [('Standard 19%', 19), ('Ermäßigt 7%', 7), ('Steuerfrei', 0)]:
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
+        elif country == 'SI':
+            for name, rate in [('DDV 22%', 22), ('DDV 9.5%', 9.5), ('Oproščeno', 0)]:
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
+        else:
+            for name, rate in [('PDV 25%', 25), ('PDV 13%', 13), ('PDV 5%', 5), ('Oslobođeno 0%', 0)]:
+                TaxRate.objects.get_or_create(country=country, rate=rate, defaults={'name': name})
+
+    tax_rates = TaxRate.objects.filter(country=country).order_by('-rate')
+
     pos_types = [
         {'value': 'quick', 'label': 'Brza blagajna', 'icon': '⚡', 'color': '#c9a84c',
          'desc': 'Najbrzi put do naplate. Idealno za pekare, kioske, market.'},
@@ -559,13 +586,11 @@ def new_terminal(request):
          'desc': 'Za hotele, apartmane, kampove.'},
     ]
 
-    from companies.models import CompanyBranch
-    branches = CompanyBranch.objects.filter(parent_company=company, is_active=True)
-
     return render(request, 'pos/new_terminal.html', {
         'company': company,
         'pos_types': pos_types,
-        'branches': branches,
+        'tax_rates': tax_rates,
+        'country': country,
     })
 
 
@@ -3924,6 +3949,24 @@ def knjiga_prigovora_pdf(request):
 # ═══════════════════════════════════════════════════════════════
 
 @login_required
+def receipt_list(request):
+    """Lista svih racuna za ispis/pregled/naknadni WhatsApp."""
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Nema konteksta tvrtke.')
+        return redirect('pos:dashboard')
+
+    receipts = POSReceipt.objects.filter(
+        session__terminal__company=company
+    ).select_related('session__terminal', 'cashier').order_by('-created_at')[:200]
+
+    return render(request, 'pos/receipt_list.html', {
+        'receipts': receipts,
+        'company': company,
+    })
+
+
+@login_required
 def receipt_deliver(request, receipt_id):
     """
     Unified receipt delivery — poziva se nakon naplate.
@@ -4007,9 +4050,16 @@ Placeno: {receipt.payment_lines.first().get_method_display() if receipt.payment_
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
         if phone:
-            # Clean phone number
-            phone = phone.replace(' ', '').replace('+', '').replace('-', '')
-            if not phone.startswith('385'):
+            # Clean phone number — preserve international prefix
+            phone = phone.replace(' ', '').replace('-', '')
+            if phone.startswith('+'):
+                phone = phone[1:]  # strip + but keep country code
+            elif phone.startswith('00'):
+                phone = phone[2:]  # 00385 → 385
+            elif phone.startswith('0'):
+                phone = '385' + phone[1:]  # 091... → 38591...
+            # Only add 385 if it looks like a local HR number (no country code)
+            if len(phone) <= 10 and not phone.startswith(('385', '49', '43', '386', '44', '39', '33')):
                 phone = '385' + phone.lstrip('0')
             import urllib.parse
             wa_url = f'https://wa.me/{phone}?text={urllib.parse.quote(msg)}'
