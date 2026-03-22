@@ -306,7 +306,7 @@
     <!-- Search + Scanner -->
     <div class="prod-search" style="display:flex;gap:6px;align-items:center">
       <input type="text" id="prodSearch" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1">
-      <button type="button" onclick="openSmartCreate(function(d){location.reload()})" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-weight:700;line-height:1.2">+</button>
+      <button type="button" onclick="openSmartCreate(function(d){ if(typeof addItemToBasket==='function'){addItemToBasket(d)} else if(typeof showToast==='function'){showToast('Artikl dodan: '+d.name)} })" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-weight:700;line-height:1.2">+</button>
       <button type="button" onclick="openScanner()" style="background:var(--gold);color:#000;border:none;border-radius:6px;padding:6px 10px;font-size:1rem;cursor:pointer;flex-shrink:0" title="Skeniraj barkod">📷</button>
     </div>
 
