@@ -167,7 +167,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <div class="share-bar">
     <a class="share-btn share-wa" href="https://wa.me/?text=Racun%20%23{{ receipt.receipt_number }}%20{{ company.name }}%20EUR{{ receipt.total|floatformat:2 }}" target="_blank">WhatsApp</a>
     <a class="share-btn share-email" href="mailto:?subject=Racun%20%23{{ receipt.receipt_number }}&body=Racun%20iz%20{{ company.name }}%20-%20EUR{{ receipt.total|floatformat:2 }}" >Email</a>
-    <a class="share-btn share-dl" href="/hr/pos/receipt/{{ receipt.pk }}/pdf/?format=a4"  target="_blank">PDF</a>
+    <a class="share-btn share-dl" href="javascript:window.print()" onclick="this.style.display='none'"  target="_blank">Ispiši</a>
   </div>
 
   <div class="footer">

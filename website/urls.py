@@ -11,6 +11,7 @@ urlpatterns = [
     path('cms/gallery/toggle/<int:id>/', cms_views.toggle_img, name='toggle_img'),
 
     # Viskovic public pages
+    path('feedback/', views.feedback_page, name='feedback'),
     path('', views.homepage, name='homepage'),
     path('bau/', views.bau_page, name='bau_page'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIMIT Connect — Povratna informacija</title>
+<style>
+:root{--black:#0a0a0a;--gold:#c9a84c;--dark:#111}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:#e8e8e8;font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:var(--dark);border:1px solid #222;border-radius:16px;padding:32px;max-width:480px;width:100%;text-align:center}
+.card h1{font-size:1.5rem;color:var(--gold);margin-bottom:8px}
+.card p{color:#888;font-size:.9rem;margin-bottom:24px}
+.stars{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+.star{font-size:2.5rem;cursor:pointer;color:#333;transition:color .15s}
+.star.on{color:var(--gold)}
+.star:hover{color:var(--gold)}
+textarea{width:100%;padding:12px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#e8e8e8;font-size:.9rem;min-height:80px;resize:vertical;margin-bottom:16px}
+textarea:focus{border-color:var(--gold);outline:none}
+.btn{background:var(--gold);color:#000;border:none;padding:14px 32px;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;width:100%}
+.btn:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.4}
+.msg{margin-top:12px;font-size:.85rem;min-height:20px}
+.links{margin-top:24px;border-top:1px solid #222;padding-top:16px;font-size:.85rem;color:#666}
+.links a{color:var(--gold);text-decoration:none;margin:0 8px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Kako vam se sviđa?</h1>
+  <p>Vaše mišljenje nam pomaže da budemo bolji.</p>
+
+  <div class="stars" id="stars">
+    <span class="star" data-v="1" onclick="rate(1)">★</span>
+    <span class="star" data-v="2" onclick="rate(2)">★</span>
+    <span class="star" data-v="3" onclick="rate(3)">★</span>
+    <span class="star" data-v="4" onclick="rate(4)">★</span>
+    <span class="star" data-v="5" onclick="rate(5)">★</span>
+  </div>
+
+  <textarea id="comment" placeholder="Što bismo mogli poboljšati? (opcionalno)"></textarea>
+
+  <button class="btn" id="btnSend" onclick="send()" disabled>Pošalji</button>
+  <div class="msg" id="msg"></div>
+
+  <div class="links">
+    <a href="https://limit-connect.com">limit-connect.com</a>
+    <a href="https://limit-connect.com/register/">Besplatna registracija</a>
+  </div>
+</div>
+
+<script>
+var _rating = 0;
+function rate(n) {
+  _rating = n;
+  document.querySelectorAll('.star').forEach(function(s) { s.classList.toggle('on', parseInt(s.dataset.v) <= n); });
+  document.getElementById('btnSend').disabled = false;
+}
+function send() {
+  var btn = document.getElementById('btnSend');
+  btn.disabled = true; btn.textContent = 'Šaljem...';
+  fetch('/api/feedback/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({rating: _rating, comment: document.getElementById('comment').value, source: 'web'})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    document.getElementById('msg').innerHTML = '<span style="color:#22c55e">Hvala! Vaše mišljenje je zabilježeno.</span>';
+    btn.textContent = '✓ Poslano';
+  })
+  .catch(function() {
+    document.getElementById('msg').innerHTML = '<span style="color:#22c55e">Hvala na povratnoj informaciji!</span>';
+    btn.textContent = '✓ Hvala';
+  });
+}
+</script>
+</body>
+</html>

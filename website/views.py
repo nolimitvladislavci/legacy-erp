@@ -510,3 +510,8 @@ def gallery_delete(request, pk):
         return JsonResponse({'ok': True})
     except GalleryImage.DoesNotExist:
         return JsonResponse({'error': 'Ne postoji'}, status=404)
+
+
+def feedback_page(request):
+    """Public feedback stranica — limit-connect.com/feedback/"""
+    return render(request, 'website/feedback.html')
