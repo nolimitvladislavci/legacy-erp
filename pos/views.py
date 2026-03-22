@@ -104,6 +104,20 @@ def close_session(request, session_id):
     if open_count:
         messages.error(request, f'Cannot close: {open_count} open receipt(s) pending.')
         return redirect('pos:session_detail', session_id=session_id)
+    # Provjera: prazna smjena?
+    paid_count = session.receipts.filter(status=POSReceipt.Status.PAID).count()
+    force = request.POST.get('force_close', '')
+    if paid_count == 0 and not force:
+        messages.warning(request, 'Zatvarate smjenu bez ijednog bona. Ako ste sigurni, kliknite ponovo.')
+        # Set flag da sljedeći PUT prolazi
+        from django.shortcuts import render
+        return render(request, 'pos/session.html', {
+            'session': session,
+            'open_receipts': session.receipts.filter(status__in=[POSReceipt.Status.OPEN, 'ISSUED']),
+            'paid_receipts': session.receipts.filter(status=POSReceipt.Status.PAID).order_by('-paid_at')[:30],
+            'confirm_empty_close': True,
+        })
+
     closing_cash = Decimal(request.POST.get('closing_cash', '0') or '0')
     session.closing_cash = closing_cash; session.closed_at = now()
     session.status = POSSession.Status.CLOSED; session.save()
@@ -786,16 +800,10 @@ def quick_pos(request, terminal_id):
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     session  = POSSession.objects.filter(terminal=terminal, status='open').first()
 
-    # Auto-otvori sesiju ako ne postoji (UX: korisnik ne mora ručno)
+    # Auto-otvori sesiju ako ne postoji — redirect na terminal za unos pologa
     if not session and request.user.is_authenticated:
-        last = terminal.sessions.order_by('-session_number').first()
-        next_num = (last.session_number + 1) if last else 1
-        session = POSSession.objects.create(
-            terminal=terminal, operator=request.user,
-            session_number=next_num, opening_cash=Decimal('0'),
-            status='open',
-        )
-        messages.info(request, 'Smjena #%d automatski otvorena.' % session.session_number)
+        messages.warning(request, 'Unesite početnu gotovinu prije otvaranja blagajne.')
+        return redirect('pos:terminal_detail', terminal_id=terminal.pk)
 
     # Uvijek koristi kompaniju terminala - ne usera (admin može biti druga firma)
     company = terminal.company

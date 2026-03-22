@@ -195,6 +195,19 @@ button[disabled]{opacity:.5;cursor:not-allowed}
         <button type="button" class="np-btn np-dot" onclick="npPress('.')">·</button>
       </div>
 
+      {% if confirm_empty_close %}
+      <div style="background:rgba(245,158,11,.1);border:1px solid #f59e0b44;border-radius:8px;padding:12px;margin-bottom:12px;text-align:center">
+        <div style="color:#f59e0b;font-weight:700;font-size:.9rem;margin-bottom:6px">⚠ Smjena nema bonova</div>
+        <div style="color:var(--muted);font-size:.8rem;margin-bottom:10px">Zatvarate praznu smjenu. Jeste li sigurni?</div>
+        <form method="post" action="{% url 'pos:close_session' session.id %}" style="display:inline">
+          {% csrf_token %}
+          <input type="hidden" name="closing_cash" value="0">
+          <input type="hidden" name="force_close" value="1">
+          <button type="submit" class="btn btn-red" style="padding:10px 24px;font-size:.9rem">Da, zatvori praznu smjenu</button>
+        </form>
+      </div>
+      {% endif %}
+
       <!-- Close session form (hidden input gets value from numpad) -->
       <form method="post" action="{% url 'pos:close_session' session.id %}"
             id="closeSessionForm">

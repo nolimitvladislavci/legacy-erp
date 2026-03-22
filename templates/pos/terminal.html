@@ -51,7 +51,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
                style="width:100%;max-width:250px;padding:12px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:1.3rem;font-weight:700;text-align:center">
         <div style="font-size:.75rem;color:var(--muted);margin-top:4px">{% trans "Ako ne znate točan iznos, ostavite 0 — možete promijeniti kasnije." %}</div>
       </div>
-      <button type="submit" class="btn btn-gold" style="width:100%;max-width:250px;padding:14px;font-size:1rem">
+      <button type="submit" class="btn btn-gold" style="width:100%;max-width:250px;padding:14px;font-size:1rem"
+              onclick="var cash=this.form.opening_cash.value; if(parseFloat(cash)===0||!cash){return confirm('Blagajna je prazna (0 EUR).\nAko imate gotovinu u ladici, unesite iznos prije otvaranja.\n\nPotvrdite: blagajna je zaista prazna?')}">
         {% trans "Otvori blagajnu →" %}
       </button>
     </form>
