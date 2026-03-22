@@ -3863,8 +3863,8 @@ def onboarding_wizard(request):
         {
             'name': 'Blagajnik',
             'done': POSCashier.objects.filter(company=company).exists(),
-            'url': '/hr/pos/settings/',
-            'desc': 'Dodajte blagajnika s PIN-om',
+            'url': '/hr/pos/cashier/setup/',
+            'desc': 'Dodajte blagajnika s PIN-om i OIB-om (zakonska obaveza)',
         },
         {
             'name': 'Fiskalizacija',
@@ -3882,6 +3882,50 @@ def onboarding_wizard(request):
         'completed': completed,
         'total': total,
         'progress': int(completed / total * 100) if total else 0,
+    })
+
+
+# ══════════════════════════════════════════════════════════════
+# BLAGAJNIK SETUP — Onboarding wizard korak
+# ══════════════════════════════════════════════════════════════
+
+@login_required
+def cashier_setup(request):
+    """Dedicated view za kreaciju blagajnika s PIN-om i OIB-om.
+    Koristi se iz onboarding wizarda i POS settings."""
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Nema tvrtke.')
+        return redirect('core:dashboard')
+
+    error = None
+    if request.method == 'POST':
+        name = request.POST.get('cashier_name', '').strip()
+        oib = request.POST.get('cashier_oib', '').strip()
+        pin = request.POST.get('cashier_pin', '').strip()
+        pin2 = request.POST.get('cashier_pin2', '').strip()
+
+        if not name:
+            error = 'Unesite ime blagajnika.'
+        elif oib and len(oib) != 11:
+            error = 'OIB mora imati točno 11 znamenki.'
+        elif not pin or len(pin) < 4:
+            error = 'PIN mora imati najmanje 4 znamenke.'
+        elif pin != pin2:
+            error = 'PIN-ovi se ne podudaraju.'
+        else:
+            cashier = POSCashier(company=company, name=name, oib=oib, is_active=True)
+            cashier.save()
+            if hasattr(cashier, 'set_pin'):
+                cashier.set_pin(pin)
+                cashier.save(update_fields=['pin_hash'])
+            messages.success(request, f'Blagajnik {name} kreiran.')
+            next_url = request.POST.get('next') or request.GET.get('next') or '/hr/pos/onboarding/'
+            return redirect(next_url)
+
+    return render(request, 'pos/cashier_setup.html', {
+        'error': error,
+        'next': request.GET.get('next', '/hr/pos/onboarding/'),
     })
 
 

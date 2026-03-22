@@ -132,6 +132,7 @@ urlpatterns = [
     path('improvements/',                       views.improvement_list,    name='improvement_list'),
     path('improvements/<int:pk>/update/',       views.improvement_update,  name='improvement_update'),
     path('onboarding/',                         views.onboarding_wizard,   name='onboarding_wizard'),
+    path('cashier/setup/',                       views.cashier_setup,        name='cashier_setup'),
     # ── BEZ PAPIRA — Receipt delivery ────────────────────────────────────────
     path('receipts/',                                views.receipt_list,         name='receipt_list'),
     path('receipt/<int:receipt_id>/deliver/',      views.receipt_deliver,      name='receipt_deliver'),

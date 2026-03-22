@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Novi blagajnik — LIMIT Connect{% endblock %}
+
+{% block content %}
+<div style="max-width:480px;margin:2rem auto;padding:0 1rem">
+
+  <div style="background:#111;border:1px solid #c9a84c33;border-radius:16px;padding:2rem">
+
+    <h2 style="color:#c9a84c;font-family:'Cormorant Garamond',serif;font-size:1.6rem;
+               font-weight:700;margin:0 0 .3rem">Novi blagajnik</h2>
+    <p style="color:#64748b;font-size:.9rem;margin:0 0 1.5rem">
+      Unesite podatke blagajnika. OIB i PIN su zakonska obaveza (NN 133/2015).
+    </p>
+
+    {% if error %}
+    <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);
+                border-radius:8px;padding:12px 16px;color:#ef4444;margin-bottom:1rem;font-size:.9rem">
+      ⚠ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <!-- Ime blagajnika -->
+      <div style="margin-bottom:1rem">
+        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
+          Ime i prezime *
+        </label>
+        <input type="text" name="cashier_name" required autofocus
+               placeholder="npr. Ana Kovač"
+               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
+                      padding:12px 14px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box"
+               onfocus="this.style.borderColor='#c9a84c'"
+               onblur="this.style.borderColor='#333'">
+      </div>
+
+      <!-- OIB -->
+      <div style="margin-bottom:1rem">
+        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
+          OIB blagajnika <span style="color:#555">(11 znamenki)</span>
+        </label>
+        <input type="text" name="cashier_oib" maxlength="11" inputmode="numeric"
+               placeholder="12345678901"
+               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
+                      padding:12px 14px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box"
+               onfocus="this.style.borderColor='#c9a84c'"
+               onblur="validateOIBField(this)"
+               oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)">
+        <div id="oib-error" style="color:#ef4444;font-size:.78rem;margin-top:4px;display:none">
+          Neispravan OIB (MOD 11,10 provjera)
+        </div>
+      </div>
+
+      <!-- PIN -->
+      <div style="margin-bottom:1rem">
+        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
+          PIN kod * <span style="color:#555">(4–6 znamenki)</span>
+        </label>
+        <input type="password" name="cashier_pin" id="pin1" required
+               maxlength="6" inputmode="numeric" placeholder="••••"
+               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
+                      padding:12px 14px;color:#e2e8f0;font-size:1.2rem;letter-spacing:4px;
+                      box-sizing:border-box"
+               onfocus="this.style.borderColor='#c9a84c'"
+               onblur="this.style.borderColor='#333'"
+               oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
+      </div>
+
+      <!-- Potvrda PIN-a -->
+      <div style="margin-bottom:1.5rem">
+        <label style="display:block;color:#94a3b8;font-size:.85rem;margin-bottom:6px">
+          Potvrdi PIN *
+        </label>
+        <input type="password" name="cashier_pin2" id="pin2" required
+               maxlength="6" inputmode="numeric" placeholder="••••"
+               style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
+                      padding:12px 14px;color:#e2e8f0;font-size:1.2rem;letter-spacing:4px;
+                      box-sizing:border-box"
+               onfocus="this.style.borderColor='#c9a84c'"
+               onblur="checkPinMatch(this)"
+               oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
+        <div id="pin-error" style="color:#ef4444;font-size:.78rem;margin-top:4px;display:none">
+          PIN-ovi se ne podudaraju
+        </div>
+      </div>
+
+      {% include "includes/_nav_buttons.html" with back_url="/hr/pos/onboarding/" forward_label="Spremi blagajnika" cancel_url=next %}
+
+    </form>
+  </div>
+
+  <p style="text-align:center;margin-top:1rem;font-size:.75rem;color:#334155">
+    Podaci se pohranjuju prema ZSF i ZZP — PIN se nikad ne pohranjuje u čitljivom obliku.
+  </p>
+
+</div>
+
+<script>
+function validateOIB(oib) {
+  if (!oib || oib.length !== 11 || !/^\d+$/.test(oib)) return false;
+  var total = 10;
+  for (var i = 0; i < 10; i++) {
+    total = (total + parseInt(oib[i])) % 10;
+    if (total === 0) total = 10;
+    total = (total * 2) % 11;
+  }
+  return ((11 - total) % 10) === parseInt(oib[10]);
+}
+
+function validateOIBField(input) {
+  var err = document.getElementById('oib-error');
+  if (input.value && !validateOIB(input.value)) {
+    input.style.borderColor = '#ef4444';
+    err.style.display = 'block';
+  } else {
+    input.style.borderColor = input.value ? '#22c55e' : '#333';
+    err.style.display = 'none';
+  }
+}
+
+function checkPinMatch(input) {
+  var p1 = document.getElementById('pin1').value;
+  var err = document.getElementById('pin-error');
+  if (input.value && input.value !== p1) {
+    input.style.borderColor = '#ef4444';
+    err.style.display = 'block';
+  } else {
+    input.style.borderColor = input.value ? '#22c55e' : '#333';
+    err.style.display = 'none';
+  }
+}
+</script>
+{% endblock %}

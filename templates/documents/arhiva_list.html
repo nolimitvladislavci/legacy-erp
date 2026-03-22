@@ -514,6 +514,7 @@
                             <div style="display:flex; align-items:center; gap:6px;">
                             <a href="{% url 'documents:arhiva_pdf' e.pk %}" class="file-link file-pdf" title="Preuzmi PDF"><i class="fas fa-file-pdf"></i></a>
                             <a href="{% url 'documents:arhiva_xml' e.pk %}" class="file-link file-xml" title="Preuzmi XML"><i class="fas fa-file-code"></i></a>
+                            <button onclick="openShare({type:'document',id:{{ e.id }},title:'{{ e.doc_number|escapejs }}',public_url:'/hr/documents/{{ e.id }}/public/'})" title="Podijeli" style="background:none;border:1px solid #333;border-radius:6px;padding:3px 8px;cursor:pointer;color:#c9a84c;font-size:.8rem;transition:all .15s" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#333'">📤</button>
                             </div>
                         </td>
                         <td class="doc-date-sm">{{ e.archived_at|date:"d.m.Y" }}</td>
@@ -1073,3 +1074,4 @@ function deleteEntry(pk, row) {
 </script>
 
 {% endblock %}
+{% include 'includes/_share_modal.html' %}

@@ -85,13 +85,14 @@
     </div>
 
     <div class="sh-viral">
-      Fiskalizacija u džepu · <a href="https://limit-connect.com/register/">LIMIT Connect</a>
+      Fiskalizacija u džepu · <a href="https://limit-connect.com/register/{% if request.user.saleslead_set.first.ref_code %}?ref={{ request.user.saleslead_set.first.ref_code }}{% endif %}">Besplatno isprobaj LIMIT Connect</a>
     </div>
   </div>
 </div>
 
 <script>
 var _shCtx = {};
+var _shRefCode = '{{ request.user.saleslead_set.first.ref_code|default:"" }}';
 
 function openShare(ctx) {
   /* ctx = {type:'receipt'|'invoice'|'document', id:123, url:'/pdf/', title:'Račun #5'} */
@@ -134,9 +135,12 @@ function _shAction(action) {
 }
 
 function _shGetBaseUrl() {
-  if (_shCtx.type === 'receipt') return '/hr/pos/receipt/' + _shCtx.id;
-  if (_shCtx.type === 'invoice') return '/hr/invoicing/' + _shCtx.id;
-  return _shCtx.url || '';
+  var base = '';
+  if (_shCtx.type === 'receipt') base = '/hr/pos/receipt/' + _shCtx.id;
+  else if (_shCtx.type === 'invoice') base = '/hr/invoicing/' + _shCtx.id;
+  else base = _shCtx.url || '';
+  if (_shRefCode) base += (base.indexOf('?') >= 0 ? '&' : '?') + 'ref=' + _shRefCode;
+  return base;
 }
 
 function _shSendWa() {

@@ -137,6 +137,7 @@
               <a href="{% url "invoicing:generate_pdf" inv.pk %}" class="btn btn-sm btn-outline-secondary" title="PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
               <a href="/eracun/from-invoice/{{ inv.pk }}/" class="btn btn-sm btn-outline-primary" title="e-Racun" onclick="return confirm('Kreirati e-Racun?')"><i class="fas fa-file-invoice"></i></a>
               <a href="{% url "invoicing:invoice_edit" inv.pk %}" class="btn btn-sm btn-outline-primary" title="Uredi"><i class="fas fa-edit"></i></a>
+              <button onclick="openShare({type:'invoice',id:{{ inv.id }},title:'Račun #{{ inv.number|escapejs }}',public_url:'/hr/eracun/p/{{ inv.uuid }}/'})" class="btn btn-sm btn-outline-warning" title="Podijeli">📤</button>
             </div>
           </td>
         </tr>
@@ -157,3 +158,4 @@
 </div>
 {% endif %}
 {% endblock %}
+{% include 'includes/_share_modal.html' %}
