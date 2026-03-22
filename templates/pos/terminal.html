@@ -42,12 +42,18 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   {% if not active_session %}
   <div class="open-form">
-    <div style="font-weight:600;margin-bottom:.875rem">{% trans "Početak radnog vremena" %}</div>
+    <div style="font-weight:600;margin-bottom:.5rem;font-size:1.05rem;color:var(--gold)">{% trans "Početak radnog vremena" %}</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">{% trans "Unesite početnu gotovinu u blagajni (opcionalno) i pokrenite smjenu." %}</div>
     <form method="post" action="{% url 'pos:open_session' terminal.id %}">{% csrf_token %}
-      <div class="form-row">
-        <div><label>{% trans "Pocetna gotovina (&euro;)" %}</label><input type="number" name="opening_cash" value="0" min="0" step="0.01"></div>
-        <button type="submit" class="btn btn-green">{% trans "Početak radnog vremena" %}</button>
+      <div style="margin-bottom:1rem">
+        <label style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:.35rem">{% trans "Početna gotovina (€)" %}</label>
+        <input type="number" name="opening_cash" value="0" min="0" step="0.01"
+               style="width:100%;max-width:250px;padding:12px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:1.3rem;font-weight:700;text-align:center">
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px">{% trans "Ako ne znate točan iznos, ostavite 0 — možete promijeniti kasnije." %}</div>
       </div>
+      <button type="submit" class="btn btn-gold" style="width:100%;max-width:250px;padding:14px;font-size:1rem">
+        {% trans "Otvori blagajnu →" %}
+      </button>
     </form>
   </div>
   {% else %}

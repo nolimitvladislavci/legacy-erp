@@ -1,3 +1,4 @@
+import json
 """smart_import/views.py -- Upload, staging, confirm with full CRUD.
    v2 - 2026-03-17: Problem report, better status API, retry endpoint.
 """

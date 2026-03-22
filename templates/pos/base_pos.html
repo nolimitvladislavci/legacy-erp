@@ -160,4 +160,6 @@ a{color:inherit;text-decoration:none}
 {% block extra_js %}
 <div id="offlineSyncBadge" onclick="window.syncOfflineData && window.syncOfflineData()"></div>
 {% endblock %}
+
+{% if request.user.is_authenticated %}{% include "ai_assistant/chat_widget.html" %}{% endif %}
 </body></html>
