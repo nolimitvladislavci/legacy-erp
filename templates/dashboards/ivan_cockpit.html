@@ -351,13 +351,18 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 
 <script>
 const SEATS = {
-  ivan: {name:'🧑‍💼 Ivan Brtan', desc:'Vlasnik projekta. WhatsApp ili bilješka.', color:'#c9a84c', type:'wa'},
-  cc:   {name:'🤖 Claude Code', desc:'Executor na serveru. Piše kod, testira, deploya. Submit kao task.', color:'#22c55e', type:'task'},
-  gemini:{name:'🔵 Gemini', desc:'Autonomni agent — piše kod, čita fajlove, pokreće testove. Direktan pristup serveru.', color:'#3b82f6', type:'gemini_agent'},
-  sonnet:{name:'🟡 Sonnet', desc:'Koordinator. Planira, pečati, vodi tim. claude.ai', color:'#f59e0b', type:'claude'},
-  marija:{name:'👩‍💼 Marija Brtan', desc:'Tenant Admin — Konjik d.o.o. WhatsApp direktno.', color:'#ec4899', type:'wa_direct', phone:'385976091655'}
+  ivan:   {name:'🧑‍💼 Ivan Brtan',  desc:'Vlasnik projekta. Bilješka ili AI request.', color:'#c9a84c', type:'wa'},
+  cc:     {name:'🤖 Claude Code',  desc:'Executor — piše kod, testira, deploya.', color:'#22c55e', type:'task'},
+  gemini: {name:'🔵 Gemini',       desc:'Autonomni agent — direktan pristup serveru.', color:'#3b82f6', type:'gemini_agent'},
+  sonnet: {name:'🟡 Sonnet',       desc:'Koordinator — planira, vodi tim.', color:'#f59e0b', type:'claude'},
+  marija: {name:'👩‍💼 Marija Brtan', desc:'Tenant Admin — Konjik d.o.o. WhatsApp direktno.', color:'#ec4899', type:'wa_direct', phone:'385976091655'}
 };
 let cur = null;
+
+function getCsrf() {
+  const m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
 
 function openSeat(id) {
   cur = id;
@@ -369,112 +374,121 @@ function openSeat(id) {
   document.getElementById('seat-msg').value = '';
   document.getElementById('seat-status').textContent = '';
   document.getElementById('seat-response').style.display = 'none';
-  document.getElementById('seat-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  clearPhoto();
+  document.getElementById('seat-panel').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
+
 function closeSeat() {
   document.getElementById('seat-panel').classList.remove('open');
+  cur = null;
 }
-function getCsrf() {
-  const m = document.cookie.match(/csrftoken=([^;]+)/);
-  return m ? m[1] : '';
-}
+
 function sendMsg() {
+  if (!cur) return;
   const msg = document.getElementById('seat-msg').value.trim();
-  if (!msg) return;
   const s = SEATS[cur];
   const st = document.getElementById('seat-status');
   const resp = document.getElementById('seat-response');
 
-  if (s.type === 'wa') {
-    st.textContent = 'Šaljem...';
-    fetch('/superadmin/ai/api/submit-request/', {
-      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
-      body: JSON.stringify({description:'[COCKPIT→IVAN] '+msg, module:'cockpit', priority:1})
-    }).then(()=>{ st.textContent='✅ Zabilježeno'; });
-
-  } else if (s.type === 'task') {
-    st.textContent = 'Kreiram task...';
-    fetch('/superadmin/ai/api/submit-request/', {
-      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
-      body: JSON.stringify({description:'[CC TASK]\n\n'+msg, module:'cockpit', priority:2})
-    }).then(r=>r.json()).then(d=>{
-      st.textContent = d.ok||d.id ? '✅ Task kreiran #'+(d.id||'') : '⚠️ '+( d.error||'greška');
-    }).catch(()=>{ st.textContent='❌ Greška'; });
-
-  } else if (s.type === 'gemini_agent') {
-    st.textContent = '🤖 Pokrećem Gemini agenta...';
-    fetch('/api/cockpit/gemini-task/', {
-      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
-      body: JSON.stringify({task: msg, max_steps: 10})
-    }).then(r=>r.json()).then(d=>{
-      if(d.ok){
-        st.textContent = '✅ Gemini agent pokrenut! Task ID: '+(d.task_id||'').substring(0,8);
-        resp.style.display = 'block';
-        resp.textContent = 'Gemini radi autonomno. Rezultat stiže kao notifikacija.\nTask: '+msg;
-      } else {
-        st.textContent = '⚠️ '+(d.error||'Greška');
-      }
-    }).catch(()=>{ st.textContent='❌ Greška'; });
-
-  } else if (s.type === 'claude') {
-    resp.style.display = 'block';
-    resp.textContent = '💬 Za Soneta — kopiraj i paste u claude.ai:\n\n'+msg;
-    st.textContent = '→ Otvaram...';
-    setTimeout(()=> window.open('https://claude.ai','_blank'), 600);
-
-  // Ako ima priložena slika, uploadaj je
+  // Ako ima priložena slika — uploadaj je prvo (za sve tipove sjedala)
   const photoInput = document.getElementById('seat-camera');
   const galleryInput = document.getElementById('seat-gallery');
-  const hasPhoto = (photoInput && photoInput.files[0]) || (galleryInput && galleryInput.files[0]);
-  if (hasPhoto) {
-    const file = (photoInput && photoInput.files[0]) || galleryInput.files[0];
+  const photoFile = (photoInput && photoInput.files[0]) || (galleryInput && galleryInput.files[0]);
+  if (photoFile) {
     const fd = new FormData();
-    fd.append('photo', file);
+    fd.append('photo', photoFile);
     fd.append('seat', cur);
     fd.append('message', msg || '(bez poruke)');
     st.textContent = 'Uploadam sliku...';
     fetch('/api/cockpit/upload-photo/', {
-      method:'POST', headers:{'X-CSRFToken':getCsrf()}, body: fd
-    }).then(r=>r.json()).then(d=>{
-      if(d.ok){
+      method: 'POST',
+      headers: {'X-CSRFToken': getCsrf()},
+      body: fd
+    }).then(r => r.json()).then(d => {
+      if (d.ok) {
         st.textContent = '✅ Slika uploadana';
         clearPhoto();
         loadPhotoFeed();
-
-// Cockpit controls
-function ctrlAction(action) {
-  if (!confirm('Izvrsiti: ' + action + '?')) return;
-  var endpoints = {
-    'gunicorn': '/superadmin/ai/api/restart/?service=gunicorn',
-    'celery': '/superadmin/ai/api/restart/?service=celery',
-    'all': '/superadmin/ai/api/restart/?service=all',
-    'backup': '/superadmin/ai/api/restart/?service=backup',
-  };
-  var url = endpoints[action];
-  if (!url) return;
-  
-  fetch(url, {method:'POST', headers:{'X-CSRFToken': document.cookie.match('csrftoken=([^;]+)')[1]}})
-    .then(function(r){return r.json()})
-    .then(function(d){alert(d.message || d.ok || 'OK')})
-    .catch(function(e){alert('Error: ' + e.message)});
-}
-      } else { st.textContent = '⚠️ '+(d.error||'greška'); }
-    }).catch(()=>{ st.textContent='❌ Upload error'; });
-    return; // Ne šalji tekst ako ima slika
+      } else {
+        st.textContent = '⚠️ ' + (d.error || 'greška uploada');
+      }
+    }).catch(() => { st.textContent = '❌ Upload error'; });
+    return;
   }
 
-  if (s.type === 'wa_direct') {
+  if (!msg) { st.textContent = '⚠️ Upiši poruku'; return; }
+
+  if (s.type === 'wa') {
+    st.textContent = 'Šaljem...';
+    fetch('/superadmin/ai/api/submit-request/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+      body: JSON.stringify({description: '[COCKPIT→IVAN] ' + msg, module: 'cockpit', priority: 1})
+    }).then(() => { st.textContent = '✅ Zabilježeno'; })
+      .catch(() => { st.textContent = '❌ Greška'; });
+
+  } else if (s.type === 'task') {
+    st.textContent = 'Kreiram task...';
+    fetch('/superadmin/ai/api/submit-request/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+      body: JSON.stringify({description: '[CC TASK]\n\n' + msg, module: 'cockpit', priority: 2})
+    }).then(r => r.json()).then(d => {
+      st.textContent = (d.ok || d.id) ? '✅ Task kreiran #' + (d.id || '') : '⚠️ ' + (d.error || 'greška');
+    }).catch(() => { st.textContent = '❌ Greška'; });
+
+  } else if (s.type === 'gemini_agent') {
+    st.textContent = '🤖 Pokrećem Gemini agenta...';
+    fetch('/api/cockpit/gemini-task/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+      body: JSON.stringify({task: msg, max_steps: 10})
+    }).then(r => r.json()).then(d => {
+      if (d.ok) {
+        st.textContent = '✅ Gemini pokrenut — Task ID: ' + (d.task_id || '').substring(0, 8);
+        resp.style.display = 'block';
+        resp.textContent = 'Gemini radi autonomno. Rezultat stiže kao notifikacija.\nTask: ' + msg;
+      } else {
+        st.textContent = '⚠️ ' + (d.error || 'Greška');
+      }
+    }).catch(() => { st.textContent = '❌ Greška'; });
+
+  } else if (s.type === 'claude') {
+    resp.style.display = 'block';
+    resp.textContent = '💬 Kopiraj i paste u claude.ai:\n\n' + msg;
+    st.textContent = '→ Otvaram claude.ai...';
+    setTimeout(() => window.open('https://claude.ai', '_blank'), 600);
+
+  } else if (s.type === 'wa_direct') {
     st.textContent = 'Šaljem WhatsApp...';
     fetch('/api/cockpit/send-whatsapp/', {
-      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
       body: JSON.stringify({phone: s.phone, message: msg, seat: cur})
-    }).then(r=>r.json()).then(d=>{
-      st.textContent = d.ok ? '✅ WhatsApp poslan' : '⚠️ '+( d.error||'greška');
-    }).catch(()=>{ st.textContent='❌ Greška'; });
+    }).then(r => r.json()).then(d => {
+      st.textContent = d.ok ? '✅ WhatsApp poslan' : '⚠️ ' + (d.error || 'greška');
+    }).catch(() => { st.textContent = '❌ Greška'; });
   }
 }
 
-// FenixCamera for seat photos
+// Cockpit server controls
+function ctrlAction(action) {
+  if (!confirm('Izvršiti: ' + action + '?')) return;
+  const endpoints = {
+    gunicorn: '/superadmin/ai/api/restart/?service=gunicorn',
+    celery:   '/superadmin/ai/api/restart/?service=celery',
+    all:      '/superadmin/ai/api/restart/?service=all',
+    backup:   '/superadmin/ai/api/restart/?service=backup',
+  };
+  const url = endpoints[action];
+  if (!url) return;
+  fetch(url, {method: 'POST', headers: {'X-CSRFToken': getCsrf()}})
+    .then(r => r.json())
+    .then(d => alert(d.message || (d.ok ? 'OK' : 'Greška')))
+    .catch(e => alert('Error: ' + e.message));
+}
+
+// FenixCamera
 function fenixSeatCamera() {
   if (window.FenixCamera) {
     FenixCamera.pick({
@@ -482,13 +496,12 @@ function fenixSeatCamera() {
         document.getElementById('photo-img').src = r.dataUrl;
         document.getElementById('photo-preview').style.display = 'block';
         document.getElementById('photo-name').textContent = r.filename || 'fenix-photo.jpg';
-        var byteString = atob(r.b64);
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
-        for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-        var blob = new Blob([ab], {type: 'image/jpeg'});
-        var file = new File([blob], r.filename || 'fenix-photo.jpg', {type: 'image/jpeg'});
-        var dt = new DataTransfer();
+        const byteStr = atob(r.b64);
+        const ab = new ArrayBuffer(byteStr.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteStr.length; i++) ia[i] = byteStr.charCodeAt(i);
+        const file = new File([ab], r.filename || 'fenix-photo.jpg', {type: 'image/jpeg'});
+        const dt = new DataTransfer();
         dt.items.add(file);
         document.getElementById('seat-camera').files = dt.files;
       }
@@ -498,39 +511,45 @@ function fenixSeatCamera() {
   }
 }
 
-// Photo preview
 function previewPhoto(input) {
-  if(!input.files[0]) return;
+  if (!input.files[0]) return;
   const reader = new FileReader();
-  reader.onload = function(e){
+  reader.onload = e => {
     document.getElementById('photo-img').src = e.target.result;
     document.getElementById('photo-preview').style.display = 'block';
     document.getElementById('photo-name').textContent = input.files[0].name;
   };
   reader.readAsDataURL(input.files[0]);
 }
+
 function clearPhoto() {
   document.getElementById('photo-preview').style.display = 'none';
   document.getElementById('photo-name').textContent = '';
-  document.getElementById('seat-camera').value = '';
-  document.getElementById('seat-gallery').value = '';
+  const cam = document.getElementById('seat-camera');
+  const gal = document.getElementById('seat-gallery');
+  if (cam) cam.value = '';
+  if (gal) gal.value = '';
 }
 
-// Photo feed
 function loadPhotoFeed() {
   fetch('/api/cockpit/photos/')
-    .then(r=>r.json())
-    .then(d=>{
+    .then(r => r.json())
+    .then(d => {
       const list = document.getElementById('photo-feed-list');
-      if(!d.photos||!d.photos.length){ list.innerHTML='<span style="color:#333;font-size:.7rem">Nema fotki</span>'; return; }
-      list.innerHTML = d.photos.map(p=>
+      if (!d.photos || !d.photos.length) {
+        list.innerHTML = '<span style="color:#333;font-size:.7rem">Nema fotki</span>';
+        return;
+      }
+      list.innerHTML = d.photos.map(p =>
         '<div style="flex-shrink:0;position:relative">' +
-        '<img src="'+p.url+'" style="height:80px;border-radius:6px;border:1px solid #333;cursor:pointer" onclick="window.open(this.src)" title="'+p.seat+': '+p.message+'">' +
-        '<div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.7);color:#fff;font-size:.55rem;padding:1px 4px;border-radius:3px">'+p.seat+' '+p.time+'</div>' +
-        '</div>'
+        '<img src="' + p.url + '" style="height:80px;border-radius:6px;border:1px solid #333;cursor:pointer" ' +
+        'onclick="window.open(this.src)" title="' + p.seat + ': ' + p.message + '">' +
+        '<div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.7);color:#fff;font-size:.55rem;padding:1px 4px;border-radius:3px">' +
+        p.seat + ' ' + p.time + '</div></div>'
       ).join('');
-    }).catch(()=>{});
+    }).catch(() => {});
 }
+
 loadPhotoFeed();
 </script>
 </body>

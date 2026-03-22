@@ -2411,15 +2411,29 @@ def ivan_cockpit(request):
     subs = list(CompanySubscription.objects.filter(is_active=True).select_related('company').order_by('-monthly_fee'))
     mrr = sum(float(s.monthly_fee or 0) for s in subs)
     pos_today_qs = POSReceipt.objects.filter(created_at__date=today, status='paid')
-    pos_by_company = list(POSReceipt.objects.filter(created_at__date=today,status='paid').values('session__terminal__company__name').annotate(promet=Sum('total'),bonovi=Count('id')).order_by('-promet'))
+    # pos_by_company — template koristi row.b i row.p (kratki aliasi)
+    pos_by_company = list(POSReceipt.objects.filter(
+        created_at__date=today, status='paid'
+    ).values('session__terminal__company__name').annotate(
+        promet=Sum('total'), bonovi=Count('id'), p=Sum('total'), b=Count('id')
+    ).order_by('-promet'))
     try:
         disk=subprocess.check_output(['df','-h','/'],text=True).split('\n')[1].split()
-        disk_info=f"{disk[4]} ({disk[3]} slobodno)"
-    except: disk_info='N/A'
+        # disk: [device, total, used, free, pct, mount]
+        disk_used = disk[2]   # 30G
+        disk_free = disk[3]   # 114G
+        disk_pct  = disk[4]   # 21%
+        disk_info = f"{disk_pct} ({disk_free} slobodno)"
+    except:
+        disk_used = disk_free = disk_pct = disk_info = 'N/A'
     try:
         mem=subprocess.check_output(['free','-h'],text=True).split('\n')[1].split()
-        mem_info=f"{mem[2]} / {mem[1]}"
-    except: mem_info='N/A'
+        # mem: [Mem:, total, used, free, shared, buff, available]
+        mem_used  = mem[2]   # 4.7Gi
+        mem_total = mem[1]   # 7.6Gi
+        mem_info  = f"{mem_used} / {mem_total}"
+    except:
+        mem_used = mem_total = mem_info = 'N/A'
     try:
         logs_raw=subprocess.check_output(['tail','-30','/var/www/fina-connect/logs/django.log'],text=True).strip().split('\n')
         recent_logs=[l for l in logs_raw if any(k in l for k in ['ERROR','WARNING','INFO whatsapp'])][-8:]
@@ -2432,39 +2446,27 @@ def ivan_cockpit(request):
     ).aggregate(t=Sum('total'))['t'] or 0
     _inv_count  = Invoice.objects.filter(date_issued__date__gte=month_start).count()
     _inv_promet = Invoice.objects.filter(date_issued__date__gte=month_start).aggregate(t=Sum('total'))['t'] or 0
-    _disk_parts = disk_info.split(' ') if disk_info != 'N/A' else ['N/A','']
-    _mem_parts  = mem_info.split(' / ')  if mem_info  != 'N/A' else ['N/A','N/A']
     context={
         'now':now,'today':today,
-        # user stats
         'users_total':User.objects.count(),
-        'users_active_week':_pos_week,  # alias unused but kept
+        'users_active_week':User.objects.filter(last_login__gte=week_ago).count(),
         'users_week':User.objects.filter(last_login__gte=week_ago).count(),
         'users_never':User.objects.filter(last_login__isnull=True,is_active=True).count(),
         'companies':Company.objects.count(),
         'subs':subs,'mrr':mrr,
-        # POS — nova i stara imena
         'pos_promet_danas':_pos_promet, 'pos_promet':_pos_promet,
         'pos_bonovi_danas':_pos_bonovi, 'pos_bonovi':_pos_bonovi,
         'pos_open_sessions':_pos_open,  'pos_open':_pos_open,
         'pos_terminal_count':POSTerminal.objects.filter(is_active=True).count(),
         'pos_week':_pos_week,
         'pos_by_company':pos_by_company,
-        # fakture
         'invoices_month':_inv_count,  'inv_count':_inv_count,
         'invoices_promet':_inv_promet,'inv_promet':_inv_promet,
-        # eracun + arhiva
         'eracun_total':ERacun.objects.count(),
         'eracun_sent':ERacun.objects.filter(status='sent').count(),
         'arhiva_total':ArhivaEntry.objects.count(), 'arhiva':ArhivaEntry.objects.count(),
-        # server info — stara i nova imena
-        'disk_info':disk_info,
-        'disk_used':_disk_parts[0] if len(_disk_parts)>0 else 'N/A',
-        'disk_free':_disk_parts[1].strip('()') if len(_disk_parts)>1 else 'N/A',
-        'mem_info':mem_info,
-        'mem_used':_mem_parts[0] if len(_mem_parts)>0 else 'N/A',
-        'mem_total':_mem_parts[1] if len(_mem_parts)>1 else 'N/A',
-        # logs + feedback
+        'disk_info':disk_info, 'disk_used':disk_used, 'disk_free':disk_free,
+        'mem_info':mem_info,   'mem_used':mem_used,   'mem_total':mem_total,
         'recent_logs':recent_logs, 'logs':recent_logs,
         'feedback':ImprovementSuggestion.objects.filter(status='new').order_by('-created_at')[:5],
     }
