@@ -798,15 +798,47 @@ def quick_pos_redirect(request):
 @login_required
 def quick_pos(request, terminal_id):
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
+    company = terminal.company
     session  = POSSession.objects.filter(terminal=terminal, status='open').first()
+
+    # ── TERMINAL LIMIT: besplatni plan = 1 aktivan terminal ──
+    if not session:
+        other_open = POSSession.objects.filter(
+            terminal__company=company, status='open'
+        ).exclude(terminal=terminal).select_related('terminal').first()
+
+        if other_open:
+            # Provjeri plan
+            try:
+                sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
+                max_terminals = 1  # default za besplatni
+                if sub and sub.pricing_plan:
+                    max_terminals = sub.pricing_plan.max_locations or 1
+            except Exception:
+                max_terminals = 1
+
+            open_count = POSSession.objects.filter(
+                terminal__company=company, status='open'
+            ).count()
+
+            if open_count >= max_terminals:
+                messages.warning(request,
+                    'Već imate aktivnu blagajnu (%s). '
+                    'Besplatni plan podržava %d terminal(a). '
+                    'Zatvorite postojeću smjenu ili nadogradite plan.'
+                    % (other_open.terminal.name, max_terminals))
+                return render(request, 'pos/upgrade_terminal.html', {
+                    'current_terminal': other_open.terminal,
+                    'current_session': other_open,
+                    'wanted_terminal': terminal,
+                    'max_terminals': max_terminals,
+                    'company': company,
+                })
 
     # Auto-otvori sesiju ako ne postoji — redirect na terminal za unos pologa
     if not session and request.user.is_authenticated:
         messages.warning(request, 'Unesite početnu gotovinu prije otvaranja blagajne.')
         return redirect('pos:terminal_detail', terminal_id=terminal.pk)
-
-    # Uvijek koristi kompaniju terminala - ne usera (admin može biti druga firma)
-    company = terminal.company
 
     try:
         from inventory.models import InventoryItem
