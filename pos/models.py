@@ -181,6 +181,11 @@ class POSReceipt(models.Model):
     session        = models.ForeignKey(POSSession, on_delete=models.CASCADE,
                                         related_name='receipts', verbose_name=_('Smjena'))
     receipt_number = models.PositiveIntegerField(verbose_name=_('Broj bona'))
+    global_number  = models.PositiveIntegerField(
+        null=True, blank=True, db_index=True,
+        verbose_name=_('Globalni redni broj'),
+        help_text=_('Jedinstven po firmi, bez duplikata. Za fiskalizaciju i analizu.'),
+    )
 
     # Veza na Invoice (kreira se automatski pri plaćanju + fiskalizira)
     invoice        = models.OneToOneField(
@@ -267,8 +272,18 @@ class POSReceipt(models.Model):
         unique_together     = [('session', 'receipt_number')]
         ordering            = ['-created_at']
 
+    def save(self, *args, **kwargs):
+        if not self.global_number:
+            from django.db.models import Max
+            company = self.session.terminal.company
+            last = POSReceipt.objects.filter(
+                session__terminal__company=company
+            ).aggregate(m=Max('global_number'))['m'] or 0
+            self.global_number = last + 1
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f'Bon #{self.receipt_number} – {self.total} EUR ({self.get_status_display()})'
+        return f'Bon #{self.global_number or self.receipt_number} – {self.total} EUR ({self.get_status_display()})'
 
     def recalculate(self):
         """Reizračunaj iznose iz stavki."""

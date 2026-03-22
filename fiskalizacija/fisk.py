@@ -225,7 +225,7 @@ def _build_racun(receipt, oib, ozn_pos_pr, ozn_nap_ur, zki, dt) -> etree._Elemen
     sub(racun, 'OznSlijed', 'P')   # P = Prodaja
 
     br_rac_el = sub(racun, 'BrRac')
-    sub(br_rac_el, 'BrOznRac', receipt.receipt_number)
+    sub(br_rac_el, 'BrOznRac', receipt.global_number or receipt.receipt_number)
     sub(br_rac_el, 'OznPosPr', ozn_pos_pr)
     sub(br_rac_el, 'OznNapUr', ozn_nap_ur)
 
@@ -399,7 +399,7 @@ def fiscalize_receipt(receipt) -> str | None:
     ozn_pos = config.ozn_pos_pr
     ozn_ur  = config.ozn_nap_ur or receipt.session.terminal.terminal_code[:20]
 
-    zki = generate_zki(oib, dt, receipt.receipt_number, ozn_pos, ozn_ur,
+    zki = generate_zki(oib, dt, receipt.global_number or receipt.receipt_number, ozn_pos, ozn_ur,
                        receipt.total, key)
 
     soap_xml = build_signed_soap(receipt, oib, ozn_pos, ozn_ur, zki, dt,
