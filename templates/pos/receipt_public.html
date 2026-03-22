@@ -131,7 +131,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       document.getElementById('reviewForm').style.display = 'none';
 
       // Google My Business link (company settings ili default)
-      var googleUrl = '{{ company.settings.google_review_url|default:"https://g.page/review" }}';
+      var googleUrl = '{{ company.settings.google_review_url|default:"https://limit-connect.com/feedback/" }}';
       setTimeout(function() {
         window.open(googleUrl, '_blank');
       }, 1500);

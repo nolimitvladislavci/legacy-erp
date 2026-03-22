@@ -72,6 +72,7 @@
 .prod-name{font-size:.76rem;font-weight:600;color:var(--text);line-height:1.2;word-break:break-word;max-width:100%}
 .prod-price{font-size:.85rem;font-weight:800;color:var(--gold)}
 .prod-sku{font-size:.58rem;color:var(--muted)}
+@media(max-width:600px){.prod-sku{display:none}}
 .prod-qty-badge{position:absolute;top:4px;right:4px;background:var(--gold);color:#000;font-size:.62rem;font-weight:800;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center}
 .prod-qty-badge.show{display:flex}
 @keyframes ripple{to{transform:scale(4);opacity:0}}
@@ -193,8 +194,8 @@
   .cash-input-row{margin-bottom:.2rem}
   .cash-quick{margin-bottom:.25rem}
   .cash-q-btn{min-height:26px;padding:.2rem .4rem;font-size:.68rem}
-  .tot-row{font-size:.75rem;padding:.1rem 0}
-  .tot-row.grand{font-size:.95rem}
+  .tot-row{display:none!important}
+  .tot-row.grand{display:flex!important;font-size:.95rem}
 }
 @media(max-width:500px){
   .prod-grid{grid-template-columns:repeat(2,1fr)}
