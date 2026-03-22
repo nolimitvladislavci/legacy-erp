@@ -125,7 +125,7 @@ class RateLimitMiddleware:
         ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', 'unknown')
 
         # Static files, i18n, health — no rate limit
-        if path.startswith('/static/') or path.startswith('/media/') or '/i18n/' in path or path == '/health/':
+        if path.startswith('/static/') or path.startswith('/media/') or '/i18n/' in path or path == '/health/' or '/switch-company/' in path:
             return self.get_response(request)
 
         if '/login/' in path or '/api/token/' in path or '/password/' in path:
