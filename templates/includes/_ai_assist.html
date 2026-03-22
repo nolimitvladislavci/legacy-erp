@@ -98,6 +98,52 @@
       title: 'Vaš pregled',
       text: 'Ovdje vidite dnevni promet, otvorene račune i status fiskalizacije. Za POS kliknite izbornik ☰.',
     },
+    // POS: smjena otvorena ali nema bonova 2 min
+    {
+      page: /\/pos\/session\//,
+      check: function(){ return document.querySelectorAll('.rc').length === 0; },
+      delay: 120000,
+      id: 'pos_no_receipts',
+      title: 'Smjena otvorena',
+      text: 'Kliknite <b>Novi bon</b> ili idite na <b>Brzu blagajnu</b> za prodaju.',
+    },
+    // POS: Z gumb — hint za zatvaranje
+    {
+      page: /\/pos\/quick\//,
+      check: function(){ var z = document.getElementById('btnShiftClose'); return z && z.offsetParent !== null; },
+      delay: 5000,
+      id: 'pos_z_hint',
+      title: 'Z-izvještaj',
+      text: 'Kliknite <b>Z</b> gumb za zatvaranje smjene, prebrojavanje gotovine i Z-izvještaj.',
+      once: true,
+    },
+    // POS: nakon naplate — hint za dijeljenje
+    {
+      page: /\/pos\/quick\//,
+      check: function(){ var s = document.getElementById('successOverlay'); return s && s.classList.contains('show'); },
+      delay: 3000,
+      id: 'pos_share_hint',
+      title: 'Račun izdan!',
+      text: 'Kliknite <b>Spremi i podijeli</b> za slanje na WhatsApp ili email.',
+    },
+    // Onboarding hint
+    {
+      page: /\/onboarding/,
+      check: function(){ return true; },
+      delay: 5000,
+      id: 'onboarding_welcome',
+      title: 'Dobrodošli!',
+      text: 'Pratite korake — postavljamo vaš sustav. Ako zapnete, pitajte AI asistenta (zlatni krug 🤖).',
+    },
+    // Arhiva: hint za skeniranje
+    {
+      page: /\/documents\/arhiva/,
+      check: function(){ return true; },
+      delay: 15000,
+      id: 'arhiva_scan_hint',
+      title: 'Brzi unos',
+      text: 'Kliknite <b>📷 Skeniraj dokument</b> — kamera se otvori, slikajte račun, AI ga pročita.',
+    },
     // Anywhere: idle 2 min
     {
       page: /./,
@@ -105,7 +151,7 @@
       delay: 120000,
       id: 'global_idle',
       title: 'Trebate pomoć?',
-      text: 'Kliknite ☰ za navigaciju ili <b>🤖</b> za AI asistenta. Sve pitanja pošaljite na WhatsApp.',
+      text: 'Kliknite ☰ za navigaciju ili <b>🤖</b> za AI asistenta.',
     },
   ];
 
