@@ -48,9 +48,7 @@
       {% endif %}
     </div>
     <div class="rl-actions">
-      <a href="{% url 'pos:receipt_public' r.id %}" class="rl-btn" target="_blank" title="Pregled">👁</a>
-      <a href="{% url 'pos:receipt_whatsapp' r.id %}" class="rl-btn" title="WhatsApp" onclick="event.preventDefault();waShare({{ r.id }})">💬</a>
-      <a href="/hr/pos/receipt/{{ r.id }}/deliver/" class="rl-btn" title="Ispis/Email">🖨</a>
+      <button class="rl-btn" onclick="openShare({type:'receipt',id:{{ r.id }},title:'Račun #{{ r.receipt_number }}'})" title="Podijeli">📤 Podijeli</button>
     </div>
   </div>
   {% empty %}
@@ -86,4 +84,5 @@ function waShare(rid) {
   .catch(function() { alert('Greška veze'); });
 }
 </script>
+{% include "includes/_share_modal.html" %}
 {% endblock %}

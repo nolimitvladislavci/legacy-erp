@@ -47,8 +47,14 @@ def item_detail(request, pk):
 def item_create(request):
     if request.method == "POST":
         try:
+            from core.company_utils import get_user_company
+            company = get_user_company(request)
+            if not company:
+                messages.error(request, "Greška: nema konteksta tvrtke.")
+                return redirect("inventory:list")
             supplier_id = request.POST.get("supplier")
             item = InventoryItem(
+                company=company,
                 name=request.POST["name"],
                 sku=request.POST["sku"],
                 category=request.POST.get("category", "other"),
@@ -379,6 +385,191 @@ def api_quick_create_article(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+# ── GLOBAL SMART CREATE (3 klika) ─────────────────────────────────────────────
+
+# Kategorije koje NE prate zalihe (quantity nema smisla)
+NO_STOCK_CATEGORIES = ('service',)
+
+
+@login_required
+def api_ai_predict_item(request):
+    """AI predviđanje kategorije, poreza i barkoda na osnovu imena artikla.
+    GET ?name=Burek sa sirom → {"category":"food","tax_rate":13,"tax_rate_id":2,"barcode":"2000001234567"}
+    """
+    import re
+    name = request.GET.get('name', '').strip()
+    if not name:
+        return JsonResponse({'category': 'other', 'tax_rate': 25})
+
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    country = getattr(company, 'country', 'HR') if company else 'HR'
+
+    # ── Smart category prediction (rule-based, instant) ──
+    nl = name.lower()
+
+    food_words = ['kruh', 'pecivo', 'burek', 'pizza', 'sendvic', 'meso', 'sir', 'salata',
+                  'juha', 'grah', 'riza', 'tjestenina', 'kroasan', 'kifla', 'strudla',
+                  'hamburger', 'hot dog', 'wrap', 'tortilla', 'brot', 'brötchen', 'semmel']
+    drink_words = ['kava', 'juice', 'sok', 'voda', 'pivo', 'vino', 'cola', 'fanta', 'sprite',
+                   'cedevita', 'cappuccino', 'espresso', 'latte', 'čaj', 'tee', 'kaffee',
+                   'mineral', 'gaziran', 'limonada', 'smoothie', 'mlijeko', 'milch']
+    dessert_words = ['kolač', 'torta', 'muffin', 'donut', 'krafna', 'čokolad', 'sladoled',
+                     'kuchen', 'keks', 'brownie', 'tiramisu', 'palačink', 'waffle']
+    service_words = ['usluga', 'servis', 'popravak', 'montaža', 'dostava', 'prijevoz',
+                     'dienstleistung', 'reparatur', 'consulting', 'savjetovanje', 'najam',
+                     'rent', 'pranje', 'čišćenje', 'frizur', 'šišanje', 'tretman']
+    material_words = ['vijak', 'čavao', 'boja', 'cement', 'ljepilo', 'traka', 'žica',
+                      'material', 'stoff', 'farbe']
+
+    category = 'other'
+    if any(w in nl for w in food_words):
+        category = 'food'
+    elif any(w in nl for w in drink_words):
+        category = 'drink'
+    elif any(w in nl for w in dessert_words):
+        category = 'dessert'
+    elif any(w in nl for w in service_words):
+        category = 'service'
+    elif any(w in nl for w in material_words):
+        category = 'material'
+
+    # ── Smart tax prediction ──
+    from companies.models import TaxRate
+    tax_rate_pct = 25  # default HR
+    tax_rate_id = None
+
+    if country in ('DE', 'AT'):
+        # DE: food = 7%, drinks = 19%, services = 19%
+        if category in ('food', 'dessert'):
+            tax_rate_pct = 7
+        else:
+            tax_rate_pct = 19
+    else:
+        # HR: food/drink = 13%, services = 25%, basic bread = 5%
+        if category in ('food', 'drink', 'dessert'):
+            tax_rate_pct = 13
+            # Basic bread/milk = 5%
+            if any(w in nl for w in ['kruh', 'mlijeko', 'brašno', 'ulje jestivo']):
+                tax_rate_pct = 5
+        else:
+            tax_rate_pct = 25
+
+    # Find matching TaxRate object
+    tr = TaxRate.objects.filter(country=country or 'HR', rate=tax_rate_pct, is_active=True).first()
+    if tr:
+        tax_rate_id = tr.pk
+
+    # ── Auto barcode (EAN-13 internal range 200-299) ──
+    from inventory.models import InventoryItem
+    last_barcode = InventoryItem.objects.filter(
+        company=company, barcode__startswith='200'
+    ).order_by('-barcode').values_list('barcode', flat=True).first()
+
+    if last_barcode and last_barcode.isdigit() and len(last_barcode) == 13:
+        next_num = int(last_barcode[:12]) + 1
+    else:
+        next_num = 200000000000 + (InventoryItem.objects.filter(company=company).count() + 1)
+
+    # EAN-13 check digit
+    digits = str(next_num).zfill(12)
+    check = (10 - sum((3 if i % 2 else 1) * int(d) for i, d in enumerate(digits))) % 10
+    barcode = digits + str(check)
+
+    # Track stock?
+    track_stock = category not in NO_STOCK_CATEGORIES
+
+    return JsonResponse({
+        'category': category,
+        'tax_rate': tax_rate_pct,
+        'tax_rate_id': tax_rate_id,
+        'barcode': barcode,
+        'track_stock': track_stock,
+        'unit': 'h' if category == 'service' else 'kom',
+    })
+
+
+@login_required
+def api_smart_create(request):
+    """Globalni smart create — 3 klika: ime, cijena, spremi.
+    AI popunjava ostalo u pozadini. Koristi se iz POS-a, fakturiranja, inventara.
+    POST JSON: {name, unit_price, category?, tax_rate_id?, barcode?, unit?}
+    """
+    import json
+    from decimal import Decimal, InvalidOperation
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'Nema aktivne firme'}, status=400)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    name = data.get('name', '').strip()
+    if not name:
+        return JsonResponse({'error': 'Naziv je obavezan'}, status=400)
+
+    try:
+        price = Decimal(str(data.get('unit_price', 0) or 0))
+    except (InvalidOperation, ValueError):
+        price = Decimal('0')
+
+    category = data.get('category', 'other')
+    unit = data.get('unit', 'kom')
+    barcode = data.get('barcode', '').strip()
+
+    # Tax rate
+    tax_obj = None
+    tax_rate_id = data.get('tax_rate_id')
+    if tax_rate_id:
+        from companies.models import TaxRate
+        tax_obj = TaxRate.objects.filter(pk=tax_rate_id, is_active=True).first()
+
+    # Auto-SKU
+    import re
+    clean = re.sub(r'[^A-Z0-9]', '', name.upper()[:8])
+    from inventory.models import InventoryItem
+    count = InventoryItem.objects.filter(company=company).count() + 1
+    sku = f'{clean}-{count}'
+
+    # Detect: should we track stock?
+    track_stock = category not in NO_STOCK_CATEGORIES
+
+    item = InventoryItem(
+        company=company,
+        name=name,
+        sku=sku,
+        barcode=barcode,
+        category=category,
+        unit=unit,
+        unit_price=price,
+        quantity=0 if track_stock else Decimal('999999'),
+        min_quantity=0,
+        tax_rate=tax_obj,
+        is_active=True,
+    )
+    item.save()
+
+    return JsonResponse({
+        'ok': True,
+        'id': item.pk,
+        'name': item.name,
+        'sku': item.sku,
+        'barcode': item.barcode,
+        'unit_price': str(item.unit_price),
+        'category': item.category,
+        'tax_rate': str(tax_obj.rate) if tax_obj else None,
+        'track_stock': track_stock,
+        'message': f'Artikl "{name}" kreiran!',
+    })
 
 
 # ── KALO (NATURAL SHRINKAGE) ─────────────────────────────────────────────────

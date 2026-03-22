@@ -1,0 +1,243 @@
+{# ═══ GLOBAL SHARE / BEZ PAPIRA — pozovi iz bilo kojeg dijela sustava ═══ #}
+{# Usage: {% include "includes/_share_modal.html" %} #}
+{# JS API: openShare({type:'receipt', id:123}) ili openShare({type:'invoice', id:456, url:'/path/to/pdf'}) #}
+{# Tipovi: receipt, invoice, otpremnica, document, custom #}
+<style>
+.sh-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:20000;display:none;align-items:center;justify-content:center}
+.sh-overlay.show{display:flex}
+.sh-card{background:#0d1117;border:1px solid #c9a84c33;border-radius:16px;width:92%;max-width:400px;padding:0;overflow:hidden}
+.sh-header{background:linear-gradient(135deg,#1a1a2e,#0d1117);padding:16px 20px;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between}
+.sh-title{color:#c9a84c;font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700}
+.sh-close{background:none;border:none;color:#666;font-size:1.5rem;cursor:pointer;line-height:1}
+.sh-body{padding:16px 20px}
+.sh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.sh-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:#111;border:1px solid #222;border-radius:12px;padding:16px 10px;cursor:pointer;transition:all .15s;text-decoration:none;color:#ccc}
+.sh-btn:hover,.sh-btn:active{border-color:#c9a84c;transform:scale(.97);color:#c9a84c}
+.sh-btn .sh-icon{font-size:1.8rem}
+.sh-btn .sh-label{font-size:.8rem;font-weight:600}
+.sh-input-row{display:flex;gap:6px;margin-bottom:10px}
+.sh-input{flex:1;background:#111;border:1px solid #333;border-radius:8px;padding:10px;color:#e2e8f0;font-size:.9rem}
+.sh-input:focus{border-color:#c9a84c;outline:none}
+.sh-send{background:#c9a84c;color:#000;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
+.sh-section{display:none;margin-top:12px}
+.sh-section.show{display:block}
+.sh-qr-box{text-align:center;padding:16px;background:#fff;border-radius:10px;margin:8px auto;max-width:200px}
+.sh-qr-box img{width:100%;image-rendering:pixelated}
+.sh-viral{text-align:center;padding:10px 20px 16px;border-top:1px solid #1a1a1a;font-size:.7rem;color:#555}
+.sh-viral a{color:#c9a84c;text-decoration:none}
+</style>
+
+<div class="sh-overlay" id="shOverlay" onclick="if(event.target===this)closeShare()">
+  <div class="sh-card">
+    <div class="sh-header">
+      <span class="sh-title" id="shTitle">Podijeli</span>
+      <button class="sh-close" onclick="closeShare()">&times;</button>
+    </div>
+    <div class="sh-body">
+      <!-- Glavni gumbi -->
+      <div class="sh-grid">
+        <div class="sh-btn" onclick="_shAction('whatsapp')">
+          <span class="sh-icon">💬</span>
+          <span class="sh-label">WhatsApp</span>
+        </div>
+        <div class="sh-btn" onclick="_shAction('email')">
+          <span class="sh-icon">📧</span>
+          <span class="sh-label">Email</span>
+        </div>
+        <div class="sh-btn" onclick="_shAction('qr')">
+          <span class="sh-icon">📱</span>
+          <span class="sh-label">QR kod</span>
+        </div>
+        <div class="sh-btn" onclick="_shAction('print')">
+          <span class="sh-icon">🖨️</span>
+          <span class="sh-label">Ispis</span>
+        </div>
+        <div class="sh-btn" onclick="_shAction('copy')">
+          <span class="sh-icon">📋</span>
+          <span class="sh-label">Kopiraj link</span>
+        </div>
+        <div class="sh-btn" onclick="_shAction('knjiga')">
+          <span class="sh-icon">📖</span>
+          <span class="sh-label">Knjiga žalbi</span>
+        </div>
+      </div>
+
+      <!-- WhatsApp panel -->
+      <div class="sh-section" id="shWaPanel">
+        <div class="sh-input-row">
+          <input type="tel" class="sh-input" id="shWaPhone" placeholder="+385 91 234 5678">
+          <button class="sh-send" onclick="_shSendWa()">Pošalji</button>
+        </div>
+      </div>
+
+      <!-- Email panel -->
+      <div class="sh-section" id="shEmailPanel">
+        <div class="sh-input-row">
+          <input type="email" class="sh-input" id="shEmailAddr" placeholder="email@primjer.hr">
+          <button class="sh-send" onclick="_shSendEmail()">Pošalji</button>
+        </div>
+      </div>
+
+      <!-- QR panel -->
+      <div class="sh-section" id="shQrPanel">
+        <div class="sh-qr-box" id="shQrImg">Generiram QR...</div>
+      </div>
+    </div>
+
+    <div class="sh-viral">
+      Powered by <a href="https://limit-connect.com/register/">LIMIT Connect</a> · Bez papira
+    </div>
+  </div>
+</div>
+
+<script>
+var _shCtx = {};
+
+function openShare(ctx) {
+  /* ctx = {type:'receipt'|'invoice'|'document', id:123, url:'/pdf/', title:'Račun #5'} */
+  _shCtx = ctx || {};
+  document.getElementById('shTitle').textContent = ctx.title || 'Podijeli';
+  // Hide all panels
+  document.querySelectorAll('.sh-section').forEach(function(el){el.classList.remove('show')});
+  document.getElementById('shOverlay').classList.add('show');
+}
+
+function closeShare() {
+  document.getElementById('shOverlay').classList.remove('show');
+}
+
+function _shAction(action) {
+  // Hide all panels first
+  document.querySelectorAll('.sh-section').forEach(function(el){el.classList.remove('show')});
+
+  if (action === 'whatsapp') {
+    document.getElementById('shWaPanel').classList.add('show');
+    document.getElementById('shWaPhone').focus();
+  }
+  else if (action === 'email') {
+    document.getElementById('shEmailPanel').classList.add('show');
+    document.getElementById('shEmailAddr').focus();
+  }
+  else if (action === 'qr') {
+    document.getElementById('shQrPanel').classList.add('show');
+    _shGenerateQR();
+  }
+  else if (action === 'print') {
+    _shPrint();
+  }
+  else if (action === 'copy') {
+    _shCopyLink();
+  }
+  else if (action === 'knjiga') {
+    window.location.href = '/hr/pos/improvements/';
+  }
+}
+
+function _shGetBaseUrl() {
+  if (_shCtx.type === 'receipt') return '/hr/pos/receipt/' + _shCtx.id;
+  if (_shCtx.type === 'invoice') return '/hr/invoicing/' + _shCtx.id;
+  return _shCtx.url || '';
+}
+
+function _shSendWa() {
+  var phone = document.getElementById('shWaPhone').value.trim();
+  if (!phone) { document.getElementById('shWaPhone').focus(); return; }
+
+  if (_shCtx.type === 'receipt') {
+    fetch(_shGetBaseUrl() + '/whatsapp/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'Content-Type':'application/x-www-form-urlencoded',
+                'X-CSRFToken': _shGetCSRF()},
+      body: 'phone=' + encodeURIComponent(phone)
+    })
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if (d.wa_url) { window.open(d.wa_url, '_blank'); closeShare(); }
+      else alert(d.error || 'Greška');
+    }).catch(function(e){alert('Greška: '+e)});
+  } else {
+    // Generic: share public URL via wa.me
+    var url = window.location.origin + (_shCtx.public_url || _shGetBaseUrl() + '/');
+    var msg = (_shCtx.title || 'Dokument') + '\n\n' + url + '\n\nPowered by LIMIT Connect';
+    window.open('https://wa.me/' + phone.replace(/[\s\-\+]/g,'') + '?text=' + encodeURIComponent(msg), '_blank');
+    closeShare();
+  }
+}
+
+function _shSendEmail() {
+  var email = document.getElementById('shEmailAddr').value.trim();
+  if (!email) { document.getElementById('shEmailAddr').focus(); return; }
+
+  if (_shCtx.type === 'receipt') {
+    fetch(_shGetBaseUrl() + '/email/', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'Content-Type':'application/x-www-form-urlencoded',
+                'X-CSRFToken': _shGetCSRF()},
+      body: 'email=' + encodeURIComponent(email)
+    })
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if (d.ok) { alert('Email poslan na ' + email); closeShare(); }
+      else alert(d.error || 'Greška');
+    }).catch(function(e){alert('Greška: '+e)});
+  } else {
+    // Generic: mailto
+    var url = window.location.origin + (_shCtx.public_url || _shGetBaseUrl() + '/');
+    var subject = encodeURIComponent(_shCtx.title || 'Dokument');
+    var body = encodeURIComponent((_shCtx.title || 'Dokument') + '\n\n' + url + '\n\nPowered by LIMIT Connect · limit-connect.com');
+    window.open('mailto:' + email + '?subject=' + subject + '&body=' + body);
+    closeShare();
+  }
+}
+
+function _shGenerateQR() {
+  var url = window.location.origin + (_shCtx.public_url || '');
+  if (_shCtx.type === 'receipt') {
+    fetch(_shGetBaseUrl() + '/deliver/', {credentials:'same-origin'})
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if (d.public_url) {
+        url = window.location.origin + d.public_url;
+      }
+      document.getElementById('shQrImg').innerHTML =
+        '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url) + '" alt="QR">' +
+        '<div style="margin-top:6px;font-size:.75rem;color:#333">Skeniraj za pregled</div>';
+    });
+  } else {
+    document.getElementById('shQrImg').innerHTML =
+      '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url) + '" alt="QR">' +
+      '<div style="margin-top:6px;font-size:.75rem;color:#333">Skeniraj za pregled</div>';
+  }
+}
+
+function _shPrint() {
+  if (_shCtx.type === 'receipt') {
+    window.open(_shGetBaseUrl() + '/pdf/?format=a4', '_blank');
+  } else if (_shCtx.url) {
+    window.open(_shCtx.url, '_blank');
+  } else {
+    window.print();
+  }
+  closeShare();
+}
+
+function _shCopyLink() {
+  var url = window.location.origin + (_shCtx.public_url || _shGetBaseUrl() + '/');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){
+      if (typeof fenixToast === 'function') fenixToast('Link kopiran!', 'success');
+      else alert('Link kopiran: ' + url);
+      closeShare();
+    });
+  } else {
+    prompt('Kopiraj link:', url);
+  }
+}
+
+function _shGetCSRF() {
+  var el = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (el) return el.value;
+  var m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
+</script>

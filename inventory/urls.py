@@ -11,6 +11,8 @@ app_name = "inventory"
 
 urlpatterns = [
     path('api/quick-create-article/', views.api_quick_create_article, name='api_quick_create_article'),
+    path('api/smart-create/', views.api_smart_create, name='api_smart_create'),
+    path('api/ai-predict/', views.api_ai_predict_item, name='api_ai_predict_item'),
     # Articles
     path("", views.item_list, name="list"),
     path("new/", views.item_create, name="create"),
