@@ -801,17 +801,24 @@ def quick_pos(request, terminal_id):
     company = terminal.company
     session  = POSSession.objects.filter(terminal=terminal, status='open').first()
 
-    # ── TERMINAL LIMIT: besplatni plan = 1 aktivan terminal ──
-    if not session:
+    # ── STROGA PROVJERA: samo 1 aktivan POS (besplatni plan) ──
+    # Knjigovođa (role=bookkeeper/superadmin) može svugdje bez limita
+    is_bookkeeper = False
+    try:
+        role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
+        is_bookkeeper = role in ('superadmin', 'bookkeeper') or request.user.is_superuser
+    except Exception:
+        pass
+
+    if not session and not is_bookkeeper:
         other_open = POSSession.objects.filter(
             terminal__company=company, status='open'
         ).exclude(terminal=terminal).select_related('terminal').first()
 
         if other_open:
-            # Provjeri plan
             try:
                 sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
-                max_terminals = 1  # default za besplatni
+                max_terminals = 1
                 if sub and sub.pricing_plan:
                     max_terminals = sub.pricing_plan.max_locations or 1
             except Exception:
@@ -822,11 +829,6 @@ def quick_pos(request, terminal_id):
             ).count()
 
             if open_count >= max_terminals:
-                messages.warning(request,
-                    'Već imate aktivnu blagajnu (%s). '
-                    'Besplatni plan podržava %d terminal(a). '
-                    'Zatvorite postojeću smjenu ili nadogradite plan.'
-                    % (other_open.terminal.name, max_terminals))
                 return render(request, 'pos/upgrade_terminal.html', {
                     'current_terminal': other_open.terminal,
                     'current_session': other_open,

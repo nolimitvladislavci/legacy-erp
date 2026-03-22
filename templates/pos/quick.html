@@ -633,7 +633,7 @@
   "session_id": {% if session %}{{ session.id }}{% else %}null{% endif %},
   "default_cashier": "{{ request.user.get_full_name|default:request.user.username|escapejs }}"
 }</script>
-<script src="/static/js/pos/pos-quick.js"></script>
+<script src="/static/js/pos/pos-quick.js?v=20260322b"></script>
 <script src="/static/js/pos/pos-fiscal.js"></script>
 <script src="/static/js/html5-qrcode.min.js"></script>
 <script src="/static/js/pos/pos-scanner.js"></script>
