@@ -329,7 +329,7 @@
     </div>
 
     <div class="filter-panel">
-        <button class="filter-toggle" onclick="toggleFilters(this)" type="button">
+        <button class="filter-toggle" id="filterToggleBtn" type="button">
             <span><i class="fas fa-sliders-h" style="margin-right:6px"></i> {% trans "Filteri" %}
                 {% if q or source_type or company_filter or date_from or date_to or currency or has_fiscal or has_file or bookmarked %}
                 <span style="background:var(--gold);color:#0a0a0a;padding:1px 7px;border-radius:10px;font-size:0.68rem;margin-left:6px">{% trans "Aktivno" %}</span>
@@ -764,6 +764,14 @@ function toggleFilters(btn){
     document.getElementById('filterBody').classList.toggle('open');
     btn.classList.toggle('open');
 }
+// Bind via addEventListener (onclick doesn't work on some mobile browsers)
+document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('filterToggleBtn');
+    if(btn) {
+        btn.addEventListener('click', function(e){ e.preventDefault(); toggleFilters(this); });
+        btn.addEventListener('touchend', function(e){ e.preventDefault(); toggleFilters(this); });
+    }
+});
 
 // Keyboard: / = focus search
 document.addEventListener('keydown',function(e){
