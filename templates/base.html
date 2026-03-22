@@ -435,7 +435,7 @@
             </div>
         </div>
         {% if has_multiple_companies %}
-        <div id="companySwitcher" style="display:none;background:#0a1020;border-bottom:1px solid #1e293b;padding:4px 8px;max-height:200px;overflow-y:auto">
+        <div id="companySwitcher" style="display:none;position:fixed;top:80px;left:8px;right:8px;max-width:280px;background:#0a1020;border:1px solid #c9a84c44;border-radius:10px;padding:8px;max-height:300px;overflow-y:auto;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.7)">
             {% for mem in user_memberships %}
             <form method="post" action="/accounts/switch-company/" style="margin:0">
                 {% csrf_token %}
