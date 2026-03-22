@@ -166,6 +166,14 @@ function dismissPushBanner(){
 .badge-draft{background:#f1f5f9;color:#475569}
 .badge-sent{background:#dbeafe;color:#1e40af}
 .empty-row{padding:20px 16px;text-align:center;color:var(--text-dim);font-size:.82rem}
+.empty-state{text-align:center;padding:30px 20px}
+.empty-state-icon{font-size:2.5rem;color:var(--gold);margin-bottom:12px;opacity:.6}
+.empty-state-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.empty-state-message{font-size:.82rem;color:var(--text-dim);margin-bottom:14px}
+.empty-state-action{display:inline-block;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);padding:8px 18px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;transition:all .2s}
+.empty-state-action:hover{background:var(--gold);color:#000}
+.empty-state-secondary{display:inline-block;color:var(--text-dim);font-size:.78rem;margin-left:12px;text-decoration:none}
+.empty-state-secondary:hover{color:var(--gold)}
 
 /* Interventions */
 .iv-pill{font-size:.68rem;padding:.2rem .6rem;border-radius:8px;white-space:nowrap;font-weight:600}
@@ -190,7 +198,7 @@ function dismissPushBanner(){
 </style>
 
 <div class="cd-wrap page-enter">
-  <div class="cd-title">🏢 Admin nadzorna ploča
+  <div class="cd-title"><a href="/" style="color:var(--text-dim);text-decoration:none;font-size:.78rem;margin-right:8px"><i class="fas fa-arrow-left"></i></a> Admin nadzorna ploča
     {% if company %}<span style="font-size:.8rem;color:var(--text-dim);font-weight:400">— {{ company.name }}</span>
     <a href="/companies/settings/" style="margin-left:auto;font-size:.75rem;color:var(--gold);text-decoration:none;font-weight:600;background:var(--gold-dim);border:1px solid var(--gold-border);padding:5px 12px;border-radius:6px"><i class="fas fa-cog me-1"></i>Postavke tvrtke</a>{% endif %}
   </div>
@@ -219,6 +227,26 @@ function dismissPushBanner(){
     </div></a>
   </div>
 
+  <!-- Getting started — shows when no activity yet -->
+  {% if not recent_invoices and not active_iv_list and workers_total == 0 %}
+  <div style="background:linear-gradient(135deg,#1a1a1a,#111);border:1px solid var(--gold-border);border-radius:12px;padding:24px;margin-bottom:24px;text-align:center">
+    <div style="font-size:2rem;margin-bottom:8px">🚀</div>
+    <h6 style="color:var(--gold);font-weight:700;margin-bottom:6px">Pocnite koristiti LIMIT Connect</h6>
+    <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:16px">Evo 3 brza koraka za pocetak:</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <a href="/companies/settings/?tab=info" style="background:var(--surface);border:1px solid var(--gold-border);color:var(--gold);padding:12px 20px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;flex:1;max-width:200px">
+        <i class="fas fa-building" style="font-size:1.2rem;display:block;margin-bottom:6px"></i>1. Postavite firmu
+      </a>
+      <a href="/partners/new/" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:12px 20px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;flex:1;max-width:200px">
+        <i class="fas fa-handshake" style="font-size:1.2rem;display:block;margin-bottom:6px;color:var(--gold)"></i>2. Dodajte partnera
+      </a>
+      <a href="/invoicing/wizard/" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:12px 20px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;flex:1;max-width:200px">
+        <i class="fas fa-file-invoice" style="font-size:1.2rem;display:block;margin-bottom:6px;color:var(--gold)"></i>3. Izdajte racun
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Worker status grid -->
   <div class="s-title">{% trans "👷 Status radnika" %}</div>
   <div class="workers-grid" style="margin-bottom:24px">
@@ -241,8 +269,10 @@ function dismissPushBanner(){
       </div>
     </div>
     {% empty %}
-    <div style="color:var(--text-dim);font-size:.85rem;grid-column:1/-1;padding:12px 0">
-      {% trans "Nema registriranih radnika." %}
+    <div style="color:var(--text-dim);font-size:.85rem;grid-column:1/-1;padding:20px 0;text-align:center">
+      <div style="font-size:2rem;margin-bottom:8px">👷</div>
+      <div style="margin-bottom:10px">Nemate registriranih radnika.</div>
+      <a href="/companies/settings/?tab=employees" style="display:inline-block;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:700;text-decoration:none"><i class="fas fa-user-plus me-1"></i>Dodaj zaposlenika</a>
     </div>
     {% endfor %}
   </div>
@@ -270,7 +300,10 @@ function dismissPushBanner(){
         </div>
         {% endfor %}
       {% else %}
-        <div class="empty-row">{% trans "Nema sati na odobrenju ✓" %}</div>
+        <div class="empty-row" style="padding:28px 16px">
+        <div style="font-size:1.6rem;margin-bottom:6px;color:var(--green)"><i class="fas fa-check-circle"></i></div>
+        <div style="color:var(--text-dim);font-size:.82rem">Svi sati odobreni — nema cekanja.</div>
+      </div>
       {% endif %}
     </div>
 
@@ -291,7 +324,10 @@ function dismissPushBanner(){
         </div></a>
         {% endfor %}
       {% else %}
-        <div class="empty-row">{% trans "Nema aktivnih intervencija ✓" %}</div>
+        <div class="empty-row" style="padding:28px 16px">
+        <div style="font-size:1.6rem;margin-bottom:6px;color:var(--green)"><i class="fas fa-check-circle"></i></div>
+        <div style="color:var(--text-dim);font-size:.82rem">Nema aktivnih intervencija — sve je pod kontrolom.</div>
+      </div>
       {% endif %}
     </div>
 
@@ -314,7 +350,11 @@ function dismissPushBanner(){
       </div>
       {% endfor %}
     {% else %}
-      <div class="empty-row">{% trans "Nema faktura." %}</div>
+      <div class="empty-row" style="padding:28px 16px">
+        <div style="font-size:2rem;margin-bottom:8px">📄</div>
+        <div style="color:var(--text-dim);font-size:.85rem;margin-bottom:10px">Nemate jos niti jednu fakturu.</div>
+        <a href="/invoicing/wizard/" style="display:inline-block;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:700;text-decoration:none"><i class="fas fa-plus me-1"></i>Izdajte prvi racun</a>
+      </div>
     {% endif %}
   </div>
 

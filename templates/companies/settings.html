@@ -2,9 +2,26 @@
 {% load i18n l10n %}
 {% block title %}Postavke tvrtke — LIMIT Connect{% endblock %}
 {% block content %}
+<style>
+.lc-toast{position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:10px;font-size:.85rem;font-weight:600;color:#fff;box-shadow:0 6px 25px rgba(0,0,0,.4);animation:toastIn .3s ease;max-width:380px}
+.lc-toast.success{background:linear-gradient(135deg,#065f46,#047857);border:1px solid #10b981}
+.lc-toast.error{background:linear-gradient(135deg,#7f1d1d,#991b1b);border:1px solid #ef4444}
+@keyframes toastIn{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-15px)}}
+</style>
+<div id="lcToastContainer"></div>
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h5 class="mb-0"><i class="fas fa-cog text-muted me-2"></i>Postavke tvrtke</h5>
+  <div class="d-flex align-items-center gap-2">
+    <a href="/dashboard/company/" class="btn btn-sm btn-outline-secondary" style="font-size:.78rem"><i class="fas fa-arrow-left me-1"></i>Dashboard</a>
+    <h5 class="mb-0"><i class="fas fa-cog text-muted me-2"></i>Postavke tvrtke</h5>
+  </div>
 </div>
+
+{% if not company.oib %}
+<div class="alert mb-3 py-2" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.35);color:#c9a84c;font-size:.85rem;border-radius:8px">
+  <i class="fas fa-exclamation-triangle me-2"></i><strong>OIB nije unesen.</strong> Unesite OIB u tab "Info" za fiskalizaciju i e-racune.
+</div>
+{% endif %}
 
 <ul class="nav nav-tabs mb-3" id="settingsTabs">
   <li class="nav-item"><a class="nav-link{% if tab == 'info' %} active{% endif %}" href="?tab=info"><i class="fas fa-building me-1"></i> Info</a></li>
@@ -17,7 +34,17 @@
 </ul>
 
 {% if messages %}
-<div class="mb-3">{% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show py-2" style="font-size:.85rem">{{ m }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>{% endfor %}</div>
+{% for m in messages %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var t=document.createElement('div');
+  t.className='lc-toast {% if m.tags == "error" %}error{% else %}success{% endif %}';
+  t.innerHTML='<i class="fas fa-{% if m.tags == "error" %}times-circle{% else %}check-circle{% endif %} me-2"></i>{{ m|escapejs }}';
+  document.getElementById('lcToastContainer').appendChild(t);
+  setTimeout(function(){t.style.animation='toastOut .3s ease forwards';setTimeout(function(){t.remove()},300)},4000);
+});
+</script>
+{% endfor %}
 {% endif %}
 
 {% if tab == "info" %}
@@ -49,43 +76,43 @@
       </div>
       <div class="col-md-6">
         <label class="form-label fw-bold" style="font-size:.8rem">Adresa</label>
-        <input type="text" name="address" class="form-control" value="{{ company.address }}">
+        <input type="text" name="address" class="form-control" value="{{ company.address }}" placeholder="Ulica i kucni broj">
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">Grad</label>
-        <input type="text" name="city" class="form-control" value="{{ company.city }}">
+        <input type="text" name="city" class="form-control" value="{{ company.city }}" placeholder="npr. Zagreb">
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">Postanski broj</label>
-        <input type="text" name="zip_code" class="form-control" value="{{ company.zip_code }}">
+        <input type="text" name="zip_code" class="form-control" value="{{ company.zip_code }}" placeholder="npr. 10000">
       </div>
       <div class="col-md-4">
         <label class="form-label fw-bold" style="font-size:.8rem">IBAN</label>
-        <input type="text" name="iban" class="form-control" value="{{ company.iban }}">
+        <input type="text" name="iban" class="form-control" value="{{ company.iban }}" placeholder="HR12 3456 7890 1234 5678 9">
       </div>
       <div class="col-md-4">
         <label class="form-label fw-bold" style="font-size:.8rem">Porezni broj</label>
-        <input type="text" name="tax_number" class="form-control" value="{{ company.tax_number }}">
+        <input type="text" name="tax_number" class="form-control" value="{{ company.tax_number }}" placeholder="npr. 56447/32919 (DE) ili OIB">
       </div>
       <div class="col-md-4">
         <label class="form-label fw-bold" style="font-size:.8rem">PDV ID / VAT ID</label>
-        <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}">
+        <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}" placeholder="npr. HR12345678901 ili DE123456789">
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">Telefon</label>
-        <input type="text" name="phone" class="form-control" value="{{ company.phone }}">
+        <input type="text" name="phone" class="form-control" value="{{ company.phone }}" placeholder="+385 1 234 5678">
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">Mobitel</label>
-        <input type="text" name="mobile" class="form-control" value="{{ company.mobile }}">
+        <input type="text" name="mobile" class="form-control" value="{{ company.mobile }}" placeholder="+385 91 234 5678">
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">E-mail tvrtke</label>
-        <input type="email" name="company_email" class="form-control" value="{{ company.email }}">
+        <input type="email" name="company_email" class="form-control" value="{{ company.email }}" placeholder="info@firma.hr">
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold" style="font-size:.8rem">Web stranica</label>
-        <input type="url" name="website_url" class="form-control" value="{{ company.website_url }}">
+        <input type="url" name="website_url" class="form-control" value="{{ company.website_url }}" placeholder="https://www.firma.hr">
       </div>
       <div class="col-12">
         <label class="form-label fw-bold" style="font-size:.8rem">NKD djelatnost</label>
@@ -106,7 +133,9 @@
         {% if company.logo %}<div class="mt-1"><img src="{{ company.logo.url }}" style="max-height:40px;border-radius:4px"></div>{% endif %}
       </div>
     </div>
-    <div class="mt-3"><button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Spremi</button></div>
+    <div class="mt-3" style="position:sticky;bottom:0;background:#0a0a0a;padding:12px 0;z-index:50;border-top:1px solid rgba(201,168,76,.15)">
+      <button type="submit" class="btn btn-primary" style="background:#c9a84c;border-color:#c9a84c;color:#000;font-weight:700"><i class="fas fa-save me-1"></i> Spremi</button>
+    </div>
   </form>
 </div>
 {% endif %}
@@ -393,8 +422,8 @@
   </div>
 </div>
 
-<div class="d-flex">
-  <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Spremi postavke</button>
+<div style="position:sticky;bottom:0;background:#0a0a0a;padding:12px 0;z-index:50;border-top:1px solid rgba(201,168,76,.15)">
+  <button type="submit" class="btn btn-primary" style="background:#c9a84c;border-color:#c9a84c;color:#000;font-weight:700"><i class="fas fa-save me-1"></i> Spremi postavke</button>
 </div>
 </form>
 {% endif %}
