@@ -1,0 +1,174 @@
+{# ═══ GLOBAL AI ASSISTANT — aktivno prati svaki proces ═══ #}
+{# Uključi u base.html → radi na SVAKOJ stranici #}
+{# Prati: idle vrijeme, nepopunjena polja, nedovršene akcije #}
+{# Nudi pomoć: tooltip, hint, nudge — nikad agresivno #}
+<style>
+.ai-hint{position:fixed;bottom:20px;right:20px;z-index:15000;max-width:320px;background:#0d1117;border:1px solid #c9a84c55;border-radius:14px;padding:14px 16px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:none;animation:aiSlideIn .3s ease}
+.ai-hint.show{display:block}
+@keyframes aiSlideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.ai-hint-close{position:absolute;top:6px;right:10px;background:none;border:none;color:#666;font-size:1.1rem;cursor:pointer}
+.ai-hint-icon{font-size:1.2rem;margin-right:6px}
+.ai-hint-title{color:#c9a84c;font-weight:700;font-size:.85rem;margin-bottom:6px}
+.ai-hint-text{color:#94a3b8;font-size:.8rem;line-height:1.4}
+.ai-hint-action{display:inline-block;background:#c9a84c22;border:1px solid #c9a84c44;border-radius:6px;padding:4px 10px;color:#c9a84c;font-size:.75rem;margin-top:8px;cursor:pointer;text-decoration:none}
+.ai-hint-action:hover{background:#c9a84c33}
+.ai-pulse{position:fixed;bottom:20px;right:20px;z-index:14999;width:44px;height:44px;background:#c9a84c;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;box-shadow:0 4px 15px rgba(201,168,76,.3);transition:transform .15s}
+.ai-pulse:hover{transform:scale(1.1)}
+.ai-pulse.hidden{display:none}
+</style>
+
+<div class="ai-pulse hidden" id="aiPulse" onclick="_aiShowLastHint()" title="AI asistent">🤖</div>
+
+<div class="ai-hint" id="aiHint">
+  <button class="ai-hint-close" onclick="_aiDismiss()">&times;</button>
+  <div class="ai-hint-title"><span class="ai-hint-icon">🤖</span> <span id="aiHintTitle">AI Asistent</span></div>
+  <div class="ai-hint-text" id="aiHintText"></div>
+</div>
+
+<script>
+(function(){
+  var _aiIdleTimer = null;
+  var _aiShown = {};
+  var _aiLastHint = null;
+  var _aiDismissed = false;
+  var PAGE = window.location.pathname;
+
+  // ── KONTEKSTNA PRAVILA ──
+  var RULES = [
+    // POS: nema artikala u košarici 30s
+    {
+      page: /\/pos\/quick\//,
+      check: function(){ return document.querySelectorAll('.basket-item, .receipt-item').length === 0; },
+      delay: 30000,
+      id: 'pos_empty_basket',
+      title: 'Počnite s prodajom',
+      text: 'Kliknite na artikl za dodavanje u račun, ili <b>+</b> za kreiranje novog artikla.',
+    },
+    // POS: košarica puna ali ne naplaćuje 60s
+    {
+      page: /\/pos\/quick\//,
+      check: function(){ return document.querySelectorAll('.basket-item, .receipt-item').length > 0; },
+      delay: 60000,
+      id: 'pos_checkout_hint',
+      title: 'Spremni za naplatu?',
+      text: 'Odaberite način plaćanja ispod košarice — gotovina, kartica ili Revolut.',
+    },
+    // Inventory: prazan form
+    {
+      page: /\/inventory\/new/,
+      check: function(){ var n = document.querySelector('[name=name]'); return n && !n.value; },
+      delay: 15000,
+      id: 'inv_empty_form',
+      title: 'Brzi start',
+      text: 'Upišite samo <b>naziv i cijenu</b> — AI automatski predviđa kategoriju, porez i barkod.',
+    },
+    // Invoicing: kreiranje računa
+    {
+      page: /\/invoicing\/create/,
+      check: function(){ return true; },
+      delay: 20000,
+      id: 'inv_create_help',
+      title: 'Novi račun',
+      text: 'Odaberite partnera, dodajte stavke i kliknite <b>Spremi</b>. Fiskalizacija je automatska.',
+    },
+    // Settings: prvi put
+    {
+      page: /\/companies\/settings/,
+      check: function(){ return true; },
+      delay: 10000,
+      id: 'settings_tour',
+      title: 'Postavke firme',
+      text: 'Ovdje postavite OIB, adresu i IBAN — to ide na svaki račun. Tabovi: Firma, Zaposleni, Poslovnice.',
+    },
+    // Tax rates page
+    {
+      page: /\/companies\/tax-rates/,
+      check: function(){ return true; },
+      delay: 8000,
+      id: 'tax_rates_info',
+      title: 'Porezne stope',
+      text: 'HR standard: 25% (opće), 13% (hrana/piće), 5% (kruh/mlijeko), 0% (oslobođeno). Uredite po potrebi.',
+    },
+    // Dashboard: nema aktivnosti
+    {
+      page: /\/dashboard/,
+      check: function(){ return true; },
+      delay: 15000,
+      id: 'dashboard_hint',
+      title: 'Vaš pregled',
+      text: 'Ovdje vidite dnevni promet, otvorene račune i status fiskalizacije. Za POS kliknite izbornik ☰.',
+    },
+    // Anywhere: idle 2 min
+    {
+      page: /./,
+      check: function(){ return true; },
+      delay: 120000,
+      id: 'global_idle',
+      title: 'Trebate pomoć?',
+      text: 'Kliknite ☰ za navigaciju ili <b>🤖</b> za AI asistenta. Sve pitanja pošaljite na WhatsApp.',
+    },
+  ];
+
+  function _startObserver() {
+    // Za svako pravilo koje matchira ovu stranicu, postavi timer
+    RULES.forEach(function(rule) {
+      if (!rule.page.test(PAGE)) return;
+      if (_aiShown[rule.id]) return;
+      if (sessionStorage.getItem('ai_dismissed_' + rule.id)) return;
+
+      setTimeout(function() {
+        if (_aiShown[rule.id] || _aiDismissed) return;
+        if (rule.check()) {
+          _aiShowHint(rule.id, rule.title, rule.text);
+        }
+      }, rule.delay);
+    });
+
+    // Reset idle on any interaction
+    ['click', 'keydown', 'touchstart', 'scroll'].forEach(function(evt) {
+      document.addEventListener(evt, function() {
+        _aiDismissed = false;
+      }, {passive: true, once: false});
+    });
+  }
+
+  function _aiShowHint(id, title, text) {
+    if (_aiShown[id] || sessionStorage.getItem('ai_dismissed_' + id)) return;
+    _aiShown[id] = true;
+    _aiLastHint = {id: id, title: title, text: text};
+
+    document.getElementById('aiHintTitle').innerHTML = '🤖 ' + title;
+    document.getElementById('aiHintText').innerHTML = text;
+    document.getElementById('aiHint').classList.add('show');
+
+    // Auto-hide after 12s
+    setTimeout(function() {
+      document.getElementById('aiHint').classList.remove('show');
+      document.getElementById('aiPulse').classList.remove('hidden');
+    }, 12000);
+  }
+
+  window._aiDismiss = function() {
+    var hint = document.getElementById('aiHint');
+    hint.classList.remove('show');
+    _aiDismissed = true;
+    if (_aiLastHint) {
+      sessionStorage.setItem('ai_dismissed_' + _aiLastHint.id, '1');
+    }
+    document.getElementById('aiPulse').classList.remove('hidden');
+  };
+
+  window._aiShowLastHint = function() {
+    if (_aiLastHint) {
+      document.getElementById('aiHintTitle').innerHTML = '🤖 ' + _aiLastHint.title;
+      document.getElementById('aiHintText').innerHTML = _aiLastHint.text;
+      document.getElementById('aiHint').classList.add('show');
+      document.getElementById('aiPulse').classList.add('hidden');
+    }
+  };
+
+  // Start after page load
+  if (document.readyState === 'complete') _startObserver();
+  else window.addEventListener('load', _startObserver);
+})();
+</script>
