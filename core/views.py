@@ -2424,25 +2424,48 @@ def ivan_cockpit(request):
         logs_raw=subprocess.check_output(['tail','-30','/var/www/fina-connect/logs/django.log'],text=True).strip().split('\n')
         recent_logs=[l for l in logs_raw if any(k in l for k in ['ERROR','WARNING','INFO whatsapp'])][-8:]
     except: recent_logs=[]
+    _pos_promet = pos_today_qs.aggregate(t=Sum('total'))['t'] or 0
+    _pos_bonovi = pos_today_qs.count()
+    _pos_open   = POSSession.objects.filter(status='open').count()
+    _pos_week   = POSReceipt.objects.filter(
+        created_at__gte=week_ago, status='paid'
+    ).aggregate(t=Sum('total'))['t'] or 0
+    _inv_count  = Invoice.objects.filter(date_issued__date__gte=month_start).count()
+    _inv_promet = Invoice.objects.filter(date_issued__date__gte=month_start).aggregate(t=Sum('total'))['t'] or 0
+    _disk_parts = disk_info.split(' ') if disk_info != 'N/A' else ['N/A','']
+    _mem_parts  = mem_info.split(' / ')  if mem_info  != 'N/A' else ['N/A','N/A']
     context={
         'now':now,'today':today,
+        # user stats
         'users_total':User.objects.count(),
-        'users_active_week':User.objects.filter(last_login__gte=week_ago).count(),
+        'users_active_week':_pos_week,  # alias unused but kept
+        'users_week':User.objects.filter(last_login__gte=week_ago).count(),
         'users_never':User.objects.filter(last_login__isnull=True,is_active=True).count(),
         'companies':Company.objects.count(),
         'subs':subs,'mrr':mrr,
-        'pos_promet_danas':pos_today_qs.aggregate(t=Sum('total'))['t'] or 0,
-        'pos_bonovi_danas':pos_today_qs.count(),
-        'pos_open_sessions':POSSession.objects.filter(status='open').count(),
+        # POS — nova i stara imena
+        'pos_promet_danas':_pos_promet, 'pos_promet':_pos_promet,
+        'pos_bonovi_danas':_pos_bonovi, 'pos_bonovi':_pos_bonovi,
+        'pos_open_sessions':_pos_open,  'pos_open':_pos_open,
         'pos_terminal_count':POSTerminal.objects.filter(is_active=True).count(),
+        'pos_week':_pos_week,
         'pos_by_company':pos_by_company,
-        'invoices_month':Invoice.objects.filter(date_issued__date__gte=month_start).count(),
-        'invoices_promet':Invoice.objects.filter(date_issued__date__gte=month_start).aggregate(t=Sum('total'))['t'] or 0,
+        # fakture
+        'invoices_month':_inv_count,  'inv_count':_inv_count,
+        'invoices_promet':_inv_promet,'inv_promet':_inv_promet,
+        # eracun + arhiva
         'eracun_total':ERacun.objects.count(),
         'eracun_sent':ERacun.objects.filter(status='sent').count(),
-        'arhiva_total':ArhivaEntry.objects.count(),
-        'disk_info':disk_info,'mem_info':mem_info,
-        'recent_logs':recent_logs,
+        'arhiva_total':ArhivaEntry.objects.count(), 'arhiva':ArhivaEntry.objects.count(),
+        # server info — stara i nova imena
+        'disk_info':disk_info,
+        'disk_used':_disk_parts[0] if len(_disk_parts)>0 else 'N/A',
+        'disk_free':_disk_parts[1].strip('()') if len(_disk_parts)>1 else 'N/A',
+        'mem_info':mem_info,
+        'mem_used':_mem_parts[0] if len(_mem_parts)>0 else 'N/A',
+        'mem_total':_mem_parts[1] if len(_mem_parts)>1 else 'N/A',
+        # logs + feedback
+        'recent_logs':recent_logs, 'logs':recent_logs,
         'feedback':ImprovementSuggestion.objects.filter(status='new').order_by('-created_at')[:5],
     }
     # API key + cert health check
@@ -2482,7 +2505,6 @@ def ivan_cockpit(request):
 
     return render(request,'dashboards/ivan_cockpit.html',context)
 
-
 @login_required
 @require_POST
 def cockpit_gemini_task(request):
@@ -2502,6 +2524,154 @@ def cockpit_gemini_task(request):
     from core.gemini_tasks import run_gemini_task
     result = run_gemini_task.delay(task_desc, max_steps=max_steps, requested_by=request.user.username)
     return JsonResponse({'ok': True, 'task_id': str(result.id)})
+
+
+@login_required
+def cockpit_upload_photo(request):
+    """API: Upload fotke iz Fenix Cockpit okruglog stola."""
+    _cockpit_users = {'superadmin', 'marija.brtan'}
+    if not request.user.is_superuser and request.user.username not in _cockpit_users:
+        return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST only'}, status=405)
+    photo = request.FILES.get('photo')
+    if not photo:
+        return JsonResponse({'ok': False, 'error': 'Nema slike'}, status=400)
+    seat = request.POST.get('seat', 'unknown')
+    message = request.POST.get('message', '')[:200]
+    import os, uuid
+    ext = os.path.splitext(photo.name)[1] or '.jpg'
+    filename = 'cockpit_%s_%s%s' % (seat, uuid.uuid4().hex[:8], ext)
+    save_dir = '/var/www/fina-connect/media/cockpit/'
+    os.makedirs(save_dir, exist_ok=True)
+    filepath = os.path.join(save_dir, filename)
+    with open(filepath, 'wb') as f:
+        for chunk in photo.chunks():
+            f.write(chunk)
+    import json
+    log_path = os.path.join(save_dir, 'feed.json')
+    try:
+        with open(log_path, 'r') as f:
+            feed = json.load(f)
+    except Exception:
+        feed = []
+    feed.insert(0, {
+        'filename': filename, 'url': '/media/cockpit/%s' % filename,
+        'seat': seat, 'user': request.user.username, 'message': message,
+        'time': timezone.now().strftime('%H:%M'), 'date': timezone.now().strftime('%d.%m.'),
+        'uploaded_at': timezone.now().isoformat(),
+    })
+    feed = feed[:50]
+    with open(log_path, 'w') as f:
+        json.dump(feed, f, ensure_ascii=False)
+    return JsonResponse({'ok': True, 'url': '/media/cockpit/%s' % filename})
+
+
+@login_required
+def cockpit_photos(request):
+    """API: Dohvati feed fotki iz cockpita."""
+    import json, os
+    log_path = '/var/www/fina-connect/media/cockpit/feed.json'
+    try:
+        with open(log_path, 'r') as f:
+            feed = json.load(f)
+    except Exception:
+        feed = []
+    return JsonResponse({'photos': feed[:20]})
+
+
+@login_required
+def cockpit_send_whatsapp(request):
+    """API: Pošalji WhatsApp iz Fenix Cockpit okruglog stola."""
+    _cockpit_users = {'superadmin', 'marija.brtan'}
+    if not request.user.is_superuser and request.user.username not in _cockpit_users:
+        return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'POST only'}, status=405)
+    import json as _json
+    try:
+        data = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+    phone = data.get('phone', '').strip()
+    message = data.get('message', '').strip()
+    seat = data.get('seat', '')
+    if not phone or not message:
+        return JsonResponse({'ok': False, 'error': 'phone i message obavezni'}, status=400)
+    try:
+        from core.whatsapp_tasks import send_whatsapp_text_task
+        send_whatsapp_text_task.delay(phone, message)
+        from superadmin_ai.models import PendingAIAction
+        PendingAIAction.objects.create(
+            module='cockpit', action_type='whatsapp_sent',
+            description='[COCKPIT→%s] %s' % (seat.upper(), message[:100]),
+            status='executed', payload={'phone': phone, 'seat': seat},
+        )
+        return JsonResponse({'ok': True})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)[:100]}, status=500)
+
+
+@login_required
+def tim_chat(request):
+    from pos.models import ImprovementSuggestion
+    qs = ImprovementSuggestion.objects.filter(author=request.user).order_by('-created_at')[:10]
+    return render(request, 'dashboards/tim_chat.html', {'user_messages': qs})
+
+
+@login_required
+def tim_chat(request):
+    from pos.models import ImprovementSuggestion
+    qs = ImprovementSuggestion.objects.filter(
+        author=request.user
+    ).order_by('-created_at')[:10]
+    return render(request, 'dashboards/tim_chat.html', {'user_messages': qs})
+
+
+@login_required
+def tim_chat(request):
+    from pos.models import ImprovementSuggestion
+    qs = ImprovementSuggestion.objects.filter(
+        author=request.user
+    ).order_by('-created_at')[:10]
+    return render(request, 'dashboards/tim_chat.html', {'user_messages': qs})
+
+@login_required
+@require_POST  
+def tim_chat_send(request):
+    from django.http import JsonResponse
+    import json as _json
+    try:
+        data = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    desc = data.get('description','').strip()
+    if not desc:
+        return JsonResponse({'error': 'Prazna poruka'}, status=400)
+    from pos.models import ImprovementSuggestion
+    from core.company_utils import get_user_company
+    s = ImprovementSuggestion.objects.create(
+        company=get_user_company(request),
+        author=request.user,
+        source='user',
+        title='Tim Chat: ' + desc[:50],
+        description=desc,
+        category=data.get('module','tim_chat'),
+        priority=int(data.get('priority',2)),
+        status='new',
+    )
+    return JsonResponse({'ok': True, 'id': str(s.id), 'message': 'Poruka primljena ✅'})
+
+
+def promo_page(request):
+    return render(request, 'website/promo_hr.html')
+
+def promo_page_de(request):
+    return render(request, 'website/promo_de.html')
+
+
+def promo_opg(request):
+    return render(request, 'website/promo_opg.html')
 
 
 @csrf_exempt
@@ -2641,256 +2811,3 @@ def partner_signup_api(request):
 def cockpit_upload_photo(request):
     """API: Upload fotke iz Fenix Cockpit okruglog stola."""
     _cockpit_users = {'superadmin', 'marija.brtan'}
-    if not request.user.is_superuser and request.user.username not in _cockpit_users:
-        return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': 'POST only'}, status=405)
-
-    photo = request.FILES.get('photo')
-    if not photo:
-        return JsonResponse({'ok': False, 'error': 'Nema slike'}, status=400)
-
-    seat = request.POST.get('seat', 'unknown')
-    message = request.POST.get('message', '')[:200]
-
-    import os, uuid
-    from django.utils import timezone
-    ext = os.path.splitext(photo.name)[1] or '.jpg'
-    filename = 'cockpit_%s_%s%s' % (seat, uuid.uuid4().hex[:8], ext)
-    save_dir = os.path.join('/var/www/fina-connect/media/cockpit/')
-    os.makedirs(save_dir, exist_ok=True)
-    filepath = os.path.join(save_dir, filename)
-
-    with open(filepath, 'wb') as f:
-        for chunk in photo.chunks():
-            f.write(chunk)
-
-    # Spremi metadata u JSON log
-    import json
-    log_path = os.path.join(save_dir, 'feed.json')
-    try:
-        with open(log_path, 'r') as f:
-            feed = json.load(f)
-    except Exception:
-        feed = []
-
-    feed.insert(0, {
-        'filename': filename,
-        'url': '/media/cockpit/%s' % filename,
-        'seat': seat,
-        'user': request.user.username,
-        'message': message,
-        'time': timezone.now().strftime('%H:%M'),
-        'date': timezone.now().strftime('%d.%m.'),
-        'uploaded_at': timezone.now().isoformat(),
-    })
-    feed = feed[:50]  # Zadrži zadnjih 50
-
-    with open(log_path, 'w') as f:
-        json.dump(feed, f, ensure_ascii=False)
-
-    return JsonResponse({'ok': True, 'url': '/media/cockpit/%s' % filename})
-
-
-@login_required
-def cockpit_photos(request):
-    """API: Dohvati feed fotki iz cockpita."""
-    import json, os
-    log_path = '/var/www/fina-connect/media/cockpit/feed.json'
-    try:
-        with open(log_path, 'r') as f:
-            feed = json.load(f)
-    except Exception:
-        feed = []
-    return JsonResponse({'photos': feed[:20]})
-
-
-@login_required
-def cockpit_send_whatsapp(request):
-    """API: Pošalji WhatsApp iz Fenix Cockpit okruglog stola."""
-    _cockpit_users = {'superadmin', 'marija.brtan'}
-    if not request.user.is_superuser and request.user.username not in _cockpit_users:
-        return JsonResponse({'ok': False, 'error': 'Nemas pristup'}, status=403)
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': 'POST only'}, status=405)
-    import json as _json
-    try:
-        data = _json.loads(request.body)
-    except Exception:
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
-    phone = data.get('phone', '').strip()
-    message = data.get('message', '').strip()
-    seat = data.get('seat', '')
-    if not phone or not message:
-        return JsonResponse({'ok': False, 'error': 'phone i message obavezni'}, status=400)
-    try:
-        from core.whatsapp_tasks import send_whatsapp_text_task
-        send_whatsapp_text_task.delay(phone, message)
-        # Log u audit
-        from superadmin_ai.models import PendingAIAction
-        PendingAIAction.objects.create(
-            module='cockpit', action_type='whatsapp_sent',
-            description='[COCKPIT→%s] %s' % (seat.upper(), message[:100]),
-            status='executed',
-            payload={'phone': phone, 'seat': seat},
-        )
-        return JsonResponse({'ok': True})
-    except Exception as e:
-        return JsonResponse({'ok': False, 'error': str(e)[:100]}, status=500)
-
-
-@login_required
-def ivan_cockpit(request):
-    _cockpit_users = {'superadmin', 'marija.brtan'}
-    if not request.user.is_superuser and request.user.username not in _cockpit_users:
-        from django.http import HttpResponseForbidden
-        return HttpResponseForbidden()
-    from django.db.models import Sum, Count
-    from django.utils import timezone
-    from datetime import timedelta
-    import subprocess
-    now = timezone.now()
-    today = now.date()
-    week_ago = now - timedelta(days=7)
-    month_start = today.replace(day=1)
-    from django.contrib.auth.models import User
-    from companies.models import Company
-    from registration.models import CompanySubscription
-    from pos.models import POSReceipt, POSSession, POSTerminal, ImprovementSuggestion
-    from invoicing.models import Invoice
-    from documents.models import ArhivaEntry
-    from eracun.models import ERacun
-    subs = list(CompanySubscription.objects.filter(is_active=True).select_related('company').order_by('-monthly_fee'))
-    mrr = sum(float(s.monthly_fee or 0) for s in subs)
-    pos_today_qs = POSReceipt.objects.filter(created_at__date=today, status='paid')
-    pos_by_company = list(POSReceipt.objects.filter(created_at__date=today,status='paid').values('session__terminal__company__name').annotate(promet=Sum('total'),bonovi=Count('id')).order_by('-promet'))
-    try:
-        disk=subprocess.check_output(['df','-h','/'],text=True).split('\n')[1].split()
-        disk_info=f"{disk[4]} ({disk[3]} slobodno)"
-    except: disk_info='N/A'
-    try:
-        mem=subprocess.check_output(['free','-h'],text=True).split('\n')[1].split()
-        mem_info=f"{mem[2]} / {mem[1]}"
-    except: mem_info='N/A'
-    try:
-        logs_raw=subprocess.check_output(['tail','-30','/var/www/fina-connect/logs/django.log'],text=True).strip().split('\n')
-        recent_logs=[l for l in logs_raw if any(k in l for k in ['ERROR','WARNING','INFO whatsapp'])][-8:]
-    except: recent_logs=[]
-    context={
-        'now':now,'today':today,
-        'users_total':User.objects.count(),
-        'users_active_week':User.objects.filter(last_login__gte=week_ago).count(),
-        'users_never':User.objects.filter(last_login__isnull=True,is_active=True).count(),
-        'companies':Company.objects.count(),
-        'subs':subs,'mrr':mrr,
-        'pos_promet_danas':pos_today_qs.aggregate(t=Sum('total'))['t'] or 0,
-        'pos_bonovi_danas':pos_today_qs.count(),
-        'pos_open_sessions':POSSession.objects.filter(status='open').count(),
-        'pos_terminal_count':POSTerminal.objects.filter(is_active=True).count(),
-        'pos_by_company':pos_by_company,
-        'invoices_month':Invoice.objects.filter(date_issued__date__gte=month_start).count(),
-        'invoices_promet':Invoice.objects.filter(date_issued__date__gte=month_start).aggregate(t=Sum('total'))['t'] or 0,
-        'eracun_total':ERacun.objects.count(),
-        'eracun_sent':ERacun.objects.filter(status='sent').count(),
-        'arhiva_total':ArhivaEntry.objects.count(),
-        'disk_info':disk_info,'mem_info':mem_info,
-        'recent_logs':recent_logs,
-        'feedback':ImprovementSuggestion.objects.filter(status='new').order_by('-created_at')[:5],
-    }
-    # API key + cert health check
-    try:
-        import anthropic, os
-        api_key = os.environ.get('ANTHROPIC_API_KEY', '')
-        if api_key:
-            try:
-                c = anthropic.Anthropic(api_key=api_key)
-                c.messages.create(model='claude-haiku-4-5-20251001', max_tokens=5, messages=[{'role':'user','content':'ok'}])
-                context['api_status'] = 'ok'
-                context['api_key_short'] = api_key[:12] + '...' + api_key[-4:]
-            except anthropic.BadRequestError as e:
-                if 'credit balance' in str(e):
-                    context['api_status'] = 'no_credit'
-                else:
-                    context['api_status'] = 'error'
-                context['api_error'] = str(e)[:100]
-                context['api_key_short'] = api_key[:12] + '...' + api_key[-4:]
-            except Exception as e:
-                context['api_status'] = 'error'
-                context['api_error'] = str(e)[:100]
-        else:
-            context['api_status'] = 'missing'
-    except Exception:
-        context['api_status'] = 'unknown'
-
-    # Cert expiry
-    try:
-        from eracun.services.cert_monitor import check_all_certs
-        certs = check_all_certs()
-        context['certs'] = certs
-        context['certs_expiring'] = [c for c in certs if c.get('status') in ('CRITICAL','WARNING','ATTENTION','EXPIRED')]
-    except Exception:
-        context['certs'] = []
-        context['certs_expiring'] = []
-
-    return render(request,'dashboards/ivan_cockpit.html',context)
-
-@login_required
-def tim_chat(request):
-    from pos.models import ImprovementSuggestion
-    qs = ImprovementSuggestion.objects.filter(author=request.user).order_by('-created_at')[:10]
-    return render(request, 'dashboards/tim_chat.html', {'user_messages': qs})
-
-
-@login_required
-def tim_chat(request):
-    from pos.models import ImprovementSuggestion
-    qs = ImprovementSuggestion.objects.filter(
-        author=request.user
-    ).order_by('-created_at')[:10]
-    return render(request, 'dashboards/tim_chat.html', {'user_messages': qs})
-
-
-@login_required
-def tim_chat(request):
-    from pos.models import ImprovementSuggestion
-    qs = ImprovementSuggestion.objects.filter(
-        author=request.user
-    ).order_by('-created_at')[:10]
-    return render(request, 'dashboards/tim_chat.html', {'user_messages': qs})
-
-@login_required
-@require_POST  
-def tim_chat_send(request):
-    from django.http import JsonResponse
-    import json as _json
-    try:
-        data = _json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    desc = data.get('description','').strip()
-    if not desc:
-        return JsonResponse({'error': 'Prazna poruka'}, status=400)
-    from pos.models import ImprovementSuggestion
-    from core.company_utils import get_user_company
-    s = ImprovementSuggestion.objects.create(
-        company=get_user_company(request),
-        author=request.user,
-        source='user',
-        title='Tim Chat: ' + desc[:50],
-        description=desc,
-        category=data.get('module','tim_chat'),
-        priority=int(data.get('priority',2)),
-        status='new',
-    )
-    return JsonResponse({'ok': True, 'id': str(s.id), 'message': 'Poruka primljena ✅'})
-
-
-def promo_page(request):
-    return render(request, 'website/promo_hr.html')
-
-def promo_page_de(request):
-    return render(request, 'website/promo_de.html')
-
-
-def promo_opg(request):
-    return render(request, 'website/promo_opg.html')
