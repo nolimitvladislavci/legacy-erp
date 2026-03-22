@@ -52,22 +52,24 @@ Varijable:
 </div>
 
 {% else %}
-{# ── A4 / e-RAČUN — profesionalno, pravnički ton ── #}
+{# ── A4 / e-RAČUN — profesionalno + QR ── #}
 <div style="margin-top:12px;padding:8px 12px;border-top:1px solid #ddd;font-size:7.5pt;color:#666;display:flex;justify-content:space-between;align-items:center">
-  <div>
+  <div style="flex:1">
     {% if company.country == 'DE' or company.country == 'AT' %}
-    Erstellt mit <strong style="color:#333">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu · limit-connect.com<br>
-    <span style="font-size:6.5pt">Kryptografisch gesichert (SHA-256 Hash Chain) &bull; EU ViDA 2028 konform &bull; GoBD-konform</span>
+    Erstellt mit <strong style="color:#333">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu<br>
+    <span style="font-size:6.5pt">SHA-256 Hash Chain &bull; EU ViDA 2028 &bull; GoBD-konform</span>
     {% else %}
-    Izrađeno u <strong style="color:#333">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu · limit-connect.com<br>
-    <span style="font-size:6.5pt">Kriptografski zaštićeno (SHA-256 Hash Chain) &bull; EU ViDA 2028 &bull; Usklađeno s čl. 9. ZOR-a</span>
+    Izrađeno u <strong style="color:#333">LIMIT Connect</strong> &mdash; Fiskalizacija u džepu<br>
+    <span style="font-size:6.5pt">SHA-256 Hash Chain &bull; EU ViDA 2028 &bull; čl. 9. ZOR-a</span>
+    {% endif %}
+    {% if receipt.chain_link_safe %}
+    <br><span style="font-family:monospace;font-size:6pt;color:#999">{{ receipt.chain_link_safe.chain_hash|truncatechars:24 }}</span>
     {% endif %}
   </div>
-  {% if receipt.chain_link_safe %}
-  <div style="text-align:right;font-family:monospace;font-size:6.5pt">
-    <span style="color:#2ecc71">&#x25CF;</span> Integritet OK<br>
-    {{ receipt.chain_link_safe.chain_hash|truncatechars:24 }}
+  <div style="text-align:center;margin-left:8px">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://limit-connect.com/register/%3Fsource%3Dpdf&color=333333&bgcolor=ffffff"
+         style="width:15mm;height:15mm" alt="QR">
+    <div style="font-size:5pt;color:#999">limit-connect.com</div>
   </div>
-  {% endif %}
 </div>
 {% endif %}
