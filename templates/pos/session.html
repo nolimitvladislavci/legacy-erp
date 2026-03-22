@@ -65,13 +65,15 @@ td{padding:.55rem .6rem;border-bottom:1px solid rgba(255,255,255,.03);font-size:
 button[disabled]{opacity:.5;cursor:not-allowed}
 
 @media(max-width:900px){
-  .sl{grid-template-columns:1fr;height:auto}
-  .sl-left{max-height:40vh;overflow-y:auto}
-  .sl-right{height:auto;border-top:1px solid var(--border)}
+  .sl{display:flex;flex-direction:column-reverse;height:auto}
+  .sl-left{max-height:35vh;overflow-y:auto;order:2}
+  .sl-right{height:auto;border-bottom:1px solid var(--border);order:1}
   .close-panel{margin-top:0;padding:12px}
+  .sp{padding:10px 12px}
+  .sp-row{font-size:.8rem;padding:.25rem 0}
   .np-grid .np-btn{min-height:44px;font-size:1rem}
   .np-quick-btn{min-height:36px;font-size:.7rem}
-  .btn-close-session{position:sticky;bottom:0;z-index:50;border-radius:0;min-height:56px;font-size:1rem}
+  .btn-close-session{min-height:52px;font-size:1rem}
 }
 </style>
 {% endblock %}
