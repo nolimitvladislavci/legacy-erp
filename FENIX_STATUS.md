@@ -6,8 +6,8 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-23 15:45 — Sonnet (Wizard P1: Celery, Haiku retroNKD, funnel widget)
-Git HEAD: 8f7e84b
+2026-03-23 17:28 — Opus (T&C consent, SupplierRiskAlert, classify_buyer_types Celery, kg_summary)
+Git HEAD: 1d53447
 
 ---
 
@@ -159,11 +159,11 @@ Commit: 8a2fc66
 ### Kritični otvoreni problemi (van wizard-a)
 | Problem | Opis | Hitnost |
 |---------|------|---------|
-| T&C consent 0/86 | Nitko nije potpisao — KG nema pravne osnove | **HITNO** |
+| T&C consent | View + banner implementiran (commit 8def4fe) | **DONE** |
 | NKD NULL 86/86 | Sve firme bez NKD — KG confidence niži | VISOK |
-| _build_xml() NotImplemented | eIzvjestavanje blokira produkcijsko slanje | **HITNO** |
+| _build_xml() | IMPLEMENTIRANO (generate_ubl_xml + build_fina_xml) | **DONE** |
 | buyer_type b2c default | 19.237 partnera treba reklasifikaciju | VISOK |
-| SupplierRiskAlert 0 zapisa | FINA bonitet nije auto-triggered | SREDNJI |
+| SupplierRiskAlert | _save_alert popravljen + invoice signal (commit cd5b9f6) | **DONE** |
 
 ### DE Compliance
 - Fiskaly sandbox (treba API ključeve) — CEKA
