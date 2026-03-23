@@ -782,16 +782,48 @@ from .models import POSPaymentLine, POSReceipt, POSReceiptItem, POSSession, POST
 
 # ── QUICK POS ─────────────────────────────────────────────────────────────────
 
-@login_required
+POS_TYPE_META = [
+    {'value': 'quick',      'label': 'Brza blagajna', 'icon': '⚡', 'desc': 'Najbrži put do naplate. Pekare, kiosci, marketi.', 'recommended': True},
+    {'value': 'retail',     'label': 'Maloprodaja',   'icon': '🏪', 'desc': 'Barkod, kategorije, inventura. Dućani.', 'recommended': False},
+    {'value': 'restaurant', 'label': 'Restoran',      'icon': '🍽', 'desc': 'Stolovi, narudžbe, kuhinja (KDS).', 'recommended': False},
+    {'value': 'field',      'label': 'Terenska',      'icon': '🚚', 'desc': 'Utovar, ruta, prodaja na terenu.', 'recommended': False},
+    {'value': 'service',    'label': 'Usluge',        'icon': '🔧', 'desc': 'Satnica, usluge, frizerski saloni.', 'recommended': False},
+    {'value': 'reception',  'label': 'Recepcija',     'icon': '🏨', 'desc': 'Hoteli, apartmani, kampovi.', 'recommended': False},
+]
+
+_POS_ICON = {t['value']: t['icon'] for t in POS_TYPE_META}
+
+
 @login_required
 def quick_pos_redirect(request):
-    """Auto-select first terminal for quick POS."""
+    """POS selector — brza blagajna je default, mogu se pregledati i ostali tipovi."""
     company = get_user_company(request)
-    terminal = POSTerminal.objects.filter(company=company).first()
-    if terminal:
-        return redirect('pos:quick_pos', terminal_id=terminal.pk)
-    return render(request, 'pos/empty_terminal.html', {
+    terminals = list(POSTerminal.objects.filter(company=company, is_active=True).order_by('pos_type'))
+
+    # Ako postoji TOČNO jedan quick terminal s otvorenom smjenom — otvori direktno
+    quick_open = [
+        t for t in terminals
+        if t.pos_type == 'quick' and t.sessions.filter(status=POSSession.Status.OPEN).exists()
+    ]
+    if len(quick_open) == 1 and len(terminals) == 1:
+        return redirect('pos:quick_pos', terminal_id=quick_open[0].pk)
+
+    # Inače — prikaži selector
+    for t in terminals:
+        t.icon = _POS_ICON.get(t.pos_type, '🖥')
+        sess = t.sessions.filter(status=POSSession.Status.OPEN).first()
+        t.active_session = sess
+        if t.pos_type == 'quick' and sess:
+            t.url = f'/pos/quick/{t.pk}/'
+        elif t.pos_type == 'restaurant' and sess:
+            t.url = f'/pos/restaurant/{t.pk}/'
+        else:
+            t.url = f'/pos/terminal/{t.pk}/'
+
+    return render(request, 'pos/selector.html', {
         'company': company,
+        'terminals': terminals,
+        'pos_types': POS_TYPE_META,
     })
 
 
@@ -4845,3 +4877,30 @@ def qr_quick_pay(request, session_id):
     except Exception as e:
         logger.error("qr_quick_pay error: %s", e, exc_info=True)
         return JsonResponse({"ok": False, "error": "Sistemska greska pri naplati"}, status=500)
+
+
+# ═══════════════════════════════════════════════════════
+#  KIOSK — Robot prodavač (touchscreen 15")
+# ═══════════════════════════════════════════════════════
+
+def kiosk_view(request, token):
+    """
+    Kiosk mode — touchscreen 15", full-screen, bez logina.
+    Koristi access_token za identifikaciju terminala.
+    """
+    terminal = get_object_or_404(POSTerminal, access_token=token, is_active=True)
+    company = terminal.company
+
+    from inventory.models import InventoryItem
+    items = InventoryItem.objects.filter(
+        company=company, is_active=True, webshop_visible=True
+    ).order_by('category', 'name')
+
+    categories = sorted(set(i.category or 'ostalo' for i in items))
+
+    return render(request, 'pos/kiosk.html', {
+        'company': company,
+        'terminal': terminal,
+        'items': items,
+        'categories': categories,
+    })

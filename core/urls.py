@@ -142,6 +142,8 @@ urlpatterns += i18n_patterns(
     path("partner/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/partner_signup.html'), name="partner_signup"),
     path("api/partner-signup/", views.partner_signup_api, name="partner_signup_api"),
 
+    # Robot Prodavač — SEO landing
+    path('robot-pekara/', lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'landing/robot_pekara.html'), name='robot_pekara'),
     # UVIJEK FRIŠKO — landing + letci
     path('frisko/', lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/landing_frisko.html')),
     path('frisko/letak/a3/', lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/letak_a3_frisko.html')),

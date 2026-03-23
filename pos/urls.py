@@ -8,6 +8,7 @@ from . import views_v2
 app_name = 'pos'
 
 urlpatterns = [
+    path('kiosk/<str:token>/', views.kiosk_view, name='kiosk'),
     # Standardizirani API (Gemini JSON Ugovor A/B/C)
     path('api/pos/items/', views.api_pos_items, name='api_pos_items'),
     path('api/pos/checkout/', views.api_pos_checkout, name='api_pos_checkout'),
