@@ -43,4 +43,7 @@ urlpatterns += [
     # Pretplata
     path('subscription/', views.subscription_view, name='subscription'),
     path('subscription/cancel/', views.subscription_cancel, name='subscription_cancel'),
+
+    # T&C Consent
+    path('tc-consent/', views.tc_consent_view, name='tc_consent'),
 ]

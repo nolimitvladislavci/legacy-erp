@@ -621,3 +621,40 @@ def subscription_cancel(request):
 
     from django.shortcuts import redirect
     return redirect('companies:subscription')
+
+
+# ── T&C Consent ──────────────────────────────────────────────────────────────
+
+@login_required
+def tc_consent_view(request):
+    """GDPR T&C consent – firma mora prihvatiti prije korištenja FINA/KG usluga."""
+    from core.company_utils import get_user_company
+    from django.utils import timezone
+
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Niste povezani s firmom.')
+        return redirect('dashboard')
+
+    if company.has_signed_tc_consent:
+        messages.info(request, 'Uvjeti su već prihvaćeni.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        if request.POST.get('accept_tc') == 'on':
+            company.has_signed_tc_consent = True
+            company.tc_consent_signed_at = timezone.now()
+            company.tc_consent_version = '1.0'
+            company.save(update_fields=[
+                'has_signed_tc_consent',
+                'tc_consent_signed_at',
+                'tc_consent_version',
+            ])
+            messages.success(request, 'Uvjeti korištenja uspješno prihvaćeni. Hvala!')
+            return redirect('dashboard')
+        else:
+            messages.warning(request, 'Morate označiti polje za prihvaćanje uvjeta.')
+
+    return render(request, 'companies/tc_consent_document.html', {
+        'company': company,
+    })

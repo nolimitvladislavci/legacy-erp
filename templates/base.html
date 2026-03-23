@@ -415,6 +415,12 @@
 <div style="height:42px"></div><!-- push content below banner -->
 <!-- Impersonation timer now in core.js via window.FC.impersonationStart -->
 {% endif %}
+{% if request.user.is_authenticated and request.company and not request.company.has_signed_tc_consent %}
+<div style="background:linear-gradient(90deg,#1a1000,#2a1800);border-bottom:2px solid #c9a84c;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'Barlow Condensed',sans-serif">
+  <span style="color:#e8c96a;font-size:.85rem"><strong>⚠ Za punu funkcionalnost</strong> potrebno je prihvatiti uvjete korištenja platforme.</span>
+  <a href="/companies/tc-consent/" style="background:#c9a84c;color:#000;padding:6px 16px;border-radius:6px;font-weight:700;font-size:.8rem;text-decoration:none;white-space:nowrap">Prihvati uvjete →</a>
+</div>
+{% endif %}
 <div class="app-layout">
     <!-- Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
