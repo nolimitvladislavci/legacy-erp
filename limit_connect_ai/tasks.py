@@ -410,3 +410,25 @@ def campaign_suggestions_all(self):
 
     logger.info("campaign_suggestions_all: processed %d missions", count)
     return "Processed {} campaign missions".format(count)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BORG FENIX: Narodne Novine RSS Feed — automatska asimilacija zakona
+# ══════════════════════════════════════════════════════════════════════════════
+
+@shared_task(bind=True, max_retries=3, name='limit_connect_ai.fetch_nn_feed')
+def fetch_and_process_nn_feed(self):
+    """
+    Svakih 6h: dohvati NN RSS, parsiraj zakone, LLM ekstrakcija.
+    Retry: 3 pokušaja, 15 min između.
+    """
+    logger.info('[BORG] Započinjem asimilaciju NN feeda...')
+    try:
+        from limit_connect_ai.services.nn_feed_service import NNFeedScraperService
+        service = NNFeedScraperService()
+        result = service.process_feed()
+        logger.info('[BORG] NN feed završen: %s', result)
+        return result
+    except Exception as exc:
+        logger.error('[BORG] Kritična greška u NN feed tasku: %s', exc)
+        raise self.retry(exc=exc, countdown=60 * 15)

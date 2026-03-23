@@ -501,6 +501,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "limit_connect_ai.tasks.compliance_check_all",
         "schedule": crontab(hour=8, minute=0, day_of_week=1),
     },
+    "borg-nn-feed-scraper": {
+        "task": "limit_connect_ai.fetch_nn_feed",
+        "schedule": 21600,  # svakih 6 sati
+    },
     "ai-campaign-suggestions": {
         "task": "limit_connect_ai.tasks.campaign_suggestions_all",
         "schedule": crontab(hour=10, minute=0, day_of_week=5),
