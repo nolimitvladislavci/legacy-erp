@@ -28,10 +28,10 @@
   <span class="er-badge {{ eracun.status }}" style="font-size:.85rem;padding:5px 14px">{{ eracun.get_status_display }}</span>
 
   {% if eracun.status == 'draft' or eracun.status == 'valid' or eracun.status == 'invalid' or eracun.status == 'error' or eracun.status == 'rejected' %}
-  <form method="post" action="{% url 'eracun:send' eracun.pk %}" style="display:inline">
-    {% csrf_token %}
-    <button class="btn btn-primary btn-sm" onclick="return confirm('Poslati e-Racun na FINA?')"><i class="fas fa-paper-plane"></i> Posalji na FINA</button>
-  </form>
+  <button id="btn-send-fina" class="btn btn-primary btn-sm" data-url="{% url 'eracun:send' eracun.pk %}">
+    <i class="fas fa-paper-plane"></i> <span id="btn-send-text">Pošalji na FINA</span>
+  </button>
+  <div id="fina-status" style="display:none;margin-left:8px;font-size:.8rem;padding:6px 12px;border-radius:6px;align-self:center"></div>
   {% endif %}
 
   <a href="{% url 'eracun:download_xml' eracun.pk %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-code"></i> UBL XML</a>
@@ -161,3 +161,79 @@
 </div>
 {% endif %}
 {% endblock %}
+
+<script>
+(function() {
+  const btn = document.getElementById('btn-send-fina');
+  if (!btn) return;
+
+  const btnText = document.getElementById('btn-send-text');
+  const statusDiv = document.getElementById('fina-status');
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value
+    || '{{ csrf_token }}';
+
+  btn.addEventListener('click', async function() {
+    if (!confirm('Poslati e-Račun na FINA?')) return;
+
+    // Disable + status
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btnText.textContent = 'Validacija sheme...';
+    statusDiv.style.display = 'inline-block';
+    statusDiv.style.background = '#eff6ff';
+    statusDiv.style.color = '#1e40af';
+    statusDiv.style.border = '1px solid #bfdbfe';
+    statusDiv.textContent = 'Obrada FINA zahtjeva...';
+
+    try {
+      const resp = await fetch(btn.dataset.url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      });
+      const data = await resp.json();
+
+      if (data.ok || data.status === 'accepted' || data.status === 'queued') {
+        // Uspjeh
+        statusDiv.style.background = '#f0fdf4';
+        statusDiv.style.color = '#166534';
+        statusDiv.style.border = '1px solid #bbf7d0';
+        statusDiv.textContent = data.message || 'Uspješno poslano u red čekanja (FINA).';
+        btnText.textContent = 'Poslano';
+        // Reload za prikaz novog statusa
+        setTimeout(() => location.reload(), 2000);
+      } else if (data.error_code === 'XSD_ERROR' || (data.errors && data.errors.length)) {
+        // XSD greška — prikaži detalje
+        const errors = data.errors || [{ message_hr: data.message || data.error }];
+        const errorHtml = errors.map(e => e.message_hr || e.message || e).join('<br>');
+        statusDiv.style.background = '#fef2f2';
+        statusDiv.style.color = '#991b1b';
+        statusDiv.style.border = '1px solid #fecaca';
+        statusDiv.innerHTML = '<strong>Dokument nije poslan.</strong> Greška u strukturi:<br>' + errorHtml;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btnText.textContent = 'Pošalji na FINA';
+      } else {
+        // Općenita greška
+        statusDiv.style.background = '#fffbeb';
+        statusDiv.style.color = '#92400e';
+        statusDiv.style.border = '1px solid #fde68a';
+        statusDiv.textContent = data.message || data.error || 'Nepoznata greška';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btnText.textContent = 'Pošalji na FINA';
+      }
+    } catch (err) {
+      statusDiv.style.background = '#fef2f2';
+      statusDiv.style.color = '#991b1b';
+      statusDiv.style.border = '1px solid #fecaca';
+      statusDiv.textContent = 'Mrežna greška: ' + err.message;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btnText.textContent = 'Pošalji na FINA';
+    }
+  });
+})();
+</script>

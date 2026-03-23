@@ -15,8 +15,8 @@ from lxml import etree
 logger = logging.getLogger('eracun.validator')
 
 # XSD schema path — downloadamo jednom, validiramo zauvijek
-XSD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'xsd')
-UBL_XSD = os.path.join(XSD_DIR, 'UBL-Invoice-2.1.xsd')
+XSD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'schemas')
+UBL_XSD = os.path.join(XSD_DIR, 'maindoc', 'UBL-Invoice-2.1.xsd')
 
 _xsd_schema = None
 
@@ -59,6 +59,83 @@ def validate_xsd(xml_bytes):
         return True, []
     except Exception as e:
         return False, [f'XML parse error: {e}']
+
+
+class XSDValidationError(Exception):
+    """Specifičan exception za XSD greške s lokacijom u XML-u."""
+    def __init__(self, errors):
+        self.errors = errors  # List of dicts: {line, column, message, message_hr}
+        summary = '; '.join(e['message_hr'] for e in errors[:3])
+        super().__init__(f'XSD validacija neuspješna: {summary}')
+
+
+def validate_xml_against_xsd(xml_content):
+    """
+    Validira XML protiv UBL 2.1 XSD sheme.
+    Ako validacija padne → raise XSDValidationError s lokacijom greške.
+
+    Args:
+        xml_content: bytes ili str XML sadržaj
+
+    Returns:
+        True ako je validan
+
+    Raises:
+        XSDValidationError: s listom grešaka (linija, stupac, opis na HR)
+    """
+    schema = _get_xsd_schema()
+    if schema is None:
+        logger.warning('XSD shema nije dostupna — preskačem validaciju')
+        return True
+
+    xml_bytes = xml_content if isinstance(xml_content, bytes) else xml_content.encode('utf-8')
+
+    try:
+        doc = etree.fromstring(xml_bytes)
+    except etree.XMLSyntaxError as e:
+        raise XSDValidationError([{
+            'line': getattr(e, 'lineno', 0),
+            'column': getattr(e, 'offset', 0) or 0,
+            'message': str(e),
+            'message_hr': f'XML sintaksna greška na liniji {getattr(e, "lineno", "?")}: {e}',
+        }])
+
+    is_valid = schema.validate(doc)
+    if is_valid:
+        return True
+
+    errors = []
+    for err in schema.error_log:
+        # Translate common XSD errors to Croatian
+        msg_hr = _translate_xsd_error(err.message)
+        errors.append({
+            'line': err.line,
+            'column': err.column,
+            'message': err.message,
+            'message_hr': f'Linija {err.line}: {msg_hr}',
+        })
+
+    raise XSDValidationError(errors[:10])
+
+
+def _translate_xsd_error(msg):
+    """Prevedi česte XSD greške na hrvatski."""
+    translations = {
+        'is not a valid value': 'nije ispravna vrijednost',
+        'Element': 'Element',
+        'is not expected': 'nije očekivan na ovom mjestu',
+        'Missing child element': 'Nedostaje obavezni podelement',
+        'is not valid': 'nije ispravan',
+        'The value': 'Vrijednost',
+        'does not match': 'ne odgovara uzorku',
+        'expected': 'očekivano',
+        'Invalid content was found': 'Pronađen neispravan sadržaj',
+        'not among the possible': 'nije među mogućim vrijednostima',
+    }
+    result = msg
+    for eng, hr in translations.items():
+        result = result.replace(eng, hr)
+    return result
 
 
 def validate_business_rules(xml_bytes):

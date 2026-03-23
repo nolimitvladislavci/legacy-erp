@@ -93,16 +93,66 @@ def detail(request, pk):
 @login_required
 @require_POST
 def send_eracun(request, pk):
-    """Send e-Racun to FINA."""
+    """Send e-Racun to FINA — sync ili async (AJAX)."""
+    from django.http import JsonResponse
     company = get_user_company(request)
     eracun = get_object_or_404(ERacun, pk=pk, company=company)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if eracun.status in ('accepted', 'archived'):
+        if is_ajax:
+            return JsonResponse({'ok': False, 'message': 'Ovaj e-Račun je već poslan.'})
         messages.warning(request, 'Ovaj e-Racun je vec poslan.')
         return redirect('eracun:detail', pk=pk)
 
+    # ── XSD-First validacija ─────────────────────────────────────────
+    if eracun.xml_request:
+        try:
+            from eracun.services.validator import validate_xml_against_xsd, XSDValidationError
+            validate_xml_against_xsd(eracun.xml_request.encode('utf-8'))
+        except XSDValidationError as xsd_err:
+            eracun.status = 'invalid'
+            eracun.error_message = xsd_err.errors[0]['message_hr']
+            eracun.error_code = 'XSD_ERROR'
+            eracun.save(update_fields=['status', 'error_message', 'error_code'])
+            if is_ajax:
+                return JsonResponse({
+                    'ok': False,
+                    'error_code': 'XSD_ERROR',
+                    'message': 'Dokument nije poslan. Greška u strukturi.',
+                    'errors': xsd_err.errors[:5],
+                }, status=400)
+            messages.error(request, f'XSD greška: {xsd_err.errors[0]["message_hr"]}')
+            return redirect('eracun:detail', pk=pk)
+        except Exception:
+            pass  # XSD nedostupan — nastavi
+
+    # ── Async slanje (ako je AJAX) ───────────────────────────────────
+    if is_ajax:
+        try:
+            from eracun.tasks import send_eracun_to_fina_async
+            send_eracun_to_fina_async.delay(str(eracun.pk))
+            eracun.status = 'sending'
+            eracun.save(update_fields=['status'])
+            return JsonResponse({
+                'ok': True,
+                'status': 'queued',
+                'message': 'Uspješno poslano u red čekanja (FINA). Obrada u tijeku...',
+            })
+        except Exception as e:
+            # Fallback na sync ako Celery nije dostupan
+            pass
+
+    # ── Sync fallback ────────────────────────────────────────────────
     from .services.engine import process_eracun
     success, message = process_eracun(eracun, user=request.user)
+
+    if is_ajax:
+        return JsonResponse({
+            'ok': success,
+            'status': 'accepted' if success else 'error',
+            'message': message,
+        }, status=200 if success else 400)
 
     if success:
         messages.success(request, message)
