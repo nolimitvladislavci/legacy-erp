@@ -324,3 +324,105 @@ class MigrationLog(models.Model):
     def __str__(self):
         prefix = f"Red {self.row_number}: " if self.row_number else ""
         return f"[{self.level.upper()}] {prefix}{self.message[:80]}"
+
+
+# ═══════════════════════════════════════════════════════════════════
+# TIER 1 ZAKRPA: Trajni audit log — prezivljava 24h brisanje
+# ═══════════════════════════════════════════════════════════════════
+
+class PermanentMigrationAudit(models.Model):
+    """
+    Trajni, neizbrisivi zapis o izvrsenoj migraciji podataka.
+    Ovo ostaje u bazi 11 godina, cak i nakon sto se MigrationProject obrise.
+
+    PRAVNA OSNOVA: ZoRacunovodstvu — rok cuvanja poslovne dokumentacije.
+    Ovaj zapis NIJE vezan FK na MigrationProject (koji se brise nakon 24h).
+    Svi podaci su denormalizirani — zapis je samodovoljan.
+
+    Koristenje na sudu:
+    - Dokazuje TKO je importirao STO, KADA, S KOJIM mapiranjem
+    - Sadrzi IP adresu korisnika
+    - Sadrzi SHA-256 fingerprint originalne datoteke
+    - Korisnik je eksplicitno prihvatio disclaimer (agreed_to_disclaimer)
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    # Denormalizirani podaci o tvrtki i korisniku (ne FK — prezivljava brisanje)
+    company_id = models.IntegerField(verbose_name="ID tvrtke", db_index=True)
+    company_name = models.CharField(max_length=200, verbose_name="Naziv tvrtke")
+    company_oib = models.CharField(max_length=13, blank=True, default="", verbose_name="OIB tvrtke")
+    user_id = models.IntegerField(null=True, blank=True, verbose_name="ID korisnika")
+    user_email = models.EmailField(verbose_name="Email korisnika")
+    user_full_name = models.CharField(max_length=200, blank=True, default="", verbose_name="Ime i prezime")
+
+    # Izvorni sustav
+    source_system = models.CharField(max_length=100, blank=True, default="", verbose_name="Izvorni program")
+    original_filename = models.CharField(max_length=255, verbose_name="Naziv datoteke")
+    file_size_bytes = models.PositiveIntegerField(default=0, verbose_name="Velicina datoteke (bytes)")
+    file_sha256 = models.CharField(
+        max_length=64, blank=True, default="",
+        verbose_name="SHA-256 fingerprint datoteke",
+        help_text="Kriptografski otisak originalne datoteke za dokaz autenticnosti.",
+    )
+
+    # Tip podataka
+    entity_type = models.CharField(max_length=20, verbose_name="Tip podataka")
+    total_rows_in_file = models.IntegerField(default=0, verbose_name="Ukupno redova u datoteci")
+
+    # Sto je korisnik tocno mapirao i prihvatio
+    agreed_to_disclaimer = models.BooleanField(default=False, verbose_name="Prihvatio disclaimer")
+    disclaimer_text = models.TextField(
+        blank=True, default="",
+        verbose_name="Tekst disclaimera",
+        help_text="Tocna verzija teksta koji je korisnik prihvatio.",
+    )
+    field_mapping_snapshot = models.JSONField(
+        default=dict, verbose_name="Snapshot mapiranja polja",
+        help_text="Tocno mapiranje koje je korisnik potvrdio prije importa.",
+    )
+
+    # Statistika importa
+    records_created = models.IntegerField(default=0, verbose_name="Kreirano")
+    records_updated = models.IntegerField(default=0, verbose_name="Azurirano")
+    records_skipped = models.IntegerField(default=0, verbose_name="Preskoceno")
+    records_failed = models.IntegerField(default=0, verbose_name="Neuspjelo")
+
+    # Sigurnosni potpis
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP adresa")
+    user_agent = models.CharField(max_length=500, blank=True, default="", verbose_name="User-Agent")
+
+    # Vrijeme
+    execution_started_at = models.DateTimeField(verbose_name="Pocetak importa")
+    execution_completed_at = models.DateTimeField(auto_now_add=True, verbose_name="Zavrsetak importa")
+
+    # Zakonska zastita od brisanja (11 godina)
+    deletion_protected_until = models.DateField(
+        null=True, blank=True,
+        verbose_name="Zasticen od brisanja do",
+        help_text="ZoRacunovodstvu: 11 godina od datuma importa.",
+    )
+
+    class Meta:
+        verbose_name = "Trajni migracijski audit"
+        verbose_name_plural = "Trajni migracijski auditi"
+        ordering = ["-execution_completed_at"]
+
+    def __str__(self):
+        return f"Audit: {self.company_name} — {self.original_filename} ({self.execution_completed_at})"
+
+    def save(self, *args, **kwargs):
+        # Automatski postavi 11-godisnju zastitu
+        if not self.deletion_protected_until:
+            self.deletion_protected_until = (
+                timezone.now().date() + timezone.timedelta(days=11 * 365)
+            )
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """Blokira brisanje ako je unutar zakonskog roka cuvanja."""
+        if self.deletion_protected_until and timezone.now().date() < self.deletion_protected_until:
+            raise PermissionError(
+                f"Zapis zasticen od brisanja do {self.deletion_protected_until} "
+                f"(ZoRacunovodstvu — 11 godina). Brisanje nije dozvoljeno."
+            )
+        super().delete(*args, **kwargs)

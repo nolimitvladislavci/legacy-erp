@@ -1,10 +1,9 @@
 """
 data_migration/tasks.py
 
-Celery taskovi:
-1. cleanup_stale_migrations — svaki sat brise stare projekte (24h)
-2. run_migration — asinhroni import s inkrementalnim progress updateom
-3. post_migration_fenix_hook — orkestrator koji se okida nakon importa
+TIER 1 ZAKRPE:
+- run_migration prima audit_ctx i kreira PermanentMigrationAudit po zavrsetku
+- PermanentMigrationAudit zapis prezivljava 24h brisanje projekta
 """
 import logging
 import traceback
@@ -18,8 +17,8 @@ logger = logging.getLogger(__name__)
 @shared_task
 def cleanup_stale_migrations():
     """
-    Brise sve migracijske projekte i njihove datoteke starije od 24 sata,
-    bez obzira na status. LIMIT Connect nije arhiva.
+    Brise sve migracijske projekte i njihove datoteke starije od 24 sata.
+    PermanentMigrationAudit zapisi se NE brisu — oni ostaju 11 godina.
     """
     from .models import MigrationFile, MigrationProject
 
@@ -45,7 +44,8 @@ def cleanup_stale_migrations():
     total = file_count + project_count
     if total:
         logger.info(
-            "cleanup_stale_migrations: obrisano %d projekata, %d datoteka.",
+            "cleanup_stale_migrations: obrisano %d projekata, %d datoteka. "
+            "PermanentMigrationAudit zapisi SACUVANI.",
             project_count, file_count,
         )
 
@@ -53,17 +53,18 @@ def cleanup_stale_migrations():
 
 
 @shared_task
-def run_migration(project_pk):
+def run_migration(project_pk, audit_ctx=None):
     """
     Pokrece import podataka u ERP bazu.
-    Inkrementalno azurira project.processed_rows svakih 100 redova.
-    Po zavrsetku okida post_migration_fenix_hook.
+    Po zavrsetku kreira PermanentMigrationAudit zapis.
     """
     from .adapters.base import get_adapter
-    from .models import MigrationProject
+    from .models import MigrationProject, PermanentMigrationAudit
+
+    audit_ctx = audit_ctx or {}
 
     try:
-        project = MigrationProject.objects.unscoped().get(pk=project_pk)
+        project = MigrationProject.objects.unscoped().select_related("company", "created_by").get(pk=project_pk)
     except MigrationProject.DoesNotExist:
         logger.error("run_migration: projekt %s ne postoji.", project_pk)
         return
@@ -78,6 +79,8 @@ def run_migration(project_pk):
         project.save(update_fields=["status"])
         logger.error("run_migration: projekt %s nema datoteka.", project_pk)
         return
+
+    execution_started = timezone.now()
 
     try:
         adapter = get_adapter(mf.adapter_used)
@@ -114,7 +117,10 @@ def run_migration(project_pk):
             project_pk, result.created, result.updated, result.failed,
         )
 
-        # ── FENIX Post-Import Hook ──────────────────────────────
+        # ── TIER 1: Trajni audit zapis ───────────────────────────
+        _create_permanent_audit(project, mf, result, execution_started, audit_ctx)
+
+        # ── FENIX Post-Import Hook ───────────────────────────────
         post_migration_fenix_hook.delay(project_pk)
 
     except Exception as e:
@@ -129,19 +135,49 @@ def run_migration(project_pk):
             message=f"Fatalna greska tijekom importa: {e}\n{traceback.format_exc()[:1000]}",
         )
 
+        # Audit i za neuspjeli import — dokazuje pokusaj
+        _create_permanent_audit(project, mf, None, execution_started, audit_ctx, failed=True)
+
+
+def _create_permanent_audit(project, mf, result, started_at, audit_ctx, failed=False):
+    """Kreira neizbrisiv PermanentMigrationAudit zapis."""
+    from .models import PermanentMigrationAudit
+
+    company = project.company
+    user = project.created_by
+
+    try:
+        PermanentMigrationAudit.objects.create(
+            company_id=company.pk,
+            company_name=company.name[:200],
+            company_oib=getattr(company, "oib", "")[:13],
+            user_id=user.pk if user else None,
+            user_email=user.email if user else "unknown@unknown",
+            user_full_name=(user.get_full_name() if user else "")[:200],
+            source_system=(project.source_program or "")[:100],
+            original_filename=audit_ctx.get("original_filename", mf.original_filename)[:255],
+            file_size_bytes=audit_ctx.get("file_size", mf.file_size) or 0,
+            file_sha256=audit_ctx.get("file_sha256", ""),
+            entity_type=project.entity_type,
+            total_rows_in_file=project.total_rows,
+            agreed_to_disclaimer=audit_ctx.get("disclaimer_accepted", False),
+            disclaimer_text=audit_ctx.get("disclaimer_text", ""),
+            field_mapping_snapshot=project.field_mapping or {},
+            records_created=result.created if result else 0,
+            records_updated=result.updated if result else 0,
+            records_skipped=result.skipped if result else 0,
+            records_failed=result.failed if result else project.total_rows,
+            ip_address=audit_ctx.get("ip_address"),
+            user_agent=audit_ctx.get("user_agent", ""),
+            execution_started_at=started_at,
+        )
+        logger.info("PermanentMigrationAudit kreiran za projekt %s", project.pk)
+    except Exception as e:
+        logger.error("KRITICNO: PermanentMigrationAudit kreiranje FAILED za projekt %s: %s", project.pk, e)
+
 
 @shared_task
 def post_migration_fenix_hook(project_pk):
-    """
-    FENIX orkestrator — pokrece se automatski nakon uspjesnog importa.
-
-    Aktivnosti:
-    1. WhatsApp izvjestaj vlasniku tvrtke (ako je WhatsApp konfiguriran)
-    2. Logira rezultat u AI Assistant kontekst (ako modul postoji)
-
-    Ovaj task je fire-and-forget — ne smije blokirati niti baciti exception
-    koji bi utjecao na korisnicko iskustvo.
-    """
     from .models import MigrationProject
 
     try:
@@ -152,11 +188,8 @@ def post_migration_fenix_hook(project_pk):
     company = project.company
     user = project.created_by
 
-    # ── 1. WhatsApp izvjestaj ────────────────────────────────────
     try:
         from core.whatsapp_tasks import send_whatsapp_message
-
-        # Pronadji admin korisnika (vlasnika) tvrtke
         admin_phone = _get_company_admin_phone(company)
         if admin_phone:
             msg = (
@@ -172,16 +205,13 @@ def post_migration_fenix_hook(project_pk):
                 f"Vrijeme: {project.completed_at:%d.%m.%Y %H:%M}" if project.completed_at else ""
             )
             send_whatsapp_message.delay(admin_phone, msg)
-            logger.info("FENIX hook: WhatsApp izvjestaj poslan za projekt %s", project_pk)
     except ImportError:
-        logger.debug("FENIX hook: WhatsApp modul nije dostupan — preskoceno.")
+        pass
     except Exception as e:
-        logger.warning("FENIX hook: WhatsApp greska za projekt %s: %s", project_pk, e)
+        logger.warning("FENIX hook: WhatsApp greska: %s", e)
 
-    # ── 2. AI Assistant kontekst ─────────────────────────────────
     try:
         from ai_assistant.models import AIContext
-
         AIContext.objects.create(
             company=company,
             context_type="migration_completed",
@@ -201,20 +231,16 @@ def post_migration_fenix_hook(project_pk):
                 "records_failed": project.records_failed,
             },
         )
-        logger.info("FENIX hook: AI kontekst zapisan za projekt %s", project_pk)
     except ImportError:
-        logger.debug("FENIX hook: AI Assistant modul nije dostupan — preskoceno.")
+        pass
     except Exception as e:
-        logger.warning("FENIX hook: AI kontekst greska za projekt %s: %s", project_pk, e)
+        logger.warning("FENIX hook: AI kontekst greska: %s", e)
 
 
 def _get_company_admin_phone(company):
-    """Vraca telefonski broj admina tvrtke za WhatsApp obavijest."""
     try:
         from django.contrib.auth.models import User
         from permissions.manager import PermissionManager
-
-        # Trazi company_admin ili superadmin korisnika
         for user in User.objects.filter(is_active=True):
             try:
                 role = PermissionManager.get_user_role(user)

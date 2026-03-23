@@ -19,15 +19,6 @@
   <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-1"></i>{{ error }}</div>
   {% endif %}
 
-  <div class="alert alert-warning d-flex align-items-start gap-2 mb-3" style="background:#fefce8;border-color:#fde68a;color:#92400e">
-    <i class="fas fa-shield-alt mt-1"></i>
-    <div>
-      <strong>LIMIT Connect nije arhiva vaseg starog programa.</strong><br>
-      Podaci se isčitavaju i importiraju u ERP bazu. Originalne datoteke se
-      brisu sa servera nakon 24 sata. <strong>Zadrzite vlastitu kopiju.</strong>
-    </div>
-  </div>
-
   <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px">
     <form method="post" enctype="multipart/form-data" id="uploadForm">
       {% csrf_token %}
@@ -74,6 +65,21 @@
         </button>
       </div>
 
+      <!-- TIER 1: Pravno obvezujuci disclaimer checkbox -->
+      <div class="mb-3 p-3 rounded" style="background:var(--badge-bg);border:1px solid var(--border)">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="disclaimer_accepted"
+                 id="disclaimerCheck" required>
+          <label class="form-check-label small" for="disclaimerCheck" style="color:var(--text)">
+            <strong>Potvrdujete</strong> da LIMIT Connect nije arhivski sustav te da ste duzni
+            cuvati originalnu datoteku sukladno Zakonu o racunovodstvu
+            (NN 78/15, 134/15, 120/16, 116/18, 42/20, 47/20, 114/22, 82/23).
+            Uploadana datoteka ce biti automatski obrisana sa servera nakon 24 sata.
+            LIMIT Connect ne preuzima odgovornost za gubitak podataka iz izvornog sustava.
+          </label>
+        </div>
+      </div>
+
       <div class="d-grid">
         <button type="submit" class="btn btn-warning fw-bold py-2" id="submitBtn" disabled>
           <i class="fas fa-arrow-right me-1"></i>Ucitaj i nastavi na mapiranje
@@ -94,9 +100,16 @@
   var fileName = document.getElementById('fileName');
   var fileSize = document.getElementById('fileSize');
   var submitBtn = document.getElementById('submitBtn');
+  var disclaimerCheck = document.getElementById('disclaimerCheck');
   var form = document.getElementById('uploadForm');
+  var MAX_SIZE = 52428800; // 50 MB
 
-  // Drag & drop
+  function updateSubmitState(){
+    submitBtn.disabled = !(fileInput.files.length > 0 && disclaimerCheck.checked);
+  }
+
+  disclaimerCheck.addEventListener('change', updateSubmitState);
+
   ['dragenter','dragover'].forEach(function(ev){
     dropZone.addEventListener(ev, function(e){ e.preventDefault(); dropZone.style.borderColor='var(--accent)'; dropZone.style.background='var(--table-row-hover)'; });
   });
@@ -112,21 +125,25 @@
   });
 
   function showFile(f){
+    if(f.size > MAX_SIZE){
+      alert('Datoteka prevelika (' + (f.size/1048576).toFixed(1) + ' MB). Maksimalna velicina: 50 MB.');
+      fileInput.value = '';
+      return;
+    }
     fileName.textContent = f.name;
     fileSize.textContent = '(' + (f.size / 1024).toFixed(0) + ' KB)';
     fileInfo.classList.remove('d-none');
     dropZone.classList.add('d-none');
-    submitBtn.disabled = false;
+    updateSubmitState();
   }
 
   window.clearFile = function(){
     fileInput.value = '';
     fileInfo.classList.add('d-none');
     dropZone.classList.remove('d-none');
-    submitBtn.disabled = true;
+    updateSubmitState();
   };
 
-  // Submit loading state
   form.addEventListener('submit', function(){
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Parsiranje datoteke... Molimo ne zatvarajte stranicu';

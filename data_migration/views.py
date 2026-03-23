@@ -4,18 +4,19 @@ data_migration/views.py
 Strict state machine flow:
     upload → mapping → preview → execute → result
 
-Pravila:
-- Svaki view provjerava project.status i redirecta na ispravan korak
-- mapping_view dozvoljava draft I mapped (korisnik se moze vratiti)
-- AJAX endpointi vracaju JSON
-- Partial save mapiranja (ne gubi se rad)
+TIER 1 ZAKRPE:
+- Disclaimer checkbox (required) na upload stranici
+- Server-side file size validation (50MB)
+- Zabrana brisanja tijekom importa
+- IP adresa + user agent zapisani u session za audit
 """
+import hashlib
 import json
 import logging
 import os
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
@@ -27,9 +28,20 @@ from .models import MigrationFile, MigrationLog, MigrationProject
 
 logger = logging.getLogger(__name__)
 
+# Max upload size: 50 MB
+MAX_UPLOAD_SIZE = 52_428_800
+
+# Tekst disclaimera — verzioniran. Mijenjaj verziju kad se tekst promijeni.
+DISCLAIMER_TEXT = (
+    "Potvrdujete da LIMIT Connect nije arhivski sustav te da ste duzni "
+    "cuvati originalnu datoteku sukladno Zakonu o racunovodstvu (NN 78/15, 134/15, 120/16, 116/18, 42/20, 47/20, 114/22, 82/23). "
+    "Uploadana datoteka ce biti automatski obrisana sa servera nakon 24 sata. "
+    "LIMIT Connect ne preuzima odgovornost za gubitak podataka iz izvornog sustava."
+)
+DISCLAIMER_VERSION = "v1.0-2026"
+
 # ── Helpers ───────────────────────────────────────────────────────
 
-# Dozvoljeni statusi po viewu + redirect destinacija za krivi status
 _STATE_RULES = {
     "mapping":  {"allowed": {"draft", "mapped"},    "fallback": "data_migration:upload"},
     "preview":  {"allowed": {"mapped"},             "fallback": "data_migration:mapping"},
@@ -39,7 +51,6 @@ _STATE_RULES = {
 
 
 def _get_project(request, pk):
-    """Dohvaca projekt uz company scope provjeru."""
     company = get_user_company(request)
     return get_object_or_404(
         MigrationProject.objects.unscoped().filter(company=company),
@@ -48,17 +59,12 @@ def _get_project(request, pk):
 
 
 def _check_state(request, project, view_name):
-    """
-    Provjerava je li projekt u dozvoljenom statusu za dani view.
-    Vraca None ako je OK, ili HttpResponseRedirect ako treba redirectat.
-    """
     rules = _STATE_RULES.get(view_name)
     if not rules:
         return None
     if project.status in rules["allowed"]:
         return None
 
-    # Odredi kuda redirectat na temelju aktualnog statusa
     status_to_view = {
         "draft":     "data_migration:mapping",
         "mapped":    "data_migration:mapping",
@@ -74,12 +80,10 @@ def _check_state(request, project, view_name):
 
 
 def _get_primary_file(project):
-    """Vraca prvu (glavnu) datoteku projekta."""
     return project.files.first()
 
 
 def _detect_format_from_ext(filename):
-    """Detektira format iz ekstenzije."""
     ext = os.path.splitext(filename)[1].lower().lstrip(".")
     format_map = {
         "csv": "csv", "xlsx": "xlsx", "xls": "xls",
@@ -88,11 +92,27 @@ def _detect_format_from_ext(filename):
     return format_map.get(ext, "other")
 
 
+def _get_client_ip(request):
+    xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "")
+
+
+def _compute_file_sha256(file_obj):
+    """Racuna SHA-256 hash uploadadne datoteke."""
+    h = hashlib.sha256()
+    file_obj.seek(0)
+    for chunk in file_obj.chunks(65536):
+        h.update(chunk)
+    file_obj.seek(0)
+    return h.hexdigest()
+
+
 # ── Dashboard ─────────────────────────────────────────────────────
 
 @login_required
 def dashboard(request):
-    """Lista svih migracijskih projekata za tvrtku."""
     company = get_user_company(request)
     projects = MigrationProject.objects.filter(company=company)
     return render(request, "data_migration/dashboard.html", {
@@ -105,7 +125,6 @@ def dashboard(request):
 
 @login_required
 def upload_view(request):
-    """Upload datoteke + kreiranje projekta."""
     company = get_user_company(request)
 
     if request.method == "POST":
@@ -113,6 +132,22 @@ def upload_view(request):
         if not uploaded_file:
             return render(request, "data_migration/upload.html", {
                 "error": "Odaberite datoteku za uvoz.",
+                "disclaimer_text": DISCLAIMER_TEXT,
+            })
+
+        # ── TIER 1: Server-side file size validation ─────────────
+        if uploaded_file.size > MAX_UPLOAD_SIZE:
+            return render(request, "data_migration/upload.html", {
+                "error": f"Datoteka prevelika ({uploaded_file.size // 1048576} MB). Maksimalna velicina: 50 MB.",
+                "disclaimer_text": DISCLAIMER_TEXT,
+            })
+
+        # ── TIER 1: Disclaimer checkbox validation ───────────────
+        disclaimer_accepted = request.POST.get("disclaimer_accepted") == "on"
+        if not disclaimer_accepted:
+            return render(request, "data_migration/upload.html", {
+                "error": "Morate prihvatiti uvjete koristenja prije uploada.",
+                "disclaimer_text": DISCLAIMER_TEXT,
             })
 
         name = request.POST.get("name", "").strip()
@@ -122,7 +157,9 @@ def upload_view(request):
         entity_type = request.POST.get("entity_type", "partners")
         source_program = request.POST.get("source_program", "").strip()
 
-        # Kreiraj projekt
+        # ── SHA-256 fingerprint datoteke ─────────────────────────
+        file_sha256 = _compute_file_sha256(uploaded_file)
+
         project = MigrationProject.objects.create(
             company=company,
             name=name[:200],
@@ -132,10 +169,8 @@ def upload_view(request):
             created_by=request.user,
         )
 
-        # Detektiraj format
         file_format = _detect_format_from_ext(uploaded_file.name)
 
-        # Spremi datoteku
         mf = MigrationFile(
             project=project,
             original_filename=uploaded_file.name[:255],
@@ -144,14 +179,12 @@ def upload_view(request):
         mf.file.save(uploaded_file.name, uploaded_file, save=False)
         mf.save()
 
-        # chmod 600 na uploadanu datoteku
         try:
             file_path = mf.file.path
             os.chmod(file_path, 0o600)
         except (OSError, NotImplementedError):
             pass
 
-        # Detektiraj adapter i ekstrahiraj podatke
         try:
             file_path = mf.file.path
             adapter = detect_adapter(file_path, file_format)
@@ -159,6 +192,7 @@ def upload_view(request):
                 project.delete()
                 return render(request, "data_migration/upload.html", {
                     "error": f"Format '{file_format}' nije podrzani. Podrzani: CSV, Excel (XLSX/XLS).",
+                    "disclaimer_text": DISCLAIMER_TEXT,
                 })
 
             raw_data = adapter.extract_raw_data(file_path)
@@ -172,7 +206,6 @@ def upload_view(request):
                 "adapter_used", "extracted_data", "row_count", "detected_columns",
             ])
 
-            # Postavi total_rows na projektu
             project.total_rows = len(raw_data)
             project.save(update_fields=["total_rows"])
 
@@ -180,24 +213,39 @@ def upload_view(request):
             project.delete()
             return render(request, "data_migration/upload.html", {
                 "error": str(e),
+                "disclaimer_text": DISCLAIMER_TEXT,
             })
         except Exception as e:
             logger.exception("Greska pri parsiranju datoteke: %s", e)
             project.delete()
             return render(request, "data_migration/upload.html", {
                 "error": f"Greska pri citanju datoteke: {e}",
+                "disclaimer_text": DISCLAIMER_TEXT,
             })
+
+        # ── Spremi audit kontekst u session za kasniji zapis ─────
+        request.session[f"dm_audit_{project.pk}"] = {
+            "disclaimer_accepted": True,
+            "disclaimer_text": DISCLAIMER_TEXT,
+            "disclaimer_version": DISCLAIMER_VERSION,
+            "file_sha256": file_sha256,
+            "file_size": uploaded_file.size,
+            "original_filename": uploaded_file.name[:255],
+            "ip_address": _get_client_ip(request),
+            "user_agent": request.META.get("HTTP_USER_AGENT", "")[:500],
+        }
 
         return redirect("data_migration:mapping", pk=project.pk)
 
-    return render(request, "data_migration/upload.html")
+    return render(request, "data_migration/upload.html", {
+        "disclaimer_text": DISCLAIMER_TEXT,
+    })
 
 
 # ── Step 2: Mapping ───────────────────────────────────────────────
 
 @login_required
 def mapping_view(request, pk):
-    """Mapiranje kolona iz datoteke u ERP polja."""
     project = _get_project(request, pk)
     redir = _check_state(request, project, "mapping")
     if redir:
@@ -211,10 +259,8 @@ def mapping_view(request, pk):
     schema = adapter.get_mapping_schema(project.entity_type)
     detected_columns = mf.detected_columns or []
 
-    # Sample redovi za preview (prvih 5)
     raw_samples = mf.extracted_data[:5] if mf.extracted_data else []
 
-    # Pretvori u dict: {kolona: "primjer vrijednosti iz prvog reda"}
     sample_values = {}
     for col in detected_columns:
         for row in raw_samples:
@@ -225,12 +271,10 @@ def mapping_view(request, pk):
         else:
             sample_values[col] = ""
 
-    # Pretvori sample redove u liste za tablicu
     sample_table = []
     for row in raw_samples:
         sample_table.append([str(row.get(col, ""))[:50] for col in detected_columns])
 
-    # Auto-match: ako detektirana kolona ima isto ime kao ERP polje
     auto_mapping = {}
     if not project.field_mapping:
         schema_labels = {f["label"].lower(): f["key"] for f in schema}
@@ -256,7 +300,6 @@ def mapping_view(request, pk):
 @login_required
 @require_POST
 def mapping_save_api(request, pk):
-    """AJAX: sprema mapiranje (partial ili finalno)."""
     project = _get_project(request, pk)
     if project.status not in ("draft", "mapped"):
         return JsonResponse({"ok": False, "error": "Projekt nije u stanju za mapiranje."}, status=400)
@@ -269,7 +312,6 @@ def mapping_save_api(request, pk):
     mapping = body.get("mapping", {})
     is_final = body.get("is_final", False)
 
-    # Uvijek spremi (partial save)
     project.field_mapping = mapping
     project.save(update_fields=["field_mapping", "updated_at"])
 
@@ -293,7 +335,6 @@ def mapping_save_api(request, pk):
 
 @login_required
 def preview_view(request, pk):
-    """Preview transformiranih podataka prije importa."""
     project = _get_project(request, pk)
     redir = _check_state(request, project, "preview")
     if redir:
@@ -305,20 +346,16 @@ def preview_view(request, pk):
 
     adapter = get_adapter(mf.adapter_used)
 
-    # Transformiraj prvih 50 redova
     preview_slice = mf.extracted_data[:50] if mf.extracted_data else []
     mapped_preview = adapter.apply_mapping(preview_slice, project.field_mapping)
 
-    # Spremi preview i postavi status
     project.preview_data = mapped_preview
     project.status = "preview"
     project.save(update_fields=["preview_data", "status", "updated_at"])
 
-    # Shema za prikaz zaglavlja tablice — samo mapirana polja
     schema = adapter.get_mapping_schema(project.entity_type)
     mapped_fields = [f for f in schema if f["key"] in project.field_mapping.values()]
 
-    # Pretvori preview dict-ove u liste za Django template iteraciju
     field_keys = [f["key"] for f in mapped_fields]
     preview_table = []
     for row in mapped_preview:
@@ -338,7 +375,6 @@ def preview_view(request, pk):
 @login_required
 @require_POST
 def execute_api(request, pk):
-    """AJAX: pokrece Celery task za import."""
     project = _get_project(request, pk)
     if project.status != "preview":
         return JsonResponse(
@@ -346,7 +382,6 @@ def execute_api(request, pk):
             status=400,
         )
 
-    # Postavi status na importing
     project.status = "importing"
     project.processed_rows = 0
     project.records_created = 0
@@ -358,9 +393,24 @@ def execute_api(request, pk):
         "records_updated", "records_skipped", "records_failed", "updated_at",
     ])
 
-    # Pokreni Celery task
+    # Proslijedi audit kontekst iz sessiona u Celery task
+    audit_ctx = request.session.pop(f"dm_audit_{project.pk}", {})
+    # Fallback ako session nema (npr. korisnik se vracao)
+    if not audit_ctx:
+        mf = _get_primary_file(project)
+        audit_ctx = {
+            "disclaimer_accepted": True,
+            "disclaimer_text": DISCLAIMER_TEXT,
+            "disclaimer_version": DISCLAIMER_VERSION,
+            "file_sha256": "",
+            "file_size": mf.file_size if mf else 0,
+            "original_filename": mf.original_filename if mf else "",
+            "ip_address": _get_client_ip(request),
+            "user_agent": request.META.get("HTTP_USER_AGENT", "")[:500],
+        }
+
     from .tasks import run_migration
-    run_migration.delay(project.pk)
+    run_migration.delay(project.pk, audit_ctx)
 
     return JsonResponse({"ok": True, "status": "importing"})
 
@@ -368,7 +418,6 @@ def execute_api(request, pk):
 @login_required
 @require_GET
 def status_api(request, pk):
-    """AJAX polling: vraca trenutni status importa."""
     project = _get_project(request, pk)
     data = {
         "status": project.status,
@@ -389,7 +438,6 @@ def status_api(request, pk):
 
 @login_required
 def result_view(request, pk):
-    """Rezultat importa sa statistikom i logovima."""
     project = _get_project(request, pk)
     redir = _check_state(request, project, "result")
     if redir:
@@ -397,7 +445,6 @@ def result_view(request, pk):
 
     logs = project.logs.all()
 
-    # Filter po levelu
     level_filter = request.GET.get("level", "")
     if level_filter in ("info", "warning", "error"):
         logs = logs.filter(level=level_filter)
@@ -410,7 +457,7 @@ def result_view(request, pk):
 
     return render(request, "data_migration/result.html", {
         "project": project,
-        "logs": logs[:500],  # max 500 logova na stranici
+        "logs": logs[:500],
         "level_filter": level_filter,
         "log_counts": log_counts,
     })
@@ -421,10 +468,15 @@ def result_view(request, pk):
 @login_required
 @require_POST
 def delete_project(request, pk):
-    """Brise projekt i sve povezane datoteke."""
     project = _get_project(request, pk)
 
-    # Fizicki brisi datoteke s diska
+    # ── TIER 1: Zabrana brisanja tijekom importa ─────────────────
+    if project.status == "importing":
+        return HttpResponseForbidden(
+            "Brisanje nije dozvoljeno dok je import u tijeku. "
+            "Sacekajte zavrsetak importa."
+        )
+
     for mf in project.files.all():
         mf.delete_file_from_disk()
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import MigrationProject, MigrationFile, MigrationLog
+from .models import MigrationProject, MigrationFile, MigrationLog, PermanentMigrationAudit
 
 
 class MigrationFileInline(admin.TabularInline):
@@ -35,3 +35,32 @@ class MigrationLogAdmin(admin.ModelAdmin):
     list_display = ("project", "level", "entity_type", "row_number", "message", "created_at")
     list_filter = ("level", "entity_type")
     readonly_fields = ("created_at",)
+
+
+@admin.register(PermanentMigrationAudit)
+class PermanentMigrationAuditAdmin(admin.ModelAdmin):
+    list_display = (
+        "company_name", "user_email", "source_system", "original_filename",
+        "entity_type", "records_created", "records_updated", "records_failed",
+        "agreed_to_disclaimer", "execution_completed_at", "deletion_protected_until",
+    )
+    list_filter = ("entity_type", "agreed_to_disclaimer", "source_system")
+    search_fields = ("company_name", "company_oib", "user_email", "original_filename")
+    readonly_fields = (
+        "id", "company_id", "company_name", "company_oib",
+        "user_id", "user_email", "user_full_name",
+        "source_system", "original_filename", "file_size_bytes", "file_sha256",
+        "entity_type", "total_rows_in_file",
+        "agreed_to_disclaimer", "disclaimer_text", "field_mapping_snapshot",
+        "records_created", "records_updated", "records_skipped", "records_failed",
+        "ip_address", "user_agent",
+        "execution_started_at", "execution_completed_at", "deletion_protected_until",
+    )
+
+    def has_delete_permission(self, request, obj=None):
+        """Zabrani brisanje iz admin panela — zakonska zastita."""
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        """Zabrani editiranje — audit zapis je imutabilan."""
+        return False
