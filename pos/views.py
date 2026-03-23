@@ -900,6 +900,18 @@ def quick_pos(request, terminal_id):
     except Exception:
         pass
 
+    # TASK 1: Terminal limit banner za besplatni plan
+    show_upgrade_banner = False
+    try:
+        from registration.models import CompanySubscription
+        sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
+        if sub and sub.plan in ('starter', 'micro'):
+            active_terms = POSTerminal.objects.filter(company=company, is_active=True).count()
+            if active_terms > 1:
+                show_upgrade_banner = True
+    except Exception:
+        pass
+
     return render(request, 'pos/quick.html', {
         'terminal':           terminal,
         'session':            session,
@@ -908,6 +920,7 @@ def quick_pos(request, terminal_id):
         'categories':         cats,
         'cashiers':           cashiers,
         'session_report_url': report_url,
+        'show_upgrade_banner': show_upgrade_banner,
     })
 
 
@@ -3962,6 +3975,14 @@ def prigovori_api(request):
                 'datum_odgovora': p.datum_odgovora.isoformat() if p.datum_odgovora else None,
                 'rok_istekao': p.rok_istekao,
                 'dana_do_roka': p.dana_do_roka,
+                'ai_category': p.ai_category,
+                'ai_sentiment': p.ai_sentiment,
+                'ai_priority': p.ai_priority,
+                'ai_suggested_response': p.ai_suggested_response,
+                'has_audio': bool(p.audio_recording),
+                'has_signature': bool(p.signature),
+                'integrity_hash': p.integrity_hash[:16] if p.integrity_hash else '',
+                'integrity_valid': p.verify_integrity() if p.integrity_hash else None,
             })
         return JsonResponse({'status': 'success', 'data': data})
 
@@ -3988,7 +4009,33 @@ def prigovori_api(request):
                 voice_input=bool(data.get('voice_input', False)),
                 created_by=request.user,
             )
-            return JsonResponse({'status': 'success', 'message': 'Prigovor #%d zaprimljen.' % p.redni_broj})
+
+            # Audio recording (base64 WebM → file)
+            audio_b64 = data.get('audio_recording', '')
+            if audio_b64:
+                import base64
+                from django.core.files.base import ContentFile
+                try:
+                    audio_data = base64.b64decode(audio_b64.split(',')[-1])
+                    p.audio_recording.save(
+                        'prigovor_%d.webm' % p.redni_broj,
+                        ContentFile(audio_data), save=True,
+                    )
+                except Exception:
+                    pass
+
+            # Trigger AI analysis (async Celery)
+            try:
+                from pos.tasks import ai_analyze_prigovor
+                ai_analyze_prigovor.delay(p.pk)
+            except Exception:
+                pass
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Prigovor #%d zaprimljen. AI analiza u tijeku.' % p.redni_broj,
+                'integrity_hash': p.integrity_hash,
+            })
 
         elif action == 'odgovori':
             from django.utils import timezone as tz

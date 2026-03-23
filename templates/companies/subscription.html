@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Pretplata{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:2rem auto;padding:0 1rem">
+  <h1 style="color:var(--gold);margin-bottom:1.5rem">Pretplata</h1>
+
+  {% if subscription %}
+  <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--gold)">{{ subscription.get_plan_display }}</div>
+        <div style="font-size:.8rem;color:var(--muted)">{{ company.name }}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:1.1rem;font-weight:600">{{ subscription.monthly_fee }} EUR/mj</div>
+        <div style="font-size:.75rem;color:var(--muted)">{{ subscription.get_billing_cycle_display }}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;font-size:.85rem">
+      <div><span style="color:var(--muted)">Od:</span> {{ subscription.valid_from|date:"d.m.Y" }}</div>
+      <div><span style="color:var(--muted)">Do:</span> {{ subscription.valid_until|date:"d.m.Y"|default:"Neograničeno" }}</div>
+      <div><span style="color:var(--muted)">Status:</span>
+        {% if subscription.cancel_at_period_end %}
+          <span style="color:#ef4444">Otkazuje se {{ subscription.valid_until|date:"d.m.Y" }}</span>
+        {% elif subscription.is_active %}
+          <span style="color:#22c55e">Aktivna</span>
+        {% else %}
+          <span style="color:#ef4444">Neaktivna</span>
+        {% endif %}
+      </div>
+      {% if subscription.trial_ends %}
+      <div><span style="color:var(--muted)">Trial do:</span> {{ subscription.trial_ends|date:"d.m.Y" }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if subscription.cancel_at_period_end %}
+  <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:.85rem">
+    <p style="margin:0 0 .5rem"><strong>Pretplata je otkazana.</strong></p>
+    <p style="margin:0;color:var(--muted)">Pristup ostaje do {{ subscription.valid_until|date:"d.m.Y" }}.
+    Nakon toga prelazite na arhivski plan (samo čitanje). Arhiva je dostupna 11 godina (ZOR).</p>
+    <form method="post" action="{% url 'companies:subscription_cancel' %}" style="margin-top:.8rem">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="reactivate">
+      <button type="submit" style="background:var(--gold);color:#000;border:none;padding:.4rem 1rem;border-radius:6px;cursor:pointer;font-weight:600">Reaktiviraj pretplatu</button>
+    </form>
+  </div>
+  {% else %}
+  <form method="post" action="{% url 'companies:subscription_cancel' %}" onsubmit="return confirm('Sigurno želite otkazati pretplatu?\nPristup ostaje do kraja plaćenog perioda.')">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="cancel">
+    <button type="submit" style="background:transparent;color:#ef4444;border:1px solid #ef4444;padding:.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:.85rem">Otkaži pretplatu</button>
+  </form>
+  <p style="font-size:.75rem;color:var(--muted);margin-top:.5rem">
+    Arhiva dokumenata ostaje dostupna i nakon otkazivanja (zakonska obveza čuvanja 11 godina).
+  </p>
+  {% endif %}
+
+  {% else %}
+  <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:2rem;text-align:center">
+    <p style="font-size:1.1rem;margin-bottom:1rem">Nemate aktivnu pretplatu.</p>
+    <a href="/register/upgrade/" style="background:var(--gold);color:#000;padding:.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600">Odaberi plan</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

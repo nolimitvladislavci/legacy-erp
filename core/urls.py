@@ -56,6 +56,7 @@ urlpatterns = [
     path('rosetta/', include('rosetta.urls')),
     # Ovaj red rješava 404 grešku na /accounts/login/
     path('accounts/login/', RedirectView.as_view(pattern_name='login', permanent=True)),
+    path('login/', views.login_view, name='login_root'),
     # Device token scan API (izvan i18n — koristi ga POS scanner direktno)
     path('api/device-login/', __import__('accounts.auth_views', fromlist=['device_token_login']).device_token_login, name='device_token_login_api'),
     path('api/ai-agent/', __import__('superadmin_ai.views', fromlist=['agent_gateway']).agent_gateway, name='ai_agent_gateway'),
@@ -251,6 +252,13 @@ urlpatterns += [
 
 # Health check (no language prefix needed)
 urlpatterns += [
+    # Inspektor Dashboard (PUBLIC — bez logina)
+    path('inspektor/<str:token>/', __import__('core.views_inspector', fromlist=['inspector_dashboard']).inspector_dashboard, name='inspector_dashboard'),
+    # Panic Button (login required)
+    path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
+    path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
+    path('api/search/', __import__('core.views_search', fromlist=['global_search']).global_search, name='global_search'),
+    path('report/synesis-dokaz/', __import__('core.views_search', fromlist=['synesis_report']).synesis_report, name='synesis_report'),
     path('health/', views.health_check, name='health_check'),
     path('api/whatsapp/health/', views.whatsapp_health, name='whatsapp_health'),
     path("api/whatsapp/webhook/", __import__("helpdesk.whatsapp_webhook", fromlist=["whatsapp_webhook"]).whatsapp_webhook, name="whatsapp_webhook"),

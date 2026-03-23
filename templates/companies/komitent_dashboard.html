@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Komitenti — KS LIMIT{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 style="color:var(--gold)"><i class="fas fa-users-cog"></i> Komitenti — KS LIMIT</h2>
+  <a href="{% url 'companies:komitent_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Novi komitent</a>
+</div>
+
+<!-- KPI -->
+<div class="row g-2 mb-3">
+  <div class="col"><div class="stat-card text-center"><div style="font-size:2rem;font-weight:800">{{ kpi.total }}</div><small class="text-muted">Ukupno</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #22c55e"><div style="font-size:2rem;font-weight:800;color:#22c55e">{{ kpi.active }}</div><small class="text-muted">Aktivnih</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #3b82f6"><div style="font-size:2rem;font-weight:800;color:#3b82f6">{{ kpi.onboarding }}</div><small class="text-muted">U prijemu</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #f59e0b"><div style="font-size:2rem;font-weight:800;color:#f59e0b">{{ kpi.notice }}</div><small class="text-muted">U otkazu</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid #888"><div style="font-size:2rem;font-weight:800;color:#888">{{ kpi.archived }}</div><small class="text-muted">Arhivirano</small></div></div>
+  <div class="col"><div class="stat-card text-center" style="border-left:3px solid var(--gold)"><div style="font-size:2rem;font-weight:800;color:var(--gold)">{{ kpi.mrr }}€</div><small class="text-muted">MRR</small></div></div>
+</div>
+
+<!-- Filteri -->
+<div class="stat-card mb-3">
+  <form method="get" class="d-flex gap-2 align-items-end flex-wrap">
+    <div>
+      <label class="form-label small mb-0">Status</label>
+      <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">Svi</option>
+        {% for val, label in status_choices %}<option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="form-label small mb-0">Kategorija</label>
+      <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">Sve</option>
+        <option value="obrt" {% if category_filter == "obrt" %}selected{% endif %}>Obrt</option>
+        <option value="doo" {% if category_filter == "doo" %}selected{% endif %}>d.o.o.</option>
+        <option value="opg" {% if category_filter == "opg" %}selected{% endif %}>OPG</option>
+        <option value="udruga" {% if category_filter == "udruga" %}selected{% endif %}>Udruga</option>
+        <option value="fizicka" {% if category_filter == "fizicka" %}selected{% endif %}>Fizička osoba</option>
+        <option value="strano" {% if category_filter == "strano" %}selected{% endif %}>Strano</option>
+      </select>
+    </div>
+    <div style="flex:1">
+      <label class="form-label small mb-0">Pretraga</label>
+      <input type="text" name="q" value="{{ search }}" class="form-control form-control-sm" placeholder="Ime, OIB, kontakt...">
+    </div>
+    <button class="btn btn-sm btn-outline-primary"><i class="fas fa-search"></i></button>
+    {% if status_filter or category_filter or search %}<a href="{% url 'companies:komitent_dashboard' %}" class="btn btn-sm btn-outline-secondary">Reset</a>{% endif %}
+  </form>
+</div>
+
+<!-- Lista -->
+<div class="stat-card" style="padding:0;overflow:hidden">
+<div class="table-responsive">
+<table class="table table-hover mb-0" style="font-size:.82rem">
+<thead><tr>
+  <th style="width:30px"></th>
+  <th>Firma</th>
+  <th>OIB</th>
+  <th>Status</th>
+  <th>Kategorija</th>
+  <th>Kontakt</th>
+  <th>Klijent od</th>
+  <th class="text-end">Naknada</th>
+  <th class="text-end">Partneri</th>
+  <th class="text-end">Fakture</th>
+  <th class="text-end">Knjiženja</th>
+  <th></th>
+</tr></thead>
+<tbody>
+{% for item in profiles %}
+<tr style="{% if item.profile.status == 'archived' %}opacity:.5{% elif item.profile.status == 'notice' %}background:rgba(245,158,11,.05){% elif item.profile.status == 'blocked' %}background:rgba(220,38,38,.05){% endif %}">
+  <td>
+    {% if item.profile.synesis_imported %}<i class="fas fa-database" title="Synesis import" style="color:var(--gold);font-size:.7rem"></i>{% endif %}
+  </td>
+  <td><a href="{% url 'companies:komitent_detail' item.profile.pk %}" style="font-weight:600">{{ item.company.name }}</a></td>
+  <td><code style="font-size:.75rem">{{ item.company.oib }}</code></td>
+  <td>
+    {% if item.profile.status == 'active' %}<span class="badge bg-success">Aktivan</span>
+    {% elif item.profile.status == 'onboarding' %}<span class="badge bg-info">U prijemu</span>
+    {% elif item.profile.status == 'notice' %}<span class="badge bg-warning text-dark">U otkazu</span>
+    {% elif item.profile.status == 'archived' %}<span class="badge bg-secondary">Arhiviran</span>
+    {% elif item.profile.status == 'paused' %}<span class="badge bg-dark">Pauziran</span>
+    {% elif item.profile.status == 'blocked' %}<span class="badge bg-danger">Blokiran</span>
+    {% elif item.profile.status == 'lead' %}<span class="badge bg-primary">Lead</span>
+    {% endif %}
+  </td>
+  <td>{{ item.profile.get_category_display|default:"-" }}</td>
+  <td>{{ item.profile.contact_person|default:"-" }}<br><small class="text-muted">{{ item.profile.contact_phone }}</small></td>
+  <td>{{ item.profile.client_since|date:"d.m.Y"|default:"-" }}</td>
+  <td class="text-end">{% if item.profile.monthly_fee %}{{ item.profile.monthly_fee }}€{% else %}-{% endif %}</td>
+  <td class="text-end">{{ item.stats.partners }}</td>
+  <td class="text-end">{{ item.stats.invoices }}</td>
+  <td class="text-end">{{ item.stats.entries }}</td>
+  <td>
+    <a href="{% url 'companies:komitent_detail' item.profile.pk %}" class="btn btn-sm btn-outline-warning" title="Detalji"><i class="fas fa-pen"></i></a>
+  </td>
+</tr>
+{% empty %}
+<tr><td colspan="12" class="text-center text-muted py-4">Nema komitenata s tim filterima.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="text-muted small mt-2">
+  Prikazano: {{ profiles|length }} komitenata | Synesis uvoz: {{ kpi.synesis }}
+</div>
+
+</div>
+{% endblock %}

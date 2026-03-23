@@ -339,6 +339,30 @@ def checkout(request):
             except Exception as e:
                 logger.warning(f'Draft invoice creation failed: {e}')
 
+        # Payment gateway integration
+        payment_method = request.POST.get('payment_method', '')
+        if payment_method and payment_method != 'invoice':
+            try:
+                from payments.services import create_payment
+                base_url = request.build_absolute_uri('/').rstrip('/')
+                payment = create_payment(
+                    company=company,
+                    source='marketplace',
+                    source_id=str(order.pk),
+                    amount=order.total_amount,
+                    method=payment_method,
+                    customer_email=request.user.email or '',
+                    customer_name=company.name,
+                    description=f'Marketplace narudžba {order.order_number}',
+                    success_url=base_url + f'/marketplace/orders/{order.pk}/',
+                    cancel_url=base_url + '/marketplace/cart/',
+                )
+                if payment.external_url:
+                    request.session['marketplace_cart'] = {}
+                    return redirect(payment.external_url)
+            except Exception as e:
+                logger.warning(f'Payment creation failed: {e}')
+
         request.session['marketplace_cart'] = {}
         messages.success(request, f'Narudzba {order.order_number} kreirana!')
         return redirect('marketplace:order_detail', order.pk)

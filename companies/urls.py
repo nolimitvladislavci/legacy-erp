@@ -31,3 +31,16 @@ urlpatterns = [
     path('modules/', views_modules.module_picker, name='module_picker'),
     path('modules/api/toggle/', views_modules.module_toggle_api, name='module_toggle'),
 ]
+
+# KS LIMIT Komitent Manager
+from companies import views_komitent
+urlpatterns += [
+    path('komitenti/', views_komitent.komitent_dashboard, name='komitent_dashboard'),
+    path('komitenti/novi/', views_komitent.komitent_create, name='komitent_create'),
+    path('komitenti/<int:pk>/', views_komitent.komitent_detail, name='komitent_detail'),
+    path('komitenti/<int:pk>/status/', views_komitent.komitent_quick_status, name='komitent_status'),
+
+    # Pretplata
+    path('subscription/', views.subscription_view, name='subscription'),
+    path('subscription/cancel/', views.subscription_cancel, name='subscription_cancel'),
+]

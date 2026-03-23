@@ -634,3 +634,139 @@ class CompanyModuleConfig(models.Model):
                 if mod:
                     result.append(mod)
         return result
+
+
+# ═══════════════════════════════════════════════════
+#  KOMITENT MANAGER — KS LIMIT CRM za knjigovodstvo
+# ═══════════════════════════════════════════════════
+
+class KomitentStatus(models.TextChoices):
+    LEAD       = 'lead',       _('Potencijalni klijent')
+    ONBOARDING = 'onboarding', _('U procesu prijema')
+    ACTIVE     = 'active',     _('Aktivan')
+    PAUSED     = 'paused',     _('Pauziran')
+    NOTICE     = 'notice',     _('U otkazu')
+    ARCHIVED   = 'archived',   _('Arhiviran (otišao)')
+    BLOCKED    = 'blocked',    _('Blokiran (dug)')
+
+
+class KomitentProfile(models.Model):
+    """
+    Prošireni profil za upravljanje komitentima knjigovodstvenog servisa.
+    Jedna firma = jedan komitent. Ovo je CRM sloj povrh Company modela.
+    """
+    company = models.OneToOneField('Company', on_delete=models.CASCADE,
+                                    related_name='komitent_profile')
+
+    # Status
+    status = models.CharField(max_length=20, choices=KomitentStatus.choices,
+                              default=KomitentStatus.ACTIVE, verbose_name=_('Status'))
+
+    # Datumi
+    client_since = models.DateField(null=True, blank=True, verbose_name=_('Klijent od'))
+    notice_date = models.DateField(null=True, blank=True, verbose_name=_('Datum otkaza'))
+    left_date = models.DateField(null=True, blank=True, verbose_name=_('Datum odlaska'))
+    next_review = models.DateField(null=True, blank=True, verbose_name=_('Sljedeći pregled'))
+
+    # Kontakt
+    contact_person = models.CharField(max_length=200, blank=True, verbose_name=_('Kontakt osoba'))
+    contact_phone = models.CharField(max_length=50, blank=True, verbose_name=_('Telefon'))
+    contact_email = models.EmailField(blank=True, verbose_name=_('Email'))
+
+    # Ugovor
+    contract_type = models.CharField(max_length=30, blank=True, choices=[
+        ('mjesecni', _('Mjesečni')),
+        ('godisnji', _('Godišnji')),
+        ('pausal',   _('Paušal')),
+        ('po_satu',  _('Po satu')),
+        ('besplatno', _('Besplatno / Pro bono')),
+    ], verbose_name=_('Tip ugovora'))
+    monthly_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                       verbose_name=_('Mjesečna naknada (EUR)'))
+    notes = models.TextField(blank=True, verbose_name=_('Bilješke'))
+
+    # Kategorija
+    category = models.CharField(max_length=30, blank=True, choices=[
+        ('obrt',     _('Obrt')),
+        ('doo',      _('d.o.o.')),
+        ('opg',      _('OPG')),
+        ('udruga',   _('Udruga')),
+        ('ustanova', _('Ustanova')),
+        ('fizicka',  _('Fizička osoba')),
+        ('strano',   _('Strano poduzeće')),
+    ], verbose_name=_('Kategorija'))
+
+    # Referral
+    referred_by = models.CharField(max_length=200, blank=True,
+                                    verbose_name=_('Preporuka od'))
+
+    # Synesis legacy
+    synesis_imported = models.BooleanField(default=False, verbose_name=_('Uvezeno iz Synesisa'))
+    synesis_db_path = models.CharField(max_length=500, blank=True, verbose_name=_('Synesis DB path'))
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Komitent profil')
+        verbose_name_plural = _('Komitent profili')
+        ordering = ['company__name']
+
+    def __str__(self):
+        return f'{self.company.name} ({self.get_status_display()})'
+
+    @property
+    def is_active(self):
+        return self.status in ('active', 'onboarding')
+
+    @property
+    def is_leaving(self):
+        return self.status in ('notice', 'archived')
+
+    @property
+    def days_as_client(self):
+        if not self.client_since:
+            return None
+        from datetime import date
+        end = self.left_date or date.today()
+        return (end - self.client_since).days
+
+
+class KomitentEvent(models.Model):
+    """
+    Timeline dogadjaja za komitenta — tko je što promijenio i kada.
+    Automatski se kreira na svaku promjenu statusa.
+    """
+    EVENT_TYPES = [
+        ('created',     _('Kreiran')),
+        ('activated',   _('Aktiviran')),
+        ('paused',      _('Pauziran')),
+        ('notice',      _('Otkaz primljen')),
+        ('archived',    _('Arhiviran')),
+        ('reactivated', _('Reaktiviran')),
+        ('blocked',     _('Blokiran')),
+        ('plan_change', _('Promjena plana')),
+        ('fee_change',  _('Promjena naknade')),
+        ('note',        _('Bilješka')),
+        ('contact',     _('Kontaktiran')),
+        ('meeting',     _('Sastanak')),
+        ('document',    _('Dokument')),
+        ('import',      _('Uvoz podataka')),
+    ]
+
+    profile = models.ForeignKey(KomitentProfile, on_delete=models.CASCADE,
+                                 related_name='events')
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
+    description = models.TextField(verbose_name=_('Opis'))
+    old_value = models.CharField(max_length=100, blank=True)
+    new_value = models.CharField(max_length=100, blank=True)
+    created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Komitent događaj')
+        verbose_name_plural = _('Komitent događaji')
+
+    def __str__(self):
+        return f'{self.profile.company.name} — {self.get_event_type_display()} ({self.created_at.date()})'

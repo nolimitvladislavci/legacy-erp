@@ -163,6 +163,58 @@ def _gather_company_context(company):
     except Exception:
         ctx["active_funds"] = 0
 
+    # Overdue invoices (dospjele fakture)
+    try:
+        from invoicing.models import Invoice
+        overdue = Invoice.objects.filter(
+            company=company,
+            status__in=['SENT', 'UNPAID', 'OVERDUE'],
+            date_due__lt=today,
+        ).order_by('date_due')[:5]
+        ctx["overdue_invoices"] = [
+            {"number": inv.number, "client": inv.client_name,
+             "total": float(inv.total or 0),
+             "days": (today - inv.date_due).days}
+            for inv in overdue
+        ]
+        ctx["overdue_count"] = Invoice.objects.filter(
+            company=company, status__in=['SENT', 'UNPAID', 'OVERDUE'],
+            date_due__lt=today,
+        ).count()
+    except Exception:
+        ctx["overdue_invoices"] = []
+        ctx["overdue_count"] = 0
+
+    # Open helpdesk tickets
+    try:
+        from helpdesk.models import Ticket
+        open_tickets = Ticket.objects.filter(
+            company=company,
+            status__in=['open', 'in_progress'],
+        ).count()
+        ctx["open_tickets"] = open_tickets
+    except Exception:
+        ctx["open_tickets"] = 0
+
+    # Bank unmatched transactions
+    try:
+        from konto.models import BankTransaction
+        ctx["unmatched_transactions"] = BankTransaction.objects.filter(
+            company=company, status='unmatched'
+        ).count()
+    except Exception:
+        ctx["unmatched_transactions"] = 0
+
+    # Worktime anomalies (today)
+    try:
+        from worktime.models import AnomalyReport
+        ctx["worktime_anomalies"] = AnomalyReport.objects.filter(
+            company=company,
+            created_at__date=today,
+        ).count()
+    except Exception:
+        ctx["worktime_anomalies"] = 0
+
     return ctx
 
 

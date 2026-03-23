@@ -459,11 +459,18 @@
     if (name) { bar.textContent = '👤 Aktivni blagajnik: ' + name; bar.classList.add('show'); } else { bar.classList.remove('show'); }
   }
   function selectCashier(el, name, id) {
+    // TASK 2: Multi-konobar preuzimanje
+    var prevName = window._currentCashier;
+    var prevId = window._currentCashierId;
+    if (prevId && prevId !== id && prevName) {
+      if (!confirm('👤 ' + prevName + ' je aktivan/na.\nPreuzeti blagajnu?')) return;
+      showToast('🔄 ' + prevName + ' → ' + name, 2500);
+    }
     document.querySelectorAll('.cashier-btn').forEach(function(b){ b.classList.remove('active'); });
     if (el) el.classList.add('active');
     window._currentCashier = name || ''; window._currentCashierId = id || null;
     updateCashierBar(name);
-    if (name) showToast('👤 ' + name + ' — prijavljen/a', 2500);
+    if (name && !prevId) showToast('👤 ' + name + ' — prijavljen/a', 2500);
   }
 
   var _revolutPollTimer = null;

@@ -29,7 +29,7 @@
         <div class="year-select">
             <label>Godina:</label>
             <select onchange="location.href='{% url 'udruge:donacija_list' %}?year='+this.value">
-                {% for y in year|add:"-2"|add:"0" %}{% endfor %}
+                <!-- year selector -->
                 <option {% if year == "2024" %}selected{% endif %} value="2024">2024</option>
                 <option {% if year == "2025" %}selected{% endif %} value="2025">2025</option>
                 <option {% if year == "2026" %}selected{% endif %} value="2026">2026</option>

@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Knjiga prigovora{% endblock %}
+{% block page_title %}Knjiga prigovora{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:#c9a84c"></i>{% trans "Knjiga prigovora" %}</h2>
+    <small class="text-muted">{% trans "Zakon o zaštiti potrošača čl. 10 — rok za odgovor: 15 dana" %}</small>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-primary" onclick="openCreate()"><i class="fas fa-plus me-1"></i>{% trans "Novi prigovor" %}</button>
+    <a href="{% url 'pos:knjiga_prigovora_pdf' %}" class="btn btn-outline-secondary" target="_blank"><i class="fas fa-file-pdf me-1"></i>{% trans "PDF za inspekciju" %}</a>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle" id="prigovoriTable">
+    <thead class="table-dark">
+      <tr>
+        <th style="width:50px">R.br.</th>
+        <th>{% trans "Datum" %}</th>
+        <th>{% trans "Potrošač" %}</th>
+        <th>{% trans "Prigovor" %}</th>
+        <th>{% trans "Status / Rok" %}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr><td colspan="6" class="text-center text-muted py-4">{% trans "Učitavanje..." %}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal: Novi prigovor -->
+<div class="modal fade" id="createModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #c9a84c">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" style="color:#c9a84c"><i class="fas fa-edit me-2"></i>{% trans "Zavedi prigovor" %}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Korak 1: Podaci -->
+        <div id="step1Create">
+          <div class="mb-3">
+            <label class="form-label">{% trans "Ime i prezime potrošača" %} *</label>
+            <input type="text" id="pIme" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{% trans "Kontakt (e-mail ili adresa)" %}</label>
+            <input type="text" id="pKontakt" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{% trans "Opis prigovora" %} *</label>
+            <div class="d-flex gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-danger" id="btnVoice" onclick="toggleVoice()">
+                <i class="fas fa-microphone me-1"></i>{% trans "Govori prigovor" %}
+              </button>
+              <span id="voiceStatus" class="text-muted small align-self-center"></span>
+            </div>
+            <textarea id="pOpis" class="form-control" rows="4" placeholder="{% trans 'Upišite ili izgovorite prigovor...' %}"></textarea>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-primary" onclick="goStep2()">
+              {% trans "Dalje — Identifikacija" %} <i class="fas fa-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Korak 2: Identifikacija + Potvrda -->
+        <div id="step2Create" style="display:none">
+          <div class="mb-3">
+            <label class="form-label"><i class="fas fa-id-card me-2"></i>{% trans "Slika osobne iskaznice" %}</label>
+            <p class="text-muted small mb-2">{% trans "Slikajte prednju stranu osobne iskaznice kamerom" %}</p>
+            <div class="d-flex gap-2 mb-2">
+              <button type="button" class="btn btn-sm btn-outline-info" onclick="fenixIdCamera()">
+                <i class="fas fa-camera me-1"></i>{% trans "Pokreni kameru" %}
+              </button>
+              <label class="btn btn-sm btn-outline-secondary mb-0">
+                <i class="fas fa-upload me-1"></i>{% trans "Upload sliku" %}
+                <input type="file" accept="image/*" capture="environment" id="idFileInput" style="display:none" onchange="handleIdFile(this)">
+              </label>
+            </div>
+            <div id="idCameraWrap" style="display:none">
+              <video id="idVideo" style="width:100%;max-height:200px;border-radius:8px;background:#000" autoplay playsinline></video>
+              <button type="button" class="btn btn-sm btn-danger mt-1" onclick="captureIdPhoto()">
+                <i class="fas fa-camera me-1"></i>{% trans "Slikaj" %}
+              </button>
+            </div>
+            <canvas id="idCanvas" style="display:none"></canvas>
+            <div id="idPreview" style="display:none" class="mt-2">
+              <img id="idImage" style="width:100%;max-height:150px;object-fit:contain;border-radius:8px;border:2px solid #22c55e">
+              <div class="text-success small mt-1"><i class="fas fa-check me-1"></i>{% trans "Slika osobne spremljena" %}</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"><i class="fas fa-signature me-2"></i>{% trans "Potpis potrošača" %}</label>
+            <p class="text-muted small mb-2">{% trans "Potpišite prstom ili mišem" %}</p>
+            <canvas id="sigCanvas" width="380" height="120"
+                    style="border:2px solid #2a2f45;border-radius:8px;background:#111;cursor:crosshair;touch-action:none;width:100%"></canvas>
+            <div class="d-flex gap-2 mt-1">
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSignature()">
+                <i class="fas fa-eraser me-1"></i>{% trans "Obriši potpis" %}
+              </button>
+            </div>
+          </div>
+
+          <div class="alert alert-warning py-2 small">
+            <i class="fas fa-info-circle me-1"></i>
+            {% trans "Potrošač potvrđuje da je prigovor vjerodostojan i da se slaže s obradom osobnih podataka u svrhu rješavanja prigovora (GDPR čl. 6 st. 1b)." %}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Odustani" %}</button>
+        <button type="button" class="btn btn-outline-secondary" id="btnBack" onclick="goStep1()" style="display:none">
+          <i class="fas fa-arrow-left me-1"></i>{% trans "Natrag" %}
+        </button>
+        <button type="button" class="btn btn-primary" id="btnSave" onclick="savePrigovor()" style="display:none">
+          <i class="fas fa-check-double me-1"></i>{% trans "Potvrdi i spremi" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Odgovor -->
+<div class="modal fade" id="odgovorModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #22c55e">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" style="color:#22c55e"><i class="fas fa-reply me-2"></i>{% trans "Odgovor na prigovor" %}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="oId">
+        <div class="mb-3">
+          <label class="form-label">{% trans "Tekst odgovora" %} *</label>
+          <textarea id="oTekst" class="form-control" rows="4"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Odustani" %}</button>
+        <button type="button" class="btn btn-success" id="btnReply" onclick="saveOdgovor()">
+          <i class="fas fa-paper-plane me-1"></i>{% trans "Pošalji odgovor" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+const API = '{% url "pos:prigovori_api" %}';
+
+// ═══ STEP NAVIGATION ═══
+function goStep2() {
+  var ime = document.getElementById('pIme').value.trim();
+  var opis = document.getElementById('pOpis').value.trim();
+  if (!ime || !opis) { alert('Ime i opis su obavezni!'); return; }
+  document.getElementById('step1Create').style.display = 'none';
+  document.getElementById('step2Create').style.display = 'block';
+  document.getElementById('btnSave').style.display = 'inline-block';
+  document.getElementById('btnBack').style.display = 'inline-block';
+  initSignature();
+}
+function goStep1() {
+  document.getElementById('step1Create').style.display = 'block';
+  document.getElementById('step2Create').style.display = 'none';
+  document.getElementById('btnSave').style.display = 'none';
+  document.getElementById('btnBack').style.display = 'none';
+}
+
+// ═══ VOICE INPUT (Web Speech API) ═══
+var recognition = null;
+var isListening = false;
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Preglednik ne podržava glasovni unos. Koristite Chrome ili Edge.');
+    return;
+  }
+  if (isListening) { stopVoice(); return; }
+
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'hr-HR';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  var finalText = document.getElementById('pOpis').value;
+
+  recognition.onresult = function(e) {
+    var interim = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        finalText += e.results[i][0].transcript + '. ';
+        document.getElementById('pOpis').value = finalText;
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    document.getElementById('voiceStatus').textContent = interim ? '...' + interim : '';
+  };
+
+  recognition.onerror = function(e) {
+    document.getElementById('voiceStatus').textContent = 'Greška: ' + e.error;
+    stopVoice();
+  };
+
+  recognition.onend = function() {
+    if (isListening) recognition.start(); // auto-restart
+  };
+
+  recognition.start();
+  isListening = true;
+  document.getElementById('btnVoice').classList.remove('btn-outline-danger');
+  document.getElementById('btnVoice').classList.add('btn-danger');
+  document.getElementById('btnVoice').innerHTML = '<i class="fas fa-stop me-1"></i>Zaustavi snimanje';
+  document.getElementById('voiceStatus').textContent = 'Slušam...';
+}
+
+function stopVoice() {
+  if (recognition) { recognition.stop(); recognition = null; }
+  isListening = false;
+  document.getElementById('btnVoice').classList.remove('btn-danger');
+  document.getElementById('btnVoice').classList.add('btn-outline-danger');
+  document.getElementById('btnVoice').innerHTML = '<i class="fas fa-microphone me-1"></i>Govori prigovor';
+  document.getElementById('voiceStatus').textContent = '';
+}
+
+// ═══ ID CAMERA ═══
+var idStream = null;
+var idPhotoData = null;
+
+function startIdCamera() {
+  var video = document.getElementById('idVideo');
+  var wrap = document.getElementById('idCameraWrap');
+  navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment', width: {ideal: 1280}}})
+    .then(function(stream) {
+      idStream = stream;
+      video.srcObject = stream;
+      wrap.style.display = 'block';
+    })
+    .catch(function(e) { alert('Kamera nije dostupna: ' + e.message); });
+}
+
+function captureIdPhoto() {
+  var video = document.getElementById('idVideo');
+  var canvas = document.getElementById('idCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  idPhotoData = canvas.toDataURL('image/jpeg', 0.8);
+  document.getElementById('idImage').src = idPhotoData;
+  document.getElementById('idPreview').style.display = 'block';
+  // Stop camera
+  if (idStream) { idStream.getTracks().forEach(function(t){t.stop()}); idStream = null; }
+  document.getElementById('idCameraWrap').style.display = 'none';
+}
+
+function handleIdFile(input) {
+  if (!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    idPhotoData = e.target.result;
+    document.getElementById('idImage').src = idPhotoData;
+    document.getElementById('idPreview').style.display = 'block';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// ═══ SIGNATURE PAD ═══
+var sigCtx = null;
+var sigDrawing = false;
+var sigData = null;
+
+function initSignature() {
+  var canvas = document.getElementById('sigCanvas');
+  sigCtx = canvas.getContext('2d');
+  // Set actual size
+  var rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  sigCtx.scale(2, 2);
+  sigCtx.strokeStyle = '#c9a84c';
+  sigCtx.lineWidth = 2.5;
+  sigCtx.lineCap = 'round';
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var touch = e.touches ? e.touches[0] : e;
+    return {x: touch.clientX - rect.left, y: touch.clientY - rect.top};
+  }
+
+  canvas.addEventListener('mousedown', function(e) { sigDrawing = true; sigCtx.beginPath(); var p = getPos(e); sigCtx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', function(e) { if (!sigDrawing) return; var p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); });
+  canvas.addEventListener('mouseup', function() { sigDrawing = false; });
+  canvas.addEventListener('mouseleave', function() { sigDrawing = false; });
+
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); sigDrawing = true; sigCtx.beginPath(); var p = getPos(e); sigCtx.moveTo(p.x, p.y); }, {passive: false});
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (!sigDrawing) return; var p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); }, {passive: false});
+  canvas.addEventListener('touchend', function() { sigDrawing = false; });
+}
+
+function clearSignature() {
+  if (!sigCtx) return;
+  var canvas = document.getElementById('sigCanvas');
+  sigCtx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function getSignatureData() {
+  var canvas = document.getElementById('sigCanvas');
+  if (!sigCtx) return null;
+  // Check if canvas has any drawing
+  var data = sigCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+  var hasContent = false;
+  for (var i = 3; i < data.length; i += 4) {
+    if (data[i] > 0) { hasContent = true; break; }
+  }
+  return hasContent ? canvas.toDataURL('image/png') : null;
+}
+
+function openCreate() { new bootstrap.Modal(document.getElementById('createModal')).show(); }
+
+async function loadData() {
+  try {
+    const res = await fetch(API);
+    const d = await res.json();
+    const tbody = document.getElementById('tableBody');
+    if (!d.data || !d.data.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-book fa-2x mb-2 d-block"></i>Knjiga je prazna — nema prigovora.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = d.data.map(p => `
+      <tr>
+        <td class="fw-bold text-center">#${p.redni_broj}</td>
+        <td>${p.datum_primitka}</td>
+        <td>${p.ime}<br><small class="text-muted">${p.kontakt || ''}</small></td>
+        <td style="max-width:300px">${p.opis}</td>
+        <td>
+          ${p.datum_odgovora
+            ? `<span class="badge bg-success">Odgovoreno ${p.datum_odgovora}</span>`
+            : (p.rok_istekao
+              ? `<span class="badge bg-danger">PROBIJEN ROK!</span>`
+              : `<span class="badge bg-warning text-dark">Čeka (${p.dana_do_roka}d)</span>`)
+          }
+        </td>
+        <td>
+          ${!p.datum_odgovora
+            ? `<button class="btn btn-sm btn-outline-success" onclick="openOdgovor(${p.id})"><i class="fas fa-reply me-1"></i>Odgovori</button>`
+            : `<small class="text-muted">${p.odgovor ? p.odgovor.substring(0, 50) + '...' : ''}</small>`
+          }
+        </td>
+      </tr>
+    `).join('');
+  } catch(e) { console.error(e); }
+}
+
+async function savePrigovor() {
+  const ime = document.getElementById('pIme').value.trim();
+  const opis = document.getElementById('pOpis').value.trim();
+  if (!ime || !opis) { alert('Ime i opis su obavezni!'); return; }
+
+  // Potpis obavezan
+  var sig = getSignatureData();
+  if (!sig) { alert('Potrošač mora potpisati prigovor!'); return; }
+
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Spremanje...';
+
+  stopVoice(); // Zaustavi snimanje ako je aktivno
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+      body: JSON.stringify({
+        action: 'create',
+        ime: ime,
+        kontakt: document.getElementById('pKontakt').value,
+        opis: opis,
+        id_photo: idPhotoData || null,
+        signature: sig,
+        voice_input: isListening || document.getElementById('voiceStatus').textContent ? true : false,
+      })
+    });
+    const d = await res.json();
+    if (d.status === 'success') {
+      bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
+      document.getElementById('pIme').value = '';
+      document.getElementById('pKontakt').value = '';
+      document.getElementById('pOpis').value = '';
+      idPhotoData = null;
+      document.getElementById('idPreview').style.display = 'none';
+      goStep1();
+      loadData();
+    } else { alert(d.error?.message || 'Greška'); }
+  } catch(e) { alert('Greška: ' + e); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Spremi'; }
+}
+
+function openOdgovor(id) {
+  document.getElementById('oId').value = id;
+  document.getElementById('oTekst').value = '';
+  new bootstrap.Modal(document.getElementById('odgovorModal')).show();
+}
+
+async function saveOdgovor() {
+  const id = document.getElementById('oId').value;
+  const odgovor = document.getElementById('oTekst').value.trim();
+  if (!odgovor) { alert('Unesite odgovor!'); return; }
+  const btn = document.getElementById('btnReply');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Slanje...';
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+      body: JSON.stringify({action:'odgovori', id: parseInt(id), odgovor})
+    });
+    const d = await res.json();
+    if (d.status === 'success') {
+      bootstrap.Modal.getInstance(document.getElementById('odgovorModal')).hide();
+      loadData();
+    } else { alert(d.error?.message || 'Greška'); }
+  } catch(e) { alert('Greška: ' + e); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Pošalji odgovor'; }
+}
+
+document.addEventListener('DOMContentLoaded', loadData);
+
+// FenixCamera for ID photo capture
+function fenixIdCamera() {
+  if (window.FenixCamera) {
+    FenixCamera.pick({
+      onCapture: function(r) {
+        idPhotoData = r.dataUrl;
+        document.getElementById('idImage').src = r.dataUrl;
+        document.getElementById('idPreview').style.display = 'block';
+        if (idStream) { idStream.getTracks().forEach(function(t){t.stop()}); idStream = null; }
+        document.getElementById('idCameraWrap').style.display = 'none';
+      }
+    });
+  } else {
+    startIdCamera();
+  }
+}
+</script>
+{% endblock %}

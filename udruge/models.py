@@ -799,3 +799,59 @@ class EmailLog(models.Model):
     class Meta:
         db_table = 'udruge_email_log'
         ordering = ['-sent_at']
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# VOLONTERSKE AKTIVNOSTI
+# ═══════════════════════════════════════════════════════════════════════════
+
+class VolunteerActivity(models.Model):
+    """Evidencija volonterskih aktivnosti — Zakon o volonterstvu (NN 58/07, 22/13)."""
+    STATUS_CHOICES = [
+        ('planned', 'Planirana'), ('in_progress', 'U tijeku'),
+        ('completed', 'Zavrsena'), ('cancelled', 'Otkazana'),
+    ]
+    CATEGORY_CHOICES = [
+        ('admin', 'Administrativno'), ('field', 'Terenski rad'),
+        ('event', 'Organizacija eventi'), ('education', 'Edukacija / Mentoring'),
+        ('fundraising', 'Fundraising'), ('it', 'IT / Digitalizacija'),
+        ('legal', 'Pravna pomoc'), ('social', 'Socijalni rad'),
+        ('sports', 'Sport / Rekreacija'), ('culture', 'Kultura / Umjetnost'),
+        ('environment', 'Zastita okolisa'), ('other', 'Ostalo'),
+    ]
+
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='volunteer_activities')
+    clan = models.ForeignKey(Clan, on_delete=models.CASCADE, related_name='volunteer_activities', verbose_name='Volonter')
+    dogadjaj = models.ForeignKey(Dogadjaj, on_delete=models.SET_NULL, null=True, blank=True, related_name='volunteer_activities')
+    kampanja = models.ForeignKey(Kampanja, on_delete=models.SET_NULL, null=True, blank=True, related_name='volunteer_activities')
+
+    title = models.CharField(max_length=200, verbose_name='Naziv aktivnosti')
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
+    date = models.DateField(verbose_name='Datum')
+    hours = models.DecimalField(max_digits=5, decimal_places=2, verbose_name='Broj sati')
+    location = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planned')
+    eu_project_code = models.CharField(max_length=100, blank=True)
+    inkind_rate_eur = models.DecimalField(max_digits=8, decimal_places=2, default=0,
+        verbose_name='In-kind satnica (EUR)',
+        help_text='Fer trzisna vrijednost sata volonterskog rada za EU izvjestaj')
+    verified_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_volunteer_activity'
+        ordering = ['-date']
+        indexes = [
+            models.Index(fields=['company', 'date'], name='udruge_vol_comp_date_idx'),
+            models.Index(fields=['company', 'clan', 'date'], name='udruge_vol_comp_clan_idx'),
+        ]
+
+    def __str__(self):
+        return '%s — %s (%s sati)' % (self.clan.full_name, self.title[:30], self.hours)
+
+    @property
+    def inkind_value(self):
+        return self.hours * self.inkind_rate_eur

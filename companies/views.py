@@ -569,3 +569,55 @@ def tax_rate_list(request):
 
     rates = TaxRate.objects.filter(country=country).order_by('-rate')
     return render(request, 'companies/tax_rates.html', {'rates': rates, 'country': country})
+
+
+
+# ── PRETPLATA / SUBSCRIPTION ──────────────────────────────────
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
+@login_required
+def subscription_view(request):
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    if not company:
+        from django.shortcuts import redirect
+        return redirect('dashboard')
+
+    from registration.models import CompanySubscription
+    sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
+
+    from django.shortcuts import render
+    return render(request, 'companies/subscription.html', {
+        'company': company,
+        'subscription': sub,
+    })
+
+
+@login_required
+@require_POST
+def subscription_cancel(request):
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'Nema firme'}, status=400)
+
+    from registration.models import CompanySubscription
+    sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
+    if not sub:
+        return JsonResponse({'error': 'Nema aktivne pretplate'}, status=400)
+
+    action = request.POST.get('action', 'cancel')
+    if action == 'reactivate':
+        sub.reactivate()
+        from django.contrib import messages
+        messages.success(request, 'Pretplata reaktivirana!')
+    else:
+        sub.cancel()
+        from django.contrib import messages
+        messages.success(request, 'Pretplata ce biti otkazana na kraju perioda (%s). Arhiva ostaje dostupna.' % sub.valid_until)
+
+    from django.shortcuts import redirect
+    return redirect('companies:subscription')

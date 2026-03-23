@@ -212,6 +212,15 @@ class POSReceipt(models.Model):
         help_text=_('Za R1 racun — OIB tvrtke kupca'))
     buyer_name = models.CharField(max_length=200, blank=True, verbose_name=_('Naziv kupca (R1)'))
     buyer_address = models.CharField(max_length=255, blank=True, verbose_name=_('Adresa kupca'))
+
+    # Clan udruge (membership discount tracking)
+    member_name = models.CharField(max_length=200, blank=True, verbose_name=_('Ime clana'),
+        help_text=_('Clan udruge koji je ostvario popust'))
+    member_clan_id = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('Clan ID'),
+        help_text=_('FK na udruge.Clan — za audit trail popusta'))
+    member_discount_applied = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+        verbose_name=_('Primijenjeni clanski popust (%)'))
+
     is_r1      = models.BooleanField(default=False, verbose_name=_('R1 racun'),
         help_text=_('Racun s podacima kupca — za knjizenje reprezentacije'))
 
@@ -1232,6 +1241,53 @@ class KnjigaPrigovora(models.Model):
     id_photo = models.TextField(blank=True, verbose_name=_('Slika osobne (base64)'))
     signature = models.TextField(blank=True, verbose_name=_('Potpis potrošača (base64)'))
     voice_input = models.BooleanField(default=False, verbose_name=_('Glasovni unos'))
+    audio_recording = models.FileField(
+        upload_to='prigovori/audio/%Y/%m/', blank=True, null=True,
+        verbose_name=_('Zvučni zapis'),
+        help_text=_('WebM/MP3 snimka glasovnog prigovora'),
+    )
+
+    # AI analiza (Celery task popunjava automatski)
+    ai_category = models.CharField(
+        max_length=30, blank=True, verbose_name=_('AI kategorija'),
+        choices=[
+            ('product_quality', 'Kvaliteta proizvoda'),
+            ('service', 'Usluga / Osoblje'),
+            ('pricing', 'Cijena / Naplata'),
+            ('hygiene', 'Higijena / Čistoća'),
+            ('wait_time', 'Vrijeme čekanja'),
+            ('delivery', 'Dostava / Isporuka'),
+            ('warranty', 'Garancija / Reklamacija'),
+            ('safety', 'Sigurnost / Ozljeda'),
+            ('other', 'Ostalo'),
+        ],
+    )
+    ai_sentiment = models.CharField(
+        max_length=15, blank=True, verbose_name=_('AI sentiment'),
+        choices=[
+            ('critical', 'Kritično — hitno'),
+            ('negative', 'Negativno'),
+            ('neutral', 'Neutralno'),
+            ('constructive', 'Konstruktivno'),
+        ],
+    )
+    ai_priority = models.PositiveSmallIntegerField(
+        default=0, verbose_name=_('AI prioritet (1-5)'),
+        help_text=_('0=nije analizirano, 5=najhitnije'),
+    )
+    ai_suggested_response = models.TextField(
+        blank=True, verbose_name=_('AI prijedlog odgovora'),
+        help_text=_('Claude generira prijedlog odgovora na hrvatskom'),
+    )
+    ai_analyzed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('AI analizirano'),
+    )
+
+    # Certificirani zapis — SHA256(potpis + tekst + datum + redni_broj)
+    integrity_hash = models.CharField(
+        max_length=64, blank=True, verbose_name=_('Integritetski hash'),
+        help_text=_('SHA256 certifikat — dokaz nepromijenjenosti zapisa'),
+    )
 
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
@@ -1254,7 +1310,24 @@ class KnjigaPrigovora(models.Model):
                 company=self.company
             ).order_by('-redni_broj').first()
             self.redni_broj = (last.redni_broj + 1) if last else 1
+        # Compute integrity hash on first save (certifikacija)
+        if not self.integrity_hash and self.opis_prigovora:
+            self.integrity_hash = self._compute_hash()
         super().save(*args, **kwargs)
+
+    def _compute_hash(self):
+        import hashlib
+        raw = '%s|%s|%s|%s|%s' % (
+            self.company_id, self.redni_broj or 0,
+            self.datum_primitka or '', self.ime_potrosaca,
+            self.opis_prigovora,
+        )
+        if self.signature:
+            raw += '|SIG:' + self.signature[:100]
+        return hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
+    def verify_integrity(self):
+        return self.integrity_hash == self._compute_hash()
 
     @property
     def rok_istekao(self):

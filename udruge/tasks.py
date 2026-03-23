@@ -279,3 +279,114 @@ def send_email_campaign(self, campaign_id):
                 campaign.name, sent, errors, len(recipients))
 
     return {'sent': sent, 'errors': errors, 'total': len(recipients)}
+
+
+@shared_task(bind=True, soft_time_limit=120)
+def ai_search_eu_funds(self, company_id):
+    """AI pretraga EU fondova — pronalazi relevantne natjecaje za udrugu."""
+    import os, json
+    from django.db.models import Sum
+    from companies.models import Company
+    from .models import Clan, Kampanja, Donacija
+
+    try:
+        company = Company.objects.get(pk=company_id)
+    except Company.DoesNotExist:
+        return {'error': 'Company not found'}
+
+    member_count = Clan.objects.filter(company=company, status='aktivan').count()
+    annual_budget = Donacija.objects.filter(
+        company=company, date__year=timezone.now().year,
+    ).aggregate(s=Sum('amount'))['s'] or 0
+    existing_eu = list(Kampanja.objects.filter(
+        company=company, campaign_type='eu_fond',
+    ).values_list('eu_program', 'eu_project_code', 'name'))
+
+    profile = json.dumps({
+        'name': company.name,
+        'type': getattr(company, 'business_type', 'udruga'),
+        'city': getattr(company, 'city', ''),
+        'members': member_count,
+        'annual_budget_eur': float(annual_budget),
+        'existing_eu_projects': [{'program': p, 'code': c, 'name': n} for p, c, n in existing_eu],
+    }, ensure_ascii=False)
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
+        prompt = (
+            'Analiziraj profil hrvatske udruge i predlozi 3-5 relevantnih EU fondova/natjecaja.\n'
+            'Fokus: ESF+, ERDF, Erasmus+, CERV, Horizon Europe, Creative Europe.\n'
+            'PROFIL:\n%s\n\n'
+            'Odgovori ISKLJUCIVO kao JSON array:\n'
+            '[{"program":"ESF+","name":"Naziv","amount_range":"50000-150000",'
+            '"deadline":"2026-06-30","relevance":"Opis","priority":"high"}]'
+        ) % profile
+
+        response = client.messages.create(
+            model='claude-haiku-4-5-20251001', max_tokens=1500,
+            messages=[{'role': 'user', 'content': prompt}])
+        text = response.content[0].text.strip()
+        if text.startswith('```'):
+            text = text.split('\n', 1)[1].rsplit('```', 1)[0]
+        suggestions = json.loads(text)
+        created = 0
+        for s in suggestions:
+            if not s.get('name'):
+                continue
+            exists = Kampanja.objects.filter(
+                company=company, campaign_type='eu_fond',
+                eu_program=s.get('program', ''),
+                name__icontains=s.get('name', '')[:50]).exists()
+            if exists:
+                continue
+            deadline = None
+            try:
+                from datetime import datetime as dt
+                deadline = dt.strptime(s.get('deadline', ''), '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                pass
+            amount = 0
+            amt = str(s.get('amount_range', '0'))
+            if '-' in amt:
+                try:
+                    amount = int(amt.split('-')[-1])
+                except ValueError:
+                    pass
+            Kampanja.objects.create(
+                company=company, name=s['name'][:200], campaign_type='eu_fond',
+                description='AI preporuka: %s' % s.get('relevance', ''),
+                start_date=timezone.now().date(), end_date=deadline,
+                goal_amount=amount, eu_program=s.get('program', '')[:200],
+                eu_status='preparing', status='draft',
+                notes='AI generirao %s. Prioritet: %s.' % (
+                    timezone.now().strftime('%d.%m.%Y.'), s.get('priority', 'medium')))
+            created += 1
+        logger.info('AI EU fund search %s: %d suggestions, %d created', company.name, len(suggestions), created)
+        return {'suggestions': len(suggestions), 'created': created}
+    except Exception as e:
+        logger.error('AI EU fund search %s: %s', company.name, e)
+        return {'error': str(e)}
+
+
+@shared_task(bind=True, soft_time_limit=60)
+def generate_volunteer_summary(self, company_id, year=None):
+    """Sumarni izvjestaj volonterskih aktivnosti za godinu."""
+    from .models import VolunteerActivity
+    from django.db.models import Sum, Count
+    from companies.models import Company
+    if not year:
+        year = timezone.now().year
+    try:
+        company = Company.objects.get(pk=company_id)
+    except Company.DoesNotExist:
+        return {'error': 'Company not found'}
+    activities = VolunteerActivity.objects.filter(company=company, date__year=year, status='completed')
+    return {
+        'year': year, 'company': company.name,
+        'total_activities': activities.count(),
+        'total_hours': float(activities.aggregate(s=Sum('hours'))['s'] or 0),
+        'total_inkind_eur': float(sum(a.inkind_value for a in activities)),
+        'unique_volunteers': activities.values('clan').distinct().count(),
+        'by_category': list(activities.values('category').annotate(count=Count('id'), hours=Sum('hours')).order_by('-hours')),
+    }

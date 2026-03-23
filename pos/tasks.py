@@ -297,3 +297,145 @@ def nightly_owner_zreport(self):
                 logger.warning('Z-report failed for %s: %s', company.name, e)
 
     return {'sent': sent, 'date': str(today)}
+
+
+
+@shared_task(bind=True, soft_time_limit=30)
+def ai_analyze_prigovor(self, prigovor_id):
+    """
+    AI analiza prigovora potrošača — kategorizacija, sentiment, prijedlog odgovora.
+    Koristi Claude Haiku za brzu analizu na hrvatskom jeziku.
+    """
+    import os, json
+    from pos.models import KnjigaPrigovora
+    from django.utils import timezone
+
+    try:
+        p = KnjigaPrigovora.objects.get(pk=prigovor_id)
+    except KnjigaPrigovora.DoesNotExist:
+        return {'error': 'Not found'}
+
+    if p.ai_analyzed_at:
+        return {'status': 'already_analyzed'}
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
+
+        prompt = """Analiziraj prigovor potrošača i odgovori ISKLJUČIVO kao JSON:
+
+PRIGOVOR:
+Ime: %s
+Opis: %s
+
+VRATI JSON:
+{
+  "category": "product_quality|service|pricing|hygiene|wait_time|delivery|warranty|safety|other",
+  "sentiment": "critical|negative|neutral|constructive",
+  "priority": 1-5 (5=najhitnije, npr. sigurnost/ozljeda),
+  "suggested_response": "Prijedlog službenog odgovora na hrvatskom jeziku, profesionalan ton, max 200 riječi. Referencira zakonski rok od 15 dana.",
+  "key_issues": ["kratki opis problema 1", "problem 2"]
+}""" % (p.ime_potrosaca, p.opis_prigovora[:500])
+
+        response = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=500,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+
+        text = response.content[0].text.strip()
+        if text.startswith('```'):
+            text = text.split('\n', 1)[1].rsplit('```', 1)[0]
+        result = json.loads(text)
+
+        p.ai_category = result.get('category', 'other')[:30]
+        p.ai_sentiment = result.get('sentiment', 'neutral')[:15]
+        p.ai_priority = min(5, max(1, int(result.get('priority', 3))))
+        p.ai_suggested_response = result.get('suggested_response', '')[:2000]
+        p.ai_analyzed_at = timezone.now()
+        p.save(update_fields=[
+            'ai_category', 'ai_sentiment', 'ai_priority',
+            'ai_suggested_response', 'ai_analyzed_at',
+        ])
+
+        logger.info('AI prigovor #%d: category=%s sentiment=%s priority=%d',
+                     p.redni_broj, p.ai_category, p.ai_sentiment, p.ai_priority)
+
+        return {
+            'category': p.ai_category,
+            'sentiment': p.ai_sentiment,
+            'priority': p.ai_priority,
+        }
+
+    except Exception as e:
+        logger.warning('AI prigovor #%d failed: %s', prigovor_id, e)
+        return {'error': str(e)}
+
+
+# ══════════════════════════════════════════════════════════════
+# OFFLINE POS — 48h Zakonski alarm (Zakon o fiskalizaciji čl.11)
+# ══════════════════════════════════════════════════════════════
+
+@shared_task(name='pos.check_fiscal_deadline')
+def check_fiscal_deadline():
+    """
+    Svakih 30 min provjeri bonove koji prijete zakonskim rokom.
+    36h = upozorenje (12h rezerva do zakonskog roka od 48h).
+    Šalje WhatsApp vlasniku tvrtke.
+    """
+    from pos.models import POSReceipt
+    from django.utils import timezone
+    from datetime import timedelta
+
+    now = timezone.now()
+    limit_36h = now - timedelta(hours=36)
+    limit_48h = now - timedelta(hours=48)
+
+    critical = POSReceipt.objects.filter(
+        status='paid',
+        paid_at__lt=limit_36h,
+        paid_at__gte=limit_48h,
+    ).filter(
+        Q(jir__isnull=True) | Q(jir='')
+    ).select_related('session__terminal__company')
+
+    if not critical.exists():
+        return {'status': 'ok', 'critical': 0}
+
+    # Grupiraj po kompaniji
+    companies_alerted = set()
+    alerted = 0
+
+    for receipt in critical[:20]:
+        company = receipt.session.terminal.company
+        if company.id in companies_alerted:
+            continue
+        companies_alerted.add(company.id)
+
+        age_h = (now - receipt.paid_at).total_seconds() / 3600
+        cnt = critical.filter(session__terminal__company=company).count()
+
+        try:
+            from core.whatsapp import send_whatsapp_message
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            admin = User.objects.filter(
+                company=company, is_staff=True
+            ).select_related('profile').first()
+            if not admin:
+                admin = User.objects.filter(company=company).first()
+            phone = getattr(getattr(admin, 'profile', None), 'phone', None) if admin else None
+            if phone:
+                msg = (
+                    f"\u26a0\ufe0f FISKALIZACIJA ALARM — {company.name}\n"
+                    f"{cnt} bon(ova) bez JIR-a, najstariji {age_h:.0f}h.\n"
+                    f"Zakonski rok: 48h od uspostave veze.\n"
+                    f"Provjeri internet odmah! limit-connect.com"
+                )
+                send_whatsapp_message(phone, msg)
+                alerted += 1
+        except Exception as e:
+            logger.warning('check_fiscal_deadline WhatsApp failed: %s', e)
+
+    logger.warning('[FISCAL DEADLINE] %d tvrtki s bonovima >36h bez JIR-a', len(companies_alerted))
+    return {'status': 'warning', 'critical': critical.count(), 'alerted': alerted}

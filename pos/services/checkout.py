@@ -9,7 +9,7 @@ Pravila:
 """
 import logging
 from decimal import Decimal, InvalidOperation
-from django.db import transaction
+from django.db import models, transaction
 from django.utils import timezone as tz
 
 logger = logging.getLogger('pos_checkout')
@@ -341,6 +341,8 @@ class CheckoutService:
             is_r1=bool(payload.get('buyer_oib')),
             note=str(note)[:255] if note else (cashier_obj.name if cashier_obj else ''),
             is_training=getattr(session.terminal, 'is_training', False) or session.is_training,
+            member_name=member_name or '',
+            member_discount_applied=member_discount,
                 )
                 break  # Success — exit retry loop
             except Exception as _dup_err:
@@ -407,6 +409,11 @@ class CheckoutService:
                 inv.tax_rate.rate if inv.tax_rate else 25
             )))
 
+            # Apply member discount if active subscription exists
+            item_discount = Decimal('0')
+            if member_discount > 0 and not getattr(inv, 'is_nonprofit_activity', False):
+                item_discount = member_discount  # % popust za clanove
+
             POSReceiptItem.objects.create(
                 receipt=receipt,
                 inventory_item=inv,
@@ -414,6 +421,7 @@ class CheckoutService:
                 quantity=qty,
                 unit_price=unit_price,
                 tax_rate=tax_rate,
+                discount_percent=item_discount,
                 is_pfand_return=is_pfand,
                 is_nonprofit_activity=getattr(inv, 'is_nonprofit_activity', False),
             )
@@ -423,6 +431,46 @@ class CheckoutService:
                 cls._deduct_stock(inv, qty, unit_price, next_number, user)
             except Exception as stock_err:
                 logger.warning('POS: StockMovement greska za item %s: %s', item_id, stock_err)
+
+            # ── CLANARINA AUTO-LINK ──
+            # Ako je artikl povezan s MembershipPlan, automatski kreiraj/oznaci Clanarinu
+            if getattr(inv, 'is_nonprofit_activity', False):
+                try:
+                    from udruge.models import MembershipPlan, Clanarina, Clan
+                    mp = MembershipPlan.objects.filter(linked_item=inv, company=company, is_active=True).first()
+                    if mp and member_name:
+                        # Pronadi clana
+                        card_uid = (payload.get('member_card') or '').strip()
+                        m_id = payload.get('member_id')
+                        clan = None
+                        if card_uid:
+                            clan = Clan.objects.filter(access_card_uid=card_uid, company=company).first()
+                        elif m_id:
+                            clan = Clan.objects.filter(pk=m_id, company=company).first()
+                        if clan:
+                            receipt.member_clan_id = clan.pk
+                            from datetime import timedelta
+                            today = tz.now().date()
+                            # Kreiraj clanarinu ako ne postoji za ovaj period
+                            existing = Clanarina.objects.filter(
+                                company=company, clan=clan,
+                                period_start=today,
+                            ).exists()
+                            if not existing:
+                                cl = Clanarina.objects.create(
+                                    company=company, clan=clan,
+                                    period_start=today,
+                                    period_end=today + timedelta(days=mp.duration_days),
+                                    amount=unit_price * qty,
+                                    payment_method='pos',
+                                    status='placena',
+                                    paid_at=tz.now(),
+                                    receipt_number='POS-%d' % next_number,
+                                )
+                                logger.info('AUTO-CLANARINA: Clan %s, plan %s, bon #%d -> Clanarina %d',
+                                           clan.full_name, mp.name, next_number, cl.pk)
+                except Exception as clan_err:
+                    logger.warning('Clanarina auto-link: %s', clan_err)
 
         # ── 5. NAPOJNICA (zasebna stavka) ──
         if tip_amount > 0:
@@ -451,6 +499,27 @@ class CheckoutService:
         # ── 6. RECALCULATE (koristi model metodu) ──
         receipt.recalculate()
         receipt.save()
+
+        # ── 6b. BLAGAJNICKI MAKSIMUM (cash_register_limit) ──
+        # Zakonski limit gotovine u blagajni za udruge
+        if payment_method == 'CASH':
+            limit = getattr(company, 'cash_register_limit', None)
+            if limit and limit > 0:
+                # Izracunaj trenutnu gotovinu u smjeni
+                from django.db.models import Sum
+                from pos.models import POSPaymentLine
+                current_cash = session.receipts.filter(
+                    status='paid',
+                ).aggregate(
+                    cash_in=Sum('payments__amount', filter=models.Q(payments__method='CASH')),
+                )['cash_in'] or Decimal('0')
+                if current_cash + receipt.total > limit:
+                    logger.warning(
+                        'CASH LIMIT: Smjena %s — %s + %s > %s EUR limit',
+                        session.pk, current_cash, receipt.total, limit,
+                    )
+                    # Ne blokiramo ali dodajemo warning u result
+                    # (zakonski se mora uplatiti visak na banku)
 
         # ── 7. PLACANJE ──
         change = Decimal('0')
@@ -608,8 +677,6 @@ class CheckoutService:
                         'payment_method': payment_method, 'items_count': len(items_data)},
               company=company)
 
-        return result
-
         # ── 12. POS PULSE — AI Anomaly Detection ──
         try:
             from pos.pulse import analyze_receipt
@@ -631,4 +698,21 @@ class CheckoutService:
                 result["chain_seq"] = chain_link.sequence
             except Exception as _chain_err:
                 logger.warning("Hash chain append failed: %s", _chain_err)
+
+        # ── 15. CASH LIMIT WARNING ──
+        if payment_method == 'CASH':
+            limit = getattr(company, 'cash_register_limit', None)
+            if limit and limit > 0:
+                from django.db.models import Sum as S2
+                from pos.models import POSPaymentLine as PPL2
+                cash_now = session.receipts.filter(status='paid').aggregate(
+                    c=S2('payments__amount', filter=models.Q(payments__method='CASH'))
+                )['c'] or Decimal('0')
+                if cash_now > limit * Decimal('0.8'):
+                    result['cash_limit_warning'] = (
+                        'Gotovina u blagajni: %.2f / %.2f EUR (%.0f%%). '
+                        'Uplatite visak na banku.' % (cash_now, limit, cash_now / limit * 100)
+                    )
+
+        return result
 

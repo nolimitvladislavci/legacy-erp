@@ -56,7 +56,10 @@
             <label class="form-label">{% trans "Opis prigovora" %} *</label>
             <div class="d-flex gap-2 mb-2">
               <button type="button" class="btn btn-sm btn-outline-danger" id="btnVoice" onclick="toggleVoice()">
-                <i class="fas fa-microphone me-1"></i>{% trans "Govori prigovor" %}
+                <i class="fas fa-microphone me-1"></i>{% trans "Govori prigovor</button>
+        <button type="button" id="audioRecBtn" onclick="startAudioRec()" style="background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.3);padding:.4rem .8rem;border-radius:8px;cursor:pointer;font-size:.8rem">🎤 Snimi zvučni zapis</button>
+        <div id="audioStatus" style="font-size:.72rem;color:var(--muted);margin-top:4px"></div>
+        <span style="display:none">" %}
               </button>
               <span id="voiceStatus" class="text-muted small align-self-center"></span>
             </div>
@@ -451,3 +454,55 @@ function fenixIdCamera() {
 }
 </script>
 {% endblock %}
+
+<!-- AUDIO RECORDING (MediaRecorder API) -->
+<script>
+(function(){
+  var mediaRec = null, audioChunks = [], isRecording = false;
+  var audioB64 = '';
+
+  window.startAudioRec = function() {
+    if (isRecording) { stopAudioRec(); return; }
+    navigator.mediaDevices.getUserMedia({audio: true}).then(function(stream) {
+      mediaRec = new MediaRecorder(stream, {mimeType: 'audio/webm;codecs=opus'});
+      audioChunks = [];
+      mediaRec.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRec.onstop = function() {
+        var blob = new Blob(audioChunks, {type: 'audio/webm'});
+        var reader = new FileReader();
+        reader.onloadend = function() {
+          audioB64 = reader.result;
+          var el = document.getElementById('audioStatus');
+          if (el) el.innerHTML = '🎵 Snimljeno (' + Math.round(blob.size/1024) + ' KB) <button onclick="playAudioPreview()" style="background:var(--gold);color:#000;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:.7rem">▶ Play</button>';
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(function(t){ t.stop(); });
+      };
+      mediaRec.start();
+      isRecording = true;
+      var btn = document.getElementById('audioRecBtn');
+      if (btn) { btn.textContent = '⏹ Zaustavi snimanje'; btn.style.background = '#ef4444'; }
+    }).catch(function(err) {
+      alert('Mikrofon nije dostupan: ' + err.message);
+    });
+  };
+
+  window.stopAudioRec = function() {
+    if (mediaRec && isRecording) {
+      mediaRec.stop();
+      isRecording = false;
+      var btn = document.getElementById('audioRecBtn');
+      if (btn) { btn.textContent = '🎤 Snimi zvučni zapis'; btn.style.background = ''; }
+    }
+  };
+
+  window.playAudioPreview = function() {
+    if (audioB64) {
+      var audio = new Audio(audioB64);
+      audio.play();
+    }
+  };
+
+  window.getAudioB64 = function() { return audioB64; };
+})();
+</script>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Nova volonterska aktivnost{% endblock %}
+{% block content %}
+<div class="page-header"><h1>Nova volonterska aktivnost</h1></div>
+<form method="post" class="form-card">
+    {% csrf_token %}
+    <div class="form-group"><label>Volonter</label><select name="clan" required>
+        {% for c in clanovi %}<option value="{{ c.pk }}">{{ c.full_name }}</option>{% endfor %}
+    </select></div>
+    <div class="form-group"><label>Naziv</label><input type="text" name="title" required></div>
+    <div class="form-group"><label>Kategorija</label><select name="category">
+        {% for k, v in category_choices %}<option value="{{ k }}">{{ v }}</option>{% endfor %}
+    </select></div>
+    <div class="form-group"><label>Datum</label><input type="date" name="date" required></div>
+    <div class="form-group"><label>Sati</label><input type="number" name="hours" step="0.5" required></div>
+    <div class="form-group"><label>Lokacija</label><input type="text" name="location"></div>
+    <div class="form-group"><label>Status</label><select name="status">
+        {% for k, v in status_choices %}<option value="{{ k }}">{{ v }}</option>{% endfor %}
+    </select></div>
+    <div class="form-group"><label>EU projekt sifra</label><input type="text" name="eu_project_code"></div>
+    <div class="form-group"><label>In-kind satnica (EUR)</label><input type="number" name="inkind_rate_eur" step="0.01" value="0"></div>
+    <div class="form-group"><label>Biljeske</label><textarea name="notes"></textarea></div>
+    <button type="submit" class="btn-gold">Spremi</button>
+</form>
+{% endblock %}

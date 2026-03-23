@@ -51,6 +51,11 @@
 /* ── Aktivni blagajnik indicator ────────────────────────────────────────────── */
 .active-cashier-bar{display:none;background:rgba(201,168,76,.12);border-bottom:1px solid rgba(201,168,76,.3);padding:.25rem .6rem;font-size:.72rem;color:var(--gold);font-weight:600;text-align:center;flex-shrink:0}
 .active-cashier-bar.show{display:block}
+.offline-banner{display:none;background:#7c3aed;color:#fff;text-align:center;padding:.3rem .8rem;font-size:.75rem;font-weight:600;border-bottom:1px solid rgba(255,255,255,.2);flex-shrink:0}
+.offline-banner.show{display:flex;align-items:center;justify-content:center;gap:.5rem}
+.offline-badge{background:rgba(255,255,255,.25);border-radius:10px;padding:1px 7px;font-size:.7rem;min-width:20px;text-align:center}
+.offline-critical{display:none;background:#dc2626;color:#fff;text-align:center;padding:.3rem .8rem;font-size:.75rem;font-weight:700;flex-shrink:0}
+.offline-critical.show{display:block}
 
 /* ── Toast poruka ────────────────────────────────────────────────────────────── */
 .pos-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,.95);color:#fff;border:1px solid var(--gold);border-radius:10px;padding:.6rem 1.2rem;font-size:.88rem;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
@@ -267,8 +272,18 @@
       <!-- Red 1: ime + sat + akcijski gumbi -->
       <div class="qp-status-top">
         <div class="qp-status-info">
+          {% if terminal.company.logo %}
+          <a href="/hr/companies/settings/#logo" title="Promijeni logo">
+            <img src="{{ terminal.company.logo.url }}" alt="{{ terminal.company.name }}"
+                 style="height:28px;max-width:80px;object-fit:contain;border-radius:4px;margin-bottom:2px;display:block">
+          </a>
+          {% else %}
           <div class="qp-company">{{ terminal.company.name|default:"POS" }}</div>
+          {% endif %}
           <div class="qp-terminal">{{ terminal.name }}</div>
+          <div id="active-cashier-name" style="font-size:.65rem;color:var(--gold);opacity:.7;margin-top:1px">
+            👤 {{ request.user.get_full_name|default:request.user.username }}
+          </div>
         </div>
         <div class="qp-clock-wrap">
           <div id="pos-clock"></div>
@@ -302,6 +317,19 @@
 
     <!-- Aktivni blagajnik bar -->
     <div class="active-cashier-bar" id="activeCashierBar"></div>
+    <div class="offline-banner" id="offlineBanner">
+      <span>&#9889; OFFLINE MOD &mdash; bonovi se čuvaju lokalno</span>
+      <span class="offline-badge" id="offlineSyncBadge" style="display:none"></span>
+    </div>
+    <div class="offline-critical" id="offline48hBanner">
+      &#9888;&#65039; UPOZORENJE: Bon bez JIR-a &gt;36h! Uspostavi vezu odmah.
+    </div>
+{% if show_upgrade_banner %}
+<div style="background:linear-gradient(90deg,#1a1a2e,#16213e);border-bottom:2px solid var(--gold);padding:.4rem 1rem;text-align:center;font-size:.78rem;color:#e2e8f0">
+  ⚡ Besplatni plan podržava 1 blagajnu.
+  <a href="/register/upgrade/?module=pos" style="color:var(--gold);font-weight:700;text-decoration:underline;margin-left:.5rem">Nadoplati →</a>
+</div>
+{% endif %}
 
     <!-- Search + Scanner -->
     <div class="prod-search" style="display:flex;gap:6px;align-items:center">
@@ -631,8 +659,12 @@
 
 <script type="application/json" id="pos-config">{
   "session_id": {% if session %}{{ session.id }}{% else %}null{% endif %},
-  "default_cashier": "{{ request.user.get_full_name|default:request.user.username|escapejs }}"
+  "default_cashier": "{{ request.user.get_full_name|default:request.user.username|escapejs }}",
+  "terminal_id": {% if terminal %}{{ terminal.id }}{% else %}null{% endif %},
+  "terminal_name": "{{ terminal.name|escapejs }}",
+  "company_name": "{{ terminal.company.name|escapejs }}"
 }</script>
+<script src="/static/js/pos/pos-offline.js?v=20260323"></script>
 <script src="/static/js/pos/pos-quick.js?v=20260322b"></script>
 <script src="/static/js/pos/pos-fiscal.js"></script>
 <script src="/static/js/html5-qrcode.min.js"></script>

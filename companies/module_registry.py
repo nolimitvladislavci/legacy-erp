@@ -192,6 +192,15 @@ MODULES = [
         'category': 'specijalizirani',
         'description': 'AI patrol, anomaly detection, builder.',
     },
+    {
+        'id': 'udruge',
+        'name': 'Udruga',
+        'icon': 'bi-people-fill',
+        'url': '/udruge/',
+        'category': 'specijalizirani',
+        'description': 'Clanovi, clanarine, donacije, eventi, EU fondovi, volonteri.',
+        'counter_model': 'udruge.Clan',
+    },
 ]
 
 CATEGORIES = {

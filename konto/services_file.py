@@ -1022,3 +1022,150 @@ def parse_integrity_error(e):
     if 'unique' in msg:
         return 'Duplikat zapisa — ovaj unos već postoji u bazi.'
     return f'Baza podataka je odbila upis: {str(e)[:200]}'
+
+
+# ═══════════════════════════════════════════════════
+#  POS → KONTO: Auto-knjiženje zatvorene POS sesije
+# ═══════════════════════════════════════════════════
+
+@transaction.atomic
+def book_pos_session(session, user=None):
+    """Book a closed POS session into the ledger.
+
+    Agregira sve plaćene račune u sesiji po načinu plaćanja i PDV stopi.
+    Jedna temeljnica po sesiji:
+
+    Gotovina 500€, Kartica 300€, Prihod neto 640€, PDV 160€:
+      D: 1000 Blagajna               500,00€
+      D: 1210 Potraživanja kartica   300,00€
+      P: 7500 POS Prihodi            640,00€
+      P: 2400 Obveze za PDV          160,00€
+
+    Returns JournalEntry or None if already booked / no sales.
+    """
+    from .models import KontoAccount, JournalEntry, LedgerLine
+    from pos.models import POSReceipt, POSPaymentLine
+
+    company = session.terminal.company
+
+    # Check if already booked
+    prefix = f"POS-{session.terminal.terminal_code}-{session.session_number}"
+    if JournalEntry.objects.filter(company=company, entry_number__startswith=prefix).exists():
+        return None  # Already booked
+
+    # Get paid receipts (exclude training)
+    receipts = session.receipts.filter(
+        status=POSReceipt.Status.PAID,
+        is_training=False,
+    )
+    if not receipts.exists():
+        return None
+
+    # Aggregate by payment method
+    payment_totals = {}
+    for receipt in receipts.prefetch_related('payment_lines'):
+        for pl in receipt.payment_lines.all():
+            method = pl.method
+            payment_totals[method] = payment_totals.get(method, Decimal('0')) + pl.amount - pl.change_given
+
+    # Aggregate tax breakdown
+    total_subtotal = Decimal('0')
+    total_tax = Decimal('0')
+    tax_by_rate = {}
+    for receipt in receipts.prefetch_related('items'):
+        for item in receipt.items.all():
+            net = item.quantity * item.unit_price * (1 - item.discount_percent / 100)
+            tax = net * item.tax_rate / 100
+            total_subtotal += net
+            total_tax += tax
+            rate = item.tax_rate
+            tax_by_rate[rate] = tax_by_rate.get(rate, Decimal('0')) + tax
+
+    total_sales = total_subtotal + total_tax
+    if total_sales <= 0:
+        return None
+
+    # Payment method → konto mapping
+    PAYMENT_KONTO = {
+        'CASH':    ('1000', 'Blagajna', 'asset'),
+        'CARD':    ('1210', 'Potraživanja kartice', 'asset'),
+        'MOBILE':  ('1215', 'Mobilno plaćanje', 'asset'),
+        'VOUCHER': ('1290', 'Voucher potraživanja', 'asset'),
+        'ACCOUNT': ('1200', 'Potraživanja od kupaca', 'asset'),
+        'CRYPTO':  ('1280', 'Kripto potraživanja', 'asset'),
+        'REVOLUT': ('1216', 'Revolut potraživanja', 'asset'),
+        'AIRCASH': ('1217', 'Aircash potraživanja', 'asset'),
+    }
+
+    # Determine country
+    country = getattr(company, 'country', 'HR')
+    if country == 'DE':
+        revenue_code, revenue_name = '8000', 'Erlöse POS'
+        vat_code, vat_name = '1776', 'Umsatzsteuer'
+    else:
+        revenue_code, revenue_name = '7500', 'POS Prihodi od prodaje'
+        vat_code, vat_name = '2400', 'Obveze za PDV'
+
+    # Create journal entry
+    entry_number = _next_entry_number(company, 'POS')
+    session_date = (session.closed_at or session.opened_at).date() if hasattr(
+        (session.closed_at or session.opened_at), 'date') else (session.closed_at or session.opened_at)
+
+    je = JournalEntry.objects.create(
+        company=company,
+        entry_number=entry_number,
+        date=session_date,
+        description=f"POS {session.terminal.name} smjena #{session.session_number} — {receipts.count()} računa",
+        source_type='pos',
+        is_posted=True,
+        created_by=user,
+    )
+
+    # DEBIT: Payment methods
+    for method, amount in payment_totals.items():
+        if amount <= 0:
+            continue
+        code, name, acct_type = PAYMENT_KONTO.get(method, ('1000', 'Blagajna', 'asset'))
+        acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code=code,
+            defaults={'name': name, 'account_type': acct_type})
+        LedgerLine.objects.create(
+            journal_entry=je, account=acct,
+            side='debit', amount=round(amount, 2),
+            description=f"POS {method} smjena #{session.session_number}")
+
+    # CREDIT: Revenue (subtotal without VAT)
+    if total_subtotal > 0:
+        rev_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code=revenue_code,
+            defaults={'name': revenue_name, 'account_type': 'income'})
+        LedgerLine.objects.create(
+            journal_entry=je, account=rev_acct,
+            side='credit', amount=round(total_subtotal, 2),
+            description=f"POS prihod smjena #{session.session_number}")
+
+    # CREDIT: VAT
+    if total_tax > 0:
+        vat_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code=vat_code,
+            defaults={'name': vat_name, 'account_type': 'liability'})
+        LedgerLine.objects.create(
+            journal_entry=je, account=vat_acct,
+            side='credit', amount=round(total_tax, 2),
+            description=f"PDV POS smjena #{session.session_number}")
+
+    # Verify balance
+    if not je.is_balanced:
+        import logging
+        logging.getLogger(__name__).error(
+            "POS booking NOT balanced! JE=%s debit=%s credit=%s",
+            je.entry_number, je.total_debit, je.total_credit)
+        # Fix rounding by adjusting revenue
+        diff = je.total_debit - je.total_credit
+        if abs(diff) < Decimal('0.10'):
+            rev_line = je.lines.filter(side='credit', account__code=revenue_code).first()
+            if rev_line:
+                rev_line.amount += diff
+                rev_line.save(update_fields=['amount'])
+
+    return je

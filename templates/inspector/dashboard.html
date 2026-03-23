@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspekcija — {{ company.name }}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--bg:#0f0f0f;--card:#1a1a1a;--gold:#c9a84c;--red:#dc2626;--green:#22c55e;--blue:#3b82f6;--text:#e5e5e5;--muted:#888;--border:#333}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.top-bar{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--gold)}
+.top-bar h1{color:var(--gold);font-size:1.3rem;letter-spacing:2px}
+.top-bar .meta{color:var(--muted);font-size:.85rem;text-align:right}
+.top-bar .scope-badge{background:var(--red);color:#fff;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.tabs{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:12px 24px;cursor:pointer;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab i{font-size:1rem}
+.container{max-width:1400px;margin:0 auto;padding:1.5rem}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem}
+.kpi{background:var(--card);border-radius:12px;padding:1.25rem;border-left:4px solid var(--gold)}
+.kpi .val{font-size:2rem;font-weight:800;color:#fff}
+.kpi .lbl{color:var(--muted);font-size:.85rem;margin-top:4px}
+.section{background:var(--card);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.section h3{color:var(--gold);margin-bottom:1rem;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:rgba(201,168,76,.1);color:var(--gold);padding:10px 8px;text-align:left;font-weight:600;position:sticky;top:0}
+td{padding:8px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:hover{background:rgba(255,255,255,.02)}
+.r{text-align:right;font-variant-numeric:tabular-nums}
+.ok{color:var(--green)}
+.warn{color:#f59e0b}
+.err{color:var(--red)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600}
+.badge-green{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-red{background:rgba(220,38,38,.15);color:var(--red)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold)}
+.footer{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+.watermark{position:fixed;bottom:10px;right:20px;color:rgba(201,168,76,.08);font-size:4rem;font-weight:900;letter-spacing:5px;pointer-events:none;z-index:0}
+@media(max-width:768px){.grid{grid-template-columns:1fr 1fr}.top-bar{flex-direction:column;gap:.5rem;text-align:center}}
+@media print{body{background:#fff;color:#000}.top-bar{background:#000!important}th{background:#f0f0f0;color:#000}td{color:#000;border-color:#ccc}.tab{display:none}.tab-content{display:block!important}.watermark{display:none}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1><i class="fas fa-shield-halved"></i> INSPEKCIJA — {{ company.name }}</h1>
+    <div style="color:var(--muted);font-size:.85rem;margin-top:4px">
+      {% if company.oib %}OIB: {{ company.oib }} | {% endif %}
+      Period: {{ date_from|date:"d.m.Y" }} — {{ date_to|date:"d.m.Y" }}
+    </div>
+  </div>
+  <div class="meta">
+    <span class="scope-badge">{{ token.get_scope_display }}</span><br>
+    <small>Token: ...{{ token.token|truncatechars:12 }} | Pregleda: {{ token.view_count }}/{{ token.max_views }}</small><br>
+    <small>Vrijedi do: {{ token.expires_at|date:"d.m.Y H:i" }}</small>
+  </div>
+</div>
+
+<div class="tabs">
+  {% for tab in tabs %}
+  <div class="tab {% if forloop.first %}active{% endif %}" data-tab="{{ tab.id }}">
+    <i class="fas {{ tab.icon }}"></i> {{ tab.label }}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="container">
+
+{% if porezna %}
+<div class="tab-content {% if tabs.0.id == 'porezna' %}active{% endif %}" id="tab-porezna">
+  <div class="grid">
+    <div class="kpi"><div class="val">{{ porezna.invoices_count }}</div><div class="lbl">Faktura u periodu</div></div>
+    <div class="kpi"><div class="val">{{ porezna.invoices_total|floatformat:2 }} &euro;</div><div class="lbl">Ukupni promet</div></div>
+    <div class="kpi"><div class="val">{{ porezna.invoices_tax|floatformat:2 }} &euro;</div><div class="lbl">PDV u periodu</div></div>
+    {% if porezna.vat.payable %}<div class="kpi"><div class="val">{{ porezna.vat.payable|floatformat:2 }} &euro;</div><div class="lbl">PDV za uplatu</div></div>{% endif %}
+  </div>
+
+  {% if porezna.pnl %}
+  <div class="section">
+    <h3><i class="fas fa-chart-line"></i> Racun dobiti i gubitka</h3>
+    <div class="grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="kpi" style="border-color:var(--green)"><div class="val ok">{{ porezna.pnl.income.total|floatformat:2 }} &euro;</div><div class="lbl">Prihodi</div></div>
+      <div class="kpi" style="border-color:var(--red)"><div class="val err">{{ porezna.pnl.expenses.total|floatformat:2 }} &euro;</div><div class="lbl">Rashodi</div></div>
+      <div class="kpi" style="border-color:var(--blue)"><div class="val">{{ porezna.pnl.profit_loss|floatformat:2 }} &euro;</div><div class="lbl">Dobit / Gubitak</div></div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if porezna.balance_sheet %}
+  <div class="section">
+    <h3><i class="fas fa-balance-scale"></i> Bilanca na {{ date_to|date:"d.m.Y" }}</h3>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div class="kpi" style="border-color:var(--blue)"><div class="val">{{ porezna.balance_sheet.assets.total|floatformat:2 }} &euro;</div><div class="lbl">Aktiva (imovina)</div></div>
+      <div class="kpi" style="border-color:var(--gold)"><div class="val">{{ porezna.balance_sheet.total_pasiva|floatformat:2 }} &euro;</div><div class="lbl">Pasiva (obveze+kapital)</div></div>
+    </div>
+    <p style="margin-top:10px;font-size:.9rem">
+      {% if porezna.balance_sheet.is_balanced %}<span class="ok"><i class="fas fa-check-circle"></i> BILANCA U RAVNOTEZI</span>{% else %}<span class="err"><i class="fas fa-exclamation-circle"></i> BILANCA NIJE U RAVNOTEZI!</span>{% endif %}
+    </p>
+  </div>
+  {% endif %}
+
+  {% if porezna.recent_invoices %}
+  <div class="section">
+    <h3><i class="fas fa-file-invoice"></i> Posljednje fakture</h3>
+    <div style="overflow-x:auto"><table>
+    <tr><th>Broj</th><th>Tip</th><th>Klijent</th><th>OIB</th><th>Datum</th><th>Iznos</th><th>PDV</th><th>Status</th></tr>
+    {% for inv in porezna.recent_invoices %}
+    <tr>
+      <td>{{ inv.number }}</td><td><span class="badge badge-gold">{{ inv.doctype }}</span></td>
+      <td>{{ inv.client_name|truncatechars:30 }}</td><td>{{ inv.client_oib }}</td>
+      <td>{{ inv.date_issued|date:"d.m.Y" }}</td>
+      <td class="r">{{ inv.total|floatformat:2 }}</td><td class="r">{{ inv.tax_amount|floatformat:2 }}</td>
+      <td><span class="badge {% if inv.status == 'PAID' %}badge-green{% elif inv.status == 'OVERDUE' %}badge-red{% else %}badge-blue{% endif %}">{{ inv.status }}</span></td>
+    </tr>
+    {% endfor %}
+    </table></div>
+  </div>
+  {% endif %}
+
+  {% if porezna.receivables %}
+  <div class="section">
+    <h3><i class="fas fa-hand-holding-usd"></i> Otvorena potrazivanja (saldakonti kupaca)</h3>
+    <table>
+    <tr><th>Klijent</th><th>Racun</th><th>Dospijece</th><th>Ukupno</th><th>Placeno</th><th>Preostalo</th><th>Dana</th></tr>
+    {% for r in porezna.receivables %}
+    <tr><td>{{ r.client }}</td><td>{{ r.invoice_number }}</td><td>{{ r.due_date }}</td>
+    <td class="r">{{ r.total|floatformat:2 }}</td><td class="r">{{ r.paid|floatformat:2 }}</td>
+    <td class="r {% if r.remaining > 0 %}warn{% endif %}">{{ r.remaining|floatformat:2 }}</td>
+    <td class="{% if r.days_overdue > 30 %}err{% elif r.days_overdue > 0 %}warn{% endif %}">{{ r.days_overdue }}</td></tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if pos %}
+<div class="tab-content {% if tabs.0.id == 'pos' %}active{% endif %}" id="tab-pos">
+  <div class="grid">
+    <div class="kpi"><div class="val">{{ pos.receipts_count }}</div><div class="lbl">POS racuna</div></div>
+    <div class="kpi"><div class="val">{{ pos.receipts_total|floatformat:2 }} &euro;</div><div class="lbl">Ukupni POS promet</div></div>
+    <div class="kpi"><div class="val ok">{{ pos.fiscalized }}</div><div class="lbl">Fiskaliziranih (JIR)</div></div>
+    <div class="kpi"><div class="val {% if pos.not_fiscalized > 0 %}err{% endif %}">{{ pos.not_fiscalized }}</div><div class="lbl">Bez fiskalizacije</div></div>
+  </div>
+
+  {% if pos.cert %}
+  <div class="section">
+    <h3><i class="fas fa-certificate"></i> Fiskalni certifikat</h3>
+    <p>Izdavatelj: {{ pos.cert.issuer }} | Subjekt: {{ pos.cert.subject }}</p>
+    <p>Vrijedi: {{ pos.cert.valid_from }} — {{ pos.cert.valid_to }}</p>
+  </div>
+  {% endif %}
+
+  {% if pos.payment_methods %}
+  <div class="section">
+    <h3><i class="fas fa-money-bill-wave"></i> Nacini placanja</h3>
+    <table><tr><th>Nacin</th><th>Transakcija</th><th>Iznos</th></tr>
+    {% for pm in pos.payment_methods %}
+    <tr><td>{{ pm.method }}</td><td class="r">{{ pm.cnt }}</td><td class="r">{{ pm.total|floatformat:2 }} &euro;</td></tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+
+  {% if pos.recent_receipts %}
+  <div class="section">
+    <h3><i class="fas fa-receipt"></i> Posljednji racuni (s JIR/ZKI)</h3>
+    <div style="overflow-x:auto"><table>
+    <tr><th>#</th><th>Terminal</th><th>Iznos</th><th>PDV</th><th>ZKI</th><th>JIR</th><th>Datum fiskalizacije</th><th>Status</th></tr>
+    {% for r in pos.recent_receipts %}
+    <tr>
+      <td>{{ r.global_number }}</td><td>{{ r.session__terminal__name }}</td>
+      <td class="r">{{ r.total|floatformat:2 }}</td><td class="r">{{ r.tax_amount|floatformat:2 }}</td>
+      <td style="font-size:.7rem">{{ r.zki|default:"-" }}</td>
+      <td style="font-size:.7rem" class="{% if r.jir %}ok{% else %}err{% endif %}">{{ r.jir|default:"NEMA" }}</td>
+      <td>{{ r.fiscal_datetime|date:"d.m.Y H:i"|default:"-" }}</td>
+      <td><span class="badge {% if r.status == 'paid' %}badge-green{% else %}badge-gold{% endif %}">{{ r.status }}</span></td>
+    </tr>
+    {% endfor %}
+    </table></div>
+  </div>
+  {% endif %}
+
+  {% if pos.sessions %}
+  <div class="section">
+    <h3><i class="fas fa-clock"></i> POS Smjene (Z-izvjesca)</h3>
+    <table><tr><th>#</th><th>Terminal</th><th>Otvorena</th><th>Zatvorena</th><th>Otvaranje</th><th>Zatvaranje</th><th>Status</th></tr>
+    {% for s in pos.sessions %}
+    <tr><td>{{ s.session_number }}</td><td>{{ s.terminal__name }}</td>
+    <td>{{ s.opened_at|date:"d.m.Y H:i" }}</td><td>{{ s.closed_at|date:"d.m.Y H:i"|default:"-" }}</td>
+    <td class="r">{{ s.opening_cash|floatformat:2 }}</td><td class="r">{{ s.closing_cash|floatformat:2 }}</td>
+    <td><span class="badge {% if s.status == 'closed' or s.status == 'z_done' %}badge-green{% else %}badge-gold{% endif %}">{{ s.status }}</span></td></tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if radna %}
+<div class="tab-content {% if tabs.0.id == 'radna' %}active{% endif %}" id="tab-radna">
+  <div class="grid">
+    <div class="kpi"><div class="val">{{ radna.employees_count }}</div><div class="lbl">Zaposlenika</div></div>
+    <div class="kpi"><div class="val">{{ radna.total_regular|floatformat:0 }}h</div><div class="lbl">Redovni sati</div></div>
+    <div class="kpi"><div class="val {% if radna.total_overtime > 0 %}warn{% endif %}">{{ radna.total_overtime|floatformat:0 }}h</div><div class="lbl">Prekovremeni</div></div>
+    <div class="kpi"><div class="val">{{ radna.total_night|floatformat:0 }}h</div><div class="lbl">Nocni sati</div></div>
+  </div>
+
+  {% if radna.zor_warnings %}
+  <div class="section" style="border:2px solid var(--red)">
+    <h3 style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i> ZOR Upozorenja</h3>
+    {% for w in radna.zor_warnings %}<p class="err" style="margin:4px 0">{{ w }}</p>{% endfor %}
+  </div>
+  {% endif %}
+
+  {% if radna.overtime_by_user %}
+  <div class="section">
+    <h3><i class="fas fa-user-clock"></i> Prekovremeni po zaposleniku</h3>
+    <table><tr><th>Zaposlenik</th><th>Prekovremeni (h)</th><th>ZOR Limit</th></tr>
+    {% for o in radna.overtime_by_user %}
+    <tr><td>{{ o.user__first_name }} {{ o.user__last_name }}</td>
+    <td class="r {% if o.ot_total > 180 %}err{% elif o.ot_total > 150 %}warn{% endif %}">{{ o.ot_total|floatformat:1 }}</td>
+    <td>180h/god</td></tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+
+  {% if radna.payroll_runs %}
+  <div class="section">
+    <h3><i class="fas fa-money-check-alt"></i> Obracuni placa</h3>
+    <table><tr><th>Period</th><th>Status</th><th>Bruto</th><th>Neto</th><th>Porez</th></tr>
+    {% for p in radna.payroll_runs %}
+    <tr><td>{{ p.month }}/{{ p.year }}</td>
+    <td><span class="badge {% if p.status == 'PAID' %}badge-green{% elif p.status == 'FINALIZED' %}badge-blue{% else %}badge-gold{% endif %}">{{ p.status }}</span></td>
+    <td class="r">{{ p.total_gross|floatformat:2 }}</td><td class="r">{{ p.total_net|floatformat:2 }}</td><td class="r">{{ p.total_tax|floatformat:2 }}</td></tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if livestock %}
+<div class="tab-content {% if tabs.0.id == 'livestock' %}active{% endif %}" id="tab-livestock">
+  <div class="grid">
+    <div class="kpi"><div class="val">{{ livestock.animals_count }}</div><div class="lbl">Zivotinja</div></div>
+    <div class="kpi"><div class="val {% if livestock.in_karencija > 0 %}err{% endif %}">{{ livestock.in_karencija }}</div><div class="lbl">U karenciji</div></div>
+    <div class="kpi"><div class="val">{{ livestock.fields_count }}</div><div class="lbl">Polja/parcela</div></div>
+  </div>
+
+  {% if livestock.in_karencija > 0 %}
+  <div class="section" style="border:2px solid var(--red)">
+    <h3 style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i> KARENCIJA — ZABRANA KLANJA/MUZNJE</h3>
+    <p>{{ livestock.in_karencija }} zivotinja ima aktivnu karenciju. Provjerite zdravstvene zapise.</p>
+  </div>
+  {% endif %}
+
+  {% if livestock.health_records %}
+  <div class="section">
+    <h3><i class="fas fa-notes-medical"></i> Zdravstveni zapisi (Knjiga lijecenja)</h3>
+    <table><tr><th>Usna m.</th><th>Ime</th><th>Datum</th><th>Dijagnoza</th><th>Lijecenje</th><th>Veterinar</th><th>Karencija do</th></tr>
+    {% for h in livestock.health_records %}
+    <tr><td>{{ h.animal__ear_tag }}</td><td>{{ h.animal__name }}</td><td>{{ h.date }}</td>
+    <td>{{ h.diagnosis|truncatechars:40 }}</td><td>{{ h.treatment|truncatechars:40 }}</td>
+    <td>{{ h.vet_name }}</td>
+    <td class="{% if h.karencija_do %}err{% endif %}">{{ h.karencija_do|default:"-" }}</td></tr>
+    {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+</div>
+
+<div class="footer">
+  <i class="fas fa-shield-halved"></i> LIMIT CONNECT — Inspekcijski pristup (read-only)<br>
+  Firma: {{ company.name }} {% if company.oib %}| OIB: {{ company.oib }}{% endif %}<br>
+  Generirano: {% now "d.m.Y H:i" %} | Token: ...{{ token.token|truncatechars:12 }} | Pregled #{{ token.view_count }}
+</div>
+
+<div class="watermark">INSPEKCIJA</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

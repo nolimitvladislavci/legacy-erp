@@ -1,3 +1,64 @@
+/* ═══ POS Offline Engine v3 — 48h zakonski mod (23.03.2026) ═══ */
+
+// Čitaj terminal_id iz pos-config (injektira Django template)
+function _getPosConfig() {
+  try { return JSON.parse(document.getElementById('pos-config').textContent || '{}'); } catch(e) { return {}; }
+}
+
+// 48h provjera — poziva se svakih 10 min
+function _check48hAlarm() {
+  var banner = document.getElementById('offline48hBanner');
+  if (!banner) return;
+  openDB(function(db) {
+    var tx = db.transaction('receipts', 'readonly');
+    var critical = 0;
+    var limit36h = Date.now() - 36 * 60 * 60 * 1000;
+    tx.objectStore('receipts').openCursor().onsuccess = function(e) {
+      var c = e.target.result;
+      if (c) {
+        var r = c.value;
+        if (!r.synced && new Date(r.created_at).getTime() < limit36h) critical++;
+        c.continue();
+      }
+    };
+    tx.oncomplete = function() {
+      if (critical > 0) {
+        banner.classList.add('show');
+        banner.textContent = '⚠️ UPOZORENJE: ' + critical + ' bon(ova) bez JIR-a >36h! Uspostavi vezu odmah (zakon: 48h).';
+      } else {
+        banner.classList.remove('show');
+      }
+    };
+  });
+}
+setInterval(_check48hAlarm, 10 * 60 * 1000);
+setTimeout(_check48hAlarm, 3000);
+
+// Ažuriraj offline banner (online/offline status)
+function _updateOnlineBanner() {
+  var b = document.getElementById('offlineBanner');
+  if (!b) return;
+  if (!navigator.onLine) {
+    b.classList.add('show');
+  } else {
+    openDB(function(db) {
+      var tx = db.transaction('receipts', 'readonly');
+      var cnt = 0;
+      tx.objectStore('receipts').index('synced').openCursor(IDBKeyRange.only(0)).onsuccess = function(e) {
+        var c = e.target.result; if (c) { cnt++; c.continue(); }
+      };
+      tx.oncomplete = function() {
+        if (cnt > 0) { b.classList.add('show'); } else { b.classList.remove('show'); }
+        var badge = document.getElementById('offlineSyncBadge');
+        if (badge) { badge.textContent = cnt || ''; badge.style.display = cnt ? 'inline-block' : 'none'; }
+      };
+    });
+  }
+}
+window.addEventListener('online', function() { _updateOnlineBanner(); setTimeout(function(){ if(window.syncOfflineData) window.syncOfflineData(); }, 2000); });
+window.addEventListener('offline', function() { _updateOnlineBanner(); });
+setTimeout(_updateOnlineBanner, 1500);
+
 /* ═══ POS Offline Engine v2 — Kompletna smjena bez interneta ═══
  *
  * Nadogradnja pos-core.js offline sustava.
@@ -68,7 +129,7 @@
     var record = {
       offline_id: offlineId,
       session_id: receiptData.session_id || (session ? session.id : null),
-      terminal_id: receiptData.terminal_id || (session ? session.terminal_id : null),
+      terminal_id: receiptData.terminal_id || (session ? session.terminal_id : null) || _getPosConfig().terminal_id || null,
       items: receiptData.items || [],
       payment_method: receiptData.payment_method || 'CASH',
       amount_paid: receiptData.amount_paid || 0,

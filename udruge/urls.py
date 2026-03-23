@@ -53,4 +53,14 @@ urlpatterns = [
     path('email/', views.email_kampanja_list, name='email_kampanja_list'),
     path('email/nova/', views.email_kampanja_create, name='email_kampanja_create'),
     path('email/<int:pk>/send/', views.email_kampanja_send, name='email_kampanja_send'),
+
+    # Edit
+    path('<int:pk>/edit/', views.clan_edit, name='clan_edit'),
+
+    # Volonterske aktivnosti
+    path('volonteri/', views.volunteer_list, name='volunteer_list'),
+    path('volonteri/nova/', views.volunteer_create, name='volunteer_create'),
+
+    # EU fond AI search
+    path('eu/ai-search/', views.eu_fund_search, name='eu_fund_search'),
 ]

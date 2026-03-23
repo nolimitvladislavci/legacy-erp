@@ -89,17 +89,28 @@ def clan_create(request):
             membership_expires=request.POST.get('membership_expires') or None,
             business_interest=request.POST.get('business_interest', ''),
             has_opg='has_opg' in request.POST,
+            has_obrt='has_obrt' in request.POST,
+            opg_oib=request.POST.get('opg_oib', ''),
+            date_of_birth=request.POST.get('date_of_birth') or None,
+            access_card_uid=request.POST.get('access_card_uid', ''),
             whatsapp_phone=request.POST.get('whatsapp_phone', ''),
             whatsapp_opt_in='whatsapp_opt_in' in request.POST,
             notes=request.POST.get('notes', ''),
         )
+        sponsor_id = request.POST.get('paying_sponsor')
+        if sponsor_id:
+            clan.paying_sponsor_id = int(sponsor_id)
         clan.save()
         messages.success(request, 'Clan %s %s dodan.' % (clan.first_name, clan.last_name))
         return redirect('udruge:clan_detail', pk=clan.pk)
 
+    from partners.models import Partner
+    sponsors = Partner.objects.filter(company=company)[:50] if company else []
     return render(request, 'udruge/clan_form.html', {
         'membership_choices': Clan.MEMBERSHIP_CHOICES,
+        'status_choices': Clan.STATUS_CHOICES,
         'interest_choices': Clan.INTEREST_CHOICES,
+        'sponsors': sponsors,
     })
 
 
@@ -344,6 +355,9 @@ def donacija_create(request):
             purpose=request.POST.get('purpose', ''),
             date=request.POST.get('date') or timezone.now().date(),
             note=request.POST.get('note', ''),
+            is_material='is_material' in request.POST,
+            material_description=request.POST.get('material_description', ''),
+            material_fair_value=request.POST.get('material_fair_value') or None,
         )
 
         # Auto-zapis u Knjigu primitaka
@@ -377,6 +391,7 @@ def donacija_create(request):
 
     return render(request, 'udruge/donacija_form.html', {
         'donor_types': Donacija.DONOR_TYPE_CHOICES,
+        'aml_statuses': Donacija.AML_STATUS_CHOICES,
     })
 
 
@@ -517,7 +532,12 @@ def download_donatorska_potvrda(request, pk):
         donacija.potvrda_issued_at = timezone.now()
         donacija.save(update_fields=['potvrda_number', 'potvrda_issued', 'potvrda_issued_at'])
 
-    # Generate simple HTML -> PDF-ready response
+    # Generate QR code and viral code
+    from .qr_utils import generate_donation_qr, generate_viral_code
+    qr_base64 = generate_donation_qr(donacija)
+    viral_code = generate_viral_code(company.pk, donacija.pk)
+
+    # Generate HTML with QR and viral code -> PDF-ready response
     html = '''<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Potvrda o donaciji</title>
 <style>
@@ -561,6 +581,15 @@ h1 { text-align: center; font-size: 18px; }
         donacija.purpose or 'Opca namjena',
         company.city, timezone.now().strftime('%d.%m.%Y.'),
     )
+
+    # Inject QR + viral code before </body>
+    qr_html = ''
+    if qr_base64:
+        qr_html += '<div style="margin-top:30px;text-align:center;border-top:1px solid #ccc;padding-top:15px;">'
+        qr_html += '<img src="data:image/png;base64,%s" width="120" height="120" />' % qr_base64
+        qr_html += '<p style="font-size:11px;color:#666;">Referral: <strong>%s</strong></p>' % viral_code
+        qr_html += '<p style="font-size:10px;color:#999;">Skenirajte QR kod za verifikaciju potvrde</p></div>'
+    html = html.replace('</body>', qr_html + '</body>')
 
     response = HttpResponse(html, content_type='text/html; charset=utf-8')
     response['Content-Disposition'] = 'inline; filename="potvrda_%s.html"' % donacija.potvrda_number
@@ -1010,3 +1039,116 @@ def email_kampanja_send(request, pk):
 
     messages.success(request, "Email kampanja '%s' zakazana za slanje!" % kampanja.name)
     return redirect("udruge:email_kampanja_list")
+
+
+# ── CLAN EDIT ──────────────────────────────────────────────────────────────
+
+@login_required
+def clan_edit(request, pk):
+    company = get_user_company(request)
+    from .models import Clan
+    clan = get_object_or_404(Clan, pk=pk, company=company)
+
+    if request.method == 'POST':
+        for field in ['first_name', 'last_name', 'oib', 'email', 'phone',
+                       'address', 'city', 'membership_type', 'membership_number',
+                       'business_interest', 'whatsapp_phone', 'notes', 'opg_oib', 'access_card_uid']:
+            val = request.POST.get(field)
+            if val is not None:
+                setattr(clan, field, val)
+        for bf in ['has_opg', 'has_obrt', 'whatsapp_opt_in']:
+            setattr(clan, bf, bf in request.POST)
+        for df in ['date_of_birth', 'membership_expires', 'date_joined']:
+            setattr(clan, df, request.POST.get(df) or None)
+        status = request.POST.get('status')
+        if status:
+            clan.status = status
+        sponsor_id = request.POST.get('paying_sponsor')
+        clan.paying_sponsor_id = int(sponsor_id) if sponsor_id else None
+        clan.save()
+        messages.success(request, 'Clan %s azuriran.' % clan.full_name)
+        return redirect('udruge:clan_detail', pk=clan.pk)
+
+    from partners.models import Partner
+    sponsors = Partner.objects.filter(company=company)[:50] if company else []
+    return render(request, 'udruge/clan_form.html', {
+        'clan': clan, 'membership_choices': Clan.MEMBERSHIP_CHOICES,
+        'status_choices': Clan.STATUS_CHOICES, 'interest_choices': Clan.INTEREST_CHOICES,
+        'sponsors': sponsors, 'edit_mode': True,
+    })
+
+
+# ── VOLONTERSKE AKTIVNOSTI ──────────────────────────────────────────────────
+
+@login_required
+def volunteer_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('dashboard')
+    from .models import VolunteerActivity
+    from django.db.models import Sum
+    year = request.GET.get('year', str(timezone.now().year))
+    clan_id = request.GET.get('clan')
+    category = request.GET.get('category')
+    qs = VolunteerActivity.objects.filter(company=company, date__year=year).select_related('clan', 'dogadjaj')
+    if clan_id:
+        qs = qs.filter(clan_id=clan_id)
+    if category:
+        qs = qs.filter(category=category)
+    stats = {
+        'ukupno': qs.count(),
+        'sati': qs.aggregate(s=Sum('hours'))['s'] or 0,
+        'volonteri': qs.values('clan').distinct().count(),
+        'inkind': sum(a.inkind_value for a in qs),
+    }
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/volunteer_list.html', {
+        'page_obj': page, 'stats': stats, 'year': year,
+        'category_choices': VolunteerActivity.CATEGORY_CHOICES, 'category_f': category,
+    })
+
+
+@login_required
+def volunteer_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('udruge:volunteer_list')
+    from .models import VolunteerActivity, Clan, Dogadjaj, Kampanja
+    from decimal import Decimal
+    if request.method == 'POST':
+        VolunteerActivity.objects.create(
+            company=company, clan_id=int(request.POST.get('clan')),
+            title=request.POST.get('title', ''), description=request.POST.get('description', ''),
+            category=request.POST.get('category', 'other'),
+            date=request.POST.get('date') or timezone.now().date(),
+            hours=Decimal(request.POST.get('hours', '0')),
+            location=request.POST.get('location', ''), status=request.POST.get('status', 'planned'),
+            eu_project_code=request.POST.get('eu_project_code', ''),
+            inkind_rate_eur=Decimal(request.POST.get('inkind_rate_eur', '0') or '0'),
+            dogadjaj_id=request.POST.get('dogadjaj') or None,
+            kampanja_id=request.POST.get('kampanja') or None, notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Volonterska aktivnost evidentirana.')
+        return redirect('udruge:volunteer_list')
+    return render(request, 'udruge/volunteer_form.html', {
+        'clanovi': Clan.objects.filter(company=company, status='aktivan'),
+        'category_choices': VolunteerActivity.CATEGORY_CHOICES,
+        'status_choices': VolunteerActivity.STATUS_CHOICES,
+        'dogadjaji': Dogadjaj.objects.filter(company=company)[:20],
+        'kampanje': Kampanja.objects.filter(company=company)[:20],
+    })
+
+
+# ── EU FOND AI SEARCH ──────────────────────────────────────────────────────
+
+@login_required
+@require_POST
+def eu_fund_search(request):
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'Nema aktivne udruge'}, status=400)
+    from .tasks import ai_search_eu_funds
+    ai_search_eu_funds.delay(company.pk)
+    messages.success(request, 'AI pretraga EU fondova pokrenuta. Rezultati u Kampanjama.')
+    return redirect('udruge:kampanja_list')

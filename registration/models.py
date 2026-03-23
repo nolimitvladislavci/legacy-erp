@@ -161,6 +161,13 @@ class CompanySubscription(models.Model):
         null=True, blank=True,
         verbose_name='Korišteni promo kod',
     )
+    cancel_at_period_end = models.BooleanField(
+        default=False,
+        verbose_name='Otkaži na kraju perioda',
+        help_text='Pretplata ostaje aktivna do valid_until, zatim auto-downgrade na archive_readonly',
+    )
+    cancelled_at = models.DateTimeField(null=True, blank=True, verbose_name='Datum otkazivanja')
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -188,6 +195,23 @@ class CompanySubscription(models.Model):
 
     def has_module(self, module_name):
         return module_name in self.allowed_modules
+
+    def cancel(self):
+        """Otkaži pretplatu na kraju perioda. Arhiva ostaje dostupna (ZOR 11g)."""
+        from django.utils import timezone
+        self.cancel_at_period_end = True
+        self.cancelled_at = timezone.now()
+        self.save(update_fields=['cancel_at_period_end', 'cancelled_at'])
+
+    def reactivate(self):
+        """Poništi otkazivanje."""
+        self.cancel_at_period_end = False
+        self.cancelled_at = None
+        self.save(update_fields=['cancel_at_period_end', 'cancelled_at'])
+
+    @property
+    def is_cancelled(self):
+        return self.cancel_at_period_end
 
 class PromoCode(models.Model):
     """Promo / gutschein kod za popust ili besplatne module pri registraciji."""

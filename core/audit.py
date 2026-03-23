@@ -75,6 +75,13 @@ AUDITED_MODELS = [
     'documents.ArhivaEntry',
     # Pristup
     'accounts.CompanyMembership',
+    # Udruge — nonprofit compliance (ZSPNFT, AML)
+    'udruge.Clan',
+    'udruge.Clanarina',
+    'udruge.Donacija',
+    'udruge.MemberSubscription',
+    'udruge.Kampanja',
+    'udruge.KnjigaPrimitaka',
 ]
 
 

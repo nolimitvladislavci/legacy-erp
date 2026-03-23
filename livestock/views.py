@@ -135,14 +135,33 @@ def vet_quick_entry(request, farm_token):
 
         # Notify farmer via WhatsApp
         try:
-            from core.whatsapp import send_text
-            owner_phone = company.phone or company.mobile
+            from core.whatsapp import send_text, normalize_phone
+            from accounts.models import UserProfile
+            # Pokušaj phone iz company, pa iz admin korisnika firme
+            owner_phone = company.phone or getattr(company, 'mobile', None)
+            if not owner_phone:
+                admin_profile = UserProfile.objects.filter(
+                    company=company,
+                    role__in=('company_admin', 'tenant_admin'),
+                ).select_related('user').first()
+                if admin_profile:
+                    owner_phone = (admin_profile.phone or
+                                   getattr(admin_profile, 'mobile', None))
+            owner_phone = normalize_phone(owner_phone or '')
             if owner_phone:
-                msg = 'Veterinar %s je zabilje\u017eio tretman za %s (%s).\nLijek: %s\nKarencija do: %s' % (
-                    request.POST.get('veterinar', 'N/A'),
-                    animal.ear_tag, animal.name or animal.get_vrsta_display(),
+                karencija_do = request.POST.get('karencija_do', '')
+                msg = (
+                    'Vet zapis - %s\n'
+                    'Grlo: %s %s\n'
+                    'Lijek: %s\n'
+                    'Veterinar: %s\n'
+                    'Karencija do: %s'
+                ) % (
+                    company.name,
+                    animal.ear_tag, '(%s)' % (animal.name or animal.get_vrsta_display()),
                     request.POST.get('lijek', 'N/A'),
-                    request.POST.get('karencija_do', 'Nema'),
+                    request.POST.get('veterinar', 'N/A'),
+                    karencija_do or 'Nema',
                 )
                 send_text(owner_phone, msg)
         except Exception:
@@ -253,6 +272,25 @@ def robot_identify(request):
             'liters': float(last_milk.ukupno_l),
         }
 
+    # Ako robot šalje litre — automatski zapisuj MilkRecord
+    jutarnja = data.get('jutarnja_l')
+    vecernja = data.get('vecernja_l')
+    if not is_blocked and (jutarnja is not None or vecernja is not None):
+        from django.utils import timezone as _tz
+        from .models import MilkRecord
+        today = _tz.now().date()
+        mr, created = MilkRecord.objects.get_or_create(
+            animal=animal, datum=today,
+            defaults={'jutarnja_l': 0, 'vecernja_l': 0},
+        )
+        if jutarnja is not None:
+            mr.jutarnja_l = float(jutarnja)
+        if vecernja is not None:
+            mr.vecernja_l = float(vecernja)
+        mr.save()
+        response['milk_recorded'] = True
+        response['milk_total_today'] = float(mr.ukupno_l)
+
     return JsonResponse(response)
 
 
@@ -317,13 +355,16 @@ def institutional_api(request, scope):
         # Kretanje zivotinja
         animals = Livestock.objects.filter(company=company).order_by('ear_tag')
         data = [{
-            'ear_tag': a.ear_tag,
-            'type': a.get_vrsta_display(),
-            'breed': a.breed,
-            'status': a.get_status_display(),
+            'ear_tag':       a.ear_tag,
+            'species_code':  'GVD',   # Govedo — JRDZ kod
+            'type':          a.get_vrsta_display(),
+            'sex':           ('M' if a.vrsta in ('bik', 'vo') else 'F'),
+            'breed':         a.breed,
+            'status':        a.get_status_display(),
             'date_of_birth': str(a.date_of_birth) if a.date_of_birth else None,
-            'weight_kg': float(a.weight_kg) if a.weight_kg else None,
-            'is_organic': a.is_organic,
+            'weight_kg':     float(a.weight_kg) if a.weight_kg else None,
+            'is_organic':    a.is_organic,
+            'arkod_fields':  [],  # parcele — proširiti ako treba
         } for a in animals]
         return JsonResponse({'farm': company.name, 'oib': company.oib, 'animals': data, 'count': len(data)})
 
@@ -521,27 +562,23 @@ def generate_inspection_pdf(request):
         'generated_at': timezone.now(),
     }
 
-    # Add integrity badge
     from django.template.loader import render_to_string
     style = request.GET.get('style', 'modern')
     template_map = {
         'modern': 'livestock/inspection_pdf_modern.html',
-        'datev': 'livestock/inspection_pdf_datev.html',
+        'datev':  'livestock/inspection_pdf_datev.html',
         'viskovic': 'livestock/inspection_pdf_viskovic.html',
     }
     pdf_template = template_map.get(style, 'livestock/inspection_pdf_modern.html')
-    html = render_to_string(pdf_template, ctx)
+    # Prvo render za integrity hash
+    html_for_hash = render_to_string(pdf_template, ctx)
     ctx.update(get_integrity_badge_context(
-        request=request, document_id='INS-%s-%s' % (company.oib, today),
-        content=html, company=company,
+        request=request,
+        document_id='INS-%s-%s' % (company.oib, today),
+        content=html_for_hash,
+        company=company,
     ))
-    style = request.GET.get('style', 'modern')
-    template_map = {
-        'modern': 'livestock/inspection_pdf_modern.html',
-        'datev': 'livestock/inspection_pdf_datev.html',
-        'viskovic': 'livestock/inspection_pdf_viskovic.html',
-    }
-    pdf_template = template_map.get(style, 'livestock/inspection_pdf_modern.html')
+    # Finalni render s integrity badge u contextu
     html = render_to_string(pdf_template, ctx)
 
     # Generate PDF with WeasyPrint

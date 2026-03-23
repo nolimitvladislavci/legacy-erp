@@ -85,6 +85,26 @@
         .sidebar-group-links.collapsed { max-height: 0 !important; }
 
         
+
+        /* ═══ MODULE TILES ═══ */
+        .mod-tile { display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 4px; border-radius:10px; border:1px solid rgba(255,255,255,.06); color:#94a3b8; text-decoration:none; font-size:.68rem; transition:.15s; text-align:center; }
+        .mod-tile:hover { background:rgba(201,168,76,.08); border-color:rgba(201,168,76,.2); color:#e2e8f0; }
+        .mod-tile i { font-size:1.1rem; }
+        .mod-tile span { line-height:1.1; }
+
+        /* ═══ MOBILE BOTTOM TAB BAR ═══ */
+        .bottom-tabs { display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999; background:var(--sidebar-bg,#0f172a); border-top:1px solid rgba(255,255,255,.08); padding:0; padding-bottom:env(safe-area-inset-bottom,0); }
+        .bottom-tabs-inner { display:flex; justify-content:space-around; align-items:center; }
+        .bottom-tab { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px 6px; color:#64748b; text-decoration:none; font-size:.6rem; flex:1; text-align:center; transition:.15s; -webkit-tap-highlight-color:transparent; }
+        .bottom-tab:active { transform:scale(.92); }
+        .bottom-tab i { font-size:1.15rem; }
+        .bottom-tab.active { color:var(--gold); }
+        @media (max-width:768px) {
+            .bottom-tabs { display:block; }
+            .content { padding-bottom:70px !important; }
+            .sidebar-footer { padding-bottom:8px; }
+        }
+
         /* ═══ COMMAND PALETTE (Ctrl+K) ═══ */
         .cmd-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:10000; backdrop-filter:blur(4px); }
         .cmd-overlay.open { display:flex; align-items:flex-start; justify-content:center; padding-top:15vh; }
@@ -439,7 +459,7 @@
             {% for mem in user_memberships %}
             <form method="post" action="{% url 'accounts:switch_company' %}" style="margin:0">
                 {% csrf_token %}
-                <input type="hidden" name="membership_id" value="{{ mem.id }}">
+                {% if mem.pk %}<input type="hidden" name="membership_id" value="{{ mem.id }}">{% else %}<input type="hidden" name="company_id" value="{{ mem.company.id }}">{% endif %}
                 <button type="submit" style="width:100%;text-align:left;background:{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %};border:none;color:#e2e8f0;padding:5px 10px;font-size:.68rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %}'">
                     {% if mem.company.id == request.company.id %}<i class="fas fa-check" style="color:#c9a84c;font-size:.5rem"></i>{% else %}<i class="fas fa-building" style="color:#475569;font-size:.5rem"></i>{% endif %}
                     {{ mem.company.name }}
@@ -452,230 +472,112 @@
         {% endif %}
         {% endif %}
 
-        <!-- ══ NAVIGACIJA ══ -->
-        <a href="/" onclick="closeSidebar()" style="margin-top:4px"><i class="fas fa-satellite-dish"></i> <span>{% trans "Control Tower" %}</span></a>
-        <a href="/documents/" onclick="closeSidebar()"><i class="fas fa-archive"></i> <span>{% trans "Arhiva" %}</span></a>
-        <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:#c9a84c"><i class="fas fa-cloud-upload-alt"></i> <span>{% trans "Upload Dokumenta" %}</span></a>
-        <a href="/hr/documents/ai-inbox/" onclick="closeSidebar()" style="color:#f59e0b"><i class="fas fa-robot"></i> <span>{% trans "AI Inbox" %}</span></a>
-        <a href="/documents/knjiga/?type=URA" onclick="closeSidebar()"><i class="fas fa-book"></i> <span>{% trans "Knjiga URA/IRA" %}</span></a>
-        <a href="/documents/pdv/" onclick="closeSidebar()"><i class="fas fa-file-invoice-dollar"></i> <span>{% trans "PDV obrazac" %}</span></a>
-        {% if request.user.is_superuser or request.user.is_staff %}<a href="/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-brain"></i> <span>{% trans "AI Upravljanje" %}</span></a>{% endif %}
-        <a href="/website/gallery/" onclick="closeSidebar()"><i class="fas fa-images"></i> <span>{% trans "Galerija" %}</span></a>
-
-        <!-- ══ POSLOVANJE ══ -->
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-briefcase" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Poslovanje" %}</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links">
-                {% if 'projects' in allowed_modules %}<a href="/projects/" onclick="closeSidebar()"><i class="fas fa-hard-hat"></i> {% trans "Projekti" %}</a>{% endif %}
-                {% if 'projects' in allowed_modules or request.user.is_superuser %}<a href="/marketplace/" onclick="closeSidebar()"><i class="fas fa-gavel"></i> {% trans "Burza projekata" %}</a>{% endif %}
-                {% if 'partners' in allowed_modules %}<a href="/partners/" onclick="closeSidebar()"><i class="fas fa-handshake"></i> {% trans "Partneri" %}</a>{% endif %}
-                {% if 'invoicing' in allowed_modules %}<a href="/invoicing/" onclick="closeSidebar()"><i class="fas fa-file-invoice-dollar"></i> {% trans "Fakture" %}</a>{% endif %}
-                {% if "invoicing" in allowed_modules %}<a href="/invoicing/canvas/" onclick="closeSidebar()" style="color:#c9a84c"><i class="fas fa-bolt"></i> {% trans "Nova transakcija" %}</a>{% endif %}
-                {% if "invoicing" in allowed_modules and is_company_admin %}<a href="/invoicing/profiles/" onclick="closeSidebar()"><i class="fas fa-id-card"></i> {% trans "Profili fakturiranja" %}</a>{% endif %}
-                {% if "invoicing" in allowed_modules and is_company_admin %}<a href="/invoicing/dunning/" onclick="closeSidebar()"><i class="fas fa-bell" style="color:#c9a84c"></i> {% trans "Opomene (Dunning)" %}</a>{% endif %}
-                {% if 'documents' in allowed_modules or 'invoicing' in allowed_modules %}<a href="/documents/" onclick="closeSidebar()"><i class="fas fa-folder-open"></i> {% trans "Dokumenti-Arhiva" %}</a>
-                <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:#c9a84c;font-weight:600"><i class="fas fa-cloud-upload-alt"></i> Upload Dokumenta</a>
-                <a href="/hr/documents/ai-inbox/" onclick="closeSidebar()"><i class="fas fa-robot"></i> AI Inbox</a>{% endif %}
-                {% if 'calculator' in allowed_modules %}<a href="/calculator/" onclick="closeSidebar()"><i class="fas fa-calculator"></i> {% trans "Kalkulator" %}</a>{% endif %}
-                {% if 'calculator' in allowed_modules %}<a href="/calculator/bathroom/" onclick="closeSidebar()"><i class="fas fa-bath"></i> {% trans "Bad-Kalkulator" %}</a>{% endif %}
-                {% if 'calculator' in allowed_modules %}<a href="/calculator/bom/" onclick="closeSidebar()"><i class="fas fa-sitemap"></i> {% trans "Sastavnice (BOM)" %}</a>{% endif %}
-                {% if 'work_orders' in allowed_modules %}<a href="/work-orders/" onclick="closeSidebar()"><i class="fas fa-tools"></i> {% trans "Radni nalozi" %}</a>{% endif %}
-                {% if 'assessment' in allowed_modules %}<a href="/assessment/" onclick="closeSidebar()"><i class="fas fa-clipboard-list"></i> {% trans "Procjene / Nalazi" %}</a>
-                <a href="/assessment/bad-nalaz/" onclick="closeSidebar()" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem .45rem 2.4rem;font-size:.82rem;color:#c9a84c;margin:.1rem 0;border-radius:6px;text-decoration:none;background:rgba(201,168,76,.06);border-left:2px solid rgba(201,168,76,.35)"><i class="fas fa-plus-circle" style="font-size:.78rem"></i> Novi terenska procjena</a>{% endif %}
-                {% if 'outreach' in allowed_modules %}<a href="/outreach/" onclick="closeSidebar()"><i class="fas fa-envelope-open-text"></i> {% trans "Outreach / CRM" %}</a>{% endif %}
-            </div>
-        </div>
-
-        <!-- ══ FINANCIJE ══ -->
-        {% if is_company_admin or request.user.is_superuser or request.user.is_staff %}
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-coins" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Financije" %}</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links">
-                {% if 'finance' in allowed_modules %}<a href="/finance/" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> {% trans "Financije" %}</a>{% endif %}
-                {% if "konto" in allowed_modules %}<a href="/konto/" onclick="closeSidebar()"><i class="fas fa-book"></i> {% trans "Knjigovodstvo" %}</a>{% endif %}
-                {% if "konto" in allowed_modules %}<a href="/konto/reconciliation/" onclick="closeSidebar()"><i class="fas fa-exchange-alt"></i> {% trans "Rekoncilijacija" %}</a>{% endif %}
-                {% if 'payroll' in allowed_modules and is_company_admin %}<a href="/payroll/" onclick="closeSidebar()"><i class="fas fa-money-bill-wave"></i> {% trans "Payroll" %}</a>{% endif %}
-                {% if 'invoicing' in allowed_modules or 'finance' in allowed_modules %}<a href="/reports/" onclick="closeSidebar()"><i class="fas fa-chart-bar"></i> {% trans "Izvjestaji" %}</a>{% endif %}
-                {% if 'eracun' in allowed_modules or 'invoicing' in allowed_modules %}<a href="/eracun/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> {% trans "e-Racuni" %}</a>{% endif %}
-                {% if 'eracun' in allowed_modules or 'invoicing' in allowed_modules %}<a href="{% url 'propter:dashboard' %}" onclick="closeSidebar()"><i class="fas fa-leaf" style="color:#22c55e"></i> Propter Hub</a>{% endif %}
-                {% if "eracun" in allowed_modules or "invoicing" in allowed_modules %}<a href="{% url 'propter:propter_soba' %}" onclick="closeSidebar()"><i class="fas fa-door-open" style="color:#c9a84c"></i> Propter Soba</a>{% endif %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- ══ ZAPOSLENICI & VRIJEME ══ -->
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-users" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Tim" %}</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links">
-                {% if 'worktime' in allowed_modules %}<a href="/worktime/" onclick="closeSidebar()"><i class="fas fa-clock"></i> {% trans "Radno vrijeme" %}</a>{% endif %}
-                {% if 'worktime' in allowed_modules %}<a href="/worktime/manager/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> {% trans "Manager" %}</a>{% endif %}
-                {% if is_company_admin %}<a href="/companies/settings/" onclick="closeSidebar()"><i class="fas fa-user-cog"></i> {% trans "Zaposlenici" %}</a>{% endif %}
-                {% if 'appointments' in allowed_modules %}<a href="/appointments/" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> {% trans "Termini" %}</a>{% endif %}
-                {% if 'appointments' in allowed_modules %}<a href="{% url 'appointments:service_list' %}" onclick="closeSidebar()"><i class="fas fa-concierge-bell"></i> {% trans "Usluge" %}</a>{% endif %}
-                {% if 'appointments' in allowed_modules %}<a href="{% url 'appointments:dossier_list' %}" onclick="closeSidebar()"><i class="fas fa-folder-open"></i> {% trans "Kartoni klijenata" %}</a>{% endif %}
-                {% if 'tracking' in allowed_modules %}<a href="/tracking/" onclick="closeSidebar()"><i class="fas fa-map-marker-alt"></i> {% trans "Tracking" %}</a>{% endif %}
-                {% if 'interventions' in allowed_modules %}<a href="/interventions/" onclick="closeSidebar()"><i class="fas fa-ambulance"></i> {% trans "Intervencije" %}</a>{% endif %}
-            </div>
-        </div>
-
-        <!-- ══ SKLADISTE & POS ══ -->
-        {% if 'inventory' in allowed_modules or 'pos' in allowed_modules or 'webshop' in allowed_modules %}
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-boxes" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Skladiste & POS" %}</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links">
-                {% if 'inventory' in allowed_modules %}<a href="/inventory/" onclick="closeSidebar()"><i class="fas fa-boxes"></i> {% trans "Skladiste" %}</a>{% endif %}
-                {% if 'inventory' in allowed_modules %}<a href="/inventory/receipts/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> {% trans "Primke" %}</a>{% endif %}
-                {% if 'inventory' in allowed_modules %}<a href="/inventory/overview/" onclick="closeSidebar()"><i class="fas fa-chart-pie"></i> {% trans "Pregled zalihe" %}</a>{% endif %}
-                {% if 'inventory' in allowed_modules %}<a href="/inventory/reorder-predictions/" onclick="closeSidebar()"><i class="fas fa-brain"></i> {% trans "Prediktivna nabava" %}</a>{% endif %}
-                {% if 'inventory' in allowed_modules %}<a href="/inventory/inventura/" onclick="closeSidebar()"><i class="fas fa-clipboard-check"></i> {% trans "Inventura" %}</a>{% endif %}
-                {% if 'pos' in allowed_modules %}<a href="/pos/" onclick="closeSidebar()"><i class="fas fa-cash-register"></i> {% trans "POS" %}</a>{% endif %}
-                {% if 'pos' in allowed_modules %}<a href="/pos/gastro/" onclick="closeSidebar()"><i class="fas fa-utensils"></i> {% trans "Gastro POS" %}</a>{% endif %}
-                {% if 'pos' in allowed_modules %}<a href="/pos/expiry/" onclick="closeSidebar()"><i class="fas fa-hourglass-half"></i> {% trans "Rokovi trajanja" %}</a>{% endif %}
-                {% if 'pos' in allowed_modules %}<a href="/pos/vouchers/" onclick="closeSidebar()"><i class="fas fa-ticket-alt"></i> {% trans "Vauceri" %}</a>{% endif %}
-                {% if 'webshop' in allowed_modules %}<a href="/webshop/" onclick="closeSidebar()"><i class="fas fa-shopping-cart"></i> {% trans "Webshop" %}</a>{% endif %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- ══ TRZNICA ══ -->
-        {% if 'documents' in allowed_modules %}
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)" style="color:var(--gold)">
-                <span><i class="fas fa-store" style="margin-right:6px;font-size:0.65rem"></i>Trznica Online</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links collapsed">
-                <a href="/documents/" onclick="closeSidebar()"><i class="fas fa-folder-open"></i> {% trans "Dokumenti-Arhiva" %}</a>
-                <a href="/documents/otpremnica/" onclick="closeSidebar()"><i class="fas fa-truck"></i> Otpremnice</a>
-                <a href="/documents/otkupni/" onclick="closeSidebar()"><i class="fas fa-handshake"></i> Otkupni blokovi</a>
-                <a href="/documents/primka/" onclick="closeSidebar()"><i class="fas fa-clipboard-check"></i> Primke robe</a>
-                <a href="/documents/cmr/" onclick="closeSidebar()"><i class="fas fa-globe"></i> CMR</a>
-                <a href="/inventory/kalo/" onclick="closeSidebar()"><i class="fas fa-cut"></i> Kalo &amp; Otpis</a>
-                <a href="/pos/prigovori/" onclick="closeSidebar()"><i class="fas fa-book"></i> {% trans "Knjiga prigovora" %}</a>
-                <a href="/hr/revizorski-paket/" onclick="closeSidebar()"><i class="fas fa-file-archive"></i> {% trans "Revizorski paket" %}</a>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- ══ SPECIJALNI MODULI ══ -->
-        {% if 'rental' in allowed_modules or 'marketplace' in allowed_modules or 'delivery' in allowed_modules or 'ai_assistant' in allowed_modules or request.user.is_superuser %}
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-puzzle-piece" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Specijalno" %}</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links collapsed">
-                {% if 'rental' in allowed_modules %}<a href="/rental/" onclick="closeSidebar()"><i class="fas fa-key"></i> {% trans "Robot Hotel" %}</a>{% endif %}
-                {% if 'marketplace' in allowed_modules or request.user.is_superuser %}<a href="/marketplace/" onclick="closeSidebar()"><i class="fas fa-store"></i> {% trans "Grossmarkt" %}</a>{% endif %}
-                {% if "marketplace" in allowed_modules or request.user.is_superuser %}<a href="/marketplace/futures/" onclick="closeSidebar()"><i class="fas fa-seedling"></i> {% trans "Futures" %}</a>{% endif %}
-                {% if 'delivery' in allowed_modules or request.user.is_superuser %}<a href="/delivery/consolidated/" onclick="closeSidebar()"><i class="fas fa-boxes-stacked"></i> {% trans "Dostava / Hub" %}</a>{% endif %}
-                {% if 'ai_assistant' in allowed_modules %}<a href="/ai/" onclick="closeSidebar()"><i class="fas fa-robot"></i> {% trans "AI Asistent" %}</a>{% endif %}
-                {% if "maintenance" in allowed_modules or request.user.is_superuser %}<a href="/maintenance/" onclick="closeSidebar()"><i class="fas fa-cogs"></i> {% trans "Odrzavanje" %}</a>{% endif %}
-            </div>
-        </div>
-        {% endif %}
-
+        <!-- ══ SMART NAVIGATION ══ -->
         
-        <!-- ══ NABAVA & ODRŽAVANJE ══ -->
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-cogs"></i> Upravljanje</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links">
-                {% if 'procurement' in allowed_modules %}
-                <a href="/procurement/" onclick="closeSidebar()">
-                    <i class="fas fa-file-invoice"></i> Narudžbenice
-                </a>
-                <a href="/procurement/dashboard/" onclick="closeSidebar()">
-                    <i class="fas fa-chart-pie"></i> Nabava Dashboard
-                </a>
-                <a href="/procurement/price-lists/" onclick="closeSidebar()">
-                    <i class="fas fa-tags"></i> Cjenici dobavljača
-                </a>
-                {% endif %}
-                {% if 'maintenance' in allowed_modules %}
-                <a href="/maintenance/" onclick="closeSidebar()">
-                    <i class="fas fa-tools"></i> Održavanje
-                </a>
-                <a href="/maintenance/assets/" onclick="closeSidebar()">
-                    <i class="fas fa-warehouse"></i> Registar imovine
-                </a>
-                <a href="/maintenance/calendar/" onclick="closeSidebar()">
-                    <i class="fas fa-calendar-check"></i> Kalendar servisa
-                </a>
-                <a href="/maintenance/expiring/" onclick="closeSidebar()">
-                    <i class="fas fa-exclamation-triangle"></i> Istječu dokumenti
-                </a>
-                {% endif %}
-                {% if 'helpdesk' in allowed_modules %}
-                <a href="/helpdesk/" onclick="closeSidebar()">
-                    <i class="fas fa-headset"></i> Helpdesk tiketi
-                </a>
-                <a href="/helpdesk/dashboard/" onclick="closeSidebar()">
-                    <i class="fas fa-tachometer-alt"></i> Helpdesk Dashboard
-                </a>
-                {% endif %}
-            </div>
+        <!-- Search in sidebar -->
+        <div style="padding:8px 12px;margin-top:4px">
+          <div onclick="openCmdPalette();closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;color:#64748b;font-size:.82rem;transition:.15s">
+            <i class="fas fa-search" style="font-size:.75rem"></i>
+            <span style="flex:1">Pretrazi...</span>
+            <kbd style="font-size:.6rem;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px;color:#475569">Ctrl+K</kbd>
+          </div>
         </div>
 
-        <!-- ══ INTEGRACIJE ══ -->
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-plug" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Integracije" %}</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links collapsed">
-                {% if 'synesis' in allowed_modules or request.user.is_superuser %}<a href="/synesis/" onclick="closeSidebar()"><i class="fas fa-database"></i> Synesis</a>{% endif %}
-                {% if 'synesis' in allowed_modules or request.user.is_superuser %}<a href="/synesis/mdb/upload/" onclick="closeSidebar()" style="font-size:0.78rem;padding-left:28px;"><i class="fas fa-cloud-upload-alt"></i> MDB Import</a>{% endif %}
-                {% if 'smart_import' in allowed_modules or request.user.is_superuser %}<a href="/smart-import/" onclick="closeSidebar()"><i class="fas fa-file-import"></i> Smart Import (AIP)</a>{% endif %}
-                <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:#c9a84c"><i class="fas fa-cloud-upload-alt"></i> Upload Dokumenta</a>
-                <a href="/hr/documents/ai-inbox/" onclick="closeSidebar()"><i class="fas fa-robot"></i> AI Inbox</a>
-                <a href="/helpdesk/dashboard/" onclick="closeSidebar()"><i class="fas fa-headset"></i> Helpdesk</a>
-            </div>
+        <!-- Favorites -->
+        <div id="sidebarFavs" style="padding:4px 8px">
+          <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 2px">Favoriti</div>
         </div>
 
-        <!-- ══ SUSTAV (superadmin) ══ -->
+        <!-- Quick Actions -->
+        <div style="padding:2px 8px 4px">
+          <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 4px">Brzi pristup</div>
+          <a href="/" onclick="closeSidebar()" style="color:#e2e8f0"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+          {% if "invoicing" in sidebar_enabled_ids %}<a href="/invoicing/canvas/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-bolt"></i> <span>Nova transakcija</span></a>{% endif %}
+          {% if "pos" in sidebar_enabled_ids %}<a href="/pos/" onclick="closeSidebar()" style="color:#22c55e"><i class="fas fa-cash-register"></i> <span>POS Blagajna</span></a>{% endif %}
+          <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-cloud-upload-alt"></i> <span>Upload dokumenta</span></a>
+        </div>
+
+        <!-- Module Grid -->
+        <div style="padding:4px 8px">
+          <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 4px">Moduli</div>
+          <div id="moduleGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:0 4px">
+            {% if 'partners' in sidebar_enabled_ids %}<a href="/partners/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-handshake"></i><span>Partneri</span></a>{% endif %}
+            {% if 'invoicing' in sidebar_enabled_ids %}<a href="/invoicing/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-file-invoice-dollar"></i><span>Fakture</span></a>{% endif %}
+            {% if 'inventory' in sidebar_enabled_ids %}<a href="/inventory/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-boxes"></i><span>Skladiste</span></a>{% endif %}
+            {% if 'pos' in sidebar_enabled_ids %}<a href="/pos/" onclick="closeSidebar()" class="mod-tile" style="border-color:rgba(34,197,94,.3)"><i class="fas fa-cash-register" style="color:#22c55e"></i><span>POS</span></a>{% endif %}
+            {% if 'konto' in sidebar_enabled_ids %}<a href="/konto/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-book"></i><span>Konto</span></a>{% endif %}
+            {% if 'documents' in sidebar_enabled_ids or 'invoicing' in sidebar_enabled_ids %}<a href="/documents/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-archive"></i><span>Arhiva</span></a>{% endif %}
+            {% if 'worktime' in sidebar_enabled_ids %}<a href="/worktime/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-clock"></i><span>Vrijeme</span></a>{% endif %}
+            {% if 'payroll' in sidebar_enabled_ids and is_company_admin %}<a href="/payroll/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-money-bill-wave"></i><span>Place</span></a>{% endif %}
+          </div>
+        </div>
+
+        <!-- More modules (collapsed) -->
+        <div style="padding:2px 8px">
+          <button class="sidebar-group-toggle" onclick="toggleGroup(this)" style="color:#475569">
+            <span><i class="fas fa-th" style="margin-right:6px;font-size:.55rem"></i>Vise modula</span>
+            <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
+          </button>
+          <div class="sidebar-group-links collapsed">
+            {% if 'appointments' in sidebar_enabled_ids %}<a href="/appointments/" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> <span>Termini</span></a>{% endif %}
+            {% if 'eracun' in sidebar_enabled_ids %}<a href="/eracun/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> <span>e-Racuni</span></a>{% endif %}
+            {% if 'finance' in sidebar_enabled_ids %}<a href="/finance/" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> <span>Financije</span></a>{% endif %}
+            {% if 'invoicing' in sidebar_enabled_ids %}<a href="/reports/" onclick="closeSidebar()"><i class="fas fa-chart-bar"></i> <span>Izvjestaji</span></a>{% endif %}
+            {% if 'work_orders' in sidebar_enabled_ids %}<a href="/work-orders/" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Radni nalozi</span></a>{% endif %}
+            {% if 'calculator' in sidebar_enabled_ids %}<a href="/calculator/" onclick="closeSidebar()"><i class="fas fa-calculator"></i> <span>Kalkulator</span></a>{% endif %}
+            {% if 'assessment' in sidebar_enabled_ids %}<a href="/assessment/" onclick="closeSidebar()"><i class="fas fa-clipboard-list"></i> <span>Procjene</span></a>{% endif %}
+            {% if 'outreach' in sidebar_enabled_ids %}<a href="/outreach/" onclick="closeSidebar()"><i class="fas fa-envelope-open-text"></i> <span>CRM / Outreach</span></a>{% endif %}
+            {% if 'procurement' in sidebar_enabled_ids %}<a href="/procurement/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> <span>Nabava</span></a>{% endif %}
+            {% if 'maintenance' in sidebar_enabled_ids %}<a href="/maintenance/" onclick="closeSidebar()"><i class="fas fa-cogs"></i> <span>Odrzavanje</span></a>{% endif %}
+            {% if 'tracking' in sidebar_enabled_ids %}<a href="/tracking/" onclick="closeSidebar()"><i class="fas fa-map-marker-alt"></i> <span>Tracking</span></a>{% endif %}
+            {% if 'interventions' in sidebar_enabled_ids %}<a href="/interventions/" onclick="closeSidebar()"><i class="fas fa-ambulance"></i> <span>Intervencije</span></a>{% endif %}
+            {% if 'rental' in sidebar_enabled_ids %}<a href="/rental/" onclick="closeSidebar()"><i class="fas fa-key"></i> <span>Robot Hotel</span></a>{% endif %}
+            {% if 'marketplace' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/marketplace/" onclick="closeSidebar()"><i class="fas fa-store"></i> <span>Grossmarkt</span></a>{% endif %}
+            {% if 'delivery' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/delivery/consolidated/" onclick="closeSidebar()"><i class="fas fa-truck"></i> <span>Dostava</span></a>{% endif %}
+            {% if 'helpdesk' in sidebar_enabled_ids %}<a href="/helpdesk/" onclick="closeSidebar()"><i class="fas fa-headset"></i> <span>Helpdesk</span></a>{% endif %}
+            {% if 'ai_assistant' in sidebar_enabled_ids %}<a href="/ai/" onclick="closeSidebar()"><i class="fas fa-robot"></i> <span>AI Asistent</span></a>{% endif %}
+          </div>
+        </div>
+
+        <!-- Integracije (collapsed) -->
+        <div style="padding:2px 8px">
+          <button class="sidebar-group-toggle" onclick="toggleGroup(this)" style="color:#475569">
+            <span><i class="fas fa-plug" style="margin-right:6px;font-size:.55rem"></i>Integracije</span>
+            <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
+          </button>
+          <div class="sidebar-group-links collapsed">
+            {% if 'synesis' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/synesis/" onclick="closeSidebar()"><i class="fas fa-database"></i> <span>Synesis</span></a>{% endif %}
+            {% if 'smart_import' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/smart-import/" onclick="closeSidebar()"><i class="fas fa-file-import"></i> <span>Smart Import</span></a>{% endif %}
+            <a href="/hr/documents/ai-inbox/" onclick="closeSidebar()"><i class="fas fa-robot"></i> <span>AI Inbox</span></a>
+            {% if 'eracun' in sidebar_enabled_ids %}<a href="{% url 'propter:dashboard' %}" onclick="closeSidebar()"><i class="fas fa-leaf" style="color:#22c55e"></i> <span>Propter</span></a>{% endif %}
+          </div>
+        </div>
+
+        <!-- Superadmin (collapsed) -->
         {% if request.user.is_superuser %}
-        <div class="sidebar-group">
-            <button class="sidebar-group-toggle" onclick="toggleGroup(this)">
-                <span><i class="fas fa-cog" style="margin-right:6px;font-size:0.65rem"></i>{% trans "Sustav" %}</span>
-                <i class="fas fa-chevron-down chevron"></i>
-            </button>
-            <div class="sidebar-group-links collapsed">
-                <a href="/superadmin/ivan/" onclick="closeSidebar()" style="color:#c9a84c;font-weight:700;"><i class="fas fa-fire"></i> 🔥 Fenix Cockpit</a>
-                <a href="/superadmin/users/" onclick="closeSidebar()" style="color:#e2e8f0;font-weight:600"><i class="fas fa-users-cog"></i> 👤 Upravljanje korisnicima</a>
-                <a href="/admin/auth/user/" target="_blank" onclick="closeSidebar()" style="color:#e2e8f0;"><i class="fas fa-key"></i> 🔑 Lozinke i prava</a>
-                <a href="/accounts/" onclick="closeSidebar()"><i class="fas fa-users"></i> {% trans "Korisnici" %}</a>
-                <a href="/superadmin/companies/" onclick="closeSidebar()"><i class="fas fa-building"></i> {% trans "Tvrtke" %}</a>
-                <a href="/umbrella/" onclick="closeSidebar()"><i class="fas fa-sitemap"></i> {% trans "Umbrella" %}</a>
-                <a href="/superadmin/users/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> {% trans "Korisnici" %}</a>
-                <a href="/superadmin/#promo-kodovi" onclick="closeSidebar()"><i class="fas fa-ticket-alt"></i> {% trans "Promo kodovi" %}</a>
-                <a href="/register/propter/" onclick="closeSidebar()"><i class="fas fa-bolt"></i> Propter SaaS</a>
-                <a href="/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-robot"></i> {% trans "AI Upravljanje" %}</a>
-                <a href="/builder/" onclick="closeSidebar()"><i class="fas fa-magic"></i> {% trans "AI Builder" %}</a>
-                <a href="/admin/" target="_blank" onclick="closeSidebar()"><i class="fas fa-tools"></i> {% trans "Django Admin" %}</a>
-                <a href="{% url 'website:admin_panel' %}" onclick="closeSidebar()"><i class="fas fa-globe"></i> {% trans "Web stranica" %}</a>
-            </div>
+        <div style="padding:2px 8px">
+          <button class="sidebar-group-toggle" onclick="toggleGroup(this)" style="color:var(--gold)">
+            <span><i class="fas fa-crown" style="margin-right:6px;font-size:.55rem"></i>Admin</span>
+            <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
+          </button>
+          <div class="sidebar-group-links collapsed">
+            <a href="/superadmin/ivan/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-fire"></i> <span>Fenix Cockpit</span></a>
+            <a href="/hr/companies/komitenti/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> <span>Komitenti</span></a>
+            <a href="/superadmin/users/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Korisnici</span></a>
+            <a href="/umbrella/" onclick="closeSidebar()"><i class="fas fa-sitemap"></i> <span>Umbrella</span></a>
+            <a href="/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-brain"></i> <span>AI Upravljanje</span></a>
+            <a href="/admin/" target="_blank" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Django Admin</span></a>
+          </div>
         </div>
         {% endif %}
 
         <div class="sidebar-footer">
-            <a href="/hr/companies/modules/" title="Moduli" style="margin-bottom:4px;"><i class="fas fa-cog"></i> <span>{% trans "Moduli" %}</span></a>
-            <a href="/hr/auth/device-tokens/" style="margin-bottom:4px;"><i class="fas fa-mobile-alt"></i> <span>{% trans "Mobilni pristup" %}</span></a>
-            <a href="/logout/"><i class="fas fa-sign-out-alt"></i> <span>{% trans "Odjava" %}</span></a>
+            <a href="/panic/" onclick="closeSidebar()" style="background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;font-size:.78rem;letter-spacing:1px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;margin-bottom:4px"><i class="fas fa-shield-halved"></i> <span>INSPEKCIJA</span></a>
+            <div style="display:flex;gap:4px">
+              <a href="/hr/companies/modules/" onclick="closeSidebar()" style="flex:1;text-align:center;font-size:.75rem" title="Moduli"><i class="fas fa-th"></i></a>
+              <a href="/hr/companies/settings/" onclick="closeSidebar()" style="flex:1;text-align:center;font-size:.75rem" title="Postavke"><i class="fas fa-cog"></i></a>
+              <a href="/logout/" style="flex:1;text-align:center;font-size:.75rem" title="Odjava"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
         </div>
 
     </div>
@@ -875,5 +777,56 @@ window.FC = {
 
 <script src="/static/js/fenix-ui.js"></script>
 {% include "includes/_ai_assist.html" %}
+
+    <!-- ═══ MOBILE BOTTOM TAB BAR ═══ -->
+    {% if request.user.is_authenticated %}
+    <nav class="bottom-tabs">
+      <div class="bottom-tabs-inner">
+        <a href="/" class="bottom-tab"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="/invoicing/" class="bottom-tab"><i class="fas fa-file-invoice-dollar"></i><span>Fakture</span></a>
+        <a href="/pos/" class="bottom-tab" style="position:relative"><i class="fas fa-cash-register" style="font-size:1.4rem;color:#22c55e"></i><span style="color:#22c55e;font-weight:700">POS</span></a>
+        <a href="/inventory/" class="bottom-tab"><i class="fas fa-boxes"></i><span>Skladiste</span></a>
+        <button class="bottom-tab" onclick="openSidebar()" style="background:none;border:none;cursor:pointer"><i class="fas fa-bars"></i><span>Vise</span></button>
+      </div>
+    </nav>
+    {% endif %}
+
+    <script>
+    // ═══ SIDEBAR FAVORITES (localStorage) ═══
+    (function(){
+      var FAVS_KEY = 'lc-sidebar-favs';
+      var DEFAULT_FAVS = [
+        {url:'/invoicing/',label:'Fakture',icon:'fa-file-invoice-dollar'},
+        {url:'/pos/',label:'POS',icon:'fa-cash-register'},
+        {url:'/inventory/',label:'Skladiste',icon:'fa-boxes'},
+        {url:'/konto/',label:'Konto',icon:'fa-book'},
+      ];
+      function getFavs(){ try{return JSON.parse(localStorage.getItem(FAVS_KEY))||DEFAULT_FAVS}catch(e){return DEFAULT_FAVS} }
+      function saveFavs(f){ localStorage.setItem(FAVS_KEY, JSON.stringify(f)); }
+      function renderFavs(){
+        var c=document.getElementById('sidebarFavs'); if(!c)return;
+        var favs=getFavs(), html='<div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 2px">Favoriti</div>';
+        favs.forEach(function(f,i){
+          html+='<a href="'+f.url+'" onclick="closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:7px 12px;color:#e2e8f0;text-decoration:none;border-radius:8px;margin:1px 4px;font-size:.82rem;transition:.15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='none'"><i class="fas '+f.icon+'" style="width:18px;text-align:center;font-size:.8rem;color:#c9a84c"></i>'+f.label+'</a>';
+        });
+        c.innerHTML=html;
+      }
+      // Expose for command palette
+      window._lcFavs={get:getFavs,save:saveFavs,render:renderFavs,add:function(url,label,icon){
+        var f=getFavs();if(f.length>=6)f.pop();if(!f.some(function(x){return x.url===url}))f.unshift({url:url,label:label,icon:icon});saveFavs(f);renderFavs();
+      }};
+      document.addEventListener('DOMContentLoaded',renderFavs);
+    })();
+
+    // ═══ HIGHLIGHT ACTIVE BOTTOM TAB ═══
+    (function(){
+      var path=location.pathname;
+      document.querySelectorAll('.bottom-tab').forEach(function(t){
+        var href=t.getAttribute('href');
+        if(href && path.startsWith(href) && href!=='/') t.classList.add('active');
+        else if(href==='/' && path==='/') t.classList.add('active');
+      });
+    })();
+    </script>
 </body>
 </html>

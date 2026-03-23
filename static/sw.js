@@ -1,7 +1,7 @@
 // LIMIT Connect Service Worker – v4 (PWA + Offline)
 'use strict';
 
-var CACHE_VERSION = 'fina-v6';
+var CACHE_VERSION = 'fina-v7';
 var STATIC_CACHE  = CACHE_VERSION + '-static';
 var PAGE_CACHE    = CACHE_VERSION + '-pages';
 
@@ -155,4 +155,190 @@ self.addEventListener('notificationclick', function(event) {
       if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
     })
   );
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POS OFFLINE QUEUE — IndexedDB za bonove bez interneta
+// ══════════════════════════════════════════════════════════════════════════════
+
+var POS_DB_NAME = 'limit-pos-offline';
+var POS_DB_VERSION = 1;
+var POS_STORE = 'pending_receipts';
+
+function openPosDB() {
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open(POS_DB_NAME, POS_DB_VERSION);
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains(POS_STORE)) {
+        db.createObjectStore(POS_STORE, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = function(e) { resolve(e.target.result); };
+    req.onerror = function(e) { reject(e.target.error); };
+  });
+}
+
+function savePendingReceipt(data) {
+  return openPosDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction(POS_STORE, 'readwrite');
+      var store = tx.objectStore(POS_STORE);
+      data.created_at = new Date().toISOString();
+      data.synced = false;
+      var req = store.add(data);
+      req.onsuccess = function() { resolve(req.result); };
+      req.onerror = function() { reject(req.error); };
+    });
+  });
+}
+
+function getPendingReceipts() {
+  return openPosDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction(POS_STORE, 'readonly');
+      var store = tx.objectStore(POS_STORE);
+      var req = store.getAll();
+      req.onsuccess = function() { resolve(req.result); };
+      req.onerror = function() { reject(req.error); };
+    });
+  });
+}
+
+function deletePendingReceipt(id) {
+  return openPosDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction(POS_STORE, 'readwrite');
+      tx.objectStore(POS_STORE).delete(id);
+      tx.oncomplete = function() { resolve(); };
+      tx.onerror = function() { reject(tx.error); };
+    });
+  });
+}
+
+// ── Sync pending receipts when online ─────────────────────────────────────────
+function syncPendingReceipts() {
+  return getPendingReceipts().then(function(receipts) {
+    if (!receipts || receipts.length === 0) return Promise.resolve(0);
+    
+    var synced = 0;
+    var chain = Promise.resolve();
+    
+    receipts.forEach(function(receipt) {
+      chain = chain.then(function() {
+        return fetch('/hr/pos/api/quick-pay/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': receipt.csrf_token || '',
+          },
+          body: JSON.stringify(receipt.data),
+          credentials: 'same-origin',
+        }).then(function(response) {
+          if (response.ok) {
+            synced++;
+            return deletePendingReceipt(receipt.id);
+          }
+        }).catch(function() {
+          // Skip failed — will retry next sync
+        });
+      });
+    });
+    
+    return chain.then(function() { return synced; });
+  });
+}
+
+// ── Background sync registration ──────────────────────────────────────────────
+self.addEventListener('sync', function(event) {
+  if (event.tag === 'pos-sync-receipts') {
+    event.waitUntil(
+      syncPendingReceipts().then(function(count) {
+        if (count > 0) {
+          return self.registration.showNotification('POS Sync', {
+            body: count + ' bon(ova) uspjesno sinkronizirano!',
+            icon: '/static/icons/icon-192.png',
+            badge: '/static/icons/icon-192.png',
+          });
+        }
+      })
+    );
+  }
+});
+
+// ── Periodic sync (every 5 min when online) ──────────────────────────────────
+self.addEventListener('periodicsync', function(event) {
+  if (event.tag === 'pos-periodic-sync') {
+    event.waitUntil(syncPendingReceipts());
+  }
+});
+
+// ── Message handler for POS page ──────────────────────────────────────────────
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'POS_SAVE_OFFLINE') {
+    savePendingReceipt(event.data.receipt).then(function(id) {
+      event.ports[0].postMessage({ saved: true, id: id });
+    }).catch(function(err) {
+      event.ports[0].postMessage({ saved: false, error: err.message });
+    });
+  }
+  if (event.data && event.data.type === 'POS_SYNC_NOW') {
+    syncPendingReceipts().then(function(count) {
+      event.ports[0].postMessage({ synced: count });
+    });
+  }
+  if (event.data && event.data.type === 'POS_GET_PENDING') {
+    getPendingReceipts().then(function(receipts) {
+      event.ports[0].postMessage({ pending: receipts });
+    });
+  }
+});
+
+// ── Enhanced fetch: cache POS pages and API responses ─────────────────────────
+var POS_CACHE = CACHE_VERSION + '-pos';
+var POS_URLS = ['/hr/pos/', '/hr/pos/quick/', '/hr/pos/restaurant/'];
+
+self.addEventListener('fetch', function(event) {
+  var url = new URL(event.request.url);
+  
+  // Cache POS pages with network-first strategy
+  if (POS_URLS.some(function(p) { return url.pathname.startsWith(p); }) && event.request.method === 'GET') {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (response.ok) {
+          var clone = response.clone();
+          caches.open(POS_CACHE).then(function(cache) {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(event.request).then(function(cached) {
+          return cached || caches.match('/offline.html');
+        });
+      })
+    );
+    return;
+  }
+  
+  // For POS API POST when offline — save to IndexedDB
+  if (url.pathname.includes('/pos/api/quick-pay') && event.request.method === 'POST' && !navigator.onLine) {
+    event.respondWith(
+      event.request.json().then(function(data) {
+        return savePendingReceipt({ data: data }).then(function(id) {
+          return new Response(JSON.stringify({
+            offline: true,
+            pending_id: id,
+            message: 'Bon spremljen lokalno. Sinkronizira se kad se vrati internet.'
+          }), {
+            status: 202,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        });
+      }).catch(function() {
+        return new Response(JSON.stringify({ error: 'Offline save failed' }), { status: 500 });
+      })
+    );
+    return;
+  }
 });

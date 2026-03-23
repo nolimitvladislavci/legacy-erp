@@ -106,7 +106,7 @@ def bank_upload(request):
         except UnicodeDecodeError:
             xml_string = xml_file.read().decode('utf-8-sig', errors='replace')
 
-        from konto.services.bank_import import import_bank_statement, parse_camt053
+        from konto.services.bank_import import import_bank_statement, parse_camt053, import_any_statement
 
         try:
             # If no account selected, try to find by IBAN in XML

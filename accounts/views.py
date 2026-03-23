@@ -291,24 +291,46 @@ def quick_register(request):
 def switch_company(request):
     from accounts.models import CompanyMembership
     membership_id = request.POST.get('membership_id')
-    if not membership_id:
-        messages.error(request, 'Nedostaje membership_id.')
+    company_id = request.POST.get('company_id')
+
+    if not membership_id and not company_id:
+        messages.error(request, 'Nedostaje membership_id ili company_id.')
         return redirect('/')
+
     try:
-        mem = CompanyMembership.objects.select_related('company').get(
-            pk=membership_id, user=request.user, is_active=True
-        )
-        request.session['active_membership_id'] = mem.id
-        messages.success(request, f'Prebaceno na: {mem.company.name} ({mem.get_role_display()})')
+        if membership_id:
+            mem = CompanyMembership.objects.select_related('company').get(
+                pk=membership_id, user=request.user, is_active=True
+            )
+            request.session['active_membership_id'] = mem.id
+            company = mem.company
+            role_display = mem.get_role_display()
+        elif company_id and request.user.is_superuser:
+            # Superadmin pristup — auto-create membership ili koristi company_id
+            from companies.models import Company
+            company = Company.objects.get(pk=company_id)
+            mem, created = CompanyMembership.objects.get_or_create(
+                user=request.user, company=company,
+                defaults={'role': 'owner', 'is_active': True}
+            )
+            request.session['active_membership_id'] = mem.id
+            role_display = 'Superadmin'
+            if created:
+                messages.info(request, f'Pristup kreiran za: {company.name}')
+        else:
+            messages.error(request, 'Nemate pristup toj tvrtki.')
+            return redirect('/')
+
+        messages.success(request, f'Prebaceno na: {company.name} ({role_display})')
         # B-16: Audit log za company switch
         try:
             from worktime.tracker import track
             track(request.user, 'AUTH', 'COMPANY_SWITCH',
-                  ref=str(mem.company.pk),
-                  detail='Switch na %s (%s)' % (mem.company.name, mem.get_role_display()),
-                  company=mem.company)
+                  ref=str(company.pk),
+                  detail='Switch na %s (%s)' % (company.name, role_display),
+                  company=company)
         except Exception:
             pass
-    except CompanyMembership.DoesNotExist:
+    except (CompanyMembership.DoesNotExist, Company.DoesNotExist):
         messages.error(request, 'Nemate pristup toj tvrtki.')
     return redirect('/')

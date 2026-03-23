@@ -236,6 +236,7 @@ def btcpay_webhook(request):
 def _on_payment_completed(payment):
     """Callback when payment is completed - update source records."""
     try:
+        # Gastro QR (legacy handler)
         if payment.source == 'gastro_qr' and payment.source_id:
             from pos.models import GastroOrder
             order = GastroOrder.objects.filter(pk=int(payment.source_id)).first()
@@ -247,8 +248,13 @@ def _on_payment_completed(payment):
             from invoicing.models import Invoice
             inv = Invoice.objects.filter(pk=int(payment.source_id)).first()
             if inv:
-                inv.status = 'paid'
+                inv.status = 'PAID'
                 inv.save(update_fields=['status'])
+
+        # Universal handler for all modules (webshop, rental, fitness, etc.)
+        from payments.integrations import handle_payment_completed
+        handle_payment_completed(payment)
+
     except Exception as e:
         logger.warning("_on_payment_completed error: %s", e)
 
