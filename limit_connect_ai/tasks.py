@@ -432,3 +432,167 @@ def fetch_and_process_nn_feed(self):
     except Exception as exc:
         logger.error('[BORG] Kritična greška u NN feed tasku: %s', exc)
         raise self.retry(exc=exc, countdown=60 * 15)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BORG FENIX: Post-Import Auto-Activation
+# Okida se automatski nakon uspješne migracije podataka.
+# Troslojni napad: WhatsApp klijent + In-app + WhatsApp superadmin
+# ══════════════════════════════════════════════════════════════════════════════
+
+@shared_task(bind=True, max_retries=2, name='limit_connect_ai.fenix_post_import_scan')
+def fenix_post_import_scan(self, company_id, project_id=None):
+    """
+    FENIX orkestrator — pokreće se automatski nakon data_migration COMPLETED.
+
+    1. OpportunityScanner → pronalazi olakšice za firmu
+    2. FinaBonitetService → provjerava rizik novih partnera (po OIB-u)
+    3. Master Report → spaja prilike + rizike u jedan izvještaj
+    4. Troslojne notifikacije: klijent WA, in-app, superadmin WA
+    """
+    # ── Svi importi unutar funkcije (circular import zaštita) ────────
+    from companies.models import Company
+    from partners.models import Partner
+    from limit_connect_ai.services.opportunity_scanner import (
+        match_opportunities_for_company, generate_onboarding_report,
+    )
+    from fiskalizacija.fina_bonitet_service import get_supplier_risk
+
+    try:
+        company = Company.objects.get(pk=company_id)
+    except Company.DoesNotExist:
+        logger.error('[FENIX] Company %s ne postoji', company_id)
+        return {'error': 'Company not found'}
+
+    logger.info('[FENIX] Post-import scan za %s (project=%s)', company.name, project_id)
+
+    # ── 1. Opportunity Scan ──────────────────────────────────────────
+    scan_result = match_opportunities_for_company(company)
+    opp_count = scan_result['count']
+    total_savings = scan_result['total_savings']
+
+    # ── 2. Bonitet Check — novouvezeni partneri s OIB-om ─────────────
+    risk_count = 0
+    high_risk_partners = []
+
+    partners_with_oib = Partner.objects.filter(
+        company=company,
+        oib__isnull=False,
+    ).exclude(oib='').order_by('-created_at')[:50]  # Max 50 za performanse
+
+    for partner in partners_with_oib:
+        try:
+            risk = get_supplier_risk(partner.oib, company_id=str(company.pk))
+            if risk.get('risk_level') in ('HIGH', 'CRITICAL'):
+                risk_count += 1
+                high_risk_partners.append({
+                    'name': partner.name,
+                    'oib': partner.oib,
+                    'risk': risk['risk_level'],
+                    'note': risk.get('note', ''),
+                })
+        except Exception as e:
+            logger.debug('[FENIX] Bonitet check skip za %s: %s', partner.oib, e)
+
+    # ── 3. Master Report ─────────────────────────────────────────────
+    report = generate_onboarding_report(company)
+
+    # Dodaj rizik sekciju ako ima
+    if risk_count > 0:
+        risk_lines = [
+            '',
+            f'*Upozorenje:* {risk_count} dobavljač(a) s povišenim rizikom:',
+        ]
+        for rp in high_risk_partners[:5]:
+            risk_lines.append(f'  - {rp["name"]} (OIB: {rp["oib"]}) — {rp["risk"]}')
+        if risk_count > 5:
+            risk_lines.append(f'  ... i još {risk_count - 5}')
+        report += '\n'.join(risk_lines)
+
+    # Dodaj migration info
+    if project_id:
+        try:
+            from data_migration.models import MigrationProject
+            project = MigrationProject.objects.get(pk=project_id)
+            report += (
+                f'\n\n_Import "{project.name}": '
+                f'{project.records_created} kreirano, '
+                f'{project.records_updated} ažurirano._'
+            )
+        except Exception:
+            pass
+
+    # ── 4. Troslojne notifikacije ────────────────────────────────────
+
+    # 4a. Klijent — WhatsApp
+    admin_user = None
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        # User ↔ Company veza ide preko accounts.CompanyMembership
+        from accounts.models import CompanyMembership
+        membership = CompanyMembership.objects.filter(
+            company=company,
+        ).select_related('user__profile').first()
+        admin_user = membership.user if membership else None
+
+        if not admin_user:
+            # Fallback: creator projekta
+            admin_user = User.objects.filter(
+                is_active=True, is_staff=True,
+            ).select_related('profile').first()
+
+        if admin_user:
+            phone = getattr(getattr(admin_user, 'profile', None), 'phone', None)
+            if phone:
+                from core.whatsapp import send_text
+                send_text(phone, report, company_id=str(company.pk))
+                logger.info('[FENIX] WhatsApp poslan klijentu %s', phone)
+    except Exception as e:
+        logger.warning('[FENIX] Klijent WhatsApp failed: %s', e)
+
+    # 4b. Klijent — In-App notifikacija
+    try:
+        from notifications.services import notify as notify_inapp
+        if admin_user:
+            notify_inapp(
+                recipient=admin_user,
+                notification_type='system',
+                title='FENIX: Analiza završena!',
+                message=(
+                    f'Pronađeno {opp_count} prilika za uštedu od {total_savings:,.2f} EUR. '
+                    f'{f"{risk_count} rizičnih dobavljača detektirano." if risk_count else "Svi dobavljači OK."}'
+                ),
+                url='/data-migration/',
+                company=company,
+            )
+    except Exception as e:
+        logger.warning('[FENIX] In-app notifikacija failed: %s', e)
+
+    # 4c. Superadmin — WhatsApp
+    try:
+        from core.notify import notify as notify_admin
+        notify_admin(
+            'INFO',
+            f'Klijent *{company.name}* uspješno migriran.\n'
+            f'Pronađeno *{opp_count} prilika* ({total_savings:,.2f} EUR) '
+            f'i *{risk_count} rizik(a)*.',
+        )
+    except Exception as e:
+        logger.warning('[FENIX] Superadmin notify failed: %s', e)
+
+    result = {
+        'company': company.name,
+        'opportunities': opp_count,
+        'total_savings': str(total_savings),
+        'risks': risk_count,
+        'high_risk_partners': high_risk_partners[:5],
+        'report_sent': True,
+    }
+
+    logger.info(
+        '[FENIX] Scan komplet: %s → %d prilika, %.2f EUR, %d rizika',
+        company.name, opp_count, total_savings, risk_count,
+    )
+
+    return result
