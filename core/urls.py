@@ -73,6 +73,10 @@ urlpatterns += i18n_patterns(
     path('2fa/setup/', __import__('accounts.auth_views', fromlist=['setup_2fa']).setup_2fa, name='setup_2fa'),
     path('2fa/verify/', __import__('accounts.auth_views', fromlist=['verify_2fa']).verify_2fa, name='verify_2fa'),
 
+    # GDPR (Clanak 17 + 20)
+    path('gdpr/export/', __import__('accounts.auth_views', fromlist=['gdpr_export_view']).gdpr_export_view, name='gdpr_export'),
+    path('gdpr/delete/', __import__('accounts.auth_views', fromlist=['gdpr_delete_view']).gdpr_delete_view, name='gdpr_delete'),
+
     # Device token (mobilni barcode login)
     path('auth/device-tokens/', __import__('accounts.auth_views', fromlist=['device_token_manage']).device_token_manage, name='device_token_manage'),
     path('auth/device-tokens/<int:token_id>/', __import__('accounts.auth_views', fromlist=['device_token_detail']).device_token_detail, name='device_token_detail'),

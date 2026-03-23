@@ -948,3 +948,122 @@ def device_token_qr_image(request, token_id):
         return HttpResponse(buf.getvalue(), content_type='image/png')
     except Exception:
         return HttpResponse(status=500)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GDPR Data Portability — Članak 20 (Sudo Mode)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def gdpr_export_view(request):
+    """
+    GDPR export osobnih podataka — Sudo Mode.
+    GET: prikaži formu za potvrdu lozinke
+    POST: provjeri lozinku → download JSON
+    """
+    from django.http import HttpResponse, JsonResponse
+
+    if request.method == 'GET':
+        return render(request, 'accounts/gdpr_export.html')
+
+    # POST — sudo mode provjera
+    password = request.POST.get('password', '')
+
+    if not password or not request.user.check_password(password):
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'error': 'Lozinka je netočna. Pokušajte ponovo.',
+            }, status=403)
+        from django.contrib import messages
+        messages.error(request, 'Lozinka je netočna. Pokušajte ponovo.')
+        return render(request, 'accounts/gdpr_export.html')
+
+    # Lozinka OK — generiraj export
+    try:
+        from accounts.services.gdpr_export import GDPRExportService
+
+        json_data = GDPRExportService.generate_export(request.user)
+
+        # Audit log
+        try:
+            from core.models import SystemAuditLog
+            SystemAuditLog.objects.create(
+                user=request.user,
+                action='export',
+                model_name='User',
+                object_id=str(request.user.pk),
+                object_repr=f'GDPR export za {request.user.username}',
+                ip_address=request.META.get('REMOTE_ADDR', ''),
+            )
+        except Exception:
+            pass
+
+        filename = f'limit_connect_gdpr_{request.user.username}_{timezone.now().strftime("%Y%m%d")}.json'
+        response = HttpResponse(json_data, content_type='application/json; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error('GDPR export error: %s', e)
+        return JsonResponse({
+            'success': False,
+            'error': 'Sistemska greška pri generiranju izvoza.',
+        }, status=500)
+
+
+# ── GDPR ANONIMIZACIJA (Clanak 17) ────────────────────────────────
+
+@login_required
+def gdpr_delete_view(request):
+    """
+    GDPR brisanje (anonimizacija) osobnih podataka -- Sudo Mode.
+    GET: prikazi formu za potvrdu lozinke + upozorenje
+    POST: provjeri lozinku -> anonimizacija -> logout
+    """
+    if request.method == 'GET':
+        return render(request, 'accounts/gdpr_delete.html')
+
+    # POST -- sudo mode provjera
+    password = request.POST.get('password', '')
+
+    if not password or not request.user.check_password(password):
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'error': 'Lozinka je netocna. Pokusajte ponovo.',
+            }, status=403)
+        from django.contrib import messages as _msgs
+        _msgs.error(request, 'Lozinka je netocna. Pokusajte ponovo.')
+        return render(request, 'accounts/gdpr_delete.html')
+
+    # Lozinka OK -- pokreni anonimizaciju
+    try:
+        from accounts.services.gdpr import GDPRAnonymizationService
+
+        result = GDPRAnonymizationService.anonymize_user(request.user)
+
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        if is_ajax:
+            logout(request)
+            return JsonResponse({
+                'success': True,
+                'message': 'Vas racun je trajno anonimiziran. Odjavljujemo vas.',
+                'actions': result.get('actions', []),
+            })
+
+        logout(request)
+        from django.contrib import messages as _msgs
+        _msgs.success(request, 'Vas racun je trajno anonimiziran sukladno GDPR Clanku 17.')
+        return redirect('login')
+
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error('GDPR delete error: %s', e)
+        return JsonResponse({
+            'success': False,
+            'error': 'Sistemska greska pri anonimizaciji.',
+        }, status=500)
