@@ -6,8 +6,8 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-23 15:10 — Sonnet (Ured u džepu P0 kompletno)
-Git HEAD: 8a2fc66
+2026-03-23 15:45 — Sonnet (Wizard P1: Celery, Haiku retroNKD, funnel widget)
+Git HEAD: 8f7e84b
 
 ---
 
@@ -140,7 +140,13 @@ Commit: 8a2fc66
 
 ## OTVORENO — Wizard P1 (sljedeće sesije)
 
-### Wizard — što ostaje za P1
+### Wizard P1 — DONE (23.03.2026)
+- Celery cleanup task (03:00 dnevno) — DONE
+- Haiku retroNKD: 47/86 firmi ažurirano (55%) — DONE
+- Funnel widget u dashboard — DONE
+- Beat schedule registriran — DONE
+
+### Wizard — što ostaje za P2
 | Task | Opis | Prioritet |
 |------|------|-----------|
 | NKD bulk import | DZS puna lista ~1000 kodova (74 je dovoljno za demo) | SREDNJI |
