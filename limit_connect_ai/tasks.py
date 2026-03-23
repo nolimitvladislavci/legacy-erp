@@ -697,3 +697,144 @@ def execute_approved_adaptation(self, rule_id):
         except Exception:
             pass
         raise self.retry(exc=exc, countdown=300)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BORG FENIX: B2B Interceptor — skenira ulazne e-Račune za rizike i olakšice
+# ══════════════════════════════════════════════════════════════════════════════
+
+@shared_task(bind=True, max_retries=3, name='limit_connect_ai.fenix_intercept_incoming')
+def fenix_intercept_incoming(self, eracun_id):
+    """
+    FENIX B2B Interceptor — okida se automatski kad stigne ulazni e-Račun.
+
+    1. Risk Shield: bonitet check dobavljača po OIB-u (Redis cached 24h)
+    2. Opportunity Trigger: ključne riječi u stavkama → Knowledge Graph match
+    3. Notifikacija: WhatsApp + In-App ako postoji rizik ili prilika
+    """
+    from eracun.models import ERacun
+    from fiskalizacija.fina_bonitet_service import get_supplier_risk
+
+    try:
+        racun = ERacun.objects.select_related('company').get(pk=eracun_id)
+    except ERacun.DoesNotExist:
+        logger.warning('[FENIX B2B] ERacun %s ne postoji', eracun_id)
+        return
+
+    company = racun.company
+    issuer_oib = racun.issuer_oib or ''
+    alerts = []
+
+    # ── 1. Risk Shield — bonitet dobavljača ──────────────────────────
+    risk_data = None
+    if issuer_oib and len(issuer_oib) >= 8:
+        try:
+            risk_data = get_supplier_risk(issuer_oib, company_id=str(company.pk))
+            if risk_data.get('risk_level') in ('HIGH', 'CRITICAL'):
+                alerts.append({
+                    'type': 'risk',
+                    'level': risk_data['risk_level'],
+                    'message': (
+                        f'Dobavljač {racun.issuer_name} (OIB: {issuer_oib}) '
+                        f'ima {risk_data["risk_label"]}. '
+                        f'{risk_data.get("note", "Preporučujemo oprez pri plaćanju.")}'
+                    ),
+                })
+                logger.warning(
+                    '[FENIX B2B] RIZIK: %s od %s — %s',
+                    racun.invoice_number, racun.issuer_name, risk_data['risk_level'],
+                )
+        except Exception as e:
+            logger.debug('[FENIX B2B] Bonitet check skip: %s', e)
+
+    # ── 2. Opportunity Trigger — ključne riječi u stavkama ───────────
+    opportunity_keywords = {
+        'solar': 'green_incentive',
+        'fotovoltai': 'green_incentive',
+        'elektricno vozilo': 'green_incentive',
+        'ev charg': 'green_incentive',
+        'edukacija': 'digital_voucher',
+        'softver': 'digital_voucher',
+        'erp': 'digital_voucher',
+        'digitalizacija': 'digital_voucher',
+        'webshop': 'digital_voucher',
+        'cyber': 'digital_voucher',
+    }
+
+    matched_opportunities = set()
+    try:
+        for item in racun.items.all():
+            desc_lower = (item.description or '').lower()
+            for keyword, opp_type in opportunity_keywords.items():
+                if keyword in desc_lower:
+                    matched_opportunities.add((keyword, opp_type))
+    except Exception:
+        pass
+
+    if matched_opportunities:
+        kw_list = ', '.join(kw for kw, _ in matched_opportunities)
+        alerts.append({
+            'type': 'opportunity',
+            'message': (
+                f'Račun od {racun.issuer_name} sadrži stavke vezane za poticaje: {kw_list}. '
+                f'Provjerite dostupne olakšice na Dashboard-u.'
+            ),
+        })
+        logger.info('[FENIX B2B] Opportunity match: %s → %s', racun.invoice_number, kw_list)
+
+    # ── 3. Notifikacije (samo ako ima alertova) ──────────────────────
+    if not alerts:
+        logger.debug('[FENIX B2B] %s od %s — čisto, nema alertova', racun.invoice_number, racun.issuer_name)
+        return {'status': 'clean', 'alerts': 0}
+
+    # WhatsApp klijentu
+    try:
+        from accounts.models import CompanyMembership
+        membership = CompanyMembership.objects.filter(
+            company=company,
+        ).select_related('user__profile').first()
+
+        if membership and membership.user:
+            phone = getattr(getattr(membership.user, 'profile', None), 'phone', None)
+            if phone:
+                from core.whatsapp import send_text
+                msg_parts = [f'*FENIX — Ulazni račun {racun.invoice_number}*\n']
+                for alert in alerts:
+                    if alert['type'] == 'risk':
+                        msg_parts.append(f'⚠️ RIZIK: {alert["message"]}')
+                    elif alert['type'] == 'opportunity':
+                        msg_parts.append(f'💡 PRILIKA: {alert["message"]}')
+                send_text(phone, '\n'.join(msg_parts), company_id=str(company.pk))
+    except Exception as e:
+        logger.warning('[FENIX B2B] WhatsApp failed: %s', e)
+
+    # In-App notifikacija
+    try:
+        from notifications.services import notify as notify_inapp
+        if membership and membership.user:
+            title = f'FENIX: Ulazni račun {racun.invoice_number}'
+            message = '; '.join(a['message'][:100] for a in alerts)
+            notify_inapp(
+                recipient=membership.user,
+                notification_type='system',
+                title=title,
+                message=message[:300],
+                url=f'/eracun/inbox/',
+                company=company,
+            )
+    except Exception as e:
+        logger.warning('[FENIX B2B] In-app notify failed: %s', e)
+
+    # Superadmin WhatsApp
+    try:
+        from core.notify import notify
+        notify(
+            'INFO',
+            f'Ulazni račun za *{company.name}*: {racun.invoice_number} od {racun.issuer_name}\n'
+            f'Alertova: {len(alerts)} ({", ".join(a["type"] for a in alerts)})',
+        )
+    except Exception:
+        pass
+
+    logger.info('[FENIX B2B] %s: %d alertova obrađeno', racun.invoice_number, len(alerts))
+    return {'status': 'intercepted', 'alerts': len(alerts), 'details': alerts}

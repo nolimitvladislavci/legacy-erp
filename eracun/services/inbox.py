@@ -306,6 +306,13 @@ def receive_eracun(company, xml_string, received_via='upload', user=None):
 
     logger.info(f'eRacun inbox: {eracun.invoice_number} from {eracun.issuer_name} ({eracun.total} {eracun.currency})')
 
+    # ── FENIX B2B Interceptor: async scan za rizike i olakšice ───────
+    try:
+        from limit_connect_ai.tasks import fenix_intercept_incoming
+        fenix_intercept_incoming.delay(str(eracun.pk))
+    except Exception as e:
+        logger.debug('FENIX intercept trigger skipped: %s', e)
+
     return {
         'success': True,
         'eracun': eracun,
