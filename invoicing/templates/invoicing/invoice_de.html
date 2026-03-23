@@ -163,6 +163,34 @@
 <div class="note-box">{{ invoice.note }}</div>
 {% endif %}
 
+
+{% if invoice.qr_code_base64 %}
+<div class="payment-section" style="display:flex;gap:16pt;align-items:flex-start;margin-bottom:16pt">
+  <div class="qr-box" style="text-align:center;min-width:90pt">
+    <img src="data:image/png;base64,{{ invoice.qr_code_base64 }}"
+         style="width:80pt;height:80pt;display:block">
+    <p style="font-size:7pt;color:#64748b;margin-top:4pt">{% trans "Scan to pay · EPC/SEPA QR" %}</p>
+  </div>
+  <div style="flex:1;font-size:8pt;color:#475569;line-height:1.6">
+    <strong style="font-size:8.5pt;color:#0f172a">{% trans "QR-Zahlung" %}</strong><br>
+    {% trans "Diesen QR-Code mit Ihrer Banking-App scannen, um die Zahlung automatisch vorzubereiten." %}<br>
+    {% trans "Betrag und IBAN sind bereits ausgefüllt (EPC/GiroCode Standard)." %}<br>
+    <span style="color:#94a3b8;font-size:7.5pt">Dok.-UUID: {{ invoice.uuid }}</span>
+  </div>
+</div>
+{% endif %}
+
+{% if invoice.is_fiscalized and invoice.zki %}
+<div class="fiscal-box" style="background:#f0fdf4;border:0.5pt solid #86efac;padding:8pt 10pt;margin-bottom:16pt;font-size:8pt">
+  <div style="font-weight:700;color:#166534;margin-bottom:5pt">✓ {% trans "Fiskalisierter Beleg" %}</div>
+  <div style="display:flex;gap:16pt;font-family:monospace;font-size:7.5pt;color:#475569">
+    <div>ZKI: <strong>{{ invoice.zki }}</strong></div>
+    <div>JIR: <strong>{{ invoice.jir }}</strong></div>
+    <div>{% trans "Datum:" %} {{ invoice.fiscal_datetime|date:"d.m.Y H:i" }}</div>
+  </div>
+</div>
+{% endif %}
+
 <div class="legal-box">
   Gemäß § 19 UStG wird keine Umsatzsteuer berechnet. (falls zutreffend) ·
   Bitte überweisen Sie den Betrag unter Angabe der Rechnungsnummer. ·
