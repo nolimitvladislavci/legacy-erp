@@ -124,10 +124,17 @@ def render_invoice_html(invoice, request=None):
     prev_lang = get_language()
     activate(render_lang)
 
-    # Shared extra context — logo + brand QR
+    # Shared extra context — logo + brand QR + contacts
+    contacts = []
+    try:
+        s = invoice.company.settings or {}
+        contacts = s.get("invoice_contacts", [])
+    except Exception:
+        pass
     extra_ctx = {
-        'company_logo_src': _get_company_logo_b64(invoice),
-        'lc_qr_b64':        _get_lc_brand_qr_b64(),
+        "company_logo_src": _get_company_logo_b64(invoice),
+        "lc_qr_b64":        _get_lc_brand_qr_b64(),
+        "invoice_contacts": contacts,
     }
 
     try:
