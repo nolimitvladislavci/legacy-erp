@@ -1,3 +1,4 @@
+from core.fields import FernetEncryptedCharField
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -27,7 +28,7 @@ class UserProfile(models.Model):
                                       verbose_name=_('Profilna slika'))
     phone = models.CharField(max_length=20, blank=True, verbose_name=_('Telefon'))
     department = models.CharField(max_length=100, blank=True, verbose_name=_('Odjel'))
-    totp_secret = models.CharField(max_length=32, blank=True, verbose_name='TOTP Secret')
+    totp_secret = FernetEncryptedCharField(blank=True, verbose_name='TOTP Secret')
     totp_enabled = models.BooleanField(default=False, verbose_name='2FA aktiviran')
     google_id = models.CharField(max_length=100, blank=True)
     microsoft_id = models.CharField(max_length=100, blank=True)
@@ -45,7 +46,7 @@ class UserProfile(models.Model):
     must_change_password = models.BooleanField(default=False, verbose_name=_("Mora promijeniti lozinku"))
 
     two_factor_enabled = models.BooleanField(default=False)
-    two_factor_secret = models.CharField(max_length=32, blank=True)
+    two_factor_secret = FernetEncryptedCharField(blank=True)
     branch       = models.ForeignKey(
         'companies.CompanyBranch',
         on_delete=models.SET_NULL,

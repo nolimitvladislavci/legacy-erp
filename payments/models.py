@@ -1,3 +1,4 @@
+from core.fields import FernetEncryptedCharField
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -12,27 +13,27 @@ class PaymentConfig(models.Model):
     )
     # Stripe
     stripe_enabled = models.BooleanField(default=False, verbose_name=_('Stripe aktivan'))
-    stripe_public_key = models.CharField(max_length=200, blank=True, verbose_name=_('Stripe Publishable Key'))
-    stripe_secret_key = models.CharField(max_length=200, blank=True, verbose_name=_('Stripe Secret Key'))
-    stripe_webhook_secret = models.CharField(max_length=200, blank=True, verbose_name=_('Stripe Webhook Secret'))
+    stripe_public_key = FernetEncryptedCharField(blank=True, verbose_name=_('Stripe Publishable Key'))
+    stripe_secret_key = FernetEncryptedCharField(blank=True, verbose_name=_('Stripe Secret Key'))
+    stripe_webhook_secret = FernetEncryptedCharField(blank=True, verbose_name=_('Stripe Webhook Secret'))
 
     # BTCPay
     btcpay_enabled = models.BooleanField(default=False, verbose_name=_('BTCPay aktivan'))
     btcpay_url = models.URLField(blank=True, verbose_name=_('BTCPay Server URL'))
     btcpay_store_id = models.CharField(max_length=100, blank=True, verbose_name=_('BTCPay Store ID'))
-    btcpay_api_key = models.CharField(max_length=200, blank=True, verbose_name=_('BTCPay API Key'))
+    btcpay_api_key = FernetEncryptedCharField(blank=True, verbose_name=_('BTCPay API Key'))
 
     # PayPal
     paypal_enabled = models.BooleanField(default=False, verbose_name=_('PayPal aktivan'))
-    paypal_client_id = models.CharField(max_length=200, blank=True, verbose_name=_('PayPal Client ID'))
-    paypal_secret = models.CharField(max_length=200, blank=True, verbose_name=_('PayPal Secret'))
+    paypal_client_id = FernetEncryptedCharField(blank=True, verbose_name=_('PayPal Client ID'))
+    paypal_secret = FernetEncryptedCharField(blank=True, verbose_name=_('PayPal Secret'))
     paypal_mode = models.CharField(max_length=10, default='live', choices=[('sandbox','Sandbox'),('live','Live')], verbose_name=_('PayPal Mode'))
 
     # Revolut
     revolut_enabled = models.BooleanField(default=False, verbose_name=_('Revolut aktivan'))
-    revolut_api_key = models.CharField(max_length=200, blank=True, verbose_name=_('Revolut API Key'))
-    revolut_merchant_id = models.CharField(max_length=200, blank=True, verbose_name=_('Revolut Merchant ID'))
-    revolut_webhook_secret = models.CharField(max_length=200, blank=True, verbose_name=_('Revolut Webhook Secret'))
+    revolut_api_key = FernetEncryptedCharField(blank=True, verbose_name=_('Revolut API Key'))
+    revolut_merchant_id = FernetEncryptedCharField(blank=True, verbose_name=_('Revolut Merchant ID'))
+    revolut_webhook_secret = FernetEncryptedCharField(blank=True, verbose_name=_('Revolut Webhook Secret'))
     revolut_mode = models.CharField(max_length=10, default='sandbox', choices=[('sandbox','Sandbox'),('production','Production')], verbose_name=_('Revolut Mode'))
 
     # General

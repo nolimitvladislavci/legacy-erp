@@ -3,10 +3,17 @@ limit_connect_ai/proactive_widget.py — AI Proactive Dashboard Widget.
 
 Generira instant insights za dashboard bez cekanja na jutarnji email.
 Poziva se sinhrono iz dashboard viewa.
+
+v2 (2026-03-23): Knowledge Graph integracija
+- RegulatoryUpdate: nove zakonske promjene (zadnjih 7 dana)
+- LegalOpportunity + ClientOpportunityMatch: prilike za ustedu
+- SupplierRiskAlert: rizici u lancu opskrbe
 """
 import logging
 from datetime import date, timedelta
 from decimal import Decimal
+
+from django.db.models import Sum
 
 logger = logging.getLogger(__name__)
 
@@ -14,11 +21,17 @@ logger = logging.getLogger(__name__)
 def get_dashboard_insights(company):
     """
     Generate real-time insights for company dashboard.
-    Returns dict of alerts, suggestions, and stats.
+    Returns dict of alerts, suggestions, opportunities, and legal_alerts.
     """
     today = date.today()
     alerts = []
     suggestions = []
+    opportunities = []
+    legal_alerts = []
+
+    # ══════════════════════════════════════════════════════════════
+    # SEKCIJA A: Operativni insighti (postojeći)
+    # ══════════════════════════════════════════════════════════════
 
     # 1. DOSPJELE FAKTURE
     try:
@@ -122,7 +135,6 @@ def get_dashboard_insights(company):
     # 6. POS PROMET DANAS
     try:
         from pos.models import POSReceipt
-        from django.db.models import Sum
         pos_today = POSReceipt.objects.filter(
             session__terminal__company=company,
             created_at__date=today,
@@ -177,9 +189,145 @@ def get_dashboard_insights(company):
     except Exception:
         pass
 
+    # ══════════════════════════════════════════════════════════════
+    # SEKCIJA B: BORG FENIX Knowledge Graph insighti
+    # ══════════════════════════════════════════════════════════════
+
+    # 9. PRONAĐENE PRILIKE ZA UŠTEDU (ClientOpportunityMatch)
+    try:
+        from limit_connect_ai.models_knowledge_graph import ClientOpportunityMatch
+        active_matches = ClientOpportunityMatch.objects.filter(
+            company=company,
+            status__in=['identified', 'notified', 'interested'],
+            opportunity__is_active=True,
+        ).select_related('opportunity')[:5]
+
+        total_savings = Decimal('0')
+        for match in active_matches:
+            total_savings += match.calculated_savings or Decimal('0')
+
+        match_count = len(active_matches)
+        if match_count > 0:
+            # Glavni insight — ukupna ušteda
+            opportunities.append({
+                'type': 'success',
+                'icon': 'gift',
+                'title': f'{match_count} {"prilika" if match_count == 1 else "prilika"} za ustedu',
+                'detail': f'Potencijalna usteda: {total_savings:,.2f} EUR',
+                'action_url': '/hr/intelligence/',
+                'action_text': 'Pregledaj prilike',
+            })
+
+            # Top 3 prilike — pojedinačno
+            for match in active_matches[:3]:
+                opp = match.opportunity
+                deadline_str = ''
+                if opp.deadline:
+                    days_left = (opp.deadline - today).days
+                    if days_left <= 14:
+                        deadline_str = f' (rok: {opp.deadline:%d.%m.}, jos {days_left} dana!)'
+                    elif days_left <= 30:
+                        deadline_str = f' (rok: {opp.deadline:%d.%m.})'
+
+                opportunities.append({
+                    'type': 'info',
+                    'icon': _opportunity_icon(opp.opportunity_type),
+                    'title': f'{opp.name[:60]}{deadline_str}',
+                    'detail': f'{match.calculated_savings:,.2f} EUR — {opp.get_opportunity_type_display()}',
+                    'action_url': opp.url or '/hr/intelligence/',
+                    'action_text': 'Detalji',
+                })
+    except Exception:
+        logger.debug('proactive_widget: opportunity match error', exc_info=True)
+
+    # 10. NOVE ZAKONSKE PROMJENE (RegulatoryUpdate — zadnjih 7 dana)
+    try:
+        from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate
+        week_ago = today - timedelta(days=7)
+        recent_updates = RegulatoryUpdate.objects.filter(
+            publication_date__gte=week_ago,
+            is_processed=True,
+            impact_score__gte=5,  # Samo relevantne — ne zagušuj dashboard
+        ).order_by('-impact_score', '-publication_date')[:5]
+
+        for update in recent_updates:
+            affected = update.affected_modules or []
+            if update.is_breaking:
+                legal_alerts.append({
+                    'type': 'danger',
+                    'icon': 'alert-octagon',
+                    'title': f'{update.title[:70]}',
+                    'detail': f'{update.nn_number or update.get_category_display()} — '
+                              f'impact {update.impact_score}/10'
+                              f'{" — utjece na: " + ", ".join(affected) if affected else ""}',
+                    'action_url': update.url or '/hr/intelligence/',
+                    'action_text': 'Procitaj',
+                })
+            elif update.impact_score >= 7:
+                legal_alerts.append({
+                    'type': 'warning',
+                    'icon': 'book',
+                    'title': f'{update.title[:70]}',
+                    'detail': f'{update.nn_number or update.get_category_display()} — '
+                              f'impact {update.impact_score}/10',
+                    'action_url': update.url or '/hr/intelligence/',
+                    'action_text': 'Procitaj',
+                })
+            else:
+                legal_alerts.append({
+                    'type': 'info',
+                    'icon': 'file-text',
+                    'title': f'{update.title[:70]}',
+                    'detail': f'{update.nn_number or update.get_category_display()}',
+                    'action_url': update.url or '/hr/intelligence/',
+                    'action_text': 'Procitaj',
+                })
+    except Exception:
+        logger.debug('proactive_widget: regulatory update error', exc_info=True)
+
+    # 11. RIZICI U LANCU OPSKRBE (SupplierRiskAlert)
+    try:
+        from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+        active_risks = SupplierRiskAlert.objects.filter(
+            company=company,
+            is_acknowledged=False,
+            risk_level__in=['HIGH', 'CRITICAL'],
+        ).order_by('-detected_at')[:3]
+
+        for risk in active_risks:
+            alerts.append({
+                'type': 'danger' if risk.risk_level == 'CRITICAL' else 'warning',
+                'icon': 'shield-off',
+                'title': f'Rizik: {risk.supplier_name[:50]}',
+                'detail': f'{risk.get_risk_level_display()} — {risk.risk_description[:80]}',
+                'action_url': '/hr/intelligence/',
+                'action_text': 'Detalji',
+            })
+    except Exception:
+        logger.debug('proactive_widget: supplier risk error', exc_info=True)
+
     return {
         'alerts': alerts,
         'suggestions': suggestions,
+        'opportunities': opportunities,
+        'legal_alerts': legal_alerts,
         'total_alerts': len(alerts),
         'total_suggestions': len(suggestions),
+        'total_opportunities': len(opportunities),
+        'total_legal_alerts': len(legal_alerts),
     }
+
+
+def _opportunity_icon(opp_type):
+    """Vrati Feather icon name za tip prilike."""
+    icons = {
+        'tax_relief': 'percent',
+        'employment_subsidy': 'users',
+        'eu_fund': 'globe',
+        'depreciation': 'trending-down',
+        'vat_exemption': 'slash',
+        'regional_aid': 'map-pin',
+        'green_incentive': 'sun',
+        'digital_voucher': 'smartphone',
+    }
+    return icons.get(opp_type, 'star')

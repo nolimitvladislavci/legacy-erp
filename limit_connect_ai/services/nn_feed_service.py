@@ -7,6 +7,11 @@ Hibridni pipeline:
 3. Semantic Extractor: Claude Haiku parsira zakon → strukturirani JSON
 
 Pokreće se svakih 6h via Celery beat.
+
+HARDENED v2 (2026-03-23):
+- Strict Proxy Mode: bez HR_PROXY_URL scraper NE radi (štiti server IP)
+- Dead-proxy alerting: WhatsApp ALERT ako proxy ne odgovara
+- SSL verify=True po defaultu (verify=False samo ako PROXY_SKIP_SSL=1)
 """
 import json
 import logging
@@ -24,6 +29,11 @@ from limit_connect_ai.models_knowledge_graph import RegulatorySource, Regulatory
 logger = logging.getLogger(__name__)
 
 
+class ProxyUnavailableError(Exception):
+    """HR proxy ne odgovara — scraper se gasi."""
+    pass
+
+
 class NNFeedScraperService:
     """Scraper za Narodne novine RSS + LLM ekstrakcija."""
 
@@ -33,6 +43,10 @@ class NNFeedScraperService:
         'https://narodne-novine.nn.hr/rss/',
     ]
 
+    # Timeout za proxy health check i HTTP zahtjeve
+    PROXY_TIMEOUT = 15
+    HTTP_TIMEOUT = 20
+
     def __init__(self):
         self.html_converter = html2text.HTML2Text()
         self.html_converter.ignore_links = True
@@ -40,8 +54,89 @@ class NNFeedScraperService:
         self.html_converter.ignore_tables = False
         self.html_converter.body_width = 0  # Bez word-wrapa
 
+        self._proxy_url = os.environ.get('HR_PROXY_URL', '').strip()
+        self._skip_ssl = os.environ.get('PROXY_SKIP_SSL', '0') == '1'
+
+    @property
+    def proxies(self):
+        if not self._proxy_url:
+            return None
+        return {'http': self._proxy_url, 'https': self._proxy_url}
+
+    def _check_proxy_health(self):
+        """Provjeri da li HR proxy odgovara. Baca ProxyUnavailableError ako ne."""
+        if not self._proxy_url:
+            raise ProxyUnavailableError(
+                'HR_PROXY_URL nije postavljen u .env — scraper neće raditi bez proxyja '
+                'kako bi zaštitio IP reputaciju produkcijskog servera.'
+            )
+
+        try:
+            resp = requests.get(
+                'https://narodne-novine.nn.hr/',
+                proxies=self.proxies,
+                timeout=self.PROXY_TIMEOUT,
+                verify=not self._skip_ssl,
+                headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'},
+            )
+            if resp.status_code >= 500:
+                raise ProxyUnavailableError(
+                    f'HR proxy vratio status {resp.status_code} za NN health check'
+                )
+        except requests.exceptions.ProxyError as e:
+            raise ProxyUnavailableError(f'HR proxy connection error: {e}')
+        except requests.exceptions.ConnectTimeout as e:
+            raise ProxyUnavailableError(f'HR proxy timeout: {e}')
+        except requests.exceptions.ConnectionError as e:
+            raise ProxyUnavailableError(f'HR proxy connection refused: {e}')
+        except ProxyUnavailableError:
+            raise
+        except Exception as e:
+            raise ProxyUnavailableError(f'HR proxy unexpected error: {e}')
+
+    def _send_proxy_alert(self, error_msg):
+        """Pošalji WhatsApp ALERT da je FENIX oslijepio."""
+        try:
+            from core.notify import notify
+            notify(
+                'ALERT',
+                f'FENIX Intelligence je oslijepio!\n\n'
+                f'HR Proxy ne odgovara — scraper zaustavljen.\n'
+                f'Greška: {str(error_msg)[:200]}\n\n'
+                f'Scraper neće dohvaćati NN podatke dok se proxy ne popravi.\n'
+                f'Server IP reputacija je zaštićena.',
+                urgent=True,
+            )
+        except Exception as e:
+            logger.error('[NN] Neuspjeli WhatsApp alert: %s', e)
+
+    def _proxied_get(self, url):
+        """HTTP GET kroz HR proxy. Nikada ne koristi direktnu vezu."""
+        return requests.get(
+            url,
+            timeout=self.HTTP_TIMEOUT,
+            proxies=self.proxies,
+            verify=not self._skip_ssl,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                              'AppleWebKit/537.36 (KHTML, like Gecko) '
+                              'Chrome/123.0.0.0 Safari/537.36',
+                'Accept-Language': 'hr-HR,hr;q=0.9,en;q=0.8',
+            },
+        )
+
     def process_feed(self):
         """Glavni entry point — dohvati RSS, parsiraj, LLM ekstrakcija."""
+        # ── Proxy health check (fail-fast) ────────────────────
+        try:
+            self._check_proxy_health()
+        except ProxyUnavailableError as e:
+            logger.error('[NN] PROXY DOWN: %s', e)
+            self._send_proxy_alert(e)
+            return {'processed': 0, 'skipped': 0, 'errors': 1, 'proxy_error': str(e)}
+
+        logger.info('[NN] Proxy health OK — pokrećem scrape')
+
         source = self._get_source()
         if not source:
             logger.error('[NN] RegulatorySource za Narodne novine ne postoji')
@@ -51,17 +146,12 @@ class NNFeedScraperService:
         logger.info('[NN] Dohvaćam feed: %s', feed_url)
 
         try:
-            # feedparser ne podržava proxies nativno — koristimo requests za download
-            proxy_url = os.environ.get('HR_PROXY_URL')
-            if proxy_url:
-                proxies = {'http': proxy_url, 'https': proxy_url}
-                resp = requests.get(feed_url, timeout=20, proxies=proxies,
-                                    verify=False, headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                })
-                feed = feedparser.parse(resp.content)
-            else:
-                feed = feedparser.parse(feed_url)
+            resp = self._proxied_get(feed_url)
+            feed = feedparser.parse(resp.content)
+        except requests.exceptions.ProxyError as e:
+            logger.error('[NN] Proxy pao tijekom feed downloada: %s', e)
+            self._send_proxy_alert(f'Proxy pao tijekom RSS downloada: {e}')
+            return {'processed': 0, 'skipped': 0, 'errors': 1, 'proxy_error': str(e)}
         except Exception as e:
             logger.error('[NN] Feed parse error: %s', e)
             return {'processed': 0, 'skipped': 0, 'errors': 1}
@@ -90,14 +180,15 @@ class NNFeedScraperService:
                 skipped += 1
                 continue
 
-            # Preuzimanje HTML-a (HR proxy za zaobilaženje firewall blokade stranih DC-ova)
+            # Preuzimanje HTML-a kroz HR proxy
             try:
-                proxy_url = os.environ.get('HR_PROXY_URL')
-                proxies = {'http': proxy_url, 'https': proxy_url} if proxy_url else None
-                resp = requests.get(link, timeout=20, headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                }, proxies=proxies, verify=not bool(proxy_url))
+                resp = self._proxied_get(link)
                 resp.raise_for_status()
+            except requests.exceptions.ProxyError as e:
+                logger.error('[NN] Proxy pao za %s: %s — zaustavljam batch', link, e)
+                self._send_proxy_alert(f'Proxy pao tijekom article scrape: {e}')
+                errors += 1
+                break  # Prekini cijeli batch — proxy je mrtav
             except requests.exceptions.RequestException as e:
                 logger.warning('[NN] HTTP error za %s: %s', link, e)
                 errors += 1

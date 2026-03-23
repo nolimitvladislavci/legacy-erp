@@ -67,12 +67,12 @@ function dismissOnboarding() {
 </div>
 
 <!-- FENIX AI Insights — proactive widget -->
-{% if ai_insights and ai_insights.total_alerts > 0 or ai_insights and ai_insights.total_suggestions > 0 %}
+{% if ai_insights and ai_insights.total_alerts > 0 or ai_insights and ai_insights.total_suggestions > 0 or ai_insights and ai_insights.total_opportunities > 0 or ai_insights and ai_insights.total_legal_alerts > 0 %}
 <div style="background:linear-gradient(135deg,#1a1a0a 0%,#111 100%);border:1px solid #c9a84c44;border-radius:12px;padding:16px 20px;margin-bottom:16px">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
     <i class="fas fa-brain" style="color:#c9a84c;font-size:1.1rem"></i>
     <span style="color:#c9a84c;font-weight:700;font-size:.85rem">FENIX AI Insights</span>
-    <span style="color:#555;font-size:.7rem;margin-left:auto">{{ ai_insights.total_alerts }} upozorenja &bull; {{ ai_insights.total_suggestions }} prijedloga</span>
+    <span style="color:#555;font-size:.7rem;margin-left:auto">{{ ai_insights.total_alerts }} upozorenja &bull; {{ ai_insights.total_suggestions }} prijedloga{% if ai_insights.total_opportunities %} &bull; {{ ai_insights.total_opportunities }} prilika{% endif %}{% if ai_insights.total_legal_alerts %} &bull; {{ ai_insights.total_legal_alerts }} zakona{% endif %}</span>
   </div>
   {% for alert in ai_insights.alerts %}
   <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid {% if alert.type == 'danger' %}#ef4444{% elif alert.type == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %}">
@@ -94,6 +94,42 @@ function dismissOnboarding() {
     {% if sug.action_url %}<a href="{{ sug.action_url }}" style="color:#c9a84c;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ sug.action_text }}</a>{% endif %}
   </div>
   {% endfor %}
+  {% if ai_insights.opportunities %}
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid #c9a84c22">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <i class="fas fa-gem" style="color:#22c55e;font-size:.8rem"></i>
+      <span style="color:#22c55e;font-weight:700;font-size:.78rem">PRILIKE ZA USTEDU</span>
+    </div>
+    {% for opp in ai_insights.opportunities %}
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid {% if opp.type == 'success' %}#22c55e{% else %}#3b82f6{% endif %}">
+      <i class="fas fa-{{ opp.icon }}" style="color:{% if opp.type == 'success' %}#22c55e{% else %}#3b82f6{% endif %};margin-top:2px;font-size:.85rem"></i>
+      <div style="flex:1">
+        <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ opp.title }}</div>
+        {% if opp.detail %}<div style="font-size:.72rem;color:#888">{{ opp.detail }}</div>{% endif %}
+      </div>
+      {% if opp.action_url %}<a href="{{ opp.action_url }}" style="color:#22c55e;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ opp.action_text }}</a>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if ai_insights.legal_alerts %}
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid #c9a84c22">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <i class="fas fa-gavel" style="color:#a78bfa;font-size:.8rem"></i>
+      <span style="color:#a78bfa;font-weight:700;font-size:.78rem">ZAKONSKE PROMJENE (7 DANA)</span>
+    </div>
+    {% for law in ai_insights.legal_alerts %}
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid {% if law.type == 'danger' %}#ef4444{% elif law.type == 'warning' %}#f59e0b{% else %}#a78bfa{% endif %}">
+      <i class="fas fa-{{ law.icon }}" style="color:{% if law.type == 'danger' %}#ef4444{% elif law.type == 'warning' %}#f59e0b{% else %}#a78bfa{% endif %};margin-top:2px;font-size:.85rem"></i>
+      <div style="flex:1">
+        <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ law.title }}</div>
+        {% if law.detail %}<div style="font-size:.72rem;color:#888">{{ law.detail }}</div>{% endif %}
+      </div>
+      {% if law.action_url %}<a href="{{ law.action_url }}" style="color:#a78bfa;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ law.action_text }}</a>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% endif %}
 

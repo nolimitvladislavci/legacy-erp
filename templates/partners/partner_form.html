@@ -22,14 +22,14 @@
 
 <form method="post" id="partnerForm">
   {% csrf_token %}
-
   <div class="row g-3">
-    <!-- Lijeva kolona: Osnovni podaci -->
+
+    <!-- LIJEVA KOLONA -->
     <div class="col-lg-8">
+
+      <!-- OSNOVNI PODACI -->
       <div class="stat-card p-4 mb-3">
         <h6 class="fw-bold mb-3"><i class="fas fa-building me-2 text-primary"></i>{% trans "Osnovni podaci" %}</h6>
-
-        <!-- OIB lookup red -->
         <div class="row g-2 mb-3 align-items-end">
           <div class="col-sm-3">
             <label class="form-label fw-semibold small mb-1">{% trans "Zemlja (lookup)" %}</label>
@@ -45,13 +45,10 @@
           <div class="col-sm-6">
             <label class="form-label fw-semibold small mb-1">{% trans "OIB / VAT broj" %}</label>
             <div class="input-group input-group-sm">
-              <input type="text" name="oib" id="oibInput"
-                     class="form-control"
-                     value="{{ partner.oib|default:'' }}"
-                     placeholder="npr. 12345678901"
-                     maxlength="13"
-                     autocomplete="off">
-              <button type="button" class="btn btn-outline-primary" id="oibInputBtn" title="Pretraži registar">
+              <input type="text" name="oib" id="oibInput" class="form-control"
+                     value="{{ partner.oib|default:'' }}" placeholder="npr. 12345678901"
+                     maxlength="13" autocomplete="off">
+              <button type="button" class="btn btn-outline-primary" id="oibInputBtn">
                 <i class="fas fa-search" id="oibInputIcon"></i>
               </button>
             </div>
@@ -59,12 +56,11 @@
           </div>
           <div class="col-sm-3 d-flex align-items-end">
             <small class="text-muted" style="font-size:.75rem">
-              <i class="fas fa-info-circle"></i> Auto-pretraga pri 11 znamenki (HR OIB) ili paste
+              <i class="fas fa-info-circle"></i> Auto-pretraga pri 11 znamenki
             </small>
           </div>
         </div>
 
-        <!-- Naziv -->
         <div class="mb-3">
           <label class="form-label fw-semibold small mb-1">{% trans "Naziv *" %}</label>
           <input type="text" name="name" class="form-control" value="{{ partner.name|default:'' }}"
@@ -95,27 +91,162 @@
         </div>
       </div>
 
-      <!-- NKD djelatnost -->
+      <!-- URED U DŽEPU — eRačun routing -->
+      <div class="stat-card p-4 mb-3" style="border-left:3px solid #6366f1">
+        <h6 class="fw-bold mb-1" style="color:#6366f1">
+          <i class="fas fa-mobile-alt me-2"></i>Ured u džepu — tip kupca
+        </h6>
+        <p class="text-muted small mb-3" style="font-size:.8rem">
+          Odabirom tipa sustav automatski zna koji račun izdati (eRačun / fiskalni bon / PDF).
+          Postavi jednom — nikad više ne razmišljaj o fiskalizaciji.
+        </p>
+
+        <!-- BUYER TYPE KARTICA-ODABIR -->
+        <div class="row g-2 mb-3" id="buyerTypeCards">
+
+          <div class="col-6 col-md-4">
+            <label class="buyer-card {% if partner.buyer_type == 'b2c' or not partner.buyer_type %}active{% endif %}"
+                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+              <input type="radio" name="buyer_type" value="b2c" class="d-none buyer-radio"
+                     {% if partner.buyer_type == 'b2c' or not partner.buyer_type %}checked{% endif %}>
+              <div style="font-size:1.4rem;margin-bottom:4px">🧑</div>
+              <div class="fw-semibold" style="font-size:.8rem">Građanin (B2C)</div>
+              <div class="text-muted" style="font-size:.7rem">Fiskalni bon F1.0</div>
+            </label>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="buyer-card {% if partner.buyer_type == 'b2b_vat' %}active{% endif %}"
+                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+              <input type="radio" name="buyer_type" value="b2b_vat" class="d-none buyer-radio"
+                     {% if partner.buyer_type == 'b2b_vat' %}checked{% endif %}>
+              <div style="font-size:1.4rem;margin-bottom:4px">🏢</div>
+              <div class="fw-semibold" style="font-size:.8rem">Tvrtka u PDV-u</div>
+              <div class="text-muted" style="font-size:.7rem">eRačun F2.0</div>
+            </label>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="buyer-card {% if partner.buyer_type == 'b2b_novat' %}active{% endif %}"
+                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+              <input type="radio" name="buyer_type" value="b2b_novat" class="d-none buyer-radio"
+                     {% if partner.buyer_type == 'b2b_novat' %}checked{% endif %}>
+              <div style="font-size:1.4rem;margin-bottom:4px">🏬</div>
+              <div class="fw-semibold" style="font-size:.8rem">Tvrtka bez PDV-a</div>
+              <div class="text-muted" style="font-size:.7rem">eRačun F2.0</div>
+            </label>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="buyer-card {% if partner.buyer_type == 'b2g' %}active{% endif %}"
+                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+              <input type="radio" name="buyer_type" value="b2g" class="d-none buyer-radio"
+                     {% if partner.buyer_type == 'b2g' %}checked{% endif %}>
+              <div style="font-size:1.4rem;margin-bottom:4px">🏛️</div>
+              <div class="fw-semibold" style="font-size:.8rem">Proračunski (škola…)</div>
+              <div class="text-muted" style="font-size:.7rem">eRačun B2G</div>
+            </label>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="buyer-card {% if partner.buyer_type == 'udruga_vat' %}active{% endif %}"
+                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+              <input type="radio" name="buyer_type" value="udruga_vat" class="d-none buyer-radio"
+                     {% if partner.buyer_type == 'udruga_vat' %}checked{% endif %}>
+              <div style="font-size:1.4rem;margin-bottom:4px">🤝</div>
+              <div class="fw-semibold" style="font-size:.8rem">Udruga u PDV-u</div>
+              <div class="text-muted" style="font-size:.7rem">eRačun F2.0</div>
+            </label>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="buyer-card {% if partner.buyer_type == 'udruga_novat' %}active{% endif %}"
+                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+              <input type="radio" name="buyer_type" value="udruga_novat" class="d-none buyer-radio"
+                     {% if partner.buyer_type == 'udruga_novat' %}checked{% endif %}>
+              <div style="font-size:1.4rem;margin-bottom:4px">🌱</div>
+              <div class="fw-semibold" style="font-size:.8rem">Udruga bez PDV-a</div>
+              <div class="text-muted" style="font-size:.7rem">Obični PDF</div>
+            </label>
+          </div>
+
+          <div class="col-6 col-md-4">
+            <label class="buyer-card {% if partner.buyer_type == 'inozemstvo' %}active{% endif %}"
+                   style="cursor:pointer;border:2px solid transparent;border-radius:10px;padding:12px 10px;display:block;text-align:center;background:#f8fafc;transition:.15s">
+              <input type="radio" name="buyer_type" value="inozemstvo" class="d-none buyer-radio"
+                     {% if partner.buyer_type == 'inozemstvo' %}checked{% endif %}>
+              <div style="font-size:1.4rem;margin-bottom:4px">🌍</div>
+              <div class="fw-semibold" style="font-size:.8rem">Inozemstvo</div>
+              <div class="text-muted" style="font-size:.7rem">Obični PDF</div>
+            </label>
+          </div>
+
+        </div>
+
+        <!-- Routing rezultat — live prikaz -->
+        <div id="routingResult" style="padding:10px 14px;border-radius:8px;background:#eef2ff;border:1px solid #c7d2fe;font-size:.82rem;display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.2rem" id="routingIcon">🧑</span>
+          <div>
+            <div class="fw-semibold" id="routingLabel">Fiskalni bon F1.0 (građanin / krajnja potrošnja)</div>
+            <div class="text-muted" id="routingNote">OIB u fiskalizaciji: Ne &nbsp;|&nbsp; Gotovina: Da</div>
+          </div>
+        </div>
+
+        <!-- Checkboxovi za posebne slučajeve -->
+        <div class="row g-2 mt-3">
+          <div class="col-sm-6">
+            <div class="form-check">
+              <input type="checkbox" name="is_budget_user" class="form-check-input" id="isBudget"
+                     {% if partner.is_budget_user %}checked{% endif %}>
+              <label class="form-check-label small" for="isBudget">
+                <i class="fas fa-university text-warning me-1"></i>
+                <strong>Proračunski korisnik</strong>
+                <div class="text-muted" style="font-size:.73rem">Škola, bolnica, općina, državno tijelo — uvijek eRačun B2G</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-check">
+              <input type="checkbox" name="is_nonprofit_no_activity" class="form-check-input" id="isNonprofit"
+                     {% if partner.is_nonprofit_no_activity %}checked{% endif %}>
+              <label class="form-check-label small" for="isNonprofit">
+                <i class="fas fa-leaf text-success me-1"></i>
+                <strong>Neprofitna bez gosp. djel.</strong>
+                <div class="text-muted" style="font-size:.73rem">Udruga bez PDV-a i bez djelatnosti — obični PDF račun</div>
+              </label>
+            </div>
+          </div>
+          <div class="col-sm-6 mt-1">
+            <div class="form-check">
+              <input type="checkbox" name="is_vat_registered" class="form-check-input" id="isVat"
+                     {% if partner.is_vat_registered %}checked{% endif %}>
+              <label class="form-check-label small" for="isVat">
+                <i class="fas fa-receipt text-info me-1"></i>
+                <strong>U sustavu PDV-a</strong>
+                <div class="text-muted" style="font-size:.73rem">Kupac je PDV obveznik</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ured u džepu -->
+
+      <!-- NKD -->
       <div class="stat-card p-4 mb-3">
         <h6 class="fw-bold mb-3"><i class="fas fa-industry me-2 text-secondary"></i>{% trans "NKD Djelatnost" %}</h6>
-        <div class="row g-2">
-          <div class="col-12">
-            <label class="form-label fw-semibold small mb-1">{% trans "Pretražite NKD šifarnik" %}</label>
-            <div style="position:relative">
-              <input type="text" id="nkdSearch" class="form-control form-control-sm"
-                     autocomplete="off"
-                     placeholder="Unesite naziv ili šifru djelatnosti (npr. 01.41 ili mliječno)"
-                     value="{% if partner.nkd_code %}{{ partner.nkd_code.code }} — {{ partner.nkd_code.name_hr }}{% endif %}">
-            </div>
-            <input type="hidden" name="nkd_code_id" id="nkdHidden" value="{{ partner.nkd_code_id|default:'' }}">
-            <div class="mt-1" style="font-size:.75rem;color:#6c757d">
-              <i class="fas fa-info-circle"></i> Počnite tipkati — prikazuje se lista djelatnosti
-            </div>
+        <div class="col-12">
+          <label class="form-label fw-semibold small mb-1">{% trans "Pretražite NKD šifarnik" %}</label>
+          <input type="text" id="nkdSearch" class="form-control form-control-sm" autocomplete="off"
+                 placeholder="Unesite naziv ili šifru djelatnosti"
+                 value="{% if partner.nkd_code %}{{ partner.nkd_code.code }} — {{ partner.nkd_code.name_hr }}{% endif %}">
+          <input type="hidden" name="nkd_code_id" id="nkdHidden" value="{{ partner.nkd_code_id|default:'' }}">
+          <div class="mt-1" style="font-size:.75rem;color:#6c757d">
+            <i class="fas fa-info-circle"></i> Počnite tipkati — prikazuje se lista djelatnosti
           </div>
         </div>
       </div>
 
-      <!-- Napomene -->
+      <!-- NAPOMENE -->
       <div class="stat-card p-4">
         <label class="form-label fw-semibold small mb-1">{% trans "Interne napomene" %}</label>
         <textarea name="notes" class="form-control form-control-sm" rows="3"
@@ -123,10 +254,12 @@
       </div>
     </div>
 
-    <!-- Desna kolona: Adresa + Uvjeti -->
+    <!-- DESNA KOLONA -->
     <div class="col-lg-4">
+
+      <!-- ADRESA -->
       <div class="stat-card p-4 mb-3">
-        <h6 class="fw-bold mb-3"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{% trans "Adresa" %}</h6>
+        <h6 class="fw-bold mb-2"><i class="fas fa-map-marker-alt me-2 text-danger"></i>{% trans "Adresa sjedišta" %}</h6>
         <div class="mb-2">
           <label class="form-label fw-semibold small mb-1">{% trans "Ulica i broj" %}</label>
           <input type="text" name="address" class="form-control form-control-sm" value="{{ partner.address|default:'' }}">
@@ -145,27 +278,50 @@
           <label class="form-label fw-semibold small mb-1">{% trans "Država" %}</label>
           <input type="text" name="country" class="form-control form-control-sm" value="{{ partner.country|default:'Hrvatska' }}">
         </div>
+
+        <!-- "Bez adrese" — koristi Konjik d.o.o. -->
+        <div class="mt-3 p-3" style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="fas fa-mobile-alt text-success"></i>
+            <span class="fw-semibold small text-success">Ured u džepu</span>
+          </div>
+          <div style="font-size:.75rem;color:#166534">
+            Klijent nema fizički ured? Može koristiti adresu računovodstva kao sjedište — legalno po ZTD-u uz pismenu suglasnost vlasnika prostora.
+          </div>
+          <div class="mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="useKonjikAddr" onchange="toggleKonjikAddr(this)">
+              <label class="form-check-label small fw-semibold" for="useKonjikAddr" style="color:#166534">
+                Koristiti adresu računovodstva
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- UVJETI -->
       <div class="stat-card p-4 mb-3">
         <h6 class="fw-bold mb-3"><i class="fas fa-file-contract me-2 text-success"></i>{% trans "Uvjeti" %}</h6>
         <div class="mb-2">
           <label class="form-label fw-semibold small mb-1">{% trans "Rok plaćanja (dana)" %}</label>
-          <input type="number" name="payment_term" class="form-control form-control-sm" value="{{ partner.payment_term|default:'0'|unlocalize }}" min="0">
+          <input type="number" name="payment_term" class="form-control form-control-sm"
+                 value="{{ partner.payment_term|default:'0'|unlocalize }}" min="0">
         </div>
         <div class="mb-2">
           <label class="form-label fw-semibold small mb-1">{% trans "Rabat (%)" %}</label>
-          <input type="number" step="0.01" name="discount_percent" class="form-control form-control-sm" value="{{ partner.discount_percent|default:'0'|unlocalize }}" min="0" max="100">
+          <input type="number" step="0.01" name="discount_percent" class="form-control form-control-sm"
+                 value="{{ partner.discount_percent|default:'0'|unlocalize }}" min="0" max="100">
         </div>
         {% if partner and partner.pk %}
         <div class="form-check mt-2">
-          <input type="checkbox" name="is_active" class="form-check-input" id="isActive" {% if partner.is_active %}checked{% endif %}>
+          <input type="checkbox" name="is_active" class="form-check-input" id="isActive"
+                 {% if partner.is_active %}checked{% endif %}>
           <label class="form-check-label small" for="isActive">{% trans "Aktivan partner" %}</label>
         </div>
         {% endif %}
       </div>
 
-      <!-- Akcije -->
+      <!-- AKCIJE -->
       <div class="stat-card p-4">
         <div class="d-grid gap-2">
           <button type="submit" class="btn btn-primary">
@@ -176,20 +332,93 @@
           </a>
         </div>
       </div>
-    </div>
 
+    </div>
   </div><!-- /row -->
 </form>
 
+<style>
+.buyer-card.active {
+  border-color: #6366f1 !important;
+  background: #eef2ff !important;
+}
+.buyer-card:hover {
+  border-color: #a5b4fc !important;
+  background: #f5f3ff !important;
+}
+</style>
+
 <script>
+const ROUTING = {
+  'b2c':         { icon:'🧑', label:'Fiskalni bon F1.0 (građanin / krajnja potrošnja)', note:'OIB u fiskalizaciji: Ne · Gotovina: Da', color:'#eef2ff', border:'#c7d2fe' },
+  'b2b_vat':     { icon:'🏢', label:'eRačun F2.0 (tvrtka u PDV-u)', note:'OIB u fiskalizaciji: Da · Gotovina do 700€: Da', color:'#f0fdf4', border:'#86efac' },
+  'b2b_novat':   { icon:'🏬', label:'eRačun F2.0 (tvrtka/obrtnik NIJE u PDV-u)', note:'OIB u fiskalizaciji: Da · Gotovina do 700€: Da', color:'#f0fdf4', border:'#86efac' },
+  'b2g':         { icon:'🏛️', label:'eRačun B2G (proračunski korisnik)', note:'OIB u fiskalizaciji: Da · Gotovina: Ne', color:'#fefce8', border:'#fde68a' },
+  'udruga_vat':  { icon:'🤝', label:'eRačun F2.0 (udruga u PDV-u)', note:'OIB u fiskalizaciji: Da · Gotovina do 700€: Da', color:'#f0fdf4', border:'#86efac' },
+  'udruga_novat':{ icon:'🌱', label:'Obični PDF (udruga bez PDV-a, bez gosp. djel.)', note:'OIB u fiskalizaciji: Ne · Gotovina: Da', color:'#fff7ed', border:'#fed7aa' },
+  'inozemstvo':  { icon:'🌍', label:'Obični PDF (inozemni kupac)', note:'Nije tuzemna transakcija — bez fiskalizacije', color:'#f8fafc', border:'#cbd5e1' },
+};
+
 document.addEventListener('DOMContentLoaded', function() {
-  // OIB Lookup — koristi [name="oib_country"] za odabir države pri pretrazi
-  new FinaOibLookup('oibInput', {
-    countryInputName: 'oib_country'
+  // OIB lookup
+  new FinaOibLookup('oibInput', { countryInputName: 'oib_country' });
+  // NKD search
+  new FinaNkdSearch('nkdSearch', 'nkdHidden');
+
+  // Buyer type kartica UI
+  const cards = document.querySelectorAll('.buyer-card');
+  const radios = document.querySelectorAll('.buyer-radio');
+
+  function updateRouting(val) {
+    const r = ROUTING[val] || ROUTING['b2c'];
+    const el = document.getElementById('routingResult');
+    document.getElementById('routingIcon').textContent = r.icon;
+    document.getElementById('routingLabel').textContent = r.label;
+    document.getElementById('routingNote').textContent = r.note;
+    el.style.background = r.color;
+    el.style.borderColor = r.border;
+  }
+
+  cards.forEach(function(card) {
+    card.addEventListener('click', function() {
+      cards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      const radio = card.querySelector('.buyer-radio');
+      if (radio) {
+        radio.checked = true;
+        updateRouting(radio.value);
+      }
+    });
   });
 
-  // NKD Search
-  new FinaNkdSearch('nkdSearch', 'nkdHidden');
+  // Inicijalni prikaz
+  const checked = document.querySelector('.buyer-radio:checked');
+  if (checked) updateRouting(checked.value);
+
+  // is_budget_user override
+  document.getElementById('isBudget').addEventListener('change', function() {
+    if (this.checked) {
+      const b2g = document.querySelector('[name="buyer_type"][value="b2g"]');
+      if (b2g) b2g.closest('label').click();
+    }
+  });
 });
+
+function toggleKonjikAddr(cb) {
+  if (cb.checked) {
+    // Popuni s adresom računovodstva — u produkciji dohvatiti iz settings
+    document.querySelector('[name="address"]').value = '{{ request.user.company_address|default:"Vaša ulica bb" }}';
+    document.querySelector('[name="city"]').value = '{{ request.user.company_city|default:"Grad" }}';
+    document.querySelector('[name="zip_code"]').value = '{{ request.user.company_zip|default:"" }}';
+    document.querySelector('[name="country"]').value = 'Hrvatska';
+    // Vizualni feedback
+    document.querySelector('[name="address"]').style.borderColor = '#22c55e';
+    document.querySelector('[name="city"]').style.borderColor = '#22c55e';
+    setTimeout(function() {
+      document.querySelector('[name="address"]').style.borderColor = '';
+      document.querySelector('[name="city"]').style.borderColor = '';
+    }, 2000);
+  }
+}
 </script>
 {% endblock %}

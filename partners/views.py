@@ -88,6 +88,10 @@ def partner_create(request):
                 phone=request.POST.get("phone", ""),
                 web=request.POST.get("web", ""),
                 partner_type=request.POST.get("partner_type", "client"),
+                buyer_type=request.POST.get("buyer_type", "b2c"),
+                is_budget_user="is_budget_user" in request.POST,
+                is_nonprofit_no_activity="is_nonprofit_no_activity" in request.POST,
+                is_vat_registered="is_vat_registered" in request.POST,
                 payment_term=int(request.POST.get("payment_term", 0) or 0),
                 discount_percent=request.POST.get("discount_percent", 0) or 0,
                 notes=request.POST.get("notes", ""),
@@ -126,6 +130,10 @@ def partner_edit(request, pk):
             partner.phone = request.POST.get("phone", "")
             partner.web = request.POST.get("web", "")
             partner.partner_type = request.POST.get("partner_type", "client")
+            partner.buyer_type = request.POST.get("buyer_type", "b2c")
+            partner.is_budget_user = "is_budget_user" in request.POST
+            partner.is_nonprofit_no_activity = "is_nonprofit_no_activity" in request.POST
+            partner.is_vat_registered = "is_vat_registered" in request.POST
             partner.payment_term = int(request.POST.get("payment_term", 0) or 0)
             partner.discount_percent = request.POST.get("discount_percent", 0) or 0
             partner.notes = request.POST.get("notes", "")

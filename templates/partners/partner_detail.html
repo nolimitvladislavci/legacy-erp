@@ -81,6 +81,27 @@ function copyPortalLink(){
         {% if partner.notes %}
         <div class="col-12"><div class="label">{% trans "Napomene" %}</div><div class="text-muted small">{{ partner.notes }}</div></div>
         {% endif %}
+        <!-- URED U DŽEPU — invoice routing -->
+        <div class="col-12 mt-2">
+          {% with r=partner.get_invoice_routing %}
+          <div class="d-flex align-items-center gap-2 p-2" style="border-radius:8px;background:{% if r.route == 'eracun_f20' %}#f0fdf4{% elif r.route == 'eracun_b2g' %}#fefce8{% elif r.route == 'obicni_pdf' %}#fff7ed{% else %}#eef2ff{% endif %};border:1px solid {% if r.route == 'eracun_f20' %}#86efac{% elif r.route == 'eracun_b2g' %}#fde68a{% elif r.route == 'obicni_pdf' %}#fed7aa{% else %}#c7d2fe{% endif %}">
+            <span style="font-size:1.1rem">
+              {% if r.route == 'eracun_f20' %}📄
+              {% elif r.route == 'eracun_b2g' %}🏛️
+              {% elif r.route == 'fiskalni_f10' %}🧾
+              {% else %}📋{% endif %}
+            </span>
+            <div>
+              <div class="fw-semibold" style="font-size:.8rem">{{ r.label }}</div>
+              <div class="text-muted" style="font-size:.72rem">
+                OIB u fiskalizaciji: {% if r.needs_oib %}Da{% else %}Ne{% endif %}
+                &nbsp;·&nbsp;
+                Gotovina: {% if r.can_be_cash %}Da{% else %}Ne{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endwith %}
+        </div>
       </div>
     </div>
   </div>

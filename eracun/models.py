@@ -1,3 +1,4 @@
+from core.fields import FernetEncryptedCharField
 """e-Račun models — multi-tenant e-invoice gateway."""
 from django.db import models
 from django.utils import timezone
@@ -39,7 +40,7 @@ class ERacunConfig(models.Model):
     archive_days = models.IntegerField(default=4015, verbose_name='Cuvaj arhivu (dana)', help_text='Zakonski min 11 godina = 4015 dana')
 
     # API pristup za vanjske klijente
-    api_key = models.CharField(max_length=64, blank=True, unique=True, verbose_name='API kljuc')
+    api_key = FernetEncryptedCharField(blank=True, unique=True, verbose_name='API kljuc')
     api_enabled = models.BooleanField(default=False, verbose_name='API pristup aktivan')
     api_rate_limit = models.IntegerField(default=100, verbose_name='Max zahtjeva/sat')
 

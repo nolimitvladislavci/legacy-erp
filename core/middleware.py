@@ -81,6 +81,148 @@ class ForcePasswordChangeMiddleware(MiddlewareMixin):
         return None
 
 
+class Force2FAMiddleware:
+    """
+    Blokira superadmin, company_admin i tenant_admin korisnike
+    koji nemaju aktiviran TOTP 2FA.
+    Preusmjerava ih na /2fa/setup/ dok god totp_enabled != True.
+
+    Anti-loop: poruka se dodaje samo jednom (nema message spama).
+    """
+
+    WHITELISTED_PREFIXES = (
+        '/2fa/',
+        '/accounts/logout',
+        '/logout',
+        '/static/',
+        '/media/',
+        '/health/',
+        '/api/',
+        '/admin/',
+        '/__debug__/',
+        '/i18n/',
+    )
+
+    ENFORCED_ROLES = ('superadmin', 'company_admin', 'tenant_admin')
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not getattr(request, 'user', None) or not request.user.is_authenticated:
+            return self.get_response(request)
+
+        # Whitelist — propusti bez provjere
+        path = request.path
+        for prefix in self.WHITELISTED_PREFIXES:
+            if path.startswith(prefix):
+                return self.get_response(request)
+
+        # Provjeri samo kriticne uloge
+        try:
+            profile = request.user.userprofile
+        except Exception:
+            return self.get_response(request)
+
+        if profile.role not in self.ENFORCED_ROLES and not request.user.is_superuser:
+            return self.get_response(request)
+
+        # Ako 2FA vec aktiviran — propusti
+        if profile.totp_enabled:
+            return self.get_response(request)
+
+        # Blokada — preusmjeri na setup (bez message spama)
+        from django.contrib import messages
+        from django.shortcuts import redirect
+
+        system_message = 'Sustav zahtijeva obaveznu aktivaciju 2FA zaštite za administratore.'
+        has_message = False
+        storage = messages.get_messages(request)
+        for msg in storage:
+            if msg.message == system_message:
+                has_message = True
+                break
+        storage.used = False  # Vrati poruke u storage da se prikazu na iducem ekranu
+
+        if not has_message:
+            messages.warning(request, system_message)
+
+        return redirect('setup_2fa')
+
+
+
+
+class ForceTCMiddleware:
+    """
+    Blokira korisnike čija firma NEMA potpisan T&C consent (GDPR čl.6b).
+    Bez has_signed_tc_consent=True sustav NE SMIJE agregirati podatke firme
+    (Knowledge Graph, OpportunityScanner, FINA bonitet).
+
+    Preusmjerava na /legal/tc-consent/ dok admin ne potpiše.
+    Superadmini su izuzeti (oni upravljaju, ne koriste).
+    """
+
+    WHITELISTED_PREFIXES = (
+        '/legal/',
+        '/accounts/logout',
+        '/logout',
+        '/static/',
+        '/media/',
+        '/health/',
+        '/api/',
+        '/admin/',
+        '/__debug__/',
+        '/i18n/',
+        '/2fa/',
+        '/login',
+    )
+
+    TC_CURRENT_VERSION = 'v1.0-2026'
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not getattr(request, 'user', None) or not request.user.is_authenticated:
+            return self.get_response(request)
+
+        path = request.path
+        for prefix in self.WHITELISTED_PREFIXES:
+            if path.startswith(prefix):
+                return self.get_response(request)
+
+        # Superadmini izuzeti — oni upravljaju sustavom
+        if request.user.is_superuser:
+            return self.get_response(request)
+
+        # Dohvati firmu
+        company = getattr(request, 'current_company', None)
+        if not company:
+            try:
+                company = request.user.userprofile.company
+            except Exception:
+                return self.get_response(request)
+
+        if not company:
+            return self.get_response(request)
+
+        # Ako je T&C potpisan i verzija aktualna — propusti
+        if company.has_signed_tc_consent and company.tc_consent_version == self.TC_CURRENT_VERSION:
+            return self.get_response(request)
+
+        # Blokada — preusmjeri na T&C stranicu
+        from django.contrib import messages
+        from django.shortcuts import redirect
+
+        msg = 'Potrebno je prihvatiti uvjete korištenja LIMIT Connect sustava prije nastavka.'
+        storage = messages.get_messages(request)
+        has_msg = any(m.message == msg for m in storage)
+        storage.used = False
+        if not has_msg:
+            messages.warning(request, msg)
+
+        return redirect('tc_consent')
+
 class ImpersonationMiddleware(MiddlewareMixin):
     """Allow superadmin to impersonate another company."""
     def process_request(self, request):

@@ -598,3 +598,211 @@ class NNFeedServiceTest(BORGTestBase):
         self.assertIsNotNone(result)
         self.assertEqual(result['category'], 'VAT')
         self.assertEqual(result['impact_score'], 8)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TEST 8: Proactive Widget — Knowledge Graph Integration (v2)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class ProactiveWidgetKGTest(BORGTestBase):
+    """Testovi za Knowledge Graph sekcije u proactive widgetu."""
+
+    def test_empty_knowledge_graph_graceful(self):
+        """Prazan KG ne ruši widget — opportunities i legal_alerts su prazne liste."""
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+        from companies.models import Company
+
+        empty = Company.objects.create(name='KG Prazna', oib='99999999999')
+        result = get_dashboard_insights(empty)
+
+        self.assertIn('opportunities', result)
+        self.assertIn('legal_alerts', result)
+        self.assertIsInstance(result['opportunities'], list)
+        self.assertIsInstance(result['legal_alerts'], list)
+        self.assertEqual(result['total_opportunities'], 0)
+        self.assertEqual(result['total_legal_alerts'], 0)
+
+    def test_opportunity_match_appears_in_widget(self):
+        """ClientOpportunityMatch za firmu pojavljuje se u opportunities sekciji."""
+        from limit_connect_ai.models_knowledge_graph import (
+            LegalOpportunity, ClientOpportunityMatch,
+        )
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        opp = LegalOpportunity.objects.create(
+            opportunity_type='tax_relief',
+            name='Widget Test Olaksica',
+            description='Test opis',
+            typical_savings_eur=Decimal('7500.00'),
+            is_active=True,
+        )
+        ClientOpportunityMatch.objects.create(
+            company=self.company,
+            opportunity=opp,
+            calculated_savings=Decimal('7500.00'),
+            status='identified',
+        )
+
+        result = get_dashboard_insights(self.company)
+
+        self.assertGreater(result['total_opportunities'], 0)
+        all_titles = ' '.join(o['title'] for o in result['opportunities'])
+        self.assertIn('Widget Test Olaksica', all_titles)
+        all_details = ' '.join(o.get('detail', '') for o in result['opportunities'])
+        self.assertIn('7,500', all_details)
+
+    def test_utilized_match_not_shown(self):
+        """Iskorištena prilika (status=utilized) se NE prikazuje."""
+        from limit_connect_ai.models_knowledge_graph import (
+            LegalOpportunity, ClientOpportunityMatch,
+        )
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        opp = LegalOpportunity.objects.create(
+            opportunity_type='eu_fund',
+            name='Vec Iskoristena',
+            description='Done',
+            is_active=True,
+        )
+        ClientOpportunityMatch.objects.create(
+            company=self.company,
+            opportunity=opp,
+            calculated_savings=Decimal('3000.00'),
+            status='utilized',
+        )
+
+        result = get_dashboard_insights(self.company)
+        all_titles = ' '.join(o['title'] for o in result['opportunities'])
+        self.assertNotIn('Vec Iskoristena', all_titles)
+
+    def test_breaking_regulatory_update_in_legal_alerts(self):
+        """Breaking zakonska promjena (impact >= 9) pojavljuje se kao danger alert."""
+        from limit_connect_ai.models_knowledge_graph import RegulatorySource, RegulatoryUpdate
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        src = RegulatorySource.objects.create(name='NN Test', source_type='nn')
+        RegulatoryUpdate.objects.create(
+            source=src,
+            title='HITNA Promjena PDV stope',
+            category='VAT',
+            publication_date=date.today(),
+            impact_score=10,
+            is_breaking=True,
+            is_processed=True,
+            affected_modules=['pos', 'invoicing'],
+        )
+
+        result = get_dashboard_insights(self.company)
+
+        self.assertGreater(result['total_legal_alerts'], 0)
+        danger_alerts = [a for a in result['legal_alerts'] if a['type'] == 'danger']
+        self.assertGreater(len(danger_alerts), 0)
+        self.assertIn('HITNA Promjena PDV', danger_alerts[0]['title'])
+
+    def test_low_impact_update_not_shown(self):
+        """Zakonska promjena s impact < 5 se NE prikazuje."""
+        from limit_connect_ai.models_knowledge_graph import RegulatorySource, RegulatoryUpdate
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        src = RegulatorySource.objects.create(name='NN Low', source_type='nn')
+        RegulatoryUpdate.objects.create(
+            source=src,
+            title='Beznacajna promjena',
+            category='OTHER',
+            publication_date=date.today(),
+            impact_score=2,
+            is_breaking=False,
+            is_processed=True,
+        )
+
+        result = get_dashboard_insights(self.company)
+        all_titles = ' '.join(a['title'] for a in result['legal_alerts'])
+        self.assertNotIn('Beznacajna', all_titles)
+
+    def test_old_update_not_shown(self):
+        """Zakonska promjena starija od 7 dana se NE prikazuje."""
+        from limit_connect_ai.models_knowledge_graph import RegulatorySource, RegulatoryUpdate
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        src = RegulatorySource.objects.create(name='NN Old', source_type='nn')
+        RegulatoryUpdate.objects.create(
+            source=src,
+            title='Stara promjena',
+            category='TAX',
+            publication_date=date.today() - timedelta(days=14),
+            impact_score=8,
+            is_breaking=False,
+            is_processed=True,
+        )
+
+        result = get_dashboard_insights(self.company)
+        all_titles = ' '.join(a['title'] for a in result['legal_alerts'])
+        self.assertNotIn('Stara promjena', all_titles)
+
+    def test_supplier_risk_alert_appears(self):
+        """HIGH risk alert za firmu pojavljuje se u alerts sekciji."""
+        from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        SupplierRiskAlert.objects.create(
+            company=self.company,
+            supplier_oib='11111111111',
+            supplier_name='Rizicni Dobavljac d.o.o.',
+            risk_level='HIGH',
+            risk_description='Blokiran racun 45 dana',
+        )
+
+        result = get_dashboard_insights(self.company)
+
+        risk_alerts = [a for a in result['alerts'] if 'Rizicni Dobavljac' in a['title']]
+        self.assertGreater(len(risk_alerts), 0)
+        self.assertEqual(risk_alerts[0]['type'], 'warning')  # HIGH = warning
+
+    def test_critical_risk_is_danger(self):
+        """CRITICAL risk alert prikazuje se kao danger tip."""
+        from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        SupplierRiskAlert.objects.create(
+            company=self.company,
+            supplier_oib='22222222222',
+            supplier_name='Stecaj Firma d.o.o.',
+            risk_level='CRITICAL',
+            risk_description='Pokrenut stecajni postupak',
+        )
+
+        result = get_dashboard_insights(self.company)
+        risk_alerts = [a for a in result['alerts'] if 'Stecaj Firma' in a['title']]
+        self.assertGreater(len(risk_alerts), 0)
+        self.assertEqual(risk_alerts[0]['type'], 'danger')
+
+    def test_acknowledged_risk_not_shown(self):
+        """Potvrdjeni (acknowledged) rizik se NE prikazuje."""
+        from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        SupplierRiskAlert.objects.create(
+            company=self.company,
+            supplier_oib='33333333333',
+            supplier_name='Potvrdjen Rizik',
+            risk_level='HIGH',
+            risk_description='Vec potvrdjen',
+            is_acknowledged=True,
+        )
+
+        result = get_dashboard_insights(self.company)
+        all_titles = ' '.join(a['title'] for a in result['alerts'])
+        self.assertNotIn('Potvrdjen Rizik', all_titles)
+
+    def test_widget_returns_all_v2_keys(self):
+        """Widget v2 vraća sve potrebne ključeve u rječniku."""
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+
+        result = get_dashboard_insights(self.company)
+
+        required_keys = [
+            'alerts', 'suggestions', 'opportunities', 'legal_alerts',
+            'total_alerts', 'total_suggestions', 'total_opportunities', 'total_legal_alerts',
+        ]
+        for key in required_keys:
+            self.assertIn(key, result, f'Missing key: {key}')
