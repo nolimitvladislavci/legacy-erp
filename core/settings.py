@@ -485,6 +485,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "data_migration.tasks.cleanup_stale_migrations",
         "schedule": 3600,  # svaki sat
     },
+    "wizard-cleanup-stale-drafts": {
+        "task": "partners.cleanup_stale_wizard_drafts",
+        "schedule": crontab(hour=3, minute=0),
+    },
     "intelligence-nightly-patrol": {
         "task": "intelligence.tasks.intelligence_nightly_patrol",
         "schedule": crontab(hour=3, minute=30),
@@ -518,6 +522,15 @@ CELERY_BEAT_SCHEDULE = {
     "ai-campaign-suggestions": {
         "task": "limit_connect_ai.tasks.campaign_suggestions_all",
         "schedule": crontab(hour=10, minute=0, day_of_week=5),
+    },
+    # ── Wizard Onboarding ──
+    "cleanup-stale-wizard-drafts": {
+        "task": "partners.cleanup_stale_wizard_drafts",
+        "schedule": crontab(hour=3, minute=0),
+    },
+    "retroactive-nkd-lookup": {
+        "task": "partners.retroactive_nkd_lookup",
+        "schedule": crontab(hour=4, minute=0, day_of_week=0),  # nedjelja 04:00
     },
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────

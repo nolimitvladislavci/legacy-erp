@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}DRAFT tvrtke — OIB Finalizer{% endblock %}
+{% block content %}
+<style>
+.df-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:1.2rem;margin-bottom:1rem;transition:box-shadow .2s}
+.df-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.df-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem}
+.df-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.68rem;font-weight:700}
+.df-badge-draft{background:rgba(253,126,20,.12);color:#fd7e14}
+.df-badge-complete{background:rgba(40,167,69,.12);color:#28a745}
+.df-badge-pending{background:rgba(108,117,125,.12);color:#6c757d}
+.df-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;font-size:.82rem;margin-bottom:.8rem}
+.df-grid dt{color:var(--text-muted,#64748b);font-size:.72rem;text-transform:uppercase;letter-spacing:.03em}
+.df-grid dd{margin:0;font-weight:500}
+.df-oib-form{display:flex;gap:.5rem;align-items:center;padding:.8rem;background:rgba(201,168,76,.04);border:1px dashed var(--gold,#c9a84c);border-radius:8px;margin-top:.5rem}
+.df-oib-form input{flex:1;padding:8px 12px;font-family:monospace;font-size:.95rem;letter-spacing:1px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a)}
+.df-oib-form input:focus{outline:none;border-color:var(--gold,#c9a84c);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+.df-oib-form button{padding:8px 20px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.df-oib-form button:hover{background:#b8943f}
+.df-step-dots{display:flex;gap:4px}
+.df-step-dot{width:8px;height:8px;border-radius:50%;background:var(--border,#e2e8f0)}
+.df-step-dot.filled{background:var(--gold,#c9a84c)}
+.df-empty{text-align:center;padding:4rem;color:var(--text-muted,#64748b)}
+.df-result{margin-top:.6rem;padding:.6rem;border-radius:6px;font-size:.82rem;display:none}
+.df-result.success{display:block;background:rgba(40,167,69,.08);border:1px solid rgba(40,167,69,.2);color:#28a745}
+.df-result.error{display:block;background:rgba(220,53,69,.08);border:1px solid rgba(220,53,69,.2);color:#dc3545}
+</style>
+
+<div style="max-width:900px;margin:0 auto;padding:1rem">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h4 style="margin:0;font-weight:700;color:var(--text,#0f172a)">
+        <i class="fas fa-id-card" style="color:var(--gold,#c9a84c)"></i> OIB Finalizer
+      </h4>
+      <p style="color:var(--text-muted,#64748b);font-size:.82rem;margin:4px 0 0">
+        {{ draft_count }} tvrtk{{ draft_count|pluralize:"a,e,i" }} čeka pravi OIB
+      </p>
+    </div>
+    <a href="{% url 'umbrella_dashboard' %}" style="padding:6px 14px;background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);text-decoration:none;font-size:.82rem;font-weight:600">
+      <i class="fas fa-arrow-left"></i> Umbrella
+    </a>
+  </div>
+
+  {% if messages %}
+  {% for message in messages %}
+  <div style="padding:.8rem 1rem;margin-bottom:1rem;border-radius:8px;font-size:.85rem;
+    {% if message.tags == 'success' %}background:rgba(40,167,69,.08);border:1px solid rgba(40,167,69,.2);color:#28a745
+    {% elif message.tags == 'error' %}background:rgba(220,53,69,.08);border:1px solid rgba(220,53,69,.2);color:#dc3545
+    {% else %}background:rgba(253,126,20,.08);border:1px solid rgba(253,126,20,.2);color:#fd7e14{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if drafts %}
+    {% for d in drafts %}
+    <div class="df-card">
+      <div class="df-card-header">
+        <div>
+          <h5 style="margin:0;font-size:1rem;font-weight:700;color:var(--text,#0f172a)">
+            {{ d.company.name }}
+          </h5>
+          <code style="font-size:.78rem;color:#fd7e14">{{ d.company.oib }}</code>
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          {% if d.completed %}
+            <span class="df-badge df-badge-complete"><i class="fas fa-check"></i> Wizard zavrsen</span>
+          {% else %}
+            <span class="df-badge df-badge-pending">Korak {{ d.step }}/6</span>
+          {% endif %}
+          <span class="df-badge df-badge-draft">DRAFT</span>
+        </div>
+      </div>
+
+      <div class="df-grid">
+        <div>
+          <dt>Direktor</dt>
+          <dd>{{ d.director|default:"-" }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ d.director_email|default:"-" }}</dd>
+        </div>
+        <div>
+          <dt>Tip</dt>
+          <dd>{{ d.firma_type|default:"-" }}</dd>
+        </div>
+        <div>
+          <dt>Grad</dt>
+          <dd>{{ d.company.city|default:"-" }}</dd>
+        </div>
+        <div>
+          <dt>Kreiran</dt>
+          <dd>{{ d.created|date:"d.m.Y H:i" }}</dd>
+        </div>
+        <div>
+          <dt>Wizard koraci</dt>
+          <dd>
+            <div class="df-step-dots">
+              {% for i in "012345" %}
+              <div class="df-step-dot {% if forloop.counter0 < d.step %}filled{% endif %}"></div>
+              {% endfor %}
+            </div>
+          </dd>
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'finalize_oib' %}" class="df-oib-form"
+            onsubmit="return confirmFinalize(this)">
+        {% csrf_token %}
+        <input type="hidden" name="company_id" value="{{ d.company.id }}">
+        <i class="fas fa-fingerprint" style="color:var(--gold,#c9a84c);font-size:1.2rem"></i>
+        <input type="text" name="new_oib" placeholder="Unesite pravi OIB (11 znamenki)"
+               pattern="\d{11}" maxlength="11" required
+               title="OIB mora imati tocno 11 znamenki">
+        <button type="submit">
+          <i class="fas fa-check-circle"></i> Ozakoni
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="df-empty">
+      <i class="fas fa-check-double" style="font-size:3rem;opacity:.3;display:block;margin-bottom:1rem;color:var(--gold,#c9a84c)"></i>
+      <h5 style="color:var(--text,#0f172a)">Sve tvrtke imaju pravi OIB</h5>
+      <p>Nema DRAFT tvrtki koje cekaju finalizaciju.</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+function confirmFinalize(form) {
+  var oib = form.querySelector('input[name="new_oib"]').value.trim();
+  var name = form.closest('.df-card').querySelector('h5').textContent;
+  if (oib.length !== 11 || !/^\d{11}$/.test(oib)) {
+    alert('OIB mora imati tocno 11 znamenki.');
+    return false;
+  }
+  return confirm(
+    'Zelite li finalizirati OIB za:\n\n' +
+    name + '\n' +
+    'Novi OIB: ' + oib + '\n\n' +
+    'Ova akcija ce:\n' +
+    '1. Zamijeniti DRAFT OIB s pravim\n' +
+    '2. Pokrenuti VIES provjeru\n' +
+    '3. Sinkronizirati podatke s postojecim partnerima\n' +
+    '4. Provjeriti bonitet\n\n' +
+    'Nastaviti?'
+  );
+}
+</script>
+{% endblock %}

@@ -1144,6 +1144,23 @@ def company_dashboard(request):
     except Exception:
         logger.warning("Suppressed error", exc_info=True)
 
+    # ── Wizard Funnel — draftovi koje ova firma vodi kao accounting_firm ─────
+    try:
+        from partners.models import WizardDraft
+        from django.db.models import Count, Q
+        wd_qs = WizardDraft.objects.filter(accounting_firm=company)
+        context['wizard_funnel'] = {
+            'total':      wd_qs.count(),
+            'completed':  wd_qs.filter(completed=True).count(),
+            'in_progress': wd_qs.filter(completed=False, tc_accepted=True).count(),
+            'abandoned':  wd_qs.filter(completed=False, tc_accepted=False).count(),
+            'recent':     list(wd_qs.filter(tc_accepted=True).order_by('-updated_at')
+                               .values('id','firma_ime','current_step','completed',
+                                       'updated_at','direktor_email','kapital_tip')[:8]),
+        }
+    except Exception:
+        context['wizard_funnel'] = None
+
     return render(request, 'dashboards/company_admin.html', context)
 
 

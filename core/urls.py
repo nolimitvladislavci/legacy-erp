@@ -11,6 +11,8 @@ import os as _os
 from django.contrib.auth import views as auth_views
 from . import views
 from core import steuerberater_views
+from core import intelligence_views
+from core import oib_finalizer_views
 from core import onboarding_views
 
 def _serve_offline(request):
@@ -167,6 +169,11 @@ urlpatterns += i18n_patterns(
     path('superadmin/companies/', views.superadmin_companies, name='superadmin_companies'),
     path('superadmin/users/', views.superadmin_users, name='superadmin_users'),
     path('umbrella/', views.umbrella_dashboard, name='umbrella_dashboard'),
+    path('umbrella/intelligence/', intelligence_views.intelligence_dashboard, name='intelligence_dashboard'),
+    path('umbrella/intelligence/search/', intelligence_views.intelligence_search, name='intelligence_search'),
+    path('umbrella/drafts/', oib_finalizer_views.draft_companies_view, name='draft_companies'),
+    path('umbrella/drafts/finalize/', oib_finalizer_views.finalize_oib_view, name='finalize_oib'),
+    path('api/oib-finalizer/', oib_finalizer_views.finalize_oib_api, name='finalize_oib_api'),
     path('umbrella/switch/<uuid:company_id>/', views.umbrella_switch_company, name='umbrella_switch_company'),
     path('umbrella/switch-back/', views.umbrella_switch_back, name='umbrella_switch_back'),
     path('superadmin/users/<int:user_id>/edit/', views.superadmin_edit_user, name='superadmin_edit_user'),
