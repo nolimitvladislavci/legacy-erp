@@ -2420,3 +2420,39 @@ def promo_page_de(request):
 
 def promo_opg(request):
     return render(request, 'website/promo_opg.html')
+
+
+@login_required
+def tc_consent(request):
+    """T&C Consent — firma mora potpisati prije korištenja AI sustava."""
+    from companies.models import Company
+    from django.utils import timezone as tz
+
+    company = None
+    try:
+        company = request.user.userprofile.company
+    except Exception:
+        pass
+
+    if not company:
+        from django.contrib import messages
+        messages.error(request, 'Nemate dodijeljenu tvrtku.')
+        return redirect('/')
+
+    TC_VERSION = 'v1.0-2026'
+
+    if request.method == 'POST' and request.POST.get('accept') == 'yes':
+        company.has_signed_tc_consent = True
+        company.tc_consent_signed_at = tz.now()
+        company.tc_consent_version = TC_VERSION
+        company.save(update_fields=['has_signed_tc_consent', 'tc_consent_signed_at', 'tc_consent_version'])
+
+        from django.contrib import messages
+        messages.success(request, 'Uvjeti korištenja prihvaćeni. Dobrodošli u LIMIT Connect!')
+        return redirect('/')
+
+    return render(request, 'legal/tc_consent.html', {
+        'company': company,
+        'tc_version': TC_VERSION,
+    })
+

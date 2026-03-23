@@ -133,6 +133,7 @@ urlpatterns += i18n_patterns(
     path("legal/tippgeber-ausweis/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/tippgeber_ausweis_de.html'), name="tippgeber_ausweis"),
     path("legal/posrednicki-ugovor/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/posrednicki_ugovor_hr.html'), name="posrednicki_ugovor"),
     path("legal/opci-uvjeti/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/opci_uvjeti_hr.html'), name="opci_uvjeti"),
+    path('legal/tc-consent/', __import__('core.views', fromlist=['tc_consent']).tc_consent, name='tc_consent'),
     path("legal/dpa/", lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'legal/dpa_hr.html'), name="dpa"),
 
     # Partner Signup (public)

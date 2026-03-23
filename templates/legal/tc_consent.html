@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Uvjeti korištenja — LIMIT Connect{% endblock %}
+{% block content %}
+<div style="max-width:720px;margin:40px auto;padding:0 20px">
+
+<div style="text-align:center;margin-bottom:32px">
+  <div style="font-size:2.5rem;margin-bottom:8px">&#128220;</div>
+  <h2 style="color:#c9a84c;margin-bottom:4px">Uvjeti korištenja LIMIT Connect</h2>
+  <p style="color:#888;font-size:.85rem">Verzija: {{ tc_version }} | Tvrtka: {{ company.name }}</p>
+</div>
+
+<div style="background:#111;border:1px solid #c9a84c33;border-radius:12px;padding:24px;margin-bottom:24px;max-height:400px;overflow-y:auto;font-size:.85rem;color:#ccc;line-height:1.7">
+  <h3 style="color:#c9a84c;font-size:1rem;margin-bottom:12px">1. Predmet ugovora</h3>
+  <p>LIMIT Connect ("Sustav") pruža usluge poslovnog upravljanja, fiskalizacije, financijskog izvještavanja i AI potpomognutog savjetovanja za tvrtku {{ company.name }} ("Korisnik").</p>
+
+  <h3 style="color:#c9a84c;font-size:1rem;margin:16px 0 8px">2. Obrada podataka (GDPR čl. 6b)</h3>
+  <p>Prihvaćanjem ovih uvjeta, Korisnik izričito dopušta Sustavu da:</p>
+  <ul style="margin:8px 0;padding-left:20px">
+    <li>Agregira poslovne podatke Korisnika u svrhu AI analize (Opportunity Scanner, Compliance Watch)</li>
+    <li>Provjerava bonitet poslovnih partnera Korisnika putem javno dostupnih registara (FINA, sudski registar)</li>
+    <li>Prati regulatorne promjene relevantne za poslovanje Korisnika (Knowledge Graph)</li>
+    <li>Šalje automatske obavijesti o prilikama, rizicima i zakonskim obvezama</li>
+  </ul>
+
+  <h3 style="color:#c9a84c;font-size:1rem;margin:16px 0 8px">3. Prava ispitanika</h3>
+  <p>Korisnik u svakom trenutku može:</p>
+  <ul style="margin:8px 0;padding-left:20px">
+    <li>Zatražiti uvid u podatke koje Sustav obrađuje (čl. 15 GDPR)</li>
+    <li>Zatražiti brisanje podataka (čl. 17 GDPR, "pravo na zaborav")</li>
+    <li>Povući privolu — u tom slučaju AI funkcionalnosti se isključuju, ali osnovni ERP ostaje funkcionalan</li>
+  </ul>
+
+  <h3 style="color:#c9a84c;font-size:1rem;margin:16px 0 8px">4. Čuvanje podataka</h3>
+  <p>Poslovni podaci čuvaju se sukladno zakonskim rokovima (11 godina za fakture i glavnu knjigu, 7 godina za putne naloge, trajno za kontni plan i obračune plaća).</p>
+
+  <h3 style="color:#c9a84c;font-size:1rem;margin:16px 0 8px">5. Sigurnost</h3>
+  <p>Sustav koristi AES-256 enkripciju za osjetljive podatke (payment keys, TOTP secrets), HTTPS/TLS za sve komunikacije, i dvofaktorsku autentifikaciju za administratorske račune.</p>
+
+  <h3 style="color:#c9a84c;font-size:1rem;margin:16px 0 8px">6. Odgovornost</h3>
+  <p>AI prijedlozi (olakšice, compliance upozorenja) su informativnog karaktera i ne zamjenjuju profesionalni računovodstveni ili pravni savjet. Korisnik je odgovoran za konačne poslovne odluke.</p>
+</div>
+
+<form method="post" style="text-align:center">
+  {% csrf_token %}
+  <label style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;cursor:pointer">
+    <input type="checkbox" id="accept-check" onchange="document.getElementById('accept-btn').disabled=!this.checked" style="width:18px;height:18px;accent-color:#c9a84c">
+    <span style="color:#ccc;font-size:.85rem">Pročitao/la sam i prihvaćam uvjete korištenja LIMIT Connect sustava</span>
+  </label>
+  <input type="hidden" name="accept" value="yes">
+  <button type="submit" id="accept-btn" disabled style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:12px 40px;font-size:.95rem;font-weight:700;cursor:pointer;opacity:.5;transition:opacity .3s" onmouseover="if(!this.disabled)this.style.opacity='0.9'" onmouseout="if(!this.disabled)this.style.opacity='1'">
+    Prihvaćam uvjete
+  </button>
+</form>
+<script>
+document.getElementById('accept-check').addEventListener('change', function() {
+  var btn = document.getElementById('accept-btn');
+  btn.disabled = !this.checked;
+  btn.style.opacity = this.checked ? '1' : '.5';
+});
+</script>
+
+</div>
+{% endblock %}

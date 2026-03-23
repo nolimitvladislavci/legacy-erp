@@ -17,7 +17,8 @@ if _env_file.exists():
             os.environ.setdefault(_env_key, _env_val)
 
 # ── Core ──────────────────────────────────────────────────────
-SECRET_KEY = os.environ.get("SECRET_KEY", "insecure-fallback-change-me")
+SECRET_KEY = os.environ["SECRET_KEY"]
+FERNET_KEY = os.environ["FERNET_KEY"]
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [
@@ -39,6 +40,8 @@ CSRF_TRUSTED_ORIGINS = [
 # ── Security (production only) ────────────────────────────────
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
@@ -145,6 +148,7 @@ MIDDLEWARE = [
     "core.middleware.AdminLangRedirectMiddleware",
     "core.middleware.ForcePasswordChangeMiddleware",
     "core.middleware.Force2FAMiddleware",
+    "core.middleware.ForceTCMiddleware",
     "registration.middleware.SubscriptionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -559,6 +563,11 @@ IP_RESTRICTED_PATHS = [
     '/admin/',
     '/superadmin/',
 ]
+
+# ── eReporting Safety Pin ─────────────────────────────────────────────────────
+# Dok XML generator za Poreznu upravu nije certificiran, blokiraj slanje.
+# Postaviti na True tek nakon verifikacije s Poreznom.
+ENABLE_E_REPORTING = os.environ.get('ENABLE_E_REPORTING', 'False').lower() in ('true', '1')
 
 # Upload limits for MDB files
 DATA_UPLOAD_MAX_MEMORY_SIZE = 209715200  # 200MB
