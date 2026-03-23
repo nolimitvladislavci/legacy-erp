@@ -6,8 +6,8 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-24 09:30 — Sonnet (BORG FENIX plan + 4 nova task fajla)
-Git HEAD: 8d44bad
+2026-03-23 15:10 — Sonnet (Ured u džepu P0 kompletno)
+Git HEAD: 8a2fc66
 
 ---
 
@@ -47,6 +47,36 @@ Svi novi taskovi slijede ovaj smjer.
 
 ## DONE — NE DIRATI
 
+### Ured u džepu — Wizard P0 (KOMPLET — 23.03.2026)
+Commit: 8a2fc66
+
+**Što je izgrađeno:**
+- `WizardDraft` model (partners/models.py) + migration 0007
+  - Polja: session_key, ip_address, tc_accepted+timestamp, nkd_codes_json,
+    firma_ime, broj_osnivaca, direktor (ime/oib/email), kapital_tip,
+    koristi_konjik, sjediste polja, current_step, completed, pending_company FK,
+    accounting_firm FK, created_at/updated_at
+- 6 URL endpointa: wizard/, save-step/, step-preview/, reset/, suglasnost-pdf/, nkd-semantic/
+- AJAX perzistencija — svaki "Dalje" sprema u bazu (wizard nije stateless)
+- T&C korak 0 — GDPR gatekeeper s IP+timestamp bilježenjem
+- Company factory — na koraku 2 kreira Company(status=pending, OIB=DRAFTxxxxxx)
+- CompanyPartnership — automatski veže pending Company na accounting_firm (Marija)
+- NKD sync — na koraku 5 upisuje primarni NKD na pending Company
+- OnboardingProgress — automatski kreiran na završetku (korak 7)
+- CustomEvent arhitektura JS — `wizard:step` event, nema override bugova
+- StateValidator — collectState() prisilno povlači DOM podatke prije save-a
+- NKD semantic search — keyword + Haiku AI fallback (74 kodova u bazi)
+- PDF suglasnosti — WeasyPrint, 13KB, pravno ispravan (ZTD čl.36)
+- Resume detection — wizard nastavlja od zadnjeg koraka
+
+**Testirano:**
+- Komplet flow test: draft → T&C → NKD → firma → Company factory → direktor →
+  kapital → sjedište → NKD sync → OnboardingProgress → završetak ✓
+- Haiku semantic: "prodaja kave i kolača online" → 5 točnih NKD-ova s AI obrazloženjem ✓
+- PDF: 13KB, generiran za <1s ✓
+
+**URL:** /hr/partners/wizard/
+
 ### BORG FENIX Plan (KOMPLET — 24.03.2026)
 - BORG_FENIX_MASTER_PLAN.md — 90-dnevni master plan — DONE
 - CC_TASK_SCAN_BATCH_100.md — batch scan do 100, 2-tipke UI — DONE (task spreman)
@@ -75,16 +105,15 @@ Svi novi taskovi slijede ovaj smjer.
 ### Sales + Onboarding, Dokumenti + PDF, Mobile, MCP Server, WhatsApp, Tim Chat,
 ### Country Registry, AI Tools v2, Livestock, Intelligence, VetIS, Institutional API,
 ### limit_connect_ai Faza 1, GTM Foundation, Invoice Growth Engine, Predarhiva OCR,
-### Predkomora, Fiskalizacija fix, Hash Chain, PLG Virus, OIB Validator, POS QR, Robot Plan
+### Predkomora, Fiskalizacija fix, Hash Chain, PLG Virus, OIB Validator, POS QR, Robot Plan,
+### Security P0 (certifikati → /etc/limit-connect/certs/), Knowledge Graph (11 opp, 932 match),
+### buyer_type + invoice routing (NN 89/25), T&C consent middleware
 
 ---
 
 ## TASKOVI ZA AGENTE
 
-### ★ BORG FENIX — VETO AKTIVAN (24.03.)
-### CC Code BLOKIRAN dok Gemini ne završi KNOWLEDGE_GRAPH_MODELS
-
-## ★ BORG FENIX — Faza 1
+### ★ BORG FENIX — Faza 1
 | Fajl | Agent | Prioritet |
 |------|-------|-----------|
 | CC_TASK_SCAN_BATCH_100.md | CC Code | **VISOK** |
@@ -104,20 +133,41 @@ Svi novi taskovi slijede ovaj smjer.
 
 ### Treba napisati (backlog)
 - CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi Faza 2
+- CC_TASK_WIZARD_NKD_BULK.md — DZS puna NKD lista (~1000 kodova) umjesto 74
+- CC_TASK_WIZARD_BILJEZNICK_LISTA.md — statična JSON lista e-Notar bilježnika
 
 ---
 
-## OTVORENO
+## OTVORENO — Wizard P1 (sljedeće sesije)
 
-### Livestock
-- sex polje direktno na modelu — OTVORENO
-- Testovi (47) — provjeri rezultate
+### Wizard — što ostaje za P1
+| Task | Opis | Prioritet |
+|------|------|-----------|
+| NKD bulk import | DZS puna lista ~1000 kodova (74 je dovoljno za demo) | SREDNJI |
+| OIB validacija na draft | Luhnov algoritam na direktor_oib pri save | SREDNJI |
+| Marija dashboard widget | "Aktivni wizard drafti" pregled za Mariju | SREDNJI |
+| DE/EN lokalizacija | Template na DE/EN za EU klijente | NIZAK (Q3) |
+| Bilježnik lista | Statični JSON 3-5 bilježnika za e-Notar | NIZAK |
+| T&C dokument PDF | Pravi pravni dokument za TC consent (ne inline tekst) | SREDNJI |
+
+### Kritični otvoreni problemi (van wizard-a)
+| Problem | Opis | Hitnost |
+|---------|------|---------|
+| T&C consent 0/86 | Nitko nije potpisao — KG nema pravne osnove | **HITNO** |
+| NKD NULL 86/86 | Sve firme bez NKD — KG confidence niži | VISOK |
+| _build_xml() NotImplemented | eIzvjestavanje blokira produkcijsko slanje | **HITNO** |
+| buyer_type b2c default | 19.237 partnera treba reklasifikaciju | VISOK |
+| SupplierRiskAlert 0 zapisa | FINA bonitet nije auto-triggered | SREDNJI |
 
 ### DE Compliance
 - Fiskaly sandbox (treba API ključeve) — CEKA
 - DATEV SKR03/04 kontni plan — OTVORENO
 - DATEV Buchungsstapel export — OTVORENO
 - Steuernummer validacija — NEDOSTAJE
+
+### Livestock
+- sex polje direktno na modelu — OTVORENO
+- Testovi (47) — provjeri rezultate
 
 ### Knjiga boljitaka (9/21 preostalo)
 - B-01, B-05, B-06, B-09, B-10, B-11, B-13, B-17, B-21
