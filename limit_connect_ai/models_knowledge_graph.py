@@ -153,8 +153,14 @@ class ImpactDomain(models.Model):
         """Provjeri odgovara li firma ovoj domeni."""
         if self.country != '*' and getattr(company, 'country', 'HR') != self.country:
             return False
-        if self.nkd_codes and getattr(company, 'nkd_code', '') not in self.nkd_codes:
-            return False
+        # nkd_code je FK na NKDCode — treba .code atribut; None = nema NKD = propusti
+        if self.nkd_codes:
+            nkd_fk = getattr(company, 'nkd_code', None)
+            company_nkd = nkd_fk.code if nkd_fk else None
+            if company_nkd is None:
+                pass  # Firma nema NKD — ne isključuj jer ne možemo potvrditi
+            elif company_nkd not in self.nkd_codes:
+                return False
         if self.business_types and getattr(company, 'business_type', '') not in self.business_types:
             return False
         if self.requires_vat and not getattr(company, 'is_vat_registered', True):
