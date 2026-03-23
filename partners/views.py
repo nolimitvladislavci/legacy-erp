@@ -294,3 +294,120 @@ def api_quick_create(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+# ── Buyer Type Verification ───────────────────────────────────────
+import re
+
+@login_required
+def buyer_type_verify(request):
+    """View za Mariju: pregled i potvrda 469 auto-klasificiranih partnera."""
+    from collections import OrderedDict
+    from companies.models import Company
+    from django.utils import timezone
+
+    qs = Partner.objects.select_related('company').filter(
+        notes__contains='needs_verification'
+    ).order_by('buyer_type', 'name')
+
+    # ── POST: potvrdi ili promijeni ──
+    if request.method == 'POST':
+        # Single confirm
+        single_id = request.POST.get('confirm_single')
+        if single_id:
+            p = get_object_or_404(Partner, pk=single_id)
+            new_type = request.POST.get(f'new_type_{single_id}', p.buyer_type)
+            _verify_partner(p, new_type)
+            messages.success(request, f'{p.name} verificiran kao {new_type}.')
+            return redirect(request.get_full_path())
+
+        # Bulk confirm
+        ids = request.POST.getlist('ids')
+        if ids:
+            partners = Partner.objects.filter(pk__in=ids)
+            if 'bulk_b2c' in request.POST:
+                for p in partners:
+                    _verify_partner(p, 'b2c')
+                messages.success(request, f'{len(ids)} partnera vraćeno na B2C.')
+            else:
+                count = 0
+                for p in partners:
+                    new_type = request.POST.get(f'new_type_{p.pk}', p.buyer_type)
+                    _verify_partner(p, new_type)
+                    count += 1
+                messages.success(request, f'{count} partnera verificirano.')
+            return redirect(request.get_full_path())
+
+    # ── GET: filtriranje ──
+    q = request.GET.get('q', '')
+    filter_bt = request.GET.get('buyer_type', '')
+    filter_company = request.GET.get('company', '')
+
+    if q:
+        qs = qs.filter(Q(name__icontains=q) | Q(oib__icontains=q))
+    if filter_bt:
+        qs = qs.filter(buyer_type=filter_bt)
+    if filter_company:
+        qs = qs.filter(company_id=filter_company)
+
+    # Stats
+    stats = OrderedDict()
+    for row in qs.values('buyer_type').annotate(cnt=Q(pk__isnull=False)).order_by():
+        stats[row['buyer_type']] = row['cnt']
+    # Use actual count
+    from django.db.models import Count
+    stats_qs = qs.values('buyer_type').annotate(cnt=Count('id')).order_by('-cnt')
+    stats = OrderedDict((r['buyer_type'], r['cnt']) for r in stats_qs)
+
+    total = qs.count()
+    verified_today = Partner.objects.filter(
+        notes__contains='VERIFIED',
+        updated_at__date=timezone.now().date(),
+    ).count()
+
+    # Annotate classify reason from notes
+    paginator = Paginator(qs, 50)
+    page = paginator.get_page(request.GET.get('page'))
+
+    for p in page:
+        match = re.search(r'\[AUTO-CLASSIFY[^\]]*\][^\|]*\|\s*(.+)', p.notes or '')
+        p.classify_reason = match.group(1).strip() if match else ''
+
+    companies = Company.objects.all().order_by('name')
+
+    return render(request, 'partners/buyer_type_verify.html', {
+        'page_obj': page,
+        'total': total,
+        'verified_today': verified_today,
+        'stats': stats,
+        'q': q,
+        'filter_bt': filter_bt,
+        'filter_company': int(filter_company) if filter_company else '',
+        'companies': companies,
+        'buyer_type_choices': Partner.BUYER_TYPE_CHOICES,
+    })
+
+
+def _verify_partner(partner, new_type):
+    """Potvrdi buyer_type i ukloni needs_verification marker."""
+    from django.utils import timezone
+    valid_types = [c[0] for c in Partner.BUYER_TYPE_CHOICES]
+    if new_type not in valid_types:
+        new_type = partner.buyer_type
+
+    partner.buyer_type = new_type
+    partner.is_budget_user = (new_type == 'b2g')
+    partner.is_nonprofit_no_activity = new_type.startswith('udruga')
+
+    # Replace needs_verification with VERIFIED marker
+    notes = partner.notes or ''
+    notes = re.sub(
+        r'\[AUTO-CLASSIFY[^\]]*\] needs_verification=True',
+        f'[VERIFIED {timezone.now():%Y-%m-%d}]',
+        notes,
+    )
+    partner.notes = notes
+    partner.save(update_fields=[
+        'buyer_type', 'is_budget_user', 'is_nonprofit_no_activity',
+        'notes', 'updated_at',
+    ])

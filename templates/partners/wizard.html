@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Ured u džepu — osnivanje firme{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h5 class="mb-0"><i class="fas fa-mobile-alt me-2 text-primary"></i>Ured u džepu</h5>
+    <small class="text-muted">Vođeno osnivanje firme — 7 koraka, bez papirologije</small>
+  </div>
+  <a href="{% url 'partners:list' %}" class="btn btn-sm btn-outline-secondary">
+    <i class="fas fa-arrow-left me-1"></i>Natrag
+  </a>
+</div>
+
+<!-- Progres bar -->
+<div class="stat-card p-3 mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <span id="stepLabel" class="fw-semibold small" style="color:#6366f1">Korak 1 od 7</span>
+    <span id="stepTitle" class="text-muted small">Što ćete raditi?</span>
+  </div>
+  <div class="progress" style="height:6px;border-radius:3px">
+    <div id="progressBar" class="progress-bar" style="background:#6366f1;width:14%;transition:.3s"></div>
+  </div>
+</div>
+
+<!-- Kontejner koraka -->
+<div id="wizardBody" class="stat-card p-4">
+
+  <!-- KORAK 1: Djelatnost — semantički NKD search -->
+  <div class="wizard-step" data-step="1">
+    <h6 class="fw-bold mb-1">Što ćete raditi?</h6>
+    <p class="text-muted small mb-3">Opišite slobodnim riječima — sustav pronalazi točne djelatnosti (NKD šifre).</p>
+    <div style="position:relative">
+      <input type="text" id="nkdFreeText" class="form-control"
+             placeholder='npr. "prodaja kave i kolača" ili "IT konzultacije i web razvoj"'
+             autocomplete="off">
+      <div id="nkdAiResults" class="position-absolute bg-white border rounded shadow-sm"
+           style="width:100%;max-height:280px;overflow-y:auto;z-index:1050;display:none"></div>
+    </div>
+    <div id="selectedNkd" class="mt-3 d-flex flex-wrap gap-2"></div>
+    <input type="hidden" id="nkdIds" value="">
+    <div class="mt-2 text-muted" style="font-size:.78rem">
+      <i class="fas fa-info-circle"></i>
+      Odaberite 1–5 djelatnosti. Preporučamo sve s kojima planirate raditi — dodavanje kasnije košta.
+    </div>
+  </div>
+
+  <!-- KORAK 2: Ime firme -->
+  <div class="wizard-step d-none" data-step="2">
+    <h6 class="fw-bold mb-1">Kako će se zvati vaša firma?</h6>
+    <p class="text-muted small mb-3">Naziv mora biti jedinstven u sudskom registru. Preporučujemo provjeru na <a href="https://sudreg.pravosudje.hr" target="_blank">sudreg.pravosudje.hr</a>.</p>
+    <input type="text" id="firmaIme" class="form-control form-control-lg"
+           placeholder='npr. "Moja Firma d.o.o." ili "Moja Firma j.d.o.o."'>
+    <div class="mt-2 text-muted" style="font-size:.78rem">
+      <i class="fas fa-info-circle"></i>
+      d.o.o. = min. kapital 2.500 EUR &nbsp;|&nbsp; j.d.o.o. = min. kapital 1 EUR
+    </div>
+  </div>
+
+  <!-- KORAK 3: Osnivači i direktor -->
+  <div class="wizard-step d-none" data-step="3">
+    <h6 class="fw-bold mb-1">Tko osniva firmu?</h6>
+    <p class="text-muted small mb-3">Direktor može biti i jedini osnivač.</p>
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <label class="form-label small fw-semibold">Broj osnivača</label>
+        <select id="brojOsnivaca" class="form-select">
+          <option value="1">1 (solo)</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4+ (treba bilježnik)</option>
+        </select>
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label small fw-semibold">Ime i prezime direktora</label>
+        <input type="text" id="direktorIme" class="form-control" placeholder="Ime Prezime">
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label small fw-semibold">OIB direktora</label>
+        <input type="text" id="direktorOib" class="form-control" placeholder="11 znamenki" maxlength="11">
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label small fw-semibold">Email direktora</label>
+        <input type="email" id="direktorEmail" class="form-control" placeholder="direktor@email.com">
+      </div>
+    </div>
+  </div>
+
+  <!-- KORAK 4: Temeljni kapital -->
+  <div class="wizard-step d-none" data-step="4">
+    <h6 class="fw-bold mb-1">Koji oblik društva?</h6>
+    <p class="text-muted small mb-3">Za početak preporučujemo j.d.o.o. — jeftinije, brže, isti zakonski okvir.</p>
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <label class="p-3 border rounded cursor-pointer d-block" id="cardJdoo"
+               style="cursor:pointer;border-color:#6366f1!important;background:#eef2ff">
+          <input type="radio" name="kapital" value="jdoo" checked class="me-2">
+          <strong>j.d.o.o.</strong>
+          <div class="text-muted small mt-1">Kapital: min. 1 EUR<br>Troškovi: ~180 EUR<br>Idealno za početak</div>
+        </label>
+      </div>
+      <div class="col-sm-6">
+        <label class="p-3 border rounded cursor-pointer d-block" id="cardDoo"
+               style="cursor:pointer">
+          <input type="radio" name="kapital" value="doo" class="me-2">
+          <strong>d.o.o.</strong>
+          <div class="text-muted small mt-1">Kapital: min. 2.500 EUR<br>Troškovi: ~530 EUR<br>Za ozbiljniji nastup</div>
+        </label>
+      </div>
+    </div>
+    <div class="alert alert-info mt-3 py-2" style="font-size:.82rem">
+      <i class="fas fa-info-circle me-1"></i>
+      j.d.o.o. može prerasti u d.o.o. — promjena je jednostavna i jeftina kada vam to treba.
+    </div>
+  </div>
+
+  <!-- KORAK 5: Sjedište -->
+  <div class="wizard-step d-none" data-step="5">
+    <h6 class="fw-bold mb-1">Gdje će biti sjedište firme?</h6>
+    <p class="text-muted small mb-3">Sjedište mora biti fizička adresa u RH — ali ne mora biti vaša.</p>
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <label class="p-3 border rounded d-block sjediste-opt" data-val="vlastita"
+               style="cursor:pointer">
+          <input type="radio" name="sjediste" value="vlastita" class="me-2">
+          <strong>Vlastita adresa</strong>
+          <div class="text-muted small mt-1">Stan, ured, poslovni prostor. Unesite adresu.</div>
+        </label>
+      </div>
+      <div class="col-sm-6">
+        <label class="p-3 border rounded d-block sjediste-opt" data-val="konjik"
+               style="cursor:pointer;border-color:#22c55e!important;background:#f0fdf4">
+          <input type="radio" name="sjediste" value="konjik" class="me-2" checked>
+          <strong style="color:#166534">Ured u džepu</strong>
+          <div class="text-muted small mt-1">
+            Koristite adresu računovodstva.<br>
+            <span style="color:#166534;font-weight:500">{{ company_name }}</span><br>
+            {{ company_address }}, {{ company_zip }} {{ company_city }}<br>
+            <span style="font-size:.72rem">Legalno po ZTD-u uz pismenu suglasnost ✓</span>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div id="vlastita_polja" class="mt-3 d-none">
+      <div class="row g-2">
+        <div class="col-8">
+          <input type="text" id="sjelisteAdr" class="form-control form-control-sm" placeholder="Ulica i broj">
+        </div>
+        <div class="col-4">
+          <input type="text" id="sjedistePtt" class="form-control form-control-sm" placeholder="PTT">
+        </div>
+        <div class="col-12">
+          <input type="text" id="sjelisteGrad" class="form-control form-control-sm" placeholder="Grad">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KORAK 6: Pregled -->
+  <div class="wizard-step d-none" data-step="6">
+    <h6 class="fw-bold mb-1">Pregled — sve u redu?</h6>
+    <p class="text-muted small mb-3">Provjerite podatke prije nego generiramo dokumente.</p>
+    <div id="previewBox" class="p-3" style="background:#f8fafc;border-radius:8px;font-size:.88rem">
+      <div class="text-muted">Učitavanje...</div>
+    </div>
+    <div id="previewErrors" class="mt-2"></div>
+  </div>
+
+  <!-- KORAK 7: Dokumenti -->
+  <div class="wizard-step d-none" data-step="7">
+    <h6 class="fw-bold mb-1">Dokumenti su spremni!</h6>
+    <p class="text-muted small mb-3">Odaberite put registracije koji vam odgovara.</p>
+
+    <div id="registrationPath" class="mb-3 p-3 rounded" style="background:#f0fdf4;border:1px solid #86efac">
+      <div class="fw-semibold text-success" id="pathTitle"></div>
+      <div class="text-muted small mt-1" id="pathNote"></div>
+    </div>
+
+    <div class="row g-2">
+      <div class="col-12">
+        <button id="btnSuglasnost" class="btn btn-outline-success w-100"
+                onclick="downloadSuglasnost()">
+          <i class="fas fa-file-pdf me-2"></i>Preuzmi Suglasnost za sjedište (PDF)
+        </button>
+      </div>
+      <div class="col-sm-6">
+        <a id="startLink" href="https://start.gov.hr" target="_blank"
+           class="btn btn-primary w-100">
+          <i class="fas fa-external-link-alt me-2"></i>Otvori START
+        </a>
+      </div>
+      <div class="col-sm-6">
+        <button class="btn btn-outline-secondary w-100" onclick="alert('Bilježnik lista — uskoro.')">
+          <i class="fas fa-stamp me-2"></i>Pronađi bilježnika
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-3 p-3" style="background:#eef2ff;border-radius:8px;font-size:.82rem">
+      <div class="fw-semibold" style="color:#4338ca"><i class="fas fa-rocket me-1"></i>Sljedeći koraci nakon registracije</div>
+      <ul class="mt-2 mb-0 ps-3" style="color:#4338ca">
+        <li>eRačun sustav se automatski aktivira (LIMIT Connect)</li>
+        <li>Fiskalizacija je postavljena od dana 1</li>
+        <li>Računovodstvo preuzima sve tekuće obveze</li>
+        <li>Pošta dolazi na adresu računovodstva — skenira se, šalje digitalno</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /wizardBody -->
+
+<!-- Navigacija -->
+<div class="d-flex justify-content-between mt-3">
+  <button id="btnBack" class="btn btn-outline-secondary d-none" onclick="wizardBack()">
+    <i class="fas fa-arrow-left me-2"></i>Natrag
+  </button>
+  <div class="ms-auto">
+    <button id="btnNext" class="btn btn-primary px-4" onclick="wizardNext()">
+      Dalje <i class="fas fa-arrow-right ms-2"></i>
+    </button>
+  </div>
+</div>
+
+<script>
+var W = {
+  step: 1,
+  total: 7,
+  nkdSelected: [],
+  data: {},
+  stepTitles: [
+    '', 'Što ćete raditi?', 'Ime firme', 'Osnivači',
+    'Oblik društva', 'Sjedište', 'Pregled', 'Dokumenti'
+  ]
+};
+
+function wizardGoto(step) {
+  document.querySelectorAll('.wizard-step').forEach(function(el) {
+    el.classList.add('d-none');
+  });
+  document.querySelector('[data-step="' + step + '"]').classList.remove('d-none');
+  document.getElementById('stepLabel').textContent = 'Korak ' + step + ' od ' + W.total;
+  document.getElementById('stepTitle').textContent = W.stepTitles[step] || '';
+  document.getElementById('progressBar').style.width = Math.round(step / W.total * 100) + '%';
+  document.getElementById('btnBack').classList.toggle('d-none', step === 1);
+  document.getElementById('btnNext').innerHTML = step === W.total
+    ? '<i class="fas fa-check me-2"></i>Završi'
+    : 'Dalje <i class="fas fa-arrow-right ms-2"></i>';
+  W.step = step;
+  if (step === 6) loadPreview();
+}
+
+function wizardNext() {
+  if (!validateStep(W.step)) return;
+  if (W.step < W.total) wizardGoto(W.step + 1);
+}
+
+function wizardBack() {
+  if (W.step > 1) wizardGoto(W.step - 1);
+}
+
+function validateStep(step) {
+  if (step === 1 && W.nkdSelected.length === 0) {
+    alert('Odaberite barem jednu djelatnost.'); return false;
+  }
+  if (step === 2) {
+    var ime = document.getElementById('firmaIme').value.trim();
+    if (ime.length < 3) { alert('Unesite ime firme.'); return false; }
+    W.data.firma_ime = ime;
+  }
+  if (step === 3) {
+    W.data.broj_osnivaca = document.getElementById('brojOsnivaca').value;
+    W.data.direktor_ime = document.getElementById('direktorIme').value.trim();
+    W.data.direktor_oib = document.getElementById('direktorOib').value.trim();
+    W.data.direktor_email = document.getElementById('direktorEmail').value.trim();
+  }
+  if (step === 4) {
+    W.data.kapital = document.querySelector('[name="kapital"]:checked').value;
+  }
+  if (step === 5) {
+    W.data.koristi_konjik = document.querySelector('[name="sjediste"]:checked').value === 'konjik';
+  }
+  return true;
+}
+
+// NKD semantički search
+var nkdTimer;
+document.getElementById('nkdFreeText').addEventListener('input', function() {
+  clearTimeout(nkdTimer);
+  var q = this.value.trim();
+  if (q.length < 2) { document.getElementById('nkdAiResults').style.display = 'none'; return; }
+  nkdTimer = setTimeout(function() {
+    fetch('/partners/wizard/nkd-semantic/?q=' + encodeURIComponent(q), {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) { renderNkdResults(data); });
+  }, 350);
+});
+
+function renderNkdResults(items) {
+  var box = document.getElementById('nkdAiResults');
+  if (!items.length) { box.style.display = 'none'; return; }
+  box.innerHTML = items.map(function(item) {
+    var aiNote = item.ai_reason ? '<div style="font-size:.72rem;color:#6366f1;margin-top:2px">' + item.ai_reason + '</div>' : '';
+    return '<div class="px-3 py-2 nkd-ai-opt" style="cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:.84rem"'
+      + ' data-id="' + item.id + '" data-code="' + item.code + '" data-name="' + (item.name_hr || '').replace(/"/g, '') + '">'
+      + '<span class="badge bg-secondary me-1" style="font-size:.7rem">' + item.code + '</span>'
+      + (item.name_hr || item.name_en || '')
+      + aiNote
+      + '</div>';
+  }).join('');
+  box.style.display = 'block';
+
+  box.querySelectorAll('.nkd-ai-opt').forEach(function(el) {
+    el.addEventListener('mouseenter', function() { this.style.background = '#f8f9fa'; });
+    el.addEventListener('mouseleave', function() { this.style.background = ''; });
+    el.addEventListener('click', function() {
+      addNkd(this.dataset.id, this.dataset.code, this.dataset.name);
+      box.style.display = 'none';
+      document.getElementById('nkdFreeText').value = '';
+    });
+  });
+}
+
+function addNkd(id, code, name) {
+  if (W.nkdSelected.find(function(n) { return n.id == id; })) return;
+  if (W.nkdSelected.length >= 5) { alert('Maksimalno 5 djelatnosti.'); return; }
+  W.nkdSelected.push({id: id, code: code, name: name});
+  renderSelectedNkd();
+  updateNkdHidden();
+}
+
+function removeNkd(id) {
+  W.nkdSelected = W.nkdSelected.filter(function(n) { return n.id != id; });
+  renderSelectedNkd();
+  updateNkdHidden();
+}
+
+function renderSelectedNkd() {
+  var box = document.getElementById('selectedNkd');
+  box.innerHTML = W.nkdSelected.map(function(n) {
+    return '<span class="badge d-inline-flex align-items-center gap-1" style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;font-size:.8rem;padding:6px 10px">'
+      + '<span style="font-weight:700">' + n.code + '</span> ' + n.name
+      + '<button type="button" onclick="removeNkd(' + n.id + ')" style="background:none;border:none;color:#6366f1;cursor:pointer;padding:0 0 0 6px;font-size:1rem">&times;</button>'
+      + '</span>';
+  }).join('');
+}
+
+function updateNkdHidden() {
+  document.getElementById('nkdIds').value = W.nkdSelected.map(function(n) { return n.id; }).join(',');
+  W.data.nkd_ids = W.nkdSelected.map(function(n) { return n.id; });
+}
+
+// Sjedište toggle
+document.querySelectorAll('.sjediste-opt').forEach(function(lbl) {
+  lbl.addEventListener('click', function() {
+    document.querySelectorAll('.sjediste-opt').forEach(function(l) {
+      l.style.borderColor = ''; l.style.background = '';
+    });
+    this.style.borderColor = '#22c55e';
+    this.style.background = '#f0fdf4';
+    document.getElementById('vlastita_polja').classList.toggle(
+      'd-none', this.dataset.val !== 'vlastita'
+    );
+  });
+});
+
+// Kapital toggle
+document.querySelectorAll('[name="kapital"]').forEach(function(radio) {
+  radio.addEventListener('change', function() {
+    document.getElementById('cardJdoo').style.background = '';
+    document.getElementById('cardJdoo').style.borderColor = '';
+    document.getElementById('cardDoo').style.background = '';
+    document.getElementById('cardDoo').style.borderColor = '';
+    var card = document.getElementById(this.value === 'jdoo' ? 'cardJdoo' : 'cardDoo');
+    card.style.background = '#eef2ff';
+    card.style.borderColor = '#6366f1';
+  });
+});
+
+// Preview (korak 6)
+function loadPreview() {
+  W.data.nkd_ids = W.nkdSelected.map(function(n) { return n.id; });
+  fetch('/partners/wizard/preview/', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+    body: JSON.stringify(W.data),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.valid) {
+      document.getElementById('previewErrors').innerHTML =
+        data.errors.map(function(e) { return '<div class="alert alert-warning py-1 small">' + e + '</div>'; }).join('');
+      return;
+    }
+    var s = data.summary;
+    document.getElementById('previewBox').innerHTML =
+      '<table class="table table-sm mb-0">'
+      + '<tr><td class="text-muted">Firma</td><td class="fw-semibold">' + s.firma_ime + ' ' + s.tip + '</td></tr>'
+      + '<tr><td class="text-muted">Kapital</td><td>' + s.kapital + '</td></tr>'
+      + '<tr><td class="text-muted">Osnivači</td><td>' + s.broj_osnivaca + '</td></tr>'
+      + '<tr><td class="text-muted">Sjedište</td><td>' + s.sjediste + '</td></tr>'
+      + '<tr><td class="text-muted">Djelatnosti</td><td>'
+      + s.nkd.map(function(n) { return '<span class="badge bg-secondary me-1">' + n.code + '</span>' + n.name_hr; }).join('<br>')
+      + '</td></tr>'
+      + '</table>';
+
+    // Spremi za korak 7
+    W.data.registration_path = s.registration_path;
+    W.data.registration_note = s.registration_note;
+  });
+}
+
+// Kad dođemo na korak 7 — pokaži put registracije
+var origGoto = wizardGoto;
+wizardGoto = function(step) {
+  origGoto(step);
+  if (step === 7 && W.data.registration_path) {
+    document.getElementById('pathTitle').textContent =
+      W.data.registration_path === 'start' ? '✓ Može se registrirati online — START sustav' : '⚑ Preporučujemo bilježnika';
+    document.getElementById('pathNote').textContent = W.data.registration_note || '';
+  }
+};
+
+function downloadSuglasnost() {
+  var params = new URLSearchParams({
+    klijent_ime: W.data.firma_ime || '',
+    klijent_oib: W.data.direktor_oib || '',
+    klijent_direktor: W.data.direktor_ime || '',
+  });
+  window.open('/partners/wizard/suglasnost-pdf/?' + params.toString(), '_blank');
+}
+
+function getCsrf() {
+  var m = document.cookie.match(/csrftoken=([^;]+)/);
+  return m ? m[1] : '';
+}
+
+document.addEventListener('click', function(e) {
+  var box = document.getElementById('nkdAiResults');
+  if (!box.contains(e.target) && !document.getElementById('nkdFreeText').contains(e.target)) {
+    box.style.display = 'none';
+  }
+});
+
+// Inicijalni prikaz
+wizardGoto(1);
+</script>
+{% endblock %}

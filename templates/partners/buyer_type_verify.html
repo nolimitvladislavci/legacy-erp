@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Verifikacija Buyer Type{% endblock %}
+{% block page_title %}Verifikacija Buyer Type{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="mb-0"><i class="fas fa-clipboard-check me-2 text-warning"></i>Verifikacija Buyer Type</h2>
+    <small class="text-muted">{{ total }} partnera čeka provjeru &middot; {{ verified_today }} verificirano danas</small>
+  </div>
+  <a href="{% url 'partners:list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Svi partneri</a>
+</div>
+
+{% if stats %}
+<div class="row mb-3">
+  {% for bt, cnt in stats.items %}
+  <div class="col-auto">
+    <div class="stat-card p-2 px-3 text-center" style="min-width:100px">
+      <div class="fw-bold" style="font-size:1.3rem">{{ cnt }}</div>
+      <small class="text-muted">{{ bt }}</small>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="stat-card mb-3">
+  <form method="get" class="row g-2">
+    <div class="col-md-3">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, OIB...">
+    </div>
+    <div class="col-md-2">
+      <select name="buyer_type" class="form-select">
+        <option value="">Svi tipovi</option>
+        {% for val, label in buyer_type_choices %}
+        <option value="{{ val }}" {% if filter_bt == val %}selected{% endif %}>{{ val }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="company" class="form-select">
+        <option value="">Sve firme</option>
+        {% for c in companies %}
+        <option value="{{ c.id }}" {% if filter_company == c.id %}selected{% endif %}>{{ c.name|truncatechars:25 }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-grow-1">Filtriraj</button>
+      <a href="{% url 'partners:buyer_type_verify' %}" class="btn btn-outline-secondary">Reset</a>
+    </div>
+  </form>
+</div>
+
+{% if not page_obj %}
+<div class="stat-card text-center py-5">
+  <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+  <h5>Sve verificirano!</h5>
+  <p class="text-muted">Nema partnera koji čekaju provjeru buyer type klasifikacije.</p>
+</div>
+{% else %}
+<form method="post" id="verifyForm">
+  {% csrf_token %}
+  <div class="stat-card p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" style="font-size:0.88rem">
+        <thead class="table-light">
+          <tr>
+            <th style="width:30px"><input type="checkbox" id="checkAll"></th>
+            <th>Naziv</th>
+            <th>OIB</th>
+            <th>Firma</th>
+            <th>Trenutni tip</th>
+            <th>Novi tip</th>
+            <th>Razlog klasifikacije</th>
+            <th style="width:80px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in page_obj %}
+          <tr id="row-{{ p.pk }}">
+            <td><input type="checkbox" name="ids" value="{{ p.pk }}" class="row-check"></td>
+            <td>
+              <a href="{% url 'partners:detail' p.pk %}" class="fw-bold text-decoration-none text-dark">{{ p.name|truncatechars:45 }}</a>
+              {% if p.city %}<br><small class="text-muted">{{ p.city }}</small>{% endif %}
+            </td>
+            <td><code style="font-size:0.78rem">{{ p.oib|default:"-" }}</code></td>
+            <td><small>{{ p.company.name|truncatechars:20 }}</small></td>
+            <td>
+              <span class="badge {% if p.buyer_type == 'b2g' %}bg-danger{% elif p.buyer_type == 'b2b_novat' %}bg-primary{% elif p.buyer_type == 'udruga_novat' %}bg-info{% elif p.buyer_type == 'inozemstvo' %}bg-secondary{% else %}bg-warning text-dark{% endif %}">
+                {{ p.buyer_type }}
+              </span>
+            </td>
+            <td>
+              <select name="new_type_{{ p.pk }}" class="form-select form-select-sm" style="width:140px;font-size:0.78rem">
+                {% for val, label in buyer_type_choices %}
+                <option value="{{ val }}" {% if p.buyer_type == val %}selected{% endif %}>{{ val }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td><small class="text-muted">{{ p.classify_reason|default:"-" }}</small></td>
+            <td>
+              <button type="submit" name="confirm_single" value="{{ p.pk }}" class="btn btn-sm btn-outline-success" title="Potvrdi">
+                <i class="fas fa-check"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="d-flex gap-2">
+      <button type="submit" name="bulk_confirm" value="1" class="btn btn-success">
+        <i class="fas fa-check-double me-1"></i>Potvrdi odabrane
+      </button>
+      <button type="submit" name="bulk_b2c" value="1" class="btn btn-outline-warning">
+        <i class="fas fa-undo me-1"></i>Vrati na B2C
+      </button>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <nav><ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&buyer_type={{ filter_bt }}&company={{ filter_company }}">&#171;</a></li>{% endif %}
+      <li class="page-item active"><a class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+      {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&buyer_type={{ filter_bt }}&company={{ filter_company }}">&#187;</a></li>{% endif %}
+    </ul></nav>
+    {% endif %}
+  </div>
+</form>
+{% endif %}
+
+<script>
+document.getElementById('checkAll')?.addEventListener('change', function() {
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked);
+});
+</script>
+{% endblock %}
