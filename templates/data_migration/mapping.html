@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Mapiranje — {{ project.name }}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <h2 class="mb-2">Korak 2: Mapiranje polja</h2>
+  <p class="text-muted mb-4">Povežite kolone iz vaše datoteke s poljima u sustavu.</p>
+
+  {% if sample_data %}
+  <div class="mb-4" style="overflow-x:auto;max-height:250px">
+    <table class="table table-sm table-bordered" style="font-size:.8rem">
+      <thead class="table-dark">
+        <tr>{% for col in detected_columns %}<th>{{ col }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for row in sample_data %}
+        <tr>{% for col in detected_columns %}<td>{{ row|default_if_none:"" }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="row">
+      {% for col in detected_columns %}
+      <div class="col-md-4 col-lg-3 mb-3">
+        <label class="form-label fw-bold" style="font-size:.85rem">{{ col }}</label>
+        <select name="map_{{ col }}" class="form-select form-select-sm">
+          <option value="">-- Preskoči --</option>
+          {% for field in schema %}
+          <option value="{{ field.key }}" {% if current_mapping|default_if_none:"" %}{% endif %}
+            {% if field.required %}style="font-weight:bold"{% endif %}>
+            {{ field.label }}{% if field.required %} *{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+      <a href="{% url 'data_migration:project_list' %}" class="btn btn-outline-secondary">Odustani</a>
+      <button type="submit" class="btn btn-primary"><i class="fas fa-arrow-right"></i> Spremi i pregledaj</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

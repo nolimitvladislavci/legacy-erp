@@ -210,6 +210,7 @@ urlpatterns += i18n_patterns(
     path('api/pricing/advisor/', __import__('website.views', fromlist=['pricing_ai_advisor']).pricing_ai_advisor, name='pricing_ai_advisor'),
     path('synesis/', include('synesis.urls')),
     path('smart-import/', include('smart_import.urls', namespace='smart_import')),
+    path('data-migration/', include('data_migration.urls')),
     path('konto/', include('konto.urls')),
     
     path('website/', include('website.urls')),

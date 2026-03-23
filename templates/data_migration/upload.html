@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Upload — Migracija podataka{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:700px">
+  <h2 class="mb-4"><i class="fas fa-upload"></i> Novi import</h2>
+
+  <form method="post" enctype="multipart/form-data" id="upload-form">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Naziv projekta</label>
+      <input type="text" name="name" class="form-control" placeholder="Npr. Partneri iz Luceeda">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Izvorni program</label>
+      <select name="source_program" class="form-select">
+        <option value="">-- Nepoznato --</option>
+        <option value="synesis">Synesis</option>
+        <option value="luceed">Luceed</option>
+        <option value="pantheon">Pantheon (Datalab)</option>
+        <option value="minimax">Minimax</option>
+        <option value="rasco">Rasco</option>
+        <option value="saop">SAOP</option>
+        <option value="excel">Excel tablica</option>
+        <option value="other">Drugo</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Tip podataka</label>
+      <select name="entity_type" class="form-select">
+        <option value="partners">Partneri (kupci, dobavljači)</option>
+        <option value="items">Artikli (roba, usluge)</option>
+        <option value="ledger">Knjiženja (temeljnice)</option>
+        <option value="mixed">Mješovito / ne znam</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-bold">Datoteka</label>
+      <input type="file" name="file" class="form-control" accept=".csv,.xlsx,.xls,.json,.xml" required>
+      <small class="text-muted">CSV, Excel, JSON ili XML. Max 50 MB. Datoteka se automatski briše nakon 24h.</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg w-100" id="btn-upload">
+      <i class="fas fa-cloud-upload-alt"></i> <span id="btn-text">Učitaj i analiziraj</span>
+    </button>
+  </form>
+</div>
+
+<script>
+document.getElementById('upload-form').addEventListener('submit', function() {
+  const btn = document.getElementById('btn-upload');
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  document.getElementById('btn-text').textContent = 'Učitavanje i analiza...';
+});
+</script>
+{% endblock %}
