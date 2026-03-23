@@ -1215,6 +1215,122 @@ self.addEventListener('fetch', (e) => {
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# POCKET MODE — Mobitel = blagajna, bez papira, bez prostora
+# Jednim klikom: digital receipt, no printer, pokretna prodaja, offline-first
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+@require_POST
+def pocket_mode_activate(request):
+    """
+    Aktiviraj Pocket Mode za tvrtku.
+    Postavlja: receipt_delivery=qr, auto_print=False, pocket_mode=True,
+    pocket_location_label=POKRETNA PRODAJA, drawer_kick=False.
+    Ako POSSettings ne postoji — kreira ga.
+    """
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'ok': False, 'error': 'Nema tvrtke'}, status=400)
+
+    from pos.models import POSSettings
+    settings, created = POSSettings.objects.get_or_create(
+        company=company,
+        defaults={
+            'pocket_mode': True,
+            'receipt_delivery': 'qr',
+            'auto_print': False,
+            'drawer_kick': False,
+            'pocket_location_label': 'POKRETNA PRODAJA',
+        },
+    )
+
+    if not created:
+        settings.pocket_mode = True
+        settings.receipt_delivery = 'qr'
+        settings.auto_print = False
+        settings.drawer_kick = False
+        if not settings.pocket_location_label:
+            settings.pocket_location_label = 'POKRETNA PRODAJA'
+        settings.save(update_fields=[
+            'pocket_mode', 'receipt_delivery', 'auto_print',
+            'drawer_kick', 'pocket_location_label',
+        ])
+
+    # Auto-create terminal if none exists
+    terminal = POSTerminal.objects.filter(company=company).first()
+    if not terminal:
+        import secrets
+        terminal = POSTerminal.objects.create(
+            company=company,
+            name='Mobitel',
+            terminal_code='MOB1',
+            pos_type='quick',
+            display_token=secrets.token_urlsafe(20),
+        )
+
+    # Scan for opportunities
+    savings_info = {}
+    try:
+        from limit_connect_ai.services.opportunity_scanner import match_opportunities_for_company
+        result = match_opportunities_for_company(company)
+        savings_info = {
+            'opportunities_count': result['count'],
+            'total_savings_eur': str(result['total_savings']),
+            'top_opportunities': [
+                {'name': m['name'], 'savings': m['savings_eur']}
+                for m in result['matches'][:3]
+            ],
+        }
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'ok': True,
+        'pocket_mode': True,
+        'terminal_id': terminal.pk,
+        'terminal_name': terminal.name,
+        'quick_pos_url': f'/pos/quick/{terminal.pk}/',
+        'settings': {
+            'receipt_delivery': 'qr',
+            'auto_print': False,
+            'pocket_location': settings.pocket_location_label,
+            'offline_sync': True,
+        },
+        'message': (
+            f'Pocket Mode aktiviran za {company.name}! '
+            f'Mobilna blagajna spremna. Bon ide digitalno (QR/WhatsApp). '
+            f'Oznaka prostora: {settings.pocket_location_label}.'
+        ),
+        **savings_info,
+    })
+
+
+@login_required
+def pocket_mode_status(request):
+    """Status Pocket Mode-a za tvrtku."""
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'ok': False, 'error': 'Nema tvrtke'}, status=400)
+
+    from pos.models import POSSettings
+    settings = POSSettings.objects.filter(company=company).first()
+
+    is_pocket = settings.pocket_mode if settings else False
+    terminal = POSTerminal.objects.filter(company=company).first()
+
+    return JsonResponse({
+        'ok': True,
+        'pocket_mode': is_pocket,
+        'terminal_id': terminal.pk if terminal else None,
+        'quick_pos_url': f'/pos/quick/{terminal.pk}/' if terminal else None,
+        'receipt_delivery': settings.receipt_delivery if settings else 'thermal',
+        'pocket_location': settings.pocket_location_label if settings else '',
+    })
+
+
 # HASH CHAIN — Verify + Anchor endpointi
 # ══════════════════════════════════════════════════════════════════════════════
 

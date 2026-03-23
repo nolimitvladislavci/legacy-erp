@@ -500,6 +500,20 @@ class POSSettings(models.Model):
         default=False, verbose_name=_('Auto-print Z-reporta'),
         help_text=_('Automatski printaj Z-report pri zatvaranju smjene'),
     )
+    # ── POCKET MODE — Mobitel = blagajna ─────────────────────────────────
+    pocket_mode = models.BooleanField(
+        default=False, verbose_name=_('Pocket Mode'),
+        help_text=_(
+            'Mobitel kao jedini uređaj. Auto: digital receipt, '
+            'bez printera, pokretna prodaja, offline-first.'
+        ),
+    )
+    pocket_location_label = models.CharField(
+        max_length=100, blank=True, default='POKRETNA PRODAJA',
+        verbose_name=_('Oznaka prostora (fiskalizacija)'),
+        help_text=_('Za čl.28a Zakona o fiskalizaciji'),
+    )
+
     updated_at    = models.DateTimeField(auto_now=True)
 
     class Meta:

@@ -175,6 +175,9 @@ urlpatterns = [
     path('pulse/',                               views_v2.pulse_dashboard,       name='pulse_dashboard'),
     path('api/pulse/',                           views_v2.pulse_api,             name='pulse_api'),
     path('api/pulse/read/',                      views_v2.pulse_mark_read,       name='pulse_mark_read'),
+    # Pocket Mode (mobitel = blagajna)
+    path('pocket/activate/',                     views_v2.pocket_mode_activate,  name='pocket_activate'),
+    path('pocket/status/',                       views_v2.pocket_mode_status,    name='pocket_status'),
     # Offline Sync (ServiceWorker batch)
     path('api/offline-sync/',                    views_v2.offline_sync,          name='offline_sync'),
     # B-01: ServiceWorker
