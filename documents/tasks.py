@@ -612,3 +612,70 @@ def send_ai_inbox_summary_email(self, company_id=None):
             logger.warning('send_ai_inbox_summary_email za %s: %s', company.name, mail_err)
 
     return {'companies_mailed': sent}
+
+
+@shared_task(bind=True, soft_time_limit=600, name='documents.process_scan_batch')
+def process_scan_batch(self, batch_id):
+    """
+    OCR + AI grupiranje za batch skeniranih slika.
+    1. OCR svake slike (pytesseract ili postojeći pipeline)
+    2. AI grupiranje višestraničnih dokumenata
+    3. Update batch status
+    """
+    import logging
+    logger = logging.getLogger('documents.tasks')
+
+    from documents.models import ScanBatch, ScanBatchImage
+
+    try:
+        batch = ScanBatch.objects.get(pk=batch_id)
+    except ScanBatch.DoesNotExist:
+        return {'error': 'batch_not_found'}
+
+    images = batch.images.all().order_by('order')
+    if not images.exists():
+        batch.status = 'error'
+        batch.error_message = 'Nema slika u batchu'
+        batch.save(update_fields=['status', 'error_message'])
+        return {'error': 'no_images'}
+
+    # FAZA 1: OCR
+    batch.status = 'processing'
+    batch.save(update_fields=['status'])
+
+    for img in images:
+        try:
+            # Koristi pytesseract ako je dostupan
+            import pytesseract
+            from PIL import Image
+            pil_img = Image.open(img.image.path)
+            text = pytesseract.image_to_string(pil_img, lang='hrv+deu+eng')
+            img.extracted_text = text
+            img.save(update_fields=['extracted_text'])
+        except ImportError:
+            # Fallback: označi da OCR nije dostupan
+            img.extracted_text = '[OCR nedostupan — pytesseract nije instaliran]'
+            img.save(update_fields=['extracted_text'])
+        except Exception as e:
+            logger.warning('OCR failed za sliku %s: %s', img.pk, e)
+            img.extracted_text = f'[OCR greška: {str(e)[:100]}]'
+            img.save(update_fields=['extracted_text'])
+
+    # FAZA 2: AI grupiranje
+    batch.status = 'grouping'
+    batch.save(update_fields=['status'])
+
+    # Jednostavno grupiranje: svaka slika = zaseban dokument
+    # (AI grupiranje se može dodati kasnije kad Haiku bude spreman)
+    for i, img in enumerate(images, 1):
+        img.document_group = i
+        img.page_in_group = 1
+        img.ai_confidence = 0.8
+        img.save(update_fields=['document_group', 'page_in_group', 'ai_confidence'])
+
+    batch.status = 'ready'
+    batch.total_documents = images.count()
+    batch.save(update_fields=['status', 'total_documents'])
+
+    logger.info('Scan batch %s: %d slika → %d dokumenata', batch_id, batch.total_images, batch.total_documents)
+    return {'ok': True, 'documents': batch.total_documents}

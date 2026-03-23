@@ -8,6 +8,13 @@ router.register(r"api", views.DocumentViewSet, basename="document")
 
 app_name = "documents"
 urlpatterns = [
+    # Scan Batch — BORG FENIX
+    path("scan/batch/new/", views.scan_batch_new, name="scan_batch_new"),
+    path("scan/batch/<int:pk>/", views.scan_batch_detail, name="scan_batch_detail"),
+    path("scan/batch/<int:pk>/upload/", views.scan_batch_upload, name="scan_batch_upload"),
+    path("scan/batch/<int:pk>/process/", views.scan_batch_process, name="scan_batch_process"),
+    path("scan/batch/<int:pk>/status/", views.scan_batch_status, name="scan_batch_status"),
+    path("scan/batch/<int:pk>/archive/", views.scan_batch_archive, name="scan_batch_archive"),
     path("arhiva-upute/", views.arhiva_upute, name="arhiva_upute"),
     path("arhiva-vodic/", views.arhiva_guide_pdf, name="arhiva_guide_pdf"),
     path("verfahrensdokumentation/", views.verfahrensdokumentation, name="verfahrensdokumentation"),

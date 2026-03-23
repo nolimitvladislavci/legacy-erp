@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Scan Batch #{{ batch.pk }}{% endblock %}
+{% block page_title %}Skeniranje dokumenata{% endblock %}
+
+{% block content %}
+<style>
+.sb{max-width:700px;margin:0 auto;padding:16px}
+.sb-drop{border:2px dashed #333;border-radius:12px;padding:40px;text-align:center;transition:all .2s;cursor:pointer;background:#0a0a0a}
+.sb-drop.dragover{border-color:#c9a84c;background:#1a1400}
+.sb-drop-icon{font-size:3rem;margin-bottom:8px}
+.sb-drop-text{color:#94a3b8;font-size:.9rem}
+.sb-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0}
+.sb-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #222;background:#111}
+.sb-thumb img{width:100%;height:100%;object-fit:cover}
+.sb-thumb .badge{position:absolute;top:4px;right:4px;background:#c9a84c;color:#000;font-size:.65rem;padding:1px 5px;border-radius:4px;font-weight:700}
+.sb-status{text-align:center;padding:12px;background:#111;border:1px solid #222;border-radius:8px;margin:12px 0;color:#94a3b8;font-size:.85rem}
+.sb-status b{color:#c9a84c}
+.sb-btn{display:block;width:100%;padding:14px;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:1px}
+.sb-btn-primary{background:#c9a84c;color:#000}
+.sb-btn-secondary{background:#1a1a1a;border:1px solid #333;color:#94a3b8}
+.sb-btn:disabled{opacity:.4;cursor:not-allowed}
+.sb-progress{height:4px;background:#222;border-radius:2px;margin:12px 0;overflow:hidden}
+.sb-progress-bar{height:100%;background:#c9a84c;transition:width .3s;width:0}
+.sb-row{display:flex;gap:8px}
+.sb-row .sb-btn{flex:1}
+</style>
+
+<div class="sb">
+  <div class="sb-status">
+    Batch #{{ batch.pk }} — <b id="sbStatusText">{{ batch.get_status_display }}</b>
+    — <span id="sbCount">{{ batch.total_images }}</span>/100 slika
+    (<span id="sbSize">{{ batch.total_size_kb }}</span> KB)
+  </div>
+
+  <!-- FAZA 1: Upload -->
+  <div id="phase1" {% if batch.status != 'collecting' %}style="display:none"{% endif %}>
+    <div class="sb-drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div class="sb-drop-icon">📄</div>
+      <div class="sb-drop-text">Povuci slike ovdje ili klikni</div>
+    </div>
+    <input type="file" id="fileInput" multiple accept="image/*" capture="environment" style="display:none">
+
+    <div class="sb-grid" id="thumbGrid"></div>
+
+    <div class="sb-row">
+      <button class="sb-btn sb-btn-primary" id="btnProcess" onclick="startProcess()" disabled>Obradi sve</button>
+      <button class="sb-btn sb-btn-secondary" onclick="document.getElementById('fileInput').click()">+ Dodaj još</button>
+    </div>
+  </div>
+
+  <!-- FAZA 2: Processing -->
+  <div id="phase2" style="display:none">
+    <div class="sb-progress"><div class="sb-progress-bar" id="progressBar"></div></div>
+    <div style="text-align:center;color:#94a3b8;padding:20px">
+      <div style="font-size:2rem;margin-bottom:8px">⚙</div>
+      OCR obrada u tijeku...
+    </div>
+  </div>
+
+  <!-- FAZA 3: Ready -->
+  <div id="phase3" style="display:none">
+    <div class="sb-grid" id="resultGrid"></div>
+    <div class="sb-row">
+      <button class="sb-btn sb-btn-primary" onclick="archiveBatch()">Spremi u arhivu</button>
+      <button class="sb-btn sb-btn-secondary" onclick="location.reload()">Pregledaj</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var BATCH_ID = {{ batch.pk }};
+var totalImages = {{ batch.total_images }};
+
+function getCSRF() {
+  var c = document.cookie.match(/csrftoken=([^;]+)/);
+  return c ? c[1] : '';
+}
+
+// Drag & drop
+var dz = document.getElementById('dropZone');
+if (dz) {
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', function(){ dz.classList.remove('dragover'); });
+  dz.addEventListener('drop', function(e){
+    e.preventDefault(); dz.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e){
+  handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+  if (!files.length) return;
+  var form = new FormData();
+  var remaining = 100 - totalImages;
+  var count = Math.min(files.length, remaining);
+
+  for (var i = 0; i < count; i++) {
+    form.append('images', files[i]);
+  }
+
+  fetch('/documents/scan/batch/' + BATCH_ID + '/upload/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCSRF()},
+    body: form
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data.ok) {
+      totalImages = data.total_images;
+      document.getElementById('sbCount').textContent = totalImages;
+      document.getElementById('sbSize').textContent = data.total_size_kb;
+      document.getElementById('btnProcess').disabled = totalImages === 0;
+      // Add thumbs
+      for (var i = 0; i < count; i++) {
+        var div = document.createElement('div');
+        div.className = 'sb-thumb';
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(files[i]);
+        div.appendChild(img);
+        document.getElementById('thumbGrid').appendChild(div);
+      }
+    }
+  });
+}
+
+function startProcess() {
+  document.getElementById('phase1').style.display = 'none';
+  document.getElementById('phase2').style.display = 'block';
+  document.getElementById('sbStatusText').textContent = 'OCR obrada';
+
+  fetch('/documents/scan/batch/' + BATCH_ID + '/process/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCSRF()}
+  }).then(function(){ pollStatus(); });
+}
+
+function pollStatus() {
+  fetch('/documents/scan/batch/' + BATCH_ID + '/status/')
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    document.getElementById('sbStatusText').textContent = data.status;
+    var done = data.images.filter(function(i){ return i.has_text; }).length;
+    var pct = data.total_images ? (done / data.total_images * 100) : 0;
+    document.getElementById('progressBar').style.width = pct + '%';
+
+    if (data.status === 'ready') {
+      document.getElementById('phase2').style.display = 'none';
+      document.getElementById('phase3').style.display = 'block';
+      // Show result grid
+      var grid = document.getElementById('resultGrid');
+      grid.innerHTML = '';
+      data.images.forEach(function(img){
+        var div = document.createElement('div');
+        div.className = 'sb-thumb';
+        div.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;font-size:.75rem">Dok.' + (img.document_group || '?') + '</div>';
+        if (img.document_group) {
+          div.innerHTML += '<span class="badge">D' + img.document_group + '</span>';
+        }
+        grid.appendChild(div);
+      });
+    } else if (data.status === 'error') {
+      document.getElementById('phase2').innerHTML = '<div style="text-align:center;color:#dc2626;padding:20px">Greška pri obradi</div>';
+    } else {
+      setTimeout(pollStatus, 2000);
+    }
+  });
+}
+
+function archiveBatch() {
+  fetch('/documents/scan/batch/' + BATCH_ID + '/archive/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCSRF()}
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (data.ok) {
+      document.getElementById('sbStatusText').textContent = 'Arhivirano';
+      document.getElementById('phase3').innerHTML = '<div style="text-align:center;color:#22c55e;padding:30px;font-size:1.2rem">✓ ' + data.archived + ' dokumenata arhivirano</div><a href="/documents/arhiva/" class="sb-btn sb-btn-primary" style="text-decoration:none;text-align:center;display:block">Otvori arhivu</a>';
+    }
+  });
+}
+</script>
+{% endblock %}

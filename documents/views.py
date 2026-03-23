@@ -9,12 +9,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from rest_framework import viewsets
 
 from core.company_utils import get_user_company
 from partners.models import Partner
 
 from .models import Document
+from .models import ScanBatch, ScanBatchImage, ArhivaEntry
 from .serializers import DocumentSerializer
 
 
@@ -3109,3 +3112,157 @@ def verfahren_sign(request):
         'entry_id': entry.pk,
     })
 
+
+
+# ═══════════════════════════════════════════════════════
+#  SCAN BATCH — BORG FENIX
+# ═══════════════════════════════════════════════════════
+
+@login_required
+def scan_batch_new(request):
+    """Kreiraj novu batch sesiju za skeniranje."""
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    if not company:
+        return redirect('documents:list')
+
+    batch = ScanBatch.objects.create(company=company, created_by=request.user)
+    return redirect('documents:scan_batch_detail', pk=batch.pk)
+
+
+@login_required
+def scan_batch_detail(request, pk):
+    """Pregled batch sesije s 2-tipke UI."""
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    batch = get_object_or_404(ScanBatch, pk=pk, company=company)
+    images = batch.images.all().order_by('order')
+    return render(request, 'documents/scan_batch.html', {
+        'batch': batch,
+        'images': images,
+    })
+
+
+@login_required
+@require_POST
+def scan_batch_upload(request, pk):
+    """Upload slika u batch (multipart, do 100)."""
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    batch = get_object_or_404(ScanBatch, pk=pk, company=company)
+
+    if batch.status not in ('collecting',):
+        return JsonResponse({'ok': False, 'error': 'Batch nije u collecting statusu'}, status=400)
+
+    files = request.FILES.getlist('images')
+    if not files:
+        return JsonResponse({'ok': False, 'error': 'Nema slika'}, status=400)
+
+    current_count = batch.images.count()
+    if current_count + len(files) > 100:
+        return JsonResponse({'ok': False, 'error': f'Max 100 slika (trenutno {current_count})'}, status=400)
+
+    added = 0
+    for i, f in enumerate(files):
+        ScanBatchImage.objects.create(
+            batch=batch,
+            image=f,
+            order=current_count + i + 1,
+            original_filename=f.name,
+            file_size_kb=f.size // 1024,
+        )
+        added += 1
+
+    batch.total_images = batch.images.count()
+    batch.total_size_kb = sum(img.file_size_kb for img in batch.images.all())
+    batch.save(update_fields=['total_images', 'total_size_kb', 'updated_at'])
+
+    return JsonResponse({
+        'ok': True,
+        'added': added,
+        'total_images': batch.total_images,
+        'total_size_kb': batch.total_size_kb,
+    })
+
+
+@login_required
+@require_POST
+def scan_batch_process(request, pk):
+    """Pokreni OCR + AI grupiranje za batch."""
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    batch = get_object_or_404(ScanBatch, pk=pk, company=company)
+
+    if batch.total_images == 0:
+        return JsonResponse({'ok': False, 'error': 'Nema slika za obradu'}, status=400)
+
+    batch.status = 'processing'
+    batch.save(update_fields=['status'])
+
+    from documents.tasks import process_scan_batch
+    process_scan_batch.delay(batch.pk)
+
+    return JsonResponse({'ok': True, 'status': 'processing'})
+
+
+@login_required
+def scan_batch_status(request, pk):
+    """JSON status za polling."""
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    batch = get_object_or_404(ScanBatch, pk=pk, company=company)
+
+    images = batch.images.all().order_by('order')
+    return JsonResponse({
+        'status': batch.status,
+        'total_images': batch.total_images,
+        'total_documents': batch.total_documents,
+        'images': [
+            {
+                'id': img.pk,
+                'order': img.order,
+                'document_group': img.document_group,
+                'page_in_group': img.page_in_group,
+                'confidence': img.ai_confidence,
+                'has_text': bool(img.extracted_text),
+            }
+            for img in images
+        ],
+    })
+
+
+@login_required
+@require_POST
+def scan_batch_archive(request, pk):
+    """Spremi batch u arhivu — kreira ArhivaEntry za svaki dokument."""
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    batch = get_object_or_404(ScanBatch, pk=pk, company=company)
+
+    if batch.status != 'ready':
+        return JsonResponse({'ok': False, 'error': 'Batch nije spreman'}, status=400)
+
+    groups = {}
+    for img in batch.images.filter(document_group__isnull=False).order_by('document_group', 'page_in_group'):
+        groups.setdefault(img.document_group, []).append(img)
+
+    created = 0
+    for group_num, imgs in groups.items():
+        first = imgs[0]
+        data = first.extracted_data or {}
+        ArhivaEntry.objects.create(
+            company=company,
+            uploaded_by=request.user,
+            file=first.image,
+            original_filename=first.original_filename or f'batch_{batch.pk}_doc_{group_num}',
+            doc_type=data.get('doc_type', 'unknown'),
+            extracted_data=data,
+            status='ai_processed',
+        )
+        created += 1
+
+    batch.status = 'done'
+    batch.total_documents = created
+    batch.save(update_fields=['status', 'total_documents'])
+
+    return JsonResponse({'ok': True, 'archived': created})

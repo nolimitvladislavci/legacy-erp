@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -553,3 +554,67 @@ class ConversionRecord(models.Model):
         if self.original_size and self.xml_size:
             return f"{self.original_size // 1024}KB -> {self.xml_size // 1024}KB ({self.size_reduction_pct:.0f}%)"
         return "-"
+
+
+# ═══════════════════════════════════════════════════════
+#  SCAN BATCH — BORG FENIX Asimilator računa
+# ═══════════════════════════════════════════════════════
+
+class ScanBatch(models.Model):
+    """Batch sesija za grupno skeniranje do 100 dokumenata."""
+
+    STATUS_CHOICES = [
+        ('collecting', 'Prikupljanje'),
+        ('processing', 'OCR obrada'),
+        ('grouping', 'AI grupiranje'),
+        ('ready', 'Spreman za arhivu'),
+        ('done', 'Arhivirano'),
+        ('error', 'Greška'),
+    ]
+
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE,
+                                related_name='scan_batches')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='collecting')
+    total_images = models.PositiveIntegerField(default=0)
+    total_size_kb = models.PositiveIntegerField(default=0)
+    total_documents = models.PositiveIntegerField(default=0)
+    error_message = models.TextField(blank=True, default='')
+
+    class Meta:
+        verbose_name = 'Scan Batch'
+        verbose_name_plural = 'Scan Batches'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Batch #{self.pk} — {self.total_images} slika ({self.get_status_display()})'
+
+
+class ScanBatchImage(models.Model):
+    """Pojedinačna slika unutar batch sesije."""
+
+    batch = models.ForeignKey(ScanBatch, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='scan_batches/%Y/%m/')
+    order = models.PositiveIntegerField(default=0)
+    original_filename = models.CharField(max_length=255, blank=True, default='')
+    file_size_kb = models.PositiveIntegerField(default=0)
+    # AI grupiranje
+    document_group = models.PositiveIntegerField(null=True, blank=True,
+        help_text='Koji dokument (1, 2, 3...)')
+    page_in_group = models.PositiveIntegerField(null=True, blank=True,
+        help_text='Koja stranica unutar dokumenta')
+    ai_confidence = models.FloatField(null=True, blank=True)
+    # OCR rezultat
+    extracted_text = models.TextField(blank=True, default='')
+    extracted_data = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Scan slika'
+        ordering = ['batch', 'order']
+
+    def __str__(self):
+        group = f' [dok.{self.document_group}]' if self.document_group else ''
+        return f'Slika #{self.order}{group} — batch #{self.batch_id}'
