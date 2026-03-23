@@ -1,64 +1,121 @@
 {% extends "base.html" %}
-{% load i18n %}
 {% block title %}Ured u džepu — osnivanje firme{% endblock %}
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <h5 class="mb-0"><i class="fas fa-mobile-alt me-2 text-primary"></i>Ured u džepu</h5>
-    <small class="text-muted">Vođeno osnivanje firme — 7 koraka, bez papirologije</small>
+    <small class="text-muted">Vođeno osnivanje firme — bez papirologije</small>
   </div>
-  <a href="{% url 'partners:list' %}" class="btn btn-sm btn-outline-secondary">
-    <i class="fas fa-arrow-left me-1"></i>Natrag
-  </a>
+  <div class="d-flex gap-2">
+    {% if resume %}
+    <button class="btn btn-sm btn-outline-warning" onclick="Wizard.reset()">
+      <i class="fas fa-redo me-1"></i>Počni ispočetka
+    </button>
+    {% endif %}
+    <a href="{% url 'partners:list' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Natrag
+    </a>
+  </div>
 </div>
 
-<!-- Progres bar -->
+{% if resume %}
+<div class="alert alert-info py-2 mb-3" style="font-size:.85rem">
+  <i class="fas fa-info-circle me-1"></i>
+  Nastavljaš gdje si stao/la — korak <strong>{{ draft.current_step }}</strong>.
+  Podaci su sačuvani.
+</div>
+{% endif %}
+
+<!-- Progres -->
 <div class="stat-card p-3 mb-3">
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <span id="stepLabel" class="fw-semibold small" style="color:#6366f1">Korak 1 od 7</span>
-    <span id="stepTitle" class="text-muted small">Što ćete raditi?</span>
+    <span id="stepLabel" class="fw-semibold small" style="color:#6366f1"></span>
+    <span id="stepTitle" class="text-muted small"></span>
   </div>
   <div class="progress" style="height:6px;border-radius:3px">
-    <div id="progressBar" class="progress-bar" style="background:#6366f1;width:14%;transition:.3s"></div>
+    <div id="progressBar" class="progress-bar"
+         style="background:#6366f1;width:0%;transition:width .35s ease"></div>
   </div>
 </div>
 
-<!-- Kontejner koraka -->
+<!-- Wizard body -->
 <div id="wizardBody" class="stat-card p-4">
 
-  <!-- KORAK 1: Djelatnost — semantički NKD search -->
-  <div class="wizard-step" data-step="1">
-    <h6 class="fw-bold mb-1">Što ćete raditi?</h6>
-    <p class="text-muted small mb-3">Opišite slobodnim riječima — sustav pronalazi točne djelatnosti (NKD šifre).</p>
+  <!-- KORAK 0: T&C / GDPR gatekeeper -->
+  <div class="wizard-step d-none" data-step="0">
+    <h6 class="fw-bold mb-1"><i class="fas fa-shield-alt me-2 text-success"></i>Prije nego počnemo</h6>
+    <p class="text-muted small mb-3">
+      Trebamo prikupiti i pohraniti tvoje podatke kako bismo proveli ovaj proces.
+      Molimo potvrdi da se slažeš s uvjetima.
+    </p>
+    <div class="p-3 mb-3" style="background:#f8fafc;border-radius:8px;font-size:.83rem;max-height:200px;overflow-y:auto;border:1px solid #e2e8f0">
+      <strong>Uvjeti korištenja — Ured u džepu</strong><br><br>
+      Korištenjem ovog alata ovlašćuješ <strong>{{ company_name }}</strong> da u tvoje ime
+      prikupi i pohrani podatke potrebne za osnivanje društva u Republici Hrvatskoj.<br><br>
+      Podaci koji se prikupljaju: naziv firme, ime i OIB direktora, odabrane djelatnosti (NKD),
+      podaci o sjedištu. Podaci se pohranjuju na serverima EU/RH i obrađuju isključivo za svrhu
+      osnivanja društva i pružanja računovodstvenih usluga.<br><br>
+      Imaš pravo na uvid, ispravak i brisanje podataka u skladu s GDPR (Uredba EU 2016/679)
+      i Zakonom o provedbi opće uredbe o zaštiti podataka (NN 42/18).<br><br>
+      Ova suglasnost bilježi se s IP adresom i timestampom te ima dokaznu snagu za potrebe
+      GDPR evidencije obrade podataka.
+    </div>
+    <label class="d-flex align-items-start gap-3 p-3 rounded"
+           style="cursor:pointer;background:#f0fdf4;border:2px solid #86efac">
+      <input type="checkbox" id="tcCheckbox" style="margin-top:3px;transform:scale(1.3)">
+      <span style="font-size:.88rem">
+        <strong>Prihvaćam uvjete</strong> i slažem se s prikupljanjem i obradom navedenih podataka
+        u svrhu osnivanja društva putem LIMIT Connect platforme.
+      </span>
+    </label>
+    <p id="tcError" class="text-danger small mt-2 d-none">Moraš prihvatiti uvjete da nastaviš.</p>
+  </div>
+
+  <!-- KORAK 1: NKD semantički search -->
+  <div class="wizard-step d-none" data-step="1">
+    <h6 class="fw-bold mb-1">Što ćeš raditi?</h6>
+    <p class="text-muted small mb-3">
+      Opiši slobodnim riječima — AI pronalazi točne djelatnosti (NKD šifre).
+    </p>
     <div style="position:relative">
       <input type="text" id="nkdFreeText" class="form-control"
              placeholder='npr. "prodaja kave i kolača" ili "IT konzultacije i web razvoj"'
              autocomplete="off">
-      <div id="nkdAiResults" class="position-absolute bg-white border rounded shadow-sm"
+      <div id="nkdDropdown" class="position-absolute bg-white border rounded shadow-sm"
            style="width:100%;max-height:280px;overflow-y:auto;z-index:1050;display:none"></div>
     </div>
-    <div id="selectedNkd" class="mt-3 d-flex flex-wrap gap-2"></div>
-    <input type="hidden" id="nkdIds" value="">
-    <div class="mt-2 text-muted" style="font-size:.78rem">
+    <div id="selectedNkdBox" class="mt-3 d-flex flex-wrap gap-2"></div>
+    <p class="mt-2 text-muted" style="font-size:.78rem">
       <i class="fas fa-info-circle"></i>
-      Odaberite 1–5 djelatnosti. Preporučamo sve s kojima planirate raditi — dodavanje kasnije košta.
-    </div>
+      Odaberi 1–5 djelatnosti. Preporučamo sve s kojima planiraš raditi — dodavanje kasnije košta.
+    </p>
+    <p id="nkdError" class="text-danger small d-none">Odaberi barem jednu djelatnost.</p>
   </div>
 
   <!-- KORAK 2: Ime firme -->
   <div class="wizard-step d-none" data-step="2">
-    <h6 class="fw-bold mb-1">Kako će se zvati vaša firma?</h6>
-    <p class="text-muted small mb-3">Naziv mora biti jedinstven u sudskom registru. Preporučujemo provjeru na <a href="https://sudreg.pravosudje.hr" target="_blank">sudreg.pravosudje.hr</a>.</p>
+    <h6 class="fw-bold mb-1">Kako će se zvati tvoja firma?</h6>
+    <p class="text-muted small mb-3">
+      Naziv mora biti jedinstven. Provjeri na
+      <a href="https://sudreg.pravosudje.hr" target="_blank">sudreg.pravosudje.hr</a>.
+    </p>
     <input type="text" id="firmaIme" class="form-control form-control-lg"
-           placeholder='npr. "Moja Firma d.o.o." ili "Moja Firma j.d.o.o."'>
-    <div class="mt-2 text-muted" style="font-size:.78rem">
+           placeholder='npr. "Moja Firma d.o.o."' value="{{ draft.firma_ime }}">
+    <p class="mt-2 text-muted" style="font-size:.78rem">
       <i class="fas fa-info-circle"></i>
-      d.o.o. = min. kapital 2.500 EUR &nbsp;|&nbsp; j.d.o.o. = min. kapital 1 EUR
+      Naziv bez nastavka d.o.o. / j.d.o.o. — oblik biramo u sljedećem koraku.
+    </p>
+    <p id="firmaError" class="text-danger small d-none">Unesite ime firme (min. 3 znaka).</p>
+    <div id="pendingCompanyBadge" class="mt-3 d-none">
+      <span class="badge" style="background:#eef2ff;color:#4338ca;font-size:.78rem;padding:6px 10px">
+        <i class="fas fa-building me-1"></i>
+        Tvrtka <span id="pendingCompanyName"></span> je rezervirana u sustavu ✓
+      </span>
     </div>
   </div>
 
-  <!-- KORAK 3: Osnivači i direktor -->
+  <!-- KORAK 3: Osnivači -->
   <div class="wizard-step d-none" data-step="3">
     <h6 class="fw-bold mb-1">Tko osniva firmu?</h6>
     <p class="text-muted small mb-3">Direktor može biti i jedini osnivač.</p>
@@ -66,44 +123,47 @@
       <div class="col-sm-6">
         <label class="form-label small fw-semibold">Broj osnivača</label>
         <select id="brojOsnivaca" class="form-select">
-          <option value="1">1 (solo)</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4+ (treba bilježnik)</option>
+          <option value="1" {% if draft.broj_osnivaca == 1 %}selected{% endif %}>1 (solo)</option>
+          <option value="2" {% if draft.broj_osnivaca == 2 %}selected{% endif %}>2</option>
+          <option value="3" {% if draft.broj_osnivaca == 3 %}selected{% endif %}>3</option>
+          <option value="4" {% if draft.broj_osnivaca >= 4 %}selected{% endif %}>4+ (treba bilježnik)</option>
         </select>
       </div>
       <div class="col-sm-6">
         <label class="form-label small fw-semibold">Ime i prezime direktora</label>
-        <input type="text" id="direktorIme" class="form-control" placeholder="Ime Prezime">
+        <input type="text" id="direktorIme" class="form-control"
+               placeholder="Ime Prezime" value="{{ draft.direktor_ime }}">
       </div>
       <div class="col-sm-6">
         <label class="form-label small fw-semibold">OIB direktora</label>
-        <input type="text" id="direktorOib" class="form-control" placeholder="11 znamenki" maxlength="11">
+        <input type="text" id="direktorOib" class="form-control"
+               placeholder="11 znamenki" maxlength="11" value="{{ draft.direktor_oib }}">
       </div>
       <div class="col-sm-6">
         <label class="form-label small fw-semibold">Email direktora</label>
-        <input type="email" id="direktorEmail" class="form-control" placeholder="direktor@email.com">
+        <input type="email" id="direktorEmail" class="form-control"
+               placeholder="direktor@email.com" value="{{ draft.direktor_email }}">
       </div>
     </div>
   </div>
 
-  <!-- KORAK 4: Temeljni kapital -->
+  <!-- KORAK 4: Kapital -->
   <div class="wizard-step d-none" data-step="4">
     <h6 class="fw-bold mb-1">Koji oblik društva?</h6>
-    <p class="text-muted small mb-3">Za početak preporučujemo j.d.o.o. — jeftinije, brže, isti zakonski okvir.</p>
+    <p class="text-muted small mb-3">Za početak preporučamo j.d.o.o. — jeftinije, brže, isti zakonski okvir.</p>
     <div class="row g-3">
       <div class="col-sm-6">
-        <label class="p-3 border rounded cursor-pointer d-block" id="cardJdoo"
-               style="cursor:pointer;border-color:#6366f1!important;background:#eef2ff">
-          <input type="radio" name="kapital" value="jdoo" checked class="me-2">
+        <label class="p-3 border rounded d-block kapital-card" data-val="jdoo" style="cursor:pointer">
+          <input type="radio" name="kapital" value="jdoo"
+                 {% if draft.kapital_tip == 'jdoo' %}checked{% endif %} class="me-2">
           <strong>j.d.o.o.</strong>
           <div class="text-muted small mt-1">Kapital: min. 1 EUR<br>Troškovi: ~180 EUR<br>Idealno za početak</div>
         </label>
       </div>
       <div class="col-sm-6">
-        <label class="p-3 border rounded cursor-pointer d-block" id="cardDoo"
-               style="cursor:pointer">
-          <input type="radio" name="kapital" value="doo" class="me-2">
+        <label class="p-3 border rounded d-block kapital-card" data-val="doo" style="cursor:pointer">
+          <input type="radio" name="kapital" value="doo"
+                 {% if draft.kapital_tip == 'doo' %}checked{% endif %} class="me-2">
           <strong>d.o.o.</strong>
           <div class="text-muted small mt-1">Kapital: min. 2.500 EUR<br>Troškovi: ~530 EUR<br>Za ozbiljniji nastup</div>
         </label>
@@ -111,47 +171,49 @@
     </div>
     <div class="alert alert-info mt-3 py-2" style="font-size:.82rem">
       <i class="fas fa-info-circle me-1"></i>
-      j.d.o.o. može prerasti u d.o.o. — promjena je jednostavna i jeftina kada vam to treba.
+      j.d.o.o. može prerasti u d.o.o. — promjena je jednostavna kada to treba.
     </div>
   </div>
 
   <!-- KORAK 5: Sjedište -->
   <div class="wizard-step d-none" data-step="5">
     <h6 class="fw-bold mb-1">Gdje će biti sjedište firme?</h6>
-    <p class="text-muted small mb-3">Sjedište mora biti fizička adresa u RH — ali ne mora biti vaša.</p>
+    <p class="text-muted small mb-3">Sjedište mora biti fizička adresa u RH — ali ne mora biti tvoja.</p>
     <div class="row g-3">
       <div class="col-sm-6">
-        <label class="p-3 border rounded d-block sjediste-opt" data-val="vlastita"
-               style="cursor:pointer">
-          <input type="radio" name="sjediste" value="vlastita" class="me-2">
+        <label class="p-3 border rounded d-block sjediste-opt" data-val="vlastita" style="cursor:pointer">
+          <input type="radio" name="sjediste" value="vlastita" class="me-2"
+                 {% if not draft.koristi_konjik %}checked{% endif %}>
           <strong>Vlastita adresa</strong>
-          <div class="text-muted small mt-1">Stan, ured, poslovni prostor. Unesite adresu.</div>
+          <div class="text-muted small mt-1">Stan, ured, poslovni prostor.</div>
         </label>
       </div>
       <div class="col-sm-6">
-        <label class="p-3 border rounded d-block sjediste-opt" data-val="konjik"
-               style="cursor:pointer;border-color:#22c55e!important;background:#f0fdf4">
-          <input type="radio" name="sjediste" value="konjik" class="me-2" checked>
+        <label class="p-3 border rounded d-block sjediste-opt" data-val="konjik" style="cursor:pointer">
+          <input type="radio" name="sjediste" value="konjik" class="me-2"
+                 {% if draft.koristi_konjik %}checked{% endif %}>
           <strong style="color:#166534">Ured u džepu</strong>
           <div class="text-muted small mt-1">
-            Koristite adresu računovodstva.<br>
             <span style="color:#166534;font-weight:500">{{ company_name }}</span><br>
             {{ company_address }}, {{ company_zip }} {{ company_city }}<br>
-            <span style="font-size:.72rem">Legalno po ZTD-u uz pismenu suglasnost ✓</span>
+            <span style="font-size:.72rem">Legalno po ZTD čl.36 uz suglasnost ✓</span>
           </div>
         </label>
       </div>
     </div>
-    <div id="vlastita_polja" class="mt-3 d-none">
+    <div id="vlastita_polja" class="mt-3 {% if draft.koristi_konjik %}d-none{% endif %}">
       <div class="row g-2">
         <div class="col-8">
-          <input type="text" id="sjelisteAdr" class="form-control form-control-sm" placeholder="Ulica i broj">
+          <input type="text" id="sjelisteAdr" class="form-control form-control-sm"
+                 placeholder="Ulica i broj" value="{{ draft.sjediste_adresa }}">
         </div>
         <div class="col-4">
-          <input type="text" id="sjedistePtt" class="form-control form-control-sm" placeholder="PTT">
+          <input type="text" id="sjedistePtt" class="form-control form-control-sm"
+                 placeholder="PTT" value="{{ draft.sjediste_zip }}">
         </div>
         <div class="col-12">
-          <input type="text" id="sjelisteGrad" class="form-control form-control-sm" placeholder="Grad">
+          <input type="text" id="sjelisteGrad" class="form-control form-control-sm"
+                 placeholder="Grad" value="{{ draft.sjediste_grad }}">
         </div>
       </div>
     </div>
@@ -160,47 +222,49 @@
   <!-- KORAK 6: Pregled -->
   <div class="wizard-step d-none" data-step="6">
     <h6 class="fw-bold mb-1">Pregled — sve u redu?</h6>
-    <p class="text-muted small mb-3">Provjerite podatke prije nego generiramo dokumente.</p>
+    <p class="text-muted small mb-3">Provjeri podatke prije nego generiramo dokumente.</p>
     <div id="previewBox" class="p-3" style="background:#f8fafc;border-radius:8px;font-size:.88rem">
-      <div class="text-muted">Učitavanje...</div>
+      <div class="text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Učitavanje...</div>
     </div>
     <div id="previewErrors" class="mt-2"></div>
   </div>
 
   <!-- KORAK 7: Dokumenti -->
   <div class="wizard-step d-none" data-step="7">
-    <h6 class="fw-bold mb-1">Dokumenti su spremni!</h6>
-    <p class="text-muted small mb-3">Odaberite put registracije koji vam odgovara.</p>
+    <h6 class="fw-bold mb-1"><i class="fas fa-check-circle text-success me-2"></i>Dokumenti su spremni!</h6>
+    <p class="text-muted small mb-3">Odaberi put registracije.</p>
 
-    <div id="registrationPath" class="mb-3 p-3 rounded" style="background:#f0fdf4;border:1px solid #86efac">
+    <div id="registrationPath" class="mb-3 p-3 rounded"
+         style="background:#f0fdf4;border:1px solid #86efac">
       <div class="fw-semibold text-success" id="pathTitle"></div>
       <div class="text-muted small mt-1" id="pathNote"></div>
     </div>
 
     <div class="row g-2">
       <div class="col-12">
-        <button id="btnSuglasnost" class="btn btn-outline-success w-100"
-                onclick="downloadSuglasnost()">
+        <button class="btn btn-outline-success w-100" onclick="Wizard.downloadSuglasnost()">
           <i class="fas fa-file-pdf me-2"></i>Preuzmi Suglasnost za sjedište (PDF)
         </button>
       </div>
       <div class="col-sm-6">
-        <a id="startLink" href="https://start.gov.hr" target="_blank"
-           class="btn btn-primary w-100">
+        <a href="https://start.gov.hr" target="_blank" class="btn btn-primary w-100">
           <i class="fas fa-external-link-alt me-2"></i>Otvori START
         </a>
       </div>
       <div class="col-sm-6">
-        <button class="btn btn-outline-secondary w-100" onclick="alert('Bilježnik lista — uskoro.')">
+        <button class="btn btn-outline-secondary w-100"
+                onclick="alert('Bilježnik lista dolazi uskoro.')">
           <i class="fas fa-stamp me-2"></i>Pronađi bilježnika
         </button>
       </div>
     </div>
 
     <div class="mt-3 p-3" style="background:#eef2ff;border-radius:8px;font-size:.82rem">
-      <div class="fw-semibold" style="color:#4338ca"><i class="fas fa-rocket me-1"></i>Sljedeći koraci nakon registracije</div>
+      <div class="fw-semibold" style="color:#4338ca">
+        <i class="fas fa-rocket me-1"></i>Sljedeći koraci nakon registracije
+      </div>
       <ul class="mt-2 mb-0 ps-3" style="color:#4338ca">
-        <li>eRačun sustav se automatski aktivira (LIMIT Connect)</li>
+        <li>eRačun sustav se automatski aktivira u LIMIT Connect</li>
         <li>Fiskalizacija je postavljena od dana 1</li>
         <li>Računovodstvo preuzima sve tekuće obveze</li>
         <li>Pošta dolazi na adresu računovodstva — skenira se, šalje digitalno</li>
@@ -212,239 +276,439 @@
 
 <!-- Navigacija -->
 <div class="d-flex justify-content-between mt-3">
-  <button id="btnBack" class="btn btn-outline-secondary d-none" onclick="wizardBack()">
+  <button id="btnBack" class="btn btn-outline-secondary d-none" onclick="Wizard.back()">
     <i class="fas fa-arrow-left me-2"></i>Natrag
   </button>
-  <div class="ms-auto">
-    <button id="btnNext" class="btn btn-primary px-4" onclick="wizardNext()">
+  <div class="ms-auto d-flex gap-2">
+    <span id="savingIndicator" class="text-muted small align-self-center d-none">
+      <i class="fas fa-spinner fa-spin me-1"></i>Spremanje...
+    </span>
+    <button id="btnNext" class="btn btn-primary px-4" onclick="Wizard.next()">
       Dalje <i class="fas fa-arrow-right ms-2"></i>
     </button>
   </div>
 </div>
 
 <script>
-var W = {
-  step: 1,
-  total: 7,
-  nkdSelected: [],
-  data: {},
-  stepTitles: [
-    '', 'Što ćete raditi?', 'Ime firme', 'Osnivači',
-    'Oblik društva', 'Sjedište', 'Pregled', 'Dokumenti'
-  ]
-};
+// ─── WIZARD STATE MACHINE ─────────────────────────────────────────────────────
+var Wizard = (function() {
+  var STEPS = [0,1,2,3,4,5,6,7];
+  var TITLES = {
+    0: 'Uvjeti korištenja',
+    1: 'Što ćeš raditi?',
+    2: 'Ime firme',
+    3: 'Osnivači i direktor',
+    4: 'Oblik društva',
+    5: 'Sjedište',
+    6: 'Pregled',
+    7: 'Dokumenti'
+  };
 
-function wizardGoto(step) {
-  document.querySelectorAll('.wizard-step').forEach(function(el) {
-    el.classList.add('d-none');
-  });
-  document.querySelector('[data-step="' + step + '"]').classList.remove('d-none');
-  document.getElementById('stepLabel').textContent = 'Korak ' + step + ' od ' + W.total;
-  document.getElementById('stepTitle').textContent = W.stepTitles[step] || '';
-  document.getElementById('progressBar').style.width = Math.round(step / W.total * 100) + '%';
-  document.getElementById('btnBack').classList.toggle('d-none', step === 1);
-  document.getElementById('btnNext').innerHTML = step === W.total
-    ? '<i class="fas fa-check me-2"></i>Završi'
-    : 'Dalje <i class="fas fa-arrow-right ms-2"></i>';
-  W.step = step;
-  if (step === 6) loadPreview();
-}
+  // Draft state — sinkroniziran s bazom
+  var state = {{ draft_json|safe }};
+  // NKD odabrani za ovaj session
+  var nkdSelected = Array.isArray(state.nkd_codes_json)
+    ? state.nkd_codes_json.map(function(n) {
+        return {id: n.id || n, code: n.code || '', name: n.name_hr || n.name || ''};
+      })
+    : [];
 
-function wizardNext() {
-  if (!validateStep(W.step)) return;
-  if (W.step < W.total) wizardGoto(W.step + 1);
-}
+  var currentStep = state.current_step || 0;
+  var saving = false;
 
-function wizardBack() {
-  if (W.step > 1) wizardGoto(W.step - 1);
-}
+  // ── StateValidator ──────────────────────────────────────────────────────────
+  // Prisilno povlači sve podatke iz DOM-a neposredno prije AJAX save-a.
+  // Garantira da race condition između input events i step navigation nije moguć.
+  function collectState(step) {
+    switch(step) {
+      case 0:
+        return { tc_accepted: document.getElementById('tcCheckbox').checked };
+      case 1:
+        return { nkd_codes: nkdSelected.map(function(n) {
+          return {id: n.id, code: n.code, name_hr: n.name};
+        })};
+      case 2:
+        return { firma_ime: (document.getElementById('firmaIme').value || '').trim() };
+      case 3:
+        return {
+          broj_osnivaca: parseInt(document.getElementById('brojOsnivaca').value),
+          direktor_ime:  (document.getElementById('direktorIme').value || '').trim(),
+          direktor_oib:  (document.getElementById('direktorOib').value || '').trim(),
+          direktor_email:(document.getElementById('direktorEmail').value || '').trim(),
+        };
+      case 4:
+        var r = document.querySelector('[name="kapital"]:checked');
+        return { kapital_tip: r ? r.value : 'jdoo' };
+      case 5:
+        var konjik = document.querySelector('[name="sjediste"]:checked');
+        var isKonjik = !konjik || konjik.value === 'konjik';
+        return {
+          koristi_konjik: isKonjik,
+          sjediste_adresa: isKonjik ? '' : (document.getElementById('sjelisteAdr').value||'').trim(),
+          sjediste_zip:    isKonjik ? '' : (document.getElementById('sjedistePtt').value||'').trim(),
+          sjediste_grad:   isKonjik ? '' : (document.getElementById('sjelisteGrad').value||'').trim(),
+        };
+      default:
+        return {};
+    }
+  }
 
-function validateStep(step) {
-  if (step === 1 && W.nkdSelected.length === 0) {
-    alert('Odaberite barem jednu djelatnost.'); return false;
+  // ── Validacija ──────────────────────────────────────────────────────────────
+  function validate(step) {
+    clearErrors();
+    switch(step) {
+      case 0:
+        if (!document.getElementById('tcCheckbox').checked) {
+          document.getElementById('tcError').classList.remove('d-none');
+          return false;
+        }
+        return true;
+      case 1:
+        if (nkdSelected.length === 0) {
+          document.getElementById('nkdError').classList.remove('d-none');
+          return false;
+        }
+        return true;
+      case 2:
+        var ime = (document.getElementById('firmaIme').value||'').trim();
+        if (ime.length < 3) {
+          document.getElementById('firmaError').classList.remove('d-none');
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
   }
-  if (step === 2) {
-    var ime = document.getElementById('firmaIme').value.trim();
-    if (ime.length < 3) { alert('Unesite ime firme.'); return false; }
-    W.data.firma_ime = ime;
-  }
-  if (step === 3) {
-    W.data.broj_osnivaca = document.getElementById('brojOsnivaca').value;
-    W.data.direktor_ime = document.getElementById('direktorIme').value.trim();
-    W.data.direktor_oib = document.getElementById('direktorOib').value.trim();
-    W.data.direktor_email = document.getElementById('direktorEmail').value.trim();
-  }
-  if (step === 4) {
-    W.data.kapital = document.querySelector('[name="kapital"]:checked').value;
-  }
-  if (step === 5) {
-    W.data.koristi_konjik = document.querySelector('[name="sjediste"]:checked').value === 'konjik';
-  }
-  return true;
-}
 
-// NKD semantički search
-var nkdTimer;
-document.getElementById('nkdFreeText').addEventListener('input', function() {
-  clearTimeout(nkdTimer);
-  var q = this.value.trim();
-  if (q.length < 2) { document.getElementById('nkdAiResults').style.display = 'none'; return; }
-  nkdTimer = setTimeout(function() {
-    fetch('/partners/wizard/nkd-semantic/?q=' + encodeURIComponent(q), {
-      headers: {'X-Requested-With': 'XMLHttpRequest'}
+  function clearErrors() {
+    ['tcError','nkdError','firmaError'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.add('d-none');
+    });
+  }
+
+  // ── AJAX save step ──────────────────────────────────────────────────────────
+  function saveStep(step, data, onSuccess) {
+    saving = true;
+    document.getElementById('savingIndicator').classList.remove('d-none');
+    document.getElementById('btnNext').disabled = true;
+
+    fetch('/hr/partners/wizard/save-step/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrf(),
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({ step: step, data: data }),
     })
     .then(function(r) { return r.json(); })
-    .then(function(data) { renderNkdResults(data); });
-  }, 350);
-});
-
-function renderNkdResults(items) {
-  var box = document.getElementById('nkdAiResults');
-  if (!items.length) { box.style.display = 'none'; return; }
-  box.innerHTML = items.map(function(item) {
-    var aiNote = item.ai_reason ? '<div style="font-size:.72rem;color:#6366f1;margin-top:2px">' + item.ai_reason + '</div>' : '';
-    return '<div class="px-3 py-2 nkd-ai-opt" style="cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:.84rem"'
-      + ' data-id="' + item.id + '" data-code="' + item.code + '" data-name="' + (item.name_hr || '').replace(/"/g, '') + '">'
-      + '<span class="badge bg-secondary me-1" style="font-size:.7rem">' + item.code + '</span>'
-      + (item.name_hr || item.name_en || '')
-      + aiNote
-      + '</div>';
-  }).join('');
-  box.style.display = 'block';
-
-  box.querySelectorAll('.nkd-ai-opt').forEach(function(el) {
-    el.addEventListener('mouseenter', function() { this.style.background = '#f8f9fa'; });
-    el.addEventListener('mouseleave', function() { this.style.background = ''; });
-    el.addEventListener('click', function() {
-      addNkd(this.dataset.id, this.dataset.code, this.dataset.name);
-      box.style.display = 'none';
-      document.getElementById('nkdFreeText').value = '';
+    .then(function(resp) {
+      saving = false;
+      document.getElementById('savingIndicator').classList.add('d-none');
+      document.getElementById('btnNext').disabled = false;
+      if (resp.ok) {
+        state = resp.draft;
+        if (onSuccess) onSuccess(resp.draft);
+      } else {
+        alert('Greška pri spremanju: ' + (resp.error || 'Pokušaj ponovo.'));
+      }
+    })
+    .catch(function(e) {
+      saving = false;
+      document.getElementById('savingIndicator').classList.add('d-none');
+      document.getElementById('btnNext').disabled = false;
+      console.error('Wizard save error:', e);
     });
-  });
-}
+  }
 
-function addNkd(id, code, name) {
-  if (W.nkdSelected.find(function(n) { return n.id == id; })) return;
-  if (W.nkdSelected.length >= 5) { alert('Maksimalno 5 djelatnosti.'); return; }
-  W.nkdSelected.push({id: id, code: code, name: name});
-  renderSelectedNkd();
-  updateNkdHidden();
-}
-
-function removeNkd(id) {
-  W.nkdSelected = W.nkdSelected.filter(function(n) { return n.id != id; });
-  renderSelectedNkd();
-  updateNkdHidden();
-}
-
-function renderSelectedNkd() {
-  var box = document.getElementById('selectedNkd');
-  box.innerHTML = W.nkdSelected.map(function(n) {
-    return '<span class="badge d-inline-flex align-items-center gap-1" style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;font-size:.8rem;padding:6px 10px">'
-      + '<span style="font-weight:700">' + n.code + '</span> ' + n.name
-      + '<button type="button" onclick="removeNkd(' + n.id + ')" style="background:none;border:none;color:#6366f1;cursor:pointer;padding:0 0 0 6px;font-size:1rem">&times;</button>'
-      + '</span>';
-  }).join('');
-}
-
-function updateNkdHidden() {
-  document.getElementById('nkdIds').value = W.nkdSelected.map(function(n) { return n.id; }).join(',');
-  W.data.nkd_ids = W.nkdSelected.map(function(n) { return n.id; });
-}
-
-// Sjedište toggle
-document.querySelectorAll('.sjediste-opt').forEach(function(lbl) {
-  lbl.addEventListener('click', function() {
-    document.querySelectorAll('.sjediste-opt').forEach(function(l) {
-      l.style.borderColor = ''; l.style.background = '';
+  // ── Goto (CustomEvent dispatcher) ──────────────────────────────────────────
+  function goto(step) {
+    document.querySelectorAll('.wizard-step').forEach(function(el) {
+      el.classList.add('d-none');
     });
-    this.style.borderColor = '#22c55e';
-    this.style.background = '#f0fdf4';
-    document.getElementById('vlastita_polja').classList.toggle(
-      'd-none', this.dataset.val !== 'vlastita'
-    );
-  });
-});
+    var target = document.querySelector('[data-step="' + step + '"]');
+    if (target) target.classList.remove('d-none');
 
-// Kapital toggle
-document.querySelectorAll('[name="kapital"]').forEach(function(radio) {
-  radio.addEventListener('change', function() {
-    document.getElementById('cardJdoo').style.background = '';
-    document.getElementById('cardJdoo').style.borderColor = '';
-    document.getElementById('cardDoo').style.background = '';
-    document.getElementById('cardDoo').style.borderColor = '';
-    var card = document.getElementById(this.value === 'jdoo' ? 'cardJdoo' : 'cardDoo');
-    card.style.background = '#eef2ff';
-    card.style.borderColor = '#6366f1';
-  });
-});
+    var total = 8; // koraci 0-7
+    document.getElementById('stepLabel').textContent = 'Korak ' + (step+1) + ' od ' + total;
+    document.getElementById('stepTitle').textContent = TITLES[step] || '';
+    document.getElementById('progressBar').style.width = Math.round((step+1)/total*100) + '%';
+    document.getElementById('btnBack').classList.toggle('d-none', step === 0);
 
-// Preview (korak 6)
-function loadPreview() {
-  W.data.nkd_ids = W.nkdSelected.map(function(n) { return n.id; });
-  fetch('/partners/wizard/preview/', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
-    body: JSON.stringify(W.data),
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (!data.valid) {
-      document.getElementById('previewErrors').innerHTML =
-        data.errors.map(function(e) { return '<div class="alert alert-warning py-1 small">' + e + '</div>'; }).join('');
+    var btn = document.getElementById('btnNext');
+    btn.innerHTML = step === 7
+      ? '<i class="fas fa-check me-2"></i>Završi'
+      : 'Dalje <i class="fas fa-arrow-right ms-2"></i>';
+
+    currentStep = step;
+
+    // CustomEvent — svaki modul može slušati
+    document.dispatchEvent(new CustomEvent('wizard:step', {
+      detail: { step: step, state: state }
+    }));
+  }
+
+  // ── Listener: wizard:step ───────────────────────────────────────────────────
+  document.addEventListener('wizard:step', function(e) {
+    var step = e.detail.step;
+
+    if (step === 4) {
+      // Highlightaj aktivni kapital card
+      document.querySelectorAll('.kapital-card').forEach(function(card) {
+        var radio = card.querySelector('input[type=radio]');
+        card.style.background = radio && radio.checked ? '#eef2ff' : '';
+        card.style.borderColor = radio && radio.checked ? '#6366f1' : '';
+      });
+    }
+
+    if (step === 5) {
+      // Highlightaj aktivnu sjedište opciju
+      highlightSjediste();
+    }
+
+    if (step === 6) {
+      loadPreview();
+    }
+
+    if (step === 7 && state) {
+      var path = state.pending_company_id ? 'start' : 'start';
+      var pathEl = document.getElementById('pathTitle');
+      var noteEl = document.getElementById('pathNote');
+      if (pathEl) pathEl.textContent =
+        parseInt(state.broj_osnivaca||1) > 3
+          ? '⚑ Preporučujemo javnog bilježnika'
+          : '✓ Može se registrirati online — START sustav';
+      if (noteEl) noteEl.textContent =
+        parseInt(state.broj_osnivaca||1) > 3
+          ? 'Više od 3 osnivača — potreban javni bilježnik ili e-Notar.'
+          : 'Online registracija (3,98 EUR). Potrebna eOsobna iskaznica.';
+    }
+  });
+
+  // ── next() ──────────────────────────────────────────────────────────────────
+  function next() {
+    if (saving) return;
+    if (!validate(currentStep)) return;
+
+    var stepData = collectState(currentStep);
+    var nextStep = currentStep + 1;
+
+    if (currentStep === 6) {
+      // Korak 6 je read-only preview — samo goto 7
+      saveStep(7, {}, function() { goto(7); });
       return;
     }
-    var s = data.summary;
-    document.getElementById('previewBox').innerHTML =
-      '<table class="table table-sm mb-0">'
-      + '<tr><td class="text-muted">Firma</td><td class="fw-semibold">' + s.firma_ime + ' ' + s.tip + '</td></tr>'
-      + '<tr><td class="text-muted">Kapital</td><td>' + s.kapital + '</td></tr>'
-      + '<tr><td class="text-muted">Osnivači</td><td>' + s.broj_osnivaca + '</td></tr>'
-      + '<tr><td class="text-muted">Sjedište</td><td>' + s.sjediste + '</td></tr>'
-      + '<tr><td class="text-muted">Djelatnosti</td><td>'
-      + s.nkd.map(function(n) { return '<span class="badge bg-secondary me-1">' + n.code + '</span>' + n.name_hr; }).join('<br>')
-      + '</td></tr>'
-      + '</table>';
 
-    // Spremi za korak 7
-    W.data.registration_path = s.registration_path;
-    W.data.registration_note = s.registration_note;
-  });
-}
-
-// Kad dođemo na korak 7 — pokaži put registracije
-var origGoto = wizardGoto;
-wizardGoto = function(step) {
-  origGoto(step);
-  if (step === 7 && W.data.registration_path) {
-    document.getElementById('pathTitle').textContent =
-      W.data.registration_path === 'start' ? '✓ Može se registrirati online — START sustav' : '⚑ Preporučujemo bilježnika';
-    document.getElementById('pathNote').textContent = W.data.registration_note || '';
+    saveStep(currentStep, stepData, function(draft) {
+      // Korak 2 — pokaži pending company badge
+      if (currentStep === 2 && draft.pending_company_id) {
+        var badge = document.getElementById('pendingCompanyBadge');
+        var name = document.getElementById('pendingCompanyName');
+        if (badge) badge.classList.remove('d-none');
+        if (name) name.textContent = draft.firma_ime;
+      }
+      goto(nextStep);
+    });
   }
-};
 
-function downloadSuglasnost() {
-  var params = new URLSearchParams({
-    klijent_ime: W.data.firma_ime || '',
-    klijent_oib: W.data.direktor_oib || '',
-    klijent_direktor: W.data.direktor_ime || '',
-  });
-  window.open('/partners/wizard/suglasnost-pdf/?' + params.toString(), '_blank');
-}
-
-function getCsrf() {
-  var m = document.cookie.match(/csrftoken=([^;]+)/);
-  return m ? m[1] : '';
-}
-
-document.addEventListener('click', function(e) {
-  var box = document.getElementById('nkdAiResults');
-  if (!box.contains(e.target) && !document.getElementById('nkdFreeText').contains(e.target)) {
-    box.style.display = 'none';
+  // ── back() ──────────────────────────────────────────────────────────────────
+  function back() {
+    if (currentStep > 0) goto(currentStep - 1);
   }
-});
 
-// Inicijalni prikaz
-wizardGoto(1);
+  // ── reset() ─────────────────────────────────────────────────────────────────
+  function reset() {
+    if (!confirm('Obrisat ćeš sve unesene podatke i početi ispočetka. Nastavi?')) return;
+    fetch('/hr/partners/wizard/reset/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCsrf()},
+    }).then(function() {
+      window.location.reload();
+    });
+  }
+
+  // ── downloadSuglasnost() ────────────────────────────────────────────────────
+  function downloadSuglasnost() {
+    window.open('/hr/partners/wizard/suglasnost-pdf/', '_blank');
+  }
+
+  // ── loadPreview() ───────────────────────────────────────────────────────────
+  function loadPreview() {
+    var box = document.getElementById('previewBox');
+    if (box) box.innerHTML = '<div class="text-muted"><i class="fas fa-spinner fa-spin me-2"></i>Učitavanje...</div>';
+
+    fetch('/hr/partners/wizard/step-preview/', {
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.valid) {
+        var errBox = document.getElementById('previewErrors');
+        if (errBox) errBox.innerHTML = data.errors.map(function(e) {
+          return '<div class="alert alert-warning py-1 small">' + e + '</div>';
+        }).join('');
+        if (box) box.innerHTML = '<div class="text-danger small">Ispravi greške i vrati se na odgovarajući korak.</div>';
+        return;
+      }
+      var s = data.summary;
+      var nkdHtml = (s.nkd||[]).map(function(n) {
+        return '<span class="badge bg-secondary me-1">' + n.code + '</span>' + (n.name_hr||'');
+      }).join('<br>');
+
+      if (box) box.innerHTML =
+        '<table class="table table-sm mb-0">'
+        + '<tr><td class="text-muted" style="width:35%">Firma</td><td class="fw-semibold">' + (s.firma_ime||'') + ' ' + (s.tip||'') + '</td></tr>'
+        + '<tr><td class="text-muted">Kapital</td><td>' + (s.kapital||'') + '</td></tr>'
+        + '<tr><td class="text-muted">Osnivači</td><td>' + (s.broj_osnivaca||1) + '</td></tr>'
+        + '<tr><td class="text-muted">Sjedište</td><td>' + (s.sjediste||'') + '</td></tr>'
+        + '<tr><td class="text-muted">Djelatnosti</td><td>' + nkdHtml + '</td></tr>'
+        + '<tr><td class="text-muted">Registracija</td><td>' + (s.registration_note||'') + '</td></tr>'
+        + '</table>';
+    });
+  }
+
+  // ── NKD search ──────────────────────────────────────────────────────────────
+  var nkdTimer;
+  function initNkdSearch() {
+    var inp = document.getElementById('nkdFreeText');
+    if (!inp) return;
+    inp.addEventListener('input', function() {
+      clearTimeout(nkdTimer);
+      var q = this.value.trim();
+      if (q.length < 2) { closeNkdDropdown(); return; }
+      nkdTimer = setTimeout(function() {
+        fetch('/hr/partners/wizard/nkd-semantic/?q=' + encodeURIComponent(q), {
+          headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(function(r) { return r.json(); })
+        .then(renderNkdDropdown);
+      }, 350);
+    });
+  }
+
+  function renderNkdDropdown(items) {
+    var box = document.getElementById('nkdDropdown');
+    if (!box) return;
+    if (!items || !items.length) { box.style.display='none'; return; }
+    box.innerHTML = items.map(function(item) {
+      var ai = item.ai_reason
+        ? '<div style="font-size:.72rem;color:#6366f1;margin-top:2px">' + item.ai_reason + '</div>'
+        : '';
+      return '<div class="px-3 py-2 nkd-drop-opt" style="cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:.84rem"'
+        + ' data-id="' + item.id + '" data-code="' + item.code
+        + '" data-name="' + (item.name_hr||'').replace(/"/g,'') + '">'
+        + '<span class="badge bg-secondary me-1" style="font-size:.7rem">' + item.code + '</span>'
+        + (item.name_hr || item.name_en || '') + ai + '</div>';
+    }).join('');
+    box.style.display = 'block';
+    box.querySelectorAll('.nkd-drop-opt').forEach(function(el) {
+      el.addEventListener('mouseenter', function() { this.style.background='#f8f9fa'; });
+      el.addEventListener('mouseleave', function() { this.style.background=''; });
+      el.addEventListener('click', function() {
+        addNkd(this.dataset.id, this.dataset.code, this.dataset.name);
+        closeNkdDropdown();
+        document.getElementById('nkdFreeText').value = '';
+      });
+    });
+  }
+
+  function closeNkdDropdown() {
+    var box = document.getElementById('nkdDropdown');
+    if (box) box.style.display = 'none';
+  }
+
+  function addNkd(id, code, name) {
+    if (nkdSelected.find(function(n) { return String(n.id)===String(id); })) return;
+    if (nkdSelected.length >= 5) { alert('Maksimalno 5 djelatnosti.'); return; }
+    nkdSelected.push({id: id, code: code, name: name});
+    renderSelectedNkd();
+  }
+
+  function removeNkd(id) {
+    nkdSelected = nkdSelected.filter(function(n) { return String(n.id)!==String(id); });
+    renderSelectedNkd();
+  }
+
+  function renderSelectedNkd() {
+    var box = document.getElementById('selectedNkdBox');
+    if (!box) return;
+    box.innerHTML = nkdSelected.map(function(n) {
+      return '<span class="badge d-inline-flex align-items-center gap-1"'
+        + ' style="background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe;font-size:.8rem;padding:6px 10px">'
+        + '<span class="fw-bold">' + n.code + '</span> ' + n.name
+        + '<button type="button" onclick="Wizard._removeNkd(\'' + n.id + '\')"'
+        + ' style="background:none;border:none;color:#6366f1;cursor:pointer;padding:0 0 0 6px;font-size:1rem">&times;</button>'
+        + '</span>';
+    }).join('');
+  }
+
+  // ── sjedište highlight ──────────────────────────────────────────────────────
+  function highlightSjediste() {
+    var checked = document.querySelector('[name="sjediste"]:checked');
+    document.querySelectorAll('.sjediste-opt').forEach(function(el) {
+      el.style.borderColor=''; el.style.background='';
+    });
+    if (checked) {
+      var lbl = checked.closest('.sjediste-opt');
+      if (lbl) {
+        lbl.style.borderColor = checked.value==='konjik' ? '#22c55e' : '#6366f1';
+        lbl.style.background = checked.value==='konjik' ? '#f0fdf4' : '#eef2ff';
+      }
+      document.getElementById('vlastita_polja').classList.toggle('d-none', checked.value==='konjik');
+    }
+  }
+
+  // ── sjedište event ──────────────────────────────────────────────────────────
+  document.querySelectorAll('.sjediste-opt').forEach(function(lbl) {
+    lbl.addEventListener('click', highlightSjediste);
+  });
+
+  document.querySelectorAll('.kapital-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      document.querySelectorAll('.kapital-card').forEach(function(c) {
+        c.style.background=''; c.style.borderColor='';
+      });
+      this.style.background='#eef2ff'; this.style.borderColor='#6366f1';
+    });
+  });
+
+  // ── close dropdown on outside click ────────────────────────────────────────
+  document.addEventListener('click', function(e) {
+    var inp = document.getElementById('nkdFreeText');
+    var box = document.getElementById('nkdDropdown');
+    if (box && inp && !box.contains(e.target) && !inp.contains(e.target)) {
+      closeNkdDropdown();
+    }
+  });
+
+  // ── getCsrf ─────────────────────────────────────────────────────────────────
+  function getCsrf() {
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  // ── init ────────────────────────────────────────────────────────────────────
+  function init() {
+    initNkdSearch();
+    renderSelectedNkd();
+    // Resume na zadnji korak (ne više od 6 — preview uvijek refreshamo)
+    var startStep = Math.min(state.current_step || 0, 6);
+    goto(startStep);
+  }
+
+  // Public API
+  return {
+    next: next,
+    back: back,
+    reset: reset,
+    downloadSuglasnost: downloadSuglasnost,
+    _removeNkd: removeNkd,
+    init: init,
+  };
+})();
+
+document.addEventListener('DOMContentLoaded', function() { Wizard.init(); });
 </script>
 {% endblock %}

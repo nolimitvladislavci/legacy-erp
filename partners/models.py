@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from companies.models import Company
 from core.managers import CompanyManager
@@ -338,3 +339,73 @@ class AgentPayout(models.Model):
 
     def __str__(self):
         return '%s — %02d/%d — %s EUR' % (self.agent.name, self.period_month, self.period_year, self.amount)
+
+
+class WizardDraft(models.Model):
+    """
+    Perzistentni state za Ured u džepu onboarding wizard.
+    Kreira se na koraku 0 (T&C prihvat), ažurira se na svakom "Dalje".
+    """
+    KAPITAL_CHOICES = [('jdoo', 'j.d.o.o.'), ('doo', 'd.o.o.')]
+
+    session_key      = models.CharField(max_length=64, unique=True, db_index=True)
+    ip_address       = models.GenericIPAddressField(null=True, blank=True)
+    user_agent       = models.TextField(blank=True, default='')
+
+    # Korak 0 — T&C / GDPR
+    tc_accepted      = models.BooleanField(default=False)
+    tc_accepted_at   = models.DateTimeField(null=True, blank=True)
+
+    # Korak 1 — djelatnosti (NKD)
+    nkd_codes_json   = models.JSONField(default=list, blank=True)
+
+    # Korak 2 — ime firme
+    firma_ime        = models.CharField(max_length=200, blank=True, default='')
+
+    # Korak 3 — osnivači
+    broj_osnivaca    = models.PositiveSmallIntegerField(default=1)
+    direktor_ime     = models.CharField(max_length=200, blank=True, default='')
+    direktor_oib     = models.CharField(max_length=11, blank=True, default='')
+    direktor_email   = models.EmailField(blank=True, default='')
+
+    # Korak 4 — oblik društva
+    kapital_tip      = models.CharField(max_length=10, default='jdoo', choices=KAPITAL_CHOICES)
+
+    # Korak 5 — sjedište
+    koristi_konjik   = models.BooleanField(default=True)
+    sjediste_adresa  = models.CharField(max_length=200, blank=True, default='')
+    sjediste_grad    = models.CharField(max_length=100, blank=True, default='')
+    sjediste_zip     = models.CharField(max_length=20, blank=True, default='')
+
+    # Funnel tracking
+    current_step     = models.PositiveSmallIntegerField(default=0)
+    completed        = models.BooleanField(default=False)
+    completed_at     = models.DateTimeField(null=True, blank=True)
+
+    # FK veze
+    pending_company  = models.ForeignKey(
+        'companies.Company', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='wizard_drafts')
+    accounting_firm  = models.ForeignKey(
+        'companies.Company', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='wizard_managed_drafts')
+
+    created_at  = models.DateTimeField(default=timezone.now)
+    updated_at  = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'partners_wizard_draft'
+        ordering = ['-updated_at']
+        verbose_name = 'Wizard Draft'
+        verbose_name_plural = 'Wizard Drafts'
+
+    def __str__(self):
+        return f'{self.firma_ime or "(bez naziva)"} | korak {self.current_step} | {self.created_at:%d.%m.%Y}'
+
+    @property
+    def display_name(self):
+        return self.firma_ime or f'Draft #{self.pk}'
+
+    @property
+    def registration_path(self):
+        return 'biljeznik' if self.broj_osnivaca > 3 else 'start'

@@ -21,8 +21,10 @@ urlpatterns = [
     path("<int:partner_id>/send-portal-whatsapp/", portal_views.send_portal_whatsapp, name="send_portal_whatsapp"),
     # Ured u džepu — onboarding wizard
     path("wizard/", wizard_views.wizard_view, name="wizard"),
-    path("wizard/nkd-semantic/", wizard_views.wizard_nkd_semantic, name="wizard_nkd_semantic"),
+    path("wizard/save-step/", wizard_views.wizard_save_step, name="wizard_save_step"),
+    path("wizard/step-preview/", wizard_views.wizard_step_preview, name="wizard_step_preview"),
+    path("wizard/reset/", wizard_views.wizard_reset, name="wizard_reset"),
     path("wizard/suglasnost-pdf/", wizard_views.wizard_suglasnost_pdf, name="wizard_suglasnost_pdf"),
-    path("wizard/preview/", wizard_views.wizard_preview, name="wizard_preview"),
+    path("wizard/nkd-semantic/", wizard_views.wizard_nkd_semantic, name="wizard_nkd_semantic"),
 ]
 
