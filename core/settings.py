@@ -144,6 +144,7 @@ MIDDLEWARE = [
     "core.middleware.CompanyBranchMiddleware",
     "core.middleware.AdminLangRedirectMiddleware",
     "core.middleware.ForcePasswordChangeMiddleware",
+    "core.middleware.Force2FAMiddleware",
     "registration.middleware.SubscriptionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
