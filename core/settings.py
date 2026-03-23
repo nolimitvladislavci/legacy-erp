@@ -483,6 +483,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "intelligence.tasks.check_auto_listings",
         "schedule": crontab(hour=7, minute=0),
     },
+    # POS: Zakonski alarm za bonove bez JIR-a (čl.11 Zakona o fiskalizaciji)
+    "pos-check-fiscal-deadline": {
+        "task": "pos.check_fiscal_deadline",
+        "schedule": 1800,  # svakih 30 min
+    },
     # ── LIMIT Connect AI ──
     "ai-morning-report": {
         "task": "limit_connect_ai.tasks.morning_report_all",

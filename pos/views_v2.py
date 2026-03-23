@@ -869,6 +869,231 @@ def pulse_mark_read(request):
     return JsonResponse({'ok': True})
 
 
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# OFFLINE SYNC — Batch endpoint za IndexedDB bonove
+# ServiceWorker šalje batch kad se internet vrati (Background Sync API)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@csrf_exempt
+@require_POST
+def offline_sync(request):
+    """
+    Prima batch offline bonova iz IndexedDB via ServiceWorker.
+    Idempotentno po offline_id — duplikati se preskaču.
+
+    Payload: {
+      "session_id": 123,
+      "receipts": [
+        {
+          "offline_id": "uuid-offline-1",
+          "items": [{"item_id": 5, "quantity": 2, "unit_price": "3.50", "description": "Kava", "tax_rate": "25.00"}],
+          "payment_method": "CASH",
+          "amount_paid": "7.00",
+          "tip_amount": "0",
+          "note": "",
+          "created_at": "2026-03-23T10:15:00Z"
+        }
+      ]
+    }
+    """
+    # Auth: cookie session or Authorization header
+    if not request.user.is_authenticated:
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        if auth_header.startswith('Bearer '):
+            from rest_framework.authtoken.models import Token
+            try:
+                token = Token.objects.select_related('user').get(key=auth_header[7:])
+                request.user = token.user
+            except Exception:
+                pass
+        if not request.user.is_authenticated:
+            return JsonResponse({'ok': False, 'error': 'Auth required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+
+    session_id = data.get('session_id')
+    receipts_data = data.get('receipts', [])
+
+    if not session_id or not receipts_data:
+        return JsonResponse({'ok': False, 'error': 'session_id i receipts su obavezni'}, status=400)
+
+    if len(receipts_data) > 50:
+        return JsonResponse({'ok': False, 'error': 'Max 50 bonova po batchu'}, status=400)
+
+    session = POSSession.objects.filter(pk=session_id).select_related('terminal__company').first()
+    if not session:
+        return JsonResponse({'ok': False, 'error': 'Sesija ne postoji'}, status=404)
+
+    company = session.terminal.company
+    results = []
+
+    for r_data in receipts_data:
+        offline_id = str(r_data.get('offline_id', ''))[:64]
+        if not offline_id:
+            results.append({'offline_id': '', 'ok': False, 'error': 'offline_id obavezan'})
+            continue
+
+        # Idempotentnost — provjeri da offline_id nije već procesiran
+        existing = POSReceipt.objects.filter(
+            session__terminal__company=company,
+            note__contains=f'[SW-SYNC:{offline_id}]',
+        ).first()
+        if existing:
+            results.append({
+                'offline_id': offline_id,
+                'ok': True,
+                'duplicate': True,
+                'receipt_id': existing.pk,
+                'receipt_number': existing.receipt_number,
+            })
+            continue
+
+        try:
+            with transaction.atomic():
+                items_data = r_data.get('items', [])
+                if not items_data:
+                    results.append({'offline_id': offline_id, 'ok': False, 'error': 'Nema stavki'})
+                    continue
+
+                payment_method = str(r_data.get('payment_method', 'CASH')).upper()
+                amount_paid = Decimal(str(r_data.get('amount_paid', '0')))
+                tip_amount = Decimal(str(r_data.get('tip_amount', '0')))
+                note = str(r_data.get('note', ''))[:500]
+
+                last_r = session.receipts.order_by('-receipt_number').first()
+                next_rn = (last_r.receipt_number + 1) if last_r else 1
+
+                receipt = POSReceipt.objects.create(
+                    session=session,
+                    receipt_number=next_rn,
+                    note=f'{note} [SW-SYNC:{offline_id}]'.strip(),
+                    status='paid',
+                    paid_at=tz.now(),
+                    order_source='pos',
+                )
+
+                subtotal = Decimal('0')
+                tax_total = Decimal('0')
+
+                for item_data in items_data:
+                    qty = Decimal(str(item_data.get('quantity', '1')))
+                    price = Decimal(str(item_data.get('unit_price', '0')))
+                    tax_rate = Decimal(str(item_data.get('tax_rate', '25.00')))
+                    desc = str(item_data.get('description', 'Artikl'))[:255]
+                    item_id = item_data.get('item_id')
+
+                    line_total = (qty * price).quantize(Decimal('0.01'))
+                    line_tax = (line_total * tax_rate / (100 + tax_rate)).quantize(Decimal('0.01'))
+                    line_net = line_total - line_tax
+
+                    subtotal += line_net
+                    tax_total += line_tax
+
+                    POSReceiptItem.objects.create(
+                        receipt=receipt,
+                        inventory_item_id=item_id if item_id else None,
+                        description=desc,
+                        quantity=qty,
+                        unit_price=price,
+                        tax_rate=tax_rate,
+                    )
+
+                    # Stock deduction
+                    if item_id:
+                        try:
+                            from inventory.models import StockMovement
+                            StockMovement.objects.create(
+                                item_id=item_id,
+                                movement_type='out',
+                                quantity=qty,
+                                unit_price=price,
+                                reason=f'POS offline bon #{next_rn} [SW-SYNC]',
+                                performed_by=request.user,
+                            )
+                        except Exception:
+                            pass
+
+                # Tip
+                if tip_amount > 0:
+                    POSReceiptItem.objects.create(
+                        receipt=receipt,
+                        description='Napojnica',
+                        quantity=1,
+                        unit_price=tip_amount,
+                        tax_rate=Decimal('0'),
+                        is_tip=True,
+                    )
+
+                total = subtotal + tax_total + tip_amount
+                receipt.subtotal = subtotal
+                receipt.tax_amount = tax_total
+                receipt.total = total
+                receipt.save(update_fields=['subtotal', 'tax_amount', 'total'])
+
+                change = max(amount_paid - total, Decimal('0'))
+                POSPaymentLine.objects.create(
+                    receipt=receipt,
+                    method=payment_method,
+                    amount=amount_paid if amount_paid > 0 else total,
+                    change_given=change,
+                )
+
+                # Fiskalizacija (naknadna dostava — NakDost=true)
+                fiscal_result = {}
+                try:
+                    from fiskalizacija.fisk import fiscalize_receipt
+                    jir = fiscalize_receipt(receipt, naknadna_dostava=True)
+                    if jir:
+                        fiscal_result = {'jir': jir, 'zki': receipt.zki}
+                except Exception as e:
+                    fiscal_result = {'fiscal_warning': str(e)[:100]}
+                    logger.warning('Offline sync fiskalizacija failed for %s: %s', offline_id, e)
+
+                results.append({
+                    'offline_id': offline_id,
+                    'ok': True,
+                    'duplicate': False,
+                    'receipt_id': receipt.pk,
+                    'receipt_number': next_rn,
+                    'total': str(total),
+                    **fiscal_result,
+                })
+
+        except Exception as e:
+            logger.error('Offline sync error for %s: %s', offline_id, e, exc_info=True)
+            results.append({'offline_id': offline_id, 'ok': False, 'error': str(e)[:100]})
+
+    synced = sum(1 for r in results if r.get('ok'))
+    failed = len(results) - synced
+
+    # Pulse event
+    if synced > 0:
+        try:
+            from pos.pulse import emit
+            emit(company, 'offline_sync', 'info',
+                 f'Offline sync: {synced} bon(ova) sinhronizirano',
+                 f'{synced} OK, {failed} failed',
+                 terminal=session.terminal,
+                 metadata={'results': results})
+        except Exception:
+            pass
+
+    logger.info('[OFFLINE-SYNC] company=%s session=%s synced=%d failed=%d',
+                company.pk, session_id, synced, failed)
+
+    return JsonResponse({
+        'ok': True,
+        'synced': synced,
+        'failed': failed,
+        'results': results,
+    })
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # B-01: ServiceWorker za background sync
 # ══════════════════════════════════════════════════════════════════════════════
@@ -905,40 +1130,53 @@ async function syncOfflineReceipts() {
   const index = store.index('synced');
   const unsynced = await getAllFromIndex(index, 0);
 
-  for (const receipt of unsynced) {
-    try {
-      const resp = await fetch('/pos/session/' + receipt.session_id + '/quick-pay/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: receipt.session_id,
-          items: receipt.items,
-          payment_method: receipt.payment_method,
-          amount_paid: receipt.amount_paid,
-          tip_amount: receipt.tip_amount,
-          note: (receipt.note || '') + ' [SW-SYNC:' + receipt.offline_id + ']',
-        })
-      });
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.ok) {
-          const utx = db.transaction('receipts', 'readwrite');
-          receipt.synced = 1;
-          receipt.server_receipt_id = data.receipt_id;
-          utx.objectStore('receipts').put(receipt);
-          // Notify all tabs
-          self.clients.matchAll().then(clients => {
-            clients.forEach(c => c.postMessage({
-              type: 'SYNC_COMPLETE',
-              offline_id: receipt.offline_id,
-              receipt_id: data.receipt_id,
-            }));
-          });
-        }
+  if (unsynced.length === 0) return;
+
+  // Batch sync — svi offline bonovi u jednom requestu
+  try {
+    const batch = unsynced.map(r => ({
+      offline_id: r.offline_id,
+      items: r.items,
+      payment_method: r.payment_method,
+      amount_paid: r.amount_paid,
+      tip_amount: r.tip_amount || 0,
+      note: r.note || '',
+      created_at: r.created_at,
+    }));
+    const resp = await fetch('/pos/api/offline-sync/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: unsynced[0].session_id,
+        receipts: batch,
+      })
+    });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!data.ok) return;
+
+    const utx = db.transaction('receipts', 'readwrite');
+    const ustore = utx.objectStore('receipts');
+    for (const result of (data.results || [])) {
+      if (!result.ok) continue;
+      const match = unsynced.find(r => r.offline_id === result.offline_id);
+      if (match) {
+        match.synced = 1;
+        match.server_receipt_id = result.receipt_id;
+        ustore.put(match);
       }
-    } catch (err) {
-      console.error('SW sync error:', err);
     }
+
+    // Notify all tabs
+    self.clients.matchAll().then(clients => {
+      clients.forEach(c => c.postMessage({
+        type: 'BATCH_SYNC_COMPLETE',
+        synced: data.synced,
+        results: data.results,
+      }));
+    });
+  } catch (err) {
+    console.error('SW batch sync error:', err);
   }
 }
 

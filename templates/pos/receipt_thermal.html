@@ -195,8 +195,10 @@ td      { padding: 2px 0; vertical-align: top; }
     {% if receipt.jir %}
     <div>JIR: {{ receipt.jir }}</div>
     {% else %}
-    <div style="color:#c00;font-weight:bold">JIR: Nije ishođen (Offline)</div>
-    <div style="font-size:6pt;color:#c00">Račun će biti naknadno prijavljen Poreznoj upravi</div>
+    <div style="border:2px solid #c00;padding:4px;margin:4px 0;text-align:center">
+      <div style="color:#c00;font-weight:bold;font-size:9pt">VEZA S CIS-om NIJE OSTVARENA</div>
+      <div style="font-size:6.5pt;color:#c00">Obveznik fiskalizacije će naknadno dostaviti<br>račun Poreznoj upravi u zakonskom roku od 48h<br>(čl. 41. st. 3. Zakona o fiskalizaciji)</div>
+    </div>
     {% endif %}
     {% if receipt.fiscal_datetime %}<div>Fiskalizirano: {{ receipt.fiscal_datetime|date:"d.m.Y H:i:s" }}</div>{% endif %}
     {% if business_location %}

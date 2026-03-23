@@ -175,6 +175,8 @@ urlpatterns = [
     path('pulse/',                               views_v2.pulse_dashboard,       name='pulse_dashboard'),
     path('api/pulse/',                           views_v2.pulse_api,             name='pulse_api'),
     path('api/pulse/read/',                      views_v2.pulse_mark_read,       name='pulse_mark_read'),
+    # Offline Sync (ServiceWorker batch)
+    path('api/offline-sync/',                    views_v2.offline_sync,          name='offline_sync'),
     # B-01: ServiceWorker
     path('sw.js',                                views_v2.pos_service_worker,    name='pos_sw'),
     # Hash Chain — kriptografski audit trail
