@@ -4,116 +4,239 @@
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { margin: 15mm 15mm 20mm 15mm; size: A4; }
+  @page { margin: 15mm 15mm 22mm 15mm; size: A4; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; }
-  
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24pt; border-bottom:2pt solid #0f172a; padding-bottom:16pt; }
-  .logo-area h1 { font-size:18pt; font-weight:700; color:#0f172a; letter-spacing:1px; }
-  .logo-area .subtitle { font-size:7.5pt; color:#64748b; letter-spacing:2px; text-transform:uppercase; margin-top:2pt; }
-  .issuer-info { text-align:right; font-size:8.5pt; color:#475569; line-height:1.6; }
-  .issuer-info strong { color:#0f172a; font-size:9pt; }
 
-  .invoice-meta { display:flex; justify-content:space-between; margin-bottom:20pt; }
-  .invoice-title { }
-  .invoice-title h2 { font-size:20pt; font-weight:700; color:#0f172a; }
-  .invoice-title .number { font-size:11pt; color:#c9a84c; font-weight:600; margin-top:4pt; }
-  .invoice-title .status { display:inline-block; margin-top:6pt; padding:2pt 8pt; background:#0f172a; color:white; font-size:7pt; letter-spacing:1px; text-transform:uppercase; }
-  
-  .dates-box { text-align:right; }
-  .date-row { display:flex; gap:12pt; justify-content:flex-end; margin-bottom:4pt; }
-  .date-label { font-size:8pt; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; width:90pt; text-align:right; }
-  .date-val { font-size:8.5pt; font-weight:600; color:#0f172a; width:70pt; text-align:right; }
+  /* ── HEADER 3-stupačni ───────────────────────────────────────── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18pt;
+    border-bottom: 2pt solid #0f172a;
+    padding-bottom: 13pt;
+  }
+  .hdr-left {
+    width: 36%;
+    font-size: 8pt;
+    color: #475569;
+    line-height: 1.65;
+  }
+  .hdr-left .group-name {
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4pt;
+  }
+  .hdr-left .web-links {
+    margin-top: 5pt;
+    font-size: 7pt;
+    color: #94a3b8;
+    letter-spacing: 0.3px;
+  }
+  .hdr-center {
+    width: 26%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 6pt;
+  }
+  .hdr-center .logo-img {
+    max-width: 120pt;
+    max-height: 52pt;
+    object-fit: contain;
+  }
+  .hdr-center .logo-text {
+    font-size: 15pt;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+  .hdr-center .tagline {
+    font-size: 7pt;
+    color: #94a3b8;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4pt;
+  }
+  .hdr-right {
+    width: 34%;
+    text-align: right;
+  }
+  .hdr-right .doc-type {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+  }
+  .hdr-right .doc-number {
+    font-size: 10pt;
+    color: #c9a84c;
+    font-weight: 600;
+    margin-top: 3pt;
+  }
+  .hdr-right .doc-status {
+    display: inline-block;
+    margin-top: 4pt;
+    padding: 2pt 7pt;
+    background: #0f172a;
+    color: white;
+    font-size: 7pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .hdr-right .doc-dates { margin-top: 6pt; }
+  .date-row { display:flex; gap:8pt; justify-content:flex-end; margin-bottom:3pt; }
+  .date-label { font-size:7.5pt; color:#64748b; text-align:right; }
+  .date-val { font-size:8pt; font-weight:600; color:#0f172a; min-width:52pt; text-align:right; }
 
-  .parties { display:flex; gap:20pt; margin-bottom:20pt; }
-  .party-box { flex:1; background:#f8fafc; padding:12pt; border-left:3pt solid #c9a84c; }
+  /* ── PARTIES ─────────────────────────────────────────────────── */
+  .parties { display:flex; gap:16pt; margin-bottom:18pt; }
+  .party-box { flex:1; background:#f8fafc; padding:11pt; border-left:3pt solid #c9a84c; }
   .party-box.issuer { border-left-color:#0f172a; }
-  .party-label { font-size:7pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:6pt; }
-  .party-name { font-size:10.5pt; font-weight:700; color:#0f172a; margin-bottom:4pt; }
+  .party-label { font-size:7pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:5pt; }
+  .party-name { font-size:10.5pt; font-weight:700; color:#0f172a; margin-bottom:3pt; }
   .party-detail { font-size:8.5pt; color:#475569; line-height:1.6; }
 
-  table { width:100%; border-collapse:collapse; margin-bottom:16pt; }
+  /* ── TABLE ───────────────────────────────────────────────────── */
+  table { width:100%; border-collapse:collapse; margin-bottom:14pt; }
   thead tr { background:#0f172a; color:white; }
-  thead th { padding:7pt 8pt; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; text-align:left; }
-  thead th:last-child, thead th:nth-child(3), thead th:nth-child(4) { text-align:right; }
+  thead th { padding:6pt 7pt; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; text-align:left; }
+  thead th:last-child, thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5) { text-align:right; }
   tbody tr { border-bottom:0.5pt solid #e2e8f0; }
   tbody tr:nth-child(even) { background:#f8fafc; }
-  tbody td { padding:7pt 8pt; font-size:9pt; color:#374151; }
-  tbody td:last-child, tbody td:nth-child(3), tbody td:nth-child(4) { text-align:right; }
-  tfoot td { padding:5pt 8pt; font-size:9pt; }
+  tbody td { padding:6pt 7pt; font-size:9pt; color:#374151; }
+  tbody td:last-child, tbody td:nth-child(3), tbody td:nth-child(4), tbody td:nth-child(5) { text-align:right; }
 
-  .totals { display:flex; justify-content:flex-end; margin-bottom:20pt; }
-  .totals-table { width:200pt; }
+  /* ── TOTALS ──────────────────────────────────────────────────── */
+  .totals { display:flex; justify-content:flex-end; margin-bottom:14pt; }
+  .totals-table { width:215pt; }
   .totals-table tr td { padding:4pt 6pt; font-size:9pt; }
   .totals-table tr td:last-child { text-align:right; font-weight:600; }
   .totals-table .total-row td { background:#0f172a; color:white; font-size:11pt; font-weight:700; padding:7pt 6pt; }
-  .totals-table .total-row td:first-child { border-radius:0; }
 
-  .payment-section { display:flex; gap:20pt; margin-bottom:20pt; }
-  .payment-box { flex:1; background:#f8fafc; padding:10pt; border:0.5pt solid #e2e8f0; }
-  .payment-box h4 { font-size:8pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:8pt; }
+  /* ── PAYMENT + QR ────────────────────────────────────────────── */
+  .payment-section { display:flex; gap:16pt; align-items:flex-start;
+    background:#f8fafc; border:0.5pt solid #e2e8f0; padding:10pt; margin-bottom:14pt; }
+  .payment-box { flex:1; }
+  .payment-box h4 { font-size:7.5pt; text-transform:uppercase; letter-spacing:1px; color:#64748b; margin-bottom:7pt; }
   .payment-row { display:flex; justify-content:space-between; margin-bottom:3pt; }
   .payment-label { font-size:8pt; color:#64748b; }
   .payment-val { font-size:8.5pt; font-weight:600; color:#0f172a; }
+  .qr-wrap { text-align:center; min-width:84pt; }
+  .qr-wrap p { font-size:6.5pt; color:#64748b; margin-top:3pt; line-height:1.3; }
 
-  .fiscal-box { background:#f0fdf4; border:0.5pt solid #86efac; padding:8pt 12pt; margin-bottom:16pt; }
-  .fiscal-box h4 { font-size:7.5pt; text-transform:uppercase; letter-spacing:1px; color:#16a34a; margin-bottom:4pt; }
+  /* ── FISCAL ──────────────────────────────────────────────────── */
+  .fiscal-box { background:#f0fdf4; border:0.5pt solid #86efac;
+    padding:8pt 10pt; margin-bottom:14pt; }
+  .fiscal-box h4 { font-size:7.5pt; text-transform:uppercase; letter-spacing:1px;
+    color:#16a34a; margin-bottom:4pt; }
   .fiscal-codes { display:flex; gap:16pt; }
   .fiscal-code { font-size:8pt; }
-  .fiscal-code span { font-weight:600; color:#0f172a; font-family: monospace; }
+  .fiscal-code span { font-weight:600; color:#0f172a; font-family:monospace; }
 
-  .qr-section { display:flex; justify-content:flex-end; margin-bottom:16pt; }
-  .qr-box { text-align:center; }
-  .qr-box p { font-size:7pt; color:#64748b; margin-top:4pt; }
+  /* ── NOTES ───────────────────────────────────────────────────── */
+  .note-box { background:#fffbeb; border-left:3pt solid #f59e0b;
+    padding:8pt 12pt; margin-bottom:14pt; font-size:8.5pt; color:#374151; }
 
-  .note-box { background:#fffbeb; border-left:3pt solid #f59e0b; padding:8pt 12pt; margin-bottom:16pt; font-size:8.5pt; color:#374151; }
-  
-  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:7.5pt; color:#94a3b8; border-top:0.5pt solid #e2e8f0; padding:6pt 15mm; background:white; }
+  /* ── BRAND FOOTER BLOCK ──────────────────────────────────────── */
+  .brand-block {
+    display: flex;
+    align-items: center;
+    gap: 10pt;
+    background: #f8fafc;
+    border: 0.5pt solid #e2e8f0;
+    border-top: 1.5pt solid #0f172a;
+    padding: 7pt 10pt;
+    margin-top: 8pt;
+  }
+  .brand-qr { text-align:center; min-width:44pt; }
+  .brand-qr p { font-size:5.5pt; color:#94a3b8; margin-top:2pt; }
+  .brand-center { flex:1; font-size:7pt; color:#475569; line-height:1.55; text-align:center; }
+  .brand-center strong { color:#0f172a; font-size:7.5pt; }
+  .brand-center .partners { color:#94a3b8; font-size:6.5pt; margin-top:2pt; }
+  .brand-right { text-align:right; font-size:7pt; color:#94a3b8; line-height:1.6; min-width:90pt; }
+
+  /* ── PAGE FOOTER (fixed) ─────────────────────────────────────── */
+  .footer { position:fixed; bottom:0; left:0; right:0; text-align:center;
+    font-size:7pt; color:#94a3b8; border-top:0.5pt solid #e2e8f0;
+    padding:5pt 15mm; background:white; }
   .footer strong { color:#0f172a; }
 </style>
 </head>
 <body>
 
+<div class="footer">
+  <strong>{{ invoice.issuer_name }}</strong> · OIB: {{ invoice.issuer_oib }} · IBAN: {{ invoice.issuer_iban }} · {{ invoice.issuer_email }}
+  <br>Generirano: {{ now|date:"d.m.Y H:i" }} · UUID: {{ invoice.uuid }}
+</div>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════════ -->
 <div class="header">
-  <div class="logo-area">
-    <h1>{{ invoice.issuer_name|default:invoice.company.name }}</h1>
-    <div class="subtitle">Poslovna dokumentacija · {{ invoice.get_country_display }}</div>
-  </div>
-  <div class="issuer-info">
-    <strong>{{ invoice.issuer_name|default:invoice.company.name }}</strong><br>
+
+  <!-- LIJEVO: adresa + kontakt -->
+  <div class="hdr-left">
+    <div class="group-name">{{ invoice.company.name|default:"LIMIT Connect" }}</div>
     {{ invoice.issuer_address }}<br>
     OIB: {{ invoice.issuer_oib }}<br>
-    IBAN: {{ invoice.issuer_iban }}<br>
-    {{ invoice.issuer_email }}
+    {% if invoice.issuer_phone %}Tel.: {{ invoice.issuer_phone }}<br>{% endif %}
+    {{ invoice.issuer_email }}<br>
+    {% if invoice.issuer_iban %}IBAN: {{ invoice.issuer_iban }}{% endif %}
+    <div class="web-links">
+      limit-connect.com · grosmarkt-online.eu
+    </div>
   </div>
-</div>
 
-<div class="invoice-meta">
-  <div class="invoice-title">
-    <h2>{% if invoice.doctype == 'R' %}RAČUN{% elif invoice.doctype == 'P' %}PREDRAČUN{% elif invoice.doctype == 'A' %}AVANSNI RAČUN{% else %}{{ invoice.get_doctype_display|upper }}{% endif %}</h2>
-    <div class="number">Broj: {{ invoice.number }}</div>
-    <div class="status">{{ invoice.get_status_display }}</div>
-  </div>
-  <div class="dates-box">
-    <div class="date-row">
-      <div class="date-label">{% trans "Datum izdavanja" %}</div>
-      <div class="date-val">{{ invoice.date_issued|date:"d.m.Y" }}</div>
-    </div>
-    {% if invoice.date_due %}
-    <div class="date-row">
-      <div class="date-label">{% trans "Rok plaćanja" %}</div>
-      <div class="date-val">{{ invoice.date_due|date:"d.m.Y" }}</div>
-    </div>
+  <!-- SREDINA: logo -->
+  <div class="hdr-center">
+    {% if company_logo_src %}
+      <img class="logo-img" src="{{ company_logo_src }}" alt="{{ invoice.issuer_name }}">
+    {% else %}
+      <div class="logo-text">{{ invoice.issuer_name|default:invoice.company.name }}</div>
     {% endif %}
-    {% if invoice.date_delivery %}
-    <div class="date-row">
-      <div class="date-label">{% trans "Datum isporuke" %}</div>
-      <div class="date-val">{{ invoice.date_delivery|date:"d.m.Y" }}</div>
-    </div>
-    {% endif %}
+    <div class="tagline">Poslovna dokumentacija · RH</div>
   </div>
-</div>
 
+  <!-- DESNO: tip + broj + datumi -->
+  <div class="hdr-right">
+    <div class="doc-type">
+      {% if invoice.doctype == 'R' %}RAČUN
+      {% elif invoice.doctype == 'P' %}PREDRAČUN
+      {% elif invoice.doctype == 'A' %}AVANSNI RAČUN
+      {% elif invoice.doctype == 'GS' %}ODOBRENJE
+      {% elif invoice.doctype == 'S' %}STORNO
+      {% else %}{{ invoice.get_doctype_display|upper }}{% endif %}
+    </div>
+    <div class="doc-number">Broj: {{ invoice.number }}</div>
+    <div class="doc-status">{{ invoice.get_status_display }}</div>
+    <div class="doc-dates">
+      <div class="date-row">
+        <div class="date-label">{% trans "Datum izdavanja" %}</div>
+        <div class="date-val">{{ invoice.date_issued|date:"d.m.Y" }}</div>
+      </div>
+      {% if invoice.date_due %}
+      <div class="date-row">
+        <div class="date-label">{% trans "Rok plaćanja" %}</div>
+        <div class="date-val">{{ invoice.date_due|date:"d.m.Y" }}</div>
+      </div>
+      {% endif %}
+      {% if invoice.date_delivery %}
+      <div class="date-row">
+        <div class="date-label">{% trans "Datum isporuke" %}</div>
+        <div class="date-val">{{ invoice.date_delivery|date:"d.m.Y" }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+<!-- ══ /HEADER ══════════════════════════════════════════════════════ -->
+
+<!-- Stranke -->
 <div class="parties">
   <div class="party-box issuer">
     <div class="party-label">{% trans "Izdavatelj" %}</div>
@@ -136,6 +259,7 @@
   </div>
 </div>
 
+<!-- Tablica -->
 <table>
   <thead>
     <tr>
@@ -163,33 +287,31 @@
   </tbody>
 </table>
 
+<!-- PDV rekapitulacija -->
+<div style="margin-bottom:14pt">
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="background:#f1f5f9">
+        <th style="padding:4pt 7pt;font-size:7.5pt;text-align:left;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "PDV stopa" %}</th>
+        <th style="padding:4pt 7pt;font-size:7.5pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "Osnovica" %}</th>
+        <th style="padding:4pt 7pt;font-size:7.5pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "PDV iznos" %}</th>
+        <th style="padding:4pt 7pt;font-size:7.5pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "Ukupno" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in tax_groups %}{% if group.base > 0 %}
+      <tr>
+        <td style="padding:4pt 7pt;font-size:9pt;border:0.5pt solid #e2e8f0">{{ group.rate }}% – {{ group.name }}</td>
+        <td style="padding:4pt 7pt;font-size:9pt;text-align:right;border:0.5pt solid #e2e8f0">{{ group.base|floatformat:2 }} {{ invoice.currency }}</td>
+        <td style="padding:4pt 7pt;font-size:9pt;text-align:right;border:0.5pt solid #e2e8f0">{{ group.tax|floatformat:2 }} {{ invoice.currency }}</td>
+        <td style="padding:4pt 7pt;font-size:9pt;text-align:right;font-weight:600;border:0.5pt solid #e2e8f0">{{ group.total|floatformat:2 }} {{ invoice.currency }}</td>
+      </tr>
+      {% endif %}{% endfor %}
+    </tbody>
+  </table>
+</div>
 
-  <!-- REKAPITULACIJA PDV-a -->
-  <div style="margin-bottom:16pt">
-    <table style="width:100%;border-collapse:collapse">
-      <thead>
-        <tr style="background:#f1f5f9">
-          <th style="padding:5pt 8pt;font-size:8pt;text-align:left;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "PDV stopa" %}</th>
-          <th style="padding:5pt 8pt;font-size:8pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "Osnovica" %}</th>
-          <th style="padding:5pt 8pt;font-size:8pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "PDV iznos" %}</th>
-          <th style="padding:5pt 8pt;font-size:8pt;text-align:right;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;border:0.5pt solid #e2e8f0">{% trans "Ukupno" %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for group in tax_groups %}
-        {% if group.base > 0 %}
-        <tr>
-          <td style="padding:5pt 8pt;font-size:9pt;border:0.5pt solid #e2e8f0">{{ group.rate }}% – {{ group.name }}</td>
-          <td style="padding:5pt 8pt;font-size:9pt;text-align:right;border:0.5pt solid #e2e8f0">{{ group.base|floatformat:2 }} {{ invoice.currency }}</td>
-          <td style="padding:5pt 8pt;font-size:9pt;text-align:right;border:0.5pt solid #e2e8f0">{{ group.tax|floatformat:2 }} {{ invoice.currency }}</td>
-          <td style="padding:5pt 8pt;font-size:9pt;text-align:right;font-weight:600;border:0.5pt solid #e2e8f0">{{ group.total|floatformat:2 }} {{ invoice.currency }}</td>
-        </tr>
-        {% endif %}
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
+<!-- Ukupno -->
 <div class="totals">
   <table class="totals-table">
     <tr><td>{% trans "Osnovica (bez PDV):" %}</td><td>{{ invoice.subtotal|floatformat:2 }} {{ invoice.currency }}</td></tr>
@@ -198,40 +320,41 @@
   </table>
 </div>
 
-
-  <!-- OPERATER I PRODAJNO MJESTO -->
-  <div style="display:flex;gap:20pt;margin-bottom:16pt;font-size:8.5pt;color:#475569">
-    <div style="flex:1">
-      {% if invoice.business_location %}
-      <strong style="color:#0f172a">{% trans "Poslovni prostor:" %}</strong>
-      {{ invoice.business_location.name }} ({{ invoice.business_location.location_code }})<br>
-      {{ invoice.business_location.address }}, {{ invoice.business_location.city }}
-      {% endif %}
-    </div>
-    <div style="flex:1;text-align:right">
-      {% if invoice.operator %}
-      <strong style="color:#0f172a">{% trans "Operater:" %}</strong>
-      {{ invoice.operator.name }}<br>
-      OIB operatera: {{ invoice.operator.oib }}
-      {% endif %}
-      {% if invoice.created_by %}
-      <br><span style="font-size:7.5pt;color:#94a3b8">Kreirao: {{ invoice.created_by.get_full_name|default:invoice.created_by.username }}</span>
-      {% endif %}
-    </div>
+<!-- Operater -->
+<div style="display:flex;gap:16pt;margin-bottom:14pt;font-size:8.5pt;color:#475569">
+  <div style="flex:1">
+    {% if invoice.business_location %}
+    <strong style="color:#0f172a">{% trans "Poslovni prostor:" %}</strong>
+    {{ invoice.business_location.name }} ({{ invoice.business_location.location_code }})<br>
+    {{ invoice.business_location.address }}, {{ invoice.business_location.city }}
+    {% endif %}
   </div>
+  <div style="flex:1;text-align:right">
+    {% if invoice.operator %}
+    <strong style="color:#0f172a">{% trans "Operater:" %}</strong>
+    {{ invoice.operator.name }}<br>
+    OIB: {{ invoice.operator.oib }}
+    {% endif %}
+    {% if invoice.created_by %}
+    <br><span style="font-size:7.5pt;color:#94a3b8">Kreirao: {{ invoice.created_by.get_full_name|default:invoice.created_by.username }}</span>
+    {% endif %}
+  </div>
+</div>
 
+<!-- Plaćanje + QR -->
 <div class="payment-section">
   <div class="payment-box">
     <h4>{% trans "Podaci za plaćanje" %}</h4>
     <div class="payment-row"><span class="payment-label">{% trans "Način plaćanja:" %}</span><span class="payment-val">{{ invoice.get_payment_method_display }}</span></div>
-    <div class="payment-row"><span class="payment-label">{% trans "IBAN:" %}</span><span class="payment-val">{{ invoice.issuer_iban }}</span></div>
+    <div class="payment-row"><span class="payment-label">{% trans "IBAN:" %}</span><span class="payment-val" style="font-family:monospace">{{ invoice.issuer_iban }}</span></div>
     {% if invoice.reference_number %}<div class="payment-row"><span class="payment-label">{% trans "Poziv na broj:" %}</span><span class="payment-val">{{ invoice.reference_number }}</span></div>{% endif %}
     <div class="payment-row"><span class="payment-label">{% trans "Rok plaćanja:" %}</span><span class="payment-val">{{ invoice.date_due|date:"d.m.Y"|default:"Po dogovoru" }}</span></div>
+    <div class="payment-row" style="margin-top:4pt"><span class="payment-label" style="font-size:7pt;color:#94a3b8">UUID:</span><span style="font-size:7pt;color:#94a3b8;font-family:monospace">{{ invoice.uuid }}</span></div>
   </div>
   {% if invoice.qr_code_base64 %}
-  <div class="qr-box">
-    <img src="data:image/png;base64,{{ invoice.qr_code_base64 }}" style="width:80pt;height:80pt">
-    <p>{% trans "Skeniraj za plaćanje" %}</p>
+  <div class="qr-wrap">
+    <img src="data:image/png;base64,{{ invoice.qr_code_base64 }}" style="width:80pt;height:80pt;display:block;border:0.5pt solid #e2e8f0">
+    <p><strong>{% trans "Skeniraj za plaćanje" %}</strong><br>EPC/GiroCode<br>ISO 20022</p>
   </div>
   {% endif %}
 </div>
@@ -251,11 +374,29 @@
 <div class="note-box">{{ invoice.note }}</div>
 {% endif %}
 
-<div class="footer">
-  <strong>{{ invoice.issuer_name }}</strong> · OIB: {{ invoice.issuer_oib }} · IBAN: {{ invoice.issuer_iban }} · {{ invoice.issuer_email }}
-  <br>Račun generiran: {{ now|date:"d.m.Y H:i" }} · UUID: {{ invoice.uuid }}
-  <br><span style="color:#999;font-size:7pt">Kreirano u LIMIT Connect · limit-connect.com</span>
+<!-- ══ BRAND / PARTNER FOOTER BLOCK ══════════════════════════════ -->
+<div class="brand-block">
+  <div class="brand-qr">
+    {% if lc_qr_b64 %}
+    <img src="data:image/png;base64,{{ lc_qr_b64 }}" style="width:40pt;height:40pt;display:block">
+    {% endif %}
+    <p>limit-connect.com</p>
+  </div>
+  <div class="brand-center">
+    <strong>Kreirano s LIMIT Connect</strong> — Digitalna platforma za obrt i poslovanje u EU<br>
+    eRačun · Fiskalizacija · AI računovodstvo · EU ViDA 2028 sukladan<br>
+    <span class="partners">
+      <strong>LIMIT Connect</strong> · limit-connect.com &nbsp;|&nbsp;
+      <strong>Grosmarkt Online</strong> · grosmarkt-online.eu
+    </span>
+  </div>
+  <div class="brand-right">
+    Generirano: {{ now|date:"d.m.Y H:i" }}<br>
+    {{ invoice.issuer_name }}<br>
+    <span style="color:#0f172a;font-size:6.5pt">LIMIT Connect Partner</span>
+  </div>
 </div>
+<!-- ══ /BRAND FOOTER ══════════════════════════════════════════════ -->
 
 </body>
 </html>

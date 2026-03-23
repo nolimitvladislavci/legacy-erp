@@ -78,11 +78,42 @@ def _ensure_qr(invoice):
         invoice.save(update_fields=['qr_code_base64'])
 
 
+def _get_company_logo_b64(invoice):
+    """Return base64 logo string for company, or empty string."""
+    try:
+        company = invoice.company
+        if company and company.logo:
+            logo_path = company.logo.path
+            with open(logo_path, 'rb') as f:
+                data = f.read()
+            ext = logo_path.rsplit('.', 1)[-1].lower()
+            mime = 'image/png' if ext == 'png' else 'image/jpeg'
+            return f"data:{mime};base64,{base64.b64encode(data).decode()}"
+    except Exception:
+        pass
+    return ''
+
+
+def _get_lc_brand_qr_b64():
+    """Return LIMIT Connect brand QR (navy) as base64 PNG."""
+    try:
+        import qrcode, io
+        qr = qrcode.QRCode(version=1, box_size=4, border=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_M)
+        qr.add_data('https://limit-connect.com')
+        qr.make(fit=True)
+        img = qr.make_image(fill_color='#1e3a5f', back_color='white')
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        return base64.b64encode(buf.getvalue()).decode()
+    except Exception:
+        return ''
+
+
 def render_invoice_html(invoice, request=None):
     """Render invoice to HTML string using HR, DE, or bilingual template."""
     profile = getattr(invoice, 'invoice_profile', None)
 
-    # Determine the rendering language
     if profile and profile.language:
         render_lang = profile.language
     elif invoice.is_hr:
@@ -90,18 +121,22 @@ def render_invoice_html(invoice, request=None):
     else:
         render_lang = 'de'
 
-    # Save current language, activate the invoice language
     prev_lang = get_language()
     activate(render_lang)
+
+    # Shared extra context — logo + brand QR
+    extra_ctx = {
+        'company_logo_src': _get_company_logo_b64(invoice),
+        'lc_qr_b64':        _get_lc_brand_qr_b64(),
+    }
+
     try:
-        # Check if the invoice profile has bilingual enabled
         if profile and getattr(profile, 'bilingual', False) and profile.secondary_language:
             from .bilingual_labels import get_bilingual_labels
             primary_lang = render_lang
             secondary_lang = profile.secondary_language
             labels = get_bilingual_labels(primary_lang, secondary_lang, invoice.doctype)
-            template = 'invoicing/invoice_bilingual.html'
-            return render_to_string(template, {
+            return render_to_string('invoicing/invoice_bilingual.html', {
                 'invoice': invoice,
                 'now': timezone.now(),
                 'request': request,
@@ -109,6 +144,7 @@ def render_invoice_html(invoice, request=None):
                 'labels': labels,
                 'primary_lang': primary_lang,
                 'secondary_lang': secondary_lang,
+                **extra_ctx,
             })
         template = 'invoicing/invoice_hr.html' if invoice.is_hr else 'invoicing/invoice_de.html'
         return render_to_string(template, {
@@ -116,9 +152,9 @@ def render_invoice_html(invoice, request=None):
             'now': timezone.now(),
             'request': request,
             'tax_groups': build_tax_groups(invoice),
+            **extra_ctx,
         })
     finally:
-        # Restore previous language
         if prev_lang:
             activate(prev_lang)
 
