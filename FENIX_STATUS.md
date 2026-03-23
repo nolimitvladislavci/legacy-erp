@@ -6,8 +6,8 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-23 — Sonnet (Share modal + nav partial + cashier wizard)
-Git HEAD: 7d49022 — Share: invite tracking + arhiva/invoicing + nav partial + cashier wizard
+2026-03-23 22:00 — Sonnet (Synesis P1 import monitoring + status)
+Git HEAD: 07ee6a5 — Status: CC_TASK_SHARE_NAV_WIZARD DONE
 
 ---
 
@@ -45,6 +45,14 @@ Git HEAD: 7d49022 — Share: invite tracking + arhiva/invoicing + nav partial + 
 ---
 
 ## DONE — NE DIRATI
+
+### Synesis P1 Import (u tijeku — 23.03.2026)
+- 86 firmi, 33.270 partnera, 11.856 artikala — DONE
+- Fakture: 10.206 uvezenih (IRA ~50%, URA ~4%) — U TIJEKU
+- Stavke knjiženja: ~110.000 · Temeljnice: ~17.000 — DONE
+- Globalna bilanca: D=P ±94 EUR — BALANSIRA
+- PID 505139 radi u pozadini, procjena završetka: 01:00-02:00
+- URA čeka: Konjik d.o.o. sam ima 2.120 URA zapisa
 
 ### Share Modal + Nav Partial + Cashier Wizard (KOMPLET — 23.03.)
 - _share_modal.html: ref_code invite tracking (_shRefCode, _shGetBaseUrl s ?ref=) — DONE
