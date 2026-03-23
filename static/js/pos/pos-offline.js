@@ -547,3 +547,29 @@ setTimeout(_updateOnlineBanner, 1500);
     };
   }
 })();
+
+// ═══ TRIGGER_SYNC from ServiceWorker ═══════════════════════════════════
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+  navigator.serviceWorker.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'TRIGGER_SYNC') {
+      console.log('POS Offline: SW triggered sync');
+      if (window.syncOfflineData) window.syncOfflineData();
+    }
+  });
+}
+
+// ═══ Periodic sync every 2 minutes ═══════════════════════════════════
+setInterval(function() {
+  if (navigator.onLine && window.syncOfflineData) {
+    window.syncOfflineData();
+  }
+}, 2 * 60 * 1000);
+
+// ═══ CIS poruka na ispisu bona bez JIR-a ══════════════════════════════
+window._offlineFiscalNote = function(receipt) {
+  if (!receipt || receipt.jir) return '';
+  return '<div style="text-align:center;border:2px solid #000;padding:4px;margin:8px 0;' +
+    'font-size:.8rem;font-weight:bold">' +
+    'VEZA S CIS-om NIJE OSTVARENA<br>' +
+    '<small>Fiskalizacija u tijeku — ZKI: ' + (receipt.zki || 'LOKALNI') + '</small></div>';
+};

@@ -342,3 +342,16 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 });
+
+// ═══ TRIGGER_SYNC — šalji signal klijentima da pokrenu sync ═══════════
+self.addEventListener('sync', function(event) {
+  if (event.tag === 'pos-offline-sync') {
+    event.waitUntil(
+      self.clients.matchAll().then(function(clients) {
+        clients.forEach(function(client) {
+          client.postMessage({type: 'TRIGGER_SYNC'});
+        });
+      })
+    );
+  }
+});
