@@ -288,6 +288,62 @@ class PosrednikService:
             return {'ok': False, 'error': str(e)}
 
     @classmethod
+    def get_incoming_xml(cls, company, invoice_id):
+        """
+        Two-Step Fetch: dohvati puni UBL 2.1 XML za ulazni račun po ID-u.
+        Vraća XML string ili None.
+        """
+        cfg = cls.get_config(company)
+        if not cls.is_configured(company):
+            return None
+
+        posrednik_type = cfg['type']
+        base = (
+            cfg.get('test_base', cls.POSREDNICI.get(posrednik_type, {}).get('test_base', ''))
+            if cfg.get('test_mode')
+            else cls.POSREDNICI.get(posrednik_type, {}).get('api_base', '')
+        )
+        api_key = cfg.get('api_key', '')
+
+        if not base:
+            return None
+
+        try:
+            resp = requests.get(
+                '%s/incoming-invoices/%s/xml' % (base, invoice_id),
+                headers={
+                    'Authorization': 'Bearer %s' % api_key,
+                    'Accept': 'application/xml, application/json',
+                },
+                timeout=15,
+            )
+
+            if resp.status_code != 200:
+                logger.warning('get_incoming_xml HTTP %d for %s', resp.status_code, invoice_id)
+                return None
+
+            content_type = resp.headers.get('Content-Type', '')
+
+            # Ako posrednik vraća JSON s base64 kodiranim XML-om
+            if 'application/json' in content_type:
+                import base64
+                data = resp.json()
+                xml_b64 = data.get('Xml', '') or data.get('Document', '') or data.get('xml', '')
+                if xml_b64:
+                    try:
+                        return base64.b64decode(xml_b64).decode('utf-8')
+                    except Exception:
+                        return xml_b64  # Možda nije base64
+                return None
+
+            # Čisti XML response
+            return resp.text
+
+        except Exception as e:
+            logger.error('get_incoming_xml error for %s: %s', invoice_id, e)
+            return None
+
+    @classmethod
     def check_status(cls, eracun):
         """Provjeri status poslanog e-racuna kod posrednika."""
         cfg = cls.get_config(eracun.company)

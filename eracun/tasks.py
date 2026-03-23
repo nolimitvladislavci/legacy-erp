@@ -8,14 +8,21 @@ logger = logging.getLogger('eracun.tasks')
 
 @shared_task(bind=True, soft_time_limit=120)
 def fetch_posrednik_inbox(self):
-    """Dohvati nove e-racune od posrednika za sve konfigurirane firme."""
+    """
+    Two-Step Fetch: dohvati listu → za svaki dohvati XML → receive_eracun().
+    Step 1: GET /incoming-invoices → JSON lista s ID-jevima
+    Step 2: GET /incoming-invoices/{id}/xml → puni UBL 2.1 XML
+    receive_eracun() kreira ERacun + Items + TaxSummary + okida FENIX Interceptor.
+    """
     from companies.models import Company
     from eracun.services.posrednik_service import PosrednikService
+    from eracun.services.inbox import receive_eracun
     from eracun.models import ERacun
     from django.utils import timezone
     from datetime import timedelta
 
     fetched = 0
+    skipped = 0
     errors = 0
     since = timezone.now() - timedelta(days=7)
 
@@ -25,25 +32,69 @@ def fetch_posrednik_inbox(self):
 
         try:
             result = PosrednikService.fetch_inbox(company, since=since)
-            if result.get('ok') and result.get('invoices'):
-                for inv_data in result['invoices']:
-                    inv_id = inv_data.get('id', inv_data.get('invoiceId', ''))
-                    if not ERacun.objects.filter(fina_uuid=inv_id).exists():
-                        ERacun.objects.create(
-                            company=company,
-                            doc_type='380',
-                            invoice_number=inv_data.get('invoiceNumber', inv_id),
-                            issuer_name=inv_data.get('senderName', ''),
-                            issuer_oib=inv_data.get('senderOib', ''),
-                            recipient_name=company.name,
-                            recipient_oib=company.oib,
-                            total=inv_data.get('totalAmount', 0),
-                            issue_date=timezone.now().date(),
-                            status='accepted',
-                            fina_uuid=inv_id,
-                            note='Primljeno od posrednika',
-                        )
-                        fetched += 1
+            if not result.get('ok') or not result.get('invoices'):
+                continue
+
+            for inv_data in result['invoices']:
+                inv_id = inv_data.get('id', inv_data.get('invoiceId', ''))
+                inv_number = inv_data.get('invoiceNumber', inv_data.get('invoice_number', str(inv_id)))
+                issuer_oib = inv_data.get('senderOib', inv_data.get('issuer_oib', ''))
+
+                # Duplikat check PRIJE API poziva (štedi bandwidth)
+                if ERacun.objects.filter(
+                    company=company,
+                    invoice_number=inv_number,
+                    issuer_oib=issuer_oib,
+                    direction='incoming',
+                ).exists() or ERacun.objects.filter(fina_uuid=inv_id).exists():
+                    skipped += 1
+                    continue
+
+                # Two-Step: dohvati puni XML
+                xml_string = PosrednikService.get_incoming_xml(company, str(inv_id))
+
+                if xml_string and xml_string.strip().startswith('<?xml') or (xml_string and '<Invoice' in xml_string):
+                    # Puni UBL XML — delegiraj na receive_eracun (koji okida FENIX)
+                    try:
+                        inbox_result = receive_eracun(company, xml_string, received_via='posrednik')
+                        if inbox_result.get('success'):
+                            # Spremi posrednik ID za tracking
+                            eracun = inbox_result.get('eracun')
+                            if eracun and inv_id:
+                                eracun.fina_uuid = str(inv_id)
+                                eracun.save(update_fields=['fina_uuid'])
+                            fetched += 1
+                            logger.info('Two-Step fetch OK: %s od %s', inv_number, issuer_oib)
+                        else:
+                            # Duplikat ili parse error — logiramo ali ne pada
+                            skipped += 1
+                            logger.debug('receive_eracun skip: %s', inbox_result.get('error', ''))
+                    except Exception as e:
+                        errors += 1
+                        logger.warning('receive_eracun error za %s: %s', inv_number, e)
+                elif xml_string is None:
+                    # XML endpoint nije dostupan — fallback na header-only (stari način)
+                    ERacun.objects.create(
+                        company=company,
+                        direction='incoming',
+                        doc_type='380',
+                        invoice_number=inv_number,
+                        issuer_name=inv_data.get('senderName', ''),
+                        issuer_oib=issuer_oib,
+                        recipient_name=company.name,
+                        recipient_oib=company.oib or '',
+                        total=inv_data.get('totalAmount', 0),
+                        issue_date=timezone.now().date(),
+                        status='accepted',
+                        fina_uuid=str(inv_id),
+                        note='Primljeno od posrednika (samo zaglavlje — XML nedostupan)',
+                    )
+                    fetched += 1
+                    logger.info('Header-only fetch: %s (XML endpoint nedostupan)', inv_number)
+                else:
+                    errors += 1
+                    logger.warning('Nevaljan XML za %s: %s...', inv_number, (xml_string or '')[:50])
+
         except Exception as e:
             errors += 1
             logger.warning('Inbox fetch error za %s: %s', company.name, e)
