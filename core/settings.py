@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "pos",
     "fiscal",
     "synesis",
+    "data_migration",
     "smart_import",
     "payroll",
     "tracking",
@@ -474,6 +475,10 @@ CELERY_BEAT_SCHEDULE = {
     "udruge-evaluate-subscriptions": {
         "task": "udruge.tasks.evaluate_subscriptions",
         "schedule": crontab(hour=2, minute=15),
+    },
+    "cleanup-stale-migrations": {
+        "task": "data_migration.tasks.cleanup_stale_migrations",
+        "schedule": 3600,  # svaki sat
     },
     "intelligence-nightly-patrol": {
         "task": "intelligence.tasks.intelligence_nightly_patrol",

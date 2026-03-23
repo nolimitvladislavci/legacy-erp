@@ -1,60 +1,136 @@
-{% extends "base.html" %}
-{% block title %}Upload — Migracija podataka{% endblock %}
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block page_title %}Uvoz podataka{% endblock %}
+{% block title %}Uvoz podataka — LIMIT Connect{% endblock %}
+
 {% block content %}
-<div class="container py-4" style="max-width:700px">
-  <h2 class="mb-4"><i class="fas fa-upload"></i> Novi import</h2>
+<div class="container-fluid px-3 py-3" style="max-width:680px">
 
-  <form method="post" enctype="multipart/form-data" id="upload-form">
-    {% csrf_token %}
+  <nav class="mb-3" style="font-size:.85rem">
+    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+      <i class="fas fa-arrow-left me-1"></i>Svi projekti
+    </a>
+  </nav>
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">Naziv projekta</label>
-      <input type="text" name="name" class="form-control" placeholder="Npr. Partneri iz Luceeda">
+  <h4 class="mb-3"><i class="fas fa-file-upload me-2" style="color:var(--gold)"></i>Korak 1: Upload datoteke</h4>
+
+  {% if error %}
+  <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-1"></i>{{ error }}</div>
+  {% endif %}
+
+  <div class="alert alert-warning d-flex align-items-start gap-2 mb-3" style="background:#fefce8;border-color:#fde68a;color:#92400e">
+    <i class="fas fa-shield-alt mt-1"></i>
+    <div>
+      <strong>LIMIT Connect nije arhiva vaseg starog programa.</strong><br>
+      Podaci se isčitavaju i importiraju u ERP bazu. Originalne datoteke se
+      brisu sa servera nakon 24 sata. <strong>Zadrzite vlastitu kopiju.</strong>
     </div>
+  </div>
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">Izvorni program</label>
-      <select name="source_program" class="form-select">
-        <option value="">-- Nepoznato --</option>
-        <option value="synesis">Synesis</option>
-        <option value="luceed">Luceed</option>
-        <option value="pantheon">Pantheon (Datalab)</option>
-        <option value="minimax">Minimax</option>
-        <option value="rasco">Rasco</option>
-        <option value="saop">SAOP</option>
-        <option value="excel">Excel tablica</option>
-        <option value="other">Drugo</option>
-      </select>
-    </div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px">
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      {% csrf_token %}
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">Tip podataka</label>
-      <select name="entity_type" class="form-select">
-        <option value="partners">Partneri (kupci, dobavljači)</option>
-        <option value="items">Artikli (roba, usluge)</option>
-        <option value="ledger">Knjiženja (temeljnice)</option>
-        <option value="mixed">Mješovito / ne znam</option>
-      </select>
-    </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold" style="color:var(--text)">Naziv projekta</label>
+        <input type="text" name="name" class="form-control" placeholder="Npr. Prijelaz s Luceeda — partneri"
+               style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+      </div>
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">Datoteka</label>
-      <input type="file" name="file" class="form-control" accept=".csv,.xlsx,.xls,.json,.xml" required>
-      <small class="text-muted">CSV, Excel, JSON ili XML. Max 50 MB. Datoteka se automatski briše nakon 24h.</small>
-    </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold" style="color:var(--text)">Tip podataka</label>
+          <select name="entity_type" class="form-select" style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+            <option value="partners">Partneri</option>
+            <option value="items">Artikli</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold" style="color:var(--text)">Izvorni program (opcionalno)</label>
+          <input type="text" name="source_program" class="form-control" placeholder="Npr. Luceed, Pantheon, minimax..."
+                 style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+        </div>
+      </div>
 
-    <button type="submit" class="btn btn-primary btn-lg w-100" id="btn-upload">
-      <i class="fas fa-cloud-upload-alt"></i> <span id="btn-text">Učitaj i analiziraj</span>
-    </button>
-  </form>
+      <!-- Drop zone -->
+      <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3"
+           style="border-color:var(--gold)!important;cursor:pointer;background:var(--bg-card-hover);transition:all .15s"
+           onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color:var(--gold)"></i>
+        <p class="mb-1 fw-semibold" style="color:var(--text)">Povucite datoteku ovdje ili kliknite za odabir</p>
+        <p class="small mb-0" style="color:var(--text-muted)">CSV, Excel (.xlsx / .xls) — max 50 MB</p>
+      </div>
+      <input type="file" id="fileInput" name="file"
+             accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+             class="d-none">
+      <div id="fileInfo" class="d-none mb-3 p-2 rounded d-flex align-items-center gap-2"
+           style="background:var(--badge-bg);border:1px solid var(--border)">
+        <i class="fas fa-file-alt" style="color:var(--accent)"></i>
+        <span id="fileName" class="fw-semibold" style="color:var(--text)"></span>
+        <span id="fileSize" class="text-muted small"></span>
+        <button type="button" class="btn btn-sm ms-auto" style="color:#dc2626" onclick="clearFile()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-warning fw-bold py-2" id="submitBtn" disabled>
+          <i class="fas fa-arrow-right me-1"></i>Ucitaj i nastavi na mapiranje
+        </button>
+      </div>
+    </form>
+  </div>
+
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-document.getElementById('upload-form').addEventListener('submit', function() {
-  const btn = document.getElementById('btn-upload');
-  btn.disabled = true;
-  btn.style.opacity = '0.7';
-  document.getElementById('btn-text').textContent = 'Učitavanje i analiza...';
-});
+(function(){
+  var dropZone = document.getElementById('dropZone');
+  var fileInput = document.getElementById('fileInput');
+  var fileInfo = document.getElementById('fileInfo');
+  var fileName = document.getElementById('fileName');
+  var fileSize = document.getElementById('fileSize');
+  var submitBtn = document.getElementById('submitBtn');
+  var form = document.getElementById('uploadForm');
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(function(ev){
+    dropZone.addEventListener(ev, function(e){ e.preventDefault(); dropZone.style.borderColor='var(--accent)'; dropZone.style.background='var(--table-row-hover)'; });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    dropZone.addEventListener(ev, function(e){ e.preventDefault(); dropZone.style.borderColor='var(--gold)'; dropZone.style.background='var(--bg-card-hover)'; });
+  });
+  dropZone.addEventListener('drop', function(e){
+    if(e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; showFile(e.dataTransfer.files[0]); }
+  });
+
+  fileInput.addEventListener('change', function(){
+    if(this.files.length) showFile(this.files[0]);
+  });
+
+  function showFile(f){
+    fileName.textContent = f.name;
+    fileSize.textContent = '(' + (f.size / 1024).toFixed(0) + ' KB)';
+    fileInfo.classList.remove('d-none');
+    dropZone.classList.add('d-none');
+    submitBtn.disabled = false;
+  }
+
+  window.clearFile = function(){
+    fileInput.value = '';
+    fileInfo.classList.add('d-none');
+    dropZone.classList.remove('d-none');
+    submitBtn.disabled = true;
+  };
+
+  // Submit loading state
+  form.addEventListener('submit', function(){
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Parsiranje datoteke... Molimo ne zatvarajte stranicu';
+  });
+})();
 </script>
 {% endblock %}

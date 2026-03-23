@@ -69,6 +69,38 @@ class Partner(models.Model):
         help_text=_('EU PDV identifikacijski broj (npr. HR12345678901)'),
     )
 
+    # Tip kupca za eRačun routing (Zakon o fiskalizaciji NN 89/25)
+    BUYER_TYPE_CHOICES = [
+        ('b2c',      'Građanin (B2C) — fiskalni bon'),
+        ('b2b_vat',  'Tvrtka / obrt u PDV-u — eRačun F2.0'),
+        ('b2b_novat','Tvrtka / obrt NIJE u PDV-u — eRačun F2.0'),
+        ('b2g',      'Proračunski korisnik (škola, općina...) — eRačun B2G'),
+        ('udruga_vat',   'Udruga / neprofitna u PDV-u — eRačun'),
+        ('udruga_novat', 'Udruga / neprofitna NIJE u PDV-u — obični račun'),
+        ('inozemstvo',   'Inozemni kupac — obični račun (nije tuzemna transakcija)'),
+    ]
+    buyer_type = models.CharField(
+        max_length=20,
+        choices=BUYER_TYPE_CHOICES,
+        default='b2c',
+        verbose_name=_('Tip kupca (routing računa)'),
+        help_text=_(
+            'Određuje koji tip računa sustav automatski izdaje. '            'B2C=fiskalni bon, B2B PDV=eRačun, proračunski=eRačun B2G, '            'udruga bez PDV=obični PDF, inozemstvo=obični PDF.'
+        ),
+    )
+    is_budget_user = models.BooleanField(
+        default=False,
+        verbose_name=_('Proračunski korisnik'),
+        help_text=_('Škole, bolnice, općine, državna tijela. Uvijek primaju eRačun (B2G).'),
+    )
+    is_nonprofit_no_activity = models.BooleanField(
+        default=False,
+        verbose_name=_('Neprofitna bez gospodarske djel.'),
+        help_text=_(
+            'Udruge/zaklade koje ne obavljaju gospodarsku djelatnost i nisu u PDV-u. '            'Primaju obični PDF račun — bez obveze eRačuna po NN 89/25.'
+        ),
+    )
+
     # Komercijalni uvjeti
     partner_type   = models.CharField(max_length=10, choices=TYPE_CHOICES, default='client',
                                        verbose_name=_('Tip partnera'))
@@ -119,6 +151,80 @@ class Partner(models.Model):
         return missing
     def __str__(self):
         return f"{self.name} ({self.city or 'N/A'})"
+
+    def get_invoice_routing(self) -> dict:
+        """
+        Određuje koji tip računa treba izdati za ovog partnera.
+        Zakon o fiskalizaciji NN 89/25 — pravila routing-a:
+
+        Vraća dict:
+            route:        'eracun_f20' | 'eracun_b2g' | 'fiskalni_f10' | 'obicni_pdf'
+            label:        Opis za UI
+            needs_oib:    bool — treba li OIB u fiskalizacijskoj poruci
+            can_be_cash:  bool — može li se platiti gotovinom/karticom
+        """
+        # Inozemstvo — nema obveze eRačuna
+        if self.country not in ('HR', ''):
+            return {
+                'route': 'obicni_pdf',
+                'label': 'Obični račun (inozemstvo — nije tuzemna transakcija)',
+                'needs_oib': False,
+                'can_be_cash': False,
+            }
+
+        # Proračunski korisnik — uvijek eRačun B2G
+        if self.is_budget_user:
+            return {
+                'route': 'eracun_b2g',
+                'label': 'eRačun B2G (škola, općina, državno tijelo)',
+                'needs_oib': True,
+                'can_be_cash': False,
+            }
+
+        # Udruga/neprofitna bez gospodarske djelatnosti i bez PDV-a
+        if self.is_nonprofit_no_activity and not self.is_vat_registered:
+            return {
+                'route': 'obicni_pdf',
+                'label': 'Obični PDF račun (udruga bez PDV-a i gospodarske djelatnosti)',
+                'needs_oib': False,
+                'can_be_cash': True,
+            }
+
+        # Fizička osoba / građanin — fiskalni bon F1.0
+        if self.buyer_type == 'b2c':
+            return {
+                'route': 'fiskalni_f10',
+                'label': 'Fiskalni bon F1.0 (građanin / krajnja potrošnja)',
+                'needs_oib': False,
+                'can_be_cash': True,
+            }
+
+        # B2B — tvrtka ili obrtnik (PDV ili ne) — eRačun F2.0
+        # Iznimka čl.39 ZOF: gotovina/kartica do 700€ → može ići kao F1.0 s OIB-om
+        if self.is_vat_registered:
+            return {
+                'route': 'eracun_f20',
+                'label': 'eRačun F2.0 (tvrtka u PDV-u)',
+                'needs_oib': True,
+                'can_be_cash': True,   # iznimka čl.39 — gotovina/kartica do 700€
+            }
+        else:
+            return {
+                'route': 'eracun_f20',
+                'label': 'eRačun F2.0 (tvrtka/obrtnik NIJE u PDV-u)',
+                'needs_oib': True,
+                'can_be_cash': True,   # iznimka čl.39 — gotovina/kartica do 700€
+            }
+
+    @property
+    def invoice_route(self) -> str:
+        """Kratki string za template: 'eracun_f20', 'fiskalni_f10', 'obicni_pdf', 'eracun_b2g'"""
+        return self.get_invoice_routing()['route']
+
+    @property
+    def invoice_route_label(self) -> str:
+        """Opis routing-a za prikaz u UI."""
+        return self.get_invoice_routing()['label']
 
     def update_balance(self):
         inflow  = self.transactions.filter(direction='income').aggregate(Sum('amount'))['amount__sum'] or 0

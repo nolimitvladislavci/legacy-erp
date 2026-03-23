@@ -1,98 +1,240 @@
-{% extends "base.html" %}
-{% block title %}Pregled — {{ project.name }}{% endblock %}
-{% block content %}
-<div class="container-fluid py-4">
-  <h2 class="mb-2">Korak 3: Pregled prije importa</h2>
-  <p class="text-muted">{{ total_rows }} redova spremno za uvoz. Prikazano prvih 50.</p>
+{% extends 'base.html' %}
+{% load i18n %}
 
-  {% if preview_data %}
-  <div class="mb-4" style="overflow-x:auto;max-height:400px">
-    <table class="table table-sm table-striped" style="font-size:.8rem">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          {% for key in preview_data.0.keys %}<th>{{ key }}</th>{% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in preview_data %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          {% for val in row.values %}<td>{{ val|default:"-"|truncatechars:50 }}</td>{% endfor %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+{% block page_title %}Pregled prije importa{% endblock %}
+{% block title %}Pregled podataka — LIMIT Connect{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 py-3" style="max-width:1100px">
+
+  <nav class="mb-3" style="font-size:.85rem">
+    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+      <i class="fas fa-arrow-left me-1"></i>Svi projekti
+    </a>
+    <span style="color:var(--text-muted)"> / {{ project.name }}</span>
+  </nav>
+
+  <h4 class="mb-3"><i class="fas fa-search me-2" style="color:var(--gold)"></i>Korak 3: Pregled podataka</h4>
+
+  <!-- Info -->
+  <div class="row g-2 mb-3">
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Ukupno redova</div>
+        <div class="fw-bold fs-5" style="color:var(--text)">{{ total_rows }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Prikazano</div>
+        <div class="fw-bold fs-5" style="color:var(--text)">{{ preview_data|length }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Tip</div>
+        <div class="fw-bold" style="color:var(--text)">{{ project.get_entity_type_display }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Mapirana polja</div>
+        <div class="fw-bold" style="color:var(--text)">{{ mapped_fields|length }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview tablica -->
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div class="table-responsive" style="max-height:500px;overflow:auto">
+      <table class="table table-hover table-sm mb-0" style="color:var(--text);font-size:.82rem">
+        <thead style="background:var(--table-header-bg);position:sticky;top:0;z-index:1">
+          <tr>
+            <th style="color:var(--text-secondary)">#</th>
+            {% for f in mapped_fields %}
+            <th style="color:var(--text-secondary)">{{ f.label }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in preview_table %}
+          <tr>
+            <td class="text-muted">{{ forloop.counter }}</td>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if total_rows > 50 %}
+  <div class="text-center mt-2 small" style="color:var(--text-muted)">
+    <i class="fas fa-info-circle me-1"></i>Prikazano prvih 50 od {{ total_rows }} redova
   </div>
   {% endif %}
 
-  <div id="import-status" style="display:none;padding:16px;border-radius:8px;margin-bottom:16px"></div>
+  <!-- Progress area (hidden until import starts) -->
+  <div id="progressArea" class="d-none mt-4">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center">
+      <i class="fas fa-cog fa-spin fa-2x mb-3" style="color:var(--gold)"></i>
+      <h5 style="color:var(--text)" id="progressTitle">Inicijalizacija importa...</h5>
+      <div class="progress mb-2" style="height:24px;background:var(--badge-bg);border-radius:12px">
+        <div class="progress-bar" id="progressBar" role="progressbar"
+             style="width:0%;background:var(--gold);border-radius:12px;font-weight:600;color:#000;transition:width .3s">
+          0%
+        </div>
+      </div>
+      <div id="progressDetail" class="small" style="color:var(--text-muted)">
+        Obrada: 0 / {{ total_rows }} redova
+      </div>
+      <div class="row g-2 mt-3" id="progressStats">
+        <div class="col-3">
+          <div class="small" style="color:var(--text-muted)">Kreirano</div>
+          <div class="fw-bold" style="color:#059669" id="statCreated">0</div>
+        </div>
+        <div class="col-3">
+          <div class="small" style="color:var(--text-muted)">Azurirano</div>
+          <div class="fw-bold" style="color:var(--accent)" id="statUpdated">0</div>
+        </div>
+        <div class="col-3">
+          <div class="small" style="color:var(--text-muted)">Preskoceno</div>
+          <div class="fw-bold" style="color:var(--text-muted)" id="statSkipped">0</div>
+        </div>
+        <div class="col-3">
+          <div class="small" style="color:var(--text-muted)">Greske</div>
+          <div class="fw-bold" style="color:#dc2626" id="statFailed">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <div class="d-flex gap-2">
-    <a href="{% url 'data_migration:mapping' project.pk %}" class="btn btn-outline-secondary">
-      <i class="fas fa-arrow-left"></i> Natrag na mapiranje
+  <!-- Error area -->
+  <div id="importError" class="alert alert-danger d-none mt-3">
+    <i class="fas fa-exclamation-triangle me-1"></i>
+    <strong>Greska tijekom importa</strong>
+    <div id="importErrorText" class="mt-1"></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="d-flex justify-content-between mt-3" id="actionButtons">
+    <a href="{% url 'data_migration:mapping' pk=project.pk %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Nazad na mapiranje
     </a>
-    <button id="btn-execute" class="btn btn-success btn-lg" data-url="{% url 'data_migration:execute' project.pk %}">
-      <i class="fas fa-database"></i> <span id="btn-text">Pokreni import ({{ total_rows }} redova)</span>
+    <button type="button" class="btn btn-warning fw-bold px-4" id="importBtn">
+      <i class="fas fa-play me-1"></i>Pokreni import ({{ total_rows }} redova)
     </button>
   </div>
+
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-(function() {
-  const btn = document.getElementById('btn-execute');
-  const btnText = document.getElementById('btn-text');
-  const statusDiv = document.getElementById('import-status');
+(function(){
+  var EXECUTE_URL = '{% url "data_migration:execute" pk=project.pk %}';
+  var STATUS_URL = '{% url "data_migration:status" pk=project.pk %}';
+  var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+  csrf = csrf ? csrf[1] : '';
 
-  btn.addEventListener('click', async function() {
-    if (!confirm('Jeste li sigurni? Podaci će se uvesti u sustav.')) return;
+  var importBtn = document.getElementById('importBtn');
+  var progressArea = document.getElementById('progressArea');
+  var progressBar = document.getElementById('progressBar');
+  var progressTitle = document.getElementById('progressTitle');
+  var progressDetail = document.getElementById('progressDetail');
+  var actionButtons = document.getElementById('actionButtons');
+  var importError = document.getElementById('importError');
+  var importErrorText = document.getElementById('importErrorText');
+  var pollInterval = null;
 
-    btn.disabled = true;
-    btn.style.opacity = '0.6';
-    btnText.textContent = 'Uvoz u tijeku...';
-    statusDiv.style.display = 'block';
-    statusDiv.style.background = '#eff6ff';
-    statusDiv.style.color = '#1e40af';
-    statusDiv.style.border = '1px solid #bfdbfe';
-    statusDiv.textContent = 'Obrada podataka — molimo pričekajte...';
+  importBtn.addEventListener('click', function(){
+    // Disable + spinner
+    importBtn.disabled = true;
+    importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Inicijalizacija importa...';
 
-    try {
-      const resp = await fetch(btn.dataset.url, {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': '{{ csrf_token }}',
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      });
-      const data = await resp.json();
+    // Show progress, hide buttons
+    progressArea.classList.remove('d-none');
 
-      if (data.success) {
-        statusDiv.style.background = '#f0fdf4';
-        statusDiv.style.color = '#166534';
-        statusDiv.style.border = '1px solid #bbf7d0';
-        statusDiv.innerHTML = '<strong>' + data.message + '</strong>';
-        btnText.textContent = 'Završeno!';
-        if (data.redirect_url) {
-          setTimeout(() => location.href = data.redirect_url, 2000);
-        }
-      } else {
-        statusDiv.style.background = '#fef2f2';
-        statusDiv.style.color = '#991b1b';
-        statusDiv.style.border = '1px solid #fecaca';
-        statusDiv.innerHTML = '<strong>Greška:</strong> ' + (data.message || 'Nepoznata greška');
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        btnText.textContent = 'Pokušaj ponovo';
+    // POST to execute
+    fetch(EXECUTE_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': csrf},
+      body: '{}'
+    })
+    .then(function(r){
+      if(!r.ok) return r.json().then(function(d){ throw new Error(d.error || 'HTTP ' + r.status); });
+      return r.json();
+    })
+    .then(function(data){
+      if(!data.ok){
+        showError(data.error || 'Nepoznata greska');
+        return;
       }
-    } catch (err) {
-      statusDiv.style.background = '#fef2f2';
-      statusDiv.style.color = '#991b1b';
-      statusDiv.textContent = 'Mrežna greška: ' + err.message;
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      btnText.textContent = 'Pokušaj ponovo';
-    }
+      // Start polling
+      actionButtons.classList.add('d-none');
+      progressTitle.textContent = 'Import u tijeku...';
+      pollInterval = setInterval(pollStatus, 1500);
+    })
+    .catch(function(err){
+      showError('Greska pokretanja importa: ' + err.message);
+    });
   });
+
+  function pollStatus(){
+    fetch(STATUS_URL)
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data){
+      // Update progress bar
+      var pct = data.progress_percent || 0;
+      progressBar.style.width = pct + '%';
+      progressBar.textContent = pct + '%';
+
+      // Update detail text
+      progressDetail.textContent = 'Obrada: ' + (data.processed_rows||0) + ' / ' + (data.total_rows||0) + ' redova';
+
+      // Update stats
+      document.getElementById('statCreated').textContent = data.records_created || 0;
+      document.getElementById('statUpdated').textContent = data.records_updated || 0;
+      document.getElementById('statSkipped').textContent = data.records_skipped || 0;
+      document.getElementById('statFailed').textContent = data.records_failed || 0;
+
+      // Check if done
+      if(data.status === 'completed' || data.status === 'failed'){
+        clearInterval(pollInterval);
+        progressBar.style.width = '100%';
+        progressBar.textContent = '100%';
+
+        if(data.status === 'completed'){
+          progressTitle.innerHTML = '<i class="fas fa-check-circle me-2" style="color:#059669"></i>Import zavrsen!';
+          progressBar.style.background = '#059669';
+        } else {
+          progressTitle.innerHTML = '<i class="fas fa-exclamation-triangle me-2" style="color:#dc2626"></i>Import zavrsen s greskama';
+          progressBar.style.background = '#dc2626';
+        }
+
+        if(data.redirect_url){
+          setTimeout(function(){ window.location.href = data.redirect_url; }, 1500);
+        }
+      }
+    })
+    .catch(function(err){
+      // Ne prekidaj polling na jednokratnu gresku — retry
+      console.warn('Poll error:', err);
+    });
+  }
+
+  function showError(msg){
+    importError.classList.remove('d-none');
+    importErrorText.textContent = msg;
+    importBtn.disabled = false;
+    importBtn.innerHTML = '<i class="fas fa-redo me-1"></i>Pokusaj ponovo';
+    progressArea.classList.add('d-none');
+  }
 })();
 </script>
 {% endblock %}

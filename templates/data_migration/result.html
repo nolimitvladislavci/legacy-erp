@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block page_title %}Rezultat importa{% endblock %}
+{% block title %}Rezultat importa — LIMIT Connect{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 py-3" style="max-width:1000px">
+
+  <nav class="mb-3" style="font-size:.85rem">
+    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+      <i class="fas fa-arrow-left me-1"></i>Svi projekti
+    </a>
+    <span style="color:var(--text-muted)"> / {{ project.name }}</span>
+  </nav>
+
+  <!-- Status header -->
+  {% if project.status == 'completed' %}
+  <div class="d-flex align-items-center gap-3 mb-3 p-3" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;border-left:4px solid #059669">
+    <i class="fas fa-check-circle fa-2x" style="color:#059669"></i>
+    <div>
+      <h5 class="mb-0" style="color:var(--text)">Import zavrsen</h5>
+      <span class="small" style="color:var(--text-muted)">{{ project.completed_at|date:"d.m.Y H:i" }} — {{ project.get_entity_type_display }}</span>
+    </div>
+  </div>
+  {% else %}
+  <div class="d-flex align-items-center gap-3 mb-3 p-3" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;border-left:4px solid #dc2626">
+    <i class="fas fa-exclamation-triangle fa-2x" style="color:#dc2626"></i>
+    <div>
+      <h5 class="mb-0" style="color:var(--text)">Import neuspjesan</h5>
+      <span class="small" style="color:var(--text-muted)">{{ project.completed_at|date:"d.m.Y H:i"|default:"—" }}</span>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Stats -->
+  <div class="row g-2 mb-4">
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Kreirano</div>
+        <div class="fw-bold fs-4" style="color:#059669">{{ project.records_created }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Azurirano</div>
+        <div class="fw-bold fs-4" style="color:var(--accent)">{{ project.records_updated }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Preskoceno</div>
+        <div class="fw-bold fs-4" style="color:var(--text-muted)">{{ project.records_skipped }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Greske</div>
+        <div class="fw-bold fs-4" style="color:#dc2626">{{ project.records_failed }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log filteri -->
+  <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+    <strong style="color:var(--text)">Logovi:</strong>
+    <a href="?level=" class="btn btn-sm {% if not level_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      Sve ({{ log_counts.info|add:log_counts.warning|add:log_counts.error }})
+    </a>
+    <a href="?level=error" class="btn btn-sm {% if level_filter == 'error' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+      <i class="fas fa-times-circle me-1"></i>Greske ({{ log_counts.error }})
+    </a>
+    <a href="?level=warning" class="btn btn-sm {% if level_filter == 'warning' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+      <i class="fas fa-exclamation-circle me-1"></i>Upozorenja ({{ log_counts.warning }})
+    </a>
+    <a href="?level=info" class="btn btn-sm {% if level_filter == 'info' %}btn-info{% else %}btn-outline-info{% endif %}">
+      <i class="fas fa-info-circle me-1"></i>Info ({{ log_counts.info }})
+    </a>
+  </div>
+
+  <!-- Log tablica -->
+  {% if logs %}
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div class="table-responsive" style="max-height:500px;overflow:auto">
+      <table class="table table-sm mb-0" style="color:var(--text);font-size:.82rem">
+        <thead style="background:var(--table-header-bg);position:sticky;top:0;z-index:1">
+          <tr>
+            <th style="color:var(--text-secondary);width:8%">Red</th>
+            <th style="color:var(--text-secondary);width:10%">Razina</th>
+            <th style="color:var(--text-secondary);width:10%">Polje</th>
+            <th style="color:var(--text-secondary);width:42%">Poruka</th>
+            <th style="color:var(--text-secondary);width:15%">Originalno</th>
+            <th style="color:var(--text-secondary);width:15%">Razrijeseno</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td class="text-muted">{{ log.row_number|default:"—" }}</td>
+            <td>
+              {% if log.level == 'error' %}
+                <span class="badge" style="background:#dc2626;color:#fff">Greska</span>
+              {% elif log.level == 'warning' %}
+                <span class="badge" style="background:#d97706;color:#fff">Upozorenje</span>
+              {% else %}
+                <span class="badge" style="background:var(--accent);color:#fff">Info</span>
+              {% endif %}
+            </td>
+            <td class="text-muted">{{ log.field_name|default:"—" }}</td>
+            <td>{{ log.message }}</td>
+            <td class="text-muted" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ log.original_value|default:"—" }}</td>
+            <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ log.resolved_value|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-4" style="color:var(--text-muted)">
+    <i class="fas fa-check-circle fa-2x mb-2" style="color:#059669"></i>
+    <p>Nema logova za prikaz — import je prosan bez upozorenja.</p>
+  </div>
+  {% endif %}
+
+  <!-- Actions -->
+  <div class="d-flex justify-content-between mt-3">
+    <a href="{% url 'data_migration:dashboard' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Povratak na listu
+    </a>
+    <a href="{% url 'data_migration:upload' %}" class="btn btn-warning fw-bold">
+      <i class="fas fa-plus me-1"></i>Novi import
+    </a>
+  </div>
+
+</div>
+{% endblock %}

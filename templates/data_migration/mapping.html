@@ -1,48 +1,266 @@
-{% extends "base.html" %}
-{% block title %}Mapiranje — {{ project.name }}{% endblock %}
-{% block content %}
-<div class="container-fluid py-4">
-  <h2 class="mb-2">Korak 2: Mapiranje polja</h2>
-  <p class="text-muted mb-4">Povežite kolone iz vaše datoteke s poljima u sustavu.</p>
+{% extends 'base.html' %}
+{% load i18n %}
 
-  {% if sample_data %}
-  <div class="mb-4" style="overflow-x:auto;max-height:250px">
-    <table class="table table-sm table-bordered" style="font-size:.8rem">
-      <thead class="table-dark">
-        <tr>{% for col in detected_columns %}<th>{{ col }}</th>{% endfor %}</tr>
-      </thead>
-      <tbody>
-        {% for row in sample_data %}
-        <tr>{% for col in detected_columns %}<td>{{ row|default_if_none:"" }}</td>{% endfor %}</tr>
-        {% endfor %}
-      </tbody>
-    </table>
+{% block page_title %}Mapiranje polja{% endblock %}
+{% block title %}Mapiranje polja — LIMIT Connect{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 py-3" style="max-width:1100px">
+
+  <nav class="mb-3" style="font-size:.85rem">
+    <a href="{% url 'data_migration:dashboard' %}" style="color:var(--accent);text-decoration:none">
+      <i class="fas fa-arrow-left me-1"></i>Svi projekti
+    </a>
+    <span style="color:var(--text-muted)"> / {{ project.name }}</span>
+  </nav>
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h4 class="mb-0"><i class="fas fa-columns me-2" style="color:var(--gold)"></i>Korak 2: Mapiranje polja</h4>
+    <div>
+      <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="autoMatchBtn">
+        <i class="fas fa-magic me-1"></i>Auto-Match
+      </button>
+      <span id="saveIndicator" class="small d-none" style="color:#059669">
+        <i class="fas fa-check-circle me-1"></i>Spremljeno
+      </span>
+    </div>
+  </div>
+
+  <!-- Info kartica -->
+  <div class="row g-2 mb-3">
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Datoteka</div>
+        <div class="fw-bold" style="color:var(--text)">{{ mf.original_filename|truncatechars:25 }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Redova</div>
+        <div class="fw-bold" style="color:var(--text)">{{ mf.row_count }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Kolona</div>
+        <div class="fw-bold" style="color:var(--text)">{{ detected_columns|length }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div class="small" style="color:var(--text-muted)">Tip</div>
+        <div class="fw-bold" style="color:var(--text)">{{ project.get_entity_type_display }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mapping tablica -->
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <div class="table-responsive">
+      <table class="table mb-0" style="color:var(--text)">
+        <thead style="background:var(--table-header-bg)">
+          <tr>
+            <th style="color:var(--text-secondary);width:40%">Kolona iz datoteke</th>
+            <th style="color:var(--text-secondary);width:5%;text-align:center"><i class="fas fa-arrow-right"></i></th>
+            <th style="color:var(--text-secondary);width:40%">ERP polje</th>
+            <th style="color:var(--text-secondary);width:15%">Primjer</th>
+          </tr>
+        </thead>
+        <tbody id="mappingBody">
+          {% for col in detected_columns %}
+          <tr data-col="{{ col }}">
+            <td class="fw-semibold align-middle">
+              <i class="fas fa-table me-2" style="color:var(--text-muted)"></i>{{ col }}
+            </td>
+            <td class="text-center align-middle"><i class="fas fa-long-arrow-alt-right" style="color:var(--gold)"></i></td>
+            <td>
+              <select class="form-select form-select-sm mapping-select"
+                      data-source-col="{{ col }}"
+                      style="background:var(--input-bg);border-color:var(--input-border);color:var(--text)">
+                <option value="">— Ne importiraj —</option>
+                {% for f in schema %}
+                <option value="{{ f.key }}"
+                  {% if f.key == existing_mapping|default_if_none:"" %}selected{% endif %}
+                  {% if f.required %}style="font-weight:600"{% endif %}>
+                  {{ f.label }}{% if f.required %} *{% endif %}{% if f.hint %} ({{ f.hint }}){% endif %}
+                </option>
+                {% endfor %}
+              </select>
+            </td>
+            <td class="small align-middle" style="color:var(--text-muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                data-sample-col="{{ col }}">
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Error container -->
+  <div id="mappingErrors" class="alert alert-danger d-none mt-3">
+    <i class="fas fa-exclamation-triangle me-1"></i>
+    <span id="mappingErrorText"></span>
+  </div>
+
+  <!-- Gumbi -->
+  <div class="d-flex justify-content-between mt-3">
+    <a href="{% url 'data_migration:upload' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-1"></i>Nazad
+    </a>
+    <button type="button" class="btn btn-warning fw-bold px-4" id="continueBtn">
+      <i class="fas fa-arrow-right me-1"></i>Nastavi na pregled
+    </button>
+  </div>
+
+  <!-- Sample preview -->
+  {% if sample_table %}
+  <div class="mt-4">
+    <h6 style="color:var(--text-muted)"><i class="fas fa-eye me-1"></i>Prvih {{ sample_table|length }} redova iz datoteke:</h6>
+    <div class="table-responsive" style="max-height:200px;overflow:auto">
+      <table class="table table-sm" style="font-size:.78rem;background:var(--bg-card);color:var(--text)">
+        <thead style="background:var(--table-header-bg)">
+          <tr>{% for col in detected_columns %}<th style="color:var(--text-secondary)">{{ col }}</th>{% endfor %}</tr>
+        </thead>
+        <tbody>
+          {% for row in sample_table %}
+          <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
   {% endif %}
 
-  <form method="post">
-    {% csrf_token %}
-    <div class="row">
-      {% for col in detected_columns %}
-      <div class="col-md-4 col-lg-3 mb-3">
-        <label class="form-label fw-bold" style="font-size:.85rem">{{ col }}</label>
-        <select name="map_{{ col }}" class="form-select form-select-sm">
-          <option value="">-- Preskoči --</option>
-          {% for field in schema %}
-          <option value="{{ field.key }}" {% if current_mapping|default_if_none:"" %}{% endif %}
-            {% if field.required %}style="font-weight:bold"{% endif %}>
-            {{ field.label }}{% if field.required %} *{% endif %}
-          </option>
-          {% endfor %}
-        </select>
-      </div>
-      {% endfor %}
-    </div>
-
-    <div class="d-flex gap-2 mt-3">
-      <a href="{% url 'data_migration:project_list' %}" class="btn btn-outline-secondary">Odustani</a>
-      <button type="submit" class="btn btn-primary"><i class="fas fa-arrow-right"></i> Spremi i pregledaj</button>
-    </div>
-  </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  var SAVE_URL = '{% url "data_migration:mapping_save" pk=project.pk %}';
+  var PREVIEW_URL = '{% url "data_migration:preview" pk=project.pk %}';
+  var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+  csrf = csrf ? csrf[1] : '';
+
+  var existingMapping = {{ existing_mapping|safe }};
+  var sampleValues = {{ sample_values|safe }};
+  var schema = {{ schema|safe }};
+  var saveTimer = null;
+  var saveIndicator = document.getElementById('saveIndicator');
+
+  // Popuni sample vrijednosti u mapping tablici
+  document.querySelectorAll('[data-sample-col]').forEach(function(td){
+    var col = td.dataset.sampleCol;
+    td.textContent = sampleValues[col] || '';
+  });
+  var errorDiv = document.getElementById('mappingErrors');
+  var errorText = document.getElementById('mappingErrorText');
+
+  // Pre-populate existing mapping
+  document.querySelectorAll('.mapping-select').forEach(function(sel){
+    var col = sel.dataset.sourceCol;
+    if(existingMapping[col]){
+      sel.value = existingMapping[col];
+    }
+  });
+
+  // Auto-match button
+  document.getElementById('autoMatchBtn').addEventListener('click', function(){
+    var schemaMap = {};
+    schema.forEach(function(f){
+      schemaMap[f.label.toLowerCase()] = f.key;
+      schemaMap[f.key.toLowerCase()] = f.key;
+    });
+    document.querySelectorAll('.mapping-select').forEach(function(sel){
+      if(sel.value) return; // Ne dirati vec mapirana polja
+      var col = sel.dataset.sourceCol.toLowerCase().trim();
+      if(schemaMap[col]){
+        sel.value = schemaMap[col];
+        sel.style.borderColor = 'var(--gold)';
+        setTimeout(function(){ sel.style.borderColor = ''; }, 1500);
+      }
+    });
+    triggerAutoSave();
+  });
+
+  // AJAX auto-save na promjenu bilo kojeg selecta
+  document.querySelectorAll('.mapping-select').forEach(function(sel){
+    sel.addEventListener('change', function(){
+      // Duplikat check — ne dozvoli isto ERP polje na dvije kolone
+      var val = this.value;
+      if(val){
+        document.querySelectorAll('.mapping-select').forEach(function(other){
+          if(other !== sel && other.value === val){
+            other.value = '';
+            other.style.borderColor = '#dc2626';
+            setTimeout(function(){ other.style.borderColor = ''; }, 2000);
+          }
+        });
+      }
+      triggerAutoSave();
+    });
+  });
+
+  function triggerAutoSave(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){ doSave(false); }, 500);
+  }
+
+  function collectMapping(){
+    var mapping = {};
+    document.querySelectorAll('.mapping-select').forEach(function(sel){
+      if(sel.value){ mapping[sel.dataset.sourceCol] = sel.value; }
+    });
+    return mapping;
+  }
+
+  function doSave(isFinal){
+    var mapping = collectMapping();
+    errorDiv.classList.add('d-none');
+
+    fetch(SAVE_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': csrf},
+      body: JSON.stringify({mapping: mapping, is_final: isFinal})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.ok){
+        if(isFinal){
+          window.location.href = PREVIEW_URL;
+        } else {
+          saveIndicator.classList.remove('d-none');
+          setTimeout(function(){ saveIndicator.classList.add('d-none'); }, 2000);
+        }
+      } else {
+        var errs = data.errors || [data.error || 'Nepoznata greska'];
+        errorText.innerHTML = errs.join('<br>');
+        errorDiv.classList.remove('d-none');
+        if(isFinal){
+          var btn = document.getElementById('continueBtn');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i>Nastavi na pregled';
+        }
+      }
+    })
+    .catch(function(err){
+      errorText.textContent = 'Greska komunikacije sa serverom: ' + err.message;
+      errorDiv.classList.remove('d-none');
+      if(isFinal){
+        var btn = document.getElementById('continueBtn');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-arrow-right me-1"></i>Nastavi na pregled';
+      }
+    });
+  }
+
+  // Continue button — final save + validate
+  document.getElementById('continueBtn').addEventListener('click', function(){
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Validacija mapiranja...';
+    doSave(true);
+  });
+})();
+</script>
 {% endblock %}

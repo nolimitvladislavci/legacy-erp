@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block page_title %}Migracija podataka{% endblock %}
+{% block title %}Migracija podataka — LIMIT Connect{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 py-3" style="max-width:960px">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h4 class="mb-0"><i class="fas fa-exchange-alt me-2" style="color:var(--gold)"></i>Migracija podataka</h4>
+    <a href="{% url 'data_migration:upload' %}" class="btn btn-warning fw-bold">
+      <i class="fas fa-plus me-1"></i>Novi uvoz
+    </a>
+  </div>
+
+  <div class="alert alert-info d-flex align-items-start gap-2 mb-4" style="background:var(--bg-card);border-color:var(--border);color:var(--text)">
+    <i class="fas fa-info-circle mt-1" style="color:var(--accent)"></i>
+    <div>
+      <strong>LIMIT Connect nije arhiva.</strong> Uploadane datoteke se automatski brisu nakon 24 sata.
+      Zadrzite vlastite originale u sigurnoj pohrani.
+    </div>
+  </div>
+
+  {% if projects %}
+  <div class="table-responsive">
+    <table class="table table-hover" style="background:var(--bg-card);border-radius:12px;overflow:hidden">
+      <thead style="background:var(--table-header-bg)">
+        <tr>
+          <th style="color:var(--text-secondary)">Projekt</th>
+          <th style="color:var(--text-secondary)">Izvor</th>
+          <th style="color:var(--text-secondary)">Tip</th>
+          <th style="color:var(--text-secondary)">Status</th>
+          <th style="color:var(--text-secondary)">Redova</th>
+          <th style="color:var(--text-secondary)">Kreiran</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in projects %}
+        <tr style="color:var(--text)">
+          <td class="fw-semibold">{{ p.name }}</td>
+          <td><span class="text-muted">{{ p.source_program|default:"—" }}</span></td>
+          <td>{{ p.get_entity_type_display }}</td>
+          <td>
+            {% if p.status == 'completed' %}
+              <span class="badge" style="background:#059669;color:#fff">Zavrseno</span>
+            {% elif p.status == 'failed' %}
+              <span class="badge" style="background:#dc2626;color:#fff">Neuspjelo</span>
+            {% elif p.status == 'importing' %}
+              <span class="badge" style="background:#d97706;color:#fff"><i class="fas fa-spinner fa-spin me-1"></i>U tijeku</span>
+            {% elif p.status == 'draft' %}
+              <span class="badge" style="background:var(--badge-bg);color:var(--text-muted)">Nacrt</span>
+            {% else %}
+              <span class="badge" style="background:var(--accent);color:#fff">{{ p.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>{{ p.total_rows|default:"—" }}</td>
+          <td class="text-muted">{{ p.created_at|date:"d.m.Y H:i" }}</td>
+          <td class="text-end">
+            {% if p.status == 'draft' or p.status == 'mapped' %}
+              <a href="{% url 'data_migration:mapping' pk=p.pk %}" class="btn btn-sm btn-outline-primary">Nastavi</a>
+            {% elif p.status == 'preview' %}
+              <a href="{% url 'data_migration:preview' pk=p.pk %}" class="btn btn-sm btn-outline-primary">Preview</a>
+            {% elif p.status == 'importing' %}
+              <a href="{% url 'data_migration:status' pk=p.pk %}" class="btn btn-sm btn-outline-warning">Pracenje</a>
+            {% elif p.status == 'completed' or p.status == 'failed' %}
+              <a href="{% url 'data_migration:result' pk=p.pk %}" class="btn btn-sm btn-outline-secondary">Rezultat</a>
+            {% endif %}
+            <form method="post" action="{% url 'data_migration:delete' pk=p.pk %}" class="d-inline ms-1"
+                  onsubmit="return confirm('Obrisati projekt \'{{ p.name }}\'?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5" style="color:var(--text-muted)">
+    <i class="fas fa-database fa-3x mb-3" style="color:var(--border)"></i>
+    <p class="mb-1">Nemate migracijskih projekata.</p>
+    <p>Kliknite <strong>"Novi uvoz"</strong> za prijenos podataka iz starog programa.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
