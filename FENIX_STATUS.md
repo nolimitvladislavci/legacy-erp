@@ -6,8 +6,8 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-23 17:28 — Opus (T&C consent, SupplierRiskAlert, classify_buyer_types Celery, kg_summary)
-Git HEAD: 1d53447
+2026-03-23 18:54 — Opus (Scan Batch 100, Offline POS sync, Robot Prodavač kiosk)
+Git HEAD: 314f3de
 
 ---
 
