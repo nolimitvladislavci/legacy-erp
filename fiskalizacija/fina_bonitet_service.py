@@ -142,14 +142,34 @@ def _build_result(oib, risk_level, details, note=''):
 def _save_alert(oib, company_id, result):
     """Spremi SupplierRiskAlert u bazu ako rizik > LOW."""
     try:
-        from limit_connect_ai.models_knowledge_graph import ClientOpportunityMatch
-        # Za sada logiramo — SupplierRiskAlert model se može dodati kasnije
-        logger.warning(
-            '[BONITET ALERT] OIB=%s rizik=%s company=%s detalji=%s',
-            oib, result['risk_level'], company_id, result.get('note', ''),
+        from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+        from companies.models import Company
+
+        if not company_id:
+            logger.warning('[BONITET ALERT] OIB=%s rizik=%s — nema company_id, preskačem bazu', oib, result['risk_level'])
+            return
+
+        # Ne dupliciraj alerte za isti OIB u zadnjih 30 dana
+        recent = SupplierRiskAlert.objects.filter(
+            company_id=company_id,
+            supplier_oib=oib,
+            detected_at__gte=timezone.now() - timezone.timedelta(days=30),
+        ).exists()
+        if recent:
+            logger.debug('[BONITET] Alert za OIB=%s već postoji (30d), preskačem', oib)
+            return
+
+        SupplierRiskAlert.objects.create(
+            company_id=company_id,
+            supplier_oib=oib,
+            supplier_name=result.get('details', {}).get('vies_name', '') or f'OIB:{oib}',
+            risk_level=result['risk_level'],
+            risk_description=result.get('note', '') or f"Automatska provjera: {result.get('risk_label', '')}",
+            source_data=result.get('details'),
         )
+        logger.info('[BONITET ALERT] Kreiran SupplierRiskAlert: OIB=%s rizik=%s company=%s', oib, result['risk_level'], company_id)
     except Exception:
-        pass
+        logger.warning('[BONITET ALERT] Greška pri spremanju alerta OIB=%s', oib, exc_info=True)
 
 
 def invalidate_cache(oib):

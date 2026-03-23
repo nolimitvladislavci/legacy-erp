@@ -59,3 +59,35 @@ def auto_book_invoice(sender, instance, created, **kwargs):
             'Auto-knjiženje neuspješno za fakturu %s',
             instance.number, exc_info=True,
         )
+
+
+# ── SupplierRiskAlert auto-trigger za ulazne fakture ─────────────────────
+
+@receiver(post_save, sender='invoicing.Invoice')
+def trigger_supplier_risk_check(sender, instance, created, **kwargs):
+    """
+    Kad se kreira ulazna faktura (URA) — provjeri bonitet dobavljača.
+    Pokreće async Celery task. Preskače ako firma nema T&C consent (GDPR).
+    """
+    if not created:
+        return
+    # Samo ulazne fakture
+    if instance.doctype not in ('URA', 'UR'):
+        return
+    # Treba imati OIB dobavljača
+    supplier_oib = getattr(instance, 'client_oib', '') or ''
+    if not supplier_oib or len(supplier_oib) < 8:
+        return
+    # Company mora postojati
+    company = getattr(instance, 'company', None)
+    if not company:
+        return
+    # GDPR: preskoci ako nema T&C consent
+    if not getattr(company, 'has_signed_tc_consent', False):
+        return
+
+    try:
+        from fiskalizacija.tasks import check_supplier_risk_async
+        check_supplier_risk_async.delay(supplier_oib, str(company.id))
+    except Exception:
+        logger.debug('SupplierRisk async trigger failed for OIB=%s', supplier_oib, exc_info=True)
