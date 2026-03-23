@@ -1,14 +1,14 @@
 """
-UBL 2.1 / EN 16931 compliant XML generator for Croatian e-Racun.
+UBL 2.1 / EN 16931 compliant XML generator for Croatian e-Račun.
 
 Generates XML per:
 - EU Standard EN 16931-1:2017
-- PEPPOL BIS Billing 3.0
-- Croatian CIUS (HR specifics)
+- PEPPOL BIS Billing 3.0 (cross-border)
+- Croatian CIUS-2025 (domestic B2B/B2G per NN 89/25)
+- HR Extension urn:mfin.gov.hr:ext-2025:1.0
 """
 from lxml import etree
 from decimal import Decimal
-import datetime
 
 # Namespaces
 NS = {
@@ -19,8 +19,21 @@ NS = {
     'ext': 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2',
 }
 
-CUSTOMIZATION_ID = 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0'
-PROFILE_ID = 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0'
+# ── Customization IDs per NN 89/25 ──────────────────────────────
+# Domaći B2B/B2G (HR CIUS-2025 + HR Extension)
+CIUS_HR_2025 = (
+    'urn:cen.eu:en16931:2017'
+    '#compliant#urn:mfin.gov.hr:cius-2025:1.0'
+    '#conformant#urn:mfin.gov.hr:ext-2025:1.0'
+)
+PROFILE_HR_2025 = 'urn:mfin.gov.hr:profile:hr-eracun:1.0'
+
+# Cross-border / PEPPOL
+CIUS_PEPPOL = (
+    'urn:cen.eu:en16931:2017'
+    '#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0'
+)
+PROFILE_PEPPOL = 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0'
 
 # Payment means mapping
 PAYMENT_MEANS_MAP = {
@@ -55,15 +68,8 @@ def _el(parent, ns_tag, text=None, **attrs):
         full_tag = ns_tag
     el = etree.SubElement(parent, full_tag, **attrs)
     if text is not None:
-        el.text = _safe(str(text))
+        el.text = str(text)
     return el
-
-
-def _safe(text):
-    """Escape special XML characters."""
-    if text is None:
-        return ''
-    return str(text).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
 
 def map_unit_code(unit):
@@ -74,9 +80,21 @@ def map_unit_code(unit):
     return code if len(code) <= 5 else 'EA'
 
 
+def _is_domestic_hr(eracun):
+    """Check if both issuer and recipient are HR — use CIUS-2025."""
+    return (
+        getattr(eracun, 'issuer_country', 'HR') == 'HR'
+        and getattr(eracun, 'recipient_country', 'HR') == 'HR'
+    )
+
+
 def generate_ubl_xml(eracun):
     """
-    Generate EN 16931 / PEPPOL BIS 3.0 compliant UBL 2.1 Invoice XML.
+    Generate EN 16931 compliant UBL 2.1 Invoice XML.
+
+    Automatically selects:
+      - CIUS-2025 (HR domestic B2B/B2G) when both parties are HR
+      - PEPPOL BIS 3.0 for cross-border
 
     Args:
         eracun: ERacun model instance with related items and tax_summaries
@@ -90,22 +108,30 @@ def generate_ubl_xml(eracun):
         'cbc': NS['cbc'],
     }
 
+    domestic = _is_domestic_hr(eracun)
+
     root = etree.Element(f"{{{NS['ubl']}}}Invoice", nsmap=nsmap)
 
-    # BT-24: CustomizationID (REQUIRED for PEPPOL)
-    _el(root, 'cbc:CustomizationID', CUSTOMIZATION_ID)
-    # BT-23: ProfileID
-    _el(root, 'cbc:ProfileID', PROFILE_ID)
-    # BT-1: Invoice number
+    # ── BT-24: CustomizationID ──────────────────────────────────
+    _el(root, 'cbc:CustomizationID', CIUS_HR_2025 if domestic else CIUS_PEPPOL)
+
+    # ── BT-23: ProfileID ────────────────────────────────────────
+    _el(root, 'cbc:ProfileID', PROFILE_HR_2025 if domestic else PROFILE_PEPPOL)
+
+    # ── BT-1: Invoice number ────────────────────────────────────
     _el(root, 'cbc:ID', eracun.invoice_number)
-    # BT-2: Issue date
+
+    # ── BT-2: Issue date ────────────────────────────────────────
     _el(root, 'cbc:IssueDate', eracun.issue_date.strftime('%Y-%m-%d'))
-    # BT-9: Due date
+
+    # ── BT-9: Due date ──────────────────────────────────────────
     if eracun.due_date:
         _el(root, 'cbc:DueDate', eracun.due_date.strftime('%Y-%m-%d'))
-    # BT-3: Invoice type code
+
+    # ── BT-3: Invoice type code ─────────────────────────────────
     _el(root, 'cbc:InvoiceTypeCode', eracun.doc_type)
-    # BT-22: Note (include ZKI/JIR if fiscalized)
+
+    # ── BT-22: Note (ZKI/JIR za fiskalizaciju) ─────────────────
     notes = []
     if eracun.note:
         notes.append(eracun.note)
@@ -115,19 +141,43 @@ def generate_ubl_xml(eracun):
         notes.append(f'JIR: {eracun.jir}')
     if notes:
         _el(root, 'cbc:Note', ' | '.join(notes))
-    # BT-7: Tax point date (delivery date)
+
+    # ── BT-5: Currency ──────────────────────────────────────────
+    _el(root, 'cbc:DocumentCurrencyCode', eracun.currency)
+
+    # ── BT-10: BuyerReference (obavezan za B2G, korisno za B2B) ─
+    buyer_ref = getattr(eracun, 'buyer_reference', '') or ''
+    if not buyer_ref and getattr(eracun, 'payment_reference', ''):
+        buyer_ref = eracun.payment_reference
+    if buyer_ref:
+        _el(root, 'cbc:BuyerReference', buyer_ref)
+    elif domestic:
+        # CIUS-2025: BT-10 obavezan, stavimo N/A ako nema
+        _el(root, 'cbc:BuyerReference', 'N/A')
+
+    # ── BT-13: OrderReference (broj narudžbe kupca) ─────────────
+    order_ref = getattr(eracun, 'order_reference', '') or ''
+    if order_ref:
+        oref = _el(root, 'cac:OrderReference')
+        _el(oref, 'cbc:ID', order_ref)
+
+    # ── BT-7: Tax point date / Invoice period ───────────────────
     if eracun.delivery_date:
         tax_point = _el(root, 'cac:InvoicePeriod')
         _el(tax_point, 'cbc:StartDate', eracun.delivery_date.strftime('%Y-%m-%d'))
         _el(tax_point, 'cbc:EndDate', eracun.delivery_date.strftime('%Y-%m-%d'))
-    # BT-5: Currency
-    _el(root, 'cbc:DocumentCurrencyCode', eracun.currency)
 
-    # BG-4: Seller / Supplier (Izdavatelj)
+    # ═══════════════════════════════════════════════════════════
+    # BG-4: Seller / AccountingSupplierParty
+    # ═══════════════════════════════════════════════════════════
     supplier_party = _el(root, 'cac:AccountingSupplierParty')
     party = _el(supplier_party, 'cac:Party')
 
-    # BT-30: Seller legal registration ID (OIB)
+    # BT-29: Seller electronic address (CIUS-2025 obavezan)
+    if domestic:
+        ep = _el(party, 'cbc:EndpointID', eracun.issuer_oib, schemeID='0192')
+
+    # BT-30: Seller ID
     pid = _el(party, 'cac:PartyIdentification')
     _el(pid, 'cbc:ID', eracun.issuer_oib, schemeID='0192')  # 0192 = HR:OIB
 
@@ -157,9 +207,15 @@ def generate_ubl_xml(eracun):
     _el(legal, 'cbc:RegistrationName', eracun.issuer_name)
     _el(legal, 'cbc:CompanyID', eracun.issuer_oib, schemeID='0192')
 
-    # BG-7: Buyer / Customer (Primatelj)
+    # ═══════════════════════════════════════════════════════════
+    # BG-7: Buyer / AccountingCustomerParty
+    # ═══════════════════════════════════════════════════════════
     customer_party = _el(root, 'cac:AccountingCustomerParty')
     cparty = _el(customer_party, 'cac:Party')
+
+    # BT-49: Buyer electronic address (CIUS-2025 obavezan)
+    if domestic:
+        _el(cparty, 'cbc:EndpointID', eracun.recipient_oib, schemeID='0192')
 
     cpid = _el(cparty, 'cac:PartyIdentification')
     _el(cpid, 'cbc:ID', eracun.recipient_oib, schemeID='0192')
@@ -187,9 +243,20 @@ def generate_ubl_xml(eracun):
     _el(clegal, 'cbc:RegistrationName', eracun.recipient_name)
     _el(clegal, 'cbc:CompanyID', eracun.recipient_oib, schemeID='0192')
 
+    # ═══════════════════════════════════════════════════════════
     # BG-16: Payment means
+    # ═══════════════════════════════════════════════════════════
     pm = _el(root, 'cac:PaymentMeans')
     _el(pm, 'cbc:PaymentMeansCode', eracun.payment_means_code)
+
+    # BT-83: Payment ID / Poziv na broj (HR CIUS-2025)
+    pay_ref = getattr(eracun, 'payment_reference', '') or ''
+    pay_model = getattr(eracun, 'payment_model', '') or ''
+    if pay_ref:
+        # HR format: MODEL-POZIVNABROJ (npr. HR00-12345-67890)
+        full_ref = f'{pay_model}-{pay_ref}' if pay_model else pay_ref
+        _el(pm, 'cbc:PaymentID', full_ref)
+
     if eracun.issuer_iban:
         payee = _el(pm, 'cac:PayeeFinancialAccount')
         _el(payee, 'cbc:ID', eracun.issuer_iban)
@@ -197,13 +264,17 @@ def generate_ubl_xml(eracun):
             branch = _el(payee, 'cac:FinancialInstitutionBranch')
             _el(branch, 'cbc:ID', eracun.issuer_swift)
 
+    # ═══════════════════════════════════════════════════════════
     # BG-17: Payment terms
+    # ═══════════════════════════════════════════════════════════
     if eracun.due_date:
         pt = _el(root, 'cac:PaymentTerms')
         days = (eracun.due_date - eracun.issue_date).days
         _el(pt, 'cbc:Note', f'Rok placanja: {days} dana' if days > 0 else 'Placanje odmah')
 
-    # BG-23: Tax totals (per category/rate)
+    # ═══════════════════════════════════════════════════════════
+    # BG-23: Tax totals
+    # ═══════════════════════════════════════════════════════════
     tax_total = _el(root, 'cac:TaxTotal')
     _el(tax_total, 'cbc:TaxAmount', f'{eracun.tax_amount:.2f}', currencyID=eracun.currency)
 
@@ -219,7 +290,6 @@ def generate_ubl_xml(eracun):
             scheme = _el(cat, 'cac:TaxScheme')
             _el(scheme, 'cbc:ID', 'VAT')
     else:
-        # Fallback: single tax subtotal from totals
         subtotal = _el(tax_total, 'cac:TaxSubtotal')
         _el(subtotal, 'cbc:TaxableAmount', f'{eracun.subtotal:.2f}', currencyID=eracun.currency)
         _el(subtotal, 'cbc:TaxAmount', f'{eracun.tax_amount:.2f}', currencyID=eracun.currency)
@@ -232,14 +302,18 @@ def generate_ubl_xml(eracun):
         scheme = _el(cat, 'cac:TaxScheme')
         _el(scheme, 'cbc:ID', 'VAT')
 
-    # BG-22: Legal monetary total
+    # ═══════════════════════════════════════════════════════════
+    # BG-22: Legal monetary totals
+    # ═══════════════════════════════════════════════════════════
     lmt = _el(root, 'cac:LegalMonetaryTotal')
     _el(lmt, 'cbc:LineExtensionAmount', f'{eracun.subtotal:.2f}', currencyID=eracun.currency)
     _el(lmt, 'cbc:TaxExclusiveAmount', f'{eracun.subtotal:.2f}', currencyID=eracun.currency)
     _el(lmt, 'cbc:TaxInclusiveAmount', f'{eracun.total:.2f}', currencyID=eracun.currency)
     _el(lmt, 'cbc:PayableAmount', f'{eracun.total:.2f}', currencyID=eracun.currency)
 
+    # ═══════════════════════════════════════════════════════════
     # BG-25: Invoice lines
+    # ═══════════════════════════════════════════════════════════
     items = eracun.items.all()
     for item in items:
         line = _el(root, 'cac:InvoiceLine')

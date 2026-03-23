@@ -165,13 +165,19 @@ def retroactive_nkd_lookup(company_ids=None, dry_run=False):
 
 def _infer_nkd_from_context(company) -> 'NKDCode | None':
     """
-    Pokušava zaključiti NKD iz dostupnog konteksta firme — bez eksternih API poziva.
-    Strategija:
-    1. Pogleda ClientOpportunityMatch — opportunities imaju NKD filter
-    2. Pogleda fakturne opise (invoicing) — keyword match na NKD nazive
-    3. POS kategorije (ako firma ima POS)
+    Zaključuje NKD iz konteksta firme.
+    Strategija (redoslijed):
+    1. Haiku AI — iz naziva firme (85-95% accuracy, ~0.01 USD po firmi)
+    2. Knowledge Graph match patterns
+    3. Invoice keyword match
+    4. POS detect (→ 47.99 maloprodaja)
     """
     from companies.models import NKDCode
+
+    # Strategija 0: Haiku inference iz naziva (primarno)
+    nkd = _haiku_infer_nkd(company.name)
+    if nkd:
+        return nkd
 
     # Strategija 1: Knowledge Graph match patterns
     try:
@@ -226,4 +232,64 @@ def _infer_nkd_from_context(company) -> 'NKDCode | None':
     except Exception:
         pass
 
+    return None
+
+
+def _haiku_infer_nkd(company_name: str):
+    """
+    Haiku inference NKD koda iz naziva firme.
+    Batch-friendly — poziva se jednom po firmi, ~0.01 USD.
+    Returns NKDCode object ili None.
+    """
+    import os
+    import requests as req
+    import json as _json
+
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        return None
+
+    from companies.models import NKDCode
+    nkd_list = '\n'.join(
+        f'{c}: {n}'
+        for c, n in NKDCode.objects.filter(is_active=True).values_list('code', 'name_hr').order_by('code')
+    )
+
+    prompt = (
+        f'Tvrtka se zove: "{company_name}"\n\n'
+        f'Dostupni NKD kodovi:\n{nkd_list}\n\n'
+        f'Koji NKD kod NAJVJEROJATNIJE odgovara ovoj tvrtki?\n'
+        f'Vrati SAMO JSON: {{"code": "xx.xx", "confidence": 0.0}}\n'
+        f'Bez ikakvog teksta.'
+    )
+
+    try:
+        resp = req.post(
+            'https://api.anthropic.com/v1/messages',
+            headers={
+                'x-api-key': api_key,
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json',
+            },
+            json={
+                'model': 'claude-haiku-4-5-20251001',
+                'max_tokens': 60,
+                'messages': [{'role': 'user', 'content': prompt}],
+            },
+            timeout=8,
+        )
+        resp.raise_for_status()
+        text = resp.json()['content'][0]['text'].strip()
+        if '```' in text:
+            text = text.split('```')[1]
+            if text.startswith('json'):
+                text = text[4:]
+        data = _json.loads(text.strip())
+        code = data.get('code', '').strip()
+        confidence = float(data.get('confidence', 0))
+
+        if code and confidence >= 0.7:
+            return NKDCode.objects.filter(code=code, is_active=True).first()
+    except Exception:
+        pass
     return None
