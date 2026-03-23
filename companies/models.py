@@ -230,6 +230,24 @@ class Company(models.Model):
         verbose_name='Umbrella mj. naknada (EUR)',
     )
 
+    # ── GDPR / T&C privola (čl. 6b) ─────────────────────────────────────────
+    # SIGURNOST: bez has_signed_tc_consent=True sustav ne smije agregirati
+    # institucijske podatke ove firme (FINA, Porezna uprava, Knowledge Graph).
+    has_signed_tc_consent = models.BooleanField(
+        default=False,
+        verbose_name=_('Potpisao T&C (GDPR čl.6b)'),
+        help_text=_('Mora biti True da sustav smije agregirati podatke ove firme.'),
+    )
+    tc_consent_signed_at = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_('Datum potpisivanja T&C'),
+    )
+    tc_consent_version = models.CharField(
+        max_length=20, blank=True, default='',
+        verbose_name=_('Verzija T&C'),
+        help_text=_('Npr. v2.1-2026'),
+    )
+
     def save(self, *args, **kwargs):
         if not self.booking_slug and self.name:
             base_slug = slugify(self.name)

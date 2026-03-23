@@ -343,3 +343,78 @@ class ClientOpportunityMatch(models.Model):
 
     def __str__(self):
         return f"{self.company.name} → {self.opportunity.name} ({self.calculated_savings} EUR)"
+
+
+class SupplierRiskAlert(models.Model):
+    """
+    Sustav ranog upozoravanja na temelju FINA API podataka (GFI, boniteti, blokade).
+
+    ARHITEKTONSKA NOTA (Gemini, 2026-03-24):
+    Strogo odvojeno od LegalOpportunity modela.
+    LegalOpportunity = generiranje novca (olakšice, poticaji).
+    SupplierRiskAlert = zaštita novca (rizici, blokade, stečaj).
+    Nikad ne miješati ova dva koncepta.
+    """
+
+    RISK_LEVEL_CHOICES = [
+        ('LOW', 'Nizak rizik'),
+        ('MEDIUM', 'Srednji rizik (povećan dug / pad prihoda)'),
+        ('HIGH', 'Visok rizik (predstečaj / upozorenje)'),
+        ('CRITICAL', 'Kritičan rizik (blokada / stečaj / brisanje)'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='supplier_risk_alerts',
+        verbose_name='Naš klijent koji je ugrožen',
+    )
+    supplier_oib = models.CharField(
+        max_length=11, verbose_name='OIB dobavljača',
+        db_index=True,
+    )
+    supplier_name = models.CharField(max_length=255, verbose_name='Naziv dobavljača')
+    risk_level = models.CharField(
+        max_length=20, choices=RISK_LEVEL_CHOICES,
+        verbose_name='Razina rizika', db_index=True,
+    )
+    risk_description = models.TextField(
+        verbose_name='Detalji',
+        help_text='Npr. "Blokiran račun duže od 30 dana"',
+    )
+    source_data = models.JSONField(
+        verbose_name='Sirovi FINA podaci (audit trail)',
+        blank=True, null=True,
+    )
+    detected_at = models.DateTimeField(auto_now_add=True)
+    is_acknowledged = models.BooleanField(
+        default=False,
+        verbose_name='Klijent potvrdio',
+        help_text='Je li klijent vidio i potvrdio upozorenje?',
+    )
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    notified_via = models.CharField(
+        max_length=20, blank=True,
+        help_text='whatsapp / email / sms',
+    )
+    notified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Upozorenje o riziku dobavljača'
+        verbose_name_plural = 'Upozorenja o rizicima dobavljača'
+        ordering = ['-detected_at']
+        indexes = [
+            models.Index(fields=['company', 'supplier_oib']),
+            models.Index(fields=['risk_level', 'is_acknowledged']),
+        ]
+
+    def __str__(self):
+        return f'[{self.risk_level}] {self.supplier_name} → {self.company.name}'
+
+    @property
+    def is_critical(self):
+        return self.risk_level == 'CRITICAL'
+
+    @property
+    def needs_immediate_action(self):
+        return self.risk_level in ('HIGH', 'CRITICAL') and not self.is_acknowledged

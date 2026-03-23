@@ -13,9 +13,19 @@ class ERacunConfig(models.Model):
     )
     is_active = models.BooleanField(default=False, verbose_name='e-Račun aktivan')
 
-    # FINA certifikat
-    cert_p12 = models.FileField(upload_to='eracun/certs/', blank=True, verbose_name='FINA P12 certifikat')
-    cert_password = models.CharField(max_length=100, blank=True, verbose_name='Lozinka certifikata')
+    # FINA certifikat — pohranjen IZVAN web roota u /etc/limit-connect/certs/
+    # SIGURNOST: FileField je uklonjen (bio je web-dostupan). Koristiti cert_path.
+    cert_path = models.CharField(
+        max_length=500, blank=True,
+        verbose_name='Putanja certifikata',
+        help_text='Apsolutna putanja: /etc/limit-connect/certs/firma.p12'
+    )
+    # NAPOMENA: lozinka se čita iz /etc/limit-connect/certs/.cert_password, ne iz baze
+    cert_password_deprecated = models.CharField(
+        max_length=100, blank=True,
+        verbose_name='[DEPRECATED] Lozinka — koristiti .cert_password fajl',
+        help_text='Ne koristiti. Ostaje radi migracije podataka.'
+    )
     cert_oib = models.CharField(max_length=11, blank=True, verbose_name='OIB iz certifikata')
     cert_valid_until = models.DateField(null=True, blank=True, verbose_name='Certifikat vrijedi do')
 

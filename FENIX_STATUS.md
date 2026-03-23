@@ -6,13 +6,16 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-23 22:00 — Sonnet (Synesis P1 import monitoring + status)
-Git HEAD: 07ee6a5 — Status: CC_TASK_SHARE_NAV_WIZARD DONE
+2026-03-24 09:30 — Sonnet (BORG FENIX plan + 4 nova task fajla)
+Git HEAD: 8d44bad
 
 ---
 
-## Git HEAD
-8d44bad — Refactor: cockpit izolacija + globalni dekorator + normalize_phone unifikacija
+## ★ NOVI SMJER — BORG SYSTEM FENIX (2026-03-24)
+Master plan: /var/www/fina-connect/BORG_FENIX_MASTER_PLAN.md
+Filozofija: Asimilacija stvarne materije (zakoni, računi, tržište) u real-time.
+90-dnevni plan: 3 faze (Asimilacija → Compliance → Autonomija)
+Svi novi taskovi slijede ovaj smjer.
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |
@@ -21,9 +24,9 @@ Git HEAD: 07ee6a5 — Status: CC_TASK_SHARE_NAV_WIZARD DONE
 | Marija Brtan | Konjik d.o.o. | Arhiva, eRacun, Invoicing, Konto | LIVE |
 | Niksa Viskovic | Viskovic Bau | DE market, GoBD, TSE, DSFinV-K | ONBOARDING |
 | Dragan Jakovljevic | Viskovic Bau | Partner (Strategie), superadmin | ONBOARDING |
-| Slađana Kruljac | O.P.G. Kruljac + Korpaš d.o.o. | Livestock, Vet, Arhiva | LIVE (obiteljska priča) |
+| Slađana Kruljac | O.P.G. Kruljac + Korpaš d.o.o. | Livestock, Vet, Arhiva | LIVE |
 
-## Korpa klijenti (nova grupa — 22.03.)
+## Korpa klijenti (22.03.)
 | Firma | OIB | User | Email |
 |-------|-----|------|-------|
 | Korpaš d.o.o. | 92922919857 | katarina.furdi | katarina.furdi@limit-connect.com |
@@ -31,8 +34,6 @@ Git HEAD: 07ee6a5 — Status: CC_TASK_SHARE_NAV_WIZARD DONE
 | O.P.G. Kruljac Slađana | 41439993573 | opg_kruljac | opg.kruljac@limit-connect.com |
 | Furdi, obrt | 88069902084 | furdi.obrt | furdi.obrt@limit-connect.com |
 | Dubinsko Čišćenje Čizo | 69824516722 | cizo.ciscenje | cizo.ciscenje@limit-connect.com |
-- Podaci učitani iz Synesis arhive (Storage.mdb Settings)
-- Novi korisnici lozinke poslane na +4915771998747 via WhatsApp
 
 ## Superadmini
 | User | Login | Firma |
@@ -46,147 +47,80 @@ Git HEAD: 07ee6a5 — Status: CC_TASK_SHARE_NAV_WIZARD DONE
 
 ## DONE — NE DIRATI
 
-### Synesis P1 Import (u tijeku — 23.03.2026)
+### BORG FENIX Plan (KOMPLET — 24.03.2026)
+- BORG_FENIX_MASTER_PLAN.md — 90-dnevni master plan — DONE
+- CC_TASK_SCAN_BATCH_100.md — batch scan do 100, 2-tipke UI — DONE (task spreman)
+- GEMINI_TASK_COMPLIANCE_WATCHDOG_V2.md — legal exploit engine — DONE (task spreman)
+- HAIKU_TASK_REALTIME_CLASSIFIER.md — multi-page grouping — DONE (task spreman)
+
+### Synesis P1 Import (23.03.2026)
 - 86 firmi, 33.270 partnera, 11.856 artikala — DONE
-- Fakture: 10.206 uvezenih (IRA ~50%, URA ~4%) — U TIJEKU
+- Fakture: 10.206 uvezenih — DONE
 - Stavke knjiženja: ~110.000 · Temeljnice: ~17.000 — DONE
 - Globalna bilanca: D=P ±94 EUR — BALANSIRA
-- PID 505139 radi u pozadini, procjena završetka: 01:00-02:00
-- URA čeka: Konjik d.o.o. sam ima 2.120 URA zapisa
 
 ### Share Modal + Nav Partial + Cashier Wizard (KOMPLET — 23.03.)
-- _share_modal.html: ref_code invite tracking (_shRefCode, _shGetBaseUrl s ?ref=) — DONE
-- _share_modal.html: viralni footer s dinamičnim ref linkom — DONE
-- templates/includes/_nav_buttons.html: globalni nav partial kreiran — DONE
-- arhiva_list.html: share dugme 📤 na svakom dokumentu — DONE
-- invoice_list.html: share dugme 📤 na svakom računu + share modal include — DONE
-- pos/views.py: cashier_setup view (GET/POST, PIN hash, OIB validacija) — DONE
-- pos/urls.py: /hr/pos/cashier/setup/ URL — DONE
-- templates/pos/cashier_setup.html: forma s OIB MOD11 JS validacijom — DONE
-- onboarding_wizard: Blagajnik korak vodi na /hr/pos/cashier/setup/ — DONE
 - Commit: 7d49022
 
 ### Cockpit 10/10 (KOMPLET — 22.03.)
-- core/cockpit_views.py NOVI FAJL — sve cockpit funkcije izolirane — DONE
-- COCKPIT_USERS = frozenset — jedino mjesto za access listu (bilo 5x rasuto) — DONE
-- _cockpit_allowed() + _cockpit_guard() shared helpers — DONE
-- @cockpit_required() dekorator u permissions/decorators.py — DONE
-- core/views.py: 2815 → 2414 linija (-401), 0x _cockpit_users, 0x tim_chat duplikata — DONE
-- helpdesk/_normalize_phone delegira na core.whatsapp.normalize_phone — DONE
-- Context mismatch fix (users_week, pos_promet, disk_used, mem_used, pos_week...) — DONE
-- disk parsing: disk[2]=used, disk[3]=free (bio krivi) — DONE
-- pos_by_company: row.b i row.p annotate aliasi — DONE
-- JS sendMsg() kompletno prepisan — 63/63 braces balanced — DONE
-- JS ctrlAction() + getCsrf() unified — DONE
-- Marija WhatsApp gumb + foto upload za sva sjedala — DONE
-- partner_signup_api + cockpit API viewovi vraćeni nakon greške — DONE
 - Commit: 8d44bad, 9d7a68a, 8b5eb7f
 
-### Livestock/Vet modul bugfixi (22.03.)
-- PDF integrity badge duplikat (dvostruki render_to_string) — FIX DONE — DONE
-- Robot API auto-zapisuje MilkRecord (jutarnja_l/vecernja_l params) — DONE
-- inspector_invalid.html template kreiran — DONE
-- WhatsApp notify s phone fallback na UserProfile admin — DONE
-- JRDZ scope: species_code='GVD' + sex M/F dodano — DONE
-- OPG robot_api_key postavljen u Company.settings — DONE
-- OPG i Korpaš phone broj (0976091655) dodan — DONE
-- 47 testova napisano u livestock/tests.py (6 klasa) — DONE (izvršavanje u pozadini)
+### Livestock/Vet modul bugfixi (22.03.) — DONE
 
-### Korpa firme registracija (22.03.)
-- 5 firmi: email, address, zip, IBAN popunjeni iz Synesis Settings — DONE
-- 3 nova korisnika kreirana (kud.dukat, furdi.obrt, cizo.ciscenje) — DONE
-- 2 postojeća korisnika email ažuriran (katarina.furdi, opg_kruljac) — DONE
-- Lozinke poslane na +4915771998747 WhatsApp — DONE
+### Korpa firme registracija (22.03.) — DONE
 
-### [SVE PRETHODNO IZ PRETHODNIH SESIJA — NEPROMIJENJENO]
-### Udruge modul (KOMPLET)
-### FINA izvjestaji (KOMPLET)
-### DE KassenSichV (KOMPLET)
-### EU Fondovi + Volonteri (KOMPLET)
-### AML + Napojnice + Voucheri (KOMPLET)
-### Payments (KOMPLET)
-### i18n (FAZA 1 KOMPLET)
-### POS Offline (KOMPLET)
-### FenixCamera (KOMPLET — 19 templatea)
-### Transport modul Faza 1 (KOMPLET)
-### Korpa Synesis Import (KOMPLET)
-### Knjiga boljitaka (12/21)
-### Infrastruktura (KOMPLET)
-### Sales + Onboarding (KOMPLET)
-### Dokumenti + PDF (KOMPLET)
-### Mobile (KOMPLET)
-### MCP Server (KOMPLET)
-### WhatsApp (KOMPLET)
-### Tim Chat (KOMPLET)
-### Country Registry (KOMPLET)
-### AI Tools v2 (KOMPLET)
-### Livestock modul (KOMPLET — V1+V2+V3)
-### Intelligence modul (KOMPLET)
-### VetIS + Vet Portal (KOMPLET)
-### Institutional API (KOMPLET)
-### limit_connect_ai Faza 1 (KOMPLET)
-### GTM Foundation (KOMPLET)
-### Invoice-Powered Growth Engine (KOMPLET)
-### Predarhiva Bulk OCR (KOMPLET)
-### Predkomora — Smart Import Review (KOMPLET)
-### Fiskalizacija bug fix (KOMPLET)
-### Hash Chain — Kriptografski Audit Trail (KOMPLET)
-### PLG Virus — Viralni Footer (KOMPLET)
-### OIB / VAT Validator (KOMPLET)
-### POS QR Instant Open (KOMPLET)
-### Šeki Robot Prodavač — Plan (KOMPLET)
+### [SVE PRETHODNO — NEPROMIJENJENO]
+### Udruge modul, FINA izvjestaji, DE KassenSichV, EU Fondovi, AML, Payments, i18n,
+### POS Offline, FenixCamera, Transport Faza 1, Synesis Import, Infrastruktura,
+### Sales + Onboarding, Dokumenti + PDF, Mobile, MCP Server, WhatsApp, Tim Chat,
+### Country Registry, AI Tools v2, Livestock, Intelligence, VetIS, Institutional API,
+### limit_connect_ai Faza 1, GTM Foundation, Invoice Growth Engine, Predarhiva OCR,
+### Predkomora, Fiskalizacija fix, Hash Chain, PLG Virus, OIB Validator, POS QR, Robot Plan
 
 ---
 
 ## TASKOVI ZA AGENTE
 
-### Aktivni task fajlovi na serveru
+### ★ BORG FENIX — VETO AKTIVAN (24.03.)
+### CC Code BLOKIRAN dok Gemini ne završi KNOWLEDGE_GRAPH_MODELS
+
+## ★ BORG FENIX — Faza 1
 | Fajl | Agent | Prioritet |
 |------|-------|-----------|
-| CC_TASK_20260322_SHARE_NAV_WIZARD.md | CC | **VISOK** |
+| CC_TASK_SCAN_BATCH_100.md | CC Code | **VISOK** |
+| HAIKU_TASK_REALTIME_CLASSIFIER.md | Haiku (via Celery) | **VISOK** |
+| GEMINI_TASK_COMPLIANCE_WATCHDOG_V2.md | Gemini | **VISOK** |
+
+### Stari aktivni taskovi
+| Fajl | Agent | Prioritet |
+|------|-------|-----------|
 | CC_TASK_20260322_MULTI_KONOBAR_PRETPLATE.md | CC | **VISOK** |
-| `CC_TASK_20260323_OFFLINE_POS.md` | Offline POS 48h zakonski mod | CC | **VISOK** |
+| CC_TASK_20260323_OFFLINE_POS.md | CC | **VISOK** |
 | CC_TASK_POS_REDESIGN_3KLIKA.md | CC | **VISOK** |
 | CC_TASK_ROBOT_PRODAVAC_KOMPLET.md | CC | SREDNJI |
 | CC_TASK_TESTS_PREDKOMORA.md | CC | SREDNJI |
 | GEMINI_TASK_TESTS_HASHCHAIN.md | Gemini | SREDNJI |
 | GEMINI_TASK_LIMIT_AI_COMPLIANCE.md | Gemini | SREDNJI |
-| CC_TASK_20260322_BACKLOG.md | — | REFERENCA |
 
-### Nedostaje — treba napisati
-- CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi workflow Faza 2 (bio najavljen, fajl ne postoji)
+### Treba napisati (backlog)
+- CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi Faza 2
 
 ---
 
-## OTVORENO — treba raditi
+## OTVORENO
 
-### Livestock — još nedostaje
-- sex polje direktno na Livestock modelu (trenutno se izvodi iz vrste — nije precizno) — OTVORENO
-- Testovi (47 komada) — provjeriti rezultate izvršavanja
+### Livestock
+- sex polje direktno na modelu — OTVORENO
+- Testovi (47) — provjeri rezultate
 
 ### DE Compliance
-- Fiskaly sandbox test (treba API kljuceve) — CEKA
+- Fiskaly sandbox (treba API ključeve) — CEKA
 - DATEV SKR03/04 kontni plan — OTVORENO
 - DATEV Buchungsstapel export — OTVORENO
-- Steuernummer validacija (validate_steuernummer_de) — NEDOSTAJE
+- Steuernummer validacija — NEDOSTAJE
 
-### Knjiga boljitaka (preostalo — 9/21)
-- B-01 Offline cross-device sync — DJELOMICNO
-- B-05 WaiterShift heartbeat — OTVORENO
-- B-06 Konobar race condition — DJELOMICNO
-- B-09 QR error toast — DJELOMICNO
-- B-10 Claim race condition — DJELOMICNO
-- B-11 QR bez emaila loyalty — OTVORENO
-- B-13 Kitchen API rate limit — OTVORENO
-- B-17 OCR confidence — OTVORENO
-- B-21 Print QR label — DJELOMICNO
+### Knjiga boljitaka (9/21 preostalo)
+- B-01, B-05, B-06, B-09, B-10, B-11, B-13, B-17, B-21
 
 ### Transport Faza 2
-- CMR automatski iz TransportOrder — OTVORENO
-- Multi-country routing UI — OTVORENO
-- Kabotaža counter (max 3/7 dana) — OTVORENO
-- Driver PWA kompletni — OTVORENO
-
-### LIMIT Connect AI — Faze 2-4
-- CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi workflow — TREBA NAPISATI
-- GEMINI_TASK_LIMIT_AI_COMPLIANCE.md — ComplianceWatchdog — SPREMAN ZA GEMINI
+- CMR auto, multi-country routing, kabotaža, Driver PWA
