@@ -66,6 +66,37 @@ function dismissOnboarding() {
   </div>
 </div>
 
+<!-- FENIX AI Insights — proactive widget -->
+{% if ai_insights and ai_insights.total_alerts > 0 or ai_insights and ai_insights.total_suggestions > 0 %}
+<div style="background:linear-gradient(135deg,#1a1a0a 0%,#111 100%);border:1px solid #c9a84c44;border-radius:12px;padding:16px 20px;margin-bottom:16px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <i class="fas fa-brain" style="color:#c9a84c;font-size:1.1rem"></i>
+    <span style="color:#c9a84c;font-weight:700;font-size:.85rem">FENIX AI Insights</span>
+    <span style="color:#555;font-size:.7rem;margin-left:auto">{{ ai_insights.total_alerts }} upozorenja &bull; {{ ai_insights.total_suggestions }} prijedloga</span>
+  </div>
+  {% for alert in ai_insights.alerts %}
+  <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid {% if alert.type == 'danger' %}#ef4444{% elif alert.type == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %}">
+    <i class="fas fa-{{ alert.icon }}" style="color:{% if alert.type == 'danger' %}#ef4444{% elif alert.type == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %};margin-top:2px;font-size:.85rem"></i>
+    <div style="flex:1">
+      <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ alert.title }}</div>
+      {% if alert.detail %}<div style="font-size:.72rem;color:#888">{{ alert.detail }}</div>{% endif %}
+    </div>
+    {% if alert.action_url %}<a href="{{ alert.action_url }}" style="color:#c9a84c;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ alert.action_text }}</a>{% endif %}
+  </div>
+  {% endfor %}
+  {% for sug in ai_insights.suggestions %}
+  <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid #22c55e">
+    <i class="fas fa-{{ sug.icon }}" style="color:#22c55e;margin-top:2px;font-size:.85rem"></i>
+    <div style="flex:1">
+      <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ sug.title }}</div>
+      {% if sug.detail %}<div style="font-size:.72rem;color:#888">{{ sug.detail }}</div>{% endif %}
+    </div>
+    {% if sug.action_url %}<a href="{{ sug.action_url }}" style="color:#c9a84c;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ sug.action_text }}</a>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <!-- Push notification opt-in -->
 <div id="push-banner" style="display:none;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid var(--gold-border);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:none">
   <div style="display:flex;align-items:center;gap:12px">

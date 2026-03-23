@@ -1136,6 +1136,14 @@ def company_dashboard(request):
         logger.warning("Suppressed error", exc_info=True)
     context['grosmarkt_stats'] = grosmarkt_stats
 
+    # ── FENIX Proactive Widget — AI insights u realnom vremenu ────────────
+    try:
+        from limit_connect_ai.proactive_widget import get_dashboard_insights
+        if company:
+            context['ai_insights'] = get_dashboard_insights(company)
+    except Exception:
+        logger.warning("Suppressed error", exc_info=True)
+
     return render(request, 'dashboards/company_admin.html', context)
 
 

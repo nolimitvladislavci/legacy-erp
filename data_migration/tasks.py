@@ -236,6 +236,16 @@ def post_migration_fenix_hook(project_pk):
     except Exception as e:
         logger.warning("FENIX hook: AI kontekst greska: %s", e)
 
+    # ── FENIX Opportunity + Risk Scan ────────────────────────────
+    # Ovo je "Aha!" moment: klijent uveze partnere i odmah dobije:
+    # "Pronašli smo 12 firmi u blokadi i 4 prilike za uštedu od 8.340 EUR"
+    try:
+        from limit_connect_ai.tasks import fenix_post_import_scan
+        fenix_post_import_scan.delay(str(company.pk), project.pk)
+        logger.info("FENIX scan pokrenut za %s (project=%s)", company.name, project.pk)
+    except Exception as e:
+        logger.warning("FENIX hook: scan pokretanje greska: %s", e)
+
 
 def _get_company_admin_phone(company):
     try:
