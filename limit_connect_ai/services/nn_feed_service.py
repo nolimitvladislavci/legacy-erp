@@ -51,7 +51,17 @@ class NNFeedScraperService:
         logger.info('[NN] Dohvaćam feed: %s', feed_url)
 
         try:
-            feed = feedparser.parse(feed_url)
+            # feedparser ne podržava proxies nativno — koristimo requests za download
+            proxy_url = os.environ.get('HR_PROXY_URL')
+            if proxy_url:
+                proxies = {'http': proxy_url, 'https': proxy_url}
+                resp = requests.get(feed_url, timeout=20, proxies=proxies,
+                                    verify=False, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                })
+                feed = feedparser.parse(resp.content)
+            else:
+                feed = feedparser.parse(feed_url)
         except Exception as e:
             logger.error('[NN] Feed parse error: %s', e)
             return {'processed': 0, 'skipped': 0, 'errors': 1}
@@ -80,11 +90,13 @@ class NNFeedScraperService:
                 skipped += 1
                 continue
 
-            # Preuzimanje HTML-a
+            # Preuzimanje HTML-a (HR proxy za zaobilaženje firewall blokade stranih DC-ova)
             try:
-                resp = requests.get(link, timeout=15, headers={
-                    'User-Agent': 'LIMIT-Connect-BORG/1.0 (+https://limit-connect.com)',
-                })
+                proxy_url = os.environ.get('HR_PROXY_URL')
+                proxies = {'http': proxy_url, 'https': proxy_url} if proxy_url else None
+                resp = requests.get(link, timeout=20, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                }, proxies=proxies, verify=not bool(proxy_url))
                 resp.raise_for_status()
             except requests.exceptions.RequestException as e:
                 logger.warning('[NN] HTTP error za %s: %s', link, e)
