@@ -596,3 +596,104 @@ def fenix_post_import_scan(self, company_id, project_id=None):
     )
 
     return result
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BORG FENIX: AdaptationEngine — Safety Gateway + Scheduled Execution
+# ══════════════════════════════════════════════════════════════════════════════
+
+@shared_task(name='limit_connect_ai.request_adaptation_approval')
+def request_adaptation_approval(rule_id):
+    """
+    Safety Gateway: FENIX traži odobrenje prije mijenjanja poreznih stopa.
+    Šalje WhatsApp + In-App notifikaciju administratoru.
+    FENIX NIKAD ne primjenjuje promjenu bez ljudske potvrde.
+    """
+    from limit_connect_ai.models_knowledge_graph import AdaptationRule
+    from core.notify import notify
+
+    try:
+        rule = AdaptationRule.objects.select_related('regulatory_update').get(pk=rule_id)
+    except AdaptationRule.DoesNotExist:
+        logger.error('[ADAPT] Rule %s ne postoji', rule_id)
+        return
+
+    payload = rule.action_payload
+    effective = payload.get('effective_date', 'N/A')
+
+    msg = (
+        f'*FENIX REGULATORNA AKCIJA*\n\n'
+        f'Zakon: {rule.regulatory_update.title[:100]}\n'
+        f'Promjena: {payload.get("country", "HR")} PDV '
+        f'{payload.get("old_rate")}% → {payload.get("new_rate")}%\n'
+        f'Stupa na snagu: {effective}\n\n'
+        f'Sustav će kreirati novu stopu i prebaciti artikle. '
+        f'Povijesni POS bonovi i fakture ostaju netaknuti.\n\n'
+        f'Odobrite na: limit-connect.com/admin/\n'
+        f'Ili odgovorite DA za autorizaciju.'
+    )
+
+    notify('ACTION', msg)
+
+    # In-app notifikacija
+    try:
+        from notifications.services import notify as notify_inapp
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        for admin in User.objects.filter(is_staff=True, is_superuser=True, is_active=True)[:3]:
+            notify_inapp(
+                recipient=admin,
+                notification_type='system',
+                title='FENIX: Odobrenje potrebno — promjena PDV stope',
+                message=f'{payload.get("country")} {payload.get("old_rate")}% → {payload.get("new_rate")}%. Stupa na snagu: {effective}',
+                url='/admin/limit_connect_ai/adaptationrule/',
+            )
+    except Exception as e:
+        logger.warning('[ADAPT] In-app notify failed: %s', e)
+
+    logger.info('[ADAPT] Approval request sent for rule %s', rule_id)
+
+
+@shared_task(bind=True, max_retries=2, name='limit_connect_ai.execute_approved_adaptation')
+def execute_approved_adaptation(self, rule_id):
+    """
+    Izvršava odobrenu AdaptationRule.
+    Poziva se:
+    - Ručno iz Django admina (admin action)
+    - Zakazano via .apply_async(eta=effective_date) nakon odobrenja
+    - Nikad automatski bez ljudske potvrde
+    """
+    from limit_connect_ai.models_knowledge_graph import AdaptationRule
+    from limit_connect_ai.services.adaptation_engine import AdaptationEngine
+
+    try:
+        rule = AdaptationRule.objects.get(pk=rule_id)
+    except AdaptationRule.DoesNotExist:
+        logger.error('[ADAPT] Rule %s ne postoji', rule_id)
+        return {'error': 'Rule not found'}
+
+    if rule.is_executed:
+        logger.info('[ADAPT] Rule %s već izvršen, preskačem', rule_id)
+        return {'status': 'already_executed'}
+
+    try:
+        success, count = AdaptationEngine.execute_tax_rate_change(rule)
+
+        if not success:
+            raise Exception('AdaptationEngine vratio False — provjerite logove')
+
+        logger.info('[ADAPT] Rule %s izvršen: %d artikala ažurirano', rule_id, count)
+        return {
+            'status': 'completed',
+            'updated_items': count,
+            'rule_id': str(rule_id),
+        }
+
+    except Exception as exc:
+        logger.error('[ADAPT] Execution failed za rule %s: %s', rule_id, exc)
+        try:
+            rule.error_log = str(exc)[:500]
+            rule.save(update_fields=['error_log'])
+        except Exception:
+            pass
+        raise self.retry(exc=exc, countdown=300)
