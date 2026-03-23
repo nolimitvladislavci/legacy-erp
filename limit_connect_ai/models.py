@@ -244,3 +244,14 @@ class CampaignPlan(models.Model):
 
     def __str__(self):
         return f"{self.company.name} — {self.title} ({self.get_status_display()})"
+
+
+# ── BORG FENIX: Knowledge Graph modeli ──────────────────────────────────────
+from limit_connect_ai.models_knowledge_graph import (  # noqa: E402, F401
+    RegulatorySource,
+    RegulatoryUpdate,
+    ImpactDomain,
+    AdaptationRule,
+    LegalOpportunity,
+    ClientOpportunityMatch,
+)

@@ -43,3 +43,56 @@ class CampaignPlanAdmin(admin.ModelAdmin):
     list_filter = ['status', 'campaign_type', 'channel', 'ai_suggestion']
     search_fields = ['company__name', 'title']
     readonly_fields = ['id', 'created_at', 'updated_at']
+
+
+# ── BORG FENIX: Knowledge Graph Admin ──────────────────────────────────────
+from .models_knowledge_graph import (
+    RegulatorySource, RegulatoryUpdate, ImpactDomain,
+    AdaptationRule, LegalOpportunity, ClientOpportunityMatch,
+)
+
+
+@admin.register(RegulatorySource)
+class RegulatorySourceAdmin(admin.ModelAdmin):
+    list_display = ['name', 'source_type', 'is_active', 'last_scraped', 'scrape_interval_hours']
+    list_filter = ['source_type', 'is_active']
+
+
+class ImpactDomainInline(admin.TabularInline):
+    model = ImpactDomain
+    extra = 0
+
+
+class AdaptationRuleInline(admin.TabularInline):
+    model = AdaptationRule
+    extra = 0
+    readonly_fields = ['is_executed', 'executed_at', 'executed_by']
+
+
+class LegalOpportunityInline(admin.TabularInline):
+    model = LegalOpportunity
+    extra = 0
+
+
+@admin.register(RegulatoryUpdate)
+class RegulatoryUpdateAdmin(admin.ModelAdmin):
+    list_display = ['title', 'category', 'publication_date', 'effective_date', 'impact_score', 'is_breaking', 'is_processed']
+    list_filter = ['category', 'is_processed', 'is_breaking']
+    search_fields = ['title', 'nn_number', 'raw_text']
+    readonly_fields = ['id', 'created_at']
+    inlines = [ImpactDomainInline, AdaptationRuleInline, LegalOpportunityInline]
+
+
+@admin.register(LegalOpportunity)
+class LegalOpportunityAdmin(admin.ModelAdmin):
+    list_display = ['name', 'opportunity_type', 'typical_savings_eur', 'deadline', 'is_active']
+    list_filter = ['opportunity_type', 'is_active']
+    search_fields = ['name', 'description']
+
+
+@admin.register(ClientOpportunityMatch)
+class ClientOpportunityMatchAdmin(admin.ModelAdmin):
+    list_display = ['company', 'opportunity', 'calculated_savings', 'status', 'matched_at']
+    list_filter = ['status']
+    search_fields = ['company__name', 'opportunity__name']
+    readonly_fields = ['id', 'matched_at']
