@@ -293,3 +293,43 @@ def _haiku_infer_nkd(company_name: str):
     except Exception:
         pass
     return None
+
+
+@shared_task(name='partners.classify_buyer_types_batch')
+def classify_buyer_types_batch(company_id=None):
+    """
+    Batch klasifikacija buyer_type za partnere.
+    Poziva istu logiku kao management command classify_buyer_types.
+    """
+    from partners.management.commands.classify_buyer_types import classify_partner
+    from partners.models import Partner
+    from django.utils import timezone
+    import logging
+
+    logger = logging.getLogger('partners.tasks')
+
+    qs = Partner.objects.all()
+    if company_id:
+        qs = qs.filter(company_id=company_id)
+
+    changed = 0
+    for partner in qs.iterator(chunk_size=2000):
+        result = classify_partner(partner)
+        if result['confidence'] == 'skip':
+            continue
+
+        if (partner.buyer_type != result['buyer_type'] or
+            partner.is_budget_user != result['is_budget_user'] or
+            partner.is_nonprofit_no_activity != result['is_nonprofit_no_activity']):
+
+            partner.buyer_type = result['buyer_type']
+            partner.is_budget_user = result['is_budget_user']
+            partner.is_nonprofit_no_activity = result['is_nonprofit_no_activity']
+            partner.save(update_fields=[
+                'buyer_type', 'is_budget_user',
+                'is_nonprofit_no_activity', 'updated_at',
+            ])
+            changed += 1
+
+    logger.info('classify_buyer_types_batch: %d partnera ažurirano (company=%s)', changed, company_id)
+    return {'changed': changed, 'total': qs.count()}
