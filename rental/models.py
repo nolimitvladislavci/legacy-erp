@@ -71,6 +71,25 @@ class Property(models.Model):
     location = models.CharField(max_length=200, blank=True, verbose_name=_('Lokacija / Adresa'))
     photo_url = models.URLField(blank=True, verbose_name=_('Foto URL'))
 
+    # EU Rental Tax Engine fields
+    razred_mjesta = models.CharField(
+        max_length=2, blank=True, default="A",
+        choices=[("A", "A - turisticko mjesto"), ("B", "B - ostalo mjesto"),
+                 ("C", "C - Zagreb"), ("D", "D - potpomognuto podrucje")],
+        verbose_name="Razred mjesta (HR boravisna pristojba)",
+    )
+    tax_calculation_rule = models.CharField(
+        max_length=30, blank=True, default="HR_FIXED_BORAVISNA",
+        choices=[
+            ("HR_FIXED_BORAVISNA", "HR fiksna boravisna pristojba"),
+            ("CITY_TAX_5_PERCENT", "DE City Tax 5%"),
+            ("CITY_TAX_7_PERCENT", "DE City Tax 7% (München)"),
+            ("AT_ORTSTAXE_PERCENT", "AT Ortstaxe (%)"),
+            ("NONE", "Bez turisticke pristojbe"),
+        ],
+        verbose_name="Pravilo obracuna pristojbe",
+    )
+
     # Amenities
     amenities = models.JSONField(default=list, blank=True, verbose_name=_('Pogodnosti'),
                                   help_text=_('["wifi","parking","ac","tv","kitchen"]'))
@@ -253,3 +272,163 @@ class HousekeepingLog(models.Model):
 
     def __str__(self):
         return f'{self.rental_property.name} - {self.get_status_display()}'
+
+
+# ═══════════════════════════════════════════════════════════════
+#  F1: Guest, GuestDocument, RentalInvoice, TrafficRecord
+# ═══════════════════════════════════════════════════════════════
+
+class Guest(models.Model):
+    """Jedan gost u rezervaciji. Booking može imati više gostiju."""
+
+    SEX_CHOICES = [('M', 'Muški'), ('F', 'Ženski'), ('X', 'Ostalo')]
+
+    booking = models.ForeignKey(
+        'Booking', on_delete=models.CASCADE, related_name='guests',
+    )
+
+    # Osnovni podaci (auto-popunjeno iz OCR)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    date_of_birth = models.DateField(null=True, blank=True)
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True)
+    nationality = models.CharField(max_length=3, blank=True)  # ISO 3166-1 alpha-3
+
+    # Dokument
+    document_type = models.CharField(max_length=20, blank=True)  # passport, id_card
+    document_number = models.CharField(max_length=30, blank=True)
+    document_country = models.CharField(max_length=3, blank=True)
+    document_expiry = models.DateField(null=True, blank=True)
+
+    # eVisitor specific
+    residence_country = models.CharField(max_length=3, blank=True)
+    residence_city = models.CharField(max_length=100, blank=True)
+
+    # Status
+    is_primary = models.BooleanField(default=False)
+    evisitor_synced = models.BooleanField(default=False)
+    evisitor_synced_at = models.DateTimeField(null=True, blank=True)
+    evisitor_status = models.CharField(
+        max_length=10, default="pending",
+        choices=[("pending", "Na cekanju"), ("sent", "Poslano"), ("error", "Greska"), ("exempt", "Oslobodeno")],
+        verbose_name="eVisitor status",
+    )
+
+    # GDPR
+    consent_given = models.BooleanField(default=False)
+    consent_given_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-is_primary', 'last_name']
+        verbose_name = 'Gost'
+        verbose_name_plural = 'Gosti'
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
+    @property
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
+
+    def tourist_tax_category(self):
+        """Kategorija boravišne pristojbe po dobi."""
+        if not self.date_of_birth:
+            return 'odrasli'
+        from django.utils import timezone
+        age = (timezone.now().date() - self.date_of_birth).days // 365
+        if age < 12:
+            return 'besplatno'
+        elif age < 18:
+            return 'popust_50'
+        return 'odrasli'
+
+
+class GuestDocument(models.Model):
+    """Slika dokumenta gosta (za OCR i arhivu)."""
+
+    guest = models.ForeignKey(Guest, on_delete=models.CASCADE, related_name='documents')
+    image = models.ImageField(upload_to='guest_docs/%Y/%m/')
+
+    # OCR rezultat
+    ocr_raw = models.JSONField(default=dict, blank=True)
+    ocr_confidence = models.FloatField(default=0.0)
+    ocr_processed = models.BooleanField(default=False)
+
+    # GDPR — automatsko brisanje 24h nakon check-outa
+    delete_after = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Dokument gosta'
+        verbose_name_plural = 'Dokumenti gostiju'
+
+    def __str__(self):
+        return f'{self.guest.full_name} — {self.guest.document_type or "dokument"}'
+
+
+class RentalInvoice(models.Model):
+    """Račun za boravak — vezan za Booking i Invoice modul."""
+
+    booking = models.OneToOneField(
+        'Booking', on_delete=models.CASCADE, related_name='rental_invoice',
+    )
+    invoice = models.OneToOneField(
+        'invoicing.Invoice', on_delete=models.SET_NULL, null=True, blank=True,
+    )
+
+    accommodation_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tourist_tax_total = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    cleaning_fee = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    is_cancelled = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    sent_to_email = models.EmailField(blank=True)
+    sent_via_wa = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Račun za najam'
+        verbose_name_plural = 'Računi za najam'
+
+    def __str__(self):
+        inv_num = self.invoice.number if self.invoice else 'N/A'
+        return f'{inv_num} — {self.booking.guest_name} ({self.total} EUR)'
+
+
+class TrafficRecord(models.Model):
+    """Evidencija o prometu (Obrazac EP) — zakonska obveza."""
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='traffic_records',
+    )
+    rental_property = models.ForeignKey(
+        'Property', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='traffic_records',
+    )
+    booking = models.ForeignKey(
+        'Booking', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='traffic_records',
+    )
+
+    date = models.DateField()
+    invoice_number = models.CharField(max_length=30)
+    guest_name = models.CharField(max_length=200)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    tourist_tax = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date']
+        verbose_name = 'EP Evidencija prometa'
+        verbose_name_plural = 'EP Evidencije prometa'
+
+    def __str__(self):
+        return f'EP {self.date} — {self.guest_name} ({self.total} EUR)'
