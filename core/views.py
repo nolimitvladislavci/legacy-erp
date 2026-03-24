@@ -2464,6 +2464,27 @@ def tc_consent(request):
         company.tc_consent_version = TC_VERSION
         company.save(update_fields=['has_signed_tc_consent', 'tc_consent_signed_at', 'tc_consent_version'])
 
+        # Audit trail — GDPR zahtjev: tko je potpisao, kada, s kojeg IP-a
+        try:
+            from core.models import SystemAuditLog
+            ip = (request.META.get('HTTP_X_FORWARDED_FOR', '') or '').split(',')[0].strip() \
+                 or request.META.get('REMOTE_ADDR', '')
+            SystemAuditLog.objects.create(
+                user=request.user,
+                company=company,
+                model_name='Company',
+                object_id=str(company.pk),
+                action='tc_consent_signed',
+                details={
+                    'version': TC_VERSION,
+                    'ip': ip,
+                    'user_agent': request.META.get('HTTP_USER_AGENT', '')[:200],
+                    'signed_at': tz.now().isoformat(),
+                },
+            )
+        except Exception:
+            pass  # Audit ne smije blokirati potpis
+
         from django.contrib import messages
         messages.success(request, 'Uvjeti korištenja prihvaćeni. Dobrodošli u LIMIT Connect!')
         return redirect('/')
