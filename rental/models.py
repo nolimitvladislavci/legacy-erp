@@ -67,6 +67,10 @@ class Property(models.Model):
     # Status
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='available',
                                 verbose_name=_('Status'))
+    is_assisted_area = models.BooleanField(
+        default=False, verbose_name=_('Potpomognuto područje'),
+        help_text='I.-IV. razvojna skupina — 20% popust na TZ članarinu (čl.7 st.2 NN 52/19)',
+    )
     is_active = models.BooleanField(default=True, verbose_name=_('Aktivna'))
     location = models.CharField(max_length=200, blank=True, verbose_name=_('Lokacija / Adresa'))
     photo_url = models.URLField(blank=True, verbose_name=_('Foto URL'))
@@ -318,6 +322,13 @@ class Guest(models.Model):
     consent_given = models.BooleanField(default=False)
     consent_given_at = models.DateTimeField(null=True, blank=True)
 
+    # PII Encryption (GDPR cl.32)
+    encrypted_document_number = models.TextField(blank=True, default='', verbose_name='Enkriptirani br. dokumenta')
+    encrypted_first_name = models.TextField(blank=True, default='', verbose_name='Enkriptirano ime')
+    encrypted_last_name = models.TextField(blank=True, default='', verbose_name='Enkriptirano prezime')
+    pii_encrypted = models.BooleanField(default=False, verbose_name='PII enkriptirano')
+
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -432,3 +443,206 @@ class TrafficRecord(models.Model):
 
     def __str__(self):
         return f'EP {self.date} — {self.guest_name} ({self.total} EUR)'
+
+
+# ═══════════════════════════════════════════════════════════════
+#  P0: LandlordProfile — Osobni podaci iznajmljivača
+# ═══════════════════════════════════════════════════════════════
+
+class LandlordProfile(models.Model):
+    """
+    Kartica iznajmljivača — osobni i porezni podaci fizičke osobe.
+
+    Company model sadrži OIB, IBAN, adresu — ovaj model dodaje:
+    - Ime/prezime fizičke osobe (Company.name je "Ana Horvat" ali nema split)
+    - Datum rođenja (za obrasce)
+    - Porezni status paušalca
+    - Porezna ispostava
+    - Rješenje o kategorizaciji (klasa, datum, rok)
+
+    OneToOne na Company — svaka firma iznajmljivač ima točno jedan profil.
+    """
+
+    class TaxStatus(models.TextChoices):
+        PAUSAL      = 'pausal',      'Paušalni porez (čl.57 ZoPD)'
+        OBRT_DOH    = 'obrt_doh',    'Obrt (dohodak)'
+        OBRT_DOB    = 'obrt_dob',    'Obrt (dobit)'
+        DOO         = 'doo',         'd.o.o.'
+
+    company = models.OneToOneField(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='landlord_profile',
+        verbose_name='Firma',
+    )
+
+    # Osobni podaci fizičke osobe
+    first_name = models.CharField(max_length=100, verbose_name='Ime')
+    last_name = models.CharField(max_length=100, verbose_name='Prezime')
+    date_of_birth = models.DateField(null=True, blank=True, verbose_name='Datum rođenja')
+    phone = models.CharField(max_length=30, blank=True, verbose_name='Telefon')
+    email = models.EmailField(blank=True, verbose_name='Email')
+
+    # Porezni status
+    tax_status = models.CharField(
+        max_length=20, choices=TaxStatus.choices, default=TaxStatus.PAUSAL,
+        verbose_name='Porezni status',
+    )
+    is_vat_registered = models.BooleanField(
+        default=False, verbose_name='PDV obveznik',
+    )
+    tax_office = models.CharField(
+        max_length=100, blank=True, verbose_name='Porezna uprava',
+        help_text='Npr. Porezna uprava Split',
+    )
+    tax_branch = models.CharField(
+        max_length=100, blank=True, verbose_name='Ispostava',
+        help_text='Npr. Ispostava Makarska',
+    )
+    nkd_code = models.CharField(
+        max_length=10, blank=True, default='55.20',
+        verbose_name='NKD šifra',
+        help_text='55.20 = Iznajmljivanje stanova, soba i postelja',
+    )
+    activity_start_date = models.DateField(
+        null=True, blank=True,
+        verbose_name='Početak obavljanja djelatnosti',
+    )
+
+    # Turistička zajednica
+    tz_name = models.CharField(
+        max_length=200, blank=True,
+        verbose_name='Nadležna turistička zajednica',
+        help_text='Npr. TZ Grada Makarske',
+    )
+    tz_member_id = models.CharField(
+        max_length=50, blank=True,
+        verbose_name='Broj člana TZ',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Profil iznajmljivača'
+        verbose_name_plural = 'Profili iznajmljivača'
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name} ({self.company.name})'
+
+    @property
+    def full_name(self):
+        return f'{self.first_name} {self.last_name}'
+
+    @property
+    def is_pausal(self):
+        return self.tax_status == self.TaxStatus.PAUSAL
+
+
+# ═══════════════════════════════════════════════════════════════
+#  P0: AccommodationUnit — Smještajne jedinice s krevetima
+# ═══════════════════════════════════════════════════════════════
+
+class AccommodationUnit(models.Model):
+    """
+    Smještajna jedinica unutar objekta (Property).
+
+    Jedan Property (Apartman Sunce) može imati:
+      - A1 Studio (2 stalna + 1 pomoćni)
+      - A2 Apartman (4 stalna + 2 pomoćna)
+
+    Stalni vs. pomoćni kreveti su ključni za:
+      - TZ-2 obrazac (prijava kapaciteta turističkoj zajednici)
+      - Paušalni porez (izračunava se po krevetu)
+      - eVisitor prijava (smještajna jedinica je obavezno polje)
+    """
+
+    class UnitType(models.TextChoices):
+        ROOM       = 'room',       'Soba'
+        APARTMENT  = 'apartment',  'Apartman'
+        STUDIO     = 'studio',     'Studio'
+        SUITE      = 'suite',      'Suite'
+        HOUSE      = 'house',      'Kuća za odmor'
+        CAMP_PITCH = 'camp_pitch', 'Kamp parcela'
+
+    rental_property = models.ForeignKey(
+        'Property', on_delete=models.CASCADE,
+        related_name='units',
+        verbose_name='Objekt',
+    )
+    name = models.CharField(
+        max_length=50, verbose_name='Oznaka/Naziv',
+        help_text='Npr. A1, A2, Soba 101, Studio Sunset',
+    )
+    unit_type = models.CharField(
+        max_length=20, choices=UnitType.choices, default=UnitType.APARTMENT,
+        verbose_name='Vrsta jedinice',
+    )
+
+    # Kreveti — ključno za porezne obračune
+    permanent_beds = models.PositiveSmallIntegerField(
+        default=2, verbose_name='Stalni kreveti',
+        help_text='Kreveti navedeni u rješenju o kategorizaciji',
+    )
+    auxiliary_beds = models.PositiveSmallIntegerField(
+        default=0, verbose_name='Pomoćni kreveti',
+        help_text='Dodatni/pomoćni ležajevi (kauč, dječji krevet)',
+    )
+
+    # Površina i kat
+    area_sqm = models.DecimalField(
+        max_digits=6, decimal_places=2, null=True, blank=True,
+        verbose_name='Površina (m²)',
+    )
+    floor = models.CharField(max_length=10, blank=True, verbose_name='Kat')
+
+    # Kategorizacija ove jedinice (može se razlikovati od objekta)
+    category_stars = models.PositiveSmallIntegerField(
+        null=True, blank=True,
+        verbose_name='Kategorija (zvjezdice)',
+        help_text='1-5, ako se razlikuje od objekta',
+    )
+
+    # Rješenje o kategorizaciji
+    categorization_class = models.CharField(
+        max_length=100, blank=True,
+        verbose_name='Klasa rješenja',
+        help_text='Npr. UP/I-334-08/23-01/0234',
+    )
+    categorization_date = models.DateField(
+        null=True, blank=True,
+        verbose_name='Datum rješenja',
+    )
+    categorization_valid_until = models.DateField(
+        null=True, blank=True,
+        verbose_name='Rješenje vrijedi do',
+    )
+
+    is_active = models.BooleanField(default=True, verbose_name='Aktivna')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['rental_property', 'name']
+        unique_together = [('rental_property', 'name')]
+        verbose_name = 'Smještajna jedinica'
+        verbose_name_plural = 'Smještajne jedinice'
+
+    def __str__(self):
+        return f'{self.name} ({self.get_unit_type_display()}) — {self.rental_property.name}'
+
+    @property
+    def total_beds(self):
+        return self.permanent_beds + self.auxiliary_beds
+
+    @property
+    def categorization_expired(self):
+        if not self.categorization_valid_until:
+            return False
+        from django.utils import timezone
+        return self.categorization_valid_until < timezone.now().date()
+
+    @property
+    def categorization_days_remaining(self):
+        if not self.categorization_valid_until:
+            return None
+        from django.utils import timezone
+        return (self.categorization_valid_until - timezone.now().date()).days
