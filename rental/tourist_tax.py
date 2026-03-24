@@ -132,7 +132,7 @@ class RentalTaxEngine:
 
         # Override iz property.tourist_tax ako je postavljen
         if self.prop.tourist_tax and self.prop.tourist_tax > 0:
-            per_person = self.prop.tourist_tax
+            per_person = Decimal(str(self.prop.tourist_tax))
 
         total = (per_person * guest_count).quantize(Decimal('0.01'))
         return {
