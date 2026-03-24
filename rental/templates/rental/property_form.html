@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if prop %}Uredi{% else %}Nova{% endif %} nekretnina — Rental{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">
+    <i class="bi bi-building me-2"></i>
+    {% if prop %}Uredi: {{ prop.name }}{% else %}Nova nekretnina{% endif %}
+  </h2>
+  <a href="{% url 'rental:property_list' %}" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Natrag
+  </a>
+</div>
+
+<form method="post" class="needs-validation" novalidate>
+  {% csrf_token %}
+
+  <div class="row g-4">
+    <!-- Basic info -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-dark text-gold fw-semibold">
+          <i class="bi bi-info-circle me-1"></i>Osnovni podaci
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Naziv *</label>
+              <input type="text" name="name" class="form-control" value="{{ prop.name|default:'' }}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Tip *</label>
+              <select name="type" class="form-select" required>
+                <option value="">— Odaberi —</option>
+                <option value="room" {% if prop.type == 'room' %}selected{% endif %}>Soba</option>
+                <option value="apartment" {% if prop.type == 'apartment' %}selected{% endif %}>Apartman</option>
+                <option value="house" {% if prop.type == 'house' %}selected{% endif %}>Kuća</option>
+                <option value="studio" {% if prop.type == 'studio' %}selected{% endif %}>Studio</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Kat</label>
+              <input type="number" name="floor" class="form-control" value="{{ prop.floor|default:'' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Kapacitet *</label>
+              <input type="number" name="capacity" class="form-control" value="{{ prop.capacity|default:'' }}" required min="1">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Kreveti</label>
+              <input type="number" name="beds" class="form-control" value="{{ prop.beds|default:'' }}" min="0">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Opis</label>
+              <textarea name="description" class="form-control" rows="3">{{ prop.description|default:'' }}</textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Lokacija</label>
+              <input type="text" name="location" class="form-control" value="{{ prop.location|default:'' }}" placeholder="Adresa ili koordinate">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-dark text-gold fw-semibold">
+          <i class="bi bi-currency-euro me-1"></i>Cijene
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Cijena/noć *</label>
+            <div class="input-group">
+              <input type="number" name="price_per_night" class="form-control" step="0.01" value="{{ prop.price_per_night|default:'' }}" required>
+              <span class="input-group-text">€</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cijena vikend</label>
+            <div class="input-group">
+              <input type="number" name="price_weekend" class="form-control" step="0.01" value="{{ prop.price_weekend|default:'' }}">
+              <span class="input-group-text">€</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cijena mjesečno</label>
+            <div class="input-group">
+              <input type="number" name="price_monthly" class="form-control" step="0.01" value="{{ prop.price_monthly|default:'' }}">
+              <span class="input-group-text">€</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Turistička pristojba</label>
+            <div class="input-group">
+              <input type="number" name="tourist_tax" class="form-control" step="0.01" value="{{ prop.tourist_tax|default:'' }}">
+              <span class="input-group-text">€</span>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Naknada čišćenje</label>
+            <div class="input-group">
+              <input type="number" name="cleaning_fee" class="form-control" step="0.01" value="{{ prop.cleaning_fee|default:'' }}">
+              <span class="input-group-text">€</span>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Min. noći</label>
+            <input type="number" name="min_nights" class="form-control" value="{{ prop.min_nights|default:'1' }}" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-dark text-gold fw-semibold">
+          <i class="bi bi-wifi me-1"></i>Smart pristup
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Smart lock ID</label>
+            <input type="text" name="smart_lock_id" class="form-control" value="{{ prop.smart_lock_id|default:'' }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Smart lock tip</label>
+            <input type="text" name="smart_lock_type" class="form-control" value="{{ prop.smart_lock_type|default:'' }}" placeholder="nuki/ttlock/yale">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">WiFi naziv</label>
+            <input type="text" name="wifi_name" class="form-control" value="{{ prop.wifi_name|default:'' }}">
+          </div>
+          <div>
+            <label class="form-label">WiFi lozinka</label>
+            <input type="text" name="wifi_password" class="form-control" value="{{ prop.wifi_password|default:'' }}">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+    <button type="submit" class="btn btn-gold px-4">
+      <i class="bi bi-check-lg me-1"></i>{% if prop %}Spremi{% else %}Kreiraj{% endif %}
+    </button>
+    <a href="{% url 'rental:property_list' %}" class="btn btn-outline-secondary">Odustani</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if booking %}Uredi{% else %}Nova{% endif %} rezervacija — Rental{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">
+    <i class="bi bi-calendar-check me-2"></i>
+    {% if booking %}Uredi rezervaciju: {{ booking.guest_name }}{% else %}Nova rezervacija{% endif %}
+  </h2>
+  <a href="{% url 'rental:booking_list' %}" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Natrag
+  </a>
+</div>
+
+<form method="post" class="needs-validation" novalidate>
+  {% csrf_token %}
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-dark text-gold fw-semibold">
+          <i class="bi bi-person me-1"></i>Podaci o gostu
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Ime gosta *</label>
+              <input type="text" name="guest_name" class="form-control" value="{{ booking.guest_name|default:'' }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" name="guest_email" class="form-control" value="{{ booking.guest_email|default:'' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Telefon</label>
+              <input type="text" name="guest_phone" class="form-control" value="{{ booking.guest_phone|default:'' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Država</label>
+              <input type="text" name="guest_country" class="form-control" value="{{ booking.guest_country|default:'' }}" placeholder="HR">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Broj gostiju *</label>
+              <input type="number" name="guest_count" class="form-control" value="{{ booking.guest_count|default:'1' }}" min="1" required>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-dark text-gold fw-semibold">
+          <i class="bi bi-house-door me-1"></i>Rezervacija
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Nekretnina *</label>
+            <select name="rental_property_id" class="form-select" required>
+              <option value="">— Odaberi —</option>
+              {% for p in properties %}
+              <option value="{{ p.pk }}" {% if booking.rental_property_id == p.pk %}selected{% endif %}>
+                {{ p.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label">Check-in *</label>
+              <input type="date" name="check_in" class="form-control" value="{{ booking.check_in|date:'Y-m-d'|default:'' }}" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Check-out *</label>
+              <input type="date" name="check_out" class="form-control" value="{{ booking.check_out|date:'Y-m-d'|default:'' }}" required>
+            </div>
+          </div>
+          <div class="row g-3 mt-0">
+            <div class="col-6">
+              <label class="form-label">Cijena/noć</label>
+              <div class="input-group">
+                <input type="number" name="price_per_night" class="form-control" step="0.01" value="{{ booking.price_per_night|default:'' }}">
+                <span class="input-group-text">€</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Izvor *</label>
+              <select name="source" class="form-select" required>
+                <option value="direct" {% if booking.source == 'direct' %}selected{% endif %}>Direktno</option>
+                <option value="booking_com" {% if booking.source == 'booking_com' %}selected{% endif %}>Booking.com</option>
+                <option value="airbnb" {% if booking.source == 'airbnb' %}selected{% endif %}>Airbnb</option>
+                <option value="other" {% if booking.source == 'other' %}selected{% endif %}>Ostalo</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-3">
+            <label class="form-label">Napomene</label>
+            <textarea name="notes" class="form-control" rows="3">{{ booking.notes|default:'' }}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+    <button type="submit" class="btn btn-gold px-4">
+      <i class="bi bi-check-lg me-1"></i>{% if booking %}Spremi{% else %}Kreiraj{% endif %}
+    </button>
+    <a href="{% url 'rental:booking_list' %}" class="btn btn-outline-secondary">Odustani</a>
+  </div>
+</form>
+{% endblock %}

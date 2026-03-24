@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Check-in: {{ booking.guest_name }}{% endblock %}
+
+{% block content %}
+<style>
+.ci-header{background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px}
+.ci-header h4{color:var(--gold);margin:0}
+.ci-guest-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.ci-guest-card .avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem}
+.ci-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.ocr-zone{border:2px dashed var(--border);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:border-color .2s}
+.ocr-zone:hover{border-color:var(--gold)}
+.ocr-zone i{font-size:2rem;color:var(--text-muted)}
+.ci-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.ci-summary .item{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.ci-summary .item .val{font-size:1.2rem;font-weight:700}
+.ci-summary .item .lbl{font-size:.65rem;text-transform:uppercase;color:var(--text-muted)}
+</style>
+
+<div class="ci-header">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div>
+      <h4><i class="fas fa-user-check"></i> Check-in: {{ booking.guest_name }}</h4>
+      <div style="font-size:.78rem;color:#94a3b8;margin-top:4px">
+        {{ booking.rental_property.name }} | {{ booking.check_in|date:"d.m" }} - {{ booking.check_out|date:"d.m.Y" }} | {{ booking.guest_count }} gostiju
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'rental:evisitor_xml' booking.pk %}" class="btn btn-sm" style="background:#22c55e;color:#fff"><i class="fas fa-download"></i> eVisitor XML</a>
+      <a href="{% url 'rental:dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i></a>
+    </div>
+  </div>
+</div>
+
+<!-- Price Summary -->
+<div class="ci-summary" style="margin-bottom:20px">
+  <div class="item"><div class="val">{{ nights }}</div><div class="lbl">Nocenja</div></div>
+  <div class="item"><div class="val">&euro;{{ booking.price_per_night|floatformat:2 }}</div><div class="lbl">Po noci</div></div>
+  <div class="item"><div class="val">&euro;{{ tourist_tax|floatformat:2 }}</div><div class="lbl">Bor. pristojba</div></div>
+  <div class="item"><div class="val" style="color:#22c55e">&euro;{{ total|floatformat:2 }}</div><div class="lbl">Ukupno</div></div>
+</div>
+
+<!-- OCR Upload -->
+<div class="ocr-zone" onclick="document.getElementById('ocr-input').click()" id="ocr-drop">
+  <input type="file" id="ocr-input" accept="image/*" capture="environment" style="display:none">
+  <i class="fas fa-camera"></i>
+  <p style="margin:8px 0 0;color:var(--text-muted);font-size:.85rem">Slikaj osobnu / putovnicu za OCR unos gosta</p>
+  <div id="ocr-status" style="display:none;margin-top:8px"></div>
+</div>
+
+<!-- Guest List -->
+<h5 style="margin:20px 0 12px;font-size:.85rem;font-weight:700">
+  <i class="fas fa-users"></i> Gosti ({{ guests|length }}/{{ booking.guest_count }})
+</h5>
+
+{% for g in guests %}
+<div class="ci-guest-card">
+  <div class="avatar">{{ g.first_name|first }}{{ g.last_name|first }}</div>
+  <div style="flex:1">
+    <strong>{{ g.full_name }}</strong>
+    {% if g.is_primary %}<span style="font-size:.65rem;background:var(--gold);color:#0a0a0a;padding:1px 6px;border-radius:3px;margin-left:4px">GLAVNI</span>{% endif %}
+    <br>
+    <small style="color:var(--text-muted)">
+      {{ g.nationality }} | {{ g.get_document_type_display }} {{ g.document_number }}
+      {% if g.date_of_birth %} | {{ g.date_of_birth|date:"d.m.Y" }}{% endif %}
+    </small>
+  </div>
+  {% if g.evisitor_status != "sent" %}
+  <span style="font-size:.7rem;padding:2px 6px;border-radius:4px;background:#fef3c7;color:#92400e">eVisitor: {{ g.evisitor_status }}</span>
+  {% else %}
+  <span style="font-size:.7rem;padding:2px 6px;border-radius:4px;background:#dcfce7;color:#166534">eVisitor: poslano</span>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- Manual Guest Add Form -->
+<div class="stat-card" style="margin-top:16px">
+  <h6 style="font-size:.82rem;font-weight:700;margin-bottom:12px"><i class="fas fa-user-plus"></i> Dodaj gosta rucno</h6>
+  <form method="post">
+    {% csrf_token %}
+    <div class="row g-2">
+      <div class="col-md-3"><input type="text" name="first_name" class="form-control form-control-sm" placeholder="Ime" required></div>
+      <div class="col-md-3"><input type="text" name="last_name" class="form-control form-control-sm" placeholder="Prezime" required></div>
+      <div class="col-md-2"><input type="date" name="date_of_birth" class="form-control form-control-sm" placeholder="Datum rod."></div>
+      <div class="col-md-2">
+        <select name="nationality" class="form-select form-select-sm"><option value="HRV">HRV</option><option value="DEU">DEU</option><option value="AUT">AUT</option><option value="ITA">ITA</option><option value="SVN">SVN</option><option value="BIH">BIH</option><option value="SRB">SRB</option><option value="GBR">GBR</option></select>
+      </div>
+      <div class="col-md-2"><input type="text" name="document_number" class="form-control form-control-sm" placeholder="Br. dokumenta"></div>
+    </div>
+    <div class="row g-2 mt-1">
+      <div class="col-md-3">
+        <select name="document_type" class="form-select form-select-sm"><option value="id_card">Osobna</option><option value="passport">Putovnica</option><option value="drivers_license">Vozacka</option></select>
+      </div>
+      <div class="col-md-2">
+        <select name="sex" class="form-select form-select-sm"><option value="M">M</option><option value="F">Z</option></select>
+      </div>
+      <div class="col-md-3"><label class="form-check" style="font-size:.78rem;margin-top:6px"><input type="checkbox" name="consent" class="form-check-input" checked> GDPR suglasnost</label></div>
+      <div class="col-md-4 text-end"><button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Dodaj gosta</button></div>
+    </div>
+  </form>
+</div>
+
+<!-- Check-in Action -->
+{% if guests %}
+<div style="margin-top:20px;text-align:center">
+  <form method="post" action="{% url 'rental:check_in' booking.pk %}">
+    {% csrf_token %}
+    <button class="btn btn-lg btn-success" style="padding:12px 40px;font-size:1rem"><i class="fas fa-check-circle"></i> Potvrdi Check-in ({{ guests|length }} gostiju)</button>
+  </form>
+</div>
+{% endif %}
+
+<script>
+document.getElementById('ocr-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('ocr-status');
+  status.style.display = 'block';
+  status.innerHTML = '<span style="color:var(--gold)"><i class="fas fa-spinner fa-spin"></i> OCR obrada...</span>';
+  
+  const fd = new FormData();
+  fd.append('image', file);
+  fetch('{% url "rental:guest_ocr" booking.pk %}', {method:'POST', body:fd, headers:{'X-CSRFToken':'{{ csrf_token }}'}})
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        status.innerHTML = '<span style="color:#22c55e"><i class="fas fa-check"></i> ' + d.data.first_name + ' ' + d.data.last_name + ' (' + Math.round(d.confidence*100) + '%)</span>';
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        status.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times"></i> OCR neuspjesan: ' + (d.error||'') + '</span>';
+      }
+    })
+    .catch(() => { status.innerHTML = '<span style="color:#ef4444">Greska</span>'; });
+});
+</script>
+{% endblock %}

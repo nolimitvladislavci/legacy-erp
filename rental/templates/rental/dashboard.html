@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Rental Dashboard{% endblock %}
+
+{% block content %}
+<style>
+.rt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.rt-stat{background:var(--bg-card);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)}
+.rt-stat .val{font-size:1.5rem;font-weight:700;color:var(--text)}
+.rt-stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-top:2px}
+.rt-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.rt-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.68rem;text-transform:uppercase;color:var(--text-muted)}
+.rt-table td{padding:8px 10px;border-bottom:1px solid var(--border-light)}
+.rt-table tr:hover{background:var(--table-row-hover)}
+.rt-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.rt-badge.confirmed{background:#dbeafe;color:#1e40af}
+.rt-badge.checked_in{background:#dcfce7;color:#166534}
+.rt-badge.checked_out{background:var(--badge-bg);color:var(--text-muted)}
+.rt-badge.pending{background:#fef3c7;color:#92400e}
+.rt-badge.cancelled{background:#fef2f2;color:#991b1b}
+.rt-section{margin-bottom:20px}
+.rt-section h5{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:10px}
+</style>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+  <div>
+    <div style="font-weight:700;font-size:1.1rem;color:var(--text)"><i class="fas fa-hotel" style="color:var(--gold)"></i> Rental Dashboard</div>
+    <div style="font-size:.7rem;color:var(--text-muted)">{{ today|date:"d.m.Y" }} | Robot Hotel</div>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    <a href="{% url 'rental:booking_create' %}" class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;font-weight:700"><i class="fas fa-plus"></i> Nova rezervacija</a>
+    <a href="{% url 'rental:calendar' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-calendar"></i></a>
+    <a href="{% url 'rental:housekeeping' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-broom"></i></a>
+  </div>
+</div>
+
+<div class="rt-grid">
+  <div class="rt-stat"><div class="val">{{ total_rooms }}</div><div class="lbl">Ukupno soba</div></div>
+  <div class="rt-stat"><div class="val" style="color:#166534">{{ available }}</div><div class="lbl">Slobodno</div></div>
+  <div class="rt-stat"><div class="val" style="color:#1e40af">{{ occupied }}</div><div class="lbl">Zauzeto</div></div>
+  <div class="rt-stat"><div class="val" style="color:#92400e">{{ cleaning }}</div><div class="lbl">Ciscenje</div></div>
+  <div class="rt-stat"><div class="val">&euro;{{ month_revenue|floatformat:0 }}</div><div class="lbl">Prihod (mjesec)</div></div>
+</div>
+
+{% if arrivals %}
+<div class="rt-section">
+  <h5><i class="fas fa-plane-arrival" style="color:#22c55e"></i> Danas dolaze ({{ arrivals|length }})</h5>
+  <div class="stat-card">
+    <table class="rt-table">
+      <thead><tr><th>Gost</th><th>Objekt</th><th>Nocenja</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for b in arrivals %}
+        <tr>
+          <td><strong>{{ b.guest_name }}</strong><br><small style="color:var(--text-muted)">{{ b.guest_country }} | {{ b.guest_count }} os.</small></td>
+          <td>{{ b.rental_property.name }}</td>
+          <td>{{ b.check_in|date:"d.m" }} - {{ b.check_out|date:"d.m" }}</td>
+          <td><span class="rt-badge {{ b.status }}">{{ b.get_status_display }}</span></td>
+          <td><a href="{% url 'rental:checkin_flow' b.pk %}" class="btn btn-sm btn-success"><i class="fas fa-sign-in-alt"></i> Check-in</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if departures %}
+<div class="rt-section">
+  <h5><i class="fas fa-plane-departure" style="color:#ef4444"></i> Danas odlaze ({{ departures|length }})</h5>
+  <div class="stat-card">
+    <table class="rt-table">
+      <thead><tr><th>Gost</th><th>Objekt</th><th></th></tr></thead>
+      <tbody>
+        {% for b in departures %}
+        <tr>
+          <td><strong>{{ b.guest_name }}</strong></td>
+          <td>{{ b.rental_property.name }}</td>
+          <td><a href="{% url 'rental:check_out' b.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-sign-out-alt"></i> Check-out</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if active_stays %}
+<div class="rt-section">
+  <h5><i class="fas fa-bed" style="color:var(--accent)"></i> Aktivni boravci ({{ active_stays|length }})</h5>
+  <div class="stat-card">
+    <table class="rt-table">
+      <thead><tr><th>Gost</th><th>Objekt</th><th>Odlazi</th><th>Iznos</th></tr></thead>
+      <tbody>
+        {% for b in active_stays %}
+        <tr>
+          <td>{{ b.guest_name }}</td>
+          <td>{{ b.rental_property.name }}</td>
+          <td>{{ b.check_out|date:"d.m.Y" }}</td>
+          <td>&euro;{{ b.total_price|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if upcoming %}
+<div class="rt-section">
+  <h5><i class="fas fa-calendar-alt" style="color:var(--text-muted)"></i> Nadolazece rezervacije</h5>
+  <div class="stat-card">
+    <table class="rt-table">
+      <thead><tr><th>Gost</th><th>Objekt</th><th>Dolazak</th><th>Nocenja</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for b in upcoming %}
+        <tr>
+          <td>{{ b.guest_name }}</td>
+          <td>{{ b.rental_property.name }}</td>
+          <td>{{ b.check_in|date:"d.m.Y" }}</td>
+          <td>{{ b.check_in|date:"d.m" }} - {{ b.check_out|date:"d.m" }}</td>
+          <td><span class="rt-badge {{ b.status }}">{{ b.get_status_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

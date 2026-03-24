@@ -1,0 +1,66 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Self Check-in | {{ booking.rental_property.name }}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+body{background:#0f172a;color:#e2e8f0;font-family:'Barlow',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.checkin-card{background:#1e293b;border-radius:16px;padding:28px;max-width:420px;width:100%;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.checkin-card h3{color:#c9a84c;margin-bottom:4px}
+.checkin-card .subtitle{color:#94a3b8;font-size:.82rem;margin-bottom:20px}
+.form-control,.form-select{background:#0f172a;border-color:#334155;color:#e2e8f0}
+.form-control:focus,.form-select:focus{background:#0f172a;border-color:#c9a84c;color:#e2e8f0;box-shadow:0 0 0 .15rem rgba(201,168,76,.25)}
+.btn-gold{background:linear-gradient(135deg,#c9a84c,#b8963c);color:#0a0a0a;font-weight:700;border:none;padding:12px;font-size:1rem;border-radius:10px;width:100%}
+.btn-gold:hover{background:linear-gradient(135deg,#d4b85c,#c9a84c);color:#0a0a0a}
+.info-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #334155;font-size:.85rem}
+.info-row .label{color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="checkin-card">
+  <h3><i class="fas fa-door-open"></i> Welcome!</h3>
+  <div class="subtitle">Self Check-in | {{ booking.rental_property.name }}</div>
+
+  <div style="margin-bottom:16px">
+    <div class="info-row"><span class="label">Guest</span><span>{{ booking.guest_name }}</span></div>
+    <div class="info-row"><span class="label">Stay</span><span>{{ booking.check_in|date:"d M" }} - {{ booking.check_out|date:"d M Y" }}</span></div>
+    <div class="info-row"><span class="label">Guests</span><span>{{ booking.guest_count }}</span></div>
+  </div>
+
+  {% if booking.status == "checked_in" %}
+  <div style="text-align:center;padding:20px 0">
+    <i class="fas fa-check-circle" style="font-size:3rem;color:#22c55e"></i>
+    <h4 style="margin-top:10px;color:#22c55e">Already checked in!</h4>
+    <a href="{% url 'rental:guest_access' booking.access_qr %}" class="btn btn-gold mt-3">View Access Info</a>
+  </div>
+  {% else %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label" style="font-size:.78rem;color:#94a3b8">ID / Passport Number</label>
+      <input type="text" name="id_number" class="form-control" required placeholder="e.g. AB1234567">
+    </div>
+    <div class="row mb-3">
+      <div class="col-6">
+        <label class="form-label" style="font-size:.78rem;color:#94a3b8">Country</label>
+        <input type="text" name="country" class="form-control" value="{{ booking.guest_country }}" placeholder="HR" maxlength="3">
+      </div>
+      <div class="col-6">
+        <label class="form-label" style="font-size:.78rem;color:#94a3b8">Number of Guests</label>
+        <input type="number" name="guest_count" class="form-control" value="{{ booking.guest_count }}" min="1" max="20">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-gold"><i class="fas fa-sign-in-alt"></i> Check In Now</button>
+  </form>
+  {% endif %}
+
+  <div style="text-align:center;margin-top:16px;font-size:.7rem;color:#475569">
+    Powered by <strong style="color:#c9a84c">LIMIT Connect</strong>
+  </div>
+</div>
+</body>
+</html>
