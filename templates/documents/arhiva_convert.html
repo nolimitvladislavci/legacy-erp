@@ -107,22 +107,19 @@
 
   <!-- Skriveni inputi -->
   <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+  <input type="file" id="cameraInput" accept="image/*;capture=camera" capture="environment" style="display:none">
 
   <!-- Upload -->
   <div id="uploadArea">
     <div class="upload-btns">
+      <button type="button" onclick="document.getElementById('cameraInput').click()" class="btn-gold" id="btnCameraConvert">
+        <i class="fas fa-camera"></i> {% trans "Slikaj kamerom" %}
+      </button>
       <button type="button" onclick="document.getElementById('fileInput').click()" class="btn-ghost">
         <i class="fas fa-images"></i> {% trans "Iz galerije" %}
       </button>
-      <button type="button" onclick="fenixConvertCamera()" class="btn-gold" id="btnCameraConvert">
-        <i class="fas fa-camera"></i> {% trans "Slikaj kamerom" %}
-      </button>
-      <button type="button" onclick="startQRScan()" class="btn-ghost" id="btnQR">
-        <i class="fas fa-qrcode"></i> {% trans "Skeniraj mobitelom" %}
-      </button>
     </div>
-    <!-- QR scan modal -->
+    <!-- QR scan modal (sakriveno — koristiti samo desktop) -->
     <div id="qrModal" style="display:none;margin-top:1rem;padding:1.5rem;background:var(--bg-card);border:1px solid var(--gold);border-radius:12px;text-align:center">
       <div style="font-size:.9rem;font-weight:600;color:var(--gold);margin-bottom:.75rem"><i class="fas fa-qrcode"></i> Skenirajte QR kod mobitelom</div>
       <img id="qrImage" style="max-width:200px;border-radius:8px;margin-bottom:.75rem" alt="QR">

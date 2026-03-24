@@ -129,6 +129,9 @@ body { font-family: 'DejaVu', Arial, Helvetica, sans-serif; }
   </div>
 </div>
 
+
+{% include "pos/includes/_viral_footer.html" with format="a4" company=company %}
+
 <div class="footer">
   Generirano: {% now "d.m.Y H:i" %} &nbsp;|&nbsp; LIMIT Connect POS &nbsp;|&nbsp; {{ session.terminal.terminal_code }}
 </div>
