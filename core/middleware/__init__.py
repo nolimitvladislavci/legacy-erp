@@ -188,6 +188,7 @@ class ForceTCMiddleware:
 
     WHITELISTED_PREFIXES = (
         '/legal/', '/accounts/logout', '/logout', '/static/', '/media/',
+        '/digitalni-posrednik/', '/partners/wizard/',
         '/health/', '/api/', '/admin/', '/__debug__/', '/i18n/', '/2fa/', '/login',
     )
 
@@ -418,3 +419,141 @@ class AdminLangRedirectMiddleware(MiddlewareMixin):
             request.LANGUAGE_CODE = lang
 
         return None
+
+
+# ═══════════════════════════════════════════════════════════════
+#  GRACEFUL ERROR HANDLER — Zero Friction Error Experience
+# ═══════════════════════════════════════════════════════════════
+
+class GracefulErrorMiddleware:
+    """
+    Hvata unhandled exceptions i pretvara ih u user-friendly toast redirect.
+
+    Umjesto: 500 page → korisnik klikne "Početna" → izgubljen kontekst
+    Sada:    Exception → redirect na referrer/home → zlatni toast
+             "Dogodila se greška. Tim je obaviješten."
+    """
+
+    ERROR_MESSAGES = {
+        'default': 'Dogodila se neočekivana greška. Tim je obaviješten i radi na rješenju.',
+        'database': 'Privremeni problem s bazom podataka. Pokušajte ponovo za minutu.',
+        'permission': 'Nemate pristup ovom resursu. Kontaktirajte administratora.',
+        'timeout': 'Zahtjev je trajao predugo. Pokušajte ponovo.',
+        'validation': 'Podaci nisu ispravni. Provjerite unos i pokušajte ponovo.',
+    }
+
+    EXCEPTION_MAP = {
+        'OperationalError': 'database',
+        'InterfaceError': 'database',
+        'DatabaseError': 'database',
+        'PermissionDenied': 'permission',
+        'Forbidden': 'permission',
+        'TimeoutError': 'timeout',
+        'ConnectionTimeout': 'timeout',
+        'ValidationError': 'validation',
+    }
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
+
+    def process_exception(self, request, exception):
+        """Hvata SVE unhandled exceptions prije nego Django renderira 500."""
+        import traceback as tb_module
+        from django.core.exceptions import (
+            DisallowedHost, SuspiciousOperation, PermissionDenied,
+        )
+        from django.http import Http404
+
+        # Django internal exceptions — pustimo ih, Django ih sam obrađuje
+        if isinstance(exception, (DisallowedHost, SuspiciousOperation, Http404)):
+            return None
+
+        # PermissionDenied — Django sam radi 403
+        if isinstance(exception, PermissionDenied):
+            return None
+
+        # API/AJAX — ostavi, vraćaju JSON
+        if self._is_api(request):
+            return None
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return None
+        if 'application/json' in request.headers.get('Accept', ''):
+            return None
+
+        exc_name = type(exception).__name__
+        category = self.EXCEPTION_MAP.get(exc_name, 'default')
+        traceback_str = tb_module.format_exc()
+
+        logger.error(
+            'GracefulError [%s] %s %s: %s\n%s',
+            category, request.method, request.path, exception, traceback_str,
+        )
+
+        # Async alert trojci
+        self._notify_team(request, exception, category, traceback_str)
+
+        # Audit log
+        self._audit_log(request, exception, category)
+
+        # Redirect s toast porukom
+        return self._graceful_redirect(request, category)
+
+    def _graceful_redirect(self, request, category):
+        from django.contrib import messages
+        from django.shortcuts import redirect
+
+        msg = self.ERROR_MESSAGES.get(category, self.ERROR_MESSAGES['default'])
+        messages.error(request, msg)
+
+        referrer = request.META.get('HTTP_REFERER', '')
+        if referrer and request.build_absolute_uri() != referrer:
+            from urllib.parse import urlparse
+            parsed = urlparse(referrer)
+            if parsed.netloc == '' or parsed.netloc == request.get_host():
+                return redirect(referrer)
+
+        return redirect('/')
+
+    def _notify_team(self, request, exception, category, traceback_str):
+        try:
+            from core.tasks import notify_error_to_team
+            notify_error_to_team.delay(
+                user=request.user.username if request.user.is_authenticated else 'anonymous',
+                path=request.path,
+                method=request.method,
+                exc_class=type(exception).__name__,
+                exc_message=str(exception)[:500],
+                category=category,
+                traceback=traceback_str[-2000:],
+                ip=request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0].strip(),
+            )
+        except Exception as e:
+            logger.warning('Failed to dispatch error notification: %s', e)
+
+    def _audit_log(self, request, exception, category):
+        try:
+            from core.models import SystemAuditLog
+            SystemAuditLog.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                company_id=getattr(request, 'company_id', None),
+                model_name='_system_error',
+                object_id='0',
+                action='error',
+                changes={
+                    'category': category,
+                    'exception': type(exception).__name__,
+                    'message': str(exception)[:500],
+                    'path': request.path,
+                    'method': request.method,
+                },
+                ip_address=request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '')).split(',')[0].strip(),
+            )
+        except Exception:
+            pass
+
+    @staticmethod
+    def _is_api(request):
+        return '/api/' in request.path or request.path.startswith('/_dev/')

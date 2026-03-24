@@ -332,3 +332,10 @@ urlpatterns += [
 
 # ── Custom Error Handlers ──────────────────────────────────────
 handler404 = 'core.error_handlers.custom_404_handler'
+
+# ROOT FALLBACK — izvan i18n_patterns da pokrije goli '/' i '/login/'
+# Bez ovih ruta LocaleMiddleware ne može matchati / → 404 → redirect loop
+urlpatterns += [
+    path('', views.smart_home, name='home_root'),
+    path('login/', views.login_view, name='login_fallback'),
+]
