@@ -2655,3 +2655,31 @@ def tc_consent_remind(request):
 
     messages.success(request, f'Poslano {sent} podsjetnika za T&C potpis.')
     return redirect('tc_consent_status')
+
+
+# ═══════════════════════════════════════════════════
+#  BORG ERROR QUEUE — Auto-Remediation Dashboard
+# ═══════════════════════════════════════════════════
+
+@login_required
+def borg_error_queue(request):
+    """Superadmin: BORG error queue — pending fixes."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Samo superadmin.')
+        return redirect('dashboard')
+
+    from superadmin_ai.models import PendingAIAction
+
+    pending = PendingAIAction.objects.filter(
+        module='error_remediation', status='pending',
+    ).order_by('-created_at')[:50]
+
+    resolved = PendingAIAction.objects.filter(
+        module='error_remediation', status__in=['approved', 'executed', 'rejected'],
+    ).order_by('-created_at')[:20]
+
+    return render(request, 'superadmin/borg_error_queue.html', {
+        'pending': pending,
+        'pending_count': pending.count(),
+        'resolved': resolved,
+    })

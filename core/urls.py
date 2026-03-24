@@ -105,6 +105,7 @@ urlpatterns += i18n_patterns(
     path('superadmin/', views.superadmin_dashboard, name='superadmin_dashboard'),
     path('superadmin/cross-company/', views.cross_company_dashboard, name='cross_company_dashboard'),
     path('superadmin/tc-status/', views.tc_consent_status, name='tc_consent_status'),
+    path('superadmin/borg-errors/', views.borg_error_queue, name='borg_error_queue'),
     path('superadmin/tc-remind/', views.tc_consent_remind, name='tc_consent_remind'),
     path('superadmin/ai/', include('superadmin_ai.urls')),
     path('superadmin/ivan/', views.ivan_cockpit, name='ivan_cockpit'),
