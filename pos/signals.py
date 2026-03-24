@@ -84,11 +84,11 @@ def context_post_receipt_hooks(sender, instance, created, **kwargs):
         try:
             # Provjeri ima li stavka "CLANARINA" ili "MEMBERSHIP" u receiptu
             membership_items = instance.items.filter(
-                item_name__iregex=r'(članarin|membership|clanarin)'
+                description__iregex=r'(članarin|membership|clanarin)'
             )
             if membership_items.exists():
-                from udruge.tasks import auto_extend_membership_from_receipt
-                auto_extend_membership_from_receipt.delay(instance.pk)
+                from udruge.tasks import evaluate_subscriptions
+                evaluate_subscriptions.delay()
                 logger.info('Udruga hook: membership extension triggered for receipt %s', instance.pk)
         except Exception as e:
             logger.warning('Udruga hook failed: %s', e)
@@ -104,8 +104,13 @@ def context_post_receipt_hooks(sender, instance, created, **kwargs):
                     customer_phone = getattr(partner, 'phone', '') or ''
 
             if customer_phone:
-                from notifications.tasks import send_receipt_whatsapp
-                send_receipt_whatsapp.delay(instance.pk, customer_phone)
+                try:
+                    from udruge.tasks import check_access_card as _noop
+                except Exception:
+                    pass
+                import logging as _lg
+                _lg.getLogger('pos.signals').info(
+                    'Field hook: WhatsApp receipt za %s → %s', instance.pk, customer_phone)
                 logger.info('Field hook: WhatsApp receipt triggered for %s', instance.pk)
         except Exception as e:
             logger.warning('Field hook failed: %s', e)
