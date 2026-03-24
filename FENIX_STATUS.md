@@ -25,6 +25,31 @@ Fajlovi:
 Status: PLAN READY — čeka se F1 pokretanje
 MVP target: 2027-02-01 (rok DOH 2026)
 
+
+---
+
+## POS KAO CENTAR SVIJETA — reBORGanizacija (2026-03-24)
+Commit: 2430991
+
+**Što je izgrađeno (229 LOC, 0 promjena u core views.py):**
+- POSTerminal.quick_actions (JSONField) + 14 registriranih akcija (QUICK_ACTION_REGISTRY)
+- Auto-defaults po pos_type: retail/reception/field/service/restaurant
+- Udruga override (business_type override umjesto pos_type)
+- QuickActions panel u quick.html (JS Action Registry, dinamički render)
+- 3 post-receipt context hooka u pos/signals.py:
+  - reception → check_evisitor_pending.delay()
+  - udruga → auto_extend_membership_from_receipt.delay()
+  - field → send_receipt_whatsapp.delay()
+- Open/Closed princip: proširenje bez modifikacije jezgre
+
+**eRacun posrednik:**
+- get_cert_pem() bug fix (cert_p12 → cert_path)
+- Konjik certifikat: /etc/limit-connect/certs/konjik-doo-fina-certifikat-37590751921.A.1.p12
+- Vrijedi do: 2030-07-31
+- Pipeline radi: certifikat → validacija → XML → potpis → SOAP
+- Bloker: pogrešan FINA endpoint (fiskalizacija vs eRačun)
+- CC_TASK_ERACUN_POSREDNIK_F1.md — čeka ispravak endpointa
+
 ## ★ NOVI SMJER — BORG SYSTEM FENIX (2026-03-24)
 Master plan: /var/www/fina-connect/BORG_FENIX_MASTER_PLAN.md
 Filozofija: Asimilacija stvarne materije (zakoni, računi, tržište) u real-time.

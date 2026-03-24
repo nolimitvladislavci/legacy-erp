@@ -263,24 +263,41 @@ def get_cert_pem(config):
     """
     from cryptography.hazmat.primitives.serialization import pkcs12, Encoding, PrivateFormat, NoEncryption
 
-    # Try config file field first
-    if config.cert_p12 and hasattr(config.cert_p12, 'path') and os.path.exists(config.cert_p12.path):
-        p12_path = config.cert_p12.path
+    # 1. Direktni cert_path (CharField, sigurna lokacija)
+    if getattr(config, 'cert_path', None) and os.path.exists(config.cert_path):
+        p12_path = config.cert_path
     else:
-        # Fallback to shared FINA certs directory
-        cert_dir = os.path.join(settings.BASE_DIR, 'certs')
-        p12_files = [f for f in os.listdir(cert_dir) if f.endswith('.p12')] if os.path.isdir(cert_dir) else []
-        if not p12_files:
-            raise FileNotFoundError('Nema P12 certifikata')
-        p12_path = os.path.join(cert_dir, p12_files[0])
+        # 2. Fallback: /etc/limit-connect/certs/ — traži cert po OIB-u
+        secure_dir = '/etc/limit-connect/certs'
+        cert_oib = getattr(config, 'cert_oib', '') or ''
+        p12_path = None
+        if os.path.isdir(secure_dir):
+            # Prioritet: certifikat koji sadrži OIB firme u imenu
+            candidates = [f for f in os.listdir(secure_dir) if f.endswith('.p12')]
+            if cert_oib:
+                oib_match = [f for f in candidates if cert_oib in f]
+                if oib_match:
+                    p12_path = os.path.join(secure_dir, sorted(oib_match)[-1])
+            if not p12_path and candidates:
+                p12_path = os.path.join(secure_dir, 'fina_cert.p12')
+        if not p12_path:
+            # 3. Zadnji fallback: project certs dir
+            cert_dir = os.path.join(settings.BASE_DIR, 'certs')
+            candidates = [f for f in os.listdir(cert_dir) if f.endswith('.p12')] if os.path.isdir(cert_dir) else []
+            if not candidates:
+                raise FileNotFoundError('Nema P12 certifikata ni u /etc/limit-connect/certs/ ni u certs/')
+            p12_path = os.path.join(cert_dir, candidates[0])
 
-    password = (config.cert_password or '').encode() or None
-    # Check for password file
+    # Lozinka: .cert_password fajl u istom direktoriju, ili deprecated polje
+    p12_dir = os.path.dirname(p12_path)
+    pw_file = os.path.join(p12_dir, '.cert_password')
+    password = None
+    if os.path.exists(pw_file):
+        with open(pw_file, 'r') as f:
+            password = f.read().strip().encode() or None
     if not password:
-        pw_file = os.path.join(os.path.dirname(p12_path), '.cert_password')
-        if os.path.exists(pw_file):
-            with open(pw_file, 'r') as f:
-                password = f.read().strip().encode()
+        deprecated_pwd = getattr(config, 'cert_password_deprecated', '') or ''
+        password = deprecated_pwd.encode() or None
 
     with open(p12_path, 'rb') as f:
         p12_data = f.read()
