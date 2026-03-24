@@ -3,335 +3,303 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LIMIT Connect &mdash; Cijene</title>
+<title>LIMIT Connect — Cijene</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { --gold: #c9a84c; --black: #0a0a0a; --dark: #1a1a2e; --gray: #2a2a3e; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif; background: var(--black); color: #e0e0e0; }
-.hero { text-align: center; padding: 4rem 1rem 2rem; }
-.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: var(--gold); margin-bottom: 0.5rem; }
-.hero p { font-size: 1.2rem; color: #999; max-width: 600px; margin: 0 auto; }
-.slogan { color: var(--gold); font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.3rem; margin-top: 1.2rem; }
-.sub-slogan { color: #777; font-size: 0.95rem; margin-top: 0.5rem; }
-.plans { display: flex; justify-content: center; gap: 2rem; padding: 2rem 1rem; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
-.plan-card { background: var(--dark); border: 1px solid #333; border-radius: 16px; padding: 2rem; width: 340px; position: relative; transition: all 0.3s; }
-.plan-card:hover { transform: translateY(-8px); border-color: var(--gold); box-shadow: 0 8px 30px rgba(201,168,76,0.2); }
-.plan-card.popular { border-color: var(--gold); }
-.plan-card.popular::before { content: 'NAJPOPULARNIJI'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--black); padding: 4px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; }
-.plan-name { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 0.5rem; }
-.plan-price { font-size: 3rem; font-weight: 700; color: #fff; }
-.plan-price span { font-size: 1rem; color: #888; font-weight: 400; }
-.plan-yearly { color: #888; font-size: 0.85rem; }
-.plan-features { list-style: none; margin: 1.5rem 0; }
-.plan-features li { padding: 6px 0; color: #bbb; font-size: 0.9rem; }
-.plan-features li i { color: var(--gold); margin-right: 8px; width: 16px; }
-.btn-plan { display: block; width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; text-align: center; transition: all 0.2s; }
-.btn-plan.primary { background: var(--gold); color: var(--black); }
-.btn-plan.primary:hover { background: #d4b55a; }
-.btn-plan.outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
-.btn-plan.outline:hover { background: var(--gold); color: var(--black); }
+:root{--gold:#c9a84c;--gold2:#e8c96a;--bg:#0a0a0a;--card:#111827;--border:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--green:#22c55e;--blue:#3b82f6}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Barlow',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+h1,h2,h3{font-family:'Cormorant Garamond',serif}
+a{color:var(--gold);text-decoration:none}
 
-/* AI Advisor */
-.advisor { max-width: 700px; margin: 3rem auto; padding: 2rem; background: var(--dark); border-radius: 16px; border: 1px solid #333; }
-.advisor h3 { color: var(--gold); margin-bottom: 1rem; font-family: 'Cormorant Garamond', serif; }
-.advisor select, .advisor input { background: var(--gray); border: 1px solid #444; color: #fff; padding: 10px 14px; border-radius: 8px; width: 100%; margin-bottom: 1rem; font-family: 'Barlow', sans-serif; }
-.advisor .needs-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
-.advisor .need-tag { padding: 6px 14px; border-radius: 20px; border: 1px solid #555; color: #bbb; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
-.advisor .need-tag.selected { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.1); }
-.advisor .result { background: rgba(201,168,76,0.1); border: 1px solid var(--gold); border-radius: 12px; padding: 1.5rem; margin-top: 1rem; display: none; }
+/* Hero */
+.hero{text-align:center;padding:50px 20px 30px}
+.hero h1{font-size:2.6rem;color:var(--gold);margin-bottom:6px}
+.hero p{color:var(--muted);font-size:1.05rem;max-width:500px;margin:0 auto}
 
-/* Connect widget on public page */
-.connect-public { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
-.connect-pill { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 30px; background: linear-gradient(135deg, #c9a84c, #a08030); color: #0a0a0a; font-weight: 600; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 15px rgba(201,168,76,0.4); transition: transform 0.2s; text-decoration: none; }
-.connect-pill:hover { transform: scale(1.05); color: #0a0a0a; }
+/* Joker — "Tko si?" selector */
+.joker{max-width:800px;margin:0 auto 30px;padding:0 16px}
+.joker-label{text-align:center;color:var(--gold);font-size:1.1rem;font-weight:600;margin-bottom:16px}
+.joker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.joker-btn{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:18px 12px;text-align:center;cursor:pointer;transition:all .2s}
+.joker-btn:hover,.joker-btn.active{border-color:var(--gold);background:rgba(201,168,76,.08);transform:translateY(-2px)}
+.joker-btn i{font-size:1.6rem;color:var(--gold);display:block;margin-bottom:6px}
+.joker-btn .jlabel{font-size:.82rem;font-weight:600;color:var(--text)}
+.joker-btn .jsub{font-size:.68rem;color:var(--muted);margin-top:2px}
 
-.footer { text-align: center; padding: 3rem 1rem; color: #666; font-size: 0.85rem; }
-.footer a { color: var(--gold); text-decoration: none; }
-.eco { display: inline-flex; align-items: center; gap: 6px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); border-radius: 20px; padding: 6px 16px; color: #4ade80; font-size: 0.85rem; margin-top: 1.5rem; }
-@media(max-width:768px) { .plans { flex-direction: column; align-items: center; } .hero h1 { font-size: 2rem; } }
+/* Result area */
+.result-area{max-width:900px;margin:0 auto;padding:0 16px;min-height:300px}
+.result-area .prompt{text-align:center;color:var(--muted);padding:60px 20px;font-size:1rem}
+
+/* Plan cards */
+.plan-row{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:360px;position:relative;transition:all .3s}
+.plan-card:hover{border-color:var(--gold);box-shadow:0 8px 30px rgba(201,168,76,.15);transform:translateY(-4px)}
+.plan-card.recommended{border-color:var(--gold);border-width:2px}
+.plan-card.recommended::before{content:'PREPORUKA';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:3px 14px;border-radius:16px;font-size:.68rem;font-weight:700;letter-spacing:1px}
+.plan-name{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold);margin-bottom:4px}
+.plan-tag{font-size:.75rem;color:var(--muted);margin-bottom:12px}
+.plan-price{font-size:2.4rem;font-weight:700;color:#fff}
+.plan-price small{font-size:.85rem;color:var(--muted);font-weight:400}
+.plan-yearly{font-size:.78rem;color:var(--muted);margin-bottom:16px}
+.plan-features{list-style:none;margin-bottom:20px}
+.plan-features li{padding:5px 0;font-size:.85rem;color:#cbd5e1}
+.plan-features li i{color:var(--gold);margin-right:8px;width:14px;font-size:.75rem}
+.plan-features li.highlight{color:var(--green);font-weight:600}
+.btn-plan{display:block;width:100%;padding:12px;border-radius:8px;border:none;font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;text-decoration:none}
+.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:var(--gold2)}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Compare drawer */
+.compare-toggle{text-align:center;margin:30px 0 10px}
+.compare-toggle button{background:none;border:1px solid var(--border);color:var(--muted);padding:8px 20px;border-radius:8px;cursor:pointer;font-size:.82rem;transition:all .2s}
+.compare-toggle button:hover{border-color:var(--gold);color:var(--gold)}
+.compare-table{max-width:1100px;margin:0 auto;padding:0 16px;display:none;overflow-x:auto}
+.compare-table table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:30px}
+.compare-table th{padding:8px;text-align:left;color:var(--gold);border-bottom:2px solid var(--border);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+.compare-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.compare-table td:first-child{color:var(--muted);width:25%}
+.compare-table .yes{color:var(--green)}
+.compare-table .no{color:#475569}
+
+/* Corner actions */
+.corners{position:fixed;z-index:100}
+.corner-btn{position:fixed;padding:8px 14px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:rgba(17,24,39,.9);color:var(--muted);backdrop-filter:blur(8px);transition:all .2s;text-decoration:none}
+.corner-btn:hover{border-color:var(--gold);color:var(--gold)}
+.c-tl{top:16px;left:16px}
+.c-tr{top:16px;right:16px}
+.c-bl{bottom:16px;left:16px}
+.c-br{bottom:16px;right:16px}
+
+/* Footer */
+.footer{text-align:center;padding:40px 20px;color:var(--muted);font-size:.78rem;border-top:1px solid var(--border);margin-top:40px}
+.footer .logo{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700}
+
+/* Mobile */
+@media(max-width:768px){
+  .hero h1{font-size:1.8rem}
+  .joker-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .joker-btn{padding:12px 8px}
+  .joker-btn i{font-size:1.2rem}
+  .plan-card{width:100%}
+  .corner-btn{font-size:.65rem;padding:6px 10px}
+}
+@media(max-width:480px){
+  .joker-grid{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
 
+<!-- Corner actions -->
+<a href="#compare" class="corner-btn c-tl" onclick="toggleCompare()"><i class="fas fa-columns"></i> Usporedi sve</a>
+<a href="/register/" class="corner-btn c-tr"><i class="fas fa-rocket"></i> Registracija</a>
+<a href="https://wa.me/385976091655" class="corner-btn c-bl"><i class="fab fa-whatsapp"></i> Kontakt</a>
+<a href="/digitalni-posrednik/" class="corner-btn c-br"><i class="fas fa-brain"></i> Demo</a>
+
+<!-- Hero -->
 <div class="hero">
-  <h1><i class="fas fa-bolt"></i> LIMIT Connect</h1>
-  <p>ERP platforma za mala i srednja poduzeca &mdash; HR &amp; DE</p>
-  <div class="slogan">Vi vodite posao. Mi vodimo sve ostalo.</div>
-  <div class="sub-slogan">Potpuno digitalno. Bez papira, bez stresa &mdash; od fakture do fiskalizacije.</div>
-  <div class="eco"><i class="fas fa-leaf"></i> Digitalno poslovanje = zdraviji planet. Svaka faktura u oblaku je jedno drvo manje.</div>
-  <div style="margin-top:1rem;display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:20px;padding:8px 20px;color:var(--gold);font-size:0.9rem;font-weight:600">
-    <i class="fas fa-archive"></i> Digitalna arhiva 11 godina &mdash; UKLJUČENA u svaki plan
-  </div>
+  <h1>LIMIT Connect</h1>
+  <p>ERP platforma za mala poduzeca — HR &amp; DE</p>
 </div>
 
-<div class="plans">
-  {% for plan in plans %}
-  <div class="plan-card {% if plan.is_popular %}popular{% endif %}">
-    <div class="plan-name">{{ plan.name }}</div>
-    <div class="plan-price">{{ plan.price_monthly|floatformat:0 }}&euro; <span>/ mj.</span></div>
-    <div class="plan-yearly">ili {{ plan.price_yearly|floatformat:0 }}&euro;/god. (usteda 17%)</div>
-
-    <ul class="plan-features">
-      {% if plan.slug == 'starter' %}
-      <li><i class="fas fa-check"></i>Fakturiranje i naplata</li>
-      <li><i class="fas fa-check"></i>Upravljanje partnerima</li>
-      <li><i class="fas fa-check"></i>POS blagajna</li>
-      <li><i class="fas fa-check"></i>Radni sati &amp; projekti</li>
-      <li><i class="fas fa-check"></i>Termini</li>
-      <li><i class="fas fa-check"></i>Dokumenti &amp; kalkulator</li>
-      <li><i class="fas fa-check"></i>Do 3 korisnika</li>
-      <li><i class="fas fa-check"></i>Email podrska</li>
-      <li><i class="fas fa-shield-alt" style="color:#4ade80"></i><strong style="color:#4ade80">Cloud backup &amp; arhiva</strong></li>
-      {% elif plan.slug == 'professional' %}
-      <li><i class="fas fa-check"></i>Sve iz Starter paketa</li>
-      <li><i class="fas fa-check"></i>Knjigovodstvo (SKR 03/RRiF)</li>
-      <li><i class="fas fa-check"></i>Izvjestaji &amp; analitika</li>
-      <li><i class="fas fa-check"></i>GPS tracking</li>
-      <li><i class="fas fa-check"></i>CRM / Outreach</li>
-      <li><i class="fas fa-check"></i>Radni nalozi</li>
-      <li><i class="fas fa-check"></i>Grossmarkt &amp; dostava</li>
-      <li><i class="fas fa-check"></i>Gastro meni &amp; payroll</li>
-      <li><i class="fas fa-check"></i>Do 15 korisnika</li>
-      <li><i class="fas fa-check"></i>Prioritetna podrska</li>
-      <li><i class="fas fa-shield-alt" style="color:#4ade80"></i><strong style="color:#4ade80">Cloud backup &amp; arhiva</strong></li>
-      {% elif plan.slug == 'enterprise' %}
-      <li><i class="fas fa-check"></i>Sve iz Professional paketa</li>
-      <li><i class="fas fa-check"></i>Financije &amp; treasury</li>
-      <li><i class="fas fa-check"></i>Skladiste &amp; inventura</li>
-      <li><i class="fas fa-check"></i>Webshop &amp; najam</li>
-      <li><i class="fas fa-check"></i>AI Asistent (Connect)</li>
-      <li><i class="fas fa-check"></i>e-Racun (UBL / FINA CIS)</li>
-      <li><i class="fas fa-check"></i>Helpdesk &amp; nabava</li>
-      <li><i class="fas fa-check"></i>Neogranicen broj korisnika</li>
-      <li><i class="fas fa-check"></i>API pristup &amp; premium podrska</li>
-      <li><i class="fas fa-shield-alt" style="color:#4ade80"></i><strong style="color:#4ade80">Cloud backup &amp; arhiva</strong></li>
-      {% endif %}
-    </ul>
-
-    <a href="/register/?plan={{ plan.slug }}" class="btn-plan {% if plan.is_popular %}primary{% else %}outline{% endif %}">
-      {% if plan.price_monthly == 0 %}Kreni odmah — besplatno zauvijek
-      {% elif plan.slug == 'starter' %}Zapocni odmah
-      {% elif plan.slug == 'enterprise' or plan.slug == 'distributor' %}Kontaktirajte nas
-      {% else %}Odaberi plan{% endif %}
-    </a>
-  </div>
-  {% endfor %}
-</div>
-
-
-<!-- Backup & Digitalna Arhiva — USP sekcija -->
-<section style="max-width:1000px;margin:3rem auto 0;padding:3rem 2rem;background:linear-gradient(135deg,var(--dark) 0%,var(--black) 100%);border:1px solid rgba(201,168,76,0.3);border-radius:16px;text-align:center;">
-    <div style="font-size:2.5rem;margin-bottom:16px"><i class="fas fa-shield-alt" style="color:var(--gold)"></i></div>
-    <h2 style="color:var(--gold);font-family:Cormorant Garamond,serif;font-size:2rem;margin-bottom:12px">
-        Vasi podaci su sigurni. Zauvijek.
-    </h2>
-    <p style="color:#bbb;font-size:1.05rem;line-height:1.8;margin-bottom:2rem;max-width:700px;margin-left:auto;margin-right:auto">
-        Automatski backup svaku noc na cloud. Digitalna arhiva u skladu sa
-        <strong style="color:var(--gold)">Zakonom o racunovodstvu</strong> &mdash; cuvamo vase podatke
-        <strong style="color:var(--gold)">minimum 11 godina</strong>, kako zakon nalaze.
-    </p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
-        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
-            <div style="margin-bottom:10px"><i class="fas fa-cloud" style="color:var(--gold);font-size:1.5rem"></i></div>
-            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Cloud Backup</h3>
-            <p style="color:#888;font-size:0.85rem">Automatski svaku noc. Backblaze B2 enkripcija.</p>
-        </div>
-        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
-            <div style="margin-bottom:10px"><i class="fas fa-archive" style="color:var(--gold);font-size:1.5rem"></i></div>
-            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Digitalna Arhiva</h3>
-            <p style="color:#888;font-size:0.85rem">Svi racuni, primke, temeljnice &mdash; pretrazivi i dostupni.</p>
-        </div>
-        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
-            <div style="margin-bottom:10px"><i class="fas fa-balance-scale" style="color:var(--gold);font-size:1.5rem"></i></div>
-            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Zakonska uskladenost</h3>
-            <p style="color:#888;font-size:0.85rem">ZOR cl.10 &mdash; cuvanje min. 11 godina. PDV &mdash; min. 10 godina.</p>
-        </div>
-        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:24px">
-            <div style="margin-bottom:10px"><i class="fas fa-sync-alt" style="color:var(--gold);font-size:1.5rem"></i></div>
-            <h3 style="color:var(--gold);font-size:0.95rem;margin-bottom:6px">Disaster Recovery</h3>
-            <p style="color:#888;font-size:0.85rem">Vracanje podataka u roku 24h. Nikad vise izgubljeni dokumenti.</p>
-        </div>
+<!-- Joker — "Tko si?" -->
+<div class="joker">
+  <div class="joker-label"><i class="fas fa-magic"></i> Odaberite svoj profil — prikazat cemo vam savrseni paket</div>
+  <div class="joker-grid">
+    <div class="joker-btn" onclick="selectProfile('obrtnik')" data-profile="obrtnik">
+      <i class="fas fa-hammer"></i>
+      <div class="jlabel">Obrtnik</div>
+      <div class="jsub">Pausal / redovni</div>
     </div>
-    <p style="color:var(--gold);font-size:1.1rem;margin-top:1.5rem;font-weight:600">
-        <i class="fas fa-check-circle"></i> Ukljuceno u SVAKI plan &mdash; bez dodatne naplate
-    </p>
-</section>
-
-<!-- Pricing Calculator -->
-<div class="advisor" id="pricing-calc">
-  <h3><i class="fas fa-calculator me-2"></i>Izracunajte svoju ustedu</h3>
-  <div style="margin-bottom:1.5rem">
-    <label style="color:#bbb;font-size:0.9rem;display:block;margin-bottom:6px">
-      Broj faktura mjesecno: <strong id="calc-inv-val" style="color:var(--gold)">30</strong>
-    </label>
-    <input type="range" id="calc-invoices" min="0" max="300" step="10" value="30"
-      style="width:100%;accent-color:var(--gold);cursor:pointer">
-  </div>
-  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem">
-    <label style="display:flex;align-items:center;gap:8px;color:#bbb;cursor:pointer;font-size:0.9rem">
-      <input type="checkbox" id="calc-pos" style="accent-color:var(--gold)"> POS blagajna
-    </label>
-    <label style="display:flex;align-items:center;gap:8px;color:#bbb;cursor:pointer;font-size:0.9rem">
-      <input type="checkbox" id="calc-de" style="accent-color:var(--gold)"> Poslovanje u Njemackoj
-    </label>
-    <label style="display:flex;align-items:center;gap:8px;color:#bbb;cursor:pointer;font-size:0.9rem">
-      <input type="checkbox" id="calc-nonprofit" style="accent-color:var(--gold)"> Udruga / neprofitna
-    </label>
-  </div>
-  <div id="calc-result" style="background:rgba(201,168,76,0.1);border:1px solid var(--gold);border-radius:12px;padding:1.5rem;text-align:center">
-    <div style="font-size:0.85rem;color:#888;margin-bottom:4px">Preporuceni plan</div>
-    <div id="calc-plan" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);font-weight:700">Starter</div>
-    <div id="calc-price" style="font-size:2.5rem;font-weight:700;color:#fff;margin:8px 0">22&euro;<span style="font-size:1rem;color:#888;font-weight:400"> / mj.</span></div>
-    <div style="display:flex;justify-content:center;gap:2rem;margin:1rem 0;flex-wrap:wrap">
-      <div>
-        <div style="color:#888;font-size:0.8rem">Rucno racunovodstvo</div>
-        <div id="calc-manual" style="color:#ef4444;font-size:1.2rem;font-weight:600;text-decoration:line-through">210&euro;/mj</div>
-      </div>
-      <div>
-        <div style="color:#888;font-size:0.8rem">S LIMIT Connect</div>
-        <div id="calc-limit" style="color:#22c55e;font-size:1.2rem;font-weight:600">22&euro;/mj</div>
-      </div>
+    <div class="joker-btn" onclick="selectProfile('udruga')" data-profile="udruga">
+      <i class="fas fa-hand-holding-heart"></i>
+      <div class="jlabel">Udruga</div>
+      <div class="jsub">Neprofitna org.</div>
     </div>
-    <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:10px;margin-top:8px">
-      <span style="color:#22c55e;font-weight:700;font-size:1.1rem">
-        <i class="fas fa-piggy-bank"></i> Ustedite <span id="calc-saving">2.256</span>&euro; godisnje
-      </span>
+    <div class="joker-btn" onclick="selectProfile('rental')" data-profile="rental">
+      <i class="fas fa-bed"></i>
+      <div class="jlabel">Iznajmljivac</div>
+      <div class="jsub">Apartmani / sobe</div>
     </div>
-    <a id="calc-cta" href="/register/?plan=starter" class="btn-plan primary" style="margin-top:1rem;display:inline-block;width:auto;padding:10px 30px">
-      Pocnite besplatno 30 dana
-    </a>
+    <div class="joker-btn" onclick="selectProfile('firma')" data-profile="firma">
+      <i class="fas fa-building"></i>
+      <div class="jlabel">Firma</div>
+      <div class="jsub">d.o.o. / j.d.o.o.</div>
+    </div>
+    <div class="joker-btn" onclick="selectProfile('racunovodja')" data-profile="racunovodja">
+      <i class="fas fa-user-tie"></i>
+      <div class="jlabel">Racunovodja</div>
+      <div class="jsub">Vise klijenata</div>
+    </div>
+    <div class="joker-btn" onclick="selectProfile('gastro')" data-profile="gastro">
+      <i class="fas fa-utensils"></i>
+      <div class="jlabel">Ugostiteljstvo</div>
+      <div class="jsub">Kafic / restoran</div>
+    </div>
   </div>
 </div>
 
-<div class="advisor">
-  <h3><i class="fas fa-robot me-2"></i>Connect savjetnik &mdash; koji plan vam odgovara?</h3>
-  <select id="adv-industry">
-    <option value="">Odaberite industriju...</option>
-    <option value="it">IT &amp; Software</option>
-    <option value="trade">Trgovina</option>
-    <option value="services">Usluge</option>
-    <option value="gastro">Ugostiteljstvo</option>
-    <option value="construction">Gradevina</option>
-    <option value="health">Zdravstvo</option>
-    <option value="other">Ostalo</option>
-  </select>
-  <input type="number" id="adv-employees" placeholder="Broj zaposlenih" min="1" value="1">
-  <p style="color:#999;font-size:0.9rem;margin-bottom:8px">Sto vam treba?</p>
-  <div class="needs-grid">
-    <span class="need-tag" data-need="invoicing" onclick="toggleNeed(this)">Fakturiranje</span>
-    <span class="need-tag" data-need="pos" onclick="toggleNeed(this)">POS Kasa</span>
-    <span class="need-tag" data-need="inventory" onclick="toggleNeed(this)">Zalihe</span>
-    <span class="need-tag" data-need="tracking" onclick="toggleNeed(this)">GPS Tracking</span>
-    <span class="need-tag" data-need="reports" onclick="toggleNeed(this)">Izvjestaji</span>
-    <span class="need-tag" data-need="konto" onclick="toggleNeed(this)">Knjigovodstvo</span>
-    <span class="need-tag" data-need="payroll" onclick="toggleNeed(this)">Payroll</span>
-    <span class="need-tag" data-need="ai" onclick="toggleNeed(this)">AI Asistent</span>
-    <span class="need-tag" data-need="eracun" onclick="toggleNeed(this)">e-Racun</span>
-    <span class="need-tag" data-need="rental" onclick="toggleNeed(this)">Najam</span>
-    <span class="need-tag" data-need="webshop" onclick="toggleNeed(this)">Webshop</span>
-    <span class="need-tag" data-need="delivery" onclick="toggleNeed(this)">Dostava</span>
-    <span class="need-tag" data-need="gastro" onclick="toggleNeed(this)">Gastro</span>
-    <span class="need-tag" data-need="helpdesk" onclick="toggleNeed(this)">Helpdesk</span>
-  </div>
-  <button onclick="getAdvice()" class="btn-plan primary" style="width:auto;padding:10px 30px">
-    <i class="fas fa-magic me-2"></i>Preporuci plan
-  </button>
-  <div class="result" id="adv-result">
-    <h5 style="color:#c9a84c" id="adv-plan"></h5>
-    <p id="adv-reason" style="color:#ccc"></p>
-    <a id="adv-link" href="#" class="btn-plan primary" style="margin-top:1rem;width:auto;display:inline-block;padding:10px 24px">Odaberi ovaj plan</a>
-  </div>
+<!-- Result area — BORG shows relevant plans -->
+<div class="result-area" id="result-area">
+  <div class="prompt"><i class="fas fa-hand-pointer" style="color:var(--gold);font-size:1.5rem"></i><br>Odaberite profil iznad — BORG ce preporuciti savrseni plan za vas</div>
 </div>
 
-<!-- Connect widget on public page -->
-<div class="connect-public">
-  <a href="/register/" class="connect-pill">
-    <i class="fas fa-robot"></i>
-    <span>Connect &mdash; tu sam.</span>
-  </a>
+<!-- Compare all (hidden by default) -->
+<div class="compare-toggle"><button onclick="toggleCompare()"><i class="fas fa-table"></i> Usporedi sve planove</button></div>
+<div class="compare-table" id="compare-table">
+<table>
+<thead>
+<tr><th></th>
+{% for plan in plans %}<th>{{ plan.name }}<br><small>{{ plan.price_monthly|floatformat:0 }} EUR</small></th>{% endfor %}
+</tr>
+</thead>
+<tbody>
+<tr><td>Korisnici</td>{% for p in plans %}<td>{{ p.max_users }}</td>{% endfor %}</tr>
+<tr><td>Lokacije</td>{% for p in plans %}<td>{{ p.max_locations }}</td>{% endfor %}</tr>
+<tr><td>Fakture/mj</td>{% for p in plans %}<td>{{ p.max_invoices_per_month }}</td>{% endfor %}</tr>
+<tr><td>Artikli</td>{% for p in plans %}<td>{{ p.max_articles }}</td>{% endfor %}</tr>
+<tr><td>Fiskalizacija</td>{% for p in plans %}<td class="{% if p.has_fiscalization %}yes{% else %}no{% endif %}">{% if p.has_fiscalization %}<i class="fas fa-check"></i>{% else %}—{% endif %}</td>{% endfor %}</tr>
+<tr><td>WhatsApp</td>{% for p in plans %}<td class="{% if p.has_whatsapp %}yes{% else %}no{% endif %}">{% if p.has_whatsapp %}<i class="fas fa-check"></i>{% else %}—{% endif %}</td>{% endfor %}</tr>
+<tr><td>API</td>{% for p in plans %}<td class="{% if p.has_api_access %}yes{% else %}no{% endif %}">{% if p.has_api_access %}<i class="fas fa-check"></i>{% else %}—{% endif %}</td>{% endfor %}</tr>
+<tr><td>Premium podrska</td>{% for p in plans %}<td class="{% if p.has_premium_support %}yes{% else %}no{% endif %}">{% if p.has_premium_support %}<i class="fas fa-check"></i>{% else %}—{% endif %}</td>{% endfor %}</tr>
+</tbody>
+</table>
 </div>
 
+<!-- Footer -->
 <div class="footer">
-  <p>&copy; 2026 LIMIT Connect | <a href="/">Pocetna</a> | <a href="/register/">Registracija</a> | <a href="/login/">Prijava</a></p>
-  <p style="margin-top:0.5rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold)">Bez papira. Bez brige. Bez granica.</p>
+  <div class="logo">LIMIT Connect</div>
+  <div>Konjik d.o.o. | limit-connect.com</div>
+  <div style="margin-top:8px"><i class="fas fa-shield-alt" style="color:var(--green)"></i> 11 godina digitalna arhiva ukljucena u svaki plan</div>
 </div>
 
 <script>
-// Pricing Calculator
-(function(){
-  var slider = document.getElementById('calc-invoices');
-  var valEl = document.getElementById('calc-inv-val');
-  var posCheck = document.getElementById('calc-pos');
-  var deCheck = document.getElementById('calc-de');
-  var npCheck = document.getElementById('calc-nonprofit');
+const PLANS = {
+{% for plan in plans %}
+  '{{ plan.slug }}': {
+    name: '{{ plan.name }}',
+    price: {{ plan.price_monthly }},
+    yearly: {{ plan.price_yearly }},
+    slug: '{{ plan.slug }}',
+    tagline: '{{ plan.tagline|escapejs }}',
+    users: {{ plan.max_users }},
+    locations: {{ plan.max_locations }},
+    invoices: {{ plan.max_invoices_per_month }},
+    fiscal: {{ plan.has_fiscalization|yesno:"true,false" }},
+    popular: {{ plan.is_popular|yesno:"true,false" }},
+    modules: {{ plan.included_modules|safe }},
+  },
+{% endfor %}
+};
 
-  function update() {
-    var inv = parseInt(slider.value);
-    var pos = posCheck.checked;
-    var de = deCheck.checked;
-    var np = npCheck.checked;
-    valEl.textContent = inv;
+const PROFILES = {
+  obrtnik: {
+    title: 'Za obrtnike',
+    plans: ['pausalac', 'pos-besplatno', 'starter'],
+    recommended: 'pausalac',
+    features: {
+      'pausalac': ['POS blagajna s fiskalizacijom', 'PO-SD obrazac (automatski)', 'Tax Wizard — AI porezni savjetnik', 'Push notifikacije', '1 korisnik, 1 lokacija', 'Besplatno — zauvijek'],
+      'pos-besplatno': ['POS blagajna', 'Partneri', 'Inventura', '1 korisnik, 1 lokacija', 'Besplatno — zauvijek'],
+      'starter': ['Fakturiranje + POS', 'Radni sati i projekti', 'Dokumenti + kalkulator', 'Do 3 korisnika', 'Tax Wizard', 'Smart Import'],
+    },
+  },
+  udruga: {
+    title: 'Za udruge i neprofitne organizacije',
+    plans: ['udruga-starter'],
+    recommended: 'udruga-starter',
+    features: {
+      'udruga-starter': ['Clanarine i donacije', 'Evidencija clanova', 'Konto (SKR)', 'e-Racun (FINA/Peppol)', 'Izvjestaji za skupstinu', 'Tax Wizard', 'Do 5 korisnika', 'Bez fiskalizacije (zakonski)'],
+    },
+  },
+  rental: {
+    title: 'Za iznajmljivace',
+    plans: ['rental-starter', 'pos-arhiva'],
+    recommended: 'rental-starter',
+    features: {
+      'rental-starter': ['eVisitor automatski', 'Turisticka pristojba kalkulator', 'Check-in s OCR dokumenta', 'POS recepcija (fiskalizacija)', 'Tax Wizard + PO-SD', 'Do 3 korisnika, 5 objekata', 'Push notifikacije'],
+      'pos-arhiva': ['Sve iz Rental paketa', 'Digitalna arhiva + AI', 'Konto knjizenje', 'Smart Import skeniranih racuna', '2 lokacije'],
+    },
+  },
+  firma: {
+    title: 'Za tvrtke (d.o.o. / j.d.o.o.)',
+    plans: ['starter', 'professional', 'enterprise'],
+    recommended: 'professional',
+    features: {
+      'starter': ['Fakturiranje + POS', 'Partneri + dokumenti', 'Radni sati + projekti', 'Do 3 korisnika', 'Tax Wizard'],
+      'professional': ['Sve iz Starter', 'Konto (SKR 03/RRiF)', 'Payroll + izvjestaji', 'Gastro + dostava', 'GPS tracking + CRM', 'e-Racun (FINA/Peppol)', 'BORG Intelligence', 'Do 15 korisnika'],
+      'enterprise': ['Sve iz Professional', 'Skladiste + inventura', 'Webshop + rental', 'AI Asistent', 'Helpdesk + nabava', 'API pristup', 'Neograniceni korisnici'],
+    },
+  },
+  racunovodja: {
+    title: 'Za racunovodstvene urede',
+    plans: ['arhiva-ai', 'enterprise', 'distributor'],
+    recommended: 'enterprise',
+    features: {
+      'arhiva-ai': ['Smart Import (OCR skeniranje)', 'Konto + e-Racun', 'AI klasifikacija dokumenata', 'Tax Wizard za klijente', 'Digitalna arhiva 11 god'],
+      'enterprise': ['Sve iz Arhiva+AI', 'POS za klijente', 'Multi-tenant (78+ firmi)', 'AI Asistent + Intelligence', 'Helpdesk + podrska klijentima', 'Neograniceni korisnici'],
+      'distributor': ['Sve iz Enterprise', 'Do 10 lokacija', 'White-label branding', 'Prioritetni SLA', 'Dedicirana podrska'],
+    },
+  },
+  gastro: {
+    title: 'Za ugostiteljstvo',
+    plans: ['pos-besplatno', 'pos-arhiva', 'professional'],
+    recommended: 'pos-arhiva',
+    features: {
+      'pos-besplatno': ['POS blagajna + fiskalizacija', 'Barkod skener', 'Inventura artikala', '1 lokacija', 'Besplatno'],
+      'pos-arhiva': ['POS + fiskalizacija', 'Digitalna arhiva + AI', 'Konto knjizenje', 'Smart Import', 'e-Racun', '2 lokacije'],
+      'professional': ['Gastro modul (stolovi, kuhinja)', 'Meni editor', 'Payroll za osoblje', 'GPS tracking dostave', 'CRM + outreach', 'Do 15 korisnika'],
+    },
+  },
+};
 
-    // Determine plan
-    var plan, price;
-    if (de || inv >= 150) {
-      plan = 'Enterprise'; price = 189;
-    } else if (inv >= 30 || pos) {
-      plan = 'Professional'; price = 69;
-    } else {
-      plan = 'Starter'; price = 22;
-    }
-    var slug = plan.toLowerCase();
-
-    // Manual cost estimate: 2 EUR per invoice + 150 EUR base
-    var manual = inv * 2 + 150;
-    if (de) manual += 100; // DE compliance adds cost
-    if (np) manual += 50;  // Nonprofit bookkeeping adds cost
-
-    var yearSaving = (manual - price) * 12;
-    if (yearSaving < 0) yearSaving = 0;
-
-    document.getElementById('calc-plan').textContent = plan;
-    document.getElementById('calc-price').innerHTML = price + '&euro;<span style="font-size:1rem;color:#888;font-weight:400"> / mj.</span>';
-    document.getElementById('calc-manual').textContent = manual + '\u20ac/mj';
-    document.getElementById('calc-limit').textContent = price + '\u20ac/mj';
-    document.getElementById('calc-saving').textContent = yearSaving.toLocaleString('hr');
-    document.getElementById('calc-cta').href = '/register/?plan=' + slug;
-  }
-
-  slider.addEventListener('input', update);
-  posCheck.addEventListener('change', update);
-  deCheck.addEventListener('change', update);
-  npCheck.addEventListener('change', update);
-  update();
-})();
-
-var selectedNeeds = [];
-function toggleNeed(el) {
-  el.classList.toggle('selected');
-  var n = el.dataset.need;
-  var i = selectedNeeds.indexOf(n);
-  if (i >= 0) selectedNeeds.splice(i, 1); else selectedNeeds.push(n);
-}
-function getAdvice() {
-  fetch('/api/pricing/advisor/', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      industry: document.getElementById('adv-industry').value,
-      employees: document.getElementById('adv-employees').value,
-      needs: selectedNeeds
-    })
-  }).then(function(r){return r.json()}).then(function(d){
-    var names = {starter: 'Starter (9 EUR/mj)', professional: 'Professional (29 EUR/mj)', enterprise: 'Enterprise (79 EUR/mj)'};
-    document.getElementById('adv-plan').textContent = 'Preporuka: ' + names[d.recommended];
-    document.getElementById('adv-reason').textContent = d.reason;
-    document.getElementById('adv-link').href = '/register/?plan=' + d.recommended;
-    document.getElementById('adv-result').style.display = 'block';
+function selectProfile(profileKey) {
+  // Active state
+  document.querySelectorAll('.joker-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-profile="${profileKey}"]`).classList.add('active');
+  
+  const profile = PROFILES[profileKey];
+  if (!profile) return;
+  
+  let html = `<div style="text-align:center;margin-bottom:20px"><h2 style="color:var(--gold);font-size:1.4rem">${profile.title}</h2></div>`;
+  html += '<div class="plan-row">';
+  
+  profile.plans.forEach(slug => {
+    const plan = PLANS[slug];
+    if (!plan) return;
+    const isRec = slug === profile.recommended;
+    const features = (profile.features[slug] || []);
+    
+    html += `<div class="plan-card ${isRec ? 'recommended' : ''}">`;
+    html += `<div class="plan-name">${plan.name}</div>`;
+    html += `<div class="plan-tag">${plan.tagline || ''}</div>`;
+    html += `<div class="plan-price">${plan.price == 0 ? 'Besplatno' : plan.price + '<small> EUR / mj.</small>'}</div>`;
+    if (plan.yearly > 0) html += `<div class="plan-yearly">${plan.yearly} EUR/god. (ušteda 17%)</div>`;
+    
+    html += '<ul class="plan-features">';
+    features.forEach((f, i) => {
+      const cls = i === features.length - 1 && f.includes('esplatn') ? 'highlight' : '';
+      html += `<li class="${cls}"><i class="fas fa-check"></i>${f}</li>`;
+    });
+    html += '</ul>';
+    
+    html += `<a href="/register/?plan=${slug}" class="btn-plan ${isRec ? 'btn-gold' : 'btn-outline'}">${plan.price == 0 ? 'Kreni besplatno' : 'Odaberi'}</a>`;
+    html += '</div>';
   });
+  
+  html += '</div>';
+  document.getElementById('result-area').innerHTML = html;
 }
+
+function toggleCompare() {
+  const el = document.getElementById('compare-table');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// Auto-select if URL has ?profile=
+const urlProfile = new URLSearchParams(location.search).get('profile');
+if (urlProfile && PROFILES[urlProfile]) selectProfile(urlProfile);
 </script>
 </body>
 </html>
