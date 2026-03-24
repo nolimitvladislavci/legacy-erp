@@ -31,7 +31,6 @@ TEMPLATE_MAP = {
         'hr': 'invoicing/invoice_hr_modern.html',
     },
 }
-# Fallback na viskovic ako datoteka ne postoji
 TEMPLATE_FALLBACK = {
     'de': 'invoicing/invoice_de.html',
     'hr': 'invoicing/invoice_hr.html',
@@ -98,28 +97,43 @@ def _ensure_qr(invoice):
         invoice.save(update_fields=['qr_code_base64'])
 
 
+def _logo_to_data_uri(path):
+    """
+    Čita logo fajl i vraća data URI s ispravnim MIME.
+    Detektira PNG/JPEG iz magic bytes — ignorira ekstenziju.
+    """
+    with open(path, 'rb') as f:
+        data = f.read()
+    # Magic bytes detekcija
+    if data[:4] == bytes([0x89, 0x50, 0x4e, 0x47]):   # PNG
+        mime = 'image/png'
+    elif data[:2] == bytes([0xff, 0xd8]):               # JPEG
+        mime = 'image/jpeg'
+    elif data[:4] in (b'<svg', b'\xef\xbb\xbf<'):      # SVG
+        mime = 'image/svg+xml'
+    else:
+        mime = 'image/png'                              # safe fallback
+    return f"data:{mime};base64,{base64.b64encode(data).decode()}"
+
+
 def _get_company_logo_b64(invoice):
     """
     Vraća base64 data URI loga firme.
-    Redosljed pokušaja:
-    1. company.logo (Django ImageField) — glavni put
-    2. company.settings['logo_path'] — fallback ručna putanja
+    Redosljed:
+    1. company.logo (Django ImageField)
+    2. company.settings['logo_path'] — ručna putanja
     """
     try:
         company = invoice.company
         if not company:
             return ''
 
-        # 1. Django ImageField — provjeri i name i postojanje fajla
+        # 1. Django ImageField
         if company.logo and company.logo.name:
             try:
                 path = company.logo.path
                 if _os.path.exists(path):
-                    with open(path, 'rb') as f:
-                        data = f.read()
-                    ext = path.rsplit('.', 1)[-1].lower()
-                    mime = 'image/png' if ext == 'png' else 'image/jpeg'
-                    return f"data:{mime};base64,{base64.b64encode(data).decode()}"
+                    return _logo_to_data_uri(path)
             except Exception:
                 pass
 
@@ -127,11 +141,7 @@ def _get_company_logo_b64(invoice):
         settings = company.settings or {}
         path = settings.get('logo_path', '')
         if path and _os.path.exists(path):
-            with open(path, 'rb') as f:
-                data = f.read()
-            ext = path.rsplit('.', 1)[-1].lower()
-            mime = 'image/png' if ext == 'png' else 'image/jpeg'
-            return f"data:{mime};base64,{base64.b64encode(data).decode()}"
+            return _logo_to_data_uri(path)
 
     except Exception:
         pass
@@ -156,7 +166,7 @@ def _get_lc_brand_qr_b64():
 def _pick_template(invoice, lang):
     """
     Odaberi HTML template prema company.pdf_template i jeziku.
-    Ako template fajl ne postoji → fallback na viskovic dizajn.
+    Fallback → viskovic dizajn ako template ne postoji.
     """
     from django.template.loader import get_template
     from django.template.exceptions import TemplateDoesNotExist
@@ -172,7 +182,6 @@ def _pick_template(invoice, lang):
     tmap = TEMPLATE_MAP.get(pdf_tmpl, TEMPLATE_MAP['viskovic'])
     template_name = tmap.get(lang_key, TEMPLATE_FALLBACK[lang_key])
 
-    # Provjeri postoji li template; ako ne, koristi viskovic fallback
     try:
         get_template(template_name)
     except TemplateDoesNotExist:
@@ -182,10 +191,9 @@ def _pick_template(invoice, lang):
 
 
 def render_invoice_html(invoice, request=None):
-    """Render invoice to HTML string using correct template for company style and language."""
+    """Render invoice to HTML string using correct template."""
     profile = getattr(invoice, 'invoice_profile', None)
 
-    # Jezik
     if profile and profile.language:
         render_lang = profile.language
     elif invoice.is_hr:
@@ -196,7 +204,6 @@ def render_invoice_html(invoice, request=None):
     prev_lang = get_language()
     activate(render_lang)
 
-    # Extra context
     contacts = []
     try:
         s = invoice.company.settings or {}
@@ -211,7 +218,6 @@ def render_invoice_html(invoice, request=None):
     }
 
     try:
-        # Dvojezični
         if profile and getattr(profile, 'bilingual', False) and profile.secondary_language:
             from .bilingual_labels import get_bilingual_labels
             labels = get_bilingual_labels(render_lang, profile.secondary_language, invoice.doctype)
@@ -226,7 +232,6 @@ def render_invoice_html(invoice, request=None):
                 **extra_ctx,
             })
 
-        # Odaberi template prema pdf_template fieldu
         template = _pick_template(invoice, render_lang)
         return render_to_string(template, {
             'invoice': invoice,
