@@ -11,13 +11,26 @@ def custom_404_handler(request, exception=None):
 
 
 def custom_500_handler(request):
-    """500 → renders 500 stranica + BORG error ingestion."""
-    # Fire-and-forget: BORG hvata kontekst za auto-remediation
+    """500 → BORG ingestion + redirect na početnu s porukom."""
+    # Fire-and-forget: BORG hvata kontekst
     try:
         capture_error_for_borg(request)
     except Exception:
-        pass  # NIKADA ne crashaj error handler
-    return render(request, '500.html', status=500)
+        pass
+    
+    # Redirect na početnu s error porukom
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    try:
+        messages.error(
+            request,
+            'Došlo je do greške. Tim je obaviješten i radi na rješenju. '
+            'Pokušajte ponovo ili kontaktirajte podršku.'
+        )
+        return redirect('/')
+    except Exception:
+        # Ako ni redirect ne radi (session corruption), vrati static 500
+        return render(request, '500.html', status=500)
 
 
 # ═══════════════════════════════════════════════════

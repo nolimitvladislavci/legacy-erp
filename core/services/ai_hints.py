@@ -111,10 +111,15 @@ def _check_eracun_status(company, hints):
             'category': 'compliance',
         })
 
-    # Unbooked incoming
-    unbooked = ERacun.objects.filter(
-        company=company, direction='incoming', is_booked=False
-    ).count()
+    # Unbooked incoming (AS4Message, not ERacun)
+    unbooked = 0
+    try:
+        from einvoice.models.as4_message import AS4Message
+        unbooked = AS4Message.objects.filter(
+            company=company, direction='IN', status='DELIVERED'
+        ).count()
+    except Exception:
+        pass
     if unbooked > 0:
         hints.append({
             'level': 'warning',
