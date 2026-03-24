@@ -7,7 +7,7 @@
 <div class="container" style="max-width:700px;padding:30px 20px">
 
   <!-- INFO BANNER -->
-  <div style="background:linear-gradient(135deg,#1a1a2e,#0f172a);border:1px solid rgba(201,168,76,.4);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start">
+  <div style="background:var(--bg-card);border:1px solid rgba(201,168,76,.4);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start">
     <span style="font-size:2rem;line-height:1">&#129302;</span>
     <div>
       <div style="color:#c9a84c;font-weight:700;font-size:1rem;margin-bottom:.25rem">Sustav automatski &#269;ita podatke s ra&#269;una</div>
@@ -24,7 +24,7 @@
     <!-- DRAG & DROP ZONA -->
     <div id="dropZone"
          title="Mozete fotografirati zguzvan racun - AI ga automatski ispravlja i cita sve podatke"
-         style="border:2px dashed #334155;border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .3s;background:#0f172a;margin-bottom:1.5rem;position:relative">
+         style="border:2px dashed #334155;border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg-card);margin-bottom:1.5rem;position:relative">
 
       <div id="dropContent">
         <div style="font-size:3rem;margin-bottom:.75rem">&#128196;</div>
@@ -34,14 +34,14 @@
         <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
           <button type="button" id="btnCameraFenix"
                   title="Fotografirajte fizicki racun direktno mobilnim uredajem"
-                  style="background:#1e3a5f;color:#60a5fa;border:1px solid #1e40af;border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s"
+                  style="background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.4);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s"
                   onclick="fenixCameraCapture()">
             &#128247; Fotografirati mobilom
           </button>
           <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
 
           <label title="Odaberite PDF, sliku ili XML datoteku s racunala"
-                 style="background:#1a1a2e;color:#c9a84c;border:1px solid rgba(201,168,76,.5);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s">
+                 style="background:var(--bg-card);color:#c9a84c;border:1px solid rgba(201,168,76,.5);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s">
             &#128193; Odaberi fajl
             <input type="file" name="file" id="fileInputMain" accept=".pdf,.xml,.jpg,.jpeg,.png,.gif,.webp,.heic,.doc,.docx" style="display:none" onchange="handleFile(this)">
           </label>
@@ -71,22 +71,22 @@
         <span id="step3" style="color:#475569;font-size:.8rem;font-weight:600">&#9314; AI cita...</span>
         <span id="step4" style="color:#475569;font-size:.8rem;font-weight:600">&#9315; Spreman!</span>
       </div>
-      <div style="height:4px;background:#1e293b;border-radius:2px;overflow:hidden">
+      <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
         <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#c9a84c,#f59e0b);width:25%;transition:width .8s ease;border-radius:2px"></div>
       </div>
     </div>
 
     <!-- DETALJI -->
-    <div style="background:#0d1117;border:1px solid #1e293b;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">
 
       <div class="row mb-3">
         <div class="col-md-6">
-          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Tip dokumenta
             <span title="Ulazni racun = sto ste Vi platili dobavljacu. Izlazni = sto ste Vi naplatili kupcu."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <select name="source_type" class="form-select" style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px">
+          <select name="source_type" class="form-select" style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px">
             {% for val, label in source_types %}
             <option value="{{ val }}">{{ label }}</option>
             {% endfor %}
@@ -96,49 +96,52 @@
           </small>
         </div>
         <div class="col-md-6">
-          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Broj dokumenta
             <span title="Broj s racuna. Mozete ostaviti prazno, AI ce ga automatski procitati."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="text" name="doc_number" class="form-control"
-                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px"
+                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
                  placeholder="Ostavite prazno - AI cita automatski">
         </div>
       </div>
 
-      <div class="row mb-3">
+      <details style="margin-top:.5rem">
+        <summary style="color:#64748b;font-size:.82rem;cursor:pointer;font-weight:600">Dodatni podaci (opcionalno — AI popunjava automatski)</summary>
+      <div class="row mb-3" style="margin-top:.75rem">
         <div class="col-md-6">
-          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Partner (dobavljac / kupac)
             <span title="Naziv firme koja je izdala ili primila racun. Mozete ostaviti prazno."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="text" name="partner_name" class="form-control"
-                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px"
+                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
                  placeholder="Ostavite prazno - AI cita automatski">
         </div>
         <div class="col-md-3">
-          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Iznos (EUR)
             <span title="Ukupni iznos s PDV-om. Mozete ostaviti prazno."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="number" name="amount" step="0.01" class="form-control"
-                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px"
+                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
                  placeholder="0.00 (auto)">
         </div>
         <div class="col-md-3">
-          <label style="color:#94a3b8;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
+          <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Datum
             <span title="Datum s racuna. Ako ostavite prazno, koristit ce se danasnji datum."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="date" name="doc_date" class="form-control"
-                 style="background:#0a0a0a;border:1px solid #2d3748;color:#e2e8f0;border-radius:8px">
+                 style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px">
         </div>
       </div>
 
+      </details>
       <details style="margin-top:.5rem">
         <summary style="color:#475569;font-size:.78rem;cursor:pointer">&#9881; Napredne opcije (pohrana)</summary>
         <div style="margin-top:.75rem;display:flex;gap:1.5rem;flex-wrap:wrap">
@@ -198,7 +201,12 @@ function fenixCameraCapture() {
     FenixCamera.quick('camera-preview', {
       onReady: function(r) { handleFenixResult(r); }
     });
+  } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    // Moderan pristup — direktno otvori kameru
+    document.getElementById('fileInputCamera').setAttribute('capture', 'environment');
+    document.getElementById('fileInputCamera').click();
   } else {
+    // Fallback za stare browsere
     document.getElementById('fileInputCamera').click();
   }
 }
