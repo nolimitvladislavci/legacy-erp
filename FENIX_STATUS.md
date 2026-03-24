@@ -69,6 +69,32 @@ Commit: fb2b82e
 
 Status: Marija može pristupiti arhivi, scan batchu i poreznom savjetniku.
 
+
+### CC Code sprint — Task A + B + Sandbox + NN fix (2026-03-24 ~14:00)
+Commiti: 46539a2, d836b89, 861bcfa, 2430991
+
+**Task A — eRačun Endpoint:**
+- FINA_URLS['test'] = 'https://eracun-test.fina.hr/eRacunServis' (bio FiskalizacijaService)
+- SOAPAction header dodan u send_to_fina()
+- Posrednik fallback ugrađen
+
+**Task B — QuickActions UI Handlers (templates/pos/quick.html):**
+- rental_checkin → modal s AJAX listom današnjih dolazaka
+- rental_checkout → modal s listom odlazaka + plaćeno/neplaćeno  
+- rental_evisitor → modal s pending bookings + 1-klik XML download
+- rental_ocr → modal s kamerom + AI OCR + confidence prikaz
+- membership_scan → modal s lookup po iskaznici/OIB + obnova
+- 5 novih API endpointa POS→Rental/Udruge bridge
+
+**Smart Mailbox UI (d836b89):** swipe-to-approve, push notifikacije, mobile CSS
+**EU Rental Tax (861bcfa):** RentalTaxEngine, razred_mjesta, Guest.evisitor_status
+**NN Scraper (nn_feed_service.py):** Web scraping umjesto RSS (NN nema javni RSS)
+
+**Čeka:**
+- FINA/Moj-eRacun API key → live test eRačun
+- Ivan: 3 beta iznajmljivača
+- Marija: T&C consent (0/78 firmi)
+
 ## ★ NOVI SMJER — BORG SYSTEM FENIX (2026-03-24)
 Master plan: /var/www/fina-connect/BORG_FENIX_MASTER_PLAN.md
 Filozofija: Asimilacija stvarne materije (zakoni, računi, tržište) u real-time.
