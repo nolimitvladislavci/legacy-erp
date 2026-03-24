@@ -192,6 +192,26 @@
 </div>
 {% endif %}
 
+
+<!-- PDV One-Tap Approve -->
+{% if invoice.status in 'DRAFT,SENT,ACCEPTED' %}
+<div class="b2b-card" style="border:2px solid var(--gold);background:rgba(212,168,67,.05)">
+  <div class="b2b-card-header" style="color:var(--gold)"><i class="fas fa-calculator"></i> PDV odobrenje</div>
+  <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:16px">
+    Potvrdite da su PDV podaci na ovom računu ispravni — jednim klikom.
+  </p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <button class="btn btn-gold" id="btnPdvApprove" onclick="pdvAction('approve')" style="font-size:1.1rem;padding:12px 32px">
+      <i class="fas fa-check-circle me-1"></i> PDV OK — Odobri
+    </button>
+    <button class="btn btn-outline" style="border-color:var(--error);color:var(--error);padding:12px 24px" onclick="pdvAction('reject')">
+      <i class="fas fa-exclamation-triangle me-1"></i> PDV netočan
+    </button>
+  </div>
+  <div id="pdv-result" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-weight:600"></div>
+</div>
+{% endif %}
+
 <!-- Comment Form -->
 <div class="b2b-card">
   <div class="b2b-card-header"><i class="fas fa-comment-dots"></i> Posaljite poruku</div>
@@ -208,6 +228,33 @@
 {% block extra_js %}
 <script>
 var ACTION_URL = '{% url "b2b_invoice_action" token invoice.pk %}';
+
+
+async function pdvAction(action) {
+  const fd = new FormData();
+  fd.append('action', action);
+  fd.append('csrfmiddlewaretoken', FC.csrf || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '');
+  try {
+    const resp = await fetch('{% url "portal_pdv_approve" token invoice.pk %}', {
+      method: 'POST', body: fd, headers: {'X-Requested-With': 'XMLHttpRequest'}
+    });
+    const data = await resp.json();
+    const el = document.getElementById('pdv-result');
+    if (action === 'approve') {
+      el.style.background = 'rgba(16,185,129,.15)';
+      el.style.color = '#10b981';
+      el.innerHTML = '<i class="fas fa-check-circle me-1"></i> PDV odobren!';
+    } else {
+      el.style.background = 'rgba(239,68,68,.15)';
+      el.style.color = '#ef4444';
+      el.innerHTML = '<i class="fas fa-times-circle me-1"></i> PDV označen kao netočan.';
+    }
+    el.style.display = 'block';
+    document.getElementById('btnPdvApprove')?.remove();
+  } catch (e) {
+    alert('Greška: ' + e.message);
+  }
+}
 
 async function doAccept(btn) {
   if (!confirm('Zelite li prihvatiti ovaj dokument?')) return;

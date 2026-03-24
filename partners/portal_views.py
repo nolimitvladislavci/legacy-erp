@@ -179,3 +179,85 @@ def send_portal_whatsapp(request, partner_id):
     else:
         messages.error(request, f"Greska: {result["error"]}")
     return redirect(request.META.get("HTTP_REFERER", "/partners/"))
+
+
+# ═══════════════════════════════════════════════════
+#  DRAG & DROP UPLOAD
+# ═══════════════════════════════════════════════════
+
+def portal_upload(request, token):
+    """Drag&drop document upload for clients."""
+    partner = _get_partner(token)
+    from documents.models import Document
+    from django.utils import timezone
+
+    if request.method == 'POST':
+        files = request.FILES.getlist('files')
+        uploaded = 0
+        for f in files:
+            # Security: max 20MB, only safe extensions
+            if f.size > 20 * 1024 * 1024:
+                continue
+            ext = f.name.rsplit('.', 1)[-1].lower() if '.' in f.name else ''
+            if ext not in ('pdf', 'jpg', 'jpeg', 'png', 'xlsx', 'xls', 'csv', 'doc', 'docx', 'xml'):
+                continue
+
+            Document.objects.create(
+                company=partner.company,
+                partner=partner,
+                doc_type='bill',
+                doc_number=f'UPLOAD-{timezone.now().strftime("%Y%m%d%H%M%S")}-{uploaded+1}',
+                date_issued=timezone.now().date(),
+                file=f,
+                total_amount=0,
+            )
+            uploaded += 1
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from django.http import JsonResponse
+            return JsonResponse({'uploaded': uploaded})
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        messages.success(request, f'{uploaded} dokument(a) uploadano.')
+        return redirect('portal_documents', token=token)
+
+    return render(request, 'portal/upload.html', {
+        'partner': partner,
+        'token': token,
+    })
+
+
+# ═══════════════════════════════════════════════════
+#  ONE-TAP PDV APPROVE
+# ═══════════════════════════════════════════════════
+
+def portal_pdv_approve(request, token, pk):
+    """One-tap PDV approval for invoices."""
+    partner = _get_partner(token)
+    from invoicing.models import Invoice
+    invoice = get_object_or_404(Invoice, pk=pk, partner=partner)
+
+    if request.method == 'POST':
+        action = request.POST.get('action', 'approve')
+        if action == 'approve' and invoice.status in ('DRAFT', 'SENT', 'ACCEPTED'):
+            invoice.tax_status = 'approved'
+            invoice.status = 'ACCEPTED'
+            invoice.internal_note = (invoice.internal_note or '') + f'\nPDV odobren via portal {__import__("django.utils.timezone", fromlist=["now"]).now().isoformat()}'
+            invoice.save(update_fields=['tax_status', 'status', 'internal_note'])
+        elif action == 'reject':
+            invoice.tax_status = 'rejected'
+            invoice.internal_note = (invoice.internal_note or '') + f'\nPDV odbijen via portal'
+            invoice.save(update_fields=['tax_status', 'internal_note'])
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            from django.http import JsonResponse
+            return JsonResponse({'status': invoice.status, 'tax_status': invoice.tax_status})
+        from django.shortcuts import redirect
+        return redirect('portal_invoice_detail', token=token, pk=pk)
+
+    return render(request, 'portal/invoice_detail.html', {
+        'partner': partner,
+        'token': token,
+        'invoice': invoice,
+        'items': invoice.items.all(),
+    })

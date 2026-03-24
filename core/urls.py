@@ -103,6 +103,9 @@ urlpatterns += i18n_patterns(
     path('', views.smart_home, name='home'),
     path('dashboard/', views.smart_home, name='dashboard'),
     path('superadmin/', views.superadmin_dashboard, name='superadmin_dashboard'),
+    path('superadmin/cross-company/', views.cross_company_dashboard, name='cross_company_dashboard'),
+    path('superadmin/tc-status/', views.tc_consent_status, name='tc_consent_status'),
+    path('superadmin/tc-remind/', views.tc_consent_remind, name='tc_consent_remind'),
     path('superadmin/ai/', include('superadmin_ai.urls')),
     path('superadmin/ivan/', views.ivan_cockpit, name='ivan_cockpit'),
     path('api/cockpit/send-whatsapp/', views.cockpit_send_whatsapp, name='cockpit_send_whatsapp'),
@@ -281,6 +284,15 @@ urlpatterns += [
     path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
     path('api/search/', __import__('core.views_search', fromlist=['global_search']).global_search, name='global_search'),
     path('report/synesis-dokaz/', __import__('core.views_search', fromlist=['synesis_report']).synesis_report, name='synesis_report'),
+
+    # ── Rental QuickAction API ──
+    path('api/rental/today-arrivals/', __import__('rental.views', fromlist=['api_today_arrivals']).api_today_arrivals, name='rental_api_arrivals'),
+    path('api/rental/today-departures/', __import__('rental.views', fromlist=['api_today_departures']).api_today_departures, name='rental_api_departures'),
+    path('api/rental/evisitor-pending/', __import__('rental.views', fromlist=['api_evisitor_pending']).api_evisitor_pending, name='rental_api_evisitor'),
+    path('api/rental/active-bookings/', __import__('rental.views', fromlist=['api_active_bookings']).api_active_bookings, name='rental_api_active'),
+
+    # ── Membership QuickAction API ──
+    path('api/udruge/member-lookup/', __import__('udruge.views', fromlist=['api_member_lookup']).api_member_lookup, name='udruge_api_member_lookup'),
     path('health/', views.health_check, name='health_check'),
     path('api/whatsapp/health/', views.whatsapp_health, name='whatsapp_health'),
     path("api/whatsapp/webhook/", __import__("helpdesk.whatsapp_webhook", fromlist=["whatsapp_webhook"]).whatsapp_webhook, name="whatsapp_webhook"),
@@ -289,6 +301,7 @@ urlpatterns += [
     path('privatnost/', views.datenschutz, name='privatnost'),
     path('grosmarkt/anfrage/', __import__('website.views', fromlist=['grosmarkt_anfrage']).grosmarkt_anfrage, name='grosmarkt_anfrage_direct'),
     path("api/grosmarkt/partners/", __import__("website.views", fromlist=["grosmarkt_partners_api"]).grosmarkt_partners_api, name="grosmarkt_partners"),
+    path('digitalni-posrednik/', __import__('website.views', fromlist=['digitalni_posrednik']).digitalni_posrednik, name='digitalni_posrednik'),
 ]
 
 # Dev remote API — UKLONJENO 2026-03-19 (security audit: RCE rizik)

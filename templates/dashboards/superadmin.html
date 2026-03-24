@@ -114,6 +114,8 @@
 {% block page_title %}👑 Superadmin{% endblock %}
 
 {% block content %}
+<div class="mb-3"><a href="{% url 'cross_company_dashboard' %}" class="btn" style="background:var(--gold);color:#000;font-weight:bold"><i class="fas fa-globe me-1"></i>Cross-Company Dashboard — Dugovi po OIB-u</a></div>
+
 <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
   {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
   {% for lang_code, lang_name in LANGUAGES %}

@@ -333,3 +333,100 @@ def classify_buyer_types_batch(company_id=None):
 
     logger.info('classify_buyer_types_batch: %d partnera ažurirano (company=%s)', changed, company_id)
     return {'changed': changed, 'total': qs.count()}
+
+
+# ═══════════════════════════════════════════════════
+#  VIES BATCH VALIDACIJA
+# ═══════════════════════════════════════════════════
+
+@shared_task(bind=True, max_retries=2, default_retry_delay=300)
+def vies_batch_validate(self, batch_size=50):
+    """
+    Batch VIES validacija partnera s HR OIB-om ili EU VAT ID-om.
+    Koristi EU VIES SOAP servis.
+    Pokreće se periodično (celery-beat) ili ručno.
+    """
+    import requests
+    from xml.etree import ElementTree as ET
+    from partners.models import Partner
+    from django.utils import timezone as tz
+    from django.db.models import Q
+
+    VIES_URL = 'https://ec.europa.eu/taxation_customs/vies/services/checkVatService'
+    SOAP_TPL = """<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:urn="urn:ec.europa.eu:taxud:vies:services:checkVat:types">
+  <soapenv:Body>
+    <urn:checkVat>
+      <urn:countryCode>{cc}</urn:countryCode>
+      <urn:vatNumber>{vat}</urn:vatNumber>
+    </urn:checkVat>
+  </soapenv:Body>
+</soapenv:Envelope>"""
+
+    # Dohvati partnere koji trebaju provjeru
+    stale = tz.now() - tz.timedelta(days=30)
+    partners = Partner.objects.filter(
+        Q(vies_valid__isnull=True) | Q(vies_checked_at__lt=stale)
+    ).filter(
+        Q(is_vat_registered=True) | Q(buyer_type__in=['b2b', 'b2b_vat', 'b2g', 'inozemstvo'])
+    ).exclude(oib='').order_by('?')[:batch_size]
+
+    checked = 0
+    valid = 0
+    errors = 0
+
+    for partner in partners:
+        # Determine country code + VAT number
+        if partner.vat_id and len(partner.vat_id) > 2:
+            cc = partner.vat_id[:2].upper()
+            vat_num = partner.vat_id[2:].strip()
+        elif partner.oib and len(partner.oib) == 11 and partner.oib.isdigit():
+            cc = 'HR'
+            vat_num = partner.oib
+        else:
+            continue
+
+        try:
+            resp = requests.post(
+                VIES_URL,
+                data=SOAP_TPL.format(cc=cc, vat=vat_num),
+                headers={'Content-Type': 'text/xml; charset=utf-8'},
+                timeout=15,
+            )
+            if resp.status_code != 200:
+                errors += 1
+                continue
+
+            root = ET.fromstring(resp.content)
+            ns = {'v': 'urn:ec.europa.eu:taxud:vies:services:checkVat:types'}
+            is_valid = root.find('.//v:valid', ns)
+            name_el = root.find('.//v:name', ns)
+            addr_el = root.find('.//v:address', ns)
+
+            partner.vies_valid = is_valid is not None and is_valid.text == 'true'
+            partner.vies_checked_at = tz.now()
+            if name_el is not None and name_el.text:
+                partner.vies_name = name_el.text[:255]
+            if addr_el is not None and addr_el.text:
+                partner.vies_address = addr_el.text[:500]
+            partner.save(update_fields=['vies_valid', 'vies_checked_at', 'vies_name', 'vies_address'])
+
+            checked += 1
+            if partner.vies_valid:
+                valid += 1
+
+        except requests.exceptions.Timeout:
+            errors += 1
+            continue
+        except Exception as e:
+            logger.warning("VIES error for %s: %s", partner.oib, e)
+            errors += 1
+            continue
+
+        # Rate limit: VIES allows ~60 req/min
+        import time
+        time.sleep(1.1)
+
+    logger.info("VIES batch: checked=%d, valid=%d, errors=%d", checked, valid, errors)
+    return {'checked': checked, 'valid': valid, 'errors': errors}

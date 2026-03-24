@@ -8,4 +8,6 @@ urlpatterns = [
     path('invoices/<int:pk>/pdf/', portal_views.portal_invoice_pdf, name='portal_invoice_pdf'),
     path('projects/', portal_views.portal_projects, name='portal_projects'),
     path('documents/', portal_views.portal_documents, name='portal_documents'),
+    path('upload/', portal_views.portal_upload, name='portal_upload'),
+    path('invoices/<int:pk>/pdv-approve/', portal_views.portal_pdv_approve, name='portal_pdv_approve'),
 ]

@@ -722,3 +722,12 @@ S3_ARCHIVE_BUCKET = os.environ.get("S3_ARCHIVE_BUCKET", "propter-einvoice-archiv
 
 # phase4 AP (Phase 3 — disabled by default)
 PHASE4_AP_ENABLED = os.environ.get("PHASE4_AP_ENABLED", "False").lower() in ("true", "1")
+
+# ── VIES Batch Validacija ──────────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "vies-batch-validate-daily": {
+        "task": "partners.tasks.vies_batch_validate",
+        "schedule": 86400.0,  # 1x dnevno
+        "kwargs": {"batch_size": 100},
+    },
+})

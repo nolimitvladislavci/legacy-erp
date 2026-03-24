@@ -35,6 +35,7 @@
                 <a href="{% url 'portal_invoices' token %}" class="{% if active_tab == 'invoices' %}active{% endif %}"><i class="fas fa-file-invoice"></i> {% trans "Fakture" %}</a>
                 <a href="{% url 'portal_projects' token %}" class="{% if active_tab == 'projects' %}active{% endif %}"><i class="fas fa-hard-hat"></i> {% trans "Projekti" %}</a>
                 <a href="{% url 'portal_documents' token %}" class="{% if active_tab == 'documents' %}active{% endif %}"><i class="fas fa-folder-open"></i> {% trans "Dokumenti" %}</a>
+                <a href="{% url 'portal_upload' token %}" class="{% if active_tab == 'upload' %}active{% endif %}"><i class="fas fa-cloud-upload-alt"></i> {% trans "Upload" %}</a>
             </div>
         </div>
     </div>

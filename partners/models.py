@@ -120,6 +120,13 @@ class Partner(models.Model):
     cached_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00,
                                           verbose_name=_('Saldo'))
 
+    # VIES validacija
+    vies_valid = models.BooleanField(null=True, default=None, verbose_name=_('VIES validan'))
+    vies_checked_at = models.DateTimeField(null=True, blank=True, verbose_name=_('VIES provjera'))
+    vies_name = models.CharField(max_length=255, blank=True, verbose_name=_('VIES naziv'))
+    vies_address = models.CharField(max_length=500, blank=True, verbose_name=_('VIES adresa'))
+
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

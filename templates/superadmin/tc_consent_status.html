@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}T&C Consent Status{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 style="font-family:var(--font-heading);color:var(--gold)">
+      <i class="fas fa-file-signature me-2"></i>T&C Consent — {{ signed_count }}/{{ total }} ({{ percent }}%)
+    </h4>
+    <div>
+      <form method="post" action="{% url 'tc_consent_remind' %}" style="display:inline">
+        {% csrf_token %}
+        <button class="btn btn-sm" style="background:var(--gold);color:#000;font-weight:bold" onclick="return confirm('Poslati email podsjetnik svim nepotpisanim firmama?')">
+          <i class="fas fa-envelope me-1"></i>Pošalji podsjetnike ({{ unsigned_count }})
+        </button>
+      </form>
+      <a href="{% url 'superadmin_dashboard' %}" class="btn btn-sm btn-outline-secondary ms-2"><i class="fas fa-arrow-left"></i></a>
+    </div>
+  </div>
+
+  {# Progress bar #}
+  <div class="progress mb-4" style="height:24px;border-radius:12px;background:var(--bg-card)">
+    <div class="progress-bar" style="width:{{ percent }}%;background:var(--gold);color:#000;font-weight:bold;font-size:.85rem">
+      {{ signed_count }}/{{ total }}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    {# Unsigned #}
+    <div class="col-md-7">
+      <div class="card" style="background:var(--bg-card);border:2px solid #ef4444">
+        <div class="card-header" style="background:rgba(239,68,68,.1)">
+          <h6 class="mb-0" style="color:#ef4444"><i class="fas fa-times-circle me-2"></i>Nepotpisano ({{ unsigned_count }})</h6>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm table-hover mb-0" style="color:var(--text);font-size:.82rem">
+            <thead style="background:var(--table-header-bg)"><tr><th>Firma</th><th>Admin email</th><th class="text-end">Admini</th></tr></thead>
+            <tbody>
+              {% for item in unsigned %}
+              <tr>
+                <td>{{ item.company.name }}</td>
+                <td>{{ item.admin_email|default:"—" }}</td>
+                <td class="text-end">{{ item.admin_count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    {# Signed #}
+    <div class="col-md-5">
+      <div class="card" style="background:var(--bg-card);border:2px solid #10b981">
+        <div class="card-header" style="background:rgba(16,185,129,.1)">
+          <h6 class="mb-0" style="color:#10b981"><i class="fas fa-check-circle me-2"></i>Potpisano ({{ signed_count }})</h6>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0" style="color:var(--text);font-size:.82rem">
+            <thead style="background:var(--table-header-bg)"><tr><th>Firma</th><th>Datum</th><th>Verzija</th></tr></thead>
+            <tbody>
+              {% for c in signed %}
+              <tr>
+                <td>{{ c.name }}</td>
+                <td>{{ c.tc_consent_signed_at|date:"d.m.Y H:i" }}</td>
+                <td><span class="badge" style="background:#10b981;font-size:.65rem">{{ c.tc_consent_version }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

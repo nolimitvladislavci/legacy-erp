@@ -2494,3 +2494,164 @@ def tc_consent(request):
         'tc_version': TC_VERSION,
     })
 
+
+
+# ═══════════════════════════════════════════════════
+#  CROSS-COMPANY DASHBOARD — agregirani dugovi po OIB
+# ═══════════════════════════════════════════════════
+
+@login_required
+def cross_company_dashboard(request):
+    """Superadmin: agregirani prikaz dugova po OIB-u preko svih firmi."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Samo superadmin.')
+        return redirect('dashboard')
+
+    from invoicing.models import Invoice
+    from partners.models import Partner
+    from django.db.models import Sum, Count, Q, F, Value, CharField
+    from django.db.models.functions import Coalesce
+
+    # Unpaid invoices across ALL companies
+    unpaid = Invoice.objects.filter(
+        doctype='R',
+        status__in=('SENT', 'DRAFT', 'UNPAID', 'OVERDUE', 'ACCEPTED'),
+    ).exclude(client_oib='').values('client_oib').annotate(
+        total_debt=Sum('total'),
+        invoice_count=Count('id'),
+        client_name=F('client_name'),
+    ).order_by('-total_debt')
+
+    # Deduplicate by OIB — aggregate from same OIB across companies
+    oib_map = {}
+    for row in unpaid:
+        oib = row['client_oib'].strip()
+        if not oib:
+            continue
+        if oib not in oib_map:
+            oib_map[oib] = {
+                'oib': oib,
+                'name': row['client_name'] or oib,
+                'total_debt': float(row['total_debt'] or 0),
+                'invoice_count': row['invoice_count'],
+                'companies': set(),
+            }
+        else:
+            oib_map[oib]['total_debt'] += float(row['total_debt'] or 0)
+            oib_map[oib]['invoice_count'] += row['invoice_count']
+
+    # Enrich with company names
+    for row in Invoice.objects.filter(
+        doctype='R',
+        status__in=('SENT', 'DRAFT', 'UNPAID', 'OVERDUE', 'ACCEPTED'),
+    ).exclude(client_oib='').values('client_oib', 'company__name').distinct():
+        oib = row['client_oib'].strip()
+        if oib in oib_map:
+            oib_map[oib]['companies'].add(row['company__name'])
+
+    # Sort by total debt desc
+    debtors = sorted(oib_map.values(), key=lambda x: -x['total_debt'])
+
+    # Convert sets to lists for template
+    for d in debtors:
+        d['companies'] = sorted(d['companies'])
+        d['company_count'] = len(d['companies'])
+
+    # Summary stats
+    total_outstanding = sum(d['total_debt'] for d in debtors)
+    multi_company = [d for d in debtors if d['company_count'] > 1]
+
+    # VIES info
+    vies_stats = {
+        'valid': Partner.objects.filter(vies_valid=True).count(),
+        'invalid': Partner.objects.filter(vies_valid=False).count(),
+        'pending': Partner.objects.filter(vies_valid__isnull=True, is_vat_registered=True).count(),
+    }
+
+    return render(request, 'superadmin/cross_company_dashboard.html', {
+        'debtors': debtors[:200],
+        'total_outstanding': total_outstanding,
+        'total_debtors': len(debtors),
+        'multi_company': multi_company[:50],
+        'multi_company_count': len(multi_company),
+        'vies_stats': vies_stats,
+    })
+
+
+# ═══════════════════════════════════════════════════
+#  T&C CONSENT TRACKING
+# ═══════════════════════════════════════════════════
+
+@login_required
+def tc_consent_status(request):
+    """Superadmin: pregled T&C consent statusa za sve firme."""
+    if not request.user.is_superuser:
+        messages.error(request, 'Samo superadmin.')
+        return redirect('dashboard')
+
+    from companies.models import Company
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    signed = Company.objects.filter(has_signed_tc_consent=True).order_by('-tc_consent_signed_at')
+    unsigned = Company.objects.filter(has_signed_tc_consent=False).order_by('name')
+
+    # Enrich unsigned with contact info
+    unsigned_data = []
+    for c in unsigned:
+        admin_users = User.objects.filter(profile__company=c, is_staff=True)
+        admin_email = admin_users.first().email if admin_users.exists() else ''
+        unsigned_data.append({
+            'company': c,
+            'admin_email': admin_email,
+            'admin_count': admin_users.count(),
+        })
+
+    return render(request, 'superadmin/tc_consent_status.html', {
+        'signed': signed,
+        'signed_count': signed.count(),
+        'unsigned': unsigned_data,
+        'unsigned_count': unsigned.count(),
+        'total': signed.count() + unsigned.count(),
+        'percent': round(signed.count() / max(signed.count() + unsigned.count(), 1) * 100),
+    })
+
+
+@login_required
+def tc_consent_remind(request):
+    """Send T&C reminder to unsigned companies (via their admin users)."""
+    if not request.user.is_superuser or request.method != 'POST':
+        return redirect('tc_consent_status')
+
+    from companies.models import Company
+    from django.contrib.auth import get_user_model
+    from django.core.mail import send_mail
+    User = get_user_model()
+
+    unsigned = Company.objects.filter(has_signed_tc_consent=False)
+    sent = 0
+    for c in unsigned:
+        admin = User.objects.filter(profile__company=c, is_staff=True, email__isnull=False).exclude(email='').first()
+        if admin:
+            try:
+                login_url = request.build_absolute_uri('/login/')
+                send_mail(
+                    subject='LIMIT Connect — Uvjeti korištenja čekaju potpis',
+                    message=(
+                        f'Poštovani,\n\n'
+                        f'Tvrtka "{c.name}" još nije potpisala Uvjete korištenja (T&C) sustava LIMIT Connect.\n'
+                        f'Potpis je obavezan za nastavak korištenja.\n\n'
+                        f'Prijavite se: {login_url}\n\n'
+                        f'Sustav će vas automatski preusmjeriti na stranicu za potpis.\n\n'
+                        f'Hvala,\nLIMIT Connect tim'
+                    ),
+                    from_email='noreply@limit-connect.com',
+                    recipient_list=[admin.email],
+                    fail_silently=True,
+                )
+                sent += 1
+            except Exception:
+                pass
+
+    messages.success(request, f'Poslano {sent} podsjetnika za T&C potpis.')
+    return redirect('tc_consent_status')
