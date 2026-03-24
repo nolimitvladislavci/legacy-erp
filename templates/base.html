@@ -30,6 +30,15 @@
             --cmd-bg:#ffffff; --cmd-border:#e2e8f0; --cmd-input-color:#0f172a;
             --cmd-item-hover:#f1f5f9; --cmd-hint-bg:#f1f5f9;
         }
+
+        /* Light mode explicit — sprečava dark bleedthrough */
+        :root .table { --bs-table-bg:#ffffff; --bs-table-border-color:#e2e8f0; color:#0f172a; }
+        :root .table thead th { background:#f8fafc; color:#475569; }
+        :root .table td { color:#0f172a; }
+        :root .stat-card { background:#ffffff; color:#0f172a; }
+        :root .stat-card .value { color:#0f172a; }
+        :root .form-control, :root .form-select { background:#ffffff; color:#0f172a; }
+
         [data-theme="dark"] {
             --bg:#0a0a0a; --bg-card:#111214; --bg-card-hover:#1a1c20;
             --text:#e8e8e8; --text-secondary:#94a3b8; --text-muted:#6b7280;
@@ -836,7 +845,7 @@ window.FC = {
     })();
     </script>
 <!-- Signal gumb — Prijavi gresku gumb -->
-<div id="borg-signal-fab" style="position:fixed;bottom:80px;right:16px;z-index:9998">
+<div id="borg-signal-fab" style="position:fixed;bottom:140px;right:16px;z-index:9998">
   <button onclick="document.getElementById('borg-signal-modal').style.display='flex'" style="width:44px;height:44px;border-radius:50%;background:var(--gold,#c9a84c);border:none;color:#000;font-size:1.1rem;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center" title="Prijavi problem"><i class="fas fa-flag"></i></button>
 </div>
 <div id="borg-signal-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10001;align-items:center;justify-content:center;padding:16px">
