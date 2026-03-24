@@ -342,21 +342,33 @@ class UserLanguageMiddleware(MiddlewareMixin):
 
 
 class RateLimitMiddleware:
-    """Redis-based rate limiting per IP."""
+    """Redis-based rate limiting per IP — pametno po kontekstu."""
+
+    SKIP_PREFIXES = ('/static/', '/media/', '/favicon', '/manifest', '/sw.js', '/health/')
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         path = request.path
-        ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', 'unknown')
 
-        if '/login/' in path or '/api/token/' in path or '/password/' in path:
-            limit, window = 10, 60
-        elif path.startswith('/api/') or path.startswith('/_dev/'):
+        # Preskoči static/media — nginx ih ionako servira, ovo je fallback
+        for prefix in self.SKIP_PREFIXES:
+            if path.startswith(prefix):
+                return self.get_response(request)
+
+        ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', 'unknown')
+        is_authenticated = getattr(request, 'user', None) and getattr(request.user, 'is_authenticated', False)
+
+        # Autenticirani korisnici — visok limit (normalno korištenje)
+        if is_authenticated:
+            limit, window = 1000, 60
+        elif ('/login/' in path or '/api/token/' in path or '/password/' in path) and request.method == 'POST':
+            limit, window = 15, 60
+        elif path.startswith('/api/'):
             limit, window = 60, 60
         else:
-            limit, window = 300, 60
+            limit, window = 200, 60
 
         key = 'rl:%s:%s' % (ip, path.split('/')[1] if len(path) > 1 else 'root')
 
@@ -370,7 +382,7 @@ class RateLimitMiddleware:
             count, _ = pipe.execute()
             if count > limit:
                 from django.http import JsonResponse
-                return JsonResponse({'error': 'Previse zahtjeva. Pricekajte.', 'retry_after': window}, status=429)
+                return JsonResponse({'error': 'Previse zahtjeva. Pricekajte minutu.', 'retry_after': window}, status=429)
         except Exception:
             pass
 
