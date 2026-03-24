@@ -1,6 +1,49 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Upload Dokumenta — LIMIT CONNECT{% endblock %}
+{% block title %}Upload Dokumenta — LIMIT CONNECT
+<!-- LIVE KAMERA MODAL -->
+<div id="liveCamModal" style="display:none;position:fixed;inset:0;z-index:10000;background:#000">
+  <video id="liveCamVideo" autoplay playsinline style="width:100%;height:calc(100% - 60px);object-fit:cover"></video>
+  <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:#111;display:flex;align-items:center;justify-content:center;gap:20px">
+    <button onclick="liveCamSnap()" style="width:50px;height:50px;border-radius:50%;background:#c9a84c;border:3px solid #fff;cursor:pointer"></button>
+    <button onclick="liveCamClose()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;position:absolute;right:16px">&times;</button>
+  </div>
+</div>
+<canvas id="liveCamCanvas" style="display:none"></canvas>
+<script>
+var _camStream=null;
+function openLiveCamera(){
+  var modal=document.getElementById('liveCamModal');
+  var video=document.getElementById('liveCamVideo');
+  modal.style.display='block';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+    .then(function(stream){_camStream=stream;video.srcObject=stream;})
+    .catch(function(err){
+      // Fallback na file input ako kamera nije dostupna
+      modal.style.display='none';
+      document.getElementById('fileInputCamera').click();
+    });
+}
+function liveCamSnap(){
+  var video=document.getElementById('liveCamVideo');
+  var canvas=document.getElementById('liveCamCanvas');
+  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  canvas.toBlob(function(blob){
+    var file=new File([blob],'foto-'+Date.now()+'.jpg',{type:'image/jpeg'});
+    var dt=new DataTransfer();dt.items.add(file);
+    document.getElementById('fileInputMain').files=dt.files;
+    document.getElementById('fileInputMain').dispatchEvent(new Event('change'));
+    liveCamClose();
+  },'image/jpeg',0.85);
+}
+function liveCamClose(){
+  document.getElementById('liveCamModal').style.display='none';
+  if(_camStream){_camStream.getTracks().forEach(function(t){t.stop()});_camStream=null;}
+}
+</script>
+
+{% endblock %}
 {% block page_title %}Upload Dokumenta{% endblock %}
 
 {% block content %}
@@ -35,7 +78,7 @@
           <button type="button" id="btnCameraFenix"
                   title="Fotografirajte fizicki racun direktno mobilnim uredajem"
                   style="background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.4);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s"
-                  onclick="fenixCameraCapture()">
+                  onclick="openLiveCamera()">
             &#128247; Fotografirati mobilom
           </button>
           <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
