@@ -181,6 +181,7 @@ urlpatterns = [
     path('pocket/status/',                       views_v2.pocket_mode_status,    name='pocket_status'),
     # Offline Sync (ServiceWorker batch)
     path('api/offline-sync/',                    views_v2.offline_sync,          name='offline_sync'),
+    path('api/offline-catalog/',                 views_v2.offline_catalog,       name='offline_catalog'),
     # B-01: ServiceWorker
     path('sw.js',                                views_v2.pos_service_worker,    name='pos_sw'),
     # Hash Chain — kriptografski audit trail

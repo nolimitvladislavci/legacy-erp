@@ -1,7 +1,7 @@
 // LIMIT Connect Service Worker – v4 (PWA + Offline)
 'use strict';
 
-var CACHE_VERSION = 'fina-v7';
+var CACHE_VERSION = 'fina-v8';
 var STATIC_CACHE  = CACHE_VERSION + '-static';
 var PAGE_CACHE    = CACHE_VERSION + '-pages';
 
@@ -11,6 +11,10 @@ var PRECACHE_URLS = [
   '/static/manifest.json',
   '/static/icons/icon-192.png',
   '/static/icons/icon-512.png',
+  '/static/js/pos/pos-offline.js',
+  '/static/js/pos/pos-quick.js',
+  '/static/js/pos/pos-fiscal.js',
+  '/static/js/pos/pos-scanner.js',
 ];
 
 // ── Install: precache static assets ─────────────────────────────────────────

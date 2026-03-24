@@ -1380,3 +1380,102 @@ def chain_receipt_check(request, receipt_id):
         return JsonResponse({'ok': True, 'status': 'VALID', 'message': 'Bon je nepromijenjen od upisa u lanac'})
     else:
         return JsonResponse({'ok': False, 'status': 'TAMPERED', 'message': 'UPOZORENJE: Bon je modificiran nakon upisa u lanac!'})
+
+
+# ═══════════════════════════════════════════════════
+#  OFFLINE DATA API — Cache artikala za IndexedDB
+# ═══════════════════════════════════════════════════
+
+@login_required
+def offline_catalog(request):
+    """
+    GET /pos/api/offline-catalog/?terminal_id=X
+    
+    Vraća SVE podatke potrebne za offline POS rad:
+    - Artikli (id, name, price, tax_rate, category, sku, unit, barcode, is_weighable)
+    - Kategorije
+    - Quick items
+    - Session info
+    - Terminal config
+    - Timestamp za staleness check
+    
+    Frontend poziva ovo pri svakom otvaranju POS-a i sprema u IndexedDB.
+    Kad internet padne, POS crta grid iz IndexedDB.
+    """
+    from inventory.models import InventoryItem
+    from companies.models import TaxRate
+    from django.utils import timezone as tz
+
+    terminal_id = request.GET.get('terminal_id')
+    if not terminal_id:
+        return JsonResponse({'ok': False, 'error': 'terminal_id obavezan'}, status=400)
+
+    terminal = POSTerminal.objects.filter(pk=terminal_id).select_related('company').first()
+    if not terminal:
+        return JsonResponse({'ok': False, 'error': 'Terminal ne postoji'}, status=404)
+
+    company = terminal.company
+
+    # Artikli
+    items_qs = InventoryItem.objects.filter(
+        company=company, is_active=True,
+    ).select_related('tax_rate').order_by('category', 'name')
+
+    # Filter po terminal category_filter
+    cat_filter = terminal.category_filter
+    if cat_filter:
+        cats = [c.strip() for c in cat_filter.split(',') if c.strip()]
+        if cats:
+            items_qs = items_qs.filter(category__in=cats)
+
+    items = []
+    categories = set()
+    for item in items_qs:
+        tax_rate = item.tax_rate.rate if item.tax_rate else 25
+        cat = item.category or ''
+        if cat:
+            categories.add(cat)
+        items.append({
+            'id': item.pk,
+            'name': item.name,
+            'price': str(item.unit_price),
+            'tax_rate': str(tax_rate),
+            'category': cat,
+            'sku': item.sku or '',
+            'barcode': item.barcode or '',
+            'unit': item.unit or 'kom',
+            'is_weighable': item.is_weighable,
+        })
+
+    # Quick items (top 8 most used)
+    quick_items = items[:8] if items else []
+
+    # Active session
+    session = POSSession.objects.filter(
+        terminal=terminal, status='open',
+    ).first()
+
+    # Quick actions
+    qa = terminal.get_quick_actions()
+
+    return JsonResponse({
+        'ok': True,
+        'timestamp': tz.now().isoformat(),
+        'terminal': {
+            'id': terminal.pk,
+            'name': terminal.name,
+            'code': terminal.terminal_code,
+            'pos_type': terminal.pos_type,
+            'company_name': company.name,
+            'company_id': str(company.pk),
+        },
+        'session': {
+            'id': session.pk if session else None,
+            'number': session.session_number if session else None,
+            'status': session.status if session else None,
+        } if session else None,
+        'items': items,
+        'categories': sorted(categories),
+        'quick_actions': qa,
+        'item_count': len(items),
+    })

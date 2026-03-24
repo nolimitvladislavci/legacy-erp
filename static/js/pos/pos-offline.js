@@ -573,3 +573,204 @@ window._offlineFiscalNote = function(receipt) {
     'VEZA S CIS-om NIJE OSTVARENA<br>' +
     '<small>Fiskalizacija u tijeku — ZKI: ' + (receipt.zki || 'LOKALNI') + '</small></div>';
 };
+
+
+/* ═══ OFFLINE CATALOG CACHE — artikli u IndexedDB ═══
+ *
+ * Pri svakom otvaranju POS-a:
+ *   1. Fetch /pos/api/offline-catalog/?terminal_id=X
+ *   2. Spremi artikle u IndexedDB store "catalog"
+ *   3. Spremi timestamp zadnjeg refresha
+ *
+ * Kad internet padne:
+ *   1. Čitaj artikle iz IndexedDB "catalog"
+ *   2. Renderaj grid iz JS-a (umjesto Django template)
+ *   3. Košarica, plaćanje, sve radi lokalno
+ *   4. Bonovi se spremaju u "receipts" store → sync kad se vrati net
+ */
+
+(function(){
+  'use strict';
+
+  var CATALOG_DB = 'pos_catalog_v1';
+  var CATALOG_VERSION = 2;
+
+  function openCatalogDB(cb) {
+    var req = indexedDB.open(CATALOG_DB, CATALOG_VERSION);
+    req.onupgradeneeded = function(e) {
+      var d = e.target.result;
+      if (!d.objectStoreNames.contains('items')) {
+        var store = d.createObjectStore('items', { keyPath: 'id' });
+        store.createIndex('category', 'category');
+        store.createIndex('barcode', 'barcode');
+        store.createIndex('sku', 'sku');
+      }
+      if (!d.objectStoreNames.contains('meta')) {
+        d.createObjectStore('meta', { keyPath: 'key' });
+      }
+    };
+    req.onsuccess = function(e) { cb(e.target.result); };
+    req.onerror = function(e) { console.error('CatalogDB error:', e); };
+  }
+
+  // Fetch + cache catalog from server
+  window.refreshOfflineCatalog = function(terminalId, callback) {
+    if (!terminalId) {
+      try { terminalId = JSON.parse(document.getElementById('pos-config').textContent).terminal_id; } catch(e) {}
+    }
+    if (!terminalId) { console.warn('No terminal_id for catalog'); return; }
+
+    fetch('/pos/api/offline-catalog/?terminal_id=' + terminalId, { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.ok) { console.warn('Catalog API error:', data.error); return; }
+
+        openCatalogDB(function(db) {
+          // Clear old items
+          var clearTx = db.transaction('items', 'readwrite');
+          clearTx.objectStore('items').clear();
+          clearTx.oncomplete = function() {
+            // Write new items
+            var writeTx = db.transaction(['items', 'meta'], 'readwrite');
+            var store = writeTx.objectStore('items');
+            data.items.forEach(function(item) { store.put(item); });
+
+            // Save metadata
+            var meta = writeTx.objectStore('meta');
+            meta.put({ key: 'last_refresh', value: new Date().toISOString() });
+            meta.put({ key: 'item_count', value: data.items.length });
+            meta.put({ key: 'categories', value: data.categories });
+            meta.put({ key: 'terminal', value: data.terminal });
+            meta.put({ key: 'session', value: data.session });
+            meta.put({ key: 'quick_actions', value: data.quick_actions });
+
+            writeTx.oncomplete = function() {
+              console.log('[Offline] Catalog cached: ' + data.items.length + ' items');
+              if (callback) callback(data);
+            };
+          };
+        });
+      })
+      .catch(function(err) {
+        console.warn('[Offline] Catalog fetch failed (offline?):', err.message);
+        if (callback) callback(null);
+      });
+  };
+
+  // Load catalog from IndexedDB (for offline grid rendering)
+  window.loadOfflineCatalog = function(callback) {
+    openCatalogDB(function(db) {
+      var tx = db.transaction(['items', 'meta'], 'readonly');
+      var items = [];
+      var meta = {};
+
+      tx.objectStore('items').openCursor().onsuccess = function(e) {
+        var c = e.target.result;
+        if (c) { items.push(c.value); c.continue(); }
+      };
+
+      // Read meta
+      ['last_refresh', 'categories', 'terminal', 'session', 'quick_actions', 'item_count'].forEach(function(key) {
+        tx.objectStore('meta').get(key).onsuccess = function(e) {
+          if (e.target.result) meta[key] = e.target.result.value;
+        };
+      });
+
+      tx.oncomplete = function() {
+        callback({ items: items, meta: meta });
+      };
+    });
+  };
+
+  // Render offline product grid (replaces Django template grid)
+  window.renderOfflineGrid = function(items, gridId) {
+    var grid = document.getElementById(gridId || 'prodGrid');
+    if (!grid) return;
+
+    if (!items || items.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">⚡ Offline — nema cached artikala</div>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    items.forEach(function(item) {
+      var btn = document.createElement('button');
+      btn.className = 'prod-btn';
+      btn.id = 'pb-' + item.id;
+      btn.dataset.id = item.id;
+      btn.dataset.name = item.name;
+      btn.dataset.price = item.price;
+      btn.dataset.tax = item.tax_rate;
+      btn.dataset.cat = item.category || '';
+      btn.dataset.weighable = item.is_weighable ? '1' : '0';
+      btn.dataset.unit = item.unit || 'kom';
+      btn.dataset.sku = item.sku || '';
+      btn.title = item.name + ' – €' + parseFloat(item.price).toFixed(2);
+      btn.setAttribute('onclick', 'addProduct(this)');
+      btn.innerHTML = '<div class="prod-name">' + item.name + '</div>' +
+                       '<div class="prod-price">€' + parseFloat(item.price).toFixed(2) + '</div>' +
+                       (item.sku ? '<div class="prod-sku">' + item.sku + '</div>' : '') +
+                       '<div class="prod-qty-badge" id="qb-' + item.id + '">0</div>';
+      grid.appendChild(btn);
+    });
+
+    // Rebuild category tabs from offline data
+    var catBar = document.querySelector('.cat-bar');
+    if (catBar) {
+      var cats = {};
+      items.forEach(function(i) { if (i.category) cats[i.category] = true; });
+      var existing = catBar.querySelectorAll('.cat-tab:not([data-cat=""])');
+      if (Object.keys(cats).length > 0 && existing.length === 0) {
+        Object.keys(cats).sort().forEach(function(cat) {
+          var tab = document.createElement('div');
+          tab.className = 'cat-tab';
+          tab.dataset.cat = cat;
+          tab.textContent = cat;
+          tab.setAttribute('onclick', "filterCat(this,'" + cat.replace(/'/g, "\\'") + "')");
+          catBar.appendChild(tab);
+        });
+      }
+    }
+
+    console.log('[Offline] Grid rendered: ' + items.length + ' items from IndexedDB');
+  };
+
+  // ── AUTO-INIT: Cache catalog on page load ──
+  document.addEventListener('DOMContentLoaded', function() {
+    var config;
+    try { config = JSON.parse(document.getElementById('pos-config').textContent); } catch(e) { return; }
+    if (!config || !config.terminal_id) return;
+
+    if (navigator.onLine) {
+      // Online: refresh cache u pozadini (ne blokira UI)
+      setTimeout(function() {
+        window.refreshOfflineCatalog(config.terminal_id);
+      }, 2000);
+    } else {
+      // Offline: renderaj grid iz IndexedDB
+      window.loadOfflineCatalog(function(data) {
+        if (data.items.length > 0) {
+          window.renderOfflineGrid(data.items);
+          // Show offline banner
+          var banner = document.getElementById('offlineBanner');
+          if (banner) {
+            banner.classList.add('show');
+            banner.innerHTML = '📡 OFFLINE MODE — ' + data.items.length + ' artikala iz cache-a' +
+              (data.meta.last_refresh ? ' (ažurirano: ' + new Date(data.meta.last_refresh).toLocaleString('hr') + ')' : '');
+          }
+        }
+      });
+    }
+
+    // Kad se vrati internet — osvježi catalog
+    window.addEventListener('online', function() {
+      setTimeout(function() {
+        window.refreshOfflineCatalog(config.terminal_id, function() {
+          // Reload grid s fresh podacima
+          location.reload();
+        });
+      }, 3000);
+    });
+  });
+
+})();

@@ -366,12 +366,12 @@
         scan_barcode: () => { const input=document.getElementById('barcode-input'); if(input){input.focus();input.select();} },
         open_url: (a) => { window.location.href = a.url; },
         open_modal: (a) => { const m=document.getElementById(a.modal_id); if(m)m.style.display='flex'; },
-        rental_checkin: () => { window.location.href = '/rental/'; },
-        rental_checkout: () => { window.location.href = '/rental/'; },
-        rental_evisitor: () => { alert('Odaberite booking za eVisitor export na /rental/ stranici.'); },
-        rental_ocr: () => { window.location.href = '/rental/'; },
-        membership_scan: () => { const input=document.getElementById('barcode-input'); if(input){input.focus();input.placeholder='Skeniraj iskaznicu...';} },
-        membership_renew: () => { const sku='CLANARINA'; const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();} else {alert('Dodajte artikl CLANARINA u inventar.');} },
+        rental_checkin: () => { _openRentalCheckinModal(); },
+        rental_checkout: () => { _openRentalCheckoutModal(); },
+        rental_evisitor: () => { _openEvisitorModal(); },
+        rental_ocr: () => { _openOcrModal(); },
+        membership_scan: () => { _openMembershipScanModal(); },
+        membership_renew: () => { const sku='CLANARINA'; const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();} else {_openMembershipRenewPrompt();} },
         donation: () => { const amt=prompt('Iznos donacije (EUR):'); if(amt){addManualAmount(parseFloat(amt),'Donacija');} },
         whatsapp_receipt: () => { window._sendWhatsAppAfterPay=true; },
         gps_location: () => { if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{document.getElementById('gps-info')&&(document.getElementById('gps-info').textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4));});} },
@@ -708,7 +708,7 @@
   "terminal_name": "{{ terminal.name|escapejs }}",
   "company_name": "{{ terminal.company.name|escapejs }}"
 }</script>
-<script src="/static/js/pos/pos-offline.js?v=20260323"></script>
+<script src="/static/js/pos/pos-offline.js?v=20260324"></script>
 <script src="/static/js/pos/pos-quick.js?v=20260322b"></script>
 <script src="/static/js/pos/pos-fiscal.js"></script>
 <script src="/static/js/html5-qrcode.min.js"></script>
@@ -797,6 +797,370 @@ function shareLastReceipt() {
       if (typeof showToast === 'function') showToast('Pokušajte ponovo za sekundu');
     }
   }, 1000);
+}
+</script>
+
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  RENTAL & MEMBERSHIP MODALS (QuickActions F1)             -->
+<!-- ══════════════════════════════════════════════════════════ -->
+
+<!-- Rental Check-in Modal -->
+<div class="qmodal" id="rentalCheckinModal">
+  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
+    <div class="qmodal-title"><i class="fas fa-door-open" style="color:#10b981"></i> Danas dolasci</div>
+    <div id="rcm-list" style="margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+        <i class="fas fa-spinner fa-spin"></i> Učitavanje...
+      </div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('rentalCheckinModal').style.display='none'">Zatvori</button>
+      <button class="qmodal-btn" onclick="window.location.href='/hr/rental/'" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Svi bookings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rental Check-out Modal -->
+<div class="qmodal" id="rentalCheckoutModal">
+  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
+    <div class="qmodal-title"><i class="fas fa-sign-out-alt" style="color:#f59e0b"></i> Danas odlasci</div>
+    <div id="rco-list" style="margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+        <i class="fas fa-spinner fa-spin"></i> Učitavanje...
+      </div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('rentalCheckoutModal').style.display='none'">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- eVisitor Export Modal -->
+<div class="qmodal" id="evisitorModal">
+  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
+    <div class="qmodal-title"><i class="fas fa-passport" style="color:#3b82f6"></i> eVisitor prijava</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem">Bookings bez eVisitor prijave:</p>
+    <div id="evm-list" style="margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+        <i class="fas fa-spinner fa-spin"></i> Učitavanje...
+      </div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('evisitorModal').style.display='none'">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- OCR Document Modal -->
+<div class="qmodal" id="ocrModal">
+  <div class="qmodal-box" style="max-width:440px">
+    <div class="qmodal-title"><i class="fas fa-id-card" style="color:#8b5cf6"></i> Skeniranje dokumenta</div>
+    <div id="ocr-booking-select" style="margin-bottom:1rem">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Odaberi booking:</label>
+      <select id="ocr-booking-id" class="qmodal-input" style="width:100%;padding:8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px">
+        <option value="">Učitavanje...</option>
+      </select>
+    </div>
+    <div style="border:2px dashed var(--border);border-radius:8px;padding:1.5rem;text-align:center;margin-bottom:1rem;cursor:pointer" id="ocr-dropzone" onclick="document.getElementById('ocr-file-input').click()">
+      <i class="fas fa-camera" style="font-size:2rem;color:var(--gold);margin-bottom:.5rem;display:block"></i>
+      <div style="font-size:.85rem;color:var(--muted)">Klikni za slikanje ili odabir dokumenta</div>
+      <input type="file" id="ocr-file-input" accept="image/*" capture="environment" style="display:none" onchange="_processOcrFile(this)">
+    </div>
+    <div id="ocr-result" style="display:none;margin-bottom:1rem">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">AI rezultat:</div>
+      <div id="ocr-result-data" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.75rem;font-size:.82rem"></div>
+    </div>
+    <div id="ocr-status" style="display:none;text-align:center;padding:.5rem;font-size:.85rem"></div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('ocrModal').style.display='none'">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- Membership Scan Modal -->
+<div class="qmodal" id="membershipModal">
+  <div class="qmodal-box" style="max-width:400px">
+    <div class="qmodal-title"><i class="fas fa-id-badge" style="color:#10b981"></i> Iskaznica člana</div>
+    <div style="margin-bottom:1rem">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Broj iskaznice ili OIB:</label>
+      <input type="text" id="membership-code" class="qmodal-input" placeholder="Skeniraj ili upiši..." autofocus
+             onkeyup="if(event.key==='Enter')_lookupMember()">
+    </div>
+    <div id="member-result" style="display:none;margin-bottom:1rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.75rem">
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('membershipModal').style.display='none'">Zatvori</button>
+      <button class="qmodal-btn" onclick="_lookupMember()" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Traži</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  QUICKACTION HANDLERS — rental + membership
+// ═══════════════════════════════════════════════════════════
+
+const _CSRF = '{{ csrf_token }}';
+const _LANG = document.documentElement.lang || 'hr';
+
+// ── RENTAL CHECK-IN ─────────────────────────────────────
+function _openRentalCheckinModal() {
+  const modal = document.getElementById('rentalCheckinModal');
+  const list = document.getElementById('rcm-list');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch('/api/rental/today-arrivals/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      if (!data.bookings || !data.bookings.length) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">Nema dolazaka danas.</div>';
+        return;
+      }
+      list.innerHTML = data.bookings.map(b => `
+        <a href="/${_LANG}/rental/booking/${b.id}/checkin/" style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text)">
+          <div>
+            <div style="font-weight:600">${b.guest_name}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${b.property_name} · ${b.nights} noći</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--gold);font-weight:700">${b.total_price}€</div>
+            <div style="font-size:.7rem;color:var(--muted)">${b.guests_count} gostiju</div>
+          </div>
+        </a>
+      `).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška pri dohvatu. <a href="/hr/rental/" style="color:var(--gold)">Otvori rental →</a></div>';
+    });
+}
+
+// ── RENTAL CHECK-OUT ────────────────────────────────────
+function _openRentalCheckoutModal() {
+  const modal = document.getElementById('rentalCheckoutModal');
+  const list = document.getElementById('rco-list');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch('/api/rental/today-departures/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      if (!data.bookings || !data.bookings.length) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">Nema odlazaka danas.</div>';
+        return;
+      }
+      list.innerHTML = data.bookings.map(b => `
+        <a href="/${_LANG}/rental/bookings/${b.id}/check-out/" style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text)">
+          <div>
+            <div style="font-weight:600">${b.guest_name}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${b.property_name}</div>
+          </div>
+          <div style="color:#f59e0b;font-weight:700">${b.is_paid ? '✅ Plaćeno' : '⏳ Neplaćeno'}</div>
+        </a>
+      `).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška pri dohvatu.</div>';
+    });
+}
+
+// ── eVISITOR EXPORT ─────────────────────────────────────
+function _openEvisitorModal() {
+  const modal = document.getElementById('evisitorModal');
+  const list = document.getElementById('evm-list');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch('/api/rental/evisitor-pending/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      if (!data.bookings || !data.bookings.length) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:#10b981"><i class="fas fa-check-circle"></i> Svi gosti prijavljeni!</div>';
+        return;
+      }
+      list.innerHTML = data.bookings.map(b => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px">
+          <div>
+            <div style="font-weight:600">${b.guest_name}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${b.property_name} · ${b.check_in}</div>
+            <div style="font-size:.7rem;color:#ef4444">${b.hours_pending}h od check-ina</div>
+          </div>
+          <a href="/${_LANG}/rental/booking/${b.id}/evisitor.xml" style="background:var(--gold);color:#000;padding:6px 12px;border-radius:6px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap">
+            <i class="fas fa-download"></i> XML
+          </a>
+        </div>
+      `).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška. <a href="/hr/rental/" style="color:var(--gold)">Otvori rental →</a></div>';
+    });
+}
+
+// ── OCR DOCUMENT ────────────────────────────────────────
+function _openOcrModal() {
+  const modal = document.getElementById('ocrModal');
+  const sel = document.getElementById('ocr-booking-id');
+  const result = document.getElementById('ocr-result');
+  const status = document.getElementById('ocr-status');
+  result.style.display = 'none';
+  status.style.display = 'none';
+  modal.style.display = 'flex';
+
+  // Dohvati aktivne bookinge za OCR
+  fetch('/api/rental/active-bookings/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      sel.innerHTML = '<option value="">— Odaberi booking —</option>';
+      (data.bookings || []).forEach(b => {
+        sel.innerHTML += `<option value="${b.id}">${b.guest_name} · ${b.property_name} (${b.check_in})</option>`;
+      });
+    })
+    .catch(() => {
+      sel.innerHTML = '<option value="">Greška pri učitavanju</option>';
+    });
+}
+
+function _processOcrFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const bookingId = document.getElementById('ocr-booking-id').value;
+  if (!bookingId) {
+    alert('Odaberite booking prije skeniranja.');
+    input.value = '';
+    return;
+  }
+
+  const status = document.getElementById('ocr-status');
+  const result = document.getElementById('ocr-result');
+  const resultData = document.getElementById('ocr-result-data');
+
+  status.style.display = 'block';
+  status.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:var(--gold)"></i> AI čita dokument...';
+  result.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('image', file);
+
+  fetch(`/${_LANG}/rental/booking/${bookingId}/ocr/`, {
+    method: 'POST',
+    headers: {'X-CSRFToken': _CSRF},
+    body: fd,
+  })
+  .then(r => r.json())
+  .then(data => {
+    status.style.display = 'none';
+    result.style.display = 'block';
+    if (data.ok && data.confidence > 0.5) {
+      const d = data.data;
+      resultData.innerHTML = `
+        <div style="color:#10b981;font-weight:700;margin-bottom:.5rem">
+          <i class="fas fa-check-circle"></i> Pouzdanost: ${Math.round(data.confidence * 100)}%
+        </div>
+        <div><strong>${d.first_name} ${d.last_name}</strong></div>
+        <div style="font-size:.78rem;color:var(--muted)">
+          ${d.nationality} · ${d.document_type} · ${d.document_number}<br>
+          Rođen: ${d.date_of_birth || 'N/A'} · Spol: ${d.sex || 'N/A'}
+        </div>
+        <div style="margin-top:.5rem;font-size:.78rem;color:#10b981">
+          <i class="fas fa-check"></i> Gost dodan u booking
+        </div>
+      `;
+    } else {
+      resultData.innerHTML = `
+        <div style="color:#f59e0b">
+          <i class="fas fa-exclamation-triangle"></i> Niska pouzdanost (${Math.round((data.confidence||0) * 100)}%)
+        </div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">
+          Unesite podatke ručno na <a href="/${_LANG}/rental/booking/${bookingId}/checkin/" style="color:var(--gold)">check-in stranici</a>.
+        </div>
+      `;
+    }
+  })
+  .catch(err => {
+    status.style.display = 'block';
+    status.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> Greška: ' + err.message + '</span>';
+  });
+
+  input.value = '';
+}
+
+// ── MEMBERSHIP SCAN ─────────────────────────────────────
+function _openMembershipScanModal() {
+  const modal = document.getElementById('membershipModal');
+  const input = document.getElementById('membership-code');
+  const result = document.getElementById('member-result');
+  result.style.display = 'none';
+  modal.style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
+}
+
+function _lookupMember() {
+  const code = document.getElementById('membership-code').value.trim();
+  if (!code) return;
+
+  const result = document.getElementById('member-result');
+  result.style.display = 'block';
+  result.innerHTML = '<div style="text-align:center;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch(`/api/udruge/member-lookup/?code=${encodeURIComponent(code)}`, {
+    headers: {'Accept':'application/json', 'X-CSRFToken': _CSRF},
+  })
+  .then(r => r.ok ? r.json() : Promise.reject(r))
+  .then(data => {
+    if (data.found) {
+      const m = data.member;
+      const statusColor = m.is_active ? '#10b981' : '#ef4444';
+      const statusText = m.is_active ? 'Aktivno' : 'Isteklo';
+      result.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div style="font-weight:700;font-size:1rem">${m.name}</div>
+            <div style="font-size:.78rem;color:var(--muted)">${m.membership_type || 'Član'}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">
+              OIB: ${m.oib || 'N/A'}<br>
+              Vrijedi do: ${m.valid_until || 'N/A'}
+            </div>
+          </div>
+          <span style="background:${statusColor}22;color:${statusColor};padding:4px 10px;border-radius:12px;font-size:.75rem;font-weight:700">${statusText}</span>
+        </div>
+        ${!m.is_active ? '<div style="margin-top:.5rem"><button class="qmodal-btn" onclick="_addMembershipRenewal(\''+m.id+'\',\''+m.name.replace(/'/g,"\\'")+'\')" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold);font-size:.8rem;width:100%"><i class="fas fa-sync"></i> Obnovi članstvo</button></div>' : ''}
+      `;
+    } else {
+      result.innerHTML = '<div style="color:#f59e0b;text-align:center"><i class="fas fa-user-slash"></i> Član nije pronađen</div>';
+    }
+  })
+  .catch(() => {
+    result.innerHTML = '<div style="color:#ef4444;text-align:center">Greška pri pretrazi</div>';
+  });
+}
+
+function _addMembershipRenewal(memberId, memberName) {
+  // Traži CLANARINA artikl u gridu ili dodaj manual amount
+  const sku = 'CLANARINA';
+  const btn = document.querySelector('[data-sku="'+sku+'"]');
+  if (btn) {
+    btn.click();
+    document.getElementById('membershipModal').style.display = 'none';
+    return;
+  }
+  // Fallback: manual amount
+  if (typeof addManualAmount === 'function') {
+    const amt = prompt('Iznos članarine (EUR):');
+    if (amt) {
+      addManualAmount(parseFloat(amt), 'Članarina: ' + memberName);
+      document.getElementById('membershipModal').style.display = 'none';
+    }
+  }
+}
+
+function _openMembershipRenewPrompt() {
+  const amt = prompt('Iznos članarine (EUR):');
+  if (amt && typeof addManualAmount === 'function') {
+    addManualAmount(parseFloat(amt), 'Članarina');
+  }
 }
 </script>
 
