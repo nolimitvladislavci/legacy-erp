@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ template.form_type }} {{ session.tax_year }} — Porezni savjetnik{% endblock %}
+
+{% block content %}
+<style>
+.wz-wrap{max-width:640px;margin:0 auto}
+.wz-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.wz-back{color:var(--text-muted);text-decoration:none;font-size:.8rem;padding:4px 8px;border-radius:6px;border:1px solid var(--border)}
+.wz-back:hover{background:var(--bg-hover)}
+.wz-title{font-weight:700;font-size:.95rem;color:var(--text);flex:1}
+.wz-live{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.wz-live-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.wz-live-val{font-size:1.3rem;font-weight:700;color:var(--gold)}
+.wz-live-val.green{color:#22c55e}
+.wz-live-val.red{color:#dc2626}
+.wz-progress{display:flex;gap:4px;margin-bottom:18px}
+.wz-step{flex:1;height:4px;border-radius:2px;background:var(--border);transition:.3s}
+.wz-step.done{background:var(--gold)}
+.wz-step.active{background:var(--gold);opacity:.6}
+.wz-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px}
+.wz-field{margin-bottom:14px}
+.wz-label{font-size:.75rem;font-weight:700;color:var(--text);margin-bottom:5px;display:block}
+.wz-hint{font-size:.67rem;color:var(--text-muted);margin-bottom:5px}
+.wz-input{width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.88rem}
+.wz-input:focus{outline:none;border-color:var(--gold)}
+.wz-prefill{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:6px;padding:6px 10px;font-size:.72rem;color:var(--text-muted);margin-bottom:5px}
+.wz-prefill strong{color:var(--gold)}
+.wz-ai{background:var(--bg);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:8px 10px;margin-bottom:10px;font-size:.78rem;color:var(--text)}
+.wz-ai.info{border-left-color:#3b82f6}
+.wz-ai.warning{border-left-color:#f59e0b}
+.wz-ai.error{border-left-color:#dc2626}
+.wz-result{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:8px}
+.wz-result-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border-light);font-size:.82rem}
+.wz-result-row:last-child{border-bottom:none;font-weight:700;font-size:.9rem}
+.wz-actions{display:flex;gap:8px;margin-top:14px}
+.wz-btn{flex:1;padding:11px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;border:none;transition:.15s}
+.wz-btn-primary{background:var(--gold);color:#0a0a0a}
+.wz-btn-primary:hover{opacity:.9}
+.wz-btn-secondary{background:var(--bg-card);color:var(--text);border:1px solid var(--border)}
+.wz-btn-primary:disabled,.wz-btn-secondary:disabled{opacity:.5;cursor:not-allowed}
+</style>
+
+<div class="wz-wrap">
+
+<div class="wz-header">
+  <a href="{% url 'tax_wizard:dashboard' %}" class="wz-back">← Savjetnik</a>
+  <div class="wz-title">{{ template.form_type }} {{ session.tax_year }}</div>
+  <span style="font-size:.68rem;color:var(--text-muted)">{{ company.name }}</span>
+</div>
+
+<!-- Progress bar -->
+<div class="wz-progress" id="wz-progress">
+  {% for step in template.schema.steps %}
+  <div class="wz-step {% if forloop.counter0 < session.current_step %}done{% elif forloop.counter0 == session.current_step %}active{% endif %}"
+       title="{{ step.title }}"></div>
+  {% endfor %}
+</div>
+
+<!-- Live kalkulator -->
+<div class="wz-live" id="wz-live" style="{% if not session.calculated_results %}display:none{% endif %}">
+  <div>
+    <div class="wz-live-label">Godišnji porez</div>
+    <div class="wz-live-val" id="live-tax">
+      {% if session.calculated_results %}{{ session.calculated_results.godisnji_porez|default:"?" }} €{% endif %}
+    </div>
+  </div>
+  <div style="text-align:right">
+    <div class="wz-live-label">Razlika</div>
+    <div class="wz-live-val {% if session.calculated_results.razlika > 0 %}red{% else %}green{% endif %}" id="live-diff">
+      {% if session.calculated_results %}{{ session.calculated_results.razlika|default:"?" }} €{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- AI poruke -->
+<div id="wz-ai-msgs">
+{% if session.ai_messages %}
+{% for msg in session.ai_messages %}
+<div class="wz-ai {{ msg.type }}">💡 {{ msg.message }}</div>
+{% endfor %}
+{% endif %}
+</div>
+
+<!-- GLAVNI SADRŽAJ — renderira JS iz schema JSON-a -->
+<div id="wz-content">
+  <div class="wz-card">
+    <div style="text-align:center;padding:20px">
+      <div class="sb-spinner" style="margin:0 auto 10px"></div>
+      <div style="font-size:.82rem;color:var(--text-muted)">Učitavam wizard...</div>
+    </div>
+  </div>
+</div>
+
+<div class="wz-actions" id="wz-actions">
+  <button class="wz-btn wz-btn-secondary" id="btn-prev" disabled>← Natrag</button>
+  <button class="wz-btn wz-btn-primary" id="btn-next">Dalje →</button>
+</div>
+
+</div>
+
+<script>
+(function(){
+const SESSION = {{ session_json|safe }};
+const SCHEMA  = {{ schema_json|safe }};
+const TIERS   = {{ tiers_json|safe }};
+const SAVE_URL = '{% url "tax_wizard:wizard_save_step" session_id=session.id %}';
+const CSRF    = '{{ csrf_token }}';
+
+const steps   = SCHEMA.steps || [];
+let cur       = SESSION.current_step || 0;
+let formData  = SESSION.form_data || {};
+
+function renderStep(idx) {
+  const step = steps[idx];
+  if (!step) return;
+  const content = document.getElementById('wz-content');
+
+  // Progress
+  document.querySelectorAll('.wz-step').forEach((el, i) => {
+    el.className = 'wz-step' + (i < idx ? ' done' : i === idx ? ' active' : '');
+  });
+
+  // Buttons
+  document.getElementById('btn-prev').disabled = idx === 0;
+  const isLast = idx === steps.length - 1;
+  document.getElementById('btn-next').textContent = isLast ? '✓ Zaključi' : 'Dalje →';
+
+  if (step.type === 'review') {
+    renderReview(content);
+    return;
+  }
+
+  let html = `<div class="wz-card"><div style="font-weight:700;font-size:.95rem;margin-bottom:14px">${step.title || ''}</div>`;
+
+  (step.fields || []).forEach(field => {
+    const val = formData[field.name] || field.default || '';
+    const prefill = SESSION.form_data['_prefill_sources'] && formData[field.name];
+
+    html += `<div class="wz-field">`;
+    html += `<label class="wz-label" for="f_${field.name}">${field.label || field.name}</label>`;
+
+    if (prefill && field.source) {
+      html += `<div class="wz-prefill">📊 Automatski unos: <strong>${val}</strong> — iz ${field.source}</div>`;
+    }
+    if (field.help_text) {
+      html += `<div class="wz-hint">${field.help_text}</div>`;
+    }
+
+    if (field.type === 'boolean') {
+      html += `<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer">
+        <input type="checkbox" id="f_${field.name}" name="${field.name}" ${val ? 'checked' : ''} style="width:16px;height:16px">
+        Da
+      </label>`;
+    } else if (field.type === 'select' && field.choices) {
+      html += `<select class="wz-input" id="f_${field.name}" name="${field.name}">`;
+      field.choices.forEach(c => {
+        html += `<option value="${c[0]}" ${val == c[0] ? 'selected' : ''}>${c[1]}</option>`;
+      });
+      html += `</select>`;
+    } else {
+      const t = field.type === 'decimal' || field.type === 'currency' ? 'number' : 'text';
+      const step_attr = t === 'number' ? 'step="0.01"' : '';
+      html += `<input class="wz-input" type="${t}" id="f_${field.name}" name="${field.name}" value="${val}" ${step_attr} ${field.required ? 'required' : ''}>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  content.innerHTML = html;
+}
+
+function renderReview(content) {
+  const calc = SESSION.calculated_results || {};
+  const r = formData;
+  let html = `<div class="wz-result">
+    <div style="font-weight:700;margin-bottom:10px">Pregled — {{ template.form_type }} {{ session.tax_year }}</div>`;
+
+  if (calc.ukupni_primitak) {
+    html += row('Ukupni primitci', calc.ukupni_primitak + ' €');
+    html += row('Porezni razred', 'T' + (calc.porezni_razred||'?'));
+    html += row('Godišnji porez', (calc.godisnji_porez||'?') + ' €');
+    html += row('Već plaćeno', (calc.vec_placeni_porez||0) + ' €');
+    html += `<div class="wz-result-row"><span>Za uplatu / povrat</span>
+      <span style="color:${calc.razlika>0?'#dc2626':'#22c55e'}">${calc.razlika||'?'} €</span></div>`;
+  } else {
+    html += `<div style="color:var(--text-muted);font-size:.82rem">Unesi podatke u prethodnim koracima za izračun.</div>`;
+  }
+  html += `</div>`;
+  content.innerHTML = html;
+}
+
+function row(label, val) {
+  return `<div class="wz-result-row"><span>${label}</span><span>${val}</span></div>`;
+}
+
+function collectData() {
+  const data = {};
+  document.querySelectorAll('[name]').forEach(el => {
+    if (el.type === 'checkbox') data[el.name] = el.checked;
+    else if (el.value !== '') data[el.name] = el.value;
+  });
+  return data;
+}
+
+async function saveStep(direction) {
+  const stepData = collectData();
+  Object.assign(formData, stepData);
+
+  const btn = direction > 0 ? document.getElementById('btn-next') : document.getElementById('btn-prev');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(SAVE_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken':CSRF},
+      body: JSON.stringify({step: cur, data: formData})
+    });
+    const d = await res.json();
+
+    if (d.ok) {
+      if (d.session) {
+        SESSION.calculated_results = d.session.calculated_results;
+        SESSION.ai_messages = d.session.ai_messages || [];
+        updateLive(d.session.calculated_results);
+        updateAI(d.session.ai_messages);
+      }
+      const isLast = cur === steps.length - 1;
+      if (direction > 0 && isLast) {
+        window.location = '{% url "tax_wizard:wizard_preview" session_id=session.id %}';
+        return;
+      }
+      cur = Math.max(0, Math.min(steps.length - 1, cur + direction));
+      renderStep(cur);
+    } else {
+      alert((d.errors||['Greška']).join('\n'));
+    }
+  } catch(e) {
+    alert('Greška: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function updateLive(calc) {
+  if (!calc) return;
+  const live = document.getElementById('wz-live');
+  if (calc.godisnji_porez) {
+    live.style.display = '';
+    document.getElementById('live-tax').textContent = calc.godisnji_porez + ' €';
+    const diff = document.getElementById('live-diff');
+    diff.textContent = (calc.razlika||0) + ' €';
+    diff.className = 'wz-live-val ' + (calc.razlika > 0 ? 'red' : 'green');
+  }
+}
+
+function updateAI(msgs) {
+  if (!msgs || !msgs.length) return;
+  const container = document.getElementById('wz-ai-msgs');
+  container.innerHTML = msgs.map(m =>
+    `<div class="wz-ai ${m.type||'info'}">💡 ${m.message}</div>`
+  ).join('');
+}
+
+document.getElementById('btn-next').addEventListener('click', () => saveStep(1));
+document.getElementById('btn-prev').addEventListener('click', () => saveStep(-1));
+
+renderStep(cur);
+})();
+</script>
+{% endblock %}

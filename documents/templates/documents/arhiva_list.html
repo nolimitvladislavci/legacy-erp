@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Arhiva dokumenata{% endblock %}
+
+{% block content %}
+<style>
+.arh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.arh-stat{background:var(--bg-card);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)}
+.arh-stat .val{font-size:1.4rem;font-weight:700;color:var(--text)}
+.arh-stat .val.gold{color:var(--gold)}
+.arh-stat .lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-top:3px}
+.arh-filter{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.arh-filter input,.arh-filter select{font-size:.78rem;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+.arh-filter input:focus,.arh-filter select:focus{outline:none;border-color:var(--gold)}
+.arh-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.arh-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.65rem;text-transform:uppercase;color:var(--text-muted);white-space:nowrap}
+.arh-table td{padding:7px 10px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+.arh-table tr:hover{background:var(--table-row-hover);cursor:pointer}
+.arh-badge{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.65rem;font-weight:700;text-transform:uppercase}
+.arh-badge.pos{background:#dcfce7;color:#166534}
+.arh-badge.invoice{background:#dbeafe;color:#1e40af}
+.arh-badge.manual{background:#f3f4f6;color:#374151}
+.arh-badge.rental{background:#fef3c7;color:#92400e}
+.arh-hash{font-family:monospace;font-size:.6rem;color:var(--text-muted)}
+.arh-amount{font-weight:700;white-space:nowrap}
+.arh-amount.positive{color:#166534}
+.arh-pagination{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:.78rem}
+.arh-pagination a{padding:4px 10px;border-radius:6px;border:1px solid var(--border);color:var(--text);text-decoration:none}
+.arh-pagination a:hover{background:var(--bg-hover)}
+.arh-pagination .current{padding:4px 10px;background:var(--gold);color:#0a0a0a;border-radius:6px;font-weight:700}
+</style>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+  <div>
+    <div style="font-weight:700;font-size:1.1rem;color:var(--text)">
+      <i class="fas fa-archive" style="color:var(--gold)"></i> Arhiva dokumenata
+    </div>
+    <div style="font-size:.7rem;color:var(--text-muted)">
+      {% if is_superadmin %}Sve firme{% else %}{{ request.company.name }}{% endif %}
+    </div>
+  </div>
+  <div class="ms-auto d-flex gap-2 flex-wrap">
+    <a href="{% url 'documents:scan_batch_new' %}" class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;font-weight:700">
+      <i class="fas fa-camera"></i> Skeniraj račune
+    </a>
+    <a href="{% url 'documents:upload_shortcut' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-upload"></i> Upload
+    </a>
+    {% if stats.total_count %}
+    <a href="{% url 'documents:arhiva_export' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-download"></i> Export CSV
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="arh-stats">
+  <div class="arh-stat">
+    <div class="val">{{ stats.total_count|default:0 }}</div>
+    <div class="lbl">Dokumenata</div>
+  </div>
+  <div class="arh-stat">
+    <div class="val gold">{{ stats.total_amount|floatformat:0|default:0 }} €</div>
+    <div class="lbl">Ukupna vrijednost</div>
+  </div>
+  <div class="arh-stat">
+    <div class="val">{{ stats.fiscal_count|default:0 }}</div>
+    <div class="lbl">S fisk. kodom</div>
+  </div>
+  <div class="arh-stat">
+    <div class="val">{{ stats.file_count|default:0 }}</div>
+    <div class="lbl">S fajlom</div>
+  </div>
+</div>
+
+<!-- FILTERI -->
+<form method="get" class="arh-filter">
+  <input type="text" name="q" placeholder="Pretraži partnera, broj..." value="{{ q }}" style="min-width:180px">
+  <select name="source_type">
+    <option value="">Svi tipovi</option>
+    {% for val, label in source_types %}
+    <option value="{{ val }}" {% if source_type == val %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <input type="date" name="date_from" value="{{ date_from }}" title="Od datuma">
+  <input type="date" name="date_to" value="{{ date_to }}" title="Do datuma">
+  {% if is_superadmin %}
+  <select name="company">
+    <option value="">Sve firme</option>
+    {% for c in companies %}
+    <option value="{{ c.id }}" {% if company_filter == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" name="year" placeholder="Godina" value="{{ year_filter_val }}" style="width:80px">
+  {% endif %}
+  <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
+  <a href="{% url 'documents:arhiva_list' %}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times"></i></a>
+</form>
+
+<!-- TABLICA -->
+<div class="stat-card" style="padding:0;overflow-x:auto">
+{% if entries %}
+<table class="arh-table">
+  <thead>
+    <tr>
+      <th>
+        <a href="?{{ request.GET.urlencode }}&sort=date&order={% if sort == 'date' and order == 'asc' %}desc{% else %}asc{% endif %}" style="color:inherit;text-decoration:none">
+          Datum {% if sort == 'date' %}<i class="fas fa-sort-{{ order }}"></i>{% endif %}
+        </a>
+      </th>
+      <th>
+        <a href="?{{ request.GET.urlencode }}&sort=partner&order={% if sort == 'partner' and order == 'asc' %}desc{% else %}asc{% endif %}" style="color:inherit;text-decoration:none">
+          Partner {% if sort == 'partner' %}<i class="fas fa-sort-{{ order }}"></i>{% endif %}
+        </a>
+      </th>
+      <th>Broj</th>
+      <th>Tip</th>
+      <th>
+        <a href="?{{ request.GET.urlencode }}&sort=amount&order={% if sort == 'amount' and order == 'asc' %}desc{% else %}asc{% endif %}" style="color:inherit;text-decoration:none">
+          Iznos {% if sort == 'amount' %}<i class="fas fa-sort-{{ order }}"></i>{% endif %}
+        </a>
+      </th>
+      <th>Fajlovi</th>
+      <th>Hash</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for e in entries %}
+  <tr onclick="window.location='{% url 'documents:arhiva_detail_ajax' e.pk %}'" data-id="{{ e.pk }}">
+    <td style="white-space:nowrap">{{ e.doc_date|date:"d.m.Y" }}</td>
+    <td>
+      {% if e.partner_name %}
+        <span title="{{ e.partner_name }}">{{ e.partner_name|truncatechars:28 }}</span>
+      {% else %}
+        <span style="color:var(--text-muted)">—</span>
+      {% endif %}
+    </td>
+    <td style="font-size:.72rem;color:var(--text-muted)">{{ e.doc_number|truncatechars:18 }}</td>
+    <td>
+      <span class="arh-badge {{ e.source_type }}">{{ e.source_type }}</span>
+      {% if e.zki %}<i class="fas fa-check-circle" style="color:#22c55e;font-size:.7rem" title="Fiskalizirano"></i>{% endif %}
+    </td>
+    <td class="arh-amount {% if e.amount > 0 %}positive{% endif %}">
+      {{ e.amount|floatformat:2 }} {{ e.currency }}
+    </td>
+    <td style="white-space:nowrap">
+      {% if e.has_pdf %}<i class="fas fa-file-pdf" style="color:#dc2626" title="PDF"></i>{% endif %}
+      {% if e.has_xml %}<i class="fas fa-code" style="color:#3b82f6" title="XML"></i>{% endif %}
+      {% if e.has_image %}<i class="fas fa-image" style="color:#8b5cf6" title="Slika"></i>{% endif %}
+    </td>
+    <td>
+      {% if e.integrity_hash %}
+      <span class="arh-hash" title="{{ e.integrity_hash }}">
+        <i class="fas fa-shield-alt" style="color:#22c55e"></i>
+        {{ e.integrity_hash|slice:":8" }}…
+      </span>
+      {% else %}
+      <span style="color:var(--text-muted);font-size:.65rem">—</span>
+      {% endif %}
+    </td>
+    <td onclick="event.stopPropagation()" style="white-space:nowrap">
+      {% if e.has_pdf %}
+      <a href="{% url 'documents:arhiva_pdf' e.pk %}" class="btn btn-xs btn-outline-secondary" title="PDF" target="_blank">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      {% endif %}
+      {% if e.has_xml %}
+      <a href="{% url 'documents:arhiva_xml' e.pk %}" class="btn btn-xs btn-outline-secondary" title="XML" target="_blank">
+        <i class="fas fa-code"></i>
+      </a>
+      {% endif %}
+      <button class="btn btn-xs btn-outline-secondary bookmark-btn" data-id="{{ e.pk }}"
+              title="Bookmark" {% if e.pk in bookmarked_ids %}style="color:var(--gold)"{% endif %}>
+        <i class="fa{% if e.pk in bookmarked_ids %}s{% else %}r{% endif %} fa-star"></i>
+      </button>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<!-- PAGINACIJA -->
+{% if page_obj.has_other_pages %}
+<div class="arh-pagination" style="padding:10px 14px">
+  {% if page_obj.has_previous %}
+  <a href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}"><i class="fas fa-chevron-left"></i></a>
+  {% endif %}
+  <span>Stranica</span>
+  <span class="current">{{ page_obj.number }}</span>
+  <span>od {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+  <a href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+  {% endif %}
+  <span style="color:var(--text-muted);margin-left:8px">{{ stats.total_count }} dokumenata ukupno</span>
+</div>
+{% endif %}
+
+{% else %}
+<div style="text-align:center;padding:48px 20px;color:var(--text-muted)">
+  <i class="fas fa-inbox fa-2x" style="opacity:.3;margin-bottom:12px;display:block"></i>
+  <div style="font-size:.9rem">Nema dokumenata za zadane filtre.</div>
+  <div style="margin-top:12px">
+    <a href="{% url 'documents:scan_batch_new' %}" class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;font-weight:700">
+      <i class="fas fa-camera"></i> Skeniraj prve račune
+    </a>
+  </div>
+</div>
+{% endif %}
+</div>
+
+<script>
+// Bookmark toggle
+document.querySelectorAll('.bookmark-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    const resp = await fetch(`/hr/documents/arhiva/${id}/bookmark/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': '{{ csrf_token }}'}
+    });
+    const data = await resp.json();
+    const icon = btn.querySelector('i');
+    if (data.bookmarked) {
+      icon.className = 'fas fa-star'; btn.style.color = 'var(--gold)';
+    } else {
+      icon.className = 'far fa-star'; btn.style.color = '';
+    }
+  });
+});
+</script>
+{% endblock %}

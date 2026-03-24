@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Porezni savjetnik{% endblock %}
+
+{% block content %}
+<style>
+.tw-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.tw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+@media(max-width:600px){.tw-grid{grid-template-columns:1fr}}
+.tw-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.tw-card h6{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px;font-weight:700}
+.tw-form-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);text-decoration:none;color:var(--text);transition:.15s;margin-bottom:6px;font-size:.85rem}
+.tw-form-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.06);color:var(--text)}
+.tw-form-btn .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.tw-form-btn .label{font-weight:700}
+.tw-form-btn .desc{font-size:.68rem;color:var(--text-muted)}
+.tw-session{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;font-size:.8rem;text-decoration:none;color:var(--text);transition:.15s}
+.tw-session:hover{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.tw-status{display:inline-block;padding:2px 7px;border-radius:4px;font-size:.65rem;font-weight:700}
+.tw-status.draft{background:#fef3c7;color:#92400e}
+.tw-status.confirmed{background:#dbeafe;color:#1e40af}
+.tw-status.submitted{background:#dcfce7;color:#166534}
+.tw-tier{display:flex;gap:6px;margin-bottom:6px}
+.tw-tier-item{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 6px;text-align:center}
+.tw-tier-item .tier-num{font-size:.65rem;color:var(--text-muted)}
+.tw-tier-item .tier-range{font-size:.72rem;font-weight:700;color:var(--text)}
+.tw-tier-item .tier-tax{font-size:.65rem;color:var(--gold)}
+.tw-deadline{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-light);font-size:.78rem}
+.tw-deadline:last-child{border-bottom:none}
+.tw-dl-date{font-weight:700;color:var(--text);white-space:nowrap}
+.tw-dl-name{color:var(--text-muted);font-size:.72rem}
+.tw-urgent{color:#dc2626!important}
+</style>
+
+<div class="tw-header">
+  <div>
+    <div style="font-weight:700;font-size:1.1rem;color:var(--text)">
+      <i class="fas fa-calculator" style="color:var(--gold)"></i> Porezni savjetnik
+    </div>
+    <div style="font-size:.7rem;color:var(--text-muted)">{{ company.name }} · {{ current_year }}</div>
+  </div>
+</div>
+
+<div class="tw-grid">
+
+  <!-- LIJEVO: Obrasci -->
+  <div>
+    <div class="tw-card">
+      <h6>Pokreni novi obrazac</h6>
+      {% for tmpl in templates %}
+      <a href="{% url 'tax_wizard:wizard_start' tmpl.form_type %}?year={{ current_year|add:'-1' }}"
+         class="tw-form-btn">
+        <div class="icon" style="background:rgba(201,168,76,.15);color:var(--gold)">
+          <i class="fas {% if tmpl.form_type == 'PO-SD' %}fa-store{% elif tmpl.form_type == 'DOH' %}fa-file-invoice-dollar{% else %}fa-receipt{% endif %}"></i>
+        </div>
+        <div>
+          <div class="label">{{ tmpl.form_type }}</div>
+          <div class="desc">{{ tmpl.name }}</div>
+        </div>
+        <i class="fas fa-chevron-right ms-auto" style="font-size:.65rem;color:var(--text-muted)"></i>
+      </a>
+      {% empty %}
+      <div style="color:var(--text-muted);font-size:.8rem;padding:8px 0">Nema dostupnih obrazaca.</div>
+      {% endfor %}
+    </div>
+
+    <!-- Paušalni tierovi -->
+    {% if tiers %}
+    <div class="tw-card" style="margin-top:12px">
+      <h6>Paušalni razredi {{ current_year }}</h6>
+      <div class="tw-tier">
+        {% for t in tiers %}
+        <div class="tw-tier-item">
+          <div class="tier-num">T{{ t.tier_number }}</div>
+          <div class="tier-range" style="font-size:.62rem">do {{ t.max_income|floatformat:0 }}€</div>
+          <div class="tier-tax">{{ t.annual_tax }}€/god</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- DESNO: Sesije + rokovi -->
+  <div>
+    {% if sessions %}
+    <div class="tw-card" style="margin-bottom:12px">
+      <h6>Nedavne sesije</h6>
+      {% for s in sessions %}
+      <a href="{% url 'tax_wizard:wizard_view' session_id=s.id %}" class="tw-session">
+        <i class="fas fa-file-alt" style="color:var(--gold);width:16px;text-align:center"></i>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:.8rem">{{ s.template.form_type }} {{ s.tax_year }}</div>
+          <div style="font-size:.68rem;color:var(--text-muted)">{{ s.updated_at|date:"d.m.Y H:i" }}</div>
+        </div>
+        <span class="tw-status {{ s.status }}">{{ s.get_status_display }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if deadlines %}
+    <div class="tw-card">
+      <h6>Rokovi</h6>
+      {% for d in deadlines %}
+      <div class="tw-deadline">
+        <div>
+          <div class="tw-dl-date {% if d.is_overdue %}tw-urgent{% endif %}">
+            {{ d.deadline_date|date:"d.m.Y" }}
+            {% if d.is_overdue %} ⚠{% endif %}
+          </div>
+          <div class="tw-dl-name">{{ d.template.form_type }} — {{ d.description|default:d.template.name|truncatechars:30 }}</div>
+        </div>
+        {% if d.session %}
+        <a href="{% url 'tax_wizard:wizard_view' session_id=d.session.id %}"
+           class="btn btn-xs btn-outline-secondary">Nastavi</a>
+        {% else %}
+        <a href="{% url 'tax_wizard:wizard_start' d.template.form_type %}"
+           class="btn btn-xs" style="background:var(--gold);color:#0a0a0a;font-weight:700">Pokreni</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Skeniranje računa{% endblock %}
+
+{% block content %}
+<style>
+.sb-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sb-back{color:var(--text-muted);text-decoration:none;font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--border)}
+.sb-back:hover{background:var(--bg-hover);color:var(--text)}
+.sb-title{font-weight:700;font-size:1rem;color:var(--text);flex:1}
+.sb-badge{font-size:.68rem;padding:2px 8px;border-radius:10px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-muted)}
+.sb-progress-wrap{height:5px;background:var(--border);border-radius:3px;margin-bottom:5px}
+.sb-progress-bar{height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
+.sb-progress-text{font-size:.68rem;color:var(--text-muted);text-align:right;margin-bottom:16px}
+.sb-dropzone{border:2px dashed var(--gold);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px}
+.sb-dropzone:hover,.sb-dropzone.dragover{background:rgba(201,168,76,.06)}
+.sb-drop-icon{font-size:2rem;margin-bottom:8px;opacity:.6}
+.sb-drop-title{font-weight:700;font-size:.95rem;color:var(--text)}
+.sb-drop-sub{color:var(--text-muted);font-size:.78rem;margin:4px 0}
+.sb-drop-hint{font-size:.68rem;color:var(--text-muted);margin-top:6px}
+.sb-actions{display:flex;gap:10px;margin-bottom:10px}
+.sb-btn{flex:1;padding:11px 16px;border-radius:8px;font-weight:700;font-size:.82rem;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;text-decoration:none}
+.sb-btn-primary{background:var(--gold);color:#0a0a0a}
+.sb-btn-primary:hover{opacity:.9}
+.sb-btn-secondary{background:var(--bg-card);color:var(--text);border:1px solid var(--border)}
+.sb-btn-secondary:hover{background:var(--bg-hover)}
+.sb-btn-success{background:#22c55e;color:#fff}
+.sb-btn-ghost{background:transparent;border:none;color:var(--text-muted);font-size:.75rem;cursor:pointer;flex:0}
+.sb-btn:disabled{opacity:.5;cursor:not-allowed}
+.sb-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.sb-thumb{width:58px;height:58px;border-radius:6px;overflow:hidden;background:var(--bg-card);border:1px solid var(--border);position:relative;flex-shrink:0}
+.sb-thumb img{width:100%;height:100%;object-fit:cover}
+.sb-thumb-del{position:absolute;top:2px;right:2px;background:rgba(220,38,38,.85);color:#fff;border:none;width:16px;height:16px;border-radius:50%;font-size:9px;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0}
+.sb-thumb:hover .sb-thumb-del{display:flex}
+.sb-spinner{width:44px;height:44px;border:4px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sb-processing-title{font-weight:700;color:var(--text);margin-bottom:4px}
+.sb-processing-sub{color:var(--text-muted);font-size:.8rem}
+.sb-results-summary{background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:.82rem;color:#166534}
+.sb-result-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)}
+.sb-result-vendor{font-weight:600;color:var(--text);font-size:.82rem}
+.sb-result-meta{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+.sb-result-warning{font-size:.68rem;color:#dc2626;margin-top:2px}
+.sb-check,.sb-exclude{width:26px;height:26px;border-radius:50%;border:2px solid;font-size:.75rem;cursor:pointer;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-check{border-color:#22c55e;color:#22c55e}
+.sb-check.active{background:#22c55e;color:#fff}
+.sb-exclude{border-color:var(--border);color:var(--text-muted)}
+.sb-done{text-align:center;padding:40px 20px}
+.sb-done-icon{font-size:2.5rem;margin-bottom:10px}
+.sb-done-title{font-weight:700;font-size:1.1rem;color:var(--text)}
+.sb-done-sub{color:var(--text-muted);font-size:.85rem;margin:6px 0 16px}
+</style>
+
+<div class="sb-header">
+  <a href="{% url 'documents:arhiva_list' %}" class="sb-back">← Arhiva</a>
+  <div class="sb-title" id="sb-title">
+    {% if batch.total_images > 0 %}Batch #{{ batch.pk }} · {{ batch.total_images }} slik{{ batch.total_images|pluralize:"a,e,a" }}{% else %}Novi batch skeniranja{% endif %}
+  </div>
+  <span class="sb-badge" id="sb-status-badge">
+    {% if batch.status == 'collecting' %}⏳ Prikupljanje
+    {% elif batch.status == 'processing' %}🔄 AI analizira
+    {% elif batch.status == 'grouping' %}🧩 Grupiranje
+    {% elif batch.status == 'ready' %}✅ Spreman
+    {% elif batch.status == 'done' %}✓ Arhivirano
+    {% else %}{{ batch.status }}{% endif %}
+  </span>
+</div>
+
+<div class="sb-progress-wrap">
+  <div class="sb-progress-bar" id="sb-progress-bar" style="width:{% widthratio batch.total_images 100 100 %}%"></div>
+</div>
+<div class="sb-progress-text"><span id="img-count">{{ batch.total_images }}</span> / 100 slika</div>
+
+<div id="scan-app"
+     data-batch-id="{{ batch.pk }}"
+     data-upload-url="{% url 'documents:scan_batch_upload' batch.pk %}"
+     data-process-url="{% url 'documents:scan_batch_process' batch.pk %}"
+     data-status-url="{% url 'documents:scan_batch_status' batch.pk %}"
+     data-archive-url="{% url 'documents:scan_batch_archive' batch.pk %}"
+     data-csrf="{{ csrf_token }}">
+
+<!-- FAZA 1: UPLOAD -->
+<div id="phase-upload" {% if batch.total_images > 0 %}style="display:none"{% endif %}>
+  <div class="sb-dropzone" id="dropzone">
+    <div class="sb-drop-icon">📷</div>
+    <div class="sb-drop-title">Povuci račune ovdje ili klikni tipku</div>
+    <div class="sb-drop-sub">Slika → AI prepoznaje → arhiva popunjena</div>
+    <div class="sb-drop-hint">JPG · PNG · WebP · HEIC (iPhone) · max 100 slika</div>
+  </div>
+  <div class="sb-actions">
+    <label class="sb-btn sb-btn-primary" for="camera-input">
+      <i class="fas fa-camera"></i> Snimi kamerom
+      <input type="file" id="camera-input" accept="image/*" capture="environment" multiple style="display:none">
+    </label>
+    <label class="sb-btn sb-btn-secondary" for="file-input">
+      <i class="fas fa-folder-open"></i> Odaberi fajlove
+      <input type="file" id="file-input" accept="image/*,.heic,.heif" multiple style="display:none">
+    </label>
+  </div>
+</div>
+
+<!-- FAZA 2: PREGLED -->
+<div id="phase-preview" {% if batch.total_images == 0 or batch.status != 'collecting' %}style="display:none"{% endif %}>
+  <div class="sb-grid" id="sb-grid">
+    {% for img in images %}
+    <div class="sb-thumb" data-id="{{ img.pk }}">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='58'%3E%3Crect fill='%23374151' width='58' height='58'/%3E%3C/svg%3E"
+           alt="{{ img.order }}" loading="lazy">
+      <button class="sb-thumb-del" data-id="{{ img.pk }}" title="Ukloni">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="sb-actions">
+    <button class="sb-btn sb-btn-primary" id="btn-process">
+      <i class="fas fa-robot"></i> Analiziraj sve (AI)
+    </button>
+    <label class="sb-btn sb-btn-secondary" for="file-input-more">
+      <i class="fas fa-plus"></i> Dodaj još
+      <input type="file" id="file-input-more" accept="image/*" multiple style="display:none">
+    </label>
+  </div>
+  <div style="text-align:center">
+    <button class="sb-btn-ghost" id="btn-clear">🗑 Očisti sve</button>
+  </div>
+</div>
+
+<!-- FAZA 3: AI PROCESIRANJE -->
+<div id="phase-processing" {% if batch.status not in 'processing,grouping' %}style="display:none"{% endif %}>
+  <div style="text-align:center;padding:30px 0">
+    <div class="sb-spinner"></div>
+    <div class="sb-processing-title">AI analizira račune...</div>
+    <div class="sb-processing-sub" id="processing-msg">{{ batch.error_message|default:"Priprema..." }}</div>
+  </div>
+</div>
+
+<!-- FAZA 4: REZULTATI -->
+<div id="phase-results" {% if batch.status != 'ready' %}style="display:none"{% endif %}>
+  {% if batch.status == 'ready' %}
+  <div class="sb-results-summary">
+    ✅ AI pronašao <strong id="doc-count">{{ batch.total_documents }}</strong>
+    dokumenata iz {{ batch.total_images }} slika
+  </div>
+  <div id="results-list">
+    {% regroup images by document_group as doc_groups %}
+    {% for grp in doc_groups %}
+    {% with first=grp.list.0 %}
+    {% if grp.grouper %}
+    <div class="sb-result-item" data-group="{{ grp.grouper }}">
+      <div style="font-size:1.1rem;width:28px;flex-shrink:0">📄</div>
+      <div style="flex:1;min-width:0">
+        <div class="sb-result-vendor">
+          {{ first.extracted_data.seller.name|default:"Nepoznat dobavljač" }}
+        </div>
+        <div class="sb-result-meta">
+          {{ first.extracted_data.issue_date|default:"?" }} ·
+          {{ first.extracted_data.total|default:"??" }} {{ first.extracted_data.currency|default:"EUR" }}
+          {% if grp.list|length > 1 %} · <span style="color:var(--gold)">{{ grp.list|length }} str.</span>{% endif %}
+        </div>
+        {% if not first.extracted_data.seller.oib %}
+        <div class="sb-result-warning">⚠ Nedostaje OIB dobavljača</div>
+        {% endif %}
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="sb-check active" title="Uključi">✓</button>
+        <button class="sb-exclude" title="Isključi">✗</button>
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% endfor %}
+  </div>
+  <div class="sb-actions" style="margin-top:14px">
+    <button class="sb-btn sb-btn-success" id="btn-archive">
+      <i class="fas fa-archive"></i> Spremi u arhivu (<span id="archive-count">{{ batch.total_documents }}</span>)
+    </button>
+    <button class="sb-btn sb-btn-secondary" id="btn-review">↩ Pregledaj</button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- FAZA 5: GOTOVO -->
+<div id="phase-done" {% if batch.status != 'done' %}style="display:none"{% endif %}>
+  <div class="sb-done">
+    <div class="sb-done-icon">✅</div>
+    <div class="sb-done-title">Arhivirano!</div>
+    <div class="sb-done-sub">{{ batch.total_documents }} dokumenata spremljeno.</div>
+    <a href="{% url 'documents:arhiva_list' %}" class="sb-btn sb-btn-primary" style="display:inline-flex;max-width:200px">
+      → Otvori arhivu
+    </a>
+  </div>
+</div>
+
+</div>
+
+<script>
+(function(){
+  const app = document.getElementById('scan-app');
+  const URLS = {
+    upload: app.dataset.uploadUrl,
+    process: app.dataset.processUrl,
+    status: app.dataset.statusUrl,
+    archive: app.dataset.archiveUrl,
+  };
+  const CSRF = app.dataset.csrf;
+  let pollTimer = null;
+
+  function showPhase(name) {
+    ['upload','preview','processing','results','done'].forEach(p => {
+      const el = document.getElementById('phase-' + p);
+      if (el) el.style.display = (p === name) ? '' : 'none';
+    });
+  }
+  function updateProgress(count) {
+    document.getElementById('img-count').textContent = count;
+    document.getElementById('sb-progress-bar').style.width = Math.min(count, 100) + '%';
+    document.getElementById('sb-title').textContent =
+      count > 0 ? `Batch #${app.dataset.batchId} · ${count} slik${count===1?'a':count<5?'e':'a'}` : 'Novi batch skeniranja';
+  }
+  async function compressImage(file) {
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        const max = 1200;
+        if (w > max || h > max) { const r = Math.min(max/w, max/h); w=Math.round(w*r); h=Math.round(h*r); }
+        const c = document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        c.toBlob(b => b ? res(b) : rej('compress fail'), 'image/webp', 0.82);
+      };
+      img.onerror = rej;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  async function uploadFiles(files) {
+    if (!files.length) return;
+    const fd = new FormData();
+    for (const f of files) {
+      try { fd.append('images', await compressImage(f), f.name.replace(/\.\w+$/, '.webp')); }
+      catch { fd.append('images', f); }
+    }
+    fd.append('csrfmiddlewaretoken', CSRF);
+    const res = await fetch(URLS.upload, { method:'POST', body:fd });
+    const data = await res.json();
+    if (data.ok) {
+      updateProgress(data.total_images);
+      location.reload();
+    } else { alert(data.error || 'Upload nije uspio'); }
+  }
+  ['camera-input','file-input','file-input-more'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', e => uploadFiles([...e.target.files]));
+  });
+  const dz = document.getElementById('dropzone');
+  if (dz) {
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); uploadFiles([...e.dataTransfer.files]); });
+    dz.addEventListener('click', () => document.getElementById('file-input').click());
+  }
+  const btnProcess = document.getElementById('btn-process');
+  if (btnProcess) btnProcess.addEventListener('click', async () => {
+    btnProcess.disabled = true; btnProcess.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pokrećem...';
+    const fd = new FormData(); fd.append('csrfmiddlewaretoken', CSRF);
+    const res = await fetch(URLS.process, { method:'POST', body:fd });
+    const data = await res.json();
+    if (data.ok) { showPhase('processing'); startPolling(); }
+    else { alert(data.error||'Greška'); btnProcess.disabled=false; btnProcess.innerHTML='<i class="fas fa-robot"></i> Analiziraj sve (AI)'; }
+  });
+  const btnArchive = document.getElementById('btn-archive');
+  if (btnArchive) btnArchive.addEventListener('click', async () => {
+    btnArchive.disabled = true; btnArchive.innerHTML = '⏳ Arhiviranje...';
+    const fd = new FormData(); fd.append('csrfmiddlewaretoken', CSRF);
+    const res = await fetch(URLS.archive, { method:'POST', body:fd });
+    const data = await res.json();
+    if (data.ok) showPhase('done');
+    else { alert(data.error||'Greška'); btnArchive.disabled=false; }
+  });
+  function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(async () => {
+      const res = await fetch(URLS.status);
+      const data = await res.json();
+      const msg = document.getElementById('processing-msg');
+      if (msg) msg.textContent = data.error_message || 'Obrađujem...';
+      if (data.status === 'ready' || data.status === 'done') { clearInterval(pollTimer); location.reload(); }
+      else if (data.status === 'error') { clearInterval(pollTimer); alert('Greška: ' + (data.error_message||'')); }
+    }, 3000);
+  }
+  const status = '{{ batch.status }}';
+  if (status === 'processing' || status === 'grouping') startPolling();
+})();
+</script>
+{% endblock %}
