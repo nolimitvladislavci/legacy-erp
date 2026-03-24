@@ -16,11 +16,22 @@ from django.conf import settings
 
 logger = logging.getLogger('eracun.engine')
 
-# FINA CIS endpoints
-FINA_URLS = {
+# FINA CIS endpoints — FISKALIZACIJA (POS gotovinski računi)
+FINA_FISCAL_URLS = {
     'test': 'https://cistest.apis-it.hr:8509/FiskalizacijaService',
     'production': 'https://cis.porezna-uprava.hr:8449/FiskalizacijaService',
 }
+
+# FINA eRačun endpoints — B2B elektronički računi
+# NAPOMENA: eRačun servis koristi isti XML format (EvidentirajERacunZahtjev)
+# ali potpuno drugi endpoint od FiskalizacijaService!
+FINA_ERACUN_URLS = {
+    'test': 'https://eracun-test.fina.hr/eRacunServis',
+    'production': 'https://eracun.fina.hr/eRacunServis',
+}
+
+# Backward compat — stari kod koji koristi FINA_URLS
+FINA_URLS = FINA_ERACUN_URLS
 
 # SOAP namespaces for EvidentirajERacunZahtjev
 NS_SOAP = 'http://schemas.xmlsoap.org/soap/envelope/'
@@ -209,23 +220,37 @@ def wrap_soap(signed_root):
     return etree.tostring(envelope, pretty_print=True, xml_declaration=True, encoding='UTF-8')
 
 
-def send_to_fina(xml_payload, use_test=True):
+def send_to_fina(xml_payload, use_test=True, service='eracun'):
     """
-    Send SOAP XML to FINA CIS endpoint.
+    Send SOAP XML to FINA endpoint.
+
+    service='eracun' → B2B eRačun (EvidentirajERacunZahtjev)
+    service='fiscal' → POS fiskalizacija (RacunZahtjev)
+
     Returns (success, response_data_dict).
     """
     import requests as req_lib
     import urllib3
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    url = FINA_URLS['test'] if use_test else FINA_URLS['production']
+    if service == 'fiscal':
+        urls = FINA_FISCAL_URLS
+        soap_action = 'http://www.apis-it.hr/fin/2012/RacunZahtjev'
+    else:
+        urls = FINA_ERACUN_URLS
+        soap_action = 'http://www.porezna-uprava.gov.hr/fin/2024/EvidentirajERacunZahtjev'
+
+    url = urls['test'] if use_test else urls['production']
 
     try:
         resp = req_lib.post(
             url,
             data=xml_payload,
-            headers={'Content-Type': 'text/xml; charset=utf-8'},
-            verify=False,
+            headers={
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': soap_action,
+            },
+            verify=not use_test,  # verify SSL u produkciji
             timeout=30,
         )
 
@@ -365,7 +390,8 @@ def process_eracun(eracun, config=None, user=None):
 
         # 3. Sign
         cert_pem, key_pem = get_cert_pem(config)
-        signed_root = sign_xml(root, cert_pem, key_pem)
+        from eracun.services.xades_signer import sign_xades_b
+        signed_root = sign_xades_b(root, cert_pem, key_pem)
         xml_payload = wrap_soap(signed_root)
 
         eracun.xml_request = xml_payload.decode('utf-8', errors='replace')
@@ -408,7 +434,13 @@ def process_eracun(eracun, config=None, user=None):
     eracun.status = 'sending'
     eracun.save(update_fields=['status'])
 
-    success, result = send_to_fina(xml_payload, use_test=config.use_test_env)
+    # Provjeri: posrednik ili direktno FINA?
+    posrednik_mode = _should_use_posrednik(config)
+
+    if posrednik_mode:
+        success, result = _send_via_posrednik(eracun, config)
+    else:
+        success, result = send_to_fina(xml_payload, use_test=config.use_test_env, service='eracun')
 
     eracun.xml_response = result.get('raw', '')
     eracun.sent_at = timezone.now()
@@ -537,6 +569,30 @@ def create_eracun_from_invoice(invoice, user=None):
 
     return er
 
+
+
+
+def _should_use_posrednik(config):
+    """Provjeri ima li firma konfiguriran posrednik (Moj-eRacun.hr etc.)."""
+    try:
+        from eracun.services.posrednik_service import get_posrednik_config
+        pc = get_posrednik_config(config.company)
+        return pc is not None and pc.get('enabled', False)
+    except Exception:
+        return False
+
+
+def _send_via_posrednik(eracun, config):
+    """Šalje eRačun kroz posrednika (REST API, UBL 2.1)."""
+    try:
+        from eracun.services.posrednik_service import send_via_posrednik
+        return send_via_posrednik(eracun, config)
+    except ImportError:
+        logger.warning('posrednik_service not available, falling back to FINA direct')
+        return False, {'status': 'error', 'error_message': 'Posrednik servis nije dostupan'}
+    except Exception as e:
+        logger.error('Posrednik send failed: %s', e)
+        return False, {'status': 'error', 'error_message': str(e)}
 
 # Import the unit map from UBL generator
 UNIT_MAP = {
