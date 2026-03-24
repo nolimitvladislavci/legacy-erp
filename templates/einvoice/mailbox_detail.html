@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}URA {{ inbound.invoice_number }} — Smart Mailbox{% endblock %}
+
+{% block content %}
+<style>
+.ai-panel{background:linear-gradient(135deg,#0f172a,#1e293b);color:#e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px}
+.ai-panel h5{color:var(--gold);margin-bottom:12px}
+.ai-conf-big{font-size:2rem;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.ai-conf-big.high{color:#22c55e}
+.ai-conf-big.mid{color:#f59e0b}
+.ai-conf-big.low{color:#ef4444}
+.ai-suggestion{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px}
+.ai-suggestion .item{background:rgba(255,255,255,.05);padding:10px;border-radius:8px}
+.ai-suggestion .item .label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8}
+.ai-suggestion .item .value{font-size:1rem;font-weight:700;margin-top:2px}
+.detail-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.detail-card .header{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:.85rem}
+.detail-card .body{padding:16px}
+.detail-table{width:100%;font-size:.82rem;border-collapse:collapse}
+.detail-table th{text-align:left;padding:6px 8px;color:var(--text-muted);font-size:.7rem;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.detail-table td{padding:6px 8px;border-bottom:1px solid var(--border-light)}
+.event-timeline{position:relative;padding-left:24px}
+.event-timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.event-dot{position:absolute;left:3px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg-card)}
+.event-item{position:relative;padding-bottom:12px}
+.sm-status{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.sm-status.PENDING,.sm-status.AUTO{background:#fef3c7;color:#92400e}
+.sm-status.BOOKED{background:#dcfce7;color:#166534}
+.sm-status.APPROVED{background:#dbeafe;color:#1e40af}
+.sm-status.REJECTED{background:#fef2f2;color:#991b1b}
+.sm-status.DUPLICATE{background:#f3e8ff;color:#7c3aed}
+</style>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+  <div>
+    <div style="font-weight:700;font-size:1.1rem;color:var(--text)">
+      URA {{ inbound.invoice_number }}
+      <span class="sm-status {{ inbound.status }}" style="margin-left:8px">{{ inbound.get_status_display }}</span>
+    </div>
+    <div style="font-size:.75rem;color:var(--text-muted)">{{ inbound.supplier_name }} | {{ inbound.issue_date|date:"d.m.Y" }}</div>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    {% if inbound.status == "AUTO" or inbound.status == "PENDING" %}
+    <form method="post" action="{% url 'einvoice:mailbox_approve' inbound.pk %}" class="d-inline">
+      {% csrf_token %}
+      <input type="hidden" name="konto" value="{{ inbound.suggested_konto }}">
+      <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Proknjiži</button>
+    </form>
+    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal"><i class="fas fa-times"></i> Odbij</button>
+    {% endif %}
+    <a href="{% url 'einvoice:smart_mailbox' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Inbox</a>
+  </div>
+</div>
+
+<!-- AI Classification Panel -->
+<div class="ai-panel">
+  <h5><i class="fas fa-brain"></i> AI Klasifikacija</h5>
+  <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div>
+      <div class="ai-conf-big {% if inbound.classification_confidence >= 0.8 %}high{% elif inbound.classification_confidence >= 0.4 %}mid{% else %}low{% endif %}">
+        {% widthratio inbound.classification_confidence 1 100 %}%
+      </div>
+      <div style="font-size:.7rem;color:#94a3b8">Pouzdanost klasifikacije</div>
+    </div>
+    <div style="flex:1;font-size:.82rem;color:#cbd5e1">
+      {{ inbound.classification_reason }}
+    </div>
+  </div>
+  <div class="ai-suggestion">
+    <div class="item">
+      <div class="label">Predlozeni konto</div>
+      <div class="value" style="font-family:monospace">{{ inbound.suggested_konto|default:"—" }}</div>
+      <div style="font-size:.7rem;color:#94a3b8">{{ inbound.suggested_konto_name }}</div>
+    </div>
+    <div class="item">
+      <div class="label">PDV tretman</div>
+      <div class="value">{{ inbound.get_suggested_vat_treatment_display|default:"—" }}</div>
+    </div>
+    <div class="item">
+      <div class="label">Troskovno mjesto</div>
+      <div class="value">{{ inbound.suggested_cost_center|default:"—" }}</div>
+    </div>
+    <div class="item">
+      <div class="label">Ukupno</div>
+      <div class="value" style="color:#22c55e">&euro;{{ inbound.gross_amount|floatformat:2 }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Approve Form (if not yet booked) -->
+{% if inbound.status == "AUTO" or inbound.status == "PENDING" %}
+<div class="detail-card">
+  <div class="header"><i class="fas fa-journal-whills"></i> Proknjiži</div>
+  <div class="body">
+    <form method="post" action="{% url 'einvoice:mailbox_approve' inbound.pk %}">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label" style="font-size:.75rem">Konto</label>
+          <input type="text" name="konto" class="form-control" value="{{ inbound.suggested_konto }}" placeholder="4010" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label" style="font-size:.75rem">Troskovno mjesto</label>
+          <input type="text" name="cost_center" class="form-control" value="{{ inbound.suggested_cost_center }}" placeholder="Opcionalno">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" style="font-size:.75rem">Biljeske</label>
+          <input type="text" name="notes" class="form-control" placeholder="Opcionalno">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-success w-100"><i class="fas fa-check"></i> Proknjiži</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<!-- Booking result -->
+{% if inbound.status == "BOOKED" %}
+<div class="detail-card" style="border-left:4px solid #22c55e">
+  <div class="body">
+    <strong style="color:#166534"><i class="fas fa-check-circle"></i> Proknjizeno</strong>
+    <span class="ms-2">Konto: <span style="font-family:monospace;font-weight:700">{{ inbound.final_konto }}</span></span>
+    {% if inbound.final_cost_center %}<span class="ms-2">TM: {{ inbound.final_cost_center }}</span>{% endif %}
+    <span class="ms-2" style="color:var(--text-muted)">{{ inbound.approved_by }} | {{ inbound.approved_at|date:"d.m.Y H:i" }}</span>
+  </div>
+</div>
+{% endif %}
+
+<div class="row">
+  <!-- Supplier -->
+  <div class="col-md-6">
+    <div class="detail-card">
+      <div class="header">Dobavljac</div>
+      <div class="body">
+        <p class="fw-bold mb-1">{{ inbound.supplier_name }}</p>
+        <p class="mb-1" style="font-size:.82rem">OIB: {{ inbound.supplier_tax_id }}</p>
+        {% if inbound.supplier_address %}<p class="mb-0" style="font-size:.82rem">{{ inbound.supplier_address }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  <!-- Document -->
+  <div class="col-md-6">
+    <div class="detail-card">
+      <div class="header">Dokument</div>
+      <div class="body" style="font-size:.82rem">
+        <p class="mb-1">Broj: <strong>{{ inbound.invoice_number }}</strong></p>
+        <p class="mb-1">Datum: {{ inbound.issue_date|date:"d.m.Y" }}</p>
+        {% if inbound.due_date %}<p class="mb-1">Rok placanja: {{ inbound.due_date|date:"d.m.Y" }}</p>{% endif %}
+        <p class="mb-0">Primljeno: {{ inbound.received_at|date:"d.m.Y H:i" }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Line Items -->
+{% if inbound.line_items %}
+<div class="detail-card">
+  <div class="header">Stavke ({{ inbound.line_items|length }})</div>
+  <div class="body p-0">
+    <table class="detail-table">
+      <thead><tr><th>#</th><th>Opis</th><th class="text-end">Kolicina</th><th class="text-end">Iznos</th></tr></thead>
+      <tbody>
+        {% for item in inbound.line_items %}
+        <tr>
+          <td>{{ item.line_id|default:forloop.counter }}</td>
+          <td>{{ item.name }}</td>
+          <td class="text-end">{{ item.quantity }}</td>
+          <td class="text-end fw-bold">&euro;{{ item.amount|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3" class="text-end">Osnovica:</td><td class="text-end">&euro;{{ inbound.net_amount|floatformat:2 }}</td></tr>
+        <tr><td colspan="3" class="text-end">PDV:</td><td class="text-end">&euro;{{ inbound.tax_amount|floatformat:2 }}</td></tr>
+        <tr class="fw-bold"><td colspan="3" class="text-end">UKUPNO:</td><td class="text-end">&euro;{{ inbound.gross_amount|floatformat:2 }}</td></tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Tax Breakdown -->
+{% if inbound.tax_breakdown %}
+<div class="detail-card">
+  <div class="header">PDV razrada</div>
+  <div class="body p-0">
+    <table class="detail-table">
+      <thead><tr><th>Stopa</th><th class="text-end">Osnovica</th><th class="text-end">PDV</th></tr></thead>
+      <tbody>
+        {% for tax in inbound.tax_breakdown %}
+        <tr>
+          <td>{{ tax.rate }}%</td>
+          <td class="text-end">&euro;{{ tax.base|floatformat:2 }}</td>
+          <td class="text-end">&euro;{{ tax.amount|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- AS4 Audit Trail -->
+{% if events %}
+<div class="detail-card">
+  <div class="header"><i class="fas fa-history"></i> AS4 Audit Trail</div>
+  <div class="body">
+    <div class="event-timeline">
+      {% for event in events %}
+      <div class="event-item">
+        <div class="event-dot" {% if event.to_status == "BOOKED" or event.to_status == "DELIVERED" %}style="background:#22c55e"{% elif event.to_status == "SEND_FAIL" or event.to_status == "REJECTED" %}style="background:#ef4444"{% endif %}></div>
+        <div style="font-size:.78rem">
+          <strong>{{ event.from_status }} → {{ event.to_status }}</strong>
+          <span style="color:var(--text-muted);margin-left:8px">{{ event.created_at|date:"d.m.Y H:i:s" }}</span>
+        </div>
+        {% if event.detail %}<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px">{{ event.detail|truncatechars:200 }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Archive Hash -->
+{% if inbound.as4_message.archive_sha256 %}
+<div class="detail-card">
+  <div class="header"><i class="fas fa-shield-alt"></i> Arhivski integritet</div>
+  <div class="body" style="font-size:.78rem">
+    <p class="mb-1">SHA-256: <code style="font-size:.72rem">{{ inbound.as4_message.archive_sha256 }}</code></p>
+    <a href="/api/einvoice/archive/verify/{{ inbound.as4_message.archive_sha256 }}/" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fas fa-check-double"></i> Verificiraj integritet</a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'einvoice:mailbox_reject' inbound.pk %}">
+        {% csrf_token %}
+        <div class="modal-header"><h5 class="modal-title">Odbij racun</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <label class="form-label">Razlog odbijanja</label>
+          <textarea name="reason" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Odustani</button>
+          <button type="submit" class="btn btn-danger">Odbij</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

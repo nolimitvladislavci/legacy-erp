@@ -209,6 +209,7 @@ urlpatterns += i18n_patterns(
     path('payments/', include('payments.urls')),
     path('eracun/', include('eracun.urls')),
     path('api/einvoice/', include('einvoice.api.urls')),
+    path('einvoice/', include('einvoice.urls')),
     path('helpdesk/', include('helpdesk.urls')),
     path('maintenance/', include('maintenance.urls')),
     path('propter/', include('propter.urls')),
@@ -317,11 +318,4 @@ urlpatterns += [
 
 
 # ── Custom Error Handlers ──────────────────────────────────────
-def custom_404_handler(request, exception=None):
-    """404 → redirect na početnu s toast porukom."""
-    from django.contrib import messages
-    from django.shortcuts import redirect
-    messages.warning(request, f'Stranica "{request.path}" nije pronađena.')
-    return redirect('/')
-
-handler404 = 'core.urls.custom_404_handler'
+handler404 = 'core.error_handlers.custom_404_handler'

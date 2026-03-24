@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Smart Mailbox — PROPTER{% endblock %}
+
+{% block content %}
+<style>
+.sm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.sm-stat{background:var(--bg-card);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)}
+.sm-stat .val{font-size:1.5rem;font-weight:700;color:var(--text)}
+.sm-stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-top:2px}
+.conf-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700}
+.conf-high{background:#dcfce7;color:#166534}
+.conf-mid{background:#fef3c7;color:#92400e}
+.conf-low{background:#fef2f2;color:#991b1b}
+.conf-none{background:var(--badge-bg);color:var(--text-muted)}
+.sm-status{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.sm-status.PENDING,.sm-status.AUTO{background:#fef3c7;color:#92400e}
+.sm-status.BOOKED{background:#dcfce7;color:#166534}
+.sm-status.APPROVED{background:#dbeafe;color:#1e40af}
+.sm-status.REJECTED{background:#fef2f2;color:#991b1b}
+.sm-status.DUPLICATE{background:#f3e8ff;color:#7c3aed}
+.sm-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.sm-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.68rem;text-transform:uppercase;color:var(--text-muted)}
+.sm-table td{padding:8px 10px;border-bottom:1px solid var(--border-light)}
+.sm-table tr:hover{background:var(--table-row-hover)}
+.sm-konto{font-family:monospace;font-size:.78rem;padding:2px 6px;background:var(--badge-bg);border-radius:4px}
+.sm-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.sm-filter a{padding:4px 12px;border-radius:6px;font-size:.75rem;text-decoration:none;border:1px solid var(--border);color:var(--text-muted)}
+.sm-filter a.active,.sm-filter a:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+  <div>
+    <div style="font-weight:700;font-size:1.1rem;color:var(--text)"><i class="fas fa-brain" style="color:var(--gold)"></i> Smart Mailbox</div>
+    <div style="font-size:.7rem;color:var(--text-muted)">AI-klasificirani ulazni racuni | PROPTER e-Invoice</div>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    <a href="{% url 'einvoice:outbound_messages' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-paper-plane"></i> Izlazni</a>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="sm-grid">
+  <div class="sm-stat"><div class="val" style="color:#92400e">{{ stats.pending }}</div><div class="lbl">Ceka pregled</div></div>
+  <div class="sm-stat"><div class="val" style="color:#166534">{{ stats.booked }}</div><div class="lbl">Proknjizeno</div></div>
+  <div class="sm-stat"><div class="val" style="color:#991b1b">{{ stats.rejected }}</div><div class="lbl">Odbijeno</div></div>
+  <div class="sm-stat"><div class="val" style="color:#7c3aed">{{ stats.duplicates }}</div><div class="lbl">Duplikati</div></div>
+  <div class="sm-stat"><div class="val">{{ stats.total }}</div><div class="lbl">Ukupno</div></div>
+  <div class="sm-stat"><div class="val">&euro;{{ stats.pending_amount|floatformat:2 }}</div><div class="lbl">Ceka (iznos)</div></div>
+</div>
+
+<!-- AS4 Pipeline -->
+<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+  <span style="font-size:.72rem;padding:4px 10px;border-radius:6px;background:#dbeafe;color:#1e40af"><i class="fas fa-paper-plane"></i> {{ as4_stats.outbound_queued }} u redu</span>
+  <span style="font-size:.72rem;padding:4px 10px;border-radius:6px;background:#dcfce7;color:#166534"><i class="fas fa-check-circle"></i> {{ as4_stats.outbound_delivered }} dostavljeno</span>
+  {% if as4_stats.dlq > 0 %}
+  <span style="font-size:.72rem;padding:4px 10px;border-radius:6px;background:#fef2f2;color:#991b1b"><i class="fas fa-skull-crossbones"></i> {{ as4_stats.dlq }} DLQ</span>
+  {% endif %}
+</div>
+
+<!-- Filter -->
+<div class="sm-filter">
+  <a href="?status=" class="{% if not status_filter %}active{% endif %}">Svi</a>
+  <a href="?status=PENDING" class="{% if status_filter == 'PENDING' %}active{% endif %}">Ceka</a>
+  <a href="?status=AUTO" class="{% if status_filter == 'AUTO' %}active{% endif %}">Klasificirano</a>
+  <a href="?status=BOOKED" class="{% if status_filter == 'BOOKED' %}active{% endif %}">Proknjizeno</a>
+  <a href="?status=REJECTED" class="{% if status_filter == 'REJECTED' %}active{% endif %}">Odbijeno</a>
+  <a href="?status=DUPLICATE" class="{% if status_filter == 'DUPLICATE' %}active{% endif %}">Duplikati</a>
+</div>
+
+<!-- Table -->
+<div class="stat-card" style="overflow-x:auto">
+{% if invoices %}
+<table class="sm-table">
+  <thead>
+    <tr>
+      <th>Broj</th>
+      <th>Dobavljac</th>
+      <th class="text-end">Iznos</th>
+      <th>AI Konto</th>
+      <th>Pouzdanost</th>
+      <th>Status</th>
+      <th>Primljeno</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for inv in invoices %}
+    <tr>
+      <td><a href="{% url 'einvoice:mailbox_detail' inv.pk %}" style="color:var(--accent);font-weight:600">{{ inv.invoice_number }}</a></td>
+      <td>
+        {{ inv.supplier_name|truncatechars:30 }}
+        <br><small style="color:var(--text-muted)">{{ inv.supplier_tax_id }}</small>
+      </td>
+      <td class="text-end fw-bold">&euro;{{ inv.gross_amount|floatformat:2 }}</td>
+      <td>
+        {% if inv.final_konto %}
+          <span class="sm-konto">{{ inv.final_konto }}</span>
+        {% elif inv.suggested_konto %}
+          <span class="sm-konto" style="opacity:.7">{{ inv.suggested_konto }}</span>
+          <br><small style="color:var(--text-muted);font-size:.65rem">{{ inv.suggested_konto_name|truncatechars:20 }}</small>
+        {% else %}
+          <span style="color:var(--text-muted);font-size:.7rem">—</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if inv.classification_confidence >= 0.8 %}
+          <span class="conf-badge conf-high"><i class="fas fa-check-circle"></i> {% widthratio inv.classification_confidence 1 100 %}%</span>
+        {% elif inv.classification_confidence >= 0.4 %}
+          <span class="conf-badge conf-mid"><i class="fas fa-exclamation-triangle"></i> {% widthratio inv.classification_confidence 1 100 %}%</span>
+        {% elif inv.classification_confidence > 0 %}
+          <span class="conf-badge conf-low"><i class="fas fa-question-circle"></i> {% widthratio inv.classification_confidence 1 100 %}%</span>
+        {% else %}
+          <span class="conf-badge conf-none">—</span>
+        {% endif %}
+      </td>
+      <td><span class="sm-status {{ inv.status }}">{{ inv.get_status_display }}</span></td>
+      <td><small>{{ inv.received_at|date:"d.m.Y" }}</small></td>
+      <td>
+        {% if inv.status == "AUTO" or inv.status == "PENDING" %}
+        <form method="post" action="{% url 'einvoice:mailbox_approve' inv.pk %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="konto" value="{{ inv.suggested_konto }}">
+          <button class="btn btn-sm btn-outline-success" title="Proknjiži {{ inv.suggested_konto }}" {% if not inv.suggested_konto %}disabled{% endif %}>
+            <i class="fas fa-check"></i>
+          </button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="text-center py-5">
+  <div style="font-size:2.5rem;margin-bottom:10px"><i class="fas fa-inbox" style="color:var(--text-muted)"></i></div>
+  <h5 style="color:var(--text)">Nema ulaznih racuna</h5>
+  <p style="color:var(--text-muted);font-size:.85rem">Ulazni racuni stizu automatski iz FINA posrednika ili uploada.</p>
+</div>
+{% endif %}
+</div>
+{% endblock %}
