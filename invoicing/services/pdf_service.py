@@ -2,6 +2,7 @@
 import hashlib
 import hmac
 import base64
+import os as _os
 from decimal import Decimal
 from django.template.loader import render_to_string
 from django.utils.translation import activate, get_language
@@ -15,9 +16,29 @@ RATE_NAMES = {
     '25': 'Standardna',
 }
 
+# Mapa pdf_template → template fajlovi (DE i HR varijanta)
+TEMPLATE_MAP = {
+    'viskovic': {
+        'de': 'invoicing/invoice_de.html',
+        'hr': 'invoicing/invoice_hr.html',
+    },
+    'datev': {
+        'de': 'invoicing/invoice_de_datev.html',
+        'hr': 'invoicing/invoice_hr_datev.html',
+    },
+    'modern': {
+        'de': 'invoicing/invoice_de_modern.html',
+        'hr': 'invoicing/invoice_hr_modern.html',
+    },
+}
+# Fallback na viskovic ako datoteka ne postoji
+TEMPLATE_FALLBACK = {
+    'de': 'invoicing/invoice_de.html',
+    'hr': 'invoicing/invoice_hr.html',
+}
+
 
 def build_tax_groups(invoice):
-    """Return list of tax-group dicts for invoice recap table."""
     groups = {}
     for item in invoice.items.all():
         key = str(int(item.tax_rate))
@@ -39,14 +60,14 @@ def build_tax_groups(invoice):
 
 
 def generate_qr(invoice):
-    """Generate QR code base64 string for invoice payment data."""
     try:
-        import qrcode
-        import io
+        import qrcode, io
+        iban = (invoice.issuer_iban or '').replace(' ', '')
         payment_data = (
-            f"BCD\n002\n1\nSCT\n{invoice.issuer_iban}\n{invoice.issuer_name}\n"
-            f"{invoice.issuer_iban}\nEUR{invoice.total}\n\n{invoice.number}\n"
-            f"Plaćanje računa {invoice.number}"
+            f"BCD\n002\n1\nSCT\n{invoice.swift or ''}\n"
+            f"{invoice.issuer_name}\n{iban}\n"
+            f"EUR{invoice.total}\n\n{invoice.number}\n"
+            f"Zahlung {invoice.number}"
         )
         qr = qrcode.QRCode(version=1, box_size=5, border=2)
         qr.add_data(payment_data)
@@ -60,7 +81,6 @@ def generate_qr(invoice):
 
 
 def generate_zki(invoice, cert_key='demo_key'):
-    """Generate ZKI (zaštitni kod izdavatelja) for HR fiscalization."""
     data = (
         f"{invoice.issuer_oib}"
         f"{invoice.date_issued.strftime('%d.%m.%Y %H:%M:%S')}"
@@ -79,23 +99,46 @@ def _ensure_qr(invoice):
 
 
 def _get_company_logo_b64(invoice):
-    """Return base64 logo string for company, or empty string."""
+    """
+    Vraća base64 data URI loga firme.
+    Redosljed pokušaja:
+    1. company.logo (Django ImageField) — glavni put
+    2. company.settings['logo_path'] — fallback ručna putanja
+    """
     try:
         company = invoice.company
-        if company and company.logo:
-            logo_path = company.logo.path
-            with open(logo_path, 'rb') as f:
+        if not company:
+            return ''
+
+        # 1. Django ImageField — provjeri i name i postojanje fajla
+        if company.logo and company.logo.name:
+            try:
+                path = company.logo.path
+                if _os.path.exists(path):
+                    with open(path, 'rb') as f:
+                        data = f.read()
+                    ext = path.rsplit('.', 1)[-1].lower()
+                    mime = 'image/png' if ext == 'png' else 'image/jpeg'
+                    return f"data:{mime};base64,{base64.b64encode(data).decode()}"
+            except Exception:
+                pass
+
+        # 2. Fallback: settings['logo_path']
+        settings = company.settings or {}
+        path = settings.get('logo_path', '')
+        if path and _os.path.exists(path):
+            with open(path, 'rb') as f:
                 data = f.read()
-            ext = logo_path.rsplit('.', 1)[-1].lower()
+            ext = path.rsplit('.', 1)[-1].lower()
             mime = 'image/png' if ext == 'png' else 'image/jpeg'
             return f"data:{mime};base64,{base64.b64encode(data).decode()}"
+
     except Exception:
         pass
     return ''
 
 
 def _get_lc_brand_qr_b64():
-    """Return LIMIT Connect brand QR (navy) as base64 PNG."""
     try:
         import qrcode, io
         qr = qrcode.QRCode(version=1, box_size=4, border=1,
@@ -110,10 +153,39 @@ def _get_lc_brand_qr_b64():
         return ''
 
 
+def _pick_template(invoice, lang):
+    """
+    Odaberi HTML template prema company.pdf_template i jeziku.
+    Ako template fajl ne postoji → fallback na viskovic dizajn.
+    """
+    from django.template.loader import get_template
+    from django.template.exceptions import TemplateDoesNotExist
+
+    pdf_tmpl = 'viskovic'
+    try:
+        if invoice.company:
+            pdf_tmpl = invoice.company.pdf_template or 'viskovic'
+    except Exception:
+        pass
+
+    lang_key = 'hr' if lang == 'hr' else 'de'
+    tmap = TEMPLATE_MAP.get(pdf_tmpl, TEMPLATE_MAP['viskovic'])
+    template_name = tmap.get(lang_key, TEMPLATE_FALLBACK[lang_key])
+
+    # Provjeri postoji li template; ako ne, koristi viskovic fallback
+    try:
+        get_template(template_name)
+    except TemplateDoesNotExist:
+        template_name = TEMPLATE_FALLBACK[lang_key]
+
+    return template_name
+
+
 def render_invoice_html(invoice, request=None):
-    """Render invoice to HTML string using HR, DE, or bilingual template."""
+    """Render invoice to HTML string using correct template for company style and language."""
     profile = getattr(invoice, 'invoice_profile', None)
 
+    # Jezik
     if profile and profile.language:
         render_lang = profile.language
     elif invoice.is_hr:
@@ -124,36 +196,38 @@ def render_invoice_html(invoice, request=None):
     prev_lang = get_language()
     activate(render_lang)
 
-    # Shared extra context — logo + brand QR + contacts
+    # Extra context
     contacts = []
     try:
         s = invoice.company.settings or {}
-        contacts = s.get("invoice_contacts", [])
+        contacts = s.get('invoice_contacts', [])
     except Exception:
         pass
+
     extra_ctx = {
-        "company_logo_src": _get_company_logo_b64(invoice),
-        "lc_qr_b64":        _get_lc_brand_qr_b64(),
-        "invoice_contacts": contacts,
+        'company_logo_src': _get_company_logo_b64(invoice),
+        'lc_qr_b64':        _get_lc_brand_qr_b64(),
+        'invoice_contacts': contacts,
     }
 
     try:
+        # Dvojezični
         if profile and getattr(profile, 'bilingual', False) and profile.secondary_language:
             from .bilingual_labels import get_bilingual_labels
-            primary_lang = render_lang
-            secondary_lang = profile.secondary_language
-            labels = get_bilingual_labels(primary_lang, secondary_lang, invoice.doctype)
+            labels = get_bilingual_labels(render_lang, profile.secondary_language, invoice.doctype)
             return render_to_string('invoicing/invoice_bilingual.html', {
                 'invoice': invoice,
                 'now': timezone.now(),
                 'request': request,
                 'tax_groups': build_tax_groups(invoice),
                 'labels': labels,
-                'primary_lang': primary_lang,
-                'secondary_lang': secondary_lang,
+                'primary_lang': render_lang,
+                'secondary_lang': profile.secondary_language,
                 **extra_ctx,
             })
-        template = 'invoicing/invoice_hr.html' if invoice.is_hr else 'invoicing/invoice_de.html'
+
+        # Odaberi template prema pdf_template fieldu
+        template = _pick_template(invoice, render_lang)
         return render_to_string(template, {
             'invoice': invoice,
             'now': timezone.now(),
@@ -167,7 +241,6 @@ def render_invoice_html(invoice, request=None):
 
 
 def generate_invoice_pdf(invoice, request=None):
-    """Return (bytes, mime_type) for the invoice PDF (or HTML fallback)."""
     _ensure_qr(invoice)
     html = render_invoice_html(invoice, request)
     try:
@@ -181,7 +254,6 @@ def generate_invoice_pdf(invoice, request=None):
 
 
 def generate_eracun_xml(invoice):
-    """Return UBL 2.1 XML string for e-račun."""
     oib_block = (
         f'<cac:PartyTaxScheme><cbc:CompanyID>{invoice.client_oib}</cbc:CompanyID>'
         f'<cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme>'
