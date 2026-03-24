@@ -24,7 +24,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = [
     "limit-connect.com", "www.limit-connect.com",
     "viskovic-group.de", "www.viskovic-group.de",
-    "85.9.201.204", "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1",
+    "85.9.201.204", "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -557,6 +557,24 @@ CELERY_BEAT_SCHEDULE = {
         "task": "tax_wizard.tasks.generate_annual_deadlines",
         "schedule": crontab(month_of_year=1, day_of_month=1, hour=0, minute=30),
     },
+    # ── Rental ──
+    "rental-daily-landlord-brief": {
+        "task": "rental.tasks.daily_landlord_brief",
+        "schedule": crontab(hour=8, minute=0),
+    },
+    "rental-check-evisitor-pending": {
+        "task": "rental.tasks.check_evisitor_pending",
+        "schedule": crontab(hour="*/6", minute=15),
+    },
+    "rental-annual-limit-check": {
+        "task": "rental.tasks.annual_limit_check",
+        "schedule": crontab(hour=9, minute=0, day_of_week=1),
+    },
+    "rental-gdpr-cleanup-docs": {
+        "task": "rental.tasks.gdpr_cleanup_guest_docs",
+        "schedule": crontab(hour=4, minute=0),
+    },
+
 
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────
@@ -696,9 +714,9 @@ FINA_POSREDNIK_CLIENT_KEY = os.environ.get("FINA_POSREDNIK_CLIENT_KEY", "")
 FINA_POSREDNIK_SANDBOX = os.environ.get("FINA_POSREDNIK_SANDBOX", "True").lower() in ("true", "1")
 
 # S3/MinIO Archive
-S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://minio:9000")
-S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "")
-S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "")
+S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://127.0.0.1:9000")
+S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "limitconnect")
+S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "LimitConnect2026S3Archive")
 S3_REGION = os.environ.get("S3_REGION", "eu-central-1")
 S3_ARCHIVE_BUCKET = os.environ.get("S3_ARCHIVE_BUCKET", "propter-einvoice-archive")
 
