@@ -96,3 +96,20 @@ class ClientOpportunityMatchAdmin(admin.ModelAdmin):
     list_filter = ['status']
     search_fields = ['company__name', 'opportunity__name']
     readonly_fields = ['id', 'matched_at']
+
+
+# ── BORG Signal Admin ──
+from limit_connect_ai.models_signal import FenixSignal
+
+@admin.register(FenixSignal)
+class FenixSignalAdmin(admin.ModelAdmin):
+    list_display = ["signal_type", "status", "priority", "message_short", "user", "company", "source", "created_at"]
+    list_filter = ["signal_type", "status", "source", "priority"]
+    search_fields = ["message", "page_url", "user__username"]
+    readonly_fields = ["id", "created_at", "ip_address", "user_agent", "context"]
+    date_hierarchy = "created_at"
+    list_editable = ["status", "priority", "assigned_to"] if False else []
+
+    def message_short(self, obj):
+        return obj.message[:80]
+    message_short.short_description = "Poruka"
