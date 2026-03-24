@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 18mm 14mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a1a; line-height: 1.35; }
+  h1 { font-size: 13pt; text-align: center; margin: 0 0 2px; }
+  h2 { font-size: 10pt; margin: 14px 0 5px; padding-bottom: 2px; border-bottom: 1px solid #c9a84c; }
+  .hdr { border: 2px solid #c9a84c; padding: 10px 14px; margin-bottom: 14px; background: #fdfcf8; text-align: center; }
+  .hdr .org { font-size: 10pt; font-weight: bold; color: #c9a84c; letter-spacing: 1px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { border: 1px solid #ccc; padding: 4px 7px; font-size: 9pt; }
+  th { background: #f5f0e5; font-weight: bold; }
+  .r { text-align: right; }
+  .b { font-weight: bold; }
+  .tot { background: #f5f0e5; font-weight: bold; }
+  .gold { color: #c9a84c; }
+  .info td:first-child { width: 34%; color: #666; }
+  .warn { background: #fff3cd; border: 1px solid #ffc107; padding: 5px 8px; font-size: 8.5pt; margin: 6px 0; }
+  .note { margin-top: 14px; padding: 8px; border: 1px solid #ddd; background: #fafafa; font-size: 7.5pt; color: #888; }
+  .sig { margin-top: 28px; display: flex; justify-content: space-between; }
+  .sig-box { width: 44%; text-align: center; border-top: 1px solid #333; padding-top: 3px; font-size: 8.5pt; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="org">OBRAZAC PO-SD</div>
+  <h1>Izvješće o paušalnom dohotku od samostalnih djelatnosti</h1>
+  <div style="font-size:8.5pt;color:#666;">Porezna godina: <b>{{ year }}.</b> | Čl.82. Zakona o porezu na dohodak</div>
+</div>
+
+<h2>I. Podaci o poreznom obvezniku</h2>
+<table class="info">
+  <tr><td>Ime i prezime</td><td class="b">{{ osobni.ime_prezime }}</td></tr>
+  <tr><td>OIB</td><td>{{ osobni.oib }}</td></tr>
+  <tr><td>Adresa</td><td>{{ osobni.adresa }}</td></tr>
+  <tr><td>Porezna uprava / ispostava</td><td>{{ osobni.porezna_uprava }} / {{ osobni.ispostava }}</td></tr>
+  <tr><td>Djelatnost</td><td>{{ osobni.djelatnost }}</td></tr>
+  {% if osobni.pocetak_djelatnosti %}<tr><td>Početak obavljanja</td><td>{{ osobni.pocetak_djelatnosti|date:"d.m.Y" }}</td></tr>{% endif %}
+  <tr><td>IBAN</td><td>{{ osobni.iban }}</td></tr>
+</table>
+
+<h2>II. Ostvareni primitci (Evidencija prometa)</h2>
+<table>
+  <thead><tr><th>Tromjesečje</th><th>Razdoblje</th><th class="r">Primitci (EUR)</th></tr></thead>
+  <tbody>
+    {% for rok in rokovi %}
+    <tr>
+      <td>Q{{ rok.q }}</td>
+      <td>{{ rok.label }}</td>
+      <td class="r b">{{ rok.promet }} €</td>
+    </tr>
+    {% endfor %}
+    <tr class="tot">
+      <td colspan="2">UKUPNI GODIŠNJI PRIMITCI</td>
+      <td class="r gold" style="font-size:11pt;">{{ godisnji_promet }} €</td>
+    </tr>
+  </tbody>
+</table>
+
+{% if not porez_konfiguriran %}
+<div class="warn">
+  ⚠ Iznos paušalnog poreza po krevetu NIJE konfiguriran za ovu općinu/grad.
+  Unesite u Admin → Firma → Postavke → "posd_tax_per_bed".
+</div>
+{% endif %}
+
+<h2>III. Obračun paušalnog poreza</h2>
+<table>
+  <tr><td>Stalni kreveti (za oporezivanje)</td><td class="r b">{{ stalni_kreveti }}</td></tr>
+  <tr><td>Iznos po krevetu (JLS odluka)</td><td class="r">{{ porez_po_krevetu }} €</td></tr>
+  <tr class="tot"><td>Godišnji paušalni porez</td><td class="r">{{ godisnji_porez }} €</td></tr>
+  <tr><td>Prirez ({{ prirez_rate }}%)</td><td class="r">{{ prirez }} €</td></tr>
+  <tr class="tot"><td>UKUPNO GODIŠNJE (porez + prirez)</td><td class="r b gold" style="font-size:12pt;">{{ ukupno_godisnje }} €</td></tr>
+</table>
+
+<div style="margin:8px 0;font-size:8.5pt;color:#666;">
+  Efektivna porezna stopa: <b>{{ efektivna_stopa }}%</b> (porez / primitci)
+  {% if efektivna_stopa > 30 %}
+  <span style="color:#ef4444;">— Razmotrite prijelaz na oporezivanje dohotka ako imate značajne troškove.</span>
+  {% endif %}
+</div>
+
+<h2>IV. Tromjesečne rate s uplatnicama</h2>
+<table>
+  <thead><tr><th>Kvartal</th><th class="r">Promet</th><th class="r">Rata poreza</th><th>Rok uplate</th></tr></thead>
+  <tbody>
+    {% for rok in rokovi %}
+    <tr>
+      <td>Q{{ rok.q }} ({{ rok.label }})</td>
+      <td class="r">{{ rok.promet }} €</td>
+      <td class="r b">{{ rok.rata }} €</td>
+      <td>{{ rok.deadline|date:"d.m.Y" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% for rok in rokovi %}
+{% if rok.hub3a_base64 %}
+<div style="border:1px solid #ddd;padding:8px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;">
+  <div>
+    <div class="b" style="font-size:9pt;">Q{{ rok.q }} — {{ rok.rata }} €</div>
+    <div style="font-size:7.5pt;color:#666;">Rok: {{ rok.deadline|date:"d.m.Y" }} | IBAN: {{ pu_iban }}</div>
+    <div style="font-size:7pt;color:#999;">Model: HR68 | Poziv: {{ rok.hub3a_reference }}</div>
+  </div>
+  <img src="data:image/png;base64,{{ rok.hub3a_base64 }}" style="width:170px;height:auto;" alt="HUB-3A Q{{ rok.q }}">
+</div>
+{% endif %}
+{% endfor %}
+
+<h2>V. Podaci za uplatu</h2>
+<table class="info">
+  <tr><td>Primatelj</td><td class="b">Državni proračun RH</td></tr>
+  <tr><td>IBAN</td><td>{{ pu_iban }}</td></tr>
+  <tr><td>Model</td><td>HR68</td></tr>
+  <tr><td>Poziv na broj</td><td>1427-{{ osobni.oib }}-{{ year }}</td></tr>
+  <tr><td>Opis plaćanja</td><td>Paušalni porez — iznajmljivanje {{ year }}.</td></tr>
+</table>
+
+<div class="note">
+  Obrazac generiran: {{ generated_at|date:"d.m.Y H:i" }} | LIMIT Connect — limit-connect.com<br>
+  Primitci iz Evidencije prometa (EP). Porez prema čl.82. ZoPD i Pravilniku NN 1/2017.<br>
+  Ovo je informativni dokument. Obveznik provjerava točnost prije predaje Poreznoj upravi.
+</div>
+<div class="sig">
+  <div class="sig-box">Datum: _______________</div>
+  <div class="sig-box">Potpis poreznog obveznika</div>
+</div>
+</body>
+</html>

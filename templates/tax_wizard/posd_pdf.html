@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>PO-SD {{ data.porezna_godina }}</title>
+<style>
+  body { font-family: 'Barlow', Arial, sans-serif; font-size: 11pt; color: #0f172a; margin: 30px; }
+  h1 { font-family: 'Cormorant Garamond', Georgia, serif; color: #c9a84c; font-size: 18pt; margin-bottom: 5px; }
+  h2 { font-size: 13pt; border-bottom: 2px solid #c9a84c; padding-bottom: 4px; margin-top: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+  th, td { padding: 6px 10px; border: 1px solid #e2e8f0; text-align: left; }
+  th { background: #f8fafc; font-size: 9pt; color: #64748b; text-transform: uppercase; }
+  .text-right { text-align: right; }
+  .total-row { background: #fef9e7; font-weight: bold; }
+  .gold { color: #c9a84c; }
+  .footer { margin-top: 30px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+  .disclaimer { background: #f1f5f9; padding: 10px; border-radius: 4px; font-size: 8pt; color: #64748b; margin-top: 20px; }
+  .logo { font-family: 'Cormorant Garamond', serif; color: #c9a84c; font-size: 24pt; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div>
+    <div class="logo">LIMIT CONNECT</div>
+    <div style="font-size:9pt;color:#64748b;">Porezni Savjetnik — Informativni izračun</div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:9pt;color:#64748b;">Generirano: {{ generated_at|date:"d.m.Y H:i" }}</div>
+    <div style="font-size:9pt;color:#64748b;">Porezna godina: {{ data.porezna_godina }}</div>
+  </div>
+</div>
+
+<h1>PO-SD — Izvješće o paušalnom dohotku</h1>
+
+<h2>Podaci o obvezniku</h2>
+<table>
+  <tr><th style="width:30%;">OIB</th><td>{{ data.oib }}</td></tr>
+  <tr><th>Ime i prezime</th><td>{{ data.ime_prezime }}</td></tr>
+  <tr><th>Naziv obrta</th><td>{{ data.naziv_obrta }}</td></tr>
+  <tr><th>Adresa</th><td>{{ data.adresa }}</td></tr>
+  <tr><th>Djelatnost (NKD)</th><td>{{ data.djelatnost_nkd }}</td></tr>
+</table>
+
+<h2>Primitci po kvartalima</h2>
+<table>
+  <tr><th>Kvartal</th><th class="text-right">Iznos (EUR)</th></tr>
+  <tr><td>I. kvartal (siječanj – ožujak)</td><td class="text-right">{{ data.q1_primitak|default:"0" }}</td></tr>
+  <tr><td>II. kvartal (travanj – lipanj)</td><td class="text-right">{{ data.q2_primitak|default:"0" }}</td></tr>
+  <tr><td>III. kvartal (srpanj – rujan)</td><td class="text-right">{{ data.q3_primitak|default:"0" }}</td></tr>
+  <tr><td>IV. kvartal (listopad – prosinac)</td><td class="text-right">{{ data.q4_primitak|default:"0" }}</td></tr>
+  <tr class="total-row"><td>Ukupni godišnji primitak</td><td class="text-right gold">{{ calc.ukupni_primitak|default:"0" }} EUR</td></tr>
+</table>
+
+<h2>Porezni izračun</h2>
+<table>
+  <tr><th style="width:50%;">Porezni razred</th><td class="text-right">{{ calc.porezni_razred }}</td></tr>
+  <tr><th>Godišnji porez</th><td class="text-right">{{ calc.godisnji_porez }} EUR</td></tr>
+  <tr><th>Mjesečni doprinosi</th><td class="text-right">{{ calc.monthly_contributions }} EUR/mj</td></tr>
+  <tr><th>Godišnji doprinosi</th><td class="text-right">{{ calc.annual_contributions }} EUR</td></tr>
+  <tr class="total-row"><th>Ukupni godišnji troškovi</th><td class="text-right gold">{{ calc.total_annual_cost }} EUR</td></tr>
+  <tr><th>Već plaćeni predujam</th><td class="text-right">{{ calc.vec_placeni_porez|default:"0" }} EUR</td></tr>
+  <tr class="total-row"><th>Razlika za uplatu / povrat</th><td class="text-right gold">{{ calc.razlika|default:"0" }} EUR</td></tr>
+</table>
+
+<div class="disclaimer">
+  <strong>Napomena:</strong> Ovo je informativni izračun temeljen na trenutno važećim poreznim stopama
+  i unesenim podacima. Ne predstavlja porezni ili pravni savjet. Za službeno tumačenje obratite se
+  ovlaštenom poreznom savjetniku ili nadležnoj ispostavi Porezne uprave.
+  <br><br>
+  Zakonska osnova: Zakon o porezu na dohodak (NN 115/16, 106/18, 121/19, 32/20, 138/20, 151/22, 114/23, 35/25) — čl. 82.;
+  Pravilnik o paušalnom oporezivanju (NN 1/20, 1/21, 156/22, 143/23) — čl. 2.–8.
+</div>
+
+<div class="footer">
+  LIMIT Connect — limit-connect.com | Ovaj dokument je generiran automatski i ne zahtijeva potpis.<br>
+  Hash: {{ session.data_hash|truncatechars:16 }} | Session: {{ session.id|truncatechars:8 }}
+</div>
+
+</body>
+</html>

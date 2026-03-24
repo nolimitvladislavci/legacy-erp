@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}TZ-2 Obrazac — {{ year }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-3" style="max-width:900px;">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="mb-0" style="color:var(--gold);font-family:'Cormorant Garamond',serif;">
+        <i class="fas fa-file-alt me-2"></i>TZ-2 Obrazac — {{ year }}.
+      </h4>
+      <small class="text-muted">{{ profile.full_name }} · {{ company.name }}</small>
+    </div>
+    <div>
+      <a href="{% url 'rental:tz2_download' year %}" class="btn" style="background:var(--gold);color:#000;font-weight:bold;">
+        <i class="fas fa-file-pdf me-1"></i> Preuzmi PDF
+      </a>
+    </div>
+  </div>
+
+  {% if deadline %}
+  <div class="mb-3 p-3" style="border-left:3px solid {% if deadline < generated_at.date %}#ef4444{% else %}var(--gold){% endif %};background:var(--bg-card);border-radius:0 8px 8px 0;">
+    <strong>Rok predaje:</strong> {{ deadline|date:"d.m.Y" }}
+    {% if deadline < generated_at.date %}
+      <span class="badge bg-danger ms-2">ISTEKAO</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# Iznajmljivač #}
+  <div class="card mb-3" style="background:var(--bg-card);border:1px solid var(--border);">
+    <div class="card-header" style="background:var(--table-header-bg);border-bottom:1px solid var(--border);">
+      <h6 class="mb-0"><i class="fas fa-user me-2"></i>Iznajmljivač</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <small class="text-muted">Ime i prezime</small><br><strong>{{ profile.first_name }} {{ profile.last_name }}</strong><br>
+          <small class="text-muted">OIB</small><br>{{ company.oib }}<br>
+          <small class="text-muted">Adresa</small><br>{{ company.address }}, {{ company.zip_code }} {{ company.city }}
+        </div>
+        <div class="col-md-6">
+          <small class="text-muted">Porezni status</small><br>{{ profile.get_tax_status_display }}<br>
+          <small class="text-muted">Ispostava</small><br>{{ profile.tax_office|default:"—" }} / {{ profile.tax_branch|default:"—" }}<br>
+          <small class="text-muted">TZ</small><br>{{ profile.tz_name|default:"—" }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Objekti i jedinice #}
+  {% for p in properties %}
+  <div class="card mb-3" style="background:var(--bg-card);border:1px solid var(--border);">
+    <div class="card-header" style="background:var(--table-header-bg);border-bottom:1px solid var(--border);">
+      <h6 class="mb-0"><i class="fas fa-building me-2"></i>{{ p.property.name }} <span class="badge" style="background:var(--gold);color:#000;">Razred {{ p.razred }}</span></h6>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-sm mb-0" style="color:var(--text);">
+        <thead><tr style="background:var(--table-header-bg);">
+          <th>Jedinica</th><th>Vrsta</th><th class="text-end">Stalni</th><th class="text-end">Pomoćni</th><th class="text-end">Ukupno</th>
+        </tr></thead>
+        <tbody>
+          {% for u in p.units %}
+          <tr>
+            <td>{{ u.name }}</td>
+            <td>{{ u.get_unit_type_display }}</td>
+            <td class="text-end">{{ u.permanent_beds }}</td>
+            <td class="text-end">{{ u.auxiliary_beds }}</td>
+            <td class="text-end fw-bold">{{ u.total_beds }}</td>
+          </tr>
+          {% endfor %}
+          <tr style="border-top:2px solid var(--gold);">
+            <td colspan="2" class="fw-bold">Ukupno</td>
+            <td class="text-end fw-bold">{{ p.permanent_beds }}</td>
+            <td class="text-end fw-bold">{{ p.auxiliary_beds }}</td>
+            <td class="text-end fw-bold" style="color:var(--gold);">{{ p.total_beds }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+
+  {# Porezni obračun #}
+  <div class="card mb-3" style="border:2px solid var(--gold);background:var(--bg-card);">
+    <div class="card-header" style="background:var(--table-header-bg);border-bottom:1px solid var(--border);">
+      <h6 class="mb-0"><i class="fas fa-calculator me-2"></i>Obračun paušalnog poreza</h6>
+    </div>
+    <div class="card-body">
+      <table class="table table-sm mb-0" style="color:var(--text);">
+        <tr><td>Stalni kreveti: {{ total_permanent }} × {{ pausal_per_permanent }} €</td><td class="text-end fw-bold">{{ annual_tax_permanent }} €</td></tr>
+        <tr><td>Pomoćni kreveti: {{ total_auxiliary }} × {{ pausal_per_auxiliary }} €</td><td class="text-end fw-bold">{{ annual_tax_auxiliary }} €</td></tr>
+        <tr style="border-top:1px solid var(--border);"><td>Godišnji porez</td><td class="text-end">{{ annual_tax_total }} €</td></tr>
+        <tr><td>Prirez ({{ prirez_rate_pct }}%)</td><td class="text-end">{{ prirez_amount }} €</td></tr>
+        <tr style="border-top:2px solid var(--gold);"><td class="fw-bold">UKUPNO GODIŠNJE</td><td class="text-end fw-bold" style="color:var(--gold);font-size:1.2rem;">{{ total_with_prirez }} €</td></tr>
+      </table>
+    </div>
+  </div>
+
+  {# Tromjesečne rate #}
+  <div class="card mb-3" style="background:var(--bg-card);border:1px solid var(--border);">
+    <div class="card-header" style="background:var(--table-header-bg);border-bottom:1px solid var(--border);">
+      <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Tromjesečne rate</h6>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-sm mb-0" style="color:var(--text);">
+        <thead><tr style="background:var(--table-header-bg);"><th>Kvartal</th><th class="text-end">Iznos</th><th>Rok uplate</th></tr></thead>
+        <tbody>
+          {% for q in quarterly_deadlines %}
+          <tr>
+            <td>Q{{ q.q }}</td>
+            <td class="text-end fw-bold">{{ q.amount }} €</td>
+            <td>{{ q.deadline|date:"d.m.Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="{% url 'rental:tz2_download' year %}" class="btn btn-lg" style="background:var(--gold);color:#000;font-weight:bold;">
+      <i class="fas fa-file-pdf me-2"></i> Preuzmi TZ-2 PDF
+    </a>
+    <a href="{% url 'rental:dashboard' %}" class="btn btn-outline-secondary ms-2">
+      <i class="fas fa-arrow-left me-1"></i> Natrag
+    </a>
+  </div>
+
+</div>
+{% endblock %}

@@ -558,7 +558,7 @@ def fenix_post_import_scan(self, company_id, project_id=None):
             notify_inapp(
                 recipient=admin_user,
                 notification_type='system',
-                title='FENIX: Analiza završena!',
+                title='Analiza završena!',
                 message=(
                     f'Pronađeno {opp_count} prilika za uštedu od {total_savings:,.2f} EUR. '
                     f'{f"{risk_count} rizičnih dobavljača detektirano." if risk_count else "Svi dobavljači OK."}'
@@ -644,7 +644,7 @@ def request_adaptation_approval(rule_id):
             notify_inapp(
                 recipient=admin,
                 notification_type='system',
-                title='FENIX: Odobrenje potrebno — promjena PDV stope',
+                title='Odobrenje potrebno — promjena PDV stope',
                 message=f'{payload.get("country")} {payload.get("old_rate")}% → {payload.get("new_rate")}%. Stupa na snagu: {effective}',
                 url='/admin/limit_connect_ai/adaptationrule/',
             )
@@ -812,7 +812,7 @@ def fenix_intercept_incoming(self, eracun_id):
     try:
         from notifications.services import notify as notify_inapp
         if membership and membership.user:
-            title = f'FENIX: Ulazni račun {racun.invoice_number}'
+            title = f'Ulazni račun {racun.invoice_number}'
             message = '; '.join(a['message'][:100] for a in alerts)
             notify_inapp(
                 recipient=membership.user,

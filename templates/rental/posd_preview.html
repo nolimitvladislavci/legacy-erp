@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}PO-SD — {{ year }}{% endblock %}
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-3" style="max-width:900px;">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="mb-0" style="color:var(--gold);font-family:'Cormorant Garamond',serif;">
+        <i class="fas fa-file-invoice-dollar me-2"></i>PO-SD — {{ year }}.
+      </h4>
+      <small class="text-muted">{{ profile.full_name }} · {{ company.name }}</small>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'rental:posd_pdf' year %}" class="btn" style="background:var(--gold);color:#000;font-weight:bold;">
+        <i class="fas fa-file-pdf me-1"></i> PDF
+      </a>
+      <a href="{% url 'rental:posd_xml' year %}" class="btn btn-outline-secondary">
+        <i class="fas fa-file-code me-1"></i> XML
+      </a>
+    </div>
+  </div>
+
+  {% if not porez_konfiguriran %}
+  <div class="alert alert-warning py-2"><i class="fas fa-exclamation-triangle me-1"></i>
+    Iznos poreza po krevetu nije konfiguriran. Unesite u Postavke firme: <code>posd_tax_per_bed</code></div>
+  {% endif %}
+
+  {# Dio I #}
+  <div class="card mb-3" style="background:var(--bg-card);border:1px solid var(--border);">
+    <div class="card-header" style="background:var(--table-header-bg);"><h6 class="mb-0"><i class="fas fa-user me-2"></i>I. Porezni obveznik</h6></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6"><small class="text-muted">Ime</small><br><strong>{{ osobni.ime_prezime }}</strong><br><small class="text-muted">OIB</small><br>{{ osobni.oib }}</div>
+        <div class="col-md-6"><small class="text-muted">Ispostava</small><br>{{ osobni.porezna_uprava }} / {{ osobni.ispostava }}<br><small class="text-muted">Djelatnost</small><br>{{ osobni.djelatnost }}</div>
+      </div>
+    </div>
+  </div>
+
+  {# Dio II #}
+  <div class="card mb-3" style="background:var(--bg-card);border:1px solid var(--border);">
+    <div class="card-header" style="background:var(--table-header-bg);"><h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>II. Primitci iz EP</h6></div>
+    <div class="card-body p-0">
+      <table class="table table-sm mb-0" style="color:var(--text);">
+        {% for rok in rokovi %}
+        <tr><td>Q{{ rok.q }} ({{ rok.label }})</td><td class="text-end fw-bold">{{ rok.promet }} €</td></tr>
+        {% endfor %}
+        <tr style="border-top:2px solid var(--gold);"><td class="fw-bold">UKUPNO {{ year }}.</td><td class="text-end fw-bold" style="color:var(--gold);font-size:1.1rem;">{{ godisnji_promet }} €</td></tr>
+      </table>
+    </div>
+  </div>
+
+  {# Dio III #}
+  <div class="card mb-3" style="border:2px solid var(--gold);background:var(--bg-card);">
+    <div class="card-header" style="background:var(--table-header-bg);"><h6 class="mb-0"><i class="fas fa-calculator me-2"></i>III. Paušalni porez</h6></div>
+    <div class="card-body">
+      <table class="table table-sm mb-0" style="color:var(--text);">
+        <tr><td>Stalni kreveti</td><td class="text-end fw-bold">{{ stalni_kreveti }}</td></tr>
+        <tr><td>Porez po krevetu (JLS)</td><td class="text-end">{{ porez_po_krevetu }} €</td></tr>
+        <tr><td>Godišnji porez</td><td class="text-end">{{ godisnji_porez }} €</td></tr>
+        <tr><td>Prirez ({{ prirez_rate }}%)</td><td class="text-end">{{ prirez }} €</td></tr>
+        <tr style="border-top:2px solid var(--gold);"><td class="fw-bold">UKUPNO</td><td class="text-end fw-bold" style="color:var(--gold);font-size:1.2rem;">{{ ukupno_godisnje }} €</td></tr>
+      </table>
+      <div class="mt-2" style="font-size:.85rem;color:var(--text-muted);">Efektivna stopa: <strong>{{ efektivna_stopa }}%</strong>
+        {% if efektivna_stopa > 30 %}<span class="text-danger ms-1">Visoka stopa — razmotrite prijelaz na dohodak.</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Rate s barkodovima #}
+  <div class="card mb-3" style="background:var(--bg-card);border:1px solid var(--border);">
+    <div class="card-header" style="background:var(--table-header-bg);"><h6 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>IV. Rate + uplatnice</h6></div>
+    <div class="card-body p-0">
+      <table class="table table-sm mb-0" style="color:var(--text);">
+        <thead><tr style="background:var(--table-header-bg);"><th>Kvartal</th><th class="text-end">Promet</th><th class="text-end">Rata</th><th>Rok</th><th>Uplatnica</th></tr></thead>
+        <tbody>
+          {% for rok in rokovi %}
+          <tr>
+            <td>Q{{ rok.q }}</td>
+            <td class="text-end">{{ rok.promet }} €</td>
+            <td class="text-end fw-bold">{{ rok.rata }} €</td>
+            <td>{{ rok.deadline|date:"d.m.Y" }}</td>
+            <td>{% if rok.hub3a_base64 %}<img src="data:image/png;base64,{{ rok.hub3a_base64 }}" style="width:120px;" alt="HUB-3A">{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="{% url 'rental:posd_pdf' year %}" class="btn btn-lg" style="background:var(--gold);color:#000;font-weight:bold;"><i class="fas fa-file-pdf me-2"></i>Preuzmi PO-SD PDF</a>
+    <a href="{% url 'rental:posd_xml' year %}" class="btn btn-lg btn-outline-secondary ms-2"><i class="fas fa-file-code me-2"></i>XML za ePorezna</a>
+  </div>
+</div>
+{% endblock %}

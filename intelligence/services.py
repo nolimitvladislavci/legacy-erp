@@ -139,7 +139,7 @@ def _posalji_obavijest(job, result):
             return False
 
         msg = (
-            f'Fenix Intelligence -- nova prilika\n\n'
+            f'Poslovna inteligencija -- nova prilika\n\n'
             f'*{result.naslov}*\n\n'
             f'{result.summary[:300]}\n\n'
             f'Relevantnost: {result.ai_relevantnost}%\n'

@@ -75,8 +75,8 @@ class FenixSignal(models.Model):
             models.Index(fields=["status", "-created_at"], name="idx_signal_status_date"),
             models.Index(fields=["company", "-created_at"], name="idx_signal_company_date"),
         ]
-        verbose_name = "BORG Signal"
-        verbose_name_plural = "BORG Signali"
+        verbose_name = "Prijava problema"
+        verbose_name_plural = "Prijave problema"
 
     def __str__(self):
         who = self.user.get_full_name() if self.user else "Anon"

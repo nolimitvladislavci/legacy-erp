@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 18mm 14mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a1a; line-height: 1.35; }
+  h1 { font-size: 13pt; text-align: center; margin: 0 0 2px; }
+  h2 { font-size: 10pt; margin: 14px 0 5px; padding-bottom: 2px; border-bottom: 1px solid #c9a84c; }
+  .hdr { border: 2px solid #c9a84c; padding: 10px 14px; margin-bottom: 14px; background: #fdfcf8; text-align: center; }
+  .hdr .org { font-size: 10pt; font-weight: bold; color: #c9a84c; letter-spacing: 1px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  th, td { border: 1px solid #ccc; padding: 4px 7px; font-size: 9pt; }
+  th { background: #f5f0e5; font-weight: bold; }
+  .r { text-align: right; }
+  .b { font-weight: bold; }
+  .tot { background: #f5f0e5; font-weight: bold; }
+  .gold { color: #c9a84c; }
+  .info td:first-child { width: 34%; color: #666; }
+  .disc { background: #e8f5e9; }
+  .warn { background: #fff8e1; border: 1px solid #ffc107; padding: 5px 8px; font-size: 8.5pt; margin: 6px 0; }
+  .note { margin-top: 16px; padding: 8px; border: 1px solid #ddd; background: #fafafa; font-size: 7.5pt; color: #888; }
+  .sig { margin-top: 30px; display: flex; justify-content: space-between; }
+  .sig-box { width: 44%; text-align: center; border-top: 1px solid #333; padding-top: 3px; font-size: 8.5pt; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="org">OBRAZAC TZ-2</div>
+  <h1>Prijava kapaciteta i obračun članarine turističkoj zajednici</h1>
+  <div style="font-size:8.5pt;color:#666;">{{ profile.tz_name|default:"—" }} | Godina: <b>{{ year }}.</b> | Zakon NN 52/19, 144/20</div>
+</div>
+
+<h2>1. Podaci o iznajmljivaču</h2>
+<table class="info">
+  <tr><td>Ime i prezime</td><td class="b">{{ profile.first_name }} {{ profile.last_name }}</td></tr>
+  <tr><td>OIB</td><td>{{ company.oib }}</td></tr>
+  <tr><td>Adresa</td><td>{{ company.address }}, {{ company.zip_code }} {{ company.city }}</td></tr>
+  <tr><td>IBAN</td><td>{{ company.iban|default:"—" }}</td></tr>
+  <tr><td>Porezna ispostava</td><td>{{ profile.tax_office|default:"—" }} / {{ profile.tax_branch|default:"—" }}</td></tr>
+  <tr><td>NKD</td><td>{{ profile.nkd_code }} — Iznajmljivanje smještaja</td></tr>
+</table>
+
+{% for p in properties %}
+<h2>2.{{ forloop.counter }} {{ p.property.name }}{% if p.is_assisted %} <span style="color:#16a34a;font-size:8pt;">(potpomognuto područje)</span>{% endif %}</h2>
+<table>
+  <thead><tr><th>Jedinica</th><th>Vrsta</th><th class="r">Stalni</th><th class="r">Pomoćni</th><th class="r">Ukupno</th></tr></thead>
+  <tbody>
+    {% for u in p.units %}
+    <tr><td>{{ u.name }}</td><td>{{ u.get_unit_type_display }}</td><td class="r">{{ u.permanent_beds }}</td><td class="r">{{ u.auxiliary_beds }}</td><td class="r b">{{ u.total_beds }}</td></tr>
+    {% empty %}
+    <tr><td colspan="2">{{ p.property.name }}</td><td class="r">{{ p.permanent_beds }}</td><td class="r">{{ p.auxiliary_beds }}</td><td class="r b">{{ p.total_beds }}</td></tr>
+    {% endfor %}
+    <tr class="tot"><td colspan="2">Ukupno</td><td class="r">{{ p.permanent_beds }}</td><td class="r">{{ p.auxiliary_beds }}</td><td class="r">{{ p.total_beds }}</td></tr>
+  </tbody>
+</table>
+{% if p.expired_units %}<div class="warn">⚠ Istekla kategorizacija: {% for u in p.expired_units %}{{ u.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+{% endfor %}
+
+<h2>3. Ukupni kapaciteti</h2>
+<table>
+  <tr><th>Vrsta</th><th class="r">Broj</th></tr>
+  <tr><td>Stalni kreveti</td><td class="r b">{{ total_permanent }}</td></tr>
+  <tr><td>Pomoćni kreveti</td><td class="r">{{ total_auxiliary }}</td></tr>
+  <tr class="tot"><td>SVEUKUPNO</td><td class="r">{{ total_beds }}</td></tr>
+</table>
+
+<h2>4. Obračun članarine turističkoj zajednici</h2>
+<table>
+  <tr><td>Stalni kreveti: {{ total_permanent }} × {{ tz_fee_permanent_rate }} €</td><td class="r b">{{ tz_fee_permanent }} €</td></tr>
+  <tr><td>Pomoćni kreveti: {{ total_auxiliary }} × {{ tz_fee_auxiliary_rate }} €</td><td class="r b">{{ tz_fee_auxiliary }} €</td></tr>
+  <tr class="tot"><td>Ukupno članarina</td><td class="r">{{ tz_fee_subtotal }} €</td></tr>
+  {% if tz_any_assisted %}
+  <tr class="disc"><td>Popust 20% — potpomognuto područje (čl.7 st.2)</td><td class="r" style="color:#16a34a;">−{{ tz_assisted_discount }} €</td></tr>
+  <tr class="tot"><td>ZA UPLATU</td><td class="r gold b" style="font-size:11pt;">{{ tz_fee_total }} €</td></tr>
+  {% else %}
+  <tr class="tot"><td>ZA UPLATU</td><td class="r gold b" style="font-size:11pt;">{{ tz_fee_total }} €</td></tr>
+  {% endif %}
+</table>
+
+<h2>5. Rate uplate članarine</h2>
+<table>
+  <thead><tr><th>Rata</th><th class="r">Iznos</th><th>Rok</th></tr></thead>
+  <tbody>
+    {% for r in tz_rates %}
+    <tr><td>{{ r.r }}. rata</td><td class="r b">{{ r.amount }} €</td><td>{{ r.deadline|date:"d.m.Y" }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>5b. Uplatnica s barkodom</h2>
+{% if hub3a_total_base64 %}
+<div style="border:2px solid #c9a84c;padding:12px;margin:8px 0;background:#fdfcf8;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div style="flex:1;">
+      <div style="font-size:8pt;color:#666;margin-bottom:2px;">PRIMATELJ:</div>
+      <div class="b" style="font-size:9pt;">{{ profile.tz_name|default:"Turistička zajednica" }}</div>
+      <div style="font-size:8pt;">IBAN: {{ hub3a_iban }}</div>
+      <div style="font-size:8pt;">Model: {{ hub3a_model }} | Poziv: {{ hub3a_reference }}</div>
+      <div style="margin-top:6px;font-size:8pt;color:#666;">PLATITELJ:</div>
+      <div style="font-size:8pt;">{{ profile.full_name }}, OIB: {{ company.oib }}</div>
+      <div style="margin-top:6px;">
+        <span class="b gold" style="font-size:12pt;">{{ tz_fee_total }} €</span>
+        <span style="font-size:8pt;color:#666;margin-left:4px;">TZ članarina {{ year }}.</span>
+      </div>
+    </div>
+    <div style="flex:0 0 auto;text-align:center;">
+      <img src="data:image/png;base64,{{ hub3a_total_base64 }}" style="width:200px;height:auto;" alt="HUB-3A barkod">
+      <div style="font-size:7pt;color:#999;margin-top:2px;">Skeniraj bankovnom aplikacijom</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if hub3a_rates %}
+<div style="font-size:8.5pt;color:#666;margin:6px 0 4px;">Barkodovi po ratama:</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+  {% for r in hub3a_rates %}
+  <div style="border:1px solid #ddd;padding:8px;flex:1;min-width:180px;text-align:center;">
+    <div class="b" style="font-size:9pt;">{{ r.r }}. rata — {{ r.amount }} €</div>
+    <div style="font-size:7.5pt;color:#666;">Rok: {{ r.deadline|date:"d.m.Y" }}</div>
+    <img src="data:image/png;base64,{{ r.hub3a_base64 }}" style="width:160px;height:auto;margin-top:4px;" alt="Rata {{ r.r }}">
+    <div style="font-size:7pt;color:#999;">{{ r.reference }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h2>6. Paušalni porez na dohodak (odvojen obračun)</h2>
+<table>
+  <tr><td>Stalni: {{ total_permanent }} × {{ tax_per_permanent }} €</td><td class="r">{{ tax_annual }} €</td></tr>
+  <tr><td>Prirez ({{ tax_prirez_rate }}%)</td><td class="r">{{ tax_prirez }} €</td></tr>
+  <tr class="tot"><td>Godišnji porez + prirez</td><td class="r b">{{ tax_total }} €</td></tr>
+  <tr><td>Tromjesečna rata</td><td class="r">{{ tax_quarterly }} €</td></tr>
+</table>
+
+<h2>7. Ukupni primitci — Točka 17 ({{ ep_year }}.)</h2>
+<table>
+  <tr><td>Q1 (siječanj–ožujak)</td><td class="r">{{ ep_quarters.q1 }} €</td></tr>
+  <tr><td>Q2 (travanj–lipanj)</td><td class="r">{{ ep_quarters.q2 }} €</td></tr>
+  <tr><td>Q3 (srpanj–rujan)</td><td class="r">{{ ep_quarters.q3 }} €</td></tr>
+  <tr><td>Q4 (listopad–prosinac)</td><td class="r">{{ ep_quarters.q4 }} €</td></tr>
+  <tr class="tot"><td>UKUPNI PRIMITCI {{ ep_year }}.</td><td class="r b gold">{{ ep_total }} €</td></tr>
+</table>
+
+<div class="note">
+  Obrazac generiran: {{ generated_at|date:"d.m.Y H:i" }} | LIMIT Connect — limit-connect.com<br>
+  Rok predaje: <b>15. siječnja {{ year }}.</b> Članarina prema Zakonu NN 52/19, 144/20. Primitci iz Evidencije prometa (EP).<br>
+  Ovo je informativni dokument. Obveznik provjerava točnost prije predaje.
+</div>
+<div class="sig">
+  <div class="sig-box">Datum: _______________</div>
+  <div class="sig-box">Potpis iznajmljivača</div>
+</div>
+</body>
+</html>

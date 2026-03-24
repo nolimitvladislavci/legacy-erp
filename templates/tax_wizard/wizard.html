@@ -1,0 +1,810 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Porezni Savjetnik — {{ template.get_form_type_display }} {{ session.tax_year }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2 px-md-4 py-3" style="max-width:800px;">
+
+  {# ── HEADER ─────────────────────────────────────────── #}
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h4 class="mb-0" style="color:var(--gold);font-family:'Cormorant Garamond',serif;">
+        <i class="fas fa-file-invoice-dollar me-2"></i>{{ template.get_form_type_display }}
+      </h4>
+      <small class="text-muted">{{ company.name }} — {{ session.tax_year }}. godina</small>
+    </div>
+    <span class="badge" id="statusBadge" style="background:var(--gold);color:#000;">Nacrt</span>
+  </div>
+
+  {# ── PROGRESS BAR ──────────────────────────────────── #}
+  <div class="mb-4">
+    <div class="d-flex justify-content-between mb-1">
+      <small class="text-muted" id="stepLabel">Korak 1 od 5</small>
+      <small class="text-muted" id="progressPct">0%</small>
+    </div>
+    <div class="progress" style="height:6px;background:var(--border);">
+      <div class="progress-bar" id="progressBar"
+           style="width:0%;background:var(--gold);transition:width 0.4s ease;"></div>
+    </div>
+    <div class="d-flex justify-content-between mt-1">
+      <div class="wizard-dots" id="wizardDots"></div>
+    </div>
+  </div>
+
+  {# ── TOAST CONTAINER ───────────────────────────────── #}
+  <div id="toastContainer" style="position:fixed;top:80px;right:16px;z-index:9999;max-width:360px;"></div>
+
+  {# ── AI MESSAGE PANEL ──────────────────────────────── #}
+  <div id="aiPanel" class="mb-3" style="display:none;">
+    <div class="card" style="border-left:3px solid var(--gold);background:var(--bg-card);">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-start">
+          <i class="fas fa-robot me-2 mt-1" style="color:var(--gold);"></i>
+          <div>
+            <small class="text-muted d-block mb-1">LIMIT AI Asistent</small>
+            <div id="aiMessage" style="font-size:0.9rem;color:var(--text);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── WIZARD STEPS ──────────────────────────────────── #}
+  <div id="wizardBody" class="card" style="background:var(--bg-card);border:1px solid var(--border);">
+    <div class="card-body p-3 p-md-4">
+
+      {# Step 0: Osnovni podaci #}
+      <div class="wizard-step" data-step="0">
+        <h5 class="mb-3"><i class="fas fa-user me-2"></i>Osnovni podaci</h5>
+        <div class="mb-3">
+          <label class="form-label small">OIB obveznika</label>
+          <input type="text" class="form-control" id="f_oib" maxlength="11"
+                 placeholder="12345678901" style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">Ime i prezime</label>
+          <input type="text" class="form-control" id="f_ime_prezime"
+                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">Adresa prebivališta</label>
+          <input type="text" class="form-control" id="f_adresa"
+                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">Naziv obrta</label>
+          <input type="text" class="form-control" id="f_naziv_obrta"
+                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">Djelatnost (NKD šifra)</label>
+          <input type="text" class="form-control" id="f_djelatnost_nkd"
+                 placeholder="47.11 — Trgovina na malo"
+                 style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+        </div>
+      </div>
+
+      {# Step 1: Primitci po kvartalima #}
+      <div class="wizard-step" data-step="1" style="display:none;">
+        <h5 class="mb-3"><i class="fas fa-coins me-2"></i>Primitci po kvartalima</h5>
+        <p class="text-muted small mb-3" id="prefillNote"></p>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label small">Q1 (sij–ožu)</label>
+            <div class="input-group">
+              <input type="number" class="form-control q-input" id="f_q1_primitak"
+                     step="0.01" min="0" data-q="1"
+                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <label class="form-label small">Q2 (tra–lip)</label>
+            <div class="input-group">
+              <input type="number" class="form-control q-input" id="f_q2_primitak"
+                     step="0.01" min="0" data-q="2"
+                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <label class="form-label small">Q3 (srp–ruj)</label>
+            <div class="input-group">
+              <input type="number" class="form-control q-input" id="f_q3_primitak"
+                     step="0.01" min="0" data-q="3"
+                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <label class="form-label small">Q4 (lis–pro)</label>
+            <div class="input-group">
+              <input type="number" class="form-control q-input" id="f_q4_primitak"
+                     step="0.01" min="0" data-q="4"
+                     style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+              <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+            </div>
+          </div>
+        </div>
+
+        {# Live kalkulator #}
+        <div class="card p-3 mb-2" style="background:var(--table-header-bg);border:1px solid var(--border);">
+          <div class="d-flex justify-content-between">
+            <span class="fw-bold">Ukupno:</span>
+            <span class="fw-bold" id="liveTotal" style="color:var(--gold);font-size:1.2rem;">0,00 EUR</span>
+          </div>
+          <div class="d-flex justify-content-between mt-1">
+            <small class="text-muted">Razred:</small>
+            <small id="liveTier" class="fw-bold">—</small>
+          </div>
+          <div class="d-flex justify-content-between">
+            <small class="text-muted">Godišnji porez:</small>
+            <small id="liveTax" class="fw-bold">—</small>
+          </div>
+        </div>
+
+        <div id="limitWarning" class="alert alert-danger small py-2 d-none">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          Primitci prelaze 60.000 EUR — paušalni obrt nije moguć!
+        </div>
+      </div>
+
+      {# Step 2: Izračun poreza #}
+      <div class="wizard-step" data-step="2" style="display:none;">
+        <h5 class="mb-3"><i class="fas fa-calculator me-2"></i>Izračun poreza</h5>
+
+        <div class="table-responsive">
+          <table class="table table-sm" style="color:var(--text);">
+            <tr><td class="text-muted">Ukupni primitak</td><td class="text-end fw-bold" id="calc_total">—</td></tr>
+            <tr><td class="text-muted">Porezni razred</td><td class="text-end fw-bold" id="calc_tier">—</td></tr>
+            <tr><td class="text-muted">Godišnji porez</td><td class="text-end fw-bold" id="calc_tax">—</td></tr>
+            <tr><td class="text-muted">Mjesečni doprinosi</td><td class="text-end" id="calc_contrib">—</td></tr>
+            <tr><td class="text-muted">Godišnji doprinosi</td><td class="text-end" id="calc_contrib_yr">—</td></tr>
+            <tr style="border-top:2px solid var(--gold);">
+              <td class="fw-bold">Ukupni godišnji troškovi</td>
+              <td class="text-end fw-bold" style="color:var(--gold);" id="calc_total_cost">—</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small">Već plaćeni predujam poreza (EUR)</label>
+          <div class="input-group">
+            <input type="number" class="form-control" id="f_vec_placeni_porez"
+                   step="0.01" min="0" value="0"
+                   style="background:var(--input-bg);color:var(--text);border-color:var(--input-border);">
+            <span class="input-group-text" style="background:var(--border);color:var(--text-muted);">EUR</span>
+          </div>
+          <small class="text-muted">Koliko ste ukupno platili kvartalnih predujmova?</small>
+        </div>
+
+        <div class="card p-3" id="razlikaCard" style="border:2px solid var(--gold);background:var(--table-header-bg);">
+          <div class="d-flex justify-content-between">
+            <span class="fw-bold" id="razlikaLabel">Razlika:</span>
+            <span class="fw-bold" style="font-size:1.3rem;" id="razlikaValue">—</span>
+          </div>
+        </div>
+      </div>
+
+      {# Step 3: AI provjera #}
+      <div class="wizard-step" data-step="3" style="display:none;">
+        <h5 class="mb-3"><i class="fas fa-brain me-2"></i>Provjera i analiza</h5>
+        <div id="aiCheckResults"></div>
+      </div>
+
+      {# Step 4: Preview i podnošenje #}
+      <div class="wizard-step" data-step="4" style="display:none;">
+        <h5 class="mb-3"><i class="fas fa-check-circle me-2"></i>Pregled i podnošenje</h5>
+
+        <div id="previewSummary" class="mb-3"></div>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-lg" id="btnFinalize"
+                  style="background:var(--gold);color:#000;font-weight:bold;">
+            <i class="fas fa-lock me-2"></i>Finaliziraj obrazac
+          </button>
+          <button class="btn btn-outline-secondary" id="btnDownloadXml" style="display:none;">
+            <i class="fas fa-file-code me-2"></i>Preuzmi XML za ePorezna
+          </button>
+          <button class="btn btn-outline-secondary" id="btnDownloadPdf" style="display:none;">
+            <i class="fas fa-file-pdf me-2"></i>Preuzmi PDF za arhivu
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {# ── NAVIGATION BUTTONS ────────────────────────────── #}
+  <div class="d-flex justify-content-between mt-3">
+    <button class="btn btn-outline-secondary" id="btnPrev" disabled>
+      <i class="fas fa-arrow-left me-1"></i> Natrag
+    </button>
+    <button class="btn" id="btnNext" style="background:var(--gold);color:#000;font-weight:bold;">
+      Dalje <i class="fas fa-arrow-right ms-1"></i>
+    </button>
+  </div>
+
+  {# ── PREFILL BADGE ─────────────────────────────────── #}
+  <div class="text-center mt-3" id="prefillBadge" style="display:none;">
+    <span class="badge" style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:6px 12px;">
+      <i class="fas fa-magic me-1"></i>
+      Podaci automatski povučeni iz sustava — <span id="prefillSources"></span>
+    </span>
+  </div>
+
+</div>
+
+{# ── DISCLAIMER ──────────────────────────────────────── #}
+<div class="text-center py-3 px-4" style="max-width:800px;margin:0 auto;">
+  <small class="text-muted" style="font-size:0.75rem;">
+    Ovo je informativni izračun temeljen na trenutno važećim poreznim stopama.
+    Ne predstavlja porezni ili pravni savjet. Za službeno tumačenje obratite se
+    ovlaštenom poreznom savjetniku ili nadležnoj ispostavi Porezne uprave.
+  </small>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  'use strict';
+
+  // ── State ──────────────────────────────────────────
+  const SESSION   = {{ session_json|safe }};
+  const SCHEMA    = {{ schema_json|safe }};
+  const TIERS     = {{ tiers_json|safe }};
+  const SAVE_URL  = '{% url "tax_wizard:wizard_save_step" session.id %}';
+  const FINAL_URL = '{% url "tax_wizard:wizard_finalize" session.id %}';
+  const XML_URL   = '{% url "tax_wizard:export_xml" session.id %}';
+  const PDF_URL   = '{% url "tax_wizard:export_pdf" session.id %}';
+  const CSRF      = '{{ csrf_token }}';
+  const STEPS     = SCHEMA.steps || [];
+  const TOTAL_STEPS = STEPS.length;
+
+  let currentStep = Math.min(SESSION.current_step || 0, TOTAL_STEPS - 1);
+  let saving = false;
+
+  // ── Init ───────────────────────────────────────────
+  function init() {
+    prefillFields(SESSION.form_data);
+    renderDots();
+    showStep(currentStep);
+    setupLiveCalc();
+    showPrefillBadge();
+    showConfidenceBadges();
+    showYoYDelta();
+
+    document.getElementById('btnNext').addEventListener('click', nextStep);
+    document.getElementById('btnPrev').addEventListener('click', prevStep);
+    document.getElementById('btnFinalize').addEventListener('click', finalizeForm);
+  }
+
+  // ── Field prefill ──────────────────────────────────
+  function prefillFields(data) {
+    if (!data) return;
+    const fields = ['oib','ime_prezime','adresa','naziv_obrta','djelatnost_nkd',
+                     'q1_primitak','q2_primitak','q3_primitak','q4_primitak','vec_placeni_porez'];
+    fields.forEach(f => {
+      const el = document.getElementById('f_' + f);
+      if (el && data[f] !== undefined && data[f] !== null) {
+        el.value = data[f];
+      }
+    });
+  }
+
+  // ── Step navigation ────────────────────────────────
+  function showStep(step) {
+    document.querySelectorAll('.wizard-step').forEach(el => {
+      el.style.display = parseInt(el.dataset.step) === step ? 'block' : 'none';
+    });
+
+    currentStep = step;
+    updateProgress();
+    updateButtons();
+    showAiMessage(step);
+
+    // Step 2: fill calculation table
+    if (step === 2) fillCalcTable();
+    // Step 3: show AI results
+    if (step === 3) showAiChecks();
+    // Step 4: show preview
+    if (step === 4) showPreview();
+  }
+
+  function nextStep() {
+    if (saving) return;
+    if (currentStep >= TOTAL_STEPS - 1) return;
+
+    const data = collectStepData(currentStep);
+    const errors = validateStep(currentStep, data);
+    if (errors.length) {
+      errors.forEach(e => showToast(e, 'danger'));
+      return;
+    }
+
+    saveStep(currentStep, data, function(result) {
+      if (result.ok) {
+        // Update local state with server response
+        if (result.session) {
+          Object.assign(SESSION, result.session);
+        }
+        showStep(currentStep + 1);
+      } else {
+        (result.errors || []).forEach(e => showToast(e, 'danger'));
+      }
+    });
+  }
+
+  function prevStep() {
+    if (currentStep > 0) showStep(currentStep - 1);
+  }
+
+  // ── Collect data ───────────────────────────────────
+  function collectStepData(step) {
+    const data = {};
+    if (step === 0) {
+      data.oib = document.getElementById('f_oib').value.trim();
+      data.ime_prezime = document.getElementById('f_ime_prezime').value.trim();
+      data.adresa = document.getElementById('f_adresa').value.trim();
+      data.naziv_obrta = document.getElementById('f_naziv_obrta').value.trim();
+      data.djelatnost_nkd = document.getElementById('f_djelatnost_nkd').value.trim();
+      data.porezna_godina = {{ session.tax_year }};
+    } else if (step === 1) {
+      data.q1_primitak = parseFloat(document.getElementById('f_q1_primitak').value) || 0;
+      data.q2_primitak = parseFloat(document.getElementById('f_q2_primitak').value) || 0;
+      data.q3_primitak = parseFloat(document.getElementById('f_q3_primitak').value) || 0;
+      data.q4_primitak = parseFloat(document.getElementById('f_q4_primitak').value) || 0;
+    } else if (step === 2) {
+      data.vec_placeni_porez = parseFloat(document.getElementById('f_vec_placeni_porez').value) || 0;
+    }
+    return data;
+  }
+
+  // ── Validation ─────────────────────────────────────
+  function validateStep(step, data) {
+    const errors = [];
+    if (step === 0) {
+      if (!data.oib || data.oib.length !== 11) errors.push('OIB mora imati točno 11 znamenki.');
+      if (!data.ime_prezime) errors.push('Ime i prezime je obavezno.');
+      if (!data.naziv_obrta) errors.push('Naziv obrta je obavezan.');
+    } else if (step === 1) {
+      const total = data.q1_primitak + data.q2_primitak + data.q3_primitak + data.q4_primitak;
+      if (total > 60000) errors.push('Primitci prelaze 60.000 EUR — paušalni obrt nije moguć!');
+      if (total < 0) errors.push('Primitci ne mogu biti negativni.');
+    }
+    return errors;
+  }
+
+  // ── AJAX save ──────────────────────────────────────
+  function saveStep(step, data, callback) {
+    saving = true;
+    setBtnLoading(true);
+
+    fetch(SAVE_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+      body: JSON.stringify({step: step, data: data}),
+    })
+    .then(r => r.json())
+    .then(result => {
+      saving = false;
+      setBtnLoading(false);
+      callback(result);
+    })
+    .catch(err => {
+      saving = false;
+      setBtnLoading(false);
+      showToast('Greška pri spremanju. Pokušajte ponovo.', 'danger');
+    });
+  }
+
+  // ── Button loading state ───────────────────────────
+  function setBtnLoading(loading) {
+    const btn = document.getElementById('btnNext');
+    if (loading) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Obrada...';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = 'Dalje <i class="fas fa-arrow-right ms-1"></i>';
+    }
+  }
+
+  // ── Progress ───────────────────────────────────────
+  function updateProgress() {
+    const pct = Math.round(((currentStep + 1) / TOTAL_STEPS) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('stepLabel').textContent = `Korak ${currentStep + 1} od ${TOTAL_STEPS}`;
+
+    document.querySelectorAll('.wiz-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i <= currentStep);
+    });
+  }
+
+  function updateButtons() {
+    document.getElementById('btnPrev').disabled = currentStep === 0;
+    const btn = document.getElementById('btnNext');
+    if (currentStep === TOTAL_STEPS - 1) {
+      btn.style.display = 'none';
+    } else {
+      btn.style.display = '';
+    }
+  }
+
+  function renderDots() {
+    const container = document.getElementById('wizardDots');
+    container.innerHTML = '';
+    for (let i = 0; i < TOTAL_STEPS; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'wiz-dot';
+      dot.style.cssText = 'width:10px;height:10px;border-radius:50%;display:inline-block;margin:0 3px;background:var(--border);cursor:pointer;transition:background 0.3s;';
+      dot.addEventListener('click', () => { if (i <= (SESSION.current_step || 0)) showStep(i); });
+      container.appendChild(dot);
+    }
+  }
+
+  // ── AI Messages ────────────────────────────────────
+  function showAiMessage(step) {
+    const panel = document.getElementById('aiPanel');
+    const msgEl = document.getElementById('aiMessage');
+    const stepSchema = STEPS[step];
+
+    if (stepSchema && stepSchema.ai_message) {
+      const locale = SESSION.locale || 'hr';
+      const msg = (locale !== 'hr' && stepSchema.ai_message_en) ? stepSchema.ai_message_en : stepSchema.ai_message;
+      msgEl.innerHTML = msg;
+      panel.style.display = 'block';
+    } else {
+      panel.style.display = 'none';
+    }
+  }
+
+  // ── Live calculator (Step 1) ───────────────────────
+  function setupLiveCalc() {
+    document.querySelectorAll('.q-input').forEach(input => {
+      input.addEventListener('input', updateLiveCalc);
+    });
+  }
+
+  function updateLiveCalc() {
+    const q1 = parseFloat(document.getElementById('f_q1_primitak').value) || 0;
+    const q2 = parseFloat(document.getElementById('f_q2_primitak').value) || 0;
+    const q3 = parseFloat(document.getElementById('f_q3_primitak').value) || 0;
+    const q4 = parseFloat(document.getElementById('f_q4_primitak').value) || 0;
+    const total = q1 + q2 + q3 + q4;
+
+    document.getElementById('liveTotal').textContent = formatEUR(total);
+
+    // Tier lookup
+    const tier = TIERS.find(t => total >= parseFloat(t.min_income) && total <= parseFloat(t.max_income));
+    if (tier) {
+      document.getElementById('liveTier').textContent = 'Razred ' + tier.tier_number;
+      document.getElementById('liveTax').textContent = formatEUR(parseFloat(tier.annual_tax));
+    } else if (total > 60000) {
+      document.getElementById('liveTier').textContent = 'IZNAD LIMITA';
+      document.getElementById('liveTier').style.color = '#ef4444';
+      document.getElementById('liveTax').textContent = '—';
+    } else {
+      document.getElementById('liveTier').textContent = '—';
+      document.getElementById('liveTax').textContent = '—';
+    }
+
+    // 60K warning
+    const warning = document.getElementById('limitWarning');
+    warning.classList.toggle('d-none', total <= 60000);
+  }
+
+  // ── Fill calc table (Step 2) ───────────────────────
+  function fillCalcTable() {
+    const c = SESSION.calculated_results || {};
+    document.getElementById('calc_total').textContent = formatEUR(c.ukupni_primitak || 0);
+    document.getElementById('calc_tier').textContent = 'Razred ' + (c.porezni_razred || '—');
+    document.getElementById('calc_tax').textContent = formatEUR(c.godisnji_porez || 0);
+    document.getElementById('calc_contrib').textContent = formatEUR(c.monthly_contributions || 0) + '/mj';
+    document.getElementById('calc_contrib_yr').textContent = formatEUR(c.annual_contributions || 0) + '/god';
+    document.getElementById('calc_total_cost').textContent = formatEUR(c.total_annual_cost || 0);
+  }
+
+  // ── AI checks (Step 3) ─────────────────────────────
+  function showAiChecks() {
+    const container = document.getElementById('aiCheckResults');
+    const msgs = SESSION.ai_messages || [];
+    container.innerHTML = '';
+
+    if (!msgs.length) {
+      container.innerHTML = '<p class="text-muted">Nema AI poruka.</p>';
+      return;
+    }
+
+    msgs.forEach(m => {
+      const icons = {error:'exclamation-circle',warning:'exclamation-triangle',info:'info-circle',success:'check-circle',simulation:'chart-line'};
+      const colors = {error:'#ef4444',warning:'#f59e0b',info:'#3b82f6',success:'#10b981',simulation:'#8b5cf6'};
+      const type = m.type || 'info';
+      const div = document.createElement('div');
+      div.className = 'card mb-2';
+      div.style.borderLeft = '3px solid ' + (colors[type] || '#6b7280');
+      div.style.background = 'var(--bg-card)';
+      div.innerHTML = `<div class="card-body p-3">
+        <i class="fas fa-${icons[type] || 'info-circle'} me-2" style="color:${colors[type] || '#6b7280'};"></i>
+        <span style="font-size:0.9rem;">${m.message}</span>
+      </div>`;
+      container.appendChild(div);
+    });
+  }
+
+  // ── Preview (Step 4) ───────────────────────────────
+  function showPreview() {
+    const d = SESSION.form_data || {};
+    const c = SESSION.calculated_results || {};
+    const container = document.getElementById('previewSummary');
+
+    container.innerHTML = `
+      <div class="card mb-3" style="background:var(--table-header-bg);border:1px solid var(--border);">
+        <div class="card-body p-3">
+          <h6 class="mb-2">Obveznik</h6>
+          <table class="table table-sm mb-0" style="color:var(--text);">
+            <tr><td class="text-muted">OIB</td><td>${d.oib || '—'}</td></tr>
+            <tr><td class="text-muted">Ime</td><td>${d.ime_prezime || '—'}</td></tr>
+            <tr><td class="text-muted">Obrt</td><td>${d.naziv_obrta || '—'}</td></tr>
+            <tr><td class="text-muted">Adresa</td><td>${d.adresa || '—'}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="card mb-3" style="background:var(--table-header-bg);border:1px solid var(--border);">
+        <div class="card-body p-3">
+          <h6 class="mb-2">Primitci ${d.porezna_godina || ''}</h6>
+          <table class="table table-sm mb-0" style="color:var(--text);">
+            <tr><td class="text-muted">Q1</td><td class="text-end">${formatEUR(d.q1_primitak || 0)}</td></tr>
+            <tr><td class="text-muted">Q2</td><td class="text-end">${formatEUR(d.q2_primitak || 0)}</td></tr>
+            <tr><td class="text-muted">Q3</td><td class="text-end">${formatEUR(d.q3_primitak || 0)}</td></tr>
+            <tr><td class="text-muted">Q4</td><td class="text-end">${formatEUR(d.q4_primitak || 0)}</td></tr>
+            <tr style="border-top:2px solid var(--gold);">
+              <td class="fw-bold">Ukupno</td>
+              <td class="text-end fw-bold" style="color:var(--gold);">${formatEUR(c.ukupni_primitak || 0)}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="border:2px solid var(--gold);background:var(--table-header-bg);">
+        <div class="card-body p-3">
+          <h6 class="mb-2">Izračun</h6>
+          <table class="table table-sm mb-0" style="color:var(--text);">
+            <tr><td class="text-muted">Razred</td><td class="text-end fw-bold">${c.porezni_razred || '—'}</td></tr>
+            <tr><td class="text-muted">Godišnji porez</td><td class="text-end">${formatEUR(c.godisnji_porez || 0)}</td></tr>
+            <tr><td class="text-muted">Godišnji doprinosi</td><td class="text-end">${formatEUR(c.annual_contributions || 0)}</td></tr>
+            <tr style="border-top:2px solid var(--gold);">
+              <td class="fw-bold">Ukupni godišnji troškovi</td>
+              <td class="text-end fw-bold" style="color:var(--gold);">${formatEUR(c.total_annual_cost || 0)}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Finalize ───────────────────────────────────────
+  function finalizeForm() {
+    if (saving) return;
+    if (!confirm('Jeste li sigurni? Nakon finalizacije obrazac se zaključava.')) return;
+
+    saving = true;
+    const btn = document.getElementById('btnFinalize');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Finalizacija...';
+
+    fetch(FINAL_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+    })
+    .then(r => r.json())
+    .then(result => {
+      saving = false;
+      if (result.ok) {
+        showToast('Obrazac finaliziran!', 'success');
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Finalizirano';
+        btn.classList.add('btn-success');
+        btn.style.background = '#10b981';
+
+        // Pokaži download gumbe
+        document.getElementById('btnDownloadXml').style.display = '';
+        document.getElementById('btnDownloadPdf').style.display = '';
+        document.getElementById('btnDownloadXml').addEventListener('click', () => window.open(XML_URL));
+        document.getElementById('btnDownloadPdf').addEventListener('click', () => window.open(PDF_URL));
+
+        document.getElementById('statusBadge').textContent = 'Finalizirano';
+        document.getElementById('statusBadge').style.background = '#10b981';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-lock me-2"></i>Finaliziraj obrazac';
+        showToast(result.error || 'Greška pri finalizaciji.', 'danger');
+      }
+    })
+    .catch(() => {
+      saving = false;
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock me-2"></i>Finaliziraj obrazac';
+      showToast('Greška pri finalizaciji.', 'danger');
+    });
+  }
+
+  // ── Prefill badge ──────────────────────────────────
+  function showPrefillBadge() {
+    const sources = SESSION.form_data._prefill_sources;
+    if (sources && sources.length) {
+      const labels = {invoicing: 'Fakture', pos: 'POS blagajna'};
+      const text = sources.map(s => labels[s] || s).join(' + ');
+      document.getElementById('prefillSources').textContent = text;
+      document.getElementById('prefillBadge').style.display = '';
+
+      const total = SESSION.form_data.ukupni_primitak || 0;
+      if (total > 0) {
+        document.getElementById('prefillNote').innerHTML =
+          `<i class="fas fa-magic me-1" style="color:var(--gold);"></i> ` +
+          `Automatski povučeno <strong>${formatEUR(total)}</strong> iz vaših ${text.toLowerCase()}.`;
+      }
+    }
+  }
+
+  // ── Toast ──────────────────────────────────────────
+  function showToast(message, type) {
+    const container = document.getElementById('toastContainer');
+    const colors = {danger:'#ef4444',success:'#10b981',warning:'#f59e0b',info:'#3b82f6'};
+    const icons = {danger:'exclamation-circle',success:'check-circle',warning:'exclamation-triangle',info:'info-circle'};
+
+    const toast = document.createElement('div');
+    toast.className = 'mb-2 shadow-sm';
+    toast.style.cssText = `
+      background:var(--bg-card);border:1px solid var(--border);border-left:4px solid ${colors[type]||'#6b7280'};
+      border-radius:8px;padding:12px 16px;animation:slideIn 0.3s ease;font-size:0.9rem;color:var(--text);
+    `;
+    toast.innerHTML = `<i class="fas fa-${icons[type]||'info-circle'} me-2" style="color:${colors[type]||'#6b7280'};"></i>${message}`;
+    container.appendChild(toast);
+
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 4000);
+    setTimeout(() => toast.remove(), 4500);
+  }
+
+  // ── Helpers ────────────────────────────────────────
+  function formatEUR(val) {
+    return new Intl.NumberFormat('hr-HR', {style:'currency', currency:'EUR'}).format(val || 0);
+  }
+
+
+  // ── Confidence Badges ────────────────────────────
+  function showConfidenceBadges() {
+    const confidence = SESSION.form_data._confidence || {};
+    const fields = ['q1_primitak','q2_primitak','q3_primitak','q4_primitak'];
+
+    fields.forEach(f => {
+      const input = document.getElementById('f_' + f);
+      if (!input) return;
+
+      const score = confidence[f];
+      if (score === undefined || score === null) return;
+
+      // Ukloni stari badge ako postoji
+      const existing = input.parentElement.querySelector('.confidence-dot');
+      if (existing) existing.remove();
+
+      const dot = document.createElement('span');
+      dot.className = 'confidence-dot';
+      if (score >= 0.8) {
+        dot.classList.add('confidence-high');
+        dot.title = `Pouzdanost: ${Math.round(score * 100)}% — podaci iz sustava`;
+      } else if (score >= 0.5) {
+        dot.classList.add('confidence-medium');
+        dot.title = `Pouzdanost: ${Math.round(score * 100)}% — provjerite podatke`;
+      } else if (score > 0) {
+        dot.classList.add('confidence-low');
+        dot.title = `Pouzdanost: ${Math.round(score * 100)}% — nepotpuni podaci`;
+      } else {
+        dot.classList.add('confidence-none');
+        dot.title = 'Nema podataka u sustavu — unesite ručno';
+      }
+
+      // Dodaj pored input grupe
+      const parent = input.closest('.input-group') || input.parentElement;
+      parent.style.position = 'relative';
+      parent.appendChild(dot);
+      dot.style.position = 'absolute';
+      dot.style.right = '-18px';
+      dot.style.top = '50%';
+      dot.style.transform = 'translateY(-50%)';
+    });
+  }
+
+  // ── YoY Delta Indicators ─────────────────────────
+  function showYoYDelta() {
+    const delta = SESSION.form_data._yoy_delta;
+    if (!delta || !delta.available) return;
+
+    const quarters = delta.quarters || {};
+    for (let q = 1; q <= 4; q++) {
+      const qData = quarters['q' + q];
+      if (!qData) continue;
+
+      const pct = qData.change_pct;
+      if (Math.abs(pct) < 5) continue;  // ne prikazuj trivijalne promjene
+
+      const input = document.getElementById('f_q' + q + '_primitak');
+      if (!input) continue;
+
+      const label = input.closest('.col-6')?.querySelector('label');
+      if (!label) continue;
+
+      // Ukloni stari badge
+      const existing = label.querySelector('.yoy-badge');
+      if (existing) existing.remove();
+
+      const badge = document.createElement('span');
+      badge.className = 'yoy-badge';
+      if (pct > 0) {
+        badge.classList.add('yoy-up');
+        badge.textContent = `+${Math.round(pct)}%`;
+        badge.title = `${formatEUR(qData.current)} vs ${formatEUR(qData.previous)} (${delta.prev_year})`;
+      } else {
+        badge.classList.add('yoy-down');
+        badge.textContent = `${Math.round(pct)}%`;
+        badge.title = `${formatEUR(qData.current)} vs ${formatEUR(qData.previous)} (${delta.prev_year})`;
+      }
+      label.appendChild(badge);
+    }
+
+    // Ukupni YoY u prefill note
+    if (delta.total_change_pct && Math.abs(delta.total_change_pct) > 5) {
+      const note = document.getElementById('prefillNote');
+      if (note && note.innerHTML) {
+        const dir = delta.total_change_pct > 0 ? 'veći' : 'manji';
+        const cls = delta.total_change_pct > 0 ? 'yoy-up' : 'yoy-down';
+        note.innerHTML += ` <span class="yoy-badge ${cls}">${Math.abs(Math.round(delta.total_change_pct))}% ${dir} od ${delta.prev_year}.</span>`;
+      }
+    }
+  }
+
+  // ── Boot ───────────────────────────────────────────
+  init();
+
+})();
+</script>
+
+<style>
+  @keyframes slideIn { from { transform:translateX(100%);opacity:0; } to { transform:translateX(0);opacity:1; } }
+  .wiz-dot.active { background:var(--gold) !important; }
+  .wizard-step { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0;transform:translateY(8px); } to { opacity:1;transform:translateY(0); } }
+
+  .confidence-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .confidence-high { background: #10b981; }   /* zeleno — 0.8-1.0 */
+  .confidence-medium { background: #f59e0b; } /* žuto — 0.5-0.79 */
+  .confidence-low { background: #ef4444; }    /* crveno — <0.5 */
+  .confidence-none { background: #6b7280; }   /* sivo — 0.0 */
+
+  .yoy-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+    font-weight: 600;
+  }
+  .yoy-up { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .yoy-down { background: rgba(16,185,129,0.15); color: #10b981; }
+  .yoy-neutral { background: rgba(107,114,128,0.15); color: #6b7280; }
+  @media (max-width:576px) {
+    .container-fluid { padding-left:8px !important; padding-right:8px !important; }
+    h4 { font-size:1.2rem !important; }
+  }
+</style>
+{% endblock %}

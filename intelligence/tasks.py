@@ -28,7 +28,7 @@ def intelligence_nightly_patrol(self):
         except Exception as e:
             logger.error('Intelligence job failed %s: %s', job.company.name, e)
 
-    notify('INFO', f'Fenix Intelligence patrol zavrsen -- {total_results} pronalazaka, {total_sent} obavijesti poslano')
+    notify('INFO', f'Inteligencija patrol zavrsen -- {total_results} pronalazaka, {total_sent} obavijesti poslano')
     return {'results': total_results, 'sent': total_sent}
 
 
