@@ -50,6 +50,25 @@ Commit: 2430991
 - Bloker: pogrešan FINA endpoint (fiskalizacija vs eRačun)
 - CC_TASK_ERACUN_POSREDNIK_F1.md — čeka ispravak endpointa
 
+
+### UI Templates — DONE (2026-03-24 13:05)
+Commit: fb2b82e
+
+**Arhiva:**
+- documents/templates/documents/arhiva_list.html — kompletna tablica, filteri, stats, bookmark, paginacija
+- documents/templates/documents/scan_batch.html — 5 faza (upload/preview/AI/rezultati/done), drag&drop, kompresija WebP, live polling
+
+**Tax Wizard:**
+- tax_wizard/templates/tax_wizard/dashboard.html — obrasci, sesije, rokovi, tierovi
+- tax_wizard/templates/tax_wizard/wizard.html — JSON-driven koraci, live kalkulator, AI poruke
+- tax_wizard/templates/tax_wizard/no_company.html
+
+**Rental:**
+- Sve migracije OK (Guest, GuestDocument, RentalInvoice, TrafficRecord)
+- ocr.py, evisitor.py, invoice_service.py — sve importa
+
+Status: Marija može pristupiti arhivi, scan batchu i poreznom savjetniku.
+
 ## ★ NOVI SMJER — BORG SYSTEM FENIX (2026-03-24)
 Master plan: /var/www/fina-connect/BORG_FENIX_MASTER_PLAN.md
 Filozofija: Asimilacija stvarne materije (zakoni, računi, tržište) u real-time.
