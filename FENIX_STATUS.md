@@ -11,6 +11,20 @@ Git HEAD: 314f3de
 
 ---
 
+
+---
+
+## TAX WIZARD — Plan kreiran (2026-03-24)
+Fajlovi:
+- TAX_WIZARD_MASTER_PLAN.md — master plan + milestone tracker
+- CC_TASK_TAX_WIZARD_F1.md — infrastruktura (CC Code)
+- GEMINI_TASK_TAX_WIZARD_F2.md — AI motor + deductions (Gemini)
+- SONNET_TASK_TAX_WIZARD_F3.md — UX + partner portal + PDF (Sonnet)
+- IVAN_TASK_TAX_WIZARD_F4.md — tržište + distribucija (Ivan)
+
+Status: PLAN READY — čeka se F1 pokretanje
+MVP target: 2027-02-01 (rok DOH 2026)
+
 ## ★ NOVI SMJER — BORG SYSTEM FENIX (2026-03-24)
 Master plan: /var/www/fina-connect/BORG_FENIX_MASTER_PLAN.md
 Filozofija: Asimilacija stvarne materije (zakoni, računi, tržište) u real-time.
