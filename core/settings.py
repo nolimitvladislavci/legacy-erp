@@ -731,3 +731,15 @@ CELERY_BEAT_SCHEDULE.update({
         "kwargs": {"batch_size": 100},
     },
 })
+
+# ── BORG Signal Patrol ──────────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "borg-signal-patrol-30min": {
+        "task": "limit_connect_ai.tasks_signal.signal_patrol",
+        "schedule": 1800,  # 30 min
+    },
+    "borg-signal-daily-digest": {
+        "task": "limit_connect_ai.tasks_signal.daily_signal_digest",
+        "schedule": crontab(hour=7, minute=0),
+    },
+})

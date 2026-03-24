@@ -102,8 +102,15 @@ def submit_signal(request):
         user or ip,
     )
 
+    # FAZA 2: Haiku AI triage — async, ne blokira response
+    try:
+        from limit_connect_ai.tasks_signal import triage_new_signal
+        triage_new_signal.delay(str(signal.id))
+    except Exception:
+        pass  # Triage failure ne smije blokirati signal
+
     return JsonResponse({
         "ok": True,
         "signal_id": str(signal.id),
-        "message": "Hvala! Signal primljen. Radimo na tome.",
+        "message": "Hvala! Signal primljen. BORG analizira...",
     })
