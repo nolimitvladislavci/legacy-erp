@@ -128,10 +128,13 @@ INSTALLED_APPS = [
     "udruge",
     "livestock",
     "intelligence",
+    "einvoice",
     "limit_connect_ai",
+    "tax_wizard",
 ]
 
 MIDDLEWARE = [
+    "core.middleware.GracefulErrorMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -537,6 +540,24 @@ CELERY_BEAT_SCHEDULE = {
         "task": "limit_connect_ai.tasks_risk.scan_supplier_risk",
         "schedule": crontab(hour=4, minute=30),
     },
+    # ── Tax Wizard ──
+    "tax-check-deadlines": {
+        "task": "tax_wizard.tasks.check_tax_deadlines",
+        "schedule": crontab(hour=7, minute=0),
+    },
+    "tax-prefill-quarterly": {
+        "task": "tax_wizard.tasks.prefill_quarterly_data",
+        "schedule": crontab(day_of_month=1, hour=5, minute=0),
+    },
+    "tax-cleanup-expired": {
+        "task": "tax_wizard.tasks.cleanup_expired_sessions",
+        "schedule": crontab(hour=3, minute=30),
+    },
+    "tax-generate-annual-deadlines": {
+        "task": "tax_wizard.tasks.generate_annual_deadlines",
+        "schedule": crontab(month_of_year=1, day_of_month=1, hour=0, minute=30),
+    },
+
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────
 import os as _os
@@ -550,6 +571,19 @@ WAHA_API_URL = os.environ.get('WAHA_API_URL', 'http://127.0.0.1:3000')
 WAHA_SESSION_NAME = os.environ.get('WAHA_SESSION_NAME', 'default')
 WAHA_ENABLED = os.environ.get('WAHA_ENABLED', 'True').lower() in ('true', '1', 'yes')
 WAHA_API_KEY = os.environ.get('WAHA_API_KEY', '')
+
+# ── Error Notification Phones ──────────────────────────────────
+# WhatsApp brojevi koji primaju 500 error notifikacije
+# Dev tim dobiva traceback, ops tim dobiva user-friendly poruku
+ERROR_NOTIFY_PHONES = [
+    p.strip() for p in
+    _os.environ.get('ERROR_NOTIFY_PHONES', '').split(',') if p.strip()
+]
+ERROR_NOTIFY_OPS_PHONES = [
+    p.strip() for p in
+    _os.environ.get('ERROR_NOTIFY_OPS_PHONES', '').split(',') if p.strip()
+]
+
 
 # ── API Documentation ────────────────────────────────────────
 SPECTACULAR_SETTINGS = {
@@ -637,3 +671,36 @@ if 'test' in sys.argv:
 # Ovo utišava alarme za fiskalizaciju/eRačun na legacy podacima.
 FISCAL_SANDBOX_BEFORE = int(os.environ.get('FISCAL_SANDBOX_BEFORE', '2026'))
 IS_SANDBOX_MODE = os.environ.get('IS_SANDBOX_MODE', 'False').lower() in ('true', '1')
+
+# ── e-Invoice (PROPTER AS4/Peppol) ─────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "einvoice-poll-inbox-30s": {
+        "task": "einvoice.tasks.inbound_tasks.poll_inbox",
+        "schedule": 30.0,
+    },
+    "einvoice-check-delivery-60s": {
+        "task": "einvoice.tasks.status_tasks.check_delivery_statuses",
+        "schedule": 60.0,
+    },
+    "einvoice-process-retry-queue-60s": {
+        "task": "einvoice.tasks.outbound_tasks.process_retry_queue",
+        "schedule": 60.0,
+    },
+})
+
+# FINA Posrednik settings (Phase 1)
+FINA_POSREDNIK_BASE_URL = os.environ.get("FINA_POSREDNIK_BASE_URL", "https://api.einvoice.hr/v1")
+FINA_POSREDNIK_API_KEY = os.environ.get("FINA_POSREDNIK_API_KEY", "")
+FINA_POSREDNIK_CLIENT_CERT = os.environ.get("FINA_POSREDNIK_CLIENT_CERT", "")
+FINA_POSREDNIK_CLIENT_KEY = os.environ.get("FINA_POSREDNIK_CLIENT_KEY", "")
+FINA_POSREDNIK_SANDBOX = os.environ.get("FINA_POSREDNIK_SANDBOX", "True").lower() in ("true", "1")
+
+# S3/MinIO Archive
+S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://minio:9000")
+S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "")
+S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "")
+S3_REGION = os.environ.get("S3_REGION", "eu-central-1")
+S3_ARCHIVE_BUCKET = os.environ.get("S3_ARCHIVE_BUCKET", "propter-einvoice-archive")
+
+# phase4 AP (Phase 3 — disabled by default)
+PHASE4_AP_ENABLED = os.environ.get("PHASE4_AP_ENABLED", "False").lower() in ("true", "1")

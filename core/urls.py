@@ -190,6 +190,7 @@ urlpatterns += i18n_patterns(
     path('worktime/', include('worktime.urls')),
     path('payroll/', include('payroll.urls')),
     path('pdv-s/', include('pdv_s.urls')),
+    path('porezni-savjetnik/', include('tax_wizard.urls')),
     path('aml/', include('aml.urls')),
     path('edik/', include('edik.urls')),
     path('virtual-office/', include('virtual_office.urls')),
@@ -207,6 +208,7 @@ urlpatterns += i18n_patterns(
     path('pos/', include('pos.urls')),
     path('payments/', include('payments.urls')),
     path('eracun/', include('eracun.urls')),
+    path('api/einvoice/', include('einvoice.api.urls')),
     path('helpdesk/', include('helpdesk.urls')),
     path('maintenance/', include('maintenance.urls')),
     path('propter/', include('propter.urls')),
@@ -313,3 +315,13 @@ urlpatterns += [
     path('_dev/write/', __import__('core.remote_api', fromlist=['remote_write']).remote_write),
 ]
 
+
+# ── Custom Error Handlers ──────────────────────────────────────
+def custom_404_handler(request, exception=None):
+    """404 → redirect na početnu s toast porukom."""
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    messages.warning(request, f'Stranica "{request.path}" nije pronađena.')
+    return redirect('/')
+
+handler404 = 'core.urls.custom_404_handler'
