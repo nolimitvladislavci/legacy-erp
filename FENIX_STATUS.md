@@ -6,8 +6,8 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-23 19:54 — Opus (T&C test fix, Cross-Module POS×Invoicing task spec)
-Git HEAD: 314f3de
+2026-03-24 sesija — POS Simulacija 25/25 ✅ (Sonnet)
+Git HEAD: c76f55a
 
 ---
 
@@ -182,6 +182,13 @@ Commit: 8a2fc66
 ### Livestock/Vet modul bugfixi (22.03.) — DONE
 
 ### Korpa firme registracija (22.03.) — DONE
+
+### POS Simulacija — DONE (2026-03-24)
+Commit: c76f55a
+- 6 scenarija: quick, retail, udruga, field, brzi-iznos, reception
+- 25/25 OK | 0 ERROR | 12 training računa | 1.418 EUR ukupno
+- S3 membership, S4 WhatsApp, S6 eVisitor hookovi potvrđeni
+
 
 ### [SVE PRETHODNO — NEPROMIJENJENO]
 ### Udruge modul, FINA izvjestaji, DE KassenSichV, EU Fondovi, AML, Payments, i18n,
