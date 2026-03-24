@@ -107,6 +107,18 @@ class InventoryItem(models.Model):
         verbose_name=_("Prodaje se na vagu"),
         help_text="Ako je označeno, POS traži unos težine (kg) pri svakom dodavanju",
     )
+
+    # ── Stockable guard ──────────────────────────────────────────
+    NON_STOCKABLE_CATEGORIES = ('service',)
+
+    @property
+    def is_stockable(self):
+        """Usluge, napojnice i nonprofit stavke NEMAJU fizičku zalihu."""
+        if self.category in self.NON_STOCKABLE_CATEGORIES:
+            return False
+        if self.is_tip or self.is_tip_employer:
+            return False
+        return True
     dsfinvk_gv_typ = models.CharField(
         max_length=30, blank=True,
         verbose_name=_("DSFinV-K GV_TYP override"),

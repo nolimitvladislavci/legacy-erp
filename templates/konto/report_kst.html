@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}K&ouml;rperschaftsteuer – LIMIT CONNECT{% endblock %}
+{% block page_title %}K&ouml;St — K&ouml;rperschaftsteuer{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover,.k-nav a.active{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace}
+.k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.k-filter .fld{display:flex;flex-direction:column;gap:3px}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
+.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
+.badge-gold{background:rgba(201,168,76,.15);color:#c9a84c}
+</style>
+
+<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&larr; Dashboard</a></div>
+
+<div class="k-nav">
+  <a href="{% url 'konto:report_vat' %}">PDV/USt</a>
+  <a href="{% url 'konto:report_ustva' %}">UStVA</a>
+  <a href="{% url 'konto:report_euer' %}">E&Uuml;R</a>
+  <a href="{% url 'konto:report_annual_tax' %}">ESt</a>
+  <a href="{% url 'konto:report_kst' %}" class="active">K&ouml;St</a>
+  <a href="{% url 'konto:datev_export' %}">DATEV Export</a>
+</div>
+
+{% if error %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#ef4444;font-size:.85rem">{{ error }}</div>
+{% endif %}
+
+<form method="get" class="k-filter" style="margin-bottom:20px">
+  <div class="fld">
+    <label>Jahr</label>
+    <select name="year">{% for y in years %}<option {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+  </div>
+  <input type="hidden" name="calc" value="1">
+  <button type="submit" class="k-btn k-btn-gold">Berechnen</button>
+</form>
+
+{% if report %}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+  <div class="k-stat">
+    <div><div class="lbl">Bruttoumsatz</div><div class="num" style="color:#22c55e">{{ report.gross_revenue|floatformat:2 }} &euro;</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Betriebsausgaben</div><div class="num" style="color:#ef4444">{{ report.total_expenses|floatformat:2 }} &euro;</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Zu versteuerndes Einkommen</div><div class="num" style="color:#c9a84c">{{ report.zve|floatformat:2 }} &euro;</div></div>
+  </div>
+</div>
+
+<div class="k-card">
+  <div class="k-card-head"><h3>K&ouml;rperschaftsteuer-Berechnung {{ report.year }}</h3></div>
+  <table class="k-table">
+    <tbody>
+      <tr><td>Gewinn (Umsatz &minus; Aufwendungen)</td><td class="right mono">{{ report.gewinn|floatformat:2 }} &euro;</td></tr>
+      <tr><td>+ Nicht abziehbare Aufwendungen (&sect;10 KStG)</td><td class="right mono">{{ report.nicht_abziehbar|floatformat:2 }} &euro;</td></tr>
+      <tr style="font-weight:700;border-top:2px solid #334155"><td>Zu versteuerndes Einkommen (zvE)</td><td class="right mono" style="color:#c9a84c">{{ report.zve|floatformat:2 }} &euro;</td></tr>
+      <tr><td colspan="2" style="height:8px"></td></tr>
+      <tr><td>K&ouml;rperschaftsteuer ({{ report.kst_rate }})</td><td class="right mono">{{ report.kst|floatformat:2 }} &euro;</td></tr>
+      <tr><td>Solidarit&auml;tszuschlag ({{ report.soli_rate }} auf KSt)</td><td class="right mono">{{ report.soli|floatformat:2 }} &euro;</td></tr>
+      <tr><td colspan="2" style="height:8px"></td></tr>
+      <tr><td>Gewerbesteuer-Messbetrag (3,5%)</td><td class="right mono">{{ report.gewst_messbetrag|floatformat:2 }} &euro;</td></tr>
+      <tr><td>Gewerbesteuer (Hebesatz {{ report.hebesatz|floatformat:0 }}%)</td><td class="right mono">{{ report.gewst|floatformat:2 }} &euro;</td></tr>
+      {% if not report.is_kapitalgesellschaft %}
+      <tr><td colspan="2" style="color:#64748b;font-size:.75rem;padding-top:4px">Freibetrag 24.500 &euro; f&uuml;r Personengesellschaften ber&uuml;cksichtigt</td></tr>
+      {% endif %}
+      <tr><td colspan="2" style="height:12px"></td></tr>
+      <tr style="font-weight:700;border-top:2px solid #c9a84c">
+        <td style="color:#c9a84c">GESAMTE STEUERBELASTUNG</td>
+        <td class="right mono" style="color:#c9a84c;font-size:1.1rem">{{ report.total_tax|floatformat:2 }} &euro;</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="k-card">
+  <div style="padding:20px;text-align:center">
+    <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Effektiver Steuersatz</div>
+    <div style="font-size:2rem;font-weight:800;color:#c9a84c">{{ report.effective_rate }}%</div>
+    <div style="font-size:.8rem;color:#64748b;margin-top:4px">KSt {{ report.kst_rate }} + Soli {{ report.soli_rate }} + GewSt (Hebesatz {{ report.hebesatz|floatformat:0 }}%)</div>
+  </div>
+</div>
+
+<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:16px">
+  <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Hinweis</div>
+  <div style="font-size:.82rem;color:#94a3b8">
+    Die K&ouml;rperschaftsteuer-Erkl&auml;rung ist bis zum <strong style="color:#c9a84c">31. Juli</strong> des Folgejahres
+    beim Finanzamt einzureichen (mit Steuerberater: 28./29. Februar des &uuml;bern&auml;chsten Jahres).
+    Der Gewerbesteuer-Hebesatz ist gemeindespezifisch und kann im Admin angepasst werden.
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -137,6 +137,12 @@
   <button class="cp-tab" data-tab="payments" onclick="switchTab('payments')">
     <i class="fas fa-credit-card"></i> Placanja
   </button>
+  <button class="cp-tab" data-tab="upload" onclick="switchTab('upload')">
+    <i class="fas fa-cloud-upload-alt"></i> Upload
+  </button>
+  <button class="cp-tab" data-tab="eracun" onclick="switchTab('eracun');loadTimeline()">
+    <i class="fas fa-route"></i> e-Racun
+  </button>
 </div>
 
 <!-- ═══════════════════ SECTION: TRACKING ═══════════════════ -->
@@ -407,6 +413,58 @@
     </div>
   {% endif %}
 </div>
+<!-- ═══════════════════ SECTION: UPLOAD ═══════════════════ -->
+<div class="cp-section" id="sec-upload">
+  <div class="section-header">
+    <h3><i class="fas fa-cloud-upload-alt"></i> Upload dokumenta</h3>
+  </div>
+
+  <div id="dropzone" style="
+    border:2px dashed var(--gold-muted);border-radius:var(--radius);
+    padding:60px 20px;text-align:center;cursor:pointer;
+    transition:all .3s;background:var(--surface);
+  ">
+    <i class="fas fa-file-upload" style="font-size:2.5rem;color:var(--gold);margin-bottom:16px;display:block"></i>
+    <p style="font-size:1rem;font-weight:600;color:var(--text);margin-bottom:8px">
+      Povucite datoteku ovdje
+    </p>
+    <p style="font-size:.82rem;color:var(--text-secondary)">
+      ili kliknite za odabir &middot; PDF, JPG, PNG &middot; Max 10 MB
+    </p>
+    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none">
+  </div>
+
+  <div id="uploadResult" style="display:none;margin-top:16px" class="b2b-card">
+    <div style="display:flex;align-items:center;gap:12px">
+      <i id="uploadIcon" class="fas fa-check-circle" style="font-size:1.4rem;color:var(--success)"></i>
+      <div>
+        <div id="uploadMsg" style="font-weight:600"></div>
+        <div id="uploadDetail" style="font-size:.82rem;color:var(--text-secondary)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="uploadProgress" style="display:none;margin-top:16px">
+    <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+      <div id="uploadBar" style="height:100%;background:var(--gold);width:0%;transition:width .3s"></div>
+    </div>
+    <p style="font-size:.78rem;color:var(--text-secondary);margin-top:6px">Ucitavanje...</p>
+  </div>
+</div>
+
+<!-- ═══════════════════ SECTION: eRACUN TIMELINE ═══════════════════ -->
+<div class="cp-section" id="sec-eracun">
+  <div class="section-header">
+    <h3><i class="fas fa-route"></i> e-Racun Status</h3>
+  </div>
+  <div id="timelineContent">
+    <div class="b2b-empty">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Ucitavanje...</p>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -416,6 +474,107 @@ function switchTab(name) {
   document.querySelectorAll('.cp-section').forEach(s => s.classList.remove('active'));
   document.querySelector('[data-tab="'+name+'"]').classList.add('active');
   document.getElementById('sec-'+name).classList.add('active');
+}
+
+
+// ── Dropzone ──────────────────────────────────────────────────
+const dz = document.getElementById('dropzone');
+const fi = document.getElementById('fileInput');
+
+if (dz) {
+  dz.addEventListener('click', () => fi.click());
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--gold)'; dz.style.background='rgba(212,175,55,.06)'; });
+  dz.addEventListener('dragleave', () => { dz.style.borderColor='var(--gold-muted)'; dz.style.background='var(--surface)'; });
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.style.borderColor='var(--gold-muted)'; dz.style.background='var(--surface)';
+    if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+  });
+  fi.addEventListener('change', () => { if (fi.files.length) uploadFile(fi.files[0]); });
+}
+
+function uploadFile(file) {
+  const prog = document.getElementById('uploadProgress');
+  const bar = document.getElementById('uploadBar');
+  const result = document.getElementById('uploadResult');
+  result.style.display = 'none';
+  prog.style.display = 'block';
+  bar.style.width = '30%';
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  fetch('api/upload/', { method: 'POST', body: fd, headers: {'X-CSRFToken': getCookie('csrftoken')} })
+    .then(r => r.json())
+    .then(data => {
+      bar.style.width = '100%';
+      setTimeout(() => {
+        prog.style.display = 'none';
+        result.style.display = 'block';
+        document.getElementById('uploadMsg').textContent = data.message || 'Uploaded';
+        document.getElementById('uploadDetail').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+        const icon = document.getElementById('uploadIcon');
+        if (data.ok) { icon.className = 'fas fa-check-circle'; icon.style.color = 'var(--success)'; }
+        else { icon.className = 'fas fa-exclamation-circle'; icon.style.color = 'var(--error)'; }
+      }, 400);
+    })
+    .catch(err => {
+      prog.style.display = 'none';
+      result.style.display = 'block';
+      document.getElementById('uploadMsg').textContent = 'Greska: ' + err.message;
+      document.getElementById('uploadIcon').className = 'fas fa-exclamation-circle';
+      document.getElementById('uploadIcon').style.color = 'var(--error)';
+    });
+}
+
+function getCookie(name) {
+  const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return v ? v.pop() : '';
+}
+
+// ── eRacun Timeline ───────────────────────────────────────────
+function loadTimeline() {
+  fetch('api/eracun-timeline/')
+    .then(r => r.json())
+    .then(data => {
+      const el = document.getElementById('timelineContent');
+      if (!data.ok || !data.eracuni.length) {
+        el.innerHTML = '<div class="b2b-empty"><i class="fas fa-file-invoice"></i><p>Nema e-racuna za prikaz.</p></div>';
+        return;
+      }
+      let html = '';
+      data.eracuni.forEach(er => {
+        html += '<div class="b2b-card" style="margin-bottom:14px">';
+        html += '<div class="flex-between" style="margin-bottom:12px">';
+        html += '<div><span class="text-mono text-gold">' + er.number + '</span>';
+        html += '<span style="margin-left:10px;font-size:.82rem;color:var(--text-secondary)">' + er.date + '</span></div>';
+        html += '<span style="font-weight:700">' + er.total + ' ' + er.currency + '</span></div>';
+        // Timeline steps
+        html += '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">';
+        er.steps.forEach((s, i) => {
+          const color = s.error ? 'var(--error)' : s.done ? 'var(--success)' : 'var(--text-muted)';
+          const icon = s.error ? 'fa-times-circle' : s.done ? 'fa-check-circle' : 'fa-circle';
+          html += '<div style="display:flex;align-items:center;gap:4px">';
+          html += '<i class="fas ' + icon + '" style="font-size:.7rem;color:' + color + '"></i>';
+          html += '<span style="font-size:.75rem;color:' + color + ';font-weight:' + (s.done?'600':'400') + '">' + s.label + '</span>';
+          if (i < er.steps.length - 1) html += '<i class="fas fa-chevron-right" style="font-size:.5rem;color:var(--border);margin:0 2px"></i>';
+          html += '</div>';
+        });
+        html += '</div>';
+        // ZKI/JIR
+        if (er.zki || er.jir) {
+          html += '<div style="font-size:.72rem;color:var(--text-muted);margin-top:8px;font-family:monospace">';
+          if (er.zki) html += 'ZKI: ' + er.zki.substring(0,20) + '... ';
+          if (er.jir) html += 'JIR: ' + er.jir;
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+      el.innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('timelineContent').innerHTML = '<div class="b2b-empty"><i class="fas fa-exclamation-triangle"></i><p>Greska pri ucitavanju.</p></div>';
+    });
 }
 </script>
 {% endblock %}

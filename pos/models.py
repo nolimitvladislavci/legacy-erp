@@ -3,7 +3,7 @@ POS Kasa — Point of Sale module
 Podržava HR fiskalizaciju, bar kod skeniranje i integraciju s invoicing app.
 """
 import uuid
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -228,6 +228,14 @@ class POSReceipt(models.Model):
     paid_at        = models.DateTimeField(null=True, blank=True, verbose_name=_('Plaćen u'))
     cancel_reason  = models.CharField(max_length=200, blank=True, verbose_name=_('Razlog storniranja'))
 
+    # Event-sourced storno: negativni bon referencira originalni
+    parent_receipt = models.ForeignKey(
+        'self', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='refund_receipts',
+        verbose_name=_('Originalni bon (za storno/povrat)'),
+    )
+
     # Audit trail (B-03)
     client_ip      = models.GenericIPAddressField(null=True, blank=True, verbose_name=_('IP adresa'))
     client_ua      = models.CharField(max_length=300, blank=True, verbose_name=_('User Agent'))
@@ -295,17 +303,18 @@ class POSReceipt(models.Model):
         return f'Bon #{self.global_number or self.receipt_number} – {self.total} EUR ({self.get_status_display()})'
 
     def recalculate(self):
-        """Reizračunaj iznose iz stavki."""
+        """Reizračunaj iznose iz stavki — Decimal.quantize(ROUND_HALF_UP)."""
+        _Q = Decimal('0.01')
         items = self.items.all()
         self.subtotal = sum(
-            i.quantity * i.unit_price * (1 - i.discount_percent / 100)
+            (i.quantity * i.unit_price * (1 - i.discount_percent / 100)).quantize(_Q, rounding=ROUND_HALF_UP)
             for i in items
-        )
+        ) or Decimal('0')
         self.tax_amount = sum(
-            i.quantity * i.unit_price * (1 - i.discount_percent / 100) * (i.tax_rate / 100)
+            (i.quantity * i.unit_price * (1 - i.discount_percent / 100) * (i.tax_rate / 100)).quantize(_Q, rounding=ROUND_HALF_UP)
             for i in items
-        )
-        self.total = self.subtotal + self.tax_amount - self.discount
+        ) or Decimal('0')
+        self.total = (self.subtotal + self.tax_amount - self.discount).quantize(_Q, rounding=ROUND_HALF_UP)
         return self
 
     @property
@@ -386,7 +395,7 @@ class POSReceiptItem(models.Model):
         net = Decimal(str(self.quantity)) * Decimal(str(self.unit_price)) * (
             1 - Decimal(str(self.discount_percent)) / 100
         )
-        self.total_price = round(net * (1 + Decimal(str(self.tax_rate)) / 100), 2)
+        self.total_price = (net * (1 + Decimal(str(self.tax_rate)) / 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         super().save(*args, **kwargs)
 
 
@@ -1131,9 +1140,9 @@ class POSDailyReport(models.Model):
                 tax_bd[rate_key] = {'base': 0, 'tax': 0, 'total': 0}
             net = float(item.total_price / (1 + item.tax_rate / 100)) if item.tax_rate else float(item.total_price)
             tax_amount = float(item.total_price) - net
-            tax_bd[rate_key]['base'] = round(tax_bd[rate_key]['base'] + net, 2)
-            tax_bd[rate_key]['tax'] = round(tax_bd[rate_key]['tax'] + tax_amount, 2)
-            tax_bd[rate_key]['total'] = round(tax_bd[rate_key]['total'] + float(item.total_price), 2)
+            tax_bd[rate_key]['base'] = Decimal(str(tax_bd[rate_key]['base'] + net)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            tax_bd[rate_key]['tax'] = Decimal(str(tax_bd[rate_key]['tax'] + tax_amount)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            tax_bd[rate_key]['total'] = Decimal(str(tax_bd[rate_key]['total'] + float(item.total_price))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         # Cashier breakdown
         cashier_bd = {}

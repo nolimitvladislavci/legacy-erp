@@ -114,6 +114,9 @@ def deduct_inventory(invoice, old_status, user):
         for iitem in invoice.items.select_related('inventory_item').all():
             if not iitem.inventory_item_id:
                 continue
+            # Usluge i non-stockable stavke — ne diramo zalihu
+            if not iitem.inventory_item.is_stockable:
+                continue
             StockMovement.objects.create(
                 item_id=iitem.inventory_item_id,
                 movement_type='out',

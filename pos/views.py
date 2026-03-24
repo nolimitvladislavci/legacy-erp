@@ -1,12 +1,12 @@
 import json
 import logging
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.conf import settings
 from django.db import models
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
@@ -39,6 +39,30 @@ def _recalculate(receipt):
     receipt.save(update_fields=['subtotal', 'tax_amount', 'total'])
 
 
+# ── Tenant Isolation Helper ─────────────────────────────────────────
+def _check_tenant(request, obj):
+    """
+    Verify that obj belongs to the requesting user's company.
+    Works with POSTerminal, POSSession, POSReceipt.
+    Returns (company, None) on success, or (None, HttpResponse) on failure.
+    """
+    company = get_user_company(request)
+    if not company:
+        return None, JsonResponse({'ok': False, 'error': 'No company context'}, status=400)
+    # Determine obj's company
+    obj_company = None
+    if hasattr(obj, 'company_id'):
+        obj_company = obj.company
+    elif hasattr(obj, 'terminal'):
+        obj_company = obj.terminal.company
+    elif hasattr(obj, 'session'):
+        obj_company = obj.session.terminal.company
+    if obj_company and obj_company.pk != company.pk:
+        raise Http404
+    return company, None
+# ────────────────────────────────────────────────────────────────────
+
+
 @login_required
 def dashboard(request):
     company = get_user_company(request)
@@ -51,6 +75,8 @@ def dashboard(request):
 @login_required
 def terminal_detail(request, terminal_id):
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
+    company, err = _check_tenant(request, terminal)
+    if err: return err
     active_session = terminal.sessions.filter(status=POSSession.Status.OPEN).first()
     recent_sessions = terminal.sessions.order_by('-opened_at')[:15]
     return render(request, 'pos/terminal.html', {
@@ -62,6 +88,8 @@ def terminal_detail(request, terminal_id):
 @require_POST
 def open_session(request, terminal_id):
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
+    company, err = _check_tenant(request, terminal)
+    if err: return err
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
         messages.warning(request, 'Terminal already has an open session.')
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
@@ -80,6 +108,8 @@ def open_session(request, terminal_id):
 @login_required
 def session_detail(request, session_id):
     session = get_object_or_404(POSSession, pk=session_id)
+    company, err = _check_tenant(request, session)
+    if err: return err
     open_receipts = session.receipts.filter(status__in=[POSReceipt.Status.OPEN, 'ISSUED']).order_by('-created_at')
 
     # Auto-redirect: ako je session open i ima tocno 1 otvoren bon, idi direktno na njega
@@ -97,6 +127,8 @@ def session_detail(request, session_id):
 @transaction.atomic
 def close_session(request, session_id):
     session = get_object_or_404(POSSession, pk=session_id)
+    company, err = _check_tenant(request, session)
+    if err: return err
     if session.status != POSSession.Status.OPEN:
         messages.warning(request, 'Session is already closed.')
         return redirect('pos:session_detail', session_id=session_id)
@@ -612,6 +644,8 @@ def new_terminal(request):
 def session_zreport(request, session_id):
     """Generate Z-report PDF for a closed session."""
     session = get_object_or_404(POSSession, pk=session_id)
+    company, err = _check_tenant(request, session)
+    if err: return err
     if session.status == POSSession.Status.OPEN:
         messages.error(request, 'Smjena mora biti zatvorena prije generiranja Z-reporta.')
         return redirect('pos:session_detail', session_id=session_id)
@@ -688,6 +722,8 @@ def receipt_pdf(request, receipt_id):
     (default)        → xhtml2pdf thermal PDF (legacy)
     """
     receipt = get_object_or_404(POSReceipt, pk=receipt_id)
+    company, err = _check_tenant(request, receipt)
+    if err: return err
     fmt = request.GET.get('format', '')
     items = receipt.items.all()
 
@@ -2528,22 +2564,43 @@ def cashier_full_report(request, session_id):
 @login_required
 def refund_receipt(request, receipt_id):
     """
-    Povrat računa — kreira negativni račun (storno s povratom novca).
-    GET: prikaži stavke originalnog računa za odabir
-    POST: {items: [{item_id, quantity}]} → kreira refund receipt
+    Event-Sourced Partial Storno — kreira NOVI negativni bon koji referencira originalni.
+    GET: prikaži stavke originalnog računa za odabir (s preostalom količinom)
+    POST: {items: [{item_id, quantity}], reason: "..."} → kreira refund receipt
+    Immutable: originalni bon se NIKAD ne mijenja.
     """
     company = get_user_company(request)
     original = get_object_or_404(POSReceipt, pk=receipt_id)
+    company_chk, err = _check_tenant(request, original)
+    if err: return err
+
     if original.status not in ('paid',):
         return JsonResponse({'error': 'Samo plaćeni računi se mogu refundirati'}, status=400)
+    if original.parent_receipt_id:
+        return JsonResponse({'error': 'Storno bona se ne može ponovo stornirati'}, status=400)
+
+    # Izračunaj već refundirane količine (double-refund guard)
+    from django.db.models import Sum
+    already_refunded = {}
+    for ref_receipt in original.refund_receipts.exclude(status='cancelled'):
+        for ri in ref_receipt.items.all():
+            key = ri.description.replace('POVRAT: ', '')
+            already_refunded[key] = already_refunded.get(key, Decimal('0')) + abs(ri.quantity)
 
     if request.method == 'GET':
         items = []
         for ri in original.items.select_related('inventory_item'):
+            desc = ri.description or (ri.inventory_item.name if ri.inventory_item else '')
+            refunded_qty = already_refunded.get(desc, Decimal('0'))
+            remaining_qty = ri.quantity - refunded_qty
+            if remaining_qty <= 0:
+                continue  # Već potpuno refundirano
             items.append({
                 'id': ri.pk,
-                'name': ri.description or (ri.inventory_item.name if ri.inventory_item else ''),
+                'name': desc,
                 'quantity': float(ri.quantity),
+                'refunded': float(refunded_qty),
+                'remaining': float(remaining_qty),
                 'unit_price': float(ri.unit_price),
                 'total': float(ri.total_price),
                 'is_tip': ri.is_tip,
@@ -2555,6 +2612,7 @@ def refund_receipt(request, receipt_id):
             'total': float(original.total),
             'paid_at': original.paid_at.isoformat() if original.paid_at else '',
             'items': items,
+            'is_fully_refunded': len(items) == 0,
         })
 
     # POST — kreira refund
@@ -2582,57 +2640,93 @@ def refund_receipt(request, receipt_id):
     refund_receipt = POSReceipt.objects.create(
         session=session,
         receipt_number=next_rn,
-        note='POVRAT — Originalni bon #%d | %s' % (original.receipt_number, reason),
+        note='STORNO — Originalni bon #%d | %s' % (original.receipt_number, reason),
         status='refunded',
         paid_at=tz.now(),
+        parent_receipt=original,  # Event-sourced link
+        cancel_reason=reason,
     )
 
     from inventory.models import StockMovement as _SM
+    _Q = Decimal('0.01')
     refund_total = Decimal('0')
+    items_returned = 0
     for ri_data in refund_items:
         try:
             orig_item = original.items.get(pk=ri_data.get('item_id'))
         except POSReceiptItem.DoesNotExist:
             continue
-        qty = min(Decimal(str(ri_data.get('quantity', 0))), orig_item.quantity)
+        req_qty = Decimal(str(ri_data.get('quantity', 0)))
+        if req_qty <= 0:
+            continue
+
+        # Double-refund guard: provjeri preostalu količinu
+        desc = orig_item.description or ''
+        already = already_refunded.get(desc, Decimal('0'))
+        max_qty = orig_item.quantity - already
+        qty = min(req_qty, max_qty)
         if qty <= 0:
             continue
-        price = orig_item.unit_price * qty * Decimal('-1')  # Negativan iznos
+
+        net = (qty * orig_item.unit_price * (1 - orig_item.discount_percent / 100))
+        tax = net * orig_item.tax_rate / 100
+        total_price = -(net + tax).quantize(_Q, rounding=ROUND_HALF_UP)
+
         POSReceiptItem.objects.create(
             receipt=refund_receipt,
             inventory_item=orig_item.inventory_item,
-            description='POVRAT: %s' % (orig_item.description or ''),
+            description='POVRAT: %s' % desc,
             quantity=qty,
             unit_price=-orig_item.unit_price,
+            discount_percent=orig_item.discount_percent,
             tax_rate=orig_item.tax_rate,
-            total_price=price,
+            total_price=total_price,
         )
-        refund_total += price
-        # Vrati u zalihu (in = ulaz natrag na skladište)
-        if orig_item.inventory_item:
+        refund_total += total_price
+        items_returned += 1
+
+        # Vrati u zalihu — ali samo za stockable items!
+        if orig_item.inventory_item and orig_item.inventory_item.is_stockable:
             _SM.objects.create(
                 item=orig_item.inventory_item,
                 movement_type='in',
                 quantity=qty,
                 unit_price=orig_item.unit_price,
-                reason='Povrat gosta — POS bon #%d' % original.receipt_number,
+                reason='Storno gosta — POS bon #%d' % original.receipt_number,
                 performed_by=request.user,
             )
 
+    refund_receipt.subtotal = refund_total
+    refund_receipt.tax_amount = Decimal('0')  # Already included in negative total
     refund_receipt.total = refund_total
-    refund_receipt.save()
-    # Payment line negativna
+    refund_receipt.save(update_fields=['subtotal', 'tax_amount', 'total'])
+
+    # Recalculate properly
+    refund_receipt.recalculate()
+    refund_receipt.save(update_fields=['subtotal', 'tax_amount', 'total'])
+
+    # Payment line negativna — istim načinom kao originalni
     orig_method = original.payment_lines.first()
     method = orig_method.method if orig_method else 'CASH'
     POSPaymentLine.objects.create(
-        receipt=refund_receipt, method=method, amount=refund_total,
+        receipt=refund_receipt, method=method, amount=refund_receipt.total,
     )
+
+    # Hash chain — storno bon ulazi u lanac kao i svaki drugi
+    try:
+        from pos.hashchain import append_receipt
+        append_receipt(refund_receipt)
+    except Exception as e:
+        logger.warning('Hash chain append failed for refund #%d: %s', refund_receipt.pk, e)
 
     return JsonResponse({
         'ok': True,
         'refund_receipt_id': refund_receipt.pk,
-        'refund_total': str(refund_total),
-        'items_returned': len(refund_items),
+        'refund_receipt_number': refund_receipt.receipt_number,
+        'parent_receipt_id': original.pk,
+        'parent_receipt_number': original.receipt_number,
+        'refund_total': str(refund_receipt.total),
+        'items_returned': items_returned,
     })
 
 
@@ -4560,6 +4654,8 @@ def session_report_json(request, session_id):
     """Z-report za cijelu sesiju (svi blagajnici)."""
     from django.db import connection
     session = get_object_or_404(POSSession, pk=session_id)
+    company, err = _check_tenant(request, session)
+    if err: return err
 
     with connection.cursor() as cur:
         cur.execute("""

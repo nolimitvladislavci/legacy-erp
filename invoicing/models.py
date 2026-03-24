@@ -304,6 +304,19 @@ class Invoice(models.Model):
         """
         from django.core.exceptions import PermissionDenied
 
+        # ── Guard: zaključano obračunsko razdoblje (Mina 1) ─────────────────
+        if not self.pk and self.date_issued and hasattr(self, 'company') and self.company_id:
+            from konto.models import AccountingPeriod
+            _dt = self.date_issued
+            if hasattr(_dt, 'date'):
+                _dt = _dt.date()
+            if AccountingPeriod.is_period_locked(self.company, _dt.year, _dt.month):
+                raise PermissionDenied(
+                    f"Razdoblje {_dt.month:02d}/{_dt.year} je zaključano. "
+                    f"Nova faktura se ne može kreirati u zatvorenom periodu. "
+                    f"Koristite sljedeći otvoreni mjesec ili kontaktirajte administratora."
+                )
+
         # ── Guard: zaključani račun ──────────────────────────────────────────
         if self.pk:
             _uf = kwargs.get('update_fields')

@@ -56,6 +56,10 @@ class CheckoutService:
         # Lock item row — sprecava race condition
         locked_item = InventoryItem.objects.select_for_update().get(pk=item.pk)
 
+        # Usluge i non-stockable stavke — ne diramo zalihu
+        if not locked_item.is_stockable:
+            return
+
         # Provjeri zalihu
         company = locked_item.company
         allow_negative = getattr(company, 'allow_negative_stock', False)

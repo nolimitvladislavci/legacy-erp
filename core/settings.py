@@ -532,6 +532,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "partners.retroactive_nkd_lookup",
         "schedule": crontab(hour=4, minute=0, day_of_week=0),  # nedjelja 04:00
     },
+    # Tax Compliance — supplier risk daily scan
+    "scan-supplier-risk": {
+        "task": "limit_connect_ai.tasks_risk.scan_supplier_risk",
+        "schedule": crontab(hour=4, minute=30),
+    },
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────
 import os as _os
@@ -626,3 +631,9 @@ if 'test' in sys.argv:
         return _orig_forwards(self, app_label, schema_editor, from_state, to_state)
     _OrigRunSQL.database_forwards = _safe_forwards
 
+
+# ── Sandbox / Simulation Mode ──────────────────────────────────────
+# Podaci iz 2025 i ranije su Synesis importi (vježba), ne produkcijski.
+# Ovo utišava alarme za fiskalizaciju/eRačun na legacy podacima.
+FISCAL_SANDBOX_BEFORE = int(os.environ.get('FISCAL_SANDBOX_BEFORE', '2026'))
+IS_SANDBOX_MODE = os.environ.get('IS_SANDBOX_MODE', 'False').lower() in ('true', '1')

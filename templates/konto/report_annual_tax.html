@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Godišnji porez" %} – LIMIT CONNECT{% endblock %}
+{% block page_title %}{% trans "Godišnji porez / Jahressteuer" %}{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a;border-color:#c9a84c}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table tr:hover{background:rgba(59,130,246,.05)}
+.k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
+.k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.k-filter .fld{display:flex;flex-direction:column;gap:3px}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
+.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.k-btn-outline{background:transparent;border:1.5px solid #334155;color:#94a3b8}.k-btn-outline:hover{border-color:#c9a84c;color:#c9a84c}
+.tax-total-row td{font-weight:800;border-top:2px solid #c9a84c !important;font-size:.9rem}
+</style>
+
+<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&#8592; {% trans "Dashboard" %}</a></div>
+
+<div class="k-nav">
+  <a href="{% url 'konto:report_pnl' %}">P&amp;L</a>
+  <a href="{% url 'konto:report_balance_sheet' %}">{% trans "Bilanca" %}</a>
+  <a href="{% url 'konto:report_receivables' %}">{% trans "Potraživanja" %}</a>
+  <a href="{% url 'konto:report_vat' %}">{% trans "PDV Prijava" %}</a>
+  <a href="{% url 'konto:report_annual_tax' %}" class="active">{% trans "Godišnji porez" %}</a>
+  <a href="{% url 'konto:report_euer' %}">E&Uuml;R</a>
+</div>
+
+{% if error %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#ef4444;font-size:.85rem">{{ error }}</div>
+{% endif %}
+
+<!-- FILTER -->
+<form method="get" class="k-filter" style="margin-bottom:20px">
+  <div class="fld">
+    <label>{% trans "Godina" %}</label>
+    <select name="year">{% for y in years %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+  </div>
+  <input type="hidden" name="calc" value="1">
+  <button type="submit" class="k-btn k-btn-gold" style="align-self:flex-end">{% trans "Izračunaj" %}</button>
+</form>
+
+{% if summary %}
+<!-- STATS -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+  <div class="k-stat">
+    <div>
+      <div class="lbl">{% if summary.country == 'DE' %}Brutto-Einnahmen{% else %}{% trans "Bruto prihod" %}{% endif %}</div>
+      <div class="num" style="color:#22c55e">{{ summary.gross_revenue|floatformat:2 }} &euro;</div>
+    </div>
+  </div>
+  <div class="k-stat">
+    <div>
+      <div class="lbl">{% if summary.country == 'DE' %}Ausgaben{% else %}{% trans "Ukupni rashodi" %}{% endif %}</div>
+      <div class="num" style="color:#ef4444">{{ summary.total_expenses|floatformat:2 }} &euro;</div>
+    </div>
+  </div>
+  <div class="k-stat">
+    <div>
+      <div class="lbl">{% if summary.country == 'DE' %}Steuerpflichtiges Einkommen{% else %}{% trans "Oporezivi dohodak" %}{% endif %}</div>
+      <div class="num" style="color:#c9a84c">{{ summary.taxable_income|floatformat:2 }} &euro;</div>
+    </div>
+  </div>
+</div>
+
+<!-- BREAKDOWN TABLE -->
+<div class="k-card">
+  <div class="k-card-head">
+    <h3>{% if summary.country == 'DE' %}Steuerberechnung {{ summary.year }}{% else %}{% trans "Obračun poreza" %} {{ summary.year }}{% endif %}</h3>
+    <span style="font-size:.75rem;color:#64748b">{% if summary.country == 'DE' %}DE{% else %}HR{% endif %}</span>
+  </div>
+  <table class="k-table">
+    <thead>
+      <tr>
+        <th>{% trans "Stavka" %}</th>
+        <th class="right">{% trans "Iznos" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% if summary.country == 'DE' %}
+      <tr>
+        <td>Brutto-Einnahmen</td>
+        <td class="right mono" style="color:#22c55e">{{ summary.gross_revenue|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>Ausgaben</td>
+        <td class="right mono" style="color:#ef4444">{{ summary.total_expenses|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700">Steuerpflichtiges Einkommen</td>
+        <td class="right mono" style="font-weight:700">{{ summary.taxable_income|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>Grundfreibetrag</td>
+        <td class="right mono" style="color:#64748b">{{ summary.grundfreibetrag|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>Einkommensteuer</td>
+        <td class="right mono">{{ summary.einkommensteuer|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>Solidarit&auml;tszuschlag</td>
+        <td class="right mono">{{ summary.solidaritaetszuschlag|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>Gewerbesteuer <span style="color:#64748b;font-size:.75rem">(Hebesatz {{ summary.hebesatz_pct }}%)</span></td>
+        <td class="right mono">{{ summary.gewerbesteuer|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr class="tax-total-row">
+        <td style="color:#c9a84c">GESAMT</td>
+        <td class="right mono" style="color:#c9a84c">{{ summary.total_tax_due|floatformat:2 }} &euro;</td>
+      </tr>
+    {% else %}
+      <tr>
+        <td>{% trans "Bruto prihod" %}</td>
+        <td class="right mono" style="color:#22c55e">{{ summary.gross_revenue|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>{% trans "Ukupni rashodi" %}</td>
+        <td class="right mono" style="color:#ef4444">{{ summary.total_expenses|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700">{% trans "Oporezivi dohodak" %}</td>
+        <td class="right mono" style="font-weight:700">{{ summary.taxable_income|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>{% trans "Porez na dohodak" %} <span style="color:#64748b;font-size:.75rem">(20% / 30%)</span></td>
+        <td class="right mono">{{ summary.income_tax_base|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr>
+        <td>{% trans "Prirez" %} <span style="color:#64748b;font-size:.75rem">({{ summary.prirez_rate_pct }}%)</span></td>
+        <td class="right mono">{{ summary.prirez|floatformat:2 }} &euro;</td>
+      </tr>
+      <tr class="tax-total-row">
+        <td style="color:#c9a84c">{% trans "UKUPNO ZA UPLATU" %}</td>
+        <td class="right mono" style="color:#c9a84c">{{ summary.total_tax_due|floatformat:2 }} &euro;</td>
+      </tr>
+    {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<!-- EFFECTIVE RATE -->
+<div class="k-stat" style="max-width:320px">
+  <div>
+    <div class="lbl">{% if summary.country == 'DE' %}Effektiver Steuersatz{% else %}{% trans "Efektivna stopa" %}{% endif %}</div>
+    <div class="num" style="color:#c9a84c">{{ summary.effective_rate_pct|floatformat:1 }}%</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

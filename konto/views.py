@@ -726,6 +726,67 @@ def api_unmatched_invoices(request):
 #  TAX / PDV REPORTS
 # ═══════════════════════════════════════════════════════════════════════
 
+
+
+@login_required
+def tax_dashboard(request):
+    """Batch tax dashboard — all companies at a glance (Marijin kokpit)."""
+    from .models import TaxPeriod
+    from companies.models import Company
+    from limit_connect_ai.models_knowledge_graph import SupplierRiskAlert
+
+    # Filters
+    pdv_filter = request.GET.get('pdv_status', '')
+    btype_filter = request.GET.get('business_type', '')
+
+    companies = Company.objects.all().order_by('name')
+    if pdv_filter:
+        companies = companies.filter(pdv_status=pdv_filter)
+    if btype_filter:
+        companies = companies.filter(business_type=btype_filter)
+
+    today = timezone.now().date()
+    rows = []
+    totals = {'obveza': Decimal('0'), 'prihod': Decimal('0'), 'alerts': 0}
+
+    for c in companies:
+        # Latest TaxPeriod
+        latest = TaxPeriod.objects.filter(company=c).order_by('-year', '-month').first()
+
+        # Risk alerts count
+        alert_count = SupplierRiskAlert.objects.filter(
+            company=c, risk_level__in=['HIGH', 'CRITICAL'], is_acknowledged=False
+        ).count()
+
+        row = {
+            'company': c,
+            'pdv_status': c.pdv_status,
+            'business_type': c.get_business_type_display() if hasattr(c, 'get_business_type_display') else c.business_type,
+            'latest_period': f"{latest.month:02d}/{latest.year}" if latest and latest.month else None,
+            'is_filed': latest.is_filed if latest else None,
+            'vat_payable': latest.vat_payable if latest else Decimal('0'),
+            'total_revenue': latest.total_revenue if latest else Decimal('0'),
+            'alert_count': alert_count,
+        }
+        rows.append(row)
+
+        if latest:
+            totals['obveza'] += latest.vat_payable or Decimal('0')
+            totals['prihod'] += latest.total_revenue or Decimal('0')
+        totals['alerts'] += alert_count
+
+    ctx = {
+        'rows': rows,
+        'totals': totals,
+        'pdv_filter': pdv_filter,
+        'btype_filter': btype_filter,
+        'pdv_choices': [('', 'Sve'), ('obveznik', 'Obveznik'), ('pausalic', 'Paušalac'), ('none', 'Nije u PDV-u')],
+        'btype_choices': [('', 'Sve'), ('doo', 'd.o.o.'), ('obrt', 'Obrt'), ('udruga', 'Udruga'), ('jdoo', 'j.d.o.o.'), ('gmbh', 'GmbH')],
+        'company_count': companies.count(),
+    }
+    return render(request, 'konto/tax_dashboard.html', ctx)
+
+
 @login_required
 def report_vat(request):
     """VAT/PDV period report — USt-Voranmeldung / PDV obrazac."""
@@ -794,6 +855,31 @@ def report_annual_tax(request):
     })
 
 
+
+@login_required
+def report_corporate_tax(request):
+    """PD — Porez na dobit (Corporate tax) for d.o.o. companies."""
+    company = _get_company(request)
+    today = timezone.now().date()
+    year = int(request.GET.get('year', today.year - 1))  # Default: previous year
+    years = list(range(today.year - 4, today.year + 1))
+
+    report = None
+    error = None
+    if request.GET.get('calc'):
+        try:
+            report = services.calculate_corporate_tax(company, year)
+        except Exception as exc:
+            error = str(exc)
+
+    return render(request, 'konto/report_corporate_tax.html', {
+        'report': report,
+        'error': error,
+        'year': year,
+        'years': years,
+        'company': company,
+    })
+
 @login_required
 def report_euer(request):
     """EÜR — Einnahmenüberschussrechnung (DE) / Jednostavno knjigovodstvo (HR)."""
@@ -818,6 +904,32 @@ def report_euer(request):
         'company': company,
     })
 
+
+
+# Insert after report_euer view in views.py
+@login_required
+def report_po_sd(request):
+    """PO-SD — Paušalni obrtnici (Izvješće o paušalnom dohotku)."""
+    company = _get_company(request)
+    today = timezone.now().date()
+    year = int(request.GET.get('year', today.year - 1))
+    years = list(range(today.year - 4, today.year + 1))
+
+    report = None
+    error = None
+    if request.GET.get('calc'):
+        try:
+            report = services.calculate_po_sd(company, year)
+        except Exception as exc:
+            error = str(exc)
+
+    return render(request, 'konto/report_po_sd.html', {
+        'report': report,
+        'error': error,
+        'year': year,
+        'years': years,
+        'company': company,
+    })
 
 @login_required
 def report_vat_mark_filed(request, pk):
@@ -1339,3 +1451,79 @@ def gfi_pod_export(request):
     response = HttpResponse(xml_str, content_type="application/xml")
     response["Content-Disposition"] = "attachment; filename=\"GFI-POD_%s_%s.xml\"" % (company.oib, year)
     return response
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  GERMAN TAX MODULE
+# ═══════════════════════════════════════════════════════════════════════
+
+@login_required
+def report_ustva(request):
+    """UStVA — Umsatzsteuervoranmeldung (German monthly VAT return)."""
+    import calendar
+    company = _get_company(request)
+    today = timezone.now().date()
+
+    year = int(request.GET.get('year', today.year))
+    month = int(request.GET.get('month', today.month))
+    years = list(range(today.year - 3, today.year + 1))
+
+    report = None
+    error = None
+    if request.GET.get('calc'):
+        try:
+            from konto.ustva_export import generate_ustva
+            report = generate_ustva(company, year, month)
+        except Exception as exc:
+            error = str(exc)
+
+    return render(request, 'konto/report_ustva.html', {
+        'report': report,
+        'error': error,
+        'year': year,
+        'month': month,
+        'years': years,
+        'month_choices': [(i, calendar.month_name[i]) for i in range(1, 13)],
+        'company': company,
+    })
+
+
+@login_required
+def ustva_xml_export(request, year, month):
+    """Download UStVA XML for ELSTER/DATEV import."""
+    company = _get_company(request)
+    from konto.ustva_export import generate_ustva, generate_ustva_xml
+
+    kz_data = generate_ustva(company, year, month)
+    xml_str = generate_ustva_xml(company, year, month, kz_data)
+
+    steuernr = (company.oib or 'unknown').replace('/', '-')
+    filename = f"UStVA_{steuernr}_{month:02d}{year}.xml"
+    resp = HttpResponse(xml_str, content_type='application/xml')
+    resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return resp
+
+
+@login_required
+def report_koerperschaftsteuer(request):
+    """KSt — Körperschaftsteuer (German corporate tax) for GmbH/UG."""
+    company = _get_company(request)
+    today = timezone.now().date()
+    year = int(request.GET.get('year', today.year - 1))
+    years = list(range(today.year - 4, today.year + 1))
+
+    report = None
+    error = None
+    if request.GET.get('calc'):
+        try:
+            report = services.calculate_koerperschaftsteuer(company, year)
+        except Exception as exc:
+            error = str(exc)
+
+    return render(request, 'konto/report_kst.html', {
+        'report': report,
+        'error': error,
+        'year': year,
+        'years': years,
+        'company': company,
+    })

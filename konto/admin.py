@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import KontoAccount, BankAccount, BankTransaction, JournalEntry, LedgerLine
+from .models import KontoAccount, BankAccount, BankTransaction, JournalEntry, LedgerLine, TaxPeriod, TaxLineDetail
 
 
 class LedgerLineInline(admin.TabularInline):
@@ -29,8 +29,6 @@ class BankTransactionAdmin(admin.ModelAdmin):
                     'status', 'is_booked', 'bank_account')
     list_filter = ('status', 'transaction_type', 'is_booked', 'company')
     search_fields = ('counterparty_name', 'description', 'reference_number')
-    date_hierarchy = 'transaction_date'
-    raw_id_fields = ('matched_invoice',)
 
 
 @admin.register(JournalEntry)
@@ -38,6 +36,22 @@ class JournalEntryAdmin(admin.ModelAdmin):
     list_display = ('entry_number', 'date', 'description', 'source_type', 'is_posted', 'company')
     list_filter = ('source_type', 'is_posted', 'company')
     search_fields = ('entry_number', 'description')
-    date_hierarchy = 'date'
     inlines = [LedgerLineInline]
-    raw_id_fields = ('source_invoice', 'source_transaction')
+
+
+class TaxLineDetailInline(admin.TabularInline):
+    model = TaxLineDetail
+    extra = 0
+    fields = ('tax_rate', 'revenue_base', 'output_vat')
+    readonly_fields = ('tax_rate', 'revenue_base', 'output_vat')
+
+
+@admin.register(TaxPeriod)
+class TaxPeriodAdmin(admin.ModelAdmin):
+    list_display = ('company', 'period_type', 'year', 'month', 'total_output_vat',
+                    'total_input_vat', 'vat_payable', 'is_filed', 'filing_deadline')
+    list_filter = ('period_type', 'is_filed', 'company', 'year')
+    search_fields = ('company__name',)
+    ordering = ('-year', '-month')
+    inlines = [TaxLineDetailInline]
+    list_editable = ('is_filed',)

@@ -937,6 +937,135 @@ def get_annual_tax_summary(company, year):
     return details
 
 
+
+def calculate_corporate_tax(company, year):
+    """PD obrazac — Porez na dobit za d.o.o. (Čl.28 ZPD, NN 177/04, izmjena NN 114/23)."""
+    import datetime
+    from .models import KontoAccount, LedgerLine
+    from invoicing.models import Invoice
+    from django.db.models import Sum as DSum
+
+    date_from = datetime.date(year, 1, 1)
+    date_to = datetime.date(year, 12, 31)
+
+    # Revenue from invoices
+    gross_revenue = (
+        Invoice.objects.filter(
+            company=company,
+            doctype__in=['R', 'A', 'GS', 'IRA'],
+            status__in=['PAID', 'SENT', 'OVERDUE', 'UNPAID'],
+            date_issued__date__gte=date_from,
+            date_issued__date__lte=date_to,
+        ).aggregate(t=DSum('subtotal'))['t'] or Decimal('0')
+    )
+
+    # Expenses from konto
+    exp_accts = KontoAccount.objects.filter(company=company, account_type='expense')
+    total_expenses = Decimal('0')
+    if exp_accts.exists():
+        exp_d = (LedgerLine.objects.filter(
+            account__in=exp_accts, side='debit',
+            journal_entry__date__gte=date_from,
+            journal_entry__date__lte=date_to,
+            journal_entry__is_posted=True,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0'))
+        exp_c = (LedgerLine.objects.filter(
+            account__in=exp_accts, side='credit',
+            journal_entry__date__gte=date_from,
+            journal_entry__date__lte=date_to,
+            journal_entry__is_posted=True,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0'))
+        total_expenses = exp_d - exp_c
+
+    gross_profit = gross_revenue - total_expenses
+
+    # Non-deductible expenses (Čl.5-7 ZPD) — representacija, 50% auto, kazne
+    # Check konto accounts 4600 (repr), 4610 (auto 50%), 4620 (kazne)
+    NON_DEDUCT_CODES = ['4600', '4610', '4620', '4630', '4640']
+    non_deductible = Decimal('0')
+    nd_accts = KontoAccount.objects.filter(company=company, code__in=NON_DEDUCT_CODES)
+    if nd_accts.exists():
+        nd_d = (LedgerLine.objects.filter(
+            account__in=nd_accts, side='debit',
+            journal_entry__date__gte=date_from,
+            journal_entry__date__lte=date_to,
+            journal_entry__is_posted=True,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0'))
+        non_deductible = nd_d * Decimal('0.50')  # 50% non-deductible
+
+    # Exempt income (dividende, kapitalni dobici) — konto 7800-7899
+    exempt_income = Decimal('0')
+    ex_accts = KontoAccount.objects.filter(
+        company=company, code__gte='7800', code__lte='7899'
+    )
+    if ex_accts.exists():
+        ex_c = (LedgerLine.objects.filter(
+            account__in=ex_accts, side='credit',
+            journal_entry__date__gte=date_from,
+            journal_entry__date__lte=date_to,
+            journal_entry__is_posted=True,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0'))
+        exempt_income = ex_c
+
+    tax_base = max(gross_profit + non_deductible - exempt_income, Decimal('0'))
+
+    # Tax rate (Čl.28 ZPD, NN 114/23)
+    THRESHOLD = Decimal('1000000')  # 1M EUR
+    RATE_LOW = Decimal('0.10')   # 10%
+    RATE_HIGH = Decimal('0.18')  # 18%
+
+    if tax_base <= THRESHOLD:
+        corporate_tax = (tax_base * RATE_LOW).quantize(Decimal('0.01'))
+        rate_label = '10%'
+    else:
+        corporate_tax = (
+            THRESHOLD * RATE_LOW + (tax_base - THRESHOLD) * RATE_HIGH
+        ).quantize(Decimal('0.01'))
+        rate_label = '10% + 18%'
+
+    # Legal reliefs from BORG FENIX
+    reliefs = []
+    relief_total = Decimal('0')
+    try:
+        from limit_connect_ai.models_knowledge_graph import ClientOpportunityMatch
+        matches = ClientOpportunityMatch.objects.filter(
+            company=company,
+            status__in=['identified', 'applied', 'utilized'],
+            opportunity__opportunity_type__in=['tax_relief', 'employment_subsidy'],
+        ).select_related('opportunity')
+        for m in matches:
+            amt = Decimal(str(m.calculated_savings or 0))
+            if amt > 0:
+                reliefs.append({
+                    'name': m.opportunity.name,
+                    'amount': float(amt),
+                    'type': m.opportunity.opportunity_type,
+                })
+                relief_total += amt
+    except Exception:
+        pass
+
+    net_tax = max(corporate_tax - relief_total, Decimal('0'))
+
+    return {
+        'year': year,
+        'country': company.country,
+        'company_name': company.name,
+        'business_type': company.business_type,
+        'gross_revenue': float(gross_revenue),
+        'total_expenses': float(total_expenses),
+        'gross_profit': float(gross_profit),
+        'non_deductible': float(non_deductible),
+        'exempt_income': float(exempt_income),
+        'tax_base': float(tax_base),
+        'tax_rate': rate_label,
+        'corporate_tax': float(corporate_tax),
+        'reliefs': reliefs,
+        'relief_total': float(relief_total),
+        'net_tax': float(net_tax),
+        'effective_rate_pct': float((net_tax / gross_revenue * 100) if gross_revenue else 0),
+    }
+
 def get_euer_report(company, year):
     """Einnahmenüberschussrechnung (EÜR) — German simple income/expense report.
 
@@ -1169,3 +1298,242 @@ def book_pos_session(session, user=None):
                 rev_line.save(update_fields=['amount'])
 
     return je
+
+
+def calculate_po_sd(company, year):
+    """
+    PO-SD obrazac — Izvješće o paušalnom dohotku od samostalne djelatnosti.
+    Za paušalne obrtnike (pdv_status='pausalic').
+
+    Čl.82 Zakona o porezu na dohodak (NN 115/16)
+    Primitci se razvrstavaju u razrede:
+    - Razred 1: do 12.750 EUR godišnje → porez 1.530 EUR (12%)
+    - Razred 2: 12.750-17.500 EUR → porez 2.100 EUR (12%)
+    - Razred 3: 17.500-22.500 EUR → porez 2.700 EUR (12%)
+    - Razred 4: 22.500-35.000 EUR → porez 4.200 EUR (12%)
+    - Razred 5: 35.000-39.816,84 EUR → porez 4.778,02 EUR (12%)
+    Prirez: ovisno o općini/gradu prebivališta (0-18%)
+    """
+    import datetime
+    from invoicing.models import Invoice
+    from django.db.models import Sum as DSum
+    from konto.models import BankTransaction
+
+    date_from = datetime.date(year, 1, 1)
+    date_to = datetime.date(year, 12, 31)
+
+    # Primitci iz izdanih računa
+    invoice_primitci = (
+        Invoice.objects.filter(
+            company=company,
+            doctype__in=['R', 'A', 'GS', 'IRA'],
+            status__in=['PAID', 'SENT', 'OVERDUE', 'UNPAID'],
+            date_issued__date__gte=date_from,
+            date_issued__date__lte=date_to,
+        ).aggregate(t=DSum('total'))['t'] or Decimal('0')
+    )
+
+    # Primitci iz bankovnih uplata (backup ako nema faktura)
+    bank_primitci = (
+        BankTransaction.objects.filter(
+            company=company,
+            transaction_type='inflow',
+            transaction_date__gte=date_from,
+            transaction_date__lte=date_to,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0')
+    )
+
+    # Koristimo veći iznos (fakture ili banka)
+    primitci = max(invoice_primitci, bank_primitci)
+
+    # Razredi PO-SD (2024/2025 pragovi, NN 115/16 + izmjene)
+    RAZREDI = [
+        (Decimal('12750'), Decimal('1530.00'), '1'),
+        (Decimal('17500'), Decimal('2100.00'), '2'),
+        (Decimal('22500'), Decimal('2700.00'), '3'),
+        (Decimal('35000'), Decimal('4200.00'), '4'),
+        (Decimal('39816.84'), Decimal('4778.02'), '5'),
+    ]
+
+    razred = '0'
+    pausal_porez = Decimal('0')
+    gornja_granica = Decimal('0')
+
+    for granica, porez, r in RAZREDI:
+        if primitci <= granica:
+            razred = r
+            pausal_porez = porez
+            gornja_granica = granica
+            break
+    else:
+        # Prekoračen limit za paušalca!
+        razred = 'PREKORAČEN'
+        pausal_porez = Decimal('0')
+        gornja_granica = RAZREDI[-1][0]
+
+    # Prirez (default 0%, Marija može korigirati)
+    prirez_rate = Decimal('0.10')  # 10% za Čepin (default)
+    prirez = (pausal_porez * prirez_rate).quantize(Decimal('0.01'))
+    ukupno = pausal_porez + prirez
+
+    # Kvartalni pregled primitaka
+    kvartali = []
+    for q in range(1, 5):
+        q_start = datetime.date(year, (q - 1) * 3 + 1, 1)
+        if q < 4:
+            q_end = datetime.date(year, q * 3 + 1, 1) - datetime.timedelta(days=1)
+        else:
+            q_end = date_to
+
+        q_primitci = (
+            Invoice.objects.filter(
+                company=company,
+                doctype__in=['R', 'A', 'GS', 'IRA'],
+                status__in=['PAID', 'SENT', 'OVERDUE', 'UNPAID'],
+                date_issued__date__gte=q_start,
+                date_issued__date__lte=q_end,
+            ).aggregate(t=DSum('total'))['t'] or Decimal('0')
+        )
+        kvartali.append({
+            'q': q,
+            'start': q_start.strftime('%d.%m.'),
+            'end': q_end.strftime('%d.%m.'),
+            'primitci': float(q_primitci),
+        })
+
+    prekoracen = primitci > RAZREDI[-1][0]
+
+    return {
+        'year': year,
+        'company_name': company.name,
+        'oib': company.oib,
+        'primitci_fakture': float(invoice_primitci),
+        'primitci_banka': float(bank_primitci),
+        'primitci': float(primitci),
+        'razred': razred,
+        'gornja_granica': float(gornja_granica),
+        'pausal_porez': float(pausal_porez),
+        'prirez_rate': float(prirez_rate * 100),
+        'prirez': float(prirez),
+        'ukupno_porez': float(ukupno),
+        'kvartali': kvartali,
+        'prekoracen': prekoracen,
+        'napomena': 'UPOZORENJE: Primitci prelaze 39.816,84 EUR — obrtnik MORA prijeći u sustav PDV-a!' if prekoracen else '',
+    }
+
+
+def calculate_koerperschaftsteuer(company, year):
+    """
+    KSt — Körperschaftsteuer für GmbH/UG/AG.
+
+    Steuersätze (2024/2025):
+    - Körperschaftsteuer: 15% auf zu versteuerndes Einkommen
+    - Solidaritätszuschlag: 5,5% auf KSt
+    - Gewerbesteuer: Messbetrag (3,5%) × Hebesatz (Gemeinde)
+    - Effektiver Steuersatz: ~30% (KSt + Soli + GewSt)
+
+    Ref: KStG §23 Abs. 1, SolzG §4, GewStG §11
+    """
+    import datetime
+    from .models import KontoAccount, LedgerLine
+    from invoicing.models import Invoice
+    from django.db.models import Sum as DSum
+
+    date_from = datetime.date(year, 1, 1)
+    date_to = datetime.date(year, 12, 31)
+
+    # Revenue
+    gross_revenue = (
+        Invoice.objects.filter(
+            company=company,
+            doctype__in=['R', 'A', 'GS', 'IRA'],
+            status__in=['PAID', 'SENT', 'OVERDUE', 'UNPAID'],
+            date_issued__date__gte=date_from,
+            date_issued__date__lte=date_to,
+        ).aggregate(t=DSum('subtotal'))['t'] or Decimal('0')
+    )
+
+    # Expenses
+    exp_accts = KontoAccount.objects.filter(company=company, account_type='expense')
+    total_expenses = Decimal('0')
+    if exp_accts.exists():
+        exp_d = (LedgerLine.objects.filter(
+            account__in=exp_accts, side='debit',
+            journal_entry__date__gte=date_from,
+            journal_entry__date__lte=date_to,
+            journal_entry__is_posted=True,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0'))
+        exp_c = (LedgerLine.objects.filter(
+            account__in=exp_accts, side='credit',
+            journal_entry__date__gte=date_from,
+            journal_entry__date__lte=date_to,
+            journal_entry__is_posted=True,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0'))
+        total_expenses = exp_d - exp_c
+
+    gewinn = max(gross_revenue - total_expenses, Decimal('0'))
+
+    # Nicht abziehbare Aufwendungen (§10 KStG)
+    # Bewirtung 30%, Geschenke >50 EUR, Geldbußen
+    nicht_abziehbar = Decimal('0')
+    na_codes = ['4650', '4600']  # Bewirtung, Werbekosten (Geschenke)
+    na_accts = KontoAccount.objects.filter(company=company, code__in=na_codes)
+    if na_accts.exists():
+        na_d = (LedgerLine.objects.filter(
+            account__in=na_accts, side='debit',
+            journal_entry__date__gte=date_from,
+            journal_entry__date__lte=date_to,
+            journal_entry__is_posted=True,
+        ).aggregate(t=DSum('amount'))['t'] or Decimal('0'))
+        nicht_abziehbar = (na_d * Decimal('0.30')).quantize(Decimal('0.01'))
+
+    # Zu versteuerndes Einkommen
+    zve = max(gewinn + nicht_abziehbar, Decimal('0'))
+
+    # Körperschaftsteuer (15%)
+    KST_RATE = Decimal('0.15')
+    kst = (zve * KST_RATE).quantize(Decimal('0.01'))
+
+    # Solidaritätszuschlag (5,5% auf KSt)
+    SOLI_RATE = Decimal('0.055')
+    soli = (kst * SOLI_RATE).quantize(Decimal('0.01'))
+
+    # Gewerbesteuer
+    MESSZAHL = Decimal('0.035')
+    hebesatz = Decimal('4.00')  # 400% — Bundesdurchschnitt, anpassbar
+    freibetrag = Decimal('24500')  # nur für Einzelunternehmen/PersGes, nicht GmbH
+
+    # GmbH hat KEINEN Freibetrag bei GewSt
+    is_kapitalgesellschaft = company.business_type in ('gmbh', 'ag', 'ug')
+    if is_kapitalgesellschaft:
+        gewerbe_gewinn = zve  # kein Freibetrag
+    else:
+        gewerbe_gewinn = max(zve - freibetrag, Decimal('0'))
+
+    gewst_messbetrag = (gewerbe_gewinn * MESSZAHL).quantize(Decimal('0.01'))
+    gewst = (gewst_messbetrag * hebesatz).quantize(Decimal('0.01'))
+
+    total_tax = kst + soli + gewst
+    effective_rate = float((total_tax / zve * 100) if zve else 0)
+
+    return {
+        'year': year,
+        'country': 'DE',
+        'company_name': company.name,
+        'business_type': company.business_type,
+        'gross_revenue': float(gross_revenue),
+        'total_expenses': float(total_expenses),
+        'gewinn': float(gewinn),
+        'nicht_abziehbar': float(nicht_abziehbar),
+        'zve': float(zve),
+        'kst_rate': '15%',
+        'kst': float(kst),
+        'soli_rate': '5,5%',
+        'soli': float(soli),
+        'hebesatz': float(hebesatz * 100),
+        'gewst_messbetrag': float(gewst_messbetrag),
+        'gewst': float(gewst),
+        'is_kapitalgesellschaft': is_kapitalgesellschaft,
+        'total_tax': float(total_tax),
+        'effective_rate': round(effective_rate, 1),
+    }

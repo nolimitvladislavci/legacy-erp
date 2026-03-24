@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Porezni pregled – LIMIT CONNECT{% endblock %}
+{% block page_title %}Porezni pregled svih firmi{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table tr:hover{background:rgba(201,168,76,.05)}
+.k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace}
+.k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.k-filter .fld{display:flex;flex-direction:column;gap:3px}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-yellow{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-gray{background:rgba(100,116,139,.15);color:#64748b}
+.badge-gold{background:rgba(201,168,76,.15);color:#c9a84c}
+.vat-pos{color:#ef4444}.vat-neg{color:#22c55e}
+</style>
+
+<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&larr; Dashboard</a></div>
+
+<!-- SUMMARY STATS -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+  <div class="k-stat">
+    <div><div class="lbl">Firme</div><div class="num" style="color:#c9a84c">{{ company_count }}</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Ukupna PDV obveza</div><div class="num {% if totals.obveza > 0 %}vat-pos{% else %}vat-neg{% endif %}">{{ totals.obveza|floatformat:2 }} &euro;</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Ukupni prihodi</div><div class="num" style="color:#22c55e">{{ totals.prihod|floatformat:2 }} &euro;</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Aktivni alarmi</div><div class="num" style="color:{% if totals.alerts > 0 %}#ef4444{% else %}#22c55e{% endif %}">{{ totals.alerts }}</div></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<form method="get" class="k-filter" style="margin-bottom:20px">
+  <div class="fld">
+    <label>PDV Status</label>
+    <select name="pdv_status" onchange="this.form.submit()">
+      {% for val, label in pdv_choices %}
+      <option value="{{ val }}" {% if val == pdv_filter %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="fld">
+    <label>Tip</label>
+    <select name="business_type" onchange="this.form.submit()">
+      {% for val, label in btype_choices %}
+      <option value="{{ val }}" {% if val == btype_filter %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+
+<!-- MAIN TABLE -->
+<div class="k-card">
+  <div class="k-card-head">
+    <h3>Porezni status po firmama</h3>
+    <span style="color:#64748b;font-size:.75rem">{{ company_count }} firmi</span>
+  </div>
+  <table class="k-table">
+    <thead>
+      <tr>
+        <th>Firma</th>
+        <th>Tip</th>
+        <th>PDV Status</th>
+        <th>Zadnji period</th>
+        <th class="right">Obveza PDV</th>
+        <th class="right">Prihod</th>
+        <th>Alarmi</th>
+        <th>Prijavljeno</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+    <tr>
+      <td><a href="{% url 'konto:report_vat' %}?calc=1&year=2026&month=3" style="color:#c9a84c;text-decoration:none;font-weight:600">{{ row.company.name }}</a></td>
+      <td><span class="badge badge-gray">{{ row.business_type }}</span></td>
+      <td>
+        {% if row.pdv_status == 'obveznik' %}<span class="badge badge-gold">Obveznik</span>
+        {% elif row.pdv_status == 'pausalic' %}<span class="badge badge-yellow">Pau&scaron;alac</span>
+        {% else %}<span class="badge badge-gray">-</span>{% endif %}
+      </td>
+      <td class="mono">{% if row.latest_period %}{{ row.latest_period }}{% else %}&mdash;{% endif %}</td>
+      <td class="right mono {% if row.vat_payable > 0 %}vat-pos{% elif row.vat_payable < 0 %}vat-neg{% endif %}">
+        {% if row.latest_period %}{{ row.vat_payable|floatformat:2 }} &euro;{% else %}&mdash;{% endif %}
+      </td>
+      <td class="right mono" style="color:#22c55e">
+        {% if row.latest_period %}{{ row.total_revenue|floatformat:2 }} &euro;{% else %}&mdash;{% endif %}
+      </td>
+      <td>
+        {% if row.alert_count > 0 %}<span class="badge badge-red">{{ row.alert_count }}</span>
+        {% else %}<span class="badge badge-green">0</span>{% endif %}
+      </td>
+      <td>
+        {% if row.is_filed == True %}<span class="badge badge-green">Da</span>
+        {% elif row.is_filed == False %}<span class="badge badge-red">Ne</span>
+        {% else %}<span class="badge badge-gray">&mdash;</span>{% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px">Nema firmi za prikaz</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

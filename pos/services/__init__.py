@@ -7,7 +7,7 @@ Extracted from views.py to enable:
 - Clear separation of concerns
 """
 import logging
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 
 from django.db import transaction
@@ -34,9 +34,10 @@ def recalculate_receipt(receipt: "POSReceipt") -> None:
         tax = net * item.tax_rate / 100
         subtotal += net
         tax_total += tax
-    receipt.subtotal = round(subtotal, 2)
-    receipt.tax_amount = round(tax_total, 2)
-    receipt.total = round(subtotal + tax_total - receipt.discount, 2)
+    _Q = Decimal('0.01')
+    receipt.subtotal = subtotal.quantize(_Q, rounding=ROUND_HALF_UP)
+    receipt.tax_amount = tax_total.quantize(_Q, rounding=ROUND_HALF_UP)
+    receipt.total = (subtotal + tax_total - receipt.discount).quantize(_Q, rounding=ROUND_HALF_UP)
     receipt.save(update_fields=["subtotal", "tax_amount", "total"])
 
 
@@ -250,6 +251,8 @@ def _deduct_inventory(receipt: "POSReceipt", user: "User | None" = None) -> int:
 
     for item in receipt.items.select_related("inventory_item").all():
         if not item.inventory_item_id:
+            continue
+        if not item.inventory_item.is_stockable:
             continue
 
         StockMovement.objects.create(

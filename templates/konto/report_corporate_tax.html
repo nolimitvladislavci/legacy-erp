@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Porez na dobit – LIMIT CONNECT{% endblock %}
+{% block page_title %}Porez na dobit (PD obrazac){% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover,.k-nav a.active{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace}
+.k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.k-filter .fld{display:flex;flex-direction:column;gap:3px}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.k-filter .fld input,.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
+.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.k-btn-outline{background:transparent;border:1.5px solid #334155;color:#94a3b8}.k-btn-outline:hover{border-color:#c9a84c;color:#c9a84c}
+.badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
+.badge-gold{background:rgba(201,168,76,.15);color:#c9a84c}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
+.big-gold{font-size:2rem;font-weight:900;color:#c9a84c;font-family:'Cormorant Garamond',serif}
+.pd-row{display:flex;justify-content:space-between;padding:10px 16px;border-bottom:1px solid rgba(51,65,85,.3)}
+.pd-row .label{color:#94a3b8;font-size:.85rem}.pd-row .value{font-weight:700;font-family:'IBM Plex Mono',monospace;font-size:.9rem;color:#e2e8f0}
+.pd-row.highlight{background:rgba(201,168,76,.05)}.pd-row.highlight .value{color:#c9a84c}
+.pd-row.total{border-top:2px solid #c9a84c;border-bottom:none;padding-top:14px}
+</style>
+
+<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&larr; Dashboard</a></div>
+
+<div class="k-nav">
+  <a href="{% url 'konto:report_pnl' %}">P&amp;L</a>
+  <a href="{% url 'konto:report_balance_sheet' %}">Bilanca</a>
+  <a href="{% url 'konto:report_receivables' %}">Potra&zcaron;ivanja</a>
+  <a href="{% url 'konto:report_vat' %}">PDV Prijava</a>
+  <a href="{% url 'konto:report_annual_tax' %}">Godi&scaron;nji porez</a>
+  <a href="{% url 'konto:report_corporate_tax' %}" class="active">Porez na dobit</a>
+  <a href="{% url 'konto:report_euer' %}">E&Uuml;R</a>
+</div>
+
+{% if error %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#ef4444;font-size:.85rem">{{ error }}</div>
+{% endif %}
+
+<!-- FILTER -->
+<form method="get" class="k-filter" style="margin-bottom:20px">
+  <div class="fld">
+    <label>Godina</label>
+    <select name="year">
+      {% for y in years %}
+      <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <input type="hidden" name="calc" value="1">
+  <button type="submit" class="k-btn k-btn-gold">Izra&ccaron;unaj</button>
+</form>
+
+{% if report %}
+<!-- STATS ROW -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
+  <div class="k-stat">
+    <div>
+      <div class="lbl">Bruto prihod</div>
+      <div class="num" style="color:#22c55e">{{ report.gross_revenue|floatformat:2 }} &euro;</div>
+    </div>
+  </div>
+  <div class="k-stat">
+    <div>
+      <div class="lbl">Rashodi</div>
+      <div class="num" style="color:#ef4444">{{ report.total_expenses|floatformat:2 }} &euro;</div>
+    </div>
+  </div>
+  <div class="k-stat">
+    <div>
+      <div class="lbl">Bruto dobit</div>
+      <div class="num" style="color:{% if report.gross_profit >= 0 %}#22c55e{% else %}#ef4444{% endif %}">{{ report.gross_profit|floatformat:2 }} &euro;</div>
+    </div>
+  </div>
+</div>
+
+<!-- PD DETAIL CARD -->
+<div class="k-card">
+  <div class="k-card-head">
+    <h3>PD obrazac &mdash; {{ report.company_name }} ({{ report.year }})</h3>
+    <span class="badge badge-gold">{{ report.country }}</span>
+  </div>
+  <div style="padding:4px 0">
+    <div class="pd-row">
+      <span class="label">Bruto dobit (prihodi &minus; rashodi)</span>
+      <span class="value">{{ report.gross_profit|floatformat:2 }} &euro;</span>
+    </div>
+    <div class="pd-row">
+      <span class="label">+ Nepriznati rashodi (&ccaron;l.5-7 ZPD, 50%)</span>
+      <span class="value">{{ report.non_deductible|floatformat:2 }} &euro;</span>
+    </div>
+    <div class="pd-row">
+      <span class="label">&minus; Oslobo&dstrok;eni prihodi (dividende, kap. dobici)</span>
+      <span class="value">{{ report.exempt_income|floatformat:2 }} &euro;</span>
+    </div>
+    <div class="pd-row highlight">
+      <span class="label"><strong>= Porezna osnovica</strong></span>
+      <span class="value" style="color:#c9a84c;font-size:1rem">{{ report.tax_base|floatformat:2 }} &euro;</span>
+    </div>
+    <div class="pd-row">
+      <span class="label">Porezna stopa</span>
+      <span class="value">{{ report.tax_rate }}</span>
+    </div>
+    <div class="pd-row highlight">
+      <span class="label"><strong>Porez na dobit (bruto)</strong></span>
+      <span class="value" style="color:#c9a84c">{{ report.corporate_tax|floatformat:2 }} &euro;</span>
+    </div>
+
+    {% if report.reliefs %}
+    <div style="padding:10px 16px;border-bottom:1px solid rgba(51,65,85,.3)">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px">Olak&scaron;ice (BORG FENIX)</div>
+      {% for r in report.reliefs %}
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.82rem">
+        <span style="color:#94a3b8">{{ r.name }} <span class="badge badge-green">{{ r.type }}</span></span>
+        <span style="color:#22c55e;font-weight:700;font-family:'IBM Plex Mono',monospace">&minus;{{ r.amount|floatformat:2 }} &euro;</span>
+      </div>
+      {% endfor %}
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.82rem;border-top:1px solid #334155;margin-top:4px">
+        <span style="color:#64748b;font-weight:700">Ukupno olak&scaron;ica</span>
+        <span style="color:#22c55e;font-weight:700;font-family:'IBM Plex Mono',monospace">&minus;{{ report.relief_total|floatformat:2 }} &euro;</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="pd-row total">
+      <span class="label" style="font-size:1rem;font-weight:700;color:#e2e8f0">NETO POREZ ZA UPLATU</span>
+      <span class="big-gold">{{ report.net_tax|floatformat:2 }} &euro;</span>
+    </div>
+  </div>
+</div>
+
+<!-- EFFECTIVE RATE -->
+<div style="text-align:center;margin-top:12px">
+  <span class="badge {% if report.effective_rate_pct <= 10 %}badge-green{% elif report.effective_rate_pct <= 18 %}badge-gold{% else %}badge-red{% endif %}" style="font-size:.85rem;padding:6px 16px">
+    Efektivna stopa: {{ report.effective_rate_pct|floatformat:1 }}%
+  </span>
+</div>
+
+{% elif not error %}
+<div class="k-card" style="padding:40px;text-align:center">
+  <div style="font-size:2.5rem;margin-bottom:12px">&#x1f3db;</div>
+  <div style="color:#64748b;font-size:.9rem">Odaberite godinu i kliknite <strong style="color:#c9a84c">Izra&ccaron;unaj</strong> za izra&ccaron;un poreza na dobit.</div>
+  <div style="color:#475569;font-size:.75rem;margin-top:8px">&ccaron;l.28 Zakona o porezu na dobit (NN 177/04, izmjena NN 114/23)</div>
+</div>
+{% endif %}
+
+{% endblock %}

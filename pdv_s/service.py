@@ -141,6 +141,73 @@ def generate_pdv_s(company, year, month, invoices_in, invoices_out):
     return data
 
 
+def generate_pdv_s_from_tax_period(company, year, month, user=None):
+    """
+    Bridge: Generate PDV-S report from existing TaxPeriod + invoice data.
+    Combines TaxPeriod aggregates with invoice-level PDV-S detail.
+    Returns PDVSReport instance.
+    """
+    from django.db import models as dm
+    from invoicing.models import Invoice
+    from pdv_s.models import PDVSReport
+
+    # Get invoices for the period
+    invoices_in = Invoice.objects.filter(
+        company=company,
+        date_issued__year=year,
+        date_issued__month=month,
+    ).filter(
+        dm.Q(doctype='URA') | dm.Q(source='eracun')
+    ).exclude(status__in=['DRAFT', 'CANCELLED', 'STORNO'])
+
+    invoices_out = Invoice.objects.filter(
+        company=company,
+        date_issued__year=year,
+        date_issued__month=month,
+        doctype__in=['R', 'PO', 'P', 'A', 'FA', 'RN', 'IRA'],
+    ).exclude(status__in=['DRAFT', 'CANCELLED', 'STORNO'])
+
+    pdv_data = generate_pdv_s(company, year, month, invoices_in, invoices_out)
+
+    report, created = PDVSReport.objects.update_or_create(
+        company=company, year=year, month=month,
+        defaults={
+            'i1_base': pdv_data['i1_base'], 'i1_tax': pdv_data['i1_tax'],
+            'i2_base': pdv_data['i2_base'], 'i2_tax': pdv_data['i2_tax'],
+            'i3_base': pdv_data['i3_base'], 'i3_tax': pdv_data['i3_tax'],
+            'ii1_base': pdv_data['ii1_base'], 'ii1_tax': pdv_data['ii1_tax'],
+            'ii2_base': pdv_data['ii2_base'], 'ii2_tax': pdv_data['ii2_tax'],
+            'ii3_base': pdv_data['ii3_base'], 'ii3_tax': pdv_data['ii3_tax'],
+            'ii4_base': pdv_data['ii4_base'],
+            'ii5_base': pdv_data['ii5_base'],
+            'ii6_base': pdv_data['ii6_base'],
+            'iii_total_pretporez': pdv_data['iii_total_pretporez'],
+            'iii_ispravak': pdv_data['iii_ispravak'],
+            'iv_pdv_isporuke': pdv_data['iv_pdv_isporuke'],
+            'iv_pretporez': pdv_data['iv_pretporez'],
+            'iv_razlika': pdv_data['iv_razlika'],
+            'generated_by': user,
+        }
+    )
+    return report
+
+
+def batch_generate_pdv_s(year, month, user=None):
+    """Generate PDV-S for ALL companies with pdv_status='obveznik'."""
+    from companies.models import Company
+    results = []
+    companies = Company.objects.filter(pdv_status='obveznik')
+    for c in companies:
+        try:
+            report = generate_pdv_s_from_tax_period(c, year, month, user)
+            results.append({'company': c.name, 'oib': c.oib, 'status': 'ok',
+                            'razlika': float(report.iv_razlika)})
+        except Exception as e:
+            results.append({'company': c.name, 'oib': c.oib, 'status': 'error',
+                            'error': str(e)})
+    return results
+
+
 def generate_pdv_s_xml(company, year, month, pdv_data):
     """Generate PDV-S XML for e-Porezna submission."""
     root = ET.Element('ObrazacPDV')

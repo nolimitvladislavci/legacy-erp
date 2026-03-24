@@ -134,7 +134,9 @@ B2B_PATTERNS = re.compile(
     r'\bGMBH\b|\bS\.R\.L\b|\bKG\b|'
     r'\bB\.V\.\b|\bN\.V\.\b|'
     r'\bLTD\b|\bINC\b|\bCORP\b|'
-    r'\bTVRTKA\b'
+    r'\bTVRTKA\b|'
+    r'\bZADRUGA\b|'
+    r'\bVODOVOD\b|\bKOMUNALN|\bPLINARA\b'
     r')',
     re.IGNORECASE | re.UNICODE,
 )

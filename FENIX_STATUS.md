@@ -6,7 +6,7 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-23 18:54 — Opus (Scan Batch 100, Offline POS sync, Robot Prodavač kiosk)
+2026-03-23 19:54 — Opus (T&C test fix, Cross-Module POS×Invoicing task spec)
 Git HEAD: 314f3de
 
 ---
@@ -130,6 +130,8 @@ Commit: 8a2fc66
 | CC_TASK_TESTS_PREDKOMORA.md | CC | SREDNJI |
 | GEMINI_TASK_TESTS_HASHCHAIN.md | Gemini | SREDNJI |
 | GEMINI_TASK_LIMIT_AI_COMPLIANCE.md | Gemini | SREDNJI |
+| GEMINI_TASK_CROSS_MODULE_POS_INVOICING.md | Gemini | **VISOK** |
+| GEMINI_TASK_CROSS_MODULE_POS_INVOICING.md | Gemini | **VISOK** |
 
 ### Treba napisati (backlog)
 - CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi Faza 2

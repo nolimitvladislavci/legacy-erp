@@ -33,12 +33,19 @@ urlpatterns = [
     path('reports/balance-sheet/', views.report_balance_sheet, name='report_balance_sheet'),
     path('reports/receivables/', views.report_receivables, name='report_receivables'),
 
-    # Porezni izvještaji
+    # Porezni izvještaji (HR + DE)
+    path('reports/tax-dashboard/', views.tax_dashboard, name='tax_dashboard'),
     path('reports/vat/', views.report_vat, name='report_vat'),
     path('reports/annual-tax/', views.report_annual_tax, name='report_annual_tax'),
     path('reports/euer/', views.report_euer, name='report_euer'),
+    path('reports/corporate-tax/', views.report_corporate_tax, name='report_corporate_tax'),
+    path('reports/po-sd/', views.report_po_sd, name='report_po_sd'),
     path('reports/vat/<int:pk>/filed/', views.report_vat_mark_filed, name='report_vat_mark_filed'),
 
+    # Deutsche Steuerberichte
+    path('reports/ustva/', views.report_ustva, name='report_ustva'),
+    path('reports/ustva/<int:year>/<int:month>/xml/', views.ustva_xml_export, name='ustva_xml_export'),
+    path('reports/koerperschaftsteuer/', views.report_koerperschaftsteuer, name='report_kst'),
 
     # ── Bank Import (camt.053) ──
     path('bank/dashboard/', views_bank.bank_dashboard, name='bank_dashboard'),

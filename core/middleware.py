@@ -206,6 +206,14 @@ class ForceTCMiddleware:
         if not company:
             return self.get_response(request)
 
+        # Free tier / nema plaćene pretplate → ne blokiraj (PLG: vidi vrijednost prije potpisa)
+        try:
+            sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
+            if not sub or sub.monthly_fee == 0:
+                return self.get_response(request)
+        except Exception:
+            return self.get_response(request)
+
         # Ako je T&C potpisan i verzija aktualna — propusti
         if company.has_signed_tc_consent and company.tc_consent_version == self.TC_CURRENT_VERSION:
             return self.get_response(request)

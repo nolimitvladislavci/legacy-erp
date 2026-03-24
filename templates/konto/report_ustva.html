@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}UStVA – LIMIT CONNECT{% endblock %}
+{% block page_title %}UStVA — Umsatzsteuervoranmeldung{% endblock %}
+{% block content %}
+<style>
+.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.k-stat .num{font-size:1.5rem;font-weight:800}.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;margin-bottom:16px}
+.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
+.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
+.k-nav a:hover,.k-nav a.active{border-color:#c9a84c;color:#c9a84c}
+.k-nav a.active{background:#c9a84c;color:#0f172a}
+.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
+.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
+.k-table .right{text-align:right}.k-table .mono{font-family:'IBM Plex Mono',monospace}
+.k-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.k-filter .fld{display:flex;flex-direction:column;gap:3px}
+.k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
+.k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
+.k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-gold{background:rgba(201,168,76,.15);color:#c9a84c}
+.vat-pos{color:#ef4444}.vat-neg{color:#22c55e}
+</style>
+
+<div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&larr; Dashboard</a></div>
+
+<div class="k-nav">
+  <a href="{% url 'konto:report_vat' %}">PDV/USt</a>
+  <a href="{% url 'konto:report_ustva' %}" class="active">UStVA</a>
+  <a href="{% url 'konto:report_euer' %}">E&Uuml;R</a>
+  <a href="{% url 'konto:report_annual_tax' %}">ESt</a>
+  <a href="{% url 'konto:report_kst' %}">K&ouml;St</a>
+  <a href="{% url 'konto:datev_export' %}">DATEV Export</a>
+</div>
+
+{% if error %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px;color:#ef4444;font-size:.85rem">{{ error }}</div>
+{% endif %}
+
+<form method="get" class="k-filter" style="margin-bottom:20px">
+  <div class="fld">
+    <label>Jahr</label>
+    <select name="year">{% for y in years %}<option {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+  </div>
+  <div class="fld">
+    <label>Monat</label>
+    <select name="month">{% for m, mname in month_choices %}<option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ mname }}</option>{% endfor %}</select>
+  </div>
+  <input type="hidden" name="calc" value="1">
+  <button type="submit" class="k-btn k-btn-gold">Berechnen</button>
+</form>
+
+{% if report %}
+<div style="margin-bottom:12px">
+  <a href="{% url 'konto:ustva_xml_export' year=report.year month=report.month %}" class="k-btn k-btn-gold" target="_blank">XML herunterladen</a>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+  <div class="k-stat">
+    <div><div class="lbl">Umsatzsteuer</div><div class="num" style="color:#f59e0b">{{ report.total_ust|floatformat:2 }} &euro;</div></div>
+  </div>
+  <div class="k-stat">
+    <div><div class="lbl">Vorsteuer</div><div class="num" style="color:#3b82f6">{{ report.total_vorsteuer|floatformat:2 }} &euro;</div></div>
+  </div>
+  <div class="k-stat">
+    <div>
+      <div class="lbl">Vorauszahlung (KZ 83)</div>
+      <div class="num {% if report.kz83 > 0 %}vat-pos{% else %}vat-neg{% endif %}">{{ report.kz83|floatformat:2 }} &euro;</div>
+    </div>
+  </div>
+</div>
+
+<div class="k-card">
+  <div class="k-card-head"><h3>I. Steuerpflichtige Lieferungen und Leistungen</h3></div>
+  <table class="k-table">
+    <thead><tr><th>KZ</th><th>Beschreibung</th><th class="right">Bemessungsgrundlage</th><th class="right">Steuer</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-gold">81</span></td><td>Zum Steuersatz von 19%</td><td class="right mono">{{ report.kz81_base|floatformat:2 }} &euro;</td><td class="right mono" style="color:#f59e0b">{{ report.kz81_tax|floatformat:2 }} &euro;</td></tr>
+      <tr><td><span class="badge badge-gold">86</span></td><td>Zum Steuersatz von 7%</td><td class="right mono">{{ report.kz86_base|floatformat:2 }} &euro;</td><td class="right mono" style="color:#f59e0b">{{ report.kz86_tax|floatformat:2 }} &euro;</td></tr>
+      {% if report.kz35_base %}<tr><td><span class="badge badge-gold">35</span></td><td>Andere Steuers&auml;tze</td><td class="right mono">{{ report.kz35_base|floatformat:2 }} &euro;</td><td class="right mono">{{ report.kz35_tax|floatformat:2 }} &euro;</td></tr>{% endif %}
+      {% if report.kz77_base %}<tr><td><span class="badge badge-gold">77</span></td><td>Steuerfreie EU-Lieferungen</td><td class="right mono">{{ report.kz77_base|floatformat:2 }} &euro;</td><td class="right mono">&mdash;</td></tr>{% endif %}
+      {% if report.kz76_base %}<tr><td><span class="badge badge-gold">76</span></td><td>Steuerfreie sonstige</td><td class="right mono">{{ report.kz76_base|floatformat:2 }} &euro;</td><td class="right mono">&mdash;</td></tr>{% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="k-card">
+  <div class="k-card-head"><h3>II. Abziehbare Vorsteuerbetr&auml;ge</h3></div>
+  <table class="k-table">
+    <thead><tr><th>KZ</th><th>Beschreibung</th><th class="right">Betrag</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-gold">66</span></td><td>Vorsteuer aus Rechnungen (19%)</td><td class="right mono" style="color:#3b82f6">{{ report.kz66|floatformat:2 }} &euro;</td></tr>
+      {% if report.kz61 %}<tr><td><span class="badge badge-gold">61</span></td><td>Vorsteuer aus Rechnungen (7%)</td><td class="right mono" style="color:#3b82f6">{{ report.kz61|floatformat:2 }} &euro;</td></tr>{% endif %}
+      {% if report.kz62 %}<tr><td><span class="badge badge-gold">62</span></td><td>Innergemeinschaftlicher Erwerb</td><td class="right mono" style="color:#3b82f6">{{ report.kz62|floatformat:2 }} &euro;</td></tr>{% endif %}
+      {% if report.kz67 %}<tr><td><span class="badge badge-gold">67</span></td><td>Vorsteuer &sect;13b</td><td class="right mono" style="color:#3b82f6">{{ report.kz67|floatformat:2 }} &euro;</td></tr>{% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="k-card">
+  <div style="padding:20px;text-align:center">
+    <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">KZ 83 — Verbleibende Vorauszahlung</div>
+    <div style="font-size:2rem;font-weight:800;color:{% if report.kz83 > 0 %}#ef4444{% elif report.kz83 < 0 %}#22c55e{% else %}#c9a84c{% endif %}">{{ report.kz83|floatformat:2 }} &euro;</div>
+    <div style="font-size:.8rem;color:#64748b;margin-top:4px">
+      {% if report.kz83 > 0 %}An das Finanzamt zu zahlen{% elif report.kz83 < 0 %}Erstattung vom Finanzamt{% else %}Nullmeldung{% endif %}
+      &mdash; Frist: {{ report.filing_deadline }}
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

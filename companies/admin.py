@@ -16,10 +16,11 @@ class NKDCodeAdmin(admin.ModelAdmin):
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display  = ('name', 'oib', 'country', 'business_type', 'nkd_code',
+    list_display  = ('name', 'oib', 'country', 'business_type', 'pdv_status', 'nkd_code',
                       'currency', 'fiscal_system', 'is_vat_registered', 'is_platform_owner', 'grosmarkt_partner', 'city', 'created_at')
     search_fields = ('name', 'oib', 'tax_number', 'vat_id')
-    list_filter   = ('country', 'business_type', 'currency', 'fiscal_system', 'is_vat_registered', 'is_platform_owner', 'grosmarkt_partner')
+    list_filter   = ('country', 'business_type', 'pdv_status', 'currency', 'fiscal_system', 'is_vat_registered', 'is_platform_owner', 'grosmarkt_partner')
+    list_editable = ('pdv_status',)
     autocomplete_fields = ('nkd_code',)
     fieldsets = (
         (_('Osnovni podaci'), {
@@ -32,7 +33,7 @@ class CompanyAdmin(admin.ModelAdmin):
             'fields': ('country', 'business_type', 'tax_number', 'vat_id', 'currency', 'fiscal_system'),
         }),
         (_('PDV i konfiguracija'), {
-            'fields': ('is_vat_registered',),
+            'fields': ('pdv_status', 'is_vat_registered'),
         }),
         (_('Grosmarkt Partner'), {
             'fields': ('grosmarkt_partner', 'grosmarkt_role', 'grosmarkt_description', 'grosmarkt_show_name'),

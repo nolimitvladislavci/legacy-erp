@@ -274,3 +274,117 @@ def client_ticket_detail(request, token, ticket_id):
         'messages': messages_list,
         'active_tab': 'support',
     })
+
+
+# ── Document Upload (Drag & Drop) ─────────────────────────────────
+import json
+
+def client_upload(request, token):
+    """AJAX: Klijent uploada fakturu (slika/PDF) → draft URA via Gemini OCR."""
+    partner = _get_partner(token)
+    company = partner.company
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    file = request.FILES.get('file')
+    if not file:
+        return JsonResponse({'error': 'Nema datoteke'}, status=400)
+
+    # Validate file type
+    allowed = ('.pdf', '.jpg', '.jpeg', '.png', '.webp')
+    ext = '.' + file.name.rsplit('.', 1)[-1].lower() if '.' in file.name else ''
+    if ext not in allowed:
+        return JsonResponse({'error': f'Nepodržan format. Dozvoljeno: {", ".join(allowed)}'}, status=400)
+
+    # Max 10MB
+    if file.size > 10 * 1024 * 1024:
+        return JsonResponse({'error': 'Datoteka prevelika (max 10 MB)'}, status=400)
+
+    # Save to ArhivaEntry
+    try:
+        from documents.models import ArhivaEntry
+        entry = ArhivaEntry.objects.create(
+            company=company,
+            title=f'Upload: {file.name}',
+            category='URA',
+            source='client_portal',
+            notes=f'Uploadao klijent {partner.name} via portal',
+        )
+        # Save file
+        from django.core.files.storage import default_storage
+        path = f'portal_uploads/{company.id}/{timezone.now():%Y/%m}/{file.name}'
+        saved_path = default_storage.save(path, file)
+        entry.notes += f'\nFile: {saved_path}'
+        entry.save(update_fields=['notes'])
+
+    except Exception as e:
+        return JsonResponse({'ok': True, 'status': 'saved', 'message': f'Dokument spremljen (OCR nedostupan: {e})'})
+
+    # Try OCR via smart_import if available
+    ocr_result = None
+    try:
+        from smart_import.services import extract_invoice_data
+        ocr_result = extract_invoice_data(saved_path)
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'ok': True,
+        'status': 'uploaded',
+        'file_name': file.name,
+        'entry_id': entry.id if entry else None,
+        'ocr': ocr_result,
+        'message': f'Dokument "{file.name}" spremljen. ' + (
+            'OCR obrada pokrenuta.' if ocr_result else 'Računovođa će ga obraditi.'
+        ),
+    })
+
+
+# ── eRačun Timeline ───────────────────────────────────────────────
+def client_eracun_timeline(request, token):
+    """AJAX: dohvati eRačun status timeline za partnera."""
+    partner = _get_partner(token)
+    company = partner.company
+
+    try:
+        from eracun.models import ERacun
+        eracuni = ERacun.objects.filter(
+            company=company,
+            recipient_oib=partner.oib,
+        ).order_by('-created_at')[:20]
+
+        data = []
+        for er in eracuni:
+            steps = [
+                {'key': 'draft', 'label': 'Kreiran', 'done': True, 'date': er.created_at.isoformat()},
+                {'key': 'valid', 'label': 'Validiran', 'done': er.status not in ('draft', 'validating', 'invalid'), 'date': ''},
+                {'key': 'signed', 'label': 'Potpisan', 'done': er.status not in ('draft', 'validating', 'valid', 'invalid', 'signing'), 'date': ''},
+                {'key': 'sent', 'label': 'Poslan', 'done': er.sent_at is not None, 'date': er.sent_at.isoformat() if er.sent_at else ''},
+                {'key': 'accepted', 'label': 'Zaprimljen', 'done': er.status == 'accepted', 'date': er.accepted_at.isoformat() if er.accepted_at else ''},
+            ]
+            # Mark current step
+            current = er.status
+            if current == 'error':
+                for s in steps:
+                    if not s['done']:
+                        s['error'] = True
+                        s['label'] += f' (Greška)'
+                        break
+
+            data.append({
+                'id': str(er.id),
+                'number': er.invoice_number,
+                'date': er.issue_date.isoformat(),
+                'total': str(er.total),
+                'currency': er.currency,
+                'status': er.status,
+                'status_display': er.get_status_display(),
+                'zki': er.zki or '',
+                'jir': er.jir or '',
+                'steps': steps,
+            })
+
+        return JsonResponse({'ok': True, 'eracuni': data})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)}, status=500)

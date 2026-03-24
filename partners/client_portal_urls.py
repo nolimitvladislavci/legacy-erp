@@ -10,4 +10,6 @@ urlpatterns = [
     path('invoices/', views.client_invoices, name='invoices'),
     path('support/new/', views.client_new_ticket, name='new_ticket'),
     path('support/<int:ticket_id>/', views.client_ticket_detail, name='ticket_detail'),
+    path('api/upload/', views.client_upload, name='upload'),
+    path('api/eracun-timeline/', views.client_eracun_timeline, name='eracun_timeline'),
 ]
