@@ -52,6 +52,17 @@ def poll_inbox():
                 try:
                     mailbox.process_incoming(message)
                     total_received += 1
+                    # Push notification for new invoice
+                    try:
+                        from push_notifications.push import send_company_push
+                        send_company_push(
+                            config.company.id,
+                            title="Nova ulazna faktura",
+                            body=f"{msg_summary.get('senderName', 'Nepoznat')} — {msg_summary.get('invoiceNumber', '')}",
+                            url="/einvoice/inbox/",
+                        )
+                    except Exception:
+                        pass
                 except Exception as e:
                     logger.error(f"Smart Mailbox failed for {ext_id}: {e}")
                     message.transition_to(MessageStatus.VALIDATION_FAILED, detail=str(e))

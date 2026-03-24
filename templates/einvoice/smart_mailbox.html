@@ -27,6 +27,20 @@
 .sm-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .sm-filter a{padding:4px 12px;border-radius:6px;font-size:.75rem;text-decoration:none;border:1px solid var(--border);color:var(--text-muted)}
 .sm-filter a.active,.sm-filter a:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media(max-width:768px){
+  .sm-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .sm-stat .val{font-size:1.1rem}
+  .sm-stat .lbl{font-size:.55rem}
+  .sm-table{font-size:.72rem}
+  .sm-table th:nth-child(5),.sm-table td:nth-child(5),
+  .sm-table th:nth-child(7),.sm-table td:nth-child(7){display:none}
+  .sm-filter{overflow-x:auto;flex-wrap:nowrap}
+  .sm-filter a{white-space:nowrap;flex-shrink:0}
+}
+@media(max-width:480px){
+  .sm-grid{grid-template-columns:repeat(2,1fr)}
+  .sm-table th:nth-child(4),.sm-table td:nth-child(4){display:none}
+}
 </style>
 
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
@@ -139,4 +153,58 @@
 </div>
 {% endif %}
 </div>
+<script>
+// Swipe-to-approve on mobile
+(function(){
+  if(!("ontouchstart" in window)) return;
+  let startX=0, startY=0, row=null;
+  const THRESHOLD=80;
+  
+  document.querySelector(".sm-table tbody")?.addEventListener("touchstart", function(e){
+    row=e.target.closest("tr");
+    if(!row) return;
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+  });
+  
+  document.querySelector(".sm-table tbody")?.addEventListener("touchmove", function(e){
+    if(!row) return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=Math.abs(e.touches[0].clientY-startY);
+    if(dy>30){row.style.transform="";row=null;return;}
+    if(Math.abs(dx)>10){
+      e.preventDefault();
+      row.style.transition="none";
+      row.style.transform="translateX("+dx+"px)";
+      row.style.opacity=Math.max(0.3,1-Math.abs(dx)/300);
+      if(dx>THRESHOLD) row.style.background="rgba(34,197,94,.15)";
+      else if(dx<-THRESHOLD) row.style.background="rgba(59,130,246,.15)";
+      else row.style.background="";
+    }
+  });
+  
+  document.querySelector(".sm-table tbody")?.addEventListener("touchend", function(e){
+    if(!row) return;
+    const dx=e.changedTouches[0].clientX-startX;
+    row.style.transition="transform .2s,opacity .2s,background .2s";
+    row.style.transform="";
+    row.style.opacity="";
+    
+    if(dx>THRESHOLD){
+      var form=row.querySelector("form");
+      if(form){
+        row.style.transform="translateX(100%)";
+        row.style.opacity="0";
+        setTimeout(function(){form.submit()},200);
+      }
+    } else if(dx<-THRESHOLD){
+      var link=row.querySelector("a[href*=\"/inbox/\"]");
+      if(link) window.location.href=link.href;
+    }
+    
+    setTimeout(function(){if(row){row.style.background=""}},300);
+    row=null;
+  });
+})();
+</script>
 {% endblock %}

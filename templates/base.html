@@ -527,6 +527,7 @@
           <div class="sidebar-group-links collapsed">
             {% if 'appointments' in sidebar_enabled_ids %}<a href="/appointments/" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> <span>Termini</span></a>{% endif %}
             {% if 'eracun' in sidebar_enabled_ids %}<a href="/eracun/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> <span>e-Racuni</span></a>{% endif %}
+            {% if "eracun" in sidebar_enabled_ids %}<a href="/einvoice/inbox/" onclick="closeSidebar()"><i class="fas fa-brain" style="color:#c9a84c"></i> <span>Smart Mailbox</span></a>{% endif %}
             {% if 'finance' in sidebar_enabled_ids %}<a href="/finance/" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> <span>Financije</span></a>{% endif %}
             {% if 'invoicing' in sidebar_enabled_ids %}<a href="/reports/" onclick="closeSidebar()"><i class="fas fa-chart-bar"></i> <span>Izvjestaji</span></a>{% endif %}
             {% if 'work_orders' in sidebar_enabled_ids %}<a href="/work-orders/" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Radni nalozi</span></a>{% endif %}

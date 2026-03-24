@@ -72,3 +72,20 @@ def send_push_to_user(user, title: str, body: str, url: str = '/interventions/')
     except Exception as exc:
         logger.warning(f'send_push_to_user error: {exc}')
         return False
+
+
+def send_company_push(company_id, title, body, url="/einvoice/inbox/"):
+    """Posalji push notifikaciju svim korisnicima koji pripadaju firmi."""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    users = User.objects.filter(
+        profile__company_id=company_id,
+        profile__push_subscription__gt="",
+        is_active=True,
+    ).select_related("profile")
+    sent = 0
+    for user in users:
+        if send_push_to_user(user, title, body, url=url):
+            sent += 1
+    logger.info(f"Company push ({company_id}): {sent}/{users.count()} delivered")
+    return sent
