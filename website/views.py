@@ -515,3 +515,13 @@ def gallery_delete(request, pk):
 def feedback_page(request):
     """Public feedback stranica — limit-connect.com/feedback/"""
     return render(request, 'website/feedback.html')
+
+
+def digitalni_posrednik(request):
+    """Javna stranica: Digitalni Posrednik — kronologija i upute."""
+    return render(request, 'website/digitalni_posrednik.html')
+
+
+def digitalni_posrednik(request):
+    """Public page: Digitalni Posrednik chronicle and status."""
+    return render(request, 'website/digitalni_posrednik.html')
