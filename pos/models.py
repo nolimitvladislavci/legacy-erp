@@ -66,6 +66,20 @@ class POSTerminal(models.Model):
         verbose_name="Customer Display token",
         help_text="Token za pristup ekranu kupca (drugi ekran/tablet).")
 
+    # Context-Aware QuickActions (POS kao Centar Svijeta)
+    quick_actions = models.JSONField(
+        default=list, blank=True,
+        verbose_name="Brze tipke (QuickActions)",
+        help_text="JSON lista akcija. Prazno = auto-generiranje po pos_type.",
+    )
+
+    def get_quick_actions(self):
+        """Vraca brze tipke — korisnicke ako postoje, inace default po pos_type."""
+        if self.quick_actions:
+            return self.quick_actions
+        bt = getattr(self.company, "business_type", "doo") if self.company_id else "doo"
+        return get_default_quick_actions(self.pos_type, bt)
+
     def save(self, *args, **kwargs):
         if not self.access_token:
             import secrets
@@ -1430,3 +1444,86 @@ class POSPulseEvent(models.Model):
 # Import ChainLink so Django model discovery includes it
 from pos.hashchain import ChainLink  # noqa: F401
 
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Context-Aware QuickActions — POS kao Centar Svijeta
+# ═══════════════════════════════════════════════════════════════
+
+# Action Registry — dozvoljene akcije s validacijom
+QUICK_ACTION_REGISTRY = {
+    # Univerzalne
+    'add_item':       {'label': 'Dodaj artikl',     'requires': ['item_sku']},
+    'add_amount':     {'label': 'Brzi iznos',        'requires': []},
+    'open_url':       {'label': 'Otvori stranicu',   'requires': ['url']},
+    'scan_barcode':   {'label': 'Skeniraj barkod',   'requires': []},
+    'open_modal':     {'label': 'Otvori modal',      'requires': ['modal_id']},
+    # Rental
+    'rental_checkin': {'label': 'Check-in gosta',    'requires': []},
+    'rental_checkout': {'label': 'Check-out',        'requires': []},
+    'rental_evisitor': {'label': 'eVisitor XML',     'requires': []},
+    'rental_ocr':     {'label': 'OCR dokument',      'requires': []},
+    # Udruga
+    'membership_scan': {'label': 'Skeniraj iskaznicu', 'requires': []},
+    'membership_renew': {'label': 'Obnovi clanstvo', 'requires': []},
+    'donation':       {'label': 'Donacija',          'requires': []},
+    # Field
+    'whatsapp_receipt': {'label': 'WhatsApp racun',  'requires': []},
+    'gps_location':   {'label': 'GPS lokacija',      'requires': []},
+}
+
+
+def get_default_quick_actions(pos_type, business_type='doo'):
+    """
+    Generira defaultne brze tipke ovisno o pos_type i business_type.
+    Poziva se automatski ako terminal nema konfiguriranih tipki.
+    """
+    defaults = {
+        'quick': [
+            {'icon': 'fa-barcode', 'label': 'Barkod', 'action': 'scan_barcode', 'color': '#3b82f6'},
+            {'icon': 'fa-calculator', 'label': 'Brzi iznos', 'action': 'add_amount', 'color': '#c9a84c'},
+        ],
+        'retail': [
+            {'icon': 'fa-barcode', 'label': 'Barkod', 'action': 'scan_barcode', 'color': '#3b82f6'},
+            {'icon': 'fa-calculator', 'label': 'Brzi iznos', 'action': 'add_amount', 'color': '#c9a84c'},
+            {'icon': 'fa-search', 'label': 'Trazi', 'action': 'open_modal', 'modal_id': 'searchModal', 'color': '#6b7280'},
+        ],
+        'restaurant': [
+            {'icon': 'fa-utensils', 'label': 'Stolovi', 'action': 'open_url', 'url': '/pos/gastro/', 'color': '#f59e0b'},
+            {'icon': 'fa-clipboard-list', 'label': 'Narudzbe', 'action': 'open_url', 'url': '/pos/gastro/orders/', 'color': '#3b82f6'},
+            {'icon': 'fa-calculator', 'label': 'Brzi iznos', 'action': 'add_amount', 'color': '#c9a84c'},
+        ],
+        'reception': [
+            {'icon': 'fa-sign-in-alt', 'label': 'Check-in', 'action': 'rental_checkin', 'color': '#22c55e'},
+            {'icon': 'fa-bed', 'label': 'Nocenje', 'action': 'add_item', 'item_sku': 'NOCENJE', 'color': '#3b82f6'},
+            {'icon': 'fa-broom', 'label': 'Cistenje', 'action': 'add_item', 'item_sku': 'CLEANING', 'color': '#f59e0b'},
+            {'icon': 'fa-receipt', 'label': 'Pristojba', 'action': 'add_item', 'item_sku': 'TOURIST_TAX', 'color': '#8b5cf6'},
+            {'icon': 'fa-camera', 'label': 'OCR Gost', 'action': 'rental_ocr', 'color': '#ec4899'},
+            {'icon': 'fa-download', 'label': 'eVisitor', 'action': 'rental_evisitor', 'color': '#14b8a6'},
+        ],
+        'field': [
+            {'icon': 'fa-calculator', 'label': 'Brzi iznos', 'action': 'add_amount', 'color': '#c9a84c'},
+            {'icon': 'fa-wrench', 'label': 'Usluga', 'action': 'add_item', 'item_sku': 'SERVICE', 'color': '#3b82f6'},
+            {'icon': 'fa-map-marker-alt', 'label': 'GPS', 'action': 'gps_location', 'color': '#22c55e'},
+            {'icon': 'fa-whatsapp', 'label': 'WhatsApp', 'action': 'whatsapp_receipt', 'color': '#25D366'},
+        ],
+        'service': [
+            {'icon': 'fa-clock', 'label': 'Sat rada', 'action': 'add_item', 'item_sku': 'HOUR', 'color': '#3b82f6'},
+            {'icon': 'fa-tools', 'label': 'Materijal', 'action': 'add_item', 'item_sku': 'MATERIAL', 'color': '#f59e0b'},
+            {'icon': 'fa-car', 'label': 'Dolazak', 'action': 'add_item', 'item_sku': 'TRAVEL', 'color': '#6b7280'},
+            {'icon': 'fa-calculator', 'label': 'Brzi iznos', 'action': 'add_amount', 'color': '#c9a84c'},
+        ],
+    }
+
+    actions = defaults.get(pos_type, defaults['retail'])
+
+    # Udruga override — dodaj membership tipke
+    if business_type in ('udruga', 'zadruga', 'ustanova'):
+        actions = [
+            {'icon': 'fa-id-card', 'label': 'Iskaznica', 'action': 'membership_scan', 'color': '#3b82f6'},
+            {'icon': 'fa-sync', 'label': 'Clanarina', 'action': 'membership_renew', 'color': '#22c55e'},
+            {'icon': 'fa-heart', 'label': 'Donacija', 'action': 'donation', 'color': '#ec4899'},
+            {'icon': 'fa-calculator', 'label': 'Brzi iznos', 'action': 'add_amount', 'color': '#c9a84c'},
+        ]
+
+    return actions

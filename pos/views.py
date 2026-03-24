@@ -989,6 +989,7 @@ def quick_pos(request, terminal_id):
         'cashiers':           cashiers,
         'session_report_url': report_url,
         'show_upgrade_banner': show_upgrade_banner,
+        'quick_actions_json':  json.dumps(terminal.get_quick_actions()),
     })
 
 

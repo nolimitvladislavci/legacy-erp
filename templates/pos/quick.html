@@ -349,6 +349,50 @@
     </div>
 
     <!-- BRZE TIPKE — Top artikli (veliki gumbi) -->
+
+    <!-- CONTEXT QUICKACTIONS — POS kao Centar Svijeta -->
+    {% if quick_actions_json %}
+    <div id="qa-panel" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:5px;padding:4px 6px 8px;border-bottom:2px solid var(--gold,#c9a84c);margin-bottom:6px">
+    </div>
+    <script>
+    (function(){
+      const actions = {{ quick_actions_json|safe }};
+      const panel = document.getElementById('qa-panel');
+      if (!actions.length) { panel.style.display='none'; return; }
+      
+      const ACTION_HANDLERS = {
+        add_item: (a) => { const sku=a.item_sku; if(sku){const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();return;}} alert('Artikl '+sku+' nije pronaden. Dodajte ga u inventar.'); },
+        add_amount: () => { const modal=document.getElementById('manualAmountModal'); if(modal){modal.style.display='flex';} else { const amt=prompt('Unesite iznos (EUR):'); if(amt){addManualAmount(parseFloat(amt));}} },
+        scan_barcode: () => { const input=document.getElementById('barcode-input'); if(input){input.focus();input.select();} },
+        open_url: (a) => { window.location.href = a.url; },
+        open_modal: (a) => { const m=document.getElementById(a.modal_id); if(m)m.style.display='flex'; },
+        rental_checkin: () => { window.location.href = '/rental/'; },
+        rental_checkout: () => { window.location.href = '/rental/'; },
+        rental_evisitor: () => { alert('Odaberite booking za eVisitor export na /rental/ stranici.'); },
+        rental_ocr: () => { window.location.href = '/rental/'; },
+        membership_scan: () => { const input=document.getElementById('barcode-input'); if(input){input.focus();input.placeholder='Skeniraj iskaznicu...';} },
+        membership_renew: () => { const sku='CLANARINA'; const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();} else {alert('Dodajte artikl CLANARINA u inventar.');} },
+        donation: () => { const amt=prompt('Iznos donacije (EUR):'); if(amt){addManualAmount(parseFloat(amt),'Donacija');} },
+        whatsapp_receipt: () => { window._sendWhatsAppAfterPay=true; },
+        gps_location: () => { if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{document.getElementById('gps-info')&&(document.getElementById('gps-info').textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4));});} },
+      };
+      
+      actions.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'prod-btn';
+        btn.style.cssText = 'background:'+a.color+'22;border:1px solid '+a.color+'44;min-height:46px;font-size:.78rem;cursor:pointer';
+        btn.innerHTML = '<i class="fas '+a.icon+'" style="font-size:1.1rem;color:'+a.color+'"></i><div style="font-size:.68rem;margin-top:2px;color:var(--text)">'+a.label+'</div>';
+        btn.onclick = () => {
+          const handler = ACTION_HANDLERS[a.action];
+          if (handler) handler(a);
+          else console.warn('Unknown action:', a.action);
+        };
+        panel.appendChild(btn);
+      });
+    })();
+    </script>
+    {% endif %}
+
     {% if quick_items %}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 6px 8px;border-bottom:2px solid var(--border,#2a2f45);margin-bottom:6px">
       {% for qi in quick_items %}
