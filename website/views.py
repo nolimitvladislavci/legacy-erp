@@ -403,7 +403,17 @@ def pricing_ai_advisor(request):
     employees = int(body.get('employees', 1))
     needs = body.get('needs', [])
 
-    score = {'starter': 0, 'professional': 0, 'enterprise': 0}
+    score = {'starter': 0, 'professional': 0, 'enterprise': 0,
+             'pausalac': 0, 'udruga-starter': 0, 'rental-starter': 0}
+
+    # Industry-specific routing — BORG prepoznaje tko si
+    business_type = body.get('business_type', '')
+    if business_type in ('udruga', 'zadruga', 'ustanova'):
+        score['udruga-starter'] += 10  # Instant match
+    elif business_type == 'opg' or industry == 'rental':
+        score['rental-starter'] += 10
+    elif business_type == 'obrt' and employees <= 1:
+        score['pausalac'] += 10
 
     if employees <= 3:
         score['starter'] += 3
@@ -433,6 +443,9 @@ def pricing_ai_advisor(request):
         'starter': 'Za male tvrtke do 3 korisnika s osnovnim potrebama fakturiranja i POS-a.',
         'professional': 'Idealan za rastuce tvrtke koje trebaju izvjestaje, tracking, payroll i CRM.',
         'enterprise': 'Kompletno rjesenje sa svim modulima, AI asistentom i neogranicenim korisnicima.',
+        'pausalac': 'Besplatno za pausalne obrtnike — POS, fiskalizacija i PO-SD obrazac ukljuceni.',
+        'udruga-starter': 'Poseban paket za udruge — clanarine, donacije, izvjestaji, bez fiskalizacije.',
+        'rental-starter': 'Za iznajmljivace — eVisitor, turisticka pristojba, check-in, POS recepcija.',
     }
 
     return JsonResponse({

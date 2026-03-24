@@ -511,7 +511,7 @@ def admin_approve_registration(request, pk):
         company_fields = [f.name for f in Company._meta.get_fields()]
         country_map = {'Croatia': 'HR', 'Germany': 'DE', 'Austria': 'AT', 'Slovenia': 'SI', 'Bosnia': 'BA', 'Serbia': 'RS'}
         country_code = country_map.get(reg.country, 'OTHER')
-        btype_map = {'doo': 'doo', 'jdoo': 'jdoo', 'obrt': 'obrt', 'dd': 'dd', 'sp': 'other', 'eu': 'other', 'other': 'other'}
+        btype_map = {'doo': 'doo', 'jdoo': 'jdoo', 'obrt': 'obrt', 'dd': 'dd', 'sp': 'other', 'eu': 'other', 'udruga': 'udruga', 'zadruga': 'zadruga', 'ustanova': 'ustanova', 'opg': 'opg', 'gmbh': 'gmbh', 'ag': 'ag', 'einzelunternehmen': 'einzelunternehmen', 'other': 'other'}
         btype = btype_map.get(reg.business_type, 'other')
         company_kwargs = {'name': reg.name, 'oib': reg.oib}
         if 'country' in company_fields:
