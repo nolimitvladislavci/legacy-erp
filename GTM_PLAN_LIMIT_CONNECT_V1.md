@@ -324,6 +324,69 @@ Svaki novi klijent mora u roku 24h dobiti:
 3. **Changelog vidljiv korisnicima** — svaka zakonska integracija mora biti vidljiva. Trenutno se dogodi u gitu, korisnik ne zna. Ovo je direktno oružje protiv churna.
 4. **70 spavača je pravi pipeline** — akvizicija izvana je skuplja od aktivacije unutra. Tier A kontaktirati ovaj tjedan.
 
+
+---
+
+## G5 — EU INTEGRACIJA KAO KILLER PRODAJNI ARGUMENT (2026-03-25)
+
+### Ključna poruka za sve materijale:
+> *"LIMIT Connect prati EU prilike umjesto vas.
+> Kad se otvori natječaj za koji ste prihvatljivi — vi prvi saznate.
+> R1 računi za subvencije već su u arhivi."*
+
+### Zašto ovo radi:
+Svaka korisnička grupa ima novac koji ostaje na stolu jer ne zna za prilike
+ili ne stigne aplicirati. LIMIT Connect to rješava automatski.
+Ovo nije "nice to have" — ovo je ROI koji se mjeri u eurima.
+
+### Po segmentu — konkretni argumenti:
+
+**Pčelari (OPG):**
+"APPRRR plaća 100% opreme za pčelarstvo. Sve što trebate:
+R1 račun u arhivi i EPP Prilog 3 jednim klikom.
+LIMIT Connect to generira automatski. Vi džepate subvenciju."
+Potencijalna vrijednost: 500 EUR – 5.000 EUR/god po korisniku
+
+**Rental / Iznajmljivači:**
+"EAFRD daje do 200.000 EUR za ruralni smještaj.
+HTZ financira rekonstrukciju i digitalizaciju.
+eVisitor prijava direktno iz sustava — zakonska obveza riješena."
+Potencijalna vrijednost: 10.000 EUR – 200.000 EUR po projektu
+
+**Udruge:**
+"ESF+ natječaji daju do 2.000.000 EUR za socijalne projekte.
+Volonterski sati iz vašeg WorkTime modula direktno u EU format.
+Godišnje izvješće za Ministarstvo — automatski iz sustava."
+Potencijalna vrijednost: 50.000 EUR – 2.000.000 EUR po projektu
+
+**OPG (opće):**
+"Izravna plaćanja, IPARD III, EAFRD — sve na jednom mjestu.
+Zahtjevi s R1 računima iz arhive — bez ručnog traženja papira."
+
+**MSP:**
+"ERDF digitalizacija do 100k EUR. MINPO voucheri do 25k EUR.
+HZZ pokriva 85% bruto plaće za novog zaposlenika 12 mjeseci.
+AI provjerava prihvatljivost i predpopunjava prijavu."
+
+**DE klijenti:**
+"BAFA pokriva do 70% energetske obnove. KfW krediti od 1%.
+§7g EStG — 200.000 EUR investicijska rezerva.
+GoBD usklađenost garantirana. DATEV export jednim klikom."
+
+---
+
+### Implementacija u marketing materijalima:
+1. Landing page `/eu-fondovi/` — interaktivni kalkulator potencijalne potpore po djelatnosti
+2. Onboarding korak 3: "Pronašli smo 2 EU prilike za vaš OPG"
+3. Dashboard widget "EU Prilike" — 3 aktivna fonda s rokom
+4. WhatsApp alert kad se otvori relevantni natječaj
+5. Case Study: "Pčelar iz Slavonije dobio 3.200 EUR subvencije za opremu — LIMIT Connect je pronašao natječaj"
+
+### Referentni fajlovi:
+- EU_FONDOVI_MASTER_MATRIX.md — kompletna matrica prilike/segmenti
+- CC_TASK_LIMIT_AI_FUNDS.md — implementacija Fund workflow-a
+- GEMINI_TASK_COMPLIANCE_WATCHDOG_V2.md — automatsko praćenje 20+ izvora
+
 ---
 
 ## ZADNJE AZURIRANJE
