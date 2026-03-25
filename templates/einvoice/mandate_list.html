@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Punomoći (Mandati) — PROPTER{% endblock %}
+
+{% block content %}
+<style>
+.mn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.mn-stat{background:var(--bg-card);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)}
+.mn-stat .val{font-size:1.5rem;font-weight:700;color:var(--text)}
+.mn-stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-top:2px}
+.mn-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.mn-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.68rem;text-transform:uppercase;color:var(--text-muted)}
+.mn-table td{padding:8px 10px;border-bottom:1px solid var(--border-light)}
+.mn-table tr:hover{background:var(--table-row-hover)}
+.mn-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700}
+.mn-badge.draft{background:#fef3c7;color:#92400e}
+.mn-badge.signed{background:#dbeafe;color:#1e40af}
+.mn-badge.active{background:#dcfce7;color:#166534}
+.mn-badge.revoked{background:#fef2f2;color:#991b1b}
+.mn-badge.expired{background:#f3e8ff;color:#7c3aed}
+.mn-type{font-family:monospace;font-size:.72rem;padding:2px 6px;background:var(--badge-bg);border-radius:4px}
+.mn-section{margin-bottom:28px}
+.mn-section-title{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.mn-actions{display:flex;gap:4px;flex-wrap:wrap}
+@media(max-width:768px){
+  .mn-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .mn-stat .val{font-size:1.1rem}
+  .mn-table{font-size:.72rem}
+  .mn-table th:nth-child(5),.mn-table td:nth-child(5),
+  .mn-table th:nth-child(6),.mn-table td:nth-child(6){display:none}
+}
+</style>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+  <div>
+    <div style="font-weight:700;font-size:1.1rem;color:var(--text)"><i class="fas fa-file-signature" style="color:var(--gold)"></i> Punomoći (e-Račun Mandati)</div>
+    <div style="font-size:.7rem;color:var(--text-muted)">Upravljanje punomoćima za slanje e-Računa u ime drugih firmi</div>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    <a href="{% url 'einvoice:smart_mailbox' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-inbox"></i> Inbox</a>
+    <button class="btn btn-primary btn-sm" onclick="showCreateModal()"><i class="fas fa-plus"></i> Nova punomoć</button>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="mn-grid">
+  <div class="mn-stat"><div class="val" style="color:#1e40af">{{ stats.held_total }}</div><div class="lbl">Držimo (agent)</div></div>
+  <div class="mn-stat"><div class="val" style="color:#166534">{{ stats.held_active }}</div><div class="lbl">Aktivnih (agent)</div></div>
+  <div class="mn-stat"><div class="val" style="color:#92400e">{{ stats.given_total }}</div><div class="lbl">Dali (principal)</div></div>
+  <div class="mn-stat"><div class="val" style="color:#166534">{{ stats.given_active }}</div><div class="lbl">Aktivnih (principal)</div></div>
+</div>
+
+<!-- Mandates Held (we are Agent) -->
+<div class="mn-section">
+  <div class="mn-section-title"><i class="fas fa-hand-holding-usd"></i> Punomoći koje držimo (mi smo opunomoćenik)</div>
+  <div class="stat-card" style="overflow-x:auto">
+  {% if mandates_held %}
+  <table class="mn-table">
+    <thead>
+      <tr>
+        <th>Opunomoćitelj</th>
+        <th>OIB</th>
+        <th>Tip</th>
+        <th>Status</th>
+        <th>Vrijedi od</th>
+        <th>Vrijedi do</th>
+        <th>Akcije</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in mandates_held %}
+      <tr>
+        <td style="font-weight:600">{{ m.principal_company.name|truncatechars:35 }}</td>
+        <td><code>{{ m.principal_oib }}</code></td>
+        <td><span class="mn-type">{{ m.get_mandate_type_display }}</span></td>
+        <td><span class="mn-badge {{ m.status }}">{{ m.get_status_display }}</span></td>
+        <td><small>{{ m.valid_from|date:"d.m.Y" }}</small></td>
+        <td><small>{% if m.valid_until %}{{ m.valid_until|date:"d.m.Y" }}{% else %}<em>neogr.</em>{% endif %}</small></td>
+        <td>
+          <div class="mn-actions">
+            <a href="{% url 'einvoice:mandate_pdf' m.pk %}" class="btn btn-outline-secondary btn-sm" title="Preuzmi PDF"><i class="fas fa-file-pdf"></i></a>
+            {% if m.status == "draft" %}
+            <button class="btn btn-outline-primary btn-sm" title="Upload potpisanu" onclick="uploadSigned('{{ m.pk }}')"><i class="fas fa-upload"></i></button>
+            {% endif %}
+            {% if is_superadmin and m.status == "signed" %}
+            <button class="btn btn-outline-success btn-sm" title="Aktiviraj (FINA)" onclick="activateMandate('{{ m.pk }}')"><i class="fas fa-check-circle"></i></button>
+            {% endif %}
+            {% if m.status != "revoked" %}
+            <button class="btn btn-outline-danger btn-sm" title="Opozovi" onclick="revokeMandate('{{ m.pk }}')"><i class="fas fa-ban"></i></button>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="text-center py-4">
+    <div style="font-size:2rem;margin-bottom:8px;color:var(--text-muted)"><i class="fas fa-file-signature"></i></div>
+    <p style="color:var(--text-muted);font-size:.85rem">Nemate punomoći kao opunomoćenik.</p>
+  </div>
+  {% endif %}
+  </div>
+</div>
+
+<!-- Mandates Given (we are Principal) -->
+<div class="mn-section">
+  <div class="mn-section-title"><i class="fas fa-share-alt"></i> Punomoći koje smo dali (mi smo opunomoćitelj)</div>
+  <div class="stat-card" style="overflow-x:auto">
+  {% if mandates_given %}
+  <table class="mn-table">
+    <thead>
+      <tr>
+        <th>Opunomoćenik</th>
+        <th>OIB</th>
+        <th>Tip</th>
+        <th>Status</th>
+        <th>Vrijedi od</th>
+        <th>Vrijedi do</th>
+        <th>FINA reg.</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in mandates_given %}
+      <tr>
+        <td style="font-weight:600">{{ m.agent_company.name|truncatechars:35 }}</td>
+        <td><code>{{ m.agent_oib }}</code></td>
+        <td><span class="mn-type">{{ m.get_mandate_type_display }}</span></td>
+        <td><span class="mn-badge {{ m.status }}">{{ m.get_status_display }}</span></td>
+        <td><small>{{ m.valid_from|date:"d.m.Y" }}</small></td>
+        <td><small>{% if m.valid_until %}{{ m.valid_until|date:"d.m.Y" }}{% else %}<em>neogr.</em>{% endif %}</small></td>
+        <td>
+          {% if m.registered_with_fina %}
+            <span style="color:#166534;font-size:.75rem"><i class="fas fa-check"></i> {{ m.fina_registered_at|date:"d.m.Y" }}</span>
+          {% else %}
+            <span style="color:var(--text-muted);font-size:.75rem">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="text-center py-4">
+    <div style="font-size:2rem;margin-bottom:8px;color:var(--text-muted)"><i class="fas fa-share-alt"></i></div>
+    <p style="color:var(--text-muted);font-size:.85rem">Niste dali nijednu punomoć.</p>
+  </div>
+  {% endif %}
+  </div>
+</div>
+
+<!-- Hidden upload form -->
+<form id="uploadForm" method="post" enctype="multipart/form-data" style="display:none">
+  {% csrf_token %}
+  <input type="file" id="uploadFile" name="document" accept=".pdf,.jpg,.jpeg,.png,.tiff">
+</form>
+
+<script>
+function getCookie(n){let v=document.cookie.match('(^|;)\\s*'+n+'=([^;]*)');return v?decodeURIComponent(v[2]):null;}
+const csrf=getCookie('csrftoken');
+
+function showCreateModal(){
+  const cid=prompt("Unesite ID firme opunomoćitelja (principal_company_id):");
+  if(!cid) return;
+  const mtype=prompt("Tip punomoći (full/send/receive):","full");
+  if(!mtype) return;
+  const vfrom=prompt("Vrijedi od (YYYY-MM-DD):",new Date().toISOString().slice(0,10));
+  if(!vfrom) return;
+  const vuntil=prompt("Vrijedi do (YYYY-MM-DD, prazno=neograničeno):","");
+
+  fetch("{% url 'einvoice:mandate_create' %}",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-CSRFToken":csrf},
+    body:JSON.stringify({
+      principal_company_id:parseInt(cid),
+      mandate_type:mtype,
+      valid_from:vfrom,
+      valid_until:vuntil||null
+    })
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.error){alert("Greška: "+d.error);return;}
+    alert("Mandat kreiran!\nID: "+d.id+"\nPreuzmite PDF za potpis.");
+    location.reload();
+  })
+  .catch(e=>alert("Greška: "+e));
+}
+
+function uploadSigned(mandateId){
+  const inp=document.getElementById('uploadFile');
+  inp.onchange=function(){
+    if(!inp.files.length) return;
+    const fd=new FormData();
+    fd.append('document',inp.files[0]);
+    fetch("/einvoice/mandates/"+mandateId+"/upload/",{
+      method:"POST",
+      headers:{"X-CSRFToken":csrf},
+      body:fd
+    })
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.error){alert("Greška: "+d.error);return;}
+      alert("Dokument uploadan! Status: "+d.status);
+      location.reload();
+    })
+    .catch(e=>alert("Greška: "+e));
+    inp.value='';
+  };
+  inp.click();
+}
+
+function activateMandate(mandateId){
+  if(!confirm("Aktiviraj mandat i označi kao registriran kod FINA?")) return;
+  const finaRef=prompt("FINA referenca mandata (opcionalno):","");
+  fetch("/einvoice/mandates/"+mandateId+"/activate/",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","X-CSRFToken":csrf},
+    body:JSON.stringify({fina_mandate_id:finaRef||""})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.error){alert("Greška: "+d.error);return;}
+    alert("Mandat aktiviran!");
+    location.reload();
+  })
+  .catch(e=>alert("Greška: "+e));
+}
+
+function revokeMandate(mandateId){
+  if(!confirm("Jeste li sigurni da želite opozvati ovaj mandat?")) return;
+  fetch("/einvoice/mandates/"+mandateId+"/revoke/",{
+    method:"POST",
+    headers:{"X-CSRFToken":csrf}
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.error){alert("Greška: "+d.error);return;}
+    alert("Mandat opozvan.");
+    location.reload();
+  })
+  .catch(e=>alert("Greška: "+e));
+}
+</script>
+{% endblock %}
