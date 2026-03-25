@@ -136,7 +136,7 @@ let _allInvoices = [];
 function autoMatch(){
   fetch('{% url "konto:api_auto_match" %}',{method:'POST',headers:{'X-CSRFToken':document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'','Content-Type':'application/json'}})
   .then(r=>r.json()).then(d=>{
-    if(d.success){alert('Parirano: '+d.matched_count+' transakcija');if(d.matched_count>0)location.reload();}
+    if(d.success){fenixToast('Parirano: '+d.matched_count+' transakcija', 'warning');if(d.matched_count>0)location.reload();}
     else window.fenixNetworkError('Greška mreže');
   }).catch(()=>window.fenixNetworkError('Greška mreže'));
 }
@@ -205,9 +205,9 @@ function confirmMatch(invoicePk) {
       closeMatchModal();
       location.reload();
     } else {
-      alert('Pariranje nije uspjelo: ' + (d.error || 'Greška'));
+      fenixToast('Pariranje nije uspjelo: ' + (d.error || 'Greška', 'error'));
     }
-  }).catch(()=>alert('Mrežna greška'));
+  }).catch(()=>fenixToast('Mrežna greška', 'error'));
 }
 
 function ignoreTransaction(pk, btn) {
@@ -220,7 +220,7 @@ function ignoreTransaction(pk, btn) {
   .then(r=>r.json()).then(d=>{
     if (d.ok || d.success) location.reload();
     else window.fenixNetworkError('Greška mreže', (d.error || 'Nepoznata greška'));
-  }).catch(()=>alert('Mrežna greška'));
+  }).catch(()=>fenixToast('Mrežna greška', 'error'));
 }
 
 document.getElementById('matchModal').addEventListener('click', function(e) {

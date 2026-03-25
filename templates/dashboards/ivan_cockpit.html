@@ -484,8 +484,8 @@ function ctrlAction(action) {
   if (!url) return;
   fetch(url, {method: 'POST', headers: {'X-CSRFToken': getCsrf()}})
     .then(r => r.json())
-    .then(d => alert(d.message || (d.ok ? 'OK' : 'Greška')))
-    .catch(e => alert('Error: ' + e.message));
+    .then(d => fenixToast(d.message || (d.ok ? 'OK' : 'Greška', 'error')))
+    .catch(e => fenixToast('Error: ' + e.message, 'error'));
 }
 
 // FenixCamera

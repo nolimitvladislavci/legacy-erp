@@ -378,7 +378,7 @@ function approveItem() {
     if (_diff > 0.02) {
       allBtns.forEach(b => b.disabled = false);
       btn.innerHTML = '<i class="fas fa-check me-1"></i>Proknjiži i spoji';
-      alert('Matematika ne štima! Osnovica (' + _base.toFixed(2) + ') + PDV (' + _vat.toFixed(2) + ') = ' + _expected.toFixed(2) + ', ali Ukupno je ' + _total.toFixed(2) + '. Razlika: ' + _diff.toFixed(2));
+      fenixToast('Matematika ne štima! Osnovica (' + _base.toFixed(2, 'warning') + ') + PDV (' + _vat.toFixed(2) + ') = ' + _expected.toFixed(2) + ', ali Ukupno je ' + _total.toFixed(2) + '. Razlika: ' + _diff.toFixed(2));
       document.getElementById('fTotal').focus();
       return;
     }
@@ -422,7 +422,7 @@ function approveItem() {
         document.getElementById('fBase').classList.add('low-conf');
         document.getElementById('fVAT').classList.add('low-conf');
       }
-      alert(d.error || 'Greška');
+      fenixToast(d.error || 'Greška', 'error');
     }
   })
   .catch(() => {

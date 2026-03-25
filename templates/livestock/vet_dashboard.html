@@ -139,7 +139,7 @@
 function copyVetLink(slug){
     var url = window.location.origin + '/livestock/vet/' + slug + '/';
     navigator.clipboard.writeText(url).then(function(){
-        alert('Link kopiran: ' + url);
+        fenixToast('Link kopiran: ' + url, 'success');
     });
 }
 </script>

@@ -369,6 +369,77 @@ def tim_chat_send(request):
     return JsonResponse({'ok': True, 'id': str(s.id), 'message': 'Poruka primljena ✅'})
 
 
+
+
+# ─── SYSTEM IMPROVEMENT API (bez login-a) ─────────────────────────────────────
+
+@csrf_exempt
+@require_POST
+def system_improvement_api(request):
+    """
+    Interni API za kreiranje ImprovementSuggestion s source='system'.
+    Koristi se iz fenixNetworkError (JS auto-error-logging) i Celery taskova.
+    Auth: X-System-Token header (HMAC od SECRET_KEY).
+    Ako je korisnik ulogiran, koristi session auth kao fallback.
+    """
+    import hashlib
+    from django.conf import settings
+
+    # Auth: ulogiran korisnik ILI validan system token
+    is_authenticated = hasattr(request, 'user') and request.user.is_authenticated
+    system_token = request.META.get('HTTP_X_SYSTEM_TOKEN', '')
+    expected_token = hashlib.sha256(
+        ('fenix-system:' + settings.SECRET_KEY[:20]).encode()
+    ).hexdigest()[:48]
+
+    if not is_authenticated and system_token != expected_token:
+        return JsonResponse({'ok': False, 'error': 'Unauthorized'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+
+    title = (data.get('title') or '')[:200].strip()
+    desc = (data.get('description') or '').strip()
+    if not desc:
+        return JsonResponse({'ok': False, 'error': 'description obavezan'}, status=400)
+    if not title:
+        title = 'System: ' + desc[:50]
+
+    # Odredjivanje company
+    company = None
+    company_id = data.get('company_id', '')
+    if company_id:
+        from companies.models import Company
+        company = Company.objects.filter(pk=company_id).first()
+    elif is_authenticated:
+        from core.company_utils import get_user_company
+        company = get_user_company(request)
+
+    if not company:
+        from companies.models import Company
+        company = Company.objects.first()
+        if not company:
+            return JsonResponse({'ok': False, 'error': 'Nema kompanije'}, status=400)
+
+    from pos.models import ImprovementSuggestion
+    source = data.get('source', 'system')
+    if source not in ('system', 'anonymous'):
+        source = 'system'
+
+    s = ImprovementSuggestion.objects.create(
+        company=company,
+        author=request.user if is_authenticated else None,
+        source=source,
+        title=title,
+        description=desc,
+        category=(data.get('category') or 'auto')[:50],
+        priority=min(max(int(data.get('priority', 3) or 3), 1), 5),
+        status='new',
+    )
+    return JsonResponse({'ok': True, 'id': s.pk})
+
 # ─── PARTNER SIGNUP API ───────────────────────────────────────────────────────
 
 @csrf_exempt

@@ -151,7 +151,7 @@ document.getElementById('submitBatch').addEventListener('click', function(e) {
   const checked = document.querySelectorAll('.inv-check:checked').length;
   if (checked === 0) {
     e.preventDefault();
-    alert('Odaberite barem jedan račun.');
+    fenixToast('Odaberite barem jedan račun.', 'warning');
   }
 });
 </script>

@@ -244,7 +244,7 @@
     if (data.ok) {
       updateProgress(data.total_images);
       location.reload();
-    } else { alert(data.error || 'Upload nije uspio'); }
+    } else { fenixToast(data.error || 'Upload nije uspio', 'error'); }
   }
   ['camera-input','file-input','file-input-more'].forEach(id => {
     const el = document.getElementById(id);
@@ -264,7 +264,7 @@
     const res = await fetch(URLS.process, { method:'POST', body:fd });
     const data = await res.json();
     if (data.ok) { showPhase('processing'); startPolling(); }
-    else { alert(data.error||'Greška'); btnProcess.disabled=false; btnProcess.innerHTML='<i class="fas fa-robot"></i> Analiziraj sve (AI)'; }
+    else { fenixToast(data.error||'Greška', 'error'); btnProcess.disabled=false; btnProcess.innerHTML='<i class="fas fa-robot"></i> Analiziraj sve (AI)'; }
   });
   const btnArchive = document.getElementById('btn-archive');
   if (btnArchive) btnArchive.addEventListener('click', async () => {
@@ -273,7 +273,7 @@
     const res = await fetch(URLS.archive, { method:'POST', body:fd });
     const data = await res.json();
     if (data.ok) showPhase('done');
-    else { alert(data.error||'Greška'); btnArchive.disabled=false; }
+    else { fenixToast(data.error||'Greška', 'error'); btnArchive.disabled=false; }
   });
   function startPolling() {
     if (pollTimer) clearInterval(pollTimer);

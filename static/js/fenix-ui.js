@@ -54,9 +54,9 @@ window.fenixNetworkError = function(context, err) {
   if (window.fenixToast) {
     window.fenixToast('⚠️ ' + msg + ' — pokušajte ponovo ili prijavite grešku.', 'error');
   } else {
-    alert(msg);
+    fenixToast(msg, 'warning');
   }
-  // Auto-log greška u ImprovementSuggestion
+  // Auto-log greška u ImprovementSuggestion (system endpoint, bez login-a)
   try {
     var payload = {
       title: 'Automatski log: ' + msg,
@@ -65,13 +65,10 @@ window.fenixNetworkError = function(context, err) {
       priority: 2,
       source: 'system'
     };
-    var csrf = document.cookie.match(/csrftoken=([^;]+)/);
-    if (csrf) {
-      fetch('/pos/improvements/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf[1]},
-        body: JSON.stringify(payload)
-      }).catch(function(){});  // silent — ne prikazuj error od error handlera
-    }
+    fetch('/api/system/improvement/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    }).catch(function(){});
   } catch(e) {}
 };

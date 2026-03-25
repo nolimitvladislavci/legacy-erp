@@ -85,7 +85,7 @@
     <div class="wizard-url">{{ wizard_url }}</div>
     <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ wizard_url|urlencode }}" alt="QR Code">
     <div class="qr-actions">
-      <button onclick="navigator.clipboard.writeText('{{ wizard_url }}').then(function(){alert('Link kopiran!')})">Kopiraj link</button>
+      <button onclick="navigator.clipboard.writeText('{{ wizard_url }}').then(function(){fenixToast('Link kopiran!', 'success')})">Kopiraj link</button>
       <button onclick="window.print()">Ispis kartice</button>
       <a href="{% url 'registration:sales_wizard' %}?ref={{ ref_code }}">Otvori wizard</a>
     </div>

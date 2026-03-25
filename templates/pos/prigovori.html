@@ -164,7 +164,7 @@ const API = '{% url "pos:prigovori_api" %}';
 function goStep2() {
   var ime = document.getElementById('pIme').value.trim();
   var opis = document.getElementById('pOpis').value.trim();
-  if (!ime || !opis) { alert('Ime i opis su obavezni!'); return; }
+  if (!ime || !opis) { fenixToast('Ime i opis su obavezni!', 'warning'); return; }
   document.getElementById('step1Create').style.display = 'none';
   document.getElementById('step2Create').style.display = 'block';
   document.getElementById('btnSave').style.display = 'inline-block';
@@ -184,7 +184,7 @@ var isListening = false;
 
 function toggleVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    alert('Preglednik ne podržava glasovni unos. Koristite Chrome ili Edge.');
+    fenixToast('Preglednik ne podržava glasovni unos. Koristite Chrome ili Edge.', 'warning');
     return;
   }
   if (isListening) { stopVoice(); return; }
@@ -249,7 +249,7 @@ function startIdCamera() {
       video.srcObject = stream;
       wrap.style.display = 'block';
     })
-    .catch(function(e) { alert('Kamera nije dostupna: ' + e.message); });
+    .catch(function(e) { fenixToast('Kamera nije dostupna: ' + e.message, 'warning'); });
 }
 
 function captureIdPhoto() {
@@ -367,11 +367,11 @@ async function loadData() {
 async function savePrigovor() {
   const ime = document.getElementById('pIme').value.trim();
   const opis = document.getElementById('pOpis').value.trim();
-  if (!ime || !opis) { alert('Ime i opis su obavezni!'); return; }
+  if (!ime || !opis) { fenixToast('Ime i opis su obavezni!', 'warning'); return; }
 
   // Potpis obavezan
   var sig = getSignatureData();
-  if (!sig) { alert('Potrošač mora potpisati prigovor!'); return; }
+  if (!sig) { fenixToast('Potrošač mora potpisati prigovor!', 'warning'); return; }
 
   const btn = document.getElementById('btnSave');
   btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Spremanje...';
@@ -402,7 +402,7 @@ async function savePrigovor() {
       document.getElementById('idPreview').style.display = 'none';
       goStep1();
       loadData();
-    } else { alert(d.error?.message || 'Greška'); }
+    } else { fenixToast(d.error?.message || 'Greška', 'error'); }
   } catch(e) { window.fenixNetworkError('Greška mreže', e); }
   finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Spremi'; }
 }
@@ -416,7 +416,7 @@ function openOdgovor(id) {
 async function saveOdgovor() {
   const id = document.getElementById('oId').value;
   const odgovor = document.getElementById('oTekst').value.trim();
-  if (!odgovor) { alert('Unesite odgovor!'); return; }
+  if (!odgovor) { fenixToast('Unesite odgovor!', 'warning'); return; }
   const btn = document.getElementById('btnReply');
   btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Slanje...';
   try {
@@ -429,7 +429,7 @@ async function saveOdgovor() {
     if (d.status === 'success') {
       bootstrap.Modal.getInstance(document.getElementById('odgovorModal')).hide();
       loadData();
-    } else { alert(d.error?.message || 'Greška'); }
+    } else { fenixToast(d.error?.message || 'Greška', 'error'); }
   } catch(e) { window.fenixNetworkError('Greška mreže', e); }
   finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Pošalji odgovor'; }
 }
@@ -483,7 +483,7 @@ function fenixIdCamera() {
       var btn = document.getElementById('audioRecBtn');
       if (btn) { btn.textContent = '⏹ Zaustavi snimanje'; btn.style.background = '#ef4444'; }
     }).catch(function(err) {
-      alert('Mikrofon nije dostupan: ' + err.message);
+      fenixToast('Mikrofon nije dostupan: ' + err.message, 'warning');
     });
   };
 

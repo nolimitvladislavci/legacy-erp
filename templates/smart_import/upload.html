@@ -277,7 +277,7 @@ function renderFiles() {
 document.getElementById('uploadForm').addEventListener('submit', function(e) {
   if (allFiles.length === 0) {
     e.preventDefault();
-    alert('Dodajte barem jednu datoteku ili slikajte racun.');
+    fenixToast('Dodajte barem jednu datoteku ili slikajte racun.', 'warning');
     return;
   }
   const btn = document.getElementById('submitBtn');

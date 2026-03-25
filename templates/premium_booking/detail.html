@@ -268,7 +268,7 @@ function selectTime(t) {
 function goFromDatenToZahlung() {
     var name = document.getElementById('name').value.trim();
     var email = document.getElementById('email').value.trim();
-    if (!name || !email) { alert('Molimo ispunite sva obavezna polja.'); return; }
+    if (!name || !email) { fenixToast('Molimo ispunite sva obavezna polja.', 'warning'); return; }
     var parts = selectedDateStr.split('-');
     document.getElementById('summaryBar5').innerHTML = '<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; <strong>' + parts[2] + '.' + parts[1] + '.' + parts[0] + '</strong> u <strong>' + selectedTimeStr + '</strong>';
     goToStep(5);

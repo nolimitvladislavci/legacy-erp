@@ -124,7 +124,7 @@ function sendOne(ccId, btn){
       var row=document.getElementById('row-'+ccId);
       row.cells[2].innerHTML='<span class="pill p-sent">Gesendet</span>';
       row.cells[4].innerHTML='<span style="color:#64748b;font-size:.74rem">✓ Gesendet</span>';
-    }else{ btn.disabled=false; btn.textContent='▶ Senden'; alert(d.error||'Fehler'); }
+    }else{ btn.disabled=false; btn.textContent='▶ Senden'; fenixToast(d.error||'Fehler', 'error'); }
   }).catch(()=>{ btn.disabled=false; btn.textContent='▶ Senden'; });
 }
 </script>{% endblock %}

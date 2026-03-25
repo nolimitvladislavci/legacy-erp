@@ -120,11 +120,11 @@ function uploadFiles(files) {
     if (data.ok) {
       location.reload();
     } else {
-      alert(data.error || 'Greska');
+      fenixToast(data.error || 'Greska', 'error');
       location.reload();
     }
   })
-  .catch(function(e) { alert('Greska: ' + e.message); location.reload(); });
+  .catch(function(e) { fenixToast('Greska: ' + e.message, 'error'); location.reload(); });
 }
 
 function deleteImg(pk) {

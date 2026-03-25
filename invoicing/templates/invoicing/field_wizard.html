@@ -386,12 +386,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.fwNext = () => {
     if (currentStep === 0 && !selectedClient) {
-      alert('Odaberite ili unesite klijenta');
+      fenixToast('Odaberite ili unesite klijenta', 'warning');
       return;
     }
     if (currentStep === 1) {
       const desc = document.getElementById('fwDesc').value.trim();
-      if (!desc) { alert('Unesite opis posla'); return; }
+      if (!desc) { fenixToast('Unesite opis posla', 'warning'); return; }
       // Auto-add first item from work description if no items yet
       if (items.length === 0) {
         const cat = document.querySelector('input[name="fwCat"]:checked')?.value || 'Ostalo';
@@ -408,9 +408,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (currentStep === 2) {
       syncCurrentItem();
-      if (items.length === 0) { alert('Dodajte barem jednu stavku'); return; }
+      if (items.length === 0) { fenixToast('Dodajte barem jednu stavku', 'warning'); return; }
       const hasPrice = items.some(it => it.price > 0);
-      if (!hasPrice) { alert('Unesite cijenu za barem jednu stavku'); return; }
+      if (!hasPrice) { fenixToast('Unesite cijenu za barem jednu stavku', 'warning'); return; }
     }
     showStep(currentStep + 1);
   };
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.fwConfirmNewClient = () => {
     const name = document.getElementById('fwNewName').value.trim();
-    if (!name) { alert('Unesite naziv klijenta'); return; }
+    if (!name) { fenixToast('Unesite naziv klijenta', 'warning'); return; }
     selectedClient = {
       name: name,
       address: document.getElementById('fwNewAddr').value.trim(),
@@ -712,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     })
     .catch(err => {
-      alert('Mrežna greška. Provjerite internet vezu.');
+      fenixToast('Mrežna greška. Provjerite internet vezu.', 'error');
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-check"></i> Završi';
     });

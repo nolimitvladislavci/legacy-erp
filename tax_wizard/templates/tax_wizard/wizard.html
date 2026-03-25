@@ -233,7 +233,7 @@ async function saveStep(direction) {
       cur = Math.max(0, Math.min(steps.length - 1, cur + direction));
       renderStep(cur);
     } else {
-      alert((d.errors||['Greška']).join('\n'));
+      fenixToast((d.errors||['Greška'], 'error').join('\n'));
     }
   } catch(e) {
     window.fenixNetworkError('Greška mreže', e.message);

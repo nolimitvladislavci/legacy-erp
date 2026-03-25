@@ -155,7 +155,7 @@ function openCheckout() { document.getElementById('checkoutModal').classList.add
 
 function submitOrder() {
     var name = document.getElementById('custName').value.trim();
-    if (!name) { alert('Ime je obavezno'); return; }
+    if (!name) { fenixToast('Ime je obavezno', 'warning'); return; }
     var items = [];
     for (var k in cart) items.push({id: parseInt(k), qty: cart[k].qty});
 
@@ -177,9 +177,9 @@ function submitOrder() {
             document.getElementById('successModal').classList.add('show');
             cart = {};
         } else {
-            alert(data.error || 'Greska');
+            fenixToast(data.error || 'Greska', 'error');
         }
-    }).catch(function() { alert('Greska veze'); });
+    }).catch(function() { fenixToast('Greska veze', 'error'); });
 }
 </script>
 <div style="text-align:center;padding:18px 0 12px;border-top:1px solid #222;margin-top:20px;">

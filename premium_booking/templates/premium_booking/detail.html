@@ -383,7 +383,7 @@ function selectTime(t) {
 function goFromDatenToZahlung() {
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
-    if (!name || !email) { alert('Bitte füllen Sie alle Pflichtfelder aus.'); return; }
+    if (!name || !email) { fenixToast('Bitte füllen Sie alle Pflichtfelder aus.', 'warning'); return; }
     const [y,m,d] = selectedDateStr.split('-');
     document.getElementById('summaryBar5').innerHTML = `<strong>{{ resource.name }}</strong> &nbsp;|&nbsp; <strong>${d}.${m}.${y}</strong> um <strong>${selectedTimeStr} Uhr</strong>`;
     showStep(5);

@@ -76,7 +76,7 @@
 
   window.confirmWeight = function() {
     var qty = parseFloat(document.getElementById('weightInput').value);
-    if (!qty || qty <= 0) { alert('Unesite ispravnu količinu'); return; }
+    if (!qty || qty <= 0) { fenixToast('Unesite ispravnu količinu', 'warning'); return; }
     var btn = _weighBtn;
     var id = btn.dataset.id;
     var key = id + '_w' + Date.now();
@@ -188,7 +188,7 @@
   }
 
   window.pay = function(method) {
-    if (!SESSION_ID) { alert('Nema aktivne smjene!'); return; }
+    if (!SESSION_ID) { fenixToast('Nema aktivne smjene!', 'warning'); return; }
     var ids = Object.keys(basket);
     if (!ids.length) return;
     var btn = document.getElementById(method === 'CASH' ? 'payCash' : 'payCard');
@@ -249,7 +249,7 @@
         window.queueOfflineSale({ _url: API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', items: items, method: method, amount_paid: amtPaid, tip_amount: window._tip || 0, cashier: window._currentCashier || '', cashier_id: window._currentCashierId || '' });
         showSuccess('OFF', parseFloat(window._total).toFixed(2), 0);
         clearBasket();
-      } else { alert('Nema veze. Pokusajte ponovo.'); }
+      } else { fenixToast('Nema veze. Pokusajte ponovo.', 'warning'); }
     })
     .finally(function() { btn.dataset.submitting = ''; btn.disabled = false; btn.innerHTML = method === 'CASH' ? '💵 GOTOVINA' : '💳 KARTICA'; });
   };
@@ -385,8 +385,8 @@
     .then(function(r){ return r.text(); }).then(function(vtxt) {
       var data; try { data = JSON.parse(vtxt); } catch(e) { window.location.reload(); return; }
       if (data.ok) { lastReceiptUrl = data.print_url || ""; lastReceiptId = data.receipt_id || null; window.lastReceiptId = lastReceiptId; window._publicUrl = data.public_url || null; showSuccess(data.receipt_number, data.total, 0); clearBasket(); clearTip(); }
-      else { alert("Greska: " + (data.error || "nepoznata")); }
-    }).catch(function() { alert("Greska veze."); })
+      else { fenixToast("Greska: " + (data.error || "nepoznata", 'error')); }
+    }).catch(function() { fenixToast("Greska veze.", 'error'); })
     .finally(function() { btn.dataset.submitting = ""; btn.disabled = false; btn.innerHTML = "🎫 BON"; });
   };
 
@@ -475,12 +475,12 @@
 
   var _revolutPollTimer = null;
   window.payRevolut = function() {
-    if (!SESSION_ID) { alert('Nema smjene!'); return; }
+    if (!SESSION_ID) { fenixToast('Nema smjene!', 'warning'); return; }
     if (!Object.keys(basket).length) return;
     var items = buildItemsPayload();
     fetch(API_BASE + '/pos/session/' + SESSION_ID + '/quick-pay/', { method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF}, body: JSON.stringify({items: items, method: 'REVOLUT', amount_paid: window._total, cashier: window._currentCashier || '', cashier_id: window._currentCashierId || ''}) })
     .then(function(r){ return r.json(); }).then(function(data) {
-      if (!data.ok) { alert(data.error || 'Greška'); return; }
+      if (!data.ok) { fenixToast(data.error || 'Greška', 'error'); return; }
       var receiptId = data.receipt_id;
       document.getElementById('revolutAmount').textContent = '€' + parseFloat(data.total).toFixed(2);
       fetch(API_BASE + '/pos/revolut/pay/' + receiptId + '/', { method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF} })

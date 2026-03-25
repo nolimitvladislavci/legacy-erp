@@ -116,7 +116,7 @@
 function copyVetLink(){
     var url = document.getElementById('vet-link-text').textContent;
     navigator.clipboard.writeText(url).then(function(){
-        alert('Link kopiran u clipboard!');
+        fenixToast('Link kopiran u clipboard!', 'success');
     });
 }
 </script>

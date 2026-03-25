@@ -78,7 +78,7 @@ function addToOrder(itemId, itemName){
     if(d.ok) location.reload();
   });
   {% else %}
-  alert('Kreirajte narudzbu prvo.');
+  fenixToast('Kreirajte narudzbu prvo.', 'warning');
   {% endif %}
 }
 </script>

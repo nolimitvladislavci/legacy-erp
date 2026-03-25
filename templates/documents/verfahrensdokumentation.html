@@ -149,8 +149,8 @@
 
   window.submitSignature = function(){
     var name = document.getElementById('signerName').value.trim();
-    if(!name){alert('Bitte Name eingeben.');return;}
-    if(!hasDrawn){alert('Bitte unterschreiben.');return;}
+    if(!name){fenixToast('Bitte Name eingeben.', 'warning');return;}
+    if(!hasDrawn){fenixToast('Bitte unterschreiben.', 'warning');return;}
     var btn = document.getElementById('signBtn');
     btn.disabled=true; btn.textContent='Wird gesendet...';
     var sigData = canvas.toDataURL('image/png');

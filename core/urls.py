@@ -295,6 +295,8 @@ urlpatterns += [
     # ── Membership QuickAction API ──
     path('api/udruge/member-lookup/', __import__('udruge.views', fromlist=['api_member_lookup']).api_member_lookup, name='udruge_api_member_lookup'),
     path('health/', views.health_check, name='health_check'),
+    path('api/system/improvement/', __import__('core.cockpit_views', fromlist=['system_improvement_api']).system_improvement_api, name='system_improvement_api'),
+
     path('api/whatsapp/health/', views.whatsapp_health, name='whatsapp_health'),
     path("api/whatsapp/webhook/", __import__("helpdesk.whatsapp_webhook", fromlist=["whatsapp_webhook"]).whatsapp_webhook, name="whatsapp_webhook"),
     path('impressum/', views.impressum, name='impressum'),

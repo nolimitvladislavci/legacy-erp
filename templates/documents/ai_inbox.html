@@ -221,11 +221,11 @@ function sendEmailSummary() {
     headers: {'X-CSRFToken': CSRF}
   }).then(function(r){ return r.json(); }).then(function(d) {
     if (d.ok) {
-      alert('Email sazetak je poslan!');
+      fenixToast('Email sazetak je poslan!', 'success');
     } else {
-      alert('Greska: ' + (d.error || 'Nepoznata greska'));
+      fenixToast('Greska: ' + (d.error || 'Nepoznata greska', 'error'));
     }
-  }).catch(function(){ alert('Greska pri slanju emaila'); });
+  }).catch(function(){ fenixToast('Greska pri slanju emaila', 'error'); });
 }
 
 function loadMore() {

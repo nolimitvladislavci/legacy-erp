@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checked = []; const entryIds = [];
     const period = val('wWtDateFrom') && val('wWtDateTo') ? val('wWtDateFrom')+' - '+val('wWtDateTo') : '';
     document.querySelectorAll('.wt-row').forEach(tr => { if (tr.querySelector('.wt-cb').checked) checked.push(tr); });
-    if (!checked.length) { alert('Odaberite barem jedan redak'); return; }
+    if (!checked.length) { fenixToast('Odaberite barem jedan redak', 'warning'); return; }
     const dp = getDefaultRate();
     if (_wtMode === 'zbirno') {
       checked.forEach(tr => {

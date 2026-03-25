@@ -144,7 +144,7 @@ const CSRF = '{{ csrf_token }}';
 async function doAssign(pk) {
   const sel = document.getElementById('wsel-' + pk);
   const workerId = sel ? sel.value : '';
-  if (!workerId) { alert('Odaberite radnika.'); return; }
+  if (!workerId) { fenixToast('Odaberite radnika.', 'warning'); return; }
   try {
     const r = await fetch(`/interventions/${pk}/assign/`, {
       method: 'POST',
@@ -153,8 +153,8 @@ async function doAssign(pk) {
     });
     const d = await r.json();
     if (d.ok) { location.reload(); }
-    else { alert(d.error || 'Greška'); }
-  } catch(e) { alert('Mrežna greška'); }
+    else { fenixToast(d.error || 'Greška', 'error'); }
+  } catch(e) { fenixToast('Mrežna greška', 'error'); }
 }
 
 async function doEscalate(pk) {
@@ -167,9 +167,9 @@ async function doEscalate(pk) {
       body: JSON.stringify({title: title || ''}),
     });
     const d = await r.json();
-    if (d.ok) { alert(d.message); location.reload(); }
-    else { alert(d.error || 'Greška'); }
-  } catch(e) { alert('Mrežna greška'); }
+    if (d.ok) { fenixToast(d.message, 'warning'); location.reload(); }
+    else { fenixToast(d.error || 'Greška', 'error'); }
+  } catch(e) { fenixToast('Mrežna greška', 'error'); }
 }
 </script>
 {% endblock %}

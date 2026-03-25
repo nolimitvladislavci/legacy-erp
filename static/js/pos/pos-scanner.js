@@ -182,10 +182,10 @@
           _addScannedProduct({id: data.id, name: name, price: parseFloat(price), tax_rate: parseInt(vat)});
           _setScanStatus('Novi artikl "' + name + '" spremljen i dodan!', '#22c55e');
           _flashOverlay('#22c55e'); cancelNewItem();
-        } else { alert('Greska: ' + (data.error || xhr.responseText.substring(0, 100))); }
-      } catch(e) { alert('Greska: ' + xhr.status); }
+        } else { fenixToast('Greska: ' + (data.error || xhr.responseText.substring(0, 100, 'error'))); }
+      } catch(e) { fenixToast('Greska: ' + xhr.status, 'error'); }
     };
-    xhr.onerror = function() { alert('Greska veze'); };
+    xhr.onerror = function() { fenixToast('Greska veze', 'error'); };
     xhr.send(JSON.stringify({ name: name, price: parseFloat(price), category: category, tax_rate: parseInt(vat), barcode: _pendingBarcode }));
   };
 

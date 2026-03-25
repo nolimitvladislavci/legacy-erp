@@ -316,7 +316,7 @@ function goToPodaci(dateFormatted, t) {
 function goFromPodaciToPlacanje() {
     var first = document.getElementById('clientFirst').value.trim(), last = document.getElementById('clientLast').value.trim();
     var phone = document.getElementById('clientPhone').value.trim(), email = document.getElementById('clientEmail').value.trim();
-    if (!first || !last || !phone || !email) { alert('Molimo popunite sva polja.'); return; }
+    if (!first || !last || !phone || !email) { fenixToast('Molimo popunite sva polja.', 'warning'); return; }
     var parts = selectedDateStr.split('-'), fmt = parts[2] + '.' + parts[1] + '.' + parts[0] + '.';
     document.getElementById('summaryDate5').textContent = fmt; document.getElementById('summaryTime5').textContent = selectedTimeStr;
     showStep(5);

@@ -361,7 +361,7 @@
       if (!actions.length) { panel.style.display='none'; return; }
       
       const ACTION_HANDLERS = {
-        add_item: (a) => { const sku=a.item_sku; if(sku){const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();return;}} alert('Artikl '+sku+' nije pronaden. Dodajte ga u inventar.'); },
+        add_item: (a) => { const sku=a.item_sku; if(sku){const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();return;}} fenixToast('Artikl '+sku+' nije pronaden. Dodajte ga u inventar.', 'warning'); },
         add_amount: () => { const modal=document.getElementById('manualAmountModal'); if(modal){modal.style.display='flex';} else { const amt=prompt('Unesite iznos (EUR):'); if(amt){addManualAmount(parseFloat(amt));}} },
         scan_barcode: () => { const input=document.getElementById('barcode-input'); if(input){input.focus();input.select();} },
         open_url: (a) => { window.location.href = a.url; },
@@ -1028,7 +1028,7 @@ function _processOcrFile(input) {
 
   const bookingId = document.getElementById('ocr-booking-id').value;
   if (!bookingId) {
-    alert('Odaberite booking prije skeniranja.');
+    fenixToast('Odaberite booking prije skeniranja.', 'warning');
     input.value = '';
     return;
   }

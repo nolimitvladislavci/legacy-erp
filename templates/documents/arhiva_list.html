@@ -757,7 +757,7 @@ function bulkDownload(){
     var ids=[];
     document.querySelectorAll('.row-check:checked').forEach(function(c){ids.push(parseInt(c.value));});
     if(ids.length===0)return;
-    if(ids.length>50){alert('Maksimalno 50 datoteka odjednom.');return;}
+    if(ids.length>50){fenixToast('Maksimalno 50 datoteka odjednom.', 'warning');return;}
     fetch('/hr/documents/arhiva/bulk-download/',{method:'POST',headers:{'X-CSRFToken':getCsrf(),'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
         .then(function(r){if(!r.ok)throw new Error('Download failed');return r.blob()})
         .then(function(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='arhiva_'+ids.length+'_files.zip';a.click();showToast('Preuzimanje: '+ids.length+' datoteka','success');}).catch(function(e){showToast('Greska: '+e.message,'danger');});
@@ -964,7 +964,7 @@ document.addEventListener('keydown', function(e){
 <script>
 function startVoice(){
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){alert('Govorna pretraga nije podrzana u ovom pregledniku. Koristite Chrome.');return;}
+  if(!SR){fenixToast('Govorna pretraga nije podrzana u ovom pregledniku. Koristite Chrome.', 'warning');return;}
   var r = new SR();
   r.lang = 'hr-HR'; r.interimResults = false; r.maxAlternatives = 1;
   var btn = document.getElementById('voiceBtn');
@@ -976,7 +976,7 @@ function startVoice(){
     var form = document.getElementById('voiceSearchInput').closest('form');
     if(form) form.submit();
   };
-  r.onerror = function(e){ if(btn){ btn.style.color=''; btn.title='Govorna pretraga'; } if(e.error!=='no-speech') alert('Greska: '+e.error); };
+  r.onerror = function(e){ if(btn){ btn.style.color=''; btn.title='Govorna pretraga'; } if(e.error!=='no-speech') fenixToast('Greska: '+e.error, 'error'); };
   r.onend = function(){ if(btn){ btn.style.color=''; btn.title='Govorna pretraga'; } };
   r.start();
 }
@@ -1034,12 +1034,12 @@ function deleteEntry(pk, row) {
       row.style.transform = 'translateX(30px)';
       setTimeout(function() { row.remove(); }, 300);
     } else {
-      alert(d.error || 'Greska');
+      fenixToast(d.error || 'Greska', 'error');
       if (btn) { btn.disabled = false; btn.textContent = 'X'; }
     }
   })
   .catch(function() {
-    alert('Greska mreze');
+    fenixToast('Greska mreze', 'error');
     if (btn) { btn.disabled = false; btn.textContent = 'X'; }
   });
 }

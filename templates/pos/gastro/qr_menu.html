@@ -374,13 +374,13 @@ function submitOrder(){
         cart = {};
         updateCart();
       } else {
-        alert(data.error || 'Greska');
+        fenixToast(data.error || 'Greska', 'error');
         btn.disabled = false;
         btn.textContent = '\u2705 Posalji narudzbu';
       }
     })
     .catch(function(){
-      alert('Greska u mrezi. Pokusajte ponovo.');
+      fenixToast('Greska u mrezi. Pokusajte ponovo.', 'error');
       btn.disabled = false;
       btn.textContent = '\u2705 Posalji narudzbu';
     });

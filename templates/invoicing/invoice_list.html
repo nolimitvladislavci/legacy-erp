@@ -27,7 +27,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       setTimeout(() => { location.reload(); }, 1500);
     } else {
       btn.innerHTML = origHTML; btn.disabled = false;
-      alert(d.error || 'Greška pri uploadu');
+      fenixToast(d.error || 'Greška pri uploadu', 'error');
     }
   })
   .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
@@ -61,7 +61,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       setTimeout(() => { location.reload(); }, 1500);
     } else {
       btn.innerHTML = origHTML; btn.disabled = false;
-      alert(d.error || 'Greška pri uploadu');
+      fenixToast(d.error || 'Greška pri uploadu', 'error');
     }
   })
   .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
@@ -280,7 +280,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       setTimeout(() => { location.reload(); }, 1500);
     } else {
       btn.innerHTML = origHTML; btn.disabled = false;
-      alert(d.error || 'Greška pri uploadu');
+      fenixToast(d.error || 'Greška pri uploadu', 'error');
     }
   })
   .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });

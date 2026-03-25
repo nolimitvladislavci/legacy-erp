@@ -252,14 +252,14 @@ function claimOrder(id, btn) {
   btn.disabled = true; btn.textContent = '...';
   fetch(API + '/pos/waiter/claim/' + id + '/', { method: 'POST', headers: { 'X-CSRFToken': csrf } })
     .then(function(r){ return r.json(); })
-    .then(function(d){ if (d.ok) location.reload(); else { alert(d.error); btn.disabled = false; } });
+    .then(function(d){ if (d.ok) location.reload(); else { fenixToast(d.error, 'error'); btn.disabled = false; } });
 }
 
 function deliverOrder(id, btn) {
   btn.disabled = true; btn.textContent = '...';
   fetch(API + '/pos/waiter/deliver/' + id + '/', { method: 'POST', headers: { 'X-CSRFToken': csrf } })
     .then(function(r){ return r.json(); })
-    .then(function(d){ if (d.ok) location.reload(); else { alert(d.error); btn.disabled = false; } });
+    .then(function(d){ if (d.ok) location.reload(); else { fenixToast(d.error, 'error'); btn.disabled = false; } });
 }
 
 {% if active_shift %}

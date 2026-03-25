@@ -126,7 +126,7 @@
 
   function showFile(f){
     if(f.size > MAX_SIZE){
-      alert('Datoteka prevelika (' + (f.size/1048576).toFixed(1) + ' MB). Maksimalna velicina: 50 MB.');
+      fenixToast('Datoteka prevelika (' + (f.size/1048576, 'warning').toFixed(1) + ' MB). Maksimalna velicina: 50 MB.');
       fileInput.value = '';
       return;
     }

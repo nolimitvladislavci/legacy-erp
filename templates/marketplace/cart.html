@@ -20,13 +20,13 @@ Istice za ' + d.expires_in_minutes + ' min.';
 Poruka poslana na WhatsApp!';
         else msg += '
 WhatsApp nije konfiguriran - kopirajte link rucno.';
-        alert(msg);
+        fenixToast(msg, 'warning');
         navigator.clipboard.writeText(d.share_url).catch(function(){});
       } else {
-        alert('Greska: ' + (d.error || 'Nepoznata greska'));
+        fenixToast('Greska: ' + (d.error || 'Nepoznata greska', 'error'));
       }
     })
-    .catch(function(e){alert('Greska: ' + e)});
+    .catch(function(e){fenixToast('Greska: ' + e, 'error')});
 }
 </script>
 {% endblock %}
@@ -89,13 +89,13 @@ Istice za ' + d.expires_in_minutes + ' min.';
 Poruka poslana na WhatsApp!';
         else msg += '
 WhatsApp nije konfiguriran - kopirajte link rucno.';
-        alert(msg);
+        fenixToast(msg, 'warning');
         navigator.clipboard.writeText(d.share_url).catch(function(){});
       } else {
-        alert('Greska: ' + (d.error || 'Nepoznata greska'));
+        fenixToast('Greska: ' + (d.error || 'Nepoznata greska', 'error'));
       }
     })
-    .catch(function(e){alert('Greska: ' + e)});
+    .catch(function(e){fenixToast('Greska: ' + e, 'error')});
 }
 </script>
 {% endblock %}

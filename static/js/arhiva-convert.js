@@ -22,8 +22,8 @@ window.addEventListener('pageshow', function() { if (cam.files && cam.files[0] &
 document.addEventListener('visibilitychange', function() { if (!document.hidden && cam.files && cam.files[0] && !_files.length) addFile(cam.files[0]); });
 
 function addFile(file) {
-  if (!file.type.startsWith('image/')) { alert('Samo slike.'); return; }
-  if (file.size > 10*1024*1024) { alert('Prevelika: ' + file.name); return; }
+  if (!file.type.startsWith('image/')) { fenixToast('Samo slike.', 'warning'); return; }
+  if (file.size > 10*1024*1024) { fenixToast('Prevelika: ' + file.name, 'warning'); return; }
   _files.push(file);
   renderPhotos();
 }
@@ -219,7 +219,7 @@ function startQRScan() {
       if (_qrSeconds <= 0) cancelQRScan();
     }, 1000);
   })
-  .catch(function(e) { alert('Greska: ' + e.message); });
+  .catch(function(e) { fenixToast('Greska: ' + e.message, 'error'); });
 }
 
 function pollForScan() {

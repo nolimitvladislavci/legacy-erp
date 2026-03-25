@@ -293,8 +293,8 @@ async function saveProfile(){
   try{
     const r=await fetch('{% url "invoicing:profile_save" %}',{method:'POST',body:fd});
     const d=await r.json();
-    if(d.ok){closeModal();location.reload()}else{alert(d.error)}
-  }catch(e){alert('Mrežna greška')}
+    if(d.ok){closeModal();location.reload()}else{fenixToast(d.error, 'error')}
+  }catch(e){fenixToast('Mrežna greška', 'error')}
   btn.disabled=false; btn.textContent='Spremi';
 }
 
@@ -304,8 +304,8 @@ async function deleteProfile(id,name){
   try{
     const r=await fetch('/invoicing/profiles/'+id+'/delete/',{method:'POST',body:fd});
     const d=await r.json();
-    if(d.ok) location.reload(); else alert(d.error);
-  }catch(e){alert('Mrežna greška')}
+    if(d.ok) location.reload(); else fenixToast(d.error, 'error');
+  }catch(e){fenixToast('Mrežna greška', 'error')}
 }
 </script>
 {% endblock %}

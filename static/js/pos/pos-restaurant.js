@@ -22,7 +22,7 @@
 
   function loadReceipt(rid) {
     fetch('/pos/receipt/' + rid + '/json/').then(function(r){ return r.json(); }).then(function(data) {
-      if (!data.ok) { alert(data.error||'Greška'); return; }
+      if (!data.ok) { fenixToast(data.error||'Greška', 'error'); return; }
       activeRid = rid; activeTotal = parseFloat(data.total||0);
       renderItems(data.items||[]); updateTotals(data.subtotal||data.total||0, data.tax_amount||0, data.total||0);
       document.getElementById('emptyHint').style.display = 'none';
@@ -66,18 +66,18 @@
   window.pickItem = function(id) { selItem = INV.find(function(i){ return i.id === id; }); if (!selItem) return; acInput.value = selItem.name; acList.classList.remove('open'); document.getElementById('acQty').focus(); };
 
   window.addItemToReceipt = function() {
-    if (!activeRid){ alert('Odaberite stol/bon'); return; } if (!selItem){ alert('Odaberite artikal'); return; }
+    if (!activeRid){ fenixToast('Odaberite stol/bon', 'warning'); return; } if (!selItem){ fenixToast('Odaberite artikal', 'warning'); return; }
     var qty = parseFloat(document.getElementById('acQty').value)||1;
     fetch('/pos/receipt/' + activeRid + '/add-item/', { method:'POST', headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'}, body:JSON.stringify({inventory_item_id:selItem.id,description:selItem.name,quantity:qty,unit_price:selItem.price,tax_rate:selItem.tax}) })
     .then(function(r){ return r.json(); }).then(function(data) {
       if (data.ok){ renderItems(data.items||[]); updateTotals(data.subtotal||data.total||0, data.tax_amount||0, data.total||0); acInput.value=''; acList.classList.remove('open'); document.getElementById('acQty').value='1'; selItem=null;
         var card = document.querySelector('.tbl-card[data-rid="' + activeRid + '"]'); if (card){ var t=card.querySelector('.tbl-total'); if(t) t.textContent='€'+parseFloat(data.total).toFixed(2); }
-      } else { alert(data.error||'Greška'); }
+      } else { fenixToast(data.error||'Greška', 'error'); }
     });
   };
 
   window.openPay = function(method){
-    if (!activeRid){ alert('Odaberite bon'); return; } payMethod = method; tipAmount = 0;
+    if (!activeRid){ fenixToast('Odaberite bon', 'warning'); return; } payMethod = method; tipAmount = 0;
     var tc = document.getElementById('tipCustom'); if(tc) tc.value = '';
     var td = document.getElementById('tipDisplay'); if(td) td.textContent = '';
     document.querySelectorAll('#tipSection .qc').forEach(function(b){ b.style.background = ''; });
@@ -101,14 +101,14 @@
   var paying = false;
   window.confirmPay = function(){
     if(paying) return; var paid=parseFloat(document.getElementById('cashInput').value)||0;
-    if(payMethod==='CASH'&&paid<activeTotal){ alert('Primljeni iznos je manji od ukupnog!'); return; }
+    if(payMethod==='CASH'&&paid<activeTotal){ fenixToast('Primljeni iznos je manji od ukupnog!', 'success'); return; }
     paying=true; document.getElementById('payConfirmBtn').textContent='…';
     var tipPromise = tipAmount > 0 ? fetch('/pos/receipt/' + activeRid + '/add-item/', { method:'POST', headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'}, body: JSON.stringify({ description: 'Napojnica (Trinkgeld)', quantity: '1', unit_price: tipAmount.toFixed(2), tax_rate: '0', is_tip: true }) }).catch(function(e){ console.warn('Tip fail:', e); }) : Promise.resolve();
     tipPromise.then(function(){ return fetch('/pos/receipt/' + activeRid + '/pay/', { method:'POST', headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'}, body:JSON.stringify({method:payMethod,amount_paid:(paid+tipAmount).toFixed(2)}) }); })
     .then(function(r){ return r.json(); }).then(function(data){
       paying=false; document.getElementById('payConfirmBtn').textContent='Naplati';
       if(data.ok){ closePay(); document.getElementById('okNum').textContent = 'Bon #' + data.receipt_number; document.getElementById('okTotal').textContent = '€' + parseFloat(data.total).toFixed(2); document.getElementById('okChg').textContent = parseFloat(data.change)>0?'Kusur: €'+parseFloat(data.change).toFixed(2):''; document.getElementById('okPrint').href = data.print_url||'#'; document.getElementById('okOverlay').classList.add('open'); setTimeout(closeOk, 5000); }
-      else { alert(data.error||'Greška pri naplati'); }
+      else { fenixToast(data.error||'Greška pri naplati', 'error'); }
     }).catch(function(){ paying=false; document.getElementById('payConfirmBtn').textContent='Naplati'; });
   };
   window.closeOk = function(){ document.getElementById('okOverlay').classList.remove('open'); location.reload(); };
@@ -117,10 +117,10 @@
   window.closeNewBon = function(){ document.getElementById('newBonOverlay').classList.remove('open'); };
   var creating = false;
   window.createBon = function(){
-    if(creating||!SESSION_ID){ alert('Nema aktivne smjene'); return; } creating=true;
+    if(creating||!SESSION_ID){ fenixToast('Nema aktivne smjene', 'warning'); return; } creating=true;
     var tableNum = document.getElementById('newBonTable').value.trim()||null;
     fetch('/pos/session/' + SESSION_ID + '/new-receipt/', { method:'POST', headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'}, body:JSON.stringify({table_number:tableNum?parseInt(tableNum):null}) })
-    .then(function(r){ return r.json(); }).then(function(data){ creating=false; if(data.ok){ closeNewBon(); location.reload(); } else { alert(data.error||'Greška'); } });
+    .then(function(r){ return r.json(); }).then(function(data){ creating=false; if(data.ok){ closeNewBon(); location.reload(); } else { fenixToast(data.error||'Greška', 'error'); } });
   };
 
   // Pfand for restaurant

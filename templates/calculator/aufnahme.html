@@ -425,7 +425,7 @@ var isRecording = false;
 
 function toggleVoice() {
   if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-    alert('Diktat nicht unterstützt'); return;
+    fenixToast('Diktat nicht unterstützt', 'warning'); return;
   }
   if (isRecording) {
     recognition && recognition.stop(); return;
@@ -488,12 +488,12 @@ function saveNalaz() {
       document.getElementById('result-card').classList.add('show');
       document.getElementById('result-card').scrollIntoView({behavior:'smooth'});
     } else {
-      alert('Fehler: ' + (d.error || 'Unbekannt'));
+      fenixToast('Fehler: ' + (d.error || 'Unbekannt', 'error'));
       btn.disabled = false; btn.textContent = 'Speichern';
     }
   })
   .catch(function(e) {
-    alert('Verbindungsfehler'); btn.disabled = false; btn.textContent = 'Speichern';
+    fenixToast('Verbindungsfehler', 'error'); btn.disabled = false; btn.textContent = 'Speichern';
   });
 }
 

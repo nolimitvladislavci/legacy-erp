@@ -231,7 +231,7 @@
                                     <span>{{ inv.date_issued|date:"d.m.Y" }} · {{ inv.total }} €</span>
                                 </div>
                             </div>
-                            <a href="#" onclick="alert('Dokument se priprema. Molimo pokušajte ponovno kasnije.'); return false;" class="btn-download"><i class="fas fa-download"></i></a>
+                            <a href="#" onclick="fenixToast('Dokument se priprema. Molimo pokušajte ponovno kasnije.', 'info'); return false;" class="btn-download"><i class="fas fa-download"></i></a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -272,7 +272,7 @@
                                     <span>20.02.2026 · Ugovor</span>
                                 </div>
                             </div>
-                            <a href="#" onclick="alert('Dokument se priprema. Molimo pokušajte ponovno kasnije.'); return false;" class="btn-download"><i class="fas fa-download"></i></a>
+                            <a href="#" onclick="fenixToast('Dokument se priprema. Molimo pokušajte ponovno kasnije.', 'info'); return false;" class="btn-download"><i class="fas fa-download"></i></a>
                         </li>
                     </ul>
                 {% endif %}

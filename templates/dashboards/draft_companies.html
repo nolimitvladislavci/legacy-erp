@@ -137,7 +137,7 @@ function confirmFinalize(form) {
   var oib = form.querySelector('input[name="new_oib"]').value.trim();
   var name = form.closest('.df-card').querySelector('h5').textContent;
   if (oib.length !== 11 || !/^\d{11}$/.test(oib)) {
-    alert('OIB mora imati tocno 11 znamenki.');
+    fenixToast('OIB mora imati tocno 11 znamenki.', 'warning');
     return false;
   }
   return confirm(

@@ -1282,7 +1282,7 @@ async function copyInvoiceItems(id){
     btn.style.borderColor='var(--green)';btn.style.color='#166534';
     btn.innerHTML='\u2713 '+items.length+' stavki kopirano';
     setTimeout(()=>{btn.style.borderColor='';btn.style.color='';btn.innerHTML='\U0001f4cb Kopiraj stavke s pro\u0161log ra\u010duna';},2000);
-  }catch(e){alert('Gre\u0161ka pri kopiranju');}
+  }catch(e){fenixToast('Gre\u0161ka pri kopiranju', 'success');}
 }
 document.addEventListener('click',function(e){if(!e.target.closest('.copy-wrap-pos')){document.getElementById('copyDropdown').classList.remove('open');_co=false;}});
 document.addEventListener('DOMContentLoaded',function(){loadQuickButtons();});

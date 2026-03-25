@@ -187,9 +187,9 @@ function _sciSave() {
       if (_sciCallback) _sciCallback(d);
       if (typeof fenixToast === 'function') fenixToast(d.message || 'Artikl spremljen!', 'success');
       else if (typeof showToast === 'function') showToast(d.message || 'Artikl spremljen!');
-      else alert(d.message || 'Artikl spremljen!');
+      else fenixToast(d.message || 'Artikl spremljen!', 'warning');
     } else {
-      alert(d.error || 'Greška pri spremanju');
+      fenixToast(d.error || 'Greška pri spremanju', 'error');
     }
   })
   .catch(function(e){ btn.disabled = false; btn.textContent = 'Spremi artikl'; window.fenixNetworkError('Greška mreže', e); });

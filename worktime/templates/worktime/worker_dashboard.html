@@ -294,14 +294,14 @@ if(af)af.addEventListener('submit',function(ev){
     var sm=parseInt(s[0])*60+parseInt(s[1]),em=parseInt(e[0])*60+parseInt(e[1]);
     if(em<=sm)em+=1440;
     var br=parseInt(fB?fB.value:0)||0,h=(em-sm-br)/60;
-    if(h>16){ev.preventDefault();alert('❌ Max 16h po unosu! ('+h.toFixed(1)+'h)');return;}
+    if(h>16){ev.preventDefault();fenixToast('❌ Max 16h po unosu! ('+h.toFixed(1, 'warning')+'h)');return;}
     if(h>12&&!confirm('⚠️ '+h.toFixed(1)+'h - sigurni?')){ev.preventDefault();return;}
-    if(h<=0){ev.preventDefault();alert('❌ Trajanje mora biti pozitivno!');return;}
+    if(h<=0){ev.preventDefault();fenixToast('❌ Trajanje mora biti pozitivno!', 'warning');return;}
   }
   var fd=document.getElementById('fDate');
   if(fd&&fd.value){
     var d=new Date(fd.value),t=new Date();t.setHours(0,0,0,0);
-    if((t-d)/(864e5)>60){ev.preventDefault();alert('❌ Max 60 dana unazad!');return;}
+    if((t-d)/(864e5)>60){ev.preventDefault();fenixToast('❌ Max 60 dana unazad!', 'warning');return;}
     if(d>t&&!confirm('⚠️ Budući datum - sigurni?')){ev.preventDefault();return;}
   }
 });

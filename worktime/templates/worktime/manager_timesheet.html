@@ -25,7 +25,7 @@ function openRejectModal() {
   // Collect checked entry IDs
   const checked = document.querySelectorAll('input[name="entry_ids"]:checked');
   if (!checked.length) {
-    alert('Odaberi unose za odbijanje.');
+    fenixToast('Odaberi unose za odbijanje.', 'warning');
     return;
   }
   const container = document.getElementById('rejectEntryIds');
@@ -149,7 +149,7 @@ document.getElementById('rejectModal').addEventListener('click', function(e) {
 function toggleAll(c){document.querySelectorAll('.worker-cb,.ecb').forEach(cb=>{if(!cb.disabled)cb.checked=c;});upd();}
 function toggleW(uid,c){document.querySelectorAll(`.ecb-${uid}`).forEach(cb=>{if(!cb.disabled)cb.checked=c;});upd();}
 function upd(){const n=document.querySelectorAll('.ecb:checked:not(:disabled)').length;document.getElementById('si').textContent=`${n} odabrano`;}
-function cb(){const n=document.querySelectorAll('.ecb:checked:not(:disabled)').length;if(!n){alert('Niste odabrali unose!');return false;}return confirm(`Fakturirati ${n} unosa?`);}
+function cb(){const n=document.querySelectorAll('.ecb:checked:not(:disabled)').length;if(!n){fenixToast('Niste odabrali unose!', 'warning');return false;}return confirm(`Fakturirati ${n} unosa?`);}
 document.querySelectorAll('.ecb').forEach(cb=>cb.addEventListener('change',upd));upd();
 </script>
 {% endblock %}

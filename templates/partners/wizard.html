@@ -253,7 +253,7 @@
       </div>
       <div class="col-sm-6">
         <button class="btn btn-outline-secondary w-100"
-                onclick="alert('Bilježnik lista dolazi uskoro.')">
+                onclick="fenixToast('Bilježnik lista dolazi uskoro.', 'info')">
           <i class="fas fa-stamp me-2"></i>Pronađi bilježnika
         </button>
       </div>
@@ -621,7 +621,7 @@ var Wizard = (function() {
 
   function addNkd(id, code, name) {
     if (nkdSelected.find(function(n) { return String(n.id)===String(id); })) return;
-    if (nkdSelected.length >= 5) { alert('Maksimalno 5 djelatnosti.'); return; }
+    if (nkdSelected.length >= 5) { fenixToast('Maksimalno 5 djelatnosti.', 'warning'); return; }
     nkdSelected.push({id: id, code: code, name: name});
     renderSelectedNkd();
   }

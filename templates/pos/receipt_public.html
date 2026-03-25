@@ -147,7 +147,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
   function submitReview() {
     var text = document.getElementById('reviewText').value.trim();
-    if (!text) { alert('Unesite komentar'); return; }
+    if (!text) { fenixToast('Unesite komentar', 'warning'); return; }
 
     fetch('/hr/pos/receipt/{{ receipt.pk }}/public/', {
       method: 'POST',
@@ -185,9 +185,9 @@ function emailPrompt(){
     headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':getCookie('csrftoken')},
     body:'email='+encodeURIComponent(e)
   }).then(r=>r.json()).then(d=>{
-    if(d.ok) alert('Racun poslan na '+d.sent_to);
-    else alert(d.error||'Greska');
-  }).catch(()=>alert('Greska pri slanju'));
+    if(d.ok) fenixToast('Racun poslan na '+d.sent_to, 'success');
+    else fenixToast(d.error||'Greska', 'error');
+  }).catch(()=>fenixToast('Greska pri slanju', 'error'));
 }
 function getCookie(n){var v=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return v?v.pop():'';}
 </script>

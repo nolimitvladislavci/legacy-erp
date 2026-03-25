@@ -79,7 +79,7 @@
     var actual   = parseFloat(document.getElementById("closingCashInput").value) || 0;
     var expected = npExpected;
     if (actual === 0 && expected > 0) {
-      alert('Molimo prebrojite gotovinu u blagajni i unesite iznos.');
+      fenixToast('Molimo prebrojite gotovinu u blagajni i unesite iznos.', 'warning');
       return;
     }
     var diff = parseFloat((actual - expected).toFixed(2));

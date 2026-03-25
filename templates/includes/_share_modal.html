@@ -157,7 +157,7 @@ function _shSendWa() {
     .then(function(r){return r.json()})
     .then(function(d){
       if (d.wa_url) { window.open(d.wa_url, '_blank'); closeShare(); }
-      else alert(d.error || 'Greška');
+      else fenixToast(d.error || 'Greška', 'error');
     }).catch(function(e){window.fenixNetworkError('Greška mreže', e)});
   } else {
     // Generic: share public URL via wa.me
@@ -181,8 +181,8 @@ function _shSendEmail() {
     })
     .then(function(r){return r.json()})
     .then(function(d){
-      if (d.ok) { alert('Email poslan na ' + email); closeShare(); }
-      else alert(d.error || 'Greška');
+      if (d.ok) { fenixToast('Email poslan na ' + email, 'success'); closeShare(); }
+      else fenixToast(d.error || 'Greška', 'error');
     }).catch(function(e){window.fenixNetworkError('Greška mreže', e)});
   } else {
     // Generic: mailto
@@ -230,7 +230,7 @@ function _shCopyLink() {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function(){
       if (typeof fenixToast === 'function') fenixToast('Link kopiran!', 'success');
-      else alert('Link kopiran: ' + url);
+      else fenixToast('Link kopiran: ' + url, 'success');
       closeShare();
     });
   } else {

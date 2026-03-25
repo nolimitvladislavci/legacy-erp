@@ -43,7 +43,7 @@
     </div>
     <div style="display:flex;gap:.4rem;margin-top:.75rem">
       <button onclick="aiAnalyze()" class="btn btn-gold btn-sm" style="flex:1">AI Analiza</button>
-      <button onclick="if(window.FenixCamera)FenixCamera.pick({onCapture:function(r){FenixCamera.analyzeWithAI(r.b64,{prompt:'Analiziraj ovaj dokument clana udruge. Sto vidis?',module:'udruge',onResult:function(t){alert(t)}})}})" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem">🤖 AI Analiza dokumenta</button>
+      <button onclick="if(window.FenixCamera)FenixCamera.pick({onCapture:function(r){FenixCamera.analyzeWithAI(r.b64,{prompt:'Analiziraj ovaj dokument clana udruge. Sto vidis?',module:'udruge',onResult:function(t){fenixToast(t, 'warning')}})}})" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem">🤖 AI Analiza dokumenta</button>
       {% if clan.whatsapp_opt_in %}<button onclick="sendWA()" class="btn btn-sm" style="flex:1;background:#25d366;color:#fff;border:none">WhatsApp</button>{% endif %}
     </div>
     <div id="aiResult" style="margin-top:.5rem;font-size:.82rem"></div>
@@ -97,7 +97,7 @@ function sendWA(){
   var msg=prompt("Poruka:");
   if(!msg)return;
   fetch("{% url 'udruge:send_whatsapp' clan.pk %}",{method:"POST",headers:{"X-CSRFToken":CSRF,"Content-Type":"application/x-www-form-urlencoded"},body:"type=custom&message="+encodeURIComponent(msg)})
-  .then(function(r){return r.json();}).then(function(d){alert(d.ok?"Poslano!":d.error);});
+  .then(function(r){return r.json();}).then(function(d){fenixToast(d.ok?"Poslano!":d.error, 'error');});
 }
 </script>
 {% endblock %}

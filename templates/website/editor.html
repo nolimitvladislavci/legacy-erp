@@ -350,7 +350,7 @@ function wsTab(name) {
 // Services
 function srvSave() {
   const title = document.getElementById('srv-title').value.trim();
-  if (!title) { alert('Naziv je obavezan'); return; }
+  if (!title) { fenixToast('Naziv je obavezan', 'warning'); return; }
   const data = new FormData();
   data.append('title', title);
   data.append('description', document.getElementById('srv-desc').value);
@@ -370,7 +370,7 @@ function srvSave() {
         document.getElementById('srv-desc').value = '';
         document.getElementById('srv-icon').value = '';
         document.getElementById('srv-price').value = '';
-      } else { alert(d.error || 'Greška'); }
+      } else { fenixToast(d.error || 'Greška', 'error'); }
     });
 }
 
@@ -384,7 +384,7 @@ function srvDelete(pk) {
 // Gallery
 function galUpload() {
   const file = document.getElementById('gal-file').files[0];
-  if (!file) { alert('Odaberite sliku'); return; }
+  if (!file) { fenixToast('Odaberite sliku', 'warning'); return; }
   const data = new FormData();
   data.append('image', file);
   data.append('caption', document.getElementById('gal-caption').value);
@@ -399,7 +399,7 @@ function galUpload() {
         document.getElementById('gal-list').appendChild(div);
         document.getElementById('gal-file').value = '';
         document.getElementById('gal-caption').value = '';
-      } else { alert(d.error || 'Greška'); }
+      } else { fenixToast(d.error || 'Greška', 'error'); }
     });
 }
 
@@ -414,7 +414,7 @@ function galDelete(pk, btn) {
 function revSave() {
   const author = document.getElementById('rev-author').value.trim();
   const text = document.getElementById('rev-text').value.trim();
-  if (!author || !text) { alert('Ime i tekst su obavezni'); return; }
+  if (!author || !text) { fenixToast('Ime i tekst su obavezni', 'warning'); return; }
   const data = new FormData();
   data.append('author_name', author);
   data.append('rating', document.getElementById('rev-rating').value);
@@ -430,7 +430,7 @@ function revSave() {
         document.getElementById('rev-list').prepend(li);
         document.getElementById('rev-author').value = '';
         document.getElementById('rev-text').value = '';
-      } else { alert(d.error || 'Greška'); }
+      } else { fenixToast(d.error || 'Greška', 'error'); }
     });
 }
 

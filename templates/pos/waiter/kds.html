@@ -150,12 +150,12 @@ function cookLogout(){
       localStorage.removeItem('kds_cook_bc_'+TOKEN);
       document.getElementById('cookBadge').style.display='none';
       document.getElementById('cookLogoutBtn').style.display='none';
-      alert(d.cook_name+' odjavljen!');
+      fenixToast(d.cook_name+' odjavljen!', 'success');
     } else {
-      alert(d.error||'Greska pri odjavi');
+      fenixToast(d.error||'Greska pri odjavi', 'error');
     }
   })
-  .catch(function(e){alert('Greska: '+e)});
+  .catch(function(e){fenixToast('Greska: '+e, 'error')});
 }
 
 // Beep sound

@@ -321,7 +321,7 @@ function sobaRenderFiles() {
 }
 
 document.getElementById('sobaUploadForm').addEventListener('submit', function(e) {
-    if (sobaFiles.length === 0) { e.preventDefault(); alert('Dodajte barem jednu datoteku.'); return; }
+    if (sobaFiles.length === 0) { e.preventDefault(); fenixToast('Dodajte barem jednu datoteku.', 'warning'); return; }
     var btn = document.getElementById('sobaUploadBtn');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obrada...'; btn.disabled = true;
 });

@@ -351,10 +351,10 @@ document.getElementById('cameraInput').addEventListener('change', function() { i
 function pickFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   if (!['jpg','jpeg','png','webp','gif'].includes(ext)) {
-    alert('Samo slike (JPG, PNG, WebP). Za PDF koristite Smart Import.');
+    fenixToast('Samo slike (JPG, PNG, WebP). Za PDF koristite Smart Import.', 'warning');
     return;
   }
-  if (file.size > 10*1024*1024) { alert('Datoteka prevelika (maks 10MB).'); return; }
+  if (file.size > 10*1024*1024) { fenixToast('Datoteka prevelika (maks 10MB).', 'warning'); return; }
   _file = file;
   const r = new FileReader();
   r.onload = e => {

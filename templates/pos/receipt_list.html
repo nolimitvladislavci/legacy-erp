@@ -80,7 +80,7 @@ function waShare(rid) {
     body: 'phone=' + encodeURIComponent(phone)
   })
   .then(function(r) { return r.json(); })
-  .then(function(d) { if (d.wa_url) window.open(d.wa_url, '_blank'); else alert(d.error || 'Greška'); })
+  .then(function(d) { if (d.wa_url) window.open(d.wa_url, '_blank'); else fenixToast(d.error || 'Greška', 'error'); })
   .catch(function() { window.fenixNetworkError('Greška veze'); });
 }
 </script>

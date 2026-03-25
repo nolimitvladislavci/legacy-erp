@@ -79,14 +79,14 @@ function getSelectedCount(){
 }
 function doApprove(){
   var n=getSelectedCount();
-  if(n===0){alert('{% trans "Označite barem jedan unos." %}');return;}
+  if(n===0){fenixToast('{% trans "Označite barem jedan unos." %}', 'warning');return;}
   if(!confirm('{% trans "Odobri" %} '+n+' {% trans "unosa?" %}')){return;}
   document.getElementById('formAction').value='approve';
   document.getElementById('approveForm').submit();
 }
 function doApproveOT(){
   var n=getSelectedCount();
-  if(n===0){alert('{% trans "Označite barem jedan unos." %}');return;}
+  if(n===0){fenixToast('{% trans "Označite barem jedan unos." %}', 'warning');return;}
   if(!confirm('{% trans "Odobri" %} '+n+' {% trans "unosa kao PREKOVREMENO?" %}')){return;}
   document.getElementById('formAction').value='approve';
   document.getElementById('markOvertimeInput').value='1';
@@ -94,7 +94,7 @@ function doApproveOT(){
 }
 function openRejectDialog(){
   var n=getSelectedCount();
-  if(n===0){alert('{% trans "Označite barem jedan unos." %}');return;}
+  if(n===0){fenixToast('{% trans "Označite barem jedan unos." %}', 'warning');return;}
   document.getElementById('rejectInfo').textContent='{% trans "Odbijate" %} '+n+' {% trans "odabranih unosa." %}';
   document.getElementById('rejectModal').style.display='flex';
 }

@@ -984,7 +984,7 @@ function buildCalcSummary() {
 ");
 }
 function shareWhatsApp(){window.open("https://wa.me/?text="+encodeURIComponent(buildCalcSummary()),"_blank");}
-function copyCalcText(){var t=buildCalcSummary();if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){alert("Kopirano!");});}else{var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);alert("Kopirano!");}}
+function copyCalcText(){var t=buildCalcSummary();if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){fenixToast("Kopirano!", 'success');});}else{var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);fenixToast("Kopirano!", 'success');}}
 
 function sendToUpit() {
   var dani    = parseFloat(document.getElementById('p-dani').value)||5;

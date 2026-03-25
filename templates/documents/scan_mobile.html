@@ -149,13 +149,13 @@ function sendPhoto() {
       document.getElementById('doneArea').style.display = 'block';
       document.getElementById('statusText').textContent = 'Poslano!';
     } else {
-      alert(data.error || 'Greska pri slanju');
+      fenixToast(data.error || 'Greska pri slanju', 'error');
       resetScan();
     }
   })
   .catch(function(e) {
     document.getElementById('uploadingArea').style.display = 'none';
-    alert('Greska: ' + e.message);
+    fenixToast('Greska: ' + e.message, 'error');
     resetScan();
   });
 }

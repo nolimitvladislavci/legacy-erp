@@ -452,7 +452,7 @@ function validateStep(s) {
     var contact = document.getElementById('f_contact').value.trim();
     var phone = document.getElementById('f_phone').value.trim();
     if (!comp || !contact || !phone) {
-      alert(LANG === 'de' ? 'Bitte Firma, Kontaktperson und Telefon ausfüllen.' : 'Unesite naziv tvrtke, kontakt osobu i telefon.');
+      fenixToast(LANG === 'de' ? 'Bitte Firma, Kontaktperson und Telefon ausfüllen.' : 'Unesite naziv tvrtke, kontakt osobu i telefon.', 'warning');
       return false;
     }
   }
@@ -573,13 +573,13 @@ function submitWizard() {
     } else {
       btn.disabled = false;
       btn.textContent = t.submit;
-      alert(data.message || 'Error');
+      fenixToast(data.message || 'Error', 'error');
     }
   })
   .catch(function(err) {
     btn.disabled = false;
     btn.textContent = t.submit;
-    alert('Network error: ' + err.message);
+    fenixToast('Network error: ' + err.message, 'error');
   });
 }
 

@@ -459,8 +459,8 @@ function retryBatch() {
     headers: {"X-CSRFToken": CSRF},
   }).then(r => r.json()).then(d => {
     if (d.ok) window.location.reload();
-    else alert("Greska: " + (d.error || "Nepoznata greska"));
-  }).catch(e => alert("Greska komunikacije: " + e));
+    else fenixToast("Greska: " + (d.error || "Nepoznata greska", 'error'));
+  }).catch(e => fenixToast("Greska komunikacije: " + e, 'error'));
 }
 
 // -- Report problem --
@@ -489,7 +489,7 @@ function submitReport() {
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 4000);
     }
-  }).catch(e => alert("Greska: " + e));
+  }).catch(e => fenixToast("Greska: " + e, 'error'));
 }
 
 // -- CRUD functions --
@@ -518,7 +518,7 @@ function deleteItem(itemId) {
 
 function addItem(suffix) {
   const name = document.getElementById("newName" + suffix).value.trim();
-  if (!name) { alert("Unesite naziv."); return; }
+  if (!name) { fenixToast("Unesite naziv.", 'warning'); return; }
   const qty = document.getElementById("newQty" + suffix).value || "1";
   const pp = document.getElementById("newPP" + suffix).value || "0";
   postData("/smart-import/" + BATCH_ID + "/add-item/", {

@@ -83,7 +83,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     dropZone.style.borderColor = '#ef4444';
     dropZone.style.animation = 'shake .3s ease';
     setTimeout(function(){ dropZone.style.borderColor = '#334155'; }, 1000);
-    alert('Molimo odaberite datoteku za upload.');
+    fenixToast('Molimo odaberite datoteku za upload.', 'warning');
     return;
   }
   document.getElementById('progressSection').style.display = 'block';
