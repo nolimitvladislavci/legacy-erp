@@ -360,17 +360,20 @@ class RateLimitMiddleware:
         ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', 'unknown')
         is_authenticated = getattr(request, 'user', None) and getattr(request.user, 'is_authenticated', False)
 
-        # Autenticirani korisnici — visok limit (normalno korištenje)
+        # Autenticirani korisnici — praktično bez limita
         if is_authenticated:
-            limit, window = 1000, 60
-        elif ('/login/' in path or '/api/token/' in path or '/password/' in path) and request.method == 'POST':
-            limit, window = 15, 60
-        elif path.startswith('/api/'):
-            limit, window = 60, 60
-        else:
-            limit, window = 200, 60
+            return self.get_response(request)
 
-        key = 'rl:%s:%s' % (ip, path.split('/')[1] if len(path) > 1 else 'root')
+        # Login brute-force zaštita — striktno po IP+path
+        if ('/login/' in path or '/api/token/' in path or '/password/' in path) and request.method == 'POST':
+            limit, window = 20, 60
+            key = 'rl:%s:login' % ip
+        elif path.startswith('/api/'):
+            limit, window = 120, 60
+            key = 'rl:%s:api' % ip
+        else:
+            limit, window = 300, 60
+            key = 'rl:%s:page' % ip
 
         try:
             import redis
