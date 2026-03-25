@@ -47,13 +47,13 @@
   <div class="reg-form-row">
     <div class="reg-field">
       <label>{% trans "Lozinka" %} *</label>
-      <input type="password" name="password1" id="pw1" class="reg-input" minlength="8" required>
+      <input type="password" name="password1" id="pw1" class="reg-input" minlength="10" required>
       {% if errors.password1 %}<div class="error-msg">{{ errors.password1 }}</div>{% endif %}
       <div id="pw-strength" style="height:4px;border-radius:2px;margin-top:4px;background:var(--border);overflow:hidden">
         <div id="pw-bar" style="height:100%;width:0;transition:all .3s;border-radius:2px"></div>
       </div>
       <div style="margin-top:6px;font-size:.7rem;color:#94a3b8;line-height:1.5">
-        <div id="reqLen" style="color:#94a3b8">&#x2022; {% trans "Najmanje 8 znakova" %}</div>
+        <div id="reqLen" style="color:#94a3b8">&#x2022; {% trans "Najmanje 10 znakova" %}</div>
         <div id="reqUpper" style="color:#94a3b8">&#x2022; {% trans "Veliko slovo" %} (A-Z)</div>
         <div id="reqLower" style="color:#94a3b8">&#x2022; {% trans "Malo slovo" %} (a-z)</div>
         <div id="reqDigit" style="color:#94a3b8">&#x2022; {% trans "Broj" %} (0-9)</div>
@@ -62,7 +62,7 @@
     </div>
     <div class="reg-field">
       <label>{% trans "Potvrdite lozinku" %} *</label>
-      <input type="password" name="password2" id="pw2" class="reg-input" minlength="8" required>
+      <input type="password" name="password2" id="pw2" class="reg-input" minlength="10" required>
       {% if errors.password2 %}<div class="error-msg">{{ errors.password2 }}</div>{% endif %}
     </div>
   </div>

@@ -147,7 +147,7 @@ body { display: flex; flex-direction: column; align-items: center; padding: 0; }
                 </div>
                 <div class="auth-form-group"><label>{% trans "Email" %}</label><input type="email" id="regEmail" required autocomplete="email"></div>
                 <div class="auth-form-group"><label>{% trans "Korisničko ime" %}</label><input type="text" id="regUsername" required autocomplete="username"></div>
-                <div class="auth-form-group"><label>{% trans "Lozinka (min. 8 znakova)" %}</label><input type="password" id="regPassword" required autocomplete="new-password" minlength="8"></div>
+                <div class="auth-form-group"><label>{% trans "Lozinka (min. 10 znakova)" %}</label><input type="password" id="regPassword" required autocomplete="new-password" minlength="10"></div>
                 <button type="submit" class="btn-gold">{% trans "Registriraj se i nastavi" %}</button>
             </form>
         </div>
