@@ -46,3 +46,23 @@ class DailyNoteAdmin(admin.ModelAdmin):
     list_display = ['user', 'date', 'note']
     list_filter = ['user']
     date_hierarchy = 'date'
+
+
+from worktime.models import TravelExpense, TravelOrder
+
+class TravelExpenseInline(admin.TabularInline):
+    model = TravelExpense
+    extra = 1
+
+# Dodaj inline u TravelOrderAdmin ako postoji
+try:
+    admin.site.unregister(TravelOrder)
+except:
+    pass
+
+@admin.register(TravelOrder)
+class TravelOrderAdmin(admin.ModelAdmin):
+    list_display = ['order_number', 'employee', 'destination', 'departure_date', 'status', 'total_cost']
+    list_filter = ['status', 'transport_type']
+    search_fields = ['order_number', 'destination', 'employee__username']
+    inlines = [TravelExpenseInline]

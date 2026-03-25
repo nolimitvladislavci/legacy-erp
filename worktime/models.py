@@ -744,3 +744,45 @@ class AnomalyReport(models.Model):
 
     def __str__(self):
         return f"{self.user.username} -- {self.anomaly_type} ({self.severity})"
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Travel Order Attachments (računi, karte, hotel...)
+# ═══════════════════════════════════════════════════════════════
+
+class TravelExpense(models.Model):
+    """Pojedinačni trošak na putnom nalogu — s prilogom (račun/karta)."""
+
+    EXPENSE_TYPES = [
+        ('fuel', 'Gorivo'),
+        ('toll', 'Cestarina'),
+        ('parking', 'Parking'),
+        ('hotel', 'Smještaj'),
+        ('food', 'Prehrana'),
+        ('ticket', 'Karta (bus/vlak/avion)'),
+        ('taxi', 'Taksi / prijevoz'),
+        ('registration', 'Kotizacija / prijava'),
+        ('equipment', 'Oprema / materijal'),
+        ('costume', 'Kostim / uniforma'),  # KUD
+        ('licence', 'Dozvola / licence'),   # Ribolov/Lov
+        ('other', 'Ostalo'),
+    ]
+
+    travel_order = models.ForeignKey(
+        TravelOrder, on_delete=models.CASCADE, related_name='expenses',
+    )
+    expense_type = models.CharField(max_length=20, choices=EXPENSE_TYPES, default='other')
+    description = models.CharField(max_length=200)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    receipt_file = models.FileField(upload_to='travel_receipts/%Y/%m/', blank=True)
+    receipt_date = models.DateField(null=True, blank=True)
+    notes = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['receipt_date', 'created_at']
+        verbose_name = 'Trošak putnog naloga'
+        verbose_name_plural = 'Troškovi putnog naloga'
+
+    def __str__(self):
+        return f'{self.get_expense_type_display()}: {self.amount} EUR — {self.description}'

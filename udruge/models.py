@@ -16,6 +16,13 @@ class Clan(models.Model):
         ('pridruzeni', 'Pridruzeni clan'),
         ('osnivac', 'Osnivacki clan'),
         ('branitelj', 'Branitelj'),
+        ('senior', 'Senior'),
+        ('junior', 'Junior / Omladinac'),
+        ('kadeti', 'Kadet'),
+        ('sportski', 'Sportski clan'),
+        ('rekreativac', 'Rekreativac'),
+        ('zena', 'Clan - zena'),
+        ('umirovljenik', 'Umirovljenik'),
     ]
     STATUS_CHOICES = [
         ('aktivan', 'Aktivan'),
@@ -855,3 +862,121 @@ class VolunteerActivity(models.Model):
     @property
     def inkind_value(self):
         return self.hours * self.inkind_rate_eur
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Sekcije + Dozvole — KUD, Ribolov, Lov, Sport
+# ═══════════════════════════════════════════════════════════════
+
+class Sekcija(models.Model):
+    """Sekcija/skupina unutar udruge (KUD: tamburaši, pjevači; Ribolov: seniori, juniori)."""
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='sekcije',
+    )
+    name = models.CharField(max_length=100, verbose_name='Naziv sekcije')
+    description = models.TextField(blank=True)
+    leader = models.ForeignKey(
+        'Clan', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='led_sections',
+        verbose_name='Voditelj sekcije',
+    )
+    max_members = models.PositiveIntegerField(default=0, help_text='0=neograničeno')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Sekcija'
+        verbose_name_plural = 'Sekcije'
+        unique_together = [('company', 'name')]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def member_count(self):
+        return self.members.filter(clan__status='aktivan').count()
+
+
+class ClanSekcija(models.Model):
+    """Članstvo u sekciji (M2M through)."""
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='section_memberships')
+    sekcija = models.ForeignKey(Sekcija, on_delete=models.CASCADE, related_name='members')
+    role = models.CharField(max_length=30, blank=True, help_text='Npr. solist, bubnjač, kapetan')
+    joined_at = models.DateField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('clan', 'sekcija')]
+        verbose_name = 'Član sekcije'
+        verbose_name_plural = 'Članovi sekcija'
+
+    def __str__(self):
+        return f'{self.clan} → {self.sekcija} ({self.role})'
+
+
+class ClanskiDokument(models.Model):
+    """Dozvola/licenca člana — ribolovna, lovačka, oružni list, zdravstvena potvrda."""
+    DOC_TYPES = [
+        ('ribolovna', 'Ribolovna dozvola'),
+        ('lovacka', 'Lovačka dozvola'),
+        ('oruzni_list', 'Oružni list'),
+        ('zdravstvena', 'Zdravstvena potvrda'),
+        ('osiguranje', 'Polica osiguranja'),
+        ('iskaznica', 'Članska iskaznica'),
+        ('certifikat', 'Certifikat / licenca'),
+        ('other', 'Ostalo'),
+    ]
+
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='dokumenti')
+    doc_type = models.CharField(max_length=20, choices=DOC_TYPES)
+    doc_number = models.CharField(max_length=50, blank=True, verbose_name='Broj dokumenta')
+    issued_by = models.CharField(max_length=100, blank=True, verbose_name='Izdao')
+    issue_date = models.DateField(null=True, blank=True)
+    valid_until = models.DateField(null=True, blank=True)
+    file = models.FileField(upload_to='clan_docs/%Y/', blank=True)
+    notes = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-valid_until']
+        verbose_name = 'Članski dokument'
+        verbose_name_plural = 'Članski dokumenti'
+
+    def __str__(self):
+        return f'{self.get_doc_type_display()} — {self.clan} (do {self.valid_until})'
+
+    @property
+    def is_expired(self):
+        if not self.valid_until:
+            return False
+        return self.valid_until < timezone.now().date()
+
+    @property
+    def expires_soon(self):
+        """Ističe u sljedećih 30 dana."""
+        if not self.valid_until:
+            return False
+        from datetime import timedelta
+        return self.valid_until <= (timezone.now().date() + timedelta(days=30))
+
+
+class NatjecanjeRezultat(models.Model):
+    """Rezultat natjecanja/nastupa — vezano na Dogadjaj."""
+    dogadjaj = models.ForeignKey('Dogadjaj', on_delete=models.CASCADE, related_name='rezultati')
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='rezultati',
+                             null=True, blank=True, help_text='Individualni rezultat')
+    sekcija = models.ForeignKey(Sekcija, on_delete=models.SET_NULL,
+                                null=True, blank=True, help_text='Ekipni rezultat')
+    placement = models.PositiveIntegerField(null=True, blank=True, verbose_name='Plasman')
+    score = models.CharField(max_length=50, blank=True, verbose_name='Rezultat/bodovi')
+    category = models.CharField(max_length=100, blank=True, verbose_name='Kategorija')
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['placement']
+        verbose_name = 'Rezultat natjecanja'
+        verbose_name_plural = 'Rezultati natjecanja'
+
+    def __str__(self):
+        who = self.clan or self.sekcija or '?'
+        return f'{who} — #{self.placement} ({self.dogadjaj})'

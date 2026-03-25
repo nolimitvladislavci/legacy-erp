@@ -390,3 +390,39 @@ def generate_volunteer_summary(self, company_id, year=None):
         'unique_volunteers': activities.values('clan').distinct().count(),
         'by_category': list(activities.values('category').annotate(count=Count('id'), hours=Sum('hours')).order_by('-hours')),
     }
+
+
+@shared_task
+def check_expiring_documents():
+    """
+    Dnevna provjera — upozori na dozvole koje ističu u sljedećih 30 dana.
+    Ribolovna dozvola, lovačka dozvola, oružni list, zdravstvena.
+    """
+    from datetime import timedelta
+    from django.utils import timezone
+    from udruge.models import ClanskiDokument
+
+    today = timezone.now().date()
+    threshold = today + timedelta(days=30)
+
+    expiring = ClanskiDokument.objects.filter(
+        valid_until__lte=threshold,
+        valid_until__gte=today,
+        clan__status='aktivan',
+    ).select_related('clan')
+
+    expired = ClanskiDokument.objects.filter(
+        valid_until__lt=today,
+        clan__status='aktivan',
+    ).select_related('clan')
+
+    logger.info(
+        'Document check: %d expiring in 30 days, %d already expired',
+        expiring.count(), expired.count(),
+    )
+
+    # TODO: slanje notifikacija (push/email/WhatsApp) članovima
+    return {
+        'expiring_30d': expiring.count(),
+        'expired': expired.count(),
+    }
