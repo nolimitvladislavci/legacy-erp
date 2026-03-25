@@ -236,7 +236,7 @@ async function saveStep(direction) {
       alert((d.errors||['Greška']).join('\n'));
     }
   } catch(e) {
-    alert('Greška: ' + e.message);
+    window.fenixNetworkError('Greška mreže', e.message);
   } finally {
     btn.disabled = false;
   }

@@ -412,7 +412,7 @@ var Wizard = (function() {
         state = resp.draft;
         if (onSuccess) onSuccess(resp.draft);
       } else {
-        alert('Greška pri spremanju: ' + (resp.error || 'Pokušaj ponovo.'));
+        window.fenixNetworkError('Greška pri spremanju', (resp.error || 'Pokušaj ponovo.'));
       }
     })
     .catch(function(e) {

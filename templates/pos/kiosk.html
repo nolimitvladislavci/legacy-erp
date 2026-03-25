@@ -184,7 +184,7 @@ function checkout() {
     }
   })
   .catch(function(e){
-    alert('Greška: '+e.message);
+    window.fenixNetworkError('Greška mreže', e.message);
   });
 }
 </script>

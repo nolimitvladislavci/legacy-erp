@@ -208,7 +208,7 @@
     .then(function(result) {
       var data;
       try { data = JSON.parse(result.text); } catch(e) {
-        if (result.text.includes('login') || result.res.status === 302) { window.location.reload(); } else { alert('Greška servera (' + result.res.status + ').'); }
+        if (result.text.includes('login') || result.res.status === 302) { window.location.reload(); } else { window.fenixNetworkError('Greška servera', result.res.status ); }
         return;
       }
       if (data.ok) {
@@ -217,7 +217,7 @@
         var change = method === 'CASH' ? Math.max(0, amtPaid - parseFloat(data.total)) : 0;
         showSuccess(data.receipt_number, data.total, change);
         clearBasket();
-      } else { alert('Greška: ' + (data.error || 'nepoznata')); }
+      } else { window.fenixNetworkError('Greška mreže', (data.error || 'nepoznata')); }
     })
     .catch(function(e) {
       clearTimeout(_timeout);
@@ -496,7 +496,7 @@
           });
         }, 2000);
       });
-    }).catch(function(e) { alert('Greška: ' + e); });
+    }).catch(function(e) { window.fenixNetworkError('Greška mreže', e); });
   };
   window.closeRevolutModal = function() { document.getElementById('revolutModal').style.display = 'none'; if (_revolutPollTimer) { clearInterval(_revolutPollTimer); _revolutPollTimer = null; } };
 

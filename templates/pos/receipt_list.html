@@ -81,7 +81,7 @@ function waShare(rid) {
   })
   .then(function(r) { return r.json(); })
   .then(function(d) { if (d.wa_url) window.open(d.wa_url, '_blank'); else alert(d.error || 'Greška'); })
-  .catch(function() { alert('Greška veze'); });
+  .catch(function() { window.fenixNetworkError('Greška veze'); });
 }
 </script>
 {% include "includes/_share_modal.html" %}

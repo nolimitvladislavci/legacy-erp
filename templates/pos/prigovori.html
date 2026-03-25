@@ -403,7 +403,7 @@ async function savePrigovor() {
       goStep1();
       loadData();
     } else { alert(d.error?.message || 'Greška'); }
-  } catch(e) { alert('Greška: ' + e); }
+  } catch(e) { window.fenixNetworkError('Greška mreže', e); }
   finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Spremi'; }
 }
 
@@ -430,7 +430,7 @@ async function saveOdgovor() {
       bootstrap.Modal.getInstance(document.getElementById('odgovorModal')).hide();
       loadData();
     } else { alert(d.error?.message || 'Greška'); }
-  } catch(e) { alert('Greška: ' + e); }
+  } catch(e) { window.fenixNetworkError('Greška mreže', e); }
   finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Pošalji odgovor'; }
 }
 

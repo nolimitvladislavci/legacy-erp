@@ -192,6 +192,6 @@ function _sciSave() {
       alert(d.error || 'Greška pri spremanju');
     }
   })
-  .catch(function(e){ btn.disabled = false; btn.textContent = 'Spremi artikl'; alert('Greška: '+e); });
+  .catch(function(e){ btn.disabled = false; btn.textContent = 'Spremi artikl'; window.fenixNetworkError('Greška mreže', e); });
 }
 </script>

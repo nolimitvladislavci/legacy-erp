@@ -530,7 +530,7 @@ function showDetail(id) {
 
     el.scrollIntoView({behavior: 'smooth', block: 'start'});
   })
-  .catch(err => alert('Greška: ' + err.message));
+  .catch(err => window.fenixNetworkError('Greška mreže', err.message));
 }
 
 // ── Primka ───────────────────────────────────────────────────────────────────
@@ -547,11 +547,11 @@ async function createPrimka(recordId) {
       if (confirm('✅ ' + data.message + '\n\nOtvori primku?'))
         window.location.href = data.primka_url;
     } else {
-      alert('Greška: ' + (data.error || 'nepoznato'));
+      window.fenixNetworkError('Greška mreže', (data.error || 'nepoznato'));
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-boxes"></i> Napravi primku'; }
     }
   } catch(e) {
-    alert('Greška veze: ' + e.message);
+    window.fenixNetworkError('Greška veze', e.message);
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-boxes"></i> Napravi primku'; }
   }
 }

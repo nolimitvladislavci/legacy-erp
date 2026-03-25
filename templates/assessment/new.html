@@ -924,7 +924,7 @@ async function submitWizard() {
       localStorage.removeItem(STORAGE_KEY);
       window.location.href = data.redirect_url || '/assessment/';
     } else {
-      alert('Greška pri spremanju. Pokušajte ponovo.');
+      window.fenixNetworkError('Greška pri spremanju');
       btn.dataset.submitting = '';
       btn.disabled = false;
       btn.innerHTML = '✓ Spremi nalaz';

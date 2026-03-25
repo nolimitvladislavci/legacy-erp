@@ -43,3 +43,35 @@
     });
   });
 })();
+
+
+/* Fenix Network Error Handler — auto-injected */
+window.fenixNetworkError = function(context, err) {
+  var msg = context || 'Greška mreže';
+  // Log u konzolu za debug
+  if (err) console.error('[FenixError]', context, err);
+  // Prikaži toast umjesto alert
+  if (window.fenixToast) {
+    window.fenixToast('⚠️ ' + msg + ' — pokušajte ponovo ili prijavite grešku.', 'error');
+  } else {
+    alert(msg);
+  }
+  // Auto-log greška u ImprovementSuggestion
+  try {
+    var payload = {
+      title: 'Automatski log: ' + msg,
+      description: 'URL: ' + window.location.href + '\nError: ' + (err ? err.toString() : 'network') + '\nUA: ' + navigator.userAgent,
+      category: 'network',
+      priority: 2,
+      source: 'system'
+    };
+    var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+    if (csrf) {
+      fetch('/pos/improvements/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf[1]},
+        body: JSON.stringify(payload)
+      }).catch(function(){});  // silent — ne prikazuj error od error handlera
+    }
+  } catch(e) {}
+};

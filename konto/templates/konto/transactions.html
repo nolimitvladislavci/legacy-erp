@@ -137,8 +137,8 @@ function autoMatch(){
   fetch('{% url "konto:api_auto_match" %}',{method:'POST',headers:{'X-CSRFToken':document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'','Content-Type':'application/json'}})
   .then(r=>r.json()).then(d=>{
     if(d.success){alert('Parirano: '+d.matched_count+' transakcija');if(d.matched_count>0)location.reload();}
-    else alert('Greška');
-  }).catch(()=>alert('Greška'));
+    else window.fenixNetworkError('Greška mreže');
+  }).catch(()=>window.fenixNetworkError('Greška mreže'));
 }
 
 function openMatchModal(txnPk, name, amount) {
@@ -219,7 +219,7 @@ function ignoreTransaction(pk, btn) {
   })
   .then(r=>r.json()).then(d=>{
     if (d.ok || d.success) location.reload();
-    else alert('Greška: ' + (d.error || 'Nepoznata greška'));
+    else window.fenixNetworkError('Greška mreže', (d.error || 'Nepoznata greška'));
   }).catch(()=>alert('Mrežna greška'));
 }
 

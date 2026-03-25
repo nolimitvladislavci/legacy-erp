@@ -158,7 +158,7 @@ function _shSendWa() {
     .then(function(d){
       if (d.wa_url) { window.open(d.wa_url, '_blank'); closeShare(); }
       else alert(d.error || 'Greška');
-    }).catch(function(e){alert('Greška: '+e)});
+    }).catch(function(e){window.fenixNetworkError('Greška mreže', e)});
   } else {
     // Generic: share public URL via wa.me
     var url = window.location.origin + (_shCtx.public_url || _shGetBaseUrl() + '/');
@@ -183,7 +183,7 @@ function _shSendEmail() {
     .then(function(d){
       if (d.ok) { alert('Email poslan na ' + email); closeShare(); }
       else alert(d.error || 'Greška');
-    }).catch(function(e){alert('Greška: '+e)});
+    }).catch(function(e){window.fenixNetworkError('Greška mreže', e)});
   } else {
     // Generic: mailto
     var url = window.location.origin + (_shCtx.public_url || _shGetBaseUrl() + '/');

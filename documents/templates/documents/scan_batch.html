@@ -283,7 +283,7 @@
       const msg = document.getElementById('processing-msg');
       if (msg) msg.textContent = data.error_message || 'Obrađujem...';
       if (data.status === 'ready' || data.status === 'done') { clearInterval(pollTimer); location.reload(); }
-      else if (data.status === 'error') { clearInterval(pollTimer); alert('Greška: ' + (data.error_message||'')); }
+      else if (data.status === 'error') { clearInterval(pollTimer); window.fenixNetworkError('Greška mreže', (data.error_message||'')); }
     }, 3000);
   }
   const status = '{{ batch.status }}';

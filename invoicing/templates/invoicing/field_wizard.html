@@ -706,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fwSuccessLink').href = '/invoicing/' + data.invoice_id + '/edit/';
         showStep(99);
       } else {
-        alert('Greška: ' + (data.error || 'Nepoznata greška'));
+        window.fenixNetworkError('Greška mreže', (data.error || 'Nepoznata greška'));
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check"></i> Završi';
       }

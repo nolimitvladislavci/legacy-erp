@@ -30,7 +30,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       alert(d.error || 'Greška pri uploadu');
     }
   })
-  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; alert('Greška mreže'); });
+  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
 });
 </script>
 {% endblock %}
@@ -64,7 +64,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       alert(d.error || 'Greška pri uploadu');
     }
   })
-  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; alert('Greška mreže'); });
+  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
 });
 </script>
 {% endblock %}
@@ -283,7 +283,7 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
       alert(d.error || 'Greška pri uploadu');
     }
   })
-  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; alert('Greška mreže'); });
+  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; window.fenixNetworkError('Greška mreže'); });
 });
 </script>
 {% endblock %}
