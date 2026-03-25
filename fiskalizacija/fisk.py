@@ -265,8 +265,11 @@ def _build_racun(receipt, oib, ozn_pos_pr, ozn_nap_ur, zki, dt) -> etree._Elemen
             nap_el = sub(racun, 'Napojnica')
             sub(nap_el, 'IznosN', f'{tip_total:.2f}')
             # Nacin placanja napojnice: K=Kartica, G=Gotovina
+            # Split-payment fix: tip follows the LAST payment line method
+            # (e.g. meal paid by card, tip added in cash → last line = CASH)
             tip_pay = 'G'
-            if pay and pay.method in ('CARD', 'REVOLUT', 'MOBILE'):
+            last_pay = receipt.payment_lines.order_by('-id').first()
+            if last_pay and last_pay.method in ('CARD', 'REVOLUT', 'MOBILE'):
                 tip_pay = 'K'
             sub(nap_el, 'NacinPlacanjaN', tip_pay)
 

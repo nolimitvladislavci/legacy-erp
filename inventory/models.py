@@ -395,6 +395,20 @@ class GoodsReceipt(models.Model):
                         performed_by=self.created_by,
                     )
 
+                    # LOT/batch auto-creation (Drone #3)
+                    if ri.batch_number or ri.expiry_date:
+                        batch = StockBatch.objects.create(
+                            company=self.company,
+                            item=item,
+                            batch_number=ri.batch_number or '',
+                            quantity=ri.quantity,
+                            expected_weight=ri.quantity if item.is_weighable else 0,
+                            expiry_date=ri.expiry_date,
+                            location=self.warehouse or '',
+                        )
+                        ri.stock_batch = batch
+                        ri.save(update_fields=['stock_batch'])
+
                 total_purchase += ri.total_cost_price
                 total_selling  += ri.total_selling_gross
 
@@ -618,6 +632,23 @@ class GoodsReceiptItem(models.Model):
                                                 verbose_name=_('Uk. nabavna s troš.'))
     total_selling_gross  = models.DecimalField(max_digits=14, decimal_places=2, default=0,
                                                 verbose_name=_('Uk. MPC'))
+
+    # LOT / batch tracking (Drone #3)
+    batch_number = models.CharField(
+        max_length=100, blank=True,
+        verbose_name=_('Broj sarze / LOT'),
+        help_text=_('LOT oznaka sa ambalaže dobavljača'),
+    )
+    expiry_date = models.DateField(
+        null=True, blank=True,
+        verbose_name=_('Datum isteka roka'),
+    )
+    stock_batch = models.ForeignKey(
+        'StockBatch', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='goods_receipt_items',
+        verbose_name=_('Kreirana sarža'),
+    )
 
     class Meta:
         verbose_name        = _('Stavka primke')
