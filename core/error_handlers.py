@@ -5,8 +5,29 @@ Izdvojeno iz urls.py da se izbjegne circular import pri test DB kreaciji.
 from django.shortcuts import render
 
 
+def custom_403_handler(request, exception=None):
+    """403 → tenant izolacija ili permission denied."""
+    return render(request, '403.html', status=403)
+
+
 def custom_404_handler(request, exception=None):
-    """404 → renders 404 stranica. NIKAD redirect (izaziva beskonačnu petlju)."""
+    """404 → renders 404 stranica s FenixSignal gumbom."""
+    # Auto-report za ulogirane korisnike
+    try:
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            from limit_connect_ai.models_signal import FenixSignal
+            FenixSignal.objects.create(
+                user=request.user,
+                company=getattr(request, 'current_company', None),
+                signal_type='bug',
+                source='in_app',
+                message=f'404 na {request.path}',
+                page_url=request.build_absolute_uri(),
+                context={'referrer': request.META.get("HTTP_REFERER", ""), 'auto': True},
+                ip_address=request.META.get("REMOTE_ADDR", ""),
+            )
+    except Exception:
+        pass
     return render(request, '404.html', status=404)
 
 

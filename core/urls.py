@@ -333,6 +333,8 @@ urlpatterns += [
 
 # ── Custom Error Handlers ──────────────────────────────────────
 handler404 = 'core.error_handlers.custom_404_handler'
+handler403 = 'core.error_handlers.custom_403_handler'
+handler500 = 'core.error_handlers.custom_500_handler'
 
 # ROOT FALLBACK — izvan i18n_patterns da pokrije goli '/' i '/login/'
 # Bez ovih ruta LocaleMiddleware ne može matchati / → 404 → redirect loop
