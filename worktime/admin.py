@@ -48,21 +48,19 @@ class DailyNoteAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
 
 
-from worktime.models import TravelExpense, TravelOrder
-
-class TravelExpenseInline(admin.TabularInline):
-    model = TravelExpense
-    extra = 1
-
-# Dodaj inline u TravelOrderAdmin ako postoji
 try:
-    admin.site.unregister(TravelOrder)
-except:
-    pass
+    from worktime.models import TravelExpense, TravelOrder
 
-@admin.register(TravelOrder)
-class TravelOrderAdmin(admin.ModelAdmin):
-    list_display = ['order_number', 'employee', 'destination', 'departure_date', 'status', 'total_cost']
-    list_filter = ['status', 'transport_type']
-    search_fields = ['order_number', 'destination', 'employee__username']
-    inlines = [TravelExpenseInline]
+    class TravelExpenseInline(admin.TabularInline):
+        model = TravelExpense
+        extra = 1
+
+    @admin.register(TravelOrder)
+    class TravelOrderAdmin(admin.ModelAdmin):
+        list_display = ['order_number', 'employee', 'destination', 'departure_date', 'status', 'total_cost']
+        list_filter = ['status', 'transport_type']
+        search_fields = ['order_number', 'destination', 'employee__username']
+        inlines = [TravelExpenseInline]
+except Exception as _e:
+    import logging
+    logging.getLogger(__name__).warning("TravelOrder admin skip: %s", _e)

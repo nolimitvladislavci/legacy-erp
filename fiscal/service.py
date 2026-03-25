@@ -56,6 +56,18 @@ def fiscalize_pos_receipt(receipt):
     """
     from .models import FiscalLog
 
+    # IDEMPOTENCY GUARD — ne šalji isti račun dvaput FINA-i
+    from .models import FiscalLog
+    existing = FiscalLog.objects.filter(
+        receipt_type='pos_receipt', receipt_id=receipt.pk, status='success'
+    ).first()
+    if existing:
+        import logging as _log
+        _log.getLogger(__name__).warning(
+            "Receipt %d already fiscalized — returning existing JIR", receipt.pk
+        )
+        return existing.jir or None
+
     # Use existing fiskalizacija.fisk engine (proper WS-Security)
     try:
         from fiskalizacija.fisk import fiscalize_receipt as fisk_fiscalize

@@ -46,6 +46,9 @@ def open_session(terminal: "POSTerminal", user: "User", opening_cash: Decimal = 
     """Open a new POS session on terminal. Returns session or raises."""
     from .models import POSSession
 
+    # LOCK — sprečava duplu sesiju pri istovremenom otvaranju
+    terminal = type(terminal).objects.select_for_update().get(pk=terminal.pk)
+
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
         raise SessionError("Terminal već ima otvorenu sesiju.")
 
@@ -144,6 +147,9 @@ def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
     """
     from .models import POSPaymentLine, POSReceipt
 
+    # LOCK — sprečava duplu naplatu pri istovremenim zahtjevima
+    receipt = POSReceipt.objects.select_for_update().get(pk=receipt.pk)
+
     if receipt.status != POSReceipt.Status.OPEN:
         raise PaymentError("Račun je već zatvoren.")
     if not receipt.items.exists():
@@ -227,6 +233,16 @@ def _deduct_inventory(receipt: "POSReceipt", user: "User | None" = None) -> int:
     """Deduct inventory for all items in receipt. Returns count of movements."""
     from inventory.models import StockMovement
     count = 0
+
+    # LOCK — zaključaj sve inventory artikle odjednom prije dedukcije
+    item_ids = [
+        item.inventory_item_id
+        for item in receipt.items.all()
+        if item.inventory_item_id
+    ]
+    if item_ids:
+        from inventory.models import InventoryItem
+        list(InventoryItem.objects.select_for_update().filter(pk__in=item_ids))
 
     for item in receipt.items.select_related("inventory_item").all():
         if not item.inventory_item_id:
