@@ -74,18 +74,18 @@ function liveCamClose(){
         <div style="color:#fff;font-size:1.1rem;font-weight:600;margin-bottom:.5rem">Prevucite ra&#269;un ovdje</div>
         <div style="color:#64748b;font-size:.875rem;margin-bottom:1.5rem">ili odaberite jednu od opcija ispod</div>
 
-        <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:.75rem;align-items:center;max-width:280px;margin:0 auto">
           <button type="button" id="btnCameraFenix"
                   title="Fotografirajte fizicki racun direktno mobilnim uredajem"
-                  style="background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.4);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s"
+                  style="background:#c9a84c;color:#0a0a0a;border:none;border-radius:12px;padding:14px 24px;cursor:pointer;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%"
                   onclick="openLiveCamera()">
-            &#128247; Fotografirati mobilom
+            <i class="fas fa-camera"></i> Slikaj kamerom
           </button>
           <input type="file" name="file" id="fileInputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
 
           <label title="Odaberite PDF, sliku ili XML datoteku s racunala"
-                 style="background:var(--bg-card);color:#c9a84c;border:1px solid rgba(201,168,76,.5);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s">
-            &#128193; Odaberi fajl
+                 style="background:transparent;color:#94a3b8;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%">
+            <i class="fas fa-folder-open"></i> Odaberi iz galerije
             <input type="file" name="file" id="fileInputMain" accept=".pdf,.xml,.jpg,.jpeg,.png,.gif,.webp,.heic,.doc,.docx" style="display:none" onchange="handleFile(this)">
           </label>
         </div>
