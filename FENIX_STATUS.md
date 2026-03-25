@@ -1,247 +1,180 @@
 # FENIX STATUS — Koordinacijski fajl
-# Svi agenti citaju OVO prije svakog taska.
-# PRAVILO: Ako nesto pise DONE ovdje — NE RADIS PONOVO.
-# PRAVILO: Prije nego stavis task u plan — provjeri ovaj fajl.
+# Zadnje azuriranje: 2026-03-25 — ZAPOVJEDNIČKA SESIJA (Sonnet)
+# Git HEAD: f8c58a9
+# PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
 
-## Zadnje azuriranje
-2026-03-25 sesija — Compliance Shield + Concurrency Lockovi + PDV Alarm (Sonnet)
-Git HEAD: c76f55a
+## ★ RATNI RASPORED — 7 DANA DO 1.4.2026
+
+| Dan | Datum | Zadatak | Odgovorni | Status |
+|-----|-------|---------|-----------|--------|
+| 0 | 25.3. | Race condition, PDV, NKD, alert→toast, BUG-05 | Sonnet | ✅ DONE |
+| 0 | 25.3. | 6 Gemini/Haiku taskova pokrenuta | Sonnet | 🔄 U TIJEKU |
+| 1 | 26.3. | DNS TTL → 60s (Ivan ručno, Hetzner panel) | **IVAN** | ⏳ ČEKA |
+| 1 | 26.3. | Putni nalog templates | CC Code | ⏳ ČEKA |
+| 2 | 27.3. | Joker Pricing + 3-klik registracija | CC Code | ⏳ ČEKA |
+| 3 | 28.3. | Unscoped audit finish + GDPR | CC Code | ⏳ ČEKA |
+| 4 | 29.3. | Vatrogasci modul (dnevnik intervencija) | CC Code | ⏳ ČEKA |
+| 5 | 30.3. | Novi server naručiti (Hetzner CPX51) | **IVAN** | ⏳ ČEKA |
+| 5 | 30.3. | Server priprema + load test | Sonnet+CC | ⏳ ČEKA |
+| 7 | 1.4. | **MIGRACIJA 03:00** — 0-downtime | Sonnet | ⏳ ČEKA |
+| 7 | 1.4. | **VRATA OTVORENA** — 87 firmi probni pristup | Ivan | ⏳ ČEKA |
 
 ---
 
-## ★ 🔴 NOVI HITNI TASKOVI (2026-03-25 — ova sesija)
+## ★ AGENTI U ZRAKU (2026-03-25 21:21)
 
-### Concurrency + Race Condition
-| Fajl | Agent | Prioritet | Opis |
-|------|-------|-----------|------|
-| CC_TASK_CONCURRENCY_LOCKOVI.md | CC Code | **KRITIČAN** | select_for_update() na 4 mjesta u pos/services.py + fiscal/service.py |
+| Task ID | Agent | Zadatak | Status |
+|---------|-------|---------|--------|
+| d447b1fd | Gemini | VATROGASCI_GTM_REPORT.md | 🔄 |
+| b2e45215 | Gemini | PUTNI_NALOG_COMPLIANCE_REPORT.md | 🔄 |
+| f7f28532 | Gemini | N+1 fix + N1_FIXES_REPORT.md | 🔄 |
+| b6c7079e | Gemini | COMPLIANCE_WATCHDOG_REPORT_20260325.md | 🔄 |
+| 8b481281 | Haiku | Unscoped audit + UNSCOPED_FIX_REPORT.md | 🔄 |
+| 97128557 | Haiku | TravelExpense ai_classified + Celery task | 🔄 |
 
-### Cross-tenant GDPR
-| Fajl | Agent | Prioritet | Opis |
-|------|-------|-----------|------|
-| CC_TASK_UNSCOPED_AUDIT.md | CC Code | **KRITIČAN** | 89 unscoped() querija — cross-tenant leak |
+---
 
-### PDV Alarm — Šeki
-| Fajl | Agent | Prioritet | Opis |
-|------|-------|-----------|------|
-| PDV_ALARM_UVIJEK_FRISKO.md | CC Code | **HITNO** | Pekarski artikli na 25% umjesto 5% — provjeri inventory i live promet |
+## ★ DEPLOYAN DANAS (25.03.2026) — STVARAN KOD, NE PLAN
 
-### Compliance Shield (trajni dokument)
+| Što | Commit | Opis |
+|-----|--------|------|
+| Race condition fix | 19912ac | select_for_update() pos/services.py, fiscal idempotency |
+| PDV 5% Šeki | 19912ac | 12 pekarskih artikala 25%→5% direktno u bazi |
+| Admin TravelOrder bug | 19912ac | try/except wrap, admin radi |
+| NKD 74→331 kodova | c734571 | Hijerarhija, auto-assign 42/42 firmi, 100% pokrivenost |
+| NKD 84.25 vatrogasci | 1abf5a1 | + 8 novih kodova za vatrogasni sektor |
+| alert()→fenixNetworkError | dee9c89 | 23 mjesta, auto-log u ImprovementSuggestion |
+| BUG-05 stari IP | f8c58a9 | 85.9.201.204 uklonjen iz ALLOWED_HOSTS |
+| Udruge segment templates | f8c58a9 | DVD, KUD, ribari, pčelari, rakijari, voćari |
+| udruge migracija 0009 | f8c58a9 | Destilacija, Kostim, i ostali modeli live |
+
+---
+
+## ★ IVAN — AKCIJE ZA TEBE (ne može nitko drugi)
+
+| Prioritet | Akcija | Zašto hitno |
+|-----------|--------|-------------|
+| 🔴 1. | DNS TTL → 60s na Hetzner panelu | Mora stajati 24h prije migracije |
+| 🔴 2. | Naruči Hetzner CPX51 (35 EUR/mj) | Treba za 1.4. migraciju |
+| 🟠 3. | Šeki WhatsApp: "Kruh i pecivo smo ispravili na 5% PDV" | Preventiva za inspekciju |
+| 🟡 4. | FINA/Moj-eRacun API key | eRačun live test blokiran bez toga |
+
+---
+
+## TASKOVI ZA CC CODE (redosljed izvršavanja)
+
+### 🔴 ODMAH (blokira otvaranje vrata)
 | Fajl | Opis |
 |------|------|
-| COMPLIANCE_SHIELD.md | Sve zakonske prijetnje Ivanu osobno + monitoring pravila |
+| CC_TASK_PUTNI_NALOG_TEMPLATES.md | 3 templates + PDF — KUD/DVD nemaju modul bez ovog |
+| CC_TASK_JOKER_PRICING.md | /pricing/?profile= — novi korisnici ne znaju što kliknuti |
+| CC_TASK_3KLIK_REGISTRACIJA.md | OIB auto-fill, ServiceProvider seed |
+| CC_TASK_PORTAL_BUGFIX_SPRINT.md | BUG-02,04,06,07 + rate limit |
+
+### 🟠 VISOKI (ovaj tjedan)
+| Fajl | Opis |
+|------|------|
+| CC_TASK_UNSCOPED_AUDIT.md | GDPR — Haiku u tijeku, CC verificira |
+| CC_TASK_VATROGASCI_MODUL.md | FireIntervention model + atest alarm |
+| CC_TASK_NKD_KOMPLET.md | Management command (Sonnet već dodao 331 kodova direktno) |
+| CC_TASK_SUBSCRIPTION_TRACKING.md | ARR/MRR cockpit metrics |
+| CC_TASK_BEEKEEPING_MODULE.md | Pčelari — 11k u HR |
+| CC_TASK_API_KEY_AUTH.md | Passwordless API |
+
+### 🟡 SREDNJI (travanj)
+| Fajl | Opis |
+|------|------|
+| CC_TASK_SCAN_BATCH_100.md | BORG Faza 1 |
+| CC_TASK_INVOICING_BACKLOG.md | Flow diagram, clone, expiry |
+| CC_TASK_20260323_OFFLINE_POS.md | Offline POS |
+| CC_TASK_POS_REDESIGN_3KLIKA.md | POS redesign |
+| CC_TASK_LIMIT_AI_FUNDS.md | EU fondovi workflow |
+| CC_TASK_VATROGASCI_MODUL.md | DVD dnevnik intervencija |
 
 ---
 
-## ★ PORTAL SKEN 2026-03-25 — Kompletni nalazi
+## TASKOVI ZA GEMINI (u izvršavanju)
+→ Vidi tablicu "AGENTI U ZRAKU" gore
 
-### 🔴 Bugovi
-| # | Bug | Fajl | Status |
-|---|-----|------|--------|
-| BUG-01 | direction='IN' → MessageDirection.INBOUND | core/services/ai_hints.py | ✅ POPRAVLJENO |
-| BUG-02 | pulse.py metadata__contains SQLite fix | pos/pulse.py | CC Code task |
-| BUG-03 | udruga signal item_name → description | pos/signals.py | ✅ VEĆ ISPRAVNO — NE DIRAJ |
-| BUG-04 | digitalni_posrednik() definirana DVAPUT | website/views.py | CC Code task |
-| BUG-05 | 🔒 SECURITY: 85.9.201.204 stari IP u ALLOWED_HOSTS | core/settings.py | CC Code task — HITNO |
-| BUG-06 | pricing_page() ignorira ?profile= parametar | website/views.py | CC Code task |
-| BUG-07 | pulse.py fiskalizacija fail: jir kontradikcija | pos/pulse.py | CC Code task |
-
-### 🟡 Prilike
-| Prilika | Task |
-|---------|------|
-| N+1 queriji — analiza i fix | GEMINI_TASK_PORTAL_SCAN_FINDINGS.md |
-| Celery beat reliability audit | GEMINI_TASK_PORTAL_SCAN_FINDINGS.md |
-| ServiceAgreement views/templates | CC_TASK_3KLIK_REGISTRACIJA.md |
-| 89 unscoped() poziva — cross-tenant | CC_TASK_UNSCOPED_AUDIT.md |
-| Ghost moduli audit (fitness, gastro_menu, insurance) | GEMINI_TASK_PORTAL_SCAN_FINDINGS.md |
-| public_pdf rate limiting | CC_TASK_PORTAL_BUGFIX_SPRINT.md |
-
-### Što je dobro — NE DIRAJ
-- Middleware stack: kompletan (T&C, 2FA, RateLimit, GracefulError, Language) ✅
-- Security settings: HSTS, CSRF secure, SESSION secure ✅
-- Registration flow step1-4: radi ✅
-- CompanyManager arhitektura: ispravna ✅
-- Celery beat: 40+ taskova ✅
+### Sljedeći Gemini taskovi (nakon završetka tekućih)
+- GEMINI_TASK_CROSS_MODULE_POS_INVOICING.md
+- GEMINI_TASK_TAX_WIZARD_F2.md
 
 ---
 
-## ★ JOKER PRICING + ONBOARDING REVOLUTION — Plan
+## TRŽIŠNI SEGMENTI — UDRUGE MAPA
 
-### Joker Pricing Page (/pricing/)
-| Profil | Preporuka | URL |
-|--------|-----------|-----|
-| 🔨 Obrtnik | Paušalac (0 EUR) | /pricing/?profile=obrtnik |
-| ❤️ Udruga | Udruga (14.99) | /pricing/?profile=udruga |
-| 🛏 Iznajmljivač | Rental (9.99) | /pricing/?profile=rental |
-| 🏢 Firma | Starter/Pro/Enterprise | /pricing/?profile=firma |
-| 👔 Računovođa | Arhiva+AI/Enterprise/Distributor | /pricing/?profile=racunovodja |
-| 🍽 Gastro | POS/POS+Arhiva/Professional | /pricing/?profile=gastro |
+| Segment | HR tržište | Status | Što već radi |
+|---------|-----------|--------|-------------|
+| KUD-ovi | ~2.000 | ✅ Templates live | POS, putni nalozi, volonteri |
+| DVD-ovi | ~1.800 | ✅ Templates live | POS, putni nalozi, volonteri |
+| ŠRD (ribari) | ~800 | ✅ Templates live | POS, dozvole, reviri |
+| Lovačka društva | ~600 | ✅ Templates live | POS, dozvole |
+| Pčelari | ~11.000 | ✅ Templates live | POS, košnice, med |
+| Voćari/OPG | ~60.000 | ✅ Templates live | POS, berbe, tretmani |
+| Rakijari | ~5.000 | ✅ Templates live | Kotlovi, destilacije, trosarina |
+| Vatrogasci (JVP) | ~30 | 🔨 CC task | FireIntervention model |
 
-**Status:** PLAN — CC_TASK_JOKER_PRICING.md (treba napisati)
-
----
-
-### 3-Klik Registracija
-- CompanyRegistration, CompanySubscription, PricingPlan, PromoCode ✅ postoje
-- ServiceAgreement, ServiceProvider, CompanyDocument ✅ postoje
-- Registration step1-4 flow ✅ radi
-- **Nedostaje:** step za ServiceAgreement + ServiceProvider seed za Konjik d.o.o.
-**Status:** PLAN — CC_TASK_3KLIK_REGISTRACIJA.md (treba napisati)
+**UKUPNO adresabilno: ~80.000 organizacija u HR. Nebo je plavo.**
 
 ---
 
-### Growth Plan 2026
-| Milestone | Datum |
-|-----------|-------|
-| Testna faza | do 1.4.2026 — 87 firmi |
-| Novo gnijezdo | Uskrs 2026 — HW spec za 1500 korisnika |
-
----
-
-## TAX WIZARD — PLAN READY (2026-03-24)
-Taskovi: CC_TASK_TAX_WIZARD_F1.md | GEMINI_TASK_TAX_WIZARD_F2.md | SONNET_TASK_TAX_WIZARD_F3.md
-
----
-
-## POS KAO CENTAR SVIJETA (2026-03-24)
-Commit: 2430991 — 14 QuickActions, 3 post-receipt hooka
-Bloker: FINA API key za live eRačun test
-
----
-
-## ★ BORG SYSTEM FENIX
-Master plan: BORG_FENIX_MASTER_PLAN.md | Trenutna faza: FAZA 1
-
----
-
-## Aktivni klijenti
+## AKTIVNI KLIJENTI
 | Klijent | Firma | Status |
 |---------|-------|--------|
-| Seki Temaj | Uvijek Frisko | LIVE — POS 3 lok, 5 term ⚠️ PDV alarm |
+| Seki Temaj | Uvijek Friško | LIVE ⚠️ PDV fix deployan |
 | Marija Brtan | Konjik d.o.o. | LIVE — fiskal 2 u toku |
-| Niksa Viskovic | Viskovic Bau | ONBOARDING — DE |
-| Dragan Jakovljevic | Viskovic Bau | ONBOARDING |
+| Niksa Viskovic | Viskovic Bau | ONBOARDING DE |
 | Slađana Kruljac | O.P.G. Kruljac + Korpaš | LIVE |
+| KUD Dukat Vladislavci | — | KORPA klijent |
 
-## Korpa klijenti (22.03.)
-Korpaš d.o.o. | KUD Dukat Vladislavci | O.P.G. Kruljac Slađana | Furdi obrt | Dubinsko Čišćenje Čizo
+---
 
-## Superadmini
-Ivan Brtan (superadmin) | Marija Brtan | Niksa Viskovic | Dragan Jakovljevic
+## KRITIČNI OTVORENI PROBLEMI
+
+| Problem | Hitnost | Tko |
+|---------|---------|-----|
+| DNS TTL (28 min → 60 sec) | 🔴 Ivan mora danas | Ivan |
+| Novi server narudžba | 🔴 Do 30.3. | Ivan |
+| T&C consent 0/78 firmi | 🟠 Pravni rizik | CC Code |
+| FINA eRačun API key | 🟠 Bloker za live | Ivan |
+| buyer_type b2c default 19k partnera | 🟡 | CC Code |
 
 ---
 
 ## DONE — NE DIRATI
 
-### Compliance Shield kreiran (25.03.2026) — COMPLIANCE_SHIELD.md
-### PDV Alarm dokumentiran (25.03.2026) — PDV_ALARM_UVIJEK_FRISKO.md
-### Concurrency task kreiran (25.03.2026) — CC_TASK_CONCURRENCY_LOCKOVI.md
-### Unscoped audit task kreiran (25.03.2026) — CC_TASK_UNSCOPED_AUDIT.md
-### Portal Sken Faza 2 (25.03.2026) — 7 bugova, 6 taskova
-### Portal Sken Faza 1 (25.03.2026) — distribucija taskova
-### BUG-01 direction fix (25.03.2026)
-### BUG-03 signals.py (ISPRAVNO — potvrđeno, NE DIRAJ)
-### Ured u džepu — Wizard P0 (23.03.2026) — Commit: 8a2fc66
-### BORG FENIX Plan (24.03.2026)
-### Synesis P1 Import (23.03.2026) — 86 firmi, 33.270 partnera, D=P ±94 EUR
-### Share Modal + Nav Partial + Cashier Wizard (23.03.) — Commit: 7d49022
-### Cockpit 10/10 (22.03.) — Commit: 8d44bad
-### POS Simulacija (24.03.) — Commit: c76f55a — 25/25 OK
-### [SVE PRETHODNO: Udruge, FINA, DE KassenSichV, EU Fondovi, AML, Payments, i18n,
-### POS Offline, FenixCamera, Transport F1, Infrastruktura, Dokumenti+PDF, Mobile,
-### MCP Server, WhatsApp, Tim Chat, Country Registry, AI Tools v2, Livestock,
-### Intelligence, VetIS, Institutional API, limit_connect_ai F1, GTM, Invoice Growth,
-### Predarhiva OCR, Predkomora, Fiskalizacija fix, Hash Chain, PLG Virus,
-### OIB Validator, POS QR, Robot Plan, Security P0, Knowledge Graph,
-### buyer_type, T&C consent middleware]
+### 2026-03-25 (ova sesija)
+- Race condition + fiscal idempotency
+- PDV Šeki 25%→5% (12 artikala)
+- NKD 74→331, auto-assign 100%
+- NKD 84.25 vatrogasci + 8 kodova
+- alert()→fenixNetworkError() (23 mjesta)
+- BUG-01, BUG-05
+- Udruge segment templates (DVD, KUD, ribari, pčelari, rakijari, voćari)
+- HW_SPEC_1500_USERS.md
+- 6 agenata pokrenuto u pozadinu
+
+### [SVE PRETHODNO — NEPROMIJENJENO]
+- Udruge POS bypass, FINA, DE KassenSichV, EU Fondovi, AML, Payments,
+- POS Offline, FenixCamera, Transport, Infrastruktura, Dokumenti+PDF,
+- Mobile, MCP Server, WhatsApp, Tim Chat, Country Registry, AI Tools v2,
+- Livestock, Intelligence, VetIS, Institutional API, limit_connect_ai F1,
+- GTM, Invoice Growth, Predarhiva OCR, Fiskalizacija fix, Hash Chain,
+- PLV Virus, OIB Validator, POS QR, Robot Plan, Security P0,
+- Knowledge Graph, buyer_type, T&C middleware, Cockpit 10/10,
+- POS Simulacija 25/25, BORG Plan, Synesis P1, Share Modal, Wizard P0
 
 ---
 
 ## TRAJNI RESURSI
-
 | Fajl | Opis |
 |------|------|
 | COMPLIANCE_SHIELD.md | ⚖️ Zakonski štit — Ivan ne ide u zatvor |
-| EU_FONDOVI_MASTER_MATRIX.md | Korisničke grupe + EU prilike |
-| BORG_FENIX_MASTER_PLAN.md | 90-dnevni master plan |
-| LIMIT_CONNECT_AI_PLAN.md | AI Faze 1-4 |
-| GTM_PLAN_LIMIT_CONNECT_V1.md | Prodajni plan |
+| HW_SPEC_1500_USERS.md | Server specifikacija za 1.500 korisnika |
+| VATROGASCI_ANALIZA.md | Vatrogasci tržišna analiza |
+| EU_FONDOVI_MASTER_MATRIX.md | EU prilike po segmentima |
+| BORG_FENIX_MASTER_PLAN.md | 90-dnevni plan |
 | CLAUDE.md | Komunikacijski protokol za agente |
-| PORTAL_SCAN_2026_03_25.md | Sken Faza 1 |
-
----
-
-## TASKOVI ZA AGENTE
-
-### 🔴 KRITIČNO (radi odmah, redosljed)
-| Fajl | Agent | Opis |
-|------|-------|------|
-| CC_TASK_CONCURRENCY_LOCKOVI.md | CC Code | select_for_update(), idempotency fiskalizacija |
-| CC_TASK_UNSCOPED_AUDIT.md | CC Code | 89 unscoped() → GDPR |
-| PDV_ALARM_UVIJEK_FRISKO.md | CC Code | Provjeri inventory tax_rate za Šekija |
-| CC_TASK_PORTAL_BUGFIX_SPRINT.md | CC Code | BUG-02,04,05,06,07 + rate limit |
-
-### ★ VISOKI PRIORITET
-| Fajl | Agent | Prioritet |
-|------|-------|-----------|
-| GEMINI_TASK_PORTAL_SCAN_FINDINGS.md | Gemini | VISOK |
-| GEMINI_TASK_COMPLIANCE_WATCHDOG_V2.md | Gemini | VISOK |
-| GEMINI_TASK_CROSS_MODULE_POS_INVOICING.md | Gemini | VISOK |
-| CC_TASK_INVOICING_BACKLOG.md | CC Code | VISOK |
-| CC_TASK_API_KEY_AUTH.md | CC Code | VISOK |
-| CC_TASK_SUBSCRIPTION_TRACKING.md | CC Code | VISOK |
-| CC_TASK_BEEKEEPING_MODULE.md | CC Code | VISOK |
-| CC_TASK_LIMIT_AI_FUNDS.md | CC Code | VISOK |
-| CC_TASK_SCAN_BATCH_100.md | CC Code | VISOK — BORG Faza 1 |
-| HAIKU_TASK_REALTIME_CLASSIFIER.md | Haiku | VISOK — BORG Faza 1 |
-| CC_TASK_20260322_MULTI_KONOBAR_PRETPLATE.md | CC Code | VISOK |
-| CC_TASK_20260323_OFFLINE_POS.md | CC Code | VISOK |
-| CC_TASK_POS_REDESIGN_3KLIKA.md | CC Code | VISOK |
-
-### SREDNJI PRIORITET
-| Fajl | Agent |
-|------|-------|
-| CC_TASK_ROBOT_PRODAVAC_KOMPLET.md | CC Code |
-| CC_TASK_TESTS_PREDKOMORA.md | CC Code |
-| GEMINI_TASK_TESTS_HASHCHAIN.md | Gemini |
-| GEMINI_TASK_LIMIT_AI_COMPLIANCE.md | Gemini |
-
-### Treba napisati (backlog)
-- CC_TASK_JOKER_PRICING.md
-- CC_TASK_3KLIK_REGISTRACIJA.md
-- CC_TASK_GLOBAL_AI_CAMERA.md
-- HW_SPEC_1500_USERS.md — za Uskrs
-- CC_TASK_WIZARD_NKD_BULK.md
-- CC_TASK_WIZARD_BILJEZNICK_LISTA.md
-
-### NIZAK PRIORITET
-| Fajl | Agent |
-|------|-------|
-| CC_TASK_CLEANUP_PRINT_LOGS.md | CC Code |
-
----
-
-## OTVORENO — Kritični problemi
-
-| Problem | Hitnost |
-|---------|---------|
-| Race condition pos/services.py | 🔴 KRITIČAN — CC_TASK_CONCURRENCY_LOCKOVI.md |
-| 89 unscoped() — GDPR rizik | 🔴 KRITIČAN — CC_TASK_UNSCOPED_AUDIT.md |
-| PDV 25% za pekarske artikle Šeki | 🔴 HITNO — PDV_ALARM_UVIJEK_FRISKO.md |
-| BUG-05: stari IP u ALLOWED_HOSTS | 🔴 SECURITY |
-| BUG-07: pulse.py jir fail alarm | 🔴 VISOK |
-| NKD NULL 86/86 firmi | VISOK |
-| buyer_type b2c default (19.237 partnera) | VISOK |
-| FINA/Moj-eRacun API key | VISOK |
-| T&C consent 0/78 firmi | VISOK |
-
-### DE Compliance
-- Fiskaly sandbox API ključevi — CEKA
-- DATEV SKR03/04 + Buchungsstapel — OTVORENO
-
-### Wizard P2
-- NKD bulk import, OIB validacija, Marija widget, T&C PDF
-
-### Transport Faza 2, Livestock sex polje, Knjiga boljitaka (9/21)

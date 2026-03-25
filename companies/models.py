@@ -632,6 +632,16 @@ class CompanyModuleConfig(models.Model):
         verbose_name='Redoslijed u sidebaru')
     ai_recommended = models.JSONField(default=list, blank=True,
         verbose_name='AI preporuceni moduli')
+    NOTIFICATION_MODE_CHOICES = [
+        ('digest', 'Tjedni digest (ponedjeljak 08:00)'),
+        ('realtime', 'Real-time notifikacije'),
+        ('off', 'Isključeno'),
+    ]
+    notification_mode = models.CharField(
+        max_length=10, choices=NOTIFICATION_MODE_CHOICES, default='digest',
+        verbose_name='Način notifikacija',
+        help_text='digest=tjedni email, realtime=odmah, off=bez notifikacija',
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

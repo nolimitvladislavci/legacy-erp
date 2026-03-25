@@ -130,7 +130,7 @@ td      { padding: 2px 0; vertical-align: top; }
       </tr>
       <tr>
         <td style="font-size:7.5pt;color:#555" colspan="2">
-          &euro;{{ item.unit_price|floatformat:2 }} &times; {{ item.quantity|floatformat:"-2" }} | PDV {{ item.tax_rate|floatformat:0 }}%{% if item.discount_percent %} | Pop. {{ item.discount_percent|floatformat:0 }}%{% endif %}{% if item.is_pfand_return %} | POVRAT{% endif %}
+          &euro;{{ item.unit_price|floatformat:2 }} &times; {{ item.quantity|floatformat:"-2" }} | PDV {{ item.tax_rate|floatformat:0 }}%{% if item.discount_percent %} | Pop. {{ item.discount_percent|floatformat:0 }}%{% endif %}{% if item.is_pfand_return %} | POVRAT{% endif %}{% if item.lot_number %}<br>LOT: {{ item.lot_number }}{% if item.expiry_date %} | Rok: {{ item.expiry_date|date:"d.m.Y" }}{% endif %}{% endif %}
         </td>
         <td></td>
       </tr>

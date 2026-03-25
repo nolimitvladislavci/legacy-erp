@@ -777,6 +777,7 @@ class TravelExpense(models.Model):
     receipt_file = models.FileField(upload_to='travel_receipts/%Y/%m/', blank=True)
     receipt_date = models.DateField(null=True, blank=True)
     notes = models.CharField(max_length=200, blank=True)
+    ai_classified = models.BooleanField(default=False, verbose_name='AI klasificirano')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

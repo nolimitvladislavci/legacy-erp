@@ -1,6 +1,7 @@
 """
 companies/views_modules.py
 Module picker — visual grid for enabling/disabling ERP modules.
+Also: specialized module config (udruge, DVD, KUD, etc.)
 """
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -91,6 +92,130 @@ def module_toggle_api(request):
 
     return JsonResponse({'ok': True, 'enabled': config.enabled_modules})
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Specialized Module Config (udruge, DVD, KUD, ribolov, etc.)
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def company_modules(request):
+    """
+    Admin panel for specialized modules — toggle switches per business type.
+    URL: /companies/modules/config/
+    Template: templates/companies/module_config.html
+    """
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Nema aktivne firme.')
+        return redirect('dashboard')
+
+    from .models import CompanyModuleConfig
+    from core.module_registry import (
+        get_active_modules,
+        get_all_modules_grouped,
+        auto_detect_modules,
+        activate_module,
+        deactivate_module,
+        MODULE_REGISTRY,
+    )
+
+    config, _ = CompanyModuleConfig.objects.get_or_create(
+        company=company,
+        defaults={'enabled_modules': []}
+    )
+
+    ai_detected = None
+
+    if request.method == 'POST':
+        action = request.POST.get('action', 'save')
+
+        if action == 'save':
+            # Get selected modules from form
+            selected = set(request.POST.getlist('modules'))
+
+            # Ensure always-on modules stay active
+            for key, mod in MODULE_REGISTRY.items():
+                if mod.get('always_on') and company.business_type in mod.get('auto_activate_for', []):
+                    selected.add(key)
+
+            # Separate spec modules from general ERP modules
+            spec_keys = set(MODULE_REGISTRY.keys())
+            non_spec = [m for m in config.enabled_modules if m not in spec_keys]
+            config.enabled_modules = non_spec + sorted(selected)
+            config.save(update_fields=['enabled_modules', 'updated_at'])
+
+            messages.success(
+                request,
+                f'Konfiguracija spremljena! {len(selected)} specijaliziranih modula aktivno.'
+            )
+            return redirect('companies:company_modules')
+
+        elif action == 'auto_detect':
+            ai_detected = auto_detect_modules(company)
+            if not ai_detected:
+                messages.info(
+                    request,
+                    'Auto-detekcija nije pronašla dodatne module za vašu firmu. '
+                    'Provjerite NKD kod i tip djelatnosti.'
+                )
+
+        elif action == 'apply_detected':
+            detected_keys = request.POST.getlist('detected_modules')
+            count = 0
+            for key in detected_keys:
+                try:
+                    if activate_module(company, key):
+                        count += 1
+                except (ValueError, Exception):
+                    pass
+            if count:
+                messages.success(request, f'Aktivirano {count} preporučenih modula!')
+            else:
+                messages.info(request, 'Svi preporučeni moduli su već aktivni.')
+            return redirect('companies:company_modules')
+
+    active_keys = get_active_modules(company)
+    categories = get_all_modules_grouped()
+
+    return render(request, 'companies/module_config.html', {
+        'company': company,
+        'config': config,
+        'active_keys': active_keys,
+        'categories': categories,
+        'ai_detected': ai_detected,
+    })
+
+
+@login_required
+def spec_module_toggle_api(request):
+    """AJAX toggle for specialized modules."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    import json
+    body = json.loads(request.body)
+    module_key = body.get('module_key', '')
+    enabled = body.get('enabled', True)
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'No company'}, status=400)
+
+    from core.module_registry import activate_module, deactivate_module
+
+    try:
+        if enabled:
+            activate_module(company, module_key)
+        else:
+            deactivate_module(company, module_key)
+        return JsonResponse({'ok': True, 'module': module_key, 'enabled': enabled})
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Helpers (unchanged)
+# ═══════════════════════════════════════════════════════════════════════════
 
 def _get_module_counters(company):
     """Get record counts for modules that have counter_model."""

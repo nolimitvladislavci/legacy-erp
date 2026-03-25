@@ -153,6 +153,7 @@ MIDDLEWARE = [
     "core.middleware.Force2FAMiddleware",
     "core.middleware.ForceTCMiddleware",
     "registration.middleware.SubscriptionMiddleware",
+    "core.image_compression.ImageQuotaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "permissions.ip_filter.IPFilterMiddleware",
@@ -178,6 +179,7 @@ TEMPLATES = [{
             "permissions.context_processors.subscription_context",
             "core.context_processors.booking_globals",
                 "core.context_processors.company_switcher",
+                "core.context_processors.module_context",
         ],
     },
 }]
@@ -741,5 +743,13 @@ CELERY_BEAT_SCHEDULE.update({
     "borg-signal-daily-digest": {
         "task": "limit_connect_ai.tasks_signal.daily_signal_digest",
         "schedule": crontab(hour=7, minute=0),
+    },
+})
+
+# ── Notification Digest — tjedni izvještaj za udruge ───────────────
+CELERY_BEAT_SCHEDULE.update({
+    "weekly-notification-digest": {
+        "task": "core.notification_digest.send_weekly_digest",
+        "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Ponedjeljak 08:00
     },
 })

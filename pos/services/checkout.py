@@ -48,8 +48,9 @@ class CheckoutService:
     @staticmethod
     def _deduct_stock(item, qty, unit_price, receipt_number, user):
         """
-        Smanji zalihu + BOM auto-deduction.
+        Smanji zalihu + BOM auto-deduction + FEFO batch tracking.
         B-08: select_for_update za race condition zastitu.
+        Vraca: (lot_number, expiry_date, stock_batch_id) ili (None, None, None)
         """
         from inventory.models import InventoryItem, StockMovement
 
@@ -58,7 +59,7 @@ class CheckoutService:
 
         # Usluge i non-stockable stavke — ne diramo zalihu
         if not locked_item.is_stockable:
-            return
+            return None, None, None
 
         # Provjeri zalihu
         company = locked_item.company
@@ -77,6 +78,40 @@ class CheckoutService:
             reason='POS bon #%d' % receipt_number,
             performed_by=user,
         )
+
+        # ── FEFO Batch Deduction (EU 178/2002 LOT slijedivost) ──
+        lot_number = None
+        expiry_date = None
+        batch_id = None
+        try:
+            from inventory.models import StockBatch
+            batches = StockBatch.objects.filter(
+                item=locked_item,
+                quantity__gt=0,
+                quarantine_status='active',
+            ).order_by('expiry_date', 'created_at')  # FEFO
+
+            remaining = qty
+            primary_batch = None
+            for batch in batches:
+                if remaining <= 0:
+                    break
+                deduct = min(batch.quantity, remaining)
+                batch.quantity -= deduct
+                batch.save(update_fields=['quantity'])
+                remaining -= deduct
+                if primary_batch is None:
+                    primary_batch = batch
+
+            if primary_batch:
+                lot_number = primary_batch.batch_number or None
+                expiry_date = primary_batch.expiry_date
+                batch_id = primary_batch.pk
+        except Exception as e:
+            # StockBatch ne postoji za ovaj artikl ili nema batcheva — OK
+            logger.debug('FEFO batch deduction skipped for %s: %s', locked_item.name, e)
+
+        return lot_number, expiry_date, batch_id
         # BOM auto-deduction
         try:
             from calculator.models import BOM
@@ -432,7 +467,19 @@ class CheckoutService:
 
             # Stock deduction
             try:
-                cls._deduct_stock(inv, qty, unit_price, next_number, user)
+                lot_num, exp_date, batch_pk = cls._deduct_stock(inv, qty, unit_price, next_number, user) or (None, None, None)
+                # LOT slijedivost: spremi na receipt item
+                if lot_num or exp_date:
+                    try:
+                        ri = receipt.items.filter(inventory_item=inv).last()
+                        if ri:
+                            ri.lot_number = lot_num or ''
+                            ri.expiry_date = exp_date
+                            if batch_pk:
+                                ri.stock_batch_id = batch_pk
+                            ri.save(update_fields=['lot_number', 'expiry_date', 'stock_batch_id'])
+                    except Exception:
+                        pass
             except Exception as stock_err:
                 logger.warning('POS: StockMovement greska za item %s: %s', item_id, stock_err)
 
@@ -477,6 +524,15 @@ class CheckoutService:
                     logger.warning('Clanarina auto-link: %s', clan_err)
 
         # ── 5. NAPOJNICA (zasebna stavka) ──
+        # Validacija napojnice (Dron #1 fix)
+        if tip_amount < 0:
+            tip_amount = Decimal('0')
+            logger.warning('Negativna napojnica odbacena za bon #%d', receipt.pk)
+        if tip_amount > 0 and receipt.total > 0 and tip_amount > receipt.total * 3:
+            logger.warning(
+                'Napojnica %.2f EUR > 3x iznos bona %.2f EUR — moguca greska, bon #%d',
+                tip_amount, receipt.total, receipt.pk,
+            )
         if tip_amount > 0:
             POSReceiptItem.objects.create(
                 receipt=receipt,

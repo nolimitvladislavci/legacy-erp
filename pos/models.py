@@ -388,6 +388,23 @@ class POSReceiptItem(models.Model):
         help_text=_("Clanarina/donacija — ne fiskalizira se"),
     )
 
+    # LOT slijedivost (EU 178/2002, Zakon o sigurnosti hrane)
+    stock_batch = models.ForeignKey(
+        'inventory.StockBatch', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='pos_items',
+        verbose_name=_('Sarza (LOT)'),
+    )
+    lot_number = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name=_('LOT broj'),
+        help_text=_('Denormalizirano — trajno na bonu cak i ako se sarza obrise'),
+    )
+    expiry_date = models.DateField(
+        null=True, blank=True,
+        verbose_name=_('Rok trajanja'),
+    )
+
     total_price    = models.DecimalField(max_digits=10, decimal_places=2, default=0,
                                           verbose_name=_('Ukupno s PDV'))
 
@@ -1158,14 +1175,21 @@ class POSDailyReport(models.Model):
             tax_bd[rate_key]['tax'] = Decimal(str(tax_bd[rate_key]['tax'] + tax_amount)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             tax_bd[rate_key]['total'] = Decimal(str(tax_bd[rate_key]['total'] + float(item.total_price))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        # Cashier breakdown
+        # Cashier breakdown (s napojnicama per NN 156/2023)
         cashier_bd = {}
-        for r in receipts.select_related('cashier'):
+        for r in receipts.select_related('cashier').prefetch_related('items'):
             name = r.cashier.name if r.cashier else r.note or 'Nepoznat'
             if name not in cashier_bd:
-                cashier_bd[name] = {'count': 0, 'total': 0}
+                cashier_bd[name] = {'count': 0, 'total': 0, 'tips': 0}
             cashier_bd[name]['count'] += 1
             cashier_bd[name]['total'] = round(cashier_bd[name]['total'] + float(r.total), 2)
+            # Napojnice per cashier (samo employee tips, ne AG)
+            tip_sum = sum(
+                float(item.unit_price * item.quantity)
+                for item in r.items.all()
+                if item.is_tip and not item.is_tip_employer
+            )
+            cashier_bd[name]['tips'] = round(cashier_bd[name].get('tips', 0) + tip_sum, 2)
 
         report, created = cls.objects.update_or_create(
             session=session,

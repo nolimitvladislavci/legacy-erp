@@ -68,3 +68,42 @@ def company_switcher(request):
             }
     except Exception:
         return {}
+
+
+def module_context(request):
+    """
+    Inject specialized module info into every template context.
+    Provides:
+      - active_spec_modules: list of active specialized module keys
+      - sidebar_spec_modules: structured sidebar for specialized modules
+      - spec_module_is_active: dict {module_key: bool} for quick checks
+    """
+    if not getattr(request, 'user', None) or not request.user.is_authenticated:
+        return {}
+
+    try:
+        from core.company_utils import get_user_company
+        company = get_user_company(request)
+        if not company:
+            return {}
+
+        from core.module_registry import (
+            get_active_modules,
+            get_sidebar_items,
+            MODULE_REGISTRY,
+        )
+
+        active_keys = get_active_modules(company)
+        sidebar = get_sidebar_items(company)
+
+        # Build quick-check dict for all registered modules
+        module_active_map = {key: (key in active_keys) for key in MODULE_REGISTRY}
+
+        return {
+            'active_spec_modules': active_keys,
+            'sidebar_spec_modules': sidebar,
+            'spec_module_is_active': module_active_map,
+        }
+
+    except Exception:
+        return {}

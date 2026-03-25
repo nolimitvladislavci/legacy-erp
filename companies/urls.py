@@ -27,9 +27,13 @@ urlpatterns = [
     path("api/nkd-search/", views.nkd_search, name="nkd_search"),
     path("", include(router.urls)),
 
-    # Module Picker
+    # Module Picker (general ERP modules)
     path('modules/', views_modules.module_picker, name='module_picker'),
     path('modules/api/toggle/', views_modules.module_toggle_api, name='module_toggle'),
+
+    # Specialized Module Config (udruge, DVD, KUD, etc.)
+    path('modules/config/', views_modules.company_modules, name='company_modules'),
+    path('modules/config/api/toggle/', views_modules.spec_module_toggle_api, name='spec_module_toggle'),
 ]
 
 # KS LIMIT Komitent Manager
