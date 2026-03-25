@@ -69,10 +69,13 @@
     <div class="col-md-2">
       <select name="doctype" class="form-select">
         <option value="">{% trans "Sve vrste" %}</option>
-        <option value="R">{% trans "Račun" %}</option>
-        <option value="P">{% trans "Predračun" %}</option>
-        <option value="A">{% trans "Avansni" %}</option>
-        <option value="S">{% trans "Storno" %}</option>
+        <option value="PO" {% if doctype == "PO" %}selected{% endif %}>{% trans "Ponuda" %}</option>
+        <option value="R" {% if doctype == "R" %}selected{% endif %}>{% trans "Račun" %}</option>
+        <option value="P" {% if doctype == "P" %}selected{% endif %}>{% trans "Predračun" %}</option>
+        <option value="A" {% if doctype == "A" %}selected{% endif %}>{% trans "Avansni" %}</option>
+        <option value="FA" {% if doctype == "FA" %}selected{% endif %}>{% trans "Faktura B2B" %}</option>
+        <option value="URA" {% if doctype == "URA" %}selected{% endif %}>{% trans "Ulazni račun" %}</option>
+        <option value="S" {% if doctype == "S" %}selected{% endif %}>{% trans "Storno" %}</option>
       </select>
     </div>
     {% if synesis_years %}
@@ -135,9 +138,30 @@
           <td>
             <div class="d-flex gap-1">
               <a href="{% url "invoicing:generate_pdf" inv.pk %}" class="btn btn-sm btn-outline-secondary" title="PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
-              <a href="/eracun/from-invoice/{{ inv.pk }}/" class="btn btn-sm btn-outline-primary" title="e-Racun" onclick="return confirm('Kreirati e-Racun?')"><i class="fas fa-file-invoice"></i></a>
               <a href="{% url "invoicing:invoice_edit" inv.pk %}" class="btn btn-sm btn-outline-primary" title="Uredi"><i class="fas fa-edit"></i></a>
-              <button onclick="openShare({type:'invoice',id:{{ inv.id }},title:'Račun #{{ inv.number|escapejs }}',public_url:'/hr/eracun/p/{{ inv.uuid }}/'})" class="btn btn-sm btn-outline-warning" title="Podijeli">📤</button>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" style="font-size:.7rem"><i class="fas fa-ellipsis-v"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end" style="font-size:.82rem">
+                  {% if inv.doctype == "PO" %}
+                  <li><a class="dropdown-item" href="{% url 'invoicing:to_predracun' inv.pk %}" onclick="return confirm('Pretvoriti ponudu u predračun?')"><i class="fas fa-file-alt text-primary"></i> Pretvori u predračun</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:to_invoice' inv.pk %}" onclick="return confirm('Pretvoriti ponudu u račun?')"><i class="fas fa-file-invoice-dollar text-success"></i> Pretvori u račun</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  {% elif inv.doctype == "P" %}
+                  <li><a class="dropdown-item" href="{% url 'invoicing:to_invoice' inv.pk %}" onclick="return confirm('Pretvoriti predračun u račun?')"><i class="fas fa-file-invoice-dollar text-success"></i> Pretvori u račun</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  {% endif %}
+                  {% if inv.doctype == "R" and not inv.is_fiscalized %}
+                  <li><a class="dropdown-item" href="{% url 'invoicing:fiscalize' inv.pk %}" onclick="return confirm('Fiskalizirati?')"><i class="fas fa-cash-register text-warning"></i> Fiskaliziraj</a></li>
+                  {% endif %}
+                  {% if inv.doctype == "R" %}
+                  <li><a class="dropdown-item" href="{% url 'invoicing:storno' inv.pk %}" onclick="return confirm('Stornirati račun?')"><i class="fas fa-ban text-danger"></i> Storno</a></li>
+                  {% endif %}
+                  <li><a class="dropdown-item" href="/eracun/from-invoice/{{ inv.pk }}/" onclick="return confirm('Kreirati e-Račun?')"><i class="fas fa-file-invoice text-info"></i> e-Račun</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:invoice_clone' inv.pk %}"><i class="fas fa-copy text-muted"></i> Kloniraj</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:send_email' inv.pk %}" onclick="return confirm('Poslati email?')"><i class="fas fa-envelope text-muted"></i> Email</a></li>
+                  <li><a class="dropdown-item" href="{% url 'invoicing:send_whatsapp' inv.pk %}" onclick="return confirm('Poslati WhatsApp?')"><i class="fab fa-whatsapp text-success"></i> WhatsApp</a></li>
+                </ul>
+              </div>
             </div>
           </td>
         </tr>
