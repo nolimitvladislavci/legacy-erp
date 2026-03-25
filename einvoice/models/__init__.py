@@ -9,6 +9,7 @@ from .peppol_participant import PeppolParticipant
 from .transport_config import TransportConfiguration
 from .inbound_invoice import InboundInvoice
 from .document_archive import DocumentArchive
+from .mandate import Mandate, MandateStatus, MandateType
 
 __all__ = [
     "AS4Message",
@@ -20,4 +21,7 @@ __all__ = [
     "TransportConfiguration",
     "InboundInvoice",
     "DocumentArchive",
+    "Mandate",
+    "MandateStatus",
+    "MandateType",
 ]
