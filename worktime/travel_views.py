@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from decimal import Decimal
 from core.company_utils import get_user_company
-from .models import TravelOrder
+from .models import TravelOrder, TravelExpense
 
 
 @login_required
@@ -54,7 +54,13 @@ def travel_order_detail(request, pk):
     company = get_user_company(request)
     order = get_object_or_404(TravelOrder, pk=pk, company=company)
     can_approve = request.user.is_staff or (hasattr(request.user, "employeeprofile") and request.user.employeeprofile.is_manager)
-    return render(request, "worktime/travel_order_detail.html", {"order": order, "can_approve": can_approve})
+    expenses = order.expenses.all()
+    expenses_total = sum(e.amount for e in expenses)
+    return render(request, "worktime/travel_order_detail.html", {
+        "order": order, "can_approve": can_approve,
+        "expenses": expenses, "expenses_total": expenses_total,
+        "expense_types": TravelExpense.EXPENSE_TYPES,
+    })
 
 
 @login_required
@@ -78,4 +84,23 @@ def travel_order_approve(request, pk):
         order.status = "cancelled"
         order.save()
         messages.warning(request, f"Putni nalog {order.order_number} otkazan.")
+    return redirect("worktime:travel_order_detail", pk=pk)
+
+
+@login_required
+def travel_expense_add(request, pk):
+    """Dodaj pojedinacni trosak na putni nalog."""
+    company = get_user_company(request)
+    order = get_object_or_404(TravelOrder, pk=pk, company=company)
+    if request.method == "POST" and order.status != "cancelled":
+        TravelExpense.objects.create(
+            travel_order=order,
+            expense_type=request.POST.get("expense_type", "other"),
+            description=request.POST.get("description", ""),
+            amount=Decimal(request.POST.get("amount", "0")),
+            receipt_file=request.FILES.get("receipt_file"),
+            receipt_date=request.POST.get("receipt_date") or None,
+            notes=request.POST.get("notes", ""),
+        )
+        messages.success(request, "Trosak dodan.")
     return redirect("worktime:travel_order_detail", pk=pk)

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Nova sekcija{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+  <h4 style="margin:0;color:var(--gold)"><i class="fas fa-layer-group"></i> Nova sekcija</h4>
+  <a href="{% url 'udruge:sekcija_list' %}" class="btn btn-ghost btn-sm">Odustani</a>
+</div>
+
+<div class="card" style="padding:1.5rem">
+  <form method="post">
+    {% csrf_token %}
+    <div style="margin-bottom:1rem">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Naziv sekcije *</label>
+      <input type="text" name="name" required placeholder="Npr. Tamburaski sastav, Seniori, Kadeti..." style="width:100%;padding:.5rem .75rem;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem">
+    </div>
+    <div style="margin-bottom:1rem">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Opis</label>
+      <textarea name="description" rows="3" placeholder="Opis sekcije..." style="width:100%;padding:.5rem .75rem;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem;resize:vertical"></textarea>
+    </div>
+    <div style="margin-bottom:1.5rem">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:4px">Max clanova (0 = neograniceno)</label>
+      <input type="number" name="max_members" value="0" min="0" style="width:120px;padding:.5rem .75rem;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.9rem">
+    </div>
+    <button type="submit" class="btn btn-gold" style="width:100%">Kreiraj sekciju</button>
+  </form>
+</div>
+</div>
+{% endblock %}

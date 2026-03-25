@@ -63,4 +63,13 @@ urlpatterns = [
 
     # EU fond AI search
     path('eu/ai-search/', views.eu_fund_search, name='eu_fund_search'),
+
+    # Sekcije
+    path('sekcije/', views.sekcija_list, name='sekcija_list'),
+    path('sekcije/nova/', views.sekcija_create, name='sekcija_create'),
+    path('sekcije/<int:pk>/', views.sekcija_detail, name='sekcija_detail'),
+    path('sekcije/<int:pk>/add-member/', views.sekcija_add_member, name='sekcija_add_member'),
+    # Dokumenti / Dozvole
+    path('<int:pk>/dokumenti/', views.clan_dokumenti, name='clan_dokumenti'),
+    path('dozvole/', views.dozvole_pregled, name='dozvole_pregled'),
 ]

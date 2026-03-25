@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ sekcija.name }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div>
+    <h4 style="margin:0;color:var(--gold)"><i class="fas fa-layer-group"></i> {{ sekcija.name }}</h4>
+    <small style="color:var(--muted)">{{ sekcija.member_count }} clanova{% if sekcija.max_members %} / max {{ sekcija.max_members }}{% endif %}</small>
+  </div>
+  <a href="{% url 'udruge:sekcija_list' %}" class="btn btn-ghost btn-sm">Natrag</a>
+</div>
+
+{% if sekcija.description %}
+<div class="card" style="padding:1rem;margin-bottom:1rem">
+  <p style="margin:0;font-size:.88rem;color:var(--muted)">{{ sekcija.description }}</p>
+</div>
+{% endif %}
+
+{% if sekcija.leader %}
+<div class="card" style="padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+  <i class="fas fa-user-tie" style="color:var(--gold)"></i>
+  <span style="font-size:.82rem;color:var(--muted)">Voditelj:</span>
+  <strong style="font-size:.88rem">{{ sekcija.leader }}</strong>
+</div>
+{% endif %}
+
+<div class="card" style="padding:1rem;margin-bottom:1rem">
+  <h6 style="color:var(--gold);margin-bottom:.75rem">Dodaj clana u sekciju</h6>
+  <form method="post" action="{% url 'udruge:sekcija_add_member' sekcija.pk %}" style="display:flex;gap:.5rem;align-items:end;flex-wrap:wrap">
+    {% csrf_token %}
+    <div style="flex:2;min-width:180px">
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Clan</label>
+      <select name="clan_id" required style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+        <option value="">-- Odaberi --</option>
+        {% for c in available_clans %}
+        <option value="{{ c.pk }}">{{ c.full_name }}{% if c.membership_number %} ({{ c.membership_number }}){% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex:1;min-width:120px">
+      <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:3px">Uloga</label>
+      <input type="text" name="role" placeholder="Npr. solist, kapetan..." style="width:100%;padding:.4rem .6rem;background:var(--dark);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:.85rem">
+    </div>
+    <button type="submit" class="btn btn-gold btn-sm">Dodaj</button>
+  </form>
+</div>
+
+<div class="card">
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Clan</th>
+          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Uloga</th>
+          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Clan od</th>
+          <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in members %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+          <td style="padding:.5rem .6rem;font-size:.85rem">
+            <a href="{% url 'udruge:clan_detail' m.clan.pk %}" style="color:var(--text);font-weight:600;text-decoration:none">{{ m.clan.full_name }}</a>
+          </td>
+          <td style="padding:.5rem .6rem;font-size:.82rem;color:var(--gold)">{{ m.role|default:"-" }}</td>
+          <td style="padding:.5rem .6rem;font-size:.82rem">{{ m.joined_at|date:"d.m.Y" }}</td>
+          <td style="padding:.5rem .6rem">
+            {% if m.clan.status == "aktivan" %}
+            <span style="color:#22c55e;font-size:.78rem;font-weight:600">Aktivan</span>
+            {% else %}
+            <span style="color:var(--muted);font-size:.78rem">{{ m.clan.get_status_display }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--muted)">Nema clanova u sekciji</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

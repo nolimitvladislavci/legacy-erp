@@ -1204,3 +1204,120 @@ def api_member_lookup(request):
             'is_active': is_active,
         },
     })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SEKCIJE (Sections — KUD, ribolov, sport)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def sekcija_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Sekcija
+    sekcije = Sekcija.objects.filter(company=company)
+    return render(request, 'udruge/sekcija_list.html', {'sekcije': sekcije})
+
+
+@login_required
+def sekcija_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Sekcija
+    sekcija = get_object_or_404(Sekcija, pk=pk, company=company)
+    members = sekcija.members.select_related('clan').all()
+    from .models import Clan
+    available_clans = Clan.objects.filter(company=company, status='aktivan').exclude(
+        pk__in=members.values_list('clan_id', flat=True)
+    )
+    return render(request, 'udruge/sekcija_detail.html', {
+        'sekcija': sekcija, 'members': members, 'available_clans': available_clans,
+    })
+
+
+@login_required
+def sekcija_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    if request.method == 'POST':
+        from .models import Sekcija
+        Sekcija.objects.create(
+            company=company,
+            name=request.POST.get('name', ''),
+            description=request.POST.get('description', ''),
+            max_members=int(request.POST.get('max_members', 0) or 0),
+        )
+        messages.success(request, 'Sekcija kreirana.')
+        return redirect('udruge:sekcija_list')
+    return render(request, 'udruge/sekcija_form.html', {})
+
+
+@login_required
+@require_POST
+def sekcija_add_member(request, pk):
+    company = get_user_company(request)
+    from .models import Sekcija, ClanSekcija, Clan
+    sekcija = get_object_or_404(Sekcija, pk=pk, company=company)
+    clan_id = request.POST.get('clan_id')
+    role = request.POST.get('role', '')
+    if clan_id:
+        clan = get_object_or_404(Clan, pk=clan_id)
+        ClanSekcija.objects.get_or_create(clan=clan, sekcija=sekcija, defaults={'role': role})
+        messages.success(request, '%s dodan u %s.' % (clan, sekcija.name))
+    return redirect('udruge:sekcija_detail', pk=pk)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DOKUMENTI / DOZVOLE
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def clan_dokumenti(request, pk):
+    """Dokumenti jednog clana — dozvole, licence."""
+    company = get_user_company(request)
+    from .models import Clan, ClanskiDokument
+    clan = get_object_or_404(Clan, pk=pk, company=company)
+    docs = ClanskiDokument.objects.filter(clan=clan)
+
+    if request.method == 'POST':
+        ClanskiDokument.objects.create(
+            clan=clan,
+            doc_type=request.POST.get('doc_type', 'other'),
+            doc_number=request.POST.get('doc_number', ''),
+            issued_by=request.POST.get('issued_by', ''),
+            issue_date=request.POST.get('issue_date') or None,
+            valid_until=request.POST.get('valid_until') or None,
+            file=request.FILES.get('file'),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Dokument dodan.')
+        return redirect('udruge:clan_dokumenti', pk=pk)
+
+    return render(request, 'udruge/clan_dokumenti.html', {
+        'clan': clan, 'docs': docs, 'doc_types': ClanskiDokument.DOC_TYPES,
+    })
+
+
+@login_required
+def dozvole_pregled(request):
+    """Pregled svih dozvola — istekle, uskoro isticu, aktivne."""
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ClanskiDokument
+    from datetime import timedelta
+
+    today = timezone.now().date()
+    threshold = today + timedelta(days=30)
+
+    all_docs = ClanskiDokument.objects.filter(clan__company=company).select_related('clan')
+    expired = all_docs.filter(valid_until__lt=today)
+    expiring = all_docs.filter(valid_until__gte=today, valid_until__lte=threshold)
+    valid = all_docs.filter(valid_until__gt=threshold)
+    no_expiry = all_docs.filter(valid_until__isnull=True)
+
+    return render(request, 'udruge/dozvole_pregled.html', {
+        'expired': expired, 'expiring': expiring, 'valid': valid, 'no_expiry': no_expiry,
+        'total': all_docs.count(),
+    })

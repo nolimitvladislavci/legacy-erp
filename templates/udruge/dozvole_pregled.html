@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Pregled dozvola{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div>
+    <h4 style="margin:0;color:var(--gold)"><i class="fas fa-shield-alt"></i> Pregled dozvola i licenci</h4>
+    <small style="color:var(--muted)">{{ total }} dokumenata ukupno</small>
+  </div>
+  <a href="{% url 'udruge:clan_list' %}" class="btn btn-ghost btn-sm">Natrag</a>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1.5rem">
+  <div class="card" style="text-align:center;padding:.75rem;border-left:3px solid #ef4444">
+    <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ expired.count }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Istekle</div>
+  </div>
+  <div class="card" style="text-align:center;padding:.75rem;border-left:3px solid #f59e0b">
+    <div style="font-size:1.3rem;font-weight:800;color:#f59e0b">{{ expiring.count }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Istice &lt;30d</div>
+  </div>
+  <div class="card" style="text-align:center;padding:.75rem;border-left:3px solid #22c55e">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ valid.count }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Aktivne</div>
+  </div>
+  <div class="card" style="text-align:center;padding:.75rem;border-left:3px solid var(--muted)">
+    <div style="font-size:1.3rem;font-weight:800">{{ no_expiry.count }}</div>
+    <div style="font-size:.72rem;color:var(--muted)">Bez roka</div>
+  </div>
+</div>
+
+{% if expired.count %}
+<div class="card" style="margin-bottom:1.5rem;border-left:3px solid #ef4444">
+  <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+    <h6 style="margin:0;color:#ef4444"><i class="fas fa-exclamation-triangle"></i> Istekle dozvole ({{ expired.count }})</h6>
+  </div>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Clan</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Dokument</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Broj</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Istekao</th>
+      </tr></thead>
+      <tbody>
+      {% for d in expired %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.4rem .6rem;font-size:.85rem"><a href="{% url 'udruge:clan_dokumenti' d.clan.pk %}" style="color:var(--text);text-decoration:none;font-weight:600">{{ d.clan.full_name }}</a></td>
+        <td style="padding:.4rem .6rem;font-size:.82rem">{{ d.get_doc_type_display }}</td>
+        <td style="padding:.4rem .6rem;font-size:.82rem;font-family:monospace">{{ d.doc_number|default:"-" }}</td>
+        <td style="padding:.4rem .6rem;font-size:.82rem;color:#ef4444;font-weight:600">{{ d.valid_until|date:"d.m.Y" }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if expiring.count %}
+<div class="card" style="margin-bottom:1.5rem;border-left:3px solid #f59e0b">
+  <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+    <h6 style="margin:0;color:#f59e0b"><i class="fas fa-clock"></i> Istice uskoro ({{ expiring.count }})</h6>
+  </div>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Clan</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Dokument</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Broj</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Istice</th>
+      </tr></thead>
+      <tbody>
+      {% for d in expiring %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.4rem .6rem;font-size:.85rem"><a href="{% url 'udruge:clan_dokumenti' d.clan.pk %}" style="color:var(--text);text-decoration:none;font-weight:600">{{ d.clan.full_name }}</a></td>
+        <td style="padding:.4rem .6rem;font-size:.82rem">{{ d.get_doc_type_display }}</td>
+        <td style="padding:.4rem .6rem;font-size:.82rem;font-family:monospace">{{ d.doc_number|default:"-" }}</td>
+        <td style="padding:.4rem .6rem;font-size:.82rem;color:#f59e0b;font-weight:600">{{ d.valid_until|date:"d.m.Y" }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if valid.count %}
+<div class="card" style="margin-bottom:1.5rem;border-left:3px solid #22c55e">
+  <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+    <h6 style="margin:0;color:#22c55e"><i class="fas fa-check-circle"></i> Aktivne dozvole ({{ valid.count }})</h6>
+  </div>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Clan</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Dokument</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Broj</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Vrijedi do</th>
+      </tr></thead>
+      <tbody>
+      {% for d in valid %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.4rem .6rem;font-size:.85rem"><a href="{% url 'udruge:clan_dokumenti' d.clan.pk %}" style="color:var(--text);text-decoration:none;font-weight:600">{{ d.clan.full_name }}</a></td>
+        <td style="padding:.4rem .6rem;font-size:.82rem">{{ d.get_doc_type_display }}</td>
+        <td style="padding:.4rem .6rem;font-size:.82rem;font-family:monospace">{{ d.doc_number|default:"-" }}</td>
+        <td style="padding:.4rem .6rem;font-size:.82rem;color:#22c55e">{{ d.valid_until|date:"d.m.Y" }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if no_expiry.count %}
+<div class="card" style="margin-bottom:1.5rem">
+  <div style="padding:.75rem 1rem;border-bottom:1px solid var(--border)">
+    <h6 style="margin:0;color:var(--muted)"><i class="fas fa-infinity"></i> Bez roka trajanja ({{ no_expiry.count }})</h6>
+  </div>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Clan</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Dokument</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Broj</th>
+        <th style="text-align:left;padding:.4rem .6rem;font-size:.72rem;color:var(--muted);border-bottom:1px solid var(--border)">Napomena</th>
+      </tr></thead>
+      <tbody>
+      {% for d in no_expiry %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.4rem .6rem;font-size:.85rem"><a href="{% url 'udruge:clan_dokumenti' d.clan.pk %}" style="color:var(--text);text-decoration:none;font-weight:600">{{ d.clan.full_name }}</a></td>
+        <td style="padding:.4rem .6rem;font-size:.82rem">{{ d.get_doc_type_display }}</td>
+        <td style="padding:.4rem .6rem;font-size:.82rem;font-family:monospace">{{ d.doc_number|default:"-" }}</td>
+        <td style="padding:.4rem .6rem;font-size:.78rem;color:var(--muted)">{{ d.notes|default:"-" }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
