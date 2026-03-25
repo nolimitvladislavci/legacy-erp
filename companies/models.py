@@ -789,3 +789,6 @@ class KomitentEvent(models.Model):
 
     def __str__(self):
         return f'{self.profile.company.name} — {self.get_event_type_display()} ({self.created_at.date()})'
+# NKD kodovi za vatrogasce — dodati u import ako nedostaju
+# 84.25 — Djelatnosti vatrogasnih postrojbi
+# 94.99 — Ostale čl. organizacije (DVD koriste ovaj kod)
