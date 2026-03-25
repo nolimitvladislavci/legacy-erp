@@ -213,25 +213,7 @@ function liveCamClose(){
       </div>
     </div>
 
-    <!-- GUMB ZA SLANJE -->
-    <div style="display:flex;gap:.75rem">
-      <button type="submit" id="submitBtn"
-              title="Klikom se racun sigurno arhivira i AI automatski cita podatke"
-              style="background:linear-gradient(135deg,#c9a84c,#b8963c);color:#0a0a0a;font-weight:700;flex:1;padding:.875rem;border:none;border-radius:12px;font-size:1rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.5rem">
-        <span id="btnIcon">&#128228;</span>
-        <span id="btnText">Spremi i posalji na AI analizu</span>
-      </button>
-      <a href="{% url 'documents:arhiva_list' %}"
-         title="Odustanite bez pohrane"
-         style="border:1px solid #374151;color:#6b7280;border-radius:12px;padding:.875rem 1.25rem;text-decoration:none;display:flex;align-items:center;font-size:.875rem">
-        Odustani
-      </a>
-    </div>
 
-    <div style="text-align:center;margin-top:.875rem;color:#475569;font-size:.78rem">
-      &#9201; AI analiza traje 15-30 sekundi. Vidjet cete je u
-      <a href="{% url 'documents:ai_inbox' %}" style="color:#c9a84c;text-decoration:none">AI Inboxu</a> cim zavrsi.
-    </div>
 
   </form>
 </div>
