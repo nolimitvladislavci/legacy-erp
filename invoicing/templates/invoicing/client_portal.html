@@ -482,7 +482,7 @@ table.items tbody tr:last-child td{border-bottom:none}
       <div class="card-head-label">{% trans "Akcije" %}</div>
     </div>
     <div class="card-body">
-    {% if invoice.status in 'DRAFT,SENT' %}
+    {% if invoice.status in 'DRAFT,SENT' and invoice.doctype == 'PO' %}
       <div class="actions-grid">
         <form method="post" style="display:contents">{% csrf_token %}
           <button type="submit" name="action" value="accept" class="btn btn-accept">
@@ -492,7 +492,7 @@ table.items tbody tr:last-child td{border-bottom:none}
             {% trans "Odbijam" %}
           </button>
         </form>
-        <a href="/invoicing/{{ invoice.pk }}/download/" class="btn btn-pdf">
+        <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" class="btn btn-pdf" target="_blank">
           ↓ {% trans "Preuzmi PDF" %}
         </a>
       </div>

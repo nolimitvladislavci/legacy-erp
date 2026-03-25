@@ -100,6 +100,11 @@ def index(request):
         'quotes_total': all_inv.filter(doctype='PO').count(),
         'quotes_pending': all_inv.filter(doctype='PO', status__in=['DRAFT', 'SENT']).count(),
     }
+    # Conversion rate (Z3)
+    _total_q = totals['quotes_total']
+    _accepted_q = all_inv.filter(doctype='PO', status='ACCEPTED').count()
+    totals['quote_conversion'] = round(_accepted_q / _total_q * 100, 1) if _total_q else 0
+    totals['accepted_quotes'] = _accepted_q
     synesis_years = Invoice.objects.filter(
         company=company, synesis_year__isnull=False
     ).values_list('synesis_year', flat=True).distinct().order_by('-synesis_year')
@@ -156,6 +161,14 @@ def download_pdf(request, pk):
     return resp
 
 
+def public_pdf(request, token):
+    """Javni PDF endpoint — klijentski portal, bez login_required."""
+    invoice = get_object_or_404(Invoice, client_token=token)
+    from invoicing.services.pdf_service import generate_invoice_pdf
+    content, mime = generate_invoice_pdf(invoice, request)
+    resp = HttpResponse(content, content_type=mime)
+    resp['Content-Disposition'] = f'inline; filename="{invoice.number}.pdf"'
+    return resp
 
 @login_required
 def send_email(request, pk):
@@ -907,13 +920,39 @@ def client_portal(request, token):
         if action == 'accept':
             invoice.status = 'ACCEPTED'
             invoice.save(update_fields=['status'])
+            # Notifikacija kompaniji — WhatsApp
+            try:
+                admin_phone = (invoice.company.settings or {}).get('admin_whatsapp', '')
+                if admin_phone:
+                    from core.whatsapp import send_text
+                    send_text(
+                        admin_phone,
+                        f"✅ *Ponuda prihvaćena!*\n"
+                        f"{invoice.number} — {invoice.client_name}\n"
+                        f"Iznos: {invoice.total} {invoice.currency}",
+                        company_id=invoice.company_id
+                    )
+            except Exception:
+                pass
+            messages.success(request, 'Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro.')
         elif action == 'reject':
             invoice.status = 'REJECTED'
             invoice.save(update_fields=['status'])
+            messages.info(request, 'Ponuda je odbijenaena. Slobodno nas kontaktirajte za prilagodbu.')
         return redirect(request.path)
+
+    # Dohvati sekcije za renderiranje (ista logika kao PDF)
+    from invoicing.services.pdf_service import build_sections
+    try:
+        sections = build_sections(invoice)
+    except Exception:
+        sections = [{'name': '', 'items': list(invoice.items.all()), 'subtotal': invoice.subtotal}]
+
     return render(request, 'invoicing/client_portal.html', {
         'invoice': invoice,
         'items': invoice.items.all(),
+        'sections': sections,
+        'can_accept': invoice.doctype == 'PO' and invoice.status in ('DRAFT', 'SENT'),
     })
 
 # ── CLONE INVOICE ─────────────────────────────────────────────────────────────────────────────
@@ -923,12 +962,20 @@ def invoice_clone(request, pk):
     src = get_object_or_404(Invoice, pk=pk)
     from django.utils import timezone
     now = timezone.now()
-    last = Invoice.objects.order_by("-id").first()
-    new_num = f"KNJ-{now.year}-{(last.id + 1 if last else 1):04d}"
+    # Prefix po doctype — ne uvijek KNJ
+    prefix_map = {'PO': 'PO', 'P': 'PR', 'R': 'KNJ', 'A': 'AV', 'GS': 'GS', 'FA': 'FA'}
+    prefix = prefix_map.get(src.doctype, 'KNJ')
+    new_num = f"{prefix}-{now.year}-{now.strftime('%m%d%H%M%S')}"
     clone = _copy_invoice(src, src.doctype, new_num, extra_fields={
         "source": "duplicate",
-        "created_by": request.user,
+        "status": "DRAFT",
+        "validity_date": None,
+        "is_fiscalized": False,
+        "zki": None,
+        "jir": None,
     })
+    clone.created_by = request.user
+    clone.status = 'DRAFT'
     clone.save()
     for item in src.items.all():
         InvoiceItem.objects.create(
@@ -938,6 +985,7 @@ def invoice_clone(request, pk):
             unit=item.unit,
             unit_price=item.unit_price,
             discount_percent=item.discount_percent,
+            total_price=item.total_price,
             tax_rate=item.tax_rate,
             tax_rate_obj=item.tax_rate_obj,
             inventory_item=item.inventory_item,
@@ -945,7 +993,7 @@ def invoice_clone(request, pk):
     clone.recalculate()
     clone.save()
     messages.success(request, f"Kopija kreirana: {clone.number}")
-    return redirect(f"/invoicing/{clone.pk}/edit/")
+    return redirect('invoicing:invoice_edit', pk=clone.pk)
 
 
 # ── API ZA UVOZ IZ MODULA

@@ -18,7 +18,6 @@ urlpatterns = [
     path('<int:pk>/storno/', views.storno, name='storno'),
     path('<int:pk>/eracun/', views.generate_eracun, name='generate_eracun'),
 
-    # API rute
     # Workflow
     path('<int:pk>/whatsapp/',       views.send_invoice_whatsapp, name='send_whatsapp'),
     path('<int:pk>/to-predracun/', views.convert_to_predracun, name='to_predracun'),
@@ -26,6 +25,9 @@ urlpatterns = [
     path('<int:pk>/mark-sent/',    views.mark_sent,            name='mark_sent'),
     path('<int:pk>/mark-accepted/', views.mark_accepted,       name='mark_accepted'),
     path('<int:pk>/mark-rejected/', views.mark_rejected,       name='mark_rejected'),
+
+    # Javni PDF za klijentski portal (bez login_required)
+    path('public/<uuid:token>/pdf/', views.public_pdf, name='public_pdf'),
 
     # API rute
     path('api/profiles/', views.api_invoice_profiles, name='api_profiles'),
@@ -52,19 +54,12 @@ urlpatterns = [
     path('fiscal/certificates/upload/', views.fiscal_certificate_upload, name='fiscal_certificate_upload'),
     path('fiscal/certificates/<int:pk>/test/', views.fiscal_certificate_test, name='fiscal_certificate_test'),
     path('fiscal/certificates/<int:pk>/delete/', views.fiscal_certificate_delete, name='fiscal_certificate_delete'),
-    # Batch fiskalizacija
     path('fiscal/batch/', views.fiscal_batch_view, name='fiscal_batch'),
     path('fiscal/batch/', views.fiscal_batch_list, name='fiscal_batch_list'),
     path('fiscal/batch/create/', views.fiscal_batch_create, name='fiscal_batch_create'),
-    # API
     path('api/tax-calculate/', views.api_tax_calculate, name='api_tax_calculate'),
-    # Invoice forms
     path('form/', views.invoice_form_view, name='invoice_form'),
     path('form-standalone/', views.standalone_invoice_form, name='invoice_form_standalone'),
-
-    # Transactional Canvas
-
-    # Invoice Profile CRUD
     path('profiles/', views.invoice_profiles_list, name='profiles_list'),
     path('profiles/save/', views.invoice_profile_save, name='profile_save'),
     path('profiles/<int:pk>/delete/', views.invoice_profile_delete, name='profile_delete'),
