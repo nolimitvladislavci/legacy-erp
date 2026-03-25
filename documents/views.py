@@ -641,7 +641,7 @@ def arhiva_upload(request):
 
         uploaded = request.FILES['file']
         source_type = request.POST.get('source_type', 'document')
-        backend_name = request.POST.get('backend', None)  # None = default iz .env
+        backend_name = request.POST.get('backend', '') or None  # Prazan string → None = auto
 
         # Odredi backend iz StorageConfig ako postoji
         if backend_name is None:
