@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Berbe{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-apple-alt"></i> Berbe</h4>
+  <small style="color:var(--text-muted)">Evidencija berbi, prinosi, kvaliteta</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.berbi|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Berbi</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ukupno_kg|default:"0" }} kg</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Ubrano</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.prosjek_prinos|default:"0" }} kg/ha</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Prosjek</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.kultura|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Kultura</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vocnjak</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kultura</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kolicina</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kvaliteta</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Radnika</th>
+    </tr></thead>
+    <tbody>
+      {% for b in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ b.datum|date:"d.m.Y" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vocnjak">{{ b.vocnjak }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Kultura">{{ b.kultura }}</td>
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:700;color:var(--gold)" data-label="Kolicina">{{ b.kolicina_kg }} kg</td>
+        <td style="padding:.5rem .6rem" data-label="Kvaliteta">
+          {% if b.kvaliteta == 'A' %}<span style="color:#22c55e;font-weight:600;font-size:.82rem">A</span>
+          {% elif b.kvaliteta == 'B' %}<span style="color:#f59e0b;font-size:.82rem">B</span>
+          {% else %}<span style="font-size:.82rem">{{ b.kvaliteta|default:"-" }}</span>{% endif %}
+        </td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Radnika">{{ b.broj_radnika|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema berbi</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

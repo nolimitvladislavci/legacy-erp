@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Obracun trosarine{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-calculator"></i> Obracun trosarine</h4>
+  <small style="color:var(--text-muted)">Trosarina na alkohol, carinsko</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ukupna_trosarina|default:"0" }} EUR</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Trosarina</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.litara_cisti_alk|default:"0" }}L</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Cistog alkohola</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.placeno|default:"0" }} EUR</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Placeno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ stats.dugovanje|default:"0" }} EUR</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Dugovanje</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Razdoblje</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Pecar</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Litara</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">%Alk</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Cisti alk (L)</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Trosarina</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Status</th>
+    </tr></thead>
+    <tbody>
+      {% for t in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Razdoblje">{{ t.razdoblje }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Pecar">{{ t.pecar }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Litara">{{ t.litara }}L</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="%Alk">{{ t.postotak_alkohola }}%</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Cisti alk">{{ t.cisti_alkohol_litara }}L</td>
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:700;color:var(--gold)" data-label="Trosarina">{{ t.iznos_trosarine }} EUR</td>
+        <td style="padding:.5rem .6rem" data-label="Status">
+          {% if t.placeno %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Placeno</span>
+          {% else %}<span style="color:#ef4444;font-size:.78rem;font-weight:600">Neplaceno</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema obracuna</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

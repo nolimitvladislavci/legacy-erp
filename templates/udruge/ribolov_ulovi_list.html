@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Evidencija ulova{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-fish"></i> Evidencija ulova</h4>
+  <small style="color:var(--text-muted)">Ulovi po revirima, statistika</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno_ulova|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Ulova</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ukupno_kg|default:"0" }} kg</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Ukupno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.vrsta_riba|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Vrsta</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.pusteno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Pusteno</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Ribar</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Revir</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vrsta</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Tezina</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Pusteno</th>
+    </tr></thead>
+    <tbody>
+      {% for u in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ u.datum|date:"d.m.Y" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Ribar">{{ u.ribar }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Revir">{{ u.revir|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vrsta">{{ u.vrsta_ribe }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Tezina">{{ u.tezina_kg }} kg</td>
+        <td style="padding:.5rem .6rem" data-label="Pusteno">
+          {% if u.pusteno %}<span style="color:#22c55e;font-size:.78rem"><i class="fas fa-check"></i></span>
+          {% else %}<span style="color:var(--text-muted);font-size:.78rem">-</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema ulova</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

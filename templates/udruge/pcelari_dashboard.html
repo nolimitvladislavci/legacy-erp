@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Pcelari Dashboard{% endblock %}
+{% block content %}
+<div style="margin-bottom:1.5rem">
+  <h4 style="margin:0;color:var(--gold)"><i class="fas fa-archive"></i> Pcelari Dashboard</h4>
+  <small style="color:var(--text-muted)">Pcelarska udruga</small>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1.5rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Pcelara</div>
+    <div style="font-size:1.6rem;font-weight:800;color:var(--gold)">{{ stats.pcelara|default:0 }}</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Kosnica</div>
+    <div style="font-size:1.6rem;font-weight:800;color:#f59e0b">{{ stats.kosnica|default:0 }}</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Med (kg)</div>
+    <div style="font-size:1.6rem;font-weight:800;color:#22c55e">{{ stats.med_kg|default:0 }}</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Pcelinjaka</div>
+    <div style="font-size:1.6rem;font-weight:800;color:#3b82f6">{{ stats.pcelinjaka|default:0 }}</div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" class="stats-grid">
+  <div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border)">
+    <h6 style="color:var(--gold);font-size:.8rem;margin-bottom:.75rem"><i class="fas fa-exclamation-triangle"></i> Tretmani potrebni</h6>
+    {% for k in tretmani_potrebni %}
+    <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem">
+      <span>Kosnica #{{ k.broj }} ({{ k.pcelinjak }})</span>
+      <span style="color:#f59e0b;font-weight:600">{{ k.zadnji_tretman|date:"d.m.Y"|default:"Nikad" }}</span>
+    </div>
+    {% empty %}<div style="color:var(--text-muted);font-size:.82rem;padding:.5rem 0">Svi tretmani azurni</div>{% endfor %}
+  </div>
+  <div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border)">
+    <h6 style="color:var(--gold);font-size:.8rem;margin-bottom:.75rem"><i class="fas fa-chart-bar"></i> Proizvodnja po vrsti</h6>
+    {% for v in proizvodnja_vrsta %}
+    <div style="margin-bottom:.5rem">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:2px">
+        <span>{{ v.vrsta }}</span><span style="color:var(--gold);font-weight:600">{{ v.kg }} kg</span>
+      </div>
+      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:{{ v.postotak }}%;background:var(--gold);border-radius:3px"></div>
+      </div>
+    </div>
+    {% empty %}<div style="color:var(--text-muted);font-size:.82rem;padding:.5rem 0">Nema podataka</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

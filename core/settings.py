@@ -24,7 +24,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = [
     "limit-connect.com", "www.limit-connect.com",
     "viskovic-group.de", "www.viskovic-group.de",
-    "85.9.201.204", "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver",
+    "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -626,7 +626,7 @@ IP_FILTER_ENABLED = False  # Set to True to activate
 IP_WHITELIST = [
     '127.0.0.1',
     '::1',
-    '85.9.201.204',    # Admin IP
+    '37.27.248.86',    # Admin IP
     '35.188.35.214',   # Dev API access
 ]
 IP_RESTRICTED_PATHS = [

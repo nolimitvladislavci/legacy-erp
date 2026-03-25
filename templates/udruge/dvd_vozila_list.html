@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}DVD Vozila{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-truck"></i> Vatrogasna vozila</h4>
+  <small style="color:var(--text-muted)">Evidencija, registracija, servis</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Vozila</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.registrirano|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Registrirano</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ stats.servis_potreban|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Servis</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vozilo</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Registracija</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Tip</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Reg. istice</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Km</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Status</th>
+    </tr></thead>
+    <tbody>
+      {% for v in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Vozilo">{{ v.naziv }}</td>
+        <td style="padding:.5rem .6rem;font-size:.78rem;font-family:monospace" data-label="Reg.">{{ v.registracija|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Tip">{{ v.get_tip_display|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Reg.istice">
+          {% if v.registracija_istice %}
+            {% if v.reg_expired %}<span style="color:#ef4444">{{ v.registracija_istice|date:"d.m.Y" }}</span>
+            {% else %}{{ v.registracija_istice|date:"d.m.Y" }}{% endif %}
+          {% else %}-{% endif %}
+        </td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Km">{{ v.kilometraza|default:"-" }}</td>
+        <td style="padding:.5rem .6rem" data-label="Status">
+          {% if v.operativan %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Operativan</span>
+          {% else %}<span style="color:#ef4444;font-size:.78rem">Neoperativan</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema vozila</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

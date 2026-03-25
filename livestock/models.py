@@ -236,6 +236,17 @@ class CropPlan(models.Model):
         ('soja', 'Soja'),
         ('secerna_repa', 'Secerna repa'),
         ('suncokret', 'Suncokret'),
+        ('jabuka', 'Jabuka'),
+        ('kruska', 'Kruška'),
+        ('sljiva', 'Šljiva'),
+        ('tresnja', 'Trešnja'),
+        ('visnja', 'Višnja'),
+        ('breskva', 'Breskva'),
+        ('marelica', 'Marelica'),
+        ('orah', 'Orah'),
+        ('malina', 'Malina'),
+        ('jagoda', 'Jagoda'),
+        ('vinova_loza', 'Vinova loza'),
         ('ostalo', 'Ostalo'),
     ]
 

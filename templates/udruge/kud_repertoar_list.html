@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}KUD Repertoar{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-music"></i> Repertoar</h4>
+  <small style="color:var(--text-muted)">Po sekcijama, koreografije, pjesme</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Ukupno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.aktivno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Aktivno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.sekcija|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Sekcija</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#a855f7">{{ stats.nastupa|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Nastupa</div>
+  </div>
+</div>
+{% for sekcija in sekcije %}
+<div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border);margin-bottom:.75rem">
+  <h6 style="color:var(--gold);font-size:.85rem;margin-bottom:.5rem"><i class="fas fa-layer-group"></i> {{ sekcija.naziv }}</h6>
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.4rem .5rem;font-size:.7rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Naziv</th>
+      <th style="text-align:left;padding:.4rem .5rem;font-size:.7rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Tip</th>
+      <th style="text-align:left;padding:.4rem .5rem;font-size:.7rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Regija</th>
+      <th style="text-align:left;padding:.4rem .5rem;font-size:.7rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Status</th>
+    </tr></thead>
+    <tbody>
+      {% for r in sekcija.repertoar %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.4rem .5rem;font-size:.82rem;font-weight:600" data-label="Naziv">{{ r.naziv }}</td>
+        <td style="padding:.4rem .5rem;font-size:.78rem" data-label="Tip">{{ r.get_tip_display|default:"-" }}</td>
+        <td style="padding:.4rem .5rem;font-size:.78rem" data-label="Regija">{{ r.regija|default:"-" }}</td>
+        <td style="padding:.4rem .5rem" data-label="Status">
+          {% if r.aktivan %}<span style="color:#22c55e;font-size:.75rem;font-weight:600">Aktivan</span>
+          {% else %}<span style="color:var(--text-muted);font-size:.75rem">Arhiviran</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:.82rem">Nema stavki</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% empty %}
+<div class="card" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema sekcija</div>
+{% endfor %}
+{% endblock %}

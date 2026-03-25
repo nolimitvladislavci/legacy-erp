@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Gotovi proizvodi{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-wine-bottle"></i> Gotovi proizvodi</h4>
+  <small style="color:var(--text-muted)">Rakije, likeri, buteljiranje</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.proizvoda|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Proizvoda</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ukupno_litara|default:"0" }}L</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Na zalihi</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#a855f7">{{ stats.boca|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Butelja</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Naziv</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vrsta</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">%Alk</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Litara</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Boca</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Godina</th>
+    </tr></thead>
+    <tbody>
+      {% for p in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Naziv">{{ p.naziv }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vrsta">{{ p.get_vrsta_display|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="%Alk">{{ p.postotak_alkohola }}%</td>
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:700;color:var(--gold)" data-label="Litara">{{ p.litara_na_zalihi }}L</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Boca">{{ p.broj_boca|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Godina">{{ p.godina|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema proizvoda</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

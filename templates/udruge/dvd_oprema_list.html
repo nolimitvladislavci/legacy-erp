@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}DVD Oprema{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-fire-extinguisher"></i> Oprema DVD</h4>
+  <small style="color:var(--text-muted)">Evidencija opreme, atesti, rokovi</small></div>
+  <a href="{% url 'udruge:dvd_oprema_create' %}" class="btn btn-gold btn-sm">+ Nova oprema</a>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Ukupno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.atest_ok|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Atest OK</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#f59e0b">{{ stats.atest_istice|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Istice 30d</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ stats.atest_istekao|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Istekao</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Naziv</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Inv. broj</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kategorija</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Atest do</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Status</th>
+      <th style="padding:.5rem;border-bottom:1px solid var(--border)"></th>
+    </tr></thead>
+    <tbody>
+      {% for o in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Naziv">{{ o.naziv }}</td>
+        <td style="padding:.5rem .6rem;font-size:.78rem;font-family:monospace" data-label="Inv.br">{{ o.inventurni_broj|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Kat.">{{ o.get_kategorija_display|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Atest">{{ o.atest_datum|date:"d.m.Y"|default:"-" }}</td>
+        <td style="padding:.5rem .6rem" data-label="Status">
+          {% if o.atest_status == 'istekao' %}<span style="color:#ef4444;font-size:.78rem;font-weight:600">Istekao</span>
+          {% elif o.atest_status == 'istice' %}<span style="color:#f59e0b;font-size:.78rem;font-weight:600">Istice</span>
+          {% else %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">OK</span>{% endif %}
+        </td>
+        <td style="padding:.5rem .6rem"><a href="{% url 'udruge:dvd_oprema_edit' o.pk %}" style="color:var(--gold);font-size:.8rem">Uredi</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema opreme</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

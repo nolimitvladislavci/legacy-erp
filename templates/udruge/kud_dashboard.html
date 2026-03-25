@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}KUD Dashboard{% endblock %}
+{% block content %}
+<div style="margin-bottom:1.5rem">
+  <h4 style="margin:0;color:var(--gold)"><i class="fas fa-music"></i> KUD Dashboard</h4>
+  <small style="color:var(--text-muted)">Kulturno-umjetnicko drustvo</small>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1.5rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Clanova</div>
+    <div style="font-size:1.6rem;font-weight:800;color:var(--gold)">{{ stats.clanova|default:0 }}</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Sekcija</div>
+    <div style="font-size:1.6rem;font-weight:800;color:#3b82f6">{{ stats.sekcija|default:0 }}</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Repertoar</div>
+    <div style="font-size:1.6rem;font-weight:800;color:#a855f7">{{ stats.repertoar|default:0 }}</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:1rem">
+    <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Kostimi</div>
+    <div style="font-size:1.6rem;font-weight:800">{{ stats.kostimi|default:0 }}</div>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem" class="stats-grid">
+  <div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border)">
+    <h6 style="color:var(--gold);font-size:.8rem;margin-bottom:.75rem"><i class="fas fa-calendar"></i> Nadolazece probe</h6>
+    {% for p in nadolazece_probe %}
+    <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem">
+      <span>{{ p.datum|date:"d.m.Y" }} - {{ p.sekcija }}</span>
+      <span style="color:var(--text-muted)">{{ p.voditelj|default:"" }}</span>
+    </div>
+    {% empty %}<div style="color:var(--text-muted);font-size:.82rem;padding:.5rem 0">Nema zakazanih proba</div>{% endfor %}
+  </div>
+  <div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border)">
+    <h6 style="color:var(--gold);font-size:.8rem;margin-bottom:.75rem"><i class="fas fa-chart-bar"></i> Prisutnost po sekcijama</h6>
+    {% for s in prisutnost_sekcije %}
+    <div style="margin-bottom:.5rem">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:2px">
+        <span>{{ s.naziv }}</span><span style="color:var(--gold);font-weight:600">{{ s.postotak }}%</span>
+      </div>
+      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:{{ s.postotak }}%;background:var(--gold);border-radius:3px"></div>
+      </div>
+    </div>
+    {% empty %}<div style="color:var(--text-muted);font-size:.82rem;padding:.5rem 0">Nema podataka</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

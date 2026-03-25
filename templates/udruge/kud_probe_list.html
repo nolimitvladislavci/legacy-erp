@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}KUD Probe{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-calendar-check"></i> Evidencija proba</h4>
+  <small style="color:var(--text-muted)">Prisutnost, sekcije, raspored</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Proba</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.prosjecna_prisutnost|default:0 }}%</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Prosjek prisutnosti</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.ovaj_mjesec|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Ovaj mjesec</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Sekcija</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Prisutni</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">%</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Voditelj</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Napomena</th>
+    </tr></thead>
+    <tbody>
+      {% for p in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ p.datum|date:"d.m.Y" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Sekcija">{{ p.sekcija|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Prisutni">{{ p.prisutni }}/{{ p.ukupno_clanova }}</td>
+        <td style="padding:.5rem .6rem" data-label="%">
+          {% if p.postotak >= 80 %}<span style="color:#22c55e;font-weight:600;font-size:.82rem">{{ p.postotak }}%</span>
+          {% elif p.postotak >= 50 %}<span style="color:#f59e0b;font-weight:600;font-size:.82rem">{{ p.postotak }}%</span>
+          {% else %}<span style="color:#ef4444;font-weight:600;font-size:.82rem">{{ p.postotak }}%</span>{% endif %}
+        </td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Voditelj">{{ p.voditelj|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.78rem;color:var(--text-muted)" data-label="Napomena">{{ p.napomena|truncatechars:30|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema proba</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

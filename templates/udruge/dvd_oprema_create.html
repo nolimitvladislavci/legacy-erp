@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if form.instance.pk %}Uredi opremu{% else %}Nova oprema{% endif %}{% endblock %}
+{% block content %}
+<div style="max-width:700px">
+  <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem">
+    <a href="{% url 'udruge:dvd_oprema_list' %}" style="color:var(--text-muted);font-size:.85rem"><i class="fas fa-arrow-left"></i></a>
+    <h4 style="margin:0;color:var(--gold)"><i class="fas fa-fire-extinguisher"></i> {% if form.instance.pk %}Uredi opremu{% else %}Nova oprema{% endif %}</h4>
+  </div>
+  <div class="card" style="padding:1.5rem;border-radius:12px;border:1px solid var(--border)">
+    <form method="post">{% csrf_token %}
+      {% for field in form %}
+      <div style="margin-bottom:1rem">
+        <label style="display:block;font-size:.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div style="color:#ef4444;font-size:.75rem;margin-top:2px">{{ field.errors.0 }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <div style="display:flex;gap:.5rem;margin-top:1.5rem">
+        <button type="submit" class="btn btn-gold">Spremi</button>
+        <a href="{% url 'udruge:dvd_oprema_list' %}" class="btn btn-ghost">Odustani</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

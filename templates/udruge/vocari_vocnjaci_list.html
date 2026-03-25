@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Vocnjaci{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-tree"></i> Vocnjaci</h4>
+  <small style="color:var(--text-muted)">Parcele, kulture, povrsine</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.vocnjaka|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Vocnjaka</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ha_ukupno|default:"0" }} ha</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Povrsina</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.stabala|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Stabala</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.kultura|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Kultura</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Naziv</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vlasnik</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kultura</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Povrsina</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Stabala</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Godina sadnje</th>
+    </tr></thead>
+    <tbody>
+      {% for v in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Naziv">{{ v.naziv }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vlasnik">{{ v.vlasnik|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Kultura">{{ v.kultura }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem;color:var(--gold);font-weight:700" data-label="Povrsina">{{ v.povrsina_ha }} ha</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Stabala">{{ v.broj_stabala|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Godina">{{ v.godina_sadnje|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema vocnjaka</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

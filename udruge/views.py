@@ -1321,3 +1321,1473 @@ def dozvole_pregled(request):
         'expired': expired, 'expiring': expiring, 'valid': valid, 'no_expiry': no_expiry,
         'total': all_docs.count(),
     })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DVD — VATROGASCI
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def dvd_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import VatrogasnaOprema, VatrogasnoVozilo, Intervencija, Vjezba, VatrogasnoZvanje
+    from django.db.models import Count, Sum, Avg
+    from datetime import timedelta
+
+    today = timezone.now().date()
+    oprema = VatrogasnaOprema.objects.filter(company=company)
+    vozila = VatrogasnoVozilo.objects.filter(company=company)
+    intervencije = Intervencija.objects.filter(company=company)
+    vjezbe = Vjezba.objects.filter(company=company)
+    zvanja = VatrogasnoZvanje.objects.filter(company=company)
+
+    ctx = {
+        'oprema_total': oprema.count(),
+        'oprema_neispravno': oprema.filter(status='neispravno').count(),
+        'oprema_atest_istekao': oprema.filter(atest_vrijedi_do__lt=today).count(),
+        'oprema_atest_istice': oprema.filter(atest_vrijedi_do__gte=today, atest_vrijedi_do__lte=today + timedelta(days=30)).count(),
+        'vozila_total': vozila.count(),
+        'vozila_aktivna': vozila.filter(status='aktivno').count(),
+        'intervencije_total': intervencije.count(),
+        'intervencije_godina': intervencije.filter(alarm_primljen__year=today.year).count(),
+        'intervencije_steta': intervencije.aggregate(s=Sum('steta_eur'))['s'] or 0,
+        'intervencije_spaseno': intervencije.aggregate(s=Sum('spaseno_osoba'))['s'] or 0,
+        'vjezbe_total': vjezbe.count(),
+        'vjezbe_godina': vjezbe.filter(datum__year=today.year).count(),
+        'zvanja_total': zvanja.count(),
+    }
+    return render(request, 'udruge/dvd_dashboard.html', ctx)
+
+
+@login_required
+def vatrogasna_oprema_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import VatrogasnaOprema
+    qs = VatrogasnaOprema.objects.filter(company=company)
+    kat = request.GET.get('kategorija', '')
+    status = request.GET.get('status', '')
+    if kat:
+        qs = qs.filter(kategorija=kat)
+    if status:
+        qs = qs.filter(status=status)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/vatrogasna_oprema_list.html', {
+        'page_obj': page, 'kategorija': kat, 'status': status,
+        'kategorije': VatrogasnaOprema.KATEGORIJA_CHOICES, 'statusi': VatrogasnaOprema.STATUS_CHOICES,
+    })
+
+
+@login_required
+def vatrogasna_oprema_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import VatrogasnaOprema
+    from decimal import Decimal
+    if request.method == 'POST':
+        VatrogasnaOprema.objects.create(
+            company=company, naziv=request.POST.get('naziv', ''),
+            kategorija=request.POST.get('kategorija', 'ostalo'),
+            serijski_broj=request.POST.get('serijski_broj', ''),
+            proizvodac=request.POST.get('proizvodac', ''),
+            godina_nabave=int(request.POST.get('godina_nabave') or 0) or None,
+            nabavna_vrijednost=Decimal(request.POST.get('nabavna_vrijednost') or '0'),
+            status=request.POST.get('status', 'ispravno'),
+            atest_datum=request.POST.get('atest_datum') or None,
+            atest_vrijedi_do=request.POST.get('atest_vrijedi_do') or None,
+            atest_izdavac=request.POST.get('atest_izdavac', ''),
+            sljedeci_servis=request.POST.get('sljedeci_servis') or None,
+            lokacija=request.POST.get('lokacija', ''),
+            qr_code=request.POST.get('qr_code', ''),
+            photo=request.FILES.get('photo'),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Oprema dodana.')
+        return redirect('udruge:vatrogasna_oprema_list')
+    return render(request, 'udruge/vatrogasna_oprema_form.html', {
+        'kategorije': VatrogasnaOprema.KATEGORIJA_CHOICES, 'statusi': VatrogasnaOprema.STATUS_CHOICES,
+    })
+
+
+@login_required
+def vatrogasna_oprema_detail(request, pk):
+    company = get_user_company(request)
+    from .models import VatrogasnaOprema
+    obj = get_object_or_404(VatrogasnaOprema, pk=pk, company=company)
+    return render(request, 'udruge/vatrogasna_oprema_detail.html', {'oprema': obj})
+
+
+@login_required
+def vatrogasno_vozilo_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import VatrogasnoVozilo
+    qs = VatrogasnoVozilo.objects.filter(company=company)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/vatrogasno_vozilo_list.html', {'page_obj': page})
+
+
+@login_required
+def vatrogasno_vozilo_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import VatrogasnoVozilo
+    if request.method == 'POST':
+        VatrogasnoVozilo.objects.create(
+            company=company, naziv=request.POST.get('naziv', ''),
+            tip=request.POST.get('tip', 'navalno'),
+            reg_oznaka=request.POST.get('reg_oznaka', ''),
+            marka=request.POST.get('marka', ''),
+            godina_proizvodnje=int(request.POST.get('godina_proizvodnje') or 0) or None,
+            kapacitet_vode_l=int(request.POST.get('kapacitet_vode_l') or 0),
+            reg_vrijedi_do=request.POST.get('reg_vrijedi_do') or None,
+            tehnicki_do=request.POST.get('tehnicki_do') or None,
+            osiguranje_do=request.POST.get('osiguranje_do') or None,
+            status=request.POST.get('status', 'aktivno'),
+            photo=request.FILES.get('photo'),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Vozilo dodano.')
+        return redirect('udruge:vatrogasno_vozilo_list')
+    return render(request, 'udruge/vatrogasno_vozilo_form.html', {
+        'tipovi': VatrogasnoVozilo.TIP_CHOICES,
+    })
+
+
+@login_required
+def vatrogasno_vozilo_detail(request, pk):
+    company = get_user_company(request)
+    from .models import VatrogasnoVozilo
+    obj = get_object_or_404(VatrogasnoVozilo, pk=pk, company=company)
+    return render(request, 'udruge/vatrogasno_vozilo_detail.html', {'vozilo': obj})
+
+
+@login_required
+def intervencija_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Intervencija
+    qs = Intervencija.objects.filter(company=company).select_related('voditelj')
+    tip = request.GET.get('tip', '')
+    if tip:
+        qs = qs.filter(tip=tip)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/intervencija_list.html', {
+        'page_obj': page, 'tip': tip, 'tipovi': Intervencija.TIP_CHOICES,
+    })
+
+
+@login_required
+def intervencija_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Intervencija, Clan
+    if request.method == 'POST':
+        voditelj_id = request.POST.get('voditelj') or None
+        Intervencija.objects.create(
+            company=company, evidencijski_broj=request.POST.get('evidencijski_broj', ''),
+            tip=request.POST.get('tip', 'pozar'),
+            opis=request.POST.get('opis', ''),
+            alarm_primljen=request.POST.get('alarm_primljen'),
+            izlazak=request.POST.get('izlazak') or None,
+            dolazak=request.POST.get('dolazak') or None,
+            zavrsetak=request.POST.get('zavrsetak') or None,
+            povratak=request.POST.get('povratak') or None,
+            lokacija=request.POST.get('lokacija', ''),
+            voditelj_id=voditelj_id,
+            broj_sudionika=int(request.POST.get('broj_sudionika') or 0),
+            voda_utrosena_l=int(request.POST.get('voda_utrosena_l') or 0),
+            pjena_utrosena_l=int(request.POST.get('pjena_utrosena_l') or 0),
+            steta_eur=request.POST.get('steta_eur') or 0,
+            spaseno_osoba=int(request.POST.get('spaseno_osoba') or 0),
+            spaseno_zivotinja=int(request.POST.get('spaseno_zivotinja') or 0),
+            notes=request.POST.get('notes', ''),
+            created_by=request.user,
+        )
+        messages.success(request, 'Intervencija evidentirana.')
+        return redirect('udruge:intervencija_list')
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/intervencija_form.html', {
+        'tipovi': Intervencija.TIP_CHOICES, 'clanovi': clanovi,
+    })
+
+
+@login_required
+def intervencija_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Intervencija
+    obj = get_object_or_404(Intervencija, pk=pk, company=company)
+    return render(request, 'udruge/intervencija_detail.html', {'intervencija': obj})
+
+
+@login_required
+def vjezba_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Vjezba
+    qs = Vjezba.objects.filter(company=company).select_related('voditelj')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/vjezba_list.html', {'page_obj': page})
+
+
+@login_required
+def vjezba_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Vjezba, Clan
+    from decimal import Decimal
+    if request.method == 'POST':
+        Vjezba.objects.create(
+            company=company, naziv=request.POST.get('naziv', ''),
+            tip=request.POST.get('tip', 'prakticna'),
+            datum=request.POST.get('datum'),
+            trajanje_sati=Decimal(request.POST.get('trajanje_sati') or '2'),
+            lokacija=request.POST.get('lokacija', ''),
+            voditelj_id=request.POST.get('voditelj') or None,
+            opis=request.POST.get('opis', ''),
+            ocjena=request.POST.get('ocjena', ''),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Vježba evidentirana.')
+        return redirect('udruge:vjezba_list')
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/vjezba_form.html', {
+        'tipovi': Vjezba.TIP_CHOICES, 'clanovi': clanovi,
+    })
+
+
+@login_required
+def vjezba_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Vjezba
+    obj = get_object_or_404(Vjezba, pk=pk, company=company)
+    return render(request, 'udruge/vjezba_detail.html', {'vjezba': obj})
+
+
+@login_required
+def vatrogasno_zvanje_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import VatrogasnoZvanje
+    qs = VatrogasnoZvanje.objects.filter(company=company).select_related('clan')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/vatrogasno_zvanje_list.html', {'page_obj': page})
+
+
+@login_required
+def vatrogasno_zvanje_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import VatrogasnoZvanje, Clan
+    if request.method == 'POST':
+        VatrogasnoZvanje.objects.create(
+            company=company,
+            clan_id=request.POST.get('clan'),
+            zvanje=request.POST.get('zvanje', ''),
+            datum_stjecanja=request.POST.get('datum_stjecanja') or None,
+            certifikat_broj=request.POST.get('certifikat_broj', ''),
+            izdavac=request.POST.get('izdavac', ''),
+            vrijedi_do=request.POST.get('vrijedi_do') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Zvanje dodano.')
+        return redirect('udruge:vatrogasno_zvanje_list')
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/vatrogasno_zvanje_form.html', {'clanovi': clanovi})
+
+
+@login_required
+def vatrogasno_zvanje_detail(request, pk):
+    company = get_user_company(request)
+    from .models import VatrogasnoZvanje
+    obj = get_object_or_404(VatrogasnoZvanje, pk=pk, company=company)
+    return render(request, 'udruge/vatrogasno_zvanje_detail.html', {'zvanje': obj})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# KUD — KULTURNO-UMJETNIČKO DRUŠTVO
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def kud_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Repertoar, ProbaLog, Kostim, NastupPlan, Dogadjaj
+    from django.db.models import Count, Sum
+
+    today = timezone.now().date()
+    repertoar = Repertoar.objects.filter(company=company)
+    probe = ProbaLog.objects.filter(company=company)
+    kostimi = Kostim.objects.filter(company=company)
+    nastupi = NastupPlan.objects.filter(dogadjaj__company=company)
+
+    ctx = {
+        'repertoar_total': repertoar.count(),
+        'repertoar_aktivan': repertoar.filter(is_active=True).count(),
+        'probe_total': probe.count(),
+        'probe_godina': probe.filter(datum__year=today.year).count(),
+        'kostimi_total': kostimi.count(),
+        'kostimi_dobri': kostimi.filter(stanje__in=['novo', 'dobro']).count(),
+        'kostimi_popravak': kostimi.filter(stanje='popravak').count(),
+        'kostimi_vrijednost': kostimi.aggregate(s=Sum('nabavna_cijena'))['s'] or 0,
+        'nastupi_total': nastupi.count(),
+        'nadolazeci_nastupi': NastupPlan.objects.filter(
+            dogadjaj__company=company, dogadjaj__date__gte=today
+        ).select_related('dogadjaj')[:5],
+    }
+    return render(request, 'udruge/kud_dashboard.html', ctx)
+
+
+@login_required
+def repertoar_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Repertoar
+    qs = Repertoar.objects.filter(company=company)
+    tip = request.GET.get('tip', '')
+    if tip:
+        qs = qs.filter(tip=tip)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/repertoar_list.html', {
+        'page_obj': page, 'tip': tip, 'tipovi': Repertoar.TIP_CHOICES,
+    })
+
+
+@login_required
+def repertoar_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Repertoar, Sekcija
+    if request.method == 'POST':
+        Repertoar.objects.create(
+            company=company, naziv=request.POST.get('naziv', ''),
+            tip=request.POST.get('tip', 'pjesma'),
+            sekcija_id=request.POST.get('sekcija') or None,
+            autor=request.POST.get('autor', ''),
+            trajanje_min=int(request.POST.get('trajanje_min') or 0) or None,
+            region=request.POST.get('region', ''),
+            opis=request.POST.get('opis', ''),
+            note_file=request.FILES.get('note_file'),
+            audio_file=request.FILES.get('audio_file'),
+            video_url=request.POST.get('video_url', ''),
+            koreografija_file=request.FILES.get('koreografija_file'),
+        )
+        messages.success(request, 'Repertoar dodan.')
+        return redirect('udruge:repertoar_list')
+    sekcije = Sekcija.objects.filter(company=company)
+    return render(request, 'udruge/repertoar_form.html', {
+        'tipovi': Repertoar.TIP_CHOICES, 'sekcije': sekcije,
+    })
+
+
+@login_required
+def repertoar_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Repertoar
+    obj = get_object_or_404(Repertoar, pk=pk, company=company)
+    return render(request, 'udruge/repertoar_detail.html', {'repertoar': obj})
+
+
+@login_required
+def proba_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ProbaLog
+    qs = ProbaLog.objects.filter(company=company).select_related('sekcija', 'voditelj')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/proba_list.html', {'page_obj': page})
+
+
+@login_required
+def proba_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ProbaLog, Sekcija, Clan
+    if request.method == 'POST':
+        ProbaLog.objects.create(
+            company=company,
+            sekcija_id=request.POST.get('sekcija'),
+            datum=request.POST.get('datum'),
+            pocetak=request.POST.get('pocetak') or None,
+            kraj=request.POST.get('kraj') or None,
+            lokacija=request.POST.get('lokacija', ''),
+            voditelj_id=request.POST.get('voditelj') or None,
+            biljeska=request.POST.get('biljeska', ''),
+        )
+        messages.success(request, 'Proba evidentirana.')
+        return redirect('udruge:proba_list')
+    sekcije = Sekcija.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/proba_form.html', {'sekcije': sekcije, 'clanovi': clanovi})
+
+
+@login_required
+def proba_detail(request, pk):
+    company = get_user_company(request)
+    from .models import ProbaLog
+    obj = get_object_or_404(ProbaLog, pk=pk, company=company)
+    return render(request, 'udruge/proba_detail.html', {'proba': obj})
+
+
+@login_required
+def kostim_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Kostim
+    qs = Kostim.objects.filter(company=company).select_related('sekcija', 'dodijeljen_clanu')
+    stanje = request.GET.get('stanje', '')
+    if stanje:
+        qs = qs.filter(stanje=stanje)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/kostim_list.html', {
+        'page_obj': page, 'stanje': stanje, 'stanja': Kostim.STANJE_CHOICES,
+    })
+
+
+@login_required
+def kostim_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Kostim, Sekcija, Clan
+    from decimal import Decimal
+    if request.method == 'POST':
+        Kostim.objects.create(
+            company=company, naziv=request.POST.get('naziv', ''),
+            sekcija_id=request.POST.get('sekcija') or None,
+            region=request.POST.get('region', ''),
+            spol=request.POST.get('spol', 'U'),
+            velicina=request.POST.get('velicina', ''),
+            inventarni_broj=request.POST.get('inventarni_broj', ''),
+            dodijeljen_clanu_id=request.POST.get('dodijeljen_clanu') or None,
+            dodijeljen_od=request.POST.get('dodijeljen_od') or None,
+            stanje=request.POST.get('stanje', 'dobro'),
+            nabavna_cijena=Decimal(request.POST.get('nabavna_cijena') or '0'),
+            photo=request.FILES.get('photo'),
+            opis_dijelova=request.POST.get('opis_dijelova', ''),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Kostim dodan.')
+        return redirect('udruge:kostim_list')
+    sekcije = Sekcija.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/kostim_form.html', {
+        'stanja': Kostim.STANJE_CHOICES, 'sekcije': sekcije, 'clanovi': clanovi,
+    })
+
+
+@login_required
+def kostim_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Kostim
+    obj = get_object_or_404(Kostim, pk=pk, company=company)
+    return render(request, 'udruge/kostim_detail.html', {'kostim': obj})
+
+
+@login_required
+def nastup_plan_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import NastupPlan
+    qs = NastupPlan.objects.filter(dogadjaj__company=company).select_related('dogadjaj')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/nastup_plan_list.html', {'page_obj': page})
+
+
+@login_required
+def nastup_plan_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import NastupPlan, Dogadjaj
+    from decimal import Decimal
+    if request.method == 'POST':
+        NastupPlan.objects.create(
+            dogadjaj_id=request.POST.get('dogadjaj'),
+            raspored_dolaska=request.POST.get('raspored_dolaska') or None,
+            proba_prije_nastupa=request.POST.get('proba_prije_nastupa') == 'on',
+            garderoba=request.POST.get('garderoba', ''),
+            prijevoz=request.POST.get('prijevoz', ''),
+            smjestaj=request.POST.get('smjestaj', ''),
+            troskovi=Decimal(request.POST.get('troskovi') or '0'),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Plan nastupa kreiran.')
+        return redirect('udruge:nastup_plan_list')
+    dogadjaji = Dogadjaj.objects.filter(company=company)
+    return render(request, 'udruge/nastup_plan_form.html', {'dogadjaji': dogadjaji})
+
+
+@login_required
+def nastup_plan_detail(request, pk):
+    company = get_user_company(request)
+    from .models import NastupPlan
+    obj = get_object_or_404(NastupPlan, pk=pk, dogadjaj__company=company)
+    return render(request, 'udruge/nastup_plan_detail.html', {'nastup': obj})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RIBARI — ŠPORTSKI RIBOLOV
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def ribari_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Revir, RibolovnaDozvola, UlovEvidencija, Poribljavanje, CuvarskaStraza
+    from django.db.models import Sum, Count
+
+    today = timezone.now().date()
+    reviri = Revir.objects.filter(company=company)
+    dozvole = RibolovnaDozvola.objects.filter(company=company)
+    ulovi = UlovEvidencija.objects.filter(revir__company=company)
+    poribljavanje = Poribljavanje.objects.filter(revir__company=company)
+    straze = CuvarskaStraza.objects.filter(company=company)
+
+    ctx = {
+        'reviri_total': reviri.count(),
+        'reviri_aktivni': reviri.filter(is_active=True).count(),
+        'reviri_zabrana': reviri.filter(zabrana_ribolova=True).count(),
+        'dozvole_total': dozvole.count(),
+        'dozvole_aktivne': dozvole.filter(valid_until__gte=today).count(),
+        'dozvole_prihod': dozvole.aggregate(s=Sum('cijena'))['s'] or 0,
+        'ulovi_total': ulovi.count(),
+        'ulovi_godina': ulovi.filter(datum__year=today.year).count(),
+        'ulovi_kg': ulovi.aggregate(s=Sum('tezina_kg'))['s'] or 0,
+        'poribljavanje_total': poribljavanje.count(),
+        'poribljavanje_kg': poribljavanje.aggregate(s=Sum('kolicina_kg'))['s'] or 0,
+        'straze_total': straze.count(),
+        'straze_godina': straze.filter(datum__year=today.year).count(),
+    }
+    return render(request, 'udruge/ribari_dashboard.html', ctx)
+
+
+@login_required
+def revir_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Revir
+    qs = Revir.objects.filter(company=company)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/revir_list.html', {'page_obj': page})
+
+
+@login_required
+def revir_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Revir
+    from decimal import Decimal
+    if request.method == 'POST':
+        Revir.objects.create(
+            company=company, naziv=request.POST.get('naziv', ''),
+            tip=request.POST.get('tip', 'rijeka'),
+            lokacija=request.POST.get('lokacija', ''),
+            povrsina_ha=Decimal(request.POST.get('povrsina_ha') or '0') or None,
+            duljina_km=Decimal(request.POST.get('duljina_km') or '0') or None,
+            max_dnevni_ulov_kg=Decimal(request.POST.get('max_dnevni_ulov_kg') or '5'),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Revir dodan.')
+        return redirect('udruge:revir_list')
+    return render(request, 'udruge/revir_form.html', {'tipovi': Revir.TIP_CHOICES})
+
+
+@login_required
+def revir_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Revir
+    obj = get_object_or_404(Revir, pk=pk, company=company)
+    return render(request, 'udruge/revir_detail.html', {'revir': obj})
+
+
+@login_required
+def ribolovna_dozvola_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import RibolovnaDozvola
+    qs = RibolovnaDozvola.objects.filter(company=company).select_related('clan')
+    kat = request.GET.get('kategorija', '')
+    if kat:
+        qs = qs.filter(kategorija=kat)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/ribolovna_dozvola_list.html', {
+        'page_obj': page, 'kategorija': kat, 'kategorije': RibolovnaDozvola.KATEGORIJA_CHOICES,
+    })
+
+
+@login_required
+def ribolovna_dozvola_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import RibolovnaDozvola, Clan, Revir
+    from decimal import Decimal
+    if request.method == 'POST':
+        doz = RibolovnaDozvola.objects.create(
+            company=company,
+            clan_id=request.POST.get('clan'),
+            kategorija=request.POST.get('kategorija', 'A'),
+            broj_dozvole=request.POST.get('broj_dozvole', ''),
+            valid_from=request.POST.get('valid_from'),
+            valid_until=request.POST.get('valid_until'),
+            cijena=Decimal(request.POST.get('cijena') or '0'),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Dozvola izdana.')
+        return redirect('udruge:ribolovna_dozvola_list')
+    clanovi = Clan.objects.filter(company=company)
+    reviri = Revir.objects.filter(company=company, is_active=True)
+    return render(request, 'udruge/ribolovna_dozvola_form.html', {
+        'kategorije': RibolovnaDozvola.KATEGORIJA_CHOICES, 'clanovi': clanovi, 'reviri': reviri,
+    })
+
+
+@login_required
+def ribolovna_dozvola_detail(request, pk):
+    company = get_user_company(request)
+    from .models import RibolovnaDozvola
+    obj = get_object_or_404(RibolovnaDozvola, pk=pk, company=company)
+    return render(request, 'udruge/ribolovna_dozvola_detail.html', {'dozvola': obj})
+
+
+@login_required
+def ulov_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import UlovEvidencija
+    qs = UlovEvidencija.objects.filter(company=company).select_related('revir', 'clan')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/ulov_list.html', {'page_obj': page})
+
+
+@login_required
+def ulov_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import UlovEvidencija, Revir, Clan
+    from decimal import Decimal
+    if request.method == 'POST':
+        UlovEvidencija.objects.create(
+            company=company,
+            revir_id=request.POST.get('revir'),
+            clan_id=request.POST.get('clan'),
+            datum=request.POST.get('datum'),
+            vrsta_ribe=request.POST.get('vrsta_ribe', ''),
+            tezina_kg=Decimal(request.POST.get('tezina_kg') or '0'),
+            duzina_cm=int(request.POST.get('duzina_cm') or 0) or None,
+            catch_and_release=request.POST.get('catch_and_release') == 'on',
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Ulov evidentiran.')
+        return redirect('udruge:ulov_list')
+    reviri = Revir.objects.filter(company=company, is_active=True)
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/ulov_form.html', {'reviri': reviri, 'clanovi': clanovi})
+
+
+@login_required
+def ulov_detail(request, pk):
+    company = get_user_company(request)
+    from .models import UlovEvidencija
+    obj = get_object_or_404(UlovEvidencija, pk=pk, company=company)
+    return render(request, 'udruge/ulov_detail.html', {'ulov': obj})
+
+
+@login_required
+def poribljavanje_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Poribljavanje
+    qs = Poribljavanje.objects.filter(company=company).select_related('revir')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/poribljavanje_list.html', {'page_obj': page})
+
+
+@login_required
+def poribljavanje_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Poribljavanje, Revir
+    from decimal import Decimal
+    if request.method == 'POST':
+        Poribljavanje.objects.create(
+            company=company,
+            revir_id=request.POST.get('revir'),
+            datum=request.POST.get('datum'),
+            vrsta_ribe=request.POST.get('vrsta_ribe', ''),
+            kolicina_kg=Decimal(request.POST.get('kolicina_kg') or '0'),
+            komada=int(request.POST.get('komada') or 0),
+            dobavljac=request.POST.get('dobavljac', ''),
+            cijena_eur=Decimal(request.POST.get('cijena_eur') or '0'),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Poribljavanje evidentirano.')
+        return redirect('udruge:poribljavanje_list')
+    reviri = Revir.objects.filter(company=company, is_active=True)
+    return render(request, 'udruge/poribljavanje_form.html', {'reviri': reviri})
+
+
+@login_required
+def poribljavanje_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Poribljavanje
+    obj = get_object_or_404(Poribljavanje, pk=pk, company=company)
+    return render(request, 'udruge/poribljavanje_detail.html', {'poribljavanje': obj})
+
+
+@login_required
+def cuvarska_straza_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import CuvarskaStraza
+    qs = CuvarskaStraza.objects.filter(company=company).select_related('cuvar', 'revir')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/cuvarska_straza_list.html', {'page_obj': page})
+
+
+@login_required
+def cuvarska_straza_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import CuvarskaStraza, Clan, Revir
+    if request.method == 'POST':
+        CuvarskaStraza.objects.create(
+            company=company,
+            cuvar_id=request.POST.get('cuvar'),
+            revir_id=request.POST.get('revir'),
+            datum_od=request.POST.get('datum_od'),
+            datum_do=request.POST.get('datum_do'),
+            prekrsaji=int(request.POST.get('prekrsaji') or 0),
+            zapisnik=request.POST.get('zapisnik', ''),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Čuvarska straža evidentirana.')
+        return redirect('udruge:cuvarska_straza_list')
+    clanovi = Clan.objects.filter(company=company)
+    reviri = Revir.objects.filter(company=company, is_active=True)
+    return render(request, 'udruge/cuvarska_straza_form.html', {'clanovi': clanovi, 'reviri': reviri})
+
+
+@login_required
+def cuvarska_straza_detail(request, pk):
+    company = get_user_company(request)
+    from .models import CuvarskaStraza
+    obj = get_object_or_404(CuvarskaStraza, pk=pk, company=company)
+    return render(request, 'udruge/cuvarska_straza_detail.html', {'straza': obj})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PČELARI
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def pcelari_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Pcelinjak, Kosnica, TretmanKosnice, MedProizvodnja, SelidbaLog
+    from django.db.models import Sum, Count
+
+    today = timezone.now().date()
+    pcelinjaci = Pcelinjak.objects.filter(company=company)
+    kosnice = Kosnica.objects.filter(pcelinjak__company=company)
+    tretmani = TretmanKosnice.objects.filter(kosnica__pcelinjak__company=company)
+    med = MedProizvodnja.objects.filter(pcelinjak__company=company)
+    selidbe = SelidbaLog.objects.filter(pcelinjak__company=company)
+
+    ctx = {
+        'pcelinjaci_total': pcelinjaci.count(),
+        'kosnice_total': kosnice.count(),
+        'kosnice_aktivne': kosnice.filter(status='aktivna').count(),
+        'kosnice_bolesne': kosnice.filter(status='bolesna').count(),
+        'kosnice_uginule': kosnice.filter(status='uginula').count(),
+        'tretmani_total': tretmani.count(),
+        'tretmani_godina': tretmani.filter(datum__year=today.year).count(),
+        'karencija_aktivna': tretmani.filter(karencija_do__gte=today).count(),
+        'med_total_kg': med.aggregate(s=Sum('kolicina_kg'))['s'] or 0,
+        'med_godina_kg': med.filter(datum_vrcanja__year=today.year).aggregate(s=Sum('kolicina_kg'))['s'] or 0,
+        'selidbe_total': selidbe.count(),
+    }
+    return render(request, 'udruge/pcelari_dashboard.html', ctx)
+
+
+@login_required
+def pcelinjak_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Pcelinjak
+    qs = Pcelinjak.objects.filter(company=company).select_related('vlasnik')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/pcelinjak_list.html', {'page_obj': page})
+
+
+@login_required
+def pcelinjak_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Pcelinjak, Clan
+    if request.method == 'POST':
+        Pcelinjak.objects.create(
+            company=company,
+            vlasnik_id=request.POST.get('vlasnik'),
+            naziv=request.POST.get('naziv', ''),
+            lokacija=request.POST.get('lokacija', ''),
+            katastarska_cestica=request.POST.get('katastarska_cestica', ''),
+            jrdz_broj=request.POST.get('jrdz_broj', ''),
+            stacionarni=request.POST.get('stacionarni') != 'off',
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Pčelinjak dodan.')
+        return redirect('udruge:pcelinjak_list')
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/pcelinjak_form.html', {'clanovi': clanovi})
+
+
+@login_required
+def pcelinjak_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Pcelinjak
+    obj = get_object_or_404(Pcelinjak, pk=pk, company=company)
+    kosnice = obj.kosnice.all()
+    return render(request, 'udruge/pcelinjak_detail.html', {'pcelinjak': obj, 'kosnice': kosnice})
+
+
+@login_required
+def kosnica_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Kosnica
+    qs = Kosnica.objects.filter(pcelinjak__company=company).select_related('pcelinjak')
+    status = request.GET.get('status', '')
+    if status:
+        qs = qs.filter(status=status)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/kosnica_list.html', {
+        'page_obj': page, 'status': status, 'statusi': Kosnica.STATUS_CHOICES,
+    })
+
+
+@login_required
+def kosnica_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Kosnica, Pcelinjak
+    if request.method == 'POST':
+        Kosnica.objects.create(
+            pcelinjak_id=request.POST.get('pcelinjak'),
+            oznaka=request.POST.get('oznaka', ''),
+            tip=request.POST.get('tip', 'lr'),
+            status=request.POST.get('status', 'aktivna'),
+            godina_matice=int(request.POST.get('godina_matice') or 0) or None,
+            boja_matice=request.POST.get('boja_matice', ''),
+            snaga_zajednice=int(request.POST.get('snaga_zajednice') or 0) or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Košnica dodana.')
+        return redirect('udruge:kosnica_list')
+    pcelinjaci = Pcelinjak.objects.filter(company=company)
+    return render(request, 'udruge/kosnica_form.html', {
+        'pcelinjaci': pcelinjaci, 'tipovi': Kosnica.TIP_CHOICES, 'statusi': Kosnica.STATUS_CHOICES,
+    })
+
+
+@login_required
+def kosnica_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Kosnica
+    obj = get_object_or_404(Kosnica, pk=pk, pcelinjak__company=company)
+    tretmani = obj.tretmani.all()[:10]
+    return render(request, 'udruge/kosnica_detail.html', {'kosnica': obj, 'tretmani': tretmani})
+
+
+@login_required
+def tretman_kosnice_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import TretmanKosnice
+    qs = TretmanKosnice.objects.filter(kosnica__pcelinjak__company=company).select_related('kosnica', 'kosnica__pcelinjak')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/tretman_kosnice_list.html', {'page_obj': page})
+
+
+@login_required
+def tretman_kosnice_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import TretmanKosnice, Kosnica
+    if request.method == 'POST':
+        TretmanKosnice.objects.create(
+            kosnica_id=request.POST.get('kosnica'),
+            datum=request.POST.get('datum'),
+            tip=request.POST.get('tip', 'varroa'),
+            lijek=request.POST.get('lijek', ''),
+            doza=request.POST.get('doza', ''),
+            veterinar=request.POST.get('veterinar', ''),
+            karencija_do=request.POST.get('karencija_do') or None,
+            rezultat=request.POST.get('rezultat', ''),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Tretman evidentiran.')
+        return redirect('udruge:tretman_kosnice_list')
+    kosnice = Kosnica.objects.filter(pcelinjak__company=company).select_related('pcelinjak')
+    return render(request, 'udruge/tretman_kosnice_form.html', {
+        'kosnice': kosnice, 'tipovi': TretmanKosnice.TIP_CHOICES,
+    })
+
+
+@login_required
+def tretman_kosnice_detail(request, pk):
+    company = get_user_company(request)
+    from .models import TretmanKosnice
+    obj = get_object_or_404(TretmanKosnice, pk=pk, kosnica__pcelinjak__company=company)
+    return render(request, 'udruge/tretman_kosnice_detail.html', {'tretman': obj})
+
+
+@login_required
+def med_proizvodnja_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import MedProizvodnja
+    qs = MedProizvodnja.objects.filter(pcelinjak__company=company).select_related('pcelinjak')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/med_proizvodnja_list.html', {'page_obj': page})
+
+
+@login_required
+def med_proizvodnja_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import MedProizvodnja, Pcelinjak
+    from decimal import Decimal
+    if request.method == 'POST':
+        MedProizvodnja.objects.create(
+            pcelinjak_id=request.POST.get('pcelinjak'),
+            datum_vrcanja=request.POST.get('datum_vrcanja'),
+            vrsta=request.POST.get('vrsta', 'livada'),
+            kolicina_kg=Decimal(request.POST.get('kolicina_kg') or '0'),
+            vlaga_posto=Decimal(request.POST.get('vlaga_posto') or '0') or None,
+            broj_kosnica_vrcano=int(request.POST.get('broj_kosnica_vrcano') or 0),
+            za_prodaju=request.POST.get('za_prodaju') == 'on',
+            cijena_eur_kg=Decimal(request.POST.get('cijena_eur_kg') or '0') or None,
+            serija=request.POST.get('serija', ''),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Proizvodnja meda evidentirana.')
+        return redirect('udruge:med_proizvodnja_list')
+    pcelinjaci = Pcelinjak.objects.filter(company=company)
+    return render(request, 'udruge/med_proizvodnja_form.html', {
+        'pcelinjaci': pcelinjaci, 'vrste': MedProizvodnja.VRSTA_CHOICES,
+    })
+
+
+@login_required
+def med_proizvodnja_detail(request, pk):
+    company = get_user_company(request)
+    from .models import MedProizvodnja
+    obj = get_object_or_404(MedProizvodnja, pk=pk, pcelinjak__company=company)
+    return render(request, 'udruge/med_proizvodnja_detail.html', {'med': obj})
+
+
+@login_required
+def selidba_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import SelidbaLog
+    qs = SelidbaLog.objects.filter(pcelinjak__company=company).select_related('pcelinjak')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/selidba_list.html', {'page_obj': page})
+
+
+@login_required
+def selidba_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import SelidbaLog, Pcelinjak
+    if request.method == 'POST':
+        SelidbaLog.objects.create(
+            pcelinjak_id=request.POST.get('pcelinjak'),
+            datum=request.POST.get('datum'),
+            odrediste=request.POST.get('odrediste', ''),
+            broj_kosnica=int(request.POST.get('broj_kosnica') or 0),
+            razlog=request.POST.get('razlog', ''),
+            prijavljeno_veterinaru=request.POST.get('prijavljeno_veterinaru') == 'on',
+            vracanje_datum=request.POST.get('vracanje_datum') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Selidba evidentirana.')
+        return redirect('udruge:selidba_list')
+    pcelinjaci = Pcelinjak.objects.filter(company=company)
+    return render(request, 'udruge/selidba_form.html', {'pcelinjaci': pcelinjaci})
+
+
+@login_required
+def selidba_detail(request, pk):
+    company = get_user_company(request)
+    from .models import SelidbaLog
+    obj = get_object_or_404(SelidbaLog, pk=pk, pcelinjak__company=company)
+    return render(request, 'udruge/selidba_detail.html', {'selidba': obj})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RAKIJA — DESTILACIJA
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def rakija_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import DestilacijaKotao, DestilacijaLog, RakijaProizvodnja, TrosarinaPrijava
+    from django.db.models import Sum, Count
+
+    today = timezone.now().date()
+    kotlovi = DestilacijaKotao.objects.filter(company=company)
+    destilacije = DestilacijaLog.objects.filter(kotao__company=company)
+    rakije = RakijaProizvodnja.objects.filter(company=company)
+    trosarine = TrosarinaPrijava.objects.filter(company=company)
+
+    ctx = {
+        'kotlovi_total': kotlovi.count(),
+        'kotlovi_aktivni': kotlovi.filter(is_active=True).count(),
+        'destilacije_total': destilacije.count(),
+        'destilacije_godina': destilacije.filter(datum__year=today.year).count(),
+        'destilacije_litara': destilacije.aggregate(s=Sum('litara_destilata'))['s'] or 0,
+        'rakije_total': rakije.count(),
+        'rakije_litara': rakije.aggregate(s=Sum('litara'))['s'] or 0,
+        'rakije_za_prodaju': rakije.filter(za_prodaju=True).count(),
+        'trosarine_total': trosarine.count(),
+        'trosarina_zadnja': trosarine.first(),
+    }
+    return render(request, 'udruge/rakija_dashboard.html', ctx)
+
+
+@login_required
+def destilacija_kotao_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import DestilacijaKotao
+    qs = DestilacijaKotao.objects.filter(company=company).select_related('vlasnik')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/destilacija_kotao_list.html', {'page_obj': page})
+
+
+@login_required
+def destilacija_kotao_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import DestilacijaKotao, Clan
+    if request.method == 'POST':
+        DestilacijaKotao.objects.create(
+            company=company,
+            vlasnik_id=request.POST.get('vlasnik') or None,
+            registarski_broj=request.POST.get('registarski_broj', ''),
+            volumen_litara=int(request.POST.get('volumen_litara') or 0),
+            tip=request.POST.get('tip', ''),
+            lokacija=request.POST.get('lokacija', ''),
+            carinski_ured=request.POST.get('carinski_ured', ''),
+            registriran_od=request.POST.get('registriran_od') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Kotao registriran.')
+        return redirect('udruge:destilacija_kotao_list')
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/destilacija_kotao_form.html', {'clanovi': clanovi})
+
+
+@login_required
+def destilacija_kotao_detail(request, pk):
+    company = get_user_company(request)
+    from .models import DestilacijaKotao
+    obj = get_object_or_404(DestilacijaKotao, pk=pk, company=company)
+    destilacije = obj.destilacije.all()[:10]
+    return render(request, 'udruge/destilacija_kotao_detail.html', {'kotao': obj, 'destilacije': destilacije})
+
+
+@login_required
+def destilacija_log_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import DestilacijaLog
+    qs = DestilacijaLog.objects.filter(kotao__company=company).select_related('kotao')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/destilacija_log_list.html', {'page_obj': page})
+
+
+@login_required
+def destilacija_log_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import DestilacijaLog, DestilacijaKotao
+    from decimal import Decimal
+    if request.method == 'POST':
+        DestilacijaLog.objects.create(
+            kotao_id=request.POST.get('kotao'),
+            datum=request.POST.get('datum'),
+            sirovina=request.POST.get('sirovina', 'sljiva'),
+            kg_sirovina=Decimal(request.POST.get('kg_sirovina') or '0'),
+            litara_komine=Decimal(request.POST.get('litara_komine') or '0') or None,
+            litara_destilata=Decimal(request.POST.get('litara_destilata') or '0'),
+            alkohol_posto=Decimal(request.POST.get('alkohol_posto') or '0'),
+            temperatura_c=Decimal(request.POST.get('temperatura_c') or '0') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Destilacija evidentirana.')
+        return redirect('udruge:destilacija_log_list')
+    kotlovi = DestilacijaKotao.objects.filter(company=company, is_active=True)
+    return render(request, 'udruge/destilacija_log_form.html', {
+        'kotlovi': kotlovi, 'sirovine': DestilacijaLog.SIROVINA_CHOICES,
+    })
+
+
+@login_required
+def destilacija_log_detail(request, pk):
+    company = get_user_company(request)
+    from .models import DestilacijaLog
+    obj = get_object_or_404(DestilacijaLog, pk=pk, kotao__company=company)
+    return render(request, 'udruge/destilacija_log_detail.html', {'destilacija': obj})
+
+
+@login_required
+def rakija_proizvodnja_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import RakijaProizvodnja
+    qs = RakijaProizvodnja.objects.filter(company=company)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/rakija_proizvodnja_list.html', {'page_obj': page})
+
+
+@login_required
+def rakija_proizvodnja_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import RakijaProizvodnja, DestilacijaLog
+    from decimal import Decimal
+    if request.method == 'POST':
+        RakijaProizvodnja.objects.create(
+            company=company,
+            destilacija_id=request.POST.get('destilacija') or None,
+            naziv=request.POST.get('naziv', ''),
+            tip_rakije=request.POST.get('tip_rakije', ''),
+            litara=Decimal(request.POST.get('litara') or '0'),
+            alkohol_posto=Decimal(request.POST.get('alkohol_posto') or '40'),
+            serija=request.POST.get('serija', ''),
+            godina=int(request.POST.get('godina') or today.year),
+            za_prodaju=request.POST.get('za_prodaju') == 'on',
+            cijena_eur_l=Decimal(request.POST.get('cijena_eur_l') or '0') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Rakija evidentirana.')
+        return redirect('udruge:rakija_proizvodnja_list')
+    destilacije = DestilacijaLog.objects.filter(kotao__company=company)[:50]
+    today = timezone.now().date()
+    return render(request, 'udruge/rakija_proizvodnja_form.html', {'destilacije': destilacije})
+
+
+@login_required
+def rakija_proizvodnja_detail(request, pk):
+    company = get_user_company(request)
+    from .models import RakijaProizvodnja
+    obj = get_object_or_404(RakijaProizvodnja, pk=pk, company=company)
+    return render(request, 'udruge/rakija_proizvodnja_detail.html', {'rakija': obj})
+
+
+@login_required
+def trosarina_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import TrosarinaPrijava
+    qs = TrosarinaPrijava.objects.filter(company=company)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/trosarina_list.html', {'page_obj': page})
+
+
+@login_required
+def trosarina_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import TrosarinaPrijava
+    from decimal import Decimal
+    if request.method == 'POST':
+        TrosarinaPrijava.objects.create(
+            company=company,
+            godina=int(request.POST.get('godina') or timezone.now().year),
+            ukupno_litara_destilata=Decimal(request.POST.get('ukupno_litara_destilata') or '0'),
+            prosjecni_alkohol_posto=Decimal(request.POST.get('prosjecni_alkohol_posto') or '40'),
+            ukupno_litara_cistog=Decimal(request.POST.get('ukupno_litara_cistog') or '0'),
+            stopa_eur_hl=Decimal(request.POST.get('stopa_eur_hl') or '0'),
+            status=request.POST.get('status', 'draft'),
+            datum_prijave=request.POST.get('datum_prijave') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Trošarinska prijava kreirana.')
+        return redirect('udruge:trosarina_list')
+    return render(request, 'udruge/trosarina_form.html', {
+        'statusi': TrosarinaPrijava.STATUS_CHOICES,
+    })
+
+
+@login_required
+def trosarina_detail(request, pk):
+    company = get_user_company(request)
+    from .models import TrosarinaPrijava
+    obj = get_object_or_404(TrosarinaPrijava, pk=pk, company=company)
+    return render(request, 'udruge/trosarina_detail.html', {'trosarina': obj})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# VOĆARI
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def vocari_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Vocnjak, BerbaLog, TretmanVocnjaka
+    from django.db.models import Sum, Count
+
+    today = timezone.now().date()
+    vocnjaci = Vocnjak.objects.filter(company=company)
+    berbe = BerbaLog.objects.filter(vocnjak__company=company)
+    tretmani = TretmanVocnjaka.objects.filter(vocnjak__company=company)
+
+    ctx = {
+        'vocnjaci_total': vocnjaci.count(),
+        'ukupno_stabala': vocnjaci.aggregate(s=Sum('broj_stabala'))['s'] or 0,
+        'ukupno_ha': vocnjaci.aggregate(s=Sum('povrsina_ha'))['s'] or 0,
+        'eko_vocnjaci': vocnjaci.filter(is_organic=True).count(),
+        'berbe_total': berbe.count(),
+        'berbe_godina': berbe.filter(datum__year=today.year).count(),
+        'berbe_kg_godina': berbe.filter(datum__year=today.year).aggregate(s=Sum('kolicina_kg'))['s'] or 0,
+        'berbe_kg_total': berbe.aggregate(s=Sum('kolicina_kg'))['s'] or 0,
+        'tretmani_total': tretmani.count(),
+        'tretmani_godina': tretmani.filter(datum__year=today.year).count(),
+        'karencija_aktivna': tretmani.filter(karencija_do__gte=today).count(),
+        'vrste': vocnjaci.values('vrsta').annotate(cnt=Count('id')).order_by('-cnt')[:10],
+    }
+    return render(request, 'udruge/vocari_dashboard.html', ctx)
+
+
+@login_required
+def vocnjak_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Vocnjak
+    qs = Vocnjak.objects.filter(company=company).select_related('vlasnik')
+    vrsta = request.GET.get('vrsta', '')
+    if vrsta:
+        qs = qs.filter(vrsta=vrsta)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/vocnjak_list.html', {
+        'page_obj': page, 'vrsta': vrsta, 'vrste': Vocnjak.VRSTA_CHOICES,
+    })
+
+
+@login_required
+def vocnjak_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Vocnjak, Clan
+    from decimal import Decimal
+    if request.method == 'POST':
+        Vocnjak.objects.create(
+            company=company,
+            vlasnik_id=request.POST.get('vlasnik') or None,
+            naziv=request.POST.get('naziv', ''),
+            vrsta=request.POST.get('vrsta', 'jabuka'),
+            sorta=request.POST.get('sorta', ''),
+            podloga=request.POST.get('podloga', ''),
+            sustav_uzgoja=request.POST.get('sustav_uzgoja', 'spalir'),
+            broj_stabala=int(request.POST.get('broj_stabala') or 0),
+            godina_sadnje=int(request.POST.get('godina_sadnje') or 0) or None,
+            povrsina_ha=Decimal(request.POST.get('povrsina_ha') or '0') or None,
+            is_organic=request.POST.get('is_organic') == 'on',
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Voćnjak dodan.')
+        return redirect('udruge:vocnjak_list')
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/vocnjak_form.html', {
+        'vrste': Vocnjak.VRSTA_CHOICES, 'sustavi': Vocnjak.SUSTAV_CHOICES, 'clanovi': clanovi,
+    })
+
+
+@login_required
+def vocnjak_detail(request, pk):
+    company = get_user_company(request)
+    from .models import Vocnjak
+    obj = get_object_or_404(Vocnjak, pk=pk, company=company)
+    berbe = obj.berbe.all()[:10]
+    tretmani = obj.tretmani.all()[:10]
+    return render(request, 'udruge/vocnjak_detail.html', {
+        'vocnjak': obj, 'berbe': berbe, 'tretmani': tretmani,
+    })
+
+
+@login_required
+def berba_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import BerbaLog
+    qs = BerbaLog.objects.filter(vocnjak__company=company).select_related('vocnjak')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/berba_list.html', {'page_obj': page})
+
+
+@login_required
+def berba_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import BerbaLog, Vocnjak
+    from decimal import Decimal
+    if request.method == 'POST':
+        BerbaLog.objects.create(
+            vocnjak_id=request.POST.get('vocnjak'),
+            datum=request.POST.get('datum'),
+            kolicina_kg=Decimal(request.POST.get('kolicina_kg') or '0'),
+            kvaliteta=request.POST.get('kvaliteta', 'I'),
+            broj_radnika=int(request.POST.get('broj_radnika') or 1),
+            sati_berbe=Decimal(request.POST.get('sati_berbe') or '0'),
+            za_prodaju=request.POST.get('za_prodaju') == 'on',
+            za_preradu=request.POST.get('za_preradu') == 'on',
+            cijena_eur_kg=Decimal(request.POST.get('cijena_eur_kg') or '0') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Berba evidentirana.')
+        return redirect('udruge:berba_list')
+    vocnjaci = Vocnjak.objects.filter(company=company)
+    return render(request, 'udruge/berba_form.html', {'vocnjaci': vocnjaci})
+
+
+@login_required
+def berba_detail(request, pk):
+    company = get_user_company(request)
+    from .models import BerbaLog
+    obj = get_object_or_404(BerbaLog, pk=pk, vocnjak__company=company)
+    return render(request, 'udruge/berba_detail.html', {'berba': obj})
+
+
+@login_required
+def tretman_vocnjaka_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import TretmanVocnjaka
+    qs = TretmanVocnjaka.objects.filter(vocnjak__company=company).select_related('vocnjak')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/tretman_vocnjaka_list.html', {'page_obj': page})
+
+
+@login_required
+def tretman_vocnjaka_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import TretmanVocnjaka, Vocnjak
+    if request.method == 'POST':
+        TretmanVocnjaka.objects.create(
+            vocnjak_id=request.POST.get('vocnjak'),
+            datum=request.POST.get('datum'),
+            tip=request.POST.get('tip', 'fungicid'),
+            sredstvo=request.POST.get('sredstvo', ''),
+            doza=request.POST.get('doza', ''),
+            kolicina_ukupno=request.POST.get('kolicina_ukupno', ''),
+            karencija_dana=int(request.POST.get('karencija_dana') or 0),
+            karencija_do=request.POST.get('karencija_do') or None,
+            tretirao=request.POST.get('tretirao', ''),
+            vremenske_prilike=request.POST.get('vremenske_prilike', ''),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Tretman evidentiran.')
+        return redirect('udruge:tretman_vocnjaka_list')
+    vocnjaci = Vocnjak.objects.filter(company=company)
+    return render(request, 'udruge/tretman_vocnjaka_form.html', {
+        'vocnjaci': vocnjaci, 'tipovi': TretmanVocnjaka.TIP_CHOICES,
+    })
+
+
+@login_required
+def tretman_vocnjaka_detail(request, pk):
+    company = get_user_company(request)
+    from .models import TretmanVocnjaka
+    obj = get_object_or_404(TretmanVocnjaka, pk=pk, vocnjak__company=company)
+    return render(request, 'udruge/tretman_vocnjaka_detail.html', {'tretman': obj})

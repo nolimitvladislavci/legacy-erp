@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Ribolovni reviri{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-water"></i> Ribolovni reviri</h4>
+  <small style="color:var(--text-muted)">Vodena tijela, granice, pravila</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.ukupno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Revira</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.aktivno|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Aktivno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.ha_ukupno|default:0 }} ha</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Povrsina</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Naziv</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Tip vode</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Povrsina</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vrste riba</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Status</th>
+    </tr></thead>
+    <tbody>
+      {% for r in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Naziv">{{ r.naziv }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Tip">{{ r.get_tip_vode_display|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Povrsina">{{ r.povrsina_ha|default:"-" }} ha</td>
+        <td style="padding:.5rem .6rem;font-size:.78rem" data-label="Vrste">{{ r.vrste_riba|truncatechars:30|default:"-" }}</td>
+        <td style="padding:.5rem .6rem" data-label="Status">
+          {% if r.aktivan %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">Aktivan</span>
+          {% else %}<span style="color:var(--text-muted);font-size:.78rem">Neaktivan</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema revira</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

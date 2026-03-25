@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Dnevnik pecenja{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-flask"></i> Dnevnik pecenja</h4>
+  <small style="color:var(--text-muted)">Destilacije, sirovine, prinosi</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.destilacija|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Destilacija</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.litara_ukupno|default:"0" }}L</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Proizvedeno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.sirovine_kg|default:"0" }} kg</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Sirovine</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#a855f7">{{ stats.prosjek_prinos|default:"0" }}%</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Prosjek prinos</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Pecar</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Sirovina</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kg</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Litara</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">%Alk</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kotao</th>
+    </tr></thead>
+    <tbody>
+      {% for d in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ d.datum|date:"d.m.Y" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Pecar">{{ d.pecar }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Sirovina">{{ d.get_sirovina_display|default:d.sirovina }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Kg">{{ d.kolicina_sirovine_kg }}</td>
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:700;color:var(--gold)" data-label="Litara">{{ d.litara_proizvedeno }}L</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="%Alk">{{ d.postotak_alkohola|default:"-" }}%</td>
+        <td style="padding:.5rem .6rem;font-size:.78rem" data-label="Kotao">{{ d.kotao|default:"-" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema destilacija</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}

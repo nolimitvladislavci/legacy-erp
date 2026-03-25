@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Proizvodnja meda{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <div><h4 style="margin:0;color:var(--gold)"><i class="fas fa-jar"></i> Proizvodnja meda</h4>
+  <small style="color:var(--text-muted)">Vrcanje, kolicine, vrste meda</small></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800">{{ stats.vrcanja|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Vrcanja</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">{{ stats.ukupno_kg|default:"0" }} kg</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Ukupno</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#3b82f6">{{ stats.vrsta_meda|default:0 }}</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Vrsta</div>
+  </div>
+  <div class="stat-card" style="text-align:center;padding:.75rem">
+    <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ stats.prosjek_po_kosnici|default:"0" }} kg</div>
+    <div style="font-size:.72rem;color:var(--text-muted)">Prosjek/kosnica</div>
+  </div>
+</div>
+<div class="card" style="border-radius:12px;border:1px solid var(--border)">
+  <div style="overflow-x:auto"><div class="mobile-cards"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Datum</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Pcelar</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Vrsta meda</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kolicina</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kosnica</th>
+      <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Kvaliteta</th>
+    </tr></thead>
+    <tbody>
+      {% for m in object_list %}
+      <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:600" data-label="Datum">{{ m.datum|date:"d.m.Y" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Pcelar">{{ m.pcelar|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Vrsta">{{ m.vrsta_meda }}</td>
+        <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:700;color:var(--gold)" data-label="Kolicina">{{ m.kolicina_kg }} kg</td>
+        <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Kosnica">{{ m.broj_kosnica|default:"-" }}</td>
+        <td style="padding:.5rem .6rem" data-label="Kvaliteta">
+          {% if m.kvaliteta == 'A' %}<span style="color:#22c55e;font-size:.78rem;font-weight:600">A</span>
+          {% elif m.kvaliteta == 'B' %}<span style="color:#f59e0b;font-size:.78rem">B</span>
+          {% else %}<span style="font-size:.78rem">{{ m.kvaliteta|default:"-" }}</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema podataka o proizvodnji</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div></div>
+</div>
+{% endblock %}
