@@ -58,6 +58,86 @@ def build_tax_groups(invoice):
     ]
 
 
+def build_sections(invoice):
+    """
+    Grupira InvoiceItem po section polju (ako postoji u DB).
+    Koristi raw SQL za sortiranje — otporno na ORM cache koji ne zna za nova polja.
+    Vraća: [{'name': str, 'items': [...], 'subtotal': Decimal}, ...]
+    Fallback: jedna grupa bez naslova ako section polje ne postoji u DB.
+    """
+    from django.db import connection
+    from itertools import groupby as _groupby
+
+    # Provjeri postoji li section kolona u bazi (ne u ORM cache!)
+    has_section_col = False
+    try:
+        with connection.cursor() as c:
+            c.execute("""
+                SELECT column_name FROM information_schema.columns
+                WHERE table_name='invoicing_invoiceitem' AND column_name='section'
+            """)
+            has_section_col = bool(c.fetchone())
+    except Exception:
+        pass
+
+    if not has_section_col:
+        # Nema kolone — vrati sve stavke u jednoj grupi bez naslova
+        items = list(invoice.items.all().order_by('id'))
+        return [{'name': '', 'items': items, 'subtotal': sum(i.total_price for i in items)}]
+
+    # Fetch item IDs sortiranih po section, sort_order, id — raw SQL
+    try:
+        with connection.cursor() as c:
+            c.execute("""
+                SELECT id, section
+                FROM invoicing_invoiceitem
+                WHERE invoice_id = %s
+                ORDER BY
+                    CASE WHEN section IS NULL OR section = '' THEN 1 ELSE 0 END,
+                    section,
+                    sort_order,
+                    id
+            """, [invoice.pk])
+            rows = c.fetchall()
+    except Exception:
+        items = list(invoice.items.all().order_by('id'))
+        return [{'name': '', 'items': items, 'subtotal': sum(i.total_price for i in items)}]
+
+    if not rows:
+        return [{'name': '', 'items': [], 'subtotal': Decimal('0')}]
+
+    # Fetch svih item objekata odjednom (1 query)
+    id_order = [r[0] for r in rows]
+    id_to_section = {r[0]: (r[1] or '') for r in rows}
+    items_by_id = {item.id: item for item in invoice.items.filter(id__in=id_order)}
+
+    # Sortirani item objekti
+    sorted_items = [items_by_id[i] for i in id_order if i in items_by_id]
+
+    # Provjeri ima li uopće sekcija
+    has_any_section = any(id_to_section.get(i.id, '') for i in sorted_items)
+
+    if not has_any_section:
+        total = sum(i.total_price for i in sorted_items)
+        return [{'name': '', 'items': sorted_items, 'subtotal': total}]
+
+    # Grupiraj po sekciji (uz čuvanje redoslijeda)
+    sections = []
+    seen = {}
+    for item in sorted_items:
+        sec = id_to_section.get(item.id, '')
+        if sec not in seen:
+            seen[sec] = []
+            sections.append({'name': sec, '_items': seen[sec]})
+        seen[sec].append(item)
+
+    return [
+        {'name': s['name'], 'items': s['_items'],
+         'subtotal': sum(i.total_price for i in s['_items'])}
+        for s in sections
+    ]
+
+
 def generate_qr(invoice):
     try:
         import qrcode, io
@@ -98,37 +178,24 @@ def _ensure_qr(invoice):
 
 
 def _logo_to_data_uri(path):
-    """
-    Čita logo fajl i vraća data URI s ispravnim MIME.
-    Detektira PNG/JPEG iz magic bytes — ignorira ekstenziju.
-    """
     with open(path, 'rb') as f:
         data = f.read()
-    # Magic bytes detekcija
-    if data[:4] == bytes([0x89, 0x50, 0x4e, 0x47]):   # PNG
+    if data[:4] == bytes([0x89, 0x50, 0x4e, 0x47]):
         mime = 'image/png'
-    elif data[:2] == bytes([0xff, 0xd8]):               # JPEG
+    elif data[:2] == bytes([0xff, 0xd8]):
         mime = 'image/jpeg'
-    elif data[:4] in (b'<svg', b'\xef\xbb\xbf<'):      # SVG
+    elif data[:4] in (b'<svg', b'\xef\xbb\xbf<'):
         mime = 'image/svg+xml'
     else:
-        mime = 'image/png'                              # safe fallback
+        mime = 'image/png'
     return f"data:{mime};base64,{base64.b64encode(data).decode()}"
 
 
 def _get_company_logo_b64(invoice):
-    """
-    Vraća base64 data URI loga firme.
-    Redosljed:
-    1. company.logo (Django ImageField)
-    2. company.settings['logo_path'] — ručna putanja
-    """
     try:
         company = invoice.company
         if not company:
             return ''
-
-        # 1. Django ImageField
         if company.logo and company.logo.name:
             try:
                 path = company.logo.path
@@ -136,13 +203,10 @@ def _get_company_logo_b64(invoice):
                     return _logo_to_data_uri(path)
             except Exception:
                 pass
-
-        # 2. Fallback: settings['logo_path']
         settings = company.settings or {}
         path = settings.get('logo_path', '')
         if path and _os.path.exists(path):
             return _logo_to_data_uri(path)
-
     except Exception:
         pass
     return ''
@@ -164,10 +228,6 @@ def _get_lc_brand_qr_b64():
 
 
 def _pick_template(invoice, lang):
-    """
-    Odaberi HTML template prema company.pdf_template i jeziku.
-    Fallback → viskovic dizajn ako template ne postoji.
-    """
     from django.template.loader import get_template
     from django.template.exceptions import TemplateDoesNotExist
 
@@ -226,6 +286,7 @@ def render_invoice_html(invoice, request=None):
                 'now': timezone.now(),
                 'request': request,
                 'tax_groups': build_tax_groups(invoice),
+                'sections': build_sections(invoice),
                 'labels': labels,
                 'primary_lang': render_lang,
                 'secondary_lang': profile.secondary_language,
@@ -238,6 +299,7 @@ def render_invoice_html(invoice, request=None):
             'now': timezone.now(),
             'request': request,
             'tax_groups': build_tax_groups(invoice),
+            'sections': build_sections(invoice),
             **extra_ctx,
         })
     finally:

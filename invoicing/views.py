@@ -137,7 +137,6 @@ def generate_zki(invoice, cert_key='demo_key'):
 
 # ── PDF GENERIRANJE
 @login_required
-@login_required
 def generate_pdf(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     from invoicing.services.pdf_service import generate_invoice_pdf
@@ -145,23 +144,6 @@ def generate_pdf(request, pk):
     resp = HttpResponse(content, content_type=mime)
     resp['Content-Disposition'] = f'inline; filename="racun_{invoice.number}.pdf"'
     return resp
-
-
-    html_content = render_to_string(template, {
-        'invoice': invoice,
-        'now': timezone.now(),
-        'request': request,
-        'tax_groups': tax_groups_data,
-    })
-
-    try:
-        from weasyprint import CSS, HTML
-        pdf_file = HTML(string=html_content, base_url=request.build_absolute_uri('/')).write_pdf()
-        response = HttpResponse(pdf_file, content_type='application/pdf')
-        response['Content-Disposition'] = f'inline; filename="racun_{invoice.number}.pdf"'
-        return response
-    except ImportError:
-        return HttpResponse(html_content)
 
 
 @login_required
@@ -184,15 +166,37 @@ def send_email(request, pk):
         messages.success(request, _(msg))
     else:
         messages.error(request, _(msg))
-    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    return redirect('invoicing:index')
 
 
 
 @login_required
 def send_invoice_whatsapp(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
-    messages.info(request, _('WhatsApp slanje jos nije konfigurirano. Koristite email.'))
-    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    phone = (invoice.partner.phone if invoice.partner else '') or invoice.client_email or ''
+    if not phone:
+        messages.error(request, _('Klijent nema broj telefona u sustavu.'))
+        return redirect('invoicing:index')
+    portal_url = f'https://limit-connect.com/hr/invoicing/client/{invoice.client_token}/'
+    doctype_names = {'PO': 'Ponuda', 'P': 'Predračun', 'R': 'Račun', 'A': 'Avansni'}
+    doc_name = doctype_names.get(invoice.doctype, 'Dokument')
+    msg = (
+        f"❤️ *{doc_name} {invoice.number}*\n"
+        f"Iznos: *{invoice.total} {invoice.currency}*\n"
+        f"Datum: {invoice.date_issued.strftime('%d.%m.%Y') if invoice.date_issued else '-'}\n"
+        f"\nPregled i potvrda: {portal_url}"
+    )
+    try:
+        from core.whatsapp import send_text
+        company = get_user_company(request)
+        result = send_text(phone, msg, company_id=company.id if company else None)
+        if result.get('success'):
+            messages.success(request, _(f'WhatsApp poslan na {phone}!'))
+        else:
+            messages.warning(request, _(f'WhatsApp: {result.get("error", "Greška")}. Kopirajte link: {portal_url}'))
+    except Exception as e:
+        messages.warning(request, _(f'WhatsApp nije dostupan. Portal link: {portal_url}'))
+    return redirect('invoicing:index')
 
 
 @login_required
@@ -222,7 +226,7 @@ def fiscalize(request, pk):
             messages.success(request, f'ZKI: {result["zki"]} | JIR: {result["jir"]}')
     else:
         messages.error(request, f'Greska: {result["error"]}')
-    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    return redirect('invoicing:index')
 
 
 # ── STORNO RAČUN
@@ -237,10 +241,10 @@ def storno(request, pk):
     result = create_storno(original, user=request.user, ip_address=ip, cancel_reason=cancel_reason)
     if result['success']:
         messages.success(request, f'Storno racun {result["storno_invoice"].number} kreiran!')
-        return redirect(f'/admin/invoicing/invoice/{result["storno_invoice"].pk}/change/')
+        return redirect('invoicing:index')
     else:
         messages.error(request, result['message'])
-        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+        return redirect('invoicing:index')
 
 
 # ── WORKFLOW: PONUDA → PREDRAČUN → RAČUN ──────────────────────────────────────
@@ -259,12 +263,12 @@ def convert_to_predracun(request, pk):
 
     if source.doctype != 'PO':
         messages.error(request, _('Samo ponude se mogu pretvoriti u predračun!'))
-        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+        return redirect('invoicing:index')
 
     if Invoice.objects.unscoped().filter(source_document=source, doctype='P').exists():
         existing = Invoice.objects.unscoped().get(source_document=source, doctype='P')
         messages.warning(request, _(f'Predračun već postoji: {existing.number}'))
-        return redirect(f'/admin/invoicing/invoice/{existing.pk}/change/')
+        return redirect('invoicing:invoice_edit', pk=existing.pk)
 
     from django.utils import timezone
 
@@ -295,7 +299,7 @@ def convert_to_predracun(request, pk):
     source.save(update_fields=['status'])
 
     messages.success(request, _(f'Predračun {new_doc.number} kreiran iz ponude {source.number}!'))
-    return redirect(f'/admin/invoicing/invoice/{new_doc.pk}/change/')
+    return redirect('invoicing:invoice_edit', pk=new_doc.pk)
 
 
 @transaction.atomic
@@ -306,12 +310,12 @@ def convert_to_invoice(request, pk):
 
     if source.doctype not in ('PO', 'P'):
         messages.error(request, _('Samo ponude ili predračuni se mogu pretvoriti u račun!'))
-        return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+        return redirect('invoicing:index')
 
     if Invoice.objects.unscoped().filter(source_document=source, doctype='R').exists():
         existing = Invoice.objects.unscoped().get(source_document=source, doctype='R')
         messages.warning(request, _(f'Račun već postoji: {existing.number}'))
-        return redirect(f'/admin/invoicing/invoice/{existing.pk}/change/')
+        return redirect('invoicing:invoice_edit', pk=existing.pk)
 
     from django.utils import timezone
 
@@ -350,7 +354,7 @@ def convert_to_invoice(request, pk):
     source.save(update_fields=['status'])
 
     messages.success(request, _(f'Račun {new_doc.number} kreiran iz {source.get_doctype_display()} {source.number}!'))
-    return redirect(f'/admin/invoicing/invoice/{new_doc.pk}/change/')
+    return redirect('invoicing:invoice_edit', pk=new_doc.pk)
 
 
 @login_required
@@ -363,7 +367,7 @@ def mark_sent(request, pk):
         messages.success(request, _(f'{doc.get_doctype_display()} {doc.number} označen kao poslan.'))
     else:
         messages.warning(request, _('Dokument nije u statusu Nacrt.'))
-    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    return redirect('invoicing:index')
 
 
 @login_required
@@ -376,7 +380,7 @@ def mark_accepted(request, pk):
         messages.success(request, _(f'{doc.get_doctype_display()} {doc.number} označen kao prihvaćen.'))
     else:
         messages.warning(request, _('Nije moguće označiti kao prihvaćeno.'))
-    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    return redirect('invoicing:index')
 
 
 @login_required
@@ -389,7 +393,7 @@ def mark_rejected(request, pk):
         messages.success(request, _(f'{doc.get_doctype_display()} {doc.number} označen kao odbijen.'))
     else:
         messages.warning(request, _('Nije moguće označiti kao odbijeno.'))
-    return redirect(f'/admin/invoicing/invoice/{pk}/change/')
+    return redirect('invoicing:index')
 
 
 
@@ -559,7 +563,6 @@ def invoice_edit(request, pk):
 
 
 @require_permission("invoices.create")
-@login_required
 @login_required
 def invoice_save(request):
     if request.method != 'POST':

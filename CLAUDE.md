@@ -1,5 +1,5 @@
 # LIMIT Connect — Upute za AI agente
-*Ažurirano: 22.03.2026 22:00 — Sonnet (usklađivanje)*
+*Ažurirano: 2026-03-25 — Sonnet (komunikacijski protokol + arhitektura)*
 
 ---
 
@@ -10,6 +10,30 @@ root@37.27.248.86 | /var/www/fina-connect
 systemctl restart gunicorn-fina celery-worker celery-beat
 ```
 
+---
+
+## ★ KOMUNIKACIJSKI PROTOKOL — OBAVEZNO ČITATI
+
+### Što Ivan traži od Sonneta (i svih agenata):
+1. **Skeniraj, pa preporuči** — ne čekaj da te pita. Vidiš problem u modulu → kažeš odmah.
+   Primjer: "Skenirao sam invoicing/models.py i uočio X — predlažem Y."
+2. **Znaj što je u bazi** — 86 firmi iz Synesis importa POSTOJE. Marija ih zna.
+   Nikad ne pitaj "imaš li kontakt listu" — provjeri bazu prvo.
+3. **Bez pritiska** — Ivan zna tempo. 26 dana od nastanka. Plan je 01.04.
+   Sonnet ne urgira, ne podsjeća na rokove, ne pita "jesi li spreman".
+4. **Ideje, ne upozorenja** — umjesto "trebaš riješiti X", kaži "imam ideju za X — evo kako".
+5. **Marija je kanal** — 86 firmi ide kroz nju. Ona ih vodi. Naš posao je da njoj sve radi.
+6. **Kampanja = Marija + QR + AI letak** — kada Ivan kaže "kampanja za 86 firmi",
+   to znači: pripremi materijale za Mariju, ne outreach strategiju.
+
+### Što NE raditi:
+- Ne pitati za stvari koje su već u bazi ili FENIX_STATUS.md
+- Ne stvarati pritisak oko rokova
+- Ne ponavljati iste preporuke iz prethodnih sesija
+- Ne pisati dugačke uvode — idi direktno na stvar
+
+---
+
 ## Pravila — UVIJEK
 
 1. **Tema:** crna-zlatna (`--black:#0a0a0a`, `--gold:#c9a84c`), fontovi Cormorant Garamond + Barlow
@@ -17,15 +41,15 @@ systemctl restart gunicorn-fina celery-worker celery-beat
 3. **Slogan:** "Fiskalizacija u džepu"
 4. **HTML forme:** native `<label><input type="radio">` — NIKAD JavaScript onclick za selekciju. Mora raditi na mobitelu.
 5. **Tenant isolation:** SVAKI query mora imati `company=` filter.
-6. **Prije pisanja koda:** pročitaj stvarna polja iz models.py. Ne pretpostavljaj nazive (greške bile: grand_total umjesto total, PaymentMethod umjesto Method).
+6. **Prije pisanja koda:** pročitaj stvarna polja iz models.py. Ne pretpostavljaj nazive.
 7. **Istina uvijek:** nikad prešutjeti problem, bug, rizik ili bolju opciju.
-8. **Revolucionarne stvari** (MCP, arhitekturne promjene): proaktivno reći, ne čekati da Ivan pita.
+8. **Revolucionarne stvari** proaktivno reći — ne čekati da Ivan pita.
 
 ---
 
 ## Task fajlovi
 
-- **Naming:** `CC_TASK_YYYYMMDD_OPIS.md` (datum obavezan)
+- **Naming:** `CC_TASK_OPIS.md` (bez datuma — datum je u sadržaju)
 - **Jednokratni:** napiši → agent odradi → obriši
 - **Nikad > 10 aktivnih** — prioritiziraj i obriši stare
 - **Trajni kontekst** ide u CLAUDE.md ili FENIX_STATUS.md, ne u task fajlove
@@ -33,80 +57,52 @@ systemctl restart gunicorn-fina celery-worker celery-beat
 
 ---
 
-## Aktivni task fajlovi (22.03.2026)
+## Kampanja za 86 firmi (Synesis import) — KONTEKST
 
-| Fajl | Opis | Agent | Prioritet |
-|------|------|-------|-----------|
-| `CC_TASK_20260322_SHARE_NAV_WIZARD.md` | Share invite tracking + nav partial + cashier wizard | CC | **VISOK** |
-| `CC_TASK_20260322_MULTI_KONOBAR_PRETPLATE.md` | Multi-konobar PIN preuzimanje + pretplate + logo POS | CC | **VISOK** |
-| `CC_TASK_POS_REDESIGN_3KLIKA.md` | POS 3 klika — TaxRate seed, wizard, cashier OIB | CC | **VISOK** |
-| `CC_TASK_ROBOT_PRODAVAC_KOMPLET.md` | Robot prodavač — Šeki pilot (kiosk, Stripe, QR plakati) | CC | SREDNJI |
-| `CC_TASK_TESTS_PREDKOMORA.md` | 15 testova StagingFileHeader + Predkomora | CC | SREDNJI |
-| `GEMINI_TASK_TESTS_HASHCHAIN.md` | 13 testova Hash Chain + PLG chain_link_safe | Gemini | SREDNJI |
-| `GEMINI_TASK_LIMIT_AI_COMPLIANCE.md` | ComplianceWatchdog Faza 2 | Gemini | SREDNJI |
-| `CC_TASK_20260322_BACKLOG.md` | Konsolidirani backlog | — | REFERENCA |
+**Strategija:** Marija Brtan (Konjik d.o.o.) je centralni kanal.
+- 86 firmi iz Synesis importa je njenih klijenata
+- Kada Marija počne koristiti arhivu → sve firme slijede
+- Materijali koje treba pripremiti (AI zadatak, uskoro):
+  - QR kod plakat za ulaz (brzi pristup)
+  - Email s QR kodom i promo letkom za firme koje imaju email
+  - Personalizirani link po firmi
+- **Status:** Čeka da Marija bude sigurna u arhivu i fiskal
 
-**Napomena:** CC_TASK_LIMIT_AI_FUNDS.md naveden u STATUS-u ali fajl ne postoji — treba napisati.
+**Sinesis firme u bazi:** 86 firmi, 33.270 partnera, 10.206 faktura — UVEZENO 23.03.2026
 
 ---
 
 ## Arhitektura — ključni moduli
 
 ### Cockpit (refaktorizirano 22.03. — commit 8d44bad)
-- `core/cockpit_views.py` — **NOVI FAJL** — sve cockpit funkcije izolirane iz core/views.py
-- `COCKPIT_USERS = frozenset(...)` — jedino mjesto za access listu (bio rasut 5x)
-- `_cockpit_allowed(user)` + `_cockpit_guard(request)` — shared helpers
+- `core/cockpit_views.py` — sve cockpit funkcije izolirane
 - `@cockpit_required()` dekorator u `permissions/decorators.py`
-- `core/views.py` smanjen 2815 → 2414 linija
-- `helpdesk/whatsapp_webhook.py` → delegira normalize_phone na `core.whatsapp.normalize_phone`
 
-### Share sistem
-- `templates/includes/_share_modal.html` — globalni share modal (WhatsApp, Email, QR, Print, Copy)
-- Pozivanje: `openShare({type:'receipt'|'invoice'|'document', id:123, title:'...'})` 
-- Trenutno uključen samo u: `pos/quick.html`, `pos/receipt_list.html`
-- **NEDOSTAJE** na: arhivi, invoicingu, partnerima
-
-### Nav buttons
-- `templates/includes/_nav_buttons.html` — **TREBA KREIRATI**
-- Pattern: Natrag / Odustani / [Submit Nastavi →]
-- Pozivanje: `{% include "includes/_nav_buttons.html" with back_url="..." forward_label="..." cancel_url="..." %}`
-
-### POS
-- `pos/models.py` → `POSCashier` model: name, pin_hash, oib, set_pin(), check_pin()
-- `templates/pos/onboarding.html` → wizard s koracima (progress bar)
-- `templates/pos/quick.html` → glavna blagajna (share modal tu postoji)
-- Multi-konobar: PIN preuzimanje → bon bilježi cashier OIB
-- Besplatni plan: 1 terminal, soft banner pri otvaranju 2. terminala
-
-### Livestock/Vet (bugfixi 22.03.)
-- PDF integrity badge: bio dvostruki `render_to_string` — POPRAVLJENO
-- Robot API: auto-zapisuje MilkRecord (params: jutarnja_l, vecernja_l)
-- `inspector_invalid.html` template kreiran
-- WhatsApp notify: phone fallback na UserProfile admin
-- JRDZ scope: species_code='GVD' + sex M/F dodano
-- OPG robot_api_key postavljen u Company.settings
-- **OTVORENO:** `sex` polje direktno na Livestock modelu (trenutno se izvodi iz vrste — nije precizno)
-- 47 testova u `livestock/tests.py` (6 klasa)
+### POS — Centar svijeta (commit 2430991)
+- `POSTerminal.quick_actions` (JSONField) + 14 akcija (QUICK_ACTION_REGISTRY)
+- QuickActions panel u `quick.html`, 3 post-receipt hooka
+- Multi-konobar PIN preuzimanje: `POSCashier` model, `set_pin()`, `check_pin()`
 
 ### Arhiva / Smart Import
-- `templates/documents/arhiva_list.html` → lista dokumenata (nema share)
+- `templates/documents/arhiva_list.html` + `scan_batch.html` (5 faza, drag&drop)
 - `smart_import/` → Predkomora OCR pipeline
   - `StagingBatch` → `StagingFile` → `StagingFileHeader`
-  - `extract_invoice_header()` — Gemini OCR za zaglavlje
-  - `auto_match_partner()` — OIB → Partner auto-spajanje
+
+### Invoicing
+- `InvoiceItem.section` + `sort_order` — NOVO (CC_TASK_INVOICE_SECTIONS.md u toku)
+- VIS-AN-2026-003: Teil 1 Arbeiten 17.782,88 € + Teil 2 Material 6.111,86 €
+
+### Auth
+- TOTP (totp_secret/totp_enabled) — postoji, opcija
+- DeviceToken (UUID barcode, POS auto-login) — postoji
+- UserAPIKey (lc_live_ format) — NOVO (CC_TASK_API_KEY_AUTH.md u toku)
 
 ### Hash Chain (commit 73a0701)
-- `pos/hashchain.py` → ChainLink, append_receipt(), verify_chain(), verify_single()
+- `pos/hashchain.py` → ChainLink, append_receipt(), verify_chain()
 
-### PLG Virus (commit 81ee45a)
-- `templates/pos/includes/_viral_footer.html` — share/promo footer na svim dokumentima
-
-### OIB / VAT Lookup
-- `core/oib_validator.py` → validate_oib_hr() ISO 7064, validate_vat_id() HR/DE/AT/SI
-- `core/business_lookup.py` → lookup_business(tax_id, country, company)
-  - HR: VIES → FINA Info.BIZ → fallback
-  - DE: VIES (USt-IdNr) — Kleinunternehmer = ručni unos
-  - **NEDOSTAJE:** validate_steuernummer_de() za lokalni DE porezni broj
+### eRačun posrednik
+- `CC_TASK_ERACUN_POSREDNIK_F1.md` čeka FINA API key za live test
+- Certifikat Konjik: `/etc/limit-connect/certs/` vrijedi do 2030-07-31
 
 ---
 
@@ -115,23 +111,16 @@ systemctl restart gunicorn-fina celery-worker celery-beat
 | Klijent | Firma | Moduli | Status |
 |---------|-------|--------|--------|
 | Seki Temaj | Uvijek Friško | POS (3 lok, 5 term), Pickup QR, Booking | LIVE |
-| Marija Brtan | Konjik d.o.o. | Arhiva, eRačun, Invoicing, Konto | LIVE |
+| Marija Brtan | Konjik d.o.o. | Arhiva, eRačun, Invoicing, Konto | LIVE — fiskal 2 + arhiva |
 | Nikša Visković | Viskovic Bau | DE market, GoBD, TSE, DSFinV-K | ONBOARDING |
 | Dragan Jakovljevic | Viskovic Bau | Partner (Strategie), superadmin | ONBOARDING |
 | Slađana Kruljac | O.P.G. Kruljac + Korpaš d.o.o. | Livestock, Vet, Arhiva | LIVE |
 
-### Korpa grupa (registrirane 22.03.)
-| Firma | OIB | User | Email |
-|-------|-----|------|-------|
-| Korpaš d.o.o. | 92922919857 | katarina.furdi | katarina.furdi@limit-connect.com |
-| KUD Dukat Vladislavci | 12817544866 | kud.dukat | kud.dukat@limit-connect.com |
-| O.P.G. Kruljac Slađana | 41439993573 | opg_kruljac | opg.kruljac@limit-connect.com |
-| Furdi, obrt | 88069902084 | furdi.obrt | furdi.obrt@limit-connect.com |
-| Dubinsko Čišćenje Čizo | 69824516722 | cizo.ciscenje | cizo.ciscenje@limit-connect.com |
+### Synesis / Korpa klijenti
+- 86 firmi Marijinih klijenata — u bazi od 23.03.2026
+- Korpa direktni: Korpaš, KUD Dukat, OPG Kruljac, Furdi obrt, Cizo čišćenje
 
 ### Superadmini
-| User | Firma |
-|------|-------|
 | superadmin / antonio.brtan | Platform owner (Ivan Brtan) |
 | marija.brtan | Konjik d.o.o. |
 | niksa.viskovic | Viskovic Bau |
@@ -139,5 +128,5 @@ systemctl restart gunicorn-fina celery-worker celery-beat
 
 ---
 
-## Git HEAD
-`8d44bad` — Refactor: cockpit izolacija + globalni dekorator + normalize_phone unifikacija
+## Git HEAD (zadnji poznati)
+`c76f55a` — POS Simulacija 25/25

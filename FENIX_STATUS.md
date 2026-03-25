@@ -6,106 +6,113 @@
 ---
 
 ## Zadnje azuriranje
-2026-03-24 sesija — POS Simulacija 25/25 ✅ (Sonnet)
+2026-03-25 sesija — Invoicing fixes LIVE + PDF sekcije + WhatsApp + Redirecti (Sonnet)
 Git HEAD: c76f55a
 
 ---
 
+## ★ JOKER PRICING + ONBOARDING REVOLUTION — Plan (2026-03-25)
+
+### Joker Pricing Page (/pricing/)
+**Filozofija:** Korisnik kaže tko je → BORG mu kaže što treba. Bez 11 kartica.
+
+**6 profila → 1-3 kartice po profilu:**
+| Profil | Preporuka | URL |
+|--------|-----------|-----|
+| 🔨 Obrtnik | Paušalac (0 EUR) | /pricing/?profile=obrtnik |
+| ❤️ Udruga | Udruga (14.99) | /pricing/?profile=udruga |
+| 🛏 Iznajmljivač | Rental (9.99) | /pricing/?profile=rental |
+| 🏢 Firma | Starter/Pro/Enterprise | /pricing/?profile=firma |
+| 👔 Računovođa | Arhiva+AI/Enterprise/Distributor | /pricing/?profile=racunovodja |
+| 🍽 Gastro | POS/POS+Arhiva/Professional | /pricing/?profile=gastro |
+
+**4 kutna dugmeta (uvijek vidljiva):**
+- ↗ Usporedi sve  ↖ Registracija
+- ↘ Demo          ↙ WhatsApp kontakt
+
+**Status:** PLAN — CC_TASK_JOKER_PRICING.md (treba napisati)
+
+---
+
+### 3-Klik Registracija (NOVO — zamjena za stari flow)
+**Model:**
+- Registracija → 15 dana sve bez ograničenja (testna faza)
+- Nakon 15 dana: POS + Arhiva računa ostaju BESPLATNO 11 godina
+- Plaćeni moduli: dostupni tek nakon odabira paketa
+
+**Onboarding flow (odmah nakon registracije):**
+1. Dobrodošlica ekran
+2. Ugovor o korištenju (prihvati/odbij)
+3. Kamera → uslika osobni dokument + rješenje o osnivanju obrta
+4. AI agenti popunjavaju sve podatke o firmi/obrtniku automatski
+5. IBAN upozorenje: zakonska provjera + upozorenje o rizicima i pravima (uskladiti sa zakonom!)
+
+**Globalni UI — NA SVIM FORMAMA (zamjena Demo+Kontakt):**
+- AI ikona — dolje lijevo, pomičan (drag & drop), zamjenjuje "Kontakt" gumb
+- Kamera ikona — dolje desno, pomičan (drag & drop), zamjenjuje "Demo" gumb
+- Isključiti sve stare popup poruke — zamijenjeni AI pratnjom ("Nisi sam — tu sam ja...")
+
+**Status:** PLAN — CC_TASK_3KLIK_REGISTRACIJA.md + CC_TASK_GLOBAL_AI_CAMERA.md (treba napisati)
+
+---
+
+### VIS-AN-2026-003 — Ponuda Islamović, sekcije (2026-03-25)
+**Status:** CC_TASK_INVOICE_SECTIONS.md SPREMAN — čeka CC Code
+**Struktura:**
+- Teil 1 — Arbeitsleistungen: 17 stavki, neto 17.782,88 €
+- Teil 2 — Material und Ausstattung: 10 stavki, neto 6.111,86 €
+- Ukupno neto: 23.894,74 € | Bruto: 28.434,72 €
+**Nakon CC taska:** Ponuda ide Zlatanu Islamović (+491727203519) — Ivan čeka potvrdu
+
+---
+
+### Growth Plan 2026 — KONKRETAN
+| Milestone | Datum | Akcija |
+|-----------|-------|--------|
+| Testna faza | do 1.4.2026 | 87 firmi na vrata, testiranje kompletnog flowa |
+| 50% kapaciteta | cca travanj | Sign za preseljenje u novo gnijezdo |
+| Uskrs 2026 | slobodan tjedan | Priprema terena za 1500 korisnika |
+| Novo gnijezdo | uskrs/travanj | HW specifikacija za 1500 korisnika (Sonnet priprema) |
+| Skaliranje | ovisno o tempu | Potencijalno još jedno preseljenje |
 
 ---
 
 ## TAX WIZARD — Plan kreiran (2026-03-24)
-Fajlovi:
-- TAX_WIZARD_MASTER_PLAN.md — master plan + milestone tracker
-- CC_TASK_TAX_WIZARD_F1.md — infrastruktura (CC Code)
-- GEMINI_TASK_TAX_WIZARD_F2.md — AI motor + deductions (Gemini)
-- SONNET_TASK_TAX_WIZARD_F3.md — UX + partner portal + PDF (Sonnet)
-- IVAN_TASK_TAX_WIZARD_F4.md — tržište + distribucija (Ivan)
-
 Status: PLAN READY — čeka se F1 pokretanje
-MVP target: 2027-02-01 (rok DOH 2026)
-
+Taskovi: CC_TASK_TAX_WIZARD_F1.md | GEMINI_TASK_TAX_WIZARD_F2.md | SONNET_TASK_TAX_WIZARD_F3.md
 
 ---
 
 ## POS KAO CENTAR SVIJETA — reBORGanizacija (2026-03-24)
-Commit: 2430991
+Commit: 2430991 — QuickActions, 14 akcija, 3 post-receipt hooka, Open/Closed princip
 
-**Što je izgrađeno (229 LOC, 0 promjena u core views.py):**
-- POSTerminal.quick_actions (JSONField) + 14 registriranih akcija (QUICK_ACTION_REGISTRY)
-- Auto-defaults po pos_type: retail/reception/field/service/restaurant
-- Udruga override (business_type override umjesto pos_type)
-- QuickActions panel u quick.html (JS Action Registry, dinamički render)
-- 3 post-receipt context hooka u pos/signals.py:
-  - reception → check_evisitor_pending.delay()
-  - udruga → auto_extend_membership_from_receipt.delay()
-  - field → send_receipt_whatsapp.delay()
-- Open/Closed princip: proširenje bez modifikacije jezgre
+**eRacun posrednik — Bloker:**
+- FINA endpoint ispravljen, ali treba API key za live test
+- CC_TASK_ERACUN_POSREDNIK_F1.md čeka ispravak endpointa
 
-**eRacun posrednik:**
-- get_cert_pem() bug fix (cert_p12 → cert_path)
-- Konjik certifikat: /etc/limit-connect/certs/konjik-doo-fina-certifikat-37590751921.A.1.p12
-- Vrijedi do: 2030-07-31
-- Pipeline radi: certifikat → validacija → XML → potpis → SOAP
-- Bloker: pogrešan FINA endpoint (fiskalizacija vs eRačun)
-- CC_TASK_ERACUN_POSREDNIK_F1.md — čeka ispravak endpointa
+**UI Templates — DONE (2026-03-24)**
+Commit: fb2b82e — Arhiva, Tax Wizard, Rental sve templatei
 
-
-### UI Templates — DONE (2026-03-24 13:05)
-Commit: fb2b82e
-
-**Arhiva:**
-- documents/templates/documents/arhiva_list.html — kompletna tablica, filteri, stats, bookmark, paginacija
-- documents/templates/documents/scan_batch.html — 5 faza (upload/preview/AI/rezultati/done), drag&drop, kompresija WebP, live polling
-
-**Tax Wizard:**
-- tax_wizard/templates/tax_wizard/dashboard.html — obrasci, sesije, rokovi, tierovi
-- tax_wizard/templates/tax_wizard/wizard.html — JSON-driven koraci, live kalkulator, AI poruke
-- tax_wizard/templates/tax_wizard/no_company.html
-
-**Rental:**
-- Sve migracije OK (Guest, GuestDocument, RentalInvoice, TrafficRecord)
-- ocr.py, evisitor.py, invoice_service.py — sve importa
-
-Status: Marija može pristupiti arhivi, scan batchu i poreznom savjetniku.
-
-
-### CC Code sprint — Task A + B + Sandbox + NN fix (2026-03-24 ~14:00)
+**CC Code sprint Task A+B (2026-03-24)**
 Commiti: 46539a2, d836b89, 861bcfa, 2430991
-
-**Task A — eRačun Endpoint:**
-- FINA_URLS['test'] = 'https://eracun-test.fina.hr/eRacunServis' (bio FiskalizacijaService)
-- SOAPAction header dodan u send_to_fina()
-- Posrednik fallback ugrađen
-
-**Task B — QuickActions UI Handlers (templates/pos/quick.html):**
-- rental_checkin → modal s AJAX listom današnjih dolazaka
-- rental_checkout → modal s listom odlazaka + plaćeno/neplaćeno  
-- rental_evisitor → modal s pending bookings + 1-klik XML download
-- rental_ocr → modal s kamerom + AI OCR + confidence prikaz
-- membership_scan → modal s lookup po iskaznici/OIB + obnova
-- 5 novih API endpointa POS→Rental/Udruge bridge
-
-**Smart Mailbox UI (d836b89):** swipe-to-approve, push notifikacije, mobile CSS
-**EU Rental Tax (861bcfa):** RentalTaxEngine, razred_mjesta, Guest.evisitor_status
-**NN Scraper (nn_feed_service.py):** Web scraping umjesto RSS (NN nema javni RSS)
 
 **Čeka:**
 - FINA/Moj-eRacun API key → live test eRačun
 - Ivan: 3 beta iznajmljivača
 - Marija: T&C consent (0/78 firmi)
 
+---
+
 ## ★ NOVI SMJER — BORG SYSTEM FENIX (2026-03-24)
 Master plan: /var/www/fina-connect/BORG_FENIX_MASTER_PLAN.md
-Filozofija: Asimilacija stvarne materije (zakoni, računi, tržište) u real-time.
-90-dnevni plan: 3 faze (Asimilacija → Compliance → Autonomija)
-Svi novi taskovi slijede ovaj smjer.
+
+---
 
 ## Aktivni klijenti
 | Klijent | Firma | Moduli | Status |
 |---------|-------|--------|--------|
 | Seki Temaj | Uvijek Frisko | POS (3 lok, 5 term), Pickup QR, Booking | LIVE |
-| Marija Brtan | Konjik d.o.o. | Arhiva, eRacun, Invoicing, Konto | LIVE |
+| Marija Brtan | Konjik d.o.o. | Arhiva, eRacun, Invoicing, Konto | LIVE — fiskal 2 u toku |
 | Niksa Viskovic | Viskovic Bau | DE market, GoBD, TSE, DSFinV-K | ONBOARDING |
 | Dragan Jakovljevic | Viskovic Bau | Partner (Strategie), superadmin | ONBOARDING |
 | Slađana Kruljac | O.P.G. Kruljac + Korpaš d.o.o. | Livestock, Vet, Arhiva | LIVE |
@@ -120,8 +127,6 @@ Svi novi taskovi slijede ovaj smjer.
 | Dubinsko Čišćenje Čizo | 69824516722 | cizo.ciscenje | cizo.ciscenje@limit-connect.com |
 
 ## Superadmini
-| User | Login | Firma |
-|------|-------|-------|
 | Ivan Brtan | superadmin / antonio.brtan | Platform owner |
 | Marija Brtan | marija.brtan | Konjik d.o.o. |
 | Niksa Viskovic | niksa.viskovic | Viskovic Bau |
@@ -131,78 +136,55 @@ Svi novi taskovi slijede ovaj smjer.
 
 ## DONE — NE DIRATI
 
-### Ured u džepu — Wizard P0 (KOMPLET — 23.03.2026)
-Commit: 8a2fc66
-
-**Što je izgrađeno:**
-- `WizardDraft` model (partners/models.py) + migration 0007
-  - Polja: session_key, ip_address, tc_accepted+timestamp, nkd_codes_json,
-    firma_ime, broj_osnivaca, direktor (ime/oib/email), kapital_tip,
-    koristi_konjik, sjediste polja, current_step, completed, pending_company FK,
-    accounting_firm FK, created_at/updated_at
-- 6 URL endpointa: wizard/, save-step/, step-preview/, reset/, suglasnost-pdf/, nkd-semantic/
-- AJAX perzistencija — svaki "Dalje" sprema u bazu (wizard nije stateless)
-- T&C korak 0 — GDPR gatekeeper s IP+timestamp bilježenjem
-- Company factory — na koraku 2 kreira Company(status=pending, OIB=DRAFTxxxxxx)
-- CompanyPartnership — automatski veže pending Company na accounting_firm (Marija)
-- NKD sync — na koraku 5 upisuje primarni NKD na pending Company
-- OnboardingProgress — automatski kreiran na završetku (korak 7)
-- CustomEvent arhitektura JS — `wizard:step` event, nema override bugova
-- StateValidator — collectState() prisilno povlači DOM podatke prije save-a
-- NKD semantic search — keyword + Haiku AI fallback (74 kodova u bazi)
-- PDF suglasnosti — WeasyPrint, 13KB, pravno ispravan (ZTD čl.36)
-- Resume detection — wizard nastavlja od zadnjeg koraka
-
-**Testirano:**
-- Komplet flow test: draft → T&C → NKD → firma → Company factory → direktor →
-  kapital → sjedište → NKD sync → OnboardingProgress → završetak ✓
-- Haiku semantic: "prodaja kave i kolača online" → 5 točnih NKD-ova s AI obrazloženjem ✓
-- PDF: 13KB, generiran za <1s ✓
-
-**URL:** /hr/partners/wizard/
-
+### Ured u džepu — Wizard P0 (KOMPLET — 23.03.2026) — Commit: 8a2fc66
 ### BORG FENIX Plan (KOMPLET — 24.03.2026)
-- BORG_FENIX_MASTER_PLAN.md — 90-dnevni master plan — DONE
-- CC_TASK_SCAN_BATCH_100.md — batch scan do 100, 2-tipke UI — DONE (task spreman)
-- GEMINI_TASK_COMPLIANCE_WATCHDOG_V2.md — legal exploit engine — DONE (task spreman)
-- HAIKU_TASK_REALTIME_CLASSIFIER.md — multi-page grouping — DONE (task spreman)
-
-### Synesis P1 Import (23.03.2026)
-- 86 firmi, 33.270 partnera, 11.856 artikala — DONE
-- Fakture: 10.206 uvezenih — DONE
-- Stavke knjiženja: ~110.000 · Temeljnice: ~17.000 — DONE
-- Globalna bilanca: D=P ±94 EUR — BALANSIRA
-
-### Share Modal + Nav Partial + Cashier Wizard (KOMPLET — 23.03.)
-- Commit: 7d49022
-
-### Cockpit 10/10 (KOMPLET — 22.03.)
-- Commit: 8d44bad, 9d7a68a, 8b5eb7f
-
-### Livestock/Vet modul bugfixi (22.03.) — DONE
-
-### Korpa firme registracija (22.03.) — DONE
-
-### POS Simulacija — DONE (2026-03-24)
-Commit: c76f55a
-- 6 scenarija: quick, retail, udruga, field, brzi-iznos, reception
-- 25/25 OK | 0 ERROR | 12 training računa | 1.418 EUR ukupno
-- S3 membership, S4 WhatsApp, S6 eVisitor hookovi potvrđeni
-
+### Synesis P1 Import (23.03.2026) — 86 firmi, 33.270 partnera, 10.206 faktura, D=P ±94 EUR
+### Share Modal + Nav Partial + Cashier Wizard (KOMPLET — 23.03.) — Commit: 7d49022
+### Cockpit 10/10 (KOMPLET — 22.03.) — Commit: 8d44bad
+### POS Simulacija (KOMPLET — 24.03.) — Commit: c76f55a — 25/25 OK
 
 ### [SVE PRETHODNO — NEPROMIJENJENO]
-### Udruge modul, FINA izvjestaji, DE KassenSichV, EU Fondovi, AML, Payments, i18n,
-### POS Offline, FenixCamera, Transport Faza 1, Synesis Import, Infrastruktura,
-### Sales + Onboarding, Dokumenti + PDF, Mobile, MCP Server, WhatsApp, Tim Chat,
-### Country Registry, AI Tools v2, Livestock, Intelligence, VetIS, Institutional API,
-### limit_connect_ai Faza 1, GTM Foundation, Invoice Growth Engine, Predarhiva OCR,
-### Predkomora, Fiskalizacija fix, Hash Chain, PLG Virus, OIB Validator, POS QR, Robot Plan,
-### Security P0 (certifikati → /etc/limit-connect/certs/), Knowledge Graph (11 opp, 932 match),
-### buyer_type + invoice routing (NN 89/25), T&C consent middleware
+### Udruge, FINA, DE KassenSichV, EU Fondovi, AML, Payments, i18n, POS Offline,
+### FenixCamera, Transport F1, Infrastruktura, Dokumenti+PDF, Mobile, MCP Server,
+### WhatsApp, Tim Chat, Country Registry, AI Tools v2, Livestock, Intelligence, VetIS,
+### Institutional API, limit_connect_ai F1, GTM, Invoice Growth, Predarhiva OCR,
+### Predkomora, Fiskalizacija fix, Hash Chain, PLG Virus, OIB Validator, POS QR,
+### Robot Plan, Security P0, Knowledge Graph, buyer_type, T&C consent middleware
+
+---
+
+## TRAJNI RESURSI — REFERENTNI FAJLOVI
+
+| Fajl | Opis |
+|------|------|
+| EU_FONDOVI_MASTER_MATRIX.md | Sve korisničke grupe + EU prilike + promo argumenti |
+| BORG_FENIX_MASTER_PLAN.md | 90-dnevni master plan |
+| LIMIT_CONNECT_AI_PLAN.md | AI Faze 1-4 |
+| GTM_PLAN_LIMIT_CONNECT_V1.md | Prodajni plan |
+| CLAUDE.md | Komunikacijski protokol za agente |
 
 ---
 
 ## TASKOVI ZA AGENTE
+
+### ★ HITNO — Invoice Sections (2026-03-25)
+| Fajl | Agent | Prioritet | Napomena |
+|------|-------|-----------|---------|
+| CC_TASK_INVOICING_BACKLOG.md | CC Code | **VISOK** | U1-U3+Z1-Z3: flow diagram, clone, expiry, client accept |
+| CC_TASK_INVOICE_SECTIONS.md | CC Code | **HITNO** | VIS-AN-2026-003 za Zlatana — čeka slanje | → DONE: sekcije aplicirane direktno
+| CC_TASK_API_KEY_AUTH.md | CC Code | **VISOK** | Passwordless API ključ — nova registracija + portal |
+| CC_TASK_SUBSCRIPTION_TRACKING.md | CC Code | **VISOK** | ARR/MRR tracking, trial management, cockpit metrics |
+| CC_TASK_BEEKEEPING_MODULE.md | CC Code | **VISOK** | Apiary+Hive+EPP Prilog3+berba meda — ~11k pčelara HR |
+| CC_TASK_LIMIT_AI_FUNDS.md | CC Code | **VISOK** | EU fondovi workflow — pčelari+rental+udruge+MSP+DE |
+| GEMINI_TASK_COMPLIANCE_WATCHDOG_V2.md | Gemini | **VISOK** | Ažurirano: +pčelari, +rental, 20 izvora, fund scanner |
+| CC_TASK_CLEANUP_PRINT_LOGS.md | CC Code | NIZAK | print()→logger, tools_archive arhiviranje |
+
+### ★ NOVO — Joker Pricing + 3-klik Onboarding
+| Fajl | Agent | Prioritet |
+|------|-------|-----------|
+| CC_TASK_JOKER_PRICING.md | CC Code | **VISOK** |
+| CC_TASK_3KLIK_REGISTRACIJA.md | CC Code | **VISOK** |
+| CC_TASK_GLOBAL_AI_CAMERA.md | CC Code | **VISOK** |
 
 ### ★ BORG FENIX — Faza 1
 | Fajl | Agent | Prioritet |
@@ -222,54 +204,33 @@ Commit: c76f55a
 | GEMINI_TASK_TESTS_HASHCHAIN.md | Gemini | SREDNJI |
 | GEMINI_TASK_LIMIT_AI_COMPLIANCE.md | Gemini | SREDNJI |
 | GEMINI_TASK_CROSS_MODULE_POS_INVOICING.md | Gemini | **VISOK** |
-| GEMINI_TASK_CROSS_MODULE_POS_INVOICING.md | Gemini | **VISOK** |
 
 ### Treba napisati (backlog)
+- CC_TASK_JOKER_PRICING.md
+- CC_TASK_3KLIK_REGISTRACIJA.md
+- CC_TASK_GLOBAL_AI_CAMERA.md
+- HW_SPEC_1500_USERS.md — za Uskrs
 - CC_TASK_LIMIT_AI_FUNDS.md — EU fondovi Faza 2
-- CC_TASK_WIZARD_NKD_BULK.md — DZS puna NKD lista (~1000 kodova) umjesto 74
-- CC_TASK_WIZARD_BILJEZNICK_LISTA.md — statična JSON lista e-Notar bilježnika
+- CC_TASK_WIZARD_NKD_BULK.md
+- CC_TASK_WIZARD_BILJEZNICK_LISTA.md
 
 ---
 
-## OTVORENO — Wizard P1 (sljedeće sesije)
+## OTVORENO
 
-### Wizard P1 — DONE (23.03.2026)
-- Celery cleanup task (03:00 dnevno) — DONE
-- Haiku retroNKD: 47/86 firmi ažurirano (55%) — DONE
-- Funnel widget u dashboard — DONE
-- Beat schedule registriran — DONE
-
-### Wizard — što ostaje za P2
-| Task | Opis | Prioritet |
-|------|------|-----------|
-| NKD bulk import | DZS puna lista ~1000 kodova (74 je dovoljno za demo) | SREDNJI |
-| OIB validacija na draft | Luhnov algoritam na direktor_oib pri save | SREDNJI |
-| Marija dashboard widget | "Aktivni wizard drafti" pregled za Mariju | SREDNJI |
-| DE/EN lokalizacija | Template na DE/EN za EU klijente | NIZAK (Q3) |
-| Bilježnik lista | Statični JSON 3-5 bilježnika za e-Notar | NIZAK |
-| T&C dokument PDF | Pravi pravni dokument za TC consent (ne inline tekst) | SREDNJI |
-
-### Kritični otvoreni problemi (van wizard-a)
-| Problem | Opis | Hitnost |
-|---------|------|---------|
-| T&C consent | View + banner implementiran (commit 8def4fe) | **DONE** |
-| NKD NULL 86/86 | Sve firme bez NKD — KG confidence niži | VISOK |
-| _build_xml() | IMPLEMENTIRANO (generate_ubl_xml + build_fina_xml) | **DONE** |
-| buyer_type b2c default | 19.237 partnera treba reklasifikaciju | VISOK |
-| SupplierRiskAlert | _save_alert popravljen + invoice signal (commit cd5b9f6) | **DONE** |
+### Kritični problemi
+| Problem | Hitnost |
+|---------|---------|
+| NKD NULL 86/86 firmi | VISOK |
+| buyer_type b2c default (19.237 partnera) | VISOK |
+| FINA/Moj-eRacun API key za eRačun live | VISOK |
 
 ### DE Compliance
 - Fiskaly sandbox (treba API ključeve) — CEKA
 - DATEV SKR03/04 kontni plan — OTVORENO
 - DATEV Buchungsstapel export — OTVORENO
-- Steuernummer validacija — NEDOSTAJE
 
-### Livestock
-- sex polje direktno na modelu — OTVORENO
-- Testovi (47) — provjeri rezultate
+### Wizard P2 backlog
+- NKD bulk import (~1000 kodova), OIB validacija, Marija widget, T&C PDF
 
-### Knjiga boljitaka (9/21 preostalo)
-- B-01, B-05, B-06, B-09, B-10, B-11, B-13, B-17, B-21
-
-### Transport Faza 2
-- CMR auto, multi-country routing, kabotaža, Driver PWA
+### Transport Faza 2, Livestock sex polje, Knjiga boljitaka (9/21)

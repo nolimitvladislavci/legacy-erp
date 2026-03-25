@@ -100,6 +100,22 @@
   thead th.r { text-align:right; }
   tbody tr { border-bottom:0.5pt solid #e2e8f0; }
   tbody tr:nth-child(even) { background:#f8fafc; }
+  .sec-header td {
+    background: #1e3a5f;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 8.5pt;
+    padding: 5pt 7pt;
+    letter-spacing: 0.3px;
+    border-bottom: none;
+  }
+  .sec-subtotal td {
+    background: #f0f4f8;
+    font-size: 8.5pt;
+    padding: 4pt 7pt;
+    border-top: 0.8pt solid #1e3a5f;
+    border-bottom: 1.5pt solid #1e3a5f;
+  }
   tbody td { padding:5.5pt 7pt; font-size:8.8pt; }
   tbody td.r { text-align:right; }
 
@@ -302,7 +318,14 @@
     <th class="r" style="width:12%">Betrag</th>
   </tr></thead>
   <tbody>
-    {% for item in invoice.items.all %}
+    {% if sections %}
+      {% for sec in sections %}
+        {% if sec.name %}
+        <tr class="sec-header">
+          <td colspan="6">{{ sec.name }}</td>
+        </tr>
+        {% endif %}
+        {% for item in sec.items %}
     <tr>
       <td>{{ forloop.counter }}</td>
       <td>{{ item.description }}</td>
@@ -312,7 +335,27 @@
       <td class="r">{% if item.discount_percent %}{{ item.discount_percent }}%{% else %}–{% endif %}</td>
       <td class="r">{{ item.total_price|floatformat:2 }} {{ invoice.currency }}</td>
     </tr>
-    {% endfor %}
+        {% endfor %}
+        {% if sec.name %}
+        <tr class="sec-subtotal">
+          <td colspan="5" style="text-align:right;font-style:italic">Zwischensumme {{ sec.name|slice:":6" }}:</td>
+          <td style="text-align:right;font-weight:700">{{ sec.subtotal|floatformat:2 }} {{ invoice.currency }}</td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% for item in invoice.items.all %}
+        <tr>
+          <td style="color:#94a3b8;font-size:7.5pt">{{ forloop.counter }}</td>
+          <td>{{ item.description }}</td>
+          <td class="r">{{ item.quantity }}</td>
+          <td>{{ item.unit }}</td>
+          <td class="r">{{ item.unit_price|floatformat:2 }} {{ invoice.currency }}</td>
+          <td class="r">{% if item.discount_percent %}{{ item.discount_percent }}%{% else %}–{% endif %}</td>
+          <td class="r">{{ item.total_price|floatformat:2 }} {{ invoice.currency }}</td>
+        </tr>
+      {% endfor %}
+    {% endif %}
   </tbody>
 </table>
 
