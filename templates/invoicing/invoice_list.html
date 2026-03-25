@@ -1,7 +1,73 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Računi{% endblock %}
-{% block page_title %}Računi{% endblock %}
+{% block title %}Računi
+<script>
+document.getElementById('cam-input')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('source', 'camera');
+  
+  // Status feedback
+  const btn = document.querySelector('[onclick*="cam-input"]');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obradujem...';
+  btn.disabled = true;
+  
+  fetch('/smart-import/api/upload/', {
+    method: 'POST',
+    body: fd,
+    headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok || d.id) {
+      btn.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Spremljeno';
+      setTimeout(() => { location.reload(); }, 1500);
+    } else {
+      btn.innerHTML = origHTML; btn.disabled = false;
+      alert(d.error || 'Greška pri uploadu');
+    }
+  })
+  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; alert('Greška mreže'); });
+});
+</script>
+{% endblock %}
+{% block page_title %}Računi
+<script>
+document.getElementById('cam-input')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('source', 'camera');
+  
+  // Status feedback
+  const btn = document.querySelector('[onclick*="cam-input"]');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obradujem...';
+  btn.disabled = true;
+  
+  fetch('/smart-import/api/upload/', {
+    method: 'POST',
+    body: fd,
+    headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok || d.id) {
+      btn.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Spremljeno';
+      setTimeout(() => { location.reload(); }, 1500);
+    } else {
+      btn.innerHTML = origHTML; btn.disabled = false;
+      alert(d.error || 'Greška pri uploadu');
+    }
+  })
+  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; alert('Greška mreže'); });
+});
+</script>
+{% endblock %}
 {% block content %}
 <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
   {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
@@ -24,9 +90,15 @@
     <h2 class="mb-0"><i class="fas fa-file-invoice-dollar me-2 text-warning"></i>{% trans "Računi" %}</h2>
     <small class="text-muted">{{ invoices.count }} ukupno</small>
   </div>
-  <a href="{% url "invoicing:invoice_create" %}" class="btn btn-primary">
-    <i class="fas fa-plus me-2"></i>{% trans "Novi račun" %}
-  </a>
+  <div class="d-flex gap-2">
+    <button onclick="document.getElementById('cam-input').click()" class="btn btn-outline-warning" title="Skeniraj račun kamerom">
+      <i class="fas fa-camera"></i><span class="d-none d-md-inline ms-1">Skeniraj</span>
+    </button>
+    <a href="{% url "invoicing:invoice_create" %}" class="btn btn-primary">
+      <i class="fas fa-plus me-2"></i><span class="d-none d-sm-inline">{% trans "Novi račun" %}</span><span class="d-sm-none">+</span>
+    </a>
+  </div>
+  <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
 </div>
 
 <div class="row g-2 mb-3">
@@ -181,5 +253,38 @@
   </div>
 </div>
 {% endif %}
+
+<script>
+document.getElementById('cam-input')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('source', 'camera');
+  
+  // Status feedback
+  const btn = document.querySelector('[onclick*="cam-input"]');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obradujem...';
+  btn.disabled = true;
+  
+  fetch('/smart-import/api/upload/', {
+    method: 'POST',
+    body: fd,
+    headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok || d.id) {
+      btn.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Spremljeno';
+      setTimeout(() => { location.reload(); }, 1500);
+    } else {
+      btn.innerHTML = origHTML; btn.disabled = false;
+      alert(d.error || 'Greška pri uploadu');
+    }
+  })
+  .catch(() => { btn.innerHTML = origHTML; btn.disabled = false; alert('Greška mreže'); });
+});
+</script>
 {% endblock %}
 {% include 'includes/_share_modal.html' %}
