@@ -193,6 +193,22 @@ class Company(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # ── Vault / Deaktivacija (Data Vaulting paradigma) ───────────────────────
+    is_vaulted = models.BooleanField(
+        default=False, verbose_name=_('Zapecacena arhiva'),
+        help_text=_('True = firma deaktivirana, podaci zapecaceni. Baza NETAKNUTA.'),
+    )
+    is_deactivated = models.BooleanField(
+        default=False, verbose_name=_('Deaktiviran'),
+    )
+    deactivation_requested_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('Zahtjev za deaktivacijom'),
+    )
+    deactivation_reason = models.CharField(
+        max_length=500, blank=True, default='',
+        verbose_name=_('Razlog odlaska'),
+    )
+
     # Geofence / GPS
     latitude = models.FloatField(null=True, blank=True, verbose_name='GPS Latitude')
     longitude = models.FloatField(null=True, blank=True, verbose_name='GPS Longitude')

@@ -1,0 +1,173 @@
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Zapečati Arhivu - LIMIT CONNECT{% endblock %}
+{% block page_title %}Deaktiviraj i Zapečati Arhivu{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  {% if is_vaulted %}
+  {# ── Arhiva zapečaćena ─────────────────────────────────────── #}
+  <div class="alert alert-secondary text-center" role="alert">
+    <i class="fas fa-vault fa-2x mb-2 d-block"></i>
+    <h5>Arhiva zapečaćena</h5>
+    <p class="mb-0">
+      Vaši poslovni podaci čuvaju se kao nepromjenjiva arhiva
+      sukladno čl. 17. st. 3. GDPR-a, Zakonu o računovodstvu i Općem poreznom zakonu.
+    </p>
+    <p class="mt-2 text-muted small">
+      Želite se vratiti? Kontaktirajte nas: info@limit-connect.com — reaktivacija je moguća u jednom kliku.
+    </p>
+  </div>
+
+  {% elif is_pending %}
+  {# ── Vault u tijeku — countdown ────────────────────────────── #}
+  <div class="alert alert-warning" role="alert">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-hourglass-half fa-2x me-3"></i>
+      <div>
+        <h5 class="alert-heading mb-1">Zapečaćenje arhive u tijeku</h5>
+        <p class="mb-0">
+          Preostalo: <strong>{{ days_remaining }} dana</strong>
+          {% if expiry_date %}
+            (datum zapečaćenja: {{ expiry_date|date:"d.m.Y" }})
+          {% endif %}
+        </p>
+        <p class="mb-0 mt-1 text-muted">
+          Vaš račun je u read-only načinu. Preuzmite podatke ili poništite zahtjev.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-6 mb-3">
+      <div class="card border-success">
+        <div class="card-body text-center">
+          <h6 class="card-title text-success">Poništi — ostani s nama</h6>
+          <p class="card-text small text-muted">Račun se vraća u potpuno funkcionalni način rada.</p>
+          <form method="post" action="{% url 'accounts:cancel_deactivation' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-undo me-1"></i> Poništi i nastavi raditi
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="card border-primary">
+        <div class="card-body text-center">
+          <h6 class="card-title text-primary">Preuzmi podatke</h6>
+          <p class="card-text small text-muted">GDPR čl. 20 — svi podaci tvrtke u JSON formatu.</p>
+          <a href="{% url 'accounts:export_company_data' %}" class="btn btn-outline-primary">
+            <i class="fas fa-download me-1"></i> Preuzmi sve podatke
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  {# ── Forma za zahtjev ──────────────────────────────────────── #}
+  <div class="alert alert-info" role="alert">
+    <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Što se događa kad zapečatite arhivu?</h5>
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <h6><i class="fas fa-lock me-1 text-warning"></i> Što se zaključava:</h6>
+        <ul class="mb-0">
+          <li>Prijava u sustav se <strong>onemogućuje</strong> nakon {{ grace_period_days }} dana</li>
+          <li>Račun prelazi u <strong>read-only</strong> odmah</li>
+          <li>Svi korisnici tvrtke gube pristup</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6><i class="fas fa-shield-check me-1 text-success"></i> Što ostaje netaknuto:</h6>
+        <ul class="mb-0">
+          <li>Svi poslovni podaci (računi, partneri, artikli)</li>
+          <li>Fiskalni zapisi (JIR, ZKI) — <strong>11 godina</strong></li>
+          <li>Fakture, POS bonovi, porezni dokumenti</li>
+          <li><strong>Reaktivacija moguća</strong> u bilo kojem trenutku</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-light border" role="alert">
+    <h6><i class="fas fa-gavel me-2"></i>Pravna osnova:</h6>
+    <p class="mb-0 small">
+      Sukladno čl. 17. st. 3. Opće uredbe o zaštiti podataka (GDPR), Zakonu o računovodstvu (ZOR),
+      Općem poreznom zakonu (OPZ) i Zakonu o fiskalizaciji (NN 133/12), poslovni podaci i porezna
+      dokumentacija čuvaju se kao nepromjenjiva arhiva u trajanju od 11 godina.
+      Ovo je zakonska obveza koja nadilazi pravo na brisanje.
+    </p>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header bg-dark text-white">
+      <h5 class="card-title mb-0"><i class="fas fa-vault me-2"></i>Deaktiviraj i Zapečati Arhivu</h5>
+    </div>
+    <div class="card-body">
+      <form method="post" action="{% url 'accounts:request_deactivation' %}" id="vault-form">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="confirm-legal" required>
+            <label class="form-check-label" for="confirm-legal">
+              <strong>Potvrđujem</strong> da preuzimam odgovornost za prenesene podatke.
+              Razumijem da će LIMIT Connect, sukladno čl. 17. st. 3. GDPR-a, Zakonu o računovodstvu
+              i Zakonu o fiskalizaciji, zadržati <strong>nepromjenjivu (read-only) kopiju</strong>
+              mojih poslovnih podataka na razdoblje od <strong>11 godina</strong> u svrhu poreznih
+              inspekcija i zakonske arhive.
+            </label>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="confirm-export" required>
+            <label class="form-check-label" for="confirm-export">
+              Razumijem da nakon {{ grace_period_days }} dana <strong>neću imati pristup</strong> sustavu,
+              te sam preuzeo/la svoje podatke ili ću to učiniti tijekom grace perioda.
+            </label>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="reason" class="form-label">Zašto odlazite? <span class="text-muted">(neobavezno)</span></label>
+          <textarea class="form-control" id="reason" name="reason" rows="3"
+                    placeholder="Vaš odgovor nam pomaže poboljšati uslugu..." maxlength="500"></textarea>
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <a href="{% url 'accounts:export_company_data' %}" class="btn btn-outline-primary">
+            <i class="fas fa-download me-1"></i> Preuzmi sve podatke (JSON)
+          </a>
+          <button type="submit" class="btn btn-danger btn-lg" id="btn-vault" disabled>
+            <i class="fas fa-vault me-1"></i> Deaktiviraj i Zapečati Arhivu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% if not is_vaulted and not is_pending %}
+<script>
+(function() {
+  var cb1 = document.getElementById('confirm-legal');
+  var cb2 = document.getElementById('confirm-export');
+  var btn = document.getElementById('btn-vault');
+  function check() { btn.disabled = !(cb1.checked && cb2.checked); }
+  cb1.addEventListener('change', check);
+  cb2.addEventListener('change', check);
+})();
+</script>
+{% endif %}
+{% endblock %}

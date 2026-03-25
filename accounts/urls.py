@@ -1,6 +1,8 @@
 from django.urls import path
 
 from . import views
+from . import deactivation
+from . import data_export
 
 app_name = 'accounts'
 urlpatterns = [
@@ -12,4 +14,10 @@ urlpatterns = [
     path('<int:pk>/toggle/', views.toggle_user_status, name='toggle_status'),
     path('quick-register/', views.quick_register, name='quick_register'),
     path('translations/<str:lang_code>/', views.translation_manager, name='translation_manager'),
+    # Deactivation flow
+    path('deactivate/', deactivation.request_deactivation, name='request_deactivation'),
+    path('deactivate/status/', deactivation.deactivation_status, name='deactivation_status'),
+    path('deactivate/cancel/', deactivation.cancel_deactivation, name='cancel_deactivation'),
+    # GDPR data export
+    path('export/', data_export.export_company_data, name='export_company_data'),
 ]
