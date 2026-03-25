@@ -2352,9 +2352,9 @@ def smart_home(request):
     if 'viskovic-group' in host:
         return render(request, 'viskovic_group_index.html')
 
-    # limit-connect.com public landing page
-    if 'fina-connect' in host and not request.user.is_authenticated:
-        return render(request, 'fina_connect_landing.html')
+    # limit-connect.com / fina-connect — public landing → pricing
+    if ('limit-connect' in host or 'fina-connect' in host) and not request.user.is_authenticated:
+        return redirect('pricing')
 
     # All other domains require login
     if not request.user.is_authenticated:
