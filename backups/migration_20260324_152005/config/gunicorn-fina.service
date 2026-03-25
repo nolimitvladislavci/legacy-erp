@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn daemon for fina-connect
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/fina-connect
+ExecStart=/var/www/fina-connect/venv/bin/gunicorn core.wsgi:application --bind 127.0.0.1:8000 --bind 172.17.0.1:8000 --workers 3 --timeout 300 --max-requests 1000 --max-requests-jitter 50 --graceful-timeout 30 --preload
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

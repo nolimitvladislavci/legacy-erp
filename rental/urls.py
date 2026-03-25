@@ -31,4 +31,25 @@ urlpatterns = [
 
     # Calendar
     path('calendar/', views.calendar_view, name='calendar'),
+
+    # ── F3: Check-in + OCR + eVisitor + Accountant ──
+    path('booking/<int:pk>/checkin/', views.checkin_flow, name='checkin_flow'),
+    path('booking/<int:pk>/ocr/', views.guest_ocr_upload, name='guest_ocr'),
+    path('booking/<int:pk>/evisitor.xml', views.evisitor_xml_download, name='evisitor_xml'),
+    path('booking/<int:pk>/invoice.pdf', views.rental_invoice_pdf, name='rental_invoice_pdf'),
+    path('accountant/', views.rental_accountant_dashboard, name='accountant_dashboard'),
+
+    # ── TZ-2 Obrazac ──
+    path('tz2/', views.tz2_preview, name='tz2_preview'),
+    path('tz2/<int:year>/', views.tz2_preview, name='tz2_preview_year'),
+    path('tz2/<int:year>/pdf/', views.tz2_download, name='tz2_download'),
+    path('accountant/<str:company_id>/tz2/<int:year>.pdf', views.tz2_accountant_download, name='tz2_accountant_download'),
+
+    path('tz2/<int:year>/xml/', views.tz2_xml_download, name='tz2_xml'),
+
+    # ── PO-SD Obrazac ──
+    path('posd/', views.posd_preview, name='posd_preview'),
+    path('posd/<int:year>/', views.posd_preview, name='posd_preview_year'),
+    path('posd/<int:year>/pdf/', views.posd_pdf, name='posd_pdf'),
+    path('posd/<int:year>/xml/', views.posd_xml, name='posd_xml'),
 ]

@@ -1152,3 +1152,55 @@ def eu_fund_search(request):
     ai_search_eu_funds.delay(company.pk)
     messages.success(request, 'AI pretraga EU fondova pokrenuta. Rezultati u Kampanjama.')
     return redirect('udruge:kampanja_list')
+
+
+# ═══════════════════════════════════════════════════════════════
+#  QuickAction API — Member lookup (POS iskaznica scan)
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+def api_member_lookup(request):
+    """Traži člana po broju iskaznice, OIB-u ili imenu."""
+    from django.http import JsonResponse
+    from udruge.models import Clan
+
+    code = request.GET.get('code', '').strip()
+    if not code:
+        return JsonResponse({'found': False})
+
+    company = get_user_company(request)
+
+    # Traži po card_number, oib, ili imenu
+    member = Clan.objects.filter(company=company).filter(
+        models.Q(card_number=code) |
+        models.Q(oib=code) |
+        models.Q(first_name__icontains=code) |
+        models.Q(last_name__icontains=code)
+    ).first()
+
+    if not member:
+        return JsonResponse({'found': False})
+
+    # Provjeri aktivnost članstva
+    from django.utils import timezone
+    is_active = True
+    valid_until = None
+    try:
+        sub = member.subscriptions.order_by('-end_date').first()
+        if sub:
+            valid_until = sub.end_date.strftime('%d.%m.%Y') if sub.end_date else None
+            is_active = sub.end_date >= timezone.now().date() if sub.end_date else True
+    except Exception:
+        pass
+
+    return JsonResponse({
+        'found': True,
+        'member': {
+            'id': member.pk,
+            'name': f'{member.first_name} {member.last_name}',
+            'oib': getattr(member, 'oib', '') or '',
+            'membership_type': getattr(member, 'membership_type', '') or 'Član',
+            'valid_until': valid_until,
+            'is_active': is_active,
+        },
+    })

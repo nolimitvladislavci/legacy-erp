@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import date, timedelta
 from decimal import Decimal
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -149,7 +149,7 @@ def booking_form(request, pk=None):
         booking.guest_count = int(request.POST.get('guest_count', 1))
         booking.check_in = request.POST.get('check_in')
         booking.check_out = request.POST.get('check_out')
-        booking.price_per_night = Decimal(request.POST.get('price_per_night') or str(booking.property.price_per_night))
+        booking.price_per_night = Decimal(request.POST.get('price_per_night') or str(booking.rental_property.price_per_night))
         booking.source = request.POST.get('source', 'direct')
         booking.notes = request.POST.get('notes', '').strip()
         booking.calculate_price()
@@ -179,10 +179,10 @@ def check_in(request, pk):
         booking.save()
 
         # Update property status
-        booking.property.status = 'occupied'
-        booking.property.save(update_fields=['status'])
+        booking.rental_property.status = 'occupied'
+        booking.rental_property.save(update_fields=['status'])
 
-        messages.success(request, f'{booking.guest_name} prijavljen u {booking.property.name}')
+        messages.success(request, f'{booking.guest_name} prijavljen u {booking.rental_property.name}')
         return redirect('rental:dashboard')
 
     return render(request, 'rental/check_in.html', {'booking': booking})
@@ -200,12 +200,12 @@ def check_out(request, pk):
         booking.save()
 
         # Property goes to cleaning
-        booking.property.status = 'cleaning'
-        booking.property.save(update_fields=['status'])
+        booking.rental_property.status = 'cleaning'
+        booking.rental_property.save(update_fields=['status'])
 
         # Create housekeeping task
         HousekeepingLog.objects.create(
-            property=booking.property,
+            rental_property=booking.rental_property,
             booking=booking,
             status='pending',
         )
@@ -223,7 +223,7 @@ def check_out(request, pk):
                     method='stripe',
                     customer_email=booking.guest_email,
                     customer_name=booking.guest_name,
-                    description=f'Boravak {booking.booking_number} - {booking.property.name}',
+                    description=f'Boravak {booking.booking_number} - {booking.rental_property.name}',
                     success_url=base_url + '/rental/',
                     cancel_url=base_url + '/rental/',
                 )
@@ -232,7 +232,7 @@ def check_out(request, pk):
             except Exception as e:
                 logger.warning("Auto-payment on checkout failed: %s", e)
 
-        messages.success(request, f'{booking.guest_name} odjavljen iz {booking.property.name}')
+        messages.success(request, f'{booking.guest_name} odjavljen iz {booking.rental_property.name}')
         return redirect('rental:dashboard')
 
     return render(request, 'rental/check_out.html', {'booking': booking})
@@ -258,8 +258,8 @@ def guest_self_checkin(request, access_qr):
         booking.calculate_price()
         booking.save()
 
-        booking.property.status = 'occupied'
-        booking.property.save(update_fields=['status'])
+        booking.rental_property.status = 'occupied'
+        booking.rental_property.save(update_fields=['status'])
 
         return render(request, 'rental/guest_welcome.html', {'booking': booking})
 
@@ -300,7 +300,7 @@ def guest_pay(request, access_qr):
                 method=method,
                 customer_email=booking.guest_email,
                 customer_name=booking.guest_name,
-                description=f'Stay {booking.booking_number} - {booking.property.name}',
+                description=f'Stay {booking.booking_number} - {booking.rental_property.name}',
                 success_url=base_url + f'/rental/guest/{access_qr}/access/',
                 cancel_url=base_url + f'/rental/guest/{access_qr}/pay/',
             )
@@ -386,3 +386,431 @@ def calendar_view(request):
         'dates': dates,
         'today': today,
     })
+
+
+# ═══════════════════════════════════════════════════════════════
+#  F3: Check-in Flow + OCR + eVisitor + Accountant Dashboard
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+def checkin_flow(request, pk):
+    """Check-in forma za iznajmljivača — lista gostiju + OCR + eVisitor."""
+    company = get_user_company(request)
+    booking = get_object_or_404(Booking, pk=pk, rental_property__company=company)
+    guests = booking.guests.all()
+
+    if request.method == 'POST':
+        # Ručni unos gosta
+        from rental.models import Guest
+        guest = Guest.objects.create(
+            booking=booking,
+            first_name=request.POST.get('first_name', ''),
+            last_name=request.POST.get('last_name', ''),
+            nationality=request.POST.get('nationality', 'HRV'),
+            document_type=request.POST.get('document_type', 'id_card'),
+            document_number=request.POST.get('document_number', ''),
+            sex=request.POST.get('sex', ''),
+            is_primary=not guests.exists(),
+            consent_given='consent' in request.POST,
+            consent_given_at=timezone.now() if 'consent' in request.POST else None,
+        )
+        # Date of birth
+        dob = request.POST.get('date_of_birth', '')
+        if dob:
+            from datetime import date
+            try:
+                guest.date_of_birth = date.fromisoformat(dob)
+                guest.save()
+            except (ValueError, TypeError):
+                pass
+
+        from django.contrib import messages
+        messages.success(request, f'Gost {guest.full_name} dodan.')
+        return redirect('rental:checkin_flow', pk=pk)
+
+    # Izračun
+    nights = (booking.check_out - booking.check_in).days or 1
+    from rental.tourist_tax import calculate_booking_tourist_tax
+    tax = calculate_booking_tourist_tax(booking)
+    total = booking.price_per_night * nights + tax + (booking.rental_property.cleaning_fee or 0)
+
+    return render(request, 'rental/checkin_flow.html', {
+        'booking': booking,
+        'guests': guests,
+        'nights': nights,
+        'tourist_tax': tax,
+        'total': total,
+    })
+
+
+@login_required
+def guest_ocr_upload(request, pk):
+    """AJAX: prima sliku dokumenta, pokreće OCR, vraća JSON."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    company = get_user_company(request)
+    booking = get_object_or_404(Booking, pk=pk, rental_property__company=company)
+
+    image = request.FILES.get('image')
+    if not image:
+        return JsonResponse({'error': 'No image'}, status=400)
+
+    # Kreiraj Guest + GuestDocument
+    from rental.models import Guest, GuestDocument
+    guest = Guest.objects.create(
+        booking=booking,
+        first_name='',
+        last_name='',
+        is_primary=not booking.guests.exists(),
+        consent_given=True,
+        consent_given_at=timezone.now(),
+    )
+
+    doc = GuestDocument.objects.create(
+        guest=guest,
+        image=image,
+    )
+
+    # GDPR: postavi brisanje 24h nakon check-outa
+    if booking.check_out:
+        from datetime import timedelta, datetime
+        checkout_dt = datetime.combine(booking.check_out, datetime.min.time())
+        from django.utils.timezone import make_aware
+        doc.delete_after = make_aware(checkout_dt) + timedelta(hours=24)
+        doc.save()
+
+    # OCR
+    try:
+        from rental.ocr import apply_ocr_to_guest
+        result = apply_ocr_to_guest(doc.pk)
+        guest.refresh_from_db()
+
+        return JsonResponse({
+            'ok': True,
+            'guest_id': guest.pk,
+            'data': {
+                'first_name': guest.first_name,
+                'last_name': guest.last_name,
+                'date_of_birth': str(guest.date_of_birth) if guest.date_of_birth else '',
+                'nationality': guest.nationality,
+                'document_type': guest.document_type,
+                'document_number': guest.document_number,
+                'sex': guest.sex,
+            },
+            'confidence': result.get('confidence', 0),
+        })
+    except Exception as e:
+        return JsonResponse({
+            'ok': False,
+            'guest_id': guest.pk,
+            'error': str(e),
+            'confidence': 0,
+        })
+
+
+@login_required
+def evisitor_xml_download(request, pk):
+    """Download eVisitor XML za booking."""
+    company = get_user_company(request)
+    booking = get_object_or_404(Booking, pk=pk, rental_property__company=company)
+
+    from rental.evisitor import build_evisitor_xml
+    xml = build_evisitor_xml(booking)
+
+    response = HttpResponse(xml, content_type='application/xml')
+    response['Content-Disposition'] = (
+        f'attachment; filename="eVisitor_{booking.booking_number}.xml"'
+    )
+    return response
+
+
+@login_required
+def rental_invoice_pdf(request, pk):
+    """Generiraj/preuzmi račun za booking."""
+    company = get_user_company(request)
+    booking = get_object_or_404(Booking, pk=pk, rental_property__company=company)
+
+    # Kreiraj invoice ako ne postoji
+    from rental.models import RentalInvoice
+    try:
+        ri = booking.rental_invoice
+    except RentalInvoice.DoesNotExist:
+        from rental.invoice_service import create_rental_invoice
+        ri = create_rental_invoice(booking)
+
+    if ri.invoice:
+        # Redirect na invoicing PDF
+        return redirect('invoicing:invoice_pdf', pk=ri.invoice.pk)
+
+    return JsonResponse({'error': 'Račun nije generiran.'}, status=400)
+
+
+@login_required
+def rental_accountant_dashboard(request):
+    """Marija vidi sve klijente iznajmljivače."""
+    from rental.models import Property
+    from rental.ai_assistant import check_annual_limit_warning
+    from companies.models import Company
+
+    # Sve firme koje imaju rental objekte
+    company_ids = Property.objects.filter(
+        is_active=True,
+    ).values_list('company_id', flat=True).distinct()
+
+    clients = []
+    for cid in company_ids:
+        try:
+            company = Company.objects.get(pk=cid)
+            props = Property.objects.filter(company=company, is_active=True)
+            limit = check_annual_limit_warning(company)
+
+            clients.append({
+                'company': company,
+                'property_count': props.count(),
+                'total_beds': sum(p.capacity or 0 for p in props),
+                'ytd': limit['ytd'],
+                'percent': limit['percent'],
+                'remaining': limit['remaining'],
+                'warning_level': limit.get('warning_level'),
+                'message': limit.get('message'),
+            })
+        except Exception:
+            pass
+
+    # Sortiraj po % praga (najhitniji gore)
+    clients.sort(key=lambda x: x['percent'], reverse=True)
+
+    return render(request, 'rental/accountant_dashboard.html', {
+        'clients': clients,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+#  QuickAction API endpoints (POS → Rental bridge)
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+def api_today_arrivals(request):
+    """API za POS QuickAction — današnji dolasci."""
+    company = get_user_company(request)
+    today = timezone.now().date()
+
+    bookings = Booking.objects.filter(
+        rental_property__company=company,
+        check_in=today,
+        status__in=['confirmed', 'pending'],
+    ).select_related('rental_property')
+
+    data = [{
+        'id': b.pk,
+        'guest_name': b.guest_name,
+        'property_name': b.rental_property.name,
+        'nights': (b.check_out - b.check_in).days,
+        'total_price': float(b.total_price),
+        'guests_count': b.guests.count() if hasattr(b, 'guests') else b.guest_count,
+        'check_in': b.check_in.strftime('%H:%M') if hasattr(b.check_in, 'strftime') and hasattr(b.check_in, 'hour') else str(b.check_in),
+    } for b in bookings]
+
+    return JsonResponse({'bookings': data})
+
+
+@login_required
+def api_today_departures(request):
+    """API za POS QuickAction — današnji odlasci."""
+    company = get_user_company(request)
+    today = timezone.now().date()
+
+    bookings = Booking.objects.filter(
+        rental_property__company=company,
+        check_out=today,
+        status='checked_in',
+    ).select_related('rental_property')
+
+    data = [{
+        'id': b.pk,
+        'guest_name': b.guest_name,
+        'property_name': b.rental_property.name,
+        'is_paid': b.is_paid,
+    } for b in bookings]
+
+    return JsonResponse({'bookings': data})
+
+
+@login_required
+def api_evisitor_pending(request):
+    """API za POS QuickAction — bookings bez eVisitor prijave."""
+    company = get_user_company(request)
+
+    bookings = Booking.objects.filter(
+        rental_property__company=company,
+        status='checked_in',
+    ).select_related('rental_property')
+
+    pending = []
+    for b in bookings:
+        unsynced = b.guests.filter(evisitor_synced=False).count() if hasattr(b, 'guests') else 0
+        if unsynced > 0 or not hasattr(b, 'guests') or not b.guests.exists():
+            hours = 0
+            if b.actual_check_in:
+                hours = int((timezone.now() - b.actual_check_in).total_seconds() / 3600)
+            pending.append({
+                'id': b.pk,
+                'guest_name': b.guest_name,
+                'property_name': b.rental_property.name,
+                'check_in': b.check_in.strftime('%d.%m.') if b.check_in else '',
+                'hours_pending': hours,
+                'unsynced_guests': unsynced,
+            })
+
+    return JsonResponse({'bookings': pending})
+
+
+@login_required
+def api_active_bookings(request):
+    """API za POS QuickAction — aktivni bookings za OCR."""
+    company = get_user_company(request)
+
+    bookings = Booking.objects.filter(
+        rental_property__company=company,
+        status__in=['confirmed', 'checked_in'],
+    ).select_related('rental_property').order_by('-check_in')[:20]
+
+    data = [{
+        'id': b.pk,
+        'guest_name': b.guest_name,
+        'property_name': b.rental_property.name,
+        'check_in': b.check_in.strftime('%d.%m.') if b.check_in else '',
+    } for b in bookings]
+
+    return JsonResponse({'bookings': data})
+
+
+# ═══════════════════════════════════════════════════════════════
+#  TZ-2 Obrazac — PDF generacija i pregled
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+def tz2_preview(request, year=None):
+    """Pregled TZ-2 podataka prije generiranja PDF-a."""
+    company = get_user_company(request)
+    if year is None:
+        year = timezone.now().year
+
+    try:
+        from rental.tz2_service import generate_tz2_data
+        data = generate_tz2_data(company, year)
+        return render(request, 'rental/tz2_preview.html', data)
+    except ValueError as e:
+        from django.contrib import messages
+        messages.error(request, str(e))
+        return redirect('rental:dashboard')
+
+
+@login_required
+def tz2_download(request, year=None):
+    """Download TZ-2 PDF."""
+    company = get_user_company(request)
+    if year is None:
+        year = timezone.now().year
+
+    try:
+        from rental.tz2_service import generate_tz2_pdf
+        pdf = generate_tz2_pdf(company, year)
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f'TZ-2_{company.oib}_{year}.pdf'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    except (ValueError, RuntimeError) as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@login_required
+def tz2_accountant_download(request, company_id, year):
+    """Marija downloadira TZ-2 za klijenta."""
+    from companies.models import Company
+    company = get_object_or_404(Company, pk=company_id)
+
+    try:
+        from rental.tz2_service import generate_tz2_pdf
+        pdf = generate_tz2_pdf(company, year)
+
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f'TZ-2_{company.oib}_{year}.pdf'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    except (ValueError, RuntimeError) as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@login_required
+def tz2_xml_download(request, year=None):
+    """Download TZ-2 XML za ePorezna upload."""
+    company = get_user_company(request)
+    if year is None:
+        year = timezone.now().year
+
+    try:
+        from rental.tz2_service import generate_tz2_xml
+        xml = generate_tz2_xml(company, year)
+
+        response = HttpResponse(xml, content_type='application/xml')
+        filename = f'TZ-2_{company.oib}_{year}.xml'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    except (ValueError, RuntimeError) as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+# ═══════════════════════════════════════════════════════════════
+#  PO-SD Obrazac — paušalni porez iznajmljivača
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+def posd_preview(request, year=None):
+    """Pregled PO-SD podataka."""
+    company = get_user_company(request)
+    if year is None:
+        year = timezone.now().year
+
+    try:
+        from rental.posd_service import generate_posd_data
+        data = generate_posd_data(company, year)
+        return render(request, 'rental/posd_preview.html', data)
+    except ValueError as e:
+        from django.contrib import messages
+        messages.error(request, str(e))
+        return redirect('rental:dashboard')
+
+
+@login_required
+def posd_pdf(request, year=None):
+    """Download PO-SD PDF."""
+    company = get_user_company(request)
+    if year is None:
+        year = timezone.now().year
+    try:
+        from rental.posd_service import generate_posd_pdf
+        pdf = generate_posd_pdf(company, year)
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="PO-SD_{company.oib}_{year}.pdf"'
+        return response
+    except (ValueError, RuntimeError) as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@login_required
+def posd_xml(request, year=None):
+    """Download PO-SD XML za ePorezna."""
+    company = get_user_company(request)
+    if year is None:
+        year = timezone.now().year
+    try:
+        from rental.posd_service import generate_posd_xml
+        xml = generate_posd_xml(company, year)
+        response = HttpResponse(xml, content_type='application/xml')
+        response['Content-Disposition'] = f'attachment; filename="PO-SD_{company.oib}_{year}.xml"'
+        return response
+    except (ValueError, RuntimeError) as e:
+        return JsonResponse({'error': str(e)}, status=400)

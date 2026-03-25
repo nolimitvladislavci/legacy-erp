@@ -1,252 +1,204 @@
 """
-BORG FENIX — Narodne Novine Feed Scraper + LLM Semantic Extractor
+BORG FENIX — Narodne Novine Scraper + LLM Semantic Extractor
 
-Hibridni pipeline:
-1. Feed Watchdog: RSS parse, duplikat check po URL-u
-2. Sanitizer: HTML → čisti Markdown (BeautifulSoup + html2text)
-3. Semantic Extractor: Claude Haiku parsira zakon → strukturirani JSON
+Pipeline:
+1. Web scraper: POST na NN tražilicu → lista zakona po godini/mjesecu
+2. Article fetch: dohvati HTML svakog zakona
+3. Sanitizer: HTML → čisti Markdown
+4. LLM ekstrakcija: Claude Haiku → strukturirani JSON
 
 Pokreće se svakih 6h via Celery beat.
 
-HARDENED v2 (2026-03-23):
-- Strict Proxy Mode: bez HR_PROXY_URL scraper NE radi (štiti server IP)
-- Dead-proxy alerting: WhatsApp ALERT ako proxy ne odgovara
-- SSL verify=True po defaultu (verify=False samo ako PROXY_SKIP_SSL=1)
+ADAPTIVE v3 (2026-03-24):
+- Bez RSS (NN nema javni RSS feed) — koristi web scraping NN tražilice
+- Bez obveznog proxyja — direktna veza s rate limitingom (2s između zahtjeva)
+- Proxy opcionalan: ako HR_PROXY_URL postoji, koristi ga za article fetch
+- Scraping samo zakona (eli/sluzbeni), ne oglasnog dijela
 """
 import json
 import logging
 import os
+import time
 from datetime import datetime
 
-import feedparser
-import html2text
 import requests
 from bs4 import BeautifulSoup
+import html2text
 from django.utils import timezone
 
 from limit_connect_ai.models_knowledge_graph import RegulatorySource, RegulatoryUpdate
 
 logger = logging.getLogger(__name__)
 
+NN_BASE        = 'https://narodne-novine.nn.hr'
+NN_SEARCH_URL  = f'{NN_BASE}/search.aspx'
+ARTICLE_DELAY  = 2   # sekunde između zahtjeva — courtesy prema NN serveru
+HTTP_TIMEOUT   = 20
 
-class ProxyUnavailableError(Exception):
-    """HR proxy ne odgovara — scraper se gasi."""
-    pass
+BROWSER_UA = (
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
+)
 
 
 class NNFeedScraperService:
-    """Scraper za Narodne novine RSS + LLM ekstrakcija."""
-
-    # Fallback RSS URL-ovi ako baza nema endpoint
-    NN_RSS_URLS = [
-        'https://narodne-novine.nn.hr/rss.aspx',
-        'https://narodne-novine.nn.hr/rss/',
-    ]
-
-    # Timeout za proxy health check i HTTP zahtjeve
-    PROXY_TIMEOUT = 15
-    HTTP_TIMEOUT = 20
+    """Scraper za Narodne novine + LLM semantic ekstrakcija."""
 
     def __init__(self):
-        self.html_converter = html2text.HTML2Text()
-        self.html_converter.ignore_links = True
-        self.html_converter.ignore_images = True
-        self.html_converter.ignore_tables = False
-        self.html_converter.body_width = 0  # Bez word-wrapa
+        self._proxy_url  = os.environ.get('HR_PROXY_URL', '').strip()
+        self._skip_ssl   = os.environ.get('PROXY_SKIP_SSL', '0') == '1'
+        self._session    = requests.Session()
+        self._session.headers['User-Agent'] = BROWSER_UA
 
-        self._proxy_url = os.environ.get('HR_PROXY_URL', '').strip()
-        self._skip_ssl = os.environ.get('PROXY_SKIP_SSL', '0') == '1'
+        self.html_conv = html2text.HTML2Text()
+        self.html_conv.ignore_links  = True
+        self.html_conv.ignore_images = True
+        self.html_conv.body_width    = 0
+
+    # ── HTTP helpers ────────────────────────────────────────────
 
     @property
-    def proxies(self):
-        if not self._proxy_url:
-            return None
-        return {'http': self._proxy_url, 'https': self._proxy_url}
+    def _proxies(self):
+        return {'http': self._proxy_url, 'https': self._proxy_url} if self._proxy_url else None
 
-    def _check_proxy_health(self):
-        """Provjeri da li HR proxy odgovara. Baca ProxyUnavailableError ako ne."""
-        if not self._proxy_url:
-            raise ProxyUnavailableError(
-                'HR_PROXY_URL nije postavljen u .env — scraper neće raditi bez proxyja '
-                'kako bi zaštitio IP reputaciju produkcijskog servera.'
-            )
+    def _get(self, url):
+        return self._session.get(url, timeout=HTTP_TIMEOUT,
+                                  proxies=self._proxies,
+                                  verify=not self._skip_ssl)
 
+    def _post(self, url, data):
+        return self._session.post(url, data=data, timeout=HTTP_TIMEOUT,
+                                   proxies=self._proxies,
+                                   verify=not self._skip_ssl)
+
+    # ── NN tražilica ────────────────────────────────────────────
+
+    def _get_viewstate(self):
+        """Dohvati ASP.NET VIEWSTATE s NN tražilice."""
+        r = self._get(NN_SEARCH_URL)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, 'html.parser')
+        return {
+            '__VIEWSTATE':          (soup.find('input', {'name': '__VIEWSTATE'}) or {}).get('value', ''),
+            '__VIEWSTATEGENERATOR': (soup.find('input', {'name': '__VIEWSTATEGENERATOR'}) or {}).get('value', ''),
+            '__EVENTTARGET':        '',
+            '__EVENTARGUMENT':      '',
+        }
+
+    def _fetch_nn_issue_list(self, year: int, month: int) -> list[dict]:
+        """
+        Dohvati listu zakona za zadani mjesec/godinu.
+        Strategija:
+          1. POST na NN tražilicu → lista brojeva glasnika za taj mjesec
+          2. Za svaki broj glasnika: dohvati HTML stranicu → lista pojedinačnih zakona
+        Vraća: [{'url': str, 'title': str, 'nn_number': str}, ...]
+        """
+        # Korak 1: lista glasnika za mjesec
         try:
-            resp = requests.get(
-                'https://narodne-novine.nn.hr/',
-                proxies=self.proxies,
-                timeout=self.PROXY_TIMEOUT,
-                verify=not self._skip_ssl,
-                headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'},
-            )
-            if resp.status_code >= 500:
-                raise ProxyUnavailableError(
-                    f'HR proxy vratio status {resp.status_code} za NN health check'
-                )
-        except requests.exceptions.ProxyError as e:
-            raise ProxyUnavailableError(f'HR proxy connection error: {e}')
-        except requests.exceptions.ConnectTimeout as e:
-            raise ProxyUnavailableError(f'HR proxy timeout: {e}')
-        except requests.exceptions.ConnectionError as e:
-            raise ProxyUnavailableError(f'HR proxy connection refused: {e}')
-        except ProxyUnavailableError:
-            raise
+            state = self._get_viewstate()
         except Exception as e:
-            raise ProxyUnavailableError(f'HR proxy unexpected error: {e}')
+            logger.error('[NN] Viewstate fetch error: %s', e)
+            return []
 
-    def _send_proxy_alert(self, error_msg):
-        """Pošalji WhatsApp ALERT da je FENIX oslijepio."""
+        payload = {
+            **state,
+            'btnPopisSvihIzadnja': 'Prikaži',
+            'ddlGodina':  str(year),
+            'ddlMjesec':  str(month),
+            'ddlResultPerPage': '100',
+        }
+
         try:
-            from core.notify import notify
-            notify(
-                'ALERT',
-                f'FENIX Intelligence je oslijepio!\n\n'
-                f'HR Proxy ne odgovara — scraper zaustavljen.\n'
-                f'Greška: {str(error_msg)[:200]}\n\n'
-                f'Scraper neće dohvaćati NN podatke dok se proxy ne popravi.\n'
-                f'Server IP reputacija je zaštićena.',
-                urgent=True,
-            )
+            r = self._post(NN_SEARCH_URL, payload)
+            r.raise_for_status()
         except Exception as e:
-            logger.error('[NN] Neuspjeli WhatsApp alert: %s', e)
+            logger.error('[NN] Search POST error: %s', e)
+            return []
 
-    def _proxied_get(self, url):
-        """HTTP GET kroz HR proxy. Nikada ne koristi direktnu vezu."""
-        return requests.get(
-            url,
-            timeout=self.HTTP_TIMEOUT,
-            proxies=self.proxies,
-            verify=not self._skip_ssl,
-            headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                              'AppleWebKit/537.36 (KHTML, like Gecko) '
-                              'Chrome/123.0.0.0 Safari/537.36',
-                'Accept-Language': 'hr-HR,hr;q=0.9,en;q=0.8',
-            },
-        )
+        soup = BeautifulSoup(r.text, 'html.parser')
 
-    def process_feed(self):
-        """Glavni entry point — dohvati RSS, parsiraj, LLM ekstrakcija."""
-        # ── Proxy health check (fail-fast) ────────────────────
-        try:
-            self._check_proxy_health()
-        except ProxyUnavailableError as e:
-            logger.error('[NN] PROXY DOWN: %s', e)
-            self._send_proxy_alert(e)
-            return {'processed': 0, 'skipped': 0, 'errors': 1, 'proxy_error': str(e)}
-
-        logger.info('[NN] Proxy health OK — pokrećem scrape')
-
-        source = self._get_source()
-        if not source:
-            logger.error('[NN] RegulatorySource za Narodne novine ne postoji')
-            return {'processed': 0, 'skipped': 0, 'errors': 0}
-
-        feed_url = source.url_endpoint or self.NN_RSS_URLS[0]
-        logger.info('[NN] Dohvaćam feed: %s', feed_url)
-
-        try:
-            resp = self._proxied_get(feed_url)
-            feed = feedparser.parse(resp.content)
-        except requests.exceptions.ProxyError as e:
-            logger.error('[NN] Proxy pao tijekom feed downloada: %s', e)
-            self._send_proxy_alert(f'Proxy pao tijekom RSS downloada: {e}')
-            return {'processed': 0, 'skipped': 0, 'errors': 1, 'proxy_error': str(e)}
-        except Exception as e:
-            logger.error('[NN] Feed parse error: %s', e)
-            return {'processed': 0, 'skipped': 0, 'errors': 1}
-
-        if not feed.entries:
-            logger.info('[NN] Feed prazan ili nedostupan (bozo_exception=%s)',
-                        getattr(feed, 'bozo_exception', 'none'))
-            # Update last_scraped čak i ako je prazan
-            source.last_scraped = timezone.now()
-            source.save(update_fields=['last_scraped'])
-            return {'processed': 0, 'skipped': 0, 'errors': 0}
-
-        processed = 0
-        skipped = 0
-        errors = 0
-
-        for entry in feed.entries:
-            link = getattr(entry, 'link', '')
-            title = getattr(entry, 'title', '')
-
-            if not link:
+        # Nađi linkove na glasnike (eli/sluzbeni/YYYY/N) — bez /pdf
+        issue_urls = []
+        seen_issues = set()
+        for a in soup.find_all('a', href=True):
+            href = a.get('href', '')
+            if f'/eli/sluzbeni/{year}/' not in href:
                 continue
-
-            # Duplikat check po URL-u
-            if RegulatoryUpdate.objects.filter(url=link).exists():
-                skipped += 1
-                continue
-
-            # Preuzimanje HTML-a kroz HR proxy
+            # Uzmi samo broj glasnika (eli/sluzbeni/2026/25), preskoči PDF
+            parts = href.rstrip('/').split('/')
             try:
-                resp = self._proxied_get(link)
-                resp.raise_for_status()
-            except requests.exceptions.ProxyError as e:
-                logger.error('[NN] Proxy pao za %s: %s — zaustavljam batch', link, e)
-                self._send_proxy_alert(f'Proxy pao tijekom article scrape: {e}')
-                errors += 1
-                break  # Prekini cijeli batch — proxy je mrtav
-            except requests.exceptions.RequestException as e:
-                logger.warning('[NN] HTTP error za %s: %s', link, e)
-                errors += 1
+                idx = parts.index('sluzbeni')
+                issue_num = parts[idx + 2].split('?')[0].split('/')[0]
+                if not issue_num.isdigit():
+                    continue
+                issue_url = f'{NN_BASE}/eli/sluzbeni/{year}/{issue_num}'
+                if issue_url not in seen_issues:
+                    seen_issues.add(issue_url)
+                    issue_urls.append((issue_url, int(issue_num)))
+            except (ValueError, IndexError):
                 continue
 
-            # Sanitize HTML → Markdown
-            clean_markdown = self._sanitize_html(resp.text)
-            if len(clean_markdown.strip()) < 100:
-                logger.debug('[NN] Preskačem %s — premalo sadržaja', link)
-                skipped += 1
-                continue
+        logger.info('[NN] %d/%02d: %d glasnika pronađeno', year, month, len(issue_urls))
 
-            # LLM ekstrakcija
-            llm_result = self._extract_semantics_via_llm(clean_markdown, title)
-            if not llm_result:
-                # Fallback: spremi s osnovnim podacima
-                llm_result = {
-                    'title': title,
-                    'category': 'OTHER',
-                    'effective_date': None,
-                    'impact_score': 3,
-                    'is_opportunity': False,
-                    'impact_keywords': [],
-                }
+        # Korak 2: za svaki glasnik dohvati listu zakona (HTML)
+        results = []
+        seen_articles = set()
 
-            # Spremi u bazu
+        for issue_url, issue_num in sorted(issue_urls, key=lambda x: x[1]):
+            time.sleep(1)  # ljubaznost prema NN serveru
             try:
-                self._create_regulatory_update(source, entry, link, llm_result, clean_markdown)
-                processed += 1
+                r = self._get(issue_url)
+                r.raise_for_status()
             except Exception as e:
-                logger.error('[NN] DB save error za %s: %s', link, e)
-                errors += 1
+                logger.warning('[NN] Glasnik fetch error %s: %s', issue_url, e)
+                continue
 
-        # Update last_scraped
-        source.last_scraped = timezone.now()
-        source.save(update_fields=['last_scraped'])
+            s2 = BeautifulSoup(r.text, 'html.parser')
+            nn_num = f'NN {issue_num}/{year}'
 
-        logger.info('[NN] Feed završen: processed=%d, skipped=%d, errors=%d',
-                    processed, skipped, errors)
-        return {'processed': processed, 'skipped': skipped, 'errors': errors}
+            for a in s2.find_all('a', href=True):
+                href  = a.get('href', '')
+                title = a.text.strip()
 
-    def _get_source(self):
-        """Dohvati ili kreiraj RegulatorySource za NN."""
+                if '/clanci/sluzbeni/' not in href:
+                    continue
+                if not title or len(title) < 5:
+                    continue
+
+                art_url = href if href.startswith('http') else NN_BASE + href
+                if art_url in seen_articles:
+                    continue
+                seen_articles.add(art_url)
+
+                results.append({
+                    'url': art_url,
+                    'title': title,
+                    'nn_number': nn_num,
+                })
+
+            logger.debug('[NN] Glasnik %s: %d zakona', nn_num,
+                         len([x for x in results if x['nn_number'] == nn_num]))
+
+        logger.info('[NN] %d/%02d: %d zakona ukupno', year, month, len(results))
+        return results
+
+    # ── Article scraping ────────────────────────────────────────
+
+    def _fetch_article_markdown(self, url: str) -> str:
+        """Dohvati i sanitiziraj jedan zakon → Markdown."""
+        time.sleep(ARTICLE_DELAY)
         try:
-            return RegulatorySource.objects.get(source_type='nn')
-        except RegulatorySource.DoesNotExist:
-            return None
+            r = self._get(url)
+            r.raise_for_status()
+        except Exception as e:
+            logger.warning('[NN] Article fetch error %s: %s', url, e)
+            return ''
 
-    def _sanitize_html(self, html_content):
-        """HTML → čisti Markdown. Uklanja navigaciju, header, footer, JS, CSS."""
-        soup = BeautifulSoup(html_content, 'html.parser')
-
-        # Ukloni vizualni šum
-        for el in soup(['header', 'footer', 'nav', 'script', 'style', 'aside',
-                        'iframe', 'form', 'button', 'input']):
+        soup = BeautifulSoup(r.text, 'html.parser')
+        for el in soup(['header', 'footer', 'nav', 'script', 'style',
+                        'aside', 'iframe', 'form', 'button', 'input']):
             el.decompose()
 
-        # Pronađi glavni sadržaj — NN koristi razne ID-jeve
         main = (
             soup.find('div', id='dokument')
             or soup.find('div', class_='doc-body')
@@ -255,133 +207,155 @@ class NNFeedScraperService:
             or soup.find('main')
             or soup.find('body')
         )
-
         if not main:
             return ''
 
-        markdown = self.html_converter.handle(str(main))
-        # Skrati na ~15K znakova da ne probijemo token limit
-        return markdown[:15000]
+        return self.html_conv.handle(str(main))[:15000]
 
-    def _extract_semantics_via_llm(self, markdown_text, fallback_title=''):
-        """Pošalji tekst Claudeu za semantičku ekstrakciju."""
+    # ── LLM ekstrakcija ─────────────────────────────────────────
+
+    def _extract_via_llm(self, markdown: str, fallback_title: str = '') -> dict | None:
         api_key = os.environ.get('ANTHROPIC_API_KEY', '')
         if not api_key:
-            logger.warning('[NN] ANTHROPIC_API_KEY nije postavljen — preskačem LLM')
             return None
 
-        system_prompt = (
-            "Ti si pravni i porezni asistent specijaliziran za hrvatsko zakonodavstvo. "
-            "Tvoj zadatak je pročitati tekst zakona/pravilnika i vratiti ISKLJUČIVO validan JSON, "
-            "bez ikakvog dodatnog teksta, bez markdown blokova.\n\n"
-            "Očekivani JSON format:\n"
-            "{\n"
-            '  "title": "Službeni naslov akta",\n'
-            '  "category": "TAX" | "VAT" | "LABOUR" | "FISCAL" | "ERACUN" | "CORP" | '
-            '"TRADE" | "GDPR" | "AML" | "NONPROFIT" | "EU_FUND" | "OTHER",\n'
-            '  "effective_date": "YYYY-MM-DD" ili null,\n'
-            '  "impact_score": 1-10,\n'
-            '  "is_opportunity": true/false,\n'
-            '  "impact_keywords": ["ključna_riječ_1", "ključna_riječ_2"],\n'
-            '  "affected_modules": ["pos", "invoicing", "payroll", "eracun", "konto"]\n'
-            "}\n\n"
-            "Pravila:\n"
-            "- impact_score 8-10: direktno utječe na poreze, plaće ili fiskalizaciju\n"
-            "- impact_score 5-7: utječe na poslovanje ali nije hitan\n"
-            "- impact_score 1-4: informativno, nema direktnog utjecaja\n"
-            "- is_opportunity=true: zakon donosi olakšice, poticaje, izuzeća\n"
-            "- affected_modules: koji LIMIT Connect moduli su pogođeni\n"
+        system = (
+            "Ti si pravni asistent za hrvatsko zakonodavstvo. "
+            "Vrati SAMO validan JSON, bez markdown blokova:\n"
+            '{"title":"...","category":"TAX|VAT|LABOUR|FISCAL|ERACUN|CORP|TRADE|GDPR|AML|NONPROFIT|EU_FUND|OTHER",'
+            '"effective_date":"YYYY-MM-DD ili null","impact_score":1-10,'
+            '"is_opportunity":true/false,"impact_keywords":["kw1"],'
+            '"affected_modules":["pos","invoicing","payroll","eracun","konto"]}\n'
+            "impact_score 8-10 = direktno utječe na poreze/plaće/fiskalizaciju. "
+            "is_opportunity=true = donosi olakšice ili poticaje."
         )
 
         try:
             from anthropic import Anthropic
-            client = Anthropic(api_key=api_key)
-
-            response = client.messages.create(
+            resp = Anthropic(api_key=api_key).messages.create(
                 model='claude-haiku-4-5-20251001',
-                max_tokens=1000,
-                temperature=0.1,
-                system=system_prompt,
-                messages=[{
-                    'role': 'user',
-                    'content': f'Analiziraj ovaj tekst i vrati JSON:\n\n{markdown_text[:12000]}',
-                }],
+                max_tokens=600, temperature=0.1,
+                system=system,
+                messages=[{'role': 'user', 'content': f'Analiziraj:\n\n{markdown[:10000]}'}],
             )
-
-            text = response.content[0].text.strip()
-
-            # Čišćenje markdown code blocks ako ih ima
-            if text.startswith('```'):
-                text = text.split('\n', 1)[1] if '\n' in text else text[3:]
-                if text.endswith('```'):
-                    text = text[:-3]
-                text = text.strip()
-
-            result = json.loads(text)
-            logger.info('[NN] LLM ekstrakcija OK: %s (score=%s)',
-                        result.get('title', '?')[:50], result.get('impact_score'))
-            return result
-
+            text = resp.content[0].text.strip().strip('`')
+            if text.startswith('json'):
+                text = text[4:].strip()
+            return json.loads(text)
         except json.JSONDecodeError as e:
-            logger.warning('[NN] LLM vratio neispravan JSON: %s', str(e)[:100])
-            return None
+            logger.warning('[NN] LLM neispravan JSON: %s', e)
         except Exception as e:
-            logger.error('[NN] LLM ekstrakcija error: %s', e)
-            return None
+            logger.error('[NN] LLM error: %s', e)
+        return None
 
-    def _create_regulatory_update(self, source, entry, link, llm_result, markdown_text):
-        """Kreiraj RegulatoryUpdate iz LLM rezultata."""
-        eff_date = None
-        eff_date_str = llm_result.get('effective_date')
-        if eff_date_str:
+    # ── Glavni entry point ──────────────────────────────────────
+
+    def process_feed(self):
+        """Dohvati zakone za tekući i prethodni mjesec, parsiraj, spremi."""
+        now    = timezone.now()
+        year   = now.year
+        month  = now.month
+
+        source = self._get_or_create_source()
+
+        # Dohvati ovaj i prethodni mjesec (za sigurnost)
+        months_to_check = [(year, month)]
+        if month == 1:
+            months_to_check.append((year - 1, 12))
+        else:
+            months_to_check.append((year, month - 1))
+
+        all_items = []
+        for y, m in months_to_check:
+            all_items.extend(self._fetch_nn_issue_list(y, m))
+
+        # Dedupliciraj
+        seen_urls = set(RegulatoryUpdate.objects.filter(
+            url__in=[i['url'] for i in all_items]
+        ).values_list('url', flat=True))
+
+        new_items = [i for i in all_items if i['url'] not in seen_urls]
+        logger.info('[NN] %d novih zakona za obradu', len(new_items))
+
+        processed = skipped = errors = 0
+        skipped = len(all_items) - len(new_items)
+
+        for item in new_items:
+            markdown = self._fetch_article_markdown(item['url'])
+            if len(markdown.strip()) < 100:
+                skipped += 1
+                continue
+
+            llm = self._extract_via_llm(markdown, item['title'])
+            if not llm:
+                llm = {
+                    'title': item['title'],
+                    'category': 'OTHER',
+                    'effective_date': None,
+                    'impact_score': 3,
+                    'is_opportunity': False,
+                    'impact_keywords': [],
+                    'affected_modules': [],
+                }
+
             try:
-                eff_date = datetime.strptime(eff_date_str, '%Y-%m-%d').date()
+                self._save_update(source, item, llm, markdown)
+                processed += 1
+            except Exception as e:
+                logger.error('[NN] DB save error %s: %s', item['url'], e)
+                errors += 1
+
+        source.last_scraped = timezone.now()
+        source.save(update_fields=['last_scraped'])
+
+        logger.info('[NN] Završeno: processed=%d skipped=%d errors=%d',
+                    processed, skipped, errors)
+        return {'processed': processed, 'skipped': skipped, 'errors': errors}
+
+    # ── Helpers ─────────────────────────────────────────────────
+
+    def _get_or_create_source(self):
+        src, _ = RegulatorySource.objects.get_or_create(
+            source_type='nn',
+            defaults={
+                'name': 'Narodne novine',
+                'url_endpoint': NN_SEARCH_URL,
+                'is_active': True,
+            }
+        )
+        return src
+
+    def _save_update(self, source, item: dict, llm: dict, markdown: str):
+        eff_date = None
+        if llm.get('effective_date'):
+            try:
+                eff_date = datetime.strptime(llm['effective_date'], '%Y-%m-%d').date()
             except (ValueError, TypeError):
                 pass
 
-        # Ako je opportunity, podigni impact
-        impact = llm_result.get('impact_score', 3)
-        if llm_result.get('is_opportunity'):
+        impact = int(llm.get('impact_score', 3))
+        if llm.get('is_opportunity'):
             impact = max(impact, 8)
 
-        # NN broj iz naslova (npr. "NN 123/2026")
-        nn_number = ''
-        title = llm_result.get('title', getattr(entry, 'title', ''))
-        if 'NN' in title.upper():
-            import re
-            nn_match = re.search(r'NN\s*(\d+/\d{4})', title, re.IGNORECASE)
-            if nn_match:
-                nn_number = f'NN {nn_match.group(1)}'
+        keywords = llm.get('impact_keywords', [])
+        affected = llm.get('affected_modules', [])
 
-        # Publication date iz RSS entry
-        pub_date = timezone.now().date()
-        if hasattr(entry, 'published_parsed') and entry.published_parsed:
-            try:
-                pub_date = datetime(*entry.published_parsed[:3]).date()
-            except Exception:
-                pass
-
-        keywords = llm_result.get('impact_keywords', [])
-        affected = llm_result.get('affected_modules', [])
-
-        update = RegulatoryUpdate.objects.create(
-            source=source,
-            title=title[:500],
-            category=llm_result.get('category', 'OTHER'),
-            nn_number=nn_number,
-            publication_date=pub_date,
-            effective_date=eff_date,
-            raw_text=markdown_text[:5000],
-            ai_summary=f"Ključne riječi: {', '.join(keywords)}. "
-                       f"Prilika: {'Da' if llm_result.get('is_opportunity') else 'Ne'}.",
-            impact_score=impact,
-            affected_modules=affected,
-            is_processed=True,
-            is_breaking=impact >= 9,
-            url=link,
+        RegulatoryUpdate.objects.create(
+            source       = source,
+            title        = llm.get('title', item['title'])[:500],
+            category     = llm.get('category', 'OTHER'),
+            nn_number    = item.get('nn_number', ''),
+            publication_date = timezone.now().date(),
+            effective_date   = eff_date,
+            raw_text     = markdown[:5000],
+            ai_summary   = (
+                f"Ključne riječi: {', '.join(keywords)}. "
+                f"Prilika: {'Da' if llm.get('is_opportunity') else 'Ne'}."
+            ),
+            impact_score    = impact,
+            affected_modules= affected,
+            is_processed    = True,
+            is_breaking     = impact >= 9,
+            url             = item['url'],
         )
-
-        logger.info('[NN] Kreiran RegulatoryUpdate: %s (impact=%d, cat=%s)',
-                    update.title[:60], impact, update.category)
-
-        return update
+        logger.info('[NN] Spremljeno: %s (impact=%d)', item['title'][:60], impact)

@@ -1,0 +1,17 @@
+[Unit]
+Description=Celery Beat for fina-connect
+After=network.target redis.service postgresql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/fina-connect
+Environment="LANG=en_US.UTF-8" "LC_ALL=en_US.UTF-8"
+ExecStart=/var/www/fina-connect/venv/bin/celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+Restart=always
+RestartSec=10
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

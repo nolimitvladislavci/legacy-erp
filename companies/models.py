@@ -65,6 +65,7 @@ class Company(models.Model):
         UDRUGA           = 'udruga',           _('Udruga')
         ZADRUGA          = 'zadruga',          _('Zadruga')
         USTANOVA         = 'ustanova',         _('Ustanova')
+        IZNAJMLJIVAC     = 'iznajmljivac',     _('Iznajmljivač (fizička osoba)')
         OTHER            = 'other',            _('Ostalo')
 
     class Currency(models.TextChoices):
