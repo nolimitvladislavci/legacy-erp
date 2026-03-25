@@ -376,66 +376,206 @@ VRATI JSON:
 # OFFLINE POS — 48h Zakonski alarm (Zakon o fiskalizaciji čl.11)
 # ══════════════════════════════════════════════════════════════
 
+def _get_company_phone(company):
+    """Pronađi telefon vlasnika/admina firme za WhatsApp alert."""
+    # 1. Direktno s firme
+    phone = getattr(company, 'phone', '') or getattr(company, 'mobile', '')
+    if phone:
+        return phone
+    # 2. CompanyMembership owner/admin
+    from accounts.models import CompanyMembership
+    membership = (CompanyMembership.objects
+        .filter(company=company, role__in=['owner', 'company_admin'], is_active=True)
+        .select_related('user__profile')
+        .first())
+    if membership and hasattr(membership.user, 'profile'):
+        phone = getattr(membership.user.profile, 'phone', '') or ''
+        if phone:
+            return phone
+    # 3. Bilo koji aktivan user firme s telefonom
+    membership = (CompanyMembership.objects
+        .filter(company=company, is_active=True)
+        .select_related('user__profile')
+        .first())
+    if membership and hasattr(membership.user, 'profile'):
+        return getattr(membership.user.profile, 'phone', '') or ''
+    return ''
+
+
+def _get_operator_phone(receipt):
+    """Pronađi telefon operatera koji je otvorio sesiju."""
+    operator = receipt.session.operator
+    if operator and hasattr(operator, 'profile'):
+        return getattr(operator.profile, 'phone', '') or ''
+    return ''
+
+
 @shared_task(name='pos.check_fiscal_deadline')
 def check_fiscal_deadline():
     """
     Svakih 30 min provjeri bonove koji prijete zakonskim rokom.
-    36h = upozorenje (12h rezerva do zakonskog roka od 48h).
-    Šalje WhatsApp vlasniku tvrtke.
+    Tri razine alarma — šalje WhatsApp operateru I vlasniku firme.
+
+    Tier 1 (>24h): WARNING — operater + admin
+    Tier 2 (>36h): SOS CRITICAL — operater + admin + superadmin
+    Tier 3 (>48h): BREACH — samo log (retry_fiscalization već handla)
+
+    Anti-spam: svaki tier se šalje samo jednom per receipt (prati se u fiscal_last_error).
     """
     from pos.models import POSReceipt
     from django.utils import timezone
     from datetime import timedelta
 
     now = timezone.now()
-    limit_36h = now - timedelta(hours=36)
-    limit_48h = now - timedelta(hours=48)
 
-    critical = POSReceipt.objects.filter(
+    # Svi plaćeni bez JIR-a, stariji od 12h, mlađi od 48h
+    pending = POSReceipt.objects.filter(
         status='paid',
-        paid_at__lt=limit_36h,
-        paid_at__gte=limit_48h,
+        paid_at__gte=now - timedelta(hours=48),
+        paid_at__lt=now - timedelta(hours=12),
     ).filter(
-        Q(jir__isnull=True) | Q(jir='')
-    ).select_related('session__terminal__company')
+        Q(jir__isnull=True) | Q(jir=''),
+    ).exclude(
+        session__terminal__company__fiscal_exempt=True,
+    ).select_related(
+        'session__terminal__company', 'session__operator__profile',
+    ).order_by('paid_at')
 
-    if not critical.exists():
-        return {'status': 'ok', 'critical': 0}
+    if not pending.exists():
+        return {'status': 'ok', 'alerts': 0}
 
-    # Grupiraj po kompaniji
-    companies_alerted = set()
-    alerted = 0
+    # Grupiraj po kompaniji, pronađi najstariji bon
+    from collections import defaultdict
+    company_receipts = defaultdict(list)
+    for r in pending[:100]:
+        company_receipts[r.session.terminal.company].append(r)
 
-    for receipt in critical[:20]:
-        company = receipt.session.terminal.company
-        if company.id in companies_alerted:
+    alerts_sent = 0
+    tier1_companies = 0  # 24-36h
+    tier2_companies = 0  # 36-48h
+
+    for company, receipts in company_receipts.items():
+        oldest = receipts[0]  # Sorted by paid_at ASC
+        age_h = (now - oldest.paid_at).total_seconds() / 3600
+        cnt = len(receipts)
+
+        # Odredi tier
+        if age_h >= 36:
+            tier = 'SOS_36H'
+            tier2_companies += 1
+        elif age_h >= 24:
+            tier = 'WARN_24H'
+            tier1_companies += 1
+        else:
+            continue  # 12-24h: samo retry, bez alarma korisniku
+
+        # Anti-spam: provjeri jesmo li već alertali ovaj tier za ovu firmu
+        already_alerted = any(
+            tier in (r.fiscal_last_error or '') for r in receipts
+        )
+        if already_alerted:
             continue
-        companies_alerted.add(company.id)
 
-        age_h = (now - receipt.paid_at).total_seconds() / 3600
-        cnt = critical.filter(session__terminal__company=company).count()
+        # Označi receipte da smo alertali ovaj tier
+        for r in receipts:
+            existing_err = r.fiscal_last_error or ''
+            if tier not in existing_err:
+                r.fiscal_last_error = ('%s [%s]' % (existing_err, tier)).strip()
+                r.save(update_fields=['fiscal_last_error'])
 
+        # Poruke
+        if tier == 'SOS_36H':
+            emoji = '\u26a0\ufe0f\u26a0\ufe0f\u26a0\ufe0f'
+            msg = (
+                '%s HITNO — FISKALIZACIJA\n'
+                '%s\n\n'
+                '%d racun(a) bez JIR-a, najstariji %.0fh!\n'
+                'Zakonski rok: 48h. Preostalo: ~%.0fh.\n'
+                'Kazna: do 10.000 EUR.\n\n'
+                'SPOJI UREDAJ NA INTERNET ODMAH!\n'
+                'limit-connect.com'
+            ) % (emoji, company.name, cnt, age_h, 48 - age_h)
+        else:  # WARN_24H
+            emoji = '\u26a0\ufe0f'
+            msg = (
+                '%s Fiskalizacija — upozorenje\n'
+                '%s\n\n'
+                '%d racun(a) ceka JIR vec %.0fh.\n'
+                'Rok je 48h — preostalo ~%.0fh.\n'
+                'Spoji POS uredaj na internet.\n'
+                'limit-connect.com'
+            ) % (emoji, company.name, cnt, age_h, 48 - age_h)
+
+        # Šalji WhatsApp
+        phones_sent = set()
         try:
-            from core.whatsapp import send_whatsapp_message
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
-            admin = User.objects.filter(
-                company=company, is_staff=True
-            ).select_related('profile').first()
-            if not admin:
-                admin = User.objects.filter(company=company).first()
-            phone = getattr(getattr(admin, 'profile', None), 'phone', None) if admin else None
-            if phone:
-                msg = (
-                    f"\u26a0\ufe0f FISKALIZACIJA ALARM — {company.name}\n"
-                    f"{cnt} bon(ova) bez JIR-a, najstariji {age_h:.0f}h.\n"
-                    f"Zakonski rok: 48h od uspostave veze.\n"
-                    f"Provjeri internet odmah! limit-connect.com"
-                )
-                send_whatsapp_message(phone, msg)
-                alerted += 1
-        except Exception as e:
-            logger.warning('check_fiscal_deadline WhatsApp failed: %s', e)
+            from core.whatsapp import send_text
 
-    logger.warning('[FISCAL DEADLINE] %d tvrtki s bonovima >36h bez JIR-a', len(companies_alerted))
-    return {'status': 'warning', 'critical': critical.count(), 'alerted': alerted}
+            # 1. Operater (blagajnik koji je izdao bon)
+            op_phone = _get_operator_phone(oldest)
+            if op_phone:
+                send_text(op_phone, msg)
+                phones_sent.add(op_phone)
+                alerts_sent += 1
+
+            # 2. Admin/vlasnik firme
+            admin_phone = _get_company_phone(company)
+            if admin_phone and admin_phone not in phones_sent:
+                send_text(admin_phone, msg)
+                phones_sent.add(admin_phone)
+                alerts_sent += 1
+
+        except Exception as e:
+            logger.warning('check_fiscal_deadline WhatsApp failed (%s): %s', company.name, e)
+
+        # 3. Za SOS tier: superadmin notifikacija + ImprovementSuggestion log
+        if tier == 'SOS_36H':
+            try:
+                from superadmin_ai.tasks import _notify_superadmins
+                _notify_superadmins(
+                    title='SOS FISKALIZACIJA: %s — %d bonova, %.0fh!' % (company.name, cnt, age_h),
+                    message=(
+                        '%d racuna bez JIR-a, najstariji %.0fh.\n'
+                        'Preostalo ~%.0fh do zakonskog roka.\n'
+                        'Tvrtka: %s\n'
+                        'WhatsApp poslan: %s'
+                    ) % (cnt, age_h, 48 - age_h, company.name,
+                         'DA (%d)' % len(phones_sent) if phones_sent else 'NE — nema broja!'),
+                    notification_type='system',
+                )
+            except Exception:
+                pass
+
+            # Log u ImprovementSuggestion (system)
+            try:
+                from pos.models import ImprovementSuggestion
+                ImprovementSuggestion.objects.create(
+                    company=company,
+                    author=None,
+                    source='system',
+                    title='FISCAL SOS: %d bonova bez JIR-a (%.0fh)' % (cnt, age_h),
+                    description=(
+                        'Automatski alarm: %d racuna bez JIR-a, najstariji %.0fh.\n'
+                        'Zakonski rok 48h (NN 133/12). WhatsApp poslan: %s.\n'
+                        'Operater: %s'
+                    ) % (cnt, age_h,
+                         ', '.join(phones_sent) if phones_sent else 'NEMA BROJA',
+                         oldest.session.operator.username if oldest.session.operator else 'N/A'),
+                    category='fiscal',
+                    priority=1,
+                    status='new',
+                )
+            except Exception:
+                pass
+
+        logger.warning(
+            '[FISCAL %s] %s: %d bonova, najstariji %.0fh, WA sent: %d',
+            tier, company.name, cnt, age_h, len(phones_sent)
+        )
+
+    return {
+        'status': 'alerts_sent' if alerts_sent else 'no_alerts_needed',
+        'tier1_24h': tier1_companies,
+        'tier2_36h': tier2_companies,
+        'whatsapp_sent': alerts_sent,
+    }
