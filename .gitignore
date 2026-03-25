@@ -20,3 +20,4 @@ synesis_email_baza.csv
 logs/
 EU_FONDOVI_*.md
 *.bak2
+minio-data/
