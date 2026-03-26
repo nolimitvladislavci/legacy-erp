@@ -49,6 +49,7 @@ class InspectionToken(models.Model):
         ('hapih',    'HAPIH — Knjiga lijekova'),
         ('jrdz',     'JRDZ — Registar životinja'),
         ('vetis',    'VetIS — Vet knjiga'),
+        ('prigovori', 'Knjiga prigovora i utisaka'),
         ('all',      'Potpuni pristup (sve)'),
     ]
 

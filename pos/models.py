@@ -1478,6 +1478,20 @@ class KnjigaPrigovora(models.Model):
         help_text=_('SHA256 certifikat — dokaz nepromijenjenosti zapisa'),
     )
 
+    # ── Auto-archive u DocumentBlob ──────────────────────────────────
+    archive_blob = models.ForeignKey(
+        'documents.DocumentBlob', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='prigovori',
+        verbose_name=_('Arhivski PDF'),
+        help_text=_('Auto-generirani PDF za zakonsku arhivu'),
+    )
+
+    # ── ADR/ODR EU Compliance ────────────────────────────────────────
+    adr_offered = models.BooleanField(
+        default=False, verbose_name=_('ADR ponudjeno'),
+        help_text=_('Da li je potrosac obaviijesten o ADR/mirenju'),
+    )
+
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
         verbose_name=_('Evidentirao'),

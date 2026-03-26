@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}QR kodovi — Knjiga prigovora{% endblock %}
+{% block page_title %}QR kodovi za Knjigu prigovora{% endblock %}
+
+{% block extra_css %}
+<style>
+.qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+.qr-item {
+    background: #1a1a2e; border: 1px solid #c9a84c33; border-radius: 12px;
+    padding: 1.5rem; text-align: center;
+}
+.qr-item h4 { font-family: 'Cormorant Garamond', serif; color: #c9a84c; margin-bottom: 0.5rem; }
+.qr-item .code { font-size: 0.85rem; color: #888; margin-bottom: 1rem; }
+.qr-item img { width: 160px; height: 160px; border-radius: 8px; background: #fff; padding: 8px; }
+.qr-actions { margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+.qr-actions a {
+    padding: 6px 14px; border-radius: 8px; font-size: 0.85rem;
+    text-decoration: none; border: 1px solid #c9a84c44;
+}
+.qr-actions a.primary { background: #c9a84c; color: #1a1a2e; }
+.qr-actions a.secondary { background: transparent; color: #c9a84c; }
+.top-actions { margin-bottom: 1.5rem; }
+.top-actions a { margin-right: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="top-actions">
+    <a href="{% url 'pos:complaint_dashboard' %}" class="btn btn-outline-warning"><i class="fas fa-chart-bar"></i> Dashboard</a>
+    <a href="{% url 'pos:prigovori_list' %}" class="btn btn-outline-warning"><i class="fas fa-list"></i> Lista</a>
+</div>
+
+{% if terminals %}
+<div class="qr-grid">
+    {% for t in terminals %}
+    <div class="qr-item">
+        <h4>{{ t.name }}</h4>
+        <div class="code">{{ t.terminal_code }} | {{ t.get_pos_type_display }}</div>
+        <img src="{% url 'pos:complaint_qr_terminal' t.pk %}?format=png" alt="QR {{ t.name }}" loading="lazy">
+        <div class="qr-actions">
+            <a href="{% url 'pos:complaint_qr_terminal' t.pk %}" class="primary"><i class="fas fa-print"></i> A6 kartica</a>
+            <a href="{% url 'pos:complaint_qr_terminal' t.pk %}?format=png" class="secondary" download><i class="fas fa-download"></i> PNG</a>
+            <a href="{% url 'pos:complaint_qr_terminal' t.pk %}?format=svg" class="secondary" download><i class="fas fa-download"></i> SVG</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="color:#888;">Nema aktivnih terminala. Dodajte terminal u POS postavkama.</p>
+{% endif %}
+{% endblock %}

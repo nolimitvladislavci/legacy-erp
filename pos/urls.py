@@ -107,10 +107,18 @@ urlpatterns = [
     path('prigovori/',           views.prigovori_list,       name='prigovori_list'),
     path('api/prigovori/',       views.prigovori_api,        name='prigovori_api'),
     path('prigovori/pdf/',       views.knjiga_prigovora_pdf, name='knjiga_prigovora_pdf'),
-    # Globalna knjiga — public + respond
+    # Globalna knjiga — public + respond + dashboard + QR + widget + inspect
     path("prigovori/new/",             __import__("pos.complaint_views", fromlist=["complaint_public_form"]).complaint_public_form, name="complaint_public_form"),
     path("api/prigovori/public/",      __import__("pos.complaint_views", fromlist=["complaint_api_public"]).complaint_api_public, name="complaint_api_public"),
     path("api/prigovori/respond/",     __import__("pos.complaint_views", fromlist=["complaint_respond"]).complaint_respond, name="complaint_respond"),
+    # Session 2: Dashboard, QR, Widget, Inspection
+    path("prigovori/dashboard/",       __import__("pos.complaint_views", fromlist=["complaint_dashboard"]).complaint_dashboard, name="complaint_dashboard"),
+    path("api/prigovori/dashboard/",   __import__("pos.complaint_views", fromlist=["complaint_dashboard_api"]).complaint_dashboard_api, name="complaint_dashboard_api"),
+    path("prigovori/qr/<int:terminal_id>/", __import__("pos.complaint_views", fromlist=["complaint_qr_terminal"]).complaint_qr_terminal, name="complaint_qr_terminal"),
+    path("prigovori/qr/",             __import__("pos.complaint_views", fromlist=["complaint_qr_list"]).complaint_qr_list, name="complaint_qr_list"),
+    path("prigovori/widget/<int:company_id>/", __import__("pos.complaint_views", fromlist=["complaint_widget"]).complaint_widget, name="complaint_widget"),
+    path("prigovori/widget/<int:company_id>/js/", __import__("pos.complaint_views", fromlist=["complaint_widget_js"]).complaint_widget_js, name="complaint_widget_js"),
+    path("inspect/<str:token>/prigovori/", __import__("pos.complaint_views", fromlist=["complaint_inspect"]).complaint_inspect, name="complaint_inspect"),
     path('tips/',                        views.tip_report,        name='tip_report'),
     # Revolut naplata
     path('revolut/pay/<int:receipt_id>/',    views.revolut_pay,     name='revolut_pay'),

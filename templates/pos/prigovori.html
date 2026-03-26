@@ -2,17 +2,62 @@
 {% load i18n %}
 {% block title %}Knjiga prigovora{% endblock %}
 {% block page_title %}Knjiga prigovora{% endblock %}
+{% block extra_css %}
+<style>
+@keyframes blink { 50% { opacity: 0.5; } }
+.blink { animation: blink 1s infinite; }
+#filterBar select { min-width: 120px; }
+input[name="channel"]:checked + i { font-weight: 900; }
+label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; border-color: #c9a84c !important; }
+</style>
+{% endblock %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <div>
-    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:#c9a84c"></i>{% trans "Knjiga prigovora" %}</h2>
-    <small class="text-muted">{% trans "Zakon o zaštiti potrošača čl. 10 — rok za odgovor: 15 dana" %}</small>
+    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:#c9a84c"></i>{% trans "Knjiga prigovora i utisaka" %}</h2>
+    <small class="text-muted">{% trans "Zakon o zaštiti potrošača čl. 10 — rok za odgovor: 15 dana (HR) / 14 dana (DE)" %}</small>
   </div>
-  <div class="d-flex gap-2">
-    <button class="btn btn-primary" onclick="openCreate()"><i class="fas fa-plus me-1"></i>{% trans "Novi prigovor" %}</button>
-    <a href="{% url 'pos:knjiga_prigovora_pdf' %}" class="btn btn-outline-secondary" target="_blank"><i class="fas fa-file-pdf me-1"></i>{% trans "PDF za inspekciju" %}</a>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'pos:complaint_dashboard' %}" class="btn btn-outline-warning"><i class="fas fa-chart-bar me-1"></i>Dashboard</a>
+    <a href="{% url 'pos:complaint_qr_list' %}" class="btn btn-outline-warning"><i class="fas fa-qrcode me-1"></i>QR</a>
+    <button class="btn btn-primary" onclick="openCreate()"><i class="fas fa-plus me-1"></i>{% trans "Novi" %}</button>
+    <a href="{% url 'pos:knjiga_prigovora_pdf' %}" class="btn btn-outline-secondary" target="_blank"><i class="fas fa-file-pdf me-1"></i>PDF</a>
   </div>
+</div>
+
+<!-- Filters -->
+<div class="d-flex gap-2 mb-3 flex-wrap" id="filterBar">
+  <select id="filterType" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+    <option value="">Sve vrste</option>
+    <option value="prigovor">Prigovor</option>
+    <option value="reklamacija">Reklamacija</option>
+    <option value="pohvala">Pohvala</option>
+    <option value="utisak">Utisak</option>
+    <option value="prijedlog">Prijedlog</option>
+  </select>
+  <select id="filterSource" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+    <option value="">Svi izvori</option>
+    <option value="pos">POS</option>
+    <option value="qr">QR</option>
+    <option value="invoicing">Fakturiranje</option>
+    <option value="gastro">Gastro</option>
+    <option value="general">Općenito</option>
+  </select>
+  <select id="filterStatus" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+    <option value="">Svi statusi</option>
+    <option value="pending">Čeka odgovor</option>
+    <option value="responded">Odgovoreno</option>
+    <option value="overdue">Prekoračen rok</option>
+    <option value="escalated">Eskalirano</option>
+  </select>
+  <select id="filterPriority" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+    <option value="">Svi prioriteti</option>
+    <option value="5">Kritičan (5)</option>
+    <option value="4">Visok (4)</option>
+    <option value="3">Srednji (3)</option>
+    <option value="1">Nizak (1-2)</option>
+  </select>
 </div>
 
 <div class="table-responsive">
@@ -21,8 +66,10 @@
       <tr>
         <th style="width:50px">R.br.</th>
         <th>{% trans "Datum" %}</th>
+        <th>{% trans "Vrsta" %}</th>
         <th>{% trans "Potrošač" %}</th>
-        <th>{% trans "Prigovor" %}</th>
+        <th>{% trans "Opis" %}</th>
+        <th>{% trans "AI" %}</th>
         <th>{% trans "Status / Rok" %}</th>
         <th></th>
       </tr>
@@ -131,9 +178,9 @@
   </div>
 </div>
 
-<!-- Modal: Odgovor -->
+<!-- Modal: Odgovor V2 (channel chooser + AI suggest) -->
 <div class="modal fade" id="odgovorModal" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #22c55e">
       <div class="modal-header border-0">
         <h5 class="modal-title" style="color:#22c55e"><i class="fas fa-reply me-2"></i>{% trans "Odgovor na prigovor" %}</h5>
@@ -141,16 +188,67 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="oId">
+
+        <!-- AI Suggested Response -->
+        <div id="aiSuggestBox" class="mb-3 p-3" style="background:#c9a84c11;border:1px solid #c9a84c33;border-radius:8px;display:none">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small style="color:#c9a84c"><i class="fas fa-robot me-1"></i>AI prijedlog odgovora</small>
+            <button type="button" class="btn btn-sm btn-outline-warning" onclick="acceptAiSuggestion()">
+              <i class="fas fa-check me-1"></i>Prihvati
+            </button>
+          </div>
+          <div id="aiSuggestText" style="font-size:0.85rem;color:#bbb;white-space:pre-wrap"></div>
+        </div>
+
         <div class="mb-3">
           <label class="form-label">{% trans "Tekst odgovora" %} *</label>
-          <textarea id="oTekst" class="form-control" rows="4"></textarea>
+          <textarea id="oTekst" class="form-control" rows="5"></textarea>
+        </div>
+
+        <!-- Channel chooser -->
+        <div class="mb-3">
+          <label class="form-label"><i class="fas fa-paper-plane me-1"></i>{% trans "Kanal dostave" %}</label>
+          <div class="d-flex gap-2">
+            <label class="btn btn-sm btn-outline-info">
+              <input type="radio" name="channel" value="email" checked class="d-none"> <i class="fas fa-envelope me-1"></i>Email
+            </label>
+            <label class="btn btn-sm btn-outline-success">
+              <input type="radio" name="channel" value="whatsapp" class="d-none"> <i class="fab fa-whatsapp me-1"></i>WhatsApp
+            </label>
+            <label class="btn btn-sm btn-outline-warning">
+              <input type="radio" name="channel" value="both" class="d-none"> <i class="fas fa-broadcast-tower me-1"></i>Oba
+            </label>
+          </div>
+        </div>
+
+        <!-- ADR checkbox -->
+        <div class="form-check mb-3">
+          <input type="checkbox" class="form-check-input" id="oAdr" checked>
+          <label class="form-check-label" for="oAdr">
+            <small>{% trans "Uključi ADR/ODR informacije u odgovor (EU Direktiva 2013/11)" %}</small>
+          </label>
         </div>
       </div>
       <div class="modal-footer border-0">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Odustani" %}</button>
-        <button type="button" class="btn btn-success" id="btnReply" onclick="saveOdgovor()">
+        <button type="button" class="btn btn-success" id="btnReply" onclick="saveOdgovorV2()">
           <i class="fas fa-paper-plane me-1"></i>{% trans "Pošalji odgovor" %}
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: SES Metadata -->
+<div class="modal fade" id="sesModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #c9a84c">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" style="color:#c9a84c"><i class="fas fa-shield-alt me-2"></i>SES Metadata (eIDAS)</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="sesBody">
+        <p class="text-muted">Učitavanje...</p>
       </div>
     </div>
   </div>
@@ -334,30 +432,70 @@ async function loadData() {
   try {
     const res = await fetch(API);
     const d = await res.json();
+    allData = d.data || [];
     const tbody = document.getElementById('tableBody');
     if (!d.data || !d.data.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-book fa-2x mb-2 d-block"></i>Knjiga je prazna — nema prigovora.</td></tr>';
       return;
     }
-    tbody.innerHTML = d.data.map(p => `
-      <tr>
+    // Apply filters
+    var fType = document.getElementById('filterType').value;
+    var fSource = document.getElementById('filterSource').value;
+    var fStatus = document.getElementById('filterStatus').value;
+    var fPriority = document.getElementById('filterPriority').value;
+    var filtered = d.data.filter(function(p) {
+      if (fType && p.record_type !== fType) return false;
+      if (fSource && p.source_module !== fSource) return false;
+      if (fStatus === 'pending' && (p.datum_odgovora || !p.needs_response)) return false;
+      if (fStatus === 'responded' && !p.datum_odgovora) return false;
+      if (fStatus === 'overdue' && !p.rok_istekao) return false;
+      if (fStatus === 'escalated' && !p.is_escalated) return false;
+      if (fPriority === '5' && p.ai_priority < 5) return false;
+      if (fPriority === '4' && (p.ai_priority < 4 || p.ai_priority > 4)) return false;
+      if (fPriority === '3' && p.ai_priority !== 3) return false;
+      if (fPriority === '1' && p.ai_priority > 2) return false;
+      return true;
+    });
+
+    var typeColors = {prigovor:'danger',pohvala:'success',utisak:'info',reklamacija:'warning',prijedlog:'secondary'};
+    var typeIcons = {prigovor:'fa-exclamation-circle',pohvala:'fa-heart',utisak:'fa-comment',reklamacija:'fa-undo',prijedlog:'fa-lightbulb'};
+    var sentColors = {critical:'#ef4444',negative:'#f59e0b',neutral:'#6b7280',constructive:'#22c55e'};
+
+    tbody.innerHTML = filtered.map(p => `
+      <tr class="${p.is_escalated ? 'table-danger' : ''}">
         <td class="fw-bold text-center">#${p.redni_broj}</td>
-        <td>${p.datum_primitka}</td>
-        <td>${p.ime}<br><small class="text-muted">${p.kontakt || ''}</small></td>
-        <td style="max-width:300px">${p.opis}</td>
-        <td>
-          ${p.datum_odgovora
-            ? `<span class="badge bg-success">Odgovoreno ${p.datum_odgovora}</span>`
-            : (p.rok_istekao
-              ? `<span class="badge bg-danger">PROBIJEN ROK!</span>`
-              : `<span class="badge bg-warning text-dark">Čeka (${p.dana_do_roka}d)</span>`)
-          }
+        <td>${p.datum_primitka}<br><small class="text-muted">${p.source_module}</small></td>
+        <td><span class="badge bg-${typeColors[p.record_type]||'secondary'}"><i class="fas ${typeIcons[p.record_type]||'fa-file'} me-1"></i>${p.record_type}</span>
+          ${p.star_rating ? '<br><span style="color:#c9a84c">' + '★'.repeat(p.star_rating) + '☆'.repeat(5-p.star_rating) + '</span>' : ''}
+          ${p.language !== 'hr' ? '<br><small class="text-muted">' + p.language.toUpperCase() + '</small>' : ''}
+        </td>
+        <td>${p.ime}<br><small class="text-muted">${p.kontakt || ''}${p.consumer_email ? ' | '+p.consumer_email : ''}${p.consumer_phone ? ' | '+p.consumer_phone : ''}</small>
+          ${p.has_signature ? '<br><i class="fas fa-signature text-warning" title="Potpisan"></i>' : ''}
+          ${p.has_audio ? '<i class="fas fa-microphone text-info ms-1" title="Zvucni zapis"></i>' : ''}
+        </td>
+        <td style="max-width:250px">${p.opis.substring(0,120)}${p.opis.length>120?'...':''}
+          ${p.is_escalated ? '<br><span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>ESKALIRANO</span>' : ''}
         </td>
         <td>
-          ${!p.datum_odgovora
-            ? `<button class="btn btn-sm btn-outline-success" onclick="openOdgovor(${p.id})"><i class="fas fa-reply me-1"></i>Odgovori</button>`
-            : `<small class="text-muted">${p.odgovor ? p.odgovor.substring(0, 50) + '...' : ''}</small>`
+          ${p.ai_category ? '<span class="badge" style="background:'+((sentColors[p.ai_sentiment]||'#666')+'33')+';color:'+(sentColors[p.ai_sentiment]||'#ccc')+'">P'+p.ai_priority+' '+p.ai_category+'</span>' : '<small class="text-muted">—</small>'}
+        </td>
+        <td>
+          ${p.datum_odgovora
+            ? '<span class="badge bg-success">Odg. '+p.datum_odgovora+'</span>'
+            : (p.rok_istekao
+              ? '<span class="badge bg-danger blink">ROK ISTEKAO!</span>'
+              : (p.needs_response
+                ? '<span class="badge bg-warning text-dark">'+p.dana_do_roka+'d</span>'
+                : '<span class="badge bg-secondary">—</span>'))
           }
+          ${p.integrity_hash ? '<br><small class="text-muted" title="'+p.integrity_hash+'">🔒 '+(p.integrity_valid?'✓':'✗')+' '+p.integrity_hash+'</small>' : ''}
+        </td>
+        <td>
+          ${!p.datum_odgovora && p.needs_response
+            ? '<button class="btn btn-sm btn-outline-success mb-1" onclick="openOdgovorV2('+p.id+',\''+escape(p.ai_suggested_response||'')+'\')"><i class="fas fa-reply me-1"></i>Odgovori</button>'
+            : (p.odgovor ? '<small class="text-muted">'+p.odgovor.substring(0,40)+'...</small>' : '')
+          }
+          <br><a href="#" class="text-muted small" onclick="showSES('+p.id+');return false"><i class="fas fa-info-circle"></i> SES</a>
         </td>
       </tr>
     `).join('');
@@ -407,31 +545,77 @@ async function savePrigovor() {
   finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i>Spremi'; }
 }
 
-function openOdgovor(id) {
+function openOdgovor(id) { openOdgovorV2(id, ''); }
+
+function openOdgovorV2(id, aiSuggestion) {
   document.getElementById('oId').value = id;
   document.getElementById('oTekst').value = '';
+  var sugBox = document.getElementById('aiSuggestBox');
+  if (aiSuggestion && aiSuggestion !== 'undefined' && aiSuggestion !== 'null') {
+    try { aiSuggestion = unescape(aiSuggestion); } catch(e) {}
+    document.getElementById('aiSuggestText').textContent = aiSuggestion;
+    sugBox.style.display = 'block';
+  } else {
+    sugBox.style.display = 'none';
+  }
   new bootstrap.Modal(document.getElementById('odgovorModal')).show();
 }
 
-async function saveOdgovor() {
+function acceptAiSuggestion() {
+  var text = document.getElementById('aiSuggestText').textContent;
+  document.getElementById('oTekst').value = text;
+  document.getElementById('aiSuggestBox').style.display = 'none';
+  fenixToast('AI prijedlog prihvaćen — prilagodite po potrebi.', 'success');
+}
+
+async function saveOdgovorV2() {
   const id = document.getElementById('oId').value;
   const odgovor = document.getElementById('oTekst').value.trim();
   if (!odgovor) { fenixToast('Unesite odgovor!', 'warning'); return; }
+  var channel = 'email';
+  var checked = document.querySelector('input[name="channel"]:checked');
+  if (checked) channel = checked.value;
+  var adrOffered = document.getElementById('oAdr').checked;
+
   const btn = document.getElementById('btnReply');
   btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Slanje...';
   try {
-    const res = await fetch(API, {
+    const res = await fetch('/pos/api/prigovori/respond/', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
-      body: JSON.stringify({action:'odgovori', id: parseInt(id), odgovor})
+      body: JSON.stringify({id: parseInt(id), odgovor, channel, adr_offered: adrOffered})
     });
     const d = await res.json();
-    if (d.status === 'success') {
+    if (d.success) {
       bootstrap.Modal.getInstance(document.getElementById('odgovorModal')).hide();
+      fenixToast(d.message, 'success');
       loadData();
-    } else { fenixToast(d.error?.message || 'Greška', 'error'); }
-  } catch(e) { window.fenixNetworkError('Greška mreže', e); }
+    } else { fenixToast(d.error || 'Greška', 'error'); }
+  } catch(e) { window.fenixNetworkError && window.fenixNetworkError('Greška mreže', e); }
   finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane me-1"></i>Pošalji odgovor'; }
+}
+
+// SES metadata viewer
+var allData = [];
+function showSES(id) {
+  var p = allData.find(x => x.id === id);
+  var body = document.getElementById('sesBody');
+  if (!p || !p.ses_metadata) {
+    body.innerHTML = '<p class="text-muted">Nema SES podataka.</p>';
+  } else {
+    var s = p.ses_metadata;
+    var html = '<table class="table table-sm" style="color:#ccc">';
+    if (s.gps) html += '<tr><td>GPS</td><td>' + s.gps.lat + ', ' + s.gps.lng + ' <a href="https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng+'" target="_blank" style="color:#c9a84c"><i class="fas fa-map-marker-alt"></i> Mapa</a></td></tr>';
+    if (s.ip) html += '<tr><td>IP</td><td>' + s.ip + '</td></tr>';
+    if (s.device) html += '<tr><td>Uređaj</td><td style="font-size:.8rem">' + s.device + '</td></tr>';
+    if (s.signature_time) html += '<tr><td>Potpis</td><td>' + s.signature_time + '</td></tr>';
+    html += '<tr><td>Hash</td><td style="font-family:monospace;font-size:.75rem;word-break:break-all">' + (s.integrity_hash||'—') + '</td></tr>';
+    html += '<tr><td>Potpis</td><td>' + (s.has_signature ? '✓ Prisutan' : '✗') + '</td></tr>';
+    html += '<tr><td>ID foto</td><td>' + (s.has_id_photo ? '✓ Prisutan' : '✗') + '</td></tr>';
+    html += '</table>';
+    body.innerHTML = html;
+  }
+  new bootstrap.Modal(document.getElementById('sesModal')).show();
 }
 
 document.addEventListener('DOMContentLoaded', loadData);

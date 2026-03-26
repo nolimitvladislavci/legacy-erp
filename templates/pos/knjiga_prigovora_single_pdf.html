@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 11px; color: #333; margin: 20px; }
+.header { text-align: center; border-bottom: 2px solid #c9a84c; padding-bottom: 10px; margin-bottom: 15px; }
+.header h1 { font-size: 18px; color: #1a1a2e; margin: 0; }
+.header .company { font-size: 14px; color: #666; }
+.header .subtitle { font-size: 10px; color: #888; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+table th, table td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+table th { background: #1a1a2e; color: #c9a84c; font-size: 10px; text-transform: uppercase; }
+.section { margin: 15px 0; }
+.section h2 { font-size: 13px; color: #1a1a2e; border-bottom: 1px solid #c9a84c; padding-bottom: 3px; }
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 8px 0; }
+.meta-item { font-size: 10px; }
+.meta-item .label { color: #888; }
+.meta-item .value { color: #333; font-weight: bold; }
+.response-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 4px; padding: 8px; margin: 8px 0; }
+.adr-box { background: #fefce8; border: 1px solid #fde68a; border-radius: 4px; padding: 8px; margin: 10px 0; font-size: 9px; }
+.adr-box h3 { font-size: 11px; color: #92400e; margin: 0 0 5px; }
+.hash { font-family: monospace; font-size: 9px; color: #666; word-break: break-all; }
+.stars { color: #c9a84c; }
+.footer { text-align: center; font-size: 8px; color: #999; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 20px; }
+.badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: bold; }
+.badge-prigovor { background: #fef2f2; color: #ef4444; }
+.badge-pohvala { background: #f0fdf4; color: #22c55e; }
+.badge-reklamacija { background: #fff7ed; color: #f59e0b; }
+.badge-utisak { background: #eff6ff; color: #3b82f6; }
+.badge-prijedlog { background: #faf5ff; color: #8b5cf6; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>{% if lang == 'de' %}Beschwerde- und Eindrucksbuch{% else %}Knjiga prigovora i utisaka{% endif %}</h1>
+    <div class="company">{{ company.name }}</div>
+    <div class="subtitle">
+        {% if lang == 'de' %}
+            Gem. EU-Richtlinie 2013/11/EU | Erstellt: {{ p.created_at|date:"d.m.Y H:i" }}
+        {% else %}
+            Sukladno ZZP cl.10 | Generirano: {{ p.created_at|date:"d.m.Y H:i" }}
+        {% endif %}
+    </div>
+</div>
+
+<div class="section">
+    <h2>
+        {% if lang == 'de' %}Eintrag Nr. {{ p.redni_broj }}{% else %}Zapis br. {{ p.redni_broj }}{% endif %}
+        <span class="badge badge-{{ p.record_type }}">{{ p.get_record_type_display }}</span>
+    </h2>
+
+    <table>
+        <tr>
+            <th>{% if lang == 'de' %}Datum{% else %}Datum primitka{% endif %}</th>
+            <td>{{ p.datum_primitka|date:"d.m.Y" }}</td>
+            <th>{% if lang == 'de' %}Quelle{% else %}Izvor{% endif %}</th>
+            <td>{{ p.get_source_module_display }}</td>
+        </tr>
+        <tr>
+            <th>{% if lang == 'de' %}Name{% else %}Ime potrosaca{% endif %}</th>
+            <td>{{ p.ime_potrosaca }}</td>
+            <th>{% if lang == 'de' %}Kontakt{% else %}Kontakt{% endif %}</th>
+            <td>{{ p.kontakt }}{% if p.consumer_email %} | {{ p.consumer_email }}{% endif %}{% if p.consumer_phone %} | {{ p.consumer_phone }}{% endif %}</td>
+        </tr>
+        {% if p.star_rating %}
+        <tr>
+            <th>{% if lang == 'de' %}Bewertung{% else %}Ocjena{% endif %}</th>
+            <td colspan="3">
+                <span class="stars">{% for i in "12345" %}{% if forloop.counter <= p.star_rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}</span>
+                ({{ p.star_rating }}/5)
+            </td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+
+<div class="section">
+    <h2>{% if lang == 'de' %}Beschreibung{% else %}Opis{% endif %}</h2>
+    <p>{{ p.opis_prigovora }}</p>
+</div>
+
+{% if p.odgovor %}
+<div class="section">
+    <h2>{% if lang == 'de' %}Antwort{% else %}Odgovor{% endif %}</h2>
+    <div class="response-box">
+        <p>{{ p.odgovor }}</p>
+        <p style="font-size:9px;color:#666;">
+            {% if lang == 'de' %}Beantwortet am{% else %}Odgovoreno{% endif %}: {{ p.datum_odgovora|date:"d.m.Y" }}
+            {% if p.responded_by %} | {{ p.responded_by.get_full_name|default:p.responded_by.username }}{% endif %}
+            {% if p.response_channel %} | {{ p.get_response_channel_display }}{% endif %}
+        </p>
+    </div>
+</div>
+{% endif %}
+
+{% if p.ai_category %}
+<div class="section">
+    <h2>AI analiza</h2>
+    <table>
+        <tr>
+            <th>Kategorija</th><td>{{ p.get_ai_category_display }}</td>
+            <th>Sentiment</th><td>{{ p.ai_sentiment }}</td>
+        </tr>
+        <tr>
+            <th>Prioritet</th><td>{{ p.ai_priority }}/5</td>
+            <th>{% if p.is_escalated %}ESKALIRANO{% else %}Status{% endif %}</th>
+            <td>{% if p.is_escalated %}DA — {{ p.escalation_reason }}{% else %}Normalan{% endif %}</td>
+        </tr>
+    </table>
+</div>
+{% endif %}
+
+{% if p.gps_latitude or p.client_ip or p.signature %}
+<div class="section">
+    <h2>SES Metadata (eIDAS)</h2>
+    <table>
+        {% if p.gps_latitude %}<tr><th>GPS</th><td colspan="3">{{ p.gps_latitude }}, {{ p.gps_longitude }}</td></tr>{% endif %}
+        {% if p.client_ip %}<tr><th>IP</th><td>{{ p.client_ip }}</td><th>Uredaj</th><td>{{ p.device_info|truncatewords:10 }}</td></tr>{% endif %}
+        {% if p.signature_timestamp %}<tr><th>Potpis</th><td colspan="3">{{ p.signature_timestamp|date:"d.m.Y H:i:s" }}</td></tr>{% endif %}
+        {% if p.signature %}<tr><th>Digitalni potpis</th><td colspan="3">Prisutan (canvas SES)</td></tr>{% endif %}
+    </table>
+</div>
+{% endif %}
+
+{% if adr and p.needs_response %}
+<div class="adr-box">
+    <h3>{{ adr.title }}</h3>
+    <p>{{ adr.body }}</p>
+    <p>{{ adr.adr_body }}</p>
+    <p>{{ adr.odr_label }}: {{ adr.odr_link }}</p>
+    <p><em>{{ adr.note }}</em></p>
+</div>
+{% endif %}
+
+<div class="section">
+    <h2>Integritet</h2>
+    <p class="hash">SHA-256: {{ p.integrity_hash }}</p>
+    <p style="font-size:9px;color:#888;">
+        Ovaj hash certificira da zapis nije modificiran nakon evidentiranja.
+        Verificirajte na: https://limit-connect.com/pos/prigovori/
+    </p>
+</div>
+
+<div class="footer">
+    {{ company.name }} | OIB: {{ company.oib|default:"—" }} |
+    {% if lang == 'de' %}Erstellt{% else %}Generirano{% endif %}: {% now "d.m.Y H:i" %} |
+    LIMIT Connect &mdash; limit-connect.com
+</div>
+</body>
+</html>

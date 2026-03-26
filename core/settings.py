@@ -753,3 +753,15 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Ponedjeljak 08:00
     },
 })
+
+# ── Knjiga prigovora — auto-eskalacija + weekly digest ──────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "complaints-auto-escalate": {
+        "task": "pos.auto_escalate_complaints",
+        "schedule": crontab(hour=9, minute=0),  # Svaki dan 09:00
+    },
+    "complaints-weekly-digest": {
+        "task": "pos.weekly_complaints_digest",
+        "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Ponedjeljak 08:00
+    },
+})

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspekcija — Knjiga prigovora | {{ company.name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Barlow', sans-serif; background: #f8fafc; color: #1e293b; }
+.container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+.header {
+    background: #1a1a2e; color: #fff; padding: 1.5rem 2rem; border-radius: 12px;
+    margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;
+}
+.header h1 { font-size: 1.3rem; }
+.header .scope { background: #c9a84c; color: #1a1a2e; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+.stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.5rem; flex: 1; text-align: center; }
+.stat-card .value { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; }
+.stat-card .label { font-size: 0.8rem; color: #64748b; }
+.toolbar { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+.toolbar a { padding: 8px 16px; background: #1a1a2e; color: #c9a84c; border-radius: 8px; text-decoration: none; font-size: 0.85rem; }
+.toolbar a:hover { background: #2a2a4e; }
+table { width: 100%; background: #fff; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+th { background: #1a1a2e; color: #c9a84c; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; text-align: left; }
+td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+tr:hover td { background: #f8fafc; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+.badge-prigovor { background: #fef2f2; color: #dc2626; }
+.badge-pohvala { background: #f0fdf4; color: #16a34a; }
+.badge-reklamacija { background: #fff7ed; color: #ea580c; }
+.badge-utisak { background: #eff6ff; color: #2563eb; }
+.badge-prijedlog { background: #faf5ff; color: #7c3aed; }
+.badge-ok { background: #f0fdf4; color: #16a34a; }
+.badge-pending { background: #fff7ed; color: #ea580c; }
+.badge-overdue { background: #fef2f2; color: #dc2626; }
+.stars { color: #c9a84c; }
+.footer { text-align: center; margin-top: 2rem; font-size: 0.75rem; color: #94a3b8; }
+.footer .token-info { font-family: monospace; font-size: 0.7rem; }
+.read-only-banner {
+    background: #fef3c7; border: 1px solid #fde68a; color: #92400e;
+    padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1rem;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>Knjiga prigovora i utisaka</h1>
+            <div style="font-size:0.85rem;color:#ccc;margin-top:4px;">{{ company.name }}</div>
+        </div>
+        <span class="scope">Inspekcija</span>
+    </div>
+
+    <div class="read-only-banner">
+        Samo za citanje — inspekcijski pristup. Token istjece: {{ token.expires_at|date:"d.m.Y H:i" }}.
+        Pregled {{ token.view_count }}/{{ token.max_views }}.
+    </div>
+
+    <div class="stats">
+        <div class="stat-card"><div class="value">{{ total }}</div><div class="label">Ukupno zapisa</div></div>
+        <div class="stat-card"><div class="value">{{ prigovori_cnt }}</div><div class="label">Prigovori/Reklamacije</div></div>
+        <div class="stat-card"><div class="value">{{ pohvale_cnt }}</div><div class="label">Pohvale/Utisci</div></div>
+    </div>
+
+    <div class="toolbar">
+        <a href="?format=pdf"><i class="fas fa-file-pdf"></i> Preuzmi PDF</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Datum</th>
+                <th>Vrsta</th>
+                <th>Ime</th>
+                <th>Opis</th>
+                <th>Ocjena</th>
+                <th>Odgovor</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in prigovori %}
+            <tr>
+                <td>{{ p.redni_broj }}</td>
+                <td>{{ p.datum_primitka|date:"d.m.Y" }}</td>
+                <td><span class="badge badge-{{ p.record_type }}">{{ p.get_record_type_display }}</span></td>
+                <td>{{ p.ime_potrosaca }}</td>
+                <td>{{ p.opis_prigovora|truncatewords:20 }}</td>
+                <td>{% if p.star_rating %}<span class="stars">{% for i in "12345" %}{% if forloop.counter <= p.star_rating %}&#9733;{% endif %}{% endfor %}</span>{% else %}—{% endif %}</td>
+                <td>{% if p.datum_odgovora %}{{ p.datum_odgovora|date:"d.m.Y" }}{% else %}—{% endif %}</td>
+                <td>
+                    {% if p.datum_odgovora %}
+                        <span class="badge badge-ok">Odgovoreno</span>
+                    {% elif p.rok_istekao %}
+                        <span class="badge badge-overdue">Prekoracen rok</span>
+                    {% elif p.needs_response %}
+                        <span class="badge badge-pending">Ceka ({{ p.dana_do_roka }}d)</span>
+                    {% else %}
+                        <span class="badge badge-ok">OK</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" style="text-align:center;color:#94a3b8;">Nema zapisa.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Inspekcijski pregled — {{ company.name }} | limit-connect.com</p>
+        <p class="token-info">Token: {{ token.token|truncatechars:16 }}... | Scope: {{ token.get_scope_display }}</p>
+    </div>
+</div>
+</body>
+</html>

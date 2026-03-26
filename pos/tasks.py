@@ -636,3 +636,124 @@ def check_fiscal_deadline():
         'tier2_36h': tier2_companies,
         'whatsapp_sent': alerts_sent,
     }
+
+
+@shared_task(bind=True, soft_time_limit=60)
+def archive_prigovor_pdf(self, prigovor_id):
+    """Auto-archive prigovora u DocumentBlob kao PDF."""
+    from pos.models import KnjigaPrigovora
+    from pos.complaint_views import archive_prigovor_to_blob
+
+    try:
+        p = KnjigaPrigovora.objects.get(pk=prigovor_id)
+    except KnjigaPrigovora.DoesNotExist:
+        return {'error': 'Not found'}
+
+    try:
+        blob = archive_prigovor_to_blob(p)
+        logger.info('Prigovor #%d archived as DocumentBlob %s', p.redni_broj, blob.pk)
+        return {'status': 'archived', 'blob_id': str(blob.pk)}
+    except Exception as e:
+        logger.warning('Archive prigovor #%d failed: %s', prigovor_id, e)
+        return {'error': str(e)}
+
+
+@shared_task(name='pos.auto_escalate_complaints')
+def auto_escalate_complaints():
+    """
+    Auto-eskalacija za prigovore koji su 3 dana do roka bez odgovora.
+    Celery beat: svaki dan u 09:00.
+    """
+    from pos.models import KnjigaPrigovora
+    from django.utils import timezone
+
+    now = timezone.now().date()
+    escalated = 0
+
+    pending = KnjigaPrigovora.objects.filter(
+        record_type__in=['prigovor', 'reklamacija'],
+        datum_odgovora__isnull=True,
+        is_escalated=False,
+    )
+
+    for p in pending:
+        if p.dana_do_roka is not None and p.dana_do_roka <= 3:
+            p.is_escalated = True
+            p.escalated_at = timezone.now()
+            p.escalation_reason = 'Auto-eskalacija: %d dana do zakonskog roka' % p.dana_do_roka
+            p.save(update_fields=['is_escalated', 'escalated_at', 'escalation_reason'])
+            escalated += 1
+
+            # Notify admin
+            try:
+                from pos.complaint_views import _notify_admin_new_complaint
+                _notify_admin_new_complaint(p)
+            except Exception:
+                pass
+
+            logger.warning('Auto-eskalacija prigovor #%d (%s) — %d dana do roka',
+                          p.redni_broj, p.company.name, p.dana_do_roka)
+
+    return {'escalated': escalated}
+
+
+@shared_task(name='pos.weekly_complaints_digest')
+def weekly_complaints_digest():
+    """
+    Weekly digest email adminu — koliko novih prigovora, koliko čeka odgovor.
+    Celery beat: ponedjeljak 08:00.
+    """
+    from pos.models import KnjigaPrigovora
+    from companies.models import Company
+    from django.utils import timezone
+    from datetime import timedelta
+
+    week_ago = timezone.now().date() - timedelta(days=7)
+    sent = 0
+
+    for company in Company.objects.filter(is_platform_owner=False):
+        qs = KnjigaPrigovora.objects.filter(company=company)
+        new_week = qs.filter(datum_primitka__gte=week_ago).count()
+        pending = qs.filter(
+            record_type__in=['prigovor', 'reklamacija'],
+            datum_odgovora__isnull=True,
+        ).count()
+        overdue = sum(1 for p in qs.filter(
+            record_type__in=['prigovor', 'reklamacija'],
+            datum_odgovora__isnull=True,
+        ) if p.rok_istekao)
+
+        if new_week == 0 and pending == 0:
+            continue
+
+        # Find admin email
+        from accounts.models import UserProfile
+        admin = UserProfile.objects.filter(
+            company=company,
+            role__in=['tenant_admin', 'company_admin', 'owner'],
+        ).select_related('user').first()
+
+        if not admin or not admin.user.email:
+            continue
+
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        subject = 'Knjiga prigovora — tjedni pregled (%s)' % company.name
+        body = (
+            'Tjedni pregled Knjige prigovora i utisaka\n'
+            '==========================================\n\n'
+            'Novi zapisi (zadnjih 7 dana): %d\n'
+            'Cekaju odgovor: %d\n'
+            'Prekoracen rok: %d\n\n'
+            'Pogledajte na: https://limit-connect.com/pos/prigovori/dashboard/\n\n'
+            'LIMIT Connect\n'
+        ) % (new_week, pending, overdue)
+
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [admin.user.email], fail_silently=True)
+            sent += 1
+        except Exception:
+            pass
+
+    return {'sent': sent}

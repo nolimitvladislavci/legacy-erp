@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ company.name }} — Utisci</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Barlow', sans-serif; color: #e0e0e0;
+    background: {% if embed %}transparent{% else %}linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%){% endif %};
+    min-height: 100vh;
+}
+.widget-container {
+    max-width: 480px; margin: 0 auto; padding: 1.5rem;
+}
+
+/* Header */
+.widget-header { text-align: center; margin-bottom: 1.5rem; }
+.widget-header h2 {
+    font-family: 'Cormorant Garamond', serif; color: #c9a84c;
+    font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem;
+}
+.widget-header .company { font-size: 0.9rem; color: #999; }
+
+/* Rating summary */
+.rating-summary {
+    background: #1a1a2e; border: 1px solid #c9a84c33; border-radius: 16px;
+    padding: 1.5rem; text-align: center; margin-bottom: 1.5rem;
+}
+.big-rating {
+    font-family: 'Cormorant Garamond', serif; font-size: 3rem;
+    color: #c9a84c; font-weight: 700; line-height: 1;
+}
+.stars-row { font-size: 1.5rem; margin: 0.3rem 0; }
+.stars-row .filled { color: #c9a84c; }
+.stars-row .empty { color: #333; }
+.total-count { font-size: 0.85rem; color: #888; }
+
+/* Star distribution */
+.star-dist { margin-top: 1rem; }
+.star-bar { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.star-bar .label { width: 20px; text-align: right; font-size: 0.8rem; color: #c9a84c; }
+.star-bar .bar-bg { flex: 1; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+.star-bar .bar-fill { height: 100%; background: #c9a84c; border-radius: 3px; transition: width 0.5s; }
+.star-bar .count { width: 30px; font-size: 0.75rem; color: #888; }
+
+/* Reviews */
+.review-list { display: flex; flex-direction: column; gap: 1rem; }
+.review-card {
+    background: #1a1a2e; border: 1px solid #c9a84c22; border-radius: 12px;
+    padding: 1rem 1.2rem;
+}
+.review-card .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.review-card .reviewer { font-weight: 500; color: #ddd; }
+.review-card .review-date { font-size: 0.8rem; color: #666; }
+.review-card .review-stars { color: #c9a84c; font-size: 0.9rem; margin-bottom: 0.4rem; }
+.review-card .review-text { font-size: 0.9rem; color: #bbb; line-height: 1.5; }
+.review-card .review-type {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.7rem; margin-top: 0.5rem;
+}
+.review-card .review-type.pohvala { background: #22c55e22; color: #22c55e; }
+.review-card .review-type.utisak { background: #3b82f622; color: #3b82f6; }
+.review-card .review-type.prijedlog { background: #8b5cf622; color: #8b5cf6; }
+
+/* Footer */
+.widget-footer {
+    text-align: center; margin-top: 1.5rem; padding-top: 1rem;
+    border-top: 1px solid #c9a84c22;
+}
+.widget-footer a { color: #c9a84c; text-decoration: none; font-size: 0.8rem; }
+.powered { font-size: 0.7rem; color: #555; margin-top: 0.5rem; }
+
+.no-reviews { text-align: center; color: #666; padding: 2rem; }
+</style>
+</head>
+<body>
+<div class="widget-container">
+
+    <div class="widget-header">
+        <h2>Knjiga utisaka</h2>
+        <div class="company">{{ company.name }}</div>
+    </div>
+
+    {% if total_reviews > 0 %}
+    <div class="rating-summary">
+        <div class="big-rating">{{ avg_rating }}</div>
+        <div class="stars-row">
+            {% for i in "12345" %}
+                {% if forloop.counter <= avg_rating %}
+                    <span class="filled">&#9733;</span>
+                {% else %}
+                    <span class="empty">&#9733;</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="total-count">{{ total_reviews }} recenzija</div>
+
+        {% if star_dist %}
+        <div class="star-dist">
+            {% for star in "54321" %}
+            <div class="star-bar">
+                <div class="label">{{ star }}&#9733;</div>
+                <div class="bar-bg">
+                    <div class="bar-fill" style="width: {% widthratio star_dist|default_if_none:"{}"|dictsort:star|first|default:0 total_reviews 100 %}%"></div>
+                </div>
+                <div class="count">{{ star_dist|default_if_none:"{}"|dictsort:star|first|default:0 }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if reviews %}
+    <div class="review-list">
+        {% for r in reviews %}
+        <div class="review-card">
+            <div class="review-header">
+                <span class="reviewer">{{ r.public_display_name|default:r.ime_potrosaca }}</span>
+                <span class="review-date">{{ r.datum_primitka|date:"d.m.Y" }}</span>
+            </div>
+            {% if r.star_rating %}
+            <div class="review-stars">
+                {% for i in "12345" %}{% if forloop.counter <= r.star_rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}
+            </div>
+            {% endif %}
+            <div class="review-text">{{ r.opis_prigovora|truncatewords:50 }}</div>
+            <span class="review-type {{ r.record_type }}">
+                {% if r.record_type == 'pohvala' %}Pohvala{% elif r.record_type == 'prijedlog' %}Prijedlog{% else %}Utisak{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-reviews">
+        <p>Zasad nema javnih utisaka.</p>
+    </div>
+    {% endif %}
+
+    <div class="widget-footer">
+        <a href="/pos/prigovori/new/?company={{ company.pk }}&type=utisak">Ostavite svoj utisak</a>
+        <div class="powered">Powered by LIMIT Connect</div>
+    </div>
+</div>
+</body>
+</html>

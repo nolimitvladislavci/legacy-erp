@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR Knjiga prigovora — {{ terminal.name }}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Barlow:wght@400;500&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fff; font-family: 'Barlow', sans-serif; }
+@media print {
+    @page { size: 105mm 148mm; margin: 0; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+.card {
+    width: 105mm; height: 148mm; margin: auto;
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%);
+    color: #fff; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 8mm;
+    border: 2px solid #c9a84c;
+}
+.logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #c9a84c; font-weight: 700; margin-bottom: 4mm; letter-spacing: 1px; }
+.company-name { font-size: 14px; color: #ccc; margin-bottom: 6mm; }
+.qr-frame {
+    width: 55mm; height: 55mm; background: #fff; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3mm; margin-bottom: 5mm;
+}
+.qr-frame img { width: 100%; height: 100%; }
+.terminal-name { font-size: 12px; color: #c9a84c; font-weight: 500; margin-bottom: 3mm; }
+.instructions { font-size: 10px; color: #aaa; text-align: center; line-height: 1.6; }
+.instructions strong { color: #c9a84c; }
+.footer { margin-top: auto; font-size: 8px; color: #666; }
+.divider { width: 40mm; height: 1px; background: #c9a84c44; margin: 3mm 0; }
+
+/* Dual language */
+.lang-block { margin-bottom: 2mm; }
+.lang-label { font-size: 8px; color: #c9a84c88; text-transform: uppercase; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="card">
+    <div class="logo">LIMIT Connect</div>
+    <div class="company-name">{{ company.name }}</div>
+
+    <div class="qr-frame">
+        <img src="{% url 'pos:complaint_qr_terminal' terminal.pk %}?format=png" alt="QR">
+    </div>
+
+    <div class="terminal-name">{{ terminal.name }} ({{ terminal.terminal_code }})</div>
+
+    <div class="divider"></div>
+
+    <div class="instructions">
+        <div class="lang-block">
+            <div class="lang-label">HR</div>
+            <strong>Skenirajte QR kod</strong> za prijavu prigovora,<br>
+            pohvale ili utiska. Bez aplikacije, bez registracije.
+        </div>
+        <div class="lang-block">
+            <div class="lang-label">DE</div>
+            <strong>QR-Code scannen</strong> um eine Beschwerde,<br>
+            ein Lob oder einen Eindruck zu hinterlassen.
+        </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="footer">ZZP cl.10 / BGB &sect;355 | GDPR cl.6(1)(f) | limit-connect.com</div>
+</div>
+
+<script>
+// Auto-print if ?print=1
+if (new URLSearchParams(window.location.search).get('print') === '1') {
+    window.onload = () => window.print();
+}
+</script>
+</body>
+</html>

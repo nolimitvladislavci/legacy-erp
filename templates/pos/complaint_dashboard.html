@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Knjiga prigovora — Dashboard{% endblock %}
+{% block page_title %}Knjiga prigovora — Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.kpi-card { background: #1a1a2e; border: 1px solid #c9a84c33; border-radius: 12px; padding: 1.2rem; text-align: center; }
+.kpi-card .value { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: #c9a84c; font-weight: 700; }
+.kpi-card .label { font-family: 'Barlow', sans-serif; font-size: 0.85rem; color: #aaa; margin-top: 0.3rem; }
+.kpi-card.danger .value { color: #ef4444; }
+.kpi-card.success .value { color: #22c55e; }
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.chart-box { background: #1a1a2e; border: 1px solid #c9a84c22; border-radius: 12px; padding: 1.5rem; }
+.chart-box h3 { font-family: 'Cormorant Garamond', serif; color: #c9a84c; margin: 0 0 1rem; font-size: 1.1rem; }
+.chart-box canvas { max-height: 300px; }
+.heatmap-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.heatmap-cell { padding: 8px; text-align: center; border-radius: 6px; font-size: 0.8rem; }
+.period-filter { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+.period-btn { padding: 6px 16px; border-radius: 20px; border: 1px solid #c9a84c44; background: transparent; color: #ccc; cursor: pointer; font-size: 0.85rem; }
+.period-btn.active { background: #c9a84c; color: #1a1a2e; font-weight: 600; }
+.stars { color: #c9a84c; }
+.nav-links { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.nav-links a { padding: 8px 16px; background: #c9a84c22; border: 1px solid #c9a84c44; border-radius: 8px; color: #c9a84c; text-decoration: none; font-size: 0.9rem; }
+.nav-links a:hover { background: #c9a84c33; }
+@media (max-width: 768px) { .chart-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nav-links">
+    <a href="{% url 'pos:prigovori_list' %}"><i class="fas fa-list"></i> Lista prigovora</a>
+    <a href="{% url 'pos:complaint_qr_list' %}"><i class="fas fa-qrcode"></i> QR kodovi</a>
+    <a href="{% url 'pos:knjiga_prigovora_pdf' %}"><i class="fas fa-file-pdf"></i> PDF</a>
+    <a href="{% url 'pos:complaint_widget' company.pk %}"><i class="fas fa-star"></i> Widget</a>
+</div>
+
+<!-- Period filter -->
+<div class="period-filter">
+    {% for m in "3,6,12,24" %}
+    <a href="?months={{ m }}" class="period-btn {% if months == m|add:0 %}active{% endif %}">{{ m }}M</a>
+    {% endfor %}
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="value">{{ total }}</div>
+        <div class="label">Ukupno zapisa</div>
+    </div>
+    <div class="kpi-card">
+        <div class="value">{{ prigovori_cnt }}</div>
+        <div class="label">Prigovori/Reklamacije</div>
+    </div>
+    <div class="kpi-card success">
+        <div class="value">{{ pohvale_cnt }}</div>
+        <div class="label">Pohvale/Utisci</div>
+    </div>
+    <div class="kpi-card">
+        <div class="value">{{ avg_rating }} <span class="stars">&#9733;</span></div>
+        <div class="label">Prosjecna ocjena</div>
+    </div>
+    <div class="kpi-card {% if pending_response > 0 %}danger{% endif %}">
+        <div class="value">{{ pending_response }}</div>
+        <div class="label">Ceka odgovor</div>
+    </div>
+    <div class="kpi-card {% if overdue > 0 %}danger{% endif %}">
+        <div class="value">{{ overdue }}</div>
+        <div class="label">Prekoracen rok</div>
+    </div>
+    <div class="kpi-card">
+        <div class="value">{{ escalated }}</div>
+        <div class="label">Eskalirano</div>
+    </div>
+    <div class="kpi-card">
+        <div class="value">{{ avg_response_days }}d</div>
+        <div class="label">Prosj. vrijeme odgovora</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="chart-row">
+    <div class="chart-box">
+        <h3>Trend po mjesecima</h3>
+        <canvas id="trendChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <h3>Po vrsti zapisa</h3>
+        <canvas id="typeChart"></canvas>
+    </div>
+</div>
+<div class="chart-row">
+    <div class="chart-box">
+        <h3>Top 5 AI kategorija</h3>
+        <canvas id="categoryChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <h3>AI Sentiment</h3>
+        <canvas id="sentimentChart"></canvas>
+    </div>
+</div>
+<div class="chart-row">
+    <div class="chart-box">
+        <h3>Vrijeme odgovora (heatmap)</h3>
+        <canvas id="heatmapChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <h3>Izvorni modul</h3>
+        <canvas id="sourceChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    const gold = '#c9a84c';
+    const red = '#ef4444';
+    const green = '#22c55e';
+    const blue = '#3b82f6';
+    const purple = '#8b5cf6';
+    const orange = '#f59e0b';
+    const cyan = '#06b6d4';
+
+    // Trend
+    const monthly = {{ monthly_json|safe }};
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: monthly.map(m => m.month),
+            datasets: [
+                { label: 'Prigovori', data: monthly.map(m => m.prigovori), borderColor: red, backgroundColor: red + '33', tension: 0.3, fill: true },
+                { label: 'Pohvale', data: monthly.map(m => m.pohvale), borderColor: green, backgroundColor: green + '33', tension: 0.3, fill: true },
+                { label: 'Ocjena (avg)', data: monthly.map(m => m.avg_star), borderColor: gold, borderDash: [5,5], yAxisID: 'y1', tension: 0.3 },
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#999' }, grid: { color: '#333' } },
+                y1: { position: 'right', min: 0, max: 5, ticks: { color: gold }, grid: { display: false } },
+                x: { ticks: { color: '#999' }, grid: { color: '#222' } },
+            },
+            plugins: { legend: { labels: { color: '#ccc' } } }
+        }
+    });
+
+    // By type (doughnut)
+    const byType = {{ by_type_json|safe }};
+    const typeLabels = { prigovor: 'Prigovor', pohvala: 'Pohvala', utisak: 'Utisak', reklamacija: 'Reklamacija', prijedlog: 'Prijedlog' };
+    const typeColors = { prigovor: red, pohvala: green, utisak: blue, reklamacija: orange, prijedlog: purple };
+    new Chart(document.getElementById('typeChart'), {
+        type: 'doughnut',
+        data: {
+            labels: byType.map(t => typeLabels[t.record_type] || t.record_type),
+            datasets: [{ data: byType.map(t => t.cnt), backgroundColor: byType.map(t => typeColors[t.record_type] || '#666') }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#ccc' } } } }
+    });
+
+    // By category (horizontal bar)
+    const byCat = {{ by_category_json|safe }};
+    const catLabels = {
+        product_quality: 'Kvaliteta', service: 'Usluga', pricing: 'Cijena',
+        hygiene: 'Higijena', wait_time: 'Cekanje', delivery: 'Dostava',
+        warranty: 'Garancija', safety: 'Sigurnost', other: 'Ostalo'
+    };
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'bar',
+        data: {
+            labels: byCat.map(c => catLabels[c.ai_category] || c.ai_category),
+            datasets: [{ data: byCat.map(c => c.cnt), backgroundColor: gold + 'cc', borderRadius: 6 }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true,
+            scales: { x: { ticks: { color: '#999' }, grid: { color: '#333' } }, y: { ticks: { color: '#ccc' } } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Sentiment (polar area)
+    const bySent = {{ by_sentiment_json|safe }};
+    const sentColors = { critical: red, negative: orange, neutral: '#6b7280', constructive: green, positive: cyan, very_positive: blue };
+    new Chart(document.getElementById('sentimentChart'), {
+        type: 'polarArea',
+        data: {
+            labels: bySent.map(s => s.ai_sentiment),
+            datasets: [{ data: bySent.map(s => s.cnt), backgroundColor: bySent.map(s => (sentColors[s.ai_sentiment] || '#666') + 'cc') }]
+        },
+        options: {
+            responsive: true,
+            scales: { r: { ticks: { color: '#999' }, grid: { color: '#333' } } },
+            plugins: { legend: { position: 'bottom', labels: { color: '#ccc' } } }
+        }
+    });
+
+    // Response time heatmap (as stacked bar)
+    const heatmap = {{ heatmap_json|safe }};
+    const months_set = [...new Set(Object.keys(heatmap).map(k => k.split('|')[0]))].sort();
+    const buckets = ['0-3', '4-7', '8-14', '15+'];
+    const bucketColors = [green, blue, orange, red];
+    new Chart(document.getElementById('heatmapChart'), {
+        type: 'bar',
+        data: {
+            labels: months_set,
+            datasets: buckets.map((b, i) => ({
+                label: b + ' dana',
+                data: months_set.map(m => heatmap[m + '|' + b] || 0),
+                backgroundColor: bucketColors[i] + 'cc',
+                borderRadius: 4,
+            }))
+        },
+        options: {
+            responsive: true, scales: {
+                x: { stacked: true, ticks: { color: '#999' }, grid: { color: '#222' } },
+                y: { stacked: true, ticks: { color: '#999' }, grid: { color: '#333' } },
+            },
+            plugins: { legend: { labels: { color: '#ccc' } } }
+        }
+    });
+
+    // Source module (bar)
+    const bySource = {{ by_source_json|safe }};
+    new Chart(document.getElementById('sourceChart'), {
+        type: 'bar',
+        data: {
+            labels: bySource.map(s => s.source_module),
+            datasets: [{ data: bySource.map(s => s.cnt), backgroundColor: purple + 'cc', borderRadius: 6 }]
+        },
+        options: {
+            responsive: true,
+            scales: { x: { ticks: { color: '#999' }, grid: { color: '#222' } }, y: { ticks: { color: '#999' }, grid: { color: '#333' } } },
+            plugins: { legend: { display: false } }
+        }
+    });
+})();
+</script>
+{% endblock %}
