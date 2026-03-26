@@ -205,19 +205,22 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
           <textarea id="oTekst" class="form-control" rows="5"></textarea>
         </div>
 
-        <!-- Channel chooser -->
+        <!-- Channel chooser (Dron #3: WA disabled without consent) -->
         <div class="mb-3">
           <label class="form-label"><i class="fas fa-paper-plane me-1"></i>{% trans "Kanal dostave" %}</label>
           <div class="d-flex gap-2">
             <label class="btn btn-sm btn-outline-info">
               <input type="radio" name="channel" value="email" checked class="d-none"> <i class="fas fa-envelope me-1"></i>Email
             </label>
-            <label class="btn btn-sm btn-outline-success">
-              <input type="radio" name="channel" value="whatsapp" class="d-none"> <i class="fab fa-whatsapp me-1"></i>WhatsApp
+            <label class="btn btn-sm btn-outline-success" id="waChannelLabel">
+              <input type="radio" name="channel" value="whatsapp" class="d-none" id="waChannelRadio"> <i class="fab fa-whatsapp me-1"></i>WhatsApp
             </label>
-            <label class="btn btn-sm btn-outline-warning">
-              <input type="radio" name="channel" value="both" class="d-none"> <i class="fas fa-broadcast-tower me-1"></i>Oba
+            <label class="btn btn-sm btn-outline-warning" id="bothChannelLabel">
+              <input type="radio" name="channel" value="both" class="d-none" id="bothChannelRadio"> <i class="fas fa-broadcast-tower me-1"></i>Oba
             </label>
+          </div>
+          <div id="waConsentWarning" class="small text-danger mt-1" style="display:none;">
+            <i class="fas fa-lock me-1"></i>{% trans "Potrošač nije dao pristanak za WhatsApp komunikaciju (Meta Business API compliance)" %}
           </div>
         </div>
 
@@ -492,10 +495,12 @@ async function loadData() {
         </td>
         <td>
           ${!p.datum_odgovora && p.needs_response
-            ? '<button class="btn btn-sm btn-outline-success mb-1" onclick="openOdgovorV2('+p.id+',\''+escape(p.ai_suggested_response||'')+'\')"><i class="fas fa-reply me-1"></i>Odgovori</button>'
+            ? '<button class="btn btn-sm btn-outline-success mb-1" onclick="openOdgovorV2('+p.id+',\''+escape(p.ai_suggested_response||'')+'\','+!!p.whatsapp_consent+')"><i class="fas fa-reply me-1"></i>Odgovori</button>'
             : (p.odgovor ? '<small class="text-muted">'+p.odgovor.substring(0,40)+'...</small>' : '')
           }
           <br><a href="#" class="text-muted small" onclick="showSES('+p.id+');return false"><i class="fas fa-info-circle"></i> SES</a>
+          ${p.moderation_passed === true ? '<br><span class="badge bg-success" style="font-size:.6rem">MOD ✓</span>' : (p.moderation_passed === false ? '<br><span class="badge bg-warning text-dark" style="font-size:.6rem" title="'+(p.moderation_note||'')+'">MOD ✗</span>' : '')}
+          ${p.whatsapp_consent ? '<br><i class="fab fa-whatsapp text-success" style="font-size:.7rem" title="WA consent"></i>' : ''}
         </td>
       </tr>
     `).join('');
@@ -547,7 +552,7 @@ async function savePrigovor() {
 
 function openOdgovor(id) { openOdgovorV2(id, ''); }
 
-function openOdgovorV2(id, aiSuggestion) {
+function openOdgovorV2(id, aiSuggestion, waConsent) {
   document.getElementById('oId').value = id;
   document.getElementById('oTekst').value = '';
   var sugBox = document.getElementById('aiSuggestBox');
@@ -558,6 +563,32 @@ function openOdgovorV2(id, aiSuggestion) {
   } else {
     sugBox.style.display = 'none';
   }
+
+  // Dron #3: Lock WhatsApp buttons if no consent
+  var waLabel = document.getElementById('waChannelLabel');
+  var bothLabel = document.getElementById('bothChannelLabel');
+  var waRadio = document.getElementById('waChannelRadio');
+  var bothRadio = document.getElementById('bothChannelRadio');
+  var waWarning = document.getElementById('waConsentWarning');
+
+  if (!waConsent) {
+    waLabel.style.opacity = '0.4';
+    waLabel.style.pointerEvents = 'none';
+    bothLabel.style.opacity = '0.4';
+    bothLabel.style.pointerEvents = 'none';
+    waRadio.disabled = true;
+    bothRadio.disabled = true;
+    waWarning.style.display = 'block';
+  } else {
+    waLabel.style.opacity = '1';
+    waLabel.style.pointerEvents = 'auto';
+    bothLabel.style.opacity = '1';
+    bothLabel.style.pointerEvents = 'auto';
+    waRadio.disabled = false;
+    bothRadio.disabled = false;
+    waWarning.style.display = 'none';
+  }
+
   new bootstrap.Modal(document.getElementById('odgovorModal')).show();
 }
 

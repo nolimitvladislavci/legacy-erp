@@ -103,7 +103,7 @@
             </div>
             <div class="col-6">
                 <label class="form-label small">{% if lang == 'de' %}Telefon{% else %}Telefon/WhatsApp{% endif %}</label>
-                <input type="tel" id="inp-phone" class="form-control" placeholder="+385...">
+                <input type="tel" id="inp-phone" class="form-control" placeholder="+385..." oninput="toggleWaConsent()">
             </div>
         </div>
 
@@ -149,6 +149,25 @@
                 {% if lang == 'de' %}Ausweisfoto (optional){% else %}Foto osobne (opcionalno){% endif %}
             </label>
             <input type="file" id="inp-id-photo" class="form-control form-control-sm" accept="image/*" capture="environment">
+        </div>
+
+        {# WhatsApp consent checkbox (Dron #3) #}
+        <div class="form-check mb-3" id="wa-consent-section" style="display:none;">
+            <input type="checkbox" class="form-check-input" id="inp-wa-consent">
+            <label class="form-check-label small" for="inp-wa-consent">
+                {% if lang == 'de' %}
+                Ich stimme zu, eine Antwort per WhatsApp zu erhalten
+                {% else %}
+                Pristajem primiti odgovor putem WhatsApp-a na navedeni broj
+                {% endif %}
+            </label>
+        </div>
+
+        {# Honeypot fields — hidden by CSS, bots fill them (Dron #1) #}
+        <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true" tabindex="-1">
+            <input type="text" id="inp-website" name="website" autocomplete="off" tabindex="-1">
+            <input type="text" id="inp-company-url" name="company_url" autocomplete="off" tabindex="-1">
+            <input type="text" id="inp-fax" name="fax_number" autocomplete="off" tabindex="-1">
         </div>
 
         <div class="d-flex gap-2 mb-3">
@@ -367,6 +386,12 @@ async function submitComplaint() {
         device_info: navigator.userAgent + ' | ' + screen.width + 'x' + screen.height,
         signature_timestamp: new Date().toISOString(),
         voice_input: voiceRecording || document.getElementById('inp-opis').dataset.voice === '1',
+        // Dron #3: WhatsApp opt-in consent
+        whatsapp_consent: document.getElementById('inp-wa-consent').checked,
+        // Dron #1: Honeypot fields (bots fill these)
+        website: document.getElementById('inp-website').value,
+        company_url: document.getElementById('inp-company-url').value,
+        fax_number: document.getElementById('inp-fax').value,
     };
 
     try {
@@ -407,6 +432,18 @@ document.getElementById('inp-opis').addEventListener('input', function() {
 {% if default_type %}
 document.querySelector('[data-type="{{ default_type }}"]')?.click();
 {% endif %}
+
+// Dron #3: Show WA consent checkbox when phone is entered
+function toggleWaConsent() {
+    var phone = document.getElementById('inp-phone').value.trim();
+    var section = document.getElementById('wa-consent-section');
+    if (phone.length >= 6) {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+        document.getElementById('inp-wa-consent').checked = false;
+    }
+}
 </script>
 </body>
 </html>

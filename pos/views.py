@@ -4291,6 +4291,9 @@ def prigovori_api(request):
                 'integrity_hash': p.integrity_hash[:16] if p.integrity_hash else '',
                 'integrity_valid': p.verify_integrity() if p.integrity_hash else None,
                 'ses_metadata': p.ses_metadata,
+                'whatsapp_consent': p.whatsapp_consent,
+                'moderation_passed': p.moderation_passed,
+                'moderation_note': p.moderation_note,
             })
         return JsonResponse({'status': 'success', 'data': data})
 

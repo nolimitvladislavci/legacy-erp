@@ -1492,6 +1492,22 @@ class KnjigaPrigovora(models.Model):
         help_text=_('Da li je potrosac obaviijesten o ADR/mirenju'),
     )
 
+    # ── WhatsApp Opt-in (Meta Business API compliance) ───────────────
+    whatsapp_consent = models.BooleanField(
+        default=False, verbose_name=_('WhatsApp pristanak'),
+        help_text=_('Potrošač eksplicitno pristao na WhatsApp komunikaciju'),
+    )
+
+    # ── GDPR Content Moderation (Dron #2) ────────────────────────────
+    moderation_passed = models.BooleanField(
+        default=False, verbose_name=_('Moderacija prošla'),
+        help_text=_('Sadržaj prošao AI + ručnu moderaciju za javni prikaz'),
+    )
+    moderation_note = models.CharField(
+        max_length=500, blank=True, verbose_name=_('Moderacijska napomena'),
+        help_text=_('AI/admin razlog odobrenja ili odbijanja javnog prikaza'),
+    )
+
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
         verbose_name=_('Evidentirao'),

@@ -416,6 +416,13 @@ VRATI JSON:
                     pass
             logger.info('Auto-response sent for %s #%d', p.record_type, p.redni_broj)
 
+        # Dron #2: Trigger content moderation for public widget candidates
+        if p.record_type in ('pohvala', 'utisak', 'prijedlog'):
+            try:
+                moderate_prigovor_content.delay(p.pk)
+            except Exception:
+                pass
+
         return {
             'category': p.ai_category,
             'sentiment': p.ai_sentiment,
@@ -757,3 +764,124 @@ def weekly_complaints_digest():
             pass
 
     return {'sent': sent}
+
+
+@shared_task(bind=True, soft_time_limit=30)
+def moderate_prigovor_content(self, prigovor_id):
+    """
+    DRON #2: AI Content Moderation za javni widget.
+    Provjerava sadržaj za:
+    - Vlastita imena (NER — može biti kleveta)
+    - OIB-ove (11-znamenkasti, GDPR kršenje)
+    - Psovke i uvrede
+    - Osobne podatke (email, telefon u tekstu)
+
+    Ako prođe → moderation_passed=True, is_public=True
+    Ako ne prođe → moderation_passed=False, moderation_note s razlogom
+    """
+    import os
+    import re
+    from pos.models import KnjigaPrigovora
+
+    try:
+        p = KnjigaPrigovora.objects.get(pk=prigovor_id)
+    except KnjigaPrigovora.DoesNotExist:
+        return {'error': 'Not found'}
+
+    # Only moderate pohvale/utisci/prijedlozi (prigovori never go public)
+    if p.record_type in ('prigovor', 'reklamacija'):
+        return {'status': 'skip', 'reason': 'prigovori never public'}
+
+    text = (p.opis_prigovora or '').strip()
+    issues = []
+
+    # ── Rule 1: OIB detection (11-digit Croatian ID) ──
+    oib_pattern = re.compile(r'\b\d{11}\b')
+    if oib_pattern.search(text):
+        issues.append('Sadrži OIB (osobni identifikacijski broj) — GDPR čl.87')
+
+    # ── Rule 2: Email in text ──
+    email_pattern = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+    if email_pattern.search(text):
+        issues.append('Sadrži email adresu u tekstu — osobni podatak')
+
+    # ── Rule 3: Phone number in text ──
+    phone_pattern = re.compile(r'(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}')
+    if phone_pattern.search(text):
+        issues.append('Sadrži telefonski broj u tekstu — osobni podatak')
+
+    # ── Rule 4: Common profanity (HR + DE basic list) ──
+    profanity_hr = [
+        'jeb', 'pičk', 'kurac', 'sranj', 'pizd', 'drolja', 'kurv',
+        'debil', 'idiot', 'kreten', 'retard', 'šupak',
+    ]
+    profanity_de = [
+        'scheiß', 'fick', 'arsch', 'hurensohn', 'wichser', 'fotze',
+        'missgeburt', 'idiot', 'bastard',
+    ]
+    text_lower = text.lower()
+    for word in profanity_hr + profanity_de:
+        if word in text_lower:
+            issues.append(f'Sadrži neprimjeren jezik: "{word}..."')
+            break  # One is enough
+
+    # ── Rule 5: AI NER check for proper names (Claude Haiku) ──
+    if not issues:
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
+            response = client.messages.create(
+                model='claude-haiku-4-5-20251001',
+                max_tokens=200,
+                messages=[{'role': 'user', 'content': (
+                    'Analiziraj ovaj tekst recenzije i odgovori SAMO kao JSON:\n\n'
+                    f'"{text[:500]}"\n\n'
+                    'Vrati JSON:\n'
+                    '{"has_names": true/false, "names_found": ["ime1"], '
+                    '"has_defamation": true/false, "safe_for_public": true/false, '
+                    '"reason": "kratko obrazloženje"}'
+                )}],
+            )
+            result_text = response.content[0].text.strip()
+            if result_text.startswith('```'):
+                result_text = result_text.split('\n', 1)[1].rsplit('```', 1)[0]
+            import json
+            result = json.loads(result_text)
+
+            if result.get('has_names'):
+                names = ', '.join(result.get('names_found', []))
+                issues.append(f'AI detektirao vlastita imena: {names} — rizik klevete')
+
+            if result.get('has_defamation'):
+                issues.append(f'AI: potencijalna kleveta — {result.get("reason", "")}')
+
+            if not result.get('safe_for_public', True):
+                issues.append(f'AI: nije sigurno za javni prikaz — {result.get("reason", "")}')
+
+        except Exception as e:
+            logger.debug('AI moderation for #%d failed: %s', p.redni_broj, e)
+            # If AI unavailable, don't auto-approve — leave for manual review
+            issues.append('AI moderacija nedostupna — potrebna ručna provjera')
+
+    # ── Decision ──
+    if issues:
+        p.moderation_passed = False
+        p.moderation_note = '; '.join(issues)[:500]
+        p.is_public = False
+        p.save(update_fields=['moderation_passed', 'moderation_note', 'is_public'])
+        logger.info('Moderation FAILED for #%d: %s', p.redni_broj, p.moderation_note)
+        return {'status': 'rejected', 'issues': issues}
+    else:
+        p.moderation_passed = True
+        p.moderation_note = 'AI + regex provjera prošla — sigurno za javni prikaz'
+        # Auto-set public display name (GDPR: samo inicijali)
+        if not p.public_display_name and p.ime_potrosaca:
+            parts = p.ime_potrosaca.strip().split()
+            if len(parts) >= 2:
+                p.public_display_name = f'{parts[0]} {parts[-1][0]}.'
+            else:
+                p.public_display_name = parts[0] if parts else 'Anonim'
+        p.is_public = True
+        p.save(update_fields=['moderation_passed', 'moderation_note', 'is_public', 'public_display_name'])
+        logger.info('Moderation PASSED for #%d', p.redni_broj)
+        return {'status': 'approved'}

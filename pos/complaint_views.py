@@ -14,6 +14,7 @@ Views:
 import json
 import hashlib
 import logging
+import re
 from collections import Counter
 from datetime import timedelta
 from io import BytesIO
@@ -21,6 +22,7 @@ from io import BytesIO
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils import timezone
@@ -33,6 +35,80 @@ from companies.models import Company
 from core.company_utils import get_user_company
 
 logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  SECURITY: Rate Limiter + Honeypot + UA Validation (Dron #1)
+# ═══════════════════════════════════════════════════════════════════════
+
+# Known bot User-Agent patterns
+BOT_UA_PATTERNS = [
+    'python-requests', 'python-urllib', 'curl/', 'wget/', 'httpie/',
+    'scrapy', 'bot', 'crawler', 'spider', 'headless', 'phantom',
+    'selenium', 'puppeteer', 'playwright',
+]
+
+COMPLAINT_RATE_LIMIT = 3       # Max complaints per IP per day
+COMPLAINT_RATE_WINDOW = 86400  # 24 hours in seconds
+
+
+def _get_client_ip(request):
+    """Extract real client IP from request."""
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '0.0.0.0')
+
+
+def _check_rate_limit(ip, company_id):
+    """
+    Rate limit: max COMPLAINT_RATE_LIMIT complaints per IP per day per company.
+    Returns (allowed: bool, remaining: int).
+    """
+    cache_key = f'complaint_rate:{ip}:{company_id}'
+    current = cache.get(cache_key, 0)
+    if current >= COMPLAINT_RATE_LIMIT:
+        return False, 0
+    return True, COMPLAINT_RATE_LIMIT - current - 1
+
+
+def _increment_rate_limit(ip, company_id):
+    """Increment the rate limit counter after successful submission."""
+    cache_key = f'complaint_rate:{ip}:{company_id}'
+    current = cache.get(cache_key, 0)
+    cache.set(cache_key, current + 1, COMPLAINT_RATE_WINDOW)
+
+
+def _validate_user_agent(request):
+    """
+    Validate User-Agent header — block known bot patterns.
+    Returns (valid: bool, reason: str).
+    """
+    ua = request.META.get('HTTP_USER_AGENT', '').lower()
+
+    # No User-Agent at all = bot
+    if not ua or len(ua) < 10:
+        return False, 'Missing or invalid User-Agent'
+
+    # Check against known bot patterns
+    for pattern in BOT_UA_PATTERNS:
+        if pattern in ua:
+            return False, f'Bot User-Agent detected: {pattern}'
+
+    return True, ''
+
+
+def _check_honeypot(data):
+    """
+    Honeypot field validation — if 'website' or 'company_url' field
+    is filled, it's a bot (real form hides these fields with CSS).
+    Returns True if honeypot triggered (= bot).
+    """
+    honeypot_fields = ['website', 'company_url', 'fax_number']
+    for field in honeypot_fields:
+        if data.get(field, '').strip():
+            return True
+    return False
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -95,10 +171,25 @@ def complaint_api_public(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
+    # ── DRON #1: User-Agent validation ──
+    ua_valid, ua_reason = _validate_user_agent(request)
+    if not ua_valid:
+        logger.warning('Complaint blocked — bot UA: %s', ua_reason)
+        return JsonResponse({'error': 'Request blocked'}, status=403)
+
     try:
         data = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    # ── DRON #1: Honeypot check ──
+    if _check_honeypot(data):
+        logger.warning('Complaint blocked — honeypot triggered from IP %s', _get_client_ip(request))
+        # Return fake success to not alert the bot
+        return JsonResponse({
+            'success': True, 'redni_broj': 0,
+            'message': 'Zapis evidentiran', 'integrity_hash': '', 'deadline': None,
+        })
 
     company_id = data.get('company_id')
     if not company_id:
@@ -108,6 +199,16 @@ def complaint_api_public(request):
         company = Company.objects.get(pk=company_id)
     except Company.DoesNotExist:
         return JsonResponse({'error': 'Company not found'}, status=404)
+
+    # ── DRON #1: Rate limiting (3/day per IP per company) ──
+    ip = _get_client_ip(request)
+    rate_ok, remaining = _check_rate_limit(ip, company_id)
+    if not rate_ok:
+        logger.warning('Complaint rate limit hit: IP=%s company=%s', ip, company_id)
+        return JsonResponse({
+            'error': 'Prekoračen dnevni limit prijava. Pokušajte sutra.',
+            'error_de': 'Tageslimit erreicht. Bitte versuchen Sie es morgen.',
+        }, status=429)
 
     # Validate required fields
     ime = (data.get('ime', '') or '').strip()
@@ -179,10 +280,15 @@ def complaint_api_public(request):
         id_photo=data.get('id_photo', '') or '',
         signature=data.get('signature', '') or '',
         voice_input=bool(data.get('voice_input', False)),
+        # Dron #3: WhatsApp opt-in consent
+        whatsapp_consent=bool(data.get('whatsapp_consent', False)),
         # Created by (if authenticated)
         created_by=request.user if request.user.is_authenticated else None,
     )
     p.save()
+
+    # Dron #1: Increment rate limit after successful save
+    _increment_rate_limit(ip, company_id)
 
     # Audio recording (base64 WebM → file)
     audio_b64 = data.get('audio_recording', '')
@@ -212,8 +318,8 @@ def complaint_api_public(request):
     except Exception:
         logger.debug('Archive task not available')
 
-    # Send confirmation via WhatsApp if phone provided
-    if p.consumer_phone:
+    # Send confirmation via WhatsApp ONLY if opt-in consent given (Dron #3)
+    if p.consumer_phone and p.whatsapp_consent:
         try:
             _send_complaint_confirmation_wa(p)
         except Exception:
@@ -271,13 +377,19 @@ def complaint_respond(request):
     p.adr_offered = data.get('adr_offered', True)
     p.save()
 
-    # Deliver response
+    # Deliver response — WhatsApp only if consumer gave consent (Dron #3)
     channel = data.get('channel', 'email')
     if channel in ('whatsapp', 'both') and p.consumer_phone:
-        try:
-            _send_response_wa(p)
-        except Exception:
-            logger.warning('WhatsApp response delivery failed for #%d', p.redni_broj)
+        if not p.whatsapp_consent:
+            logger.info('WhatsApp blocked for #%d — no opt-in consent', p.redni_broj)
+            # Fallback to email if available
+            if p.consumer_email and channel == 'whatsapp':
+                channel = 'email'
+        else:
+            try:
+                _send_response_wa(p)
+            except Exception:
+                logger.warning('WhatsApp response delivery failed for #%d', p.redni_broj)
 
     if channel in ('email', 'both') and p.consumer_email:
         try:
@@ -562,17 +674,19 @@ def complaint_widget(request, company_id):
 
     from pos.models import KnjigaPrigovora
 
-    # Samo javno vidljivi zapisi
+    # Samo javno vidljivi I moderirani zapisi (Dron #2: GDPR safe)
     public = KnjigaPrigovora.objects.filter(
         company=company,
         is_public=True,
+        moderation_passed=True,  # Dron #2: must pass AI + manual moderation
         record_type__in=['pohvala', 'utisak', 'prijedlog'],
     ).order_by('-datum_primitka')[:10]
 
-    # Agregat ocjena
+    # Agregat ocjena (samo moderirani)
     stats = KnjigaPrigovora.objects.filter(
         company=company,
         is_public=True,
+        moderation_passed=True,
         star_rating__isnull=False,
     ).aggregate(
         avg=Avg('star_rating'),
@@ -584,7 +698,7 @@ def complaint_widget(request, company_id):
     if stats['cnt']:
         for s in range(1, 6):
             star_dist[s] = KnjigaPrigovora.objects.filter(
-                company=company, is_public=True, star_rating=s,
+                company=company, is_public=True, moderation_passed=True, star_rating=s,
             ).count()
 
     return render(request, 'pos/complaint_widget.html', {
