@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
-# Zadnje azuriranje: 2026-03-26 — Sonnet (kraj sesije) + CC Code Asimilacija
-# Git HEAD: 49011505
+# Zadnje azuriranje: 2026-03-27 — CC Code Opus (POS Joker sesija)
+# Git HEAD: 4fc8b0ba
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -14,7 +14,7 @@
 | 1 | 26.3. | Tax Wizard: 6 obrazaca, 7 deadlines, widget global | Sonnet+CC | ✅ DONE |
 | 1 | 26.3. | Worktime /mine/ — mobilna stranica za radnika | CC Code | ✅ DONE |
 | 1 | 26.3. | DNS TTL → 60s (Ivan ručno, Hetzner panel) | **IVAN** | ⏳ ČEKA |
-| 2 | 27.3. | Joker Pricing + 3-klik registracija | CC Code | ⏳ ČEKA |
+| 2 | 27.3. | POS Joker unified + tax widget + subscription cockpit | CC Code | ✅ DONE |
 | 3 | 28.3. | Unscoped audit finish + GDPR | CC Code | ⏳ ČEKA |
 | 4 | 29.3. | Vatrogasci modul (dnevnik intervencija) | CC Code | ⏳ ČEKA |
 | 5 | 30.3. | Novi server naručiti (Hetzner CPX51) | **IVAN** | ⏳ ČEKA |
@@ -23,6 +23,17 @@
 | 7 | 1.4. | **VRATA OTVORENA** — 87 firmi probni pristup | Ivan | ⏳ ČEKA |
 
 ---
+
+
+## ★ DEPLOYAN DANAS (27.03.2026) — CC Code Opus sesija
+
+| Što | Commit | Opis |
+|-----|--------|------|
+| POS Joker Faza 1 | 9debb022 | Unified template pos/joker.html — svi pos_type-ovi, gastro conditional |
+| Tax Wizard Widget | 69fcbe36 | Widget u 6 templatea: invoice, pos, rental, worktime, home, udruge |
+| Subscription Cockpit | 4fc8b0ba | ARR/MRR dashboard na /ai/subscriptions/ — KPI, trend, trial alerts |
+| POS Legacy Redirect | 9debb022 | /pos/quick/ i /pos/restaurant/ redirectaju na /pos/joker/ |
+| Selector Update | 9debb022 | Svi terminali koriste joker URL |
 
 ## ★ DEPLOYAN DANAS (26.03.2026) — Sonnet + CC Code sesija
 
