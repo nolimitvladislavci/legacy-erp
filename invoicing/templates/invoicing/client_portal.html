@@ -536,14 +536,34 @@ table.items tbody tr:last-child td{border-bottom:none}
       </div>
 
     {% elif invoice.status == 'ACCEPTED' %}
-      <div class="status-accepted">
-        <div class="status-icon">✓</div>
-        <div class="status-title">{% trans "Ponuda prihvaćena" %}</div>
-        <div class="status-sub">{% trans "Kontaktirat ćemo vas u najkraćem mogućem roku." %}</div>
+      <div class="status-accepted" style="text-align:center;padding:8px 0 16px;">
+        <div class="status-icon" style="font-size:2.8rem;margin-bottom:8px;">✅</div>
+        <div class="status-title" style="font-size:1.3rem;font-weight:700;color:var(--green);margin-bottom:6px;">
+          Vielen Dank! / Hvala vam!
+        </div>
+        <div class="status-sub" style="color:var(--text-dim);margin-bottom:16px;line-height:1.6;">
+          Ihre Bestätigung wurde erfolgreich registriert.<br>
+          <span style="font-size:.85rem;opacity:.75;">Vaša potvrda je zabilježena. Kontaktirat ćemo vas u najkraćem mogućem roku.</span>
+        </div>
+        <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" class="btn btn-pdf" target="_blank" style="margin-bottom:20px;display:inline-block;">
+          ↓ Angebot als PDF / Preuzmi PDF
+        </a>
+        <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px;">
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;">
+            Versehentlich bestätigt? / Slučajno ste pritisnuli?
+          </div>
+          <form method="post">{% csrf_token %}
+            <button type="submit" name="action" value="undo_accept"
+              style="background:none;border:1px solid var(--border);color:var(--text-dim);
+                     padding:8px 18px;border-radius:8px;cursor:pointer;font-size:.82rem;
+                     transition:all .2s;"
+              onmouseover="this.style.borderColor='var(--amber)';this.style.color='var(--amber)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">
+              ↩ Bestätigung zurückziehen / Opozovite prihvaćanje
+            </button>
+          </form>
+        </div>
       </div>
-      <a href="/invoicing/{{ invoice.pk }}/download/" class="btn btn-pdf" style="margin-top:12px">
-        ↓ {% trans "Preuzmi PDF" %}
-      </a>
 
     {% elif invoice.status == 'PAID' %}
       <div class="status-accepted">
@@ -553,9 +573,38 @@ table.items tbody tr:last-child td{border-bottom:none}
       </div>
 
     {% elif invoice.status == 'REJECTED' %}
-      <div class="status-accepted">
-        <div class="status-title" style="color:var(--muted)">{% trans "Ponuda odbijena" %}</div>
-        <div class="status-sub">{% trans "Za više informacija kontaktirajte nas." %}</div>
+      <div class="status-accepted" style="text-align:center;padding:8px 0 16px;">
+        <div class="status-icon" style="font-size:2.4rem;margin-bottom:8px;opacity:.6;">🤝</div>
+        <div class="status-title" style="font-size:1.2rem;font-weight:600;color:var(--text-dim);margin-bottom:6px;">
+          Danke für Ihre Rückmeldung! / Hvala na odgovoru.
+        </div>
+        <div class="status-sub" style="color:var(--text-dim);margin-bottom:20px;line-height:1.6;">
+          Wir respektieren Ihre Entscheidung.<br>
+          <span style="font-size:.85rem;opacity:.75;">
+            Falls Sie Fragen haben oder das Angebot anpassen möchten, stehen wir Ihnen gerne zur Verfügung.<br>
+            Ako imate pitanja ili želite prilagodbu ponude — slobodno nas kontaktirajte.
+          </span>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:16px;">
+          <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:12px;font-weight:500;">
+            Haben Sie es sich anders überlegt? / Jeste li se predomislili?
+          </div>
+          <form method="post">{% csrf_token %}
+            <button type="submit" name="action" value="undo_reject"
+              style="background:rgba(16,185,129,.08);border:1px solid var(--green);
+                     color:var(--green);padding:10px 24px;border-radius:8px;
+                     cursor:pointer;font-size:.9rem;font-weight:600;
+                     transition:all .2s;display:block;width:100%;margin-bottom:10px;"
+              onmouseover="this.style.background='rgba(16,185,129,.18)'"
+              onmouseout="this.style.background='rgba(16,185,129,.08)'">
+              ✓ Angebot doch annehmen / Ipak prihvaćam ponudu
+            </button>
+          </form>
+          <a href="{% url 'invoicing:public_pdf' invoice.client_token %}" class="btn btn-pdf" target="_blank"
+             style="display:block;text-align:center;">
+            ↓ Angebot als PDF / Preuzmi PDF
+          </a>
+        </div>
       </div>
     {% endif %}
     </div>

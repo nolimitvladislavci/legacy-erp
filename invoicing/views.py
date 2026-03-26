@@ -927,10 +927,13 @@ def _notify_quote_action(invoice, action: str):
     import logging
     log = logging.getLogger('invoicing.notify')
 
+    action_map = {
+        'accepted':      ('✅', 'prihvaćena',            'angenommen'),
+        'rejected':      ('❌', 'odbijena',               'abgelehnt'),
+        'undo_accepted': ('↩', 'prihvaćanje opozvano',   'Bestätigung zurückgezogen'),
+    }
+    emoji, verb_hr, verb_de = action_map.get(action, ('ℹ️', action, action))
     is_accepted = action == 'accepted'
-    emoji   = '✅' if is_accepted else '❌'
-    verb_hr = 'prihvaćena' if is_accepted else 'odbijena'
-    verb_de = 'angenommen' if is_accepted else 'abgelehnt'
 
     # ── Pronađi kontakt podatke kompanije ──────────────────────
     company = invoice.company
@@ -1022,11 +1025,26 @@ def client_portal(request, token):
             invoice.save(update_fields=['status'])
             _notify_quote_action(invoice, 'accepted')
             messages.success(request, 'Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro.')
+
         elif action == 'reject':
             invoice.status = 'REJECTED'
             invoice.save(update_fields=['status'])
             _notify_quote_action(invoice, 'rejected')
             messages.info(request, 'Ponuda je odbijena. Slobodno nas kontaktirajte za prilagodbu.')
+
+        elif action == 'undo_accept' and invoice.status == 'ACCEPTED':
+            # Klijent je slučajno prihvatio — vraća se na SENT
+            invoice.status = 'SENT'
+            invoice.save(update_fields=['status'])
+            _notify_quote_action(invoice, 'undo_accepted')
+            messages.info(request, 'Prihvaćanje je opozvano. Ponuda je aktivna — možete ponovo odlučiti.')
+
+        elif action == 'undo_reject' and invoice.status == 'REJECTED':
+            # Klijent se predomislio — direktno prihvaća
+            invoice.status = 'ACCEPTED'
+            invoice.save(update_fields=['status'])
+            _notify_quote_action(invoice, 'accepted')
+            messages.success(request, 'Odlično! Ponuda je prihvaćena. Kontaktirat ćemo vas uskoro.')
         return redirect(request.path)
 
     # Dohvati sekcije za renderiranje (ista logika kao PDF)
