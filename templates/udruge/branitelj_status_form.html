@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Status branitelja — {{ clan }}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-medal"></i> Status branitelja: {{ clan }}</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="row mb-3"><div class="col-md-6"><label class="form-label">Vrsta statusa</label>
+<select name="vrsta_statusa" class="form-select bg-dark text-light border-secondary">
+{% for code, label in vrsta_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
+<div class="col-md-6"><label class="form-label">Postrojba</label>
+<select name="postrojba" class="form-select bg-dark text-light border-secondary">
+<option value="">—</option>{% for code, label in postrojba_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div></div>
+<div class="mb-3"><label class="form-label">Puni naziv postrojbe</label><input type="text" name="naziv_postrojbe" class="form-control bg-dark text-light border-secondary"></div>
+<div class="row mb-3"><div class="col-md-4"><label>Od datuma</label><input type="date" name="od_datuma" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Do datuma</label><input type="date" name="do_datuma" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Dana sudjelovanja</label><input type="number" name="dana_sudjelovanja" class="form-control bg-dark text-light border-secondary" value="0"></div></div>
+<div class="row mb-3"><div class="col-md-4"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="borbeni_sektor" id="bs"><label class="form-check-label" for="bs">Borbeni sektor</label></div></div>
+<div class="col-md-4"><label>Br. potvrde Ministarstva</label><input type="text" name="broj_potvrde_ministarstva" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>HRVI % oštećenja</label><input type="number" name="postotak_invalidnosti" class="form-control bg-dark text-light border-secondary" min="0" max="100"></div></div>
+<div class="mb-3"><label>Napomena</label><textarea name="napomena" rows="2" class="form-control bg-dark text-light border-secondary"></textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:branitelji_dashboard' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi</button></div></form></div>
+{% endblock %}

@@ -51,7 +51,7 @@ def make_receipt(session, items_data, buyer_oib='', is_r1=False, note='SIM'):
     tot = sub + tax
     r = POSReceipt.objects.create(
         session=session,
-        receipt_number=(POSReceipt.objects.order_by("-receipt_number").values_list("receipt_number", flat=True).first() or 19000) + random.randint(1, 50),
+        receipt_number=max(1, (POSReceipt.objects.filter(session=session).order_by('-receipt_number').values_list('receipt_number', flat=True).first() or 0) + 1),
         subtotal=sub, tax_amount=tax, total=tot,
         status='paid', is_r1=is_r1,
         buyer_oib=buyer_oib, note=note,

@@ -1964,3 +1964,234 @@ class TretmanVocnjaka(models.Model):
             from datetime import timedelta
             self.karencija_do = self.datum + timedelta(days=self.karencija_dana)
         super().save(*args, **kwargs)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# BRANITELJI — Zakon NN 121/17, 98/19, 84/21, 156/23
+# ═══════════════════════════════════════════════════════════════════
+
+class StatusBranitelja(models.Model):
+    VRSTA_STATUSA = [
+        ('branitelj',      'Hrvatski branitelj iz DR'),
+        ('dragovoljac',    'Dragovoljac iz DR'),
+        ('hrvi_1',         'HRVI — I. skupina (80-100%)'),
+        ('hrvi_2',         'HRVI — II. skupina (60-79%)'),
+        ('hrvi_3',         'HRVI — III. skupina (40-59%)'),
+        ('hrvi_4',         'HRVI — IV. skupina (20-39%)'),
+        ('civilni_invalid','Civilni invalid rata'),
+        ('smrtno_stradali','Smrtno stradali (nasljednici)'),
+        ('nestali',        'Nestali (obitelj)'),
+    ]
+    POSTROJBA_CHOICES = [
+        ('HV',   'Hrvatska vojska'),
+        ('MUP',  'MUP'),
+        ('ZNG',  'Zbor narodne garde'),
+        ('HOS',  'Hrvatske obrambene snage'),
+        ('NZ',   'Narodna zaštita'),
+        ('HVO',  'HVO (BiH)'),
+        ('ostalo','Ostalo'),
+    ]
+    clan = models.OneToOneField('Clan', on_delete=models.CASCADE, related_name='status_branitelja')
+    vrsta_statusa = models.CharField(max_length=20, choices=VRSTA_STATUSA, default='branitelj')
+    postrojba = models.CharField(max_length=10, choices=POSTROJBA_CHOICES, blank=True)
+    naziv_postrojbe = models.CharField(max_length=200, blank=True)
+    od_datuma = models.DateField(null=True, blank=True, verbose_name='Sudjelovanje od')
+    do_datuma = models.DateField(null=True, blank=True, verbose_name='Sudjelovanje do')
+    dana_sudjelovanja = models.PositiveIntegerField(default=0)
+    borbeni_sektor = models.BooleanField(default=False)
+    broj_potvrde_ministarstva = models.CharField(max_length=50, blank=True)
+    datum_potvrde = models.DateField(null=True, blank=True)
+    postotak_invalidnosti = models.PositiveSmallIntegerField(null=True, blank=True)
+    ima_njegovatelja = models.BooleanField(default=False)
+    fond_udjeli = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    fond_nasljednici = models.CharField(max_length=500, blank=True)
+    ostvarena_prava = models.JSONField(default=dict, blank=True)
+    odlikovanja = models.TextField(blank=True)
+    napomena = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'udruge_status_branitelja'
+        verbose_name = 'Status branitelja'
+        verbose_name_plural = 'Statusi branitelja'
+
+    def __str__(self):
+        return '%s — %s' % (self.clan, self.get_vrsta_statusa_display())
+
+    @property
+    def je_hrvi(self):
+        return self.vrsta_statusa.startswith('hrvi_')
+
+
+class OdlikovanjeBranitelja(models.Model):
+    ODLIKOVANJE_VRSTA = [
+        ('red_danice_hr', 'Red Danice Hrvatske'),
+        ('domovinska_rat', 'Domovinska medalja — ratna'),
+        ('domovinska_mir', 'Domovinska medalja — mirovna'),
+        ('medalja_slobode', 'Medalja slobode'),
+        ('ostalo', 'Ostalo odlikovanje'),
+    ]
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='odlikovanja_bran')
+    vrsta = models.CharField(max_length=30, choices=ODLIKOVANJE_VRSTA)
+    naziv = models.CharField(max_length=200)
+    datum_dodjeljivanja = models.DateField(null=True, blank=True)
+    broj_odluke = models.CharField(max_length=100, blank=True)
+    napomena = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        db_table = 'udruge_odlikovanje_branitelja'
+        verbose_name = 'Odlikovanje'
+        ordering = ['-datum_dodjeljivanja']
+
+
+# ═══════════════════════════════════════════════════════════════════
+# LOV — Zakon o lovstvu (NN), Pravilnik NN 48/22, SLE od 06/2025
+# ═══════════════════════════════════════════════════════════════════
+
+class Loviste(models.Model):
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='lovista')
+    naziv = models.CharField(max_length=200)
+    broj_lovista = models.CharField(max_length=30, blank=True)
+    povrsina_ha = models.DecimalField(max_digits=10, decimal_places=2)
+    vrsta = models.CharField(max_length=20, choices=[
+        ('zajednicko', 'Zajedničko lovište'),
+        ('privatno', 'Privatno lovište'),
+        ('uzgajaliste', 'Uzgajalište divljači'),
+    ], default='zajednicko')
+    lovoovlastenik = models.CharField(max_length=200, blank=True)
+    zakup_od = models.DateField(null=True, blank=True)
+    zakup_do = models.DateField(null=True, blank=True)
+    opis_granica = models.TextField(blank=True)
+    napomena = models.CharField(max_length=300, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'udruge_loviste'
+        verbose_name = 'Lovište'
+        ordering = ['naziv']
+
+    def __str__(self):
+        return '%s (%s ha)' % (self.naziv, self.povrsina_ha)
+
+
+class LovackaIskaznica(models.Model):
+    KATEGORIJA_CHOICES = [
+        ('hr_5god', 'HR državljanin (5 godina)'),
+        ('inozemac', 'Strani državljanin (sezonska)'),
+        ('pocasna', 'Počasna iskaznica'),
+    ]
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='lovacke_iskaznice')
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='lovacke_iskaznice')
+    broj_iskaznice = models.CharField(max_length=30)
+    kategorija = models.CharField(max_length=15, choices=KATEGORIJA_CHOICES, default='hr_5god')
+    datum_izdavanja = models.DateField()
+    vrijedi_do = models.DateField()
+    markica_godina = models.PositiveSmallIntegerField(null=True, blank=True)
+    markica_datum = models.DateField(null=True, blank=True)
+    uvjerenje_ispit = models.CharField(max_length=50, blank=True)
+    datum_ispita = models.DateField(null=True, blank=True)
+    napomena = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_lovacka_iskaznica'
+        verbose_name = 'Lovačka iskaznica'
+        ordering = ['-datum_izdavanja']
+
+    def __str__(self):
+        return 'Iskaznica %s — %s' % (self.broj_iskaznice, self.clan)
+
+    @property
+    def je_aktivna(self):
+        from django.utils import timezone
+        return self.vrijedi_do >= timezone.now().date()
+
+    @property
+    def treba_markicu(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        lovna_god = today.year if today.month >= 4 else today.year - 1
+        return self.markica_godina != lovna_god
+
+
+class DopustenjeLova(models.Model):
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='dopustenja_lova')
+    loviste = models.ForeignKey(Loviste, on_delete=models.PROTECT, related_name='dopustenja')
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='dopustenja_lova')
+    broj_dopustenja = models.CharField(max_length=20)
+    datum_lova = models.DateField()
+    vrsta_divljaci = models.CharField(max_length=100)
+    broj_komada = models.PositiveSmallIntegerField(default=1)
+    sle_evidencija_br = models.CharField(max_length=50, blank=True)
+    napomena = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_dopustenje_lova'
+        verbose_name = 'Dopuštenje za lov'
+        ordering = ['-datum_lova']
+
+    def __str__(self):
+        return 'Dopuštenje %s — %s' % (self.broj_dopustenja, self.vrsta_divljaci)
+
+
+class ZapisnikLova(models.Model):
+    NACIN_LOVA = [
+        ('pojedinacni', 'Pojedinačni lov'),
+        ('skupni', 'Skupni lov (hajka)'),
+        ('tihacenje', 'Tihačenje'),
+        ('iz_zasjede', 'Iz zasjede'),
+    ]
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='zapisnici_lova')
+    dopustenje = models.ForeignKey(DopustenjeLova, on_delete=models.SET_NULL, null=True, blank=True, related_name='zapisnici')
+    loviste = models.ForeignKey(Loviste, on_delete=models.PROTECT, related_name='zapisnici')
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='zapisnici_lova')
+    datum = models.DateField()
+    nacin_lova = models.CharField(max_length=15, choices=NACIN_LOVA, default='pojedinacni')
+    vrsta_divljaci = models.CharField(max_length=100)
+    spol = models.CharField(max_length=10, choices=[('muz', 'Mužjak'), ('zen', 'Ženka'), ('mlado', 'Mlado')], blank=True)
+    masa_kg = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    lokalitet = models.CharField(max_length=200, blank=True)
+    sle_broj = models.CharField(max_length=50, blank=True)
+    photo = models.ImageField(upload_to='lov/zapisnici/%Y/', blank=True)
+    napomena = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_zapisnik_lova'
+        verbose_name = 'Zapisnik o lovu'
+        ordering = ['-datum']
+
+    def __str__(self):
+        return '%s — %s (%s)' % (self.vrsta_divljaci, self.clan, self.datum)
+
+
+class Trofej(models.Model):
+    VRSTA_TROFEJA = [
+        ('jelen_paroske', 'Jelenje paroške'),
+        ('srna_rogi', 'Srneće rogovlje'),
+        ('vepar_kljove', 'Veprove kljove'),
+        ('medvjed_lubanja', 'Medvjeđa lubanja'),
+        ('muflon_rogi', 'Muflonovo rogovlje'),
+        ('ostalo', 'Ostali trofej'),
+    ]
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='trofeji')
+    zapisnik = models.OneToOneField(ZapisnikLova, on_delete=models.CASCADE, related_name='trofej', null=True, blank=True)
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='trofeji')
+    vrsta = models.CharField(max_length=20, choices=VRSTA_TROFEJA)
+    rok_lista = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    teza_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    cis_tockova = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='CIC točaka')
+    medalja = models.CharField(max_length=10, blank=True, choices=[('zlato','Zlato'), ('srebro','Srebro'), ('bronca','Bronca')])
+    datum_vrjednovanja = models.DateField(null=True, blank=True)
+    photo = models.ImageField(upload_to='lov/trofeji/%Y/', blank=True)
+    napomena = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        db_table = 'udruge_trofej'
+        verbose_name = 'Trofej'
+        ordering = ['-cis_tockova']
+
+    def __str__(self):
+        return '%s — %s' % (self.get_vrsta_display(), self.clan)

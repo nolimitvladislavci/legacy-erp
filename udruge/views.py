@@ -2893,3 +2893,195 @@ def kostim_edit(request, pk):
         'kostim': obj, 'edit': True,
         'stanja': Kostim.STANJE_CHOICES, 'sekcije': sekcije, 'clanovi': clanovi,
     })
+
+
+# ═══════════════════════════════════════════════════════════════════
+# BRANITELJI — udruge branitelja
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+def branitelji_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import StatusBranitelja
+    qs = StatusBranitelja.objects.filter(clan__company=company).select_related('clan')
+    stats = {
+        'ukupno': qs.count(),
+        'hrvi': qs.filter(vrsta_statusa__startswith='hrvi_').count(),
+        'dragovoljci': qs.filter(vrsta_statusa='dragovoljac').count(),
+        'borbeni_sektor': qs.filter(borbeni_sektor=True).count(),
+        's_odlikovanjem': qs.filter(clan__odlikovanja_bran__isnull=False).distinct().count(),
+    }
+    vrsta_f = request.GET.get('vrsta', '')
+    if vrsta_f:
+        qs = qs.filter(vrsta_statusa=vrsta_f)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/branitelji_dashboard.html', {
+        'page_obj': page, 'stats': stats, 'vrsta_f': vrsta_f,
+        'vrsta_choices': StatusBranitelja.VRSTA_STATUSA,
+    })
+
+
+@login_required
+def branitelj_status_create(request, clan_pk):
+    company = get_user_company(request)
+    from .models import Clan, StatusBranitelja
+    clan = get_object_or_404(Clan, pk=clan_pk, company=company)
+    if hasattr(clan, 'status_branitelja'):
+        messages.info(request, 'Član već ima status branitelja.')
+        return redirect('udruge:branitelji_dashboard')
+    if request.method == 'POST':
+        d = request.POST
+        StatusBranitelja.objects.create(
+            clan=clan,
+            vrsta_statusa=d.get('vrsta_statusa', 'branitelj'),
+            postrojba=d.get('postrojba', ''),
+            naziv_postrojbe=d.get('naziv_postrojbe', ''),
+            od_datuma=d.get('od_datuma') or None,
+            do_datuma=d.get('do_datuma') or None,
+            dana_sudjelovanja=int(d.get('dana_sudjelovanja') or 0),
+            borbeni_sektor='borbeni_sektor' in d,
+            broj_potvrde_ministarstva=d.get('broj_potvrde_ministarstva', ''),
+            datum_potvrde=d.get('datum_potvrde') or None,
+            postotak_invalidnosti=int(d.get('postotak_invalidnosti') or 0) or None,
+            odlikovanja=d.get('odlikovanja', ''),
+            napomena=d.get('napomena', ''),
+        )
+        messages.success(request, 'Status branitelja dodan za %s.' % clan)
+        return redirect('udruge:branitelji_dashboard')
+    return render(request, 'udruge/branitelj_status_form.html', {
+        'clan': clan,
+        'vrsta_choices': StatusBranitelja.VRSTA_STATUSA,
+        'postrojba_choices': StatusBranitelja.POSTROJBA_CHOICES,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════
+# LOV — lovačka društva
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+def lov_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import LovackaIskaznica, ZapisnikLova, Trofej, Loviste
+    iskaznice = LovackaIskaznica.objects.filter(company=company)
+    stats = {
+        'lovaca': iskaznice.count(),
+        'aktivne_iskaznice': sum(1 for i in iskaznice if i.je_aktivna),
+        'treba_markicu': sum(1 for i in iskaznice if i.treba_markicu),
+        'odstrjel_ukupno': ZapisnikLova.objects.filter(company=company).count(),
+        'trofeji_medalja': Trofej.objects.filter(company=company).exclude(medalja='').count(),
+        'lovista': Loviste.objects.filter(company=company, is_active=True).count(),
+    }
+    zapisnici = ZapisnikLova.objects.filter(company=company).select_related('clan', 'loviste')[:10]
+    return render(request, 'udruge/lov_dashboard.html', {'stats': stats, 'zapisnici': zapisnici})
+
+
+@login_required
+def lov_iskaznice_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import LovackaIskaznica
+    qs = LovackaIskaznica.objects.filter(company=company).select_related('clan')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/lov_iskaznice_list.html', {'page_obj': page})
+
+
+@login_required
+def lov_dopustenja_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import DopustenjeLova
+    qs = DopustenjeLova.objects.filter(company=company).select_related('clan', 'loviste')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/lov_dopustenja_list.html', {'page_obj': page})
+
+
+@login_required
+def lov_dopustenje_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import DopustenjeLova, Loviste, Clan
+    if request.method == 'POST':
+        DopustenjeLova.objects.create(
+            company=company,
+            loviste_id=request.POST.get('loviste'),
+            clan_id=request.POST.get('clan'),
+            broj_dopustenja=request.POST.get('broj_dopustenja', ''),
+            datum_lova=request.POST.get('datum_lova'),
+            vrsta_divljaci=request.POST.get('vrsta_divljaci', ''),
+            broj_komada=int(request.POST.get('broj_komada') or 1),
+            sle_evidencija_br=request.POST.get('sle_evidencija_br', ''),
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Dopuštenje kreirano.')
+        return redirect('udruge:lov_dopustenja_list')
+    lovista = Loviste.objects.filter(company=company, is_active=True)
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/lov_dopustenje_form.html', {'lovista': lovista, 'clanovi': clanovi})
+
+
+@login_required
+def lov_zapisnici_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ZapisnikLova
+    qs = ZapisnikLova.objects.filter(company=company).select_related('clan', 'loviste')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/lov_zapisnici_list.html', {'page_obj': page})
+
+
+@login_required
+def lov_zapisnik_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ZapisnikLova, Loviste, Clan
+    if request.method == 'POST':
+        ZapisnikLova.objects.create(
+            company=company,
+            loviste_id=request.POST.get('loviste'),
+            clan_id=request.POST.get('clan'),
+            dopustenje_id=request.POST.get('dopustenje') or None,
+            datum=request.POST.get('datum'),
+            nacin_lova=request.POST.get('nacin_lova', 'pojedinacni'),
+            vrsta_divljaci=request.POST.get('vrsta_divljaci', ''),
+            spol=request.POST.get('spol', ''),
+            masa_kg=request.POST.get('masa_kg') or None,
+            lokalitet=request.POST.get('lokalitet', ''),
+            sle_broj=request.POST.get('sle_broj', ''),
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Zapisnik kreiran.')
+        return redirect('udruge:lov_zapisnici_list')
+    from .models import DopustenjeLova
+    lovista = Loviste.objects.filter(company=company, is_active=True)
+    clanovi = Clan.objects.filter(company=company)
+    dopustenja = DopustenjeLova.objects.filter(company=company).order_by('-datum_lova')[:20]
+    return render(request, 'udruge/lov_zapisnik_form.html', {
+        'lovista': lovista, 'clanovi': clanovi, 'dopustenja': dopustenja,
+        'nacin_choices': ZapisnikLova.NACIN_LOVA,
+    })
+
+
+@login_required
+def lov_trofeji_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Trofej
+    qs = Trofej.objects.filter(company=company).select_related('clan', 'zapisnik')
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/lov_trofeji_list.html', {'page_obj': page})

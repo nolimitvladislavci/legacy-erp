@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Novi zapisnik o lovu{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-book"></i> Zapisnik o obavljenom lovu (ZOL)</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="row mb-3"><div class="col-md-6"><label class="form-label">Lovište</label>
+<select name="loviste" required class="form-select bg-dark text-light border-secondary">
+{% for l in lovista %}<option value="{{ l.pk }}">{{ l.naziv }}</option>{% endfor %}</select></div>
+<div class="col-md-6"><label class="form-label">Lovac</label>
+<select name="clan" required class="form-select bg-dark text-light border-secondary">
+{% for c in clanovi %}<option value="{{ c.pk }}">{{ c.last_name }}, {{ c.first_name }}</option>{% endfor %}</select></div></div>
+<div class="row mb-3"><div class="col-md-4"><label>Datum</label><input type="date" name="datum" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Način lova</label><select name="nacin_lova" class="form-select bg-dark text-light border-secondary">
+{% for code, label in nacin_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
+<div class="col-md-4"><label>Spol</label><select name="spol" class="form-select bg-dark text-light border-secondary">
+<option value="">—</option><option value="muz">Mužjak</option><option value="zen">Ženka</option><option value="mlado">Mlado</option></select></div></div>
+<div class="row mb-3"><div class="col-md-6"><label>Vrsta divljači</label><input type="text" name="vrsta_divljaci" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-3"><label>Masa (kg)</label><input type="number" name="masa_kg" step="0.01" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-3"><label>SLE broj</label><input type="text" name="sle_broj" class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="mb-3"><label>Lokalitet</label><input type="text" name="lokalitet" class="form-control bg-dark text-light border-secondary"></div>
+<div class="mb-3"><label>Dopuštenje</label><select name="dopustenje" class="form-select bg-dark text-light border-secondary">
+<option value="">— Bez dopuštenja —</option>{% for d in dopustenja %}<option value="{{ d.pk }}">{{ d.broj_dopustenja }} — {{ d.vrsta_divljaci }} ({{ d.datum_lova|date:"d.m.Y" }})</option>{% endfor %}</select></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:lov_zapisnici_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi</button></div></form></div>
+{% endblock %}

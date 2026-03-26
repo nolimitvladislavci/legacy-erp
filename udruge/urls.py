@@ -155,4 +155,21 @@ urlpatterns = [
     path('vocari/berbe/nova/', views.berba_create, name='berba_create'),
     path('vocari/tretmani-vocnjak/', views.tretman_vocnjaka_list, name='tretman_vocnjaka_list'),
     path('vocari/tretmani-vocnjak/novi/', views.tretman_vocnjaka_create, name='tretman_vocnjaka_create'),
+
+    # ═══════════════════════════════════════════════════════════════════
+    # BRANITELJI
+    # ═══════════════════════════════════════════════════════════════════
+    path('branitelji/', views.branitelji_dashboard, name='branitelji_dashboard'),
+    path('branitelji/status/<int:clan_pk>/create/', views.branitelj_status_create, name='branitelj_status_create'),
+
+    # ═══════════════════════════════════════════════════════════════════
+    # LOV — LOVAČKA DRUŠTVA
+    # ═══════════════════════════════════════════════════════════════════
+    path('lov/', views.lov_dashboard, name='lov_dashboard'),
+    path('lov/iskaznice/', views.lov_iskaznice_list, name='lov_iskaznice_list'),
+    path('lov/dopustenja/', views.lov_dopustenja_list, name='lov_dopustenja_list'),
+    path('lov/dopustenja/create/', views.lov_dopustenje_create, name='lov_dopustenje_create'),
+    path('lov/zapisnici/', views.lov_zapisnici_list, name='lov_zapisnici_list'),
+    path('lov/zapisnici/create/', views.lov_zapisnik_create, name='lov_zapisnik_create'),
+    path('lov/trofeji/', views.lov_trofeji_list, name='lov_trofeji_list'),
 ]
