@@ -5,6 +5,7 @@ from django.apps import apps
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.db import models
 from django.utils import timezone
 
 from .models import AIModulePermission, PendingAIAction, AIActionLog
@@ -677,3 +678,99 @@ def live_metrics(request):
         'recent_actions': recent_list,
         'pending_actions': pending_list,
     })
+
+
+# ── SUBSCRIPTION COCKPIT — ARR/MRR ───────────────────────────────────────────
+
+@login_required
+@user_passes_test(is_superadmin)
+def subscription_cockpit(request):
+    """ARR/MRR cockpit — monetizacijski pregled za superadmina."""
+    from registration.models import CompanySubscription, PricingPlan
+    from companies.models import Company
+    from decimal import Decimal
+    from datetime import timedelta
+    from collections import Counter, defaultdict
+
+    today = timezone.now().date()
+
+    # Active subscriptions
+    active_subs = CompanySubscription.objects.filter(
+        is_active=True
+    ).select_related('company', 'pricing_plan')
+
+    # MRR calculation
+    mrr = Decimal('0.00')
+    plan_revenue = defaultdict(Decimal)
+    billing_breakdown = Counter()
+
+    for sub in active_subs:
+        if sub.billing_cycle == 'yearly' and sub.monthly_fee:
+            monthly = sub.monthly_fee / 12
+        else:
+            monthly = sub.monthly_fee or Decimal('0.00')
+        mrr += monthly
+        plan_name = sub.pricing_plan.name if sub.pricing_plan else sub.plan
+        plan_revenue[plan_name] += monthly
+        billing_breakdown[sub.billing_cycle] += 1
+
+    arr = mrr * 12
+
+    # Trial metrics
+    trials = active_subs.filter(trial_ends__isnull=False, trial_ends__gte=today)
+    trial_expiring_7d = trials.filter(trial_ends__lte=today + timedelta(days=7))
+
+    # Churn risk — subscriptions with cancel_at_period_end=True
+    churn_risk = active_subs.filter(cancel_at_period_end=True)
+
+    # Plan distribution
+    plan_dist = sorted(plan_revenue.items(), key=lambda x: x[1], reverse=True)
+
+    # Companies without subscription
+    total_companies = Company.objects.count()
+    companies_with_sub = active_subs.values('company').distinct().count()
+    companies_no_sub = total_companies - companies_with_sub
+
+    # Recent subscriptions (last 30 days)
+    recent = CompanySubscription.objects.filter(
+        valid_from__gte=today - timedelta(days=30)
+    ).select_related('company', 'pricing_plan').order_by('-valid_from')[:20]
+
+    # Monthly trend (last 6 months)
+    months = []
+    for i in range(5, -1, -1):
+        m_start = today.replace(day=1) - timedelta(days=30 * i)
+        m_start = m_start.replace(day=1)
+        month_subs = CompanySubscription.objects.filter(
+            is_active=True,
+            valid_from__lte=m_start,
+        ).filter(
+            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=m_start)
+        )
+        m_mrr = sum(
+            (s.monthly_fee / 12 if s.billing_cycle == 'yearly' else s.monthly_fee) or Decimal('0')
+            for s in month_subs
+        )
+        months.append({
+            'label': m_start.strftime('%b %Y'),
+            'mrr': float(m_mrr),
+            'count': month_subs.count(),
+        })
+
+    ctx = {
+        'mrr': mrr,
+        'arr': arr,
+        'active_count': active_subs.count(),
+        'plan_dist': plan_dist,
+        'billing_breakdown': dict(billing_breakdown),
+        'trials': trials,
+        'trial_expiring_7d': trial_expiring_7d,
+        'churn_risk': churn_risk,
+        'total_companies': total_companies,
+        'companies_with_sub': companies_with_sub,
+        'companies_no_sub': companies_no_sub,
+        'recent': recent,
+        'months_json': json.dumps(months),
+    }
+    return render(request, 'superadmin_ai/subscription_cockpit.html', ctx)
+
