@@ -295,17 +295,23 @@ class Invoice(models.Model):
     def clean(self):
         from django.core.exceptions import ValidationError
         from konto.models import AccountingPeriod
+        is_draft = (self.status == 'DRAFT')
+
+        # Zaključano razdoblje: blokiraj samo ne-DRAFT dokumente
         if self.date_issued and hasattr(self, 'company') and self.company_id:
-            if AccountingPeriod.is_period_locked(self.company, self.date_issued.year, self.date_issued.month):
+            if not is_draft and AccountingPeriod.is_period_locked(self.company, self.date_issued.year, self.date_issued.month):
                 raise ValidationError(f"Razdoblje {self.date_issued.month:02d}/{self.date_issued.year} je zaključano. Izdavanje računa nije moguće.")
 
         # DocumentValidator — 8 pravila (Sprint 1E)
+        # DRAFT: samo WARN/INFO upozorenja, nikad BLOCK
+        # BLOCK se okida tek na tranziciji DRAFT -> ISSUED/SENT/FISCALIZED
         try:
             from invoicing.document_validator import validator
             issues = validator.validate(self)
-            blocking = [i for i in issues if i.severity.value == 'block']
-            if blocking:
-                raise ValidationError({i.field or '__all__': i.message for i in blocking})
+            if not is_draft:
+                blocking = [i for i in issues if i.severity.value == 'block']
+                if blocking:
+                    raise ValidationError({i.field or '__all__': i.message for i in blocking})
             self._validation_warnings = [i for i in issues if i.severity.value in ('warn', 'info')]
         except ValidationError:
             raise

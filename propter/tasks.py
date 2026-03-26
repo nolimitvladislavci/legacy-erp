@@ -133,13 +133,33 @@ def generate_monthly_sammelrechnung(self):
 
                 # Popis OTP-a
                 otp_lines = '\n'.join([
-                    'OTP-%s od %s — %s EUR' % (otp.number, otp.issue_date, otp.total)
+                    'OTP-%s (isporuka: %s) — %s EUR' % (
+                        otp.number,
+                        (otp.delivery_date or otp.issue_date).strftime('%d.%m.%Y'),
+                        otp.total
+                    )
                     for otp in partner_otps
                 ])
+
+                # Datum isporuke: najraniji i najkasniji iz otpremnica
+                delivery_dates = [otp.delivery_date or otp.issue_date for otp in partner_otps]
+                first_delivery = min(delivery_dates)
+                last_delivery = max(delivery_dates)
+                supply_period = '%s — %s' % (
+                    first_delivery.strftime('%d.%m.%Y'),
+                    last_delivery.strftime('%d.%m.%Y'),
+                )
+
                 note = (
-                    'Zbirni racun za period %02d/%d\n'
+                    'Zbirni racun / Sammelrechnung za period %02d/%d\n'
+                    'Razdoblje isporuke (Date of Supply): %s\n'
                     'Ukljucuje %d otpremnica:\n%s'
-                ) % (target_month, target_year, totals['count'], otp_lines)
+                ) % (target_month, target_year, supply_period, totals['count'], otp_lines)
+
+                # Datum isporuke = zadnji dan prethodnog mjeseca (zakonski: Date of Supply)
+                import calendar
+                last_day = calendar.monthrange(target_year, target_month)[1]
+                date_of_supply = datetime.date(target_year, target_month, last_day)
 
                 # Kreiraj Invoice ZR (skip fiscal check)
                 zr = Invoice(
@@ -147,6 +167,7 @@ def generate_monthly_sammelrechnung(self):
                     doctype='ZR',
                     number=zr_num,
                     date_issued=timezone.now(),
+                    date_delivery=date_of_supply,
                     date_due=timezone.now().date() + datetime.timedelta(days=30),
                     client_name=partner['recipient_name'] or 'Razni kupci',
                     client_oib=partner['recipient_oib'] or '',
@@ -155,7 +176,7 @@ def generate_monthly_sammelrechnung(self):
                     total=totals['total'] or 0,
                     status='DRAFT',
                     note=note,
-                    internal_note='[Auto-generated] BillingPeriod %s' % period.pk,
+                    internal_note='[Auto-generated] BillingPeriod %s, Supply: %s' % (period.pk, supply_period),
                     country=getattr(company, 'country', 'HR') or 'HR',
                 )
                 zr._skip_fiscal_check = True

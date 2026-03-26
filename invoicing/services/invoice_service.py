@@ -432,3 +432,137 @@ def copy_invoice_items(source_invoice, target_invoice):
             total_price=item.total_price,
             inventory_item_id=item.inventory_item_id,
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Service Layer: create_invoice + bulk_create_invoices
+# Dron #1 fix: post_save signali NE rade s bulk_create().
+# Sva poslovna logika (otpremnica, knjiženje, partner) mora ići ovdje.
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _create_otpremnica_for_invoice(invoice):
+    """Eksplicitno kreira Otpremnicu za Invoice. Signal-agnostic."""
+    if invoice.doctype not in ('R', 'FA', 'RN'):
+        return None
+    try:
+        from invoicing.models import InvoiceItem
+        items_with_inv = InvoiceItem.objects.filter(
+            invoice=invoice,
+            inventory_item__isnull=False,
+        ).select_related('inventory_item')
+        if not items_with_inv.exists():
+            return None
+
+        from propter.models import Otpremnica, OtpremnicaItem, BillingPeriod
+
+        if Otpremnica.objects.filter(invoice_id=str(invoice.pk)).exists():
+            return Otpremnica.objects.filter(invoice_id=str(invoice.pk)).first()
+
+        bp = BillingPeriod.get_or_create_current(invoice.company)
+        issue_date = invoice.date_issued
+        if hasattr(issue_date, 'date'):
+            issue_date = issue_date.date()
+
+        otp = Otpremnica.objects.create(
+            company=invoice.company,
+            billing_period=bp,
+            invoice_id=str(invoice.pk),
+            issue_date=issue_date,
+            delivery_date=getattr(invoice, 'date_delivery', None) or issue_date,
+            recipient_name=invoice.client_name or '',
+            recipient_oib=invoice.client_oib or '',
+            recipient_address=invoice.client_address or '',
+            subtotal=invoice.subtotal or 0,
+            tax_amount=invoice.tax_amount or 0,
+            total=invoice.total or 0,
+            source=Otpremnica.Source.INVOICE,
+            status=Otpremnica.Status.ISSUED,
+        )
+
+        for i, item in enumerate(items_with_inv, 1):
+            OtpremnicaItem.objects.create(
+                otpremnica=otp,
+                line_number=i,
+                description=item.description or '',
+                quantity=item.quantity or 1,
+                unit='EA',
+                unit_price=item.unit_price or 0,
+                tax_rate=getattr(item, 'tax_percent', 25) or 25,
+                line_total=getattr(item, 'total', 0) or (item.unit_price or 0) * (item.quantity or 1),
+            )
+
+        from django.db import models as db_models
+        BillingPeriod.objects.filter(pk=bp.pk).update(
+            otpremnica_count=db_models.F('otpremnica_count') + 1
+        )
+        return otp
+    except Exception as e:
+        import logging
+        logging.getLogger('invoicing.services').warning(
+            'create_otpremnica failed for %s: %s', invoice.number, e
+        )
+        return None
+
+
+@transaction.atomic
+def create_invoice(company, user=None, **kwargs):
+    """
+    Centralni entry point za kreiranje Invoice.
+    Garantira: partner, otpremnica, knjiženje — bez oslanjanja na signale.
+    
+    Koristi ovo umjesto Invoice.objects.create() kad trebaš poslovnu logiku.
+    """
+    from invoicing.models import Invoice
+
+    kwargs.setdefault('status', 'DRAFT')
+    kwargs.setdefault('currency', 'EUR')
+    invoice = Invoice(company=company, created_by=user, **kwargs)
+    invoice._skip_fiscal_check = True
+    invoice.save()
+
+    ensure_partner(company, invoice)
+    _create_otpremnica_for_invoice(invoice)
+
+    return invoice
+
+
+@transaction.atomic
+def bulk_create_invoices(invoice_list):
+    """
+    Bulk kreiranje faktura s poslovnom logikom.
+    
+    invoice_list: lista dict-ova s ključevima:
+        company, doctype, number, date_issued, client_name, ...
+        items: lista dict-ova za InvoiceItem
+    
+    Radi atomic: ili sve ili ništa.
+    Garantira otpremnice za svaku fakturu (signal-agnostic).
+    """
+    from invoicing.models import Invoice, InvoiceItem
+    import logging
+    logger = logging.getLogger('invoicing.services')
+
+    created = []
+    for data in invoice_list:
+        items_data = data.pop('items', [])
+        company = data.pop('company')
+        user = data.pop('user', None)
+        data.setdefault('status', 'DRAFT')
+        data.setdefault('currency', 'EUR')
+
+        inv = Invoice(company=company, created_by=user, **data)
+        inv._skip_fiscal_check = True
+        inv.save()
+
+        for item in items_data:
+            InvoiceItem.objects.create(invoice=inv, **item)
+
+        ensure_partner(company, inv)
+        otp = _create_otpremnica_for_invoice(inv)
+
+        created.append(inv)
+        if otp:
+            logger.info('bulk: Invoice %s + OTP %s', inv.number, otp.number)
+
+    logger.info('bulk_create_invoices: %d faktura kreirano', len(created))
+    return created

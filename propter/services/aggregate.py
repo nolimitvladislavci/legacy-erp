@@ -189,10 +189,14 @@ def aggregate_to_eracun(period, user=None):
 
         for otp in otpremnice:
             for item in otp.items.all():
+                # Dron #3: Date of Supply u svakoj stavci (zakonski obavezno za ZR)
+                delivery_dt = (otp.delivery_date or otp.issue_date).strftime('%d.%m.%Y')
                 ERacunItem.objects.create(
                     eracun=eracun,
                     line_number=line_num,
-                    description="{} (OTP {})".format(item.description, otp.number),
+                    description="{} (OTP {} — isporuka {})".format(
+                        item.description, otp.number, delivery_dt
+                    ),
                     quantity=item.quantity,
                     unit_code=item.unit or "EA",
                     unit_price=item.unit_price,
