@@ -852,3 +852,36 @@ venv/bin/python manage.py test invoicing.tests --verbosity=1 --no-input 2>&1 | t
 3. **Čitaj models.py** za svaki app prije pisanja koda — field nazivi se razlikuju
 4. **Commit po sprintu** — 1A, 1B, 1C, 1D, 1E, 1F zasebno
 5. **propter/tasks.py** — kreiraj ako ne postoji, dodaj celery imports
+
+
+---
+
+## ⚠️ KRITIČNI PARAMETAR — DODANO 2026-03-27
+
+**OBAVEZNO ČITAJ AGENT_PARAMS_TESTNI_PODACI.md PRIJE SVAKOG COMPLIANCE KODA.**
+
+```
+cat AGENT_PARAMS_TESTNI_PODACI.md
+```
+
+### Što znači za Sprint 1
+
+**DocumentValidator i fiscal_rules smiju provjeravati SAMO:**
+```python
+# Uvijek na početku validate() i should_fiscalize():
+if invoice.synesis_id or (invoice.date_issued and invoice.date_issued.year < 2026):
+    return []  # Skip — historijski podaci, ne naši propisi
+```
+
+**Celery Sammelrechnung task:**
+```python
+# Samo otpremnice iz 2026+
+otps = Otpremnica.objects.filter(
+    billing_period=period,
+    status=Otpremnica.Status.ISSUED,
+    issue_date__year__gte=2026,  # OBVEZNO
+)
+```
+
+**Svi compliance reporti:**
+Naslov mora sadržavati: "Analiza se odnosi samo na produkcijske podatke (2026+). Historijskih 15.325 Synesis dokumenata (2011-2025) je isključeno."

@@ -26,3 +26,27 @@
 4. **48h** - Konfiguriraj PDV stavove (5%, 25%) za compliance izvještaje
 
 **Zaključak:** Sustav radi, ali sa **nestandarnim dokumentnim tokom** koji zaobilazi otpremnice.
+---
+
+## ⚠️ KOREKCIJA — DODANO 2026-03-27
+
+**Prethodna analiza je bila netočna** jer je uključila historijske Synesis uvezene podatke (15.325 dokumenata, 2011-2025) u compliance provjeru.
+
+### Ispravno stanje baze
+
+| | Broj | Napomena |
+|---|---|---|
+| Produkcijski Invoice (2026) | **236** | Pravi klijenti, pravi propisi 2026 |
+| POS računi (2026) | **251** | Pravi klijenti |
+| Synesis uvoz (2011-2025) | **15.325** | Historija, **ISKLJUČI iz provjera** |
+| Otpremnice | **0** | Tijek nije još aktiviran (Sprint 1) |
+
+### Ispravni zaključak
+- "Dokumentni nebalans" koji je Haiku prijavio = **lažni alarm** — to su historijski Synesis podaci
+- "Nema PDV segmentacije" = **djelomično točno** za produkciju ali nije hitno (236 dok.)
+- BillingPeriod s 0 otpremnica = **točno**, ali to je planirano (Sprint 1 to rješava)
+
+### Compliance provjere koje stvarno treba raditi (2026+)
+1. Je li 236 prod. Invoice-a pravilno fiskalizirano?
+2. Imaju li DE klijenti e-Rechnung od 2025?
+3. PDV stope na artiklima klijenata koji su u prehrambenoj djelatnosti?

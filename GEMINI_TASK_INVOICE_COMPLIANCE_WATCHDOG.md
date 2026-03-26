@@ -95,3 +95,35 @@ ComplianceWatchItem.objects.get_or_create(
 ## Output fajlovi
 1. `/var/www/fina-connect/COMPLIANCE_INVOICE_REPORT_20260327.md`
 2. ComplianceWatchItem zapisi u bazi za svaki nalaz
+
+---
+
+## ⚠️ KRITIČNI PARAMETAR — DODANO 2026-03-27
+
+**OBAVEZNO PROČITAJ: `AGENT_PARAMS_TESTNI_PODACI.md`**
+
+### SQL upiti — OBAVEZNI FILTER
+
+Svaki SQL upit mora imati WHERE uvjet za produkcijske podatke:
+
+```sql
+-- UVIJEK koristiti ovaj filter:
+WHERE synesis_id IS NULL
+AND EXTRACT(year FROM date_issued) >= 2026
+
+-- NIKAD:
+-- bez WHERE filtera
+-- WHERE EXTRACT(year FROM date_issued) = 2025  (to je Synesis uvoz)
+```
+
+### Zakonski parametri za analizu
+
+- PDV provjere: vrijede od 2026, HR standard 25%, snižena 5%, ugostiteljstvo 13%
+- DE e-Rechnung: obveza od 01.01.2025 — provjeri samo DE dokumente >= 2025-01-01
+- HRK valuta na starim dokumentima = normalno, ne greška
+- COVID PDV 16% DE u 2020 = normalno, ne greška
+
+### Pravi podaci za analizu
+- **236** produkcijskih Invoice-a (2026, manual)
+- **251** POS računa (2026)
+- **0** otpremnica (tijek još nije wire-an — Sprint 1 to rješava)

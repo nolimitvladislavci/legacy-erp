@@ -682,3 +682,31 @@ print('Issues found:', issues)
 venv/bin/python manage.py check
 git log --oneline -6
 ```
+
+
+---
+
+## ⚠️ KRITIČNI PARAMETAR — DODANO 2026-03-27
+
+**OBAVEZNO ČITAJ: `AGENT_PARAMS_TESTNI_PODACI.md`**
+
+### AI Scan (Sprint 2A)
+Kad AI skenira dokument i izvlači podatke — **ne radi compliance provjeru** na skeniranom dokumentu ako je `date_issued < 2026`. Samo ekstrahiraj podatke, bez validacije propisa.
+
+### Compliance Watchdog (Sprint 2B)
+```python
+# JEDINA ispravna query za compliance:
+production_invoices = Invoice.objects.filter(
+    synesis_id__isnull=True,
+    date_issued__year__gte=2026,
+)
+# NIKAD:
+# Invoice.objects.all() — uključuje 15.325 historijskih
+# Invoice.objects.filter(date_issued__year=2025) — Synesis uvoz, ne produkcija
+```
+
+### Haiku analiza iz ranije sesije — KOREKCIJA
+Haiku compliance analiza iz 2026-03-27 je bila djelomično netočna jer je uključila historijske podatke. Ispravno stanje:
+- 236 produkcijskih dokumenata (2026, manual) → ovo je pravo
+- 15.325 Synesis uvoz → historija, ne compliance target
+- 251 POS račun (2026) → produkcija
