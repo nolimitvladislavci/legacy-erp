@@ -179,3 +179,25 @@ LIMIT Connect Borg (26.03.2026):
 - **7 konto API rupa** zatvoreno (get_object_or_404 bez company check)
 - **0% view scoping apps identificirani**: fitness, insurance, premium_booking, tracking — TREBAJU company FK migraciju
 - **GDPR pokriveni članci**: 5(1)(f), 17, 20, 30
+
+### Knjiga prigovora i utisaka — Sesija 1 DONE (28.03.2026)
+| Što | Status |
+|-----|--------|
+| Model: 21 novih polja (record_type, SES metadata, star_rating, eskalacija...) | ✅ |
+| Mobile-first forma: 4-step wizard, QR pristup bez logina | ✅ |
+| Potpis: canvas + GPS + timestamp + IP + device = SES bundle | ✅ |
+| HR + DE bilingual (forma, PDF, AI prompts) | ✅ |
+| WhatsApp: potvrda potrošaču + notifikacija adminu | ✅ |
+| Email: potvrda + dostava odgovora | ✅ |
+| AI: auto-trijaža, auto-eskalacija (priority>=4), auto-respond (pohvale) | ✅ |
+| PDF: dual-section (prigovori + pohvale), signature, hash, HR+DE | ✅ |
+| Templatetag: {% load complaints %}{% complaints_button %} globalno | ✅ |
+| ZZP čl.10 (15d HR) + BGB (14d DE) + GDPR čl.6(1)(f) | ✅ |
+
+**Sesija 2 TODO:**
+- Dashboard analytics (sentiment trend, response times)
+- QR generiranje per terminal + print template
+- Knjiga utisaka public widget (embed)
+- Auto-archive u DocumentBlob
+- ADR/ODR EU compliance
+- Inspection token integracija
