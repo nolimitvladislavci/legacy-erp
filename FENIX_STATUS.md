@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
-# Zadnje azuriranje: 2026-03-25 — ZAPOVJEDNIČKA SESIJA (Sonnet)
-# Git HEAD: f8c58a9
+# Zadnje azuriranje: 2026-03-26 — CC Code Opus sesija — ZAPOVJEDNIČKA SESIJA (Sonnet)
+# Git HEAD: 985d434
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -116,6 +116,8 @@
 | Voćari/OPG | ~60.000 | ✅ Templates live | POS, berbe, tretmani |
 | Rakijari | ~5.000 | ✅ Templates live | Kotlovi, destilacije, trosarina |
 | Vatrogasci (JVP) | ~30 | 🔨 CC task | FireIntervention model |
+| Branitelji (HVIDRA) | ~2.000 | ✅ LIVE | StatusBranitelja, odlikovanja, HRVI |
+| Lovačka društva | ~600 | ✅ LIVE | Lovište, iskaznica, ZOL, trofej, SLE |
 
 **UKUPNO adresabilno: ~80.000 organizacija u HR. Nebo je plavo.**
 
@@ -141,6 +143,21 @@
 | T&C consent 0/78 firmi | 🟠 Pravni rizik | CC Code |
 | FINA eRačun API key | 🟠 Bloker za live | Ivan |
 | buyer_type b2c default 19k partnera | 🟡 | CC Code |
+
+---
+
+
+## ★ DEPLOYAN DANAS (26.03.2026) — CC Code sesija
+
+| Što | Commit | Opis |
+|-----|--------|------|
+| Udruge URL fix | 0b20795 | 12 broken URL ref + 3 edit viewa (DVD/KUD) |
+| Putni nalog PDF | 91126f5 | travel_order_pdf view + verifikacija pricing/registracija |
+| BUG-02,04,06,07 | a8784dd | pulse JSONField, duplicate view, pricing filter, jir Q, rate limit |
+| GDPR isolation | 1472e07 | 3 unscoped queries fixed (webshop, outreach, invoicing) |
+| Branitelji + Lov | f423863 | 7 modela, migracija 0010, views, templates |
+| Lov templates fix | 09189e9 | 4 prazna lista popunjena |
+| 10/10 CRUD + testovi | 985d434 | Edit views, lovište CRUD, trofej create, 17 testova |
 
 ---
 
