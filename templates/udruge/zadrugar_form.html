@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Novi zadrugar{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-handshake"></i> Novi zadrugar</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="row mb-3"><div class="col-md-5"><label>Ime</label><input type="text" name="first_name" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-5"><label>Prezime</label><input type="text" name="last_name" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-2"><label>OIB</label><input type="text" name="oib" maxlength="11" class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="row mb-3"><div class="col-md-4"><label>Uloga</label><select name="uloga" class="form-select bg-dark text-light border-secondary">
+{% for code, label in uloga_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
+<div class="col-md-4"><label>Datum pristupanja</label><input type="date" name="datum_pristupanja" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Clanski ulog (EUR)</label><input type="number" name="clanski_ulog_eur" step="0.01" value="0" class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="row mb-3"><div class="col-md-4"><label>Udjeli (%)</label><input type="number" name="udjeli_postotak" step="0.01" value="0" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Email</label><input type="email" name="email" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Telefon</label><input type="text" name="phone" class="form-control bg-dark text-light border-secondary"></div></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:zadruge_dashboard' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi</button></div></form></div>
+{% endblock %}

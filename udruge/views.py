@@ -3264,3 +3264,82 @@ def trofej_create(request):
         'vrsta_choices': Trofej.VRSTA_TROFEJA,
         'medalja_choices': [('','Bez medalje'),('zlato','Zlato'),('srebro','Srebro'),('bronca','Bronca')],
     })
+
+
+# ═══════════════════════════════════════════════════════════════════
+# ZADRUGE
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+def zadruge_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Zadrugar, ZadruznRevizija
+    from django.db.models import Sum
+    zadrugari = Zadrugar.objects.filter(company=company, status='aktivan')
+    ukupni_ulozi = zadrugari.aggregate(s=Sum('clanski_ulog_eur'))['s'] or 0
+    zadnja_revizija = ZadruznRevizija.objects.filter(company=company).first()
+    stats = {
+        'ukupno': zadrugari.count(),
+        'osnivaci': zadrugari.filter(uloga='osnivac').count(),
+        'ukupni_ulozi': ukupni_ulozi,
+        'revizija': zadnja_revizija,
+    }
+    return render(request, 'udruge/zadruge_dashboard.html', {
+        'zadrugari': zadrugari.order_by('-udjeli_postotak'),
+        'stats': stats,
+    })
+
+
+@login_required
+def zadrugar_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Zadrugar
+    from decimal import Decimal
+    if request.method == 'POST':
+        Zadrugar.objects.create(
+            company=company,
+            first_name=request.POST.get('first_name', ''),
+            last_name=request.POST.get('last_name', ''),
+            oib=request.POST.get('oib', ''),
+            adresa=request.POST.get('adresa', ''),
+            datum_pristupanja=request.POST.get('datum_pristupanja'),
+            uloga=request.POST.get('uloga', 'redovni'),
+            clanski_ulog_eur=Decimal(request.POST.get('clanski_ulog_eur') or '0'),
+            udjeli_postotak=Decimal(request.POST.get('udjeli_postotak') or '0'),
+            email=request.POST.get('email', ''),
+            phone=request.POST.get('phone', ''),
+            notes=request.POST.get('notes', ''),
+        )
+        messages.success(request, 'Zadrugar dodan.')
+        return redirect('udruge:zadruge_dashboard')
+    return render(request, 'udruge/zadrugar_form.html', {
+        'uloga_choices': Zadrugar.ULOGA_CHOICES,
+    })
+
+
+@login_required
+def revizija_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ZadruznRevizija
+    if request.method == 'POST':
+        ZadruznRevizija.objects.create(
+            company=company,
+            godina=int(request.POST.get('godina') or timezone.now().year),
+            revizor_ime=request.POST.get('revizor_ime', ''),
+            revizor_firma=request.POST.get('revizor_firma', ''),
+            datum_pocetak=request.POST.get('datum_pocetak'),
+            datum_zavrsetak=request.POST.get('datum_zavrsetak') or None,
+            nalaz=request.POST.get('nalaz', ''),
+            ocjena=request.POST.get('ocjena', ''),
+        )
+        messages.success(request, 'Revizija evidentirana.')
+        return redirect('udruge:zadruge_dashboard')
+    return render(request, 'udruge/revizija_form.html', {
+        'ocjena_choices': [('uredna','Uredna'),('napomene','S napomenama'),('neuredna','Neuredna')],
+    })

@@ -2195,3 +2195,70 @@ class Trofej(models.Model):
 
     def __str__(self):
         return '%s — %s' % (self.get_vrsta_display(), self.clan)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# ZADRUGE — Zakon o zadrugama NN 76/14, Pravilnik NN 56/12
+# ═══════════════════════════════════════════════════════════════════
+
+class Zadrugar(models.Model):
+    ULOGA_CHOICES = [
+        ('osnivac', 'Osnivač'),
+        ('redovni', 'Redovni zadrugar'),
+        ('pridruzeni', 'Pridruženi zadrugar'),
+        ('pocasni', 'Počasni zadrugar'),
+    ]
+    STATUS_CHOICES = [
+        ('aktivan', 'Aktivan'),
+        ('mirovanje', 'Mirovanje'),
+        ('istupio', 'Istupio'),
+        ('iskljucen', 'Isključen'),
+    ]
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='zadrugari')
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    oib = models.CharField(max_length=11, blank=True)
+    adresa = models.TextField(blank=True)
+    datum_pristupanja = models.DateField()
+    datum_istupanja = models.DateField(null=True, blank=True)
+    uloga = models.CharField(max_length=20, choices=ULOGA_CHOICES, default='redovni')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aktivan')
+    clanski_ulog_eur = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    udjeli_postotak = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+    ukupni_prinos_eur = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'udruge_zadrugar'
+        verbose_name = 'Zadrugar'
+        ordering = ['last_name', 'first_name']
+
+    def __str__(self):
+        return '%s %s' % (self.last_name, self.first_name)
+
+
+class ZadruznRevizija(models.Model):
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='zadruznrevizije')
+    godina = models.PositiveSmallIntegerField()
+    revizor_ime = models.CharField(max_length=200)
+    revizor_firma = models.CharField(max_length=200, blank=True)
+    datum_pocetak = models.DateField()
+    datum_zavrsetak = models.DateField(null=True, blank=True)
+    nalaz = models.TextField(blank=True)
+    ocjena = models.CharField(max_length=20, choices=[
+        ('uredna', 'Poslovanje uredno'),
+        ('napomene', 'S napomenama'),
+        ('neuredna', 'Neuredna'),
+    ], blank=True)
+    izvjestaj_pdf = models.FileField(upload_to='zadruge/revizija/%Y/', blank=True)
+    sljedeca_revizija = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'udruge_zadruzna_revizija'
+        verbose_name = 'Zadružna revizija'
+        ordering = ['-godina']

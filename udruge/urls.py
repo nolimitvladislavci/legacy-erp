@@ -181,4 +181,9 @@ urlpatterns = [
     path('lov/dopustenja/<int:pk>/edit/', views.lov_dopustenje_edit, name='lov_dopustenje_edit'),
     path('lov/zapisnici/<int:pk>/edit/', views.lov_zapisnik_edit, name='lov_zapisnik_edit'),
     path('lov/trofeji/create/', views.trofej_create, name='trofej_create'),
+
+    # ZADRUGE
+    path('zadruge/', views.zadruge_dashboard, name='zadruge_dashboard'),
+    path('zadruge/novi/', views.zadrugar_create, name='zadrugar_create'),
+    path('zadruge/revizija/', views.revizija_create, name='revizija_create'),
 ]

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Nova revizija{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:600px">
+<h2 class="mb-3"><i class="fas fa-search"></i> Zadruzna revizija</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="row mb-3"><div class="col-md-4"><label>Godina</label><input type="number" name="godina" value="2026" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-8"><label>Revizor</label><input type="text" name="revizor_ime" required class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="row mb-3"><div class="col-md-6"><label>Datum pocetka</label><input type="date" name="datum_pocetak" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-6"><label>Datum zavrsetka</label><input type="date" name="datum_zavrsetak" class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="mb-3"><label>Ocjena</label><select name="ocjena" class="form-select bg-dark text-light border-secondary">
+<option value="">—</option>{% for code, label in ocjena_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
+<div class="mb-3"><label>Nalaz</label><textarea name="nalaz" rows="3" class="form-control bg-dark text-light border-secondary"></textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:zadruge_dashboard' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi</button></div></form></div>
+{% endblock %}
