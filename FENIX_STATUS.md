@@ -201,3 +201,32 @@ LIMIT Connect Borg (26.03.2026):
 - Auto-archive u DocumentBlob
 - ADR/ODR EU compliance
 - Inspection token integracija
+
+---
+
+## ★ DEPLOYAN 26.03.2026 (večer) — Sonnet koordinacijska sesija
+
+| Što | Status |
+|-----|--------|
+| FENIX Test Runner (`manage.py run_system_test`) | ✅ LIVE |
+| Celery beat: nočni test 02:00 + jutarnji 07:30 | ✅ LIVE |
+| WhatsApp report na +491723006985 | ✅ RADI |
+| Gemini System Test task pokrenut | ✅ RUNNING |
+| Gemini Invoice Compliance task pokrenut | ✅ RUNNING |
+
+## ★ OTVORENI TASKOVI ZA CC CODE (prioritet redosljed)
+
+| Fajl | Prioritet | Rok |
+|------|-----------|-----|
+| CC_TASK_CRITICAL_1APRIL.md | 🔴 BLOKIRA 1.4. | Do 29.3. |
+| CC_TASK_W1C_W1D_W1E.md | 🟠 VISOK | Do 30.3. |
+| CC_TASK_COMMERCIAL_DOC_ENGINE_S2.md | 🟠 VISOK | Do 30.3. |
+| CC_TASK_ASIMILACIJA_26_03_2026.md | 🟡 SREDNJI | Uskoro |
+
+## ★ IVAN — HITNE AKCIJE (bez tebe stoji)
+
+| Akcija | Rok |
+|--------|-----|
+| 🔴 DNS TTL → 60s (Hetzner panel) | DANAS — mora 24h+ prije migracije |
+| 🔴 Naruči Hetzner CPX51 (35€/mj) | Do 28.3. |
+

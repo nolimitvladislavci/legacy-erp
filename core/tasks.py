@@ -86,3 +86,35 @@ def notify_error_to_team(self, user, path, method, exc_class,
     except Exception as e:
         logger.warning('Email error notification failed: %s', e)
 
+
+
+@shared_task(name='core.run_system_test_task', bind=True, max_retries=0)
+def run_system_test_task(self, phone='+491723006985', quick=False):
+    """
+    Autonomni test sustava — pokreće se iz Celery beat.
+    Testira sve module i šalje WhatsApp report Ivanu.
+    """
+    import logging
+    logger = logging.getLogger('system_test')
+    logger.info(f'🤖 run_system_test_task pokrenut — phone={phone}')
+
+    from django.core.management import call_command
+    from io import StringIO
+    out = StringIO()
+    try:
+        call_command('run_system_test',
+                     notify=phone,
+                     quick=quick,
+                     stdout=out)
+    except Exception as e:
+        logger.error(f'run_system_test crash: {e}')
+        try:
+            from core.whatsapp import send_text
+            send_text(
+                phone=phone,
+                message=f'🔴 FENIX TEST CRASH\n{type(e).__name__}: {e}',
+                session='default'
+            )
+        except Exception:
+            pass
+    return out.getvalue()
