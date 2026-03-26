@@ -8,6 +8,7 @@ class SystemAuditLog(models.Model):
         ('create', 'Kreiranje'),
         ('update', 'Ažuriranje'),
         ('delete', 'Brisanje'),
+        ('read', 'Pristup'),
     ]
 
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)

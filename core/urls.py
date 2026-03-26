@@ -78,6 +78,9 @@ urlpatterns += i18n_patterns(
     # GDPR (Clanak 17 + 20)
     path('gdpr/export/', __import__('accounts.auth_views', fromlist=['gdpr_export_view']).gdpr_export_view, name='gdpr_export'),
     path('gdpr/delete/', __import__('accounts.auth_views', fromlist=['gdpr_delete_view']).gdpr_delete_view, name='gdpr_delete'),
+    path("gdpr/dashboard/", __import__("core.gdpr_views", fromlist=["gdpr_dashboard"]).gdpr_dashboard, name="gdpr_dashboard"),
+    path("api/gdpr/export/", __import__("core.gdpr_views", fromlist=["api_gdpr_export"]).api_gdpr_export, name="api_gdpr_export"),
+    path("api/gdpr/erase/", __import__("core.gdpr_views", fromlist=["api_gdpr_erase"]).api_gdpr_erase, name="api_gdpr_erase"),
 
     # Device token (mobilni barcode login)
     path('auth/device-tokens/', __import__('accounts.auth_views', fromlist=['device_token_manage']).device_token_manage, name='device_token_manage'),

@@ -24,6 +24,7 @@ from .models import (
     JournalEntry, LedgerLine, AccountType,
 )
 from . import services
+from core.audit_access import audit_sensitive_access, audit_bulk_access
 
 
 def _get_company(request):

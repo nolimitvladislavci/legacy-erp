@@ -13,6 +13,7 @@ Rute:
 """
 
 from django.shortcuts import render, get_object_or_404, redirect
+from core.audit_access import audit_sensitive_access, audit_bulk_access
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse
