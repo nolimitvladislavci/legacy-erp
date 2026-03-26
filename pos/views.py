@@ -842,17 +842,15 @@ def quick_pos_redirect(request):
         if t.pos_type == 'quick' and t.sessions.filter(status=POSSession.Status.OPEN).exists()
     ]
     if len(quick_open) == 1 and len(terminals) == 1:
-        return redirect('pos:quick_pos', terminal_id=quick_open[0].pk)
+        return redirect('pos:pos_joker', terminal_id=quick_open[0].pk)
 
     # Inače — prikaži selector
     for t in terminals:
         t.icon = _POS_ICON.get(t.pos_type, '🖥')
         sess = t.sessions.filter(status=POSSession.Status.OPEN).first()
         t.active_session = sess
-        if t.pos_type == 'quick' and sess:
-            t.url = f'/pos/quick/{t.pk}/'
-        elif t.pos_type == 'restaurant' and sess:
-            t.url = f'/pos/restaurant/{t.pk}/'
+        if sess:
+            t.url = f'/pos/joker/{t.pk}/'
         else:
             t.url = f'/pos/terminal/{t.pk}/'
 
@@ -865,6 +863,12 @@ def quick_pos_redirect(request):
 
 @login_required
 def quick_pos(request, terminal_id):
+    """Legacy view — redirects to unified Joker POS."""
+    return redirect('pos:pos_joker', terminal_id=terminal_id)
+
+
+def _quick_pos_legacy(request, terminal_id):
+    """Original quick_pos — kept for reference, not called."""
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     company = terminal.company
     session  = POSSession.objects.filter(terminal=terminal, status='open').first()
@@ -992,6 +996,167 @@ def quick_pos(request, terminal_id):
         'quick_actions_json':  json.dumps(terminal.get_quick_actions()),
     })
 
+# ── POS JOKER — Unified Interface ─────────────────────────────────────────────
+
+POS_TITLE_MAP = {
+    'quick': 'Brza blagajna',
+    'retail': 'Maloprodaja',
+    'restaurant': 'Restoran',
+    'field': 'Terenska prodaja',
+    'service': 'Usluge',
+    'reception': 'Recepcija',
+}
+
+
+@login_required
+def pos_joker(request, terminal_id):
+    """
+    Unified POS view — jedan template za sve pos_type-ove.
+    Gastro mod (restaurant) dodaje table grid.
+    """
+    terminal = get_object_or_404(POSTerminal, pk=terminal_id)
+    company = terminal.company
+    session = POSSession.objects.filter(terminal=terminal, status='open').first()
+    is_gastro = terminal.pos_type == 'restaurant'
+
+    # ── STROGA PROVJERA: samo N aktivnih POS-ova po planu ──
+    is_bookkeeper = False
+    try:
+        role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
+        is_bookkeeper = role in ('superadmin', 'bookkeeper') or request.user.is_superuser
+    except Exception:
+        pass
+
+    if not session and not is_bookkeeper:
+        other_open = POSSession.objects.filter(
+            terminal__company=company, status='open'
+        ).exclude(terminal=terminal).select_related('terminal').first()
+
+        if other_open:
+            try:
+                sub = company.subscriptions.filter(is_active=True).order_by('-valid_from').first()
+                max_terminals = 1
+                if sub and sub.pricing_plan:
+                    max_terminals = sub.pricing_plan.max_locations or 1
+            except Exception:
+                max_terminals = 1
+
+            open_count = POSSession.objects.filter(
+                terminal__company=company, status='open'
+            ).count()
+
+            if open_count >= max_terminals:
+                return render(request, 'pos/upgrade_terminal.html', {
+                    'current_terminal': other_open.terminal,
+                    'current_session': other_open,
+                    'wanted_terminal': terminal,
+                    'max_terminals': max_terminals,
+                    'company': company,
+                })
+
+    # Auto-redirect za unos pologa
+    if not session and request.user.is_authenticated:
+        messages.warning(request, 'Unesite početnu gotovinu prije otvaranja blagajne.')
+        return redirect('pos:terminal_detail', terminal_id=terminal.pk)
+
+    # ── Inventory ──
+    try:
+        from inventory.models import InventoryItem
+        qs = InventoryItem.objects.filter(company=company, is_active=True)
+        if terminal.category_filter:
+            cat_list = [c.strip() for c in terminal.category_filter.split(',') if c.strip()]
+            if cat_list:
+                qs = qs.filter(category__in=cat_list)
+        inventory_items = list(qs.select_related('tax_rate').order_by('name')[:300])
+    except Exception:
+        logger.warning("Suppressed error", exc_info=True)
+        inventory_items = []
+
+    cats = sorted(set(getattr(i, 'category', '') or 'Ostalo' for i in inventory_items))
+
+    from pos.models import POSCashier
+    cashiers = list(POSCashier.objects.filter(company=company, is_active=True).order_by('name'))
+
+    try:
+        from django.urls import reverse
+        report_url = reverse('pos:cashier_report_html', args=[session.id]) if session else '#'
+    except Exception:
+        report_url = '#'
+
+    # Top 12 najprodavanijih = brze tipke
+    quick_items = []
+    try:
+        from django.db.models import Count
+        top_ids = list(
+            POSReceiptItem.objects
+            .filter(receipt__session__terminal__company=company, receipt__status='paid')
+            .exclude(is_tip=True)
+            .values('inventory_item_id')
+            .annotate(cnt=Count('id'))
+            .order_by('-cnt')
+            .values_list('inventory_item_id', flat=True)[:12]
+        )
+        if top_ids:
+            items_map = {i.pk: i for i in InventoryItem.objects.filter(pk__in=top_ids, is_active=True).select_related('tax_rate')}
+            quick_items = [items_map[pk] for pk in top_ids if pk in items_map]
+        if len(quick_items) < 12:
+            existing = {i.pk for i in quick_items}
+            filler = list(InventoryItem.objects.filter(company=company, is_active=True)
+                         .exclude(pk__in=existing).select_related('tax_rate').order_by('name')[:12 - len(quick_items)])
+            quick_items.extend(filler)
+    except Exception:
+        pass
+
+    # Upgrade banner
+    show_upgrade_banner = False
+    try:
+        from registration.models import CompanySubscription
+        sub = CompanySubscription.objects.filter(company=company, is_active=True).first()
+        if sub and sub.plan in ('starter', 'micro'):
+            active_terms = POSTerminal.objects.filter(company=company, is_active=True).count()
+            if active_terms > 1:
+                show_upgrade_banner = True
+    except Exception:
+        pass
+
+    ctx = {
+        'terminal':           terminal,
+        'session':            session,
+        'inventory_items':    inventory_items,
+        'quick_items':        quick_items,
+        'categories':         cats,
+        'cashiers':           cashiers,
+        'session_report_url': report_url,
+        'show_upgrade_banner': show_upgrade_banner,
+        'quick_actions_json':  json.dumps(terminal.get_quick_actions()),
+        'is_gastro':          is_gastro,
+        'pos_title':          POS_TITLE_MAP.get(terminal.pos_type, 'POS'),
+    }
+
+    # ── Gastro: tables + open receipts ──
+    if is_gastro and session:
+        open_receipts = list(
+            session.receipts
+            .filter(status='open')
+            .prefetch_related('items')
+            .order_by('table_number', 'receipt_number')
+        )
+        receipt_by_num = {}
+        for r in open_receipts:
+            if r.table_number:
+                try:
+                    n = int(r.table_number)
+                    receipt_by_num[n] = r
+                except ValueError:
+                    pass
+        tables = [{'num': i, 'receipt': receipt_by_num.get(i)} for i in range(1, 21)]
+        ctx['open_receipts'] = open_receipts
+        ctx['tables'] = tables
+
+    return render(request, 'pos/joker.html', ctx)
+
+
+
 
 @csrf_exempt
 @require_POST
@@ -1046,6 +1211,12 @@ def quick_pay(request, session_id):
 
 @login_required
 def restaurant_pos(request, terminal_id):
+    """Legacy view — redirects to unified Joker POS."""
+    return redirect('pos:pos_joker', terminal_id=terminal_id)
+
+
+def _restaurant_pos_legacy(request, terminal_id):
+    """Original restaurant_pos — kept for reference, not called."""
     terminal = get_object_or_404(POSTerminal, pk=terminal_id)
     session  = POSSession.objects.filter(terminal=terminal, status='open').first()
 

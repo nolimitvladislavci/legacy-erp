@@ -34,8 +34,10 @@ urlpatterns = [
     path('session/<int:session_id>/deposit/', views.cash_deposit, name='cash_deposit'),
     path('receipt/<int:receipt_id>/pdf/', views.receipt_pdf, name='receipt_pdf'),
     path('session/<int:session_id>/cashier-report/', views.cashier_full_report, name='cashier_full_report'),
-    # ── POS Variants ───────────────────────────────────────────────────────
+    # ── POS JOKER — Unified Interface ──────────────────────────────────────
     path('quick/', views.quick_pos_redirect, name='quick_pos_redirect'),
+    path('joker/<int:terminal_id>/',      views.pos_joker,      name='pos_joker'),
+    # Legacy URLs — redirect to joker
     path('quick/<int:terminal_id>/',      views.quick_pos,      name='quick_pos'),
     path('restaurant/<int:terminal_id>/', views.restaurant_pos, name='restaurant_pos'),
     path('session/<int:session_id>/quick-pay/', views.quick_pay, name='quick_pay'),

@@ -1,0 +1,1247 @@
+{% extends "pos/base_pos.html" %}
+{% block topbar_nav %}{% endblock %}
+{% block quick_nav %}{% endblock %}
+{% load i18n %}
+{% block title %}{{ pos_title|default:"POS" }} – {{ terminal.name }}{% endblock %}
+{% block extra_css %}
+<style>
+/* ── Layout ─────────────────────────────────────────────────────────────────── */
+.qp{display:grid;grid-template-columns:1fr 340px;height:calc(100dvh - var(--topbar-h,52px));overflow:hidden}
+.qp-left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);min-height:0}
+.qp-right{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+
+/* ── Status bar ─────────────────────────────────────────────────────────────── */
+.qp-status{padding:.35rem .6rem;background:var(--dark);border-bottom:1px solid var(--border);flex-shrink:0;font-size:.8rem}
+.qp-status-top{display:flex;align-items:center;gap:.5rem}
+.qp-status-info{min-width:0;flex-shrink:0}
+.qp-company{font-size:.65rem;color:var(--muted);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.qp-terminal{font-size:.78rem;font-weight:700;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.qp-clock-wrap{flex:1;text-align:center}
+#pos-clock{font-size:1.25rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:.04em;line-height:1}
+#pos-date{font-size:.58rem;color:var(--muted)}
+.qp-actions{display:flex;gap:.25rem;flex-shrink:0}
+.qp-action-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:3px 6px;color:var(--gold);font-size:.78rem;text-decoration:none;cursor:pointer;font-family:inherit}
+.qp-cashiers{display:flex;gap:.3rem;overflow-x:auto;padding:.3rem 0 .1rem;scrollbar-width:none;margin-top:.25rem}
+.qp-cashiers::-webkit-scrollbar{display:none}
+.cashier-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:.25rem .55rem;font-size:.7rem;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.cashier-btn.active{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);font-weight:700}
+
+/* ── Zaključak smjene modal ─────────────────────────────────────────────────── */
+.shift-modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:8000;display:none;align-items:center;justify-content:center;padding:1rem}
+.shift-modal.show{display:flex}
+.shift-box{background:var(--card,#1a1a1a);border:1px solid var(--border);border-radius:14px;width:100%;max-width:420px;overflow:hidden}
+.shift-head{padding:1rem 1.25rem;background:rgba(201,168,76,.1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.shift-head-title{font-size:1rem;font-weight:700;color:var(--gold)}
+.shift-body{padding:1.25rem}
+.shift-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.88rem}
+.shift-row:last-child{border-bottom:none}
+.shift-row .lbl{color:var(--muted)}
+.shift-row .val{font-weight:700;color:var(--text)}
+.shift-row .val.gold{color:var(--gold);font-size:1rem}
+.shift-row .val.green{color:var(--green,#4caf7d)}
+.shift-receipts{margin-top:.75rem;max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:6px}
+.shift-r-row{display:flex;justify-content:space-between;padding:.3rem .6rem;font-size:.78rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.shift-r-row:last-child{border-bottom:none}
+.shift-r-row span{color:var(--muted)}
+.shift-r-row strong{color:var(--text)}
+.shift-foot{padding:.75rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:.5rem}
+.shift-btn-close{flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:.65rem;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit}
+.shift-btn-cancel{background:rgba(255,255,255,.08);color:var(--text);border:none;border-radius:8px;padding:.65rem 1rem;font-size:.85rem;cursor:pointer;font-family:inherit}
+
+/* ── Aktivni blagajnik indicator ────────────────────────────────────────────── */
+.active-cashier-bar{display:none;background:rgba(201,168,76,.12);border-bottom:1px solid rgba(201,168,76,.3);padding:.25rem .6rem;font-size:.72rem;color:var(--gold);font-weight:600;text-align:center;flex-shrink:0}
+.active-cashier-bar.show{display:block}
+.offline-banner{display:none;background:#7c3aed;color:#fff;text-align:center;padding:.3rem .8rem;font-size:.75rem;font-weight:600;border-bottom:1px solid rgba(255,255,255,.2);flex-shrink:0}
+.offline-banner.show{display:flex;align-items:center;justify-content:center;gap:.5rem}
+.offline-badge{background:rgba(255,255,255,.25);border-radius:10px;padding:1px 7px;font-size:.7rem;min-width:20px;text-align:center}
+.offline-critical{display:none;background:#dc2626;color:#fff;text-align:center;padding:.3rem .8rem;font-size:.75rem;font-weight:700;flex-shrink:0}
+.offline-critical.show{display:block}
+
+/* ── Toast poruka ────────────────────────────────────────────────────────────── */
+.pos-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,.95);color:#fff;border:1px solid var(--gold);border-radius:10px;padding:.6rem 1.2rem;font-size:.88rem;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.pos-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Category tabs ───────────────────────────────────────────────────────────── */
+.cat-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);overflow-x:auto;flex-shrink:0;background:var(--dark);scrollbar-width:none}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{padding:.6rem 1rem;font-size:.82rem;cursor:pointer;color:var(--muted);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;user-select:none;font-weight:600}
+.cat-tab:hover{color:var(--text)}
+.cat-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* ── Product grid ────────────────────────────────────────────────────────────── */
+.prod-scroll{flex:1;overflow-y:auto;padding:.6rem}
+.prod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+.prod-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem .5rem;cursor:pointer;text-align:center;transition:all .12s;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;font-family:inherit;user-select:none;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.prod-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.prod-btn:active{transform:scale(.94);background:rgba(201,168,76,.14)}
+.prod-name{font-size:.76rem;font-weight:600;color:var(--text);line-height:1.2;word-break:break-word;max-width:100%}
+.prod-price{font-size:.85rem;font-weight:800;color:var(--gold)}
+.prod-sku{font-size:.58rem;color:var(--muted)}
+@media(max-width:600px){.prod-sku{display:none}}
+.prod-qty-badge{position:absolute;top:4px;right:4px;background:var(--gold);color:#000;font-size:.62rem;font-weight:800;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center}
+.prod-qty-badge.show{display:flex}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
+.ripple{position:absolute;border-radius:50%;background:rgba(201,168,76,.35);width:40px;height:40px;margin:-20px;pointer-events:none;animation:ripple .4s ease-out forwards}
+
+/* ── Search ──────────────────────────────────────────────────────────────────── */
+.prod-search{padding:.4rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.prod-search input{background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.4rem .7rem;font-size:.85rem;width:100%;outline:none}
+.prod-search input:focus{border-color:var(--gold)}
+
+/* ── Basket ──────────────────────────────────────────────────────────────────── */
+.basket-head{padding:.6rem 1rem;border-bottom:1px solid var(--border);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
+.basket-items{flex:1;overflow-y:auto;padding:.4rem 0}
+.b-row{display:flex;align-items:center;gap:.4rem;padding:.4rem .75rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.b-name{flex:1;font-size:.8rem;font-weight:500;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.b-qty-ctrl{display:flex;align-items:center;gap:3px}
+.bq-btn{background:var(--dark);border:1px solid var(--border);color:var(--muted);border-radius:4px;width:22px;height:22px;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
+.bq-btn:hover{border-color:var(--gold);color:var(--gold)}
+.b-qty{font-size:.82rem;font-weight:700;min-width:20px;text-align:center;color:var(--text)}
+.b-price{font-size:.8rem;font-weight:700;color:var(--gold);white-space:nowrap;width:52px;text-align:right}
+.b-del{background:none;border:none;color:var(--muted);cursor:pointer;padding:.15rem .25rem;font-size:.85rem;opacity:.6}
+.b-del:hover{color:var(--red);opacity:1}
+.basket-empty{text-align:center;padding:1.5rem;color:var(--muted);font-size:.85rem}
+
+/* ── Totals ──────────────────────────────────────────────────────────────────── */
+.basket-totals{padding:.5rem .75rem;border-top:1px solid var(--border);flex-shrink:0}
+.tot-row{display:flex;justify-content:space-between;font-size:.8rem;padding:.15rem 0;color:var(--muted)}
+.tot-row.grand{border-top:1px solid var(--border);margin-top:.3rem;padding-top:.4rem;font-size:1.1rem;font-weight:800;color:var(--text)}
+.tot-row.grand .tv{color:var(--gold)}
+
+/* ── Payment ─────────────────────────────────────────────────────────────────── */
+.pay-zone{padding:.5rem .75rem;border-top:1px solid var(--border);flex-shrink:0}
+.cash-input-row{display:flex;gap:.4rem;align-items:center;margin-bottom:.4rem}
+.cash-input{background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.45rem .6rem;font-size:.95rem;font-weight:700;flex:1;outline:none;text-align:right;font-family:inherit}
+.cash-input:focus{border-color:var(--gold)}
+.cash-quick{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.5rem}
+.cash-q-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:5px;padding:.35rem .55rem;font-size:.72rem;cursor:pointer;font-weight:600;min-height:32px;font-family:inherit}
+.cash-q-btn:hover{border-color:var(--gold);color:var(--gold)}
+.change-row{background:rgba(76,175,125,.1);border:1px solid var(--green);border-radius:6px;padding:.4rem .6rem;text-align:center;margin-bottom:.4rem;display:none}
+.change-row.show{display:block}
+.change-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.change-val{font-size:1.1rem;font-weight:800;color:var(--green)}
+/* Pay gumbi - 3 u redu bez odrezivanja */
+.pay-btns-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem}
+.pay-btns{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.pay-cash,.pay-card{border:none;border-radius:8px;padding:.75rem .4rem;font-size:.88rem;font-weight:800;cursor:pointer;min-height:56px;font-family:inherit;transition:all .15s}
+.pay-cash{background:var(--green);color:#fff}
+.pay-cash:hover{background:#3d9c68}
+.pay-card{background:#2563eb;color:#fff}
+.pay-card:hover{background:#1d4ed8}
+.pay-cash:disabled,.pay-card:disabled{opacity:.4;cursor:not-allowed}
+.pay-bon:disabled{opacity:.4;cursor:not-allowed}
+.cashier-required-hint{display:none;text-align:center;font-size:.72rem;color:#f59e0b;padding:.3rem;border:1px dashed #f59e0b;border-radius:6px;margin-bottom:.4rem}
+.cashier-required-hint.show{display:block}
+.pay-bon{border:2px solid var(--gold);border-radius:8px;padding:.7rem .4rem;font-size:.82rem;font-weight:800;cursor:pointer;min-height:56px;font-family:inherit;background:rgba(201,168,76,.1);color:var(--gold);transition:all .15s}
+.pay-bon:hover{background:rgba(201,168,76,.25)}
+.pay-bon:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Extras / Tip ────────────────────────────────────────────────────────────── */
+.extras-bar{padding:.3rem .75rem;border-top:1px solid var(--border);display:flex;gap:.35rem;flex-wrap:wrap;flex-shrink:0;background:rgba(255,255,255,.02)}
+.ex-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:5px;padding:.3rem .6rem;font-size:.7rem;cursor:pointer;font-weight:600;font-family:inherit}
+.ex-btn:hover{border-color:var(--gold);color:var(--gold)}
+.ex-btn.active{background:rgba(201,168,76,.2);border-color:var(--gold);color:var(--gold)}
+.tip-row{display:flex;gap:.3rem;align-items:center;padding:.35rem .5rem;background:rgba(76,175,125,.05);border:1px solid rgba(76,175,125,.2);border-radius:6px;flex-wrap:wrap}
+.tip-row.hidden{display:none}
+.tip-lbl{font-size:.7rem;color:var(--muted);white-space:nowrap}
+.tip-pct-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:4px;padding:.2rem .5rem;font-size:.7rem;cursor:pointer;font-family:inherit}
+.tip-pct-btn:hover,.tip-pct-btn.active{background:rgba(76,175,125,.2);border-color:var(--green);color:var(--green)}
+.tip-custom{background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:.2rem .45rem;font-size:.72rem;width:64px;outline:none}
+.tip-val{font-size:.75rem;color:var(--green);font-weight:700}
+
+/* ── Modals / Overlays ───────────────────────────────────────────────────────── */
+.success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;display:none}
+.success-overlay.show{display:flex}
+.success-icon{font-size:4rem;margin-bottom:.75rem}
+.success-total{font-size:1.8rem;font-weight:800;color:var(--gold);margin-bottom:.25rem}
+.success-change{font-size:1.1rem;color:var(--green);margin-bottom:1rem}
+.success-num{font-size:.82rem;color:var(--muted);margin-bottom:1.25rem}
+.success-close{background:var(--gold);color:#000;border:none;border-radius:8px;padding:.75rem 1.75rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+.pfand-item-row{display:flex;align-items:center;gap:.5rem;padding:.45rem 0;border-bottom:1px solid var(--border)}
+.qmodal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;display:none;align-items:center;justify-content:center}
+.qmodal.show{display:flex}
+.qmodal-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;width:320px;max-width:95vw}
+.qmodal-title{font-size:.95rem;font-weight:700;color:var(--gold);margin-bottom:.75rem}
+.qmodal-input{width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:.55rem .75rem;font-size:.95rem;outline:none;margin-bottom:.6rem}
+.qmodal-input:focus{border-color:var(--gold)}
+.qmodal-info{font-size:.78rem;color:var(--muted);margin-bottom:.75rem;min-height:1em}
+.qmodal-btns{display:flex;gap:.4rem}
+.qmodal-btn{flex:1;border:none;border-radius:6px;padding:.55rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
+.qmodal-btn-ok{background:var(--gold);color:#000}
+.qmodal-btn-cancel{background:rgba(255,255,255,.08);color:var(--text)}
+.weight-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:none;align-items:center;justify-content:center}
+.weight-modal.show{display:flex}
+.weight-box{background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:1.5rem;width:300px;max-width:95vw;text-align:center}
+.weight-title{font-size:.82rem;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em}
+.weight-product{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:1rem}
+.weight-input{background:var(--dark);border:2px solid var(--gold);color:var(--gold);border-radius:8px;padding:.65rem;font-size:1.8rem;font-weight:800;width:100%;text-align:center;outline:none;font-family:inherit}
+.weight-unit{font-size:.82rem;color:var(--muted);margin:.4rem 0 1rem}
+.weight-btns{display:flex;gap:.4rem}
+.weight-btn-ok{flex:1;background:var(--gold);color:#000;border:none;border-radius:8px;padding:.65rem;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit}
+.weight-btn-cancel{flex:1;background:rgba(255,255,255,.08);color:var(--text);border:none;border-radius:8px;padding:.65rem;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit}
+.no-session{text-align:center;padding:2.5rem;color:var(--muted)}
+
+/* ── Mobile layout ───────────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  .qp{display:flex;flex-direction:column;height:calc(100dvh - var(--topbar-h,52px));overflow:hidden}
+  .qp-left{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;border-right:none}
+  .qp-right{flex:0 0 auto;max-height:48vh;min-height:200px;display:flex;flex-direction:column;overflow:hidden;border-top:2px solid var(--border)}
+  .prod-grid{grid-template-columns:repeat(3,1fr)}
+  .qp-status{padding:.3rem .6rem}
+  .cashier-btn{padding:.2rem .4rem;font-size:.68rem}
+  .pos-sidebar-toggle{bottom:56px!important;top:auto!important;transform:none!important;border-radius:0 6px 6px 0!important}
+  .pay-cash,.pay-card,.pay-bon{min-height:46px!important;padding:.5rem .3rem!important;font-size:.82rem!important}
+  .basket-totals{padding:.35rem .6rem}
+  .extras-bar{display:none}
+  .pay-zone{padding:.35rem .6rem}
+  .cash-input-row{margin-bottom:.2rem}
+  .cash-quick{margin-bottom:.25rem}
+  .cash-q-btn{min-height:26px;padding:.2rem .4rem;font-size:.68rem}
+  .tot-row{display:none!important}
+  .tot-row.grand{display:flex!important;font-size:.95rem}
+}
+@media(max-width:500px){
+  .prod-grid{grid-template-columns:repeat(2,1fr)}
+  .prod-btn{min-height:62px;padding:.6rem .3rem}
+  .prod-name{font-size:.7rem}
+  .prod-price{font-size:.78rem}
+  .qp-status{padding:.25rem .4rem;font-size:.68rem}
+  .qp-status-name{font-size:.75rem}
+  .pos-sidebar-toggle{bottom:50px!important}
+  .basket-head{padding:.35rem .5rem;font-size:.62rem}
+  .b-row{padding:.25rem .5rem}
+  .pay-cash,.pay-card,.pay-bon{min-height:42px!important;font-size:.78rem!important}
+  .cat-tab{padding:.5rem .7rem;font-size:.75rem}
+}
+</style>
+<style>
+/* ── Mobile layout ─────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  /* Vertikalni flex — artikli gore, plaćanje dno */
+  .qp{display:flex;flex-direction:column;height:calc(100dvh - var(--topbar-h,52px));overflow:hidden}
+  .qp-left{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;border-right:none}
+  .qp-right{flex:0 0 auto;max-height:50vh;min-height:200px;display:flex;flex-direction:column;overflow:hidden;border-top:2px solid var(--border)}
+  /* Brze tipke: 4 kolone */
+  .qk-grid{grid-template-columns:repeat(4,1fr)}
+  .prod-grid{grid-template-columns:repeat(3,1fr)}
+  /* Kompaktniji status */
+  .qp-status{padding:.35rem .6rem}
+  .cashier-btn{padding:.2rem .45rem;font-size:.7rem}
+  /* Sidebar toggle — iznad pay tipki */
+  .pos-sidebar-toggle{bottom:56px!important;top:auto!important;transform:none!important;border-radius:0 6px 6px 0!important}
+  /* Pay kompaktniji */
+  .pay-cash,.pay-card,.pay-bon{min-height:46px!important;padding:.5rem!important;font-size:.85rem!important}
+  .basket-totals{padding:.4rem .75rem}
+  .extras-bar{display:none}
+  .pay-zone{padding:.4rem .6rem}
+  .cash-input-row{margin-bottom:.2rem}
+  .cash-quick{margin-bottom:.25rem}
+  .cash-q-btn{min-height:28px;padding:.25rem .45rem;font-size:.72rem}
+  .tot-row{font-size:.78rem;padding:.15rem 0}
+  .tot-row.grand{font-size:1rem}
+}
+@media(max-width:500px){
+  .qk-grid{grid-template-columns:repeat(3,1fr);gap:.2rem}
+  .qk-btn{min-height:42px;padding:.3rem .15rem}
+  .qk-name{font-size:.62rem}
+  .qk-price{font-size:.65rem}
+  .prod-grid{grid-template-columns:repeat(2,1fr)}
+  .qp-company{max-width:90px}
+  .qp-terminal{max-width:90px;font-size:.72rem}
+  #pos-clock{font-size:1.1rem}
+  .pos-sidebar-toggle{bottom:50px!important}
+  .basket-head{padding:.4rem .6rem;font-size:.65rem}
+  .b-row{padding:.3rem .6rem}
+  .b-name{font-size:.78rem}
+  .b-price{font-size:.78rem}
+  .pay-cash,.pay-card,.pay-bon{min-height:44px!important;font-size:.82rem!important}
+}
+</style>
+
+{% if is_gastro %}
+<style>
+.gastro-tbl:hover{border-color:var(--gold)!important;transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#gastro-tables{max-height:200px;overflow-y:auto}
+@media(max-width:600px){#gastro-tables{max-height:150px}}
+</style>
+{% endif %}
+
+{% endblock %}
+
+{% block content %}
+<div class="qp">
+
+  <!-- LEFT: Products -->
+  <div class="qp-left">
+
+    <!-- Status bar: dva reda na mobitelu, jedan na desktopu -->
+    <div class="qp-status">
+      <!-- Red 1: ime + sat + akcijski gumbi -->
+      <div class="qp-status-top">
+        <div class="qp-status-info">
+          {% if terminal.company.logo %}
+          <a href="/hr/companies/settings/#logo" title="Promijeni logo">
+            <img src="{{ terminal.company.logo.url }}" alt="{{ terminal.company.name }}"
+                 style="height:28px;max-width:80px;object-fit:contain;border-radius:4px;margin-bottom:2px;display:block">
+          </a>
+          {% else %}
+          <div class="qp-company">{{ terminal.company.name|default:"POS" }}</div>
+          {% endif %}
+          <div class="qp-terminal">{{ terminal.name }}</div>
+          <div id="active-cashier-name" style="font-size:.65rem;color:var(--gold);opacity:.7;margin-top:1px">
+            👤 {{ request.user.get_full_name|default:request.user.username }}
+          </div>
+        </div>
+        <div class="qp-clock-wrap">
+          <div id="pos-clock"></div>
+          <div id="pos-date"></div>
+        </div>
+        <div class="qp-actions">
+          <a href="/hr/pos/receipts/" title="Svi računi" class="qp-action-btn" style="font-weight:900;color:var(--gold);">R</a>
+          <a href="/hr/pos/settings/" title="Postavke" class="qp-action-btn">⚙️</a>
+          <a href="{{ session_report_url }}" title="Izvještaj smjene" class="qp-action-btn" target="_blank">📊</a>
+          <button onclick="togglePosTheme()" title="Tema" class="qp-action-btn">&#9790;</button>
+          <button onclick="openShiftModal()" title="Z ispis / Zaključak smjene" class="qp-action-btn" id="btnShiftClose" style="border-color:var(--gold);color:var(--gold)">Z</button>
+        </div>
+      </div>
+      <!-- Red 2: blagajnici (horizontalni scroll) -->
+      <div class="qp-cashiers">
+        {% if cashiers %}
+          {% for c in cashiers %}
+          <button class="cashier-btn" id="cb-{{ c.id }}"
+                  data-id="{{ c.id }}" data-name="{{ c.name|escapejs }}"
+                  data-has-pin="{% if c.pin_hash %}1{% else %}0{% endif %}"
+                  onclick="onCashierClick(this)"
+                  title="{% if c.pin_hash %}PIN zaštićen{% else %}Bez PIN-a{% endif %}">
+            {% if c.pin_hash %}<span style="font-size:.6rem;opacity:.6">🔐</span>{% endif %}{{ c.name }}
+          </button>
+          {% endfor %}
+        {% else %}
+          <a href="/pos/settings/#cashiers" style="font-size:.72rem;color:var(--gold);text-decoration:none;border:1px solid var(--gold);border-radius:5px;padding:.2rem .5rem">⚙️ Dodaj blagajnika</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Aktivni blagajnik bar -->
+    <div class="active-cashier-bar" id="activeCashierBar"></div>
+    <div class="offline-banner" id="offlineBanner">
+      <span>&#9889; OFFLINE MOD &mdash; bonovi se čuvaju lokalno</span>
+      <span class="offline-badge" id="offlineSyncBadge" style="display:none"></span>
+    </div>
+    <div class="offline-critical" id="offline48hBanner">
+      &#9888;&#65039; UPOZORENJE: Bon bez JIR-a &gt;36h! Uspostavi vezu odmah.
+    </div>
+{% if show_upgrade_banner %}
+<div style="background:linear-gradient(90deg,#1a1a2e,#16213e);border-bottom:2px solid var(--gold);padding:.4rem 1rem;text-align:center;font-size:.78rem;color:#e2e8f0">
+  ⚡ Besplatni plan podržava 1 blagajnu.
+  <a href="/register/upgrade/?module=pos" style="color:var(--gold);font-weight:700;text-decoration:underline;margin-left:.5rem">Nadoplati →</a>
+</div>
+{% endif %}
+
+
+{% if is_gastro %}
+<!-- ═══ GASTRO: Table Grid ════════════════════════════════════════════════ -->
+<div id="gastro-tables" style="padding:.6rem;border-bottom:2px solid var(--gold)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+    <div style="font-size:.85rem;font-weight:700;color:var(--gold)">
+      <i class="fas fa-utensils"></i> Raspored stolova
+      {% if open_receipts %}<span style="font-size:.7rem;color:var(--muted);margin-left:.5rem">{{ open_receipts|length }} aktivni{{ open_receipts|length|pluralize:",h" }}</span>{% endif %}
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="openGastroNewBon()" style="font-size:.75rem">+ Novi bon</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.4rem">
+    {% for t in tables %}
+    {% if t.receipt %}
+    <div class="gastro-tbl gastro-tbl-occ" data-table="{{ t.num }}" data-rid="{{ t.receipt.id }}" onclick="selectGastroTable(this)"
+         style="background:rgba(239,68,68,.08);border:2px solid #ef4444;border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;position:relative;transition:all .15s">
+      <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#ef4444"></div>
+      <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
+      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">stol</div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--gold)">&euro;{{ t.receipt.total|floatformat:2 }}</div>
+    </div>
+    {% else %}
+    <div class="gastro-tbl gastro-tbl-free" data-table="{{ t.num }}" data-rid="" onclick="selectGastroTable(this)"
+         style="background:var(--card);border:2px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;transition:all .15s">
+      <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#22c55e;position:relative;display:inline-block"></div>
+      <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
+      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">slobodan</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+    <!-- Search + Scanner -->
+    <div class="prod-search" style="display:flex;gap:6px;align-items:center">
+      <input type="text" id="prodSearch" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1">
+      <button type="button" onclick="openSmartCreate(function(d){ if(typeof addItemToBasket==='function'){addItemToBasket(d)} else if(typeof showToast==='function'){showToast('Artikl dodan: '+d.name)} })" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-weight:700;line-height:1.2">+</button>
+      <button type="button" onclick="openScanner()" style="background:var(--gold);color:#000;border:none;border-radius:6px;padding:6px 10px;font-size:1rem;cursor:pointer;flex-shrink:0" title="Skeniraj barkod">📷</button>
+    </div>
+
+
+    {# qk-zone disabled - using full grid with category tabs #}
+    <!-- Category tabs -->
+    <div class="cat-tabs" id="catTabs">
+      <div class="cat-tab active" data-cat="" onclick="filterCat(this,'')">{% trans "Sve" %}</div>
+      {% for cat in categories %}
+      <div class="cat-tab" data-cat="{{ cat|escapejs }}" onclick="filterCat(this,'{{ cat|escapejs }}')">{{ cat }}</div>
+      {% endfor %}
+    </div>
+
+    <!-- BRZE TIPKE — Top artikli (veliki gumbi) -->
+
+    <!-- CONTEXT QUICKACTIONS — POS kao Centar Svijeta -->
+    {% if quick_actions_json %}
+    <div id="qa-panel" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:5px;padding:4px 6px 8px;border-bottom:2px solid var(--gold,#c9a84c);margin-bottom:6px">
+    </div>
+    <script>
+    (function(){
+      const actions = {{ quick_actions_json|safe }};
+      const panel = document.getElementById('qa-panel');
+      if (!actions.length) { panel.style.display='none'; return; }
+      
+      const ACTION_HANDLERS = {
+        add_item: (a) => { const sku=a.item_sku; if(sku){const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();return;}} fenixToast('Artikl '+sku+' nije pronaden. Dodajte ga u inventar.', 'warning'); },
+        add_amount: () => { const modal=document.getElementById('manualAmountModal'); if(modal){modal.style.display='flex';} else { const amt=prompt('Unesite iznos (EUR):'); if(amt){addManualAmount(parseFloat(amt));}} },
+        scan_barcode: () => { const input=document.getElementById('barcode-input'); if(input){input.focus();input.select();} },
+        open_url: (a) => { window.location.href = a.url; },
+        open_modal: (a) => { const m=document.getElementById(a.modal_id); if(m)m.style.display='flex'; },
+        rental_checkin: () => { _openRentalCheckinModal(); },
+        rental_checkout: () => { _openRentalCheckoutModal(); },
+        rental_evisitor: () => { _openEvisitorModal(); },
+        rental_ocr: () => { _openOcrModal(); },
+        membership_scan: () => { _openMembershipScanModal(); },
+        membership_renew: () => { const sku='CLANARINA'; const btn=document.querySelector('[data-sku="'+sku+'"]'); if(btn){btn.click();} else {_openMembershipRenewPrompt();} },
+        donation: () => { const amt=prompt('Iznos donacije (EUR):'); if(amt){addManualAmount(parseFloat(amt),'Donacija');} },
+        whatsapp_receipt: () => { window._sendWhatsAppAfterPay=true; },
+        gps_location: () => { if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{document.getElementById('gps-info')&&(document.getElementById('gps-info').textContent=p.coords.latitude.toFixed(4)+','+p.coords.longitude.toFixed(4));});} },
+      };
+      
+      actions.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'prod-btn';
+        btn.style.cssText = 'background:'+a.color+'22;border:1px solid '+a.color+'44;min-height:46px;font-size:.78rem;cursor:pointer';
+        btn.innerHTML = '<i class="fas '+a.icon+'" style="font-size:1.1rem;color:'+a.color+'"></i><div style="font-size:.68rem;margin-top:2px;color:var(--text)">'+a.label+'</div>';
+        btn.onclick = () => {
+          const handler = ACTION_HANDLERS[a.action];
+          if (handler) handler(a);
+          else console.warn('Unknown action:', a.action);
+        };
+        panel.appendChild(btn);
+      });
+    })();
+    </script>
+    {% endif %}
+
+    {% if quick_items %}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 6px 8px;border-bottom:2px solid var(--border,#2a2f45);margin-bottom:6px">
+      {% for qi in quick_items %}
+      <button class="prod-btn" style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.3);min-height:52px;font-size:.85rem"
+              data-id="{{ qi.id }}"
+              data-name="{{ qi.name|escapejs }}"
+              data-price="{{ qi.unit_price|stringformat:".2f" }}"
+              data-tax="{% if qi.tax_rate %}{{ qi.tax_rate.rate }}{% else %}25{% endif %}"
+              data-cat="{{ qi.category|default:''|escapejs }}"
+              data-weighable="{% if qi.is_weighable %}1{% else %}0{% endif %}"
+              data-unit="{{ qi.unit }}"
+              onclick="addProduct(this)"
+              title="{{ qi.name }}">
+        <div class="prod-name" style="font-weight:800;color:var(--gold,#c9a84c)">{{ qi.name|truncatechars:20 }}</div>
+        <div class="prod-price">&euro;{{ qi.unit_price|floatformat:2 }}</div>
+        <div class="prod-qty-badge" id="qb-{{ qi.id }}">0</div>
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Product grid -->
+    <div class="prod-scroll">
+      {% if session %}
+      <div class="prod-grid" id="prodGrid">
+        {% for item in inventory_items %}
+        <button class="prod-btn" id="pb-{{ item.id }}"
+                data-id="{{ item.id }}"
+                data-name="{{ item.name|escapejs }}"
+                data-price="{{ item.unit_price|stringformat:".2f" }}"
+                data-tax="{% if item.tax_rate %}{{ item.tax_rate.rate }}{% else %}25{% endif %}"
+                data-cat="{{ item.category|default:''|escapejs }}"
+                onclick="addProduct(this)"
+                data-weighable="{% if item.is_weighable %}1{% else %}0{% endif %}"
+                data-unit="{{ item.unit }}"
+                title="{{ item.name }} – €{{ item.unit_price }}">
+          <div class="prod-name">{{ item.name }}</div>
+          <div class="prod-price">&euro;{{ item.unit_price|floatformat:2 }}</div>
+          {% if item.sku %}<div class="prod-sku">{{ item.sku }}</div>{% endif %}
+          <div class="prod-qty-badge" id="qb-{{ item.id }}">0</div>
+        </button>
+        {% empty %}
+        <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">
+          {% trans "Nema artikala u skladištu. Dodajte u" %} <a href="/inventory/" style="color:var(--gold)">{% trans "Skladištu →" %}</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="no-session">
+        <div style="font-size:2.5rem;margin-bottom:.75rem">⏸</div>
+        <p>{% trans "Nema aktivne smjene." %}</p>
+        <a href="{% url 'pos:terminal_detail' terminal.id %}" class="btn btn-gold" style="margin-top:1rem;display:inline-flex">{% trans "Pokreni smjenu →" %}</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT: Basket + Payment -->
+  <div class="qp-right">
+    <div class="basket-head">
+      {% trans "🛒 Košarica" %}
+      <button onclick="clearBasket()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.72rem" title="{% trans "Isprazni" %}">{% trans "🗑 Isprazni" %}</button>
+    </div>
+    <div class="basket-items" id="basketList">
+      <div class="basket-empty" id="basketEmpty">{% trans "Dodajte artiklе klikom ↑" %}</div>
+    </div>
+
+    <div class="basket-totals">
+      <div class="tot-row"><span>{% trans "Neto:" %}</span><span class="tv" id="tNeto">€0.00</span></div>
+      <div class="tot-row"><span>{% trans "PDV:" %}</span><span class="tv" id="tPdv">€0.00</span></div>
+      <div class="tot-row grand"><span>{% trans "UKUPNO:" %}</span><span class="tv" id="tTotal">€0.00</span></div>
+    </div>
+
+    <!-- Extras toolbar: Napojnica + Pfand -->
+    <div class="extras-bar" id="extrasBar">
+      <button class="ex-btn" id="tipToggleBtn" onclick="toggleTip()" disabled>💰 Napojnica</button>
+      <button class="ex-btn" onclick="openPfandModal()" id="pfandBtn" disabled>↩ Ambalaža</button>
+      <a href="/pos/vouchers/" class="ex-btn" target="_blank" title="Upravljanje vaučerima" style="text-decoration:none">🎫 Vaučeri ↗</a>
+    </div>
+    <!-- Tip row -->
+    <div class="tip-row hidden" id="tipRow">
+      <span class="tip-lbl">Napojnica:</span>
+      <button class="tip-pct-btn" onclick="setTipPct(5)">5%</button>
+      <button class="tip-pct-btn" onclick="setTipPct(10)">10%</button>
+      <button class="tip-pct-btn" onclick="setTipPct(15)">15%</button>
+      <input type="number" class="tip-custom" id="tipCustom" placeholder="€" min="0" step="0.01" oninput="setTipCustom(this.value)">
+      <span class="tip-val" id="tipVal"></span>
+      <button class="tip-clear" onclick="clearTip()" title="Ukloni">✕</button>
+    </div>
+
+    <div class="pay-zone" id="payZone">
+      <div class="cashier-required-hint" id="cashierHint">⚠️ Odaberite blagajnika prije naplate</div>
+      <!-- Cash amount input (visible only for CASH) -->
+      <div id="cashSection">
+        <div class="cash-input-row">
+          <span style="font-size:.75rem;color:var(--muted);white-space:nowrap">{% trans "Primljeno (€):" %}</span>
+          <input type="number" class="cash-input" id="cashAmt" min="0" step="0.01" placeholder="0.00" oninput="calcChange()">
+        </div>
+        <div class="cash-quick">
+          <button class="cash-q-btn" onclick="setCash(0)" style="background:#ef4444;color:#fff;font-weight:800">✕</button>
+          <button class="cash-q-btn" onclick="setExact()">{% trans "Točno" %}</button>
+          <button class="cash-q-btn" onclick="setCash(10)">10</button>
+          <button class="cash-q-btn" onclick="setCash(20)">20</button>
+          <button class="cash-q-btn" onclick="setCash(50)">50</button>
+          <button class="cash-q-btn" onclick="setCash(100)">100</button>
+        </div>
+        <div class="change-row" id="changeRow">
+          <div class="change-lbl">{% trans "Kusur" %}</div>
+          <div class="change-val" id="changeVal">€0.00</div>
+        </div>
+      </div>
+      <div class="pay-btns-3" style="grid-template-columns:1fr 1fr">
+        <button class="pay-cash" id="payCash" onclick="pay('CASH')" disabled>
+          💵 GOTOVINA
+        </button>
+        <button class="pay-card" id="payCard" onclick="pay('CARD')" disabled>
+          💳 KARTICA
+        </button>
+        <button class="pay-card" id="payRevolut" onclick="payRevolut()" disabled style="background:linear-gradient(135deg,#0075EB,#00D4AA)">
+          📱 REVOLUT
+        </button>
+        <button class="pay-bon" id="payBon" onclick="openVoucherModal()" disabled>
+          🎫 BON
+        </button>
+      </div>
+
+      <!-- Revolut QR modal -->
+      <div id="revolutModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center">
+        <div style="background:#1a1a2e;border:2px solid #0075EB;border-radius:16px;padding:24px;max-width:350px;width:90%;text-align:center">
+          <h3 style="color:#0075EB;margin-bottom:8px">📱 Revolut plaćanje</h3>
+          <p style="color:#888;font-size:.85rem;margin-bottom:16px">Gost skenira QR ili otvori link</p>
+          <div id="revolutQR" style="margin-bottom:12px"></div>
+          <div id="revolutStatus" style="font-size:.9rem;margin-bottom:12px;color:#0075EB">Čekam plaćanje...</div>
+          <div style="font-size:1.5rem;font-weight:800;color:#0075EB;margin-bottom:12px" id="revolutAmount"></div>
+          <button onclick="closeRevolutModal()" style="background:#333;color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer">Zatvori</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="qmodal" id="pinModal">
+  <div class="qmodal-box" style="text-align:center">
+    <div class="qmodal-title" id="pinModalTitle">🔐 Unesite PIN</div>
+    <div style="font-size:2rem;letter-spacing:.4em;color:var(--gold);margin:.75rem 0;min-height:2.5rem" id="pinDots"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.75rem">
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('1')">1</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('2')">2</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('3')">3</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('4')">4</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('5')">5</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('6')">6</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('7')">7</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('8')">8</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('9')">9</button>
+      <button class="qmodal-btn" style="font-size:1.1rem" onclick="pinKey('clear')">✕</button>
+      <button class="qmodal-btn" style="font-size:1.3rem;font-weight:700;padding:.75rem" onclick="pinKey('0')">0</button>
+      <button class="qmodal-btn qmodal-btn-ok" style="font-size:1.1rem" onclick="pinKey('ok')">✓</button>
+    </div>
+    <button class="qmodal-btn qmodal-btn-cancel" onclick="closePinModal()">Odustani</button>
+  </div>
+</div>
+
+
+<!-- Pfand Modal -->
+<div class="qmodal" id="pfandModal">
+  <div class="qmodal-box">
+    <div class="qmodal-title">↩ Povrat ambalaže (Pfand)</div>
+    <div id="pfandList" style="max-height:240px;overflow-y:auto;margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem">Učitavanje...</div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="closePfandModal()">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- Voucher Modal -->
+<div class="qmodal" id="voucherModal">
+  <div class="qmodal-box">
+    <div class="qmodal-title">🎫 Plaćanje vaučerom</div>
+    <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Kod vaučera</label>
+    <input type="text" class="qmodal-input" id="voucherCodeInput" placeholder="BON-2026-XXXXXX"
+           oninput="this.value=this.value.toUpperCase()" onkeyup="if(event.key==='Enter')checkVoucher()">
+    <div class="qmodal-info" id="voucherInfo"></div>
+    <div style="margin-bottom:.75rem" id="voucherSplitSection" style="display:none">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">
+        Iznos vaučera (ostatak gotovinom):
+      </label>
+      <input type="number" class="qmodal-input" id="voucherAmountInput" step="0.01" min="0" placeholder="0.00">
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="closeVoucherModal()">Odustani</button>
+      <button class="qmodal-btn" id="voucherCheckBtn" onclick="checkVoucher()"
+              style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Provjeri</button>
+      <button class="qmodal-btn qmodal-btn-ok" id="voucherPayBtn" onclick="payWithVoucher()" style="display:none">Plati</button>
+    </div>
+  </div>
+</div>
+
+<!-- Weight modal -->
+<div class="weight-modal" id="weightModal">
+  <div class="weight-box">
+    <div class="weight-title">Unos težine / količine</div>
+    <div class="weight-product" id="weightProductName"></div>
+    <input type="number" class="weight-input" id="weightInput" step="0.001" min="0.001" placeholder="0.000" inputmode="decimal">
+    <div class="weight-unit" id="weightUnit">kg</div>
+    <div class="weight-btns">
+      <button class="weight-btn-cancel" onclick="cancelWeight()">✕ Odustani</button>
+      <button class="weight-btn-ok" onclick="confirmWeight()">✓ Dodaj</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-icon">✅</div>
+  <div class="success-total" id="sucTotal"></div>
+  <div class="success-change" id="sucChange"></div>
+  <div class="success-num" id="sucNum"></div>
+  <div style="display:flex;flex-direction:column;gap:.5rem;max-width:300px;width:100%">
+    <button class="success-close" id="btnShareReceipt" onclick="shareLastReceipt()" style="background:#c9a84c;border:1px solid #c9a84c;color:#000;padding:.85rem;font-weight:700;font-size:1.05rem;border-radius:10px;width:100%">📤 Spremi i podijeli</button>
+    <button class="success-close" onclick="closeSuccess()" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:.75rem;font-size:.9rem;border-radius:10px;width:100%">Završi</button>
+  </div>
+</div>
+
+
+<!-- ── Fiscal Shield Widget (topbar inline) ─────────────────────────────── -->
+<style>
+@keyframes pulse-gold{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes pulse-red{0%,100%{opacity:.6}50%{opacity:1}}
+.shield-ok{animation:pulse-gold 3s infinite}
+.shield-warn{animation:pulse-red .6s infinite;background:#ef4444 !important;box-shadow:0 0 16px rgba(239,68,68,.6) !important}
+#fiscal-shield{
+  position:fixed; top:8px; right:130px; z-index:2001;
+  display:flex; align-items:center; gap:6px;
+  background:rgba(26,26,26,.9); border:1px solid #c9a84c;
+  border-radius:20px; padding:4px 10px 4px 6px;
+  cursor:default; text-decoration:none;
+}
+#fiscal-shield a.fs-link{
+  display:flex;align-items:center;gap:5px;
+  text-decoration:none;color:#c9a84c;font-size:.72rem;font-weight:700;
+}
+#fiscal-shield a.fs-link:hover{color:#fff}
+#shield-badge-text{font-size:.7rem;font-weight:800;color:#c9a84c}
+</style>
+<div id="fiscal-shield">
+  <div id="shield-ring" style="width:20px;height:20px;border:2px solid #c9a84c;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s">
+    <span id="shield-dot" style="width:8px;height:8px;background:#c9a84c;border-radius:50%;display:block"></span>
+  </div>
+  <a href="/pos/fiscal/room/" class="fs-link" title="Fiskalna soba">
+    <span id="shield-badge-text">Fiskal</span>
+  </a>
+</div>
+
+
+<!-- Barcode Scanner Overlay -->
+<div id="scannerOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);overflow-y:auto">
+  <div style="max-width:500px;margin:0 auto;padding:20px;text-align:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="color:#c9a84c;font-weight:800;font-size:1.1rem">Skeniraj barkod</span>
+      <button onclick="closeScanner()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer">&times;</button>
+    </div>
+    <div id="scannerVideo" style="width:100%;border-radius:12px;overflow:hidden;border:3px solid #c9a84c"></div>
+    <div id="scannerResult" style="margin-top:12px;color:#22c55e;font-weight:700;font-size:1rem"></div>
+    <!-- Novi artikl panel -->
+    <div id="newItemPanel" style="display:none;margin-top:12px;background:#1a1a1a;border:1px solid #c9a84c;border-radius:10px;padding:12px;text-align:left">
+      <div style="font-size:.85rem;font-weight:700;color:#c9a84c;margin-bottom:8px">Novi artikl — barkod: <span id="newItemBarcode"></span></div>
+      <div id="newItemLoading" style="text-align:center;padding:8px;color:#888;display:none">
+        <span style="display:inline-block;width:14px;height:14px;border:2px solid #333;border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite"></span> AI prepoznaje proizvod...
+      </div>
+      <div id="newItemForm" style="display:none">
+        <div style="margin-bottom:6px"><input id="niName" placeholder="Naziv artikla" style="width:100%;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem"></div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input id="niPrice" type="number" step="0.01" placeholder="Cijena EUR" style="flex:1;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem">
+          <select id="niCategory" style="flex:1;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem">
+            <option value="food">Hrana</option><option value="drink">Pice</option><option value="dessert">Slatkisi</option><option value="special">Ostalo</option>
+          </select>
+          <select id="niVat" style="flex:0 0 70px;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem">
+            <option value="25">25%</option><option value="13">13%</option><option value="5">5%</option><option value="0">0%</option>
+          </select>
+        </div>
+        <div id="niAiHint" style="font-size:.72rem;color:#888;margin-bottom:8px"></div>
+        <div style="display:flex;gap:6px">
+          <button type="button" onclick="confirmNewItem()" style="flex:1;background:#c9a84c;color:#000;border:none;padding:10px;border-radius:8px;font-weight:700;font-size:.88rem;cursor:pointer">Potvrdi i dodaj</button>
+          <button type="button" onclick="cancelNewItem()" style="background:transparent;border:1px solid #333;color:#888;padding:10px 16px;border-radius:8px;font-size:.88rem;cursor:pointer">Odustani</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:8px;color:#94a3b8;font-size:.8rem">Usmjeri kameru na barkod artikla</div>
+    <div style="margin-top:10px;text-align:center">
+      <button onclick="aiSnapAndRecognize()" id="btnAiSnap" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:14px 20px;font-weight:700;font-size:.95rem;cursor:pointer;width:100%">
+        <span id="aiSnapLabel">Slikaj i prepoznaj (AI)</span>
+      </button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:6px">
+      <input type="text" id="manualBarcode" placeholder="Ili unesi barkod rucno..." style="flex:1;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:.85rem;text-align:center" onkeydown="if(event.key==='Enter')manualLookup()">
+      <button onclick="manualLookup()" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:.85rem">OK</button>
+    </div>
+  </div>
+</div>
+<script src="/static/js/html5-qrcode.min.js"></script>
+
+
+
+<script type="application/json" id="pos-config">{
+  "session_id": {% if session %}{{ session.id }}{% else %}null{% endif %},
+  "default_cashier": "{{ request.user.get_full_name|default:request.user.username|escapejs }}",
+  "terminal_id": {% if terminal %}{{ terminal.id }}{% else %}null{% endif %},
+  "terminal_name": "{{ terminal.name|escapejs }}",
+  "company_name": "{{ terminal.company.name|escapejs }}"
+}</script>
+<script src="/static/js/pos/pos-offline.js?v=20260324"></script>
+<script src="/static/js/pos/pos-quick.js?v=20260322b"></script>
+<script src="/static/js/pos/pos-fiscal.js"></script>
+<script src="/static/js/html5-qrcode.min.js"></script>
+<script src="/static/js/pos/pos-scanner.js"></script>
+
+{% if is_gastro %}
+<script src="/static/js/pos/pos-restaurant.js"></script>
+<script src="/static/js/pos/pos-pfand.js"></script>
+<script>
+// ── Gastro Table Interaction ──────────────────────────────
+window._gastroSelectedTable = null;
+function selectGastroTable(el) {
+  document.querySelectorAll('.gastro-tbl').forEach(t => t.style.boxShadow = '');
+  el.style.boxShadow = '0 0 0 3px rgba(201,168,76,.4)';
+  window._gastroSelectedTable = el.dataset.table;
+  const rid = el.dataset.rid;
+  if (rid) {
+    // Load existing receipt into basket
+    fetch('/pos/api/receipt/' + rid + '/json/', {headers:{'Accept':'application/json'}})
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => {
+        if (typeof loadReceiptIntoBasket === 'function') loadReceiptIntoBasket(data);
+        fenixToast('Stol ' + el.dataset.table + ' učitan');
+      })
+      .catch(() => fenixToast('Greška pri učitavanju stola', 'error'));
+  } else {
+    // Clear basket for new table
+    if (typeof clearBasket === 'function') clearBasket();
+    fenixToast('Stol ' + el.dataset.table + ' — novi bon');
+  }
+}
+function openGastroNewBon() {
+  const table = prompt('Broj stola (prazno za šank):');
+  if (table !== null) {
+    window._gastroSelectedTable = table || null;
+    if (typeof clearBasket === 'function') clearBasket();
+    fenixToast(table ? 'Stol ' + table + ' — spreman' : 'Šank — spreman');
+  }
+}
+</script>
+{% endif %}
+
+<!-- Zakljucak smjene modal — 3 koraka -->
+<div class="shift-modal" id="shiftModal">
+  <div class="shift-box" style="max-width:400px;width:95%">
+    <div class="shift-head">
+      <span class="shift-head-title">Zatvaranje smjene</span>
+      <button onclick="closeShiftModal()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1">&times;</button>
+    </div>
+
+    <!-- KORAK 1: Prebroji gotovinu -->
+    <div id="shiftStep1">
+      <div class="shift-body" id="shiftBody">
+        <div style="text-align:center;padding:1rem;color:var(--muted)">Učitavam...</div>
+      </div>
+      <div style="padding:12px 16px;border-top:1px solid var(--border)">
+        <label style="font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Prebrojana gotovina (€)</label>
+        <input type="number" id="shiftCashInput" step="0.01" placeholder="0.00"
+               style="width:100%;padding:12px;background:var(--dark);border:1px solid var(--border);border-radius:8px;color:var(--gold);font-size:1.5rem;font-weight:800;text-align:center;font-family:inherit">
+        <div id="shiftCashDiff" style="text-align:center;font-size:.85rem;margin-top:6px;min-height:20px"></div>
+      </div>
+      <div class="shift-foot" style="flex-wrap:wrap;gap:6px">
+        <button class="shift-btn-cancel" onclick="closeShiftModal()">Odustani</button>
+        <button class="shift-btn-cancel" onclick="shiftSkipCash()" style="color:var(--gold)">Preskoči</button>
+        <button class="shift-btn-close" onclick="shiftGoStep2()" style="flex:2">Zatvori smjenu →</button>
+      </div>
+    </div>
+
+    <!-- KORAK 2: Z-izvješće + dijeljenje -->
+    <div id="shiftStep2" style="display:none">
+      <div style="padding:16px;text-align:center">
+        <div style="font-size:2rem;margin-bottom:8px">✅</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:4px">Smjena zatvorena!</div>
+        <div id="shiftCloseSummary" style="font-size:.85rem;color:var(--muted)"></div>
+      </div>
+      <div class="shift-foot" style="flex-direction:column;gap:8px">
+        <button class="shift-btn-close" onclick="shiftZReport()" style="width:100%">📋 Z-izvješće (PDF)</button>
+        <button class="shift-btn-close" onclick="shiftShare()" style="width:100%;background:#22c55e">📤 Podijeli Z-izvješće</button>
+        <button class="shift-btn-cancel" onclick="shiftFinish()" style="width:100%">Završi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "inventory/includes/_smart_create_modal.html" %}
+{% include "includes/_share_modal.html" %}
+<script>
+function shareLastReceipt() {
+  var rid = window.lastReceiptId;
+  var btn = document.getElementById('btnShareReceipt');
+
+  function doShare(receiptId) {
+    // Zatvori success overlay PRIJE otvaranja share modala
+    var sov = document.getElementById('successOverlay');
+    if (sov) sov.classList.remove('show');
+    // Mali delay da se DOM refresha
+    setTimeout(function() {
+      openShare({type:'receipt', id:receiptId, title:document.getElementById('sucNum')?.textContent || 'Račun'});
+    }, 150);
+  }
+
+  if (rid) {
+    doShare(rid);
+    return;
+  }
+
+  // Bon se još sprema — čekaj do 5s
+  btn.disabled = true;
+  btn.textContent = '⏳ Spremam...';
+  var attempt = 0;
+  var check = setInterval(function() {
+    attempt++;
+    rid = window.lastReceiptId;
+    if (rid) {
+      clearInterval(check);
+      btn.disabled = false;
+      btn.textContent = '📤 Spremi i podijeli';
+      doShare(rid);
+    } else if (attempt >= 5) {
+      clearInterval(check);
+      btn.disabled = false;
+      btn.textContent = '📤 Spremi i podijeli';
+      if (typeof showToast === 'function') showToast('Pokušajte ponovo za sekundu');
+    }
+  }, 1000);
+}
+</script>
+
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--  RENTAL & MEMBERSHIP MODALS (QuickActions F1)             -->
+<!-- ══════════════════════════════════════════════════════════ -->
+
+<!-- Rental Check-in Modal -->
+<div class="qmodal" id="rentalCheckinModal">
+  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
+    <div class="qmodal-title"><i class="fas fa-door-open" style="color:#10b981"></i> Danas dolasci</div>
+    <div id="rcm-list" style="margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+        <i class="fas fa-spinner fa-spin"></i> Učitavanje...
+      </div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('rentalCheckinModal').style.display='none'">Zatvori</button>
+      <button class="qmodal-btn" onclick="window.location.href='/hr/rental/'" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Svi bookings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rental Check-out Modal -->
+<div class="qmodal" id="rentalCheckoutModal">
+  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
+    <div class="qmodal-title"><i class="fas fa-sign-out-alt" style="color:#f59e0b"></i> Danas odlasci</div>
+    <div id="rco-list" style="margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+        <i class="fas fa-spinner fa-spin"></i> Učitavanje...
+      </div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('rentalCheckoutModal').style.display='none'">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- eVisitor Export Modal -->
+<div class="qmodal" id="evisitorModal">
+  <div class="qmodal-box" style="max-width:420px;max-height:80vh;overflow-y:auto">
+    <div class="qmodal-title"><i class="fas fa-passport" style="color:#3b82f6"></i> eVisitor prijava</div>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem">Bookings bez eVisitor prijave:</p>
+    <div id="evm-list" style="margin-bottom:1rem">
+      <div style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem">
+        <i class="fas fa-spinner fa-spin"></i> Učitavanje...
+      </div>
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('evisitorModal').style.display='none'">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- OCR Document Modal -->
+<div class="qmodal" id="ocrModal">
+  <div class="qmodal-box" style="max-width:440px">
+    <div class="qmodal-title"><i class="fas fa-id-card" style="color:#8b5cf6"></i> Skeniranje dokumenta</div>
+    <div id="ocr-booking-select" style="margin-bottom:1rem">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Odaberi booking:</label>
+      <select id="ocr-booking-id" class="qmodal-input" style="width:100%;padding:8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px">
+        <option value="">Učitavanje...</option>
+      </select>
+    </div>
+    <div style="border:2px dashed var(--border);border-radius:8px;padding:1.5rem;text-align:center;margin-bottom:1rem;cursor:pointer" id="ocr-dropzone" onclick="document.getElementById('ocr-file-input').click()">
+      <i class="fas fa-camera" style="font-size:2rem;color:var(--gold);margin-bottom:.5rem;display:block"></i>
+      <div style="font-size:.85rem;color:var(--muted)">Klikni za slikanje ili odabir dokumenta</div>
+      <input type="file" id="ocr-file-input" accept="image/*" capture="environment" style="display:none" onchange="_processOcrFile(this)">
+    </div>
+    <div id="ocr-result" style="display:none;margin-bottom:1rem">
+      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">AI rezultat:</div>
+      <div id="ocr-result-data" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.75rem;font-size:.82rem"></div>
+    </div>
+    <div id="ocr-status" style="display:none;text-align:center;padding:.5rem;font-size:.85rem"></div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('ocrModal').style.display='none'">Zatvori</button>
+    </div>
+  </div>
+</div>
+
+<!-- Membership Scan Modal -->
+<div class="qmodal" id="membershipModal">
+  <div class="qmodal-box" style="max-width:400px">
+    <div class="qmodal-title"><i class="fas fa-id-badge" style="color:#10b981"></i> Iskaznica člana</div>
+    <div style="margin-bottom:1rem">
+      <label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Broj iskaznice ili OIB:</label>
+      <input type="text" id="membership-code" class="qmodal-input" placeholder="Skeniraj ili upiši..." autofocus
+             onkeyup="if(event.key==='Enter')_lookupMember()">
+    </div>
+    <div id="member-result" style="display:none;margin-bottom:1rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.75rem">
+    </div>
+    <div class="qmodal-btns">
+      <button class="qmodal-btn qmodal-btn-cancel" onclick="document.getElementById('membershipModal').style.display='none'">Zatvori</button>
+      <button class="qmodal-btn" onclick="_lookupMember()" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold)">Traži</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  QUICKACTION HANDLERS — rental + membership
+// ═══════════════════════════════════════════════════════════
+
+const _CSRF = '{{ csrf_token }}';
+const _LANG = document.documentElement.lang || 'hr';
+
+// ── RENTAL CHECK-IN ─────────────────────────────────────
+function _openRentalCheckinModal() {
+  const modal = document.getElementById('rentalCheckinModal');
+  const list = document.getElementById('rcm-list');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch('/api/rental/today-arrivals/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      if (!data.bookings || !data.bookings.length) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">Nema dolazaka danas.</div>';
+        return;
+      }
+      list.innerHTML = data.bookings.map(b => `
+        <a href="/${_LANG}/rental/booking/${b.id}/checkin/" style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text)">
+          <div>
+            <div style="font-weight:600">${b.guest_name}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${b.property_name} · ${b.nights} noći</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:var(--gold);font-weight:700">${b.total_price}€</div>
+            <div style="font-size:.7rem;color:var(--muted)">${b.guests_count} gostiju</div>
+          </div>
+        </a>
+      `).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška pri dohvatu. <a href="/hr/rental/" style="color:var(--gold)">Otvori rental →</a></div>';
+    });
+}
+
+// ── RENTAL CHECK-OUT ────────────────────────────────────
+function _openRentalCheckoutModal() {
+  const modal = document.getElementById('rentalCheckoutModal');
+  const list = document.getElementById('rco-list');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch('/api/rental/today-departures/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      if (!data.bookings || !data.bookings.length) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">Nema odlazaka danas.</div>';
+        return;
+      }
+      list.innerHTML = data.bookings.map(b => `
+        <a href="/${_LANG}/rental/bookings/${b.id}/check-out/" style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text)">
+          <div>
+            <div style="font-weight:600">${b.guest_name}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${b.property_name}</div>
+          </div>
+          <div style="color:#f59e0b;font-weight:700">${b.is_paid ? '✅ Plaćeno' : '⏳ Neplaćeno'}</div>
+        </a>
+      `).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška pri dohvatu.</div>';
+    });
+}
+
+// ── eVISITOR EXPORT ─────────────────────────────────────
+function _openEvisitorModal() {
+  const modal = document.getElementById('evisitorModal');
+  const list = document.getElementById('evm-list');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch('/api/rental/evisitor-pending/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      if (!data.bookings || !data.bookings.length) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:#10b981"><i class="fas fa-check-circle"></i> Svi gosti prijavljeni!</div>';
+        return;
+      }
+      list.innerHTML = data.bookings.map(b => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;margin-bottom:4px;background:var(--bg);border:1px solid var(--border);border-radius:6px">
+          <div>
+            <div style="font-weight:600">${b.guest_name}</div>
+            <div style="font-size:.75rem;color:var(--muted)">${b.property_name} · ${b.check_in}</div>
+            <div style="font-size:.7rem;color:#ef4444">${b.hours_pending}h od check-ina</div>
+          </div>
+          <a href="/${_LANG}/rental/booking/${b.id}/evisitor.xml" style="background:var(--gold);color:#000;padding:6px 12px;border-radius:6px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap">
+            <i class="fas fa-download"></i> XML
+          </a>
+        </div>
+      `).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div style="text-align:center;padding:1rem;color:#ef4444">Greška. <a href="/hr/rental/" style="color:var(--gold)">Otvori rental →</a></div>';
+    });
+}
+
+// ── OCR DOCUMENT ────────────────────────────────────────
+function _openOcrModal() {
+  const modal = document.getElementById('ocrModal');
+  const sel = document.getElementById('ocr-booking-id');
+  const result = document.getElementById('ocr-result');
+  const status = document.getElementById('ocr-status');
+  result.style.display = 'none';
+  status.style.display = 'none';
+  modal.style.display = 'flex';
+
+  // Dohvati aktivne bookinge za OCR
+  fetch('/api/rental/active-bookings/', {headers:{'Accept':'application/json','X-CSRFToken':_CSRF}})
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(data => {
+      sel.innerHTML = '<option value="">— Odaberi booking —</option>';
+      (data.bookings || []).forEach(b => {
+        sel.innerHTML += `<option value="${b.id}">${b.guest_name} · ${b.property_name} (${b.check_in})</option>`;
+      });
+    })
+    .catch(() => {
+      sel.innerHTML = '<option value="">Greška pri učitavanju</option>';
+    });
+}
+
+function _processOcrFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const bookingId = document.getElementById('ocr-booking-id').value;
+  if (!bookingId) {
+    fenixToast('Odaberite booking prije skeniranja.', 'warning');
+    input.value = '';
+    return;
+  }
+
+  const status = document.getElementById('ocr-status');
+  const result = document.getElementById('ocr-result');
+  const resultData = document.getElementById('ocr-result-data');
+
+  status.style.display = 'block';
+  status.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:var(--gold)"></i> AI čita dokument...';
+  result.style.display = 'none';
+
+  const fd = new FormData();
+  fd.append('image', file);
+
+  fetch(`/${_LANG}/rental/booking/${bookingId}/ocr/`, {
+    method: 'POST',
+    headers: {'X-CSRFToken': _CSRF},
+    body: fd,
+  })
+  .then(r => r.json())
+  .then(data => {
+    status.style.display = 'none';
+    result.style.display = 'block';
+    if (data.ok && data.confidence > 0.5) {
+      const d = data.data;
+      resultData.innerHTML = `
+        <div style="color:#10b981;font-weight:700;margin-bottom:.5rem">
+          <i class="fas fa-check-circle"></i> Pouzdanost: ${Math.round(data.confidence * 100)}%
+        </div>
+        <div><strong>${d.first_name} ${d.last_name}</strong></div>
+        <div style="font-size:.78rem;color:var(--muted)">
+          ${d.nationality} · ${d.document_type} · ${d.document_number}<br>
+          Rođen: ${d.date_of_birth || 'N/A'} · Spol: ${d.sex || 'N/A'}
+        </div>
+        <div style="margin-top:.5rem;font-size:.78rem;color:#10b981">
+          <i class="fas fa-check"></i> Gost dodan u booking
+        </div>
+      `;
+    } else {
+      resultData.innerHTML = `
+        <div style="color:#f59e0b">
+          <i class="fas fa-exclamation-triangle"></i> Niska pouzdanost (${Math.round((data.confidence||0) * 100)}%)
+        </div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">
+          Unesite podatke ručno na <a href="/${_LANG}/rental/booking/${bookingId}/checkin/" style="color:var(--gold)">check-in stranici</a>.
+        </div>
+      `;
+    }
+  })
+  .catch(err => {
+    status.style.display = 'block';
+    status.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> Greška: ' + err.message + '</span>';
+  });
+
+  input.value = '';
+}
+
+// ── MEMBERSHIP SCAN ─────────────────────────────────────
+function _openMembershipScanModal() {
+  const modal = document.getElementById('membershipModal');
+  const input = document.getElementById('membership-code');
+  const result = document.getElementById('member-result');
+  result.style.display = 'none';
+  modal.style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
+}
+
+function _lookupMember() {
+  const code = document.getElementById('membership-code').value.trim();
+  if (!code) return;
+
+  const result = document.getElementById('member-result');
+  result.style.display = 'block';
+  result.innerHTML = '<div style="text-align:center;color:var(--muted)"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch(`/api/udruge/member-lookup/?code=${encodeURIComponent(code)}`, {
+    headers: {'Accept':'application/json', 'X-CSRFToken': _CSRF},
+  })
+  .then(r => r.ok ? r.json() : Promise.reject(r))
+  .then(data => {
+    if (data.found) {
+      const m = data.member;
+      const statusColor = m.is_active ? '#10b981' : '#ef4444';
+      const statusText = m.is_active ? 'Aktivno' : 'Isteklo';
+      result.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div style="font-weight:700;font-size:1rem">${m.name}</div>
+            <div style="font-size:.78rem;color:var(--muted)">${m.membership_type || 'Član'}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">
+              OIB: ${m.oib || 'N/A'}<br>
+              Vrijedi do: ${m.valid_until || 'N/A'}
+            </div>
+          </div>
+          <span style="background:${statusColor}22;color:${statusColor};padding:4px 10px;border-radius:12px;font-size:.75rem;font-weight:700">${statusText}</span>
+        </div>
+        ${!m.is_active ? '<div style="margin-top:.5rem"><button class="qmodal-btn" onclick="_addMembershipRenewal(\''+m.id+'\',\''+m.name.replace(/'/g,"\\'")+'\')" style="background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold);font-size:.8rem;width:100%"><i class="fas fa-sync"></i> Obnovi članstvo</button></div>' : ''}
+      `;
+    } else {
+      result.innerHTML = '<div style="color:#f59e0b;text-align:center"><i class="fas fa-user-slash"></i> Član nije pronađen</div>';
+    }
+  })
+  .catch(() => {
+    result.innerHTML = '<div style="color:#ef4444;text-align:center">Greška pri pretrazi</div>';
+  });
+}
+
+function _addMembershipRenewal(memberId, memberName) {
+  // Traži CLANARINA artikl u gridu ili dodaj manual amount
+  const sku = 'CLANARINA';
+  const btn = document.querySelector('[data-sku="'+sku+'"]');
+  if (btn) {
+    btn.click();
+    document.getElementById('membershipModal').style.display = 'none';
+    return;
+  }
+  // Fallback: manual amount
+  if (typeof addManualAmount === 'function') {
+    const amt = prompt('Iznos članarine (EUR):');
+    if (amt) {
+      addManualAmount(parseFloat(amt), 'Članarina: ' + memberName);
+      document.getElementById('membershipModal').style.display = 'none';
+    }
+  }
+}
+
+function _openMembershipRenewPrompt() {
+  const amt = prompt('Iznos članarine (EUR):');
+  if (amt && typeof addManualAmount === 'function') {
+    addManualAmount(parseFloat(amt), 'Članarina');
+  }
+}
+</script>
+
+{% endblock %}
