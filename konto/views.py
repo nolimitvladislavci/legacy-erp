@@ -167,7 +167,8 @@ def chart_of_accounts(request):
 @login_required
 def account_detail(request, pk):
     """View account ledger (all entries)."""
-    account = get_object_or_404(KontoAccount, pk=pk)
+    company = _get_company(request)
+    account = get_object_or_404(KontoAccount, pk=pk, company=company)
     date_from = request.GET.get('from', '')
     date_to = request.GET.get('to', '')
 
@@ -386,7 +387,8 @@ def journal_entries(request):
 @login_required
 def journal_entry_detail(request, pk):
     """View a single journal entry with all lines."""
-    entry = get_object_or_404(JournalEntry, pk=pk)
+    company = _get_company(request)
+    entry = get_object_or_404(JournalEntry, pk=pk, company=company)
     lines = entry.lines.select_related('account').order_by('side', 'id')
     ctx = {
         'entry': entry,
@@ -559,7 +561,8 @@ def api_match_transaction(request, pk):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
-    txn = get_object_or_404(BankTransaction, pk=pk)
+    company = _get_company(request)
+    txn = get_object_or_404(BankTransaction, pk=pk, company=company)
     data = json.loads(request.body)
     invoice_id = data.get('invoice_id')
 
@@ -567,7 +570,7 @@ def api_match_transaction(request, pk):
         return JsonResponse({'error': 'invoice_id required'}, status=400)
 
     from invoicing.models import Invoice
-    invoice = get_object_or_404(Invoice, pk=invoice_id)
+    invoice = get_object_or_404(Invoice, pk=invoice_id, company=company)
     result = services.match_transaction_to_invoice(txn, invoice)
 
     return JsonResponse({'success': result})
@@ -579,8 +582,9 @@ def api_book_invoice(request, pk):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
+    company = _get_company(request)
     from invoicing.models import Invoice
-    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice = get_object_or_404(Invoice, pk=pk, company=company)
     try:
         je = services.book_invoice(invoice, request.user)
     except IntegrityError as e:
@@ -605,9 +609,10 @@ def api_book_transactions(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
 
+    company = _get_company(request)
     data = json.loads(request.body)
     ids = data.get('transaction_ids', [])
-    qs = BankTransaction.objects.filter(pk__in=ids, is_booked=False)
+    qs = BankTransaction.objects.filter(pk__in=ids, is_booked=False, company=company)
     try:
         entries = services.book_bank_transactions(qs, request.user)
     except IntegrityError as e:
@@ -706,8 +711,9 @@ def api_chart_data(request):
 def api_unmatched_invoices(request):
     """GET: Return unpaid invoices for matching UI."""
     from invoicing.models import Invoice
+    company = _get_company(request)
     invoices = Invoice.objects.filter(
-        status__in=['SENT', 'UNPAID', 'OVERDUE']
+        company=company, status__in=['SENT', 'UNPAID', 'OVERDUE']
     ).order_by('-date_issued')[:100]
 
     data = [{
