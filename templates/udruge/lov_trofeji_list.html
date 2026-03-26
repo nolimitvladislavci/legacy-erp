@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Trofeji{% endblock %}
+{% block content %}
+<div class="container-fluid">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="fas fa-trophy"></i> Trofeji</h2>
+  <a href="{% url 'udruge:lov_dashboard' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left"></i> Dashboard</a>
+</div>
+<div class="card bg-dark border-secondary"><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-dark table-hover mb-0"><thead><tr>
+  <th style="font-size:.75rem">Lovac</th><th style="font-size:.75rem">Vrsta trofeja</th>
+  <th style="font-size:.75rem">CIC tocke</th><th style="font-size:.75rem">Medalja</th>
+  <th style="font-size:.75rem">Tezina</th><th style="font-size:.75rem">Datum</th>
+</tr></thead><tbody>
+{% for t in page_obj %}
+<tr>
+  <td style="font-size:.82rem">{{ t.clan }}</td>
+  <td style="font-size:.85rem"><strong>{{ t.get_vrsta_display }}</strong></td>
+  <td style="font-size:.82rem">{{ t.cis_tockova|default:"-" }}</td>
+  <td style="font-size:.82rem">{% if t.medalja == 'zlato' %}<span class="badge" style="background:gold;color:#000">Zlato</span>{% elif t.medalja == 'srebro' %}<span class="badge bg-secondary">Srebro</span>{% elif t.medalja == 'bronca' %}<span class="badge" style="background:#cd7f32;color:#fff">Bronca</span>{% else %}-{% endif %}</td>
+  <td style="font-size:.82rem">{% if t.teza_kg %}{{ t.teza_kg }} kg{% else %}-{% endif %}</td>
+  <td style="font-size:.82rem">{{ t.datum_vrjednovanja|date:"d.m.Y"|default:"-" }}</td>
+</tr>
+{% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Nema trofeja</td></tr>{% endfor %}
+</tbody></table></div></div></div>
+</div>
+{% endblock %}
