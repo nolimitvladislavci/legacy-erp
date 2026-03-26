@@ -1036,3 +1036,229 @@ def check_ownership_expiry():
     log.info('Ownership alerts: %d leasing, %d IP, %d retention',
              leasing_expiry.count(), ip_expiry.count(), retention.count())
 ```
+
+
+---
+## ⚠️ GEMINI SIGURNOSNA POJAČANJA — OBAVEZNO
+## Dodano: 2026-03-27 | Izvor: Gemini 2.5 Flash analiza
+
+---
+
+## POJAČANJE 1 — REDOSLIJED MIKRO-SPRINTOVA (ne paralelno!)
+
+```
+ZABRANJEN redoslijed:   W1A + W1B + W1C + W1D + W1E odjednom
+OBAVEZAN redoslijed:
+
+  BORG-0 (CC_TASK_BORG0_CLASSIFY.md)  ← PRVO, čisti bazu
+      ↓ done + commit
+  W1A: makemigrations + migrate + test  ← SAMO OVO
+      ↓ done + commit + check
+  W1B: StockInputProcessor              ← SAMO OVO
+      ↓ done + commit + test
+  W1C: Kamera AI + MATH CHECK           ← SAMO OVO
+      ↓ done + commit + test
+  W1D: Price engine                     ← SAMO OVO
+      ↓ done + commit + test
+  W1E: Amortizacija DRAFT only          ← SAMO OVO
+      ↓ done + commit
+```
+
+Svaki sprint: `venv/bin/python manage.py check` + test + commit PRIJE sljedećeg.
+
+---
+
+## POJAČANJE 2 — W1C MATEMATIČKI CROSS-CHECK (obavezan)
+
+```python
+# inventory/camera_input.py — dodati u ai_extract_from_document():
+
+def _validate_math(extracted_data: dict) -> tuple[bool, str]:
+    """
+    Matematički cross-check AI ekstrakcije.
+    LLM-ovi su notorno loši u matematici — ovo je obavezni filter.
+    
+    Gemini analiza: "Ako Haiku pročita cijenu artikla kao 10.00 EUR
+    umjesto 100.00 EUR, stvorit ćeš manjak u skladištu."
+    """
+    from decimal import Decimal, InvalidOperation
+    
+    lines = extracted_data.get('lines', [])
+    if not lines:
+        return True, ''  # Nema stavki = nema što provjeriti
+    
+    # Izračunaj što BI trebalo biti ukupno
+    calculated_net = Decimal('0')
+    for line in lines:
+        try:
+            qty = Decimal(str(line.get('quantity', 1) or 1))
+            unit_price = Decimal(str(line.get('unit_price', 0) or 0))
+            tax_rate = Decimal(str(line.get('tax_rate', 0) or 0))
+            
+            line_net = qty * unit_price
+            calculated_net += line_net
+        except (InvalidOperation, TypeError):
+            return False, f'Nečitljiva stavka: {line}'
+    
+    # PDV na izračunatu osnovu
+    # (koristimo prosječnu stopu iz prve stavke kao proxy)
+    avg_tax = Decimal(str(lines[0].get('tax_rate', 25) if lines else 25))
+    calculated_tax = calculated_net * avg_tax / Decimal('100')
+    calculated_total = calculated_net + calculated_tax
+    
+    # Usporedi s onim što je AI rekao
+    ai_total = Decimal(str(extracted_data.get('total', 0) or 0))
+    
+    if ai_total == 0:
+        return True, ''  # AI nije dao ukupan iznos — ne možemo provjeriti
+    
+    # TOLERANCIJA: ±0.02 EUR (zaokruživanje)
+    diff = abs(calculated_total - ai_total)
+    if diff > Decimal('0.02'):
+        return False, (
+            f'Matematička nekonzistentnost! '
+            f'AI kaže ukupno: {ai_total} EUR, '
+            f'izračunato: {calculated_total:.2f} EUR, '
+            f'razlika: {diff:.2f} EUR. '
+            f'Molimo provjerite ručno.'
+        )
+    
+    # Bonus check: cijena stavke vs. interni cjenik (ako >20% odstupanje)
+    return True, ''
+
+
+# U process_camera_input() — OBAVEZNO dodati:
+def process_camera_input(image_bytes, company_id, country='HR'):
+    # ... postojeći kod ...
+    
+    doc = ai_extract_from_document(image_bytes, country)
+    
+    # === GEMINI SIGURNOSNI FILTER ===
+    is_valid, math_error = _validate_math(doc.raw_data)
+    if not is_valid:
+        return {
+            'success': False,
+            'needs_review': True,
+            'ai_confidence': doc.ai_confidence,
+            'math_error': math_error,
+            'message': f'⛔ MATEMATIČKA GREŠKA: {math_error}',
+            'extracted': doc,
+        }
+    # ================================
+    
+    # ... nastavak ...
+```
+
+---
+
+## POJAČANJE 3 — W1E AMORTIZACIJA = DRAFT ONLY
+
+```python
+# inventory/tasks.py — ZAMIJENITI originalnu implementaciju:
+
+@shared_task(name='inventory.annual_depreciation_draft')
+def create_depreciation_draft(year=None):
+    """
+    31.12. u 23:00: Kreira NACRT amortizacije.
+    NE knjizi automatski — čeka Marijin klik u siječnju/veljači.
+    
+    Gemini analiza: "Računovođe znaju da se godina zatvara u veljači
+    ili ožujku iduće godine. Automatsko knjiženje = uništena bilanca."
+    """
+    from django.utils import timezone
+    from inventory.models import InventoryItem
+    
+    if year is None:
+        year = timezone.now().year
+    
+    assets = InventoryItem.objects.filter(
+        item_class='asset',
+        is_active=True,
+        asset_purchase_date__isnull=False,
+        asset_useful_life_years__gt=0,
+    )
+    
+    draft_lines = []
+    for asset in assets:
+        annual_dep = asset.get_depreciation_this_year()
+        if annual_dep <= 0:
+            continue
+        
+        draft_lines.append({
+            'item_id':     asset.pk,
+            'item_name':   asset.name,
+            'current_value': float(asset.asset_current_value or asset.purchase_price),
+            'annual_depreciation': float(annual_dep),
+            'new_value':   max(0, float(asset.asset_current_value or asset.purchase_price) - annual_dep),
+            'konto':       '427',  # Amortizacija rashodi
+        })
+    
+    # Spremi kao Nacrt — NE idi u konto odmah
+    # TODO: Kreirati DepreciationDraft model u W4
+    import json
+    draft_path = f'/var/www/fina-connect/tmp/depreciation_draft_{year}.json'
+    with open(draft_path, 'w') as f:
+        json.dump({'year': year, 'status': 'DRAFT', 'lines': draft_lines}, f, indent=2)
+    
+    # Pošalji notifikaciju adminu
+    # TODO: Webhook / WhatsApp Mariji — "Nacrt amortizacije spreman, čeka vaš pregled"
+    
+    import logging
+    logging.getLogger('inventory').info(
+        'Depreciation DRAFT kreiran za %d: %d assets, ukupno za otpisati: %.2f EUR',
+        year, len(draft_lines), sum(l['annual_depreciation'] for l in draft_lines)
+    )
+    
+    return {'year': year, 'status': 'DRAFT', 'assets': len(draft_lines)}
+
+
+# ZABRANJENA implementacija (Gemini Dron #3):
+# def apply_depreciation_automatically() -- NE SMIJE POSTOJATI
+```
+
+**DepreciationDraft model (dodati u W4):**
+```python
+class DepreciationDraft(models.Model):
+    company      = FK(Company)
+    year         = PositiveSmallIntegerField()
+    status       = CharField(choices=[
+                       ('draft',    'Nacrt — čeka provjeru'),
+                       ('reviewed', 'Pregledano — čeka knjiženje'),
+                       ('posted',   'Proknjiženo'),
+                   ], default='draft')
+    created_at   = DateTimeField(auto_now_add=True)
+    reviewed_by  = FK(User, null=True)  # Marija
+    reviewed_at  = DateTimeField(null=True)
+    posted_at    = DateTimeField(null=True)
+    
+    # Korisnik pritisne "Proknjiži" → TADA ide u konto
+    def post(self, user):
+        """Human-in-the-loop: korisnik pokreće knjiženje."""
+        if self.status != 'reviewed':
+            raise ValueError('Nacrt mora biti pregledano prije knjiženja')
+        # ... konto booking ...
+        self.status = 'posted'
+        self.posted_at = timezone.now()
+        self.save()
+```
+
+---
+
+## POJAČANJE 4 — MICRO-SPRINT COMMIT PROTOKOL
+
+Nakon SVAKOG sprint-a, OBAVEZNO:
+
+```bash
+# 1. Provjera (blokira deploy ako pada)
+venv/bin/python manage.py check
+venv/bin/python manage.py test inventory.tests --verbosity=1 --no-input 2>&1 | tail -3
+
+# 2. Migracije su čiste
+venv/bin/python manage.py showmigrations inventory | grep -v '\[X\]' | head -5
+
+# 3. Commit s jasnim opisom sprinta
+git add .
+git commit -m "feat: warehouse W1[A/B/C/D/E] — [što konkretno]"
+
+# 4. STOP — ne pokreći sljedeći sprint dok ovaj nije zelen
+```
