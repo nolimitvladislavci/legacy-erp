@@ -273,3 +273,20 @@ LIMIT Connect Borg (26.03.2026):
 
 Gemini radi autonomno. Rezultati će biti u git commitovima.
 WhatsApp report Ivanu na +491723006985 po završetku svakog taska.
+
+---
+
+## ★ KRAJ SESIJE — 26.03.2026 (Sonnet)
+**Git HEAD:** 310e9728
+**Ivan:** Na putu u HR — sastanci Šeki, Marija, Kruljac
+**Sutra:** Nastavak razgovora u živo
+
+### Što radi u pozadini:
+- Gemini: 3 taska pokrenuta (bugfix + pricing + W1C/D/E)
+- Celery beat: test runner 02:00 + 07:30 → WhatsApp na +491723006985
+- Šekijeve notifikacije: ugašene ✅
+
+### Za sutra (Ivan nastavlja):
+1. Poruka Šekiju — Ivan odobrava tekst pa šaljemo
+2. Marija → odluka o CCX33 serveru
+3. Provjera Gemini commitova
