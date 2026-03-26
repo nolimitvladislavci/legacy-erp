@@ -1018,7 +1018,7 @@ def _notify_quote_action(invoice, action: str):
 # ── CLIENT PORTAL (no login) ──────────────────────────────────────────────────
 def client_portal(request, token):
     invoice = get_object_or_404(Invoice, client_token=token)
-    if request.method == 'POST' and invoice.status in ('DRAFT', 'SENT'):
+    if request.method == 'POST' and invoice.status in ('DRAFT', 'SENT', 'ACCEPTED', 'REJECTED'):
         action = request.POST.get('action')
         if action == 'accept':
             invoice.status = 'ACCEPTED'
