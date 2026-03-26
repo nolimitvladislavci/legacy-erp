@@ -19,6 +19,9 @@ class Invoice(models.Model):
         ('FA', _('Faktura (B2B)')),
         ('URA', _('Ulazni racun')),
         ('RN', _('Racun - gotovina')),
+        ('OTP', _('Otpremnica (Lieferschein)')),
+        ('ZR',  _('Zbirni račun (Sammelrechnung)')),
+        ('NAR', _('Narudžbenica')),
     ]
     STATUS_CHOICES = [
         ('DRAFT',     _('Nacrt')),
@@ -296,6 +299,19 @@ class Invoice(models.Model):
             if AccountingPeriod.is_period_locked(self.company, self.date_issued.year, self.date_issued.month):
                 raise ValidationError(f"Razdoblje {self.date_issued.month:02d}/{self.date_issued.year} je zaključano. Izdavanje računa nije moguće.")
 
+        # DocumentValidator — 8 pravila (Sprint 1E)
+        try:
+            from invoicing.document_validator import validator
+            issues = validator.validate(self)
+            blocking = [i for i in issues if i.severity.value == 'block']
+            if blocking:
+                raise ValidationError({i.field or '__all__': i.message for i in blocking})
+            self._validation_warnings = [i for i in issues if i.severity.value in ('warn', 'info')]
+        except ValidationError:
+            raise
+        except Exception:
+            pass
+
     def save(self, *args, **kwargs):
         """
         Zakonska zaštita:
@@ -355,6 +371,18 @@ class Invoice(models.Model):
             str(self.issuer_oib or ""),
         ])
         self.archive_hash = hashlib.sha256(hash_source.encode("utf-8")).hexdigest()
+
+        # ── Auto: fiscal_rules check (ne blokira, samo bilježi) ─────────
+        if not getattr(self, '_skip_fiscal_check', False):
+            try:
+                from invoicing.fiscal_rules import should_fiscalize
+                should, reason = should_fiscalize(self)
+                if not should and self.doctype in ('R', 'RN', 'A', 'FA'):
+                    if not self.internal_note or 'fiscal_skip' not in self.internal_note:
+                        self.internal_note = (self.internal_note or '') + chr(10) + '[fiscal_skip: %s]' % reason
+            except Exception:
+                pass
+
         super().save(*args, **kwargs)
 
     def recalculate(self):

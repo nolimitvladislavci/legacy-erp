@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body { font-family: Arial, sans-serif; font-size: 10px; color: #333; margin: 15mm; }
+.header { text-align: center; border-bottom: 2px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 12px; }
+.header h1 { font-size: 16px; color: #1a1a2e; margin: 0; }
+.header .sub { font-size: 11px; color: #666; }
+table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+table th { background: #1a1a2e; color: #c9a84c; padding: 5px 8px; text-align: left; font-size: 9px; text-transform: uppercase; }
+table td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+table tr.total td { font-weight: bold; background: #f0f0f0; border-top: 2px solid #1a1a2e; }
+.section { margin: 10px 0; }
+.section h2 { font-size: 12px; color: #1a1a2e; border-bottom: 1px solid #c9a84c; padding-bottom: 3px; margin: 0 0 5px; }
+.footer { text-align: center; font-size: 8px; color: #999; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 15px; }
+.amount { text-align: right; font-family: 'Courier New', monospace; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>Z-IZVJESTAJ / Z-BERICHT</h1>
+    <div class="sub">{{ company.name|default:"—" }}</div>
+    <div class="sub">Terminal: {{ terminal.name }} ({{ terminal.terminal_code }}) | Datum: {{ report.date|date:"d.m.Y" }}</div>
+</div>
+
+<div class="section">
+    <h2>Promet / Umsatz</h2>
+    <table>
+        <tr><td>Gotovina / Bar</td><td class="amount">{{ report.cash_total }} EUR</td></tr>
+        <tr><td>Kartice / Karte</td><td class="amount">{{ report.card_total }} EUR</td></tr>
+        {% if report.mobile_total %}<tr><td>Mobilno / Mobil</td><td class="amount">{{ report.mobile_total }} EUR</td></tr>{% endif %}
+        {% if report.voucher_total %}<tr><td>Vauceri / Gutscheine</td><td class="amount">{{ report.voucher_total }} EUR</td></tr>{% endif %}
+        <tr class="total"><td>UKUPNO / GESAMT</td><td class="amount">{{ report.total_revenue }} EUR</td></tr>
+    </table>
+</div>
+
+<div class="section">
+    <h2>Statistika / Statistik</h2>
+    <table>
+        <tr><td>Broj racuna / Anzahl Belege</td><td class="amount">{{ report.receipt_count }}</td></tr>
+        <tr><td>Stornirani / Storniert</td><td class="amount">{{ report.cancelled_count }}</td></tr>
+        <tr><td>Prosjecni bon / Durchschn. Bon</td><td class="amount">{{ report.average_ticket }} EUR</td></tr>
+        {% if report.tip_total %}<tr><td>Napojnice / Trinkgeld</td><td class="amount">{{ report.tip_total }} EUR</td></tr>{% endif %}
+    </table>
+</div>
+
+{% if report.ai_notes %}
+<div class="section">
+    <h2>AI analiza</h2>
+    <p style="font-size:9px;color:#666;">{{ report.ai_notes }}</p>
+</div>
+{% endif %}
+
+<div class="footer">
+    {{ company.name }} | OIB: {{ company.oib|default:"—" }} |
+    Generirano: {% now "d.m.Y H:i" %} | LIMIT Connect
+</div>
+</body>
+</html>

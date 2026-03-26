@@ -765,3 +765,11 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Ponedjeljak 08:00
     },
 })
+
+# ── Propter — Sammelrechnung (zbirni racun) ──────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "propter-monthly-sammelrechnung": {
+        "task": "propter.generate_monthly_sammelrechnung",
+        "schedule": crontab(day_of_month="1", hour="6", minute="0"),
+    },
+})

@@ -729,6 +729,13 @@ class CheckoutService:
             except Exception:
                 pass
 
+        # ── 10c. AUTO OTPREMNICA (Sprint 1B — non-blocking) ──
+        try:
+            from pos.services._otpremnica_bridge import pos_receipt_to_otpremnica
+            pos_receipt_to_otpremnica(receipt)
+        except Exception as e:
+            logger.warning('CheckoutService OTP bridge: %s', e)
+
         # ── 11. ACTIVITY EVENT ──
         from worktime.tracker import track
         track(user, 'POS', 'POS_CHECKOUT', ref='Bon #%s' % next_number,

@@ -191,6 +191,13 @@ def process_payment(receipt: "POSReceipt", method: str, amount_paid: Decimal,
     # Fiscalization (non-blocking)
     jir = _attempt_fiscalization(receipt)
 
+    # Auto-create Otpremnica (non-blocking, Sprint 1B)
+    try:
+        from pos.services._otpremnica_bridge import pos_receipt_to_otpremnica
+        pos_receipt_to_otpremnica(receipt)
+    except Exception as e:
+        logger.warning('pos_receipt_to_otpremnica failed: %s', e)
+
     logger.info(
         "Payment processed: receipt=%d method=%s total=%.2f jir=%s",
         receipt.receipt_number, method, receipt.total, jir or "none"

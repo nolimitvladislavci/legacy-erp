@@ -1215,6 +1215,22 @@ class POSDailyReport(models.Model):
                 'cashier_breakdown': cashier_bd,
             },
         )
+
+        # Sprint 1F: Auto-generate Z-report PDF
+        if not report.z_report_pdf:
+            try:
+                from pos.pdf_service import generate_z_report_pdf
+                from django.core.files.base import ContentFile
+                pdf_bytes = generate_z_report_pdf(report)
+                report.z_report_pdf.save(
+                    'z_report_%s_%s.pdf' % (report.terminal.terminal_code, report.date),
+                    ContentFile(pdf_bytes),
+                    save=True,
+                )
+            except Exception as e:
+                import logging
+                logging.getLogger('pos').warning('Z-report PDF failed: %s', e)
+
         return report
 
 

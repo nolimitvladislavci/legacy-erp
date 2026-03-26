@@ -60,3 +60,120 @@ def recalculate_eko_stats(billing_period_id):
     except Exception as exc:
         logger.error("recalculate_eko_stats: %s", exc)
         return {"error": str(exc)}
+
+
+@shared_task(name='propter.generate_monthly_sammelrechnung', bind=True, max_retries=2)
+def generate_monthly_sammelrechnung(self):
+    """
+    Pokreće se 1. u mjesecu u 06:00.
+    Za svaku firmu s otvorenim BillingPeriod-om prošlog mjeseca:
+    1. Grupira Otpremnice po partneru (recipient_oib)
+    2. Kreira Invoice doctype='ZR' (Zbirni Račun / Sammelrechnung)
+    3. Stavke: popis svih OTP-a s datumima
+    4. Zatvara BillingPeriod
+    """
+    from django.utils import timezone
+    from propter.models import BillingPeriod, Otpremnica
+    from invoicing.models import Invoice
+    from django.db.models import Sum, Count
+    import datetime
+
+    # Prošli mjesec
+    today = timezone.now().date()
+    if today.month == 1:
+        target_year, target_month = today.year - 1, 12
+    else:
+        target_year, target_month = today.year, today.month - 1
+
+    periods = BillingPeriod.objects.filter(
+        year=target_year,
+        month=target_month,
+        status=BillingPeriod.Status.OPEN,
+        otpremnica_count__gt=0,
+    ).select_related('company')
+
+    generated = 0
+
+    for period in periods:
+        try:
+            otps = Otpremnica.objects.filter(
+                billing_period=period,
+                status=Otpremnica.Status.ISSUED,
+            ).order_by('issue_date')
+
+            if not otps.exists():
+                period.status = BillingPeriod.Status.CLOSED
+                period.closed_at = timezone.now()
+                period.save(update_fields=['status', 'closed_at'])
+                continue
+
+            # Grupiraj po partneru
+            partners = otps.values('recipient_oib', 'recipient_name').distinct()
+
+            for partner in partners:
+                partner_otps = otps.filter(
+                    recipient_oib=partner['recipient_oib'],
+                    recipient_name=partner['recipient_name'],
+                )
+
+                totals = partner_otps.aggregate(
+                    subtotal=Sum('subtotal'),
+                    tax=Sum('tax_amount'),
+                    total=Sum('total'),
+                    count=Count('id'),
+                )
+
+                company = period.company
+
+                # Generiraj broj
+                zr_count = Invoice.objects.filter(
+                    company=company, doctype='ZR',
+                ).count() + 1
+                zr_num = 'ZR-%d-%04d' % (target_year, zr_count)
+
+                # Popis OTP-a
+                otp_lines = '\n'.join([
+                    'OTP-%s od %s — %s EUR' % (otp.number, otp.issue_date, otp.total)
+                    for otp in partner_otps
+                ])
+                note = (
+                    'Zbirni racun za period %02d/%d\n'
+                    'Ukljucuje %d otpremnica:\n%s'
+                ) % (target_month, target_year, totals['count'], otp_lines)
+
+                # Kreiraj Invoice ZR (skip fiscal check)
+                zr = Invoice(
+                    company=company,
+                    doctype='ZR',
+                    number=zr_num,
+                    date_issued=timezone.now(),
+                    date_due=timezone.now().date() + datetime.timedelta(days=30),
+                    client_name=partner['recipient_name'] or 'Razni kupci',
+                    client_oib=partner['recipient_oib'] or '',
+                    subtotal=totals['subtotal'] or 0,
+                    tax_amount=totals['tax'] or 0,
+                    total=totals['total'] or 0,
+                    status='DRAFT',
+                    note=note,
+                    internal_note='[Auto-generated] BillingPeriod %s' % period.pk,
+                    country=getattr(company, 'country', 'HR') or 'HR',
+                )
+                zr._skip_fiscal_check = True
+                zr.save()
+
+                # OTP-i → AGGREGATED
+                partner_otps.update(status=Otpremnica.Status.AGGREGATED)
+
+                generated += 1
+                logger.info('ZR %s kreiran za %s (%s OTP)', zr_num, company.name, totals['count'])
+
+            # Zatvori period
+            period.status = BillingPeriod.Status.INVOICED
+            period.invoiced_at = timezone.now()
+            period.save(update_fields=['status', 'invoiced_at'])
+
+        except Exception as e:
+            logger.error('Sammelrechnung failed for period %s: %s', period.pk, e)
+            continue
+
+    return {'generated': generated, 'periods_processed': periods.count()}
