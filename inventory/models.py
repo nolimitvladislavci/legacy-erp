@@ -36,6 +36,62 @@ class InventoryItem(models.Model):
     description = models.TextField(blank=True, verbose_name=_('Opis'))
     unit     = models.CharField(max_length=20, default='kom', verbose_name=_('Jedinica mjere'))
 
+    # ── W1A: KLASIFIKACIJA (BORG-0 popunjava) ────────────────────────
+    ITEM_CLASS_CHOICES = [
+        ('tangible',   _('Materijalno (roba/materijal)')),
+        ('service',    _('Usluga (ne ide u skladište)')),
+        ('intangible', _('Nematerijalno (IP/licence)')),
+        ('asset',      _('Imovina (osnovna sredstva)')),
+        ('financial',  _('Financijsko (devize/vrijednosnice)')),
+    ]
+    FISCAL_TREATMENT_CHOICES = [
+        ('standard',     _('Standardno — fiskalizira')),
+        ('service_cash', _('Usluga — fiskalizira pri gotovinskoj naplati')),
+        ('exempt_pdv',   _('Oslobođeno PDV-a')),
+        ('no_fiscal',    _('Ne fiskalizira (imovina/IP)')),
+        ('currency',     _('Deviza — posebna evidencija')),
+        ('pfand',        _('Ambalaža/Pfand — poseban tretman')),
+    ]
+    TRADE_TYPE_CHOICES = [
+        ('retail',    _('Maloprodaja (B2C)')),
+        ('wholesale', _('Veleprodaja (B2B)')),
+        ('both',      _('Oboje')),
+        ('internal',  _('Interno — ne prodaje se')),
+    ]
+
+    item_class       = models.CharField(max_length=15, choices=ITEM_CLASS_CHOICES,
+                                        default='tangible', db_index=True, verbose_name=_('Klasa artikla'))
+    fiscal_treatment = models.CharField(max_length=15, choices=FISCAL_TREATMENT_CHOICES,
+                                        default='standard', db_index=True, verbose_name=_('Fiskalni tretman'))
+    trade_type       = models.CharField(max_length=15, choices=TRADE_TYPE_CHOICES,
+                                        default='both', verbose_name=_('Tip prodaje'))
+
+    # ── W1A: VELEPRODAJNE CIJENE ──────────────────────────────────────
+    wholesale_price    = models.DecimalField(max_digits=12, decimal_places=4, default=0,
+                                            verbose_name=_('Veleprodajna cijena (bez PDV)'))
+    min_order_qty      = models.DecimalField(max_digits=10, decimal_places=2, default=1,
+                                            verbose_name=_('Min. narudžba (veleprodaja)'))
+    price_valid_until  = models.DateField(null=True, blank=True, verbose_name=_('Cijena vrijedi do'))
+    vat_excluded_price = models.BooleanField(default=False,
+                                            verbose_name=_('Cijena bez PDV-a (veleprodaja)'))
+
+    # ── W1A: IMOVINA / ASSET ─────────────────────────────────────────
+    asset_purchase_date       = models.DateField(null=True, blank=True, verbose_name=_('Datum nabave imovine'))
+    asset_useful_life_years   = models.PositiveSmallIntegerField(null=True, blank=True,
+                                                                 verbose_name=_('Vijek trajanja (god.)'))
+    asset_depreciation_method = models.CharField(max_length=10, blank=True,
+                                                 choices=[('linear', 'Linearna'), ('declining', 'Degresivna')],
+                                                 verbose_name=_('Metoda amortizacije'))
+    asset_current_value       = models.DecimalField(max_digits=14, decimal_places=2, default=0,
+                                                    verbose_name=_('Sadašnja vrijednost'))
+    asset_location            = models.CharField(max_length=200, blank=True, verbose_name=_('Fizička lokacija'))
+    asset_serial_number       = models.CharField(max_length=100, blank=True, verbose_name=_('Serijski broj'))
+    asset_inventory_number    = models.CharField(max_length=50, blank=True, verbose_name=_('Inventarni broj'))
+
+    # ── W1A: CARINSKA / PODRIJETLO ───────────────────────────────────
+    customs_tariff     = models.CharField(max_length=15, blank=True, verbose_name=_('Carinska tarifa (HS kod)'))
+    country_of_origin  = models.CharField(max_length=2, blank=True, verbose_name=_('Zemlja podrijetla (ISO)'))
+
     # Količine
     quantity     = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Trenutna zaliha'))
     min_quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Minimalna zaliha'))
