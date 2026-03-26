@@ -29,6 +29,13 @@ class Property(models.Model):
         'companies.Company', on_delete=models.CASCADE,
         related_name='rental_properties', verbose_name=_('Tvrtka'),
     )
+    owner = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='owned_properties',
+        verbose_name='Vlasnik / Iznajmljivač',
+        help_text='Osoba kojoj prihod od najma osobno pripada (≠ firma)',
+    )
     objects = CompanyManager()
 
     name = models.CharField(max_length=100, verbose_name=_('Naziv'))
