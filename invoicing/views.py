@@ -163,6 +163,11 @@ def download_pdf(request, pk):
 
 def public_pdf(request, token):
     """Javni PDF endpoint — klijentski portal, bez login_required."""
+    from django.core.cache import cache
+    cache_key = f'pdf_throttle:{token}'
+    if cache.get(cache_key):
+        return HttpResponse('Previše zahtjeva. Pokušajte za 30 sekundi.', status=429)
+    cache.set(cache_key, True, 30)
     invoice = get_object_or_404(Invoice, client_token=token)
     from invoicing.services.pdf_service import generate_invoice_pdf
     content, mime = generate_invoice_pdf(invoice, request)

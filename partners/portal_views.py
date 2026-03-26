@@ -75,6 +75,12 @@ def portal_invoice_detail(request, token, pk):
 
 def portal_invoice_pdf(request, token, pk):
     """Download invoice PDF without requiring login."""
+    from django.core.cache import cache
+    cache_key = f'portal_pdf_throttle:{token}:{pk}'
+    if cache.get(cache_key):
+        from django.http import HttpResponse
+        return HttpResponse('Previše zahtjeva. Pokušajte za 30 sekundi.', status=429)
+    cache.set(cache_key, True, 30)
     partner = _get_partner(token)
     from invoicing.models import Invoice
     invoice = get_object_or_404(Invoice, pk=pk, partner=partner)

@@ -380,10 +380,22 @@ def pricing_page(request):
     from registration.constants import PLAN_FEATURES
     plans = PricingPlan.objects.filter(is_active=True).order_by('sort_order')
     lang = request.GET.get('lang', 'hr')
+    profile = request.GET.get('profile', '')
+    PROFILE_PLAN_MAP = {
+        'obrtnik': ['pausalac', 'pos-besplatno', 'starter'],
+        'udruga': ['udruga-starter'],
+        'rental': ['rental-starter', 'pos-arhiva-combo'],
+        'firma': ['starter', 'professional', 'enterprise'],
+        'racunovodja': ['arhiva-ai', 'enterprise', 'distributor'],
+        'gastro': ['pos-besplatno', 'pos-arhiva-combo', 'professional'],
+    }
+    if profile and profile in PROFILE_PLAN_MAP:
+        plans = plans.filter(slug__in=PROFILE_PLAN_MAP[profile])
     return render(request, 'website/pricing.html', {
         'plans': plans,
         'plan_features': PLAN_FEATURES,
         'lang': lang,
+        'active_profile': profile,
     })
 
 
@@ -528,11 +540,6 @@ def gallery_delete(request, pk):
 def feedback_page(request):
     """Public feedback stranica — limit-connect.com/feedback/"""
     return render(request, 'website/feedback.html')
-
-
-def digitalni_posrednik(request):
-    """Javna stranica: Digitalni Posrednik — kronologija i upute."""
-    return render(request, 'website/digitalni_posrednik.html')
 
 
 def digitalni_posrednik(request):

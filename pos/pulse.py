@@ -123,7 +123,7 @@ def analyze_receipt(receipt):
             exists = company.pulse_events.filter(
                 event_type='milestone_revenue',
                 created_at__date=today,
-                metadata__contains={'threshold': threshold},
+                metadata__threshold=threshold,
             ).exists()
             if not exists:
                 emit(company, 'milestone_revenue', 'success',
@@ -133,13 +133,14 @@ def analyze_receipt(receipt):
 
     # ── 5. FISKALIZACIJA FAIL ──
     if not receipt.jir and not receipt.is_training and receipt.status == 'paid':
+        from django.db.models import Q
         fail_streak = POSReceipt.objects.filter(
             session__terminal__company=company,
             status='paid',
-            jir__isnull=True,
-            jir='',
             paid_at__date=today,
             is_training=False,
+        ).filter(
+            Q(jir__isnull=True) | Q(jir='')
         ).count()
         if fail_streak >= 3:
             emit(company, 'alert_fiscal', 'critical',
