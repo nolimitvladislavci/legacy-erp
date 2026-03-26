@@ -2791,3 +2791,105 @@ def tretman_vocnjaka_detail(request, pk):
     from .models import TretmanVocnjaka
     obj = get_object_or_404(TretmanVocnjaka, pk=pk, vocnjak__company=company)
     return render(request, 'udruge/tretman_vocnjaka_detail.html', {'tretman': obj})
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# EDIT VIEWS — DVD oprema, intervencije, KUD kostimi
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def vatrogasna_oprema_edit(request, pk):
+    company = get_user_company(request)
+    from .models import VatrogasnaOprema
+    from decimal import Decimal
+    obj = get_object_or_404(VatrogasnaOprema, pk=pk, company=company)
+    if request.method == 'POST':
+        obj.naziv = request.POST.get('naziv', obj.naziv)
+        obj.kategorija = request.POST.get('kategorija', obj.kategorija)
+        obj.serijski_broj = request.POST.get('serijski_broj', obj.serijski_broj)
+        obj.proizvodac = request.POST.get('proizvodac', obj.proizvodac)
+        obj.godina_nabave = int(request.POST.get('godina_nabave') or 0) or obj.godina_nabave
+        obj.nabavna_vrijednost = Decimal(request.POST.get('nabavna_vrijednost') or '0')
+        obj.status = request.POST.get('status', obj.status)
+        obj.atest_datum = request.POST.get('atest_datum') or obj.atest_datum
+        obj.atest_vrijedi_do = request.POST.get('atest_vrijedi_do') or obj.atest_vrijedi_do
+        obj.atest_izdavac = request.POST.get('atest_izdavac', obj.atest_izdavac)
+        obj.sljedeci_servis = request.POST.get('sljedeci_servis') or obj.sljedeci_servis
+        obj.lokacija = request.POST.get('lokacija', obj.lokacija)
+        obj.notes = request.POST.get('notes', obj.notes)
+        if request.FILES.get('photo'):
+            obj.photo = request.FILES['photo']
+        obj.save()
+        messages.success(request, 'Oprema azurirana.')
+        return redirect('udruge:vatrogasna_oprema_list')
+    return render(request, 'udruge/vatrogasna_oprema_form.html', {
+        'oprema': obj, 'edit': True,
+        'kategorije': VatrogasnaOprema.KATEGORIJA_CHOICES,
+        'statusi': VatrogasnaOprema.STATUS_CHOICES,
+    })
+
+
+@login_required
+def intervencija_edit(request, pk):
+    company = get_user_company(request)
+    from .models import Intervencija, Clan
+    obj = get_object_or_404(Intervencija, pk=pk, company=company)
+    if request.method == 'POST':
+        obj.evidencijski_broj = request.POST.get('evidencijski_broj', obj.evidencijski_broj)
+        obj.tip = request.POST.get('tip', obj.tip)
+        obj.opis = request.POST.get('opis', obj.opis)
+        obj.alarm_primljen = request.POST.get('alarm_primljen') or obj.alarm_primljen
+        obj.izlazak = request.POST.get('izlazak') or obj.izlazak
+        obj.dolazak = request.POST.get('dolazak') or obj.dolazak
+        obj.zavrsetak = request.POST.get('zavrsetak') or obj.zavrsetak
+        obj.povratak = request.POST.get('povratak') or obj.povratak
+        obj.lokacija = request.POST.get('lokacija', obj.lokacija)
+        voditelj_id = request.POST.get('voditelj') or None
+        obj.voditelj_id = voditelj_id
+        obj.broj_sudionika = int(request.POST.get('broj_sudionika') or 0)
+        obj.voda_utrosena_l = int(request.POST.get('voda_utrosena_l') or 0)
+        obj.pjena_utrosena_l = int(request.POST.get('pjena_utrosena_l') or 0)
+        obj.steta_eur = request.POST.get('steta_eur') or 0
+        obj.spaseno_osoba = int(request.POST.get('spaseno_osoba') or 0)
+        obj.spaseno_zivotinja = int(request.POST.get('spaseno_zivotinja') or 0)
+        obj.notes = request.POST.get('notes', obj.notes)
+        obj.save()
+        messages.success(request, 'Intervencija azurirana.')
+        return redirect('udruge:intervencija_detail', pk=obj.pk)
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/intervencija_form.html', {
+        'intervencija': obj, 'edit': True,
+        'tipovi': Intervencija.TIP_CHOICES, 'clanovi': clanovi,
+    })
+
+
+@login_required
+def kostim_edit(request, pk):
+    company = get_user_company(request)
+    from .models import Kostim, Sekcija, Clan
+    from decimal import Decimal
+    obj = get_object_or_404(Kostim, pk=pk, company=company)
+    if request.method == 'POST':
+        obj.naziv = request.POST.get('naziv', obj.naziv)
+        obj.sekcija_id = request.POST.get('sekcija') or obj.sekcija_id
+        obj.region = request.POST.get('region', obj.region)
+        obj.spol = request.POST.get('spol', obj.spol)
+        obj.velicina = request.POST.get('velicina', obj.velicina)
+        obj.inventarni_broj = request.POST.get('inventarni_broj', obj.inventarni_broj)
+        obj.dodijeljen_clanu_id = request.POST.get('dodijeljen_clanu') or obj.dodijeljen_clanu_id
+        obj.dodijeljen_od = request.POST.get('dodijeljen_od') or obj.dodijeljen_od
+        obj.stanje = request.POST.get('stanje', obj.stanje)
+        obj.nabavna_cijena = Decimal(request.POST.get('nabavna_cijena') or '0')
+        obj.opis_dijelova = request.POST.get('opis_dijelova', obj.opis_dijelova)
+        obj.notes = request.POST.get('notes', obj.notes)
+        if request.FILES.get('photo'):
+            obj.photo = request.FILES['photo']
+        obj.save()
+        messages.success(request, 'Kostim azuriran.')
+        return redirect('udruge:kostim_list')
+    sekcije = Sekcija.objects.filter(company=company)
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/kostim_form.html', {
+        'kostim': obj, 'edit': True,
+        'stanja': Kostim.STANJE_CHOICES, 'sekcije': sekcije, 'clanovi': clanovi,
+    })

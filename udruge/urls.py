@@ -79,11 +79,13 @@ urlpatterns = [
     path('dvd/oprema/', views.vatrogasna_oprema_list, name='vatrogasna_oprema_list'),
     path('dvd/oprema/nova/', views.vatrogasna_oprema_create, name='vatrogasna_oprema_create'),
     path('dvd/oprema/<int:pk>/', views.vatrogasna_oprema_detail, name='vatrogasna_oprema_detail'),
+    path('dvd/oprema/<int:pk>/edit/', views.vatrogasna_oprema_edit, name='vatrogasna_oprema_edit'),
     path('dvd/vozila/', views.vatrogasno_vozilo_list, name='vatrogasno_vozilo_list'),
     path('dvd/vozila/novo/', views.vatrogasno_vozilo_create, name='vatrogasno_vozilo_create'),
     path('dvd/intervencije/', views.intervencija_list, name='intervencija_list'),
     path('dvd/intervencije/nova/', views.intervencija_create, name='intervencija_create'),
     path('dvd/intervencije/<int:pk>/', views.intervencija_detail, name='intervencija_detail'),
+    path('dvd/intervencije/<int:pk>/edit/', views.intervencija_edit, name='intervencija_edit'),
     path('dvd/vjezbe/', views.vjezba_list, name='vjezba_list'),
     path('dvd/vjezbe/nova/', views.vjezba_create, name='vjezba_create'),
     path('dvd/zvanja/', views.vatrogasno_zvanje_list, name='vatrogasno_zvanje_list'),
@@ -98,6 +100,7 @@ urlpatterns = [
     path('kud/kostimi/', views.kostim_list, name='kostim_list'),
     path('kud/kostimi/novi/', views.kostim_create, name='kostim_create'),
     path('kud/kostimi/<int:pk>/', views.kostim_detail, name='kostim_detail'),
+    path('kud/kostimi/<int:pk>/edit/', views.kostim_edit, name='kostim_edit'),
     path('kud/nastup-plan/', views.nastup_plan_list, name='nastup_plan_list'),
 
     # ═══════════════════════════════════════════════════════════════════

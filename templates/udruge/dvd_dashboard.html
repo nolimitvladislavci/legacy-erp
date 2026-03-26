@@ -39,7 +39,7 @@
     <h6 style="color:var(--gold);font-size:.8rem;margin-bottom:.75rem"><i class="fas fa-fire"></i> Zadnje intervencije</h6>
     {% for i in zadnje_intervencije %}
     <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem">
-      <a href="{% url 'udruge:dvd_intervencija_detail' i.pk %}" style="color:var(--text);text-decoration:none">{{ i.datum|date:"d.m.Y" }} - {{ i.get_tip_display }}</a>
+      <a href="{% url 'udruge:intervencija_detail' i.pk %}" style="color:var(--text);text-decoration:none">{{ i.datum|date:"d.m.Y" }} - {{ i.get_tip_display }}</a>
       <span style="color:var(--text-muted)">{{ i.lokacija|truncatechars:20 }}</span>
     </div>
     {% empty %}<div style="color:var(--text-muted);font-size:.82rem;padding:.5rem 0">Nema intervencija</div>{% endfor %}

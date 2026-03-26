@@ -4,7 +4,7 @@
 {% block content %}
 <div style="max-width:700px">
   <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem">
-    <a href="{% url 'udruge:kud_kostimi_list' %}" style="color:var(--text-muted);font-size:.85rem"><i class="fas fa-arrow-left"></i></a>
+    <a href="{% url 'udruge:kostim_list' %}" style="color:var(--text-muted);font-size:.85rem"><i class="fas fa-arrow-left"></i></a>
     <h4 style="margin:0;color:var(--gold)"><i class="fas fa-tshirt"></i> {% if form.instance.pk %}Uredi kostim{% else %}Novi kostim{% endif %}</h4>
   </div>
   <div class="card" style="padding:1.5rem;border-radius:12px;border:1px solid var(--border)">
@@ -18,7 +18,7 @@
       {% endfor %}
       <div style="display:flex;gap:.5rem;margin-top:1.5rem">
         <button type="submit" class="btn btn-gold">Spremi</button>
-        <a href="{% url 'udruge:kud_kostimi_list' %}" class="btn btn-ghost">Odustani</a>
+        <a href="{% url 'udruge:kostim_list' %}" class="btn btn-ghost">Odustani</a>
       </div>
     </form>
   </div>

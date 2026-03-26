@@ -5,10 +5,10 @@
 <div style="max-width:900px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
     <div style="display:flex;align-items:center;gap:.5rem">
-      <a href="{% url 'udruge:dvd_intervencija_list' %}" style="color:var(--text-muted);font-size:.85rem"><i class="fas fa-arrow-left"></i></a>
+      <a href="{% url 'udruge:intervencija_list' %}" style="color:var(--text-muted);font-size:.85rem"><i class="fas fa-arrow-left"></i></a>
       <h4 style="margin:0;color:var(--gold)"><i class="fas fa-fire"></i> Intervencija {{ object.datum|date:"d.m.Y H:i" }}</h4>
     </div>
-    <a href="{% url 'udruge:dvd_intervencija_edit' object.pk %}" class="btn btn-gold btn-sm">Uredi</a>
+    <a href="{% url 'udruge:intervencija_edit' object.pk %}" class="btn btn-gold btn-sm">Uredi</a>
   </div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1rem" class="stats-grid">
     <div class="stat-card" style="text-align:center;padding:.75rem">
