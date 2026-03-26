@@ -1,3 +1,4 @@
+{% load tax_wizard_tags %}
 {% extends "pos/base_pos.html" %}
 {% block title %}Robot Hotel{% endblock %}
 {% block extra_css %}
@@ -32,6 +33,7 @@
 </style>
 {% endblock %}
 {% block content %}
+{% tax_wizard_widget "rental" %}
 <div class="page">
   <div class="page-title">
     <span>&#127968; Robot Hotel</span>

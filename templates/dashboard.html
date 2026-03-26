@@ -1,9 +1,11 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
+{% load tax_wizard_tags %}
 {% block title %}Dashboard - LIMIT CONNECT{% endblock %}
 {% block page_title %}Operativni Centar{% endblock %}
 {% block content %}
+{% tax_wizard_widget "general" %}
 <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
   {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
   {% for lang_code, lang_name in LANGUAGES %}

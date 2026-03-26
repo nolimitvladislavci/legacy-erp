@@ -1,5 +1,6 @@
 {% extends "pos/base_pos.html" %}
 {% load i18n %}
+{% load tax_wizard_tags %}
 {% block title %}POS Terminali{% endblock %}
 {% block extra_css %}
 <style>
@@ -23,6 +24,7 @@
 </style>
 {% endblock %}
 {% block content %}
+{% tax_wizard_widget "pos" %}
 <div class="page">
   <div class="page-header">
     <div class="page-title">{% trans "POS Terminali" %}
