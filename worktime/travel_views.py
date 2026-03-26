@@ -104,3 +104,91 @@ def travel_expense_add(request, pk):
         )
         messages.success(request, "Trosak dodan.")
     return redirect("worktime:travel_order_detail", pk=pk)
+
+
+@login_required
+def travel_order_pdf(request, pk):
+    """Generira print-ready HTML za putni nalog (A4 za ispis/PDF)."""
+    from django.http import HttpResponse
+    company = get_user_company(request)
+    order = get_object_or_404(TravelOrder, pk=pk, company=company)
+    expenses = order.expenses.all()
+    expenses_total = sum(e.amount for e in expenses)
+
+    html = """<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Putni nalog %s</title>
+<style>
+body{font-family:Arial,sans-serif;margin:30px;font-size:12px;color:#000}
+h1{font-size:18px;text-align:center;margin-bottom:5px}
+.header{text-align:center;margin-bottom:20px;border-bottom:2px solid #000;padding-bottom:10px}
+.header .firma{font-weight:bold;font-size:14px}
+.header .oib{color:#555;font-size:11px}
+table{width:100%%;border-collapse:collapse;margin:10px 0}
+th,td{padding:5px 8px;text-align:left;border:1px solid #ccc;font-size:11px}
+th{background:#f0f0f0;font-weight:bold}
+.total-row td{font-weight:bold;background:#f9f9f0}
+.signatures{margin-top:50px;display:flex;justify-content:space-between}
+.sig-box{text-align:center;width:28%%}
+.sig-line{border-top:1px solid #000;margin-top:40px;padding-top:4px;font-size:10px}
+.footer{text-align:center;margin-top:30px;font-size:9px;color:#999}
+@media print{body{margin:15mm}}
+</style></head><body>
+<div class="header">
+<div class="firma">%s</div>
+<div class="oib">OIB: %s | %s, %s %s</div>
+</div>
+<h1>PUTNI NALOG br. %s</h1>
+<p style="text-align:center;color:#555">Status: %s</p>
+<table>
+<tr><th width="30%%">Zaposlenik</th><td>%s</td></tr>
+<tr><th>Odrediste</th><td>%s</td></tr>
+<tr><th>Svrha</th><td>%s</td></tr>
+<tr><th>Polazak</th><td>%s</td></tr>
+<tr><th>Povratak</th><td>%s</td></tr>
+<tr><th>Prijevoz</th><td>%s</td></tr>
+</table>
+<h3 style="margin-top:15px">Troskovi</h3>
+<table>
+<tr><th>Stavka</th><th style="text-align:right">Iznos (EUR)</th></tr>
+<tr><td>Kilometrina (%s km x %s EUR/km)</td><td style="text-align:right">%s</td></tr>
+<tr><td>Dnevnice (%s dana x %s EUR/dan)</td><td style="text-align:right">%s</td></tr>
+<tr><td>Ostali troskovi</td><td style="text-align:right">%s</td></tr>""" % (
+        order.order_number,
+        company.name, company.oib or '-',
+        company.address or '', company.zip_code or '', company.city or '',
+        order.order_number, order.get_status_display(),
+        order.employee.get_full_name() if order.employee else '-',
+        order.destination, order.purpose or '-',
+        order.departure_date.strftime('%d.%m.%Y %H:%M') if order.departure_date else '-',
+        order.return_date.strftime('%d.%m.%Y %H:%M') if order.return_date else '-',
+        order.get_transport_type_display(),
+        order.distance_km, order.mileage_rate, order.mileage_total,
+        order.per_diem_days, order.per_diem_rate, order.per_diem_total,
+        order.other_costs,
+    )
+
+    # Individual expenses
+    if expenses:
+        for exp in expenses:
+            html += '<tr><td>%s: %s</td><td style="text-align:right">%s</td></tr>' % (
+                exp.get_expense_type_display(), exp.description, exp.amount)
+
+    grand_total = order.total_cost + expenses_total
+    html += """<tr class="total-row"><td><strong>UKUPNO</strong></td><td style="text-align:right"><strong>%s EUR</strong></td></tr>
+</table>""" % grand_total
+
+    if order.notes:
+        html += '<p><strong>Napomene:</strong> %s</p>' % order.notes
+
+    html += """
+<div class="signatures">
+<div class="sig-box"><div class="sig-line">Djelatnik</div></div>
+<div class="sig-box"><div class="sig-line">Odobrio</div></div>
+<div class="sig-box"><div class="sig-line">Blagajnik</div></div>
+</div>
+<div class="footer">Ispis: %s | LIMIT Connect — limit-connect.com</div>
+</body></html>""" % timezone.now().strftime('%d.%m.%Y %H:%M')
+
+    response = HttpResponse(html, content_type='text/html; charset=utf-8')
+    response['Content-Disposition'] = 'inline; filename="PN-%s.html"' % order.order_number
+    return response
