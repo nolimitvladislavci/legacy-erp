@@ -1,0 +1,412 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ lang|default:'hr' }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>{% if lang == 'de' %}Beschwerde / Eindruck{% else %}Prigovor / Utisak{% endif %} — {{ company.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --gold: #d4af37; --dark: #1a1a2e; }
+        body { background: var(--dark); color: #f0f0f0; font-family: 'Barlow', sans-serif; min-height: 100vh; }
+        .card { background: #16213e; border: 1px solid rgba(212,175,55,.2); border-radius: 16px; }
+        .btn-gold { background: var(--gold); color: var(--dark); font-weight: 600; border: none; }
+        .btn-gold:hover { background: #e6c44d; color: var(--dark); }
+        .form-control, .form-select { background: #0f3460; border: 1px solid rgba(212,175,55,.3); color: #f0f0f0; }
+        .form-control:focus, .form-select:focus { border-color: var(--gold); box-shadow: 0 0 0 .2rem rgba(212,175,55,.25); background: #0f3460; color: #f0f0f0; }
+        .type-card { cursor: pointer; transition: all .2s; border: 2px solid transparent; }
+        .type-card.selected { border-color: var(--gold); background: rgba(212,175,55,.1); }
+        .type-card:hover { border-color: rgba(212,175,55,.5); }
+        #signature-pad { border: 2px dashed rgba(212,175,55,.4); border-radius: 12px; background: #fff; touch-action: none; }
+        .step { display: none; } .step.active { display: block; }
+        .star-rating { font-size: 2rem; cursor: pointer; }
+        .star-rating .bi-star-fill { color: var(--gold); }
+        .star-rating .bi-star { color: #555; }
+        .voice-btn.recording { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,.5); } 50% { box-shadow: 0 0 0 15px rgba(212,175,55,0); } }
+        .company-header { border-bottom: 2px solid var(--gold); }
+        .legal-notice { font-size: .7rem; color: #888; }
+    </style>
+</head>
+<body>
+{% if error %}
+<div class="d-flex align-items-center justify-content-center min-vh-100 p-3">
+    <div class="text-center">
+        <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+        <h4 class="mt-3">{{ error }}</h4>
+    </div>
+</div>
+{% else %}
+<div class="container py-3" style="max-width: 520px;">
+
+    {# Company header #}
+    <div class="text-center company-header pb-3 mb-4">
+        <h5 class="text-gold mb-0">{{ company.name }}</h5>
+        <small class="text-muted">{% if lang == 'de' %}Beschwerde- und Eindruckbuch{% else %}Knjiga prigovora i utisaka{% endif %}</small>
+    </div>
+
+    {# ── STEP 1: Choose type ── #}
+    <div id="step1" class="step active">
+        <h6 class="mb-3">{% if lang == 'de' %}Was möchten Sie mitteilen?{% else %}Što želite podijeliti?{% endif %}</h6>
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <div class="card type-card p-3 text-center" data-type="prigovor" onclick="selectType(this)">
+                    <i class="bi bi-emoji-frown display-5 text-danger"></i>
+                    <div class="mt-1 small fw-bold">{% if lang == 'de' %}Beschwerde{% else %}Prigovor{% endif %}</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card type-card p-3 text-center" data-type="pohvala" onclick="selectType(this)">
+                    <i class="bi bi-emoji-heart-eyes display-5 text-success"></i>
+                    <div class="mt-1 small fw-bold">{% if lang == 'de' %}Lob{% else %}Pohvala{% endif %}</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card type-card p-3 text-center" data-type="utisak" onclick="selectType(this)">
+                    <i class="bi bi-chat-dots display-5 text-info"></i>
+                    <div class="mt-1 small fw-bold">{% if lang == 'de' %}Eindruck{% else %}Utisak{% endif %}</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card type-card p-3 text-center" data-type="reklamacija" onclick="selectType(this)">
+                    <i class="bi bi-arrow-repeat display-5 text-warning"></i>
+                    <div class="mt-1 small fw-bold">{% if lang == 'de' %}Reklamation{% else %}Reklamacija{% endif %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── STEP 2: Details ── #}
+    <div id="step2" class="step">
+        <h6 class="mb-3" id="step2-title"></h6>
+
+        {# Star rating (for pohvala/utisak) #}
+        <div id="star-section" class="text-center mb-3" style="display:none;">
+            <div class="star-rating">
+                {% for i in "12345" %}
+                <i class="bi bi-star" data-star="{{ i }}" onclick="setRating({{ i }})"></i>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small">{% if lang == 'de' %}Ihr Name *{% else %}Vaše ime *{% endif %}</label>
+            <input type="text" id="inp-name" class="form-control" required maxlength="200"
+                   placeholder="{% if lang == 'de' %}Vor- und Nachname{% else %}Ime i prezime{% endif %}">
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <label class="form-label small">E-mail</label>
+                <input type="email" id="inp-email" class="form-control" placeholder="email@example.com">
+            </div>
+            <div class="col-6">
+                <label class="form-label small">{% if lang == 'de' %}Telefon{% else %}Telefon/WhatsApp{% endif %}</label>
+                <input type="tel" id="inp-phone" class="form-control" placeholder="+385...">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small" id="lbl-opis">{% if lang == 'de' %}Beschreibung *{% else %}Opis *{% endif %}</label>
+            <textarea id="inp-opis" class="form-control" rows="4" maxlength="5000"
+                      placeholder="{% if lang == 'de' %}Bitte beschreiben Sie...{% else %}Molimo opišite...{% endif %}"></textarea>
+            <div class="d-flex justify-content-between mt-1">
+                <button type="button" class="btn btn-sm btn-outline-light voice-btn" onclick="toggleVoice()" id="btn-voice">
+                    <i class="bi bi-mic"></i> {% if lang == 'de' %}Spracheingabe{% else %}Glasovni unos{% endif %}
+                </button>
+                <small class="text-muted" id="char-count">0/5000</small>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-light flex-fill" onclick="goStep(1)">
+                <i class="bi bi-arrow-left"></i> {% if lang == 'de' %}Zurück{% else %}Natrag{% endif %}
+            </button>
+            <button class="btn btn-gold flex-fill" onclick="goStep(3)">
+                {% if lang == 'de' %}Weiter{% else %}Dalje{% endif %} <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    {# ── STEP 3: Signature + submit ── #}
+    <div id="step3" class="step">
+        <h6 class="mb-3">{% if lang == 'de' %}Unterschrift{% else %}Potpis{% endif %}</h6>
+
+        <div class="text-center mb-3">
+            <canvas id="signature-pad" width="460" height="200"></canvas>
+            <div class="mt-1">
+                <button class="btn btn-sm btn-outline-light" onclick="clearSignature()">
+                    <i class="bi bi-eraser"></i> {% if lang == 'de' %}Löschen{% else %}Obriši{% endif %}
+                </button>
+            </div>
+        </div>
+
+        {# ID photo (optional) #}
+        <div class="mb-3">
+            <label class="form-label small">
+                <i class="bi bi-camera"></i>
+                {% if lang == 'de' %}Ausweisfoto (optional){% else %}Foto osobne (opcionalno){% endif %}
+            </label>
+            <input type="file" id="inp-id-photo" class="form-control form-control-sm" accept="image/*" capture="environment">
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+            <button class="btn btn-outline-light flex-fill" onclick="goStep(2)">
+                <i class="bi bi-arrow-left"></i> {% if lang == 'de' %}Zurück{% else %}Natrag{% endif %}
+            </button>
+            <button class="btn btn-gold flex-fill" onclick="submitComplaint()" id="btn-submit">
+                <i class="bi bi-check-circle"></i> {% if lang == 'de' %}Absenden{% else %}Pošalji{% endif %}
+            </button>
+        </div>
+
+        <div class="legal-notice text-center">
+            {% if lang == 'de' %}
+            Mit der Absendung bestätigen Sie die Richtigkeit Ihrer Angaben.
+            Ihre Daten werden gemäß DSGVO Art. 6(1)(f) verarbeitet.
+            {% else %}
+            Slanjem potvrđujete istinitost podataka.
+            Podaci se obrađuju sukladno GDPR čl. 6(1)(f) — legitimni interes.
+            ZZP čl. 10 — rok za odgovor 15 dana.
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── STEP 4: Confirmation ── #}
+    <div id="step4" class="step">
+        <div class="text-center py-5">
+            <i class="bi bi-check-circle display-1 text-success"></i>
+            <h4 class="mt-3" id="confirm-title"></h4>
+            <p id="confirm-message" class="text-muted"></p>
+            <div class="card p-3 mt-3">
+                <small class="text-muted">{% if lang == 'de' %}Integritäts-Hash{% else %}Integritetski hash{% endif %}</small>
+                <code id="confirm-hash" class="d-block mt-1 text-break" style="font-size:.75rem;"></code>
+            </div>
+            <p class="mt-3 small text-muted" id="confirm-deadline"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+let selectedType = '{{ default_type|default:"" }}';
+let starRating = null;
+let signatureCanvas, signatureCtx, isDrawing = false;
+let voiceRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+
+// ── Type selection ──
+function selectType(el) {
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedType = el.dataset.type;
+    setTimeout(() => goStep(2), 200);
+}
+
+// ── Step navigation ──
+function goStep(n) {
+    if (n === 2 && !selectedType) return;
+    if (n === 3) {
+        const name = document.getElementById('inp-name').value.trim();
+        const opis = document.getElementById('inp-opis').value.trim();
+        if (!name) { document.getElementById('inp-name').focus(); return; }
+        if (!opis && ['prigovor','reklamacija'].includes(selectedType)) {
+            document.getElementById('inp-opis').focus(); return;
+        }
+    }
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    currentStep = n;
+
+    if (n === 2) {
+        const titles = {
+            prigovor: '{% if lang == "de" %}Ihre Beschwerde{% else %}Vaš prigovor{% endif %}',
+            pohvala: '{% if lang == "de" %}Ihr Lob{% else %}Vaša pohvala{% endif %}',
+            utisak: '{% if lang == "de" %}Ihr Eindruck{% else %}Vaš utisak{% endif %}',
+            reklamacija: '{% if lang == "de" %}Ihre Reklamation{% else %}Vaša reklamacija{% endif %}'
+        };
+        document.getElementById('step2-title').textContent = titles[selectedType] || '';
+        document.getElementById('star-section').style.display =
+            ['pohvala','utisak'].includes(selectedType) ? 'block' : 'none';
+    }
+    if (n === 3) initSignature();
+}
+
+// ── Stars ──
+function setRating(n) {
+    starRating = n;
+    document.querySelectorAll('.star-rating i').forEach((s, i) => {
+        s.className = i < n ? 'bi bi-star-fill' : 'bi bi-star';
+    });
+}
+
+// ── Signature canvas ──
+function initSignature() {
+    const canvas = document.getElementById('signature-pad');
+    if (signatureCanvas) return;
+    signatureCanvas = canvas;
+    signatureCtx = canvas.getContext('2d');
+
+    // Resize canvas to actual display size
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    signatureCtx.scale(2, 2);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+
+    signatureCtx.strokeStyle = '#1a1a2e';
+    signatureCtx.lineWidth = 2;
+    signatureCtx.lineCap = 'round';
+
+    function getPos(e) {
+        const r = canvas.getBoundingClientRect();
+        const t = e.touches ? e.touches[0] : e;
+        return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
+
+    canvas.addEventListener('mousedown', e => { isDrawing = true; signatureCtx.beginPath(); const p = getPos(e); signatureCtx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', e => { if (!isDrawing) return; const p = getPos(e); signatureCtx.lineTo(p.x, p.y); signatureCtx.stroke(); });
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing = true; signatureCtx.beginPath(); const p = getPos(e); signatureCtx.moveTo(p.x, p.y); }, {passive: false});
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!isDrawing) return; const p = getPos(e); signatureCtx.lineTo(p.x, p.y); signatureCtx.stroke(); }, {passive: false});
+    canvas.addEventListener('touchend', () => isDrawing = false);
+}
+
+function clearSignature() {
+    if (signatureCtx) signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+}
+
+function getSignatureData() {
+    if (!signatureCanvas) return '';
+    const blank = document.createElement('canvas');
+    blank.width = signatureCanvas.width;
+    blank.height = signatureCanvas.height;
+    if (signatureCanvas.toDataURL() === blank.toDataURL()) return '';
+    return signatureCanvas.toDataURL('image/png');
+}
+
+// ── Voice input ──
+function toggleVoice() {
+    if (voiceRecording) { stopVoice(); return; }
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SR();
+        recognition.lang = '{{ lang|default:"hr" }}' === 'de' ? 'de-DE' : 'hr-HR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = e => {
+            let t = '';
+            for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+            document.getElementById('inp-opis').value = t;
+            document.getElementById('char-count').textContent = t.length + '/5000';
+        };
+        recognition.start();
+        window._recognition = recognition;
+        voiceRecording = true;
+        document.getElementById('btn-voice').classList.add('recording');
+        document.getElementById('btn-voice').innerHTML = '<i class="bi bi-mic-fill text-danger"></i> Stop';
+    }
+}
+function stopVoice() {
+    if (window._recognition) window._recognition.stop();
+    voiceRecording = false;
+    document.getElementById('btn-voice').classList.remove('recording');
+    document.getElementById('btn-voice').innerHTML = '<i class="bi bi-mic"></i> {% if lang == "de" %}Spracheingabe{% else %}Glasovni unos{% endif %}';
+}
+
+// ── ID photo → base64 ──
+function getIdPhoto() {
+    return new Promise(resolve => {
+        const input = document.getElementById('inp-id-photo');
+        if (!input.files || !input.files[0]) { resolve(''); return; }
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(input.files[0]);
+    });
+}
+
+// ── GPS ──
+function getGPS() {
+    return new Promise(resolve => {
+        if (!navigator.geolocation) { resolve(null); return; }
+        navigator.geolocation.getCurrentPosition(
+            pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            () => resolve(null),
+            { timeout: 5000, enableHighAccuracy: false }
+        );
+    });
+}
+
+// ── Submit ──
+async function submitComplaint() {
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    const sig = getSignatureData();
+    const idPhoto = await getIdPhoto();
+    const gps = await getGPS();
+
+    const payload = {
+        company_id: '{{ company.pk }}',
+        record_type: selectedType,
+        ime: document.getElementById('inp-name').value.trim(),
+        email: document.getElementById('inp-email').value.trim(),
+        phone: document.getElementById('inp-phone').value.trim(),
+        kontakt: document.getElementById('inp-email').value.trim(),
+        opis: document.getElementById('inp-opis').value.trim(),
+        source_module: '{{ source_module }}',
+        source_url: window.location.href,
+        language: '{{ lang|default:"hr" }}',
+        star_rating: starRating,
+        signature: sig,
+        id_photo: idPhoto,
+        gps: gps,
+        device_info: navigator.userAgent + ' | ' + screen.width + 'x' + screen.height,
+        signature_timestamp: new Date().toISOString(),
+        voice_input: voiceRecording || document.getElementById('inp-opis').dataset.voice === '1',
+    };
+
+    try {
+        const resp = await fetch('/pos/api/prigovori/public/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const result = await resp.json();
+        if (result.success) {
+            document.getElementById('confirm-title').textContent = result.message;
+            document.getElementById('confirm-hash').textContent = result.integrity_hash;
+            document.getElementById('confirm-message').textContent =
+                '{% if lang == "de" %}Eintrag Nr.{% else %}Evidencijski broj{% endif %} #' + result.redni_broj;
+            if (result.deadline) {
+                document.getElementById('confirm-deadline').textContent =
+                    '{% if lang == "de" %}Antwortfrist: {% else %}Rok za odgovor: {% endif %}' + result.deadline + ' {% if lang == "de" %}Tage{% else %}dana{% endif %}';
+            }
+            goStep(4);
+        } else {
+            alert(result.error || 'Greška');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> {% if lang == "de" %}Absenden{% else %}Pošalji{% endif %}';
+        }
+    } catch (err) {
+        alert('Greška: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> {% if lang == "de" %}Absenden{% else %}Pošalji{% endif %}';
+    }
+}
+
+// Char counter
+document.getElementById('inp-opis').addEventListener('input', function() {
+    document.getElementById('char-count').textContent = this.value.length + '/5000';
+});
+
+// Pre-select type if provided
+{% if default_type %}
+document.querySelector('[data-type="{{ default_type }}"]')?.click();
+{% endif %}
+</script>
+</body>
+</html>

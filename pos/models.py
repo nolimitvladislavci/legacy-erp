@@ -1311,6 +1311,131 @@ class KnjigaPrigovora(models.Model):
         help_text=_('WebM/MP3 snimka glasovnog prigovora'),
     )
 
+    # ── Tip zapisa (prigovor / pohvala / utisak / reklamacija) ────────
+    RECORD_TYPES = [
+        ('prigovor', _('Prigovor / Beschwerde')),
+        ('pohvala', _('Pohvala / Lob')),
+        ('utisak', _('Utisak / Eindruck')),
+        ('reklamacija', _('Reklamacija / Reklamation')),
+        ('prijedlog', _('Prijedlog poboljšanja / Verbesserungsvorschlag')),
+    ]
+    record_type = models.CharField(
+        max_length=20, choices=RECORD_TYPES, default='prigovor',
+        verbose_name=_('Vrsta zapisa'),
+    )
+
+    # ── Izvorni modul (globalni pristup) ──────────────────────────────
+    SOURCE_MODULES = [
+        ('pos', 'POS'),
+        ('invoicing', _('Fakturiranje')),
+        ('rental', _('Smještaj / Vermietung')),
+        ('delivery', _('Dostava / Lieferung')),
+        ('marketplace', _('Tržnica / Marktplatz')),
+        ('webshop', 'Webshop'),
+        ('work_orders', _('Radni nalozi / Aufträge')),
+        ('appointments', _('Termini / Termine')),
+        ('fitness', 'Fitness'),
+        ('gastro', _('Gastronomija / Gastronomie')),
+        ('general', _('Općenito / Allgemein')),
+        ('qr', _('QR kod (potrošač)')),
+    ]
+    source_module = models.CharField(
+        max_length=20, choices=SOURCE_MODULES, default='pos',
+        verbose_name=_('Izvorni modul'),
+    )
+    source_url = models.URLField(
+        blank=True, verbose_name=_('Izvorni URL'),
+        help_text=_('URL stranice s koje je prigovor poslan'),
+    )
+
+    # ── Ocjena (za utiske / pohvale) ─────────────────────────────────
+    star_rating = models.PositiveSmallIntegerField(
+        null=True, blank=True, verbose_name=_('Ocjena (1-5)'),
+        help_text=_('Zvjezdice — samo za pohvale i utiske'),
+    )
+
+    # ── Kontakt podaci (prošireni) ───────────────────────────────────
+    consumer_email = models.EmailField(
+        blank=True, verbose_name=_('E-mail potrošača'),
+        help_text=_('Za slanje potvrde i odgovora'),
+    )
+    consumer_phone = models.CharField(
+        max_length=30, blank=True, verbose_name=_('Telefon / WhatsApp'),
+    )
+
+    # ── SES metadata bundle (pravna valjanost potpisa) ───────────────
+    gps_latitude = models.DecimalField(
+        max_digits=10, decimal_places=7, null=True, blank=True,
+        verbose_name=_('GPS širina'),
+    )
+    gps_longitude = models.DecimalField(
+        max_digits=10, decimal_places=7, null=True, blank=True,
+        verbose_name=_('GPS dužina'),
+    )
+    device_info = models.CharField(
+        max_length=500, blank=True, verbose_name=_('Uređaj'),
+        help_text=_('User-Agent + screen resolution'),
+    )
+    client_ip = models.GenericIPAddressField(
+        null=True, blank=True, verbose_name=_('IP adresa'),
+    )
+    signature_timestamp = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('Vrijeme potpisa'),
+        help_text=_('Točan trenutak kada je potpis stavljen'),
+    )
+
+    # ── Odgovor — prošireno ──────────────────────────────────────────
+    RESPONSE_CHANNELS = [
+        ('email', 'E-mail'),
+        ('whatsapp', 'WhatsApp'),
+        ('post', _('Pošta / Post')),
+        ('phone', _('Telefon / Telefon')),
+        ('in_person', _('Osobno / Persönlich')),
+    ]
+    response_channel = models.CharField(
+        max_length=15, blank=True, choices=RESPONSE_CHANNELS,
+        verbose_name=_('Kanal odgovora'),
+    )
+    response_sent_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('Odgovor poslan'),
+    )
+    responded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='responded_prigovori', verbose_name=_('Odgovorio/la'),
+    )
+
+    # ── Eskalacija ───────────────────────────────────────────────────
+    is_escalated = models.BooleanField(
+        default=False, verbose_name=_('Eskalirano'),
+    )
+    escalated_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('Eskalirano u'),
+    )
+    escalation_reason = models.CharField(
+        max_length=200, blank=True, verbose_name=_('Razlog eskalacije'),
+    )
+
+    # ── Javna vidljivost (za utiske) ─────────────────────────────────
+    is_public = models.BooleanField(
+        default=False, verbose_name=_('Javno vidljivo'),
+        help_text=_('Prikazuje se na web stranici / widgetu'),
+    )
+    public_display_name = models.CharField(
+        max_length=100, blank=True, verbose_name=_('Ime za prikaz'),
+        help_text=_('Npr. "Marko P." umjesto punog imena'),
+    )
+
+    # ── Zemlja / jezik ───────────────────────────────────────────────
+    LANG_CHOICES = [
+        ('hr', 'Hrvatski'),
+        ('de', 'Deutsch'),
+        ('en', 'English'),
+    ]
+    language = models.CharField(
+        max_length=2, choices=LANG_CHOICES, default='hr',
+        verbose_name=_('Jezik / Sprache'),
+    )
+
     # AI analiza (Celery task popunjava automatski)
     ai_category = models.CharField(
         max_length=30, blank=True, verbose_name=_('AI kategorija'),
@@ -1361,13 +1486,14 @@ class KnjigaPrigovora(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        verbose_name = _('Prigovor')
-        verbose_name_plural = _('Knjiga prigovora')
+        verbose_name = _('Zapis (prigovor/utisak)')
+        verbose_name_plural = _('Knjiga prigovora i utisaka')
         unique_together = [('company', 'redni_broj')]
         ordering = ['-redni_broj']
 
     def __str__(self):
-        return '#%d — %s (%s)' % (self.redni_broj, self.ime_potrosaca, self.datum_primitka)
+        type_label = dict(self.RECORD_TYPES).get(self.record_type, self.record_type)
+        return '#%d [%s] — %s (%s)' % (self.redni_broj, type_label, self.ime_potrosaca, self.datum_primitka)
 
     def save(self, *args, **kwargs):
         if not self.redni_broj:
@@ -1382,34 +1508,68 @@ class KnjigaPrigovora(models.Model):
 
     def _compute_hash(self):
         import hashlib
-        raw = '%s|%s|%s|%s|%s' % (
+        raw = '%s|%s|%s|%s|%s|%s' % (
             self.company_id, self.redni_broj or 0,
             self.datum_primitka or '', self.ime_potrosaca,
-            self.opis_prigovora,
+            self.opis_prigovora, self.record_type,
         )
         if self.signature:
             raw += '|SIG:' + self.signature[:100]
+        if self.gps_latitude and self.gps_longitude:
+            raw += '|GPS:%s,%s' % (self.gps_latitude, self.gps_longitude)
+        if self.signature_timestamp:
+            raw += '|TS:' + str(self.signature_timestamp)
+        if self.client_ip:
+            raw += '|IP:' + self.client_ip
         return hashlib.sha256(raw.encode('utf-8')).hexdigest()
 
     def verify_integrity(self):
         return self.integrity_hash == self._compute_hash()
 
     @property
+    def needs_response(self):
+        """Samo prigovori i reklamacije zahtijevaju zakonski odgovor."""
+        return self.record_type in ('prigovor', 'reklamacija')
+
+    @property
+    def legal_deadline_days(self):
+        """Zakonski rok ovisi o vrsti i zemlji."""
+        if not self.needs_response:
+            return None
+        # HR: ZZP čl.10 = 15 dana, DE: BGB = 14 dana (Widerrufsfrist)
+        lang = self.language or 'hr'
+        return 14 if lang == 'de' else 15
+
+    @property
     def rok_istekao(self):
-        """Zakonski rok: 15 dana od primitka."""
-        if self.datum_odgovora:
+        """Zakonski rok istekao?"""
+        if not self.needs_response or self.datum_odgovora:
             return False
         from django.utils import timezone
-        from datetime import timedelta
-        return (timezone.now().date() - self.datum_primitka).days > 15
+        deadline = self.legal_deadline_days or 15
+        return (timezone.now().date() - self.datum_primitka).days > deadline
 
     @property
     def dana_do_roka(self):
         """Koliko dana ostalo do zakonskog roka."""
-        if self.datum_odgovora:
+        if not self.needs_response or self.datum_odgovora:
             return None
         from django.utils import timezone
-        return 15 - (timezone.now().date() - self.datum_primitka).days
+        deadline = self.legal_deadline_days or 15
+        return deadline - (timezone.now().date() - self.datum_primitka).days
+
+    @property
+    def ses_metadata(self):
+        """SES metadata bundle za pravnu valjanost."""
+        return {
+            'gps': {'lat': float(self.gps_latitude), 'lng': float(self.gps_longitude)} if self.gps_latitude else None,
+            'ip': self.client_ip,
+            'device': self.device_info,
+            'signature_time': self.signature_timestamp.isoformat() if self.signature_timestamp else None,
+            'integrity_hash': self.integrity_hash,
+            'has_signature': bool(self.signature),
+            'has_id_photo': bool(self.id_photo),
+        }
 
 
 # ══════════════════════════════════════════════════════════════════════════════

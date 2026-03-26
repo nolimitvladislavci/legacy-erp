@@ -1,0 +1,44 @@
+{% load i18n %}
+{% if style == "fab" %}
+{# Floating Action Button — za mobilni i desktop #}
+<div class="position-fixed" style="bottom: 80px; right: 20px; z-index: 1050;">
+    <a href="/pos/prigovori/{% if company_id %}?source={{ source_module }}{% endif %}"
+       class="btn btn-gold rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+       style="width: 56px; height: 56px; font-size: 1.4rem;"
+       title="{% trans 'Knjiga prigovora i utisaka' %}">
+        <i class="bi bi-journal-text"></i>
+    </a>
+    {% if pending_count > 0 %}
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ pending_count }}
+    </span>
+    {% endif %}
+</div>
+
+{% elif style == "qr" %}
+{# QR kod za potrošačev mobitel #}
+<div class="text-center p-3">
+    <p class="small text-muted mb-2">{% trans "Skenirajte za prigovor ili utisak" %}</p>
+    <div id="complaint-qr-{{ company_id }}" style="width:150px;height:150px;margin:0 auto;"></div>
+    <script>
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(document.getElementById('complaint-qr-{{ company_id }}'), {
+            text: window.location.origin + '/pos/prigovori/new/?company={{ company_id }}&source=qr',
+            width: 150, height: 150,
+            colorDark: '#1a1a2e', colorLight: '#ffffff',
+        });
+    }
+    </script>
+</div>
+
+{% else %}
+{# Inline button — za navbar, sidebar, kartice #}
+<a href="/pos/prigovori/{% if company_id %}?source={{ source_module }}{% endif %}"
+   class="btn btn-outline-gold btn-sm">
+    <i class="bi bi-journal-text"></i>
+    {% trans "Knjiga prigovora" %}
+    {% if pending_count > 0 %}
+    <span class="badge bg-danger ms-1">{{ pending_count }}</span>
+    {% endif %}
+</a>
+{% endif %}

@@ -107,6 +107,10 @@ urlpatterns = [
     path('prigovori/',           views.prigovori_list,       name='prigovori_list'),
     path('api/prigovori/',       views.prigovori_api,        name='prigovori_api'),
     path('prigovori/pdf/',       views.knjiga_prigovora_pdf, name='knjiga_prigovora_pdf'),
+    # Globalna knjiga — public + respond
+    path("prigovori/new/",             __import__("pos.complaint_views", fromlist=["complaint_public_form"]).complaint_public_form, name="complaint_public_form"),
+    path("api/prigovori/public/",      __import__("pos.complaint_views", fromlist=["complaint_api_public"]).complaint_api_public, name="complaint_api_public"),
+    path("api/prigovori/respond/",     __import__("pos.complaint_views", fromlist=["complaint_respond"]).complaint_respond, name="complaint_respond"),
     path('tips/',                        views.tip_report,        name='tip_report'),
     # Revolut naplata
     path('revolut/pay/<int:receipt_id>/',    views.revolut_pay,     name='revolut_pay'),
