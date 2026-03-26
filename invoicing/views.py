@@ -917,6 +917,101 @@ def invoice_add_hours(request, pk):
     return JsonResponse({'ok': True, 'added': len(entry_ids)})
 
 
+
+def _notify_quote_action(invoice, action: str):
+    """
+    Globalna notifikacija — šalje email + WhatsApp vlasniku firme
+    kad klijent prihvati ili odbije ponudu iz client portala.
+    Radi za sve kompanije automatski.
+    """
+    import logging
+    log = logging.getLogger('invoicing.notify')
+
+    is_accepted = action == 'accepted'
+    emoji   = '✅' if is_accepted else '❌'
+    verb_hr = 'prihvaćena' if is_accepted else 'odbijena'
+    verb_de = 'angenommen' if is_accepted else 'abgelehnt'
+
+    # ── Pronađi kontakt podatke kompanije ──────────────────────
+    company = invoice.company
+    admin_phones = []
+    admin_emails = []
+
+    # 1. Company email / phone
+    if getattr(company, 'email', None):
+        admin_emails.append(company.email)
+    if getattr(company, 'phone', None):
+        admin_phones.append(company.phone)
+
+    # 2. Admin/owner UserProfile za tu firmu
+    try:
+        from accounts.models import UserProfile
+        admins = UserProfile.objects.filter(
+            company=company,
+            user__is_active=True,
+        ).select_related('user').order_by('-user__is_staff', 'id')[:3]
+
+        for up in admins:
+            if up.phone and up.phone not in admin_phones:
+                admin_phones.append(up.phone)
+            if up.user.email and up.user.email not in admin_emails:
+                admin_emails.append(up.user.email)
+    except Exception as e:
+        log.warning('notify: cannot fetch admin profiles: %s', e)
+
+    portal_url = f'https://limit-connect.com/hr/invoicing/{invoice.pk}/edit/'
+
+    # ── WhatsApp ────────────────────────────────────────────────
+    wa_msg = (
+        f"{emoji} *Ponuda {verb_hr}!*\n\n"
+        f"Broj: {invoice.number}\n"
+        f"Klijent: {invoice.client_name}\n"
+        f"Iznos: {invoice.total} {invoice.currency}\n\n"
+        f"👉 {portal_url}"
+    )
+
+    try:
+        from core.whatsapp import send_text, normalize_phone
+        for phone in admin_phones:
+            if phone and len(phone) >= 8:
+                normalized = normalize_phone(phone)
+                send_text(normalized, wa_msg)
+                log.info('notify WA sent to %s for %s (%s)', normalized, invoice.number, action)
+    except Exception as e:
+        log.error('notify WhatsApp failed: %s', e)
+
+    # ── Email ───────────────────────────────────────────────────
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        subject = f"{emoji} Ponuda {invoice.number} — {verb_hr} ({invoice.client_name})"
+        body = (
+            f"Ponuda je {verb_hr}.\n\n"
+            f"Broj: {invoice.number}\n"
+            f"Klijent: {invoice.client_name}\n"
+            f"Iznos: {invoice.total} {invoice.currency}\n"
+            f"Datum: {invoice.date_issued.strftime('%d.%m.%Y.')}\n\n"
+            f"Otvori u panelu:\n{portal_url}\n\n"
+            f"---\n"
+            f"Automatska poruka — LIMIT Connect"
+        )
+
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@limit-connect.com')
+
+        if admin_emails:
+            send_mail(
+                subject=subject,
+                message=body,
+                from_email=from_email,
+                recipient_list=admin_emails,
+                fail_silently=True,
+            )
+            log.info('notify email sent to %s for %s (%s)', admin_emails, invoice.number, action)
+    except Exception as e:
+        log.error('notify email failed: %s', e)
+
+
 # ── CLIENT PORTAL (no login) ──────────────────────────────────────────────────
 def client_portal(request, token):
     invoice = get_object_or_404(Invoice, client_token=token)
@@ -925,25 +1020,13 @@ def client_portal(request, token):
         if action == 'accept':
             invoice.status = 'ACCEPTED'
             invoice.save(update_fields=['status'])
-            # Notifikacija kompaniji — WhatsApp
-            try:
-                admin_phone = (invoice.company.settings or {}).get('admin_whatsapp', '')
-                if admin_phone:
-                    from core.whatsapp import send_text
-                    send_text(
-                        admin_phone,
-                        f"✅ *Ponuda prihvaćena!*\n"
-                        f"{invoice.number} — {invoice.client_name}\n"
-                        f"Iznos: {invoice.total} {invoice.currency}",
-                        company_id=invoice.company_id
-                    )
-            except Exception:
-                pass
+            _notify_quote_action(invoice, 'accepted')
             messages.success(request, 'Hvala! Vaša potvrda je zabilježena. Kontaktirat ćemo vas uskoro.')
         elif action == 'reject':
             invoice.status = 'REJECTED'
             invoice.save(update_fields=['status'])
-            messages.info(request, 'Ponuda je odbijenaena. Slobodno nas kontaktirajte za prilagodbu.')
+            _notify_quote_action(invoice, 'rejected')
+            messages.info(request, 'Ponuda je odbijena. Slobodno nas kontaktirajte za prilagodbu.')
         return redirect(request.path)
 
     # Dohvati sekcije za renderiranje (ista logika kao PDF)
