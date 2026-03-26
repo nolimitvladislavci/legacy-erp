@@ -5,7 +5,7 @@
 
 ---
 
-## ★ RATNI RASPORED — 7 DANA DO 1.4.2026
+## ★ RATNI RASPORED — 20 DANA DO 15.4.2026
 
 | Dan | Datum | Zadatak | Odgovorni | Status |
 |-----|-------|---------|-----------|--------|
@@ -13,14 +13,14 @@
 | 1 | 26.3. | Udruge: Branitelji + Lov + Zadruge | CC Code | ✅ DONE |
 | 1 | 26.3. | Tax Wizard: 6 obrazaca, 7 deadlines, widget global | Sonnet+CC | ✅ DONE |
 | 1 | 26.3. | Worktime /mine/ — mobilna stranica za radnika | CC Code | ✅ DONE |
-| 1 | 26.3. | DNS TTL → 60s (Ivan ručno, Hetzner panel) | **IVAN** | ⏳ ČEKA |
+| 1 | 26.3. | DNS TTL → 60s (Namecheap) | **IVAN** | ✅ DONE |
 | 2 | 27.3. | POS Joker unified + tax widget + subscription cockpit | CC Code | ✅ DONE |
 | 3 | 28.3. | Unscoped audit finish + GDPR | CC Code | ✅ DONE |
 | 4 | 29.3. | Vatrogasci modul (dnevnik intervencija) | CC Code | ✅ DONE (26.3.) |
-| 5 | 30.3. | Novi server naručiti (Hetzner CPX51) | **IVAN** | ⏳ ČEKA |
-| 5 | 30.3. | Server priprema + load test | Sonnet+CC | ⏳ ČEKA |
-| 7 | 1.4. | **MIGRACIJA 03:00** — 0-downtime | Sonnet | ⏳ ČEKA |
-| 7 | 1.4. | **VRATA OTVORENA** — 87 firmi probni pristup | Ivan | ⏳ ČEKA |
+| 10 | 5.4. | Naruči Hetzner CCX33 (Konjik d.o.o.) — 89EUR/mj | **IVAN** | ⏳ ČEKA |
+| 12 | 10.4. | Server priprema + load test | Sonnet+CC | ⏳ ČEKA |
+| 15 | 15.4. | **PRODUKCIJA GO-LIVE** — 0-downtime | Sonnet | ⏳ ČEKA |
+| 15 | 15.4. | **VRATA OTVORENA** — testni korisnici (Marija odobrava) probni pristup | Ivan | ⏳ ČEKA |
 
 ---
 
@@ -230,3 +230,28 @@ LIMIT Connect Borg (26.03.2026):
 | 🔴 DNS TTL → 60s (Hetzner panel) | DANAS — mora 24h+ prije migracije |
 | 🔴 Naruči Hetzner CPX51 (35€/mj) | Do 28.3. |
 
+
+---
+
+## ★ PLAN DO 15.4.2026 — Novi raspored
+
+| Tjedan | Zadatak | Odgovorni | Status |
+|--------|---------|-----------|--------|
+| 26-30.3. | Bug fix sprint (T&C, race condition, PDF, sidebar) | CC Code | 🔴 ODMAH |
+| 26-30.3. | Joker Pricing + 3-klik registracija | CC Code | 🔴 ODMAH |
+| 31.3-6.4. | W1C/D/E + Commercial Engine S2 | CC Code | 🟠 |
+| 1-10.4. | Marija testira — bilježi 500 greške | Marija | ⏳ |
+| 5.4. | Naruči CCX33 (Konjik d.o.o.) | Marija/Ivan | ⏳ |
+| 10-14.4. | Server priprema + load test + migracija | Sonnet+CC | ⏳ |
+| 15.4. | **GO-LIVE** — vrata otvorena | Ivan + Marija | ⏳ |
+
+## ★ PRIORITETNI BUGOVI ZA CC CODE (odmah)
+
+| Bug | Task | Hitnost |
+|-----|------|---------|
+| T&C consent 77/90 firmi | CC_TASK_BUGFIX_MARIJA_SPRINT.md | 🔴 PRAVNI RIZIK |
+| POS receipt_number race condition | CC_TASK_BUGFIX_MARIJA_SPRINT.md | 🟠 |
+| Worktime PDF export | CC_TASK_BUGFIX_MARIJA_SPRINT.md | 🟠 |
+| FINA eRačun namespace | CC_TASK_BUGFIX_MARIJA_SPRINT.md | 🟠 |
+| Tax wizard sidebar link | CC_TASK_BUGFIX_MARIJA_SPRINT.md | 🟡 |
+| Joker Pricing (blokira onboarding) | CC_TASK_CRITICAL_1APRIL.md | 🔴 |
