@@ -1,6 +1,7 @@
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="hr">
+<script>(function(){var t=localStorage.getItem('fina-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}());</script>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -37,6 +38,40 @@
   --font-b:'Barlow',sans-serif;
   --font-c:'Barlow Condensed',sans-serif;
 }
+
+
+/* ── LIGHT MODE OVERRIDE ─────────────────────────────────────── */
+[data-theme="light"]{
+  --gold:#b5860e;--gold2:#c9960f;
+  --gold-dim:rgba(181,134,14,.08);--gold-border:rgba(181,134,14,.30);
+  --black:#f4f5f7;--dark:#e8eaed;--surface:#ffffff;--surface2:#f0f2f5;
+  --border:#d1d5db;--border-light:rgba(0,0,0,.08);
+  --text:#111827;--text-dim:#4b5563;--muted:#9ca3af;
+  --green:#059669;--green-dim:rgba(5,150,105,.10);
+  --amber:#d97706;--amber-dim:rgba(217,119,6,.10);
+  --red:#dc2626;--blue:#2563eb;
+  --shadow:0 4px 20px rgba(0,0,0,.12);
+}
+[data-theme="light"] body{
+  background:#f4f5f7;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%,rgba(181,134,14,.04) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,0,0,.025) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,0,0,.025) 40px);
+}
+[data-theme="light"] .topbar{background:rgba(244,245,247,.92);border-bottom-color:var(--border);}
+[data-theme="light"] .card{background:#fff;border-color:var(--border);}
+[data-theme="light"] .meta-row{border-bottom-color:var(--border);}
+[data-theme="light"] .items-table th{background:#f8f9fa;color:var(--text-dim);border-color:var(--border);}
+[data-theme="light"] .items-table td{border-color:var(--border);}
+[data-theme="light"] .totals-block{background:#f8f9fa;border-color:var(--border);}
+[data-theme="light"] .footer{border-top-color:var(--border);color:var(--text-dim);}
+.theme-toggle{
+  background:none;border:1px solid var(--border);color:var(--text-dim);
+  padding:6px 10px;border-radius:8px;cursor:pointer;font-size:.85rem;
+  transition:all .2s;line-height:1;
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
 
 /* ── BASE ───────────────────────────────────────────────────── */
 body{
@@ -349,7 +384,10 @@ table.items tbody tr:last-child td{border-bottom:none}
       Digitalna Soba
     </div>
   </div>
-  <div class="doc-badge">{{ invoice.get_doctype_display }}</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="doc-badge">{{ invoice.get_doctype_display }}</div>
+    <button class="theme-toggle" id="theme-toggle-btn" onclick="togglePortalTheme()" title="Tamna / Svijetla">&#127769;</button>
+  </div>
 </div>
 
 <div class="wrap">
@@ -528,6 +566,36 @@ table.items tbody tr:last-child td{border-bottom:none}
 <div class="footer">
   <span>PROPTER</span> · Digitalna Soba · Powered by <span>Limit Connect</span>
 </div>
+
+
+<script>
+(function(){
+  var s=localStorage.getItem('fina-theme');
+  var b=document.getElementById('theme-toggle-btn');
+  if(s==='light'){document.documentElement.setAttribute('data-theme','light');if(b)b.innerHTML='&#9728;';}
+  else{if(b)b.innerHTML='&#127769;';}
+})();
+function togglePortalTheme(){
+  var h=document.documentElement;
+  var b=document.getElementById('theme-toggle-btn');
+  if(h.getAttribute('data-theme')==='light'){
+    h.removeAttribute('data-theme');
+    localStorage.setItem('fina-theme','dark');
+    if(b)b.innerHTML='&#127769;';
+  }else{
+    h.setAttribute('data-theme','light');
+    localStorage.setItem('fina-theme','light');
+    if(b)b.innerHTML='&#9728;';
+  }
+}
+window.addEventListener('storage',function(e){
+  if(e.key==='fina-theme'){
+    var b=document.getElementById('theme-toggle-btn');
+    if(e.newValue==='light'){document.documentElement.setAttribute('data-theme','light');if(b)b.innerHTML='&#9728;';}
+    else{document.documentElement.removeAttribute('data-theme');if(b)b.innerHTML='&#127769;';}
+  }
+});
+</script>
 
 </body>
 </html>
