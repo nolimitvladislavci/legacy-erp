@@ -1,0 +1,5378 @@
+{
+  "classified": 766,
+  "errors": 0,
+  "stats": {
+    "material": 115,
+    "service": 149,
+    "other": 21,
+    "product": 154,
+    "tool": 60,
+    "equipment": 189,
+    "food": 38,
+    "drink": 40
+  },
+  "results": [
+    {
+      "id": 74,
+      "name": "OGRIJAVNO DRVO GRAB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 85,
+      "name": "OGRIJEVNO DRVO BUKVA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 54,
+      "name": "OGRIJEVNO DRVO-BUKVA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 65,
+      "name": "OGRIJEVNO DRVO - GRAB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 55,
+      "name": "OGRIJEVNO DRVO - HRAST",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 73,
+      "name": "OGRIJEVNO DRVO HRAST",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 75,
+      "name": "OGRIJEVNO DRVO JASEN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 76,
+      "name": "OGRIJEVNO DRVO KLEN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 77,
+      "name": "OGRIJEVNO DRVO OTB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9589,
+      "name": "ORANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7799,
+      "name": "OSTALO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 9431,
+      "name": "PAKET",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11704,
+      "name": "POČETNO STANJE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 1065,
+      "name": "PO-SD",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 9710,
+      "name": "PROLAZNA STAVKA-FOND",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 9703,
+      "name": "PROLAZNA STAVKA-PPMV",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 6958,
+      "name": "PROZOL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8706,
+      "name": "PROZORČIĆ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2891,
+      "name": "PROZORČIĆ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9607,
+      "name": "PRSKALICA",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11133,
+      "name": "PRSKALICA",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 6967,
+      "name": "PRSKALICA 1200 L",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 6607,
+      "name": "PRSKALICA 1500 EN BM",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11093,
+      "name": "PRSKANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 663,
+      "name": "PRSTEN ABS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 415,
+      "name": "PRSTEN ISPUŠNE GRANE MAN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 653,
+      "name": "PRSTEN USIT USS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10355,
+      "name": "PRSTIĆI SA SIROM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10614,
+      "name": "PRSTIĆI SLANI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 11723,
+      "name": "PS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 11768,
+      "name": "PULVIS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3450,
+      "name": "PUMP 5M PWM ENER+",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9275,
+      "name": "PUMP 5M PWM ENER+",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 3395,
+      "name": "PUMP PARA MTSL/7-50/SC-12",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9219,
+      "name": "PUMP PARA MTSL/7-50/SC-12",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 2919,
+      "name": "PUMP PARA MTSL/7-50/SC-12",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 8734,
+      "name": "PUMP PARA MTSL/7-50/SC-12",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 8878,
+      "name": "PUMP PARA MTSL/7-50/SC-12",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 3058,
+      "name": "PUMP PARA MTSL/7-50/SC-12",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 2295,
+      "name": "PUR PJENA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 8097,
+      "name": "PUR PJENA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11032,
+      "name": "PUR PJENA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 234,
+      "name": "PUR PJENA 750 ML ZA PIŠTOLJ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 459,
+      "name": "PUŠKICA CILINDRA FI 34/40-36mm",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 455,
+      "name": "PUŠKICA CILINDRA O23/32-31 mm",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 458,
+      "name": "PUŠKICA CILINDRA O28/32-36mm",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 283,
+      "name": "PUTNI TROŠKOVI",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10466,
+      "name": "PUŽ SA ORAHOM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10601,
+      "name": "PUŽ SA SIROM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 6678,
+      "name": "PYRAMIN WG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10732,
+      "name": "RAČUN ZA NAPLATU",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11112,
+      "name": "RAD",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10978,
+      "name": "RAD",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11125,
+      "name": "RAD",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10638,
+      "name": "RAD",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11522,
+      "name": "RAD",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6518,
+      "name": "RADIJSKA FREKVENCIJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 4598,
+      "name": "RADIONICA- PODUZETNIŠTVO",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4596,
+      "name": "RADIONICA- POSLOVNI PLAN",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4599,
+      "name": "RADIONICA- ZADRUGARSTVO",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11219,
+      "name": "RADNI SAT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 719,
+      "name": "RADNI STROJ HCB 4 CX",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 278,
+      "name": "RAD RADNIKA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6551,
+      "name": "RAD ROTODRLJAČOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6985,
+      "name": "RAD ŠTRIGLOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6763,
+      "name": "RAD VILJUŠKAROM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6715,
+      "name": "RAD VILJUŠKAROM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6487,
+      "name": "RAFT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10993,
+      "name": "RASHLADNIK VODE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6934,
+      "name": "RASIPAČ BODRUM 1000 L",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11146,
+      "name": "RASIPAČ VIKON",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11099,
+      "name": "RAZBACIVANJE GNOJIVA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10492,
+      "name": "RAŽENA KIFLA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 6598,
+      "name": "RAZLIKA CIJENE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6802,
+      "name": "RAZLIKA CIJENE REPE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 116,
+      "name": "RAZMAKNICA SA ŽICOM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10974,
+      "name": "RAZMOTAVANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10878,
+      "name": "RAZVOD KANALIZACIJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10834,
+      "name": "RAZVOD OBORINSKIH VODA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 1315,
+      "name": "RECEPT",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 8545,
+      "name": "REDUK. ZN 1*3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 2730,
+      "name": "REDUK. ZN 1*3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 3328,
+      "name": "REG. LETVICA TTO 10 ZONSKA 230",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9152,
+      "name": "REG. LETVICA TTO 10 ZONSKA 230",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9153,
+      "name": "REG. LETVICA TTO 6 ZONSKA 230",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 3329,
+      "name": "REG. LETVICA TTO 6 ZONSKA 230",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6735,
+      "name": "REGLONE FORTE 5/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 2323,
+      "name": "REG. TLA. P. GAZGEP EKB-10/GA1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8126,
+      "name": "REG. TLA. P. GAZGEP EKB-10/GA1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8104,
+      "name": "REGUL. TLATA GAZGEP EKB10/G55",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2302,
+      "name": "REGUL. TLATA GAZGEP EKB10/G55",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8255,
+      "name": "REGU. TLAKA GAZGEP EKB-10/GA1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2449,
+      "name": "REGU. TLAKA GAZGEP EKB-10/GA1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8801,
+      "name": "Reparacija",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 647,
+      "name": "REP. SET ČELJUSTI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10936,
+      "name": "REŠETKA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 553,
+      "name": "RETROVIZOR ISPRED KABINE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9965,
+      "name": "REVIZIJA EUEM I EPZ",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 2413,
+      "name": "REVIZIJA KAN. VAR. 50",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 8219,
+      "name": "REVIZIJA KAN. VAR. 50",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7099,
+      "name": "REVYSTAR FLEX",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6992,
+      "name": "REVYSTAR XL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10284,
+      "name": "REZANJE I POLIRANJE KAMENA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 629,
+      "name": "REZERVOAR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6776,
+      "name": "RIAS 300 EC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11179,
+      "name": "RIBLJI MENU",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 904,
+      "name": "RIBLJI PERKELT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 6512,
+      "name": "RIDOMIL MZ-68 GOLD 1/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11218,
+      "name": "roba",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9916,
+      "name": "ROBA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1073,
+      "name": "ROBA PO SPECIFIKACIJI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10623,
+      "name": "ROČIŠTE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 336,
+      "name": "ROFIL ALU 25/25/3000",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6905,
+      "name": "ROGOR 40",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6692,
+      "name": "ROKO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6691,
+      "name": "ROKO 5/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 465,
+      "name": "ROLICA PLATFORME FI 100/25-50",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 829,
+      "name": "ROMER 0,33",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 773,
+      "name": "ROMERQEWLLW WMOTION LIM. TRAVA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 793,
+      "name": "ROMERQUELLE 0,1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 770,
+      "name": "ROMERQUELLE 0,33 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 792,
+      "name": "ROMERQUELLE 0,75 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 6851,
+      "name": "ROOTEX",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10308,
+      "name": "ROSA BETA 15 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10301,
+      "name": "ROSA BETA 1 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10145,
+      "name": "ROSA BETA 2 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10210,
+      "name": "ROSA BETA 3 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10209,
+      "name": "ROSA BETA 5 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10171,
+      "name": "ROSA BETA 6 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10283,
+      "name": "ROSA BETA 7 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10219,
+      "name": "ROSA BETA 8 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 387,
+      "name": "ROTACIONA LAMPA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6724,
+      "name": "ROTOR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 155,
+      "name": "RUBNJACI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 8140,
+      "name": "RUČICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 1823,
+      "name": "RUČICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 1899,
+      "name": "RUČICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 7556,
+      "name": "RUČICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 7632,
+      "name": "RUČICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2334,
+      "name": "RUČICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 578,
+      "name": "RUČICA KIPE U KABINI SET",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 3262,
+      "name": "RUČICA (KLACKALICA)",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9083,
+      "name": "RUČICA (KLACKALICA)",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2460,
+      "name": "RUČICA VGV",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 8266,
+      "name": "RUČICA VGV",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 7269,
+      "name": "RUČNI I STROJNI",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11429,
+      "name": "RUČNI OMEKŠIVAČ VODE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 3499,
+      "name": "RUČNI OMEKŠIVAČ VODE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11293,
+      "name": "RUČNI OMEKŠIVAČ VODE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 222,
+      "name": "RUČNI VILIČARI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11539,
+      "name": "RUKOHVAT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 7069,
+      "name": "RUTH",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11413,
+      "name": "SABIRNICA 3P VILIČASTA 10MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11277,
+      "name": "SABIRNICA 3P VILIČASTA 10MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6696,
+      "name": "SAFIR 2*30 G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10981,
+      "name": "ŠAHT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11808,
+      "name": "SAKUPLJAČ STAR 300",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6752,
+      "name": "SAMBA 0,2 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 6751,
+      "name": "SAMBA 0,5 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9725,
+      "name": "SAMOLJEPLJIVA NALJEPNICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 340,
+      "name": "SAMOPEV UNI 25 KG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10719,
+      "name": "SAMSON EXTRA 1/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6919,
+      "name": "SAMSON EXTRA 6 OD",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8996,
+      "name": "Sanacija",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10812,
+      "name": "SANACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 214,
+      "name": "SANACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10256,
+      "name": "SANIRANJE ZIDOVA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7271,
+      "name": "SANITARNA SJEČA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7855,
+      "name": "SAPNICA (VENTURI)",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2073,
+      "name": "SAPNICA (VENTURI)",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10630,
+      "name": "SASTAV",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10627,
+      "name": "SASTAV KUPOPRODAJNOG UGOVORA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10622,
+      "name": "SASTAV TUŽBE U PREDMETU",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 807,
+      "name": "SCHWEPPES",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9619,
+      "name": "SCHWEPPES BITTER LEMON 0,25",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 736,
+      "name": "SCHWEPPES BITTER LEMON 0,25 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 783,
+      "name": "SCHWEPPES POMEGRANATE 0,25",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9674,
+      "name": "SCHWEPPES TANGERINE 0,25",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 739,
+      "name": "SCHWEPPES TONIC WATWR 0,25 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 737,
+      "name": "SCHWEPPWS TANGERINE 0,25 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 7147,
+      "name": "SEACTIV AXIS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 507,
+      "name": "SELEN BLOK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 575,
+      "name": "SELEN STR. STABILIZATORA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 8321,
+      "name": "SELTRON PUM. GRUPA DIREKT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2514,
+      "name": "SELTRON PUM. GRUPA DIREKT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2513,
+      "name": "SELTRON PUMPNA GRUPA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8320,
+      "name": "SELTRON PUMPNA GRUPA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 659,
+      "name": "SEMERING KOTAČA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 416,
+      "name": "SEMERING MJENJAČA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 500,
+      "name": "SEMERING RADILICE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 7126,
+      "name": "SENAT WG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10740,
+      "name": "SENAT WG 1/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 894,
+      "name": "SENDVIĆ DELUX",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 7313,
+      "name": "SENDVIĆ KIFLA 120G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 407,
+      "name": "SENZOR ABS STRAŽNJI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 590,
+      "name": "SENZOR POLOŽAJA RADILICE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 594,
+      "name": "SENZOR RAZINE RASHL. TEK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 679,
+      "name": "SENZOR VISINE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 601,
+      "name": "SEPARATOR TEKUĆINE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 625,
+      "name": "SEPARATOR ULJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11187,
+      "name": "SERVICE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 620,
+      "name": "SERVO KVAČILA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 609,
+      "name": "SERVO UREĐAJ KOČNICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 377,
+      "name": "SET BRTVI KARTERA ULJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 576,
+      "name": "SET HIDRAULIKE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 373,
+      "name": "SET KOŠULJICA KLIPA/CILINDARA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 613,
+      "name": "SET KVAČILA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 646,
+      "name": "SET TURBINE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 579,
+      "name": "SET ZA ZUPČASTU PUMPU",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 346,
+      "name": "SEZONSKO ČUVANJE GUMA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 645,
+      "name": "SHELL SPIRAX S2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 621,
+      "name": "SHELL SPIRAX S6 75W80 - 20 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 247,
+      "name": "SIDRO HKD M8X30",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 8002,
+      "name": "SIL.SAN. BIJELI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2200,
+      "name": "SIL.SAN. BIJELI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2201,
+      "name": "SIL.SAN. TRANS.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8003,
+      "name": "SIL.SAN. TRANS.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7166,
+      "name": "SILWET GOLD",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 619,
+      "name": "SIMERING",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 335,
+      "name": "SIMPRA 5 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 5368,
+      "name": "SINČ.N. VISIONARIO YORKE 04",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 134,
+      "name": "ŠIPKA ACMG SI 8 MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9417,
+      "name": "SIR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 699,
+      "name": "SIR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 9420,
+      "name": "SIR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 7162,
+      "name": "SIRTAKI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 9434,
+      "name": "SIRUTKA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 9595,
+      "name": "SJETVA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11091,
+      "name": "SJETVA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9487,
+      "name": "SJETVA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6524,
+      "name": "SJETVA ROTO DRLJAČOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11599,
+      "name": "SJETVA S ROTODRLJAČOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9510,
+      "name": "SJETVA TRINITAL",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11596,
+      "name": "SJETVOSPREMAČ 4,5M  MB VRŠAC",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11147,
+      "name": "SJETVOSPREMAČ RAU",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 6938,
+      "name": "SJETVOSPREMAČ Z645",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11764,
+      "name": "SJETVOSPREMANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7178,
+      "name": "SJ.PŠENICE AG MAJA OS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7179,
+      "name": "SJ.PŠENICE AG VATRENA OS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10739,
+      "name": "SJ.PŠENICE APACHE C2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7062,
+      "name": "SJ.PŠENICE OBIWAN C2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6930,
+      "name": "SJ.STOČNI GRAŠAK OS ZELENI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6956,
+      "name": "SJ.ULJANE REPICE AMETYST",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6935,
+      "name": "SJ.ZOB ESCUDINO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7022,
+      "name": "SJ.ZOB ESCUDINO C2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 5086,
+      "name": "SKENIRANJE A3",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 5087,
+      "name": "SKENIRANJE A3 U BOJI",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 5089,
+      "name": "SKENIRANJE  OD 1-50 KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10678,
+      "name": "SKIDANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10254,
+      "name": "SKIDANJE SPOMENIKA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6766,
+      "name": "SKLADIŠNINA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11040,
+      "name": "SKLOP MIJEŠAJUĆI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11056,
+      "name": "SLAGANJE KOCKE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11470,
+      "name": "SLAGANJE RZ ORMARA NA KROVU",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10503,
+      "name": "SLANAC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 5113,
+      "name": "SLANJE E-MAIL-a",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 882,
+      "name": "SLATKI KORNET",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 9774,
+      "name": "SLIJEPA TRAKA, PERFORIRANA 220",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10232,
+      "name": "SLIKA U PORCULANU",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10212,
+      "name": "SLIKE GRAVIRANE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 5353,
+      "name": "S.LINE 1,5 UNC REC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 1188,
+      "name": "S.LINE 1,67 AS SHMC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10199,
+      "name": "SLOVA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9720,
+      "name": "SMART DONGLE-WLAN-FE SDONGLEA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 7160,
+      "name": "SMJESA ZA TRAVNI POJAS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11181,
+      "name": "SMJEŠTAJ",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 545,
+      "name": "SNOP ELEKTRIČNIH KABLOVA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10478,
+      "name": "SOK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11643,
+      "name": "SOKOVI PRIRODNI 0,20L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9889,
+      "name": "SOLAX BMS 5,8 kWh MASTER",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9890,
+      "name": "SOLAX BMS 5,8 kWh SLAVE",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9933,
+      "name": "SOLAX MIC TROFAZ.G2 MPPT 10kW",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9937,
+      "name": "SOLAX MIC TROFAZ.G2 MPPT 5kW",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 10008,
+      "name": "SOLAX POCKET WIFI+LAN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9963,
+      "name": "SOLAX POCKET WIFI/LAN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9934,
+      "name": "SOLAX POCKET WIFI V3.0",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9952,
+      "name": "SOLAX X1 BOOST G3 6 kW",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9888,
+      "name": "SOLAX X1 HYBRID 7.5D IZMJENJIV",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9941,
+      "name": "SOLAX X3 FORTH TROFAZ. 100kW",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 10003,
+      "name": "SOLAX X3 MIC 6K G2",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 10050,
+      "name": "SOLFEGGIO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 833,
+      "name": "SOMERSBY",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 877,
+      "name": "SOMUN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 7358,
+      "name": "SOMUN 200 G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 9779,
+      "name": "SONDA ZA UZEMLJENJE 1,5 M",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 7146,
+      "name": "SOPTECH",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6750,
+      "name": "SORGUM 30 G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 1157,
+      "name": "ŠPAGICE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6669,
+      "name": "SPARTA 60 GR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6680,
+      "name": "SPHERE EC 535",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7247,
+      "name": "ŠPINA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 7249,
+      "name": "ŠPINA ZELENA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10934,
+      "name": "SPIRO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7928,
+      "name": "SPOJ. MAT. ZN M 8*30",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2140,
+      "name": "SPOJ. MAT. ZN M 8*30",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2315,
+      "name": "SPOJNA MAT. ZN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 8117,
+      "name": "SPOJNA MAT. ZN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2303,
+      "name": "SPOJNI ELEMENT-MOST",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8105,
+      "name": "SPOJNI ELEMENT-MOST",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8667,
+      "name": "SPOJNI SET SA SIG. GRUPOM I OS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2852,
+      "name": "SPOJNI SET SA SIG. GRUPOM I OS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2204,
+      "name": "SPOJ. PRIJEL. K1 25-3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8006,
+      "name": "SPOJ. PRIJEL. K1 25-3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10266,
+      "name": "SPOMENIK",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 439,
+      "name": "SPONA VOLANA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 207,
+      "name": "SPREJ ROTHENBERGER RONOL 600ML",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1473,
+      "name": "SPREJ ZA NAOČALNE LEĆE 60ML",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9895,
+      "name": "SPREMNIK ZA DOKUMENTACIJU A4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 682,
+      "name": "SPREMNIK ZRAKA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 7077,
+      "name": "SPYRALE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8325,
+      "name": "Sređivanje",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 154,
+      "name": "ŠTAFLE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 6519,
+      "name": "STAJNJAK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 479,
+      "name": "STAKLO PREDNJEG SVJETLA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 452,
+      "name": "ŠTANGE Q 40",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7356,
+      "name": "ŠTAPIĆ SEZAM 80G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 5116,
+      "name": "STATISTIČKO IZVJEŠĆE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 4881,
+      "name": "STATISTIKA-GORIVO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 10854,
+      "name": "STAVKE:",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 93,
+      "name": "STELNE JUNICE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10814,
+      "name": "ŠTEMANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10870,
+      "name": "ŠTEMANJE KANALA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10843,
+      "name": "ŠTEMANJE PODOVA I ZIDOVA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10818,
+      "name": "ŠTEMANJE ŠLICEVA ZA RAZVOD",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10819,
+      "name": "ŠTEMANJE ZA KANALIZACIJU",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10831,
+      "name": "ŠTEMANJE ZIDOVA ZA RAZVOD VODE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 585,
+      "name": "STEPENICA  LIJEVA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10106,
+      "name": "STEPENICE 2 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10107,
+      "name": "STEPENICE 3 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 7037,
+      "name": "STICMAN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2831,
+      "name": "ŠTITNIK OD VJETRA VAIL.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8646,
+      "name": "ŠTITNIK OD VJETRA VAIL.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 767,
+      "name": "STOCK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 9611,
+      "name": "STOCK 84 1,00",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 9643,
+      "name": "STOCK-NIVELACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9399,
+      "name": "STOL ZA ULJANU REPICU",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11557,
+      "name": "STORNO PREDUJMA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 528,
+      "name": "STRAŽNJA SVJETLA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 5063,
+      "name": "STROJ",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 7026,
+      "name": "STROJNO KOŠENJE TRAVE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 60,
+      "name": "strojno razastiranje zemlje",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 133,
+      "name": "STROJ ZA PRIPREMU SIROVINE",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9464,
+      "name": "STRUČNI ISPIT",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6605,
+      "name": "STRUČNO PREDAVANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10611,
+      "name": "ŠTRUDLA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10389,
+      "name": "ŠTRUDLA SA MAKOM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10390,
+      "name": "ŠTRUDLA SA ORASIMA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10407,
+      "name": "ŠTRUDLA SA SIROM SLATKA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10388,
+      "name": "ŠTRUDLA S VIŠNJAMA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 7344,
+      "name": "ŠTRUDLA S VIŠNJAMA 200G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 6940,
+      "name": "SULFAMMO 30 N-PROCESS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7132,
+      "name": "SULFAMO 23N-PROCESS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7079,
+      "name": "S.ULJANE REP.BLUESTAR+LUMIP",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6902,
+      "name": "SUMIALFA 5 FL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7101,
+      "name": "SUMPOR WG 80",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7089,
+      "name": "SUMPOR WG 80 a 5 KG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 1672,
+      "name": "SUMPOR WG 80 a 5 KG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 1161,
+      "name": "SUN.ANA HICKMANN 6576 CLIP",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11220,
+      "name": "SUNČANA ELEKTRANA",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 4600,
+      "name": "SUNČANA ELEKTRANA KONJIK2",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 4077,
+      "name": "SUNČ.NATIKAČ 605601001",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1205,
+      "name": "SUNČ.NATIKAČ ZA NAOČALE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 4551,
+      "name": "SUNČ.NATIKAČ ZA NAOČALE C0",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1204,
+      "name": "SUNČ.NATIKAČ ZA NAOČALE PODIZ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1531,
+      "name": "SUNČ.N GUESS GF6142",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1522,
+      "name": "SUNČ.N PLD6160/S",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 5212,
+      "name": "SUNČ-N.POLAROID 4137",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3344,
+      "name": "SUN.NATIKAČ 12557/12558",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3448,
+      "name": "SUN.NATIKAČ 12611",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3537,
+      "name": "SUN.NATIKAČ 12652/784/789/794",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 4129,
+      "name": "SUN.NATIKAČ C0 FIKSNI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 4118,
+      "name": "SUN.NATIKAČ ZA NAOČALE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6560,
+      "name": "SUPER 3 205/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7171,
+      "name": "SURFARE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10675,
+      "name": "SUZUKI VITARA 1,4 PREMIUNM",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11001,
+      "name": "SVITAK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 674,
+      "name": "TABLICA ZA UPOZORENJE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 854,
+      "name": "TAGLIATELLE PESTO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 98,
+      "name": "TAMPONSKA MJEŠAVINA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10236,
+      "name": "TAN BROWN 3 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10237,
+      "name": "TAN BROWN 5 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10238,
+      "name": "TAN BROWN 8 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11738,
+      "name": "TANJURAČA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10075,
+      "name": "TANJURAČA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 11755,
+      "name": "TANJURAČA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 11597,
+      "name": "TANJURAČA 32",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 6623,
+      "name": "TANJURAČA AGL 32-560 120 X 120",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6768,
+      "name": "TANJURANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11584,
+      "name": "TANJURANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11076,
+      "name": "TANJURANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11763,
+      "name": "TANJURANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10717,
+      "name": "TARIS 1/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 869,
+      "name": "TARTAR UMAK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 3196,
+      "name": "TASLONKA ZID. VIESMMANN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9017,
+      "name": "TASLONKA ZID. VIESMMANN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6973,
+      "name": "TAZER SC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 2602,
+      "name": "T-COM POC. 3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8410,
+      "name": "T-COM POC. 3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7168,
+      "name": "TEBUSHA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7097,
+      "name": "TEBU SUPER 25 EW",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 8963,
+      "name": "TEERMOSTAT HONEYWELL SOB.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 3143,
+      "name": "TEERMOSTAT HONEYWELL SOB.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10641,
+      "name": "TEHNIČKI PREGLED",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7235,
+      "name": "TELAD",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7223,
+      "name": "TELAD",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11633,
+      "name": "TELAD ZA TOV",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11626,
+      "name": "TELIĆI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11012,
+      "name": "TEL.UGRADBENA GARNITURA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 7244,
+      "name": "TEMELJI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7039,
+      "name": "TEMSA SC",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 339,
+      "name": "TERANIL 25 KG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9539,
+      "name": "TEREĆENJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 5109,
+      "name": "TEREĆENJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9598,
+      "name": "TEREĆENJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9518,
+      "name": "TEREĆENJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9492,
+      "name": "TEREĆENJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 844,
+      "name": "TERENSKI OBILAZAK",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 718,
+      "name": "TERETNO VOZILO SCANIA",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 6917,
+      "name": "TERIDOX 500 EC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 2358,
+      "name": "TERMINAL OK. JEREMIAS 60/100IN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8164,
+      "name": "TERMINAL OK. JEREMIAS 60/100IN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8974,
+      "name": "TERMOELEMENAT MAG 144/1 Z",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 3154,
+      "name": "TERMOELEMENAT MAG 144/1 Z",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2036,
+      "name": "TERMOELEMENAT VGH",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 7811,
+      "name": "TERMOELEMENAT VGH",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9296,
+      "name": "TER.sensoROOM pure VRT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 3471,
+      "name": "TER.sensoROOM pure VRT",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 343,
+      "name": "TEXO PU PIŠ.N.E. 750",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 403,
+      "name": "TIJELO SINHRONA ZF",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10386,
+      "name": "TIJESTO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10581,
+      "name": "TIJESTO ZA LANGOŠ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 7332,
+      "name": "TIJESTO ZA PIZZU 500G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 6885,
+      "name": "TILT 250 EC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11037,
+      "name": "TIPLA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 333,
+      "name": "TIPLA UDARNA 6X60",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 3189,
+      "name": "TIPLA UNI. 4 MZ-K 12",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9010,
+      "name": "TIPLA UNI. 4 MZ-K 12",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 341,
+      "name": "TKK SEAL ACRYL 3/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10979,
+      "name": "T komad",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 8409,
+      "name": "T-KOM POC. 3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2601,
+      "name": "T-KOM POC. 3/4",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 8546,
+      "name": "T-KOM. ZN 1/2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 2731,
+      "name": "T-KOM. ZN 1/2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10639,
+      "name": "TLAČNA PROBA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10856,
+      "name": "TLAČNA PROBA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10670,
+      "name": "TLAČNA PROBA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9293,
+      "name": "TOBOLAC S NAVOJEM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 3468,
+      "name": "TOBOLAC S NAVOJEM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9671,
+      "name": "TOCCO LOCCO 24/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9672,
+      "name": "TOCO LOCO 19,5 G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 38,
+      "name": "TONER-MAXNAVIA HP 285A",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7470,
+      "name": "TOPLI SENDVIĆ 150G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 6879,
+      "name": "TOPSIN M 500 SC 1/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6836,
+      "name": "TOTMAST SH GADUS S33 V220",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11196,
+      "name": "TOURIST SERVICES",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9408,
+      "name": "TOVNE JUNICE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7164,
+      "name": "TRAILER",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 11036,
+      "name": "TRAKA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 329,
+      "name": "TRAKA BAND.SAM.90M",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 204,
+      "name": "TRAKA DEKORODAL 5 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 115,
+      "name": "TRAKASTI PODMETAČI 50 MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 3632,
+      "name": "TRAKICA EASY U BOJI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 5104,
+      "name": "TRAKICE PLIVAJUĆE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11191,
+      "name": "TRANSFER",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11214,
+      "name": "TRANSFER (bez PDV-a)",
+      "item_class": "service",
+      "fiscal_treatment": "exempt_pdv",
+      "category": "service"
+    },
+    {
+      "id": 8724,
+      "name": "TRANSFORMATOR REHAU NEA SMART",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2909,
+      "name": "TRANSFORMATOR REHAU NEA SMART",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6810,
+      "name": "TRAZEX 1 KG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11156,
+      "name": "TRESAČ MAJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 7161,
+      "name": "TRIBE 75 WG 0,02 KG",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6986,
+      "name": "TRIMUR 100 G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6997,
+      "name": "TRIMUR 75 WG 10X0,1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9976,
+      "name": "TRINA NEG9R.28 N TYPE 440W",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9981,
+      "name": "TRINA NEG9R.28 N TYPE 450W",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9397,
+      "name": "TRITIKAL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7226,
+      "name": "TRITIKAL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11175,
+      "name": "TRITIKAL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3137,
+      "name": "TRMOSTAT HONEYWELL BEŽ.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8957,
+      "name": "TRMOSTAT HONEYWELL BEŽ.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9928,
+      "name": "TROFAZNI RAZVODNI ORMAR 10 kW",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9929,
+      "name": "TROFAZNI RAZVODNI ORMAR 18kW",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10399,
+      "name": "TROKUT PEKMEZ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 4592,
+      "name": "TROMJESEČNI IZVJEŠTAJ",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6695,
+      "name": "TROPHY 1/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6661,
+      "name": "TROPHY 5/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 1193,
+      "name": "TROŠARINE ZA GORIVO",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9551,
+      "name": "TROŠKOVI",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6592,
+      "name": "TROŠKOVI ANALIZE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9562,
+      "name": "TROŠKOVI NA GRANICI",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6489,
+      "name": "TROŠKOVI OTKUPA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10182,
+      "name": "TROŠKOVNIK RADOVA SANACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9819,
+      "name": "TS KONČNA SPONKA 35 MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7115,
+      "name": "TSL 29",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9820,
+      "name": "TS SHORTRAIL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10968,
+      "name": "TULJAK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11207,
+      "name": "TURA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11200,
+      "name": "TURA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11205,
+      "name": "TURA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 642,
+      "name": "TURBINA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 503,
+      "name": "TURBOPUNJAČ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11193,
+      "name": "TURIST SERVICES",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 255,
+      "name": "TUŠ RUČICA HANSGROHE CROMA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9401,
+      "name": "TVORNIČKA PREMIJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10337,
+      "name": "TVORNIČKA PREMIJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11620,
+      "name": "TVORNIČKA PREMIJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10007,
+      "name": "TW SOLAR 485 Wp N BF",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9956,
+      "name": "TW SOLAR 490Wp N-TYPE",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 1076,
+      "name": "TZ",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4074,
+      "name": "U BOJI A3 DVOSTR. 1KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4073,
+      "name": "U BOJI A3 JEDNOSTR. 1KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4070,
+      "name": "U BOJI A4 DVOSTR. 1-50KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4071,
+      "name": "U BOJI A4 DVOSTR. 51-... KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4068,
+      "name": "U BOJI A4 JEDNOSTR. 51-... KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4067,
+      "name": "U BOJI A4 JEDNOSTRANO 0-50KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4022,
+      "name": "U BOJI PRINTANJE 1-50KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4023,
+      "name": "U BOJI PRINTANJE 51-... KOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7724,
+      "name": "Učvršćivanje",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10109,
+      "name": "UKRASNI ŠARAFI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11186,
+      "name": "ULAZNICE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6829,
+      "name": "ULJ.REP.PETROL 1500 CRUISER",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 498,
+      "name": "ULOŽAK DIZNE CR 369",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 533,
+      "name": "ULOŽAK DIZNE DSLA 154P960",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7067,
+      "name": "ULYSSES",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10153,
+      "name": "UMJETNI BIJELI 2 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10154,
+      "name": "UMJETNI BIJELI S UGRADNJOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11432,
+      "name": "UMREŽAVANJE UREDA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 5850,
+      "name": "UMREŽAVANJE UREDA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11296,
+      "name": "UMREŽAVANJE UREDA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 342,
+      "name": "UNIFLOTT 5/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 3456,
+      "name": "UPALJAČ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9281,
+      "name": "UPALJAČ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9466,
+      "name": "Upisnina u imenik",
+      "item_class": "service",
+      "fiscal_treatment": "exempt_pdv",
+      "category": "service"
+    },
+    {
+      "id": 9463,
+      "name": "UPIS U KOMORU",
+      "item_class": "service",
+      "fiscal_treatment": "exempt_pdv",
+      "category": "service"
+    },
+    {
+      "id": 672,
+      "name": "UPRAVLJAČKI CILINDAR ZGLOB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 673,
+      "name": "UPRAVLJAČKI CILINDAR ZGLOBNI L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10933,
+      "name": "URAVLJAČ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10772,
+      "name": "UREA 40/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6482,
+      "name": "UREA 46%",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10774,
+      "name": "UREA VERA YARA 600/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10791,
+      "name": "UREA VERA YARA 600/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9816,
+      "name": "UREĐENJE LABORATORIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7274,
+      "name": "UREĐENJE ZELENIH POVRŠINA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6638,
+      "name": "USITNJAVANJE BILJNIH OSTATAKA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11166,
+      "name": "USLUŽNI TOV TELADI",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 688,
+      "name": "UTIČNI 1/22ˇ 19 MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 7918,
+      "name": "UTIKAČ 2P KUTNI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 2131,
+      "name": "UTIKAČ 2P KUTNI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10973,
+      "name": "UVARIVANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 4066,
+      "name": "UVEZIVANJE SPIRALNO",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10858,
+      "name": "UZEMLJENJE MRS-e",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10711,
+      "name": "UZIMANJE  UZORAKA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6702,
+      "name": "VAĐENJE REPE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6739,
+      "name": "VAĐENJE REPE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 2951,
+      "name": "VAIL. AUT. SENSOCOMF. 720",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8766,
+      "name": "VAIL. AUT. SENSOCOMF. 720",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8457,
+      "name": "VAIL. DIM. 1M 80",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2649,
+      "name": "VAIL. DIM. 1M 80",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2982,
+      "name": "VAIL. DIM 2 M",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8797,
+      "name": "VAIL. DIM 2 M",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2644,
+      "name": "VAIL. PL. KO. VUW 25/26 CS/1-5",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8452,
+      "name": "VAIL. PL. KO. VUW 25/26 CS/1-5",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1951,
+      "name": "VAIL. RAD 22 V 500/1600",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7685,
+      "name": "VAIL. RAD 22 V 500/1600",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8365,
+      "name": "VAIL. SIG. GRUPA BEZ RED.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2557,
+      "name": "VAIL. SIG. GRUPA BEZ RED.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8579,
+      "name": "VAIL. SPOJ. SET. VU+VIR R 120",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2764,
+      "name": "VAIL. SPOJ. SET. VU+VIR R 120",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8577,
+      "name": "VAIL. TER. E RELAX",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2762,
+      "name": "VAIL. TER. E RELAX",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2642,
+      "name": "VAIL. TERMO. SENSOHOME VRT 380",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8450,
+      "name": "VAIL. TERMO. SENSOHOME VRT 380",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8788,
+      "name": "VAIL. TER. NETATMO ON/OFF",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2973,
+      "name": "VAIL. TER. NETATMO ON/OFF",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8692,
+      "name": "VAIL. VIH R 120/6 B",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2877,
+      "name": "VAIL. VIH R 120/6 B",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8534,
+      "name": "VANJSKI OSJ. SEN. COM. VRC 720",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2719,
+      "name": "VANJSKI OSJ. SEN. COM. VRC 720",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6633,
+      "name": "VANTIFREZ EXTRA 5/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2553,
+      "name": "VA. PLI. KOT. VUW 30/36 CS/1-5",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8361,
+      "name": "VA. PLI. KOT. VUW 30/36 CS/1-5",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 355,
+      "name": "VAPNO HIDRATIZIRANO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9793,
+      "name": "VARIJABILNA KUKA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9749,
+      "name": "VARIJABILNA KUKA 3X FLEXI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10297,
+      "name": "VAZA I LAMPON",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10528,
+      "name": "VEKNARICA SIMPLEX",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7318,
+      "name": "VELIKA CIABATTA 200G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10138,
+      "name": "VERDE OLIVIA 3 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10139,
+      "name": "VERDE OLIVIA 5 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9955,
+      "name": "VEZICA 250 X 4,8 MM CRNA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9866,
+      "name": "VEZICA 310X4,8MM CRNA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9727,
+      "name": "VEZICA 3,5 X 200 mm 100/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 8540,
+      "name": "VGT T-KOM 25*20*25 VAR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2725,
+      "name": "VGT T-KOM 25*20*25 VAR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2724,
+      "name": "VGT T-KOM 25*25*25 VARG.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8539,
+      "name": "VGT T-KOM 25*25*25 VARG.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6993,
+      "name": "VIBALLA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9652,
+      "name": "VIGOR VODKA ORIGINAL 1,00",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 10990,
+      "name": "VIK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 419,
+      "name": "VILICA MJENJAČA ZF",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 306,
+      "name": "VILICA POTISNOG MAN KPL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11785,
+      "name": "VILIČAR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 48,
+      "name": "VILICE 15/15",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10323,
+      "name": "VILJUŠKAR LINDE H30D-02/351",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 7082,
+      "name": "VILJUŠKAR ZETTELMAYER",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9616,
+      "name": "VINJAK 1,00",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11666,
+      "name": "VINO-GRAŠEVINA KUTJ. 10L-POV",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9644,
+      "name": "VINO-NIVELACIJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11687,
+      "name": "VINO-RAJSKI RIZLING 0,75",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 10288,
+      "name": "VISCONT WHITE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11153,
+      "name": "VIŠNJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 11082,
+      "name": "VIŠNJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 805,
+      "name": "VIŠNJEVAC 0,03",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9657,
+      "name": "VIŠNJEVAC 1,00",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 10488,
+      "name": "VODA 2 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 10420,
+      "name": "VODA BISTRA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 10519,
+      "name": "VODA SMART 0,5 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11042,
+      "name": "VODIČ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9783,
+      "name": "VODIČ P/F 6 Ž/Z",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 759,
+      "name": "VODKA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11677,
+      "name": "VODKA 1,0 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 5822,
+      "name": "VODKA 1,0 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 896,
+      "name": "VODKA 1 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9646,
+      "name": "VODKA-NIVELACIJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11659,
+      "name": "VODKA SEGESTICA 1L-POV",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11668,
+      "name": "VODKA VIGOR 1L-POV",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 11011,
+      "name": "VODOMJER",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2609,
+      "name": "VODOMJER CDSD PLUS EVO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8417,
+      "name": "VODOMJER CDSD PLUS EVO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10912,
+      "name": "VODOVOD I KANALIZACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10902,
+      "name": "VORTICE LINEO 315",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9705,
+      "name": "VOZILO",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 9709,
+      "name": "VOZILO",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 8792,
+      "name": "VR 71",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9085,
+      "name": "VR 71",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3264,
+      "name": "VR 71",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2977,
+      "name": "VR 71",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7524,
+      "name": "VR 81/2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1791,
+      "name": "VR 81/2",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7523,
+      "name": "VR 91",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 1790,
+      "name": "VR 91",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9087,
+      "name": "VR 92",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8689,
+      "name": "VR 92",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 8777,
+      "name": "VR 92",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3266,
+      "name": "VR 92",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2874,
+      "name": "VR 92",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 2962,
+      "name": "VR 92",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 7718,
+      "name": "VR 920 KOMUNIKACIJSKA JEDINICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 1984,
+      "name": "VR 920 KOMUNIKACIJSKA JEDINICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2721,
+      "name": "VR 92 SOBNI KOREKTOR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8536,
+      "name": "VR 92 SOBNI KOREKTOR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9086,
+      "name": "VRC 720",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 3265,
+      "name": "VRC 720",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2351,
+      "name": "VRC 720 F",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8157,
+      "name": "VRC 720 F",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2851,
+      "name": "VRC 720 SENSO COM. VAIL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8666,
+      "name": "VRC 720 SENSO COM. VAIL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6501,
+      "name": "VREĆA EKO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 6589,
+      "name": "VRŠENJE BEZ SJEČKE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6587,
+      "name": "VRŠENJE PŠENICE SA SJEČKOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7044,
+      "name": "VRŠENJE SA SJEČKOM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6629,
+      "name": "VRŠENJE SOJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6730,
+      "name": "VRŠENJE ULJANE REPICE SA SJEČK",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9515,
+      "name": "VRŠENJE ULJNE TIKVE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11096,
+      "name": "VRŠIDBA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11085,
+      "name": "VRŠIDBA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10712,
+      "name": "VRŠIDBA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11078,
+      "name": "VRŠIDBA PŠENICE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 8471,
+      "name": "VRT 50 DIG SOB. TER. VAIL.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2663,
+      "name": "VRT 50 DIG SOB. TER. VAIL.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 504,
+      "name": "V SPONA MP2/MP3 PRATEĆA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 10989,
+      "name": "VTR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2393,
+      "name": "VUI 30/36 CS/1-5 + VIH CL 20",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8199,
+      "name": "VUI 30/36 CS/1-5 + VIH CL 20",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8189,
+      "name": "VUI 30/36 CS/1-5 +VIH CL 20 VA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2383,
+      "name": "VUI 30/36 CS/1-5 +VIH CL 20 VA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6576,
+      "name": "VULTRAMAX HLP 46 2 VALVOLINE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11731,
+      "name": "VUNA OVČJA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 8757,
+      "name": "VUW 246/5-3 PRO K.B. VAIL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2942,
+      "name": "VUW 246/5-3 PRO K.B. VAIL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2532,
+      "name": "VUW 246/5-3 PRO KOM. BOJ. VAIL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8340,
+      "name": "VUW 246/5-3 PRO KOM. BOJ. VAIL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9102,
+      "name": "VUW 25/32 CS/1-5 KON. KOM. BOJ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 3281,
+      "name": "VUW 25/32 CS/1-5 KON. KOM. BOJ",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 6911,
+      "name": "WEEDMASTER",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 909,
+      "name": "WHISKY JACK DANIEL´S 0,03",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 827,
+      "name": "WHISKY JACK DANIEL´S 0,03 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 790,
+      "name": "WHISKY JACK DANIEL`S 1 L",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9645,
+      "name": "WHISKY-NIVELACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 10292,
+      "name": "WIZAGE BLUE 12 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10220,
+      "name": "WIZAGE BLUE 3 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10221,
+      "name": "WIZAGE BLUE 5 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10279,
+      "name": "WIZAGE BLUE 6 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10123,
+      "name": "WIZAGE BLUE 7 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10224,
+      "name": "WIZAGE BLUE 8 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9439,
+      "name": "YAMAHA CLASS VOCALS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3551,
+      "name": "YAMAHA CLASS VOCALS",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11828,
+      "name": "Zadnji komad",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 11696,
+      "name": "ZADUŽENJE PO UGOVORU",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6990,
+      "name": "ZAFTRA AZC 250 SC",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 10940,
+      "name": "ZAJEDNIČKE STAVKE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 4601,
+      "name": "ZAKONSKA ZATEZNA KAMATA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 615,
+      "name": "ZAMAŠNJAK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 300,
+      "name": "ZAMAŠNJAK MAN D20 430MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 284,
+      "name": "ZAMAŠNJAK MAN TGA D2876 430 MM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10971,
+      "name": "Zamijena vodovodnih",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7073,
+      "name": "ZAMIR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 3571,
+      "name": "ZAMJENSKA RUČKICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 11126,
+      "name": "ZAŠTITA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6579,
+      "name": "ZAŠTITA PRSKANJEM DO 200 L",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11072,
+      "name": "ZAŠTITA ŠPRICANJEM",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9897,
+      "name": "ZAŠTITNI PREK. 10kA B32A 2-POL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9860,
+      "name": "ZAŠTITNI PREK. 10kA C32A 3-POL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9861,
+      "name": "ZAŠTITNI PREK. 10kA C40A 3-POL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9973,
+      "name": "ZAŠTITNI PREK. 10kA C50A 3P+N",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9862,
+      "name": "ZAŠTITNI PREK. 10kA C50A 3-POL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9935,
+      "name": "ZAŠTITNI PREK. 6kA B32A 3-POL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9722,
+      "name": "ZAŠTITNI PREK AMPARO 10kA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9834,
+      "name": "ZAŠTITNI PREK AMPARO 10kA C20A",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10006,
+      "name": "ZAŠTITNI PREK AMPARO 6kA B16A",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9865,
+      "name": "ZAŠTITNI PREK AMPARO 6kA C16A",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9903,
+      "name": "ZAŠTITNI PREK. C40A 2-POL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9953,
+      "name": "ZAŠTTITNI PREK. 6kA B40A 3-POL",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10625,
+      "name": "ZASTUPANJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11536,
+      "name": "ZASUN",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 11090,
+      "name": "ZATVARAJE ZIMSKE BRAZDE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6491,
+      "name": "ZAVISNI TROŠKOVI",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 573,
+      "name": "ZAVJESICA BLATOBRANA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "tool"
+    },
+    {
+      "id": 9975,
+      "name": "ZAVRŠNA DOKUMENTACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7311,
+      "name": "ZEMIČKA MALA 70G",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10406,
+      "name": "ZEMIČKE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "food"
+    },
+    {
+      "id": 10628,
+      "name": "ZEMLJIŠNO KNJIŽNI POSTUPAK",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 9647,
+      "name": "ŽESTOKA PIĆA 0,03 PRODANO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "drink"
+    },
+    {
+      "id": 9662,
+      "name": "ŽESTOKA PIĆA-NIVELACIJA",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 6727,
+      "name": "ŽIČANO PLETIVO",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 11371,
+      "name": "ŽIĆENJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 11235,
+      "name": "ŽIĆENJE",
+      "item_class": "service",
+      "fiscal_treatment": "service_cash",
+      "category": "service"
+    },
+    {
+      "id": 7,
+      "name": "ZID",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 9893,
+      "name": "ZIDNI ORMAR METLANI IP66",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 2789,
+      "name": "ZILMET EKS. POS. 18L 4 BARA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 8604,
+      "name": "ZILMET EKS. POS. 18L 4 BARA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 10319,
+      "name": "ZIMBABWE 2 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10285,
+      "name": "ZIMBABWE 3 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10286,
+      "name": "ZIMBABWE 5 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10271,
+      "name": "ZIMBABWE 8 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10152,
+      "name": "ZIMBABWE MEMORIAL 6 CM",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 630,
+      "name": "ZIPČANIK KOMP",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 559,
+      "name": "ŽMIGAVAC BOĆNI L/D ŽUTI",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "equipment"
+    },
+    {
+      "id": 9392,
+      "name": "ZOB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 9603,
+      "name": "ZOB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 11119,
+      "name": "ZOB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6906,
+      "name": "ZOB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 11788,
+      "name": "ZOB",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 7007,
+      "name": "ZOB MERKANTILNA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 6544,
+      "name": "ZOB MERKANTILNA ROD 2017.",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    },
+    {
+      "id": 6892,
+      "name": "ZOOM 11 SC 1/1",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "material"
+    },
+    {
+      "id": 492,
+      "name": "ZRAC. 11,2/12,4-28",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 551,
+      "name": "ZRAČ. 155/165-13",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 525,
+      "name": "ZRAČ. 16,9/18, 4-38",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 675,
+      "name": "ZRAČ. 20,8-38 TR-218 T-GUM/KAB",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 493,
+      "name": "ZRAC. 6,00-16",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 526,
+      "name": "ZRAČ. 650/65-42",
+      "item_class": "asset",
+      "fiscal_treatment": "no_fiscal",
+      "category": "equipment"
+    },
+    {
+      "id": 6525,
+      "name": "ZRAČNICA",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 6615,
+      "name": "ZRAČNICA 560 X 165-11 TIGAR",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 307,
+      "name": "ZRAČNI JASTUK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 692,
+      "name": "ZRAČNI JASTUK PODIZNE OSOVINE",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "product"
+    },
+    {
+      "id": 10770,
+      "name": "ZTK",
+      "item_class": "tangible",
+      "fiscal_treatment": "standard",
+      "category": "other"
+    }
+  ]
+}
