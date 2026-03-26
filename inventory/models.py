@@ -166,15 +166,7 @@ class InventoryItem(models.Model):
 
     # ── Stockable guard ──────────────────────────────────────────
     NON_STOCKABLE_CATEGORIES = ('service',)
-
-    @property
-    def is_stockable(self):
-        """Usluge, napojnice i nonprofit stavke NEMAJU fizičku zalihu."""
-        if self.category in self.NON_STOCKABLE_CATEGORIES:
-            return False
-        if self.is_tip or self.is_tip_employer:
-            return False
-        return True
+    # is_stockable property moved to W1A business logic block below
     dsfinvk_gv_typ = models.CharField(
         max_length=30, blank=True,
         verbose_name=_("DSFinV-K GV_TYP override"),
@@ -213,6 +205,54 @@ class InventoryItem(models.Model):
     def __str__(self):
         return f"{self.name} ({self.sku}) – {self.quantity} {self.unit}"
 
+    # ── W1A: Poslovna logika (BORG-0 klasifikacija omogućuje) ────────
+
+    def should_track_stock(self):
+        """Da li ovaj artikl ide u fizičko skladište?"""
+        return self.item_class in ('tangible', 'asset')
+
+    def should_fiscalize(self):
+        """Da li ovaj artikl ide u fiskalizaciju?"""
+        return self.fiscal_treatment in ('standard', 'service_cash', 'pfand')
+
+    def get_price_for_buyer(self, buyer_type='b2c', quantity=1):
+        """Vrati ispravnu cijenu ovisno o tipu kupca.
+        Returns: dict(price, vat_included, price_type)
+        """
+        from decimal import Decimal
+        if buyer_type in ('b2b', 'wholesale') and self.wholesale_price > 0:
+            if quantity >= float(self.min_order_qty):
+                return {
+                    'price': self.wholesale_price,
+                    'vat_included': not self.vat_excluded_price,
+                    'price_type': 'wholesale',
+                }
+        return {
+            'price': self.unit_price,
+            'vat_included': True,
+            'price_type': 'retail',
+        }
+
+    def get_depreciation_annual(self):
+        """Godišnja linearna amortizacija za asset."""
+        if self.item_class != 'asset':
+            return 0
+        if not self.asset_purchase_date or not self.asset_useful_life_years:
+            return 0
+        if self.asset_depreciation_method == 'linear':
+            return float(self.purchase_price) / self.asset_useful_life_years
+        return 0
+
+    @property
+    def is_stockable(self):
+        """Usluge, napojnice, IP i nonprofit NEMAJU fizičku zalihu."""
+        if self.item_class in ('service', 'intangible', 'financial'):
+            return False
+        if self.category in self.NON_STOCKABLE_CATEGORIES:
+            return False
+        if self.is_tip or self.is_tip_employer:
+            return False
+        return True
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
