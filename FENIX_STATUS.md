@@ -255,3 +255,21 @@ LIMIT Connect Borg (26.03.2026):
 | FINA eRačun namespace | CC_TASK_BUGFIX_MARIJA_SPRINT.md | 🟠 |
 | Tax wizard sidebar link | CC_TASK_BUGFIX_MARIJA_SPRINT.md | 🟡 |
 | Joker Pricing (blokira onboarding) | CC_TASK_CRITICAL_1APRIL.md | 🔴 |
+
+---
+
+## ★ REORGANIZACIJA EKIPE — 26.03.2026 večer
+
+**CC Code offline** — Ivan ugasio računalo.
+**Nova ekipa:** Gemini (executor) + Haiku (classifier/helper) + Sonnet (koordinator)
+
+### Gemini preuzima sve CC Code taskove:
+
+| Task | Gemini Task ID | Status |
+|------|---------------|--------|
+| CC_TASK_BUGFIX_MARIJA_SPRINT.md | 64c5f376 | 🔄 RUNNING |
+| CC_TASK_CRITICAL_1APRIL.md | 9375cd72 | 🔄 RUNNING |
+| CC_TASK_W1C_W1D_W1E.md | 1dc3966c | 🔄 RUNNING |
+
+Gemini radi autonomno. Rezultati će biti u git commitovima.
+WhatsApp report Ivanu na +491723006985 po završetku svakog taska.
