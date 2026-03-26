@@ -76,7 +76,9 @@ def dashboard(request):
 # ── contacts ──────────────────────────────────────────────────────────────────
 @login_required
 def contacts_list(request):
-    qs       = Contact.objects.all()
+    from core.company_utils import get_user_company
+    company = get_user_company(request)
+    qs       = Contact.objects.filter(company=company) if company else Contact.objects.none()
     status_f = request.GET.get('status', '')
     type_f   = request.GET.get('type', '')
     q        = request.GET.get('q', '').strip()

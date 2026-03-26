@@ -1098,8 +1098,8 @@ def invoice_office_wizard(request):
     _co2 = _guc2(request)
     profiles = InvoiceProfile.objects.filter(is_active=True, company=_co2).order_by('-is_default', 'company_name') if _co2 else InvoiceProfile.objects.filter(is_active=True).order_by('-is_default', 'company_name')
     default_profile = InvoiceProfile.get_default()
-    locations = BusinessLocation.objects.all()
-    operators = FiscalOperator.objects.all()
+    locations = BusinessLocation.objects.filter(company=_co2) if _co2 else BusinessLocation.objects.none()
+    operators = FiscalOperator.objects.all()  # FiscalOperator has no company FK — global
     country = 'HR'
     if default_profile:
         country = default_profile.country or 'HR'

@@ -216,6 +216,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        from core.company_utils import get_user_company
+        company = get_user_company(self.request)
+        if company:
+            return Product.objects.filter(company=company)
+        return Product.objects.none()
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
