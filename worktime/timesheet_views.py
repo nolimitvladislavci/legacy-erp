@@ -1326,3 +1326,53 @@ def _empty_ctx():
         'task_types': [], 'burza_leads': [],
         'overtime_warnings': [],
     }
+
+
+@login_required
+def worker_mine(request):
+    """
+    /worktime/mine/ — mobilna stranica za radnika.
+    Prikazuje vlastite sate. Nema satnica, nema financija.
+    Zakon: ZOR + ArbZG §16.
+    """
+    from worktime.models import TimeEntry, EmployeeProfile
+    from datetime import timedelta
+    from decimal import Decimal
+
+    company = _user_company(request.user)
+    today = timezone.now().date()
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+    month_start = today.replace(day=1)
+
+    week_entries = TimeEntry.objects.filter(
+        user=request.user, company=company,
+        date__range=(week_start, week_end),
+    ).order_by('-date', 'start_time')
+
+    month_entries = TimeEntry.objects.filter(
+        user=request.user, company=company,
+        date__range=(month_start, today),
+    ).order_by('-date')
+
+    week_hours = sum((e.duration or Decimal('0')) for e in week_entries)
+    month_hours = sum((e.duration or Decimal('0')) for e in month_entries)
+
+    try:
+        ep = EmployeeProfile.objects.get(user=request.user, company=company)
+        weekly_target = getattr(ep, 'weekly_hours', None) or Decimal('40')
+    except EmployeeProfile.DoesNotExist:
+        weekly_target = Decimal('40')
+    monthly_target = weekly_target * 4
+
+    return render(request, 'worktime/worker_mine.html', {
+        'week_entries': week_entries,
+        'month_entries': month_entries,
+        'week_hours': week_hours,
+        'month_hours': month_hours,
+        'weekly_target': weekly_target,
+        'monthly_target': monthly_target,
+        'week_start': week_start,
+        'week_end': week_end,
+        'today': today,
+    })

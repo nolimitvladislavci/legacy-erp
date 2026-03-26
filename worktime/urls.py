@@ -43,6 +43,7 @@ urlpatterns = [
     path('travel-orders/<int:pk>/approve/', travel_views.travel_order_approve, name='travel_order_approve'),
     path('travel-orders/<int:pk>/expense/', travel_views.travel_expense_add, name='travel_expense_add'),
     path('travel-orders/<int:pk>/pdf/', travel_views.travel_order_pdf, name='travel_order_pdf'),
+    path('mine/', timesheet_views.worker_mine, name='ts_mine'),
 
     # Hybrid Time Tracking API
     path('api/clock-in/', api_clock_in, name='api_clock_in'),
