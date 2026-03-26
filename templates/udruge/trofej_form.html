@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Novi trofej{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-trophy"></i> Novi trofej</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="row mb-3"><div class="col-md-6"><label class="form-label">Lovac</label>
+<select name="clan" required class="form-select bg-dark text-light border-secondary">
+{% for c in clanovi %}<option value="{{ c.pk }}">{{ c.last_name }}, {{ c.first_name }}</option>{% endfor %}</select></div>
+<div class="col-md-6"><label class="form-label">Vrsta trofeja</label>
+<select name="vrsta" class="form-select bg-dark text-light border-secondary">
+{% for code, label in vrsta_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div></div>
+<div class="row mb-3"><div class="col-md-4"><label>CIC tocke</label><input type="number" name="cis_tockova" step="0.01" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Medalja</label><select name="medalja" class="form-select bg-dark text-light border-secondary">
+{% for code, label in medalja_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div>
+<div class="col-md-4"><label>Tezina (kg)</label><input type="number" name="teza_kg" step="0.01" class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="row mb-3"><div class="col-md-6"><label>Rok lista (cm)</label><input type="number" name="rok_lista" step="0.1" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-6"><label>Datum vrjednovanja</label><input type="date" name="datum_vrjednovanja" class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="mb-3"><label>Zapisnik</label><select name="zapisnik" class="form-select bg-dark text-light border-secondary">
+<option value="">— Bez zapisnika —</option>{% for z in zapisnici %}<option value="{{ z.pk }}">{{ z.vrsta_divljaci }} — {{ z.clan }} ({{ z.datum|date:"d.m.Y" }})</option>{% endfor %}</select></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:lov_trofeji_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi</button></div></form></div>
+{% endblock %}

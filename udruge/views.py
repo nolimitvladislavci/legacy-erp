@@ -3085,3 +3085,182 @@ def lov_trofeji_list(request):
     paginator = Paginator(qs, 30)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'udruge/lov_trofeji_list.html', {'page_obj': page})
+
+
+# ═══════════════════════════════════════════════════════════════════
+# EDIT VIEWS — Branitelji, Lov
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+def branitelj_status_edit(request, pk):
+    company = get_user_company(request)
+    from .models import StatusBranitelja
+    obj = get_object_or_404(StatusBranitelja, pk=pk, clan__company=company)
+    if request.method == 'POST':
+        d = request.POST
+        obj.vrsta_statusa = d.get('vrsta_statusa', obj.vrsta_statusa)
+        obj.postrojba = d.get('postrojba', obj.postrojba)
+        obj.naziv_postrojbe = d.get('naziv_postrojbe', obj.naziv_postrojbe)
+        obj.od_datuma = d.get('od_datuma') or obj.od_datuma
+        obj.do_datuma = d.get('do_datuma') or obj.do_datuma
+        obj.dana_sudjelovanja = int(d.get('dana_sudjelovanja') or 0)
+        obj.borbeni_sektor = 'borbeni_sektor' in d
+        obj.broj_potvrde_ministarstva = d.get('broj_potvrde_ministarstva', obj.broj_potvrde_ministarstva)
+        obj.datum_potvrde = d.get('datum_potvrde') or obj.datum_potvrde
+        obj.postotak_invalidnosti = int(d.get('postotak_invalidnosti') or 0) or None
+        obj.odlikovanja = d.get('odlikovanja', obj.odlikovanja)
+        obj.napomena = d.get('napomena', obj.napomena)
+        obj.save()
+        messages.success(request, 'Status branitelja ažuriran.')
+        return redirect('udruge:branitelji_dashboard')
+    return render(request, 'udruge/branitelj_status_form.html', {
+        'clan': obj.clan, 'obj': obj, 'edit': True,
+        'vrsta_choices': StatusBranitelja.VRSTA_STATUSA,
+        'postrojba_choices': StatusBranitelja.POSTROJBA_CHOICES,
+    })
+
+
+@login_required
+def lov_dopustenje_edit(request, pk):
+    company = get_user_company(request)
+    from .models import DopustenjeLova, Loviste, Clan
+    obj = get_object_or_404(DopustenjeLova, pk=pk, company=company)
+    if request.method == 'POST':
+        obj.loviste_id = request.POST.get('loviste', obj.loviste_id)
+        obj.clan_id = request.POST.get('clan', obj.clan_id)
+        obj.broj_dopustenja = request.POST.get('broj_dopustenja', obj.broj_dopustenja)
+        obj.datum_lova = request.POST.get('datum_lova') or obj.datum_lova
+        obj.vrsta_divljaci = request.POST.get('vrsta_divljaci', obj.vrsta_divljaci)
+        obj.broj_komada = int(request.POST.get('broj_komada') or 1)
+        obj.sle_evidencija_br = request.POST.get('sle_evidencija_br', obj.sle_evidencija_br)
+        obj.napomena = request.POST.get('napomena', obj.napomena)
+        obj.save()
+        messages.success(request, 'Dopuštenje ažurirano.')
+        return redirect('udruge:lov_dopustenja_list')
+    lovista = Loviste.objects.filter(company=company, is_active=True)
+    clanovi = Clan.objects.filter(company=company)
+    return render(request, 'udruge/lov_dopustenje_form.html', {
+        'obj': obj, 'edit': True, 'lovista': lovista, 'clanovi': clanovi,
+    })
+
+
+@login_required
+def lov_zapisnik_edit(request, pk):
+    company = get_user_company(request)
+    from .models import ZapisnikLova, Loviste, Clan, DopustenjeLova
+    obj = get_object_or_404(ZapisnikLova, pk=pk, company=company)
+    if request.method == 'POST':
+        obj.loviste_id = request.POST.get('loviste', obj.loviste_id)
+        obj.clan_id = request.POST.get('clan', obj.clan_id)
+        obj.dopustenje_id = request.POST.get('dopustenje') or obj.dopustenje_id
+        obj.datum = request.POST.get('datum') or obj.datum
+        obj.nacin_lova = request.POST.get('nacin_lova', obj.nacin_lova)
+        obj.vrsta_divljaci = request.POST.get('vrsta_divljaci', obj.vrsta_divljaci)
+        obj.spol = request.POST.get('spol', obj.spol)
+        obj.masa_kg = request.POST.get('masa_kg') or obj.masa_kg
+        obj.lokalitet = request.POST.get('lokalitet', obj.lokalitet)
+        obj.sle_broj = request.POST.get('sle_broj', obj.sle_broj)
+        obj.napomena = request.POST.get('napomena', obj.napomena)
+        obj.save()
+        messages.success(request, 'Zapisnik ažuriran.')
+        return redirect('udruge:lov_zapisnici_list')
+    lovista = Loviste.objects.filter(company=company, is_active=True)
+    clanovi = Clan.objects.filter(company=company)
+    dopustenja = DopustenjeLova.objects.filter(company=company).order_by('-datum_lova')[:20]
+    return render(request, 'udruge/lov_zapisnik_form.html', {
+        'obj': obj, 'edit': True, 'lovista': lovista, 'clanovi': clanovi,
+        'dopustenja': dopustenja, 'nacin_choices': ZapisnikLova.NACIN_LOVA,
+    })
+
+
+@login_required
+def loviste_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Loviste
+    qs = Loviste.objects.filter(company=company)
+    return render(request, 'udruge/loviste_list.html', {'lovista': qs})
+
+
+@login_required
+def loviste_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Loviste
+    from decimal import Decimal
+    if request.method == 'POST':
+        Loviste.objects.create(
+            company=company,
+            naziv=request.POST.get('naziv', ''),
+            broj_lovista=request.POST.get('broj_lovista', ''),
+            povrsina_ha=Decimal(request.POST.get('povrsina_ha') or '0'),
+            vrsta=request.POST.get('vrsta', 'zajednicko'),
+            lovoovlastenik=request.POST.get('lovoovlastenik', ''),
+            zakup_od=request.POST.get('zakup_od') or None,
+            zakup_do=request.POST.get('zakup_do') or None,
+            opis_granica=request.POST.get('opis_granica', ''),
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Lovište dodano.')
+        return redirect('udruge:loviste_list')
+    return render(request, 'udruge/loviste_form.html', {
+        'vrsta_choices': [('zajednicko','Zajedničko'),('privatno','Privatno'),('uzgajaliste','Uzgajalište')],
+    })
+
+
+@login_required
+def loviste_edit(request, pk):
+    company = get_user_company(request)
+    from .models import Loviste
+    from decimal import Decimal
+    obj = get_object_or_404(Loviste, pk=pk, company=company)
+    if request.method == 'POST':
+        obj.naziv = request.POST.get('naziv', obj.naziv)
+        obj.broj_lovista = request.POST.get('broj_lovista', obj.broj_lovista)
+        obj.povrsina_ha = Decimal(request.POST.get('povrsina_ha') or '0')
+        obj.vrsta = request.POST.get('vrsta', obj.vrsta)
+        obj.lovoovlastenik = request.POST.get('lovoovlastenik', obj.lovoovlastenik)
+        obj.zakup_od = request.POST.get('zakup_od') or obj.zakup_od
+        obj.zakup_do = request.POST.get('zakup_do') or obj.zakup_do
+        obj.opis_granica = request.POST.get('opis_granica', obj.opis_granica)
+        obj.napomena = request.POST.get('napomena', obj.napomena)
+        obj.save()
+        messages.success(request, 'Lovište ažurirano.')
+        return redirect('udruge:loviste_list')
+    return render(request, 'udruge/loviste_form.html', {
+        'obj': obj, 'edit': True,
+        'vrsta_choices': [('zajednicko','Zajedničko'),('privatno','Privatno'),('uzgajaliste','Uzgajalište')],
+    })
+
+
+@login_required
+def trofej_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Trofej, Clan, ZapisnikLova
+    from decimal import Decimal
+    if request.method == 'POST':
+        Trofej.objects.create(
+            company=company,
+            clan_id=request.POST.get('clan'),
+            zapisnik_id=request.POST.get('zapisnik') or None,
+            vrsta=request.POST.get('vrsta', 'ostalo'),
+            rok_lista=Decimal(request.POST.get('rok_lista') or '0') or None,
+            teza_kg=Decimal(request.POST.get('teza_kg') or '0') or None,
+            cis_tockova=Decimal(request.POST.get('cis_tockova') or '0') or None,
+            medalja=request.POST.get('medalja', ''),
+            datum_vrjednovanja=request.POST.get('datum_vrjednovanja') or None,
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Trofej dodan.')
+        return redirect('udruge:lov_trofeji_list')
+    clanovi = Clan.objects.filter(company=company)
+    zapisnici = ZapisnikLova.objects.filter(company=company).order_by('-datum')[:30]
+    return render(request, 'udruge/trofej_form.html', {
+        'clanovi': clanovi, 'zapisnici': zapisnici,
+        'vrsta_choices': Trofej.VRSTA_TROFEJA,
+        'medalja_choices': [('','Bez medalje'),('zlato','Zlato'),('srebro','Srebro'),('bronca','Bronca')],
+    })

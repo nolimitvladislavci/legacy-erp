@@ -172,4 +172,13 @@ urlpatterns = [
     path('lov/zapisnici/', views.lov_zapisnici_list, name='lov_zapisnici_list'),
     path('lov/zapisnici/create/', views.lov_zapisnik_create, name='lov_zapisnik_create'),
     path('lov/trofeji/', views.lov_trofeji_list, name='lov_trofeji_list'),
+
+    # Edit views — branitelji + lov
+    path('branitelji/status/<int:pk>/edit/', views.branitelj_status_edit, name='branitelj_status_edit'),
+    path('lov/lovista/', views.loviste_list, name='loviste_list'),
+    path('lov/lovista/create/', views.loviste_create, name='loviste_create'),
+    path('lov/lovista/<int:pk>/edit/', views.loviste_edit, name='loviste_edit'),
+    path('lov/dopustenja/<int:pk>/edit/', views.lov_dopustenje_edit, name='lov_dopustenje_edit'),
+    path('lov/zapisnici/<int:pk>/edit/', views.lov_zapisnik_edit, name='lov_zapisnik_edit'),
+    path('lov/trofeji/create/', views.trofej_create, name='trofej_create'),
 ]

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{% if edit %}Uredi{% else %}Novo{% endif %} loviste{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-tree"></i> {% if edit %}Uredi{% else %}Novo{% endif %} loviste</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="mb-3"><label class="form-label">Naziv lovista</label><input type="text" name="naziv" value="{{ obj.naziv|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="row mb-3"><div class="col-md-4"><label>Broj lovista</label><input type="text" name="broj_lovista" value="{{ obj.broj_lovista|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Povrsina (ha)</label><input type="number" name="povrsina_ha" step="0.01" value="{{ obj.povrsina_ha|default:'0' }}" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-4"><label>Vrsta</label><select name="vrsta" class="form-select bg-dark text-light border-secondary">
+{% for code, label in vrsta_choices %}<option value="{{ code }}" {% if obj.vrsta == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div>
+<div class="mb-3"><label>Lovoovlastenik</label><input type="text" name="lovoovlastenik" value="{{ obj.lovoovlastenik|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="row mb-3"><div class="col-md-6"><label>Zakup od</label><input type="date" name="zakup_od" value="{{ obj.zakup_od|date:'Y-m-d'|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="col-md-6"><label>Zakup do</label><input type="date" name="zakup_do" value="{{ obj.zakup_do|date:'Y-m-d'|default:'' }}" class="form-control bg-dark text-light border-secondary"></div></div>
+<div class="mb-3"><label>Opis granica</label><textarea name="opis_granica" rows="2" class="form-control bg-dark text-light border-secondary">{{ obj.opis_granica|default:'' }}</textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:loviste_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi</button></div></form></div>
+{% endblock %}
