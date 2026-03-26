@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-20 00:28+0100\n"
+"POT-Creation-Date: 2026-03-26 07:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -143,6 +143,20 @@ msgstr "Investor"
 
 msgid "Partner / Klijent"
 msgstr "Partner / Kunde"
+
+msgid "Veterinar"
+msgstr ""
+
+msgid "Racunovodja / Steuerberater"
+msgstr ""
+
+#, fuzzy
+#| msgid "Transakcija"
+msgid "Inspektor"
+msgstr "Transaktion"
+
+msgid "Revizor"
+msgstr ""
 
 msgid "Uloga"
 msgstr "Rolle"
@@ -693,498 +707,6 @@ msgstr ""
 msgid "Ušteda"
 msgstr ""
 
-msgid "Izlazni Račun"
-msgstr "Abschlussrechnung"
-
-msgid "Ponuda"
-msgstr "Angebot"
-
-msgid "Ulazni Račun"
-msgstr "Eingabekonto"
-
-msgid "Ugovor"
-msgstr "Vertrag"
-
-msgid "Partner"
-msgstr "Partner"
-
-msgid "Tip dokumenta"
-msgstr "Dokumenttyp"
-
-msgid "Broj dokumenta"
-msgstr "Dokumentennummer"
-
-msgid "Datum izdavanja"
-msgstr "Erscheinungsdatum"
-
-msgid "Datum dospijeća"
-msgstr "Fälligkeitsdatum"
-
-msgid "Iznos"
-msgstr "Betrag"
-
-msgid "Plaćeno"
-msgstr "Bezahlt"
-
-msgid "Dokument"
-msgstr "Dokument"
-
-msgid "Dokumenti"
-msgstr "Dokumente"
-
-msgid "Nacrt"
-msgstr "Entwurf"
-
-msgid "Stornirano"
-msgstr "Storniert"
-
-#, fuzzy
-#| msgid "Datum isporuke"
-msgid "Datum potvrde"
-msgstr "Liefertermin"
-
-msgid "Napomena"
-msgstr "Hinweis"
-
-#, fuzzy
-#| msgid "Kreirano:"
-msgid "Kreirao"
-msgstr "Storniert"
-
-msgid "Naziv"
-msgstr "Bezeichnung"
-
-msgid "Količina"
-msgstr "Menge"
-
-#, fuzzy
-#| msgid "Jed. mjera"
-msgid "Jed. mjere"
-msgstr "Maßeinheit"
-
-msgid "Jed. cijena"
-msgstr "Stückpreis"
-
-msgid "PDV %"
-msgstr "MwSt. %"
-
-msgid "Popust %"
-msgstr "Rabatt %"
-
-#, fuzzy
-#| msgid "Adresa intervencije"
-msgid "Adresa dostave"
-msgstr "Interventionsadresse"
-
-msgid "Reg. oznaka"
-msgstr ""
-
-msgid "Vozač"
-msgstr ""
-
-#, fuzzy
-#| msgid "Oprema"
-msgid "Otpremnica"
-msgstr "Ausrüstung"
-
-#, fuzzy
-#| msgid "Spremi"
-msgid "Otpremnice"
-msgstr "Spremi"
-
-msgid "LOT / Šarža"
-msgstr ""
-
-msgid "Veza na LOT (ExpiryBatch)"
-msgstr ""
-
-msgid "Stavka otpremnice"
-msgstr ""
-
-msgid "Stavke otpremnice"
-msgstr ""
-
-msgid "Poljoprivrednik"
-msgstr ""
-
-msgid "OIB"
-msgstr "OIB"
-
-msgid "Adresa"
-msgstr "Adresse"
-
-msgid "IBAN"
-msgstr "IBAN"
-
-msgid "Virman"
-msgstr "Im Folgenden finden Sie eine Liste der häufigsten Fehler."
-
-msgid "Otkupni blok"
-msgstr ""
-
-msgid "Otkupni blokovi"
-msgstr ""
-
-msgid "Porijeklo"
-msgstr ""
-
-msgid "Klasa"
-msgstr ""
-
-msgid "Stavka otkupnog bloka"
-msgstr ""
-
-msgid "Stavke otkupnog bloka"
-msgstr ""
-
-msgid "Pošiljatelj"
-msgstr ""
-
-#, fuzzy
-#| msgid "Primatelj / Kupac"
-msgid "Primatelj"
-msgstr "Empfänger / Kunde"
-
-#, fuzzy
-#| msgid "Prijevoz / dnevnice"
-msgid "Prijevoznik"
-msgstr "Transport / pro Tag"
-
-msgid "Mjesto utovara"
-msgstr ""
-
-msgid "Mjesto istovara"
-msgstr ""
-
-msgid "Temp. režim"
-msgstr ""
-
-#, fuzzy
-#| msgid "Sistemski Status"
-msgid "Carinski status"
-msgstr "Interne ID"
-
-msgid "CMR teretni list"
-msgstr ""
-
-msgid "CMR teretni listovi"
-msgstr ""
-
-#, fuzzy
-#| msgid "Fakturiranje"
-msgid "Pakiranje"
-msgstr "Rechnungen"
-
-msgid "Bruto kg"
-msgstr ""
-
-msgid "m³"
-msgstr ""
-
-msgid "CMR stavka"
-msgstr ""
-
-#, fuzzy
-#| msgid "Stavke"
-msgid "CMR stavke"
-msgstr "Streiks"
-
-#, fuzzy
-#| msgid "Izlazni Račun"
-msgid "Izlazni račun"
-msgstr "Abschlussrechnung"
-
-msgid "Ulazni račun (smart import)"
-msgstr ""
-
-msgid "e-Račun (FINA/XML)"
-msgstr ""
-
-msgid "Dokument (ručni upload)"
-msgstr ""
-
-#, fuzzy
-#| msgid "Info o certifikatu"
-msgid "FINA certifikat"
-msgstr "Zertifikat"
-
-msgid "Primka"
-msgstr ""
-
-msgid "CMR"
-msgstr ""
-
-#, fuzzy
-#| msgid "Na račun"
-msgid "POS račun"
-msgstr "Keine Rechnung"
-
-#, fuzzy
-#| msgid "Tip workflowa"
-msgid "Tip izvora"
-msgstr "Art des Workflows"
-
-msgid "ID izvornog objekta"
-msgstr ""
-
-msgid "Evidencijski broj"
-msgstr ""
-
-msgid "Valuta"
-msgstr "Währung"
-
-#, fuzzy
-#| msgid "Detalji dokumenta"
-msgid "Datum dokumenta"
-msgstr "Verbundener Dokument"
-
-#, fuzzy
-#| msgid "ZKI:"
-msgid "ZKI"
-msgstr "ZKI:"
-
-#, fuzzy
-#| msgid "JIR:"
-msgid "JIR"
-msgstr "JIR:"
-
-#, fuzzy
-#| msgid "PDF datoteka"
-msgid "Putanja datoteke"
-msgstr "Datei"
-
-msgid "Ima XML"
-msgstr ""
-
-msgid "Ima PDF"
-msgstr ""
-
-msgid "Ima sliku"
-msgstr ""
-
-msgid "Arhivirao"
-msgstr ""
-
-#, fuzzy
-#| msgid "Datum izdavanja"
-msgid "Datum arhiviranja"
-msgstr "Erscheinungsdatum"
-
-msgid "Ključ sesije"
-msgstr ""
-
-msgid "Integritet hash"
-msgstr ""
-
-msgid "Zaštićeno do"
-msgstr ""
-
-msgid "Proknjiženo"
-msgstr ""
-
-msgid "AI prijedlog knjiženja"
-msgstr ""
-
-msgid "Barcode"
-msgstr ""
-
-msgid "Arhivski zapis"
-msgstr ""
-
-msgid "Arhivski zapisi"
-msgstr ""
-
-#, fuzzy
-#| msgid "Naziv tvrtke"
-msgid "Naziv datoteke"
-msgstr "Firmenname"
-
-msgid "MIME tip"
-msgstr ""
-
-msgid "Velicina (bytes)"
-msgstr ""
-
-msgid "SHA-256"
-msgstr ""
-
-#, fuzzy
-#| msgid "Documents"
-msgid "Document Blob"
-msgstr "Dokument"
-
-#, fuzzy
-#| msgid "Documents"
-msgid "Document Blobs"
-msgstr "Dokument"
-
-msgid "Lokalni disk"
-msgstr ""
-
-msgid "Cloud (B2/S3)"
-msgstr ""
-
-#, fuzzy
-#| msgid "Pregled podataka"
-msgid "Baza podataka"
-msgstr "Keine Daten"
-
-msgid "Storage backend"
-msgstr ""
-
-msgid "Max velicina datoteke (MB)"
-msgstr ""
-
-msgid "Auto kompresija slika"
-msgstr ""
-
-msgid "Cloud bucket"
-msgstr ""
-
-msgid "Cloud prefix"
-msgstr ""
-
-#, fuzzy
-#| msgid "PDV i konfiguracija"
-msgid "Storage Konfiguracija"
-msgstr "MwSt. und Konfiguration"
-
-#, fuzzy
-#| msgid "PDV i konfiguracija"
-msgid "Storage Konfiguracije"
-msgstr "MwSt. und Konfiguration"
-
-msgid "Arhivska oznaka"
-msgstr ""
-
-msgid "Arhivske oznake"
-msgstr ""
-
-msgid "Na cekanju"
-msgstr "Ausstehend"
-
-#, fuzzy
-#| msgid "Stornirano"
-msgid "Ekstrahirano"
-msgstr "Storniert"
-
-msgid "XML generiran"
-msgstr ""
-
-#, fuzzy
-#| msgid "Fiskalizirano"
-msgid "Validirano"
-msgstr "Fiskalisiert"
-
-#, fuzzy
-#| msgid "Dospijelo"
-msgid "Neuspjelo"
-msgstr "Fällig"
-
-msgid "Visoko (>90%)"
-msgstr ""
-
-msgid "Srednje (70-90%)"
-msgstr ""
-
-msgid "Nisko (<70%)"
-msgstr ""
-
-#, fuzzy
-#| msgid "Original (HR)"
-msgid "Originalni naziv"
-msgstr "Beschreibung"
-
-msgid "Originalna velicina (bytes)"
-msgstr ""
-
-msgid "SHA-256 originala"
-msgstr ""
-
-msgid "MIME tip originala"
-msgstr ""
-
-#, fuzzy
-#| msgid "Putanja certifikata"
-msgid "Putanja originala"
-msgstr "Zertifikat"
-
-msgid "AI model"
-msgstr ""
-
-msgid "Verzija prompta"
-msgstr ""
-
-msgid "Pouzdanost AI"
-msgstr ""
-
-msgid "Tocnost (0-1)"
-msgstr ""
-
-msgid "Tokeni odgovora"
-msgstr ""
-
-#, fuzzy
-#| msgid "Cijena"
-msgid "Cijena (EUR)"
-msgstr "Preis"
-
-#, fuzzy
-#| msgid "Osnovni podaci"
-msgid "Ekstrahirani podaci"
-msgstr "Grundlegende Informationen"
-
-msgid "Generirani XML"
-msgstr ""
-
-msgid "SHA-256 XML-a"
-msgstr ""
-
-msgid "Velicina XML (bytes)"
-msgstr ""
-
-msgid "Putanja XML-a"
-msgstr ""
-
-#, fuzzy
-#| msgid "Bez fiskalizacije"
-msgid "Greske validacije"
-msgstr "Datum der Fiskalisierung"
-
-msgid "Smanjenje velicine (%)"
-msgstr ""
-
-#, fuzzy
-#| msgid "Broj radnih dana"
-msgid "Broj ekstrahiranih polja"
-msgstr "Kontonummer"
-
-#, fuzzy
-#| msgid "Dodaj stavku"
-msgid "Broj stavki"
-msgstr "Bild hinzufügen"
-
-msgid "Konverzijski zapis"
-msgstr ""
-
-msgid "Konverzijski zapisi"
-msgstr ""
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Hrvatski"
-msgstr "Kroatisch"
-
-msgid "English"
-msgstr "Englisch"
-
-msgid "Türkçe"
-msgstr "Türkisch"
-
-msgid "Ελληνικά"
-msgstr "Griechisch"
-
 msgid "Novi upit"
 msgstr "Novi unos"
 
@@ -1226,6 +748,30 @@ msgstr "Fassade"
 
 msgid "Ostalo"
 msgstr "Sonstiges"
+
+msgid "Kukuruz / Zitarice"
+msgstr ""
+
+#, fuzzy
+#| msgid "Stol / Zona"
+msgid "Stoka / Zivotinje"
+msgstr "Tisch / Zone"
+
+msgid "Mlijeko / Sir"
+msgstr ""
+
+#, fuzzy
+#| msgid "Bon / Voucher"
+msgid "Povrce / Voce"
+msgstr "Gutschein"
+
+#, fuzzy
+#| msgid "Lokalizacija"
+msgid "Mehanizacija / Oprema"
+msgstr "Fiskalisierung (HR)"
+
+msgid "EU Fond / Poticaj"
+msgstr ""
 
 msgid "🏗️ Zlatni Kanban"
 msgstr "🏗️ Goldenes Kanban"
@@ -1415,6 +961,9 @@ msgstr "Treffen"
 msgid "Materijal/Komponenta"
 msgstr "Galerie"
 
+msgid "Količina"
+msgstr "Menge"
+
 msgid "JMJ"
 msgstr ""
 
@@ -1507,6 +1056,9 @@ msgstr "Stundenzettel"
 msgid "Troškovi"
 msgstr "Kosten"
 
+msgid "Ponuda"
+msgstr "Angebot"
+
 msgid "👷 Radnici na projektu"
 msgstr "👷 Projektmitarbeiter"
 
@@ -1555,8 +1107,8 @@ msgid ""
 "Stvarni trošak/sat = (Bruto + 17%% doprinos) × (1 + prekovremeni%%) + "
 "prijevoz/sat"
 msgstr ""
-"Tatsächliche Kosten/Stunde = (Brutto + 17%% Beitrag) × (1 + Überstunden%%) "
-"+ Transport/Stunde"
+"Tatsächliche Kosten/Stunde = (Brutto + 17%% Beitrag) × (1 + Überstunden%%) + "
+"Transport/Stunde"
 
 msgid "gdje: prijevoz/sat = dnevnica/dan ÷ sati/dan (iz Ponude)"
 msgstr ""
@@ -1861,6 +1413,9 @@ msgstr "Genossenschaft"
 msgid "Ustanova"
 msgstr "Einrichtung"
 
+msgid "Iznajmljivač (fizička osoba)"
+msgstr ""
+
 msgid "HR Fiskalizacija (CIS)"
 msgstr "Fiskalisierung (HR)"
 
@@ -1875,6 +1430,9 @@ msgstr "Datum der Fiskalisierung"
 
 msgid "Naziv tvrtke"
 msgstr "Firmenname"
+
+msgid "Adresa"
+msgstr "Adresse"
 
 msgid "Grad"
 msgstr "Stadt"
@@ -1895,11 +1453,15 @@ msgid "Porezni identifikacijski broj (za strana poduzeća)"
 msgstr "Steueridentifikationsnummer (für ausländische Unternehmen)"
 
 msgid "PDV ID / VAT ID"
-msgstr "USt-IdNr."
-"Umsatzsteuer-Identifikationsnummer / Umsatzsteuer-Identifikationsnummer"
+msgstr ""
+"USt-IdNr.Umsatzsteuer-Identifikationsnummer / Umsatzsteuer-"
+"Identifikationsnummer"
 
 msgid "EU PDV identifikacijski broj (npr. HR12345678901)"
 msgstr "EU-Umsatzsteuer-Identifikationsnummer (z. B. HR12345678901)"
+
+msgid "Valuta"
+msgstr "Währung"
 
 msgid "Fiskalni sustav"
 msgstr "Steuersystem"
@@ -1927,6 +1489,14 @@ msgstr ""
 
 msgid ""
 "Zakonski limit gotovine u blagajni. Za udruge obavezno. Prazno = bez limita."
+msgstr ""
+
+#, fuzzy
+#| msgid "Predložak usluge"
+msgid "PDF predložak"
+msgstr "Servicevorlage"
+
+msgid "Izgled svih PDF dokumenata (računi, izvještaji, potvrde)."
 msgstr ""
 
 msgid "NKD djelatnost"
@@ -1964,6 +1534,44 @@ msgstr ""
 #| msgid "Podaci tvrtke"
 msgid "Postavke tvrtke"
 msgstr "Unternehmensverwalter"
+
+#, fuzzy
+#| msgid "Cijena materijala"
+msgid "Zapecacena arhiva"
+msgstr "Materialpreis"
+
+msgid "True = firma deaktivirana, podaci zapecaceni. Baza NETAKNUTA."
+msgstr ""
+
+#, fuzzy
+#| msgid "Aktivan"
+msgid "Deaktiviran"
+msgstr "Aktiv"
+
+msgid "Zahtjev za deaktivacijom"
+msgstr ""
+
+#, fuzzy
+#| msgid "Razlog / Napomena"
+msgid "Razlog odlaska"
+msgstr "Hinweis"
+
+msgid "Potpisao T&C (GDPR čl.6b)"
+msgstr ""
+
+msgid "Mora biti True da sustav smije agregirati podatke ove firme."
+msgstr ""
+
+#, fuzzy
+#| msgid "Datum izdavanja *"
+msgid "Datum potpisivanja T&C"
+msgstr "Erscheinungsdatum"
+
+msgid "Verzija T&C"
+msgstr ""
+
+msgid "Npr. v2.1-2026"
+msgstr ""
 
 msgid "Tvrtke"
 msgstr "Unternehmen"
@@ -2037,6 +1645,9 @@ msgstr "Finanzen"
 msgid "Partneri"
 msgstr "Partner"
 
+msgid "Dokumenti"
+msgstr "Dokumente"
+
 msgid "Webshop"
 msgstr "Webshop"
 
@@ -2096,11 +1707,192 @@ msgstr "Maßeinheit"
 msgid "Zadana cijena (€)"
 msgstr "Standardpreis (€)"
 
+msgid "PDV %"
+msgstr "MwSt. %"
+
 msgid "Predložak usluge"
 msgstr "Servicevorlage"
 
 msgid "Predlošci usluga (cjenik)"
 msgstr "Servicevorlagen (Preisliste)"
+
+#, fuzzy
+#| msgid "Unesite naziv klijenta"
+msgid "Potencijalni klijent"
+msgstr "E-Mail-Client"
+
+msgid "U procesu prijema"
+msgstr ""
+
+#, fuzzy
+#| msgid "Planirano"
+msgid "Pauziran"
+msgstr "Geplant"
+
+msgid "U otkazu"
+msgstr ""
+
+msgid "Arhiviran (otišao)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Planirano"
+msgid "Blokiran (dug)"
+msgstr "Geplant"
+
+#, fuzzy
+#| msgid "Klijent"
+msgid "Klijent od"
+msgstr "Kunde"
+
+#, fuzzy
+#| msgid "Datum isporuke"
+msgid "Datum otkaza"
+msgstr "Liefertermin"
+
+#, fuzzy
+#| msgid "Datum"
+msgid "Datum odlaska"
+msgstr "Datum"
+
+#, fuzzy
+#| msgid "Sljedeći broj"
+msgid "Sljedeći pregled"
+msgstr "Weiter →"
+
+#, fuzzy
+#| msgid "Kontakt ime *"
+msgid "Kontakt osoba"
+msgstr "Kontakte"
+
+#, fuzzy
+#| msgid "Riješeno"
+msgid "Mjesečni"
+msgstr "Gelöst"
+
+msgid "Godišnji"
+msgstr ""
+
+msgid "Paušal"
+msgstr ""
+
+#, fuzzy
+#| msgid "Ukupno sati"
+msgid "Po satu"
+msgstr "Ukupno / Gesamt"
+
+msgid "Besplatno / Pro bono"
+msgstr ""
+
+#, fuzzy
+#| msgid "Tip workflowa"
+msgid "Tip ugovora"
+msgstr "Art des Workflows"
+
+#, fuzzy
+#| msgid "Cijena sata"
+msgid "Mjesečna naknada (EUR)"
+msgstr "Materialpreis"
+
+msgid "Bilješke"
+msgstr ""
+
+msgid "d.o.o."
+msgstr ""
+
+msgid "OPG"
+msgstr ""
+
+msgid "Fizička osoba"
+msgstr ""
+
+msgid "Strano poduzeće"
+msgstr ""
+
+msgid "Preporuka od"
+msgstr ""
+
+msgid "Uvezeno iz Synesisa"
+msgstr ""
+
+msgid "Synesis DB path"
+msgstr ""
+
+#, fuzzy
+#| msgid "Korisnički profil"
+msgid "Komitent profil"
+msgstr "Benutzerprofil"
+
+#, fuzzy
+#| msgid "Korisnički profili"
+msgid "Komitent profili"
+msgstr "Korisnički-Profil"
+
+#, fuzzy
+#| msgid "Kreirano:"
+msgid "Kreiran"
+msgstr "Storniert"
+
+#, fuzzy
+#| msgid "Aktivan"
+msgid "Aktiviran"
+msgstr "Aktiv"
+
+#, fuzzy
+#| msgid "Stavke"
+msgid "Otkaz primljen"
+msgstr "Streiks"
+
+#, fuzzy
+#| msgid "Stornirano"
+msgid "Arhiviran"
+msgstr "Storniert"
+
+#, fuzzy
+#| msgid "Aktivan"
+msgid "Reaktiviran"
+msgstr "Aktiv"
+
+#, fuzzy
+#| msgid "Planirano"
+msgid "Blokiran"
+msgstr "Geplant"
+
+#, fuzzy
+#| msgid "Cijena sata"
+msgid "Promjena plana"
+msgstr "Materialpreis"
+
+#, fuzzy
+#| msgid "Reset lozinke"
+msgid "Promjena naknade"
+msgstr "Lozinke zurücksetzen"
+
+#, fuzzy
+#| msgid "Cijena dana"
+msgid "Bilješka"
+msgstr "Materialpreis"
+
+#, fuzzy
+#| msgid "Kontakt ime *"
+msgid "Kontaktiran"
+msgstr "Kontakte"
+
+msgid "Dokument"
+msgstr "Dokument"
+
+#, fuzzy
+#| msgid "Pregled podataka"
+msgid "Uvoz podataka"
+msgstr "Keine Daten"
+
+msgid "Komitent događaj"
+msgstr ""
+
+#, fuzzy
+#| msgid "Fešte / Događaji"
+msgid "Komitent događaji"
+msgstr "Feste / Veranstaltungen"
 
 msgid "Companies"
 msgstr "Unternehmen"
@@ -2110,6 +1902,21 @@ msgstr "Überblick und Management - Unternehmen"
 
 msgid "Companies Modul"
 msgstr "Firmenmodul"
+
+msgid "Deutsch"
+msgstr "Deutsch"
+
+msgid "Hrvatski"
+msgstr "Kroatisch"
+
+msgid "English"
+msgstr "Englisch"
+
+msgid "Türkçe"
+msgstr "Türkisch"
+
+msgid "Ελληνικά"
+msgstr "Griechisch"
 
 msgid "Kombi"
 msgstr ""
@@ -2122,6 +1929,9 @@ msgstr ""
 
 msgid "Hladnjača"
 msgstr ""
+
+msgid "Naziv"
+msgstr "Bezeichnung"
 
 msgid "Hladni lanac"
 msgstr ""
@@ -2161,6 +1971,9 @@ msgstr "Fertig"
 #| msgid "Otkazano"
 msgid "Otkazana"
 msgstr "Abgebrochen"
+
+msgid "Vozač"
+msgstr ""
 
 msgid "Ruta dostave"
 msgstr ""
@@ -2288,6 +2101,11 @@ msgstr "Kontakt"
 
 msgid "Ref (linija/reg.oznaka/profil)"
 msgstr ""
+
+#, fuzzy
+#| msgid "Adresa intervencije"
+msgid "Adresa dostave"
+msgstr "Interventionsadresse"
 
 msgid "Rok dostave u hub"
 msgstr ""
@@ -2598,6 +2416,11 @@ msgid "Prikupljeno"
 msgstr ""
 
 #, fuzzy
+#| msgid "Fakturiranje"
+msgid "Pakiranje"
+msgstr "Rechnungen"
+
+#, fuzzy
 #| msgid "Planirano"
 msgid "Zapakirano"
 msgstr "Geplant"
@@ -2690,6 +2513,345 @@ msgstr "Für B2C-Filialen"
 #| msgid "Međunarodne postavke"
 msgid "Zone dostave"
 msgstr "Erweiterte Systemeinstellungen"
+
+#, fuzzy
+#| msgid "Reset lozinke"
+msgid "Prometna dozvola"
+msgstr "Lozinke zurücksetzen"
+
+#, fuzzy
+#| msgid "Certifikat (.p12)"
+msgid "ATP certifikat (temp. prijevoz)"
+msgstr "Zertifikat"
+
+#, fuzzy
+#| msgid "PDV i konfiguracija"
+msgid "Obvezno osiguranje"
+msgstr "MwSt. und Konfiguration"
+
+#, fuzzy
+#| msgid "PDV i konfiguracija"
+msgid "Kasko osiguranje"
+msgstr "MwSt. und Konfiguration"
+
+msgid "CMR osiguranje prijevoznika"
+msgstr ""
+
+msgid "Tehnički pregled"
+msgstr ""
+
+msgid "Baždarenje tahografa"
+msgstr ""
+
+msgid "Licenca Zajednice (EU)"
+msgstr ""
+
+msgid "Tip dokumenta"
+msgstr "Dokumenttyp"
+
+msgid "Broj dokumenta"
+msgstr "Dokumentennummer"
+
+#, fuzzy
+#| msgid "Zadane vrijednosti"
+msgid "Vrijedi od"
+msgstr "Standardwerte"
+
+#, fuzzy
+#| msgid "Zadane vrijednosti"
+msgid "Vrijedi do"
+msgstr "Standardwerte"
+
+msgid "Podsjetnik (dana prije)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Dokumenti"
+msgid "Dokument vozila"
+msgstr "Dokumente"
+
+#, fuzzy
+#| msgid "Dokumenti"
+msgid "Dokumenti vozila"
+msgstr "Dokumente"
+
+msgid "Vozačka dozvola"
+msgstr ""
+
+msgid "CPC kartica (kvalifikacija)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Certifikat (.p12)"
+msgid "ADR certifikat (opasne tvari)"
+msgstr "Zertifikat"
+
+msgid "Potvrda za vozače (non-EU)"
+msgstr ""
+
+msgid "Liječnička potvrda"
+msgstr ""
+
+#, fuzzy
+#| msgid "+ Nova kartica"
+msgid "Tahograf kartica"
+msgstr "+ Neue Karte"
+
+#, fuzzy
+#| msgid "Kupaonica"
+msgid "Osobna / Putovnica"
+msgstr "Satnica"
+
+msgid "Radna dozvola"
+msgstr ""
+
+msgid "Izjava o upućivanju (DE Posting)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Kategorija"
+msgid "Kategorije"
+msgstr "Kategorie"
+
+msgid "B, C, CE..."
+msgstr ""
+
+#, fuzzy
+#| msgid "Datum izdavanja"
+msgid "Država izdavanja"
+msgstr "Erscheinungsdatum"
+
+#, fuzzy
+#| msgid "Dokument"
+msgid "Dokument vozača"
+msgstr "Dokument"
+
+#, fuzzy
+#| msgid "Dokumenti"
+msgid "Dokumenti vozača"
+msgstr "Dokumente"
+
+msgid "Hrana — lokalna dostava"
+msgstr ""
+
+msgid "Hrana — regionalna (do 48h)"
+msgstr ""
+
+msgid "Hrana — međunarodni"
+msgstr ""
+
+msgid "Teret — EU"
+msgstr ""
+
+msgid "Teret — izvan EU (BA/RS/ME)"
+msgstr ""
+
+msgid "Selidba / kombi prijevoz"
+msgstr ""
+
+#, fuzzy
+#| msgid "Gotov proizvod"
+msgid "Terenska prodaja"
+msgstr "Fertiges Produkt"
+
+msgid "Nacrt"
+msgstr "Entwurf"
+
+#, fuzzy
+#| msgid "Broj dokumenta"
+msgid "Provjera dokumenata"
+msgstr "Dokumentennummer"
+
+msgid "Utovar"
+msgstr ""
+
+msgid "U tranzitu"
+msgstr ""
+
+#, fuzzy
+#| msgid "Sistemski Status"
+msgid "Carinski prijelaz"
+msgstr "Interne ID"
+
+msgid "Istovar"
+msgstr ""
+
+msgid "Isporučeno"
+msgstr ""
+
+#, fuzzy
+#| msgid "Broj računa"
+msgid "Broj naloga"
+msgstr "Kontonummer"
+
+#, fuzzy
+#| msgid "Tip workflowa"
+msgid "Tip prijevoza"
+msgstr "Art des Workflows"
+
+msgid "Polazište"
+msgstr ""
+
+msgid "Odredište"
+msgstr ""
+
+msgid "Tranzitne države"
+msgstr ""
+
+msgid "[\"AT\",\"HU\"] za rutu kroz Austriju i Mađarsku"
+msgstr ""
+
+#, fuzzy
+#| msgid "Prodajna cijena"
+msgid "Procjena km"
+msgstr "Transaktionen"
+
+#, fuzzy
+#| msgid "Planirano"
+msgid "Planirani polazak"
+msgstr "Geplant"
+
+#, fuzzy
+#| msgid "Planirano"
+msgid "Planirani dolazak"
+msgstr "Geplant"
+
+#, fuzzy
+#| msgid "Opis *"
+msgid "Opis tereta"
+msgstr "Beschreibung"
+
+#, fuzzy
+#| msgid "Nabavna cijena"
+msgid "Ukupna težina (kg)"
+msgstr "Kaufpreis"
+
+#, fuzzy
+#| msgid "Vezani dokument"
+msgid "Ukupni volumen (m³)"
+msgstr "Verbundener Dokument"
+
+#, fuzzy
+#| msgid "Broj dokumenta"
+msgid "Broj koleta"
+msgstr "Dokumentennummer"
+
+#, fuzzy
+#| msgid "Trošak rada"
+msgid "Trošak goriva"
+msgstr "Arbeitskosten"
+
+msgid "Cestarina"
+msgstr ""
+
+#, fuzzy
+#| msgid "Troškovi"
+msgid "Ostali troškovi"
+msgstr "Kosten"
+
+#, fuzzy
+#| msgid "Ukupno najam:"
+msgid "Ukupni trošak"
+msgstr "Ukupno / Gesamt"
+
+#, fuzzy
+#| msgid "Ime klijenta"
+msgid "Cijena za klijenta"
+msgstr "E-Mail-Client"
+
+msgid "Licenca Zajednice ✓"
+msgstr ""
+
+#, fuzzy
+#| msgid "Zadana cijena (€)"
+msgid "Potvrda za vozača ✓"
+msgstr "Standardpreis (€)"
+
+msgid "Posting declaration ✓"
+msgstr ""
+
+#, fuzzy
+#| msgid "Vezani dokument"
+msgid "Posting Declaration dokument"
+msgstr "Verbundener Dokument"
+
+msgid "FK na DriverDocument tipa posting_declaration s IMI referencom"
+msgstr ""
+
+#, fuzzy
+#| msgid "Info o certifikatu"
+msgid "ATP certifikat ✓"
+msgstr "Zertifikat"
+
+#, fuzzy
+#| msgid "Vezani dokument"
+msgid "Carinski dokumenti ✓"
+msgstr "Verbundener Dokument"
+
+msgid "Kabotaža provjera ✓"
+msgstr ""
+
+#, fuzzy
+#| msgid "Primatelj / Kupac"
+msgid "Naručitelj"
+msgstr "Empfänger / Kunde"
+
+msgid "Referenca naručitelja"
+msgstr ""
+
+msgid "Nalog za prijevoz"
+msgstr ""
+
+msgid "Nalozi za prijevoz"
+msgstr ""
+
+msgid "Vožnja (min)"
+msgstr ""
+
+msgid "Ostali rad (min)"
+msgstr ""
+
+msgid "Raspoloživost (min)"
+msgstr ""
+
+msgid "Odmor (min)"
+msgstr ""
+
+msgid "km start"
+msgstr ""
+
+msgid "km kraj"
+msgstr ""
+
+msgid "Tahograf zapis"
+msgstr ""
+
+msgid "Tahograf zapisi"
+msgstr ""
+
+msgid "Litara"
+msgstr ""
+
+#, fuzzy
+#| msgid "Cijena"
+msgid "Cijena/L"
+msgstr "Preis"
+
+msgid "Kilometraža"
+msgstr ""
+
+#, fuzzy
+#| msgid "Dodaj stavku"
+msgid "Postaja"
+msgstr "Bild hinzufügen"
+
+#, fuzzy
+#| msgid "Broj računa"
+msgid "Foto računa"
+msgstr "Kontonummer"
+
+msgid "Gorivo"
+msgstr ""
 
 msgid "Dispatcherska upravljacka ploca"
 msgstr ""
@@ -2917,6 +3079,437 @@ msgstr "Begriffe"
 msgid "Napredak"
 msgstr ""
 
+msgid "Izlazni Račun"
+msgstr "Abschlussrechnung"
+
+msgid "Ulazni Račun"
+msgstr "Eingabekonto"
+
+msgid "Ugovor"
+msgstr "Vertrag"
+
+msgid "Partner"
+msgstr "Partner"
+
+msgid "Datum izdavanja"
+msgstr "Erscheinungsdatum"
+
+msgid "Datum dospijeća"
+msgstr "Fälligkeitsdatum"
+
+msgid "Iznos"
+msgstr "Betrag"
+
+msgid "Plaćeno"
+msgstr "Bezahlt"
+
+msgid "Stornirano"
+msgstr "Storniert"
+
+#, fuzzy
+#| msgid "Datum isporuke"
+msgid "Datum potvrde"
+msgstr "Liefertermin"
+
+msgid "Napomena"
+msgstr "Hinweis"
+
+#, fuzzy
+#| msgid "Kreirano:"
+msgid "Kreirao"
+msgstr "Storniert"
+
+#, fuzzy
+#| msgid "Jed. mjera"
+msgid "Jed. mjere"
+msgstr "Maßeinheit"
+
+msgid "Jed. cijena"
+msgstr "Stückpreis"
+
+msgid "Popust %"
+msgstr "Rabatt %"
+
+msgid "Reg. oznaka"
+msgstr ""
+
+#, fuzzy
+#| msgid "Oprema"
+msgid "Otpremnica"
+msgstr "Ausrüstung"
+
+#, fuzzy
+#| msgid "Spremi"
+msgid "Otpremnice"
+msgstr "Spremi"
+
+msgid "LOT / Šarža"
+msgstr ""
+
+msgid "Veza na LOT (ExpiryBatch)"
+msgstr ""
+
+msgid "Stavka otpremnice"
+msgstr ""
+
+msgid "Stavke otpremnice"
+msgstr ""
+
+msgid "Poljoprivrednik"
+msgstr ""
+
+msgid "OIB"
+msgstr "OIB"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "Virman"
+msgstr "Im Folgenden finden Sie eine Liste der häufigsten Fehler."
+
+msgid "Otkupni blok"
+msgstr ""
+
+msgid "Otkupni blokovi"
+msgstr ""
+
+msgid "Porijeklo"
+msgstr ""
+
+msgid "Klasa"
+msgstr ""
+
+msgid "Stavka otkupnog bloka"
+msgstr ""
+
+msgid "Stavke otkupnog bloka"
+msgstr ""
+
+msgid "Pošiljatelj"
+msgstr ""
+
+#, fuzzy
+#| msgid "Primatelj / Kupac"
+msgid "Primatelj"
+msgstr "Empfänger / Kunde"
+
+#, fuzzy
+#| msgid "Prijevoz / dnevnice"
+msgid "Prijevoznik"
+msgstr "Transport / pro Tag"
+
+msgid "Mjesto utovara"
+msgstr ""
+
+msgid "Mjesto istovara"
+msgstr ""
+
+msgid "Temp. režim"
+msgstr ""
+
+#, fuzzy
+#| msgid "Sistemski Status"
+msgid "Carinski status"
+msgstr "Interne ID"
+
+msgid "CMR teretni list"
+msgstr ""
+
+msgid "CMR teretni listovi"
+msgstr ""
+
+msgid "Bruto kg"
+msgstr ""
+
+msgid "m³"
+msgstr ""
+
+msgid "CMR stavka"
+msgstr ""
+
+#, fuzzy
+#| msgid "Stavke"
+msgid "CMR stavke"
+msgstr "Streiks"
+
+#, fuzzy
+#| msgid "Izlazni Račun"
+msgid "Izlazni račun"
+msgstr "Abschlussrechnung"
+
+msgid "Ulazni račun (smart import)"
+msgstr ""
+
+msgid "e-Račun (FINA/XML)"
+msgstr ""
+
+msgid "Dokument (ručni upload)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Info o certifikatu"
+msgid "FINA certifikat"
+msgstr "Zertifikat"
+
+msgid "Primka"
+msgstr ""
+
+msgid "CMR"
+msgstr ""
+
+#, fuzzy
+#| msgid "Na račun"
+msgid "POS račun"
+msgstr "Keine Rechnung"
+
+#, fuzzy
+#| msgid "Tip workflowa"
+msgid "Tip izvora"
+msgstr "Art des Workflows"
+
+msgid "ID izvornog objekta"
+msgstr ""
+
+msgid "Evidencijski broj"
+msgstr ""
+
+#, fuzzy
+#| msgid "Detalji dokumenta"
+msgid "Datum dokumenta"
+msgstr "Verbundener Dokument"
+
+#, fuzzy
+#| msgid "ZKI:"
+msgid "ZKI"
+msgstr "ZKI:"
+
+#, fuzzy
+#| msgid "JIR:"
+msgid "JIR"
+msgstr "JIR:"
+
+#, fuzzy
+#| msgid "PDF datoteka"
+msgid "Putanja datoteke"
+msgstr "Datei"
+
+msgid "Ima XML"
+msgstr ""
+
+msgid "Ima PDF"
+msgstr ""
+
+msgid "Ima sliku"
+msgstr ""
+
+msgid "Arhivirao"
+msgstr ""
+
+#, fuzzy
+#| msgid "Datum izdavanja"
+msgid "Datum arhiviranja"
+msgstr "Erscheinungsdatum"
+
+msgid "Ključ sesije"
+msgstr ""
+
+msgid "Integritet hash"
+msgstr ""
+
+msgid "Zaštićeno do"
+msgstr ""
+
+msgid "Proknjiženo"
+msgstr ""
+
+msgid "AI prijedlog knjiženja"
+msgstr ""
+
+msgid "Barcode"
+msgstr ""
+
+msgid "Arhivski zapis"
+msgstr ""
+
+msgid "Arhivski zapisi"
+msgstr ""
+
+#, fuzzy
+#| msgid "Naziv tvrtke"
+msgid "Naziv datoteke"
+msgstr "Firmenname"
+
+msgid "MIME tip"
+msgstr ""
+
+msgid "Velicina (bytes)"
+msgstr ""
+
+msgid "SHA-256"
+msgstr ""
+
+#, fuzzy
+#| msgid "Documents"
+msgid "Document Blob"
+msgstr "Dokument"
+
+#, fuzzy
+#| msgid "Documents"
+msgid "Document Blobs"
+msgstr "Dokument"
+
+msgid "Lokalni disk"
+msgstr ""
+
+msgid "Cloud (B2/S3)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Pregled podataka"
+msgid "Baza podataka"
+msgstr "Keine Daten"
+
+msgid "Storage backend"
+msgstr ""
+
+msgid "Max velicina datoteke (MB)"
+msgstr ""
+
+msgid "Auto kompresija slika"
+msgstr ""
+
+msgid "Cloud bucket"
+msgstr ""
+
+msgid "Cloud prefix"
+msgstr ""
+
+#, fuzzy
+#| msgid "PDV i konfiguracija"
+msgid "Storage Konfiguracija"
+msgstr "MwSt. und Konfiguration"
+
+#, fuzzy
+#| msgid "PDV i konfiguracija"
+msgid "Storage Konfiguracije"
+msgstr "MwSt. und Konfiguration"
+
+msgid "Arhivska oznaka"
+msgstr ""
+
+msgid "Arhivske oznake"
+msgstr ""
+
+msgid "Na cekanju"
+msgstr "Ausstehend"
+
+#, fuzzy
+#| msgid "Stornirano"
+msgid "Ekstrahirano"
+msgstr "Storniert"
+
+msgid "XML generiran"
+msgstr ""
+
+#, fuzzy
+#| msgid "Fiskalizirano"
+msgid "Validirano"
+msgstr "Fiskalisiert"
+
+#, fuzzy
+#| msgid "Dospijelo"
+msgid "Neuspjelo"
+msgstr "Fällig"
+
+msgid "Visoko (>90%)"
+msgstr ""
+
+msgid "Srednje (70-90%)"
+msgstr ""
+
+msgid "Nisko (<70%)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Original (HR)"
+msgid "Originalni naziv"
+msgstr "Beschreibung"
+
+msgid "Originalna velicina (bytes)"
+msgstr ""
+
+msgid "SHA-256 originala"
+msgstr ""
+
+msgid "MIME tip originala"
+msgstr ""
+
+#, fuzzy
+#| msgid "Putanja certifikata"
+msgid "Putanja originala"
+msgstr "Zertifikat"
+
+msgid "AI model"
+msgstr ""
+
+msgid "Verzija prompta"
+msgstr ""
+
+msgid "Pouzdanost AI"
+msgstr ""
+
+msgid "Tocnost (0-1)"
+msgstr ""
+
+msgid "Tokeni odgovora"
+msgstr ""
+
+#, fuzzy
+#| msgid "Cijena"
+msgid "Cijena (EUR)"
+msgstr "Preis"
+
+#, fuzzy
+#| msgid "Osnovni podaci"
+msgid "Ekstrahirani podaci"
+msgstr "Grundlegende Informationen"
+
+msgid "Generirani XML"
+msgstr ""
+
+msgid "SHA-256 XML-a"
+msgstr ""
+
+msgid "Velicina XML (bytes)"
+msgstr ""
+
+msgid "Putanja XML-a"
+msgstr ""
+
+#, fuzzy
+#| msgid "Bez fiskalizacije"
+msgid "Greske validacije"
+msgstr "Datum der Fiskalisierung"
+
+msgid "Smanjenje velicine (%)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Broj radnih dana"
+msgid "Broj ekstrahiranih polja"
+msgstr "Kontonummer"
+
+#, fuzzy
+#| msgid "Dodaj stavku"
+msgid "Broj stavki"
+msgstr "Bild hinzufügen"
+
+msgid "Konverzijski zapis"
+msgstr ""
+
+msgid "Konverzijski zapisi"
+msgstr ""
+
 msgid "Documents"
 msgstr "Dokument"
 
@@ -2925,6 +3518,89 @@ msgstr "Überprüfung und Verwaltung – Dokumente"
 
 msgid "Documents Modul"
 msgstr "Dokument"
+
+msgid "Potpuna punomoć (slanje + primanje)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Samo fakturiranje"
+msgid "Samo slanje"
+msgstr "Rechnungsstellung"
+
+#, fuzzy
+#| msgid "Samo fakturiranje"
+msgid "Samo primanje"
+msgstr "Rechnungsstellung"
+
+msgid "Nacrt — čeka potpis"
+msgstr ""
+
+msgid "Potpisan — čeka registraciju kod FINA"
+msgstr ""
+
+msgid "Aktivan — registriran kod FINA"
+msgstr ""
+
+msgid "Opozvan"
+msgstr ""
+
+#, fuzzy
+#| msgid "Isteklo"
+msgid "Istekao"
+msgstr "Abgelaufen"
+
+msgid "Opunomoćitelj (vlasnik OIB-a)"
+msgstr ""
+
+msgid "Firma čiji se e-Računi šalju"
+msgstr ""
+
+msgid "OIB opunomoćitelja"
+msgstr ""
+
+msgid "Opunomoćenik (posrednik)"
+msgstr ""
+
+msgid "Firma koja šalje e-Račune u ime opunomoćitelja"
+msgstr ""
+
+#, fuzzy
+#| msgid "Broj dokumenta"
+msgid "OIB opunomoćenika"
+msgstr "Dokumentennummer"
+
+msgid "Tip punomoći"
+msgstr ""
+
+msgid "FINA referenca mandata"
+msgstr ""
+
+msgid "ID dobiven od FINA nakon registracije"
+msgstr ""
+
+#, fuzzy
+#| msgid "Registriraj se i nastavi"
+msgid "Registrirano kod FINA"
+msgstr "Registrieren und fortfahren"
+
+#, fuzzy
+#| msgid "Registracija"
+msgid "Datum registracije kod FINA"
+msgstr "Standort"
+
+msgid "PDF punomoći (potpisana)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Naziv kategorije"
+msgid "Prazno = neograničeno"
+msgstr "Firmenname"
+
+msgid "Punomoć (e-Račun mandat)"
+msgstr ""
+
+msgid "Punomoći (e-Račun mandati)"
+msgstr ""
 
 msgid "Transakcija"
 msgstr "Transaktion"
@@ -3580,6 +4256,22 @@ msgstr ""
 msgid "Uk. MPC"
 msgstr ""
 
+msgid "Broj sarze / LOT"
+msgstr ""
+
+msgid "LOT oznaka sa ambalaže dobavljača"
+msgstr ""
+
+#, fuzzy
+#| msgid "Datoteka"
+msgid "Datum isteka roka"
+msgstr "Datei"
+
+#, fuzzy
+#| msgid "Kreiraj unos"
+msgid "Kreirana sarža"
+msgstr "Spremi unos"
+
 #, fuzzy
 #| msgid "Stavke"
 msgid "Stavka primke"
@@ -3627,9 +4319,6 @@ msgid "HACCP karantena"
 msgstr ""
 
 msgid "Zbrinuto"
-msgstr ""
-
-msgid "Broj sarze / LOT"
 msgstr ""
 
 msgid "Ocekivana tezina (kg)"
@@ -4450,11 +5139,6 @@ msgid "Status dokumenta"
 msgstr "Dokumentennummer"
 
 #, fuzzy
-#| msgid "Kreirano:"
-msgid "Kreiran"
-msgstr "Storniert"
-
-#, fuzzy
 #| msgid "Lokacija"
 msgid "pozicija"
 msgstr "Standort"
@@ -4751,97 +5435,24 @@ msgstr "Fällig"
 msgid "Storno"
 msgstr "Storniert"
 
-msgid "Geschäftsdokument · Deutschland"
-msgstr "Geschäftsdokument · Deutschland"
-
-#, fuzzy
-#| msgid "Fälligkeitsdatum:"
-msgid "Angebotsdatum:"
-msgstr "Fälligkeitsdatum:"
-
-msgid "Rechnungsdatum:"
-msgstr "Rechnungsdatum:"
-
-#, fuzzy
-#| msgid "Fällig bis:"
-msgid "Gültig bis:"
-msgstr "Fällig bis:"
-
-msgid "Fälligkeitsdatum:"
-msgstr "Fälligkeitsdatum:"
-
-msgid "Leistungsdatum:"
-msgstr "Aufführungstermin:"
-
-msgid "Absender / Rechnungssteller"
-msgstr "Absender / Rechnungssteller"
-
-msgid "Empfänger / Rechnungsempfänger"
-msgstr "Emfänger / Rechnungsempfänger"
-
-msgid "Pos."
-msgstr "Pos."
-
-msgid "Beschreibung"
-msgstr "Beschreibung"
-
-msgid "Menge"
-msgstr "Menge"
-
-msgid "Einheit"
-msgstr "Einheit"
-
-msgid "Einzelpreis"
-msgstr "Einzelpreis"
-
-msgid "Rabatt"
-msgstr "Rabatt (%)"
-
-msgid "Betrag"
-msgstr "Natrag"
-
-msgid "Nettobetrag:"
-msgstr "Nettobetrag:"
-
-msgid "GESAMTBETRAG:"
-msgstr "GESAMTBETRAG:"
-
-msgid "Zahlungsinformationen"
-msgstr "Zahlungsinformationen"
-
-msgid "Zahlungsart:"
-msgstr "Zahlungsart:"
-
-msgid "IBAN:"
-msgstr "IBAN:"
-
-msgid "BIC/SWIFT:"
-msgstr "BIC/SWIFT:"
-
-msgid "Fällig bis:"
-msgstr "Fällig bis:"
-
-msgid "Verwendungszweck:"
-msgstr "Verwendungszweck:"
-
 msgid "Primatelj / Kupac"
 msgstr "Empfänger / Kunde"
 
-#, python-format
-msgid "Pop. %%"
+msgid "Rbr."
+msgstr ""
+
+#, fuzzy, python-format
+#| msgid "Pop. %%"
+msgid "Pop.%%"
 msgstr "Pop. %%"
 
-msgid "Osnovica (bez PDV):"
-msgstr "Betrag ohne Mehrwertsteuer/MwSt"
+#, fuzzy
+#| msgid "Osnovica"
+msgid "Osnovica:"
+msgstr "Grundlegende Informationen"
 
 msgid "UKUPNO ZA PLATITI:"
 msgstr "GESAMTZAHLUNG"
-
-msgid "Poslovni prostor:"
-msgstr "Geschäftsräume"
-
-msgid "Operater:"
-msgstr "Betreiber"
 
 msgid "Podaci za plaćanje"
 msgstr "Zahlung"
@@ -4849,26 +5460,11 @@ msgstr "Zahlung"
 msgid "Način plaćanja:"
 msgstr "Zahlungsweise"
 
-msgid "Poziv na broj:"
-msgstr "Signatur"
-
 msgid "Rok plaćanja:"
 msgstr "Zahlungsfrist"
 
-msgid "Skeniraj za plaćanje"
-msgstr "Zahlungsweise"
-
-msgid "✓ Fiskalizirani račun"
-msgstr "Fiskalisiert"
-
-msgid "ZKI:"
-msgstr "ZKI:"
-
-msgid "JIR:"
-msgstr "JIR:"
-
-msgid "Datum:"
-msgstr "Datum"
+msgid "Poziv na broj:"
+msgstr "Signatur"
 
 msgid "Novi račun — Uredski wizard"
 msgstr "Neue Rechnung — Büro-Assistent"
@@ -5120,7 +5716,19 @@ msgstr "Keine Daten"
 msgid "Greška"
 msgstr ""
 
-msgid "WhatsApp slanje jos nije konfigurirano. Koristite email."
+msgid "Klijent nema broj telefona u sustavu."
+msgstr ""
+
+#, python-brace-format
+msgid "WhatsApp poslan na {phone}!"
+msgstr ""
+
+msgid ""
+"WhatsApp: {result.get(\"error\", \"Greška\")}. Kopirajte link: {portal_url}"
+msgstr ""
+
+#, python-brace-format
+msgid "WhatsApp nije dostupan. Portal link: {portal_url}"
 msgstr ""
 
 msgid "Samo ponude se mogu pretvoriti u predračun!"
@@ -6633,11 +7241,6 @@ msgstr ""
 msgid "Osnovno"
 msgstr "Grundlegende Informationen"
 
-#, fuzzy
-#| msgid "Kontakt ime *"
-msgid "Kontakt osoba"
-msgstr "Kontakte"
-
 msgid "Uvjeti poslovanja"
 msgstr ""
 
@@ -6667,6 +7270,9 @@ msgstr "Partner (Beides)"
 
 msgid "Zaposlenik"
 msgstr "Mitarbeiter"
+
+msgid "Prodajni agent / Tippgeber"
+msgstr ""
 
 msgid "Italija"
 msgstr ""
@@ -6699,6 +7305,29 @@ msgstr "E-Mail-Client"
 msgid "Email kontakt osobe"
 msgstr "E-Mail-Client"
 
+msgid "Tip kupca (routing računa)"
+msgstr ""
+
+msgid ""
+"Određuje koji tip računa sustav automatski izdaje. B2C=fiskalni bon, B2B "
+"PDV=eRačun, proračunski=eRačun B2G, udruga bez PDV=obični PDF, "
+"inozemstvo=obični PDF."
+msgstr ""
+
+msgid "Proračunski korisnik"
+msgstr ""
+
+msgid "Škole, bolnice, općine, državna tijela. Uvijek primaju eRačun (B2G)."
+msgstr ""
+
+msgid "Neprofitna bez gospodarske djel."
+msgstr ""
+
+msgid ""
+"Udruge/zaklade koje ne obavljaju gospodarsku djelatnost i nisu u PDV-u. "
+"Primaju obični PDF račun — bez obveze eRačuna po NN 89/25."
+msgstr ""
+
 #, fuzzy
 #| msgid "Tip termina"
 msgid "Tip partnera"
@@ -6715,6 +7344,126 @@ msgid "Rabat (%)"
 msgstr "Rabatt (%)"
 
 msgid "Kreditni limit"
+msgstr ""
+
+#, fuzzy
+#| msgid "Fiskalizirano"
+msgid "VIES validan"
+msgstr "Fiskalisiert"
+
+msgid "VIES provjera"
+msgstr ""
+
+msgid "VIES naziv"
+msgstr ""
+
+#, fuzzy
+#| msgid "Adresa"
+msgid "VIES adresa"
+msgstr "Adresse"
+
+msgid "Čeka aktivaciju"
+msgstr ""
+
+msgid "Aktivan — provizija teče"
+msgstr ""
+
+#, fuzzy
+#| msgid "Isteklo"
+msgid "Istekao (12 mj)"
+msgstr "Abgelaufen"
+
+#, fuzzy
+#| msgid "Otkazano"
+msgid "Otkazan"
+msgstr "Abgebrochen"
+
+msgid "Agent"
+msgstr ""
+
+#, fuzzy
+#| msgid "Naziv tvrtke"
+msgid "Preporučena tvrtka"
+msgstr "Firmenname"
+
+msgid "Referral kod"
+msgstr ""
+
+msgid "Jedinstveni kod za praćenje (npr. REF-ANTONIO-001)"
+msgstr ""
+
+msgid "Provizija (%)"
+msgstr ""
+
+msgid "Trajanje provizije (mjeseci)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Ukupno fakturirano"
+msgid "Ukupno zarađeno (EUR)"
+msgstr "Gesamtbetrag der Rechnung"
+
+#, fuzzy
+#| msgid "Ukupno radnika"
+msgid "Ukupno isplaćeno (EUR)"
+msgstr "Gesamtbetrag der Rechnung"
+
+msgid "Ugovor potpisan"
+msgstr ""
+
+#, fuzzy
+#| msgid "Ukupno radnika"
+msgid "IBAN agenta"
+msgstr "Gesamtbetrag der Rechnung"
+
+msgid "Agent Referral"
+msgstr ""
+
+msgid "Agent Referrals"
+msgstr ""
+
+msgid "Mjesec"
+msgstr ""
+
+msgid "Godina"
+msgstr ""
+
+#, fuzzy
+#| msgid "Iznos (€)"
+msgid "Iznos (EUR)"
+msgstr "Betrag"
+
+#, fuzzy
+#| msgid "Potvrdi rezervaciju"
+msgid "Broj referrala"
+msgstr "Bestätigen Sie die Reservierung"
+
+#, fuzzy
+#| msgid "Partner (klijent)"
+msgid "Razrada po klijentima"
+msgstr "Partner / Kunde"
+
+#, fuzzy
+#| msgid "IBAN za uplatu"
+msgid "IBAN za isplatu"
+msgstr "IBAN für die Zahlung"
+
+#, fuzzy
+#| msgid "Račun"
+msgid "Izračunato"
+msgstr "Rechnung"
+
+#, fuzzy
+#| msgid "Neplaćeno"
+msgid "Isplaćeno"
+msgstr "Unbezahlt"
+
+#, fuzzy
+#| msgid "Isplata / Rashod"
+msgid "Agent isplata"
+msgstr "Zahlung / Ausgabe"
+
+msgid "Agent isplate"
 msgstr ""
 
 #, fuzzy
@@ -6898,12 +7647,6 @@ msgstr ""
 msgid "Isplaćeno — pain.001 generiran"
 msgstr ""
 
-msgid "Godina"
-msgstr ""
-
-msgid "Mjesec"
-msgstr ""
-
 #, fuzzy
 #| msgid "Način plaćanja"
 msgid "Obračuni plaća"
@@ -6994,6 +7737,9 @@ msgid ""
 "Comma-separated: food,drink,dessert ili prazno=sve. Optika: product,service"
 msgstr ""
 
+msgid "Training modus"
+msgstr ""
+
 msgid "POS terminal (kasa)"
 msgstr "POS-Terminal (Kasse)"
 
@@ -7035,6 +7781,11 @@ msgstr ""
 msgid "Vraceni artikli"
 msgstr ""
 
+#, fuzzy
+#| msgid "Nabavna cijena"
+msgid "Training smjena"
+msgstr "Kaufpreis"
+
 msgid "Blagajnici u smjeni"
 msgstr ""
 
@@ -7072,6 +7823,14 @@ msgid "Broj bona"
 msgstr "Bonnummer"
 
 #, fuzzy
+#| msgid "Porezni broj"
+msgid "Globalni redni broj"
+msgstr "Steuernummer"
+
+msgid "Jedinstven po firmi, bez duplikata. Za fiskalizaciju i analizu."
+msgstr ""
+
+#, fuzzy
 #| msgid "✓ Fiskalizirani račun"
 msgid "Fiskalni račun"
 msgstr "Fiskalisiert"
@@ -7097,10 +7856,54 @@ msgstr ""
 msgid "Napomena na bonu"
 msgstr "Bonnotiz"
 
+msgid "OIB kupca (R1)"
+msgstr ""
+
+msgid "Za R1 racun — OIB tvrtke kupca"
+msgstr ""
+
+#, fuzzy
+#| msgid "Naziv stope"
+msgid "Naziv kupca (R1)"
+msgstr "Kassenname"
+
+#, fuzzy
+#| msgid "Adresa"
+msgid "Adresa kupca"
+msgstr "Adresse"
+
+#, fuzzy
+#| msgid "Ime blagajnika"
+msgid "Ime clana"
+msgstr "Kassierername"
+
+msgid "Clan udruge koji je ostvario popust"
+msgstr ""
+
+msgid "Clan ID"
+msgstr ""
+
+msgid "FK na udruge.Clan — za audit trail popusta"
+msgstr ""
+
+msgid "Primijenjeni clanski popust (%)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Ulazni Račun"
+msgid "R1 racun"
+msgstr "Eingabekonto"
+
+msgid "Racun s podacima kupca — za knjizenje reprezentacije"
+msgstr ""
+
 #, fuzzy
 #| msgid "Plaćeno"
 msgid "Plaćen u"
 msgstr "Bezahlt"
+
+msgid "Originalni bon (za storno/povrat)"
+msgstr ""
 
 #, fuzzy
 #| msgid "Adresa"
@@ -7111,6 +7914,12 @@ msgid "User Agent"
 msgstr ""
 
 msgid "Kanal narudzbe"
+msgstr ""
+
+msgid "Training bon"
+msgstr ""
+
+msgid "Bon iz obuke — nema fiskalnu vrijednost"
 msgstr ""
 
 #, fuzzy
@@ -7176,6 +7985,15 @@ msgid "Napojnica vlasnika (AG)"
 msgstr ""
 
 msgid "Clanarina/donacija — ne fiskalizira se"
+msgstr ""
+
+msgid "Sarza (LOT)"
+msgstr ""
+
+msgid "LOT broj"
+msgstr ""
+
+msgid "Denormalizirano — trajno na bonu cak i ako se sarza obrise"
 msgstr ""
 
 #, fuzzy
@@ -7296,6 +8114,24 @@ msgid "Automatski printaj Z-report pri zatvaranju smjene"
 msgstr ""
 
 #, fuzzy
+#| msgid "Documents Modul"
+msgid "Pocket Mode"
+msgstr "Dokument"
+
+msgid ""
+"Mobitel kao jedini uređaj. Auto: digital receipt, bez printera, pokretna "
+"prodaja, offline-first."
+msgstr ""
+
+#, fuzzy
+#| msgid "Poslovni prostori"
+msgid "Oznaka prostora (fiskalizacija)"
+msgstr "Geschäftsräume"
+
+msgid "Za čl.28a Zakona o fiskalizaciji"
+msgstr ""
+
+#, fuzzy
 #| msgid "Stavke"
 msgid "POS postavke"
 msgstr "Streiks"
@@ -7318,6 +8154,9 @@ msgstr "Bilder hochladen"
 #| msgid "Popust %"
 msgid "Max popust (%)"
 msgstr "Rabatt %"
+
+msgid "Zakonski obavezno za fiskalizaciju (čl. 9. Zakona o fiskalizaciji)"
+msgstr ""
 
 msgid "Django korisnik"
 msgstr ""
@@ -7505,6 +8344,28 @@ msgstr "Signatur"
 msgid "Sarzni rokovi"
 msgstr ""
 
+#, fuzzy
+#| msgid "Tip termina"
+msgid "Tip vaucera"
+msgstr "Begriffe"
+
+msgid ""
+"Visenamjenski = obveza pri prodaji (bez PDV). Jednonamjenski = prihod s PDV."
+msgstr ""
+
+#, fuzzy
+#| msgid "Prodajna cijena"
+msgid "Prodan"
+msgstr "Transaktionen"
+
+msgid "True = kreiran prodajom na POS-u"
+msgstr ""
+
+#, fuzzy
+#| msgid "Projekt"
+msgid "Bon prodaje"
+msgstr "Projekt"
+
 msgid "Kod vaučera"
 msgstr ""
 
@@ -7681,6 +8542,45 @@ msgstr ""
 msgid "Glasovni unos"
 msgstr ""
 
+#, fuzzy
+#| msgid "Ukupno sati"
+msgid "Zvučni zapis"
+msgstr "Ukupno / Gesamt"
+
+msgid "WebM/MP3 snimka glasovnog prigovora"
+msgstr ""
+
+#, fuzzy
+#| msgid "Kategorija"
+msgid "AI kategorija"
+msgstr "Kategorie"
+
+msgid "AI sentiment"
+msgstr ""
+
+msgid "AI prioritet (1-5)"
+msgstr ""
+
+msgid "0=nije analizirano, 5=najhitnije"
+msgstr ""
+
+msgid "AI prijedlog odgovora"
+msgstr ""
+
+msgid "Claude generira prijedlog odgovora na hrvatskom"
+msgstr ""
+
+#, fuzzy
+#| msgid "Fiskalizirano"
+msgid "AI analizirano"
+msgstr "Fiskalisiert"
+
+msgid "Integritetski hash"
+msgstr ""
+
+msgid "SHA256 certifikat — dokaz nepromijenjenosti zapisa"
+msgstr ""
+
 msgid "Evidentirao"
 msgstr ""
 
@@ -7690,6 +8590,79 @@ msgid "Prigovor"
 msgstr "Vertrag"
 
 msgid "Knjiga prigovora"
+msgstr ""
+
+msgid "Neobičan storno"
+msgstr ""
+
+#, fuzzy
+#| msgid "Korisnički profil"
+msgid "Neobičan popust"
+msgstr "Benutzerprofil"
+
+msgid "Cash manjak"
+msgstr ""
+
+#, fuzzy
+#| msgid "Poslovni prostor"
+msgid "Masovni storno"
+msgstr "Geschäftsräume"
+
+#, fuzzy
+#| msgid "Pregled podataka"
+msgid "Prebrza naplata"
+msgstr "Keine Daten"
+
+msgid "Sumnjivi povrat"
+msgstr ""
+
+#, fuzzy
+#| msgid "Termini"
+msgid "Terminal heartbeat"
+msgstr "Begriffe"
+
+#, fuzzy
+#| msgid "Trenutna zaliha"
+msgid "Kritična zaliha"
+msgstr "Aktueller Bestand"
+
+#, fuzzy
+#| msgid "Fiskalizacija"
+msgid "Fiskalizacija fail"
+msgstr "Fiskalisierung (HR)"
+
+msgid "100. bon danas"
+msgstr ""
+
+msgid "Revenue milestone"
+msgstr ""
+
+#, fuzzy
+#| msgid "Zatvorena"
+msgid "Smjena otvorena"
+msgstr "Geschlossen"
+
+#, fuzzy
+#| msgid "Zatvorena"
+msgid "Smjena zatvorena"
+msgstr "Geschlossen"
+
+msgid "Info"
+msgstr ""
+
+msgid "Upozorenje"
+msgstr ""
+
+msgid "Kritično"
+msgstr ""
+
+msgid "Uspjeh"
+msgstr ""
+
+msgid "POS Pulse Event"
+msgstr ""
+
+msgid "POS Pulse Events"
 msgstr ""
 
 msgid "Gruppe"
@@ -7874,7 +8847,7 @@ msgid "Novi projekt"
 msgstr "Projektleiter"
 
 msgid "Otvori"
-msgstr ""
+msgstr "Öffnen"
 
 #, fuzzy
 #| msgid "Nema rezultata"
@@ -7989,6 +8962,9 @@ msgstr ""
 msgid "WiFi lozinka"
 msgstr "Passwort"
 
+msgid "Potpomognuto područje"
+msgstr ""
+
 #, fuzzy
 #| msgid "Lokacija (grad, adresa)"
 msgid "Lokacija / Adresa"
@@ -8013,7 +8989,7 @@ msgid "Sezona"
 msgstr ""
 
 msgid "Od"
-msgstr ""
+msgstr "Ab"
 
 msgid "Do"
 msgstr ""
@@ -8257,6 +9233,166 @@ msgstr ""
 msgid "AI logovi"
 msgstr ""
 
+msgid "PO-SD — Paušalni obrt"
+msgstr ""
+
+msgid "DOH — Godišnja prijava poreza na dohodak"
+msgstr ""
+
+msgid "ZPP-DOH — Zahtjev za priznavanje prava"
+msgstr ""
+
+msgid "PD — Prijava poreza na dobit"
+msgstr ""
+
+msgid "PD-IPO — Transferne cijene"
+msgstr ""
+
+msgid "PDV — Prijava PDV-a"
+msgstr ""
+
+msgid "PDV-K — Konačni obračun PDV-a"
+msgstr ""
+
+msgid "GFI-POD — Godišnji financijski izvještaj"
+msgstr ""
+
+msgid "INO-DOH — Inozemni dohodak"
+msgstr ""
+
+msgid "JOPPD — Izvješće o primicima i doprinosima"
+msgstr ""
+
+msgid "Čeka pregled računovođe"
+msgstr ""
+
+msgid "Vraćeno na ispravak"
+msgstr ""
+
+#, fuzzy
+#| msgid "Fiskalizirano"
+msgid "Finalizirano"
+msgstr "Fiskalisiert"
+
+#, fuzzy
+#| msgid "Porezna stopa"
+msgid "Predano na ePorezna"
+msgstr "Steuersatz"
+
+#, fuzzy
+#| msgid "Prihvaćeno"
+msgid "Prihvaćeno od Porezne"
+msgstr "Bezahlt"
+
+#, fuzzy
+#| msgid "2. Prevedi odabrano"
+msgid "Odbijeno od Porezne"
+msgstr "2. Ausgewählte übersetzen"
+
+#, fuzzy
+#| msgid "Fisk."
+msgid "Niska"
+msgstr "Fisch."
+
+#, fuzzy
+#| msgid "Normativ"
+msgid "Normalna"
+msgstr "Normativ"
+
+#, fuzzy
+#| msgid "Gradnja"
+msgid "Visoka"
+msgstr "Grad"
+
+msgid "Kritična"
+msgstr ""
+
+msgid "Plaća vs. dividenda"
+msgstr ""
+
+#, fuzzy
+#| msgid "Prilagođeno"
+msgid "Pronađene olakšice"
+msgstr "Maßgeschneidert"
+
+msgid "ZPP-DOH retroaktivno (5 god)"
+msgstr ""
+
+msgid "Paušal tier optimizacija"
+msgstr ""
+
+msgid "PDV prag 60K monitoring"
+msgstr ""
+
+msgid "Usporedba prireza po općinama"
+msgstr ""
+
+msgid "I. skupina — 700€ osobni odbitak"
+msgstr ""
+
+msgid "II. skupina — 650€ osobni odbitak"
+msgstr ""
+
+#, fuzzy
+#| msgid "Odabrani termin:"
+msgid "Uzdržavani član"
+msgstr "Ihre Rechnungen und Termine"
+
+msgid "1. dijete"
+msgstr ""
+
+msgid "2. dijete"
+msgstr ""
+
+msgid "3. dijete"
+msgstr ""
+
+msgid "4. dijete"
+msgstr ""
+
+msgid "5. i svako daljnje dijete"
+msgstr ""
+
+msgid "Djelomična invalidnost"
+msgstr ""
+
+#, python-format
+msgid "100% invalidnost"
+msgstr ""
+
+msgid "HRVI I. skupina"
+msgstr ""
+
+msgid "HRVI II. skupina"
+msgstr ""
+
+msgid "HRVI ostale skupine"
+msgstr ""
+
+#, fuzzy
+#| msgid "Fakturiranje"
+msgid "Ažuriranje"
+msgstr "Rechnungsstellung"
+
+#, fuzzy
+#| msgid "Fiskalizacija"
+msgid "Finalizacija"
+msgstr "Fiskalisierung (HR)"
+
+msgid "Podnošenje"
+msgstr ""
+
+#, fuzzy
+#| msgid "Identifikacija"
+msgid "Simulacija"
+msgstr "E-Mail-Verifizierung"
+
+msgid "XML export"
+msgstr ""
+
+msgid "PDF export"
+msgstr ""
+
 msgid "DB veličina (MB)"
 msgstr ""
 
@@ -8379,7 +9515,7 @@ msgstr ""
 
 #, fuzzy
 #| msgid "Lozinka (min. 8 znakova)"
-msgid "Unesite novu lozinku (min. 8 znakova)"
+msgid "Unesite novu lozinku (min. 10 znakova)"
 msgstr "Das Passwort muss mindestens 8 Zeichen lang sein."
 
 #, fuzzy
@@ -8389,7 +9525,7 @@ msgstr "Passwort"
 
 #, fuzzy
 #| msgid "Lozinka (min. 8 znakova)"
-msgid "Min. 8 znakova"
+msgid "Min. 10 znakova"
 msgstr "Das Passwort muss mindestens 8 Zeichen lang sein."
 
 #, fuzzy
@@ -8464,7 +9600,7 @@ msgstr ""
 msgid "Mobilni pristup — Device tokeni"
 msgstr ""
 
-msgid "Generiraj barcode za instant login s mobitelom (bez lozinke)"
+msgid "Mobitel = pristupna kartica. Skeniraj barcode za instant POS prijavu."
 msgstr ""
 
 msgid "Novi device token"
@@ -8484,16 +9620,23 @@ msgstr ""
 msgid "Generiraj barcode"
 msgstr ""
 
+msgid "Puni ekran"
+msgstr ""
+
 #, fuzzy
 #| msgid "Aktivan"
-msgid "Deaktiviran"
+msgid "Deaktiviraj"
+msgstr "Aktiv"
+
+#, fuzzy
+#| msgid "Aktivan"
+msgid "Aktiviraj"
 msgstr "Aktiv"
 
 msgid "Nemaš device tokena"
 msgstr ""
 
-msgid ""
-"Generiraj barcode iznad — spremi u mobitel i skeniraj za instant POS pristup."
+msgid "Generiraj barcode iznad — svaki uređaj dobije svoj token."
 msgstr ""
 
 msgid "Kako radi?"
@@ -8548,12 +9691,6 @@ msgstr "Zurück zur Titelseite"
 #| msgid "Prijava - FINA-CONNECT"
 msgid "Prijava – LIMIT CONNECT"
 msgstr "Anmelden - FINA-CONNECT"
-
-msgid "FINA"
-msgstr "LIMIT"
-
-msgid "Visković Group · Poslovni portal"
-msgstr ""
 
 #, fuzzy
 #| msgid "Super Administrator"
@@ -8831,6 +9968,11 @@ msgstr "E-Mail-Client"
 #| msgid "--- Bez resursa ---"
 msgid "-- resurs --"
 msgstr "--- Keine Ressourcen ---"
+
+#, fuzzy
+#| msgid "Lozinka (min. 8 znakova)"
+msgid "Lozinka (min. 10 znakova)"
+msgstr "Das Passwort muss mindestens 8 Zeichen lang sein."
 
 #, fuzzy
 #| msgid "📄 Pregled PDF"
@@ -9814,188 +10956,6 @@ msgstr ""
 msgid "LIMIT"
 msgstr ""
 
-msgid "Control Tower"
-msgstr ""
-
-#, fuzzy
-#| msgid "Tip dokumenta"
-msgid "Upload Dokumenta"
-msgstr "Dokumenttyp"
-
-msgid "AI Inbox"
-msgstr ""
-
-msgid "Knjiga URA/IRA"
-msgstr ""
-
-#, fuzzy
-#| msgid "PDV stopa"
-msgid "PDV obrazac"
-msgstr "PDV-Gruppe"
-
-#, fuzzy
-#| msgid "Trajanje"
-msgid "AI Upravljanje"
-msgstr "Verwaltung"
-
-#, fuzzy
-#| msgid "Materijal"
-msgid "Galerija"
-msgstr "Galerie"
-
-#, fuzzy
-#| msgid "Poslano"
-msgid "Poslovanje"
-msgstr "Gesendet"
-
-msgid "Burza projekata"
-msgstr ""
-
-#, fuzzy
-#| msgid "Bankovna transakcija"
-msgid "Nova transakcija"
-msgstr "Bankbuchung"
-
-msgid "Opomene (Dunning)"
-msgstr ""
-
-#, fuzzy
-#| msgid "Dokumenti"
-msgid "Dokumenti-Arhiva"
-msgstr "Dokumente"
-
-#, fuzzy
-#| msgid "Kalkulator ponude"
-msgid "Kalkulator"
-msgstr "Rechner"
-
-#, fuzzy
-#| msgid "Kalkulator ponude"
-msgid "Bad-Kalkulator"
-msgstr "Rechner"
-
-msgid "Procjene / Nalazi"
-msgstr ""
-
-#, fuzzy
-#| msgid "Rekoncilirano"
-msgid "Rekoncilijacija"
-msgstr "Storniert"
-
-msgid "Payroll"
-msgstr ""
-
-msgid "Izvjestaji"
-msgstr ""
-
-msgid "e-Racuni"
-msgstr ""
-
-#, fuzzy
-#| msgid "Tip"
-msgid "Tim"
-msgstr "Typ"
-
-msgid "Manager"
-msgstr ""
-
-msgid "Zaposlenici"
-msgstr ""
-
-#, fuzzy
-#| msgid "Usluga"
-msgid "Usluge"
-msgstr "Service"
-
-#, fuzzy
-#| msgid "Email klijenta"
-msgid "Kartoni klijenata"
-msgstr "E-Mail-Client"
-
-#, fuzzy
-#| msgid "Adresa intervencije"
-msgid "Intervencije"
-msgstr "Interventionsadresse"
-
-msgid "Skladiste & POS"
-msgstr ""
-
-#, fuzzy
-#| msgid "Kretanje zalihe"
-msgid "Pregled zalihe"
-msgstr "Lagerbewegung"
-
-msgid "Prediktivna nabava"
-msgstr ""
-
-msgid "POS"
-msgstr ""
-
-msgid "Gastro POS"
-msgstr ""
-
-#, fuzzy
-#| msgid "Rok plaćanja"
-msgid "Rokovi trajanja"
-msgstr "Zahlungsfrist"
-
-msgid "Vauceri"
-msgstr ""
-
-msgid "Revizorski paket"
-msgstr ""
-
-msgid "Specijalno"
-msgstr ""
-
-msgid "Robot Hotel"
-msgstr ""
-
-msgid "Grossmarkt"
-msgstr ""
-
-msgid "Futures"
-msgstr ""
-
-msgid "Dostava / Hub"
-msgstr ""
-
-msgid "AI Asistent"
-msgstr ""
-
-#, fuzzy
-#| msgid "Interna procjena"
-msgid "Integracije"
-msgstr "Integrationen"
-
-#, fuzzy
-#| msgid "Korisničko ime"
-msgid "Korisnici"
-msgstr "Benutzerprofil"
-
-msgid "Umbrella"
-msgstr ""
-
-msgid "Promo kodovi"
-msgstr ""
-
-msgid "AI Builder"
-msgstr ""
-
-msgid "Django Admin"
-msgstr ""
-
-msgid "Moduli"
-msgstr "Module"
-
-msgid "Mobilni pristup"
-msgstr ""
-
-#, fuzzy
-#| msgid "Prijava"
-msgid "Odjava"
-msgstr "Anmelden"
-
 msgid "&#x1F4D2; Knjigovodstvo"
 msgstr ""
 
@@ -10251,6 +11211,9 @@ msgid "&#x1F4C4; Otvori dokumente &rarr;"
 msgstr ""
 
 msgid "&#x2190; Glavni dashboard"
+msgstr ""
+
+msgid "POS"
 msgstr ""
 
 msgid "&#x1F374; Restoran"
@@ -10638,6 +11601,11 @@ msgstr ""
 msgid "Kreiraj"
 msgstr "Storniert"
 
+#, fuzzy
+#| msgid "Kalkulator ponude"
+msgid "Kalkulator"
+msgstr "Rechner"
+
 msgid "Kalkulator trenutno nije dostupan"
 msgstr ""
 
@@ -10664,6 +11632,9 @@ msgstr ""
 msgid "Nova tvrtka"
 msgstr "Firmenname"
 
+msgid "IBAN:"
+msgstr "IBAN:"
+
 #, fuzzy
 #| msgid "U sustavu PDV-a"
 msgid "U sustavu PDV"
@@ -10678,6 +11649,142 @@ msgstr "Keine Daten"
 #| msgid "Kreiraj unos"
 msgid "Kreiraj prvu."
 msgstr "Spremi unos"
+
+#, fuzzy
+#| msgid "Zadana porezna stopa"
+msgid "Nema definiranih poreznih stopa."
+msgstr "Standardtarif"
+
+#, fuzzy
+#| msgid "Dodaj stavku"
+msgid "Dodaj novu stopu"
+msgstr "Bild hinzufügen"
+
+#, fuzzy, python-format
+#| msgid "Stopa (%)"
+msgid "Stopa %%"
+msgstr "Fuß"
+
+msgid "Dodaj"
+msgstr "Hinzufügen"
+
+#, fuzzy
+#| msgid "&#8592; Natrag na podatke"
+msgid "Natrag na postavke"
+msgstr "&#8592; Zurück zum Kalender"
+
+msgid "Uvjeti korištenja"
+msgstr ""
+
+msgid "Uvjeti korištenja platforme"
+msgstr ""
+
+msgid "Suglasnost za obradu podataka"
+msgstr ""
+
+msgid "Verzija"
+msgstr ""
+
+#, fuzzy
+#| msgid "Voditelj projekta"
+msgid "Voditelj obrade"
+msgstr "Projektleiter"
+
+#, fuzzy
+#| msgid "Porezna stopa"
+msgid "Pravna osnova"
+msgstr "Steuersatz"
+
+msgid "Obrada podataka temelji se na:"
+msgstr ""
+
+msgid "GDPR čl. 6(1)(b) — izvršenje ugovora o pružanju računovodstvenih usluga"
+msgstr ""
+
+msgid "GDPR čl. 6(1)(c) — zakonska obveza (porezna evidencija, NN 89/25)"
+msgstr ""
+
+msgid ""
+"GDPR čl. 6(1)(f) — legitimni interes (prevencija prijevara, bonitetna "
+"provjera)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Kategorije transakcija"
+msgid "Kategorije podataka"
+msgstr "Transaktionsdatum"
+
+msgid "Podaci o tvrtki: naziv, OIB, adresa, IBAN, kontakt"
+msgstr ""
+
+msgid "Podaci o partnerima: naziv, OIB/VAT ID, adresa, tip kupca"
+msgstr ""
+
+msgid "Financijski podaci: računi, knjiženja, PDV obrasci, plaće"
+msgstr ""
+
+msgid "Podaci zaposlenika: ime, OIB, radni sati, JOPPD"
+msgstr ""
+
+#, fuzzy
+#| msgid "U obradi"
+msgid "Svrhe obrade"
+msgstr "In Bearbeitung"
+
+msgid "Izdavanje i primanje e-Računa (FINA eIzvještavanje)"
+msgstr ""
+
+msgid "VIES provjera PDV statusa EU partnera"
+msgstr ""
+
+msgid "Knowledge Graph — analiza poslovnih prilika i rizika"
+msgstr ""
+
+msgid "Bonitetna provjera dobavljača (FINA)"
+msgstr ""
+
+msgid "Klasifikacija partnera prema NN 89/25 (eRačun zakon)"
+msgstr ""
+
+#, fuzzy
+#| msgid "Rok plaćanja"
+msgid "Rok čuvanja"
+msgstr "Zahlungsfrist"
+
+msgid "Financijska dokumentacija: 11 godina (Zakon o računovodstvu)."
+msgstr ""
+
+msgid "Podaci o plaćama i JOPPD: trajno."
+msgstr ""
+
+msgid "Knowledge Graph zapisi: do povlačenja suglasnosti."
+msgstr ""
+
+msgid "Prava ispitanika"
+msgstr ""
+
+msgid ""
+"Imate pravo na pristup, ispravak, brisanje, ograničenje obrade, prenosivost "
+"podataka i prigovor. Zahtjeve šaljite na"
+msgstr ""
+
+msgid "Povlačenje suglasnosti"
+msgstr ""
+
+msgid ""
+"Suglasnost možete povući u bilo kojem trenutku bez utjecaja na zakonitost "
+"obrade temeljene na suglasnosti prije njezina povlačenja."
+msgstr ""
+
+msgid ""
+"Pročitao/la sam i prihvaćam uvjete korištenja platforme LIMIT CONNECT za "
+"firmu"
+msgstr ""
+
+#, fuzzy
+#| msgid "Prihvatam ponudu"
+msgid "Prihvaćam uvjete"
+msgstr "Ich nehme das Angebot an"
 
 #, fuzzy
 #| msgid "Sati po danu"
@@ -10753,9 +11860,6 @@ msgstr ""
 msgid "Tjedan:"
 msgstr ""
 
-msgid "Nema registriranih radnika."
-msgstr ""
-
 msgid "⏳ Radni sati – na odobrenju"
 msgstr ""
 
@@ -10763,9 +11867,6 @@ msgid "Sve →"
 msgstr ""
 
 msgid "✓ Odobri"
-msgstr ""
-
-msgid "Nema sati na odobrenju ✓"
 msgstr ""
 
 #, fuzzy
@@ -10776,9 +11877,6 @@ msgstr "Interventionsadresse"
 msgid "Kanban →"
 msgstr ""
 
-msgid "Nema aktivnih intervencija ✓"
-msgstr ""
-
 #, fuzzy
 #| msgid "📄 Kreiraj fakturu"
 msgid "📄 Nedavne fakture"
@@ -10786,11 +11884,6 @@ msgstr "📄 Erstellen Sie eine Rechnung"
 
 msgid "Naplati sate →"
 msgstr ""
-
-#, fuzzy
-#| msgid "Nema kalkulacija."
-msgid "Nema faktura."
-msgstr "Nema-Rechnung"
 
 #, fuzzy
 #| msgid "Bankovna transakcija"
@@ -10992,6 +12085,11 @@ msgstr "Materialpreis"
 msgid "Otvorene sada"
 msgstr ""
 
+#, fuzzy
+#| msgid "Korisničko ime"
+msgid "Korisnici"
+msgstr "Benutzerprofil"
+
 msgid "Upravljaj →"
 msgstr ""
 
@@ -11006,9 +12104,6 @@ msgid "Danas"
 msgstr "Heute"
 
 msgid "Dispatcher →"
-msgstr ""
-
-msgid "U tranzitu"
 msgstr ""
 
 #, fuzzy
@@ -11241,6 +12336,9 @@ msgstr "POS-Registrierkasse"
 msgid "Terminali, smjene, bonovi"
 msgstr ""
 
+msgid "Burza projekata"
+msgstr ""
+
 msgid "Upiti, kanban, ponude"
 msgstr ""
 
@@ -11248,6 +12346,9 @@ msgid "Lista, impersonacija, nova tvrtka"
 msgstr ""
 
 msgid "Odobravanje novih tvrtki"
+msgstr ""
+
+msgid "Django Admin"
 msgstr ""
 
 #, fuzzy
@@ -11291,6 +12392,9 @@ msgstr ""
 msgid "Neaktivan"
 msgstr "Aktiv"
 
+msgid "Promo kodovi"
+msgstr ""
+
 #, fuzzy
 #| msgid "Pregled podataka"
 msgid "Pregled zahtjeva →"
@@ -11307,9 +12411,6 @@ msgstr ""
 msgid "Švicarska"
 msgstr ""
 
-msgid "d.o.o."
-msgstr ""
-
 msgid "j.d.o.o."
 msgstr ""
 
@@ -11323,7 +12424,7 @@ msgid "EU company"
 msgstr ""
 
 msgid "Bez pretplate"
-msgstr ""
+msgstr "Ohne Abo"
 
 msgid "Starter – €29/mj"
 msgstr ""
@@ -11356,6 +12457,9 @@ msgstr ""
 
 msgid "&#x1F3E2; Podru&#382;nice"
 msgstr ""
+
+msgid "Moduli"
+msgstr "Module"
 
 msgid "Nema tvrtki u sustavu."
 msgstr ""
@@ -11436,16 +12540,8 @@ msgstr ""
 msgid "Slikaj ili učitaj račun — AI ga pročita i spremi u arhivu"
 msgstr ""
 
-#, fuzzy
-#| msgid "1. Skeniraj kod"
-msgid "Skeniraj mobitelom"
-msgstr "1. Scannen Sie den Code"
-
 msgid "ili povucite sliku ovdje"
 msgstr ""
-
-msgid "Dodaj"
-msgstr "Hinzufügen"
 
 msgid "Kamera"
 msgstr ""
@@ -11463,15 +12559,18 @@ msgstr "Dokumenttyp"
 msgid "Pregled svih arhiviranih dokumenata"
 msgstr "Überprüfung und Verwaltung – Dokumente"
 
-#, fuzzy
-#| msgid "Export PDF"
-msgid "Export CSV"
-msgstr "PDF exportieren"
+msgid "Exportiraj filtrirane dokumente u CSV"
+msgstr ""
 
 #, fuzzy
 #| msgid "2. Prevedi odabrano"
 msgid "Preuzmi odabrane"
 msgstr "2. Ausgewählte übersetzen"
+
+#, fuzzy
+#| msgid "Vezani dokument"
+msgid "Skeniraj dokument"
+msgstr "Verbundener Dokument"
 
 #, fuzzy
 #| msgid "Ukupno sati"
@@ -11550,13 +12649,18 @@ msgstr ""
 msgid "Oznaci"
 msgstr ""
 
-msgid "Nema rezultata za odabrane filtere."
+msgid "Pokusajte promijeniti filtere ili pretrazivanje."
 msgstr ""
 
 #, fuzzy
-#| msgid "Nema rezultata"
-msgid "Nema rezultata."
-msgstr "Keine Ergebnisse"
+#| msgid "Nazivi dokumenata"
+msgid "Arhiva je prazna"
+msgstr "Dokumenttyp"
+
+msgid ""
+"Dokumenti ce se automatski pojaviti nakon izdavanja racuna, primanja e-"
+"racuna ili uploada."
+msgstr ""
 
 #, fuzzy
 #| msgid "Učitavanje termina..."
@@ -11595,11 +12699,6 @@ msgstr ""
 #| msgid "Tvrtka"
 msgid "Tvrtka *"
 msgstr "Unternehmen"
-
-#, fuzzy
-#| msgid "Iznos (€)"
-msgid "Iznos (EUR)"
-msgstr "Betrag"
 
 msgid "Datoteka (PDF, DOC...)"
 msgstr ""
@@ -11658,6 +12757,11 @@ msgstr "Transaktionen"
 #| msgid "Kategorija transakcije"
 msgid "Financijske transakcije"
 msgstr "Transaktionsdatum"
+
+#, fuzzy
+#| msgid "Bankovna transakcija"
+msgid "Nova transakcija"
+msgstr "Bankbuchung"
 
 msgid "Svi smjerovi"
 msgstr ""
@@ -11781,6 +12885,11 @@ msgstr ""
 
 msgid "Član"
 msgstr ""
+
+#, fuzzy
+#| msgid "Prijava"
+msgid "Odjava"
+msgstr "Anmelden"
 
 msgid "Unutra"
 msgstr ""
@@ -12187,6 +13296,25 @@ msgstr ""
 msgid "Odrediste (GPS radnika jos nije aktivan)"
 msgstr ""
 
+msgid "npr. Burek sa sirom"
+msgstr ""
+
+msgid "Porez"
+msgstr ""
+
+#, fuzzy
+#| msgid "Potrošni materijal"
+msgid "Potrošni"
+msgstr "Verbrauchsmaterial"
+
+#, fuzzy
+#| msgid "Spremi"
+msgid "Spremi artikl"
+msgstr "Spremi"
+
+msgid "automatski predviđa kategoriju, porez i barkod na osnovu naziva"
+msgstr ""
+
 msgid "prebrojano"
 msgstr ""
 
@@ -12421,6 +13549,16 @@ msgid "Avansni"
 msgstr "💰 Vorab"
 
 #, fuzzy
+#| msgid "📄 Faktura"
+msgid "Faktura B2B"
+msgstr "Rechnung"
+
+#, fuzzy
+#| msgid "Ulazni Račun"
+msgid "Ulazni račun"
+msgstr "Eingabekonto"
+
+#, fuzzy
 #| msgid "Fiskalizirano"
 msgid "Nije fiskalizirano"
 msgstr "Fiskalisiert"
@@ -12459,6 +13597,95 @@ msgstr "CSV-Import"
 
 msgid "Obracunska razdoblja"
 msgstr ""
+
+#, fuzzy
+#| msgid "Pokušaji prijave"
+msgid "Godišnji porez"
+msgstr "Anmeldeversuche"
+
+msgid "Godišnji porez / Jahressteuer"
+msgstr ""
+
+#, fuzzy
+#| msgid "Prijava"
+msgid "PDV Prijava"
+msgstr "Anmelden"
+
+#, fuzzy
+#| msgid "Račun"
+msgid "Izračunaj"
+msgstr "Rechnung"
+
+#, fuzzy
+#| msgid "Uplata / Prihod"
+msgid "Bruto prihod"
+msgstr "Zahlung / Einkommen"
+
+#, fuzzy
+#| msgid "Ukupno radnika"
+msgid "Ukupni rashodi"
+msgstr "Gesamtbetrag der Rechnung"
+
+msgid "Oporezivi dohodak"
+msgstr ""
+
+#, fuzzy
+#| msgid "Način plaćanja"
+msgid "Obračun poreza"
+msgstr "Zahlungsweise"
+
+#, fuzzy
+#| msgid "Porezna stopa"
+msgid "Porez na dohodak"
+msgstr "Steuersatz"
+
+msgid "Prirez"
+msgstr ""
+
+#, fuzzy
+#| msgid "UKUPNO ZA PLATITI"
+msgid "UKUPNO ZA UPLATU"
+msgstr "GESAMTZAHLUNG"
+
+#, fuzzy
+#| msgid "Porezna stopa"
+msgid "Efektivna stopa"
+msgstr "Steuersatz"
+
+msgid "Primitci i izdaci"
+msgstr ""
+
+msgid "Primitci"
+msgstr ""
+
+#, fuzzy
+#| msgid "Podaci"
+msgid "Izdaci"
+msgstr "Unternehmensverwalter"
+
+msgid "Nema primitaka u periodu"
+msgstr ""
+
+#, fuzzy
+#| msgid "Pregled podataka"
+msgid "Nema izdataka u periodu"
+msgstr "Keine Daten"
+
+#, fuzzy
+#| msgid "Prihod i rashod"
+msgid "Prihod iz faktura"
+msgstr "Einnahmen und Ausgaben"
+
+msgid "razlika"
+msgstr ""
+
+msgid "primitci"
+msgstr ""
+
+#, fuzzy
+#| msgid "Podaci"
+msgid "izdaci"
+msgstr "Unternehmensverwalter"
 
 msgid "Zakasnjeli servisi"
 msgstr ""
@@ -12528,11 +13755,6 @@ msgstr ""
 #| msgid "Kontaktirajte nas direktno."
 msgid "Kontaktirajte dispecera za novi link."
 msgstr "Wir werden uns bald mit Ihnen in Verbindung setzen."
-
-#, fuzzy
-#| msgid "Isteklo"
-msgid "Istekao"
-msgstr "Abgelaufen"
 
 msgid "Narudzba vec kreirana"
 msgstr ""
@@ -12714,6 +13936,11 @@ msgstr "NKD-Aktivität"
 msgid "Pretražite NKD šifarnik"
 msgstr "Partner suchen"
 
+#, fuzzy
+#| msgid "Adresa"
+msgid "Adresa sjedišta"
+msgstr "Adresse"
+
 msgid "PTT"
 msgstr ""
 
@@ -12851,6 +14078,24 @@ msgid "Azuriranja"
 msgstr "Rechnungsstellung"
 
 #, fuzzy
+#| msgid "Tip dokumenta"
+msgid "Upload dokumenata"
+msgstr "Dokumenttyp"
+
+msgid ""
+"Povucite datoteke ili kliknite za odabir. PDF, slike, Excel, Word — max 20 "
+"MB."
+msgstr ""
+
+#, fuzzy
+#| msgid "PDF datoteka"
+msgid "Povucite datoteke ovdje"
+msgstr "Datei"
+
+msgid "ili kliknite za odabir"
+msgstr ""
+
+#, fuzzy
 #| msgid "Termini"
 msgid "Terminali"
 msgstr "Begriffe"
@@ -12956,8 +14201,15 @@ msgstr "Schnellkasse"
 msgid "&#x1F374; Restoran &rarr;"
 msgstr ""
 
-msgid "Pokreni smjenu"
-msgstr ""
+#, fuzzy
+#| msgid "Brza blagajna"
+msgid "Blagajna &rarr;"
+msgstr "Schnellkasse"
+
+#, fuzzy
+#| msgid "Početak"
+msgid "Početak rada"
+msgstr "Startseite"
 
 #, fuzzy
 #| msgid "+ Dodaj radnika"
@@ -12968,6 +14220,11 @@ msgstr "Bild hinzufügen"
 #| msgid "Odaberite termin"
 msgid "Odaberi artikl"
 msgstr "Begriffe nachschlagen"
+
+#, fuzzy
+#| msgid "Rok plaćanja"
+msgid "Rokovi trajanja"
+msgstr "Zahlungsfrist"
 
 #, fuzzy
 #| msgid "Cijena dana"
@@ -13018,6 +14275,139 @@ msgstr ""
 msgid "Pretrazi artikle..."
 msgstr "Partner suchen"
 
+msgid "Raspored stolova"
+msgstr "Tischplan"
+
+#, fuzzy
+#| msgid "Novi račun"
+msgid "Novi bon"
+msgstr "Neues Konto"
+
+msgid "stol"
+msgstr "Tisch"
+
+#, fuzzy
+#| msgid "Slobodno"
+msgid "slobodan"
+msgstr "Frei"
+
+msgid "Pretrazi proizvode..."
+msgstr ""
+
+#, fuzzy
+#| msgid "+ Nova kartica"
+msgid "Dodaj novi artikal"
+msgstr "+ Neue Karte"
+
+#, fuzzy
+#| msgid "Pretraži artikle iz skladišta"
+msgid "Nema artikala u skladištu. Dodajte u"
+msgstr "Nach einem Artikel suchen..."
+
+msgid "Skladištu →"
+msgstr ""
+
+msgid "Nema aktivne smjene."
+msgstr ""
+
+msgid "Pokreni smjenu →"
+msgstr ""
+
+msgid "🛒 Košarica"
+msgstr ""
+
+msgid "Isprazni"
+msgstr ""
+
+msgid "🗑 Isprazni"
+msgstr ""
+
+msgid "Dodajte artiklе klikom ↑"
+msgstr ""
+
+msgid "Neto:"
+msgstr ""
+
+#, fuzzy
+#| msgid "UKUPNO"
+msgid "UKUPNO:"
+msgstr "GESAMT"
+
+msgid "Primljeno (€):"
+msgstr ""
+
+msgid "Točno"
+msgstr ""
+
+msgid "Kusur"
+msgstr ""
+
+#, fuzzy
+#| msgid "Fiskalizacija"
+msgid "Fiskalizacija u džepu"
+msgstr "Fiskalisierung (HR)"
+
+#, fuzzy
+#| msgid "Porezne stope"
+msgid "1. Porezne stope"
+msgstr "Starten Sie den Stopper"
+
+msgid "Stope su automatski postavljene za"
+msgstr ""
+
+msgid "Možete ih urediti u postavkama."
+msgstr ""
+
+#, fuzzy
+#| msgid "Zadana porezna stopa"
+msgid "Nema poreznih stopa"
+msgstr "Standardtarif"
+
+#, fuzzy
+#| msgid "Dodajte barem jednu stavku"
+msgid "dodajte ih u postavkama"
+msgstr "Bild hinzufügen"
+
+#, fuzzy
+#| msgid "Porezne stope"
+msgid "Uredi stope"
+msgstr "Starten Sie den Stopper"
+
+msgid "Dalje"
+msgstr ""
+
+#, fuzzy
+#| msgid "Ime blagajnika"
+msgid "2. Blagajnik"
+msgstr "Kassierername"
+
+msgid "Tko će koristiti blagajnu? OIB je zakonski obavezan za fiskalizaciju."
+msgstr ""
+
+#, fuzzy
+#| msgid "OIB operatera"
+msgid "OIB operatera (11 znamenki)"
+msgstr "Bedienungsanleitung für den Betreiber"
+
+msgid "OIB mora imati 11 znamenki"
+msgstr ""
+
+#, fuzzy
+#| msgid "Kraj (Opcionalno)"
+msgid "PIN (4 znamenke, opcionalno)"
+msgstr "Beschreibung der Arbeit (optional)"
+
+#, fuzzy
+#| msgid "Odaberite modul"
+msgid "3. Odaberi tip blagajne"
+msgstr "Odaberi-Projekt"
+
+msgid "Odaberite tip i pritisnite gumb za otvaranje POS-a."
+msgstr ""
+
+msgid "Otvori POS"
+msgstr ""
+
 msgid "Zakon o zaštiti potrošača čl. 10 — rok za odgovor: 15 dana"
 msgstr ""
 
@@ -13041,9 +14431,6 @@ msgid "Zavedi prigovor"
 msgstr ""
 
 msgid "Kontakt (e-mail ili adresa)"
-msgstr ""
-
-msgid "Govori prigovor"
 msgstr ""
 
 msgid "Upišite ili izgovorite prigovor..."
@@ -13097,52 +14484,6 @@ msgid "Tekst odgovora"
 msgstr ""
 
 msgid "Pošalji odgovor"
-msgstr ""
-
-msgid "Pretrazi proizvode..."
-msgstr ""
-
-#, fuzzy
-#| msgid "Pretraži artikle iz skladišta"
-msgid "Nema artikala u skladištu. Dodajte u"
-msgstr "Nach einem Artikel suchen..."
-
-msgid "Skladištu →"
-msgstr ""
-
-msgid "Nema aktivne smjene."
-msgstr ""
-
-msgid "Pokreni smjenu →"
-msgstr ""
-
-msgid "🛒 Košarica"
-msgstr ""
-
-msgid "Isprazni"
-msgstr ""
-
-msgid "🗑 Isprazni"
-msgstr ""
-
-msgid "Dodajte artiklе klikom ↑"
-msgstr ""
-
-msgid "Neto:"
-msgstr ""
-
-#, fuzzy
-#| msgid "UKUPNO"
-msgid "UKUPNO:"
-msgstr "GESAMT"
-
-msgid "Primljeno (€):"
-msgstr ""
-
-msgid "Točno"
-msgstr ""
-
-msgid "Kusur"
 msgstr ""
 
 msgid "&larr; Smjena"
@@ -13247,19 +14588,11 @@ msgstr "Startseite"
 msgid "Terminal nema aktivnu smjenu"
 msgstr "Rechnungsstellung"
 
-msgid "Raspored stolova"
+msgid "Pokreni smjenu"
 msgstr ""
 
 msgid "+ Novi bon"
 msgstr ""
-
-msgid "stol"
-msgstr ""
-
-#, fuzzy
-#| msgid "Slobodno"
-msgid "slobodan"
-msgstr "Frei"
 
 #, fuzzy
 #| msgid "Slobodno"
@@ -13308,11 +14641,6 @@ msgid "Ispiši"
 msgstr ""
 
 #, fuzzy
-#| msgid "Novi račun"
-msgid "Novi bon"
-msgstr "Neues Konto"
-
-#, fuzzy
 #| msgid "Nova lozinka (ostavi prazno za zadržati)"
 msgid "Broj stola (ostavite prazno za šank / dostavu)"
 msgstr "Neues Passwort (zum Behalten leer lassen)"
@@ -13324,6 +14652,22 @@ msgstr ""
 #| msgid "Otvori u Adminu"
 msgid "Otvori bon"
 msgstr "Im Admin öffnen"
+
+#, fuzzy
+#| msgid "Ime blagajnika"
+msgid "Blagajna"
+msgstr "Kassierername"
+
+msgid "Odaberi terminal ili otvori novi"
+msgstr ""
+
+msgid "Odaberi tip blagajne i kreni"
+msgstr ""
+
+#, fuzzy
+#| msgid "Ime blagajnika"
+msgid "Nova blagajna"
+msgstr "Kassierername"
 
 msgid "Otvoreni"
 msgstr ""
@@ -13719,16 +15063,28 @@ msgstr "Schnellkasse"
 msgid "Restoran &rarr;"
 msgstr "Restaurant/Café-Bar"
 
-msgid "Pokreni novu smjenu"
+#, fuzzy
+#| msgid "Naziv radnog naloga"
+msgid "Početak radnog vremena"
+msgstr "Name des Arbeitsauftrags"
+
+msgid "Unesite početnu gotovinu u blagajni (opcionalno) i pokrenite smjenu."
 msgstr ""
 
-msgid "Pocetna gotovina (&euro;)"
+#, fuzzy
+#| msgid "Zadana cijena (€)"
+msgid "Početna gotovina (€)"
+msgstr "Standardpreis (€)"
+
+msgid "Ako ne znate točan iznos, ostavite 0 — možete promijeniti kasnije."
 msgstr ""
+
+#, fuzzy
+#| msgid "Otvori u Adminu"
+msgid "Otvori blagajnu →"
+msgstr "Im Admin öffnen"
 
 msgid "AKTIVNA SMJENA"
-msgstr ""
-
-msgid "Otvori POS"
 msgstr ""
 
 msgid "Zadnje smjene"
@@ -13744,6 +15100,9 @@ msgstr ""
 
 msgid "*** TEST ISPIS ***"
 msgstr ""
+
+msgid "Datum:"
+msgstr "Datum"
 
 #, fuzzy
 #| msgid "Vrijeme"
@@ -14147,6 +15506,9 @@ msgstr "Unternehmen"
 msgid "View →"
 msgstr ""
 
+msgid "FINA"
+msgstr "LIMIT"
+
 msgid "-Connect"
 msgstr ""
 
@@ -14158,8 +15520,10 @@ msgstr "← Zurück zu Kanban"
 msgid "ime@firma.com"
 msgstr ""
 
-msgid "Zaboravljena lozinka?"
-msgstr ""
+#, fuzzy
+#| msgid "Dobavljač"
+msgid "Zaboravljena?"
+msgstr "Lieferant"
 
 msgid "Zapamti me"
 msgstr ""
@@ -14175,19 +15539,19 @@ msgid "Registrirajte se"
 msgstr "Registrieren und fortfahren"
 
 #, fuzzy
-#| msgid "Naslov"
-msgid "Naslovnica"
-msgstr "Titel"
-
-msgid "Naše web stranice"
-msgstr ""
-
-#, fuzzy
 #| msgid "Odaberite modul"
 msgid "Odaberite plan"
 msgstr "Odaberi-Projekt"
 
-msgid "14 dana besplatnog trial perioda. Bez kreditne kartice."
+msgid "Fiskalizacija u džepu. Bez kreditne kartice."
+msgstr ""
+
+#, fuzzy
+#| msgid "2. Prevedi odabrano"
+msgid "odabran"
+msgstr "2. Ausgewählte übersetzen"
+
+msgid "Imate pozivni kod?"
 msgstr ""
 
 msgid "Popularno"
@@ -14223,9 +15587,33 @@ msgid "Premium podrška"
 msgstr ""
 
 #, fuzzy
+#| msgid "↕ Promijeni status"
+msgid "Promotivni kod"
+msgstr "↕ Status ändern"
+
+#, fuzzy
+#| msgid "Kraj (Opcionalno)"
+msgid "opcionalno"
+msgstr "Beschreibung der Arbeit (optional)"
+
+msgid "npr. TRIAL30"
+msgstr ""
+
+msgid "Provjeri"
+msgstr ""
+
+#, fuzzy
 #| msgid "Nema stavki."
 msgid "Nastavi"
 msgstr "Keine Daten"
+
+msgid "Provjera"
+msgstr ""
+
+#, fuzzy
+#| msgid "Greška provjere."
+msgid "Greška pri provjeri"
+msgstr "Verifizierungsfehler."
 
 #, fuzzy
 #| msgid "Podaci tvrtke"
@@ -14235,10 +15623,22 @@ msgstr "Unternehmensverwalter"
 msgid "Unesite osnovne podatke o vašoj tvrtki."
 msgstr ""
 
+msgid "Primjer d.o.o."
+msgstr ""
+
 #, fuzzy
 #| msgid "Porezni broj"
 msgid "OIB / Porezni broj"
 msgstr "Signatur"
+
+msgid "Ne znam OIB?"
+msgstr ""
+
+msgid "Kako pronaći OIB?"
+msgstr ""
+
+msgid "Razumijem"
+msgstr ""
 
 #, fuzzy
 #| msgid "Ulica i broj"
@@ -14250,6 +15650,18 @@ msgstr "Straße und Hausnummer"
 msgid "Djelatnost"
 msgstr "NKD-Aktivität"
 
+msgid "Tražim u registru"
+msgstr ""
+
+msgid "Tvrtka već postoji u sustavu."
+msgstr ""
+
+msgid "Pronašli smo vašu tvrtku u registru!"
+msgstr ""
+
+msgid "Nije pronađeno — unesite ručno."
+msgstr ""
+
 #, fuzzy
 #| msgid "Korisnički profil"
 msgid "Korisnički račun"
@@ -14260,7 +15672,7 @@ msgstr ""
 
 #, fuzzy
 #| msgid "Lozinka (min. 8 znakova)"
-msgid "Najmanje 8 znakova"
+msgid "Najmanje 10 znakova"
 msgstr "Das Passwort muss mindestens 8 Zeichen lang sein."
 
 msgid "Veliko slovo"
@@ -14300,6 +15712,11 @@ msgstr "Ihre Rechnungen und Termine"
 #, fuzzy
 #| msgid "Zadana stopa"
 msgid "dana besplatno"
+msgstr "Standardtarif"
+
+#, fuzzy
+#| msgid "Zadana stopa"
+msgid "Zauvijek besplatno"
 msgstr "Standardtarif"
 
 #, fuzzy
@@ -14414,6 +15831,45 @@ msgstr ""
 #| msgid "Projekt"
 msgid "Po projektu"
 msgstr "Projekt"
+
+msgid "Subscription Cockpit"
+msgstr "Abo-Cockpit"
+
+msgid "ARR/MRR monetizacijski pregled"
+msgstr "ARR/MRR Monetarisierungsübersicht"
+
+#, fuzzy
+#| msgid "&#8592; Početna"
+msgid "AI Dashboard"
+msgstr "Startseite"
+
+msgid "MRR"
+msgstr ""
+
+msgid "ARR"
+msgstr ""
+
+#, fuzzy
+#| msgid "Aktivna"
+msgid "Aktivne pretplate"
+msgstr "Aktiv"
+
+msgid "Plan distribucija (MRR)"
+msgstr "Plan-Verteilung (MRR)"
+
+msgid "MRR trend (6 mjeseci)"
+msgstr "MRR-Trend (6 Monate)"
+
+#, fuzzy
+#| msgid "Broj radnih dana"
+msgid "Zadnje pretplate (30 dana)"
+msgstr "Kontonummer"
+
+msgid "Ciklus"
+msgstr "Zyklus"
+
+msgid "Nema novih pretplata u zadnjih 30 dana"
+msgstr "Keine neuen Abos in den letzten 30 Tagen"
 
 msgid "Tracked Items"
 msgstr ""
@@ -14733,9 +16189,6 @@ msgstr ""
 msgid "Sve odobreno!"
 msgstr ""
 
-msgid "⚡ Fina Connect"
-msgstr ""
-
 #, fuzzy
 #| msgid "⏱ Radni sati"
 msgid "⏱ Moji sati"
@@ -15026,11 +16479,6 @@ msgstr ""
 msgid "Štoperica"
 msgstr ""
 
-#, fuzzy
-#| msgid "Planirano"
-msgid "Pauziran"
-msgstr "Geplant"
-
 msgid "Pauza"
 msgstr ""
 
@@ -15211,9 +16659,6 @@ msgstr ""
 msgid "Klasifikacija"
 msgstr "Klassifizierung der Aktivitäten"
 
-msgid "Info"
-msgstr ""
-
 msgid "Stranica"
 msgstr ""
 
@@ -15256,6 +16701,11 @@ msgstr ""
 #| msgid "Profilna slika"
 msgid "Galerijska slika"
 msgstr "Profilbild"
+
+#, fuzzy
+#| msgid "Materijal"
+msgid "Galerija"
+msgstr "Galerie"
 
 msgid "Info o tvrtki (web)"
 msgstr ""
@@ -15701,11 +17151,6 @@ msgstr "Fertig"
 msgid "Fakturiran"
 msgstr "Rechnungsstellung"
 
-#, fuzzy
-#| msgid "Otkazano"
-msgid "Otkazan"
-msgstr "Abgebrochen"
-
 msgid "Nisko"
 msgstr ""
 
@@ -15716,11 +17161,6 @@ msgstr "Normativ"
 
 msgid "Visoko"
 msgstr ""
-
-#, fuzzy
-#| msgid "Broj računa"
-msgid "Broj naloga"
-msgstr "Kontonummer"
 
 msgid "Opis radova"
 msgstr ""
@@ -15798,9 +17238,6 @@ msgstr ""
 msgid "Motor"
 msgstr ""
 
-msgid "Kilometraža"
-msgstr ""
-
 #, fuzzy
 #| msgid "Kartica"
 msgid "Karton vozila"
@@ -15865,6 +17302,11 @@ msgid "Karton klijenta"
 msgstr "Partner / Kunde"
 
 #, fuzzy
+#| msgid "Email klijenta"
+msgid "Kartoni klijenata"
+msgstr "E-Mail-Client"
+
+#, fuzzy
 #| msgid "Sati"
 msgid "YTD Sati"
 msgstr "Samstag"
@@ -15902,11 +17344,6 @@ msgstr "Modul „Termine“."
 #| msgid "Odbijeno"
 msgid "Odbij unose"
 msgstr "Abgelehnt"
-
-#, fuzzy
-#| msgid "Kraj (Opcionalno)"
-msgid "opcionalno"
-msgstr "Beschreibung der Arbeit (optional)"
 
 msgid "Npr. Nedostaje opis zadatka, prijavi ispočetka..."
 msgstr ""
@@ -16221,6 +17658,177 @@ msgstr ""
 
 msgid "Promijeni lozinku"
 msgstr ""
+
+#~ msgid "Geschäftsdokument · Deutschland"
+#~ msgstr "Geschäftsdokument · Deutschland"
+
+#, fuzzy
+#~| msgid "Fälligkeitsdatum:"
+#~ msgid "Angebotsdatum:"
+#~ msgstr "Fälligkeitsdatum:"
+
+#~ msgid "Rechnungsdatum:"
+#~ msgstr "Rechnungsdatum:"
+
+#, fuzzy
+#~| msgid "Fällig bis:"
+#~ msgid "Gültig bis:"
+#~ msgstr "Fällig bis:"
+
+#~ msgid "Fälligkeitsdatum:"
+#~ msgstr "Fälligkeitsdatum:"
+
+#~ msgid "Leistungsdatum:"
+#~ msgstr "Aufführungstermin:"
+
+#~ msgid "Absender / Rechnungssteller"
+#~ msgstr "Absender / Rechnungssteller"
+
+#~ msgid "Empfänger / Rechnungsempfänger"
+#~ msgstr "Emfänger / Rechnungsempfänger"
+
+#~ msgid "Pos."
+#~ msgstr "Pos."
+
+#~ msgid "Beschreibung"
+#~ msgstr "Beschreibung"
+
+#~ msgid "Menge"
+#~ msgstr "Menge"
+
+#~ msgid "Einheit"
+#~ msgstr "Einheit"
+
+#~ msgid "Einzelpreis"
+#~ msgstr "Einzelpreis"
+
+#~ msgid "Rabatt"
+#~ msgstr "Rabatt (%)"
+
+#~ msgid "Betrag"
+#~ msgstr "Natrag"
+
+#~ msgid "Nettobetrag:"
+#~ msgstr "Nettobetrag:"
+
+#~ msgid "GESAMTBETRAG:"
+#~ msgstr "GESAMTBETRAG:"
+
+#~ msgid "Zahlungsinformationen"
+#~ msgstr "Zahlungsinformationen"
+
+#~ msgid "Zahlungsart:"
+#~ msgstr "Zahlungsart:"
+
+#~ msgid "BIC/SWIFT:"
+#~ msgstr "BIC/SWIFT:"
+
+#~ msgid "Fällig bis:"
+#~ msgstr "Fällig bis:"
+
+#~ msgid "Verwendungszweck:"
+#~ msgstr "Verwendungszweck:"
+
+#~ msgid "Osnovica (bez PDV):"
+#~ msgstr "Betrag ohne Mehrwertsteuer/MwSt"
+
+#~ msgid "Poslovni prostor:"
+#~ msgstr "Geschäftsräume"
+
+#~ msgid "Operater:"
+#~ msgstr "Betreiber"
+
+#~ msgid "Skeniraj za plaćanje"
+#~ msgstr "Zahlungsweise"
+
+#~ msgid "✓ Fiskalizirani račun"
+#~ msgstr "Fiskalisiert"
+
+#~ msgid "ZKI:"
+#~ msgstr "ZKI:"
+
+#~ msgid "JIR:"
+#~ msgstr "JIR:"
+
+#, fuzzy
+#~| msgid "PDV stopa"
+#~ msgid "PDV obrazac"
+#~ msgstr "PDV-Gruppe"
+
+#, fuzzy
+#~| msgid "Trajanje"
+#~ msgid "AI Upravljanje"
+#~ msgstr "Verwaltung"
+
+#, fuzzy
+#~| msgid "Poslano"
+#~ msgid "Poslovanje"
+#~ msgstr "Gesendet"
+
+#, fuzzy
+#~| msgid "Dokumenti"
+#~ msgid "Dokumenti-Arhiva"
+#~ msgstr "Dokumente"
+
+#, fuzzy
+#~| msgid "Kalkulator ponude"
+#~ msgid "Bad-Kalkulator"
+#~ msgstr "Rechner"
+
+#, fuzzy
+#~| msgid "Rekoncilirano"
+#~ msgid "Rekoncilijacija"
+#~ msgstr "Storniert"
+
+#, fuzzy
+#~| msgid "Tip"
+#~ msgid "Tim"
+#~ msgstr "Typ"
+
+#, fuzzy
+#~| msgid "Usluga"
+#~ msgid "Usluge"
+#~ msgstr "Service"
+
+#, fuzzy
+#~| msgid "Adresa intervencije"
+#~ msgid "Intervencije"
+#~ msgstr "Interventionsadresse"
+
+#, fuzzy
+#~| msgid "Kretanje zalihe"
+#~ msgid "Pregled zalihe"
+#~ msgstr "Lagerbewegung"
+
+#, fuzzy
+#~| msgid "Interna procjena"
+#~ msgid "Integracije"
+#~ msgstr "Integrationen"
+
+#, fuzzy
+#~| msgid "Nema kalkulacija."
+#~ msgid "Nema faktura."
+#~ msgstr "Nema-Rechnung"
+
+#, fuzzy
+#~| msgid "1. Skeniraj kod"
+#~ msgid "Skeniraj mobitelom"
+#~ msgstr "1. Scannen Sie den Code"
+
+#, fuzzy
+#~| msgid "Export PDF"
+#~ msgid "Export CSV"
+#~ msgstr "PDF exportieren"
+
+#, fuzzy
+#~| msgid "Nema rezultata"
+#~ msgid "Nema rezultata."
+#~ msgstr "Keine Ergebnisse"
+
+#, fuzzy
+#~| msgid "Naslov"
+#~ msgid "Naslovnica"
+#~ msgstr "Titel"
 
 #~ msgid ""
 #~ "Otvara obrazac s automatski popunjenim iznosima i opisom kalkulacije."

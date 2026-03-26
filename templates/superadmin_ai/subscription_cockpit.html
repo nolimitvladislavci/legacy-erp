@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Subscription Cockpit — ARR/MRR{% endblock %}
+{% block title %}{% trans "Subscription Cockpit" %} — ARR/MRR{% endblock %}
 {% block content %}
 <div style="max-width:1200px;margin:0 auto;padding:1rem">
 
@@ -8,27 +8,27 @@
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
     <div>
       <h3 style="margin:0;color:var(--gold)">Subscription Cockpit</h3>
-      <small style="color:var(--muted)">ARR/MRR monetizacijski pregled</small>
+      <small style="color:var(--muted)">{% trans "ARR/MRR monetizacijski pregled" %}</small>
     </div>
-    <a href="{% url 'superadmin_ai:dashboard' %}" class="btn btn-ghost btn-sm">&larr; AI Dashboard</a>
+    <a href="{% url 'superadmin_ai:dashboard' %}" class="btn btn-ghost btn-sm">&larr; {% trans "AI Dashboard" %}</a>
   </div>
 
   <!-- KPI Cards -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem" class="stats-grid">
     <div class="stat-card" style="text-align:center;padding:1.25rem;border-radius:12px;border:1px solid var(--border)">
-      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">MRR</div>
+      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">{% trans "MRR" %}</div>
       <div style="font-size:1.8rem;font-weight:800;color:var(--gold)">&euro;{{ mrr|floatformat:2 }}</div>
     </div>
     <div class="stat-card" style="text-align:center;padding:1.25rem;border-radius:12px;border:1px solid var(--border)">
-      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">ARR</div>
+      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">{% trans "ARR" %}</div>
       <div style="font-size:1.8rem;font-weight:800;color:#22c55e">&euro;{{ arr|floatformat:2 }}</div>
     </div>
     <div class="stat-card" style="text-align:center;padding:1.25rem;border-radius:12px;border:1px solid var(--border)">
-      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Aktivne pretplate</div>
+      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">{% trans "Aktivne pretplate" %}</div>
       <div style="font-size:1.8rem;font-weight:800">{{ active_count }}</div>
     </div>
     <div class="stat-card" style="text-align:center;padding:1.25rem;border-radius:12px;border:1px solid var(--border)">
-      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Bez pretplate</div>
+      <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">{% trans "Bez pretplate" %}</div>
       <div style="font-size:1.8rem;font-weight:800;color:#ef4444">{{ companies_no_sub }}</div>
       <div style="font-size:.7rem;color:var(--muted)">od {{ total_companies }} firmi</div>
     </div>
@@ -57,7 +57,7 @@
 
     <!-- Plan Distribution -->
     <div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border)">
-      <h6 style="color:var(--gold);font-size:.85rem;margin-bottom:.75rem">Plan distribucija (MRR)</h6>
+      <h6 style="color:var(--gold);font-size:.85rem;margin-bottom:.75rem">{% trans "Plan distribucija (MRR)" %}</h6>
       {% for plan_name, revenue in plan_dist %}
       <div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem">
         <span>{{ plan_name }}</span>
@@ -71,7 +71,7 @@
 
     <!-- MRR Trend (mini chart) -->
     <div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border)">
-      <h6 style="color:var(--gold);font-size:.85rem;margin-bottom:.75rem">MRR trend (6 mjeseci)</h6>
+      <h6 style="color:var(--gold);font-size:.85rem;margin-bottom:.75rem">{% trans "MRR trend (6 mjeseci)" %}</h6>
       <div id="mrr-bars" style="display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:.5rem">
       </div>
     </div>
@@ -79,16 +79,16 @@
 
   <!-- Recent Subscriptions -->
   <div class="card" style="padding:1rem;border-radius:12px;border:1px solid var(--border)">
-    <h6 style="color:var(--gold);font-size:.85rem;margin-bottom:.75rem">Zadnje pretplate (30 dana)</h6>
+    <h6 style="color:var(--gold);font-size:.85rem;margin-bottom:.75rem">{% trans "Zadnje pretplate (30 dana)" %}</h6>
     <div style="overflow-x:auto">
       <table style="width:100%;font-size:.82rem;border-collapse:collapse">
         <thead>
           <tr style="border-bottom:1px solid var(--border);color:var(--muted)">
-            <th style="text-align:left;padding:.4rem .5rem">Firma</th>
-            <th style="text-align:left;padding:.4rem .5rem">Plan</th>
-            <th style="text-align:right;padding:.4rem .5rem">Cijena</th>
-            <th style="text-align:left;padding:.4rem .5rem">Ciklus</th>
-            <th style="text-align:left;padding:.4rem .5rem">Od</th>
+            <th style="text-align:left;padding:.4rem .5rem">{% trans "Firma" %}</th>
+            <th style="text-align:left;padding:.4rem .5rem">{% trans "Plan" %}</th>
+            <th style="text-align:right;padding:.4rem .5rem">{% trans "Cijena" %}</th>
+            <th style="text-align:left;padding:.4rem .5rem">{% trans "Ciklus" %}</th>
+            <th style="text-align:left;padding:.4rem .5rem">{% trans "Od" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -101,7 +101,7 @@
             <td style="padding:.4rem .5rem;color:var(--muted)">{{ s.valid_from|date:"d.m.Y." }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" style="padding:1rem;text-align:center;color:var(--muted)">Nema novih pretplata u zadnjih 30 dana</td></tr>
+          <tr><td colspan="5" style="padding:1rem;text-align:center;color:var(--muted)">{% trans "Nema novih pretplata u zadnjih 30 dana" %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

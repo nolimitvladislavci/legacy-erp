@@ -346,10 +346,10 @@
 <div id="gastro-tables" style="padding:.6rem;border-bottom:2px solid var(--gold)">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
     <div style="font-size:.85rem;font-weight:700;color:var(--gold)">
-      <i class="fas fa-utensils"></i> Raspored stolova
+      <i class="fas fa-utensils"></i> {% trans "Raspored stolova" %}
       {% if open_receipts %}<span style="font-size:.7rem;color:var(--muted);margin-left:.5rem">{{ open_receipts|length }} aktivni{{ open_receipts|length|pluralize:",h" }}</span>{% endif %}
     </div>
-    <button class="btn btn-ghost btn-sm" onclick="openGastroNewBon()" style="font-size:.75rem">+ Novi bon</button>
+    <button class="btn btn-ghost btn-sm" onclick="openGastroNewBon()" style="font-size:.75rem">+ {% trans "Novi bon" %}</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.4rem">
     {% for t in tables %}
@@ -358,7 +358,7 @@
          style="background:rgba(239,68,68,.08);border:2px solid #ef4444;border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;position:relative;transition:all .15s">
       <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#ef4444"></div>
       <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">stol</div>
+      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">{% trans "stol" %}</div>
       <div style="font-size:.7rem;font-weight:700;color:var(--gold)">&euro;{{ t.receipt.total|floatformat:2 }}</div>
     </div>
     {% else %}
@@ -366,7 +366,7 @@
          style="background:var(--card);border:2px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;transition:all .15s">
       <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#22c55e;position:relative;display:inline-block"></div>
       <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
-      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">slobodan</div>
+      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">{% trans "slobodan" %}</div>
     </div>
     {% endif %}
     {% endfor %}
