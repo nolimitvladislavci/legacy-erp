@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class MarketplaceCategory(models.Model):
@@ -116,6 +117,7 @@ class MarketplaceProduct(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Proizvod na tržnici')
@@ -229,6 +231,7 @@ class MarketplaceOrder(models.Model):
     )
     requires_cold_chain = models.BooleanField(default=False, verbose_name=_('Zahtijeva hladni lanac'))
     cutoff_acknowledged = models.BooleanField(default=False, verbose_name=_('Cut-off potvrden'))
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Narudžba tržnice')
@@ -307,6 +310,7 @@ class MarketplaceOrderItem(models.Model):
         verbose_name=_('Pakirao')
     )
     packed_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Pakirano'))
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Stavka narudžbe')
@@ -376,6 +380,7 @@ class SellerSubOrder(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Sub-narudžba prodavača')
@@ -432,6 +437,7 @@ class PartnerDiscount(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Partnerski rabat')
@@ -466,6 +472,7 @@ class CategoryDiscount(models.Model):
     valid_from = models.DateField(null=True, blank=True)
     valid_until = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Rabat po kategoriji')
@@ -501,6 +508,7 @@ class VolumeDiscount(models.Model):
     )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Kolicinski rabat')
@@ -561,6 +569,7 @@ class FuturesListing(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Futures ponuda')
@@ -641,6 +650,7 @@ class FuturesReservation(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Futures rezervacija')
@@ -795,6 +805,7 @@ class CartSnapshot(models.Model):
         null=True, blank=True, verbose_name=_('Kreirao (dispeeer)')
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Cart Snapshot')

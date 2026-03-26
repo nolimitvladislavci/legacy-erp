@@ -1,4 +1,5 @@
 from django.db import models
+from core.managers import CompanyManager
 
 
 class Product(models.Model):
@@ -58,6 +59,7 @@ class Product(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'webshop_product'
@@ -96,6 +98,7 @@ class CartItem(models.Model):
     item_attributes = models.JSONField(default=dict, blank=True,
         verbose_name='Atributi stavke (SPH, CYL, itd.)')
     locked_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Stavka kosrice'

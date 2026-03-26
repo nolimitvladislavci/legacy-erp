@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class SitePage(models.Model):
@@ -97,6 +98,7 @@ class GalleryImage(models.Model):
     is_active = models.BooleanField(default=True)
     uploaded_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Galerijska slika')

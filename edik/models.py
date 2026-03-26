@@ -1,6 +1,7 @@
 """EDIK — e-Porezna status tracking."""
 from django.db import models
 from django.conf import settings
+from core.managers import CompanyManager
 
 
 class TaxFormType(models.Model):
@@ -63,6 +64,7 @@ class TaxSubmission(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         unique_together = [('company', 'form_type', 'period_year', 'period_month')]
@@ -91,6 +93,7 @@ class TaxCalendar(models.Model):
     is_completed = models.BooleanField(default=False)
     submission = models.ForeignKey(TaxSubmission, on_delete=models.SET_NULL,
                                     null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['deadline']

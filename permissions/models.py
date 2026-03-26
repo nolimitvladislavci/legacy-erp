@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from core.managers import CompanyManager
 
 
 class Permission(models.Model):
@@ -137,6 +138,7 @@ class UserRole(models.Model):
     created_by = models.ForeignKey(User, null=True, blank=True,
                                   on_delete=models.SET_NULL,
                                   related_name='assigned_roles')
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'user_roles'
@@ -180,6 +182,7 @@ class PermissionOverride(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
                                   related_name='granted_overrides')
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'permission_overrides'

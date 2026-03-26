@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from core.managers import CompanyManager
 
 BRANCH_TYPES = [
     ('general',     'Općenito'),
@@ -79,6 +80,7 @@ class Appointment(models.Model):
     reminder_sent_at       = models.DateTimeField(null=True, blank=True)
     created_at       = models.DateTimeField(auto_now_add=True)
     updated_at       = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'appointments_appointment'
@@ -138,6 +140,7 @@ class BookingService(models.Model):
     total_price           = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     payment_method        = models.CharField(max_length=50, default='invoice')
     whatsapp_number       = models.CharField(max_length=50, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Usluga'

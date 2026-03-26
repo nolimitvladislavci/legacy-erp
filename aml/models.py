@@ -4,6 +4,7 @@ Zakon o sprjecavanju pranja novca i financiranja terorizma (NN 108/17).
 """
 from django.db import models
 from django.conf import settings
+from core.managers import CompanyManager
 
 
 class AMLRiskCategory(models.Model):
@@ -85,6 +86,7 @@ class AMLClientProfile(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-assessment_date']
@@ -131,6 +133,7 @@ class AMLTransaction(models.Model):
     reference_number = models.CharField(max_length=100, blank=True,
         verbose_name='AMLA referenca')
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-transaction_date']

@@ -298,6 +298,7 @@ class AgentReferral(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Istječe'))
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Agent Referral')

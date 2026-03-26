@@ -8,6 +8,7 @@ import uuid
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class DigitalMenu(models.Model):
@@ -31,6 +32,7 @@ class DigitalMenu(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Digitalni meni')
@@ -124,6 +126,7 @@ class TableQR(models.Model):
     qr_code = models.UUIDField(default=uuid.uuid4, unique=True)
     qr_image = models.ImageField(upload_to='gastro/table_qr/', blank=True, null=True)
     ordering_enabled = models.BooleanField(default=False, verbose_name=_('Naručivanje s mobitela'))
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('QR stola')
@@ -160,6 +163,7 @@ class TableOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
     served_at = models.DateTimeField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Narudžba sa stola')

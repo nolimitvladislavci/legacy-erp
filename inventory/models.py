@@ -756,6 +756,7 @@ class StockBatch(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Sarzna zaliha')
@@ -825,6 +826,7 @@ class InventoryCountLog(models.Model):
     )
     notes = models.TextField(blank=True, verbose_name=_('Napomena'))
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Zapisnik inventure')
@@ -1053,6 +1055,7 @@ class Inventura(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-date_started', '-created_at']

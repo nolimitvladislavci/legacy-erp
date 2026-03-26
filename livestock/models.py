@@ -6,6 +6,7 @@ plan ishrane, parcele, usjeve i put prema bio certifikaciji.
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from core.managers import CompanyManager
 
 
 class Livestock(models.Model):
@@ -53,6 +54,7 @@ class Livestock(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'livestock_animal'
@@ -204,6 +206,7 @@ class Field(models.Model):
     arkod_id = models.CharField(max_length=50, blank=True, verbose_name='ARKOD ID',
                                  help_text='Potreban za APPRRR poticaje')
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'livestock_field'
@@ -285,6 +288,7 @@ class CropPlan(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'livestock_crop_plan'
@@ -337,6 +341,7 @@ class InstitutionalAccessToken(models.Model):
     created_by = models.ForeignKey(
         'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
     )
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'livestock_institutional_token'

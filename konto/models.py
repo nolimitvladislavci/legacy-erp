@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 # ─────────────────────────────────────────────
@@ -29,6 +30,7 @@ class KontoAccount(models.Model):
                                related_name='children', verbose_name=_('Nadređeni konto'))
     is_active = models.BooleanField(default=True)
     description = models.TextField(blank=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['code']
@@ -82,6 +84,7 @@ class BankAccount(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-is_primary', 'name']
@@ -156,6 +159,7 @@ class BankTransaction(models.Model):
         help_text='ID iz banke za dedup')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-transaction_date', '-id']
@@ -203,6 +207,7 @@ class JournalEntry(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                                     null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-date', '-id']
@@ -323,6 +328,7 @@ class TaxPeriod(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-year', '-month', '-quarter']
@@ -380,6 +386,7 @@ class AccountingPeriod(models.Model):
         related_name='locked_periods')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         unique_together = [['company', 'year', 'month']]

@@ -8,6 +8,7 @@ import uuid
 from decimal import Decimal
 from django.db import models
 from django.utils import timezone
+from core.managers import CompanyManager
 
 
 # =============================================================================
@@ -47,6 +48,7 @@ class BillingPeriod(models.Model):
     total_tax        = models.DecimalField(max_digits=14, decimal_places=2, default=0)
     total_with_tax   = models.DecimalField(max_digits=14, decimal_places=2, default=0)
     otpremnica_count = models.PositiveIntegerField(default=0)
+    objects = CompanyManager()
 
     class Meta:
         unique_together = ("company", "year", "month")
@@ -124,6 +126,7 @@ class Otpremnica(models.Model):
     created_by = models.ForeignKey(
         "auth.User", on_delete=models.SET_NULL, null=True, blank=True
     )
+    objects = CompanyManager()
 
     class Meta:
         ordering = ["-issue_date", "-created_at"]

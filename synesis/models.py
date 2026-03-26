@@ -1,6 +1,7 @@
 import secrets
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 def _token():
@@ -71,6 +72,7 @@ class SynesisLog(models.Model):
     duration_seconds = models.FloatField(default=0)
     synced_at = models.DateTimeField(auto_now_add=True)
     client_ip = models.GenericIPAddressField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-synced_at']
@@ -106,6 +108,7 @@ class SynesisExportQueue(models.Model):
     created_by = models.ForeignKey(
         'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
     )
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Synesis export'

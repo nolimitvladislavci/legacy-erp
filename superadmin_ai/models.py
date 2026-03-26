@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class AIModulePermission(models.Model):
@@ -55,6 +56,7 @@ class AIModulePermission(models.Model):
     )
     updated_at = models.DateTimeField(auto_now=True)
     notes = models.TextField(blank=True, verbose_name=_('Napomena'))
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'ai_module_permission'
@@ -156,6 +158,7 @@ class PendingAIAction(models.Model):
         default=dict, blank=True, verbose_name=_('Rezultat izvršenja')
     )
 
+    objects = CompanyManager()
     class Meta:
         db_table = 'ai_pending_action'
         verbose_name = _('AI čekajuća akcija')
@@ -196,6 +199,7 @@ class AIActionLog(models.Model):
     )
     details = models.JSONField(default=dict, blank=True, verbose_name=_('Detalji'))
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'ai_action_log'

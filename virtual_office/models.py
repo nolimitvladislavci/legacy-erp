@@ -4,6 +4,7 @@ App: virtual_office/
 """
 from django.db import models
 from django.conf import settings
+from core.managers import CompanyManager
 
 
 class VirtualMailbox(models.Model):
@@ -69,6 +70,7 @@ class IncomingMail(models.Model):
 
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-received_date', '-created_at']

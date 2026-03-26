@@ -407,6 +407,7 @@ class DocumentBlob(models.Model):
     file_hash = models.CharField(max_length=64, db_index=True, verbose_name=_('SHA-256'))
     source_type = models.CharField(max_length=30, blank=True, verbose_name=_('Tip izvora'))
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Document Blob')
@@ -536,6 +537,7 @@ class ConversionRecord(models.Model):
                                     verbose_name=_('Kreirao'))
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Konverzijski zapis')
@@ -582,6 +584,7 @@ class ScanBatch(models.Model):
     total_size_kb = models.PositiveIntegerField(default=0)
     total_documents = models.PositiveIntegerField(default=0)
     error_message = models.TextField(blank=True, default='')
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Scan Batch'

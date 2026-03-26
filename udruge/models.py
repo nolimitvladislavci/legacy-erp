@@ -5,6 +5,7 @@ Cross-sell: clan udruge -> potencijalni OPG/obrt korisnik LC-a.
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from core.managers import CompanyManager
 
 
 class Clan(models.Model):
@@ -90,6 +91,7 @@ class Clan(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_clan'
@@ -183,6 +185,7 @@ class Clanarina(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_clanarina'
@@ -251,6 +254,7 @@ class Donacija(models.Model):
                                                verbose_name='Fer trzisna vrijednost (EUR)')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_donacija'
@@ -302,6 +306,7 @@ class KnjigaPrimitaka(models.Model):
     dokument = models.CharField(max_length=100, blank=True, verbose_name='Broj dokumenta')
     napomena = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_knjiga_primitaka'
@@ -365,6 +370,7 @@ class MembershipPlan(models.Model):
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_membership_plan'
@@ -425,6 +431,7 @@ class MemberSubscription(models.Model):
     reminders_count = models.PositiveSmallIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_member_subscription'
@@ -550,6 +557,7 @@ class Dogadjaj(models.Model):
 
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_dogadjaj'
@@ -668,6 +676,7 @@ class Kampanja(models.Model):
 
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_kampanja'
@@ -755,6 +764,7 @@ class EmailKampanja(models.Model):
 
     created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_email_kampanja'
@@ -847,6 +857,7 @@ class VolunteerActivity(models.Model):
     verified_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_volunteer_activity'
@@ -884,6 +895,7 @@ class Sekcija(models.Model):
     max_members = models.PositiveIntegerField(default=0, help_text='0=neograničeno')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Sekcija'
@@ -1028,6 +1040,7 @@ class VatrogasnaOprema(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_vatrogasna_oprema'
@@ -1085,6 +1098,7 @@ class VatrogasnoVozilo(models.Model):
     photo = models.ImageField(upload_to='vatrogasci/vozila/%Y/', blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_vatrogasno_vozilo'
@@ -1139,6 +1153,7 @@ class Intervencija(models.Model):
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_intervencija'
@@ -1184,6 +1199,7 @@ class Vjezba(models.Model):
     ocjena = models.CharField(max_length=50, blank=True, verbose_name='Ocjena/Rezultat')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_vjezba'
@@ -1254,6 +1270,7 @@ class Repertoar(models.Model):
     koreografija_file = models.FileField(upload_to='kud/koreo/%Y/', blank=True, verbose_name='Koreografija (PDF)')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_repertoar'
@@ -1277,6 +1294,7 @@ class ProbaLog(models.Model):
     repertoar_radjen = models.ManyToManyField(Repertoar, blank=True, related_name='probe', verbose_name='Repertoar rađen')
     biljeska = models.TextField(blank=True, verbose_name='Bilješka')
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_proba_log'
@@ -1329,6 +1347,7 @@ class Kostim(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_kostim'
@@ -1396,6 +1415,7 @@ class Revir(models.Model):
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_revir'
@@ -1429,6 +1449,7 @@ class RibolovnaDozvola(models.Model):
         ('gotovina', 'Gotovina'), ('pos', 'POS'), ('virman', 'Virman'), ('online', 'Online'),
     ])
     issued_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_ribolovna_dozvola'
@@ -1467,6 +1488,7 @@ class UlovEvidencija(models.Model):
     photo = models.ImageField(upload_to='ribolov/ulovi/%Y/', blank=True)
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_ulov'
@@ -1495,6 +1517,7 @@ class Poribljavanje(models.Model):
         help_text='članarine, proračun, HSR, EU fond...')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_poribljavanje'
@@ -1516,6 +1539,7 @@ class CuvarskaStraza(models.Model):
     zapisnik = models.TextField(blank=True, verbose_name='Zapisnik')
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_cuvarska_straza'
@@ -1545,6 +1569,7 @@ class Pcelinjak(models.Model):
     stacionarni = models.BooleanField(default=True, verbose_name='Stacionarni (ne seli)')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_pcelinjak'
@@ -1710,6 +1735,7 @@ class DestilacijaKotao(models.Model):
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_destilacija_kotao'
@@ -1783,6 +1809,7 @@ class RakijaProizvodnja(models.Model):
     cijena_eur_l = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, verbose_name='Cijena (EUR/L)')
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_rakija_proizvodnja'
@@ -1817,6 +1844,7 @@ class TrosarinaPrijava(models.Model):
     datum_prijave = models.DateField(null=True, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_trosarina_prijava'
@@ -1884,6 +1912,7 @@ class Vocnjak(models.Model):
     is_organic = models.BooleanField(default=False, verbose_name='Ekološki uzgoj')
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_vocnjak'
@@ -2065,6 +2094,7 @@ class Loviste(models.Model):
     opis_granica = models.TextField(blank=True)
     napomena = models.CharField(max_length=300, blank=True)
     is_active = models.BooleanField(default=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_loviste'
@@ -2093,6 +2123,7 @@ class LovackaIskaznica(models.Model):
     datum_ispita = models.DateField(null=True, blank=True)
     napomena = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_lovacka_iskaznica'
@@ -2126,6 +2157,7 @@ class DopustenjeLova(models.Model):
     sle_evidencija_br = models.CharField(max_length=50, blank=True)
     napomena = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_dopustenje_lova'
@@ -2157,6 +2189,7 @@ class ZapisnikLova(models.Model):
     photo = models.ImageField(upload_to='lov/zapisnici/%Y/', blank=True)
     napomena = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_zapisnik_lova'
@@ -2187,6 +2220,7 @@ class Trofej(models.Model):
     datum_vrjednovanja = models.DateField(null=True, blank=True)
     photo = models.ImageField(upload_to='lov/trofeji/%Y/', blank=True)
     napomena = models.CharField(max_length=200, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_trofej'
@@ -2231,6 +2265,7 @@ class Zadrugar(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_zadrugar'
@@ -2257,6 +2292,7 @@ class ZadruznRevizija(models.Model):
     izvjestaj_pdf = models.FileField(upload_to='zadruge/revizija/%Y/', blank=True)
     sljedeca_revizija = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'udruge_zadruzna_revizija'

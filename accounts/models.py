@@ -2,6 +2,7 @@ from core.fields import FernetEncryptedCharField
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class UserProfile(models.Model):
@@ -56,6 +57,7 @@ class UserProfile(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'core_userprofile'
@@ -139,6 +141,7 @@ class ImpersonationLog(models.Model):
     ended_at      = models.DateTimeField(null=True, blank=True, verbose_name='Kraj')
     ip_address    = models.GenericIPAddressField(null=True, blank=True, verbose_name='IP adresa')
     actions_count = models.IntegerField(default=0, verbose_name='Broj akcija')
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-started_at']
@@ -169,6 +172,7 @@ class CompanyMembership(models.Model):
     is_default = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     joined_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         unique_together = ('user', 'company')
@@ -240,6 +244,7 @@ class DeviceToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_used_at = models.DateTimeField(null=True, blank=True)
     last_ip = models.GenericIPAddressField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Device token')

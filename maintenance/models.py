@@ -152,6 +152,7 @@ class DepreciationLog(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     journal_entry_number = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         unique_together = [['asset', 'year', 'month']]

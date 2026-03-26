@@ -7,6 +7,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class Vehicle(models.Model):
@@ -41,6 +42,7 @@ class Vehicle(models.Model):
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Vozilo')
@@ -138,6 +140,7 @@ class DeliveryStop(models.Model):
 
     # Temperatura pri primopredaji
     temp_at_handover = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True, verbose_name=_('Temp °C'))
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Stanica dostave')
@@ -301,6 +304,7 @@ class ConsolidatedDelivery(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='created_consolidated_deliveries'
     )
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Konsolidirana isporuka')
@@ -354,6 +358,7 @@ class ColdChainZone(models.Model):
     sensor_api_url = models.URLField(blank=True, verbose_name=_('API URL senzora'))
 
     is_active = models.BooleanField(default=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Zona hladnog lanca')
@@ -600,6 +605,7 @@ class SmartBox(models.Model):
     last_reading_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Smart Box'
@@ -670,6 +676,7 @@ class DeliveryCostRule(models.Model):
     max_distance_km = models.PositiveIntegerField(default=50, verbose_name=_('Max udaljenost (km)'))
     cold_chain_surcharge = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('1.50'), verbose_name=_('Dodatak hladni lanac (€)'))
     is_active = models.BooleanField(default=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Pravilo cijene dostave')
@@ -1079,6 +1086,7 @@ class PickWave(models.Model):
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Pick Wave')
@@ -1181,6 +1189,7 @@ class DeliveryZone(models.Model):
     is_active = models.BooleanField(default=True, verbose_name=_('Aktivna'))
     sort_order = models.IntegerField(default=0, verbose_name=_('Redoslijed'))
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['sort_order', 'price']
@@ -1299,6 +1308,7 @@ class DriverDocument(models.Model):
     reminder_days = models.PositiveSmallIntegerField(default=30, verbose_name=_('Podsjetnik (dana prije)'))
     notes = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Dokument vozača')
@@ -1442,6 +1452,7 @@ class TransportOrder(models.Model):
                                     related_name='created_transport_orders')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Nalog za prijevoz')

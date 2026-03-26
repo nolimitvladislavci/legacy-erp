@@ -21,6 +21,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -314,6 +315,7 @@ class TaxWizardSession(models.Model):
         max_length=5, default='hr',
         help_text='hr, en, de — za višejezični wizard',
     )
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']
@@ -471,6 +473,7 @@ class TaxDeadline(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         unique_together = [('company', 'template', 'tax_year', 'tax_month')]
@@ -582,6 +585,7 @@ class TaxSimulation(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']

@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.db import models
 from decimal import Decimal
 from datetime import date, timedelta
+from core.managers import CompanyManager
 
 
 class Member(models.Model):
@@ -102,6 +103,7 @@ class MembershipPlan(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = "Plan članstva"
@@ -241,6 +243,7 @@ class Payment(models.Model):
         help_text="Firma kojoj pripada ova uplata.",
         verbose_name="Firma"
     )
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = "Uplata"
@@ -301,6 +304,7 @@ class WorkoutClass(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = "Klasa vježbanja"
@@ -401,6 +405,7 @@ class Equipment(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = "Oprema"

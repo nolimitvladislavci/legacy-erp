@@ -1,6 +1,7 @@
 """PDV-S (Prijava PDV-a) — modeli."""
 from django.db import models
 from django.conf import settings
+from core.managers import CompanyManager
 
 
 class PDVSReport(models.Model):
@@ -71,6 +72,7 @@ class PDVSReport(models.Model):
                                       null=True, blank=True)
     xml_file = models.FileField(upload_to='pdv_s/exports/', blank=True)
     notes = models.TextField(blank=True)
+    objects = CompanyManager()
 
     class Meta:
         unique_together = [('company', 'year', 'month')]

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from core.managers import CompanyManager
 
 
 class Notification(models.Model):
@@ -26,6 +27,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE, null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'notifications'

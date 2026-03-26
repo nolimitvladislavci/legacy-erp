@@ -1046,6 +1046,7 @@ class GastroReview(models.Model):
     ambience_rating = models.PositiveSmallIntegerField(null=True, blank=True)  # 1-5
     is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']
@@ -1128,6 +1129,7 @@ class POSDailyReport(models.Model):
         verbose_name=_('Z-report PDF'),
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Dnevni izvještaj POS')
@@ -1254,6 +1256,7 @@ class ImprovementSuggestion(models.Model):
     admin_note = models.TextField(blank=True, verbose_name=_('Biljeska admina'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Prijedlog poboljsanja')
@@ -1355,6 +1358,7 @@ class KnjigaPrigovora(models.Model):
         verbose_name=_('Evidentirao'),
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Prigovor')
@@ -1455,6 +1459,7 @@ class POSPulseEvent(models.Model):
     is_read = models.BooleanField(default=False)
     notified_whatsapp = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('POS Pulse Event')

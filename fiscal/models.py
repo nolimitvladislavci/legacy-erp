@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from core.managers import CompanyManager
 
 
 class FiscalProvider(models.TextChoices):
@@ -36,6 +37,7 @@ class FiscalConfiguration(models.Model):
     tse_api_secret = models.CharField(max_length=255, blank=True, help_text='fiskaly API Secret')
     tse_tss_id = models.CharField(max_length=255, blank=True, help_text='TSS ID iz fiskaly dashboarda')
     tse_client_id = models.CharField(max_length=255, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Fiskalna konfiguracija'

@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from core.managers import CompanyManager
 
 
 class Conversation(models.Model):
@@ -71,6 +72,7 @@ class PatrolReport(models.Model):
     has_issues = models.BooleanField(default=False)
     finding_count = models.PositiveIntegerField(default=0)
     critical_count = models.PositiveIntegerField(default=0)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']

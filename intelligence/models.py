@@ -5,6 +5,7 @@ Fenix Intelligence -- autonomni istrazivacki agent.
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from core.managers import CompanyManager
 
 
 class IntelligenceSource(models.Model):
@@ -75,6 +76,7 @@ class IntelligenceJob(models.Model):
 
     zadnji_run = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'intelligence_job'
@@ -240,6 +242,7 @@ class FundApplication(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'intelligence_fund_application'

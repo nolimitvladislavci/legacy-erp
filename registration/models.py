@@ -2,6 +2,7 @@ import uuid
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class CompanyRegistration(models.Model):
@@ -169,6 +170,7 @@ class CompanySubscription(models.Model):
     cancelled_at = models.DateTimeField(null=True, blank=True, verbose_name='Datum otkazivanja')
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']
@@ -435,6 +437,7 @@ class UmbrellaInviteCode(models.Model):
     is_active = models.BooleanField(default=True)
     valid_until = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = 'Umbrella pozivni kod'

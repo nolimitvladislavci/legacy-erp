@@ -1,4 +1,5 @@
 from django.db import models
+from core.managers import CompanyManager
 
 
 class SystemAuditLog(models.Model):
@@ -18,6 +19,7 @@ class SystemAuditLog(models.Model):
     object_repr = models.CharField(max_length=300, blank=True)
     changes = models.JSONField(default=dict, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-timestamp']
@@ -71,6 +73,7 @@ class InspectionToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_accessed = models.DateTimeField(null=True, blank=True)
     access_ip = models.GenericIPAddressField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']

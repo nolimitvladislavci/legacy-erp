@@ -184,6 +184,7 @@ class CompanyMailbox(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = "Email sandučić"
@@ -204,6 +205,7 @@ class FailedImport(models.Model):
     error_message = models.TextField()
     mailbox_user = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = "Neuspjeli uvoz"
@@ -230,6 +232,7 @@ class ProblemReport(models.Model):
     description = models.TextField(verbose_name="Opis problema")
     created_at = models.DateTimeField(auto_now_add=True)
     resolved = models.BooleanField(default=False, verbose_name="Rijeseno")
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = "Prijava problema"

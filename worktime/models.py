@@ -522,6 +522,7 @@ class TimeLog(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'worktime_timelog'
@@ -593,6 +594,7 @@ class ActivityEvent(models.Model):
     metadata = models.JSONField(default=dict, blank=True)
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'worktime_activity_event'
@@ -733,6 +735,7 @@ class AnomalyReport(models.Model):
         null=True, blank=True, related_name='resolved_anomalies'
     )
     resolution_note = models.TextField(blank=True)
+    objects = CompanyManager()
 
     class Meta:
         db_table = 'worktime_anomaly_report'

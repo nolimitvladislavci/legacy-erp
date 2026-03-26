@@ -9,6 +9,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.managers import CompanyManager
 
 
 class ProductTrace(models.Model):
@@ -53,6 +54,7 @@ class ProductTrace(models.Model):
     trace_url = models.URLField(blank=True, verbose_name=_('Javni URL'))
 
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = CompanyManager()
 
     class Meta:
         verbose_name = _('Trag proizvoda')

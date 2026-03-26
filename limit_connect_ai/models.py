@@ -2,6 +2,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from core.managers import CompanyManager
 
 
 class AIAgentMission(models.Model):
@@ -53,6 +54,7 @@ class AIAgentMission(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']
@@ -88,6 +90,7 @@ class AIReportLog(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     ai_tokens_used = models.IntegerField(default=0)
     error_message = models.TextField(blank=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-sent_at']
@@ -130,6 +133,7 @@ class FundApplicationDraft(models.Model):
         null=True, blank=True, related_name='reviewed_fund_drafts',
     )
     submitted_at = models.DateTimeField(null=True, blank=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-created_at']
@@ -170,6 +174,7 @@ class ComplianceWatchItem(models.Model):
     last_checked = models.DateTimeField(default=timezone.now, verbose_name='Zadnja provjera')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['deadline', '-created_at']
@@ -236,6 +241,7 @@ class CampaignPlan(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = CompanyManager()
 
     class Meta:
         ordering = ['-planned_date', '-created_at']
