@@ -4361,15 +4361,27 @@ def prigovori_api(request):
 
 @login_required
 def knjiga_prigovora_pdf(request):
-    """Službeni PDF Knjige prigovora za inspekciju."""
+    """Službeni PDF Knjige prigovora i utisaka za inspekciju. HR + DE."""
     company = get_user_company(request)
     from .models import KnjigaPrigovora
-    prigovori = KnjigaPrigovora.objects.filter(company=company).order_by('redni_broj')
+
+    all_records = KnjigaPrigovora.objects.filter(company=company).order_by('redni_broj')
+    prigovori = all_records.filter(record_type__in=['prigovor', 'reklamacija'])
+    pohvale = all_records.filter(record_type__in=['pohvala', 'utisak', 'prijedlog'])
+
+    # Detect language
+    lang = request.GET.get('lang', '')
+    if not lang:
+        lang = 'de' if getattr(company, 'country', '') == 'DE' else 'hr'
 
     from django.template.loader import render_to_string
     html = render_to_string('pos/knjiga_prigovora_pdf.html', {
         'prigovori': prigovori,
+        'pohvale': pohvale,
+        'prigovori_count': prigovori.count(),
+        'pohvale_count': pohvale.count(),
         'company': company,
+        'lang': lang,
     })
     try:
         from xhtml2pdf import pisa

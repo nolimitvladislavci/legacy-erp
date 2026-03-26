@@ -322,9 +322,32 @@ def ai_analyze_prigovor(self, prigovor_id):
         import anthropic
         client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
 
-        prompt = """Analiziraj prigovor potrošača i odgovori ISKLJUČIVO kao JSON:
+        # Adapt prompt based on record type and language
+        lang_label = {'hr': 'hrvatskom', 'de': 'Deutsch', 'en': 'English'}.get(p.language, 'hrvatskom')
+        type_label = dict(p.RECORD_TYPES).get(p.record_type, p.record_type)
 
-PRIGOVOR:
+        if p.record_type in ('pohvala', 'utisak'):
+            prompt = """Analiziraj %s potrošača i odgovori ISKLJUČIVO kao JSON:
+
+%s:
+Ime: %s
+Ocjena: %s zvjezdica
+Opis: %s
+
+VRATI JSON:
+{
+  "category": "product_quality|service|pricing|hygiene|wait_time|delivery|warranty|safety|other",
+  "sentiment": "positive|very_positive|neutral|constructive",
+  "priority": 1 (pohvale nisu hitne),
+  "suggested_response": "Kratka zahvala na %s jeziku, profesionalan i srdačan ton, max 100 riječi.",
+  "key_positives": ["pozitivna stavka 1", "stavka 2"],
+  "auto_respond": true
+}""" % (type_label, type_label, p.ime_potrosaca, p.star_rating or '?', p.opis_prigovora[:500], lang_label)
+        else:
+            deadline = p.legal_deadline_days or 15
+            prompt = """Analiziraj %s potrošača i odgovori ISKLJUČIVO kao JSON:
+
+%s:
 Ime: %s
 Opis: %s
 
@@ -333,9 +356,11 @@ VRATI JSON:
   "category": "product_quality|service|pricing|hygiene|wait_time|delivery|warranty|safety|other",
   "sentiment": "critical|negative|neutral|constructive",
   "priority": 1-5 (5=najhitnije, npr. sigurnost/ozljeda),
-  "suggested_response": "Prijedlog službenog odgovora na hrvatskom jeziku, profesionalan ton, max 200 riječi. Referencira zakonski rok od 15 dana.",
-  "key_issues": ["kratki opis problema 1", "problem 2"]
-}""" % (p.ime_potrosaca, p.opis_prigovora[:500])
+  "suggested_response": "Prijedlog službenog odgovora na %s jeziku, profesionalan ton, max 200 riječi. Referencira zakonski rok od %d dana.",
+  "key_issues": ["kratki opis problema 1", "problem 2"],
+  "auto_respond": false,
+  "escalate": false
+}""" % (type_label, type_label, p.ime_potrosaca, p.opis_prigovora[:500], lang_label, deadline)
 
         response = client.messages.create(
             model='claude-haiku-4-5-20251001',
@@ -358,13 +383,45 @@ VRATI JSON:
             'ai_suggested_response', 'ai_analyzed_at',
         ])
 
-        logger.info('AI prigovor #%d: category=%s sentiment=%s priority=%d',
-                     p.redni_broj, p.ai_category, p.ai_sentiment, p.ai_priority)
+        logger.info('AI prigovor #%d [%s]: category=%s sentiment=%s priority=%d',
+                     p.redni_broj, p.record_type, p.ai_category, p.ai_sentiment, p.ai_priority)
+
+        # Auto-escalate if critical priority
+        if p.ai_priority >= 4 and p.record_type in ('prigovor', 'reklamacija'):
+            p.is_escalated = True
+            p.escalated_at = timezone.now()
+            p.escalation_reason = f'AI prioritet {p.ai_priority}/5 — automatska eskalacija'
+            p.save(update_fields=['is_escalated', 'escalated_at', 'escalation_reason'])
+            logger.warning('ESKALACIJA: prigovor #%d prioritet %d', p.redni_broj, p.ai_priority)
+
+        # Auto-respond for pohvale/utisci (if AI says auto_respond=true)
+        if result.get('auto_respond') and p.record_type in ('pohvala', 'utisak') and not p.odgovor:
+            p.odgovor = p.ai_suggested_response
+            p.datum_odgovora = timezone.now().date()
+            p.response_channel = 'email' if p.consumer_email else ('whatsapp' if p.consumer_phone else '')
+            p.save(update_fields=['odgovor', 'datum_odgovora', 'response_channel'])
+
+            # Send auto-response
+            if p.consumer_email:
+                try:
+                    from pos.complaint_views import _send_response_email
+                    _send_response_email(p)
+                except Exception:
+                    pass
+            if p.consumer_phone:
+                try:
+                    from pos.complaint_views import _send_response_wa
+                    _send_response_wa(p)
+                except Exception:
+                    pass
+            logger.info('Auto-response sent for %s #%d', p.record_type, p.redni_broj)
 
         return {
             'category': p.ai_category,
             'sentiment': p.ai_sentiment,
             'priority': p.ai_priority,
+            'auto_responded': result.get('auto_respond', False),
+            'escalated': p.is_escalated,
         }
 
     except Exception as e:

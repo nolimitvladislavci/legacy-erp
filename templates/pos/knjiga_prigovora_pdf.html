@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,62 +8,150 @@
   body { font-family: Helvetica, Arial, sans-serif; font-size: 10px; color: #1a1a1a; }
   h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
   .sub { text-align: center; font-size: 9px; color: #666; margin-bottom: 12px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
   th, td { border: 1px solid #333; padding: 5px 6px; font-size: 9px; vertical-align: top; }
   th { background: #f0f0f0; font-weight: bold; text-align: center; }
   .expired { color: #dc2626; font-weight: bold; }
   .answered { color: #16a34a; }
+  .escalated { color: #dc2626; font-weight: bold; background: #fee2e2; }
+  .pohvala { background: #f0fdf4; }
+  .utisak { background: #eff6ff; }
+  .type-badge { display: inline-block; padding: 1px 4px; border-radius: 3px; font-size: 7px; font-weight: bold; }
+  .type-prigovor { background: #fecaca; color: #991b1b; }
+  .type-pohvala { background: #bbf7d0; color: #166534; }
+  .type-utisak { background: #bfdbfe; color: #1e40af; }
+  .type-reklamacija { background: #fde68a; color: #92400e; }
+  .type-prijedlog { background: #e9d5ff; color: #6b21a8; }
+  .sig-img { max-width: 80px; max-height: 30px; }
+  .stars { color: #d4af37; font-size: 10px; }
   .footer { text-align: center; font-size: 7px; color: #888; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 5px; }
+  .integrity { font-family: monospace; font-size: 6px; color: #999; }
+  .section-title { background: #1a1a2e; color: #d4af37; padding: 6px; font-size: 11px; font-weight: bold; margin-top: 12px; }
 </style>
 </head>
 <body>
 
-<h1>KNJIGA PRIGOVORA</h1>
+{% if lang == 'de' %}
+<h1>BESCHWERDE- UND EINDRUCKBUCH</h1>
+<div class="sub">
+  {{ company.name }} | USt-IdNr: {{ company.vat_id|default:company.oib|default:"—" }} | {{ company.address|default:"" }}, {{ company.city|default:"" }}<br>
+  Gem. Gaststättenverordnung / DSGVO Art. 6(1)(f) — Evidenz der Kundenbeschwerden und Eindrücke
+</div>
+{% else %}
+<h1>KNJIGA PRIGOVORA I UTISAKA</h1>
 <div class="sub">
   {{ company.name }} | OIB: {{ company.oib|default:"—" }} | {{ company.address|default:"" }}, {{ company.city|default:"" }}<br>
-  Zakon o zaštiti potrošača (NN 19/22) čl. 10 — Evidencija prigovora
+  Zakon o zaštiti potrošača (NN 19/22) čl. 10 — Evidencija prigovora i utisaka potrošača
 </div>
+{% endif %}
 
+{# === PRIGOVORI I REKLAMACIJE === #}
+<div class="section-title">
+  {% if lang == 'de' %}BESCHWERDEN UND REKLAMATIONEN{% else %}PRIGOVORI I REKLAMACIJE{% endif %}
+  ({{ prigovori_count }})
+</div>
 <table>
   <thead>
     <tr>
-      <th style="width:30px">R.br.</th>
-      <th style="width:65px">Datum primitka</th>
-      <th style="width:100px">Potrošač</th>
-      <th style="width:80px">Kontakt</th>
-      <th>Opis prigovora</th>
-      <th style="width:65px">Datum odgovora</th>
-      <th>Odgovor</th>
+      <th style="width:25px">{% if lang == 'de' %}Nr.{% else %}R.br.{% endif %}</th>
+      <th style="width:60px">{% if lang == 'de' %}Datum{% else %}Datum{% endif %}</th>
+      <th style="width:18px">{% if lang == 'de' %}Typ{% else %}Tip{% endif %}</th>
+      <th style="width:85px">{% if lang == 'de' %}Verbraucher{% else %}Potrošač{% endif %}</th>
+      <th>{% if lang == 'de' %}Beschreibung{% else %}Opis{% endif %}</th>
+      <th style="width:55px">{% if lang == 'de' %}Antwort{% else %}Odgovor{% endif %}</th>
+      <th style="width:30px">{% if lang == 'de' %}Sign.{% else %}Pot.{% endif %}</th>
+      <th style="width:50px">Hash</th>
     </tr>
   </thead>
   <tbody>
     {% for p in prigovori %}
-    <tr>
+    <tr class="{% if p.is_escalated %}escalated{% endif %}">
       <td style="text-align:center;font-weight:bold">{{ p.redni_broj }}</td>
       <td>{{ p.datum_primitka|date:"d.m.Y" }}</td>
-      <td>{{ p.ime_potrosaca }}</td>
-      <td style="font-size:8px">{{ p.kontakt }}</td>
-      <td>{{ p.opis_prigovora }}</td>
+      <td>
+        <span class="type-badge type-{{ p.record_type }}">
+          {% if p.record_type == 'prigovor' %}P{% elif p.record_type == 'reklamacija' %}R{% else %}{{ p.record_type|first|upper }}{% endif %}
+        </span>
+      </td>
+      <td>{{ p.ime_potrosaca }}<br><span style="font-size:7px;color:#666">{{ p.consumer_email|default:p.kontakt }}</span></td>
+      <td>{{ p.opis_prigovora|truncatewords:50 }}</td>
       <td>
         {% if p.datum_odgovora %}
           <span class="answered">{{ p.datum_odgovora|date:"d.m.Y" }}</span>
         {% elif p.rok_istekao %}
-          <span class="expired">PROBIJEN ROK!</span>
+          <span class="expired">{% if lang == 'de' %}FRIST ABGELAUFEN!{% else %}PROBIJEN ROK!{% endif %}</span>
+        {% elif p.dana_do_roka is not None %}
+          <em style="color:#888">{{ p.dana_do_roka }}{% if lang == 'de' %}T{% else %}d{% endif %}</em>
         {% else %}
-          <em style="color:#888">Čeka ({{ p.dana_do_roka }}d)</em>
+          —
         {% endif %}
       </td>
-      <td>{{ p.odgovor|default:"—" }}</td>
+      <td style="text-align:center">
+        {% if p.signature %}
+          <img src="{{ p.signature }}" class="sig-img" alt="sig">
+        {% else %}—{% endif %}
+      </td>
+      <td class="integrity">{{ p.integrity_hash|truncatechars:12 }}</td>
     </tr>
     {% empty %}
-    <tr><td colspan="7" style="text-align:center;color:#888;padding:20px">Nema evidentiranih prigovora.</td></tr>
+    <tr><td colspan="8" style="text-align:center;color:#888;padding:15px">
+      {% if lang == 'de' %}Keine Beschwerden registriert.{% else %}Nema evidentiranih prigovora.{% endif %}
+    </td></tr>
     {% endfor %}
   </tbody>
 </table>
 
+{# === POHVALE I UTISCI === #}
+{% if pohvale_count %}
+<div class="section-title">
+  {% if lang == 'de' %}LOB UND EINDRÜCKE{% else %}POHVALE I UTISCI{% endif %}
+  ({{ pohvale_count }})
+</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width:25px">{% if lang == 'de' %}Nr.{% else %}R.br.{% endif %}</th>
+      <th style="width:60px">{% if lang == 'de' %}Datum{% else %}Datum{% endif %}</th>
+      <th style="width:18px">{% if lang == 'de' %}Typ{% else %}Tip{% endif %}</th>
+      <th style="width:85px">{% if lang == 'de' %}Name{% else %}Ime{% endif %}</th>
+      <th style="width:30px">{% if lang == 'de' %}Bew.{% else %}Ocj.{% endif %}</th>
+      <th>{% if lang == 'de' %}Kommentar{% else %}Komentar{% endif %}</th>
+      <th style="width:30px">{% if lang == 'de' %}Sign.{% else %}Pot.{% endif %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in pohvale %}
+    <tr class="{{ p.record_type }}">
+      <td style="text-align:center">{{ p.redni_broj }}</td>
+      <td>{{ p.datum_primitka|date:"d.m.Y" }}</td>
+      <td>
+        <span class="type-badge type-{{ p.record_type }}">
+          {% if p.record_type == 'pohvala' %}+{% else %}✎{% endif %}
+        </span>
+      </td>
+      <td>{{ p.public_display_name|default:p.ime_potrosaca }}</td>
+      <td class="stars">{% if p.star_rating %}{{ p.star_rating }}★{% else %}—{% endif %}</td>
+      <td>{{ p.opis_prigovora|truncatewords:40 }}</td>
+      <td style="text-align:center">
+        {% if p.signature %}<img src="{{ p.signature }}" class="sig-img" alt="sig">{% else %}—{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
 <div class="footer">
+  {% if lang == 'de' %}
+  Erstellt: {% now "d.m.Y H:i" %} | {{ company.name }} | Antwortfrist: 14 Tage (BGB)<br>
+  Diese Evidenz wird dauerhaft aufbewahrt und muss auf Anfrage der Aufsichtsbehörde zugänglich sein.<br>
+  Integritätsprüfung: SHA256-Hash pro Eintrag sichert Unveränderlichkeit.
+  {% else %}
   Generirano: {% now "d.m.Y H:i" %} | {{ company.name }} | Rok za odgovor: 15 dana (čl. 10 st. 5 ZZP)<br>
-  Ova evidencija se čuva trajno i mora biti dostupna inspektoru na zahtjev.
+  Ova evidencija se čuva trajno i mora biti dostupna inspektoru na zahtjev.<br>
+  Integritetska provjera: SHA256 hash po zapisu jamči nepromjenjivost.
+  {% endif %}
 </div>
 
 </body>
