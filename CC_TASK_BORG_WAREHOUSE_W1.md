@@ -855,3 +855,184 @@ git log --oneline -5
    ```
 5. **pyzbar** — može biti nije instaliran. Koristiti try/except i AI fallback.
 6. Commit po svakom sprintu: W1A, W1B, W1C, W1D, W1E zasebno
+
+
+---
+## ⚠️ DOPUNA W1A — OWNERSHIP LAYER (Vlasnički odnosi)
+## Dodano: 2026-03-27 — Sonnet (analiza vlasničkih odnosa)
+
+### Zašto ownership layer u InventoryItem
+
+Konsignacija postoji u GoodsReceipt ali NIJE wire-ana na konto 9100 (izvanbilančna).
+Komisija, lizing, JV, franšiza, Eigentumsvorbehalt — ne postoje ni kao koncepti.
+
+**Direktna veza sa skladištem:**
+- Konsignacija → roba fizički kod tebe, vlasnik = dobavljač → 9100 izvanbilančna
+- Komisija → tuđe, prodaješ za % → konto 760 prihodi od provizija
+- Lizing imovine → u upotrebi ali ne tvoje → 420 zakupnina (ne amortizacija)
+- JV → zajednička imovina → split prihoda pri prodaji
+- Eigentumsvorbehalt (DE §449 BGB) → vlasništvo prelazi tek punom isplatom
+
+### Dodati u InventoryItem (uz W1A polja)
+
+```python
+OWNERSHIP_TYPE_CHOICES = [
+    ('own',         _('Vlastito (puno vlasništvo)')),
+    ('consignment', _('Konsignacija (vlasnik = dobavljač)')),
+    ('commission',  _('Komisija (prodajemo za %)')),
+    ('leased_op',   _('Operativni lizing')),
+    ('leased_fin',  _('Financijski lizing')),
+    ('jv_shared',   _('Zajednička imovina (JV)')),
+    ('franchise',   _('Franšiza')),
+    ('retention',   _('Eigentumsvorbehalt (DE §449 BGB)')),
+]
+
+ownership_type        = models.CharField(max_length=15, choices=OWNERSHIP_TYPE_CHOICES,
+                                          default='own', verbose_name=_('Tip vlasništva'))
+ownership_partner     = models.ForeignKey('partners.Partner', null=True, blank=True,
+                                           on_delete=models.SET_NULL,
+                                           related_name='consignment_items',
+                                           verbose_name=_('Vlasnik / Partner'))
+ownership_split_pct   = models.DecimalField(max_digits=5, decimal_places=2, default=100,
+                                             verbose_name=_('Moj udio u prihodu (%)'))
+ownership_contract    = models.CharField(max_length=100, blank=True,
+                                          verbose_name=_('Broj ugovora'))
+ownership_valid_until = models.DateField(null=True, blank=True,
+                                          verbose_name=_('Aranžman vrijedi do'))
+
+# IP Royalty (plaćamo vlasniku prava)
+profit_sharing_pct    = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+                                             verbose_name=_('Udio partnera u prihodu (%)'))
+
+# Lizing specifično
+lease_monthly_rate    = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+                                             verbose_name=_('Mjesečna rata lizinga'))
+lease_end_date        = models.DateField(null=True, blank=True,
+                                          verbose_name=_('Kraj lizing ugovora'))
+lease_purchase_option = models.BooleanField(default=False,
+                                             verbose_name=_('Opcija otkupa'))
+lease_residual_value  = models.DecimalField(max_digits=12, decimal_places=2, default=0,
+                                             verbose_name=_('Ostatak. vrijednost'))
+
+# Eigentumsvorbehalt (DE)
+retention_of_title    = models.BooleanField(default=False,
+                                             verbose_name=_('Pridržaj vlasništva (DE §449 BGB)'))
+title_transfer_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0,
+                                             verbose_name=_('Preostalo za prijenos vlasništva'))
+```
+
+### Metoda calculate_net_revenue() — dodati u InventoryItem
+
+```python
+def calculate_net_revenue(self, gross_sale_price) -> dict:
+    """
+    Za svaki prodani artikl izračunaj NET prihod firme.
+    Uzima u obzir: konsignaciju, komisiju, JV, royalty, franšizu.
+    Automatski generiše obveze prema partnerima.
+    """
+    from decimal import Decimal
+    gsp = Decimal(str(gross_sale_price))
+    result = {
+        'gross': gsp,
+        'own_revenue': Decimal('0'),
+        'partner_payable': Decimal('0'),
+        'royalty_payable': Decimal('0'),
+        'konto_credit': '660',
+        'partner': None,
+    }
+    
+    own_pct = Decimal(str(self.ownership_split_pct or 100)) / Decimal('100')
+    
+    if self.ownership_type == 'own':
+        result['own_revenue'] = gsp
+    elif self.ownership_type == 'consignment':
+        margin = gsp - (Decimal(str(self.purchase_price or 0)))
+        result['own_revenue'] = max(Decimal('0'), margin)
+        result['partner_payable'] = Decimal(str(self.purchase_price or 0))
+        result['partner'] = self.ownership_partner
+    elif self.ownership_type == 'commission':
+        result['own_revenue'] = gsp * own_pct
+        result['partner_payable'] = gsp * (1 - own_pct)
+        result['konto_credit'] = '760'
+        result['partner'] = self.ownership_partner
+    elif self.ownership_type == 'jv_shared':
+        result['own_revenue'] = gsp * own_pct
+        result['partner_payable'] = gsp * (1 - own_pct)
+        result['konto_credit'] = '750'
+        result['partner'] = self.ownership_partner
+    else:
+        result['own_revenue'] = gsp
+    
+    # IP royalty odbitka
+    if self.ip_royalty_pct and self.ip_royalty_pct > 0:
+        royalty = gsp * Decimal(str(self.ip_royalty_pct)) / Decimal('100')
+        result['royalty_payable'] = royalty
+        result['own_revenue'] -= royalty
+    
+    return result
+```
+
+### should_track_stock() dopuna za lizing
+
+```python
+def should_track_stock(self) -> bool:
+    """Fizičko skladište — da ili ne?"""
+    if self.ownership_type == 'leased_op':
+        return True  # Operativni lizing: u upotrebi, evidentiraj
+    if self.ownership_type == 'leased_fin':
+        return True  # Financijski lizing: tvoje za računovodstvo
+    return self.item_class in ('tangible', 'asset')
+
+def get_konto_class(self) -> str:
+    """Koji konto za ovu vrstu artikla?"""
+    mapping = {
+        ('tangible', 'own'):         '1300',  # Roba/zalihe
+        ('tangible', 'consignment'): '9100',  # Izvanbilančna
+        ('asset', 'own'):            '0230',  # Osnovna sredstva
+        ('asset', 'leased_fin'):     '0230',  # Fin. lizing = tvoje
+        ('asset', 'leased_op'):      '4200',  # Zakupnina expense
+        ('intangible', 'own'):       '0130',  # Nematerijalna imovina
+    }
+    return mapping.get((self.item_class, self.ownership_type), '1300')
+```
+
+### Alerts za expiry
+
+Dodati u Celery beat (weekly):
+```python
+@shared_task(name='inventory.ownership_alerts')
+def check_ownership_expiry():
+    """Provjeri aranžmane koji ističu u sljedećih 30 dana."""
+    from django.utils import timezone
+    from datetime import timedelta
+    from inventory.models import InventoryItem
+    
+    soon = timezone.now().date() + timedelta(days=30)
+    
+    # Lizing koji ističe
+    leasing_expiry = InventoryItem.objects.filter(
+        ownership_type__in=('leased_op', 'leased_fin'),
+        lease_end_date__lte=soon,
+        is_active=True,
+    )
+    
+    # IP prava koja ističu
+    ip_expiry = InventoryItem.objects.filter(
+        item_class='intangible',
+        ip_valid_until__lte=soon,
+        is_active=True,
+    )
+    
+    # Eigentumsvorbehalt s preostalim iznosom
+    retention = InventoryItem.objects.filter(
+        retention_of_title=True,
+        title_transfer_amount__gt=0,
+        is_active=True,
+    )
+    
+    # TODO: Pošalji notifikaciju adminu / WhatsApp
+    import logging
+    log = logging.getLogger('inventory')
+    log.info('Ownership alerts: %d leasing, %d IP, %d retention',
+             leasing_expiry.count(), ip_expiry.count(), retention.count())
+```
