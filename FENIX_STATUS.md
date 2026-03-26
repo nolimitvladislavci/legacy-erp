@@ -15,8 +15,8 @@
 | 1 | 26.3. | Worktime /mine/ — mobilna stranica za radnika | CC Code | ✅ DONE |
 | 1 | 26.3. | DNS TTL → 60s (Ivan ručno, Hetzner panel) | **IVAN** | ⏳ ČEKA |
 | 2 | 27.3. | POS Joker unified + tax widget + subscription cockpit | CC Code | ✅ DONE |
-| 3 | 28.3. | Unscoped audit finish + GDPR | CC Code | ⏳ ČEKA |
-| 4 | 29.3. | Vatrogasci modul (dnevnik intervencija) | CC Code | ⏳ ČEKA |
+| 3 | 28.3. | Unscoped audit finish + GDPR | CC Code | ✅ DONE |
+| 4 | 29.3. | Vatrogasci modul (dnevnik intervencija) | CC Code | ✅ DONE (26.3.) |
 | 5 | 30.3. | Novi server naručiti (Hetzner CPX51) | **IVAN** | ⏳ ČEKA |
 | 5 | 30.3. | Server priprema + load test | Sonnet+CC | ⏳ ČEKA |
 | 7 | 1.4. | **MIGRACIJA 03:00** — 0-downtime | Sonnet | ⏳ ČEKA |
@@ -161,3 +161,21 @@ LIMIT Connect Borg (26.03.2026):
   ├── Transport (CMR, putni nalog PDF)
   └── AI (Gemini patrol, Haiku classifier, BORG signal)
 ```
+
+## ★ DEPLOYAN DANAS (28.03.2026) — CC Code Opus sesija (Dan 3)
+
+| Što | Commit | Opis |
+|-----|--------|------|
+| CompanyManager 136 modela | 7ca1129b | Svaki model s company FK sada ima CompanyManager — cross-tenant izolacija |
+| Konto view guards | 8a20a351 | 7 API endpointa u konto/ dobili explicit company= checks |
+| GDPR Audit Access | 7b5f2db4 | @audit_sensitive_access dekorator, 'read' akcija u SystemAuditLog |
+| GDPR Dashboard | 7b5f2db4 | /gdpr/dashboard/ — filtrabilni audit log, sensitive access stats |
+| GDPR REST API | 7b5f2db4 | /api/gdpr/export/ (čl.20) + /api/gdpr/erase/ (čl.17) |
+| Payroll audit | 7b5f2db4 | Svaki pristup plaćama, listićima, pain.001 se logira |
+| Konto audit | 7b5f2db4 | Pristup temeljnicama, žiro računima, izvještajima se logira |
+
+### Sigurnosni audit rezultati (28.03.2026)
+- **136 modela** dobilo CompanyManager (prije: samo 43/179 imalo)
+- **7 konto API rupa** zatvoreno (get_object_or_404 bez company check)
+- **0% view scoping apps identificirani**: fitness, insurance, premium_booking, tracking — TREBAJU company FK migraciju
+- **GDPR pokriveni članci**: 5(1)(f), 17, 20, 30
