@@ -710,3 +710,21 @@ Haiku compliance analiza iz 2026-03-27 je bila djelomično netočna jer je uklju
 - 236 produkcijskih dokumenata (2026, manual) → ovo je pravo
 - 15.325 Synesis uvoz → historija, ne compliance target
 - 251 POS račun (2026) → produkcija
+
+
+---
+## ⚠️ LEGAL PARAMS — AŽURIRANO 2026-03-27
+
+**OBAVEZNO ČITAJ PRIJE COMPLIANCE KODA:**
+```bash
+cat LEGAL_PARAMS_MASTER.md
+```
+
+**LEGAL_PARAMS_MASTER.md** sadrži:
+- HR PDV stope po godinama (2013–2026+) s NN brojevima
+- HR Fiskalizacija v1.0→v2.0 (NN 133/12 → NN 89/25) s točnim datumima
+- DE MwSt povijest (uključivo COVID 16%/5% 07-12.2020.)
+- DE E-Rechnung timeline (2025 primanje, 2026-2028 slanje)
+- HRK/EUR tranzicija (01.01.2023., tečaj 7,53450)
+- Compliance matrica po periodu
+- SQL/Django filter za produkcijske dokumente

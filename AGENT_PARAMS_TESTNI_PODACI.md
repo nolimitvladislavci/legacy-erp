@@ -144,3 +144,21 @@ Kad klasificiraš invoice dokumente, uzmi u obzir:
 - PDV 16% u 2020. = COVID iznimka DE, NORMALNO
 - Nedostajući ZKI/JIR pre-2023 = NORMALNO (stara fiskalizacija)
 - Synesis source = historijski uvoz, bez compliance provjere
+
+
+---
+## ⚠️ LEGAL PARAMS — AŽURIRANO 2026-03-27
+
+**OBAVEZNO ČITAJ PRIJE COMPLIANCE KODA:**
+```bash
+cat LEGAL_PARAMS_MASTER.md
+```
+
+**LEGAL_PARAMS_MASTER.md** sadrži:
+- HR PDV stope po godinama (2013–2026+) s NN brojevima
+- HR Fiskalizacija v1.0→v2.0 (NN 133/12 → NN 89/25) s točnim datumima
+- DE MwSt povijest (uključivo COVID 16%/5% 07-12.2020.)
+- DE E-Rechnung timeline (2025 primanje, 2026-2028 slanje)
+- HRK/EUR tranzicija (01.01.2023., tečaj 7,53450)
+- Compliance matrica po periodu
+- SQL/Django filter za produkcijske dokumente
