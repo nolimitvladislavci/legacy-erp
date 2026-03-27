@@ -292,6 +292,10 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@limit-connect
 ADMINS = [("Admin", os.environ.get("ADMIN_EMAIL", "admin@limit-connect.com"))]
 
 # ── Password validators ───────────────────────────────────────
+AUTHENTICATION_BACKENDS = [
+    "core.auth_backends.EmailOrUsernameBackend",
+]
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
