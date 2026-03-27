@@ -291,7 +291,7 @@
                 transform: translateX(0);
             }
             /* Padding na dnu sidebara da zadnji link nije ispod footera */
-            .sidebar { padding-bottom: 100px; }
+            .sidebar { padding-bottom: 140px; }
             .main { margin-left: 0; }
             .hamburger { display: block; }
             .content { padding: 12px; }
@@ -551,6 +551,8 @@
             {% if 'marketplace' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/marketplace/" onclick="closeSidebar()"><i class="fas fa-store"></i> <span>Grossmarkt</span></a>{% endif %}
             {% if 'delivery' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/delivery/consolidated/" onclick="closeSidebar()"><i class="fas fa-truck"></i> <span>Dostava</span></a>{% endif %}
             {% if 'helpdesk' in sidebar_enabled_ids %}<a href="/helpdesk/" onclick="closeSidebar()"><i class="fas fa-headset"></i> <span>Helpdesk</span></a>{% endif %}
+            {% if 'udruge' in sidebar_enabled_ids %}<a href="/udruge/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Udruge</span></a>{% endif %}
+            {% if 'udruge' in sidebar_enabled_ids %}<a href="/udruge/golubar/" onclick="closeSidebar()"><i class="fas fa-dove"></i> <span>Golubar</span></a>{% endif %}
             {% if 'ai_assistant' in sidebar_enabled_ids %}<a href="/ai/" onclick="closeSidebar()"><i class="fas fa-robot"></i> <span>AI Asistent</span></a>{% endif %}
           </div>
         </div>
