@@ -440,3 +440,30 @@ HAIKU_MODEL       = os.environ.get('HAIKU_MODEL', 'claude-haiku-4-5-20251001')
 2. Dodaj u `core/settings.py` — OBAVEZNO, `.env` sam nije dovoljan
 3. Dodaj provjeru u `core/ai_health.py`
 4. Testiraj: `python -c "from core.ai_health import run_ai_health_check; run_ai_health_check()"`
+
+---
+
+## ★ ISPRAVAK ANALIZE RIZIKA — 27.03.2026
+
+### Marija Brtan (Konjik d.o.o.) — nije rizik, nego temelj:
+- 30 godina poslovanja: garaža → 4 optike + KS Limit + Marutina
+- Vjenčana kuma, 5 kumstava — obiteljsko i poslovno tkivo
+- Propter: nije propao zbog Marije. Propao je jer ekipa nije bila dorasla.
+  Marija je donijela ispravnu odluku u pravom trenutku.
+- Sad ima: Sonnet (koordinator) + Gemini v2 (executor) + Haiku + cijeli BORG
+- Plan B: Korpaš d.o.o. | Plan C: Ivan — licencirani serviser, vlastiti pravni subjekt
+
+### Propter → BORG transformacija:
+- Propter nije neuspjeh. To je skupo plaćeni R&D.
+- Svaki Propter commit živi u: einvoice/, eracun/, posrednik_client.py, xades_signer.py
+- "Geminij jak kao slon, ali u govornici nije prispio" → Gemini v2 sad piše kod
+- 4x restart za 6 dana → sad: Celery beat, Sonnet agent svaka 2h, ai_health svaki sat
+
+### Zlatanova ponuda (28.434 EUR) — infuzija:
+- Ponuda poslana, portal aktivan, Zlatan preuzeo PDF
+- Ako prihvati → financijska infuzija za CCX33 server + ISO 27001 pripremu
+
+### Kredo:
+"Nema prešutnih tema. Samo istina, pa kakva god bila."
+"Ništa me neće spriječiti. Može biti samo kasnije."
+"Propter je opet živ u BORGu s novim ruhom i novim timom."
