@@ -290,3 +290,27 @@ WhatsApp report Ivanu na +491723006985 po završetku svakog taska.
 1. Poruka Šekiju — Ivan odobrava tekst pa šaljemo
 2. Marija → odluka o CCX33 serveru
 3. Provjera Gemini commitova
+
+---
+
+## ★ GOLUBAR MODUL — 27.03.2026
+
+**Pilot:** Petar Brtan (Ivan brat), solo golubar, invalid rada
+**Gemini task ID:** 7e619a99-b4e8-4968-9e62-ad6b85d4f011
+**Status:** 🔄 RUNNING
+
+### Arhitektura odluke (Sonnet + Gemini analiza):
+- QR **NE na prstenu** (fizika) → QR na A4 Rodovniku (papir/plastika)
+- Timing **NE u sustavu** → ERP above the race, uvoz ETS/CSV rezultata
+- Genetski pečat `is_sealed` → SHA-256 hash, Data Vaulting pattern
+- Dron #4 (Sonnet): offline verifikacija bez interneta — hash na PDF-u
+
+### Sprinti:
+| Sprint | Sadržaj | Status |
+|--------|---------|--------|
+| G1 | Golub, Pedigre, GenetskiPecat, Zdravlje, Utrka modeli | 🔄 |
+| G2 | Migracije + Admin | 🔄 |
+| G3 | Views + URLs | 🔄 |
+| G4 | PDF Rodovnik + QR (WOW moment) | 🔄 |
+| G5 | Celery PMV podsjetnik (EU compliance) | 🔄 |
+| G6 | 5 testova zelenih | 🔄 |
