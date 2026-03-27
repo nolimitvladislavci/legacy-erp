@@ -370,3 +370,27 @@ Sonnet odlučuje, delegira Geminiju, javlja Ivanu samo kad mora.
 | **Gemini** | Executor, coder, implementer | Sonnet ili ručno |
 | **Haiku** | Classifier, quick checks | Gemini ili inline |
 
+
+---
+
+## ★ eINVOICE ASIMILACIJA — 27.03.2026
+
+### Stanje modula (verificirano):
+| Komponenta | Status |
+|-----------|--------|
+| AS4Message model (DLQ, retry_count, archive_sha256) | ✅ LIVE |
+| XAdES-BES signer (signxml, lxml, enveloped) | ✅ LIVE |
+| OutboundPipeline (Generate→Validate→Route→Submit) | ✅ LIVE |
+| TransportRouter (4 kanala: FINA/phase4/B2C/email) | ✅ LIVE |
+| PosrednikClient (submit, check_status, poll, ack) | ✅ LIVE |
+| SmartMailboxService (rule-based klasifikacija) | ✅ LIVE |
+| ArchiveService (SHA-256 integritet) | ✅ LIVE |
+| DLQ (Dead Letter Queue, max_retries=5) | ✅ LIVE |
+| Prometheus metrike | ✅ INSTALIRANO |
+| **Test suite: 33/33 zelenih** | ✅ NOVO |
+
+### Preostali bloker (nije u ovoj sesiji):
+| Bloker | Opis |
+|--------|------|
+| FINA sandbox test | Treba stvarni certifikat od FINA-e |
+| XAdES-B produkcijski certifikat | Ivan/Marija nabavljaju |
