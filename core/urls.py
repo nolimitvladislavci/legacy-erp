@@ -34,7 +34,10 @@ def _serve_sw(request):
         raise Http404
     return FileResponse(open(sw_path, 'rb'), content_type='application/javascript')
 
+from django.views.generic import TemplateView
+
 urlpatterns = [
+    path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
     path('legal/tc-accept/', tc_views.tc_accept_view, name='tc_accept'),
 
     # BEZ PAPIRA — public receipt (no login)
