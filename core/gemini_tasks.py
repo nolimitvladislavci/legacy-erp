@@ -27,6 +27,20 @@ def run_gemini_task(self, task_description, max_steps=10, requested_by='system')
     result = agent.run_task(task_description)
     result['requested_by'] = requested_by
 
+    # Upozori ako Gemini nije ništa napravio
+    if not result.get('stvarni_rad', True):
+        logger.error('[GEMINI TASK] UPOZORENJE: 0 fajlova napisano, 0 komandi — task nije izvrsio nista!')
+        from core.whatsapp import send_text
+        try:
+            send_text(
+                phone='+491723006985',
+                message=f"🟠 Gemini task nije izvrsio nista (0 fajlova/komandi).
+Task: {task_description[:100]}
+Pokrenuo: {requested_by}"
+            )
+        except Exception:
+            pass
+
     # Notificiraj superadmina o završetku
     try:
         from superadmin_ai.tasks import _notify_superadmins
