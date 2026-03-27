@@ -134,3 +134,18 @@ def sonnet_cycle(self):
         import logging
         logging.getLogger('sonnet_agent').error(f'sonnet_cycle crash: {exc}')
         raise self.retry(exc=exc, countdown=300)
+
+
+@shared_task(name='core.ai_health_check', bind=True, max_retries=0)
+def ai_health_check(self):
+    """
+    AI Infrastruktura Health Check — svaki sat.
+    Provjeri Gemini, Haiku, Sonnet, WAHA, Celery, Redis.
+    Ako nešto pukne — WhatsApp Ivan + automatski restart gdje moguće.
+    """
+    try:
+        from core.ai_health import run_ai_health_check
+        return run_ai_health_check()
+    except Exception as e:
+        import logging
+        logging.getLogger('ai_health').error(f'Health check crash: {e}')

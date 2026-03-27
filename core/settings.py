@@ -795,3 +795,19 @@ CELERY_BEAT_SCHEDULE.update({
         'schedule': crontab(minute=0, hour='*/2'),  # Svaka 2 sata
     },
 })
+
+# ── AI Infrastruktura — API Ključevi ──────────────────────────────────────────
+# KRITIČNO: Ovi ključevi su obavezni za Gemini agent i Sonnet agent.
+# Ako nedostaju — AI infrastruktura pada, BORG ne funkcionira.
+GEMINI_API_KEY   = _os.environ.get('GEMINI_API_KEY', '')
+ANTHROPIC_API_KEY = _os.environ.get('ANTHROPIC_API_KEY', '')
+CLAUDE_MODEL     = _os.environ.get('CLAUDE_MODEL', 'claude-sonnet-4-5')
+HAIKU_MODEL      = _os.environ.get('HAIKU_MODEL', 'claude-haiku-4-5-20251001')
+
+# ── AI Health Check — svaki sat ───────────────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    'ai-health-check-hourly': {
+        'task': 'core.ai_health_check',
+        'schedule': crontab(minute=15),  # svaki sat u :15 (ne u :00 s ostalima)
+    },
+})

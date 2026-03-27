@@ -394,3 +394,49 @@ Sonnet odlučuje, delegira Geminiju, javlja Ivanu samo kad mora.
 |--------|------|
 | FINA sandbox test | Treba stvarni certifikat od FINA-e |
 | XAdES-B produkcijski certifikat | Ivan/Marija nabavljaju |
+
+---
+
+## ★ AI INFRASTRUKTURA PRAVILA — ZABETONIRAN 27.03.2026
+
+### Korijenski uzrok problema (3x Gemini "lažao"):
+`GEMINI_API_KEY` bio u `.env` ali **nikad definiran u `settings.py`**.
+Gemini agent ga tražio iz `settings.GEMINI_API_KEY` → `AttributeError` → fallback na `''` → API fail.
+Celery task vratio `SUCCESS` jer nije provjera bila binarna.
+
+### Trajno rješenje (implementirano):
+
+**1. `core/settings.py`** — svi AI ključevi eksplicitno definirani:
+```python
+GEMINI_API_KEY    = os.environ.get('GEMINI_API_KEY', '')
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+CLAUDE_MODEL      = os.environ.get('CLAUDE_MODEL', 'claude-sonnet-4-5')
+HAIKU_MODEL       = os.environ.get('HAIKU_MODEL', 'claude-haiku-4-5-20251001')
+```
+
+**2. `core/ai_health.py`** — health check svaki sat u :15:
+- Gemini API test (generate_content)
+- Haiku API test
+- Sonnet API test
+- WAHA sessions check
+- Celery worker + beat status
+- Redis ping
+- Ako degradacija → WhatsApp Ivan ODMAH
+- Ako Celery pao → automatski restart
+- Ako oporavak → WhatsApp Ivan (tiho info)
+
+**3. `GeminiAgent v2`** — `stvarni_rad` flag:
+- Ako `files_written == 0` i `commands_run == 0` → WhatsApp upozorenje
+
+### Celery Beat raspored AI taskova:
+| Task | Raspored | Svrha |
+|------|---------|-------|
+| `core.ai_health_check` | Svaki sat u :15 | Provjera svih AI komponenti |
+| `core.sonnet_cycle` | Svaka 2h u :00 | Vođa projekta, koordinacija |
+| `core.run_system_test_task` | 02:00 i 07:30 | System test |
+
+### OBAVEZNO pri svakom novom AI modelu/ključu:
+1. Dodaj u `.env`
+2. Dodaj u `core/settings.py` — OBAVEZNO, `.env` sam nije dovoljan
+3. Dodaj provjeru u `core/ai_health.py`
+4. Testiraj: `python -c "from core.ai_health import run_ai_health_check; run_ai_health_check()"`
