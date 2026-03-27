@@ -4,7 +4,7 @@
 <div class="container-fluid">
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2><i class="fas fa-flag-checkered"></i> Utrke</h2>
-  <a href="{% url 'udruge:golubar_utrka_create' %}" class="btn btn-warning btn-sm">+ Nova utrka</a>
+  <a href="{% url 'udruge:utrka_create' %}" class="btn btn-warning btn-sm">+ Nova utrka</a>
 </div>
 <div class="card bg-dark border-secondary"><div class="card-body p-0"><div class="table-responsive">
 <table class="table table-dark table-hover mb-0"><thead><tr>
@@ -13,7 +13,7 @@
   <th style="font-size:.75rem">Organizator</th><th style="font-size:.75rem">Natjecatelja</th>
 </tr></thead><tbody>
 {% for u in utrke %}
-<tr onclick="location.href='{% url 'udruge:golubar_utrka_detail' u.pk %}'" style="cursor:pointer">
+<tr onclick="location.href='{% url 'udruge:utrka_detail' u.pk %}'" style="cursor:pointer">
   <td style="font-size:.82rem"><strong style="color:#c9a84c">{{ u.naziv }}</strong></td>
   <td style="font-size:.82rem">{{ u.datum|date:"d.m.Y" }}</td>
   <td style="font-size:.82rem">{{ u.startna_tocka|default:"—" }}</td>

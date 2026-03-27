@@ -5,8 +5,8 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2><i class="fas fa-home"></i> {{ golubinjak.naziv }}</h2>
   <div>
-    <a href="{% url 'udruge:golubar_golub_create' %}?golubinjak={{ golubinjak.pk }}" class="btn btn-warning btn-sm">+ Dodaj goluba</a>
-    <a href="{% url 'udruge:golubar_golubinjak_edit' golubinjak.pk %}" class="btn btn-outline-secondary btn-sm ms-1">Uredi</a>
+    <a href="{% url 'udruge:golub_create' %}?golubinjak={{ golubinjak.pk }}" class="btn btn-warning btn-sm">+ Dodaj goluba</a>
+    <a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Uredi</a>
   </div>
 </div>
 <div class="row g-3 mb-4">
@@ -29,7 +29,7 @@
   <th style="font-size:.75rem">Spol</th><th style="font-size:.75rem">Boja</th>
 </tr></thead><tbody>
 {% for g in golubovi %}
-<tr onclick="location.href='{% url 'udruge:golubar_golub_detail' g.pk %}'" style="cursor:pointer">
+<tr onclick="location.href='{% url 'udruge:golub_detail' g.pk %}'" style="cursor:pointer">
   <td style="font-size:.82rem"><strong style="color:#c9a84c">{{ g.prsten_broj }}</strong></td>
   <td style="font-size:.82rem">{{ g.naziv|default:"—" }}</td>
   <td style="font-size:.82rem">{{ g.get_spol_display|default:g.spol }}</td>
@@ -37,6 +37,6 @@
 </tr>
 {% empty %}<tr><td colspan="4" class="text-center text-muted py-4">Nema golubova u ovom golubinjaku</td></tr>{% endfor %}
 </tbody></table></div></div></div>
-<div class="mt-3"><a href="{% url 'udruge:golubar_golubinjak_list' %}" class="btn btn-outline-secondary">&larr; Natrag</a></div>
+<div class="mt-3"><a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary">&larr; Natrag</a></div>
 </div>
 {% endblock %}

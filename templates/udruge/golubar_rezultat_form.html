@@ -29,6 +29,6 @@
   <div class="col-md-4"><label class="form-label">Bodovi</label><input type="number" name="bodovi" step="0.01" class="form-control bg-dark text-light border-secondary"></div>
 </div>
 </div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:golubar_utrka_detail' utrka.pk %}" class="btn btn-outline-secondary">Odustani</a>
+<a href="{% url 'udruge:utrka_detail' utrka.pk %}" class="btn btn-outline-secondary">Odustani</a>
 <button type="submit" class="btn btn-warning">Spremi rezultat</button></div></form></div>
 {% endblock %}

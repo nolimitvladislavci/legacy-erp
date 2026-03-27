@@ -22,6 +22,6 @@
 </div>
 <div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary">{{ par.napomena|default:'' }}</textarea></div>
 </div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:golubar_par_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<a href="{% url 'udruge:par_list' %}" class="btn btn-outline-secondary">Odustani</a>
 <button type="submit" class="btn btn-warning">Spremi par</button></div></form></div>
 {% endblock %}

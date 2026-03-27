@@ -19,6 +19,6 @@
 <div class="mb-3"><label class="form-label">Uvjeti</label><textarea name="uvjeti" rows="2" class="form-control bg-dark text-light border-secondary">{{ utrka.uvjeti|default:'' }}</textarea></div>
 <div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="2" class="form-control bg-dark text-light border-secondary">{{ utrka.napomena|default:'' }}</textarea></div>
 </div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:golubar_utrka_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<a href="{% url 'udruge:utrka_list' %}" class="btn btn-outline-secondary">Odustani</a>
 <button type="submit" class="btn btn-warning">Spremi utrku</button></div></form></div>
 {% endblock %}
