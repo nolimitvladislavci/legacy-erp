@@ -10,6 +10,16 @@ from django.conf import settings
 
 logger = logging.getLogger('whatsapp')
 
+# ── TEST MODE — WhatsApp Whitelist ─────────────────────────────────────────
+# Dok je TEST_MODE aktivan, poruke idu SAMO na whitelist.
+# Sve ostalo se logira ali NE šalje — ne plašimo klijente testnim podacima.
+# Isključi na produkciji (15.4.2026): WHATSAPP_TEST_MODE = False u settings.
+WHATSAPP_TEST_MODE = getattr(settings, 'WHATSAPP_TEST_MODE', True)
+WHATSAPP_WHITELIST = getattr(settings, 'WHATSAPP_WHITELIST', [
+    '491723006985',  # Ivan DE broj (Nufringen)
+])
+# ──────────────────────────────────────────────────────────────────────────
+
 
 def normalize_phone(phone):
     """Normalize phone number to international format for WhatsApp.
@@ -173,6 +183,13 @@ def send_text(phone, message, company_id=None):
     if not getattr(settings, 'WAHA_ENABLED', False):
         return {'success': False, 'error': 'WhatsApp gateway disabled', 'response': None}
 
+    # TEST MODE — šalji samo na whitelist brojeve
+    if WHATSAPP_TEST_MODE:
+        _norm = normalize_phone(phone)
+        if _norm not in WHATSAPP_WHITELIST:
+            logger.info(f'TEST_MODE: poruka blokirana za {_norm} (nije na whitelistu)')
+            return {'success': True, 'error': None, 'response': {'test_mode_blocked': True}}
+
     if not _wa_rate_ok():
         return {'success': False, 'error': 'WhatsApp daily limit reached (500/day)', 'response': None}
 
@@ -240,6 +257,13 @@ def send_document(phone, file_path, caption='', filename='', company_id=None):
 
     if not getattr(settings, 'WAHA_ENABLED', False):
         return {'success': False, 'error': 'WhatsApp gateway disabled', 'response': None}
+
+    # TEST MODE — šalji samo na whitelist brojeve
+    if WHATSAPP_TEST_MODE:
+        _norm = normalize_phone(phone)
+        if _norm not in WHATSAPP_WHITELIST:
+            logger.info(f'TEST_MODE: poruka blokirana za {_norm} (nije na whitelistu)')
+            return {'success': True, 'error': None, 'response': {'test_mode_blocked': True}}
 
     if not os.path.exists(file_path):
         return {'success': False, 'error': f'File not found: {file_path}', 'response': None}
@@ -356,6 +380,13 @@ def send_image(phone, image_path_or_b64, caption='', company_id=None):
 
     if not getattr(settings, 'WAHA_ENABLED', False):
         return {'success': False, 'error': 'WhatsApp gateway disabled', 'response': None}
+
+    # TEST MODE — šalji samo na whitelist brojeve
+    if WHATSAPP_TEST_MODE:
+        _norm = normalize_phone(phone)
+        if _norm not in WHATSAPP_WHITELIST:
+            logger.info(f'TEST_MODE: poruka blokirana za {_norm} (nije na whitelistu)')
+            return {'success': True, 'error': None, 'response': {'test_mode_blocked': True}}
 
     normalized = normalize_phone(phone)
     if not normalized:
