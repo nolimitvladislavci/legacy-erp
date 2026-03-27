@@ -1,39 +1,285 @@
 {% extends "base.html" %}
-{% block title %}Golubarski savez{% endblock %}
+{% block title %}Golubarski Centar{% endblock %}
+{% block extra_css %}
+<style>
+/* ═══ GOLUBAR DASHBOARD ═══ */
+.golubar-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1a1000 50%, #0f172a 100%);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.golubar-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(201,168,76,.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.golubar-hero-icon {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, rgba(201,168,76,.2), rgba(201,168,76,.05));
+  border: 2px solid rgba(201,168,76,.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; color: #c9a84c;
+  margin-bottom: 1rem;
+  animation: heroPulse 3s ease-in-out infinite;
+}
+@keyframes heroPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,.2); }
+  50% { box-shadow: 0 0 20px 8px rgba(201,168,76,.1); }
+}
+.golubar-hero h1 {
+  font-size: 1.8rem; font-weight: 800; color: #fff;
+  margin: 0 0 .25rem;
+  letter-spacing: -.5px;
+}
+.golubar-hero h1 span { color: #c9a84c; }
+.golubar-hero p { color: #94a3b8; font-size: .9rem; margin: 0; }
+
+/* Stat cards */
+.g-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; margin-bottom: 2rem; }
+@media(max-width:992px) { .g-stats { grid-template-columns: repeat(3, 1fr); } }
+@media(max-width:576px) { .g-stats { grid-template-columns: repeat(2, 1fr); } }
+.g-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex; align-items: center; gap: 1rem;
+  transition: all .25s ease;
+  cursor: default;
+}
+.g-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  border-color: rgba(201,168,76,.3);
+}
+.g-stat-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.g-stat-icon.teal { background: rgba(20,184,166,.12); color: #14b8a6; }
+.g-stat-icon.gold { background: rgba(201,168,76,.12); color: #c9a84c; }
+.g-stat-icon.green { background: rgba(34,197,94,.12); color: #22c55e; }
+.g-stat-icon.pink { background: rgba(236,72,153,.12); color: #ec4899; }
+.g-stat-icon.red { background: rgba(239,68,68,.12); color: #ef4444; }
+.g-stat-icon.blue { background: rgba(59,130,246,.12); color: #3b82f6; }
+.g-stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text); line-height: 1; }
+.g-stat-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); margin-top: 2px; }
+
+/* Quick actions */
+.g-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+@media(max-width:768px) { .g-actions { grid-template-columns: repeat(2, 1fr); } }
+.g-action-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .6rem; padding: 1.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all .2s ease;
+  min-height: 110px;
+}
+.g-action-tile:hover {
+  border-color: #c9a84c;
+  background: rgba(201,168,76,.04);
+  transform: translateY(-2px);
+  color: var(--text);
+}
+.g-action-tile i {
+  font-size: 1.5rem; color: #c9a84c;
+  width: 52px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(201,168,76,.08);
+  border-radius: 14px;
+  transition: all .2s;
+}
+.g-action-tile:hover i { background: rgba(201,168,76,.15); transform: scale(1.05); }
+.g-action-tile span { font-size: .82rem; font-weight: 600; }
+
+/* Race table */
+.g-race-table { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+.g-race-table .card-header {
+  background: linear-gradient(135deg, rgba(201,168,76,.08), transparent);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+}
+.g-race-table .card-header h5 { color: #c9a84c; font-weight: 700; font-size: 1rem; }
+.g-race-table table thead th {
+  background: var(--table-header-bg);
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: var(--text-muted);
+  border: none;
+  padding: .75rem 1rem;
+}
+.g-race-table table td {
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  vertical-align: middle;
+  border-color: var(--border);
+}
+.g-race-table table tbody tr { transition: background .15s; }
+.g-race-table table tbody tr:hover { background: rgba(201,168,76,.03); }
+.g-medal { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; }
+.g-medal-1 { background: linear-gradient(135deg, #c9a84c, #e8d48b); color: #0a0a0a; }
+.g-medal-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0a0a; }
+.g-medal-3 { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
+
+/* Empty state */
+.g-empty {
+  text-align: center; padding: 4rem 2rem;
+}
+.g-empty-dove {
+  font-size: 3rem; color: #c9a84c; margin-bottom: 1.5rem;
+  animation: emptyFloat 4s ease-in-out infinite;
+}
+@keyframes emptyFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.g-empty h3 { color: var(--text); font-weight: 700; margin-bottom: .5rem; }
+.g-empty p { color: var(--text-muted); max-width: 400px; margin: 0 auto 1.5rem; font-size: .9rem; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid">
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2><i class="fas fa-dove"></i> Golubarski savez</h2>
-  <div>
-    <a href="{% url 'udruge:golub_create' %}" class="btn btn-warning btn-sm">+ Golub</a>
-    <a href="{% url 'udruge:golubinjak_create' %}" class="btn btn-outline-secondary btn-sm ms-1">+ Golubinjak</a>
-    <a href="{% url 'udruge:utrka_create' %}" class="btn btn-outline-secondary btn-sm ms-1">+ Utrka</a>
-    <a href="{% url 'udruge:par_create' %}" class="btn btn-outline-secondary btn-sm ms-1">+ Par</a>
+<div class="container-fluid" style="max-width:1200px">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item active">Nadzorna ploča</li>
+  </ol>
+</nav>
+
+<!-- Hero -->
+<div class="golubar-hero">
+  <div class="golubar-hero-icon"><i class="fas fa-dove"></i></div>
+  <h1>Golubarski <span>Centar</span></h1>
+  <p>Upravljanje golubinjacima, uzgojem, utrkama i zdravljem vaših golubova</p>
+</div>
+
+<!-- Stats -->
+<div class="g-stats">
+  <div class="g-stat-card">
+    <div class="g-stat-icon teal"><i class="fas fa-home"></i></div>
+    <div><div class="g-stat-value">{{ stats.golubinjaka|default:"0" }}</div><div class="g-stat-label">Golubinjaka</div></div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon gold"><i class="fas fa-dove"></i></div>
+    <div><div class="g-stat-value">{{ stats.golubova|default:"0" }}</div><div class="g-stat-label">Golubova</div></div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon green"><i class="fas fa-check-circle"></i></div>
+    <div><div class="g-stat-value">{{ stats.aktivnih|default:"0" }}</div><div class="g-stat-label">Aktivnih</div></div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon pink"><i class="fas fa-heart"></i></div>
+    <div><div class="g-stat-value">{{ stats.parova|default:"0" }}</div><div class="g-stat-label">Parova</div></div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon red"><i class="fas fa-flag-checkered"></i></div>
+    <div><div class="g-stat-value">{{ stats.utrka|default:"0" }}</div><div class="g-stat-label">Utrka</div></div>
+  </div>
+  <div class="g-stat-card">
+    <div class="g-stat-icon blue"><i class="fas fa-heartbeat"></i></div>
+    <div><div class="g-stat-value">{{ stats.zdravstvenih|default:"0" }}</div><div class="g-stat-label">Zdravstvenih</div></div>
   </div>
 </div>
-<div class="row g-3 mb-4">
-  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-warning">{{ stats.golubinjaka }}</div><small class="text-muted">Golubinjaka</small></div></div>
-  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-success">{{ stats.golubova }}</div><small class="text-muted">Golubova</small></div></div>
-  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-info">{{ stats.aktivnih }}</div><small class="text-muted">Aktivnih</small></div></div>
-  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3" style="color:#c9a84c">{{ stats.parova }}</div><small class="text-muted">Parova</small></div></div>
-  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-danger">{{ stats.utrka }}</div><small class="text-muted">Utrka</small></div></div>
-  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-light">{{ stats.zdravstvenih }}</div><small class="text-muted">Zdravstvenih</small></div></div>
+
+<!-- Quick Actions -->
+<div class="g-actions">
+  <a href="{% url 'udruge:golubinjak_list' %}" class="g-action-tile">
+    <i class="fas fa-home"></i><span>Golubinjaci</span>
+  </a>
+  <a href="{% url 'udruge:golub_list' %}" class="g-action-tile">
+    <i class="fas fa-dove"></i><span>Registar golubova</span>
+  </a>
+  <a href="{% url 'udruge:par_list' %}" class="g-action-tile">
+    <i class="fas fa-heart"></i><span>Uzgojni parovi</span>
+  </a>
+  <a href="{% url 'udruge:utrka_list' %}" class="g-action-tile">
+    <i class="fas fa-flag-checkered"></i><span>Utrke</span>
+  </a>
 </div>
-<div class="row g-3 mb-3">
-  <div class="col-md-3"><a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-home"></i> Golubinjaci</a></div>
-  <div class="col-md-3"><a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-dove"></i> Golubovi</a></div>
-  <div class="col-md-3"><a href="{% url 'udruge:par_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-heart"></i> Parovi</a></div>
-  <div class="col-md-3"><a href="{% url 'udruge:utrka_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-flag-checkered"></i> Utrke</a></div>
+
+<!-- Recent Races -->
+<div class="g-race-table card" style="background:var(--bg-card)">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Zadnje utrke</h5>
+    <a href="{% url 'udruge:utrka_create' %}" class="btn btn-sm" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:600;font-size:.78rem">
+      <i class="fas fa-plus me-1"></i>Nova utrka
+    </a>
+  </div>
+  <div class="card-body p-0">
+    {% if utrke %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Naziv utrke</th>
+            <th>Startna točka</th>
+            <th>Udaljenost</th>
+            <th>Organizator</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in utrke %}
+          <tr>
+            <td>
+              <span style="background:var(--badge-bg);padding:3px 8px;border-radius:6px;font-size:.78rem;font-weight:600">
+                {{ u.datum|date:"d.m.Y" }}
+              </span>
+            </td>
+            <td>
+              <a href="{% url 'udruge:utrka_detail' u.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none">
+                {{ u.naziv }}
+              </a>
+            </td>
+            <td style="color:var(--text-secondary)">{{ u.startna_tocka|default:"--" }}</td>
+            <td>
+              <span style="background:rgba(59,130,246,.1);color:#60a5fa;padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:600">
+                {{ u.udaljenost_km }} km
+              </span>
+            </td>
+            <td style="color:var(--text-secondary)">{{ u.organizator|default:"--" }}</td>
+            <td>
+              <a href="{% url 'udruge:utrka_detail' u.pk %}" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem;padding:3px 10px">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="g-empty">
+      <div class="g-empty-dove"><i class="fas fa-dove"></i></div>
+      <h3>Dobrodošli u Golubarski Centar!</h3>
+      <p>Započnite dodavanjem golubinjaka, registracijom golubova i stvaranjem prvog uzgojnog para.</p>
+      <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px">
+        <i class="fas fa-plus me-1"></i>Dodaj prvi golubinjak
+      </a>
+    </div>
+    {% endif %}
+  </div>
 </div>
-<div class="card bg-dark border-secondary"><div class="card-header"><h5 class="mb-0" style="color:#c9a84c">Zadnje utrke</h5></div><div class="card-body p-0"><div class="table-responsive">
-<table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Datum</th><th style="font-size:.75rem">Naziv</th><th style="font-size:.75rem">Startna točka</th>
-  <th style="font-size:.75rem">Udaljenost (km)</th><th style="font-size:.75rem">Organizator</th>
-</tr></thead><tbody>
-{% for u in utrke %}
-<tr><td style="font-size:.82rem">{{ u.datum|date:"d.m.Y" }}</td><td style="font-size:.82rem"><a href="{% url 'udruge:utrka_detail' u.pk %}" style="color:#c9a84c">{{ u.naziv }}</a></td>
-<td style="font-size:.82rem">{{ u.startna_tocka }}</td><td style="font-size:.82rem">{{ u.udaljenost_km }} km</td>
-<td style="font-size:.82rem">{{ u.organizator|default:"—" }}</td></tr>
-{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nema utrka</td></tr>{% endfor %}
-</tbody></table></div></div></div></div>
+
+</div>
 {% endblock %}

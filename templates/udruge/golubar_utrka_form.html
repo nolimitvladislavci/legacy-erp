@@ -1,24 +1,183 @@
 {% extends "base.html" %}
 {% block title %}{% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}{% endblock %}
+{% block extra_css %}
+<style>
+.uf-container { max-width: 800px; margin: 0 auto; }
+.uf-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.uf-section { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.uf-section:last-of-type { border-bottom: none; }
+.uf-section-title {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: #c9a84c; margin-bottom: 1.25rem;
+}
+.uf-input {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+  padding: .65rem .9rem !important;
+  font-size: .88rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.uf-input:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important; }
+.uf-label { font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: .4rem; display: block; }
+.uf-hint { font-size: .7rem; color: var(--text-muted); margin-top: .25rem; }
+.uf-footer {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.uf-btn-submit {
+  background: linear-gradient(135deg, #c9a84c, #a78b3d) !important;
+  color: #0a0a0a !important; border: none !important;
+  font-weight: 700 !important; padding: .6rem 2rem !important;
+  border-radius: 10px !important; font-size: .88rem !important;
+  transition: all .2s !important;
+}
+.uf-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,.3); }
+.uf-weather-icons {
+  display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .5rem;
+}
+.uf-weather-icon {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: .9rem;
+  transition: all .15s;
+  color: var(--text-muted);
+}
+.uf-weather-icon:hover { border-color: rgba(201,168,76,.3); color: #c9a84c; }
+.uf-weather-icon.selected { border-color: #c9a84c; background: rgba(201,168,76,.08); color: #c9a84c; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
-<h2 class="mb-3"><i class="fas fa-flag-checkered"></i> {% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}</h2>
-<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
-<div class="mb-3"><label class="form-label">Naziv utrke</label><input type="text" name="naziv" value="{{ utrka.naziv|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Datum</label><input type="date" name="datum" value="{{ utrka.datum|date:'Y-m-d'|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-6"><label class="form-label">Organizator</label><input type="text" name="organizator" value="{{ utrka.organizator|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="uf-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:utrka_list' %}">Utrke</a></li>
+    <li class="breadcrumb-item active">{% if utrka %}Uredi{% else %}Nova utrka{% endif %}</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+  <div style="width:52px;height:52px;background:rgba(239,68,68,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
+    <i class="fas fa-flag-checkered" style="font-size:1.3rem;color:#ef4444"></i>
+  </div>
+  <div>
+    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">{% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}</h2>
+    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Evidentirajte podatke o natjecanju</p>
+  </div>
 </div>
-<div class="mb-3"><label class="form-label">Startna točka</label><input type="text" name="startna_tocka" value="{{ utrka.startna_tocka|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-<div class="row mb-3">
-  <div class="col-md-4"><label class="form-label">Startna lat</label><input type="number" name="startna_lat" step="0.000001" value="{{ utrka.startna_lat|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-4"><label class="form-label">Startna lng</label><input type="number" name="startna_lng" step="0.000001" value="{{ utrka.startna_lng|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-4"><label class="form-label">Udaljenost (km)</label><input type="number" name="udaljenost_km" step="0.1" value="{{ utrka.udaljenost_km|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+
+<form method="post">
+{% csrf_token %}
+<div class="uf-card">
+
+  <!-- Race info -->
+  <div class="uf-section">
+    <div class="uf-section-title"><i class="fas fa-info-circle"></i> Informacije o utrci</div>
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="uf-label">Naziv utrke *</label>
+        <input type="text" name="naziv" value="{{ utrka.naziv|default:'' }}" required class="form-control uf-input" placeholder="Npr. Grand Prix Čepin 2026">
+      </div>
+      <div class="col-md-4">
+        <label class="uf-label">Datum *</label>
+        <input type="date" name="datum" value="{{ utrka.datum|date:'Y-m-d'|default:'' }}" required class="form-control uf-input">
+      </div>
+    </div>
+    <div class="row g-3 mt-1">
+      <div class="col-md-4">
+        <label class="uf-label"><i class="fas fa-route me-1"></i>Udaljenost (km)</label>
+        <input type="number" name="udaljenost_km" value="{{ utrka.udaljenost_km|default:'' }}" step="0.1" class="form-control uf-input" placeholder="250">
+      </div>
+      <div class="col-md-4">
+        <label class="uf-label"><i class="fas fa-building me-1"></i>Organizator</label>
+        <input type="text" name="organizator" value="{{ utrka.organizator|default:'' }}" class="form-control uf-input" placeholder="Naziv saveza/kluba">
+      </div>
+      <div class="col-md-4">
+        <label class="uf-label"><i class="fas fa-users me-1"></i>Broj natjecatelja</label>
+        <input type="number" name="broj_natjecatelja" value="{{ utrka.broj_natjecatelja|default:'' }}" class="form-control uf-input" placeholder="120" min="0">
+      </div>
+    </div>
+  </div>
+
+  <!-- Start location -->
+  <div class="uf-section">
+    <div class="uf-section-title"><i class="fas fa-map-marker-alt"></i> Startna lokacija</div>
+    <div class="row g-3">
+      <div class="col-md-12">
+        <label class="uf-label">Startna točka</label>
+        <input type="text" name="startna_tocka" value="{{ utrka.startna_tocka|default:'' }}" class="form-control uf-input" placeholder="Npr. München, Njemačka">
+      </div>
+    </div>
+    <div class="row g-3 mt-1">
+      <div class="col-md-6">
+        <label class="uf-label"><i class="fas fa-globe me-1"></i>Startna širina (Lat)</label>
+        <input type="number" name="startna_lat" step="0.000001" value="{{ utrka.startna_lat|default:'' }}" class="form-control uf-input" placeholder="48.137154">
+      </div>
+      <div class="col-md-6">
+        <label class="uf-label"><i class="fas fa-globe me-1"></i>Startna dužina (Lng)</label>
+        <input type="number" name="startna_lng" step="0.000001" value="{{ utrka.startna_lng|default:'' }}" class="form-control uf-input" placeholder="11.576124">
+      </div>
+    </div>
+    <div class="uf-hint"><i class="fas fa-info-circle me-1"></i>GPS koordinate startne točke za precizni izračun udaljenosti</div>
+  </div>
+
+  <!-- Conditions -->
+  <div class="uf-section">
+    <div class="uf-section-title"><i class="fas fa-cloud-sun"></i> Uvjeti</div>
+    <div class="uf-weather-icons">
+      <div class="uf-weather-icon" title="Sunčano" onclick="appendWeather('Sunčano')"><i class="fas fa-sun"></i></div>
+      <div class="uf-weather-icon" title="Oblačno" onclick="appendWeather('Oblačno')"><i class="fas fa-cloud"></i></div>
+      <div class="uf-weather-icon" title="Kiša" onclick="appendWeather('Kiša')"><i class="fas fa-cloud-rain"></i></div>
+      <div class="uf-weather-icon" title="Vjetar" onclick="appendWeather('Vjetar')"><i class="fas fa-wind"></i></div>
+      <div class="uf-weather-icon" title="Magla" onclick="appendWeather('Magla')"><i class="fas fa-smog"></i></div>
+      <div class="uf-weather-icon" title="Snijeg" onclick="appendWeather('Snijeg')"><i class="fas fa-snowflake"></i></div>
+    </div>
+    <textarea name="uvjeti" id="uvjeti-field" rows="2" class="form-control uf-input" placeholder="Opišite vremenske uvjete...">{{ utrka.uvjeti|default:'' }}</textarea>
+  </div>
+
+  <!-- Napomena -->
+  <div class="uf-section">
+    <div class="uf-section-title"><i class="fas fa-sticky-note"></i> Napomena</div>
+    <textarea name="napomena" rows="3" class="form-control uf-input" placeholder="Dodatne bilješke o utrci...">{{ utrka.napomena|default:'' }}</textarea>
+  </div>
+
 </div>
-<div class="mb-3"><label class="form-label">Broj natjecatelja</label><input type="number" name="broj_natjecatelja" value="{{ utrka.broj_natjecatelja|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-<div class="mb-3"><label class="form-label">Uvjeti</label><textarea name="uvjeti" rows="2" class="form-control bg-dark text-light border-secondary">{{ utrka.uvjeti|default:'' }}</textarea></div>
-<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="2" class="form-control bg-dark text-light border-secondary">{{ utrka.napomena|default:'' }}</textarea></div>
-</div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:utrka_list' %}" class="btn btn-outline-secondary">Odustani</a>
-<button type="submit" class="btn btn-warning">Spremi utrku</button></div></form></div>
+
+<div class="uf-footer">
+  <a href="{% url 'udruge:utrka_list' %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+    <i class="fas fa-arrow-left me-1"></i>Odustani
+  </a>
+  <button type="submit" class="uf-btn-submit">
+    <i class="fas fa-save me-1"></i>{% if utrka %}Spremi izmjene{% else %}Dodaj utrku{% endif %}
+  </button>
+</div>
+</form>
+
+</div>
+
+<script>
+function appendWeather(text) {
+  var field = document.getElementById('uvjeti-field');
+  if (field.value && !field.value.endsWith(' ')) field.value += ', ';
+  field.value += text;
+}
+</script>
 {% endblock %}

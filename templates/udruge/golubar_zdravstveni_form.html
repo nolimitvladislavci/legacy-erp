@@ -1,36 +1,226 @@
 {% extends "base.html" %}
-{% block title %}Zdravstveni zapis{% endblock %}
+{% block title %}Zdravstveni zapis — {{ golub.prsten_broj }}{% endblock %}
+{% block extra_css %}
+<style>
+.zf-container { max-width: 750px; margin: 0 auto; }
+.zf-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.zf-section { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.zf-section:last-of-type { border-bottom: none; }
+.zf-section-title {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: #c9a84c; margin-bottom: 1.25rem;
+}
+.zf-golub-header {
+  background: linear-gradient(135deg, rgba(59,130,246,.05), transparent);
+  border: 1px solid rgba(59,130,246,.15);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.zf-golub-icon {
+  width: 48px; height: 48px;
+  background: rgba(201,168,76,.1);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: #c9a84c;
+}
+/* Treatment type visual buttons */
+.zf-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+.zf-type-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .3rem; padding: .75rem .5rem;
+  background: rgba(201,168,76,.03);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+}
+.zf-type-btn:hover { border-color: rgba(201,168,76,.3); background: rgba(201,168,76,.06); }
+.zf-type-btn.selected { border-color: #c9a84c; background: rgba(201,168,76,.1); }
+.zf-type-btn i { font-size: 1.1rem; }
+.zf-type-btn span { font-size: .68rem; font-weight: 600; color: var(--text-secondary); }
+.zf-type-btn.selected span { color: #c9a84c; }
+.zf-type-pmv i { color: #ef4444; }
+.zf-type-newcastle i { color: #f97316; }
+.zf-type-paratifus i { color: #f59e0b; }
+.zf-type-antipar i { color: #eab308; }
+.zf-type-antibiot i { color: #3b82f6; }
+.zf-type-vet i { color: #22c55e; }
+.zf-type-ostalo i { color: #6b7280; }
+.zf-input {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+  padding: .65rem .9rem !important;
+  font-size: .88rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.zf-input:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important; }
+.zf-label { font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: .4rem; display: block; }
+.zf-footer {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.zf-btn-submit {
+  background: linear-gradient(135deg, #c9a84c, #a78b3d) !important;
+  color: #0a0a0a !important; border: none !important;
+  font-weight: 700 !important; padding: .6rem 2rem !important;
+  border-radius: 10px !important; font-size: .88rem !important;
+  transition: all .2s !important;
+}
+.zf-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,.3); }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
-<h2 class="mb-3"><i class="fas fa-heartbeat"></i> Zdravstveni zapis</h2>
-<div class="card bg-dark border-secondary mb-3"><div class="card-body">
-  <div style="font-size:.72rem;text-transform:uppercase;color:#c9a84c;margin-bottom:.5rem;letter-spacing:.05em">Golub</div>
-  <div style="font-size:.85rem">
-    <strong style="color:#c9a84c">{{ golub.prsten_broj }}</strong> {{ golub.naziv|default:"" }}
-    &nbsp;|&nbsp;
-    <span class="text-muted">Spol:</span> {{ golub.get_spol_display|default:golub.spol }}
-    &nbsp;|&nbsp;
-    <span class="text-muted">Golubinjak:</span> {{ golub.golubinjak.naziv|default:"—" }}
+<div class="zf-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golub_detail' golub.pk %}">{{ golub.prsten_broj }}</a></li>
+    <li class="breadcrumb-item active">Zdravstveni zapis</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+  <div style="width:52px;height:52px;background:rgba(59,130,246,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
+    <i class="fas fa-heartbeat" style="font-size:1.3rem;color:#3b82f6"></i>
   </div>
-</div></div>
-<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Vrsta</label>
-    <select name="vrsta" required class="form-select bg-dark text-light border-secondary">
-      {% for code, label in vrsta_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
-    </select></div>
-  <div class="col-md-6"><label class="form-label">Datum</label><input type="date" name="datum" required class="form-control bg-dark text-light border-secondary"></div>
+  <div>
+    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Novi zdravstveni zapis</h2>
+    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Evidencija tretmana i veterinarskih pregleda</p>
+  </div>
 </div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Lijek/Preparat</label><input type="text" name="lijek_preparat" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-6"><label class="form-label">Doza</label><input type="text" name="doza" class="form-control bg-dark text-light border-secondary"></div>
+
+<!-- Golub info -->
+<div class="zf-golub-header">
+  <div class="zf-golub-icon"><i class="fas fa-dove"></i></div>
+  <div>
+    <div style="font-size:.9rem;font-weight:700;color:var(--text)">{{ golub.naziv|default:"Golub" }}</div>
+    <div style="font-size:.72rem;font-family:monospace;color:#c9a84c">{{ golub.prsten_broj }}</div>
+  </div>
 </div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Veterinar</label><input type="text" name="veterinar" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-6"><label class="form-label">Sljedeći tretman</label><input type="date" name="sljedeci_tretman" class="form-control bg-dark text-light border-secondary"></div>
+
+<form method="post">
+{% csrf_token %}
+<div class="zf-card">
+
+  <!-- Treatment type -->
+  <div class="zf-section">
+    <div class="zf-section-title"><i class="fas fa-syringe"></i> Vrsta tretmana</div>
+    <div class="zf-type-grid">
+      {% for code, label in vrsta_choices %}
+      <div class="zf-type-btn zf-type-{{ code }}" data-value="{{ code }}" onclick="selectType(this, '{{ code }}')">
+        <i class="fas {% if code == 'pmv' %}fa-virus{% elif code == 'newcastle' %}fa-disease{% elif code == 'paratifus' %}fa-bacteria{% elif code == 'antipar' %}fa-shield-virus{% elif code == 'antibiot' %}fa-pills{% elif code == 'vet' %}fa-stethoscope{% else %}fa-notes-medical{% endif %}"></i>
+        <span>{{ label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <select name="vrsta" id="vrsta-select" required class="form-select zf-input" style="display:none">
+      <option value="">--</option>
+      {% for code, label in vrsta_choices %}
+      <option value="{{ code }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+    <!-- Fallback visible select for accessibility -->
+    <noscript>
+      <select name="vrsta" required class="form-select zf-input">
+        {% for code, label in vrsta_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+      </select>
+    </noscript>
+  </div>
+
+  <!-- Details -->
+  <div class="zf-section">
+    <div class="zf-section-title"><i class="fas fa-file-medical"></i> Detalji tretmana</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="zf-label"><i class="fas fa-calendar me-1"></i>Datum tretmana</label>
+        <input type="date" name="datum" required class="form-control zf-input">
+      </div>
+      <div class="col-md-6">
+        <label class="zf-label"><i class="fas fa-user-md me-1"></i>Veterinar</label>
+        <input type="text" name="veterinar" class="form-control zf-input" placeholder="Ime veterinara">
+      </div>
+    </div>
+    <div class="row g-3 mt-1">
+      <div class="col-md-6">
+        <label class="zf-label"><i class="fas fa-pills me-1"></i>Lijek / preparat</label>
+        <input type="text" name="lijek_preparat" class="form-control zf-input" placeholder="Naziv lijeka">
+      </div>
+      <div class="col-md-6">
+        <label class="zf-label"><i class="fas fa-prescription me-1"></i>Doza</label>
+        <input type="text" name="doza" class="form-control zf-input" placeholder="Npr. 0.5 ml">
+      </div>
+    </div>
+  </div>
+
+  <!-- Next treatment -->
+  <div class="zf-section">
+    <div class="zf-section-title"><i class="fas fa-calendar-check"></i> Sljedeći tretman</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="zf-label"><i class="fas fa-calendar-alt me-1"></i>Datum sljedećeg tretmana</label>
+        <input type="date" name="sljedeci_tretman" class="form-control zf-input">
+      </div>
+    </div>
+  </div>
+
+  <!-- Napomena -->
+  <div class="zf-section">
+    <div class="zf-section-title"><i class="fas fa-sticky-note"></i> Napomena</div>
+    <textarea name="napomena" rows="3" class="form-control zf-input" placeholder="Dodatne bilješke..."></textarea>
+  </div>
+
 </div>
-<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary"></textarea></div>
-</div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:golub_detail' golub.pk %}" class="btn btn-outline-secondary">Odustani</a>
-<button type="submit" class="btn btn-warning">Spremi zapis</button></div></form></div>
+
+<div class="zf-footer">
+  <a href="{% url 'udruge:golub_detail' golub.pk %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+    <i class="fas fa-arrow-left me-1"></i>Odustani
+  </a>
+  <button type="submit" class="zf-btn-submit">
+    <i class="fas fa-save me-1"></i>Spremi zapis
+  </button>
+</div>
+</form>
+
+</div>
+
+<script>
+function selectType(el, value) {
+  document.querySelectorAll('.zf-type-btn').forEach(function(b) { b.classList.remove('selected'); });
+  el.classList.add('selected');
+  var sel = document.getElementById('vrsta-select');
+  sel.value = value;
+  // Make sure the hidden select is included in form
+  sel.style.display = 'none';
+  sel.name = 'vrsta';
+}
+// On load, show the select as visible fallback if needed
+(function() {
+  var sel = document.getElementById('vrsta-select');
+  if (sel) sel.style.display = 'none';
+})();
+</script>
 {% endblock %}

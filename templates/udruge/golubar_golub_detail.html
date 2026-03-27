@@ -1,147 +1,548 @@
 {% extends "base.html" %}
 {% block title %}{{ golub.prsten_broj }} — {{ golub.naziv|default:"Golub" }}{% endblock %}
-{% block content %}
+{% block extra_css %}
 <style>
-.pedigree-tree { display: flex; align-items: center; gap: 1.5rem; overflow-x: auto; padding: 1rem 0; }
-.pedigree-col { display: flex; flex-direction: column; gap: .75rem; }
-.pedigree-card { background: rgba(201,168,76,.08); border: 1px solid rgba(201,168,76,.25); border-radius: 8px; padding: .6rem .8rem; min-width: 140px; text-align: center; }
-.pedigree-card .prsten { font-size: .75rem; color: #c9a84c; font-weight: 600; }
-.pedigree-card .name { font-size: .8rem; color: #e0e0e0; }
-.pedigree-card.empty { border-style: dashed; opacity: .5; }
-.pedigree-connector { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0; }
-.pedigree-line-h { width: 24px; height: 2px; background: rgba(201,168,76,.3); }
-.pedigree-line-v { width: 2px; height: 100%; background: rgba(201,168,76,.3); min-height: 30px; }
-.pedigree-branch { display: flex; align-items: center; }
-@media(max-width:768px){
-  .pedigree-tree { flex-direction: column; align-items: flex-start; }
-  .pedigree-card { min-width: 120px; }
+.gdet-container { max-width: 1100px; margin: 0 auto; }
+
+/* ═══ HERO ═══ */
+.gdet-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1a1000 50%, #0f172a 100%);
+  border: 1px solid rgba(201,168,76,.25);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.gdet-hero::before {
+  content: '';
+  position: absolute; top: -30%; right: -5%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(201,168,76,.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.gdet-photo {
+  width: 120px; height: 120px;
+  border-radius: 16px;
+  border: 3px solid rgba(201,168,76,.3);
+  overflow: hidden;
+  background: rgba(201,168,76,.05);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.gdet-photo img { width: 100%; height: 100%; object-fit: cover; }
+.gdet-photo .silhouette { font-size: 2.8rem; color: rgba(201,168,76,.2); }
+.gdet-prsten {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: linear-gradient(135deg, rgba(201,168,76,.2), rgba(201,168,76,.08));
+  border: 1px solid rgba(201,168,76,.3);
+  padding: 5px 14px; border-radius: 8px;
+  font-family: monospace; font-size: .85rem; font-weight: 700;
+  color: #c9a84c;
+}
+.gdet-status-bar {
+  display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem;
+}
+.gdet-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: 4px 12px; border-radius: 8px;
+  font-size: .72rem; font-weight: 600;
+}
+
+/* ═══ PEDIGREE ═══ */
+.pedigree-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.pedigree-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(135deg, rgba(201,168,76,.05), transparent);
+}
+.pedigree-header h3 { font-size: .95rem; font-weight: 700; color: #c9a84c; margin: 0; }
+.pedigree-body { padding: 1.5rem; overflow-x: auto; }
+
+/* CSS Grid pedigree chart */
+.pedigree-chart {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr 40px 1fr;
+  grid-template-rows: repeat(4, auto);
+  gap: 8px 0;
+  min-width: 700px;
+  align-items: center;
+}
+.ped-node {
+  background: rgba(201,168,76,.04);
+  border: 1px solid rgba(201,168,76,.15);
+  border-radius: 10px;
+  padding: .6rem .8rem;
+  text-align: center;
+  transition: all .2s;
+  min-width: 0;
+}
+.ped-node:hover { border-color: rgba(201,168,76,.35); background: rgba(201,168,76,.06); }
+.ped-node a { text-decoration: none; color: inherit; display: block; }
+.ped-node.main-bird {
+  border: 2px solid #c9a84c;
+  background: linear-gradient(135deg, rgba(201,168,76,.12), rgba(201,168,76,.04));
+  grid-row: 2 / 4;
+  padding: 1rem;
+}
+.ped-node.parent { grid-column: 3; }
+.ped-node.grandparent { grid-column: 5; }
+.ped-node.empty { border-style: dashed; opacity: .45; }
+.ped-node .ped-prsten { font-size: .7rem; color: #c9a84c; font-weight: 600; font-family: monospace; }
+.ped-node .ped-name { font-size: .78rem; font-weight: 600; color: var(--text); margin-top: 2px; }
+.ped-node .ped-role { font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+.ped-node .ped-spol-dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; margin-right: 4px; vertical-align: middle;
+}
+.ped-connector {
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(201,168,76,.2);
+}
+.ped-connector::after {
+  content: '';
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, rgba(201,168,76,.1), rgba(201,168,76,.25));
+}
+.ped-conn-v { grid-column: 4; }
+
+/* Seal badge */
+.gdet-seal {
+  background: linear-gradient(135deg, rgba(201,168,76,.15), rgba(201,168,76,.05));
+  border: 1px solid rgba(201,168,76,.3);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.gdet-seal-icon {
+  width: 44px; height: 44px;
+  background: rgba(201,168,76,.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #c9a84c; font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ═══ PERFORMANCE STATS ═══ */
+.gdet-perf {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.gdet-perf-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+.gdet-perf-value { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+.gdet-perf-label { font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--text-muted); margin-top: 2px; }
+
+/* ═══ HEALTH TIMELINE ═══ */
+.health-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.health-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.health-header h3 { font-size: .95rem; font-weight: 700; color: #3b82f6; margin: 0; }
+.health-timeline { padding: 1.25rem; }
+.health-item {
+  display: flex; gap: 1rem; padding: .75rem 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.health-item:last-child { border-bottom: none; }
+.health-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+.health-dot.pmv, .health-dot.newcastle { background: #ef4444; }
+.health-dot.paratifus, .health-dot.antipar { background: #f59e0b; }
+.health-dot.antibiot { background: #3b82f6; }
+.health-dot.vet { background: #22c55e; }
+.health-dot.ostalo { background: #6b7280; }
+.health-type-badge {
+  display: inline-flex; padding: 2px 8px; border-radius: 6px;
+  font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .3px;
+}
+.health-type-badge.pmv, .health-type-badge.newcastle { background: rgba(239,68,68,.1); color: #ef4444; }
+.health-type-badge.paratifus, .health-type-badge.antipar { background: rgba(245,158,11,.1); color: #f59e0b; }
+.health-type-badge.antibiot { background: rgba(59,130,246,.1); color: #3b82f6; }
+.health-type-badge.vet { background: rgba(34,197,94,.1); color: #22c55e; }
+.health-type-badge.ostalo { background: rgba(107,114,128,.1); color: #6b7280; }
+
+/* ═══ RACE RESULTS ═══ */
+.race-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.race-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.race-header h3 { font-size: .95rem; font-weight: 700; color: #ef4444; margin: 0; }
+.race-table { width: 100%; border-collapse: collapse; }
+.race-table thead th {
+  background: var(--table-header-bg);
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: var(--text-muted);
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.race-table tbody td {
+  padding: .65rem 1rem;
+  font-size: .85rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.race-table tbody tr:last-child td { border-bottom: none; }
+.placement-badge {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 800;
+}
+.placement-1 { background: linear-gradient(135deg, #c9a84c, #e8d48b); color: #0a0a0a; }
+.placement-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0a0a; }
+.placement-3 { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
+.placement-other { background: var(--border); color: var(--text-muted); }
+
+@media(max-width:768px) {
+  .gdet-hero { padding: 1.25rem; }
+  .gdet-photo { width: 80px; height: 80px; border-radius: 12px; }
+  .pedigree-chart { min-width: 550px; }
+  .gdet-perf { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
-<div class="container-fluid">
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h2 class="mb-1"><i class="fas fa-dove"></i> {{ golub.naziv|default:"Golub" }}</h2>
-    <div>
-      <span class="badge bg-secondary" style="font-size:.85rem">{{ golub.prsten_broj }}</span>
-      <span class="badge" style="background:rgba(201,168,76,.2);color:#c9a84c;font-size:.8rem">{{ golub.get_spol_display|default:golub.spol }}</span>
-      {% if golub.boja %}<span class="badge bg-secondary" style="font-size:.8rem">{{ golub.get_boja_display|default:golub.boja }}</span>{% endif %}
+{% endblock %}
+{% block content %}
+<div class="gdet-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golub_list' %}">Golubovi</a></li>
+    <li class="breadcrumb-item active">{{ golub.prsten_broj }}</li>
+  </ol>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="gdet-hero">
+  <div class="d-flex gap-3 align-items-start flex-wrap">
+    <div class="gdet-photo">
+      {% if golub.fotografija %}
+      <img src="{{ golub.fotografija.url }}" alt="{{ golub.naziv }}">
+      {% else %}
+      <div class="silhouette"><i class="fas fa-dove"></i></div>
+      {% endif %}
     </div>
-  </div>
-  <div>
-    <a href="{% url 'udruge:golub_edit' golub.pk %}" class="btn btn-outline-secondary btn-sm">Uredi</a>
-    <a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary btn-sm ms-1">&larr; Natrag</a>
+    <div style="flex:1;min-width:0">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <h1 style="font-size:1.6rem;font-weight:800;color:#fff;margin:0 0 .3rem">{{ golub.naziv|default:"Golub" }}</h1>
+          <div class="gdet-prsten"><i class="fas fa-ring" style="font-size:.7rem"></i> {{ golub.prsten_broj }}</div>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'udruge:golub_edit' golub.pk %}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;padding:6px 14px;font-size:.78rem">
+            <i class="fas fa-pen me-1"></i>Uredi
+          </a>
+        </div>
+      </div>
+      <div class="gdet-status-bar">
+        <span class="gdet-badge" style="background:{% if golub.spol == 'M' %}rgba(59,130,246,.12);color:#60a5fa{% elif golub.spol == 'F' %}rgba(236,72,153,.12);color:#ec4899{% else %}rgba(100,116,139,.12);color:#94a3b8{% endif %}">
+          {% if golub.spol == 'M' %}<i class="fas fa-mars"></i> Mužjak{% elif golub.spol == 'F' %}<i class="fas fa-venus"></i> Ženka{% else %}<i class="fas fa-question"></i> Nepoznato{% endif %}
+        </span>
+        {% if golub.boja %}
+        <span class="gdet-badge" style="background:rgba(100,116,139,.12);color:#94a3b8">
+          <i class="fas fa-palette"></i> {{ golub.get_boja_display|default:golub.boja }}
+        </span>
+        {% endif %}
+        {% if golub.datum_izlijeganja %}
+        <span class="gdet-badge" style="background:rgba(100,116,139,.12);color:#94a3b8">
+          <i class="fas fa-birthday-cake"></i> {{ golub.datum_izlijeganja|date:"d.m.Y" }}
+        </span>
+        {% endif %}
+        {% if golub.aktivan %}
+        <span class="gdet-badge" style="background:rgba(34,197,94,.12);color:#22c55e"><i class="fas fa-check-circle"></i> Aktivan</span>
+        {% else %}
+        <span class="gdet-badge" style="background:rgba(239,68,68,.12);color:#ef4444"><i class="fas fa-times-circle"></i> Neaktivan</span>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 
-{% if golub.fotografija %}
-<div class="mb-4"><img src="{{ golub.fotografija.url }}" alt="{{ golub.naziv }}" style="max-height:250px;border-radius:8px;border:1px solid rgba(201,168,76,.3)"></div>
-{% endif %}
-
+<!-- ═══ SEAL STATUS ═══ -->
 {% if golub.is_sealed %}
-<div class="alert" style="background:rgba(201,168,76,.15);border:1px solid #c9a84c;color:#c9a84c">
-  <i class="fas fa-lock"></i> <strong>ZAPEČAĆEN</strong> — Rodovnik zapečaćen {{ golub.sealed_at|date:"d.m.Y H:i" }}
+<div class="gdet-seal">
+  <div class="gdet-seal-icon"><i class="fas fa-shield-alt"></i></div>
+  <div>
+    <div style="font-weight:700;color:#c9a84c;font-size:.9rem">Rodovnik zapečaćen</div>
+    <div style="font-size:.75rem;color:var(--text-muted)">
+      {{ golub.sealed_at|date:"d.m.Y H:i" }}
+      {% if golub.genetics_hash %} | SHA-256: <code style="font-size:.65rem;color:#c9a84c">{{ golub.genetics_hash|truncatechars:24 }}</code>{% endif %}
+    </div>
+    {% if golub.sealed_reason %}<div style="font-size:.78rem;color:var(--text-secondary);margin-top:2px">{{ golub.sealed_reason }}</div>{% endif %}
+  </div>
 </div>
 {% else %}
-<form method="post" action="{% url 'udruge:golub_seal' golub.pk %}" class="mb-4" onsubmit="return confirm('Jeste li sigurni? Zapečaćeni rodovnik se ne može mijenjati.')">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-warning"><i class="fas fa-lock"></i> Zapečati rodovnik</button>
-</form>
+<div style="margin-bottom:1.5rem">
+  <form method="post" action="{% url 'udruge:golub_seal' golub.pk %}" onsubmit="return confirm('PAŽNJA: Zapečaćeni rodovnik se ne može mijenjati. Nastaviti?')">
+    {% csrf_token %}
+    <button type="submit" class="btn" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;font-weight:600;border-radius:10px;padding:.5rem 1.5rem;font-size:.82rem">
+      <i class="fas fa-shield-alt me-1"></i>Zapečati rodovnik
+    </button>
+  </form>
+</div>
 {% endif %}
 
-<!-- RODOVNIK -->
-<div class="card bg-dark border-secondary mb-4"><div class="card-header"><h5 class="mb-0" style="color:#c9a84c"><i class="fas fa-sitemap"></i> Rodovnik (3 generacije)</h5></div>
-<div class="card-body" style="overflow-x:auto">
-<div class="pedigree-tree">
-  <!-- Golub -->
-  <div class="pedigree-col">
-    <div class="pedigree-card" style="border-color:#c9a84c;background:rgba(201,168,76,.15)">
-      <div class="prsten">{{ golub.prsten_broj }}</div>
-      <div class="name"><strong>{{ golub.naziv|default:"—" }}</strong></div>
-      <div style="font-size:.7rem;color:#888">{{ golub.get_spol_display|default:"" }}</div>
-    </div>
+<!-- ═══ PERFORMANCE ═══ -->
+{% with total_races=golub.broj_utrka|default:0 wins=golub.broj_pobjeda|default:0 %}
+<div class="gdet-perf">
+  <div class="gdet-perf-card">
+    <div class="gdet-perf-value" style="color:#c9a84c">{{ total_races }}</div>
+    <div class="gdet-perf-label">Ukupno utrka</div>
   </div>
-  <div class="pedigree-connector"><div class="pedigree-line-h"></div></div>
-  <!-- Roditelji -->
-  <div class="pedigree-col">
-    {% if golub.otac %}
-    <div class="pedigree-card">
-      <div class="prsten">{{ golub.otac.prsten_broj }}</div>
-      <div class="name">{{ golub.otac.naziv|default:"—" }}</div>
-      <div style="font-size:.65rem;color:#888">Otac</div>
-    </div>
-    {% else %}
-    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Otac nepoznat</div></div>
-    {% endif %}
-    {% if golub.majka %}
-    <div class="pedigree-card">
-      <div class="prsten">{{ golub.majka.prsten_broj }}</div>
-      <div class="name">{{ golub.majka.naziv|default:"—" }}</div>
-      <div style="font-size:.65rem;color:#888">Majka</div>
-    </div>
-    {% else %}
-    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Majka nepoznata</div></div>
-    {% endif %}
+  <div class="gdet-perf-card">
+    <div class="gdet-perf-value" style="color:#22c55e">{{ wins }}</div>
+    <div class="gdet-perf-label">Pobjeda</div>
   </div>
-  <div class="pedigree-connector"><div class="pedigree-line-h"></div></div>
-  <!-- Djedovi i bake -->
-  <div class="pedigree-col">
-    {% if golub.otac and golub.otac.otac %}
-    <div class="pedigree-card"><div class="prsten">{{ golub.otac.otac.prsten_broj }}</div><div class="name">{{ golub.otac.otac.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Djed (po ocu)</div></div>
-    {% else %}
-    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Djed (po ocu)</div></div>
-    {% endif %}
-    {% if golub.otac and golub.otac.majka %}
-    <div class="pedigree-card"><div class="prsten">{{ golub.otac.majka.prsten_broj }}</div><div class="name">{{ golub.otac.majka.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Baka (po ocu)</div></div>
-    {% else %}
-    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Baka (po ocu)</div></div>
-    {% endif %}
-    {% if golub.majka and golub.majka.otac %}
-    <div class="pedigree-card"><div class="prsten">{{ golub.majka.otac.prsten_broj }}</div><div class="name">{{ golub.majka.otac.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Djed (po majci)</div></div>
-    {% else %}
-    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Djed (po majci)</div></div>
-    {% endif %}
-    {% if golub.majka and golub.majka.majka %}
-    <div class="pedigree-card"><div class="prsten">{{ golub.majka.majka.prsten_broj }}</div><div class="name">{{ golub.majka.majka.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Baka (po majci)</div></div>
-    {% else %}
-    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Baka (po majci)</div></div>
-    {% endif %}
+  <div class="gdet-perf-card">
+    <div class="gdet-perf-value">{% if total_races > 0 %}{% widthratio wins total_races 100 %}%{% else %}--{% endif %}</div>
+    <div class="gdet-perf-label">Win ratio</div>
+  </div>
+  <div class="gdet-perf-card">
+    <div class="gdet-perf-value">
+      {% if rezultati_utrka %}
+        {% for r in rezultati_utrka %}{% if forloop.first %}{{ r.placiranje }}.{% endif %}{% endfor %}
+      {% else %}--{% endif %}
+    </div>
+    <div class="gdet-perf-label">Najbolji plasman</div>
   </div>
 </div>
-</div></div>
+{% endwith %}
 
-<!-- Zdravstveni zapisi -->
-<div class="card bg-dark border-secondary mb-4"><div class="card-header d-flex justify-content-between align-items-center">
-  <h5 class="mb-0" style="color:#c9a84c"><i class="fas fa-heartbeat"></i> Zdravstveni zapisi</h5>
-  <a href="{% url 'udruge:zdravstveni_create' golub.pk %}" class="btn btn-warning btn-sm">+ Zdravstveni zapis</a>
-</div><div class="card-body p-0"><div class="table-responsive">
-<table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Datum</th><th style="font-size:.75rem">Vrsta</th>
-  <th style="font-size:.75rem">Lijek/Preparat</th><th style="font-size:.75rem">Veterinar</th>
-</tr></thead><tbody>
-{% for z in zdravstveni %}
-<tr><td style="font-size:.82rem">{{ z.datum|date:"d.m.Y" }}</td>
-<td style="font-size:.82rem">{{ z.get_vrsta_display|default:z.vrsta }}</td>
-<td style="font-size:.82rem">{{ z.lijek_preparat|default:"—" }}</td>
-<td style="font-size:.82rem">{{ z.veterinar|default:"—" }}</td></tr>
-{% empty %}<tr><td colspan="4" class="text-center text-muted py-4">Nema zdravstvenih zapisa</td></tr>{% endfor %}
-</tbody></table></div></div></div>
+<!-- ═══ PEDIGREE ═══ -->
+<div class="pedigree-section">
+  <div class="pedigree-header">
+    <h3><i class="fas fa-dna me-2"></i>Rodovnik (3 generacije)</h3>
+  </div>
+  <div class="pedigree-body">
+    <div class="pedigree-chart">
+      <!-- Row 1: Grandparent 1 (paternal grandfather) -->
+      <div style="grid-column:1;grid-row:1"></div>
+      <div style="grid-column:2;grid-row:1"></div>
+      <div style="grid-column:3;grid-row:1"></div>
+      <div class="ped-connector" style="grid-column:4;grid-row:1"></div>
+      {% if rodovnik.djed_oc %}
+      <div class="ped-node grandparent" style="grid-row:1">
+        <a href="{% url 'udruge:golub_detail' rodovnik.djed_oc.pk %}">
+          <span class="ped-spol-dot" style="background:#60a5fa"></span>
+          <div class="ped-prsten">{{ rodovnik.djed_oc.prsten_broj }}</div>
+          <div class="ped-name">{{ rodovnik.djed_oc.naziv|default:"--" }}</div>
+          <div class="ped-role">Djed (po ocu)</div>
+        </a>
+      </div>
+      {% else %}
+      <div class="ped-node grandparent empty" style="grid-row:1"><div class="ped-prsten">--</div><div class="ped-role">Djed (po ocu)</div></div>
+      {% endif %}
 
-<!-- Rezultati utrka -->
-<div class="card bg-dark border-secondary mb-4"><div class="card-header">
-  <h5 class="mb-0" style="color:#c9a84c"><i class="fas fa-flag-checkered"></i> Rezultati utrka</h5>
-</div><div class="card-body p-0"><div class="table-responsive">
-<table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Utrka</th><th style="font-size:.75rem">Datum</th>
-  <th style="font-size:.75rem">Plasman</th><th style="font-size:.75rem">Brzina (m/min)</th><th style="font-size:.75rem">Bodovi</th>
-</tr></thead><tbody>
-{% for r in rezultati %}
-<tr><td style="font-size:.82rem"><a href="{% url 'udruge:utrka_detail' r.utrka.pk %}" style="color:#c9a84c">{{ r.utrka.naziv }}</a></td>
-<td style="font-size:.82rem">{{ r.utrka.datum|date:"d.m.Y" }}</td>
-<td style="font-size:.82rem"><strong>{{ r.placiranje }}.</strong></td>
-<td style="font-size:.82rem">{{ r.brzina_mpm|default:"—" }}</td>
-<td style="font-size:.82rem">{{ r.bodovi|default:"0" }}</td></tr>
-{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nema rezultata utrka</td></tr>{% endfor %}
-</tbody></table></div></div></div>
+      <!-- Row 2: Father + Grandparent 2 (paternal grandmother) -->
+      <div style="grid-column:1;grid-row:2"></div>
+      <div class="ped-connector" style="grid-column:2;grid-row:2"></div>
+      {% if rodovnik.otac %}
+      <div class="ped-node parent" style="grid-row:2">
+        <a href="{% url 'udruge:golub_detail' rodovnik.otac.pk %}">
+          <span class="ped-spol-dot" style="background:#60a5fa"></span>
+          <div class="ped-prsten">{{ rodovnik.otac.prsten_broj }}</div>
+          <div class="ped-name">{{ rodovnik.otac.naziv|default:"--" }}</div>
+          <div class="ped-role">Otac</div>
+        </a>
+      </div>
+      {% else %}
+      <div class="ped-node parent empty" style="grid-row:2"><div class="ped-prsten">--</div><div class="ped-role">Otac</div></div>
+      {% endif %}
+      <div class="ped-connector" style="grid-column:4;grid-row:2"></div>
+      {% if rodovnik.baka_oc %}
+      <div class="ped-node grandparent" style="grid-row:2">
+        <a href="{% url 'udruge:golub_detail' rodovnik.baka_oc.pk %}">
+          <span class="ped-spol-dot" style="background:#ec4899"></span>
+          <div class="ped-prsten">{{ rodovnik.baka_oc.prsten_broj }}</div>
+          <div class="ped-name">{{ rodovnik.baka_oc.naziv|default:"--" }}</div>
+          <div class="ped-role">Baka (po ocu)</div>
+        </a>
+      </div>
+      {% else %}
+      <div class="ped-node grandparent empty" style="grid-row:2"><div class="ped-prsten">--</div><div class="ped-role">Baka (po ocu)</div></div>
+      {% endif %}
+
+      <!-- Main bird spans rows 2-3 -->
+      <div class="ped-node main-bird" style="grid-column:1;grid-row:2/4">
+        <i class="fas fa-dove" style="font-size:1.2rem;color:#c9a84c;margin-bottom:.3rem;display:block"></i>
+        <div class="ped-prsten" style="font-size:.78rem">{{ golub.prsten_broj }}</div>
+        <div class="ped-name" style="font-size:.88rem;font-weight:800">{{ golub.naziv|default:"--" }}</div>
+        <div style="font-size:.65rem;color:#c9a84c;margin-top:4px">
+          {% if golub.spol == 'M' %}Mužjak{% elif golub.spol == 'F' %}Ženka{% else %}?{% endif %}
+        </div>
+      </div>
+
+      <!-- Row 3: Mother + Grandparent 3 (maternal grandfather) -->
+      <div class="ped-connector" style="grid-column:2;grid-row:3"></div>
+      {% if rodovnik.majka %}
+      <div class="ped-node parent" style="grid-row:3">
+        <a href="{% url 'udruge:golub_detail' rodovnik.majka.pk %}">
+          <span class="ped-spol-dot" style="background:#ec4899"></span>
+          <div class="ped-prsten">{{ rodovnik.majka.prsten_broj }}</div>
+          <div class="ped-name">{{ rodovnik.majka.naziv|default:"--" }}</div>
+          <div class="ped-role">Majka</div>
+        </a>
+      </div>
+      {% else %}
+      <div class="ped-node parent empty" style="grid-row:3"><div class="ped-prsten">--</div><div class="ped-role">Majka</div></div>
+      {% endif %}
+      <div class="ped-connector" style="grid-column:4;grid-row:3"></div>
+      {% if rodovnik.djed_maj %}
+      <div class="ped-node grandparent" style="grid-row:3">
+        <a href="{% url 'udruge:golub_detail' rodovnik.djed_maj.pk %}">
+          <span class="ped-spol-dot" style="background:#60a5fa"></span>
+          <div class="ped-prsten">{{ rodovnik.djed_maj.prsten_broj }}</div>
+          <div class="ped-name">{{ rodovnik.djed_maj.naziv|default:"--" }}</div>
+          <div class="ped-role">Djed (po majci)</div>
+        </a>
+      </div>
+      {% else %}
+      <div class="ped-node grandparent empty" style="grid-row:3"><div class="ped-prsten">--</div><div class="ped-role">Djed (po majci)</div></div>
+      {% endif %}
+
+      <!-- Row 4: Grandparent 4 (maternal grandmother) -->
+      <div style="grid-column:1;grid-row:4"></div>
+      <div style="grid-column:2;grid-row:4"></div>
+      <div style="grid-column:3;grid-row:4"></div>
+      <div class="ped-connector" style="grid-column:4;grid-row:4"></div>
+      {% if rodovnik.baka_maj %}
+      <div class="ped-node grandparent" style="grid-row:4">
+        <a href="{% url 'udruge:golub_detail' rodovnik.baka_maj.pk %}">
+          <span class="ped-spol-dot" style="background:#ec4899"></span>
+          <div class="ped-prsten">{{ rodovnik.baka_maj.prsten_broj }}</div>
+          <div class="ped-name">{{ rodovnik.baka_maj.naziv|default:"--" }}</div>
+          <div class="ped-role">Baka (po majci)</div>
+        </a>
+      </div>
+      {% else %}
+      <div class="ped-node grandparent empty" style="grid-row:4"><div class="ped-prsten">--</div><div class="ped-role">Baka (po majci)</div></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HEALTH TIMELINE ═══ -->
+<div class="health-section">
+  <div class="health-header">
+    <h3><i class="fas fa-heartbeat me-2"></i>Zdravstveni zapisi</h3>
+    <a href="{% url 'udruge:zdravstveni_create' golub.pk %}" class="btn btn-sm" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:600;border-radius:8px;padding:5px 14px;font-size:.78rem">
+      <i class="fas fa-plus me-1"></i>Novi zapis
+    </a>
+  </div>
+  {% if zdravstveni_zapisi %}
+  <div class="health-timeline">
+    {% for z in zdravstveni_zapisi %}
+    <div class="health-item">
+      <div class="health-dot {{ z.vrsta }}"></div>
+      <div style="flex:1">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-1">
+          <div>
+            <span class="health-type-badge {{ z.vrsta }}">{{ z.get_vrsta_display|default:z.vrsta }}</span>
+            {% if z.lijek_preparat %}<span style="font-size:.82rem;color:var(--text);margin-left:.5rem;font-weight:600">{{ z.lijek_preparat }}</span>{% endif %}
+          </div>
+          <span style="font-size:.75rem;color:var(--text-muted)">{{ z.datum|date:"d.m.Y" }}</span>
+        </div>
+        {% if z.veterinar %}<div style="font-size:.78rem;color:var(--text-muted);margin-top:2px"><i class="fas fa-user-md me-1"></i>{{ z.veterinar }}</div>{% endif %}
+        {% if z.doza %}<div style="font-size:.75rem;color:var(--text-muted)">Doza: {{ z.doza }}</div>{% endif %}
+        {% if z.sljedeci_tretman %}<div style="font-size:.72rem;color:#f59e0b;margin-top:2px"><i class="fas fa-calendar-alt me-1"></i>Sljedeći: {{ z.sljedeci_tretman|date:"d.m.Y" }}</div>{% endif %}
+        {% if z.napomena %}<div style="font-size:.75rem;color:var(--text-muted);font-style:italic;margin-top:2px">{{ z.napomena }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:3rem;color:var(--text-muted)">
+    <i class="fas fa-heartbeat" style="font-size:2rem;opacity:.2;margin-bottom:.5rem;display:block"></i>
+    <div style="font-size:.85rem">Nema zdravstvenih zapisa</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══ RACE HISTORY ═══ -->
+<div class="race-section">
+  <div class="race-header">
+    <h3><i class="fas fa-flag-checkered me-2"></i>Rezultati utrka</h3>
+  </div>
+  {% if rezultati_utrka %}
+  <div class="table-responsive">
+    <table class="race-table">
+      <thead>
+        <tr>
+          <th>Plasman</th>
+          <th>Utrka</th>
+          <th>Datum</th>
+          <th>Brzina</th>
+          <th>Bodovi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rezultati_utrka %}
+        <tr>
+          <td>
+            <span class="placement-badge {% if r.placiranje == 1 %}placement-1{% elif r.placiranje == 2 %}placement-2{% elif r.placiranje == 3 %}placement-3{% else %}placement-other{% endif %}">
+              {% if r.placiranje == 1 %}<i class="fas fa-trophy"></i>{% else %}{{ r.placiranje }}{% endif %}
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'udruge:utrka_detail' r.utrka.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none">{{ r.utrka.naziv }}</a>
+          </td>
+          <td style="font-size:.82rem;color:var(--text-secondary)">{{ r.utrka.datum|date:"d.m.Y" }}</td>
+          <td>
+            {% if r.brzina_mpm %}
+            <span style="font-weight:600">{{ r.brzina_mpm }}</span>
+            <span style="font-size:.7rem;color:var(--text-muted)">m/min</span>
+            {% else %}--{% endif %}
+          </td>
+          <td style="font-weight:600;color:#c9a84c">{{ r.bodovi|default:"0" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:3rem;color:var(--text-muted)">
+    <i class="fas fa-flag-checkered" style="font-size:2rem;opacity:.2;margin-bottom:.5rem;display:block"></i>
+    <div style="font-size:.85rem">Nema rezultata utrka</div>
+  </div>
+  {% endif %}
+</div>
 
 </div>
 {% endblock %}

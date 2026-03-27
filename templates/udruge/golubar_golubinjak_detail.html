@@ -1,42 +1,196 @@
 {% extends "base.html" %}
-{% block title %}{{ golubinjak.naziv }}{% endblock %}
+{% block title %}{{ golubinjak.naziv }} — Golubinjak{% endblock %}
+{% block extra_css %}
+<style>
+.gd-container { max-width: 1100px; margin: 0 auto; }
+.gd-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1a1000 60%, #0f172a 100%);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.gd-header::after {
+  content: '';
+  position: absolute; top: -40%; right: -5%;
+  width: 250px; height: 250px;
+  background: radial-gradient(circle, rgba(20,184,166,.06) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.gd-header-icon {
+  width: 56px; height: 56px;
+  background: rgba(20,184,166,.12);
+  border: 2px solid rgba(20,184,166,.2);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; color: #14b8a6;
+}
+.gd-meta-badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: 4px 12px; border-radius: 8px;
+  font-size: .75rem; font-weight: 600;
+}
+.gd-golub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.gd-golub-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all .2s;
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+}
+.gd-golub-card:hover {
+  border-color: rgba(201,168,76,.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  color: var(--text);
+}
+.gd-golub-photo {
+  width: 100%; height: 140px;
+  background: var(--border-light);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: .75rem;
+  overflow: hidden;
+  position: relative;
+}
+.gd-golub-photo img { width: 100%; height: 100%; object-fit: cover; }
+.gd-golub-photo .placeholder { font-size: 2rem; color: var(--text-muted); opacity: .3; }
+.gd-spol-icon {
+  position: absolute; top: 8px; right: 8px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 800;
+}
+.gd-spol-m { background: rgba(59,130,246,.2); color: #60a5fa; }
+.gd-spol-f { background: rgba(236,72,153,.2); color: #ec4899; }
+.gd-spol-u { background: rgba(100,116,139,.2); color: #94a3b8; }
+.gd-golub-prsten {
+  font-size: .72rem; font-family: monospace;
+  color: #c9a84c; font-weight: 600;
+  margin-bottom: .2rem;
+}
+.gd-golub-name { font-size: .9rem; font-weight: 700; color: var(--text); }
+.gd-sealed-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: rgba(201,168,76,.1); color: #c9a84c;
+  padding: 2px 6px; border-radius: 4px;
+  font-size: .65rem; font-weight: 600;
+  margin-top: .3rem;
+}
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid">
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2><i class="fas fa-home"></i> {{ golubinjak.naziv }}</h2>
-  <div>
-    <a href="{% url 'udruge:golub_create' %}?golubinjak={{ golubinjak.pk }}" class="btn btn-warning btn-sm">+ Dodaj goluba</a>
-    <a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary btn-sm ms-1">Uredi</a>
-  </div>
-</div>
-<div class="row g-3 mb-4">
-  <div class="col-md-6">
-    <div class="card bg-dark border-secondary"><div class="card-body">
-      <div style="font-size:.72rem;text-transform:uppercase;color:#c9a84c;margin-bottom:.75rem;letter-spacing:.05em">Podaci golubinjaka</div>
-      <div style="font-size:.85rem">
-        <div class="mb-1"><span class="text-muted">Adresa:</span> {{ golubinjak.adresa|default:"—" }}</div>
-        <div class="mb-1"><span class="text-muted">EU reg. broj:</span> {{ golubinjak.eu_reg_broj|default:"—" }}</div>
-        <div class="mb-1"><span class="text-muted">Kapacitet:</span> {{ golubinjak.kapacitet|default:"—" }}</div>
-        <div class="mb-1"><span class="text-muted">Status:</span> {% if golubinjak.aktivan %}<span class="badge bg-success">Aktivan</span>{% else %}<span class="badge bg-secondary">Neaktivan</span>{% endif %}</div>
-        {% if golubinjak.napomena %}<div class="mb-1"><span class="text-muted">Napomena:</span> {{ golubinjak.napomena }}</div>{% endif %}
+<div class="gd-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubinjak_list' %}">Golubinjaci</a></li>
+    <li class="breadcrumb-item active">{{ golubinjak.naziv }}</li>
+  </ol>
+</nav>
+
+<!-- Header Card -->
+<div class="gd-header">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="gd-header-icon"><i class="fas fa-home"></i></div>
+      <div>
+        <h1 style="font-size:1.5rem;font-weight:800;color:#fff;margin:0">{{ golubinjak.naziv }}</h1>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          {% if golubinjak.eu_reg_broj %}
+          <span class="gd-meta-badge" style="background:rgba(59,130,246,.12);color:#60a5fa">
+            <i class="fas fa-certificate"></i> {{ golubinjak.eu_reg_broj }}
+          </span>
+          {% endif %}
+          {% if golubinjak.kapacitet %}
+          <span class="gd-meta-badge" style="background:rgba(20,184,166,.12);color:#14b8a6">
+            <i class="fas fa-dove"></i> {{ golubovi|length }}/{{ golubinjak.kapacitet }} mjesta
+          </span>
+          {% endif %}
+          {% if golubinjak.aktivan %}
+          <span class="gd-meta-badge" style="background:rgba(34,197,94,.12);color:#22c55e">
+            <i class="fas fa-check-circle"></i> Aktivan
+          </span>
+          {% else %}
+          <span class="gd-meta-badge" style="background:rgba(239,68,68,.12);color:#ef4444">
+            <i class="fas fa-times-circle"></i> Neaktivan
+          </span>
+          {% endif %}
+        </div>
       </div>
-    </div></div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'udruge:golub_create' %}?golubinjak={{ golubinjak.pk }}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.2rem;font-size:.82rem">
+        <i class="fas fa-plus me-1"></i>Dodaj goluba
+      </a>
+    </div>
   </div>
+
+  {% if golubinjak.adresa %}
+  <div class="mt-3 d-flex align-items-center gap-2" style="color:#94a3b8;font-size:.85rem">
+    <i class="fas fa-map-marker-alt" style="color:#c9a84c"></i> {{ golubinjak.adresa }}
+  </div>
+  {% endif %}
+  {% if golubinjak.napomena %}
+  <div class="mt-2" style="color:#64748b;font-size:.82rem;font-style:italic">{{ golubinjak.napomena }}</div>
+  {% endif %}
 </div>
-<div class="card bg-dark border-secondary"><div class="card-header"><h5 class="mb-0" style="color:#c9a84c">Golubovi u golubinjaku</h5></div><div class="card-body p-0"><div class="table-responsive">
-<table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Prsten br.</th><th style="font-size:.75rem">Naziv</th>
-  <th style="font-size:.75rem">Spol</th><th style="font-size:.75rem">Boja</th>
-</tr></thead><tbody>
-{% for g in golubovi %}
-<tr onclick="location.href='{% url 'udruge:golub_detail' g.pk %}'" style="cursor:pointer">
-  <td style="font-size:.82rem"><strong style="color:#c9a84c">{{ g.prsten_broj }}</strong></td>
-  <td style="font-size:.82rem">{{ g.naziv|default:"—" }}</td>
-  <td style="font-size:.82rem">{{ g.get_spol_display|default:g.spol }}</td>
-  <td style="font-size:.82rem">{{ g.get_boja_display|default:g.boja }}</td>
-</tr>
-{% empty %}<tr><td colspan="4" class="text-center text-muted py-4">Nema golubova u ovom golubinjaku</td></tr>{% endfor %}
-</tbody></table></div></div></div>
-<div class="mt-3"><a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary">&larr; Natrag</a></div>
+
+<!-- Golubovi Section -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 style="font-size:1.1rem;font-weight:700;color:var(--text);margin:0">
+    <i class="fas fa-dove me-2" style="color:#c9a84c;font-size:.9rem"></i>Golubovi u golubinjaku
+  </h3>
+  <span style="font-size:.78rem;color:var(--text-muted)">{{ golubovi|length }} golub{{ golubovi|length|pluralize:"a,ova" }}</span>
+</div>
+
+{% if golubovi %}
+<div class="gd-golub-grid">
+  {% for g in golubovi %}
+  <a href="{% url 'udruge:golub_detail' g.pk %}" class="gd-golub-card">
+    <div class="gd-golub-photo">
+      {% if g.fotografija %}
+      <img src="{{ g.fotografija.url }}" alt="{{ g.naziv }}">
+      {% else %}
+      <div class="placeholder"><i class="fas fa-dove"></i></div>
+      {% endif %}
+      <span class="gd-spol-icon {% if g.spol == 'M' %}gd-spol-m{% elif g.spol == 'F' %}gd-spol-f{% else %}gd-spol-u{% endif %}">
+        {% if g.spol == 'M' %}<i class="fas fa-mars"></i>{% elif g.spol == 'F' %}<i class="fas fa-venus"></i>{% else %}?{% endif %}
+      </span>
+    </div>
+    <div class="gd-golub-prsten">{{ g.prsten_broj }}</div>
+    <div class="gd-golub-name">{{ g.naziv|default:"Bez imena" }}</div>
+    {% if g.boja %}
+    <span style="font-size:.7rem;color:var(--text-muted)">{{ g.get_boja_display|default:g.boja }}</span>
+    {% endif %}
+    {% if g.is_sealed %}
+    <div class="gd-sealed-badge"><i class="fas fa-lock"></i> Zapečaćen</div>
+    {% endif %}
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div style="text-align:center;padding:4rem 2rem;background:var(--bg-card);border:1px solid var(--border);border-radius:14px">
+  <div style="font-size:2.5rem;color:var(--text-muted);opacity:.3;margin-bottom:1rem"><i class="fas fa-dove"></i></div>
+  <h4 style="font-weight:700;color:var(--text)">Golubinjak je prazan</h4>
+  <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1.5rem">Dodajte prvog goluba u ovaj golubinjak</p>
+  <a href="{% url 'udruge:golub_create' %}?golubinjak={{ golubinjak.pk }}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 24px;border-radius:10px">
+    <i class="fas fa-plus me-1"></i>Dodaj goluba
+  </a>
+</div>
+{% endif %}
+
 </div>
 {% endblock %}

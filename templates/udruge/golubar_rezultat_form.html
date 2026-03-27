@@ -1,34 +1,184 @@
 {% extends "base.html" %}
-{% block title %}Dodaj rezultat{% endblock %}
+{% block title %}Dodaj rezultat — {{ utrka.naziv }}{% endblock %}
+{% block extra_css %}
+<style>
+.rf-container { max-width: 700px; margin: 0 auto; }
+.rf-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.rf-section { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.rf-section:last-of-type { border-bottom: none; }
+.rf-section-title {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: #c9a84c; margin-bottom: 1.25rem;
+}
+.rf-race-info {
+  background: linear-gradient(135deg, rgba(239,68,68,.05), transparent);
+  border: 1px solid rgba(239,68,68,.15);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+  flex-wrap: wrap;
+}
+.rf-race-icon {
+  width: 48px; height: 48px;
+  background: rgba(239,68,68,.1);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: #ef4444;
+  flex-shrink: 0;
+}
+.rf-input {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+  padding: .65rem .9rem !important;
+  font-size: .88rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.rf-input:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important; }
+.rf-label { font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: .4rem; display: block; }
+.rf-hint { font-size: .7rem; color: var(--text-muted); margin-top: .25rem; }
+.rf-placement-input {
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+  text-align: center !important;
+  max-width: 120px;
+  color: #c9a84c !important;
+}
+.rf-unit {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: .75rem; color: var(--text-muted); pointer-events: none;
+}
+.rf-footer {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.rf-btn-submit {
+  background: linear-gradient(135deg, #c9a84c, #a78b3d) !important;
+  color: #0a0a0a !important; border: none !important;
+  font-weight: 700 !important; padding: .6rem 2rem !important;
+  border-radius: 10px !important; font-size: .88rem !important;
+  transition: all .2s !important;
+}
+.rf-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,.3); }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
-<h2 class="mb-3"><i class="fas fa-trophy"></i> Dodaj rezultat</h2>
-<div class="card bg-dark border-secondary mb-3"><div class="card-body">
-  <div style="font-size:.72rem;text-transform:uppercase;color:#c9a84c;margin-bottom:.5rem;letter-spacing:.05em">Utrka</div>
-  <div style="font-size:.85rem">
-    <strong style="color:#c9a84c">{{ utrka.naziv }}</strong>
-    &nbsp;|&nbsp;
-    <span class="text-muted">Datum:</span> {{ utrka.datum|date:"d.m.Y" }}
-    &nbsp;|&nbsp;
-    <span class="text-muted">Udaljenost:</span> {{ utrka.udaljenost_km }} km
+<div class="rf-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:utrka_list' %}">Utrke</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:utrka_detail' utrka.pk %}">{{ utrka.naziv }}</a></li>
+    <li class="breadcrumb-item active">Dodaj rezultat</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+  <div style="width:52px;height:52px;background:rgba(201,168,76,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
+    <i class="fas fa-trophy" style="font-size:1.3rem;color:#c9a84c"></i>
   </div>
-</div></div>
-<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
-<div class="mb-3"><label class="form-label">Golub</label>
-  <select name="golub" required class="form-select bg-dark text-light border-secondary">
-    <option value="">-- Odaberi goluba --</option>
-    {% for g in golubovi %}<option value="{{ g.pk }}">{{ g.prsten_broj }} — {{ g.naziv|default:"" }}</option>{% endfor %}
-  </select></div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Plasman</label><input type="number" name="placiranje" min="1" required class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-6"><label class="form-label">Plasman ukupno</label><input type="number" name="placiranje_ukupno" min="1" class="form-control bg-dark text-light border-secondary"></div>
+  <div>
+    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Dodaj rezultat</h2>
+    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Unesite plasman goluba na utrci</p>
+  </div>
 </div>
-<div class="row mb-3">
-  <div class="col-md-4"><label class="form-label">Brzina (m/min)</label><input type="number" name="brzina_mpm" step="0.01" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-4"><label class="form-label">Vrijeme dolaska</label><input type="datetime-local" name="vrijeme_dolaska" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-4"><label class="form-label">Bodovi</label><input type="number" name="bodovi" step="0.01" class="form-control bg-dark text-light border-secondary"></div>
+
+<!-- Race info -->
+<div class="rf-race-info">
+  <div class="rf-race-icon"><i class="fas fa-flag-checkered"></i></div>
+  <div>
+    <div style="font-size:.9rem;font-weight:700;color:var(--text)">{{ utrka.naziv }}</div>
+    <div style="font-size:.75rem;color:var(--text-muted)">
+      {{ utrka.datum|date:"d.m.Y" }}
+      {% if utrka.udaljenost_km %} | {{ utrka.udaljenost_km }} km{% endif %}
+      {% if utrka.startna_tocka %} | {{ utrka.startna_tocka }}{% endif %}
+    </div>
+  </div>
 </div>
-</div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:utrka_detail' utrka.pk %}" class="btn btn-outline-secondary">Odustani</a>
-<button type="submit" class="btn btn-warning">Spremi rezultat</button></div></form></div>
+
+<form method="post">
+{% csrf_token %}
+<div class="rf-card">
+
+  <!-- Golub selection -->
+  <div class="rf-section">
+    <div class="rf-section-title"><i class="fas fa-dove"></i> Golub</div>
+    <label class="rf-label">Odaberi goluba *</label>
+    <select name="golub" required class="form-select rf-input">
+      <option value="">-- Odaberi goluba --</option>
+      {% for g in golubovi %}
+      <option value="{{ g.pk }}">{{ g.prsten_broj }} — {{ g.naziv|default:"" }} ({{ g.get_spol_display }})</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Placement & Speed -->
+  <div class="rf-section">
+    <div class="rf-section-title"><i class="fas fa-medal"></i> Rezultat</div>
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="rf-label">Plasman *</label>
+        <input type="number" name="placiranje" required min="1" class="form-control rf-input rf-placement-input" placeholder="1">
+      </div>
+      <div class="col-md-3">
+        <label class="rf-label">Ukupno plasman</label>
+        <input type="number" name="placiranje_ukupno" min="1" class="form-control rf-input" placeholder="od ukupno">
+        <div class="rf-hint">Ukupan broj natjecatelja</div>
+      </div>
+      <div class="col-md-3" style="position:relative">
+        <label class="rf-label">Brzina</label>
+        <input type="number" name="brzina_mpm" step="0.01" class="form-control rf-input" placeholder="1200.50" style="padding-right:50px !important">
+        <span class="rf-unit">m/min</span>
+      </div>
+      <div class="col-md-3">
+        <label class="rf-label">Bodovi</label>
+        <input type="number" name="bodovi" step="0.01" class="form-control rf-input" placeholder="100">
+      </div>
+    </div>
+  </div>
+
+  <!-- Time & ETS -->
+  <div class="rf-section">
+    <div class="rf-section-title"><i class="fas fa-clock"></i> Vrijeme i ETS</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="rf-label"><i class="fas fa-clock me-1"></i>Vrijeme dolaska</label>
+        <input type="time" name="vrijeme_dolaska" step="1" class="form-control rf-input">
+      </div>
+      <div class="col-md-6">
+        <label class="rf-label"><i class="fas fa-microchip me-1"></i>ETS podatak</label>
+        <input type="text" name="ets_data" class="form-control rf-input" placeholder="Elektronski sat podatak">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="rf-footer">
+  <a href="{% url 'udruge:utrka_detail' utrka.pk %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+    <i class="fas fa-arrow-left me-1"></i>Odustani
+  </a>
+  <button type="submit" class="rf-btn-submit">
+    <i class="fas fa-save me-1"></i>Spremi rezultat
+  </button>
+</div>
+</form>
+
+</div>
 {% endblock %}

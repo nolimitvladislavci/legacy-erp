@@ -1,42 +1,298 @@
 {% extends "base.html" %}
-{% block title %}Golubovi{% endblock %}
+{% block title %}Registar golubova{% endblock %}
+{% block extra_css %}
+<style>
+.glist-container { max-width: 1200px; margin: 0 auto; }
+
+/* Search bar */
+.glist-search {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: .65rem 1rem;
+  display: flex; align-items: center; gap: .6rem;
+  margin-bottom: 1.5rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+.glist-search:focus-within {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201,168,76,.1);
+}
+.glist-search i { color: #c9a84c; font-size: .9rem; }
+.glist-search input {
+  flex: 1; border: none; outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: .9rem;
+}
+.glist-search input::placeholder { color: var(--text-muted); }
+
+/* View toggle */
+.glist-view-toggle { display: flex; gap: 2px; background: var(--border); border-radius: 8px; padding: 2px; }
+.glist-view-btn {
+  padding: 6px 12px; border: none; border-radius: 6px;
+  background: transparent; color: var(--text-muted);
+  cursor: pointer; font-size: .82rem; transition: all .15s;
+}
+.glist-view-btn.active { background: var(--bg-card); color: #c9a84c; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+/* Table */
+.glist-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.glist-table { width: 100%; border-collapse: collapse; }
+.glist-table thead th {
+  background: var(--table-header-bg);
+  font-size: .7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: var(--text-muted);
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+}
+.glist-table tbody td {
+  padding: .65rem 1rem;
+  font-size: .85rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+.glist-table tbody tr { transition: background .15s; }
+.glist-table tbody tr:hover { background: rgba(201,168,76,.03); }
+.glist-table tbody tr:last-child td { border-bottom: none; }
+.glist-spol {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .65rem;
+}
+.glist-spol-m { background: rgba(59,130,246,.12); color: #60a5fa; }
+.glist-spol-f { background: rgba(236,72,153,.12); color: #ec4899; }
+.glist-spol-u { background: rgba(100,116,139,.12); color: #94a3b8; }
+
+/* Card grid */
+.glist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+}
+.glist-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all .2s;
+  text-decoration: none; color: var(--text);
+  display: block;
+}
+.glist-card:hover {
+  border-color: rgba(201,168,76,.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  color: var(--text);
+}
+.glist-card-photo {
+  width: 100%; height: 130px;
+  background: var(--border-light);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.glist-card-photo img { width: 100%; height: 100%; object-fit: cover; }
+.glist-card-body { padding: .8rem 1rem; }
+.glist-card-prsten { font-size: .7rem; color: #c9a84c; font-weight: 600; font-family: monospace; }
+.glist-card-name { font-size: .9rem; font-weight: 700; margin-top: .1rem; }
+.glist-card-meta { display: flex; gap: .5rem; margin-top: .4rem; align-items: center; }
+.glist-card-meta span { font-size: .7rem; color: var(--text-muted); }
+.glist-sealed { display: inline-flex; align-items: center; gap: .2rem; background: rgba(201,168,76,.1); color: #c9a84c; padding: 2px 6px; border-radius: 4px; font-size: .6rem; font-weight: 600; }
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid">
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2><i class="fas fa-dove"></i> Golubovi</h2>
-  <a href="{% url 'udruge:golub_create' %}" class="btn btn-warning btn-sm">+ Novi golub</a>
-</div>
-<form method="get" class="mb-3">
-  <div class="input-group" style="max-width:400px">
-    <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Pretraži po prstenu ili imenu..." class="form-control bg-dark text-light border-secondary">
-    <button type="submit" class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
+<div class="glist-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item active">Golubovi</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="d-flex align-items-center gap-3">
+    <div style="width:48px;height:48px;background:rgba(201,168,76,.1);border-radius:12px;display:flex;align-items:center;justify-content:center">
+      <i class="fas fa-dove" style="font-size:1.2rem;color:#c9a84c"></i>
+    </div>
+    <div>
+      <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Registar golubova</h2>
+      <p style="font-size:.78rem;color:var(--text-muted);margin:0">{{ page_obj.paginator.count }} golub{{ page_obj.paginator.count|pluralize:"a,ova" }} u registru</p>
+    </div>
   </div>
-</form>
-<div class="card bg-dark border-secondary"><div class="card-body p-0"><div class="table-responsive">
-<table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Prsten br.</th><th style="font-size:.75rem">Naziv</th>
-  <th style="font-size:.75rem">Spol</th><th style="font-size:.75rem">Boja</th>
-  <th style="font-size:.75rem">Golubinjak</th><th style="font-size:.75rem">Utrke</th><th style="font-size:.75rem">Status</th>
-</tr></thead><tbody>
-{% for g in golubovi %}
-<tr onclick="location.href='{% url 'udruge:golub_detail' g.pk %}'" style="cursor:pointer">
-  <td style="font-size:.82rem"><strong style="color:#c9a84c">{{ g.prsten_broj }}</strong></td>
-  <td style="font-size:.82rem">{{ g.naziv|default:"—" }}</td>
-  <td style="font-size:.82rem">{{ g.get_spol_display|default:g.spol }}</td>
-  <td style="font-size:.82rem">{{ g.get_boja_display|default:g.boja }}</td>
-  <td style="font-size:.82rem">{{ g.golubinjak.naziv|default:"—" }}</td>
-  <td style="font-size:.82rem">{{ g.broj_utrka|default:"0" }}</td>
-  <td style="font-size:.82rem">{% if g.aktivan %}<span class="badge bg-success">Aktivan</span>{% else %}<span class="badge bg-secondary">Neaktivan</span>{% endif %}</td>
-</tr>
-{% empty %}<tr><td colspan="7" class="text-center text-muted py-4">Nema golubova</td></tr>{% endfor %}
-</tbody></table></div></div></div>
-{% if page_obj %}
-<nav class="mt-3"><ul class="pagination justify-content-center">
-  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.previous_page_number }}">Prethodna</a></li>{% endif %}
-  <li class="page-item disabled"><span class="page-link bg-dark text-warning border-secondary">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
-  {% if page_obj.has_next %}<li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="?{% if q %}q={{ q }}&{% endif %}page={{ page_obj.next_page_number }}">Sljedeća</a></li>{% endif %}
-</ul></nav>
-{% endif %}
-<div class="mt-3"><a href="{% url 'udruge:golubar_dashboard' %}" class="btn btn-outline-secondary">&larr; Natrag</a></div>
+  <div class="d-flex gap-2 align-items-center">
+    <div class="glist-view-toggle">
+      <button class="glist-view-btn active" data-view="table" onclick="switchView('table')"><i class="fas fa-list"></i></button>
+      <button class="glist-view-btn" data-view="grid" onclick="switchView('grid')"><i class="fas fa-th"></i></button>
+    </div>
+    <a href="{% url 'udruge:golub_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+      <i class="fas fa-plus me-1"></i>Novi golub
+    </a>
+  </div>
 </div>
+
+<!-- Search -->
+<form method="get" class="glist-search">
+  <i class="fas fa-search"></i>
+  <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Pretraži po prstenu, imenu, boji..." autocomplete="off">
+  {% if q %}<a href="{% url 'udruge:golub_list' %}" style="color:var(--text-muted);font-size:.82rem"><i class="fas fa-times"></i></a>{% endif %}
+</form>
+
+{% if page_obj.object_list %}
+
+<!-- Table View -->
+<div id="view-table" class="glist-table-wrap">
+  <div class="table-responsive">
+    <table class="glist-table">
+      <thead>
+        <tr>
+          <th>Prsten</th>
+          <th>Naziv</th>
+          <th>Spol</th>
+          <th>Boja</th>
+          <th>Utrke</th>
+          <th>Pobjede</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in page_obj %}
+        <tr>
+          <td>
+            <a href="{% url 'udruge:golub_detail' g.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none;font-family:monospace;font-size:.82rem">
+              {{ g.prsten_broj }}
+            </a>
+          </td>
+          <td style="font-weight:600">{{ g.naziv|default:"--" }}</td>
+          <td>
+            <span class="glist-spol {% if g.spol == 'M' %}glist-spol-m{% elif g.spol == 'F' %}glist-spol-f{% else %}glist-spol-u{% endif %}">
+              {% if g.spol == 'M' %}<i class="fas fa-mars"></i>{% elif g.spol == 'F' %}<i class="fas fa-venus"></i>{% else %}?{% endif %}
+            </span>
+          </td>
+          <td style="font-size:.82rem;color:var(--text-secondary)">{{ g.get_boja_display|default:"--" }}</td>
+          <td style="font-size:.85rem;font-weight:600">{{ g.broj_utrka|default:"0" }}</td>
+          <td>
+            {% if g.broj_pobjeda %}
+            <span style="color:#22c55e;font-weight:700;font-size:.85rem">{{ g.broj_pobjeda }}</span>
+            {% else %}<span style="color:var(--text-muted)">0</span>{% endif %}
+          </td>
+          <td>
+            {% if g.is_sealed %}
+            <span class="glist-sealed"><i class="fas fa-lock"></i> Zapečaćen</span>
+            {% elif g.aktivan %}
+            <span style="color:#22c55e;font-size:.75rem"><i class="fas fa-circle" style="font-size:.4rem"></i> Aktivan</span>
+            {% else %}
+            <span style="color:#ef4444;font-size:.75rem"><i class="fas fa-circle" style="font-size:.4rem"></i> Neaktivan</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'udruge:golub_detail' g.pk %}" class="btn btn-sm btn-outline-secondary" style="font-size:.7rem;padding:3px 8px;border-radius:6px" title="Detalji"><i class="fas fa-eye"></i></a>
+              <a href="{% url 'udruge:golub_edit' g.pk %}" class="btn btn-sm btn-outline-secondary" style="font-size:.7rem;padding:3px 8px;border-radius:6px" title="Uredi"><i class="fas fa-pen"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Grid View (hidden by default) -->
+<div id="view-grid" class="glist-grid" style="display:none">
+  {% for g in page_obj %}
+  <a href="{% url 'udruge:golub_detail' g.pk %}" class="glist-card">
+    <div class="glist-card-photo">
+      {% if g.fotografija %}
+      <img src="{{ g.fotografija.url }}" alt="{{ g.naziv }}">
+      {% else %}
+      <i class="fas fa-dove" style="font-size:2rem;color:var(--text-muted);opacity:.2"></i>
+      {% endif %}
+      <span class="glist-spol {% if g.spol == 'M' %}glist-spol-m{% elif g.spol == 'F' %}glist-spol-f{% else %}glist-spol-u{% endif %}" style="position:absolute;top:8px;right:8px">
+        {% if g.spol == 'M' %}<i class="fas fa-mars"></i>{% elif g.spol == 'F' %}<i class="fas fa-venus"></i>{% else %}?{% endif %}
+      </span>
+      {% if g.is_sealed %}
+      <div class="glist-sealed" style="position:absolute;top:8px;left:8px"><i class="fas fa-lock"></i> Seal</div>
+      {% endif %}
+    </div>
+    <div class="glist-card-body">
+      <div class="glist-card-prsten">{{ g.prsten_broj }}</div>
+      <div class="glist-card-name">{{ g.naziv|default:"Bez imena" }}</div>
+      <div class="glist-card-meta">
+        {% if g.boja %}<span>{{ g.get_boja_display }}</span>{% endif %}
+        {% if g.broj_utrka %}<span><i class="fas fa-flag-checkered" style="font-size:.55rem"></i> {{ g.broj_utrka }}</span>{% endif %}
+        {% if g.broj_pobjeda %}<span style="color:#22c55e"><i class="fas fa-trophy" style="font-size:.55rem"></i> {{ g.broj_pobjeda }}</span>{% endif %}
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&laquo;</a></li>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num or num == 1 or num == page_obj.paginator.num_pages or num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+      <a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}">{{ num }}</a>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- Empty -->
+<div style="text-align:center;padding:5rem 2rem;background:var(--bg-card);border:1px solid var(--border);border-radius:14px">
+  <div style="font-size:3rem;color:#c9a84c;opacity:.4;margin-bottom:1rem"><i class="fas fa-dove"></i></div>
+  {% if q %}
+  <h3 style="font-weight:700;color:var(--text)">Nema rezultata za "{{ q }}"</h3>
+  <p style="color:var(--text-muted);font-size:.85rem">Pokušajte s drugačijim pojmom pretrage</p>
+  <a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary mt-2">Očisti pretragu</a>
+  {% else %}
+  <h3 style="font-weight:700;color:var(--text)">Registrirajte prvog goluba</h3>
+  <p style="color:var(--text-muted);font-size:.85rem;max-width:400px;margin:0 auto 1.5rem">Dodajte golubove s brojem prstena, fotografijom i rodovnikom</p>
+  <a href="{% url 'udruge:golub_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+    <i class="fas fa-plus me-1"></i>Novi golub
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+
+</div>
+
+<script>
+function switchView(view) {
+  document.getElementById('view-table').style.display = view === 'table' ? 'block' : 'none';
+  document.getElementById('view-grid').style.display = view === 'grid' ? 'grid' : 'none';
+  document.querySelectorAll('.glist-view-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+  localStorage.setItem('golubar-view', view);
+}
+// Restore view preference
+(function() {
+  var saved = localStorage.getItem('golubar-view');
+  if (saved === 'grid') switchView('grid');
+})();
+</script>
 {% endblock %}

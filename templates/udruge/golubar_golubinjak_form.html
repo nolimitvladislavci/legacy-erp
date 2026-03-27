@@ -1,21 +1,174 @@
 {% extends "base.html" %}
 {% block title %}{% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}{% endblock %}
+{% block extra_css %}
+<style>
+.gf-container { max-width: 800px; margin: 0 auto; }
+.gf-form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.gf-section {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.gf-section:last-of-type { border-bottom: none; }
+.gf-section-title {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: #c9a84c;
+  margin-bottom: 1.25rem;
+}
+.gf-section-title i { font-size: .9rem; }
+.gf-input {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+  padding: .65rem .9rem !important;
+  font-size: .88rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.gf-input:focus {
+  border-color: #c9a84c !important;
+  box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important;
+}
+.gf-input::placeholder { color: var(--text-muted) !important; opacity: .6; }
+.gf-label {
+  font-size: .78rem; font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: .4rem; display: block;
+}
+.gf-hint {
+  font-size: .7rem; color: var(--text-muted);
+  margin-top: .25rem;
+}
+.gf-footer {
+  padding: 1.25rem 1.5rem;
+  background: rgba(201,168,76,.03);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.gf-btn-submit {
+  background: linear-gradient(135deg, #c9a84c, #a78b3d) !important;
+  color: #0a0a0a !important;
+  border: none !important;
+  font-weight: 700 !important;
+  padding: .6rem 2rem !important;
+  border-radius: 10px !important;
+  font-size: .88rem !important;
+  transition: all .2s !important;
+  display: inline-flex; align-items: center; gap: .5rem;
+}
+.gf-btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(201,168,76,.3);
+}
+.gf-unit {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-size: .75rem; color: var(--text-muted); pointer-events: none;
+}
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
-<h2 class="mb-3"><i class="fas fa-home"></i> {% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}</h2>
-<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
-<div class="mb-3"><label class="form-label">Naziv</label><input type="text" name="naziv" value="{{ golubinjak.naziv|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
-<div class="mb-3"><label class="form-label">Adresa</label><input type="text" name="adresa" value="{{ golubinjak.adresa|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">GPS Lat</label><input type="number" name="gps_lat" step="0.000001" value="{{ golubinjak.gps_lat|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-6"><label class="form-label">GPS Lng</label><input type="number" name="gps_lng" step="0.000001" value="{{ golubinjak.gps_lng|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="gf-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubinjak_list' %}">Golubinjaci</a></li>
+    <li class="breadcrumb-item active">{% if golubinjak %}Uredi{% else %}Novi golubinjak{% endif %}</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+  <div style="width:52px;height:52px;background:rgba(20,184,166,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
+    <i class="fas fa-home" style="font-size:1.3rem;color:#14b8a6"></i>
+  </div>
+  <div>
+    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">{% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}</h2>
+    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Registrirajte lokaciju za smještaj vaših golubova</p>
+  </div>
 </div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">EU registracijski broj</label><input type="text" name="eu_reg_broj" value="{{ golubinjak.eu_reg_broj|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-6"><label class="form-label">Kapacitet</label><input type="number" name="kapacitet" value="{{ golubinjak.kapacitet|default:'0' }}" class="form-control bg-dark text-light border-secondary"></div>
+
+<form method="post">
+{% csrf_token %}
+<div class="gf-form-card">
+
+  <!-- Osnovni podaci -->
+  <div class="gf-section">
+    <div class="gf-section-title"><i class="fas fa-info-circle"></i> Osnovni podaci</div>
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="gf-label">Naziv golubinjaka *</label>
+        <input type="text" name="naziv" value="{{ golubinjak.naziv|default:'' }}" required class="form-control gf-input" placeholder="Npr. Glavni golubinjak">
+      </div>
+      <div class="col-md-4" style="position:relative">
+        <label class="gf-label">Kapacitet</label>
+        <input type="number" name="kapacitet" value="{{ golubinjak.kapacitet|default:'' }}" class="form-control gf-input" placeholder="50" min="0" style="padding-right:70px !important">
+        <span class="gf-unit">golubova</span>
+      </div>
+    </div>
+    <div class="row g-3 mt-1">
+      <div class="col-md-8">
+        <label class="gf-label">Adresa</label>
+        <input type="text" name="adresa" value="{{ golubinjak.adresa|default:'' }}" class="form-control gf-input" placeholder="Ulica, grad">
+      </div>
+      <div class="col-md-4">
+        <label class="gf-label">EU registracijski broj</label>
+        <input type="text" name="eu_reg_broj" value="{{ golubinjak.eu_reg_broj|default:'' }}" class="form-control gf-input" placeholder="HR-XX-YYYY-ZZZZ">
+        <div class="gf-hint"><i class="fas fa-eu me-1"></i>Format: HR-XX-YYYY-ZZZZ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lokacija -->
+  <div class="gf-section">
+    <div class="gf-section-title"><i class="fas fa-map-marker-alt"></i> GPS lokacija</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="gf-label"><i class="fas fa-globe me-1"></i>Geografska širina (Latitude)</label>
+        <input type="number" name="gps_lat" step="0.000001" value="{{ golubinjak.gps_lat|default:'' }}" class="form-control gf-input" placeholder="45.551000">
+      </div>
+      <div class="col-md-6">
+        <label class="gf-label"><i class="fas fa-globe me-1"></i>Geografska dužina (Longitude)</label>
+        <input type="number" name="gps_lng" step="0.000001" value="{{ golubinjak.gps_lng|default:'' }}" class="form-control gf-input" placeholder="18.694000">
+      </div>
+    </div>
+    <div class="gf-hint mt-2"><i class="fas fa-info-circle me-1"></i>GPS koordinate su potrebne za izračun udaljenosti utrka</div>
+  </div>
+
+  <!-- Napomena -->
+  <div class="gf-section">
+    <div class="gf-section-title"><i class="fas fa-sticky-note"></i> Napomena</div>
+    <textarea name="napomena" rows="3" class="form-control gf-input" placeholder="Dodatne informacije o golubinjaku...">{{ golubinjak.napomena|default:'' }}</textarea>
+  </div>
+
+  <!-- Aktivan -->
+  <div class="gf-section">
+    <div class="form-check">
+      <input type="checkbox" name="aktivan" id="aktivan" class="form-check-input" {% if golubinjak.aktivan or not golubinjak %}checked{% endif %} value="1">
+      <label for="aktivan" class="form-check-label" style="font-size:.88rem;font-weight:600;color:var(--text)">Aktivan golubinjak</label>
+    </div>
+  </div>
+
 </div>
-<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary">{{ golubinjak.napomena|default:'' }}</textarea></div>
-</div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary">Odustani</a>
-<button type="submit" class="btn btn-warning">Spremi golubinjak</button></div></form></div>
+
+<!-- Footer -->
+<div class="gf-footer mt-0" style="background:var(--bg-card);border:1px solid var(--border);border-top:none;border-radius:0 0 16px 16px;padding:1.25rem 1.5rem">
+  <a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+    <i class="fas fa-arrow-left me-1"></i>Odustani
+  </a>
+  <button type="submit" class="gf-btn-submit">
+    <i class="fas fa-save"></i>
+    {% if golubinjak %}Spremi izmjene{% else %}Dodaj golubinjak{% endif %}
+  </button>
+</div>
+</form>
+
+</div>
 {% endblock %}

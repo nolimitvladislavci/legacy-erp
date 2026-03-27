@@ -1,28 +1,177 @@
 {% extends "base.html" %}
-{% block title %}Parovi{% endblock %}
+{% block title %}Uzgojni parovi{% endblock %}
+{% block extra_css %}
+<style>
+.par-container { max-width: 1100px; margin: 0 auto; }
+.par-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+@media(max-width:576px) { .par-grid { grid-template-columns: 1fr; } }
+.par-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: all .25s;
+  position: relative;
+  overflow: hidden;
+}
+.par-card:hover {
+  border-color: rgba(236,72,153,.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+}
+.par-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #60a5fa, #ec4899);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.par-card:hover::before { opacity: 1; }
+.par-pair {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1rem; margin-bottom: 1rem;
+}
+.par-bird {
+  text-align: center; flex: 1; min-width: 0;
+}
+.par-bird-icon {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; margin-bottom: .4rem;
+}
+.par-bird-m .par-bird-icon { background: rgba(59,130,246,.12); color: #60a5fa; }
+.par-bird-f .par-bird-icon { background: rgba(236,72,153,.12); color: #ec4899; }
+.par-bird-name {
+  font-size: .82rem; font-weight: 700;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.par-bird-prsten {
+  font-size: .68rem; font-family: monospace;
+  color: #c9a84c;
+}
+.par-heart {
+  width: 36px; height: 36px;
+  background: rgba(236,72,153,.08);
+  border: 1px solid rgba(236,72,153,.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #ec4899; font-size: .9rem;
+  flex-shrink: 0;
+}
+.par-meta {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--border);
+}
+.par-meta-item {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .72rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 6px;
+}
+.par-actions {
+  display: flex; gap: .5rem; margin-top: .75rem;
+}
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid">
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2><i class="fas fa-heart"></i> Parovi</h2>
-  <a href="{% url 'udruge:par_create' %}" class="btn btn-warning btn-sm">+ Novi par</a>
+<div class="par-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item active">Uzgojni parovi</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="d-flex align-items-center gap-3">
+    <div style="width:48px;height:48px;background:rgba(236,72,153,.1);border-radius:12px;display:flex;align-items:center;justify-content:center">
+      <i class="fas fa-heart" style="font-size:1.2rem;color:#ec4899"></i>
+    </div>
+    <div>
+      <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Uzgojni parovi</h2>
+      <p style="font-size:.78rem;color:var(--text-muted);margin:0">{{ page_obj.paginator.count }} registrirani{{ page_obj.paginator.count|pluralize:"h" }} par{{ page_obj.paginator.count|pluralize:"a,ova" }}</p>
+    </div>
+  </div>
+  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+    <i class="fas fa-plus me-1"></i>Novi par
+  </a>
 </div>
-<div class="card bg-dark border-secondary"><div class="card-body p-0"><div class="table-responsive">
-<table class="table table-dark table-hover mb-0"><thead><tr>
-  <th style="font-size:.75rem">Mužjak (prsten)</th><th style="font-size:.75rem">Ženka (prsten)</th>
-  <th style="font-size:.75rem">Sezona</th><th style="font-size:.75rem">Status</th>
-  <th style="font-size:.75rem">Legla</th><th style="font-size:.75rem">Akcije</th>
-</tr></thead><tbody>
-{% for p in parovi %}
-<tr>
-  <td style="font-size:.82rem"><a href="{% url 'udruge:golub_detail' p.muzjak.pk %}" style="color:#c9a84c">{{ p.muzjak.prsten_broj }}</a><br><small class="text-muted">{{ p.muzjak.naziv|default:"" }}</small></td>
-  <td style="font-size:.82rem"><a href="{% url 'udruge:golub_detail' p.zenka.pk %}" style="color:#c9a84c">{{ p.zenka.prsten_broj }}</a><br><small class="text-muted">{{ p.zenka.naziv|default:"" }}</small></td>
-  <td style="font-size:.82rem">{{ p.sezona }}</td>
-  <td style="font-size:.82rem">{% if p.aktivan %}<span class="badge bg-success">Aktivan</span>{% else %}<span class="badge bg-secondary">Neaktivan</span>{% endif %}</td>
-  <td style="font-size:.82rem">{{ p.legla_count|default:"0" }}</td>
-  <td style="font-size:.82rem"><a href="{% url 'udruge:leglo_create' p.pk %}" class="btn btn-outline-secondary btn-sm">+ Leglo</a></td>
-</tr>
-{% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Nema parova</td></tr>{% endfor %}
-</tbody></table></div></div></div>
-<div class="mt-3"><a href="{% url 'udruge:golubar_dashboard' %}" class="btn btn-outline-secondary">&larr; Natrag</a></div>
+
+{% if page_obj.object_list %}
+<div class="par-grid">
+  {% for p in page_obj %}
+  <div class="par-card">
+    <div class="par-pair">
+      <div class="par-bird par-bird-m">
+        <div class="par-bird-icon"><i class="fas fa-mars"></i></div>
+        <div class="par-bird-name">{{ p.muzjak.naziv|default:"Mužjak" }}</div>
+        <div class="par-bird-prsten">{{ p.muzjak.prsten_broj }}</div>
+      </div>
+      <div class="par-heart"><i class="fas fa-heart"></i></div>
+      <div class="par-bird par-bird-f">
+        <div class="par-bird-icon"><i class="fas fa-venus"></i></div>
+        <div class="par-bird-name">{{ p.zenka.naziv|default:"Ženka" }}</div>
+        <div class="par-bird-prsten">{{ p.zenka.prsten_broj }}</div>
+      </div>
+    </div>
+    <div class="par-meta">
+      <span class="par-meta-item" style="background:rgba(201,168,76,.08);color:#c9a84c">
+        <i class="fas fa-calendar"></i> Sezona {{ p.sezona|default:"--" }}
+      </span>
+      {% if p.aktivan %}
+      <span class="par-meta-item" style="background:rgba(34,197,94,.08);color:#22c55e">
+        <i class="fas fa-check-circle"></i> Aktivan
+      </span>
+      {% else %}
+      <span class="par-meta-item" style="background:rgba(239,68,68,.08);color:#ef4444">
+        <i class="fas fa-times-circle"></i> Neaktivan
+      </span>
+      {% endif %}
+      <span class="par-meta-item" style="background:rgba(59,130,246,.08);color:#60a5fa">
+        <i class="fas fa-egg"></i> {{ p.legla_count|default:"0" }} legla
+      </span>
+    </div>
+    <div class="par-actions">
+      <a href="{% url 'udruge:leglo_create' p.pk %}" class="btn btn-sm" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:#c9a84c;font-weight:600;border-radius:8px;font-size:.75rem;flex:1">
+        <i class="fas fa-egg me-1"></i>Dodaj leglo
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>{% endif %}
+    {% for num in page_obj.paginator.page_range %}
+    <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+    {% endfor %}
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>{% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div style="text-align:center;padding:5rem 2rem;background:var(--bg-card);border:1px solid var(--border);border-radius:14px">
+  <div style="font-size:3rem;color:#ec4899;opacity:.3;margin-bottom:1rem"><i class="fas fa-heart"></i></div>
+  <h3 style="font-weight:700;color:var(--text)">Stvorite prvi uzgojni par</h3>
+  <p style="color:var(--text-muted);font-size:.85rem;max-width:400px;margin:0 auto 1.5rem">Spojite mužjaka i ženku za praćenje uzgoja, legala i potomstva</p>
+  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+    <i class="fas fa-plus me-1"></i>Novi par
+  </a>
+</div>
+{% endif %}
+
 </div>
 {% endblock %}

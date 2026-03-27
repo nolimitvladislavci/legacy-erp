@@ -1,38 +1,198 @@
 {% extends "base.html" %}
 {% block title %}Novo leglo{% endblock %}
+{% block extra_css %}
+<style>
+.lf-container { max-width: 700px; margin: 0 auto; }
+.lf-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.lf-section { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.lf-section:last-of-type { border-bottom: none; }
+.lf-section-title {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: #c9a84c; margin-bottom: 1.25rem;
+}
+.lf-parent-info {
+  background: linear-gradient(135deg, rgba(236,72,153,.05), transparent);
+  border: 1px solid rgba(236,72,153,.15);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 1rem;
+  flex-wrap: wrap;
+}
+.lf-parent-bird {
+  display: flex; align-items: center; gap: .5rem;
+}
+.lf-parent-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem;
+}
+.lf-parent-bird.male .lf-parent-icon { background: rgba(59,130,246,.12); color: #60a5fa; }
+.lf-parent-bird.female .lf-parent-icon { background: rgba(236,72,153,.12); color: #ec4899; }
+.lf-input {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+  padding: .65rem .9rem !important;
+  font-size: .88rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.lf-input:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important; }
+.lf-label { font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: .4rem; display: block; }
+.lf-footer {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.lf-btn-submit {
+  background: linear-gradient(135deg, #c9a84c, #a78b3d) !important;
+  color: #0a0a0a !important; border: none !important;
+  font-weight: 700 !important; padding: .6rem 2rem !important;
+  border-radius: 10px !important; font-size: .88rem !important;
+  transition: all .2s !important;
+}
+.lf-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,.3); }
+.lf-chick-card {
+  background: rgba(201,168,76,.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+.lf-chick-card h4 {
+  font-size: .82rem; font-weight: 700;
+  color: var(--text); margin: 0 0 .75rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.lf-chick-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(201,168,76,.12); color: #c9a84c;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 800;
+}
+</style>
+{% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
-<h2 class="mb-3"><i class="fas fa-egg"></i> Novo leglo</h2>
-<div class="card bg-dark border-secondary mb-3"><div class="card-body">
-  <div style="font-size:.72rem;text-transform:uppercase;color:#c9a84c;margin-bottom:.5rem;letter-spacing:.05em">Par</div>
-  <div style="font-size:.85rem">
-    <span class="text-muted">Mužjak:</span> <strong>{{ par.muzjak.prsten_broj }}</strong> {{ par.muzjak.naziv|default:"" }}
-    &nbsp;|&nbsp;
-    <span class="text-muted">Ženka:</span> <strong>{{ par.zenka.prsten_broj }}</strong> {{ par.zenka.naziv|default:"" }}
-    &nbsp;|&nbsp;
-    <span class="text-muted">Sezona:</span> {{ par.sezona }}
+<div class="lf-container">
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:par_list' %}">Parovi</a></li>
+    <li class="breadcrumb-item active">Novo leglo</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+  <div style="width:52px;height:52px;background:rgba(201,168,76,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
+    <i class="fas fa-egg" style="font-size:1.3rem;color:#c9a84c"></i>
   </div>
-</div></div>
-<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
-<div class="row mb-3">
-  <div class="col-md-4"><label class="form-label">Datum jaja</label><input type="date" name="datum_jaja" required class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-4"><label class="form-label">Izliježanje ptić 1</label><input type="date" name="datum_izlijeganja_1" class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-4"><label class="form-label">Izliježanje ptić 2</label><input type="date" name="datum_izlijeganja_2" class="form-control bg-dark text-light border-secondary"></div>
+  <div>
+    <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Novo leglo</h2>
+    <p style="font-size:.82rem;color:var(--text-muted);margin:0">Zabilježite novo leglo za uzgojni par</p>
+  </div>
 </div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Ptić 1 (golub)</label>
-    <select name="ptic_1" class="form-select bg-dark text-light border-secondary">
-      <option value="">-- Nije registriran --</option>
-      {% for g in golubovi %}<option value="{{ g.pk }}">{{ g.prsten_broj }} — {{ g.naziv|default:"" }}</option>{% endfor %}
-    </select></div>
-  <div class="col-md-6"><label class="form-label">Ptić 2 (golub)</label>
-    <select name="ptic_2" class="form-select bg-dark text-light border-secondary">
-      <option value="">-- Nije registriran --</option>
-      {% for g in golubovi %}<option value="{{ g.pk }}">{{ g.prsten_broj }} — {{ g.naziv|default:"" }}</option>{% endfor %}
-    </select></div>
+
+<!-- Parent pair info -->
+<div class="lf-parent-info">
+  <div class="lf-parent-bird male">
+    <div class="lf-parent-icon"><i class="fas fa-mars"></i></div>
+    <div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--text)">{{ par.muzjak.naziv|default:"Mužjak" }}</div>
+      <div style="font-size:.68rem;font-family:monospace;color:#c9a84c">{{ par.muzjak.prsten_broj }}</div>
+    </div>
+  </div>
+  <i class="fas fa-heart" style="color:#ec4899;font-size:.8rem"></i>
+  <div class="lf-parent-bird female">
+    <div class="lf-parent-icon"><i class="fas fa-venus"></i></div>
+    <div>
+      <div style="font-size:.82rem;font-weight:700;color:var(--text)">{{ par.zenka.naziv|default:"Ženka" }}</div>
+      <div style="font-size:.68rem;font-family:monospace;color:#c9a84c">{{ par.zenka.prsten_broj }}</div>
+    </div>
+  </div>
 </div>
-<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary"></textarea></div>
-</div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:par_list' %}" class="btn btn-outline-secondary">Odustani</a>
-<button type="submit" class="btn btn-warning">Spremi leglo</button></div></form></div>
+
+<form method="post">
+{% csrf_token %}
+<div class="lf-card">
+
+  <!-- Dates -->
+  <div class="lf-section">
+    <div class="lf-section-title"><i class="fas fa-calendar-alt"></i> Datumi</div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="lf-label"><i class="fas fa-egg me-1"></i>Datum jajeta</label>
+        <input type="date" name="datum_jaja" class="form-control lf-input">
+      </div>
+      <div class="col-md-4">
+        <label class="lf-label"><i class="fas fa-baby me-1"></i>Izlijeganje ptić 1</label>
+        <input type="date" name="datum_izlijeganja_1" class="form-control lf-input">
+      </div>
+      <div class="col-md-4">
+        <label class="lf-label"><i class="fas fa-baby me-1"></i>Izlijeganje ptić 2</label>
+        <input type="date" name="datum_izlijeganja_2" class="form-control lf-input">
+      </div>
+    </div>
+  </div>
+
+  <!-- Offspring -->
+  <div class="lf-section">
+    <div class="lf-section-title"><i class="fas fa-dove"></i> Potomstvo</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="lf-chick-card">
+          <h4><span class="lf-chick-num">1</span> Ptić 1</h4>
+          <select name="ptic_1" class="form-select lf-input">
+            <option value="">-- Odaberi goluba --</option>
+            {% for g in golubovi %}
+            <option value="{{ g.pk }}">{{ g.prsten_broj }} — {{ g.naziv|default:"" }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="lf-chick-card">
+          <h4><span class="lf-chick-num">2</span> Ptić 2</h4>
+          <select name="ptic_2" class="form-select lf-input">
+            <option value="">-- Odaberi goluba --</option>
+            {% for g in golubovi %}
+            <option value="{{ g.pk }}">{{ g.prsten_broj }} — {{ g.naziv|default:"" }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Napomena -->
+  <div class="lf-section">
+    <div class="lf-section-title"><i class="fas fa-sticky-note"></i> Napomena</div>
+    <textarea name="napomena" rows="3" class="form-control lf-input" placeholder="Bilješke o leglu..."></textarea>
+  </div>
+
+</div>
+
+<div class="lf-footer">
+  <a href="{% url 'udruge:par_list' %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
+    <i class="fas fa-arrow-left me-1"></i>Odustani
+  </a>
+  <button type="submit" class="lf-btn-submit">
+    <i class="fas fa-save me-1"></i>Spremi leglo
+  </button>
+</div>
+</form>
+
+</div>
 {% endblock %}
