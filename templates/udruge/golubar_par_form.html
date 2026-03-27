@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% if par %}Uredi par{% else %}Novi par{% endif %}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-heart"></i> {% if par %}Uredi par{% else %}Novi par{% endif %}</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="row mb-3">
+  <div class="col-md-6"><label class="form-label">Mužjak</label>
+    <select name="muzjak" required class="form-select bg-dark text-light border-secondary">
+      <option value="">-- Odaberi mužjaka --</option>
+      {% for m in muzjaci %}<option value="{{ m.pk }}" {% if par.muzjak_id == m.pk %}selected{% endif %}>{{ m.prsten_broj }} — {{ m.naziv|default:"" }}</option>{% endfor %}
+    </select></div>
+  <div class="col-md-6"><label class="form-label">Ženka</label>
+    <select name="zenka" required class="form-select bg-dark text-light border-secondary">
+      <option value="">-- Odaberi ženku --</option>
+      {% for z in zenke %}<option value="{{ z.pk }}" {% if par.zenka_id == z.pk %}selected{% endif %}>{{ z.prsten_broj }} — {{ z.naziv|default:"" }}</option>{% endfor %}
+    </select></div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-6"><label class="form-label">Sezona</label><input type="number" name="sezona" value="{{ par.sezona|default:'2026' }}" required class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-6"><label class="form-label">Datum spajanja</label><input type="date" name="datum_spajanja" value="{{ par.datum_spajanja|date:'Y-m-d'|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+</div>
+<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary">{{ par.napomena|default:'' }}</textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:golubar_par_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi par</button></div></form></div>
+{% endblock %}

@@ -186,4 +186,25 @@ urlpatterns = [
     path('zadruge/', views.zadruge_dashboard, name='zadruge_dashboard'),
     path('zadruge/novi/', views.zadrugar_create, name='zadrugar_create'),
     path('zadruge/revizija/', views.revizija_create, name='revizija_create'),
+
+    # ═══════════════════════════════════════════════════════════════════
+    # GOLUBAR — GOLUBARSKI SAVEZ / UTRKE
+    # ═══════════════════════════════════════════════════════════════════
+    path('golubar/', views.golubar_dashboard, name='golubar_dashboard'),
+    path('golubar/golubinjaci/', views.golubinjak_list, name='golubinjak_list'),
+    path('golubar/golubinjaci/novi/', views.golubinjak_create, name='golubinjak_create'),
+    path('golubar/golubinjaci/<int:pk>/', views.golubinjak_detail, name='golubinjak_detail'),
+    path('golubar/golubovi/', views.golub_list, name='golub_list'),
+    path('golubar/golubovi/novi/', views.golub_create, name='golub_create'),
+    path('golubar/golubovi/<int:pk>/', views.golub_detail, name='golub_detail'),
+    path('golubar/golubovi/<int:pk>/edit/', views.golub_edit, name='golub_edit'),
+    path('golubar/golubovi/<int:pk>/seal/', views.golub_seal, name='golub_seal'),
+    path('golubar/parovi/', views.par_list, name='par_list'),
+    path('golubar/parovi/novi/', views.par_create, name='par_create'),
+    path('golubar/parovi/<int:par_pk>/leglo/', views.leglo_create, name='leglo_create'),
+    path('golubar/golubovi/<int:golub_pk>/zdravstveni/', views.zdravstveni_create, name='zdravstveni_create'),
+    path('golubar/utrke/', views.utrka_list, name='utrka_list'),
+    path('golubar/utrke/nova/', views.utrka_create, name='utrka_create'),
+    path('golubar/utrke/<int:pk>/', views.utrka_detail, name='utrka_detail'),
+    path('golubar/utrke/<int:utrka_pk>/rezultat/', views.rezultat_create, name='rezultat_create'),
 ]

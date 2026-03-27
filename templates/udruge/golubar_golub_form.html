@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-dove"></i> {% if golub %}Uredi goluba: {{ golub.prsten_broj }}{% else %}Novi golub{% endif %}</h2>
+<form method="post" enctype="multipart/form-data" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="mb-3"><label class="form-label">Golubinjak</label>
+  <select name="golubinjak" required class="form-select bg-dark text-light border-secondary">
+    <option value="">-- Odaberi golubinjak --</option>
+    {% for gj in golubinjaci %}<option value="{{ gj.pk }}" {% if golub.golubinjak_id == gj.pk or selected_golubinjak == gj.pk %}selected{% endif %}>{{ gj.naziv }}</option>{% endfor %}
+  </select></div>
+<div class="row mb-3">
+  <div class="col-md-6"><label class="form-label">Broj prstena</label><input type="text" name="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-6"><label class="form-label">Naziv</label><input type="text" name="naziv" value="{{ golub.naziv|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-4"><label class="form-label">Spol</label>
+    <select name="spol" required class="form-select bg-dark text-light border-secondary">
+      {% for code, label in spol_choices %}<option value="{{ code }}" {% if golub.spol == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select></div>
+  <div class="col-md-4"><label class="form-label">Boja</label>
+    <select name="boja" class="form-select bg-dark text-light border-secondary">
+      <option value="">-- Boja --</option>
+      {% for code, label in boja_choices %}<option value="{{ code }}" {% if golub.boja == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select></div>
+  <div class="col-md-4"><label class="form-label">Datum izliježanja</label><input type="date" name="datum_izlijeganja" value="{{ golub.datum_izlijeganja|date:'Y-m-d'|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-6"><label class="form-label">Otac</label>
+    <select name="otac" class="form-select bg-dark text-light border-secondary">
+      <option value="">-- Otac --</option>
+      {% for m in muzjaci %}<option value="{{ m.pk }}" {% if golub.otac_id == m.pk %}selected{% endif %}>{{ m.prsten_broj }} — {{ m.naziv|default:"" }}</option>{% endfor %}
+    </select></div>
+  <div class="col-md-6"><label class="form-label">Majka</label>
+    <select name="majka" class="form-select bg-dark text-light border-secondary">
+      <option value="">-- Majka --</option>
+      {% for z in zenke %}<option value="{{ z.pk }}" {% if golub.majka_id == z.pk %}selected{% endif %}>{{ z.prsten_broj }} — {{ z.naziv|default:"" }}</option>{% endfor %}
+    </select></div>
+</div>
+<div class="mb-3"><label class="form-label">Fotografija</label><input type="file" name="fotografija" accept="image/*" class="form-control bg-dark text-light border-secondary"></div>
+<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary">{{ golub.napomena|default:'' }}</textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:golubar_golub_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">{% if golub %}Spremi izmjene{% else %}Spremi goluba{% endif %}</button></div></form></div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-home"></i> {% if golubinjak %}Uredi golubinjak{% else %}Novi golubinjak{% endif %}</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="mb-3"><label class="form-label">Naziv</label><input type="text" name="naziv" value="{{ golubinjak.naziv|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="mb-3"><label class="form-label">Adresa</label><input type="text" name="adresa" value="{{ golubinjak.adresa|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="row mb-3">
+  <div class="col-md-6"><label class="form-label">GPS Lat</label><input type="number" name="gps_lat" step="0.000001" value="{{ golubinjak.gps_lat|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-6"><label class="form-label">GPS Lng</label><input type="number" name="gps_lng" step="0.000001" value="{{ golubinjak.gps_lng|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+</div>
+<div class="row mb-3">
+  <div class="col-md-6"><label class="form-label">EU registracijski broj</label><input type="text" name="eu_reg_broj" value="{{ golubinjak.eu_reg_broj|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-6"><label class="form-label">Kapacitet</label><input type="number" name="kapacitet" value="{{ golubinjak.kapacitet|default:'0' }}" class="form-control bg-dark text-light border-secondary"></div>
+</div>
+<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary">{{ golubinjak.napomena|default:'' }}</textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:golubar_golubinjak_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi golubinjak</button></div></form></div>
+{% endblock %}

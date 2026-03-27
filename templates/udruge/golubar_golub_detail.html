@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}{{ golub.prsten_broj }} — {{ golub.naziv|default:"Golub" }}{% endblock %}
+{% block content %}
+<style>
+.pedigree-tree { display: flex; align-items: center; gap: 1.5rem; overflow-x: auto; padding: 1rem 0; }
+.pedigree-col { display: flex; flex-direction: column; gap: .75rem; }
+.pedigree-card { background: rgba(201,168,76,.08); border: 1px solid rgba(201,168,76,.25); border-radius: 8px; padding: .6rem .8rem; min-width: 140px; text-align: center; }
+.pedigree-card .prsten { font-size: .75rem; color: #c9a84c; font-weight: 600; }
+.pedigree-card .name { font-size: .8rem; color: #e0e0e0; }
+.pedigree-card.empty { border-style: dashed; opacity: .5; }
+.pedigree-connector { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0; }
+.pedigree-line-h { width: 24px; height: 2px; background: rgba(201,168,76,.3); }
+.pedigree-line-v { width: 2px; height: 100%; background: rgba(201,168,76,.3); min-height: 30px; }
+.pedigree-branch { display: flex; align-items: center; }
+@media(max-width:768px){
+  .pedigree-tree { flex-direction: column; align-items: flex-start; }
+  .pedigree-card { min-width: 120px; }
+}
+</style>
+<div class="container-fluid">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-1"><i class="fas fa-dove"></i> {{ golub.naziv|default:"Golub" }}</h2>
+    <div>
+      <span class="badge bg-secondary" style="font-size:.85rem">{{ golub.prsten_broj }}</span>
+      <span class="badge" style="background:rgba(201,168,76,.2);color:#c9a84c;font-size:.8rem">{{ golub.get_spol_display|default:golub.spol }}</span>
+      {% if golub.boja %}<span class="badge bg-secondary" style="font-size:.8rem">{{ golub.get_boja_display|default:golub.boja }}</span>{% endif %}
+    </div>
+  </div>
+  <div>
+    <a href="{% url 'udruge:golubar_golub_edit' golub.pk %}" class="btn btn-outline-secondary btn-sm">Uredi</a>
+    <a href="{% url 'udruge:golubar_golub_list' %}" class="btn btn-outline-secondary btn-sm ms-1">&larr; Natrag</a>
+  </div>
+</div>
+
+{% if golub.fotografija %}
+<div class="mb-4"><img src="{{ golub.fotografija.url }}" alt="{{ golub.naziv }}" style="max-height:250px;border-radius:8px;border:1px solid rgba(201,168,76,.3)"></div>
+{% endif %}
+
+{% if golub.is_sealed %}
+<div class="alert" style="background:rgba(201,168,76,.15);border:1px solid #c9a84c;color:#c9a84c">
+  <i class="fas fa-lock"></i> <strong>ZAPEČAĆEN</strong> — Rodovnik zapečaćen {{ golub.sealed_at|date:"d.m.Y H:i" }}
+</div>
+{% else %}
+<form method="post" action="{% url 'udruge:golubar_golub_seal' golub.pk %}" class="mb-4" onsubmit="return confirm('Jeste li sigurni? Zapečaćeni rodovnik se ne može mijenjati.')">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-warning"><i class="fas fa-lock"></i> Zapečati rodovnik</button>
+</form>
+{% endif %}
+
+<!-- RODOVNIK -->
+<div class="card bg-dark border-secondary mb-4"><div class="card-header"><h5 class="mb-0" style="color:#c9a84c"><i class="fas fa-sitemap"></i> Rodovnik (3 generacije)</h5></div>
+<div class="card-body" style="overflow-x:auto">
+<div class="pedigree-tree">
+  <!-- Golub -->
+  <div class="pedigree-col">
+    <div class="pedigree-card" style="border-color:#c9a84c;background:rgba(201,168,76,.15)">
+      <div class="prsten">{{ golub.prsten_broj }}</div>
+      <div class="name"><strong>{{ golub.naziv|default:"—" }}</strong></div>
+      <div style="font-size:.7rem;color:#888">{{ golub.get_spol_display|default:"" }}</div>
+    </div>
+  </div>
+  <div class="pedigree-connector"><div class="pedigree-line-h"></div></div>
+  <!-- Roditelji -->
+  <div class="pedigree-col">
+    {% if golub.otac %}
+    <div class="pedigree-card">
+      <div class="prsten">{{ golub.otac.prsten_broj }}</div>
+      <div class="name">{{ golub.otac.naziv|default:"—" }}</div>
+      <div style="font-size:.65rem;color:#888">Otac</div>
+    </div>
+    {% else %}
+    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Otac nepoznat</div></div>
+    {% endif %}
+    {% if golub.majka %}
+    <div class="pedigree-card">
+      <div class="prsten">{{ golub.majka.prsten_broj }}</div>
+      <div class="name">{{ golub.majka.naziv|default:"—" }}</div>
+      <div style="font-size:.65rem;color:#888">Majka</div>
+    </div>
+    {% else %}
+    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Majka nepoznata</div></div>
+    {% endif %}
+  </div>
+  <div class="pedigree-connector"><div class="pedigree-line-h"></div></div>
+  <!-- Djedovi i bake -->
+  <div class="pedigree-col">
+    {% if golub.otac and golub.otac.otac %}
+    <div class="pedigree-card"><div class="prsten">{{ golub.otac.otac.prsten_broj }}</div><div class="name">{{ golub.otac.otac.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Djed (po ocu)</div></div>
+    {% else %}
+    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Djed (po ocu)</div></div>
+    {% endif %}
+    {% if golub.otac and golub.otac.majka %}
+    <div class="pedigree-card"><div class="prsten">{{ golub.otac.majka.prsten_broj }}</div><div class="name">{{ golub.otac.majka.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Baka (po ocu)</div></div>
+    {% else %}
+    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Baka (po ocu)</div></div>
+    {% endif %}
+    {% if golub.majka and golub.majka.otac %}
+    <div class="pedigree-card"><div class="prsten">{{ golub.majka.otac.prsten_broj }}</div><div class="name">{{ golub.majka.otac.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Djed (po majci)</div></div>
+    {% else %}
+    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Djed (po majci)</div></div>
+    {% endif %}
+    {% if golub.majka and golub.majka.majka %}
+    <div class="pedigree-card"><div class="prsten">{{ golub.majka.majka.prsten_broj }}</div><div class="name">{{ golub.majka.majka.naziv|default:"—" }}</div><div style="font-size:.65rem;color:#888">Baka (po majci)</div></div>
+    {% else %}
+    <div class="pedigree-card empty"><div class="prsten">—</div><div class="name">Baka (po majci)</div></div>
+    {% endif %}
+  </div>
+</div>
+</div></div>
+
+<!-- Zdravstveni zapisi -->
+<div class="card bg-dark border-secondary mb-4"><div class="card-header d-flex justify-content-between align-items-center">
+  <h5 class="mb-0" style="color:#c9a84c"><i class="fas fa-heartbeat"></i> Zdravstveni zapisi</h5>
+  <a href="{% url 'udruge:golubar_zdravstveni_create' golub.pk %}" class="btn btn-warning btn-sm">+ Zdravstveni zapis</a>
+</div><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-dark table-hover mb-0"><thead><tr>
+  <th style="font-size:.75rem">Datum</th><th style="font-size:.75rem">Vrsta</th>
+  <th style="font-size:.75rem">Lijek/Preparat</th><th style="font-size:.75rem">Veterinar</th>
+</tr></thead><tbody>
+{% for z in zdravstveni %}
+<tr><td style="font-size:.82rem">{{ z.datum|date:"d.m.Y" }}</td>
+<td style="font-size:.82rem">{{ z.get_vrsta_display|default:z.vrsta }}</td>
+<td style="font-size:.82rem">{{ z.lijek_preparat|default:"—" }}</td>
+<td style="font-size:.82rem">{{ z.veterinar|default:"—" }}</td></tr>
+{% empty %}<tr><td colspan="4" class="text-center text-muted py-4">Nema zdravstvenih zapisa</td></tr>{% endfor %}
+</tbody></table></div></div></div>
+
+<!-- Rezultati utrka -->
+<div class="card bg-dark border-secondary mb-4"><div class="card-header">
+  <h5 class="mb-0" style="color:#c9a84c"><i class="fas fa-flag-checkered"></i> Rezultati utrka</h5>
+</div><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-dark table-hover mb-0"><thead><tr>
+  <th style="font-size:.75rem">Utrka</th><th style="font-size:.75rem">Datum</th>
+  <th style="font-size:.75rem">Plasman</th><th style="font-size:.75rem">Brzina (m/min)</th><th style="font-size:.75rem">Bodovi</th>
+</tr></thead><tbody>
+{% for r in rezultati %}
+<tr><td style="font-size:.82rem"><a href="{% url 'udruge:golubar_utrka_detail' r.utrka.pk %}" style="color:#c9a84c">{{ r.utrka.naziv }}</a></td>
+<td style="font-size:.82rem">{{ r.utrka.datum|date:"d.m.Y" }}</td>
+<td style="font-size:.82rem"><strong>{{ r.placiranje }}.</strong></td>
+<td style="font-size:.82rem">{{ r.brzina_mpm|default:"—" }}</td>
+<td style="font-size:.82rem">{{ r.bodovi|default:"0" }}</td></tr>
+{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nema rezultata utrka</td></tr>{% endfor %}
+</tbody></table></div></div></div>
+
+</div>
+{% endblock %}

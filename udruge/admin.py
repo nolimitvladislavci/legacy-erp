@@ -30,3 +30,59 @@ class ClanskiDokumentAdmin(admin.ModelAdmin):
 class NatjecanjeRezultatAdmin(admin.ModelAdmin):
     list_display = ['dogadjaj', 'clan', 'sekcija', 'placement', 'score', 'category']
     list_filter = ['category']
+
+
+# ── Golubar modul ──
+from udruge.models import (
+    Golubinjak, Golub, ParGolubova, Leglo,
+    ZdravstveniZapisGolub, Utrka, RezultatUtrke,
+)
+
+
+class ZdravstveniZapisGolubInline(admin.TabularInline):
+    model = ZdravstveniZapisGolub
+    extra = 0
+
+
+class RezultatUtrkeInline(admin.TabularInline):
+    model = RezultatUtrke
+    extra = 0
+
+
+@admin.register(Golubinjak)
+class GolubinjakAdmin(admin.ModelAdmin):
+    list_display = ['naziv', 'eu_reg_broj', 'kapacitet', 'aktivan', 'company']
+
+
+@admin.register(Golub)
+class GolubAdmin(admin.ModelAdmin):
+    list_display = ['prsten_broj', 'naziv', 'spol', 'boja', 'golubinjak', 'aktivan', 'broj_utrka']
+    search_fields = ['prsten_broj', 'naziv']
+    list_filter = ['spol', 'aktivan', 'golubinjak']
+    inlines = [ZdravstveniZapisGolubInline]
+
+
+@admin.register(ParGolubova)
+class ParGolubovaAdmin(admin.ModelAdmin):
+    list_display = ['muzjak', 'zenka', 'sezona', 'aktivan']
+
+
+@admin.register(Leglo)
+class LegloAdmin(admin.ModelAdmin):
+    list_display = ['par', 'datum_jaja', 'datum_izlijeganja_1']
+
+
+@admin.register(ZdravstveniZapisGolub)
+class ZdravstveniZapisGolubAdmin(admin.ModelAdmin):
+    list_display = ['golub', 'vrsta', 'datum', 'lijek_preparat', 'veterinar']
+
+
+@admin.register(Utrka)
+class UtrkaAdmin(admin.ModelAdmin):
+    list_display = ['naziv', 'datum', 'startna_tocka', 'udaljenost_km', 'organizator']
+    inlines = [RezultatUtrkeInline]
+
+
+@admin.register(RezultatUtrke)
+class RezultatUtrkeAdmin(admin.ModelAdmin):
+    list_display = ['utrka', 'golub', 'placiranje', 'brzina_mpm', 'bodovi']

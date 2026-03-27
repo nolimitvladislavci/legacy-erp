@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ golubinjak.naziv }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="fas fa-home"></i> {{ golubinjak.naziv }}</h2>
+  <div>
+    <a href="{% url 'udruge:golubar_golub_create' %}?golubinjak={{ golubinjak.pk }}" class="btn btn-warning btn-sm">+ Dodaj goluba</a>
+    <a href="{% url 'udruge:golubar_golubinjak_edit' golubinjak.pk %}" class="btn btn-outline-secondary btn-sm ms-1">Uredi</a>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card bg-dark border-secondary"><div class="card-body">
+      <div style="font-size:.72rem;text-transform:uppercase;color:#c9a84c;margin-bottom:.75rem;letter-spacing:.05em">Podaci golubinjaka</div>
+      <div style="font-size:.85rem">
+        <div class="mb-1"><span class="text-muted">Adresa:</span> {{ golubinjak.adresa|default:"—" }}</div>
+        <div class="mb-1"><span class="text-muted">EU reg. broj:</span> {{ golubinjak.eu_reg_broj|default:"—" }}</div>
+        <div class="mb-1"><span class="text-muted">Kapacitet:</span> {{ golubinjak.kapacitet|default:"—" }}</div>
+        <div class="mb-1"><span class="text-muted">Status:</span> {% if golubinjak.aktivan %}<span class="badge bg-success">Aktivan</span>{% else %}<span class="badge bg-secondary">Neaktivan</span>{% endif %}</div>
+        {% if golubinjak.napomena %}<div class="mb-1"><span class="text-muted">Napomena:</span> {{ golubinjak.napomena }}</div>{% endif %}
+      </div>
+    </div></div>
+  </div>
+</div>
+<div class="card bg-dark border-secondary"><div class="card-header"><h5 class="mb-0" style="color:#c9a84c">Golubovi u golubinjaku</h5></div><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-dark table-hover mb-0"><thead><tr>
+  <th style="font-size:.75rem">Prsten br.</th><th style="font-size:.75rem">Naziv</th>
+  <th style="font-size:.75rem">Spol</th><th style="font-size:.75rem">Boja</th>
+</tr></thead><tbody>
+{% for g in golubovi %}
+<tr onclick="location.href='{% url 'udruge:golubar_golub_detail' g.pk %}'" style="cursor:pointer">
+  <td style="font-size:.82rem"><strong style="color:#c9a84c">{{ g.prsten_broj }}</strong></td>
+  <td style="font-size:.82rem">{{ g.naziv|default:"—" }}</td>
+  <td style="font-size:.82rem">{{ g.get_spol_display|default:g.spol }}</td>
+  <td style="font-size:.82rem">{{ g.get_boja_display|default:g.boja }}</td>
+</tr>
+{% empty %}<tr><td colspan="4" class="text-center text-muted py-4">Nema golubova u ovom golubinjaku</td></tr>{% endfor %}
+</tbody></table></div></div></div>
+<div class="mt-3"><a href="{% url 'udruge:golubar_golubinjak_list' %}" class="btn btn-outline-secondary">&larr; Natrag</a></div>
+</div>
+{% endblock %}

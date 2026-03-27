@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:700px">
+<h2 class="mb-3"><i class="fas fa-flag-checkered"></i> {% if utrka %}Uredi utrku{% else %}Nova utrka{% endif %}</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="mb-3"><label class="form-label">Naziv utrke</label><input type="text" name="naziv" value="{{ utrka.naziv|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
+<div class="row mb-3">
+  <div class="col-md-6"><label class="form-label">Datum</label><input type="date" name="datum" value="{{ utrka.datum|date:'Y-m-d'|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-6"><label class="form-label">Organizator</label><input type="text" name="organizator" value="{{ utrka.organizator|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+</div>
+<div class="mb-3"><label class="form-label">Startna točka</label><input type="text" name="startna_tocka" value="{{ utrka.startna_tocka|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="row mb-3">
+  <div class="col-md-4"><label class="form-label">Startna lat</label><input type="number" name="startna_lat" step="0.000001" value="{{ utrka.startna_lat|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-4"><label class="form-label">Startna lng</label><input type="number" name="startna_lng" step="0.000001" value="{{ utrka.startna_lng|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-4"><label class="form-label">Udaljenost (km)</label><input type="number" name="udaljenost_km" step="0.1" value="{{ utrka.udaljenost_km|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+</div>
+<div class="mb-3"><label class="form-label">Broj natjecatelja</label><input type="number" name="broj_natjecatelja" value="{{ utrka.broj_natjecatelja|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+<div class="mb-3"><label class="form-label">Uvjeti</label><textarea name="uvjeti" rows="2" class="form-control bg-dark text-light border-secondary">{{ utrka.uvjeti|default:'' }}</textarea></div>
+<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="2" class="form-control bg-dark text-light border-secondary">{{ utrka.napomena|default:'' }}</textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'udruge:golubar_utrka_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi utrku</button></div></form></div>
+{% endblock %}

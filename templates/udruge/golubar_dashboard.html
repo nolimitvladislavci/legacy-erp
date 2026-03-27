@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Golubarski savez{% endblock %}
+{% block content %}
+<div class="container-fluid">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="fas fa-dove"></i> Golubarski savez</h2>
+  <div>
+    <a href="{% url 'udruge:golubar_golub_create' %}" class="btn btn-warning btn-sm">+ Golub</a>
+    <a href="{% url 'udruge:golubar_golubinjak_create' %}" class="btn btn-outline-secondary btn-sm ms-1">+ Golubinjak</a>
+    <a href="{% url 'udruge:golubar_utrka_create' %}" class="btn btn-outline-secondary btn-sm ms-1">+ Utrka</a>
+    <a href="{% url 'udruge:golubar_par_create' %}" class="btn btn-outline-secondary btn-sm ms-1">+ Par</a>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-warning">{{ stats.golubinjaka }}</div><small class="text-muted">Golubinjaka</small></div></div>
+  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-success">{{ stats.golubova }}</div><small class="text-muted">Golubova</small></div></div>
+  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-info">{{ stats.aktivnih }}</div><small class="text-muted">Aktivnih</small></div></div>
+  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3" style="color:#c9a84c">{{ stats.parova }}</div><small class="text-muted">Parova</small></div></div>
+  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-danger">{{ stats.utrka }}</div><small class="text-muted">Utrka</small></div></div>
+  <div class="col-6 col-md-2"><div class="card bg-dark border-secondary text-center p-3"><div class="fs-3 text-light">{{ stats.zdravstvenih }}</div><small class="text-muted">Zdravstvenih</small></div></div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><a href="{% url 'udruge:golubar_golubinjak_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-home"></i> Golubinjaci</a></div>
+  <div class="col-md-3"><a href="{% url 'udruge:golubar_golub_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-dove"></i> Golubovi</a></div>
+  <div class="col-md-3"><a href="{% url 'udruge:golubar_par_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-heart"></i> Parovi</a></div>
+  <div class="col-md-3"><a href="{% url 'udruge:golubar_utrka_list' %}" class="btn btn-outline-secondary w-100"><i class="fas fa-flag-checkered"></i> Utrke</a></div>
+</div>
+<div class="card bg-dark border-secondary"><div class="card-header"><h5 class="mb-0" style="color:#c9a84c">Zadnje utrke</h5></div><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-dark table-hover mb-0"><thead><tr>
+  <th style="font-size:.75rem">Datum</th><th style="font-size:.75rem">Naziv</th><th style="font-size:.75rem">Startna točka</th>
+  <th style="font-size:.75rem">Udaljenost (km)</th><th style="font-size:.75rem">Organizator</th>
+</tr></thead><tbody>
+{% for u in utrke %}
+<tr><td style="font-size:.82rem">{{ u.datum|date:"d.m.Y" }}</td><td style="font-size:.82rem"><a href="{% url 'udruge:golubar_utrka_detail' u.pk %}" style="color:#c9a84c">{{ u.naziv }}</a></td>
+<td style="font-size:.82rem">{{ u.startna_tocka }}</td><td style="font-size:.82rem">{{ u.udaljenost_km }} km</td>
+<td style="font-size:.82rem">{{ u.organizator|default:"—" }}</td></tr>
+{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nema utrka</td></tr>{% endfor %}
+</tbody></table></div></div></div></div>
+{% endblock %}

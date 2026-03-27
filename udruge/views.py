@@ -3343,3 +3343,363 @@ def revizija_create(request):
     return render(request, 'udruge/revizija_form.html', {
         'ocjena_choices': [('uredna','Uredna'),('napomene','S napomenama'),('neuredna','Neuredna')],
     })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GOLUBAR MODUL
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def golubar_dashboard(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golubinjak, Golub, ParGolubova, Utrka, ZdravstveniZapisGolub
+    stats = {
+        'golubinjaka': Golubinjak.objects.filter(company=company).count(),
+        'golubova': Golub.objects.filter(company=company).count(),
+        'aktivnih': Golub.objects.filter(company=company, aktivan=True).count(),
+        'parova': ParGolubova.objects.filter(company=company).count(),
+        'utrka': Utrka.objects.filter(company=company).count(),
+        'zdravstvenih_zapisa': ZdravstveniZapisGolub.objects.filter(golub__company=company).count(),
+    }
+    utrke = Utrka.objects.filter(company=company)[:10]
+    return render(request, 'udruge/golubar_dashboard.html', {'stats': stats, 'utrke': utrke})
+
+
+@login_required
+def golubinjak_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golubinjak
+    qs = Golubinjak.objects.filter(company=company)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/golubar_golubinjak_list.html', {'page_obj': page})
+
+
+@login_required
+def golubinjak_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golubinjak
+    from decimal import Decimal
+    if request.method == 'POST':
+        Golubinjak.objects.create(
+            company=company,
+            naziv=request.POST.get('naziv', ''),
+            adresa=request.POST.get('adresa', ''),
+            gps_lat=Decimal(request.POST.get('gps_lat')) if request.POST.get('gps_lat') else None,
+            gps_lng=Decimal(request.POST.get('gps_lng')) if request.POST.get('gps_lng') else None,
+            eu_reg_broj=request.POST.get('eu_reg_broj', ''),
+            kapacitet=int(request.POST.get('kapacitet') or 0),
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Golubinjak kreiran.')
+        return redirect('udruge:golubinjak_list')
+    return render(request, 'udruge/golubar_golubinjak_form.html', {})
+
+
+@login_required
+def golubinjak_detail(request, pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golubinjak
+    golubinjak = get_object_or_404(Golubinjak, pk=pk, company=company)
+    golubovi = golubinjak.golubovi.all()
+    return render(request, 'udruge/golubar_golubinjak_detail.html', {
+        'golubinjak': golubinjak, 'golubovi': golubovi,
+    })
+
+
+@login_required
+def golub_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golub
+    qs = Golub.objects.filter(company=company).select_related('golubinjak')
+    q = request.GET.get('q', '')
+    if q:
+        qs = qs.filter(Q(prsten_broj__icontains=q) | Q(naziv__icontains=q))
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/golubar_golub_list.html', {'page_obj': page, 'q': q})
+
+
+@login_required
+def golub_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golub, Golubinjak
+    if request.method == 'POST':
+        golub = Golub.objects.create(
+            company=company,
+            golubinjak_id=request.POST.get('golubinjak') or None,
+            prsten_broj=request.POST.get('prsten_broj', ''),
+            naziv=request.POST.get('naziv', ''),
+            spol=request.POST.get('spol', '?'),
+            boja=request.POST.get('boja', 'ostalo'),
+            datum_izlijeganja=request.POST.get('datum_izlijeganja') or None,
+            otac_id=request.POST.get('otac') or None,
+            majka_id=request.POST.get('majka') or None,
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Golub %s kreiran.' % golub.prsten_broj)
+        return redirect('udruge:golub_detail', pk=golub.pk)
+    golubinjaci = Golubinjak.objects.filter(company=company)
+    golubovi = Golub.objects.filter(company=company)
+    return render(request, 'udruge/golubar_golub_form.html', {
+        'golubinjaci': golubinjaci,
+        'golubovi_m': golubovi.filter(spol='M'),
+        'golubovi_f': golubovi.filter(spol='F'),
+        'spol_choices': Golub.SPOL,
+        'boja_choices': Golub.BOJA,
+    })
+
+
+@login_required
+def golub_detail(request, pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golub
+    golub = get_object_or_404(Golub, pk=pk, company=company)
+    # Rodovnik: otac/majka + djedovi/bake
+    rodovnik = {
+        'otac': golub.otac,
+        'majka': golub.majka,
+        'djed_oc': golub.otac.otac if golub.otac else None,
+        'baka_oc': golub.otac.majka if golub.otac else None,
+        'djed_maj': golub.majka.otac if golub.majka else None,
+        'baka_maj': golub.majka.majka if golub.majka else None,
+    }
+    zdravstveni_zapisi = golub.zdravstveni_zapisi.all()
+    rezultati_utrka = golub.rezultati_utrka.select_related('utrka').all()
+    return render(request, 'udruge/golubar_golub_detail.html', {
+        'golub': golub,
+        'rodovnik': rodovnik,
+        'zdravstveni_zapisi': zdravstveni_zapisi,
+        'rezultati_utrka': rezultati_utrka,
+    })
+
+
+@login_required
+def golub_edit(request, pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golub, Golubinjak
+    golub = get_object_or_404(Golub, pk=pk, company=company)
+    if request.method == 'POST':
+        golub.golubinjak_id = request.POST.get('golubinjak') or None
+        golub.prsten_broj = request.POST.get('prsten_broj', golub.prsten_broj)
+        golub.naziv = request.POST.get('naziv', '')
+        golub.spol = request.POST.get('spol', '?')
+        golub.boja = request.POST.get('boja', 'ostalo')
+        golub.datum_izlijeganja = request.POST.get('datum_izlijeganja') or None
+        golub.otac_id = request.POST.get('otac') or None
+        golub.majka_id = request.POST.get('majka') or None
+        golub.napomena = request.POST.get('napomena', '')
+        golub.save()
+        messages.success(request, 'Golub %s azuriran.' % golub.prsten_broj)
+        return redirect('udruge:golub_detail', pk=golub.pk)
+    golubinjaci = Golubinjak.objects.filter(company=company)
+    golubovi = Golub.objects.filter(company=company).exclude(pk=golub.pk)
+    return render(request, 'udruge/golubar_golub_form.html', {
+        'golub': golub,
+        'golubinjaci': golubinjaci,
+        'golubovi_m': golubovi.filter(spol='M'),
+        'golubovi_f': golubovi.filter(spol='F'),
+        'spol_choices': Golub.SPOL,
+        'boja_choices': Golub.BOJA,
+    })
+
+
+@login_required
+def par_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ParGolubova
+    from django.db.models import Count
+    qs = ParGolubova.objects.filter(company=company).select_related('muzjak', 'zenka').annotate(
+        legla_count=Count('legla'),
+    )
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/golubar_par_list.html', {'page_obj': page})
+
+
+@login_required
+def par_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ParGolubova, Golub, Golubinjak
+    if request.method == 'POST':
+        par = ParGolubova.objects.create(
+            company=company,
+            golubinjak_id=request.POST.get('golubinjak') or Golub.objects.filter(
+                pk=request.POST.get('muzjak')).values_list('golubinjak_id', flat=True).first(),
+            muzjak_id=request.POST.get('muzjak'),
+            zenka_id=request.POST.get('zenka'),
+            sezona=int(request.POST.get('sezona') or timezone.now().year),
+            datum_spajanja=request.POST.get('datum_spajanja') or None,
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Par kreiran.')
+        return redirect('udruge:par_list')
+    muzjaci = Golub.objects.filter(company=company, spol='M', aktivan=True)
+    zenke = Golub.objects.filter(company=company, spol='F', aktivan=True)
+    return render(request, 'udruge/golubar_par_form.html', {
+        'muzjaci': muzjaci,
+        'zenke': zenke,
+        'current_year': timezone.now().year,
+    })
+
+
+@login_required
+def leglo_create(request, par_pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import ParGolubova, Leglo, Golub
+    par = get_object_or_404(ParGolubova, pk=par_pk, company=company)
+    if request.method == 'POST':
+        Leglo.objects.create(
+            par=par,
+            datum_jaja=request.POST.get('datum_jaja') or None,
+            datum_izlijeganja_1=request.POST.get('datum_izlijeganja_1') or None,
+            datum_izlijeganja_2=request.POST.get('datum_izlijeganja_2') or None,
+            ptic_1_id=request.POST.get('ptic_1') or None,
+            ptic_2_id=request.POST.get('ptic_2') or None,
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Leglo evidentirano.')
+        return redirect('udruge:par_list')
+    golubovi = Golub.objects.filter(company=company)
+    return render(request, 'udruge/golubar_leglo_form.html', {
+        'par': par, 'golubovi': golubovi,
+    })
+
+
+@login_required
+def zdravstveni_create(request, golub_pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golub, ZdravstveniZapisGolub
+    golub = get_object_or_404(Golub, pk=golub_pk, company=company)
+    if request.method == 'POST':
+        ZdravstveniZapisGolub.objects.create(
+            golub=golub,
+            vrsta=request.POST.get('vrsta', 'ostalo'),
+            datum=request.POST.get('datum'),
+            lijek_preparat=request.POST.get('lijek_preparat', ''),
+            doza=request.POST.get('doza', ''),
+            veterinar=request.POST.get('veterinar', ''),
+            sljedeci_tretman=request.POST.get('sljedeci_tretman') or None,
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Zdravstveni zapis kreiran.')
+        return redirect('udruge:golub_detail', pk=golub.pk)
+    return render(request, 'udruge/golubar_zdravstveni_form.html', {
+        'golub': golub,
+        'vrsta_choices': ZdravstveniZapisGolub.VRSTA,
+    })
+
+
+@login_required
+def utrka_list(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Utrka
+    qs = Utrka.objects.filter(company=company)
+    paginator = Paginator(qs, 30)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'udruge/golubar_utrka_list.html', {'page_obj': page})
+
+
+@login_required
+def utrka_create(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Utrka
+    from decimal import Decimal
+    if request.method == 'POST':
+        utrka = Utrka.objects.create(
+            company=company,
+            naziv=request.POST.get('naziv', ''),
+            datum=request.POST.get('datum'),
+            startna_tocka=request.POST.get('startna_tocka', ''),
+            startna_lat=Decimal(request.POST.get('startna_lat')) if request.POST.get('startna_lat') else None,
+            startna_lng=Decimal(request.POST.get('startna_lng')) if request.POST.get('startna_lng') else None,
+            udaljenost_km=Decimal(request.POST.get('udaljenost_km')) if request.POST.get('udaljenost_km') else None,
+            organizator=request.POST.get('organizator', ''),
+            broj_natjecatelja=int(request.POST.get('broj_natjecatelja')) if request.POST.get('broj_natjecatelja') else None,
+            uvjeti=request.POST.get('uvjeti', ''),
+            napomena=request.POST.get('napomena', ''),
+        )
+        messages.success(request, 'Utrka "%s" kreirana.' % utrka.naziv)
+        return redirect('udruge:utrka_detail', pk=utrka.pk)
+    return render(request, 'udruge/golubar_utrka_form.html', {})
+
+
+@login_required
+def utrka_detail(request, pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Utrka
+    utrka = get_object_or_404(Utrka, pk=pk, company=company)
+    rezultati = utrka.rezultati.select_related('golub').all()
+    return render(request, 'udruge/golubar_utrka_detail.html', {
+        'utrka': utrka, 'rezultati': rezultati,
+    })
+
+
+@login_required
+def rezultat_create(request, utrka_pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Utrka, RezultatUtrke, Golub
+    from decimal import Decimal
+    utrka = get_object_or_404(Utrka, pk=utrka_pk, company=company)
+    if request.method == 'POST':
+        RezultatUtrke.objects.create(
+            utrka=utrka,
+            golub_id=request.POST.get('golub'),
+            placiranje=int(request.POST.get('placiranje')) if request.POST.get('placiranje') else None,
+            placiranje_ukupno=int(request.POST.get('placiranje_ukupno')) if request.POST.get('placiranje_ukupno') else None,
+            brzina_mpm=Decimal(request.POST.get('brzina_mpm')) if request.POST.get('brzina_mpm') else None,
+            vrijeme_dolaska=request.POST.get('vrijeme_dolaska') or None,
+            bodovi=Decimal(request.POST.get('bodovi')) if request.POST.get('bodovi') else None,
+            ets_data={'napomena': request.POST.get('napomena', '')},
+        )
+        messages.success(request, 'Rezultat dodan.')
+        return redirect('udruge:utrka_detail', pk=utrka.pk)
+    golubovi = Golub.objects.filter(company=company, aktivan=True)
+    return render(request, 'udruge/golubar_rezultat_form.html', {
+        'utrka': utrka, 'golubovi': golubovi,
+    })
+
+
+@login_required
+@require_POST
+def golub_seal(request, pk):
+    company = get_user_company(request)
+    if not company:
+        return redirect('/')
+    from .models import Golub
+    golub = get_object_or_404(Golub, pk=pk, company=company)
+    golub.zapecati()
+    messages.success(request, 'Golub %s zapecacen. Hash: %s' % (golub.prsten_broj, golub.genetics_hash[:16]))
+    return redirect('udruge:golub_detail', pk=golub.pk)

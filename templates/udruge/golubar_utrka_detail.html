@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ utrka.naziv }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="fas fa-flag-checkered"></i> {{ utrka.naziv }}</h2>
+  <div>
+    <a href="{% url 'udruge:golubar_rezultat_create' utrka.pk %}" class="btn btn-warning btn-sm">+ Dodaj rezultat</a>
+    <a href="{% url 'udruge:golubar_utrka_list' %}" class="btn btn-outline-secondary btn-sm ms-1">&larr; Natrag</a>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card bg-dark border-secondary"><div class="card-body">
+      <div style="font-size:.72rem;text-transform:uppercase;color:#c9a84c;margin-bottom:.75rem;letter-spacing:.05em">Podaci utrke</div>
+      <div style="font-size:.85rem">
+        <div class="mb-1"><span class="text-muted">Datum:</span> {{ utrka.datum|date:"d.m.Y" }}</div>
+        <div class="mb-1"><span class="text-muted">Startna točka:</span> {{ utrka.startna_tocka|default:"—" }}</div>
+        <div class="mb-1"><span class="text-muted">Udaljenost:</span> {{ utrka.udaljenost_km }} km</div>
+        <div class="mb-1"><span class="text-muted">Organizator:</span> {{ utrka.organizator|default:"—" }}</div>
+        <div class="mb-1"><span class="text-muted">Natjecatelja:</span> {{ utrka.broj_natjecatelja|default:"—" }}</div>
+        {% if utrka.uvjeti %}<div class="mb-1"><span class="text-muted">Uvjeti:</span> {{ utrka.uvjeti }}</div>{% endif %}
+      </div>
+    </div></div>
+  </div>
+</div>
+<div class="card bg-dark border-secondary"><div class="card-header"><h5 class="mb-0" style="color:#c9a84c">Rezultati</h5></div><div class="card-body p-0"><div class="table-responsive">
+<table class="table table-dark table-hover mb-0"><thead><tr>
+  <th style="font-size:.75rem">Plasman</th><th style="font-size:.75rem">Golub (prsten)</th>
+  <th style="font-size:.75rem">Naziv</th><th style="font-size:.75rem">Brzina (m/min)</th><th style="font-size:.75rem">Bodovi</th>
+</tr></thead><tbody>
+{% for r in rezultati %}
+<tr>
+  <td style="font-size:.82rem"><strong>{{ r.placiranje }}.</strong></td>
+  <td style="font-size:.82rem"><a href="{% url 'udruge:golubar_golub_detail' r.golub.pk %}" style="color:#c9a84c">{{ r.golub.prsten_broj }}</a></td>
+  <td style="font-size:.82rem">{{ r.golub.naziv|default:"—" }}</td>
+  <td style="font-size:.82rem">{{ r.brzina_mpm|default:"—" }}</td>
+  <td style="font-size:.82rem">{{ r.bodovi|default:"0" }}</td>
+</tr>
+{% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nema rezultata</td></tr>{% endfor %}
+</tbody></table></div></div></div>
+</div>
+{% endblock %}
