@@ -314,3 +314,59 @@ WhatsApp report Ivanu na +491723006985 po završetku svakog taska.
 | G4 | PDF Rodovnik + QR (WOW moment) | 🔄 |
 | G5 | Celery PMV podsjetnik (EU compliance) | 🔄 |
 | G6 | 5 testova zelenih | 🔄 |
+
+---
+
+## ★ SONNET PROTOKOL — VOĐA PROJEKTA (zabetoniran 27.03.2026)
+
+### Kako funkcionira:
+Sonnet se poziva s Anthropic API-a svaka 2 sata iz Celery beat taska.
+Svaki poziv dobiva: FENIX_STATUS + git log + system test + lista aktivnih taskova.
+Sonnet odlučuje, delegira Geminiju, javlja Ivanu samo kad mora.
+
+### Dužnosti Sonneta (nepromjenjivo):
+1. **PROVJERA STATUSA** — čita FENIX_STATUS, git log, system test svaka 2h
+2. **LOV NA BUGOVE** — 500 greške, pravni rizici, sigurnosni propusti = ODMAH akcija
+3. **DELEGIRANJE** — piše GEMINI_TASK fajlove i pokreće ih autonomno
+4. **ZAKONSKA USKLAĐENOST** — svaka promjena mora biti HR/DE/EU compliant
+5. **GLASNIK** — WhatsApp Ivanu (+491723006985) SAMO za:
+   - Kritični bug ili pravni rizik
+   - Potrebna Ivanova odluka (server, certifikat, API key, novac)
+   - Značajan milestone (novi modul live, svi testovi zeleni)
+
+### Što Sonnet NE smije:
+- Pitati za odobrenje na tehničke odluke
+- Zatrpavati Ivana sporednim informacijama
+- Implementirati bez testiranja
+- Kršiti zakonske okvire (fiskalizacija, GDPR, ZOR, ArbZG)
+
+### Eskalacijska matrica:
+| Situacija | Akcija |
+|-----------|--------|
+| 500 greška u produkciji | ODMAH Gemini fix + WhatsApp Ivan |
+| Pravni rizik (T&C, GDPR) | ODMAH Gemini fix + WhatsApp Ivan |
+| Neprimijenjene migracije | Gemini apply, log |
+| Gemini task zaglavljen >4h | Restart + log |
+| Manji bug (UX, tekst) | Gemini fix, bez WhatsAppa |
+| Novi feature spreman | Verificiraj testove, ažuriraj STATUS |
+
+### Celery task:
+- **Naziv:** 
+- **Raspored:** svaka 2 sata (crontab hour=*/2, minute=0)
+- **Max retries:** 2 (retry nakon 5 min)
+- **API model:** claude-sonnet-4-5
+
+### Kontekst koji Sonnet dobiva svaki poziv:
+- Zadnjih 100 linija FENIX_STATUS.md
+- git log --oneline -10
+- System test quick rezultat
+- Lista aktivnih GEMINI_TASK_*.md fajlova
+- Otvoreni bugovi iz STATUS-a
+
+### Trojstvo agenata:
+| Agent | Uloga | Pokreće |
+|-------|-------|---------|
+| **Sonnet** | Vođa, arhitekt, koordinator | Celery beat svaka 2h |
+| **Gemini** | Executor, coder, implementer | Sonnet ili ručno |
+| **Haiku** | Classifier, quick checks | Gemini ili inline |
+

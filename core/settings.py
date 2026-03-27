@@ -787,3 +787,11 @@ CELERY_BEAT_SCHEDULE.update({
         "kwargs": {"phone": "+491723006985", "quick": True},
     },
 })
+
+# ── SONNET AGENT — Vođa projekta, svaka 2 sata ────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    'sonnet-project-lead-cycle': {
+        'task': 'core.sonnet_cycle',
+        'schedule': crontab(minute=0, hour='*/2'),  # Svaka 2 sata
+    },
+})

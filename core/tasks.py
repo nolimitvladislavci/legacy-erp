@@ -118,3 +118,19 @@ def run_system_test_task(self, phone='+491723006985', quick=False):
         except Exception:
             pass
     return out.getvalue()
+
+
+@shared_task(name='core.sonnet_cycle', bind=True, max_retries=2)
+def sonnet_cycle(self):
+    """
+    Sonnet vođa projekta — poziva se svaka 2 sata.
+    Čita FENIX_STATUS + git log, odlučuje što dalje,
+    pokreće Gemini taskove, javlja Ivanu ako treba.
+    """
+    try:
+        from core.sonnet_agent import run_sonnet_cycle
+        run_sonnet_cycle()
+    except Exception as exc:
+        import logging
+        logging.getLogger('sonnet_agent').error(f'sonnet_cycle crash: {exc}')
+        raise self.retry(exc=exc, countdown=300)
