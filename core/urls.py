@@ -71,6 +71,7 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns(
+    path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar_i18n'),
     path('premium/', include('premium_booking.urls')),
     path('admin/login/', lambda request: redirect('/worktime/') if request.user.is_authenticated and not request.user.is_staff else admin.site.login(request), name='admin_login_redirect'),
     path('admin/', admin.site.urls),
