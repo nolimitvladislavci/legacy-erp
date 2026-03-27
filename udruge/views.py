@@ -3449,14 +3449,17 @@ def golub_create(request):
             majka_id=request.POST.get('majka') or None,
             napomena=request.POST.get('napomena', ''),
         )
+        if request.FILES.get('fotografija'):
+            golub.fotografija = request.FILES['fotografija']
+            golub.save()
         messages.success(request, 'Golub %s kreiran.' % golub.prsten_broj)
         return redirect('udruge:golub_detail', pk=golub.pk)
     golubinjaci = Golubinjak.objects.filter(company=company)
     golubovi = Golub.objects.filter(company=company)
     return render(request, 'udruge/golubar_golub_form.html', {
         'golubinjaci': golubinjaci,
-        'golubovi_m': golubovi.filter(spol='M'),
-        'golubovi_f': golubovi.filter(spol='F'),
+        'muzjaci': golubovi.filter(spol='M'),
+        'zenke': golubovi.filter(spol='F'),
         'spol_choices': Golub.SPOL,
         'boja_choices': Golub.BOJA,
     })
@@ -3505,6 +3508,8 @@ def golub_edit(request, pk):
         golub.otac_id = request.POST.get('otac') or None
         golub.majka_id = request.POST.get('majka') or None
         golub.napomena = request.POST.get('napomena', '')
+        if request.FILES.get('fotografija'):
+            golub.fotografija = request.FILES['fotografija']
         golub.save()
         messages.success(request, 'Golub %s azuriran.' % golub.prsten_broj)
         return redirect('udruge:golub_detail', pk=golub.pk)
@@ -3513,8 +3518,8 @@ def golub_edit(request, pk):
     return render(request, 'udruge/golubar_golub_form.html', {
         'golub': golub,
         'golubinjaci': golubinjaci,
-        'golubovi_m': golubovi.filter(spol='M'),
-        'golubovi_f': golubovi.filter(spol='F'),
+        'muzjaci': golubovi.filter(spol='M'),
+        'zenke': golubovi.filter(spol='F'),
         'spol_choices': Golub.SPOL,
         'boja_choices': Golub.BOJA,
     })

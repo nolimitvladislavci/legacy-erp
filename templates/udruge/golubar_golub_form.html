@@ -10,8 +10,8 @@
     {% for gj in golubinjaci %}<option value="{{ gj.pk }}" {% if golub.golubinjak_id == gj.pk or selected_golubinjak == gj.pk %}selected{% endif %}>{{ gj.naziv }}</option>{% endfor %}
   </select></div>
 <div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Broj prstena</label><input type="text" name="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control bg-dark text-light border-secondary"></div>
-  <div class="col-md-6"><label class="form-label">Naziv</label><input type="text" name="naziv" value="{{ golub.naziv|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
+  <div class="col-md-6"><label class="form-label">Broj prstena</label><input type="text" name="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control bg-dark text-light border-secondary" placeholder="HR-2026-12345"></div>
+  <div class="col-md-6"><label class="form-label">Naziv</label><input type="text" name="naziv" value="{{ golub.naziv|default:'' }}" class="form-control bg-dark text-light border-secondary" placeholder="Ime goluba"></div>
 </div>
 <div class="row mb-3">
   <div class="col-md-4"><label class="form-label">Spol</label>
@@ -37,9 +37,46 @@
       {% for z in zenke %}<option value="{{ z.pk }}" {% if golub.majka_id == z.pk %}selected{% endif %}>{{ z.prsten_broj }} — {{ z.naziv|default:"" }}</option>{% endfor %}
     </select></div>
 </div>
-<div class="mb-3"><label class="form-label">Fotografija</label><input type="file" name="fotografija" accept="image/*" class="form-control bg-dark text-light border-secondary"></div>
+
+<!-- FOTOGRAFIJA — mobilna kamera + file upload -->
+<div class="mb-3">
+  <label class="form-label"><i class="fas fa-camera"></i> Fotografija goluba</label>
+  {% if golub.fotografija %}
+  <div class="mb-2"><img src="{{ golub.fotografija.url }}" class="rounded border border-secondary" style="max-height:150px"></div>
+  {% endif %}
+  <div class="d-flex gap-2 flex-wrap">
+    <label class="btn btn-outline-warning mb-0" style="cursor:pointer">
+      <i class="fas fa-camera"></i> Slikaj kamerom
+      <input type="file" name="fotografija" accept="image/*" capture="environment" class="d-none" onchange="previewImg(this)">
+    </label>
+    <label class="btn btn-outline-secondary mb-0" style="cursor:pointer">
+      <i class="fas fa-folder-open"></i> Iz galerije
+      <input type="file" name="fotografija" accept="image/*" class="d-none" onchange="previewImg(this)">
+    </label>
+  </div>
+  <div id="img-preview" class="mt-2"></div>
+</div>
+
 <div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary">{{ golub.napomena|default:'' }}</textarea></div>
 </div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:golubar_golub_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary">Odustani</a>
 <button type="submit" class="btn btn-warning">{% if golub %}Spremi izmjene{% else %}Spremi goluba{% endif %}</button></div></form></div>
+
+<script>
+function previewImg(input) {
+  if (input.files && input.files[0]) {
+    // Disable the other file input so only one is submitted
+    var allInputs = document.querySelectorAll('input[name="fotografija"]');
+    allInputs.forEach(function(inp) { if (inp !== input) inp.value = ''; });
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('img-preview').innerHTML =
+        '<img src="' + e.target.result + '" class="rounded border border-warning" style="max-height:200px">' +
+        '<br><small class="text-success mt-1 d-block"><i class="fas fa-check"></i> Fotografija učitana</small>';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
 {% endblock %}
