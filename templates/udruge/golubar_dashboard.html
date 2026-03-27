@@ -172,6 +172,12 @@
   <p>Upravljanje golubinjacima, uzgojem, utrkama i zdravljem vaših golubova</p>
 </div>
 
+<!-- Offline Pending -->
+<div id="offline-pending" style="display:none" class="alert mb-3" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;border-radius:12px;padding:1rem 1.25rem">
+  <i class="fas fa-cloud-upload-alt"></i> <span id="pending-count">0</span> zapisa ceka sinkronizaciju
+  <button onclick="GolubarOffline.syncNow()" class="btn btn-sm btn-warning ms-2" style="font-weight:600;font-size:.78rem">Sinkroniziraj sad</button>
+</div>
+
 <!-- Stats -->
 <div class="g-stats">
   <div class="g-stat-card">
@@ -282,4 +288,22 @@
 </div>
 
 </div>
+<script src="/static/js/golubar-offline.js"></script>
+<script>
+GolubarOffline.getPendingCount().then(function(c) {
+  if (c > 0) {
+    var el = document.getElementById('offline-pending');
+    if (el) {
+      el.style.display = 'block';
+      el.style.background = 'rgba(201,168,76,.1)';
+      el.style.border = '1px solid rgba(201,168,76,.3)';
+      el.style.color = '#c9a84c';
+      el.style.borderRadius = '12px';
+      el.style.padding = '1rem 1.25rem';
+    }
+    var cnt = document.getElementById('pending-count');
+    if (cnt) cnt.textContent = c;
+  }
+});
+</script>
 {% endblock %}

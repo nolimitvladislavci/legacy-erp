@@ -95,7 +95,7 @@
   </div>
 </div>
 
-<form method="post">
+<form method="post" id="golubinjak-form">
 {% csrf_token %}
 <div class="gf-form-card">
 
@@ -171,4 +171,22 @@
 </form>
 
 </div>
+<script src="/static/js/golubar-offline.js"></script>
+<script>
+document.getElementById('golubinjak-form').addEventListener('submit', function(e) {
+  if (!navigator.onLine) {
+    e.preventDefault();
+    var form = this;
+    GolubarOffline.saveGolubinjak(form).then(function(id) {
+      var bar = document.getElementById('offlineBar');
+      if (bar) { bar.style.display='block'; bar.style.background='linear-gradient(135deg,#78350f,#451a03)'; bar.style.borderColor='#c9a84c'; }
+      var msg = document.getElementById('offlineMsg');
+      if (msg) msg.textContent = 'Golubinjak spremljen offline (#'+id+'). Sinkronizira se automatski.';
+      setTimeout(function(){ window.location.href='{% url "udruge:golubinjak_list" %}'; }, 2000);
+    }).catch(function(err) {
+      alert('Greska pri offline spremanju: ' + err);
+    });
+  }
+});
+</script>
 {% endblock %}

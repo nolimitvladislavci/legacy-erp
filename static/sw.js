@@ -15,6 +15,7 @@ var PRECACHE_URLS = [
   '/static/js/pos/pos-quick.js',
   '/static/js/pos/pos-fiscal.js',
   '/static/js/pos/pos-scanner.js',
+  '/static/js/golubar-offline.js',
 ];
 
 // ── Install: precache static assets ─────────────────────────────────────────
@@ -357,5 +358,53 @@ self.addEventListener('sync', function(event) {
         });
       })
     );
+  }
+});
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GOLUBAR OFFLINE SYNC — pozovi klijente da pokrenu sync
+// ══════════════════════════════════════════════════════════════════════════════
+self.addEventListener('sync', function(event) {
+  if (event.tag === 'golubar-sync') {
+    event.waitUntil(
+      self.clients.matchAll().then(function(clients) {
+        clients.forEach(function(client) {
+          client.postMessage({ type: 'GOLUBAR_SYNC' });
+        });
+      })
+    );
+  }
+});
+
+// ── Cache golubar pages with network-first ────────────────────────────────────
+var GOLUBAR_CACHE = CACHE_VERSION + '-golubar';
+var GOLUBAR_URLS = [
+  '/udruge/golubar/',
+  '/udruge/golubar/golubovi/',
+  '/udruge/golubar/golubinjaci/',
+  '/udruge/golubar/golubovi/novi/',
+  '/udruge/golubar/golubinjaci/novi/',
+];
+
+self.addEventListener('fetch', function(event) {
+  var url = new URL(event.request.url);
+  if (url.pathname.includes('/udruge/golubar/') && event.request.method === 'GET') {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (response.ok) {
+          var clone = response.clone();
+          caches.open(GOLUBAR_CACHE).then(function(cache) {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(event.request).then(function(cached) {
+          return cached || caches.match('/offline.html');
+        });
+      })
+    );
+    return;
   }
 });

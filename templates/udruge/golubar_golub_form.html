@@ -331,4 +331,54 @@ function setFileFromBlob(blob, filename) {
   });
 }
 </script>
+<script src="/static/js/golubar-offline.js"></script>
+<script>
+document.getElementById('golub-form').addEventListener('submit', function(e) {
+  if (!navigator.onLine) {
+    e.preventDefault();
+    var form = this;
+    GolubarOffline.saveGolub(form).then(function(id) {
+      // Show success toast
+      var bar = document.getElementById('offlineBar');
+      if (bar) { bar.style.display='block'; bar.style.background='linear-gradient(135deg,#78350f,#451a03)'; bar.style.borderColor='#c9a84c'; }
+      var msg = document.getElementById('offlineMsg');
+      if (msg) msg.textContent = 'Golub spremljen offline (#'+id+'). Sinkronizira se automatski.';
+      // Redirect to list
+      setTimeout(function(){ window.location.href='{% url "udruge:golub_list" %}'; }, 2000);
+    }).catch(function(err) {
+      alert('Greska pri offline spremanju: ' + err);
+    });
+  }
+});
+// Enhance gallery with FenixCamera for better mobile multi-photo
+(function() {
+  var galleryBtn = document.querySelector('.gf-cam-gallery');
+  if (galleryBtn && typeof FenixCamera !== 'undefined') {
+    var origInput = galleryBtn.querySelector('input[type="file"]');
+    if (origInput) origInput.setAttribute('multiple', 'multiple');
+  }
+  // Store FenixCamera captures for offline queue
+  var origCapture = window.capturePhoto;
+  window.capturePhoto = function() {
+    if (typeof FenixCamera !== 'undefined') {
+      FenixCamera.pick({
+        source: 'camera',
+        quality: 0.85,
+        maxWidth: 1600,
+        onCapture: function(r) {
+          FenixCamera.showPreview(r.dataUrl, 'photo-preview', { maxHeight: 180 });
+          setFileFromBlob(r.blob, r.filename);
+          // Also store for offline queue
+          if (typeof GolubarOffline !== 'undefined') {
+            GolubarOffline.addPhotoToOfflineQueue(r, 'fotografija');
+          }
+        },
+        onError: function() { document.getElementById('photo-file-input').click(); }
+      });
+    } else {
+      document.getElementById('photo-file-input').click();
+    }
+  };
+})();
+</script>
 {% endblock %}
