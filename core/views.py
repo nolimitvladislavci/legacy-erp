@@ -108,11 +108,14 @@ def login_view(request):
 
         if not errors:
             try:
-                user_obj = AuthUser.objects.filter(email=email).order_by('-last_login').first()
+                # Traži po emailu ILI usernameu
+                user_obj = AuthUser.objects.filter(email__iexact=email).order_by('-last_login').first()
+                if user_obj is None:
+                    user_obj = AuthUser.objects.filter(username__iexact=email).first()
                 if user_obj is None:
                     raise AuthUser.DoesNotExist
             except AuthUser.DoesNotExist:
-                errors.append('Ne postoji racun s ovom email adresom.')
+                errors.append('Ne postoji racun s ovom email adresom ili korisnickim imenom.')
                 return render(request, 'registration/login.html', {
                     'errors': errors, 'email_value': email,
                 })
