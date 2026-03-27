@@ -1,82 +1,334 @@
 {% extends "base.html" %}
 {% block title %}{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}{% endblock %}
 {% block content %}
-<div class="container-fluid" style="max-width:700px">
-<h2 class="mb-3"><i class="fas fa-dove"></i> {% if golub %}Uredi goluba: {{ golub.prsten_broj }}{% else %}Novi golub{% endif %}</h2>
-<form method="post" enctype="multipart/form-data" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
-<div class="mb-3"><label class="form-label">Golubinjak</label>
-  <select name="golubinjak" required class="form-select bg-dark text-light border-secondary">
-    <option value="">-- Odaberi golubinjak --</option>
-    {% for gj in golubinjaci %}<option value="{{ gj.pk }}" {% if golub.golubinjak_id == gj.pk or selected_golubinjak == gj.pk %}selected{% endif %}>{{ gj.naziv }}</option>{% endfor %}
-  </select></div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Broj prstena</label><input type="text" name="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control bg-dark text-light border-secondary" placeholder="HR-2026-12345"></div>
-  <div class="col-md-6"><label class="form-label">Naziv</label><input type="text" name="naziv" value="{{ golub.naziv|default:'' }}" class="form-control bg-dark text-light border-secondary" placeholder="Ime goluba"></div>
-</div>
-<div class="row mb-3">
-  <div class="col-md-4"><label class="form-label">Spol</label>
-    <select name="spol" required class="form-select bg-dark text-light border-secondary">
-      {% for code, label in spol_choices %}<option value="{{ code }}" {% if golub.spol == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
-    </select></div>
-  <div class="col-md-4"><label class="form-label">Boja</label>
-    <select name="boja" class="form-select bg-dark text-light border-secondary">
-      <option value="">-- Boja --</option>
-      {% for code, label in boja_choices %}<option value="{{ code }}" {% if golub.boja == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
-    </select></div>
-  <div class="col-md-4"><label class="form-label">Datum izliježanja</label><input type="date" name="datum_izlijeganja" value="{{ golub.datum_izlijeganja|date:'Y-m-d'|default:'' }}" class="form-control bg-dark text-light border-secondary"></div>
-</div>
-<div class="row mb-3">
-  <div class="col-md-6"><label class="form-label">Otac</label>
-    <select name="otac" class="form-select bg-dark text-light border-secondary">
-      <option value="">-- Otac --</option>
-      {% for m in muzjaci %}<option value="{{ m.pk }}" {% if golub.otac_id == m.pk %}selected{% endif %}>{{ m.prsten_broj }} — {{ m.naziv|default:"" }}</option>{% endfor %}
-    </select></div>
-  <div class="col-md-6"><label class="form-label">Majka</label>
-    <select name="majka" class="form-select bg-dark text-light border-secondary">
-      <option value="">-- Majka --</option>
-      {% for z in zenke %}<option value="{{ z.pk }}" {% if golub.majka_id == z.pk %}selected{% endif %}>{{ z.prsten_broj }} — {{ z.naziv|default:"" }}</option>{% endfor %}
-    </select></div>
+<style>
+.gf-section { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#c9a84c; margin-bottom:.5rem; padding-bottom:.3rem; border-bottom:1px solid rgba(201,168,76,.2); }
+.gf-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.gf-card-body { padding:1.25rem; }
+.gf-input { background:var(--input-bg,#fff) !important; color:var(--text) !important; border-color:var(--input-border,#e2e8f0) !important; border-radius:8px !important; }
+.gf-input:focus { border-color:#c9a84c !important; box-shadow:0 0 0 .2rem rgba(201,168,76,.15) !important; }
+.gf-input::placeholder { color:var(--text-muted,#94a3b8) !important; }
+.gf-submit { background:linear-gradient(135deg,#c9a84c,#a78b3d); color:#0a0a0a; border:none; border-radius:8px; padding:12px 28px; font-weight:700; font-size:.9rem; cursor:pointer; transition:all .2s; }
+.gf-submit:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(201,168,76,.3); color:#0a0a0a; }
+.gf-cam-btn { display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:10px; cursor:pointer; font-weight:600; font-size:.85rem; transition:all .2s; min-height:48px; border:2px dashed; }
+.gf-cam-btn:hover { transform:translateY(-1px); }
+.gf-cam-photo { border-color:rgba(201,168,76,.4); color:#c9a84c; background:rgba(201,168,76,.05); }
+.gf-cam-photo:hover { border-color:#c9a84c; background:rgba(201,168,76,.1); }
+.gf-cam-ring { border-color:rgba(59,130,246,.4); color:#3b82f6; background:rgba(59,130,246,.05); }
+.gf-cam-ring:hover { border-color:#3b82f6; background:rgba(59,130,246,.1); }
+.gf-cam-gallery { border-color:var(--border); color:var(--text-secondary); background:transparent; }
+.gf-cam-gallery:hover { border-color:var(--text-muted); }
+.gf-ai-badge { display:inline-flex; align-items:center; gap:4px; font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:3px 8px; border-radius:4px; background:rgba(59,130,246,.12); color:#3b82f6; }
+#ai-status { margin-top:8px; font-size:.8rem; padding:8px 12px; border-radius:8px; display:none; }
+#ai-status.loading { display:block; background:rgba(59,130,246,.08); color:#3b82f6; border:1px solid rgba(59,130,246,.2); }
+#ai-status.success { display:block; background:rgba(34,197,94,.08); color:#22c55e; border:1px solid rgba(34,197,94,.2); }
+#ai-status.error { display:block; background:rgba(239,68,68,.08); color:#ef4444; border:1px solid rgba(239,68,68,.2); }
+#photo-preview, #ring-preview { margin-top:8px; border-radius:8px; overflow:hidden; position:relative; display:none; }
+#photo-preview img, #ring-preview img { max-height:180px; border-radius:8px; border:1px solid rgba(201,168,76,.3); }
+.gf-breadcrumb { font-size:.78rem; color:var(--text-muted); margin-bottom:1rem; }
+.gf-breadcrumb a { color:#c9a84c; text-decoration:none; }
+.gf-breadcrumb a:hover { text-decoration:underline; }
+</style>
+
+<div class="container-fluid" style="max-width:720px">
+
+<!-- Breadcrumb -->
+<div class="gf-breadcrumb">
+  <a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a> &rsaquo;
+  <a href="{% url 'udruge:golub_list' %}">Golubovi</a> &rsaquo;
+  {% if golub %}Uredi{% else %}Novi golub{% endif %}
 </div>
 
-<!-- FOTOGRAFIJA — mobilna kamera + file upload -->
-<div class="mb-3">
-  <label class="form-label"><i class="fas fa-camera"></i> Fotografija goluba</label>
-  {% if golub.fotografija %}
-  <div class="mb-2"><img src="{{ golub.fotografija.url }}" class="rounded border border-secondary" style="max-height:150px"></div>
-  {% endif %}
-  <div class="d-flex gap-2 flex-wrap">
-    <label class="btn btn-outline-warning mb-0" style="cursor:pointer">
-      <i class="fas fa-camera"></i> Slikaj kamerom
-      <input type="file" name="fotografija" accept="image/*" capture="environment" class="d-none" onchange="previewImg(this)">
-    </label>
-    <label class="btn btn-outline-secondary mb-0" style="cursor:pointer">
-      <i class="fas fa-folder-open"></i> Iz galerije
-      <input type="file" name="fotografija" accept="image/*" class="d-none" onchange="previewImg(this)">
-    </label>
+<div class="d-flex align-items-center gap-3 mb-3">
+  <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));display:flex;align-items:center;justify-content:center">
+    <i class="fas fa-dove" style="font-size:1.3rem;color:#c9a84c"></i>
   </div>
-  <div id="img-preview" class="mt-2"></div>
+  <div>
+    <h4 class="mb-0" style="font-weight:700">{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}</h4>
+    {% if golub %}<small style="color:var(--text-muted)">{{ golub.prsten_broj }}</small>{% endif %}
+  </div>
 </div>
 
-<div class="mb-3"><label class="form-label">Napomena</label><textarea name="napomena" rows="3" class="form-control bg-dark text-light border-secondary">{{ golub.napomena|default:'' }}</textarea></div>
-</div><div class="card-footer d-flex justify-content-between">
-<a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary">Odustani</a>
-<button type="submit" class="btn btn-warning">{% if golub %}Spremi izmjene{% else %}Spremi goluba{% endif %}</button></div></form></div>
+<form method="post" enctype="multipart/form-data" id="golub-form">
+{% csrf_token %}
+
+<!-- SEKCIJA: Fotografija + AI Scan -->
+<div class="gf-card mb-3">
+<div class="gf-card-body">
+  <div class="gf-section"><i class="fas fa-camera me-1"></i> Fotografija & AI prepoznavanje</div>
+
+  {% if golub.fotografija %}
+  <div class="mb-3"><img src="{{ golub.fotografija.url }}" class="rounded" style="max-height:150px;border:1px solid rgba(201,168,76,.3)"></div>
+  {% endif %}
+
+  <div class="row g-2 mb-2">
+    <div class="col-6 col-md-4">
+      <div class="gf-cam-btn gf-cam-photo" onclick="capturePhoto()">
+        <i class="fas fa-camera" style="font-size:1.1rem"></i>
+        <span>Slikaj goluba</span>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="gf-cam-btn gf-cam-ring" onclick="scanRing()">
+        <i class="fas fa-magic" style="font-size:1.1rem"></i>
+        <span>Skeniraj prsten <span class="gf-ai-badge">AI</span></span>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="gf-cam-btn gf-cam-gallery w-100 mb-0">
+        <i class="fas fa-folder-open"></i>
+        <span>Iz galerije</span>
+        <input type="file" name="fotografija" accept="image/*" class="d-none" onchange="onGalleryPick(this)">
+      </label>
+    </div>
+  </div>
+
+  <div id="photo-preview"></div>
+  <div id="ring-preview"></div>
+  <div id="ai-status"></div>
+
+  <!-- Hidden file input za photo capture -->
+  <input type="file" id="photo-file-input" name="fotografija" accept="image/*" capture="environment" class="d-none">
+</div>
+</div>
+
+<!-- SEKCIJA: Osnovni podaci -->
+<div class="gf-card mb-3">
+<div class="gf-card-body">
+  <div class="gf-section"><i class="fas fa-info-circle me-1"></i> Osnovni podaci</div>
+
+  <div class="mb-3">
+    <label class="form-label" style="font-weight:600;font-size:.85rem">Golubinjak <span class="text-danger">*</span></label>
+    <select name="golubinjak" required class="form-select gf-input">
+      <option value="">-- Odaberi golubinjak --</option>
+      {% for gj in golubinjaci %}<option value="{{ gj.pk }}" {% if golub.golubinjak_id == gj.pk %}selected{% endif %}>{{ gj.naziv }}</option>{% endfor %}
+    </select>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <label class="form-label" style="font-weight:600;font-size:.85rem">Broj prstena <span class="text-danger">*</span></label>
+      <div class="input-group">
+        <input type="text" name="prsten_broj" id="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control gf-input" placeholder="HR-2026-12345">
+        <button type="button" class="btn btn-outline-secondary" onclick="scanRing()" title="AI skeniranje prstena" style="border-color:var(--input-border)">
+          <i class="fas fa-magic" style="color:#3b82f6"></i>
+        </button>
+      </div>
+      <small style="color:var(--text-muted);font-size:.72rem">Format: HR-YYYY-NNNNN ili HOG/LOK oznaka</small>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" style="font-weight:600;font-size:.85rem">Naziv / Ime</label>
+      <input type="text" name="naziv" id="naziv" value="{{ golub.naziv|default:'' }}" class="form-control gf-input" placeholder="Ime goluba">
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-4">
+      <label class="form-label" style="font-weight:600;font-size:.85rem">Spol <span class="text-danger">*</span></label>
+      <select name="spol" required class="form-select gf-input">
+        {% for code, label in spol_choices %}<option value="{{ code }}" {% if golub.spol == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-4">
+      <label class="form-label" style="font-weight:600;font-size:.85rem">Boja</label>
+      <select name="boja" class="form-select gf-input">
+        <option value="">—</option>
+        {% for code, label in boja_choices %}<option value="{{ code }}" {% if golub.boja == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-4">
+      <label class="form-label" style="font-weight:600;font-size:.85rem">Izliježanje</label>
+      <input type="date" name="datum_izlijeganja" value="{{ golub.datum_izlijeganja|date:'Y-m-d'|default:'' }}" class="form-control gf-input">
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SEKCIJA: Rodovnik -->
+<div class="gf-card mb-3">
+<div class="gf-card-body">
+  <div class="gf-section"><i class="fas fa-sitemap me-1"></i> Rodovnik</div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" style="font-weight:600;font-size:.85rem"><i class="fas fa-mars" style="color:#3b82f6;font-size:.75rem"></i> Otac</label>
+      <select name="otac" class="form-select gf-input">
+        <option value="">-- Nepoznat --</option>
+        {% for m in muzjaci %}<option value="{{ m.pk }}" {% if golub.otac_id == m.pk %}selected{% endif %}>{{ m.prsten_broj }} — {{ m.naziv|default:"" }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" style="font-weight:600;font-size:.85rem"><i class="fas fa-venus" style="color:#ec4899;font-size:.75rem"></i> Majka</label>
+      <select name="majka" class="form-select gf-input">
+        <option value="">-- Nepoznata --</option>
+        {% for z in zenke %}<option value="{{ z.pk }}" {% if golub.majka_id == z.pk %}selected{% endif %}>{{ z.prsten_broj }} — {{ z.naziv|default:"" }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SEKCIJA: Napomena -->
+<div class="gf-card mb-3">
+<div class="gf-card-body">
+  <div class="gf-section"><i class="fas fa-sticky-note me-1"></i> Napomena</div>
+  <textarea name="napomena" rows="3" class="form-control gf-input" placeholder="Dodatne informacije o golubu...">{{ golub.napomena|default:'' }}</textarea>
+</div>
+</div>
+
+<!-- Akcije -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary" style="border-radius:8px;padding:10px 20px">
+    <i class="fas fa-arrow-left me-1"></i> Natrag
+  </a>
+  <button type="submit" class="gf-submit">
+    <i class="fas fa-check me-1"></i> {% if golub %}Spremi izmjene{% else %}Spremi goluba{% endif %}
+  </button>
+</div>
+
+</form>
+</div>
 
 <script>
-function previewImg(input) {
-  if (input.files && input.files[0]) {
-    // Disable the other file input so only one is submitted
-    var allInputs = document.querySelectorAll('input[name="fotografija"]');
-    allInputs.forEach(function(inp) { if (inp !== input) inp.value = ''; });
+// ── Slikaj goluba (FenixCamera) ──────────────────────────
+function capturePhoto() {
+  if (typeof FenixCamera !== 'undefined') {
+    FenixCamera.pick({
+      source: 'camera',
+      quality: 0.85,
+      maxWidth: 1600,
+      onCapture: function(r) {
+        FenixCamera.showPreview(r.dataUrl, 'photo-preview', { maxHeight: 180 });
+        setFileFromBlob(r.blob, r.filename);
+      },
+      onError: function(err) {
+        // Fallback: probaj native input
+        document.getElementById('photo-file-input').click();
+      }
+    });
+  } else {
+    document.getElementById('photo-file-input').click();
+  }
+}
 
+// Native fallback za photo-file-input
+document.getElementById('photo-file-input').addEventListener('change', function() {
+  if (this.files && this.files[0]) {
     var reader = new FileReader();
     reader.onload = function(e) {
-      document.getElementById('img-preview').innerHTML =
-        '<img src="' + e.target.result + '" class="rounded border border-warning" style="max-height:200px">' +
-        '<br><small class="text-success mt-1 d-block"><i class="fas fa-check"></i> Fotografija učitana</small>';
+      var el = document.getElementById('photo-preview');
+      el.style.display = 'block';
+      el.innerHTML = '<img src="'+e.target.result+'" style="max-height:180px;border-radius:8px;border:1px solid rgba(201,168,76,.3)">';
+    };
+    reader.readAsDataURL(this.files[0]);
+  }
+});
+
+// ── Skeniraj prsten (AI Vision) ──────────────────────────
+function scanRing() {
+  var aiStatus = document.getElementById('ai-status');
+
+  if (typeof FenixCamera !== 'undefined') {
+    FenixCamera.pick({
+      source: 'camera',
+      quality: 0.9,
+      maxWidth: 1200,
+      onCapture: function(r) {
+        FenixCamera.showPreview(r.dataUrl, 'ring-preview', { maxHeight: 140 });
+
+        // Pokaži loading
+        aiStatus.className = 'loading';
+        aiStatus.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> AI analizira prsten...';
+        aiStatus.style.display = 'block';
+
+        // Pošalji na AI
+        FenixCamera.analyzeWithAI(r.b64, {
+          module: 'golubar',
+          prompt: 'Ovo je fotografija prstena goluba. Pročitaj tekst na prstenu i izvuci:\n' +
+                  '- Broj prstena (ring number, npr. HR-2024-12345 ili CRO 2024 12345)\n' +
+                  '- Godinu\n' +
+                  '- Boju prstena ako se vidi\n' +
+                  'Odgovori SAMO JSON: {"prsten_broj":"...","godina":"...","boja_prstena":"...","confidence":0.9}',
+          onResult: function(text) {
+            try {
+              var match = text.match(/\{.*\}/s);
+              if (match) {
+                var data = JSON.parse(match[0]);
+                if (data.prsten_broj) {
+                  document.getElementById('prsten_broj').value = data.prsten_broj;
+                  aiStatus.className = 'success';
+                  aiStatus.innerHTML = '<i class="fas fa-check-circle me-1"></i> Prsten prepoznat: <strong>' + data.prsten_broj + '</strong>' +
+                    (data.confidence ? ' (pouzdanost: ' + Math.round(data.confidence*100) + '%)' : '');
+                } else {
+                  aiStatus.className = 'error';
+                  aiStatus.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Nije moguće pročitati prsten. Pokušajte ponovo s boljim osvjetljenjem.';
+                }
+              }
+            } catch(e) {
+              aiStatus.className = 'error';
+              aiStatus.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Greška pri analizi. Unesite ručno.';
+            }
+          },
+          onError: function(err) {
+            aiStatus.className = 'error';
+            aiStatus.innerHTML = '<i class="fas fa-times-circle me-1"></i> ' + err;
+          }
+        });
+      },
+      onError: function(err) {
+        // Fallback: native camera
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.setAttribute('capture', 'environment');
+        input.onchange = function() {
+          if (input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              var el = document.getElementById('ring-preview');
+              el.style.display = 'block';
+              el.innerHTML = '<img src="'+e.target.result+'" style="max-height:140px;border-radius:8px">';
+              aiStatus.className = 'error';
+              aiStatus.innerHTML = '<i class="fas fa-info-circle me-1"></i> AI skeniranje nije dostupno. Unesite broj prstena ručno.';
+              aiStatus.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+          }
+        };
+        input.click();
+      }
+    });
+  } else {
+    alert('Kamera nije dostupna. Unesite broj prstena ručno.');
+  }
+}
+
+// ── Galerija pick ────────────────────────────────────────
+function onGalleryPick(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var el = document.getElementById('photo-preview');
+      el.style.display = 'block';
+      el.innerHTML = '<img src="'+e.target.result+'" style="max-height:180px;border-radius:8px;border:1px solid rgba(201,168,76,.3)">' +
+        '<br><small style="color:#22c55e;margin-top:4px;display:block"><i class="fas fa-check"></i> Fotografija odabrana</small>';
     };
     reader.readAsDataURL(input.files[0]);
   }
+}
+
+// ── Set file from blob (za FenixCamera capture) ──────────
+function setFileFromBlob(blob, filename) {
+  var file = new File([blob], filename || 'golub.jpg', { type: 'image/jpeg' });
+  var dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+
+  // Postavi na sve file inpute
+  var inputs = document.querySelectorAll('input[name="fotografija"]');
+  inputs.forEach(function(inp) {
+    if (inp.type === 'file') {
+      inp.files = dataTransfer.files;
+    }
+  });
 }
 </script>
 {% endblock %}
