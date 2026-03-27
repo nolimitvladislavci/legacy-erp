@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.shortcuts import redirect
+from core import tc_views
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -34,6 +35,8 @@ def _serve_sw(request):
     return FileResponse(open(sw_path, 'rb'), content_type='application/javascript')
 
 urlpatterns = [
+    path('legal/tc-accept/', tc_views.tc_accept_view, name='tc_accept'),
+
     # BEZ PAPIRA — public receipt (no login)
     path('pos/r/<int:receipt_id>/<str:token>/', __import__('pos.views', fromlist=['receipt_public']).receipt_public, name='receipt_public_short'),
     path('pos/r/<int:receipt_id>/<str:token>', __import__('pos.views', fromlist=['receipt_public']).receipt_public, name='receipt_public_noslash'),

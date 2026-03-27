@@ -172,3 +172,11 @@ def predictive_reorder_check(self):
             results.append({'company': company.name, 'status': 'error', 'error': str(e)})
 
     return results
+
+
+@shared_task(name='inventory.tasks.depreciation_monthly_check')
+def depreciation_monthly_check():
+    """Svaki 1. u mjesecu — provjeri assete i šalje Mariji WhatsApp nacrt amortizacije."""
+    from inventory.depreciation import check_depreciation_reminders
+    count = check_depreciation_reminders()
+    return {'checked_assets': count}

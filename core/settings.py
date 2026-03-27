@@ -811,3 +811,11 @@ CELERY_BEAT_SCHEDULE.update({
         'schedule': crontab(minute=15),  # svaki sat u :15 (ne u :00 s ostalima)
     },
 })
+
+# ── Amortizacija podsjetnik — 1. u mjesecu 06:00 ─────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    'depreciation-monthly-reminder': {
+        'task': 'inventory.tasks.depreciation_monthly_check',
+        'schedule': crontab(day_of_month='1', hour='6', minute='0'),
+    },
+})

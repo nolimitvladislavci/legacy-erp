@@ -99,6 +99,8 @@ class InventoryItem(models.Model):
 
     # Cijene
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Nabavna cijena'))
+    wholesale_min_qty = models.DecimalField(max_digits=10, decimal_places=2, default=1, verbose_name='Min. kol. veleprodaja', help_text='Ispod ove kolicine — maloprodajna cijena')
+    purchase_date     = models.DateField(null=True, blank=True, verbose_name='Datum nabave', help_text='Za amortizaciju (assets)')
     unit_price     = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Prodajna cijena'))
 
     # PDV
@@ -220,7 +222,7 @@ class InventoryItem(models.Model):
         Returns: dict(price, vat_included, price_type)
         """
         from decimal import Decimal
-        if buyer_type in ('b2b', 'wholesale') and self.wholesale_price > 0:
+        if buyer_type in ('b2b', 'wholesale') and self.wholesale_price > 0 and qty >= float(self.wholesale_min_qty or 1):
             if quantity >= float(self.min_order_qty):
                 return {
                     'price': self.wholesale_price,

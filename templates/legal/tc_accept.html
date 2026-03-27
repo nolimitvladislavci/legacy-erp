@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Uvjeti korištenja — LIMIT Connect{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h2 class="fw-bold mb-2">📋 Uvjeti korištenja</h2>
+          <p class="text-muted mb-4">Molimo pročitajte i prihvatite uvjete prije nastavka.</p>
+
+          <div class="border rounded p-3 mb-4" style="max-height:300px;overflow-y:auto;font-size:.9rem;">
+            <h6>1. Prihvaćanje uvjeta</h6>
+            <p>Korištenjem LIMIT Connect platforme prihvaćate ove uvjete u skladu s Zakonom o zaštiti potrošača (NN 41/14) i GDPR-om (EU 2016/679).</p>
+            <h6>2. Obrada podataka</h6>
+            <p>Vaši poslovni podaci obrađuju se isključivo u svrhu pružanja usluge. Operator: Konjik d.o.o., OIB: 37590751921.</p>
+            <h6>3. Zaštita podataka</h6>
+            <p>Podaci su kriptirani, logirati se pristup (ISO 27001 priprema). Pravo pristupa, ispravka i brisanja na zahtjev.</p>
+            <h6>4. Odgovornost</h6>
+            <p>Platforma je u PILOT fazi. Operator ne odgovara za štetu nastalu korištenjem testnih podataka.</p>
+            <h6>5. Mjerodavno pravo</h6>
+            <p>Primjenjuje se pravo Republike Hrvatske. Nadležan sud: Osijek.</p>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" id="tc_check" name="tc_accept" required>
+              <label class="form-check-label" for="tc_check">
+                Prihvaćam uvjete korištenja i politiku privatnosti LIMIT Connect platforme.
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fw-bold">
+              ✅ Prihvaćam i nastavljam
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -34,9 +34,7 @@ def run_gemini_task(self, task_description, max_steps=10, requested_by='system')
         try:
             send_text(
                 phone='+491723006985',
-                message=f"🟠 Gemini task nije izvrsio nista (0 fajlova/komandi).
-Task: {task_description[:100]}
-Pokrenuo: {requested_by}"
+                message="Gemini task nije izvrsio nista (0 fajlova). Task: " + task_description[:80] + " | " + requested_by
             )
         except Exception:
             pass
