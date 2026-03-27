@@ -510,6 +510,7 @@
           {% if "invoicing" in sidebar_enabled_ids %}<a href="/invoicing/canvas/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-bolt"></i> <span>Nova transakcija</span></a>{% endif %}
           {% if "pos" in sidebar_enabled_ids %}<a href="/pos/" onclick="closeSidebar()" style="color:#22c55e"><i class="fas fa-cash-register"></i> <span>POS Blagajna</span></a>{% endif %}
           <a href="/hr/documents/arhiva/upload/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-cloud-upload-alt"></i> <span>Upload dokumenta</span></a>
+          {% if 'udruge' in sidebar_enabled_ids %}<a href="/udruge/golubar/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-dove"></i> <span>Golubar</span></a>{% endif %}
         </div>
 
         <!-- Module Grid -->
@@ -552,7 +553,6 @@
             {% if 'delivery' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/delivery/consolidated/" onclick="closeSidebar()"><i class="fas fa-truck"></i> <span>Dostava</span></a>{% endif %}
             {% if 'helpdesk' in sidebar_enabled_ids %}<a href="/helpdesk/" onclick="closeSidebar()"><i class="fas fa-headset"></i> <span>Helpdesk</span></a>{% endif %}
             {% if 'udruge' in sidebar_enabled_ids %}<a href="/udruge/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Udruge</span></a>{% endif %}
-            {% if 'udruge' in sidebar_enabled_ids %}<a href="/udruge/golubar/" onclick="closeSidebar()"><i class="fas fa-dove"></i> <span>Golubar</span></a>{% endif %}
             {% if 'ai_assistant' in sidebar_enabled_ids %}<a href="/ai/" onclick="closeSidebar()"><i class="fas fa-robot"></i> <span>AI Asistent</span></a>{% endif %}
           </div>
         </div>
