@@ -24,7 +24,7 @@ from django.conf import settings
 
 logger = logging.getLogger('sonnet_agent')
 
-IVAN_PHONE = '+491723006985'
+IVAN_PHONE = '+4915771998747'
 
 # ── System prompt za Sonneta ──────────────────────────────────────────────────
 SONNET_SYSTEM = """Ti si Sonnet — autonomni vođa projekta LIMIT Connect ERP platforme.

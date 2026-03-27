@@ -210,7 +210,7 @@ LIMIT Connect Borg (26.03.2026):
 |-----|--------|
 | FENIX Test Runner (`manage.py run_system_test`) | ✅ LIVE |
 | Celery beat: nočni test 02:00 + jutarnji 07:30 | ✅ LIVE |
-| WhatsApp report na +491723006985 | ✅ RADI |
+| WhatsApp report na +4915771998747 | ✅ RADI |
 | Gemini System Test task pokrenut | ✅ RUNNING |
 | Gemini Invoice Compliance task pokrenut | ✅ RUNNING |
 
@@ -272,7 +272,7 @@ LIMIT Connect Borg (26.03.2026):
 | CC_TASK_W1C_W1D_W1E.md | 1dc3966c | 🔄 RUNNING |
 
 Gemini radi autonomno. Rezultati će biti u git commitovima.
-WhatsApp report Ivanu na +491723006985 po završetku svakog taska.
+WhatsApp report Ivanu na +4915771998747 po završetku svakog taska.
 
 ---
 
@@ -283,7 +283,7 @@ WhatsApp report Ivanu na +491723006985 po završetku svakog taska.
 
 ### Što radi u pozadini:
 - Gemini: 3 taska pokrenuta (bugfix + pricing + W1C/D/E)
-- Celery beat: test runner 02:00 + 07:30 → WhatsApp na +491723006985
+- Celery beat: test runner 02:00 + 07:30 → WhatsApp na +4915771998747
 - Šekijeve notifikacije: ugašene ✅
 
 ### Za sutra (Ivan nastavlja):
@@ -329,7 +329,7 @@ Sonnet odlučuje, delegira Geminiju, javlja Ivanu samo kad mora.
 2. **LOV NA BUGOVE** — 500 greške, pravni rizici, sigurnosni propusti = ODMAH akcija
 3. **DELEGIRANJE** — piše GEMINI_TASK fajlove i pokreće ih autonomno
 4. **ZAKONSKA USKLAĐENOST** — svaka promjena mora biti HR/DE/EU compliant
-5. **GLASNIK** — WhatsApp Ivanu (+491723006985) SAMO za:
+5. **GLASNIK** — WhatsApp Ivanu (+4915771998747) SAMO za:
    - Kritični bug ili pravni rizik
    - Potrebna Ivanova odluka (server, certifikat, API key, novac)
    - Značajan milestone (novi modul live, svi testovi zeleni)

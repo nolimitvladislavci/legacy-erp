@@ -33,7 +33,7 @@ def run_gemini_task(self, task_description, max_steps=10, requested_by='system')
         from core.whatsapp import send_text
         try:
             send_text(
-                phone='+491723006985',
+                phone='+4915771998747',
                 message="Gemini task nije izvrsio nista (0 fajlova). Task: " + task_description[:80] + " | " + requested_by
             )
         except Exception:

@@ -783,12 +783,12 @@ CELERY_BEAT_SCHEDULE.update({
     "fenix-nightly-system-test": {
         "task": "core.run_system_test_task",
         "schedule": crontab(hour=2, minute=0),  # Svaku noć 02:00
-        "kwargs": {"phone": "+491723006985", "quick": False},
+        "kwargs": {"phone": "+4915771998747", "quick": False},
     },
     "fenix-quick-morning-check": {
         "task": "core.run_system_test_task",
         "schedule": crontab(hour=7, minute=30),  # Jutarnji quick check 07:30
-        "kwargs": {"phone": "+491723006985", "quick": True},
+        "kwargs": {"phone": "+4915771998747", "quick": True},
     },
 })
 

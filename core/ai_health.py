@@ -202,7 +202,7 @@ def run_ai_health_check():
                 f'Status: {ok_count}/{total} komponenti OK\n'
                 f'https://limit-connect.com/superadmin/ai/'
             )
-            send_text(phone='+491723006985', message=poruka)
+            send_text(phone='+4915771998747', message=poruka)
         except Exception as e:
             logger.error(f'WhatsApp AI health alert greška: {e}')
 

@@ -1,7 +1,7 @@
 """
 Management command: run_system_test
 Pokreće kompletni simulacijski test sustava i šalje WhatsApp report.
-Može se pozivati: manage.py run_system_test --notify=+491723006985
+Može se pozivati: manage.py run_system_test --notify=+4915771998747
 Ili automatski iz Celery beat.
 """
 import subprocess
@@ -12,7 +12,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 
-IVAN_DE_PHONE = '+491723006985'
+IVAN_DE_PHONE = '+4915771998747'
 
 MODULI = [
     ('invoicing', 'Invoicing / Fakture'),
