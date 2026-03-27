@@ -2298,3 +2298,213 @@ class ZadruznRevizija(models.Model):
         db_table = 'udruge_zadruzna_revizija'
         verbose_name = 'Zadružna revizija'
         ordering = ['-godina']
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GOLUBAR MODUL — Petar Brtan pilot (2026-03-27)
+# Sprint G1: Temeljni modeli s Genetskim pečatom
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Golubinjak(models.Model):
+    """Registrirani golubinjak — EU obveza (Uredba 2016/429)."""
+    company     = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='golubinjaci')
+    naziv       = models.CharField(max_length=200)
+    adresa      = models.CharField(max_length=300, blank=True)
+    gps_lat     = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    gps_lng     = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    eu_reg_broj = models.CharField(max_length=50, blank=True, help_text='HR-XX-YYYY-ZZZZ (EU 2016/429)')
+    kapacitet   = models.PositiveIntegerField(default=0)
+    aktivan     = models.BooleanField(default=True)
+    napomena    = models.TextField(blank=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Golubinjak'
+        verbose_name_plural = 'Golubinjaci'
+
+    def __str__(self):
+        return f'{self.naziv} ({self.eu_reg_broj or "bez EU broja"})'
+
+
+class Golub(models.Model):
+    """Individualni golub s rodovnikom i genetskim pečatom (Dron #3)."""
+    SPOL = [('M', 'Mužjak'), ('F', 'Ženka'), ('?', 'Nepoznato')]
+    BOJA = [('plav','Plav'),('bijel','Bijel'),('crn','Crn'),
+            ('crvena_siva','Crvena/siva'),('karirani','Karirani'),('ostalo','Ostalo')]
+
+    company     = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='golubovi')
+    golubinjak  = models.ForeignKey(Golubinjak, on_delete=models.SET_NULL, null=True, blank=True, related_name='golubovi')
+    prsten_broj = models.CharField(max_length=30, unique=True, help_text='LOK/HOG prsten, npr. HR-2024-12345')
+    naziv       = models.CharField(max_length=100, blank=True)
+    spol        = models.CharField(max_length=1, choices=SPOL, default='?')
+    boja        = models.CharField(max_length=20, choices=BOJA, default='ostalo')
+    datum_izlijeganja = models.DateField(null=True, blank=True)
+    fotografija = models.ImageField(upload_to='golubovi/', null=True, blank=True)
+    aktivan     = models.BooleanField(default=True)
+    napomena    = models.TextField(blank=True)
+
+    # Rodovnik — direktni roditelji (2 razine = 6 predaka vidljivo)
+    otac  = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='djeca_otac')
+    majka = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='djeca_majka')
+
+    # Genetski pečat — Data Vaulting (Dron #3)
+    is_sealed     = models.BooleanField(default=False)
+    sealed_at     = models.DateTimeField(null=True, blank=True)
+    sealed_reason = models.CharField(max_length=200, blank=True)
+    genetics_hash = models.CharField(max_length=64, blank=True, help_text='SHA-256 za offline verifikaciju')
+
+    # Cache statistika
+    broj_utrka   = models.PositiveIntegerField(default=0)
+    broj_pobjeda = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Golub'
+        verbose_name_plural = 'Golubovi'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.prsten_broj} — {self.naziv or "bez naziva"}'
+
+    def izracunaj_genetics_hash(self):
+        import hashlib, json
+        data = {
+            'prsten':       self.prsten_broj,
+            'datum':        str(self.datum_izlijeganja),
+            'otac':         self.otac.prsten_broj if self.otac else None,
+            'majka':        self.majka.prsten_broj if self.majka else None,
+            'djed_oc':      self.otac.otac.prsten_broj if self.otac and self.otac.otac else None,
+            'baka_oc':      self.otac.majka.prsten_broj if self.otac and self.otac.majka else None,
+            'djed_maj':     self.majka.otac.prsten_broj if self.majka and self.majka.otac else None,
+            'baka_maj':     self.majka.majka.prsten_broj if self.majka and self.majka.majka else None,
+        }
+        return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
+
+    def zapecati(self, razlog='aukcija'):
+        from django.utils import timezone
+        if not self.is_sealed:
+            self.genetics_hash = self.izracunaj_genetics_hash()
+            self.is_sealed    = True
+            self.sealed_at    = timezone.now()
+            self.sealed_reason = razlog
+            self.save()
+
+
+class ParGolubova(models.Model):
+    company    = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='parovi_golubova')
+    golubinjak = models.ForeignKey(Golubinjak, on_delete=models.CASCADE, related_name='parovi')
+    muzjak     = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='par_muzjak')
+    zenka      = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='par_zenka')
+    sezona     = models.PositiveIntegerField(help_text='Godina')
+    datum_spajanja   = models.DateField(null=True, blank=True)
+    datum_razdvajanja = models.DateField(null=True, blank=True)
+    aktivan    = models.BooleanField(default=True)
+    napomena   = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Par golubova'
+        verbose_name_plural = 'Parovi golubova'
+
+    def __str__(self):
+        return f'{self.muzjak} × {self.zenka} ({self.sezona})'
+
+
+class Leglo(models.Model):
+    par                  = models.ForeignKey(ParGolubova, on_delete=models.CASCADE, related_name='legla')
+    datum_jaja           = models.DateField(null=True, blank=True)
+    datum_izlijeganja_1  = models.DateField(null=True, blank=True)
+    datum_izlijeganja_2  = models.DateField(null=True, blank=True)
+    ptic_1 = models.ForeignKey(Golub, on_delete=models.SET_NULL, null=True, blank=True, related_name='leglo_ptic1')
+    ptic_2 = models.ForeignKey(Golub, on_delete=models.SET_NULL, null=True, blank=True, related_name='leglo_ptic2')
+    napomena   = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Leglo'
+        verbose_name_plural = 'Legla'
+
+
+class ZdravstveniZapisGolub(models.Model):
+    """EU PMV/Newcastle obaveza (Uredba 2016/429) — zdravstveni dnevnik."""
+    VRSTA = [
+        ('pmv',       'Cijepljenje PMV (Paramyxovirus)'),
+        ('newcastle', 'Cijepljenje Newcastle'),
+        ('paratifus', 'Cijepljenje Paratifus'),
+        ('antipar',   'Antiparazitik'),
+        ('antibiot',  'Antibiotik'),
+        ('vet',       'Veterinarski pregled'),
+        ('ostalo',    'Ostalo'),
+    ]
+    golub            = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='zdravstveni_zapisi')
+    vrsta            = models.CharField(max_length=15, choices=VRSTA)
+    datum            = models.DateField()
+    lijek_preparat   = models.CharField(max_length=200, blank=True)
+    doza             = models.CharField(max_length=100, blank=True)
+    veterinar        = models.CharField(max_length=200, blank=True)
+    sljedeci_tretman = models.DateField(null=True, blank=True, help_text='Okida Celery podsjetnik')
+    napomena         = models.TextField(blank=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Zdravstveni zapis goluba'
+        verbose_name_plural = 'Zdravstveni zapisi golubova'
+        ordering = ['-datum']
+
+    def __str__(self):
+        return f'{self.golub.prsten_broj} — {self.get_vrsta_display()} ({self.datum})'
+
+
+class Utrka(models.Model):
+    """Utrka — ERP razina, BEZ timing sustava (Dron #2)."""
+    company        = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='utrke_golub')
+    naziv          = models.CharField(max_length=200)
+    datum          = models.DateField()
+    startna_tocka  = models.CharField(max_length=200)
+    startna_lat    = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    startna_lng    = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    udaljenost_km  = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    organizator    = models.CharField(max_length=200, blank=True)
+    broj_natjecatelja = models.PositiveIntegerField(null=True, blank=True)
+    uvjeti         = models.CharField(max_length=200, blank=True, help_text='Vjetar, oblaci...')
+    napomena       = models.TextField(blank=True)
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Utrka'
+        verbose_name_plural = 'Utrke'
+        ordering = ['-datum']
+
+    def __str__(self):
+        return f'{self.naziv} ({self.datum})'
+
+
+class RezultatUtrke(models.Model):
+    """Rezultat jednog goluba — uvoz iz ETS/Bricon CSV."""
+    utrka              = models.ForeignKey(Utrka, on_delete=models.CASCADE, related_name='rezultati')
+    golub              = models.ForeignKey(Golub, on_delete=models.CASCADE, related_name='rezultati_utrka')
+    placiranje         = models.PositiveIntegerField(null=True, blank=True)
+    placiranje_ukupno  = models.PositiveIntegerField(null=True, blank=True)
+    brzina_mpm         = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                              help_text='Metri po minuti — standard')
+    vrijeme_dolaska    = models.DateTimeField(null=True, blank=True)
+    bodovi             = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    ets_data           = models.JSONField(null=True, blank=True, help_text='Raw CSV/JSON iz ETS clock-a')
+    created_at         = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Rezultat utrke'
+        verbose_name_plural = 'Rezultati utrka'
+        unique_together = [('utrka', 'golub')]
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        g = self.golub
+        g.broj_utrka   = RezultatUtrke.objects.filter(golub=g).count()
+        g.broj_pobjeda = RezultatUtrke.objects.filter(golub=g, placiranje=1).count()
+        g.save(update_fields=['broj_utrka', 'broj_pobjeda'])
+
+    def __str__(self):
+        return f'{self.golub} — {self.utrka} (#{self.placiranje})'
