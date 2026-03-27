@@ -17,6 +17,7 @@ logger = logging.getLogger('whatsapp')
 WHATSAPP_TEST_MODE = getattr(settings, 'WHATSAPP_TEST_MODE', True)
 WHATSAPP_WHITELIST = getattr(settings, 'WHATSAPP_WHITELIST', [
     '491723006985',  # Ivan DE broj (Nufringen)
+    '385976715957',  # Petar Brtan (golubar tester)
 ])
 # ──────────────────────────────────────────────────────────────────────────
 
