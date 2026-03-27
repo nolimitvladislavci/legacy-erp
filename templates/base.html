@@ -195,7 +195,7 @@
         /* ═══ MOBILE ═══ */
         /* ── GLOBAL MOBILE RESPONSIVE ── */
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar { transform: translateX(-100%); width: 280px; bottom: 60px !important; }
             .sidebar.open { transform: translateX(0); }
 
             /* Touch targets: min 44px (Apple HIG / WCAG 2.5.5) */
@@ -277,7 +277,7 @@
             /* Sidebar footer: fixed na dnu vidljivog sidebara na mobitelu */
             .sidebar .sidebar-footer {
                 position: fixed;
-                bottom: 0;
+                bottom: 60px;
                 left: 0;
                 width: 280px;
                 transform: translateX(-100%);
@@ -291,7 +291,7 @@
                 transform: translateX(0);
             }
             /* Padding na dnu sidebara da zadnji link nije ispod footera */
-            .sidebar { padding-bottom: 140px; }
+            .sidebar { padding-bottom: 80px; }
             .main { margin-left: 0; }
             .hamburger { display: block; }
             .content { padding: 12px; }
