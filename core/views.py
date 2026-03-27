@@ -89,6 +89,9 @@ def dashboard_router(request):
         # worker / unknown → worker dashboard
         return redirect('worker_dashboard')
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+
+@ensure_csrf_cookie
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')

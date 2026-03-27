@@ -823,3 +823,5 @@ CELERY_BEAT_SCHEDULE.update({
         'schedule': crontab(day_of_month='1', hour='6', minute='0'),
     },
 })
+
+CSRF_FAILURE_VIEW = 'core.csrf_handler.csrf_failure_view'
