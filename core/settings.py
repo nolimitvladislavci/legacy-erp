@@ -891,3 +891,15 @@ CELERY_BEAT_SCHEDULE.update({
 })
 
 CSRF_FAILURE_VIEW = 'core.csrf_handler.csrf_failure_view'
+
+# ── BORG Sentineli ──────────────────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "borg-schema-drift-weekly": {
+        "task": "borg_ops.tasks.schema_drift_check",
+        "schedule": crontab(day_of_week='sunday', hour='3', minute='0'),
+    },
+    "borg-orphan-data-weekly": {
+        "task": "borg_ops.tasks.orphan_data_check",
+        "schedule": crontab(day_of_week='sunday', hour='3', minute='30'),
+    },
+})

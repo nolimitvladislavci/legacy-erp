@@ -206,6 +206,16 @@ class ExperienceBooking(models.Model):
 
     # PrepaymentEscrow
     deposit_forfeited = models.BooleanField(default=False, verbose_name=_('Depozit zadržan (no-show)'))
+    deposit_invoice = models.ForeignKey(
+        'invoicing.Invoice', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='deposit_bookings',
+        verbose_name=_('Avansni račun (predujam)'),
+    )
+    forfeited_invoice = models.ForeignKey(
+        'invoicing.Invoice', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='forfeited_bookings',
+        verbose_name=_('Konačni račun (no-show)'),
+    )
     refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Povrat'))
 
     # POS veza
