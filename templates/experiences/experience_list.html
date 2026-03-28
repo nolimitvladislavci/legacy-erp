@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Iskustva{% endblock %}
+{% block extra_css %}<style>
+.exp-container{max-width:1100px;margin:0 auto}
+.exp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.exp-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center}
+.exp-stat-value{font-size:1.6rem;font-weight:800;color:var(--text)}
+.exp-stat-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);margin-top:2px}
+.exp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;transition:border-color .2s}
+.exp-card:hover{border-color:var(--gold-border)}
+.exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
+.exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
+.exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
+.exp-section{margin-bottom:1.5rem}
+.exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
+.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
+.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
+.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+</style>{% endblock %}
+{% block content %}
+<div class="exp-container">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)"><i class="fas fa-hiking me-2" style="color:var(--gold)"></i>Iskustva & Aktivnosti</h2>
+    <small style="color:var(--text-dim)">Degustacije, radionice, ture — sve na jednom mjestu</small>
+  </div>
+  <a href="{% url 'experiences:experience_create' %}" class="exp-btn-gold"><i class="fas fa-plus me-1"></i>Novo iskustvo</a>
+</div>
+
+<div class="exp-stats">
+  <div class="exp-stat"><div class="exp-stat-value" style="color:var(--gold)">{{ stats.ukupno|default:0 }}</div><div class="exp-stat-label">Iskustava</div></div>
+  <div class="exp-stat"><div class="exp-stat-value" style="color:#22c55e">{{ stats.aktivnih|default:0 }}</div><div class="exp-stat-label">Aktivnih</div></div>
+  <div class="exp-stat"><div class="exp-stat-value">{{ stats.bookinga|default:0 }}</div><div class="exp-stat-label">Rezervacija</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.25rem">
+  <form method="get" class="d-flex gap-2 flex-wrap align-items-center">
+    <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm exp-input" placeholder="Pretraži..." style="max-width:250px">
+    <select name="type" class="form-select form-select-sm exp-input" style="max-width:180px">
+      <option value="">Sve vrste</option>
+      {% for code, label in type_choices %}<option value="{{ code }}" {% if exp_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:600"><i class="fas fa-search me-1"></i>Traži</button>
+  </form>
+</div>
+
+{% if page %}
+<div class="row g-3">
+  {% for exp in page %}
+  <div class="col-md-6 col-lg-4">
+    <a href="{% url 'experiences:experience_detail' exp.pk %}" class="text-decoration-none">
+    <div class="exp-card">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h6 style="font-weight:700;color:var(--text);margin:0">{{ exp.name }}</h6>
+        <span class="exp-badge" style="background:var(--gold-dim);color:var(--gold)">{{ exp.get_experience_type_display }}</span>
+      </div>
+      <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem">{{ exp.description|truncatewords:20 }}</div>
+      <div class="d-flex justify-content-between align-items-center" style="font-size:.78rem">
+        <span style="color:var(--text-dim)"><i class="fas fa-clock me-1"></i>{{ exp.duration_minutes }} min</span>
+        <span style="color:var(--text-dim)"><i class="fas fa-users me-1"></i>max {{ exp.capacity }}</span>
+        <span style="color:var(--gold);font-weight:700">{{ exp.price_per_person }} €/os</span>
+      </div>
+    </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% include "partials/pagination.html" with page_obj=page %}
+{% else %}
+<div class="exp-empty"><i class="fas fa-hiking"></i><h5>Nema iskustava</h5><p>Kreirajte prvu aktivnost za goste.</p><a href="{% url 'experiences:experience_create' %}" class="exp-btn-gold"><i class="fas fa-plus me-1"></i>Kreiraj</a></div>
+{% endif %}
+</div>
+{% endblock %}

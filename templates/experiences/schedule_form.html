@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Novi termin — {{ exp.name }}{% endblock %}
+{% block extra_css %}<style>
+.exp-container{max-width:1100px;margin:0 auto}
+.exp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.exp-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center}
+.exp-stat-value{font-size:1.6rem;font-weight:800;color:var(--text)}
+.exp-stat-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim);margin-top:2px}
+.exp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;transition:border-color .2s}
+.exp-card:hover{border-color:var(--gold-border)}
+.exp-form{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.exp-input{background:var(--dark)!important;border-color:var(--border)!important;color:var(--text)!important;border-radius:8px!important}
+.exp-btn-gold{background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;border:none}
+.exp-btn-gold:hover{opacity:.9;color:#0a0a0a}
+.exp-badge{padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700}
+.exp-empty{text-align:center;padding:4rem 2rem;color:var(--text-dim)}
+.exp-empty i{font-size:3rem;opacity:.15;margin-bottom:.75rem;display:block}
+.exp-section{margin-bottom:1.5rem}
+.exp-section h5{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);margin-bottom:.75rem}
+.severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
+.severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
+.severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
+</style>{% endblock %}
+{% block content %}
+<div class="exp-container">
+<a href="{% url 'experiences:experience_detail' exp.pk %}" style="color:var(--text-dim);font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>{{ exp.name }}</a>
+<h2 style="font-size:1.5rem;font-weight:800;margin:.5rem 0 1.5rem;color:var(--text)"><i class="fas fa-calendar-plus me-2" style="color:var(--gold)"></i>Novi termin</h2>
+<form method="POST" class="exp-form">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Datum</label><input type="date" name="date" class="form-control exp-input" required></div>
+    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Od</label><input type="time" name="time_from" class="form-control exp-input" required></div>
+    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Do</label><input type="time" name="time_to" class="form-control exp-input" required></div>
+    <div class="col-md-4"><label class="form-label small fw-bold" style="color:var(--text-dim)">Max gostiju</label><input type="number" name="max_pax" value="{{ exp.capacity }}" class="form-control exp-input"></div>
+  </div>
+  <div class="mt-4"><button type="submit" class="exp-btn-gold"><i class="fas fa-save me-1"></i>Dodaj termin</button></div>
+</form>
+</div>
+{% endblock %}
