@@ -203,7 +203,7 @@ def change_password(request):
         p2 = request.POST.get('new_password2', '').strip()
         if p1 != p2:
             messages.error(request, 'Lozinke se ne podudaraju.')
-        elif len(p1) < 8:
+        elif len(p1) < 10:
             messages.error(request, 'Lozinka mora imati najmanje 8 znakova.')
         else:
             request.user.set_password(p1)
@@ -244,8 +244,8 @@ def quick_register(request):
             errors['email'] = 'Email je obavezan.'
         elif User.objects.filter(email=email).exists():
             errors['email'] = 'Korisnik s ovim emailom vec postoji.'
-        if len(password) < 8:
-            errors['password'] = 'Lozinka mora imati najmanje 8 znakova.'
+        if len(password) < 10:
+            errors['password'] = 'Lozinka mora imati najmanje 10 znakova.'
         if errors:
             return render(request, 'accounts/quick_register.html', {
                 'errors': errors, 'name': name, 'email': email, 'phone': phone,

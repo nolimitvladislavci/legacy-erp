@@ -346,6 +346,8 @@ def setup_2fa(request):
                 messages.success(request, _('✓ 2FA aktiviran! Koristite Google Authenticator za prijavu.'))
                 return redirect(get_dashboard_url(request.user))
             else:
+                _ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', '')
+                LoginAttempt.objects.create(email=f'2fa_setup_{request.user.pk}', ip_address=_ip, success=False, method='2fa')
                 messages.error(request, _('Pogrešan kod. Pokušajte ponovo.'))
 
     # Generiraj novi secret
@@ -376,7 +378,7 @@ def setup_2fa(request):
 
 # ── 2FA VERIFY
 def verify_2fa(request):
-    """Provjera 2FA koda pri prijavi"""
+    """Provjera 2FA koda pri prijavi — rate limited (5/10min)"""
     user_id = request.session.get('pending_2fa_user')
     if not user_id:
         return redirect('smart_login')
@@ -384,11 +386,19 @@ def verify_2fa(request):
     if request.method == 'POST':
         import pyotp
         code = request.POST.get('code', '').replace(' ', '')
+
+        # Rate limit: max 5 pokušaja u 10 min (sprečava brute-force 6-digit koda)
+        ip = request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', '')
+        attempt_key = f'2fa_{user_id}'
+        if LoginAttempt.is_blocked(ip, attempt_key, max_attempts=5, minutes=10):
+            messages.error(request, _('Previše neuspješnih pokušaja. Pričekajte 10 minuta.'))
+            return render(request, 'accounts/verify_2fa.html')
         try:
             user = User.objects.get(pk=user_id)
             profile = user.userprofile
             totp = pyotp.TOTP(profile.totp_secret)
             if totp.verify(code):
+                LoginAttempt.objects.create(email=attempt_key, ip_address=ip, success=True, method='2fa')
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
                 login(request, user)
                 del request.session['pending_2fa_user']
@@ -396,6 +406,7 @@ def verify_2fa(request):
                 messages.success(request, _('✓ Uspješna 2FA provjera!'))
                 return redirect(next_url)
             else:
+                LoginAttempt.objects.create(email=attempt_key, ip_address=ip, success=False, method='2fa')
                 messages.error(request, _('Pogrešan kod. Pokušajte ponovo.'))
         except Exception as e:
             messages.error(request, _('Greška provjere.'))
@@ -434,8 +445,8 @@ def password_reset_confirm(request):
         p2 = request.POST.get('password2', '')
         if p1 != p2:
             messages.error(request, _('Lozinke se ne podudaraju.'))
-        elif len(p1) < 8:
-            messages.error(request, _('Lozinka mora imati najmanje 8 znakova.'))
+        elif len(p1) < 10:
+            messages.error(request, _('Lozinka mora imati najmanje 10 znakova.'))
         else:
             request.user.set_password(p1)
             request.user.save()

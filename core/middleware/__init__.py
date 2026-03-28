@@ -95,7 +95,7 @@ class ForcePasswordChangeMiddleware(MiddlewareMixin):
             return None
         if request.user.is_superuser:
             return None
-        if request.path.startswith('/accounts/password/') or request.path.startswith('/accounts/logout'):
+        if request.path.startswith('/accounts/password/') or request.path.startswith('/accounts/logout') or request.path.startswith('/onboarding/'):
             return None
         try:
             profile = request.user.profile
