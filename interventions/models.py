@@ -7,9 +7,20 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.managers import CompanyManager
+from borg_ops.mixins import FSMMixin
 
 
-class HitnaIntervencija(models.Model):
+class HitnaIntervencija(FSMMixin, models.Model):
+    STATUS_FIELD = 'status'
+    TRANSITIONS = {
+        'NOVO':        ['DODIJELJENO'],
+        'DODIJELJENO': ['NA_PUTU', 'NOVO'],
+        'NA_PUTU':     ['NA_LOKACIJI'],
+        'NA_LOKACIJI': ['RIJESENO', 'ESKALIRANO'],
+        'RIJESENO':    ['FAKTURIRANO'],
+        'ESKALIRANO':  ['RIJESENO'],
+        'FAKTURIRANO': [],  # terminal
+    }
 
     class Status(models.TextChoices):
         NOVO        = 'NOVO',        'Novi poziv'
@@ -115,5 +126,7 @@ class HitnaIntervencija(models.Model):
         self.assigned_to = user
         self.assigned_at = timezone.now()
         self.ttl_expires_at = timezone.now() + timedelta(minutes=ttl_minutes)
+        self._fsm_transition_active = True
         self.status = self.Status.DODIJELJENO
-        self.save()
+        super().save()
+        self._fsm_transition_active = False

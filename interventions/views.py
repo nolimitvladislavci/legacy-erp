@@ -30,17 +30,13 @@ KANBAN_ORDER = [
 
 
 def _get_company_workers(company):
-    """Return workers for assignment dropdown.
-    - With company: workers of that company (role=worker).
-    - Without company (superadmin): all active workers across all companies.
-    """
+    """Return workers for assignment dropdown."""
     try:
         if company:
             user_ids = UserProfile.objects.filter(
                 company=company, role='worker'
             ).values_list('user_id', flat=True)
         else:
-            # Superadmin has no company in thread-local — return all workers
             user_ids = UserProfile.objects.filter(
                 role='worker'
             ).values_list('user_id', flat=True)
@@ -147,7 +143,7 @@ def field_view(request, pk):
 @login_required
 @require_POST
 def update_status(request, pk):
-    """AJAX: update intervention status (transaction-locked)."""
+    """AJAX: update intervention status (FSM validated, transaction-locked)."""
     try:
         data = json.loads(request.body)
         new_status = data.get('status', '').upper()
@@ -161,12 +157,16 @@ def update_status(request, pk):
         with transaction.atomic():
             interv = HitnaIntervencija.objects.select_for_update().get(pk=pk)
 
+            # FSM validated transition
+            try:
+                interv.transition_to(new_status, user=request.user, save=False)
+            except ValueError as e:
+                return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+
             # Set timestamp for this status
             ts_field = STATUS_TIMESTAMPS.get(new_status)
             if ts_field:
                 setattr(interv, ts_field, timezone.now())
-
-            interv.status = new_status
 
             # If assigning, set assigned fields
             if new_status == 'DODIJELJENO' and not interv.assigned_to:
@@ -174,7 +174,7 @@ def update_status(request, pk):
                 interv.assigned_at = timezone.now()
                 interv.ttl_expires_at = timezone.now() + timedelta(minutes=3)
 
-            interv.save()
+            super(type(interv), interv).save()
 
         status_label = dict(HitnaIntervencija.Status.choices).get(new_status, new_status)
         return JsonResponse({
@@ -269,9 +269,13 @@ def escalate(request, pk):
             internal_notes=f'Eskalirano s hitne intervencije #{interv.pk} | {interv.get_category_display()}',
             created_by=request.user,
         )
-        interv.status = HitnaIntervencija.Status.ESKALIRANO
+        # FSM validated escalation
+        try:
+            interv.transition_to('ESKALIRANO', user=request.user, save=True)
+        except ValueError as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=500)
         interv.project_lead = lead
-        interv.save(update_fields=['status', 'project_lead'])
+        super(type(interv), interv).save(update_fields=['project_lead'])
         return JsonResponse({
             'ok': True,
             'lead_id': lead.pk,
@@ -332,9 +336,7 @@ def tracking_view(request, tracking_token):
 
 @csrf_exempt
 def public_intervention(request):
-    """Public (no login) form to submit a new Hitna Intervencija.
-    Returns tracking page URL after submission.
-    """
+    """Public (no login) form to submit a new Hitna Intervencija."""
     from companies.models import Company
 
     categories = HitnaIntervencija.Category.choices
@@ -354,7 +356,6 @@ def public_intervention(request):
                 'post': request.POST,
             })
 
-        # Use company from thread-local context, or first available company
         from core.tenant import get_current_company
         company = get_current_company()
         if not company:
@@ -378,7 +379,6 @@ def public_intervention(request):
             status=HitnaIntervencija.Status.NOVO,
         )
 
-        # Redirect to tracking page
         return redirect(f'/track/{interv.tracking_token}/')
 
     return render(request, 'interventions/public_form.html', {
