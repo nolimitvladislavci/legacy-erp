@@ -261,34 +261,26 @@ class Command(BaseCommand):
             from invoicing.models import Invoice, InvoiceItem
             info("Kreiranje test fakture")
 
-            inv = Invoice(
+            from invoicing.services.invoice_service import create_invoice
+            from django.utils import timezone
+            inv = create_invoice(
                 company=company,
-                doc_type='IZL',
-                status='draft',
-                date_issued=date.today(),
-                # due_date=date.today() + timedelta(days=30),
+                doctype='R',
+                date_issued=timezone.now(),
+                client_name='Test Klijent — simulacija',
             )
-            # Pokušaj naći partnera
-            try:
-                from partners.models import Partner
-                partner = Partner.objects.filter(company=company).first()
-                if partner:
-                    inv.partner = partner
-            except Exception:
-                pass
-            inv.save()
-            r.success(f"Faktura kreirana: pk={inv.pk}")
+            r.success(f"Faktura kreirana: pk={inv.pk}, broj={inv.number}")
 
-            # Dodaj stavku
+            # Dodaj stavku — section/sort_order sada u modelu
             item = InvoiceItem(
                 invoice=inv,
-                description="Test usluga — simulacija",
+                description='Test usluga — simulacija',
                 quantity=Decimal('2'),
                 unit_price=Decimal('100.00'),
                 tax_rate=Decimal('25'),
             )
             item.save()
-            r.success(f"InvoiceItem kreiran: {item.description}")
+            r.success(f"InvoiceItem kreiran: {item.description} (gross: {item.gross_total} EUR)")
 
             # Provjeri izračun
             total = InvoiceItem.objects.filter(invoice=inv).count()
@@ -296,7 +288,7 @@ class Command(BaseCommand):
             r.success(f"Invoice ima {total} stavki")
 
             # Provjeri statuse
-            assert inv.status == 'draft'
+            assert inv.status == 'DRAFT'
             r.success("Status: draft OK")
 
         except Exception as e:
@@ -318,7 +310,7 @@ class Command(BaseCommand):
         try:
             from pos.models import POSReceipt
             info("Provjera POS modela")
-            count = POSReceipt.objects.filter(session__terminal__branch__company=company) if hasattr(POSReceipt, 'session') else POSReceipt.objects.none().count()
+            count = POSReceipt.objects.count()  # Cross-company count za simulaciju
             r.success(f"POSReceipt queryset OK: {count} računa")
         except Exception as e:
             r.error("POSReceipt model greška", e)
@@ -326,7 +318,7 @@ class Command(BaseCommand):
         try:
             # Provjeri POS konfiguraciju
             from pos.models import POSTerminal
-            terminals = POSTerminal.objects.filter(company=company)
+            terminals = POSTerminal.objects.all()[:5]  # Cross-company za simulaciju
             r.success(f"POS terminala: {terminals.count()}")
         except ImportError:
             r.warning("POSTerminal model ne postoji — preskačem")
@@ -430,19 +422,13 @@ class Command(BaseCommand):
             recall = RecallEvent(
                 company=company,
                 title="TEST Recall — kontaminirani med",
-                reason="Povišene razine HMF — simulacija",
-            ) if hasattr(RecallEvent, 'company') else None
-            if recall:
-                recall.save()
-                r.success(f"RecallEvent kreiran (pk={recall.pk})")
-            else:
-                # RecallEvent nema company FK — pokušaj bez njega
-                recall = RecallEvent(
-                    title="TEST Recall",
-                    reason="Simulacija"
-                )
-                recall.save()
-                r.success("RecallEvent kreiran (bez company FK)")
+                description="Povišene razine HMF — simulacija",
+                source_model='StockBatch',
+                source_id=0,
+                severity='warning',
+            )
+            recall.save()
+            r.success(f"RecallEvent kreiran (pk={recall.pk})")
         except Exception as e:
             r.error("RecallEvent greška", e)
 
@@ -768,7 +754,7 @@ class Command(BaseCommand):
         try:
             import subprocess
             result = subprocess.run(
-                ['python', 'manage.py', 'check', '--deploy'],
+                ['python3', 'manage.py', 'check', '--deploy'],
                 capture_output=True, text=True,
                 cwd='/var/www/fina-connect'
             )

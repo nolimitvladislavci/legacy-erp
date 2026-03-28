@@ -443,6 +443,11 @@ class InvoiceItem(models.Model):
         help_text=_('Veza na poreznu stopu iz registra'),
     )
 
+    # Grupiranje i sortiranje stavki na računu
+    section = models.CharField(max_length=100, blank=True, default='', verbose_name=_('Sekcija'),
+                                help_text=_('Opcionalano grupiranje stavki na računu'))
+    sort_order = models.PositiveIntegerField(default=0, verbose_name=_('Redoslijed'))
+
     # Veza na InventoryItem (opcionalno - za praćenje zaliha)
     inventory_item = models.ForeignKey(
         'inventory.InventoryItem', on_delete=models.SET_NULL,
