@@ -1,0 +1,42 @@
+{% load tz %}
+<style>
+.card-timeline{padding:8px 0}
+.ct-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.ct-item:last-child{border-bottom:none}
+.ct-dot{width:10px;height:10px;border-radius:50%;background:#334155;margin-top:5px;flex-shrink:0}
+.ct-dot.ct-status{background:#c9a84c}
+.ct-body{flex:1;min-width:0}
+.ct-action{font-size:.82rem;color:#f1f5f9;font-weight:500}
+.ct-badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:.7rem;font-weight:600;letter-spacing:.3px}
+.ct-old{background:rgba(239,68,68,.12);color:#f87171}
+.ct-new{background:rgba(16,185,129,.12);color:#34d399}
+.ct-arrow{color:#64748b;font-size:.65rem;margin:0 4px}
+.ct-meta{font-size:.7rem;color:#64748b;margin-top:2px}
+.ct-empty{text-align:center;padding:24px;color:#475569;font-size:.8rem}
+</style>
+
+<div class="card-timeline">
+  {% for act in activities %}
+  <div class="ct-item">
+    <div class="ct-dot {% if act.action == 'status_change' %}ct-status{% endif %}"></div>
+    <div class="ct-body">
+      <div class="ct-action">
+        {% if act.action == 'status_change' %}
+          <span class="ct-badge ct-old">{{ act.old_value }}</span>
+          <span class="ct-arrow">&#8594;</span>
+          <span class="ct-badge ct-new">{{ act.new_value }}</span>
+        {% else %}
+          {{ act.action }}
+        {% endif %}
+      </div>
+      <div class="ct-meta">
+        {{ act.created_at|localtime|date:"d.m.Y H:i" }}
+        {% if act.user %}&middot; {{ act.user.get_full_name|default:act.user.username }}{% endif %}
+        {% if act.note %}<br><small>{{ act.note }}</small>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="ct-empty">Nema aktivnosti</div>
+  {% endfor %}
+</div>

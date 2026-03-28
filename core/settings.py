@@ -134,6 +134,7 @@ INSTALLED_APPS = [
     "einvoice",
     "limit_connect_ai",
     "tax_wizard",
+    "borg_ops",
 ]
 
 # ── Django Channels (WebSocket) ───────────────────────────────────────
@@ -874,6 +875,18 @@ CELERY_BEAT_SCHEDULE.update({
     'depreciation-monthly-reminder': {
         'task': 'inventory.tasks.depreciation_monthly_check',
         'schedule': crontab(day_of_month='1', hour='6', minute='0'),
+    },
+})
+
+# ── BORG SLA Check — svakih 10 min ──────────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    'borg-check-sla-10min': {
+        'task': 'borg_ops.check_sla',
+        'schedule': 600.0,
+    },
+    'borg-archive-old-activity-monthly': {
+        'task': 'borg_ops.archive_old_activity',
+        'schedule': crontab(day_of_month='1', hour='3', minute='30'),
     },
 })
 
