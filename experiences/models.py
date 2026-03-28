@@ -19,6 +19,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from core.managers import CompanyManager
@@ -324,6 +325,7 @@ class ExperienceBooking(models.Model):
 
         # KORAK 2: Konačni račun za naknadu nedolaska
         try:
+            sid2 = transaction.savepoint()
             from invoicing.services.invoice_service import create_invoice
             from invoicing.models import InvoiceItem
 
@@ -334,10 +336,11 @@ class ExperienceBooking(models.Model):
             invoice = create_invoice(
                 company=company,
                 doctype='R',  # Redovni račun (ne avansni!)
+                date_issued=timezone.now(),
                 client_name=self.guest_name,
                 client_email=self.guest_email or '',
-                client_phone=self.guest_phone or '',
-                notes=(
+                
+                note=(
                     f'Naknada za nedolazak (no-show) — "{experience.name}" '
                     f'({self.schedule.date}).{storno_ref} '
                     f'Rezervacija #{self.pk}.'
@@ -357,12 +360,14 @@ class ExperienceBooking(models.Model):
 
             self.forfeited_invoice = invoice
             self.save(update_fields=['forfeited_invoice'])
+            transaction.savepoint_commit(sid2)
 
             logger.info(
                 'Konačni no-show račun %s kreiran za booking #%d — %s EUR',
                 invoice.number or invoice.pk, self.pk, self.deposit_amount,
             )
         except Exception as e:
+            transaction.savepoint_rollback(sid2)
             logger.error(
                 'Konačni no-show račun FAILED za booking #%d: %s — '
                 'KRITIČNO: depozit %s EUR bez dokumenta!',
@@ -395,6 +400,7 @@ class ExperienceBooking(models.Model):
         import logging
         logger = logging.getLogger('experiences.deposit')
         try:
+            sid = transaction.savepoint()
             from invoicing.services.invoice_service import create_invoice
             from invoicing.models import InvoiceItem
 
@@ -404,12 +410,13 @@ class ExperienceBooking(models.Model):
             invoice = create_invoice(
                 company=company,
                 doctype='A',  # Avansni račun
+                date_issued=timezone.now(),
                 client_name=self.guest_name,
                 client_email=self.guest_email or '',
-                client_phone=self.guest_phone or '',
-                notes=(
+                
+                note=(
                     f'Avansni račun — depozit za "{experience.name}" '
-                    f'({self.schedule.date} {self.schedule.time_slot}). '
+                    f'({self.schedule.date} {self.schedule.time_from}). '
                     f'Rezervacija #{self.pk}, gostiju: {self.pax_count}.'
                 ),
             )
@@ -424,12 +431,14 @@ class ExperienceBooking(models.Model):
 
             self.deposit_invoice = invoice
             self.save(update_fields=['deposit_invoice'])
+            transaction.savepoint_commit(sid)
 
             logger.info(
                 'Deposit invoice A-%s kreiran za booking #%d — %s EUR',
                 invoice.number or invoice.pk, self.pk, self.deposit_amount,
             )
         except Exception as e:
+            transaction.savepoint_rollback(sid)
             logger.error('Deposit invoice FAILED za booking #%d: %s', self.pk, e)
 
 
