@@ -56,4 +56,22 @@ class Command(BaseCommand):
             )
             self.stdout.write(f'  {"+" if created else "~"} {dt}')
 
+
+        # ── Novi standardi (LIMIT Connect inovacija) ──
+        new_types = [
+            {'institution_code': 'SANIT', 'code': 'AGRO-HEALTH', 'name': 'Agro-Fiskalizacija — AgroHealth Report',
+             'period_type': 'monthly', 'generator_class': 'gov_export.generators.agro_health.AgroHealthGenerator'},
+            {'institution_code': 'PU', 'code': 'TOURIST-ZKI', 'name': 'Turistički ZKI — Asinkrona prijava gostiju',
+             'period_type': 'monthly', 'generator_class': 'gov_export.generators.tourist_registration.TouristRegistrationGenerator'},
+            {'institution_code': 'PU', 'code': 'INV-LEDGER', 'name': 'Forenzika Zaliha — InventoryLedger',
+             'period_type': 'monthly', 'generator_class': 'gov_export.generators.inventory_ledger.InventoryLedgerGenerator'},
+        ]
+        for data in new_types:
+            inst_code = data.pop('institution_code')
+            inst = GovInstitution.objects.get(code=inst_code)
+            dt, created = GovDocumentType.objects.update_or_create(
+                institution=inst, code=data['code'], defaults=data,
+            )
+            self.stdout.write(f'  {"+" if created else "~"} {dt}')
+
         self.stdout.write(self.style.SUCCESS('Done.'))

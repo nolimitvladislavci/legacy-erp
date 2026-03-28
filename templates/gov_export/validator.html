@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BORG Validator — LIMIT Connect</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.container{max-width:600px;width:100%}
+.logo{text-align:center;margin-bottom:2rem}
+.logo h1{font-size:1.8rem;font-weight:800;color:#c9a84c}
+.logo p{color:#64748b;font-size:.85rem;margin-top:.25rem}
+.card{background:#111827;border:1px solid #1e293b;border-radius:16px;padding:2rem;margin-bottom:1.5rem}
+.upload-zone{border:2px dashed #334155;border-radius:12px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:border-color .2s}
+.upload-zone:hover{border-color:#c9a84c}
+.upload-zone i{font-size:2.5rem;color:#475569;margin-bottom:1rem;display:block}
+.upload-zone p{color:#94a3b8;font-size:.9rem}
+input[type=file]{display:none}
+.btn{background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border:none;padding:.75rem 2rem;border-radius:10px;font-size:.9rem;cursor:pointer;width:100%;margin-top:1rem}
+.result{margin-top:1.5rem}
+.result-row{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid #1e293b;font-size:.85rem}
+.result-row:last-child{border:none}
+.result-row .label{color:#64748b}
+.result-row .value{font-weight:600}
+.badge-pass{background:rgba(34,197,94,.15);color:#22c55e;padding:3px 12px;border-radius:6px;font-size:.78rem;font-weight:700}
+.badge-fail{background:rgba(239,68,68,.15);color:#ef4444;padding:3px 12px;border-radius:6px;font-size:.78rem;font-weight:700}
+.verdict{text-align:center;padding:1.5rem;border-radius:12px;margin-top:1rem}
+.verdict.valid{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)}
+.verdict.invalid{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)}
+.verdict i{font-size:2rem;margin-bottom:.5rem;display:block}
+.verdict h3{font-size:1.1rem;margin-bottom:.25rem}
+.verdict p{font-size:.8rem;color:#94a3b8}
+.footer{text-align:center;color:#475569;font-size:.75rem;margin-top:2rem}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="logo">
+  <h1><i class="fas fa-shield-alt"></i> BORG Validator</h1>
+  <p>Javna provjera kriptografskog potpisa GovExport dokumenata</p>
+</div>
+
+<div class="card">
+  <form method="POST" enctype="multipart/form-data" id="validatorForm">
+    <div class="upload-zone" onclick="document.getElementById('xmlFile').click()">
+      <i class="fas fa-file-code"></i>
+      <p>Kliknite ili prevucite XML datoteku ovdje</p>
+      <p style="font-size:.75rem;color:#475569;margin-top:.5rem" id="fileName">Podržani formati: AgroHealth, TuristPrijava, InventoryLedger, eRačun</p>
+    </div>
+    <input type="file" name="xml_file" id="xmlFile" accept=".xml" onchange="document.getElementById('fileName').textContent=this.files[0]?.name||''">
+    <button type="submit" class="btn"><i class="fas fa-search me-2"></i>Provjeri dokument</button>
+  </form>
+</div>
+
+{% if result %}
+<div class="card">
+  <h4 style="color:#c9a84c;margin-bottom:1rem"><i class="fas fa-clipboard-check me-2"></i>Rezultat provjere</h4>
+  
+  <div class="result">
+    <div class="result-row"><span class="label">Datoteka</span><span class="value">{{ result.filename }}</span></div>
+    <div class="result-row"><span class="label">Veličina</span><span class="value">{{ result.size }} bytes</span></div>
+    <div class="result-row"><span class="label">SHA-256</span><span class="value" style="font-family:monospace;font-size:.75rem">{{ result.sha256|truncatechars:32 }}</span></div>
+    <div class="result-row"><span class="label">Tip dokumenta</span><span class="value">{{ result.doc_type }}</span></div>
+    <div class="result-row"><span class="label">Izdavatelj</span><span class="value">{{ result.issuer }}</span></div>
+    <div class="result-row"><span class="label">Generirano</span><span class="value">{{ result.generated }}</span></div>
+    <div class="result-row"><span class="label">Validan XML</span><span class="{% if result.valid_xml %}badge-pass{% else %}badge-fail{% endif %}">{% if result.valid_xml %}DA{% else %}NE{% endif %}</span></div>
+    <div class="result-row"><span class="label">Digitalni potpis</span><span class="{% if result.has_signature %}badge-pass{% else %}badge-fail{% endif %}">{% if result.has_signature %}Prisutan{% else %}Nema{% endif %}</span></div>
+    {% if result.has_signature %}
+    <div class="result-row"><span class="label">Potpis valjan</span><span class="{% if result.signature_valid %}badge-pass{% else %}badge-fail{% endif %}">{% if result.signature_valid %}DA — neizvmjenjen{% else %}NE{% endif %}</span></div>
+    {% endif %}
+    {% if result.registered %}
+    <div class="result-row"><span class="label">Registriran u sustavu</span><span class="badge-pass">{{ result.reference }} ({{ result.status }})</span></div>
+    {% endif %}
+  </div>
+
+  {% if result.valid_xml and result.has_signature and result.signature_valid %}
+  <div class="verdict valid">
+    <i class="fas fa-check-circle" style="color:#22c55e"></i>
+    <h3 style="color:#22c55e">Dokument je VALJAN</h3>
+    <p>Kriptografski potpis je ispravan. Sadržaj nije izmijenjen od trenutka potpisivanja.</p>
+  </div>
+  {% elif result.valid_xml and not result.has_signature %}
+  <div class="verdict" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)">
+    <i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i>
+    <h3 style="color:#f59e0b">Dokument NIJE potpisan</h3>
+    <p>XML je valjan ali nema digitalnog potpisa. Autentičnost se ne može potvrditi.</p>
+  </div>
+  {% else %}
+  <div class="verdict invalid">
+    <i class="fas fa-times-circle" style="color:#ef4444"></i>
+    <h3 style="color:#ef4444">Dokument je NEVALJAN</h3>
+    <p>{% if result.parse_error %}{{ result.parse_error }}{% elif result.signature_error %}Potpis: {{ result.signature_error }}{% else %}XML nije mogao biti parsiran.{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="footer">
+  BORG Validator — LIMIT Connect &copy; 2026 | <a href="https://limit-connect.com" style="color:#c9a84c">limit-connect.com</a>
+</div>
+
+</div>
+</body>
+</html>
