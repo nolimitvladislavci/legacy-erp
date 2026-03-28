@@ -49,6 +49,7 @@ urlpatterns = [
     path('manifest.json', _serve_manifest, name='manifest_json'),
     path('offline.html',  _serve_offline,  name='offline_html'),
     path('burza/', include('burza.urls', namespace='burza')),
+    path('', include('borg_ops.urls', namespace='borg_ops')),
     path('livestock/', include('livestock.urls', namespace='livestock')),
     path('intelligence/', include('intelligence.urls', namespace='intelligence')),
     path('marketplace/', include('marketplace.urls', namespace='marketplace')),
@@ -353,4 +354,10 @@ handler500 = 'core.error_handlers.custom_500_handler'
 urlpatterns += [
     path('', views.smart_home, name='home_root'),
     path('login/', views.login_view, name='login_fallback'),
+]
+
+# ── FenixScan — Universalni AI Document Scanner ──────────────────────────────
+from core.views_scan import fenix_scan
+urlpatterns += [
+    path('api/fenix/scan/', fenix_scan, name='fenix_scan'),
 ]
