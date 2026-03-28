@@ -140,14 +140,14 @@
         <h2><i class="fas fa-door-open"></i> Propter Soba</h2>
         <div class="soba-header-links">
             <a href="{% url 'propter:dashboard' %}"><i class="fas fa-leaf"></i> Propter Hub</a>
-            <a href="/smart-import/"><i class="fas fa-file-import"></i> Smart Import</a>
+            <a href="{% url 'smart_import:upload' %}"><i class="fas fa-file-import"></i> Smart Import</a>
             <a href="{% url 'propter:otpremnica_list' %}"><i class="fas fa-truck"></i> Otpremnice</a>
         </div>
     </div>
 
     <div class="soba-layout">
         <div class="soba-main">
-            <form method="post" action="/smart-import/" enctype="multipart/form-data" id="sobaUploadForm">
+            <form method="post" action="{% url 'smart_import:upload' %}" enctype="multipart/form-data" id="sobaUploadForm">
                 {% csrf_token %}
                 <div class="soba-upload-zone" id="dropZone" onclick="document.getElementById('sobaFileInput').click()">
                     <div class="soba-icon"><i class="fas fa-cloud-upload-alt"></i></div>

@@ -41,7 +41,7 @@
 }
 </style>
 <div class="pos-quick-keys">
-    <a class="qk-btn" href="/pos/" title="Blagajna">
+    <a class="qk-btn" href="{% url 'pos:terminal' %}" title="Blagajna">
         <i class="fas fa-cash-register"></i><span>Blagajna</span>
     </a>
     <a class="qk-btn" href="/pos/restaurant/" title="Restoran">
@@ -62,19 +62,19 @@
     <a class="qk-btn" href="/pos/expiry/" title="Rokovi">
         <i class="fas fa-clock"></i><span>Rokovi</span>
     </a>
-    <a class="qk-btn" href="/inventory/" title="Skladište">
+    <a class="qk-btn" href="{% url 'inventory:item_list' %}" title="Skladište">
         <i class="fas fa-warehouse"></i><span>Skladište</span>
     </a>
-    <a class="qk-btn" href="/partners/" title="Partneri">
+    <a class="qk-btn" href="{% url 'partners:partner_list' %}" title="Partneri">
         <i class="fas fa-users"></i><span>Partneri</span>
     </a>
-    <a class="qk-btn" href="/appointments/" title="Termini">
+    <a class="qk-btn" href="{% url 'appointments:booking_list' %}" title="Termini">
         <i class="fas fa-calendar-check"></i><span>Termini</span>
     </a>
-    <a class="qk-btn" href="/ai/" title="AI Asistent">
+    <a class="qk-btn" href="{% url 'ai_cockpit' %}" title="AI Asistent">
         <i class="fas fa-robot"></i><span>AI Asistent</span>
     </a>
-    <a class="qk-btn" href="/dashboard/" title="Dashboard">
+    <a class="qk-btn" href="{% url 'dashboard' %}" title="Dashboard">
         <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
     </a>
 </div>

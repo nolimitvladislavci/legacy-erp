@@ -31,7 +31,7 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
   <div class="container">
-    <a class="navbar-brand" href="/">{% trans "VISKOVIC" %}<span>{% trans "GROUP" %}</span></a>
+    <a class="navbar-brand" href="{% url 'dashboard' %}">{% trans "VISKOVIC" %}<span>{% trans "GROUP" %}</span></a>
     <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="nav">
       <ul class="navbar-nav ms-auto align-items-center gap-2">
@@ -39,7 +39,7 @@
         <li class="nav-item"><a class="nav-link" href="#about">{% trans "Über uns" %}</a></li>
         <li class="nav-item"><a class="nav-link" href="#contact">{% trans "Kontakt" %}</a></li>
         <li class="nav-item"><a class="booking-btn" href="/appointments/booking/" style="padding:8px 20px;font-size:0.9rem">{% trans "Online Buchung" %}</a></li>
-        <li class="nav-item"><a class="btn btn-outline-dark btn-sm" href="/login/">{% trans "Login" %}</a></li>
+        <li class="nav-item"><a class="btn btn-outline-dark btn-sm" href="{% url 'login' %}">{% trans "Login" %}</a></li>
       </ul>
     </div>
   </div>
@@ -165,7 +165,7 @@
         <h6 class="text-white fw-bold mb-2">{% trans "Kontakt" %}</h6>
         <p class="small"><i class="fas fa-envelope me-2"></i>{% trans "viskovic.bau@gmail.com" %}</p>
         <p class="small"><i class="fas fa-globe me-2"></i>{% trans "viskovic-group.de" %}</p>
-        <a href="/login/" class="btn btn-outline-secondary btn-sm mt-2">{% trans "Mitarbeiter Login" %}</a>
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-sm mt-2">{% trans "Mitarbeiter Login" %}</a>
       </div>
     </div>
     <hr style="border-color:rgba(255,255,255,0.1);margin:24px 0">

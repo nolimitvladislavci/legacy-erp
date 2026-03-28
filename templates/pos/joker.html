@@ -479,7 +479,7 @@
         </button>
         {% empty %}
         <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">
-          {% trans "Nema artikala u skladištu. Dodajte u" %} <a href="/inventory/" style="color:var(--gold)">{% trans "Skladištu →" %}</a>
+          {% trans "Nema artikala u skladištu. Dodajte u" %} <a href="{% url 'inventory:item_list' %}" style="color:var(--gold)">{% trans "Skladištu →" %}</a>
         </div>
         {% endfor %}
       </div>

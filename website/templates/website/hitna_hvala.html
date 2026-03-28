@@ -32,7 +32,7 @@
   <p style="color:#94a3b8;font-size:.9rem">In äußerst dringenden Fällen rufen Sie uns bitte direkt an:</p>
   <a href="tel:{{ site_settings.phone_1_number|default:'+4915234209056' }}" class="phone-link">📞 {{ site_settings.phone_1_number|default:'+49 15 234 209 056' }}</a>
   <p style="color:#64748b;font-size:.8rem;margin-top:.5rem">24/7 Notdienst</p>
-  <a href="/" class="btn-back">← Zurück zur Startseite</a>
+  <a href="{% url 'dashboard' %}" class="btn-back">← Zurück zur Startseite</a>
 </div>
 </body>
 </html>

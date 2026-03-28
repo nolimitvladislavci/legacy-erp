@@ -59,8 +59,8 @@
 </head>
 <body>
 <header class="reg-header">
-  <a href="/" class="reg-logo">{% trans "FINA" %}<span>{% trans "-Connect" %}</span></a>
-  <a href="/" class="reg-back">{% trans "← Natrag na stranicu" %}</a>
+  <a href="{% url 'dashboard' %}" class="reg-logo">{% trans "FINA" %}<span>{% trans "-Connect" %}</span></a>
+  <a href="{% url 'dashboard' %}" class="reg-back">{% trans "← Natrag na stranicu" %}</a>
 </header>
 <main class="reg-main">
   <div class="reg-container">

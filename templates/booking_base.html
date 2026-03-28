@@ -13,7 +13,7 @@
 <body>
 
 <nav class="booking-nav">
-    <a href="/" class="brand">
+    <a href="{% url 'dashboard' %}" class="brand">
       {% if booking_company %}
         {{ booking_company.name }}
       {% else %}

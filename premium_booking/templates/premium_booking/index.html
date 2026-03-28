@@ -49,7 +49,7 @@
 </head>
 <body>
     <header>
-        <a href="/" class="logo">{% trans "VISKOVIĆ" %} <span style="color:var(--gold)">{% trans "GROUP" %}</span></a>
+        <a href="{% url 'dashboard' %}" class="logo">{% trans "VISKOVIĆ" %} <span style="color:var(--gold)">{% trans "GROUP" %}</span></a>
         
         <div class="lang-switcher">
             <form action="/i18n/setlang/" method="post" style="margin:0; display:flex; gap:12px;">

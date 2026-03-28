@@ -108,7 +108,7 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
 <body>
 
 <div class="sw-header">
-  <a href="/" class="brand">LIMIT Connect</a>
+  <a href="{% url 'dashboard' %}" class="brand">LIMIT Connect</a>
   <div class="actions">
     <div class="lang-switch">
       <a href="?lang=hr" class="{% if lang != 'de' %}active{% endif %}">HR</a>

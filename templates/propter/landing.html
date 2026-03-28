@@ -82,7 +82,7 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif}
     <a href="#features" style="color:var(--gray);text-decoration:none;font-size:.88rem">Mogucnosti</a>
     <a href="#pricing" style="color:var(--gray);text-decoration:none;font-size:.88rem">Cijene</a>
     <a href="#process" style="color:var(--gray);text-decoration:none;font-size:.88rem">Kako radi</a>
-    <a href="/login/" class="cta-btn" style="padding:8px 20px;font-size:.85rem">Prijava</a>
+    <a href="{% url 'login' %}" class="cta-btn" style="padding:8px 20px;font-size:.85rem">Prijava</a>
   </div>
 </nav>
 <section class="hero">
@@ -95,7 +95,7 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif}
       <div><div class="stat-val">100%</div><div class="stat-lbl">FINA CIS Compliance</div></div>
     </div>
     <a href="#pricing" class="cta-btn">Odaberite plan</a>
-    <a href="/login/" class="cta-btn outline">Prijava</a>
+    <a href="{% url 'login' %}" class="cta-btn outline">Prijava</a>
   </div>
 </section>
 <section class="features" id="features">
@@ -174,7 +174,7 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif}
   <h2>Spremni za <span>digitalizaciju</span>?</h2>
   <p>Javite nam se i krecemo. Bez ugovorne obveze, bez rucnog rada.</p>
   <a href="mailto:info@limit-connect.com?subject=Propter%20-%20Upit" class="cta-btn">Zatrazite ponudu</a>
-  <a href="/login/" class="cta-btn outline">Vec imate racun? Prijava</a>
+  <a href="{% url 'login' %}" class="cta-btn outline">Vec imate racun? Prijava</a>
 </section>
 <footer class="landing-footer">
   <p>&copy; 2026 <a href="https://limit-connect.com">LIMIT Connect</a> — Propter e-Racun platforma | <a href="/impressum/">Impressum</a> | <a href="/privatnost/">Privatnost</a></p>

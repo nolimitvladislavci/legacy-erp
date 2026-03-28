@@ -26,7 +26,7 @@ tr:hover td{background:var(--card)}
 {% endblock %}
 {% block content %}
 <div class="voucher-wrap">
-  <a href="/pos/" class="back-link">← POS Dashboard</a>
+  <a href="{% url 'pos:terminal' %}" class="back-link">← POS Dashboard</a>
   <div class="voucher-title">🎫 Vaučeri / Bonovi</div>
 
   <div class="voucher-form">

@@ -13,7 +13,7 @@
     {% endif %}
   </p>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <a href="/" style="background:var(--gold,#c9a84c);color:#000;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:.9rem">
+    <a href="{% url 'dashboard' %}" style="background:var(--gold,#c9a84c);color:#000;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:.9rem">
       <i class="fas fa-home"></i> Radna povrsina
     </a>
     {% if request.user.is_authenticated %}

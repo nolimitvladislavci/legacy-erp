@@ -129,10 +129,10 @@
 <body>
 
     <header>
-        <a href="/" class="logo">VISKOVIĆ <span>GROUP</span></a>
+        <a href="{% url 'dashboard' %}" class="logo">VISKOVIĆ <span>GROUP</span></a>
         <div class="header-actions">
             <a href="/sos/" class="sos-btn"><i class="fas fa-exclamation-triangle"></i> 24/7 Notdienst</a>
-            <a href="/login/" class="login-btn"><i class="fas fa-lock"></i> Portal Login</a>
+            <a href="{% url 'login' %}" class="login-btn"><i class="fas fa-lock"></i> Portal Login</a>
         </div>
     </header>
 

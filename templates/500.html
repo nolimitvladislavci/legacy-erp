@@ -25,7 +25,7 @@ p{color:#94a3b8;font-size:.9rem;line-height:1.6;margin:0 0 20px}
   <h2>Doslo je do greske</h2>
   <p>Tim je automatski obavijesten i vec radi na rjesenju. Mozete nastaviti rad na radnoj povrsini.</p>
   <div class="btns">
-    <a href="/" class="btn btn-gold"><i class="fas fa-home"></i> Radna povrsina</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-gold"><i class="fas fa-home"></i> Radna povrsina</a>
     <button onclick="borgReport500()" class="btn btn-ghost"><i class="fas fa-flag" style="color:#c9a84c"></i> Prijavi detalje</button>
   </div>
   <div id="result"></div>

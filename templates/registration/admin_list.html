@@ -39,7 +39,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 <body>
 <div class="topbar">
   <h1>{% trans "Company Registrations" %}</h1>
-  <a href="/dashboard/" class="back">{% trans "← Dashboard" %}</a>
+  <a href="{% url 'dashboard' %}" class="back">{% trans "← Dashboard" %}</a>
 </div>
 {% if messages %}
 <div class="messages">

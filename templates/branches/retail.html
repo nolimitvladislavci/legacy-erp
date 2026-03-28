@@ -55,9 +55,9 @@
       <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <a href="/pos/" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
-      <a href="/inventory/" class="btn btn-ghost btn-sm">{% trans "&#x1F4E6; Zalihe" %}</a>
-      <a href="/partners/" class="btn btn-ghost btn-sm">{% trans "&#x1F91D; Partneri" %}</a>
+      <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
+      <a href="{% url 'inventory:item_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4E6; Zalihe" %}</a>
+      <a href="{% url 'partners:partner_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F91D; Partneri" %}</a>
     </div>
   </div>
 
@@ -76,24 +76,24 @@
     <div class="kpi-card">
       <div class="kpi-icon">{% trans "&#x1F4E6;" %}</div>
       <div class="kpi-lbl">{% trans "Zalihe" %}</div>
-      <div class="kpi-val"><a href="/inventory/" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
+      <div class="kpi-val"><a href="{% url 'inventory:item_list' %}" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-icon">{% trans "&#x1F91D;" %}</div>
       <div class="kpi-lbl">{% trans "Dobavljači / Klijenti" %}</div>
-      <div class="kpi-val"><a href="/partners/" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
+      <div class="kpi-val"><a href="{% url 'partners:partner_list' %}" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
     </div>
   </div>
 
   <!-- Quick actions -->
   <div class="sec-title">{% trans "Brze akcije" %}</div>
   <div class="action-grid">
-    <a class="action-card" href="/pos/">
+    <a class="action-card" href="{% url 'pos:terminal' %}">
       <div class="action-icon">{% trans "&#x1F4B3;" %}</div>
       <div class="action-lbl">{% trans "POS blagajna" %}</div>
       <div class="action-sub">{% trans "Otvori prodajno mjesto" %}</div>
     </a>
-    <a class="action-card" href="/inventory/">
+    <a class="action-card" href="{% url 'inventory:item_list' %}">
       <div class="action-icon">{% trans "&#x1F4E6;" %}</div>
       <div class="action-lbl">{% trans "Zalihe" %}</div>
       <div class="action-sub">{% trans "Artikli i stanje" %}</div>
@@ -103,12 +103,12 @@
       <div class="action-lbl">{% trans "POS Postavke" %}</div>
       <div class="action-sub">{% trans "Blagajne i pisači" %}</div>
     </a>
-    <a class="action-card" href="/partners/">
+    <a class="action-card" href="{% url 'partners:partner_list' %}">
       <div class="action-icon">{% trans "&#x1F91D;" %}</div>
       <div class="action-lbl">{% trans "Partneri" %}</div>
       <div class="action-sub">{% trans "Dobavljači / klijenti" %}</div>
     </a>
-    <a class="action-card" href="/invoicing/">
+    <a class="action-card" href="{% url 'invoicing:invoice_list' %}">
       <div class="action-icon">{% trans "&#x1F4CB;" %}</div>
       <div class="action-lbl">{% trans "Računi" %}</div>
       <div class="action-sub">{% trans "Fakturiranje" %}</div>
@@ -125,7 +125,7 @@
     <div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.85rem">
       <div>{% trans "&#x1F7E2;" %} <strong>{{ open_receipts }}</strong> {% trans "otvorenih bonova" %}</div>
       <div>{% trans "&#x1F4B0;" %} <strong>&euro;{{ pos_revenue_today|floatformat:2 }}</strong> {% trans "utržak danas" %}</div>
-      <div><a href="/pos/" style="color:#f97316">{% trans "Otvori POS &rarr;" %}</a></div>
+      <div><a href="{% url 'pos:terminal' %}" style="color:#f97316">{% trans "Otvori POS &rarr;" %}</a></div>
     </div>
   </div>
 </div>

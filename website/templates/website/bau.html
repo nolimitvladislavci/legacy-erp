@@ -150,9 +150,9 @@
 <body>
 
 <header id="header">
-    <a href="/" class="header-logo">VISKOVIĆ <span>BAU</span></a>
+    <a href="{% url 'dashboard' %}" class="header-logo">VISKOVIĆ <span>BAU</span></a>
     <nav>
-        <a href="/">← Zurück zur Gruppe</a>
+        <a href="{% url 'dashboard' %}">← Zurück zur Gruppe</a>
         <a href="/calculator/" style="color: var(--gold); border-bottom: 1px solid var(--gold); padding-bottom: 2px;"><i class="fas fa-calculator"></i> Angebotsrechner</a>
         <a href="tel:{{ site_settings.phone_1_number|default:'+4915234209056' }}" class="btn-primary" style="padding: 10px 20px; font-size: 0.75rem;">📞 {{ site_settings.phone_1_number|default:"Kontakt" }}</a>
     </nav>

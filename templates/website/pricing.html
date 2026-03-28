@@ -105,12 +105,12 @@ footer small{color:var(--muted2);font-size:.75rem}
 <body>
 
 <nav>
-  <a href="/" class="nav-logo">LIMIT <span>Connect</span></a>
+  <a href="{% url 'dashboard' %}" class="nav-logo">LIMIT <span>Connect</span></a>
   <div class="nav-links">
     <a href="/hr/about/" class="nav-link">O nama</a>
     <a href="/digitalni-posrednik/" class="nav-link">Demo</a>
     <a href="https://wa.me/385976091655" class="nav-link wa" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-    <a href="/register/" class="nav-link primary"><i class="fas fa-rocket"></i> Počni besplatno</a>
+    <a href="{% url 'accounts:quick_register' %}" class="nav-link primary"><i class="fas fa-rocket"></i> Počni besplatno</a>
   </div>
 </nav>
 
@@ -221,7 +221,7 @@ footer small{color:var(--muted2);font-size:.75rem}
     <h2>Spreman za start?</h2>
     <p>Registracija traje 2 minute. Besplatni plan bez kreditne kartice.<br>Podaci sigurni na EU serverima (Hetzner, Helsinki).</p>
     <div class="cta-btns">
-      <a href="/register/" class="cta-btn primary"><i class="fas fa-rocket"></i> Počni besplatno</a>
+      <a href="{% url 'accounts:quick_register' %}" class="cta-btn primary"><i class="fas fa-rocket"></i> Počni besplatno</a>
       <a href="https://wa.me/385976091655" class="cta-btn wa" target="_blank"><i class="fab fa-whatsapp"></i> Pitaj na WhatsAppu</a>
       <a href="/digitalni-posrednik/" class="cta-btn secondary"><i class="fas fa-play"></i> Pogledaj demo</a>
     </div>

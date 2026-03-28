@@ -23,9 +23,9 @@
   <p style="color:#888">Tip podružnice: {{ branch.get_branch_type_display|default:"Ostalo" }}</p>
   <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem">
     <a href="/dashboard/company/" class="btn btn-ghost">{% trans "&#x2190; Glavni dashboard" %}</a>
-    <a href="/pos/" class="btn btn-ghost">{% trans "POS" %}</a>
-    <a href="/invoicing/" class="btn btn-ghost">{% trans "Fakture" %}</a>
-    <a href="/inventory/" class="btn btn-ghost">{% trans "Zalihe" %}</a>
+    <a href="{% url 'pos:terminal' %}" class="btn btn-ghost">{% trans "POS" %}</a>
+    <a href="{% url 'invoicing:invoice_list' %}" class="btn btn-ghost">{% trans "Fakture" %}</a>
+    <a href="{% url 'inventory:item_list' %}" class="btn btn-ghost">{% trans "Zalihe" %}</a>
   </div>
 </div>
 {% endblock %}

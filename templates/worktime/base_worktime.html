@@ -19,7 +19,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-14">
                 <div class="flex items-center gap-6">
-                    <a href="/" class="text-lg font-bold text-slate-800">⚡ LIMIT Connect</a>
+                    <a href="{% url 'dashboard' %}" class="text-lg font-bold text-slate-800">⚡ LIMIT Connect</a>
                     <div class="hidden md:flex items-center gap-1">
                         <a href="{% url 'worktime:ts_worker' %}" class="px-3 py-2 text-sm rounded-lg hover:bg-slate-100 {% if request.resolver_match.url_name == 'ts_worker' %}bg-blue-50 text-blue-600 font-semibold{% else %}text-slate-600{% endif %}">
                             {% trans "⏱ Moji sati" %}

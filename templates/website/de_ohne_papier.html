@@ -53,7 +53,7 @@ footer a{color:var(--gold);text-decoration:none}
 <a href="/de/pakete/">Pakete</a>
 <a href="/de/anleitung/">Anleitung</a>
 <a href="/de/ohne-papier/" style="color:var(--green)">Ohne Papier</a>
-<a href="/register/" class="btn-gold">Kostenlos testen</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold">Kostenlos testen</a>
 </div>
 </nav>
 
@@ -62,7 +62,7 @@ footer a{color:var(--gold);text-decoration:none}
 <span class="leaf">🌿</span>
 <h1>Schluss mit<br><span>Thermopapier</span></h1>
 <p>Jedes Jahr landen 12,5 Milliarden Kassenzettel im Müll — beschichtet mit BPA, nicht recycelbar. Es geht auch anders.</p>
-<a href="/register/" class="btn-gold" style="padding:.8rem 2rem;font-size:1rem;background:var(--green);color:#000"><i class="fas fa-leaf" style="margin-right:.5rem"></i>Jetzt papierlos kassieren</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold" style="padding:.8rem 2rem;font-size:1rem;background:var(--green);color:#000"><i class="fas fa-leaf" style="margin-right:.5rem"></i>Jetzt papierlos kassieren</a>
 
 <div class="stat-row">
 <div class="stat"><div class="num">0</div><div class="lbl">Papierrollen nötig</div></div>
@@ -121,7 +121,7 @@ footer a{color:var(--gold);text-decoration:none}
 <section class="cta">
 <h2>Bereit für die Zukunft?</h2>
 <p>Die Kasse der Zukunft druckt nicht — sie sendet.</p>
-<a href="/register/" class="btn-gold" style="padding:1rem 3rem;font-size:1.1rem;background:var(--green);color:#000"><i class="fas fa-leaf" style="margin-right:.5rem"></i>30 Tage kostenlos</a>
+<a href="{% url 'accounts:quick_register' %}" class="btn-gold" style="padding:1rem 3rem;font-size:1.1rem;background:var(--green);color:#000"><i class="fas fa-leaf" style="margin-right:.5rem"></i>30 Tage kostenlos</a>
 </section>
 
 <footer>

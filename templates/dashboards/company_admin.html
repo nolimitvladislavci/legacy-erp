@@ -332,14 +332,14 @@ function dismissPushBanner(){
 </style>
 
 <div class="cd-wrap page-enter">
-  <div class="cd-title"><a href="/" style="color:var(--text-dim);text-decoration:none;font-size:.78rem;margin-right:8px"><i class="fas fa-arrow-left"></i></a> Admin nadzorna ploča
+  <div class="cd-title"><a href="{% url 'dashboard' %}" style="color:var(--text-dim);text-decoration:none;font-size:.78rem;margin-right:8px"><i class="fas fa-arrow-left"></i></a> Admin nadzorna ploča
     {% if company %}<span style="font-size:.8rem;color:var(--text-dim);font-weight:400">— {{ company.name }}</span>
     <a href="/companies/settings/" style="margin-left:auto;font-size:.75rem;color:var(--gold);text-decoration:none;font-weight:600;background:var(--gold-dim);border:1px solid var(--gold-border);padding:5px 12px;border-radius:6px"><i class="fas fa-cog me-1"></i>Postavke tvrtke</a>{% endif %}
   </div>
 
   <!-- KPI Cards -->
   <div class="kpi-grid">
-    <a href="/invoicing/" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
+    <a href="{% url 'invoicing:invoice_list' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
       <div class="kpi-lbl">{% trans "💰 Prihod ovaj mj." %}</div>
       <div class="kpi-val green">{{ paid_month|floatformat:0 }} €</div>
       <div class="kpi-sub">Ukupno: {{ total_invoiced|floatformat:0 }} €</div>

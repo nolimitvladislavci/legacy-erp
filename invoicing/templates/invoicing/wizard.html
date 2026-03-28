@@ -17,7 +17,7 @@
     <button onclick="openArticleQuickAdd()" style="background:#c9a84c;color:#000;border:none;padding:14px 28px;border-radius:12px;font-weight:900;font-size:1rem;cursor:pointer">
       <i class="fas fa-plus-circle" style="margin-right:6px"></i>Kreiraj prvi artikl
     </button>
-    <a href="/inventory/" style="background:transparent;border:2px solid #c9a84c;color:#c9a84c;padding:14px 28px;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;display:inline-block">
+    <a href="{% url 'inventory:item_list' %}" style="background:transparent;border:2px solid #c9a84c;color:#c9a84c;padding:14px 28px;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;display:inline-block">
       <i class="fas fa-warehouse" style="margin-right:6px"></i>Otvori skladiste
     </a>
   </div>

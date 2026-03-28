@@ -175,7 +175,7 @@
 
 <div class="row g-2 mb-3">
     <div class="col-12 col-md-6">
-        <a href="/worktime/" class="action-card">
+        <a href="{% url 'worktime:dashboard' %}" class="action-card">
             <i style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-clock"></i></i>
             <div>{% trans "Radno vrijeme" %}<div class="desc">{% trans "Štoperica, unos sati, evidencija" %}</div></div>
         </a>
@@ -183,7 +183,7 @@
             <i style="background:#dcfce7;color:#16a34a"><i class="fas fa-users"></i></i>
             <div>{% trans "Evidencija sati" %}<div class="desc">{% trans "Pregled, odobrenje, PDF export" %}</div></div>
         </a>
-        <a href="/invoicing/" class="action-card">
+        <a href="{% url 'invoicing:invoice_list' %}" class="action-card">
             <i style="background:#fef3c7;color:#d97706"><i class="fas fa-file-invoice-dollar"></i></i>
             <div>{% trans "Fakturiranje" %}<div class="desc">{% trans "Kreiraj i upravljaj fakturama" %}</div></div>
         </a>
@@ -191,7 +191,7 @@
             <i style="background:#e0e7ff;color:#4f46e5"><i class="fas fa-hard-hat"></i></i>
             <div>{% trans "Projekti" %}<div class="desc">{% trans "Aktivni projekti i zadaci" %}</div></div>
         </a>
-        <a href="/partners/" class="action-card">
+        <a href="{% url 'partners:partner_list' %}" class="action-card">
             <i style="background:#fce7f3;color:#db2777"><i class="fas fa-handshake"></i></i>
             <div>{% trans "Partneri" %}<div class="desc">{% trans "Klijenti i dobavljači" %}</div></div>
         </a>
@@ -213,7 +213,7 @@
             <i style="background:#f5f3ff;color:#7c3aed"><i class="fas fa-calculator"></i></i>
             <div>{% trans "Kalkulator" %}<div class="desc">{% trans "Procjene i kalkulacije" %}</div></div>
         </a>
-        <a href="/pos/" class="action-card">
+        <a href="{% url 'pos:terminal' %}" class="action-card">
             <i style="background:#111827;color:#c9a84c"><i class="fas fa-cash-register"></i></i>
             <div>{% trans "POS Kasa" %}<div class="desc">{% trans "Terminali, smjene, bonovi" %}</div></div>
         </a>

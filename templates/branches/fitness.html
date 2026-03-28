@@ -55,9 +55,9 @@
       <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <a href="/appointments/" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
-      <a href="/pos/" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
-      <a href="/partners/" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Članovi" %}</a>
+      <a href="{% url 'appointments:booking_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
+      <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
+      <a href="{% url 'partners:partner_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Članovi" %}</a>
     </div>
   </div>
 
@@ -93,27 +93,27 @@
       <div class="action-lbl">{% trans "Novi termin" %}</div>
       <div class="action-sub">{% trans "Grupni / personalni trening" %}</div>
     </a>
-    <a class="action-card" href="/appointments/">
+    <a class="action-card" href="{% url 'appointments:booking_list' %}">
       <div class="action-icon">{% trans "&#x1F5D3;" %}</div>
       <div class="action-lbl">{% trans "Raspored" %}</div>
       <div class="action-sub">{% trans "Pregled svih termina" %}</div>
     </a>
-    <a class="action-card" href="/pos/">
+    <a class="action-card" href="{% url 'pos:terminal' %}">
       <div class="action-icon">{% trans "&#x1F4B3;" %}</div>
       <div class="action-lbl">{% trans "POS blagajna" %}</div>
       <div class="action-sub">{% trans "Naplate / članarine" %}</div>
     </a>
-    <a class="action-card" href="/partners/">
+    <a class="action-card" href="{% url 'partners:partner_list' %}">
       <div class="action-icon">{% trans "&#x1F464;" %}</div>
       <div class="action-lbl">{% trans "Članovi" %}</div>
       <div class="action-sub">{% trans "Kartice članova" %}</div>
     </a>
-    <a class="action-card" href="/invoicing/">
+    <a class="action-card" href="{% url 'invoicing:invoice_list' %}">
       <div class="action-icon">{% trans "&#x1F4CB;" %}</div>
       <div class="action-lbl">{% trans "Računi" %}</div>
       <div class="action-sub">{% trans "Članarine / usluge" %}</div>
     </a>
-    <a class="action-card" href="/worktime/">
+    <a class="action-card" href="{% url 'worktime:dashboard' %}">
       <div class="action-icon">{% trans "&#x23F1;" %}</div>
       <div class="action-lbl">{% trans "Radni sati" %}</div>
       <div class="action-sub">{% trans "Treneri i osoblje" %}</div>

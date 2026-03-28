@@ -44,7 +44,7 @@ body{background:#0f172a;color:#e2e8f0;font-family:'Inter',sans-serif}
 .ms .e{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:8px 14px;border-radius:8px;font-size:.84rem;margin-bottom:5px}
 </style></head>
 <body><div class="pw">
-<div class="bc"><a href="/">{% trans "🏠 Home" %}</a> › <a href="/outreach/">{% trans "Outreach / CRM" %}</a></div>
+<div class="bc"><a href="{% url 'dashboard' %}">{% trans "🏠 Home" %}</a> › <a href="/outreach/">{% trans "Outreach / CRM" %}</a></div>
 {% if messages %}<div class="ms">{% for m in messages %}<div class="{% if 'error' in m.tags %}e{% else %}s{% endif %}">{{ m }}</div>{% endfor %}</div>{% endif %}
 {% block bc %} › <a href="/outreach/campaign/{{ campaign.pk }}/">{{ campaign.name }}</a> › Preview{% endblock %}
 {% block content %}

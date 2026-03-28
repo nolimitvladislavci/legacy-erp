@@ -324,7 +324,7 @@ select.fw-input { cursor: pointer; }
       <h2>Račun kreiran!</h2>
       <p id="fwSuccessMsg">Račun je spremljen kao nacrt.</p>
       <div id="fwSuccessQr" style="margin: 20px auto; max-width: 200px;"></div>
-      <a id="fwSuccessLink" href="/invoicing/" class="fw-btn fw-btn-gold" style="text-decoration:none;margin-bottom:12px">
+      <a id="fwSuccessLink" href="{% url 'invoicing:invoice_list' %}" class="fw-btn fw-btn-gold" style="text-decoration:none;margin-bottom:12px">
         <i class="fas fa-eye"></i> Otvori račun
       </a>
       <br>
