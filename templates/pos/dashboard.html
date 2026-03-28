@@ -42,7 +42,9 @@
 .empty{text-align:center;padding:3rem;color:var(--muted)}
 </style>
 {% endblock %}
+{% load fiscal_health_tags %}
 {% block content %}
+{% include "components/_fiscal_health.html" %}
 {% tax_wizard_widget "pos" %}
 <div class="page">
   <div class="page-header">

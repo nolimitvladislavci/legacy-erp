@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load fiscal_health_tags %}
 {% block title %}{% trans "Operations Dashboard" %}{% endblock %}
 {% block extra_css %}
 <style>
@@ -100,6 +101,8 @@
 </div>
 
 <div class="ops-grid">
+
+{% include "components/_fiscal_health.html" %}
 
 <!-- SLA Alerts -->
 {% if sla_alerts %}

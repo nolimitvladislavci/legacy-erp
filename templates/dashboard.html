@@ -24,7 +24,9 @@
 }
 </style>
 {% endblock %}
+{% load fiscal_health_tags %}
 {% block content %}
+{% include "components/_fiscal_health.html" %}
 {% tax_wizard_widget "general" %}
 <div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
   {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
