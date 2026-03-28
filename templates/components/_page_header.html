@@ -1,0 +1,19 @@
+{% comment %}
+Reusable Page Header — naslov, podnaslov, CTA gumb.
+Usage:
+  {% include "components/_page_header.html" with title="Skladište" subtitle="42 artikala" icon="fas fa-boxes" cta_text="Novi artikl" cta_url="/inventory/create/" %}
+{% endcomment %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
+  <div>
+    {% if back_url %}<a href="{{ back_url }}" style="color:var(--text-dim,var(--text-muted));font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>{{ back_text|default:"Natrag" }}</a>{% endif %}
+    <h2 style="font-size:1.5rem;font-weight:800;margin:{% if back_url %}.5rem{% else %}0{% endif %} 0 0;color:var(--text)">
+      {% if icon %}<i class="{{ icon }} me-2" style="color:var(--gold,#c9a84c)"></i>{% endif %}{{ title }}
+    </h2>
+    {% if subtitle %}<small style="color:var(--text-dim,var(--text-muted))">{{ subtitle }}</small>{% endif %}
+  </div>
+  {% if cta_url %}
+  <a href="{{ cta_url }}" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem;text-decoration:none;border:none">
+    {% if cta_icon %}<i class="{{ cta_icon }} me-1"></i>{% endif %}{{ cta_text }}
+  </a>
+  {% endif %}
+</div>

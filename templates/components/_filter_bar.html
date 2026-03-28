@@ -1,0 +1,25 @@
+{% comment %}
+Reusable Filter Bar — search + dropdown filter.
+Usage:
+  {% include "components/_filter_bar.html" with search_name="q" search_value=q filter_name="status" filter_value=status_f filter_choices=status_choices reset_url="/list/" %}
+{% endcomment %}
+<div style="background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.25rem">
+  <form method="get" class="d-flex gap-2 flex-wrap align-items-center">
+    {% if search_name %}
+    <input type="text" name="{{ search_name }}" value="{{ search_value|default:'' }}" 
+           class="form-control form-control-sm" placeholder="{{ search_placeholder|default:'Pretraži...' }}"
+           style="max-width:250px;background:var(--dark,var(--bg));border-color:var(--border);color:var(--text);border-radius:8px">
+    {% endif %}
+    {% if filter_name %}
+    <select name="{{ filter_name }}" class="form-select form-select-sm" 
+            style="max-width:180px;background:var(--dark,var(--bg));border-color:var(--border);color:var(--text);border-radius:8px">
+      <option value="">{{ filter_placeholder|default:'Sve' }}</option>
+      {% for code, label in filter_choices %}<option value="{{ code }}" {% if filter_value == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    {% endif %}
+    <button type="submit" class="btn btn-sm" style="background:var(--gold-dim,rgba(201,168,76,.1));border:1px solid var(--gold-border,rgba(201,168,76,.3));color:var(--gold,#c9a84c);border-radius:8px;font-weight:600">
+      <i class="fas fa-search me-1"></i>{{ submit_text|default:'Traži' }}
+    </button>
+    {% if reset_url %}<a href="{{ reset_url }}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px">✕</a>{% endif %}
+  </form>
+</div>

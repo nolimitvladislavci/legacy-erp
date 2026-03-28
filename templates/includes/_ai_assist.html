@@ -144,6 +144,68 @@
       title: 'Brzi unos',
       text: 'Kliknite <b>📷 Skeniraj dokument</b> — kamera se otvori, slikajte račun, AI ga pročita.',
     },
+    // ── EXPERIENCES ──
+    {
+      page: /\/experiences\//,
+      check: function(){ return true; },
+      delay: 10000,
+      id: 'exp_overview',
+      title: 'Iskustva & Aktivnosti',
+      text: 'Ovdje kreirate degustacije, radionice i ture za goste. <b>Normativi</b> (BOM) automatski skidaju zalihe pri check-inu.',
+    },
+    {
+      page: /\/experiences\/novo/,
+      check: function(){ return true; },
+      delay: 15000,
+      id: 'exp_create_help',
+      title: 'Novo iskustvo',
+      text: 'Unesite cijenu po osobi i postotak depozita. Gosti plaćaju depozit pri rezervaciji — ostatak na licu mjesta.',
+    },
+    // ── BORG HUB ──
+    {
+      page: /\/dashboard\/operations/,
+      check: function(){ return true; },
+      delay: 8000,
+      id: 'borg_hub_intro',
+      title: 'BORG Hub',
+      text: 'Ovo je vaš operativni centar. SLA kršenja, intervencije, nalozi, gosti i zalihe — sve na jednom ekranu. <b>Osvježava se automatski</b> svake minute.',
+    },
+    // ── FLOCK / PERAD ──
+    {
+      page: /\/perad\//,
+      check: function(){ return true; },
+      delay: 10000,
+      id: 'flock_intro',
+      title: 'Jata peradi',
+      text: 'Evidentirajte nesenje jaja, zdravstvene tretmane i uginuća. <b>Karenca</b> automatski blokira prodaju na POS-u dok traje.',
+    },
+    // ── MARKETPLACE ──
+    {
+      page: /\/marketplace\//,
+      check: function(){ return true; },
+      delay: 12000,
+      id: 'marketplace_intro',
+      title: 'OPG Tržnica',
+      text: 'Objavite proizvode s automatskim rokom trajanja. Geofencing za kvarljivu robu (30km). LOT slijedivost ugrađena.',
+    },
+    // ── RECALL ──
+    {
+      page: /\/experiences\/recall/,
+      check: function(){ return true; },
+      delay: 8000,
+      id: 'recall_intro',
+      title: 'HACCP Recall',
+      text: 'Povlačenje proizvoda u 3 sekunde: Gost → Jelo → Sastojak → Flock → Svi pogođeni. Kliknite <b>Trace</b> za pokretanje.',
+    },
+    // ── WORK ORDERS ──
+    {
+      page: /\/work-orders\//,
+      check: function(){ return true; },
+      delay: 10000,
+      id: 'wo_intro',
+      title: 'Radni nalozi',
+      text: 'Drag & drop kanban ploča. SLA timer prati koliko dugo je nalog u svakom statusu. Crveno = prekoračen rok.',
+    },
     // Anywhere: idle 2 min
     {
       page: /./,

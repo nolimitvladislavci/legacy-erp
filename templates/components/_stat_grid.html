@@ -1,0 +1,19 @@
+{% comment %}
+Reusable Stat Grid — koristi na svakom dashboardu.
+Usage:
+  {% include "components/_stat_grid.html" with stats=my_stats %}
+  
+  stats = [
+    {"value": "42", "label": "Artikala", "color": "var(--gold)", "icon": "fas fa-box"},
+    {"value": "3", "label": "Upozorenja", "color": "#ef4444"},
+  ]
+{% endcomment %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.5rem">
+{% for s in stats %}
+  <div style="background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+    {% if s.icon %}<div style="font-size:.9rem;color:{{ s.color|default:'var(--text)' }};margin-bottom:4px"><i class="{{ s.icon }}"></i></div>{% endif %}
+    <div style="font-size:1.6rem;font-weight:800;color:{{ s.color|default:'var(--text)' }}">{{ s.value }}</div>
+    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim,var(--text-muted));margin-top:2px">{{ s.label }}</div>
+  </div>
+{% endfor %}
+</div>

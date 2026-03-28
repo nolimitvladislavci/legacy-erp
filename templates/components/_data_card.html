@@ -1,0 +1,16 @@
+{% comment %}
+Reusable Data Card — za grid prikaz stavki.
+Usage:
+  {% include "components/_data_card.html" with title="Degustacija" badge="Aktivno" badge_color="var(--gold)" meta="60 min | 25€/os" url="/exp/1/" %}
+{% endcomment %}
+<div style="background:var(--surface,var(--bg-card));border:1px solid var(--border);border-radius:14px;padding:1.25rem;transition:border-color .2s;cursor:{% if url %}pointer{% else %}default{% endif %}"
+     {% if url %}onclick="window.location='{{ url }}'"{% endif %}
+     onmouseover="this.style.borderColor='var(--gold-border,rgba(201,168,76,.3))'"
+     onmouseout="this.style.borderColor='var(--border)'">
+  <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.5rem">
+    <h6 style="font-weight:700;color:var(--text);margin:0;font-size:.95rem">{{ title }}</h6>
+    {% if badge %}<span style="padding:3px 10px;border-radius:6px;font-size:.72rem;font-weight:700;background:{{ badge_bg|default:'var(--gold-dim,rgba(201,168,76,.1))' }};color:{{ badge_color|default:'var(--gold,#c9a84c)' }}">{{ badge }}</span>{% endif %}
+  </div>
+  {% if description %}<div style="font-size:.8rem;color:var(--text-dim,var(--text-muted));margin-bottom:.75rem">{{ description|truncatewords:20 }}</div>{% endif %}
+  {% if meta %}<div style="font-size:.78rem;color:var(--text-dim,var(--text-muted))">{{ meta }}</div>{% endif %}
+</div>
