@@ -471,3 +471,42 @@ HAIKU_MODEL       = os.environ.get('HAIKU_MODEL', 'claude-haiku-4-5-20251001')
 ### Sonnet auto — 2026-03-27 11:33
 - Napredak: 68%
 - Novi taskovi: 6
+
+---
+
+## ★ BORG CARDS PLAN — 2026-03-28 (Sonnet koordinacija)
+
+| File | Sadržaj | Status |
+|------|---------|--------|
+| CC_TASK_FAZA1_ARMATURA.md | FSMMixin + CardActivity + SLA Engine (8 taskova, 465 linija) | ⏳ CC Code |
+| CC_TASK_FAZA2_HTMX.md | HTMX + Sortable + WO Kanban + Ops Dashboard | ⏳ Nakon Faze 1 |
+| CC_TASK_FAZA3_AI_MOZAK.md | Heuristic Triage + Smart Dispatch + WA Closed Loop | ⏳ Nakon Faze 1 |
+
+### Korekcije Sonnet (nema rukavica):
+- FSMMixin = ekstrakcija einvoice/models/as4_message.py:185 — ne pisati iznova
+- CardActivity = superset LeadActivity (burza/models.py:79) — ContentType generalizacija
+- borg_ops = nova app (ne u core/) — izbjegni circular imports
+- Injekcija work_orders/views.py:90+182 — KRITIČNO, zatvori u Task 4 Faze 1
+- einvoice transition_to() nema TRANSITIONS guard — FSMMixin će to popraviti
+- SLA task: 10 min interval (ne 5 — disk headroom)
+
+---
+
+## ★ GEMINI_TASK_FAZA1_MONITOR — REZULTATI (Sonnet, 2026-03-28)
+
+| Provjera | Rezultat | Detalj |
+|----------|---------|--------|
+| G1 Import | ✅ OK | FSMMixin, CardActivity, StatusTimestamp, WorkOrder, ProjectLead — sve bez circular importa |
+| G2 FSM logika | ✅ OK | draft→invoiced blokirano · terminal zaštićen · idempotent OK · save() guard aktivan |
+| G3 SLA timestamps | ✅ OK | 3 StatusTimestamp + 3 CardActivity zapisa (E2E CC Code testa) |
+| G4 Injekcija | ✅ OK | Linija 90: whitelist guard · Linija 182: transition_to() s try/except · 274+338: direktni FSM pozivi |
+
+**Napomena:** card_ops (krnji moj pokušaj) obrisan. Pravi je borg_ops (CC Code, 5 commitova).
+
+**Beat schedule:** borg-check-sla-10min registriran u core/settings.py.
+
+**Jedina nedovršena stavka:** `wo.status = _initial_status` na liniji 95 (kreiranje novog WO)
+prolazi bez FSM validacije — radi se o initijalnom statusu, ne tranziciji, što je ispravno.
+CC Code je svjesno ostavio whitelist provjeru umjesto transition_to() za kreiranje.
+
+**Faza 1: DONE. Faza 2 u tijeku (CC Code).**

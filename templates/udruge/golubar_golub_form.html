@@ -2,39 +2,23 @@
 {% block title %}{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}{% endblock %}
 {% block content %}
 <style>
-/* Theme support */
-:root { --input-bg: var(--dark, #111214); --input-border: var(--border, #252830); }
-.gf-section { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#c9a84c; margin-bottom:.5rem; padding-bottom:.3rem; border-bottom:1px solid rgba(201,168,76,.2); }
-.gf-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-.gf-card-body { padding:1.25rem; }
-.gf-input { background:var(--input-bg,#fff) !important; color:var(--text) !important; border-color:var(--input-border,#e2e8f0) !important; border-radius:8px !important; }
-.gf-input:focus { border-color:#c9a84c !important; box-shadow:0 0 0 .2rem rgba(201,168,76,.15) !important; }
-.gf-input::placeholder { color:var(--text-muted,#94a3b8) !important; }
-.gf-submit { background:linear-gradient(135deg,#c9a84c,#a78b3d); color:#0a0a0a; border:none; border-radius:8px; padding:12px 28px; font-weight:700; font-size:.9rem; cursor:pointer; transition:all .2s; }
-.gf-submit:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(201,168,76,.3); color:#0a0a0a; }
-.gf-cam-btn { display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:10px; cursor:pointer; font-weight:600; font-size:.85rem; transition:all .2s; min-height:48px; border:2px dashed; }
-.gf-cam-btn:hover { transform:translateY(-1px); }
-.gf-cam-photo { border-color:rgba(201,168,76,.4); color:#c9a84c; background:rgba(201,168,76,.05); }
-.gf-cam-photo:hover { border-color:#c9a84c; background:rgba(201,168,76,.1); }
-.gf-cam-ring { border-color:rgba(59,130,246,.4); color:#3b82f6; background:rgba(59,130,246,.05); }
-.gf-cam-ring:hover { border-color:#3b82f6; background:rgba(59,130,246,.1); }
-.gf-cam-gallery { border-color:var(--border); color:var(--text-secondary); background:transparent; }
-.gf-cam-gallery:hover { border-color:var(--text-muted); }
-.gf-ai-badge { display:inline-flex; align-items:center; gap:4px; font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:3px 8px; border-radius:4px; background:rgba(59,130,246,.12); color:#3b82f6; }
-#ai-status { margin-top:8px; font-size:.8rem; padding:8px 12px; border-radius:8px; display:none; }
-#ai-status.loading { display:block; background:rgba(59,130,246,.08); color:#3b82f6; border:1px solid rgba(59,130,246,.2); }
-#ai-status.success { display:block; background:rgba(34,197,94,.08); color:#22c55e; border:1px solid rgba(34,197,94,.2); }
-#ai-status.error { display:block; background:rgba(239,68,68,.08); color:#ef4444; border:1px solid rgba(239,68,68,.2); }
-#photo-preview, #ring-preview { margin-top:8px; border-radius:8px; overflow:hidden; position:relative; display:none; }
-#photo-preview img, #ring-preview img { max-height:180px; border-radius:8px; border:1px solid rgba(201,168,76,.3); }
-.gf-breadcrumb { font-size:.78rem; color:var(--text-muted); margin-bottom:1rem; }
-.gf-breadcrumb a { color:#c9a84c; text-decoration:none; }
-.gf-breadcrumb a:hover { text-decoration:underline; }
+.gf-section{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin-bottom:.75rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.2)}
+.gf-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.gf-card-body{padding:1.25rem}
+.gf-input{background:var(--input-bg)!important;color:var(--text)!important;border-color:var(--input-border)!important;border-radius:8px!important}
+.gf-input:focus{border-color:#c9a84c!important;box-shadow:0 0 0 .2rem rgba(201,168,76,.15)!important}
+.gf-input::placeholder{color:var(--text-muted)!important}
+.gf-submit{background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;border:none;border-radius:8px;padding:12px 28px;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s}
+.gf-submit:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,168,76,.3);color:#0a0a0a}
+.gf-breadcrumb{font-size:.78rem;color:var(--text-muted);margin-bottom:1rem}
+.gf-breadcrumb a{color:#c9a84c;text-decoration:none}
+.btn-regen{background:none;border:1px solid var(--input-border);color:var(--text-muted);border-radius:0 8px 8px 0;padding:0 12px;cursor:pointer;transition:color .2s}
+.btn-regen:hover{color:#c9a84c;border-color:#c9a84c}
+.ai-name-hint{font-size:.75rem;margin-top:4px;display:none;padding:5px 10px;border-radius:6px}
 </style>
 
 <div class="container-fluid" style="max-width:720px">
 
-<!-- Breadcrumb -->
 <div class="gf-breadcrumb">
   <a href="{% url 'udruge:golubar_dashboard' %}">Golubar</a> &rsaquo;
   <a href="{% url 'udruge:golub_list' %}">Golubovi</a> &rsaquo;
@@ -54,48 +38,28 @@
 <form method="post" enctype="multipart/form-data" id="golub-form">
 {% csrf_token %}
 
-<!-- SEKCIJA: Fotografija + AI Scan -->
-<div class="gf-card mb-3">
+<!-- FOTOGRAFIJA GOLUBA -->
+<div class="gf-card">
 <div class="gf-card-body">
-  <div class="gf-section"><i class="fas fa-camera me-1"></i> Fotografija & AI prepoznavanje</div>
-
+  <div class="gf-section"><i class="fas fa-dove me-1"></i> Fotografija goluba — AI generira ime</div>
   {% if golub.fotografija %}
-  <div class="mb-3"><img src="{{ golub.fotografija.url }}" class="rounded" style="max-height:150px;border:1px solid rgba(201,168,76,.3)"></div>
+  <div class="mb-2"><img src="{{ golub.fotografija.url }}" style="max-height:120px;border-radius:8px;border:1px solid rgba(201,168,76,.3)"></div>
   {% endif %}
-
-  <div class="row g-2 mb-2">
-    <div class="col-6 col-md-4">
-      <div class="gf-cam-btn gf-cam-photo" onclick="capturePhoto()">
-        <i class="fas fa-camera" style="font-size:1.1rem"></i>
-        <span>Slikaj goluba</span>
-      </div>
-    </div>
-    <div class="col-6 col-md-4">
-      <div class="gf-cam-btn gf-cam-ring" onclick="scanRing()">
-        <i class="fas fa-magic" style="font-size:1.1rem"></i>
-        <span>Skeniraj prsten <span class="gf-ai-badge">AI</span></span>
-      </div>
-    </div>
-    <div class="col-12 col-md-4">
-      <label class="gf-cam-btn gf-cam-gallery w-100 mb-0">
-        <i class="fas fa-folder-open"></i>
-        <span>Iz galerije</span>
-        <input type="file" name="fotografija" accept="image/*" class="d-none" onchange="onGalleryPick(this)">
-      </label>
-    </div>
-  </div>
-
-  <div id="photo-preview"></div>
-  <div id="ring-preview"></div>
-  <div id="ai-status"></div>
-
-  <!-- Hidden file input za photo capture -->
-  <input type="file" id="photo-file-input" name="fotografija" accept="image/*" capture="environment" class="d-none">
+  <div id="scan-golub"></div>
+  <input type="file" id="foto-form-input" name="fotografija" class="d-none">
 </div>
 </div>
 
-<!-- SEKCIJA: Osnovni podaci -->
-<div class="gf-card mb-3">
+<!-- PRSTEN — višestruke slike -->
+<div class="gf-card">
+<div class="gf-card-body">
+  <div class="gf-section"><i class="fas fa-ring me-1"></i> Fotografije prstena — AI čita broj</div>
+  <div id="scan-prsten"></div>
+</div>
+</div>
+
+<!-- OSNOVNI PODACI -->
+<div class="gf-card">
 <div class="gf-card-body">
   <div class="gf-section"><i class="fas fa-info-circle me-1"></i> Osnovni podaci</div>
 
@@ -110,17 +74,18 @@
   <div class="row g-3 mb-3">
     <div class="col-md-6">
       <label class="form-label" style="font-weight:600;font-size:.85rem">Broj prstena <span class="text-danger">*</span></label>
-      <div class="input-group">
-        <input type="text" name="prsten_broj" id="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control gf-input" placeholder="HR-2026-12345">
-        <button type="button" class="btn btn-outline-secondary" onclick="scanRing()" title="AI skeniranje prstena" style="border-color:var(--input-border)">
-          <i class="fas fa-magic" style="color:#3b82f6"></i>
-        </button>
-      </div>
+      <input type="text" name="prsten_broj" id="prsten_broj" value="{{ golub.prsten_broj|default:'' }}" required class="form-control gf-input" placeholder="AI popunjava automatski">
       <small style="color:var(--text-muted);font-size:.72rem">Format: HR-YYYY-NNNNN ili HOG/LOK oznaka</small>
     </div>
     <div class="col-md-6">
       <label class="form-label" style="font-weight:600;font-size:.85rem">Naziv / Ime</label>
-      <input type="text" name="naziv" id="naziv" value="{{ golub.naziv|default:'' }}" class="form-control gf-input" placeholder="Ime goluba">
+      <div class="input-group">
+        <input type="text" name="naziv" id="naziv" value="{{ golub.naziv|default:'' }}" class="form-control gf-input" placeholder="AI predlaže automatski">
+        <button type="button" class="btn-regen" id="btn-regen-name" style="display:none" title="Regeneriraj AI ime">
+          <i class="fas fa-sync-alt" style="font-size:.8rem"></i>
+        </button>
+      </div>
+      <div class="ai-name-hint" id="ai-name-hint"></div>
     </div>
   </div>
 
@@ -133,7 +98,7 @@
     </div>
     <div class="col-4">
       <label class="form-label" style="font-weight:600;font-size:.85rem">Boja</label>
-      <select name="boja" class="form-select gf-input">
+      <select name="boja" id="boja-select" class="form-select gf-input">
         <option value="">—</option>
         {% for code, label in boja_choices %}<option value="{{ code }}" {% if golub.boja == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
@@ -146,8 +111,8 @@
 </div>
 </div>
 
-<!-- SEKCIJA: Rodovnik -->
-<div class="gf-card mb-3">
+<!-- RODOVNIK -->
+<div class="gf-card">
 <div class="gf-card-body">
   <div class="gf-section"><i class="fas fa-sitemap me-1"></i> Rodovnik</div>
   <div class="row g-3">
@@ -169,218 +134,132 @@
 </div>
 </div>
 
-<!-- SEKCIJA: Napomena -->
-<div class="gf-card mb-3">
+<!-- NAPOMENA -->
+<div class="gf-card">
 <div class="gf-card-body">
   <div class="gf-section"><i class="fas fa-sticky-note me-1"></i> Napomena</div>
-  <textarea name="napomena" rows="3" class="form-control gf-input" placeholder="Dodatne informacije o golubu...">{{ golub.napomena|default:'' }}</textarea>
+  <textarea name="napomena" rows="3" class="form-control gf-input" placeholder="Dodatne informacije...">{{ golub.napomena|default:'' }}</textarea>
 </div>
 </div>
 
-<!-- Akcije -->
+<!-- AKCIJE -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary" style="border-radius:8px;padding:10px 20px">
-    <i class="fas fa-arrow-left me-1"></i> Natrag
+  <a href="{% url 'udruge:golub_list' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Odustani
   </a>
   <button type="submit" class="gf-submit">
-    <i class="fas fa-check me-1"></i> {% if golub %}Spremi izmjene{% else %}Spremi goluba{% endif %}
+    <i class="fas fa-save me-1"></i> {% if golub %}Spremi promjene{% else %}Dodaj goluba{% endif %}
   </button>
 </div>
 
 </form>
 </div>
 
+<script src="/static/js/fenix-scan.js"></script>
 <script>
-// ── Slikaj goluba (FenixCamera) ──────────────────────────
-function capturePhoto() {
-  if (typeof FenixCamera !== 'undefined') {
-    FenixCamera.pick({
-      source: 'camera',
-      quality: 0.85,
-      maxWidth: 1600,
-      onCapture: function(r) {
-        FenixCamera.showPreview(r.dataUrl, 'photo-preview', { maxHeight: 180 });
-        setFileFromBlob(r.blob, r.filename);
-      },
-      onError: function(err) {
-        // Fallback: probaj native input
-        document.getElementById('photo-file-input').click();
+// ── Skener goluba ─────────────────────────────────────────
+var golubScanner = FenixScan.create({
+  container:  '#scan-golub',
+  docType:    'golub',
+  maxImages:  2,
+  showLabel:  false,
+  minConfidence: 0.35,
+  onResult: function(fields, confidence) {
+    // Ime
+    var nazivEl = document.getElementById('naziv');
+    if (fields.ime && nazivEl.dataset.manualEdit !== '1') {
+      nazivEl.value = fields.ime;
+      nazivEl.dataset.aiGenerated = '1';
+      document.getElementById('btn-regen-name').style.display = 'inline-flex';
+      var hint = document.getElementById('ai-name-hint');
+      hint.style.display = 'block';
+      hint.style.background = 'rgba(34,197,94,.08)';
+      hint.style.color = '#22c55e';
+      hint.style.border = '1px solid rgba(34,197,94,.2)';
+      hint.innerHTML = '<i class="fas fa-magic me-1"></i> AI predložio: <strong>' + fields.ime + '</strong>' +
+        (fields.opis_boje ? ' · ' + fields.opis_boje : '') +
+        ' <span style="opacity:.6">— možete promijeniti</span>';
+    }
+    // Boja
+    if (fields.boja_kod) {
+      var bojaEl = document.getElementById('boja-select');
+      for (var i = 0; i < bojaEl.options.length; i++) {
+        if (bojaEl.options[i].value === fields.boja_kod) { bojaEl.selectedIndex = i; break; }
       }
-    });
-  } else {
-    document.getElementById('photo-file-input').click();
-  }
-}
-
-// Native fallback za photo-file-input
-document.getElementById('photo-file-input').addEventListener('change', function() {
-  if (this.files && this.files[0]) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var el = document.getElementById('photo-preview');
-      el.style.display = 'block';
-      el.innerHTML = '<img src="'+e.target.result+'" style="max-height:180px;border-radius:8px;border:1px solid rgba(201,168,76,.3)">';
-    };
-    reader.readAsDataURL(this.files[0]);
+    }
+    // Spremi sliku u form
+    var b64s = golubScanner.getImages();
+    if (b64s.length) _setFormFileFromB64(b64s[0], 'fotografija');
+  },
+  onError: function(msg) {
+    console.warn('Golub scan:', msg);
   }
 });
 
-// ── Skeniraj prsten (AI Vision) ──────────────────────────
-function scanRing() {
-  var aiStatus = document.getElementById('ai-status');
-
-  if (typeof FenixCamera !== 'undefined') {
-    FenixCamera.pick({
-      source: 'camera',
-      quality: 0.9,
-      maxWidth: 1200,
-      onCapture: function(r) {
-        FenixCamera.showPreview(r.dataUrl, 'ring-preview', { maxHeight: 140 });
-
-        // Pokaži loading
-        aiStatus.className = 'loading';
-        aiStatus.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> AI analizira prsten...';
-        aiStatus.style.display = 'block';
-
-        // Pošalji na AI
-        FenixCamera.analyzeWithAI(r.b64, {
-          module: 'golubar',
-          prompt: 'Ovo je fotografija prstena goluba. Pročitaj tekst na prstenu i izvuci:\n' +
-                  '- Broj prstena (ring number, npr. HR-2024-12345 ili CRO 2024 12345)\n' +
-                  '- Godinu\n' +
-                  '- Boju prstena ako se vidi\n' +
-                  'Odgovori SAMO JSON: {"prsten_broj":"...","godina":"...","boja_prstena":"...","confidence":0.9}',
-          onResult: function(text) {
-            try {
-              var match = text.match(/\{.*\}/s);
-              if (match) {
-                var data = JSON.parse(match[0]);
-                if (data.prsten_broj) {
-                  document.getElementById('prsten_broj').value = data.prsten_broj;
-                  aiStatus.className = 'success';
-                  aiStatus.innerHTML = '<i class="fas fa-check-circle me-1"></i> Prsten prepoznat: <strong>' + data.prsten_broj + '</strong>' +
-                    (data.confidence ? ' (pouzdanost: ' + Math.round(data.confidence*100) + '%)' : '');
-                } else {
-                  aiStatus.className = 'error';
-                  aiStatus.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Nije moguće pročitati prsten. Pokušajte ponovo s boljim osvjetljenjem.';
-                }
-              }
-            } catch(e) {
-              aiStatus.className = 'error';
-              aiStatus.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Greška pri analizi. Unesite ručno.';
-            }
-          },
-          onError: function(err) {
-            aiStatus.className = 'error';
-            aiStatus.innerHTML = '<i class="fas fa-times-circle me-1"></i> ' + err;
-          }
-        });
-      },
-      onError: function(err) {
-        // Fallback: native camera
-        var input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.setAttribute('capture', 'environment');
-        input.onchange = function() {
-          if (input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-              var el = document.getElementById('ring-preview');
-              el.style.display = 'block';
-              el.innerHTML = '<img src="'+e.target.result+'" style="max-height:140px;border-radius:8px">';
-              aiStatus.className = 'error';
-              aiStatus.innerHTML = '<i class="fas fa-info-circle me-1"></i> AI skeniranje nije dostupno. Unesite broj prstena ručno.';
-              aiStatus.style.display = 'block';
-            };
-            reader.readAsDataURL(input.files[0]);
-          }
-        };
-        input.click();
-      }
-    });
-  } else {
-    alert('Kamera nije dostupna. Unesite broj prstena ručno.');
-  }
-}
-
-// ── Galerija pick ────────────────────────────────────────
-function onGalleryPick(input) {
-  if (input.files && input.files[0]) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var el = document.getElementById('photo-preview');
-      el.style.display = 'block';
-      el.innerHTML = '<img src="'+e.target.result+'" style="max-height:180px;border-radius:8px;border:1px solid rgba(201,168,76,.3)">' +
-        '<br><small style="color:#22c55e;margin-top:4px;display:block"><i class="fas fa-check"></i> Fotografija odabrana</small>';
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
-// ── Set file from blob (za FenixCamera capture) ──────────
-function setFileFromBlob(blob, filename) {
-  var file = new File([blob], filename || 'golub.jpg', { type: 'image/jpeg' });
-  var dataTransfer = new DataTransfer();
-  dataTransfer.items.add(file);
-
-  // Postavi na sve file inpute
-  var inputs = document.querySelectorAll('input[name="fotografija"]');
-  inputs.forEach(function(inp) {
-    if (inp.type === 'file') {
-      inp.files = dataTransfer.files;
+// ── Skener prstena — VIŠESTRUKE SLIKE ─────────────────────
+var prstenScanner = FenixScan.create({
+  container:  '#scan-prsten',
+  docType:    'ring',
+  maxImages:  5,
+  showLabel:  false,
+  minConfidence: 0.35,
+  fieldMap: {
+    prsten_broj: '#prsten_broj',
+  },
+  onResult: function(fields, confidence, n) {
+    if (fields.prsten_broj) {
+      document.getElementById('prsten_broj').dataset.aiGenerated = '1';
     }
+  },
+  onError: function(msg) {
+    console.warn('Prsten scan:', msg);
+  }
+});
+
+// ── Ručni unos → onemogući AI override ───────────────────
+['naziv', 'prsten_broj'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', function() {
+    if (this.dataset.aiGenerated !== '1') this.dataset.manualEdit = '1';
+    this.dataset.aiGenerated = '0';
   });
+});
+
+// Regen ime
+document.getElementById('btn-regen-name').addEventListener('click', function() {
+  document.getElementById('naziv').dataset.manualEdit = '0';
+  golubScanner.rescan();
+});
+
+// ── Helper: b64 → File → form input ──────────────────────
+function _setFormFileFromB64(b64, fieldName) {
+  try {
+    var bytes = atob(b64);
+    var arr   = new Uint8Array(bytes.length);
+    for (var i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    var blob  = new Blob([arr], { type: 'image/jpeg' });
+    var file  = new File([blob], 'golub.jpg', { type: 'image/jpeg' });
+    var dt    = new DataTransfer();
+    dt.items.add(file);
+    document.querySelectorAll('input[name="' + fieldName + '"]').forEach(function(inp) {
+      if (inp.type === 'file') inp.files = dt.files;
+    });
+  } catch(e) {}
 }
 </script>
+
 <script src="/static/js/golubar-offline.js"></script>
 <script>
 document.getElementById('golub-form').addEventListener('submit', function(e) {
   if (!navigator.onLine) {
     e.preventDefault();
-    var form = this;
-    GolubarOffline.saveGolub(form).then(function(id) {
-      // Show success toast
-      var bar = document.getElementById('offlineBar');
-      if (bar) { bar.style.display='block'; bar.style.background='linear-gradient(135deg,#78350f,#451a03)'; bar.style.borderColor='#c9a84c'; }
+    GolubarOffline.saveGolub(this).then(function(id) {
       var msg = document.getElementById('offlineMsg');
-      if (msg) msg.textContent = 'Golub spremljen offline (#'+id+'). Sinkronizira se automatski.';
-      // Redirect to list
-      setTimeout(function(){ window.location.href='{% url "udruge:golub_list" %}'; }, 2000);
-    }).catch(function(err) {
-      alert('Greska pri offline spremanju: ' + err);
-    });
+      if (msg) msg.textContent = 'Golub spremljen offline (#' + id + '). Sinkronizira se automatski.';
+      setTimeout(function(){ window.location.href = '{% url "udruge:golub_list" %}'; }, 2000);
+    }).catch(function(err) { alert('Greška pri offline spremi: ' + err); });
   }
 });
-// Enhance gallery with FenixCamera for better mobile multi-photo
-(function() {
-  var galleryBtn = document.querySelector('.gf-cam-gallery');
-  if (galleryBtn && typeof FenixCamera !== 'undefined') {
-    var origInput = galleryBtn.querySelector('input[type="file"]');
-    if (origInput) origInput.setAttribute('multiple', 'multiple');
-  }
-  // Store FenixCamera captures for offline queue
-  var origCapture = window.capturePhoto;
-  window.capturePhoto = function() {
-    if (typeof FenixCamera !== 'undefined') {
-      FenixCamera.pick({
-        source: 'camera',
-        quality: 0.85,
-        maxWidth: 1600,
-        onCapture: function(r) {
-          FenixCamera.showPreview(r.dataUrl, 'photo-preview', { maxHeight: 180 });
-          setFileFromBlob(r.blob, r.filename);
-          // Also store for offline queue
-          if (typeof GolubarOffline !== 'undefined') {
-            GolubarOffline.addPhotoToOfflineQueue(r, 'fotografija');
-          }
-        },
-        onError: function() { document.getElementById('photo-file-input').click(); }
-      });
-    } else {
-      document.getElementById('photo-file-input').click();
-    }
-  };
-})();
 </script>
 {% endblock %}

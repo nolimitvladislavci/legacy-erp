@@ -119,6 +119,15 @@ function liveCamClose(){
       </div>
     </div>
 
+    <!-- FENIXSCAN: AI Invoice Reader -->
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#c9a84c;margin-bottom:.75rem;letter-spacing:.5px">
+        <i class="fas fa-magic" style="margin-right:4px"></i> AI Skeniranje racuna (opcionalno)
+      </div>
+      <div id="scan-invoice"></div>
+      <div style="font-size:.68rem;color:#64748b;margin-top:.5rem">Slikajte racun — AI automatski popunjava polja ispod. Radi i za zgužvane racune.</div>
+    </div>
+
     <!-- DETALJI -->
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.5rem">
 
@@ -144,7 +153,7 @@ function liveCamClose(){
             <span title="Broj s racuna. Mozete ostaviti prazno, AI ce ga automatski procitati."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="text" name="doc_number" class="form-control"
+          <input type="text" name="doc_number" id="doc_number" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
                  placeholder="Ostavite prazno - AI cita automatski">
         </div>
@@ -159,7 +168,7 @@ function liveCamClose(){
             <span title="Naziv firme koja je izdala ili primila racun. Mozete ostaviti prazno."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="text" name="partner_name" class="form-control"
+          <input type="text" name="partner_name" id="partner_name" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
                  placeholder="Ostavite prazno - AI cita automatski">
         </div>
@@ -169,7 +178,7 @@ function liveCamClose(){
             <span title="Ukupni iznos s PDV-om. Mozete ostaviti prazno."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="number" name="amount" step="0.01" class="form-control"
+          <input type="number" name="amount" id="amount" step="0.01" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
                  placeholder="0.00 (auto)">
         </div>
@@ -179,7 +188,7 @@ function liveCamClose(){
             <span title="Datum s racuna. Ako ostavite prazno, koristit ce se danasnji datum."
                   style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
-          <input type="date" name="doc_date" class="form-control"
+          <input type="date" name="doc_date" id="doc_date" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px">
         </div>
       </div>
@@ -220,6 +229,37 @@ function liveCamClose(){
 
 <div id="camera-preview" style="display:none"></div>
 <script src="/static/js/arhiva-upload.js"></script>
+<script src="/static/js/fenix-scan.js"></script>
+<script>
+FenixScan.create({
+  container: '#scan-invoice',
+  docType: 'invoice',
+  maxImages: 3,
+  label: 'Slikaj racun',
+  hint: 'Visestranicni racuni: dodajte sve stranice',
+  fieldMap: {
+    broj_racuna: '#doc_number',
+    partner: '#partner_name',
+    ukupno: '#amount',
+    datum: '#doc_date',
+  },
+  onResult: function(fields, confidence) {
+    // Auto-open details section if AI filled fields
+    if (fields.partner || fields.ukupno) {
+      var details = document.querySelector('details');
+      if (details) details.open = true;
+    }
+  }
+});
+// Manual edit guard
+['doc_number','partner_name','amount','doc_date'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() {
+    if (this.dataset.aiGenerated !== '1') this.dataset.manualEdit = '1';
+    this.dataset.aiGenerated = '0';
+  });
+});
+</script>
 <script>
 function fenixCameraCapture() {
   if (window.FenixCamera) {

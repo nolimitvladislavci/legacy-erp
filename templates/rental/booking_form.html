@@ -1,5 +1,35 @@
 {% extends "pos/base_pos.html" %}
-{% block title %}{% if booking %}Uredi rezervaciju{% else %}Nova rezervacija{% endif %}{% endblock %}
+{% block title %}{% if booking %}Uredi rezervaciju{% else %}Nova rezervacija{% endif %}<script src="/static/js/fenix-scan.js"></script>
+<script>
+FenixScan.create({
+  container: '#scan-id-card',
+  docType: 'id_card',
+  maxImages: 2,
+  label: 'Skeniraj osobnu',
+  hint: 'Prednja + straznja strana',
+  fieldMap: {
+    ime_prezime: '#guest_name',
+    drzavljanstvo: '[name=guest_country]',
+    email: '[name=guest_email]',
+  },
+  onResult: function(fields) {
+    // Fallback: ako AI vrati ime + prezime odvojeno
+    if (!fields.ime_prezime && fields.ime && fields.prezime) {
+      var el = document.getElementById('guest_name');
+      if (el && el.dataset.manualEdit !== '1') el.value = fields.ime + ' ' + fields.prezime;
+    }
+  }
+});
+// Manual edit guard
+['guest_name'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() {
+    if (this.dataset.aiGenerated !== '1') this.dataset.manualEdit = '1';
+    this.dataset.aiGenerated = '0';
+  });
+});
+</script>
+{% endblock %}
 {% block extra_css %}
 <style>
 .page{padding:1.5rem;max-width:600px}
@@ -24,7 +54,12 @@
           {% endfor %}
         </select>
       </div>
-      <div class="field"><label>Ime gosta *</label><input name="guest_name" value="{{ booking.guest_name|default:'' }}" required></div>
+      <!-- FenixScan: ID Card → auto-fill gost -->
+      <div class="field">
+        <label style="color:var(--gold);font-weight:700"><i class="fas fa-id-card" style="margin-right:4px"></i> Skeniraj osobnu / putovnicu</label>
+        <div id="scan-id-card"></div>
+      </div>
+      <div class="field"><label>Ime gosta *</label><input name="guest_name" id="guest_name" value="{{ booking.guest_name|default:'' }}" required></div>
       <div class="row">
         <div class="field"><label>Email</label><input name="guest_email" type="email" value="{{ booking.guest_email|default:'' }}"></div>
         <div class="field"><label>Telefon</label><input name="guest_phone" value="{{ booking.guest_phone|default:'' }}"></div>

@@ -207,6 +207,8 @@ urlpatterns = [
     path('golubar/utrke/nova/', views.utrka_create, name='utrka_create'),
     path('golubar/utrke/<int:pk>/', views.utrka_detail, name='utrka_detail'),
     path('golubar/utrke/<int:utrka_pk>/rezultat/', views.rezultat_create, name='rezultat_create'),
+    path('golubar/ai-ime/', views.golubar_ai_ime, name='golubar_ai_ime'),
+    path('golubar/ai-prsten/', views.golubar_ai_prsten, name='golubar_ai_prsten'),
 
     # ═══════════════════════════════════════════════════════════════════
     # PERAD — JATA (Flock)
