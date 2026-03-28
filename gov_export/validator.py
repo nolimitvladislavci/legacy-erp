@@ -1,5 +1,5 @@
 """
-BORG Validator — javna stranica za provjeru potpisa GovExport XML-ova.
+LIMIT Verify — javna stranica za provjeru potpisa GovExport XML-ova.
 Inspektor uploada XML → sustav provjerava kriptografski potpis → zelena/crvena.
 BEZ AUTENTIFIKACIJE — javno dostupno.
 """
