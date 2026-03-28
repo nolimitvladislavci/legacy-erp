@@ -52,6 +52,7 @@ class ExperienceScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(ExperienceBooking)
 class ExperienceBookingAdmin(admin.ModelAdmin):
+    readonly_fields = ('forfeited_invoice',)
     list_display = ['guest_name', 'schedule', 'pax_count', 'price_total', 'deposit_paid', 'status']
     list_filter = ['status', 'deposit_paid']
     search_fields = ['guest_name', 'guest_email']

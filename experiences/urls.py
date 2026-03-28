@@ -13,6 +13,8 @@ urlpatterns = [
     path('schedule/<int:schedule_pk>/book/', views.booking_create, name='booking_create'),
     path('booking/<int:pk>/confirm/', views.booking_confirm_deposit, name='booking_confirm_deposit'),
     path('booking/<int:pk>/cancel/', views.booking_cancel, name='booking_cancel'),
+    path('booking/<int:pk>/check-in/', views.booking_check_in, name='booking_check_in'),
+    path('booking/<int:pk>/complete/', views.booking_complete, name='booking_complete'),
     path('booking/<int:pk>/no-show/', views.booking_no_show, name='booking_no_show'),
     path('booking/<int:pk>/review/', views.review_create, name='review_create'),
 

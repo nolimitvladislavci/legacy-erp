@@ -3905,6 +3905,32 @@ def flock_health_create(request, flock_pk):
                 pass
 
         messages.success(request, f'Zdravstveni zapis dodan za {flock.naziv}.')
+
+        # Upozori o POS blokadi ako postoje linked InventoryItems
+        if record.karenca_dana and record.karenca_aktivna:
+            try:
+                linked_items = flock.inventory_products.filter(
+                    is_active=True
+                ).values_list('name', flat=True)
+                if linked_items:
+                    from datetime import timedelta
+                    end_date = record.datum + timedelta(days=record.karenca_dana)
+                    messages.warning(
+                        request,
+                        f'POS BLOKADA AKTIVNA: {len(linked_items)} artikl(a) '
+                        f'({", ".join(linked_items)}) blokirano za prodaju do '
+                        f'{end_date:%d.%m.%Y}. Karenca: {record.karenca_dana} dana.'
+                    )
+                else:
+                    messages.info(
+                        request,
+                        f'Karenca aktivna ({record.karenca_dana} dana), ali nema '
+                        f'povezanih artikala u inventaru. Povežite artikle s jatom '
+                        f'u Admin → Inventar → Artikl → Izvorno jato.'
+                    )
+            except Exception:
+                pass
+
         return redirect('udruge:flock_detail', pk=flock.pk)
 
     return render(request, 'udruge/flock_health_form.html', {
@@ -3985,6 +4011,29 @@ def bridge_publish(request):
                 opg_number=opg_number,
             )
             messages.success(request, f'"{product.name}" objavljeno na tržnici! Ističe: {product.expires_at}.')
+
+            # Auto-link source_flock na InventoryItem-e iste kompanije
+            if source_model == 'EggRecord':
+                try:
+                    from .models import EggRecord as ER
+                    from inventory.models import InventoryItem
+                    egg = ER.objects.select_related('flock').get(pk=int(source_id))
+                    flock = egg.flock
+                    # Nađi sve jajčane artikle bez source_flock u istoj firmi
+                    egg_items = InventoryItem.objects.filter(
+                        company=company,
+                        source_flock__isnull=True,
+                        name__icontains='jaj',
+                    )
+                    linked = egg_items.update(source_flock=flock)
+                    if linked:
+                        messages.info(
+                            request,
+                            f'Auto-link: {linked} artikl(a) povezano s jatom "{flock.naziv}" '
+                            f'za karencija enforcement na POS-u.'
+                        )
+                except Exception:
+                    pass
         except Exception as e:
             messages.error(request, f'Greška pri objavljivanju: {e}')
 

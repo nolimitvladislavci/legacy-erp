@@ -237,11 +237,89 @@ def booking_cancel(request, pk):
 
 
 @login_required
+def booking_check_in(request, pk):
+    """
+    Gost je došao — check-in.
+    Auto-alocira inventory iz ExperienceInclusion kroz SplitAllocation servis.
+    """
+    booking = get_object_or_404(ExperienceBooking, pk=pk)
+
+    if booking.status != 'confirmed':
+        messages.error(request, f'Booking nije u statusu "potvrđen" (trenutno: {booking.get_status_display()}).')
+        return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
+
+    if request.method == 'POST':
+        booking.status = 'checked_in'
+        booking.save(update_fields=['status'])
+
+        # Auto-alociraj inventory za internu upotrebu
+        from experiences.models import ExperienceInclusion
+        inclusions = ExperienceInclusion.objects.filter(
+            experience=booking.schedule.experience,
+            inventory_item__isnull=False,
+        ).select_related('inventory_item')
+
+        allocated = []
+        for incl in inclusions:
+            qty_needed = incl.quantity_per_person * booking.pax_count
+            try:
+                from inventory.services.split_allocation import allocate_to_inhouse
+                movement = allocate_to_inhouse(
+                    item=incl.inventory_item,
+                    qty=qty_needed,
+                    reason=f'Experience check-in: {booking.guest_name} x{booking.pax_count} — {incl.description}',
+                    user=request.user,
+                )
+                allocated.append(f'{incl.description} ({qty_needed} {incl.unit})')
+            except ValueError as e:
+                messages.warning(request, f'Zaliha upozorenje za {incl.description}: {e}')
+            except Exception as e:
+                import logging
+                logging.getLogger('experiences').error('Check-in allocation error: %s', e)
+
+        guest_msg = f'{booking.guest_name} (x{booking.pax_count}) — checked in!'
+        if allocated:
+            guest_msg += f' Alocirano: {", ".join(allocated)}.'
+        messages.success(request, guest_msg)
+
+    return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
+
+
+@login_required
+def booking_complete(request, pk):
+    """
+    Iskustvo završeno — generira račun ako nema depozita.
+    """
+    booking = get_object_or_404(ExperienceBooking, pk=pk)
+
+    if booking.status != 'checked_in':
+        messages.error(request, f'Gost mora biti checked-in prije završetka.')
+        return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
+
+    if request.method == 'POST':
+        booking.status = 'completed'
+        booking.save(update_fields=['status'])
+
+        # Oslobodi schedule slot
+        sched = booking.schedule
+        if sched.status == 'full':
+            sched.status = 'open'
+            sched.save(update_fields=['status'])
+
+        messages.success(request, f'{booking.guest_name} — iskustvo završeno.')
+
+    return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
+
+
+@login_required
 def booking_no_show(request, pk):
     booking = get_object_or_404(ExperienceBooking, pk=pk)
     if request.method == 'POST':
         booking.mark_no_show()
-        messages.warning(request, f'{booking.guest_name} — no-show. Depozit zadržan.')
+        msg = f'{booking.guest_name} — no-show. Depozit zadržan.'
+        if booking.forfeited_invoice_id:
+            msg += f' Račun #{booking.forfeited_invoice_id} generiran.'
+        messages.warning(request, msg)
     return redirect('experiences:experience_detail', pk=booking.schedule.experience.pk)
 
 
