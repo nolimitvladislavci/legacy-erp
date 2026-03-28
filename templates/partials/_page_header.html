@@ -1,0 +1,15 @@
+{# Poziv: {% include "partials/_page_header.html" with icon="fas fa-mountain" title="Iskustva" subtitle="Agro-Turizam 360" cta_url=cta_url cta_label="Novo iskustvo" cta_icon="fas fa-plus" %} #}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h4 class="mb-0 text-white">
+      {% if icon %}<i class="{{ icon }} me-2 {% if icon_color %}{{ icon_color }}{% else %}text-warning{% endif %}"></i>{% endif %}
+      {{ title }}
+    </h4>
+    {% if subtitle %}<div class="text-muted small mt-1">{{ subtitle }}</div>{% endif %}
+  </div>
+  {% if cta_url %}
+  <a href="{{ cta_url }}" class="btn btn-sm btn-warning">
+    <i class="{{ cta_icon|default:'fas fa-plus' }} me-1"></i>{{ cta_label|default:"Novo" }}
+  </a>
+  {% endif %}
+</div>

@@ -1,0 +1,19 @@
+{# Poziv: {% include "partials/_kanban_column.html" with col_title="U tijeku" col_color="#f59e0b" col_icon="fas fa-spinner" items=in_progress_items card_template="work_orders/_kanban_card.html" %} #}
+<div class="kanban-col flex-shrink-0" style="width:280px">
+  <div class="kanban-col-header d-flex align-items-center gap-2 px-3 py-2 rounded-top"
+       style="background:{{ col_color|default:'#3b82f6' }}22; border-top:3px solid {{ col_color|default:'#3b82f6' }}">
+    <i class="{{ col_icon|default:'fas fa-circle' }}" style="color:{{ col_color }}"></i>
+    <span class="fw-semibold small text-white">{{ col_title }}</span>
+    <span class="badge ms-auto rounded-pill" style="background:{{ col_color }}">{{ items|length }}</span>
+  </div>
+  <div class="kanban-col-body p-2 d-flex flex-column gap-2 bg-dark border border-secondary border-top-0 rounded-bottom"
+       style="min-height:200px;max-height:70vh;overflow-y:auto">
+    {% for item in items %}
+      {% include card_template with item=item %}
+    {% empty %}
+      <div class="text-center text-muted py-4" style="font-size:.8rem">
+        <i class="fas fa-inbox mb-2 d-block fs-4"></i>Prazno
+      </div>
+    {% endfor %}
+  </div>
+</div>

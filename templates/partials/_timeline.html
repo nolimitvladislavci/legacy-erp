@@ -1,0 +1,33 @@
+{# Poziv: {% include "partials/_timeline.html" with activities=card_activities %} #}
+<div class="timeline">
+  {% for act in activities %}
+  <div class="timeline-item d-flex gap-3 mb-3">
+    <div class="timeline-dot flex-shrink-0 d-flex align-items-start pt-1">
+      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+           style="width:28px;height:28px">
+        <i class="fas fa-circle-dot text-primary" style="font-size:.6rem"></i>
+      </div>
+    </div>
+    <div class="flex-grow-1">
+      <div class="card bg-dark border-secondary p-2">
+        <div class="d-flex justify-content-between align-items-start">
+          <span class="small text-white">{{ act.action }}</span>
+          <span class="text-muted" style="font-size:.7rem;white-space:nowrap">{{ act.created_at|timesince }} ago</span>
+        </div>
+        {% if act.old_value or act.new_value %}
+        <div class="mt-1" style="font-size:.75rem">
+          {% if act.old_value %}<span class="text-danger text-decoration-line-through">{{ act.old_value }}</span> → {% endif %}
+          {% if act.new_value %}<span class="text-success">{{ act.new_value }}</span>{% endif %}
+        </div>
+        {% endif %}
+        {% if act.note %}<div class="text-muted mt-1" style="font-size:.75rem">{{ act.note }}</div>{% endif %}
+        {% if act.user %}<div class="text-muted mt-1" style="font-size:.7rem"><i class="fas fa-user me-1"></i>{{ act.user.get_full_name|default:act.user.username }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center text-muted py-3">
+    <i class="fas fa-history mb-1 d-block"></i><small>Nema aktivnosti</small>
+  </div>
+  {% endfor %}
+</div>

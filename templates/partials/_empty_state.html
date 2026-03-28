@@ -1,0 +1,13 @@
+{# Poziv: {% include "partials/_empty_state.html" with icon="fas fa-mountain" title="Nema iskustava" sub="Kreirajte prvu turističku aktivnost" cta_url=cta_url cta_label="Novo iskustvo" %} #}
+<div class="text-center py-5 text-muted">
+  <div class="mb-3">
+    <i class="{{ icon|default:'fas fa-inbox' }}" style="font-size:3rem;opacity:.3"></i>
+  </div>
+  <h6 class="text-white-50 mb-1">{{ title|default:"Nema podataka" }}</h6>
+  {% if sub %}<p class="small mb-3">{{ sub }}</p>{% endif %}
+  {% if cta_url %}
+  <a href="{{ cta_url }}" class="btn btn-sm btn-outline-primary">
+    <i class="fas fa-plus me-1"></i>{{ cta_label|default:"Dodaj" }}
+  </a>
+  {% endif %}
+</div>

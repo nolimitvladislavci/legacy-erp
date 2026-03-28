@@ -126,6 +126,19 @@ html { scroll-behavior: smooth; }
 /* Selection color */
 ::selection { background: rgba(201,168,76,.3); color: #fff; }
 
+/* Kanban board */
+.kanban-board { display:flex; gap:16px; overflow-x:auto; padding-bottom:16px; }
+.kanban-board::-webkit-scrollbar { height:6px; }
+.kanban-board::-webkit-scrollbar-track { background:#1e293b; }
+.kanban-board::-webkit-scrollbar-thumb { background:#475569; border-radius:3px; }
+
+/* Timeline */
+.timeline-item + .timeline-item .timeline-dot::before {
+  content:''; position:absolute; top:-20px; left:50%; width:2px; height:16px;
+  background:var(--border, #333); transform:translateX(-50%);
+}
+.timeline-dot { position:relative; }
+
 /* Print optimization */
 @media print {
     .sidebar, .topbar, .hamburger, #mobileBottomNav,

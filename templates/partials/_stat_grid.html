@@ -1,0 +1,7 @@
+{# Poziv: {% include "partials/_stat_grid.html" with cards=stat_cards_list %} #}
+{# cards = lista dicta: [{icon, color, label, value, sub}, ...] #}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-{{ cards|length|default:4 }} g-3 mb-4">
+  {% for card in cards %}
+    {% include "partials/_stat_card.html" with icon=card.icon color=card.color label=card.label value=card.value sub=card.sub %}
+  {% endfor %}
+</div>
