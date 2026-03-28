@@ -125,6 +125,7 @@
                 {% endfor %}
               </select>
               <button class="iv-btn-assign" onclick="doAssign({{ interv.pk }})">{% trans "Dodijeli" %}</button>
+              {% include "borg_ops/_dispatch_widget.html" with intervention_pk=interv.pk %}
             </div>
             {% endif %}
           </div>

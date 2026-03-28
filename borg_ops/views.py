@@ -276,3 +276,55 @@ def activity_fragment(request):
     return render(request, 'borg_ops/_activity_log.html', {
         'activities': activities,
     })
+
+
+@login_required
+@require_GET
+def dispatch_suggest(request, pk):
+    """
+    Smart Dispatch API — predlaže radnike za intervenciju.
+    GET /api/dispatch/suggest/<pk>/
+    Returns: JSON s rangiranim kandidatima.
+    """
+    from interventions.models import HitnaIntervencija
+    from .dispatch import suggest_workers, estimate_budget
+
+    try:
+        interv = HitnaIntervencija.objects.select_related('company').get(pk=pk)
+    except HitnaIntervencija.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Intervencija ne postoji'}, status=404)
+
+    candidates = suggest_workers(interv, limit=5)
+    budget = estimate_budget(interv.category, interv.company)
+
+    return JsonResponse({
+        'ok': True,
+        'intervention': {
+            'pk': interv.pk,
+            'title': interv.title,
+            'category': interv.category,
+            'address': interv.address,
+            'has_gps': bool(interv.last_lat),
+        },
+        'candidates': [
+            {
+                'user_id': c['user'].pk,
+                'username': c['user'].username,
+                'full_name': c['user'].get_full_name() or c['user'].username,
+                'score': c['score'],
+                'distance_km': c['distance_km'],
+                'workload': c['workload'],
+                'has_category': c['has_category'],
+                'breakdown': c['breakdown'],
+            }
+            for c in candidates
+        ],
+        'budget_estimate': {
+            'estimate': str(budget['estimate']),
+            'median': str(budget['median']),
+            'min': str(budget['min']),
+            'max': str(budget['max']),
+            'sample_size': budget['sample_size'],
+            'source': budget['source'],
+        },
+    })

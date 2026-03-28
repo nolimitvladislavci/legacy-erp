@@ -1,0 +1,169 @@
+{% comment %}
+BORG _dispatch_widget.html — Smart Dispatch suggestion widget.
+
+Usage:
+  {% include "borg_ops/_dispatch_widget.html" with intervention_pk=iv.pk %}
+
+Or inline in modal:
+  <div id="dispatch-{{ iv.pk }}"
+       hx-get="/api/dispatch/suggest/{{ iv.pk }}/"
+       hx-trigger="revealed"
+       hx-swap="innerHTML">
+    Loading...
+  </div>
+{% endcomment %}
+
+{% load i18n %}
+<div class="dispatch-widget" id="dw-{{ intervention_pk }}">
+  <button type="button" class="dw-trigger"
+          onclick="loadDispatch({{ intervention_pk }}, this)">
+    <i class="fas fa-bolt"></i> {% trans "Smart Dispatch" %}
+  </button>
+  <div class="dw-panel" id="dw-panel-{{ intervention_pk }}" style="display:none"></div>
+</div>
+
+<style>
+.dispatch-widget{position:relative;display:inline-block}
+.dw-trigger{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(201,168,76,.3);background:rgba(201,168,76,.06);color:#c9a84c;transition:all .2s}
+.dw-trigger:hover{background:rgba(201,168,76,.12);border-color:#c9a84c}
+.dw-trigger.loading{opacity:.6;pointer-events:none}
+.dw-panel{position:absolute;top:100%;left:0;z-index:100;min-width:340px;max-width:420px;background:var(--bg-card,#111214);border:1px solid var(--border,#222);border-radius:12px;box-shadow:0 12px 48px rgba(0,0,0,.5);margin-top:6px;overflow:hidden}
+.dw-header{padding:12px 14px;border-bottom:1px solid var(--border,#222);display:flex;align-items:center;justify-content:space-between}
+.dw-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c}
+.dw-close{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;padding:2px 6px}
+.dw-body{padding:10px 14px;max-height:300px;overflow-y:auto}
+.dw-candidate{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;cursor:pointer;transition:background .15s}
+.dw-candidate:hover{background:rgba(201,168,76,.06)}
+.dw-rank{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0}
+.dw-rank-1{background:rgba(201,168,76,.15);color:#c9a84c}
+.dw-rank-2{background:rgba(59,130,246,.1);color:#60a5fa}
+.dw-rank-3{background:rgba(107,114,128,.1);color:#9ca3af}
+.dw-info{flex:1;min-width:0}
+.dw-name{font-size:.82rem;font-weight:600;color:var(--text,#e0e0e0)}
+.dw-meta{font-size:.65rem;color:var(--text-muted,#6b7280);display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.dw-score-bar{width:50px;height:4px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden;flex-shrink:0}
+.dw-score-fill{height:100%;border-radius:2px;transition:width .3s}
+.dw-assign-btn{padding:4px 10px;border-radius:5px;font-size:.68rem;font-weight:700;border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.06);color:#22c55e;cursor:pointer;flex-shrink:0;transition:all .15s}
+.dw-assign-btn:hover{background:rgba(34,197,94,.15)}
+.dw-budget{padding:10px 14px;border-top:1px solid var(--border,#222);display:flex;align-items:center;gap:12px}
+.dw-budget-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);font-weight:700}
+.dw-budget-val{font-size:1.1rem;font-weight:800;color:var(--text)}
+.dw-budget-range{font-size:.65rem;color:var(--text-muted)}
+.dw-empty{text-align:center;padding:20px;color:var(--text-muted);font-size:.82rem}
+</style>
+
+<script>
+function loadDispatch(pk, btn) {
+  var panel = document.getElementById('dw-panel-' + pk);
+  if (panel.style.display !== 'none') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analiziram...';
+
+  fetch('/api/dispatch/suggest/' + pk + '/', {
+    credentials: 'same-origin',
+    headers: {'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''},
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<i class="fas fa-bolt"></i> Smart Dispatch';
+
+    if (!d.ok) {
+      panel.innerHTML = '<div class="dw-empty">' + (d.error || 'Greška') + '</div>';
+      panel.style.display = 'block';
+      return;
+    }
+
+    var html = '<div class="dw-header"><span class="dw-title">⚡ Smart Dispatch</span>' +
+      '<button class="dw-close" onclick="document.getElementById(\'dw-panel-' + pk + '\').style.display=\'none\'">✕</button></div>';
+
+    html += '<div class="dw-body">';
+    if (d.candidates.length === 0) {
+      html += '<div class="dw-empty">Nema dostupnih radnika.</div>';
+    } else {
+      d.candidates.forEach(function(c, i) {
+        var scoreColor = c.score < 0.3 ? '#22c55e' : c.score < 0.6 ? '#f59e0b' : '#ef4444';
+        var scorePct = Math.round((1 - c.score) * 100);
+        html += '<div class="dw-candidate" data-user-id="' + c.user_id + '">' +
+          '<div class="dw-rank dw-rank-' + (i < 3 ? (i+1) : 3) + '">' + (i+1) + '</div>' +
+          '<div class="dw-info">' +
+            '<div class="dw-name">' + c.full_name + '</div>' +
+            '<div class="dw-meta">' +
+              (c.distance_km !== null ? '<span>📍 ' + c.distance_km + ' km</span>' : '') +
+              '<span>📋 ' + c.workload.total + ' aktiv.</span>' +
+              (c.has_category ? '<span style="color:#22c55e">✓ kategorija</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="dw-score-bar"><div class="dw-score-fill" style="width:' + scorePct + '%;background:' + scoreColor + '"></div></div>' +
+          '<button class="dw-assign-btn" onclick="assignWorker(' + pk + ',' + c.user_id + ',\'' + c.full_name.replace(/'/g,"\\'") + '\')">Dodijeli</button>' +
+        '</div>';
+      });
+    }
+    html += '</div>';
+
+    // Budget estimate
+    var b = d.budget_estimate;
+    html += '<div class="dw-budget">' +
+      '<div class="dw-budget-label">Procjena</div>' +
+      '<div class="dw-budget-val">' + b.estimate + ' €</div>' +
+      '<div class="dw-budget-range">' + b.min + ' — ' + b.max + ' € (' + b.sample_size + ' uzoraka)</div>' +
+    '</div>';
+
+    panel.innerHTML = html;
+    panel.style.display = 'block';
+  })
+  .catch(function(err) {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<i class="fas fa-bolt"></i> Smart Dispatch';
+    panel.innerHTML = '<div class="dw-empty">Mrežna greška</div>';
+    panel.style.display = 'block';
+  });
+}
+
+function assignWorker(interventionPk, userId, userName) {
+  if (!confirm('Dodijeliti ' + userName + '?')) return;
+
+  fetch('/api/card/move/', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'HitnaIntervencija',
+      pk: interventionPk,
+      new_status: 'DODIJELJENO',
+      expected_status: 'NOVO',
+    }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok || d.ok === undefined) {
+      // Also assign the worker via separate endpoint
+      fetch('/interventions/' + interventionPk + '/assign/', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'assigned_to=' + userId,
+      }).then(function() {
+        if (typeof BorgKanban !== 'undefined') BorgKanban.showToast(userName + ' dodijeljen!', 'success');
+        else if (typeof fenixToast === 'function') fenixToast(userName + ' dodijeljen!', 'success');
+        setTimeout(function() { location.reload(); }, 1500);
+      });
+    } else {
+      if (typeof BorgKanban !== 'undefined') BorgKanban.showToast(d.error || 'Greška', 'error');
+    }
+  })
+  .catch(function() {
+    if (typeof BorgKanban !== 'undefined') BorgKanban.showToast('Mrežna greška', 'error');
+  });
+}
+</script>
