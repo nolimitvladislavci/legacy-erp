@@ -168,7 +168,7 @@ class Force2FAMiddleware:
             if msg.message == system_message:
                 has_message = True
                 break
-        storage.used = False  # Vrati poruke u storage da se prikazu na iducem ekranu
+        if hasattr(storage, "used"): storage.used = False  # Vrati poruke u storage da se prikazu na iducem ekranu
 
         if not has_message:
             messages.warning(request, system_message)

@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
+from django.db import models
 from django.utils import timezone
 from django.views.decorators.http import require_POST, require_GET
 
@@ -238,12 +239,80 @@ def operations_dashboard(request):
     except Exception:
         pass
 
+    # ── Experiences — danas ──
+    exp_today = {'schedules': 0, 'bookings': 0, 'no_shows': 0, 'revenue': 0}
+    try:
+        from experiences.models import ExperienceSchedule, ExperienceBooking
+        today = now.date()
+        today_scheds = ExperienceSchedule.objects.filter(date=today)
+        exp_today['schedules'] = today_scheds.count()
+        today_bookings = ExperienceBooking.objects.filter(
+            schedule__date=today
+        )
+        exp_today['bookings'] = today_bookings.count()
+        exp_today['no_shows'] = today_bookings.filter(status='no_show').count()
+        from django.db.models import Sum
+        exp_today['revenue'] = today_bookings.filter(
+            status__in=['completed', 'checked_in']
+        ).aggregate(s=Sum('price_total'))['s'] or 0
+    except Exception:
+        pass
+
+    # ── Inventory alerts ──
+    inv_alerts = {'low_stock': 0, 'karenca': 0, 'expiring': 0, 'items': []}
+    try:
+        from inventory.models import InventoryItem, StockBatch
+        low = InventoryItem.objects.filter(
+            is_active=True, quantity__lte=models.F('min_quantity'),
+            min_quantity__gt=0,
+        )[:5]
+        inv_alerts['low_stock'] = low.count()
+        inv_alerts['items'] = list(low.values_list('name', flat=True))
+
+        # Karenca
+        karenca_items = InventoryItem.objects.filter(
+            source_flock__isnull=False, is_active=True,
+        )
+        karenca_count = 0
+        for item in karenca_items:
+            if item.source_flock and item.source_flock.has_active_karenca:
+                karenca_count += 1
+        inv_alerts['karenca'] = karenca_count
+
+        # Expiring batches (7 days)
+        from datetime import timedelta
+        week = today + timedelta(days=7)
+        inv_alerts['expiring'] = StockBatch.objects.filter(
+            expiry_date__lte=week, expiry_date__gte=today,
+            quarantine_status='active',
+        ).count()
+    except Exception:
+        pass
+
+    # ── Financijski pulse ──
+    fin_pulse = {'today_revenue': 0, 'unpaid': 0, 'overdue': 0}
+    try:
+        from invoicing.models import Invoice
+        today_invoices = Invoice.objects.filter(
+            date_issued=today, status__in=['CONFIRMED', 'FISCALIZED', 'SENT'],
+        )
+        fin_pulse['today_revenue'] = today_invoices.aggregate(
+            s=Sum('total'))['s'] or 0
+        fin_pulse['unpaid'] = Invoice.objects.filter(
+            status__in=['CONFIRMED', 'FISCALIZED', 'SENT'],
+        ).exclude(total=0).count()
+    except Exception:
+        pass
+
     return render(request, 'borg_ops/operations_dashboard.html', {
         'sla_alerts': sorted(sla_alerts, key=lambda x: -x['minutes']),
         'interventions': interventions_active,
         'work_orders': wo_active,
         'leads': leads_open,
         'signal_stats': signal_stats,
+        'exp_today': exp_today,
+        'inv_alerts': inv_alerts,
+        'fin_pulse': fin_pulse,
         'now': now,
     })
 
@@ -328,3 +397,36 @@ def dispatch_suggest(request, pk):
             'source': budget['source'],
         },
     })
+
+
+@login_required
+@require_POST
+def update_worker_gps(request):
+    """
+    POST /api/worker/gps/
+    Body: {"lat": 45.55, "lng": 18.69}
+
+    Dron #1 fix: ažurira UserProfile.last_lat/lng/gps_update.
+    Poziva se iz JS Geolocation API pri svakom FSM tranziciji na mobitelu.
+    """
+    try:
+        data = json.loads(request.body)
+        lat = float(data.get('lat', 0))
+        lng = float(data.get('lng', 0))
+    except (ValueError, TypeError):
+        return JsonResponse({'ok': False, 'error': 'Neispravan GPS'}, status=400)
+
+    if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+        return JsonResponse({'ok': False, 'error': 'GPS izvan granica'}, status=400)
+
+    try:
+        profile = request.user.profile
+        profile.last_lat = lat
+        profile.last_lng = lng
+        profile.last_gps_update = timezone.now()
+        profile.save(update_fields=['last_lat', 'last_lng', 'last_gps_update'])
+        logger.info('GPS update: user=%s lat=%.4f lng=%.4f', request.user.username, lat, lng)
+        return JsonResponse({'ok': True, 'lat': lat, 'lng': lng})
+    except Exception as e:
+        logger.error('GPS update failed: %s', e)
+        return JsonResponse({'ok': False, 'error': str(e)}, status=500)
