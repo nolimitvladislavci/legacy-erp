@@ -1,11 +1,12 @@
 """
 BORG FSM Mixin — Lightweight Finite State Machine za kartice.
 
-v2: Nadogradnja po Gemini analizi 2026-03-28
+v3: Race condition fix (Dron #2) — select_for_update() u transition_to()
   - __init__ pattern: _original_status pamti status pri instanciranju
   - save() guard bez extra DB SELECT (uspoređuje s _original_status)
   - .update() konvencija dokumentirana (nema tehničkog blocka — konvencija)
   - Compound indeksi u CardActivity i StatusTimestamp (CC Code original)
+  - transition_to() koristi select_for_update() za row-level lock
 
 Zlatni template: einvoice/models/as4_message.py:185
 
@@ -21,6 +22,7 @@ KONVENCIJA — OBVEZNO:
     zbog overhead-a — konvencija je dovoljna za mali tim.
 """
 import logging
+from django.db import transaction
 from django.utils import timezone
 
 logger = logging.getLogger('borg.fsm')
@@ -31,12 +33,9 @@ class FSMMixin:
     TRANSITIONS  = {}
 
     # ── __init__: pamti originalni status pri instanciranju ─────────
-    # Gemini pattern: eliminira extra DB SELECT u save() guardu
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Pamtimo status koji dolazi iz baze (ili default za novi obj)
         self._original_status = getattr(self, self.STATUS_FIELD, None)
-        # Flag koji transition_to() postavlja na True prije save()
         self._fsm_transition_active = False
 
     # ── Provjere ────────────────────────────────────────────────────
@@ -53,36 +52,60 @@ class FSMMixin:
     # ── Jedina legalna metoda za promjenu statusa ────────────────────
     def transition_to(self, new_status, user=None, note='', save=True):
         """
-        Atomarna FSM tranzicija s audit trailom i SLA trackingom.
+        Atomarna FSM tranzicija s audit trailom, SLA trackingom i
+        row-level lockingom (select_for_update).
+
+        Race condition zaštita: ako dva korisnika simultano pokušaju
+        pomaknut istu karticu, prvi dobiva lock, drugi čeka.
+        Kad drugi pročita svježi status iz baze, tranzicija može biti
+        odbačena ako je kartica već u drugom stanju.
+
         Raises ValueError ako tranzicija nije dozvoljena.
         Returns CardActivity instance ili None.
         """
-        current = getattr(self, self.STATUS_FIELD)
-        if current == new_status:
-            return None   # idempotent
+        with transaction.atomic():
+            # Row-level lock — drugi request čeka dok prvi ne završi
+            if self.pk:
+                fresh = (
+                    self.__class__.objects
+                    .select_for_update()
+                    .get(pk=self.pk)
+                )
+                # Osvježi in-memory status iz baze (možda ga je netko drugi promijenio)
+                fresh_status = getattr(fresh, self.STATUS_FIELD)
+                current_status = getattr(self, self.STATUS_FIELD)
+                if fresh_status != current_status:
+                    # Netko je promijenio status dok smo mi čekali lock
+                    setattr(self, self.STATUS_FIELD, fresh_status)
+                    self._original_status = fresh_status
 
-        if not self.can_transition_to(new_status):
-            allowed = self.TRANSITIONS.get(current, [])
-            raise ValueError(
-                f'FSM: {self.__class__.__name__} '
-                f'{current!r} \u2192 {new_status!r} nije dozvoljeno. '
-                f'Dozvoljeno iz \'{current}\': {allowed or ["(terminal — nema dozvoljenih)"]}'
-            )
+                current = fresh_status
+            else:
+                current = getattr(self, self.STATUS_FIELD)
 
-        old_status = current
-        setattr(self, self.STATUS_FIELD, new_status)
+            if current == new_status:
+                return None   # idempotent
 
-        # Ažuriramo _original_status uvijek — i kad save=True i kad save=False
-        # Bitno: mora biti PRIJE super().save() da guard ne puca
-        self._original_status = new_status
+            if new_status not in self.TRANSITIONS.get(current, []):
+                allowed = self.TRANSITIONS.get(current, [])
+                raise ValueError(
+                    f'FSM: {self.__class__.__name__} '
+                    f'{current!r} \u2192 {new_status!r} nije dozvoljeno. '
+                    f'Dozvoljeno iz \'{current}\': {allowed or ["(terminal)"]}'
+                )
 
-        if save:
-            self._fsm_transition_active = True
-            try:
-                super(FSMMixin, self).save(update_fields=[self.STATUS_FIELD])
-            finally:
-                self._fsm_transition_active = False
+            old_status = current
+            setattr(self, self.STATUS_FIELD, new_status)
+            self._original_status = new_status
 
+            if save:
+                self._fsm_transition_active = True
+                try:
+                    super(FSMMixin, self).save(update_fields=[self.STATUS_FIELD])
+                finally:
+                    self._fsm_transition_active = False
+
+        # Izvan transaction.atomic() — lock otpušten, ostale operacije
         logger.info(
             'FSM %s #%s: %s \u2192 %s (user=%s)',
             self.__class__.__name__, self.pk,
@@ -96,16 +119,12 @@ class FSMMixin:
 
         return activity
 
-    # ── save() guard — Gemini pattern, bez extra DB SELECT ──────────
+    # ── save() guard — bez extra DB SELECT ──────────────────────────
     def save(self, *args, **kwargs):
         """
         Guard koji detektira direktno mijenjanje statusa mimo transition_to().
-
-        Koristi _original_status (pamćen u __init__) umjesto extra DB SELECT.
-        Ne može blokirati .update() — za to postoji konvencija u docstringu.
-
-        DEBUG=True  → RuntimeError (glasno puca, odmah vidiš)
-        DEBUG=False → logger.error (produkcija, ne rušimo server)
+        DEBUG=True  → RuntimeError
+        DEBUG=False → logger.error + revert
         """
         if (
             self.pk
@@ -114,7 +133,6 @@ class FSMMixin:
         ):
             update_fields = kwargs.get('update_fields')
 
-            # Ako update_fields ne sadrži STATUS_FIELD — status se ne mijenja, OK
             if update_fields and self.STATUS_FIELD not in update_fields:
                 super().save(*args, **kwargs)
                 return
@@ -131,12 +149,10 @@ class FSMMixin:
                 from django.conf import settings
                 if settings.DEBUG:
                     raise RuntimeError(msg)
-                # Produkcija: revert na originalni status i nastavi
                 setattr(self, self.STATUS_FIELD, self._original_status)
 
         super().save(*args, **kwargs)
 
-        # Nakon prvog INSERT (novi objekt), postavi _original_status
         if self._original_status is None:
             self._original_status = getattr(self, self.STATUS_FIELD, None)
 

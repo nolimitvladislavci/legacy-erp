@@ -1,5 +1,8 @@
 """
 BORG Ops views — universal card move API + operations dashboard.
+
+v3: Race condition aware (select_for_update u FSMMixin),
+    stale card detection (expected_status), refresh endpoint.
 """
 import json
 import logging
@@ -7,10 +10,10 @@ import logging
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 from .models import CardActivity, StatusTimestamp
 
@@ -30,7 +33,16 @@ def card_move(request):
     """
     Universal card move API.
     POST /api/card/move/
-    Body: {"model": "WorkOrder", "pk": 1, "new_status": "in_progress"}
+    Body: {
+        "model": "WorkOrder",
+        "pk": 1,
+        "new_status": "in_progress",
+        "expected_status": "draft"  ← opcijalno, stale card detection
+    }
+
+    Stale card detection: ako frontend pošalje expected_status koji se
+    ne poklapa s trenutnim statusom u bazi, vraća grešku UMJESTO da
+    pokuša tranziciju. Ovo sprečava "iluziju" stale Kanban ploče.
     """
     try:
         data = json.loads(request.body)
@@ -40,6 +52,7 @@ def card_move(request):
     model_name = data.get('model', '')
     pk = data.get('pk')
     new_status = data.get('new_status', '')
+    expected_status = data.get('expected_status')  # Dron #3: stale detection
 
     if model_name not in CARD_MODELS:
         return JsonResponse({'ok': False, 'error': f'Nepoznat model: {model_name}'}, status=400)
@@ -58,29 +71,55 @@ def card_move(request):
     except Model.DoesNotExist:
         return JsonResponse({'ok': False, 'error': f'{model_name} #{pk} ne postoji'}, status=404)
 
+    # Stale card detection — Dron #3 fix
+    if expected_status:
+        actual = getattr(obj, obj.STATUS_FIELD if hasattr(obj, 'STATUS_FIELD') else 'status')
+        if actual != expected_status:
+            err_msg = (
+                f'Kartica je već promijenjena: očekivano "{expected_status}", '
+                f'stvarno "{actual}". Osvježite ploču.'
+            )
+            is_htmx = request.headers.get('HX-Request') == 'true'
+            if is_htmx:
+                response = HttpResponse('', status=200)
+                response['HX-Trigger'] = json.dumps({
+                    'showFsmError': err_msg,
+                    'refreshBoard': True,  # Signal frontendu da refresha
+                })
+                response['HX-Reswap'] = 'none'
+                return response
+            return JsonResponse({
+                'ok': False,
+                'error': err_msg,
+                'actual_status': actual,
+                'stale': True,
+            }, status=409)  # 409 Conflict
+
     try:
         obj.transition_to(new_status, user=request.user)
     except ValueError as e:
-        # Dron #3 fix: HTMX-aware error — vraća JSON ili HTML fragment
         err_msg = str(e)
         is_htmx = request.headers.get('HX-Request') == 'true'
         if is_htmx:
-            # HTMX: vraća 200 s HX-Trigger za toast, kartica ostaje na staroj poziciji
-            from django.http import HttpResponse
             response = HttpResponse(
                 f'<div class="fsm-error-toast" style="display:none">{err_msg}</div>',
                 status=200
             )
-            response['HX-Trigger'] = f'{{"showFsmError": {json.dumps(err_msg)}}}'
-            response['HX-Reswap'] = 'none'  # ne zamjenjuj ništa u DOM-u
+            response['HX-Trigger'] = json.dumps({'showFsmError': err_msg})
+            response['HX-Reswap'] = 'none'
             return response
         return JsonResponse({'ok': False, 'error': err_msg}, status=400)
 
     is_htmx = request.headers.get('HX-Request') == 'true'
     if is_htmx:
-        from django.http import HttpResponse
         response = HttpResponse('', status=200)
-        response['HX-Trigger'] = f'{{"cardMoved": {{"model": "{model_name}", "pk": "{pk}", "status": "{new_status}"}}}}'
+        response['HX-Trigger'] = json.dumps({
+            'cardMoved': {
+                'model': model_name,
+                'pk': str(pk),
+                'status': new_status,
+            }
+        })
         return response
 
     return JsonResponse({
@@ -89,6 +128,42 @@ def card_move(request):
         'pk': str(pk),
         'new_status': new_status,
         'message': f'{model_name} premješten u {new_status}',
+    })
+
+
+@login_required
+@require_GET
+def board_version(request):
+    """
+    Lagani endpoint za Dron #3 — umjesto pollinga cijele ploče,
+    frontend pita samo "ima li promjena od mog zadnjeg viđenja?"
+
+    GET /api/card/version/?since=2026-03-28T17:00:00Z
+    Returns: {"has_changes": true/false, "latest": "2026-03-28T17:05:12Z", "count": 3}
+
+    Frontend poziva ovo svakih 30s — jedan COUNT query, ne JOIN.
+    Ako has_changes=true, frontend radi puni refresh ploče.
+    """
+    since_str = request.GET.get('since', '')
+    try:
+        since = timezone.datetime.fromisoformat(since_str)
+        if timezone.is_naive(since):
+            since = timezone.make_aware(since)
+    except (ValueError, TypeError):
+        since = timezone.now() - timezone.timedelta(minutes=5)
+
+    # Samo COUNT — najlakši mogući query
+    recent = CardActivity.objects.filter(
+        action='status_change',
+        created_at__gt=since,
+    )
+    count = recent.count()
+    latest = recent.order_by('-created_at').values_list('created_at', flat=True).first()
+
+    return JsonResponse({
+        'has_changes': count > 0,
+        'latest': latest.isoformat() if latest else since.isoformat(),
+        'count': count,
     })
 
 
