@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIMIT Connect — Financijski plan isplativosti 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --gold: #c9a84c; --black: #0a0a0a; --dark: #111; --card: #1a1a1a; --border: #2a2a2a; --green: #22c55e; --red: #ef4444; --blue: #3b82f6; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Barlow',sans-serif; background:var(--black); color:#e0e0e0; line-height:1.6; }
+.container { max-width:1000px; margin:0 auto; padding:2rem 1.5rem; }
+
+/* Header */
+.header { text-align:center; padding:3rem 1rem; border-bottom:1px solid var(--border); margin-bottom:3rem; }
+.header h1 { font-family:'Cormorant Garamond',serif; font-size:2.5rem; color:var(--gold); margin-bottom:.5rem; }
+.header .sub { color:#888; font-size:1rem; }
+.header .date { color:#555; font-size:.85rem; margin-top:.5rem; }
+.badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+.badge-conf { background:rgba(201,168,76,.15); color:var(--gold); border:1px solid rgba(201,168,76,.3); }
+
+/* Sections */
+.section { margin-bottom:3rem; }
+.section-title { font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--gold); margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid var(--border); }
+.subsection { margin:1.5rem 0; }
+.subsection h3 { color:#fff; font-size:1.1rem; margin-bottom:.75rem; }
+
+/* Tables */
+table { width:100%; border-collapse:collapse; margin:1rem 0; }
+th { text-align:left; padding:10px 12px; background:#111; color:var(--gold); font-size:.8rem; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); }
+td { padding:10px 12px; border-bottom:1px solid var(--border); font-size:.9rem; }
+tr:hover { background:rgba(201,168,76,.03); }
+.num { text-align:right; font-family:'Barlow',monospace; }
+.highlight { color:var(--gold); font-weight:600; }
+.green { color:var(--green); }
+.red { color:var(--red); }
+.blue { color:var(--blue); }
+
+/* Cards */
+.card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin:1rem 0; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.5rem; text-align:center; }
+.card .num-big { font-size:2rem; font-weight:700; color:var(--gold); font-family:'Cormorant Garamond',serif; }
+.card .label { color:#888; font-size:.8rem; margin-top:.25rem; text-transform:uppercase; letter-spacing:.5px; }
+.card.positive { border-color:rgba(34,197,94,.3); }
+.card.positive .num-big { color:var(--green); }
+.card.negative { border-color:rgba(239,68,68,.3); }
+.card.negative .num-big { color:var(--red); }
+.card.special { border-color:rgba(201,168,76,.4); background:linear-gradient(145deg,#111,#13110a); }
+
+/* Scenario boxes */
+.scenario { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:2rem; margin:1.5rem 0; }
+.scenario.gold { border-color:var(--gold); }
+.scenario h3 { color:var(--gold); font-size:1.2rem; margin-bottom:1rem; }
+.scenario p { color:#bbb; margin-bottom:.5rem; }
+
+/* Progress bars */
+.progress-wrap { margin:.75rem 0; }
+.progress-label { display:flex; justify-content:space-between; font-size:.85rem; margin-bottom:4px; }
+.progress-bar { height:8px; background:#222; border-radius:4px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:4px; transition:width .5s; }
+
+/* Comparison */
+.vs { display:grid; grid-template-columns:1fr auto 1fr; gap:1rem; align-items:start; margin:2rem 0; }
+.vs-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; }
+.vs-card.win { border-color:var(--gold); }
+.vs-divider { display:flex; align-items:center; color:#555; font-size:.9rem; font-weight:700; padding-top:2rem; }
+.vs-card h4 { color:var(--gold); margin-bottom:1rem; font-size:1rem; }
+.vs-card ul { list-style:none; padding:0; }
+.vs-card li { padding:4px 0; font-size:.9rem; color:#bbb; }
+.vs-card li::before { content:'+ '; color:var(--green); font-weight:700; }
+.vs-card li.con::before { content:'- '; color:var(--red); }
+
+/* Key metric */
+.key-metric { background:linear-gradient(135deg, rgba(201,168,76,.08), rgba(201,168,76,.02)); border:2px solid var(--gold); border-radius:14px; padding:2rem; text-align:center; margin:2rem 0; }
+.key-metric .big { font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:700; color:var(--gold); }
+.key-metric .desc { color:#bbb; font-size:1rem; margin-top:.5rem; }
+
+/* Footer */
+.footer { text-align:center; padding:2rem 1rem; border-top:1px solid var(--border); margin-top:3rem; color:#555; font-size:.85rem; }
+
+/* Interactive */
+.calc-row { display:flex; align-items:center; gap:1rem; margin:.75rem 0; flex-wrap:wrap; }
+.calc-row label { color:#bbb; font-size:.9rem; min-width:180px; }
+.calc-row input[type=range] { flex:1; accent-color:var(--gold); }
+.calc-row .val { color:var(--gold); font-weight:600; min-width:60px; text-align:right; }
+#result-box { margin-top:1.5rem; }
+
+@media(max-width:768px) {
+  .header h1 { font-size:1.8rem; }
+  .vs { grid-template-columns:1fr; }
+  .vs-divider { justify-content:center; padding:0; }
+  .card-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Financijski Plan Isplativosti</h1>
+  <div class="sub">LIMIT Connect — ERP platforma za mala i srednja poduzeća</div>
+  <div class="date">Verzija: 28. ožujak 2026. &middot; <span class="badge badge-conf">Interno — Povjerljivo</span></div>
+</div>
+
+<!-- 1. TRENUTNO STANJE -->
+<div class="section">
+  <h2 class="section-title">1. Trenutno stanje</h2>
+
+  <div class="card-grid">
+    <div class="card"><div class="num-big">91</div><div class="label">Registriranih tvrtki</div></div>
+    <div class="card negative"><div class="num-big">77</div><div class="label">Besplatni planovi</div></div>
+    <div class="card positive"><div class="num-big">14</div><div class="label">Plaćajući korisnici</div></div>
+    <div class="card special"><div class="num-big">2.380€</div><div class="label">MRR (mjesečni prihod)</div></div>
+  </div>
+
+  <table>
+    <tr><th>Plan</th><th>Cijena</th><th class="num">Korisnika</th><th class="num">MRR</th><th class="num">% prihoda</th></tr>
+    <tr><td>POS Besplatno</td><td>0€</td><td class="num">77</td><td class="num red">0€</td><td class="num">0%</td></tr>
+    <tr><td>Distributor</td><td>359€</td><td class="num">6</td><td class="num green">2.093€</td><td class="num highlight">87.9%</td></tr>
+    <tr><td>Starter</td><td>22€</td><td class="num">5</td><td class="num">90€</td><td class="num">3.8%</td></tr>
+    <tr><td>Enterprise</td><td>189€</td><td class="num">1</td><td class="num">189€</td><td class="num">7.9%</td></tr>
+    <tr><td>Micro</td><td>10€</td><td class="num">1</td><td class="num">8€</td><td class="num">0.3%</td></tr>
+    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO</td><td></td><td class="num">91</td><td class="num highlight">2.380€</td><td class="num">100%</td></tr>
+  </table>
+
+  <div class="subsection">
+    <h3>Konverzija besplatno → plaćajući</h3>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Konverzija: 15.4% (14/91)</span><span class="highlight">Industrija: 2-5%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:15.4%;background:var(--green)"></div></div>
+    </div>
+    <p style="color:#888;font-size:.85rem;margin-top:.5rem">Naša konverzija je 3-7x iznad prosjeka industrije. Distributor plan dominira MRR-om (87.9%).</p>
+  </div>
+</div>
+
+<!-- 2. TROŠKOVI -->
+<div class="section">
+  <h2 class="section-title">2. Fiksni mjesečni troškovi</h2>
+
+  <table>
+    <tr><th>Stavka</th><th>Detalji</th><th class="num">€/mj</th></tr>
+    <tr><td>Server (Hetzner CX31)</td><td>8GB RAM, 4 vCPU, 80GB SSD</td><td class="num">15€</td></tr>
+    <tr><td>Domena + DNS</td><td>3 domene (limit-connect.com, viskovic-group.de, grosmarkt-online.eu)</td><td class="num">5€</td></tr>
+    <tr><td>SSL certifikati</td><td>Let's Encrypt (besplatno)</td><td class="num">0€</td></tr>
+    <tr><td>WAHA (WhatsApp API)</td><td>Self-hosted Docker</td><td class="num">0€</td></tr>
+    <tr><td>E-mail / SMTP</td><td>Transakcijski email servis</td><td class="num">10€</td></tr>
+    <tr><td>Backup / monitoring</td><td>Automatski DB dump + Sentry</td><td class="num">15€</td></tr>
+    <tr><td>Sentry (error tracking)</td><td>Developer plan</td><td class="num">0€</td></tr>
+    <tr><td>Redis</td><td>Lokalni (na serveru)</td><td class="num">0€</td></tr>
+    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO infrastruktura</td><td></td><td class="num highlight">~45€</td></tr>
+    <tr><td colspan="3" style="border:none;height:8px"></td></tr>
+    <tr><td>Claude Code (razvoj)</td><td>AI asistent za razvoj</td><td class="num">~200€</td></tr>
+    <tr><td>Rad osnivača (2 osobe)</td><td>Opportunity cost (neplaćeno)</td><td class="num red">0€*</td></tr>
+    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO operativno</td><td></td><td class="num highlight">~245€</td></tr>
+  </table>
+
+  <p style="color:#666;font-size:.8rem;margin-top:.5rem">* Rad osnivača se ne vrednuje u fazi 1 (bootstrapping). Pri skaliranju treba uračunati ~2×3.000€/mj.</p>
+</div>
+
+<!-- 3. BREAK-EVEN SCENARIJ A -->
+<div class="section">
+  <h2 class="section-title">3. Scenarij A — Samo SaaS (bez posrednika)</h2>
+
+  <div class="card-grid">
+    <div class="card"><div class="num-big">245€</div><div class="label">Mjesečni trošak</div></div>
+    <div class="card positive"><div class="num-big">2.380€</div><div class="label">Trenutni MRR</div></div>
+    <div class="card positive"><div class="num-big">+2.135€</div><div class="label">Neto profit/mj</div></div>
+    <div class="card special"><div class="num-big">9.7×</div><div class="label">Pokrivenost troškova</div></div>
+  </div>
+
+  <div class="key-metric">
+    <div class="big">7 plaćajućih korisnika</div>
+    <div class="desc">Minimum za pokriće infrastrukture (pretpostavka: avg. 35€/mj po korisniku)</div>
+  </div>
+
+  <div class="subsection">
+    <h3>Projekcija rasta — SaaS model</h3>
+    <table>
+      <tr><th>Metrika</th><th class="num">Danas</th><th class="num">+6 mj</th><th class="num">+12 mj</th><th class="num">+24 mj</th></tr>
+      <tr><td>Ukupno tvrtki</td><td class="num">91</td><td class="num">200</td><td class="num">500</td><td class="num">1.500</td></tr>
+      <tr><td>Plaćajući (15%)</td><td class="num">14</td><td class="num">30</td><td class="num">75</td><td class="num">225</td></tr>
+      <tr><td>Avg. cijena</td><td class="num">170€</td><td class="num">85€</td><td class="num">55€</td><td class="num">45€</td></tr>
+      <tr><td>MRR</td><td class="num highlight">2.380€</td><td class="num highlight">2.550€</td><td class="num highlight">4.125€</td><td class="num highlight">10.125€</td></tr>
+      <tr><td>ARR</td><td class="num">28.560€</td><td class="num">30.600€</td><td class="num">49.500€</td><td class="num green">121.500€</td></tr>
+      <tr><td>Troškovi/mj</td><td class="num">245€</td><td class="num">350€</td><td class="num">600€</td><td class="num">1.200€</td></tr>
+      <tr style="font-weight:700"><td>Neto/mj</td><td class="num green">+2.135€</td><td class="num green">+2.200€</td><td class="num green">+3.525€</td><td class="num green">+8.925€</td></tr>
+    </table>
+    <p style="color:#888;font-size:.85rem;margin-top:.5rem">Avg. cijena pada jer rast dolazi pretežno iz manjih planova (Starter, Micro). Troškovi rastu zbog servera, podrške.</p>
+  </div>
+</div>
+
+<!-- 4. DIGITALNI POSREDNIK -->
+<div class="section">
+  <h2 class="section-title">4. Scenarij B — Digitalni posrednik (e-Račun)</h2>
+
+  <div class="scenario gold">
+    <h3>Što je digitalni posrednik?</h3>
+    <p>Certificirani posrednik za razmjenu e-Računa putem <strong>Peppol mreže</strong> (pan-europski standard). FINA je trenutno jedini certificirani posrednik u HR. Postati posrednik znači:</p>
+    <ul style="margin:.75rem 0 0 1rem;color:#bbb;font-size:.9rem;line-height:2">
+      <li><strong>Zakonska obaveza:</strong> Od 2026. svi B2G računi moraju ići kroz Peppol. B2B slijedi 2027-2028.</li>
+      <li><strong>Transakcijska naknada:</strong> 0.20-0.50€ po poslanom/primljenom e-Računu</li>
+      <li><strong>Recurring revenue:</strong> Svaka faktura = prihod. Automatski, bez prodaje.</li>
+      <li><strong>Lock-in efekt:</strong> Jednom kad firma koristi tvoj Peppol endpoint, prebacivanje je komplicirano.</li>
+      <li><strong>Regulatorna barijera:</strong> Certifikacija (OpenPeppol + nacionalno tijelo) = natjecateljska prednost.</li>
+    </ul>
+  </div>
+
+  <div class="vs">
+    <div class="vs-card">
+      <h4>Koristiti tuđeg posrednika</h4>
+      <ul>
+        <li>Brzo — sutra live</li>
+        <li>Nema certifikacije</li>
+        <li>Nema investicije</li>
+        <li class="con">Plaćamo FINA/Moj-eRačun 0.15-0.30€/račun</li>
+        <li class="con">Ovisnost o trećoj strani</li>
+        <li class="con">Nema transakcijskog prihoda</li>
+        <li class="con">Margina na e-Račun = 0</li>
+      </ul>
+    </div>
+    <div class="vs-divider">VS</div>
+    <div class="vs-card win">
+      <h4>Postati digitalni posrednik</h4>
+      <ul>
+        <li>Transakcijski prihod 0.20-0.50€/račun</li>
+        <li>Regulatory moat (konkurencija ne može lako ući)</li>
+        <li>B2G obavezan 2026, B2B 2027+</li>
+        <li>Cross-sell: posrednik → ERP konverzija</li>
+        <li>Umbrella tvrtke šalju 100-500 računa/mj</li>
+        <li>Premium pricing opravdan certifikacijom</li>
+        <li class="con">Certifikacija: 3-6 mjeseci, ~5.000-10.000€</li>
+        <li class="con">Compliance overhead: revizija, SLA 99.9%</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>Financijski model — Digitalni posrednik</h3>
+    <table>
+      <tr><th>Stavka</th><th class="num">Konzervativno</th><th class="num">Realno</th><th class="num">Optimistično</th></tr>
+      <tr><td>Certifikacija (jednokratno)</td><td class="num">5.000€</td><td class="num">7.500€</td><td class="num">10.000€</td></tr>
+      <tr><td>Dodatni server (HA)</td><td class="num">30€/mj</td><td class="num">50€/mj</td><td class="num">80€/mj</td></tr>
+      <tr><td>Compliance / revizija</td><td class="num">500€/god</td><td class="num">1.000€/god</td><td class="num">2.000€/god</td></tr>
+      <tr><td colspan="4" style="border:none;height:8px;background:var(--border)"></td></tr>
+      <tr><td>Korisnici posrednika (12 mj)</td><td class="num">100 tvrtki</td><td class="num">300 tvrtki</td><td class="num">800 tvrtki</td></tr>
+      <tr><td>Avg. računa/mj po tvrtki</td><td class="num">20</td><td class="num">35</td><td class="num">50</td></tr>
+      <tr><td>Ukupno računa/mj</td><td class="num">2.000</td><td class="num">10.500</td><td class="num">40.000</td></tr>
+      <tr><td>Naknada po računu</td><td class="num">0.25€</td><td class="num">0.30€</td><td class="num">0.35€</td></tr>
+      <tr style="font-weight:700;color:var(--green)"><td>MRR od posredništva</td><td class="num">500€</td><td class="num">3.150€</td><td class="num">14.000€</td></tr>
+      <tr style="font-weight:700;color:var(--gold)"><td>ARR od posredništva</td><td class="num">6.000€</td><td class="num">37.800€</td><td class="num">168.000€</td></tr>
+      <tr><td>ROI certifikacije</td><td class="num">12 mj</td><td class="num">3 mj</td><td class="num">1 mj</td></tr>
+    </table>
+  </div>
+
+  <div class="key-metric">
+    <div class="big">42 tvrtke × 20 računa/mj</div>
+    <div class="desc">Minimum za pokriće troškova certifikacije u 12 mjeseci (uz 0.25€/račun)</div>
+  </div>
+</div>
+
+<!-- 5. KOMBINIRANI MODEL -->
+<div class="section">
+  <h2 class="section-title">5. Kombinirani model — SaaS + Posrednik</h2>
+
+  <table>
+    <tr><th>Metrika</th><th class="num">Danas</th><th class="num">+12 mj (SaaS)</th><th class="num">+12 mj (SaaS+Posrednik)</th><th class="num">Razlika</th></tr>
+    <tr><td>MRR SaaS</td><td class="num">2.380€</td><td class="num">4.125€</td><td class="num">4.125€</td><td class="num">—</td></tr>
+    <tr><td>MRR Posrednik</td><td class="num">0€</td><td class="num">0€</td><td class="num green">3.150€</td><td class="num green">+3.150€</td></tr>
+    <tr style="font-weight:700"><td>MRR ukupno</td><td class="num">2.380€</td><td class="num">4.125€</td><td class="num highlight">7.275€</td><td class="num green">+76%</td></tr>
+    <tr style="font-weight:700"><td>ARR ukupno</td><td class="num">28.560€</td><td class="num">49.500€</td><td class="num highlight">87.300€</td><td class="num green">+76%</td></tr>
+    <tr><td>Troškovi/mj</td><td class="num">245€</td><td class="num">600€</td><td class="num">750€</td><td class="num red">+150€</td></tr>
+    <tr style="font-weight:700"><td>Neto profit/mj</td><td class="num green">+2.135€</td><td class="num green">+3.525€</td><td class="num green">+6.525€</td><td class="num green">+85%</td></tr>
+  </table>
+
+  <div class="card-grid" style="margin-top:1.5rem">
+    <div class="card special">
+      <div class="num-big">+85%</div>
+      <div class="label">Više profita s posrednikom</div>
+    </div>
+    <div class="card positive">
+      <div class="num-big">87.3K€</div>
+      <div class="label">Projektirani ARR</div>
+    </div>
+    <div class="card positive">
+      <div class="num-big">2 prihoda</div>
+      <div class="label">Diverzifikacija izvora</div>
+    </div>
+    <div class="card">
+      <div class="num-big">Moat</div>
+      <div class="label">Regulatorna barijera</div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. DOBROBITI POSREDNIKA -->
+<div class="section">
+  <h2 class="section-title">6. Strateške dobrobiti digitalnog posrednika</h2>
+
+  <div class="card-grid">
+    <div class="scenario" style="margin:0">
+      <h3 style="font-size:1rem">1. Regulatorni moat</h3>
+      <p style="font-size:.88rem">Certifikacija je barijera ulaska. Konkurencija ne može postati posrednik "sutra" — treba 3-6 mjeseci i audit. Svaka nova tvrtka koja koristi vaš Peppol endpoint je locked-in.</p>
+    </div>
+    <div class="scenario" style="margin:0">
+      <h3 style="font-size:1rem">2. Transakcijski prihod</h3>
+      <p style="font-size:.88rem">Za razliku od SaaS-a (fiksni €/mj), posrednički prihod raste s volumenom. Više računa = više prihoda, bez dodavanja featurea ili podrške.</p>
+    </div>
+    <div class="scenario" style="margin:0">
+      <h3 style="font-size:1rem">3. Cross-sell pipeline</h3>
+      <p style="font-size:.88rem">Tvrtka počne kao korisnik e-Račun posrednika → vidi ERP → konvertira u plaćajućeg SaaS korisnika. Posrednik postaje top-of-funnel.</p>
+    </div>
+    <div class="scenario" style="margin:0">
+      <h3 style="font-size:1rem">4. B2B obaveza 2027+</h3>
+      <p style="font-size:.88rem">EU Direktiva ViDA (VAT in the Digital Age) propisuje obavezno e-fakturiranje. HR implementacija 2027-2028. Tko je posrednik prije toga — ima first-mover advantage.</p>
+    </div>
+    <div class="scenario" style="margin:0">
+      <h3 style="font-size:1rem">5. Premium pozicioniranje</h3>
+      <p style="font-size:.88rem">"FINA certificirani posrednik" na landing page-u odmah podiže perceived value. Računovođe i veće firme biraju certificirane partnere.</p>
+    </div>
+    <div class="scenario" style="margin:0">
+      <h3 style="font-size:1rem">6. Podatkovni flywheel</h3>
+      <p style="font-size:.88rem">Svaki račun koji prođe kroz sustav = podatak. Agregirana analitika (anonimizirana) o industrijama, sezonalnosti, trendovima — premium feature za Enterprise korisnike.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 7. INTERAKTIVNI KALKULATOR -->
+<div class="section">
+  <h2 class="section-title">7. Break-even kalkulator</h2>
+
+  <div class="scenario gold">
+    <div class="calc-row">
+      <label>Plaćajući SaaS korisnici:</label>
+      <input type="range" id="slSaas" min="5" max="500" value="75">
+      <span class="val" id="vSaas">75</span>
+    </div>
+    <div class="calc-row">
+      <label>Avg. SaaS cijena (€/mj):</label>
+      <input type="range" id="slPrice" min="10" max="200" value="55">
+      <span class="val" id="vPrice">55€</span>
+    </div>
+    <div class="calc-row">
+      <label>Posrednik — tvrtke:</label>
+      <input type="range" id="slPos" min="0" max="1000" value="300">
+      <span class="val" id="vPos">300</span>
+    </div>
+    <div class="calc-row">
+      <label>Avg. računa/mj po tvrtki:</label>
+      <input type="range" id="slInv" min="5" max="100" value="35">
+      <span class="val" id="vInv">35</span>
+    </div>
+    <div class="calc-row">
+      <label>Naknada po računu (€):</label>
+      <input type="range" id="slFee" min="10" max="80" value="30">
+      <span class="val" id="vFee">0.30€</span>
+    </div>
+    <div class="calc-row">
+      <label>Fiksni troškovi (€/mj):</label>
+      <input type="range" id="slCost" min="100" max="3000" value="600">
+      <span class="val" id="vCost">600€</span>
+    </div>
+
+    <div id="result-box">
+      <div class="card-grid">
+        <div class="card"><div class="num-big" id="rSaas">4.125€</div><div class="label">MRR SaaS</div></div>
+        <div class="card"><div class="num-big" id="rPos">3.150€</div><div class="label">MRR Posrednik</div></div>
+        <div class="card special"><div class="num-big" id="rTotal">7.275€</div><div class="label">MRR Ukupno</div></div>
+        <div class="card positive"><div class="num-big" id="rProfit">+6.675€</div><div class="label">Neto profit/mj</div></div>
+      </div>
+      <div class="card-grid" style="margin-top:.75rem">
+        <div class="card"><div class="num-big" id="rArr">87.300€</div><div class="label">Projektirani ARR</div></div>
+        <div class="card"><div class="num-big" id="rMargin">92%</div><div class="label">Profit margina</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. PREPORUKA -->
+<div class="section">
+  <h2 class="section-title">8. Preporuka</h2>
+  <div class="scenario gold">
+    <h3>Faza 1 (sada — Q2 2026): Koristiti FINA kao posrednika</h3>
+    <p>Integracija je gotova (PosrednikClient). Trošak: ~0.15€/račun. Fokus na akviziciju korisnika.</p>
+
+    <h3 style="margin-top:1.5rem">Faza 2 (Q3-Q4 2026): Pokrenuti certifikaciju</h3>
+    <p>Kad baza prijeđe 200 tvrtki i 5.000 računa/mj — isplativo postati posrednik. Investicija: 7.500€. ROI: 3-6 mjeseci.</p>
+
+    <h3 style="margin-top:1.5rem">Faza 3 (2027+): Full posrednik + ViDA compliance</h3>
+    <p>EU obavezno B2B e-fakturiranje. First-mover advantage. Ciljani ARR: 150.000€+.</p>
+  </div>
+
+  <div class="key-metric" style="margin-top:2rem">
+    <div class="big" style="font-size:2.2rem">Minimumi za isplativost</div>
+    <table style="max-width:600px;margin:1.5rem auto 0;text-align:left">
+      <tr><th>Model</th><th class="num">Min. korisnika</th><th class="num">Min. MRR</th></tr>
+      <tr><td>Samo infrastruktura (45€/mj)</td><td class="num highlight">2 × Starter</td><td class="num">44€</td></tr>
+      <tr><td>Infra + Claude Code (245€/mj)</td><td class="num highlight">7 × avg 35€</td><td class="num">245€</td></tr>
+      <tr><td>S plaćama osnivača (6.245€/mj)</td><td class="num highlight">90 × avg 70€</td><td class="num">6.300€</td></tr>
+      <tr><td>Posrednik break-even (cert 7.500€)</td><td class="num highlight">42 tvrtke × 20 rač/mj</td><td class="num">210€</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  <p>&copy; 2026 LIMIT Connect &middot; Konjik d.o.o. &middot; Interno — Povjerljivo</p>
+  <p style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:.5rem">Bez papira. Bez brige. Bez granica.</p>
+</div>
+
+</div>
+
+<script>
+// Interactive calculator
+const ids = ['slSaas','slPrice','slPos','slInv','slFee','slCost'];
+ids.forEach(id => document.getElementById(id).addEventListener('input', calc));
+
+function calc() {
+  const saasUsers = +document.getElementById('slSaas').value;
+  const avgPrice = +document.getElementById('slPrice').value;
+  const posUsers = +document.getElementById('slPos').value;
+  const avgInv = +document.getElementById('slInv').value;
+  const feeRaw = +document.getElementById('slFee').value;
+  const fee = feeRaw / 100;
+  const cost = +document.getElementById('slCost').value;
+
+  document.getElementById('vSaas').textContent = saasUsers;
+  document.getElementById('vPrice').textContent = avgPrice + '€';
+  document.getElementById('vPos').textContent = posUsers;
+  document.getElementById('vInv').textContent = avgInv;
+  document.getElementById('vFee').textContent = fee.toFixed(2) + '€';
+  document.getElementById('vCost').textContent = cost + '€';
+
+  const mrrSaas = saasUsers * avgPrice;
+  const mrrPos = posUsers * avgInv * fee;
+  const total = mrrSaas + mrrPos;
+  const profit = total - cost;
+  const arr = total * 12;
+  const margin = total > 0 ? Math.round((profit / total) * 100) : 0;
+
+  document.getElementById('rSaas').textContent = mrrSaas.toLocaleString('de-DE') + '€';
+  document.getElementById('rPos').textContent = mrrPos.toLocaleString('de-DE') + '€';
+  document.getElementById('rTotal').textContent = total.toLocaleString('de-DE') + '€';
+  document.getElementById('rProfit').textContent = (profit >= 0 ? '+' : '') + profit.toLocaleString('de-DE') + '€';
+  document.getElementById('rArr').textContent = arr.toLocaleString('de-DE') + '€';
+  document.getElementById('rMargin').textContent = margin + '%';
+
+  // Color profit
+  document.getElementById('rProfit').parentElement.className = profit >= 0 ? 'card positive' : 'card negative';
+}
+calc();
+</script>
+</body>
+</html>
