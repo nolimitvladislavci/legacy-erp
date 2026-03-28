@@ -603,3 +603,33 @@ def _fill_client_card(cc, post):
     last_visit = post.get('last_visit', '').strip()
     cc.last_visit = last_visit or None
     cc.notes = post.get('notes', '')
+
+
+# ─── Work Order Kanban Board (BORG Faza 2) ───────────────────────────────────
+
+@login_required
+def work_order_board(request):
+    """Kanban board for work orders — 5 columns by status."""
+    company = _get_company(request)
+    if not company:
+        return HttpResponseForbidden("No company.")
+
+    qs = WorkOrder.objects.filter(company=company).select_related('client', 'assigned_to')
+
+    columns = [
+        {'id': 'draft',       'label': 'Nacrt',      'icon': '📝', 'color': '#64748b',
+         'items': qs.filter(status='draft').order_by('-created_at')[:30]},
+        {'id': 'in_progress', 'label': 'U tijeku',   'icon': '🔧', 'color': '#3b82f6',
+         'items': qs.filter(status='in_progress').order_by('-created_at')[:30]},
+        {'id': 'completed',   'label': 'Završen',    'icon': '✅', 'color': '#22c55e',
+         'items': qs.filter(status='completed').order_by('-created_at')[:30]},
+        {'id': 'invoiced',    'label': 'Fakturiran', 'icon': '📄', 'color': '#c9a84c',
+         'items': qs.filter(status='invoiced').order_by('-created_at')[:30]},
+        {'id': 'cancelled',   'label': 'Otkazan',    'icon': '❌', 'color': '#ef4444',
+         'items': qs.filter(status='cancelled').order_by('-created_at')[:30]},
+    ]
+
+    return render(request, 'work_orders/board.html', {
+        'columns': columns,
+        'STATUS_CHOICES': WorkOrder.STATUS_CHOICES,
+    })

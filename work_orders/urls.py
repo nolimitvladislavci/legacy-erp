@@ -5,6 +5,7 @@ app_name = 'work_orders'
 
 urlpatterns = [
     # Work Orders
+    path('board/',                     views.work_order_board,      name='board'),
     path('',                           views.work_order_list,       name='list'),
     path('new/',                       views.work_order_create,     name='create'),
     path('<int:pk>/',                  views.work_order_detail,     name='detail'),
