@@ -151,7 +151,7 @@ def _chat_api_inner(request):
         result = chat_with_claude(
             messages=history,
             tools=TOOLS,
-            system=_build_contextual_system_prompt(request.user, company),
+            system=_build_contextual_system_prompt(request.user, company) + _get_rag_context(module_context, user_message),
             user=request.user,
         )
 

@@ -134,6 +134,16 @@ def _build_contextual_system_prompt(user, company):
     except Exception:
         pass
 
+    # RAG: dohvati relevantne članke iz baze znanja
+    try:
+        kb = retrieve_knowledge(
+            module_context=getattr(company, 'business_type', ''),
+            query='',  # Query se dodaje u chat_api
+        )
+        ctx += kb
+    except Exception:
+        pass
+
     return SYSTEM_PROMPT + ctx
 
 
@@ -185,3 +195,58 @@ def chat_with_claude(messages, tools=None, system=None, user=None):
             "output_tokens": response.usage.output_tokens,
         },
     }
+
+
+def retrieve_knowledge(module_context='', query='', limit=5):
+    """
+    RAG retrieval — dohvati relevantne članke iz KnowledgeArticle.
+    Koristi keyword matching + module filter.
+    """
+    from .models import KnowledgeArticle
+    from django.db.models import Q
+
+    qs = KnowledgeArticle.objects.filter(is_active=True)
+
+    # Module filter iz page context-a
+    module_map = {
+        'experiences': 'experiences',
+        'pos': 'pos',
+        'inventory': 'inventory',
+        'invoicing': 'invoicing',
+        'borg': 'borg',
+        'udruge': 'udruge',
+        'marketplace': 'marketplace',
+        'work-orders': 'work_orders',
+        'recall': 'experiences',
+        'rental': 'rental',
+    }
+    detected_module = None
+    for keyword, module in module_map.items():
+        if keyword in module_context.lower():
+            detected_module = module
+            break
+
+    if detected_module:
+        # Prioritet: modul-specifični + general
+        qs = qs.filter(Q(module=detected_module) | Q(module='general') | Q(module='compliance'))
+    
+    # Keyword search iz query-ja
+    if query:
+        words = query.lower().split()[:5]  # Max 5 riječi
+        q_filter = Q()
+        for word in words:
+            if len(word) > 2:  # Ignoriraj kratke riječi
+                q_filter |= Q(keywords__icontains=word) | Q(title__icontains=word) | Q(content__icontains=word)
+        if q_filter:
+            qs = qs.filter(q_filter)
+
+    articles = qs.order_by('priority')[:limit]
+    
+    if not articles:
+        return ''
+
+    kb_text = "\n\n## Baza znanja (RAG) — koristi ove podatke za točan odgovor:\n"
+    for art in articles:
+        kb_text += f"\n### {art.title}\n{art.content}\n"
+    
+    return kb_text

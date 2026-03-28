@@ -80,3 +80,43 @@ class PatrolReport(models.Model):
 
     def __str__(self):
         return f'Patrol {self.created_at:%Y-%m-%d %H:%M} — {self.company.name}'
+
+
+class KnowledgeArticle(models.Model):
+    """
+    RAG Knowledge Base — strukturirani članci koje AI koristi za odgovore.
+    Umjesto haluciniranja, AI povlači točne podatke iz ove baze.
+    """
+    MODULE_CHOICES = [
+        ('pos', 'POS (Blagajna)'),
+        ('invoicing', 'Fakturiranje'),
+        ('inventory', 'Skladište'),
+        ('experiences', 'Iskustva / Agro-Turizam'),
+        ('work_orders', 'Radni nalozi'),
+        ('rental', 'Smještaj / Rental'),
+        ('udruge', 'Udruge'),
+        ('marketplace', 'OPG Tržnica'),
+        ('compliance', 'Zakoni / Compliance'),
+        ('borg', 'BORG operacije'),
+        ('general', 'Opće'),
+    ]
+
+    module = models.CharField(max_length=30, choices=MODULE_CHOICES, db_index=True)
+    title = models.CharField(max_length=200, verbose_name='Naslov')
+    content = models.TextField(verbose_name='Sadržaj',
+                                help_text='Markdown format. AI koristi ovo za RAG odgovore.')
+    keywords = models.CharField(max_length=500, blank=True,
+                                 help_text='Ključne riječi za pretragu, odvojene zarezom')
+    is_active = models.BooleanField(default=True)
+    priority = models.PositiveIntegerField(default=5,
+                                            help_text='1=najvažnije, 10=najmanje')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Članak baze znanja'
+        verbose_name_plural = 'Članci baze znanja'
+        ordering = ['module', 'priority', 'title']
+
+    def __str__(self):
+        return f'[{self.module}] {self.title}'
