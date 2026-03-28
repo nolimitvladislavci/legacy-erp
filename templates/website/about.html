@@ -1,0 +1,183 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% trans "O nama" %} – LIMIT Connect</title>
+<meta name="description" content="LIMIT Connect - ERP platforma za mala i srednja poduzeća. Tko smo, što radimo, zašto postojimo.">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --gold: #c9a84c; --black: #0a0a0a; --dark: #1a1a2e; --gray: #2a2a3e; --border: #2a2a3e; --muted: #888; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Barlow', system-ui, sans-serif; background: var(--black); color: #e0e0e0; }
+a { color: var(--gold); text-decoration: none; }
+
+/* NAV */
+.nav { position: fixed; top: 0; width: 100%; z-index: 100; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(201,168,76,0.1); }
+.nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--gold); }
+.nav-links { display: flex; gap: 1.5rem; align-items: center; }
+.nav-links a { color: #bbb; font-size: 0.9rem; transition: color 0.2s; }
+.nav-links a:hover { color: var(--gold); }
+.nav-links a.active { color: var(--gold); }
+.btn-nav { padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
+.btn-nav-solid { background: var(--gold); color: var(--black); border: 1px solid var(--gold); }
+.btn-nav-solid:hover { background: #d4b55a; }
+
+/* HERO */
+.hero { padding: 8rem 2rem 4rem; text-align: center; position: relative; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%); }
+.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: #fff; margin-bottom: 1rem; position: relative; }
+.hero h1 span { color: var(--gold); }
+.hero p { color: #999; font-size: 1.15rem; max-width: 650px; margin: 0 auto; line-height: 1.7; position: relative; }
+
+/* SECTIONS */
+.section { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+.section-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--gold); margin-bottom: 1.5rem; }
+.section p { color: #bbb; font-size: 1rem; line-height: 1.8; margin-bottom: 1rem; }
+
+/* VALUES */
+.values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.value-card { background: var(--dark); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; transition: all .3s; }
+.value-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+.value-card .icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(201,168,76,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+.value-card .icon i { font-size: 1.2rem; color: var(--gold); }
+.value-card h3 { font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem; }
+.value-card p { color: #999; font-size: 0.9rem; line-height: 1.5; margin: 0; }
+
+/* TEAM */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.team-card { background: var(--dark); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; text-align: center; }
+.team-card .avatar { width: 64px; height: 64px; border-radius: 50%; background: rgba(201,168,76,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+.team-card .avatar i { font-size: 1.5rem; color: var(--gold); }
+.team-card h4 { color: #fff; font-size: 1rem; margin-bottom: 0.25rem; }
+.team-card .role { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+.team-card p { color: #999; font-size: 0.85rem; line-height: 1.5; }
+
+/* NUMBERS */
+.numbers { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; padding: 3rem 2rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.num-item { text-align: center; }
+.num-item .num { font-size: 2.5rem; font-weight: 700; color: var(--gold); font-family: 'Cormorant Garamond', serif; }
+.num-item .label { color: #888; font-size: 0.85rem; margin-top: 4px; }
+
+/* CTA */
+.cta { text-align: center; padding: 5rem 2rem; background: linear-gradient(180deg, transparent, rgba(201,168,76,0.05)); }
+.cta h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: #fff; margin-bottom: 1rem; }
+.cta p { color: #999; margin-bottom: 2rem; font-size: 1.05rem; }
+.btn-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 8px; font-size: 1.05rem; font-weight: 600; background: var(--gold); color: var(--black); transition: all .2s; }
+.btn-cta:hover { background: #d4b55a; transform: translateY(-2px); color: var(--black); }
+
+/* FOOTER */
+.footer { text-align: center; padding: 2.5rem 1rem; border-top: 1px solid var(--border); }
+.footer p { color: #555; font-size: 0.85rem; margin-bottom: 0.5rem; }
+.footer .slogan { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--gold); font-size: 1rem; }
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2rem; }
+  .nav-links a:not(.btn-nav) { display: none; }
+  .numbers { gap: 1.5rem; }
+  .section { padding: 3rem 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo"><i class="fas fa-bolt"></i> LIMIT Connect</a>
+  <div class="nav-links">
+    <a href="/about/" class="active">{% trans "O nama" %}</a>
+    <a href="/pricing/">{% trans "Cijene" %}</a>
+    <a href="{% url 'login' %}">{% trans "Prijava" %}</a>
+    <a href="{% url 'accounts:quick_register' %}" class="btn-nav btn-nav-solid">{% trans "Registracija" %}</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>{% trans "Digitalizacija" %} <span>{% trans "bez kompromisa" %}</span>.</h1>
+  <p>{% trans "LIMIT Connect je ERP platforma nove generacije za mala i srednja poduzeća. Razvijamo alate koji vam omogućuju da se fokusirate na ono što je važno — vaš posao." %}</p>
+</section>
+
+<div class="numbers">
+  <div class="num-item"><div class="num">30+</div><div class="label">{% trans "Modula" %}</div></div>
+  <div class="num-item"><div class="num">HR & DE</div><div class="label">{% trans "Potpuna lokalizacija" %}</div></div>
+  <div class="num-item"><div class="num">2024</div><div class="label">{% trans "Osnovano" %}</div></div>
+  <div class="num-item"><div class="num">EU</div><div class="label">{% trans "Cloud hosting" %}</div></div>
+</div>
+
+<section class="section">
+  <h2 class="section-title">{% trans "Naša priča" %}</h2>
+  <p>{% trans "LIMIT Connect nastao je iz jednostavne frustracije: postojeći ERP sustavi su preskupi, prekomplicirani i ne razumiju lokalno tržište. Obrtnik u Slavoniji i restoran u Münchenu imaju iste probleme — previše papira, previše klikova, premalo vremena." %}</p>
+  <p>{% trans "Zato smo izgradili platformu koja spaja hrvatsku preciznost s njemačkom temeljitošću. Fiskalizacija, e-Račun, POS blagajna, skladište, radni sati, AI asistent — sve u jednom sustavu, s jednim pristupom." %}</p>
+  <p>{% trans "Naš cilj je jasan: dati malim poduzećima alate koje si dosad mogao priuštiti samo koncern." %}</p>
+</section>
+
+<section class="section">
+  <h2 class="section-title">{% trans "Naše vrijednosti" %}</h2>
+  <div class="values-grid">
+    <div class="value-card">
+      <div class="icon"><i class="fas fa-feather"></i></div>
+      <h3>{% trans "Jednostavnost" %}</h3>
+      <p>{% trans "Svaka funkcija mora biti razumljiva u 10 sekundi. Ako trebate priručnik, napravili smo nešto krivo." %}</p>
+    </div>
+    <div class="value-card">
+      <div class="icon"><i class="fas fa-shield-halved"></i></div>
+      <h3>{% trans "Transparentnost" %}</h3>
+      <p>{% trans "Bez skrivenih troškova, bez vendor lock-ina. Vaši podaci su vaši — uvijek, bez iznimke." %}</p>
+    </div>
+    <div class="value-card">
+      <div class="icon"><i class="fas fa-globe"></i></div>
+      <h3>{% trans "Lokalizacija" %}</h3>
+      <p>{% trans "Ne samo prijevod, nego potpuna adaptacija — porezni sustav, e-Račun, fiskalizacija, računovodstveni okviri za HR i DE tržište." %}</p>
+    </div>
+    <div class="value-card">
+      <div class="icon"><i class="fas fa-leaf"></i></div>
+      <h3>{% trans "Digitalno = zeleno" %}</h3>
+      <p>{% trans "Svaka faktura u oblaku je jedno drvo manje. Digitalizacija nije samo praktična — ona je odgovorna." %}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">{% trans "Tim" %}</h2>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="avatar"><i class="fas fa-code"></i></div>
+      <h4>Nikša Višković</h4>
+      <div class="role">Founder & CTO</div>
+      <p>{% trans "Full-stack inženjer s iskustvom u enterprise sustavima. Vizionar platforme." %}</p>
+    </div>
+    <div class="team-card">
+      <div class="avatar"><i class="fas fa-chart-pie"></i></div>
+      <h4>Marija Višković</h4>
+      <div class="role">COO & Finance</div>
+      <p>{% trans "Vodi operacije, financije i odnose s klijentima. Brine da sve funkcionira." %}</p>
+    </div>
+    <div class="team-card">
+      <div class="avatar"><i class="fas fa-robot"></i></div>
+      <h4>Connect AI</h4>
+      <div class="role">AI Assistant</div>
+      <p>{% trans "Naš AI asistent koji automatizira rutinske zadatke i pomaže korisnicima 24/7." %}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">{% trans "Tehnologija" %}</h2>
+  <p>{% trans "Platforma je izgrađena na provjerenim tehnologijama: Django, PostgreSQL, Redis, Celery. Hosting je na EU serverima (Hetzner, Njemačka) s automatskim backupima i SSL enkripcijom." %}</p>
+  <p>{% trans "GDPR compliant od prvog dana. Vaši podaci nikad ne napuštaju EU." %}</p>
+</section>
+
+<section class="cta">
+  <h2>{% trans "Spremni za početak?" %}</h2>
+  <p>{% trans "Registrirajte se u 2 minute. 14 dana besplatno, bez kreditne kartice." %}</p>
+  <a href="{% url 'accounts:quick_register' %}" class="btn-cta"><i class="fas fa-rocket"></i> {% trans "Počni besplatno" %}</a>
+</section>
+
+<footer class="footer">
+  <p>&copy; 2026 LIMIT Connect | Konjik d.o.o. | <a href="/pricing/">{% trans "Cijene" %}</a> | <a href="{% url 'accounts:quick_register' %}">{% trans "Registracija" %}</a> | <a href="{% url 'login' %}">{% trans "Prijava" %}</a></p>
+  <p class="slogan">{% trans "Bez papira. Bez brige. Bez granica." %}</p>
+</footer>
+
+</body>
+</html>

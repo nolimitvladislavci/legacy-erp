@@ -389,14 +389,18 @@ def pricing_page(request):
         'racunovodja': ['arhiva-ai', 'enterprise', 'distributor'],
         'gastro': ['pos-besplatno', 'pos-arhiva-combo', 'professional'],
     }
-    if profile and profile in PROFILE_PLAN_MAP:
-        plans = plans.filter(slug__in=PROFILE_PLAN_MAP[profile])
+    # Always send ALL plans to template (JS PLANS_DB needs them all for profile switching)
     return render(request, 'website/pricing.html', {
         'plans': plans,
         'plan_features': PLAN_FEATURES,
         'lang': lang,
         'active_profile': profile,
     })
+
+
+def about_page(request):
+    """Public about page."""
+    return render(request, 'website/about.html')
 
 
 def pricing_ai_advisor(request):

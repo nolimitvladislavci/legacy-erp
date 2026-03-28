@@ -99,7 +99,7 @@ footer{border-top:1px solid var(--border);padding:32px 40px;display:flex;justify
 footer small{color:var(--muted2);font-size:.75rem}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:768px){nav{padding:12px 20px}.nav-links .nav-link:not(.primary):not(.wa){display:none}.hero{padding:100px 20px 60px}.profile-section,.plans-section,.compare-section,.modules-section,.cta-section{padding-left:20px;padding-right:20px}.plan-card{width:100%}.cta-box{padding:32px 20px}.trust-strip{padding:20px;gap:20px}}
+@media(max-width:768px){nav{padding:12px 20px}.nav-links .nav-link:not(.primary){display:none}.hero{padding:100px 20px 60px}.profile-section,.plans-section,.compare-section,.modules-section,.cta-section{padding-left:20px;padding-right:20px}.plan-card{width:100%}.cta-box{padding:32px 20px}.trust-strip{padding:20px;gap:20px}}
 </style>
 </head>
 <body>
@@ -107,9 +107,8 @@ footer small{color:var(--muted2);font-size:.75rem}
 <nav>
   <a href="{% url 'dashboard' %}" class="nav-logo">LIMIT <span>Connect</span></a>
   <div class="nav-links">
-    <a href="/hr/about/" class="nav-link">O nama</a>
+    <a href="{% url 'about' %}" class="nav-link">O nama</a>
     <a href="/digitalni-posrednik/" class="nav-link">Demo</a>
-    <a href="https://wa.me/385976091655" class="nav-link wa" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
     <a href="{% url 'accounts:quick_register' %}" class="nav-link primary"><i class="fas fa-rocket"></i> Počni besplatno</a>
   </div>
 </nav>
@@ -123,25 +122,25 @@ footer small{color:var(--muted2);font-size:.75rem}
 <section class="profile-section">
   <div class="profile-label">Odaberi poslovni profil &mdash; prikazat ćemo savršeni plan</div>
   <div class="profiles">
-    <a href="#plans" class="profile-btn" onclick="selectProfile('obrtnik')" data-profile="obrtnik">
+    <a href="/pricing/?profile=obrtnik#plans" class="profile-btn" onclick="selectProfile('obrtnik');return false;" data-profile="obrtnik">
       <i class="fas fa-hammer"></i><div class="plabel">Obrtnik</div><div class="psub">Paušal / redovni</div>
     </a>
-    <a href="#plans" class="profile-btn" onclick="selectProfile('udruga')" data-profile="udruga">
+    <a href="/pricing/?profile=udruga#plans" class="profile-btn" onclick="selectProfile('udruga');return false;" data-profile="udruga">
       <i class="fas fa-people-group"></i><div class="plabel">Udruga</div><div class="psub">Neprofitna org.</div>
     </a>
-    <a href="#plans" class="profile-btn" onclick="selectProfile('rental')" data-profile="rental">
+    <a href="/pricing/?profile=rental#plans" class="profile-btn" onclick="selectProfile('rental');return false;" data-profile="rental">
       <i class="fas fa-house"></i><div class="plabel">Iznajmljivač</div><div class="psub">Apartmani / sobe</div>
     </a>
-    <a href="#plans" class="profile-btn" onclick="selectProfile('firma')" data-profile="firma">
+    <a href="/pricing/?profile=firma#plans" class="profile-btn" onclick="selectProfile('firma');return false;" data-profile="firma">
       <i class="fas fa-building"></i><div class="plabel">Firma</div><div class="psub">d.o.o. / j.d.o.o.</div>
     </a>
-    <a href="#plans" class="profile-btn" onclick="selectProfile('racunovodja')" data-profile="racunovodja">
+    <a href="/pricing/?profile=racunovodja#plans" class="profile-btn" onclick="selectProfile('racunovodja');return false;" data-profile="racunovodja">
       <i class="fas fa-calculator"></i><div class="plabel">Računovođa</div><div class="psub">Više klijenata</div>
     </a>
-    <a href="#plans" class="profile-btn" onclick="selectProfile('gastro')" data-profile="gastro">
+    <a href="/pricing/?profile=gastro#plans" class="profile-btn" onclick="selectProfile('gastro');return false;" data-profile="gastro">
       <i class="fas fa-utensils"></i><div class="plabel">Ugostiteljstvo</div><div class="psub">Kafić / restoran</div>
     </a>
-    <a href="#plans" class="profile-btn" onclick="selectProfile('opg')" data-profile="opg">
+    <a href="/pricing/?profile=opg#plans" class="profile-btn" onclick="selectProfile('opg');return false;" data-profile="opg">
       <i class="fas fa-seedling"></i><div class="plabel">OPG / Farma</div><div class="psub">Seoski turizam</div>
     </a>
   </div>
@@ -261,6 +260,7 @@ function selectProfile(key) {
   document.querySelectorAll('.profile-btn').forEach(b=>b.classList.remove('active'));
   const btn=document.querySelector('[data-profile="'+key+'"]');
   if(btn)btn.classList.add('active');
+  history.replaceState(null,'','/pricing/?profile='+key+'#plans');
   const profile=PROFILES[key];
   if(!profile)return;
   const grid=document.getElementById('plans-grid');
@@ -297,6 +297,7 @@ function selectProfile(key) {
   });
   placeholder.style.display='none';
   grid.style.display='flex';
+  setTimeout(function(){ document.getElementById('plans').scrollIntoView({behavior:'smooth',block:'start'}); },100);
 }
 
 function toggleCompare(){

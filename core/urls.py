@@ -244,6 +244,7 @@ urlpatterns += i18n_patterns(
     path('notifications/', include('notifications.urls', namespace='notifications')),
     path('reports/', include('reports.urls', namespace='reports')),
     path('register/', include('registration.urls')),
+    path('about/', __import__('website.views', fromlist=['about_page']).about_page, name='about'),
     path('pricing/', __import__('website.views', fromlist=['pricing_page']).pricing_page, name='pricing'),
     path('api/pricing/advisor/', __import__('website.views', fromlist=['pricing_ai_advisor']).pricing_ai_advisor, name='pricing_ai_advisor'),
     path('synesis/', include('synesis.urls')),
