@@ -2,9 +2,13 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from borg_ops.mixins import FSMMixin
+from django.contrib.contenttypes.fields import GenericRelation
 
 
 class ProjectLead(FSMMixin, models.Model):
+    card_activities = GenericRelation('borg_ops.CardActivity', object_id_field='object_id', content_type_field='content_type')
+    sla_timestamps  = GenericRelation('borg_ops.StatusTimestamp', object_id_field='object_id', content_type_field='content_type')
+
     STATUS_FIELD = 'status'
     TRANSITIONS = {
         'NOVI_UPIT':        ['INTERNA_PROCJENA', 'NA_BURZI'],

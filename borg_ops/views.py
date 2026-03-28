@@ -61,7 +61,27 @@ def card_move(request):
     try:
         obj.transition_to(new_status, user=request.user)
     except ValueError as e:
-        return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+        # Dron #3 fix: HTMX-aware error — vraća JSON ili HTML fragment
+        err_msg = str(e)
+        is_htmx = request.headers.get('HX-Request') == 'true'
+        if is_htmx:
+            # HTMX: vraća 200 s HX-Trigger za toast, kartica ostaje na staroj poziciji
+            from django.http import HttpResponse
+            response = HttpResponse(
+                f'<div class="fsm-error-toast" style="display:none">{err_msg}</div>',
+                status=200
+            )
+            response['HX-Trigger'] = f'{{"showFsmError": {json.dumps(err_msg)}}}'
+            response['HX-Reswap'] = 'none'  # ne zamjenjuj ništa u DOM-u
+            return response
+        return JsonResponse({'ok': False, 'error': err_msg}, status=400)
+
+    is_htmx = request.headers.get('HX-Request') == 'true'
+    if is_htmx:
+        from django.http import HttpResponse
+        response = HttpResponse('', status=200)
+        response['HX-Trigger'] = f'{{"cardMoved": {{"model": "{model_name}", "pk": "{pk}", "status": "{new_status}"}}}}'
+        return response
 
     return JsonResponse({
         'ok': True,

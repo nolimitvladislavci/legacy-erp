@@ -6,6 +6,7 @@ archive_old_activity: mjesečno broji stare zapise (arhiva u v2).
 """
 import logging
 from celery import shared_task
+from borg_ops.business_hours import sla_breached, is_business_hour
 from django.utils import timezone
 
 logger = logging.getLogger('borg.sla')
@@ -46,25 +47,33 @@ def check_sla():
         ct = ContentType.objects.get_for_model(Model)
 
         for status, max_minutes in rules.items():
+            # Dron #2 fix: ne alarmiramo van radnog vremena (vikend/praznik)
+            if not is_business_hour():
+                continue
+
             cutoff = now - timezone.timedelta(minutes=max_minutes)
-            overdue = StatusTimestamp.objects.filter(
+            candidates = StatusTimestamp.objects.filter(
                 content_type=ct,
                 status=status,
                 exited_at__isnull=True,
                 entered_at__lt=cutoff,
             ).select_related('user')
 
-            for ts in overdue:
-                minutes_over = int((now - ts.entered_at).total_seconds() / 60)
+            for ts in candidates:
+                # Računaj RADNE minute — ne ukupno proteklo vrijeme
+                breached, elapsed = sla_breached(ts.entered_at, max_minutes)
+                if not breached:
+                    continue   # Ukupno radno vrijeme još nije premašeno
+
                 logger.warning(
-                    'SLA BREACH: %s #%s u statusu %s vec %d min (max %d)',
-                    model_name, ts.object_id, status, minutes_over, max_minutes
+                    'SLA BREACH: %s #%s u statusu %s — %d radnih min (max %d)',
+                    model_name, ts.object_id, status, elapsed, max_minutes
                 )
                 breaches.append({
                     'model': model_name,
                     'pk': ts.object_id,
                     'status': status,
-                    'minutes': minutes_over,
+                    'minutes': elapsed,
                     'max': max_minutes,
                 })
 

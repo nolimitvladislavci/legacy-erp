@@ -3,9 +3,14 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from core.managers import CompanyManager
 from borg_ops.mixins import FSMMixin
+from django.contrib.contenttypes.fields import GenericRelation
 
 
 class WorkOrder(FSMMixin, models.Model):
+    # GenericRelation: cascade delete CardActivity i StatusTimestamp kad se WorkOrder briše
+    card_activities = GenericRelation('borg_ops.CardActivity', object_id_field='object_id', content_type_field='content_type')
+    sla_timestamps  = GenericRelation('borg_ops.StatusTimestamp', object_id_field='object_id', content_type_field='content_type')
+
     STATUS_FIELD = 'status'
     TRANSITIONS = {
         'draft':       ['in_progress', 'cancelled'],
