@@ -257,27 +257,71 @@ def add_item(request, receipt_id):
                 try: kwargs['tax_rate'] = inv.tax_rate.rate
                 except Exception: pass
 
-            # ── KARENCA HARD BLOCK ──────────────────────────────────
+            # ── KARENCA HARD BLOCK (LOT-level preciznost) ───────────
             # Zakon o higijeni hrane: proizvodi iz jata pod aktivnom
             # karencom (antibiotik/lijek) NE SMIJU se prodavati.
+            # Blokada ide po StockBatch (LOT), NE po cijelom artiklu.
+            # Jato A pod karencom ≠ blokada jaja iz Jata B.
             # ────────────────────────────────────────────────────────
-            if inv.source_flock_id:
+            batch_id = request.POST.get('stock_batch_id', '').strip()
+            karenca_blocked = False
+
+            # Provjera 1: Ako je odabran specifični LOT/batch
+            if batch_id:
+                try:
+                    from inventory.models import StockBatch
+                    batch = StockBatch.objects.select_related('source_flock').get(pk=int(batch_id))
+                    if batch.source_flock and batch.source_flock.has_active_karenca:
+                        flock = batch.source_flock
+                        karenca_end = flock.karenca_end_date
+                        end_str = karenca_end.strftime('%d.%m.%Y') if karenca_end else '?'
+                        messages.error(
+                            request,
+                            f'ZABRANJENO: LOT {batch.batch_number} dolazi iz jata '
+                            f'"{flock.naziv}" koje je pod aktivnom karencom do {end_str}. '
+                            f'Odaberite LOT iz drugog jata ili pričekajte istek karence. '
+                            f'(Zakon o higijeni hrane)'
+                        )
+                        karenca_blocked = True
+                except Exception:
+                    pass
+
+            # Provjera 2: Fallback na InventoryItem.source_flock (ako nema LOT sustava)
+            if not karenca_blocked and not batch_id and inv.source_flock_id:
                 try:
                     flock = inv.source_flock
                     if flock and flock.has_active_karenca:
                         karenca_end = flock.karenca_end_date
                         end_str = karenca_end.strftime('%d.%m.%Y') if karenca_end else '?'
-                        messages.error(
-                            request,
-                            f'ZABRANJENO: Jato "{flock.naziv}" je pod aktivnom karencom '
-                            f'(zdravstveni tretman). Prodaja proizvoda iz ovog jata '
-                            f'nije dozvoljena do {end_str}. '
-                            f'Zakon o higijeni hrane — prekršaj može rezultirati '
-                            f'zatvaranjem objekta.'
+                        # Provjeri ima li DRUGIH LOT-ova koji NISU pod karencom
+                        from inventory.models import StockBatch
+                        safe_lots = StockBatch.objects.filter(
+                            item=inv, quarantine_status='active', quantity__gt=0
+                        ).exclude(
+                            source_flock__in=flock.__class__.objects.filter(
+                                pk=flock.pk
+                            )
                         )
-                        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+                        if safe_lots.exists():
+                            lot_names = ', '.join(safe_lots.values_list('batch_number', flat=True)[:5])
+                            messages.warning(
+                                request,
+                                f'UPOZORENJE: Jato "{flock.naziv}" pod karencom do {end_str}. '
+                                f'Ali postoje LOT-ovi iz drugih jata: {lot_names}. '
+                                f'Odaberite ispravan LOT pri prodaji.'
+                            )
+                        else:
+                            messages.error(
+                                request,
+                                f'ZABRANJENO: Svi LOT-ovi artikla "{inv.name}" dolaze iz '
+                                f'jata pod karencom (do {end_str}). Prodaja nije dozvoljena.'
+                            )
+                            karenca_blocked = True
                 except Exception:
-                    pass  # Flock deleted ili FK broken — ne blokiraj POS
+                    pass
+
+            if karenca_blocked:
+                return redirect('pos:receipt_detail', receipt_id=receipt_id)
         except InventoryItem.DoesNotExist:
             pass
     if not kwargs.get('description'):

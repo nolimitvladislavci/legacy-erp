@@ -513,3 +513,53 @@ def recall_notify(request, pk):
         return redirect('experiences:recall_detail', pk=recall.pk)
 
     return redirect('experiences:recall_detail', pk=recall.pk)
+
+
+@login_required
+def normativ_preview(request, pk):
+    """
+    GET /experiences/<pk>/normativ/?pax=10
+    Vraća JSON s normativom za zadani broj gostiju + stock status.
+    """
+    from .models import Experience, ExperienceInclusion
+    from django.http import JsonResponse
+
+    exp = get_object_or_404(Experience, pk=pk)
+    pax = int(request.GET.get('pax', 1))
+
+    items = []
+    total_cost = 0
+    all_sufficient = True
+
+    for incl in exp.inclusions.select_related('inventory_item').all():
+        needed = float(incl.total_for_pax(pax))
+        available = float(incl.inventory_item.quantity) if incl.inventory_item else None
+        sufficient = incl.stock_sufficient(pax)
+        deficit = float(incl.stock_deficit(pax)) if incl.inventory_item else 0
+
+        if not sufficient:
+            all_sufficient = False
+
+        cost = 0
+        if incl.inventory_item and incl.inventory_item.purchase_price:
+            cost = float(incl.inventory_item.purchase_price) * needed
+
+        items.append({
+            'description': incl.description,
+            'per_person': float(incl.quantity_per_person),
+            'unit': incl.unit,
+            'total_needed': needed,
+            'available': available,
+            'sufficient': sufficient,
+            'deficit': deficit,
+            'cost': round(cost, 2),
+        })
+        total_cost += cost
+
+    return JsonResponse({
+        'experience': exp.name,
+        'pax': pax,
+        'items': items,
+        'all_sufficient': all_sufficient,
+        'total_material_cost': round(total_cost, 2),
+    })

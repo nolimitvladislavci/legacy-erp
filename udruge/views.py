@@ -4012,26 +4012,35 @@ def bridge_publish(request):
             )
             messages.success(request, f'"{product.name}" objavljeno na tržnici! Ističe: {product.expires_at}.')
 
-            # Auto-link source_flock na InventoryItem-e iste kompanije
+            # Auto-link: kreira/ažurira StockBatch s source_flock za LOT slijedivost
             if source_model == 'EggRecord':
                 try:
                     from .models import EggRecord as ER
-                    from inventory.models import InventoryItem
+                    from inventory.models import InventoryItem, StockBatch
                     egg = ER.objects.select_related('flock').get(pk=int(source_id))
                     flock = egg.flock
-                    # Nađi sve jajčane artikle bez source_flock u istoj firmi
+                    # Nađi InventoryItem za jaja u istoj firmi (source_flock linked)
                     egg_items = InventoryItem.objects.filter(
-                        company=company,
-                        source_flock__isnull=True,
-                        name__icontains='jaj',
+                        company=company, source_flock=flock
                     )
-                    linked = egg_items.update(source_flock=flock)
-                    if linked:
-                        messages.info(
-                            request,
-                            f'Auto-link: {linked} artikl(a) povezano s jatom "{flock.naziv}" '
-                            f'za karencija enforcement na POS-u.'
+                    for item in egg_items:
+                        lot_num = f'FLOCK-{flock.pk}-{egg.datum.strftime("%y%m%d")}'
+                        batch, created = StockBatch.objects.update_or_create(
+                            company=company,
+                            item=item,
+                            batch_number=lot_num,
+                            defaults={
+                                'source_flock': flock,
+                                'quantity': egg.broj_jaja - egg.broken,
+                                'expiry_date': egg.datum + __import__('datetime').timedelta(days=28),
+                            }
                         )
+                        if created:
+                            messages.info(
+                                request,
+                                f'LOT {lot_num} kreiran za "{item.name}" — '
+                                f'{batch.quantity} kom, rok: {batch.expiry_date:%d.%m.%Y}.'
+                            )
                 except Exception:
                     pass
         except Exception as e:

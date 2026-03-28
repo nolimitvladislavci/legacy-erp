@@ -874,6 +874,15 @@ class StockBatch(models.Model):
         related_name='stock_batches', verbose_name=_('Artikl'),
     )
     batch_number = models.CharField(max_length=100, blank=True, verbose_name=_('Broj sarze / LOT'))
+
+    # Slijedivost — iz kojeg jata dolazi ova šarža
+    source_flock = models.ForeignKey(
+        'udruge.Flock', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='stock_batches',
+        verbose_name=_('Izvorno jato'),
+        help_text=_('LOT-level karencija: blokira samo OVU šaržu, ne sve artikle'),
+    )
+
     expected_weight = models.DecimalField(
         max_digits=10, decimal_places=3, default=0,
         verbose_name=_('Ocekivana tezina (kg)'),

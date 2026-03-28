@@ -9,6 +9,7 @@ urlpatterns = [
     path('novo/', views.experience_create, name='experience_create'),
     path('<int:pk>/', views.experience_detail, name='experience_detail'),
     path('<int:pk>/edit/', views.experience_edit, name='experience_edit'),
+    path('<int:pk>/normativ/', views.normativ_preview, name='normativ_preview'),
     path('<int:pk>/schedule/', views.schedule_create, name='schedule_create'),
     path('schedule/<int:schedule_pk>/book/', views.booking_create, name='booking_create'),
     path('booking/<int:pk>/confirm/', views.booking_confirm_deposit, name='booking_confirm_deposit'),

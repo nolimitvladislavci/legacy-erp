@@ -263,26 +263,137 @@ class ExperienceBooking(models.Model):
     def mark_no_show(self):
         """
         Gost se nije pojavio — depozit se zadržava.
-        Ako postoji plaćeni depozit, generira račun za zadržani predujam
-        (zakonska obveza — neopravdan priljev na žiro-računu).
+        Zakonski ispravan tok (čl.79 ZPDV):
+          1. Storniraj Avansni račun (predujam)
+          2. Izdaj Konačni račun za "Naknadu za nedolazak" 
+        Ovo sprečava dvostruko oporezivanje istog iznosa.
         """
         self.status = 'no_show'
         self.deposit_forfeited = True
         self.refund_amount = Decimal('0')
         self.save(update_fields=['status', 'deposit_forfeited', 'refund_amount'])
 
-        # Generiraj račun za zadržani depozit ako je uplata postojala
+        # Zakonski tok: storno predujma + konačni račun
         if self.deposit_paid and self.deposit_amount and self.deposit_amount > 0:
-            self._generate_forfeited_deposit_invoice()
+            self._storno_and_final_invoice()
 
-    def _generate_forfeited_deposit_invoice(self):
+    def _storno_and_final_invoice(self):
         """
-        Generira račun za zadržani predujam (no-show).
-        Zakonska podloga: čl. 78. Zakona o PDV-u — zadržani predujam
-        je oporezivi događaj koji zahtijeva izdavanje računa.
+        Zakonski ispravan no-show flow:
+        1. Storno Avansnog računa (poništava PDV obvezu iz predujma)
+        2. Konačni račun s stavkom "Naknada za otkazivanje / zadržani predujam"
+           (novi oporezivi događaj — čl.33 ZPDV, čl.78 ZPDV)
         """
         import logging
         logger = logging.getLogger('experiences.no_show')
+
+        experience = self.schedule.experience
+        company = experience.company
+
+        # KORAK 1: Storno avansnog računa
+        storno_result = None
+        if self.deposit_invoice_id:
+            try:
+                from invoicing.services.storno import create_storno
+                storno_result = create_storno(
+                    original=self.deposit_invoice,
+                    cancel_reason=(
+                        f'No-show: {self.guest_name} se nije pojavio na '
+                        f'"{experience.name}" ({self.schedule.date}). '
+                        f'Depozit zadržan — storno predujma, slijedi konačni račun.'
+                    ),
+                )
+                if storno_result.get('success'):
+                    logger.info(
+                        'Storno predujma %s kreiran za booking #%d',
+                        storno_result['storno_invoice'].number, self.pk,
+                    )
+                else:
+                    logger.warning(
+                        'Storno predujma FAILED za booking #%d: %s',
+                        self.pk, storno_result.get('message', ''),
+                    )
+            except Exception as e:
+                logger.error('Storno predujma ERROR za booking #%d: %s', self.pk, e)
+        else:
+            logger.warning(
+                'Booking #%d nema deposit_invoice — predujam nije bio fiskaliziran. '
+                'Generira se samo konačni račun.',
+                self.pk,
+            )
+
+        # KORAK 2: Konačni račun za naknadu nedolaska
+        try:
+            from invoicing.services.invoice_service import create_invoice
+            from invoicing.models import InvoiceItem
+
+            storno_ref = ''
+            if storno_result and storno_result.get('success'):
+                storno_ref = f' Storno predujma: {storno_result["storno_invoice"].number}.'
+
+            invoice = create_invoice(
+                company=company,
+                doctype='R',  # Redovni račun (ne avansni!)
+                client_name=self.guest_name,
+                client_email=self.guest_email or '',
+                client_phone=self.guest_phone or '',
+                notes=(
+                    f'Naknada za nedolazak (no-show) — "{experience.name}" '
+                    f'({self.schedule.date}).{storno_ref} '
+                    f'Rezervacija #{self.pk}.'
+                ),
+            )
+
+            InvoiceItem.objects.create(
+                invoice=invoice,
+                description=(
+                    f'Naknada za nedolazak: {experience.name} — '
+                    f'{self.guest_name} ({self.pax_count} os.)'
+                ),
+                quantity=1,
+                unit_price=self.deposit_amount,
+                tax_rate=Decimal('25.00'),
+            )
+
+            self.forfeited_invoice = invoice
+            self.save(update_fields=['forfeited_invoice'])
+
+            logger.info(
+                'Konačni no-show račun %s kreiran za booking #%d — %s EUR',
+                invoice.number or invoice.pk, self.pk, self.deposit_amount,
+            )
+        except Exception as e:
+            logger.error(
+                'Konačni no-show račun FAILED za booking #%d: %s — '
+                'KRITIČNO: depozit %s EUR bez dokumenta!',
+                self.pk, e, self.deposit_amount,
+            )
+
+    def confirm_deposit(self, method='card'):
+        """
+        Potvrdi uplatu depozita.
+        Izdaje Avansni račun (doctype='A') — čl.79 ZPDV.
+        """
+        self.deposit_paid = True
+        self.deposit_paid_at = timezone.now()
+        self.payment_method = method
+        self.status = 'confirmed'
+        self.save()
+
+        # Ažuriraj schedule
+        sched = self.schedule
+        sched.booked_pax += self.pax_count
+        if sched.booked_pax >= sched.max_pax:
+            sched.status = 'full'
+        sched.save(update_fields=['booked_pax', 'status'])
+
+        # Izdaj Avansni račun za depozit (čl.79 ZPDV)
+        self._generate_deposit_invoice()
+
+    def _generate_deposit_invoice(self):
+        """Avansni račun za primljeni predujam."""
+        import logging
+        logger = logging.getLogger('experiences.deposit')
         try:
             from invoicing.services.invoice_service import create_invoice
             from invoicing.models import InvoiceItem
@@ -292,12 +403,12 @@ class ExperienceBooking(models.Model):
 
             invoice = create_invoice(
                 company=company,
-                doctype='INVOICE',
+                doctype='A',  # Avansni račun
                 client_name=self.guest_name,
                 client_email=self.guest_email or '',
                 client_phone=self.guest_phone or '',
                 notes=(
-                    f'Zadržani predujam — no-show za "{experience.name}" '
+                    f'Avansni račun — depozit za "{experience.name}" '
                     f'({self.schedule.date} {self.schedule.time_slot}). '
                     f'Rezervacija #{self.pk}, gostiju: {self.pax_count}.'
                 ),
@@ -305,62 +416,89 @@ class ExperienceBooking(models.Model):
 
             InvoiceItem.objects.create(
                 invoice=invoice,
-                description=f'Zadržani predujam: {experience.name} — no-show {self.guest_name}',
+                description=f'Predujam: {experience.name} — {self.guest_name} ({self.pax_count} os.)',
                 quantity=1,
                 unit_price=self.deposit_amount,
                 tax_rate=Decimal('25.00'),
             )
 
-            # Spremi referencu na račun
-            self.forfeited_invoice = invoice
-            self.save(update_fields=['forfeited_invoice'])
+            self.deposit_invoice = invoice
+            self.save(update_fields=['deposit_invoice'])
 
             logger.info(
-                'No-show invoice #%s kreiran za booking #%d — %s EUR',
+                'Deposit invoice A-%s kreiran za booking #%d — %s EUR',
                 invoice.number or invoice.pk, self.pk, self.deposit_amount,
             )
         except Exception as e:
-            logger.error(
-                'No-show invoice FAILED za booking #%d: %s — '
-                'UPOZORENJE: zadržani depozit %s EUR nema računovodstveni dokument!',
-                self.pk, e, self.deposit_amount,
-            )
-
-    def confirm_deposit(self, method='card'):
-        """Potvrdi uplatu depozita."""
-        self.deposit_paid = True
-        self.deposit_paid_at = timezone.now()
-        self.payment_method = method
-        self.status = 'confirmed'
-        self.save()
-        # Ažuriraj schedule
-        sched = self.schedule
-        sched.booked_pax += self.pax_count
-        if sched.booked_pax >= sched.max_pax:
-            sched.status = 'full'
-        sched.save(update_fields=['booked_pax', 'status'])
+            logger.error('Deposit invoice FAILED za booking #%d: %s', self.pk, e)
 
 
 class ExperienceInclusion(models.Model):
-    """Što je uključeno u cijenu iskustva — linkovi na inventory."""
+    """
+    BOM (Bill of Materials / Normativ) za iskustvo.
+    Definira TOČNU količinu svake sirovine po osobi.
+    SplitAllocation koristi ove podatke za kirurško skidanje zaliha.
+    
+    Primjer: Degustacija sira i vina
+    - Sir Paški: 0.05 kg/os
+    - Vino Malvazija 0.5L: 0.2 L/os  
+    - Jaja domaća: 1 kom/os
+    - Kruh domaći: 0.1 kg/os
+    """
     experience = models.ForeignKey(Experience, on_delete=models.CASCADE, related_name='inclusions')
     inventory_item = models.ForeignKey(
         'inventory.InventoryItem', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='experience_inclusions',
-        verbose_name=_('Artikl iz skladišta')
+        verbose_name=_('Artikl iz skladišta'),
+        help_text=_('OBAVEZNO za auto-allocation pri check-inu'),
     )
     description = models.CharField(max_length=200, verbose_name=_('Opis'),
-                                    help_text=_('npr. "1 boca Šljivovice 0.5L"'))
-    quantity_per_person = models.DecimalField(max_digits=8, decimal_places=2, default=1,
-                                              verbose_name=_('Količina po osobi'))
-    unit = models.CharField(max_length=20, default='kom', verbose_name=_('Jedinica'))
+                                    help_text=_('npr. "Sir Paški 50g" — opis na računu'))
+    quantity_per_person = models.DecimalField(
+        max_digits=8, decimal_places=4, default=1,
+        verbose_name=_('Normativ po osobi'),
+        help_text=_('Točna količina po 1 osobi u jedinicama artikla (kg, L, kom...)'),
+    )
+    unit = models.CharField(max_length=20, default='kom', verbose_name=_('Jedinica'),
+                             help_text=_('MORA odgovarati jedinici artikla u inventaru'))
 
     class Meta:
-        verbose_name = _('Uključeno u iskustvo')
-        verbose_name_plural = _('Uključeno u iskustva')
+        verbose_name = _('Normativ (BOM stavka)')
+        verbose_name_plural = _('Normativi (BOM)')
 
     def __str__(self):
-        return f'{self.experience.name}: {self.description}'
+        return f'{self.experience.name}: {self.description} ({self.quantity_per_person} {self.unit}/os)'
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.inventory_item and self.quantity_per_person <= 0:
+            raise ValidationError({
+                'quantity_per_person': 'Normativ mora biti > 0 ako je artikl povezan.'
+            })
+        if self.inventory_item and self.unit != self.inventory_item.unit:
+            raise ValidationError({
+                'unit': f'Jedinica "{self.unit}" ne odgovara artiklu '
+                        f'"{self.inventory_item.name}" ({self.inventory_item.unit}). '
+                        f'Uskladite jedinice za točnu alokaciju.'
+            })
+
+    def total_for_pax(self, pax_count):
+        """Ukupna količina za zadani broj gostiju."""
+        return self.quantity_per_person * pax_count
+
+    def stock_sufficient(self, pax_count):
+        """Ima li dovoljno zalihe za zadani broj gostiju?"""
+        if not self.inventory_item:
+            return True
+        needed = self.total_for_pax(pax_count)
+        return self.inventory_item.quantity >= needed
+
+    def stock_deficit(self, pax_count):
+        """Koliko fali? Negativan broj = manjak."""
+        if not self.inventory_item:
+            return Decimal('0')
+        needed = self.total_for_pax(pax_count)
+        return self.inventory_item.quantity - needed
 
 
 class ExperienceReview(models.Model):
