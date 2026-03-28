@@ -24,12 +24,14 @@ class CardActivity(models.Model):
     new_value = models.CharField(max_length=100, blank=True)
     note = models.TextField(blank=True)
     is_public_facing = models.BooleanField(
-        default=False,
-        help_text='True = sigurno za prikaz klijentima (QR timeline, portal). False = samo interni.',
+        default=False, db_index=True,
+        verbose_name='Javno vidljivo',
+        help_text='Ako True, ovaj zapis se prikazuje na javnom QR traceability linka.',
     )
     is_system_generated = models.BooleanField(
-        default=False,
-        help_text='True = generiran automatski (transition_to). False = human unos.',
+        default=True, db_index=True,
+        verbose_name='Generirano od sustava',
+        help_text='Ako False, zapis je ručno unio korisnik i ne smije biti javno vidljiv.',
     )
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)

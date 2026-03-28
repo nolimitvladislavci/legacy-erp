@@ -176,7 +176,32 @@ class FSMMixin:
             logger.error('CardActivity create failed: %s', e)
             return None
 
-    # ── SLA timestamps ───────────────────────────────────────────────
+    # ── Javni milestone log ─────────────────────────────────────────
+    def _log_public_event(self, message, user=None):
+        """
+        Kreira CardActivity zapis koji JE javan.
+        SAMO sustav smije zvati ovu metodu — NE korisnici direktno.
+        Koristi za: "Berba završena", "QC: Prošao", "Pakiranje završeno"
+        """
+        try:
+            from borg_ops.models import CardActivity
+            from django.contrib.contenttypes.models import ContentType
+            return CardActivity.objects.create(
+                content_type=ContentType.objects.get_for_model(self),
+                object_id=str(self.pk),
+                action='public_milestone',
+                old_value='',
+                new_value=message,
+                note='',
+                user=user,
+                is_system_generated=True,
+                is_public_facing=True,
+            )
+        except Exception as e:
+            logger.error('Public CardActivity create failed: %s', e)
+            return None
+
+        # ── SLA timestamps ───────────────────────────────────────────────
     def _update_sla_timestamp(self, old_status, new_status, user):
         try:
             from borg_ops.models import StatusTimestamp

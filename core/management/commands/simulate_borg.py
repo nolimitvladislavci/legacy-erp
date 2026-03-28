@@ -649,6 +649,18 @@ class Command(BaseCommand):
             r.error("CardActivity greška", e)
 
         try:
+            from borg_ops.models import CardActivity
+            assert hasattr(CardActivity, 'is_public_facing'), "is_public_facing polje ne postoji!"
+            assert hasattr(CardActivity, 'is_system_generated'), "is_system_generated polje ne postoji!"
+            public_count = CardActivity.objects.filter(is_public_facing=True).count()
+            r.success(f"CardActivity.is_public_facing: OK. Javnih zapisa: {public_count}")
+            r.success(f"CardActivity.is_system_generated: OK")
+        except AssertionError as e:
+            r.error(str(e))
+        except Exception as e:
+            r.error("CardActivity sigurnosna provjera greška", e)
+
+        try:
             from borg_ops.models import StatusTimestamp
             count = StatusTimestamp.objects.count()
             r.success(f"StatusTimestamp records: {count}")

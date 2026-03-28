@@ -14,6 +14,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.db import models
 from django.utils import timezone
+from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_POST, require_GET
 
 from .models import CardActivity, StatusTimestamp
@@ -461,3 +462,25 @@ def update_worker_gps(request):
     except Exception as e:
         logger.error('GPS update failed: %s', e)
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+
+
+@cache_page(60 * 5)
+def public_trace_api(request, qr_token):
+    """
+    Javni API za QR traceability.
+    ČITA SAMO: is_public_facing=True AND is_system_generated=True
+    """
+    from .models import CardActivity
+
+    # TODO H2.2: implementirati QR token lookup
+    # Trenutno: samo potvrdi da filtar radi
+    public_activities = CardActivity.objects.filter(
+        is_public_facing=True,
+        is_system_generated=True,
+    ).count()
+
+    return JsonResponse({
+        'status': 'stub',
+        'public_records': public_activities,
+        'note': 'Full QR traceability implementira se u H2.2',
+    })
