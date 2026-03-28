@@ -16,7 +16,8 @@ logger = logging.getLogger('whatsapp')
 # Isključi na produkciji (15.4.2026): WHATSAPP_TEST_MODE = False u settings.
 WHATSAPP_TEST_MODE = getattr(settings, 'WHATSAPP_TEST_MODE', True)
 WHATSAPP_WHITELIST = getattr(settings, 'WHATSAPP_WHITELIST', [
-    '491723006985',  # Ivan DE broj (Nufringen)
+    '4915771998747', # Ivan DE broj (ispravni)
+    '385991908089',  # Ivan HR broj (0991908089)
     '385976715957',  # Petar Brtan (golubar tester)
     '4915771998747',  # Ivan Brtan (glavni)
 ])
