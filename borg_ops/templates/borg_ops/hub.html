@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}BORG Hub — Command Center{% endblock %}
+{% block extra_css %}
+<style>
+.hub-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.hub-title{font-size:1.4rem;font-weight:700;color:var(--text)}
+.hub-title .accent{color:var(--gold)}
+.hub-refresh{font-size:.72rem;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+
+/* Stat cards */
+.hub-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center}
+.stat-value{font-size:1.6rem;font-weight:800;color:var(--text)}
+.stat-value.gold{color:var(--gold)}
+.stat-value.danger{color:#ef4444}
+.stat-value.success{color:#22c55e}
+.stat-label{font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+/* Alert banner */
+.hub-alert-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:#fca5a5;font-size:.85rem;font-weight:600}
+.hub-alert-banner i{color:#ef4444;font-size:1.1rem}
+
+/* Main layout */
+.hub-main{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:992px){.hub-main{grid-template-columns:2fr 1fr}}
+
+/* Sections */
+.hub-section{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.hub-section-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.hub-section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+.hub-section-title i{color:var(--gold);font-size:.75rem}
+.hub-section-body{padding:12px 16px;max-height:400px;overflow-y:auto}
+
+/* Tabs */
+.hub-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 16px}
+.hub-tab{padding:10px 16px;font-size:.78rem;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.hub-tab:hover{color:var(--text)}
+.hub-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.hub-tab-content{display:none}
+.hub-tab-content.active{display:block}
+
+/* Kanban columns */
+.hub-kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px 16px}
+@media(max-width:768px){.hub-kanban{grid-template-columns:1fr}}
+.kanban-col-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.kanban-col-title .count{background:var(--gold);color:#000;border-radius:10px;padding:1px 7px;font-size:.65rem;font-weight:800}
+
+/* Cards */
+.hub-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;transition:border-color .15s}
+.hub-card:hover{border-color:var(--gold)}
+.hub-card-title{font-size:.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hub-card-meta{font-size:.68rem;color:var(--text-muted);margin-top:3px}
+
+/* Timeline */
+.hub-timeline-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem}
+.hub-timeline-item:last-child{border-bottom:none}
+.hub-tl-icon{width:28px;height:28px;border-radius:50%;background:rgba(59,130,246,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem;color:#60a5fa}
+.hub-tl-icon.gold{background:rgba(201,168,76,.12);color:var(--gold)}
+.hub-tl-icon.green{background:rgba(34,197,94,.12);color:#22c55e}
+.hub-tl-icon.red{background:rgba(239,68,68,.12);color:#ef4444}
+.hub-tl-text{flex:1;color:var(--text)}
+.hub-tl-text strong{color:var(--text);font-weight:600}
+.hub-tl-time{font-size:.68rem;color:var(--text-muted);white-space:nowrap}
+
+/* Quick actions */
+.hub-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px}
+.hub-action-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;font-size:.78rem;font-weight:600;color:var(--text);background:var(--bg);border:1px solid var(--border);text-decoration:none;transition:all .15s}
+.hub-action-btn:hover{border-color:var(--gold);color:var(--gold)}
+.hub-action-btn i{color:var(--gold);font-size:.8rem}
+
+/* Invoice row */
+.inv-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem}
+.inv-row:last-child{border-bottom:none}
+.inv-amount{font-weight:700;margin-left:auto;white-space:nowrap}
+.inv-overdue{color:#ef4444}
+.inv-sent{color:#fbbf24}
+
+/* Badge */
+.hub-badge{font-size:.65rem;padding:2px 8px;border-radius:4px;font-weight:700}
+.hub-badge.danger{background:rgba(239,68,68,.15);color:#fca5a5}
+.hub-badge.warning{background:rgba(245,158,11,.15);color:#fbbf24}
+.hub-badge.success{background:rgba(34,197,94,.15);color:#4ade80}
+.hub-badge.info{background:rgba(59,130,246,.15);color:#60a5fa}
+
+.empty-state{text-align:center;padding:24px;color:var(--text-muted);font-size:.82rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="hub-header">
+    <div class="hub-title"><i class="fas fa-globe" style="color:var(--gold);margin-right:8px"></i> <span class="accent">BORG</span> Hub</div>
+    <div class="hub-refresh">
+        <i class="fas fa-sync-alt"></i> Osvježava se za <span id="refresh-countdown">60</span>s
+        &middot; {{ now|date:"d.m.Y H:i" }}
+    </div>
+</div>
+
+<!-- Alert Banner -->
+{% if alerts %}
+<div class="hub-alert-banner">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ alerts|length }} aktivn{{ alerts|length|pluralize:"o,ih" }} upozorenja u sustavu
+    {% for a in alerts %}
+    &middot; <span style="color:#fff">{{ a.signal_type }}: {{ a.message|truncatechars:50 }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Quick Stats -->
+<div class="hub-stats">
+    <div class="stat-card">
+        <div class="stat-value gold">{{ wo_stats.open|default:"0" }}</div>
+        <div class="stat-label">Otvoreni WO</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value success">{{ wo_stats.completed_today|default:"0" }}</div>
+        <div class="stat-label">WO danas</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ pos_today_count }}</div>
+        <div class="stat-label">POS danas</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ exp_stats.upcoming|default:"0" }}</div>
+        <div class="stat-label">Exp. termina</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value{% if exp_stats.pending_payment %} warning{% endif %}">{{ exp_stats.pending_payment|default:"0" }}</div>
+        <div class="stat-label">Čeka uplatu</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value{% if overdue_count %} danger{% endif %}">{{ overdue_count }}</div>
+        <div class="stat-label">Overdue faktura</div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="hub-main">
+    <!-- LEFT COLUMN -->
+    <div>
+        <div class="hub-section">
+            <!-- Tabs -->
+            <div class="hub-tabs">
+                <div class="hub-tab active" onclick="switchTab(this,'tab-wo')"><i class="fas fa-wrench" style="margin-right:4px"></i> Radni nalozi</div>
+                <div class="hub-tab" onclick="switchTab(this,'tab-exp')"><i class="fas fa-star" style="margin-right:4px"></i> Experiences</div>
+                <div class="hub-tab" onclick="switchTab(this,'tab-fin')"><i class="fas fa-file-invoice-dollar" style="margin-right:4px"></i> Financije</div>
+                <div class="hub-tab" onclick="switchTab(this,'tab-burza')"><i class="fas fa-handshake" style="margin-right:4px"></i> Burza</div>
+            </div>
+
+            <!-- Tab: Work Orders Kanban -->
+            <div id="tab-wo" class="hub-tab-content active">
+                <div class="hub-kanban">
+                    <div>
+                        <div class="kanban-col-title">
+                            <i class="fas fa-circle" style="color:#94a3b8;font-size:.5rem"></i> Nacrt
+                            <span class="count">{{ work_orders.draft|length|default:"0" }}</span>
+                        </div>
+                        {% for wo in work_orders.draft %}
+                        <div class="hub-card">
+                            <div class="hub-card-title">{{ wo }}</div>
+                            <div class="hub-card-meta">{{ wo.client|default:"—" }}</div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">Nema nacrta</div>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <div class="kanban-col-title">
+                            <i class="fas fa-circle" style="color:#3b82f6;font-size:.5rem"></i> U tijeku
+                            <span class="count">{{ work_orders.in_progress|length|default:"0" }}</span>
+                        </div>
+                        {% for wo in work_orders.in_progress %}
+                        <div class="hub-card">
+                            <div class="hub-card-title">{{ wo }}</div>
+                            <div class="hub-card-meta">{{ wo.client|default:"—" }}</div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">Nema aktivnih</div>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <div class="kanban-col-title">
+                            <i class="fas fa-circle" style="color:#22c55e;font-size:.5rem"></i> Završeni danas
+                            <span class="count">{{ work_orders.completed|length|default:"0" }}</span>
+                        </div>
+                        {% for wo in work_orders.completed %}
+                        <div class="hub-card">
+                            <div class="hub-card-title">{{ wo }}</div>
+                            <div class="hub-card-meta">{{ wo.client|default:"—" }}</div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">Nema završenih</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Experiences -->
+            <div id="tab-exp" class="hub-tab-content">
+                <div class="hub-section-body">
+                    <h6 style="font-size:.75rem;color:var(--text-muted);margin-bottom:10px"><i class="fas fa-calendar"></i> Nadolazeći termini (7 dana)</h6>
+                    {% for sched in upcoming_schedules %}
+                    <div class="hub-card">
+                        <div class="hub-card-title">{{ sched.experience.name }}</div>
+                        <div class="hub-card-meta">{{ sched.date|date:"d.m." }} {{ sched.time_from|time:"H:i" }} &middot; {{ sched.booked_pax }}/{{ sched.max_pax }} gostiju</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">Nema termina u sljedećih 7 dana</div>
+                    {% endfor %}
+
+                    <h6 style="font-size:.75rem;color:var(--text-muted);margin:16px 0 10px"><i class="fas fa-clock"></i> Čekaju uplatu</h6>
+                    {% for b in pending_bookings %}
+                    <div class="hub-card">
+                        <div class="hub-card-title">{{ b.guest_name|default:b.guest_email }}</div>
+                        <div class="hub-card-meta">{{ b.schedule.experience.name }} — {{ b.schedule.date|date:"d.m." }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">Sve uplaćeno</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Tab: Financije -->
+            <div id="tab-fin" class="hub-tab-content">
+                <div class="hub-section-body">
+                    <h6 style="font-size:.75rem;color:var(--text-muted);margin-bottom:10px"><i class="fas fa-exclamation-circle"></i> Neplaćene fakture</h6>
+                    {% for inv in unpaid_invoices %}
+                    <div class="inv-row">
+                        <span class="hub-badge {% if inv.status == 'OVERDUE' %}danger{% else %}warning{% endif %}">{{ inv.get_status_display }}</span>
+                        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ inv }}</span>
+                        <span class="inv-amount {% if inv.status == 'OVERDUE' %}inv-overdue{% else %}inv-sent{% endif %}">{{ inv.total|floatformat:2 }} €</span>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">Sve plaćeno</div>
+                    {% endfor %}
+
+                    {% if pos_today_revenue %}
+                    <div style="margin-top:16px;padding:12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px">
+                        <div style="font-size:.7rem;color:var(--text-muted);text-transform:uppercase">POS promet danas</div>
+                        <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ pos_today_revenue|floatformat:2 }} €</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tab: Burza -->
+            <div id="tab-burza" class="hub-tab-content">
+                <div class="hub-section-body">
+                    {% for lead in burza_active %}
+                    <div class="hub-card">
+                        <div class="hub-card-title">{{ lead.title }}</div>
+                        <div class="hub-card-meta">
+                            <span class="hub-badge info">{{ lead.get_status_display }}</span>
+                            {{ lead.company|default:"—" }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">Nema aktivnih leadova</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Interventions -->
+        {% if interventions %}
+        <div class="hub-section" style="margin-top:16px">
+            <div class="hub-section-header">
+                <div class="hub-section-title"><i class="fas fa-ambulance"></i> Hitne intervencije</div>
+                <span class="hub-badge danger">{{ interventions|length }}</span>
+            </div>
+            <div class="hub-section-body">
+                {% for i in interventions %}
+                <div class="hub-card">
+                    <div class="hub-card-title">{{ i.title }}</div>
+                    <div class="hub-card-meta">
+                        <span class="hub-badge {% if i.status == 'ZAPRIMLJENO' %}danger{% elif i.status == 'U_TIJEKU' %}warning{% else %}info{% endif %}">{{ i.get_status_display }}</span>
+                        {{ i.assigned_to|default:"Neraspoređeno" }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <!-- Activity Timeline -->
+        <div class="hub-section">
+            <div class="hub-section-header">
+                <div class="hub-section-title"><i class="fas fa-stream"></i> Aktivnost</div>
+                <span style="font-size:.68rem;color:var(--text-muted)">Zadnjih 20</span>
+            </div>
+            <div class="hub-section-body" style="max-height:450px;overflow-y:auto">
+                {% for a in recent_activity %}
+                <div class="hub-timeline-item">
+                    <div class="hub-tl-icon {% if a.action == 'status_change' %}gold{% elif a.action == 'public_milestone' %}green{% else %}{% endif %}">
+                        <i class="fas {% if a.action == 'status_change' %}fa-exchange-alt{% elif a.action == 'public_milestone' %}fa-flag{% else %}fa-circle{% endif %}"></i>
+                    </div>
+                    <div class="hub-tl-text">
+                        <strong>{{ a.action }}</strong><br>
+                        <span style="font-size:.75rem">{{ a.old_value }} → {{ a.new_value }}</span>
+                        {% if a.note %}<br><span style="font-size:.72rem;color:var(--text-muted)">{{ a.note|truncatechars:60 }}</span>{% endif %}
+                    </div>
+                    <div class="hub-tl-time">{{ a.created_at|timesince }} ago</div>
+                </div>
+                {% empty %}
+                <div class="empty-state">Nema aktivnosti</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="hub-section" style="margin-top:16px">
+            <div class="hub-section-header">
+                <div class="hub-section-title"><i class="fas fa-bolt"></i> Brze akcije</div>
+            </div>
+            <div class="hub-actions">
+                <a href="{% url 'work_orders:create' %}" class="hub-action-btn"><i class="fas fa-wrench"></i> Novi WO</a>
+                <a href="{% url 'pos:terminal' %}" class="hub-action-btn"><i class="fas fa-cash-register"></i> POS</a>
+                <a href="/invoicing/canvas/" class="hub-action-btn"><i class="fas fa-file-invoice"></i> Novi račun</a>
+                <a href="{% url 'borg_ops:operations_dashboard' %}" class="hub-action-btn"><i class="fas fa-chart-bar"></i> Ops Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Tab switching
+function switchTab(el, tabId) {
+    document.querySelectorAll('.hub-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.hub-tab-content').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+// Auto-refresh countdown
+let countdown = 60;
+const timer = setInterval(() => {
+    countdown--;
+    const el = document.getElementById('refresh-countdown');
+    if (el) el.textContent = countdown;
+    if (countdown <= 0) { clearInterval(timer); location.reload(); }
+}, 1000);
+</script>
+{% endblock %}

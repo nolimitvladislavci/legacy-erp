@@ -484,3 +484,150 @@ def public_trace_api(request, qr_token):
         'public_records': public_activities,
         'note': 'Full QR traceability implementira se u H2.2',
     })
+
+
+@login_required
+def borg_hub(request):
+    """
+    BORG Hub — Cross-module command center.
+    Jedan prikaz za sve module u real-time.
+    """
+    from core.company_utils import get_user_company
+    from django.core.cache import cache
+    from datetime import timedelta
+    from django.db.models import Sum, Count, Q
+
+    company = get_user_company(request)
+    now = timezone.now()
+    today = now.date()
+    CACHE_TTL = 45
+
+    # ── WORK ORDERS ──
+    work_orders = cache.get(f'borg_hub_wo_{company.pk}')
+    wo_stats = cache.get(f'borg_hub_wo_stats_{company.pk}')
+    if work_orders is None:
+        try:
+            from work_orders.models import WorkOrder
+            wo_qs = WorkOrder.objects.filter(company=company)
+            work_orders = {
+                'draft':       list(wo_qs.filter(status='draft').select_related('client').order_by('-created_at')[:10]),
+                'in_progress': list(wo_qs.filter(status='in_progress').select_related('client').order_by('-created_at')[:10]),
+                'completed':   list(wo_qs.filter(status='completed', date=today).select_related('client')[:5]),
+            }
+            wo_stats = {
+                'open': wo_qs.filter(status__in=['draft', 'in_progress']).count(),
+                'completed_today': wo_qs.filter(status='completed', date=today).count(),
+            }
+        except Exception:
+            work_orders = {}
+            wo_stats = {}
+        cache.set(f'borg_hub_wo_{company.pk}', work_orders, CACHE_TTL)
+        cache.set(f'borg_hub_wo_stats_{company.pk}', wo_stats, CACHE_TTL)
+
+    # ── RECENT ACTIVITY ──
+    try:
+        recent_activity = list(CardActivity.objects.select_related('user').order_by('-created_at')[:20])
+    except Exception:
+        recent_activity = []
+
+    # ── EXPERIENCES ──
+    upcoming_schedules = []
+    pending_bookings = []
+    exp_stats = {}
+    try:
+        from experiences.models import ExperienceBooking, ExperienceSchedule
+        upcoming_schedules = list(ExperienceSchedule.objects.filter(
+            experience__company=company,
+            date__gte=today,
+            date__lte=today + timedelta(days=7),
+            status='open',
+        ).select_related('experience').order_by('date', 'time_from')[:10])
+        pending_bookings = list(ExperienceBooking.objects.filter(
+            schedule__experience__company=company,
+            status='pending',
+        ).select_related('schedule__experience')[:10])
+        exp_stats = {
+            'upcoming': len(upcoming_schedules),
+            'pending_payment': len(pending_bookings),
+        }
+    except Exception:
+        pass
+
+    # ── BURZA ──
+    burza_active = []
+    try:
+        from burza.models import ProjectLead
+        burza_active = list(ProjectLead.objects.filter(
+            company=company,
+            status__in=['NOVI_UPIT', 'INTERNA_PROCJENA', 'NA_BURZI'],
+        ).order_by('-created_at')[:5])
+    except Exception:
+        pass
+
+    # ── FENIX SIGNALS ──
+    alerts = []
+    try:
+        from limit_connect_ai.models_signal import FenixSignal
+        alerts = list(FenixSignal.objects.filter(
+            status__in=['new', 'acknowledged'],
+        ).order_by('priority', '-created_at')[:5])
+    except Exception:
+        pass
+
+    # ── INVOICING ──
+    unpaid_invoices = []
+    overdue_count = 0
+    try:
+        from invoicing.models import Invoice
+        unpaid_invoices = list(Invoice.objects.filter(
+            company=company,
+            status__in=['SENT', 'OVERDUE'],
+        ).order_by('due_date')[:8])
+        overdue_count = Invoice.objects.filter(
+            company=company, status='OVERDUE',
+        ).count()
+    except Exception:
+        pass
+
+    # ── POS DANAS ──
+    pos_today_count = 0
+    pos_today_revenue = 0
+    try:
+        from pos.models import POSReceipt
+        pos_qs = POSReceipt.objects.filter(
+            company=company, created_at__date=today,
+        )
+        pos_today_count = pos_qs.count()
+        pos_today_revenue = pos_qs.aggregate(s=Sum('total'))['s'] or 0
+    except Exception:
+        pass
+
+    # ── INTERVENTIONS ──
+    interventions_active = []
+    try:
+        from interventions.models import HitnaIntervencija
+        interventions_active = list(HitnaIntervencija.objects.filter(
+            company=company,
+        ).exclude(
+            status__in=['RIJESENO', 'FAKTURIRANO'],
+        ).select_related('assigned_to').order_by('created_at')[:5])
+    except Exception:
+        pass
+
+    return render(request, 'borg_ops/hub.html', {
+        'work_orders': work_orders,
+        'wo_stats': wo_stats,
+        'recent_activity': recent_activity,
+        'upcoming_schedules': upcoming_schedules,
+        'pending_bookings': pending_bookings,
+        'exp_stats': exp_stats,
+        'burza_active': burza_active,
+        'alerts': alerts,
+        'unpaid_invoices': unpaid_invoices,
+        'overdue_count': overdue_count,
+        'pos_today_count': pos_today_count,
+        'pos_today_revenue': pos_today_revenue,
+        'interventions': interventions_active,
+        'now': now,
+        'today': today,
+    })

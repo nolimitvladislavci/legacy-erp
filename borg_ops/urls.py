@@ -11,4 +11,5 @@ urlpatterns = [
     path('dashboard/operations/', views.operations_dashboard, name='operations_dashboard'),
     path('api/worker/gps/', views.update_worker_gps, name='update_worker_gps'),
     path('trace/<str:qr_token>/', views.public_trace_api, name='public_trace'),
+    path('hub/', views.borg_hub, name='borg_hub'),
 ]
