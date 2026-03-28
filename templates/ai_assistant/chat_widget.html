@@ -1,6 +1,23 @@
+
+<script>
+// AI Chat — per-module context injection
+window._aiPageContext = (function(){
+  var p = window.location.pathname;
+  if (p.includes('/experiences/')) return 'Korisnik je u Experiences modulu (degustacije, radionice, ture). Modul ima BOM normative, check-in flow, no-show auto-račune.';
+  if (p.includes('/pos/')) return 'Korisnik je u POS modulu (blagajna). Karenca check blokira prodaju kontaminiranih proizvoda. Z-izvještaj zatvara smjenu.';
+  if (p.includes('/inventory/')) return 'Korisnik je u Skladištu. SplitAllocation dijeli zalihu između interne upotrebe i marketplace-a. Artikli mogu biti povezani s jatom (karenca).';
+  if (p.includes('/invoicing/')) return 'Korisnik je u Fakturiranju. Podržani tipovi: R (račun), A (avansni), S (storno), FA (B2B), OTP (otpremnica).';
+  if (p.includes('/dashboard/operations')) return 'Korisnik je u BORG Hub-u — operativnom centru koji agregira SLA kršenja, intervencije, naloge, goste, zalihe i financije.';
+  if (p.includes('/udruge/')) return 'Korisnik je u Udruge modulu. Podmoduli: članovi, članarine, donacije, golubar, perad/flock, dogadjaji, kampanje.';
+  if (p.includes('/marketplace/')) return 'Korisnik je na OPG Tržnici. Proizvodi imaju auto-expiry, geofencing za kvarljivu robu, LOT slijedivost.';
+  if (p.includes('/work-orders/')) return 'Korisnik je u Radnim nalozima. Kanban ploča s drag-and-drop. SLA timer prati trajanje po statusu.';
+  if (p.includes('/recall/')) return 'Korisnik je u HACCP Recall modulu — povlačenje proizvoda s obrnutom slijedivošću.';
+  return 'Korisnik je u LIMIT Connect ERP sustavu.';
+})();
+</script>
 {% if request.user.is_authenticated %}
 <style>
-    #aiWidgetBtn { display:none !important; 
+    #aiWidgetBtn { /* display:none removed — AI chat active */ 
         position:fixed; top:80px; right:20px; z-index:9000; cursor:grab; touch-action:none;
         width:52px; height:52px; border-radius:50%;
         background:linear-gradient(135deg,#c9a84c,#a8893d); color:#0a0a0a;
@@ -240,7 +257,7 @@ Napišite pitanje u polje ili koristite gumbe:\n\n\U0001f4f7 \u2014 slikajte dok
         fetch('/ai/api/chat/', {
             method:'POST',
             headers:{'Content-Type':'application/json','X-CSRFToken':getCsrf()},
-            body:JSON.stringify({message:text, conversation_id:wConvId, module_context:ctx})
+            body:JSON.stringify({context:window._aiPageContext,message:text, conversation_id:wConvId, module_context:ctx})
         })
         .then(function(r){return r.json();})
         .then(function(data){

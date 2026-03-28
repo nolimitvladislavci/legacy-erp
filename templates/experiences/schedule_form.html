@@ -22,7 +22,20 @@
 .severity-warning{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b44}
 .severity-recall{background:#ef444422;color:#ef4444;border:1px solid #ef444444}
 .severity-critical{background:#dc262622;color:#dc2626;border:1px solid #dc262644}
-</style>{% endblock %}
+</style>
+@media(max-width:768px){
+  .exp-container{padding:0 .5rem}
+  .exp-stats{grid-template-columns:repeat(3,1fr)!important;gap:.5rem}
+  .exp-stat{padding:.6rem}
+  .exp-stat-value{font-size:1.2rem}
+  .exp-card{padding:1rem}
+  .col-md-6,.col-lg-4{width:100%!important;flex:0 0 100%!important;max-width:100%!important}
+}
+@media(max-width:480px){
+  .exp-stats{grid-template-columns:repeat(2,1fr)!important}
+  .exp-btn-gold{width:100%;text-align:center;margin-top:.5rem}
+}
+{% endblock %}
 {% block content %}
 <div class="exp-container">
 <a href="{% url 'experiences:experience_detail' exp.pk %}" style="color:var(--text-dim);font-size:.85rem"><i class="fas fa-arrow-left me-1"></i>{{ exp.name }}</a>

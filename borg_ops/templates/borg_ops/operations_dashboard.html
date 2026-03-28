@@ -38,8 +38,18 @@
 @media(max-width:992px){
     .stats-row{grid-template-columns:repeat(4,1fr)!important}
 }
+@media(max-width:768px){
+    .stats-row{grid-template-columns:repeat(4,1fr)!important}
+    .ops-grid{gap:12px}
+    .ops-section-body{padding:10px 12px}
+}
 @media(max-width:576px){
     .stats-row{grid-template-columns:repeat(2,1fr)!important}
+    .ops-header{flex-direction:column;text-align:center}
+    .stat-mini .val{font-size:1.3rem}
+    .stat-mini .lbl{font-size:.55rem}
+    .sla-alert{flex-wrap:wrap}
+    .sla-model{min-width:auto}
 }
 </style>
 {% endblock %}
