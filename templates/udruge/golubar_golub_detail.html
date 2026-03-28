@@ -1,7 +1,10 @@
 {% extends "base.html" %}
-{% block title %}{{ golub.prsten_broj }} — {{ golub.naziv|default:"Golub" }}{% endblock %}
+{% block title %}{{ golub.prsten_broj }} — {{ golub.naziv|default:"Golub" }}{% include "includes/_bridge_publish_modal.html" %}
+{% endblock %}
 {% block extra_css %}
 <style>
+/* Theme support */
+:root { --bg-card: var(--surface, #181a1d); --text-secondary: var(--text-dim, #94a3b8); --text-muted: var(--muted, #4a5060); --table-header-bg: var(--surface2, #1e293b); }
 .gdet-container { max-width: 1100px; margin: 0 auto; }
 
 /* ═══ HERO ═══ */
@@ -236,6 +239,7 @@
   .gdet-perf { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
+{% include "includes/_bridge_publish_modal.html" %}
 {% endblock %}
 {% block content %}
 <div class="gdet-container">
@@ -306,6 +310,11 @@
       {% if golub.genetics_hash %} | SHA-256: <code style="font-size:.65rem;color:#c9a84c">{{ golub.genetics_hash|truncatechars:24 }}</code>{% endif %}
     </div>
     {% if golub.sealed_reason %}<div style="font-size:.78rem;color:var(--text-secondary);margin-top:2px">{{ golub.sealed_reason }}</div>{% endif %}
+  </div>
+  <div style="margin-left:auto;flex-shrink:0">
+    <button type="button" class="btn btn-sm" style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.3);color:#c9a84c;font-weight:700;border-radius:10px;padding:.5rem 1.25rem;font-size:.8rem" onclick="openBridgePublish({model:'Golub',id:{{ golub.pk }},name:'{{ golub.prsten_broj|escapejs }}',price:'',qty:'1',unit:'kom'})">
+      <i class="fas fa-gavel me-1"></i>Ponudi na aukciji
+    </button>
   </div>
 </div>
 {% else %}
@@ -545,4 +554,5 @@
 </div>
 
 </div>
+{% include "includes/_bridge_publish_modal.html" %}
 {% endblock %}

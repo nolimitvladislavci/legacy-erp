@@ -1,0 +1,108 @@
+<!-- Bridge Publish Modal — "Ponudi na burzi" -->
+<div class="modal fade" id="bridgePublishModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
+    <div class="modal-content" style="background:var(--surface);border:1px solid var(--gold-border);border-radius:16px">
+      <form method="post" action="{% url 'udruge:bridge_publish' %}" id="bridgePublishForm">
+        {% csrf_token %}
+        <input type="hidden" name="source_model" id="bp_source_model">
+        <input type="hidden" name="source_id" id="bp_source_id">
+
+        <div style="padding:1.5rem 1.5rem 0;border-bottom:1px solid var(--border)">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div style="width:40px;height:40px;background:var(--gold-dim);border-radius:10px;display:flex;align-items:center;justify-content:center">
+              <i class="fas fa-store" style="color:var(--gold);font-size:1rem"></i>
+            </div>
+            <div>
+              <h5 style="margin:0;font-size:1rem;font-weight:700;color:var(--text)">Ponudi na burzi</h5>
+              <small style="color:var(--text-dim)" id="bp_product_name"></small>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:1.25rem 1.5rem">
+          <div class="row g-3">
+            <div class="col-6">
+              <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Cijena</label>
+              <div class="input-group">
+                <input type="number" name="price" id="bp_price" step="0.01" min="0.01" required
+                  class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px 0 0 8px">
+                <span class="input-group-text" style="background:var(--surface2);border-color:var(--border);color:var(--text-dim);font-size:.82rem" id="bp_unit_label">EUR/kg</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Kolicina</label>
+              <div class="input-group">
+                <input type="number" name="qty" id="bp_qty" step="0.1" min="0.1" required
+                  class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px 0 0 8px">
+                <span class="input-group-text" style="background:var(--surface2);border-color:var(--border);color:var(--text-dim);font-size:.82rem" id="bp_qty_unit">kg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3" id="bp_opg_row">
+            <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">
+              OPG broj <span style="color:var(--red);font-size:.7rem">(obavezno za hranu)</span>
+            </label>
+            <input type="text" name="opg_number" id="bp_opg_number" placeholder="HR-OPG-12345"
+              class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+          </div>
+
+          <div class="mt-3" style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:.75rem">
+            <div style="font-size:.72rem;color:#3b82f6;font-weight:600;margin-bottom:.3rem">
+              <i class="fas fa-info-circle me-1"></i>Auto-istjece
+            </div>
+            <div style="font-size:.75rem;color:var(--text-dim)" id="bp_expiry_info">
+              Listing automatski istice prema tipu proizvoda.
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:0 1.5rem 1.25rem;display:flex;gap:.5rem;justify-content:flex-end">
+          <button type="button" class="btn btn-sm" data-bs-dismiss="modal"
+            style="border-radius:8px;padding:.5rem 1.25rem;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)">
+            Odustani
+          </button>
+          <button type="submit" class="btn btn-sm"
+            style="border-radius:8px;padding:.5rem 1.5rem;background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700">
+            <i class="fas fa-store me-1"></i>Objavi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function openBridgePublish(opts) {
+  document.getElementById('bp_source_model').value = opts.model || '';
+  document.getElementById('bp_source_id').value = opts.id || '';
+  document.getElementById('bp_product_name').textContent = opts.name || '';
+  document.getElementById('bp_price').value = opts.price || '';
+  document.getElementById('bp_qty').value = opts.qty || '';
+  document.getElementById('bp_unit_label').textContent = 'EUR/' + (opts.unit || 'kg');
+  document.getElementById('bp_qty_unit').textContent = opts.unit || 'kg';
+
+  var expiryMap = {
+    'EggRecord': '24 sata (kvarljivo)',
+    'BerbaLog': '48 sati (kvarljivo)',
+    'MedProizvodnja': '7 dana',
+    'RakijaProizvodnja': '7 dana',
+    'Golub': '30 dana (aukcija)',
+  };
+  document.getElementById('bp_expiry_info').textContent =
+    expiryMap[opts.model] || '7 dana (standardno)';
+
+  var foodModels = ['EggRecord', 'BerbaLog', 'MedProizvodnja', 'RakijaProizvodnja'];
+  var opgRow = document.getElementById('bp_opg_row');
+  var opgInput = document.getElementById('bp_opg_number');
+  if (foodModels.indexOf(opts.model) >= 0) {
+    opgRow.style.display = 'block';
+    opgInput.required = true;
+  } else {
+    opgRow.style.display = 'none';
+    opgInput.required = false;
+  }
+
+  new bootstrap.Modal(document.getElementById('bridgePublishModal')).show();
+}
+</script>

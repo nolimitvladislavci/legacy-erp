@@ -57,6 +57,8 @@ if not DEBUG:
 
 # ── Apps ──────────────────────────────────────────────────────
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
     "core",
     "premium_booking",
     "notifications",
@@ -113,6 +115,7 @@ INSTALLED_APPS = [
     "delivery",
     "traceability",
     "gastro_menu",  # GHOST: 0 data, traceability FK
+    "experiences",
     "payments",
     "eracun",
     "helpdesk",
@@ -132,6 +135,19 @@ INSTALLED_APPS = [
     "limit_connect_ai",
     "tax_wizard",
 ]
+
+# ── Django Channels (WebSocket) ───────────────────────────────────────
+ASGI_APPLICATION = 'core.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+            'capacity': 1500,
+            'expiry': 60,
+        },
+    },
+}
 
 MIDDLEWARE = [
     "core.middleware.GracefulErrorMiddleware",
@@ -579,6 +595,43 @@ CELERY_BEAT_SCHEDULE = {
     "rental-gdpr-cleanup-docs": {
         "task": "rental.tasks.gdpr_cleanup_guest_docs",
         "schedule": crontab(hour=4, minute=0),
+    },
+
+    # ── Marketplace Ghost Inventory ──
+    # ── Agro-Turizam 360 ──
+    "experience-reminders": {
+        "task": "experiences.tasks.send_experience_reminders",
+        "schedule": 21600,  # svakih 6 sati
+    },
+    "experience-no-shows": {
+        "task": "experiences.tasks.mark_no_shows",
+        "schedule": crontab(hour=22, minute=0),
+    },
+    "recall-send-notifications": {
+        "task": "experiences.tasks.send_recall_notifications",
+        "schedule": 300,  # svakih 5 min (recall je hitan)
+    },
+    "experience-inventory-depletion": {
+        "task": "experiences.tasks.inventory_depletion_check",
+        "schedule": 21600,  # svakih 6 sati
+    },
+    "marketplace-ghost-cleanup": {
+        "task": "marketplace.tasks.ghost_inventory_cleanup",
+        "schedule": 21600,  # svakih 6 sati
+    },
+    "marketplace-expiry-reminders": {
+        "task": "marketplace.tasks.send_expiry_reminders",
+        "schedule": 21600,  # svakih 6 sati
+    },
+    # ── Auction finalization ──
+    "marketplace-auction-finalize": {
+        "task": "marketplace.tasks.finalize_ended_auctions",
+        "schedule": 300,  # svakih 5 minuta
+    },
+    # ── Gastro Bridge (Last Call) ──
+    "marketplace-gastro-bridge-check": {
+        "task": "marketplace.tasks.expiry_gastro_bridge_check",
+        "schedule": 7200,  # svakih 2 sata
     },
 
 

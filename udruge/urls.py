@@ -207,4 +207,18 @@ urlpatterns = [
     path('golubar/utrke/nova/', views.utrka_create, name='utrka_create'),
     path('golubar/utrke/<int:pk>/', views.utrka_detail, name='utrka_detail'),
     path('golubar/utrke/<int:utrka_pk>/rezultat/', views.rezultat_create, name='rezultat_create'),
+
+    # ═══════════════════════════════════════════════════════════════════
+    # PERAD — JATA (Flock)
+    # ═══════════════════════════════════════════════════════════════════
+    path('perad/', views.flock_list, name='flock_list'),
+    path('perad/novo/', views.flock_create, name='flock_create'),
+    path('perad/<int:pk>/', views.flock_detail, name='flock_detail'),
+    path('perad/<int:pk>/edit/', views.flock_edit, name='flock_edit'),
+    path('perad/<int:flock_pk>/jaja/', views.egg_record_create, name='egg_record_create'),
+    path('perad/<int:flock_pk>/zdravstveni/', views.flock_health_create, name='flock_health_create'),
+    path('perad/<int:flock_pk>/uginuce/', views.flock_mortality_create, name='flock_mortality_create'),
+
+    # Burza Bridge — "Ponudi na tržnicu"
+    path('bridge/publish/', views.bridge_publish, name='bridge_publish'),
 ]

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Unos jaja — {{ flock.naziv }}{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:0 auto">
+
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:flock_list' %}">Jata</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:flock_detail' flock.pk %}">{{ flock.naziv }}</a></li>
+    <li class="breadcrumb-item active">Unos jaja</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-3 mb-3">
+  <div style="width:52px;height:52px;border-radius:14px;background:rgba(245,158,11,.1);display:flex;align-items:center;justify-content:center;font-size:1.8rem">&#x1F95A;</div>
+  <div>
+    <h4 style="font-weight:800;margin:0">Unos jaja</h4>
+    <small style="color:var(--text-dim)">{{ flock.naziv }} | {{ flock.aktivnih_komada }} kom</small>
+  </div>
+</div>
+
+<form method="post" id="egg-form">
+{% csrf_token %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem">
+
+  <!-- 1-TAP: Datum + Broj jaja -->
+  <div class="row g-3 mb-3">
+    <div class="col-6">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Datum *</label>
+      <input type="date" name="datum" id="datum" required class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px;font-size:1rem;padding:.6rem" value="">
+    </div>
+    <div class="col-6">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Broj jaja *</label>
+      <input type="number" name="broj_jaja" id="broj_jaja" required min="0" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px;font-size:1.2rem;font-weight:800;padding:.6rem;text-align:center" placeholder="0" autofocus>
+    </div>
+  </div>
+
+  <!-- Brzi unos: preset gumbi -->
+  <div class="d-flex flex-wrap gap-2 mb-3" id="quick-btns">
+    {% for n in "5,10,15,20,25,30"|make_list %}{% endfor %}
+    <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:700;min-width:44px" onclick="document.getElementById('broj_jaja').value=5">5</button>
+    <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:700;min-width:44px" onclick="document.getElementById('broj_jaja').value=10">10</button>
+    <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:700;min-width:44px" onclick="document.getElementById('broj_jaja').value=15">15</button>
+    <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:700;min-width:44px" onclick="document.getElementById('broj_jaja').value=20">20</button>
+    <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:700;min-width:44px" onclick="document.getElementById('broj_jaja').value=25">25</button>
+    <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:700;min-width:44px" onclick="document.getElementById('broj_jaja').value=30">30</button>
+  </div>
+
+  <hr style="border-color:var(--border)">
+
+  <!-- Opcional: polomljena, prodana -->
+  <div class="row g-3 mb-3">
+    <div class="col-4">
+      <label style="font-size:.72rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Polomljena</label>
+      <input type="number" name="broken" value="0" min="0" class="form-control form-control-sm" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+    </div>
+    <div class="col-4">
+      <label style="font-size:.72rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Prodano</label>
+      <input type="number" name="sold" value="0" min="0" class="form-control form-control-sm" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+    </div>
+    <div class="col-4">
+      <label style="font-size:.72rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Cijena/kom</label>
+      <input type="number" name="cijena_eur" step="0.01" min="0" class="form-control form-control-sm" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="EUR">
+    </div>
+  </div>
+
+  <div class="form-check mb-3">
+    <input type="checkbox" name="za_prodaju" id="za_prodaju" class="form-check-input">
+    <label for="za_prodaju" class="form-check-label" style="font-size:.82rem;font-weight:600;color:var(--text)">
+      <i class="fas fa-store me-1" style="color:var(--gold)"></i>Oznaci za burzu
+    </label>
+    <div style="font-size:.68rem;color:var(--text-dim);margin-top:2px">Omogucava gumb "Ponudi na burzi" na detaljnoj stranici</div>
+  </div>
+
+  <textarea name="notes" rows="2" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px;font-size:.82rem" placeholder="Napomena (opcionalno)"></textarea>
+</div>
+
+<div class="d-flex justify-content-between mt-3 mb-4">
+  <a href="{% url 'udruge:flock_detail' flock.pk %}" class="btn btn-outline-secondary" style="border-radius:8px"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
+  <button type="submit" class="btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.6rem 2rem;font-size:.95rem">
+    <i class="fas fa-egg me-1"></i>Spremi
+  </button>
+</div>
+</form>
+</div>
+
+<script>
+// Auto-set today's date
+(function(){
+  var d = new Date();
+  var yyyy = d.getFullYear();
+  var mm = ('0'+(d.getMonth()+1)).slice(-2);
+  var dd = ('0'+d.getDate()).slice(-2);
+  document.getElementById('datum').value = yyyy+'-'+mm+'-'+dd;
+})();
+</script>
+{% endblock %}

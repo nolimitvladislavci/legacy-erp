@@ -29,6 +29,7 @@
       <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Litara</th>
       <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Boca</th>
       <th style="text-align:left;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Godina</th>
+      <th style="text-align:center;padding:.5rem .6rem;font-size:.72rem;color:var(--text-muted);border-bottom:1px solid var(--border)">Burza</th>
     </tr></thead>
     <tbody>
       {% for p in object_list %}
@@ -39,11 +40,20 @@
         <td style="padding:.5rem .6rem;font-size:.85rem;font-weight:700;color:var(--gold)" data-label="Litara">{{ p.litara_na_zalihi }}L</td>
         <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Boca">{{ p.broj_boca|default:"-" }}</td>
         <td style="padding:.5rem .6rem;font-size:.82rem" data-label="Godina">{{ p.godina|default:"-" }}</td>
+        <td style="padding:.5rem .6rem;text-align:center" data-label="Burza">
+          <button type="button" class="btn btn-sm"
+            style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;padding:3px 10px;font-size:.72rem;font-weight:600"
+            onclick="openBridgePublish({model:'RakijaProizvodnja',id:{{ p.pk }},name:'{{ p.naziv|escapejs }} {{ p.godina|default:"" }}',price:'',qty:'{{ p.litara_na_zalihi }}',unit:'l'})">
+            <i class="fas fa-store me-1"></i>Ponudi
+          </button>
+        </td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema proizvoda</td></tr>
+      <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Nema proizvoda</td></tr>
       {% endfor %}
     </tbody>
   </table></div></div>
 </div>
+
+{% include "includes/_bridge_publish_modal.html" %}
 {% endblock %}

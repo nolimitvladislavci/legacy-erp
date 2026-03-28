@@ -1,0 +1,37 @@
+{# Reusable review stars component.
+   Usage: {% include "includes/_review_stars.html" with rating=4.5 count=23 size="sm" %}
+   Params:
+     rating — Decimal/float 0-5 (required)
+     count  — number of reviews (optional, shows "(23)")
+     size   — "sm" (default), "md", "lg"
+     link   — URL to reviews page (optional, wraps in <a>)
+     gold   — use gold color instead of yellow (optional, any truthy value)
+#}
+{% with star_color=gold|yesno:"#c9a84c,#f59e0b" font_size=size|default:"sm" %}
+<span class="review-stars review-stars-{{ font_size }}" style="display:inline-flex;align-items:center;gap:.25rem;{% if font_size == 'lg' %}font-size:1.1rem{% elif font_size == 'md' %}font-size:.9rem{% else %}font-size:.75rem{% endif %}">
+  {% if link %}<a href="{{ link }}" style="text-decoration:none;display:inline-flex;align-items:center;gap:.25rem">{% endif %}
+
+  {# Full stars #}
+  {% with full_stars=rating|floatformat:"0" %}
+    {% for i in "12345" %}
+      {% if forloop.counter <= full_stars|add:"0" %}
+        <i class="fas fa-star" style="color:{{ star_color }}"></i>
+      {% elif forloop.counter == full_stars|add:"1" and rating|floatformat:"1" != full_stars|add:".0" %}
+        <i class="fas fa-star-half-alt" style="color:{{ star_color }}"></i>
+      {% else %}
+        <i class="far fa-star" style="color:{{ star_color }};opacity:.3"></i>
+      {% endif %}
+    {% endfor %}
+  {% endwith %}
+
+  {# Rating number #}
+  <span style="font-weight:700;color:var(--text);margin-left:2px">{{ rating|floatformat:"1" }}</span>
+
+  {# Count #}
+  {% if count %}
+  <span style="color:var(--text-dim);font-weight:400">({{ count }})</span>
+  {% endif %}
+
+  {% if link %}</a>{% endif %}
+</span>
+{% endwith %}

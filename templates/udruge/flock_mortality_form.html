@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Uginuce — {{ flock.naziv }}{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:0 auto">
+
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:flock_list' %}">Jata</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'udruge:flock_detail' flock.pk %}">{{ flock.naziv }}</a></li>
+    <li class="breadcrumb-item active">Uginuce</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-3 mb-3">
+  <div style="width:48px;height:48px;border-radius:12px;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center">
+    <i class="fas fa-skull-crossbones" style="font-size:1.2rem;color:#ef4444"></i>
+  </div>
+  <div>
+    <h4 style="font-weight:800;margin:0">Zapis uginuca</h4>
+    <small style="color:var(--text-dim)">{{ flock.naziv }} | {{ flock.aktivnih_komada }} aktivnih</small>
+  </div>
+</div>
+
+<form method="post">
+{% csrf_token %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem">
+  <div class="row g-3 mb-3">
+    <div class="col-6">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Datum *</label>
+      <input type="date" name="datum" required class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+    </div>
+    <div class="col-6">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Broj uginulih *</label>
+      <input type="number" name="broj_uginulih" required min="1" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px;font-size:1.1rem;font-weight:700;text-align:center" placeholder="0">
+    </div>
+  </div>
+  <div class="mb-3">
+    <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Razlog / uzrok</label>
+    <input type="text" name="razlog" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="Npr. predator, bolest, vrucina...">
+  </div>
+  <div>
+    <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Napomena</label>
+    <textarea name="napomena" rows="2" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px"></textarea>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between mt-3 mb-4">
+  <a href="{% url 'udruge:flock_detail' flock.pk %}" class="btn btn-outline-secondary" style="border-radius:8px"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
+  <button type="submit" class="btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-weight:700;border-radius:10px;padding:.6rem 2rem">
+    <i class="fas fa-skull-crossbones me-1"></i>Spremi
+  </button>
+</div>
+</form>
+</div>
+{% endblock %}

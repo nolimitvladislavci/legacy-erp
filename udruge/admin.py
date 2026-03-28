@@ -86,3 +86,49 @@ class UtrkaAdmin(admin.ModelAdmin):
 @admin.register(RezultatUtrke)
 class RezultatUtrkeAdmin(admin.ModelAdmin):
     list_display = ['utrka', 'golub', 'placiranje', 'brzina_mpm', 'bodovi']
+
+
+# ── Perad (Flock) modul ──
+from udruge.models import Flock, EggRecord, FlockHealthRecord, FlockMortality
+
+
+class EggRecordInline(admin.TabularInline):
+    model = EggRecord
+    extra = 0
+
+
+class FlockHealthRecordInline(admin.TabularInline):
+    model = FlockHealthRecord
+    extra = 0
+
+
+class FlockMortalityInline(admin.TabularInline):
+    model = FlockMortality
+    extra = 0
+
+
+@admin.register(Flock)
+class FlockAdmin(admin.ModelAdmin):
+    list_display = ['naziv', 'vrsta', 'pasmina', 'broj_komada', 'tip_uzgoja', 'aktivan', 'company']
+    list_filter = ['vrsta', 'tip_uzgoja', 'aktivan', 'company']
+    search_fields = ['naziv', 'pasmina', 'objekt']
+    inlines = [EggRecordInline, FlockHealthRecordInline, FlockMortalityInline]
+
+
+@admin.register(EggRecord)
+class EggRecordAdmin(admin.ModelAdmin):
+    list_display = ['flock', 'datum', 'broj_jaja', 'broken', 'sold', 'za_prodaju']
+    list_filter = ['za_prodaju', 'datum']
+    date_hierarchy = 'datum'
+
+
+@admin.register(FlockHealthRecord)
+class FlockHealthRecordAdmin(admin.ModelAdmin):
+    list_display = ['flock', 'vrsta_tretmana', 'datum', 'lijek', 'veterinar', 'karenca_dana']
+    list_filter = ['vrsta_tretmana']
+
+
+@admin.register(FlockMortality)
+class FlockMortalityAdmin(admin.ModelAdmin):
+    list_display = ['flock', 'datum', 'broj_uginulih', 'razlog']
+    date_hierarchy = 'datum'

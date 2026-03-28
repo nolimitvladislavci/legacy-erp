@@ -3387,7 +3387,7 @@ def golubinjak_create(request):
     from .models import Golubinjak
     from decimal import Decimal
     if request.method == 'POST':
-        Golubinjak.objects.create(
+        g = Golubinjak.objects.create(
             company=company,
             naziv=request.POST.get('naziv', ''),
             adresa=request.POST.get('adresa', ''),
@@ -3396,9 +3396,10 @@ def golubinjak_create(request):
             eu_reg_broj=request.POST.get('eu_reg_broj', ''),
             kapacitet=int(request.POST.get('kapacitet') or 0),
             napomena=request.POST.get('napomena', ''),
+            aktivan='aktivan' in request.POST,
         )
         messages.success(request, 'Golubinjak kreiran.')
-        return redirect('udruge:golubinjak_list')
+        return redirect('udruge:golubinjak_detail', pk=g.pk)
     return render(request, 'udruge/golubar_golubinjak_form.html', {})
 
 
@@ -3708,3 +3709,275 @@ def golub_seal(request, pk):
     golub.zapecati()
     messages.success(request, 'Golub %s zapecacen. Hash: %s' % (golub.prsten_broj, golub.genetics_hash[:16]))
     return redirect('udruge:golub_detail', pk=golub.pk)
+
+
+
+# ═══════════════════════════════════════════════════════════════════
+# PERAD — JATA (Flock) CRUD
+# ═══════════════════════════════════════════════════════════════════
+
+@login_required
+def flock_list(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Nema aktivne tvrtke.')
+        return redirect('dashboard')
+
+    qs = Flock.objects.filter(company=company)
+
+    # Search
+    q = request.GET.get('q', '')
+    if q:
+        qs = qs.filter(
+            models.Q(naziv__icontains=q) |
+            models.Q(pasmina__icontains=q) |
+            models.Q(objekt__icontains=q)
+        )
+
+    # Filter po vrsti
+    vrsta = request.GET.get('vrsta', '')
+    if vrsta:
+        qs = qs.filter(vrsta=vrsta)
+
+    # Statistike
+    stats = {
+        'ukupno_jata': qs.count(),
+        'ukupno_aktivnih': qs.filter(aktivan=True).count(),
+        'ukupno_komada': sum(f.aktivnih_komada for f in qs.filter(aktivan=True)),
+    }
+
+    paginator = Paginator(qs, 25)
+    page = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'udruge/flock_list.html', {
+        'page': page, 'q': q, 'vrsta': vrsta, 'stats': stats,
+        'vrsta_choices': Flock.VRSTA_CHOICES,
+    })
+
+
+@login_required
+def flock_create(request):
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Nema aktivne tvrtke.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        flock = Flock(
+            company=company,
+            naziv=request.POST.get('naziv', ''),
+            vrsta=request.POST.get('vrsta', 'kokos'),
+            pasmina=request.POST.get('pasmina', ''),
+            broj_komada=int(request.POST.get('broj_komada', 0)),
+            datum_nabave=request.POST.get('datum_nabave'),
+            tip_uzgoja=request.POST.get('tip_uzgoja', 'slobodni'),
+            objekt=request.POST.get('objekt', ''),
+            napomena=request.POST.get('napomena', ''),
+        )
+        flock.save()
+        messages.success(request, f'Jato "{flock.naziv}" kreirano.')
+        return redirect('udruge:flock_detail', pk=flock.pk)
+
+    return render(request, 'udruge/flock_form.html', {
+        'vrsta_choices': Flock.VRSTA_CHOICES,
+        'tip_uzgoja_choices': Flock.TIP_UZGOJA_CHOICES,
+    })
+
+
+@login_required
+def flock_detail(request, pk):
+    company = get_user_company(request)
+    flock = get_object_or_404(Flock, pk=pk, company=company)
+
+    egg_records = flock.egg_records.all()[:30]
+    health_records = flock.zdravstveni_zapisi.all()[:20]
+    mortalities = flock.mortaliteti.all()[:20]
+
+    # Statistika jaja (zadnjih 30 dana)
+    from datetime import timedelta
+    thirty_days_ago = timezone.now().date() - timedelta(days=30)
+    egg_stats = flock.egg_records.filter(datum__gte=thirty_days_ago).aggregate(
+        ukupno_jaja=models.Sum('broj_jaja'),
+        ukupno_polomljenih=models.Sum('broken'),
+        ukupno_prodanih=models.Sum('sold'),
+    )
+
+    return render(request, 'udruge/flock_detail.html', {
+        'flock': flock,
+        'egg_records': egg_records,
+        'health_records': health_records,
+        'mortalities': mortalities,
+        'egg_stats': egg_stats,
+    })
+
+
+@login_required
+def flock_edit(request, pk):
+    company = get_user_company(request)
+    flock = get_object_or_404(Flock, pk=pk, company=company)
+
+    if request.method == 'POST':
+        flock.naziv = request.POST.get('naziv', flock.naziv)
+        flock.vrsta = request.POST.get('vrsta', flock.vrsta)
+        flock.pasmina = request.POST.get('pasmina', flock.pasmina)
+        flock.broj_komada = int(request.POST.get('broj_komada', flock.broj_komada))
+        flock.tip_uzgoja = request.POST.get('tip_uzgoja', flock.tip_uzgoja)
+        flock.objekt = request.POST.get('objekt', flock.objekt)
+        flock.napomena = request.POST.get('napomena', flock.napomena)
+        flock.aktivan = request.POST.get('aktivan') == 'on'
+        flock.save()
+        messages.success(request, f'Jato "{flock.naziv}" ažurirano.')
+        return redirect('udruge:flock_detail', pk=flock.pk)
+
+    return render(request, 'udruge/flock_form.html', {
+        'flock': flock,
+        'vrsta_choices': Flock.VRSTA_CHOICES,
+        'tip_uzgoja_choices': Flock.TIP_UZGOJA_CHOICES,
+        'edit': True,
+    })
+
+
+@login_required
+def egg_record_create(request, flock_pk):
+    company = get_user_company(request)
+    flock = get_object_or_404(Flock, pk=flock_pk, company=company)
+
+    if request.method == 'POST':
+        record = EggRecord(
+            flock=flock,
+            datum=request.POST.get('datum'),
+            broj_jaja=int(request.POST.get('broj_jaja', 0)),
+            broken=int(request.POST.get('broken', 0)),
+            sold=int(request.POST.get('sold', 0)),
+            za_prodaju=request.POST.get('za_prodaju') == 'on',
+            cijena_eur=request.POST.get('cijena_eur') or None,
+            notes=request.POST.get('notes', ''),
+        )
+        record.save()
+        messages.success(request, f'{record.broj_jaja} jaja zapisano za {record.datum}.')
+        return redirect('udruge:flock_detail', pk=flock.pk)
+
+    return render(request, 'udruge/egg_record_form.html', {'flock': flock})
+
+
+@login_required
+def flock_health_create(request, flock_pk):
+    company = get_user_company(request)
+    flock = get_object_or_404(Flock, pk=flock_pk, company=company)
+
+    if request.method == 'POST':
+        record = FlockHealthRecord(
+            flock=flock,
+            vrsta_tretmana=request.POST.get('vrsta_tretmana', 'ostalo'),
+            datum=request.POST.get('datum'),
+            lijek=request.POST.get('lijek', ''),
+            doza=request.POST.get('doza', ''),
+            veterinar=request.POST.get('veterinar', ''),
+            karenca_dana=request.POST.get('karenca_dana') or None,
+            napomena=request.POST.get('napomena', ''),
+        )
+        record.save()
+
+        # Auto-pull: deaktiviraj marketplace oglase za jaja ovog jata ako ima karencu
+        if record.karenca_dana and record.karenca_aktivna:
+            try:
+                from marketplace.models import MarketplaceProduct
+                pulled = MarketplaceProduct.objects.filter(
+                    source_model='EggRecord',
+                    source_id__in=flock.egg_records.values_list('pk', flat=True),
+                    is_available=True,
+                ).update(is_available=False)
+                if pulled:
+                    messages.warning(
+                        request,
+                        f'KARENCA: {pulled} oglas(a) jaja automatski povucen(o) s trznice. '
+                        f'Karenca istice {record.datum + __import__("datetime").timedelta(days=record.karenca_dana):%d.%m.%Y}.'
+                    )
+            except Exception:
+                pass
+
+        messages.success(request, f'Zdravstveni zapis dodan za {flock.naziv}.')
+        return redirect('udruge:flock_detail', pk=flock.pk)
+
+    return render(request, 'udruge/flock_health_form.html', {
+        'flock': flock,
+        'vrsta_choices': FlockHealthRecord.VRSTA_TRETMANA,
+    })
+
+
+@login_required
+def flock_mortality_create(request, flock_pk):
+    company = get_user_company(request)
+    flock = get_object_or_404(Flock, pk=flock_pk, company=company)
+
+    if request.method == 'POST':
+        record = FlockMortality(
+            flock=flock,
+            datum=request.POST.get('datum'),
+            broj_uginulih=int(request.POST.get('broj_uginulih', 0)),
+            razlog=request.POST.get('razlog', ''),
+            napomena=request.POST.get('napomena', ''),
+        )
+        record.save()
+        messages.success(request, f'Uginuće: {record.broj_uginulih} zapisano.')
+        return redirect('udruge:flock_detail', pk=flock.pk)
+
+    return render(request, 'udruge/flock_mortality_form.html', {'flock': flock})
+
+
+@login_required
+def bridge_publish(request):
+    """Ponudi proizvod na tržnicu — univerzalni bridge endpoint."""
+    company = get_user_company(request)
+    if not company:
+        messages.error(request, 'Nema aktivne tvrtke.')
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        from marketplace.services.marketplace_bridge import publish_to_marketplace
+
+        source_model = request.POST.get('source_model', '')
+        source_id = request.POST.get('source_id', '')
+        price = request.POST.get('price', '0')
+        qty = request.POST.get('qty', '0')
+        opg_number = request.POST.get('opg_number', '')
+
+        # Karenca enforcement: blokada prodaje jaja pod aktivnom karencom
+        if source_model == 'EggRecord':
+            try:
+                egg = EggRecord.objects.select_related('flock').get(pk=int(source_id))
+                if egg.flock.has_active_karenca:
+                    karenca_end = egg.flock.karenca_end_date
+                    messages.error(
+                        request,
+                        'ZABRANJENO: Jato "%s" pod aktivnom karencom do %s. '
+                        'Prodaja jaja nije dozvoljena za vrijeme zdravstvenog tretmana.' % (
+                            egg.flock.naziv,
+                            karenca_end.strftime('%d.%m.%Y') if karenca_end else '?',
+                        )
+                    )
+                    return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
+            except EggRecord.DoesNotExist:
+                pass
+
+        # Validacija: OPG broj obavezan za hranu
+        food_models = {'EggRecord', 'BerbaLog', 'MedProizvodnja', 'RakijaProizvodnja'}
+        if source_model in food_models and not opg_number:
+            messages.error(request, 'OPG broj je obavezan za prehrambene proizvode (Zakon o OPG čl.12).')
+            return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
+
+        try:
+            product = publish_to_marketplace(
+                source_model=source_model,
+                source_id=int(source_id),
+                price=price,
+                qty=qty,
+                opg_number=opg_number,
+            )
+            messages.success(request, f'"{product.name}" objavljeno na tržnici! Ističe: {product.expires_at}.')
+        except Exception as e:
+            messages.error(request, f'Greška pri objavljivanju: {e}')
+
+        return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
+
+    return redirect('udruge:flock_list')

@@ -32,3 +32,5 @@ try:
     apply_vision_patch()
 except Exception:
     pass
+app.autodiscover_tasks(['marketplace'])
+app.autodiscover_tasks(['experiences'])

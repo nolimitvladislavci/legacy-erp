@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ flock.naziv }} — Jato{% endblock %}
+{% block extra_css %}
+<style>
+.fd-container { max-width: 1100px; margin: 0 auto; }
+.fd-hero { background: linear-gradient(135deg, #0f172a 0%, #1a1000 50%, #0f172a 100%); border: 1px solid var(--gold-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.fd-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: .75rem; margin-bottom: 1.5rem; }
+.fd-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: .75rem; text-align: center; }
+.fd-stat-val { font-size: 1.5rem; font-weight: 800; }
+.fd-stat-lbl { font-size: .68rem; font-weight: 600; text-transform: uppercase; color: var(--text-dim); margin-top: 2px; }
+.fd-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; }
+.fd-section-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.fd-section-title { font-size: .95rem; font-weight: 700; margin: 0; }
+.fd-table { width: 100%; border-collapse: collapse; }
+.fd-table thead th { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); padding: .6rem 1rem; border-bottom: 1px solid var(--border); }
+.fd-table tbody td { padding: .5rem 1rem; font-size: .85rem; border-bottom: 1px solid var(--border); }
+.fd-table tbody tr:last-child td { border-bottom: none; }
+.egg-chart-bar { height: 6px; border-radius: 3px; background: var(--gold); display: inline-block; vertical-align: middle; transition: width .3s; }
+@media(max-width:768px) { .fd-stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+{% endblock %}
+{% block content %}
+<div class="fd-container">
+
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:flock_list' %}">Jata peradi</a></li>
+    <li class="breadcrumb-item active">{{ flock.naziv }}</li>
+  </ol>
+</nav>
+
+<!-- Hero -->
+<div class="fd-hero">
+  <div class="d-flex gap-3 align-items-center flex-wrap">
+    <div style="width:60px;height:60px;border-radius:14px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0">
+      {% if flock.vrsta == 'kokos' %}&#x1F414;{% elif flock.vrsta == 'patka' %}&#x1F986;{% elif flock.vrsta == 'guska' %}&#x1FAB6;{% else %}&#x1F426;{% endif %}
+    </div>
+    <div style="flex:1;min-width:0">
+      <h2 style="font-size:1.4rem;font-weight:800;color:#fff;margin:0 0 .25rem">{{ flock.naziv }}</h2>
+      <div class="d-flex flex-wrap gap-2">
+        <span style="background:rgba(201,168,76,.1);border:1px solid var(--gold-border);color:var(--gold);padding:3px 10px;border-radius:8px;font-size:.72rem;font-weight:600">{{ flock.get_vrsta_display }}</span>
+        <span style="background:rgba(100,116,139,.1);color:#94a3b8;padding:3px 10px;border-radius:8px;font-size:.72rem;font-weight:600">{{ flock.get_tip_uzgoja_display }}</span>
+        {% if flock.pasmina %}<span style="background:rgba(100,116,139,.1);color:#94a3b8;padding:3px 10px;border-radius:8px;font-size:.72rem">{{ flock.pasmina }}</span>{% endif %}
+        {% if not flock.aktivan %}<span style="background:rgba(239,68,68,.1);color:#ef4444;padding:3px 10px;border-radius:8px;font-size:.72rem;font-weight:700">Neaktivno</span>{% endif %}
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'udruge:flock_edit' flock.pk %}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px"><i class="fas fa-pen me-1"></i>Uredi</a>
+    </div>
+  </div>
+</div>
+
+<!-- Karenca brana -->
+{% if flock.has_active_karenca %}
+<div style="background:rgba(239,68,68,.08);border:2px solid rgba(239,68,68,.3);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem">
+  <div style="width:44px;height:44px;background:rgba(239,68,68,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+    <i class="fas fa-ban" style="color:#ef4444;font-size:1.1rem"></i>
+  </div>
+  <div>
+    <div style="font-weight:700;color:#ef4444;font-size:.9rem">KARENCA AKTIVNA — Prodaja zabranjena</div>
+    <div style="font-size:.78rem;color:var(--text-dim)">
+      Jato pod aktivnim tretmanom. Jaja nisu za prodaju do <strong style="color:#ef4444">{{ flock.karenca_end_date|date:"d.m.Y" }}</strong>.
+      Gumb "Burza" je onemogucen. Svi aktivni oglasi su povuceni.
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Stats (30 dana) -->
+<div class="fd-stats">
+  <div class="fd-stat">
+    <div class="fd-stat-val" style="color:var(--gold)">{{ flock.aktivnih_komada }}</div>
+    <div class="fd-stat-lbl">Aktivnih</div>
+  </div>
+  <div class="fd-stat">
+    <div class="fd-stat-val" style="color:#f59e0b">{{ egg_stats.ukupno_jaja|default:0 }}</div>
+    <div class="fd-stat-lbl">Jaja (30d)</div>
+  </div>
+  <div class="fd-stat">
+    <div class="fd-stat-val" style="color:#ef4444">{{ egg_stats.ukupno_polomljenih|default:0 }}</div>
+    <div class="fd-stat-lbl">Polomljena</div>
+  </div>
+  <div class="fd-stat">
+    <div class="fd-stat-val" style="color:#22c55e">{{ egg_stats.ukupno_prodanih|default:0 }}</div>
+    <div class="fd-stat-lbl">Prodano</div>
+  </div>
+  <div class="fd-stat">
+    {% with rate=flock.aktivnih_komada %}
+    <div class="fd-stat-val">{% if rate > 0 and egg_stats.ukupno_jaja %}{% widthratio egg_stats.ukupno_jaja rate 100 %}{% else %}--{% endif %}</div>
+    {% endwith %}
+    <div class="fd-stat-lbl">% nesenja (30d)</div>
+  </div>
+</div>
+
+<!-- Dnevna jaja graf (zadnjih 14 dana) -->
+<div class="fd-section">
+  <div class="fd-section-header">
+    <h3 class="fd-section-title" style="color:#f59e0b"><i class="fas fa-egg me-2"></i>Nesenje jaja</h3>
+    <a href="{% url 'udruge:egg_record_create' flock.pk %}" class="btn btn-sm" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#0a0a0a;font-weight:700;border-radius:8px;padding:5px 14px;font-size:.78rem">
+      <i class="fas fa-plus me-1"></i>Unos jaja
+    </a>
+  </div>
+  {% if egg_records %}
+  <div style="padding:1rem 1.25rem">
+    <div class="d-flex align-items-end gap-1" style="height:80px">
+      {% for e in egg_records reversed %}
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+        <div style="font-size:.6rem;color:var(--text-dim);margin-bottom:2px">{{ e.broj_jaja }}</div>
+        <div style="width:100%;max-width:30px;background:var(--gold);border-radius:4px 4px 0 0;min-height:4px;height:{% widthratio e.broj_jaja flock.broj_komada 60 %}px"></div>
+        <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px">{{ e.datum|date:"d" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="fd-table">
+      <thead><tr>
+        <th>Datum</th><th>Jaja</th><th>Polomljena</th><th>Prodano</th><th>Za burzu</th><th></th>
+      </tr></thead>
+      <tbody>
+        {% for e in egg_records %}
+        <tr>
+          <td style="font-weight:600">{{ e.datum|date:"d.m.Y" }}</td>
+          <td><span style="font-weight:800;color:var(--gold)">{{ e.broj_jaja }}</span></td>
+          <td>{% if e.broken %}<span style="color:#ef4444">{{ e.broken }}</span>{% else %}-{% endif %}</td>
+          <td>{% if e.sold %}<span style="color:#22c55e">{{ e.sold }}</span>{% else %}-{% endif %}</td>
+          <td>{% if e.za_prodaju %}<i class="fas fa-check-circle" style="color:#22c55e"></i>{% else %}-{% endif %}</td>
+          <td style="text-align:right">
+            {% if e.za_prodaju %}
+              {% if flock.has_active_karenca %}
+              <button type="button" class="btn btn-sm" disabled
+                style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#ef4444;border-radius:6px;padding:2px 8px;font-size:.68rem;font-weight:600;cursor:not-allowed"
+                title="ZABRANJENO: Jato pod aktivnom karencom do {{ flock.karenca_end_date|date:'d.m.Y' }}">
+                <i class="fas fa-ban me-1"></i>Karenca
+              </button>
+              {% else %}
+              <button type="button" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:6px;padding:2px 8px;font-size:.68rem;font-weight:600" onclick="openBridgePublish({model:'EggRecord',id:{{ e.pk }},name:'Jaja {{ flock.get_vrsta_display|escapejs }} — {{ e.broj_jaja }} kom',price:'{{ e.cijena_eur|default:"" }}',qty:'{{ e.broj_jaja }}',unit:'kom'})">
+                <i class="fas fa-store me-1"></i>Burza
+              </button>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:3rem;color:var(--text-dim)">
+    <i class="fas fa-egg" style="font-size:2rem;opacity:.15;display:block;margin-bottom:.5rem"></i>
+    <div style="font-size:.85rem">Nema zapisa o nesenju</div>
+    <a href="{% url 'udruge:egg_record_create' flock.pk %}" class="btn btn-sm mt-2" style="background:var(--gold);color:#0a0a0a;font-weight:600;border-radius:8px">
+      <i class="fas fa-plus me-1"></i>Prvi unos
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Zdravstveni zapisi -->
+<div class="fd-section">
+  <div class="fd-section-header">
+    <h3 class="fd-section-title" style="color:#3b82f6"><i class="fas fa-heartbeat me-2"></i>Zdravstveni zapisi</h3>
+    <a href="{% url 'udruge:flock_health_create' flock.pk %}" class="btn btn-sm" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:600;border-radius:8px;padding:5px 14px;font-size:.78rem">
+      <i class="fas fa-plus me-1"></i>Novi tretman
+    </a>
+  </div>
+  {% if health_records %}
+  <div style="overflow-x:auto">
+    <table class="fd-table">
+      <thead><tr><th>Datum</th><th>Tretman</th><th>Lijek</th><th>Veterinar</th><th>Karenca</th></tr></thead>
+      <tbody>
+        {% for h in health_records %}
+        <tr>
+          <td style="font-weight:600">{{ h.datum|date:"d.m.Y" }}</td>
+          <td><span style="font-size:.78rem;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(59,130,246,.1);color:#3b82f6">{{ h.get_vrsta_tretmana_display }}</span></td>
+          <td style="font-size:.82rem">{{ h.lijek|default:"-" }}</td>
+          <td style="font-size:.82rem">{{ h.veterinar|default:"-" }}</td>
+          <td>
+            {% if h.karenca_dana %}
+              {% if h.karenca_aktivna %}<span style="color:#ef4444;font-weight:700;font-size:.78rem"><i class="fas fa-exclamation-triangle me-1"></i>{{ h.karenca_dana }}d</span>
+              {% else %}<span style="color:#22c55e;font-size:.78rem">Istekla</span>{% endif %}
+            {% else %}-{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:2.5rem;color:var(--text-dim)">
+    <i class="fas fa-heartbeat" style="font-size:1.5rem;opacity:.15;display:block;margin-bottom:.5rem"></i>
+    <div style="font-size:.85rem">Nema zdravstvenih zapisa</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Uginuca -->
+<div class="fd-section">
+  <div class="fd-section-header">
+    <h3 class="fd-section-title" style="color:#ef4444"><i class="fas fa-skull-crossbones me-2"></i>Uginuca</h3>
+    <a href="{% url 'udruge:flock_mortality_create' flock.pk %}" class="btn btn-sm" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;font-weight:600;border-radius:8px;padding:5px 14px;font-size:.78rem">
+      <i class="fas fa-plus me-1"></i>Zapis
+    </a>
+  </div>
+  {% if mortalities %}
+  <div style="overflow-x:auto">
+    <table class="fd-table">
+      <thead><tr><th>Datum</th><th>Broj</th><th>Razlog</th></tr></thead>
+      <tbody>
+        {% for m in mortalities %}
+        <tr>
+          <td style="font-weight:600">{{ m.datum|date:"d.m.Y" }}</td>
+          <td><span style="font-weight:800;color:#ef4444">{{ m.broj_uginulih }}</span></td>
+          <td style="font-size:.82rem">{{ m.razlog|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.85rem">Nema zabilježenih uginuća</div>
+  {% endif %}
+</div>
+
+</div>
+
+{% include "includes/_bridge_publish_modal.html" %}
+{% endblock %}

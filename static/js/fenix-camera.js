@@ -23,6 +23,11 @@
     format: 'image/jpeg',
   };
 
+  // Samsung browser detection — some Samsung Internet versions don't support
+  // capture attribute properly. Fallback: don't set capture, let user choose.
+  var isSamsung = /SamsungBrowser/i.test(navigator.userAgent || '');
+  var isSamsungGalaxy = /SM-/i.test(navigator.userAgent || '') && /Android/i.test(navigator.userAgent || '');
+
   function timestamp() {
     var d = new Date();
     return d.getFullYear() +
@@ -94,7 +99,13 @@
 
     var source = opts.source || 'any';
     if (source === 'camera') {
-      input.setAttribute('capture', 'environment');
+      // Samsung browser fallback: capture attribute causes black screen on some models
+      if (isSamsung || isSamsungGalaxy) {
+        // Don't set capture — let Samsung's native picker handle it
+        input.setAttribute('accept', 'image/*');
+      } else {
+        input.setAttribute('capture', 'environment');
+      }
     }
 
     input.onchange = function() {

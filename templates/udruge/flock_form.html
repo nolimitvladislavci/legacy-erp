@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if edit %}Uredi jato{% else %}Novo jato{% endif %}{% endblock %}
+{% block content %}
+<div style="max-width:640px;margin:0 auto">
+
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb" style="font-size:.78rem">
+    <li class="breadcrumb-item"><a href="{% url 'udruge:flock_list' %}">Jata peradi</a></li>
+    <li class="breadcrumb-item active">{% if edit %}Uredi{% else %}Novo jato{% endif %}</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-3 mb-3">
+  <div style="width:48px;height:48px;border-radius:12px;background:rgba(245,158,11,.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem">&#x1F414;</div>
+  <div>
+    <h4 style="font-weight:800;margin:0">{% if edit %}Uredi jato{% else %}Novo jato{% endif %}</h4>
+    {% if flock %}<small style="color:var(--text-dim)">{{ flock.naziv }}</small>{% endif %}
+  </div>
+</div>
+
+<form method="post">
+{% csrf_token %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+
+  <div style="padding:1.5rem;border-bottom:1px solid var(--border)">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;letter-spacing:.5px"><i class="fas fa-info-circle me-1"></i>Osnovni podaci</div>
+    <div class="mb-3">
+      <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Naziv jata *</label>
+      <input type="text" name="naziv" value="{{ flock.naziv|default:'' }}" required class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="Npr. Nesiljke A-1">
+    </div>
+    <div class="row g-3">
+      <div class="col-6">
+        <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Vrsta *</label>
+        <select name="vrsta" required class="form-select" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+          {% for code, label in vrsta_choices %}
+          <option value="{{ code }}" {% if flock.vrsta == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6">
+        <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Pasmina</label>
+        <input type="text" name="pasmina" value="{{ flock.pasmina|default:'' }}" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="Npr. Lohmann Brown">
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:1.5rem;border-bottom:1px solid var(--border)">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;letter-spacing:.5px"><i class="fas fa-hashtag me-1"></i>Kolicina i uzgoj</div>
+    <div class="row g-3">
+      <div class="col-4">
+        <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Broj komada *</label>
+        <input type="number" name="broj_komada" value="{{ flock.broj_komada|default:'' }}" required min="1" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+      </div>
+      <div class="col-4">
+        <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Datum nabave *</label>
+        <input type="date" name="datum_nabave" value="{{ flock.datum_nabave|date:'Y-m-d'|default:'' }}" required class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+      </div>
+      <div class="col-4">
+        <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Tip uzgoja</label>
+        <select name="tip_uzgoja" class="form-select" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+          {% for code, label in tip_uzgoja_choices %}
+          <option value="{{ code }}" {% if flock.tip_uzgoja == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:1.5rem">
+    <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Objekt / kokosinjac</label>
+    <input type="text" name="objekt" value="{{ flock.objekt|default:'' }}" class="form-control mb-3" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px" placeholder="Npr. Kokosinjac br. 2">
+    <label style="font-size:.78rem;font-weight:600;color:var(--text-dim);display:block;margin-bottom:.3rem">Napomena</label>
+    <textarea name="napomena" rows="2" class="form-control" style="background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">{{ flock.napomena|default:'' }}</textarea>
+    {% if edit %}
+    <div class="form-check mt-3">
+      <input type="checkbox" name="aktivan" id="aktivan" class="form-check-input" {% if flock.aktivan %}checked{% endif %}>
+      <label for="aktivan" class="form-check-label" style="font-size:.85rem;font-weight:600">Aktivno jato</label>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+  <a href="{% url 'udruge:flock_list' %}" class="btn btn-outline-secondary" style="border-radius:8px"><i class="fas fa-arrow-left me-1"></i>Natrag</a>
+  <button type="submit" class="btn" style="background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.6rem 2rem">
+    <i class="fas fa-check me-1"></i>{% if edit %}Spremi{% else %}Kreiraj jato{% endif %}
+  </button>
+</div>
+</form>
+</div>
+{% endblock %}

@@ -1123,6 +1123,20 @@ class POSDailyReport(models.Model):
         default=dict, blank=True, verbose_name=_('Po blagajnicima'),
         help_text=_('{"Ana": {"count": 10, "total": 500}, ...}'),
     )
+    # ── Marketplace / Online prodaja ──
+    marketplace_revenue = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0,
+        verbose_name=_('Marketplace promet'),
+        help_text=_('Ukupan promet od online tržnice za ovaj dan'),
+    )
+    marketplace_order_count = models.PositiveIntegerField(
+        default=0, verbose_name=_('Marketplace narudžbe'),
+    )
+    gastro_bridge_revenue = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0,
+        verbose_name=_('Gastro Bridge promet'),
+        help_text=_('Promet od Last Call prebacivanja'),
+    )
     # Z-report PDF
     z_report_pdf = models.FileField(
         upload_to='pos/zreports/%Y/%m/', blank=True,

@@ -925,3 +925,157 @@ def cart_shared_checkout(request, token):
         'items': items,
         'total': snapshot.total,
     })
+
+
+def traceability_view(request, pk):
+    """Farm-to-Fork QR traceability page — public."""
+    from .models import MarketplaceProduct
+    from django.shortcuts import get_object_or_404
+    import base64
+    from io import BytesIO
+
+    product = get_object_or_404(MarketplaceProduct, pk=pk)
+
+    # Generate QR code pointing to this page
+    qr_base64 = None
+    try:
+        import qrcode
+        qr_url = request.build_absolute_uri()
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=5, border=2)
+        qr.add_data(qr_url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color='black', back_color='white')
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        qr_base64 = base64.b64encode(buf.read()).decode()
+    except Exception:
+        pass
+
+    # Check karenca status for egg products
+    karenca_active = False
+    karenca_end = None
+    if product.source_model == 'EggRecord' and product.source_id:
+        try:
+            from udruge.models import EggRecord
+            egg = EggRecord.objects.select_related('flock').get(pk=product.source_id)
+            if egg.flock.has_active_karenca:
+                karenca_active = True
+                karenca_end = egg.flock.karenca_end_date
+        except Exception:
+            pass
+
+    return render(request, 'marketplace/traceability.html', {
+        'product': product,
+        'qr_base64': qr_base64,
+        'karenca_active': karenca_active,
+        'karenca_end': karenca_end,
+    })
+
+
+
+@login_required
+def gastro_bridge(request, pk):
+    """
+    Gastro bridge: 1-click prebacivanje marketplace listinga u POS gastro meni.
+    Marketplace oglas se gasi, POS dobiva novi artikl s -30% popustom.
+    """
+    from .models import MarketplaceProduct
+    from django.shortcuts import get_object_or_404
+    from decimal import Decimal
+
+    product = get_object_or_404(MarketplaceProduct, pk=pk, seller_company=get_user_company(request))
+
+    if request.method == 'POST':
+        discount = Decimal('0.30')
+        gastro_price = product.unit_price * (1 - discount)
+        gastro_name = 'Dnevni specijal: %s (Last call)' % product.name[:80]
+
+        # Kreiraj POS artikl
+        try:
+            from inventory.models import InventoryItem
+            item, created = InventoryItem.objects.get_or_create(
+                company=product.seller_company,
+                sku='GASTRO-BRIDGE-%d' % product.pk,
+                defaults={
+                    'name': gastro_name,
+                    'price': gastro_price,
+                    'unit': product.unit,
+                    'category': 'Dnevni specijal',
+                    'is_active': True,
+                    'track_stock': False,
+                    'description': 'Auto-bridge s Marketplace. Izvorni: %s. Popust: 30%%.' % product.name,
+                }
+            )
+            if not created:
+                item.name = gastro_name
+                item.price = gastro_price
+                item.is_active = True
+                item.save(update_fields=['name', 'price', 'is_active'])
+
+            # Deaktiviraj marketplace listing
+            product.is_available = False
+            product.save(update_fields=['is_available'])
+
+            messages.success(
+                request,
+                '"%s" prebaceno u gastro meni! Cijena: %.2f EUR (-30%%). '
+                'Vidljivo na digitalnom meniju.' % (gastro_name, gastro_price)
+            )
+        except Exception as e:
+            messages.error(request, 'Greska pri prebacivanju: %s' % e)
+
+        return redirect('marketplace:seller_dashboard')
+
+    # GET — confirmation page
+    gastro_price = product.unit_price * Decimal('0.70')
+    return render(request, 'marketplace/gastro_bridge.html', {
+        'product': product,
+        'gastro_price': gastro_price,
+        'discount_percent': 30,
+    })
+
+
+def auction_live(request, pk):
+    """Live auction page with WebSocket connection."""
+    from .models import MarketplaceProduct
+    from django.shortcuts import get_object_or_404
+    product = get_object_or_404(MarketplaceProduct, pk=pk, is_auction=True)
+    return render(request, 'marketplace/auction_live.html', {'product': product})
+
+
+def auction_state_api(request, pk):
+    """HTTP fallback for auction state (when WebSocket unavailable)."""
+    from .models import MarketplaceProduct
+    from django.http import JsonResponse
+    from django.utils import timezone
+
+    try:
+        product = MarketplaceProduct.objects.get(pk=pk, is_auction=True)
+    except MarketplaceProduct.DoesNotExist:
+        return JsonResponse({'error': 'Not found'}, status=404)
+
+    now = timezone.now()
+    remaining = (product.expires_at - now).total_seconds() if product.expires_at else 0
+    remaining = max(0, remaining)
+
+    top_bids = list(
+        product.bids.select_related('bidder_company')
+        .order_by('-amount')[:5]
+        .values('bidder_company__name', 'amount', 'created_at')
+    )
+    for b in top_bids:
+        b['amount'] = str(b['amount'])
+        b['created_at'] = b['created_at'].isoformat()
+
+    return JsonResponse({
+        'type': 'state',
+        'product_id': product.pk,
+        'current_bid': str(product.current_bid or product.starting_bid or product.unit_price),
+        'bid_count': product.bid_count,
+        'remaining_seconds': int(remaining),
+        'expires_at': product.expires_at.isoformat() if product.expires_at else None,
+        'auction_status': product.auction_status,
+        'top_bids': top_bids,
+        'is_ending_soon': remaining < 60,
+    })

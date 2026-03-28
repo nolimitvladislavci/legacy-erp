@@ -3,6 +3,14 @@
 {% block extra_css %}
 <style>
 .gf-container { max-width: 800px; margin: 0 auto; }
+/* Theme support: ensure dark/light variables fallback */
+:root {
+  --bg-card: var(--surface, #181a1d);
+  --input-bg: var(--dark, #111214);
+  --input-border: var(--border, #252830);
+  --text-secondary: var(--text-dim, #94a3b8);
+  --table-header-bg: var(--surface2, #1e293b);
+}
 .gf-form-card {
   background: var(--bg-card);
   border: 1px solid var(--border);

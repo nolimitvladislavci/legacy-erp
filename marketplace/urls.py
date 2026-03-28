@@ -35,6 +35,16 @@ urlpatterns = [
     # I-4: Legal Vault
     path('orders/<int:pk>/vault/', views.legal_vault, name='legal_vault'),
 
+    # Live Auction
+    path('auction/<int:pk>/', views.auction_live, name='auction_live'),
+    path('auction/<int:pk>/state/', views.auction_state_api, name='auction_state_api'),
+
+    # Gastro Bridge — Last Call
+    path('gastro-bridge/<int:pk>/', views.gastro_bridge, name='gastro_bridge'),
+
+    # Farm-to-Fork Traceability QR
+    path('traceability/<int:pk>/', views.traceability_view, name='traceability'),
+
     # WhatsApp Concierge
     path('cart/share/', views.cart_share_create, name='cart_share_create'),
     path('checkout/shared/<str:token>/', views.cart_shared_checkout, name='cart_shared_checkout'),

@@ -2508,3 +2508,151 @@ class RezultatUtrke(models.Model):
 
     def __str__(self):
         return f'{self.golub} — {self.utrka} (#{self.placiranje})'
+
+
+# ═══════════════════════════════════════════════════════════════════
+# PERAD — JATA (Flock) — kokoši, prepelice, patke, guske
+# ═══════════════════════════════════════════════════════════════════
+
+class Flock(models.Model):
+    """Jato peradi — registar za OPG-ove i udruge."""
+    VRSTA_CHOICES = [
+        ('kokos',     'Kokoš'),
+        ('prepelica', 'Prepelica'),
+        ('patka',     'Patka'),
+        ('guska',     'Guska'),
+    ]
+    TIP_UZGOJA_CHOICES = [
+        ('slobodni', 'Slobodni uzgoj'),
+        ('kavezni',  'Kavezni uzgoj'),
+        ('organski', 'Organski uzgoj'),
+    ]
+
+    company       = models.ForeignKey('companies.Company', on_delete=models.CASCADE, related_name='flockovi')
+    naziv         = models.CharField(max_length=200, verbose_name='Naziv jata')
+    vrsta         = models.CharField(max_length=15, choices=VRSTA_CHOICES)
+    pasmina       = models.CharField(max_length=100, blank=True, verbose_name='Pasmina')
+    broj_komada   = models.PositiveIntegerField(verbose_name='Broj komada')
+    datum_nabave  = models.DateField(verbose_name='Datum nabave')
+    tip_uzgoja    = models.CharField(max_length=15, choices=TIP_UZGOJA_CHOICES, default='slobodni')
+    objekt        = models.CharField(max_length=200, blank=True, verbose_name='Objekt / kokošinjac')
+    napomena      = models.TextField(blank=True)
+    aktivan       = models.BooleanField(default=True)
+    created_at    = models.DateTimeField(auto_now_add=True)
+    updated_at    = models.DateTimeField(auto_now=True)
+    objects       = CompanyManager()
+
+    class Meta:
+        verbose_name = 'Jato peradi'
+        verbose_name_plural = 'Jata peradi'
+        ordering = ['-datum_nabave']
+        db_table = 'udruge_flock'
+
+    def __str__(self):
+        return f'{self.naziv} ({self.get_vrsta_display()}, {self.broj_komada} kom)'
+
+    @property
+    def aktivnih_komada(self):
+        uginuli = self.mortaliteti.aggregate(s=models.Sum('broj_uginulih'))['s'] or 0
+        return max(0, self.broj_komada - uginuli)
+
+    @property
+    def has_active_karenca(self):
+        """True ako bilo koji zdravstveni zapis ima aktivnu karencu."""
+        return any(z.karenca_aktivna for z in self.zdravstveni_zapisi.all()
+                   if z.karenca_dana)
+
+    @property
+    def karenca_end_date(self):
+        """Najkasniji datum isteka karence, ili None."""
+        from datetime import timedelta
+        latest = None
+        for z in self.zdravstveni_zapisi.all():
+            if z.karenca_dana and z.karenca_aktivna:
+                end = z.datum + timedelta(days=z.karenca_dana)
+                if latest is None or end > latest:
+                    latest = end
+        return latest
+
+
+class EggRecord(models.Model):
+    """Dnevni zapis nesenja jaja."""
+    flock       = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name='egg_records')
+    datum       = models.DateField(verbose_name='Datum')
+    broj_jaja   = models.PositiveIntegerField(verbose_name='Broj jaja')
+    broken      = models.PositiveIntegerField(default=0, verbose_name='Polomljena')
+    sold        = models.PositiveIntegerField(default=0, verbose_name='Prodano')
+    za_prodaju  = models.BooleanField(default=False, verbose_name='Za tržnicu')
+    cijena_eur  = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                       verbose_name='Cijena (EUR/kom)')
+    notes       = models.TextField(blank=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Zapis nesenja'
+        verbose_name_plural = 'Zapisi nesenja'
+        ordering = ['-datum']
+        unique_together = [('flock', 'datum')]
+        db_table = 'udruge_egg_record'
+
+    def __str__(self):
+        return f'{self.flock.naziv} — {self.datum}: {self.broj_jaja} jaja'
+
+
+class FlockHealthRecord(models.Model):
+    """Zdravstveni tretman jata."""
+    VRSTA_TRETMANA = [
+        ('cijepljenje',  'Cijepljenje'),
+        ('antiparazit',  'Antiparazitik'),
+        ('antibiotik',   'Antibiotik'),
+        ('vitamin',      'Vitamini / dodaci'),
+        ('vet_pregled',  'Veterinarski pregled'),
+        ('ostalo',       'Ostalo'),
+    ]
+
+    flock            = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name='zdravstveni_zapisi')
+    vrsta_tretmana   = models.CharField(max_length=15, choices=VRSTA_TRETMANA)
+    datum            = models.DateField()
+    lijek            = models.CharField(max_length=200, blank=True, verbose_name='Lijek / preparat')
+    doza             = models.CharField(max_length=100, blank=True)
+    veterinar        = models.CharField(max_length=200, blank=True)
+    karenca_dana     = models.PositiveIntegerField(null=True, blank=True,
+                                                    verbose_name='Karenca (dana)',
+                                                    help_text='Koliko dana jaja nisu za prodaju')
+    napomena         = models.TextField(blank=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Zdravstveni zapis jata'
+        verbose_name_plural = 'Zdravstveni zapisi jata'
+        ordering = ['-datum']
+        db_table = 'udruge_flock_health'
+
+    def __str__(self):
+        return f'{self.flock.naziv} — {self.get_vrsta_tretmana_display()} ({self.datum})'
+
+    @property
+    def karenca_aktivna(self):
+        from django.utils import timezone
+        if not self.karenca_dana:
+            return False
+        return (timezone.now().date() - self.datum).days < self.karenca_dana
+
+
+class FlockMortality(models.Model):
+    """Zapis uginuća u jatu."""
+    flock          = models.ForeignKey(Flock, on_delete=models.CASCADE, related_name='mortaliteti')
+    datum          = models.DateField()
+    broj_uginulih  = models.PositiveIntegerField(verbose_name='Broj uginulih')
+    razlog         = models.CharField(max_length=200, blank=True, verbose_name='Razlog / uzrok')
+    napomena       = models.TextField(blank=True)
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Uginuće u jatu'
+        verbose_name_plural = 'Uginuća u jatu'
+        ordering = ['-datum']
+        db_table = 'udruge_flock_mortality'
+
+    def __str__(self):
+        return f'{self.flock.naziv} — {self.datum}: {self.broj_uginulih} uginulih'

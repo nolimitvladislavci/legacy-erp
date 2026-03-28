@@ -27,6 +27,43 @@ class InventoryItem(models.Model):
         related_name='inventory_items',
         verbose_name=_('Tvrtka'),
     )
+
+    # ── SplitAllocation — Agro-Turizam 360 ──
+    reserved_inhouse = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name=_('Rezervirano in-house'),
+        help_text=_('Količina rezervirana za gastro/konobu — ne ide na marketplace')
+    )
+    reserved_marketplace = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name=_('Rezervirano marketplace'),
+        help_text=_('Količina na aktivnim marketplace listinzima')
+    )
+    allocation_buffer_pct = models.PositiveIntegerField(
+        default=10,
+        verbose_name=_('Buffer (%)'),
+        help_text=_('Postotak zalihe koji se drži kao sigurnosni buffer')
+    )
+
+    @property
+    def unreserved_qty(self):
+        """Slobodna količina — nije ni in-house ni marketplace."""
+        return max(0, self.quantity - self.reserved_inhouse - self.reserved_marketplace)
+
+    @property
+    def buffer_qty(self):
+        """Buffer količina — minimum koji se ne prodaje."""
+        return self.quantity * self.allocation_buffer_pct / 100
+
+    @property
+    def marketplace_available(self):
+        """Koliko se još može staviti na marketplace."""
+        return max(0, self.unreserved_qty - self.buffer_qty)
+
+    def should_delist(self):
+        """Treba li skinuti s marketplace-a zbog nedovoljnih zaliha?"""
+        return self.reserved_inhouse > (self.quantity - self.buffer_qty)
+
     objects = CompanyManager()
 
     name     = models.CharField(max_length=200, verbose_name=_('Naziv'))

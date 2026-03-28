@@ -115,6 +115,49 @@ class MarketplaceProduct(models.Model):
     )
     pickup_available = models.BooleanField(default=True, verbose_name=_("Osobno preuzimanje"))
 
+    # OPG / Disclaimer (zakonska obveza za hranu)
+    opg_number = models.CharField(
+        max_length=50, blank=True, verbose_name=_('OPG broj'),
+        help_text=_('Obavezno za prehrambene proizvode — Zakon o OPG čl.12')
+    )
+    disclaimer_text = models.TextField(
+        blank=True, verbose_name=_('Disclaimer'),
+        default='Proizvod dolazi izravno s OPG-a. Prije konzumacije provjerite alergene i rok trajanja.',
+    )
+
+    # MarketplaceBridge metadata
+    source_model = models.CharField(max_length=50, blank=True, verbose_name=_('Izvorni model'),
+                                     help_text=_('npr. EggRecord, MedProizvodnja'))
+    source_id    = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('Izvorni ID'))
+    auto_listed  = models.BooleanField(default=False, verbose_name=_('Auto-objavljeno'))
+    expires_at   = models.DateTimeField(null=True, blank=True, verbose_name=_('Istječe'))
+    # Auction fields (for collectible items like pigeons)
+    is_auction = models.BooleanField(default=False, verbose_name=_('Aukcija'))
+    starting_bid = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        verbose_name=_('Pocetna cijena'),
+    )
+    current_bid = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        verbose_name=_('Trenutna ponuda'),
+    )
+    bid_count = models.PositiveIntegerField(default=0, verbose_name=_('Broj ponuda'))
+    auction_status = models.CharField(
+        max_length=20, default='', blank=True,
+        choices=[
+            ('', _('Nije aukcija')),
+            ('active', _('Aktivna')),
+            ('ending_soon', _('Zavrsava uskoro')),
+            ('sold', _('Prodano')),
+            ('no_bids', _('Bez ponuda')),
+        ],
+        verbose_name=_('Status aukcije'),
+    )
+
+    delivery_zone_km = models.PositiveIntegerField(null=True, blank=True,
+                                                    verbose_name=_('Zona dostave (km)'),
+                                                    help_text=_('Geofencing za kvarljive proizvode'))
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CompanyManager()
@@ -834,3 +877,42 @@ class CartSnapshot(models.Model):
         import hashlib, json
         raw = json.dumps(cart_data, sort_keys=True, default=str)
         return hashlib.sha256(raw.encode('utf-8')).hexdigest()
+
+
+# ── Auction System (Golublja aukcija) ────────────────────────────────
+
+class AuctionBid(models.Model):
+    """Licitacija na aukciji — golubovi i drugi collectible itemi."""
+    product = models.ForeignKey(
+        MarketplaceProduct, on_delete=models.CASCADE,
+        related_name='bids', verbose_name=_('Proizvod'),
+    )
+    bidder_company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='auction_bids', verbose_name=_('Licitant'),
+    )
+    bidder_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name=_('Korisnik'),
+    )
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, verbose_name=_('Iznos (EUR)'),
+    )
+    is_winning = models.BooleanField(default=False, verbose_name=_('Pobjednička'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Aukcijska ponuda')
+        verbose_name_plural = _('Aukcijske ponude')
+        ordering = ['-amount', '-created_at']
+        indexes = [
+            models.Index(fields=['product', '-amount']),
+        ]
+
+    def __str__(self):
+        return f"{self.bidder_company.name}: {self.amount} EUR -> {self.product.name}"
+
+    @property
+    def is_highest(self):
+        top = self.product.bids.order_by('-amount').first()
+        return top and top.pk == self.pk

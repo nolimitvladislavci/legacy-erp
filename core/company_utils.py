@@ -48,3 +48,13 @@ def company_queryset(model_class, request=None, company_field='company'):
     if not company:
         return model_class.objects.none()
     return model_class.objects.filter(**{company_field: company})
+
+
+def get_user_company_from_user(user):
+    """Get company from a User object (no request needed). For WebSocket consumers."""
+    if not user or not user.is_authenticated:
+        return None
+    try:
+        return user.profile.company
+    except Exception:
+        return None

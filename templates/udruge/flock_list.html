@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Jata peradi{% endblock %}
+{% block extra_css %}
+<style>
+.flock-container { max-width: 1100px; margin: 0 auto; }
+.flock-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; margin-bottom: 1.5rem; }
+.flock-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+.flock-stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text); }
+.flock-stat-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--text-dim); margin-top: 2px; }
+.flock-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: border-color .2s;
+  cursor: pointer;
+}
+.flock-card:hover { border-color: var(--gold-border); }
+.flock-vrsta-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+.flock-empty { text-align: center; padding: 4rem 2rem; color: var(--text-dim); }
+.flock-empty i { font-size: 3rem; opacity: .15; margin-bottom: .75rem; display: block; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="flock-container">
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h2 style="font-size:1.5rem;font-weight:800;margin:0;color:var(--text)"><i class="fas fa-egg me-2" style="color:var(--gold)"></i>Jata peradi</h2>
+    <small style="color:var(--text-dim)">Evidencija jata, nesenje jaja, zdravlje</small>
+  </div>
+  <a href="{% url 'udruge:flock_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem;font-size:.85rem">
+    <i class="fas fa-plus me-1"></i>Novo jato
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="flock-stats">
+  <div class="flock-stat">
+    <div class="flock-stat-value" style="color:var(--gold)">{{ stats.ukupno_jata|default:0 }}</div>
+    <div class="flock-stat-label">Jata</div>
+  </div>
+  <div class="flock-stat">
+    <div class="flock-stat-value" style="color:#22c55e">{{ stats.ukupno_aktivnih|default:0 }}</div>
+    <div class="flock-stat-label">Aktivnih</div>
+  </div>
+  <div class="flock-stat">
+    <div class="flock-stat-value">{{ stats.ukupno_komada|default:0 }}</div>
+    <div class="flock-stat-label">Zivotinja</div>
+  </div>
+</div>
+
+<!-- Search + Filter -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.25rem">
+  <form method="get" class="d-flex gap-2 flex-wrap align-items-center">
+    <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Pretrazi jata..." style="max-width:250px;background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+    <select name="vrsta" class="form-select form-select-sm" style="max-width:160px;background:var(--dark);border-color:var(--border);color:var(--text);border-radius:8px">
+      <option value="">Sve vrste</option>
+      {% for code, label in vrsta_choices %}
+      <option value="{{ code }}" {% if vrsta == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-sm" style="background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);border-radius:8px;font-weight:600">
+      <i class="fas fa-search me-1"></i>Trazi
+    </button>
+  </form>
+</div>
+
+<!-- Flock Grid -->
+{% if page %}
+<div class="row g-3">
+  {% for flock in page %}
+  <div class="col-md-6 col-lg-4">
+    <div class="flock-card" onclick="window.location='{% url 'udruge:flock_detail' flock.pk %}'">
+      <div class="d-flex gap-3 align-items-start">
+        <div class="flock-vrsta-icon" style="background:{% if flock.vrsta == 'kokos' %}rgba(245,158,11,.1){% elif flock.vrsta == 'patka' %}rgba(59,130,246,.1){% elif flock.vrsta == 'guska' %}rgba(34,197,94,.1){% else %}rgba(168,85,247,.1){% endif %}">
+          {% if flock.vrsta == 'kokos' %}&#x1F414;{% elif flock.vrsta == 'patka' %}&#x1F986;{% elif flock.vrsta == 'guska' %}&#x1FAB6;{% else %}&#x1F426;{% endif %}
+        </div>
+        <div style="flex:1;min-width:0">
+          <h6 style="font-weight:700;margin:0 0 .25rem;color:var(--text)">{{ flock.naziv }}</h6>
+          <div style="font-size:.78rem;color:var(--text-dim)">
+            {{ flock.get_vrsta_display }} | {{ flock.get_tip_uzgoja_display }}
+          </div>
+          {% if flock.pasmina %}<div style="font-size:.72rem;color:var(--text-dim)">{{ flock.pasmina }}</div>{% endif %}
+          <div class="d-flex gap-3 mt-2">
+            <div>
+              <span style="font-weight:800;font-size:1rem;color:var(--gold)">{{ flock.aktivnih_komada }}</span>
+              <span style="font-size:.68rem;color:var(--text-dim)">kom</span>
+            </div>
+            {% if flock.objekt %}
+            <div style="font-size:.75rem;color:var(--text-dim)"><i class="fas fa-home me-1"></i>{{ flock.objekt|truncatechars:20 }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% if not flock.aktivan %}
+        <span style="background:rgba(239,68,68,.1);color:#ef4444;font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:6px">Neaktivno</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if page.has_other_pages %}
+<nav class="mt-4 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}&q={{ q }}&vrsta={{ vrsta }}">&laquo;</a></li>{% endif %}
+    {% for num in page.paginator.page_range %}
+    <li class="page-item {% if page.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&q={{ q }}&vrsta={{ vrsta }}">{{ num }}</a></li>
+    {% endfor %}
+    {% if page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}&q={{ q }}&vrsta={{ vrsta }}">&raquo;</a></li>{% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="flock-empty">
+  <i class="fas fa-egg"></i>
+  <h5 style="color:var(--text)">Nema jata</h5>
+  <p>Dodajte prvo jato za poceti s evidencijom nesenja.</p>
+  <a href="{% url 'udruge:flock_create' %}" class="btn" style="background:var(--gold);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.5rem 1.5rem">
+    <i class="fas fa-plus me-1"></i>Novo jato
+  </a>
+</div>
+{% endif %}
+
+</div>
+{% endblock %}

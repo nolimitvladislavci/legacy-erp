@@ -2,6 +2,8 @@
 {% block title %}{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}{% endblock %}
 {% block content %}
 <style>
+/* Theme support */
+:root { --input-bg: var(--dark, #111214); --input-border: var(--border, #252830); }
 .gf-section { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#c9a84c; margin-bottom:.5rem; padding-bottom:.3rem; border-bottom:1px solid rgba(201,168,76,.2); }
 .gf-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
 .gf-card-body { padding:1.25rem; }
