@@ -321,6 +321,7 @@ urlpatterns += [
     path('privatnost/', views.datenschutz, name='privatnost'),
     path('grosmarkt/anfrage/', __import__('website.views', fromlist=['grosmarkt_anfrage']).grosmarkt_anfrage, name='grosmarkt_anfrage_direct'),
     path("api/grosmarkt/partners/", __import__("website.views", fromlist=["grosmarkt_partners_api"]).grosmarkt_partners_api, name="grosmarkt_partners"),
+    path('didin-konak/', __import__('website.views', fromlist=['brosura_didin_konak']).brosura_didin_konak, name='brosura_didin_konak'),
     path('digitalni-posrednik/', __import__('website.views', fromlist=['digitalni_posrednik']).digitalni_posrednik, name='digitalni_posrednik'),
 ]
 

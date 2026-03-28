@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LIMIT Connect za Didin Konak — Digitalizacija imanja</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--card:#111;--border:#1e1e1e;--gold:#c9a84c;--gold2:#e8c96a;--text:#e8e8e8;--muted:#888;--green:#4caf7d;--blue:#3b82f6;--wine:#8b2252}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',system-ui,sans-serif;line-height:1.7}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
+a{color:var(--gold);text-decoration:none}
+.container{max-width:860px;margin:0 auto;padding:0 20px}
+
+/* Hero */
+.hero{text-align:center;padding:60px 20px 40px;background:linear-gradient(180deg,#1a0a0a 0%,#0a0a0a 100%);border-bottom:2px solid rgba(139,34,82,.3)}
+.hero h1{font-size:2.4rem;margin-bottom:8px;letter-spacing:.02em}
+.hero .subtitle{font-size:1rem;color:var(--muted);max-width:600px;margin:0 auto 20px}
+.hero .tagline{display:inline-block;background:rgba(139,34,82,.15);border:1px solid rgba(139,34,82,.3);border-radius:20px;padding:6px 20px;font-size:.82rem;color:#d4638c;font-weight:600}
+
+/* Sections */
+section{padding:40px 0;border-bottom:1px solid var(--border)}
+section h2{font-size:1.6rem;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+section h2 i{color:var(--wine);font-size:1.2rem}
+
+/* Problem cards */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.problem{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-left:4px solid #ef4444}
+.problem h4{color:#fca5a5;font-size:.9rem;margin-bottom:6px;font-family:'Barlow',sans-serif}
+.problem p{font-size:.82rem;color:var(--muted)}
+
+/* Solution cards */
+.solution-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.solution{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;gap:16px;align-items:start}
+.solution .icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.solution h4{font-size:1rem;color:var(--text);margin-bottom:4px;font-family:'Barlow',sans-serif;font-weight:700}
+.solution p{font-size:.82rem;color:var(--muted)}
+.solution .tag{display:inline-block;font-size:.68rem;padding:2px 8px;border-radius:4px;margin-top:8px;font-weight:600}
+
+/* Modules */
+.mod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mod{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.mod i{font-size:1.5rem;color:var(--gold);margin-bottom:8px;display:block}
+.mod .name{font-weight:700;font-size:.85rem;margin-bottom:4px}
+.mod .desc{font-size:.72rem;color:var(--muted)}
+
+/* ROI */
+.roi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.roi{text-align:center;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.roi .val{font-size:1.8rem;font-weight:800;font-family:'Cormorant Garamond',serif}
+.roi .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;margin-top:4px}
+
+/* CTA */
+.cta{text-align:center;padding:50px 20px}
+.cta h2{font-size:1.8rem;margin-bottom:12px}
+.cta .btn{display:inline-block;background:linear-gradient(135deg,var(--gold),#a78b3d);color:#0a0a0a;font-weight:700;padding:14px 36px;border-radius:12px;font-size:1rem;text-decoration:none;margin:8px}
+.cta .btn-outline{display:inline-block;border:2px solid var(--gold);color:var(--gold);padding:12px 30px;border-radius:12px;font-size:.9rem;text-decoration:none;margin:8px}
+
+.footer{text-align:center;padding:30px;color:var(--muted);font-size:.75rem;border-top:1px solid var(--border)}
+@media(max-width:768px){
+  .problem-grid,.mod-grid{grid-template-columns:1fr}
+  .roi-grid{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:1.8rem}
+  .solution{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="tagline"><i class="fas fa-leaf"></i> Pripremljeno za Didin Konak, Kopačevo</div>
+  <h1>Jedno imanje.<br>Jedan sustav.</h1>
+  <p class="subtitle">
+    3 apartmana. Restoran s domaćom kuhinjom. Vinski podrum. Plastenik.
+    Kopački rit na 100 metara. Sve to zaslužuje sustav koji radi jednako dobro kao vaša kuhinja.
+  </p>
+</div>
+
+<div class="container">
+
+<!-- PROBLEMI KOJE RJEŠAVAMO -->
+<section>
+  <h2><i class="fas fa-exclamation-triangle"></i> Problemi koje prepoznajemo</h2>
+  <div class="problem-grid">
+    <div class="problem">
+      <h4><i class="fas fa-calendar-times"></i> Rezervacije na 5 mjesta</h4>
+      <p>Booking.com, Airbnb, telefon, email, WhatsApp — svaki kanal zasebno. Dupla rezervacija = loš dojam. Nema jednog kalendara.</p>
+    </div>
+    <div class="problem">
+      <h4><i class="fas fa-file-invoice"></i> Ručno fakturiranje</h4>
+      <p>Svaki račun ručno. Fiskalizacija posebno. eVisitor prijava posebno. Boravišna pristojba ručno. 4 sustava za jednog gosta.</p>
+    </div>
+    <div class="problem">
+      <h4><i class="fas fa-utensils"></i> Restoran bez POS-a</h4>
+      <p>Blok narudžbe, ručno zbrajanje, kraju dana ne znate koliki je promet bio. Konobar piše na papiru — kuhinja čeka.</p>
+    </div>
+    <div class="problem">
+      <h4><i class="fas fa-seedling"></i> Plastenik bez evidencije</h4>
+      <p>Što ste posijali, kad ste pobrali, koliko je otišlo u kuhinju a koliko na tržnicu — nitko ne zna točno. Inspekcija pita, vi tražite po ladicama.</p>
+    </div>
+    <div class="problem">
+      <h4><i class="fas fa-wine-glass-alt"></i> Degustacije na usmeni dogovor</h4>
+      <p>Gost zove, dogovorite degustaciju vina, zaboravite zapisati. Dođe 10 ljudi, pripremili ste za 5. Ili obrnuto — bačena hrana.</p>
+    </div>
+    <div class="problem">
+      <h4><i class="fas fa-chart-line"></i> Nema pregleda poslovanja</h4>
+      <p>Koliko ste zaradili ovaj mjesec? Koji apartman je najprofitabilniji? Koji jelo najviše naručuju? Ne znate bez da 3 sata kopate po papirima.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RJEŠENJA -->
+<section>
+  <h2><i class="fas fa-check-circle"></i> Kako LIMIT Connect rješava sve odjednom</h2>
+  <div class="solution-grid">
+
+    <div class="solution">
+      <div class="icon" style="background:rgba(59,130,246,.15);color:#3b82f6"><i class="fas fa-bed"></i></div>
+      <div>
+        <h4>Rental — Upravljanje smještajem</h4>
+        <p>Sva 3 apartmana (Dida Šime, Baka Lou, Dida Stipe) u jednom kalendaru. Automatska sinkronizacija s Booking.com i Airbnb. Check-in → automatska eVisitor prijava → boravišna pristojba → račun. Jedan klik.</p>
+        <span class="tag" style="background:rgba(59,130,246,.15);color:#3b82f6">Apartmani + Hotel</span>
+      </div>
+    </div>
+
+    <div class="solution">
+      <div class="icon" style="background:rgba(239,68,68,.15);color:#ef4444"><i class="fas fa-cash-register"></i></div>
+      <div>
+        <h4>POS — Restoranska blagajna</h4>
+        <p>Konobar naručuje na tabletu → kuhinja vidi na ekranu → jelo gotovo → račun fiskaliziran automatski. Z-izvještaj krajem smjene. Nema papira, nema grešaka.</p>
+        <span class="tag" style="background:rgba(239,68,68,.15);color:#ef4444">Restoran + Podrum</span>
+      </div>
+    </div>
+
+    <div class="solution">
+      <div class="icon" style="background:rgba(201,168,76,.15);color:var(--gold)"><i class="fas fa-wine-glass-alt"></i></div>
+      <div>
+        <h4>Experiences — Degustacije i aktivnosti</h4>
+        <p>Online rezervacija degustacije vina. Automatski depozit 30%. BOM normativ: 0.2L vina + 50g sira po osobi × broj gostiju = točna priprema. Check-in → zaliha se automatski skida.</p>
+        <span class="tag" style="background:rgba(201,168,76,.15);color:var(--gold)">Degustacije + Ture</span>
+      </div>
+    </div>
+
+    <div class="solution">
+      <div class="icon" style="background:rgba(76,175,125,.15);color:var(--green)"><i class="fas fa-seedling"></i></div>
+      <div>
+        <h4>Skladište — Plastenik do kuhinje</h4>
+        <p>Što raste u plasteniku → evidentirano. Berba → ulaz na zalihu. Kuhar uzme za pripremu → interna izdatnica. Prodaja na tržnici → izlaz. LOT slijedivost od sjemenke do tanjura.</p>
+        <span class="tag" style="background:rgba(76,175,125,.15);color:var(--green)">Plastenik + Kuhinja + Tržnica</span>
+      </div>
+    </div>
+
+    <div class="solution">
+      <div class="icon" style="background:rgba(139,34,82,.15);color:#d4638c"><i class="fas fa-file-invoice-dollar"></i></div>
+      <div>
+        <h4>Fakturiranje + Fiskalizacija</h4>
+        <p>Svi računi fiskalizirani automatski. eRačun za B2B goste (firme). JOPPD za zaposlenike. Sve na jednom mjestu — Marija (vaša računovotkinja) vidi sve u realnom vremenu.</p>
+        <span class="tag" style="background:rgba(139,34,82,.15);color:#d4638c">Sve u jednom</span>
+      </div>
+    </div>
+
+    <div class="solution">
+      <div class="icon" style="background:rgba(245,158,11,.15);color:#f59e0b"><i class="fas fa-robot"></i></div>
+      <div>
+        <h4>AI Asistent — Odgovara na sva pitanja</h4>
+        <p>"Koliko sam zaradio na degustacijama ovaj mjesec?" — AI zna. "Kad istječe certifikat?" — AI javlja. "Što da napravim s viškom rajčica?" — AI predloži tržnicu.</p>
+        <span class="tag" style="background:rgba(245,158,11,.15);color:#f59e0b">Chat 24/7</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULI -->
+<section>
+  <h2><i class="fas fa-th-large"></i> Aktivirani moduli za Didin Konak</h2>
+  <div class="mod-grid">
+    <div class="mod"><i class="fas fa-bed"></i><div class="name">Rental</div><div class="desc">3 apartmana, kalendar, eVisitor</div></div>
+    <div class="mod"><i class="fas fa-cash-register"></i><div class="name">POS</div><div class="desc">Restoran, konobar tablet, KDS</div></div>
+    <div class="mod"><i class="fas fa-wine-glass-alt"></i><div class="name">Experiences</div><div class="desc">Degustacije, BOM, check-in</div></div>
+    <div class="mod"><i class="fas fa-boxes"></i><div class="name">Skladište</div><div class="desc">Plastenik, LOT, kretanja</div></div>
+    <div class="mod"><i class="fas fa-file-invoice"></i><div class="name">Fakture</div><div class="desc">Fiskalizacija, eRačun</div></div>
+    <div class="mod"><i class="fas fa-users"></i><div class="name">Partneri</div><div class="desc">Dobavljači, gosti, agencije</div></div>
+    <div class="mod"><i class="fas fa-chart-pie"></i><div class="name">Dashboard</div><div class="desc">Dnevni promet, popunjenost</div></div>
+    <div class="mod"><i class="fas fa-robot"></i><div class="name">AI Chat</div><div class="desc">Pitaj bilo što o poslovanju</div></div>
+    <div class="mod"><i class="fas fa-shield-alt"></i><div class="name">GovExport</div><div class="desc">Potpisan XML za institucije</div></div>
+  </div>
+</section>
+
+<!-- ROI -->
+<section>
+  <h2><i class="fas fa-chart-bar"></i> Očekivani učinak</h2>
+  <div class="roi-grid">
+    <div class="roi"><div class="val" style="color:var(--green)">-80%</div><div class="lbl">Manje ručnog rada</div></div>
+    <div class="roi"><div class="val" style="color:var(--gold)">0</div><div class="lbl">Duplih rezervacija</div></div>
+    <div class="roi"><div class="val" style="color:var(--blue)">3 sek</div><div class="lbl">eVisitor prijava</div></div>
+    <div class="roi"><div class="val" style="color:var(--wine)">100%</div><div class="lbl">Fiskalizirano</div></div>
+  </div>
+  <p style="text-align:center;color:var(--muted);font-size:.82rem;margin-top:16px">
+    Umjesto 4 različita sustava, jedan. Umjesto papira, tablet. Umjesto nagađanja, brojevi.
+  </p>
+</section>
+
+<!-- POSEBNO ZA DIDIN KONAK -->
+<section>
+  <h2><i class="fas fa-gem"></i> Zašto baš LIMIT Connect</h2>
+  <div style="background:var(--card);border:1px solid rgba(201,168,76,.2);border-radius:16px;padding:28px;margin-bottom:20px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:.88rem">
+      <div>
+        <h4 style="color:var(--gold);font-size:.95rem;margin-bottom:8px"><i class="fas fa-map-marker-alt"></i> Lokalno razumijevanje</h4>
+        <p style="color:var(--muted)">Razumijemo Baranju, OPG-ove, seosku ekonomiju. Sustav je građen za hrvatske poduzetnike — od fiskalizacije do boravišne pristojbe.</p>
+      </div>
+      <div>
+        <h4 style="color:var(--gold);font-size:.95rem;margin-bottom:8px"><i class="fas fa-language"></i> Hrvatski + Njemački</h4>
+        <p style="color:var(--muted)">Sučelje na hrvatskom, računi na njemačkom za strane goste. Podržava EUR. ZUGFeRD za njemačko tržište.</p>
+      </div>
+      <div>
+        <h4 style="color:var(--gold);font-size:.95rem;margin-bottom:8px"><i class="fas fa-leaf"></i> Od plastinika do tanjura</h4>
+        <p style="color:var(--muted)">Jedini ERP koji prati put namirnice od sjemenke u plasteniku, kroz kuhinju, do računa na stolu gosta — s LOT slijedivošću.</p>
+      </div>
+      <div>
+        <h4 style="color:var(--gold);font-size:.95rem;margin-bottom:8px"><i class="fas fa-headset"></i> WhatsApp podrška</h4>
+        <p style="color:var(--muted)">Pišete nam na WhatsApp, odgovaramo u minutama. Nema ticketing sustava, nema čekanja. Osobna podrška.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Spremni za digitalizaciju?</h2>
+  <p style="color:var(--muted);margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto">
+    Pokažite nam kako radite danas. Mi vam pokažemo kako ćete raditi sutra.
+    Besplatna demonstracija. Bez obveza.
+  </p>
+  <a href="https://wa.me/385976091655?text=Pozdrav%2C%20zanima%20me%20LIMIT%20Connect%20za%20Didin%20Konak" class="btn">
+    <i class="fab fa-whatsapp"></i> WhatsApp razgovor
+  </a>
+  <a href="https://limit-connect.com/hr/pricing/" class="btn-outline">
+    <i class="fas fa-tag"></i> Pogledaj planove
+  </a>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div style="color:var(--gold);font-weight:700;margin-bottom:4px">LIMIT Connect</div>
+  <div>Konjik d.o.o. | OIB: 37590751921 | Čepin, Hrvatska</div>
+  <div style="margin-top:8px">Pripremljeno za: <strong>Didin Konak d.o.o.</strong>, Kopačevo</div>
+  <div style="margin-top:4px"><a href="https://limit-connect.com">limit-connect.com</a> | <a href="https://www.didinkonak.hr">didinkonak.hr</a></div>
+</div>
+
+</body>
+</html>
