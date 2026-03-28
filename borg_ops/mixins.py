@@ -169,6 +169,8 @@ class FSMMixin:
                 new_value=new_status,
                 note=note,
                 user=user,
+                is_system_generated=True,
+                is_public_facing=False,  # Default: interni. Eksplicitno markirati javne.
             )
         except Exception as e:
             logger.error('CardActivity create failed: %s', e)

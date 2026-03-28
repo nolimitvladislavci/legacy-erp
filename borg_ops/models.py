@@ -23,6 +23,14 @@ class CardActivity(models.Model):
     old_value = models.CharField(max_length=100, blank=True)
     new_value = models.CharField(max_length=100, blank=True)
     note = models.TextField(blank=True)
+    is_public_facing = models.BooleanField(
+        default=False,
+        help_text='True = sigurno za prikaz klijentima (QR timeline, portal). False = samo interni.',
+    )
+    is_system_generated = models.BooleanField(
+        default=False,
+        help_text='True = generiran automatski (transition_to). False = human unos.',
+    )
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
