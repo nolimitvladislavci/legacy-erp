@@ -2,9 +2,19 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from core.managers import CompanyManager
+from borg_ops.mixins import FSMMixin
 
 
-class WorkOrder(models.Model):
+class WorkOrder(FSMMixin, models.Model):
+    STATUS_FIELD = 'status'
+    TRANSITIONS = {
+        'draft':       ['in_progress', 'cancelled'],
+        'in_progress': ['completed', 'cancelled', 'draft'],
+        'completed':   ['invoiced', 'in_progress'],
+        'invoiced':    [],   # terminal
+        'cancelled':   ['draft'],  # reopen
+    }
+
     STATUS_CHOICES = [
         ('draft',       _('Nacrt')),
         ('in_progress', _('U tijeku')),
@@ -110,11 +120,11 @@ class WorkOrder(models.Model):
         self.total_gross     = (self.total_net + self.total_vat).quantize(Decimal('0.01'))
         self.save(update_fields=['total_labor', 'total_materials', 'total_net', 'total_vat', 'total_gross'])
 
-    def complete(self):
+    def complete(self, user=None):
         import datetime
-        self.status = 'completed'
+        self.transition_to('completed', user=user, save=True)
         self.completed_date = datetime.datetime.now()
-        self.save(update_fields=['status', 'completed_date'])
+        super(WorkOrder, self).save(update_fields=['completed_date'])
 
     @property
     def status_color(self):

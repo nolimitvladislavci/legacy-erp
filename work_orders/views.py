@@ -87,7 +87,12 @@ def work_order_create(request):
             wo.description = request.POST.get('description', '')
             wo.notes = request.POST.get('notes', '')
             wo.priority = request.POST.get('priority', 'normal')
-            wo.status = request.POST.get('status', 'draft')
+
+            # TASK 4b: Validacija statusa na kreiranju (zatvara injekciju linija 90)
+            _initial_status = request.POST.get('status', 'draft')
+            if _initial_status not in dict(WorkOrder.STATUS_CHOICES):
+                _initial_status = 'draft'
+            wo.status = _initial_status
 
             scheduled_date = request.POST.get('scheduled_date')
             if scheduled_date:
@@ -147,11 +152,20 @@ def work_order_detail(request, pk):
     wo = get_object_or_404(WorkOrder, pk=pk, company=company)
     items = wo.items.select_related('article').all()
 
+    # Card activity timeline (BORG audit trail)
+    from borg_ops.models import CardActivity
+    from django.contrib.contenttypes.models import ContentType
+    card_activities = CardActivity.objects.filter(
+        content_type=ContentType.objects.get_for_model(wo),
+        object_id=str(wo.pk),
+    )[:50]
+
     context = {
         'wo': wo,
         'items': items,
         'labor_items': items.filter(item_type='labor'),
         'material_items': items.filter(item_type='material'),
+        'activities': card_activities,
     }
     return render(request, 'work_orders/work_order_detail.html', context)
 
@@ -179,7 +193,15 @@ def work_order_edit(request, pk):
             wo.description = request.POST.get('description', '')
             wo.notes = request.POST.get('notes', '')
             wo.priority = request.POST.get('priority', 'normal')
-            wo.status = request.POST.get('status', wo.status)
+
+            # TASK 4c: FSM validated status change (zatvara injekciju linija 182)
+            _new_status = request.POST.get('status', wo.status)
+            if _new_status != wo.status:
+                try:
+                    wo.transition_to(_new_status, user=request.user, save=False)
+                except ValueError as e:
+                    messages.error(request, str(e))
+                    return redirect('work_orders:detail', pk=wo.pk)
 
             scheduled_date = request.POST.get('scheduled_date')
             wo.scheduled_date = scheduled_date or None
@@ -236,7 +258,7 @@ def work_order_complete(request, pk):
     company = _get_company(request)
     wo = get_object_or_404(WorkOrder, pk=pk, company=company)
     if request.method == 'POST':
-        wo.complete()
+        wo.complete(user=request.user)
         messages.success(request, f"Nalog {wo.order_number} označen kao završen.")
     return redirect('work_orders:detail', pk=pk)
 
@@ -248,8 +270,11 @@ def work_order_cancel(request, pk):
     company = _get_company(request)
     wo = get_object_or_404(WorkOrder, pk=pk, company=company)
     if request.method == 'POST':
-        wo.status = 'cancelled'
-        wo.save(update_fields=['status'])
+        try:
+            wo.transition_to('cancelled', user=request.user)
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('work_orders:detail', pk=pk)
         messages.success(request, f"Nalog {wo.order_number} otkazan.")
     return redirect('work_orders:detail', pk=pk)
 
@@ -309,10 +334,10 @@ def work_order_to_invoice(request, pk):
                     inventory_item=item.article,
                 )
 
-            # Link work order to invoice
+            # Link work order to invoice via FSM transition
+            wo.transition_to('invoiced', user=request.user, save=True)
             wo.invoice = invoice
-            wo.status = 'invoiced'
-            wo.save(update_fields=['invoice', 'status'])
+            super(WorkOrder, wo).save(update_fields=['invoice'])
 
         messages.success(request, f"Račun kreiran iz naloga {wo.order_number}.")
         return redirect('invoicing:invoice_edit', pk=invoice.pk)
