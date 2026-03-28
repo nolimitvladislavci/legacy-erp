@@ -246,3 +246,33 @@ def operations_dashboard(request):
         'signal_stats': signal_stats,
         'now': now,
     })
+
+
+@login_required
+@require_GET
+def activity_fragment(request):
+    """
+    HTMX lazy-load fragment za _activity_log.html.
+    GET /api/card/activity/?ct=work_orders.workorder&pk=123
+    Returns: rendered _activity_log.html partial.
+    """
+    ct_str = request.GET.get('ct', '')
+    pk = request.GET.get('pk', '')
+
+    if not ct_str or not pk:
+        return HttpResponse('<div class="al-empty">Nedostaju parametri.</div>')
+
+    try:
+        app_label, model_name = ct_str.split('.')
+        ct = ContentType.objects.get(app_label=app_label, model=model_name)
+    except (ValueError, ContentType.DoesNotExist):
+        return HttpResponse('<div class="al-empty">Nepoznat model.</div>')
+
+    activities = CardActivity.objects.filter(
+        content_type=ct,
+        object_id=str(pk),
+    ).select_related('user').order_by('-created_at')[:20]
+
+    return render(request, 'borg_ops/_activity_log.html', {
+        'activities': activities,
+    })

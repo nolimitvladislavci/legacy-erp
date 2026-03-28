@@ -22,6 +22,7 @@
 .wo-card-desc{font-size:.72rem;color:var(--text-muted);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wo-card-meta{display:flex;gap:8px;font-size:.68rem;color:var(--text-muted);flex-wrap:wrap}
 .wo-card-priority{display:inline-block;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.3px}
+.wo-card-sla{font-size:.62rem;margin-top:4px}
 .wo-card-actions{display:flex;gap:4px;margin-top:8px}
 .wo-btn{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.7rem;font-weight:600;cursor:pointer;background:var(--bg-card);color:var(--text-muted);transition:all .15s;text-align:center;text-decoration:none}
 .wo-btn:hover{border-color:#3b82f6;color:#3b82f6}
@@ -34,11 +35,12 @@
 <div class="wo-header">
     <div class="wo-title">🔧 {% trans "Radni nalozi" %} <span>/ {% trans "Kanban" %}</span></div>
     <div style="display:flex;gap:10px">
-        <a href="{% url 'work_orders:list' %}" class="wo-btn" style="padding:8px 14px">{% trans "📋 Lista" %}</a>
-        <a href="{% url 'work_orders:create' %}" class="wo-btn" style="padding:8px 14px;background:#3b82f6;color:#fff;border-color:#3b82f6">{% trans "+ Novi nalog" %}</a>
+        <button onclick="location.reload()" class="wo-btn" style="padding:8px 14px" title="Osvježi ploču">🔄 {% trans "Osvježi" %}</button>
+        <a href="{% url 'work_orders:list' %}" class="wo-btn" style="padding:8px 14px">📋 {% trans "Lista" %}</a>
+        <a href="{% url 'work_orders:create' %}" class="wo-btn" style="padding:8px 14px;background:#3b82f6;color:#fff;border-color:#3b82f6">+ {% trans "Novi nalog" %}</a>
     </div>
 </div>
-<div class="kanban-wrap">
+<div class="kanban-wrap" data-poll="30000">
 {% for col in columns %}
 <div class="kanban-col">
     <div class="kanban-col-header">
@@ -47,7 +49,7 @@
     </div>
     <div class="kanban-cards kanban-sortable" data-status="{{ col.id }}">
         {% for wo in col.items %}
-        <div class="kanban-card" id="card-{{ wo.pk }}" data-card-id="{{ wo.pk }}" data-model="WorkOrder">
+        <div class="kanban-card" id="card-{{ wo.pk }}" data-card-id="{{ wo.pk }}" data-model="WorkOrder" data-status="{{ col.id }}">
             <div class="wo-card-num">{{ wo.order_number }}</div>
             <div class="wo-card-client">{{ wo.client.name|default:"—" }}</div>
             {% if wo.description %}<div class="wo-card-desc">{{ wo.description|truncatewords:12 }}</div>{% endif %}
@@ -57,7 +59,7 @@
                 <span class="wo-card-priority" style="background:{{ wo.priority_color }}20;color:{{ wo.priority_color }}">{{ wo.get_priority_display }}</span>
             </div>
             {% if wo.sla_minutes_in_current_status > 0 %}
-            <div style="font-size:.62rem;color:{% if wo.sla_minutes_in_current_status > 480 %}#ef4444{% elif wo.sla_minutes_in_current_status > 240 %}#f59e0b{% else %}#64748b{% endif %};margin-top:4px">
+            <div class="wo-card-sla" style="color:{% if wo.sla_minutes_in_current_status > 480 %}#ef4444{% elif wo.sla_minutes_in_current_status > 240 %}#f59e0b{% else %}#64748b{% endif %}">
                 ⏱ {{ wo.sla_minutes_in_current_status }}min
             </div>
             {% endif %}
