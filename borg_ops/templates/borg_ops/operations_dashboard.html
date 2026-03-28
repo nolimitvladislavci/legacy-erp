@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Operations Dashboard" %}{% endblock %}
+{% block extra_css %}
+<style>
+.ops-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.ops-title{font-size:1.4rem;font-weight:700;color:var(--text)}
+.ops-title span{color:var(--gold)}
+.ops-grid{display:grid;grid-template-columns:1fr;gap:16px}
+.ops-section{background:var(--bg-card);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.ops-section-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ops-section-title{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);display:flex;align-items:center;gap:8px}
+.ops-section-body{padding:12px 16px}
+
+/* SLA Alerts */
+.sla-alert{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;margin-bottom:8px;font-size:.82rem}
+.sla-critical{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+.sla-warning{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#fbbf24}
+.sla-model{font-weight:700;min-width:100px}
+.sla-status{font-size:.7rem;padding:2px 8px;background:rgba(255,255,255,.06);border-radius:4px}
+.sla-time{font-weight:700;margin-left:auto;white-space:nowrap}
+
+/* Mini kanban items */
+.mini-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);font-size:.82rem}
+.mini-item:last-child{border-bottom:none}
+.mini-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mini-title{flex:1;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-meta{font-size:.7rem;color:var(--text-muted)}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-mini{text-align:center;padding:16px 12px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border)}
+.stat-mini .val{font-size:1.8rem;font-weight:800;color:var(--text)}
+.stat-mini .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-top:4px}
+.stat-mini.red .val{color:#ef4444}
+.stat-mini.gold .val{color:var(--gold)}
+
+@media(max-width:768px){
+    .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="ops-header">
+    <div class="ops-title">⚡ {% trans "Operations" %} <span>{% trans "Dashboard" %}</span></div>
+    <div style="font-size:.75rem;color:var(--text-muted)">{{ now|date:"d.m.Y H:i" }}</div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+    <div class="stat-mini {% if sla_alerts %}red{% endif %}">
+        <div class="val">{{ sla_alerts|length }}</div>
+        <div class="lbl">{% trans "SLA kršenja" %}</div>
+    </div>
+    <div class="stat-mini">
+        <div class="val">{{ interventions|length }}</div>
+        <div class="lbl">{% trans "Aktivne intervencije" %}</div>
+    </div>
+    <div class="stat-mini">
+        <div class="val">{{ work_orders|length }}</div>
+        <div class="lbl">{% trans "Otvoreni nalozi" %}</div>
+    </div>
+    <div class="stat-mini gold">
+        <div class="val">{{ signal_stats.total }}</div>
+        <div class="lbl">{% trans "Signali 24h" %}</div>
+    </div>
+</div>
+
+<div class="ops-grid">
+
+<!-- SLA Alerts -->
+{% if sla_alerts %}
+<div class="ops-section">
+    <div class="ops-section-header">
+        <div class="ops-section-title">🚨 {% trans "SLA kršenja" %}</div>
+        <span style="font-size:.7rem;color:var(--text-muted)">{{ sla_alerts|length }} {% trans "alert(a)" %}</span>
+    </div>
+    <div class="ops-section-body">
+        {% for alert in sla_alerts %}
+        <div class="sla-alert sla-{{ alert.severity }}">
+            <span class="sla-model">{{ alert.model }}</span>
+            <span class="sla-status">{{ alert.status }}</span>
+            <span>{{ alert.obj }}</span>
+            <span class="sla-time">{{ alert.minutes }}min / max {{ alert.max }}min</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Interventions -->
+<div class="ops-section">
+    <div class="ops-section-header">
+        <div class="ops-section-title">🚨 {% trans "Hitne intervencije" %}</div>
+        <a href="{% url 'interventions:kanban' %}" style="font-size:.72rem;color:var(--gold);text-decoration:none">{% trans "Otvori kanban →" %}</a>
+    </div>
+    <div class="ops-section-body">
+        {% for iv in interventions %}
+        <div class="mini-item">
+            <div class="mini-dot" style="background:{{ iv.status_color }}"></div>
+            <div class="mini-title">{{ iv.title }}</div>
+            <div class="mini-meta">{{ iv.get_status_display }} · {{ iv.elapsed_minutes }}min</div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:16px;color:var(--text-muted);font-size:.82rem">{% trans "Nema aktivnih intervencija" %}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Work Orders -->
+<div class="ops-section">
+    <div class="ops-section-header">
+        <div class="ops-section-title">🔧 {% trans "Radni nalozi" %}</div>
+        <a href="{% url 'work_orders:board' %}" style="font-size:.72rem;color:var(--gold);text-decoration:none">{% trans "Otvori kanban →" %}</a>
+    </div>
+    <div class="ops-section-body">
+        {% for wo in work_orders %}
+        <div class="mini-item">
+            <div class="mini-dot" style="background:{{ wo.status_color }}"></div>
+            <div class="mini-title">{{ wo.order_number }} — {{ wo.client.name|default:"—" }}</div>
+            <div class="mini-meta">{{ wo.get_status_display }}{% if wo.deadline %} · 📅 {{ wo.deadline|date:"d.m" }}{% endif %}</div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:16px;color:var(--text-muted);font-size:.82rem">{% trans "Nema otvorenih naloga" %}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Burza -->
+<div class="ops-section">
+    <div class="ops-section-header">
+        <div class="ops-section-title">🏗️ {% trans "Burza upiti" %}</div>
+        <a href="{% url 'burza:kanban' %}" style="font-size:.72rem;color:var(--gold);text-decoration:none">{% trans "Otvori kanban →" %}</a>
+    </div>
+    <div class="ops-section-body">
+        {% for lead in leads %}
+        <div class="mini-item">
+            <div class="mini-dot" style="background:#10b981"></div>
+            <div class="mini-title">{{ lead.title }}</div>
+            <div class="mini-meta">{{ lead.get_status_display }} · {{ lead.location }}</div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:16px;color:var(--text-muted);font-size:.82rem">{% trans "Nema otvorenih upita" %}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- AI Signals -->
+{% if signal_stats.total > 0 %}
+<div class="ops-section">
+    <div class="ops-section-header">
+        <div class="ops-section-title">📡 {% trans "Fenix signali (24h)" %}</div>
+    </div>
+    <div class="ops-section-body" style="display:flex;gap:20px;font-size:.85rem">
+        <div>{% trans "Ukupno:" %} <strong>{{ signal_stats.total }}</strong></div>
+        <div>{% trans "Novi:" %} <strong style="color:#3b82f6">{{ signal_stats.new }}</strong></div>
+        <div>{% trans "Kritični:" %} <strong style="color:#ef4444">{{ signal_stats.critical }}</strong></div>
+    </div>
+</div>
+{% endif %}
+
+</div>
+{% endblock %}
