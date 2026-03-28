@@ -1,9 +1,18 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from borg_ops.mixins import FSMMixin
 
 
-class ProjectLead(models.Model):
+class ProjectLead(FSMMixin, models.Model):
+    STATUS_FIELD = 'status'
+    TRANSITIONS = {
+        'NOVI_UPIT':        ['INTERNA_PROCJENA', 'NA_BURZI'],
+        'INTERNA_PROCJENA': ['NA_BURZI', 'NOVI_UPIT'],
+        'NA_BURZI':         ['PREUZETO'],
+        'PREUZETO':         ['RIJESENO', 'NA_BURZI'],
+        'RIJESENO':         [],  # terminal
+    }
 
     class Status(models.TextChoices):
         NOVI_UPIT          = 'NOVI_UPIT',          _('Novi upit')
@@ -70,10 +79,10 @@ class ProjectLead(models.Model):
         def _fmt(val):
             return f'{val:,.0f}'.replace(',', '.')
         if self.budget_from and self.budget_to:
-            return f'€{_fmt(self.budget_from)} – €{_fmt(self.budget_to)}'
+            return f'\u20ac{_fmt(self.budget_from)} \u2013 \u20ac{_fmt(self.budget_to)}'
         elif self.budget_from:
-            return f'od €{_fmt(self.budget_from)}'
-        return '–'
+            return f'od \u20ac{_fmt(self.budget_from)}'
+        return '\u2013'
 
 
 class LeadActivity(models.Model):

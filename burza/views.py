@@ -47,11 +47,11 @@ def kanban_board(request):
         rijeseno= own.filter(status='RIJESENO')
 
     columns = [
-        {'id': 'NOVI_UPIT',        'label': 'Novi upit',        'icon': '📥', 'color': '#3b82f6', 'leads': novi},
-        {'id': 'INTERNA_PROCJENA', 'label': 'Interna procjena', 'icon': '🔍', 'color': '#c9a84c', 'leads': interna},
-        {'id': 'NA_BURZI',         'label': 'Na burzi',         'icon': '🏪', 'color': '#10b981', 'leads': burza},
-        {'id': 'PREUZETO',         'label': 'Preuzeto',         'icon': '✅', 'color': '#8b5cf6', 'leads': preuzeto},
-        {'id': 'RIJESENO',         'label': 'Riješeno',         'icon': '🏆', 'color': '#f59e0b', 'leads': rijeseno},
+        {'id': 'NOVI_UPIT',        'label': 'Novi upit',        'icon': '\U0001f4e5', 'color': '#3b82f6', 'leads': novi},
+        {'id': 'INTERNA_PROCJENA', 'label': 'Interna procjena', 'icon': '\U0001f50d', 'color': '#c9a84c', 'leads': interna},
+        {'id': 'NA_BURZI',         'label': 'Na burzi',         'icon': '\U0001f3ea', 'color': '#10b981', 'leads': burza},
+        {'id': 'PREUZETO',         'label': 'Preuzeto',         'icon': '\u2705', 'color': '#8b5cf6', 'leads': preuzeto},
+        {'id': 'RIJESENO',         'label': 'Riješeno',         'icon': '\U0001f3c6', 'color': '#f59e0b', 'leads': rijeseno},
     ]
     return render(request, 'burza/kanban.html', {
         'columns': columns, 'is_superadmin': sa, 'company': company,
@@ -66,8 +66,19 @@ def lead_detail(request, pk):
     if not sa:
         if lead.company != company and not (lead.is_public and lead.status == 'NA_BURZI'):
             return JsonResponse({'ok': False, 'error': 'Nemate pristup.'}, status=403)
+
+    # CardActivity timeline (new BORG audit trail)
+    from borg_ops.models import CardActivity
+    from django.contrib.contenttypes.models import ContentType
+    card_activities = CardActivity.objects.filter(
+        content_type=ContentType.objects.get_for_model(lead),
+        object_id=str(lead.pk),
+    )[:50]
+
     return render(request, 'burza/lead_detail.html', {
-        'lead': lead, 'activities': lead.activities.all()[:20],
+        'lead': lead,
+        'activities': card_activities,
+        'legacy_activities': lead.activities.all()[:20],
         'is_superadmin': sa, 'company': company,
     })
 
@@ -89,15 +100,14 @@ def lead_move(request, pk):
     valid = [s[0] for s in ProjectLead.Status.choices]
     if new_status not in valid:
         return JsonResponse({'ok': False, 'error': f'Nepoznati status.'}, status=400)
-    old_status = lead.status
-    lead.status = new_status
+
+    # FSM validated transition
+    try:
+        lead.transition_to(new_status, user=request.user, save=False)
+    except ValueError as e:
+        return JsonResponse({'ok': False, 'error': str(e)}, status=400)
     lead.is_public = (new_status == 'NA_BURZI')
-    lead.save()
-    LeadActivity.objects.create(
-        lead=lead, user=request.user,
-        action=f'Status: {old_status} → {new_status}',
-        old_status=old_status, new_status=new_status
-    )
+    super(type(lead), lead).save(update_fields=[lead.STATUS_FIELD, 'is_public'])
     return JsonResponse({'ok': True, 'message': f'Pomičeno u: {lead.get_status_display()}'})
 
 
@@ -122,17 +132,18 @@ def lead_preuzmi(request, pk):
                 return JsonResponse({'ok': False, 'error': f'Posao je već preuzet.'}, status=409)
             if lead.company == company:
                 return JsonResponse({'ok': False, 'error': 'Ne možete preuzeti vlastiti posao.'}, status=400)
-            lead.status = 'PREUZETO'
+
+            # FSM validated transition
+            try:
+                lead.transition_to('PREUZETO', user=request.user,
+                                   note=f'Preuzela tvrtka: {company.name}', save=False)
+            except ValueError as e:
+                return JsonResponse({'ok': False, 'error': str(e)}, status=400)
             lead.taken_by = company
             lead.taken_by_user = request.user
             lead.taken_at = timezone.now()
             lead.is_public = False
-            lead.save()
-            LeadActivity.objects.create(
-                lead=lead, user=request.user,
-                action=f'Preuzela tvrtka: {company.name}',
-                old_status='NA_BURZI', new_status='PREUZETO'
-            )
+            super(type(lead), lead).save()
     except ProjectLead.DoesNotExist:
         return JsonResponse({'ok': False, 'error': 'Kartica ne postoji.'}, status=404)
     except Exception as e:
@@ -171,7 +182,7 @@ def public_upit(request):
     # parse budget from description if not set
     import re as _re
     if not prefill['budget_from'] and prefill['description']:
-        m = _re.search(r'([\d\.]+)\s*€\s*–\s*([\d\.]+)\s*€', prefill['description'])
+        m = _re.search(r'([\d\.]+)\s*\u20ac\s*\u2013\s*([\d\.]+)\s*\u20ac', prefill['description'])
         if m:
             prefill['budget_from'] = m.group(1).replace('.','')
             prefill['budget_to']   = m.group(2).replace('.','')
@@ -210,8 +221,6 @@ def lead_new(request):
             if bf: lead.budget_from = float(bf)
             if bt: lead.budget_to = float(bt)
             lead.save()
-            LeadActivity.objects.create(lead=lead, user=request.user,
-                action='Kartica kreirana', new_status='NOVI_UPIT')
             messages.success(request, 'Kartica kreirana uspješno.')
             return redirect('burza:kanban')
         except Exception as e:
