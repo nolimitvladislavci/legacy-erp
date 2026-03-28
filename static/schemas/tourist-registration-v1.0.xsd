@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tr="urn:limit-connect:tourist-registration:v1.0"
+           targetNamespace="urn:limit-connect:tourist-registration:v1.0"
+           elementFormDefault="qualified">
+
+  <xs:element name="TouristRegistration">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Issuer" type="tr:IssuerType"/>
+        <xs:element name="Period" type="tr:PeriodType"/>
+        <xs:element name="Guests" type="tr:GuestsType"/>
+        <xs:element name="ExperienceGuests" type="tr:ExperienceGuestsType" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="generated" type="xs:dateTime" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="IssuerType">
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="OIB" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="PeriodType">
+    <xs:sequence>
+      <xs:element name="From" type="xs:date"/>
+      <xs:element name="To" type="xs:date"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="GuestsType">
+    <xs:sequence>
+      <xs:element name="Guest" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="BookingNumber" type="xs:string"/>
+            <xs:element name="GuestName" type="xs:string"/>
+            <xs:element name="GuestCount" type="xs:integer"/>
+            <xs:element name="CheckIn" type="xs:date"/>
+            <xs:element name="CheckOut" type="xs:date"/>
+            <xs:element name="Status" type="xs:string"/>
+            <xs:element name="ActualCheckIn" type="xs:dateTime" minOccurs="0"/>
+            <xs:element name="LocalZKI" type="xs:string"/>
+            <xs:element name="TrafficRecord" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="GuestName" type="xs:string"/>
+                  <xs:element name="Nationality" type="xs:string" minOccurs="0"/>
+                  <xs:element name="DocumentNumber" type="xs:string" minOccurs="0"/>
+                  <xs:element name="EVisitorSynced" type="xs:boolean"/>
+                  <xs:element name="EVisitorSyncedAt" type="xs:dateTime" minOccurs="0"/>
+                </xs:sequence>
+                <xs:attribute name="id" type="xs:string"/>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="count" type="xs:integer"/>
+  </xs:complexType>
+
+  <xs:complexType name="ExperienceGuestsType">
+    <xs:sequence>
+      <xs:element name="Guest" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element name="Country" type="xs:string" minOccurs="0"/>
+            <xs:element name="PaxCount" type="xs:integer"/>
+            <xs:element name="Experience" type="xs:string"/>
+            <xs:element name="Date" type="xs:date"/>
+          </xs:sequence>
+          <xs:attribute name="id" type="xs:string"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="count" type="xs:integer"/>
+  </xs:complexType>
+
+</xs:schema>

@@ -120,6 +120,39 @@ def run_pipeline(export, user=None, dry_run=False):
     else:
         results['sign'] = 'skip: not required or dry_run'
 
+    # ── STEP 3b: Timestamp (XAdES-T) ──
+    t0 = time.time()
+    if export.is_signed:
+        try:
+            from .tsa import get_timestamp_token, embed_timestamp_in_xades
+            xml_bytes = export.xml_content.encode('utf-8') if isinstance(export.xml_content, str) else export.xml_content
+            ts_token = get_timestamp_token(xml_bytes)
+            if ts_token:
+                export.xml_content = embed_timestamp_in_xades(export.xml_content, ts_token)
+                export.signature_method = 'XAdES-T'  # Upgrade od BES na T
+                export.save(update_fields=['xml_content', 'signature_method'])
+                results['timestamp'] = 'ok'
+                GovExportLog.objects.create(
+                    export=export, step='timestamp', status='ok',
+                    message=f'TSA token: {len(ts_token)} bytes — XAdES-BES → XAdES-T',
+                    duration_ms=int((time.time() - t0) * 1000), actor=user,
+                )
+            else:
+                results['timestamp'] = 'skip: TSA unavailable'
+                GovExportLog.objects.create(
+                    export=export, step='timestamp', status='skip',
+                    message='TSA server nedostupan — ostaje XAdES-BES',
+                    duration_ms=int((time.time() - t0) * 1000), actor=user,
+                )
+        except Exception as e:
+            results['timestamp'] = f'error: {e}'
+            GovExportLog.objects.create(
+                export=export, step='timestamp', status='error',
+                message=str(e)[:500], duration_ms=int((time.time() - t0) * 1000), actor=user,
+            )
+    else:
+        results['timestamp'] = 'skip: not signed'
+
     # ── STEP 4: Send ──
     t0 = time.time()
     if not dry_run:
