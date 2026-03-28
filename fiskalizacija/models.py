@@ -37,12 +37,38 @@ class FiscalConfig(models.Model):
                                             verbose_name='Demo način (CIS test)')
     is_active        = models.BooleanField(default=False,
                                             verbose_name='Fiskalizacija aktivna')
+    cert_expires_at  = models.DateTimeField(null=True, blank=True,
+                                             verbose_name='Certifikat istječe',
+                                             help_text='Automatski iz P12 pri uploadu')
+    cert_subject     = models.CharField(max_length=200, blank=True, default='',
+                                         verbose_name='Certifikat Subject')
     last_test_at     = models.DateTimeField(null=True, blank=True,
                                              verbose_name='Zadnji test')
     last_test_ok     = models.BooleanField(null=True, blank=True,
                                             verbose_name='Zadnji test OK')
     created_at       = models.DateTimeField(auto_now_add=True)
     updated_at       = models.DateTimeField(auto_now=True)
+
+    def extract_cert_metadata(self):
+        """Izvuci expiry date i subject iz P12 — pozovi jednom pri uploadu."""
+        import os
+        cert_path = self.cert_path if hasattr(self, 'cert_path') else ''
+        if not cert_path or not os.path.exists(cert_path):
+            return
+        try:
+            from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
+            password = self.get_password()
+            if isinstance(password, str):
+                password = password.encode()
+            with open(cert_path, 'rb') as f:
+                p12_data = f.read()
+            key, cert, chain = load_key_and_certificates(p12_data, password)
+            from django.utils import timezone
+            self.cert_expires_at = cert.not_valid_after_utc
+            self.cert_subject = cert.subject.rfc4514_string()[:200]
+            self.save(update_fields=['cert_expires_at', 'cert_subject'])
+        except Exception:
+            pass
 
     class Meta:
         verbose_name        = 'Konfiguracija fiskalizacije'
