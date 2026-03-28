@@ -256,6 +256,28 @@ def add_item(request, receipt_id):
                 kwargs['tax_rate_obj_id'] = inv.tax_rate_id
                 try: kwargs['tax_rate'] = inv.tax_rate.rate
                 except Exception: pass
+
+            # ── KARENCA HARD BLOCK ──────────────────────────────────
+            # Zakon o higijeni hrane: proizvodi iz jata pod aktivnom
+            # karencom (antibiotik/lijek) NE SMIJU se prodavati.
+            # ────────────────────────────────────────────────────────
+            if inv.source_flock_id:
+                try:
+                    flock = inv.source_flock
+                    if flock and flock.has_active_karenca:
+                        karenca_end = flock.karenca_end_date
+                        end_str = karenca_end.strftime('%d.%m.%Y') if karenca_end else '?'
+                        messages.error(
+                            request,
+                            f'ZABRANJENO: Jato "{flock.naziv}" je pod aktivnom karencom '
+                            f'(zdravstveni tretman). Prodaja proizvoda iz ovog jata '
+                            f'nije dozvoljena do {end_str}. '
+                            f'Zakon o higijeni hrane — prekršaj može rezultirati '
+                            f'zatvaranjem objekta.'
+                        )
+                        return redirect('pos:receipt_detail', receipt_id=receipt_id)
+                except Exception:
+                    pass  # Flock deleted ili FK broken — ne blokiraj POS
         except InventoryItem.DoesNotExist:
             pass
     if not kwargs.get('description'):

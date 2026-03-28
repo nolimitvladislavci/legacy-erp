@@ -157,6 +157,14 @@ class InventoryItem(models.Model):
         help_text='Za pracenje karencije — blokira prodaju ako grlo u karenciji',
     )
 
+    # Flock link — za jaja/perad iz udruge modula
+    source_flock = models.ForeignKey(
+        'udruge.Flock', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='inventory_products',
+        verbose_name=_('Izvorno jato'),
+        help_text=_('Za karencija enforcement — blokira POS prodaju dok je jato pod lijekovima'),
+    )
+
     is_pfand = models.BooleanField(
         default=False,
         verbose_name=_("Pfand (povratna ambalaza)"),
@@ -322,13 +330,14 @@ class InventoryItem(models.Model):
 
 class StockMovement(models.Model):
     TYPE_CHOICES = [
-        ('in',          _('Ulaz (nabava)')),
-        ('out',         _('Izlaz (prodaja/upotreba)')),
-        ('adjustment',  _('Korekcija zalihe')),
-        ('transfer',    _('Prijenos na drugu lokaciju')),
-        ('return',      _('Povrat dobavljaču')),
-        ('donation_in', _('Ulaz (materijalna donacija)')),
-        ('writeoff',    _('Otpis / Kalo')),
+        ('in',           _('Ulaz (nabava)')),
+        ('out',          _('Izlaz (prodaja/upotreba)')),
+        ('internal_use', _('Interna upotreba (repromaterijal)')),
+        ('adjustment',   _('Korekcija zalihe')),
+        ('transfer',     _('Prijenos na drugu lokaciju')),
+        ('return',       _('Povrat dobavljaču')),
+        ('donation_in',  _('Ulaz (materijalna donacija)')),
+        ('writeoff',     _('Otpis / Kalo')),
     ]
 
     item          = models.ForeignKey(InventoryItem, on_delete=models.CASCADE,
@@ -374,7 +383,7 @@ class StockMovement(models.Model):
         item = self.item
         if self.movement_type == 'in':
             item.quantity = models.F('quantity') + self.quantity
-        elif self.movement_type in ('out', 'return'):
+        elif self.movement_type in ('out', 'internal_use', 'return'):
             item.quantity = models.F('quantity') - self.quantity
         elif self.movement_type == 'adjustment':
             item.quantity = self.quantity  # direct set

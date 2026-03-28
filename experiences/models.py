@@ -261,11 +261,70 @@ class ExperienceBooking(models.Model):
         sched.save(update_fields=['booked_pax', 'status'])
 
     def mark_no_show(self):
-        """Gost se nije pojavio — depozit se zadržava."""
+        """
+        Gost se nije pojavio — depozit se zadržava.
+        Ako postoji plaćeni depozit, generira račun za zadržani predujam
+        (zakonska obveza — neopravdan priljev na žiro-računu).
+        """
         self.status = 'no_show'
         self.deposit_forfeited = True
         self.refund_amount = Decimal('0')
         self.save(update_fields=['status', 'deposit_forfeited', 'refund_amount'])
+
+        # Generiraj račun za zadržani depozit ako je uplata postojala
+        if self.deposit_paid and self.deposit_amount and self.deposit_amount > 0:
+            self._generate_forfeited_deposit_invoice()
+
+    def _generate_forfeited_deposit_invoice(self):
+        """
+        Generira račun za zadržani predujam (no-show).
+        Zakonska podloga: čl. 78. Zakona o PDV-u — zadržani predujam
+        je oporezivi događaj koji zahtijeva izdavanje računa.
+        """
+        import logging
+        logger = logging.getLogger('experiences.no_show')
+        try:
+            from invoicing.services.invoice_service import create_invoice
+            from invoicing.models import InvoiceItem
+
+            experience = self.schedule.experience
+            company = experience.company
+
+            invoice = create_invoice(
+                company=company,
+                doctype='INVOICE',
+                client_name=self.guest_name,
+                client_email=self.guest_email or '',
+                client_phone=self.guest_phone or '',
+                notes=(
+                    f'Zadržani predujam — no-show za "{experience.name}" '
+                    f'({self.schedule.date} {self.schedule.time_slot}). '
+                    f'Rezervacija #{self.pk}, gostiju: {self.pax_count}.'
+                ),
+            )
+
+            InvoiceItem.objects.create(
+                invoice=invoice,
+                description=f'Zadržani predujam: {experience.name} — no-show {self.guest_name}',
+                quantity=1,
+                unit_price=self.deposit_amount,
+                tax_rate=Decimal('25.00'),
+            )
+
+            # Spremi referencu na račun
+            self.forfeited_invoice = invoice
+            self.save(update_fields=['forfeited_invoice'])
+
+            logger.info(
+                'No-show invoice #%s kreiran za booking #%d — %s EUR',
+                invoice.number or invoice.pk, self.pk, self.deposit_amount,
+            )
+        except Exception as e:
+            logger.error(
+                'No-show invoice FAILED za booking #%d: %s — '
+                'UPOZORENJE: zadržani depozit %s EUR nema računovodstveni dokument!',
+                self.pk, e, self.deposit_amount,
+            )
 
     def confirm_deposit(self, method='card'):
         """Potvrdi uplatu depozita."""

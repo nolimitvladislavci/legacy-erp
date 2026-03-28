@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from core.company_utils import get_user_company
 
 logger = logging.getLogger('udruge')
@@ -1172,10 +1173,10 @@ def api_member_lookup(request):
 
     # Traži po card_number, oib, ili imenu
     member = Clan.objects.filter(company=company).filter(
-        models.Q(card_number=code) |
-        models.Q(oib=code) |
-        models.Q(first_name__icontains=code) |
-        models.Q(last_name__icontains=code)
+        Q(card_number=code) |
+        Q(oib=code) |
+        Q(first_name__icontains=code) |
+        Q(last_name__icontains=code)
     ).first()
 
     if not member:
@@ -3718,6 +3719,7 @@ def golub_seal(request, pk):
 
 @login_required
 def flock_list(request):
+    from .models import Flock
     company = get_user_company(request)
     if not company:
         messages.error(request, 'Nema aktivne tvrtke.')
@@ -3729,9 +3731,9 @@ def flock_list(request):
     q = request.GET.get('q', '')
     if q:
         qs = qs.filter(
-            models.Q(naziv__icontains=q) |
-            models.Q(pasmina__icontains=q) |
-            models.Q(objekt__icontains=q)
+            Q(naziv__icontains=q) |
+            Q(pasmina__icontains=q) |
+            Q(objekt__icontains=q)
         )
 
     # Filter po vrsti
@@ -3757,6 +3759,7 @@ def flock_list(request):
 
 @login_required
 def flock_create(request):
+    from .models import Flock
     company = get_user_company(request)
     if not company:
         messages.error(request, 'Nema aktivne tvrtke.')
@@ -3786,6 +3789,7 @@ def flock_create(request):
 
 @login_required
 def flock_detail(request, pk):
+    from .models import Flock
     company = get_user_company(request)
     flock = get_object_or_404(Flock, pk=pk, company=company)
 
@@ -3796,10 +3800,11 @@ def flock_detail(request, pk):
     # Statistika jaja (zadnjih 30 dana)
     from datetime import timedelta
     thirty_days_ago = timezone.now().date() - timedelta(days=30)
+    from django.db.models import Sum
     egg_stats = flock.egg_records.filter(datum__gte=thirty_days_ago).aggregate(
-        ukupno_jaja=models.Sum('broj_jaja'),
-        ukupno_polomljenih=models.Sum('broken'),
-        ukupno_prodanih=models.Sum('sold'),
+        ukupno_jaja=Sum('broj_jaja'),
+        ukupno_polomljenih=Sum('broken'),
+        ukupno_prodanih=Sum('sold'),
     )
 
     return render(request, 'udruge/flock_detail.html', {
@@ -3813,6 +3818,7 @@ def flock_detail(request, pk):
 
 @login_required
 def flock_edit(request, pk):
+    from .models import Flock
     company = get_user_company(request)
     flock = get_object_or_404(Flock, pk=pk, company=company)
 
@@ -3839,6 +3845,7 @@ def flock_edit(request, pk):
 
 @login_required
 def egg_record_create(request, flock_pk):
+    from .models import Flock, EggRecord
     company = get_user_company(request)
     flock = get_object_or_404(Flock, pk=flock_pk, company=company)
 
@@ -3862,6 +3869,7 @@ def egg_record_create(request, flock_pk):
 
 @login_required
 def flock_health_create(request, flock_pk):
+    from .models import Flock, FlockHealthRecord
     company = get_user_company(request)
     flock = get_object_or_404(Flock, pk=flock_pk, company=company)
 
@@ -3907,6 +3915,7 @@ def flock_health_create(request, flock_pk):
 
 @login_required
 def flock_mortality_create(request, flock_pk):
+    from .models import Flock, FlockMortality
     company = get_user_company(request)
     flock = get_object_or_404(Flock, pk=flock_pk, company=company)
 
@@ -3945,6 +3954,7 @@ def bridge_publish(request):
         # Karenca enforcement: blokada prodaje jaja pod aktivnom karencom
         if source_model == 'EggRecord':
             try:
+                from .models import EggRecord
                 egg = EggRecord.objects.select_related('flock').get(pk=int(source_id))
                 if egg.flock.has_active_karenca:
                     karenca_end = egg.flock.karenca_end_date
@@ -3981,3 +3991,165 @@ def bridge_publish(request):
         return redirect(request.META.get('HTTP_REFERER', 'udruge:flock_list'))
 
     return redirect('udruge:flock_list')
+
+
+# ── Golubar AI: generiraj ime goluba iz slike ─────────────────────────────
+@require_POST
+@csrf_exempt
+def golubar_ai_ime(request):
+    """
+    POST /udruge/golubar/ai-ime/
+    Body JSON: { "image_b64": "<base64 jpeg>" }
+    Returns:   { "ime": "Vihor", "opis_boje": "siv s bijelim krilima", "confidence": 0.9 }
+    """
+    import json, os, logging
+    logger = logging.getLogger("borg.golubar")
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Prijava potrebna"}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"error": "Neispravan JSON"}, status=400)
+
+    b64 = data.get("image_b64", "").strip()
+    if not b64:
+        return JsonResponse({"error": "Nedostaje slika"}, status=400)
+
+    # Provjera veličine — Anthropic limit ~5MB, sigurno < 3.5MB
+    import re
+    size_bytes = len(b64) * 3 // 4
+    if size_bytes > 3_600_000:
+        return JsonResponse({"error": "Slika je prevelika (%d KB). Smanji rezoluciju." % (size_bytes//1024)}, status=400)
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=200,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {"type": "base64", "media_type": "image/jpeg", "data": b64},
+                    },
+                    {
+                        "type": "text",
+                        "text": (
+                            "Ovo je fotografija goluba trkača (racing pigeon). "
+                            "Na temelju izgleda predloži: "
+                            "1) Kratko ime (snažno, za trkačke golubove, na hrvatskom: Vihor, Munja, Oluja, Srebrni, Planinar, Stijela, Zorko, Grom, Sjever, Zora) "
+                            "2) Kratak opis boje perja "
+                            "3) Kod boje — SAMO jedan od: siv, bijel, crn, smed, plav, crven, zut, sareno, ostalo "
+                            "Odgovori ISKLJUČIVO JSON, bez ikakvog drugog teksta:\n"
+                            '{"ime":"...","opis_boje":"...","boja_kod":"siv","confidence":0.9}'
+                        ),
+                    },
+                ],
+            }],
+        )
+        raw = response.content[0].text.strip()
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        if m:
+            result = json.loads(m.group(0))
+            return JsonResponse(result)
+        return JsonResponse({"error": "AI nije vratio valjani JSON", "raw": raw[:200]}, status=500)
+    except Exception as e:
+        logger.error("golubar_ai_ime error: %s", e, exc_info=True)
+        return JsonResponse({"error": str(e)[:200]}, status=500)
+
+
+# ── Golubar AI: čitanje broja prstena iz slike ───────────────────────────
+@require_POST
+@csrf_exempt
+def golubar_ai_prsten(request):
+    """
+    POST /udruge/golubar/ai-prsten/
+    Body JSON: { "images": ["<b64>", "<b64>", ...] }  # 1-3 slike prstena
+    Returns:   { "prsten_broj": "HR-2026-12345", "godina": "2026", "confidence": 0.92 }
+    """
+    import json, os, re, base64, logging
+    logger = logging.getLogger("borg.golubar")
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Prijava potrebna"}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"error": "Neispravan JSON"}, status=400)
+
+    images = data.get("images", [])
+    if not images:
+        return JsonResponse({"error": "Nedostaje slika prstena"}, status=400)
+
+    # Provjera veličine — max 3.5MB base64 po slici
+    validated = []
+    for b64 in images[:3]:
+        b64 = b64.strip()
+        if not b64:
+            continue
+        size_bytes = len(b64) * 3 // 4
+        if size_bytes > 3_600_000:
+            # Slika prevelika — preskočimo je (frontend bi trebao resizati)
+            logger.warning("golubar_ai_prsten: slika %d bytes, preskačem", size_bytes)
+            continue
+        validated.append(b64)
+
+    if not validated:
+        return JsonResponse({"error": "Slike su prevelike. Pokušajte s manjom rezolucijom."}, status=400)
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+
+        # Gradi content — jedna ili više slika
+        content = []
+        for b64 in validated:
+            content.append({
+                "type": "image",
+                "source": {"type": "base64", "media_type": "image/jpeg", "data": b64},
+            })
+
+        if len(validated) > 1:
+            prompt = (
+                "Prikazano je {} fotografija prstena goluba. "
+                "Pogledi sve fotografije i pokuša pročitati broj prstena. "
+                "Broj prstena je obično u formatu: HR-YYYY-NNNNN, CRO YYYY NNNNN, "
+                "HOG YYYY NNNNN ili slično. "
+                "Odgovori ISKLJUČIVO u JSON formatu bez ikakvog drugog teksta:\n"
+                '{{"prsten_broj":"...","godina":"...","confidence":0.9}}'
+            ).format(len(validated))
+        else:
+            prompt = (
+                "Ovo je fotografija prstena goluba. "
+                "Pročitaj broj prstena (ring number). "
+                "Format je obično: HR-YYYY-NNNNN, CRO YYYY NNNNN, HOG YYYY NNNNN ili slično. "
+                "Ako ne možeš pročitati, vrati confidence manji od 0.3. "
+                "Odgovori ISKLJUČIVO u JSON formatu bez ikakvog drugog teksta:\n"
+                '{{"prsten_broj":"...","godina":"...","confidence":0.9}}'
+            )
+
+        content.append({"type": "text", "text": prompt})
+
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=120,
+            messages=[{"role": "user", "content": content}],
+        )
+        raw = response.content[0].text.strip()
+        m = re.search(r'\{.*\}', raw, re.DOTALL)
+        if m:
+            result = json.loads(m.group(0))
+            # Ako confidence < 0.4 — prsten_broj vrati prazan
+            if float(result.get("confidence", 0)) < 0.4:
+                result["prsten_broj"] = ""
+            return JsonResponse(result)
+        return JsonResponse({"error": "AI nije vratio valjani JSON", "raw": raw[:100]}, status=500)
+
+    except Exception as e:
+        logger.error("golubar_ai_prsten error: %s", e, exc_info=True)
+        return JsonResponse({"error": str(e)[:200]}, status=500)
