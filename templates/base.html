@@ -395,6 +395,51 @@
     });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+    <!-- HTMX UX: Loading indicators + button disable -->
+    <style>
+    .htmx-request .htmx-indicator{display:inline-block!important}
+    .htmx-indicator{display:none}
+    .htmx-request button[type=submit],.htmx-request .btn-submit{opacity:.6;pointer-events:none}
+    .toast-container{position:fixed;top:20px;right:20px;z-index:20000}
+    .borg-toast{padding:12px 20px;border-radius:10px;color:#fff;font-size:.85rem;font-weight:600;margin-bottom:8px;animation:toastIn .3s ease;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+    .borg-toast.success{background:#16a34a}
+    .borg-toast.error{background:#dc2626}
+    .borg-toast.warning{background:#d97706}
+    @keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+    </style>
+    <div class="toast-container" id="borgToasts"></div>
+    <script>
+    // Global toast notification
+    window.borgToast = function(msg, type) {
+        type = type || 'success';
+        var container = document.getElementById('borgToasts');
+        if (!container) return;
+        var toast = document.createElement('div');
+        toast.className = 'borg-toast ' + type;
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(function(){ toast.style.opacity='0'; setTimeout(function(){ toast.remove(); }, 300); }, 4000);
+    };
+
+    // HTMX error handler → toast
+    document.addEventListener('htmx:responseError', function(e) {
+        borgToast('Greška: ' + (e.detail.xhr.status || 'mreža'), 'error');
+    });
+    document.addEventListener('htmx:sendError', function() {
+        borgToast('Mrežna greška — pokušajte ponovo', 'error');
+    });
+
+    // Auto-disable submit buttons during HTMX request
+    document.addEventListener('htmx:beforeRequest', function(e) {
+        var btns = e.target.querySelectorAll('button[type=submit],.btn-submit');
+        btns.forEach(function(b){ b.dataset.origText = b.innerHTML; b.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Obrada...'; b.disabled = true; });
+    });
+    document.addEventListener('htmx:afterRequest', function(e) {
+        var btns = e.target.querySelectorAll('button[type=submit],.btn-submit');
+        btns.forEach(function(b){ if(b.dataset.origText) b.innerHTML = b.dataset.origText; b.disabled = false; });
+    });
+    </script>
 </head>
 <body>
     <!-- Offline indikator -->
