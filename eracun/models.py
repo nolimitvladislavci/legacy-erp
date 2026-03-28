@@ -256,3 +256,42 @@ class ERacunLog(models.Model):
 
     def __str__(self):
         return f'{self.action}: {self.message[:50]}'
+
+class SukladnostTestRun(models.Model):
+    """Zapis svakog pokretanja testa sukladnosti za Poreznu upravu."""
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='sukladnost_runs',
+    )
+    run_by = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True,
+    )
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    # Rezultati po scenariju
+    ts01_cert = models.BooleanField(null=True, verbose_name='TS-01: Certifikat')
+    ts02_ubl = models.BooleanField(null=True, verbose_name='TS-02: UBL generacija')
+    ts03_validate = models.BooleanField(null=True, verbose_name='TS-03: XSD validacija')
+    ts04_fiscal = models.BooleanField(null=True, verbose_name='TS-04: Fiskalizacija')
+    ts05_inbox = models.BooleanField(null=True, verbose_name='TS-05: Inbox primanje')
+    
+    total_pass = models.PositiveIntegerField(default=0)
+    total_fail = models.PositiveIntegerField(default=0)
+    details = models.JSONField(default=dict, blank=True)
+    
+    class Meta:
+        verbose_name = 'Test sukladnosti'
+        verbose_name_plural = 'Testovi sukladnosti'
+        ordering = ['-started_at']
+
+    def __str__(self):
+        return f'{self.company.name} — {self.started_at:%d.%m.%Y %H:%M} ({self.total_pass}/5)'
+
+    @property
+    def score_pct(self):
+        return int(self.total_pass / 5 * 100) if self.total_pass else 0
+
+    @property 
+    def all_pass(self):
+        return self.total_pass == 5

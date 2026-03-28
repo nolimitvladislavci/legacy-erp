@@ -32,3 +32,11 @@ class ERacunAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'fina_uuid', 'xml_request', 'xml_response', 'created_at', 'sent_at', 'accepted_at')
     inlines = [ERacunItemInline, ERacunTaxSummaryInline, ERacunLogInline]
     date_hierarchy = 'created_at'
+
+from .models import SukladnostTestRun
+
+@admin.register(SukladnostTestRun)
+class SukladnostTestRunAdmin(admin.ModelAdmin):
+    list_display = ('company', 'started_at', 'total_pass', 'total_fail', 'run_by')
+    list_filter = ('company',)
+    readonly_fields = ('details',)

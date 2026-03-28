@@ -41,4 +41,8 @@ urlpatterns = [
     # DE: ZUGFeRD + XRechnung download
     path('<uuid:pk>/zugferd/', views.download_zugferd, name='download_zugferd'),
     path('<uuid:pk>/xrechnung/', views.download_xrechnung, name='download_xrechnung'),
+
+    # Sukladnost — Portal za testiranje Porezne uprave
+    path('sukladnost/', views.sukladnost_dashboard, name='sukladnost_dashboard'),
+    path('sukladnost/run/', views.sukladnost_run, name='sukladnost_run'),
 ]
