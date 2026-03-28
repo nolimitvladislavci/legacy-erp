@@ -39,6 +39,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bag-opt input{width:auto}
 @media(min-width:500px){.items{grid-template-columns:repeat(3,1fr)}}
 </style>
+
+<script>
+function getCsrf(){var t=document.querySelector('[name=csrfmiddlewaretoken]');if(t)return t.value;var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var p=c[i].trim();if(p.startsWith('csrftoken='))return p.substring(10);}return'';}
+</script>
 </head>
 <body>
 
@@ -161,7 +165,7 @@ function submitOrder() {
 
     fetch('/pos/pickup/' + SLUG + '/order/', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken':getCsrf()},
         body: JSON.stringify({
             items: items,
             name: name,

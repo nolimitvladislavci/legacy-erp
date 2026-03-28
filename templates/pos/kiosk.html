@@ -46,6 +46,10 @@ body{background:#0a0a0a;color:#e2e8f0;font-family:'Barlow',system-ui,sans-serif;
 #screensaver .ss-brand{font-family:'Cormorant Garamond',serif;color:#c9a84c;font-size:3rem;margin-bottom:16px}
 #screensaver .ss-sub{color:#444;font-size:1.2rem}
 </style>
+
+<script>
+function getCsrf(){var t=document.querySelector('[name=csrfmiddlewaretoken]');if(t)return t.value;var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var p=c[i].trim();if(p.startsWith('csrftoken='))return p.substring(10);}return'';}
+</script>
 </head>
 <body>
 
@@ -173,7 +177,7 @@ function checkout() {
   // Kreiraj narudžbu na backendu
   fetch('/pos/api/quick-order/', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken':getCsrf()},
     body: JSON.stringify({terminal_token: '{{ terminal.access_token }}', items: items, total: total, payment_method: 'counter'})
   })
   .then(function(r){ return r.json(); })

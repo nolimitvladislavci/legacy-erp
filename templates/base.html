@@ -371,6 +371,29 @@
     {% block extra_css %}{% endblock %}
     <!-- BORG Faza 2: HTMX + Sortable.js -->
     <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
+    <!-- HTMX Global CSRF Header — svaki HTMX request šalje X-CSRFToken -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.addEventListener('htmx:configRequest', function(event) {
+            // Pokupi CSRF token iz cookie-ja (Django ga tamo stavlja)
+            var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            if (!csrfToken) {
+                // Fallback: pokupi iz cookie-ja
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var c = cookies[i].trim();
+                    if (c.startsWith('csrftoken=')) {
+                        csrfToken = c.substring('csrftoken='.length);
+                        break;
+                    }
+                }
+            }
+            if (csrfToken) {
+                event.detail.headers['X-CSRFToken'] = csrfToken;
+            }
+        });
+    });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 </head>
 <body>

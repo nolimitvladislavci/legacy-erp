@@ -226,6 +226,10 @@
 {% endblock %}
 
 {% block extra_js %}
+
+<script>
+function getCsrf(){var t=document.querySelector('[name=csrfmiddlewaretoken]');if(t)return t.value;var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var p=c[i].trim();if(p.startsWith('csrftoken='))return p.substring(10);}return'';}
+</script>
 <script>
 var ACTION_URL = '{% url "b2b_invoice_action" token invoice.pk %}';
 
@@ -236,7 +240,7 @@ async function pdvAction(action) {
   fd.append('csrfmiddlewaretoken', FC.csrf || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '');
   try {
     const resp = await fetch('{% url "portal_pdv_approve" token invoice.pk %}', {
-      method: 'POST', body: fd, headers: {'X-Requested-With': 'XMLHttpRequest'}
+      method: 'POST', body: fd, headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCsrf()}
     });
     const data = await resp.json();
     const el = document.getElementById('pdv-result');

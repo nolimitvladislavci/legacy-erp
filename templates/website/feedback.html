@@ -24,6 +24,10 @@ textarea:focus{border-color:var(--gold);outline:none}
 .links{margin-top:24px;border-top:1px solid #222;padding-top:16px;font-size:.85rem;color:#666}
 .links a{color:var(--gold);text-decoration:none;margin:0 8px}
 </style>
+
+<script>
+function getCsrf(){var t=document.querySelector('[name=csrfmiddlewaretoken]');if(t)return t.value;var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var p=c[i].trim();if(p.startsWith('csrftoken='))return p.substring(10);}return'';}
+</script>
 </head>
 <body>
 <div class="card">
@@ -61,7 +65,7 @@ function send() {
   btn.disabled = true; btn.textContent = 'Šaljem...';
   fetch('/api/feedback/', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json', 'X-CSRFToken':getCsrf()},
     body: JSON.stringify({rating: _rating, comment: document.getElementById('comment').value, source: 'web'})
   })
   .then(function(r) { return r.json(); })
