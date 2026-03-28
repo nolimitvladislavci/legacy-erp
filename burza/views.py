@@ -427,3 +427,27 @@ def bathroom_pdf(request, pk):
     except Exception:
         logger.exception("Bathroom PDF failed")
     return HttpResponse("PDF Fehler", status=500)
+
+
+@login_required
+def kanban_col(request, status):
+    """HTMX partial: returns cards for a single kanban column."""
+    company = get_company(request)
+    sa = is_superadmin(request)
+    valid_statuses = [s[0] for s in ProjectLead.Status.choices]
+    if status not in valid_statuses:
+        return render(request, 'burza/partials/kanban_col.html', {'leads': [], 'status': status})
+
+    if sa:
+        leads = ProjectLead.objects.filter(status=status).select_related('company', 'taken_by')
+    elif status == 'NA_BURZI':
+        leads = ProjectLead.objects.filter(status='NA_BURZI', is_public=True)
+    else:
+        leads = ProjectLead.objects.filter(company=company, status=status)
+
+    return render(request, 'burza/partials/kanban_col.html', {
+        'leads': leads.order_by('-created_at')[:30],
+        'status': status,
+        'is_superadmin': sa,
+        'company': company,
+    })

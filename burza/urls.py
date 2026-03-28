@@ -13,6 +13,7 @@ urlpatterns = [
     path('lead/<int:pk>/invoice/',  views.create_invoice_from_lead, name='invoice_from_lead'),
     path('lead/<int:lead_pk>/bathroom/', views.bathroom_to_project, name='bathroom_to_project'),
     path('lead/<int:pk>/bathroom-pdf/', views.bathroom_pdf, name='bathroom_pdf'),
+    path('kanban/col/<str:status>/', views.kanban_col, name='kanban_col'),
     path('upit/',                   views.public_upit,   name='upit'),
     path('upit/hvala/',             views.upit_hvala,    name='upit_hvala'),
 ]

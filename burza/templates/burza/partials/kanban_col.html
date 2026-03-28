@@ -1,0 +1,33 @@
+{% load i18n %}
+{% for lead in leads %}
+<div class="kanban-card" id="card-{{ lead.pk }}" data-card-id="{{ lead.pk }}" data-model="ProjectLead">
+    <div class="card-cat">{{ lead.get_category_display }}</div>
+    <div class="card-title" style="margin-top:8px">{{ lead.title }}</div>
+    <div class="card-meta">
+        <span>📍 {{ lead.location }}</span>
+        <span>👤 {{ lead.contact_name }}</span>
+        <span>🕐 {{ lead.created_at|date:"d.m.Y" }}</span>
+    </div>
+    {% if lead.budget_from or lead.budget_to %}<div class="card-budget">💰 {{ lead.budget_display }}</div>{% endif %}
+    {% if lead.sla_minutes_in_current_status > 0 %}
+    <div style="font-size:.65rem;color:{% if lead.sla_minutes_in_current_status > 1440 %}#ef4444{% elif lead.sla_minutes_in_current_status > 480 %}#f59e0b{% else %}#64748b{% endif %};margin-bottom:4px">
+        ⏱ {{ lead.sla_minutes_in_current_status }}min u statusu
+    </div>
+    {% endif %}
+    <div class="card-actions">
+        <button class="card-btn btn-blue" onclick="window.location='{% url 'burza:lead_detail' lead.pk %}'">{% trans "👁 Detalji" %}</button>
+        {% if is_superadmin or lead.company == company %}<button class="card-btn btn-gold" onclick="openMove({{ lead.pk }},'{{ status }}')">{% trans "↕ Pomakni" %}</button>{% endif %}
+        {% if status == 'NA_BURZI' and not is_superadmin and company %}
+        <button class="card-btn btn-green" id="p-{{ lead.pk }}" onclick="preuzmi({{ lead.pk }},this)">{% trans "✅ Preuzmi" %}</button>
+        {% endif %}
+        {% if status == 'PREUZETO' and is_superadmin %}
+        <a href="{% url 'burza:invoice_from_lead' lead.pk %}" class="card-btn btn-gold" style="text-decoration:none">{% trans "📄 Faktura" %}</a>
+        {% endif %}
+        {% if status == 'RIJESENO' %}
+        <a href="{% url 'burza:invoice_from_lead' lead.pk %}" class="card-btn btn-gold" style="text-decoration:none;flex:2">{% trans "📄 Kreiraj fakturu" %}</a>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div class="col-empty"><div style="font-size:2rem;margin-bottom:8px;opacity:.3">📭</div>{% trans "Nema kartice" %}</div>
+{% endfor %}
