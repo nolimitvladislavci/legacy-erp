@@ -229,6 +229,89 @@ section h2{font-size:1.8rem;margin-bottom:20px;padding-bottom:8px;border-bottom:
 
 </div>
 
+
+<!-- GOVEXPORT STANDARD -->
+<section style="margin-top:60px">
+  <h2><i class="fas fa-shield-alt"></i> GovExport Standard — Kriptografski Trezor</h2>
+  <p style="color:var(--muted);margin-bottom:24px">
+    LIMIT Connect uvodi novi standard za komunikaciju s državnim institucijama. 
+    Umjesto krhkih live konekcija, koristimo <strong>potpisane XML dokumente</strong> — 
+    ista logika kao fiskalizacija računa, ali za sve izvještaje.
+  </p>
+
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px">
+    <h3 style="font-size:1.3rem;margin-bottom:16px"><i class="fas fa-cogs" style="color:var(--blue)"></i> Kako funkcionira</h3>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px;text-align:center">
+      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-file-code" style="color:var(--gold);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Generate<br>XML</div></div>
+      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-check-double" style="color:var(--green);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Validate<br>XSD</div></div>
+      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-signature" style="color:var(--gold2);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Sign<br>XAdES</div></div>
+      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-clock" style="color:var(--blue);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Timestamp<br>TSA</div></div>
+      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-paper-plane" style="color:var(--green);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Send<br>Transport</div></div>
+      <div style="background:#1a1a2e;border-radius:10px;padding:12px 8px"><i class="fas fa-stamp" style="color:var(--gold);font-size:1.2rem"></i><div style="font-size:.7rem;margin-top:6px;color:var(--muted)">Confirm<br>Potvrda</div></div>
+    </div>
+    <p style="font-size:.82rem;color:var(--muted)">Svaki dokument je potpisan, hashiran (SHA-256), vremenski žigosan (RFC 3161) i auditiran. 
+    Država ga može preuzeti danas, sutra ili za 3 godine — matematika garantira neizmjenjivost.</p>
+  </div>
+
+  <!-- 3 Standarda -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-top:3px solid #4caf7d">
+      <h3 style="font-size:1.05rem;margin-bottom:8px"><i class="fas fa-leaf" style="color:#4caf7d"></i> Agro-Fiskalizacija</h3>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Veterinarski zapisi, karenca lijekova, mortalitet peradi, nesenje jaja — potpisan XML za HAPIH i sanitarnu inspekciju.</p>
+      <a href="/static/schemas/agro-health-v1.0.xsd" style="font-size:.75rem;color:var(--gold)"><i class="fas fa-download"></i> XSD Shema</a>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-top:3px solid #3b82f6">
+      <h3 style="font-size:1.05rem;margin-bottom:8px"><i class="fas fa-plane-arrival" style="color:#3b82f6"></i> Turistički ZKI</h3>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Asinkrona prijava gostiju s lokalnim ZKI kodom. Radi bez eVisitora — kriptografski dokaz vremena prijave.</p>
+      <a href="/static/schemas/tourist-registration-v1.0.xsd" style="font-size:.75rem;color:var(--gold)"><i class="fas fa-download"></i> XSD Shema</a>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;border-top:3px solid #e8c96a">
+      <h3 style="font-size:1.05rem;margin-bottom:8px"><i class="fas fa-warehouse" style="color:#e8c96a"></i> Forenzika Zaliha</h3>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Mjesečni snapshot inventara — artikli, LOT šarže, kretanja, SplitAllocation. Skladišna fiskalizacija.</p>
+      <a href="/static/schemas/inventory-ledger-v1.0.xsd" style="font-size:.75rem;color:var(--gold)"><i class="fas fa-download"></i> XSD Shema</a>
+    </div>
+  </div>
+
+  <!-- Alati -->
+  <div style="background:var(--card);border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:24px;margin-bottom:20px">
+    <h3 style="font-size:1.1rem;margin-bottom:12px"><i class="fas fa-tools" style="color:var(--gold)"></i> Javni Alati</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <a href="/hr/gov-export/validator/" style="display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a2e;border-radius:10px;border:1px solid #2a2a3e;text-decoration:none">
+        <i class="fas fa-shield-alt" style="color:var(--gold);font-size:1.3rem"></i>
+        <div><div style="color:var(--text);font-weight:600;font-size:.88rem">BORG Validator</div><div style="color:var(--muted);font-size:.72rem">Provjera potpisa XML dokumenta</div></div>
+      </a>
+      <a href="/static/schemas/" style="display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a2e;border-radius:10px;border:1px solid #2a2a3e;text-decoration:none">
+        <i class="fas fa-file-alt" style="color:var(--blue);font-size:1.3rem"></i>
+        <div><div style="color:var(--text);font-weight:600;font-size:.88rem">XSD Sheme</div><div style="color:var(--muted);font-size:.72rem">Javne definicije formata (MIT)</div></div>
+      </a>
+      <a href="https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/validation" target="_blank" style="display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a2e;border-radius:10px;border:1px solid #2a2a3e;text-decoration:none">
+        <i class="fas fa-globe-europe" style="color:#22c55e;font-size:1.3rem"></i>
+        <div><div style="color:var(--text);font-weight:600;font-size:.88rem">EU DSS Validator</div><div style="color:var(--muted);font-size:.72rem">Neovisna verifikacija (EU)</div></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Tehnička specifikacija -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px">
+    <h3 style="font-size:1.1rem;margin-bottom:12px"><i class="fas fa-microchip" style="color:var(--gold)"></i> Tehnička Specifikacija</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.82rem">
+      <div><span style="color:var(--muted)">Potpis:</span> <strong>XAdES-T</strong> (eIDAS)</div>
+      <div><span style="color:var(--muted)">Hash:</span> <strong>SHA-256</strong></div>
+      <div><span style="color:var(--muted)">Timestamp:</span> <strong>RFC 3161</strong> (FINA TSA)</div>
+      <div><span style="color:var(--muted)">Format:</span> <strong>XML + XSD</strong></div>
+      <div><span style="color:var(--muted)">Certifikat:</span> <strong>FINA X.509</strong></div>
+      <div><span style="color:var(--muted)">Transport:</span> <strong>SOAP / REST / AS4</strong></div>
+      <div><span style="color:var(--muted)">Validacija:</span> <strong>EN 16931 + CIUS-HR</strong></div>
+      <div><span style="color:var(--muted)">Licenca:</span> <strong>MIT (sheme)</strong></div>
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
+      Svi XML dokumenti su usklađeni s EU eIDAS regulativom (Uredba 910/2014). 
+      Kvalificirani elektronički potpis ima istu pravnu snagu kao vlastoručni potpis.
+      Javne XSD sheme omogućuju neovisnu implementaciju i verifikaciju bez pristupa LIMIT Connect sustavu.
+    </p>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <div class="footer">
   <div class="logo">LIMIT Connect</div>
