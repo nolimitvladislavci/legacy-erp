@@ -101,10 +101,7 @@ def expiry_gastro_bridge_check(self):
                 if phone:
                     bridge_url = f"https://limit-connect.com/marketplace/gastro-bridge/{product.pk}/"
                     msg = (
-                        f"⏰ LAST CALL: "{product.name}" istice za ~4h na trznici. "
-                        f"Nitko nije kupio. "
-                        f"Prebaci u Konobu kao dnevni specijal (-30%)?
-"
+                        f"LAST CALL: {product.name} istice za ~4h na trznici. "
                         f"→ {bridge_url}"
                     )
                     send_text(phone=phone, message=msg, company_id=str(product.seller_company.pk))
