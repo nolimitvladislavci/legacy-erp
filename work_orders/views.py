@@ -609,24 +609,54 @@ def _fill_client_card(cc, post):
 
 @login_required
 def work_order_board(request):
-    """Kanban board for work orders — 5 columns by status."""
+    """Kanban board for work orders — 5 columns by status.
+    
+    Dron #2 fix: Prefetch StatusTimestamp da se izbjegne N+1.
+    Jedan SQL za sve kartice + jedan Prefetch za SLA timestamps.
+    Total: 2 SQL umjesto 1 + N*2.
+    """
+    from django.db.models import Prefetch
+    from borg_ops.models import StatusTimestamp
+    from django.contrib.contenttypes.models import ContentType
+
     company = _get_company(request)
     if not company:
         return HttpResponseForbidden("No company.")
 
-    qs = WorkOrder.objects.filter(company=company).select_related('client', 'assigned_to')
+    # ContentType za WorkOrder — jedan lookup, cached
+    ct = ContentType.objects.get_for_model(WorkOrder)
+
+    # Prefetch samo otvorene SLA timestamps (exited_at IS NULL)
+    sla_prefetch = Prefetch(
+        'sla_timestamps',
+        queryset=StatusTimestamp.objects.filter(exited_at__isnull=True),
+        to_attr='_sla_open',
+    )
+
+    qs = (WorkOrder.objects
+          .filter(company=company)
+          .select_related('client', 'assigned_to')
+          .prefetch_related(sla_prefetch))
+
+    ACTIVE = ['draft', 'in_progress', 'completed', 'invoiced', 'cancelled']
+    all_cards = list(qs.filter(status__in=ACTIVE).order_by('-created_at')[:150])
+
+    # Grupiraj u memoriji — nema extra SQL-a
+    by_status = {}
+    for card in all_cards:
+        by_status.setdefault(card.status, []).append(card)
 
     columns = [
         {'id': 'draft',       'label': 'Nacrt',      'icon': '📝', 'color': '#64748b',
-         'items': qs.filter(status='draft').order_by('-created_at')[:30]},
+         'items': by_status.get('draft', [])[:30]},
         {'id': 'in_progress', 'label': 'U tijeku',   'icon': '🔧', 'color': '#3b82f6',
-         'items': qs.filter(status='in_progress').order_by('-created_at')[:30]},
+         'items': by_status.get('in_progress', [])[:30]},
         {'id': 'completed',   'label': 'Završen',    'icon': '✅', 'color': '#22c55e',
-         'items': qs.filter(status='completed').order_by('-created_at')[:30]},
+         'items': by_status.get('completed', [])[:30]},
         {'id': 'invoiced',    'label': 'Fakturiran', 'icon': '📄', 'color': '#c9a84c',
-         'items': qs.filter(status='invoiced').order_by('-created_at')[:30]},
+         'items': by_status.get('invoiced', [])[:30]},
         {'id': 'cancelled',   'label': 'Otkazan',    'icon': '❌', 'color': '#ef4444',
-         'items': qs.filter(status='cancelled').order_by('-created_at')[:30]},
+         'items': by_status.get('cancelled', [])[:30]},
     ]
 
     return render(request, 'work_orders/board.html', {
