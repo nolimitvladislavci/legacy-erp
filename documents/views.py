@@ -1812,8 +1812,8 @@ def pdv_obrazac(request):
         if company_id:
             try:
                 company = Company.objects.get(pk=company_id)
-            except:
-                pass
+            except Exception as e:  # BORG: was bare except
+                logger.debug("Handled exception in documents.views:%d: %s", 1815, e)  # BORG
 
     if not company:
         return render(request, 'documents/pdv_obrazac.html', {'all_companies': all_companies})

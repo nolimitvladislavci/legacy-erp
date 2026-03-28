@@ -146,7 +146,7 @@ class Force2FAMiddleware:
 
         # Provjeri samo kriticne uloge
         try:
-            profile = request.user.userprofile
+            profile = request.user.profile
         except Exception:
             return self.get_response(request)
 
@@ -212,7 +212,7 @@ class ForceTCMiddleware:
         company = getattr(request, 'current_company', None)
         if not company:
             try:
-                company = request.user.userprofile.company
+                company = request.user.profile.company
             except Exception:
                 return self.get_response(request)
 

@@ -444,7 +444,8 @@ def ai_barcode_lookup(request):
 
     try:
         data = json.loads(request.body)
-    except:
+    except Exception as e:  # BORG: was bare except
+        logger.debug("Exception in pos.views:%d: %s", 447, e)  # BORG
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     code = data.get('code', '').strip()
@@ -502,7 +503,8 @@ def ai_barcode_lookup(request):
                         tax_val = 25
                         if item.tax_rate_id:
                             try: tax_val = float(item.tax_rate.rate)
-                            except: pass
+                            except Exception as e:  # BORG: was bare except pass
+                                logger.debug("Exception in pos.views:%d: %s", 505, e)  # BORG
                         return JsonResponse({
                             'found': True, 'code': ai_code, 'name': item.name,
                             'id': str(item.pk), 'price': str(item.unit_price), 'tax_rate': tax_val
@@ -3892,7 +3894,8 @@ def api_quick_add_item(request):
 
     try:
         data = json.loads(request.body)
-    except:
+    except Exception as e:  # BORG: was bare except
+        logger.debug("Exception in pos.views:%d: %s", 3895, e)  # BORG
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     name = data.get('name', '').strip()

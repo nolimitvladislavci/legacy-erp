@@ -7,6 +7,8 @@ Pokreni: venv/bin/python synesis/import_p1.py
 import os, sys, glob, csv, io, subprocess, time, django
 from decimal import Decimal, InvalidOperation
 from collections import defaultdict
+import logging
+logger = logging.getLogger("synesis.import_p1")
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 sys.path.insert(0, '/var/www/fina-connect')
@@ -23,12 +25,14 @@ def _mdb(mdb_path, table):
         r = subprocess.run(['mdb-export', mdb_path, table], capture_output=True, text=True, timeout=60, env=env)
         if r.returncode != 0: return []
         return list(csv.DictReader(io.StringIO(r.stdout)))
-    except: return []
+    except Exception as e:  # BORG: was bare except
+        return []
 
 def _dec(val):
     if not val: return Decimal('0')
     try: return Decimal(str(val).strip().replace(',','.').replace('"','')).quantize(Decimal('0.01'))
-    except: return Decimal('0')
+    except Exception as e:  # BORG: was bare except
+        return Decimal('0')
 
 def _date(val):
     if not val: return None
@@ -36,11 +40,13 @@ def _date(val):
     from datetime import datetime, timedelta, date
     for fmt in ('%m/%d/%y %H:%M:%S','%m/%d/%Y %H:%M:%S','%m/%d/%y','%Y-%m-%d'):
         try: return datetime.strptime(val, fmt).date()
-        except: continue
+        except Exception as e:  # BORG: was bare except
+            continue
     try:
         s = float(val)
         if 30000 < s < 60000: return date(1899,12,30) + timedelta(days=int(s))
-    except: pass
+    except Exception as e:  # BORG: was bare except
+        pass
     return None
 
 def _clean(val, maxlen=200):

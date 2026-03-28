@@ -181,7 +181,7 @@ function compressImage(file, callback) {
   reader.onload = function(e) {
     var img = new Image();
     img.onload = function() {
-      var maxW = 1500, maxH = 1500;
+      var maxW = 1200, maxH = 1200;
       var w = img.width, h = img.height;
       if (w > maxW || h > maxH) {
         var ratio = Math.min(maxW / w, maxH / h);
