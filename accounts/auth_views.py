@@ -1078,3 +1078,44 @@ def gdpr_delete_view(request):
             'success': False,
             'error': 'Sistemska greska pri anonimizaciji.',
         }, status=500)
+
+
+# ── EMAIL VERIFICATION
+def verify_email(request, token):
+    """
+    GET /auth/verify-email/<token>/
+    Verificira email adresu korisnika.
+    Moderan pristup: ne zahtijeva login.
+    """
+    from accounts.email_verification import verify_email_token
+
+    success, user, message = verify_email_token(token, request)
+
+    if success:
+        messages.success(request, f'✓ {message}')
+        if request.user.is_authenticated:
+            return redirect('/')
+        return redirect('smart_login')
+    else:
+        messages.warning(request, message)
+        return redirect('smart_login')
+
+
+@login_required
+def resend_verification(request):
+    """
+    POST /auth/resend-verification/
+    Ponovo šalje verifikacijski email.
+    """
+    from accounts.email_verification import resend_verification_email
+
+    if request.method != 'POST':
+        return redirect('/')
+
+    success, message = resend_verification_email(request.user)
+    if success:
+        messages.success(request, f'✓ {message}')
+    else:
+        messages.warning(request, message)
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))

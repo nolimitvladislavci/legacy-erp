@@ -277,7 +277,29 @@ def quick_register(request):
                 pass
         request.session.flush()
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        messages.success(request, 'Racun kreiran! Dobrodosli.')
+
+        # Email verifikacija (async, ne blokira)
+        try:
+            from accounts.email_verification import send_verification_email
+            send_verification_email(user)
+        except Exception:
+            pass
+
+        # Audit log
+        try:
+            from core.models import SystemAuditLog
+            SystemAuditLog.objects.create(
+                user=user,
+                model_name='auth.User',
+                object_id=str(user.pk),
+                action='register',
+                changes={'email': email, 'method': 'quick_register'},
+                ip_address=request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR', ''),
+            )
+        except Exception:
+            pass
+
+        messages.success(request, 'Račun kreiran! Provjerite email za verifikaciju.')
         return redirect(next_url)
 
     return render(request, 'accounts/quick_register.html', {

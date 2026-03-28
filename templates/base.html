@@ -699,6 +699,21 @@
               <a href="/register/upgrade/?module={{ request.upgrade_hint }}" style="background:#c9a84c;color:#000;padding:8px 20px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap">Odaberi paket &#8594;</a>
             </div>
             {% endif %}
+            {% if user.is_authenticated and user.profile and not user.profile.email_verified %}
+            <div style="background:linear-gradient(135deg,#422006,#1c1917);border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:1.2rem">📧</span>
+                <div>
+                  <div style="font-size:.82rem;font-weight:600;color:#fbbf24">Potvrdite svoju email adresu</div>
+                  <div style="font-size:.72rem;color:#a8a29e">Provjerite {{ user.email }} za verifikacijski link</div>
+                </div>
+              </div>
+              <form method="post" action="{% url 'resend_verification' %}" style="margin:0">
+                {% csrf_token %}
+                <button type="submit" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;padding:6px 14px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer">Pošalji ponovo</button>
+              </form>
+            </div>
+            {% endif %}
             {% block content %}{% endblock %}
         </div>
     </div>

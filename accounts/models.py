@@ -59,6 +59,19 @@ class UserProfile(models.Model):
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     objects = CompanyManager()
 
+    # Dron #1: GPS lokacija radnika (ažurira se pri FSM tranziciji)
+    last_lat           = models.FloatField(null=True, blank=True)
+    last_lng           = models.FloatField(null=True, blank=True)
+    last_gps_update    = models.DateTimeField(null=True, blank=True)
+
+    # Dron #2: Eksplicitni certifikati za dispatch (hard filter)
+    # Email verifikacija
+    email_verified = models.BooleanField(default=False, verbose_name=_('Email verificiran'))
+    email_verified_at = models.DateTimeField(null=True, blank=True)
+
+    certified_categories = models.JSONField(default=list, blank=True,
+        help_text='Lista: voda, struja, plin, kljucar')
+
     class Meta:
         db_table = 'core_userprofile'
         verbose_name = _('Korisnički profil')

@@ -82,6 +82,8 @@ urlpatterns += i18n_patterns(
     # 2FA (TOTP)
     path('2fa/setup/', __import__('accounts.auth_views', fromlist=['setup_2fa']).setup_2fa, name='setup_2fa'),
     path('2fa/verify/', __import__('accounts.auth_views', fromlist=['verify_2fa']).verify_2fa, name='verify_2fa'),
+    path('auth/verify-email/<str:token>/', __import__('accounts.auth_views', fromlist=['verify_email']).verify_email, name='verify_email'),
+    path('auth/resend-verification/', __import__('accounts.auth_views', fromlist=['resend_verification']).resend_verification, name='resend_verification'),
 
     # GDPR (Clanak 17 + 20)
     path('gdpr/export/', __import__('accounts.auth_views', fromlist=['gdpr_export_view']).gdpr_export_view, name='gdpr_export'),
@@ -246,6 +248,7 @@ urlpatterns += i18n_patterns(
     path('api/pricing/advisor/', __import__('website.views', fromlist=['pricing_ai_advisor']).pricing_ai_advisor, name='pricing_ai_advisor'),
     path('synesis/', include('synesis.urls')),
     path('smart-import/', include('smart_import.urls', namespace='smart_import')),
+    path('experiences/', include('experiences.urls', namespace='experiences')),
     path('data-migration/', include('data_migration.urls')),
     path('konto/', include('konto.urls')),
     
