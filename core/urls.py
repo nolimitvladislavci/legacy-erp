@@ -245,11 +245,13 @@ urlpatterns += i18n_patterns(
     path('reports/', include('reports.urls', namespace='reports')),
     path('register/', include('registration.urls')),
     path('about/', __import__('website.views', fromlist=['about_page']).about_page, name='about'),
+    path('plan-isplativosti/', __import__('website.views', fromlist=['financijski_plan']).financijski_plan, name='financijski_plan'),
     path('pricing/', __import__('website.views', fromlist=['pricing_page']).pricing_page, name='pricing'),
     path('api/pricing/advisor/', __import__('website.views', fromlist=['pricing_ai_advisor']).pricing_ai_advisor, name='pricing_ai_advisor'),
     path('synesis/', include('synesis.urls')),
     path('smart-import/', include('smart_import.urls', namespace='smart_import')),
     path('experiences/', include('experiences.urls', namespace='experiences')),
+    path('gov-export/', include('gov_export.urls', namespace='gov_export')),
     path('data-migration/', include('data_migration.urls')),
     path('konto/', include('konto.urls')),
     

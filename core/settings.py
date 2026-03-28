@@ -105,6 +105,7 @@ INSTALLED_APPS = [
     "registration",
     "interventions",
     "fiskalizacija",
+    "gov_export",
     "burza",
     "assessment",
     "branches",
