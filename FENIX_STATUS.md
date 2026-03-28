@@ -174,6 +174,7 @@ LIMIT Connect Borg (26.03.2026):
 | Payroll audit | 7b5f2db4 | Svaki pristup plaćama, listićima, pain.001 se logira |
 | Konto audit | 7b5f2db4 | Pristup temeljnicama, žiro računima, izvještajima se logira |
 | CardActivity security | 0147306a | is_public_facing + is_system_generated — QR leak protection |
+| BORG Hub | 11395c4b | Cross-module command center — WO kanban, experiences, financije, timeline, alerts |
 
 ### Sigurnosni audit rezultati (28.03.2026)
 - **136 modela** dobilo CompanyManager (prije: samo 43/179 imalo)
