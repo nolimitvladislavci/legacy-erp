@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Knjiga prigovora{% endblock %}
-{% block page_title %}Knjiga prigovora{% endblock %}
+{% block title %}Knjiga boljitaka{% endblock %}
+{% block page_title %}Knjiga boljitaka{% endblock %}
 {% block extra_css %}
 <style>
 @keyframes blink { 50% { opacity: 0.5; } }
@@ -15,7 +15,7 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <div>
-    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:#c9a84c"></i>{% trans "Knjiga prigovora i utisaka" %}</h2>
+    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:#c9a84c"></i>{% trans "Knjiga boljitaka" %}</h2>
     <small class="text-muted">{% trans "Zakon o zaštiti potrošača čl. 10 — rok za odgovor: 15 dana (HR) / 14 dana (DE)" %}</small>
   </div>
   <div class="d-flex gap-2 flex-wrap">
@@ -30,7 +30,7 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
 <div class="d-flex gap-2 mb-3 flex-wrap" id="filterBar">
   <select id="filterType" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
     <option value="">Sve vrste</option>
-    <option value="prigovor">Prigovor</option>
+    <option value="prigovor">Prijedlog</option>
     <option value="reklamacija">Reklamacija</option>
     <option value="pohvala">Pohvala</option>
     <option value="utisak">Utisak</option>
@@ -85,7 +85,7 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
   <div class="modal-dialog">
     <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #c9a84c">
       <div class="modal-header border-0">
-        <h5 class="modal-title" style="color:#c9a84c"><i class="fas fa-edit me-2"></i>{% trans "Zavedi prigovor" %}</h5>
+        <h5 class="modal-title" style="color:#c9a84c"><i class="fas fa-edit me-2"></i>{% trans "Novi zapis" %}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -100,17 +100,17 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
             <input type="text" id="pKontakt" class="form-control">
           </div>
           <div class="mb-3">
-            <label class="form-label">{% trans "Opis prigovora" %} *</label>
+            <label class="form-label">{% trans "Vaš prijedlog" %} *</label>
             <div class="d-flex gap-2 mb-2">
               <button type="button" class="btn btn-sm btn-outline-danger" id="btnVoice" onclick="toggleVoice()">
-                <i class="fas fa-microphone me-1"></i>{% trans "Govori prigovor</button>
+                <i class="fas fa-microphone me-1"></i>{% trans "Govori</button>
         <button type="button" id="audioRecBtn" onclick="startAudioRec()" style="background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.3);padding:.4rem .8rem;border-radius:8px;cursor:pointer;font-size:.8rem">🎤 Snimi zvučni zapis</button>
         <div id="audioStatus" style="font-size:.72rem;color:var(--muted);margin-top:4px"></div>
         <span style="display:none">" %}
               </button>
               <span id="voiceStatus" class="text-muted small align-self-center"></span>
             </div>
-            <textarea id="pOpis" class="form-control" rows="4" placeholder="{% trans 'Upišite ili izgovorite prigovor...' %}"></textarea>
+            <textarea id="pOpis" class="form-control" rows="4" placeholder="{% trans 'Upišite ili izgovorite vaš prijedlog...' %}"></textarea>
           </div>
           <div class="d-flex justify-content-end">
             <button type="button" class="btn btn-primary" onclick="goStep2()">
@@ -160,7 +160,7 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
 
           <div class="alert alert-warning py-2 small">
             <i class="fas fa-info-circle me-1"></i>
-            {% trans "Potrošač potvrđuje da je prigovor vjerodostojan i da se slaže s obradom osobnih podataka u svrhu rješavanja prigovora (GDPR čl. 6 st. 1b)." %}
+            {% trans "Potrošač potvrđuje da je prigovor vjerodostojan i da se slaže s obradom osobnih podataka u svrhu rješavanja zapisa (GDPR čl. 6 st. 1b)." %}
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
   <div class="modal-dialog modal-lg">
     <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #22c55e">
       <div class="modal-header border-0">
-        <h5 class="modal-title" style="color:#22c55e"><i class="fas fa-reply me-2"></i>{% trans "Odgovor na prigovor" %}</h5>
+        <h5 class="modal-title" style="color:#22c55e"><i class="fas fa-reply me-2"></i>{% trans "Odgovor" %}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -333,7 +333,7 @@ function stopVoice() {
   isListening = false;
   document.getElementById('btnVoice').classList.remove('btn-danger');
   document.getElementById('btnVoice').classList.add('btn-outline-danger');
-  document.getElementById('btnVoice').innerHTML = '<i class="fas fa-microphone me-1"></i>Govori prigovor';
+  document.getElementById('btnVoice').innerHTML = '<i class="fas fa-microphone me-1"></i>Govori';
   document.getElementById('voiceStatus').textContent = '';
 }
 
@@ -438,7 +438,7 @@ async function loadData() {
     allData = d.data || [];
     const tbody = document.getElementById('tableBody');
     if (!d.data || !d.data.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-book fa-2x mb-2 d-block"></i>Knjiga je prazna — nema prigovora.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-book fa-2x mb-2 d-block"></i>Knjiga je prazna — nema zapisa.</td></tr>';
       return;
     }
     // Apply filters
@@ -514,7 +514,7 @@ async function savePrigovor() {
 
   // Potpis obavezan
   var sig = getSignatureData();
-  if (!sig) { fenixToast('Potrošač mora potpisati prigovor!', 'warning'); return; }
+  if (!sig) { fenixToast('Potrošač mora potpisati zapis!', 'warning'); return; }
 
   const btn = document.getElementById('btnSave');
   btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Spremanje...';

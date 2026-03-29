@@ -1,5 +1,5 @@
 """
-Templatetag za globalni pristup Knjizi prigovora/utisaka.
+Templatetag za globalni pristup Knjizi boljitaka.
 
 Korištenje u BILO KOJEM templateu:
     {% load complaints %}

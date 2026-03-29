@@ -39,16 +39,16 @@
   Gem. Gaststättenverordnung / DSGVO Art. 6(1)(f) — Evidenz der Kundenbeschwerden und Eindrücke
 </div>
 {% else %}
-<h1>KNJIGA PRIGOVORA I UTISAKA</h1>
+<h1>KNJIGA BOLJITAKA</h1>
 <div class="sub">
   {{ company.name }} | OIB: {{ company.oib|default:"—" }} | {{ company.address|default:"" }}, {{ company.city|default:"" }}<br>
-  Zakon o zaštiti potrošača (NN 19/22) čl. 10 — Evidencija prigovora i utisaka potrošača
+  Zakon o zaštiti potrošača (NN 19/22) čl. 10 — Evidencija prijedloga i utisaka potrošača
 </div>
 {% endif %}
 
 {# === PRIGOVORI I REKLAMACIJE === #}
 <div class="section-title">
-  {% if lang == 'de' %}BESCHWERDEN UND REKLAMATIONEN{% else %}PRIGOVORI I REKLAMACIJE{% endif %}
+  {% if lang == 'de' %}BESCHWERDEN UND REKLAMATIONEN{% else %}PRIJEDLOZI I REKLAMACIJE{% endif %}
   ({{ prigovori_count }})
 </div>
 <table>
@@ -96,7 +96,7 @@
     </tr>
     {% empty %}
     <tr><td colspan="8" style="text-align:center;color:#888;padding:15px">
-      {% if lang == 'de' %}Keine Beschwerden registriert.{% else %}Nema evidentiranih prigovora.{% endif %}
+      {% if lang == 'de' %}Keine Einträge registriert.{% else %}Nema zapisa.{% endif %}
     </td></tr>
     {% endfor %}
   </tbody>

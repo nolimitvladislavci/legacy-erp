@@ -746,9 +746,9 @@ def weekly_complaints_digest():
         from django.core.mail import send_mail
         from django.conf import settings
 
-        subject = 'Knjiga prigovora — tjedni pregled (%s)' % company.name
+        subject = 'Knjiga boljitaka — tjedni pregled (%s)' % company.name
         body = (
-            'Tjedni pregled Knjige prigovora i utisaka\n'
+            'Tjedni pregled Knjige boljitaka\n'
             '==========================================\n\n'
             'Novi zapisi (zadnjih 7 dana): %d\n'
             'Cekaju odgovor: %d\n'

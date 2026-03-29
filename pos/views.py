@@ -4315,7 +4315,7 @@ def cashier_setup(request):
 
 @login_required
 def prigovori_list(request):
-    """Knjiga prigovora — HTML prikaz + modal za unos."""
+    """Knjiga boljitaka — HTML prikaz + modal za unos."""
     company = get_user_company(request)
     from .models import KnjigaPrigovora
     prigovori = KnjigaPrigovora.objects.filter(company=company)

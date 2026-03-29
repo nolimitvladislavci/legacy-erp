@@ -111,7 +111,7 @@ a{color:inherit;text-decoration:none}
     <a href="{% url 'pos:pos_settings' %}" {% if '/settings/' in request.path %}class="active"{% endif %}>
       {% trans "Postavke" %}</a>
     <span class="nav-sep"></span>
-    <a href="{% url 'pos:prigovori_list' %}" style="color:#ef4444" title="Inspekcija — knjiga prigovora, Z-izvješća, fiskalni logovi">
+    <a href="{% url 'pos:prigovori_list' %}" style="color:#ef4444" title="Inspekcija — knjiga boljitaka, Z-izvješća, fiskalni logovi">
       🛡️ {% trans "Inspekcija" %}</a>
   </nav>
 {% endblock %}

@@ -1305,9 +1305,9 @@ class ImprovementSuggestion(models.Model):
 
 class KnjigaPrigovora(models.Model):
     """
-    Službena evidencija prigovora potrošača.
+    Knjiga boljitaka — evidencija prijedloga za poboljšanje i utisaka.
     Zakonski mora sadržavati: kronološki r.br., datum primitka,
-    opis prigovora, odgovor u roku od 15 dana.
+    opis, odgovor u roku od 15 dana.
     """
     company = models.ForeignKey(
         'companies.Company', on_delete=models.CASCADE,
@@ -1326,8 +1326,8 @@ class KnjigaPrigovora(models.Model):
     kontakt = models.CharField(
         max_length=200, blank=True, verbose_name=_('Adresa ili e-mail'),
     )
-    opis_prigovora = models.TextField(verbose_name=_('Opis prigovora'))
-    odgovor = models.TextField(blank=True, verbose_name=_('Odgovor na prigovor'))
+    opis_prigovora = models.TextField(verbose_name=_('Vaš prijedlog'))
+    odgovor = models.TextField(blank=True, verbose_name=_('Odgovor'))
     datum_odgovora = models.DateField(
         null=True, blank=True, verbose_name=_('Datum odgovora'),
     )
@@ -1343,7 +1343,7 @@ class KnjigaPrigovora(models.Model):
 
     # ── Tip zapisa (prigovor / pohvala / utisak / reklamacija) ────────
     RECORD_TYPES = [
-        ('prigovor', _('Prigovor / Beschwerde')),
+        ('prigovor', _('Prijedlog za poboljšanje / Verbesserungsvorschlag')),
         ('pohvala', _('Pohvala / Lob')),
         ('utisak', _('Utisak / Eindruck')),
         ('reklamacija', _('Reklamacija / Reklamation')),
@@ -1546,8 +1546,8 @@ class KnjigaPrigovora(models.Model):
     objects = CompanyManager()
 
     class Meta:
-        verbose_name = _('Zapis (prigovor/utisak)')
-        verbose_name_plural = _('Knjiga prigovora i utisaka')
+        verbose_name = _('Zapis (boljitci)')
+        verbose_name_plural = _('Knjiga boljitaka')
         unique_together = [('company', 'redni_broj')]
         ordering = ['-redni_broj']
 

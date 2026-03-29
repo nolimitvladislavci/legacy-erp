@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Knjiga prigovora — Dashboard{% endblock %}
-{% block page_title %}Knjiga prigovora — Dashboard{% endblock %}
+{% block title %}Knjiga boljitaka — Dashboard{% endblock %}
+{% block page_title %}Knjiga boljitaka — Dashboard{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -30,7 +30,7 @@
 
 {% block content %}
 <div class="nav-links">
-    <a href="{% url 'pos:prigovori_list' %}"><i class="fas fa-list"></i> Lista prigovora</a>
+    <a href="{% url 'pos:prigovori_list' %}"><i class="fas fa-list"></i> Lista zapisa</a>
     <a href="{% url 'pos:complaint_qr_list' %}"><i class="fas fa-qrcode"></i> QR kodovi</a>
     <a href="{% url 'pos:knjiga_prigovora_pdf' %}"><i class="fas fa-file-pdf"></i> PDF</a>
     <a href="{% url 'pos:complaint_widget' company.pk %}"><i class="fas fa-star"></i> Widget</a>

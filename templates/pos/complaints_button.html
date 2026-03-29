@@ -5,7 +5,7 @@
     <a href="/pos/prigovori/{% if company_id %}?source={{ source_module }}{% endif %}"
        class="btn btn-gold rounded-circle shadow-lg d-flex align-items-center justify-content-center"
        style="width: 56px; height: 56px; font-size: 1.4rem;"
-       title="{% trans 'Knjiga prigovora i utisaka' %}">
+       title="{% trans 'Knjiga boljitaka' %}">
         <i class="bi bi-journal-text"></i>
     </a>
     {% if pending_count > 0 %}
@@ -18,7 +18,7 @@
 {% elif style == "qr" %}
 {# QR kod za potrošačev mobitel #}
 <div class="text-center p-3">
-    <p class="small text-muted mb-2">{% trans "Skenirajte za prigovor ili utisak" %}</p>
+    <p class="small text-muted mb-2">{% trans "Skenirajte za prijedlog ili pohvalu" %}</p>
     <div id="complaint-qr-{{ company_id }}" style="width:150px;height:150px;margin:0 auto;"></div>
     <script>
     if (typeof QRCode !== 'undefined') {
@@ -36,7 +36,7 @@
 <a href="/pos/prigovori/{% if company_id %}?source={{ source_module }}{% endif %}"
    class="btn btn-outline-gold btn-sm">
     <i class="bi bi-journal-text"></i>
-    {% trans "Knjiga prigovora" %}
+    {% trans "Knjiga boljitaka" %}
     {% if pending_count > 0 %}
     <span class="badge bg-danger ms-1">{{ pending_count }}</span>
     {% endif %}

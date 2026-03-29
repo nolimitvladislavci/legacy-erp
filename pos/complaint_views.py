@@ -1,5 +1,5 @@
 """
-pos/complaint_views.py — Globalna Knjiga prigovora i utisaka.
+pos/complaint_views.py — Globalna Knjiga boljitaka.
 
 Views:
 - complaint_public_form: Mobile-first forma BEZ logina (QR pristup)
@@ -339,7 +339,7 @@ def complaint_api_public(request):
         logger.debug('Admin notification failed')
 
     type_labels = {
-        'prigovor': _('Prigovor zaprimljen'),
+        'prigovor': _('Prijedlog zaprimljen'),
         'pohvala': _('Hvala na pohvali!'),
         'utisak': _('Hvala na utiscima!'),
         'reklamacija': _('Reklamacija zaprimljena'),
@@ -406,7 +406,7 @@ def complaint_respond(request):
 
     return JsonResponse({
         'success': True,
-        'message': f'Odgovor poslan na prigovor #{p.redni_broj} putem {channel}.',
+        'message': f'Odgovor poslan na zapis #{p.redni_broj} putem {channel}.',
     })
 
 
@@ -416,7 +416,7 @@ def complaint_respond(request):
 
 @login_required
 def complaint_dashboard(request):
-    """Dashboard analitika za Knjigu prigovora i utisaka."""
+    """Dashboard analitika za Knjigu boljitaka."""
     company = get_user_company(request)
     if not company:
         return redirect('pos:dashboard')
@@ -583,7 +583,7 @@ def complaint_dashboard_api(request):
 
 @login_required
 def complaint_qr_terminal(request, terminal_id):
-    """Generira QR kod za Knjigu prigovora specifičnu za terminal."""
+    """Generira QR kod za Knjigu boljitaka specifičnu za terminal."""
     from pos.models import POSTerminal
     company = get_user_company(request)
     terminal = get_object_or_404(POSTerminal, pk=terminal_id, company=company)
@@ -613,7 +613,7 @@ def complaint_qr_terminal(request, terminal_id):
 
 @login_required
 def complaint_qr_list(request):
-    """Lista svih terminala s QR kodovima za Knjigu prigovora."""
+    """Lista svih terminala s QR kodovima za Knjigu boljitaka."""
     company = get_user_company(request)
     if not company:
         return redirect('pos:dashboard')
@@ -861,7 +861,7 @@ def complaint_inspect(request, token):
         return HttpResponse('Token je istekao ili deaktiviran.', status=403)
 
     if tok.scope not in ('prigovori', 'all'):
-        return HttpResponse('Token nema pristup Knjizi prigovora.', status=403)
+        return HttpResponse('Token nema pristup Knjizi boljitaka.', status=403)
 
     # Record access
     ip = (
@@ -984,7 +984,7 @@ def _send_response_email(p):
     from django.core.mail import send_mail
     from django.conf import settings
     adr = _get_adr_info(p)
-    subject = f'Odgovor na prigovor #{p.redni_broj} — {p.company.name}'
+    subject = f'Odgovor na zapis #{p.redni_broj} — {p.company.name}'
     body = (
         f'Poštovani/a {p.ime_potrosaca},\n\n'
         f'U vezi Vašeg prigovora od {p.datum_primitka.strftime("%d.%m.%Y")} '
