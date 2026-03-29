@@ -142,6 +142,7 @@ INSTALLED_APPS = [
     "limit_connect_ai",
     "tax_wizard",
     "borg_ops",
+    "komunalno",
 ]
 
 # ── Django Channels (WebSocket) ───────────────────────────────────────
@@ -917,5 +918,21 @@ CELERY_BEAT_SCHEDULE.update({
         "task": "core.database_backup",
         "schedule": crontab(hour=2, minute=0),
         "options": {"queue": "default"},
+    },
+})
+
+# ── Arhiva Integrity Check — svake nedjelje 03:15 ────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "arhiva-integrity-weekly": {
+        "task": "documents.verify_arhiva_integrity",
+        "schedule": crontab(day_of_week='sunday', hour='3', minute='15'),
+    },
+})
+
+# ── AI Auto-Book High Confidence — svaki dan 06:00 ──────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "ai-auto-book-high-confidence-daily": {
+        "task": "documents.auto_book_high_confidence",
+        "schedule": crontab(hour=6, minute=0),
     },
 })

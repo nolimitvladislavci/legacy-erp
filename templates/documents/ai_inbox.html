@@ -10,22 +10,22 @@
   <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:1.5rem 2rem;margin-bottom:1.5rem;border:1px solid rgba(201,168,76,.2)">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
       <div>
-        <h2 style="color:#c9a84c;margin:0;font-size:1.5rem">&#129302; AI Inbox — Automatsko knjizenje</h2>
-        <p style="color:#94a3b8;margin:.25rem 0 0;font-size:.9rem">AI je predlozio knjizenja — jedan klik do zavrsetka</p>
+        <h2 style="color:#c9a84c;margin:0;font-size:1.5rem">AI Inbox — Automatsko knjizenje</h2>
+        <p style="color:#94a3b8;margin:.25rem 0 0;font-size:.9rem">AI je predlozio knjizenja — filtriraj po sigurnosti, provjeri i proknjizi</p>
       </div>
       <div style="display:flex;gap:.75rem;flex-wrap:wrap">
         <button onclick="sendEmailSummary()" title="Posalji email sazetak svim odgovornim osobama za ovu firmu"
                 style="background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:.65rem 1.25rem;cursor:pointer;font-weight:600;font-size:.875rem;display:flex;align-items:center;gap:.4rem">
-          &#9993; Posalji email sazetak
+          Posalji email sazetak
         </button>
         <button onclick="bulkAcceptAll()" title="Automatski prihvaca sve prijedloge. Preporuceno samo za visoku AI sigurnost."
                 class="btn btn-lg" style="background:#c9a84c;color:#000;font-weight:700;border:none;border-radius:10px;padding:.65rem 1.5rem;cursor:pointer;font-size:.95rem">
-          &#10003; Prihvati SVE ({{ stats.total_pending }})
+          Prihvati SVE ({{ stats.total_pending }})
         </button>
       </div>
     </div>
 
-    <!-- Stats row -->
+    <!-- KPI Stats row -->
     <div style="display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap">
       <div style="background:rgba(201,168,76,.1);border-radius:10px;padding:.75rem 1.25rem;min-width:120px;text-align:center">
         <div style="font-size:1.75rem;font-weight:700;color:#c9a84c">{{ stats.total_pending }}</div>
@@ -42,22 +42,54 @@
     </div>
   </div>
 
+  <!-- CONFIDENCE FILTER BUTTONS -->
+  <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center">
+    <span style="color:#64748b;font-size:.82rem;margin-right:.5rem;font-weight:600">SIGURNOST:</span>
+    <a href="?confidence=all{% if source_type_filter %}&source_type={{ source_type_filter }}{% endif %}"
+       style="border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;text-decoration:none;border:1px solid {% if confidence_filter == 'all' %}#c9a84c{% else %}#334155{% endif %};background:{% if confidence_filter == 'all' %}rgba(201,168,76,.15){% else %}#111827{% endif %};color:{% if confidence_filter == 'all' %}#c9a84c{% else %}#94a3b8{% endif %}">
+      Sve ({{ confidence_counts.all|default:0 }})
+    </a>
+    <a href="?confidence=high{% if source_type_filter %}&source_type={{ source_type_filter }}{% endif %}"
+       style="border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;text-decoration:none;border:1px solid {% if confidence_filter == 'high' %}#4ade80{% else %}#334155{% endif %};background:{% if confidence_filter == 'high' %}rgba(74,222,128,.15){% else %}#111827{% endif %};color:{% if confidence_filter == 'high' %}#4ade80{% else %}#94a3b8{% endif %}">
+      Visoka ({{ confidence_counts.high|default:0 }})
+    </a>
+    <a href="?confidence=medium{% if source_type_filter %}&source_type={{ source_type_filter }}{% endif %}"
+       style="border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;text-decoration:none;border:1px solid {% if confidence_filter == 'medium' %}#fbbf24{% else %}#334155{% endif %};background:{% if confidence_filter == 'medium' %}rgba(251,191,36,.15){% else %}#111827{% endif %};color:{% if confidence_filter == 'medium' %}#fbbf24{% else %}#94a3b8{% endif %}">
+      Srednja ({{ confidence_counts.medium|default:0 }})
+    </a>
+    <a href="?confidence=low{% if source_type_filter %}&source_type={{ source_type_filter }}{% endif %}"
+       style="border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;text-decoration:none;border:1px solid {% if confidence_filter == 'low' %}#ef4444{% else %}#334155{% endif %};background:{% if confidence_filter == 'low' %}rgba(239,68,68,.15){% else %}#111827{% endif %};color:{% if confidence_filter == 'low' %}#ef4444{% else %}#94a3b8{% endif %}">
+      Niska ({{ confidence_counts.low|default:0 }})
+    </a>
+
+    {% if source_types %}
+    <span style="color:#334155;margin:0 .25rem">|</span>
+    <select onchange="if(this.value!==''){location.href='?confidence={{ confidence_filter }}&source_type='+this.value}else{location.href='?confidence={{ confidence_filter }}'}"
+            style="background:#111827;color:#94a3b8;border:1px solid #334155;border-radius:8px;padding:.4rem .75rem;font-size:.82rem;cursor:pointer">
+      <option value="">Svi tipovi</option>
+      {% for st_code, st_label in source_types %}
+      <option value="{{ st_code }}" {% if source_type_filter == st_code %}selected{% endif %}>{{ st_label }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+  </div>
+
   {% if entries %}
 
-  <!-- Per-company cards -->
+  <!-- Per-company collapse sections -->
   {% if stats.by_company %}
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;margin-bottom:1.5rem">
     {% for grp in stats.by_company %}
     <div style="background:#111827;border-radius:12px;padding:1rem 1.25rem;border-left:3px solid #c9a84c" id="company-card-{{ grp.company__id }}">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="font-weight:700;color:#fff;font-size:.95rem">&#127970; {{ grp.company__name }}</div>
+          <div style="font-weight:700;color:#fff;font-size:.95rem">{{ grp.company__name }}</div>
           <div style="color:#64748b;font-size:.82rem;margin-top:.15rem">{{ grp.cnt }} dok. | {{ grp.total_amt|floatformat:2 }} EUR</div>
         </div>
         <button onclick="bulkAcceptCompany('{{ grp.company__id }}', this)"
                 title="Prihvati sve AI prijedloge za ovu firmu"
-                style="background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:8px;padding:.4rem .8rem;cursor:pointer;font-weight:600;font-size:.8rem">
-          &#10003; Sve ({{ grp.cnt }})
+                style="background:rgba(201,168,76,.15);color:#c9a84c;border:1px solid rgba(201,168,76,.4);border-radius:8px;padding:.4rem .8rem;cursor:pointer;font-weight:700;font-size:.8rem">
+          Proknjizi sve za {{ grp.company__name|truncatechars:15 }}
         </button>
       </div>
     </div>
@@ -65,7 +97,7 @@
   </div>
   {% endif %}
 
-  <!-- Entries -->
+  <!-- Entries table -->
   <div style="background:#111827;border-radius:12px;overflow:hidden">
     <table style="width:100%;border-collapse:collapse">
       <thead>
@@ -75,7 +107,7 @@
           <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase">Partner</th>
           <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase;text-align:right">Iznos</th>
           <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase">AI Prijedlog (D/K)</th>
-          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase;text-align:center" title="AI sigurnost: zeleno >85% = gotovo sigurno, zuto 60-85% = preporucena provjera, crveno <60% = obavezno rucno">AI %</th>
+          <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase;text-align:center" title="AI sigurnost: zeleno >=80% = gotovo sigurno, zuto 50-80% = preporucena provjera, crveno <50% = obavezno rucno">Sigurnost</th>
           <th style="padding:.75rem;color:#c9a84c;font-size:.75rem;text-transform:uppercase;text-align:center">Akcija</th>
         </tr>
       </thead>
@@ -105,30 +137,28 @@
             {% endif %}
           </td>
           <td style="padding:.6rem .75rem;text-align:center">
-            {% with conf=e.ai_proposal.confidence %}
-            {% if conf == "high" %}
-              <span title="Visoka sigurnost (>85%) - gotovo sigurno tocno" style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">HIGH</span>
-            {% elif conf == "medium" %}
-              <span title="Srednja sigurnost (60-85%) - preporucena provjera" style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">MED</span>
-            {% elif conf == "low" %}
-              <span title="Niska sigurnost (<60%) - obavezno rucno provjeriti" style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">LOW</span>
+            {% if e._confidence_level == "high" %}
+              <span title="Visoka sigurnost ({{ e._confidence_pct }}%) — gotovo sigurno tocno" style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e._confidence_pct }}%</span>
+            {% elif e._confidence_level == "medium" %}
+              <span title="Srednja sigurnost ({{ e._confidence_pct }}%) — preporucena provjera" style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e._confidence_pct }}%</span>
+            {% elif e._confidence_level == "low" %}
+              <span title="Niska sigurnost ({{ e._confidence_pct }}%) — obavezno rucno provjeriti" style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e._confidence_pct }}%</span>
             {% else %}
               <span style="color:#475569;font-size:.72rem">—</span>
             {% endif %}
-            {% endwith %}
           </td>
           <td style="padding:.6rem .75rem;text-align:center">
             <div style="display:flex;gap:.4rem;justify-content:center">
               <button onclick="acceptOne({{ e.pk }}, this)"
-                      title="Klikom potvrdujete ovo knjizenje. Mozete ponistiti unutar 24 sata."
+                      title="Klikom potvrdujete ovo knjizenje. Kreira se temeljnica u glavnoj knjizi."
                       style="background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-weight:600;font-size:.75rem">
-                &#10003; Prihvati
+                Prihvati
               </button>
               {% if e.has_pdf or e.has_image %}
               <a href="{% url 'documents:arhiva_preview' e.pk %}" target="_blank"
                  title="Pregledaj originalni dokument"
                  style="background:rgba(99,102,241,.1);color:#818cf8;border:1px solid rgba(99,102,241,.2);border-radius:6px;padding:.3rem .5rem;text-decoration:none;font-size:.75rem">
-                &#128065;
+                Pregled
               </a>
               {% endif %}
             </div>
@@ -150,15 +180,31 @@
   {% else %}
   <!-- EMPTY STATE -->
   <div style="text-align:center;padding:4rem 2rem;background:#111827;border-radius:16px;border:1px solid #1f2937">
-    <div style="font-size:4rem;margin-bottom:1rem">&#10004;&#65039;</div>
-    <h3 style="color:#4ade80;margin:0 0 .5rem;font-size:1.5rem">Sve je proknjizeno!</h3>
-    <p style="color:#64748b;margin:0 0 1.5rem;font-size:.95rem">Nema dokumenata koji cekaju. Svaka cast!</p>
+    <h3 style="color:#4ade80;margin:0 0 .5rem;font-size:1.5rem">
+      {% if confidence_filter != 'all' %}
+        Nema dokumenata za odabrani filter
+      {% else %}
+        Sve je proknjizeno!
+      {% endif %}
+    </h3>
+    <p style="color:#64748b;margin:0 0 1.5rem;font-size:.95rem">
+      {% if confidence_filter != 'all' %}
+        Pokusajte drugi filter sigurnosti ili pregledajte sve dokumente.
+      {% else %}
+        Nema dokumenata koji cekaju. Svaka cast!
+      {% endif %}
+    </p>
     <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
-      <a href="{% url 'documents:arhiva_upload' %}" style="background:#c9a84c;color:#0a0a0a;font-weight:700;border-radius:10px;padding:.75rem 1.5rem;text-decoration:none;font-size:.9rem">
-        &#128196; Upload novog dokumenta
+      {% if confidence_filter != 'all' %}
+      <a href="?confidence=all" style="background:#c9a84c;color:#0a0a0a;font-weight:700;border-radius:10px;padding:.75rem 1.5rem;text-decoration:none;font-size:.9rem">
+        Prikazi sve
+      </a>
+      {% endif %}
+      <a href="{% url 'documents:arhiva_upload' %}" style="background:{% if confidence_filter != 'all' %}#1f2937{% else %}#c9a84c{% endif %};color:{% if confidence_filter != 'all' %}#94a3b8{% else %}#0a0a0a{% endif %};font-weight:700;border-radius:10px;padding:.75rem 1.5rem;text-decoration:none;font-size:.9rem;border:1px solid {% if confidence_filter != 'all' %}#334155{% else %}#c9a84c{% endif %}">
+        Upload novog dokumenta
       </a>
       <a href="{% url 'documents:arhiva_list' %}" style="background:#1f2937;color:#94a3b8;border:1px solid #334155;border-radius:10px;padding:.75rem 1.5rem;text-decoration:none;font-size:.9rem">
-        &#128202; Pregledaj arhivu
+        Pregledaj arhivu
       </a>
     </div>
   </div>
@@ -179,9 +225,12 @@ function acceptOne(id, btn) {
     if (d.ok) {
       var row = document.getElementById('row-' + id);
       row.style.background = 'rgba(74,222,128,.08)';
-      btn.innerHTML = '&#10003; OK';
+      btn.innerHTML = 'OK';
       btn.style.color = '#4ade80';
       btn.style.background = 'rgba(74,222,128,.25)';
+      if (d.journal_entry) {
+        btn.title = 'Temeljnica: ' + d.journal_entry;
+      }
       setTimeout(function(){ row.style.opacity = '.3'; }, 800);
     } else {
       btn.textContent = 'Greska'; btn.disabled = false;
@@ -189,17 +238,23 @@ function acceptOne(id, btn) {
   }).catch(function(){ btn.textContent = 'Greska'; btn.disabled = false; });
 }
 
-function bulkAcceptCompany(companyId, btn) {
-  if (!confirm('Prihvatiti SVE AI prijedloge za ovu firmu?')) return;
+function bulkAcceptCompany(companyId, btn, minConf) {
+  var confVal = minConf || 0;
+  var msg = confVal > 0
+    ? 'Prihvatiti AI prijedloge s sigurnoscu >= ' + (confVal*100).toFixed(0) + '% za ovu firmu?'
+    : 'Prihvatiti SVE AI prijedloge za ovu firmu?';
+  if (!confirm(msg)) return;
   btn.disabled = true; btn.textContent = 'Knjizim...';
   fetch('/hr/documents/ai-inbox/bulk-accept/', {
     method: 'POST',
     headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
-    body: JSON.stringify({company_id: companyId})
+    body: JSON.stringify({company_id: companyId, min_confidence: confVal})
   }).then(function(r){ return r.json(); }).then(function(d) {
     if (d.ok) {
       btn.textContent = d.count + ' proknjizeno!';
       btn.style.background = 'rgba(74,222,128,.3)';
+      btn.style.color = '#4ade80';
+      btn.style.borderColor = '#4ade80';
       var card = document.getElementById('company-card-' + companyId);
       if (card) card.style.borderLeftColor = '#4ade80';
     } else {
@@ -221,31 +276,52 @@ function sendEmailSummary() {
     headers: {'X-CSRFToken': CSRF}
   }).then(function(r){ return r.json(); }).then(function(d) {
     if (d.ok) {
-      fenixToast('Email sazetak je poslan!', 'success');
+      if (typeof fenixToast === 'function') fenixToast('Email sazetak je poslan!', 'success');
+      else alert('Email sazetak je poslan!');
     } else {
-      fenixToast('Greska: ' + (d.error || 'Nepoznata greska', 'error'));
+      if (typeof fenixToast === 'function') fenixToast('Greska: ' + (d.error || 'Nepoznata greska'), 'error');
+      else alert('Greska: ' + (d.error || 'Nepoznata greska'));
     }
-  }).catch(function(){ fenixToast('Greska pri slanju emaila', 'error'); });
+  }).catch(function(){
+    if (typeof fenixToast === 'function') fenixToast('Greska pri slanju emaila', 'error');
+    else alert('Greska pri slanju emaila');
+  });
 }
 
 function loadMore() {
   currentPage++;
   var btn = document.getElementById('loadMoreBtn');
   btn.textContent = 'Ucitavam...'; btn.disabled = true;
-  fetch('/hr/documents/ai-inbox/?page=' + currentPage + '&format=json')
+  var url = '/hr/documents/ai-inbox/?page=' + currentPage + '&format=json';
+  var cf = '{{ confidence_filter }}';
+  if (cf && cf !== 'all') url += '&confidence=' + cf;
+  var st = '{{ source_type_filter }}';
+  if (st) url += '&source_type=' + st;
+  fetch(url)
     .then(function(r){ return r.json(); })
     .then(function(d) {
       var tbody = document.getElementById('inboxBody');
       d.entries.forEach(function(e) {
         var proposal = e.ai_proposal || {};
-        var debit = proposal.debit && proposal.debit[0] ? proposal.debit[0] : {};
-        var credit = proposal.credit && proposal.credit[0] ? proposal.credit[0] : {};
-        var conf = proposal.confidence || '';
+        var debitHtml = '';
+        var creditHtml = '';
+        if (proposal.debit) {
+          proposal.debit.forEach(function(dd) {
+            debitHtml += '<div style="color:#f59e0b;margin-bottom:2px">D: ' + (dd.account||'') + ' ' + (dd.description||'').substring(0,30) + ' <span style="color:#94a3b8">' + (dd.amount||0).toFixed(2) + '</span></div>';
+          });
+        }
+        if (proposal.credit) {
+          proposal.credit.forEach(function(cc) {
+            creditHtml += '<div style="color:#3b82f6;margin-bottom:2px">K: ' + (cc.account||'') + ' ' + (cc.description||'').substring(0,30) + ' <span style="color:#94a3b8">' + (cc.amount||0).toFixed(2) + '</span></div>';
+          });
+        }
+        var confScore = e.confidence_score || 0;
+        var confLevel = e.confidence_level || 'low';
+        var confPct = (confScore * 100).toFixed(0);
         var confHtml = '';
-        if (conf === 'high') confHtml = '<span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">HIGH</span>';
-        else if (conf === 'medium') confHtml = '<span style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">MED</span>';
-        else if (conf === 'low') confHtml = '<span style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">LOW</span>';
-        else confHtml = '<span style="color:#475569;font-size:.72rem">&mdash;</span>';
+        if (confLevel === 'high') confHtml = '<span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">' + confPct + '%</span>';
+        else if (confLevel === 'medium') confHtml = '<span style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">' + confPct + '%</span>';
+        else confHtml = '<span style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">' + confPct + '%</span>';
 
         var tr = document.createElement('tr');
         tr.id = 'row-' + e.id;
@@ -254,12 +330,9 @@ function loadMore() {
           '<td style="padding:.6rem .75rem"><span style="color:#fff;font-weight:600">' + (e.doc_number||'&mdash;') + '</span><div style="color:#475569;font-size:.72rem">' + (e.source_type||'') + ' | ' + (e.doc_date||'') + '</div></td>' +
           '<td style="padding:.6rem .75rem;color:#cbd5e1;font-size:.85rem">' + (e.partner_name||'').substring(0,30) + '</td>' +
           '<td style="padding:.6rem .75rem;text-align:right;color:#4ade80;font-weight:600">' + (e.amount||0).toFixed(2) + ' ' + (e.currency||'EUR') + '</td>' +
-          '<td style="padding:.6rem .75rem;font-size:.78rem">' +
-            (debit.account ? '<div style="color:#f59e0b">D: ' + debit.account + ' ' + (debit.description||'').substring(0,30) + '</div>' : '') +
-            (credit.account ? '<div style="color:#3b82f6">K: ' + credit.account + ' ' + (credit.description||'').substring(0,30) + '</div>' : '') +
-          '</td>' +
+          '<td style="padding:.6rem .75rem;font-size:.78rem">' + debitHtml + creditHtml + '</td>' +
           '<td style="padding:.6rem .75rem;text-align:center">' + confHtml + '</td>' +
-          '<td style="padding:.6rem .75rem;text-align:center"><button onclick="acceptOne(' + e.id + ', this)" style="background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-weight:600;font-size:.75rem">&#10003; Prihvati</button></td>';
+          '<td style="padding:.6rem .75rem;text-align:center"><button onclick="acceptOne(' + e.id + ', this)" style="background:rgba(74,222,128,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-weight:600;font-size:.75rem">Prihvati</button></td>';
         tbody.appendChild(tr);
       });
       if (!d.has_next) {

@@ -631,6 +631,58 @@ def blob_serve(request, blob_id):
 
 from .storage_backends import store_document
 
+def _fuzzy_match_partner(partner_name, company):
+    """Fuzzy match partner_name against Partner model for the company.
+    Returns (Partner instance, match_score) or (None, 0)."""
+    if not partner_name or not partner_name.strip():
+        return None, 0
+
+    name_clean = partner_name.strip()
+
+    # 1. Exact match (case-insensitive)
+    exact = Partner.objects.filter(
+        company=company, is_active=True, name__iexact=name_clean
+    ).first()
+    if exact:
+        return exact, 1.0
+
+    # 2. Starts-with match (first 10 chars)
+    prefix = name_clean[:10]
+    starts = Partner.objects.filter(
+        company=company, is_active=True, name__istartswith=prefix
+    ).first()
+    if starts:
+        return starts, 0.85
+
+    # 3. Contains match (longest word from name)
+    words = [w for w in name_clean.split() if len(w) > 3]
+    if words:
+        longest = max(words, key=len)
+        contains = Partner.objects.filter(
+            company=company, is_active=True, name__icontains=longest
+        ).first()
+        if contains:
+            return contains, 0.65
+
+    # 4. Trigram / token overlap
+    tokens = set(name_clean.lower().split())
+    if tokens:
+        candidates = Partner.objects.filter(company=company, is_active=True)[:500]
+        best = None
+        best_score = 0
+        for p in candidates:
+            p_tokens = set(p.name.lower().split())
+            if tokens and p_tokens:
+                overlap = len(tokens & p_tokens) / max(len(tokens), len(p_tokens))
+                if overlap > best_score:
+                    best_score = overlap
+                    best = p
+        if best and best_score >= 0.5:
+            return best, best_score
+
+    return None, 0
+
+
 @login_required
 def arhiva_upload(request):
     if request.method == 'POST' and request.FILES.get('file'):
@@ -641,7 +693,7 @@ def arhiva_upload(request):
 
         uploaded = request.FILES['file']
         source_type = request.POST.get('source_type', 'document')
-        backend_name = request.POST.get('backend', '') or None  # Prazan string → None = auto
+        backend_name = request.POST.get('backend', '') or None  # Prazan string -> None = auto
 
         # Odredi backend iz StorageConfig ako postoji
         if backend_name is None:
@@ -653,45 +705,91 @@ def arhiva_upload(request):
                 pass
 
         try:
+            file_bytes = uploaded.read()
             result = store_document(
-                file_bytes=uploaded.read(),
+                file_bytes=file_bytes,
                 filename=uploaded.name,
                 company_id=company.id,
                 source_type=source_type,
                 backend_name=backend_name,
             )
 
+            # Sprint 2: Smart Upload — OCR partner extraction + fuzzy matching
+            partner_name = request.POST.get('partner_name', '').strip()
+            matched_partner = None
+            ocr_data = {}
+
+            # If image/PDF and no partner_name provided, try FenixScan OCR
+            is_image = result.get('content_type', '').startswith('image/')
+            is_pdf = uploaded.name.lower().endswith('.pdf')
+            if (is_image or is_pdf) and not partner_name:
+                try:
+                    import base64
+                    if is_image and len(file_bytes) < 3_700_000:
+                        from core.views_scan import _build_content, _call_anthropic, _parse_json, _post_process
+                        b64 = base64.b64encode(file_bytes).decode()
+                        content = _build_content([b64], 'invoice')
+                        raw = _call_anthropic(content, max_tokens=400)
+                        fields = _parse_json(raw)
+                        fields = _post_process(fields, 'invoice')
+                        ocr_data = fields
+
+                        # Auto-fill from OCR if not manually provided
+                        if not partner_name and fields.get('dobavljac'):
+                            partner_name = fields['dobavljac']
+                        if not request.POST.get('doc_number') and fields.get('broj_racuna'):
+                            pass  # Will use below
+                        if not request.POST.get('amount') and fields.get('iznos_ukupno'):
+                            pass  # Will use below
+                        logger.info('arhiva_upload: FenixScan OCR ok, partner=%s, conf=%.2f',
+                                    fields.get('dobavljac', '?'), fields.get('confidence', 0))
+                except Exception as ocr_err:
+                    logger.warning('arhiva_upload: FenixScan OCR failed (non-blocking): %s', ocr_err)
+
+            # Fuzzy match partner
+            if partner_name:
+                matched_partner, match_score = _fuzzy_match_partner(partner_name, company)
+                if matched_partner:
+                    logger.info('arhiva_upload: partner matched "%s" -> %s (score=%.2f)',
+                                partner_name, matched_partner.name, match_score)
+
+            # Use OCR data as fallback for empty fields
+            doc_number = request.POST.get('doc_number', '').strip() or ocr_data.get('broj_racuna', '') or uploaded.name
+            amount_raw = request.POST.get('amount', '') or ocr_data.get('iznos_ukupno', 0) or 0
+            doc_date = request.POST.get('doc_date') or ocr_data.get('datum', '') or None
+
             # Kreiraj ArhivaEntry
-            ArhivaEntry.objects.create(
+            entry = ArhivaEntry.objects.create(
                 company=company,
                 source_type=source_type,
                 source_id=result.get('hash', ''),
-                doc_number=request.POST.get('doc_number', uploaded.name),
-                partner_name=request.POST.get('partner_name', ''),
-                amount=Decimal(str(request.POST.get('amount', 0) or 0)),
+                doc_number=doc_number,
+                partner_name=partner_name or (matched_partner.name if matched_partner else ''),
+                partner=matched_partner,
+                amount=Decimal(str(amount_raw or 0)),
                 currency=request.POST.get('currency', 'EUR'),
-                doc_date=request.POST.get('doc_date') or timezone.now().date(),
+                doc_date=doc_date or timezone.now().date(),
                 file_path=result['path'],
                 has_pdf=uploaded.name.lower().endswith('.pdf'),
                 has_xml=uploaded.name.lower().endswith('.xml'),
-                has_image=result.get('content_type', '').startswith('image/'),
+                has_image=is_image,
                 archived_by=request.user,
                 session_key=request.session.session_key or '',
             )
 
             size_kb = result['size'] // 1024
-            messages.success(request, 'Datoteka spremljena (%s, %dKB, backend: %s)' % (uploaded.name, size_kb, result['backend']))
+            partner_msg = ''
+            if matched_partner:
+                partner_msg = ' | Partner: %s' % matched_partner.name
+            messages.success(request, 'Datoteka spremljena (%s, %dKB, backend: %s%s)' % (
+                uploaded.name, size_kb, result['backend'], partner_msg))
 
             # Trigeraj AI analizu async
             try:
                 from documents.tasks import generate_ai_proposal
-                new_entry = ArhivaEntry.objects.filter(
-                    company=company,
-                    source_id=result.get('hash', ''),
-                ).order_by('-archived_at').first()
-                if new_entry and (new_entry.has_pdf or new_entry.has_image):
+                if entry and (entry.has_pdf or entry.has_image):
                     generate_ai_proposal.apply_async(
-                        args=[new_entry.pk],
+                        args=[entry.pk],
                         countdown=3,
                     )
             except Exception as ai_err:
@@ -2499,12 +2597,140 @@ def arhiva_download_xml(request, pk):
 
 
 # ═══════════════════════════════════════════════════════════════
-# AI INBOX — 693 dokumenata ceka knjizenje
+# AI INBOX — Automatsko knjizenje s confidence razinama
 # ═══════════════════════════════════════════════════════════════
+
+def _normalize_confidence(ai_proposal):
+    """Normalize confidence from ai_proposal to float 0-1.
+    Handles: 'high', 'medium', 'low', floats like 0.6/0.95, None."""
+    if not ai_proposal or not isinstance(ai_proposal, dict):
+        return 0.0
+    conf = ai_proposal.get('confidence')
+    if conf is None:
+        return 0.0
+    if isinstance(conf, (int, float)):
+        return min(max(float(conf), 0.0), 1.0)
+    if isinstance(conf, str):
+        conf_lower = conf.strip().lower()
+        if conf_lower == 'high':
+            return 0.9
+        elif conf_lower == 'medium':
+            return 0.6
+        elif conf_lower == 'low':
+            return 0.3
+        # Try parsing numeric string
+        try:
+            return min(max(float(conf_lower), 0.0), 1.0)
+        except (ValueError, TypeError):
+            return 0.0
+    return 0.0
+
+
+def _confidence_level(score):
+    """Return 'high', 'medium', or 'low' from float score."""
+    if score >= 0.8:
+        return 'high'
+    elif score >= 0.5:
+        return 'medium'
+    return 'low'
+
+
+def _proposal_has_debit_credit(ai_proposal):
+    """Check if proposal has valid debit and credit entries."""
+    if not ai_proposal or not isinstance(ai_proposal, dict):
+        return False
+    debit = ai_proposal.get('debit')
+    credit = ai_proposal.get('credit')
+    if not debit or not credit:
+        return False
+    if not isinstance(debit, list) or not isinstance(credit, list):
+        return False
+    if len(debit) == 0 or len(credit) == 0:
+        return False
+    # Check at least first entry has account
+    if not debit[0].get('account') or not credit[0].get('account'):
+        return False
+    return True
+
+
+def _create_journal_entry_from_proposal(entry, user=None):
+    """Create JournalEntry + LedgerLines from ArhivaEntry.ai_proposal.
+    Returns the JournalEntry or None on failure."""
+    from konto.models import JournalEntry, LedgerLine, KontoAccount
+    from django.utils import timezone
+    from decimal import Decimal
+
+    proposal = entry.ai_proposal
+    if not _proposal_has_debit_credit(proposal):
+        return None
+
+    # Generate entry number
+    from datetime import date
+    year = date.today().year
+    prefix = f'AI-{year}-'
+    last = JournalEntry.objects.filter(
+        company=entry.company, entry_number__startswith=prefix
+    ).order_by('-entry_number').first()
+    if last:
+        try:
+            seq = int(last.entry_number.split('-')[-1]) + 1
+        except (ValueError, IndexError):
+            seq = 1
+    else:
+        seq = 1
+    entry_number = f'{prefix}{seq:05d}'
+
+    je = JournalEntry(
+        company=entry.company,
+        entry_number=entry_number,
+        date=entry.doc_date or date.today(),
+        description=f'AI: {entry.doc_number} — {entry.partner_name}'[:300],
+        source_type='manual',
+        is_posted=True,
+        created_by=user,
+    )
+    je.save()
+
+    for side_key, side_value in [('debit', 'debit'), ('credit', 'credit')]:
+        for line_data in proposal.get(side_key, []):
+            account_code = str(line_data.get('account', '')).strip()
+            if not account_code:
+                continue
+            amount = line_data.get('amount', 0)
+            try:
+                amount = Decimal(str(round(float(amount), 2)))
+            except (ValueError, TypeError):
+                amount = Decimal('0')
+            if amount <= 0:
+                continue
+
+            # Find or create KontoAccount
+            account, _ = KontoAccount.objects.get_or_create(
+                company=entry.company,
+                code=account_code,
+                defaults={
+                    'name': line_data.get('description', f'Konto {account_code}')[:100],
+                    'account_type': 'expense' if account_code.startswith('4') else
+                                    'revenue' if account_code.startswith('7') else
+                                    'asset' if account_code.startswith(('0', '1')) else
+                                    'liability' if account_code.startswith('2') else 'equity',
+                },
+            )
+            LedgerLine.objects.create(
+                journal_entry=je,
+                account=account,
+                side=side_value,
+                amount=amount,
+                description=(line_data.get('description', '') or '')[:200],
+            )
+
+    return je
+
 
 @login_required
 def ai_inbox(request):
-    """AI Inbox — svi dokumenti s AI prijedlogom koji nisu proknjizeni."""
+    """AI Inbox — svi dokumenti s AI prijedlogom koji nisu proknjizeni.
+    Supports confidence_filter, source_type filter, sorted by confidence DESC then amount DESC."""
     from documents.models import ArhivaEntry
     from django.db.models import Count, Sum
 
@@ -2516,7 +2742,10 @@ def ai_inbox(request):
     else:
         company = get_user_company(request)
         if not company:
-            return render(request, 'documents/ai_inbox.html', {'entries': [], 'stats': {}})
+            return render(request, 'documents/ai_inbox.html', {
+                'entries': [], 'stats': {}, 'confidence_counts': {},
+                'confidence_filter': 'all', 'source_type_filter': '',
+            })
         qs = ArhivaEntry.objects.filter(
             company=company, is_booked=False
         ).exclude(ai_proposal__isnull=True).exclude(ai_proposal={}).order_by('-archived_at')
@@ -2526,8 +2755,39 @@ def ai_inbox(request):
     if company_filter and is_superadmin:
         qs = qs.filter(company_id=company_filter)
 
-    # Stats
-    total_pending = qs.count()
+    source_type_filter = request.GET.get('source_type', '')
+    if source_type_filter:
+        qs = qs.filter(source_type=source_type_filter)
+
+    # Compute confidence for ALL entries (before confidence filter)
+    all_entries = list(qs)
+    for e in all_entries:
+        e._confidence_score = _normalize_confidence(e.ai_proposal)
+        e._confidence_level = _confidence_level(e._confidence_score)
+        e._confidence_pct = int(round(e._confidence_score * 100))
+
+    # Confidence counts (before filtering)
+    confidence_counts = {
+        'high': sum(1 for e in all_entries if e._confidence_level == 'high'),
+        'medium': sum(1 for e in all_entries if e._confidence_level == 'medium'),
+        'low': sum(1 for e in all_entries if e._confidence_level == 'low'),
+        'all': len(all_entries),
+    }
+
+    # Apply confidence filter
+    confidence_filter = request.GET.get('confidence', 'all')
+    if confidence_filter == 'high':
+        all_entries = [e for e in all_entries if e._confidence_level == 'high']
+    elif confidence_filter == 'medium':
+        all_entries = [e for e in all_entries if e._confidence_level == 'medium']
+    elif confidence_filter == 'low':
+        all_entries = [e for e in all_entries if e._confidence_level == 'low']
+
+    # Sort by confidence DESC then amount DESC
+    all_entries.sort(key=lambda e: (-e._confidence_score, -float(e.amount or 0)))
+
+    # Stats (from full queryset, not filtered)
+    total_pending = confidence_counts['all']
     by_company = qs.values('company__name', 'company__id').annotate(
         cnt=Count('id'), total_amt=Sum('amount')
     ).order_by('-cnt')
@@ -2535,8 +2795,8 @@ def ai_inbox(request):
     # Paginacija
     page = int(request.GET.get('page', 1))
     per_page = 50
-    entries = qs[(page-1)*per_page : page*per_page]
-    has_next = qs.count() > page * per_page
+    paginated_entries = all_entries[(page-1)*per_page : page*per_page]
+    has_next = len(all_entries) > page * per_page
 
     total_amount = qs.aggregate(t=Sum('amount'))['t'] or 0
     stats = {
@@ -2548,7 +2808,7 @@ def ai_inbox(request):
 
     if request.GET.get('format') == 'json':
         data = []
-        for e in entries:
+        for e in paginated_entries:
             data.append({
                 'id': e.pk,
                 'company': str(e.company),
@@ -2561,22 +2821,28 @@ def ai_inbox(request):
                 'source_type': e.source_type,
                 'ai_proposal': e.ai_proposal,
                 'is_booked': e.is_booked,
+                'confidence_score': e._confidence_score,
+                'confidence_level': e._confidence_level,
             })
         return JsonResponse({'entries': data, 'has_next': has_next, 'page': page, 'total': total_pending})
 
     return render(request, 'documents/ai_inbox.html', {
-        'entries': entries,
+        'entries': paginated_entries,
         'stats': stats,
         'page': page,
         'has_next': has_next,
         'is_superadmin': is_superadmin,
+        'confidence_counts': confidence_counts,
+        'confidence_filter': confidence_filter,
+        'source_type_filter': source_type_filter,
+        'source_types': ArhivaEntry.SOURCE_TYPES,
     })
 
 
 @login_required
 @require_POST
 def ai_inbox_accept(request, entry_id):
-    """Prihvati AI prijedlog — proknjizi dokument."""
+    """Prihvati AI prijedlog — proknjizi dokument i kreiraj temeljnicu."""
     from documents.models import ArhivaEntry
     entry = get_object_or_404(ArhivaEntry, pk=entry_id)
 
@@ -2586,19 +2852,32 @@ def ai_inbox_accept(request, entry_id):
         if company and entry.company_id != company.pk:
             return JsonResponse({'error': 'Nemate pristup'}, status=403)
 
+    # Create JournalEntry from AI proposal
+    je = None
+    if _proposal_has_debit_credit(entry.ai_proposal):
+        try:
+            je = _create_journal_entry_from_proposal(entry, user=request.user)
+        except Exception as exc:
+            logger.warning('ai_inbox_accept: JournalEntry creation failed for %s: %s', entry_id, exc)
+
     entry.is_booked = True
     entry.save(update_fields=['is_booked'])
 
-    # Opcionalno: kreiraj temeljnicu iz ai_proposal
-    # TODO: ako zelimo auto-kreirati JournalEntry iz proposal
+    logger.info('ai_inbox_accept: entry=%s booked by user=%s, JE=%s',
+                entry_id, request.user.username, je.entry_number if je else 'N/A')
 
-    return JsonResponse({'ok': True, 'id': entry.pk, 'message': 'Proknjizeno!'})
+    return JsonResponse({
+        'ok': True, 'id': entry.pk,
+        'message': 'Proknjizeno!' + (f' Temeljnica: {je.entry_number}' if je else ''),
+        'journal_entry': je.entry_number if je else None,
+    })
 
 
 @login_required
 @require_POST
 def ai_inbox_bulk_accept(request):
-    """Bulk prihvati sve AI prijedloge za odabranu firmu."""
+    """Bulk prihvati AI prijedloge za odabranu firmu.
+    Supports min_confidence filter: only accepts entries >= min_confidence with valid D/K."""
     from documents.models import ArhivaEntry
     import json
 
@@ -2611,17 +2890,48 @@ def ai_inbox_bulk_accept(request):
     if not company_id:
         return JsonResponse({'error': 'company_id required'}, status=400)
 
+    min_confidence = float(data.get('min_confidence', 0))
+
     # Security
     if not request.user.is_superuser:
         user_company = get_user_company(request)
         if user_company and str(user_company.pk) != str(company_id):
             return JsonResponse({'error': 'Nemate pristup'}, status=403)
 
-    updated = ArhivaEntry.objects.filter(
+    entries = ArhivaEntry.objects.filter(
         company_id=company_id, is_booked=False
-    ).exclude(ai_proposal__isnull=True).exclude(ai_proposal={}).update(is_booked=True)
+    ).exclude(ai_proposal__isnull=True).exclude(ai_proposal={})
 
-    return JsonResponse({'ok': True, 'count': updated, 'message': f'{updated} dokumenata proknjizeno!'})
+    booked = 0
+    je_count = 0
+    for entry in entries:
+        conf_score = _normalize_confidence(entry.ai_proposal)
+        if min_confidence > 0 and conf_score < min_confidence:
+            continue
+        if min_confidence > 0 and not _proposal_has_debit_credit(entry.ai_proposal):
+            continue
+
+        # Create JournalEntry if proposal is valid
+        if _proposal_has_debit_credit(entry.ai_proposal):
+            try:
+                je = _create_journal_entry_from_proposal(entry, user=request.user)
+                if je:
+                    je_count += 1
+            except Exception as exc:
+                logger.warning('ai_inbox_bulk_accept: JE failed for entry %s: %s', entry.pk, exc)
+
+        entry.is_booked = True
+        entry.save(update_fields=['is_booked'])
+        booked += 1
+
+    logger.info('ai_inbox_bulk_accept: company=%s, booked=%d, JEs=%d, min_conf=%.2f, user=%s',
+                company_id, booked, je_count, min_confidence, request.user.username)
+
+    return JsonResponse({
+        'ok': True, 'count': booked,
+        'journal_entries': je_count,
+        'message': f'{booked} dokumenata proknjizeno! ({je_count} temeljnica kreirano)',
+    })
 
 @login_required
 @require_POST

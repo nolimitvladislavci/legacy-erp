@@ -679,3 +679,142 @@ def process_scan_batch(self, batch_id):
 
     logger.info('Scan batch %s: %d slika → %d dokumenata', batch_id, batch.total_images, batch.total_documents)
     return {'ok': True, 'documents': batch.total_documents}
+
+
+@shared_task(bind=True, soft_time_limit=600, name='documents.verify_arhiva_integrity')
+def verify_arhiva_integrity(self):
+    """
+    Weekly integrity hash verification (Sunday 03:15).
+    Recomputes SHA-256 from current data and compares with stored hash.
+    Logs discrepancies as FenixSignal (type='integrity_violation').
+    """
+    from documents.models import ArhivaEntry
+
+    verified = 0
+    violations = 0
+    violation_details = []
+
+    # Process in batches to avoid memory issues
+    qs = ArhivaEntry.objects.filter(
+        integrity_hash__isnull=False,
+    ).exclude(integrity_hash='').order_by('id')
+
+    batch_size = 1000
+    last_id = 0
+
+    while True:
+        batch = list(qs.filter(id__gt=last_id)[:batch_size])
+        if not batch:
+            break
+
+        for entry in batch:
+            last_id = entry.id
+            current_hash = entry.compute_integrity_hash()
+            if current_hash != entry.integrity_hash:
+                violations += 1
+                violation_details.append({
+                    'entry_id': entry.id,
+                    'archive_number': entry.archive_number,
+                    'doc_number': entry.doc_number,
+                    'company_id': entry.company_id,
+                    'stored_hash': entry.integrity_hash[:16] + '...',
+                    'computed_hash': current_hash[:16] + '...',
+                })
+            verified += 1
+
+    logger.info(
+        'verify_arhiva_integrity: verified=%d, violations=%d',
+        verified, violations,
+    )
+
+    # Log violations as FenixSignal
+    if violations > 0:
+        try:
+            from limit_connect_ai.models_signal import FenixSignal
+            FenixSignal.objects.create(
+                signal_type='bug',
+                source='api',
+                status='new',
+                priority=1,  # Critical
+                message=(
+                    f'INTEGRITY VIOLATION: {violations} od {verified} arhivskih zapisa '
+                    f'ima nepodudarnost hash-a. Moguca neovlastena izmjena podataka.'
+                ),
+                context={
+                    'type': 'integrity_violation',
+                    'verified': verified,
+                    'violations': violations,
+                    'details': violation_details[:20],  # Max 20 details
+                },
+            )
+        except Exception as sig_err:
+            logger.error('verify_arhiva_integrity: FenixSignal creation failed: %s', sig_err)
+
+        # Notify superadmins
+        try:
+            from django.contrib.auth import get_user_model
+            from notifications.services import notify
+            User = get_user_model()
+            for admin in User.objects.filter(is_superuser=True, is_active=True):
+                notify(
+                    recipient=admin,
+                    notification_type='system',
+                    title='INTEGRITET: Nepodudarnost hash-a u arhivi',
+                    message=f'{violations} zapisa ima nepodudarnost. Moguca neovlastena izmjena.',
+                    url='/hr/documents/arhiva/',
+                )
+        except Exception as notif_err:
+            logger.warning('verify_arhiva_integrity: notification failed: %s', notif_err)
+
+    return {
+        'verified': verified,
+        'violations': violations,
+        'details': violation_details[:5],
+    }
+
+
+@shared_task(bind=True, soft_time_limit=600, name='documents.auto_book_high_confidence')
+def auto_book_high_confidence(self):
+    """
+    Dnevni task (06:00) — auto-proknjizi sve unbooked entries s confidence >= 0.8
+    koji imaju validan debit+credit u ai_proposal.
+    Kreira JournalEntry + LedgerLine za svaki entry.
+    """
+    from documents.models import ArhivaEntry
+    from documents.views import (
+        _normalize_confidence, _proposal_has_debit_credit,
+        _create_journal_entry_from_proposal,
+    )
+
+    qs = ArhivaEntry.objects.filter(
+        is_booked=False,
+    ).exclude(ai_proposal__isnull=True).exclude(ai_proposal={})
+
+    booked = 0
+    je_created = 0
+    errors = 0
+
+    for entry in qs.iterator():
+        conf_score = _normalize_confidence(entry.ai_proposal)
+        if conf_score < 0.8:
+            continue
+        if not _proposal_has_debit_credit(entry.ai_proposal):
+            continue
+
+        try:
+            je = _create_journal_entry_from_proposal(entry, user=None)
+            if je:
+                je_created += 1
+            entry.is_booked = True
+            entry.save(update_fields=['is_booked'])
+            booked += 1
+        except Exception as exc:
+            errors += 1
+            logger.warning('auto_book_high_confidence: failed for entry %s: %s', entry.pk, exc)
+
+    logger.info(
+        'auto_book_high_confidence: booked=%d, JEs=%d, errors=%d',
+        booked, je_created, errors,
+    )
+
+    return {'booked': booked, 'journal_entries': je_created, 'errors': errors}

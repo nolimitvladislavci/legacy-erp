@@ -209,6 +209,29 @@ class CMRItem(GrossmarktDocItem):
         verbose_name_plural = _('CMR stavke')
 
 
+
+# ════════════════════════════════════════════════════════════
+# ArhivaLabel — Labele za kategorizaciju arhivskih zapisa
+# ════════════════════════════════════════════════════════════
+
+class ArhivaLabel(models.Model):
+    """Korisnicke labele za organizaciju arhive per-company."""
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='arhiva_labels', verbose_name=_('Tvrtka'))
+    name = models.CharField(max_length=50, verbose_name=_('Naziv'))
+    color = models.CharField(max_length=7, default='#c9a84c', verbose_name=_('Boja'))
+    icon = models.CharField(max_length=30, default='tag', verbose_name=_('Ikona'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['company', 'name']
+        ordering = ['name']
+        verbose_name = _('Arhivska labela')
+        verbose_name_plural = _('Arhivske labele')
+
+    def __str__(self):
+        return self.name
+
+
 # ════════════════════════════════════════════════════════════
 # ArhivaEntry — Centralizirana arhiva svih dokumenata
 # ════════════════════════════════════════════════════════════
@@ -269,6 +292,15 @@ class ArhivaEntry(models.Model):
     barcode = models.CharField(max_length=64, blank=True, db_index=True,
                                verbose_name=_('Barcode'),
                                help_text='Interni barcode za fizičko mapiranje dokumenta')
+
+    # Sprint 2: Partner FK za smart upload matching
+    partner = models.ForeignKey('partners.Partner', on_delete=models.SET_NULL,
+                                null=True, blank=True, related_name='arhiva_entries',
+                                verbose_name=_('Partner (veza)'))
+
+    # Sprint 3: Labele za kategorizaciju
+    labels = models.ManyToManyField('ArhivaLabel', blank=True, related_name='entries',
+                                    verbose_name=_('Labele'))
 
     class Meta:
         verbose_name = _('Arhivski zapis')
