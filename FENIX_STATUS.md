@@ -175,6 +175,7 @@ LIMIT Connect Borg (26.03.2026):
 | Konto audit | 7b5f2db4 | Pristup temeljnicama, žiro računima, izvještajima se logira |
 | CardActivity security | 0147306a | is_public_facing + is_system_generated — QR leak protection |
 | BORG Hub | 11395c4b | Cross-module command center — WO kanban, experiences, financije, timeline, alerts |
+| Simulate BORG Master | 48fba3a2 | 30 novih modula (15→45), 107/107 testova (100%) |
 
 ### Sigurnosni audit rezultati (28.03.2026)
 - **136 modela** dobilo CompanyManager (prije: samo 43/179 imalo)
