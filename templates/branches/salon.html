@@ -56,7 +56,7 @@
       <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <a href="{% url 'appointments:booking_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
+      <a href="{% url 'appointments:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
       <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; Blagajna" %}</a>
       <a href="{% url 'partners:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Klijenti" %}</a>
     </div>
@@ -94,7 +94,7 @@
       <div class="action-lbl">{% trans "Novi termin" %}</div>
       <div class="action-sub">{% trans "Rezervacija usluge" %}</div>
     </a>
-    <a class="action-card" href="{% url 'appointments:booking_list' %}">
+    <a class="action-card" href="{% url 'appointments:list' %}">
       <div class="action-icon">{% trans "&#x1F4C5;" %}</div>
       <div class="action-lbl">{% trans "Svi termini" %}</div>
       <div class="action-sub">{% trans "Raspored dana" %}</div>
@@ -109,7 +109,7 @@
       <div class="action-lbl">{% trans "Klijenti" %}</div>
       <div class="action-sub">{% trans "Kartice klijenata" %}</div>
     </a>
-    <a class="action-card" href="{% url 'inventory:item_list' %}">
+    <a class="action-card" href="{% url 'inventory:list' %}">
       <div class="action-icon">{% trans "&#x1F9F4;" %}</div>
       <div class="action-lbl">{% trans "Kozmetika" %}</div>
       <div class="action-sub">{% trans "Zalihe proizvoda" %}</div>
@@ -136,7 +136,7 @@
       <div style="color:#888;font-size:.82rem;padding:.5rem 0">{% trans "Nema zakazanih termina za danas." %}</div>
     {% endif %}
     <div style="margin-top:.75rem">
-      <a href="{% url 'appointments:booking_list' %}" style="color:#f472b6;font-size:.8rem">{% trans "Svi termini &rarr;" %}</a>
+      <a href="{% url 'appointments:list' %}" style="color:#f472b6;font-size:.8rem">{% trans "Svi termini &rarr;" %}</a>
     </div>
   </div>
 

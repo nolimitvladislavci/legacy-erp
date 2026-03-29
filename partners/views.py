@@ -164,7 +164,7 @@ def partner_delete(request, pk):
         name = partner.name
         partner.delete()
         messages.success(request, f"Partner {name} obrisan.")
-        return redirect("partners:list")
+        return redirect("partners:partner_list")
     return render(request, "partners/partner_confirm_delete.html", {"partner": partner})
 
 

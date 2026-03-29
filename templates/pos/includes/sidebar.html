@@ -54,11 +54,11 @@
     <a href="/pos/vouchers/" class="ps-link"><i class="fas fa-ticket-alt"></i> Vučeri</a>
     <a href="/pos/settings/" class="ps-link"><i class="fas fa-cog"></i> POS Postavke</a>
     <hr class="ps-divider">
-    <a href="{% url 'invoicing:invoice_list' %}" class="ps-link"><i class="fas fa-file-invoice"></i> Računi</a>
+    <a href="{% url 'invoicing:index' %}" class="ps-link"><i class="fas fa-file-invoice"></i> Računi</a>
     <a href="/invoicing/create/" class="ps-link"><i class="fas fa-plus"></i> Novi račun</a>
-    <a href="{% url 'inventory:item_list' %}" class="ps-link"><i class="fas fa-warehouse"></i> Skladište</a>
+    <a href="{% url 'inventory:list' %}" class="ps-link"><i class="fas fa-warehouse"></i> Skladište</a>
     <a href="{% url 'partners:list' %}" class="ps-link"><i class="fas fa-users"></i> Partneri</a>
-    <a href="{% url 'appointments:booking_list' %}" class="ps-link"><i class="fas fa-calendar-check"></i> Termini</a>
+    <a href="{% url 'appointments:list' %}" class="ps-link"><i class="fas fa-calendar-check"></i> Termini</a>
     <hr class="ps-divider">
     <a href="{% url 'ai_cockpit' %}" class="ps-link"><i class="fas fa-robot"></i> AI Asistent</a>
     <a href="{% url 'dashboard' %}" class="ps-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>

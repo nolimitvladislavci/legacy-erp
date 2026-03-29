@@ -49,7 +49,7 @@
       <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <a href="{% url 'invoicing:invoice_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4CB; Fakture" %}</a>
+      <a href="{% url 'invoicing:index' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4CB; Fakture" %}</a>
       <a href="/documents/" class="btn btn-ghost btn-sm">{% trans "&#x1F4C4; Dokumenti" %}</a>
       <a href="{% url 'partners:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Klijenti" %}</a>
     </div>
@@ -87,7 +87,7 @@
       <div class="action-lbl">{% trans "Novi račun" %}</div>
       <div class="action-sub">{% trans "Kreiraj fakturu" %}</div>
     </a>
-    <a class="action-card" href="{% url 'invoicing:invoice_list' %}">
+    <a class="action-card" href="{% url 'invoicing:index' %}">
       <div class="action-icon">{% trans "&#x1F4B0;" %}</div>
       <div class="action-lbl">{% trans "Sve fakture" %}</div>
       <div class="action-sub">{% trans "Pregled i naplata" %}</div>
@@ -119,7 +119,7 @@
     <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:.85rem">
       <div>{% trans "&#x1F7E2;" %} <strong>{{ invoice_count }}</strong> {% trans "izdanih računa" %}</div>
       <div>{% trans "&#x1F7E1;" %} <strong>{{ pending_inv }}</strong> {% trans "čeka naplatu" %}</div>
-      <div><a href="{% url 'invoicing:invoice_list' %}" style="color:#a78bfa">{% trans "Pregled svih &rarr;" %}</a></div>
+      <div><a href="{% url 'invoicing:index' %}" style="color:#a78bfa">{% trans "Pregled svih &rarr;" %}</a></div>
     </div>
   </div>
 </div>

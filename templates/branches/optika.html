@@ -55,9 +55,9 @@
       <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <a href="{% url 'appointments:booking_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
+      <a href="{% url 'appointments:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
       <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
-      <a href="{% url 'inventory:item_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4E6; Zalihe" %}</a>
+      <a href="{% url 'inventory:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4E6; Zalihe" %}</a>
     </div>
   </div>
 
@@ -98,7 +98,7 @@
       <div class="action-lbl">{% trans "POS blagajna" %}</div>
       <div class="action-sub">{% trans "Prodaja naočala / leća" %}</div>
     </a>
-    <a class="action-card" href="{% url 'inventory:item_list' %}">
+    <a class="action-card" href="{% url 'inventory:list' %}">
       <div class="action-icon">{% trans "&#x1F4E6;" %}</div>
       <div class="action-lbl">{% trans "Zalihe" %}</div>
       <div class="action-sub">{% trans "Okviri, leće, kontaktne" %}</div>
@@ -108,7 +108,7 @@
       <div class="action-lbl">{% trans "Klijenti" %}</div>
       <div class="action-sub">{% trans "Kartice pacijenata" %}</div>
     </a>
-    <a class="action-card" href="{% url 'invoicing:invoice_list' %}">
+    <a class="action-card" href="{% url 'invoicing:index' %}">
       <div class="action-icon">{% trans "&#x1F4CB;" %}</div>
       <div class="action-lbl">{% trans "Računi" %}</div>
       <div class="action-sub">{% trans "Fakturiranje" %}</div>

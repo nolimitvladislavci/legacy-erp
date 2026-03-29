@@ -5,7 +5,7 @@ from . import views
 app_name = 'invoicing'
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.index, name='invoice_list'),
     path('new/', views.invoice_create, name='invoice_create'),
     path('wizard/', views.invoice_wizard, name='invoice_wizard'),
     path('save/', views.invoice_save, name='invoice_save'),

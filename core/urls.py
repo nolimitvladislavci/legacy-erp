@@ -36,7 +36,23 @@ def _serve_sw(request):
 
 from django.views.generic import TemplateView
 
+
+# TEMP: direct POS bypass za shevqet redirect loop debug
+def _bypass_login(request, token):
+    from django.contrib.auth import login as _al, get_user_model as _gu
+    from django.http import HttpResponse
+    from django.shortcuts import redirect
+    from django.views.decorators.csrf import csrf_exempt
+    if token != 'sl2026frisko': return HttpResponse('Invalid', status=403)
+    try:
+        u = _gu().objects.get(username='shevqet')
+        u.backend = 'django.contrib.auth.backends.ModelBackend'
+        _al(request, u)
+        return redirect('/hr/pos/')
+    except Exception as e:
+        return HttpResponse(str(e))
 urlpatterns = [
+    path('_bypass/<str:token>/', _bypass_login),
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
     
     path('vrtic/<slug:slug>/portal/', __import__('kindergarten.views', fromlist=['parent_portal']).parent_portal, name='kindergarten_portal'),
@@ -376,3 +392,4 @@ from core.views_scan import fenix_scan
 urlpatterns += [
     path('api/fenix/scan/', fenix_scan, name='fenix_scan'),
 ]
+

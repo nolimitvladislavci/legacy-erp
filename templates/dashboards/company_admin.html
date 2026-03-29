@@ -339,7 +339,7 @@ function dismissPushBanner(){
 
   <!-- KPI Cards -->
   <div class="kpi-grid">
-    <a href="{% url 'invoicing:invoice_list' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
+    <a href="{% url 'invoicing:index' %}" style="text-decoration:none"><div class="kpi fenix-card" style="cursor:pointer">
       <div class="kpi-lbl">{% trans "💰 Prihod ovaj mj." %}</div>
       <div class="kpi-val green">{{ paid_month|floatformat:0 }} €</div>
       <div class="kpi-sub">Ukupno: {{ total_invoiced|floatformat:0 }} €</div>

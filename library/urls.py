@@ -35,3 +35,12 @@ urlpatterns = [
     # Statistika
     path("statistika/", views.statistics, name="statistics"),
 ]
+
+    # Agregator izvora
+from .sources import source_hub, search_gutenberg, search_openlibrary, import_from_source
+urlpatterns += [
+    path('izvori/', source_hub, name='source_hub'),
+    path('api/gutenberg/', search_gutenberg, name='search_gutenberg'),
+    path('api/openlibrary/', search_openlibrary, name='search_openlibrary'),
+    path('api/import-source/', import_from_source, name='import_from_source'),
+]

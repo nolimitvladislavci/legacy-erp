@@ -1218,7 +1218,7 @@ class Command(BaseCommand):
         sidebar_url_names = [
             ('dashboard', []),
             ('invoicing:index', []),
-            ('partners:list', []),
+            ('partners:partner_list', []),
             ('pos:dashboard', []),
             ('work_orders:list', []),
             ('worktime:ts_worker', []),

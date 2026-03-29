@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Agregator izvora — Knjiznica{% endblock %}
+{% block page_title %}Agregator izvora{% endblock %}
+{% block extra_css %}
+<style>
+.hub-hero{background:linear-gradient(135deg,#0f172a,#1a1a2e);border:1px solid #c8a24e22;border-radius:16px;padding:2rem;margin-bottom:2rem;text-align:center}
+.hub-hero h2{color:#c8a24e;font-family:"Cormorant Garamond",serif;font-size:1.8rem;margin-bottom:.5rem}
+.hub-hero p{color:#888;font-size:.95rem;max-width:600px;margin:0 auto 1.5rem}
+
+/* Search */
+.mega-search{max-width:700px;margin:0 auto;display:flex;background:#16213e;border:2px solid #c8a24e33;border-radius:12px;overflow:hidden;transition:border-color .2s}
+.mega-search:focus-within{border-color:#c8a24e}
+.mega-search input{flex:1;background:transparent;border:none;padding:.9rem 1.2rem;color:#f0e6d3;font-size:1.05rem;outline:none}
+.mega-search input::placeholder{color:#555}
+.mega-search select{background:#0f172a;color:#c8a24e;border:none;border-left:1px solid #c8a24e22;padding:0 1rem;font-size:.85rem;cursor:pointer;outline:none}
+.mega-search button{background:#c8a24e;border:none;padding:0 1.5rem;color:#1a1a2e;font-size:1.1rem;cursor:pointer;transition:background .2s}
+.mega-search button:hover{background:#d4b456}
+.mega-search button:disabled{opacity:.5}
+
+/* Source cards */
+.source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem}
+.source-card{background:#1a1a2e;border:1px solid #ffffff08;border-radius:12px;padding:1.2rem;transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.source-card:hover{border-color:#c8a24e44;transform:translateY(-2px)}
+.source-card .badge{position:absolute;top:0;right:0;font-size:.6rem;padding:3px 10px;border-radius:0 12px 0 8px;font-weight:700;text-transform:uppercase}
+.source-card .header{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}
+.source-card .icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.source-card .name{font-weight:700;color:#f0e6d3;font-size:.95rem}
+.source-card .desc{font-size:.82rem;color:#888;line-height:1.4;margin-bottom:.5rem}
+.source-card .formats{display:flex;gap:4px;flex-wrap:wrap}
+.source-card .fmt{font-size:.65rem;padding:2px 6px;border-radius:4px;background:#ffffff08;color:#aaa}
+.source-card .legal{font-size:.7rem;color:#22c55e;margin-top:.4rem}
+
+/* Results */
+.results-area{display:none;margin-top:1.5rem}
+.results-area.show{display:block}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.results-header h4{color:#c8a24e;font-family:"Cormorant Garamond",serif}
+.results-header .count{color:#888;font-size:.85rem}
+
+.result-card{background:#1a1a2e;border:1px solid #ffffff08;border-radius:10px;padding:1rem;margin-bottom:.6rem;display:flex;gap:1rem;align-items:flex-start;transition:border-color .2s}
+.result-card:hover{border-color:#c8a24e33}
+.result-card .thumb{width:60px;height:85px;background:#16213e;border-radius:6px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.result-card .thumb img{width:100%;height:100%;object-fit:cover}
+.result-card .thumb .no-img{color:#333;font-size:1.5rem}
+.result-card .info{flex:1;min-width:0}
+.result-card .title{color:#f0e6d3;font-weight:600;font-size:.95rem;margin-bottom:.2rem}
+.result-card .meta{font-size:.8rem;color:#888}
+.result-card .links{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+.result-card .link-btn{font-size:.7rem;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;transition:all .15s;border:none;cursor:pointer}
+.link-btn.view{background:#3b82f622;color:#3b82f6;border:1px solid #3b82f633}
+.link-btn.view:hover{background:#3b82f644}
+.link-btn.import{background:#c8a24e22;color:#c8a24e;border:1px solid #c8a24e33}
+.link-btn.import:hover{background:#c8a24e44}
+.link-btn.import:disabled{opacity:.4;cursor:not-allowed}
+.link-btn.import.done{background:#22c55e22;color:#22c55e;border-color:#22c55e33}
+
+/* Loading */
+.loading-bar{height:3px;background:#16213e;border-radius:2px;overflow:hidden;margin:1rem 0;display:none}
+.loading-bar.show{display:block}
+.loading-bar .fill{height:100%;background:linear-gradient(90deg,#c8a24e,#22c55e,#c8a24e);width:30%;border-radius:2px;animation:loadSlide 1.5s ease infinite}
+@keyframes loadSlide{0%{margin-left:0}50%{margin-left:70%}100%{margin-left:0}}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:2rem;right:2rem;z-index:9999}
+.toast{background:#1a1a2e;border:1px solid #c8a24e44;border-radius:10px;padding:.8rem 1.2rem;color:#f0e6d3;font-size:.9rem;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:toastIn .3s ease;display:flex;align-items:center;gap:.6rem;margin-top:.5rem}
+.toast.error{border-color:#ef4444}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  .source-grid{grid-template-columns:1fr}
+  .mega-search{flex-wrap:wrap}
+  .mega-search input{min-width:100%}
+  .mega-search select{flex:1;border-left:none;border-top:1px solid #c8a24e22;padding:.6rem}
+  .mega-search button{padding:.6rem 1.2rem;width:100%}
+  .result-card{flex-direction:column}
+  .result-card .thumb{width:100%;height:120px}
+}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div class="hub-hero">
+  <h2><i class="bi bi-link-45deg"></i> Agregator knjiznih izvora</h2>
+  <p>Pretrazite 20M+ knjiga iz 7 izvora. Jednim klikom uvezite u svoj katalog — s naslovnicama, metapodacima i linkovima.</p>
+
+  <div class="mega-search" id="searchBox">
+    <input type="text" id="searchQ" placeholder="Pretrazite sve izvore..." autocomplete="off">
+    <select id="sourceSelect">
+      <option value="all">Svi izvori</option>
+      <option value="gutenberg">Project Gutenberg</option>
+      <option value="openlibrary">Open Library</option>
+    </select>
+    <button id="searchBtn" type="button"><i class="bi bi-search"></i></button>
+  </div>
+</div>
+
+<!-- Source Cards -->
+<h4 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin-bottom:1rem"><i class="bi bi-collection"></i> Povezani izvori</h4>
+<div class="source-grid">
+  {% for key, src in sources.items %}
+  <div class="source-card" onclick="window.open('{{ src.url }}', '_blank')">
+    <div class="badge" style="background:{{ src.color }}22;color:{{ src.color }}">{{ key|upper }}</div>
+    <div class="header">
+      <div class="icon" style="background:{{ src.color }}15;color:{{ src.color }}"><i class="bi {{ src.icon }}"></i></div>
+      <div class="name">{{ src.name }}</div>
+    </div>
+    <div class="desc">{{ src.description }}</div>
+    <div class="formats">
+      {% for fmt in src.formats %}<span class="fmt">{{ fmt }}</span>{% endfor %}
+    </div>
+    <div class="legal"><i class="bi bi-shield-check"></i> {{ src.legal }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Loading -->
+<div class="loading-bar" id="loadingBar"><div class="fill"></div></div>
+
+<!-- Results -->
+<div class="results-area" id="resultsArea">
+  <div class="results-header">
+    <h4><i class="bi bi-list-ul"></i> Rezultati pretrage</h4>
+    <span class="count" id="resultCount"></span>
+  </div>
+  <div id="resultsList"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+const searchQ = document.getElementById('searchQ');
+const searchBtn = document.getElementById('searchBtn');
+const sourceSelect = document.getElementById('sourceSelect');
+const loadingBar = document.getElementById('loadingBar');
+const resultsArea = document.getElementById('resultsArea');
+const resultsList = document.getElementById('resultsList');
+const resultCount = document.getElementById('resultCount');
+
+function toast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'');
+  t.innerHTML = '<i class="bi bi-' + (type==='error'?'exclamation-circle':'check-circle-fill') + '" style="color:' + (type==='error'?'#ef4444':'#22c55e') + '"></i> ' + msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+function setLoading(on) {
+  loadingBar.classList.toggle('show', on);
+  searchBtn.disabled = on;
+  searchBtn.innerHTML = on ? '<i class="bi bi-arrow-clockwise" style="animation:spin .8s linear infinite"></i>' : '<i class="bi bi-search"></i>';
+}
+
+async function doSearch() {
+  const q = searchQ.value.trim();
+  if (q.length < 2) return;
+  const src = sourceSelect.value;
+
+  setLoading(true);
+  resultsArea.classList.add('show');
+  resultsList.innerHTML = '';
+  resultCount.textContent = 'Trazim...';
+
+  let allResults = [];
+
+  try {
+    if (src === 'all' || src === 'gutenberg') {
+      const r = await fetch(`{% url 'library:search_gutenberg' %}?q=${encodeURIComponent(q)}`);
+      const d = await r.json();
+      if (d.results) allResults.push(...d.results);
+    }
+    if (src === 'all' || src === 'openlibrary') {
+      const r = await fetch(`{% url 'library:search_openlibrary' %}?q=${encodeURIComponent(q)}`);
+      const d = await r.json();
+      if (d.results) allResults.push(...d.results);
+    }
+  } catch(e) {
+    toast('Greska pri pretrazi: ' + e.message, 'error');
+  }
+
+  setLoading(false);
+  resultCount.textContent = allResults.length + ' rezultata';
+
+  if (!allResults.length) {
+    resultsList.innerHTML = '<div style="text-align:center;padding:2rem;color:#555"><i class="bi bi-search" style="font-size:2rem"></i><p>Nema rezultata.</p></div>';
+    return;
+  }
+
+  resultsList.innerHTML = allResults.map((b, i) => `
+    <div class="result-card" id="rc-${i}">
+      <div class="thumb">
+        ${b.cover ? '<img src="'+b.cover+'" loading="lazy">' : '<i class="bi bi-book no-img"></i>'}
+      </div>
+      <div class="info">
+        <div class="title">${b.title}</div>
+        <div class="meta">
+          ${b.authors || ''}
+          ${b.year ? ' &middot; ' + b.year : ''}
+          ${b.publisher ? ' &middot; ' + b.publisher : ''}
+          ${b.isbn ? ' &middot; ISBN: ' + b.isbn : ''}
+          &middot; <span style="color:${b.source==='gutenberg'?'#22c55e':'#3b82f6'}">${b.source==='gutenberg'?'Gutenberg':'OpenLibrary'}</span>
+          ${b.download_count ? ' &middot; ' + b.download_count.toLocaleString() + ' preuzimanja' : ''}
+        </div>
+        <div class="links">
+          ${b.source_url ? '<a href="'+b.source_url+'" target="_blank" class="link-btn view"><i class="bi bi-box-arrow-up-right"></i> Izvor</a>' : ''}
+          ${(b.formats||[]).map(f => '<a href="'+f.url+'" target="_blank" class="link-btn view"><i class="bi bi-download"></i> '+f.type+'</a>').join('')}
+          <button class="link-btn import" onclick="importBook(${i}, this)" data-idx="${i}"><i class="bi bi-plus-circle"></i> Uvezi u katalog</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  window._searchResults = allResults;
+}
+
+async function importBook(idx, btn) {
+  const b = window._searchResults[idx];
+  if (!b) return;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-arrow-clockwise" style="animation:spin .8s linear infinite"></i> Uvozim...';
+
+  try {
+    const r = await fetch('{% url "library:import_from_source" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken'),
+      },
+      body: JSON.stringify({
+        title: b.title,
+        authors: b.authors || '',
+        isbn: b.isbn || '',
+        publisher: b.publisher || '',
+        year: b.year || '',
+        cover: b.cover || '',
+        source: b.source,
+        source_url: b.source_url || '',
+        language: (b.languages||[])[0] || 'hr',
+      }),
+    });
+    const d = await r.json();
+    if (d.success) {
+      btn.className = 'link-btn import done';
+      btn.innerHTML = '<i class="bi bi-check-circle"></i> Uvezeno!';
+      toast(d.message);
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-plus-circle"></i> Uvezi';
+      toast(d.error || 'Greska', 'error');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-plus-circle"></i> Uvezi';
+    toast('Greska: ' + e.message, 'error');
+  }
+}
+
+function getCookie(name) {
+  const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return v ? v.pop() : '';
+}
+
+searchBtn.addEventListener('click', doSearch);
+searchQ.addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();doSearch();} });
+
+// Spin keyframe
+if (!document.getElementById('spinStyle')) {
+  const s = document.createElement('style');
+  s.id = 'spinStyle';
+  s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(s);
+}
+</script>
+{% endblock %}

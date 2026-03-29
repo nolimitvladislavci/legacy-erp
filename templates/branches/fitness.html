@@ -55,7 +55,7 @@
       <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <a href="{% url 'appointments:booking_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
+      <a href="{% url 'appointments:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
       <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
       <a href="{% url 'partners:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Članovi" %}</a>
     </div>
@@ -93,7 +93,7 @@
       <div class="action-lbl">{% trans "Novi termin" %}</div>
       <div class="action-sub">{% trans "Grupni / personalni trening" %}</div>
     </a>
-    <a class="action-card" href="{% url 'appointments:booking_list' %}">
+    <a class="action-card" href="{% url 'appointments:list' %}">
       <div class="action-icon">{% trans "&#x1F5D3;" %}</div>
       <div class="action-lbl">{% trans "Raspored" %}</div>
       <div class="action-sub">{% trans "Pregled svih termina" %}</div>
@@ -108,7 +108,7 @@
       <div class="action-lbl">{% trans "Članovi" %}</div>
       <div class="action-sub">{% trans "Kartice članova" %}</div>
     </a>
-    <a class="action-card" href="{% url 'invoicing:invoice_list' %}">
+    <a class="action-card" href="{% url 'invoicing:index' %}">
       <div class="action-icon">{% trans "&#x1F4CB;" %}</div>
       <div class="action-lbl">{% trans "Računi" %}</div>
       <div class="action-sub">{% trans "Članarine / usluge" %}</div>
