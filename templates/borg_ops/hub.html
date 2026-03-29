@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}BORG Hub — Command Center{% endblock %}
+
+{% block content %}
+<!-- ═══ HEADER ═══ -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <div>
+    <h4 class="mb-0 text-white">
+      <i class="fas fa-globe me-2" style="color:var(--gold,#c9a84c)"></i>
+      BORG Hub <span class="text-muted fw-normal" style="font-size:.85rem">— Command Center</span>
+    </h4>
+    <div class="text-muted small mt-1">
+      <i class="fas fa-clock me-1"></i>{{ now|date:"d.m.Y H:i" }}
+      <span class="ms-2 badge bg-secondary" style="font-size:.65rem">
+        <i class="fas fa-sync-alt me-1"></i>Auto-refresh: <span id="refresh-countdown">60</span>s
+      </span>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'borg_ops:operations_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-tachometer-alt me-1"></i>Operations
+    </a>
+  </div>
+</div>
+
+<!-- ═══ ALERT BANNER ═══ -->
+{% if alerts %}
+<div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" role="alert" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3)">
+  <i class="fas fa-exclamation-triangle fs-5"></i>
+  <div>
+    <strong>{{ alerts|length }} aktivnih upozorenja</strong>
+    {% for a in alerts %}
+      <span class="badge bg-danger ms-2" style="font-size:.7rem">{{ a.signal_type }}: {{ a.message|truncatechars:40 }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if interventions %}
+<div class="alert alert-warning d-flex align-items-center gap-2 py-2 mb-3" style="background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.3)">
+  <i class="fas fa-bolt fs-5"></i>
+  <div>
+    <strong>{{ interventions|length }} aktivnih intervencija</strong>
+    {% for hi in interventions %}
+      <span class="badge bg-warning text-dark ms-2" style="font-size:.7rem">{{ hi.get_status_display }} — {{ hi.description|truncatechars:30 }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══ QUICK STATS ═══ -->
+<div class="row row-cols-2 row-cols-sm-3 row-cols-lg-6 g-3 mb-4">
+  {% include "partials/_stat_card.html" with icon="fas fa-clipboard-list" color="text-primary" label="WO otvoreni" value=wo_stats.open|default:"0" %}
+  {% include "partials/_stat_card.html" with icon="fas fa-check-circle" color="text-success" label="WO završeni danas" value=wo_stats.completed_today|default:"0" %}
+  {% include "partials/_stat_card.html" with icon="fas fa-cash-register" color="text-info" label="POS danas" value=pos_today_count sub=pos_today_revenue|floatformat:0 %}
+  {% include "partials/_stat_card.html" with icon="fas fa-calendar" color="text-warning" label="Exp. termini (7d)" value=exp_stats.upcoming|default:"0" %}
+  {% include "partials/_stat_card.html" with icon="fas fa-hourglass-half" color="text-warning" label="Čeka uplatu" value=exp_stats.pending_payment|default:"0" %}
+  {% include "partials/_stat_card.html" with icon="fas fa-exclamation-circle" color="text-danger" label="Fakture overdue" value=overdue_count %}
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="row g-4">
+
+  <!-- LIJEVO: Tabovi -->
+  <div class="col-lg-8">
+    <div class="card bg-dark border-secondary">
+      <div class="card-header bg-dark border-secondary p-0">
+        <ul class="nav nav-tabs border-0" id="hubTabs" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active text-white" id="tab-wo" data-bs-toggle="tab" data-bs-target="#pane-wo" type="button">
+              <i class="fas fa-clipboard-list me-1 text-primary"></i>Radni nalozi
+              {% if wo_stats.open %}<span class="badge bg-primary ms-1">{{ wo_stats.open }}</span>{% endif %}
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link text-white" id="tab-exp" data-bs-toggle="tab" data-bs-target="#pane-exp" type="button">
+              <i class="fas fa-mountain me-1 text-warning"></i>Experiences
+              {% if exp_stats.upcoming %}<span class="badge bg-warning text-dark ms-1">{{ exp_stats.upcoming }}</span>{% endif %}
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link text-white" id="tab-fin" data-bs-toggle="tab" data-bs-target="#pane-fin" type="button">
+              <i class="fas fa-file-invoice-dollar me-1 text-info"></i>Financije
+              {% if overdue_count %}<span class="badge bg-danger ms-1">{{ overdue_count }}</span>{% endif %}
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link text-white" id="tab-burza" data-bs-toggle="tab" data-bs-target="#pane-burza" type="button">
+              <i class="fas fa-handshake me-1 text-success"></i>Burza
+              {% if burza_active %}<span class="badge bg-success ms-1">{{ burza_active|length }}</span>{% endif %}
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div class="card-body p-3 tab-content">
+
+        <!-- TAB: Radni nalozi (Kanban) -->
+        <div class="tab-pane fade show active" id="pane-wo">
+          {% if work_orders %}
+          <div class="kanban-board">
+            {% include "partials/_kanban_column.html" with col_title="Nacrt" col_color="#6b7280" col_icon="fas fa-pencil-alt" items=work_orders.draft card_template="borg_ops/_wo_card.html" %}
+            {% include "partials/_kanban_column.html" with col_title="U tijeku" col_color="#f59e0b" col_icon="fas fa-spinner" items=work_orders.in_progress card_template="borg_ops/_wo_card.html" %}
+            {% include "partials/_kanban_column.html" with col_title="Završeni danas" col_color="#22c55e" col_icon="fas fa-check" items=work_orders.completed card_template="borg_ops/_wo_card.html" %}
+          </div>
+          {% else %}
+          {% include "partials/_empty_state.html" with icon="fas fa-clipboard-list" title="Nema radnih naloga" %}
+          {% endif %}
+        </div>
+
+        <!-- TAB: Experiences -->
+        <div class="tab-pane fade" id="pane-exp">
+          {% if upcoming_schedules %}
+          <h6 class="text-muted mb-2"><i class="fas fa-calendar-alt me-1"></i>Nadolazeći termini (7 dana)</h6>
+          <div class="table-responsive">
+            <table class="table table-dark table-sm table-hover mb-4">
+              <thead><tr><th>Iskustvo</th><th>Datum</th><th>Vrijeme</th><th>Mjesta</th><th>Status</th></tr></thead>
+              <tbody>
+              {% for s in upcoming_schedules %}
+              <tr>
+                <td><i class="fas fa-mountain me-1 text-warning" style="font-size:.75rem"></i>{{ s.experience.name|truncatechars:30 }}</td>
+                <td>{{ s.date|date:"d.m." }}</td>
+                <td>{{ s.time_from|time:"H:i" }}–{{ s.time_to|time:"H:i" }}</td>
+                <td>{{ s.booked_pax }}/{{ s.max_pax }}</td>
+                <td><span class="badge {% if s.status == 'open' %}bg-success{% elif s.status == 'full' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ s.status }}</span></td>
+              </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+
+          {% if pending_bookings %}
+          <h6 class="text-muted mb-2"><i class="fas fa-hourglass-half me-1"></i>Čekaju uplatu depozita</h6>
+          <div class="table-responsive">
+            <table class="table table-dark table-sm table-hover">
+              <thead><tr><th>Gost</th><th>Iskustvo</th><th>Pax</th><th>Iznos</th><th>Status</th></tr></thead>
+              <tbody>
+              {% for b in pending_bookings %}
+              <tr>
+                <td>{{ b.guest_name|truncatechars:20 }}</td>
+                <td>{{ b.schedule.experience.name|truncatechars:25 }}</td>
+                <td>{{ b.pax_count }}</td>
+                <td class="text-warning">{{ b.deposit_amount|floatformat:0 }}€</td>
+                <td><span class="badge bg-warning text-dark">Pending</span></td>
+              </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+
+          {% if not upcoming_schedules and not pending_bookings %}
+          {% include "partials/_empty_state.html" with icon="fas fa-mountain" title="Nema nadolazećih termina" sub="Narednih 7 dana nema bookinga" %}
+          {% endif %}
+        </div>
+
+        <!-- TAB: Financije -->
+        <div class="tab-pane fade" id="pane-fin">
+          {% if unpaid_invoices %}
+          <div class="table-responsive">
+            <table class="table table-dark table-sm table-hover">
+              <thead><tr><th>Broj</th><th>Partner</th><th>Iznos</th><th>Dospijeće</th><th>Status</th></tr></thead>
+              <tbody>
+              {% for inv in unpaid_invoices %}
+              <tr>
+                <td><a href="#" class="text-decoration-none text-info">{{ inv.number }}</a></td>
+                <td>{{ inv.partner.name|default:"—"|truncatechars:25 }}</td>
+                <td class="text-white fw-bold">{{ inv.total|floatformat:2 }}€</td>
+                <td>{{ inv.date_due|date:"d.m.Y"|default:"—" }}</td>
+                <td>
+                  {% if inv.status == 'OVERDUE' %}
+                  <span class="badge bg-danger">Overdue</span>
+                  {% else %}
+                  <span class="badge bg-info">{{ inv.status }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          {% include "partials/_empty_state.html" with icon="fas fa-file-invoice-dollar" title="Sve plaćeno" sub="Nema dospjelih faktura" %}
+          {% endif %}
+        </div>
+
+        <!-- TAB: Burza -->
+        <div class="tab-pane fade" id="pane-burza">
+          {% if burza_active %}
+          <div class="table-responsive">
+            <table class="table table-dark table-sm table-hover">
+              <thead><tr><th>Naslov</th><th>Kategorija</th><th>Lokacija</th><th>Status</th><th>Datum</th></tr></thead>
+              <tbody>
+              {% for lead in burza_active %}
+              <tr>
+                <td>{{ lead.title|truncatechars:35 }}</td>
+                <td><span class="badge bg-secondary">{{ lead.category }}</span></td>
+                <td>{{ lead.location|truncatechars:20 }}</td>
+                <td>
+                  {% if lead.status == 'NOVI_UPIT' %}<span class="badge bg-primary">Novi</span>
+                  {% elif lead.status == 'INTERNA_PROCJENA' %}<span class="badge bg-warning text-dark">Procjena</span>
+                  {% elif lead.status == 'NA_BURZI' %}<span class="badge bg-success">Na burzi</span>
+                  {% else %}<span class="badge bg-secondary">{{ lead.status }}</span>{% endif %}
+                </td>
+                <td class="text-muted">{{ lead.created_at|date:"d.m." }}</td>
+              </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          {% include "partials/_empty_state.html" with icon="fas fa-handshake" title="Nema aktivnih upita" %}
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- DESNO: Activity Feed + Quick Actions -->
+  <div class="col-lg-4">
+
+    <!-- Quick Actions -->
+    <div class="card bg-dark border-secondary mb-3">
+      <div class="card-header bg-dark border-secondary py-2">
+        <span class="text-muted small fw-semibold"><i class="fas fa-bolt me-1 text-warning"></i>Brze akcije</span>
+      </div>
+      <div class="card-body p-2">
+        <div class="d-grid gap-2" style="grid-template-columns:1fr 1fr">
+          <a href="{% url 'work_orders:work_order_create' %}" class="btn btn-sm btn-outline-primary text-start">
+            <i class="fas fa-plus me-1"></i>Novi WO
+          </a>
+          <a href="{% url 'invoicing:invoice_create' %}" class="btn btn-sm btn-outline-info text-start">
+            <i class="fas fa-file-invoice me-1"></i>Novi račun
+          </a>
+          <a href="{% url 'experiences:experience_create' %}" class="btn btn-sm btn-outline-warning text-start">
+            <i class="fas fa-mountain me-1"></i>Novo iskustvo
+          </a>
+          <a href="{% url 'pos:pos_terminal' %}" class="btn btn-sm btn-outline-success text-start">
+            <i class="fas fa-cash-register me-1"></i>POS
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="card bg-dark border-secondary">
+      <div class="card-header bg-dark border-secondary py-2 d-flex justify-content-between align-items-center">
+        <span class="text-muted small fw-semibold"><i class="fas fa-stream me-1 text-info"></i>Aktivnost — Live Feed</span>
+        <span class="badge bg-secondary" style="font-size:.6rem">zadnjih 20</span>
+      </div>
+      <div class="card-body p-2" style="max-height:60vh;overflow-y:auto">
+        {% include "partials/_timeline.html" with activities=recent_activity %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="text-center text-muted mt-4 pt-3 border-top border-secondary" style="font-size:.75rem">
+  <i class="fas fa-sync-alt me-1"></i>Zadnje osvježenje: {{ now|date:"H:i:s" }}
+  · Sljedeće za <span id="refresh-countdown-footer">60</span>s
+  · <a href="{% url 'borg_ops:borg_hub' %}" class="text-decoration-none" style="color:var(--gold,#c9a84c)">Osvježi sada</a>
+</div>
+
+<!-- Auto-refresh -->
+<script>
+let countdown = 60;
+const timer = setInterval(() => {
+  countdown--;
+  document.querySelectorAll('[id^="refresh-countdown"]').forEach(el => el.textContent = countdown);
+  if (countdown <= 0) { clearInterval(timer); location.reload(); }
+}, 1000);
+</script>
+{% endblock %}

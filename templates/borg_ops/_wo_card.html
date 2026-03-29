@@ -1,0 +1,17 @@
+{# Kanban card za WorkOrder — koristi se iz _kanban_column.html #}
+<div class="card bg-dark border-secondary p-2" style="font-size:.82rem">
+  <div class="d-flex justify-content-between align-items-start mb-1">
+    <span class="text-white fw-semibold">{{ item.order_number|default:"WO" }}</span>
+    {% if item.priority == 'urgent' %}
+    <span class="badge bg-danger" style="font-size:.6rem">HITNO</span>
+    {% elif item.priority == 'high' %}
+    <span class="badge bg-warning text-dark" style="font-size:.6rem">VISOK</span>
+    {% endif %}
+  </div>
+  {% if item.client %}<div class="text-muted" style="font-size:.75rem"><i class="fas fa-user me-1"></i>{{ item.client.name|truncatechars:25 }}</div>{% endif %}
+  {% if item.description %}<div class="text-muted mt-1" style="font-size:.72rem">{{ item.description|truncatechars:50 }}</div>{% endif %}
+  <div class="d-flex justify-content-between align-items-center mt-2">
+    <span class="text-muted" style="font-size:.65rem">{{ item.created_at|date:"d.m. H:i" }}</span>
+    {% if item.assigned_to %}<span class="text-muted" style="font-size:.65rem"><i class="fas fa-user-cog me-1"></i>{{ item.assigned_to.get_short_name|default:item.assigned_to.username }}</span>{% endif %}
+  </div>
+</div>
