@@ -237,9 +237,27 @@ def api_create_otpremnica(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST only"}, status=405)
 
+    # Rate limiting: max 100 req/min per IP
+    from django.core.cache import cache
+    ip = (request.META.get("HTTP_X_FORWARDED_FOR", "") or "").split(",")[0].strip() \
+         or request.META.get("REMOTE_ADDR", "")
+    rate_key = f"propter_api_rate:{ip}"
+    hits = cache.get(rate_key, 0)
+    if hits > 100:
+        return JsonResponse({"error": "Rate limit exceeded (100/min)"}, status=429)
+    cache.set(rate_key, hits + 1, 60)
+
+    # Body size check (max 64KB)
+    if len(request.body) > 65536:
+        return JsonResponse({"error": "Request body too large (max 64KB)"}, status=413)
+
     api_key = request.headers.get("X-Propter-Key") or request.POST.get("api_key")
     if not api_key:
         return JsonResponse({"error": "API key obavezan"}, status=401)
+
+    # Sanitize API key (prevent injection)
+    if len(api_key) > 128 or not api_key.isalnum():
+        return JsonResponse({"error": "Nevaljan API key format"}, status=401)
 
     try:
         tenant = PropterConfig.objects.select_related("company").get(
@@ -256,17 +274,30 @@ def api_create_otpremnica(request):
 
     try:
         company = tenant.company
+        # Input validation
+        recipient_name = str(data.get("recipient_name", ""))[:200]
+        recipient_oib = str(data.get("recipient_oib", ""))[:20]
+        note = str(data.get("note", ""))[:1000]
+        try:
+            subtotal = Decimal(str(data.get("subtotal", "0")))
+            tax_amount = Decimal(str(data.get("tax_amount", "0")))
+            total = Decimal(str(data.get("total", "0")))
+            if any(v < 0 or v > Decimal("99999999.99") for v in [subtotal, tax_amount, total]):
+                return JsonResponse({"error": "Iznos izvan dozvoljenog raspona"}, status=400)
+        except Exception:
+            return JsonResponse({"error": "Neispravan format iznosa"}, status=400)
+
         otp = Otpremnica.objects.create(
             company=company,
             issue_date=data.get("issue_date") or timezone.now().date(),
-            recipient_name=data.get("recipient_name", ""),
-            recipient_oib=data.get("recipient_oib", ""),
-            subtotal=Decimal(str(data.get("subtotal", "0"))),
-            tax_amount=Decimal(str(data.get("tax_amount", "0"))),
-            total=Decimal(str(data.get("total", "0"))),
+            recipient_name=recipient_name,
+            recipient_oib=recipient_oib,
+            subtotal=subtotal,
+            tax_amount=tax_amount,
+            total=total,
             source=Otpremnica.Source.API,
             status=Otpremnica.Status.ISSUED,
-            note=data.get("note", ""),
+            note=note,
         )
         return JsonResponse({
             "id": str(otp.pk),
@@ -302,7 +333,13 @@ def eko_public(request, slug):
     Company puts badge/link on their own website.
     URL: /propter/eko/public/<slug>/
     """
+    from django.views.decorators.cache import cache_page
     from companies.models import Company
+
+    # Sanitize slug
+    if not slug or len(slug) > 100:
+        from django.http import Http404
+        raise Http404("Nevaljan slug.")
 
     company = get_object_or_404(Company, booking_slug=slug)
 
@@ -401,15 +438,21 @@ def esg_pdf(request, year=None):
 def propter_landing(request):
     """Public SaaS landing page — sells Propter e-Racun service."""
     # Live stats for social proof
-    from registration.models import PropterTenant
-    active = PropterTenant.objects.filter(is_active=True).count()
-    total_eracuni = PropterTenant.objects.aggregate(
-        t=db_models.Sum('eracuni_sent_total')
-    )['t'] or 0
-    return render(request, "propter/landing.html", {
-        "active_tenants": active,
-        "total_eracuni": total_eracuni,
-    })
+    from django.core.cache import cache
+    landing_data = cache.get("propter_landing_stats")
+    if not landing_data:
+        from registration.models import PropterTenant
+        active = PropterTenant.objects.filter(is_active=True).count()
+        total_eracuni = PropterTenant.objects.aggregate(
+            t=db_models.Sum('eracuni_sent_total')
+        )['t'] or 0
+        # Round to nearest 10 for privacy (ne exact count)
+        landing_data = {
+            "active_tenants": max((active // 10) * 10, 10),
+            "total_eracuni": max((total_eracuni // 100) * 100, 100) if total_eracuni else 0,
+        }
+        cache.set("propter_landing_stats", landing_data, 3600)  # 1h cache
+    return render(request, "propter/landing.html", landing_data)
 
 
 # -------------------------------------------------------------
@@ -423,6 +466,16 @@ def propter_soba(request):
     if not company:
         messages.error(request, "Nema povezane tvrtke.")
         return redirect("/dashboard/")
+
+    # Security: PropterConfig must exist and be active
+    try:
+        propter_config = company.propter_config
+        if not propter_config.is_active:
+            messages.warning(request, "Propter modul nije aktivan za vašu tvrtku.")
+            return redirect("propter:dashboard")
+    except PropterConfig.DoesNotExist:
+        messages.warning(request, "Propter nije konfiguriran. Kontaktirajte administratora.")
+        return redirect("propter:dashboard")
 
     from eracun.models import ERacunConfig
     config = ERacunConfig.objects.filter(company=company).first()
