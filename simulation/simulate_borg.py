@@ -125,6 +125,14 @@ class Command(BaseCommand):
             'work_orders', 'warehouse', 'worktime', 'burza',
             'partners', 'borg_ops', 'golubar', 'rental',
             'compliance', 'ai_health', 'sidebar_urls',
+            'interventions', 'eracun', 'einvoice', 'fiscal',
+            'tax_wizard', 'udruge', 'konto', 'payroll',
+            'documents', 'appointments', 'helpdesk', 'gov_export',
+            'livestock', 'delivery', 'gastro_menu', 'marketplace',
+            'aml', 'smart_import', 'fitness', 'propter',
+            'webshop', 'procurement', 'maintenance', 'payments',
+            'intelligence', 'tracking', 'traceability', 'fenix_ai',
+            'registration', 'premium_booking',
         ]
 
         if modules_requested == 'all':
@@ -791,6 +799,405 @@ class Command(BaseCommand):
         except Exception as e:
             r.error("Django check greška", e)
 
+        return r
+
+
+    def _sim_interventions(self, company, user):
+        r = SimResult('interventions')
+        head("INTERVENTIONS — Hitne intervencije")
+        try:
+            from interventions.models import HitnaIntervencija
+            count = HitnaIntervencija.objects.filter(company=company).count()
+            r.success(f"HitnaIntervencija records: {count}")
+        except Exception as e:
+            r.error("HitnaIntervencija greška", e)
+        try:
+            from django.urls import reverse
+            url = reverse('interventions:list')
+            r.success(f"Interventions URL: {url}")
+        except Exception as e:
+            r.warning(f"Interventions URL: {e}")
+        return r
+
+    def _sim_eracun(self, company, user):
+        r = SimResult('eracun')
+        head("E-RAČUN — Elektroničko fakturiranje")
+        try:
+            from eracun.models import ERacun, ERacunConfig
+            config = ERacunConfig.objects.filter(company=company).first()
+            r.success(f"ERacunConfig: {'aktivan' if config and config.is_active else 'neaktivan'}")
+            count = ERacun.objects.filter(company=company).count()
+            r.success(f"ERacun dokumenata: {count}")
+        except Exception as e:
+            r.error("ERacun greška", e)
+        try:
+            from eracun.services.validator import validate_full
+            r.success("Validator modul dostupan")
+        except Exception as e:
+            r.warning(f"Validator import: {e}")
+        return r
+
+    def _sim_einvoice(self, company, user):
+        r = SimResult('einvoice')
+        head("E-INVOICE — PEPPOL/AS4")
+        try:
+            from einvoice.models import AS4Message
+            count = AS4Message.objects.count()
+            r.success(f"AS4Message records: {count}")
+        except Exception as e:
+            r.error("AS4Message greška", e)
+        return r
+
+    def _sim_fiscal(self, company, user):
+        r = SimResult('fiscal')
+        head("FISCAL — Fiskalizacija health")
+        try:
+            from fiscal.models import FiscalConfiguration
+            latest = FiscalConfiguration.objects.first()
+            if latest:
+                r.success(f"FiscalConfiguration: {latest}")
+            else:
+                r.success("FiscalConfiguration: nema zapisa (OK za dev)")
+        except Exception as e:
+            r.error("Fiscal greška", e)
+        return r
+
+    def _sim_tax_wizard(self, company, user):
+        r = SimResult('tax_wizard')
+        head("TAX WIZARD — Porezni obrasci")
+        try:
+            from tax_wizard.models import TaxFormTemplate, TaxDeadline
+            templates = TaxFormTemplate.objects.count()
+            deadlines = TaxDeadline.objects.count()
+            r.success(f"TaxFormTemplate: {templates}, TaxDeadline: {deadlines}")
+        except Exception as e:
+            r.error("TaxWizard greška", e)
+        try:
+            from django.urls import reverse
+            url = reverse('tax_wizard:dashboard')
+            r.success(f"Tax Wizard URL: {url}")
+        except Exception as e:
+            r.warning(f"Tax Wizard URL: {e}")
+        return r
+
+    def _sim_udruge(self, company, user):
+        r = SimResult('udruge')
+        head("UDRUGE — 9 segmenata")
+        try:
+            from udruge.models import UdrugaSegment
+            segments = UdrugaSegment.objects.count()
+            r.success(f"UdrugaSegment: {segments}")
+        except Exception as e:
+            r.warning(f"UdrugaSegment: {e}")
+        segments_to_check = [
+            ('vatrogasci', 'DVD modul'),
+            ('kud', 'KUD modul'),
+            ('ribolov', 'Ribolov modul'),
+            ('pcelari', 'Pčelari modul'),
+            ('rakija', 'Rakija modul'),
+            ('vocari', 'Voćari modul'),
+            ('branitelji', 'Branitelji modul'),
+            ('lov', 'Lov modul'),
+            ('zadruge', 'Zadruge modul'),
+        ]
+        for seg_key, seg_name in segments_to_check:
+            try:
+                from django.urls import reverse
+                url = reverse(f'udruge:{seg_key}_dashboard')
+                r.success(f"{seg_name} URL: {url}")
+            except Exception:
+                r.warning(f"{seg_name} URL ne postoji")
+        return r
+
+    def _sim_konto(self, company, user):
+        r = SimResult('konto')
+        head("KONTO — Knjigovodstvo")
+        try:
+            from konto.models import KontoAccount, JournalEntry
+            kp_count = KontoAccount.objects.filter(company=company).count()
+            tj_count = JournalEntry.objects.filter(company=company).count()
+            r.success(f"KontoAccount: {kp_count}, JournalEntry: {tj_count}")
+        except Exception as e:
+            r.error("Konto greška", e)
+        try:
+            from django.urls import reverse
+            url = reverse('konto:dashboard')
+            r.success(f"Konto URL: {url}")
+        except Exception as e:
+            r.warning(f"Konto URL: {e}")
+        return r
+
+    def _sim_payroll(self, company, user):
+        r = SimResult('payroll')
+        head("PAYROLL — Obračun plaća")
+        try:
+            from payroll.models import PayrollRun
+            count = PayrollRun.objects.filter(company=company).count()
+            r.success(f"PayrollRun records: {count}")
+        except Exception as e:
+            r.error("Payroll greška", e)
+        return r
+
+    def _sim_documents(self, company, user):
+        r = SimResult('documents')
+        head("DOCUMENTS — Arhiva dokumenata")
+        try:
+            from documents.models import Document
+            count = Document.objects.filter(company=company).count()
+            r.success(f"Document records: {count}")
+        except Exception as e:
+            r.error("Documents greška", e)
+        try:
+            from django.urls import reverse
+            url = reverse('documents:archive')
+            r.success(f"Arhiva URL: {url}")
+        except Exception as e:
+            r.warning(f"Arhiva URL: {e}")
+        return r
+
+    def _sim_appointments(self, company, user):
+        r = SimResult('appointments')
+        head("APPOINTMENTS — Naručivanje")
+        try:
+            from appointments.models import Appointment, BookingService
+            services = BookingService.objects.filter(company=company).count()
+            appts = Appointment.objects.filter(company=company).count()
+            r.success(f"Services: {services}, Appointments: {appts}")
+        except Exception as e:
+            r.error("Appointments greška", e)
+        return r
+
+    def _sim_helpdesk(self, company, user):
+        r = SimResult('helpdesk')
+        head("HELPDESK — Tiketi podrške")
+        try:
+            from helpdesk.models import Ticket
+            count = Ticket.objects.count()
+            r.success(f"Ticket records: {count}")
+        except Exception as e:
+            r.error("Helpdesk greška", e)
+        return r
+
+    def _sim_gov_export(self, company, user):
+        r = SimResult('gov_export')
+        head("GOV EXPORT — Državni izvozi")
+        try:
+            from gov_export.models import GovExport
+            count = GovExport.objects.filter(company=company).count()
+            r.success(f"GovExport records: {count}")
+        except Exception as e:
+            r.error("GovExport greška", e)
+        try:
+            from django.urls import reverse
+            url = reverse('gov_export:validator')
+            r.success(f"CroXML Verify URL: {url}")
+        except Exception as e:
+            r.warning(f"CroXML Verify URL: {e}")
+        return r
+
+    def _sim_livestock(self, company, user):
+        r = SimResult('livestock')
+        head("LIVESTOCK — Stočarstvo / Flock")
+        try:
+            from livestock.models import Livestock
+            count = Livestock.objects.filter(company=company).count()
+            r.success(f"Livestock records: {count}")
+        except Exception as e:
+            r.error("Livestock greška", e)
+        return r
+
+    def _sim_delivery(self, company, user):
+        r = SimResult('delivery')
+        head("DELIVERY — Dostava")
+        try:
+            from delivery.models import DeliveryRoute
+            count = DeliveryRoute.objects.count()
+            r.success(f"DeliveryRoute records: {count}")
+        except Exception as e:
+            r.error("Delivery greška", e)
+        return r
+
+    def _sim_gastro_menu(self, company, user):
+        r = SimResult('gastro_menu')
+        head("GASTRO MENU — Jelovnik")
+        try:
+            from gastro_menu.models import MenuItem
+            count = MenuItem.objects.count()
+            r.success(f"MenuItem records: {count}")
+        except Exception as e:
+            r.error("GastroMenu greška", e)
+        return r
+
+    def _sim_marketplace(self, company, user):
+        r = SimResult('marketplace')
+        head("MARKETPLACE — Tržnica")
+        try:
+            from marketplace.models import FuturesListing
+            count = FuturesListing.objects.count()
+            r.success(f"FuturesListing records: {count}")
+        except Exception as e:
+            r.error("Marketplace greška", e)
+        return r
+
+    def _sim_aml(self, company, user):
+        r = SimResult('aml')
+        head("AML — Anti Money Laundering")
+        try:
+            from aml.models import AMLClientProfile
+            count = AMLClientProfile.objects.filter(company=company).count()
+            r.success(f"AMLClientProfile records: {count}")
+        except Exception as e:
+            r.error("AML greška", e)
+        return r
+
+    def _sim_smart_import(self, company, user):
+        r = SimResult('smart_import')
+        head("SMART IMPORT — Uvoz podataka")
+        try:
+            from smart_import.models import ImportBatch
+            count = ImportBatch.objects.filter(company=company).count()
+            r.success(f"ImportBatch records: {count}")
+        except Exception as e:
+            r.error("SmartImport greška", e)
+        return r
+
+    def _sim_fitness(self, company, user):
+        r = SimResult('fitness')
+        head("FITNESS — Teretana / Wellness")
+        try:
+            from fitness.models import Member
+            count = Member.objects.count()
+            r.success(f"Fitness Member records: {count}")
+        except Exception as e:
+            r.error("Fitness greška", e)
+        return r
+
+    def _sim_propter(self, company, user):
+        r = SimResult('propter')
+        head("PROPTER — Knjiga prigovora")
+        try:
+            from propter.models import PropterConfig
+            count = PropterConfig.objects.filter(company=company).count()
+            r.success(f"PropterConfig records: {count}")
+        except Exception as e:
+            r.error("Propter greška", e)
+        return r
+
+    def _sim_webshop(self, company, user):
+        r = SimResult('webshop')
+        head("WEBSHOP — Online trgovina")
+        try:
+            from webshop.models import Product
+            count = Product.objects.filter(company=company).count()
+            r.success(f"Webshop Product records: {count}")
+        except Exception as e:
+            r.error("Webshop greška", e)
+        return r
+
+    def _sim_procurement(self, company, user):
+        r = SimResult('procurement')
+        head("PROCUREMENT — Nabava")
+        try:
+            from procurement.models import PurchaseOrder
+            count = PurchaseOrder.objects.filter(company=company).count()
+            r.success(f"PurchaseOrder records: {count}")
+        except Exception as e:
+            r.error("Procurement greška", e)
+        return r
+
+    def _sim_maintenance(self, company, user):
+        r = SimResult('maintenance')
+        head("MAINTENANCE — Održavanje")
+        try:
+            from maintenance.models import Asset
+            count = Asset.objects.filter(company=company).count()
+            r.success(f"Asset records: {count}")
+        except Exception as e:
+            r.error("Maintenance greška", e)
+        return r
+
+    def _sim_payments(self, company, user):
+        r = SimResult('payments')
+        head("PAYMENTS — Plaćanja")
+        try:
+            from payments.models import Payment as PaymentModel
+            count = PaymentModel.objects.filter(company=company).count()
+            r.success(f"Payment records: {count}")
+        except Exception as e:
+            r.error("Payments greška", e)
+        return r
+
+    def _sim_intelligence(self, company, user):
+        r = SimResult('intelligence')
+        head("INTELLIGENCE — BI / Analytics")
+        try:
+            from intelligence.models import IntelligenceResult
+            count = IntelligenceResult.objects.count()
+            r.success(f"IntelligenceResult records: {count}")
+        except Exception as e:
+            r.error("Intelligence greška", e)
+        return r
+
+    def _sim_tracking(self, company, user):
+        r = SimResult('tracking')
+        head("TRACKING — GPS / Praćenje")
+        try:
+            from tracking.models import TrackingEvent
+            count = TrackingEvent.objects.count()
+            r.success(f"TrackingEvent records: {count}")
+        except Exception as e:
+            r.error("Tracking greška", e)
+        return r
+
+    def _sim_traceability(self, company, user):
+        r = SimResult('traceability')
+        head("TRACEABILITY — Slijedivost")
+        try:
+            from traceability.models import TraceEvent
+            count = TraceEvent.objects.count()
+            r.success(f"TraceEvent records: {count}")
+        except Exception as e:
+            r.error("Traceability greška", e)
+        return r
+
+    def _sim_fenix_ai(self, company, user):
+        r = SimResult('fenix_ai')
+        head("FENIX AI — Signali + Agenti")
+        try:
+            from limit_connect_ai.models_signal import FenixSignal
+            total = FenixSignal.objects.count()
+            new = FenixSignal.objects.filter(status='new').count()
+            r.success(f"FenixSignal: {total} total, {new} new")
+        except Exception as e:
+            r.error("FenixSignal greška", e)
+        try:
+            from limit_connect_ai.models import AIConversation
+            count = AIConversation.objects.count()
+            r.success(f"AIConversation records: {count}")
+        except Exception as e:
+            r.warning(f"AIConversation: {e}")
+        return r
+
+    def _sim_registration(self, company, user):
+        r = SimResult('registration')
+        head("REGISTRATION — Onboarding")
+        try:
+            from registration.models import CompanyRegistration
+            count = CompanyRegistration.objects.count()
+            r.success(f"CompanyRegistration records: {count}")
+        except Exception as e:
+            r.error("Registration greška", e)
+        return r
+
+    def _sim_premium_booking(self, company, user):
+        r = SimResult('premium_booking')
+        head("PREMIUM BOOKING — Premium rezervacije")
+        try:
+            from premium_booking.models import Booking
+            count = Booking.objects.count()
+            r.success(f"PremiumBooking records: {count}")
+        except Exception as e:
+            r.error("PremiumBooking greška", e)
         return r
 
     def _sim_sidebar_urls(self, company, user):
