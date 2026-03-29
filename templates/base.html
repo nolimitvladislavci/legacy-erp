@@ -589,13 +589,13 @@
         <div style="padding:4px 8px">
           <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 4px">Moduli</div>
           <div id="moduleGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:0 4px">
-            {% if 'partners' in sidebar_enabled_ids %}<a href="{% url 'partners:partner_list' %}" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-handshake"></i><span>Partneri</span></a>{% endif %}
+            {% if 'partners' in sidebar_enabled_ids %}<a href="{% url 'partners:list' %}" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-handshake"></i><span>Partneri</span></a>{% endif %}
             {% if 'invoicing' in sidebar_enabled_ids %}<a href="{% url 'invoicing:index' %}" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-file-invoice-dollar"></i><span>Fakture</span></a>{% endif %}
-            {% if 'inventory' in sidebar_enabled_ids %}<a href="{% url 'inventory:item_list' %}" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-boxes"></i><span>Skladiste</span></a>{% endif %}
+            {% if 'inventory' in sidebar_enabled_ids %}<a href="{% url 'inventory:list' %}" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-boxes"></i><span>Skladiste</span></a>{% endif %}
             {% if 'pos' in sidebar_enabled_ids %}<a href="{% url 'pos:dashboard' %}" onclick="closeSidebar()" class="mod-tile" style="border-color:rgba(34,197,94,.3)"><i class="fas fa-cash-register" style="color:#22c55e"></i><span>POS</span></a>{% endif %}
             {% if 'konto' in sidebar_enabled_ids %}<a href="/konto/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-book"></i><span>Konto</span></a>{% endif %}
             {% if 'documents' in sidebar_enabled_ids or 'invoicing' in sidebar_enabled_ids %}<a href="/documents/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-archive"></i><span>Arhiva</span></a>{% endif %}
-            {% if 'worktime' in sidebar_enabled_ids %}<a href="{% url 'worktime:dashboard' %}" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-clock"></i><span>Vrijeme</span></a>{% endif %}
+            {% if 'worktime' in sidebar_enabled_ids %}<a href="{% url 'worktime:ts_worker' %}" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-clock"></i><span>Vrijeme</span></a>{% endif %}
             {% if 'payroll' in sidebar_enabled_ids and is_company_admin %}<a href="/payroll/" onclick="closeSidebar()" class="mod-tile"><i class="fas fa-money-bill-wave"></i><span>Place</span></a>{% endif %}
           </div>
         </div>
@@ -607,7 +607,7 @@
             <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
           </button>
           <div class="sidebar-group-links collapsed">
-            {% if 'appointments' in sidebar_enabled_ids %}<a href="{% url 'appointments:booking_list' %}" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> <span>Termini</span></a>{% endif %}
+            {% if 'appointments' in sidebar_enabled_ids %}<a href="{% url 'appointments:list' %}" onclick="closeSidebar()"><i class="fas fa-calendar-check"></i> <span>Termini</span></a>{% endif %}
             {% if 'eracun' in sidebar_enabled_ids %}<a href="/eracun/" onclick="closeSidebar()"><i class="fas fa-file-invoice"></i> <span>e-Racuni</span></a>{% endif %}
             {% if "eracun" in sidebar_enabled_ids %}<a href="/einvoice/inbox/" onclick="closeSidebar()"><i class="fas fa-brain" style="color:#c9a84c"></i> <span>Smart Mailbox</span></a>{% endif %}
             {% if 'finance' in sidebar_enabled_ids %}<a href="/finance/" onclick="closeSidebar()"><i class="fas fa-chart-line"></i> <span>Financije</span></a>{% endif %}
@@ -629,7 +629,7 @@
             {% if 'library' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/knjiznica/" onclick="closeSidebar()"><i class="fas fa-book-reader"></i> <span>Knjiznica</span></a>{% endif %}
             {% if 'knjiznica' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/knjiznica/" onclick="closeSidebar()"><i class="fas fa-book-reader"></i> <span>Knjižnica</span></a>{% endif %}
             {% if 'udruge' in sidebar_enabled_ids %}<a href="/udruge/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Udruge</span></a>{% endif %}
-            {% if 'ai_assistant' in sidebar_enabled_ids %}<a href="{% url 'ai_cockpit' %}" onclick="closeSidebar()"><i class="fas fa-robot"></i> <span>AI Asistent</span></a>{% endif %}
+            {% if 'ai_assistant' in sidebar_enabled_ids %}<a href="{% url 'dashboard' %}" onclick="closeSidebar()"><i class="fas fa-robot"></i> <span>AI Asistent</span></a>{% endif %}
           </div>
         </div>
 
@@ -773,7 +773,7 @@
 <script>
 window.FC = {
   impersonationStart: {% if request.impersonation_active %}{{ request.impersonation_started_at_ts }}{% else %}0{% endif %},
-  notifMarkReadUrl: "{% url 'notifications:mark_read' pk=99999 %}",
+  notifMarkReadUrl: "{% url 'dashboard' pk=99999 %}",
   notifMarkAllUrl: "{% url 'notifications:mark_all_read' %}",
   notifApiUrl: "{% url 'notifications:api' %}"
 };
@@ -894,7 +894,7 @@ window.FC = {
         <a href="{% url 'dashboard' %}" class="bottom-tab"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="{% url 'invoicing:index' %}" class="bottom-tab"><i class="fas fa-file-invoice-dollar"></i><span>Fakture</span></a>
         <a href="{% url 'pos:dashboard' %}" class="bottom-tab" style="position:relative"><i class="fas fa-cash-register" style="font-size:1.4rem;color:#22c55e"></i><span style="color:#22c55e;font-weight:700">POS</span></a>
-        <a href="{% url 'inventory:item_list' %}" class="bottom-tab"><i class="fas fa-boxes"></i><span>Skladiste</span></a>
+        <a href="{% url 'inventory:list' %}" class="bottom-tab"><i class="fas fa-boxes"></i><span>Skladiste</span></a>
         <button class="bottom-tab" onclick="openSidebar()" style="background:none;border:none;cursor:pointer"><i class="fas fa-bars"></i><span>Vise</span></button>
       </div>
     </nav>
