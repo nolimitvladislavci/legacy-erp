@@ -1,0 +1,26 @@
+{% if error %}
+<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>{{ error }}</div>
+{% else %}
+<div class="fade-in">
+    <div class="row g-3 text-center">
+        <div class="col-4">
+            <div class="bg-light rounded p-3">
+                <small class="text-muted d-block">Osnovica</small>
+                <span class="fw-bold fs-5">{{ base }} €</span>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="bg-primary bg-opacity-10 rounded p-3">
+                <small class="text-muted d-block">PDV ({{ rate }}%)</small>
+                <span class="fw-bold fs-5 text-primary">{{ vat }} €</span>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="bg-success bg-opacity-10 rounded p-3">
+                <small class="text-muted d-block">Ukupno</small>
+                <span class="fw-bold fs-5 text-success">{{ total }} €</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

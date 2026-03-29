@@ -1,0 +1,73 @@
+{% extends "zeleni_otok/public_base.html" %}
+
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center" style="padding: 3rem 0 2.5rem;">
+    <div class="container">
+        <h1 class="display-6 fw-bold mb-2"><i class="fas fa-calculator me-2"></i>PDV Kalkulator</h1>
+        <p class="lead opacity-90">Izračunajte PDV brzo i jednostavno — sve stope</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container" style="max-width: 600px;">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form hx-post="{% url 'zeleni_otok:pdv_calculate' %}"
+                      hx-target="#pdv-result"
+                      hx-swap="innerHTML"
+                      hx-trigger="submit, keyup changed delay:300ms from:input[name='amount']">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Smjer izračuna</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="direction" id="dir_add" value="add" checked>
+                            <label class="btn btn-outline-primary" for="dir_add">Dodaj PDV na osnovicu</label>
+                            <input type="radio" class="btn-check" name="direction" id="dir_extract" value="extract">
+                            <label class="btn btn-outline-primary" for="dir_extract">Izvuci PDV iz ukupnog</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Iznos (EUR)</label>
+                        <input type="number" name="amount" class="form-control form-control-lg" 
+                               step="0.01" min="0" placeholder="0.00" autofocus>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Stopa PDV-a</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="rate" id="rate_25" value="25" checked>
+                            <label class="btn btn-outline-primary" for="rate_25">25%</label>
+                            <input type="radio" class="btn-check" name="rate" id="rate_13" value="13">
+                            <label class="btn btn-outline-primary" for="rate_13">13%</label>
+                            <input type="radio" class="btn-check" name="rate" id="rate_5" value="5">
+                            <label class="btn btn-outline-primary" for="rate_5">5%</label>
+                            <input type="radio" class="btn-check" name="rate" id="rate_0" value="0">
+                            <label class="btn btn-outline-primary" for="rate_0">0%</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-lc w-100">
+                        <i class="fas fa-calculator me-2"></i>Izračunaj
+                        <span class="htmx-indicator"><i class="fas fa-spinner fa-spin ms-2"></i></span>
+                    </button>
+                </form>
+                
+                <div id="pdv-result" class="mt-4"></div>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-center">
+            <p class="text-muted small">
+                Trebate automatski PDV obračun? 
+                <a href="{% url 'zeleni_otok:pricing' %}">LIMIT Connect</a> to radi za vas.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

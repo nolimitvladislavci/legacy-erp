@@ -1,0 +1,54 @@
+{% extends "zeleni_otok/public_base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container" style="max-width: 700px;">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4"><i class="fas fa-tasks text-primary me-2"></i>Status migracije</h4>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-semibold">{{ migration.company_name }}</span>
+                        <span class="badge {% if migration.status == 'completed' %}bg-success{% elif migration.status == 'failed' %}bg-danger{% else %}bg-primary{% endif %}">
+                            {{ migration.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: {{ migration.progress_percent }}%"></div>
+                    </div>
+                    <small class="text-muted">{{ migration.progress_percent }}% završeno</small>
+                </div>
+                
+                <table class="table table-sm">
+                    <tr><td class="text-muted">Izvorni sustav</td><td class="fw-semibold">{{ migration.get_source_system_display }}</td></tr>
+                    <tr><td class="text-muted">Zahtjev poslan</td><td>{{ migration.created_at|date:"d.m.Y. H:i" }}</td></tr>
+                    {% if migration.status_message %}
+                    <tr><td class="text-muted">Poruka</td><td>{{ migration.status_message }}</td></tr>
+                    {% endif %}
+                </table>
+                
+                {% if migration.records_found %}
+                <h6 class="fw-bold mt-4 mb-3">Pronađeni zapisi</h6>
+                <div class="row g-2">
+                    {% for key, count in migration.records_found.items %}
+                    <div class="col-md-4">
+                        <div class="bg-light rounded p-2 text-center">
+                            <div class="fw-bold text-primary">{{ count }}</div>
+                            <small class="text-muted">{{ key }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{% url 'zeleni_otok:landing' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i> Natrag
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

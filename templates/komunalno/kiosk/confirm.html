@@ -1,0 +1,101 @@
+{% extends "komunalno/kiosk/base_kiosk.html" %}
+
+{% block title %}Potvrda — {{ delivery.category.name }}{% endblock %}
+
+{% block kiosk_content %}
+<div class="text-center py-4">
+    {% if has_charge %}
+    <div class="confirm-check warning">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2 class="fw-bold mb-2" style="color: var(--kiosk-yellow);">PREKORAČENJE KVOTE</h2>
+    {% else %}
+    <div class="confirm-check success">
+        <i class="fas fa-check"></i>
+    </div>
+    <h2 class="fw-bold mb-2" style="color: var(--kiosk-green);">ZAPRIMLJENO</h2>
+    {% endif %}
+    
+    <div class="citizen-card mx-auto mb-4" style="max-width: 500px;">
+        <table class="table table-dark table-borderless mb-0">
+            <tr>
+                <td class="opacity-70">Građanin</td>
+                <td class="fw-bold text-end">{{ delivery.citizen.partner.name }}</td>
+            </tr>
+            <tr>
+                <td class="opacity-70">Otpad</td>
+                <td class="fw-bold text-end">{{ delivery.category.name }}</td>
+            </tr>
+            <tr>
+                <td class="opacity-70">Ključni broj</td>
+                <td class="fw-bold text-end">{{ delivery.category.key_number }}</td>
+            </tr>
+            <tr>
+                <td class="opacity-70">Količina</td>
+                <td class="fw-bold text-end" style="font-size: 1.5rem; color: var(--kiosk-green);">
+                    {{ delivery.quantity }} {{ delivery.unit }}
+                    {% if delivery.weight_source == 'scale' %}
+                    <i class="fas fa-weight-hanging ms-1" title="Izvagano"></i>
+                    {% endif %}
+                </td>
+            </tr>
+            {% if delivery.over_quota > 0 %}
+            <tr style="color: var(--kiosk-yellow);">
+                <td>Prekoračenje</td>
+                <td class="fw-bold text-end">{{ delivery.over_quota }} {{ delivery.unit }}</td>
+            </tr>
+            <tr style="color: var(--kiosk-red);">
+                <td>Naknada</td>
+                <td class="fw-bold text-end" style="font-size: 1.3rem;">{{ delivery.charge_amount }} EUR</td>
+            </tr>
+            {% endif %}
+            {% if remaining_after is not None %}
+            <tr>
+                <td class="opacity-70">Preostala kvota</td>
+                <td class="text-end">
+                    {% if remaining_after > 0 %}
+                    <span style="color: var(--kiosk-green);">{{ remaining_after }} {{ delivery.unit }}</span>
+                    {% else %}
+                    <span style="color: var(--kiosk-red);">ISKORIŠTENA</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+    
+    <div class="row g-3 mx-auto" style="max-width: 500px;">
+        <div class="col-6">
+            <a href="{% url 'komunalno:kiosk_receipt' station.pk delivery.pk %}" 
+               class="btn btn-outline-light kiosk-action w-100" target="_blank">
+                <i class="fas fa-print me-2"></i>ISPIS
+            </a>
+        </div>
+        <div class="col-6">
+            <a href="{% url 'komunalno:kiosk_home' station.pk %}" 
+               class="btn btn-success kiosk-action w-100">
+                <i class="fas fa-arrow-right me-2"></i>SLJEDEĆI
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-redirect za 15 sekundi -->
+<div class="text-center mt-3 opacity-50" id="autoRedirect">
+    Automatski povratak za <span id="countdown">15</span>s
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let seconds = 15;
+const timer = setInterval(function() {
+    seconds--;
+    document.getElementById('countdown').textContent = seconds;
+    if (seconds <= 0) {
+        clearInterval(timer);
+        window.location.href = '{% url "komunalno:kiosk_home" station.pk %}';
+    }
+}, 1000);
+</script>
+{% endblock %}

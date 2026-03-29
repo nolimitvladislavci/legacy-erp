@@ -1,0 +1,278 @@
+{% extends "zeleni_otok/public_base.html" %}
+{% load i18n %}
+
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "LIMIT Connect",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "offers": {
+        "@type": "AggregateOffer",
+        "lowPrice": "0",
+        "highPrice": "49.99",
+        "priceCurrency": "EUR"
+    },
+    "description": "AI-powered cloud ERP sustav za hrvatsko tržište"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero-section text-center">
+    <div class="container">
+        <span class="badge-lc mb-3 d-inline-block">Novo: AI-Powered ERP</span>
+        <h1 class="display-4 fw-bold mb-3">Vaše poslovanje zaslužuje<br>više od evidencije</h1>
+        <p class="lead mb-4 opacity-90" style="max-width: 600px; margin: 0 auto;">
+            LIMIT Connect je ERP koji radi za vas. AI automatizacija, neograničeni računi, 
+            besplatna migracija. Od 0 €/mjesečno.
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'zeleni_otok:pricing' %}" class="btn btn-light btn-lg px-4 fw-semibold">
+                <i class="fas fa-tag me-2"></i>Pogledaj cjenik
+            </a>
+            <a href="{% url 'zeleni_otok:migration' %}" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-exchange-alt me-2"></i>Prebaci se besplatno
+            </a>
+        </div>
+        
+        {% if active_campaign %}
+        <div class="mt-4 p-3 rounded" style="background: rgba(255,255,255,0.15); max-width: 500px; margin: 1rem auto 0;">
+            <i class="fas fa-gift me-2"></i>
+            <strong>{{ active_campaign.name }}:</strong> 
+            {{ active_campaign.free_months }} mjeseca gratis + besplatna migracija
+            <br><small>Vrijedi do {{ active_campaign.end_date|date:"d.m.Y." }}</small>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Stats -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-3">
+                <div class="stat-number">0 €</div>
+                <div class="text-muted">Trošak migracije</div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">&infin;</div>
+                <div class="text-muted">Računa mjesečno</div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">10 god</div>
+                <div class="text-muted">Čuvanje podataka</div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">AI</div>
+                <div class="text-muted">Automatizacija</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Switch -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-2">Zašto tvrtke prelaze na LIMIT Connect?</h2>
+        <p class="text-center text-muted mb-5">Evo što dobivate a što nemate kod konkurencije</p>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card p-4">
+                    <div class="text-primary mb-3"><i class="fas fa-infinity fa-2x"></i></div>
+                    <h5 class="fw-bold">Bez limita</h5>
+                    <p class="text-muted mb-0">Neograničen broj računa i obračuna plaća. Drugi vas kažnjavaju za rast — mi ga slavimo.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card p-4">
+                    <div class="text-primary mb-3"><i class="fas fa-robot fa-2x"></i></div>
+                    <h5 class="fw-bold">AI asistent</h5>
+                    <p class="text-muted mb-0">Automatsko knjiženje, OCR skeniranje, predviđanje cash flowa, detekcija anomalija.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card p-4">
+                    <div class="text-primary mb-3"><i class="fas fa-exchange-alt fa-2x"></i></div>
+                    <h5 class="fw-bold">Besplatna migracija</h5>
+                    <p class="text-muted mb-0">Prelazak iz Minimaxa, Luceeda, Pantheona — potpuno besplatno, s provjerenom procedurom.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card p-4">
+                    <div class="text-primary mb-3"><i class="fas fa-shield-alt fa-2x"></i></div>
+                    <h5 class="fw-bold">10 godina čuvanje</h5>
+                    <p class="text-muted mb-0">Vaši podaci su sigurni 10 godina — besplatno. Bez naplate arhiviranja, bez brisanja.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card p-4">
+                    <div class="text-primary mb-3"><i class="fas fa-th-large fa-2x"></i></div>
+                    <h5 class="fw-bold">Vertikalna rješenja</h5>
+                    <p class="text-muted mb-0">Specijalizirani moduli za udruge, OPG, turizam, vrtice, domove za starije, knjižnice.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card p-4">
+                    <div class="text-primary mb-3"><i class="fas fa-cash-register fa-2x"></i></div>
+                    <h5 class="fw-bold">POS + Fiskalizacija</h5>
+                    <p class="text-muted mb-0">Integrirani POS sustav s fiskalizacijom. Blagajna, plaćanja, Z-izvješća — sve u jednom.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison Quick -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">Brza usporedba</h2>
+        <div class="table-responsive">
+            <table class="table table-hover comparison-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Funkcionalnost</th>
+                        <th class="text-center" style="background: var(--lc-primary) !important;">LIMIT Connect</th>
+                        <th class="text-center">Minimax</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="highlight-row">
+                        <td><strong>Neograničeni računi</strong></td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                        <td class="text-center check-no"><i class="fas fa-times-circle fa-lg"></i> <small class="text-muted">Max 500/mj</small></td>
+                    </tr>
+                    <tr>
+                        <td>Neograničeni obračuni plaća</td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                        <td class="text-center check-no"><i class="fas fa-times-circle fa-lg"></i> <small class="text-muted">Max 50/mj</small></td>
+                    </tr>
+                    <tr class="highlight-row">
+                        <td><strong>AI automatizacija</strong></td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                        <td class="text-center check-no"><i class="fas fa-times-circle fa-lg"></i></td>
+                    </tr>
+                    <tr>
+                        <td>POS sustav</td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                        <td class="text-center check-no"><i class="fas fa-times-circle fa-lg"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Čuvanje podataka</td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i> <small class="text-muted">10 godina gratis</small></td>
+                        <td class="text-center check-partial"><i class="fas fa-exclamation-circle fa-lg"></i> <small class="text-muted">5 god + naplata</small></td>
+                    </tr>
+                    <tr class="highlight-row">
+                        <td><strong>Vertikale (OPG, udruge, turizam...)</strong></td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                        <td class="text-center check-no"><i class="fas fa-times-circle fa-lg"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Besplatna migracija</td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                        <td class="text-center check-no"><i class="fas fa-times-circle fa-lg"></i> <small class="text-muted">79,63 €</small></td>
+                    </tr>
+                    <tr>
+                        <td>API pristup (svi paketi)</td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Mobilna aplikacija</td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i> <small class="text-muted">PWA</small></td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i></td>
+                    </tr>
+                    <tr>
+                        <td>Besplatni paket</td>
+                        <td class="text-center check-yes"><i class="fas fa-check-circle fa-lg"></i> <small class="text-muted">0 €/mj</small></td>
+                        <td class="text-center check-no"><i class="fas fa-times-circle fa-lg"></i> <small class="text-muted">Min 5,97 €</small></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{% url 'zeleni_otok:compare' %}" class="btn btn-outline-primary">
+                Pogledaj potpunu usporedbu <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Free Tools -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-2">Besplatni online alati</h2>
+        <p class="text-center text-muted mb-5">Koristite bez registracije — potpuno besplatno</p>
+        
+        <div class="row g-4">
+            <div class="col-md-4 col-lg-2-4">
+                <a href="{% url 'zeleni_otok:pdv_calculator' %}" class="text-decoration-none text-dark">
+                    <div class="tool-card">
+                        <div class="tool-icon"><i class="fas fa-calculator"></i></div>
+                        <h6 class="fw-bold">PDV Kalkulator</h6>
+                        <small class="text-muted">Izračunaj PDV</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-2-4">
+                <a href="{% url 'zeleni_otok:oib_lookup' %}" class="text-decoration-none text-dark">
+                    <div class="tool-card">
+                        <div class="tool-icon"><i class="fas fa-search"></i></div>
+                        <h6 class="fw-bold">OIB Provjera</h6>
+                        <small class="text-muted">Validiraj OIB</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-2-4">
+                <a href="{% url 'zeleni_otok:r1_validator' %}" class="text-decoration-none text-dark">
+                    <div class="tool-card">
+                        <div class="tool-icon"><i class="fas fa-check-circle"></i></div>
+                        <h6 class="fw-bold">R-1 Validator</h6>
+                        <small class="text-muted">Provjeri račun</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-2-4">
+                <a href="{% url 'zeleni_otok:roi_calculator' %}" class="text-decoration-none text-dark">
+                    <div class="tool-card">
+                        <div class="tool-icon"><i class="fas fa-chart-line"></i></div>
+                        <h6 class="fw-bold">ROI Kalkulator</h6>
+                        <small class="text-muted">Izračunaj uštede</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 col-lg-2-4">
+                <a href="{% url 'zeleni_otok:tax_calendar' %}" class="text-decoration-none text-dark">
+                    <div class="tool-card">
+                        <div class="tool-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <h6 class="fw-bold">Porezni Kalendar</h6>
+                        <small class="text-muted">Svi rokovi</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section text-center">
+    <div class="container">
+        <h2 class="fw-bold mb-3">Spremni za promjenu?</h2>
+        <p class="lead opacity-75 mb-4">Prebacite se danas — besplatno i bez rizika.</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'zeleni_otok:migration' %}" class="btn btn-lc btn-lg">
+                <i class="fas fa-rocket me-2"></i>Započni migraciju
+            </a>
+            <a href="{% url 'zeleni_otok:roi_calculator' %}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-chart-line me-2"></i>Izračunaj uštede
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -40,21 +40,21 @@ Trajanje: {{ e.duration_days }} radnih dana
 <thead><tr><th>Opis</th><th style="text-align:center">Radnika</th><th style="text-align:center">Dana</th><th style="text-align:center">h/dan</th><th style="text-align:right">€/h</th><th style="text-align:right">Iznos</th></tr></thead>
 <tbody>
 {% for item in items %}
-<tr><td>{{ item.description }}</td><td style="text-align:center">{{ item.worker_count }}</td><td style="text-align:center">{{ item.days }}</td><td style="text-align:center">{{ item.hours_per_day }}</td><td style="text-align:right">€{{ item.cost_per_hour }}</td><td style="text-align:right"><strong>€{{ item.total_cost|floatformat:2 }}</strong></td></tr>
+<tr><td>{{ item.description }}</td><td style="text-align:center">{{ item.worker_count }}</td><td style="text-align:center">{{ item.days }}</td><td style="text-align:center">{{ item.hours_per_day }}</td><td style="text-align:right">{{ item.cost_per_hour }} €</td><td style="text-align:right"><strong>{{ item.total_cost|floatformat:2 }} €</strong></td></tr>
 {% endfor %}
 </tbody></table>
 <table style="width:50%;margin-left:auto">
-<tr><td>Rad</td><td style="text-align:right">€{{ e.labor_cost|floatformat:2 }}</td></tr>
-{% if e.material_cost %}<tr><td>Materijal</td><td style="text-align:right">€{{ e.material_cost|floatformat:2 }}</td></tr>{% endif %}
-{% if e.equipment_cost %}<tr><td>Oprema</td><td style="text-align:right">€{{ e.equipment_cost|floatformat:2 }}</td></tr>{% endif %}
-<tr><td>Režija ({{ e.overhead_pct }}%)</td><td style="text-align:right">€{{ e.overhead_amount|floatformat:2 }}</td></tr>
-<tr><td>Rizik ({{ e.risk_pct }}%)</td><td style="text-align:right">€{{ e.risk_amount|floatformat:2 }}</td></tr>
-<tr class="total-row"><td>Subtotal</td><td style="text-align:right">€{{ e.subtotal|floatformat:2 }}</td></tr>
-<tr><td>Marža ({{ e.margin_pct }}%)</td><td style="text-align:right">€{{ e.margin_amount|floatformat:2 }}</td></tr>
-{% if e.discount_amount %}<tr><td>Popust</td><td style="text-align:right;color:red">-€{{ e.discount_amount|floatformat:2 }}</td></tr>{% endif %}
-<tr class="total-row"><td>Neto</td><td style="text-align:right">€{{ e.net_total|floatformat:2 }}</td></tr>
-<tr><td>PDV ({{ e.tax_rate }}%)</td><td style="text-align:right">€{{ e.tax_amount|floatformat:2 }}</td></tr>
-<tr class="grand-total"><td><strong>UKUPNO</strong></td><td style="text-align:right"><strong>€{{ e.gross_total|floatformat:2 }}</strong></td></tr>
+<tr><td>Rad</td><td style="text-align:right">{{ e.labor_cost|floatformat:2 }} €</td></tr>
+{% if e.material_cost %}<tr><td>Materijal</td><td style="text-align:right">{{ e.material_cost|floatformat:2 }} €</td></tr>{% endif %}
+{% if e.equipment_cost %}<tr><td>Oprema</td><td style="text-align:right">{{ e.equipment_cost|floatformat:2 }} €</td></tr>{% endif %}
+<tr><td>Režija ({{ e.overhead_pct }}%)</td><td style="text-align:right">{{ e.overhead_amount|floatformat:2 }} €</td></tr>
+<tr><td>Rizik ({{ e.risk_pct }}%)</td><td style="text-align:right">{{ e.risk_amount|floatformat:2 }} €</td></tr>
+<tr class="total-row"><td>Subtotal</td><td style="text-align:right">{{ e.subtotal|floatformat:2 }} €</td></tr>
+<tr><td>Marža ({{ e.margin_pct }}%)</td><td style="text-align:right">{{ e.margin_amount|floatformat:2 }} €</td></tr>
+{% if e.discount_amount %}<tr><td>Popust</td><td style="text-align:right;color:red">-{{ e.discount_amount|floatformat:2 }} €</td></tr>{% endif %}
+<tr class="total-row"><td>Neto</td><td style="text-align:right">{{ e.net_total|floatformat:2 }} €</td></tr>
+<tr><td>PDV ({{ e.tax_rate }}%)</td><td style="text-align:right">{{ e.tax_amount|floatformat:2 }} €</td></tr>
+<tr class="grand-total"><td><strong>UKUPNO</strong></td><td style="text-align:right"><strong>{{ e.gross_total|floatformat:2 }} €</strong></td></tr>
 </table>
 {% if e.notes %}<div class="info-box" style="margin-top:20px"><strong>Napomene:</strong><br>{{ e.notes|linebreaksbr }}</div>{% endif %}
 <div class="footer"><p>{{ e.terms|default:"Rok plaćanja: 14 dana. Ponuda vrijedi 30 dana." }}</p></div>

@@ -1,0 +1,190 @@
+{% extends "zeleni_otok/public_base.html" %}
+
+{% block content %}
+<section class="hero-section text-center" style="padding: 4rem 0 3rem;">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-2">Transparentne cijene</h1>
+        <p class="lead opacity-90">Bez skrivenih troškova. Bez penalizacije za rast. Bez lock-ina.</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            <!-- Free -->
+            <div class="col-lg-2-4 col-md-4">
+                <div class="pricing-card p-4 text-center h-100">
+                    <h5 class="fw-bold text-muted">Free</h5>
+                    <div class="price my-3">0 €<span class="period">/mj</span></div>
+                    <p class="text-muted small">Za mikro poduzetnike</p>
+                    <hr>
+                    <ul class="list-unstyled text-start small">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>1 korisnik</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Do 10 računa/mj</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Fiskalizacija</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>E-računi</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>API pristup</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Mobilna app</li>
+                    </ul>
+                    <a href="/hr/accounts/register/" class="btn btn-outline-primary w-100 mt-3">Započni besplatno</a>
+                </div>
+            </div>
+            
+            <!-- Starter -->
+            <div class="col-lg-2-4 col-md-4">
+                <div class="pricing-card p-4 text-center h-100">
+                    <h5 class="fw-bold">Starter</h5>
+                    <div class="price my-3">9,99 €<span class="period">/mj</span></div>
+                    <p class="text-muted small">Za obrtnike i male tvrtke</p>
+                    <hr>
+                    <ul class="list-unstyled text-start small">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>3 korisnika</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i><strong>Neograničeni računi</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Ulazni računi</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>POS Lite</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>AI kategorizacija</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Putni nalozi</li>
+                    </ul>
+                    <a href="/hr/accounts/register/?plan=starter" class="btn btn-primary w-100 mt-3">Odaberi Starter</a>
+                </div>
+            </div>
+            
+            <!-- Business (Popular) -->
+            <div class="col-lg-2-4 col-md-4">
+                <div class="pricing-card popular p-4 text-center h-100">
+                    <span class="badge bg-primary mb-2">Najpopularniji</span>
+                    <h5 class="fw-bold">Business</h5>
+                    <div class="price my-3">19,99 €<span class="period">/mj</span></div>
+                    <p class="text-muted small">Za rastuće tvrtke</p>
+                    <hr>
+                    <ul class="list-unstyled text-start small">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>5 korisnika</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i><strong>Neograničeni računi</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i><strong>Plaće + zalihe</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Blagajna + OS</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Proizvodnja</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>AI OCR inbox</li>
+                    </ul>
+                    <a href="/hr/accounts/register/?plan=business" class="btn btn-lc w-100 mt-3">Odaberi Business</a>
+                </div>
+            </div>
+            
+            <!-- Pro -->
+            <div class="col-lg-2-4 col-md-4">
+                <div class="pricing-card p-4 text-center h-100">
+                    <h5 class="fw-bold">Pro</h5>
+                    <div class="price my-3">34,99 €<span class="period">/mj</span></div>
+                    <p class="text-muted small">Kompletno računovodstvo</p>
+                    <hr>
+                    <ul class="list-unstyled text-start small">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>10 korisnika</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Sve iz Business</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i><strong>Dvojno knjigovodstvo</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>PDV obračun</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Završni račun</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>AI asistent</li>
+                    </ul>
+                    <a href="/hr/accounts/register/?plan=pro" class="btn btn-primary w-100 mt-3">Odaberi Pro</a>
+                </div>
+            </div>
+            
+            <!-- Agency -->
+            <div class="col-lg-2-4 col-md-4">
+                <div class="pricing-card p-4 text-center h-100">
+                    <h5 class="fw-bold">Agency</h5>
+                    <div class="price my-3">49,99 €<span class="period">/mj</span></div>
+                    <p class="text-muted small">Za računovodstvene servise</p>
+                    <hr>
+                    <ul class="list-unstyled text-start small">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i><strong>Neograničeno korisnika</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i><strong>Neograničeno organizacija</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Sve iz Pro</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Podlicence za stranke</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>White-label portal</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Priority support</li>
+                    </ul>
+                    <a href="/hr/accounts/register/?plan=agency" class="btn btn-primary w-100 mt-3">Odaberi Agency</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pricing notes -->
+        <div class="mt-5 p-4 bg-light rounded-3">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6 class="fw-bold"><i class="fas fa-check-circle text-success me-2"></i>Bez skrivenih troškova</h6>
+                    <p class="small text-muted">Sve navedeno je uključeno. Nema dodatnih naknada za račune, plaće ili arhiviranje.</p>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold"><i class="fas fa-gift text-success me-2"></i>Godišnji popust</h6>
+                    <p class="small text-muted">Platite godišnje = 2 mjeseca gratis. Otkazivanje moguće u bilo kojem trenutku.</p>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold"><i class="fas fa-exchange-alt text-success me-2"></i>Besplatna migracija</h6>
+                    <p class="small text-muted">Prelazak iz drugog sustava je potpuno besplatan. Mi se brinemo za sve.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- vs Minimax -->
+        <div class="mt-5 text-center">
+            <h4 class="fw-bold mb-4">Usporedba s Minimaxom</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Paket</th>
+                            <th>LIMIT Connect</th>
+                            <th>Minimax ekvivalent</th>
+                            <th>Ušteda</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Entry (fakturiranje)</td>
+                            <td class="text-success fw-bold">0 €/mj</td>
+                            <td>5,97 €/mj (Izlazni računi)</td>
+                            <td><span class="badge bg-success">5,97 €/mj</span></td>
+                        </tr>
+                        <tr>
+                            <td>Starter (osnovno)</td>
+                            <td class="text-success fw-bold">9,99 €/mj</td>
+                            <td>11,02 €/mj (Mikro)</td>
+                            <td><span class="badge bg-success">1,03 €/mj</span></td>
+                        </tr>
+                        <tr>
+                            <td>Business (plaće + zalihe)</td>
+                            <td class="text-success fw-bold">19,99 €/mj</td>
+                            <td>22,03 €/mj (Maksi posl.)</td>
+                            <td><span class="badge bg-success">2,04 €/mj + AI</span></td>
+                        </tr>
+                        <tr>
+                            <td>Pro (računovodstvo)</td>
+                            <td class="text-success fw-bold">34,99 €/mj</td>
+                            <td>37,96 €/mj (Mini rač.)</td>
+                            <td><span class="badge bg-success">2,97 €/mj + AI</span></td>
+                        </tr>
+                        <tr>
+                            <td>Agency (rač. servis)</td>
+                            <td class="text-success fw-bold">49,99 €/mj</td>
+                            <td>61,05 €/mj (Maksi rač.)</td>
+                            <td><span class="badge bg-success">11,06 €/mj + neogr. org</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-muted small mt-2">Cijene bez PDV-a. Minimax cijene prema službenom cjeniku od 04.04.2023.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section text-center">
+    <div class="container">
+        <h3 class="fw-bold mb-3">Započnite besplatno — nadogradite kad porastete</h3>
+        <a href="/hr/accounts/register/" class="btn btn-lc btn-lg">
+            <i class="fas fa-rocket me-2"></i>Kreiraj besplatni račun
+        </a>
+    </div>
+</section>
+{% endblock %}

@@ -68,7 +68,7 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 <!-- Top stats -->
 <div class="grid4">
   <div class="card card-gold">
-    <div class="stat-num gold">€{{ mrr|floatformat:0 }}</div>
+    <div class="stat-num gold">{{ mrr|floatformat:0 }} €</div>
     <div class="stat-lbl">MRR</div>
   </div>
   <div class="card card-green">
@@ -89,7 +89,7 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
 <div class="section-title">🧾 POS Danas</div>
 <div class="grid4">
   <div class="card card-green">
-    <div class="stat-num green">€{{ pos_promet|floatformat:2 }}</div>
+    <div class="stat-num green">{{ pos_promet|floatformat:2 }} €</div>
     <div class="stat-lbl">Promet danas</div>
   </div>
   <div class="card">
@@ -101,7 +101,7 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
     <div class="stat-lbl">Otvorene smjene</div>
   </div>
   <div class="card">
-    <div class="stat-num">€{{ pos_week|floatformat:0 }}</div>
+    <div class="stat-num">{{ pos_week|floatformat:0 }} €</div>
     <div class="stat-lbl">Promet tjedan</div>
   </div>
 </div>
@@ -114,7 +114,7 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
   <tr>
     <td>{{ row.session__terminal__company__name }}</td>
     <td>{{ row.b }}</td>
-    <td class="green">€{{ row.p|floatformat:2 }}</td>
+    <td class="green">{{ row.p|floatformat:2 }} €</td>
   </tr>
   {% endfor %}
   </tbody>
@@ -130,7 +130,7 @@ textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radi
   <tr>
     <td>{{ s.company.name }}</td>
     <td><span class="badge badge-gold">{{ s.plan }}</span></td>
-    <td class="gold">€{{ s.monthly_fee }}</td>
+    <td class="gold">{{ s.monthly_fee }} €</td>
   </tr>
   {% endfor %}
   </tbody>

@@ -428,7 +428,7 @@
                 onclick="addProduct(this)"
                 data-weighable="{% if item.is_weighable %}1{% else %}0{% endif %}"
                 data-unit="{{ item.unit }}"
-                title="{{ item.name }} – €{{ item.unit_price }}">
+                title="{{ item.name }} – {{ item.unit_price }} €">
           <div class="prod-name">{{ item.name }}</div>
           <div class="prod-price">&euro;{{ item.unit_price|floatformat:2 }}</div>
           {% if item.sku %}<div class="prod-sku">{{ item.sku }}</div>{% endif %}

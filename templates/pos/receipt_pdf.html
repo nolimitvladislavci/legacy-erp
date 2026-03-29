@@ -76,11 +76,11 @@
     <tr{% if item.is_tip %} style="font-style:italic"{% elif item.is_pfand_return %} style="color:#c00"{% endif %}>
       <td class="item-name">{% if item.is_tip %}* {% endif %}{{ item.description }}</td>
       <td style="text-align:center">{{ item.quantity|floatformat:"-2" }}</td>
-      <td class="item-total">€{{ item.total_price|floatformat:2 }}</td>
+      <td class="item-total">{{ item.total_price|floatformat:2 }} €</td>
     </tr>
     <tr>
       <td style="font-size:7pt;color:#555" colspan="2">
-        €{{ item.unit_price|floatformat:2 }} x {{ item.quantity|floatformat:"-2" }} | PDV {{ item.tax_rate|floatformat:0 }}%
+        {{ item.unit_price|floatformat:2 }} € x {{ item.quantity|floatformat:"-2" }} | PDV {{ item.tax_rate|floatformat:0 }}%
         {% if item.discount_percent %} | Pop. {{ item.discount_percent|floatformat:0 }}%{% endif %}{% if item.is_pfand_return %} | POVRAT{% endif %}
       </td>
       <td></td>
@@ -91,24 +91,24 @@
 
 <hr class="divider">
 
-<div class="totals-row"><span>Neto (bez PDV):</span><span>€{{ receipt.subtotal|floatformat:2 }}</span></div>
-<div class="totals-row"><span>PDV:</span><span>€{{ receipt.tax_amount|floatformat:2 }}</span></div>
+<div class="totals-row"><span>Neto (bez PDV):</span><span>{{ receipt.subtotal|floatformat:2 }} €</span></div>
+<div class="totals-row"><span>PDV:</span><span>{{ receipt.tax_amount|floatformat:2 }} €</span></div>
 {% if receipt.discount %}
-<div class="totals-row"><span>Popust:</span><span>-€{{ receipt.discount|floatformat:2 }}</span></div>
+<div class="totals-row"><span>Popust:</span><span>-{{ receipt.discount|floatformat:2 }} €</span></div>
 {% endif %}
-<div class="totals-row grand"><span>UKUPNO:</span><span>€{{ receipt.total|floatformat:2 }}</span></div>
+<div class="totals-row grand"><span>UKUPNO:</span><span>{{ receipt.total|floatformat:2 }} €</span></div>
 
 <hr class="divider">
 
 {% for line in payment_lines %}
 <div class="payment-row">
   <span>{{ line.get_method_display }}{% if line.method == 'VOUCHER' and line.card_reference %} ({{ line.card_reference }}){% endif %}:</span>
-  <span>€{{ line.amount|floatformat:2 }}</span>
+  <span>{{ line.amount|floatformat:2 }} €</span>
 </div>
 {% if line.change_given %}
 <div class="payment-row" style="color:#555">
   <span>Kusur:</span>
-  <span>€{{ line.change_given|floatformat:2 }}</span>
+  <span>{{ line.change_given|floatformat:2 }} €</span>
 </div>
 {% endif %}
 {% endfor %}
@@ -117,7 +117,7 @@
 <hr class="divider">
 <div style="font-size:6.5pt;color:#333">
 {% for rate, data in tax_breakdown.items %}
-<div class="totals-row" style="font-size:7pt"><span>{{ rate }}:</span><span>neto €{{ data.base|floatformat:2 }} | PDV €{{ data.tax|floatformat:2 }}</span></div>
+<div class="totals-row" style="font-size:7pt"><span>{{ rate }}:</span><span>neto {{ data.base|floatformat:2 }} € | PDV {{ data.tax|floatformat:2 }} €</span></div>
 {% endfor %}
 </div>
 {% endif %}

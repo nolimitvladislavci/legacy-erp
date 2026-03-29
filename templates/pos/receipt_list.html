@@ -51,7 +51,7 @@
   <div class="rl-card" data-search="{{ r.receipt_number }} {{ r.total }} {{ r.created_at|date:'d.m.Y' }}">
     <div class="rl-num">#{{ r.receipt_number }}</div>
     <div class="rl-info">
-      <div class="rl-total">€{{ r.total|floatformat:2 }}
+      <div class="rl-total">{{ r.total|floatformat:2 }} €
         <span class="rl-status {% if r.status == 'paid' %}paid{% elif r.status == 'cancelled' %}cancelled{% elif r.status == 'refunded' %}refunded{% endif %}">
           {{ r.status }}
         </span>

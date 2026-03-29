@@ -1,0 +1,61 @@
+{% if error %}
+<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>{{ error }}</div>
+{% else %}
+<div class="fade-in">
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="bg-light rounded p-3">
+                <h6 class="text-muted mb-2">Trenutni troškovi</h6>
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td>Osnovna licenca</td><td class="text-end fw-bold">{{ competitor_base }} €</td></tr>
+                    {% if competitor_extra_invoices != "0.00" %}
+                    <tr><td>Dodatni računi</td><td class="text-end text-danger">+{{ competitor_extra_invoices }} €</td></tr>
+                    {% endif %}
+                    {% if competitor_extra_payrolls != "0.00" %}
+                    <tr><td>Dodatne plaće</td><td class="text-end text-danger">+{{ competitor_extra_payrolls }} €</td></tr>
+                    {% endif %}
+                    <tr class="border-top"><td class="fw-bold">Ukupno</td><td class="text-end fw-bold">{{ competitor_total }} €/mj</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="bg-success bg-opacity-10 rounded p-3">
+                <h6 class="text-success mb-2">LIMIT Connect — {{ lc_plan }}</h6>
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td>Licenca</td><td class="text-end fw-bold text-success">{{ lc_monthly }} €</td></tr>
+                    {% if lc_extra_users != "0.00" %}
+                    <tr><td>Dodatni korisnici</td><td class="text-end">+{{ lc_extra_users }} €</td></tr>
+                    {% endif %}
+                    <tr><td>Dodatni računi</td><td class="text-end text-success">0 € (neogr.)</td></tr>
+                    <tr><td>Dodatne plaće</td><td class="text-end text-success">0 € (neogr.)</td></tr>
+                    <tr class="border-top"><td class="fw-bold">Ukupno</td><td class="text-end fw-bold text-success">{{ lc_total }} €/mj</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    {% if saves_money %}
+    <div class="text-center p-4 bg-success bg-opacity-10 rounded-3">
+        <div class="stat-number" style="-webkit-text-fill-color: #198754;">{{ yearly_saving }} €</div>
+        <div class="text-success fw-bold">Godišnja ušteda</div>
+        <small class="text-muted">({{ monthly_saving }} €/mj × 12 mjeseci + {{ migration_saving }} € ušteda na migraciji)</small>
+    </div>
+    {% else %}
+    <div class="text-center p-4 bg-primary bg-opacity-10 rounded-3">
+        <p class="mb-1 fw-bold">Usporediva cijena — ali s LC dobivate:</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap mt-2">
+            <span class="badge bg-primary">AI automatizacija</span>
+            <span class="badge bg-primary">POS sustav</span>
+            <span class="badge bg-primary">Neograničeni računi</span>
+            <span class="badge bg-primary">10 god čuvanje</span>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="text-center mt-3">
+        <a href="{% url 'zeleni_otok:migration' %}" class="btn btn-lc">
+            <i class="fas fa-rocket me-2"></i>Prebaci se besplatno
+        </a>
+    </div>
+</div>
+{% endif %}

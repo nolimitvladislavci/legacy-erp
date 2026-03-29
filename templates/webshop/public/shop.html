@@ -102,7 +102,7 @@
         <div class="prod-card-name">{{ p.name }}</div>
         <div class="prod-card-desc">{{ p.description|truncatechars:80 }}</div>
         <div class="prod-card-footer">
-          <span class="prod-price">€{{ p.price|floatformat:2 }}</span>
+          <span class="prod-price">{{ p.price|floatformat:2 }} €</span>
           <button class="prod-add-btn" onclick="addToCart({{ p.pk }}, '{{ p.name|escapejs }}')">+ Dodaj</button>
         </div>
       </div>

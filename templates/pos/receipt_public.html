@@ -59,24 +59,24 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div class="item">
       <div>
         <div class="item-name">{{ item.description }}</div>
-        <div class="item-qty">{{ item.quantity|floatformat:"-2" }} x EUR{{ item.unit_price|floatformat:2 }} | PDV {{ item.tax_rate|floatformat:0 }}%</div>
+        <div class="item-qty">{{ item.quantity|floatformat:"-2" }} x {{ item.unit_price|floatformat:2 }} EUR | PDV {{ item.tax_rate|floatformat:0 }}%</div>
       </div>
-      <div class="item-price">EUR{{ item.total_price|floatformat:2 }}</div>
+      <div class="item-price">{{ item.total_price|floatformat:2 }} EUR</div>
     </div>
     {% endfor %}
   </div>
 
   <div class="totals">
-    <div class="total-row"><span>Neto:</span><span>EUR{{ receipt.subtotal|floatformat:2 }}</span></div>
-    <div class="total-row"><span>PDV:</span><span>EUR{{ receipt.tax_amount|floatformat:2 }}</span></div>
-    {% if receipt.discount %}<div class="total-row"><span>Popust:</span><span>-EUR{{ receipt.discount|floatformat:2 }}</span></div>{% endif %}
-    <div class="total-row grand"><span>UKUPNO:</span><span>EUR{{ receipt.total|floatformat:2 }}</span></div>
+    <div class="total-row"><span>Neto:</span><span>{{ receipt.subtotal|floatformat:2 }} EUR</span></div>
+    <div class="total-row"><span>PDV:</span><span>{{ receipt.tax_amount|floatformat:2 }} EUR</span></div>
+    {% if receipt.discount %}<div class="total-row"><span>Popust:</span><span>-{{ receipt.discount|floatformat:2 }} EUR</span></div>{% endif %}
+    <div class="total-row grand"><span>UKUPNO:</span><span>{{ receipt.total|floatformat:2 }} EUR</span></div>
   </div>
 
   {% for line in payment_lines %}
   <div class="payment">
     <span>{{ line.get_method_display }}</span>
-    <span>EUR{{ line.amount|floatformat:2 }}{% if line.change_given %} (kusur: EUR{{ line.change_given|floatformat:2 }}){% endif %}</span>
+    <span>{{ line.amount|floatformat:2 }} EUR{% if line.change_given %} (kusur: {{ line.change_given|floatformat:2 }} EUR){% endif %}</span>
   </div>
   {% endfor %}
 
@@ -165,8 +165,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </script>
 
   <div class="share-bar">
-    <a class="share-btn share-wa" href="https://wa.me/?text=Racun%20%23{{ receipt.receipt_number }}%20{{ company.name }}%20EUR{{ receipt.total|floatformat:2 }}" target="_blank">WhatsApp</a>
-    <a class="share-btn share-email" href="mailto:?subject=Racun%20%23{{ receipt.receipt_number }}&body=Racun%20iz%20{{ company.name }}%20-%20EUR{{ receipt.total|floatformat:2 }}" >Email</a>
+    <a class="share-btn share-wa" href="https://wa.me/?text=Racun%20%23{{ receipt.receipt_number }}%20{{ company.name }}%20{{ receipt.total|floatformat:2 }} EUR" target="_blank">WhatsApp</a>
+    <a class="share-btn share-email" href="mailto:?subject=Racun%20%23{{ receipt.receipt_number }}&body=Racun%20iz%20{{ company.name }}%20-%20{{ receipt.total|floatformat:2 }} EUR" >Email</a>
     <a class="share-btn share-dl" href="javascript:window.print()" onclick="this.style.display='none'"  target="_blank">Ispiši</a>
   </div>
 

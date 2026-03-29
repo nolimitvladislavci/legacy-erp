@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}Reciklažno dvorište{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --kiosk-bg: #1a1a2e;
+            --kiosk-surface: #16213e;
+            --kiosk-accent: #0f3460;
+            --kiosk-green: #4CAF50;
+            --kiosk-red: #f44336;
+            --kiosk-yellow: #FFC107;
+            --kiosk-blue: #2196F3;
+        }
+        
+        * { -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background: var(--kiosk-bg);
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .kiosk-header {
+            background: var(--kiosk-surface);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--kiosk-accent);
+        }
+        
+        .kiosk-header .station-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .kiosk-header .stats {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .kiosk-body {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Ogromni gumbi za prljave ruke */
+        .waste-btn {
+            min-height: 120px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .waste-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .waste-btn .waste-icon {
+            font-size: 2.5rem;
+        }
+        
+        .waste-btn .waste-quota {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+        
+        .waste-btn.over-quota {
+            opacity: 0.6;
+            position: relative;
+        }
+        
+        .waste-btn.over-quota::after {
+            content: 'KVOTA';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--kiosk-red);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+        }
+        
+        /* Scan input */
+        .scan-input {
+            font-size: 2rem;
+            padding: 20px;
+            text-align: center;
+            background: var(--kiosk-surface);
+            border: 3px solid var(--kiosk-accent);
+            color: white;
+            border-radius: 12px;
+            letter-spacing: 3px;
+            font-weight: 700;
+        }
+        
+        .scan-input:focus {
+            border-color: var(--kiosk-green);
+            box-shadow: 0 0 20px rgba(76,175,80,0.3);
+            outline: none;
+        }
+        
+        /* Vaga display */
+        .scale-display {
+            background: #000;
+            border: 3px solid var(--kiosk-green);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .scale-display .weight-value {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--kiosk-green);
+            text-shadow: 0 0 10px rgba(76,175,80,0.5);
+        }
+        
+        .scale-display .weight-unit {
+            font-size: 1.5rem;
+            color: var(--kiosk-green);
+            opacity: 0.7;
+        }
+        
+        .scale-display.unstable .weight-value {
+            color: var(--kiosk-yellow);
+            animation: blink 0.5s infinite;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+        
+        /* Citizen card */
+        .citizen-card {
+            background: var(--kiosk-surface);
+            border: 2px solid var(--kiosk-accent);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .citizen-card .citizen-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .citizen-card .citizen-address {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        /* Action buttons */
+        .kiosk-action {
+            min-height: 70px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: none;
+            letter-spacing: 1px;
+        }
+        
+        .kiosk-action i {
+            font-size: 1.5rem;
+        }
+        
+        /* Quota bar */
+        .quota-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        
+        .quota-bar .fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        /* Confirmation */
+        .confirm-check {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            margin: 0 auto 20px;
+        }
+        
+        .confirm-check.success {
+            background: var(--kiosk-green);
+            animation: popIn 0.3s ease-out;
+        }
+        
+        .confirm-check.warning {
+            background: var(--kiosk-yellow);
+            color: #333;
+        }
+        
+        @keyframes popIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        
+        /* Receipt print */
+        @media print {
+            body { background: white; color: black; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+        
+        .print-only { display: none; }
+        
+        /* HTMX */
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline-block; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="kiosk-header no-print">
+        <div>
+            <div class="station-name">
+                <i class="fas fa-recycle me-2"></i>{{ station.name }}
+            </div>
+            <div class="stats">{{ station.get_station_type_display }}</div>
+        </div>
+        <div class="text-end">
+            <div class="stats">{{ request.user.get_short_name|default:request.user.username }}</div>
+            <a href="{% url 'komunalno:dashboard' %}" class="btn btn-sm btn-outline-light mt-1">
+                <i class="fas fa-arrow-left"></i> Izlaz
+            </a>
+        </div>
+    </header>
+    
+    <main class="kiosk-body">
+        {% block kiosk_content %}{% endblock %}
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script>
+        // CSRF za HTMX
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            evt.detail.headers['X-CSRFToken'] = document.querySelector('meta[name="csrf-token"]').content;
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

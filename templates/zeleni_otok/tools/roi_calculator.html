@@ -1,0 +1,64 @@
+{% extends "zeleni_otok/public_base.html" %}
+
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center" style="padding: 3rem 0 2.5rem;">
+    <div class="container">
+        <h1 class="display-6 fw-bold mb-2"><i class="fas fa-chart-line me-2"></i>ROI Kalkulator</h1>
+        <p class="lead opacity-90">Izračunajte koliko štedite prelaskom na LIMIT Connect</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container" style="max-width: 700px;">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form hx-post="{% url 'zeleni_otok:roi_calculate' %}"
+                      hx-target="#roi-result"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Trenutni sustav</label>
+                            <select name="source_system" class="form-select">
+                                <option value="minimax">Minimax</option>
+                                <option value="luceed">Luceed</option>
+                                <option value="pantheon">Pantheon</option>
+                                <option value="other">Drugi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Trenutna mjesečna cijena (EUR)</label>
+                            <input type="number" name="current_monthly" class="form-control" step="0.01" value="22.03">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Broj korisnika</label>
+                            <input type="number" name="num_users" class="form-control" value="2" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Računa/mjesečno</label>
+                            <input type="number" name="num_invoices" class="form-control" value="100" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Obračuna plaća/mj</label>
+                            <input type="number" name="num_payrolls" class="form-control" value="5" min="0">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-lc w-100">
+                                <i class="fas fa-chart-line me-2"></i>Izračunaj uštede
+                                <span class="htmx-indicator"><i class="fas fa-spinner fa-spin ms-2"></i></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div id="roi-result" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

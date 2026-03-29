@@ -130,9 +130,9 @@ button[disabled]{opacity:.5;cursor:not-allowed}
                          line-height:1.2;min-height:38px;transition:all .12s;font-family:inherit"
                   onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
                   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'"
-                  title="{{qi.name}} — €{{qi.unit_price|floatformat:2}}">
+                  title="{{qi.name}} — {{qi.unit_price|floatformat:2}} €">
             <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ qi.name|truncatechars:18 }}</div>
-            <div style="color:var(--gold);font-size:.68rem;margin-top:2px">€{{ qi.unit_price|floatformat:2 }}</div>
+            <div style="color:var(--gold);font-size:.68rem;margin-top:2px">{{ qi.unit_price|floatformat:2 }} €</div>
           </button>
           {% endfor %}
         </div>

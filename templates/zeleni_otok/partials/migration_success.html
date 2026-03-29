@@ -1,0 +1,12 @@
+<div class="alert alert-success fade-in">
+    <h5><i class="fas fa-check-circle me-2"></i>Zahtjev uspješno poslan!</h5>
+    <p class="mb-2">Vaš zahtjev za migraciju tvrtke <strong>{{ migration.company_name }}</strong> je zaprimljen.</p>
+    <p class="mb-2">Broj zahtjeva: <code>{{ migration.id }}</code></p>
+    <p class="mb-0">
+        Javit ćemo vam se na <strong>{{ migration.contact_email }}</strong> u roku 24 sata.
+        <br>
+        <a href="{% url 'zeleni_otok:migration_status' migration.pk %}" class="alert-link mt-2 d-inline-block">
+            Pratite status migracije <i class="fas fa-arrow-right ms-1"></i>
+        </a>
+    </p>
+</div>

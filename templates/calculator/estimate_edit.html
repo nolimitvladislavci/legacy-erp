@@ -33,8 +33,8 @@
                         <td class="px-4 py-2 text-center text-sm">{{ item.worker_count }}</td>
                         <td class="px-4 py-2 text-center text-sm">{{ item.days }}</td>
                         <td class="px-4 py-2 text-center text-sm">{{ item.hours_per_day }}</td>
-                        <td class="px-4 py-2 text-center text-sm">€{{ item.cost_per_hour }}</td>
-                        <td class="px-4 py-2 text-right text-sm font-bold">€{{ item.total_cost|floatformat:0 }}</td>
+                        <td class="px-4 py-2 text-center text-sm">{{ item.cost_per_hour }} €</td>
+                        <td class="px-4 py-2 text-right text-sm font-bold">{{ item.total_cost|floatformat:0 }} €</td>
                         <td class="px-4 py-2"><form method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="remove_item"><input type="hidden" name="item_id" value="{{ item.pk }}"><button class="text-red-400 hover:text-red-600 text-xs">✕</button></form></td>
                     </tr>
                     {% empty %}
@@ -46,7 +46,7 @@
                 <input type="hidden" name="action" value="add_item">
                 <div class="grid grid-cols-5 gap-2 items-end">
                     <select name="category_id" class="px-2 py-1.5 border rounded-lg text-sm">
-                        {% for c in categories %}<option value="{{ c.pk }}">{{ c.name }} (€{{ c.cost_per_hour }}/h)</option>{% endfor %}
+                        {% for c in categories %}<option value="{{ c.pk }}">{{ c.name }} ({{ c.cost_per_hour }} €/h)</option>{% endfor %}
                     </select>
                     <input type="number" name="item_workers" value="1" min="1" class="px-2 py-1.5 border rounded-lg text-sm" placeholder="{% trans "Radnika" %}">
                     <input type="number" name="item_days" value="{{ estimate.duration_days|unlocalize }}" class="px-2 py-1.5 border rounded-lg text-sm" placeholder="Dana">
@@ -81,17 +81,17 @@
     <div class="space-y-4">
         <div class="bg-white rounded-xl shadow-sm border p-6 space-y-3">
             <h3 class="font-bold text-lg mb-4">{% trans "📊 Pregled" %}</h3>
-            <div class="flex justify-between text-sm"><span>{% trans "Rad" %}</span><span class="font-medium">€{{ estimate.labor_cost|floatformat:0 }}</span></div>
-            {% if estimate.material_cost %}<div class="flex justify-between text-sm"><span>{% trans "Materijal" %}</span><span>€{{ estimate.material_cost|floatformat:0 }}</span></div>{% endif %}
-            {% if estimate.equipment_cost %}<div class="flex justify-between text-sm"><span>{% trans "Oprema" %}</span><span>€{{ estimate.equipment_cost|floatformat:0 }}</span></div>{% endif %}
-            <div class="flex justify-between text-sm"><span>{% trans "Režija" %}</span><span>€{{ estimate.overhead_amount|floatformat:0 }}</span></div>
-            <div class="flex justify-between text-sm"><span>{% trans "Rizik" %}</span><span>€{{ estimate.risk_amount|floatformat:0 }}</span></div>
-            <div class="flex justify-between text-sm font-bold border-t pt-2"><span>{% trans "Subtotal" %}</span><span>€{{ estimate.subtotal|floatformat:0 }}</span></div>
-            <div class="flex justify-between text-sm"><span>Marža ({{ estimate.margin_pct }}%)</span><span>€{{ estimate.margin_amount|floatformat:0 }}</span></div>
-            {% if estimate.discount_amount %}<div class="flex justify-between text-sm text-red-600"><span>{% trans "Popust" %}</span><span>-€{{ estimate.discount_amount|floatformat:0 }}</span></div>{% endif %}
-            <div class="flex justify-between text-sm font-bold border-t pt-2"><span>{% trans "Neto" %}</span><span>€{{ estimate.net_total|floatformat:2 }}</span></div>
-            <div class="flex justify-between text-sm"><span>PDV ({{ estimate.tax_rate }}%)</span><span>€{{ estimate.tax_amount|floatformat:2 }}</span></div>
-            <div class="flex justify-between text-xl font-bold text-blue-600 border-t pt-3"><span>{% trans "UKUPNO" %}</span><span>€{{ estimate.gross_total|floatformat:2 }}</span></div>
+            <div class="flex justify-between text-sm"><span>{% trans "Rad" %}</span><span class="font-medium">{{ estimate.labor_cost|floatformat:0 }} €</span></div>
+            {% if estimate.material_cost %}<div class="flex justify-between text-sm"><span>{% trans "Materijal" %}</span><span>{{ estimate.material_cost|floatformat:0 }} €</span></div>{% endif %}
+            {% if estimate.equipment_cost %}<div class="flex justify-between text-sm"><span>{% trans "Oprema" %}</span><span>{{ estimate.equipment_cost|floatformat:0 }} €</span></div>{% endif %}
+            <div class="flex justify-between text-sm"><span>{% trans "Režija" %}</span><span>{{ estimate.overhead_amount|floatformat:0 }} €</span></div>
+            <div class="flex justify-between text-sm"><span>{% trans "Rizik" %}</span><span>{{ estimate.risk_amount|floatformat:0 }} €</span></div>
+            <div class="flex justify-between text-sm font-bold border-t pt-2"><span>{% trans "Subtotal" %}</span><span>{{ estimate.subtotal|floatformat:0 }} €</span></div>
+            <div class="flex justify-between text-sm"><span>Marža ({{ estimate.margin_pct }}%)</span><span>{{ estimate.margin_amount|floatformat:0 }} €</span></div>
+            {% if estimate.discount_amount %}<div class="flex justify-between text-sm text-red-600"><span>{% trans "Popust" %}</span><span>-{{ estimate.discount_amount|floatformat:0 }} €</span></div>{% endif %}
+            <div class="flex justify-between text-sm font-bold border-t pt-2"><span>{% trans "Neto" %}</span><span>{{ estimate.net_total|floatformat:2 }} €</span></div>
+            <div class="flex justify-between text-sm"><span>PDV ({{ estimate.tax_rate }}%)</span><span>{{ estimate.tax_amount|floatformat:2 }} €</span></div>
+            <div class="flex justify-between text-xl font-bold text-blue-600 border-t pt-3"><span>{% trans "UKUPNO" %}</span><span>{{ estimate.gross_total|floatformat:2 }} €</span></div>
         </div>
         <div class="bg-white rounded-xl shadow-sm border p-4 space-y-2">
             <form method="post">{% csrf_token %}<input type="hidden" name="action" value="update_status">

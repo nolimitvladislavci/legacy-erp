@@ -8,18 +8,18 @@
     <div class="bg-white rounded-xl shadow-sm border p-5">
         <div class="flex items-center justify-between mb-3">
             <div><div class="font-bold">{{ cat.name }}</div><div class="text-xs text-slate-400">{{ cat.code }} | {{ cat.get_country_display }}</div></div>
-            <div class="text-2xl font-bold text-blue-600">€{{ cat.cost_per_hour }}/h</div>
+            <div class="text-2xl font-bold text-blue-600">{{ cat.cost_per_hour }} €/h</div>
         </div>
         <div class="space-y-1 text-xs">
-            <div class="flex justify-between"><span class="text-slate-500">{% trans "Bruto plaća" %}</span><span>€{{ cat.gross_salary_monthly }}</span></div>
-            <div class="flex justify-between"><span class="text-slate-500">Doprinosi ({{ cat.employer_contributions_pct }}%)</span><span>€{{ cat.cost_breakdown.employer_contributions }}</span></div>
-            {% if cat.soka_bau_pct %}<div class="flex justify-between"><span class="text-slate-500">SOKA-BAU ({{ cat.soka_bau_pct }}%)</span><span>€{{ cat.cost_breakdown.soka_bau }}</span></div>{% endif %}
-            {% if cat.social_insurance_pct %}<div class="flex justify-between"><span class="text-slate-500">Socijalno ({{ cat.social_insurance_pct }}%)</span><span>€{{ cat.cost_breakdown.social_insurance }}</span></div>{% endif %}
-            {% if cat.accident_insurance_pct %}<div class="flex justify-between"><span class="text-slate-500">BG ({{ cat.accident_insurance_pct }}%)</span><span>€{{ cat.cost_breakdown.accident_insurance }}</span></div>{% endif %}
-            <div class="flex justify-between"><span class="text-slate-500">{% trans "Naknade" %}</span><span>€{{ cat.additional_benefits_monthly }}</span></div>
-            {% if cat.per_diem_daily %}<div class="flex justify-between"><span class="text-slate-500">{% trans "Dnevnice (22d)" %}</span><span>€{{ cat.cost_breakdown.per_diem }}</span></div>{% endif %}
-            {% if cat.accommodation_daily %}<div class="flex justify-between"><span class="text-slate-500">{% trans "Smještaj (22d)" %}</span><span>€{{ cat.cost_breakdown.accommodation }}</span></div>{% endif %}
-            <div class="flex justify-between font-bold border-t pt-1 mt-1"><span>{% trans "Ukupno/mj" %}</span><span>€{{ cat.total_employer_cost_monthly|floatformat:0 }}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">{% trans "Bruto plaća" %}</span><span>{{ cat.gross_salary_monthly }} €</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Doprinosi ({{ cat.employer_contributions_pct }}%)</span><span>{{ cat.cost_breakdown.employer_contributions }} €</span></div>
+            {% if cat.soka_bau_pct %}<div class="flex justify-between"><span class="text-slate-500">SOKA-BAU ({{ cat.soka_bau_pct }}%)</span><span>{{ cat.cost_breakdown.soka_bau }} €</span></div>{% endif %}
+            {% if cat.social_insurance_pct %}<div class="flex justify-between"><span class="text-slate-500">Socijalno ({{ cat.social_insurance_pct }}%)</span><span>{{ cat.cost_breakdown.social_insurance }} €</span></div>{% endif %}
+            {% if cat.accident_insurance_pct %}<div class="flex justify-between"><span class="text-slate-500">BG ({{ cat.accident_insurance_pct }}%)</span><span>{{ cat.cost_breakdown.accident_insurance }} €</span></div>{% endif %}
+            <div class="flex justify-between"><span class="text-slate-500">{% trans "Naknade" %}</span><span>{{ cat.additional_benefits_monthly }} €</span></div>
+            {% if cat.per_diem_daily %}<div class="flex justify-between"><span class="text-slate-500">{% trans "Dnevnice (22d)" %}</span><span>{{ cat.cost_breakdown.per_diem }} €</span></div>{% endif %}
+            {% if cat.accommodation_daily %}<div class="flex justify-between"><span class="text-slate-500">{% trans "Smještaj (22d)" %}</span><span>{{ cat.cost_breakdown.accommodation }} €</span></div>{% endif %}
+            <div class="flex justify-between font-bold border-t pt-1 mt-1"><span>{% trans "Ukupno/mj" %}</span><span>{{ cat.total_employer_cost_monthly|floatformat:0 }} €</span></div>
             <div class="flex justify-between text-slate-400"><span>{% trans "Produktivnih sati" %}</span><span>{{ cat.cost_breakdown.productive_hours }}h</span></div>
         </div>
     </div>

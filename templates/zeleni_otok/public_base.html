@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"LIMIT Connect — AI-Powered ERP" }}</title>
+    <meta name="description" content="{{ meta_description|default:'LIMIT Connect je moderni cloud ERP sustav s AI funkcijama. Besplatna migracija iz drugih sustava.' }}">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ page_title|default:'LIMIT Connect' }}">
+    <meta property="og:description" content="{{ meta_description|default:'AI-Powered ERP bez limita' }}">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="hr_HR">
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --lc-primary: #0d6efd;
+            --lc-secondary: #198754;
+            --lc-accent: #0dcaf0;
+            --lc-dark: #1a1d21;
+            --lc-gradient: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #2c3e50;
+        }
+        
+        .navbar-lc {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        
+        .hero-section {
+            background: var(--lc-gradient);
+            color: white;
+            padding: 5rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: white;
+            clip-path: ellipse(55% 100% at 50% 100%);
+        }
+        
+        .feature-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        .pricing-card {
+            border: 2px solid #e9ecef;
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+        
+        .pricing-card.popular {
+            border-color: var(--lc-primary);
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(13,110,253,0.2);
+        }
+        
+        .pricing-card .price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--lc-primary);
+        }
+        
+        .pricing-card .price .period {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #6c757d;
+        }
+        
+        .comparison-table th {
+            background: var(--lc-dark);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .comparison-table .check-yes {
+            color: var(--lc-secondary);
+            font-weight: bold;
+        }
+        
+        .comparison-table .check-no {
+            color: #dc3545;
+        }
+        
+        .comparison-table .check-partial {
+            color: #ffc107;
+        }
+        
+        .cta-section {
+            background: var(--lc-dark);
+            color: white;
+            padding: 4rem 0;
+        }
+        
+        .tool-card {
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .tool-card:hover {
+            border-color: var(--lc-primary);
+            box-shadow: 0 4px 16px rgba(13,110,253,0.1);
+        }
+        
+        .tool-card .tool-icon {
+            font-size: 2.5rem;
+            color: var(--lc-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .btn-lc {
+            background: var(--lc-gradient);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-lc:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13,110,253,0.3);
+        }
+        
+        .badge-lc {
+            background: var(--lc-gradient);
+            color: white;
+            font-weight: 600;
+            padding: 0.4em 0.8em;
+            border-radius: 6px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--lc-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        footer {
+            background: var(--lc-dark);
+            color: #adb5bd;
+            padding: 3rem 0 1.5rem;
+        }
+        
+        footer a { color: #adb5bd; text-decoration: none; }
+        footer a:hover { color: white; }
+        
+        .highlight-row { background: rgba(13,110,253,0.05) !important; }
+        
+        /* Animations */
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: inline-block; }
+        .htmx-request.htmx-indicator { display: inline-block; }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-lc fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'zeleni_otok:landing' %}">
+                <i class="fas fa-bolt text-primary me-1"></i>
+                LIMIT Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'zeleni_otok:pricing' %}">Cjenik</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'zeleni_otok:compare' %}">Usporedba</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Besplatni alati
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'zeleni_otok:pdv_calculator' %}"><i class="fas fa-calculator me-2"></i>PDV Kalkulator</a></li>
+                            <li><a class="dropdown-item" href="{% url 'zeleni_otok:oib_lookup' %}"><i class="fas fa-search me-2"></i>OIB Provjera</a></li>
+                            <li><a class="dropdown-item" href="{% url 'zeleni_otok:r1_validator' %}"><i class="fas fa-check-circle me-2"></i>R-1 Validator</a></li>
+                            <li><a class="dropdown-item" href="{% url 'zeleni_otok:roi_calculator' %}"><i class="fas fa-chart-line me-2"></i>ROI Kalkulator</a></li>
+                            <li><a class="dropdown-item" href="{% url 'zeleni_otok:tax_calendar' %}"><i class="fas fa-calendar-alt me-2"></i>Porezni Kalendar</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'zeleni_otok:migration' %}">Migracija</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-lc btn-sm" href="/hr/accounts/login/">Prijava <i class="fas fa-arrow-right ms-1"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div style="padding-top: 56px;">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-white"><i class="fas fa-bolt me-1"></i> LIMIT Connect</h6>
+                    <p class="small">AI-powered ERP sustav za moderne tvrtke. Bez limita na račune. Bez skrivenih troškova.</p>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h6 class="text-white">Proizvod</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{% url 'zeleni_otok:pricing' %}">Cjenik</a></li>
+                        <li><a href="{% url 'zeleni_otok:compare' %}">Usporedba</a></li>
+                        <li><a href="{% url 'zeleni_otok:migration' %}">Migracija</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h6 class="text-white">Alati</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{% url 'zeleni_otok:pdv_calculator' %}">PDV Kalkulator</a></li>
+                        <li><a href="{% url 'zeleni_otok:oib_lookup' %}">OIB Provjera</a></li>
+                        <li><a href="{% url 'zeleni_otok:r1_validator' %}">R-1 Validator</a></li>
+                        <li><a href="{% url 'zeleni_otok:tax_calendar' %}">Porezni Kalendar</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-white">Kontakt</h6>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-envelope me-2"></i>info@limit-connect.com</li>
+                        <li><i class="fas fa-phone me-2"></i>+385 1 234 5678</li>
+                        <li class="mt-2">
+                            <a href="#" class="me-3"><i class="fab fa-linkedin fa-lg"></i></a>
+                            <a href="#" class="me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                            <a href="#"><i class="fab fa-youtube fa-lg"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.1);">
+            <div class="text-center small">
+                &copy; 2024-2026 LIMIT Connect. Sva prava pridržana.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script>
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (csrfToken) {
+                evt.detail.headers['X-CSRFToken'] = csrfToken.content;
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

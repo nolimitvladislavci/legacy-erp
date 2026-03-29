@@ -56,22 +56,22 @@
     <div class="rep-card" style="margin-top:1rem">
       <div class="rep-card-head">
         <span class="rep-card-name">👤 {{ c.name }}</span>
-        <span class="rep-card-total">€{{ c.ukupno|floatformat:2 }}</span>
+        <span class="rep-card-total">{{ c.ukupno|floatformat:2 }} €</span>
       </div>
       <div class="rep-row"><span class="lbl">📄 Broj računa</span><span class="val">{{ c.racuna }}</span></div>
       <div class="rep-row"><span class="lbl">⏰ Rad od — do</span><span class="val">{{ c.prvi }} — {{ c.zadnji }}</span></div>
-      <div class="rep-row"><span class="lbl">💵 Gotovina</span><span class="val green">€{{ c.gotovina|floatformat:2 }}</span></div>
-      <div class="rep-row"><span class="lbl">💳 Kartica</span><span class="val">€{{ c.kartica|floatformat:2 }}</span></div>
+      <div class="rep-row"><span class="lbl">💵 Gotovina</span><span class="val green">{{ c.gotovina|floatformat:2 }} €</span></div>
+      <div class="rep-row"><span class="lbl">💳 Kartica</span><span class="val">{{ c.kartica|floatformat:2 }} €</span></div>
       {% if c.vavceri > 0 %}
-      <div class="rep-row"><span class="lbl">🎫 Vaučeri</span><span class="val">€{{ c.vavceri|floatformat:2 }}</span></div>
+      <div class="rep-row"><span class="lbl">🎫 Vaučeri</span><span class="val">{{ c.vavceri|floatformat:2 }} €</span></div>
       {% endif %}
     </div>
     {% endfor %}
 
     <div class="rep-total">
-      <div class="rep-total-row"><span class="lbl">Ukupno gotovina</span><span class="val">€{{ total_gotovina|floatformat:2 }}</span></div>
-      <div class="rep-total-row"><span class="lbl">Ukupno kartica</span><span class="val">€{{ total_kartica|floatformat:2 }}</span></div>
-      <div class="rep-total-row"><span class="lbl"><strong>UKUPNO SMJENA</strong></span><span class="val">€{{ total_ukupno|floatformat:2 }}</span></div>
+      <div class="rep-total-row"><span class="lbl">Ukupno gotovina</span><span class="val">{{ total_gotovina|floatformat:2 }} €</span></div>
+      <div class="rep-total-row"><span class="lbl">Ukupno kartica</span><span class="val">{{ total_kartica|floatformat:2 }} €</span></div>
+      <div class="rep-total-row"><span class="lbl"><strong>UKUPNO SMJENA</strong></span><span class="val">{{ total_ukupno|floatformat:2 }} €</span></div>
     </div>
   {% else %}
     <div class="rep-empty">Nema računa u ovoj smjeni.</div>

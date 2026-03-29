@@ -1,0 +1,274 @@
+{% extends "komunalno/kiosk/base_kiosk.html" %}
+
+{% block title %}{{ card.partner.name }} — Odabir otpada{% endblock %}
+
+{% block kiosk_content %}
+<!-- Citizen info -->
+<div class="citizen-card mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <div class="citizen-name">
+                <i class="fas fa-user me-2"></i>{{ card.partner.name }}
+            </div>
+            <div class="citizen-address">
+                <i class="fas fa-map-marker-alt me-1"></i>{{ card.address|default:card.partner.address }}
+            </div>
+            <div class="citizen-address">
+                <i class="fas fa-id-card me-1"></i>{{ card.card_number }}
+                &middot; {{ card.household_members }} član{{ card.household_members|pluralize:"ova" }}
+            </div>
+        </div>
+        <a href="{% url 'komunalno:kiosk_home' station.pk %}" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-times"></i>
+        </a>
+    </div>
+</div>
+
+<h4 class="fw-bold mb-3 text-center">ODABERITE VRSTU OTPADA</h4>
+
+<!-- Waste category buttons (BIG, COLORED, TOUCH-FRIENDLY) -->
+<div class="row g-3">
+    {% for item in button_data %}
+    <div class="col-6 col-md-4 col-lg-3">
+        <form method="post" action="{% url 'komunalno:kiosk_deliver' station.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="card_id" value="{{ card.pk }}">
+            <input type="hidden" name="category_id" value="{{ item.button.category.pk }}">
+            
+            {% if has_scale %}
+            <!-- Vaga automatski popuni -->
+            <input type="hidden" name="quantity" class="scale-weight-input" value="0">
+            <input type="hidden" name="scale_reading_id" class="scale-reading-id" value="">
+            {% endif %}
+            
+            <button type="{% if has_scale %}button{% else %}submit{% endif %}" 
+                    class="waste-btn w-100 {% if item.is_over %}over-quota{% endif %}"
+                    style="background: {{ item.button.color }};"
+                    {% if has_scale %}onclick="openWeighDialog(this)"{% endif %}
+                    data-category="{{ item.button.label }}"
+                    data-remaining="{{ item.remaining|default_if_none:'∞' }}">
+                <span class="waste-icon">
+                    <i class="fas {{ item.button.icon|default:'fa-recycle' }}"></i>
+                </span>
+                <span>{{ item.button.label }}</span>
+                <span class="waste-quota">
+                    {% if item.remaining is not None %}
+                        Preostalo: {{ item.remaining }} {{ item.button.category.unit }}
+                    {% else %}
+                        Bez limita
+                    {% endif %}
+                </span>
+                {% if item.remaining is not None and item.quota %}
+                <div class="quota-bar w-75">
+                    <div class="fill" style="width: {% widthratio item.used item.quota 100 %}%; background: {% if item.is_over %}var(--kiosk-red){% else %}rgba(255,255,255,0.5){% endif %};"></div>
+                </div>
+                {% endif %}
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+{% if has_scale %}
+<!-- Scale Weigh Modal -->
+<div class="modal fade" id="weighModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background: var(--kiosk-bg); border: 2px solid var(--kiosk-green);">
+            <div class="modal-body p-4">
+                <h3 class="text-center fw-bold mb-3" id="weighCategory">VAGANJE</h3>
+                
+                <div class="scale-display mb-4" id="scaleDisplay">
+                    <div class="weight-value" id="scaleWeight">0.00</div>
+                    <div class="weight-unit">kg</div>
+                    <div class="mt-2 small" id="scaleStatus">Čekam vagu...</div>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-outline-light kiosk-action w-100" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>ODUSTANI
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" class="btn btn-success kiosk-action w-100" id="confirmWeigh" disabled>
+                            <i class="fas fa-check me-2"></i>POTVRDI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Manual weight input modal (no scale) -->
+<div class="modal fade" id="manualWeightModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: var(--kiosk-bg); border: 2px solid var(--kiosk-accent);">
+            <div class="modal-body p-4">
+                <h3 class="text-center fw-bold mb-3">UNESITE KOLIČINU</h3>
+                <input type="number" id="manualWeight" class="form-control scan-input" 
+                       step="0.1" min="0.1" placeholder="kg" inputmode="decimal">
+                <div class="row g-3 mt-3">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-outline-light kiosk-action w-100" data-bs-dismiss="modal">
+                            ODUSTANI
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" class="btn btn-success kiosk-action w-100" id="confirmManual">
+                            POTVRDI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let activeForm = null;
+let currentScaleReading = null;
+let scalePolling = null;
+
+{% if has_scale %}
+// ─── SCALE INTEGRATION (Web Serial API) ────────────────
+function openWeighDialog(btn) {
+    activeForm = btn.closest('form');
+    document.getElementById('weighCategory').textContent = btn.dataset.category;
+    document.getElementById('scaleWeight').textContent = '0.00';
+    document.getElementById('scaleStatus').textContent = 'Čekam vagu...';
+    document.getElementById('confirmWeigh').disabled = true;
+    currentScaleReading = null;
+    
+    new bootstrap.Modal(document.getElementById('weighModal')).show();
+    startScalePolling();
+}
+
+function startScalePolling() {
+    // Poll server za zadnje očitanje s vage
+    if (scalePolling) clearInterval(scalePolling);
+    scalePolling = setInterval(async function() {
+        try {
+            const resp = await fetch('{% url "komunalno:api_scale_latest" station.pk %}');
+            const data = await resp.json();
+            if (data.available) {
+                document.getElementById('scaleWeight').textContent = parseFloat(data.weight_kg).toFixed(2);
+                const display = document.getElementById('scaleDisplay');
+                if (data.is_stable) {
+                    display.classList.remove('unstable');
+                    document.getElementById('scaleStatus').textContent = 'STABILNO ✓';
+                    document.getElementById('confirmWeigh').disabled = false;
+                    currentScaleReading = data;
+                } else {
+                    display.classList.add('unstable');
+                    document.getElementById('scaleStatus').textContent = 'Stabiliziranje...';
+                    document.getElementById('confirmWeigh').disabled = true;
+                }
+            }
+        } catch(e) { /* silent */ }
+    }, 500);
+}
+
+document.getElementById('confirmWeigh').addEventListener('click', function() {
+    if (!currentScaleReading || !activeForm) return;
+    activeForm.querySelector('.scale-weight-input').value = currentScaleReading.weight_kg;
+    activeForm.querySelector('.scale-reading-id').value = currentScaleReading.id;
+    clearInterval(scalePolling);
+    bootstrap.Modal.getInstance(document.getElementById('weighModal')).hide();
+    activeForm.submit();
+});
+
+document.getElementById('weighModal').addEventListener('hidden.bs.modal', function() {
+    if (scalePolling) clearInterval(scalePolling);
+});
+
+{% else %}
+// ─── MANUAL WEIGHT INPUT ───────────────────────────────
+document.querySelectorAll('.waste-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        activeForm = btn.closest('form');
+        document.getElementById('manualWeight').value = '';
+        new bootstrap.Modal(document.getElementById('manualWeightModal')).show();
+        setTimeout(function() { document.getElementById('manualWeight').focus(); }, 300);
+    });
+});
+
+document.getElementById('confirmManual').addEventListener('click', function() {
+    var weight = document.getElementById('manualWeight').value;
+    if (!weight || parseFloat(weight) <= 0) return;
+    // Create hidden quantity input
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'quantity';
+    input.value = weight;
+    activeForm.appendChild(input);
+    bootstrap.Modal.getInstance(document.getElementById('manualWeightModal')).hide();
+    activeForm.submit();
+});
+{% endif %}
+
+// Web Serial API — čita direktno s USB vage u browseru
+async function connectScale() {
+    if (!('serial' in navigator)) {
+        console.warn('Web Serial API not supported');
+        return;
+    }
+    try {
+        const port = await navigator.serial.requestPort();
+        await port.open({ baudRate: {{ station.scale_baud_rate|default:9600 }} });
+        const reader = port.readable.getReader();
+        let buffer = '';
+        
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += new TextDecoder().decode(value);
+            
+            // Parse when we get CR/LF
+            const lines = buffer.split(/[\r\n]+/);
+            buffer = lines.pop(); // Keep incomplete line
+            
+            for (const line of lines) {
+                if (line.trim()) {
+                    parseScaleData(line.trim());
+                }
+            }
+        }
+    } catch(e) {
+        console.error('Scale connection error:', e);
+    }
+}
+
+function parseScaleData(raw) {
+    // Generic scale protocol: "ST,GS,   152.50 kg" or "   152.50 kg"
+    const match = raw.match(/([\d.]+)\s*(kg|g|lb)/i);
+    if (!match) return;
+    
+    let weight = parseFloat(match[1]);
+    const unit = match[2].toLowerCase();
+    if (unit === 'g') weight /= 1000;
+    
+    const isStable = raw.includes('ST') || !raw.includes('US');
+    
+    // Send to server
+    fetch('{% url "komunalno:api_scale_reading" station.pk %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({
+            raw_data: raw,
+            weight_kg: weight,
+            is_stable: isStable,
+            source: 'web_serial',
+        })
+    });
+}
+</script>
+{% endblock %}

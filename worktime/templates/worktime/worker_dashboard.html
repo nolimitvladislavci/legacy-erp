@@ -125,7 +125,7 @@
     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Ovaj mjesec" %}</div>
     <div class="text-3xl font-black text-slate-800">{{ hours_month|floatformat:1 }}<span class="text-lg font-normal text-slate-400">h</span></div>
     {% if hourly_rate %}
-    <div class="text-xs text-slate-400 mt-2">≈ €{{ earnings_month|floatformat:0 }}</div>
+    <div class="text-xs text-slate-400 mt-2">≈ {{ earnings_month|floatformat:0 }} €</div>
     {% endif %}
   </div>
 
@@ -138,7 +138,7 @@
   {% else %}
   <div class="bg-white rounded-xl border shadow-sm p-4">
     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Zarada" %}</div>
-    <div class="text-3xl font-black text-green-600">€{{ earnings_month|floatformat:0 }}</div>
+    <div class="text-3xl font-black text-green-600">{{ earnings_month|floatformat:0 }} €</div>
     <div class="text-xs text-slate-400 mt-2">{% trans "ovaj mjesec" %}</div>
   </div>
   {% endif %}

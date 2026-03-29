@@ -1,0 +1,68 @@
+{% extends "komunalno/kiosk/base_kiosk.html" %}
+
+{% block title %}{{ station.name }} — Kiosk{% endblock %}
+
+{% block kiosk_content %}
+<div class="text-center mb-4">
+    <h2 class="fw-bold mb-1">SKENIRAJ ISKAZNICU</h2>
+    <p class="opacity-70">ili unesite broj iskaznice / OIB</p>
+</div>
+
+<!-- Scan Input -->
+<form method="post" action="{% url 'komunalno:kiosk_scan' station.pk %}" id="scanForm">
+    {% csrf_token %}
+    <input type="text" 
+           name="scan_input" 
+           class="form-control scan-input mb-4" 
+           placeholder="SKENIRAJ ILI UPIŠI..."
+           autofocus
+           autocomplete="off"
+           inputmode="numeric">
+</form>
+
+<!-- Brza pretraga (HTMX) -->
+<div id="search-results"
+     hx-get="{% url 'komunalno:api_citizen_lookup' %}"
+     hx-trigger="keyup changed delay:300ms from:#scanForm input"
+     hx-include="#scanForm input"
+     hx-target="#search-results"
+     hx-swap="innerHTML">
+</div>
+
+<!-- Danas statistika -->
+<div class="row g-3 mt-5">
+    <div class="col-6">
+        <div class="citizen-card text-center">
+            <div style="font-size: 2.5rem; font-weight: 900; color: var(--kiosk-green);">{{ today_count }}</div>
+            <div class="opacity-70">Dostava danas</div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="citizen-card text-center">
+            <div style="font-size: 2.5rem; font-weight: 900; color: var(--kiosk-blue);">{{ today_weight }} kg</div>
+            <div class="opacity-70">Ukupno danas</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit na scan (barkod čitač šalje Enter)
+document.querySelector('#scanForm input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('scanForm').submit();
+    }
+});
+
+// Refocus na input ako izgubi fokus (kiosk mode)
+setInterval(function() {
+    var input = document.querySelector('#scanForm input');
+    if (document.activeElement !== input) {
+        input.focus();
+    }
+}, 3000);
+</script>
+{% endblock %}

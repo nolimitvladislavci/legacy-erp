@@ -61,7 +61,7 @@
       {% for item in items %}
       <div class="summary-row">
         <span class="summary-label">{{ item.product.name }} × {{ item.qty }}</span>
-        <span class="summary-val">€{{ item.subtotal|floatformat:2 }}</span>
+        <span class="summary-val">{{ item.subtotal|floatformat:2 }} €</span>
       </div>
       {% endfor %}
       <div class="summary-row">
@@ -70,7 +70,7 @@
       </div>
       <div class="summary-row">
         <span class="summary-label"><strong>UKUPNO</strong></span>
-        <span class="summary-total" id="grandTotalDisplay">€{{ total|floatformat:2 }}</span>
+        <span class="summary-total" id="grandTotalDisplay">{{ total|floatformat:2 }} €</span>
       </div>
     </div>
   </div>
@@ -93,7 +93,7 @@
         <div class="method-label">
           <div class="method-name">{{ label }}</div>
         </div>
-        <div class="method-price">{% if cost == '0.00' %}Besplatno{% else %}+€{{ cost }}{% endif %}</div>
+        <div class="method-price">{% if cost == '0.00' %}Besplatno{% else %}+{{ cost }} €{% endif %}</div>
       </label>
       {% endfor %}
     </div>

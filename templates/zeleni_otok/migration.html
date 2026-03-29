@@ -1,0 +1,144 @@
+{% extends "zeleni_otok/public_base.html" %}
+
+{% block extra_head %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center" style="padding: 4rem 0 3rem;">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-2">Besplatna migracija</h1>
+        <p class="lead opacity-90">Prebacite podatke iz bilo kojeg sustava — potpuno besplatno</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container" style="max-width: 800px;">
+        <!-- Process steps -->
+        <div class="row g-4 mb-5 text-center">
+            <div class="col-md-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-weight: bold;">1</div>
+                <h6 class="mt-2 fw-bold">Ispunite formu</h6>
+                <small class="text-muted">Osnovni podaci</small>
+            </div>
+            <div class="col-md-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-weight: bold;">2</div>
+                <h6 class="mt-2 fw-bold">Upload podataka</h6>
+                <small class="text-muted">XML, CSV ili API</small>
+            </div>
+            <div class="col-md-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-weight: bold;">3</div>
+                <h6 class="mt-2 fw-bold">Automatski import</h6>
+                <small class="text-muted">AI mapiranje</small>
+            </div>
+            <div class="col-md-3">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-weight: bold;">4</div>
+                <h6 class="mt-2 fw-bold">Verifikacija</h6>
+                <small class="text-muted">Usporedba salda</small>
+            </div>
+        </div>
+        
+        <!-- Form -->
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-4"><i class="fas fa-exchange-alt text-primary me-2"></i>Zahtjev za migraciju</h4>
+                
+                <form method="post" action="{% url 'zeleni_otok:migration_submit' %}" enctype="multipart/form-data"
+                      hx-post="{% url 'zeleni_otok:migration_submit' %}"
+                      hx-target="#migration-result"
+                      hx-swap="innerHTML">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Naziv tvrtke *</label>
+                            <input type="text" name="company_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">OIB</label>
+                            <input type="text" name="oib" class="form-control" maxlength="11" pattern="[0-9]{11}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Kontakt osoba *</label>
+                            <input type="text" name="contact_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email *</label>
+                            <input type="email" name="contact_email" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Telefon</label>
+                            <input type="tel" name="contact_phone" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Trenutni sustav *</label>
+                            <select name="source_system" class="form-select" required>
+                                {% for value, label in source_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Trenutni paket</label>
+                            <input type="text" name="source_plan" class="form-control" placeholder="Npr. Maksi računovodstvo">
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Što želite migrirati?</label>
+                            <div class="row g-2">
+                                <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="migrate_partners" id="mp" checked><label class="form-check-label" for="mp">Partneri (kupci/dobavljači)</label></div></div>
+                                <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="migrate_articles" id="ma" checked><label class="form-check-label" for="ma">Artikli / Proizvodi</label></div></div>
+                                <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="migrate_chart_of_accounts" id="mc" checked><label class="form-check-label" for="mc">Kontni plan</label></div></div>
+                                <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="migrate_opening_balances" id="mob" checked><label class="form-check-label" for="mob">Početna salda</label></div></div>
+                                <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="migrate_invoices" id="mi"><label class="form-check-label" for="mi">Povijesni računi</label></div></div>
+                                <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="migrate_fixed_assets" id="mf"><label class="form-check-label" for="mf">Osnovna sredstva</label></div></div>
+                                <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="migrate_employees" id="me"><label class="form-check-label" for="me">Zaposlenici</label></div></div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Upload datoteke (opcionalno)</label>
+                            <input type="file" name="upload_file" class="form-control" accept=".xml,.csv,.json,.xlsx,.mdb">
+                            <small class="text-muted">Podržani formati: XML, CSV, JSON, Excel, MDB</small>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Referral kod (opcionalno)</label>
+                            <input type="text" name="referral_code" class="form-control" placeholder="Npr. LIMIT-ABC123">
+                        </div>
+                        
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-lc btn-lg w-100">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                <span>Pošalji zahtjev za migraciju</span>
+                                <span class="htmx-indicator"><i class="fas fa-spinner fa-spin ms-2"></i></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div id="migration-result" class="mt-3"></div>
+            </div>
+        </div>
+        
+        <!-- Benefits -->
+        <div class="row g-4 mt-5">
+            <div class="col-md-4 text-center">
+                <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                <h6 class="fw-bold">0 € trošak</h6>
+                <small class="text-muted">Potpuno besplatna migracija (konkurencija naplaćuje 79,63 €)</small>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                <h6 class="fw-bold">24-48h obrada</h6>
+                <small class="text-muted">Prosječno vrijeme kompletne migracije</small>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-headset fa-2x text-info mb-2"></i>
+                <h6 class="fw-bold">30 dana podrške</h6>
+                <small class="text-muted">Premium podrška nakon migracije — besplatno</small>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

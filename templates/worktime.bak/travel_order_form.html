@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Novi putni nalog{% endblock %}
+{% block extra_css %}
+<style>
+@media(max-width:768px){
+  .container-fluid{padding-left:.5rem;padding-right:.5rem}
+  .table-responsive{font-size:.78rem}
+  .table th,.table td{padding:.4rem .5rem}
+  .btn-sm{font-size:.7rem;padding:3px 8px}
+  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
+  .stat-card,.card{margin-bottom:.5rem}
+  h2,.h2{font-size:1.2rem}
+  h4,.h4{font-size:1rem}
+  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
+}
+@media(max-width:480px){
+  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
+  .btn{font-size:.75rem}
+  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:800px">
+<h2 class="mb-4"><i class="fas fa-route"></i> Novi putni nalog</h2>
+<form method="post" class="card bg-dark border-secondary">{% csrf_token %}<div class="card-body">
+<div class="row mb-3"><div class="col-md-6"><label class="form-label">Zaposlenik</label>
+<select name="employee" class="form-select bg-dark text-light border-secondary">
+{% for emp in employees %}<option value="{{ emp.id }}" {% if emp == request.user %}selected{% endif %}>{{ emp.get_full_name|default:emp.username }}</option>{% endfor %}</select></div>
+<div class="col-md-6"><label class="form-label">Vrsta prijevoza</label>
+<select name="transport_type" class="form-select bg-dark text-light border-secondary">
+{% for code, label in transport_types %}<option value="{{ code }}">{{ label }}</option>{% endfor %}</select></div></div>
+<div class="mb-3"><label class="form-label">Odrediste</label><input type="text" name="destination" class="form-control bg-dark text-light border-secondary" required></div>
+<div class="mb-3"><label class="form-label">Svrha putovanja</label><textarea name="purpose" class="form-control bg-dark text-light border-secondary" rows="2" required></textarea></div>
+<div class="row mb-3"><div class="col-md-6"><label class="form-label">Polazak</label><input type="datetime-local" name="departure_date" class="form-control bg-dark text-light border-secondary" required></div>
+<div class="col-md-6"><label class="form-label">Povratak</label><input type="datetime-local" name="return_date" class="form-control bg-dark text-light border-secondary" required></div></div>
+<hr class="border-secondary"><h5 class="mb-3" style="color:#c9a84c">Troskovi</h5>
+<div class="row mb-3">
+<div class="col-md-4"><label>Udaljenost (km)</label>
+<input type="number" name="distance_km" id="distance_km" class="form-control bg-dark text-light border-secondary" step="0.1" value="0"></div>
+<div class="col-md-4"><label>EUR/km</label>
+<input type="number" name="mileage_rate" id="mileage_rate" class="form-control bg-dark text-light border-secondary" step="0.01" value="0.40"></div>
+<div class="col-md-4"><label>Kilometrina</label>
+<input type="text" id="mileage_total" class="form-control bg-dark text-light border-secondary" readonly value="0.00"></div></div>
+<div class="row mb-3">
+<div class="col-md-4"><label>Dnevnica (dana)</label>
+<input type="number" name="per_diem_days" id="per_diem_days" class="form-control bg-dark text-light border-secondary" step="0.5" value="0"></div>
+<div class="col-md-4"><label>EUR/dan</label>
+<input type="number" name="per_diem_rate" id="per_diem_rate" class="form-control bg-dark text-light border-secondary" step="0.01" value="26.55"></div>
+<div class="col-md-4"><label>Dnevnice</label>
+<input type="text" id="per_diem_total" class="form-control bg-dark text-light border-secondary" readonly value="0.00"></div></div>
+<div class="row mb-3"><div class="col-md-4"><label>Ostali troskovi</label>
+<input type="number" name="other_costs" id="other_costs" class="form-control bg-dark text-light border-secondary" step="0.01" value="0"></div>
+<div class="col-md-4"></div><div class="col-md-4"><label><strong>UKUPNO (EUR)</strong></label>
+<input type="text" id="grand_total" class="form-control bg-dark border-warning text-warning fw-bold" readonly value="0.00"></div></div>
+<div class="mb-3"><label>Napomene</label><textarea name="notes" class="form-control bg-dark text-light border-secondary" rows="2"></textarea></div>
+</div><div class="card-footer d-flex justify-content-between">
+<a href="{% url 'worktime:travel_order_list' %}" class="btn btn-outline-secondary">Odustani</a>
+<button type="submit" class="btn btn-warning">Spremi</button></div></form></div>
+<script>function recalc(){var a=parseFloat(document.getElementById("distance_km").value)||0;
+var b=parseFloat(document.getElementById("mileage_rate").value)||0;
+var c=parseFloat(document.getElementById("per_diem_days").value)||0;
+var d=parseFloat(document.getElementById("per_diem_rate").value)||0;
+var e=parseFloat(document.getElementById("other_costs").value)||0;
+document.getElementById("mileage_total").value=(a*b).toFixed(2);
+document.getElementById("per_diem_total").value=(c*d).toFixed(2);
+document.getElementById("grand_total").value=(a*b+c*d+e).toFixed(2);}
+["distance_km","mileage_rate","per_diem_days","per_diem_rate","other_costs"].forEach(
+function(x){document.getElementById(x).addEventListener("input",recalc);});
+</script>{% endblock %}

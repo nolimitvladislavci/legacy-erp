@@ -37,15 +37,15 @@
     <div class="cart-item">
       <div class="cart-item-name">
         {{ item.product.name }}
-        <div class="cart-item-qty">{{ item.qty }} × €{{ item.product.price|floatformat:2 }}</div>
+        <div class="cart-item-qty">{{ item.qty }} × {{ item.product.price|floatformat:2 }} €</div>
       </div>
-      <div class="cart-item-price">€{{ item.subtotal|floatformat:2 }}</div>
+      <div class="cart-item-price">{{ item.subtotal|floatformat:2 }} €</div>
       <button class="remove-btn" onclick="removeItem({{ item.product.pk }})">✕</button>
     </div>
     {% endfor %}
     <div class="cart-total">
       <span class="lbl">Ukupno (bez dostave)</span>
-      <span class="val">€{{ total|floatformat:2 }}</span>
+      <span class="val">{{ total|floatformat:2 }} €</span>
     </div>
     <a href="/hr/webshop/shop/{{ company.booking_slug }}/naruci/" class="checkout-btn">Naruči →</a>
   {% else %}

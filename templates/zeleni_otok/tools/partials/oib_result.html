@@ -1,0 +1,17 @@
+{% if valid %}
+<div class="alert alert-success fade-in">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>OIB {{ oib }} je ispravan.</strong>
+    <p class="mb-0 mt-1 small">Kontrolna znamenka odgovara ISO 7064, MOD 11,10 standardu.</p>
+</div>
+{% else %}
+<div class="alert alert-danger fade-in">
+    <i class="fas fa-times-circle me-2"></i>
+    <strong>OIB nije ispravan.</strong>
+    <ul class="mb-0 mt-1">
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}

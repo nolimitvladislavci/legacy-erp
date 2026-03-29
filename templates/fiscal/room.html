@@ -50,7 +50,7 @@
         <tr>
           <td><a href="{% url 'pos:receipt_detail' r.id %}">#{{ r.receipt_number }}</a></td>
           <td>{{ r.session.terminal.name }}</td>
-          <td class="fw-bold">€{{ r.total|floatformat:2 }}</td>
+          <td class="fw-bold">{{ r.total|floatformat:2 }} €</td>
           <td>{{ r.created_at|date:"d.m.Y H:i" }}</td>
           <td>#{{ r.session.session_number }}</td>
         </tr>

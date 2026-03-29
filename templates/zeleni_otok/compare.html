@@ -1,0 +1,112 @@
+{% extends "zeleni_otok/public_base.html" %}
+
+{% block content %}
+<section class="hero-section text-center" style="padding: 4rem 0 3rem;">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-2">
+            {% if competitor %}
+                LIMIT Connect vs {{ competitor.name }}
+            {% else %}
+                Usporedba ERP sustava
+            {% endif %}
+        </h1>
+        <p class="lead opacity-90">Detaljnaanaliza funkcionalnosti — bez marketinškog šminke</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        {% if not competitor and competitors %}
+        <div class="row g-4 mb-5">
+            {% for comp in competitors %}
+            <div class="col-md-4">
+                <a href="{% url 'zeleni_otok:compare_competitor' comp.slug %}" class="text-decoration-none">
+                    <div class="card feature-card p-4 text-center">
+                        <h5 class="fw-bold text-dark">{{ comp.name }}</h5>
+                        <p class="text-muted small mb-2">{{ comp.vendor }}</p>
+                        <p class="mb-0"><span class="text-primary fw-bold">{{ comp.price_entry }} € — {{ comp.price_top }} €</span>/mj</p>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if comparison_data %}
+        <div class="table-responsive">
+            <table class="table comparison-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Funkcionalnost</th>
+                        <th class="text-center" style="background: var(--lc-primary) !important; width: 25%;">
+                            <i class="fas fa-bolt me-1"></i> LIMIT Connect
+                        </th>
+                        {% for comp in competitors %}
+                        <th class="text-center" style="width: {% widthratio 40 competitors|length 1 %}%;">{{ comp.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% regroup comparison_data by feature.category as category_list %}
+                    {% for category in category_list %}
+                    <tr class="table-secondary">
+                        <td colspan="{{ competitors|length|add:2 }}" class="fw-bold text-uppercase small">
+                            {{ category.grouper|title }}
+                        </td>
+                    </tr>
+                    {% for row in category.list %}
+                    <tr{% if row.feature.is_highlight %} class="highlight-row"{% endif %}>
+                        <td>
+                            {% if row.feature.icon %}<i class="{{ row.feature.icon }} me-2 text-muted"></i>{% endif %}
+                            {% if row.feature.is_highlight %}<strong>{{ row.feature.name }}</strong>{% else %}{{ row.feature.name }}{% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if row.lc_available %}
+                                <span class="check-yes"><i class="fas fa-check-circle"></i></span>
+                                {% if row.lc_note %}<br><small class="text-success">{{ row.lc_note }}</small>{% endif %}
+                            {% else %}
+                                <span class="check-no"><i class="fas fa-times-circle"></i></span>
+                            {% endif %}
+                        </td>
+                        {% for comp in competitors %}
+                            {% with status=row.competitors|default_if_none:"" %}
+                            <td class="text-center">
+                                {% if row.competitors %}
+                                    {% for slug, data in row.competitors.items %}
+                                        {% if slug == comp.slug %}
+                                            {% if data.status == 'yes' %}
+                                                <span class="check-yes"><i class="fas fa-check-circle"></i></span>
+                                            {% elif data.status == 'partial' or data.status == 'limited' %}
+                                                <span class="check-partial"><i class="fas fa-exclamation-circle"></i></span>
+                                            {% elif data.status == 'paid' %}
+                                                <span class="check-partial"><i class="fas fa-dollar-sign"></i></span>
+                                            {% else %}
+                                                <span class="check-no"><i class="fas fa-times-circle"></i></span>
+                                            {% endif %}
+                                            {% if data.note %}<br><small class="text-muted">{{ data.note }}</small>{% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                            {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="cta-section text-center">
+    <div class="container">
+        <h3 class="fw-bold mb-3">Uvjereni? Prebacite se besplatno.</h3>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{% url 'zeleni_otok:migration' %}" class="btn btn-lc btn-lg">Započni migraciju</a>
+            <a href="{% url 'zeleni_otok:roi_calculator' %}" class="btn btn-outline-light btn-lg">Izračunaj uštede</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
