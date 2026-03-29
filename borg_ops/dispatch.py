@@ -133,10 +133,31 @@ def score_worker(user, intervention, company_lat=None, company_lng=None):
     # 0 zadataka = 0.0, 5+ = 1.0
     load_score = min(workload['total'] / 5.0, 1.0)
 
-    # ── Category score (0 ili 1) ──────────────────────────
+    # ── Category score — Dron #2 fix: hard filter + history tie-breaker ──
+    # 1. Hard filter: certified_categories (eksplicitni certifikat)
+    certified = []
+    try:
+        certified = list(user.profile.certified_categories or [])
+    except Exception:
+        pass
+
+    # Ako ima certifikate i kategorija intervencije nije u njima — diskvaliﬁciraj
+    if certified and intervention.category not in certified:
+        return None   # Signal za suggest_workers() da isključi ovog radnika
+
+    # 2. Tie-breaker: history iz 90 dana (Luka-novi dobiva 0.5 neutral umjesto 1.0 penalty)
     worker_cats = get_worker_categories(user)
-    has_cat = intervention.category in worker_cats
-    cat_score = 0.0 if has_cat else 1.0
+    has_cat_history = intervention.category in worker_cats
+
+    if certified and intervention.category in certified:
+        # Certificiran — puni bonus bez obzira na history
+        cat_score = 0.0
+    elif has_cat_history:
+        # Nije certificiran ali ima iskustvo — blagi bonus
+        cat_score = 0.2
+    else:
+        # Novi radnik bez certifikata i bez history — neutral (ne penaliziramo)
+        cat_score = 0.5
 
     # ── Freshness score (0-1) ─────────────────────────────
     # Kad je zadnji put radio nešto? Idle radnici dobivaju prednost.
@@ -198,12 +219,20 @@ def suggest_workers(intervention, limit=5):
     company_lng = getattr(company, 'longitude', None) if company else None
 
     scored = []
+    disqualified = 0
     for worker in workers:
         try:
             result = score_worker(worker, intervention, company_lat, company_lng)
+            if result is None:
+                # Dron #2: certified_categories hard filter — radnik nije kvalificiran
+                disqualified += 1
+                continue
             scored.append(result)
         except Exception as e:
             logger.warning('Dispatch score failed for user %s: %s', worker.pk, e)
+    if disqualified:
+        logger.info('Dispatch: %d radnika diskvaliﬁcirano (no cert za kategoriju %s)',
+                    disqualified, intervention.category)
 
     # Sort: niži score = bolji
     scored.sort(key=lambda x: x['score'])
@@ -222,14 +251,33 @@ def suggest_workers(intervention, limit=5):
 def _get_worker_location(user):
     """
     Pokušaj pronaći zadnju GPS lokaciju radnika.
+    Dron #1 fix: UserProfile.last_lat je canonički izvor — ažurira se
+    pri svakom FSM tranziciji s JS Geolocation API.
+
     Izvori (prioritetni):
-    1. Zadnja aktivna intervencija s GPS-om
-    2. Company branch GPS
+    1. UserProfile.last_lat (ažurirano pri FSM tranziciji) ← NOVI PRIMARNI
+    2. Zadnja aktivna intervencija s GPS-om (fallback)
     3. None
     """
-    from interventions.models import HitnaIntervencija
+    # 1. UserProfile GPS (pravi terenska lokacija)
+    try:
+        profile = user.profile
+        if profile.last_lat and profile.last_lng:
+            from django.utils import timezone
+            age_minutes = None
+            if profile.last_gps_update:
+                age_minutes = (timezone.now() - profile.last_gps_update).total_seconds() / 60
+            # Koristimo GPS samo ako nije stariji od 4h
+            if age_minutes is None or age_minutes < 240:
+                return profile.last_lat, profile.last_lng
+            else:
+                logger.debug('GPS radnika %s star %.0f min — koristim fallback',
+                             user.username, age_minutes)
+    except Exception:
+        pass
 
-    # Zadnja intervencija s GPS-om
+    # 2. Fallback: zadnja intervencija s GPS-om
+    from interventions.models import HitnaIntervencija
     last = HitnaIntervencija.objects.filter(
         assigned_to=user,
         last_lat__isnull=False,
@@ -309,7 +357,26 @@ def estimate_budget(category, company=None, percentile=75):
     amounts.sort()
     n = len(amounts)
 
-    # Percentile calculation
+    # Dron #3 fix: IQR anomaly detection — izbaci outliere prije percentile računanja
+    if n >= 4:
+        q1_idx = n // 4
+        q3_idx = (3 * n) // 4
+        q1 = amounts[q1_idx]
+        q3 = amounts[q3_idx]
+        iqr = q3 - q1
+        lower_fence = q1 - 1.5 * iqr
+        upper_fence = q3 + 1.5 * iqr
+        clean = [a for a in amounts if lower_fence <= a <= upper_fence]
+        if len(clean) >= 2:
+            outliers_removed = n - len(clean)
+            if outliers_removed > 0:
+                logger.info('Budget estimator: %d outliera uklonjeno (IQR metoda). '
+                            'Raspon čist: %.0f–%.0f EUR',
+                            outliers_removed, clean[0], clean[-1])
+            amounts = clean
+            n = len(amounts)
+
+    # Percentile calculation na očišćenim podacima
     idx = int(n * percentile / 100)
     idx = min(idx, n - 1)
 

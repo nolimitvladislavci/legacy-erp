@@ -408,6 +408,11 @@ def financijski_plan(request):
     return render(request, 'website/financijski_plan.html')
 
 
+def trzisna_analiza(request):
+    """Market analysis — internal."""
+    return render(request, 'website/trzisna_analiza.html')
+
+
 def pricing_ai_advisor(request):
     """AI-powered plan recommendation based on business description."""
     from django.http import JsonResponse
@@ -554,7 +559,3 @@ def feedback_page(request):
 def digitalni_posrednik(request):
     """Public page: Digitalni Posrednik chronicle and status."""
     return render(request, 'website/digitalni_posrednik.html')
-
-
-def brosura_didin_konak(request):
-    return render(request, "website/brosura_didin_konak.html")

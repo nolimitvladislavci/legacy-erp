@@ -20,6 +20,7 @@ WHATSAPP_WHITELIST = getattr(settings, 'WHATSAPP_WHITELIST', [
     '385991908089',  # Ivan HR broj (0991908089)
     '385976715957',  # Petar Brtan (golubar tester)
     '4915771998747',  # Ivan Brtan (glavni)
+    '491778716331',   # Antonio
 ])
 # ──────────────────────────────────────────────────────────────────────────
 

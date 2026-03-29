@@ -149,3 +149,115 @@ def ai_health_check(self):
     except Exception as e:
         import logging
         logging.getLogger('ai_health').error(f'Health check crash: {e}')
+
+
+@shared_task(name='core.database_backup', bind=True, max_retries=2, soft_time_limit=300)
+def database_backup(self):
+    """
+    Dnevni backup PostgreSQL baze — svaki dan u 02:00.
+
+    Workflow:
+    1. pg_dump → komprimirani .dump fajl u /var/backups/fina-erp/
+    2. Čuva zadnjih 7 dana (stari se brišu)
+    3. Verifikacija integriteta (pg_restore --list)
+    4. WhatsApp Ivan: OK ili ALARM
+
+    DB: fina_erp (127.0.0.1:5432)
+    Auth: /root/.pgpass (600 permissions)
+    Format: custom (-F c) — najbrži restore, kompresija ~10:1
+    """
+    import subprocess
+    import os
+    import glob
+    from datetime import datetime
+    from django.conf import settings
+
+    log = logging.getLogger('core.backup')
+
+    BACKUP_DIR = '/var/backups/fina-erp'
+    KEEP_DAYS  = 7
+    DB_NAME    = 'fina_erp'
+    DB_USER    = 'viskovic_user'
+    DB_HOST    = '127.0.0.1'
+    DB_PORT    = '5432'
+    IVAN_PHONE = '+4915771998747'
+
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+
+    ts          = datetime.now().strftime('%Y%m%d_%H%M%S')
+    backup_file = f'{BACKUP_DIR}/{DB_NAME}_{ts}.dump'
+
+    # ── 1. pg_dump ─────────────────────────────────────────
+    try:
+        result = subprocess.run(
+            ['pg_dump', '-h', DB_HOST, '-p', DB_PORT, '-U', DB_USER,
+             '-d', DB_NAME, '-F', 'c', '-f', backup_file],
+            capture_output=True, text=True, timeout=240
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f'pg_dump failed: {result.stderr[:300]}')
+
+        size_mb = round(os.path.getsize(backup_file) / 1024 / 1024, 1)
+        if size_mb < 1:
+            raise RuntimeError(f'Backup presitan: {size_mb}MB — vjerojatno prazan dump')
+
+        log.info(f'Backup OK: {backup_file} ({size_mb}MB)')
+
+    except Exception as e:
+        log.error(f'Backup FAILED: {e}')
+        _backup_whatsapp(IVAN_PHONE, f'🔴 BACKUP ALARM\n{DB_NAME}: {e}')
+        raise self.retry(exc=e, countdown=600)
+
+    # ── 2. Verifikacija integriteta ──────────────────────────
+    try:
+        verify = subprocess.run(
+            ['pg_restore', '-h', DB_HOST, '-U', DB_USER,
+             '--list', backup_file],
+            capture_output=True, text=True, timeout=30
+        )
+        section_count = len(verify.stdout.strip().split('\n'))
+        if section_count < 100:
+            raise RuntimeError(f'Sumnjivo malo sekcija u dumpu: {section_count}')
+        log.info(f'Integritet OK: {section_count} sekcija')
+
+    except Exception as e:
+        log.warning(f'Verifikacija upozorenje: {e}')
+        # Ne failamo — backup postoji, samo verifikacija sumnjiva
+
+    # ── 3. Rotacija — čuvaj zadnjih KEEP_DAYS dana ──────────
+    all_dumps = sorted(glob.glob(f'{BACKUP_DIR}/{DB_NAME}_*.dump'))
+    deleted = 0
+    while len(all_dumps) > KEEP_DAYS:
+        old = all_dumps.pop(0)
+        try:
+            os.remove(old)
+            deleted += 1
+            log.info(f'Obrisan stari backup: {old}')
+        except OSError as e:
+            log.warning(f'Ne mogu obrisati {old}: {e}')
+
+    # ── 4. WhatsApp potvrda ──────────────────────────────────
+    msg = (
+        f'✅ Backup OK — {datetime.now().strftime("%d.%m.%Y %H:%M")}\n'
+        f'Baza: {DB_NAME} · Veličina: {size_mb}MB\n'
+        f'Fajl: {os.path.basename(backup_file)}\n'
+        f'Čuvanih backupa: {len(all_dumps)} · Obrisano starih: {deleted}'
+    )
+    _backup_whatsapp(IVAN_PHONE, msg)
+
+    return {
+        'status': 'ok',
+        'file': backup_file,
+        'size_mb': size_mb,
+        'sections': section_count if 'section_count' in dir() else 0,
+        'deleted_old': deleted,
+    }
+
+
+def _backup_whatsapp(phone, message):
+    """Helper — pošalji WhatsApp, tiho ako padne."""
+    try:
+        from core.whatsapp import send_text
+        send_text(phone=phone, message=message)
+    except Exception as e:
+        logging.getLogger('core.backup').warning(f'WhatsApp backup notif failed: {e}')

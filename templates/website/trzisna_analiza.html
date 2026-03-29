@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIMIT Connect — Tržišna analiza HR 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --gold: #c9a84c; --black: #0a0a0a; --dark: #111; --card: #1a1a1a; --border: #2a2a2a; --green: #22c55e; --red: #ef4444; --blue: #3b82f6; --purple: #a855f7; --orange: #f97316; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Barlow',sans-serif; background:var(--black); color:#e0e0e0; line-height:1.6; }
+.container { max-width:1100px; margin:0 auto; padding:2rem 1.5rem; }
+.header { text-align:center; padding:3rem 1rem; border-bottom:1px solid var(--border); margin-bottom:3rem; }
+.header h1 { font-family:'Cormorant Garamond',serif; font-size:2.5rem; color:var(--gold); margin-bottom:.5rem; }
+.header .sub { color:#888; font-size:1rem; }
+.badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; background:rgba(201,168,76,.15); color:var(--gold); border:1px solid rgba(201,168,76,.3); }
+.section { margin-bottom:3rem; }
+.section-title { font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--gold); margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid var(--border); }
+.section-title .count { font-size:1rem; color:#888; font-weight:400; }
+table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:.88rem; }
+th { text-align:left; padding:8px 10px; background:#111; color:var(--gold); font-size:.75rem; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); position:sticky; top:0; }
+td { padding:8px 10px; border-bottom:1px solid var(--border); }
+tr:hover { background:rgba(201,168,76,.03); }
+.num { text-align:right; font-family:'Barlow',monospace; }
+.highlight { color:var(--gold); font-weight:600; }
+.green { color:var(--green); }
+.red { color:var(--red); }
+.blue { color:var(--blue); }
+.purple { color:var(--purple); }
+.orange { color:var(--orange); }
+.card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin:1rem 0; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.25rem; text-align:center; }
+.card .num-big { font-size:1.8rem; font-weight:700; color:var(--gold); font-family:'Cormorant Garamond',serif; }
+.card .label { color:#888; font-size:.75rem; margin-top:.25rem; text-transform:uppercase; letter-spacing:.5px; }
+.card.green-border { border-color:rgba(34,197,94,.3); }
+.card.green-border .num-big { color:var(--green); }
+.card.purple-border { border-color:rgba(168,85,247,.3); }
+.card.purple-border .num-big { color:var(--purple); }
+.card.gold-border { border-color:rgba(201,168,76,.4); background:linear-gradient(145deg,#111,#13110a); }
+.scenario { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin:1.5rem 0; }
+.scenario.gold { border-color:var(--gold); }
+.scenario h3 { color:var(--gold); font-size:1.1rem; margin-bottom:.75rem; }
+.scenario p { color:#bbb; margin-bottom:.5rem; font-size:.9rem; }
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.tag-full { background:rgba(34,197,94,.15); color:var(--green); }
+.tag-partial { background:rgba(249,115,22,.15); color:var(--orange); }
+.tag-none { background:rgba(239,68,68,.15); color:var(--red); }
+.tag-new { background:rgba(168,85,247,.15); color:var(--purple); }
+.progress-bar { height:6px; background:#222; border-radius:3px; overflow:hidden; margin:4px 0; }
+.progress-fill { height:100%; border-radius:3px; }
+.sector-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin:1rem 0; display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.sector-card:hover { border-color:rgba(201,168,76,.3); }
+.sector-card h4 { color:#fff; font-size:1rem; margin-bottom:.5rem; grid-column:1/-1; }
+.sector-card .meta { font-size:.85rem; color:#bbb; }
+.sector-card .meta strong { color:var(--gold); }
+.key-metric { background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.02)); border:2px solid var(--gold); border-radius:14px; padding:2rem; text-align:center; margin:2rem 0; }
+.key-metric .big { font-family:'Cormorant Garamond',serif; font-size:2.5rem; font-weight:700; color:var(--gold); }
+.key-metric .desc { color:#bbb; font-size:.95rem; margin-top:.5rem; }
+.horizon { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.25rem; margin:1.5rem 0; }
+.horizon-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; }
+.horizon-card h4 { color:var(--gold); margin-bottom:.75rem; font-size:1rem; }
+.horizon-card ul { list-style:none; padding:0; }
+.horizon-card li { padding:4px 0; font-size:.88rem; color:#bbb; }
+.horizon-card li::before { content:'› '; color:var(--gold); font-weight:700; }
+.domek-compare { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin:1.5rem 0; }
+.domek-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:1.5rem; }
+.domek-card.winner { border-color:var(--gold); }
+.domek-card h4 { margin-bottom:1rem; font-size:1rem; }
+.domek-card ul { list-style:none; padding:0; }
+.domek-card li { padding:3px 0; font-size:.85rem; color:#bbb; }
+.domek-card li.pro::before { content:'+ '; color:var(--green); font-weight:700; }
+.domek-card li.con::before { content:'- '; color:var(--red); font-weight:700; }
+.footer { text-align:center; padding:2rem 1rem; border-top:1px solid var(--border); margin-top:3rem; color:#555; font-size:.85rem; }
+.tabs { display:flex; gap:4px; margin-bottom:1.5rem; flex-wrap:wrap; }
+.tab { padding:8px 16px; border:1px solid var(--border); border-radius:8px; background:transparent; color:#888; cursor:pointer; font-size:.85rem; font-family:'Barlow',sans-serif; transition:all .2s; }
+.tab:hover { border-color:var(--gold); color:var(--gold); }
+.tab.active { border-color:var(--gold); background:rgba(201,168,76,.1); color:var(--gold); font-weight:600; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+@media(max-width:768px) {
+  .header h1 { font-size:1.8rem; }
+  .card-grid { grid-template-columns:1fr 1fr; }
+  .sector-card { grid-template-columns:1fr; }
+  .domek-compare { grid-template-columns:1fr; }
+  .horizon { grid-template-columns:1fr; }
+  table { font-size:.78rem; }
+  th, td { padding:6px 6px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>Tržišna Analiza — Hrvatska 2026</h1>
+  <div class="sub">LIMIT Connect — Globalna potražnja, nepokrivenost, nove prilike</div>
+  <div style="margin-top:.75rem"><span class="badge">Interno — Strateški dokument</span></div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="section">
+  <h2 class="section-title">Executive Summary</h2>
+  <div class="card-grid">
+    <div class="card gold-border"><div class="num-big">~550K</div><div class="label">Adresabilnih subjekata</div></div>
+    <div class="card"><div class="num-big">17</div><div class="label">Analiziranih sektora</div></div>
+    <div class="card green-border"><div class="num-big">79</div><div class="label">LIMIT Connect modula</div></div>
+    <div class="card purple-border"><div class="num-big">3</div><div class="label">Nova modula potrebna</div></div>
+    <div class="card gold-border"><div class="num-big">~70K</div><div class="label">Realistično osvojivih</div></div>
+    <div class="card green-border"><div class="num-big">2,76M€</div><div class="label">ARR potencijal</div></div>
+  </div>
+  <p style="color:#888;font-size:.88rem;margin-top:1rem;text-align:center">Samo 38,6% HR MSP-ova ima osnovnu digitalnu razinu. EU cilj je 75% do 2030. — ogroman prostor za rast.</p>
+</div>
+
+<!-- SEKTORI -->
+<div class="section">
+  <h2 class="section-title">Sektorska analiza <span class="count">— 17 sektora</span></h2>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('existing')">Postojeći (12)</button>
+    <button class="tab" onclick="showTab('newmarket')">Nove prilike (5)</button>
+    <button class="tab" onclick="showTab('all')">Svi sektori</button>
+  </div>
+
+  <div id="tab-existing" class="tab-content active">
+    <table>
+      <tr><th>Sektor</th><th class="num">Subjekata</th><th class="num">Rast/god</th><th>LC pokrivenost</th><th>Nedostaje</th><th class="num">ARPU €/mj</th><th class="num">MRR potencijal</th></tr>
+      <tr><td><strong>Paušalni obrti</strong></td><td class="num highlight">133.223</td><td class="num green">+21K</td><td><span class="tag tag-full">POTPUNO</span></td><td>—</td><td class="num">10€</td><td class="num">50.000€</td></tr>
+      <tr><td>d.o.o. / j.d.o.o.</td><td class="num">~130.000</td><td class="num">+2%</td><td><span class="tag tag-full">POTPUNO</span></td><td>—</td><td class="num">55€</td><td class="num">27.500€</td></tr>
+      <tr><td><strong>Iznajmljivači</strong></td><td class="num highlight">~111.000</td><td class="num">+1%</td><td><span class="tag tag-partial">90%</span></td><td>Channel manager</td><td class="num">15€</td><td class="num">30.000€</td></tr>
+      <tr><td>OPG-ovi</td><td class="num">~96.000</td><td class="num">stab.</td><td><span class="tag tag-partial">85%</span></td><td>EU fond izvještaji</td><td class="num">15€</td><td class="num">4.500€</td></tr>
+      <tr><td><strong>Udruge</strong></td><td class="num highlight">~55.000</td><td class="num">+2%</td><td><span class="tag tag-full">POTPUNO</span></td><td>—</td><td class="num">15€</td><td class="num">15.000€</td></tr>
+      <tr><td>Redovni obrti</td><td class="num">~27.000</td><td class="num">stab.</td><td><span class="tag tag-full">POTPUNO</span></td><td>—</td><td class="num">35€</td><td class="num">9.450€</td></tr>
+      <tr><td>Građevinarstvo</td><td class="num">~22.000</td><td class="num">+3%</td><td><span class="tag tag-partial">75%</span></td><td>Normativi materijala</td><td class="num">80€</td><td class="num">40.000€</td></tr>
+      <tr><td>Ugostiteljstvo</td><td class="num">~18.000</td><td class="num">+2%</td><td><span class="tag tag-full">POTPUNO</span></td><td>—</td><td class="num">50€</td><td class="num">25.000€</td></tr>
+      <tr><td><strong>Beauty/frizeri</strong></td><td class="num">~10.800</td><td class="num green">+10,5%</td><td><span class="tag tag-full">POTPUNO</span></td><td>Loyalty program</td><td class="num">30€</td><td class="num">30.000€</td></tr>
+      <tr><td>Računovođe</td><td class="num">~4.500</td><td class="num">+3%</td><td><span class="tag tag-full">POTPUNO</span></td><td>—</td><td class="num">350€</td><td class="num">10.500€</td></tr>
+      <tr><td>Nekretnine</td><td class="num">~3.700</td><td class="num green">+15%</td><td><span class="tag tag-partial">70%</span></td><td>Oglašavanje integr.</td><td class="num">40€</td><td class="num">4.000€</td></tr>
+      <tr><td>Fitness</td><td class="num">~1.200</td><td class="num">+5%</td><td><span class="tag tag-partial">80%</span></td><td>Aktivirati modul</td><td class="num">35€</td><td class="num">4.200€</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-newmarket" class="tab-content">
+    <table>
+      <tr><th>Sektor</th><th class="num">Subjekata</th><th>Digitalizacija</th><th>LC pokrivenost</th><th>Potreban modul</th><th class="num">ARPU €/mj</th><th class="num">ARR potencijal</th></tr>
+      <tr style="background:rgba(168,85,247,.05)"><td><strong>Domovi za starije</strong></td><td class="num highlight">502</td><td><span class="tag tag-none">~20%</span></td><td><span class="tag tag-new">NOVI MODUL</span></td><td>Socijalna skrb</td><td class="num purple">500€</td><td class="num purple">300.000€</td></tr>
+      <tr><td>Privatno zdravstvo</td><td class="num">~5.000</td><td><span class="tag tag-partial">~40%</span></td><td><span class="tag tag-new">NOVI MODUL</span></td><td>HZZO obračun</td><td class="num">80€</td><td class="num">480.000€</td></tr>
+      <tr><td>Privatni vrtići/škole</td><td class="num">~1.500</td><td><span class="tag tag-none">~25%</span></td><td><span class="tag tag-new">NOVI MODUL</span></td><td>Edukacija</td><td class="num">60€</td><td class="num">108.000€</td></tr>
+      <tr><td>Autoškole</td><td class="num">~700</td><td><span class="tag tag-none">~15%</span></td><td><span class="tag tag-none">0%</span></td><td>Autoškola modul</td><td class="num">45€</td><td class="num">37.800€</td></tr>
+      <tr><td>Veterina</td><td class="num">~900</td><td><span class="tag tag-partial">~35%</span></td><td><span class="tag tag-partial">60%</span></td><td>Proširiti Livestock</td><td class="num">100€</td><td class="num">108.000€</td></tr>
+    </table>
+  </div>
+
+  <div id="tab-all" class="tab-content">
+    <table>
+      <tr><th>Sektor</th><th class="num">Subjekata</th><th class="num">Rast</th><th class="num">Digit. %</th><th>LC status</th><th class="num">ARPU</th></tr>
+      <tr><td>Paušalni obrti</td><td class="num">133.223</td><td class="num green">+21K/g</td><td class="num red">~15%</td><td><span class="tag tag-full">100%</span></td><td class="num">10€</td></tr>
+      <tr><td>d.o.o. / j.d.o.o.</td><td class="num">130.000</td><td class="num">+2%</td><td class="num orange">~40%</td><td><span class="tag tag-full">100%</span></td><td class="num">55€</td></tr>
+      <tr><td>Iznajmljivači</td><td class="num">111.000</td><td class="num">+1%</td><td class="num orange">~30%</td><td><span class="tag tag-partial">90%</span></td><td class="num">15€</td></tr>
+      <tr><td>OPG-ovi</td><td class="num">96.000</td><td class="num">stab.</td><td class="num red">~10%</td><td><span class="tag tag-partial">85%</span></td><td class="num">15€</td></tr>
+      <tr><td>Udruge</td><td class="num">55.000</td><td class="num">+2%</td><td class="num red">~10%</td><td><span class="tag tag-full">100%</span></td><td class="num">15€</td></tr>
+      <tr><td>Redovni obrti</td><td class="num">27.000</td><td class="num">stab.</td><td class="num orange">~35%</td><td><span class="tag tag-full">100%</span></td><td class="num">35€</td></tr>
+      <tr><td>Građevinarstvo</td><td class="num">22.000</td><td class="num">+3%</td><td class="num red">~20%</td><td><span class="tag tag-partial">75%</span></td><td class="num">80€</td></tr>
+      <tr><td>Ugostiteljstvo</td><td class="num">18.000</td><td class="num">+2%</td><td class="num orange">~40%</td><td><span class="tag tag-full">100%</span></td><td class="num">50€</td></tr>
+      <tr><td>Beauty/frizeri</td><td class="num">10.800</td><td class="num green">+10,5%</td><td class="num red">~20%</td><td><span class="tag tag-full">100%</span></td><td class="num">30€</td></tr>
+      <tr><td>Privatno zdravstvo</td><td class="num">5.000</td><td class="num">+5%</td><td class="num orange">~40%</td><td><span class="tag tag-new">NOVI</span></td><td class="num">80€</td></tr>
+      <tr><td>Računovođe</td><td class="num">4.500</td><td class="num">+3%</td><td class="num green">~70%</td><td><span class="tag tag-full">100%</span></td><td class="num">350€</td></tr>
+      <tr><td>Nekretnine</td><td class="num">3.700</td><td class="num green">+15%</td><td class="num orange">~35%</td><td><span class="tag tag-partial">70%</span></td><td class="num">40€</td></tr>
+      <tr><td>Privatni vrtići</td><td class="num">1.500</td><td class="num">+4%</td><td class="num red">~25%</td><td><span class="tag tag-new">NOVI</span></td><td class="num">60€</td></tr>
+      <tr><td>Fitness</td><td class="num">1.200</td><td class="num">+5%</td><td class="num orange">~35%</td><td><span class="tag tag-partial">80%</span></td><td class="num">35€</td></tr>
+      <tr><td>Veterina</td><td class="num">900</td><td class="num">+3%</td><td class="num orange">~35%</td><td><span class="tag tag-partial">60%</span></td><td class="num">100€</td></tr>
+      <tr><td>Autoškole</td><td class="num">700</td><td class="num">stab.</td><td class="num red">~15%</td><td><span class="tag tag-none">0%</span></td><td class="num">45€</td></tr>
+      <tr><td>Domovi za starije</td><td class="num">502</td><td class="num green">raste</td><td class="num red">~20%</td><td><span class="tag tag-new">NOVI</span></td><td class="num purple">500€</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- DOMOVI ZA STARIJE — DEEP DIVE -->
+<div class="section">
+  <h2 class="section-title">Domovi za starije — Deep Dive</h2>
+
+  <div class="card-grid">
+    <div class="card"><div class="num-big">502</div><div class="label">Domova u HR</div></div>
+    <div class="card"><div class="num-big">21.613</div><div class="label">Kapacitiranih mjesta</div></div>
+    <div class="card" style="border-color:rgba(239,68,68,.3)"><div class="num-big red">70.000</div><div class="label">Na listi čekanja</div></div>
+    <div class="card gold-border"><div class="num-big">300K€</div><div class="label">ARR potencijal</div></div>
+  </div>
+
+  <div class="scenario">
+    <h3>Struktura tržišta</h3>
+    <table>
+      <tr><th>Tip</th><th class="num">Broj</th><th>Vlasništvo</th><th class="num">Cijena smještaja €/mj</th></tr>
+      <tr><td>Državni domovi</td><td class="num">3</td><td>RH</td><td class="num">234 – 530€</td></tr>
+      <tr><td>Decentralizirani (županijski/gradski)</td><td class="num">52</td><td>JLS</td><td class="num">350 – 800€</td></tr>
+      <tr><td>Privatni domovi</td><td class="num">~100</td><td>d.o.o. / obrt</td><td class="num">700 – 1.700€</td></tr>
+      <tr><td>Obiteljski domovi</td><td class="num">~300</td><td>Fizičke osobe</td><td class="num">500 – 1.000€</td></tr>
+      <tr><td>Udomiteljske obitelji</td><td class="num">~47</td><td>Fizičke osobe</td><td class="num">HZZO plaća</td></tr>
+      <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO</td><td class="num highlight">~502</td><td></td><td class="num">avg ~650€</td></tr>
+    </table>
+  </div>
+
+  <div class="scenario">
+    <h3>Zakonske obaveze doma</h3>
+    <table>
+      <tr><th>Obaveza</th><th>Opis</th><th>Rok/Inspekcija</th></tr>
+      <tr><td>Evidencija korisnika</td><td>Osobni podaci, zdravstveni status, ugovor, kontakt obitelji</td><td>MRSSP inspekcija</td></tr>
+      <tr><td>Plan skrbi</td><td>Individualni plan za svakog korisnika, revizija svaka 3 mj</td><td>Zakonska obaveza</td></tr>
+      <tr><td>Evidencija lijekova</td><td>Raspored davanja, zaliha, interakcije, nuspojave</td><td>HALMED + inspekcija</td></tr>
+      <tr><td>Prehrana / HACCP</td><td>Jelovnici, dijete, alergije, nabava, temperatura</td><td>Sanitarna inspekcija</td></tr>
+      <tr><td>Kadrovska evidencija</td><td>Smjene 24/7, kvalifikacije, licence, edukacija</td><td>Min. standardi osoblja</td></tr>
+      <tr><td>Financije</td><td>Fakturiranje korisnicima, HZZO obračun, JLS sufinanciranje</td><td>Porezna + MRSSP</td></tr>
+      <tr><td>Knjiga boravka</td><td>Dolasci, odlasci, izlasci, posjete</td><td>Zakonska obaveza</td></tr>
+      <tr><td>Aktivnosti</td><td>Dnevni raspored, prisutnost, evaluacija napretka</td><td>Standard kvalitete</td></tr>
+      <tr><td>GDPR</td><td>Posebna kategorija — zdravstveni podaci, čl. 9 GDPR</td><td>AZOP nadzor</td></tr>
+      <tr><td>Izvještavanje MRSSP-u</td><td>Godišnji izvještaji, statistika, pokazatelji kvalitete</td><td>Godišnje</td></tr>
+    </table>
+  </div>
+
+  <h3 style="color:#fff;margin:1.5rem 0 1rem">Konkurencija: DOMEK vs LIMIT Connect</h3>
+
+  <div class="domek-compare">
+    <div class="domek-card">
+      <h4 style="color:#888">DOMEK <span style="font-size:.75rem;color:#555">(jedini HR konkurent)</span></h4>
+      <ul>
+        <li class="pro">7 specijaliziranih modula (korisnici, lijekovi, prehrana...)</li>
+        <li class="pro">15+ godina na tržištu, poznati u sektoru</li>
+        <li class="pro">HZZO obračun integriran</li>
+        <li class="con">Desktop aplikacija (Windows only)</li>
+        <li class="con">Licence po radnom mjestu: 2.600 – 14.700€ jednokratno</li>
+        <li class="con">Nema mobile pristup</li>
+        <li class="con">Nema integraciju s e-Račun / fiskalizacijom</li>
+        <li class="con">Nema cloud — backup ručno</li>
+        <li class="con">Zastarjeli UI (Windows Forms era)</li>
+      </ul>
+    </div>
+    <div class="domek-card winner">
+      <h4 style="color:var(--gold)">LIMIT Connect <span style="font-size:.75rem;color:#888">(potencijal)</span></h4>
+      <ul>
+        <li class="pro">Web-based — pristup s bilo kojeg uređaja</li>
+        <li class="pro">Neograničen broj korisnika po licenci</li>
+        <li class="pro">Integrirane financije + e-Račun + fiskalizacija</li>
+        <li class="pro">Kadrovska + radni sati + payroll GOTOVO</li>
+        <li class="pro">Maintenance + Inventory GOTOVO</li>
+        <li class="pro">GDPR compliance ugrađen</li>
+        <li class="pro">Mobile-first, offline capable</li>
+        <li class="pro">AI asistent za automatizaciju</li>
+        <li class="con">Treba novi "Socijalna skrb" modul (~3-4 tjedna)</li>
+        <li class="con">Nema HZZO obračun (razvoj potreban)</li>
+        <li class="con">Nema referencu u sektoru (još)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h3>Gap analiza — Što LIMIT Connect ima vs treba</h3>
+    <table>
+      <tr><th>DOMEK modul</th><th>Funkcija</th><th>LIMIT Connect</th><th>Status</th></tr>
+      <tr><td>Korisnici</td><td>Evidencija, zdravstveni karton, obitelj</td><td>Partners + proširenje</td><td><span class="tag tag-partial">ADAPTIRAJ</span></td></tr>
+      <tr><td>Prehrana</td><td>Jelovnici, dijete, alergije, nabava</td><td>—</td><td><span class="tag tag-new">NOVI</span></td></tr>
+      <tr><td>Lijekovi</td><td>Terapija, raspored, zaliha, interakcije</td><td>—</td><td><span class="tag tag-new">NOVI</span></td></tr>
+      <tr><td>Kadrovska</td><td>Smjene 24/7, kvalifikacije, edukacija</td><td>Worktime + Payroll</td><td><span class="tag tag-full">80% GOTOVO</span></td></tr>
+      <tr><td>Financije</td><td>Fakturiranje, HZZO, sufinanciranje</td><td>Invoicing + Finance</td><td><span class="tag tag-full">70% GOTOVO</span></td></tr>
+      <tr><td>Tehnička služba</td><td>Održavanje, inventar, nabava</td><td>Maintenance + Inventory</td><td><span class="tag tag-full">90% GOTOVO</span></td></tr>
+      <tr><td>Ambulanta</td><td>Medicinski pregledi, triage</td><td>—</td><td><span class="tag tag-new">NOVI</span></td></tr>
+    </table>
+    <p style="color:#888;font-size:.85rem;margin-top:.75rem"><strong>Procjena:</strong> ~60% funkcionalnosti već postoji. Preostaje ~3-4 tjedna za MVP "Socijalna skrb" modul s fokusom na Korisnici + Prehrana + Lijekovi.</p>
+  </div>
+
+  <div class="key-metric">
+    <div class="big">50 domova × 500€/mj = 300.000€ ARR</div>
+    <div class="desc">Samo 10% tržišta. Visok ARPU, nizak churn (domovi ne mijenjaju softver), regulatorni lock-in.</div>
+  </div>
+</div>
+
+<!-- SLIČNI SEKTORI -->
+<div class="section">
+  <h2 class="section-title">Slični sektori — Ista arhitektura</h2>
+  <p style="color:#888;margin-bottom:1rem">Modul "Socijalna skrb" se može prilagoditi za srodne ustanove s minimalnim promjenama:</p>
+
+  <table>
+    <tr><th>Ustanova</th><th class="num">Broj u HR</th><th>Specifičnost</th><th>Što dijeli s domovima</th><th class="num">ARPU</th></tr>
+    <tr><td><strong>Dječji domovi</strong></td><td class="num">~30</td><td>Odgojne mjere, edukacija</td><td>Evidencija, prehrana, kadrovi, aktivnosti</td><td class="num">300€</td></tr>
+    <tr><td><strong>Ustanove za osobe s invaliditetom</strong></td><td class="num">~80</td><td>Rehabilitacija, terapija</td><td>Evidencija, lijekovi, prehrana, aktivnosti</td><td class="num">400€</td></tr>
+    <tr><td><strong>Centri za socijalnu skrb</strong></td><td class="num">80</td><td>Javne ustanove, MRSSP</td><td>Evidencija korisnika, izvještavanje</td><td class="num">200€</td></tr>
+    <tr><td><strong>Hospiciji / palijativna skrb</strong></td><td class="num">~15</td><td>Medicinska njega</td><td>Lijekovi, kadrovi, evidencija</td><td class="num">400€</td></tr>
+    <tr><td><strong>Privatne bolnice (manje)</strong></td><td class="num">~50</td><td>Specijalizirane klinike</td><td>Lijekovi, kadrovska, financije</td><td class="num">600€</td></tr>
+    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO srodnih</td><td class="num highlight">~255</td><td></td><td></td><td class="num">avg 380€</td></tr>
+  </table>
+
+  <p style="color:var(--gold);font-size:.88rem;margin-top:.75rem"><strong>Ukupni potencijal sektora skrbi:</strong> (502 domova + 255 srodnih) × avg 420€/mj = <strong>~3,8 mil € ARR</strong></p>
+</div>
+
+<!-- SEOSKI / PLANINSKI / MORSKI -->
+<div class="section">
+  <h2 class="section-title">Turizam — Tri segmenta</h2>
+
+  <table>
+    <tr><th></th><th>Seoski</th><th>Planinski</th><th>Morski</th></tr>
+    <tr><td><strong>Objekata</strong></td><td class="num">~1.144</td><td class="num">~650</td><td class="num highlight">~100.000</td></tr>
+    <tr><td><strong>Kreveta</strong></td><td class="num">~7.000</td><td class="num">~4.000</td><td class="num">~600.000</td></tr>
+    <tr><td><strong>Cijena/noć</strong></td><td class="num">30-60€</td><td class="num">40-80€</td><td class="num">67€ avg</td></tr>
+    <tr><td><strong>Aktivni mjeseci</strong></td><td class="num green">8-10</td><td class="num">6-8</td><td class="num red">3-4</td></tr>
+    <tr><td><strong>Digitalizacija</strong></td><td class="num red">&lt;10%</td><td class="num red">&lt;5%</td><td class="num orange">~30%</td></tr>
+    <tr><td><strong>Rast/god</strong></td><td class="num green">+5-8%</td><td class="num green">+4-5%</td><td class="num">+1-2%</td></tr>
+    <tr><td><strong>EU fondovi</strong></td><td class="num green">do 200K€</td><td class="num">djelomično</td><td class="num red">ograničeno</td></tr>
+    <tr><td><strong>LC pokrivenost</strong></td><td><span class="tag tag-full">95%</span></td><td><span class="tag tag-partial">85%</span></td><td><span class="tag tag-partial">90%</span></td></tr>
+    <tr><td><strong>Top pain point</strong></td><td>Nula softvera, izolacija</td><td>Off-grid, infrastruktura</td><td>Sezonalnost, 2/3 suglasnost</td></tr>
+    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>Prioritet za LC</td><td class="green">VISOK — greenfield</td><td class="blue">SREDNJI</td><td class="orange">NIZAK — konkurencija</td></tr>
+  </table>
+</div>
+
+<!-- STRATEGIJA -->
+<div class="section">
+  <h2 class="section-title">Strateški plan — 3 horizonta</h2>
+
+  <div class="horizon">
+    <div class="horizon-card" style="border-color:var(--green)">
+      <h4 style="color:var(--green)">H1: Low-Hanging Fruit <span style="color:#888;font-size:.8rem">sad — Q3 2026</span></h4>
+      <ul>
+        <li><strong>Beauty/frizeri</strong> (10.800) — 90% pokriveno, samo marketing</li>
+        <li><strong>Fitness</strong> (1.200) — aktivirati dormant modul</li>
+        <li><strong>Paušalci</strong> (133K) — freemium gateway</li>
+        <li><strong>Seoski turizam OPG</strong> (1.144) — greenfield, EU fondovi</li>
+      </ul>
+      <p style="color:var(--green);font-size:.85rem;margin-top:.75rem"><strong>Procjena: +3.000€ MRR</strong></p>
+    </div>
+    <div class="horizon-card" style="border-color:var(--gold)">
+      <h4>H2: Premium niše <span style="color:#888;font-size:.8rem">Q4 2026 — Q2 2027</span></h4>
+      <ul>
+        <li><strong>Domovi za starije</strong> (502) — ARPU 500€, novi modul</li>
+        <li><strong>Veterina</strong> (900) — proširiti Livestock</li>
+        <li><strong>Građevinarstvo</strong> (22K) — situacije + normativi</li>
+        <li><strong>Digitalni posrednik</strong> — certifikacija, transakcijski prihod</li>
+      </ul>
+      <p style="color:var(--gold);font-size:.85rem;margin-top:.75rem"><strong>Procjena: +25.000€ MRR</strong></p>
+    </div>
+    <div class="horizon-card" style="border-color:var(--purple)">
+      <h4 style="color:var(--purple)">H3: Vertikalna ekspanzija <span style="color:#888;font-size:.8rem">2027+</span></h4>
+      <ul>
+        <li><strong>Privatno zdravstvo</strong> (5K) — HZZO integracija</li>
+        <li><strong>Vrtići/škole</strong> (1.500) — Edukacija modul</li>
+        <li><strong>Ustanove za invalide</strong> (80) — proširenje Soc. skrb</li>
+        <li><strong>EU ekspanzija</strong> — AT, SI, DE tržišta</li>
+      </ul>
+      <p style="color:var(--purple);font-size:.85rem;margin-top:.75rem"><strong>Cilj: 150K€+ ARR</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- FINANCIJSKI PREGLED -->
+<div class="section">
+  <h2 class="section-title">Financijski pregled — MRR po segmentima</h2>
+
+  <table>
+    <tr><th>Segment</th><th class="num">Realistično osvojivih</th><th class="num">Avg ARPU</th><th class="num">MRR</th><th class="num">ARR</th></tr>
+    <tr><td>Paušalni obrti (freemium→paid)</td><td class="num">5.000</td><td class="num">10€</td><td class="num">50.000€</td><td class="num">600.000€</td></tr>
+    <tr><td>Građevinarstvo</td><td class="num">500</td><td class="num">80€</td><td class="num">40.000€</td><td class="num">480.000€</td></tr>
+    <tr><td>Beauty + Fitness</td><td class="num">1.000</td><td class="num">30€</td><td class="num">30.000€</td><td class="num">360.000€</td></tr>
+    <tr><td>Iznajmljivači</td><td class="num">2.000</td><td class="num">15€</td><td class="num">30.000€</td><td class="num">360.000€</td></tr>
+    <tr><td>Ugostiteljstvo</td><td class="num">500</td><td class="num">50€</td><td class="num">25.000€</td><td class="num">300.000€</td></tr>
+    <tr><td><strong>Domovi za starije + skrb</strong></td><td class="num">75</td><td class="num purple">420€</td><td class="num purple">31.500€</td><td class="num purple">378.000€</td></tr>
+    <tr><td>Udruge</td><td class="num">1.000</td><td class="num">15€</td><td class="num">15.000€</td><td class="num">180.000€</td></tr>
+    <tr><td>Računovođe (distributor)</td><td class="num">30</td><td class="num">350€</td><td class="num">10.500€</td><td class="num">126.000€</td></tr>
+    <tr><td>OPG + seoski turizam</td><td class="num">300</td><td class="num">15€</td><td class="num">4.500€</td><td class="num">54.000€</td></tr>
+    <tr><td>Ostali (vet, nekretnine, IT)</td><td class="num">300</td><td class="num">50€</td><td class="num">15.000€</td><td class="num">180.000€</td></tr>
+    <tr style="font-weight:700;border-top:2px solid var(--gold)"><td>UKUPNO</td><td class="num highlight">~10.705</td><td class="num"></td><td class="num highlight">~251.500€</td><td class="num highlight">~3.018.000€</td></tr>
+  </table>
+
+  <div class="key-metric">
+    <div class="big">~3 mil € ARR</div>
+    <div class="desc">Realistični potencijal s postojećom platformom + 3 nova modula. Bez DE/AT/EU ekspanzije.</div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>&copy; 2026 LIMIT Connect &middot; Konjik d.o.o. &middot; Interno — Strateški dokument</p>
+  <p style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:.5rem">550.000 subjekata. 79 modula. Jedna platforma.</p>
+</div>
+
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+</script>
+</body>
+</html>

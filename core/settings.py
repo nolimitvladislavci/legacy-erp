@@ -904,3 +904,12 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(day_of_week='sunday', hour='3', minute='30'),
     },
 })
+
+# ── Database Backup — svaki dan 02:00 ────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "database-daily-backup": {
+        "task": "core.database_backup",
+        "schedule": crontab(hour=2, minute=0),
+        "options": {"queue": "default"},
+    },
+})
