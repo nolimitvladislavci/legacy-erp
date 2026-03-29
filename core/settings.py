@@ -214,7 +214,7 @@ DATABASES = {
         "HOST": os.environ.get("DB_HOST", "localhost"),
         "TEST": {"NAME": "test_fina_connect"},
         "PORT": os.environ.get("DB_PORT", "5432"),
-        "CONN_MAX_AGE": 300,
+        "CONN_MAX_AGE": 0,  # PgBouncer transaction pooling requires 0
     }
 }
 
