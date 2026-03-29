@@ -46,7 +46,7 @@
 
 {% block content %}
 <!-- Back link -->
-<a href="{% url 'b2b_invoices' token %}" style="font-size:.82rem;color:var(--text-secondary);display:inline-flex;align-items:center;gap:6px;margin-bottom:20px">
+<a href="{% url 'portal_invoices' token %}" style="font-size:.82rem;color:var(--text-secondary);display:inline-flex;align-items:center;gap:6px;margin-bottom:20px">
   <i class="fas fa-arrow-left"></i> Natrag na listu
 </a>
 
@@ -65,11 +65,11 @@
       <i class="fas fa-check"></i> Prihvati dokument
     </button>
     <button class="btn btn-outline" style="border-color:var(--error);color:var(--error)"
-            onclick="FC.startReject('{% url 'b2b_invoice_action' token invoice.pk %}', this)">
+            onclick="FC.startReject('{% url 'dashboard' token invoice.pk %}', this)">
       <i class="fas fa-times"></i> Odbij
     </button>
     {% endif %}
-    <a href="{% url 'b2b_invoice_pdf' token invoice.pk %}" class="btn btn-ghost" target="_blank">
+    <a href="{% url 'portal_invoice_pdf' token invoice.pk %}" class="btn btn-ghost" target="_blank">
       <i class="fas fa-file-pdf"></i> PDF
     </a>
   </div>
@@ -250,7 +250,7 @@
 function getCsrf(){var t=document.querySelector('[name=csrfmiddlewaretoken]');if(t)return t.value;var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var p=c[i].trim();if(p.startsWith('csrftoken='))return p.substring(10);}return'';}
 </script>
 <script>
-var ACTION_URL = '{% url "b2b_invoice_action" token invoice.pk %}';
+var ACTION_URL = '{% url "dashboard" token invoice.pk %}';
 
 
 async function pdvAction(action) {

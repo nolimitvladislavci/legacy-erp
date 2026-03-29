@@ -55,7 +55,7 @@
       <div class="bpage-sub">{% now "l, d. F Y." %} &mdash; {{ branch.address|default:"" }}</div>
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-      <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
+      <a href="{% url 'pos:new_terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
       <a href="{% url 'inventory:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4E6; Zalihe" %}</a>
       <a href="{% url 'partners:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F91D; Partneri" %}</a>
     </div>
@@ -88,7 +88,7 @@
   <!-- Quick actions -->
   <div class="sec-title">{% trans "Brze akcije" %}</div>
   <div class="action-grid">
-    <a class="action-card" href="{% url 'pos:terminal' %}">
+    <a class="action-card" href="{% url 'pos:new_terminal' %}">
       <div class="action-icon">{% trans "&#x1F4B3;" %}</div>
       <div class="action-lbl">{% trans "POS blagajna" %}</div>
       <div class="action-sub">{% trans "Otvori prodajno mjesto" %}</div>
@@ -125,7 +125,7 @@
     <div style="display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.85rem">
       <div>{% trans "&#x1F7E2;" %} <strong>{{ open_receipts }}</strong> {% trans "otvorenih bonova" %}</div>
       <div>{% trans "&#x1F4B0;" %} <strong>&euro;{{ pos_revenue_today|floatformat:2 }}</strong> {% trans "utržak danas" %}</div>
-      <div><a href="{% url 'pos:terminal' %}" style="color:#f97316">{% trans "Otvori POS &rarr;" %}</a></div>
+      <div><a href="{% url 'pos:new_terminal' %}" style="color:#f97316">{% trans "Otvori POS &rarr;" %}</a></div>
     </div>
   </div>
 </div>

@@ -9,6 +9,7 @@ router.register(r"api", views.PartnerViewSet, basename="partner")
 app_name = "partners"
 urlpatterns = [
     path("", views.partner_list, name="partner_list"),
+    path("", views.partner_list, name="list"),
     path("new/", views.partner_create, name="create"),
     path("verify-buyer-type/", views.buyer_type_verify, name="buyer_type_verify"),
     path("<int:pk>/", views.partner_detail, name="detail"),

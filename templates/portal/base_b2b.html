@@ -416,10 +416,10 @@ a:hover{color:var(--gold-hover)}
     <i class="fas fa-bars"></i>
   </button>
   <ul class="b2b-nav-links">
-    <li><a href="{% url 'b2b_dashboard' token %}" class="{% if active_tab == 'dashboard' %}active{% endif %}">
+    <li><a href="{% url 'portal_home' token %}" class="{% if active_tab == 'dashboard' %}active{% endif %}">
       <i class="fas fa-th-large"></i> Pregled
     </a></li>
-    <li><a href="{% url 'b2b_invoices' token %}" class="{% if active_tab == 'invoices' %}active{% endif %}">
+    <li><a href="{% url 'portal_invoices' token %}" class="{% if active_tab == 'invoices' %}active{% endif %}">
       <i class="fas fa-file-invoice"></i> Dokumenti
     </a></li>
   </ul>

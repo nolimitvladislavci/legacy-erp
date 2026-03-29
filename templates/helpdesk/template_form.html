@@ -30,14 +30,14 @@
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem}
 .form-group textarea{resize:vertical}
 </style>
-<a href="{% url 'helpdesk:templates' %}" style="font-size:.8rem;color:#64748b;text-decoration:none"><i class="fas fa-arrow-left"></i> Natrag</a>
+<a href="{% url 'helpdesk:list' %}" style="font-size:.8rem;color:#64748b;text-decoration:none"><i class="fas fa-arrow-left"></i> Natrag</a>
 <div class="stat-card" style="margin-top:10px;max-width:600px">
   <div style="font-weight:700;font-size:1rem;margin-bottom:16px"><i class="fas fa-file-alt" style="color:#c9a84c"></i> Novi predlozak</div>
   <form method="post">{% csrf_token %}
     <div class="form-group"><label>Naziv *</label><input type="text" name="name" required maxlength="200"></div>
     <div class="form-group"><label>Kategorija</label><select name="category"><option value="delivery">Dostava</option><option value="quality">Kvaliteta robe</option><option value="invoice">Racun/Faktura</option><option value="pos">POS/Blagajna</option><option value="technical">Tehnicki problem</option><option value="complaint">Reklamacija</option><option value="other" selected>Ostalo</option></select></div>
     <div class="form-group"><label>Tekst *</label><textarea name="body" rows="8" required placeholder="Tekst predloska..."></textarea></div>
-    <div style="display:flex;justify-content:flex-end;gap:8px"><a href="{% url 'helpdesk:templates' %}" class="btn btn-outline-secondary btn-sm">Odustani</a><button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Spremi</button></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px"><a href="{% url 'helpdesk:list' %}" class="btn btn-outline-secondary btn-sm">Odustani</a><button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Spremi</button></div>
   </form>
 </div>
 {% endblock %}

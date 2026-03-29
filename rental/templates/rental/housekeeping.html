@@ -34,7 +34,7 @@
           <i class="bi bi-clock me-1"></i>{{ log.created_at|date:"d.m.Y H:i" }}
         </p>
         {% if log.status == 'pending' %}
-        <form method="post" action="{% url 'rental:housekeeping_update' log.pk %}">
+        <form method="post" action="{% url 'rental:housekeeping' log.pk %}">
           {% csrf_token %}
           <input type="hidden" name="status" value="in_progress">
           <button class="btn btn-sm btn-info w-100">
@@ -42,7 +42,7 @@
           </button>
         </form>
         {% elif log.status == 'in_progress' %}
-        <form method="post" action="{% url 'rental:housekeeping_update' log.pk %}">
+        <form method="post" action="{% url 'rental:housekeeping' log.pk %}">
           {% csrf_token %}
           <input type="hidden" name="status" value="done">
           <button class="btn btn-sm btn-success w-100">

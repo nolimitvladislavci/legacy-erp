@@ -58,7 +58,7 @@
 <div class="b2b-card">
   <div class="b2b-card-header">
     <i class="fas fa-clock"></i> Posljednji dokumenti
-    <a href="{% url 'b2b_invoices' token %}" style="margin-left:auto;font-size:.8rem;font-family:var(--font-body)">
+    <a href="{% url 'portal_invoices' token %}" style="margin-left:auto;font-size:.8rem;font-family:var(--font-body)">
       Vidi sve <i class="fas fa-arrow-right" style="font-size:.7rem"></i>
     </a>
   </div>
@@ -78,7 +78,7 @@
       </thead>
       <tbody>
         {% for inv in recent %}
-        <tr class="b2b-table-link" onclick="location.href='{% url 'b2b_invoice_detail' token inv.pk %}'">
+        <tr class="b2b-table-link" onclick="location.href='{% url 'portal_invoice_detail' token inv.pk %}'">
           <td class="text-mono">{{ inv.number|default:"—" }}</td>
           <td>{{ inv.get_doctype_display }}</td>
           <td>{{ inv.date_issued|date:"d.m.Y" }}</td>

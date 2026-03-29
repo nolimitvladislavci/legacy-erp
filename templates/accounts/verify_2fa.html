@@ -29,7 +29,7 @@ button { width:100%; margin-top:16px; padding:13px; background:#1d4ed8; color:wh
     <input type="text" name="code" maxlength="6" autofocus placeholder="000000" inputmode="numeric" pattern="[0-9]{6}">
     <button type="submit">{% trans "Potvrdi →" %}</button>
   </form>
-  <a href="{% url 'smart_logout' %}" class="back">{% trans "← Odustani i odjavi se" %}</a>
+  <a href="{% url 'logout' %}" class="back">{% trans "← Odustani i odjavi se" %}</a>
 </div>
 </body>
 </html>

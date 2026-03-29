@@ -5,8 +5,8 @@
 <div class="flex items-center justify-between">
     <h1 class="text-xl font-bold">📝 {{ estimate.number }}</h1>
     <div class="flex gap-2">
-        <a href="{% url 'estimate_pdf' estimate.pk %}" class="px-3 py-1.5 bg-slate-100 rounded-lg text-sm">{% trans "📄 PDF" %}</a>
-        <a href="{% url 'estimate_duplicate' estimate.pk %}" class="px-3 py-1.5 bg-slate-100 rounded-lg text-sm">{% trans "📋 Kopiraj" %}</a>
+        <a href="{% url 'calculator:estimate_pdf' estimate.pk %}" class="px-3 py-1.5 bg-slate-100 rounded-lg text-sm">{% trans "📄 PDF" %}</a>
+        <a href="{% url 'dashboard' estimate.pk %}" class="px-3 py-1.5 bg-slate-100 rounded-lg text-sm">{% trans "📋 Kopiraj" %}</a>
         <span class="px-3 py-1.5 rounded-lg text-sm font-bold {% if estimate.status == 'ACCEPTED' %}bg-green-100 text-green-700{% elif estimate.status == 'DRAFT' %}bg-slate-100{% else %}bg-blue-100 text-blue-700{% endif %}">{{ estimate.get_status_display }}</span>
     </div>
 </div>

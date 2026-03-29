@@ -46,12 +46,12 @@
     <div style="display:flex;gap:.5rem;align-items:center">
       <span style="font-size:.72rem;padding:3px 10px;border-radius:6px;font-weight:700;{% if export.status == 'accepted' %}background:rgba(34,197,94,.15);color:#22c55e{% elif export.status == 'error' or export.status == 'rejected' %}background:rgba(239,68,68,.15);color:#ef4444{% else %}background:rgba(245,158,11,.15);color:#f59e0b{% endif %}">{{ export.get_status_display }}</span>
       {% if export.status != 'accepted' %}
-      <form method="POST" action="{% url 'gov_export:run' export.pk %}" class="d-inline">{% csrf_token %}
+      <form method="POST" action="{% url 'dashboard' export.pk %}" class="d-inline">{% csrf_token %}
         <button class="btn btn-sm" style="background:var(--gold);color:#0a0a0a;border-radius:8px;font-weight:700;font-size:.75rem;border:none"><i class="fas fa-play me-1"></i>Pipeline</button>
       </form>
       {% endif %}
       {% if export.xml_content %}
-      <a href="{% url 'gov_export:download_xml' export.pk %}" class="btn btn-sm btn-outline-info" style="border-radius:8px;font-size:.75rem"><i class="fas fa-download me-1"></i>XML</a>
+      <a href="{% url 'dashboard' export.pk %}" class="btn btn-sm btn-outline-info" style="border-radius:8px;font-size:.75rem"><i class="fas fa-download me-1"></i>XML</a>
       {% endif %}
     </div>
   </div>

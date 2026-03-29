@@ -44,7 +44,7 @@
     <h2 class="mb-0"><i class="fas fa-door-open me-2 text-success"></i>{% trans "Prijave danas" %}</h2>
     <small class="text-muted">{{ today|date:"d.m.Y" }}</small>
   </div>
-  <a href="{% url 'fitness:list' %}" class="btn btn-outline-secondary">
+  <a href="{% url 'fitness:member_list' %}" class="btn btn-outline-secondary">
     <i class="fas fa-arrow-left me-2"></i>{% trans "Svi članovi" %}
   </a>
 </div>

@@ -55,7 +55,7 @@
             {% endfor %}
         </div>
         <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 20px;">Ukupno aktivnih slika: <strong>{{ gallery.count }}</strong></p>
-        <a href="{% url 'website:custom_cms_gallery' %}" class="cms-btn action-btn" onclick="showLoading(this)">
+        <a href="{% url 'website:cms_gallery' %}" class="cms-btn action-btn" onclick="showLoading(this)">
             <i class="fas fa-images"></i> Upravljaj Galerijom
         </a>
     </div>

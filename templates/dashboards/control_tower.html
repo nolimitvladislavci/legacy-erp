@@ -466,7 +466,7 @@
 <div class="ct-actions">
     <a href="/invoicing/create/" class="ct-action-btn ct-primary"><i class="fa-solid fa-plus"></i> {% trans "Nova faktura" %}</a>
     <a href="/pos/quick/" class="ct-action-btn"><i class="fa-solid fa-cash-register"></i> {% trans "POS Brzi" %}</a>
-    <a href="{% url 'worktime:dashboard' %}" class="ct-action-btn"><i class="fa-solid fa-clock"></i> {% trans "Radno vrijeme" %}</a>
+    <a href="{% url 'worktime:ts_worker' %}" class="ct-action-btn"><i class="fa-solid fa-clock"></i> {% trans "Radno vrijeme" %}</a>
     <a href="/appointments/create/" class="ct-action-btn"><i class="fa-solid fa-calendar-plus"></i> {% trans "Novi termin" %}</a>
     <a href="{% url 'inventory:list' %}" class="ct-action-btn"><i class="fa-solid fa-warehouse"></i> {% trans "Skladište" %}</a>
     <a href="/eracun/" class="ct-action-btn"><i class="fa-solid fa-file-code"></i> {% trans "e-Račun" %}</a>
@@ -581,7 +581,7 @@
     <div class="ct-card">
         <div class="ct-card-header">
             <span><i class="fa-solid fa-cash-register"></i> POS</span>
-            <a href="{% url 'pos:terminal' %}" class="ct-card-link">{% trans "Otvori →" %}</a>
+            <a href="{% url 'pos:new_terminal' %}" class="ct-card-link">{% trans "Otvori →" %}</a>
         </div>
         <div class="ct-metric">
             <span class="ct-metric-label">{% trans "Sesije danas" %}</span>
@@ -684,7 +684,7 @@
     <div class="ct-card">
         <div class="ct-card-header">
             <span><i class="fa-solid fa-clock"></i> {% trans "Radno Vrijeme" %}</span>
-            <a href="{% url 'worktime:dashboard' %}" class="ct-card-link">{% trans "Otvori →" %}</a>
+            <a href="{% url 'worktime:ts_worker' %}" class="ct-card-link">{% trans "Otvori →" %}</a>
         </div>
         <div class="ct-metric">
             <span class="ct-metric-label">{% trans "Unosi danas" %}</span>
@@ -720,7 +720,7 @@
     <div class="ct-card">
         <div class="ct-card-header">
             <span><i class="fa-solid fa-robot"></i> AI Asistent</span>
-            <a href="{% url 'ai_cockpit' %}" class="ct-card-link">{% trans "Otvori →" %}</a>
+            <a href="{% url 'ivan_cockpit' %}" class="ct-card-link">{% trans "Otvori →" %}</a>
         </div>
         <div class="ct-metric">
             <span class="ct-metric-label">{% trans "Ukupno poziva" %}</span>

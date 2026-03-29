@@ -9,11 +9,13 @@ router.register(r"api/checkins", views.MemberCheckInViewSet)
 
 app_name = "fitness"
 urlpatterns = [
+    path("", views.member_list, name="member_list"),
     path("", views.member_list, name="list"),
     path("new/", views.member_create, name="create"),
     path("<int:pk>/", views.member_detail, name="member_detail"),
     path("<int:pk>/edit/", views.member_edit, name="edit"),
     path("<int:pk>/checkin/", views.member_checkin, name="checkin"),
+    path("dashboard/", views.checkin_dashboard, name="checkin_dashboard"),
     path("dashboard/", views.checkin_dashboard, name="dashboard"),
     path("", include(router.urls)),
 ]

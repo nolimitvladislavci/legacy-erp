@@ -57,7 +57,7 @@
     </div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
       <a href="{% url 'appointments:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
-      <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; Blagajna" %}</a>
+      <a href="{% url 'pos:new_terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; Blagajna" %}</a>
       <a href="{% url 'partners:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Klijenti" %}</a>
     </div>
   </div>
@@ -99,7 +99,7 @@
       <div class="action-lbl">{% trans "Svi termini" %}</div>
       <div class="action-sub">{% trans "Raspored dana" %}</div>
     </a>
-    <a class="action-card" href="{% url 'pos:terminal' %}">
+    <a class="action-card" href="{% url 'pos:new_terminal' %}">
       <div class="action-icon">{% trans "&#x1F4B3;" %}</div>
       <div class="action-lbl">{% trans "Naplata" %}</div>
       <div class="action-sub">{% trans "POS blagajna" %}</div>
@@ -114,7 +114,7 @@
       <div class="action-lbl">{% trans "Kozmetika" %}</div>
       <div class="action-sub">{% trans "Zalihe proizvoda" %}</div>
     </a>
-    <a class="action-card" href="{% url 'worktime:dashboard' %}">
+    <a class="action-card" href="{% url 'worktime:ts_worker' %}">
       <div class="action-icon">{% trans "&#x23F1;" %}</div>
       <div class="action-lbl">{% trans "Radni sati" %}</div>
       <div class="action-sub">{% trans "Satnica djelatnika" %}</div>

@@ -320,9 +320,9 @@
       </div>
     </div>
     <div style="display:flex;gap:6px">
-      <a href="{% url 'konto:audit_verify' %}" class="btn btn-sm" style="background:#c9a84c;color:#0f172a;font-weight:700;font-size:.75rem">Provjeri integritet</a>
+      <a href="{% url 'dashboard' %}" class="btn btn-sm" style="background:#c9a84c;color:#0f172a;font-weight:700;font-size:.75rem">Provjeri integritet</a>
       {% if audit_hashed > 0 %}
-      <a href="{% url 'konto:audit_certificate_pdf' %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">PDF certifikat</a>
+      <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">PDF certifikat</a>
       {% endif %}
     </div>
   </div>

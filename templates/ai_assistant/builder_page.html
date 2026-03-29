@@ -267,7 +267,7 @@
         genText.innerText = 'Čitam ' + module + '/models.py...';
         codeDisplay.innerHTML = '<div class="placeholder" style="color:#d4af37">Povezivanje s AI mrežom i analiza arhitekture modula <strong>' + module + '</strong>...</div>';
 
-        fetch('{% url "ai_builder_generate" %}', {
+        fetch('{% url "dashboard" %}', {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
             body: JSON.stringify({prompt: prompt, module: module})
@@ -313,7 +313,7 @@
         btn.disabled = true;
         txt.innerText = 'Šaljem...';
 
-        fetch('{% url "ai_builder_queue" %}', {
+        fetch('{% url "dashboard" %}', {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
             body: JSON.stringify(currentData)

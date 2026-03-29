@@ -45,7 +45,7 @@
     <small class="text-muted">{{ total }} članova</small>
   </div>
   <div class="d-flex gap-2">
-    <a href="{% url 'fitness:dashboard' %}" class="btn btn-outline-success">
+    <a href="{% url 'fitness:checkin_dashboard' %}" class="btn btn-outline-success">
       <i class="fas fa-door-open me-2"></i>{% trans "Prijave danas" %}
     </a>
     <a href="{% url 'fitness:create' %}" class="btn btn-primary">
@@ -104,7 +104,7 @@
     </div>
     <div class="col-md-3 d-flex gap-2">
       <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
-      <a href="{% url 'fitness:list' %}" class="btn btn-outline-secondary">✕</a>
+      <a href="{% url 'fitness:member_list' %}" class="btn btn-outline-secondary">✕</a>
     </div>
   </form>
 </div>

@@ -228,7 +228,7 @@
       </div>
       <div class="card-body p-2">
         <div class="d-grid gap-2" style="grid-template-columns:1fr 1fr">
-          <a href="{% url 'work_orders:work_order_create' %}" class="btn btn-sm btn-outline-primary text-start">
+          <a href="{% url 'work_orders:create' %}" class="btn btn-sm btn-outline-primary text-start">
             <i class="fas fa-plus me-1"></i>Novi WO
           </a>
           <a href="{% url 'invoicing:invoice_create' %}" class="btn btn-sm btn-outline-info text-start">
@@ -237,7 +237,7 @@
           <a href="{% url 'experiences:experience_create' %}" class="btn btn-sm btn-outline-warning text-start">
             <i class="fas fa-mountain me-1"></i>Novo iskustvo
           </a>
-          <a href="{% url 'pos:pos_terminal' %}" class="btn btn-sm btn-outline-success text-start">
+          <a href="{% url 'pos:new_terminal' %}" class="btn btn-sm btn-outline-success text-start">
             <i class="fas fa-cash-register me-1"></i>POS
           </a>
         </div>

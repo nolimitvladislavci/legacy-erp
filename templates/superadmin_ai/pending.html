@@ -31,7 +31,7 @@
         <pre style="font-size:0.7rem;background:#f8fafc;padding:8px;border-radius:8px;overflow-x:auto;margin-top:4px">{{ a.payload|pprint }}</pre>
     </details>
     {% endif %}
-    <form method="post" action="{% url 'superadmin_ai:review_action' a.id %}" class="d-flex gap-2 align-items-end">
+    <form method="post" action="{% url 'superadmin_ai:resolve_action' a.id %}" class="d-flex gap-2 align-items-end">
         {% csrf_token %}
         <input type="text" name="note" placeholder="Komentar (opcijski)" class="form-control form-control-sm" style="max-width:300px;font-size:0.78rem">
         <button type="submit" name="decision" value="approve" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Odobri</button>

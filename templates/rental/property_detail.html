@@ -47,7 +47,7 @@
     </small>
   </div>
   <div class="d-flex gap-2">
-    <a href="{% url 'rental:booking_create_for' prop.pk %}" class="btn btn-success">
+    <a href="{% url 'rental:booking_create' prop.pk %}" class="btn btn-success">
       <i class="fas fa-calendar-plus me-2"></i>{% trans "Nova rezervacija" %}
     </a>
     <a href="{% url 'rental:property_edit' prop.pk %}" class="btn btn-warning">
@@ -94,7 +94,7 @@
 <div class="stat-card">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h6 class="fw-bold mb-0"><i class="fas fa-calendar me-2 text-primary"></i>{% trans "Rezervacije" %}</h6>
-    <a href="{% url 'rental:booking_create_for' prop.pk %}" class="btn btn-sm btn-primary">{% trans "+ Nova" %}</a>
+    <a href="{% url 'rental:booking_create' prop.pk %}" class="btn btn-sm btn-primary">{% trans "+ Nova" %}</a>
   </div>
   <div class="table-responsive">
     <table class="table table-hover mb-0">
