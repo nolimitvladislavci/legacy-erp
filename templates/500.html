@@ -38,7 +38,7 @@ p{color:#94a3b8;font-size:.9rem;line-height:1.6;margin:0 0 20px}
 function borgReport500(){
   var btn=event.target.closest('button');btn.disabled=true;btn.textContent='Saljem...';
   var msg=prompt('Sto ste radili kad se greska pojavila? (opcionalno)');
-  fetch('/ai-cockpit/api/signal/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  fetch('/hr/ai-cockpit/api/signal/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
     type:'bug',message:'500 greska'+(msg?' — '+msg:''),page_url:document.referrer||location.href,
     context:{type:'500',referrer:document.referrer,viewport:innerWidth+'x'+innerHeight}
   })}).then(r=>r.json()).then(d=>{

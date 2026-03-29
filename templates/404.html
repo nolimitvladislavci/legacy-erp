@@ -29,7 +29,7 @@
 <script>
 function borgReport404(){
   var btn=event.target.closest('button');btn.disabled=true;btn.textContent='Saljem...';
-  fetch('/ai-cockpit/api/signal/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  fetch('/hr/ai-cockpit/api/signal/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
     type:'bug',message:'404 na '+location.href,page_url:location.href,
     context:{referrer:document.referrer,viewport:innerWidth+'x'+innerHeight}
   })}).then(r=>r.json()).then(d=>{

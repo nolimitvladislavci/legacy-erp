@@ -955,7 +955,7 @@ function sendReport(){
   var msg=document.getElementById("borg-sig-msg").value.trim();
   if(!msg){document.getElementById("borg-sig-result").textContent="Poruka je obavezna";return;}
   var btn=event.target;btn.disabled=true;btn.textContent="Saljem...";
-  fetch("/ai-cockpit/api/signal/",{method:"POST",headers:{"Content-Type":"application/json","X-CSRFToken":document.querySelector("[name=csrfmiddlewaretoken]")?.value||""},body:JSON.stringify({type:document.getElementById("borg-sig-type").value,message:msg,page_url:location.href,screen_width:screen.width,context:{viewport:innerWidth+"x"+innerHeight,theme:document.documentElement.getAttribute("data-theme")||"dark",pos_cart:window._posCart||null,ts:new Date().toISOString()}})})
+  fetch("/hr/ai-cockpit/api/signal/",{method:"POST",headers:{"Content-Type":"application/json","X-CSRFToken":document.querySelector("[name=csrfmiddlewaretoken]")?.value||""},body:JSON.stringify({type:document.getElementById("borg-sig-type").value,message:msg,page_url:location.href,screen_width:screen.width,context:{viewport:innerWidth+"x"+innerHeight,theme:document.documentElement.getAttribute("data-theme")||"dark",pos_cart:window._posCart||null,ts:new Date().toISOString()}})})
   .then(r=>r.json()).then(d=>{
     document.getElementById("borg-sig-result").innerHTML=d.ok?"<span style=color:#4caf7d>"+d.message+"</span>":"<span style=color:#e05c5c>"+(d.error||"Greska")+"</span>";
     if(d.ok){document.getElementById("borg-sig-msg").value="";setTimeout(()=>{document.getElementById("borg-signal-modal").style.display="none";btn.disabled=false;btn.textContent="Pošalji prijavu"},2000);}
