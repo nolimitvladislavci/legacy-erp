@@ -1,8 +1,10 @@
 """
 Propter operator dashboard & tenant management views.
+Security hardened: input validation, audit logging, enum checks, bounds.
 """
+import logging
 from datetime import date
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -10,12 +12,45 @@ from django.db.models import Count, Sum, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from .models import PropterTenant, CompanySubscription
+
+logger = logging.getLogger('propter.security')
+
+VALID_TIERS = {'client', 'bookkeeper'}
+VALID_CERT_STATUSES = {'none', 'pending', 'active', 'expiring', 'expired'}
+MAX_MONTHLY_FEE = Decimal('10000.00')
+MAX_COMPANIES = 10000
 
 
 def is_superadmin(user):
     return user.is_active and user.is_staff
+
+
+def _audit_log(request, action, tenant, details=''):
+    """Log sensitive propter operations."""
+    logger.info(
+        "PROPTER_AUDIT user=%s action=%s tenant=%s(pk=%s) company=%s %s",
+        request.user.username, action, tenant.company.name, tenant.pk,
+        tenant.company.oib, details,
+    )
+    try:
+        from borg_ops.models import CardActivity
+        from django.contrib.contenttypes.models import ContentType
+        ct = ContentType.objects.get_for_model(PropterTenant)
+        CardActivity.objects.create(
+            content_type=ct,
+            object_id=str(tenant.pk),
+            user=request.user,
+            action=action,
+            note=details[:200] if details else '',
+            is_system_generated=False,
+            is_public_facing=False,
+            ip_address=request.META.get('REMOTE_ADDR'),
+        )
+    except Exception:
+        pass
 
 
 @login_required
@@ -55,9 +90,9 @@ def propter_dashboard(request):
     search = request.GET.get('q', '')
 
     filtered = tenants
-    if tier_filter:
+    if tier_filter and tier_filter in VALID_TIERS:
         filtered = filtered.filter(tier=tier_filter)
-    if cert_filter:
+    if cert_filter and cert_filter in VALID_CERT_STATUSES:
         filtered = filtered.filter(fina_cert_status=cert_filter)
     if search:
         filtered = filtered.filter(
@@ -135,35 +170,91 @@ def propter_tenant_detail(request, pk):
         action = request.POST.get('action', '')
 
         if action == 'update':
-            tenant.tier = request.POST.get('tier', tenant.tier)
+            changes = []
+
+            # Tier — validate enum
+            new_tier = request.POST.get('tier', tenant.tier)
+            if new_tier in VALID_TIERS and new_tier != tenant.tier:
+                changes.append(f'tier: {tenant.tier}→{new_tier}')
+                tenant.tier = new_tier
+
             tenant.operator_name = request.POST.get('operator_name', '')
-            tenant.monthly_fee = Decimal(request.POST.get('monthly_fee', '0') or '0')
-            tenant.max_companies = int(request.POST.get('max_companies', '1') or '1')
-            tenant.billing_day = int(request.POST.get('billing_day', '1') or '1')
-            tenant.fina_cert_status = request.POST.get('fina_cert_status', tenant.fina_cert_status)
-            tenant.notes = request.POST.get('notes', '')
+
+            # Monthly fee — validate bounds
+            try:
+                new_fee = Decimal(request.POST.get('monthly_fee', '0') or '0')
+                new_fee = max(Decimal('0'), min(new_fee, MAX_MONTHLY_FEE))
+            except (InvalidOperation, ValueError):
+                new_fee = tenant.monthly_fee
+            if new_fee != tenant.monthly_fee:
+                changes.append(f'fee: {tenant.monthly_fee}→{new_fee}')
+            tenant.monthly_fee = new_fee
+
+            # Max companies — validate bounds
+            try:
+                new_max = int(request.POST.get('max_companies', '1') or '1')
+                new_max = max(1, min(new_max, MAX_COMPANIES))
+            except (ValueError, TypeError):
+                new_max = tenant.max_companies
+            tenant.max_companies = new_max
+
+            # Billing day — validate 1-28
+            try:
+                new_day = int(request.POST.get('billing_day', '1') or '1')
+                new_day = max(1, min(new_day, 28))
+            except (ValueError, TypeError):
+                new_day = tenant.billing_day
+            tenant.billing_day = new_day
+
+            # Cert status — validate enum
+            new_cert = request.POST.get('fina_cert_status', tenant.fina_cert_status)
+            if new_cert in VALID_CERT_STATUSES:
+                if new_cert != tenant.fina_cert_status:
+                    changes.append(f'cert: {tenant.fina_cert_status}→{new_cert}')
+                tenant.fina_cert_status = new_cert
+
+            # Notes — truncate to prevent abuse
+            tenant.notes = (request.POST.get('notes', '') or '')[:2000]
+
             tenant.is_active = 'is_active' in request.POST
 
-            # Managed by (bookkeeper assignment)
+            # Managed by — validate bookkeeper tier
             managed_by_id = request.POST.get('managed_by', '')
             if managed_by_id:
                 try:
-                    tenant.managed_by = PropterTenant.objects.get(pk=managed_by_id)
+                    bookkeeper = PropterTenant.objects.get(pk=managed_by_id, tier='bookkeeper')
+                    if bookkeeper != tenant.managed_by:
+                        changes.append(f'managed_by: →{bookkeeper.company.name}')
+                    tenant.managed_by = bookkeeper
                 except PropterTenant.DoesNotExist:
                     tenant.managed_by = None
             else:
+                if tenant.managed_by:
+                    changes.append('managed_by: removed')
                 tenant.managed_by = None
 
             tenant.save()
-            messages.success(request, f'Tenant {tenant.company.name} azuriran.')
+
+            # Audit log
+            _audit_log(request, 'TENANT_UPDATE', tenant, '; '.join(changes) if changes else 'no field changes')
+
+            messages.success(request, f'Tenant {tenant.company.name} ažuriran.')
             return redirect('registration:propter_tenant_detail', pk=tenant.pk)
 
         elif action == 'toggle_active':
+            old = tenant.is_active
             tenant.is_active = not tenant.is_active
             tenant.save(update_fields=['is_active'])
             status = 'aktiviran' if tenant.is_active else 'deaktiviran'
+            _audit_log(request, 'TENANT_TOGGLE', tenant, f'{old}→{tenant.is_active}')
             messages.success(request, f'{tenant.company.name} {status}.')
             return redirect('registration:propter_dashboard')
+
+    # Mask API key for display (show only last 8 chars)
+    api_key_masked = None
+    if eracun_cfg and eracun_cfg.api_key:
+        key = eracun_cfg.api_key
+        api_key_masked = '•' * max(0, len(key) - 8) + key[-8:] if len(key) > 8 else key
 
     context = {
         'tenant': tenant,
@@ -171,6 +262,7 @@ def propter_tenant_detail(request, pk):
         'managed_clients': managed_clients,
         'bookkeepers': bookkeepers,
         'eracun_cfg': eracun_cfg,
+        'api_key_masked': api_key_masked,
     }
     return render(request, 'registration/propter_tenant_detail.html', context)
 
@@ -199,17 +291,34 @@ def propter_create_tenant(request):
             return redirect('registration:propter_dashboard')
 
         tier = request.POST.get('tier', 'client')
+        if tier not in VALID_TIERS:
+            tier = 'client'
+
         fees = {'client': Decimal('50.00'), 'bookkeeper': Decimal('175.00')}
+
+        try:
+            monthly_fee = Decimal(request.POST.get('monthly_fee', '0') or str(fees.get(tier, '50')))
+            monthly_fee = max(Decimal('0'), min(monthly_fee, MAX_MONTHLY_FEE))
+        except (InvalidOperation, ValueError):
+            monthly_fee = fees.get(tier, Decimal('50.00'))
+
+        try:
+            max_co = int(request.POST.get('max_companies', '1') or '1')
+            max_co = max(1, min(max_co, MAX_COMPANIES))
+        except (ValueError, TypeError):
+            max_co = 1
 
         tenant = PropterTenant.objects.create(
             company=company,
             tier=tier,
-            operator_name=request.POST.get('operator_name', ''),
-            monthly_fee=Decimal(request.POST.get('monthly_fee', '0') or str(fees.get(tier, '50'))),
-            max_companies=int(request.POST.get('max_companies', '1') or '1'),
+            operator_name=request.POST.get('operator_name', '')[:200],
+            monthly_fee=monthly_fee,
+            max_companies=max_co,
             billing_day=1,
             is_active=True,
         )
+
+        _audit_log(request, 'TENANT_CREATE', tenant, f'tier={tier} fee={monthly_fee}')
         messages.success(request, f'Propter tenant kreiran za {company.name}.')
         return redirect('registration:propter_tenant_detail', pk=tenant.pk)
 
@@ -250,8 +359,9 @@ def propter_api_stats(request):
 
 @login_required
 @user_passes_test(is_superadmin)
+@require_POST
 def propter_regenerate_api_key(request, pk):
-    """Regenerate API key for a tenant."""
+    """Regenerate API key for a tenant. POST only."""
     import secrets
     from eracun.models import ERacunConfig
     tenant = get_object_or_404(PropterTenant, pk=pk)
@@ -260,21 +370,25 @@ def propter_regenerate_api_key(request, pk):
     )
     cfg.api_key = secrets.token_urlsafe(48)
     cfg.save(update_fields=['api_key'])
-    messages.success(request, f'API kljuc regeneriran za {tenant.company.name}.')
+    _audit_log(request, 'API_KEY_REGEN', tenant, 'API key regenerated')
+    messages.success(request, f'API ključ regeneriran za {tenant.company.name}.')
     return redirect('registration:propter_tenant_detail', pk=pk)
 
 
 @login_required
 @user_passes_test(is_superadmin)
+@require_POST
 def propter_toggle_api(request, pk):
-    """Toggle API access for a tenant."""
+    """Toggle API access for a tenant. POST only."""
     from eracun.models import ERacunConfig
     tenant = get_object_or_404(PropterTenant, pk=pk)
     cfg, _ = ERacunConfig.objects.get_or_create(
         company=tenant.company, defaults={'is_active': False}
     )
+    old = cfg.api_enabled
     cfg.api_enabled = not cfg.api_enabled
     cfg.save(update_fields=['api_enabled'])
     status = 'aktiviran' if cfg.api_enabled else 'deaktiviran'
+    _audit_log(request, 'API_TOGGLE', tenant, f'{old}→{cfg.api_enabled}')
     messages.success(request, f'API pristup {status} za {tenant.company.name}.')
     return redirect('registration:propter_tenant_detail', pk=pk)
