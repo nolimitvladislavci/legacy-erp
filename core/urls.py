@@ -55,6 +55,7 @@ urlpatterns = [
     path('_bypass/<str:token>/', _bypass_login),
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
     path('radni-sati/', TemplateView.as_view(template_name='brosura_radni_sati_landing.html'), name='brochure_worktime'),
+    path('arhiva/', TemplateView.as_view(template_name='brosura_arhiva_landing.html'), name='brochure_arhiva'),
     
     path('vrtic/<slug:slug>/portal/', __import__('kindergarten.views', fromlist=['parent_portal']).parent_portal, name='kindergarten_portal'),
     path('lib/<slug:slug>/', include('library.public_urls')),

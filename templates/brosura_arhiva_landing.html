@@ -1,0 +1,399 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digitalna Arhiva — AI dokumenti, zakonska sigurnost | LIMIT Connect</title>
+<meta name="description" content="Digitalna arhiva poslovnih dokumenata s AI prepoznavanjem, zakonskom zaštitom 11 godina i automatskim knjiženjem. 20.000+ dokumenata.">
+<meta property="og:title" content="LIMIT Connect — Digitalna Arhiva">
+<meta property="og:description" content="AI prepoznaje, klasificira i automatski knjiži vaše dokumente. ZOR compliant, 11 godina zaštita.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root { --gold:#c9a84c; --bg:#0a0a0a; --surface:#111827; --text:#e2e8f0; --dim:#94a3b8; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); }
+
+  /* HERO */
+  .hero { min-height:80vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 20px; background:linear-gradient(160deg,#0a0a0a 0%,#111827 50%,#0a0a0a 100%); position:relative; }
+  .hero::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,var(--gold),#e8d48b,var(--gold)); }
+  .hero-icon { font-size:4rem; margin-bottom:20px; }
+  .hero h1 { font-family:'Cormorant Garamond',serif; font-size:3rem; color:var(--gold); letter-spacing:3px; margin-bottom:8px; }
+  .hero h2 { font-size:1.3rem; color:var(--dim); margin-bottom:30px; font-weight:400; }
+  .hero p { max-width:560px; color:var(--dim); line-height:1.7; margin-bottom:30px; }
+
+  /* STATS */
+  .stats { display:flex; gap:24px; justify-content:center; margin-bottom:40px; flex-wrap:wrap; }
+  .stat { background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2); border-radius:12px; padding:16px 28px; text-align:center; }
+  .stat .val { font-size:1.8rem; font-weight:800; color:var(--gold); }
+  .stat .lbl { font-size:.75rem; color:var(--dim); text-transform:uppercase; letter-spacing:1px; }
+
+  /* BUTTONS */
+  .btn-gold { display:inline-flex; align-items:center; gap:10px; padding:14px 36px; background:var(--gold); color:#000; font-weight:700; font-size:1rem; border:none; border-radius:10px; text-decoration:none; cursor:pointer; transition:all .2s; }
+  .btn-gold:hover { filter:brightness(1.1); transform:translateY(-2px); }
+  .btn-outline { display:inline-flex; align-items:center; gap:10px; padding:14px 36px; border:2px solid rgba(201,168,76,.4); color:var(--gold); font-weight:700; font-size:1rem; border-radius:10px; text-decoration:none; transition:all .2s; background:transparent; }
+  .btn-outline:hover { border-color:var(--gold); background:rgba(201,168,76,.05); }
+  .btn-sm { padding:10px 24px; font-size:.9rem; }
+  .cta-buttons { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+
+  /* FEATURES */
+  .features { padding:80px 20px; max-width:1100px; margin:0 auto; }
+  .features h3 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); text-align:center; margin-bottom:50px; }
+  .feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:24px; }
+  .feat-card { background:var(--surface); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:28px; transition:all .2s; }
+  .feat-card:hover { border-color:rgba(201,168,76,.3); transform:translateY(-4px); }
+  .feat-card .icon { font-size:2rem; margin-bottom:14px; }
+  .feat-card h4 { color:var(--gold); font-size:1.1rem; margin-bottom:8px; }
+  .feat-card p { color:var(--dim); font-size:.92rem; line-height:1.6; }
+
+  /* DOWNLOADS */
+  .downloads { padding:80px 20px; background:linear-gradient(180deg,transparent,rgba(201,168,76,.03)); }
+  .downloads h3 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); text-align:center; margin-bottom:16px; }
+  .downloads .subtitle { text-align:center; color:var(--dim); margin-bottom:40px; max-width:500px; margin-left:auto; margin-right:auto; }
+  .dl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; max-width:900px; margin:0 auto; }
+  .dl-card { background:var(--surface); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:30px; text-align:center; transition:all .2s; }
+  .dl-card:hover { border-color:rgba(201,168,76,.3); transform:translateY(-4px); }
+  .dl-card .dl-icon { font-size:2.5rem; margin-bottom:16px; }
+  .dl-card h4 { color:var(--gold); font-size:1.1rem; margin-bottom:8px; }
+  .dl-card p { color:var(--dim); font-size:.85rem; line-height:1.5; margin-bottom:20px; }
+  .dl-card .dl-size { font-size:.75rem; color:#475569; margin-top:8px; }
+
+  /* VALIDATOR */
+  .validator { padding:80px 20px; max-width:800px; margin:0 auto; }
+  .validator h3 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); text-align:center; margin-bottom:16px; }
+  .validator .subtitle { text-align:center; color:var(--dim); margin-bottom:40px; }
+  .validator-box { background:var(--surface); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:30px; }
+  .validator-box h4 { color:var(--gold); margin-bottom:16px; font-size:1rem; }
+  .validator-box p { color:var(--dim); font-size:.9rem; margin-bottom:16px; line-height:1.6; }
+  .validator-features { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:20px 0; }
+  .vf-item { display:flex; align-items:flex-start; gap:8px; font-size:.88rem; color:var(--dim); }
+  .vf-item i { color:var(--gold); margin-top:3px; }
+  .drop-zone { border:2px dashed rgba(201,168,76,.3); border-radius:12px; padding:40px 20px; text-align:center; margin:20px 0; cursor:pointer; transition:all .2s; }
+  .drop-zone:hover { border-color:var(--gold); background:rgba(201,168,76,.03); }
+  .drop-zone i { font-size:2rem; color:var(--gold); margin-bottom:12px; display:block; }
+  .drop-zone p { color:var(--dim); font-size:.9rem; }
+  .drop-zone .hint { font-size:.75rem; color:#475569; margin-top:8px; }
+  #val-result { display:none; margin-top:20px; padding:20px; border-radius:12px; }
+
+  /* COMPLIANCE */
+  .compliance { padding:60px 20px; max-width:900px; margin:0 auto; }
+  .compliance h3 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); text-align:center; margin-bottom:40px; }
+  .comp-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .comp-card { background:var(--surface); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:24px; }
+  .comp-card h4 { color:var(--gold); font-size:.95rem; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .comp-card ul { list-style:none; padding:0; }
+  .comp-card li { color:var(--dim); font-size:.85rem; padding:4px 0; padding-left:16px; position:relative; }
+  .comp-card li::before { content:''; position:absolute; left:0; top:10px; width:6px; height:6px; background:var(--gold); border-radius:50%; }
+
+  footer { text-align:center; padding:30px 20px; border-top:1px solid rgba(255,255,255,.06); color:#475569; font-size:.85rem; }
+  footer a { color:var(--gold); text-decoration:none; }
+
+  @media (max-width:600px) {
+    .hero h1 { font-size:2rem; }
+    .stats { gap:12px; }
+    .stat { padding:12px 16px; }
+    .stat .val { font-size:1.3rem; }
+    .feat-grid, .dl-grid, .comp-grid, .validator-features { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-icon">🗄</div>
+  <h1>DIGITALNA ARHIVA</h1>
+  <h2>AI prepoznaje. Zakon štiti. Vi upravljate.</h2>
+  <p>Centralizirano skladište svih poslovnih dokumenata — računi, ugovori, potvrde. 
+  AI automatski čita, klasificira i predlaže knjiženje. Zakonska zaštita 11 godina.</p>
+  <div class="stats">
+    <div class="stat"><div class="val">20.336</div><div class="lbl">Dokumenata</div></div>
+    <div class="stat"><div class="val">15.810</div><div class="lbl">AI obrađeno</div></div>
+    <div class="stat"><div class="val">78%</div><div class="lbl">Auto-klasificirano</div></div>
+    <div class="stat"><div class="val">11 god</div><div class="lbl">Zaštita</div></div>
+  </div>
+  <div class="cta-buttons">
+    <a href="/static/docs/LIMIT_Connect_Digitalna_Arhiva_Brosura.pdf" class="btn-gold" target="_blank">
+      <i class="fas fa-file-pdf"></i> PDF Brošura
+    </a>
+    <a href="#validator" class="btn-outline">
+      <i class="fas fa-check-circle"></i> CroXML Validator
+    </a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <h3>Zašto LIMIT Connect Arhiva?</h3>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="icon">🤖</div>
+      <h4>AI prepoznavanje (FenixScan)</h4>
+      <p>Upload sliku ili PDF — AI čita broj računa, partnera, iznos, PDV, datum. 
+      Automatski popunjava formu. Točnost 92% za tiskane dokumente.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">📗</div>
+      <h4>Automatsko knjiženje</h4>
+      <p>AI predlaže kontiranje (konto, duguje, potražuje). Visoka sigurnost = 
+      jedan klik proknjižavanje. Auto-book svaki dan u 06:00.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">🔒</div>
+      <h4>SHA-256 Integrity</h4>
+      <p>Svaki dokument ima kriptografski hash. Tjedno se verificira da ništa 
+      nije promijenjeno. Nemoguće falsificirati.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">📱</div>
+      <h4>Mobile Scan</h4>
+      <p>Skenirajte QR kod s mobitela, fotografirajte dokument — automatski 
+      se uploaduje i AI obrađuje. Batch scan za više dokumenata.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">🏷</div>
+      <h4>Labele i organizacija</h4>
+      <p>Custom labele po tvrtki (hitno, čeka odobrenje, PDV povrat). 
+      Batch operacije — označite 100 dokumenata odjednom.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">📊</div>
+      <h4>URA/IRA Knjiga</h4>
+      <p>Automatska knjiga ulaznih i izlaznih računa. PDF i XML export 
+      za poreznu upravu. PDV obrazac za svako razdoblje.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOADS -->
+<section class="downloads" id="downloads">
+  <h3>Dokumentacija za preuzimanje</h3>
+  <p class="subtitle">Besplatni materijali o LIMIT Connect Digitalnoj Arhivi</p>
+  <div class="dl-grid">
+    <div class="dl-card">
+      <div class="dl-icon">📄</div>
+      <h4>PDF Brošura — Digitalna Arhiva</h4>
+      <p>Kompletni vodič kroz modul: upload, AI inbox, labele, pretraga, 
+      zakonski okvir, sigurnost. 6 stranica.</p>
+      <a href="/static/docs/LIMIT_Connect_Digitalna_Arhiva_Brosura.pdf" class="btn-gold btn-sm" target="_blank">
+        <i class="fas fa-download"></i> Preuzmi PDF
+      </a>
+      <div class="dl-size">PDF, 6 stranica</div>
+    </div>
+    <div class="dl-card">
+      <div class="dl-icon">⏱</div>
+      <h4>PDF Brošura — Radni Sati</h4>
+      <p>Evidencija radnog vremena: GPS prijava, štoperica, odobravanje, 
+      obračun plaća, ZOR compliance. 6 stranica.</p>
+      <a href="/static/docs/LIMIT_Connect_Radni_Sati_Brosura.pdf" class="btn-gold btn-sm" target="_blank">
+        <i class="fas fa-download"></i> Preuzmi PDF
+      </a>
+      <div class="dl-size">PDF, 6 stranica</div>
+    </div>
+    <div class="dl-card">
+      <div class="dl-icon">🔍</div>
+      <h4>CroXML Validator</h4>
+      <p>Besplatni online alat za validaciju eRačun XML datoteka prema 
+      CIUS-2025 standardu. Drag & drop provjera.</p>
+      <a href="#validator" class="btn-outline btn-sm">
+        <i class="fas fa-check-circle"></i> Otvori Validator
+      </a>
+      <div class="dl-size">Online alat, besplatno</div>
+    </div>
+  </div>
+</section>
+
+<!-- VALIDATOR -->
+<section class="validator" id="validator">
+  <h3>CroXML Validator</h3>
+  <p class="subtitle">Provjerite valjanost vaših eRačun XML datoteka — besplatno, bez registracije</p>
+  <div class="validator-box">
+    <h4><i class="fas fa-shield-alt" style="color:var(--gold)"></i> Validacija prema CIUS-HR-2025</h4>
+    <p>Povucite XML datoteku u polje ispod ili kliknite za odabir. Validator provjerava:</p>
+    <div class="validator-features">
+      <div class="vf-item"><i class="fas fa-check"></i> <span>UBL 2.1 strukturu</span></div>
+      <div class="vf-item"><i class="fas fa-check"></i> <span>CIUS-HR-2025 pravila</span></div>
+      <div class="vf-item"><i class="fas fa-check"></i> <span>OIB format (modulo 11)</span></div>
+      <div class="vf-item"><i class="fas fa-check"></i> <span>Obavezna polja (čl. 79 ZPDV)</span></div>
+      <div class="vf-item"><i class="fas fa-check"></i> <span>PDV izračun</span></div>
+      <div class="vf-item"><i class="fas fa-check"></i> <span>FINA Posrednik kompatibilnost</span></div>
+    </div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('xmlFile').click()">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Povucite XML datoteku ovdje<br>ili <strong style="color:var(--gold)">kliknite za odabir</strong></p>
+      <div class="hint">Maksimalno 5 MB &bull; Vaša datoteka se NE uploaduje na server</div>
+    </div>
+    <input type="file" id="xmlFile" accept=".xml" style="display:none" onchange="validateXML(this.files[0])">
+    <div id="val-result"></div>
+  </div>
+</section>
+
+<!-- COMPLIANCE -->
+<section class="compliance">
+  <h3>Zakonska usklađenost</h3>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <h4><i class="fas fa-balance-scale"></i> Hrvatska (HR)</h4>
+      <ul>
+        <li>OPZ čl. 66 — čuvanje 11 godina</li>
+        <li>ZOR čl. 10 — evidencija dokumentacije</li>
+        <li>ZPDV čl. 79 — obavezni elementi računa</li>
+        <li>Zakon o fiskalizaciji — fiskalni zapisi</li>
+        <li>GDPR — zaštita osobnih podataka</li>
+      </ul>
+    </div>
+    <div class="comp-card">
+      <h4><i class="fas fa-balance-scale"></i> Njemačka (DE)</h4>
+      <ul>
+        <li>GoBD — ordnungsmäßige Aufbewahrung</li>
+        <li>AO §147 — 10 Jahre Aufbewahrung</li>
+        <li>Unveränderbarkeit — integrity hash</li>
+        <li>Verfahrensdokumentation</li>
+        <li>DSGVO — Datenschutz</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="text-align:center; padding:60px 20px;">
+  <h3 style="font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); margin-bottom:16px;">
+    Digitalizirajte svoju arhivu danas
+  </h3>
+  <p style="color:var(--dim); margin-bottom:30px; max-width:500px; margin-left:auto; margin-right:auto;">
+    Prvo skeniranje za manje od 2 minute. AI prepoznaje i klasificira automatski.
+  </p>
+  <div class="cta-buttons">
+    <a href="/hr/registration/register/" class="btn-gold"><i class="fas fa-rocket"></i> Registracija</a>
+    <a href="/hr/accounts/login/" class="btn-outline"><i class="fas fa-sign-in-alt"></i> Prijava</a>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 <a href="/">LIMIT Connect</a> &bull; Konjik d.o.o. &bull; KS LIMIT, Čepin</p>
+</footer>
+
+<!-- VALIDATOR JS -->
+<script>
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#c9a84c'; dropZone.style.background = 'rgba(201,168,76,.05)'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'rgba(201,168,76,.3)'; dropZone.style.background = ''; });
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.style.borderColor = 'rgba(201,168,76,.3)'; dropZone.style.background = ''; if(e.dataTransfer.files.length) validateXML(e.dataTransfer.files[0]); });
+
+function validateXML(file) {
+  if (!file) return;
+  if (!file.name.endsWith('.xml')) { showResult('error', 'Samo XML datoteke su podržane.'); return; }
+  if (file.size > 5*1024*1024) { showResult('error', 'Datoteka prevelika (max 5 MB).'); return; }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const xml = e.target.result;
+    const results = runValidation(xml, file.name);
+    displayResults(results);
+  };
+  reader.readAsText(file);
+}
+
+function runValidation(xml, filename) {
+  const r = { filename, errors: [], warnings: [], info: [], passed: 0, failed: 0 };
+  
+  // Parse XML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'text/xml');
+  const parseError = doc.querySelector('parsererror');
+  if (parseError) { r.errors.push('XML nije valjan: ' + parseError.textContent.substring(0,200)); r.failed++; return r; }
+  
+  // UBL namespace check
+  const root = doc.documentElement;
+  const ns = root.namespaceURI || '';
+  if (ns.includes('urn:oasis:names:specification:ubl:schema:xsd:Invoice')) { r.info.push('UBL 2.1 Invoice detektiran'); r.passed++; }
+  else if (ns.includes('urn:oasis:names:specification:ubl:schema:xsd:CreditNote')) { r.info.push('UBL 2.1 CreditNote detektiran'); r.passed++; }
+  else { r.warnings.push('Neprepoznat namespace: ' + ns.substring(0,80)); }
+
+  // Helper: find element by local name
+  function find(name) { return doc.getElementsByTagNameNS('*', name); }
+  function text(name) { const el = find(name); return el.length ? el[0].textContent.trim() : ''; }
+
+  // CIUS-HR checks
+  const id = text('ID'); if (id) { r.info.push('Broj računa: ' + id); r.passed++; } else { r.errors.push('CIUS-HR: Nedostaje ID (broj računa)'); r.failed++; }
+  const issueDate = text('IssueDate'); if (issueDate) { r.passed++; } else { r.errors.push('CIUS-HR: Nedostaje IssueDate'); r.failed++; }
+  const dueDate = text('DueDate'); if (dueDate) { r.passed++; } else { r.warnings.push('DueDate nije naveden'); }
+  
+  // Supplier
+  const supplierName = text('RegistrationName') || text('Name');
+  if (supplierName) { r.info.push('Dobavljač: ' + supplierName); r.passed++; } else { r.errors.push('CIUS-HR: Nedostaje naziv dobavljača'); r.failed++; }
+  
+  // OIB check (CompanyID)
+  const companyIDs = find('CompanyID');
+  let oibFound = false;
+  for (let i = 0; i < companyIDs.length; i++) {
+    const val = companyIDs[i].textContent.trim();
+    if (/^\d{11}$/.test(val)) {
+      // Modulo 11 check
+      let a = 10;
+      for (let j = 0; j < 10; j++) { a = (a + parseInt(val[j])) % 10; if (a === 0) a = 10; a = (a * 2) % 11; }
+      const ctrl = (11 - a) % 10;
+      if (ctrl === parseInt(val[10])) { r.info.push('OIB validan: ' + val); r.passed++; oibFound = true; }
+      else { r.errors.push('OIB kontrolna znamenka neispravna: ' + val); r.failed++; oibFound = true; }
+      break;
+    }
+  }
+  if (!oibFound) r.warnings.push('OIB nije pronađen u dokumentu');
+
+  // Amount
+  const payable = text('PayableAmount');
+  if (payable) { r.info.push('Iznos: ' + payable + ' ' + (text('DocumentCurrencyCode') || 'EUR')); r.passed++; }
+  else { r.errors.push('CIUS-HR: Nedostaje PayableAmount'); r.failed++; }
+
+  // Tax
+  const taxAmount = text('TaxAmount');
+  if (taxAmount) { r.info.push('PDV: ' + taxAmount); r.passed++; } else { r.warnings.push('TaxAmount nije naveden'); }
+
+  // Line items
+  const lines = find('InvoiceLine').length || find('CreditNoteLine').length;
+  if (lines) { r.info.push('Stavke: ' + lines); r.passed++; } else { r.warnings.push('Nema stavki (InvoiceLine)'); }
+
+  // CustomizationID (CIUS)
+  const custId = text('CustomizationID');
+  if (custId) {
+    if (custId.includes('cius') || custId.includes('CIUS') || custId.includes('peppol')) { r.info.push('Profil: ' + custId.substring(0,60)); r.passed++; }
+    else { r.warnings.push('CustomizationID nije CIUS/Peppol: ' + custId.substring(0,60)); }
+  }
+
+  return r;
+}
+
+function displayResults(r) {
+  const el = document.getElementById('val-result');
+  const total = r.passed + r.failed;
+  const isOk = r.failed === 0;
+  
+  let html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">';
+  html += isOk
+    ? '<span style="font-size:2rem">✅</span><div><strong style="color:#4ade80;font-size:1.1rem">Validacija uspješna</strong><br><span style="color:#94a3b8;font-size:.85rem">' + r.filename + ' — ' + r.passed + '/' + total + ' provjera</span></div>'
+    : '<span style="font-size:2rem">❌</span><div><strong style="color:#f87171;font-size:1.1rem">' + r.failed + ' greška pronađena</strong><br><span style="color:#94a3b8;font-size:.85rem">' + r.filename + ' — ' + r.passed + '/' + total + ' provjera</span></div>';
+  html += '</div>';
+
+  if (r.errors.length) { html += '<div style="margin-bottom:12px">'; r.errors.forEach(e => html += '<div style="color:#f87171;font-size:.88rem;padding:4px 0"><i class="fas fa-times-circle" style="margin-right:6px"></i>' + e + '</div>'); html += '</div>'; }
+  if (r.warnings.length) { html += '<div style="margin-bottom:12px">'; r.warnings.forEach(w => html += '<div style="color:#facc15;font-size:.88rem;padding:4px 0"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>' + w + '</div>'); html += '</div>'; }
+  if (r.info.length) { html += '<div>'; r.info.forEach(i => html += '<div style="color:#94a3b8;font-size:.85rem;padding:3px 0"><i class="fas fa-info-circle" style="margin-right:6px;color:#3b82f6"></i>' + i + '</div>'); html += '</div>'; }
+
+  el.innerHTML = html;
+  el.style.display = 'block';
+  el.style.background = isOk ? 'rgba(34,197,94,.08)' : 'rgba(239,68,68,.08)';
+  el.style.border = '1px solid ' + (isOk ? 'rgba(34,197,94,.2)' : 'rgba(239,68,68,.2)');
+}
+
+function showResult(type, msg) {
+  const el = document.getElementById('val-result');
+  el.innerHTML = '<div style="color:' + (type==='error'?'#f87171':'#4ade80') + ';font-size:.9rem"><i class="fas fa-' + (type==='error'?'times':'check') + '-circle" style="margin-right:8px"></i>' + msg + '</div>';
+  el.style.display = 'block';
+  el.style.background = type==='error' ? 'rgba(239,68,68,.08)' : 'rgba(34,197,94,.08)';
+  el.style.border = '1px solid ' + (type==='error' ? 'rgba(239,68,68,.2)' : 'rgba(34,197,94,.2)');
+}
+</script>
+
+</body>
+</html>
