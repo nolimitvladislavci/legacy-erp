@@ -773,7 +773,7 @@
 <script>
 window.FC = {
   impersonationStart: {% if request.impersonation_active %}{{ request.impersonation_started_at_ts }}{% else %}0{% endif %},
-  notifMarkReadUrl: "{% url 'dashboard' pk=99999 %}",
+  notifMarkReadUrl: "{% url 'notifications:mark_read' pk=99999 %}",
   notifMarkAllUrl: "{% url 'notifications:mark_all_read' %}",
   notifApiUrl: "{% url 'notifications:api' %}"
 };

@@ -449,7 +449,7 @@ function dismissPushBanner(){
       </div>
       {% if active_iv_list %}
         {% for iv in active_iv_list %}
-        <a href="{% url 'interventions:detail' iv.pk %}" style="text-decoration:none"><div class="t-row" style="cursor:pointer">
+        <a href="{% url 'interventions:field' iv.pk %}" style="text-decoration:none"><div class="t-row" style="cursor:pointer">
           <div style="flex:1;min-width:0">
             <div class="t-main">{{ iv.title }}</div>
             <div class="t-sub">{{ iv.address|default:iv.client_name }} · {% if iv.assigned_to %}{{ iv.assigned_to.get_full_name|default:iv.assigned_to.username }}{% else %}Nedodijeljena{% endif %}</div>
