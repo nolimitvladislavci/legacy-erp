@@ -1,0 +1,226 @@
+═══════════════════════════════════════════════════════════
+  LIMIT Connect Load Test — Sun Mar 29 03:21:06 AM CEST 2026
+  Target: 150 concurrent users
+  PgBouncer: active (port 6432)
+  Gunicorn: 3 workers
+═══════════════════════════════════════════════════════════
+
+═══ PHASE 1: ANONYMOUS (brochures, register, public) ═══
+
+── Validator brochure (30c) (c=30, n=300) ──
+
+── Golubar brochure (30c) (c=30, n=300) ──
+Complete requests:      300
+Failed requests:        2
+Non-2xx responses:      2
+Requests per second:    453.11 [#/sec] (mean)
+Time per request:       66.209 [ms] (mean)
+Time per request:       2.207 [ms] (mean, across all concurrent requests)
+  50%     48
+  95%     55
+  99%     56
+ 100%    656 (longest request)
+
+── Register step1 (30c) (c=30, n=300) ──
+Complete requests:      300
+Failed requests:        0
+Non-2xx responses:      300
+Requests per second:    994.63 [#/sec] (mean)
+Time per request:       30.162 [ms] (mean)
+Time per request:       1.005 [ms] (mean, across all concurrent requests)
+  50%     26
+  95%     50
+  99%     51
+ 100%     52 (longest request)
+
+── Validator brochure (75c) (c=75, n=750) ──
+Complete requests:      750
+Failed requests:        0
+Non-2xx responses:      750
+Requests per second:    1171.12 [#/sec] (mean)
+Time per request:       64.041 [ms] (mean)
+Time per request:       0.854 [ms] (mean, across all concurrent requests)
+  50%     62
+  95%     69
+  99%     70
+ 100%     72 (longest request)
+
+── Register step1 (75c) (c=75, n=750) ──
+Complete requests:      750
+Failed requests:        0
+Non-2xx responses:      750
+Requests per second:    398.59 [#/sec] (mean)
+Time per request:       188.162 [ms] (mean)
+Time per request:       2.509 [ms] (mean, across all concurrent requests)
+  50%     75
+  95%    113
+  99%   1083
+ 100%   1174 (longest request)
+
+── Validator brochure (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    1123.37 [#/sec] (mean)
+Time per request:       133.526 [ms] (mean)
+Time per request:       0.890 [ms] (mean, across all concurrent requests)
+  50%    131
+  95%    148
+  99%    151
+ 100%    156 (longest request)
+
+── Register step1 (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    590.66 [#/sec] (mean)
+Time per request:       253.952 [ms] (mean)
+Time per request:       1.693 [ms] (mean, across all concurrent requests)
+  50%    138
+  95%   1292
+  99%   1302
+ 100%   1372 (longest request)
+
+── Golubar brochure (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    630.72 [#/sec] (mean)
+Time per request:       237.825 [ms] (mean)
+Time per request:       1.585 [ms] (mean, across all concurrent requests)
+  50%    122
+  95%   1219
+  99%   1224
+ 100%   1365 (longest request)
+
+═══ PHASE 2: LOGIN PAGE (full middleware stack) ═══
+
+── Login page (30c) (c=30, n=300) ──
+Complete requests:      300
+Failed requests:        0
+Non-2xx responses:      300
+Requests per second:    1176.52 [#/sec] (mean)
+Time per request:       25.499 [ms] (mean)
+Time per request:       0.850 [ms] (mean, across all concurrent requests)
+  50%     23
+  95%     35
+  99%     39
+ 100%     40 (longest request)
+
+── Login page (75c) (c=75, n=750) ──
+Complete requests:      750
+Failed requests:        0
+Non-2xx responses:      750
+Requests per second:    1143.86 [#/sec] (mean)
+Time per request:       65.567 [ms] (mean)
+Time per request:       0.874 [ms] (mean, across all concurrent requests)
+  50%     63
+  95%     79
+  99%     83
+ 100%     84 (longest request)
+
+── Login page (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    613.81 [#/sec] (mean)
+Time per request:       244.376 [ms] (mean)
+Time per request:       1.629 [ms] (mean, across all concurrent requests)
+  50%    126
+  95%   1265
+  99%   1280
+ 100%   1376 (longest request)
+
+═══ PHASE 3: STRESS (150-200 concurrent) ═══
+
+── Validator (200c STRESS) (c=200, n=2000) ──
+Complete requests:      2000
+Failed requests:        0
+Non-2xx responses:      2000
+Requests per second:    698.84 [#/sec] (mean)
+Time per request:       286.188 [ms] (mean)
+Time per request:       1.431 [ms] (mean, across all concurrent requests)
+  50%    170
+  95%   1272
+  99%   1299
+ 100%   1347 (longest request)
+
+── Login page (200c STRESS) (c=200, n=2000) ──
+Complete requests:      2000
+Failed requests:        0
+Non-2xx responses:      2000
+Requests per second:    691.88 [#/sec] (mean)
+Time per request:       289.069 [ms] (mean)
+Time per request:       1.445 [ms] (mean, across all concurrent requests)
+  50%    170
+  95%   1341
+  99%   1342
+ 100%   1358 (longest request)
+
+── Register (200c STRESS) (c=200, n=2000) ──
+Complete requests:      2000
+Failed requests:        0
+Non-2xx responses:      2000
+Requests per second:    709.95 [#/sec] (mean)
+Time per request:       281.710 [ms] (mean)
+Time per request:       1.409 [ms] (mean, across all concurrent requests)
+  50%    167
+  95%   1291
+  99%   1294
+ 100%   1349 (longest request)
+
+═══ PHASE 4: API ENDPOINTS ═══
+
+── OIB Lookup API (50c) (c=50, n=500) ──
+Complete requests:      500
+Failed requests:        0
+Non-2xx responses:      500
+Requests per second:    1136.68 [#/sec] (mean)
+Time per request:       43.988 [ms] (mean)
+Time per request:       0.880 [ms] (mean, across all concurrent requests)
+  50%     42
+  95%     48
+  99%     49
+ 100%     50 (longest request)
+
+── OIB Lookup API (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    615.36 [#/sec] (mean)
+Time per request:       243.759 [ms] (mean)
+Time per request:       1.625 [ms] (mean, across all concurrent requests)
+  50%    128
+  95%   1233
+  99%   1241
+ 100%   1358 (longest request)
+
+═══ PGBOUNCER STATS ═══
+ database  |     user      | cl_active | cl_waiting | cl_active_cancel_req | cl_waiting_cancel_req | sv_active | sv_active_cancel | sv_being_canceled | sv_idle | sv_used | sv_tested | sv_login | maxwait | maxwait_us |  pool_mode  
+-----------+---------------+-----------+------------+----------------------+-----------------------+-----------+------------------+-------------------+---------+---------+-----------+----------+---------+------------+-------------
+ fina_erp  | viskovic_user |         0 |          0 |                    0 |                     0 |         0 |                0 |                 0 |       0 |       1 |         0 |        0 |       0 |          0 | transaction
+ pgbouncer | pgbouncer     |         1 |          0 |                    0 |                     0 |         0 |                0 |                 0 |       0 |       0 |         0 |        0 |       0 |          0 | statement
+(2 rows)
+
+ database  | total_xact_count | total_query_count | total_received | total_sent | total_xact_time | total_query_time | total_wait_time | avg_xact_count | avg_query_count | avg_recv | avg_sent | avg_xact_time | avg_query_time | avg_wait_time 
+-----------+------------------+-------------------+----------------+------------+-----------------+------------------+-----------------+----------------+-----------------+----------+----------+---------------+----------------+---------------
+ fina_erp  |                1 |                 1 |             57 |        170 |            1195 |             1195 |           16054 |              0 |               0 |        0 |        0 |             0 |              0 |             0
+ pgbouncer |                6 |                 6 |              0 |          0 |               0 |                0 |               0 |              0 |               0 |        0 |        0 |             0 |              0 |             0
+(2 rows)
+
+
+═══ SYSTEM STATS ═══
+CPU load:
+ 03:22:01 up 11 days,  8:33,  5 users,  load average: 2.89, 2.55, 2.49
+Memory:
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       3.3Gi       339Mi       144Mi       4.4Gi       4.3Gi
+Swap:           17Gi       3.1Gi        14Gi
+PostgreSQL connections:
+ active 
+--------
+     11
+(1 row)
+
+
+═══ LOAD TEST COMPLETE ═══

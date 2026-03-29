@@ -1,0 +1,229 @@
+═══════════════════════════════════════════════════════════
+  LIMIT Connect Load Test — Sun Mar 29 03:18:09 AM CEST 2026
+  Target: 150 concurrent users
+  PgBouncer: active (port 6432, transaction pooling)
+  Gunicorn: 3 workers
+═══════════════════════════════════════════════════════════
+Phase 1: WARMUP (30 concurrent)
+────────────────────────────────
+
+── Dashboard (30c) (c=30, n=300) ──
+Complete requests:      300
+Failed requests:        0
+Non-2xx responses:      300
+Requests per second:    4998.17 [#/sec] (mean)
+Time per request:       6.002 [ms] (mean)
+Time per request:       0.200 [ms] (mean, across all concurrent requests)
+  50%      5
+  95%      8
+  99%      9
+
+── Invoicing (30c) (c=30, n=300) ──
+Complete requests:      300
+Failed requests:        0
+Non-2xx responses:      300
+Requests per second:    5362.79 [#/sec] (mean)
+Time per request:       5.594 [ms] (mean)
+Time per request:       0.186 [ms] (mean, across all concurrent requests)
+  50%      5
+  95%      8
+  99%      9
+
+── Landing page (30c) (c=30, n=300) ──
+Complete requests:      300
+Failed requests:        0
+Non-2xx responses:      300
+Requests per second:    4942.75 [#/sec] (mean)
+Time per request:       6.070 [ms] (mean)
+Time per request:       0.202 [ms] (mean, across all concurrent requests)
+  50%      5
+  95%      8
+  99%     10
+Phase 2: RAMP (75 concurrent)
+──────────────────────────────
+
+── Dashboard (75c) (c=75, n=750) ──
+Complete requests:      750
+Failed requests:        0
+Non-2xx responses:      750
+Requests per second:    5327.27 [#/sec] (mean)
+Time per request:       14.078 [ms] (mean)
+Time per request:       0.188 [ms] (mean, across all concurrent requests)
+  50%     13
+  95%     18
+  99%     20
+
+── POS Joker (75c) (c=75, n=750) ──
+Complete requests:      750
+Failed requests:        0
+Non-2xx responses:      750
+Requests per second:    5278.86 [#/sec] (mean)
+Time per request:       14.208 [ms] (mean)
+Time per request:       0.189 [ms] (mean, across all concurrent requests)
+  50%     14
+  95%     18
+  99%     20
+
+── BORG Hub (75c) (c=75, n=750) ──
+Complete requests:      750
+Failed requests:        0
+Non-2xx responses:      750
+Requests per second:    1340.45 [#/sec] (mean)
+Time per request:       55.952 [ms] (mean)
+Time per request:       0.746 [ms] (mean, across all concurrent requests)
+  50%     23
+  95%    353
+  99%    362
+
+── Board Version API (75c) (c=75, n=750) ──
+Complete requests:      750
+Failed requests:        0
+Non-2xx responses:      750
+Requests per second:    5332.54 [#/sec] (mean)
+Time per request:       14.065 [ms] (mean)
+Time per request:       0.188 [ms] (mean, across all concurrent requests)
+  50%     13
+  95%     24
+  99%     26
+Phase 3: FULL LOAD (150 concurrent)
+────────────────────────────────────
+
+── Dashboard (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    2661.41 [#/sec] (mean)
+Time per request:       56.361 [ms] (mean)
+Time per request:       0.376 [ms] (mean, across all concurrent requests)
+  50%     41
+  95%    211
+  99%    212
+
+── Invoicing (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    3439.37 [#/sec] (mean)
+Time per request:       43.613 [ms] (mean)
+Time per request:       0.291 [ms] (mean, across all concurrent requests)
+  50%     45
+  95%     56
+  99%     56
+
+── POS Joker (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    2310.76 [#/sec] (mean)
+Time per request:       64.914 [ms] (mean)
+Time per request:       0.433 [ms] (mean, across all concurrent requests)
+  50%     52
+  95%    132
+  99%    135
+
+── BORG Hub (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    3043.69 [#/sec] (mean)
+Time per request:       49.282 [ms] (mean)
+Time per request:       0.329 [ms] (mean, across all concurrent requests)
+  50%     52
+  95%     55
+  99%     57
+
+── Partners (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    2527.62 [#/sec] (mean)
+Time per request:       59.344 [ms] (mean)
+Time per request:       0.396 [ms] (mean, across all concurrent requests)
+  50%     53
+  95%     90
+  99%     95
+
+── Work Orders (150c) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    2501.21 [#/sec] (mean)
+Time per request:       59.971 [ms] (mean)
+Time per request:       0.400 [ms] (mean, across all concurrent requests)
+  50%     53
+  95%    120
+  99%    122
+
+── Board Version API (150c) (c=150, n=3000) ──
+Complete requests:      3000
+Failed requests:        0
+Non-2xx responses:      3000
+Requests per second:    2663.30 [#/sec] (mean)
+Time per request:       56.321 [ms] (mean)
+Time per request:       0.375 [ms] (mean, across all concurrent requests)
+  50%     55
+  95%    115
+  99%    118
+
+── Brochure (150c anon) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    3154.68 [#/sec] (mean)
+Time per request:       47.548 [ms] (mean)
+Time per request:       0.317 [ms] (mean, across all concurrent requests)
+  50%     52
+  95%     82
+  99%     84
+
+── Register step1 (150c anon) (c=150, n=1500) ──
+Complete requests:      1500
+Failed requests:        0
+Non-2xx responses:      1500
+Requests per second:    2865.98 [#/sec] (mean)
+Time per request:       52.338 [ms] (mean)
+Time per request:       0.349 [ms] (mean, across all concurrent requests)
+  50%     53
+  95%     56
+  99%     57
+Phase 4: STRESS (200 concurrent — over target)
+────────────────────────────────────────────────
+
+── Dashboard (200c STRESS) (c=200, n=2000) ──
+Complete requests:      2000
+Failed requests:        0
+Non-2xx responses:      2000
+Requests per second:    2842.31 [#/sec] (mean)
+Time per request:       70.365 [ms] (mean)
+Time per request:       0.352 [ms] (mean, across all concurrent requests)
+  50%     71
+  95%     78
+  99%     80
+
+── Board API (200c STRESS) (c=200, n=4000) ──
+Complete requests:      4000
+Failed requests:        0
+Non-2xx responses:      4000
+Requests per second:    2940.56 [#/sec] (mean)
+Time per request:       68.014 [ms] (mean)
+Time per request:       0.340 [ms] (mean, across all concurrent requests)
+  50%     70
+  95%     93
+  99%     96
+Phase 5: PgBouncer stats
+────────────────────────
+ database  |     user      | cl_active | cl_waiting | cl_active_cancel_req | cl_waiting_cancel_req | sv_active | sv_active_cancel | sv_being_canceled | sv_idle | sv_used | sv_tested | sv_login | maxwait | maxwait_us |  pool_mode  
+-----------+---------------+-----------+------------+----------------------+-----------------------+-----------+------------------+-------------------+---------+---------+-----------+----------+---------+------------+-------------
+ fina_erp  | viskovic_user |         0 |          0 |                    0 |                     0 |         0 |                0 |                 0 |       0 |       1 |         0 |        0 |       0 |          0 | transaction
+ pgbouncer | pgbouncer     |         1 |          0 |                    0 |                     0 |         0 |                0 |                 0 |       0 |       0 |         0 |        0 |       0 |          0 | statement
+(2 rows)
+
+ database  | total_xact_count | total_query_count | total_received | total_sent | total_xact_time | total_query_time | total_wait_time | avg_xact_count | avg_query_count | avg_recv | avg_sent | avg_xact_time | avg_query_time | avg_wait_time 
+-----------+------------------+-------------------+----------------+------------+-----------------+------------------+-----------------+----------------+-----------------+----------+----------+---------------+----------------+---------------
+ fina_erp  |                1 |                 1 |             57 |        170 |            1195 |             1195 |           16054 |              0 |               0 |        0 |        0 |             0 |              0 |             0
+ pgbouncer |                4 |                 4 |              0 |          0 |               0 |                0 |               0 |              0 |               0 |        0 |        0 |             0 |              0 |             0
+(2 rows)
+
+
+═══ LOAD TEST COMPLETE ═══
+Results saved to: /var/www/fina-connect/loadtest/results_20260329_0318.txt
