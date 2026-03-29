@@ -1,9 +1,11 @@
 from django.urls import path
 from . import views
+from . import portal_views
 
 app_name = 'knjiznica'
 
 urlpatterns = [
+    # ═══ ADMIN BACKEND (login_required) ═══
     path('', views.dashboard, name='dashboard'),
 
     # Katalog
@@ -26,4 +28,21 @@ urlpatterns = [
     # Statistika
     path('statistika/', views.statistics, name='statistics'),
     path('statistika/nsk-export/', views.nsk_export, name='nsk_export'),
+
+    # ═══ JAVNI PORTAL (bez django login-a) ═══
+    path('portal/<slug:slug>/', portal_views.portal_home, name='portal_home'),
+    path('portal/<slug:slug>/katalog/', portal_views.portal_catalog, name='portal_catalog'),
+    path('portal/<slug:slug>/knjiga/<int:pk>/', portal_views.portal_book_detail, name='portal_book_detail'),
+    path('portal/<slug:slug>/mediji/', portal_views.portal_media, name='portal_media'),
+    path('portal/<slug:slug>/mediji/<int:pk>/', portal_views.portal_media_watch, name='portal_media_watch'),
+    path('portal/<slug:slug>/bedževi/', portal_views.portal_badges, name='portal_badges'),
+
+    # Portal — PIN login
+    path('portal/<slug:slug>/prijava/', portal_views.portal_login, name='portal_login'),
+    path('portal/<slug:slug>/odjava/', portal_views.portal_logout, name='portal_logout'),
+
+    # Portal — Obitelj (zahtijeva PIN)
+    path('portal/<slug:slug>/obitelj/', portal_views.portal_family, name='portal_family'),
+    path('portal/<slug:slug>/dijete/<int:pk>/', portal_views.portal_child_detail, name='portal_child_detail'),
+    path('portal/<slug:slug>/zabilježi-čitanje/', portal_views.portal_log_reading, name='portal_log_reading'),
 ]

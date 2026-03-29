@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Korisnici — Dom{% endblock %}
+{% block page_title %}Korisnici doma{% endblock %}
+{% block extra_css %}
+<style>
+.res-row{background:#1a1a2e;border:1px solid #c8a24e15;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:1rem;transition:border-color .2s}
+.res-row:hover{border-color:#c8a24e55}
+.res-avatar{width:40px;height:40px;border-radius:50%;background:#c8a24e22;display:flex;align-items:center;justify-content:center;font-weight:700;color:#c8a24e;font-size:1.1rem}
+.res-info{flex:1}
+.res-info .name{color:#f0e6d3;font-weight:600}
+.res-info .meta{font-size:.8rem;color:#888}
+.status-pill{font-size:.75rem;padding:2px 10px;border-radius:12px}
+.status-pill.active{background:#22c55e22;color:#22c55e}
+.status-pill.waitlist{background:#f59e0b22;color:#f59e0b}
+.status-pill.discharged{background:#64748b22;color:#64748b}
+.status-pill.deceased{background:#ef444422;color:#ef4444}
+.filter-bar select{background:#16213e;color:#f0e6d3;border:1px solid #c8a24e33;border-radius:6px;padding:4px 10px;font-size:.85rem}
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif"><i class="bi bi-people"></i> Korisnici doma</h2>
+  <a href="{% url 'eldercare:resident_create' %}" class="btn btn-sm" style="background:#c8a24e;color:#1a1a2e;font-weight:600"><i class="bi bi-plus-lg"></i> Novi korisnik</a>
+</div>
+
+<div class="filter-bar mb-3">
+  <form method="get">
+    <select name="status" onchange="this.form.submit()">
+      <option value="active" {% if status_filter == "active" %}selected{% endif %}>Aktivni</option>
+      <option value="waitlist" {% if status_filter == "waitlist" %}selected{% endif %}>Lista cekanja</option>
+      <option value="discharged" {% if status_filter == "discharged" %}selected{% endif %}>Otpusteni</option>
+      <option value="" {% if not status_filter %}selected{% endif %}>Svi</option>
+    </select>
+  </form>
+</div>
+
+{% for r in residents %}
+<a href="{% url 'eldercare:resident_detail' pk=r.pk %}" style="text-decoration:none">
+  <div class="res-row">
+    <div class="res-avatar">{{ r.first_name|first }}{{ r.last_name|first }}</div>
+    <div class="res-info">
+      <div class="name">{{ r.first_name }} {{ r.last_name }}</div>
+      <div class="meta">
+        {{ r.age }} god.
+        {% if r.room %} · Soba {{ r.room.number }}{% else %} · Bez sobe{% endif %}
+        {% if r.mobility_notes %} · {{ r.mobility_notes }}{% endif %}
+      </div>
+    </div>
+    <span class="status-pill {{ r.status }}">{{ r.get_status_display }}</span>
+  </div>
+</a>
+{% empty %}
+<div style="text-align:center;padding:3rem;color:#666">
+  <p>Nema korisnika doma.</p>
+  <a href="{% url 'eldercare:resident_create' %}" class="btn btn-sm" style="background:#c8a24e;color:#1a1a2e">Prijemi prvog korisnika</a>
+</div>
+{% endfor %}
+{% endblock %}

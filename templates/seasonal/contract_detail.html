@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Ugovor — {{ contract.worker.full_name }}{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-3">
+  {% include "partials/_page_header.html" with title=contract.worker.full_name subtitle=contract.get_contract_type_display icon="fas fa-file-contract" %}
+
+  <div class="row g-4">
+    <div class="col-md-5">
+
+      <!-- Detalji ugovora -->
+      <div class="card bg-dark border-secondary mb-3">
+        <div class="card-header fw-semibold">Detalji ugovora</div>
+        <div class="card-body">
+          <dl class="row small mb-0">
+            <dt class="col-5 text-muted">Status</dt>
+            <dd class="col-7">
+              {% if contract.status == 'active' %}<span class="badge bg-success">Aktivan</span>
+              {% elif contract.status == 'pending' %}<span class="badge bg-info text-dark">Na čekanju</span>
+              {% elif contract.status == 'completed' %}<span class="badge bg-secondary">Završen</span>
+              {% else %}<span class="badge bg-danger">Otkazan</span>{% endif %}
+            </dd>
+            <dt class="col-5 text-muted">Periode</dt>
+            <dd class="col-7">{{ contract.start_date }} → {{ contract.end_date }}<br><span class="text-muted">{{ contract.duration_days }} dana ukupno</span></dd>
+            <dt class="col-5 text-muted">Odrađeno</dt>
+            <dd class="col-7">{{ days_worked }} dana</dd>
+            <dt class="col-5 text-muted">Bruto</dt>
+            <dd class="col-7 text-warning fw-bold">{{ contract.gross_amount }} €</dd>
+            <dt class="col-5 text-muted">Neto ~</dt>
+            <dd class="col-7 text-success">{{ net_estimate }} €</dd>
+            <dt class="col-5 text-muted">Isplata</dt>
+            <dd class="col-7">{{ contract.get_payment_cycle_display }}</dd>
+            {% if contract.position %}
+            <dt class="col-5 text-muted">Pozicija</dt>
+            <dd class="col-7">{{ contract.position }}</dd>
+            {% endif %}
+          </dl>
+        </div>
+      </div>
+
+      <!-- HZMO Status -->
+      {% if contract.contract_type == 'odredjeno' %}
+      <div class="card border-secondary mb-3 {% if not contract.hzmo_prijava_sent and today >= contract.hzmo_prijava_deadline %}border-danger{% endif %}" style="background:#1a1a2e">
+        <div class="card-header fw-semibold text-warning">
+          <i class="fas fa-building-columns me-2"></i>HZMO — Obvezne prijave
+        </div>
+        <div class="card-body small">
+          <!-- M-1 -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <div class="fw-semibold">M-1 Prijava</div>
+              <div class="text-muted">Rok: {{ hzmo_prijava_deadline }}</div>
+            </div>
+            {% if contract.hzmo_prijava_sent %}
+              <span class="badge bg-success"><i class="fas fa-check me-1"></i>Poslano {{ contract.hzmo_prijava_date }}</span>
+            {% else %}
+              <form method="post" action="{% url 'seasonal:hzmo_mark' contract.pk 'm1' %}" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-success">Označi kao poslano</button>
+              </form>
+            {% endif %}
+          </div>
+          <hr class="border-secondary my-2">
+          <!-- M-2 -->
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold">M-2 Odjava</div>
+              <div class="text-muted">Rok: {{ hzmo_odjava_deadline }}</div>
+            </div>
+            {% if contract.hzmo_odjava_sent %}
+              <span class="badge bg-success"><i class="fas fa-check me-1"></i>Poslano {{ contract.hzmo_odjava_date }}</span>
+            {% else %}
+              <form method="post" action="{% url 'seasonal:hzmo_mark' contract.pk 'm2' %}" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-secondary" {% if contract.status != 'completed' %}disabled title="Dostupno nakon završetka ugovora"{% endif %}>
+                  Označi kao poslano
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Akcije -->
+      <div class="card bg-dark border-secondary">
+        <div class="card-body d-grid gap-2">
+          {% if contract.status == 'pending' %}
+          <form method="post" action="{% url 'seasonal:contract_activate' contract.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-success w-100"><i class="fas fa-play me-1"></i>Aktiviraj (radnik počeo raditi)</button>
+          </form>
+          {% endif %}
+          {% if contract.status == 'active' %}
+          <a href="{% url 'seasonal:payment_create' contract.pk %}" class="btn btn-warning">
+            <i class="fas fa-euro-sign me-1"></i>Dodaj isplatu
+          </a>
+          <form method="post" action="{% url 'seasonal:contract_complete' contract.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-outline-secondary w-100"><i class="fas fa-flag-checkered me-1"></i>Završi sezonu</button>
+          </form>
+          {% endif %}
+          {% if contract.status == 'completed' %}
+          <a href="{% url 'seasonal:payment_create' contract.pk %}" class="btn btn-outline-warning">
+            <i class="fas fa-euro-sign me-1"></i>Dodaj isplatu
+          </a>
+          {% endif %}
+          <a href="{% url 'seasonal:worker_detail' contract.worker.pk %}" class="btn btn-outline-secondary btn-sm">
+            ← Radnik
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Isplate -->
+    <div class="col-md-7">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold"><i class="fas fa-euro-sign text-warning me-2"></i>Isplate</span>
+          {% if contract.status in 'active,completed' %}
+          <a href="{% url 'seasonal:payment_create' contract.pk %}" class="btn btn-sm btn-warning">+ Isplata</a>
+          {% endif %}
+        </div>
+        <div class="card-body p-0">
+          {% if payments %}
+          <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+              <thead><tr><th>Datum</th><th>Bruto</th><th>Porez</th><th>Neto</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                {% for p in payments %}
+                <tr>
+                  <td class="small">{{ p.payment_date }}</td>
+                  <td class="text-warning">{{ p.gross_amount }} €</td>
+                  <td class="text-muted small">{{ p.tax_amount }} €</td>
+                  <td class="text-success fw-bold">{{ p.net_amount }} €</td>
+                  <td>
+                    {% if p.status == 'paid' %}<span class="badge bg-success">Isplaćeno</span>
+                    {% elif p.status == 'approved' %}<span class="badge bg-info text-dark">Odobreno</span>
+                    {% else %}<span class="badge bg-secondary">Planirano</span>{% endif %}
+                  </td>
+                  <td>
+                    {% if p.status == 'planned' %}
+                    <form method="post" action="{% url 'seasonal:payment_approve' p.pk %}">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-outline-success py-0">Odobri</button>
+                    </form>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot class="border-top border-secondary">
+                <tr>
+                  <td class="text-muted small">Ukupno</td>
+                  <td class="text-warning fw-bold">{{ payments|length }} isplata</td>
+                  <td></td>
+                  <td class="text-success fw-bold">
+                    {{ payments|length }} × ...
+                  </td>
+                  <td colspan="2"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          {% else %}
+          {% include "partials/_empty_state.html" with icon="fas fa-euro-sign" msg="Nema isplata" %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

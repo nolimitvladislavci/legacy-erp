@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Sezonski radnici{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-3">
+
+  {% include "partials/_page_header.html" with title="Sezonski radnici" subtitle="Upravljanje ugovorima, HZMO rokovima i isplatama" icon="fas fa-umbrella-beach" %}
+
+  {% if hzmo_alerts %}
+  <div class="alert alert-danger border-0 mb-4" style="background:#2d0a0a">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <i class="fas fa-exclamation-triangle text-danger"></i>
+      <strong class="text-danger">{{ hzmo_alerts|length }} HZMO rok{{ hzmo_alerts|length|pluralize:",ova" }} zahtijeva pažnju</strong>
+    </div>
+    {% for a in hzmo_alerts %}
+    <div class="d-flex align-items-center gap-2 small mt-1">
+      {% if a.urgent %}<span class="badge bg-danger">HITNO</span>{% else %}<span class="badge bg-warning text-dark">{{ a.days_left }}d</span>{% endif %}
+      <span class="text-white">{{ a.type }} — <strong>{{ a.contract.worker.full_name }}</strong></span>
+      <span class="text-muted">rok {{ a.deadline }}</span>
+      <a href="{% url 'seasonal:contract_detail' a.contract.pk %}" class="ms-auto btn btn-sm btn-outline-danger py-0">Otvori</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    {% include "partials/_stat_card.html" with icon="fas fa-users" color="text-primary" label="Radnici u bazi" value=stats.total_workers %}
+    {% include "partials/_stat_card.html" with icon="fas fa-hard-hat" color="text-success" label="Aktivni sad" value=stats.active_now %}
+    {% include "partials/_stat_card.html" with icon="fas fa-file-contract" color="text-info" label="Ugovori {{ today.year }}" value=stats.contracts_year %}
+    {% include "partials/_stat_card.html" with icon="fas fa-euro-sign" color="text-warning" label="Isplaćeno {{ today.year }}" value=stats.total_gross_year sub="EUR bruto" %}
+    {% include "partials/_stat_card.html" with icon="fas fa-exclamation-circle" color="text-danger" label="HZMO alarmi" value=stats.hzmo_alert_count %}
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold"><i class="fas fa-hard-hat text-success me-2"></i>Aktivni radnici</span>
+          <a href="{% url 'seasonal:worker_create' %}" class="btn btn-sm btn-success">
+            <i class="fas fa-plus me-1"></i>Novi radnik
+          </a>
+        </div>
+        <div class="card-body p-0">
+          {% if active_contracts %}
+          <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+              <thead><tr>
+                <th>Radnik</th><th>Pozicija</th><th>Kraj ugovora</th><th>Bruto</th><th></th>
+              </tr></thead>
+              <tbody>
+                {% for c in active_contracts %}
+                <tr>
+                  <td><strong>{{ c.worker.full_name }}</strong><br><small class="text-muted">{{ c.worker.oib }}</small></td>
+                  <td class="text-muted small">{{ c.position|default:"—" }}</td>
+                  <td>
+                    {{ c.end_date }}
+                    {% with days=c.end_date|timeuntil %}
+                    <br><small class="text-muted">za {{ days }}</small>
+                    {% endwith %}
+                  </td>
+                  <td class="text-warning">{{ c.gross_amount }} €</td>
+                  <td><a href="{% url 'seasonal:contract_detail' c.pk %}" class="btn btn-sm btn-outline-secondary">Detalji</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          {% include "partials/_empty_state.html" with icon="fas fa-umbrella-beach" msg="Nema aktivnih radnika" %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header">
+          <span class="fw-semibold"><i class="fas fa-calendar-alt text-info me-2"></i>Predstojeći početci</span>
+        </div>
+        <div class="card-body p-0">
+          {% if upcoming_contracts %}
+          <div class="list-group list-group-flush">
+            {% for c in upcoming_contracts %}
+            <a href="{% url 'seasonal:contract_detail' c.pk %}" class="list-group-item list-group-item-action bg-dark border-secondary">
+              <div class="d-flex justify-content-between">
+                <strong class="text-white">{{ c.worker.full_name }}</strong>
+                <span class="badge bg-info text-dark">{{ c.start_date }}</span>
+              </div>
+              <small class="text-muted">{{ c.get_contract_type_display }}</small>
+            </a>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="p-3 text-muted text-center small">Nema predstojecih u sljedecih 14 dana</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card bg-dark border-secondary mt-3">
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{% url 'seasonal:worker_list' %}" class="btn btn-outline-primary">
+              <i class="fas fa-users me-2"></i>Svi radnici
+            </a>
+            <a href="{% url 'seasonal:worker_create' %}" class="btn btn-success">
+              <i class="fas fa-user-plus me-2"></i>Dodaj radnika + ugovor
+            </a>
+            <a href="{% url 'seasonal:cost_report' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-chart-bar me-2"></i>Izvještaj troškova {{ today.year }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

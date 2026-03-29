@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Novi clan — Knjiznica{% endblock %}
+{% block page_title %}Novi clan{% endblock %}
+{% block extra_css %}
+<style>
+.lib-form{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem}
+.lib-form label{color:#c8a24e;font-size:.85rem;font-weight:600;margin-bottom:.3rem}
+.lib-form input,.lib-form select{background:#16213e;color:#f0e6d3;border:1px solid #c8a24e33;border-radius:6px;padding:.5rem .8rem;width:100%}
+.lib-form input:focus,.lib-form select:focus{border-color:#c8a24e;outline:none;box-shadow:0 0 0 2px #c8a24e22}
+</style>
+{% endblock %}
+{% block content %}
+<a href="{% url 'library:member_list' %}" style="color:#c8a24e;font-size:.85rem"><i class="bi bi-arrow-left"></i> Clanovi</a>
+<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin:.5rem 0 1rem"><i class="bi bi-person-plus"></i> Novi clan</h2>
+<form method="post" class="lib-form">
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-md-4"><label>Ime *</label><input type="text" name="first_name" required></div>
+    <div class="col-md-4"><label>Prezime *</label><input type="text" name="last_name" required></div>
+    <div class="col-md-4"><label>OIB</label><input type="text" name="oib" maxlength="13"></div>
+    <div class="col-md-4"><label>Email</label><input type="email" name="email"></div>
+    <div class="col-md-4"><label>Telefon</label><input type="text" name="phone"></div>
+    <div class="col-md-4"><label>Datum rodjenja</label><input type="date" name="date_of_birth"></div>
+    <div class="col-md-8"><label>Adresa</label><input type="text" name="address"></div>
+    <div class="col-md-4"><label>Tip clanarine</label><select name="membership_type"><option value="">—</option>{% for t in types %}<option value="{{ t.pk }}">{{ t.name }} ({{ t.max_books }} knjiga, {{ t.loan_days }}d)</option>{% endfor %}</select></div>
+  </div>
+  <div class="mt-4">
+    <button type="submit" class="btn" style="background:#c8a24e;color:#1a1a2e;font-weight:600;padding:.6rem 2rem"><i class="bi bi-check-lg"></i> Upisi clana</button>
+    <a href="{% url 'library:member_list' %}" class="btn btn-outline-secondary ms-2">Odustani</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Naplata — {{ month }}/{{ year }} — Dom{% endblock %}
+{% block page_title %}Mjesecna naplata{% endblock %}
+{% block extra_css %}
+<style>
+.bill-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem}
+.month-nav{display:flex;align-items:center;gap:.8rem}
+.month-nav a{color:#c8a24e;text-decoration:none;font-size:1.2rem}
+.month-nav .current{font-size:1.3rem;color:#f0e6d3;font-weight:600;font-family:"Cormorant Garamond",serif}
+.charge-card{background:#1a1a2e;border:1px solid #c8a24e15;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.charge-name{color:#f0e6d3;font-weight:600}
+.charge-meta{font-size:.8rem;color:#888}
+.charge-amount{font-size:1.1rem;font-weight:700;color:#c8a24e}
+.charge-status{font-size:.75rem;padding:2px 10px;border-radius:12px}
+.charge-status.paid{background:#22c55e22;color:#22c55e}
+.charge-status.sent{background:#3b82f622;color:#3b82f6}
+.charge-status.overdue{background:#ef444422;color:#ef4444}
+.charge-status.draft{background:#64748b22;color:#64748b}
+.total-bar{background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #c8a24e44;border-radius:10px;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+.total-bar .total-label{color:#888;font-size:.9rem}
+.total-bar .total-val{font-size:1.5rem;font-weight:700;color:#c8a24e;font-family:"Cormorant Garamond",serif}
+</style>
+{% endblock %}
+{% block content %}
+<div class="bill-header">
+  <h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif"><i class="bi bi-receipt"></i> Naplata boravka</h2>
+  <form method="post" action="{% url 'eldercare:billing_generate' %}">
+    {% csrf_token %}
+    <input type="hidden" name="year" value="{{ year }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <button type="submit" class="btn btn-sm" style="background:#c8a24e;color:#1a1a2e;font-weight:600"><i class="bi bi-calculator"></i> Generiraj naplate</button>
+  </form>
+</div>
+
+<div class="month-nav mb-3">
+  <a href="?year={% if month == 1 %}{{ year|add:"-1" }}{% else %}{{ year }}{% endif %}&month={% if month == 1 %}12{% else %}{{ month|add:"-1" }}{% endif %}"><i class="bi bi-chevron-left"></i></a>
+  <span class="current">{{ month }}/{{ year }}</span>
+  <a href="?year={% if month == 12 %}{{ year|add:"1" }}{% else %}{{ year }}{% endif %}&month={% if month == 12 %}1{% else %}{{ month|add:"1" }}{% endif %}"><i class="bi bi-chevron-right"></i></a>
+</div>
+
+{% for c in charges %}
+<div class="charge-card">
+  <div>
+    <div class="charge-name">{{ c.resident.first_name }} {{ c.resident.last_name }}</div>
+    <div class="charge-meta">
+      {% if c.resident.room %}Soba {{ c.resident.room.number }}{% endif %}
+      · Osnova: {{ c.base_amount }} EUR
+      {% if c.extras %} + Dodaci: {{ c.extras }} EUR{% endif %}
+      {% if c.deductions %} - Odbitak: {{ c.deductions }} EUR{% endif %}
+    </div>
+  </div>
+  <div class="text-end">
+    <div class="charge-amount">{{ c.total_amount }} EUR</div>
+    <span class="charge-status {{ c.status }}">{{ c.get_status_display }}</span>
+  </div>
+</div>
+{% empty %}
+<div style="text-align:center;padding:3rem;color:#666">
+  <p>Nema naplata za ovaj mjesec.</p>
+</div>
+{% endfor %}
+
+{% if charges %}
+<div class="total-bar">
+  <span class="total-label">Ukupno za {{ month }}/{{ year }}</span>
+  <span class="total-val">{{ total|floatformat:2 }} EUR</span>
+</div>
+{% endif %}
+{% endblock %}

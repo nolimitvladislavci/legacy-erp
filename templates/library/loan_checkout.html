@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Posudba — Knjiznica{% endblock %}
+{% block page_title %}Posudba{% endblock %}
+{% block extra_css %}
+<style>
+.checkout-box{background:#1a1a2e;border:2px solid #c8a24e44;border-radius:16px;padding:2rem;max-width:600px;margin:0 auto}
+.checkout-box h3{color:#c8a24e;font-family:"Cormorant Garamond",serif;text-align:center;margin-bottom:1.5rem}
+.scan-field{position:relative;margin-bottom:1.2rem}
+.scan-field label{color:#c8a24e;font-size:.85rem;font-weight:600;margin-bottom:.4rem;display:block}
+.scan-field input{background:#16213e;color:#f0e6d3;border:2px solid #c8a24e33;border-radius:10px;padding:.8rem 1rem .8rem 3rem;width:100%;font-size:1.1rem;transition:border-color .2s}
+.scan-field input:focus{border-color:#c8a24e;outline:none;box-shadow:0 0 0 3px #c8a24e22}
+.scan-field .icon{position:absolute;left:1rem;top:2.4rem;color:#c8a24e;font-size:1.2rem}
+.scan-hint{text-align:center;color:#666;font-size:.85rem;margin:1.5rem 0}
+.scan-hint i{font-size:2rem;color:#c8a24e33;display:block;margin-bottom:.5rem}
+.member-preview{background:#16213e;border:1px solid #c8a24e33;border-radius:10px;padding:1rem;margin-bottom:1rem;display:none}
+.member-preview.show{display:block}
+.member-preview .name{color:#c8a24e;font-weight:700;font-size:1.1rem}
+.member-preview .meta{color:#888;font-size:.85rem;margin-top:.3rem}
+.member-preview .status-ok{color:#22c55e}
+.member-preview .status-bad{color:#ef4444}
+</style>
+{% endblock %}
+{% block content %}
+<div class="checkout-box">
+  <h3><i class="bi bi-arrow-right-circle"></i> Posudba knjige</h3>
+
+  <div class="scan-hint">
+    <i class="bi bi-qr-code-scan"></i>
+    Skeniraj QR iskaznicu clana + barcode knjige
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="scan-field">
+      <label>1. Clan (QR / clanski broj / OIB)</label>
+      <i class="bi bi-person-badge icon"></i>
+      <input type="text" name="member" id="memberInput" autofocus required
+             placeholder="Skeniraj ili upisi..."
+             autocomplete="off">
+    </div>
+
+    <div class="member-preview" id="memberPreview">
+      <div class="name" id="mpName"></div>
+      <div class="meta" id="mpMeta"></div>
+    </div>
+
+    <div class="scan-field">
+      <label>2. Knjiga (barcode primjerka)</label>
+      <i class="bi bi-upc-scan icon"></i>
+      <input type="text" name="barcode" id="barcodeInput" required
+             placeholder="Skeniraj barcode..."
+             autocomplete="off">
+    </div>
+
+    <button type="submit" class="btn w-100" style="background:#c8a24e;color:#1a1a2e;font-weight:700;padding:.8rem;font-size:1.1rem;border-radius:10px;margin-top:.5rem">
+      <i class="bi bi-check-circle"></i> Posudi
+    </button>
+  </form>
+
+  <div class="text-center mt-3">
+    <a href="{% url 'library:loan_return' %}" style="color:#c8a24e;font-size:.9rem"><i class="bi bi-arrow-left-circle"></i> Vracanje knjige</a>
+    &nbsp;&middot;&nbsp;
+    <a href="{% url 'library:dashboard' %}" style="color:#888;font-size:.9rem">Dashboard</a>
+  </div>
+</div>
+
+<script>
+// QR scan member preview
+document.getElementById('memberInput').addEventListener('change', function() {
+  const val = this.value.trim();
+  if (val.length < 3) return;
+  fetch(`{% url 'library:qr_scan_member' %}?token=${encodeURIComponent(val)}`)
+    .then(r => r.json())
+    .then(data => {
+      const p = document.getElementById('memberPreview');
+      if (data.found) {
+        document.getElementById('mpName').textContent = data.name + ' (' + data.member_number + ')';
+        let meta = 'Posudbi: ' + data.active_loans + '/' + data.max_books;
+        if (parseFloat(data.outstanding_fines) > 0) meta += ' | Dug: ' + data.outstanding_fines + ' EUR';
+        document.getElementById('mpMeta').innerHTML = data.can_borrow
+          ? '<span class="status-ok">&#10003; Moze posuditi</span> | ' + meta
+          : '<span class="status-bad">&#10007; Ne moze posuditi</span> | ' + meta;
+        p.classList.add('show');
+        document.getElementById('barcodeInput').focus();
+      } else {
+        p.classList.remove('show');
+      }
+    }).catch(() => {});
+});
+</script>
+{% endblock %}

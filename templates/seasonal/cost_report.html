@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Izvještaj troškova — Sezonci {% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-3">
+  {% include "partials/_page_header.html" with title="Izvještaj troškova sezone" subtitle=year icon="fas fa-chart-bar" %}
+
+  <div class="row g-3 mb-4">
+    {% include "partials/_stat_card.html" with icon="fas fa-users" color="text-primary" label="Radnika u sezoni" value=workers_count %}
+    {% include "partials/_stat_card.html" with icon="fas fa-file-contract" color="text-info" label="Ugovora" value=contracts|length %}
+    {% include "partials/_stat_card.html" with icon="fas fa-euro-sign" color="text-warning" label="Ukupno bruto" value=total_gross sub="EUR" %}
+    {% include "partials/_stat_card.html" with icon="fas fa-hand-holding-dollar" color="text-success" label="Isplaćeno neto" value=total_paid sub="EUR" %}
+  </div>
+
+  <div class="mb-3 d-flex gap-2 align-items-center">
+    <form method="get" class="d-flex gap-2">
+      <select name="year" class="form-select form-select-sm bg-dark border-secondary text-white" style="width:120px">
+        {% for y in "2024,2025,2026,2027"|split:"," %}
+        <option value="{{ y }}" {% if y == year|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm btn-outline-primary">Prikaži</button>
+    </form>
+  </div>
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-header fw-semibold">Ugovori {{ year }}. godine</div>
+    <div class="card-body p-0">
+      {% if contracts %}
+      <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Radnik</th><th>Vrsta</th><th>Période</th><th>Dana</th>
+              <th>Bruto</th><th>Neto~</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in contracts %}
+            <tr>
+              <td>
+                <a href="{% url 'seasonal:contract_detail' c.pk %}" class="text-white text-decoration-none">
+                  <strong>{{ c.worker.full_name }}</strong>
+                </a><br>
+                <small class="text-muted">{{ c.position|default:"" }}</small>
+              </td>
+              <td class="small text-muted">{{ c.get_contract_type_display }}</td>
+              <td class="small">{{ c.start_date }} → {{ c.end_date }}</td>
+              <td class="text-muted">{{ c.duration_days }}</td>
+              <td class="text-warning fw-bold">{{ c.gross_amount }} €</td>
+              <td class="text-success">{{ c.net_estimate }} €</td>
+              <td>
+                {% if c.status == 'active' %}<span class="badge bg-success">Aktivan</span>
+                {% elif c.status == 'pending' %}<span class="badge bg-info text-dark">Na čekanju</span>
+                {% elif c.status == 'completed' %}<span class="badge bg-secondary">Završen</span>
+                {% else %}<span class="badge bg-danger">Otkazan</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="border-top border-secondary">
+            <tr class="fw-bold">
+              <td colspan="4" class="text-muted">Ukupno</td>
+              <td class="text-warning">{{ total_gross }} €</td>
+              <td class="text-success">{{ total_paid }} €</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {% else %}
+      {% include "partials/_empty_state.html" with icon="fas fa-chart-bar" msg="Nema ugovora za odabranu godinu" %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

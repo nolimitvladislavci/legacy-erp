@@ -626,6 +626,7 @@
             {% if 'helpdesk' in sidebar_enabled_ids %}<a href="/helpdesk/" onclick="closeSidebar()"><i class="fas fa-headset"></i> <span>Helpdesk</span></a>{% endif %}
             {% if 'kindergarten' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/vrtic/" onclick="closeSidebar()"><i class="fas fa-child"></i> <span>Vrtić</span></a>{% endif %}
             {% if 'eldercare' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/dom/" onclick="closeSidebar()"><i class="fas fa-house-user"></i> <span>Dom za starije</span></a>{% endif %}
+            {% if 'library' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/knjiznica/" onclick="closeSidebar()"><i class="fas fa-book-reader"></i> <span>Knjiznica</span></a>{% endif %}
             {% if 'knjiznica' in sidebar_enabled_ids or request.user.is_superuser %}<a href="/knjiznica/" onclick="closeSidebar()"><i class="fas fa-book-reader"></i> <span>Knjižnica</span></a>{% endif %}
             {% if 'udruge' in sidebar_enabled_ids %}<a href="/udruge/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Udruge</span></a>{% endif %}
             {% if 'ai_assistant' in sidebar_enabled_ids %}<a href="{% url 'ai_cockpit' %}" onclick="closeSidebar()"><i class="fas fa-robot"></i> <span>AI Asistent</span></a>{% endif %}

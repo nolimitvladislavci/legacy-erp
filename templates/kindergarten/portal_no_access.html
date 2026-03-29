@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pristup odbijen — {{ company.name }}</title>
+<style>
+body{background:#0d0d1a;font-family:Barlow,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;color:#f0e6d3}
+.box{background:#1a1a2e;border:1px solid #c8a24e33;border-radius:16px;padding:2.5rem;max-width:400px;text-align:center}
+.box h3{color:#c8a24e;font-family:"Cormorant Garamond",serif}
+.box p{color:#888;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="box">
+  <div style="font-size:3rem">🔒</div>
+  <h3>Pristup odbijen</h3>
+  <p>Vaš korisnički račun nije povezan s nijednim djetetom u vrtiću {{ company.name }}.</p>
+  <p>Obratite se upravi vrtića za povezivanje računa.</p>
+  <a href="/" style="color:#c8a24e">← Natrag na početnu</a>
+</div>
+</body>
+</html>

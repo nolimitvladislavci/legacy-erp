@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Smjene — Dom{% endblock %}
+{% block page_title %}Raspored smjena{% endblock %}
+{% block extra_css %}
+<style>
+.week-nav{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}
+.week-nav a{color:#c8a24e;text-decoration:none;font-size:1.2rem}
+.week-nav .label{color:#f0e6d3;font-size:1.1rem;font-weight:600;font-family:"Cormorant Garamond",serif}
+.shift-table{width:100%;border-collapse:separate;border-spacing:0;background:#1a1a2e;border-radius:10px;overflow:hidden}
+.shift-table th{background:#16213e;color:#888;font-size:.75rem;text-transform:uppercase;padding:.6rem .8rem;text-align:center}
+.shift-table td{padding:.5rem;text-align:center;border-bottom:1px solid #ffffff08;color:#f0e6d3;font-size:.85rem}
+.shift-cell{min-height:40px}
+.shift-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.75rem;margin:2px}
+.shift-tag.morning{background:#f59e0b22;color:#f59e0b}
+.shift-tag.afternoon{background:#3b82f622;color:#3b82f6}
+.shift-tag.night{background:#8b5cf622;color:#8b5cf6}
+.shift-tag.day{background:#22c55e22;color:#22c55e}
+.today-col{background:#c8a24e0a}
+@media(max-width:768px){.shift-table{font-size:.75rem}.shift-table th,.shift-table td{padding:.3rem}}
+</style>
+{% endblock %}
+{% block content %}
+<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin-bottom:.5rem"><i class="bi bi-calendar3"></i> Raspored smjena</h2>
+
+<div class="week-nav">
+  <a href="?date={{ prev_week }}"><i class="bi bi-chevron-left"></i></a>
+  <span class="label">{{ week_dates.0|date:"d.m." }} — {{ week_dates.6|date:"d.m.Y" }}</span>
+  <a href="?date={{ next_week }}"><i class="bi bi-chevron-right"></i></a>
+</div>
+
+<table class="shift-table">
+  <thead>
+    <tr>
+      {% for d in week_dates %}
+      <th {% if d == today %}class="today-col"{% endif %}>{{ d|date:"D" }}<br>{{ d|date:"d.m." }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {% for d in week_dates %}
+      <td {% if d == today %}class="today-col"{% endif %}>
+        <div class="shift-cell">
+          {% for s in shifts %}
+          {% if s.date == d %}
+          <div><span class="shift-tag {{ s.shift_type }}">{{ s.get_shift_type_display|truncatechars:3 }}</span> {{ s.staff_member.get_full_name|truncatewords:2 }}</div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </td>
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>
+
+<p style="margin-top:1rem;font-size:.8rem;color:#666">Smjene se unose u Django Admin panelu ili API-jem.</p>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Grupe — Vrtić{% endblock %}
+{% block page_title %}Vrtićke grupe{% endblock %}
+{% block extra_css %}
+<style>
+.group-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:.8rem}
+.group-card h4{color:#c8a24e;font-family:"Cormorant Garamond",serif;margin-bottom:.8rem}
+.group-stat{display:inline-block;margin-right:1.5rem;font-size:.9rem}
+.group-stat .val{font-weight:700;color:#f0e6d3}
+.group-stat .lbl{color:#888;font-size:.8rem}
+.capacity-bar{height:6px;background:#16213e;border-radius:3px;overflow:hidden;margin-top:.5rem;max-width:200px}
+.capacity-fill{height:100%;background:linear-gradient(90deg,#22c55e,#c8a24e);border-radius:3px;transition:width .3s}
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif"><i class="bi bi-grid-3x3-gap"></i> Grupe</h2>
+</div>
+{% for g in groups %}
+<div class="group-card">
+  <h4>{{ g.name }}</h4>
+  <div>
+    <span class="group-stat"><span class="val">{{ g.enrolled_count }}</span> <span class="lbl">/ {{ g.capacity }} djece</span></span>
+    <span class="group-stat"><span class="val">{{ g.monthly_price }}€</span> <span class="lbl">mjesečno</span></span>
+    <span class="group-stat"><span class="val">{{ g.meal_daily_price }}€</span> <span class="lbl">obrok/dan</span></span>
+    <span class="group-stat"><span class="lbl">Dob:</span> <span class="val">{{ g.age_from }}—{{ g.age_to }} god.</span></span>
+    {% if g.educator %}<span class="group-stat"><span class="lbl">Odgajateljica:</span> <span class="val">{{ g.educator.get_full_name }}</span></span>{% endif %}
+  </div>
+  <div class="capacity-bar"><div class="capacity-fill" style="width:{% widthratio g.enrolled_count g.capacity 100 %}%"></div></div>
+</div>
+{% empty %}
+<div style="text-align:center;padding:3rem;color:#666">
+  <p>Nema kreiranih grupa. Grupe se kreiraju u Django Admin panelu.</p>
+</div>
+{% endfor %}
+{% endblock %}

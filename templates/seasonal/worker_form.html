@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Novi sezonski radnik{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-3" style="max-width:720px">
+  {% include "partials/_page_header.html" with title="Novi sezonski radnik" icon="fas fa-user-plus" %}
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Ime *</label>
+            <input type="text" name="first_name" value="{{ form_data.first_name|default:'' }}"
+                   class="form-control bg-dark border-secondary text-white" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Prezime *</label>
+            <input type="text" name="last_name" value="{{ form_data.last_name|default:'' }}"
+                   class="form-control bg-dark border-secondary text-white" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">OIB * (11 znamenki)</label>
+            <input type="text" name="oib" value="{{ form_data.oib|default:'' }}"
+                   class="form-control bg-dark border-secondary text-white font-monospace"
+                   maxlength="11" pattern="\d{11}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Državljanstvo</label>
+            <select name="nationality" class="form-select bg-dark border-secondary text-white">
+              {% for code, label in nationality_choices %}
+              <option value="{{ code }}" {% if form_data.nationality == code %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Mobitel</label>
+            <input type="text" name="phone" value="{{ form_data.phone|default:'' }}"
+                   class="form-control bg-dark border-secondary text-white" placeholder="+385 91 ...">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Email</label>
+            <input type="email" name="email" value="{{ form_data.email|default:'' }}"
+                   class="form-control bg-dark border-secondary text-white">
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted small">IBAN (za bankovni transfer)</label>
+            <input type="text" name="iban" value="{{ form_data.iban|default:'' }}"
+                   class="form-control bg-dark border-secondary text-white font-monospace"
+                   placeholder="HR...">
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted small">Adresa</label>
+            <input type="text" name="address" value="{{ form_data.address|default:'' }}"
+                   class="form-control bg-dark border-secondary text-white">
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted small">Napomene</label>
+            <textarea name="notes" rows="2" class="form-control bg-dark border-secondary text-white">{{ form_data.notes|default:'' }}</textarea>
+          </div>
+
+          <div class="col-12">
+            <div class="form-check">
+              <input type="checkbox" name="create_contract" id="create_contract"
+                     class="form-check-input" {% if form_data.create_contract %}checked{% endif %}>
+              <label for="create_contract" class="form-check-label text-muted">
+                Odmah kreiraj ugovor za ovog radnika
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-save me-1"></i>Spremi radnika
+          </button>
+          <a href="{% url 'seasonal:worker_list' %}" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

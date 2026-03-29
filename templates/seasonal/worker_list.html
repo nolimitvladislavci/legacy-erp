@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Radnici — Sezonci{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-3">
+  {% include "partials/_page_header.html" with title="Sezonski radnici" icon="fas fa-users" %}
+
+  <div class="card bg-dark border-secondary mb-3">
+    <div class="card-body py-2">
+      <form method="get" class="d-flex gap-2">
+        <input type="text" name="q" value="{{ q }}" placeholder="Traži po imenu ili OIB-u..."
+               class="form-control form-control-sm bg-dark border-secondary text-white" style="max-width:320px">
+        <button class="btn btn-sm btn-outline-primary">Traži</button>
+        {% if q %}<a href="{% url 'seasonal:worker_list' %}" class="btn btn-sm btn-outline-secondary">Sve</a>{% endif %}
+        <a href="{% url 'seasonal:worker_create' %}" class="btn btn-sm btn-success ms-auto">
+          <i class="fas fa-plus me-1"></i>Novi radnik
+        </a>
+      </form>
+    </div>
+  </div>
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-body p-0">
+      {% if workers %}
+      <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0">
+          <thead><tr><th>Ime i prezime</th><th>OIB</th><th>Telefon</th><th>Ugovori</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for w in workers %}
+            <tr>
+              <td><strong>{{ w.full_name }}</strong></td>
+              <td class="font-monospace text-muted">{{ w.oib }}</td>
+              <td class="text-muted">{{ w.phone|default:"—" }}</td>
+              <td><span class="badge bg-secondary">{{ w.contracts.count }}</span></td>
+              <td>
+                {% if w.is_active %}
+                  <span class="badge bg-success">Aktivan</span>
+                {% else %}
+                  <span class="badge bg-secondary">Neaktivan</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'seasonal:worker_detail' w.pk %}" class="btn btn-sm btn-outline-secondary">Detalji</a>
+                <a href="{% url 'seasonal:contract_create' w.pk %}" class="btn btn-sm btn-outline-success ms-1">+ Ugovor</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      {% include "partials/_empty_state.html" with icon="fas fa-users" msg="Nema radnika u bazi" sub="Dodaj prvog sezonskog radnika" %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

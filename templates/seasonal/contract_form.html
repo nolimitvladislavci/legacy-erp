@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Novi ugovor — {{ worker.full_name }}{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-3" style="max-width:720px">
+  {% include "partials/_page_header.html" with title="Novi ugovor" subtitle=worker.full_name icon="fas fa-file-contract" %}
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+
+          <div class="col-12">
+            <label class="form-label text-muted small">Vrsta ugovora *</label>
+            <select name="contract_type" id="contract_type" class="form-select bg-dark border-secondary text-white" required>
+              <option value="">— Odaberi —</option>
+              {% for code, label in contract_type_choices %}
+              <option value="{{ code }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div id="hzmo_notice" class="col-12 d-none">
+            <div class="alert alert-warning py-2 mb-0 small">
+              <i class="fas fa-exclamation-triangle me-1"></i>
+              Ugovor o radu na određeno zahtijeva <strong>M-1 HZMO prijavu u roku 8 dana</strong> od početka rada. Sustav će automatski generirati podsjetnik.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Datum početka *</label>
+            <input type="date" name="start_date" class="form-control bg-dark border-secondary text-white"
+                   value="{{ today|date:'Y-m-d' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Datum završetka *</label>
+            <input type="date" name="end_date" class="form-control bg-dark border-secondary text-white" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Bruto iznos (EUR) *</label>
+            <input type="number" name="gross_amount" id="gross_amount" step="0.01" min="0"
+                   class="form-control bg-dark border-secondary text-white" required
+                   placeholder="npr. 1500.00">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Procijenjeni neto</label>
+            <div id="net_estimate" class="form-control bg-dark border-secondary text-success fw-bold">—</div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted small">Ciklus isplate</label>
+            <select name="payment_cycle" class="form-select bg-dark border-secondary text-white">
+              {% for code, label in payment_cycle_choices %}
+              <option value="{{ code }}" {% if code == 'lump_sum' %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted small">Radno mjesto / opis posla</label>
+            <input type="text" name="position" class="form-control bg-dark border-secondary text-white"
+                   placeholder="npr. Konobar, Sobarica, Berač grožđa">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label text-muted small">Napomene</label>
+            <textarea name="notes" rows="2" class="form-control bg-dark border-secondary text-white"></textarea>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-save me-1"></i>Kreiraj ugovor
+          </button>
+          <a href="{% url 'seasonal:worker_detail' worker.pk %}" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('contract_type').addEventListener('change', function() {
+  const notice = document.getElementById('hzmo_notice');
+  notice.classList.toggle('d-none', this.value !== 'odredjeno');
+  updateNet();
+});
+document.getElementById('gross_amount').addEventListener('input', updateNet);
+
+function updateNet() {
+  const gross = parseFloat(document.getElementById('gross_amount').value) || 0;
+  const type = document.getElementById('contract_type').value;
+  let net = 0;
+  if (type === 'djelo' || type === 'privremeni' || type === 'autorski') {
+    net = gross * 0.80; // 20% porez
+  } else if (type === 'studentski') {
+    net = gross;
+  } else if (type === 'odredjeno') {
+    net = gross * 0.70; // aprox
+  }
+  document.getElementById('net_estimate').textContent = net > 0 ? net.toFixed(2) + ' €' : '—';
+}
+</script>
+{% endblock %}

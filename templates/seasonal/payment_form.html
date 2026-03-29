@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Isplata — {{ contract.worker.full_name }}{% endblock %}
+{% block content %}
+<div class="container-fluid px-4 py-3" style="max-width:600px">
+  {% include "partials/_page_header.html" with title="Nova isplata" subtitle=contract.worker.full_name icon="fas fa-euro-sign" %}
+
+  <div class="card bg-dark border-secondary mb-3">
+    <div class="card-body small">
+      <div class="row g-2 text-muted">
+        <div class="col-6">Vrsta ugovora: <strong class="text-white">{{ contract.get_contract_type_display }}</strong></div>
+        <div class="col-6">Ugovoreni bruto: <strong class="text-warning">{{ contract.gross_amount }} €</strong></div>
+        <div class="col-6">Procijenjeni neto: <strong class="text-success">{{ net_estimate }} €</strong></div>
+        <div class="col-6">Ciklus: <strong class="text-white">{{ contract.get_payment_cycle_display }}</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-dark border-secondary">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Datum isplate *</label>
+            <input type="date" name="payment_date" value="{{ today|date:'Y-m-d' }}"
+                   class="form-control bg-dark border-secondary text-white" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Bruto iznos (EUR) *</label>
+            <input type="number" name="gross_amount" id="gross_amount" step="0.01" min="0.01"
+                   value="{{ contract.gross_amount }}"
+                   class="form-control bg-dark border-secondary text-white" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Procijenjeni neto</label>
+            <div id="net_live" class="form-control bg-dark border-secondary text-success fw-bold">{{ net_estimate }} €</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted small">Način isplate</label>
+            <select name="payment_method" class="form-select bg-dark border-secondary text-white">
+              <option value="bank">Bankovni transfer</option>
+              <option value="cash">Gotovina</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted small">Napomene</label>
+            <textarea name="notes" rows="2" class="form-control bg-dark border-secondary text-white"></textarea>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input type="checkbox" name="approve_now" id="approve_now" class="form-check-input" checked>
+              <label for="approve_now" class="form-check-label text-muted">
+                Odmah izračunaj porez i odobri isplatu
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+          <button type="submit" class="btn btn-warning">
+            <i class="fas fa-euro-sign me-1"></i>Spremi isplatu
+          </button>
+          <a href="{% url 'seasonal:contract_detail' contract.pk %}" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+const ctype = '{{ contract.contract_type }}';
+document.getElementById('gross_amount').addEventListener('input', function() {
+  const g = parseFloat(this.value) || 0;
+  let n = 0;
+  if (ctype === 'djelo' || ctype === 'privremeni' || ctype === 'autorski') n = g * 0.80;
+  else if (ctype === 'studentski') n = g;
+  else n = g * 0.70;
+  document.getElementById('net_live').textContent = n > 0 ? n.toFixed(2) + ' €' : '—';
+});
+</script>
+{% endblock %}

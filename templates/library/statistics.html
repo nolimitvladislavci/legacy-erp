@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Statistika — Knjiznica{% endblock %}
+{% block page_title %}Statistika{% endblock %}
+{% block extra_css %}
+<style>
+.stat-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.stat-card h5{color:#c8a24e;font-family:"Cormorant Garamond",serif;margin-bottom:.8rem}
+.chart-bar{display:flex;align-items:flex-end;gap:4px;height:150px;padding:.5rem 0}
+.chart-col{flex:1;background:linear-gradient(to top,#c8a24e,#c8a24e88);border-radius:4px 4px 0 0;min-width:20px;position:relative;transition:height .5s}
+.chart-col:hover{background:#c8a24e}
+.chart-col .val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.7rem;color:#c8a24e;white-space:nowrap}
+.chart-labels{display:flex;gap:4px}
+.chart-labels span{flex:1;text-align:center;font-size:.6rem;color:#888}
+.rank-row{display:flex;align-items:center;gap:.8rem;padding:.4rem 0;border-bottom:1px solid #ffffff08}
+.rank-num{width:24px;height:24px;border-radius:50%;background:#c8a24e22;color:#c8a24e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem}
+.rank-info{flex:1;color:#f0e6d3;font-size:.9rem}
+.rank-val{color:#c8a24e;font-weight:600}
+</style>
+{% endblock %}
+{% block content %}
+<h2 style="color:#c8a24e;font-family:Cormorant Garamond,serif;margin-bottom:1rem"><i class="bi bi-graph-up"></i> Statistika</h2>
+
+<!-- Posudbe po mjesecima -->
+<div class="stat-card">
+  <h5>Posudbe po mjesecima (12 mj)</h5>
+  {% with max_count=1 %}
+  {% for s in monthly_stats %}{% if s.count > max_count %}{% with max_count=s.count %}{% endwith %}{% endif %}{% endfor %}
+  <div class="chart-bar">
+    {% for s in monthly_stats %}
+    <div class="chart-col" style="height:{% widthratio s.count 50 100 %}%"><span class="val">{{ s.count }}</span></div>
+    {% endfor %}
+  </div>
+  <div class="chart-labels">{% for s in monthly_stats %}<span>{{ s.month }}</span>{% endfor %}</div>
+  {% endwith %}
+</div>
+
+<div class="row g-3">
+  <!-- Top knjige -->
+  <div class="col-md-4">
+    <div class="stat-card">
+      <h5><i class="bi bi-trophy"></i> Top 10 knjiga</h5>
+      {% for b in top_books %}
+      <div class="rank-row">
+        <div class="rank-num">{{ forloop.counter }}</div>
+        <div class="rank-info">{{ b.title|truncatewords:5 }}</div>
+        <div class="rank-val">{{ b.times_borrowed }}x</div>
+      </div>
+      {% empty %}<p style="color:#666">Nema podataka.</p>{% endfor %}
+    </div>
+  </div>
+
+  <!-- Top clanovi -->
+  <div class="col-md-4">
+    <div class="stat-card">
+      <h5><i class="bi bi-person-check"></i> Top 10 clanova</h5>
+      {% for m in top_members %}
+      <div class="rank-row">
+        <div class="rank-num">{{ forloop.counter }}</div>
+        <div class="rank-info">{{ m.first_name }} {{ m.last_name }}</div>
+        <div class="rank-val">{{ m.total_borrowed }}x</div>
+      </div>
+      {% empty %}<p style="color:#666">Nema podataka.</p>{% endfor %}
+    </div>
+  </div>
+
+  <!-- Po kategorijama -->
+  <div class="col-md-4">
+    <div class="stat-card">
+      <h5><i class="bi bi-tags"></i> Po kategorijama</h5>
+      {% for c in cat_stats %}
+      <div class="rank-row">
+        <div class="rank-num">{{ forloop.counter }}</div>
+        <div class="rank-info">{{ c.name }}</div>
+        <div class="rank-val">{{ c.book_count }}</div>
+      </div>
+      {% empty %}<p style="color:#666">Nema kategorija.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal — {{ company.name }}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{background:#0d0d1a;font-family:Barlow,sans-serif;color:#f0e6d3}
+.portal-header{background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:2px solid #c8a24e33;padding:1.2rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.portal-header h3{color:#c8a24e;font-family:"Cormorant Garamond",serif;margin:0}
+.portal-header .user{color:#888;font-size:.85rem}
+.portal-body{max-width:800px;margin:2rem auto;padding:0 1rem}
+.p-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.p-card h5{color:#c8a24e;font-family:"Cormorant Garamond",serif;margin-bottom:.8rem;border-bottom:1px solid #c8a24e22;padding-bottom:.4rem}
+.child-tag{display:inline-block;padding:4px 12px;border-radius:20px;background:#c8a24e22;color:#c8a24e;font-size:.85rem;margin:3px}
+.report-item{padding:.8rem;border-left:3px solid #c8a24e;background:#c8a24e0a;border-radius:0 8px 8px 0;margin-bottom:.5rem}
+.report-item .date{font-size:.8rem;color:#888}
+.announce-item{padding:.6rem .8rem;border-left:3px solid #3b82f6;margin-bottom:.5rem;border-radius:0 6px 6px 0}
+.announce-item.urgent{border-left-color:#ef4444}
+.announce-item.important{border-left-color:#f59e0b}
+.bill-row{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #ffffff08}
+.footer-bar{text-align:center;padding:2rem;color:#555;font-size:.8rem}
+.footer-bar a{color:#c8a24e}
+@media(max-width:768px){.portal-header{flex-direction:column;gap:.5rem;text-align:center}}
+</style>
+</head>
+<body>
+<div class="portal-header">
+  <h3>🏫 {{ company.name }} — Portal za roditelje</h3>
+  <div class="user"><i class="bi bi-person-circle"></i> {{ guardian.first_name }} {{ guardian.last_name }} · <a href="/accounts/logout/" style="color:#c8a24e">Odjava</a></div>
+</div>
+
+<div class="portal-body">
+  <!-- Djeca -->
+  <div class="p-card">
+    <h5><i class="bi bi-people-fill"></i> Moja djeca</h5>
+    {% for child in children %}
+    <div class="child-tag">{{ child.first_name }} {{ child.last_name }} {% if child.group %}({{ child.group.name }}){% endif %}</div>
+    {% endfor %}
+  </div>
+
+  <!-- Izvještaji -->
+  <div class="p-card">
+    <h5><i class="bi bi-journal-text"></i> Dnevni izvještaji</h5>
+    {% for r in reports %}
+    <div class="report-item">
+      <div class="date">{{ r.date|date:"d.m.Y" }} — {{ r.group.name }}</div>
+      <div style="margin-top:.3rem">{{ r.content|truncatewords:50 }}</div>
+    </div>
+    {% empty %}
+    <p style="color:#666">Nema objavljenih izvještaja.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Obavijesti -->
+  <div class="p-card">
+    <h5><i class="bi bi-megaphone"></i> Obavijesti</h5>
+    {% for a in announcements %}
+    <div class="announce-item {{ a.priority }}">
+      <strong>{{ a.title }}</strong>
+      <span style="float:right;font-size:.75rem;color:#888">{{ a.published_at|date:"d.m.Y" }}</span>
+      <div style="font-size:.85rem;color:#aaa;margin-top:.2rem">{{ a.content|truncatewords:30 }}</div>
+    </div>
+    {% empty %}
+    <p style="color:#666">Nema obavijesti.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Računi -->
+  <div class="p-card">
+    <h5><i class="bi bi-receipt"></i> Računi</h5>
+    {% for b in billings %}
+    <div class="bill-row">
+      <span>{{ b.child.first_name }} — {{ b.month }}/{{ b.year }}</span>
+      <span>
+        <strong style="color:#c8a24e">{{ b.total_amount }} €</strong>
+        <span style="font-size:.75rem;padding:2px 8px;border-radius:10px;margin-left:5px;
+          {% if b.status == 'paid' %}background:#22c55e22;color:#22c55e{% elif b.status == 'overdue' %}background:#ef444422;color:#ef4444{% else %}background:#3b82f622;color:#3b82f6{% endif %}">
+          {{ b.get_status_display }}
+        </span>
+      </span>
+    </div>
+    {% empty %}
+    <p style="color:#666">Nema računa.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="footer-bar">
+  Powered by <a href="https://limit-connect.com">LIMIT Connect</a> · {{ company.name }}
+</div>
+</body>
+</html>

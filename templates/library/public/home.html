@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ company.name }} — Knjiznica</title>
+<meta name="description" content="Online katalog knjiznice {{ company.name }}. Pretrazite fond, rezervirajte knjige, upravljajte clanstvom.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0b10;--surface:#12131a;--surface2:#1a1b25;--gold:#c9a84c;--gold-dim:#c9a84c66;--text:#e8e6e1;--text2:#9a9890;--text3:#5a5850;--radius:12px;--font-display:"Cormorant Garamond",Georgia,serif;--font-body:"Barlow",system-ui,sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:var(--gold);text-decoration:none;transition:opacity .15s}
+a:hover{opacity:.85}
+
+/* ── NAV ── */
+.lib-nav{position:sticky;top:0;z-index:100;background:rgba(10,11,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,.1);padding:0 2rem}
+.lib-nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.lib-brand{font-family:var(--font-display);font-size:1.4rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:10px}
+.lib-brand .icon{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),#a08030);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#0a0b10}
+.lib-nav-links{display:flex;gap:2rem;align-items:center}
+.lib-nav-links a{color:var(--text2);font-size:.9rem;font-weight:500;transition:color .2s}
+.lib-nav-links a:hover,.lib-nav-links a.active{color:var(--gold);opacity:1}
+.nav-btn{background:var(--gold);color:var(--bg);padding:8px 20px;border-radius:8px;font-weight:600;font-size:.85rem;border:none;cursor:pointer;transition:all .2s}
+.nav-btn:hover{background:#d4b456;transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{padding:5rem 2rem 4rem;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.06) 0%,transparent 60%)}
+.hero h1{font-family:var(--font-display);font-size:clamp(2.2rem,5vw,3.5rem);font-weight:600;color:#fff;margin-bottom:.8rem;line-height:1.15}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--text2);font-size:1.1rem;max-width:500px;margin:0 auto 2rem}
+.hero-stats{display:flex;justify-content:center;gap:3rem;margin-top:2rem}
+.hero-stat .num{font-family:var(--font-display);font-size:2.2rem;font-weight:700;color:var(--gold)}
+.hero-stat .lbl{font-size:.8rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+
+/* ── SEARCH ── */
+.search-wrap{max-width:640px;margin:-1.5rem auto 0;position:relative;z-index:10}
+.search-box{display:flex;background:var(--surface);border:1px solid rgba(201,168,76,.15);border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);transition:border-color .2s}
+.search-box:focus-within{border-color:var(--gold)}
+.search-box input{flex:1;background:transparent;border:none;padding:1rem 1.2rem;color:var(--text);font-size:1rem;outline:none;font-family:var(--font-body)}
+.search-box input::placeholder{color:var(--text3)}
+.search-box button{background:var(--gold);border:none;padding:0 1.5rem;color:var(--bg);font-size:1.1rem;cursor:pointer;transition:background .2s;display:flex;align-items:center}
+.search-box button:hover{background:#d4b456}
+.search-box button.loading i{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SECTIONS ── */
+.section{max-width:1200px;margin:0 auto;padding:3rem 2rem}
+.section-title{font-family:var(--font-display);font-size:1.6rem;font-weight:600;color:#fff;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem}
+.section-title i{color:var(--gold);font-size:1.2rem}
+.section-title .count{font-size:.85rem;color:var(--text3);font-family:var(--font-body);font-weight:400}
+
+/* ── BOOK GRID ── */
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1.2rem}
+.book-card{background:var(--surface);border:1px solid rgba(255,255,255,.04);border-radius:var(--radius);overflow:hidden;transition:all .25s;cursor:pointer;position:relative}
+.book-card:hover{border-color:var(--gold-dim);transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.book-card .cover{height:220px;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.book-card .cover img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.book-card:hover .cover img{transform:scale(1.05)}
+.book-card .cover .no-img{color:var(--text3);font-size:2.5rem}
+.book-card .avail-badge{position:absolute;top:8px;right:8px;font-size:.7rem;padding:3px 8px;border-radius:6px;font-weight:600;backdrop-filter:blur(8px)}
+.book-card .avail-badge.yes{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+.book-card .avail-badge.no{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.2)}
+.book-card .info{padding:.8rem}
+.book-card .title{font-size:.88rem;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:.2rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.book-card .author{font-size:.75rem;color:var(--text2)}
+
+/* ── CATEGORIES ── */
+.cat-grid{display:flex;flex-wrap:wrap;gap:.6rem}
+.cat-pill{background:var(--surface);border:1px solid rgba(201,168,76,.1);border-radius:20px;padding:8px 18px;font-size:.85rem;color:var(--text2);cursor:pointer;transition:all .2s}
+.cat-pill:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.05)}
+
+/* ── FOOTER ── */
+.lib-footer{border-top:1px solid rgba(255,255,255,.04);padding:2rem;text-align:center;margin-top:3rem}
+.lib-footer .powered{font-size:.8rem;color:var(--text3)}
+.lib-footer .powered a{color:var(--gold)}
+
+/* ── SEARCH RESULTS OVERLAY ── */
+.search-results{position:absolute;top:100%;left:0;right:0;margin-top:4px;background:var(--surface);border:1px solid rgba(201,168,76,.15);border-radius:var(--radius);max-height:400px;overflow-y:auto;display:none;box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:50}
+.search-results.show{display:block}
+.sr-item{display:flex;gap:1rem;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .15s}
+.sr-item:hover{background:rgba(201,168,76,.05)}
+.sr-item:last-child{border-bottom:none}
+.sr-item .thumb{width:40px;height:56px;background:var(--surface2);border-radius:4px;overflow:hidden;flex-shrink:0}
+.sr-item .thumb img{width:100%;height:100%;object-fit:cover}
+.sr-item .sr-info{flex:1;min-width:0}
+.sr-item .sr-title{font-size:.9rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-item .sr-meta{font-size:.75rem;color:var(--text2)}
+.sr-item .sr-avail{font-size:.7rem;padding:2px 8px;border-radius:8px;white-space:nowrap}
+.sr-empty{padding:1.5rem;text-align:center;color:var(--text3)}
+
+/* ── TOAST ── */
+.toast-container{position:fixed;bottom:2rem;right:2rem;z-index:9999}
+.toast{background:var(--surface);border:1px solid var(--gold-dim);border-radius:var(--radius);padding:1rem 1.5rem;color:var(--text);font-size:.9rem;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:toastIn .3s ease;display:flex;align-items:center;gap:.8rem;margin-top:.5rem}
+.toast.error{border-color:#ef4444}
+.toast i{font-size:1.2rem}
+.toast.success i{color:#22c55e}
+.toast.error i{color:#ef4444}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  .lib-nav{padding:0 1rem}
+  .lib-nav-links{gap:1rem}
+  .lib-nav-links a:not(.nav-btn){display:none}
+  .hero{padding:3rem 1rem 2.5rem}
+  .hero-stats{gap:1.5rem}
+  .hero-stat .num{font-size:1.6rem}
+  .search-wrap{margin:-.5rem 1rem 0}
+  .section{padding:2rem 1rem}
+  .book-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.8rem}
+  .book-card .cover{height:180px}
+}
+@media(max-width:480px){
+  .book-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="lib-nav">
+  <div class="lib-nav-inner">
+    <a href="/lib/{{ slug }}/" class="lib-brand">
+      <div class="icon"><i class="bi bi-book"></i></div>
+      {{ company.name }}
+    </a>
+    <div class="lib-nav-links">
+      <a href="/lib/{{ slug }}/" class="active">Naslovnica</a>
+      <a href="/lib/{{ slug }}/pretraga/">Katalog</a>
+      <a href="/lib/{{ slug }}/portal/" class="nav-btn"><i class="bi bi-person-circle"></i> Moj racun</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Dobrodosli u <span>knjizn&#x69;cu</span></h1>
+  <p>Pretrazite fond, rezervirajte knjige online i upravljajte svojim clanstvom — sve na jednom mjestu.</p>
+
+  <div class="search-wrap">
+    <div class="search-box" id="searchBox">
+      <input type="text" id="searchInput" placeholder="Pretrazite po naslovu, autoru ili ISBN-u..." autocomplete="off">
+      <button type="button" id="searchBtn"><i class="bi bi-search"></i></button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">{{ total_books|default:"0" }}</div><div class="lbl">Naslova</div></div>
+    <div class="hero-stat"><div class="num">{{ total_members|default:"0" }}</div><div class="lbl">Clanova</div></div>
+  </div>
+</section>
+
+<!-- NEW BOOKS -->
+{% if new_books %}
+<section class="section">
+  <div class="section-title"><i class="bi bi-stars"></i> Novi naslovi</div>
+  <div class="book-grid">
+    {% for book in new_books %}
+    <a href="/lib/{{ slug }}/knjiga/{{ book.pk }}/" class="book-card">
+      <div class="cover">
+        {% if book.cover_url %}<img src="{{ book.cover_url }}" alt="{{ book.title }}" loading="lazy">{% else %}<i class="bi bi-book no-img"></i>{% endif %}
+        <span class="avail-badge {% if book.available_copies %}yes{% else %}no{% endif %}">
+          {% if book.available_copies %}{{ book.available_copies }} dost.{% else %}Posudjena{% endif %}
+        </span>
+      </div>
+      <div class="info">
+        <div class="title">{{ book.title }}</div>
+        <div class="author">{{ book.author_display }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- POPULAR -->
+{% if popular %}
+<section class="section">
+  <div class="section-title"><i class="bi bi-fire"></i> Popularno</div>
+  <div class="book-grid">
+    {% for book in popular %}
+    <a href="/lib/{{ slug }}/knjiga/{{ book.pk }}/" class="book-card">
+      <div class="cover">
+        {% if book.cover_url %}<img src="{{ book.cover_url }}" alt="{{ book.title }}" loading="lazy">{% else %}<i class="bi bi-book no-img"></i>{% endif %}
+        <span class="avail-badge {% if book.available_copies %}yes{% else %}no{% endif %}">
+          {% if book.available_copies %}{{ book.available_copies }} dost.{% else %}Posudjena{% endif %}
+        </span>
+      </div>
+      <div class="info">
+        <div class="title">{{ book.title }}</div>
+        <div class="author">{{ book.author_display }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- CATEGORIES -->
+{% if categories %}
+<section class="section">
+  <div class="section-title"><i class="bi bi-tags"></i> Kategorije</div>
+  <div class="cat-grid">
+    {% for cat in categories %}
+    <a href="/lib/{{ slug }}/pretraga/?category={{ cat.pk }}" class="cat-pill">
+      <i class="{{ cat.icon }}"></i> {{ cat.name }}
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- FOOTER -->
+<footer class="lib-footer">
+  <div class="powered">Powered by <a href="https://limit-connect.com">LIMIT Connect</a></div>
+</footer>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+(function(){
+  const input = document.getElementById('searchInput');
+  const btn = document.getElementById('searchBtn');
+  const results = document.getElementById('searchResults');
+  let timer, loading = false;
+
+  function setLoading(on) {
+    loading = on;
+    btn.innerHTML = on ? '<i class="bi bi-arrow-clockwise" style="animation:spin .8s linear infinite"></i>' : '<i class="bi bi-search"></i>';
+    btn.disabled = on;
+  }
+
+  function doSearch() {
+    const q = input.value.trim();
+    if (q.length < 2) { results.classList.remove('show'); return; }
+    setLoading(true);
+    fetch('/lib/{{ slug }}/pretraga/?q=' + encodeURIComponent(q), {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(r => r.json())
+    .then(data => {
+      setLoading(false);
+      if (!data.results.length) {
+        results.innerHTML = '<div class="sr-empty"><i class="bi bi-search"></i> Nema rezultata za "' + q + '"</div>';
+      } else {
+        results.innerHTML = data.results.map(b => `
+          <a href="/lib/{{ slug }}/knjiga/${b.id}/" class="sr-item">
+            <div class="thumb">${b.cover ? '<img src="'+b.cover+'">' : '<i class="bi bi-book" style="padding:12px;color:var(--text3)"></i>'}</div>
+            <div class="sr-info">
+              <div class="sr-title">${b.title}</div>
+              <div class="sr-meta">${b.authors}${b.year ? ' &middot; '+b.year : ''}</div>
+            </div>
+            <span class="sr-avail" style="background:${b.available?'rgba(34,197,94,.12);color:#22c55e':'rgba(239,68,68,.12);color:#ef4444'}">
+              ${b.available ? b.available+' dost.' : 'Posudjena'}
+            </span>
+          </a>
+        `).join('');
+      }
+      results.classList.add('show');
+    })
+    .catch(() => { setLoading(false); });
+  }
+
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(doSearch, 350); });
+  btn.addEventListener('click', doSearch);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); }});
+  document.addEventListener('click', e => { if (!document.getElementById('searchBox').contains(e.target) && !results.contains(e.target)) results.classList.remove('show'); });
+})();
+
+window.showToast = function(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'success');
+  t.innerHTML = '<i class="bi bi-' + (type==='error'?'exclamation-circle':'check-circle-fill') + '"></i> ' + msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+};
+</script>
+</body>
+</html>
