@@ -54,10 +54,13 @@ def _bypass_login(request, token):
 urlpatterns = [
     path('_bypass/<str:token>/', _bypass_login),
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
+    path('radni-sati/', TemplateView.as_view(template_name='brosura_radni_sati_landing.html'), name='brochure_worktime'),
     
     path('vrtic/<slug:slug>/portal/', __import__('kindergarten.views', fromlist=['parent_portal']).parent_portal, name='kindergarten_portal'),
     path('lib/<slug:slug>/', include('library.public_urls')),
     path('validator/', TemplateView.as_view(template_name='website/brosura_croxmlverify.html'), name='brochure_croxmlverify'),
+    path('no-limit/', TemplateView.as_view(template_name='website/no_limit.html'), name='no_limit_web'),
+    path('gov_export/', include('gov_export.urls')),
     path('legal/tc-accept/', tc_views.tc_accept_view, name='tc_accept'),
 
     # BEZ PAPIRA — public receipt (no login)
@@ -72,8 +75,9 @@ urlpatterns = [
     path('', include('borg_ops.urls', namespace='borg_ops')),
     path('vrtic/', include('kindergarten.urls', namespace='kindergarten')),
     path('dom/', include('eldercare.urls', namespace='eldercare')),
-    path('knjiznica/', include('library.urls', namespace='library')),
+    path('lib/staff/', include('library.urls', namespace='library')),
     path('livestock/', include('livestock.urls', namespace='livestock')),
+    path('komunalno/', include('komunalno.urls', namespace='komunalno')),
     path('intelligence/', include('intelligence.urls', namespace='intelligence')),
     path('marketplace/', include('marketplace.urls', namespace='marketplace')),
     path('delivery/', include('delivery.urls', namespace='delivery')),
@@ -392,4 +396,3 @@ from core.views_scan import fenix_scan
 urlpatterns += [
     path('api/fenix/scan/', fenix_scan, name='fenix_scan'),
 ]
-

@@ -1,0 +1,158 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radni Sati — Evidencija radnog vremena | LIMIT Connect</title>
+<meta name="description" content="Kompletno rješenje za evidenciju radnih sati — GPS prijava, štoperica, odobravanje, obračun plaća. ZOR i ArbZG compliant.">
+<meta property="og:title" content="LIMIT Connect — Modul Radni Sati">
+<meta property="og:description" content="Evidencija radnog vremena, GPS prijava/odjava, obračun plaća, analitika. Besplatno za male tvrtke.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root { --gold: #c9a84c; --bg: #0a0a0a; --surface: #111827; --text: #e2e8f0; --dim: #94a3b8; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); }
+  
+  .hero {
+    min-height: 80vh; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 60px 20px;
+    background: linear-gradient(160deg, #0a0a0a 0%, #111827 50%, #0a0a0a 100%);
+    position: relative;
+  }
+  .hero::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg, var(--gold), #e8d48b, var(--gold)); }
+  .hero-icon { font-size: 4rem; margin-bottom: 20px; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: var(--gold); letter-spacing: 3px; margin-bottom: 8px; }
+  .hero h2 { font-size: 1.3rem; color: var(--dim); margin-bottom: 30px; font-weight: 400; }
+  .hero p { max-width: 550px; color: var(--dim); line-height: 1.7; margin-bottom: 40px; }
+  
+  .btn-gold { display:inline-flex; align-items:center; gap:10px; padding:14px 36px; background:var(--gold); color:#000; font-weight:700; font-size:1rem; border:none; border-radius:10px; text-decoration:none; cursor:pointer; transition:all .2s; }
+  .btn-gold:hover { filter:brightness(1.1); transform:translateY(-2px); }
+  .btn-outline { display:inline-flex; align-items:center; gap:10px; padding:14px 36px; border:2px solid rgba(201,168,76,.4); color:var(--gold); font-weight:700; font-size:1rem; border-radius:10px; text-decoration:none; transition:all .2s; background:transparent; }
+  .btn-outline:hover { border-color:var(--gold); background:rgba(201,168,76,.05); }
+
+  .features { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+  .features h3 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); text-align:center; margin-bottom:50px; }
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .feat-card { background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 28px; transition: all .2s; }
+  .feat-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-4px); }
+  .feat-card .icon { font-size: 2rem; margin-bottom: 14px; }
+  .feat-card h4 { color: var(--gold); font-size: 1.1rem; margin-bottom: 8px; }
+  .feat-card p { color: var(--dim); font-size: .92rem; line-height: 1.6; }
+
+  .cta { text-align:center; padding:80px 20px; background:linear-gradient(180deg, transparent, rgba(201,168,76,.03)); }
+  .cta h3 { font-family:'Cormorant Garamond',serif; font-size:2rem; color:var(--gold); margin-bottom:16px; }
+  .cta p { color:var(--dim); margin-bottom:30px; max-width:500px; margin-left:auto; margin-right:auto; }
+  .cta-buttons { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+
+  footer { text-align:center; padding:30px 20px; border-top:1px solid rgba(255,255,255,.06); color:#475569; font-size:.85rem; }
+  footer a { color:var(--gold); text-decoration:none; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2rem; }
+    .hero h2 { font-size: 1rem; }
+    .feat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-icon">⏱</div>
+  <h1>RADNI SATI</h1>
+  <h2>Evidencija radnog vremena za moderne tvrtke</h2>
+  <p>GPS prijava/odjava, štoperica, odobravanje, obračun plaća, analitika — sve u jednom modulu. 
+  Usklađeno sa Zakonom o radu (ZOR) i njemačkim ArbZG propisima.</p>
+  <div class="cta-buttons">
+    <a href="/static/docs/LIMIT_Connect_Radni_Sati_Brosura.pdf" class="btn-gold" target="_blank">
+      <i class="fas fa-file-pdf"></i> Preuzmi PDF brošuru
+    </a>
+    <a href="/hr/accounts/login/" class="btn-outline">
+      <i class="fas fa-sign-in-alt"></i> Prijavi se
+    </a>
+  </div>
+</section>
+
+<section class="features">
+  <h3>Sve što trebate za evidenciju radnog vremena</h3>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="icon">📍</div>
+      <h4>Clock In/Out s GPS-om</h4>
+      <p>Radnici se prijavljuju jednim klikom na mobitelu. Sustav provjerava GPS lokaciju 
+      i osigurava da su unutar dozvoljenog radijusa tvrtke (geofence).</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">⏱</div>
+      <h4>Štoperica</h4>
+      <p>Start, pauza, nastavi, stop — štoperica prati rad u realnom vremenu. 
+      Kad stanete, automatski kreira unos s točnim trajanjem.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">✅</div>
+      <h4>Bulk odobravanje</h4>
+      <p>Manager odobrava sate cijelog tima jednim klikom. Filteri po radniku, projektu, 
+      datumu. Prekovremeni sati automatski označeni zastavicom.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">📊</div>
+      <h4>Analitika</h4>
+      <p>Interaktivni grafovi: dnevni trend (12 tjedana), distribucija po projektu, 
+      vrsta posla, top radnici. Sve podatke vidite na jednom ekranu.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">💶</div>
+      <h4>Obračun plaća</h4>
+      <p>Automatski razdvaja redovne, prekovremene i noćne sate. Računa bruto plaću 
+      po zaposleniku. Export u Excel jednim klikom.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">⚖️</div>
+      <h4>ZOR / ArbZG Compliance</h4>
+      <p>Automatska provjera zakonskih ograničenja: max radno vrijeme, obavezne pauze, 
+      dnevni odmor. Upozorenja za svako prekoračenje.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">📱</div>
+      <h4>Mobile-first</h4>
+      <p>PWA aplikacija — radi na svakom mobitelu bez instalacije. Dodajte na početni 
+      zaslon za pristup jednim tapom. Radi i offline.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">🚗</div>
+      <h4>Putni nalozi</h4>
+      <p>Kreiranje, odobravanje i PDF ispis putnih naloga. Evidencija troškova 
+      (gorivo, cestarina, smještaj) s automatskim obračunom dnevnica.</p>
+    </div>
+    <div class="feat-card">
+      <div class="icon">💰</div>
+      <h4>Fakturiranje sati</h4>
+      <p>Odobrene sate pretvorite u fakturu jednim klikom. Grupirano po projektu 
+      s automatskim izračunom iznosa po satnici.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h3>Započnite besplatno</h3>
+  <p>Modul Radni Sati uključen je u svaki LIMIT Connect paket. Registrirajte se 
+  i počnite pratiti radne sate u manje od 5 minuta.</p>
+  <div class="cta-buttons">
+    <a href="/static/docs/LIMIT_Connect_Radni_Sati_Brosura.pdf" class="btn-gold" target="_blank">
+      <i class="fas fa-file-pdf"></i> PDF Brošura (6 stranica)
+    </a>
+    <a href="/hr/registration/register/" class="btn-outline">
+      <i class="fas fa-rocket"></i> Registracija
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 <a href="/">LIMIT Connect</a> &bull; Konjik d.o.o. &bull; KS LIMIT, Čepin</p>
+</footer>
+
+</body>
+</html>

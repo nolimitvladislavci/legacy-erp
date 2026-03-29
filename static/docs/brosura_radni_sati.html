@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>LIMIT Connect — Modul Radni Sati</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap');
+  
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Barlow', sans-serif;
+    color: #e8e8e8;
+    background: #0a0a0a;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 0;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ═══ PAGE 1: COVER ═══ */
+  .cover {
+    background: linear-gradient(160deg, #0a0a0a 0%, #111827 50%, #0a0a0a 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 50px;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #c9a84c, #e8d48b, #c9a84c);
+  }
+  .cover-icon { font-size: 72pt; margin-bottom: 30px; opacity: 0.9; }
+  .cover h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36pt;
+    font-weight: 700;
+    color: #c9a84c;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .cover h2 {
+    font-size: 18pt;
+    font-weight: 600;
+    color: #e8e8e8;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+  }
+  .cover-desc {
+    font-size: 12pt;
+    color: #94a3b8;
+    max-width: 420px;
+    line-height: 1.7;
+    margin-bottom: 50px;
+  }
+  .cover-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 450px;
+    text-align: left;
+  }
+  .cover-feat {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 10pt;
+  }
+  .cover-feat strong { color: #c9a84c; display: block; margin-bottom: 2px; font-size: 10.5pt; }
+  .cover-feat span { color: #94a3b8; font-size: 9pt; }
+  .cover-footer {
+    position: absolute;
+    bottom: 30px;
+    font-size: 9pt;
+    color: #475569;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .cover-url {
+    position: absolute;
+    bottom: 50px;
+    font-size: 11pt;
+    color: #c9a84c;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* ═══ CONTENT PAGES ═══ */
+  .content {
+    background: #0d0d12;
+    padding: 40px 45px;
+  }
+  .content::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #c9a84c, #e8d48b, #c9a84c);
+  }
+  
+  .page-num {
+    position: absolute;
+    bottom: 25px;
+    right: 45px;
+    font-size: 9pt;
+    color: #475569;
+  }
+  .page-logo {
+    position: absolute;
+    bottom: 25px;
+    left: 45px;
+    font-size: 8pt;
+    color: #c9a84c;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22pt;
+    color: #c9a84c;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  h4 {
+    font-size: 13pt;
+    color: #c9a84c;
+    margin: 22px 0 10px;
+    font-weight: 700;
+  }
+  p, li { color: #cbd5e1; font-size: 10.5pt; line-height: 1.65; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 6px; }
+  
+  .step-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .step {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .step-num {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    background: #c9a84c;
+    color: #000;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 12pt;
+    margin-bottom: 8px;
+  }
+  .step-title { font-weight: 700; color: #e8e8e8; margin-bottom: 4px; font-size: 10.5pt; }
+  .step-desc { color: #94a3b8; font-size: 9.5pt; line-height: 1.5; }
+  
+  .highlight-box {
+    background: rgba(201,168,76,0.08);
+    border-left: 3px solid #c9a84c;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+  }
+  .highlight-box strong { color: #c9a84c; }
+  
+  .warn-box {
+    background: rgba(239,68,68,0.08);
+    border-left: 3px solid #ef4444;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+  }
+  .warn-box strong { color: #ef4444; }
+
+  .feature-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .feat-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 10pt;
+    color: #cbd5e1;
+  }
+  .feat-icon { color: #c9a84c; font-size: 12pt; flex-shrink: 0; margin-top: 1px; }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  th {
+    background: rgba(201,168,76,0.1);
+    color: #c9a84c;
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: #cbd5e1;
+  }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .role-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 8.5pt;
+    font-weight: 700;
+  }
+  .role-worker { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .role-manager { background: rgba(168,85,247,0.15); color: #c084fc; }
+  .role-admin { background: rgba(201,168,76,0.15); color: #c9a84c; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE 1: COVER -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-icon">⏱</div>
+  <h1>RADNI SATI</h1>
+  <h2>Modul za evidenciju radnog vremena</h2>
+  <p class="cover-desc">
+    Kompletno rješenje za evidenciju radnih sati, prijavu/odjavu s GPS lokacijom,
+    odobravanje, obračun plaća i izvještavanje — usklađeno sa Zakonom o radu (ZOR)
+    i njemačkim ArbZG propisima.
+  </p>
+  <div class="cover-features">
+    <div class="cover-feat">
+      <strong>📍 Clock In/Out</strong>
+      <span>GPS prijava s geofence provjerom</span>
+    </div>
+    <div class="cover-feat">
+      <strong>⏱ Štoperica</strong>
+      <span>Start/pauza/stop s automatskim unosom</span>
+    </div>
+    <div class="cover-feat">
+      <strong>📊 Analitika</strong>
+      <span>Chart.js grafovi, trendovi, projekti</span>
+    </div>
+    <div class="cover-feat">
+      <strong>💶 Obračun plaća</strong>
+      <span>Regular/prekovremeni/noćni + ZOR compliance</span>
+    </div>
+  </div>
+  <div class="cover-url">limit-connect.com</div>
+  <div class="cover-footer">LIMIT Connect &bull; Konjik d.o.o. &bull; 2026</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE 2: PREGLED MODULA -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page content">
+  <h3>Pregled modula</h3>
+  
+  <p>Modul <strong>Radni Sati</strong> pokriva cjelokupni ciklus evidencije radnog vremena 
+  — od prijave radnika na posao do obračuna plaće i inspekcijskog izvještaja.</p>
+
+  <h4>Tri razine korisnika</h4>
+  <table>
+    <tr>
+      <th>Uloga</th>
+      <th>Pristup</th>
+      <th>Ključne funkcije</th>
+    </tr>
+    <tr>
+      <td><span class="role-badge role-worker">Radnik</span></td>
+      <td>Moji sati, Prijava, Tjedni</td>
+      <td>Unos sati, štoperica, clock in/out, dnevne bilješke</td>
+    </tr>
+    <tr>
+      <td><span class="role-badge role-manager">Manager</span></td>
+      <td>Manager, Odobri, Analitika</td>
+      <td>Pregled tima, bulk odobravanje, izvještaji</td>
+    </tr>
+    <tr>
+      <td><span class="role-badge role-admin">Admin</span></td>
+      <td>Plaće, Naplata, Export</td>
+      <td>Obračun plaća, fakturiranje sati, Excel export</td>
+    </tr>
+  </table>
+
+  <h4>Navigacija</h4>
+  <p>Nakon prijave u sustav, kliknite na <strong>Sati</strong> u bočnom izborniku. 
+  Otvorit će se pod-navigacija s 8 sekcija:</p>
+  
+  <div class="feature-list">
+    <div class="feat-item"><span class="feat-icon">⏱</span> <span><strong>Moji sati</strong> — Dnevni pregled, unos, štoperica</span></div>
+    <div class="feat-item"><span class="feat-icon">📍</span> <span><strong>Prijava</strong> — Clock In/Out s GPS-om</span></div>
+    <div class="feat-item"><span class="feat-icon">📅</span> <span><strong>Tjedni</strong> — Tjedni unos (grid)</span></div>
+    <div class="feat-item"><span class="feat-icon">👔</span> <span><strong>Manager</strong> — Pregled svih radnika</span></div>
+    <div class="feat-item"><span class="feat-icon">✅</span> <span><strong>Odobri</strong> — Bulk odobravanje unosa</span></div>
+    <div class="feat-item"><span class="feat-icon">📊</span> <span><strong>Analitika</strong> — Grafovi i trendovi</span></div>
+    <div class="feat-item"><span class="feat-icon">💶</span> <span><strong>Plaće</strong> — Mjesečni obračun</span></div>
+    <div class="feat-item"><span class="feat-icon">💰</span> <span><strong>Naplata</strong> — Fakturiranje radnih sati</span></div>
+  </div>
+
+  <div class="highlight-box">
+    <strong>Savjet:</strong> Za brzi pristup s mobitela, dodajte stranicu na početni zaslon 
+    (Share → Add to Home Screen). LIMIT Connect je PWA aplikacija i radi offline.
+  </div>
+  
+  <span class="page-logo">LIMIT CONNECT</span>
+  <span class="page-num">2</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE 3: RADNIK — Unos sati -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page content">
+  <h3>Za radnike — Unos radnih sati</h3>
+  
+  <h4>Opcija 1: Ručni unos</h4>
+  <div class="step-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Otvorite "Moji sati"</div>
+      <div class="step-desc">Na dashboardu vidite danas/tjedan/mjesec statistiku i prečace za brzi unos.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Kliknite "+ Novi unos"</div>
+      <div class="step-desc">Odaberite projekt, vrstu posla (razvoj, sastanak, podrška...), datum i trajanje.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Unesite detalje</div>
+      <div class="step-desc">Početak/kraj, opis rada, tagove. Sustav automatski računa prekovremene i noćne sate.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Spremite</div>
+      <div class="step-desc">Unos ide na odobravanje manageru. Status: Na čekanju → Odobreno/Odbijeno.</div>
+    </div>
+  </div>
+
+  <h4>Opcija 2: Štoperica (Timer)</h4>
+  <div class="step-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Start</div>
+      <div class="step-desc">Odaberite projekt i kliknite zeleni gumb "Start". Timer počinje brojati.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Pauza / Nastavi</div>
+      <div class="step-desc">Idete na ručak? Kliknite "Pauza". Kad se vratite — "Nastavi". Vrijeme se akumulira.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Stop</div>
+      <div class="step-desc">Kraj rada — kliknite "Stop". Sustav automatski kreira TimeEntry s trajanjem i datumom.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Odbaci</div>
+      <div class="step-desc">Pogrešno pokrenuli? "Odbaci" briše timer bez spremanja unosa.</div>
+    </div>
+  </div>
+
+  <h4>Opcija 3: Clock In/Out (GPS)</h4>
+  <p>Za radnike na terenu — otvorite <strong>Prijava</strong> sekciju na mobitelu:</p>
+  <ul>
+    <li><strong>PRIJAVA</strong> (zeleni gumb) — sustav čita GPS lokaciju i provjerava da ste unutar dozvoljenog radijusa tvrtke (geofence)</li>
+    <li><strong>ODJAVA</strong> (crveni gumb) — zatvara smjenu, automatski obračunava sate i zakonsku pauzu</li>
+    <li>Ako ste van dozvoljene zone — prijava je <strong>odbijena</strong> s prikazom udaljenosti</li>
+  </ul>
+
+  <div class="warn-box">
+    <strong>Zakonska pauza (ZOR čl. 73 / ArbZG §4):</strong> Rad 6+ sati = min. 30 min pauza. 
+    Rad 9+ sati = min. 45 min pauza. Sustav automatski oduzima pauzu od ukupnog vremena.
+  </div>
+
+  <h4>Prečaci za brzi unos</h4>
+  <ul>
+    <li><strong>Kopiraj prethodni dan</strong> — jednim klikom ponavlja jučerašnji unos</li>
+    <li><strong>Kopiraj tjedan</strong> — kopira cijeli prethodni tjedan</li>
+    <li><strong>Predlošci</strong> — spremite česte unose (npr. "8h razvoj, projekt X") za ponovnu upotrebu</li>
+  </ul>
+
+  <span class="page-logo">LIMIT CONNECT</span>
+  <span class="page-num">3</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE 4: MANAGER — Odobravanje + Analitika -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page content">
+  <h3>Za managere — Odobravanje i analitika</h3>
+  
+  <h4>Bulk odobravanje</h4>
+  <div class="step-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Otvorite "Odobri"</div>
+      <div class="step-desc">Vidite sve unose sa statusom "Na čekanju" za vaš tim.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Filtrirajte</div>
+      <div class="step-desc">Po radniku, projektu, datumu ili vrsti posla. Suzite prikaz na ono što želite odobriti.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Označite</div>
+      <div class="step-desc">Checkbox za svaki unos ili "Odaberi sve" za masovno označavanje.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Odobri / Odbij</div>
+      <div class="step-desc">Zeleni gumb odobrava, crveni odbija (s obaveznim razlogom odbijanja).</div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <strong>Upozorenje prekovremenih:</strong> Unosi preko 10 sati dnevno automatski se označavaju 
+    narančastom zastavicom (ArbZG §3). Preko 12 sati — crvenom zastavicom (KRITIČNO).
+  </div>
+
+  <h4>Analitika (Chart.js dashboard)</h4>
+  <p>Sekcija <strong>Analitika</strong> prikazuje vizualne izvještaje:</p>
+  <ul>
+    <li><strong>Dnevni sati (12 tjedana)</strong> — stupčasti grafikon s trendnom linijom</li>
+    <li><strong>Projekti</strong> — kružni dijagram distribucije sati po projektu</li>
+    <li><strong>Vrsta posla</strong> — horizontalni stupci (razvoj, sastanak, podrška...)</li>
+    <li><strong>Top radnici</strong> — rang lista po satima ovaj mjesec</li>
+    <li><strong>KPI kartice</strong> — prosjek dnevnih sati, ukupno fakturirano, prekovremeni</li>
+  </ul>
+
+  <h4>Manager pregled tima</h4>
+  <p>U sekciji <strong>Manager</strong> vidite sve radnike vaše tvrtke:</p>
+  <ul>
+    <li>Dropdown za prebacivanje između radnika</li>
+    <li>Pregled sati po danu, tjednu, mjesecu za svakog radnika</li>
+    <li>Direktni link na odobravanje za neodobrane unose</li>
+  </ul>
+
+  <span class="page-logo">LIMIT CONNECT</span>
+  <span class="page-num">4</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE 5: ADMIN — Plaće + Export -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page content">
+  <h3>Za admine — Plaće i izvještaji</h3>
+
+  <h4>Obračun plaća</h4>
+  <p>Sekcija <strong>Plaće</strong> prikazuje mjesečni obračun za sve zaposlenike:</p>
+  <table>
+    <tr><th>Polje</th><th>Opis</th></tr>
+    <tr><td>Redovni sati</td><td>Sati unutar dnevnog fonda (default: 8h)</td></tr>
+    <tr><td>Prekovremeni</td><td>Sati iznad dnevnog fonda × uvećana satnica</td></tr>
+    <tr><td>Noćni sati</td><td>Rad između 22:00-06:00 × 25% bonus</td></tr>
+    <tr><td>Odsutnosti</td><td>Godišnji, bolovanje, plaćeni/neplaćeni dopust</td></tr>
+    <tr><td>Bruto plaća</td><td>Automatski izračun: regular×satnica + OT×OT_satnica + noćni×bonus</td></tr>
+  </table>
+
+  <div class="highlight-box">
+    <strong>Automatski izračun:</strong> Sustav za svaki unos automatski razdvaja redovne, 
+    prekovremene i noćne sate na temelju profila zaposlenika (dnevni fond, satnica, OT satnica).
+  </div>
+
+  <h4>Excel export</h4>
+  <p>Kliknite <strong>"Export Excel"</strong> za preuzimanje .xlsx datoteke s filtriranim podacima:</p>
+  <ul>
+    <li>Odaberite period (od — do)</li>
+    <li>Opcionalno filtrirajte po radniku</li>
+    <li>Generirani fajl sadrži: Datum, Radnik, Projekt, Vrsta posla, Sati, Početak, Kraj, Status, Iznos (EUR)</li>
+    <li>Zadnji red sadrži ukupne zbrojeve</li>
+  </ul>
+
+  <h4>Fakturiranje radnih sati (Naplata)</h4>
+  <p>Sekcija <strong>Naplata</strong> prikazuje sve odobrene, nefakturirane sate grupirane po projektu:</p>
+  <div class="step-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Pregledajte</div>
+      <div class="step-desc">Vidite po projektu: ukupno sati, iznos, broj unosa.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Označite</div>
+      <div class="step-desc">Odaberite koje unose želite fakturirati.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Naplati</div>
+      <div class="step-desc">Klik na "Naplati" — unosi se označavaju kao fakturirani.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Faktura</div>
+      <div class="step-desc">Opcionalno: automatski kreira fakturu u modulu Fakture.</div>
+    </div>
+  </div>
+
+  <h4>Putni nalozi</h4>
+  <p>Za službena putovanja koristite sekciju <strong>Putni nalozi</strong>:</p>
+  <ul>
+    <li>Kreiranje naloga (odredište, svrha, vozilo, dnevnice)</li>
+    <li>Dodavanje troškova (gorivo, cestarina, smještaj, prehrana)</li>
+    <li>Odobravanje od strane managera</li>
+    <li>PDF ispis za potpisivanje</li>
+  </ul>
+
+  <span class="page-logo">LIMIT CONNECT</span>
+  <span class="page-num">5</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- PAGE 6: ZAKONSKI OKVIR + FAQ -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="page content">
+  <h3>Zakonski okvir i compliance</h3>
+
+  <h4>Zakon o radu (NN 93/14, 127/17, 98/19)</h4>
+  <table>
+    <tr><th>Članak</th><th>Propis</th><th>Sustav</th></tr>
+    <tr><td>čl. 65</td><td>Puno radno vrijeme: max 40h/tjedan</td><td>Automatsko upozorenje pri prekoračenju</td></tr>
+    <tr><td>čl. 66</td><td>Prekovremeni: max 10h/tjedan, 180h/god</td><td>OT badge + compliance note</td></tr>
+    <tr><td>čl. 73</td><td>Pauza: 30 min za 6h+, 45 min za 9h+</td><td>Auto-odbitak od bruto sati</td></tr>
+    <tr><td>čl. 74</td><td>Dnevni odmor: min 12h između smjena</td><td>daily_rest_hours praćenje</td></tr>
+    <tr><td>čl. 75</td><td>Tjedni odmor: min 24h</td><td>Upozorenje za rad 7 dana uzastopno</td></tr>
+    <tr><td>čl. 86</td><td>Noćni rad: 22:00 - 06:00</td><td>Auto-detekcija + 25% dodatak</td></tr>
+  </table>
+
+  <h4>Njemački ArbZG (za DE tržište)</h4>
+  <table>
+    <tr><th>Paragraf</th><th>Propis</th><th>Sustav</th></tr>
+    <tr><td>§3</td><td>Max 8h/dan, iznimno 10h</td><td>Upozorenje >10h, KRITIČNO >12h</td></tr>
+    <tr><td>§4</td><td>Pauza 30 min (6h+), 45 min (9h+)</td><td>Identično HR</td></tr>
+    <tr><td>§5</td><td>Ruhezeit: min 11h između smjena</td><td>daily_rest_hours tracking</td></tr>
+    <tr><td>§16</td><td>Dokumentationspflicht: evidencija obavezna</td><td>Potpuni audit trail</td></tr>
+  </table>
+
+  <h4>Često postavljana pitanja</h4>
+  
+  <p><strong>Mogu li unijeti sate za prošle dane?</strong><br>
+  Da. Odaberite datum pri unosu. Manager može odobriti retro unose.</p>
+  
+  <p><strong>Što ako zaboravim Clock Out?</strong><br>
+  Manager može ručno zatvoriti otvorenu smjenu. Sustav automatski flagira smjene duže od 16h.</p>
+  
+  <p><strong>Mogu li koristiti sustav offline?</strong><br>
+  Da, djelomično. PWA kešira stranicu. Unosi se sinkroniziraju kad se vrati internet.</p>
+  
+  <p><strong>Kako postaviti satnice za zaposlenike?</strong><br>
+  U sekciji "Profil" svaki zaposlenik ima: redovna satnica, OT satnica, dnevni fond, tjedni fond.</p>
+  
+  <p><strong>Tko može vidjeti moje sate?</strong><br>
+  Vi, vaš manager i admin tvrtke. Tenant izolacija osigurava da druge tvrtke ne vide vaše podatke.</p>
+
+  <div style="margin-top: 30px; text-align: center; padding: 20px; background: rgba(201,168,76,0.05); border-radius: 12px; border: 1px solid rgba(201,168,76,0.15);">
+    <p style="font-size: 14pt; color: #c9a84c; font-weight: 700; margin-bottom: 8px;">Trebate pomoć?</p>
+    <p style="color: #94a3b8; font-size: 10pt;">
+      Kliknite zlatnu zastavicu (dolje desno) za prijavu problema<br>
+      ili kontaktirajte podršku na <strong style="color:#c9a84c">info@limit-connect.com</strong>
+    </p>
+    <p style="color: #475569; font-size: 9pt; margin-top: 12px;">
+      limit-connect.com &bull; Konjik d.o.o. &bull; KS LIMIT, Čepin
+    </p>
+  </div>
+
+  <span class="page-logo">LIMIT CONNECT</span>
+  <span class="page-num">6</span>
+</div>
+
+</body>
+</html>
