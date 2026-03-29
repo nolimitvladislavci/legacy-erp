@@ -1,0 +1,39 @@
+{% extends "knjiznica/portal/base_portal.html" %}
+{% block title %}Bedževi{% endblock %}
+{% block content %}
+
+<div style="text-align:center;margin-bottom:24px">
+  <h2 style="font-size:1.5rem;font-weight:700">
+    <i class="fas fa-trophy" style="color:var(--lib-gold)"></i> Bedževi
+  </h2>
+  <p style="color:var(--lib-muted)">Čitaj knjige, osvajaj bedževe, postani legenda knjižnice!</p>
+</div>
+
+<!-- By category -->
+{% regroup badges by get_category_display as badge_groups %}
+{% for group in badge_groups %}
+<div class="lib-card" style="margin-bottom:16px">
+  <h3>{{ group.grouper }}</h3>
+  <div class="badge-grid">
+    {% for bd in group.list %}
+    <div class="badge-card">
+      <div class="badge-icon"><i class="{{ bd.icon }}" style="color:{{ bd.color }}"></i></div>
+      <div class="badge-name">{{ bd.name }}</div>
+      <div style="font-size:.65rem;color:var(--lib-muted);margin-top:4px">{{ bd.description }}</div>
+      {% if bd.required_books %}
+      <div style="font-size:.7rem;margin-top:4px;color:var(--lib-accent)">{{ bd.required_books }} knjiga{% if bd.required_genre %} ({{ bd.required_genre }}){% endif %}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+{% if not badges %}
+<div style="text-align:center;padding:40px;color:var(--lib-muted)">
+  <i class="fas fa-trophy" style="font-size:3rem;margin-bottom:8px;opacity:.3"></i>
+  <p>Bedževi se uskoro dodaju!</p>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,17 +1,21 @@
 from django.contrib import admin
-from .models import BookMeta, LibraryMember, BookLoan, BookReservation
+from .models import (
+    BookMeta, LibraryMember, BookLoan, BookReservation,
+    ChildReader, BadgeDefinition, EarnedBadge, ReadingLog,
+    MediaContent, FamilyChallenge,
+)
 
 
 @admin.register(BookMeta)
 class BookMetaAdmin(admin.ModelAdmin):
-    list_display = ('item', 'author', 'isbn', 'shelf_location', 'is_reference')
+    list_display = ('item', 'author', 'isbn', 'age_tier', 'genre', 'shelf_location', 'is_reference')
     search_fields = ('item__name', 'author', 'isbn')
-    list_filter = ('is_reference',)
+    list_filter = ('is_reference', 'age_tier', 'genre')
 
 
 @admin.register(LibraryMember)
 class LibraryMemberAdmin(admin.ModelAdmin):
-    list_display = ('partner', 'member_number', 'status', 'membership_until', 'company')
+    list_display = ('partner', 'member_number', 'status', 'membership_until', 'portal_pin', 'company')
     list_filter = ('status', 'company')
     search_fields = ('partner__name', 'member_number')
 
@@ -27,3 +31,43 @@ class BookLoanAdmin(admin.ModelAdmin):
 class BookReservationAdmin(admin.ModelAdmin):
     list_display = ('member', 'item', 'status', 'reserved_at')
     list_filter = ('status', 'company')
+
+
+@admin.register(ChildReader)
+class ChildReaderAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'parent', 'tier', 'books_read', 'total_points', 'company')
+    list_filter = ('tier', 'company')
+    search_fields = ('first_name', 'parent__partner__name')
+
+
+@admin.register(BadgeDefinition)
+class BadgeDefinitionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'required_books', 'required_genre', 'is_active', 'sort_order')
+    list_filter = ('category', 'is_active')
+    prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(EarnedBadge)
+class EarnedBadgeAdmin(admin.ModelAdmin):
+    list_display = ('child', 'badge', 'earned_at')
+    list_filter = ('badge',)
+
+
+@admin.register(ReadingLog)
+class ReadingLogAdmin(admin.ModelAdmin):
+    list_display = ('child', 'book_title', 'read_date', 'rating', 'points_earned')
+    list_filter = ('company',)
+    search_fields = ('child__first_name',)
+
+
+@admin.register(MediaContent)
+class MediaContentAdmin(admin.ModelAdmin):
+    list_display = ('title', 'content_type', 'tier', 'is_published', 'view_count', 'company')
+    list_filter = ('content_type', 'tier', 'is_published', 'company')
+    search_fields = ('title',)
+
+
+@admin.register(FamilyChallenge)
+class FamilyChallengeAdmin(admin.ModelAdmin):
+    list_display = ('title', 'parent', 'challenge_type', 'status', 'progress', 'target_books')
+    list_filter = ('status', 'challenge_type', 'company')

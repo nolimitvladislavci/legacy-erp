@@ -1,0 +1,79 @@
+{% extends "knjiznica/portal/base_portal.html" %}
+{% block title %}{{ child.first_name }}{% endblock %}
+{% block content %}
+
+<!-- Child Header -->
+<div class="lib-card mb-4" style="text-align:center;padding:32px">
+  <div class="child-avatar" style="width:80px;height:80px;font-size:2rem;margin:0 auto 12px">
+    <i class="fas fa-{{ child.avatar }}"></i>
+  </div>
+  <h2 style="font-size:1.5rem;margin-bottom:4px">{{ child.first_name }}</h2>
+  <div style="color:var(--lib-muted)">{{ child.get_tier_display }} · {{ child.age }} godina</div>
+
+  <!-- Level -->
+  <div style="margin:16px auto;max-width:300px">
+    <div style="font-weight:700;color:var(--lib-gold);font-size:1.1rem">{{ child.level }}</div>
+    <div class="progress-bar-lib" style="margin:6px 0">
+      <div class="progress-fill" style="width:{{ child.level_progress }}%"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--lib-muted)">
+      <span>{{ child.books_read }} knjiga pročitano</span>
+      <span>{{ child.total_points }} bodova</span>
+    </div>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="stat-row" style="max-width:400px;margin:0 auto">
+    <div class="stat-box"><div class="val" style="font-size:1.4rem">{{ child.books_read }}</div><div class="lbl">Knjiga</div></div>
+    <div class="stat-box"><div class="val" style="font-size:1.4rem">{{ badges|length }}</div><div class="lbl">Bedževa</div></div>
+    <div class="stat-box"><div class="val" style="font-size:1.4rem">{{ child.total_points }}</div><div class="lbl">Bodova</div></div>
+  </div>
+</div>
+
+<!-- Badges -->
+<div class="lib-card mb-4">
+  <h3><i class="fas fa-trophy" style="color:var(--lib-gold)"></i> Bedževi</h3>
+  <div class="badge-grid">
+    {% for bd in all_badges %}
+    <div class="badge-card {% if bd.pk in earned_badge_ids %}earned{% else %}locked{% endif %}">
+      <div class="badge-icon"><i class="{{ bd.icon }}" style="color:{{ bd.color }}"></i></div>
+      <div class="badge-name">{{ bd.name }}</div>
+      <div style="font-size:.65rem;color:var(--lib-muted)">{{ bd.description|truncatechars:50 }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Reading Log -->
+<div class="lib-card mb-4">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h3 style="margin:0"><i class="fas fa-history" style="color:var(--lib-accent)"></i> Dnevnik čitanja</h3>
+    <a href="{% url 'knjiznica:portal_log_reading' slug %}" class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i>Nova knjiga</a>
+  </div>
+  {% for log in logs %}
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0ebe4">
+    <div style="font-size:1.5rem;color:var(--lib-gold)"><i class="fas fa-book"></i></div>
+    <div style="flex:1">
+      <div style="font-weight:600">{{ log.book_title }}</div>
+      <div style="font-size:.8rem;color:var(--lib-muted)">{{ log.read_date }}
+        {% if log.rating %} · <span class="stars">{% for i in "12345" %}{% if forloop.counter <= log.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}{% endfor %}</span>{% endif %}
+      </div>
+      {% if log.short_review %}<div style="font-size:.85rem;margin-top:4px;color:var(--lib-text)">{{ log.short_review }}</div>{% endif %}
+    </div>
+    <div style="text-align:center">
+      <div style="font-weight:700;color:var(--lib-accent)">+{{ log.points_earned }}</div>
+      <div style="font-size:.65rem;color:var(--lib-muted)">bodova</div>
+    </div>
+  </div>
+  {% empty %}
+  <p style="color:var(--lib-muted);text-align:center;padding:20px">
+    Još nema pročitanih knjiga. <a href="{% url 'knjiznica:portal_log_reading' slug %}">Zabilježi prvu!</a>
+  </p>
+  {% endfor %}
+</div>
+
+<div class="text-center">
+  <a href="{% url 'knjiznica:portal_family' slug %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Natrag na obitelj</a>
+</div>
+
+{% endblock %}

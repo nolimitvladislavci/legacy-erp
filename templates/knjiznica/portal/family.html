@@ -1,0 +1,87 @@
+{% extends "knjiznica/portal/base_portal.html" %}
+{% block title %}Moja obitelj{% endblock %}
+{% block content %}
+
+<h2 style="font-size:1.4rem;font-weight:700;margin-bottom:4px">
+  <i class="fas fa-users" style="color:var(--lib-accent)"></i>
+  Pozdrav, {{ member.partner.name }}!
+</h2>
+<p style="color:var(--lib-muted);margin-bottom:24px">Iskaznica: {{ member.member_number }} · Vrijedi do: {{ member.membership_until }}</p>
+
+<!-- Djeca -->
+<div class="lib-card mb-4">
+  <h3><i class="fas fa-child" style="color:var(--lib-gold)"></i> Moja djeca</h3>
+  {% for child in children %}
+  <a href="{% url 'knjiznica:portal_child_detail' slug child.pk %}" style="text-decoration:none;color:inherit">
+    <div class="child-card">
+      <div class="child-avatar"><i class="fas fa-{{ child.avatar }}"></i></div>
+      <div class="child-info" style="flex:1">
+        <div class="child-name">{{ child.first_name }}</div>
+        <div class="child-tier">{{ child.get_tier_display }} · {{ child.level }} · {{ child.books_read }} knjiga</div>
+        <div class="progress-bar-lib" style="margin-top:6px;max-width:200px">
+          <div class="progress-fill" style="width:{{ child.level_progress }}%"></div>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:1.5rem;font-weight:800;color:var(--lib-gold)">{{ child.total_points }}</div>
+        <div style="font-size:.7rem;color:var(--lib-muted)">bodova</div>
+      </div>
+      <div>
+        {% for eb in child.badges.all|slice:":4" %}
+        <span style="font-size:1.2rem" title="{{ eb.badge.name }}"><i class="{{ eb.badge.icon }}" style="color:{{ eb.badge.color }}"></i></span>
+        {% endfor %}
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  <p style="color:var(--lib-muted)">Još nemate dodanu djecu. Obratite se knjižničarki za upis.</p>
+  {% endfor %}
+</div>
+
+<!-- Brze akcije -->
+<div class="d-flex gap-2 flex-wrap mb-4">
+  <a href="{% url 'knjiznica:portal_log_reading' slug %}" class="btn btn-primary"><i class="fas fa-book-reader me-1"></i>Zabilježi pročitanu knjigu</a>
+  <a href="{% url 'knjiznica:portal_catalog' slug %}" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Pretraži katalog</a>
+  <a href="{% url 'knjiznica:portal_badges' slug %}" class="btn btn-outline-secondary"><i class="fas fa-trophy me-1"></i>Svi bedževi</a>
+</div>
+
+<!-- Aktivne posudbe -->
+{% if active_loans %}
+<div class="lib-card mb-4">
+  <h3><i class="fas fa-book-open" style="color:var(--lib-accent)"></i> Trenutno posuđene knjige</h3>
+  {% for loan in active_loans %}
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0ebe4">
+    <div>
+      <strong>{{ loan.item.name }}</strong>
+      <div style="font-size:.8rem;color:var(--lib-muted)">Rok: {{ loan.due_date }}</div>
+    </div>
+    {% if loan.status == 'overdue' %}
+    <span style="color:var(--lib-danger);font-size:.85rem;font-weight:600">Kasni {{ loan.days_overdue }} dana</span>
+    {% else %}
+    <span style="color:var(--lib-success);font-size:.85rem"><i class="fas fa-check-circle"></i> U roku</span>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Obiteljski izazovi -->
+{% if challenges %}
+<div class="lib-card">
+  <h3><i class="fas fa-flag" style="color:var(--lib-gold)"></i> Obiteljski izazovi</h3>
+  {% for ch in challenges %}
+  <div style="margin-bottom:16px">
+    <div style="font-weight:600">{{ ch.title }}</div>
+    <div style="font-size:.8rem;color:var(--lib-muted)">{{ ch.get_challenge_type_display }} · Do {{ ch.ends_at }}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+      <div class="progress-bar-lib" style="flex:1">
+        <div class="progress-fill" style="width:{{ ch.progress_pct }}%"></div>
+      </div>
+      <span style="font-size:.85rem;font-weight:600">{{ ch.progress }}/{{ ch.target_books }}</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

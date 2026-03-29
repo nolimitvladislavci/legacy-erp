@@ -1,0 +1,103 @@
+{% extends "knjiznica/portal/base_portal.html" %}
+{% block title %}Naslovnica{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div style="text-align:center;padding:32px 0 24px">
+  <h1 style="font-size:2rem;font-weight:800;color:var(--lib-text)">
+    <i class="fas fa-book-open" style="color:var(--lib-gold)"></i>
+    Dobrodošli u knjižnicu
+  </h1>
+  <p style="color:var(--lib-muted);max-width:500px;margin:8px auto 0">
+    Čitaj, istražuj, osvajaj bedževe. Tvoja knjižnica — na dlanu.
+  </p>
+</div>
+
+<!-- Stats -->
+<div class="stat-row mb-4">
+  <div class="stat-box"><div class="val">{{ stats.total_books }}</div><div class="lbl">Knjiga u fondu</div></div>
+  <div class="stat-box"><div class="val">{{ stats.total_members }}</div><div class="lbl">Aktivnih članova</div></div>
+  <div class="stat-box"><div class="val">{{ stats.active_loans }}</div><div class="lbl">Trenutno posuđeno</div></div>
+  <div class="stat-box"><div class="val">{{ stats.total_children }}</div><div class="lbl">Mladih čitača</div></div>
+</div>
+
+<!-- Quick Actions -->
+<div class="d-flex gap-2 flex-wrap mb-4 justify-content-center">
+  <a href="{% url 'knjiznica:portal_catalog' slug %}" class="btn btn-primary"><i class="fas fa-search me-1"></i>Pretraži katalog</a>
+  <a href="{% url 'knjiznica:portal_media' slug %}" class="btn btn-outline-primary"><i class="fas fa-play me-1"></i>Knjižnična TV</a>
+  {% if not member %}
+  <a href="{% url 'knjiznica:portal_login' slug %}" class="btn btn-outline-secondary"><i class="fas fa-sign-in-alt me-1"></i>Članovi — prijava</a>
+  {% else %}
+  <a href="{% url 'knjiznica:portal_family' slug %}" class="btn btn-success"><i class="fas fa-users me-1"></i>Moja obitelj</a>
+  {% endif %}
+</div>
+
+<!-- Novi naslovi -->
+{% if new_books %}
+<div class="lib-card mb-4">
+  <h3><i class="fas fa-star" style="color:var(--lib-gold)"></i> Novi naslovi</h3>
+  <div class="book-grid">
+    {% for book in new_books %}
+    <a href="{% url 'knjiznica:portal_book_detail' slug book.pk %}" class="book-card" style="text-decoration:none;color:inherit">
+      <div class="book-cover">
+        {% if book.book_meta and book.book_meta.cover_image %}
+        <img src="{{ book.book_meta.cover_image.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:4px" alt="">
+        {% else %}
+        <i class="fas fa-book"></i>
+        {% endif %}
+      </div>
+      <div class="title">{{ book.name|truncatechars:40 }}</div>
+      <div class="author">{% if book.book_meta %}{{ book.book_meta.author|truncatechars:30 }}{% endif %}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Knjižnična TV -->
+{% if media %}
+<div class="lib-card mb-4">
+  <h3><i class="fas fa-play-circle" style="color:var(--lib-accent)"></i> Knjižnična TV</h3>
+  <div class="media-grid">
+    {% for m in media %}
+    <a href="{% url 'knjiznica:portal_media_watch' slug m.pk %}" class="media-card" style="text-decoration:none;color:inherit">
+      <div class="media-thumb">
+        {% if m.thumbnail %}
+        <img src="{{ m.thumbnail.url }}" style="width:100%;height:100%;object-fit:cover" alt="">
+        {% else %}
+        <i class="fas fa-{% if m.content_type == 'audio_story' %}headphones{% elif m.content_type == 'video_read' %}book-reader{% elif m.content_type == 'quiz' %}question-circle{% else %}play{% endif %}"></i>
+        {% endif %}
+      </div>
+      <div class="media-body">
+        <div class="title">{{ m.title }}</div>
+        <div class="meta">{{ m.get_content_type_display }} {% if m.duration_minutes %}· {{ m.duration_minutes }} min{% endif %}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  <div class="text-center mt-3">
+    <a href="{% url 'knjiznica:portal_media' slug %}" class="btn btn-sm btn-outline-primary">Svi sadržaji →</a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Top čitači -->
+{% if top_readers %}
+<div class="lib-card">
+  <h3><i class="fas fa-trophy" style="color:var(--lib-gold)"></i> Naši prvaci čitanja</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+    {% for child in top_readers %}
+    <div style="text-align:center;min-width:80px">
+      <div class="child-avatar" style="width:50px;height:50px;font-size:1.2rem;margin:0 auto 4px;
+        {% if forloop.first %}background:var(--lib-gold){% endif %}">
+        <i class="fas fa-{{ child.avatar }}"></i>
+      </div>
+      <div style="font-weight:600;font-size:.85rem">{{ child.first_name }}</div>
+      <div style="font-size:.7rem;color:var(--lib-muted)">{{ child.books_read }} knjiga</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
