@@ -25,6 +25,7 @@ urlpatterns = [
     # AI Inbox
     path("ai-inbox/", views.ai_inbox, name="ai_inbox"),
     path("revizija/", views.revizija_page, name="revizija"),
+    path("labels/", views.label_manage, name="label_manage"),
     path("arhiva/autocomplete/", views.arhiva_autocomplete, name="arhiva_autocomplete"),
     path("revizija/export/", views.revizija_export, name="revizija_export"),
 

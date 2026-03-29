@@ -475,8 +475,51 @@ def _safe_err(e, default="Greska pri obradi. Kontaktirajte administratora."):
 
 from .models import ArhivaEntry
 
+from .models import ArhivaLabel
+
 @login_required
 def arhiva_list(request):
+    """Arhiva list with HTMX partial rendering, batch operations, and label filter."""
+    from .models import ArhivaBookmark, ArhivaLabel
+
+    # ── Batch POST actions ──
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        entry_ids = request.POST.getlist('entry_ids[]') or request.POST.getlist('entry_ids')
+        company = get_user_company(request)
+
+        if action == 'bulk_label' and entry_ids:
+            label_id = request.POST.get('label_id', '')
+            if label_id:
+                try:
+                    label = ArhivaLabel.objects.get(pk=label_id, company=company)
+                    entries = ArhivaEntry.objects.filter(pk__in=entry_ids, company=company)
+                    for entry in entries:
+                        entry.labels.add(label)
+                    if request.headers.get('HX-Request'):
+                        return JsonResponse({'ok': True, 'message': f'Labela "{label.name}" dodana na {entries.count()} zapisa.'})
+                    messages.success(request, f'Labela "{label.name}" dodana na {entries.count()} zapisa.')
+                except ArhivaLabel.DoesNotExist:
+                    if request.headers.get('HX-Request'):
+                        return JsonResponse({'ok': False, 'message': 'Labela ne postoji.'}, status=404)
+                    messages.error(request, 'Labela ne postoji.')
+            return redirect('documents:arhiva_list')
+
+        elif action == 'bulk_export' and entry_ids:
+            # Redirect to bulk download with IDs
+            ids_str = ','.join(str(i) for i in entry_ids)
+            return redirect(f'/hr/documents/arhiva/bulk-download/?ids={ids_str}')
+
+        elif action == 'bulk_book' and entry_ids:
+            entries = ArhivaEntry.objects.filter(pk__in=entry_ids, company=company)
+            count = entries.update(is_booked=True)
+            if request.headers.get('HX-Request'):
+                return JsonResponse({'ok': True, 'message': f'{count} zapisa proknjizeno.'})
+            messages.success(request, f'{count} zapisa proknjizeno.')
+            return redirect('documents:arhiva_list')
+
+        return redirect('documents:arhiva_list')
+
     is_superadmin = request.user.is_superuser
 
     if is_superadmin:
@@ -487,13 +530,11 @@ def arhiva_list(request):
         if managed.exists() and not request.user.company_memberships.filter(
             is_active=True, is_default=True
         ).first().company.is_platform_owner:
-            # Reseller superadmin - vidi samo svoje firme
             companies = managed
             qs = ArhivaEntry.objects.select_related('company').filter(
                 company__in=managed
             ).exclude(amount=0).order_by('-archived_at')
         else:
-            # Platform owner - vidi sve
             companies = Company.objects.all().order_by('name')
             qs = ArhivaEntry.objects.select_related('company').exclude(amount=0).order_by('-archived_at')
 
@@ -506,7 +547,7 @@ def arhiva_list(request):
     else:
         company = get_user_company(request)
         if not company:
-            return render(request, 'documents/arhiva_list.html', {'entries': [], 'is_superadmin': False})
+            return render(request, 'documents/arhiva_list.html', {'entries': [], 'is_superadmin': False, 'labels': []})
         qs = ArhivaEntry.objects.filter(company=company).exclude(amount=0).order_by('-doc_date', '-archived_at')
         company_filter = ''
         companies = []
@@ -546,6 +587,11 @@ def arhiva_list(request):
     elif has_file == 'image':
         qs = qs.filter(has_image=True)
 
+    # Label filter
+    label_filter = request.GET.get('label', '')
+    if label_filter:
+        qs = qs.filter(labels__id=label_filter)
+
     # Hide zero-amount bulk-import entries by default for non-superadmin
     hide_zero = request.GET.get("hide_zero", "")
     if hide_zero == "1" or (hide_zero == "" and not is_superadmin and "hide_zero" not in request.GET):
@@ -560,7 +606,6 @@ def arhiva_list(request):
     )
 
     # Bookmark filter
-    from .models import ArhivaBookmark
     bookmarked = request.GET.get('bookmarked', '')
     if bookmarked == '1':
         qs = qs.filter(bookmarks__user=request.user)
@@ -580,7 +625,22 @@ def arhiva_list(request):
 
     currencies = ArhivaEntry.objects.values_list('currency', flat=True).distinct().order_by('currency')
 
-    return render(request, 'documents/arhiva_list.html', {
+    # Labels for current company
+    user_company = get_user_company(request)
+    labels = ArhivaLabel.objects.filter(company=user_company).order_by('name') if user_company else ArhivaLabel.objects.none()
+
+    # Prefetch labels for entries on this page
+    entry_labels = {}
+    if page.object_list:
+        entry_ids_on_page = [e.id for e in page.object_list]
+        from django.db.models import Prefetch
+        labeled_entries = ArhivaEntry.objects.filter(
+            id__in=entry_ids_on_page
+        ).prefetch_related('labels').only('id')
+        for le in labeled_entries:
+            entry_labels[le.id] = list(le.labels.all())
+
+    context = {
         'page_obj': page,
         'entries': page,
         'source_types': ArhivaEntry.SOURCE_TYPES,
@@ -607,7 +667,88 @@ def arhiva_list(request):
         'bookmarked_ids': set(ArhivaBookmark.objects.filter(
             user=request.user
         ).values_list('entry_id', flat=True)) if request.user.is_authenticated else set(),
-    })
+        'labels': labels,
+        'label_filter': label_filter,
+        'entry_labels': entry_labels,
+    }
+
+    # HTMX partial rendering — return only the table + pagination
+    if request.headers.get('HX-Request'):
+        return render(request, 'documents/_arhiva_table_partial.html', context)
+
+    return render(request, 'documents/arhiva_list.html', context)
+
+
+@login_required
+def label_manage(request):
+    """CRUD for ArhivaLabel via AJAX."""
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'error': 'No company'}, status=400)
+
+    if request.method == 'GET':
+        labels = ArhivaLabel.objects.filter(company=company).order_by('name')
+        return JsonResponse({'labels': [
+            {'id': l.id, 'name': l.name, 'color': l.color, 'icon': l.icon}
+            for l in labels
+        ]})
+
+    elif request.method == 'POST':
+        import json
+        try:
+            data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
+        except Exception:
+            data = request.POST
+
+        label_id = data.get('id', '')
+        name = data.get('name', '').strip()
+        color = data.get('color', '#c9a84c').strip()
+        icon = data.get('icon', 'tag').strip()
+
+        if not name:
+            return JsonResponse({'error': 'Name is required'}, status=400)
+
+        if label_id:
+            try:
+                label = ArhivaLabel.objects.get(pk=label_id, company=company)
+                label.name = name
+                label.color = color
+                label.icon = icon
+                label.save()
+                return JsonResponse({'ok': True, 'id': label.id, 'message': f'Labela "{name}" azurirana.'})
+            except ArhivaLabel.DoesNotExist:
+                return JsonResponse({'error': 'Label not found'}, status=404)
+        else:
+            label, created = ArhivaLabel.objects.get_or_create(
+                company=company, name=name,
+                defaults={'color': color, 'icon': icon}
+            )
+            if not created:
+                label.color = color
+                label.icon = icon
+                label.save()
+            return JsonResponse({'ok': True, 'id': label.id, 'created': created, 'message': f'Labela "{name}" kreirana.'})
+
+    elif request.method == 'DELETE':
+        import json
+        try:
+            data = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+        label_id = data.get('id', '')
+        if not label_id:
+            return JsonResponse({'error': 'ID required'}, status=400)
+
+        try:
+            label = ArhivaLabel.objects.get(pk=label_id, company=company)
+            label.delete()
+            return JsonResponse({'ok': True, 'message': 'Labela obrisana.'})
+        except ArhivaLabel.DoesNotExist:
+            return JsonResponse({'error': 'Label not found'}, status=404)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
 
 
 # ════════════════════════════════════════════════════════════

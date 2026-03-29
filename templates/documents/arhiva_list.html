@@ -267,6 +267,94 @@
 .drawer-preview-thumb .preview-overlay i { font-size:2rem; color:#fff; }
 </style>
 
+/* ── Batch Action Bar ── */
+.batch-action-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 9000;
+    background: rgba(10,10,10,0.95); backdrop-filter: blur(12px);
+    border-top: 2px solid var(--gold); padding: 12px 20px;
+    animation: slideUp 0.2s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.batch-bar-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.batch-count {
+    color: var(--gold); font-weight: 700; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 8px;
+}
+.batch-count span { background: var(--gold); color: #0a0a0a; padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; }
+.batch-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-batch {
+    background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold); padding: 8px 16px; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s;
+}
+.btn-batch:hover { background: rgba(201,168,76,0.2); border-color: var(--gold); }
+.btn-batch-book { color: #10b981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+.btn-batch-book:hover { border-color: #10b981; background: rgba(16,185,129,0.15); }
+.btn-batch-close { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+.btn-batch-close:hover { border-color: #ef4444; color: #ef4444; }
+
+/* ── Label Dropdown ── */
+.label-dropdown {
+    position: absolute; bottom: 100%; left: 0; min-width: 220px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3); overflow: hidden; margin-bottom: 6px;
+}
+.label-option {
+    padding: 10px 14px; cursor: pointer; font-size: 0.85rem; color: var(--text);
+    display: flex; align-items: center; gap: 8px; transition: background 0.1s;
+}
+.label-option:hover { background: rgba(201,168,76,0.08); }
+.label-manage-btn { font-weight: 600; color: var(--gold); }
+
+/* ── Label Badges ── */
+.label-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 8px; border-radius: 12px; font-size: 0.68rem; font-weight: 600;
+    margin-right: 3px; white-space: nowrap; border: 1px solid;
+}
+
+/* ── Label Manager Modal ── */
+.label-manager-overlay {
+    position: fixed; inset: 0; z-index: 9500; background: rgba(0,0,0,0.65);
+    display: flex; align-items: center; justify-content: center;
+}
+.label-manager-panel {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+    width: 420px; max-width: 92vw; max-height: 80vh; overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+.label-manager-head {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.label-manager-head h3 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--text); }
+.label-manager-body { padding: 16px 20px; overflow-y: auto; max-height: 60vh; }
+.label-create-form { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+.labels-list { }
+.label-list-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; border-bottom: 1px solid var(--border-light); font-size: 0.85rem;
+}
+.label-list-item:hover { background: rgba(201,168,76,0.04); }
+.label-list-item .label-swatch {
+    width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-right: 8px;
+}
+.label-delete-btn {
+    background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px;
+}
+.label-delete-btn:hover { color: #ef4444; }
+.label-cell { min-width: 80px; }
+
+@media (max-width: 768px) {
+    .batch-bar-inner { flex-direction: column; gap: 8px; }
+    .batch-actions { width: 100%; justify-content: center; }
+    .label-dropdown { left: auto; right: 0; }
+}
+
 {% endblock %}
 
 {% block content %}
@@ -328,6 +416,7 @@
         {% if currency %}<span class="filter-pill"><i class="fas fa-coins"></i> {{ currency }}</span>{% endif %}
         {% if has_fiscal %}<span class="filter-pill"><i class="fas fa-receipt"></i> {% trans "Fiskalno" %}</span>{% endif %}
         {% if has_file %}<span class="filter-pill"><i class="fas fa-paperclip"></i> {{ has_file }}</span>{% endif %}
+        {% if label_filter %}<span class="filter-pill"><i class="fas fa-tag"></i> {% trans "Labela" %}</span>{% endif %}
         {% if bookmarked %}<span class="filter-pill"><i class="fas fa-bookmark"></i> {% trans "Oznaceno" %}</span>{% endif %}
     </div>
 
@@ -342,7 +431,7 @@
         </button>
         <div class="filter-body" id="filterBody">
             <div class="stat-card">
-                <form method="get" id="arhivaFilterForm">
+                <form method="get" id="arhivaFilterForm" hx-get="{% url 'documents:arhiva_list' %}" hx-target="#arhiva-results" hx-push-url="true" hx-trigger="submit">
                     <div class="filter-row">
                         <div class="filter-group" style="flex:2;min-width:200px">
                             <label>{% trans "Pretraga" %}</label>
@@ -420,6 +509,15 @@
                             </select>
                         </div>
                         <div class="filter-group" style="max-width:160px">
+                            <label>{% trans "Labela" %}</label>
+                            <select name="label" class="form-select">
+                                <option value="">{% trans "Sve" %}</option>
+                                {% for lbl in labels %}
+                                <option value="{{ lbl.id }}" {% if label_filter == lbl.id|stringformat:"d" %}selected{% endif %} style="color:{{ lbl.color }}">{{ lbl.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group" style="max-width:160px">
                             <div class="filter-check" style="padding-top:20px">
                                 <input type="checkbox" name="bookmarked" value="1" id="fBookmarked" {% if bookmarked == "1" %}checked{% endif %}>
                                 <label for="fBookmarked"><i class="fas fa-bookmark"></i> {% trans "Oznaceno" %}</label>
@@ -451,133 +549,66 @@
             </div>
         </div>
 
-        <div class="table-responsive desktop-table">
-            <table class="table table-hover arhiva-table">
-                <thead>
-                    <tr>
-                        <th style="width:30px"><input type="checkbox" class="bulk-check" id="checkAll" onclick="toggleAllChecks()"></th>
-                        <th class="sortable {% if sort == 'date' %}sorted{% endif %}" onclick="doSort('date')">
-                            {% trans "Datum" %}
-                            {% if sort == 'date' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
-                        </th>
-                        {% if is_superadmin %}<th>{% trans "Tvrtka" %}</th>{% endif %}
-                        <th>{% trans "Tip" %}</th>
-                        <th class="sortable {% if sort == 'number' %}sorted{% endif %}" onclick="doSort('number')">
-                            {% trans "Broj" %}
-                            {% if sort == 'number' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
-                        </th>
-                        <th class="sortable {% if sort == 'partner' %}sorted{% endif %}" onclick="doSort('partner')">
-                            {% trans "Partner" %}
-                            {% if sort == 'partner' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
-                        </th>
-                        <th class="text-end sortable {% if sort == 'amount' %}sorted{% endif %}" onclick="doSort('amount')">
-                            {% trans "Iznos" %}
-                            {% if sort == 'amount' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
-                        </th>
-                        <th>{% trans "Val." %}</th>
-                        <th class="text-center">{% trans "Fisk." %}</th>
-                        <th>{% trans "Dat." %}</th>
-                        <th style="width:30px"></th>
-                        <th style="width:60px">Export</th>
-                        <th class="sortable {% if sort == 'archived' %}sorted{% endif %}" onclick="doSort('archived')">
-                            {% trans "Arh." %}
-                            {% if sort == 'archived' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for e in entries %}
-                    <tr data-id="{{ e.id }}" tabindex="0" ondblclick="openDrawer({{ e.id }})" onkeydown="if(event.key==='Enter'&&!event.target.matches('input,button,a'))openDrawer({{ e.id }})">
-                        <td><input type="checkbox" class="bulk-check row-check" value="{{ e.id }}" onchange="updateBulk()"></td>
-                        <td style="white-space:nowrap">{{ e.doc_date|date:"d.m.Y" }}</td>
-                        {% if is_superadmin %}<td class="doc-company">{{ e.company.name|default:"-" }}</td>{% endif %}
-                        <td><span class="badge-type">{{ e.get_source_type_display }}</span></td>
-                        <td><a href="#" class="doc-link" onclick="openDrawer({{ e.id }});return false">{{ e.doc_number }}</a></td>
-                        <td class="doc-partner" title="{{ e.partner_name|default:'' }}">{{ e.partner_name|default:"-" }}</td>
-                        <td class="text-end doc-amount">{{ e.amount|floatformat:2 }}</td>
-                        <td>{{ e.currency }}</td>
-                        <td class="text-center">
-                            {% if e.zki %}<span class="fiscal-yes" title="ZKI: {{ e.zki }}"><i class="fas fa-check-circle"></i></span>{% endif %}
-                            {% if e.jir %}<span class="fiscal-yes" title="JIR: {{ e.jir }}" style="margin-left:3px"><i class="fas fa-receipt"></i></span>{% endif %}
-                            {% if not e.zki and not e.jir %}<span class="fiscal-no">&mdash;</span>{% endif %}
-                        </td>
-                        <td>
-                            <div style="display:flex; align-items:center; gap:4px;">
-                            {% if e.has_pdf and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-pdf" title="Otvori PDF"><i class="fas fa-file-pdf"></i></a>{% elif e.has_pdf %}<span class="file-link file-pdf" style="cursor:default;opacity:0.4" title="PDF (nema datoteke)"><i class="fas fa-file-pdf"></i></span>{% endif %}
-                            {% if e.has_xml and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-xml" title="Otvori XML"><i class="fas fa-file-code"></i></a>{% elif e.has_xml %}<span class="file-link file-xml" style="cursor:default;opacity:0.4" title="XML (nema datoteke)"><i class="fas fa-file-code"></i></span>{% endif %}
-                            {% if e.has_image and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-img" title="Pogledaj sliku" onclick="event.preventDefault(); openPreviewModal('{% url 'documents:arhiva_file_serve' e.file_path %}', '{{ e.doc_number|escapejs }}', 'image')"><i class="fas fa-image"></i></a>{% elif e.has_image %}<span class="file-link file-img" style="cursor:default;opacity:0.4" title="Slika (nema datoteke)"><i class="fas fa-image"></i></span>{% endif %}
-                            {% if not e.has_pdf and not e.has_xml and not e.has_image %}<span class="fiscal-no">&mdash;</span>{% endif %}
-                            </div>
-                        </td>
-                        <td><button class="bookmark-btn{% if e.id in bookmarked_ids %} active{% endif %}" data-id="{{ e.id }}" onclick="toggleBookmark(this)" title="{% trans 'Oznaci' %}" style="{% if e.id in bookmarked_ids %}color:var(--gold){% endif %}"><i class="fas fa-bookmark"></i></button></td>
-                        <td style="white-space:nowrap">
-                            <div style="display:flex; align-items:center; gap:6px;">
-                            <a href="{% url 'documents:arhiva_pdf' e.pk %}" class="file-link file-pdf" title="Preuzmi PDF"><i class="fas fa-file-pdf"></i></a>
-                            <a href="{% url 'documents:arhiva_xml' e.pk %}" class="file-link file-xml" title="Preuzmi XML"><i class="fas fa-file-code"></i></a>
-                            <button onclick="openShare({type:'document',id:{{ e.id }},title:'{{ e.doc_number|escapejs }}',public_url:'/hr/documents/{{ e.id }}/public/'})" title="Podijeli" style="background:none;border:1px solid #333;border-radius:6px;padding:3px 8px;cursor:pointer;color:#c9a84c;font-size:.8rem;transition:all .15s" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#333'">📤</button>
-                            </div>
-                        </td>
-                        <td class="doc-date-sm">{{ e.archived_at|date:"d.m.Y" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="{% if is_superadmin %}12{% else %}11{% endif %}">
-                        <div class="arhiva-empty">
-                        <i class="fas fa-search"></i>
-                        <p style="font-size:1.1rem;font-weight:600">{% trans "Nema rezultata" %}</p>
-                        <p style="font-size:.85rem;margin-top:8px">{% trans "Pokusajte promijeniti filtere ili pretrazivanje." %}</p>
-                      </div>
-                    </td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div id="arhiva-results">
+            {% include "documents/_arhiva_table_partial.html" %}
         </div>
-
-        <div class="mobile-cards" style="padding:10px">
-            {% for e in entries %}
-            <div class="mobile-card" onclick="openDrawer({{ e.id }})">
-                <div class="mobile-card-header">
-                    <div><span class="doc-link">{{ e.doc_number }}</span> <span class="badge-type" style="margin-left:6px">{{ e.get_source_type_display }}</span></div>
-                    <span class="doc-amount">{{ e.amount|floatformat:2 }} {{ e.currency }}</span>
-                </div>
-                {% if is_superadmin %}<div class="mobile-card-row"><span class="mc-label">{% trans "Tvrtka" %}</span><span class="doc-company">{{ e.company.name|default:"-" }}</span></div>{% endif %}
-                <div class="mobile-card-row"><span class="mc-label">{% trans "Partner" %}</span><span>{{ e.partner_name|default:"-" }}</span></div>
-                <div class="mobile-card-row"><span class="mc-label">{% trans "Datum" %}</span><span>{{ e.doc_date|date:"d.m.Y" }}</span></div>
-                <div class="mobile-card-footer">
-                    <div>
-                        {% if e.zki %}<span class="fiscal-yes"><i class="fas fa-check-circle"></i></span>{% endif %}
-                        {% if e.has_pdf %}<i class="fas fa-file-pdf file-link file-pdf"></i>{% endif %}
-                        {% if e.has_xml %}<i class="fas fa-file-code file-link file-xml"></i>{% endif %}
-                        {% if e.has_image %}<i class="fas fa-image file-link file-img"></i>{% endif %}
-                        <a href="{% url 'documents:arhiva_pdf' e.pk %}" class="file-link file-pdf" title="PDF" style="margin-left:6px"><i class="fas fa-download"></i> PDF</a>
-                        <a href="{% url 'documents:arhiva_xml' e.pk %}" class="file-link file-xml" title="XML" style="margin-left:4px"><i class="fas fa-download"></i> XML</a>
-                    </div>
-                    <span class="doc-date-sm">{{ e.archived_at|date:"d.m.Y H:i" }}</span>
-                </div>
-            </div>
-            {% empty %}
-            <div class="arhiva-empty">
-              <i class="fas fa-archive"></i>
-              <p style="font-size:1.1rem;font-weight:600;color:var(--gold)">{% trans "Arhiva je prazna" %}</p>
-              <p style="font-size:.85rem;margin-top:8px">{% trans "Dokumenti ce se automatski pojaviti nakon izdavanja racuna, primanja e-racuna ili uploada." %}</p>
-            </div>
-            {% endfor %}
-        </div>
-
-        {% if page_obj.has_other_pages %}
-        <div class="arhiva-pagination">
-            {% if page_obj.has_previous %}
-            <a href="?page=1&{{ request.GET.urlencode }}" class="page-btn"><i class="fas fa-angle-double-left"></i></a>
-            <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}" class="page-btn"><i class="fas fa-angle-left"></i></a>
-            {% endif %}
-            <span class="page-btn active">{{ page_obj.number }}</span>
-            <span class="page-info">/ {{ page_obj.paginator.num_pages }}</span>
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}" class="page-btn"><i class="fas fa-angle-right"></i></a>
-            <a href="?page={{ page_obj.paginator.num_pages }}&{{ request.GET.urlencode }}" class="page-btn"><i class="fas fa-angle-double-right"></i></a>
-            {% endif %}
-        </div>
-        {% endif %}
     </div>
+
+    <!-- Batch Action Bar -->
+    <div id="batchBar" class="batch-action-bar" style="display:none">
+        <div class="batch-bar-inner">
+            <span class="batch-count"><span id="batchSelectedCount">0</span> {% trans "odabrano" %}</span>
+            <div class="batch-actions">
+                <div class="batch-label-dropdown" style="position:relative">
+                    <button class="btn-batch" onclick="toggleLabelDropdown()" type="button">
+                        <i class="fas fa-tag"></i> {% trans "Labeliraj" %}
+                    </button>
+                    <div id="labelDropdown" class="label-dropdown" style="display:none">
+                        {% for lbl in labels %}
+                        <div class="label-option" onclick="batchLabel({{ lbl.id }}, '{{ lbl.name|escapejs }}')" style="border-left:3px solid {{ lbl.color }}">
+                            <i class="fas fa-{{ lbl.icon }}" style="color:{{ lbl.color }}"></i> {{ lbl.name }}
+                        </div>
+                        {% empty %}
+                        <div class="label-option" style="color:var(--text-muted);cursor:default;font-size:.8rem">
+                            <i class="fas fa-info-circle"></i> {% trans "Nema labela. Kreiraj u postavkama." %}
+                        </div>
+                        {% endfor %}
+                        <div class="label-option label-manage-btn" onclick="openLabelManager()" style="border-top:1px solid var(--border)">
+                            <i class="fas fa-cog" style="color:var(--gold)"></i> {% trans "Upravljaj labelama" %}
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-batch" onclick="batchExport()" type="button">
+                    <i class="fas fa-download"></i> {% trans "Exportiraj" %}
+                </button>
+                <button class="btn-batch btn-batch-book" onclick="batchBook()" type="button">
+                    <i class="fas fa-book"></i> {% trans "Proknjizi" %}
+                </button>
+            </div>
+            <button class="btn-batch-close" onclick="clearSelection()" type="button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Label Manager Modal -->
+    <div id="labelManagerModal" class="label-manager-overlay" style="display:none">
+        <div class="label-manager-panel">
+            <div class="label-manager-head">
+                <h3><i class="fas fa-tags" style="color:var(--gold);margin-right:8px"></i>{% trans "Upravljanje labelama" %}</h3>
+                <button onclick="closeLabelManager()" class="drawer-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="label-manager-body" id="labelManagerBody">
+                <div class="label-create-form">
+                    <input type="text" id="newLabelName" placeholder="{% trans 'Naziv labele...' %}" class="form-control" style="flex:1">
+                    <input type="color" id="newLabelColor" value="#c9a84c" style="width:40px;height:36px;border:none;border-radius:6px;cursor:pointer">
+                    <button onclick="createLabel()" class="btn-gold" style="padding:8px 16px"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="labelsList" class="labels-list"></div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Drawer -->
@@ -947,6 +978,187 @@ document.addEventListener('keydown', function(e){
 </script>
 
 {% endblock %}
+
+<script>
+// ═══ BATCH OPERATIONS ═══
+function getSelectedIds(){
+    return Array.from(document.querySelectorAll('.row-check:checked')).map(function(c){return c.value;});
+}
+
+function updateBulk(){
+    var ids = getSelectedIds();
+    var bar = document.getElementById('batchBar');
+    var countEl = document.getElementById('batchSelectedCount');
+    var bulkBtn = document.getElementById('bulkBtn');
+    if(ids.length > 0){
+        bar.style.display = 'block';
+        countEl.textContent = ids.length;
+        if(bulkBtn) { bulkBtn.style.display = 'inline-flex'; document.getElementById('bulkCount').textContent = ids.length; }
+    } else {
+        bar.style.display = 'none';
+        if(bulkBtn) bulkBtn.style.display = 'none';
+    }
+}
+
+function clearSelection(){
+    document.querySelectorAll('.row-check').forEach(function(c){ c.checked = false; });
+    var ca = document.getElementById('checkAll');
+    if(ca) ca.checked = false;
+    updateBulk();
+}
+
+function toggleLabelDropdown(){
+    var dd = document.getElementById('labelDropdown');
+    dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+}
+
+function batchLabel(labelId, labelName){
+    var ids = getSelectedIds();
+    if(!ids.length) return;
+    document.getElementById('labelDropdown').style.display = 'none';
+    fetch('{% url "documents:arhiva_list" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/x-www-form-urlencoded', 'HX-Request': 'true'},
+        body: 'action=bulk_label&label_id=' + labelId + '&' + ids.map(function(id){return 'entry_ids[]=' + id;}).join('&')
+    }).then(function(r){ return r.json(); }).then(function(d){
+        showToast(d.message || 'Labela dodana.', d.ok ? 'success' : 'danger');
+        if(d.ok) { clearSelection(); renderEntryLabels(); }
+    }).catch(function(e){ showToast('Greska: ' + e.message, 'danger'); });
+}
+
+function batchExport(){
+    var ids = getSelectedIds();
+    if(!ids.length) return;
+    if(ids.length > 50){ showToast('Maksimalno 50 datoteka odjednom.', 'warning'); return; }
+    fetch('/hr/documents/arhiva/bulk-download/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+        body: JSON.stringify({ids: ids.map(Number)})
+    }).then(function(r){ if(!r.ok) throw new Error('Download failed'); return r.blob(); })
+    .then(function(blob){
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'arhiva_' + ids.length + '_files.zip';
+        a.click();
+        showToast('Preuzimanje: ' + ids.length + ' datoteka', 'success');
+    }).catch(function(e){ showToast('Greska: ' + e.message, 'danger'); });
+}
+
+function batchBook(){
+    var ids = getSelectedIds();
+    if(!ids.length) return;
+    if(!confirm('Proknjiziti ' + ids.length + ' zapisa?')) return;
+    fetch('{% url "documents:arhiva_list" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/x-www-form-urlencoded', 'HX-Request': 'true'},
+        body: 'action=bulk_book&' + ids.map(function(id){return 'entry_ids[]=' + id;}).join('&')
+    }).then(function(r){ return r.json(); }).then(function(d){
+        showToast(d.message || 'Proknjizeno.', d.ok ? 'success' : 'danger');
+        if(d.ok) clearSelection();
+    }).catch(function(e){ showToast('Greska: ' + e.message, 'danger'); });
+}
+
+// Close label dropdown on outside click
+document.addEventListener('click', function(e){
+    var dd = document.getElementById('labelDropdown');
+    if(dd && dd.style.display !== 'none' && !e.target.closest('.batch-label-dropdown')){
+        dd.style.display = 'none';
+    }
+});
+
+// ═══ LABEL MANAGER ═══
+function openLabelManager(){
+    document.getElementById('labelDropdown').style.display = 'none';
+    document.getElementById('labelManagerModal').style.display = 'flex';
+    loadLabels();
+}
+function closeLabelManager(){
+    document.getElementById('labelManagerModal').style.display = 'none';
+}
+function loadLabels(){
+    fetch('{% url "documents:label_manage" %}')
+        .then(function(r){return r.json();})
+        .then(function(d){
+            var html = '';
+            (d.labels || []).forEach(function(l){
+                html += '<div class="label-list-item" data-label-id="'+l.id+'">';
+                html += '<div><span class="label-swatch" style="background:'+l.color+'"></span>'+l.name+'</div>';
+                html += '<button class="label-delete-btn" onclick="deleteLabel('+l.id+')" title="Obrisi"><i class="fas fa-trash"></i></button>';
+                html += '</div>';
+            });
+            if(!d.labels || !d.labels.length) html = '<p style="color:var(--text-muted);text-align:center;padding:20px">Nema labela.</p>';
+            document.getElementById('labelsList').innerHTML = html;
+        });
+}
+function createLabel(){
+    var name = document.getElementById('newLabelName').value.trim();
+    var color = document.getElementById('newLabelColor').value;
+    if(!name) return;
+    fetch('{% url "documents:label_manage" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+        body: JSON.stringify({name: name, color: color, icon: 'tag'})
+    }).then(function(r){return r.json();}).then(function(d){
+        if(d.ok){
+            document.getElementById('newLabelName').value = '';
+            showToast(d.message, 'success');
+            loadLabels();
+        } else {
+            showToast(d.error || 'Greska', 'danger');
+        }
+    });
+}
+function deleteLabel(id){
+    if(!confirm('Obrisati labelu?')) return;
+    fetch('{% url "documents:label_manage" %}', {
+        method: 'DELETE',
+        headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+        body: JSON.stringify({id: id})
+    }).then(function(r){return r.json();}).then(function(d){
+        if(d.ok){
+            showToast(d.message, 'success');
+            loadLabels();
+        } else {
+            showToast(d.error || 'Greska', 'danger');
+        }
+    });
+}
+
+// ═══ ENTRY LABELS RENDERING ═══
+var _entryLabelsCache = {};
+function renderEntryLabels(){
+    // Fetch labels for visible entries
+    var entryIds = Array.from(document.querySelectorAll('.entry-labels')).map(function(el){return el.dataset.entryId;});
+    if(!entryIds.length) return;
+    // For each entry, load its labels via detail endpoint
+    // But better: just load all labels for current page entries at once
+    // We render from server-side data injected as JSON
+}
+
+// Server-side label rendering (inline via template tag data)
+document.addEventListener('DOMContentLoaded', function(){
+    // Labels are rendered server-side via entry_labels context
+    var labelData = {};
+    {% for entry_id, lbls in entry_labels.items %}
+    labelData[{{ entry_id }}] = [
+        {% for lbl in lbls %}
+        {name: "{{ lbl.name|escapejs }}", color: "{{ lbl.color }}"}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    {% endfor %}
+
+    document.querySelectorAll('.entry-labels').forEach(function(el){
+        var eid = parseInt(el.dataset.entryId);
+        if(labelData[eid]){
+            var html = '';
+            labelData[eid].forEach(function(l){
+                html += '<span class="label-badge" style="color:' + l.color + ';border-color:' + l.color + ';background:' + l.color + '15"><i class="fas fa-tag" style="font-size:.6rem"></i> ' + l.name + '</span>';
+            });
+            el.innerHTML = html;
+        }
+    });
+});
+</script>
 
 {% block extra_js %}
 <style>

@@ -1,0 +1,149 @@
+{% load i18n %}
+{# HTMX partial: table rows + pagination for arhiva_list #}
+
+<div class="table-responsive desktop-table">
+    <table class="table table-hover arhiva-table">
+        <thead>
+            <tr>
+                <th style="width:30px"><input type="checkbox" class="bulk-check" id="checkAll" onclick="toggleAllChecks()"></th>
+                <th class="sortable {% if sort == 'date' %}sorted{% endif %}" onclick="doSort('date')">
+                    {% trans "Datum" %}
+                    {% if sort == 'date' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
+                </th>
+                {% if is_superadmin %}<th>{% trans "Tvrtka" %}</th>{% endif %}
+                <th>{% trans "Tip" %}</th>
+                <th class="sortable {% if sort == 'number' %}sorted{% endif %}" onclick="doSort('number')">
+                    {% trans "Broj" %}
+                    {% if sort == 'number' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
+                </th>
+                <th class="sortable {% if sort == 'partner' %}sorted{% endif %}" onclick="doSort('partner')">
+                    {% trans "Partner" %}
+                    {% if sort == 'partner' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
+                </th>
+                <th class="text-end sortable {% if sort == 'amount' %}sorted{% endif %}" onclick="doSort('amount')">
+                    {% trans "Iznos" %}
+                    {% if sort == 'amount' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
+                </th>
+                <th>{% trans "Val." %}</th>
+                <th class="text-center">{% trans "Fisk." %}</th>
+                <th>{% trans "Labele" %}</th>
+                <th>{% trans "Dat." %}</th>
+                <th style="width:30px"></th>
+                <th style="width:60px">Export</th>
+                <th class="sortable {% if sort == 'archived' %}sorted{% endif %}" onclick="doSort('archived')">
+                    {% trans "Arh." %}
+                    {% if sort == 'archived' %}<i class="fas fa-chevron-{% if order == 'asc' %}up{% else %}down{% endif %} sort-icon"></i>{% endif %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in entries %}
+            <tr data-id="{{ e.id }}" tabindex="0" ondblclick="openDrawer({{ e.id }})" onkeydown="if(event.key==='Enter'&&!event.target.matches('input,button,a'))openDrawer({{ e.id }})">
+                <td><input type="checkbox" class="bulk-check row-check" value="{{ e.id }}" onchange="updateBulk()"></td>
+                <td style="white-space:nowrap">{{ e.doc_date|date:"d.m.Y" }}</td>
+                {% if is_superadmin %}<td class="doc-company">{{ e.company.name|default:"-" }}</td>{% endif %}
+                <td><span class="badge-type">{{ e.get_source_type_display }}</span></td>
+                <td><a href="#" class="doc-link" onclick="openDrawer({{ e.id }});return false">{{ e.doc_number }}</a></td>
+                <td class="doc-partner" title="{{ e.partner_name|default:'' }}">{{ e.partner_name|default:"-" }}</td>
+                <td class="text-end doc-amount">{{ e.amount|floatformat:2 }}</td>
+                <td>{{ e.currency }}</td>
+                <td class="text-center">
+                    {% if e.zki %}<span class="fiscal-yes" title="ZKI: {{ e.zki }}"><i class="fas fa-check-circle"></i></span>{% endif %}
+                    {% if e.jir %}<span class="fiscal-yes" title="JIR: {{ e.jir }}" style="margin-left:3px"><i class="fas fa-receipt"></i></span>{% endif %}
+                    {% if not e.zki and not e.jir %}<span class="fiscal-no">&mdash;</span>{% endif %}
+                </td>
+                <td class="label-cell">
+                    {% for lbl in entry_labels|default_if_none:"" %}{% endfor %}
+                    {% with elabels=entry_labels %}
+                    {% if elabels %}
+                    {% for lbl in elabels|default:"" %}
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                    <span class="entry-labels" data-entry-id="{{ e.id }}"></span>
+                </td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                    {% if e.has_pdf and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-pdf" title="Otvori PDF"><i class="fas fa-file-pdf"></i></a>{% elif e.has_pdf %}<span class="file-link file-pdf" style="cursor:default;opacity:0.4" title="PDF (nema datoteke)"><i class="fas fa-file-pdf"></i></span>{% endif %}
+                    {% if e.has_xml and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-xml" title="Otvori XML"><i class="fas fa-file-code"></i></a>{% elif e.has_xml %}<span class="file-link file-xml" style="cursor:default;opacity:0.4" title="XML (nema datoteke)"><i class="fas fa-file-code"></i></span>{% endif %}
+                    {% if e.has_image and e.file_path %}<a href="{% url 'documents:arhiva_file_serve' e.file_path %}" target="_blank" class="file-link file-img" title="Pogledaj sliku" onclick="event.preventDefault(); openPreviewModal('{% url 'documents:arhiva_file_serve' e.file_path %}', '{{ e.doc_number|escapejs }}', 'image')"><i class="fas fa-image"></i></a>{% elif e.has_image %}<span class="file-link file-img" style="cursor:default;opacity:0.4" title="Slika (nema datoteke)"><i class="fas fa-image"></i></span>{% endif %}
+                    {% if not e.has_pdf and not e.has_xml and not e.has_image %}<span class="fiscal-no">&mdash;</span>{% endif %}
+                    </div>
+                </td>
+                <td><button class="bookmark-btn{% if e.id in bookmarked_ids %} active{% endif %}" data-id="{{ e.id }}" onclick="toggleBookmark(this)" title="{% trans 'Oznaci' %}" style="{% if e.id in bookmarked_ids %}color:var(--gold){% endif %}"><i class="fas fa-bookmark"></i></button></td>
+                <td style="white-space:nowrap">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                    <a href="{% url 'documents:arhiva_pdf' e.pk %}" class="file-link file-pdf" title="Preuzmi PDF"><i class="fas fa-file-pdf"></i></a>
+                    <a href="{% url 'documents:arhiva_xml' e.pk %}" class="file-link file-xml" title="Preuzmi XML"><i class="fas fa-file-code"></i></a>
+                    </div>
+                </td>
+                <td class="doc-date-sm">{{ e.archived_at|date:"d.m.Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="{% if is_superadmin %}14{% else %}13{% endif %}">
+                <div class="arhiva-empty">
+                <i class="fas fa-search"></i>
+                <p style="font-size:1.1rem;font-weight:600">{% trans "Nema rezultata" %}</p>
+                <p style="font-size:.85rem;margin-top:8px">{% trans "Pokusajte promijeniti filtere ili pretrazivanje." %}</p>
+              </div>
+            </td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mobile-cards" style="padding:10px">
+    {% for e in entries %}
+    <div class="mobile-card" onclick="openDrawer({{ e.id }})">
+        <div class="mobile-card-header">
+            <div>
+                <input type="checkbox" class="bulk-check row-check" value="{{ e.id }}" onchange="updateBulk()" onclick="event.stopPropagation()" style="accent-color:var(--gold);width:18px;height:18px;margin-right:8px;vertical-align:middle">
+                <span class="doc-link">{{ e.doc_number }}</span>
+                <span class="badge-type" style="margin-left:6px">{{ e.get_source_type_display }}</span>
+            </div>
+            <span class="doc-amount">{{ e.amount|floatformat:2 }} {{ e.currency }}</span>
+        </div>
+        {% if is_superadmin %}<div class="mobile-card-row"><span class="mc-label">{% trans "Tvrtka" %}</span><span class="doc-company">{{ e.company.name|default:"-" }}</span></div>{% endif %}
+        <div class="mobile-card-row"><span class="mc-label">{% trans "Partner" %}</span><span>{{ e.partner_name|default:"-" }}</span></div>
+        <div class="mobile-card-row"><span class="mc-label">{% trans "Datum" %}</span><span>{{ e.doc_date|date:"d.m.Y" }}</span></div>
+        <div class="mobile-card-footer">
+            <div>
+                {% if e.zki %}<span class="fiscal-yes"><i class="fas fa-check-circle"></i></span>{% endif %}
+                {% if e.has_pdf %}<i class="fas fa-file-pdf file-link file-pdf"></i>{% endif %}
+                {% if e.has_xml %}<i class="fas fa-file-code file-link file-xml"></i>{% endif %}
+                {% if e.has_image %}<i class="fas fa-image file-link file-img"></i>{% endif %}
+                <a href="{% url 'documents:arhiva_pdf' e.pk %}" class="file-link file-pdf" title="PDF" style="margin-left:6px"><i class="fas fa-download"></i> PDF</a>
+                <a href="{% url 'documents:arhiva_xml' e.pk %}" class="file-link file-xml" title="XML" style="margin-left:4px"><i class="fas fa-download"></i> XML</a>
+            </div>
+            <span class="doc-date-sm">{{ e.archived_at|date:"d.m.Y H:i" }}</span>
+        </div>
+    </div>
+    {% empty %}
+    <div class="arhiva-empty">
+      <i class="fas fa-archive"></i>
+      <p style="font-size:1.1rem;font-weight:600;color:var(--gold)">{% trans "Arhiva je prazna" %}</p>
+      <p style="font-size:.85rem;margin-top:8px">{% trans "Dokumenti ce se automatski pojaviti nakon izdavanja racuna, primanja e-racuna ili uploada." %}</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="arhiva-pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page=1&{{ request.GET.urlencode }}" class="page-btn" hx-get="?page=1&{{ request.GET.urlencode }}" hx-target="#arhiva-results" hx-push-url="true"><i class="fas fa-angle-double-left"></i></a>
+    <a href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}" class="page-btn" hx-get="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode }}" hx-target="#arhiva-results" hx-push-url="true"><i class="fas fa-angle-left"></i></a>
+    {% endif %}
+    <span class="page-btn active">{{ page_obj.number }}</span>
+    <span class="page-info">/ {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}" class="page-btn" hx-get="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode }}" hx-target="#arhiva-results" hx-push-url="true"><i class="fas fa-angle-right"></i></a>
+    <a href="?page={{ page_obj.paginator.num_pages }}&{{ request.GET.urlencode }}" class="page-btn" hx-get="?page={{ page_obj.paginator.num_pages }}&{{ request.GET.urlencode }}" hx-target="#arhiva-results" hx-push-url="true"><i class="fas fa-angle-double-right"></i></a>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+// After HTMX swap, re-render labels inline
+if(typeof renderEntryLabels === 'function') renderEntryLabels();
+if(typeof updateBulk === 'function') updateBulk();
+</script>
