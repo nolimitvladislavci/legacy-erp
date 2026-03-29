@@ -1,61 +1,214 @@
-{% extends 'base.html' %}
+{% extends "worktime/base_worktime.html" %}
 {% load i18n %}
-{% block title %}Analitika{% endblock %}
-{% block page_title %}📊 Analitika {{ year }}{% endblock %}
-{% block content %}
-<div class="row g-3 mb-4">
-  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "YTD Sati" %}</div><div class="value">{{ ytd_hours|floatformat:0 }}h</div></div></div>
-  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "YTD Iznos" %}</div><div class="value text-success">{{ ytd_amount|floatformat:0 }} €</div></div></div>
-  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "Projekata" %}</div><div class="value">{{ by_project|length }}</div></div></div>
-  <div class="col-md-3"><div class="stat-card"><div class="label">{% trans "Radnika" %}</div><div class="value">{{ by_worker|length }}</div></div></div>
-</div>
-<div class="row g-3 mb-3">
-  <div class="col-md-6">
-    <div class="stat-card h-100">
-      <h6 class="fw-bold mb-3">Po projektu ({{ year }})</h6>
-      {% for p in by_project %}
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div><span class="badge bg-primary me-1" style="font-size:0.65rem">{{ p.project__code }}</span><span style="font-size:0.85rem">{{ p.project__name }}</span></div>
-        <div><strong>{{ p.total_hours|floatformat:0 }}h</strong><span class="text-success ms-2" style="font-size:0.82rem">{{ p.total_amount|floatformat:0 }} €</span></div>
-      </div>
-      {% endfor %}
+
+{% block title %}Analitika radnog vremena{% endblock %}
+
+{% block page_title %}
+<h1 class="text-2xl font-bold text-slate-800">Analitika radnog vremena</h1>
+<p class="text-sm text-slate-500 mt-1">Pregled statistike za tekuci period</p>
+{% endblock %}
+
+{% block worktime_content %}
+<!-- KPI kartice -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Prosj. dnevno</div>
+        <div class="text-3xl font-bold text-slate-800">{{ avg_daily_hours|default:"0.0" }} <span class="text-base font-normal text-slate-400">h</span></div>
     </div>
-  </div>
-  <div class="col-md-6">
-    <div class="stat-card h-100">
-      <h6 class="fw-bold mb-3">{% trans "Po radniku (ovaj mjesec)" %}</h6>
-      <table class="table table-sm">
-        <thead><tr><th>{% trans "Radnik" %}</th><th class="text-end">{% trans "Sati" %}</th><th class="text-end">{% trans "Iznos" %}</th></tr></thead>
-        <tbody>
-          {% for w in by_worker %}
-          <tr>
-            <td style="font-size:0.85rem">{{ w.user__first_name }} {{ w.user__last_name|default:w.user__username }}</td>
-            <td class="text-end fw-bold" style="font-family:monospace">{{ w.total_hours|floatformat:1 }}</td>
-            <td class="text-end text-success" style="font-family:monospace">{{ w.total_amount|floatformat:2 }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Ukupno ovaj mjesec</div>
+        <div class="text-3xl font-bold text-blue-600">{{ total_hours_month|default:"0.0" }} <span class="text-base font-normal text-slate-400">h</span></div>
     </div>
-  </div>
-</div>
-<div class="stat-card">
-  <h6 class="fw-bold mb-3">{% trans "Tjedni trend (zadnjih 12 tjedana)" %}</h6>
-  <div style="display:flex;align-items:flex-end;gap:6px;height:140px;padding-bottom:20px">
-    {% for w in weekly %}
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%">
-      <div style="font-size:0.62rem;color:#64748b">{{ w.hours|floatformat:0 }}h</div>
-      <div style="flex:1;width:100%;display:flex;align-items:flex-end">
-        <div style="width:100%;background:#1d4ed8;border-radius:3px 3px 0 0;min-height:2px" data-h="{{ w.hours }}"></div>
-      </div>
-      <div style="font-size:0.6rem;color:#94a3b8;white-space:nowrap">{{ w.week }}</div>
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Naplativo</div>
+        <div class="text-3xl font-bold text-green-600">{{ total_billable|default:"0.0" }} <span class="text-base font-normal text-slate-400">h</span></div>
     </div>
-    {% endfor %}
-  </div>
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Prekovremeno</div>
+        <div class="text-3xl font-bold text-amber-600">{{ total_overtime|default:"0.0" }} <span class="text-base font-normal text-slate-400">h</span></div>
+    </div>
 </div>
+
+<!-- Top radnici -->
+{% if top_workers %}
+<div class="bg-white rounded-xl border border-slate-200 p-5 mb-8">
+    <h2 class="text-lg font-bold text-slate-800 mb-3">Top radnici ovog mjeseca</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for w in top_workers %}
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
+            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">
+                {{ forloop.counter }}
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-slate-800 truncate">{{ w.name }}</div>
+                <div class="text-sm text-slate-500">{{ w.hours }} sati</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Grafovi -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Dnevni sati (stupci, zadnjih 30 dana) -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-lg font-bold text-slate-800 mb-4">Dnevni sati (zadnjih 30 dana)</h2>
+        <div class="relative" style="height:300px;">
+            <canvas id="dailyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Distribucija po projektu (doughnut) -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-lg font-bold text-slate-800 mb-4">Distribucija po projektu</h2>
+        <div class="relative" style="height:300px;">
+            <canvas id="projectChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Tip zadatka (horizontalni stupci) -->
+<div class="bg-white rounded-xl border border-slate-200 p-5 mb-8">
+    <h2 class="text-lg font-bold text-slate-800 mb-4">Raspodjela po tipu zadatka</h2>
+    <div class="relative" style="height:300px;">
+        <canvas id="taskChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const bars=document.querySelectorAll('[data-h]');
-const mx=Math.max(...[...bars].map(b=>parseFloat(b.dataset.h)||0))||1;
-bars.forEach(b=>b.style.height=(parseFloat(b.dataset.h)/mx*80)+'px');
+(function() {
+    const dailyLabels = {{ daily_chart_labels|safe }};
+    const dailyData = {{ daily_chart_data|safe }};
+    const projectLabels = {{ project_labels|safe }};
+    const projectData = {{ project_data|safe }};
+    const projectColors = {{ project_colors|safe }};
+    const taskLabels = {{ task_labels|safe }};
+    const taskData = {{ task_data|safe }};
+
+    const fontFamily = "'Barlow', 'Segoe UI', sans-serif";
+    Chart.defaults.font.family = fontFamily;
+
+    // Dnevni sati - bar chart
+    new Chart(document.getElementById('dailyChart'), {
+        type: 'bar',
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: 'Sati',
+                data: dailyData,
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) { return ctx.parsed.y.toFixed(1) + ' h'; }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Sati' },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    ticks: { maxRotation: 45, maxTicksLimit: 15 },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Distribucija po projektu - doughnut
+    new Chart(document.getElementById('projectChart'), {
+        type: 'doughnut',
+        data: {
+            labels: projectLabels,
+            datasets: [{
+                data: projectData,
+                backgroundColor: projectColors,
+                borderWidth: 2,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { padding: 12, usePointStyle: true, pointStyleWidth: 10 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                            return ctx.label + ': ' + ctx.parsed.toFixed(1) + ' h (' + pct + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Tip zadatka - horizontal bar
+    new Chart(document.getElementById('taskChart'), {
+        type: 'bar',
+        data: {
+            labels: taskLabels,
+            datasets: [{
+                label: 'Sati',
+                data: taskData,
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(236, 72, 153, 0.7)',
+                    'rgba(20, 184, 166, 0.7)',
+                    'rgba(249, 115, 22, 0.7)',
+                ],
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) { return ctx.parsed.x.toFixed(1) + ' h'; }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Sati' },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+})();
 </script>
 {% endblock %}

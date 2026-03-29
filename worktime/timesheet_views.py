@@ -1271,33 +1271,298 @@ def bill_entries(request):
 
 @login_required
 def timesheet_analytics(request):
-    """Worktime analytics — placeholder."""
-    return render(request, "worktime/worker_dashboard.html", {
-        "hours_today": 0, "hours_week": 0, "hours_month": 0,
-        "earnings_month": 0, "hourly_rate": 0, "daily_target": 8,
-        "weekly_target": 40, "week_progress": 0,
-        "recent_entries": [], "projects": [],
-        "pending_count": 0, "today": __import__("datetime").date.today(),
-        "active_timer": None, "week_days": [],
-        "streak": 0, "templates": [],
-        "frequent_projects": [], "daily_note": None,
-        "task_types": [], "burza_leads": [],
-        "overtime_warnings": [],
+    """Worktime analytics — daily hours chart, project distribution, task breakdown, top workers."""
+    import json
+    import calendar
+    from django.db.models import Avg, F, Q
+    from django.db.models.functions import TruncDate, TruncWeek
+
+    company = _user_company(request.user)
+    today = date.today()
+    year = int(request.GET.get('year', today.year))
+    month_start = today.replace(day=1)
+    year_start = date(year, 1, 1)
+    year_end = date(year, 12, 31)
+
+    # Company-scoped user IDs
+    from accounts.models import UserProfile as _UP
+    if company:
+        company_uids = list(_UP.objects.filter(company=company).values_list('user_id', flat=True))
+    else:
+        company_uids = [request.user.pk]
+
+    base_qs = TimeEntry.objects.filter(user_id__in=company_uids)
+
+    # ── YTD totals ─────────────────────────────────────────────
+    ytd_agg = base_qs.filter(
+        date__gte=year_start, date__lte=today
+    ).aggregate(
+        total_hours=Sum('duration'),
+        total_amount=Sum('billing_amount'),
+    )
+    ytd_hours = ytd_agg['total_hours'] or Decimal('0')
+    ytd_amount = ytd_agg['total_amount'] or Decimal('0')
+
+    # ── By project (YTD) ──────────────────────────────────────
+    by_project = list(base_qs.filter(
+        date__gte=year_start, date__lte=today
+    ).values(
+        'project__name', 'project__code', 'project__color'
+    ).annotate(
+        total_hours=Sum('duration'),
+        total_amount=Sum('billing_amount'),
+        entry_count=Count('id'),
+    ).order_by('-total_hours')[:15])
+
+    # ── By worker (current month) ─────────────────────────────
+    by_worker = list(base_qs.filter(
+        date__gte=month_start, date__lte=today
+    ).values(
+        'user__first_name', 'user__last_name', 'user__username'
+    ).annotate(
+        total_hours=Sum('duration'),
+        total_amount=Sum('billing_amount'),
+    ).order_by('-total_hours')[:10])
+
+    # ── Project budget tracking ───────────────────────────────
+    projects_budget = []
+    for proj in Project.objects.filter(company=company, status='ACTIVE', budget_hours__isnull=False):
+        if proj.budget_hours and proj.budget_hours > 0:
+            hours_used = base_qs.filter(project=proj).aggregate(s=Sum('duration'))['s'] or Decimal('0')
+            projects_budget.append({
+                'project': proj,
+                'hours_used': hours_used,
+                'budget_hours': proj.budget_hours,
+                'percentage': min(100, round(float(hours_used) / float(proj.budget_hours) * 100)),
+            })
+
+    # ── Weekly trend (last 12 weeks) ──────────────────────────
+    weekly = []
+    for i in range(11, -1, -1):
+        w_start = today - timedelta(weeks=i, days=today.weekday())
+        w_end = w_start + timedelta(days=6)
+        w_hours = base_qs.filter(
+            date__gte=w_start, date__lte=w_end
+        ).aggregate(s=Sum('duration'))['s'] or Decimal('0')
+        weekly.append({
+            'week': f"{w_start.strftime('%d.%m')}",
+            'hours': float(w_hours),
+        })
+
+    return render(request, 'worktime/analytics.html', {
+        'year': year,
+        'ytd_hours': ytd_hours,
+        'ytd_amount': ytd_amount,
+        'by_project': by_project,
+        'by_worker': by_worker,
+        'projects_budget': projects_budget,
+        'weekly': weekly,
     })
 
 
 
 @login_required
 def billable_hours(request):
-    """Billable hours overview."""
-    return render(request, 'worktime/worker_dashboard.html', _empty_ctx())
+    """Billable hours overview — approved, unbilled entries grouped by project."""
+    company = _user_company(request.user)
+    today = date.today()
+
+    # Company-scoped user IDs
+    from accounts.models import UserProfile as _UP
+    if company:
+        company_uids = list(_UP.objects.filter(company=company).values_list('user_id', flat=True))
+    else:
+        company_uids = [request.user.pk]
+
+    # Filters
+    date_from = request.GET.get('date_from', str(today.replace(day=1)))
+    date_to = request.GET.get('date_to', str(today))
+    selected_worker = request.GET.get('worker', '')
+
+    try:
+        df = date.fromisoformat(date_from)
+        dt = date.fromisoformat(date_to)
+    except (ValueError, TypeError):
+        df, dt = today.replace(day=1), today
+
+    qs = TimeEntry.objects.filter(
+        user_id__in=company_uids,
+        status='APPROVED',
+        is_billed=False,
+        date__gte=df, date__lte=dt,
+    ).select_related('user', 'project')
+
+    if selected_worker:
+        qs = qs.filter(user_id=selected_worker)
+
+    # POST: bulk mark as billed
+    if request.method == 'POST':
+        mark_ids = request.POST.getlist('entry_ids')
+        if mark_ids:
+            marked = TimeEntry.objects.filter(
+                pk__in=mark_ids, status='APPROVED', is_billed=False
+            ).update(is_billed=True)
+            messages.success(request, f'\u2713 {marked} unosa oznaceno kao naplaceno.')
+        return redirect('worktime:billable')
+
+    # Group by project
+    groups = []
+    project_map = {}
+    for entry in qs.order_by('project__name', 'date'):
+        pid = entry.project_id
+        if pid not in project_map:
+            try:
+                rate = entry.user.employeeprofile.hourly_rate
+            except Exception:
+                rate = entry.project.hourly_rate
+            project_map[pid] = {
+                'project_name': entry.project.name,
+                'client_name': getattr(entry.project, 'client_name', ''),
+                'entries': [],
+                'entry_ids': [],
+                'total_hours': Decimal('0'),
+                'total_amount': Decimal('0'),
+                'entry_count': 0,
+            }
+        g = project_map[pid]
+        try:
+            rate = entry.user.employeeprofile.hourly_rate
+        except Exception:
+            rate = entry.project.hourly_rate
+        amount = entry.billing_amount if entry.billing_amount else entry.duration * rate
+        entry.rate = rate
+        entry.amount = amount
+        g['entries'].append(entry)
+        g['entry_ids'].append(entry.pk)
+        g['total_hours'] += entry.duration
+        g['total_amount'] += amount
+        g['entry_count'] += 1
+
+    groups = sorted(project_map.values(), key=lambda x: x['total_hours'], reverse=True)
+
+    total_hours = sum(g['total_hours'] for g in groups)
+    total_amount = sum(g['total_amount'] for g in groups)
+    total_entries = sum(g['entry_count'] for g in groups)
+    total_projects = len(groups)
+
+    all_workers = User.objects.filter(pk__in=company_uids, is_active=True).order_by('last_name', 'first_name')
+
+    return render(request, 'worktime/billable_hours.html', {
+        'groups': groups,
+        'total_hours': total_hours,
+        'total_amount': total_amount,
+        'total_entries': total_entries,
+        'total_projects': total_projects,
+        'all_workers': all_workers,
+        'date_from': date_from,
+        'date_to': date_to,
+        'selected_worker': selected_worker,
+    })
 
 
 @login_required
 def export_timesheet_excel(request):
-    """Export timesheet to Excel."""
-    from django.http import HttpResponse
-    return HttpResponse('Export not yet implemented', content_type='text/plain')
+    """Export timesheet to Excel (.xlsx) via openpyxl."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    company = _user_company(request.user)
+    today = date.today()
+
+    # Parse params
+    start_str = request.GET.get('start_date', str(today.replace(day=1)))
+    end_str = request.GET.get('end_date', str(today))
+    user_id = request.GET.get('user_id', '')
+
+    try:
+        start_date = date.fromisoformat(start_str)
+        end_date = date.fromisoformat(end_str)
+    except (ValueError, TypeError):
+        start_date, end_date = today.replace(day=1), today
+
+    # Company-scoped
+    from accounts.models import UserProfile as _UP
+    if company:
+        company_uids = list(_UP.objects.filter(company=company).values_list('user_id', flat=True))
+    else:
+        company_uids = [request.user.pk]
+
+    qs = TimeEntry.objects.filter(
+        user_id__in=company_uids,
+        date__gte=start_date, date__lte=end_date,
+    ).select_related('user', 'project').order_by('date', 'user__last_name', 'start_time')
+
+    if user_id:
+        qs = qs.filter(user_id=user_id)
+
+    # Build workbook
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"Timesheet {start_date.strftime('%d.%m')}-{end_date.strftime('%d.%m.%Y')}"
+
+    # Header style
+    header_font = Font(bold=True, color='FFFFFF', size=11)
+    header_fill = PatternFill(start_color='1e293b', end_color='1e293b', fill_type='solid')
+    header_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin'),
+    )
+
+    headers = ['Datum', 'Radnik', 'Projekt', 'Vrsta posla', 'Sati', 'Pocetak', 'Kraj', 'Status', 'Iznos (EUR)']
+    col_widths = [12, 22, 20, 16, 8, 8, 8, 12, 12]
+
+    for col_idx, (header, width) in enumerate(zip(headers, col_widths), 1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_align
+        cell.border = thin_border
+        ws.column_dimensions[get_column_letter(col_idx)].width = width
+
+    # Data rows
+    total_hours = Decimal('0')
+    total_amount = Decimal('0')
+    for row_idx, entry in enumerate(qs, 2):
+        task_label = dict(TimeEntry.TASK_TYPES).get(entry.task_type, entry.task_type)
+        status_label = dict(TimeEntry.STATUS_CHOICES).get(entry.status, entry.status)
+        values = [
+            entry.date.strftime('%d.%m.%Y'),
+            entry.user.get_full_name() or entry.user.username,
+            entry.project.name,
+            task_label,
+            float(entry.duration),
+            entry.start_time.strftime('%H:%M') if entry.start_time else '',
+            entry.end_time.strftime('%H:%M') if entry.end_time else '',
+            status_label,
+            float(entry.billing_amount),
+        ]
+        for col_idx, val in enumerate(values, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=val)
+            cell.border = thin_border
+            if col_idx in (5, 9):
+                cell.number_format = '#,##0.00'
+                cell.alignment = Alignment(horizontal='right')
+        total_hours += entry.duration
+        total_amount += entry.billing_amount
+
+    # Summary row
+    sum_row = qs.count() + 2
+    ws.cell(row=sum_row, column=1, value='UKUPNO').font = Font(bold=True)
+    ws.cell(row=sum_row, column=5, value=float(total_hours)).font = Font(bold=True)
+    ws.cell(row=sum_row, column=5).number_format = '#,##0.00'
+    ws.cell(row=sum_row, column=9, value=float(total_amount)).font = Font(bold=True)
+    ws.cell(row=sum_row, column=9).number_format = '#,##0.00'
+
+    # Response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"timesheet_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    wb.save(response)
+    return response
 
 
 @login_required
@@ -1308,8 +1573,92 @@ def inspector_print(request):
 
 @login_required
 def payroll_summary(request):
-    """Payroll summary."""
-    return render(request, 'worktime/worker_dashboard.html', _empty_ctx())
+    """Payroll summary — per-employee hours breakdown and gross pay calculation."""
+    company = _user_company(request.user)
+    today = date.today()
+
+    # Month/year from GET
+    month = int(request.GET.get('month', today.month))
+    year = int(request.GET.get('year', today.year))
+
+    import calendar
+    _, last_day = calendar.monthrange(year, month)
+    period_start = date(year, month, 1)
+    period_end = date(year, month, last_day)
+
+    # Company-scoped user IDs
+    from accounts.models import UserProfile as _UP
+    if company:
+        company_uids = list(_UP.objects.filter(company=company).values_list('user_id', flat=True))
+    else:
+        company_uids = [request.user.pk]
+
+    employees = EmployeeProfile.objects.filter(
+        user_id__in=company_uids, user__is_active=True
+    ).select_related('user')
+
+    payroll_data = []
+    grand_total = Decimal('0')
+
+    for emp in employees:
+        entries = TimeEntry.objects.filter(
+            user=emp.user,
+            date__gte=period_start, date__lte=period_end,
+        )
+
+        total_hours = entries.aggregate(s=Sum('duration'))['s'] or Decimal('0')
+        regular = entries.aggregate(s=Sum('regular_hours'))['s'] or Decimal('0')
+        overtime = entries.aggregate(s=Sum('overtime_hours'))['s'] or Decimal('0')
+        night = entries.aggregate(s=Sum('night_hours'))['s'] or Decimal('0')
+
+        # If regular_hours field was not populated, estimate from duration
+        if regular == 0 and total_hours > 0:
+            regular = total_hours - overtime - night
+
+        # Absence days
+        absence_days = entries.exclude(absence_type='').exclude(absence_type__isnull=True).values('date').distinct().count()
+
+        # Gross pay calculation
+        base_rate = emp.hourly_rate or Decimal('20.00')
+        ot_rate = emp.overtime_rate or (base_rate * Decimal('1.5'))
+        night_bonus = base_rate * Decimal('0.25')  # 25% night supplement (HR ZOR)
+
+        cost = (regular * base_rate) + (overtime * ot_rate) + (night * night_bonus)
+
+        # Warnings: daily > 10h (ArbZG), weekly > 48h
+        has_warnings = False
+        daily_max = entries.values('date').annotate(
+            day_total=Sum('duration')
+        ).order_by('-day_total').first()
+        if daily_max and daily_max['day_total'] > Decimal('10'):
+            has_warnings = True
+
+        payroll_data.append({
+            'worker': emp.user,
+            'employee': emp,
+            'hours': total_hours,
+            'regular': regular,
+            'overtime': overtime,
+            'night': night,
+            'absence_days': absence_days,
+            'rate': base_rate,
+            'ot_rate': ot_rate,
+            'cost': cost,
+            'has_warnings': has_warnings,
+        })
+        grand_total += cost
+
+    # Sort by total hours descending
+    payroll_data.sort(key=lambda x: x['hours'], reverse=True)
+
+    return render(request, 'worktime/payroll_summary.html', {
+        'payroll_data': payroll_data,
+        'grand_total': grand_total,
+        'month': month,
+        'year': year,
+        'period_start': period_start,
+        'period_end': period_end,
+    })
 
 
 def _empty_ctx():
@@ -1375,4 +1724,19 @@ def worker_mine(request):
         'week_start': week_start,
         'week_end': week_end,
         'today': today,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════
+# CLOCK IN/OUT PAGE (mobile-first)
+# ═══════════════════════════════════════════════════════════════
+
+@login_required
+def clock_inout(request):
+    from worktime.models import TimeLog
+    open_shift = TimeLog.objects.filter(user=request.user, status='OPEN').first()
+    today_shifts = TimeLog.objects.filter(user=request.user, date=date.today()).order_by('-start_time')
+    return render(request, 'worktime/clock_inout.html', {
+        'open_shift': open_shift,
+        'today_shifts': today_shifts,
     })

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Putni nalog {{ order.order_number }}{% endblock %}
+{% block extra_css %}
+<style>
+@media(max-width:768px){
+  .container-fluid{padding-left:.5rem;padding-right:.5rem}
+  .table-responsive{font-size:.78rem}
+  .table th,.table td{padding:.4rem .5rem}
+  .btn-sm{font-size:.7rem;padding:3px 8px}
+  .row.g-2>div,.row.g-3>div{flex:0 0 100%;max-width:100%}
+  .stat-card,.card{margin-bottom:.5rem}
+  h2,.h2{font-size:1.2rem}
+  h4,.h4{font-size:1rem}
+  .d-flex.justify-content-between{flex-wrap:wrap;gap:.5rem}
+}
+@media(max-width:480px){
+  .table th:nth-child(n+5),.table td:nth-child(n+5){display:none}
+  .btn{font-size:.75rem}
+  .stat-card .fs-4,.stat-mini .val,.exp-stat-value,.flock-stat-value{font-size:1.2rem}
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid" style="max-width:800px">
+<div class="d-flex justify-content-between align-items-center mb-4">
+<h2><i class="fas fa-route"></i> {{ order.order_number }}</h2>
+<div>{% if order.status == "draft" %}<span class="badge bg-secondary fs-6">Nacrt</span>
+{% elif order.status == "approved" %}<span class="badge bg-success fs-6">Odobren</span>
+{% elif order.status == "completed" %}<span class="badge bg-primary fs-6">Zavrsen</span>
+{% elif order.status == "cancelled" %}<span class="badge bg-danger fs-6">Otkazan</span>{% endif %}</div></div>
+<div class="card bg-dark border-secondary mb-4"><div class="card-body">
+<div class="row mb-3"><div class="col-md-6"><small class="text-muted">Zaposlenik</small>
+<div>{{ order.employee.get_full_name|default:order.employee.username }}</div></div>
+<div class="col-md-6"><small class="text-muted">Prijevoz</small>
+<div>{{ order.get_transport_type_display }}</div></div></div>
+<div class="row mb-3"><div class="col-12"><small class="text-muted">Odrediste</small>
+<div><strong>{{ order.destination }}</strong></div></div></div>
+<div class="row mb-3"><div class="col-12"><small class="text-muted">Svrha</small>
+<div>{{ order.purpose }}</div></div></div>
+<div class="row mb-3"><div class="col-md-6"><small class="text-muted">Polazak</small>
+<div>{{ order.departure_date|date:"d.m.Y H:i" }}</div></div>
+<div class="col-md-6"><small class="text-muted">Povratak</small>
+<div>{{ order.return_date|date:"d.m.Y H:i" }}</div></div></div>
+<hr class="border-secondary"><h5 style="color:#c9a84c">Troskovi</h5>
+<table class="table table-dark table-sm">
+<tr><td>Kilometrina ({{ order.distance_km }} km x {{ order.mileage_rate }} EUR/km)</td><td class="text-end">{{ order.mileage_total }} EUR</td></tr>
+<tr><td>Dnevnice ({{ order.per_diem_days }} dana x {{ order.per_diem_rate }} EUR/dan)</td><td class="text-end">{{ order.per_diem_total }} EUR</td></tr>
+<tr><td>Ostali troskovi</td><td class="text-end">{{ order.other_costs }} EUR</td></tr>
+<tr class="border-top border-warning"><td><strong>UKUPNO</strong></td><td class="text-end"><strong class="text-warning fs-5">{{ order.total_cost }} EUR</strong></td></tr></table>
+{% if order.notes %}<div class="mt-3"><small class="text-muted">Napomene</small><div>{{ order.notes }}</div></div>{% endif %}
+{% if order.approved_by %}<div class="mt-3 text-success"><small>Odobrio: {{ order.approved_by.get_full_name|default:order.approved_by.username }} ({{ order.approved_at|date:"d.m.Y H:i" }})</small></div>{% endif %}
+</div></div>
+
+<!-- TRAVEL EXPENSES SECTION -->
+<div class="card bg-dark border-secondary mb-4">
+<div class="card-body">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h5 style="color:#c9a84c;margin:0"><i class="fas fa-receipt"></i> Pojedinacni troskovi</h5>
+<span class="badge bg-secondary">{{ expenses.count }} stavki</span>
+</div>
+
+{% if expenses.count %}
+<div class="table-responsive">
+<table class="table table-dark table-sm table-hover mb-3">
+<thead>
+<tr>
+<th style="font-size:.75rem;color:var(--muted)">Tip</th>
+<th style="font-size:.75rem;color:var(--muted)">Opis</th>
+<th style="font-size:.75rem;color:var(--muted)">Datum</th>
+<th style="font-size:.75rem;color:var(--muted)" class="text-end">Iznos</th>
+<th style="font-size:.75rem;color:var(--muted)"></th>
+</tr>
+</thead>
+<tbody>
+{% for exp in expenses %}
+<tr>
+<td style="font-size:.85rem">{{ exp.get_expense_type_display }}</td>
+<td style="font-size:.85rem">{{ exp.description }}</td>
+<td style="font-size:.82rem">{{ exp.receipt_date|date:"d.m.Y"|default:"-" }}</td>
+<td style="font-size:.85rem;font-weight:600" class="text-end text-warning">{{ exp.amount }} EUR</td>
+<td>{% if exp.receipt_file %}<a href="{{ exp.receipt_file.url }}" target="_blank" style="color:#c9a84c;font-size:.82rem"><i class="fas fa-file-download"></i></a>{% endif %}</td>
+</tr>
+{% endfor %}
+<tr class="border-top border-warning">
+<td colspan="3"><strong>Ukupno troskovi</strong></td>
+<td class="text-end"><strong class="text-warning">{{ expenses_total }} EUR</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+{% else %}
+<p class="text-muted mb-3" style="font-size:.85rem">Nema unesenih pojedinacnih troskova.</p>
+{% endif %}
+
+{% if order.status != "cancelled" %}
+<hr class="border-secondary">
+<h6 style="color:var(--muted);margin-bottom:.75rem">Dodaj trosak</h6>
+<form method="post" enctype="multipart/form-data" action="{% url 'worktime:travel_expense_add' order.pk %}">
+{% csrf_token %}
+<div class="row g-2 mb-2">
+<div class="col-md-4">
+<label class="form-label" style="font-size:.72rem;color:var(--muted)">Tip troska</label>
+<select name="expense_type" class="form-select form-select-sm bg-dark text-light border-secondary" required>
+{% for val, lbl in expense_types %}
+<option value="{{ val }}">{{ lbl }}</option>
+{% endfor %}
+</select>
+</div>
+<div class="col-md-4">
+<label class="form-label" style="font-size:.72rem;color:var(--muted)">Opis *</label>
+<input type="text" name="description" required class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Npr. benzin, hotel...">
+</div>
+<div class="col-md-2">
+<label class="form-label" style="font-size:.72rem;color:var(--muted)">Iznos (EUR) *</label>
+<input type="number" name="amount" step="0.01" min="0" required class="form-control form-control-sm bg-dark text-light border-secondary">
+</div>
+<div class="col-md-2">
+<label class="form-label" style="font-size:.72rem;color:var(--muted)">Datum racuna</label>
+<input type="date" name="receipt_date" class="form-control form-control-sm bg-dark text-light border-secondary">
+</div>
+</div>
+<div class="row g-2 mb-3">
+<div class="col-md-6">
+<label class="form-label" style="font-size:.72rem;color:var(--muted)">Racun/prilog (sken)</label>
+<input type="file" name="receipt_file" class="form-control form-control-sm bg-dark text-light border-secondary">
+</div>
+<div class="col-md-6">
+<label class="form-label" style="font-size:.72rem;color:var(--muted)">Napomena</label>
+<input type="text" name="notes" class="form-control form-control-sm bg-dark text-light border-secondary">
+</div>
+</div>
+<button type="submit" class="btn btn-sm" style="background:#c9a84c;color:#000;font-weight:600">Dodaj trosak</button>
+</form>
+{% endif %}
+</div></div>
+
+<div class="d-flex justify-content-between">
+<a href="{% url 'worktime:travel_order_list' %}" class="btn btn-outline-secondary">Natrag</a>
+<div>{% if can_approve %}
+{% if order.status == "draft" %}
+<form method="post" action="{% url 'worktime:travel_order_approve' order.pk %}" class="d-inline">{% csrf_token %}<input type="hidden" name="action" value="approve"><button class="btn btn-success">Odobri</button></form>
+<form method="post" action="{% url 'worktime:travel_order_approve' order.pk %}" class="d-inline">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="btn btn-danger">Otkazi</button></form>
+{% elif order.status == "approved" %}
+<form method="post" action="{% url 'worktime:travel_order_approve' order.pk %}" class="d-inline">{% csrf_token %}<input type="hidden" name="action" value="complete"><button class="btn btn-primary">Zavrsi</button></form>
+{% endif %}{% endif %}</div></div></div>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends "worktime/base_worktime.html" %}
+{% load i18n %}
+
+{% block title %}Prijava/Odjava{% endblock %}
+
+{% block page_title %}
+<h1 class="text-2xl font-bold text-slate-800">Prijava / Odjava smjene</h1>
+<p class="text-sm text-slate-500 mt-1">GPS evidencija radnog vremena</p>
+{% endblock %}
+
+{% block worktime_content %}
+<div class="max-w-lg mx-auto space-y-6">
+
+    <!-- GPS Status -->
+    <div id="gps-status" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 text-sm">
+        <span id="gps-icon" class="w-3 h-3 rounded-full bg-slate-400 shrink-0"></span>
+        <span id="gps-text" class="text-slate-500">Dohvaćam GPS lokaciju...</span>
+    </div>
+
+    <!-- Geofence Distance -->
+    <div id="geofence-card" class="hidden px-4 py-3 rounded-xl border text-sm">
+        <div class="flex items-center justify-between">
+            <span class="font-medium">Udaljenost od firme:</span>
+            <span id="geofence-distance" class="font-bold font-mono"></span>
+        </div>
+        <div class="mt-2 w-full bg-slate-200 rounded-full h-2">
+            <div id="geofence-bar" class="h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <p id="geofence-msg" class="mt-1 text-xs"></p>
+    </div>
+
+    <!-- Clock In / Clock Out Button -->
+    <div class="flex flex-col items-center gap-4">
+        {% if open_shift %}
+            <!-- Active shift info -->
+            <div class="w-full bg-green-50 border border-green-200 rounded-2xl p-5 text-center">
+                <div class="text-sm text-green-600 font-medium mb-1">Smjena aktivna od</div>
+                <div class="text-lg font-bold text-green-800">{{ open_shift.start_time|date:"H:i" }}</div>
+                <div id="elapsed-timer" class="text-4xl font-mono font-bold text-green-700 mt-3 tracking-wider">00:00:00</div>
+            </div>
+
+            <!-- Clock Out Button -->
+            <button id="btn-clock-out"
+                onclick="clockOut()"
+                class="w-full py-5 rounded-2xl text-white font-bold text-xl shadow-lg
+                       bg-red-600 hover:bg-red-700 active:bg-red-800 active:scale-[0.98]
+                       transition-all duration-150 min-h-[64px] touch-manipulation
+                       disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="out-label">ODJAVA</span>
+                <span id="out-spinner" class="hidden">
+                    <svg class="animate-spin inline w-6 h-6" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                </span>
+            </button>
+        {% else %}
+            <!-- Clock In Button -->
+            <button id="btn-clock-in"
+                onclick="clockIn()"
+                class="w-full py-6 rounded-2xl text-white font-bold text-2xl shadow-lg
+                       bg-green-600 hover:bg-green-700 active:bg-green-800 active:scale-[0.98]
+                       transition-all duration-150 min-h-[80px] touch-manipulation
+                       disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="in-label">PRIJAVA</span>
+                <span id="in-spinner" class="hidden">
+                    <svg class="animate-spin inline w-6 h-6" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                </span>
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Error / Success Message -->
+    <div id="api-message" class="hidden px-4 py-3 rounded-xl text-sm font-medium"></div>
+
+    <!-- Today's Shifts -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="px-5 py-3 border-b border-slate-100 bg-slate-50">
+            <h2 class="font-semibold text-slate-700 text-sm">Danas — {{ today_shifts|length }} smjena</h2>
+        </div>
+        {% if today_shifts %}
+        <ul class="divide-y divide-slate-100">
+            {% for shift in today_shifts %}
+            <li class="px-5 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="w-2.5 h-2.5 rounded-full shrink-0
+                        {% if shift.status == 'OPEN' %}bg-green-500 animate-pulse
+                        {% elif shift.status == 'FLAGGED' %}bg-amber-500
+                        {% else %}bg-slate-400{% endif %}"></span>
+                    <div>
+                        <div class="text-sm font-medium text-slate-800">
+                            {{ shift.start_time|date:"H:i" }}
+                            {% if shift.end_time %} — {{ shift.end_time|date:"H:i" }}{% else %} — ...{% endif %}
+                        </div>
+                        {% if shift.status == 'CLOSED' %}
+                        <div class="text-xs text-slate-500">
+                            {{ shift.payable_hours }}h neto
+                            {% if shift.break_minutes %} (pauza {{ shift.break_minutes }}min){% endif %}
+                        </div>
+                        {% elif shift.status == 'OPEN' %}
+                        <div class="text-xs text-green-600 font-medium">Aktivna</div>
+                        {% elif shift.status == 'FLAGGED' %}
+                        <div class="text-xs text-amber-600">{{ shift.audit_flag }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if shift.clock_in_distance != None %}
+                <span class="text-xs text-slate-400 font-mono">{{ shift.clock_in_distance|floatformat:0 }}m</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="px-5 py-8 text-center text-slate-400 text-sm">
+            Nema evidentiranih smjena danas.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CSRF = '{{ csrf_token }}';
+let currentLat = null;
+let currentLon = null;
+let gpsReady = false;
+let timerInterval = null;
+
+// ── GPS ──────────────────────────────────────────────
+function initGPS() {
+    if (!navigator.geolocation) {
+        setGPSStatus('error', 'GPS nije dostupan na ovom uređaju.');
+        return;
+    }
+    navigator.geolocation.watchPosition(
+        (pos) => {
+            currentLat = pos.coords.latitude;
+            currentLon = pos.coords.longitude;
+            gpsReady = true;
+            const acc = pos.coords.accuracy;
+            setGPSStatus('ok', `GPS spreman (±${Math.round(acc)}m)`);
+        },
+        (err) => {
+            let msg = 'GPS greška.';
+            if (err.code === 1) msg = 'GPS pristup odbijen. Omogućite lokaciju u postavkama.';
+            else if (err.code === 2) msg = 'GPS signal nedostupan.';
+            else if (err.code === 3) msg = 'GPS timeout — pokušajte na otvorenom.';
+            setGPSStatus('error', msg);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+}
+
+function setGPSStatus(state, text) {
+    const icon = document.getElementById('gps-icon');
+    const label = document.getElementById('gps-text');
+    label.textContent = text;
+    icon.className = 'w-3 h-3 rounded-full shrink-0 ';
+    if (state === 'ok') {
+        icon.className += 'bg-green-500';
+        label.className = 'text-green-700';
+    } else if (state === 'error') {
+        icon.className += 'bg-red-500';
+        label.className = 'text-red-700';
+    } else {
+        icon.className += 'bg-amber-400 animate-pulse';
+        label.className = 'text-amber-600';
+    }
+}
+
+// ── CLOCK IN ─────────────────────────────────────────
+function clockIn() {
+    if (!gpsReady) {
+        showMessage('error', 'GPS lokacija još nije spremna. Pričekajte...');
+        return;
+    }
+    const btn = document.getElementById('btn-clock-in');
+    btn.disabled = true;
+    document.getElementById('in-label').classList.add('hidden');
+    document.getElementById('in-spinner').classList.remove('hidden');
+
+    fetch('{% url "worktime:api_clock_in" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF,
+        },
+        body: JSON.stringify({ lat: currentLat, lon: currentLon }),
+    })
+    .then(r => r.json().then(data => ({ status: r.status, data })))
+    .then(({ status, data }) => {
+        if (data.ok) {
+            showMessage('success', 'Prijava uspješna!');
+            if (data.distance !== null && data.distance !== undefined) {
+                showGeofence(data.distance);
+            }
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showMessage('error', data.error || 'Greška pri prijavi.');
+            if (data.distance) showGeofence(data.distance, data.max_allowed);
+            btn.disabled = false;
+            document.getElementById('in-label').classList.remove('hidden');
+            document.getElementById('in-spinner').classList.add('hidden');
+        }
+    })
+    .catch(err => {
+        showMessage('error', 'Mrežna greška: ' + err.message);
+        btn.disabled = false;
+        document.getElementById('in-label').classList.remove('hidden');
+        document.getElementById('in-spinner').classList.add('hidden');
+    });
+}
+
+// ── CLOCK OUT ────────────────────────────────────────
+function clockOut() {
+    if (!gpsReady) {
+        showMessage('error', 'GPS lokacija još nije spremna. Pričekajte...');
+        return;
+    }
+    const btn = document.getElementById('btn-clock-out');
+    btn.disabled = true;
+    document.getElementById('out-label').classList.add('hidden');
+    document.getElementById('out-spinner').classList.remove('hidden');
+
+    fetch('{% url "worktime:api_clock_out" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF,
+        },
+        body: JSON.stringify({ lat: currentLat, lon: currentLon }),
+    })
+    .then(r => r.json().then(data => ({ status: r.status, data })))
+    .then(({ status, data }) => {
+        if (data.ok) {
+            showMessage('success',
+                `Odjava uspješna! Neto: ${data.payable_hours}h` +
+                (data.break_minutes ? ` (pauza ${data.break_minutes}min)` : '')
+            );
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            showMessage('error', data.error || 'Greška pri odjavi.');
+            btn.disabled = false;
+            document.getElementById('out-label').classList.remove('hidden');
+            document.getElementById('out-spinner').classList.add('hidden');
+        }
+    })
+    .catch(err => {
+        showMessage('error', 'Mrežna greška: ' + err.message);
+        btn.disabled = false;
+        document.getElementById('out-label').classList.remove('hidden');
+        document.getElementById('out-spinner').classList.add('hidden');
+    });
+}
+
+// ── GEOFENCE DISPLAY ─────────────────────────────────
+function showGeofence(distance, maxAllowed) {
+    const card = document.getElementById('geofence-card');
+    const distEl = document.getElementById('geofence-distance');
+    const bar = document.getElementById('geofence-bar');
+    const msg = document.getElementById('geofence-msg');
+    const max = maxAllowed || 200;
+
+    card.classList.remove('hidden');
+    distEl.textContent = Math.round(distance) + 'm';
+
+    const pct = Math.min(100, (distance / max) * 100);
+    bar.style.width = pct + '%';
+
+    if (distance <= max) {
+        card.className = card.className.replace(/border-\w+-\d+/g, '').replace(/bg-\w+-\d+/g, '') +
+            ' bg-green-50 border-green-200';
+        bar.className = bar.className.replace(/bg-\w+-\d+/g, '') + ' bg-green-500';
+        distEl.className = 'font-bold font-mono text-green-700';
+        msg.textContent = 'Unutar dozvoljene zone.';
+        msg.className = 'mt-1 text-xs text-green-600';
+    } else {
+        card.className = card.className.replace(/border-\w+-\d+/g, '').replace(/bg-\w+-\d+/g, '') +
+            ' bg-red-50 border-red-200';
+        bar.className = bar.className.replace(/bg-\w+-\d+/g, '') + ' bg-red-500';
+        distEl.className = 'font-bold font-mono text-red-700';
+        msg.textContent = `Izvan zone! Max: ${max}m.`;
+        msg.className = 'mt-1 text-xs text-red-600';
+    }
+}
+
+// ── MESSAGES ─────────────────────────────────────────
+function showMessage(type, text) {
+    const el = document.getElementById('api-message');
+    el.classList.remove('hidden', 'bg-green-50', 'text-green-700', 'border-green-200',
+                         'bg-red-50', 'text-red-700', 'border-red-200');
+    if (type === 'success') {
+        el.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200';
+    } else {
+        el.className = 'px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+    }
+    el.textContent = text;
+}
+
+// ── ELAPSED TIMER ────────────────────────────────────
+{% if open_shift %}
+(function() {
+    const startISO = '{{ open_shift.start_time|date:"c" }}';
+    const startMs = new Date(startISO).getTime();
+    const display = document.getElementById('elapsed-timer');
+
+    function tick() {
+        const diff = Math.floor((Date.now() - startMs) / 1000);
+        const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+        const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+        const s = String(diff % 60).padStart(2, '0');
+        display.textContent = h + ':' + m + ':' + s;
+    }
+    tick();
+    timerInterval = setInterval(tick, 1000);
+})();
+{% endif %}
+
+// ── INIT ─────────────────────────────────────────────
+initGPS();
+</script>
+{% endblock %}

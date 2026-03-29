@@ -45,6 +45,9 @@ urlpatterns = [
     path('travel-orders/<int:pk>/pdf/', travel_views.travel_order_pdf, name='travel_order_pdf'),
     path('mine/', timesheet_views.worker_mine, name='ts_mine'),
 
+    # Clock In/Out mobile page
+    path('clock/', timesheet_views.clock_inout, name='clock_inout'),
+
     # Hybrid Time Tracking API
     path('api/clock-in/', api_clock_in, name='api_clock_in'),
     path('api/clock-out/', api_clock_out, name='api_clock_out'),

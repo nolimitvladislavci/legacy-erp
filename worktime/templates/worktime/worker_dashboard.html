@@ -1,355 +1,409 @@
-{% extends "base.html" %}
-{% load i18n %}
-{% block title %}{% trans "Moj radni portal" %}{% endblock %}
-{% block page_title %}{% trans "Radno vrijeme" %}{% endblock %}
+{% extends "worktime/base_worktime.html" %}
+{% load i18n l10n %}
 
-{% block extra_css %}
-<style>
-.timer-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;padding:20px;color:#fff;border:1px solid #334155;position:relative;overflow:hidden}
-.timer-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent)}
-.timer-display{font-family:'Courier New',monospace;font-size:2.8rem;font-weight:700;text-align:center;letter-spacing:4px;margin:12px 0}
-.timer-display.running{color:#22c55e;animation:tpulse 2s infinite}
-.timer-display.paused{color:#f59e0b}
-.timer-display.idle{color:#64748b}
-@keyframes tpulse{0%,100%{text-shadow:0 0 20px rgba(34,197,94,.3)}50%{text-shadow:0 0 40px rgba(34,197,94,.6)}}
-.timer-project{text-align:center;font-size:.85rem;color:#94a3b8;margin-bottom:8px}
-.timer-project strong{color:#e2e8f0}
-.timer-earnings{text-align:center;font-size:1.1rem;color:#c9a84c;font-weight:600;margin-bottom:16px}
-.timer-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.timer-btns .btn{min-width:80px;font-weight:600;border-radius:10px;padding:10px 16px;font-size:.9rem;border:none}
-.btn-go{background:#22c55e;color:#fff}.btn-go:hover,.btn-go:active{background:#16a34a;color:#fff}
-.btn-pa{background:#f59e0b;color:#fff}.btn-re{background:#3b82f6;color:#fff}
-.btn-st{background:#ef4444;color:#fff}.btn-di{background:transparent;color:#94a3b8;border:1px solid #475569!important}
+{% block title %}{% trans "Moji sati" %}{% endblock %}
 
-.rate-card{background:linear-gradient(135deg,#1e293b,#334155);border-radius:12px;padding:12px 16px;color:#fff;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.rate-info{display:flex;gap:16px;flex-wrap:wrap}
-.rate-item{text-align:center}
-.rate-val{font-size:1rem;font-weight:700;color:#c9a84c}
-.rate-lbl{font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8}
-.profile-link{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:.78rem;font-weight:600}
-
-.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-@media(min-width:768px){.stats-row{grid-template-columns:repeat(4,1fr)}}
-.mini-stat{background:#fff;border-radius:12px;padding:14px;border:1px solid #f1f5f9;text-align:center}
-.mini-stat .num{font-size:1.5rem;font-weight:700;color:#0f172a}
-.mini-stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;font-weight:600}
-
-.week-bar{display:flex;gap:4px;margin-bottom:16px}
-.week-day{flex:1;text-align:center;padding:8px 2px;background:#fff;border-radius:8px;border:1px solid #f1f5f9;font-size:.65rem}
-.week-day.today{border-color:#3b82f6;background:#eff6ff}
-.week-day .dn{font-weight:700;color:#374151}
-.week-day .dh{font-size:.8rem;font-weight:700;color:#0f172a;margin-top:2px}
-.week-day .db{height:4px;border-radius:2px;background:#e2e8f0;margin-top:4px}
-.week-day .db .f{height:100%;border-radius:2px;background:#3b82f6}
-
-.qa{background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0;margin-bottom:16px}
-.qa h6{font-weight:700;margin-bottom:12px;font-size:.85rem}
-
-.ei{background:#fff;border-radius:10px;padding:12px;border:1px solid #f1f5f9;margin-bottom:8px;display:flex;align-items:center;gap:10px}
-.ec{width:4px;height:40px;border-radius:2px;flex-shrink:0}
-.en{flex:1;min-width:0}
-.en .pn{font-weight:700;font-size:.8rem;color:#0f172a}
-.en .ed{font-size:.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.eh{font-weight:700;font-size:1rem;color:#0f172a;white-space:nowrap}
-
-.tc{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;font-size:.78rem;background:#f8fafc;border:1px solid #e2e8f0;cursor:pointer;font-weight:600;margin:3px}
-
-/* TABS */
-.mtabs{display:flex;background:#f1f5f9;border-radius:10px;padding:3px;margin-bottom:16px;overflow-x:auto}
-.mtab{flex:1;min-width:0;text-align:center;padding:10px 4px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;color:#64748b;border:none;background:none;white-space:nowrap}
-.mtab.on{background:#fff;color:#0f172a;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.tp{display:none}.tp.on{display:block}
-
-.ps{height:6px;border-radius:3px;background:#e2e8f0;margin-top:6px}
-.ps .f{height:100%;border-radius:3px}
-
-#liveCalc{text-align:center;padding:8px;font-size:.85rem;font-weight:700;border-radius:8px;margin:8px 0;display:none}
-@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:.7}}
-</style>
+{% block page_title %}
+{% if is_manager and company_workers %}
+<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:.6rem 1rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+  <span style="font-size:.85rem;font-weight:600;color:#856404">👷 Radnik:</span>
+  <form method="get" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+    <select name="worker_id" onchange="this.form.submit()"
+            style="border:1px solid #ffc107;border-radius:6px;padding:.3rem .7rem;font-size:.85rem;background:#fff;cursor:pointer">
+      <option value="">— {% trans "Ja" %} ({{ request.user.get_full_name|default:request.user.username }}) —</option>
+      {% for w in company_workers %}
+        <option value="{{ w.pk }}" {% if selected_worker.pk == w.pk %}selected{% endif %}>
+          {{ w.get_full_name|default:w.username }}
+        </option>
+      {% endfor %}
+    </select>
+    {% if selected_worker %}
+    <a href="{% url 'worktime:ts_worker' %}"
+       style="font-size:.78rem;color:#856404;text-decoration:none;border:1px solid #ffc107;border-radius:5px;padding:.25rem .6rem">
+      ✕ Povratak na svoje
+    </a>
+    {% endif %}
+  </form>
+  {% if selected_worker %}
+  <span style="font-size:.82rem;color:#856404;font-weight:600">
+    📋 Gledate dashboard za: <strong>{{ selected_worker.get_full_name|default:selected_worker.username }}</strong>
+  </span>
+  {% endif %}
+</div>
+{% endif %}
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">⏱</span>
+    <div>
+      {% if selected_worker %}
+      <h1 class="text-xl font-bold text-slate-800">{{ selected_worker.get_full_name|default:selected_worker.username }} — {% trans "Radno vrijeme" %}</h1>
+      {% else %}
+      <h1 class="text-xl font-bold text-slate-800">{% trans "Moje radno vrijeme" %}</h1>
+      {% endif %}
+      <p class="text-sm text-slate-500">{{ today|date:"l, d. F Y." }}</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 flex-wrap">
+      <a href="{% url 'worktime:ts_add' %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 flex items-center gap-1.5">
+        ➕ {% trans "Novi unos" %}
+      </a>
+      <a href="{% url 'worktime:ts_weekly' %}" class="px-4 py-2 bg-white border rounded-lg text-sm text-slate-600 hover:bg-slate-50">
+        📅 {% trans "Tjedan" %}
+      </a>
+      <div class="relative group">
+        <button class="px-4 py-2 bg-white border rounded-lg text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-1">
+          📋 {% trans "Kopiraj" %} <span class="text-xs">▾</span>
+        </button>
+        <div class="absolute right-0 top-full mt-1 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1 hidden group-hover:block">
+          <form method="post" action="{% url 'worktime:ts_copy_prev' %}">
+            {% csrf_token %}
+            <button class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex justify-between">
+              <span>📅 {% trans "Prethodni dan" %}</span><span class="text-slate-400">→ {% trans "danas" %}</span>
+            </button>
+          </form>
+          <form method="post" action="{% url 'worktime:ts_copy_week' %}">
+            {% csrf_token %}
+            <input type="hidden" name="skip_existing" value="1">
+            <button class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex justify-between">
+              <span>📆 {% trans "Prethodni tjedan" %}</span><span class="text-slate-400">→ {% trans "ovaj" %}</span>
+            </button>
+          </form>
+          <form method="post" action="{% url 'worktime:ts_copy_month' %}">
+            {% csrf_token %}
+            <input type="hidden" name="skip_existing" value="1">
+            <button class="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex justify-between">
+              <span>🗓 {% trans "Prethodni mjesec" %}</span><span class="text-slate-400">→ {% trans "ovaj" %}</span>
+            </button>
+          </form>
+          <hr class="my-1 border-slate-100">
+          <a href="{% url 'worktime:ts_add' %}" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+            ⚙️ {% trans "Napredno kopiranje..." %}
+          </a>
+        </div>
+      </div>
+      <a href="{% url 'worktime:ts_pdf' %}" class="px-4 py-2 bg-white border rounded-lg text-sm text-slate-600 hover:bg-slate-50">
+        📄 PDF
+      </a>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
-{% block content %}
-<!-- OVERTIME WARNINGS -->
-{% if overtime_warnings %}
-<div id="overtimeAlert" style="background:#dc2626;color:#fff;padding:14px 20px;border-radius:12px;margin-bottom:12px;animation:alertPulse 1.5s infinite;position:relative;z-index:100">
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <span style="font-size:1.5rem">&#9888;</span>
-    <div>
-      <strong style="font-size:1rem">UPOZORENJE: Neispravno radno vrijeme!</strong><br>
-      <span style="font-size:.85rem">
-        {% for w in overtime_warnings %}
-          {{ w.date|date:"d.m.Y" }} — {{ w.project.name }} — <strong>{{ w.duration|floatformat:1 }}h</strong>{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-      </span>
-    </div>
-  </div>
-  <div style="margin-top:8px;font-size:.8rem">
-    Korigirajte unose ili kontaktirajte administratora. Ovo upozorenje se ne moze zatvoriti.
-  </div>
-</div>
-{% endif %}
+{% block worktime_content %}
 
-<!-- TIMER OVERTIME WARNING (hidden, shown by JS when >10h) -->
-<div id="timerOvertimeAlert" style="display:none;background:#f59e0b;color:#000;padding:12px 20px;border-radius:12px;margin-bottom:12px;animation:alertPulse 2s infinite">
-  <div style="display:flex;align-items:center;gap:10px">
-    <span style="font-size:1.5rem">&#9200;</span>
-    <div>
-      <strong>Stoperica radi vec vise od <span id="timerHoursWarn">10</span> sati!</strong><br>
-      <span style="font-size:.85rem">Jeste li zaboravili iskljuciti? Provjerite i zaustavite ako je potrebno.</span>
-    </div>
-  </div>
-</div>
+{# ── KPI kartice ── #}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 
-<!-- RATE -->
-<div class="rate-card">
-  <div class="rate-info">
-    <div class="rate-item"><div class="rate-val">€{{ hourly_rate|floatformat:2 }}</div><div class="rate-lbl">{% trans "Satnica" %}</div></div>
-    <div class="rate-item"><div class="rate-val">{{ daily_target|floatformat:0 }}h</div><div class="rate-lbl">{% trans "Dnevno" %}</div></div>
-    <div class="rate-item"><div class="rate-val">{{ weekly_target|floatformat:0 }}h</div><div class="rate-lbl">{% trans "Tjedno" %}</div></div>
-    <div class="rate-item"><div class="rate-val">🔥{{ streak }}</div><div class="rate-lbl">{% trans "Streak" %}</div></div>
-  </div>
-  <a href="{% url 'worktime:ts_profile' %}" class="profile-link">{% trans "👤 Profil" %}</a>
-</div>
-
-<!-- TIMER -->
-<div class="timer-card mb-3">
-{% if active_timer %}
-  <div class="timer-project">⏱ <strong>{{ active_timer.project.name }}</strong></div>
-  <div class="timer-display {% if active_timer.status == 'RUNNING' %}running{% else %}paused{% endif %}" id="timerDisplay">{{ active_timer.elapsed_display }}</div>
-  <div class="timer-earnings" id="timerEarnings">€ 0.00</div>
-  <div class="timer-btns">
-    {% if active_timer.status == 'RUNNING' %}
-    <form method="post" action="{% url 'worktime:timer_pause' %}">{% csrf_token %}<button class="btn btn-pa">{% trans "⏸ Pauza" %}</button></form>
-    {% else %}
-    <form method="post" action="{% url 'worktime:timer_resume' %}">{% csrf_token %}<button class="btn btn-re">{% trans "▶ Nastavi" %}</button></form>
-    {% endif %}
-    <form method="post" action="{% url 'worktime:timer_stop' %}">{% csrf_token %}<button class="btn btn-st">{% trans "⏹ Spremi" %}</button></form>
-    <form method="post" action="{% url 'worktime:timer_discard' %}" onsubmit="return confirm('Odbaciti?')">{% csrf_token %}<button class="btn btn-di btn-sm">🗑</button></form>
-  </div>
-{% else %}
-  <div class="timer-project">{% trans "Pokreni štopericu" %}</div>
-  <div class="timer-display idle" id="timerDisplay">00:00:00</div>
-  <form method="post" action="{% url 'worktime:timer_start' %}">{% csrf_token %}
-    <div class="row g-2 mb-3">
-      <div class="col-5"><select name="project" class="form-select form-select-sm" required style="background:rgba(255,255,255,.08);border-color:#475569;color:#fff"><option value="">{% trans "-- Projekt --" %}</option>{% for p in projects %}<option value="{{ p.id }}" style="color:#000">{{ p.code }} – {{ p.name }}</option>{% endfor %}</select></div><div class="col-2"><button type="button" onclick="window.location.href='/projects/new/?next='+encodeURIComponent(window.location.pathname)" style="width:100%;height:31px;background:none;border:1px solid #475569;color:#94a3b8;border-radius:6px;font-weight:700;cursor:pointer" title="Novi projekt">+</button></div>
-      <div class="col-5"><select name="task_type" class="form-select form-select-sm" style="background:rgba(255,255,255,.08);border-color:#475569;color:#fff">{% for v,l in task_types %}<option value="{{ v }}" style="color:#000">{{ l }}</option>{% endfor %}</select></div>
-    </div>
-    {% if burza_leads %}<select name="project_lead" class="form-select form-select-sm mb-2" style="background:rgba(255,255,255,.08);border-color:#475569;color:#fff"><option value="" style="color:#000">{% trans "-- Burza projekt (opciono) --" %}</option>{% for bl in burza_leads %}<option value="{{ bl.pk }}" style="color:#000">[{{ bl.get_status_display }}] {{ bl.title }}</option>{% endfor %}</select>{% endif %}
-    <input type="text" name="description" placeholder="{% trans "Opis rada..." %}" class="form-control form-control-sm mb-3" style="background:rgba(255,255,255,.06);border-color:#475569;color:#fff">
-    <div class="text-center"><button type="submit" class="btn btn-go btn-lg px-5">{% trans "▶ START" %}</button></div>
-  </form>
-{% endif %}
-</div>
-
-<!-- STATS -->
-<div class="stats-row">
-  <div class="mini-stat"><div class="num">{{ hours_today|floatformat:1 }}</div><div class="lbl">{% trans "Danas" %}</div><div class="ps"><div class="f" style="width:{% widthratio hours_today daily_target 100 %}%;background:#3b82f6"></div></div></div>
-  <div class="mini-stat"><div class="num">{{ hours_week|floatformat:1 }}</div><div class="lbl">{% trans "Tjedan" %}</div><div class="ps"><div class="f" style="width:{{ week_progress }}%;background:#22c55e"></div></div></div>
-  <div class="mini-stat"><div class="num">{{ hours_month|floatformat:1 }}</div><div class="lbl">{% trans "Mjesec" %}</div></div>
-  <div class="mini-stat"><div class="num" style="color:#c9a84c">€{{ earnings_month|floatformat:0 }}</div><div class="lbl">{% trans "Zarada" %}</div></div>
-</div>
-
-<!-- WEEK -->
-<div class="week-bar">{% for d in week_days %}<div class="week-day {% if d.is_today %}today{% endif %}"><div class="dn">{{ d.day_name }}</div><div class="dh">{{ d.hours|floatformat:1 }}</div><div class="db"><div class="f" style="width:{{ d.percentage }}%"></div></div></div>{% endfor %}</div>
-
-<!-- TABS -->
-<div class="mtabs">
-  <button class="mtab on" data-t="add">{% trans "➕ Unos" %}</button>
-  <button class="mtab" data-t="entries">{% trans "📋 Unosi" %}</button>
-  <button class="mtab" data-t="quick">{% trans "⚡ Brzo" %}</button>
-  <button class="mtab" data-t="profil">{% trans "👤 Profil" %}</button>
-</div>
-
-<!-- TAB ADD -->
-<div class="tp on" id="t-add">
-  <div class="qa">
-    <h6>➕ {% trans "Novi unos" %}</h6>
-    <form method="post" action="{% url 'worktime:ts_add' %}" id="addForm">{% csrf_token %}
-      <div class="row g-2">
-        <div class="col-5"><label style="font-size:.7rem;font-weight:600">{% trans "Projekt" %}</label><select name="project" class="form-select form-select-sm" required><option value="">--</option>{% for p in projects %}<option value="{{ p.id }}">{{ p.code }} – {{ p.name }}</option>{% endfor %}</select></div><div class="col-1" style="display:flex;align-items:flex-end"><button type="button" onclick="window.location.href='/projects/new/?next='+encodeURIComponent(window.location.pathname)" style="width:100%;height:31px;background:none;border:1px solid #dee2e6;border-radius:6px;font-weight:700;cursor:pointer;color:#64748b" title="Novi projekt">+</button></div>
-        <div class="col-6"><label style="font-size:.7rem;font-weight:600">{% trans "Datum" %}</label><input type="date" name="date" value="{{ today|date:'Y-m-d' }}" class="form-control form-control-sm" id="fDate"></div>
-        <div class="col-4"><label style="font-size:.7rem;font-weight:600">{% trans "Od" %}</label><input type="time" name="start_time" class="form-control form-control-sm" value="07:00" id="fStart"></div>
-        <div class="col-4"><label style="font-size:.7rem;font-weight:600">{% trans "Do" %}</label><input type="time" name="end_time" class="form-control form-control-sm" value="15:30" id="fEnd"></div>
-        <div class="col-4"><label style="font-size:.7rem;font-weight:600">{% trans "Pauza" %}</label><input type="number" name="break_minutes" value="30" class="form-control form-control-sm" id="fBreak"></div>
-        <div class="col-8"><input type="text" name="description" class="form-control form-control-sm" placeholder="{% trans "Opis rada" %}"></div>
-        <div class="col-4"><select name="task_type" class="form-select form-select-sm">{% for v,l in task_types %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></div>
-        {% if burza_leads %}<div class="col-12"><label style="font-size:.7rem;font-weight:600">{% trans "Burza projekt (opciono)" %}</label><select name="project_lead" class="form-select form-select-sm"><option value="">{% trans "-- bez burza projekta --" %}</option>{% for bl in burza_leads %}<option value="{{ bl.pk }}">[{{ bl.get_status_display }}] {{ bl.title }}</option>{% endfor %}</select></div>{% endif %}
-        <div class="col-12"><div id="liveCalc"></div></div>
-        <div class="col-12"><button type="submit" class="btn btn-primary w-100">{% trans "💾 Spremi" %}</button></div>
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Danas" %}</div>
+    <div class="text-3xl font-black text-blue-600">{{ hours_today|floatformat:1 }}<span class="text-lg font-normal text-slate-400">h</span></div>
+    {% if daily_target %}
+    <div class="mt-2">
+      <div class="w-full bg-slate-100 rounded-full h-1.5">
+        <div class="bg-blue-500 h-1.5 rounded-full" style="width:{{ hours_today|floatformat:0 }}%"></div>
       </div>
+      <div class="text-xs text-slate-400 mt-1">{% trans "cilj" %} {{ daily_target|floatformat:1 }}h</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Ovaj tjedan" %}</div>
+    <div class="text-3xl font-black text-slate-800">{{ hours_week|floatformat:1 }}<span class="text-lg font-normal text-slate-400">h</span></div>
+    {% if weekly_target %}
+    <div class="mt-2">
+      <div class="w-full bg-slate-100 rounded-full h-1.5">
+        <div class="bg-green-500 h-1.5 rounded-full" style="width:{{ week_progress }}%"></div>
+      </div>
+      <div class="text-xs text-slate-400 mt-1">{{ week_progress }}% {% trans "od" %} {{ weekly_target|floatformat:1 }}h</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Ovaj mjesec" %}</div>
+    <div class="text-3xl font-black text-slate-800">{{ hours_month|floatformat:1 }}<span class="text-lg font-normal text-slate-400">h</span></div>
+    {% if hourly_rate %}
+    <div class="text-xs text-slate-400 mt-2">≈ €{{ earnings_month|floatformat:0 }}</div>
+    {% endif %}
+  </div>
+
+  {% if streak > 0 %}
+  <div class="bg-amber-50 border border-amber-200 rounded-xl shadow-sm p-4">
+    <div class="text-xs font-semibold text-amber-500 uppercase tracking-wide mb-1">{% trans "Streak" %}</div>
+    <div class="text-3xl font-black text-amber-600">🔥 {{ streak }}</div>
+    <div class="text-xs text-amber-500 mt-2">{% trans "radnih dana zaredom" %}</div>
+  </div>
+  {% else %}
+  <div class="bg-white rounded-xl border shadow-sm p-4">
+    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{% trans "Zarada" %}</div>
+    <div class="text-3xl font-black text-green-600">€{{ earnings_month|floatformat:0 }}</div>
+    <div class="text-xs text-slate-400 mt-2">{% trans "ovaj mjesec" %}</div>
+  </div>
+  {% endif %}
+
+</div>
+
+{# ── Tjedni bar chart ── #}
+<div class="bg-white rounded-xl border shadow-sm p-5 mb-6">
+  <div class="text-sm font-semibold text-slate-600 mb-4">📅 {% trans "Ovaj tjedan" %}</div>
+  <div class="flex items-end gap-2 h-20">
+    {% for d in week_days %}
+    <div class="flex-1 flex flex-col items-center gap-1">
+      <div class="text-xs font-bold {% if d.is_today %}text-blue-600{% else %}text-slate-400{% endif %}">
+        {{ d.hours|floatformat:1 }}
+      </div>
+      <div class="w-full rounded-t-md {% if d.is_today %}bg-blue-500{% elif d.hours > 0 %}bg-slate-300{% else %}bg-slate-100{% endif %}"
+           style="height:{{ d.percentage }}%;min-height:4px"></div>
+      <div class="text-xs {% if d.is_today %}text-blue-600 font-bold{% else %}text-slate-400{% endif %}">
+        {{ d.day_name }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+  {# ── Timer ── #}
+  <div class="bg-white rounded-xl border shadow-sm p-5">
+    <div class="text-sm font-semibold text-slate-600 mb-4">⏱ {% trans "Štoperica" %}</div>
+
+    {% if active_timer %}
+      <div class="text-center mb-4">
+        <div class="text-4xl font-mono font-black text-blue-600 mb-1" id="timerDisplay">--:--:--</div>
+        <div class="text-sm text-slate-500">
+          {% if active_timer.project %}
+            <span class="inline-block w-2 h-2 rounded-full mr-1" style="background:{{ active_timer.project.color|default:'#3b82f6' }}"></span>
+            {{ active_timer.project.name }}
+          {% endif %}
+        </div>
+        {% if active_timer.is_paused %}
+        <span class="inline-block mt-1 px-2 py-0.5 bg-amber-100 text-amber-600 text-xs rounded-full">⏸ {% trans "Pauziran" %}</span>
+        {% else %}
+        <span class="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-600 text-xs rounded-full animate-pulse">● {% trans "Aktivan" %}</span>
+        {% endif %}
+      </div>
+      <div class="flex gap-2">
+        {% if active_timer.is_paused %}
+        <form method="post" action="{% url 'worktime:timer_resume' %}" class="flex-1">{% csrf_token %}
+          <button class="w-full px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">▶ {% trans "Nastavi" %}</button>
+        </form>
+        {% else %}
+        <form method="post" action="{% url 'worktime:timer_pause' %}" class="flex-1">{% csrf_token %}
+          <button class="w-full px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-300">⏸ {% trans "Pauza" %}</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'worktime:timer_stop' %}" class="flex-1">{% csrf_token %}
+          <button class="w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">⏹ {% trans "Stop" %}</button>
+        </form>
+      </div>
+      <form method="post" action="{% url 'worktime:timer_discard' %}" class="mt-2">{% csrf_token %}
+        <button class="w-full px-3 py-1.5 text-red-400 text-xs hover:text-red-600">✕ {% trans "Odbaci" %}</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'worktime:timer_start' %}">{% csrf_token %}
+        {% if selected_worker %}<input type="hidden" name="worker_id" value="{{ selected_worker.pk }}">{% endif %}
+        <div class="space-y-3">
+          <select name="project_id" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" required>
+            <option value="">— {% trans "Odaberi projekt" %} —</option>
+            {% for p in projects %}
+            <option value="{{ p.id }}">{{ p.name }}</option>
+            {% endfor %}
+          </select>
+          <select name="task_type" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+            {% for val, lbl in task_types %}
+            <option value="{{ val }}">{{ lbl }}</option>
+            {% endfor %}
+          </select>
+          <button class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700">
+            ▶ {% trans "Pokreni timer" %}
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+
+  {# ── Brzi unos ── #}
+  <div class="bg-white rounded-xl border shadow-sm p-5">
+    <div class="text-sm font-semibold text-slate-600 mb-4">➕ {% trans "Brzi unos" %}</div>
+    <form method="post" action="{% url 'worktime:ts_add' %}" class="space-y-3">{% csrf_token %}
+      <input type="date" name="date" value="{{ today|date:'Y-m-d' }}"
+             class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+      <select name="project" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        <option value="">— {% trans "Projekt" %} —</option>
+        {% for p in projects %}
+        <option value="{{ p.id }}">{{ p.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="task_type" class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+        {% for val, lbl in task_types %}
+        <option value="{{ val }}">{{ lbl }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="duration" step="0.25" min="0.25" max="24" placeholder="{% trans 'Sati (npr. 7.5)' %}"
+             class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500" required>
+      <textarea name="description" rows="2" placeholder="{% trans 'Opis (nije obavezno)' %}"
+                class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+      <button class="w-full px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">
+        ✓ {% trans "Spremi unos" %}
+      </button>
     </form>
   </div>
-  <div class="d-flex gap-2">
-    <form method="post" action="{% url 'worktime:ts_copy_prev' %}" class="flex-fill">{% csrf_token %}<button class="btn btn-outline-secondary btn-sm w-100">{% trans "📋 Kopiraj jučer" %}</button></form>
-    <a href="{% url 'worktime:ts_weekly' %}" class="btn btn-outline-primary btn-sm flex-fill">{% trans "📅 Tjedni" %}</a>
-    <a href="/worktime/export/excel/" class="btn btn-outline-success btn-sm flex-fill">{% trans "📊 Excel" %}</a>
+
+  {# ── Dnevna bilješka + Česti projekti ── #}
+  <div class="flex flex-col gap-4">
+    <div class="bg-white rounded-xl border shadow-sm p-5 flex-1">
+      <div class="text-sm font-semibold text-slate-600 mb-3">📝 {% trans "Bilješka za danas" %}</div>
+      <form method="post" action="{% url 'worktime:ts_note_save' %}">{% csrf_token %}
+        <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
+        <textarea name="content" rows="3" placeholder="{% trans 'Što si danas radio/radila...' %}"
+                  class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 resize-none mb-2">{{ daily_note.content|default:'' }}</textarea>
+        <button class="w-full px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200">
+          {% trans "Spremi bilješku" %}
+        </button>
+      </form>
+    </div>
+
+    {% if frequent_projects %}
+    <div class="bg-white rounded-xl border shadow-sm p-5">
+      <div class="text-sm font-semibold text-slate-600 mb-3">⭐ {% trans "Česti projekti" %}</div>
+      <div class="space-y-1">
+        {% for p in frequent_projects %}
+        <div class="flex items-center gap-2 text-sm py-1">
+          <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:{{ p.project__color|default:'#94a3b8' }}"></span>
+          <span class="flex-1 text-slate-600 truncate">{{ p.project__name|default:"—" }}</span>
+          <span class="text-xs text-slate-400">{{ p.cnt }}×</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
+
 </div>
 
-<!-- TAB ENTRIES -->
-<div class="tp" id="t-entries">
-  {% if pending_count %}<div class="alert alert-warning py-2 px-3" style="font-size:.8rem;border-radius:10px">⏳ <strong>{{ pending_count }}</strong> {% trans "čeka odobrenje" %}</div>{% endif %}
-  {% for e in recent_entries %}
-  <div class="ei">
-    <div class="ec" style="background:{{ e.project.color }}"></div>
-    <div class="en"><div class="pn">{{ e.project.code }} · {{ e.date|date:"d.m" }}{% if e.from_timer %} ⏱{% endif %}</div><div class="ed">{{ e.description|default:"–" }}</div></div>
-    <div class="text-end"><div class="eh">{{ e.duration }}h</div>{% if e.status == 'PENDING' %}<span class="badge bg-warning text-dark" style="font-size:.6rem">⏳</span>{% elif e.status == 'APPROVED' %}<span class="badge bg-success" style="font-size:.6rem">✓</span>{% elif e.status == 'REJECTED' %}<span class="badge bg-danger" style="font-size:.6rem">✗</span>{% endif %}</div>
-    {% if e.status == 'PENDING' or e.status == 'DRAFT' %}<a href="{% url 'worktime:ts_edit' e.pk %}" class="btn btn-outline-primary" style="padding:4px 8px;font-size:.75rem">✏️</a>{% endif %}
+{# ── Nedavni unosi ── #}
+<div class="bg-white rounded-xl border shadow-sm mb-6">
+  <div class="flex items-center justify-between px-5 py-4 border-b">
+    <div class="text-sm font-semibold text-slate-600">📋 {% trans "Nedavni unosi" %}</div>
+    <div class="flex items-center gap-3">
+      {% if pending_count > 0 %}
+      <span class="px-2.5 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-semibold">
+        {{ pending_count }} {% trans "na čekanju" %}
+      </span>
+      {% endif %}
+      <a href="{% url 'worktime:ts_add' %}" class="text-xs text-blue-600 hover:underline">+ {% trans "novi" %}</a>
+    </div>
   </div>
-  {% empty %}<div class="text-center py-4 text-muted"><div style="font-size:2.5rem">📭</div><p class="mt-2">{% trans "Nema unosa" %}</p></div>{% endfor %}
-</div>
-
-<!-- TAB QUICK -->
-<div class="tp" id="t-quick">
-  {% if templates %}<h6 style="font-weight:700;font-size:.82rem;margin-bottom:12px">{% trans "⚡ Predlošci" %}</h6>{% for t in templates %}<form method="post" action="{% url 'worktime:ts_template_use' t.pk %}" class="d-inline">{% csrf_token %}<button type="submit" class="tc"><span style="width:8px;height:8px;border-radius:50%;background:{{ t.project.color }};display:inline-block"></span>{{ t.name }} ({{ t.default_duration }}h)</button></form>{% endfor %}{% endif %}
-  {% if frequent_projects %}<h6 style="font-weight:700;font-size:.82rem;margin:20px 0 12px">{% trans "🔥 Česti" %}</h6>{% for fp in frequent_projects %}<form method="post" action="{% url 'worktime:ts_add' %}" class="d-inline">{% csrf_token %}<input type="hidden" name="project" value="{{ fp.project__id }}"><input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}"><input type="hidden" name="duration" value="8"><input type="hidden" name="task_type" value="DEVELOPMENT"><button type="submit" class="tc" onclick="return confirm('8h danas?')"><span style="width:8px;height:8px;border-radius:50%;background:{{ fp.project__color }};display:inline-block"></span>{{ fp.project__code }} – 8h</button></form>{% endfor %}{% endif %}
-  <div class="qa mt-3"><h6>{% trans "📝 Bilješka" %}</h6><form method="post" action="{% url 'worktime:ts_note_save' %}">{% csrf_token %}<input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}"><textarea name="note" class="form-control form-control-sm mb-2" rows="2" placeholder="{% trans "Bilješke..." %}">{{ daily_note.note|default:"" }}</textarea><button type="submit" class="btn btn-outline-primary btn-sm w-100">{% trans "💾 Spremi" %}</button></form></div>
-</div>
-
-<!-- TAB PROFIL -->
-<div class="tp" id="t-profil">
-  <div class="qa">
-    <h6>{% trans "👤 Moj profil" %}</h6>
-    <table class="table table-sm table-borderless mb-0" style="font-size:.85rem">
-      <tr><td class="text-muted" style="width:40%">{% trans "Ime" %}</td><td><strong>{{ request.user.get_full_name|default:request.user.username }}</strong></td></tr>
-      <tr><td class="text-muted">{% trans "Email" %}</td><td>{{ request.user.email|default:"-" }}</td></tr>
-      <tr><td class="text-muted">{% trans "Zadnja prijava" %}</td><td>{{ request.user.last_login|date:"d.m.Y H:i"|default:"-" }}</td></tr>
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{% trans "Datum" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{% trans "Projekt" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase hidden md:table-cell">{% trans "Tip" %}</th>
+          <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase hidden md:table-cell">{% trans "Opis" %}</th>
+          <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">{% trans "Sati" %}</th>
+          <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">{% trans "Status" %}</th>
+          <th class="px-3 py-3"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for e in recent_entries %}
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">{{ e.date|date:"d.m." }}</td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              {% if e.project %}
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:{{ e.project.color|default:'#94a3b8' }}"></span>
+              <span class="text-sm font-medium text-slate-700">{{ e.project.name }}</span>
+              {% else %}
+              <span class="text-sm text-slate-400">—</span>
+              {% endif %}
+            </div>
+          </td>
+          <td class="px-4 py-3 text-sm text-slate-500 hidden md:table-cell">{{ e.get_task_type_display }}</td>
+          <td class="px-4 py-3 text-sm text-slate-500 hidden md:table-cell max-w-xs truncate">{{ e.description|default:"" }}</td>
+          <td class="px-4 py-3 text-right">
+            <span class="text-sm font-bold text-slate-800">{{ e.duration|floatformat:2 }}h</span>
+          </td>
+          <td class="px-4 py-3 text-center">
+            {% if e.status == 'APPROVED' %}
+            <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">✓ {% trans "OK" %}</span>
+            {% elif e.status == 'BILLED' %}
+            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">€ {% trans "Napl." %}</span>
+            {% else %}
+            <span class="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">○ {% trans "Čeka" %}</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-3 text-center">
+            <div class="flex items-center gap-1.5 justify-center">
+              <a href="{% url 'worktime:ts_add' %}?date={{ today|date:'Y-m-d' }}&project={{ e.project_id }}" title="Kopiraj na danas"
+                 class="text-slate-300 hover:text-green-600 text-sm" title="Kopiraj">⊕</a>
+              <a href="{% url 'worktime:ts_edit' e.pk %}" class="text-slate-400 hover:text-blue-600 text-sm" title="Uredi">✎</a>
+              <form method="post" action="{% url 'worktime:ts_duplicate' e.pk %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" title="Dupliciraj na danas" class="text-slate-300 hover:text-amber-600 text-sm">⧉</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+            <div class="text-3xl mb-2">📭</div>
+            <p>{% trans "Nema nedavnih unosa." %}</p>
+            <a href="{% url 'worktime:ts_add' %}" class="mt-2 inline-block text-sm text-blue-600 hover:underline">{% trans "Dodaj prvi unos" %}</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
+</div>
 
-  <div class="qa">
-    <h6>{% trans "💰 Satnica i fond sati" %}</h6>
-    <form method="post" action="{% url 'worktime:ts_profile' %}">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="update_rate">
-      <div class="row g-2">
-        <div class="col-4">
-          <label style="font-size:.72rem;font-weight:700">{% trans "Satnica (€)" %}</label>
-          <input type="number" name="hourly_rate" value="{{ hourly_rate|default:"0" }}" step="0.50" min="0" class="form-control" style="font-weight:700;color:#c9a84c;font-size:1.1rem;text-align:center">
-        </div>
-        <div class="col-4">
-          <label style="font-size:.72rem;font-weight:700">{% trans "Dnevno (h)" %}</label>
-          <input type="number" name="daily_hours" value="{{ daily_target|default:"0" }}" step="0.5" min="1" max="24" class="form-control" style="font-size:1.1rem;text-align:center">
-        </div>
-        <div class="col-4">
-          <label style="font-size:.72rem;font-weight:700">{% trans "Tjedno (h)" %}</label>
-          <input type="number" name="weekly_hours" value="{{ weekly_target|default:"0" }}" step="1" min="1" max="168" class="form-control" style="font-size:1.1rem;text-align:center">
-        </div>
-        <div class="col-12 mt-2">
-          <button type="submit" class="btn btn-warning w-100" style="font-weight:700;font-size:.9rem">{% trans "💾 Spremi satnicu" %}</button>
-        </div>
-      </div>
+{# ── Brzi predlošci ── #}
+{% if templates %}
+<div class="bg-white rounded-xl border shadow-sm p-5">
+  <div class="text-sm font-semibold text-slate-600 mb-3">⚡ {% trans "Brzi predlošci" %}</div>
+  <div class="flex flex-wrap gap-2">
+    {% for t in templates %}
+    <form method="post" action="{% url 'worktime:ts_template_use' t.pk %}">{% csrf_token %}
+      <button class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium hover:bg-blue-50 hover:text-blue-700 transition-colors">
+        {% if t.project %}<span class="inline-block w-2 h-2 rounded-full mr-1" style="background:{{ t.project.color|default:'#94a3b8' }}"></span>{% endif %}
+        {{ t.name|default:t.project.name|default:"Predložak" }}
+        <span class="text-slate-400 ml-1">{{ t.duration|floatformat:1 }}h</span>
+      </button>
     </form>
-  </div>
-
-  <div class="qa">
-    <h6>{% trans "📊 Mjesečni pregled" %}</h6>
-    <div class="row g-2 text-center">
-      <div class="col-4"><div style="font-size:1.3rem;font-weight:700">{{ hours_month|floatformat:1 }}h</div><div style="font-size:.6rem;color:#64748b;text-transform:uppercase">{% trans "Sati" %}</div></div>
-      <div class="col-4"><div style="font-size:1.3rem;font-weight:700;color:#c9a84c">€{{ earnings_month|floatformat:0 }}</div><div style="font-size:.6rem;color:#64748b;text-transform:uppercase">{% trans "Zarada" %}</div></div>
-      <div class="col-4"><div style="font-size:1.3rem;font-weight:700;color:#3b82f6">{{ pending_count }}</div><div style="font-size:.6rem;color:#64748b;text-transform:uppercase">{% trans "Na čekanju" %}</div></div>
-    </div>
-  </div>
-
-  <div class="d-grid gap-2">
-    <a href="{% url 'worktime:ts_profile' %}" class="btn btn-primary">{% trans "👤 Uredi profil i lozinku" %}</a>
-    <a href="{% url 'worktime:ts_analytics' %}" class="btn btn-outline-secondary btn-sm">{% trans "📈 Analitika" %}</a>
+    {% endfor %}
   </div>
 </div>
-{% endblock %}
+{% endif %}
 
-{% block extra_js %}
+{% if active_timer and not active_timer.is_paused %}
 <script>
-/* ═══ TABS ═══ */
-document.querySelectorAll('.mtab').forEach(function(b){
-  b.addEventListener('click',function(){
-    var t=this.getAttribute('data-t');
-    document.querySelectorAll('.tp').forEach(function(p){p.classList.remove('on')});
-    document.querySelectorAll('.mtab').forEach(function(x){x.classList.remove('on')});
-    document.getElementById('t-'+t).classList.add('on');
-    this.classList.add('on');
-  });
-});
-
-/* ═══ LIVE CALC ═══ */
-var fS=document.getElementById('fStart'),fE=document.getElementById('fEnd'),fB=document.getElementById('fBreak'),lc=document.getElementById('liveCalc');
-function calc(){
-  if(!fS||!fE||!fS.value||!fE.value){if(lc)lc.style.display='none';return;}
-  var s=fS.value.split(':'),e=fE.value.split(':');
-  var sm=parseInt(s[0])*60+parseInt(s[1]),em=parseInt(e[0])*60+parseInt(e[1]);
-  if(em<=sm)em+=1440;
-  var br=parseInt(fB?fB.value:0)||0,h=Math.max(0,(em-sm-br)/60);
-  lc.style.display='block';
-  if(h>16){lc.style.color='#ef4444';lc.style.background='#fef2f2';lc.textContent='❌ '+h.toFixed(1)+'h - MAX 16h!';}
-  else if(h>12){lc.style.color='#f59e0b';lc.style.background='#fffbeb';lc.textContent='⚠️ '+h.toFixed(1)+'h - sigurni?';}
-  else{lc.style.color='#3b82f6';lc.style.background='#eff6ff';lc.textContent='⏱ '+h.toFixed(1)+'h';}
+const _timerStart = new Date("{{ active_timer.started_at.isoformat }}");
+function _updateTimer() {
+  const diff = Math.floor((Date.now() - _timerStart) / 1000);
+  const h = String(Math.floor(diff/3600)).padStart(2,'0');
+  const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+  const s = String(diff%60).padStart(2,'0');
+  const disp = document.getElementById('timerDisplay');
+  if (disp) disp.textContent = h+':'+m+':'+s;
+  // Nav bar timer
+  const nav = document.getElementById('nav-timer');
+  const navDisp = document.getElementById('nav-timer-display');
+  if (nav && navDisp) {
+    nav.classList.remove('hidden');
+    nav.classList.add('flex');
+    navDisp.textContent = h+':'+m+':'+s;
+  }
 }
-if(fS){fS.addEventListener('change',calc);fE.addEventListener('change',calc);if(fB)fB.addEventListener('change',calc);calc();}
-
-/* ═══ FORM VALIDATION ═══ */
-var af=document.getElementById('addForm');
-if(af)af.addEventListener('submit',function(ev){
-  if(fS&&fE&&fS.value&&fE.value){
-    var s=fS.value.split(':'),e=fE.value.split(':');
-    var sm=parseInt(s[0])*60+parseInt(s[1]),em=parseInt(e[0])*60+parseInt(e[1]);
-    if(em<=sm)em+=1440;
-    var br=parseInt(fB?fB.value:0)||0,h=(em-sm-br)/60;
-    if(h>16){ev.preventDefault();fenixToast('❌ Max 16h po unosu! ('+h.toFixed(1, 'warning')+'h)');return;}
-    if(h>12&&!confirm('⚠️ '+h.toFixed(1)+'h - sigurni?')){ev.preventDefault();return;}
-    if(h<=0){ev.preventDefault();fenixToast('❌ Trajanje mora biti pozitivno!', 'warning');return;}
-  }
-  var fd=document.getElementById('fDate');
-  if(fd&&fd.value){
-    var d=new Date(fd.value),t=new Date();t.setHours(0,0,0,0);
-    if((t-d)/(864e5)>60){ev.preventDefault();fenixToast('❌ Max 60 dana unazad!', 'warning');return;}
-    if(d>t&&!confirm('⚠️ Budući datum - sigurni?')){ev.preventDefault();return;}
-  }
-});
-
-/* ═══ TIMER ═══ */
-{% if active_timer %}
-(function(){
-  var d=document.getElementById('timerDisplay'),e=document.getElementById('timerEarnings'),r={{ hourly_rate|default:"20" }};
-  {% if active_timer.status == 'RUNNING' %}
-  var T={{ active_timer.elapsed_seconds }},t0=Date.now();
-  function tk(){var t=T+Math.floor((Date.now()-t0)/1e3),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;
-    d.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-    e.textContent='€ '+(t/3600*r).toFixed(2);}
-  tk();setInterval(tk,1e3);
-  {% else %}
-  var t={{ active_timer.elapsed_seconds }};e.textContent='€ '+(t/3600*r).toFixed(2);
-  {% endif %}
-})();
-{% endif %}
-
-/* ═══ TIMER OVERTIME CHECK ═══ */
-{% if active_timer %}
-(function(){
-  var MAX_H = 10;
-  var warnEl = document.getElementById('timerOvertimeAlert');
-  var warnHEl = document.getElementById('timerHoursWarn');
-  function checkOvertime() {
-    var txt = document.getElementById('timerDisplay').textContent;
-    var parts = txt.split(':');
-    if (parts.length >= 1) {
-      var h = parseInt(parts[0]);
-      if (h >= MAX_H && warnEl) {
-        warnEl.style.display = 'block';
-        if (warnHEl) warnHEl.textContent = h;
-        if (navigator.vibrate && h >= 12) navigator.vibrate([300, 100, 300]);
-      }
-    }
-  }
-  setInterval(checkOvertime, 30000); // check every 30s
-  setTimeout(checkOvertime, 2000); // initial check after 2s
-})();
-{% endif %}
-
-/* ═══ VIBRATION ═══ */
-document.querySelectorAll('.btn-go,.btn-st,.btn-pa,.btn-re').forEach(function(b){
-  b.addEventListener('click',function(){if(navigator.vibrate)navigator.vibrate(50);});
-});
+_updateTimer();
+setInterval(_updateTimer, 1000);
 </script>
+{% endif %}
 
-{% include "components/quick_add_modal.html" %}
 {% endblock %}

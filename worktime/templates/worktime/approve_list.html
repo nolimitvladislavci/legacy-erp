@@ -1,45 +1,199 @@
-{% extends "base.html" %}
+{% extends "worktime/base_worktime.html" %}
 {% load i18n %}
-{% block title %}Odobrenje sati{% endblock %}
-{% block page_title %}⏳ Čeka odobrenje{% endblock %}
 
-{% block content %}
-<div class="mb-3">
-    <a href="{% url 'worktime:ts_manager' %}" class="btn btn-outline-secondary btn-sm">{% trans "← Natrag" %}</a>
-</div>
+{% block title %}Odobrenje radnih sati{% endblock %}
 
-{% if entries %}
-<form method="post" action="{% url 'worktime:ts_approve' %}">
-    {% csrf_token %}
-    <div class="stat-card mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <span><strong>{{ entries|length }}</strong> {% trans "unosa čeka odobrenje" %}</span>
-            <div class="d-flex gap-2">
-                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">{% trans "✓ Odobri" %}</button>
-                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">{% trans "✗ Odbij" %}</button>
+{% block page_title %}
+<h1 class="text-2xl font-bold text-slate-800">Odobrenje radnih sati</h1>
+<p class="text-sm text-slate-500 mt-1">Pregledajte i odobrite/odbijte prijavljene sate</p>
+{% endblock %}
+
+{% block worktime_content %}
+<!-- Filteri -->
+<div class="bg-white rounded-xl border border-slate-200 p-4 mb-6">
+    <form method="get" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Radnik</label>
+            <select name="worker" class="w-full rounded-lg border-slate-300 text-sm px-3 py-2 border focus:ring-2 focus:ring-blue-200 focus:border-blue-400">
+                <option value="">-- Svi radnici --</option>
+                {% for w in workers %}
+                <option value="{{ w.id }}" {% if selected_worker == w.id|stringformat:"d" %}selected{% endif %}>{{ w.get_full_name|default:w.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Projekt</label>
+            <select name="project" class="w-full rounded-lg border-slate-300 text-sm px-3 py-2 border focus:ring-2 focus:ring-blue-200 focus:border-blue-400">
+                <option value="">-- Svi projekti --</option>
+                {% for p in projects %}
+                <option value="{{ p.id }}" {% if selected_project == p.id|stringformat:"d" %}selected{% endif %}>{{ p.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Od datuma</label>
+            <input type="date" name="date_from" value="{{ date_from|default:'' }}"
+                   class="w-full rounded-lg border-slate-300 text-sm px-3 py-2 border focus:ring-2 focus:ring-blue-200 focus:border-blue-400">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Do datuma</label>
+            <div class="flex gap-2">
+                <input type="date" name="date_to" value="{{ date_to|default:'' }}"
+                       class="flex-1 rounded-lg border-slate-300 text-sm px-3 py-2 border focus:ring-2 focus:ring-blue-200 focus:border-blue-400">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition shrink-0">
+                    Filtriraj
+                </button>
             </div>
         </div>
-        <table class="table table-sm" style="font-size:0.82rem">
-            <thead><tr><th><input type="checkbox" onclick="document.querySelectorAll('input[name=entry_ids]').forEach(c=>c.checked=this.checked)"></th><th>{% trans "Radnik" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Sati" %}</th><th>{% trans "Iznos" %}</th></tr></thead>
-            <tbody>
-            {% for e in entries %}
-            <tr>
-                <td><input type="checkbox" name="entry_ids" value="{{ e.pk }}"></td>
-                <td>{{ e.user.first_name }} {{ e.user.last_name }}</td>
-                <td>{{ e.date|date:"d.m.Y" }}</td>
-                <td>{{ e.total_hours|floatformat:1 }}h</td>
-                <td>{{ e.earnings|floatformat:2 }}€</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    </form>
+</div>
+
+<form method="post" id="approveForm">
+    {% csrf_token %}
+
+    <!-- Akcijska traka -->
+    <div class="bg-white rounded-xl border border-slate-200 p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <span id="selectedCount" class="text-sm font-semibold text-slate-600">0 odabrano</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="submit" name="action" value="approve"
+                    class="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition disabled:opacity-40"
+                    id="btnApprove" disabled>
+                Odobri odabrane
+            </button>
+            <button type="button"
+                    class="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition disabled:opacity-40"
+                    id="btnReject" disabled
+                    onclick="document.getElementById('rejectModal').classList.remove('hidden')">
+                Odbij odabrane
+            </button>
+        </div>
+    </div>
+
+    <!-- Tablica -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200">
+                        <th class="px-4 py-3 text-left">
+                            <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Datum</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Radnik</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Projekt</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Sati</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Tip</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Opis</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for entry in entries %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-4 py-3">
+                            <input type="checkbox" name="entry_ids[]" value="{{ entry.id }}"
+                                   class="entry-cb rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                        </td>
+                        <td class="px-4 py-3 text-slate-800 font-medium whitespace-nowrap">{{ entry.date|date:"d.m.Y" }}</td>
+                        <td class="px-4 py-3 text-slate-700">{{ entry.user.get_full_name|default:entry.user.username }}</td>
+                        <td class="px-4 py-3 text-slate-700">{{ entry.project|default:"-" }}</td>
+                        <td class="px-4 py-3 text-right font-mono font-semibold text-slate-800">{{ entry.hours }}</td>
+                        <td class="px-4 py-3">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold
+                                {% if entry.entry_type == 'overtime' %}bg-amber-100 text-amber-700
+                                {% elif entry.entry_type == 'night' %}bg-purple-100 text-purple-700
+                                {% elif entry.entry_type == 'absence' %}bg-red-100 text-red-700
+                                {% else %}bg-blue-100 text-blue-700{% endif %}">
+                                {{ entry.get_entry_type_display|default:entry.entry_type }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-slate-600 max-w-xs truncate">{{ entry.description|default:"-" }}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold
+                                {% if entry.status == 'approved' %}bg-green-100 text-green-700
+                                {% elif entry.status == 'rejected' %}bg-red-100 text-red-700
+                                {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                                {{ entry.get_status_display|default:entry.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-12 text-center text-slate-400">
+                            Nema zapisa za odobrenje.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal za odbijanje -->
+    <div id="rejectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+            <h3 class="text-lg font-bold text-slate-800 mb-3">Razlog odbijanja</h3>
+            <p class="text-sm text-slate-500 mb-4">Unesite razlog za odbijanje odabranih zapisa.</p>
+            <textarea name="reject_reason" rows="4"
+                      class="w-full rounded-lg border-slate-300 text-sm px-3 py-2 border focus:ring-2 focus:ring-red-200 focus:border-red-400 mb-4"
+                      placeholder="Npr. Neispravan broj sati, ponovite unos..."></textarea>
+            <div class="flex justify-end gap-2">
+                <button type="button"
+                        class="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition"
+                        onclick="document.getElementById('rejectModal').classList.add('hidden')">
+                    Odustani
+                </button>
+                <button type="submit" name="action" value="reject"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
+                    Odbij odabrane
+                </button>
+            </div>
+        </div>
     </div>
 </form>
-{% else %}
-<div class="stat-card text-center py-5">
-    <i class="fas fa-check-circle text-success" style="font-size:3rem"></i>
-    <h5 class="mt-3">{% trans "Sve odobreno!" %}</h5>
-    <a href="{% url 'worktime:ts_manager' %}" class="btn btn-primary btn-sm mt-2">{% trans "← Natrag" %}</a>
-</div>
-{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.entry-cb');
+    const countEl = document.getElementById('selectedCount');
+    const btnApprove = document.getElementById('btnApprove');
+    const btnReject = document.getElementById('btnReject');
+
+    function updateCount() {
+        const checked = document.querySelectorAll('.entry-cb:checked').length;
+        countEl.textContent = checked + ' odabrano';
+        btnApprove.disabled = checked === 0;
+        btnReject.disabled = checked === 0;
+    }
+
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+        updateCount();
+    });
+
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            selectAll.checked = document.querySelectorAll('.entry-cb:checked').length === checkboxes.length;
+            updateCount();
+        });
+    });
+
+    // Close modal on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('rejectModal').classList.add('hidden');
+        }
+    });
+
+    // Close modal on backdrop click
+    document.getElementById('rejectModal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
+})();
+</script>
 {% endblock %}
