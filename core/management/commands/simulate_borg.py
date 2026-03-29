@@ -696,20 +696,44 @@ class Command(BaseCommand):
         head("GOLUBAR — Uzgoj golubova")
 
         try:
-            from golubar.models import Golub
-            count = Golub.objects.filter(company=company).count()
-            r.success(f"Golub records: {count}")
-        except ImportError:
-            r.warning("Golubar app nije instalirana ili Golub model ne postoji")
+            from udruge.models import Golub, Golubinjak, ParGolubova, Utrka
+            golubi = Golub.objects.filter(company=company).count()
+            golubinjaci = Golubinjak.objects.filter(company=company).count()
+            parovi = ParGolubova.objects.filter(company=company).count()
+            utrke = Utrka.objects.filter(company=company).count()
+            r.success(f"Golubi: {golubi}, Golubinjaci: {golubinjaci}, Parovi: {parovi}, Utrke: {utrke}")
         except Exception as e:
-            r.error("Golubar greška", e)
+            r.error("Golubar modeli greška", e)
+
+        try:
+            from udruge.models import Leglo, ZdravstveniZapisGolub, RezultatUtrke
+            legla = Leglo.objects.count()
+            zdravstveni = ZdravstveniZapisGolub.objects.count()
+            rezultati = RezultatUtrke.objects.count()
+            r.success(f"Legla: {legla}, Zdravstveni: {zdravstveni}, Rezultati: {rezultati}")
+        except Exception as e:
+            r.warning(f"Golubar extended modeli: {e}")
 
         try:
             from django.urls import reverse
-            url = reverse('golubar:jato_list')
-            r.success(f"Golubar URL: {url}")
+            urls = {
+                'dashboard': reverse('udruge:golubar_dashboard'),
+                'golubinjaci': reverse('udruge:golubinjak_list'),
+                'golubi': reverse('udruge:golub_list'),
+                'utrke': reverse('udruge:utrka_list'),
+                'parovi': reverse('udruge:par_list'),
+            }
+            for name, url in urls.items():
+                r.success(f"Golubar {name}: {url}")
         except Exception as e:
             r.warning(f"Golubar URL greška: {e}")
+
+        try:
+            from django.urls import reverse
+            url = reverse('brochure_golubar')
+            r.success(f"Brošura URL: {url}")
+        except Exception as e:
+            r.warning(f"Brošura URL: {e}")
 
         return r
 
