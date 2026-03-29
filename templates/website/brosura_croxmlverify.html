@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CroXML Verify — Validator za e-Račune, fiskalizaciju i XML dokumente | LIMIT Connect</title>
+<meta name="description" content="CroXML Verify: jedini HR validator koji provjerava UBL 2.1, EN 16931, XRechnung, ZUGFeRD, fiskalizaciju i XAdES potpise — u jednom alatu. Besplatna javna provjera.">
+<link rel="icon" href="/static/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e2e8f0;line-height:1.7}
+a{color:#c9a84c;text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:900px;margin:0 auto;padding:0 20px}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,#0f172a 0%,#0d1b2a 50%,#1b2838 100%);padding:60px 20px 50px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(34,197,94,.06) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(201,168,76,.06) 0%,transparent 60%)}
+.hero-content{position:relative;z-index:1;max-width:800px;margin:0 auto}
+.hero-icon{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(201,168,76,.08));border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.8rem;color:#22c55e}
+.hero h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}.hero h1 span{color:#22c55e}.hero h1 .gold{color:#c9a84c}
+.hero .subtitle{font-size:1.05rem;color:#94a3b8;max-width:640px;margin:0 auto 28px}
+.hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.76rem;font-weight:600}
+.hero-badge.green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
+.hero-badge.gold{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:#c9a84c}
+.hero-badge.blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
+
+/* Sections */
+.section{padding:50px 0}.section-divider{border:none;border-top:1px solid rgba(201,168,76,.12);margin:0}
+.section-title{font-size:1.5rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.section-title i{color:#22c55e;font-size:1.2rem}
+.section-subtitle{color:#94a3b8;font-size:.95rem;margin-bottom:32px}
+
+/* Value cards */
+.value-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:32px}
+.value-card{padding:24px;border-radius:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);transition:all .3s}
+.value-card:hover{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
+.value-card .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:14px}
+.value-card .icon.green{background:rgba(34,197,94,.12);color:#22c55e}
+.value-card .icon.gold{background:rgba(201,168,76,.12);color:#c9a84c}
+.value-card .icon.blue{background:rgba(59,130,246,.12);color:#60a5fa}
+.value-card .icon.red{background:rgba(239,68,68,.12);color:#ef4444}
+.value-card .icon.purple{background:rgba(168,85,247,.12);color:#a855f7}
+.value-card h3{font-size:1rem;font-weight:700;margin-bottom:6px}
+.value-card p{font-size:.85rem;color:#94a3b8;line-height:1.6}
+
+/* Pipeline */
+.pipeline{display:flex;gap:0;margin:32px 0;flex-wrap:wrap}
+.pipeline-step{flex:1;min-width:180px;padding:20px 16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);position:relative;text-align:center}
+.pipeline-step:first-child{border-radius:14px 0 0 14px}
+.pipeline-step:last-child{border-radius:0 14px 14px 0}
+.pipeline-step .step-num{width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,.15);color:#22c55e;font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.pipeline-step h4{font-size:.85rem;font-weight:700;margin-bottom:4px}
+.pipeline-step p{font-size:.75rem;color:#94a3b8}
+.pipeline-arrow{display:flex;align-items:center;color:rgba(34,197,94,.4);font-size:1.2rem;padding:0 2px}
+
+/* Standard badges */
+.standards{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}
+.std-badge{padding:10px 18px;border-radius:10px;font-size:.8rem;font-weight:700;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);display:flex;align-items:center;gap:8px}
+.std-badge i{font-size:.9rem}
+.std-badge.eu{border-color:rgba(59,130,246,.25);color:#60a5fa}
+.std-badge.hr{border-color:rgba(239,68,68,.2);color:#fca5a5}
+.std-badge.de{border-color:rgba(245,158,11,.2);color:#fbbf24}
+.std-badge.peppol{border-color:rgba(34,197,94,.25);color:#4ade80}
+
+/* How to use */
+.howto-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.howto-step{padding:24px;border-radius:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);text-align:center}
+.howto-step .num{font-size:2rem;font-weight:900;color:rgba(34,197,94,.3);margin-bottom:8px}
+.howto-step h4{font-size:.9rem;font-weight:700;margin-bottom:6px}
+.howto-step p{font-size:.8rem;color:#94a3b8}
+
+/* API section */
+.api-block{background:rgba(15,23,42,.8);border:1px solid rgba(59,130,246,.15);border-radius:14px;padding:24px;margin:20px 0;font-family:'Fira Code','Cascadia Code',monospace}
+.api-block .method{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.72rem;font-weight:800;margin-right:8px}
+.api-block .method.post{background:rgba(34,197,94,.15);color:#4ade80}
+.api-block .method.get{background:rgba(59,130,246,.15);color:#60a5fa}
+.api-block .url{font-size:.85rem;color:#e2e8f0}
+.api-block .desc{font-size:.78rem;color:#94a3b8;margin-top:8px}
+.api-block pre{background:rgba(0,0,0,.3);border-radius:8px;padding:14px;margin-top:12px;font-size:.75rem;color:#94a3b8;overflow-x:auto;line-height:1.5}
+.api-block pre .key{color:#c9a84c}.api-block pre .val{color:#4ade80}.api-block pre .comment{color:#475569}
+
+/* Comparison table */
+.cmp-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:.82rem}
+.cmp-table th{padding:12px 16px;text-align:left;background:rgba(255,255,255,.03);border-bottom:2px solid rgba(201,168,76,.2);color:#c9a84c;font-weight:700;text-transform:uppercase;font-size:.7rem;letter-spacing:1px}
+.cmp-table td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04)}
+.cmp-table tr:hover td{background:rgba(255,255,255,.02)}
+.cmp-check{color:#22c55e;font-weight:700}.cmp-x{color:#475569}
+
+/* CTA */
+.cta{text-align:center;padding:50px 20px;background:linear-gradient(135deg,rgba(34,197,94,.04),rgba(201,168,76,.04))}
+.cta h2{font-size:1.8rem;font-weight:800;margin-bottom:10px}
+.cta p{color:#94a3b8;margin-bottom:28px;max-width:500px;margin-left:auto;margin-right:auto}
+.cta-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;font-size:.95rem;font-weight:700;text-decoration:none;transition:all .2s}
+.cta-btn.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.cta-btn.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,197,94,.3)}
+.cta-btn.secondary{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;margin-left:12px}
+
+/* Footer */
+.footer{padding:30px 20px;text-align:center;border-top:1px solid rgba(255,255,255,.04);font-size:.75rem;color:#475569}
+.footer a{color:#94a3b8}
+
+/* Testimonial */
+.quote-block{background:rgba(201,168,76,.03);border-left:3px solid rgba(201,168,76,.4);border-radius:0 12px 12px 0;padding:20px 24px;margin:24px 0;font-style:italic;color:#cbd5e1;font-size:.9rem}
+.quote-block .author{font-style:normal;font-weight:700;color:#c9a84c;font-size:.8rem;margin-top:8px}
+
+/* Rule list */
+.rule-list{list-style:none;padding:0;margin:20px 0}
+.rule-list li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.85rem;display:flex;align-items:flex-start;gap:10px}
+.rule-list li:last-child{border-bottom:none}
+.rule-list .code{font-family:monospace;font-size:.75rem;color:#22c55e;background:rgba(34,197,94,.08);padding:2px 8px;border-radius:4px;white-space:nowrap;min-width:70px}
+
+@media(max-width:768px){
+  .hero h1{font-size:1.7rem}
+  .pipeline{flex-direction:column}
+  .pipeline-step{border-radius:0!important}
+  .pipeline-step:first-child{border-radius:14px 14px 0 0!important}
+  .pipeline-step:last-child{border-radius:0 0 14px 14px!important}
+  .pipeline-arrow{transform:rotate(90deg);justify-content:center;padding:4px 0}
+  .cta-btn.secondary{margin-left:0;margin-top:12px}
+}
+
+@media print{
+  body{background:#fff;color:#1a1a1a}
+  .hero{background:#f0f4f8!important;color:#1a1a1a}
+  .hero h1,.hero .subtitle{color:#1a1a1a}
+  .hero-badge,.std-badge,.value-card,.howto-step,.pipeline-step,.api-block{border-color:#ddd;background:#f9f9f9}
+  .section-divider{border-color:#ddd}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-icon"><i class="fas fa-shield-halved"></i></div>
+    <h1><span>CroXML</span> <span class="gold">Verify</span></h1>
+    <p class="subtitle">
+      Jedini validator u Hrvatskoj koji provjerava e-Račune, fiskalizaciju, UBL, XRechnung i XAdES potpise — u jednom alatu. Tri razine validacije. Nula kompromisa.
+    </p>
+    <div class="hero-badges">
+      <span class="hero-badge green"><i class="fas fa-check-circle"></i> UBL 2.1 + EN 16931</span>
+      <span class="hero-badge gold"><i class="fas fa-file-code"></i> XRechnung + ZUGFeRD</span>
+      <span class="hero-badge blue"><i class="fas fa-globe-europe"></i> PEPPOL BIS 3.0</span>
+      <span class="hero-badge green"><i class="fas fa-fingerprint"></i> XAdES digitalni potpis</span>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<div class="container">
+<div class="section">
+  <div class="section-title"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Problem koji rješavamo</div>
+  <div class="section-subtitle">Svaki odbijeni e-Račun košta vrijeme, novac i živce. CroXML Verify ih eliminira prije slanja.</div>
+
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="icon red"><i class="fas fa-times-circle"></i></div>
+      <h3>Odbijeni dokumenti</h3>
+      <p>FINA i Porezna odbijaju e-Račune s minimalnim greškama — krivi OIB format, nedostaje CustomizationID, PDV kalkulacija ne štima za 0.01 EUR.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon gold"><i class="fas fa-clock"></i></div>
+      <h3>Sati za debug</h3>
+      <p>Bez validatora, tražite grešku u 500+ linija XML-a. S validatorom — točna linija, točno pravilo, prijedlog za fix. Sekunde umjesto sati.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon blue"><i class="fas fa-puzzle-piece"></i></div>
+      <h3>N alata za N formata</h3>
+      <p>UBL imate ovdje, XRechnung tamo, fiskalizaciju negdje treće. CroXML Verify je jedan alat za sve — HR i DE tržište.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- 3-STAGE PIPELINE -->
+<div class="container">
+<div class="section">
+  <div class="section-title"><i class="fas fa-layer-group"></i> Tri razine validacije</div>
+  <div class="section-subtitle">Svaki dokument prolazi trostruku provjeru — isto kao što FINA i Porezna rade, ali prije slanja.</div>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <h4>XSD Schema</h4>
+      <p>Strukturalna provjera XML-a prema OASIS UBL 2.1 specifikaciji. Svaki element, atribut i namespace.</p>
+    </div>
+    <div class="pipeline-arrow"><i class="fas fa-chevron-right"></i></div>
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <h4>EN 16931 pravila</h4>
+      <p>40+ poslovnih pravila: BR-01 do BR-26, PEPPOL BIS, HR CIUS. Matematička ispravnost PDV-a.</p>
+    </div>
+    <div class="pipeline-arrow"><i class="fas fa-chevron-right"></i></div>
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <h4>HR/DE pravila</h4>
+      <p>OIB checksum (ISO 7064), datum konzistentnost, valuta podudaranje, DE §14 UStG.</p>
+    </div>
+  </div>
+
+  <div class="quote-block">
+    "Tri razine znače da je nemoguće poslati neispravan dokument. XSD hvata strukturu, EN 16931 hvata logiku, a treća razina hvata specifičnosti HR/DE zakona."
+    <div class="author">— Arhitektura CroXML Verify</div>
+  </div>
+</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- SUPPORTED STANDARDS -->
+<div class="container">
+<div class="section">
+  <div class="section-title"><i class="fas fa-certificate"></i> Podržani standardi i formati</div>
+  <div class="section-subtitle">Jedno rješenje za Hrvatsku, Njemačku i cijelu EU.</div>
+
+  <div class="standards">
+    <div class="std-badge eu"><i class="fas fa-flag"></i> UBL 2.1 (OASIS)</div>
+    <div class="std-badge eu"><i class="fas fa-gavel"></i> EN 16931</div>
+    <div class="std-badge peppol"><i class="fas fa-network-wired"></i> PEPPOL BIS 3.0</div>
+    <div class="std-badge hr"><i class="fas fa-map-marker-alt"></i> HR CIUS-2025</div>
+    <div class="std-badge de"><i class="fas fa-file-invoice"></i> XRechnung (DE)</div>
+    <div class="std-badge de"><i class="fas fa-file-pdf"></i> ZUGFeRD 2.2</div>
+    <div class="std-badge hr"><i class="fas fa-cash-register"></i> Fiskalizacija (CIS)</div>
+    <div class="std-badge eu"><i class="fas fa-signature"></i> XAdES potpis</div>
+  </div>
+
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="icon green"><i class="fas fa-file-code"></i></div>
+      <h3>e-Račun (UBL 2.1)</h3>
+      <p>Potpuna validacija prema europskoj normi EN 16931 i hrvatskom CIUS profilu. Podržava tipove: 380 (račun), 381 (odobrenje), 383 (terećenje), 386 (predujam).</p>
+    </div>
+    <div class="value-card">
+      <div class="icon gold"><i class="fas fa-file-invoice-dollar"></i></div>
+      <h3>XRechnung + ZUGFeRD</h3>
+      <p>Za tvrtke koje fakturiraju u Njemačkoj. CII format za B2B (XRechnung) i hibridni PDF+XML (ZUGFeRD 2.2) za kompatibilnost s DATEV-om.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon blue"><i class="fas fa-fingerprint"></i></div>
+      <h3>XAdES digitalni potpis</h3>
+      <p>Provjera XML potpisa na dokumentima iz GovExport sustava — AgroHealth, TuristPrijava, InventoryLedger. SHA-256 hash za integritet.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon purple"><i class="fas fa-cash-register"></i></div>
+      <h3>Fiskalizacija</h3>
+      <p>Verifikacija ZKI/JIR kodova, certifikat provjera (.p12), SOAP envelope validacija prema CIS specifikaciji Porezne uprave.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- EN 16931 RULES -->
+<div class="container">
+<div class="section">
+  <div class="section-title"><i class="fas fa-list-check"></i> Ključna poslovna pravila (EN 16931)</div>
+  <div class="section-subtitle">40+ pravila koja validator provjerava automatski.</div>
+
+  <ul class="rule-list">
+    <li><span class="code">BR-01</span> Broj računa mora postojati</li>
+    <li><span class="code">BR-02</span> Datum izdavanja je obavezan</li>
+    <li><span class="code">BR-03</span> Tip dokumenta mora biti valjan (380, 381, 383, 386...)</li>
+    <li><span class="code">BR-04</span> Valuta — ISO 4217 (3 slova: EUR, HRK, USD)</li>
+    <li><span class="code">BR-05→26</span> Prodavač/kupac podaci, iznosi, stavke, PDV</li>
+    <li><span class="code">BR-CO-10</span> Zbroj PDV-a po stopama mora odgovarati ukupnom PDV-u</li>
+    <li><span class="code">BR-S-08</span> Standardna PDV stopa mora biti pozitivna</li>
+    <li><span class="code">PEPPOL-R004</span> CustomizationID mora postojati za PEPPOL mrežu</li>
+    <li><span class="code">HR-CIUS</span> OIB format: 11 znamenki, ISO 7064 MOD 11-10 checksum</li>
+    <li><span class="code">PROP-06</span> TaxInclusive iznos mora odgovarati Payable iznosu</li>
+    <li><span class="code">PROP-07</span> Valuta mora biti konzistentna na svim razinama dokumenta</li>
+    <li><span class="code">DE-§14</span> Steuernummer obavezan, Leistungsdatum za DE fakture</li>
+  </ul>
+</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- HOW TO USE -->
+<div class="container">
+<div class="section">
+  <div class="section-title"><i class="fas fa-play-circle"></i> Kako koristiti</div>
+  <div class="section-subtitle">Tri načina — web sučelje, API, ili automatizirano unutar LIMIT Connect-a.</div>
+
+  <h3 style="font-size:1.1rem;margin-bottom:20px"><i class="fas fa-globe" style="color:#22c55e;margin-right:8px"></i> 1. Web Validator (javni pristup)</h3>
+  <div class="howto-grid" style="margin-bottom:36px">
+    <div class="howto-step">
+      <div class="num">01</div>
+      <h4>Otvorite validator</h4>
+      <p>Idite na <strong>/gov_export/validator/</strong> — nije potrebna prijava</p>
+    </div>
+    <div class="howto-step">
+      <div class="num">02</div>
+      <h4>Uploadajte XML</h4>
+      <p>Drag-and-drop ili kliknite za odabir .xml datoteke</p>
+    </div>
+    <div class="howto-step">
+      <div class="num">03</div>
+      <h4>Pregledajte rezultat</h4>
+      <p>Svaki check dobiva PASS/FAIL badge s detaljnim opisom</p>
+    </div>
+    <div class="howto-step">
+      <div class="num">04</div>
+      <h4>Ispravite i ponovite</h4>
+      <p>Greške pokazuju točnu lokaciju — ispravite i uploadajte ponovo</p>
+    </div>
+  </div>
+
+  <h3 style="font-size:1.1rem;margin-bottom:20px"><i class="fas fa-code" style="color:#60a5fa;margin-right:8px"></i> 2. e-Račun API (za integratere)</h3>
+
+  <div class="api-block">
+    <span class="method post">POST</span>
+    <span class="url">/eracun/api/create/</span>
+    <div class="desc">Kreiraj e-Račun — prolazi automatsku trostruku validaciju prije slanja</div>
+    <pre>{
+  <span class="key">"invoice_number"</span>: <span class="val">"R-2026-001"</span>,
+  <span class="key">"doc_type"</span>: <span class="val">"380"</span>,          <span class="comment">// 380=račun, 381=odobrenje</span>
+  <span class="key">"issue_date"</span>: <span class="val">"2026-03-29"</span>,
+  <span class="key">"issuer_oib"</span>: <span class="val">"12345678901"</span>,  <span class="comment">// ISO 7064 checksum</span>
+  <span class="key">"recipient_oib"</span>: <span class="val">"98765432100"</span>,
+  <span class="key">"items"</span>: [{
+    <span class="key">"description"</span>: <span class="val">"Konzultacije"</span>,
+    <span class="key">"quantity"</span>: 10,
+    <span class="key">"unit_code"</span>: <span class="val">"HUR"</span>,
+    <span class="key">"unit_price"</span>: 100.00,
+    <span class="key">"tax_rate"</span>: 25,
+    <span class="key">"tax_category"</span>: <span class="val">"S"</span>
+  }],
+  <span class="key">"auto_send"</span>: true  <span class="comment">// validira + šalje odmah</span>
+}</pre>
+  </div>
+
+  <div class="api-block">
+    <span class="method get">GET</span>
+    <span class="url">/eracun/api/status/&lt;uuid&gt;/</span>
+    <div class="desc">Provjeri status validacije i slanja</div>
+    <pre>{
+  <span class="key">"status"</span>: <span class="val">"accepted"</span>,  <span class="comment">// draft → validating → valid → sending → sent → accepted</span>
+  <span class="key">"fina_uuid"</span>: <span class="val">"550e8400-e29b..."</span>,
+  <span class="key">"errors"</span>: [],
+  <span class="key">"warnings"</span>: [<span class="val">"PROP-02: Datum izdavanja je u budućnosti"</span>]
+}</pre>
+  </div>
+
+  <div class="api-block">
+    <span class="method post">POST</span>
+    <span class="url">/eracun/sukladnost/run/</span>
+    <div class="desc">Pokreni 5 testova sukladnosti (simulira provjeru Porezne uprave)</div>
+    <pre><span class="comment">// 5 testova:</span>
+TS-01: Certifikat (.p12) — validnost, istek, subject
+TS-02: UBL generiranje — CIUS elementi, dobavljač, kupac
+TS-03: XSD + EN 16931 — schema + 40 pravila
+TS-04: Fiskalizacija — CIS ping, fiskalni certifikat
+TS-05: Inbox — prijem e-Računa, Posrednik konekcija</pre>
+  </div>
+
+  <h3 style="font-size:1.1rem;margin:36px 0 20px"><i class="fas fa-cog" style="color:#c9a84c;margin-right:8px"></i> 3. Automatski (unutar LIMIT Connect)</h3>
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="icon green"><i class="fas fa-robot"></i></div>
+      <h3>Validacija pri kreiranju</h3>
+      <p>Svaki račun kreiran kroz LIMIT Connect automatski prolazi trostruku validaciju. Ako ne prođe — ne može se poslati.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon gold"><i class="fas fa-bell"></i></div>
+      <h3>Upozorenja u realnom vremenu</h3>
+      <p>Document Validator (AI) provjerava 8 pravila prije potvrde — fiskalizacija, duplikati, DE §14 UStG, PDV stope.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- COMPARISON -->
+<div class="container">
+<div class="section">
+  <div class="section-title"><i class="fas fa-scale-balanced"></i> Usporedba</div>
+  <div class="section-subtitle">CroXML Verify vs. ostale opcije na tržištu.</div>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th>Mogućnost</th>
+        <th>CroXML Verify</th>
+        <th>EU DSS Validator</th>
+        <th>FINA provjera</th>
+        <th>Ručno</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>XSD schema provjera</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>EN 16931 (40+ pravila)</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>HR CIUS + OIB checksum</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>XRechnung (DE)</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>ZUGFeRD 2.2 generiranje</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>XAdES potpis provjera</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>Fiskalizacija (ZKI/JIR)</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>API za automatizaciju</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>Poruke na hrvatskom</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+      </tr>
+      <tr>
+        <td>Besplatan javni pristup</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+        <td class="cmp-x">—</td>
+        <td class="cmp-check"><i class="fas fa-check"></i></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<hr class="section-divider">
+
+<!-- SECURITY -->
+<div class="container">
+<div class="section">
+  <div class="section-title"><i class="fas fa-lock"></i> Sigurnost</div>
+  <div class="section-subtitle">Vaši dokumenti nikada ne napuštaju sustav.</div>
+
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="icon green"><i class="fas fa-server"></i></div>
+      <h3>Lokalna obrada</h3>
+      <p>Validacija se izvršava na serveru — XML se ne šalje trećim stranama. Nema Google, nema cloud procesora.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon gold"><i class="fas fa-key"></i></div>
+      <h3>Certifikati pod ključem</h3>
+      <p>.p12 certifikati u /etc/limit-connect/certs/ (chmod 400) — izvan web roota, samo owner čita.</p>
+    </div>
+    <div class="value-card">
+      <div class="icon blue"><i class="fas fa-shield-halved"></i></div>
+      <h3>SHA-256 integritet</h3>
+      <p>Svaki validirani dokument dobiva kriptografski hash. Bilo kakva promjena nakon validacije — detektira se.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Prestanite slati neispravne dokumente.</h2>
+  <p>CroXML Verify uhvati grešku prije FINA-e i Porezne. Besplatan web validator, API za automatizaciju, ili potpuno integrirano unutar LIMIT Connect.</p>
+  <div>
+    <a href="/gov_export/validator/" class="cta-btn primary"><i class="fas fa-shield-halved"></i> Otvori Validator</a>
+    <a href="/eracun/sukladnost/" class="cta-btn secondary"><i class="fas fa-flask"></i> Testovi sukladnosti</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p><strong>CroXML Verify</strong> — modul sustava <a href="https://limit-connect.com">LIMIT Connect</a></p>
+  <p style="margin-top:6px">Podržani standardi: UBL 2.1, EN 16931, PEPPOL BIS 3.0, HR CIUS-2025, XRechnung, ZUGFeRD 2.2, XAdES</p>
+  <p style="margin-top:6px">&copy; 2026 LIMIT Connect &middot; Sva prava pridržana</p>
+</div>
+
+</body>
+</html>

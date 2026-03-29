@@ -38,6 +38,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
+    path('validator/', TemplateView.as_view(template_name='website/brosura_croxmlverify.html'), name='brochure_croxmlverify'),
     path('legal/tc-accept/', tc_views.tc_accept_view, name='tc_accept'),
 
     # BEZ PAPIRA — public receipt (no login)
@@ -246,12 +247,12 @@ urlpatterns += i18n_patterns(
     path('register/', include('registration.urls')),
     path('about/', __import__('website.views', fromlist=['about_page']).about_page, name='about'),
     path('plan-isplativosti/', __import__('website.views', fromlist=['financijski_plan']).financijski_plan, name='financijski_plan'),
+    path('trzisna-analiza/', __import__('website.views', fromlist=['trzisna_analiza']).trzisna_analiza, name='trzisna_analiza'),
     path('pricing/', __import__('website.views', fromlist=['pricing_page']).pricing_page, name='pricing'),
     path('api/pricing/advisor/', __import__('website.views', fromlist=['pricing_ai_advisor']).pricing_ai_advisor, name='pricing_ai_advisor'),
     path('synesis/', include('synesis.urls')),
     path('smart-import/', include('smart_import.urls', namespace='smart_import')),
     path('experiences/', include('experiences.urls', namespace='experiences')),
-    path('gov-export/', include('gov_export.urls', namespace='gov_export')),
     path('data-migration/', include('data_migration.urls')),
     path('konto/', include('konto.urls')),
     
@@ -321,7 +322,6 @@ urlpatterns += [
     path('privatnost/', views.datenschutz, name='privatnost'),
     path('grosmarkt/anfrage/', __import__('website.views', fromlist=['grosmarkt_anfrage']).grosmarkt_anfrage, name='grosmarkt_anfrage_direct'),
     path("api/grosmarkt/partners/", __import__("website.views", fromlist=["grosmarkt_partners_api"]).grosmarkt_partners_api, name="grosmarkt_partners"),
-    path('didin-konak/', __import__('website.views', fromlist=['brosura_didin_konak']).brosura_didin_konak, name='brosura_didin_konak'),
     path('digitalni-posrednik/', __import__('website.views', fromlist=['digitalni_posrednik']).digitalni_posrednik, name='digitalni_posrednik'),
 ]
 
