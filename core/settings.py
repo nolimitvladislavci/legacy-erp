@@ -17,34 +17,28 @@ if _env_file.exists():
             os.environ.setdefault(_env_key, _env_val)
 
 # ── Core ──────────────────────────────────────────────────────
-SECRET_KEY = os.environ["SECRET_KEY"]
-FERNET_KEY = os.environ["FERNET_KEY"]
+SECRET_KEY = os.environ.get("SECRET_KEY", "insecure-fallback-change-me")
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = [
     "limit-connect.com", "www.limit-connect.com",
     "viskovic-group.de", "www.viskovic-group.de",
-    "37.27.248.86", "fina-connect.online", "www.fina-connect.online", "localhost", "127.0.0.1", "testserver",
+    "85.9.201.204", "localhost", "127.0.0.1", "37.27.248.86",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://limit-connect.com",
     "https://www.limit-connect.com",
     "https://viskovic-group.de",
-    "http://37.27.248.86",
     "https://www.viskovic-group.de",
-    "https://fina-connect.online",
-    "https://www.fina-connect.online",
 ]
 
 # ── Security (production only) ────────────────────────────────
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
-    CSRF_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = True          # Nginx handles redirect
     SECURE_REDIRECT_EXEMPT = [r"^api/whatsapp/webhook/$"]  # WAHA internal webhook
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -57,8 +51,6 @@ if not DEBUG:
 
 # ── Apps ──────────────────────────────────────────────────────
 INSTALLED_APPS = [
-    "daphne",
-    "channels",
     "core",
     "premium_booking",
     "notifications",
@@ -98,14 +90,12 @@ INSTALLED_APPS = [
     "pos",
     "fiscal",
     "synesis",
-    "data_migration",
     "smart_import",
     "payroll",
     "tracking",
     "registration",
     "interventions",
     "fiskalizacija",
-    "gov_export",
     "burza",
     "assessment",
     "branches",
@@ -116,7 +106,6 @@ INSTALLED_APPS = [
     "delivery",
     "traceability",
     "gastro_menu",  # GHOST: 0 data, traceability FK
-    "experiences",
     "payments",
     "eracun",
     "helpdesk",
@@ -128,31 +117,24 @@ INSTALLED_APPS = [
     "edik",
     "virtual_office",
     "superadmin_ai",
+    "kindergarten",
+    "eldercare",
+    "data_migration",
+    "borg_ops",
+    "experiences",
+    "intelligence",
+    "livestock",
+    "push_notifications",
+    "tax_wizard",
     "tech_radar",
     "udruge",
-    "livestock",
-    "intelligence",
     "einvoice",
+    "gov_export",
     "limit_connect_ai",
-    "tax_wizard",
-    "borg_ops",
+    "knjiznica",
 ]
 
-# ── Django Channels (WebSocket) ───────────────────────────────────────
-ASGI_APPLICATION = 'core.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
-            'capacity': 1500,
-            'expiry': 60,
-        },
-    },
-}
-
 MIDDLEWARE = [
-    "core.middleware.GracefulErrorMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -166,18 +148,12 @@ MIDDLEWARE = [
     "core.middleware.CompanyMiddleware",
     "core.middleware.ImpersonationMiddleware",
     "core.middleware.CompanyBranchMiddleware",
-    "core.middleware.AdminLangRedirectMiddleware",
     "core.middleware.ForcePasswordChangeMiddleware",
-    "core.middleware.Force2FAMiddleware",
-    "core.middleware.ForceTCMiddleware",
     "registration.middleware.SubscriptionMiddleware",
-    "core.image_compression.ImageQuotaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "permissions.ip_filter.IPFilterMiddleware",
     "core.middleware.api_error_format.ApiErrorFormatMiddleware",
-    "core.middleware.SecurityHeadersMiddleware",
-    "core.middleware.RateLimitMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -197,7 +173,6 @@ TEMPLATES = [{
             "permissions.context_processors.subscription_context",
             "core.context_processors.booking_globals",
                 "core.context_processors.company_switcher",
-                "core.context_processors.module_context",
         ],
     },
 }]
@@ -214,7 +189,7 @@ DATABASES = {
         "HOST": os.environ.get("DB_HOST", "localhost"),
         "TEST": {"NAME": "test_fina_connect"},
         "PORT": os.environ.get("DB_PORT", "5432"),
-        "CONN_MAX_AGE": 0,  # PgBouncer transaction pooling requires 0
+        "CONN_MAX_AGE": 60,
     }
 }
 
@@ -278,7 +253,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = 'login'
+LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
@@ -310,17 +285,9 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@limit-connect
 ADMINS = [("Admin", os.environ.get("ADMIN_EMAIL", "admin@limit-connect.com"))]
 
 # ── Password validators ───────────────────────────────────────
-AUTHENTICATION_BACKENDS = [
-    "core.auth_backends.EmailOrUsernameBackend",
-]
-
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-     "OPTIONS": {"min_length": 10}},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
-    {"NAME": "core.validators.StrongPasswordValidator"},
+     "OPTIONS": {"min_length": 8}},
 ]
 
 # ── Logging ───────────────────────────────────────────────────
@@ -392,10 +359,6 @@ CELERY_TASK_TIME_LIMIT = 600
 from celery.schedules import crontab  # noqa: E402
 
 CELERY_BEAT_SCHEDULE = {
-    'arhiva-morning-brief': {
-        'task': 'documents.tasks.arhiva_morning_brief',
-        'schedule': crontab(hour=6, minute=0),
-    },
     'propter-auto-close-billing': {
         'task': 'propter.tasks.auto_close_billing_periods',
         'schedule': crontab(hour=6, minute=0, day_of_month=1),
@@ -445,198 +408,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "konto.tasks.monthly_vat_calculation",
         "schedule": crontab(day_of_month=1, hour=3, minute=0),
     },
+    "knjiznica-daily-overdue": {
+        "task": "knjiznica.daily_overdue_check",
+        "schedule": crontab(hour=8, minute=0),
+    },
     "ai-midnight-patrol": {
         "task": "ai_assistant.tasks.ai_midnight_patrol",
         "schedule": crontab(hour=2, minute=0),
     },
-    # POS: Automatski retry nefiskaliziranih računa (svake 2 min)
-    "pos-retry-fiscalization": {
-        "task": "pos.retry_fiscalization",
-        "schedule": 120,  # svake 2 minute
-    },
-    # POS: Generiraj POSDailyReport za propuštene sesije (svakih 30 min)
-    "pos-missing-daily-reports": {
-        "task": "pos.generate_missing_daily_reports",
-        "schedule": 1800,
-    },
-    # POS: Auto-cleanup zombie sesija starijih od 16h (svaki sat)
-    "pos-cleanup-zombies": {
-        "task": "pos.cleanup_zombie_sessions",
-        "schedule": 3600,
-    },
-    "ai-inbox-daily-email": {
-        "task": "documents.tasks.send_ai_inbox_summary_email",
-        "schedule": crontab(hour=8, minute=0, day_of_week='1-5'),
-    },
-    "arhiva-ai-monitor-hourly": {
-        "task": "documents.tasks.arhiva_ai_monitor",
-        "schedule": crontab(minute=0),
-    },
-    "worktime-anomaly-patrol": {
-        "task": "worktime.tasks.worktime_anomaly_patrol",
-        "schedule": crontab(hour=2, minute=30),
-    },
-    "tech-radar-scan-15min": {
-        "task": "tech_radar.tasks.tech_radar_scan",
-        "schedule": crontab(minute="*/15"),
-    },
-    "tech-radar-capacity-hourly": {
-        "task": "tech_radar.tasks.capacity_check",
-        "schedule": crontab(minute=5),
-    },
-    "tech-radar-cleanup-daily": {
-        "task": "tech_radar.tasks.cleanup_signals",
-        "schedule": crontab(hour=3, minute=0),
-    },
-    "udruge-expiry-reminders": {
-        "task": "udruge.tasks.send_expiry_reminders",
-        "schedule": crontab(hour=9, minute=0, day_of_week=1),
-    },
-    "eracun-fetch-inbox": {
-        "task": "eracun.tasks.fetch_posrednik_inbox",
-        "schedule": crontab(hour="*/4", minute=15),
-    },
-    "eracun-retry-unsent": {
-        "task": "eracun.tasks.retry_unsent_eracuni",
-        "schedule": crontab(minute="*/30"),
-    },
-    "nightly-owner-zreport": {
-        "task": "pos.tasks.nightly_owner_zreport",
-        "schedule": crontab(hour=23, minute=55),
-    },
-    "udruge-evaluate-subscriptions": {
-        "task": "udruge.tasks.evaluate_subscriptions",
-        "schedule": crontab(hour=2, minute=15),
-    },
-    "cleanup-stale-migrations": {
-        "task": "data_migration.tasks.cleanup_stale_migrations",
-        "schedule": 3600,  # svaki sat
-    },
-    "wizard-cleanup-stale-drafts": {
-        "task": "partners.cleanup_stale_wizard_drafts",
-        "schedule": crontab(hour=3, minute=0),
-    },
-    "intelligence-nightly-patrol": {
-        "task": "intelligence.tasks.intelligence_nightly_patrol",
-        "schedule": crontab(hour=3, minute=30),
-    },
-    "check-auto-listings": {
-        "task": "intelligence.tasks.check_auto_listings",
-        "schedule": crontab(hour=7, minute=0),
-    },
-    # POS: Zakonski alarm za bonove bez JIR-a (čl.11 Zakona o fiskalizaciji)
-    "pos-check-fiscal-deadline": {
-        "task": "pos.check_fiscal_deadline",
-        "schedule": 1800,  # svakih 30 min
-    },
-    # ── LIMIT Connect AI ──
-    "ai-morning-report": {
-        "task": "limit_connect_ai.tasks.morning_report_all",
-        "schedule": crontab(hour=7, minute=30),
-    },
-    "ai-fund-check": {
-        "task": "limit_connect_ai.tasks.fund_check_all",
-        "schedule": crontab(hour=9, minute=0),
-    },
-    "ai-compliance-check": {
-        "task": "limit_connect_ai.tasks.compliance_check_all",
-        "schedule": crontab(hour=8, minute=0, day_of_week=1),
-    },
-    "borg-nn-feed-scraper": {
-        "task": "limit_connect_ai.fetch_nn_feed",
-        "schedule": 21600,  # svakih 6 sati
-    },
-    "ai-campaign-suggestions": {
-        "task": "limit_connect_ai.tasks.campaign_suggestions_all",
-        "schedule": crontab(hour=10, minute=0, day_of_week=5),
-    },
-    # ── Wizard Onboarding ──
-    "cleanup-stale-wizard-drafts": {
-        "task": "partners.cleanup_stale_wizard_drafts",
-        "schedule": crontab(hour=3, minute=0),
-    },
-    "retroactive-nkd-lookup": {
-        "task": "partners.retroactive_nkd_lookup",
-        "schedule": crontab(hour=4, minute=0, day_of_week=0),  # nedjelja 04:00
-    },
-    # Tax Compliance — supplier risk daily scan
-    "scan-supplier-risk": {
-        "task": "limit_connect_ai.tasks_risk.scan_supplier_risk",
-        "schedule": crontab(hour=4, minute=30),
-    },
-    # ── Tax Wizard ──
-    "tax-check-deadlines": {
-        "task": "tax_wizard.tasks.check_tax_deadlines",
-        "schedule": crontab(hour=7, minute=0),
-    },
-    "tax-prefill-quarterly": {
-        "task": "tax_wizard.tasks.prefill_quarterly_data",
-        "schedule": crontab(day_of_month=1, hour=5, minute=0),
-    },
-    "tax-cleanup-expired": {
-        "task": "tax_wizard.tasks.cleanup_expired_sessions",
-        "schedule": crontab(hour=3, minute=30),
-    },
-    "tax-generate-annual-deadlines": {
-        "task": "tax_wizard.tasks.generate_annual_deadlines",
-        "schedule": crontab(month_of_year=1, day_of_month=1, hour=0, minute=30),
-    },
-    # ── Rental ──
-    "rental-daily-landlord-brief": {
-        "task": "rental.tasks.daily_landlord_brief",
-        "schedule": crontab(hour=8, minute=0),
-    },
-    "rental-check-evisitor-pending": {
-        "task": "rental.tasks.check_evisitor_pending",
-        "schedule": crontab(hour="*/6", minute=15),
-    },
-    "rental-annual-limit-check": {
-        "task": "rental.tasks.annual_limit_check",
-        "schedule": crontab(hour=9, minute=0, day_of_week=1),
-    },
-    "rental-gdpr-cleanup-docs": {
-        "task": "rental.tasks.gdpr_cleanup_guest_docs",
-        "schedule": crontab(hour=4, minute=0),
-    },
-
-    # ── Marketplace Ghost Inventory ──
-    # ── Agro-Turizam 360 ──
-    "experience-reminders": {
-        "task": "experiences.tasks.send_experience_reminders",
-        "schedule": 21600,  # svakih 6 sati
-    },
-    "experience-no-shows": {
-        "task": "experiences.tasks.mark_no_shows",
-        "schedule": crontab(hour=22, minute=0),
-    },
-    "recall-send-notifications": {
-        "task": "experiences.tasks.send_recall_notifications",
-        "schedule": 300,  # svakih 5 min (recall je hitan)
-    },
-    "experience-inventory-depletion": {
-        "task": "experiences.tasks.inventory_depletion_check",
-        "schedule": 21600,  # svakih 6 sati
-    },
-    "marketplace-ghost-cleanup": {
-        "task": "marketplace.tasks.ghost_inventory_cleanup",
-        "schedule": 21600,  # svakih 6 sati
-    },
-    "marketplace-expiry-reminders": {
-        "task": "marketplace.tasks.send_expiry_reminders",
-        "schedule": 21600,  # svakih 6 sati
-    },
-    # ── Auction finalization ──
-    "marketplace-auction-finalize": {
-        "task": "marketplace.tasks.finalize_ended_auctions",
-        "schedule": 300,  # svakih 5 minuta
-    },
-    # ── Gastro Bridge (Last Call) ──
-    "marketplace-gastro-bridge-check": {
-        "task": "marketplace.tasks.expiry_gastro_bridge_check",
-        "schedule": 7200,  # svakih 2 sata
-    },
-
-
 }
 # ── VAPID Web Push ──────────────────────────────────────────────────────
 import os as _os
@@ -650,19 +429,6 @@ WAHA_API_URL = os.environ.get('WAHA_API_URL', 'http://127.0.0.1:3000')
 WAHA_SESSION_NAME = os.environ.get('WAHA_SESSION_NAME', 'default')
 WAHA_ENABLED = os.environ.get('WAHA_ENABLED', 'True').lower() in ('true', '1', 'yes')
 WAHA_API_KEY = os.environ.get('WAHA_API_KEY', '')
-
-# ── Error Notification Phones ──────────────────────────────────
-# WhatsApp brojevi koji primaju 500 error notifikacije
-# Dev tim dobiva traceback, ops tim dobiva user-friendly poruku
-ERROR_NOTIFY_PHONES = [
-    p.strip() for p in
-    _os.environ.get('ERROR_NOTIFY_PHONES', '').split(',') if p.strip()
-]
-ERROR_NOTIFY_OPS_PHONES = [
-    p.strip() for p in
-    _os.environ.get('ERROR_NOTIFY_OPS_PHONES', '').split(',') if p.strip()
-]
-
 
 # ── API Documentation ────────────────────────────────────────
 SPECTACULAR_SETTINGS = {
@@ -687,229 +453,14 @@ IP_FILTER_ENABLED = False  # Set to True to activate
 IP_WHITELIST = [
     '127.0.0.1',
     '::1',
-    '37.27.248.86',    # Admin IP
-    '35.188.35.214',   # Dev API access
+    '85.9.201.204',    # Server itself
 ]
 IP_RESTRICTED_PATHS = [
     '/admin/',
     '/superadmin/',
 ]
 
-# ── eReporting Safety Pin ─────────────────────────────────────────────────────
-# Dok XML generator za Poreznu upravu nije certificiran, blokiraj slanje.
-# Postaviti na True tek nakon verifikacije s Poreznom.
-ENABLE_E_REPORTING = os.environ.get('ENABLE_E_REPORTING', 'False').lower() in ('true', '1')
-
 # Upload limits for MDB files
 DATA_UPLOAD_MAX_MEMORY_SIZE = 209715200  # 200MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 209715200  # 200MB
 
-# ── SENTRY — Produkcijski monitoring ──────────────────────────────────
-# Aktivira se samo kad postoji SENTRY_DSN u .env
-# Besplatan račun: https://sentry.io → Create Django Project → kopiraj DSN
-SENTRY_DSN = _os.environ.get('SENTRY_DSN', '')
-if SENTRY_DSN and not DEBUG:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.celery import CeleryIntegration
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(), CeleryIntegration()],
-        traces_sample_rate=0.2,       # 20% transakcija za performance monitoring
-        send_default_pii=True,         # Šalje user ID za kontekst greške
-        environment='production',
-        release=f'limit-connect@2026.03.18',
-    )
-
-# --- CI/CD TEST OVERRIDE ---
-import sys
-if 'test' in sys.argv:
-    print('\n--- TEST MODE: In-Memory SQLite + LocMemCache + MD5 hash + Celery eager ---')
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
-    }
-    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
-    _locmem = {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
-    CACHES = {'default': _locmem, 'sessions': _locmem}
-    CELERY_TASK_ALWAYS_EAGER = True
-    CELERY_TASK_STORE_EAGER_RESULT = True
-
-    # Skip PostgreSQL-specific RunSQL migrations on SQLite
-    from django.db.migrations.operations.special import RunSQL as _OrigRunSQL
-    _orig_forwards = _OrigRunSQL.database_forwards
-    def _safe_forwards(self, app_label, schema_editor, from_state, to_state):
-        if schema_editor.connection.vendor == 'sqlite':
-            return  # Skip raw SQL on SQLite
-        return _orig_forwards(self, app_label, schema_editor, from_state, to_state)
-    _OrigRunSQL.database_forwards = _safe_forwards
-
-
-# ── Sandbox / Simulation Mode ──────────────────────────────────────
-# Podaci iz 2025 i ranije su Synesis importi (vježba), ne produkcijski.
-# Ovo utišava alarme za fiskalizaciju/eRačun na legacy podacima.
-FISCAL_SANDBOX_BEFORE = int(os.environ.get('FISCAL_SANDBOX_BEFORE', '2026'))
-IS_SANDBOX_MODE = os.environ.get('IS_SANDBOX_MODE', 'False').lower() in ('true', '1')
-
-# ── e-Invoice (PROPTER AS4/Peppol) ─────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "einvoice-poll-inbox-30s": {
-        "task": "einvoice.tasks.inbound_tasks.poll_inbox",
-        "schedule": 30.0,
-    },
-    "einvoice-check-delivery-60s": {
-        "task": "einvoice.tasks.status_tasks.check_delivery_statuses",
-        "schedule": 60.0,
-    },
-    "einvoice-process-retry-queue-60s": {
-        "task": "einvoice.tasks.outbound_tasks.process_retry_queue",
-        "schedule": 60.0,
-    },
-})
-
-# FINA Posrednik settings (Phase 1)
-FINA_POSREDNIK_BASE_URL = os.environ.get("FINA_POSREDNIK_BASE_URL", "https://api.einvoice.hr/v1")
-FINA_POSREDNIK_API_KEY = os.environ.get("FINA_POSREDNIK_API_KEY", "")
-FINA_POSREDNIK_CLIENT_CERT = os.environ.get("FINA_POSREDNIK_CLIENT_CERT", "")
-FINA_POSREDNIK_CLIENT_KEY = os.environ.get("FINA_POSREDNIK_CLIENT_KEY", "")
-FINA_POSREDNIK_SANDBOX = os.environ.get("FINA_POSREDNIK_SANDBOX", "True").lower() in ("true", "1")
-
-# S3/MinIO Archive
-S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://127.0.0.1:9000")
-S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "limitconnect")
-S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "LimitConnect2026S3Archive")
-S3_REGION = os.environ.get("S3_REGION", "eu-central-1")
-S3_ARCHIVE_BUCKET = os.environ.get("S3_ARCHIVE_BUCKET", "propter-einvoice-archive")
-
-# phase4 AP (Phase 3 — disabled by default)
-PHASE4_AP_ENABLED = os.environ.get("PHASE4_AP_ENABLED", "False").lower() in ("true", "1")
-
-# ── VIES Batch Validacija ──────────────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "vies-batch-validate-daily": {
-        "task": "partners.tasks.vies_batch_validate",
-        "schedule": 86400.0,  # 1x dnevno
-        "kwargs": {"batch_size": 100},
-    },
-})
-
-# ── BORG Signal Patrol ──────────────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "borg-signal-patrol-30min": {
-        "task": "limit_connect_ai.tasks_signal.signal_patrol",
-        "schedule": 1800,  # 30 min
-    },
-    "borg-signal-daily-digest": {
-        "task": "limit_connect_ai.tasks_signal.daily_signal_digest",
-        "schedule": crontab(hour=7, minute=0),
-    },
-})
-
-# ── Notification Digest — tjedni izvještaj za udruge ───────────────
-CELERY_BEAT_SCHEDULE.update({
-    "weekly-notification-digest": {
-        "task": "core.notification_digest.send_weekly_digest",
-        "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Ponedjeljak 08:00
-    },
-})
-
-# ── Knjiga prigovora — auto-eskalacija + weekly digest ──────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "complaints-auto-escalate": {
-        "task": "pos.auto_escalate_complaints",
-        "schedule": crontab(hour=9, minute=0),  # Svaki dan 09:00
-    },
-    "complaints-weekly-digest": {
-        "task": "pos.weekly_complaints_digest",
-        "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Ponedjeljak 08:00
-    },
-})
-
-# ── Propter — Sammelrechnung (zbirni racun) ──────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "propter-monthly-sammelrechnung": {
-        "task": "propter.generate_monthly_sammelrechnung",
-        "schedule": crontab(day_of_month="1", hour="6", minute="0"),
-    },
-})
-
-# ── FENIX System Test — nočni autonomni test (02:00) ──────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "fenix-nightly-system-test": {
-        "task": "core.run_system_test_task",
-        "schedule": crontab(hour=2, minute=0),  # Svaku noć 02:00
-        "kwargs": {"phone": "+4915771998747", "quick": False},
-    },
-    "fenix-quick-morning-check": {
-        "task": "core.run_system_test_task",
-        "schedule": crontab(hour=7, minute=30),  # Jutarnji quick check 07:30
-        "kwargs": {"phone": "+4915771998747", "quick": True},
-    },
-})
-
-# ── SONNET AGENT — Vođa projekta, svaka 2 sata ────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    'sonnet-project-lead-cycle': {
-        'task': 'core.sonnet_cycle',
-        'schedule': crontab(minute=0, hour='*/2'),  # Svaka 2 sata
-    },
-})
-
-# ── AI Infrastruktura — API Ključevi ──────────────────────────────────────────
-# KRITIČNO: Ovi ključevi su obavezni za Gemini agent i Sonnet agent.
-# Ako nedostaju — AI infrastruktura pada, BORG ne funkcionira.
-GEMINI_API_KEY   = _os.environ.get('GEMINI_API_KEY', '')
-ANTHROPIC_API_KEY = _os.environ.get('ANTHROPIC_API_KEY', '')
-CLAUDE_MODEL     = _os.environ.get('CLAUDE_MODEL', 'claude-sonnet-4-5')
-HAIKU_MODEL      = _os.environ.get('HAIKU_MODEL', 'claude-haiku-4-5-20251001')
-
-# ── AI Health Check — svaki sat ───────────────────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    'ai-health-check-hourly': {
-        'task': 'core.ai_health_check',
-        'schedule': crontab(minute=15),  # svaki sat u :15 (ne u :00 s ostalima)
-    },
-})
-
-# ── Amortizacija podsjetnik — 1. u mjesecu 06:00 ─────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    'depreciation-monthly-reminder': {
-        'task': 'inventory.tasks.depreciation_monthly_check',
-        'schedule': crontab(day_of_month='1', hour='6', minute='0'),
-    },
-})
-
-# ── BORG SLA Check — svakih 10 min ──────────────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    'borg-check-sla-10min': {
-        'task': 'borg_ops.check_sla',
-        'schedule': 600.0,
-    },
-    'borg-archive-old-activity-monthly': {
-        'task': 'borg_ops.archive_old_activity',
-        'schedule': crontab(day_of_month='1', hour='3', minute='30'),
-    },
-})
-
-CSRF_FAILURE_VIEW = 'core.csrf_handler.csrf_failure_view'
-
-# ── BORG Sentineli ──────────────────────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "borg-schema-drift-weekly": {
-        "task": "borg_ops.tasks.schema_drift_check",
-        "schedule": crontab(day_of_week='sunday', hour='3', minute='0'),
-    },
-    "borg-orphan-data-weekly": {
-        "task": "borg_ops.tasks.orphan_data_check",
-        "schedule": crontab(day_of_week='sunday', hour='3', minute='30'),
-    },
-})
-
-# ── Database Backup — svaki dan 02:00 ────────────────────────────────
-CELERY_BEAT_SCHEDULE.update({
-    "database-daily-backup": {
-        "task": "core.database_backup",
-        "schedule": crontab(hour=2, minute=0),
-        "options": {"queue": "default"},
-    },
-})

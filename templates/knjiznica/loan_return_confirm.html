@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Povrat knjige{% endblock %}
+{% block page_title %}Povrat knjige{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-undo" title="Povrat knjige" %}
+
+<div class="row">
+  <div class="col-md-6">
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+      <table class="table table-dark table-borderless mb-3">
+        <tr><td class="text-muted">Knjiga</td><td class="text-white fw-bold">{{ loan.item.name }}</td></tr>
+        <tr><td class="text-muted">Član</td><td class="text-white">{{ loan.member.partner.name }} [{{ loan.member.member_number }}]</td></tr>
+        <tr><td class="text-muted">Posuđeno</td><td>{{ loan.loan_date }}</td></tr>
+        <tr><td class="text-muted">Rok</td><td>{{ loan.due_date }}</td></tr>
+        <tr>
+          <td class="text-muted">Status</td>
+          <td>
+            {% if loan.status == 'overdue' %}
+            <span style="color:#ef4444;font-weight:600">Kasni {{ loan.days_overdue }} dana</span>
+            {% else %}
+            <span style="color:#3b82f6">Posuđeno</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% if loan.days_overdue > 0 %}
+        <tr>
+          <td class="text-muted">Kazna</td>
+          <td style="color:#ef4444;font-weight:700;font-size:1.1rem">{{ loan.days_overdue }} x {{ loan.fine_per_day }}€ = {{ loan.fine_total }}€</td>
+        </tr>
+        {% endif %}
+      </table>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-warning"><i class="fas fa-check me-1"></i>Potvrdi povrat</button>
+          <a href="{% url 'knjiznica:dashboard' %}" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

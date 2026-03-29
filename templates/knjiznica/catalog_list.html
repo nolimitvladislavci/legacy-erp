@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Katalog knjiga{% endblock %}
+{% block page_title %}Katalog{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-books" title="Katalog knjiga" subtitle="Pregled i pretraga" cta_url=catalog_create_url cta_label="Nova knjiga" cta_icon="fas fa-plus" %}
+
+<!-- Search -->
+<form method="get" class="mb-4">
+  <div class="input-group" style="max-width:400px">
+    <input type="text" name="q" value="{{ q }}" class="form-control bg-dark text-white border-secondary" placeholder="Pretraži naslov, autora, ISBN...">
+    <button type="submit" class="btn btn-outline-warning"><i class="fas fa-search"></i></button>
+  </div>
+</form>
+
+<div class="d-flex gap-2 mb-3">
+  <a href="{% url 'knjiznica:catalog_create' %}" class="btn btn-sm btn-warning"><i class="fas fa-plus me-1"></i>Nova knjiga</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-dark table-hover">
+    <thead>
+      <tr>
+        <th>Naslov</th>
+        <th>Autor</th>
+        <th>ISBN</th>
+        <th>Polica</th>
+        <th>Dostupnost</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for book in books %}
+      <tr>
+        <td><a href="{% url 'knjiznica:catalog_detail' book.pk %}" class="text-white text-decoration-none">{{ book.name }}</a></td>
+        <td class="text-muted">{% if book.book_meta %}{{ book.book_meta.author }}{% endif %}</td>
+        <td class="text-muted" style="font-size:.85rem">{% if book.book_meta %}{{ book.book_meta.isbn }}{% endif %}</td>
+        <td class="text-muted" style="font-size:.85rem">{% if book.book_meta %}{{ book.book_meta.shelf_location }}{% endif %}</td>
+        <td>
+          {% if book.book_meta and book.book_meta.is_reference %}
+          <span style="color:#f59e0b;font-size:.85rem"><i class="fas fa-lock me-1"></i>Referentna</span>
+          {% elif book.is_loaned %}
+          <span style="color:#ef4444;font-size:.85rem"><i class="fas fa-times-circle me-1"></i>Posuđena</span>
+          {% else %}
+          <span style="color:#22c55e;font-size:.85rem"><i class="fas fa-check-circle me-1"></i>Dostupna</span>
+          {% endif %}
+        </td>
+        <td><a href="{% url 'knjiznica:catalog_detail' book.pk %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">Detalji</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted text-center py-4">Nema knjiga u katalogu. <a href="{% url 'knjiznica:catalog_create' %}" style="color:#c8a24e">Dodaj prvu →</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

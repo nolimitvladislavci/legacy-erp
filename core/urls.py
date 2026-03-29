@@ -38,6 +38,8 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
+    
+    path('vrtic/<slug:slug>/portal/', __import__('kindergarten.views', fromlist=['parent_portal']).parent_portal, name='kindergarten_portal'),
     path('validator/', TemplateView.as_view(template_name='website/brosura_croxmlverify.html'), name='brochure_croxmlverify'),
     path('legal/tc-accept/', tc_views.tc_accept_view, name='tc_accept'),
 
@@ -51,12 +53,15 @@ urlpatterns = [
     path('offline.html',  _serve_offline,  name='offline_html'),
     path('burza/', include('burza.urls', namespace='burza')),
     path('', include('borg_ops.urls', namespace='borg_ops')),
+    path('vrtic/', include('kindergarten.urls', namespace='kindergarten')),
+    path('dom/', include('eldercare.urls', namespace='eldercare')),
     path('livestock/', include('livestock.urls', namespace='livestock')),
     path('intelligence/', include('intelligence.urls', namespace='intelligence')),
     path('marketplace/', include('marketplace.urls', namespace='marketplace')),
     path('delivery/', include('delivery.urls', namespace='delivery')),
     # path('traceability/', include('traceability.urls', namespace='traceability')),  # dormant app
     path('gastro-menu/', include('gastro_menu.urls', namespace='gastro_menu')),
+    path('knjiznica/', include('knjiznica.urls', namespace='knjiznica')),
     path('sos/', __import__('interventions.views', fromlist=['public_intervention']).public_intervention, name='public_sos'),
         path('track/<uuid:tracking_token>/', __import__('interventions.views', fromlist=['tracking_view']).tracking_view, name='intervention_tracking'),
     path('i18n/setlang/', set_language, name='set_language'),

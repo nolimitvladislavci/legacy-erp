@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Knjižnica — Dashboard{% endblock %}
+{% block page_title %}Knjižnica{% endblock %}
+{% block extra_css %}
+<style>
+.lib-card{background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.lib-card h5{color:#c8a24e;margin-bottom:.8rem}
+.overdue-row{background:rgba(239,68,68,.08);border-left:3px solid #ef4444;padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:4px}
+.loan-row{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+.loan-row:last-child{border-bottom:none}
+.badge-borrowed{background:#3b82f6;color:#fff;padding:3px 8px;border-radius:12px;font-size:.75rem}
+.badge-overdue{background:#ef4444;color:#fff;padding:3px 8px;border-radius:12px;font-size:.75rem}
+.badge-returned{background:#22c55e;color:#fff;padding:3px 8px;border-radius:12px;font-size:.75rem}
+</style>
+{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-book" title="Knjižnica" subtitle="Upravljanje posudbama i članovima" cta_url=loan_create_url cta_label="Nova posudba" cta_icon="fas fa-plus" %}
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    {% include "partials/_stat_card.html" with icon="fas fa-users" color="text-primary" label="Aktivni članovi" value=stats.active_members %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/_stat_card.html" with icon="fas fa-book-open" color="text-info" label="Posuđeno" value=stats.books_borrowed %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/_stat_card.html" with icon="fas fa-exclamation-triangle" color="text-danger" label="Kasni" value=stats.overdue_count %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/_stat_card.html" with icon="fas fa-clock" color="text-warning" label="Čeka rezervaciju" value=stats.waiting_reservations %}
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  <a href="{% url 'knjiznica:loan_create' %}" class="btn btn-sm btn-warning"><i class="fas fa-plus me-1"></i>Nova posudba</a>
+  <a href="{% url 'knjiznica:catalog_list' %}" class="btn btn-sm btn-outline-light"><i class="fas fa-search me-1"></i>Katalog</a>
+  <a href="{% url 'knjiznica:member_list' %}" class="btn btn-sm btn-outline-light"><i class="fas fa-users me-1"></i>Članovi</a>
+  <a href="{% url 'knjiznica:statistics' %}" class="btn btn-sm btn-outline-light"><i class="fas fa-chart-bar me-1"></i>Statistika</a>
+  <a href="{% url 'knjiznica:nsk_export' %}" class="btn btn-sm btn-outline-light"><i class="fas fa-file-csv me-1"></i>NSK Export</a>
+</div>
+
+<!-- Overdue -->
+{% if overdue_loans %}
+<div class="lib-card" style="border-color:rgba(239,68,68,.3)">
+  <h5><i class="fas fa-exclamation-triangle text-danger me-2"></i>Kasne posudbe ({{ overdue_loans|length }})</h5>
+  {% for loan in overdue_loans %}
+  <div class="overdue-row d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <strong class="text-white">{{ loan.item.name }}</strong>
+      <span class="text-muted ms-2">{{ loan.member.partner.name }} [{{ loan.member.member_number }}]</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-danger" style="font-size:.85rem">{{ loan.days_overdue }} dana kasni — {{ loan.fine_total }}€</span>
+      <a href="{% url 'knjiznica:loan_return' loan.pk %}" class="btn btn-sm btn-outline-danger">Vrati</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Recent Loans -->
+<div class="lib-card">
+  <h5><i class="fas fa-history me-2"></i>Zadnje posudbe</h5>
+  {% for loan in recent_loans %}
+  <div class="loan-row d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <strong class="text-white">{{ loan.item.name }}</strong>
+      <span class="text-muted ms-2">{{ loan.member.partner.name }}</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="text-muted" style="font-size:.85rem">{{ loan.loan_date }} — rok {{ loan.due_date }}</span>
+      <span class="badge-{{ loan.status }}">{{ loan.get_status_display }}</span>
+      {% if loan.status == 'borrowed' or loan.status == 'overdue' %}
+      <a href="{% url 'knjiznica:loan_return' loan.pk %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">Vrati</a>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted mb-0">Nema posudbi. <a href="{% url 'knjiznica:loan_create' %}" style="color:#c8a24e">Kreiraj prvu →</a></p>
+  {% endfor %}
+</div>
+{% endblock %}

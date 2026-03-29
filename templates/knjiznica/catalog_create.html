@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Nova knjiga{% endblock %}
+{% block page_title %}Nova knjiga{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-plus" title="Nova knjiga" subtitle="Dodaj u katalog" %}
+
+<div class="row">
+  <div class="col-md-7">
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+      <form method="post" action="{% url 'knjiznica:catalog_create' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label text-muted">Naslov *</label>
+          <input type="text" name="name" class="form-control bg-dark text-white border-secondary" required>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted">Autor</label>
+            <input type="text" name="author" class="form-control bg-dark text-white border-secondary">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted">ISBN</label>
+            <input type="text" name="isbn" class="form-control bg-dark text-white border-secondary" placeholder="978-...">
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted">Nakladnik</label>
+            <input type="text" name="publisher" class="form-control bg-dark text-white border-secondary">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Godina izdanja</label>
+            <input type="number" name="pub_year" class="form-control bg-dark text-white border-secondary" min="1800" max="2099">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label text-muted">Primjerak</label>
+            <input type="number" name="copy_number" value="1" class="form-control bg-dark text-white border-secondary" min="1">
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label text-muted">SKU / Šifra</label>
+            <input type="text" name="sku" class="form-control bg-dark text-white border-secondary" placeholder="Auto-generirano">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Barkod / EAN</label>
+            <input type="text" name="barcode" class="form-control bg-dark text-white border-secondary">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted">Polica</label>
+            <input type="text" name="shelf_location" class="form-control bg-dark text-white border-secondary" placeholder="A-02-3">
+          </div>
+        </div>
+        <div class="form-check mb-3">
+          <input type="checkbox" name="is_reference" class="form-check-input" id="isRef">
+          <label class="form-check-label text-muted" for="isRef">Referentna građa (ne posuđuje se)</label>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-warning"><i class="fas fa-check me-1"></i>Spremi</button>
+          <a href="{% url 'knjiznica:catalog_list' %}" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

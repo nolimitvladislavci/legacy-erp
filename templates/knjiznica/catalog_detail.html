@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ book.name }}{% endblock %}
+{% block page_title %}{{ book.name }}{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-book" title=book.name subtitle="Detalji knjige" %}
+
+<div class="row g-4">
+  <div class="col-md-5">
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+      <table class="table table-dark table-borderless mb-0">
+        <tr><td class="text-muted" style="width:35%">Naslov</td><td class="text-white fw-bold">{{ book.name }}</td></tr>
+        {% if meta %}
+        <tr><td class="text-muted">Autor</td><td class="text-white">{{ meta.author|default:"—" }}</td></tr>
+        <tr><td class="text-muted">ISBN</td><td>{{ meta.isbn|default:"—" }}</td></tr>
+        <tr><td class="text-muted">Nakladnik</td><td>{{ meta.publisher|default:"—" }}</td></tr>
+        <tr><td class="text-muted">Godina</td><td>{{ meta.pub_year|default:"—" }}</td></tr>
+        <tr><td class="text-muted">Polica</td><td>{{ meta.shelf_location|default:"—" }}</td></tr>
+        <tr><td class="text-muted">Primjerak</td><td>{{ meta.copy_number }}</td></tr>
+        <tr><td class="text-muted">Referentna</td><td>{% if meta.is_reference %}<span style="color:#f59e0b">Da — ne posuđuje se</span>{% else %}Ne{% endif %}</td></tr>
+        {% endif %}
+        <tr><td class="text-muted">Barkod</td><td>{{ book.barcode|default:"—" }}</td></tr>
+        <tr>
+          <td class="text-muted">Status</td>
+          <td>
+            {% if active_loan %}
+            <span style="color:#ef4444"><i class="fas fa-times-circle me-1"></i>Posuđena — {{ active_loan.member.partner.name }}, rok {{ active_loan.due_date }}</span>
+            {% else %}
+            <span style="color:#22c55e"><i class="fas fa-check-circle me-1"></i>Dostupna</span>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+      <h5 style="color:#c8a24e"><i class="fas fa-history me-2"></i>Povijest posudbi</h5>
+      <div class="table-responsive">
+        <table class="table table-dark table-sm">
+          <thead><tr><th>Član</th><th>Od</th><th>Do</th><th>Status</th><th>Kazna</th></tr></thead>
+          <tbody>
+            {% for l in loans %}
+            <tr>
+              <td>{{ l.member.partner.name }}</td>
+              <td>{{ l.loan_date }}</td>
+              <td>{{ l.returned_date|default:"—" }}</td>
+              <td>{{ l.get_status_display }}</td>
+              <td>{% if l.fine_total > 0 %}<span style="color:#ef4444">{{ l.fine_total }}€</span>{% else %}—{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-muted text-center">Nikad posuđena</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

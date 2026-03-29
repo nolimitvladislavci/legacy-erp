@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ member.partner.name }} — Član{% endblock %}
+{% block page_title %}{{ member.partner.name }}{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-user" title=member.partner.name subtitle="Profil člana knjižnice" %}
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+      <table class="table table-dark table-borderless mb-0">
+        <tr><td class="text-muted">Iskaznica</td><td class="text-white fw-bold">{{ member.member_number }}</td></tr>
+        <tr><td class="text-muted">Status</td><td>
+          {% if member.status == 'active' %}<span style="color:#22c55e">Aktivan</span>
+          {% elif member.status == 'junior' %}<span style="color:#3b82f6">Junior</span>
+          {% elif member.status == 'expired' %}<span style="color:#f59e0b">Istekao</span>
+          {% elif member.status == 'suspended' %}<span style="color:#ef4444">Suspendiran</span>{% endif %}
+        </td></tr>
+        <tr><td class="text-muted">Član od</td><td>{{ member.membership_from }}</td></tr>
+        <tr><td class="text-muted">Vrijedi do</td><td>{{ member.membership_until }}</td></tr>
+        <tr><td class="text-muted">Max posudbi</td><td>{{ member.max_concurrent_loans }}</td></tr>
+        <tr><td class="text-muted">Neplaćene kazne</td><td>
+          {% if member.total_fines_outstanding > 0 %}<span style="color:#ef4444;font-weight:700">{{ member.total_fines_outstanding }}€</span>
+          {% else %}<span style="color:#22c55e">0€</span>{% endif %}
+        </td></tr>
+        {% if member.partner.phone %}<tr><td class="text-muted">Telefon</td><td>{{ member.partner.phone }}</td></tr>{% endif %}
+        {% if member.partner.email %}<tr><td class="text-muted">Email</td><td>{{ member.partner.email }}</td></tr>{% endif %}
+      </table>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem;margin-bottom:1rem">
+      <h5 style="color:#c8a24e"><i class="fas fa-book-open me-2"></i>Posudbe</h5>
+      <div class="table-responsive">
+        <table class="table table-dark table-sm">
+          <thead><tr><th>Knjiga</th><th>Posuđeno</th><th>Rok</th><th>Vraćeno</th><th>Status</th><th>Kazna</th></tr></thead>
+          <tbody>
+            {% for l in loans %}
+            <tr>
+              <td>{{ l.item.name }}</td>
+              <td>{{ l.loan_date }}</td>
+              <td>{{ l.due_date }}</td>
+              <td>{{ l.returned_date|default:"—" }}</td>
+              <td>{{ l.get_status_display }}</td>
+              <td>{% if l.fine_total > 0 %}<span style="color:#ef4444">{{ l.fine_total }}€</span>{% else %}—{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-muted text-center">Nema posudbi</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if reservations %}
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+      <h5 style="color:#c8a24e"><i class="fas fa-clock me-2"></i>Rezervacije</h5>
+      <div class="table-responsive">
+        <table class="table table-dark table-sm">
+          <thead><tr><th>Knjiga</th><th>Rezervirano</th><th>Status</th><th>Istječe</th></tr></thead>
+          <tbody>
+            {% for r in reservations %}
+            <tr>
+              <td>{{ r.item.name }}</td>
+              <td>{{ r.reserved_at|date:"d.m.Y H:i" }}</td>
+              <td>{{ r.get_status_display }}</td>
+              <td>{{ r.expires_at|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Članovi knjižnice{% endblock %}
+{% block page_title %}Članovi{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-users" title="Članovi knjižnice" subtitle="Aktivni i neaktivni članovi" cta_url=member_create_url cta_label="Novi član" cta_icon="fas fa-user-plus" %}
+
+<!-- Search -->
+<form method="get" class="mb-4">
+  <div class="input-group" style="max-width:400px">
+    <input type="text" name="q" value="{{ q }}" class="form-control bg-dark text-white border-secondary" placeholder="Ime ili broj iskaznice...">
+    <button type="submit" class="btn btn-outline-warning"><i class="fas fa-search"></i></button>
+  </div>
+</form>
+
+<div class="d-flex gap-2 mb-3">
+  <a href="{% url 'knjiznica:member_create' %}" class="btn btn-sm btn-warning"><i class="fas fa-user-plus me-1"></i>Novi član</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-dark table-hover">
+    <thead>
+      <tr>
+        <th>Ime</th>
+        <th>Iskaznica</th>
+        <th>Status</th>
+        <th>Vrijedi do</th>
+        <th>Aktivne posudbe</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in members %}
+      <tr>
+        <td><a href="{% url 'knjiznica:member_detail' m.pk %}" class="text-white text-decoration-none">{{ m.partner.name }}</a></td>
+        <td class="text-muted">{{ m.member_number }}</td>
+        <td>
+          {% if m.status == 'active' %}<span style="color:#22c55e">Aktivan</span>
+          {% elif m.status == 'junior' %}<span style="color:#3b82f6">Junior</span>
+          {% elif m.status == 'expired' %}<span style="color:#f59e0b">Istekao</span>
+          {% elif m.status == 'suspended' %}<span style="color:#ef4444">Suspendiran</span>
+          {% endif %}
+        </td>
+        <td class="text-muted">{{ m.membership_until }}</td>
+        <td class="text-center">{{ m.active_loans }}</td>
+        <td><a href="{% url 'knjiznica:member_detail' m.pk %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">Profil</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted text-center py-4">Nema članova. <a href="{% url 'knjiznica:member_create' %}" style="color:#c8a24e">Dodaj prvog →</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

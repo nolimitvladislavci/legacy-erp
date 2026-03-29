@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Novi član{% endblock %}
+{% block page_title %}Novi član{% endblock %}
+{% block content %}
+{% include "partials/_page_header.html" with icon="fas fa-user-plus" title="Novi član knjižnice" subtitle="Upis člana" %}
+
+<div class="row">
+  <div class="col-md-6">
+    <div style="background:#1a1a2e;border:1px solid #c8a24e22;border-radius:10px;padding:1.5rem">
+      <form method="post" action="{% url 'knjiznica:member_create' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label text-muted">Partner *</label>
+          <select name="partner_id" class="form-select bg-dark text-white border-secondary" required>
+            <option value="">— Odaberi partnera —</option>
+            {% for p in partners %}
+            <option value="{{ p.pk }}">{{ p.name }}{% if p.oib %} ({{ p.oib }}){% endif %}</option>
+            {% endfor %}
+          </select>
+          <div class="form-text text-muted">Ako osoba ne postoji, prvo je dodaj u Partnere.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted">Broj iskaznice *</label>
+          <input type="text" name="member_number" class="form-control bg-dark text-white border-secondary" required placeholder="ČK-001">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted">Članstvo vrijedi do *</label>
+          <input type="date" name="membership_until" class="form-control bg-dark text-white border-secondary" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted">Status</label>
+          <select name="status" class="form-select bg-dark text-white border-secondary">
+            <option value="active">Aktivan</option>
+            <option value="junior">Junior (do 18 god.)</option>
+          </select>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-warning"><i class="fas fa-check me-1"></i>Spremi</button>
+          <a href="{% url 'knjiznica:member_list' %}" class="btn btn-outline-secondary">Odustani</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
