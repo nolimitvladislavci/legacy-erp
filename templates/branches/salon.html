@@ -58,7 +58,7 @@
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
       <a href="{% url 'appointments:booking_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
       <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; Blagajna" %}</a>
-      <a href="{% url 'partners:partner_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Klijenti" %}</a>
+      <a href="{% url 'partners:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Klijenti" %}</a>
     </div>
   </div>
 
@@ -82,7 +82,7 @@
     <div class="kpi-card">
       <div class="kpi-icon">{% trans "&#x1F464;" %}</div>
       <div class="kpi-lbl">{% trans "Klijenti" %}</div>
-      <div class="kpi-val"><a href="{% url 'partners:partner_list' %}" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
+      <div class="kpi-val"><a href="{% url 'partners:list' %}" style="color:inherit;text-decoration:none">{% trans "&#x2192;" %}</a></div>
     </div>
   </div>
 
@@ -104,7 +104,7 @@
       <div class="action-lbl">{% trans "Naplata" %}</div>
       <div class="action-sub">{% trans "POS blagajna" %}</div>
     </a>
-    <a class="action-card" href="{% url 'partners:partner_list' %}">
+    <a class="action-card" href="{% url 'partners:list' %}">
       <div class="action-icon">{% trans "&#x1F464;" %}</div>
       <div class="action-lbl">{% trans "Klijenti" %}</div>
       <div class="action-sub">{% trans "Kartice klijenata" %}</div>

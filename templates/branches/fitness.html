@@ -57,7 +57,7 @@
     <div style="display:flex;gap:.5rem;flex-wrap:wrap">
       <a href="{% url 'appointments:booking_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4C5; Termini" %}</a>
       <a href="{% url 'pos:terminal' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F4B3; POS" %}</a>
-      <a href="{% url 'partners:partner_list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Članovi" %}</a>
+      <a href="{% url 'partners:list' %}" class="btn btn-ghost btn-sm">{% trans "&#x1F464; Članovi" %}</a>
     </div>
   </div>
 
@@ -103,7 +103,7 @@
       <div class="action-lbl">{% trans "POS blagajna" %}</div>
       <div class="action-sub">{% trans "Naplate / članarine" %}</div>
     </a>
-    <a class="action-card" href="{% url 'partners:partner_list' %}">
+    <a class="action-card" href="{% url 'partners:list' %}">
       <div class="action-icon">{% trans "&#x1F464;" %}</div>
       <div class="action-lbl">{% trans "Članovi" %}</div>
       <div class="action-sub">{% trans "Kartice članova" %}</div>
