@@ -7,8 +7,10 @@ app_name = 'registration'
 
 urlpatterns = [
     path('', views.register_step1, name='register_step1'),
-    path('company/', views.register_step2, name='register_step2'),
-    path('account/', views.register_step3, name='register_step3'),
+    path('company/', views.register_step2_combined, name='register_step2'),
+    path('company-legacy/', views.register_step2, name='register_step2_legacy'),
+    path('account/', views.register_step3_confirm, name='register_step3'),
+    path('account-legacy/', views.register_step3, name='register_step3_legacy'),
     path('confirm/', views.register_step4, name='register_step4'),
     path('success/', views.register_success, name='register_success'),
     path('upgrade/', views.upgrade_required, name='upgrade_required'),

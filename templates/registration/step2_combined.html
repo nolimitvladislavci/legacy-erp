@@ -1,0 +1,205 @@
+{% extends 'registration/base_reg.html' %}
+{% load i18n %}
+{% block title %}{% trans "Tvrtka i račun" %} – LIMIT Connect{% endblock %}
+{% block content %}
+<!-- Step indicator — 3 koraka -->
+<div class="step-indicator">
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">Plan</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle active">2</div><div class="step-label active">{% trans "Tvrtka + Račun" %}</div></div>
+  <div class="step-line"></div>
+  <div class="step-item"><div class="step-circle">3</div><div class="step-label">{% trans "Potvrda" %}</div></div>
+</div>
+
+<div class="reg-card">
+  <form method="post" autocomplete="on">
+  {% csrf_token %}
+
+  <!-- ═══ SEKCIJA 1: TVRTKA ═══ -->
+  <div class="reg-card-title"><i class="fas fa-building" style="color:var(--gold);margin-right:8px"></i> {% trans "Podaci o tvrtki" %}</div>
+  <div class="reg-card-subtitle">{% trans "Unesite OIB — ostalo popunimo automatski." %}</div>
+
+  <div class="reg-field">
+    <label>{% trans "Država" %}</label>
+    <div style="display:flex;gap:1rem;padding-top:.5rem;flex-wrap:wrap">
+      <label class="country-opt">
+        <input type="radio" name="country" value="HR" {% if company.country == 'HR' or not company.country %}checked{% endif %}>
+        <span class="country-flag">🇭🇷</span> Hrvatska
+      </label>
+      <label class="country-opt">
+        <input type="radio" name="country" value="DE" {% if company.country == 'DE' %}checked{% endif %}>
+        <span class="country-flag">🇩🇪</span> Deutschland
+      </label>
+      <label class="country-opt">
+        <input type="radio" name="country" value="AT" {% if company.country == 'AT' %}checked{% endif %}>
+        <span class="country-flag">🇦🇹</span> Österreich
+      </label>
+    </div>
+  </div>
+
+  <div class="reg-field">
+    <label id="oibLabel">OIB *</label>
+    <input type="text" name="oib" id="oib-input" value="{{ company.oib }}" class="reg-input" placeholder="12345678901" required>
+    <div id="oib-status" style="font-size:0.85rem;margin-top:4px;display:none"></div>
+    {% if errors.oib %}<div class="error-msg">{{ errors.oib }}</div>{% endif %}
+  </div>
+
+  <div class="reg-field">
+    <label>{% trans "Naziv tvrtke" %} *</label>
+    <input type="text" name="name" id="nameInput" value="{{ company.name }}" class="reg-input" placeholder="{% trans 'Primjer d.o.o.' %}" required autocomplete="organization">
+    {% if errors.name %}<div class="error-msg">{{ errors.name }}</div>{% endif %}
+  </div>
+
+  <div class="reg-field">
+    <label>{% trans "Adresa" %}</label>
+    <input type="text" name="address" id="addressInput" value="{{ company.address }}" class="reg-input" placeholder="{% trans 'Ulica i kućni broj' %}">
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "Grad" %}</label>
+      <input type="text" name="city" id="cityInput" value="{{ company.city }}" class="reg-input" placeholder="Zagreb">
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Poštanski broj" %}</label>
+      <input type="text" name="zip_code" id="zipInput" value="{{ company.zip_code }}" class="reg-input" placeholder="10000">
+    </div>
+  </div>
+
+  <div class="reg-field">
+    <label>{% trans "Djelatnost" %}</label>
+    <select name="industry" class="reg-input">
+      {% for val, label in industries %}<option value="{{ val }}" {% if company.industry == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+
+  <!-- ═══ SEKCIJA 2: KORISNIK ═══ -->
+  <div style="border-top:1px solid var(--border);margin:24px 0 16px;padding-top:20px">
+    <div class="reg-card-title"><i class="fas fa-user" style="color:var(--gold);margin-right:8px"></i> {% trans "Vaš račun" %}</div>
+    <div class="reg-card-subtitle">{% trans "Ovo će biti administratorski pristup." %}</div>
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "Ime" %} *</label>
+      <input type="text" name="first_name" value="{{ user.first_name }}" class="reg-input" required autocomplete="given-name">
+      {% if errors.first_name %}<div class="error-msg">{{ errors.first_name }}</div>{% endif %}
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Prezime" %}</label>
+      <input type="text" name="last_name" value="{{ user.last_name }}" class="reg-input" autocomplete="family-name">
+    </div>
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>Email *</label>
+      <input type="email" name="email" value="{{ user.email }}" class="reg-input" placeholder="vas@email.com" required autocomplete="email">
+      {% if errors.email %}<div class="error-msg">{{ errors.email|safe }}</div>{% endif %}
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Telefon" %}</label>
+      <input type="tel" name="phone" value="{{ user.phone }}" class="reg-input" placeholder="+385 91 1234567" autocomplete="tel">
+    </div>
+  </div>
+
+  <div class="reg-form-row">
+    <div class="reg-field">
+      <label>{% trans "Lozinka" %} *</label>
+      <input type="password" name="password1" id="pw1" class="reg-input" minlength="8" required autocomplete="new-password">
+      {% if errors.password1 %}<div class="error-msg">{{ errors.password1 }}</div>{% endif %}
+      <div id="pw-strength" style="height:4px;border-radius:2px;margin-top:4px;background:var(--border);overflow:hidden">
+        <div id="pw-bar" style="height:100%;width:0;transition:all .3s;border-radius:2px"></div>
+      </div>
+    </div>
+    <div class="reg-field">
+      <label>{% trans "Potvrdite lozinku" %} *</label>
+      <input type="password" name="password2" id="pw2" class="reg-input" minlength="8" required autocomplete="new-password">
+      {% if errors.password2 %}<div class="error-msg">{{ errors.password2 }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="reg-actions">
+    <a href="{% url 'registration:register_step1' %}" class="reg-btn-outline">← {% trans "Natrag" %}</a>
+    <button type="submit" class="reg-btn">{% trans "Nastavi" %} →</button>
+  </div>
+  </form>
+</div>
+
+<style>
+.country-opt{display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.95rem;color:var(--text);padding:6px 12px;border:1px solid #333;border-radius:8px;transition:all .2s}
+.country-opt:has(input:checked){border-color:var(--gold);background:rgba(201,168,76,.08)}
+.country-opt input{display:none}
+.country-flag{font-size:1.2rem}
+</style>
+
+<script>
+// ═══ OIB AUTO-FILL ═══
+(function(){
+  var oibInput = document.getElementById('oib-input');
+  var statusEl = document.getElementById('oib-status');
+  var nameInput = document.getElementById('nameInput');
+  var addressInput = document.getElementById('addressInput');
+  var cityInput = document.getElementById('cityInput');
+  var zipInput = document.getElementById('zipInput');
+  var timer;
+
+  oibInput.addEventListener('input', function(){
+    clearTimeout(timer);
+    var oib = this.value.trim();
+    var country = (document.querySelector('input[name="country"]:checked') || {}).value || 'HR';
+    var minLen = country === 'HR' ? 11 : 8;
+
+    if(oib.length < minLen){ statusEl.style.display='none'; return; }
+
+    statusEl.style.display='block';
+    statusEl.innerHTML='<span style="color:#94a3b8"><i class="fas fa-spinner fa-spin"></i> Tražim...</span>';
+
+    timer = setTimeout(function(){
+      fetch('/hr/register/api/oib-lookup/?oib='+encodeURIComponent(oib)+'&country='+country)
+        .then(function(r){return r.json()})
+        .then(function(d){
+          if(d.found && !d.existing){
+            statusEl.innerHTML='<span style="color:#22c55e"><i class="fas fa-check-circle"></i> '+d.name+'</span>';
+            if(d.name && !nameInput.value) nameInput.value=d.name;
+            if(d.address && !addressInput.value) addressInput.value=d.address;
+            if(d.city && !cityInput.value) cityInput.value=d.city;
+            if(d.zip_code && !zipInput.value) zipInput.value=d.zip_code;
+          } else if(d.found && d.existing){
+            statusEl.innerHTML='<span style="color:#f59e0b"><i class="fas fa-info-circle"></i> '+d.message+'</span>';
+          } else {
+            statusEl.innerHTML='<span style="color:#94a3b8"><i class="fas fa-info-circle"></i> Nije pronađeno — unesite ručno</span>';
+          }
+        })
+        .catch(function(){
+          statusEl.innerHTML='<span style="color:#94a3b8">Pretraga nedostupna — unesite ručno</span>';
+        });
+    }, 600);
+  });
+})();
+
+// ═══ PASSWORD STRENGTH ═══
+document.getElementById('pw1').addEventListener('input', function(){
+  var pw=this.value, score=0;
+  if(pw.length>=8) score++;
+  if(pw.length>=12) score++;
+  if(/[A-Z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  var bar=document.getElementById('pw-bar');
+  var pct=Math.min(score*20,100);
+  bar.style.width=pct+'%';
+  bar.style.background=pct<40?'#ef4444':pct<70?'#f59e0b':'#22c55e';
+});
+
+// ═══ COUNTRY LABEL ═══
+document.querySelectorAll('input[name="country"]').forEach(function(r){
+  r.addEventListener('change', function(){
+    var lbl=document.getElementById('oibLabel');
+    var inp=document.getElementById('oib-input');
+    if(this.value==='DE'||this.value==='AT'){lbl.textContent='Steuernummer / USt-IdNr *';inp.placeholder='DE123456789';}
+    else{lbl.textContent='OIB *';inp.placeholder='12345678901';}
+  });
+});
+</script>
+{% endblock %}

@@ -113,6 +113,121 @@ def _seed_demo_data(company, user):
         logger.warning("Demo data seeding failed for %s: %s", company.name, e)
 
 
+
+
+def register_step2_combined(request):
+    """Step 2 (3-klik): Company + User combined — OIB auto-fill via AJAX."""
+    if not request.session.get("reg_plan"):
+        return redirect("registration:register_step1")
+
+    INDUSTRY_CHOICES = [
+        ("it", "IT i softver"),
+        ("trade", "Trgovina"),
+        ("services", "Usluge"),
+        ("gastro", "Ugostiteljstvo"),
+        ("construction", "Graditeljstvo"),
+        ("health", "Zdravstvo"),
+        ("agriculture", "Poljoprivreda"),
+        ("nonprofit", "Udruga / Neprofitno"),
+        ("other", "Ostalo"),
+    ]
+
+    if request.method == "POST":
+        import re as _re
+        # Company data
+        company_data = {
+            "name": request.POST.get("name", "").strip(),
+            "oib": request.POST.get("oib", "").strip(),
+            "country": request.POST.get("country", "HR"),
+            "address": request.POST.get("address", "").strip(),
+            "city": request.POST.get("city", "").strip(),
+            "zip_code": request.POST.get("zip_code", "").strip(),
+            "industry": request.POST.get("industry", "other"),
+        }
+        # User data
+        user_data = {
+            "first_name": request.POST.get("first_name", "").strip(),
+            "last_name": request.POST.get("last_name", "").strip(),
+            "email": request.POST.get("email", "").strip(),
+            "phone": request.POST.get("phone", "").strip(),
+        }
+        password1 = request.POST.get("password1", "")
+        password2 = request.POST.get("password2", "")
+
+        errors = {}
+        # Company validation
+        if not company_data["name"]:
+            errors["name"] = "Naziv tvrtke je obavezan."
+        if not company_data["oib"]:
+            errors["oib"] = "OIB / Porezni broj je obavezan."
+        elif company_data["country"] == "HR" and not _re.match(r'^\d{11}$', company_data["oib"]):
+            errors["oib"] = "Hrvatski OIB mora imati točno 11 znamenki."
+
+        # User validation
+        if not user_data["first_name"]:
+            errors["first_name"] = "Ime je obavezno."
+        if not user_data["email"]:
+            errors["email"] = "Email je obavezan."
+        elif User.objects.filter(email=user_data["email"]).exists():
+            errors["email"] = "Korisnik s ovim emailom već postoji. <a href='/password-reset/' style='color:#c9a84c;'>Resetirajte lozinku?</a>"
+        if len(password1) < 8:
+            errors["password1"] = "Lozinka mora imati najmanje 8 znakova."
+        elif not any(c.isupper() for c in password1):
+            errors["password1"] = "Lozinka mora sadržavati barem jedno veliko slovo."
+        elif not any(c.isdigit() for c in password1):
+            errors["password1"] = "Lozinka mora sadržavati barem jednu znamenku."
+        if password1 != password2:
+            errors["password2"] = "Lozinke se ne podudaraju."
+
+        if errors:
+            return render(request, "registration/step2_combined.html", {
+                "step": 2, "company": company_data, "user": user_data,
+                "errors": errors, "industries": INDUSTRY_CHOICES,
+            })
+
+        request.session["reg_company"] = company_data
+        request.session["reg_user"] = user_data
+        request.session["reg_password"] = password1
+        return redirect("registration:register_step3")
+
+    company_data = request.session.get("reg_company", {})
+    user_data = request.session.get("reg_user", {})
+    return render(request, "registration/step2_combined.html", {
+        "step": 2, "company": company_data, "user": user_data,
+        "errors": {}, "industries": INDUSTRY_CHOICES,
+    })
+
+
+def register_step3_confirm(request):
+    """Step 3 (3-klik): Review + T&C + Create — replaces old step4."""
+    plan_slug = request.session.get("reg_plan")
+    company_data = request.session.get("reg_company")
+    user_data = request.session.get("reg_user")
+    if not plan_slug or not company_data or not user_data:
+        return redirect("registration:register_step1")
+
+    from .models import PricingPlan
+    plan = PricingPlan.objects.filter(slug=plan_slug, is_active=True).first()
+    if not plan:
+        messages.error(request, "Odabrani plan nije dostupan.")
+        return redirect("registration:register_step1")
+
+    if request.method == "POST":
+        # T&C acceptance check
+        if not request.POST.get("tc_accept"):
+            messages.error(request, "Morate prihvatiti uvjete korištenja.")
+            return render(request, "registration/step3_confirm.html", {
+                "step": 3, "plan": plan, "company": company_data,
+                "user": user_data, "tc_error": True,
+            })
+        # Delegate to existing step4 logic via session and redirect
+        return register_step4(request)
+
+    return render(request, "registration/step3_confirm.html", {
+        "step": 3, "plan": plan, "company": company_data, "user": user_data,
+    })
+
+
 def register_step1(request):
     """Step 1: Plan selection (with optional invite code)"""
     # Check for invite code in URL or POST
@@ -149,6 +264,14 @@ def register_step1(request):
             request.session["reg_promo_code"] = promo_code
         elif "reg_promo_code" in request.session:
             del request.session["reg_promo_code"]
+        return redirect("registration:register_step2")
+    # Auto-select plan from URL param (from landing/pricing page "Odaberi" buttons)
+    plan_param = request.GET.get("plan", "")
+    if plan_param and plans.filter(slug=plan_param).exists():
+        request.session["reg_plan"] = plan_param
+        source = request.GET.get("source", "")
+        if source:
+            request.session["reg_source"] = source
         return redirect("registration:register_step2")
     source = request.GET.get("source", "")
     if source:

@@ -1,0 +1,86 @@
+{% extends 'registration/base_reg.html' %}
+{% load i18n %}
+{% block title %}{% trans "Potvrda" %} – LIMIT Connect{% endblock %}
+{% block content %}
+<!-- Step indicator — 3 koraka -->
+<div class="step-indicator">
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">Plan</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle done">✓</div><div class="step-label">{% trans "Tvrtka + Račun" %}</div></div>
+  <div class="step-line done"></div>
+  <div class="step-item"><div class="step-circle active">3</div><div class="step-label active">{% trans "Potvrda" %}</div></div>
+</div>
+
+<div class="reg-card">
+  <div class="reg-card-title">{% trans "Pregled i potvrda" %}</div>
+  <div class="reg-card-subtitle">{% trans "Provjerite podatke i prihvatite uvjete." %}</div>
+
+  <!-- Plan summary -->
+  <div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1.5rem">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.25rem">{% trans "Plan" %}</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--gold)">{{ plan.name }}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:1.4rem;font-weight:700;color:var(--text)">{{ plan.price_monthly|floatformat:0 }}€<span style="font-size:.8rem;color:var(--muted)">/{% trans "mj" %}</span></div>
+        {% if plan.price_monthly > 0 %}<div style="font-size:.8rem;color:var(--muted)">14 {% trans "dana besplatno" %}</div>{% else %}<div style="font-size:.8rem;color:#2ecc71">{% trans "Zauvijek besplatno" %}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Company + User summary -->
+  <div style="background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1.5rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.9rem">
+      <div><span style="color:var(--muted)">{% trans "Tvrtka" %}:</span> <span style="color:var(--text)">{{ company.name }}</span></div>
+      <div><span style="color:var(--muted)">OIB:</span> <span style="color:var(--text)">{{ company.oib }}</span></div>
+      <div><span style="color:var(--muted)">{% trans "Admin" %}:</span> <span style="color:var(--text)">{{ user.first_name }} {{ user.last_name }}</span></div>
+      <div><span style="color:var(--muted)">Email:</span> <span style="color:var(--text)">{{ user.email }}</span></div>
+      {% if company.city %}<div><span style="color:var(--muted)">{% trans "Lokacija" %}:</span> <span style="color:var(--text)">{{ company.zip_code }} {{ company.city }}</span></div>{% endif %}
+    </div>
+  </div>
+
+  <!-- T&C -->
+  <form method="post" id="confirmForm">
+  {% csrf_token %}
+
+  <div style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:16px;margin-bottom:20px">
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.88rem;color:var(--text)">
+      <input type="checkbox" name="tc_accept" value="1" id="tcCheck" style="margin-top:3px;accent-color:var(--gold)">
+      <span>
+        {% trans "Prihvaćam" %} <a href="/legal/terms/" target="_blank" style="color:var(--gold)">{% trans "uvjete korištenja" %}</a>
+        {% trans "i razumijem da su podaci zaštićeni sukladno" %}
+        <a href="/legal/privacy/" target="_blank" style="color:var(--gold)">GDPR</a> {% trans "regulativi" %}.
+      </span>
+    </label>
+    {% if tc_error %}<div style="color:#ef4444;font-size:.82rem;margin-top:8px;margin-left:26px">{% trans "Morate prihvatiti uvjete korištenja." %}</div>{% endif %}
+  </div>
+
+  <div class="reg-actions">
+    <a href="{% url 'registration:register_step2' %}" class="reg-btn-outline">← {% trans "Natrag" %}</a>
+    <button type="submit" class="reg-btn" id="confirmBtn" disabled>{% trans "Pokreni besplatno" %} ✓</button>
+  </div>
+  </form>
+</div>
+
+<!-- Processing -->
+<div id="processing" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,.9);z-index:9999;align-items:center;justify-content:center">
+  <div style="text-align:center">
+    <div style="width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem"></div>
+    <div style="color:var(--gold);font-size:1.3rem">{% trans "Kreiramo vaš račun..." %}</div>
+    <div style="color:var(--muted);font-size:.85rem;margin-top:.5rem">{% trans "Molimo pričekajte" %}</div>
+  </div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<script>
+// Enable submit only when T&C checked
+document.getElementById('tcCheck').addEventListener('change', function(){
+  document.getElementById('confirmBtn').disabled = !this.checked;
+});
+document.getElementById('confirmForm').addEventListener('submit', function(){
+  document.getElementById('confirmBtn').disabled=true;
+  document.getElementById('processing').style.display='flex';
+});
+</script>
+{% endblock %}
