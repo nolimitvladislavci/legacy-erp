@@ -91,12 +91,12 @@
 /* ── Basket ──────────────────────────────────────────────────────────────────── */
 .basket-head{padding:.6rem 1rem;border-bottom:1px solid var(--border);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
 .basket-items{flex:1;overflow-y:auto;padding:.4rem 0}
-.b-row{display:flex;align-items:center;gap:.4rem;padding:.4rem .75rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.b-row{display:flex;align-items:center;gap:.4rem;padding:.4rem .75rem;border-bottom:1px solid rgba(255,255,255,.04);position:relative;overflow:hidden;transition:transform 0.2s ease}
 .b-name{flex:1;font-size:.8rem;font-weight:500;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .b-qty-ctrl{display:flex;align-items:center;gap:3px}
 .bq-btn{background:var(--dark);border:1px solid var(--border);color:var(--muted);border-radius:4px;width:22px;height:22px;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
 .bq-btn:hover{border-color:var(--gold);color:var(--gold)}
-.b-qty{font-size:.82rem;font-weight:700;min-width:20px;text-align:center;color:var(--text)}
+.b-qty{font-size:.82rem;font-weight:700;min-width:20px;text-align:center;color:var(--text);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .b-price{font-size:.8rem;font-weight:700;color:var(--gold);white-space:nowrap;width:52px;text-align:right}
 .b-del{background:none;border:none;color:var(--muted);cursor:pointer;padding:.15rem .25rem;font-size:.85rem;opacity:.6}
 .b-del:hover{color:var(--red);opacity:1}
@@ -276,6 +276,61 @@
 @media(max-width:600px){#gastro-tables{max-height:150px}}
 </style>
 {% endif %}
+
+
+/* ── Fullscreen Numpad ──────────────────────────── */
+.numpad-overlay {
+  display:none; position:fixed; inset:0; z-index:9500;
+  background:rgba(0,0,0,.92); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  flex-direction:column; align-items:center; justify-content:center; padding:20px;
+}
+.numpad-overlay.show { display:flex; }
+.numpad-display {
+  font-size:3.5rem; font-weight:800; color:#c9a84c; margin-bottom:8px;
+  font-variant-numeric:tabular-nums; min-width:120px; text-align:center;
+}
+.numpad-label { font-size:.9rem; color:#94a3b8; margin-bottom:24px; }
+.numpad-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  width:100%; max-width:300px;
+}
+.numpad-btn {
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+  color:#e2e8f0; font-size:1.5rem; font-weight:700; border-radius:12px;
+  min-height:64px; cursor:pointer; font-family:inherit; transition:all .1s;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+.numpad-btn:active { background:rgba(201,168,76,.2); transform:scale(.95); }
+.numpad-btn.gold { background:rgba(201,168,76,.2); border-color:rgba(201,168,76,.4); color:#c9a84c; }
+.numpad-btn.red { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.3); color:#f87171; }
+.numpad-btn.green { background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.3); color:#4ade80; font-size:1.1rem; }
+.numpad-actions { display:flex; gap:12px; margin-top:16px; width:100%; max-width:300px; }
+.numpad-actions button { flex:1; min-height:52px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer; border:none; font-family:inherit; }
+
+/* ── Swipe to delete ──────────────────────────── */
+.b-row .swipe-delete {
+  position:absolute; right:0; top:0; bottom:0; width:80px;
+  background:#ef4444; color:#fff; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:.85rem; transform:translateX(100%); transition:transform 0.2s;
+}
+.b-row.swiped .swipe-delete { transform:translateX(0); }
+.b-row.swiped { transform:translateX(-80px); }
+
+/* ── Payment fullscreen (mobile) ──────────────── */
+@media(max-width:900px) {
+  .pay-zone.expanded {
+    position:fixed; inset:0; z-index:8500; background:#0a0a0a;
+    display:flex; flex-direction:column; justify-content:center; padding:24px;
+    animation: payFadeIn 0.2s ease;
+  }
+  .pay-zone.expanded .pay-title { font-size:1.2rem; color:#c9a84c; text-align:center; margin-bottom:16px; }
+  .pay-zone.expanded .cash-input-row input { font-size:2rem; text-align:center; padding:16px; }
+  .pay-zone.expanded .cash-quick .cash-q-btn { min-height:52px; font-size:1rem; }
+  .pay-zone.expanded .pay-cash,
+  .pay-zone.expanded .pay-card { min-height:64px !important; font-size:1.1rem !important; border-radius:14px !important; }
+}
+@keyframes payFadeIn { from{opacity:0} to{opacity:1} }
+</style>
 
 <style>
 /* ── POS Mode Bar (mobile only) ──────────────────── */
@@ -637,6 +692,7 @@
     </div>
 
     <div class="pay-zone" id="payZone">
+      <button onclick="togglePayExpand()" class="qp-action-btn" style="float:right;margin-bottom:4px;font-size:.7rem;display:none" id="payExpandBtn" title="Proširi">⛶</button>
       <div class="cashier-required-hint" id="cashierHint">⚠️ Odaberite blagajnika prije naplate</div>
       <!-- Cash amount input (visible only for CASH) -->
       <div id="cashSection">
@@ -699,6 +755,30 @@
       <div class="prod-price">{{ item.selling_price|default:item.price|floatformat:2 }} &euro;</div>
     </button>
     {% endfor %}
+  </div>
+</div>
+
+<!-- Fullscreen Numpad -->
+<div class="numpad-overlay" id="numpadOverlay">
+  <div class="numpad-label" id="numpadLabel">Količina</div>
+  <div class="numpad-display" id="numpadDisplay">1</div>
+  <div class="numpad-grid">
+    <button class="numpad-btn" onclick="numpadPress('1')">1</button>
+    <button class="numpad-btn" onclick="numpadPress('2')">2</button>
+    <button class="numpad-btn" onclick="numpadPress('3')">3</button>
+    <button class="numpad-btn" onclick="numpadPress('4')">4</button>
+    <button class="numpad-btn" onclick="numpadPress('5')">5</button>
+    <button class="numpad-btn" onclick="numpadPress('6')">6</button>
+    <button class="numpad-btn" onclick="numpadPress('7')">7</button>
+    <button class="numpad-btn" onclick="numpadPress('8')">8</button>
+    <button class="numpad-btn" onclick="numpadPress('9')">9</button>
+    <button class="numpad-btn red" onclick="numpadPress('C')">C</button>
+    <button class="numpad-btn" onclick="numpadPress('0')">0</button>
+    <button class="numpad-btn gold" onclick="numpadPress('.')">.</button>
+  </div>
+  <div class="numpad-actions">
+    <button onclick="numpadCancel()" style="background:rgba(255,255,255,.1);color:#94a3b8">Odustani</button>
+    <button onclick="numpadConfirm()" style="background:#c9a84c;color:#000">Potvrdi</button>
   </div>
 </div>
 
@@ -898,7 +978,7 @@
   "company_name": "{{ terminal.company.name|escapejs }}"
 }</script>
 <script src="/static/js/pos/pos-offline.js?v=20260324"></script>
-<script src="/static/js/pos/pos-quick.js?v=20260322b"></script>
+<script src="/static/js/pos/pos-quick.js?v=20260330"></script>
 <script src="/static/js/pos/pos-fiscal.js"></script>
 <script src="/static/js/html5-qrcode.min.js"></script>
 <script src="/static/js/pos/pos-scanner.js"></script>
@@ -1489,6 +1569,110 @@ function toggleQuickKeys() {
     else if (dy < -30) { drawer.classList.remove('peek', 'full'); } // swipe down
   }, {passive:true});
 })();
+
+
+// ── Numpad ──────────────────────────────────────────────
+var _numpadValue = '', _numpadCallback = null, _numpadItemId = null;
+function openNumpad(label, currentVal, callback, itemId) {
+  _numpadValue = String(currentVal || '');
+  _numpadCallback = callback;
+  _numpadItemId = itemId;
+  document.getElementById('numpadLabel').textContent = label || 'Količina';
+  document.getElementById('numpadDisplay').textContent = _numpadValue || '0';
+  document.getElementById('numpadOverlay').classList.add('show');
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+function numpadPress(key) {
+  if (navigator.vibrate) navigator.vibrate(5);
+  if (key === 'C') { _numpadValue = ''; }
+  else if (key === '.') { if (!_numpadValue.includes('.')) _numpadValue += '.'; }
+  else { _numpadValue += key; }
+  document.getElementById('numpadDisplay').textContent = _numpadValue || '0';
+}
+function numpadCancel() {
+  document.getElementById('numpadOverlay').classList.remove('show');
+  _numpadCallback = null;
+}
+function numpadConfirm() {
+  var val = parseFloat(_numpadValue) || 0;
+  if (_numpadCallback) _numpadCallback(val, _numpadItemId);
+  document.getElementById('numpadOverlay').classList.remove('show');
+  if (navigator.vibrate) navigator.vibrate([10, 50, 10]);
+}
+function updateItemQty(newQty, itemId) {
+  if (newQty <= 0) { if (typeof removeItem === 'function') removeItem(itemId); }
+  else { if (typeof changeQty === 'function') changeQty(itemId, 0, newQty); }
+}
+
+// ── Swipe to delete on basket rows ──────────────────────
+(function() {
+  var blist = document.querySelector('.basket-items');
+  if (!blist) return;
+  blist.addEventListener('touchstart', function(e) {
+    var row = e.target.closest('.b-row');
+    if (!row) return;
+    row._startX = e.touches[0].clientX;
+    row._startY = e.touches[0].clientY;
+  }, {passive:true});
+  blist.addEventListener('touchmove', function(e) {
+    var row = e.target.closest('.b-row');
+    if (!row || !row._startX) return;
+    var dx = row._startX - e.touches[0].clientX;
+    var dy = Math.abs(row._startY - e.touches[0].clientY);
+    if (dx > 20 && dy < 40) {
+      row.style.transform = 'translateX(' + Math.max(-80, -dx) + 'px)';
+    }
+  }, {passive:true});
+  blist.addEventListener('touchend', function(e) {
+    var row = e.target.closest('.b-row');
+    if (!row || !row._startX) return;
+    var dx = row._startX - e.changedTouches[0].clientX;
+    var dy = Math.abs(row._startY - e.changedTouches[0].clientY);
+    if (dx > 60 && dy < 40) {
+      row.classList.add('swiped');
+      row.style.transform = '';
+      if (navigator.vibrate) navigator.vibrate(15);
+    } else if (dx < -30) {
+      row.classList.remove('swiped');
+      row.style.transform = '';
+    } else {
+      row.style.transform = '';
+      row.classList.remove('swiped');
+    }
+    row._startX = null;
+  }, {passive:true});
+})();
+
+// ── Payment expand (mobile) ─────────────────────────────
+(function() {
+  // Show expand button on mobile
+  if (window.innerWidth <= 900) {
+    var btn = document.getElementById('payExpandBtn');
+    if (btn) btn.style.display = 'inline-block';
+  }
+  window.addEventListener('resize', function() {
+    var btn = document.getElementById('payExpandBtn');
+    if (btn) btn.style.display = window.innerWidth <= 900 ? 'inline-block' : 'none';
+  });
+})();
+function togglePayExpand() {
+  if (window.innerWidth > 900) return;
+  var zone = document.querySelector('.pay-zone');
+  if (zone) {
+    zone.classList.toggle('expanded');
+    if (zone.classList.contains('expanded')) {
+      if (!zone.querySelector('.pay-close-btn')) {
+        var btn = document.createElement('button');
+        btn.className = 'pay-close-btn';
+        btn.innerHTML = '\u2715 Zatvori';
+        btn.style.cssText = 'position:absolute;top:16px;right:16px;background:none;border:1px solid rgba(255,255,255,.2);color:#94a3b8;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;z-index:1';
+        btn.onclick = function() { zone.classList.remove('expanded'); btn.remove(); };
+        zone.appendChild(btn);
+      }
+    }
+  }
+}
+
 </script>
 
 {% endblock %}

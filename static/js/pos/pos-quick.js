@@ -68,6 +68,7 @@
     var price = parseFloat(btn.dataset.price);
     var tax   = parseFloat(btn.dataset.tax);
 
+    if (navigator.vibrate) navigator.vibrate(10);
     if (basket[id]) { basket[id].qty += 1; }
     else { basket[id] = { name: name, price: price, tax: tax, qty: 1 }; }
     updateQtyBadge(id);
@@ -99,9 +100,10 @@
     badge.classList.toggle('show', qty > 0);
   }
 
-  window.changeQty = function(id, delta) {
+  window.changeQty = function(id, delta, absVal) {
     if (!basket[id]) return;
-    basket[id].qty += delta;
+    if (typeof absVal === 'number') { basket[id].qty = absVal; }
+    else { basket[id].qty += delta; }
     if (basket[id].qty <= 0) delete basket[id];
     updateQtyBadge(id);
     updateQkBadge(id);
@@ -131,15 +133,16 @@
       var taxAmt = line * item.tax / 100;
       subtotal += line;
       tax += taxAmt;
-      return '<div class="b-row">' +
+      return '<div class="b-row" data-item-id="' + id + '">' +
         '<div class="b-name" title="' + item.name + '">' + item.name + '</div>' +
         '<div class="b-qty-ctrl">' +
         '<button class="bq-btn" onclick="changeQty(\'' + id + '\',-1)">−</button>' +
-        '<span class="b-qty">' + item.qty + '</span>' +
+        '<span class="b-qty" onclick="if(window.innerWidth<=900)openNumpad(\'' + item.name.replace(/'/g,'') + '\', ' + item.qty + ', updateItemQty, \'' + id + '\')">' + item.qty + '</span>' +
         '<button class="bq-btn" onclick="changeQty(\'' + id + '\',1)">+</button>' +
         '</div>' +
         '<div class="b-price">€' + (item.price * item.qty).toFixed(2) + '</div>' +
-        '<button class="b-del" onclick="removeItem(\'' + id + '\')">✕</button></div>';
+        '<button class="b-del" onclick="removeItem(\'' + id + '\')">✕</button>' +
+        '<div class="swipe-delete" onclick="removeItem(\'' + id + '\')">Obriši</div></div>';
     }).join('');
     setTotals(subtotal, tax, subtotal + tax);
     setPayEnabled(true);
@@ -188,6 +191,7 @@
   }
 
   window.pay = function(method) {
+    if (navigator.vibrate) navigator.vibrate(10);
     if (!SESSION_ID) { fenixToast('Nema aktivne smjene!', 'warning'); return; }
     var ids = Object.keys(basket);
     if (!ids.length) return;
@@ -255,6 +259,7 @@
   };
 
   function showSuccess(num, total, change) {
+    if (navigator.vibrate) navigator.vibrate([20, 80, 20, 80, 40]);
     document.getElementById('sucTotal').textContent  = '€' + parseFloat(total).toFixed(2);
     document.getElementById('sucChange').textContent = change > 0.001 ? 'Kusur: €' + change.toFixed(2) : '';
     document.getElementById('sucNum').textContent    = 'Bon #' + num;
@@ -525,6 +530,7 @@
     if (btn.dataset.weighable === '1') { var pb = document.getElementById('pb-'+btn.dataset.id); if (pb) { addProduct(pb); } else { _weighBtn = btn; document.getElementById('weightProductName').textContent = btn.dataset.name; document.getElementById('weightUnit').textContent = btn.dataset.unit||'kg'; var wi=document.getElementById('weightInput'); wi.value=''; document.getElementById('weightModal').classList.add('show'); setTimeout(function(){wi.focus();},80); } return; }
     var id = btn.dataset.id, name = btn.dataset.name;
     var price = parseFloat(btn.dataset.price), tax = parseFloat(btn.dataset.tax);
+    if (navigator.vibrate) navigator.vibrate(10);
     if (basket[id]) { basket[id].qty += 1; } else { basket[id] = { name: name, price: price, tax: tax, qty: 1 }; }
     updateQtyBadge(id); updateQkBadge(id); renderBasket();
   };
