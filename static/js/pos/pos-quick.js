@@ -69,8 +69,9 @@
     var tax   = parseFloat(btn.dataset.tax);
 
     if (navigator.vibrate) navigator.vibrate(10);
+    var sku = btn.dataset.sku || '';
     if (basket[id]) { basket[id].qty += 1; }
-    else { basket[id] = { name: name, price: price, tax: tax, qty: 1 }; }
+    else { basket[id] = { name: name, price: price, tax: tax, qty: 1, sku: sku }; }
     updateQtyBadge(id);
     renderBasket();
   };
@@ -124,6 +125,7 @@
       list.innerHTML = '<div class="basket-empty">Dodajte artiklе klikom ↑</div>';
       setTotals(0, 0, 0);
       setPayEnabled(false);
+      updateAiSuggestions();
       return;
     }
     var subtotal = 0, tax = 0;
@@ -133,20 +135,24 @@
       var taxAmt = line * item.tax / 100;
       subtotal += line;
       tax += taxAmt;
+      var metaLine = (item.sku ? item.sku + ' · ' : '') + '€' + item.price.toFixed(2) + '/kom';
       return '<div class="b-row" data-item-id="' + id + '">' +
+        '<div class="b-info">' +
         '<div class="b-name" title="' + item.name + '">' + item.name + '</div>' +
+        '<div class="b-meta">' + metaLine + '</div>' +
+        '</div>' +
         '<div class="b-qty-ctrl">' +
         '<button class="bq-btn" onclick="changeQty(\'' + id + '\',-1)">−</button>' +
         '<span class="b-qty" onclick="if(window.innerWidth<=900)openNumpad(\'' + item.name.replace(/'/g,'') + '\', ' + item.qty + ', updateItemQty, \'' + id + '\')">' + item.qty + '</span>' +
         '<button class="bq-btn" onclick="changeQty(\'' + id + '\',1)">+</button>' +
         '</div>' +
         '<div class="b-price">€' + (item.price * item.qty).toFixed(2) + '</div>' +
-        '<button class="b-del" onclick="removeItem(\'' + id + '\')">✕</button>' +
         '<div class="swipe-delete" onclick="removeItem(\'' + id + '\')">Obriši</div></div>';
     }).join('');
     setTotals(subtotal, tax, subtotal + tax);
     setPayEnabled(true);
     calcChange();
+    updateAiSuggestions();
   }
 
   function setTotals(neto, pdv, total) {
@@ -476,6 +482,69 @@
     window._currentCashier = name || ''; window._currentCashierId = id || null;
     updateCashierBar(name);
     if (name && !prevId) showToast('👤 ' + name + ' — prijavljen/a', 2500);
+  }
+
+  // ── AI Product Suggestions ──
+  function updateAiSuggestions() {
+    var bar = document.getElementById('aiSuggest');
+    if (!bar) return;
+
+    var cartItems = [];
+    document.querySelectorAll('.b-row').forEach(function(row) {
+      var id = row.getAttribute('data-item-id');
+      if (id) cartItems.push(id);
+    });
+
+    if (cartItems.length === 0) { bar.classList.remove('show'); return; }
+
+    // Get categories of items in cart
+    var cartCats = {};
+    cartItems.forEach(function(cid) {
+      var pbtn = document.getElementById('pb-' + cid);
+      if (pbtn && pbtn.dataset.cat) cartCats[pbtn.dataset.cat] = true;
+    });
+
+    var suggestions = [];
+    var shown = 0;
+    var allProducts = document.querySelectorAll('.prod-btn');
+
+    // Strategy 1: Same category products not in cart (max 3)
+    allProducts.forEach(function(btn) {
+      var id = btn.dataset.id;
+      if (id && !cartItems.includes(id) && shown < 3 && cartCats[btn.dataset.cat]) {
+        var name = btn.querySelector('.prod-name');
+        var price = btn.querySelector('.prod-price');
+        if (name) {
+          suggestions.push({id: id, name: name.textContent.trim(), price: price ? price.textContent.trim() : '', el: btn});
+          shown++;
+        }
+      }
+    });
+
+    // Strategy 2: Fill remaining slots with popular items (different category)
+    allProducts.forEach(function(btn) {
+      var id = btn.dataset.id;
+      if (id && !cartItems.includes(id) && shown < 5 && !cartCats[btn.dataset.cat]) {
+        var name = btn.querySelector('.prod-name');
+        var price = btn.querySelector('.prod-price');
+        if (name && !suggestions.some(function(s){ return s.id === id; })) {
+          suggestions.push({id: id, name: name.textContent.trim(), price: price ? price.textContent.trim() : '', el: btn});
+          shown++;
+        }
+      }
+    });
+
+    // Render
+    bar.innerHTML = '<span class="ai-suggest-label">\u{1F4A1} Prijedlog:</span>';
+    suggestions.forEach(function(s) {
+      var el = document.createElement('div');
+      el.className = 'ai-suggest-item';
+      el.innerHTML = s.name.substring(0, 20) + (s.name.length > 20 ? '…' : '') + ' <span class="price">' + s.price + '</span>';
+      el.onclick = function() { s.el.click(); if (navigator.vibrate) navigator.vibrate(10); };
+      bar.appendChild(el);
+    });
+
+    bar.classList.toggle('show', suggestions.length > 0);
   }
 
   var _revolutPollTimer = null;
