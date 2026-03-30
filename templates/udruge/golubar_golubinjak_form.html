@@ -122,7 +122,7 @@
   </div>
 </div>
 
-<form method="post" id="golubinjak-form">
+<form method="post" enctype="multipart/form-data" id="golubinjak-form">
 {% csrf_token %}
 <div class="gf-form-card">
 
@@ -185,6 +185,17 @@
 
 </div>
 
+  <!-- Fotografija golubinjaka -->
+  <div class="gf-section">
+    <div class="gf-section-title"><i class="fas fa-camera"></i> Fotografija golubinjaka</div>
+    {% if golubinjak.fotografija %}
+    <div class="mb-2"><img src="{{ golubinjak.fotografija.url }}" style="max-height:140px;border-radius:10px;border:1px solid rgba(201,168,76,.3)"></div>
+    {% endif %}
+    <div id="scan-golubinjak"></div>
+    <input type="file" id="foto-golubinjak-input" name="fotografija" accept="image/*" class="d-none">
+    <div class="gf-hint mt-2"><i class="fas fa-info-circle me-1"></i>Fotografija golubinjaka za identifikaciju i evidenciju</div>
+  </div>
+
 <!-- Footer -->
 <div class="gf-footer mt-0" style="background:var(--bg-card);border:1px solid var(--border);border-top:none;border-radius:0 0 16px 16px;padding:1.25rem 1.5rem">
   <a href="{% url 'udruge:golubinjak_list' %}" class="btn btn-outline-secondary" style="border-radius:10px;padding:.6rem 1.5rem">
@@ -198,6 +209,34 @@
 </form>
 
 </div>
+<script src="/static/js/fenix-scan.js"></script>
+<script>
+var golubinjakScanner = FenixScan.create({
+  container:   '#scan-golubinjak',
+  docType:     'general',
+  label:       'Fotografiraj golubinjak',
+  icon:        'fa-home',
+  color:       '#14b8a6',
+  maxSizeMB:   2,
+  onSuccess: function(b64s, results) {
+    if (b64s.length) _setFormFileFromB64(b64s[0], 'fotografija');
+  },
+  onError: function(msg) { console.warn('Golubinjak scan:', msg); }
+});
+
+function _setFormFileFromB64(b64, fieldName) {
+  var arr = b64.split(',');
+  var mime = arr[0].match(/:(.*?);/)[1];
+  var bstr = atob(arr[1]);
+  var n = bstr.length;
+  var u8arr = new Uint8Array(n);
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+  var file = new File([u8arr], 'golubinjak.jpg', { type: mime });
+  var dt = new DataTransfer();
+  dt.items.add(file);
+  document.getElementById('foto-golubinjak-input').files = dt.files;
+}
+</script>
 <script src="/static/js/golubar-offline.js"></script>
 <script>
 document.getElementById('golubinjak-form').addEventListener('submit', function(e) {

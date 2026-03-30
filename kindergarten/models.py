@@ -51,6 +51,7 @@ class KindergartenGroup(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "kindergarten"
         ordering = ['name']
         verbose_name = _('Vrtićka grupa')
         verbose_name_plural = _('Vrtićke grupe')
@@ -118,6 +119,7 @@ class Child(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "kindergarten"
         ordering = ['last_name', 'first_name']
         verbose_name = _('Dijete')
         verbose_name_plural = _('Djeca')
@@ -171,6 +173,7 @@ class Guardian(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "kindergarten"
         ordering = ['last_name', 'first_name']
         verbose_name = _('Roditelj/Skrbnik')
         verbose_name_plural = _('Roditelji/Skrbnici')
@@ -190,6 +193,7 @@ class ChildGuardian(models.Model):
     is_billing_contact = models.BooleanField(default=False, verbose_name=_('Prima račune'))
 
     class Meta:
+        app_label = "kindergarten"
         unique_together = ['child', 'guardian']
         verbose_name = _('Veza dijete-roditelj')
 
@@ -212,6 +216,7 @@ class Attendance(models.Model):
     recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
+        app_label = "kindergarten"
         unique_together = ['child', 'date']
         ordering = ['-date', 'child__last_name']
         verbose_name = _('Evidencija dolaska')
@@ -264,6 +269,7 @@ class MonthlyBilling(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "kindergarten"
         unique_together = ['child', 'year', 'month']
         ordering = ['-year', '-month']
         verbose_name = _('Mjesečna naplata')
@@ -313,6 +319,7 @@ class DailyReport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "kindergarten"
         unique_together = ['group', 'date']
         ordering = ['-date']
         verbose_name = _('Dnevni izvještaj')
@@ -350,6 +357,7 @@ class Announcement(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "kindergarten"
         ordering = ['-published_at']
         verbose_name = _('Obavijest')
         verbose_name_plural = _('Obavijesti')

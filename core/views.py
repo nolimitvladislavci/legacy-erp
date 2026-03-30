@@ -93,8 +93,13 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 @ensure_csrf_cookie
 def login_view(request):
+    # ?switch=1 ili ?force=1 → odjavi starog i prikaži formu (sprječava redirect loop)
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        if request.GET.get('switch') or request.GET.get('force'):
+            from django.contrib.auth import logout as _logout
+            _logout(request)
+        else:
+            return redirect('dashboard')
 
     if request.method == 'POST':
         from django.contrib.auth.models import User as AuthUser

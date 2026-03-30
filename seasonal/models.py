@@ -54,6 +54,7 @@ class SeasonalWorker(models.Model):
     created_at    = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "seasonal"
         verbose_name        = _('Sezonski radnik')
         verbose_name_plural = _('Sezonski radnici')
         ordering            = ['last_name', 'first_name']
@@ -147,6 +148,7 @@ class SeasonalContract(models.Model):
     )
 
     class Meta:
+        app_label = "seasonal"
         verbose_name        = _('Sezonski ugovor')
         verbose_name_plural = _('Sezonski ugovori')
         ordering            = ['-start_date']
@@ -241,6 +243,7 @@ class SeasonalPayment(models.Model):
     )
 
     class Meta:
+        app_label = "seasonal"
         verbose_name        = _('Isplata sezonce')
         verbose_name_plural = _('Isplate sezonskim radnicima')
         ordering            = ['-payment_date']

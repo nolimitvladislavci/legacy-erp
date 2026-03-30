@@ -53,6 +53,7 @@ class Permission(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "permissions"
         db_table = 'permissions'
         ordering = ['module', 'action']
         indexes = [
@@ -96,6 +97,7 @@ class Role(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        app_label = "permissions"
         db_table = 'roles'
         ordering = ['role_type']
 
@@ -141,6 +143,7 @@ class UserRole(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "permissions"
         db_table = 'user_roles'
         ordering = ['-is_primary', 'role']
         indexes = [
@@ -185,6 +188,7 @@ class PermissionOverride(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "permissions"
         db_table = 'permission_overrides'
         ordering = ['-created_at']
         indexes = [

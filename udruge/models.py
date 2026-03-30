@@ -2316,6 +2316,7 @@ class Golubinjak(models.Model):
     kapacitet   = models.PositiveIntegerField(default=0)
     aktivan     = models.BooleanField(default=True)
     napomena    = models.TextField(blank=True)
+    fotografija = models.ImageField(upload_to='golubinjaci/', null=True, blank=True)
     created_at  = models.DateTimeField(auto_now_add=True)
 
     class Meta:

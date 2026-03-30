@@ -1,46 +1,45 @@
 {
-  "name": "LIMIT CONNECT ERP",
-  "short_name": "LIMIT Connect",
-  "description": "Poslovni ERP sustav - Knjigovodstvo, POS, Payroll, Fiskalizacija",
-  "start_url": "/",
+  "name": "LIMIT Connect ERP",
+  "short_name": "LC",
+  "description": "AI-Powered ERP — Fakturiranje, POS, Plaće, Fiskalizacija",
+  "start_url": "/hr/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#0a0a0a",
-  "theme_color": "#c9a84c",
+  "orientation": "any",
+  "background_color": "#1a1d21",
+  "theme_color": "#0d6efd",
   "lang": "hr",
+  "categories": ["business", "finance", "productivity"],
   "icons": [
-    {
-      "src": "/static/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/static/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    {"src": "/static/icons/icon-48.png", "sizes": "48x48", "type": "image/png"},
+    {"src": "/static/icons/icon-72.png", "sizes": "72x72", "type": "image/png"},
+    {"src": "/static/icons/icon-96.png", "sizes": "96x96", "type": "image/png"},
+    {"src": "/static/icons/icon-128.png", "sizes": "128x128", "type": "image/png"},
+    {"src": "/static/icons/icon-144.png", "sizes": "144x144", "type": "image/png"},
+    {"src": "/static/icons/icon-152.png", "sizes": "152x152", "type": "image/png"},
+    {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/static/icons/icon-256.png", "sizes": "256x256", "type": "image/png"},
+    {"src": "/static/icons/icon-384.png", "sizes": "384x384", "type": "image/png"},
+    {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
   ],
   "shortcuts": [
     {
-      "name": "Knjigovodstvo",
-      "short_name": "Konto",
-      "url": "/konto/",
-      "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}]
-    },
-    {
-      "name": "POS Terminal",
+      "name": "POS Blagajna",
       "short_name": "POS",
-      "url": "/pos/",
-      "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}]
+      "url": "/hr/pos/",
+      "icons": [{"src": "/static/icons/icon-96.png", "sizes": "96x96"}]
     },
     {
-      "name": "Obracun placa",
-      "short_name": "Payroll",
-      "url": "/payroll/",
-      "icons": [{"src": "/static/icons/icon-192.png", "sizes": "192x192"}]
+      "name": "Fakture",
+      "short_name": "Fakture",
+      "url": "/hr/invoicing/",
+      "icons": [{"src": "/static/icons/icon-96.png", "sizes": "96x96"}]
+    },
+    {
+      "name": "Partneri",
+      "short_name": "Partneri",
+      "url": "/hr/partners/",
+      "icons": [{"src": "/static/icons/icon-96.png", "sizes": "96x96"}]
     }
   ]
 }

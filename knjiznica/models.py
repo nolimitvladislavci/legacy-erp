@@ -53,6 +53,7 @@ class BookMeta(models.Model):
     description = models.TextField(blank=True, verbose_name=_('Kratki opis'))
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Podaci knjige')
         verbose_name_plural = _('Podaci knjiga')
 
@@ -95,6 +96,7 @@ class LibraryMember(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Član knjižnice')
         verbose_name_plural = _('Članovi knjižnice')
         unique_together = [('company', 'member_number')]
@@ -167,6 +169,7 @@ class BookLoan(FSMMixin, models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Posudba')
         verbose_name_plural = _('Posudbe')
         ordering = ['-loan_date']
@@ -260,6 +263,7 @@ class BookReservation(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Rezervacija')
         verbose_name_plural = _('Rezervacije')
         ordering = ['reserved_at']
@@ -302,6 +306,7 @@ class ChildReader(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Dijete čitač')
         verbose_name_plural = _('Djeca čitači')
 
@@ -372,6 +377,7 @@ class BadgeDefinition(models.Model):
     sort_order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Bedž — definicija')
         verbose_name_plural = _('Bedževi — definicije')
         ordering = ['sort_order', 'name']
@@ -392,6 +398,7 @@ class EarnedBadge(models.Model):
     )
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Osvojeni bedž')
         verbose_name_plural = _('Osvojeni bedževi')
         unique_together = [('child', 'badge')]
@@ -422,6 +429,7 @@ class ReadingLog(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Zapis čitanja')
         verbose_name_plural = _('Zapisi čitanja')
         ordering = ['-read_date']
@@ -513,6 +521,7 @@ class MediaContent(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Medijski sadržaj')
         verbose_name_plural = _('Medijski sadržaji')
         ordering = ['-created_at']
@@ -553,6 +562,7 @@ class FamilyChallenge(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "knjiznica"
         verbose_name = _('Obiteljski izazov')
         verbose_name_plural = _('Obiteljski izazovi')
 

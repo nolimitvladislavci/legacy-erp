@@ -1,0 +1,247 @@
+Creating test database for alias 'default'...
+
+--- TEST MODE: In-Memory SQLite + LocMemCache + MD5 hash + Celery eager ---
+Found 29 test(s).
+  No companies found, skipping assignment
+/var/www/fina-connect/venv/lib/python3.12/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.2.0)/charset_normalizer (3.4.4) doesn't match a supported version!
+  warnings.warn(
+System check identified no issues (0 silenced).
+EEFEFFEEEEEEE..EE.F.E..EE.F.E
+======================================================================
+ERROR: test_aml_check_creation (tests.test_system_health.AMLModuleTest.test_aml_check_creation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 150, in test_aml_check_creation
+ImportError: cannot import name 'AMLCheck' from 'aml.models' (/var/www/fina-connect/aml/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.AMLModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 145, in test_models_exist
+ImportError: cannot import name 'AMLCheck' from 'aml.models' (/var/www/fina-connect/aml/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.BorgOpsModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 166, in test_models_exist
+    def test_models_importable(self):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'BorgTask' from 'borg_ops.models' (/var/www/fina-connect/borg_ops/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.DataMigrationModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 329, in test_models_exist
+ImportError: cannot import name 'MigrationRun' from 'data_migration.models' (/var/www/fina-connect/data_migration/models.py). Did you mean: 'migrations'?
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.EdikModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 178, in test_models_exist
+    field_names = [f.name for f in GovInstitution._meta.get_fields()]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'EdikDocument' from 'edik.models' (/var/www/fina-connect/edik/models.py)
+
+======================================================================
+ERROR: test_model_creation (tests.test_system_health.EinvoiceModuleTest.test_model_creation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 190, in test_model_creation
+    def test_models_importable(self):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'EInvoice' from 'einvoice.models' (/var/www/fina-connect/einvoice/models/__init__.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.EinvoiceModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 186, in test_models_exist
+    self.assertTrue(Child._meta.db_table)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'EInvoice' from 'einvoice.models' (/var/www/fina-connect/einvoice/models/__init__.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.EldercareModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 201, in test_models_exist
+    def test_models_importable(self):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'CareLog' from 'eldercare.models' (/var/www/fina-connect/eldercare/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.EracunModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 210, in test_models_exist
+    self.assertTrue(Notification._meta.db_table)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'EracunConfig' from 'eracun.models' (/var/www/fina-connect/eracun/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.GovExportModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 218, in test_models_exist
+ImportError: cannot import name 'GovExportRun' from 'gov_export.models' (/var/www/fina-connect/gov_export/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.KnjiznicaModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 235, in test_models_exist
+    self.assertTrue(Permission._meta.db_table)
+ImportError: cannot import name 'Book' from 'knjiznica.models' (/var/www/fina-connect/knjiznica/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.LibraryModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 245, in test_models_exist
+    def test_models_importable(self):
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'LibraryBook' from 'library.models' (/var/www/fina-connect/library/models.py)
+
+======================================================================
+ERROR: test_notification_creation (tests.test_system_health.NotificationsModuleTest.test_notification_creation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 260, in test_notification_creation
+  File "/var/www/fina-connect/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/fina-connect/venv/lib/python3.12/site-packages/django/db/models/query.py", line 677, in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/var/www/fina-connect/venv/lib/python3.12/site-packages/django/db/models/base.py", line 567, in __init__
+    raise TypeError(
+TypeError: Notification() got unexpected keyword arguments: 'user'
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.PermissionsModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 288, in test_models_exist
+ImportError: cannot import name 'ModulePermission' from 'permissions.models' (/var/www/fina-connect/permissions/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.PropterModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 296, in test_models_exist
+ImportError: cannot import name 'PropterSoba' from 'propter.models' (/var/www/fina-connect/propter/models.py)
+
+======================================================================
+ERROR: test_models_exist (tests.test_system_health.VirtualOfficeModuleTest.test_models_exist)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 313, in test_models_exist
+ImportError: cannot import name 'VirtualOfficeSubscription' from 'virtual_office.models' (/var/www/fina-connect/virtual_office/models.py)
+
+======================================================================
+FAIL: test_hub_url_resolves (tests.test_system_health.BorgOpsModuleTest.test_hub_url_resolves)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 171, in test_hub_url_resolves
+    class GovExportModuleTest(TestCase):
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '/hub/' != '/hr/borg/'
+- /hub/
++ /hr/borg/
+
+
+======================================================================
+FAIL: test_login_page (tests.test_system_health.DashboardSmokeTest.test_login_page)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 134, in test_login_page
+AssertionError: 301 != 200
+
+======================================================================
+FAIL: test_main_dashboard (tests.test_system_health.DashboardSmokeTest.test_main_dashboard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 129, in test_main_dashboard
+AssertionError: 301 not found in [200, 302]
+
+======================================================================
+FAIL: test_all_models_have_tables (tests.test_system_health.ModelIntegrityTest.test_all_models_have_tables)
+Verify all model tables exist in the database.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 113, in test_all_models_have_tables
+AssertionError: Lists differ: ['seasonal.SeasonalWorker -> seasonal_seas[121 chars]ent'] != []
+
+First list contains 3 additional elements.
+First extra element 0:
+'seasonal.SeasonalWorker -> seasonal_seasonalworker'
+
++ []
+- ['seasonal.SeasonalWorker -> seasonal_seasonalworker',
+-  'seasonal.SeasonalContract -> seasonal_seasonalcontract',
+-  'seasonal.SeasonalPayment -> seasonal_seasonalpayment'] : Missing tables: ['seasonal.SeasonalWorker -> seasonal_seasonalworker', 'seasonal.SeasonalContract -> seasonal_seasonalcontract', 'seasonal.SeasonalPayment -> seasonal_seasonalpayment']
+
+======================================================================
+FAIL: test_template_url_tags (tests.test_system_health.TemplateURLTest.test_template_url_tags)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/var/www/fina-connect/tests/test_system_health.py", line 80, in test_template_url_tags
+    if 'arguments' not in str(e) and 'no arguments' not in str(e):
+AssertionError: Lists differ: ['templates/zeleni_otok/public_base.html: [2523 chars]ist'] != []
+
+First list contains 41 additional elements.
+First extra element 0:
+'templates/zeleni_otok/public_base.html: zeleni_otok:landing'
+
+Diff is 2698 characters long. Set self.maxDiff to None to see it. : Broken template URL refs:
+templates/zeleni_otok/public_base.html: zeleni_otok:landing
+templates/zeleni_otok/public_base.html: zeleni_otok:pricing
+templates/zeleni_otok/public_base.html: zeleni_otok:compare
+templates/zeleni_otok/public_base.html: zeleni_otok:pdv_calculator
+templates/zeleni_otok/public_base.html: zeleni_otok:oib_lookup
+templates/zeleni_otok/public_base.html: zeleni_otok:r1_validator
+templates/zeleni_otok/public_base.html: zeleni_otok:roi_calculator
+templates/zeleni_otok/public_base.html: zeleni_otok:tax_calendar
+templates/zeleni_otok/public_base.html: zeleni_otok:migration
+templates/zeleni_otok/public_base.html: zeleni_otok:pricing
+templates/zeleni_otok/public_base.html: zeleni_otok:compare
+templates/zeleni_otok/public_base.html: zeleni_otok:migration
+templates/zeleni_otok/public_base.html: zeleni_otok:pdv_calculator
+templates/zeleni_otok/public_base.html: zeleni_otok:oib_lookup
+templates/zeleni_otok/public_base.html: zeleni_otok:r1_validator
+templates/zeleni_otok/public_base.html: zeleni_otok:tax_calendar
+templates/zeleni_otok/landing.html: zeleni_otok:pricing
+templates/zeleni_otok/landing.html: zeleni_otok:migration
+templates/zeleni_otok/landing.html: zeleni_otok:compare
+templates/zeleni_otok/landing.html: zeleni_otok:pdv_calculator
+templates/zeleni_otok/landing.html: zeleni_otok:oib_lookup
+templates/zeleni_otok/landing.html: zeleni_otok:r1_validator
+templates/zeleni_otok/landing.html: zeleni_otok:roi_calculator
+templates/zeleni_otok/landing.html: zeleni_otok:tax_calendar
+templates/zeleni_otok/landing.html: zeleni_otok:migration
+templates/zeleni_otok/landing.html: zeleni_otok:roi_calculator
+templates/fitness/member_list.html: fitness:checkin_dashboard
+templates/fitness/member_list.html: fitness:create
+templates/fitness/member_list.html: fitness:member_list
+templates/fitness/member_list.html: fitness:member_detail
+templates/fitness/member_list.html: fitness:checkin
+templates/fitness/member_list.html: fitness:edit
+templates/fitness/member_list.html: fitness:create
+templates/fitness/member_detail.html: fitness:checkin
+templates/fitness/member_detail.html: fitness:edit
+templates/fitness/member_detail.html: fitness:member_list
+templates/fitness/checkin_dashboard.html: fitness:member_list
+templates/fitness/checkin_dashboard.html: fitness:checkin
+templates/fitness/checkin_dashboard.html: fitness:member_detail
+templates/fitness/member_form.html: fitness:member_list
+templates/fitness/member_form.html: fitness:member_list
+
+----------------------------------------------------------------------
+Ran 29 tests in 1.682s
+
+FAILED (failures=5, errors=16)
+Destroying test database for alias 'default'...

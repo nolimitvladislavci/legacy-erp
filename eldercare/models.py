@@ -54,6 +54,7 @@ class Room(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "eldercare"
         ordering = ["floor", "number"]
         verbose_name = _("Soba")
         verbose_name_plural = _("Sobe")
@@ -127,6 +128,7 @@ class Resident(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "eldercare"
         ordering = ["last_name", "first_name"]
         verbose_name = _("Korisnik doma")
         verbose_name_plural = _("Korisnici doma")
@@ -170,6 +172,7 @@ class Relative(models.Model):
     can_visit = models.BooleanField(default=True, verbose_name=_("Ovlasten za posjete"))
 
     class Meta:
+        app_label = "eldercare"
         ordering = ["-is_primary_contact", "last_name"]
         verbose_name = _("Srodnik")
         verbose_name_plural = _("Srodnici")
@@ -223,6 +226,7 @@ class MonthlyCharge(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "eldercare"
         unique_together = ["resident", "year", "month"]
         ordering = ["-year", "-month"]
         verbose_name = _("Mjesecna naplata")
@@ -262,6 +266,7 @@ class StaffShift(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "eldercare"
         unique_together = ["staff_member", "date"]
         ordering = ["-date", "shift_type"]
         verbose_name = _("Smjena")
@@ -307,6 +312,7 @@ class Activity(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "eldercare"
         ordering = ["-date", "time_from"]
         verbose_name = _("Aktivnost")
         verbose_name_plural = _("Aktivnosti")

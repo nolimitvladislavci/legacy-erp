@@ -40,6 +40,39 @@ class WasteStation(models.Model):
     )
     objects = CompanyManager()
 
+    # Vaga integracija
+    scale_type = models.CharField(
+        max_length=20, blank=True,
+        choices=[
+            ('none', _('Bez vage')),
+            ('serial', _('RS232/USB serijska')),
+            ('bluetooth', _('Bluetooth')),
+            ('network', _('Mrežna (TCP/IP)')),
+            ('manual', _('Ručni unos')),
+        ],
+        default='none',
+        verbose_name=_('Tip vage')
+    )
+    scale_port = models.CharField(
+        max_length=100, blank=True,
+        verbose_name=_('Port/adresa vage'),
+        help_text=_('npr. COM3, /dev/ttyUSB0, 192.168.1.50:4001, ili BT MAC'))
+    scale_protocol = models.CharField(
+        max_length=30, blank=True,
+        choices=[
+            ('generic', _('Generički (CR/LF terminiran)')),
+            ('kern', _('Kern PCB')),
+            ('cas', _('CAS CI/ER')),
+            ('ohaus', _('Ohaus Defender')),
+            ('radwag', _('Radwag WLC/WPT')),
+        ],
+        default='generic',
+        verbose_name=_('Protokol vage')
+    )
+    scale_baud_rate = models.PositiveIntegerField(
+        default=9600, verbose_name=_('Baud rate'),
+        help_text=_('Tipično 9600 ili 2400'))
+
     class Meta:
         verbose_name = _('Reciklažno dvorište')
         verbose_name_plural = _('Reciklažna dvorišta')
@@ -220,6 +253,38 @@ class WasteDelivery(models.Model):
     onto_exported = models.BooleanField(default=False, verbose_name=_('Poslano u e-ONTO'))
     onto_export_date = models.DateTimeField(null=True, blank=True)
 
+    # Vaga — hardverski povučena težina (Mina #2: anti-korupcija)
+    scale_reading = models.ForeignKey(
+        'ScaleReading', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='deliveries',
+        verbose_name=_('Očitanje vage')
+    )
+    weight_source = models.CharField(
+        max_length=10, default='manual',
+        choices=[
+            ('scale', _('Automatski (vaga)')),
+            ('manual', _('Ručni unos')),
+        ],
+        verbose_name=_('Izvor težine')
+    )
+    integrity_hash = models.CharField(
+        max_length=64, blank=True,
+        verbose_name=_('Integrity hash'),
+        help_text=_('SHA-256 hash za tamper detection'))
+    # POS veza za prekoračenje
+    pos_receipt = models.ForeignKey(
+        'pos.POSReceipt', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='waste_deliveries',
+        verbose_name=_('POS račun (prekoračenje)'))
+    # e-ONTO batch veza
+    onto_batch = models.ForeignKey(
+        'OntoExportBatch', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='deliveries',
+        verbose_name=_('e-ONTO batch'))
+
     objects = CompanyManager()
 
     class Meta:
@@ -255,6 +320,250 @@ class WasteDelivery(models.Model):
         self.status = 'confirmed'
         self.save()
         return self
+
+
+class ScaleReading(models.Model):
+    """
+    Pojedinačno očitanje s industrijske vage.
+    Hardverski povučena vrijednost — ljudski faktor eliminiran.
+    Anti-tamper: hash se računa iz raw_data + timestamp.
+    """
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
+    station = models.ForeignKey(
+        WasteStation, on_delete=models.CASCADE,
+        related_name='scale_readings')
+    
+    # Sirovi podaci s vage
+    raw_data = models.CharField(max_length=200, verbose_name=_('Sirovi podaci s vage'),
+        help_text=_('Nekodiran string s vage, npr. "ST,GS,   152.5 kg"'))
+    weight_kg = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        verbose_name=_('Težina (kg)'))
+    is_stable = models.BooleanField(default=True,
+        verbose_name=_('Stabilno očitanje'),
+        help_text=_('True = vaga se stabilizirala (ST flag)'))
+    
+    # Anti-tamper
+    integrity_hash = models.CharField(max_length=64,
+        verbose_name=_('SHA-256 hash'),
+        help_text=_('hash(raw_data + timestamp + station_id + secret)'))
+    is_tampered = models.BooleanField(default=False,
+        verbose_name=_('Sumnja na manipulaciju'))
+    
+    # Izvor
+    source = models.CharField(max_length=20,
+        choices=[
+            ('serial', _('RS232/USB')),
+            ('bluetooth', _('Bluetooth')),
+            ('network', _('Mrežna')),
+            ('web_serial', _('Web Serial API')),
+        ],
+        default='web_serial')
+    
+    read_at = models.DateTimeField(default=timezone.now)
+    operator = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL,
+        null=True, blank=True)
+    objects = CompanyManager()
+    
+    class Meta:
+        verbose_name = _('Očitanje vage')
+        verbose_name_plural = _('Očitanja vage')
+        ordering = ['-read_at']
+    
+    def __str__(self):
+        return f'{self.weight_kg} kg @ {self.station.name} ({self.read_at:%H:%M})'
+    
+    def verify_integrity(self):
+        """Provjeri je li hash još valjan."""
+        import hashlib
+        from django.conf import settings
+        secret = getattr(settings, 'SCALE_INTEGRITY_SECRET', settings.SECRET_KEY[:16])
+        payload = f'{self.raw_data}|{self.read_at.isoformat()}|{self.station_id}|{secret}'
+        expected = hashlib.sha256(payload.encode()).hexdigest()
+        return self.integrity_hash == expected
+    
+    @staticmethod
+    def compute_hash(raw_data, timestamp, station_id):
+        """Izračunaj integrity hash za novo očitanje."""
+        import hashlib
+        from django.conf import settings
+        secret = getattr(settings, 'SCALE_INTEGRITY_SECRET', settings.SECRET_KEY[:16])
+        payload = f'{raw_data}|{timestamp.isoformat()}|{station_id}|{secret}'
+        return hashlib.sha256(payload.encode()).hexdigest()
+
+
+class OntoExportBatch(models.Model):
+    """
+    Batch export prema e-ONTO (Elektronički očevidnik o nastanku i tijeku otpada).
+    
+    Mina #3: Mrtvi državni serveri — async pattern.
+    Lokalno sprema, Celery worker u 02:00 gura prema Ministarstvu.
+    Retry logika: 3 pokušaja s exponential backoff.
+    """
+    STATUS_CHOICES = [
+        ('pending', _('Čeka slanje')),
+        ('generating', _('Generiranje XML-a')),
+        ('sending', _('Slanje u tijeku')),
+        ('accepted', _('Prihvaćeno')),
+        ('partial', _('Djelomično prihvaćeno')),
+        ('rejected', _('Odbijeno')),
+        ('error', _('Greška')),
+        ('retry', _('Čeka ponovni pokušaj')),
+    ]
+    
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
+    station = models.ForeignKey(
+        WasteStation, on_delete=models.CASCADE,
+        related_name='onto_batches')
+    
+    # Period
+    date_from = models.DateField(verbose_name=_('Od datuma'))
+    date_to = models.DateField(verbose_name=_('Do datuma'))
+    
+    # Sadržaj
+    delivery_count = models.PositiveIntegerField(default=0,
+        verbose_name=_('Broj zapisa'))
+    total_weight_kg = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0,
+        verbose_name=_('Ukupna težina (kg)'))
+    
+    # XML payload
+    xml_payload = models.TextField(blank=True,
+        verbose_name=_('XML za e-ONTO'),
+        help_text=_('Generirani XML prema e-ONTO shemi'))
+    xml_hash = models.CharField(max_length=64, blank=True,
+        verbose_name=_('SHA-256 XML-a'))
+    
+    # Status i retry
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pending')
+    retry_count = models.PositiveSmallIntegerField(default=0)
+    max_retries = models.PositiveSmallIntegerField(default=3)
+    last_error = models.TextField(blank=True, verbose_name=_('Zadnja greška'))
+    
+    # Odgovor Ministarstva
+    response_code = models.CharField(max_length=20, blank=True)
+    response_body = models.TextField(blank=True)
+    accepted_count = models.PositiveIntegerField(default=0)
+    rejected_count = models.PositiveIntegerField(default=0)
+    rejection_details = models.JSONField(default=list, blank=True)
+    
+    # Meta
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    objects = CompanyManager()
+    
+    class Meta:
+        verbose_name = _('e-ONTO batch')
+        verbose_name_plural = _('e-ONTO batchevi')
+        ordering = ['-created_at']
+        unique_together = [('company', 'station', 'date_from', 'date_to')]
+    
+    def __str__(self):
+        return f'e-ONTO {self.station.name} {self.date_from}–{self.date_to} [{self.get_status_display()}]'
+    
+    def can_retry(self):
+        return self.status in ('error', 'retry') and self.retry_count < self.max_retries
+    
+    def generate_xml(self):
+        """
+        Generira XML prema e-ONTO shemi iz WasteDelivery zapisa.
+        Poziva se iz Celery taska.
+        """
+        import hashlib
+        from xml.etree.ElementTree import Element, SubElement, tostring
+        
+        deliveries = WasteDelivery.objects.filter(
+            onto_batch=self,
+            status='confirmed'
+        ).select_related('citizen__partner', 'category', 'station')
+        
+        root = Element('eONTO')
+        root.set('version', '1.0')
+        root.set('xmlns', 'http://onto.mzoe.hr/schema/v1')
+        
+        header = SubElement(root, 'Zaglavlje')
+        SubElement(header, 'OIB').text = self.company.oib
+        SubElement(header, 'NazivObveznika').text = self.company.name
+        SubElement(header, 'DatumOd').text = self.date_from.isoformat()
+        SubElement(header, 'DatumDo').text = self.date_to.isoformat()
+        SubElement(header, 'BrojZapisa').text = str(deliveries.count())
+        
+        zapisi = SubElement(root, 'Zapisi')
+        total_kg = Decimal('0')
+        
+        for d in deliveries:
+            zapis = SubElement(zapisi, 'Zapis')
+            SubElement(zapis, 'RedniBroj').text = str(d.pk)
+            SubElement(zapis, 'DatumVrijeme').text = d.delivery_date.isoformat()
+            SubElement(zapis, 'KljucniBroj').text = d.category.key_number
+            SubElement(zapis, 'NazivOtpada').text = d.category.name
+            SubElement(zapis, 'Kolicina').text = str(d.quantity)
+            SubElement(zapis, 'JedinicaMjere').text = d.unit
+            SubElement(zapis, 'OpasniOtpad').text = 'DA' if d.category.is_hazardous else 'NE'
+            SubElement(zapis, 'IzvorTezine').text = d.weight_source
+            SubElement(zapis, 'Lokacija').text = d.station.name
+            total_kg += d.quantity
+        
+        xml_str = tostring(root, encoding='unicode', xml_declaration=True)
+        self.xml_payload = xml_str
+        self.xml_hash = hashlib.sha256(xml_str.encode()).hexdigest()
+        self.delivery_count = deliveries.count()
+        self.total_weight_kg = total_kg
+        self.status = 'generating'
+        self.save()
+        return xml_str
+
+
+class WasteQuickButton(models.Model):
+    """
+    Brzi gumbi za terenski kiosk — Mina #1: prljave ruke.
+    Umjesto padajućeg izbornika s 200 ključnih brojeva,
+    operater vidi 8-12 velikih gumba u boji.
+    """
+    COLOR_CHOICES = [
+        ('#4CAF50', _('Zelena (papir/karton)')),
+        ('#2196F3', _('Plava (plastika)')),
+        ('#FF9800', _('Narančasta (metal)')),
+        ('#795548', _('Smeđa (bio)')),
+        ('#9E9E9E', _('Siva (šuta/građevinski)')),
+        ('#F44336', _('Crvena (opasni)')),
+        ('#FFEB3B', _('Žuta (staklo)')),
+        ('#9C27B0', _('Ljubičasta (EE otpad)')),
+        ('#00BCD4', _('Tirkizna (tekstil)')),
+        ('#607D8B', _('Tamno siva (glomazni)')),
+    ]
+    
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
+    station = models.ForeignKey(
+        WasteStation, on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='quick_buttons',
+        verbose_name=_('Dvorište (prazno=sva)'))
+    category = models.ForeignKey(
+        WasteCategory, on_delete=models.CASCADE,
+        related_name='quick_buttons',
+        verbose_name=_('Kategorija otpada'))
+    
+    label = models.CharField(max_length=30, verbose_name=_('Tekst na gumbu'),
+        help_text=_('Kratko: "PAPIR", "PLASTIKA", "ŠUTA"'))
+    icon = models.CharField(max_length=50, blank=True,
+        verbose_name=_('Font Awesome ikona'),
+        help_text=_('npr. fa-newspaper, fa-recycle'))
+    color = models.CharField(max_length=7, choices=COLOR_CHOICES, default='#4CAF50',
+        verbose_name=_('Boja gumba'))
+    sort_order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    objects = CompanyManager()
+    
+    class Meta:
+        verbose_name = _('Brzi gumb')
+        verbose_name_plural = _('Brzi gumbi')
+        ordering = ['sort_order']
+    
+    def __str__(self):
+        return f'{self.label} → {self.category.key_number}'
 
 
 # ═══════════════════════════════════════════════════════

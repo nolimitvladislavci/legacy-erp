@@ -118,7 +118,12 @@ class Force2FAMiddleware:
 
     WHITELISTED_PREFIXES = (
         '/2fa/',
+        '/hr/2fa/',
+        '/de/2fa/',
+        '/en/2fa/',
         '/accounts/logout',
+        '/hr/logout',
+        '/de/logout',
         '/logout',
         '/static/',
         '/media/',

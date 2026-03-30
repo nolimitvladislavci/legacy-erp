@@ -38,6 +38,7 @@ class Author(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "library"
         ordering = ["last_name", "first_name"]
         verbose_name = _("Autor")
         verbose_name_plural = _("Autori")
@@ -73,6 +74,7 @@ class Category(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "library"
         ordering = ["name"]
         verbose_name = _("Kategorija")
         verbose_name_plural = _("Kategorije")
@@ -132,6 +134,7 @@ class Book(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "library"
         ordering = ["title"]
         verbose_name = _("Knjiga")
         verbose_name_plural = _("Knjige")
@@ -201,6 +204,7 @@ class BookCopy(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "library"
         ordering = ["barcode"]
         verbose_name = _("Primjerak")
         verbose_name_plural = _("Primjerci")
@@ -239,6 +243,7 @@ class MembershipType(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "library"
         verbose_name = _("Tip clanarine")
         verbose_name_plural = _("Tipovi clanarine")
 
@@ -302,6 +307,7 @@ class LibraryMember(models.Model):
     objects = CompanyManager()
 
     class Meta:
+        app_label = "library"
         ordering = ["last_name", "first_name"]
         verbose_name = _("Clan knjiznice")
         verbose_name_plural = _("Clanovi knjiznice")
@@ -373,6 +379,7 @@ class Loan(models.Model):
     )
 
     class Meta:
+        app_label = "library"
         ordering = ["-borrowed_date"]
         verbose_name = _("Posudba")
         verbose_name_plural = _("Posudbe")
@@ -424,6 +431,7 @@ class Reservation(models.Model):
     pickup_deadline = models.DateField(null=True, blank=True)
 
     class Meta:
+        app_label = "library"
         ordering = ["reserved_date"]
         verbose_name = _("Rezervacija")
         verbose_name_plural = _("Rezervacije")
@@ -481,6 +489,7 @@ class ImportBatch(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
+        app_label = "library"
         ordering = ["-uploaded_at"]
         verbose_name = _("Import fonda")
         verbose_name_plural = _("Importi fonda")
@@ -527,6 +536,7 @@ class DigitalAsset(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        app_label = "library"
         verbose_name = _("Digitalni sadrzaj")
         verbose_name_plural = _("Digitalni sadrzaji")
 
@@ -563,6 +573,7 @@ class DigitalLoan(models.Model):
     watermark_token = models.UUIDField(default=uuid.uuid4, unique=True)
 
     class Meta:
+        app_label = "library"
         ordering = ["-borrowed_date"]
         verbose_name = _("Digitalna posudba")
         verbose_name_plural = _("Digitalne posudbe")
@@ -629,6 +640,7 @@ class ReaderProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        app_label = "library"
         ordering = ["first_name"]
         verbose_name = _("Djecji citateljski profil")
         verbose_name_plural = _("Djecji citateljski profili")

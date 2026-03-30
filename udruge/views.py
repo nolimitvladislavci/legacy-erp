@@ -3399,6 +3399,9 @@ def golubinjak_create(request):
             napomena=request.POST.get('napomena', ''),
             aktivan='aktivan' in request.POST,
         )
+        if request.FILES.get('fotografija'):
+            g.fotografija = request.FILES['fotografija']
+            g.save(update_fields=['fotografija'])
         messages.success(request, 'Golubinjak kreiran.')
         return redirect('udruge:golubinjak_detail', pk=g.pk)
     return render(request, 'udruge/golubar_golubinjak_form.html', {})

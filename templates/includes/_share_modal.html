@@ -146,25 +146,43 @@ function _shGetBaseUrl() {
 function _shSendWa() {
   var phone = document.getElementById('shWaPhone').value.trim();
   if (!phone) { document.getElementById('shWaPhone').focus(); return; }
+  var _toast = (typeof borgToast === 'function') ? borgToast : (typeof fenixToast === 'function') ? fenixToast : function(m){alert(m)};
 
   if (_shCtx.type === 'receipt') {
+    // Disable button to prevent double-tap
+    var btn = document.querySelector('#shWaPanel .sh-send');
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
     fetch(_shGetBaseUrl() + '/whatsapp/', {
       method: 'POST', credentials: 'same-origin',
       headers: {'Content-Type':'application/x-www-form-urlencoded',
                 'X-CSRFToken': _shGetCSRF()},
       body: 'phone=' + encodeURIComponent(phone)
     })
-    .then(function(r){return r.json()})
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(function(d){
-      if (d.wa_url) { window.open(d.wa_url, '_blank'); closeShare(); }
-      else fenixToast(d.error || 'Greška', 'error');
-    }).catch(function(e){window.fenixNetworkError('Greška mreže', e)});
+      if (btn) { btn.disabled = false; btn.textContent = 'Pošalji'; }
+      if (d.wa_url) {
+        closeShare();
+        // location.href radi na mobitelu (window.open se blokira kao popup)
+        location.href = d.wa_url;
+      }
+      else _toast(d.error || 'Greška pri slanju', 'error');
+    }).catch(function(e){
+      if (btn) { btn.disabled = false; btn.textContent = 'Pošalji'; }
+      _toast('Greška mreže: ' + e.message, 'error');
+    });
   } else {
-    // Generic: share public URL via wa.me
+    // Generic: share public URL via wa.me — location.href za mobilnu kompatibilnost
     var url = window.location.origin + (_shCtx.public_url || _shGetBaseUrl() + '/');
     var msg = (_shCtx.title || 'Dokument') + '\n\n' + url + '\n\nPowered by LIMIT Connect';
-    window.open('https://wa.me/' + phone.replace(/[\s\-\+]/g,'') + '?text=' + encodeURIComponent(msg), '_blank');
+    var cleanPhone = phone.replace(/[\s\-\+\(\)]/g,'');
+    if (cleanPhone.startsWith('0') && !cleanPhone.startsWith('00')) cleanPhone = '385' + cleanPhone.substring(1);
     closeShare();
+    location.href = 'https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(msg);
   }
 }
 

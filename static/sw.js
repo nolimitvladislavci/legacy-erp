@@ -1,7 +1,7 @@
 // LIMIT Connect Service Worker – v4 (PWA + Offline)
 'use strict';
 
-var CACHE_VERSION = 'fina-v8';
+var CACHE_VERSION = 'fina-v10';
 var STATIC_CACHE  = CACHE_VERSION + '-static';
 var PAGE_CACHE    = CACHE_VERSION + '-pages';
 

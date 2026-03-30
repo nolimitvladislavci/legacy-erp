@@ -814,22 +814,170 @@ window.FC = {
 
 
 <!-- ══ GLOBALNI UPLOAD FAB ══ -->
-<a href="/hr/documents/arhiva/upload/" id="upload-fab"
-   title="Upload dokumenta — fotografirajte ili prevucite racun"
+<!-- ══ FENIX SMART FAB — context-aware kamera ══ -->
+<div id="fenix-smart-fab"
+   title=""
    style="position:fixed;bottom:80px;right:20px;z-index:9998;
           display:flex;align-items:center;gap:8px;
           padding:14px 22px;border-radius:50px;
           background:linear-gradient(135deg,#1e3a5f,#0f172a);
           color:#60a5fa;font-weight:700;font-size:0.9rem;
-          text-decoration:none;
+          cursor:pointer;
           border:1px solid rgba(96,165,250,0.3);
           box-shadow:0 4px 20px rgba(0,0,0,0.4);
-          transition:all 0.3s ease"
-   onmouseover="this.style.transform='scale(1.08)';this.style.background='linear-gradient(135deg,#c9a84c,#a08030)';this.style.color='#0a0a0a'"
-   onmouseout="this.style.transform='scale(1)';this.style.background='linear-gradient(135deg,#1e3a5f,#0f172a)';this.style.color='#60a5fa'">
-  <i class="fas fa-camera" style="font-size:1.1rem"></i>
-  <span class="d-none d-md-inline">Upload</span>
-</a>
+          transition:all 0.3s ease;user-select:none">
+  <i id="fenix-fab-icon" class="fas fa-camera" style="font-size:1.1rem"></i>
+  <span id="fenix-fab-label" class="d-none d-md-inline">Skeniraj</span>
+</div>
+
+<!-- FenixScan modal kontejner (dinamički) -->
+<div id="fenix-fab-scan-container" style="display:none;position:fixed;bottom:150px;right:20px;z-index:9999;min-width:280px"></div>
+
+<script src="/static/js/fenix-scan.js"></script>
+<script>
+(function(){
+  var fab = document.getElementById('fenix-smart-fab');
+  var fabIcon = document.getElementById('fenix-fab-icon');
+  var fabLabel = document.getElementById('fenix-fab-label');
+  var scanContainer = document.getElementById('fenix-fab-scan-container');
+  var path = window.location.pathname;
+  var scannerInstance = null;
+  var fabOpen = false;
+
+  // ── Kontekst mapa ──────────────────────────────────────────
+  var ctx = (function() {
+    if (/\/golubar\//.test(path))
+      return { icon:'fa-dove', label:'Skeniraj goluba', color:'#a78bfa',
+               border:'rgba(167,139,250,0.35)', bg:'linear-gradient(135deg,#2e1065,#1e1b4b)',
+               docType:'golub', hint:'Fotografirajte goluba ili prsten za AI prepoznavanje' };
+    if (/\/inventory\//.test(path))
+      return { icon:'fa-barcode', label:'Skeniraj artikl', color:'#34d399',
+               border:'rgba(52,211,153,0.35)', bg:'linear-gradient(135deg,#064e3b,#022c22)',
+               docType:'general', hint:'Skenirajte barcode ili fotografirajte artikl' };
+    if (/\/pos\//.test(path))
+      return { icon:'fa-receipt', label:'Skeniraj račun', color:'#fbbf24',
+               border:'rgba(251,191,36,0.35)', bg:'linear-gradient(135deg,#78350f,#451a03)',
+               docType:'invoice', hint:'Fotografirajte račun za automatski unos' };
+    if (/\/(invoicing|eracun)\//.test(path))
+      return { icon:'fa-file-invoice', label:'Skeniraj fakturu', color:'#fb923c',
+               border:'rgba(251,146,60,0.35)', bg:'linear-gradient(135deg,#7c2d12,#431407)',
+               docType:'invoice', hint:'Skenirajte fakturu za automatsko popunjavanje' };
+    if (/\/partners\//.test(path))
+      return { icon:'fa-id-card', label:'Skeniraj osobnu', color:'#38bdf8',
+               border:'rgba(56,189,248,0.35)', bg:'linear-gradient(135deg,#0c4a6e,#082f49)',
+               docType:'id_card', hint:'Skenirajte osobnu iskaznicu za automatski unos OIB-a' };
+    if (/\/(complaints|prigovori|helpdesk)\//.test(path))
+      return { icon:'fa-exclamation-circle', label:'Priloži foto', color:'#f87171',
+               border:'rgba(248,113,113,0.35)', bg:'linear-gradient(135deg,#7f1d1d,#450a0a)',
+               docType:'complaint', hint:'Fotografirajte oštećenje ili problem' };
+    // default
+    return { icon:'fa-cloud-upload-alt', label:'Upload', color:'#60a5fa',
+             border:'rgba(96,165,250,0.3)', bg:'linear-gradient(135deg,#1e3a5f,#0f172a)',
+             docType:'general', hint:'Upload dokumenta u arhivu', fallbackUrl:'/hr/documents/arhiva/upload/' };
+  })();
+
+  // Postavi izgled FAB-a prema kontekstu
+  fabIcon.className = 'fas ' + ctx.icon;
+  fabLabel.textContent = ctx.label;
+  fab.style.color = ctx.color;
+  fab.style.borderColor = ctx.border;
+  fab.style.background = ctx.bg;
+  fab.title = ctx.hint;
+
+  // Hover
+  fab.addEventListener('mouseenter', function(){
+    fab.style.transform = 'scale(1.08)';
+    fab.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
+  });
+  fab.addEventListener('mouseleave', function(){
+    fab.style.transform = 'scale(1)';
+    fab.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4)';
+  });
+
+  // Klik
+  fab.addEventListener('click', function(){
+    // Default → arhiva upload (bez scan modala)
+    if (ctx.fallbackUrl) {
+      window.location.href = ctx.fallbackUrl;
+      return;
+    }
+
+    // Toggle scan panel
+    if (fabOpen) {
+      scanContainer.style.display = 'none';
+      fabOpen = false;
+      return;
+    }
+
+    scanContainer.style.display = 'block';
+    fabOpen = true;
+
+    // Inicijaliziraj scanner samo jednom
+    if (!scannerInstance && typeof FenixScan !== 'undefined') {
+      scannerInstance = FenixScan.create({
+        container: '#fenix-fab-scan-container',
+        docType: ctx.docType,
+        label: ctx.label,
+        color: ctx.color,
+        maxSizeMB: 2,
+        onSuccess: function(b64s, results) {
+          scanContainer.style.display = 'none';
+          fabOpen = false;
+          // Pokušaj popuniti najbliži file input na stranici
+          var fileInput = document.querySelector('input[type="file"][name="fotografija"], input[type="file"][name="foto"], input[type="file"]');
+          if (fileInput && b64s.length) {
+            _fabSetFile(fileInput, b64s[0]);
+            // Flash success na FAB-u
+            fab.style.background = 'linear-gradient(135deg,#166534,#14532d)';
+            fab.style.color = '#4ade80';
+            fabIcon.className = 'fas fa-check';
+            fabLabel.textContent = 'Dodano!';
+            setTimeout(function(){
+              fabIcon.className = 'fas ' + ctx.icon;
+              fabLabel.textContent = ctx.label;
+              fab.style.background = ctx.bg;
+              fab.style.color = ctx.color;
+            }, 2500);
+          } else {
+            // Nema forme — spremi u arhivu
+            window.location.href = '/hr/documents/arhiva/upload/';
+          }
+        },
+        onError: function(msg) {
+          console.warn('FenixFAB:', msg);
+          scanContainer.style.display = 'none';
+          fabOpen = false;
+        }
+      });
+    }
+  });
+
+  // Zatvori na klik izvan
+  document.addEventListener('click', function(e){
+    if (fabOpen && !fab.contains(e.target) && !scanContainer.contains(e.target)) {
+      scanContainer.style.display = 'none';
+      fabOpen = false;
+    }
+  });
+
+  function _fabSetFile(input, b64) {
+    try {
+      var arr = b64.split(',');
+      var mime = arr[0].match(/:(.*?);/)[1];
+      var bstr = atob(arr[1]);
+      var n = bstr.length;
+      var u8 = new Uint8Array(n);
+      while(n--) u8[n] = bstr.charCodeAt(n);
+      var file = new File([u8], 'scan.jpg', {type: mime});
+      var dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      // Trigger change event
+      input.dispatchEvent(new Event('change', {bubbles:true}));
+    } catch(e) { console.warn('FenixFAB setFile:', e); }
+  }
+})();
+</script>
 
 <script src="/static/js/fenix-camera.js"></script>
 <script src="/static/js/fenix-permissions.js"></script>
