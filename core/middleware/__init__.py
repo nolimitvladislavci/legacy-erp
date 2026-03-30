@@ -371,8 +371,78 @@ class RateLimitMiddleware:
             pipe.expire(key, window)
             count, _ = pipe.execute()
             if count > limit:
-                from django.http import JsonResponse
-                return JsonResponse({'error': 'Previse zahtjeva. Pricekajte minutu.', 'retry_after': window}, status=429)
+                # API poziv → JSON
+                if (request.headers.get('Accept', '') == 'application/json'
+                        or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+                        or request.path.startswith('/api/')):
+                    from django.http import JsonResponse
+                    return JsonResponse({
+                        'error': 'Previše zahtjeva. Pričekajte minutu.',
+                        'retry_after': window
+                    }, status=429)
+                # Preglednik → lijepa HTML stranica s odbrojačem
+                from django.http import HttpResponse
+                html = """<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sigurnosna provjera — LIMIT Connect</title>
+<style>
+*{{margin:0;padding:0;box-sizing:border-box}}
+body{{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;
+      display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}}
+.box{{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:48px 40px;
+      max-width:480px;width:100%;text-align:center}}
+.icon{{font-size:3rem;margin-bottom:16px}}
+h1{{font-size:1.4rem;font-weight:700;margin-bottom:10px;color:#f1f5f9}}
+p{{font-size:.9rem;color:#94a3b8;line-height:1.6;margin-bottom:24px}}
+.countdown{{font-size:2.5rem;font-weight:800;color:#c9a84c;margin:24px 0;
+            font-variant-numeric:tabular-nums}}
+.btn{{display:inline-block;padding:12px 28px;border-radius:10px;
+      background:linear-gradient(135deg,#c9a84c,#a08030);color:#0a0a0c;
+      font-weight:700;text-decoration:none;margin-top:8px;
+      font-size:.9rem;transition:opacity .2s}}
+.btn:hover{{opacity:.85}}
+.note{{font-size:.75rem;color:#475569;margin-top:20px}}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="icon">🔒</div>
+  <h1>Sigurnosna provjera</h1>
+  <p>Detektirali smo previše pokušaja u kratkom vremenu.<br>
+     Ovo je automatska zaštita — nije greška s vaše strane.</p>
+  <div class="countdown" id="cd">{seconds}s</div>
+  <p style="font-size:.82rem;color:#64748b">Stranica se automatski osvježava kada istekne zaštita.</p>
+  <a href="javascript:location.reload()" class="btn" id="retryBtn" style="display:none">
+    → Pokušajte ponovo
+  </a>
+  <div class="note">
+    Ako problem potraje, kontaktirajte podršku ili 
+    <a href="/hr/login/" style="color:#c9a84c">prijavite se</a> ako već imate račun.
+  </div>
+</div>
+<script>
+var sec = {seconds};
+var el = document.getElementById('cd');
+var btn = document.getElementById('retryBtn');
+var t = setInterval(function(){{
+  sec--;
+  if(sec <= 0){{
+    clearInterval(t);
+    el.textContent = '✓';
+    el.style.color = '#22c55e';
+    btn.style.display = 'inline-block';
+    setTimeout(function(){{ location.reload(); }}, 800);
+  }} else {{
+    el.textContent = sec + 's';
+  }}
+}}, 1000);
+</script>
+</body>
+</html>""".format(seconds=window)
+                return HttpResponse(html, status=429, content_type='text/html; charset=utf-8')
         except Exception:
             pass
 

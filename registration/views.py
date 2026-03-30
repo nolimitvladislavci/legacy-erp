@@ -169,7 +169,21 @@ def register_step2_combined(request):
         if not user_data["email"]:
             errors["email"] = "Email je obavezan."
         elif User.objects.filter(email=user_data["email"]).exists():
-            errors["email"] = "Korisnik s ovim emailom već postoji. <a href='/password-reset/' style='color:#c9a84c;'>Resetirajte lozinku?</a>"
+            # Pametna poruka — nudi login ili reset, ne ostavlja korisnika u slijepoj ulici
+            existing_user = User.objects.filter(email=user_data["email"]).first()
+            has_company = hasattr(existing_user, 'profile') and existing_user.profile.company_id if existing_user else False
+            if has_company:
+                errors["email"] = (
+                    '⚠️ Već imate račun s ovom email adresom. '
+                    '<a href="/hr/login/" style="color:#c9a84c;font-weight:700">→ Prijavite se</a> '
+                    'ili <a href="/password-reset/" style="color:#c9a84c;">zaboravili ste lozinku?</a>'
+                )
+            else:
+                errors["email"] = (
+                    '⚠️ Ova email adresa je zauzeta. '
+                    '<a href="/hr/login/" style="color:#c9a84c;font-weight:700">→ Prijavite se</a> '
+                    'ili <a href="/password-reset/" style="color:#c9a84c;">resetirajte lozinku</a>.'
+                )
         if len(password1) < 8:
             errors["password1"] = "Lozinka mora imati najmanje 8 znakova."
         elif not any(c.isupper() for c in password1):
