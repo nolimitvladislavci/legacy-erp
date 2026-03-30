@@ -1,8 +1,9 @@
 /* ═══ POS Voice Input — Web Speech API ═══
- * Sprint 3+5: AI Voice Input for mobile POS
+ * Sprint 3+5+6: AI Voice Input for mobile POS
  * "Dodaj 3 bureka", "kava", "dva soka"
  * + Audio wave visualizer (background noise feedback)
  * + Confidence indicator
+ * + Sprint 6: Low confidence fallback — "Jeste li mislili?"
  */
 (function(){
   var _recognition = null;
@@ -72,7 +73,11 @@
       setTimeout(stopVoice, 2500);
     };
 
-    _recognition.onend = function() { stopVoice(); };
+    _recognition.onend = function() {
+      // Don't auto-close if waiting for confirmation
+      if (window._voicePendingBtn) return;
+      stopVoice();
+    };
 
     try {
       _recognition.start();
@@ -229,11 +234,11 @@
     _setVoice(null, 'Tražim: "' + searchTerm + '" × ' + qty, '');
 
     // 1. Exact match
-    var found = _findInGrid(searchTerm, qty);
+    var found = _findInGrid(searchTerm, qty, confidence);
     if (found) return;
 
     // 2. Fuzzy match (Croatian declension stem)
-    found = _findFuzzyInGrid(searchTerm, qty);
+    found = _findFuzzyInGrid(searchTerm, qty, confidence);
     if (found) return;
 
     // 3. Fallback: search input
@@ -248,7 +253,7 @@
     }
   }
 
-  function _findInGrid(term, qty) {
+  function _findInGrid(term, qty, confidence) {
     var prodButtons = document.querySelectorAll('#prodGrid .prod-btn');
     var bestMatch = null;
     var bestScore = 0;
@@ -267,11 +272,20 @@
         if (score2 > bestScore) { bestMatch = btn; bestScore = score2; }
       }
     }
-    if (bestMatch && bestScore >= 50) { _clickProduct(bestMatch, qty); return true; }
+    if (bestMatch && bestScore >= 50) {
+      // Sprint 6: Low confidence fallback — ask for confirmation
+      if (confidence < 0.5 && bestMatch) {
+        var matchName = bestMatch.dataset.name || bestMatch.querySelector('.prod-name')?.textContent || '?';
+        _showVoiceConfirm(matchName, qty, bestMatch);
+        return true;
+      }
+      _clickProduct(bestMatch, qty);
+      return true;
+    }
     return false;
   }
 
-  function _findFuzzyInGrid(term, qty) {
+  function _findFuzzyInGrid(term, qty, confidence) {
     var prodButtons = document.querySelectorAll('#prodGrid .prod-btn');
     var termWords = term.split(/\s+/);
     var bestMatch = null;
@@ -289,9 +303,50 @@
       }
       if (score > bestScore) { bestMatch = btn; bestScore = score; }
     }
-    if (bestMatch && bestScore >= 25) { _clickProduct(bestMatch, qty); return true; }
+    if (bestMatch && bestScore >= 25) {
+      // Sprint 6: Low confidence fallback — ask for confirmation
+      if (confidence < 0.5 && bestMatch) {
+        var matchName = bestMatch.dataset.name || bestMatch.querySelector('.prod-name')?.textContent || '?';
+        _showVoiceConfirm(matchName, qty, bestMatch);
+        return true;
+      }
+      _clickProduct(bestMatch, qty);
+      return true;
+    }
     return false;
   }
+
+  // ── Sprint 6: Voice Confirmation for low confidence ──────────
+  function _showVoiceConfirm(name, qty, btn) {
+    var textEl = document.getElementById('voiceText');
+    if (textEl) textEl.innerHTML = 'Jeste li mislili:<br><strong style="color:#c9a84c;font-size:1.5rem">' + qty + '× ' + name + '</strong>?';
+    var statusEl = document.getElementById('voiceStatus');
+    if (statusEl) {
+      statusEl.innerHTML = '<button onclick="_voiceConfirmYes()" style="background:#c9a84c;color:#000;border:none;padding:8px 24px;border-radius:8px;font-weight:700;margin-right:8px;font-size:1rem;cursor:pointer">DA ✓</button>' +
+        '<button onclick="_voiceConfirmNo()" style="background:rgba(255,255,255,.1);color:#94a3b8;border:1px solid rgba(255,255,255,.2);padding:8px 24px;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer">NE ✕</button>';
+      statusEl.className = 'voice-status';
+    }
+    window._voicePendingBtn = btn;
+    window._voicePendingQty = qty;
+    // Don't auto-close overlay — stop recognition but keep overlay visible
+    if (_recognition) { try { _recognition.stop(); } catch(e){} }
+  }
+
+  window._voiceConfirmYes = function() {
+    if (window._voicePendingBtn) {
+      _clickProduct(window._voicePendingBtn, window._voicePendingQty || 1);
+    }
+    window._voicePendingBtn = null;
+    window._voicePendingQty = null;
+    stopVoice();
+  };
+
+  window._voiceConfirmNo = function() {
+    window._voicePendingBtn = null;
+    window._voicePendingQty = null;
+    _setVoice('Pokušajte ponovo', 'Kliknite 🎤 za novi unos', '');
+    setTimeout(stopVoice, 1500);
+  };
 
   function _clickProduct(btn, qty) {
     var name = btn.dataset.name || btn.querySelector('.prod-name')?.textContent || '?';

@@ -51,7 +51,9 @@
     } catch(e){}
   }
   function _clearSavedCart() {
+    basket = {};  // Sprint 6: Clear in-memory basket too
     try { localStorage.removeItem(_cartKey); } catch(e){}
+    renderBasket();  // Re-render empty basket
   }
   var lastReceiptUrl = '';
   var lastReceiptId = null; window.lastReceiptId = null;
@@ -167,6 +169,11 @@
     setPayEnabled(true);
     calcChange();
     updateAiSuggestions();
+    // Sprint 6: Auto-scroll basket to show latest item
+    var basketItems = document.querySelector('.basket-items');
+    if (basketItems) {
+      setTimeout(function() { basketItems.scrollTop = basketItems.scrollHeight; }, 50);
+    }
   }
 
   function setTotals(neto, pdv, total) {

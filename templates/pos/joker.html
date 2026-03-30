@@ -80,6 +80,9 @@
 @media(max-width:600px){.prod-sku{display:none}}
 .prod-qty-badge{position:absolute;top:4px;right:4px;background:var(--gold);color:#000;font-size:.62rem;font-weight:800;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center}
 .prod-qty-badge.show{display:flex}
+.prod-stock{position:absolute;bottom:3px;left:3px;font-size:.55rem;font-weight:700;color:#94a3b8;background:rgba(0,0,0,.5);padding:1px 5px;border-radius:4px;line-height:1.2}
+.prod-stock.low{color:#facc15;background:rgba(234,179,8,.15)}
+.prod-stock.out{color:#f87171;background:rgba(239,68,68,.15)}
 @keyframes ripple{to{transform:scale(4);opacity:0}}
 .ripple{position:absolute;border-radius:50%;background:rgba(201,168,76,.35);width:40px;height:40px;margin:-20px;pointer-events:none;animation:ripple .4s ease-out forwards}
 
@@ -701,6 +704,12 @@
           <div class="prod-price">&euro;{{ item.unit_price|floatformat:2 }}</div>
           {% if item.sku %}<div class="prod-sku">{{ item.sku }}</div>{% endif %}
           <div class="prod-qty-badge" id="qb-{{ item.id }}">0</div>
+          {% if item.quantity is not None %}
+          <div class="prod-stock {% if item.quantity <= 0 %}out{% elif item.quantity <= item.min_quantity %}low{% endif %}"
+               title="Zaliha: {{ item.quantity }}">
+            {{ item.quantity|floatformat:0 }}
+          </div>
+          {% endif %}
         </button>
         {% empty %}
         <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--muted)">
