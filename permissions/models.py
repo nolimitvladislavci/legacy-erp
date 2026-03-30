@@ -25,6 +25,15 @@ class Permission(models.Model):
         ('reports', '📈 Reports'),
         ('calculator', '🧮 Calculator'),
         ('system', '⚙️ System'),
+        ('inventory', '📦 Inventory'),
+        ('pos', '🏪 POS'),
+        ('payroll', '💳 Payroll'),
+        ('ai', '🤖 AI'),
+        ('golubar', '🕊️ Golubar'),
+        ('knjiznica', '📚 Knjižnica'),
+        ('udruge', '🏛️ Udruge'),
+        ('livestock', '🐄 Livestock'),
+        ('eracun', '📧 eRačun'),
     ]
 
     ACTION_CHOICES = [
@@ -36,6 +45,10 @@ class Permission(models.Model):
         ('export', '📤 Export'),
         ('import', '📥 Import'),
         ('manage', '⚙️ Manage'),
+        ('read', '📖 Read'),
+        ('write', '✍️ Write'),
+        ('execute', '▶️ Execute'),
+        ('send', '📨 Send'),
     ]
 
     module = models.CharField(max_length=50, choices=MODULE_CHOICES, db_index=True)

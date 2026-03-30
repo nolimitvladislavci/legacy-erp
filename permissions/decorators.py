@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
 
+from .engine import get_engine
 from .manager import PermissionManager
 
 
@@ -41,7 +42,7 @@ def require_permission(permission_codename, company_param='company_id'):
                         pass
 
             # Check permission
-            has_perm = PermissionManager.has_permission(
+            has_perm = get_engine().has_permission(
                 request.user,
                 permission_codename,
                 company
@@ -79,7 +80,7 @@ def require_any_permission(*permission_codenames, company_param='company_id'):
                     except Company.DoesNotExist:
                         pass
 
-            has_perm = PermissionManager.has_any_permission(
+            has_perm = get_engine().has_any_permission(
                 request.user,
                 permission_codenames,
                 company
