@@ -1,6 +1,7 @@
 """
 companies/context_processors.py
 Injects sidebar_modules into every template context.
+Uses companies.module_registry as single source of truth.
 """
 
 
@@ -16,7 +17,10 @@ def sidebar_modules(request):
             return {}
 
         from companies.models import CompanyModuleConfig
-        from companies.module_registry import MODULES, CATEGORIES
+        from companies.module_registry import (
+            MODULES, CATEGORIES, get_modules_by_category,
+            get_quick_actions, get_module,
+        )
 
         config = CompanyModuleConfig.objects.filter(company=company).first()
 
@@ -27,23 +31,30 @@ def sidebar_modules(request):
             enabled = [m['id'] for m in MODULES]
 
         # Build sidebar structure grouped by category
-        sidebar = []
-        seen_cats = {}
-        for m in MODULES:
-            if m['id'] not in enabled and not m.get('always_visible'):
+        grouped = []
+        for cat_id, cat_info in sorted(CATEGORIES.items(), key=lambda x: x[1]['order']):
+            mods = [m for m in MODULES if m.get('category') == cat_id]
+            if not mods:
                 continue
-            cat = m.get('category', 'core')
-            if cat not in seen_cats:
-                cat_info = CATEGORIES.get(cat, {'name': cat.title(), 'icon': 'bi-folder', 'order': 99})
-                seen_cats[cat] = {'info': cat_info, 'modules': [], 'order': cat_info.get('order', 99)}
-            seen_cats[cat]['modules'].append(m)
+            # Check if any module in this category is enabled
+            has_enabled = any(
+                m['id'] in enabled or m.get('always_visible')
+                for m in mods
+            )
+            grouped.append({
+                'info': cat_info,
+                'modules': mods,
+                'has_enabled_modules': has_enabled,
+            })
 
-        sidebar = sorted(seen_cats.values(), key=lambda x: x['order'])
+        # Quick actions for enabled modules
+        quick_actions = get_quick_actions(enabled)
 
         return {
-            'sidebar_modules': sidebar,
+            'sidebar_modules': grouped,
             'sidebar_enabled_ids': enabled,
             'sidebar_all_modules': MODULES,
+            'sidebar_quick_actions': quick_actions,
         }
 
     except Exception:

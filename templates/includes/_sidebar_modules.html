@@ -1,0 +1,95 @@
+{% comment %}
+_sidebar_modules.html
+Dinamički sidebar generiran iz companies.module_registry.
+Kontekst varijable (iz context processora):
+  - sidebar_modules: lista {info, modules} po kategoriji
+  - sidebar_enabled_ids: lista aktivnih module id-ova
+  - sidebar_quick_actions: brzi pristup gumbi
+{% endcomment %}
+
+<!-- Search -->
+<div style="padding:8px 12px;margin-top:4px">
+  <div onclick="openCmdPalette();closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;color:#64748b;font-size:.82rem;transition:.15s">
+    <i class="fas fa-search" style="font-size:.75rem"></i>
+    <span style="flex:1">Pretraži...</span>
+    <kbd style="font-size:.6rem;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px;color:#475569">Ctrl+K</kbd>
+  </div>
+</div>
+
+<!-- Favorites -->
+<div id="sidebarFavs" style="padding:4px 8px">
+  <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 2px">Favoriti</div>
+</div>
+
+<!-- Quick Actions -->
+{% if sidebar_quick_actions %}
+<div style="padding:2px 8px 4px">
+  <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 4px">Brzi pristup</div>
+  <a href="{% url 'borg_ops:borg_hub' %}" class="nav-link" style="background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.2);border-radius:8px;margin:4px 8px;padding:8px 12px" onclick="closeSidebar()"><i class="fas fa-globe me-2" style="color:var(--gold)"></i><span style="color:var(--gold);font-weight:700">BORG Hub</span></a>
+  <a href="{% url 'dashboard' %}" onclick="closeSidebar()" style="color:#e2e8f0"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+  {% for qa in sidebar_quick_actions %}
+  <a href="{{ qa.url }}" onclick="closeSidebar()" style="color:{{ qa.color }}"><i class="fas {{ qa.icon }}"></i> <span>{{ qa.label }}</span></a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Module Grid (2-kolumni tile view) -->
+<div style="padding:4px 8px">
+  <div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 4px">Moduli</div>
+  <div id="moduleGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:0 4px">
+    {% for group in sidebar_modules %}
+      {% for mod in group.modules %}
+        {% if mod.id in sidebar_enabled_ids or mod.always_visible %}
+        <a href="{{ mod.url }}" onclick="closeSidebar()" class="mod-tile"
+           {% if mod.accent_color %}style="border-color:{{ mod.accent_color }}33"{% endif %}>
+          <i class="fas {{ mod.icon }}"
+             {% if mod.accent_color %}style="color:{{ mod.accent_color }}"{% endif %}></i>
+          <span>{{ mod.name }}</span>
+        </a>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Grouped list view (collapsed categories) -->
+{% for group in sidebar_modules %}
+  {% with cat=group.info %}
+  {% if group.has_enabled_modules %}
+  <div style="padding:2px 8px">
+    <button class="sidebar-group-toggle{% if cat.order > 4 %} collapsed{% endif %}" onclick="toggleGroup(this)" style="color:#475569">
+      <span><i class="fas {{ cat.icon }}" style="margin-right:6px;font-size:.55rem"></i>{{ cat.name }}</span>
+      <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
+    </button>
+    <div class="sidebar-group-links{% if cat.order > 4 %} collapsed{% endif %}">
+      {% for mod in group.modules %}
+        {% if mod.id in sidebar_enabled_ids or mod.always_visible %}
+        <a href="{{ mod.url }}" onclick="closeSidebar()"
+           {% if mod.accent_color %}style="color:{{ mod.accent_color }}"{% endif %}>
+          <i class="fas {{ mod.icon }}"></i> <span>{{ mod.name }}</span>
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+{% endfor %}
+
+<!-- Superadmin -->
+{% if request.user.is_superuser %}
+<div style="padding:2px 8px">
+  <button class="sidebar-group-toggle" onclick="toggleGroup(this)" style="color:var(--gold)">
+    <span><i class="fas fa-crown" style="margin-right:6px;font-size:.55rem"></i>Admin</span>
+    <i class="fas fa-chevron-down chevron" style="font-size:.5rem"></i>
+  </button>
+  <div class="sidebar-group-links collapsed">
+    <a href="/superadmin/ivan/" onclick="closeSidebar()" style="color:var(--gold)"><i class="fas fa-fire"></i> <span>Upravljačka ploča</span></a>
+    <a href="/hr/companies/komitenti/" onclick="closeSidebar()"><i class="fas fa-users-cog"></i> <span>Komitenti</span></a>
+    <a href="/superadmin/users/" onclick="closeSidebar()"><i class="fas fa-users"></i> <span>Korisnici</span></a>
+    <a href="/umbrella/" onclick="closeSidebar()"><i class="fas fa-sitemap"></i> <span>Umbrella</span></a>
+    <a href="/superadmin/ai/" onclick="closeSidebar()"><i class="fas fa-brain"></i> <span>AI Upravljanje</span></a>
+    <a href="/admin/" target="_blank" onclick="closeSidebar()"><i class="fas fa-tools"></i> <span>Django Admin</span></a>
+  </div>
+</div>
+{% endif %}
