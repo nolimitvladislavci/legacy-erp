@@ -8,7 +8,6 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect
 
 from .engine import get_engine
-from .manager import PermissionManager
 
 
 def require_permission(permission_codename, company_param='company_id'):
@@ -62,6 +61,8 @@ def require_permission(permission_codename, company_param='company_id'):
 
         return wrapper
     return decorator
+
+
 def require_any_permission(*permission_codenames, company_param='company_id'):
     """Require ANY of the listed permissions"""
     def decorator(view_func):
@@ -94,6 +95,8 @@ def require_any_permission(*permission_codenames, company_param='company_id'):
 
         return wrapper
     return decorator
+
+
 def require_role(*role_types):
     """
     Require specific role(s)
@@ -121,9 +124,21 @@ def require_role(*role_types):
                 except Exception:
                     pass
 
-            user_role = PermissionManager.get_user_role(request.user)
+            # Check UserRole via RBAC
+            from .models import UserRole
+            ur = UserRole.objects.filter(
+                user=request.user, is_primary=True, role__is_active=True
+            ).select_related('role').first()
+            user_role = ur.role if ur and ur.is_valid() else None
 
             if not user_role or user_role.role_type not in role_types:
+                # Fallback: check profile.role
+                try:
+                    profile_role = request.user.profile.role
+                    if profile_role in role_types:
+                        return view_func(request, *args, **kwargs)
+                except Exception:
+                    pass
                 messages.error(request, 'Nemate odgovarajucu ulogu')
                 return HttpResponseForbidden('Insufficient role')
 
@@ -137,21 +152,11 @@ def cockpit_required(json_response=False):
     """
     Dekorator za Fenix Cockpit viewove.
     Dozvoljava pristup superuserima i korisnicima u COCKPIT_USERS.
-
-    Koristi:
-        @cockpit_required()
-        def moj_view(request): ...
-
-        @cockpit_required(json_response=True)
-        def moj_api(request): ...
     """
-    from functools import wraps
-
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                from django.shortcuts import redirect
                 return redirect('login')
             from core.cockpit_views import _cockpit_allowed
             if not _cockpit_allowed(request.user):

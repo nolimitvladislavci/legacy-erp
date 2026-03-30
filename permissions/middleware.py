@@ -2,7 +2,7 @@ from django.utils.deprecation import MiddlewareMixin
 
 
 class RolePermissionMiddleware(MiddlewareMixin):
-    """Attach user_permissions (set of codenames) and user_role to request."""
+    """Attach user_permissions i user_role na request. FAL Faza 3."""
 
     SKIP_PREFIXES = ('/static/', '/media/', '/admin/', '/i18n/', '/health/')
 
@@ -12,23 +12,58 @@ class RolePermissionMiddleware(MiddlewareMixin):
             request.user_role = None
             return None
 
-        # Skip for static / admin paths
         path = request.path
         if any(path.startswith(p) for p in self.SKIP_PREFIXES):
             request.user_permissions = set()
             request.user_role = None
             return None
 
-        from .manager import PermissionManager
+        from .engine import get_engine
+        from .models import Permission, UserRole
 
-        # Superadmin bypass — gets all permissions
-        if request.user.is_superuser:
-            from .models import Permission
+        user = request.user
+
+        # Superuser bypass
+        if user.is_superuser:
             request.user_permissions = set(
                 Permission.objects.filter(is_active=True).values_list('codename', flat=True)
             )
-        else:
-            request.user_permissions = PermissionManager.get_user_permissions(request.user)
+            request.user_role = 'superadmin'
+            return None
 
-        request.user_role = PermissionManager.get_user_role(request.user)
+        # Company iz requesta
+        company = getattr(request, 'current_company', None)
+
+        # Permissions: provjeri profil brzi path, inace RBAC
+        try:
+            role = user.profile.role
+            if role in ('company_admin', 'tenant_admin', 'superadmin'):
+                request.user_permissions = set(
+                    Permission.objects.filter(is_active=True).values_list('codename', flat=True)
+                )
+            else:
+                # RBAC: dohvati permissions iz UserRole
+                perms = set()
+                urs = UserRole.objects.filter(
+                    user=user, role__is_active=True
+                ).select_related('role')
+                if company:
+                    from django.db.models import Q
+                    urs = urs.filter(Q(company=company) | Q(company__isnull=True))
+                for ur in urs:
+                    if ur.is_valid():
+                        perms.update(ur.role.get_all_permissions())
+                request.user_permissions = perms
+        except Exception:
+            request.user_permissions = set()
+
+        # UserRole za request
+        try:
+            ur = UserRole.objects.filter(
+                user=user, is_primary=True
+            ).select_related('role').first()
+            request.user_role = ur.role.role_type if ur else getattr(user.profile, 'role', None)
+        except Exception:
+            request.user_role = None
+
         return None

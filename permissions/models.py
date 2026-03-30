@@ -223,3 +223,7 @@ def clear_user_permission_cache(sender, instance, **kwargs):
     """Clear user permission cache"""
     cache_key = f"user_perms_{instance.user.id}"
     cache.delete(cache_key)
+
+
+# AI Policy models (FAL Faza 3)
+from permissions.ai_policy import AIAccessToken  # noqa: E402, F401
