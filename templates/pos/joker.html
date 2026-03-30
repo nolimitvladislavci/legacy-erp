@@ -268,6 +268,80 @@
 </style>
 {% endif %}
 
+
+{% if is_gastro %}
+<style>
+.gastro-tbl:hover{border-color:var(--gold)!important;transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#gastro-tables{max-height:200px;overflow-y:auto}
+@media(max-width:600px){#gastro-tables{max-height:150px}}
+</style>
+{% endif %}
+
+<style>
+/* ── POS Mode Bar (mobile only) ──────────────────── */
+.pos-mode-bar {
+  display: none; /* hidden on desktop */
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 7000;
+  height: 56px; background: #0a0a0a; border-top: 1px solid rgba(201,168,76,0.3);
+  justify-content: space-around; align-items: center; padding: 0 8px;
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+@media(max-width:900px) { .pos-mode-bar { display: flex; } }
+.mode-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; color: #64748b; font-size: 10px; font-weight: 600;
+  padding: 4px 8px; cursor: pointer; font-family: inherit; transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.mode-btn.active { color: #c9a84c; }
+.mode-btn i { font-size: 20px; }
+.mode-btn-center {
+  width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #c9a84c, #b8973e);
+  display: flex; align-items: center; justify-content: center; border: 3px solid #0a0a0a;
+  box-shadow: 0 4px 16px rgba(201,168,76,0.4); margin-top: -16px;
+  color: #000; font-size: 22px; cursor: pointer; transition: all 0.2s;
+}
+.mode-btn-center:active { transform: scale(0.92); }
+
+/* ── Basket Drawer (mobile) ──────────────────────── */
+@media(max-width:900px) {
+  .qp-right {
+    position: fixed; bottom: 56px; left: 0; right: 0; z-index: 6000;
+    max-height: 45vh; min-height: 0; height: auto;
+    background: #0d0d12; border-top: 2px solid rgba(201,168,76,0.4);
+    border-radius: 16px 16px 0 0; transition: transform 0.3s ease;
+    transform: translateY(calc(100% - 44px)); /* collapsed: only total visible */
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
+  }
+  .qp-right.peek { transform: translateY(0); }
+  .qp-right.full { max-height: 80vh; transform: translateY(0); }
+  .qp-left { padding-bottom: 100px; } /* space for drawer + mode bar */
+  .drawer-handle {
+    width: 40px; height: 4px; background: rgba(201,168,76,0.5); border-radius: 2px;
+    margin: 8px auto 4px; cursor: grab;
+  }
+  .basket-totals { cursor: pointer; }
+}
+@media(min-width:901px) { .drawer-handle { display: none; } }
+
+/* ── Quick Keys Overlay ──────────────────────────── */
+.qk-overlay {
+  display: none; position: fixed; bottom: 56px; left: 0; right: 0; z-index: 7500;
+  max-height: 60vh; background: #0d0d12; border-top: 2px solid rgba(201,168,76,0.5);
+  border-radius: 16px 16px 0 0; padding: 16px; overflow-y: auto;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.7);
+  animation: slideUp 0.25s ease-out;
+}
+.qk-overlay.show { display: block; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.qk-overlay-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.qk-overlay-title { font-size: 1rem; font-weight: 700; color: #c9a84c; }
+.qk-overlay-close { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 4px 8px; }
+.qk-overlay-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.qk-overlay-grid .prod-btn { min-height: 64px; }
+@media(max-width:500px) { .qk-overlay-grid { grid-template-columns: repeat(3, 1fr); } }
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -367,6 +441,40 @@
       <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#22c55e;position:relative;display:inline-block"></div>
       <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
       <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">{% trans "slobodan" %}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+{% if is_gastro %}
+<!-- ═══ GASTRO: Table Grid ════════════════════════════════════════════════ -->
+<div id="gastro-tables" style="padding:.6rem;border-bottom:2px solid var(--gold)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+    <div style="font-size:.85rem;font-weight:700;color:var(--gold)">
+      <i class="fas fa-utensils"></i> Raspored stolova
+      {% if open_receipts %}<span style="font-size:.7rem;color:var(--muted);margin-left:.5rem">{{ open_receipts|length }} aktivni{{ open_receipts|length|pluralize:",h" }}</span>{% endif %}
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="openGastroNewBon()" style="font-size:.75rem">+ Novi bon</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:.4rem">
+    {% for t in tables %}
+    {% if t.receipt %}
+    <div class="gastro-tbl gastro-tbl-occ" data-table="{{ t.num }}" data-rid="{{ t.receipt.id }}" onclick="selectGastroTable(this)"
+         style="background:rgba(239,68,68,.08);border:2px solid #ef4444;border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;position:relative;transition:all .15s">
+      <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#ef4444"></div>
+      <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
+      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">stol</div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--gold)">&euro;{{ t.receipt.total|floatformat:2 }}</div>
+    </div>
+    {% else %}
+    <div class="gastro-tbl gastro-tbl-free" data-table="{{ t.num }}" data-rid="" onclick="selectGastroTable(this)"
+         style="background:var(--card);border:2px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;transition:all .15s">
+      <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#22c55e;position:relative;display:inline-block"></div>
+      <div style="font-size:1.2rem;font-weight:800">{{ t.num }}</div>
+      <div style="font-size:.6rem;text-transform:uppercase;color:var(--muted)">slobodan</div>
     </div>
     {% endif %}
     {% endfor %}
@@ -496,6 +604,7 @@
 
   <!-- RIGHT: Basket + Payment -->
   <div class="qp-right">
+    <div class="drawer-handle" id="drawerHandle"></div>
     <div class="basket-head">
       {% trans "🛒 Košarica" %}
       <button onclick="clearBasket()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.72rem" title="{% trans "Isprazni" %}">{% trans "🗑 Isprazni" %}</button>
@@ -576,6 +685,43 @@
       </div>
     </div>
   </div>
+
+<!-- Quick Keys Overlay -->
+<div class="qk-overlay" id="qkOverlay">
+  <div class="qk-overlay-head">
+    <span class="qk-overlay-title"><i class="fas fa-bolt"></i> Brze tipke</span>
+    <button class="qk-overlay-close" onclick="toggleQuickKeys()">&times;</button>
+  </div>
+  <div class="qk-overlay-grid">
+    {% for item in quick_items %}
+    <button class="prod-btn" onclick="addItem({{ item.id }}, '{{ item.name|escapejs }}', {{ item.selling_price|default:item.price }})">
+      <div class="prod-name">{{ item.name|truncatewords:3 }}</div>
+      <div class="prod-price">{{ item.selling_price|default:item.price|floatformat:2 }} &euro;</div>
+    </button>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ═══ MOBILE MODE BAR ═══ -->
+<div class="pos-mode-bar" id="posModeBar">
+  <button class="mode-btn {% if not is_gastro %}active{% endif %}" onclick="posSetMode('retail')" id="modeRetail">
+    <i class="fas fa-store"></i><span>Retail</span>
+  </button>
+  <button class="mode-btn {% if is_gastro %}active{% endif %}" onclick="posSetMode('gastro')" id="modeGastro">
+    <i class="fas fa-utensils"></i><span>Gastro</span>
+  </button>
+  <div class="mode-btn-center" onclick="toggleBasketDrawer()">
+    <i class="fas fa-cash-register"></i>
+  </div>
+  <button class="mode-btn" onclick="toggleBasketDrawer()" id="modeBasket">
+    <i class="fas fa-shopping-cart"></i><span>Košarica</span>
+    <span id="modeBasketBadge" style="position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;display:none;align-items:center;justify-content:center"></span>
+  </button>
+  <button class="mode-btn" onclick="toggleQuickKeys()" id="modeQuick">
+    <i class="fas fa-bolt"></i><span>Brze</span>
+  </button>
+</div>
+
 </div>
 
 <!-- PIN Modal -->
@@ -756,6 +902,43 @@
 <script src="/static/js/pos/pos-fiscal.js"></script>
 <script src="/static/js/html5-qrcode.min.js"></script>
 <script src="/static/js/pos/pos-scanner.js"></script>
+
+{% if is_gastro %}
+<script src="/static/js/pos/pos-restaurant.js"></script>
+<script src="/static/js/pos/pos-pfand.js"></script>
+<script>
+// ── Gastro Table Interaction ──────────────────────────────
+window._gastroSelectedTable = null;
+function selectGastroTable(el) {
+  document.querySelectorAll('.gastro-tbl').forEach(t => t.style.boxShadow = '');
+  el.style.boxShadow = '0 0 0 3px rgba(201,168,76,.4)';
+  window._gastroSelectedTable = el.dataset.table;
+  const rid = el.dataset.rid;
+  if (rid) {
+    // Load existing receipt into basket
+    fetch('/pos/api/receipt/' + rid + '/json/', {headers:{'Accept':'application/json'}})
+      .then(r => r.ok ? r.json() : Promise.reject(r))
+      .then(data => {
+        if (typeof loadReceiptIntoBasket === 'function') loadReceiptIntoBasket(data);
+        fenixToast('Stol ' + el.dataset.table + ' učitan');
+      })
+      .catch(() => fenixToast('Greška pri učitavanju stola', 'error'));
+  } else {
+    // Clear basket for new table
+    if (typeof clearBasket === 'function') clearBasket();
+    fenixToast('Stol ' + el.dataset.table + ' — novi bon');
+  }
+}
+function openGastroNewBon() {
+  const table = prompt('Broj stola (prazno za šank):');
+  if (table !== null) {
+    window._gastroSelectedTable = table || null;
+    if (typeof clearBasket === 'function') clearBasket();
+    fenixToast(table ? 'Stol ' + table + ' — spreman' : 'Šank — spreman');
+  }
+}
+</script>
+{% endif %}
 
 {% if is_gastro %}
 <script src="/static/js/pos/pos-restaurant.js"></script>
@@ -1242,6 +1425,70 @@ function _openMembershipRenewPrompt() {
     addManualAmount(parseFloat(amt), 'Članarina');
   }
 }
+</script>
+
+
+<script>
+// ── Mode Bar Logic ──
+function posSetMode(mode) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1))?.classList.add('active');
+  // Toggle gastro tables visibility
+  const gastroSection = document.getElementById('gastro-tables');
+  if (gastroSection) gastroSection.style.display = mode === 'gastro' ? '' : 'none';
+}
+
+// ── Basket Drawer ──
+function toggleBasketDrawer() {
+  const drawer = document.querySelector('.qp-right');
+  if (!drawer) return;
+  if (drawer.classList.contains('peek')) {
+    drawer.classList.remove('peek', 'full');
+  } else {
+    drawer.classList.add('peek');
+  }
+}
+// Click on totals toggles drawer
+document.querySelector('.basket-totals')?.addEventListener('click', function(e) {
+  if (window.innerWidth <= 900) { e.stopPropagation(); toggleBasketDrawer(); }
+});
+// Update basket badge
+function updateBasketBadge() {
+  const count = document.querySelectorAll('.b-row').length;
+  const badge = document.getElementById('modeBasketBadge');
+  if (badge) {
+    if (count > 0) { badge.textContent = count; badge.style.display = 'flex'; }
+    else { badge.style.display = 'none'; }
+  }
+}
+// Call after any cart change
+const origAddItem = window.addItem;
+if (origAddItem) {
+  window.addItem = function() {
+    origAddItem.apply(this, arguments);
+    setTimeout(updateBasketBadge, 200);
+  };
+}
+
+// ── Quick Keys Overlay ──
+function toggleQuickKeys() {
+  const overlay = document.getElementById('qkOverlay');
+  if (overlay) overlay.classList.toggle('show');
+}
+
+// ── Drawer touch handling ──
+(function() {
+  const handle = document.getElementById('drawerHandle');
+  if (!handle) return;
+  let startY = 0;
+  handle.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
+  handle.addEventListener('touchend', e => {
+    const dy = startY - e.changedTouches[0].clientY;
+    const drawer = document.querySelector('.qp-right');
+    if (dy > 30) { drawer.classList.add('peek'); } // swipe up
+    else if (dy < -30) { drawer.classList.remove('peek', 'full'); } // swipe down
+  }, {passive:true});
+})();
 </script>
 
 {% endblock %}
