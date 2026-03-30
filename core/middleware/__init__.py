@@ -109,45 +109,30 @@ class ForcePasswordChangeMiddleware(MiddlewareMixin):
 
 class Force2FAMiddleware:
     """
-    Blokira superadmin, company_admin i tenant_admin korisnike
-    koji nemaju aktiviran TOTP 2FA.
-    Preusmjerava ih na /2fa/setup/ dok god totp_enabled != True.
-
-    Anti-loop: poruka se dodaje samo jednom (nema message spama).
+    Blokira admin korisnike bez aktiviranog TOTP 2FA.
+    FAL Faza 1: koristi RouteRegistry.is_public() umjesto path string matchinga.
+    Rješava i18n bug: /hr/2fa/setup/ i /en/2fa/setup/ obje su PUBLIC.
     """
-
-    WHITELISTED_PREFIXES = (
-        '/2fa/',
-        '/hr/2fa/',
-        '/de/2fa/',
-        '/en/2fa/',
-        '/accounts/logout',
-        '/hr/logout',
-        '/de/logout',
-        '/logout',
-        '/static/',
-        '/media/',
-        '/health/',
-        '/api/',
-        '/admin/',
-        '/__debug__/',
-        '/i18n/',
-    )
-
     ENFORCED_ROLES = ('superadmin', 'company_admin', 'tenant_admin')
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        from permissions.route_registry import RouteRegistry
+
+        # Nelogirani → propusti
         if not getattr(request, 'user', None) or not request.user.is_authenticated:
             return self.get_response(request)
 
-        # Whitelist — propusti bez provjere
-        path = request.path
-        for prefix in self.WHITELISTED_PREFIXES:
-            if path.startswith(prefix):
-                return self.get_response(request)
+        # Javne rute (PUBLIC + AUTHENTICATED) → propusti bez provjere 2FA
+        if RouteRegistry.is_public(request) or RouteRegistry.requires_auth_only(request):
+            return self.get_response(request)
+
+        # 2FA setup/verify view — uvijek propusti (view_name check kao sigurnosna mreža)
+        view_name = getattr(getattr(request, 'resolver_match', None), 'url_name', '')
+        if view_name in ('setup_2fa', 'verify_2fa'):
+            return self.get_response(request)
 
         # Provjeri samo kriticne uloge
         try:
@@ -191,25 +176,22 @@ class ForceTCMiddleware:
     Superadmini su izuzeti.
     """
 
-    WHITELISTED_PREFIXES = (
-        '/legal/', '/accounts/logout', '/logout', '/static/', '/media/',
-        '/digitalni-posrednik/', '/partners/wizard/',
-        '/health/', '/api/', '/admin/', '/__debug__/', '/i18n/', '/2fa/', '/login',
-    )
-
     TC_CURRENT_VERSION = 'v1.0-2026'
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        from permissions.route_registry import RouteRegistry, AccessLevel
+
+        # Nelogirani → propusti
         if not getattr(request, 'user', None) or not request.user.is_authenticated:
             return self.get_response(request)
 
-        path = request.path
-        for prefix in self.WHITELISTED_PREFIXES:
-            if path.startswith(prefix):
-                return self.get_response(request)
+        # Javne i samo-authenticated rute ne trebaju TC consent
+        level = RouteRegistry.get_access_level(request)
+        if level in (AccessLevel.PUBLIC, AccessLevel.AUTHENTICATED):
+            return self.get_response(request)
 
         if request.user.is_superuser:
             return self.get_response(request)
