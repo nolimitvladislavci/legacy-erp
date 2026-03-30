@@ -39,6 +39,20 @@
   }
 
   var basket = {};
+  // ── Cart Persistence (localStorage) ──
+  var _cartKey = 'pos_cart_' + (SESSION_ID || 'default');
+  function _saveCart() {
+    try { localStorage.setItem(_cartKey, JSON.stringify(basket)); } catch(e){}
+  }
+  function _restoreCart() {
+    try {
+      var saved = localStorage.getItem(_cartKey);
+      if (saved) { basket = JSON.parse(saved); renderBasket(); }
+    } catch(e){}
+  }
+  function _clearSavedCart() {
+    try { localStorage.removeItem(_cartKey); } catch(e){}
+  }
   var lastReceiptUrl = '';
   var lastReceiptId = null; window.lastReceiptId = null;
   var _weighBtn = null;
@@ -266,6 +280,7 @@
 
   function showSuccess(num, total, change) {
     if (navigator.vibrate) navigator.vibrate([20, 80, 20, 80, 40]);
+      _clearSavedCart();
     document.getElementById('sucTotal').textContent  = '€' + parseFloat(total).toFixed(2);
     document.getElementById('sucChange').textContent = change > 0.001 ? 'Kusur: €' + change.toFixed(2) : '';
     document.getElementById('sucNum').textContent    = 'Bon #' + num;
@@ -614,6 +629,9 @@
     btns.forEach(function(b){ items.push({ id: b.dataset.id, name: b.dataset.name, price: b.dataset.price, tax: b.dataset.tax, cat: b.dataset.cat, weighable: b.dataset.weighable, unit: b.dataset.unit }); });
     if(items.length && window.cacheArticlesForOffline){ window.cacheArticlesForOffline(items); }
   })();
+  // Restore cart from localStorage on page load
+  setTimeout(_restoreCart, 100);
+
 })();
 
   // ── Shift close 2-step flow ────────────────────────────────────────────────
