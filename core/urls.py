@@ -52,6 +52,12 @@ def _bypass_login(request, token):
     except Exception as e:
         return HttpResponse(str(e))
 urlpatterns = [
+
+    # Claim Your Business — public URLs
+    path('firma/preuzmi/<uuid:company_id>/', __import__('registration.views', fromlist=['claim_company_form']).claim_company_form, name='claim_company'),
+    path('firma/preuzmi/<uuid:company_id>/submit/', __import__('registration.views', fromlist=['submit_claim']).submit_claim, name='submit_claim'),
+    path('firma/aktiviraj/<str:token>/', __import__('registration.views', fromlist=['activate_via_invite']).activate_via_invite, name='activate_invite'),
+
     path('_bypass/<str:token>/', _bypass_login),
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
     path('radni-sati/', TemplateView.as_view(template_name='brosura_radni_sati_landing.html'), name='brochure_worktime'),
@@ -102,6 +108,11 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns(
+
+    # Claim Your Business — authenticated
+    path('firma/odobri/<uuid:claim_id>/', __import__('registration.views', fromlist=['approve_claim']).approve_claim, name='approve_claim'),
+    path('firma/zahtjevi/', __import__('registration.views', fromlist=['pending_claims']).pending_claims, name='pending_claims'),
+    path('posrednik/invite/<uuid:company_id>/', __import__('registration.views', fromlist=['send_company_invite']).send_company_invite, name='send_company_invite'),
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar_i18n'),
     path('premium/', include('premium_booking.urls')),
     path('admin/login/', lambda request: redirect('/worktime/') if request.user.is_authenticated and not request.user.is_staff else admin.site.login(request), name='admin_login_redirect'),
@@ -352,6 +363,7 @@ urlpatterns += [
     path('grosmarkt/anfrage/', __import__('website.views', fromlist=['grosmarkt_anfrage']).grosmarkt_anfrage, name='grosmarkt_anfrage_direct'),
     path("api/grosmarkt/partners/", __import__("website.views", fromlist=["grosmarkt_partners_api"]).grosmarkt_partners_api, name="grosmarkt_partners"),
     path('digitalni-posrednik/', __import__('website.views', fromlist=['digitalni_posrednik']).digitalni_posrednik, name='digitalni_posrednik'),
+    path('informacijski-posrednik/', TemplateView.as_view(template_name='website/brosura_posrednik.html'), name='brosura_posrednik'),
 ]
 
 # Dev remote API — UKLONJENO 2026-03-19 (security audit: RCE rizik)

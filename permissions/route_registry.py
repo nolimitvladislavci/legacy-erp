@@ -37,6 +37,7 @@ ROUTE_REGISTRY: dict = {
     'health_check':                AccessLevel.PUBLIC,
     'brochure_croxmlverify':       AccessLevel.PUBLIC,
     'no_limit_web':                AccessLevel.PUBLIC,
+    'brosura_posrednik':           AccessLevel.PUBLIC,
     'brochure_golubar':            AccessLevel.PUBLIC,
     'brochure_golubar_i18n':       AccessLevel.PUBLIC,
     'pricing':                     AccessLevel.PUBLIC,
@@ -151,6 +152,21 @@ ROUTE_REGISTRY: dict = {
     'tc_consent_status':           AccessLevel.SUPERADMIN,
     'tc_consent_remind':           AccessLevel.SUPERADMIN,
     'borg_error_queue':            AccessLevel.SUPERADMIN,
+
+    # Claim Your Business
+    'claim_company':               AccessLevel.PUBLIC,
+    'submit_claim':                AccessLevel.PUBLIC,
+    'activate_invite':             AccessLevel.PUBLIC,
+    'approve_claim':               AccessLevel.AUTHENTICATED,
+    'pending_claims':              AccessLevel.AUTHENTICATED,
+    'send_company_invite':         AccessLevel.AUTHENTICATED,
+
+    # Mandate (eracun)
+    'eracun:mandate_list':         AccessLevel.AUTHENTICATED,
+    'eracun:mandate_create':       AccessLevel.AUTHENTICATED,
+    'eracun:mandate_activate':     AccessLevel.AUTHENTICATED,
+    'eracun:mandate_revoke':       AccessLevel.AUTHENTICATED,
+    'eracun:mandate_bulk_umbrella': AccessLevel.AUTHENTICATED,
 }
 
 
