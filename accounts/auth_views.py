@@ -118,7 +118,7 @@ def get_dashboard_url(user):
         role = profile.role
         urls = {
             'superadmin':     '/superadmin/',
-            'company_admin':  '/dashboard/company/',
+            'company_admin':  '/hr/pos/',
             'project_manager':'/dashboard/manager/',
             'worker':         '/dashboard/worker/',
             'investor':       '/dashboard/investor/',

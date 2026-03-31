@@ -65,11 +65,11 @@ def _check_tenant(request, obj):
 
 @login_required
 def dashboard(request):
-    """
-    POS dashboard — redirecta na quick_pos_redirect koji pametan odlučuje.
-    Jedan terminal → direktno na Joker. Više → selector.
-    """
-    return redirect('pos:quick_pos_redirect')
+    company = get_user_company(request)
+    terminals = POSTerminal.objects.filter(company=company, is_active=True) if company else POSTerminal.objects.none()
+    for t in terminals:
+        t.active_session = t.sessions.filter(status=POSSession.Status.OPEN).first()
+    return render(request, 'pos/dashboard.html', {'terminals': terminals})
 
 
 @login_required
