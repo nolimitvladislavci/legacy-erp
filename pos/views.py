@@ -65,11 +65,11 @@ def _check_tenant(request, obj):
 
 @login_required
 def dashboard(request):
-    company = get_user_company(request)
-    terminals = POSTerminal.objects.filter(company=company, is_active=True) if company else POSTerminal.objects.none()
-    for t in terminals:
-        t.active_session = t.sessions.filter(status=POSSession.Status.OPEN).first()
-    return render(request, 'pos/dashboard.html', {'terminals': terminals})
+    """
+    POS dashboard — redirecta na quick_pos_redirect koji pametan odlučuje.
+    Jedan terminal → direktno na Joker. Više → selector.
+    """
+    return redirect('pos:quick_pos_redirect')
 
 
 @login_required
@@ -900,27 +900,38 @@ _POS_ICON = {t['value']: t['icon'] for t in POS_TYPE_META}
 
 @login_required
 def quick_pos_redirect(request):
-    """POS selector — brza blagajna je default, mogu se pregledati i ostali tipovi."""
+    """
+    FENIX ENTRY POINT — jedan klik do blagajne.
+
+    Logika:
+    1. Jedan terminal → direktno na Joker POS (Cashier Gate otvara se automatski)
+    2. Jedan terminal s otvorenom smjenom → direktno
+    3. Više terminala → smart selector (ne dashboard)
+    """
     company = get_user_company(request)
-    terminals = list(POSTerminal.objects.filter(company=company, is_active=True).order_by('pos_type'))
+    if not company:
+        return redirect('pos:dashboard')
 
-    # Ako postoji TOČNO jedan quick terminal s otvorenom smjenom — otvori direktno
-    quick_open = [
-        t for t in terminals
-        if t.pos_type == 'quick' and t.sessions.filter(status=POSSession.Status.OPEN).exists()
-    ]
-    if len(quick_open) == 1 and len(terminals) == 1:
-        return redirect('pos:pos_joker', terminal_id=quick_open[0].pk)
+    terminals = list(POSTerminal.objects.filter(
+        company=company, is_active=True
+    ).order_by('name'))
 
-    # Inače — prikaži selector
+    if not terminals:
+        return redirect('pos:dashboard')
+
+    # ── Slučaj 1: Točno jedan terminal → direktno bez pitanja ──
+    if len(terminals) == 1:
+        return redirect('pos:pos_joker', terminal_id=terminals[0].pk)
+
+    # ── Slučaj 2: Ima otvorena smjena → idi tamo odmah ──
+    for t in terminals:
+        if t.sessions.filter(status=POSSession.Status.OPEN).exists():
+            return redirect('pos:pos_joker', terminal_id=t.pk)
+
+    # ── Slučaj 3: Više terminala bez sesije → smart selector ──
     for t in terminals:
         t.icon = _POS_ICON.get(t.pos_type, '🖥')
-        sess = t.sessions.filter(status=POSSession.Status.OPEN).first()
-        t.active_session = sess
-        if sess:
-            t.url = f'/pos/joker/{t.pk}/'
-        else:
-            t.url = f'/pos/terminal/{t.pk}/'
+        t.active_session = t.sessions.filter(status=POSSession.Status.OPEN).first()
 
     return render(request, 'pos/selector.html', {
         'company': company,
