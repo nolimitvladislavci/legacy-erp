@@ -812,29 +812,6 @@
   <div class="voice-status" id="voiceStatus">Govorite jasno</div>
 </div>
 
-<!-- Fullscreen Numpad -->
-<div class="numpad-overlay" id="numpadOverlay" style="background:#111827!important;color:#e2e8f0!important">
-  <div class="numpad-label" id="numpadLabel">Količina</div>
-  <div class="numpad-display" id="numpadDisplay">1</div>
-  <div class="numpad-grid">
-    <button class="numpad-btn" onclick="numpadPress('1')">1</button>
-    <button class="numpad-btn" onclick="numpadPress('2')">2</button>
-    <button class="numpad-btn" onclick="numpadPress('3')">3</button>
-    <button class="numpad-btn" onclick="numpadPress('4')">4</button>
-    <button class="numpad-btn" onclick="numpadPress('5')">5</button>
-    <button class="numpad-btn" onclick="numpadPress('6')">6</button>
-    <button class="numpad-btn" onclick="numpadPress('7')">7</button>
-    <button class="numpad-btn" onclick="numpadPress('8')">8</button>
-    <button class="numpad-btn" onclick="numpadPress('9')">9</button>
-    <button class="numpad-btn red" onclick="numpadPress('C')">C</button>
-    <button class="numpad-btn" onclick="numpadPress('0')">0</button>
-    <button class="numpad-btn gold" onclick="numpadPress('.')">.</button>
-  </div>
-  <div class="numpad-actions">
-    <button onclick="numpadCancel()" style="background:rgba(255,255,255,.1);color:#94a3b8">Odustani</button>
-    <button onclick="numpadConfirm()" style="background:#c9a84c;color:#000">Potvrdi</button>
-  </div>
-</div>
 
 <!-- ═══ MOBILE MODE BAR ═══ -->
 <div class="pos-mode-bar" id="posModeBar">
@@ -1631,7 +1608,7 @@ function openNumpad(label, currentVal, callback, itemId) {
   _numpadItemId = itemId;
   document.getElementById('numpadLabel').textContent = label || 'Količina';
   document.getElementById('numpadDisplay').textContent = _numpadValue || '0';
-  document.getElementById('numpadOverlay').classList.add('show');
+  var no=document.getElementById('numpadOverlay'); no.classList.add('show'); no.style.visibility='visible'; no.style.pointerEvents='auto';
   if (navigator.vibrate) navigator.vibrate(10);
 }
 function numpadPress(key) {
@@ -1642,7 +1619,7 @@ function numpadPress(key) {
   document.getElementById('numpadDisplay').textContent = _numpadValue || '0';
 }
 function numpadCancel() {
-  document.getElementById('numpadOverlay').classList.remove('show');
+  var no2=document.getElementById('numpadOverlay'); no2.classList.remove('show'); no2.style.visibility='hidden'; no2.style.pointerEvents='none';
   _numpadCallback = null;
   _numpadValue = '';
 }
