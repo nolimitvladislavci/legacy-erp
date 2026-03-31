@@ -59,14 +59,17 @@
   var lastReceiptId = null; window.lastReceiptId = null;
   var _weighBtn = null;
 
-  window.addProduct = function(btn) {
-    var rect = btn.getBoundingClientRect();
-    var rip  = document.createElement('div');
-    rip.className = 'ripple';
-    rip.style.left = (event.clientX - rect.left) + 'px';
-    rip.style.top  = (event.clientY - rect.top)  + 'px';
-    btn.appendChild(rip);
-    setTimeout(function(){ rip.remove(); }, 400);
+  window.addProduct = function(btn, programmatic) {
+    // Ripple animacija — samo kod user-klika (event postoji)
+    if (!programmatic && typeof event !== 'undefined' && event && event.clientX) {
+      var rect = btn.getBoundingClientRect();
+      var rip  = document.createElement('div');
+      rip.className = 'ripple';
+      rip.style.left = (event.clientX - rect.left) + 'px';
+      rip.style.top  = (event.clientY - rect.top)  + 'px';
+      btn.appendChild(rip);
+      setTimeout(function(){ rip.remove(); }, 400);
+    }
 
     if (btn.dataset.weighable === '1') {
       _weighBtn = btn;
@@ -159,7 +162,7 @@
         '</div>' +
         '<div class="b-qty-ctrl">' +
         '<button class="bq-btn" onclick="changeQty(\'' + id + '\',-1)">−</button>' +
-        '<span class="b-qty" onclick="if(window.innerWidth<=900)openNumpad(\'' + item.name.replace(/'/g,'') + '\', ' + item.qty + ', updateItemQty, \'' + id + '\')">' + item.qty + '</span>' +
+        '<span class="b-qty">' + item.qty + '</span>' +
         '<button class="bq-btn" onclick="changeQty(\'' + id + '\',1)">+</button>' +
         '</div>' +
         '<div class="b-price">€' + (item.price * item.qty).toFixed(2) + '</div>' +

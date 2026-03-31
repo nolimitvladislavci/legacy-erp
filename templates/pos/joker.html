@@ -1643,7 +1643,15 @@ function numpadPress(key) {
 function numpadCancel() {
   document.getElementById('numpadOverlay').classList.remove('show');
   _numpadCallback = null;
+  _numpadValue = '';
 }
+// Zatvori numpad klikom izvan
+document.addEventListener('click', function(e) {
+  var overlay = document.getElementById('numpadOverlay');
+  if (overlay && overlay.classList.contains('show') && !overlay.contains(e.target)) {
+    numpadCancel();
+  }
+});
 function numpadConfirm() {
   var val = parseFloat(_numpadValue) || 0;
   if (_numpadCallback) _numpadCallback(val, _numpadItemId);
