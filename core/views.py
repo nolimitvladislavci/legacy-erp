@@ -2381,8 +2381,8 @@ def smart_home(request):
     # Check profile role
     role = getattr(getattr(user, 'profile', None), 'role', None)
 
-    if role == 'manager' or (user.is_staff and not user.is_superuser):
-        return redirect('manager_dashboard')
+    if role in ('company_admin', 'project_manager') or (user.is_staff and not user.is_superuser):
+        return redirect('pos:dashboard')
     elif role == 'investor':
         return redirect('investor_dashboard')
     elif role == 'partner':
@@ -2390,7 +2390,7 @@ def smart_home(request):
     elif role == 'worker':
         return redirect('worker_dashboard')
     else:
-        return redirect('company_dashboard')
+        return redirect('pos:dashboard')
 
 
 # ══════════════════════════════════════════════════════════════
