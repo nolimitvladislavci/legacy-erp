@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Odobri pristup — {{ claim.company.name }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:600px;margin:40px auto">
+  <h2 style="color:var(--gold);font-family:'Cormorant Garamond',serif">Zahtjev za pristup firmi</h2>
+
+  <div style="background:var(--card,#1a1a1a);border:1px solid var(--border,#333);border-radius:12px;padding:20px;margin:20px 0">
+    <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;font-size:.9rem">
+      <span style="color:var(--muted)">Firma:</span><strong>{{ claim.company.name }}</strong>
+      <span style="color:var(--muted)">OIB:</span><span>{{ claim.company.oib }}</span>
+      <span style="color:var(--muted)">Podnositelj:</span><strong>{{ claim.first_name }} {{ claim.last_name }}</strong>
+      <span style="color:var(--muted)">Email:</span><span>{{ claim.email }}</span>
+      {% if claim.phone %}<span style="color:var(--muted)">Telefon:</span><span>{{ claim.phone }}</span>{% endif %}
+      <span style="color:var(--muted)">Tražena uloga:</span><span>{{ claim.role_claimed }}</span>
+      <span style="color:var(--muted)">Datum:</span><span>{{ claim.created_at|date:"d.m.Y. H:i" }}</span>
+    </div>
+
+    {% if stats %}
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border,#333);display:flex;gap:16px;font-size:.8rem">
+      {% if stats.invoices %}<span style="color:var(--gold)">{{ stats.invoices }} faktura</span>{% endif %}
+      {% if stats.partners %}<span style="color:var(--gold)">{{ stats.partners }} partnera</span>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:20px">
+    <form method="post" style="flex:1">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="approve">
+      <button type="submit" style="width:100%;background:var(--gold,#c9a84c);color:#000;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer">
+        ✅ Odobri pristup
+      </button>
+    </form>
+    <form method="post" style="flex:1" onsubmit="var r=prompt('Razlog odbijanja:');if(!r)return false;this.querySelector('[name=reason]').value=r">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="reject">
+      <input type="hidden" name="reason" value="">
+      <button type="submit" style="width:100%;background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);padding:14px;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer">
+        ❌ Odbij
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

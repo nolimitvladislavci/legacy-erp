@@ -509,3 +509,152 @@ class SalesLead(models.Model):
 
     def __str__(self):
         return f'{self.company_name} ({self.status})'
+
+
+# ════════════════════════════════════════════════════════════════════
+# Claim Your Business — 71 ghost firma dobiva pristup
+# ════════════════════════════════════════════════════════════════════
+
+import secrets as _secrets
+
+
+class CompanyClaimRequest(models.Model):
+    """
+    Zahtjev za pristup firmi koja već postoji u sustavu (importirana iz Synesisa).
+
+    Tri ulaza:
+      A) Vlasnik sam traži: /firma/preuzmi/<id>/ → pending → Marija odobri
+      B) Marija šalje invite link: /firma/aktiviraj/<token>/ → vlasnik postavi lozinku
+      C) Bulk invite: management command → CSV s linkovima za WhatsApp
+    """
+    STATUS_CHOICES = [
+        ('pending',  'Čeka odobrenje'),
+        ('approved', 'Odobreno'),
+        ('rejected', 'Odbijeno'),
+        ('expired',  'Isteklo'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='claim_requests',
+    )
+
+    # Podaci vlasnika
+    email = models.EmailField()
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+
+    # Verifikacija
+    oib_confirmed = models.BooleanField(default=False)
+    role_claimed = models.CharField(max_length=50, default='company_admin')
+
+    # Token za invite link
+    verify_token = models.CharField(
+        max_length=64, unique=True,
+        default='',
+    )
+    token_expires = models.DateTimeField()
+
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_by = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='reviewed_claims',
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reject_reason = models.CharField(max_length=300, blank=True)
+
+    # Rezultat
+    created_user = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='created_from_claim',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.verify_token:
+            self.verify_token = _secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = 'company_claim_requests'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['company', 'status']),
+            models.Index(fields=['email', 'status']),
+        ]
+
+    def __str__(self):
+        return f'{self.email} → {self.company.name} [{self.status}]'
+
+    @property
+    def is_token_valid(self):
+        from django.utils import timezone
+        return self.status == 'pending' and timezone.now() < self.token_expires
+
+    def approve(self, reviewed_by):
+        """
+        Odobri zahtjev: kreira User + UserProfile + CompanyMembership.
+        Vraća (user, temp_password).
+        """
+        from django.contrib.auth.models import User
+        from django.db import transaction
+        from django.utils import timezone
+        from accounts.models import UserProfile, CompanyMembership
+
+        with transaction.atomic():
+            # Username iz emaila
+            base_un = self.email.split('@')[0].lower().replace('.', '_')[:25]
+            username = base_un
+            i = 1
+            while User.objects.filter(username=username).exists():
+                username = f'{base_un}{i}'
+                i += 1
+
+            temp_password = _secrets.token_urlsafe(12)
+            user = User.objects.create_user(
+                username=username,
+                email=self.email,
+                password=temp_password,
+                first_name=self.first_name,
+                last_name=self.last_name,
+            )
+
+            UserProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    'company': self.company,
+                    'role': self.role_claimed,
+                    'email_verified': True,
+                    'must_change_password': True,
+                },
+            )
+
+            CompanyMembership.objects.get_or_create(
+                user=user, company=self.company,
+                defaults={'role': self.role_claimed, 'is_active': True, 'is_default': True},
+            )
+
+            # RBAC
+            try:
+                from permissions.models import Role, UserRole
+                role = Role.objects.filter(role_type=self.role_claimed).first()
+                if role:
+                    UserRole.objects.get_or_create(
+                        user=user, role=role, company=self.company,
+                        defaults={'is_primary': True},
+                    )
+            except Exception:
+                pass
+
+            self.status = 'approved'
+            self.reviewed_by = reviewed_by
+            self.reviewed_at = timezone.now()
+            self.created_user = user
+            self.save(update_fields=['status', 'reviewed_by', 'reviewed_at', 'created_user'])
+
+        return user, temp_password

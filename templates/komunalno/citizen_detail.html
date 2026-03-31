@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ card.partner.name }} — Kvote{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px;margin:0 auto">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1"><i class="fas fa-user me-2"></i>{{ card.partner.name }}</h4>
+            <small class="text-muted">Iskaznica: <strong>{{ card.card_number }}</strong> | {{ card.address }} | {{ card.household_members }} član{{ card.household_members|pluralize:"a,ova" }}</small>
+        </div>
+        <a href="{% url 'komunalno:citizen_list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    <!-- Kvote -->
+    <h5 class="mb-3"><i class="fas fa-tachometer-alt me-2"></i>Kvote {{ year }}</h5>
+    {% if quota_data %}
+    <div class="row g-3 mb-4">
+        {% for qd in quota_data %}
+        <div class="col-12 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>{{ qd.category.name }}</strong>
+                    <small class="text-muted">{{ qd.category.key_number }}</small>
+                </div>
+                {% if qd.quota and qd.quota > 0 %}
+                <div class="quota-bar mb-2">
+                    <div class="fill" style="width:{% if qd.percent > 100 %}100{% else %}{{ qd.percent }}{% endif %}%;background:{% if qd.percent >= 90 %}#f44336{% elif qd.percent >= 70 %}#FF9800{% else %}#4CAF50{% endif %}"></div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <small>Iskorišteno: <strong>{{ qd.used|floatformat:1 }} {{ qd.category.unit }}</strong></small>
+                    <small>Kvota: <strong>{{ qd.quota|floatformat:1 }} {{ qd.category.unit }}</strong></small>
+                </div>
+                <small class="text-muted">Preostalo: {% if qd.remaining != None %}{{ qd.remaining|floatformat:1 }} {{ qd.category.unit }}{% else %}Bez limita{% endif %}</small>
+                {% else %}
+                <small class="text-muted">Bez limita — iskorišteno {{ qd.used|floatformat:1 }} {{ qd.category.unit }}</small>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted mb-4">Nema kvotnih podataka za {{ year }}.</p>
+    {% endif %}
+
+    <!-- Deliverije -->
+    <h5 class="mb-3"><i class="fas fa-truck me-2"></i>Dostave {{ year }}</h5>
+    {% if deliveries %}
+    <div class="table-responsive mobile-cards">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Kategorija</th>
+                    <th>Količina</th>
+                    <th>Dvorište</th>
+                    <th>Prekoračenje</th>
+                    <th>Naknada</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in deliveries %}
+                <tr>
+                    <td data-label="Datum">{{ d.delivery_date|date:"d.m.Y H:i" }}</td>
+                    <td data-label="Kategorija">{{ d.category.key_number }} — {{ d.category.name }}</td>
+                    <td data-label="Količina">{{ d.quantity|floatformat:1 }} {{ d.unit }}</td>
+                    <td data-label="Dvorište">{{ d.station.name }}</td>
+                    <td data-label="Prekoračenje">
+                        {% if d.over_quota > 0 %}
+                        <span class="text-danger">+{{ d.over_quota|floatformat:1 }} {{ d.unit }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td data-label="Naknada">
+                        {% if d.charge_amount > 0 %}
+                        <strong class="text-danger">{{ d.charge_amount|floatformat:2 }} €</strong>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-muted">Nema dostava u {{ year }}.</p>
+    {% endif %}
+</div>
+{% endblock %}

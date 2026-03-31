@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from . import views_inbox
 from . import views_posrednik
+from . import views_mandate
 
 app_name = 'eracun'
 
@@ -37,6 +38,13 @@ urlpatterns = [
     # API: primanje e-racuna od vanjskih sustava
     path('api/receive/', views_inbox.api_receive, name='api_receive'),
     path('p/<uuid:uuid>/', views.public_invoice_download, name='public_invoice'),
+
+    # Mandate (punomoći)
+    path('mandati/', views_mandate.mandate_list, name='mandate_list'),
+    path('mandati/novi/', views_mandate.mandate_create, name='mandate_create'),
+    path('mandati/<uuid:pk>/aktiviraj/', views_mandate.mandate_activate, name='mandate_activate'),
+    path('mandati/<uuid:pk>/opozovi/', views_mandate.mandate_revoke, name='mandate_revoke'),
+    path('mandati/bulk-umbrella/', views_mandate.mandate_bulk_umbrella, name='mandate_bulk_umbrella'),
 
     # DE: ZUGFeRD + XRechnung download
     path('<uuid:pk>/zugferd/', views.download_zugferd, name='download_zugferd'),

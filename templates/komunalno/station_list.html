@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Reciklažna dvorišta{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px;margin:0 auto">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="fas fa-building me-2"></i>Reciklažna dvorišta</h4>
+        <a href="{% url 'komunalno:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    {% if stations %}
+    <div class="table-responsive mobile-cards">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Naziv</th>
+                    <th>Tip</th>
+                    <th>Adresa</th>
+                    <th>Vaga</th>
+                    <th>Radno vrijeme</th>
+                    <th>Operater</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in stations %}
+                <tr>
+                    <td data-label="Naziv"><strong>{{ s.name }}</strong></td>
+                    <td data-label="Tip">{{ s.get_station_type_display }}</td>
+                    <td data-label="Adresa">{{ s.address|default:"-" }}</td>
+                    <td data-label="Vaga">
+                        {% if s.scale_type != 'none' %}
+                        <span class="badge bg-success"><i class="fas fa-weight-hanging me-1"></i>{{ s.get_scale_type_display }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Bez vage</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Radno vrijeme">{{ s.working_hours|default:"-" }}</td>
+                    <td data-label="Operater">{{ s.operator.get_short_name|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'komunalno:kiosk_home' s.pk %}" class="btn btn-sm btn-success">
+                            <i class="fas fa-desktop"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-building"></i></div>
+        <div class="empty-state-title">Nema dvorišta</div>
+        <div class="empty-state-message">Dodajte reciklažno dvorište kroz Django admin.</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

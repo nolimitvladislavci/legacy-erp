@@ -50,10 +50,28 @@ class PosrednikService:
     def get_config(cls, company):
         """
         Dohvati posrednik konfiguraciju.
-        Prvo trazi u ERacunConfig (per-company settings page),
-        fallback na company.settings['posrednik'] (JSON).
-        Svaki komitent moze imati svog posrednika.
+        1. Provjeri aktivan Mandate (firma dala punomoc posredniku)
+        2. ERacunConfig (per-company settings page)
+        3. Fallback: company.settings JSON
         """
+        # 0. Mandate check — ako firma ima posrednika, koristi njegovu config
+        try:
+            from einvoice.models.mandate import Mandate, MandateStatus
+            mandate = Mandate.objects.filter(
+                principal_company=company,
+                status=MandateStatus.ACTIVE,
+                is_active=True,
+            ).select_related('agent_company').first()
+
+            if mandate and mandate.is_valid:
+                agent_cfg = cls.get_config(mandate.agent_company)
+                agent_cfg['on_behalf_of_oib'] = mandate.principal_oib
+                agent_cfg['mandate_id'] = mandate.fina_mandate_id
+                agent_cfg['via_mandate'] = True
+                return agent_cfg
+        except Exception:
+            pass
+
         # Primarno: ERacunConfig model (settings page)
         try:
             from eracun.models import ERacunConfig
@@ -69,6 +87,8 @@ class PosrednikService:
                     'test_mode': getattr(ec, 'posrednik_test_mode', True),
                     'auto_send': getattr(ec, 'is_active', False),
                     'company_id': getattr(ec, 'posrednik_company_id', '') or '',
+                    'via_mandate': False,
+                    'on_behalf_of_oib': None,
                 }
         except Exception:
             pass
@@ -84,6 +104,8 @@ class PosrednikService:
             'password': cfg.get('password', ''),
             'test_mode': cfg.get('test_mode', True),
             'auto_send': cfg.get('auto_send', False),
+            'via_mandate': False,
+            'on_behalf_of_oib': None,
         }
 
     @classmethod
@@ -113,7 +135,11 @@ class PosrednikService:
 
         # Generiraj XML
         from eracun.services.ubl_generator import generate_ubl_xml
-        xml_content = generate_ubl_xml(eracun)
+        xml_content = generate_ubl_xml(
+            eracun,
+            on_behalf_of_oib=cfg.get('on_behalf_of_oib'),
+            mandate_id=cfg.get('mandate_id'),
+        )
 
         # Pre-flight validacija (Rupa 1)
         try:

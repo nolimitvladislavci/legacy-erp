@@ -88,7 +88,7 @@ def _is_domestic_hr(eracun):
     )
 
 
-def generate_ubl_xml(eracun):
+def generate_ubl_xml(eracun, on_behalf_of_oib=None, mandate_id=None):
     """
     Generate EN 16931 compliant UBL 2.1 Invoice XML.
 
@@ -168,6 +168,14 @@ def generate_ubl_xml(eracun):
         _el(tax_point, 'cbc:EndDate', eracun.delivery_date.strftime('%Y-%m-%d'))
 
     # ═══════════════════════════════════════════════════════════
+    # Mandate reference (posrednik šalje u ime klijenta)
+    if on_behalf_of_oib and mandate_id:
+        adr = _el(root, 'cac:AdditionalDocumentReference')
+        _el(adr, 'cbc:ID', f'MANDATE-{mandate_id}')
+        _el(adr, 'cbc:DocumentTypeCode', '130')
+        _el(adr, 'cbc:DocumentDescription',
+            f'Informacijski posrednik, OIB opunomoćitelja: {on_behalf_of_oib}')
+
     # BG-4: Seller / AccountingSupplierParty
     # ═══════════════════════════════════════════════════════════
     supplier_party = _el(root, 'cac:AccountingSupplierParty')

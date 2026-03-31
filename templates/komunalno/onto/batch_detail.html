@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}e-ONTO Batch #{{ batch.pk }}{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="fas fa-file-code me-2"></i>e-ONTO Batch #{{ batch.pk }}</h4>
+        <a href="{% url 'komunalno:onto_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    <!-- Info -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="label">Status</div>
+                <div class="value" style="font-size:1.1rem">
+                    {% if batch.status == 'accepted' %}
+                    <span class="badge bg-success">Prihvaćeno</span>
+                    {% elif batch.status == 'error' %}
+                    <span class="badge bg-danger">Greška</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ batch.get_status_display }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="label">Dvorište</div>
+                <div class="value" style="font-size:1rem">{{ batch.station.name }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="label">Period</div>
+                <div class="value" style="font-size:1rem">{{ batch.date_from|date:"d.m.Y" }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="label">Zapisi / Težina</div>
+                <div class="value" style="font-size:1rem">{{ batch.delivery_count }} / {{ batch.total_weight_kg|floatformat:1 }} kg</div>
+            </div>
+        </div>
+    </div>
+
+    {% if batch.last_error %}
+    <div class="alert alert-danger mb-4">
+        <strong>Zadnja greška:</strong> {{ batch.last_error }}
+    </div>
+    {% endif %}
+
+    {% if batch.status in 'error,retry' and batch.can_retry %}
+    <form method="post" action="{% url 'komunalno:onto_manual_export' %}" class="mb-4">
+        {% csrf_token %}
+        <input type="hidden" name="station_id" value="{{ batch.station.pk }}">
+        <button type="submit" class="btn btn-warning">
+            <i class="fas fa-redo me-1"></i>Ponovi slanje
+        </button>
+    </form>
+    {% endif %}
+
+    <!-- Deliverije u batchu -->
+    <h5 class="mb-3">Zapisi ({{ deliveries.count }})</h5>
+    {% if deliveries %}
+    <div class="table-responsive mobile-cards">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Građanin</th>
+                    <th>Ključni br.</th>
+                    <th>Kategorija</th>
+                    <th>Količina</th>
+                    <th>Izvor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in deliveries %}
+                <tr>
+                    <td data-label="Datum">{{ d.delivery_date|date:"d.m. H:i" }}</td>
+                    <td data-label="Građanin">{{ d.citizen.partner.name }}</td>
+                    <td data-label="Ključni br.">{{ d.category.key_number }}</td>
+                    <td data-label="Kategorija">{{ d.category.name }}</td>
+                    <td data-label="Količina">{{ d.quantity|floatformat:1 }} {{ d.unit }}</td>
+                    <td data-label="Izvor">
+                        {% if d.weight_source == 'scale' %}
+                        <span class="badge bg-success"><i class="fas fa-weight-hanging me-1"></i>Vaga</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Ručno</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if batch.xml_payload %}
+    <details class="mt-4">
+        <summary class="btn btn-sm btn-outline-secondary"><i class="fas fa-code me-1"></i>Prikaži XML</summary>
+        <pre class="mt-2 p-3" style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;max-height:400px;overflow:auto;font-size:.75rem">{{ batch.xml_payload }}</pre>
+    </details>
+    {% endif %}
+</div>
+{% endblock %}

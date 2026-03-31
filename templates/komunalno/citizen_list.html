@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Građani — Iskaznice{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px;margin:0 auto">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>Iskaznice građana</h4>
+        <a href="{% url 'komunalno:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" name="q" value="{{ q }}" class="form-control"
+                   placeholder="Pretraži po broju iskaznice, imenu ili adresi...">
+            <button class="btn btn-primary" type="submit">Traži</button>
+        </div>
+    </form>
+
+    {% if cards %}
+    <div class="table-responsive mobile-cards">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Br. iskaznice</th>
+                    <th>Građanin</th>
+                    <th>Adresa</th>
+                    <th>Članovi</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for card in cards %}
+                <tr>
+                    <td data-label="Br."><strong>{{ card.card_number }}</strong></td>
+                    <td data-label="Građanin">{{ card.partner.name }}</td>
+                    <td data-label="Adresa">{{ card.address|default:"-" }}</td>
+                    <td data-label="Članovi">{{ card.household_members }}</td>
+                    <td data-label="Status">
+                        {% if card.is_active %}
+                        <span class="badge bg-success">Aktivna</span>
+                        {% else %}
+                        <span class="badge bg-danger">Neaktivna</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'komunalno:citizen_detail' card.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-id-card"></i></div>
+        <div class="empty-state-title">{% if q %}Nema rezultata za "{{ q }}"{% else %}Nema iskaznica{% endif %}</div>
+        <div class="empty-state-message">{% if q %}Pokušajte s drugim pojmom.{% else %}Dodajte građane kroz admin panel.{% endif %}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

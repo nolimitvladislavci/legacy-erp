@@ -33,10 +33,8 @@ class BookMeta(models.Model):
     is_reference = models.BooleanField(
         default=False,
         verbose_name=_('Referentna građa'),
-        help_text=_('Ako True, knjiga se ne posuđuje (enciklopedije, rječnici)')
-    )
+        help_text=_('Ako True, knjiga se ne posuđuje (enciklopedije, rječnici)'))
     copy_number = models.PositiveSmallIntegerField(default=1, verbose_name=_('Primjerak br.'))
-    # Gamifikacija / portal
     cover_image = models.ImageField(
         upload_to='knjiznica/covers/', blank=True,
         verbose_name=_('Naslovna slika')
@@ -89,8 +87,8 @@ class LibraryMember(models.Model):
     )
     total_fines_paid = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     total_fines_outstanding = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    # Portal pristup
-    portal_pin = models.CharField(max_length=6, blank=True,
+    # Portal pristup — hashed PIN (max_length=128 za Django hash format)
+    portal_pin = models.CharField(max_length=128, blank=True,
         verbose_name=_('PIN za portal'),
         help_text=_('4-6 znamenki za pristup roditeljskom portalu'))
     objects = CompanyManager()
@@ -103,6 +101,30 @@ class LibraryMember(models.Model):
 
     def __str__(self):
         return f'{self.partner.name} [{self.member_number}]'
+
+    def set_portal_pin(self, raw_pin):
+        """Hashiraj i spremi PIN. Koristi Django make_password."""
+        from django.contrib.auth.hashers import make_password
+        self.portal_pin = make_password(raw_pin)
+        self.save(update_fields=['portal_pin'])
+
+    def check_portal_pin(self, raw_pin):
+        """
+        Provjeri PIN — podržava i legacy plain-text i nove hashirane.
+        Ako detektira legacy plain-text, automatski ga hashira (lazy migration).
+        """
+        if not self.portal_pin or not raw_pin:
+            return False
+        # Legacy plain-text PIN (4-6 znamenki, nema $ separatora)
+        if len(self.portal_pin) <= 6 and '$' not in self.portal_pin:
+            if self.portal_pin == raw_pin:
+                # Lazy migration: hashiraj legacy PIN
+                self.set_portal_pin(raw_pin)
+                return True
+            return False
+        # Hashirani PIN
+        from django.contrib.auth.hashers import check_password
+        return check_password(raw_pin, self.portal_pin)
 
     @property
     def can_borrow(self):
@@ -366,7 +388,6 @@ class BadgeDefinition(models.Model):
     category = models.CharField(max_length=15, choices=CATEGORY_CHOICES)
     tier = models.CharField(max_length=15, blank=True,
         help_text=_('Prazan = svi tierovi'))
-    # Uvjeti
     required_books = models.PositiveSmallIntegerField(default=0,
         help_text=_('Koliko knjiga treba pročitati'))
     required_genre = models.CharField(max_length=50, blank=True,
@@ -453,6 +474,7 @@ class ReadingLog(models.Model):
                 'books_read', 'total_points', 'last_activity'
             ])
             self._check_badges()
+            self._update_challenges()
 
     def _check_badges(self):
         """Provjeri je li dijete otključalo novi bedž."""
@@ -482,6 +504,18 @@ class ReadingLog(models.Model):
                     triggered_by_book=self.item
                 )
 
+    def _update_challenges(self):
+        """Ažuriraj FamilyChallenge progress za aktivne izazove."""
+        active_challenges = FamilyChallenge.objects.filter(
+            children=self.child, status='active',
+        )
+        for challenge in active_challenges:
+            challenge.progress += 1
+            if challenge.progress >= challenge.target_books:
+                challenge.status = 'completed'
+                challenge.completed_at = timezone.localdate()
+            challenge.save(update_fields=['progress', 'status', 'completed_at'])
+
 
 class MediaContent(models.Model):
     """
@@ -502,16 +536,13 @@ class MediaContent(models.Model):
     tier = models.CharField(max_length=15, choices=ChildReader.TIER_CHOICES, blank=True,
         help_text=_('Prazno = za sve'))
     description = models.TextField(blank=True)
-    # File
     media_file = models.FileField(upload_to='knjiznica/media/%Y/%m/', blank=True)
     thumbnail = models.ImageField(upload_to='knjiznica/thumbs/', blank=True)
     duration_minutes = models.PositiveSmallIntegerField(default=0, verbose_name=_('Trajanje (min)'))
-    # Linked book
     related_book = models.ForeignKey(
         'inventory.InventoryItem', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='media_contents'
     )
-    # Meta
     is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(

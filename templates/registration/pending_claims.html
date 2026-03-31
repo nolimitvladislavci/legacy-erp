@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Zahtjevi za pristup{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px;margin:30px auto">
+  <h2 style="color:var(--gold);font-family:'Cormorant Garamond',serif;margin-bottom:20px">
+    Zahtjevi za pristup firmama
+  </h2>
+
+  {% if claims %}
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px">
+    {% for c in claims %}
+    <a href="{% url 'approve_claim' claim_id=c.id %}" style="text-decoration:none;display:block;background:var(--card,#1a1a1a);border:1px solid var(--border,#333);border-radius:10px;padding:16px;transition:border-color .2s">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <strong style="color:var(--text,#e2e8f0);font-size:1rem">{{ c.company.name }}</strong>
+          <span style="color:var(--muted);font-size:.8rem;margin-left:8px">OIB: {{ c.company.oib }}</span>
+        </div>
+        <span style="background:rgba(234,179,8,.15);color:#facc15;font-size:.75rem;padding:3px 10px;border-radius:12px;font-weight:600">Čeka</span>
+      </div>
+      <div style="color:var(--muted);font-size:.8rem;margin-top:6px">
+        {{ c.first_name }} {{ c.last_name }} | {{ c.email }} | {{ c.created_at|date:"d.m.Y." }}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;color:var(--muted);padding:40px;font-size:.9rem">
+    Nema pending zahtjeva.
+  </div>
+  {% endif %}
+
+  {% if recent_approved %}
+  <h3 style="color:var(--muted);font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">
+    Nedavno odobreni
+  </h3>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    {% for c in recent_approved %}
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:.8rem;padding:8px 12px;background:rgba(74,222,128,.05);border-radius:6px">
+      <span style="color:var(--text)">{{ c.company.name }} — {{ c.first_name }} {{ c.last_name }}</span>
+      <span style="color:var(--muted)">{{ c.reviewed_at|date:"d.m.Y." }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

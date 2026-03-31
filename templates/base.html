@@ -562,6 +562,13 @@
         {% include "includes/_sidebar_modules.html" %}
 
         <div class="sidebar-footer">
+            {% if pending_claims_count > 0 %}
+            <a href="/hr/firma/zahtjevi/" onclick="closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:7px 12px;color:#facc15;text-decoration:none;border-radius:8px;margin:1px 4px;font-size:.8rem;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);margin-bottom:4px">
+              <i class="fas fa-inbox" style="width:18px;text-align:center"></i>
+              <span>Zahtjevi za pristup</span>
+              <span style="background:#facc15;color:#000;font-size:.65rem;font-weight:800;border-radius:10px;padding:1px 7px;margin-left:auto">{{ pending_claims_count }}</span>
+            </a>
+            {% endif %}
             <a href="/panic/" onclick="closeSidebar()" style="background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;font-size:.78rem;letter-spacing:1px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;margin-bottom:4px"><i class="fas fa-shield-halved"></i> <span>INSPEKCIJA</span></a>
             <div style="display:flex;gap:4px">
               <a href="/hr/companies/modules/" onclick="closeSidebar()" style="flex:1;text-align:center;font-size:.75rem" title="Moduli"><i class="fas fa-th"></i></a>

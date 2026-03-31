@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Dnevni izvještaj — {{ report_date|date:"d.m.Y" }}{% endblock %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Dnevni izvještaj</h4>
+        <a href="{% url 'komunalno:reports' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    <!-- Date picker -->
+    <form method="get" class="mb-4">
+        <div class="input-group" style="max-width:300px">
+            <input type="date" name="date" value="{{ report_date|date:'Y-m-d' }}" class="form-control">
+            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+        </div>
+    </form>
+
+    <!-- Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-4">
+            <div class="stat-card text-center">
+                <div class="label">Zaprimanja</div>
+                <div class="value">{{ total_count }}</div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="stat-card text-center">
+                <div class="label">Ukupna težina</div>
+                <div class="value">{{ total_weight|floatformat:1 }} kg</div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="stat-card text-center">
+                <div class="label">Naknade</div>
+                <div class="value">{{ total_charges|floatformat:2 }} €</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Po kategoriji -->
+    {% if by_category %}
+    <h5 class="mb-3">Po kategoriji</h5>
+    <div class="table-responsive mobile-cards mb-4">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Ključni broj</th>
+                    <th>Kategorija</th>
+                    <th>Br. dostava</th>
+                    <th>Ukupno kg</th>
+                    <th>Naknade €</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in by_category %}
+                <tr>
+                    <td data-label="Ključni br."><strong>{{ row.category__key_number }}</strong></td>
+                    <td data-label="Kategorija">{{ row.category__name }}</td>
+                    <td data-label="Dostava">{{ row.count }}</td>
+                    <td data-label="Ukupno">{{ row.total_qty|floatformat:1 }}</td>
+                    <td data-label="Naknade">{{ row.total_charge|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Detalji -->
+    {% if deliveries %}
+    <h5 class="mb-3">Sve dostave ({{ total_count }})</h5>
+    <div class="table-responsive mobile-cards">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Vrijeme</th>
+                    <th>Građanin</th>
+                    <th>Ključni br.</th>
+                    <th>Količina</th>
+                    <th>Izvor</th>
+                    <th>Prekoračenje</th>
+                    <th>Dvorište</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in deliveries %}
+                <tr>
+                    <td data-label="Vrijeme">{{ d.delivery_date|date:"H:i" }}</td>
+                    <td data-label="Građanin">{{ d.citizen.partner.name }}</td>
+                    <td data-label="Ključni br.">{{ d.category.key_number }}</td>
+                    <td data-label="Količina">{{ d.quantity|floatformat:1 }} {{ d.unit }}</td>
+                    <td data-label="Izvor">
+                        {% if d.weight_source == 'scale' %}
+                        <span class="badge bg-success">Vaga</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Ručno</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Prekoračenje">
+                        {% if d.over_quota > 0 %}
+                        <span class="text-danger">+{{ d.over_quota|floatformat:1 }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td data-label="Dvorište">{{ d.station.name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
+        <div class="empty-state-title">Nema podataka za {{ report_date|date:"d.m.Y" }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

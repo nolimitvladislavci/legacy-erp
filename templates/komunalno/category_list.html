@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Kategorije otpada{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px;margin:0 auto">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="fas fa-tags me-2"></i>Kategorije otpada</h4>
+        <a href="{% url 'komunalno:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Nazad
+        </a>
+    </div>
+
+    {% if categories %}
+    <div class="table-responsive mobile-cards">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Ključni broj</th>
+                    <th>Naziv</th>
+                    <th>Grupa</th>
+                    <th>Jed.</th>
+                    <th>God. kvota</th>
+                    <th>Cijena/jed. iznad</th>
+                    <th>Opasni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td data-label="Ključni br."><strong>{{ cat.key_number }}</strong></td>
+                    <td data-label="Naziv">{{ cat.name }}</td>
+                    <td data-label="Grupa"><span class="badge bg-secondary">{{ cat.category_group|default:"—" }}</span></td>
+                    <td data-label="Jed.">{{ cat.unit }}</td>
+                    <td data-label="Kvota">{% if cat.default_annual_quota > 0 %}{{ cat.default_annual_quota|floatformat:0 }} {{ cat.unit }}{% else %}<span class="text-muted">∞</span>{% endif %}</td>
+                    <td data-label="Cijena">{% if cat.price_per_unit_over_quota > 0 %}{{ cat.price_per_unit_over_quota|floatformat:2 }} €{% else %}—{% endif %}</td>
+                    <td data-label="Opasni">{% if cat.is_hazardous %}<span class="badge bg-danger"><i class="fas fa-skull-crossbones me-1"></i>DA</span>{% else %}—{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-tags"></i></div>
+        <div class="empty-state-title">Nema kategorija</div>
+        <div class="empty-state-message">Dodajte kategorije otpada (ključne brojeve) kroz admin.</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -4,10 +4,12 @@ Pristup: /portal/<slug>/  (slug = company.booking_slug)
 Bez login-a: katalog, događanja, medijski sadržaj
 S PIN-om: roditeljski dashboard, djeca, bedževi
 """
+from django.core.cache import cache
+from django.core.paginator import Paginator
+from django.db.models import Exists, F, OuterRef, Q, Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404
 from django.utils import timezone
-from django.db.models import Q, Count
 from datetime import timedelta
 
 from companies.models import Company
@@ -34,6 +36,14 @@ def _get_session_member(request, company):
         except LibraryMember.DoesNotExist:
             pass
     return None
+
+
+def _get_client_ip(request):
+    """Dohvati IP adresu klijenta."""
+    xff = request.META.get('HTTP_X_FORWARDED_FOR')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '0.0.0.0')
 
 
 # ─── JAVNE STRANICE (bez logina) ───────────────────────
@@ -80,9 +90,16 @@ def portal_catalog(request, slug):
     member = _get_session_member(request, company)
 
     from inventory.models import InventoryItem
+    # Annotate is_loaned u SQL umjesto Python petlje (N+1 fix)
+    active_loan_subq = BookLoan.objects.filter(
+        item=OuterRef('pk'), company=company,
+        status__in=['borrowed', 'overdue'],
+    )
     books = InventoryItem.objects.filter(
         company=company
-    ).select_related('book_meta').order_by('name')
+    ).select_related('book_meta').annotate(
+        is_loaned=Exists(active_loan_subq)
+    ).order_by('name')
 
     q = request.GET.get('q', '').strip()
     tier = request.GET.get('tier', '')
@@ -99,14 +116,15 @@ def portal_catalog(request, slug):
     if genre:
         books = books.filter(book_meta__genre__icontains=genre)
 
-    for book in books:
-        book.is_loaned = BookLoan.objects.filter(
-            item=book, company=company, status__in=['borrowed', 'overdue']
-        ).exists()
+    # Paginacija
+    paginator = Paginator(books, 25)
+    page = request.GET.get('page')
+    books_page = paginator.get_page(page)
 
     return render(request, 'knjiznica/portal/catalog.html', {
         'company': company, 'slug': slug, 'member': member,
-        'books': books, 'q': q, 'tier': tier, 'genre': genre,
+        'books': books_page, 'q': q, 'tier': tier, 'genre': genre,
+        'paginator': paginator,
     })
 
 
@@ -155,9 +173,13 @@ def portal_media(request, slug):
 def portal_media_watch(request, slug, pk):
     company = _get_library(slug)
     member = _get_session_member(request, company)
+
+    # F() expression — atomski inkrement, bez race condition
+    MediaContent.objects.filter(
+        pk=pk, company=company, is_published=True
+    ).update(view_count=F('view_count') + 1)
+
     item = get_object_or_404(MediaContent, pk=pk, company=company, is_published=True)
-    item.view_count += 1
-    item.save(update_fields=['view_count'])
 
     return render(request, 'knjiznica/portal/media_watch.html', {
         'company': company, 'slug': slug, 'member': member,
@@ -174,7 +196,7 @@ def portal_badges(request, slug):
     })
 
 
-# ─── PIN LOGIN ──────────────────────────────────────────
+# ─── PIN LOGIN (s rate limiting + hash) ─────────────────
 
 def portal_login(request, slug):
     company = _get_library(slug)
@@ -184,17 +206,29 @@ def portal_login(request, slug):
         member_number = request.POST.get('member_number', '').strip()
         pin = request.POST.get('pin', '').strip()
 
-        try:
-            member = LibraryMember.objects.get(
-                company=company, member_number=member_number
-            )
-            if member.portal_pin and member.portal_pin == pin:
-                request.session[f'library_member_{company.pk}'] = member.pk
-                return redirect('knjiznica:portal_family', slug=slug)
-            else:
-                error = 'Neispravan PIN.'
-        except LibraryMember.DoesNotExist:
-            error = 'Broj iskaznice nije pronađen.'
+        # Rate limiting: max 5 pokušaja / 15 min po IP
+        client_ip = _get_client_ip(request)
+        rate_key = f'lib_login_attempts:{client_ip}:{company.pk}'
+        attempts = cache.get(rate_key, 0)
+
+        if attempts >= 5:
+            error = 'Previše pokušaja. Pokušajte za 15 minuta.'
+        else:
+            try:
+                member = LibraryMember.objects.get(
+                    company=company, member_number=member_number
+                )
+                if member.check_portal_pin(pin):
+                    # Reset pokušaja na uspjeh
+                    cache.delete(rate_key)
+                    request.session[f'library_member_{company.pk}'] = member.pk
+                    return redirect('knjiznica:portal_family', slug=slug)
+                else:
+                    cache.set(rate_key, attempts + 1, 900)  # 15 min TTL
+                    error = 'Neispravan PIN.'
+            except LibraryMember.DoesNotExist:
+                cache.set(rate_key, attempts + 1, 900)
+                error = 'Broj iskaznice nije pronađen.'
 
     return render(request, 'knjiznica/portal/login.html', {
         'company': company, 'slug': slug, 'error': error,

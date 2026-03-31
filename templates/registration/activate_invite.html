@@ -1,0 +1,27 @@
+{% extends "registration/base_reg.html" %}
+{% load i18n %}
+{% block title %}Aktivirajte pristup — {{ company.name }}{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:60px auto;padding:0 20px">
+  <div style="text-align:center;margin-bottom:32px">
+    <h1 style="font-family:'Cormorant Garamond',serif;color:#c9a84c;font-size:1.6rem;margin-bottom:8px">
+      Dobrodošli, {{ claim.first_name }}!
+    </h1>
+    <p style="color:#94a3b8;font-size:.9rem">Aktivirajte pristup firmi <strong style="color:#e2e8f0">{{ company.name }}</strong></p>
+  </div>
+
+  <form method="post" style="display:flex;flex-direction:column;gap:12px">
+    {% csrf_token %}
+    <label style="color:#94a3b8;font-size:.8rem">Postavite lozinku (min. 8 znakova)</label>
+    <input name="password1" type="password" required minlength="8" placeholder="Nova lozinka"
+      style="background:#111;border:1px solid #333;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.95rem">
+    <button type="submit" style="background:#c9a84c;color:#000;border:none;padding:14px;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:8px">
+      Aktivirajte pristup
+    </button>
+  </form>
+
+  {% for msg in messages %}
+  <div style="margin-top:16px;padding:12px;border-radius:8px;font-size:.85rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171">{{ msg }}</div>
+  {% endfor %}
+</div>
+{% endblock %}

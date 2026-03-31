@@ -339,6 +339,21 @@ def switch_company(request):
             role_display = 'Superadmin'
             if created:
                 messages.info(request, f'Pristup kreiran za: {company.name}')
+        elif company_id:
+            # Umbrella admin pristup — auto-create membership za umbrella children
+            from companies.models import Company
+            company = Company.objects.get(pk=company_id)
+            user_co = request.user.profile.company
+            if user_co and user_co.is_umbrella and company.umbrella_parent_id == user_co.id:
+                mem, created = CompanyMembership.objects.get_or_create(
+                    user=request.user, company=company,
+                    defaults={'role': 'company_admin', 'is_active': True}
+                )
+                request.session['active_membership_id'] = mem.id
+                role_display = 'Umbrella Admin'
+            else:
+                messages.error(request, 'Nemate pristup toj tvrtki.')
+                return redirect('/')
         else:
             messages.error(request, 'Nemate pristup toj tvrtki.')
             return redirect('/')

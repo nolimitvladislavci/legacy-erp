@@ -205,6 +205,7 @@ TEMPLATES = [{
             "core.context_processors.booking_globals",
                 "core.context_processors.company_switcher",
                 "core.context_processors.module_context",
+                "core.context_processors.pending_claims_badge",
         ],
     },
 }]
@@ -727,6 +728,36 @@ if SENTRY_DSN and not DEBUG:
         environment='production',
         release=f'limit-connect@2026.03.18',
     )
+
+
+# ── Komunalno — e-ONTO + Kvota ──────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "komunalno-onto-nightly": {
+        "task": "komunalno.tasks.nightly_onto_export",
+        "schedule": crontab(hour=2, minute=0),
+    },
+    "komunalno-quota-warnings": {
+        "task": "komunalno.tasks.check_quota_warnings",
+        "schedule": crontab(hour=7, minute=30),
+    },
+})
+
+
+# ── Knjižnica — overdue + membership + digest + challenges ──────────
+CELERY_BEAT_SCHEDULE.update({
+    "knjiznica-membership-expiry": {
+        "task": "knjiznica.membership_expiry_check",
+        "schedule": crontab(hour=9, minute=0, day_of_week=1),
+    },
+    "knjiznica-weekly-digest": {
+        "task": "knjiznica.weekly_reading_digest",
+        "schedule": crontab(hour=18, minute=0, day_of_week=0),
+    },
+    "knjiznica-expire-challenges": {
+        "task": "knjiznica.expire_challenges",
+        "schedule": crontab(hour=0, minute=15),
+    },
+})
 
 # --- CI/CD TEST OVERRIDE ---
 import sys

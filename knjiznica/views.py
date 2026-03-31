@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib import messages
 from django.http import HttpResponse
-from django.db.models import Count, Q, Sum
 from datetime import timedelta
 from decimal import Decimal
 import csv
@@ -54,7 +55,17 @@ def dashboard(request):
 def catalog_list(request):
     company = get_user_company(request)
     from inventory.models import InventoryItem
-    books = InventoryItem.objects.filter(company=company).select_related('book_meta').order_by('name')
+
+    # Annotate is_loaned u SQL umjesto Python petlje (N+1 fix)
+    active_loan_subq = BookLoan.objects.filter(
+        item=OuterRef('pk'), company=company,
+        status__in=['borrowed', 'overdue'],
+    )
+    books = InventoryItem.objects.filter(
+        company=company
+    ).select_related('book_meta').annotate(
+        is_loaned=Exists(active_loan_subq)
+    ).order_by('name')
 
     q = request.GET.get('q', '').strip()
     if q:
@@ -64,15 +75,15 @@ def catalog_list(request):
             Q(book_meta__isbn__icontains=q)
         )
 
-    # Annotate availability
-    for book in books:
-        book.is_loaned = BookLoan.objects.filter(
-            item=book, company=company, status__in=['borrowed', 'overdue']
-        ).exists()
+    # Paginacija
+    paginator = Paginator(books, 25)
+    page = request.GET.get('page')
+    books_page = paginator.get_page(page)
 
     return render(request, 'knjiznica/catalog_list.html', {
-        'books': books,
+        'books': books_page,
         'q': q,
+        'paginator': paginator,
     })
 
 
@@ -136,9 +147,15 @@ def member_list(request):
             Q(partner__name__icontains=q) | Q(member_number__icontains=q)
         )
 
+    # Paginacija
+    paginator = Paginator(members, 25)
+    page = request.GET.get('page')
+    members_page = paginator.get_page(page)
+
     return render(request, 'knjiznica/member_list.html', {
-        'members': members,
+        'members': members_page,
         'q': q,
+        'paginator': paginator,
     })
 
 
@@ -157,6 +174,10 @@ def member_create(request):
             membership_until=request.POST.get('membership_until'),
             status=request.POST.get('status', 'active'),
         )
+        # Hash PIN ako je unesen
+        raw_pin = request.POST.get('portal_pin', '').strip()
+        if raw_pin:
+            member.set_portal_pin(raw_pin)
         messages.success(request, f'Član "{partner.name}" kreiran s iskaznicom {member.member_number}.')
         return redirect('knjiznica:member_list')
 
@@ -197,7 +218,6 @@ def loan_create(request):
         from inventory.models import InventoryItem
         item = get_object_or_404(InventoryItem, pk=item_id, company=company)
 
-        # Provjera referentne građe
         meta = getattr(item, 'book_meta', None)
         if meta and meta.is_reference:
             messages.error(request, 'Referentna građa se ne posuđuje.')
@@ -260,7 +280,6 @@ def loan_return(request, pk):
         else:
             messages.success(request, 'Knjiga vraćena. Nema kazni.')
 
-        # Provjeri čeka li netko rezervaciju
         reservation = BookReservation.objects.filter(
             item=loan.item, company=company, status='waiting'
         ).order_by('reserved_at').first()
@@ -335,7 +354,6 @@ def statistics(request):
             company=company, status__in=['active', 'junior']).count(),
     }
 
-    # Top posuđene knjige
     from inventory.models import InventoryItem
     top_books = InventoryItem.objects.filter(
         company=company, loans__loan_date__year=year
@@ -357,7 +375,7 @@ def nsk_export(request):
 
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="nsk_statistika_{year}.csv"'
-    response.write('\ufeff')  # BOM za Excel
+    response.write('\ufeff')
 
     writer = csv.writer(response, delimiter=';')
     writer.writerow([

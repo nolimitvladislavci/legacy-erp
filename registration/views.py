@@ -1064,16 +1064,25 @@ def api_oib_lookup(request):
     try:
         company = Company.objects.filter(oib=oib).first()
         if company:
+            from accounts.models import UserProfile
+            has_owner = UserProfile.objects.filter(company=company).exists()
             return JsonResponse({
                 'found': True,
                 'source': 'internal',
                 'name': company.name,
-                'address': company.address,
-                'city': company.city,
-                'zip_code': company.zip_code,
+                'address': company.address or '',
+                'city': getattr(company, 'city', '') or '',
+                'zip_code': getattr(company, 'zip_code', '') or '',
                 'legal_form': company.business_type,
-                'message': 'Tvrtka je vec u sustavu — kontaktirajte podrsku za pristup.',
                 'existing': True,
+                'has_owner': has_owner,
+                'can_claim': not has_owner,
+                'claim_url': f'/firma/preuzmi/{company.id}/' if not has_owner else '',
+                'message': (
+                    'Ova firma već ima administratora u sustavu. Kontaktirajte podršku.'
+                    if has_owner else
+                    'Ova firma je u sustavu. Možete zatražiti pristup vlastitim podacima.'
+                ),
             })
     except Exception:
         pass
@@ -1188,3 +1197,294 @@ def api_name_search(request):
             })
 
     return JsonResponse({'results': results[:8]})
+
+
+# ════════════════════════════════════════════════════════════════════
+# Claim Your Business — views
+# ════════════════════════════════════════════════════════════════════
+
+def claim_company_form(request, company_id):
+    """GET /firma/preuzmi/<uuid>/ — vlasnik traži pristup ghost firmi."""
+    from companies.models import Company
+    from accounts.models import UserProfile
+    from registration.models import CompanyClaimRequest
+
+    company = get_object_or_404(Company, id=company_id)
+
+    if UserProfile.objects.filter(company=company).exists():
+        messages.warning(request, 'Ova firma već ima aktivnog administratora.')
+        return redirect('home')
+
+    pending = CompanyClaimRequest.objects.filter(company=company, status='pending').exists()
+
+    # Statistika za prikaz
+    stats = {
+        'invoices': 0, 'partners': 0, 'journals': 0,
+    }
+    try:
+        from invoicing.models import Invoice
+        stats['invoices'] = Invoice.objects.filter(company=company).count()
+    except Exception:
+        pass
+    try:
+        from partners.models import Partner
+        stats['partners'] = Partner.objects.filter(company=company).count()
+    except Exception:
+        pass
+    try:
+        from konto.models import JournalEntry
+        stats['journals'] = JournalEntry.objects.filter(company=company).count()
+    except Exception:
+        pass
+
+    return render(request, 'registration/claim_company.html', {
+        'company': company,
+        'pending': pending,
+        'stats': stats,
+    })
+
+
+def submit_claim(request, company_id):
+    """POST /firma/preuzmi/<uuid>/submit/ — kreira ClaimRequest."""
+    from companies.models import Company
+    from accounts.models import UserProfile
+    from registration.models import CompanyClaimRequest
+    from django.utils import timezone
+
+    if request.method != 'POST':
+        return redirect('claim_company', company_id=company_id)
+
+    company = get_object_or_404(Company, id=company_id)
+
+    if UserProfile.objects.filter(company=company).exists():
+        return JsonResponse({'error': 'Firma već ima administratora.'}, status=400)
+
+    email = request.POST.get('email', '').strip()
+    first_name = request.POST.get('first_name', '').strip()
+    last_name = request.POST.get('last_name', '').strip()
+    phone = request.POST.get('phone', '').strip()
+
+    if not email or not first_name:
+        messages.error(request, 'Email i ime su obavezni.')
+        return redirect('claim_company', company_id=company_id)
+
+    if CompanyClaimRequest.objects.filter(email=email, company=company, status='pending').exists():
+        messages.info(request, 'Vaš zahtjev je već poslan. Čekajte odobrenje.')
+        return redirect('claim_company', company_id=company_id)
+
+    claim = CompanyClaimRequest.objects.create(
+        company=company,
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        phone=phone,
+        oib_confirmed=True,
+        token_expires=timezone.now() + timezone.timedelta(days=7),
+        ip_address=request.META.get('HTTP_X_REAL_IP') or request.META.get('REMOTE_ADDR'),
+    )
+
+    # WhatsApp obavijest
+    try:
+        from core.whatsapp import send_text
+        approve_url = f'https://limit-connect.com/hr/firma/odobri/{claim.id}/'
+        send_text(
+            phone='+385921104615',
+            message=(
+                f'📋 ZAHTJEV ZA PRISTUP\n'
+                f'Firma: {company.name}\n'
+                f'OIB: {company.oib}\n'
+                f'Kontakt: {first_name} {last_name} | {email}\n'
+                f'\n✅ Odobri: {approve_url}'
+            ),
+        )
+    except Exception:
+        pass
+
+    messages.success(request,
+        f'Zahtjev je poslan! Administrator će vas kontaktirati u roku 24 sata. '
+        f'Login podaci bit će poslani na {email}.'
+    )
+    return render(request, 'registration/claim_success.html', {'company': company, 'email': email})
+
+
+def activate_via_invite(request, token):
+    """GET/POST /firma/aktiviraj/<token>/ — vlasnik klikne invite link."""
+    from registration.models import CompanyClaimRequest
+
+    claim = get_object_or_404(CompanyClaimRequest, verify_token=token)
+
+    if not claim.is_token_valid:
+        messages.error(request, 'Link je istekao ili nevažeći.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        password = request.POST.get('password1', '')
+        if len(password) < 8:
+            messages.error(request, 'Lozinka mora imati najmanje 8 znakova.')
+            return render(request, 'registration/activate_invite.html', {'claim': claim})
+
+        user, _ = claim.approve(reviewed_by=None)
+        user.set_password(password)
+        user.save()
+
+        from django.contrib.auth import login
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        messages.success(request, f'Dobrodošli! Pristupili ste firmi {claim.company.name}.')
+        return redirect('dashboard')
+
+    return render(request, 'registration/activate_invite.html', {
+        'claim': claim,
+        'company': claim.company,
+    })
+
+
+@login_required
+def approve_claim(request, claim_id):
+    """GET/POST /firma/odobri/<uuid>/ — Marija odobrava/odbija."""
+    from registration.models import CompanyClaimRequest
+
+    claim = get_object_or_404(CompanyClaimRequest, id=claim_id, status='pending')
+
+    if not (request.user.is_superuser or request.user.is_staff):
+        try:
+            if request.user.profile.company != claim.company.umbrella_parent:
+                return HttpResponseForbidden('Nemate ovlast.')
+        except Exception:
+            return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            user, temp_password = claim.approve(reviewed_by=request.user)
+
+            # Email s login podacima
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                send_mail(
+                    f'Pristup LIMIT Connect — {claim.company.name}',
+                    f'Poštovani {claim.first_name},\n\n'
+                    f'Vaš pristup firmi {claim.company.name} je odobren.\n\n'
+                    f'Prijava: https://limit-connect.com/hr/login/\n'
+                    f'Korisničko ime: {user.username}\n'
+                    f'Privremena lozinka: {temp_password}\n\n'
+                    f'Molimo promijenite lozinku pri prvoj prijavi.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [claim.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
+            messages.success(request,
+                f'✅ Odobreno! {claim.first_name} može se prijaviti. '
+                f'Korisnik: {user.username} | Lozinka: {temp_password}')
+            return redirect('pending_claims')
+
+        elif action == 'reject':
+            from django.utils import timezone
+            claim.status = 'rejected'
+            claim.reviewed_by = request.user
+            claim.reviewed_at = timezone.now()
+            claim.reject_reason = request.POST.get('reason', '')
+            claim.save()
+            messages.warning(request, 'Zahtjev odbijen.')
+            return redirect('pending_claims')
+
+    # Stats za firmu
+    stats = {}
+    try:
+        from invoicing.models import Invoice
+        stats['invoices'] = Invoice.objects.filter(company=claim.company).count()
+        from partners.models import Partner
+        stats['partners'] = Partner.objects.filter(company=claim.company).count()
+    except Exception:
+        pass
+
+    return render(request, 'registration/approve_claim.html', {'claim': claim, 'stats': stats})
+
+
+@login_required
+def pending_claims(request):
+    """GET /firma/zahtjevi/ — lista pending zahtjeva."""
+    from registration.models import CompanyClaimRequest
+
+    if not (request.user.is_superuser or request.user.is_staff):
+        try:
+            user_co = request.user.profile.company
+            claims = CompanyClaimRequest.objects.filter(
+                status='pending',
+                company__umbrella_parent=user_co,
+            ).select_related('company')
+        except Exception:
+            claims = CompanyClaimRequest.objects.none()
+    else:
+        claims = CompanyClaimRequest.objects.filter(
+            status='pending'
+        ).select_related('company')
+
+    recent_approved = CompanyClaimRequest.objects.filter(
+        status='approved'
+    ).select_related('company', 'created_user').order_by('-reviewed_at')[:10]
+
+    return render(request, 'registration/pending_claims.html', {
+        'claims': claims,
+        'recent_approved': recent_approved,
+    })
+
+
+@login_required
+def send_company_invite(request, company_id):
+    """POST /posrednik/invite/<uuid>/ — Marija šalje invite link."""
+    from companies.models import Company
+    from registration.models import CompanyClaimRequest
+    from django.utils import timezone
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+
+    company = get_object_or_404(Company, id=company_id)
+
+    if not request.user.is_superuser:
+        try:
+            user_co = request.user.profile.company
+            if company.umbrella_parent != user_co and company != user_co:
+                return HttpResponseForbidden()
+        except Exception:
+            return HttpResponseForbidden()
+
+    claim = CompanyClaimRequest.objects.create(
+        company=company,
+        email=request.POST.get('email', ''),
+        first_name=request.POST.get('first_name', 'Vlasnik'),
+        last_name=request.POST.get('last_name', ''),
+        phone=request.POST.get('phone', ''),
+        oib_confirmed=True,
+        role_claimed='company_admin',
+        token_expires=timezone.now() + timezone.timedelta(days=30),
+        ip_address=request.META.get('REMOTE_ADDR'),
+    )
+
+    invite_url = f'https://limit-connect.com/firma/aktiviraj/{claim.verify_token}/'
+
+    # WhatsApp ako ima broj
+    phone = request.POST.get('phone', '')
+    if phone:
+        try:
+            from core.whatsapp import send_text
+            send_text(
+                phone=phone,
+                message=(
+                    f'Pozdrav! Vaša firma *{company.name}* je u LIMIT Connect sustavu.\n\n'
+                    f'Aktivirajte pristup ovdje:\n{invite_url}\n\n'
+                    f'Link vrijedi 30 dana.'
+                ),
+            )
+        except Exception:
+            pass
+
+    return JsonResponse({
+        'ok': True,
+        'invite_url': invite_url,
+        'claim_id': str(claim.id),
+    })

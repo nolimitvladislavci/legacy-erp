@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Punomoći (Mandati) — e-Račun{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px;margin:30px auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <h2 style="color:var(--gold);font-family:'Cormorant Garamond',serif;margin:0">Punomoći za e-Račun</h2>
+    <div style="display:flex;gap:8px">
+      <a href="{% url 'eracun:mandate_create' %}" style="background:var(--gold);color:#000;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:600;font-size:.85rem">+ Nova punomoć</a>
+      <form method="post" action="{% url 'eracun:mandate_bulk_umbrella' %}" style="display:inline" onsubmit="return confirm('Kreirati punomoći za sve firme u umbrelli?')">
+        {% csrf_token %}
+        <button type="submit" style="background:rgba(201,168,76,.1);color:var(--gold);border:1px solid var(--gold);padding:8px 16px;border-radius:8px;font-weight:600;font-size:.85rem;cursor:pointer">Bulk umbrella</button>
+      </form>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-bottom:20px">
+    <div style="background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);border-radius:8px;padding:10px 16px;font-size:.8rem;color:#facc15">Nacrt: {{ stats.draft }}</div>
+    <div style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:10px 16px;font-size:.8rem;color:#60a5fa">Potpisano: {{ stats.signed }}</div>
+    <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 16px;font-size:.8rem;color:#4ade80">Aktivno: {{ stats.active }}</div>
+  </div>
+
+  {% if mandates %}
+  <div style="display:flex;flex-direction:column;gap:8px">
+    {% for m in mandates %}
+    <div style="background:var(--card,#1a1a1a);border:1px solid var(--border,#333);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong style="color:var(--text);font-size:.9rem">{{ m.principal_company.name }}</strong>
+        <span style="color:var(--muted);font-size:.75rem;margin-left:8px">OIB: {{ m.principal_oib }}</span>
+        <div style="color:var(--muted);font-size:.7rem;margin-top:2px">→ {{ m.agent_company.name }} | {{ m.get_mandate_type_display }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:.7rem;padding:3px 10px;border-radius:12px;font-weight:600;
+          {% if m.status == 'active' %}background:rgba(74,222,128,.15);color:#4ade80{% elif m.status == 'draft' %}background:rgba(234,179,8,.15);color:#facc15{% elif m.status == 'signed' %}background:rgba(96,165,250,.15);color:#60a5fa{% else %}background:rgba(239,68,68,.15);color:#f87171{% endif %}">{{ m.get_status_display }}</span>
+        {% if m.status == 'draft' or m.status == 'signed' %}
+        <form method="post" action="{% url 'eracun:mandate_activate' pk=m.pk %}">{% csrf_token %}<button style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3);padding:4px 10px;border-radius:6px;font-size:.7rem;cursor:pointer">Aktiviraj</button></form>
+        {% endif %}
+        {% if m.status == 'active' %}
+        <form method="post" action="{% url 'eracun:mandate_revoke' pk=m.pk %}" onsubmit="return confirm('Opozovi punomoć?')">{% csrf_token %}<button style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3);padding:4px 10px;border-radius:6px;font-size:.7rem;cursor:pointer">Opozovi</button></form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;color:var(--muted);padding:40px;font-size:.9rem">Nema punomoći. Kreirajte prvu koristeći gumb iznad.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -60,6 +60,27 @@ def company_switcher(request):
                 .select_related('company')
                 .order_by('-is_default', 'company__name')
             )
+
+            # Umbrella admin: dodaj sve umbrella children kao virtual membership
+            try:
+                user_co = request.user.profile.company
+                if user_co and user_co.is_umbrella:
+                    from companies.models import Company
+                    existing_ids = {m.company_id for m in memberships}
+                    children = Company.objects.filter(
+                        umbrella_parent=user_co
+                    ).exclude(id__in=existing_ids).order_by('name')
+                    for comp in children:
+                        pseudo = CompanyMembership(
+                            user=request.user, company=comp,
+                            role='company_admin', is_active=True,
+                        )
+                        pseudo.pk = None
+                        pseudo._is_virtual = True
+                        memberships.append(pseudo)
+            except Exception:
+                pass
+
             active_id = request.session.get('active_membership_id')
             return {
                 'user_memberships': memberships,
@@ -107,3 +128,22 @@ def module_context(request):
 
     except Exception:
         return {}
+
+
+def pending_claims_badge(request):
+    """Badge za sidebar: broj pending claim zahtjeva."""
+    if not hasattr(request, 'user') or not request.user.is_authenticated:
+        return {'pending_claims_count': 0}
+    try:
+        if request.user.is_superuser or request.user.is_staff:
+            from registration.models import CompanyClaimRequest
+            count = CompanyClaimRequest.objects.filter(status='pending').count()
+        else:
+            user_co = request.user.profile.company
+            from registration.models import CompanyClaimRequest
+            count = CompanyClaimRequest.objects.filter(
+                status='pending', company__umbrella_parent=user_co,
+            ).count()
+        return {'pending_claims_count': count}
+    except Exception:
+        return {'pending_claims_count': 0}

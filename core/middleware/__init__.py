@@ -262,6 +262,8 @@ class UserLanguageMiddleware(MiddlewareMixin):
         '/burza/', '/marketplace/', '/delivery/', '/traceability/',
         '/gastro-menu/', '/sos/', '/track/', '/rosetta/',
         '/accounts/login/', '/notifications/',
+        '/firma/', '/pocni/', '/informacijski-posrednik/',
+        '/gov_export/', '/no-limit/', '/legal/',
     )
     LANG_PREFIXES = ('hr', 'en', 'de', 'tr', 'el')
 
