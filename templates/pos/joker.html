@@ -27,7 +27,7 @@
 .cashier-btn.active{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);font-weight:700}
 
 /* ── Zaključak smjene modal ─────────────────────────────────────────────────── */
-.shift-modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:8000;display:none;align-items:center;justify-content:center;padding:1rem}
+.shift-modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:var(--z-shift-modal,8000);display:none;align-items:center;justify-content:center;padding:1rem}
 .shift-modal.show{display:flex}
 .shift-box{background:var(--card,#1a1a1a);border:1px solid var(--border);border-radius:14px;width:100%;max-width:420px;overflow:hidden}
 .shift-head{padding:1rem 1.25rem;background:rgba(201,168,76,.1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
@@ -58,7 +58,7 @@
 .offline-critical.show{display:block}
 
 /* ── Toast poruka ────────────────────────────────────────────────────────────── */
-.pos-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,.95);color:#fff;border:1px solid var(--gold);border-radius:10px;padding:.6rem 1.2rem;font-size:.88rem;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+.pos-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,.95);color:#fff;border:1px solid var(--gold);border-radius:10px;padding:.6rem 1.2rem;font-size:.88rem;font-weight:600;z-index:var(--z-toast,9999);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
 .pos-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ── Category tabs ───────────────────────────────────────────────────────────── */
@@ -104,7 +104,7 @@
 }
 @keyframes voicePulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 50%{box-shadow:0 0 0 12px rgba(239,68,68,0)} }
 .voice-result {
-  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:9600;
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:var(--z-voice,9600);
   background:rgba(10,10,10,.95); border:2px solid rgba(201,168,76,.4); border-radius:16px;
   padding:24px 32px; text-align:center; display:none; min-width:280px; max-width:90vw;
   -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
@@ -178,7 +178,7 @@
 .tip-val{font-size:.75rem;color:var(--green);font-weight:700}
 
 /* ── Modals / Overlays ───────────────────────────────────────────────────────── */
-.success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;display:none}
+.success-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:var(--z-success,500);display:none}
 .success-overlay.show{display:flex}
 .success-icon{font-size:4rem;margin-bottom:.75rem}
 .success-total{font-size:1.8rem;font-weight:800;color:var(--gold);margin-bottom:.25rem}
@@ -188,7 +188,7 @@
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 .pfand-item-row{display:flex;align-items:center;gap:.5rem;padding:.45rem 0;border-bottom:1px solid var(--border)}
-.qmodal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;display:none;align-items:center;justify-content:center}
+.qmodal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:var(--z-qmodal,400);display:none;align-items:center;justify-content:center}
 .qmodal.show{display:flex}
 .qmodal-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;width:320px;max-width:95vw}
 .qmodal-title{font-size:.95rem;font-weight:700;color:var(--gold);margin-bottom:.75rem}
@@ -199,7 +199,7 @@
 .qmodal-btn{flex:1;border:none;border-radius:6px;padding:.55rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
 .qmodal-btn-ok{background:var(--gold);color:#000}
 .qmodal-btn-cancel{background:rgba(255,255,255,.08);color:var(--text)}
-.weight-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;display:none;align-items:center;justify-content:center}
+.weight-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:var(--z-weight,600);display:none;align-items:center;justify-content:center}
 .weight-modal.show{display:flex}
 .weight-box{background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:1.5rem;width:300px;max-width:95vw;text-align:center}
 .weight-title{font-size:.82rem;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.06em}
@@ -211,55 +211,16 @@
 .weight-btn-cancel{flex:1;background:rgba(255,255,255,.08);color:var(--text);border:none;border-radius:8px;padding:.65rem;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit}
 .no-session{text-align:center;padding:2.5rem;color:var(--muted)}
 
-/* ── Mobile layout ───────────────────────────────────────────────────────────── */
+/* ── Mobile layout (merged) ─────────────────────────────────────────────── */
 @media(max-width:900px){
-  .qp{display:flex;flex-direction:column;height:calc(100dvh - var(--topbar-h,52px));overflow:hidden}
-  .qp-left{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;border-right:none}
-  .qp-right{flex:0 0 auto;max-height:48vh;min-height:200px;display:flex;flex-direction:column;overflow:hidden;border-top:2px solid var(--border)}
-  .prod-grid{grid-template-columns:repeat(3,1fr)}
-  .qp-status{padding:.3rem .6rem}
-  .cashier-btn{padding:.2rem .4rem;font-size:.68rem}
-  .pos-sidebar-toggle{bottom:56px!important;top:auto!important;transform:none!important;border-radius:0 6px 6px 0!important}
-  .pay-cash,.pay-card,.pay-bon{min-height:46px!important;padding:.5rem .3rem!important;font-size:.82rem!important}
-  .basket-totals{padding:.35rem .6rem}
-  .extras-bar{display:none}
-  .pay-zone{padding:.35rem .6rem}
-  .cash-input-row{margin-bottom:.2rem}
-  .cash-quick{margin-bottom:.25rem}
-  .cash-q-btn{min-height:26px;padding:.2rem .4rem;font-size:.68rem}
-  .tot-row{display:none!important}
-  .tot-row.grand{display:flex!important;font-size:.95rem}
-}
-@media(max-width:500px){
-  .prod-grid{grid-template-columns:repeat(2,1fr)}
-  .prod-btn{min-height:62px;padding:.6rem .3rem}
-  .prod-name{font-size:.7rem}
-  .prod-price{font-size:.78rem}
-  .qp-status{padding:.25rem .4rem;font-size:.68rem}
-  .qp-status-name{font-size:.75rem}
-  .pos-sidebar-toggle{bottom:50px!important}
-  .basket-head{padding:.35rem .5rem;font-size:.62rem}
-  .b-row{padding:.25rem .5rem}
-  .pay-cash,.pay-card,.pay-bon{min-height:42px!important;font-size:.78rem!important}
-  .cat-tab{padding:.5rem .7rem;font-size:.75rem}
-}
-</style>
-<style>
-/* ── Mobile layout ─────────────────────────────────────────────────────── */
-@media(max-width:900px){
-  /* Vertikalni flex — artikli gore, plaćanje dno */
   .qp{display:flex;flex-direction:column;height:calc(100dvh - var(--topbar-h,52px));overflow:hidden}
   .qp-left{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;border-right:none}
   .qp-right{flex:0 0 auto;max-height:50vh;min-height:200px;display:flex;flex-direction:column;overflow:hidden;border-top:2px solid var(--border)}
-  /* Brze tipke: 4 kolone */
   .qk-grid{grid-template-columns:repeat(4,1fr)}
   .prod-grid{grid-template-columns:repeat(3,1fr)}
-  /* Kompaktniji status */
   .qp-status{padding:.35rem .6rem}
   .cashier-btn{padding:.2rem .45rem;font-size:.7rem}
-  /* Sidebar toggle — iznad pay tipki */
   .pos-sidebar-toggle{bottom:56px!important;top:auto!important;transform:none!important;border-radius:0 6px 6px 0!important}
-  /* Pay kompaktniji */
   .pay-cash,.pay-card,.pay-bon{min-height:46px!important;padding:.5rem!important;font-size:.85rem!important}
   .basket-totals{padding:.4rem .75rem}
   .extras-bar{display:none}
@@ -268,7 +229,7 @@
   .cash-quick{margin-bottom:.25rem}
   .cash-q-btn{min-height:28px;padding:.25rem .45rem;font-size:.72rem}
   .tot-row{font-size:.78rem;padding:.15rem 0}
-  .tot-row.grand{font-size:1rem}
+  .tot-row.grand{display:flex!important;font-size:1rem}
 }
 @media(max-width:500px){
   .qk-grid{grid-template-columns:repeat(3,1fr);gap:.2rem}
@@ -276,25 +237,22 @@
   .qk-name{font-size:.62rem}
   .qk-price{font-size:.65rem}
   .prod-grid{grid-template-columns:repeat(2,1fr)}
+  .prod-btn{min-height:62px;padding:.6rem .3rem}
+  .prod-name{font-size:.7rem}
+  .prod-price{font-size:.78rem}
   .qp-company{max-width:90px}
   .qp-terminal{max-width:90px;font-size:.72rem}
   #pos-clock{font-size:1.1rem}
+  .qp-status{padding:.25rem .4rem;font-size:.68rem}
+  .qp-status-name{font-size:.75rem}
   .pos-sidebar-toggle{bottom:50px!important}
   .basket-head{padding:.4rem .6rem;font-size:.65rem}
   .b-row{padding:.3rem .6rem}
   .b-name{font-size:.78rem}
   .b-price{font-size:.78rem}
   .pay-cash,.pay-card,.pay-bon{min-height:44px!important;font-size:.82rem!important}
+  .cat-tab{padding:.5rem .7rem;font-size:.75rem}
 }
-</style>
-
-{% if is_gastro %}
-<style>
-.gastro-tbl:hover{border-color:var(--gold)!important;transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.3)}
-#gastro-tables{max-height:200px;overflow-y:auto}
-@media(max-width:600px){#gastro-tables{max-height:150px}}
-</style>
-{% endif %}
 
 
 {% if is_gastro %}
@@ -304,13 +262,16 @@
 @media(max-width:600px){#gastro-tables{max-height:150px}}
 </style>
 {% endif %}
+
 
 <style>
 /* ── Fullscreen Numpad ──────────────────────────── */
 .numpad-overlay {
-  display:none; position:fixed; inset:0; z-index:9500;
-  background:rgba(0,0,0,.92); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-  flex-direction:column; align-items:center; justify-content:center; padding:20px;
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:var(--z-numpad,9500);
+  background:#111827; border-top:2px solid rgba(201,168,76,.3);
+  border-radius:20px 20px 0 0;
+  flex-direction:column; align-items:center; padding:14px 20px 28px;
+  box-shadow:0 -8px 32px rgba(0,0,0,.6);
 }
 .numpad-overlay.show { display:flex; }
 .numpad-display {
@@ -397,7 +358,7 @@
 /* ── POS Mode Bar (mobile only) ──────────────────── */
 .pos-mode-bar {
   display: none; /* hidden on desktop */
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 7000;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--z-mode-bar, 7000);
   height: 56px; background: #0a0a0a; border-top: 1px solid rgba(201,168,76,0.3);
   justify-content: space-around; align-items: center; padding: 0 8px;
   -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
@@ -422,7 +383,7 @@
 /* ── Basket Drawer (mobile) ──────────────────────── */
 @media(max-width:900px) {
   .qp-right {
-    position: fixed; bottom: 56px; left: 0; right: 0; z-index: 6000;
+    position: fixed; bottom: 56px; left: 0; right: 0; z-index: var(--z-basket-drawer, 6000);
     max-height: 45vh; min-height: 0; height: auto;
     background: #0d0d12; border-top: 2px solid rgba(201,168,76,0.4);
     border-radius: 16px 16px 0 0; transition: transform 0.3s ease;
@@ -442,7 +403,7 @@
 
 /* ── Quick Keys Overlay ──────────────────────────── */
 .qk-overlay {
-  display: none; position: fixed; bottom: 56px; left: 0; right: 0; z-index: 7500;
+  display: none; position: fixed; bottom: 56px; left: 0; right: 0; z-index: var(--z-quick-keys, 7500);
   max-height: 60vh; background: #0d0d12; border-top: 2px solid rgba(201,168,76,0.5);
   border-radius: 16px 16px 0 0; padding: 16px; overflow-y: auto;
   box-shadow: 0 -8px 32px rgba(0,0,0,0.7);
@@ -846,6 +807,7 @@
 </div>
 
 <!-- Fullscreen Numpad -->
+<div id="numpadBackdrop" onclick="numpadCancel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9499"></div>
 <div class="numpad-overlay" id="numpadOverlay">
   <div class="numpad-label" id="numpadLabel">Količina</div>
   <div class="numpad-display" id="numpadDisplay">1</div>
@@ -1053,9 +1015,6 @@
     </div>
   </div>
 </div>
-<script src="/static/js/html5-qrcode.min.js"></script>
-
-
 
 <script type="application/json" id="pos-config">{
   "session_id": {% if session %}{{ session.id }}{% else %}null{% endif %},
@@ -1668,6 +1627,7 @@ function openNumpad(label, currentVal, callback, itemId) {
   document.getElementById('numpadLabel').textContent = label || 'Količina';
   document.getElementById('numpadDisplay').textContent = _numpadValue || '0';
   document.getElementById('numpadOverlay').classList.add('show');
+  document.getElementById('numpadBackdrop').style.display = 'block';
   if (navigator.vibrate) navigator.vibrate(10);
 }
 function numpadPress(key) {
@@ -1679,6 +1639,7 @@ function numpadPress(key) {
 }
 function numpadCancel() {
   document.getElementById('numpadOverlay').classList.remove('show');
+  document.getElementById('numpadBackdrop').style.display = 'none';
   _numpadCallback = null;
 }
 function numpadConfirm() {
