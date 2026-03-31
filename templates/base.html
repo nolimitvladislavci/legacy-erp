@@ -797,62 +797,100 @@ window.FC = {
     fab.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4)';
   });
 
-  // Klik
+  // Klik — direktno otvori kameru bez scan panela
   fab.addEventListener('click', function(){
-    // Default → arhiva upload (bez scan modala)
+    // Default kontekst → arhiva upload
     if (ctx.fallbackUrl) {
       window.location.href = ctx.fallbackUrl;
       return;
     }
 
-    // Toggle scan panel
-    if (fabOpen) {
-      scanContainer.style.display = 'none';
-      fabOpen = false;
-      return;
-    }
+    // Direktno otvori kameru (input file s capture=environment)
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.setAttribute('capture', 'environment'); // stražnja kamera
+    input.style.display = 'none';
+    document.body.appendChild(input);
 
-    scanContainer.style.display = 'block';
-    fabOpen = true;
+    input.onchange = function() {
+      if (!input.files || !input.files[0]) return;
+      var file = input.files[0];
+      document.body.removeChild(input);
 
-    // Inicijaliziraj scanner samo jednom
-    if (!scannerInstance && typeof FenixScan !== 'undefined') {
-      scannerInstance = FenixScan.create({
-        container: '#fenix-fab-scan-container',
-        docType: ctx.docType,
-        label: ctx.label,
-        color: ctx.color,
-        maxSizeMB: 2,
-        onSuccess: function(b64s, results) {
-          scanContainer.style.display = 'none';
-          fabOpen = false;
-          // Pokušaj popuniti najbliži file input na stranici
-          var fileInput = document.querySelector('input[type="file"][name="fotografija"], input[type="file"][name="foto"], input[type="file"]');
-          if (fileInput && b64s.length) {
-            _fabSetFile(fileInput, b64s[0]);
-            // Flash success na FAB-u
-            fab.style.background = 'linear-gradient(135deg,#166534,#14532d)';
-            fab.style.color = '#4ade80';
-            fabIcon.className = 'fas fa-check';
-            fabLabel.textContent = 'Dodano!';
-            setTimeout(function(){
-              fabIcon.className = 'fas ' + ctx.icon;
-              fabLabel.textContent = ctx.label;
-              fab.style.background = ctx.bg;
-              fab.style.color = ctx.color;
-            }, 2500);
-          } else {
-            // Nema forme — spremi u arhivu
-            window.location.href = '/hr/documents/arhiva/upload/';
-          }
-        },
-        onError: function(msg) {
-          console.warn('FenixFAB:', msg);
-          scanContainer.style.display = 'none';
-          fabOpen = false;
+      // Flash loading
+      fab.style.background = 'linear-gradient(135deg,#1e3a5f,#0f172a)';
+      fabIcon.className = 'fas fa-spinner fa-spin';
+      fabLabel.textContent = 'Obrada...';
+
+      // Pošalji na API
+      var formData = new FormData();
+      formData.append('file', file);
+      formData.append('doc_type', ctx.docType || 'general');
+      formData.append('source_module', window.location.pathname);
+
+      // CSRF
+      var csrf = '';
+      var el = document.querySelector('[name=csrfmiddlewaretoken]');
+      if (el) csrf = el.value;
+      var m = document.cookie.match(/csrftoken=([^;]+)/);
+      if (m) csrf = m[1];
+
+      fetch('/api/fenix/scan/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf },
+        body: formData
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        // Success feedback
+        fab.style.background = 'linear-gradient(135deg,#166534,#14532d)';
+        fab.style.color = '#4ade80';
+        fabIcon.className = 'fas fa-check';
+        fabLabel.textContent = 'Dodano!';
+        setTimeout(function(){
+          fabIcon.className = 'fas ' + ctx.icon;
+          fabLabel.textContent = ctx.label;
+          fab.style.background = ctx.bg;
+          fab.style.color = ctx.color;
+        }, 2500);
+
+        // Popuni form na stranici ako postoji
+        if (data.fields) {
+          Object.keys(data.fields).forEach(function(key) {
+            var el = document.querySelector('[name="'+key+'"]') || document.querySelector('#'+key);
+            if (el && data.fields[key]) el.value = data.fields[key];
+          });
         }
+
+        // Ako je arhiva ili upload stranica — reload
+        if (/\/(documents|arhiva)\//.test(window.location.pathname)) {
+          setTimeout(function(){ window.location.reload(); }, 500);
+        }
+      })
+      .catch(function() {
+        // Fallback — otvori upload stranicu s file-om
+        fab.style.background = ctx.bg;
+        fab.style.color = ctx.color;
+        fabIcon.className = 'fas ' + ctx.icon;
+        fabLabel.textContent = ctx.label;
+        // Spremi u arhivu
+        var uploadForm = document.createElement('form');
+        uploadForm.method = 'POST';
+        uploadForm.action = '/hr/documents/arhiva/upload/';
+        uploadForm.enctype = 'multipart/form-data';
+        var fi = document.createElement('input');
+        fi.type = 'hidden'; fi.name = 'source_module'; fi.value = window.location.pathname;
+        var csrf2 = document.createElement('input');
+        csrf2.type = 'hidden'; csrf2.name = 'csrfmiddlewaretoken'; csrf2.value = csrf;
+        uploadForm.appendChild(fi);
+        uploadForm.appendChild(csrf2);
+        document.body.appendChild(uploadForm);
+        uploadForm.submit();
       });
-    }
+    };
+
+    input.click();
   });
 
   // Zatvori na klik izvan
