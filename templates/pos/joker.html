@@ -268,14 +268,16 @@
 /* ── Fullscreen Numpad ──────────────────────────── */
 .numpad-overlay {
   display:none; position:fixed; bottom:0; left:0; right:0; z-index:var(--z-numpad,9500);
-  background:#111827 !important; border-top:2px solid rgba(201,168,76,.3);
-  border-radius:20px 20px 0 0;
-  flex-direction:column; align-items:center; padding:14px 20px 28px;
-  box-shadow:0 -8px 32px rgba(0,0,0,.6);
+  background:#111827; border-top:2px solid rgba(201,168,76,.3);
+  border-radius:16px 16px 0 0;
+  flex-direction:column; align-items:center; padding:10px 16px 20px;
+  box-shadow:0 -4px 20px rgba(0,0,0,.4);
+  max-height:55vh;
 }
-.numpad-overlay .numpad-label { color:#94a3b8 !important; }
-.numpad-overlay .numpad-display { color:#c9a84c !important; }
-.numpad-overlay .numpad-btn { color:#e2e8f0 !important; background:rgba(255,255,255,.08) !important; }
+.numpad-overlay .numpad-label { color:#94a3b8 !important; font-size:.72rem; margin-bottom:4px; }
+.numpad-overlay .numpad-display { color:#c9a84c !important; font-size:2rem !important; margin-bottom:6px; }
+.numpad-overlay .numpad-btn { color:#e2e8f0 !important; background:rgba(255,255,255,.08) !important; min-height:44px !important; font-size:1.1rem !important; }
+.numpad-overlay .numpad-actions button { min-height:42px !important; }
 .numpad-overlay.show { display:flex; }
 .numpad-display {
   font-size:3.5rem; font-weight:800; color:#c9a84c; margin-bottom:8px;
@@ -810,7 +812,6 @@
 </div>
 
 <!-- Fullscreen Numpad -->
-<div id="numpadBackdrop" onclick="numpadCancel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9499"></div>
 <div class="numpad-overlay" id="numpadOverlay">
   <div class="numpad-label" id="numpadLabel">Količina</div>
   <div class="numpad-display" id="numpadDisplay">1</div>
@@ -1630,7 +1631,6 @@ function openNumpad(label, currentVal, callback, itemId) {
   document.getElementById('numpadLabel').textContent = label || 'Količina';
   document.getElementById('numpadDisplay').textContent = _numpadValue || '0';
   document.getElementById('numpadOverlay').classList.add('show');
-  document.getElementById('numpadBackdrop').style.display = 'block';
   if (navigator.vibrate) navigator.vibrate(10);
 }
 function numpadPress(key) {
@@ -1642,7 +1642,6 @@ function numpadPress(key) {
 }
 function numpadCancel() {
   document.getElementById('numpadOverlay').classList.remove('show');
-  document.getElementById('numpadBackdrop').style.display = 'none';
   _numpadCallback = null;
 }
 function numpadConfirm() {
