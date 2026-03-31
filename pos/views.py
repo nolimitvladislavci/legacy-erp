@@ -485,10 +485,6 @@ def cancel_receipt(request, receipt_id):
     return redirect('pos:session_detail', session_id=receipt.session_id)
 
 
-@login_required
-@login_required
-@require_POST
-
 @csrf_exempt
 def ai_barcode_lookup(request):
     """AI Vision za prepoznavanje barkoda i proizvoda sa slike."""
@@ -1056,8 +1052,13 @@ def _quick_pos_legacy(request, terminal_id):
             quick_items = [items_map[pk] for pk in top_ids if pk in items_map]
         if len(quick_items) < 12:
             existing = {i.pk for i in quick_items}
-            filler = list(InventoryItem.objects.filter(company=company, is_active=True)
-                         .exclude(pk__in=existing).select_related('tax_rate').order_by('name')[:12 - len(quick_items)])
+            # Filler - filtriraj po category_filter terminala
+            filler_qs = InventoryItem.objects.filter(company=company, is_active=True).exclude(pk__in=existing)
+            if terminal.category_filter:
+                cat_list = [c2.strip() for c2 in terminal.category_filter.split(',') if c2.strip()]
+                if cat_list:
+                    filler_qs = filler_qs.filter(category__in=cat_list)
+            filler = list(filler_qs.select_related('tax_rate').order_by('name')[:12 - len(quick_items)])
             quick_items.extend(filler)
     except Exception:
         pass
