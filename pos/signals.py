@@ -9,37 +9,51 @@ from pos.models import POSSession, POSDailyReport
 
 @receiver(post_save, sender=POSSession)
 def generate_daily_report_on_close(sender, instance, **kwargs):
-    """Kad se sesija zatvori, generiraj POSDailyReport."""
+    """Kad se sesija zatvori, generiraj POSDailyReport (on_commit)."""
     if instance.status in ('closed', 'z_done') and instance.closed_at:
-        try:
-            POSDailyReport.generate_from_session(instance)
-        except Exception:
-            import logging
-            logging.getLogger(__name__).warning(
-                'POSDailyReport generiranje neuspješno za sesiju #%s',
-                instance.pk, exc_info=True,
-            )
+        session_pk = instance.pk
+        def _gen():
+            try:
+                from pos.models import POSSession as _PS, POSDailyReport as _PDR
+                sess = _PS.objects.get(pk=session_pk)
+                _PDR.generate_from_session(sess)
+            except Exception:
+                import logging
+                logging.getLogger(__name__).warning(
+                    'POSDailyReport generiranje neuspješno za sesiju #%s',
+                    session_pk, exc_info=True,
+                )
+        from django.db import transaction
+        transaction.on_commit(_gen)
 
 
 @receiver(post_save, sender=POSSession)
 def auto_book_pos_session(sender, instance, **kwargs):
-    """Kad se sesija zatvori, automatski proknjiži u Konto modul."""
+    """Kad se sesija zatvori, automatski proknjiži u Konto modul.
+    Radi on_commit da ne kvari atomarnu transakciju close_session.
+    """
     if instance.status in ('closed', 'z_done') and instance.closed_at:
-        try:
-            from konto.services_file import book_pos_session
-            je = book_pos_session(instance)
-            if je:
+        session_pk = instance.pk
+        def _book():
+            try:
+                from pos.models import POSSession as _PS
+                sess = _PS.objects.get(pk=session_pk)
+                from konto.services_file import book_pos_session
+                je = book_pos_session(sess)
+                if je:
+                    import logging
+                    logging.getLogger(__name__).info(
+                        'POS auto-knjiženje: sesija #%s → temeljnica %s',
+                        session_pk, je.entry_number,
+                    )
+            except Exception:
                 import logging
-                logging.getLogger(__name__).info(
-                    'POS auto-knjiženje: sesija #%s → temeljnica %s',
-                    instance.pk, je.entry_number,
+                logging.getLogger(__name__).warning(
+                    'POS auto-knjiženje neuspješno za sesiju #%s',
+                    session_pk, exc_info=True,
                 )
-        except Exception:
-            import logging
-            logging.getLogger(__name__).warning(
-                'POS auto-knjiženje neuspješno za sesiju #%s',
-                instance.pk, exc_info=True,
-            )
+        from django.db import transaction
+        transaction.on_commit(_book)
 
 
 # ═══════════════════════════════════════════════════════════════
