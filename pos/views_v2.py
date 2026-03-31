@@ -1102,7 +1102,7 @@ def pos_service_worker(request):
     """Serve ServiceWorker JS za POS offline background sync."""
     sw_js = """
 // POS ServiceWorker — Background Sync + Offline Fallback
-const CACHE_NAME = 'pos-offline-v3';
+const CACHE_NAME = 'pos-offline-v4';
 const OFFLINE_URL = '/pos/offline.html';
 
 self.addEventListener('install', (e) => {
