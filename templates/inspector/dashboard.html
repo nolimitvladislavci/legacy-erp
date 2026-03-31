@@ -299,5 +299,22 @@ document.querySelectorAll('.tab').forEach(function(tab) {
   });
 });
 </script>
+
+<!-- Zlatno dugme + Prijavi problem -->
+<div style="position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;z-index:999">
+  <a href="https://limit-connect.com/hr/pos/complaints/new/" target="_blank"
+    style="background:linear-gradient(135deg,#b45309,#92400e);color:#fff;border-radius:12px;
+    padding:12px 20px;font-weight:700;font-size:.85rem;text-decoration:none;
+    box-shadow:0 4px 16px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px">
+    <i class="fas fa-exclamation-triangle"></i> Prijavi problem
+  </a>
+  <button onclick="window.print()"
+    style="background:linear-gradient(135deg,#c9a84c,#a07830);color:#000;border:none;border-radius:12px;
+    padding:12px 20px;font-weight:700;font-size:.85rem;cursor:pointer;
+    box-shadow:0 4px 16px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px">
+    <i class="fas fa-print"></i> Print
+  </button>
+</div>
+
 </body>
 </html>

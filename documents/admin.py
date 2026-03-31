@@ -52,3 +52,30 @@ class ArhivaEntryAdmin(admin.ModelAdmin):
     search_fields = ('doc_number', 'partner_name', 'zki', 'jir')
     readonly_fields = ('archived_at',)
     date_hierarchy = 'doc_date'
+
+
+from .models import ArhivaAuditLog
+
+
+@admin.register(ArhivaAuditLog)
+class ArhivaAuditLogAdmin(admin.ModelAdmin):
+    """Read-only admin for append-only audit log."""
+    list_display = ('timestamp', 'action', 'entry_archive_number', 'user', 'ip_address', 'company')
+    list_filter = ('action', 'company', 'timestamp')
+    search_fields = ('entry_archive_number', 'user__username', 'ip_address')
+    readonly_fields = (
+        'entry', 'entry_archive_number', 'company', 'action',
+        'user', 'ip_address', 'user_agent', 'changes', 'timestamp',
+    )
+    date_hierarchy = 'timestamp'
+    list_per_page = 50
+    ordering = ['-timestamp']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

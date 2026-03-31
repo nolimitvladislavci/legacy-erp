@@ -1120,9 +1120,14 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// Network-only: ne cachira ništa
+// Network-only: ne cachira ništa, uvijek fetch
 self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request));
+  // Bypass za sve - samo prosljeđuj na mrežu
+  e.respondWith(
+    fetch(e.request).catch(() => {
+      return new Response('Offline', {status: 503});
+    })
+  );
 });
 """;
     from django.http import HttpResponse

@@ -1,8 +1,9 @@
+{% load i18n %}
 <!-- POS Sidebar Navigation -->
 <style>
 .pos-sidebar-toggle {
     position: fixed; left: 0; top: 50%; transform: translateY(-50%);
-    z-index: 10001; background: var(--gold, #c9a84c); color: #0a0a0a;
+    z-index: var(--z-sidebar, 10001); background: var(--gold, #c9a84c); color: #0a0a0a;
     border: none; border-radius: 0 8px 8px 0;
     padding: 14px 10px; cursor: pointer; font-size: 18px;
     touch-action: manipulation;
@@ -12,7 +13,7 @@
 .pos-sidebar {
     position: fixed; left: -270px; top: 0; bottom: 0; width: 260px;
     background: var(--dark, #111); border-right: 1px solid rgba(201,168,76,0.2);
-    z-index: 10000; transition: left 0.3s ease;
+    z-index: var(--z-sidebar-panel, 10000); transition: left 0.3s ease;
     padding: 20px 0; overflow-y: auto;
 }
 .pos-sidebar.open { left: 0 !important; }
@@ -43,30 +44,29 @@
 <div class="pos-sidebar-overlay" id="posSidebarOverlay" onclick="togglePosSidebar()"></div>
 
 <nav id="posSidebar" class="pos-sidebar">
-    <div class="ps-header"><i class="fas fa-th"></i> FINA POS</div>
-    <a href="{% url 'pos:new_terminal' %}" class="ps-link"><i class="fas fa-cash-register"></i> POS Terminal</a>
-    <a href="/pos/restaurant/" class="ps-link"><i class="fas fa-utensils"></i> Restoran</a>
-    <a href="/pos/gastro/" class="ps-link"><i class="fas fa-hamburger"></i> Gastro</a>
-    <a href="/pos/waiter/" class="ps-link"><i class="fas fa-concierge-bell"></i> Konobar</a>
-    <a href="/pos/gastro/kds/" class="ps-link"><i class="fas fa-tv"></i> Kuhinja (KDS)</a>
+    <div class="ps-header"><i class="fas fa-th"></i> LIMIT POS</div>
+    <a href="{% url 'pos:dashboard' %}" class="ps-link"><i class="fas fa-cash-register"></i> POS Terminal</a>
+    <a href="{% url 'pos:gastro_dashboard' %}" class="ps-link"><i class="fas fa-utensils"></i> Restoran / Gastro</a>
+    <a href="{% url 'pos:waiter_app' %}" class="ps-link"><i class="fas fa-concierge-bell"></i> Konobar</a>
+    <a href="{% url 'pos:gastro_kitchen' %}" class="ps-link"><i class="fas fa-tv"></i> Kuhinja (KDS)</a>
     <hr class="ps-divider">
-    <a href="/pos/expiry/" class="ps-link"><i class="fas fa-clock"></i> Rokovi trajanja</a>
-    <a href="/pos/vouchers/" class="ps-link"><i class="fas fa-ticket-alt"></i> Vučeri</a>
-    <a href="/pos/settings/" class="ps-link"><i class="fas fa-cog"></i> POS Postavke</a>
+    <a href="{% url 'pos:expiry_dashboard' %}" class="ps-link"><i class="fas fa-clock"></i> Rokovi trajanja</a>
+    <a href="{% url 'pos:voucher_list' %}" class="ps-link"><i class="fas fa-ticket-alt"></i> Vauceri</a>
+    <a href="{% url 'pos:pos_settings' %}" class="ps-link"><i class="fas fa-cog"></i> POS Postavke</a>
     <hr class="ps-divider">
-    <a href="{% url 'invoicing:index' %}" class="ps-link"><i class="fas fa-file-invoice"></i> Računi</a>
-    <a href="/invoicing/create/" class="ps-link"><i class="fas fa-plus"></i> Novi račun</a>
-    <a href="{% url 'inventory:list' %}" class="ps-link"><i class="fas fa-warehouse"></i> Skladište</a>
+    <a href="{% url 'invoicing:index' %}" class="ps-link"><i class="fas fa-file-invoice"></i> Racuni</a>
+    <a href="{% url 'invoicing:invoice_create' %}" class="ps-link"><i class="fas fa-plus"></i> Novi racun</a>
+    <a href="{% url 'inventory:list' %}" class="ps-link"><i class="fas fa-warehouse"></i> Skladiste</a>
     <a href="{% url 'partners:list' %}" class="ps-link"><i class="fas fa-users"></i> Partneri</a>
     <a href="{% url 'appointments:list' %}" class="ps-link"><i class="fas fa-calendar-check"></i> Termini</a>
     <hr class="ps-divider">
     <a href="{% url 'ivan_cockpit' %}" class="ps-link"><i class="fas fa-robot"></i> AI Asistent</a>
     <a href="{% url 'dashboard' %}" class="ps-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <hr class="ps-divider">
-    <a href="/companies/tax-rates/" class="ps-link"><i class="fas fa-percentage"></i> Porezne stope</a>
-    <a href="/companies/settings/" class="ps-link"><i class="fas fa-building"></i> Postavke firme</a>
+    <a href="{% url 'companies:tax_rates' %}" class="ps-link"><i class="fas fa-percentage"></i> Porezne stope</a>
+    <a href="{% url 'companies:settings' %}" class="ps-link"><i class="fas fa-building"></i> Postavke firme</a>
     <hr class="ps-divider">
-    <a href="/logout/" class="ps-link" style="color:#e74c3c;"><i class="fas fa-sign-out-alt" style="color:#e74c3c;"></i> Odjava</a>
+    <a href="{% url 'logout' %}" class="ps-link" style="color:#e74c3c;"><i class="fas fa-sign-out-alt" style="color:#e74c3c;"></i> Odjava</a>
 </nav>
 
 <script>

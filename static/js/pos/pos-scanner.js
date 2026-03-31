@@ -43,7 +43,7 @@
 
   function _scannerFallback() {
     document.getElementById('scannerVideo').style.display = 'none';
-    _setScanStatus('Kamera nedostupna — unesi barkod ručno', '#f59e0b');
+    _setScanStatus('Kamera nedostupna — unesi barkod rucno', '#f59e0b');
     setTimeout(function(){ document.getElementById('manualBarcode').focus(); }, 100);
   }
 
@@ -97,14 +97,22 @@
   }
 
   function _addScannedProduct(data) {
+    // Ako postoji button u gridu, koristi ga
     var btn = document.getElementById('pb-' + data.id);
-    if (btn && typeof window.addProduct === 'function') { window.addProduct(btn); return; }
+    if (btn && typeof window.addProduct === 'function') {
+      window.addProduct(btn, true);  // true = programmatic (no event)
+      return;
+    }
+    // Inace kreiraj privremeni button s dataset atributima
     var tempBtn = document.createElement('button');
-    tempBtn.dataset.id = data.id; tempBtn.dataset.name = data.name;
-    tempBtn.dataset.price = data.price; tempBtn.dataset.tax = data.tax_rate || 25;
-    tempBtn.dataset.weighable = '0'; tempBtn.style.display = 'none';
+    tempBtn.dataset.id = data.id;
+    tempBtn.dataset.name = data.name;
+    tempBtn.dataset.price = data.price;
+    tempBtn.dataset.tax = data.tax_rate || 25;
+    tempBtn.dataset.weighable = '0';
+    tempBtn.style.display = 'none';
     document.body.appendChild(tempBtn);
-    if (typeof window.addProduct === 'function') window.addProduct(tempBtn);
+    if (typeof window.addProduct === 'function') window.addProduct(tempBtn, true);
     tempBtn.remove();
   }
 
@@ -182,7 +190,7 @@
           _addScannedProduct({id: data.id, name: name, price: parseFloat(price), tax_rate: parseInt(vat)});
           _setScanStatus('Novi artikl "' + name + '" spremljen i dodan!', '#22c55e');
           _flashOverlay('#22c55e'); cancelNewItem();
-        } else { fenixToast('Greska: ' + (data.error || xhr.responseText.substring(0, 100, 'error'))); }
+        } else { fenixToast('Greska: ' + (data.error || xhr.responseText.substring(0, 100)), 'error'); }
       } catch(e) { fenixToast('Greska: ' + xhr.status, 'error'); }
     };
     xhr.onerror = function() { fenixToast('Greska veze', 'error'); };

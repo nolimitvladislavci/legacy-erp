@@ -8,7 +8,6 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(regs) {
     regs.forEach(function(r) { r.unregister(); });
   });
-  // Clear all caches
   if (window.caches) {
     caches.keys().then(function(names) {
       names.forEach(function(n) { caches.delete(n); });
@@ -28,6 +27,25 @@ if ('serviceWorker' in navigator) {
   --topbar-bg:#111;--topbar-border:#2a2a2a;--topbar-text:#e8e8e8;
   --body-bg:#0a0a0a;--input-bg:#0a0a0a;--input-border:#2a2a2a;
   --nav-hover:rgba(201,168,76,.12);--nav-active-text:var(--gold);
+  /* ═══ Z-INDEX MAP ═══
+     Dokumentirana hijerarhija — sve POS komponente koriste ove varijable.
+     Dodaj novi layer ovdje, NE hardkodiraj z-index u komponentama.
+  */
+  --z-qmodal:400;         /* Quantity/discount modal */
+  --z-success:500;        /* Payment success overlay */
+  --z-weight:600;         /* Weight input modal */
+  --z-basket-drawer:6000; /* Mobile basket drawer */
+  --z-mode-bar:7000;      /* Mobile bottom nav */
+  --z-quick-keys:7500;    /* Quick keys overlay */
+  --z-shift-modal:8000;   /* Shift close modal */
+  --z-pay-expand:8500;    /* Mobile fullscreen payment */
+  --z-company-menu:9000;  /* Company switcher dropdown */
+  --z-numpad:9500;        /* Fullscreen numpad */
+  --z-voice:9600;         /* Voice input result */
+  --z-offline-sync:9998;  /* Offline sync badge */
+  --z-toast:9999;         /* Toast notifications */
+  --z-sidebar-panel:10000;/* Sidebar nav panel */
+  --z-sidebar:10001;      /* Sidebar toggle button */
 }
 /* ═══ LIGHT THEME ═══ */
 [data-theme="light"]{
@@ -79,7 +97,7 @@ a{color:inherit;text-decoration:none}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.3rem}
 .dot-green{background:var(--green)}.dot-grey{background:var(--muted)}
 
-/* Light overrides for specific elements */
+/* Light overrides */
 [data-theme="light"] .card{box-shadow:0 1px 3px rgba(0,0,0,.06)}
 [data-theme="light"] .btn-gold{color:#000}
 [data-theme="light"] .btn-green{color:#fff}
@@ -118,15 +136,15 @@ a{color:inherit;text-decoration:none}
     <a href="{% url 'pos:expiry_dashboard' %}" {% if '/expiry/' in request.path %}class="active"{% endif %}>
       {% trans "Rokovi" %}</a>
     <a href="{% url 'pos:voucher_list' %}" {% if '/vouchers/' in request.path %}class="active"{% endif %}>
-      {% trans "Vaučeri" %}</a>
+      {% trans "Vauceri" %}</a>
     <a href="{% url 'pos:fiscal_room' %}" {% if '/fiscal/' in request.path %}class="active"{% endif %}>
       {% trans "Fiskal" %}</a>
     <span class="nav-sep"></span>
     <a href="{% url 'pos:pos_settings' %}" {% if '/settings/' in request.path %}class="active"{% endif %}>
       {% trans "Postavke" %}</a>
     <span class="nav-sep"></span>
-    <a href="{% url 'pos:prigovori_list' %}" style="color:#ef4444" title="Inspekcija — knjiga boljitaka, Z-izvješća, fiskalni logovi">
-      🛡️ {% trans "Inspekcija" %}</a>
+    <a href="{% url 'pos:prigovori_list' %}" style="color:#ef4444" title="Inspekcija">
+      {% trans "Inspekcija" %}</a>
   </nav>
 {% endblock %}
   <div class="topbar-right">
@@ -137,7 +155,7 @@ a{color:inherit;text-decoration:none}
               style="background:none;border:1px solid #333;color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:inherit">
         {{ request.user.get_full_name|default:request.user.username }} ▾
       </button>
-      <div class="pos-company-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#111;border:1px solid #333;border-radius:8px;min-width:200px;z-index:9000;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+      <div class="pos-company-menu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:#111;border:1px solid #333;border-radius:8px;min-width:200px;z-index:var(--z-company-menu);padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)">
         {% for mem in user_memberships %}
         <form method="post" action="{% url 'accounts:switch_company' %}" style="margin:0">
           {% csrf_token %}
@@ -158,11 +176,9 @@ a{color:inherit;text-decoration:none}
 </div>
 {% if messages %}<div class="messages">{% for msg in messages %}<div class="msg {{ msg.tags }}">{{ msg }}</div>{% endfor %}</div>{% endif %}
 <div class="pos-main">
-{# quick_keys removed - use sidebar instead #}
 {% block content %}{% endblock %}
 </div>
 {% include "pos/includes/sidebar.html" %}
-<!-- theme: pos-core.js -->
 
 <script src="/static/js/pos/pos-core.js"></script>
 <script src="/static/js/pos/pos-offline.js"></script>
@@ -170,12 +186,12 @@ a{color:inherit;text-decoration:none}
 .pos-offline::before {
   content: 'OFFLINE MOD';
   position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-  z-index: 9999; background: #f59e0b; color: #000;
+  z-index: var(--z-toast); background: #f59e0b; color: #000;
   padding: 4px 20px; font-size: 11px; font-weight: 800;
   border-radius: 0 0 8px 8px; letter-spacing: 1px;
 }
 .pos-toast {
-  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  position: fixed; bottom: 20px; right: 20px; z-index: var(--z-toast);
   padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
   opacity: 0; transform: translateY(20px); transition: all 0.3s;
   max-width: 320px;
@@ -188,12 +204,9 @@ a{color:inherit;text-decoration:none}
 #offlineSyncBadge {
   display: none; background: #f59e0b; color: #000; padding: 4px 12px;
   border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;
-  position: fixed; bottom: 20px; left: 20px; z-index: 9998;
+  position: fixed; bottom: 20px; left: 20px; z-index: var(--z-offline-sync);
 }
 #offlineSyncBadge:hover { background: #fbbf24; }
-.pos-toast-warning { background: #d97706; color: #fff; }
-.pos-toast-info { background: #2563eb; color: #fff; }
-.pos-toast-error { background: #dc2626; color: #fff; }
 </style>
 
 {% block extra_js %}

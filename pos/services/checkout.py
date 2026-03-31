@@ -111,21 +111,21 @@ class CheckoutService:
             # StockBatch ne postoji za ovaj artikl ili nema batcheva — OK
             logger.debug('FEFO batch deduction skipped for %s: %s', locked_item.name, e)
 
-        return lot_number, expiry_date, batch_id
-        # BOM auto-deduction
+        # ── BOM auto-deduction ──
+        # Ako artikl ima aktivnu sastavnicu, oduzmi komponente
         try:
             from calculator.models import BOM
             boms = BOM.objects.filter(
-                company=item.company, article=item, is_active=True,
+                company=locked_item.company, article=locked_item, is_active=True,
             ).prefetch_related('items__material')
             for bom in boms:
                 sold_qty = qty / (bom.yield_quantity or 1)
                 for bi in bom.items.select_related('material').all():
-                    deduct = bi.net_quantity * sold_qty
+                    deduct_qty = bi.net_quantity * sold_qty
                     StockMovement.objects.create(
                         item=bi.material,
                         movement_type='out',
-                        quantity=deduct,
+                        quantity=deduct_qty,
                         unit_price=bi.material.purchase_price,
                         reason='BOM - POS bon #%d' % receipt_number,
                         performed_by=user,
@@ -133,13 +133,15 @@ class CheckoutService:
         except Exception:
             logger.warning('BOM deduction failed for item %s', item.pk, exc_info=True)
 
+        return lot_number, expiry_date, batch_id
+
     @staticmethod
     def _fiscalize(receipt):
         """
         Tri-Routing fiskalizacija:
-        1. fiscal_exempt → bypass (udruge bez PDV-a)
-        2. DE (KassenSichV) → TSE adapter (Fiskaly Cloud)
-        3. HR (FINA CIS) → standardna fiskalizacija
+        1. fiscal_exempt -> bypass (udruge bez PDV-a)
+        2. DE (KassenSichV) -> TSE adapter (Fiskaly Cloud)
+        3. HR (FINA CIS) -> standardna fiskalizacija
         Ne blokira naplatu ako padne.
         """
         company = receipt.session.terminal.company
@@ -209,7 +211,6 @@ class CheckoutService:
             return Decimal('0'), clan.full_name
         except Exception:
             return Decimal('0'), None
-
 
     @staticmethod
     def _fiscalize_tse(receipt):
@@ -294,7 +295,6 @@ class CheckoutService:
         if (company.country in ('DE', 'AT')
                 and not payload.get('buyer_oib', '').strip()
                 and not payload.get('buyer_name', '').strip()):
-            # Izracunaj ukupni iznos iz payloada
             est_total = sum(
                 float(i.get('unit_price', i.get('price', 0))) *
                 float(i.get('quantity', i.get('qty', 1)))
@@ -308,7 +308,6 @@ class CheckoutService:
                 )
 
         # ── 1c. KARENCIJA GUARD (livestock) ──
-        # Blokira prodaju mlijeka/mesa od grla u karenciji (antibiotik/lijek)
         for item_data in payload.get('items', []):
             item_id = item_data.get('item_id') or item_data.get('id')
             if item_id:
@@ -344,7 +343,6 @@ class CheckoutService:
             raise CheckoutValidationError('WRONG_COMPANY', 'Smjena ne pripada ovoj tvrtki')
 
         # ── 2b. VALIDACIJA MIJEŠANJA (nonprofit vs commercial) ──
-        # Fail-fast: jedan batch query, ne N upita po stavci
         item_ids = [d.get('item_id') or d.get('id') for d in items_data if d.get('item_id') or d.get('id')]
         if item_ids:
             inv_items = list(InventoryItem.objects.filter(pk__in=item_ids, company=company).only(
@@ -355,8 +353,8 @@ class CheckoutService:
             if has_nonprofit and has_commercial:
                 raise CheckoutValidationError(
                     'MIXED_NONPROFIT_COMMERCIAL',
-                    'Zabranjeno miješanje! Komercijalne stavke i neprofitne stavke '
-                    '(članarine, donacije) moraju se naplatiti na odvojene račune.'
+                    'Zabranjeno mijesanje! Komercijalne stavke i neprofitne stavke '
+                    '(clanarine, donacije) moraju se naplatiti na odvojene racune.'
                 )
 
         # ── 3. PRIPREMA ──
@@ -371,17 +369,17 @@ class CheckoutService:
                 receipt = POSReceipt.objects.create(
                     session=session,
                     receipt_number=next_number,
-            cashier=cashier_obj,
-            client_ip=payload.get('client_ip', ''),
-            client_ua=str(payload.get('client_ua', ''))[:300],
-            buyer_oib=str(payload.get('buyer_oib', ''))[:20],
-            buyer_name=str(payload.get('buyer_name', ''))[:200],
-            buyer_address=str(payload.get('buyer_address', ''))[:255],
-            is_r1=bool(payload.get('buyer_oib')),
-            note=str(note)[:255] if note else (cashier_obj.name if cashier_obj else ''),
-            is_training=getattr(session.terminal, 'is_training', False) or session.is_training,
-            member_name=member_name or '',
-            member_discount_applied=member_discount,
+                    cashier=cashier_obj,
+                    client_ip=payload.get('client_ip', ''),
+                    client_ua=str(payload.get('client_ua', ''))[:300],
+                    buyer_oib=str(payload.get('buyer_oib', ''))[:20],
+                    buyer_name=str(payload.get('buyer_name', ''))[:200],
+                    buyer_address=str(payload.get('buyer_address', ''))[:255],
+                    is_r1=bool(payload.get('buyer_oib')),
+                    note=str(note)[:255] if note else (cashier_obj.name if cashier_obj else ''),
+                    is_training=getattr(session.terminal, 'is_training', False) or session.is_training,
+                    member_name=member_name or '',
+                    member_discount_applied=member_discount,
                 )
                 break  # Success — exit retry loop
             except Exception as _dup_err:
@@ -401,7 +399,6 @@ class CheckoutService:
                 qty = Decimal('1')
 
             if is_tip:
-                # Napojnica stavka iz items arraya
                 try:
                     price = Decimal(str(item_data.get('unit_price') or item_data.get('price') or 0))
                 except (InvalidOperation, ValueError):
@@ -415,7 +412,6 @@ class CheckoutService:
                 continue
 
             if not item_id and not is_pfand:
-                # Custom stavka bez inventory linka
                 try:
                     price = Decimal(str(item_data.get('unit_price') or item_data.get('price') or 0))
                 except (InvalidOperation, ValueError):
@@ -451,7 +447,7 @@ class CheckoutService:
             # Apply member discount if active subscription exists
             item_discount = Decimal('0')
             if member_discount > 0 and not getattr(inv, 'is_nonprofit_activity', False):
-                item_discount = member_discount  # % popust za clanove
+                item_discount = member_discount
 
             POSReceiptItem.objects.create(
                 receipt=receipt,
@@ -468,7 +464,6 @@ class CheckoutService:
             # Stock deduction
             try:
                 lot_num, exp_date, batch_pk = cls._deduct_stock(inv, qty, unit_price, next_number, user) or (None, None, None)
-                # LOT slijedivost: spremi na receipt item
                 if lot_num or exp_date:
                     try:
                         ri = receipt.items.filter(inventory_item=inv).last()
@@ -484,13 +479,11 @@ class CheckoutService:
                 logger.warning('POS: StockMovement greska za item %s: %s', item_id, stock_err)
 
             # ── CLANARINA AUTO-LINK ──
-            # Ako je artikl povezan s MembershipPlan, automatski kreiraj/oznaci Clanarinu
             if getattr(inv, 'is_nonprofit_activity', False):
                 try:
                     from udruge.models import MembershipPlan, Clanarina, Clan
                     mp = MembershipPlan.objects.filter(linked_item=inv, company=company, is_active=True).first()
                     if mp and member_name:
-                        # Pronadi clana
                         card_uid = (payload.get('member_card') or '').strip()
                         m_id = payload.get('member_id')
                         clan = None
@@ -502,7 +495,6 @@ class CheckoutService:
                             receipt.member_clan_id = clan.pk
                             from datetime import timedelta
                             today = tz.now().date()
-                            # Kreiraj clanarinu ako ne postoji za ovaj period
                             existing = Clanarina.objects.filter(
                                 company=company, clan=clan,
                                 period_start=today,
@@ -524,7 +516,6 @@ class CheckoutService:
                     logger.warning('Clanarina auto-link: %s', clan_err)
 
         # ── 5. NAPOJNICA (zasebna stavka) ──
-        # Validacija napojnice (Dron #1 fix)
         if tip_amount < 0:
             tip_amount = Decimal('0')
             logger.warning('Negativna napojnica odbacena za bon #%d', receipt.pk)
@@ -552,7 +543,6 @@ class CheckoutService:
                     ok, msg = TipTracker.check_tip_limit(operator, tip_amount)
                     if not ok:
                         logger.warning('TIP LIMIT: %s — %s', operator, msg)
-                        # Ne blokiramo — samo logiramo i dodajemo warning u result
             except Exception:
                 pass
 
@@ -561,11 +551,9 @@ class CheckoutService:
         receipt.save()
 
         # ── 6b. BLAGAJNICKI MAKSIMUM (cash_register_limit) ──
-        # Zakonski limit gotovine u blagajni za udruge
         if payment_method == 'CASH':
             limit = getattr(company, 'cash_register_limit', None)
             if limit and limit > 0:
-                # Izracunaj trenutnu gotovinu u smjeni
                 from django.db.models import Sum
                 from pos.models import POSPaymentLine
                 current_cash = session.receipts.filter(
@@ -578,26 +566,19 @@ class CheckoutService:
                         'CASH LIMIT: Smjena %s — %s + %s > %s EUR limit',
                         session.pk, current_cash, receipt.total, limit,
                     )
-                    # Ne blokiramo ali dodajemo warning u result
-                    # (zakonski se mora uplatiti visak na banku)
 
         # ── 7. PLACANJE ──
         change = Decimal('0')
 
         if payment_method == 'VOUCHER' or voucher_amount > 0:
-            # Voucher split payment — Mehrzweck vs Einzweck PDV logika
             try:
                 from pos.models import Voucher
                 voucher = Voucher.objects.get(code=voucher_code, is_active=True)
                 if not voucher.is_usable:
                     raise CheckoutValidationError('VOUCHER_INVALID', 'Vaucer nije valjan ili je istekao.')
 
-                # Mehrzweck (multi): PDV se obracunava TEK pri otkupu
-                # Einzweck (single): PDV je vec obracunat pri prodaji bona
                 is_multi = getattr(voucher, 'voucher_type', 'multi') == 'multi'
                 if not is_multi:
-                    # Einzweck: stavke placene ovim bonom idu s 0% PDV
-                    # jer je PDV vec obracunat pri prodaji bona
                     logger.info('Einzweck voucher %s — PDV vec obracunat', voucher.code)
                 use_amount = min(voucher.remaining, receipt.total if not voucher_amount else voucher_amount)
                 voucher.remaining = max(Decimal('0'), voucher.remaining - use_amount)
@@ -669,117 +650,14 @@ class CheckoutService:
             result['not_fiscalized'] = True
             result['fiscal_message'] = (
                 'Racun je izdan ali NIJE fiskaliziran. '
-                'Razlog: %s. '
-                'Sustav ce automatski pokusati ponovo u roku 2 minute.'
-            ) % fiscal_error[:80]
-            logger.warning('NOT FISCALIZED: Bon #%s — %s', next_number, fiscal_error)
+                'Automatski retry ce pokusati ponovo u pozadini.'
+            )
 
-        # ── 10b. AUTO e-RACUN ZA B2B (R1) ──
-        # Od 01.01.2026. B2B transakcije MORAJU imati e-Racun
-        if receipt.buyer_oib and receipt.buyer_oib.strip():
-            try:
-                from eracun.models import ERacun
-                # Kreiraj e-Racun u pozadini (Celery)
-                from django.db import transaction as db_tx
-                def _create_eracun():
-                    try:
-                        eracun = ERacun.objects.create(
-                            company=company,
-                            source_receipt=receipt,
-                            invoice_number=result.get('invoice_number', ''),
-                            # Izdavatelj = nasa firma
-                            issuer_name=company.name,
-                            issuer_oib=company.oib,
-                            issuer_address=company.address or '',
-                            issuer_city=company.city or '',
-                            issuer_postal=company.zip_code or '',
-                            issuer_country=company.country or 'HR',
-                            issuer_iban=company.iban or '',
-                            # Primatelj = kupac s POS-a
-                            recipient_name=receipt.buyer_name or '',
-                            recipient_oib=receipt.buyer_oib,
-                            recipient_address=receipt.buyer_address or '',
-                            # Iznosi
-                            subtotal=receipt.subtotal,
-                            tax_amount=receipt.tax_amount,
-                            total=receipt.total,
-                            issue_date=tz.now().date(),
-                            # Fiskalni podaci s POS bona
-                            zki=receipt.zki or result.get('zki', ''),
-                            jir=receipt.jir or result.get('jir', ''),
-                            # Status: vec fiskaliziran kroz POS
-                            status='valid',
-                            payment_means_code='10' if payment_method == 'CASH' else '48',
-                            note='Auto-generirano iz POS R1 bona #%s' % receipt.receipt_number,
-                        )
-                        logger.info('Auto e-Racun kreiran za R1 bon #%s -> eRacun %s',
-                                    receipt.receipt_number, eracun.pk)
-                        # Auto-send kroz posrednika ako je konfiguriran
-                        try:
-                            from eracun.services.posrednik_service import PosrednikService
-                            if PosrednikService.is_configured(company):
-                                from django.db import transaction as db_tx2
-                                db_tx2.on_commit(lambda: PosrednikService.send(eracun))
-                                logger.info('e-Racun %s queued za slanje kroz posrednika', eracun.pk)
-                        except Exception as pe:
-                            logger.warning('Posrednik auto-send skip: %s', pe)
-                    except Exception as e:
-                        logger.warning('Auto e-Racun failed za bon #%s: %s', receipt.receipt_number, e)
-                db_tx.on_commit(_create_eracun)
-            except Exception:
-                pass
-
-        # ── 10c. AUTO OTPREMNICA (Sprint 1B — non-blocking) ──
-        try:
-            from pos.services._otpremnica_bridge import pos_receipt_to_otpremnica
-            pos_receipt_to_otpremnica(receipt)
-        except Exception as e:
-            logger.warning('CheckoutService OTP bridge: %s', e)
-
-        # ── 11. ACTIVITY EVENT ──
-        from worktime.tracker import track
-        track(user, 'POS', 'POS_CHECKOUT', ref='Bon #%s' % next_number,
-              detail='%s stavki, %s EUR, %s' % (len(items_data), receipt.total, payment_method),
-              metadata={'receipt_id': receipt.pk, 'total': str(receipt.total),
-                        'payment_method': payment_method, 'items_count': len(items_data)},
-              company=company)
-
-        # ── 12. POS PULSE — AI Anomaly Detection ──
+        # Pulse analytics (non-blocking)
         try:
             from pos.pulse import analyze_receipt
             analyze_receipt(receipt)
-        except Exception as _pulse_err:
-            logger.warning('Pulse analyze failed: %s', _pulse_err)
-
-        # ── 13. TRAINING MODE — skip fiscal if training ──
-        if receipt.is_training:
-            result['training'] = True
-            result['fiscal_warning'] = 'TRAINING MODE — bon nije fiskaliziran'
-
-        # ── 14. HASH CHAIN — kriptografski audit trail ──
-        if not receipt.is_training:
-            try:
-                from pos.hashchain import append_receipt
-                chain_link = append_receipt(receipt)
-                result["chain_hash"] = chain_link.chain_hash[:16]
-                result["chain_seq"] = chain_link.sequence
-            except Exception as _chain_err:
-                logger.warning("Hash chain append failed: %s", _chain_err)
-
-        # ── 15. CASH LIMIT WARNING ──
-        if payment_method == 'CASH':
-            limit = getattr(company, 'cash_register_limit', None)
-            if limit and limit > 0:
-                from django.db.models import Sum as S2
-                from pos.models import POSPaymentLine as PPL2
-                cash_now = session.receipts.filter(status='paid').aggregate(
-                    c=S2('payments__amount', filter=models.Q(payments__method='CASH'))
-                )['c'] or Decimal('0')
-                if cash_now > limit * Decimal('0.8'):
-                    result['cash_limit_warning'] = (
-                        'Gotovina u blagajni: %.2f / %.2f EUR (%.0f%%). '
-                        'Uplatite visak na banku.' % (cash_now, limit, cash_now / limit * 100)
-                    )
+        except Exception:
+            pass
 
         return result
-

@@ -338,8 +338,9 @@ class ArhivaEntry(models.Model):
             self.deletion_protected_until = self.doc_date + timedelta(days=11 * 365)
 
     def save(self, *args, **kwargs):
+        is_new = not self.pk
         # Deep duplicate check — ALL criteria must match
-        if not self.pk and self.doc_number:
+        if is_new and self.doc_number:
             qs = ArhivaEntry.objects.unscoped().filter(
                 company_id=self.company_id,
                 doc_number=self.doc_number,
@@ -371,15 +372,27 @@ class ArhivaEntry(models.Model):
             self.set_deletion_protection()
         if not self.barcode:
             self._generate_barcode()
+
+        # Detect field changes for audit log (update path)
+        _audit_changes = {}
+        if not is_new and hasattr(self, '_loaded_values'):
+            for field in self._AUDIT_TRACKED_FIELDS:
+                old_val = self._loaded_values.get(field)
+                new_val = getattr(self, field, None)
+                if str(old_val) != str(new_val):
+                    _audit_changes[field] = {'old': str(old_val), 'new': str(new_val)}
+
         # Retry on archive_number collision — each attempt in its own SAVEPOINT
         # to avoid PostgreSQL broken transaction state inside @atomic blocks
         from django.db import IntegrityError, transaction
+        saved = False
         for attempt in range(5):
             try:
                 sid = transaction.savepoint()
                 super().save(*args, **kwargs)
                 transaction.savepoint_commit(sid)
-                return
+                saved = True
+                break
             except IntegrityError as e:
                 transaction.savepoint_rollback(sid)
                 err_str = str(e)
@@ -390,8 +403,18 @@ class ArhivaEntry(models.Model):
                     self._assign_archive_number()
                 else:
                     raise
-        # Final attempt without catching
-        super().save(*args, **kwargs)
+        if not saved:
+            # Final attempt without catching
+            super().save(*args, **kwargs)
+
+        # Audit log: record create or update
+        try:
+            if is_new:
+                log_arhiva_action(self, ArhivaAuditLog.Action.CREATED)
+            elif _audit_changes:
+                log_arhiva_action(self, ArhivaAuditLog.Action.UPDATED, changes=_audit_changes)
+        except Exception:
+            pass  # Never let audit logging break the save path
 
     def _generate_barcode(self):
         import random
@@ -416,12 +439,98 @@ class ArhivaEntry(models.Model):
         seq = (max(last_nums) + 1) if last_nums else 1
         self.archive_number = '%s%05d' % (pfx, seq)
 
+    # Fields tracked by audit log
+    _AUDIT_TRACKED_FIELDS = [
+        'source_type', 'doc_number', 'partner_name', 'amount', 'currency',
+        'doc_date', 'zki', 'jir', 'file_path', 'has_xml', 'has_pdf',
+        'has_image', 'is_booked', 'ai_proposal', 'barcode', 'partner_id',
+    ]
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        # Snapshot tracked fields for change detection
+        instance._loaded_values = {
+            f: getattr(instance, f, None)
+            for f in cls._AUDIT_TRACKED_FIELDS
+            if f in field_names
+        }
+        return instance
+
     @property
     def is_deletion_protected(self):
         from django.utils import timezone
         if not self.deletion_protected_until:
             return False
         return timezone.now().date() < self.deletion_protected_until
+
+
+# ════════════════════════════════════════════════════════════
+# ArhivaAuditLog — Append-only audit log za ArhivaEntry
+# ════════════════════════════════════════════════════════════
+
+class ArhivaAuditLog(models.Model):
+    """Append-only audit log for ArhivaEntry changes. Never delete or update rows."""
+
+    class Action(models.TextChoices):
+        CREATED = 'created', 'Kreiran'
+        UPDATED = 'updated', 'Ažuriran'
+        DELETED = 'deleted', 'Obrisan'
+        VIEWED = 'viewed', 'Pregledan'
+        DOWNLOADED = 'downloaded', 'Preuzet'
+        EXPORTED = 'exported', 'Eksportiran'
+        AI_PROPOSAL = 'ai_proposal', 'AI prijedlog'
+        BOOKED = 'booked', 'Proknjižen'
+        LABEL_CHANGED = 'label_changed', 'Oznaka promijenjena'
+
+    entry = models.ForeignKey(
+        ArhivaEntry, on_delete=models.SET_NULL, null=True,
+        related_name='audit_logs'
+    )
+    entry_archive_number = models.CharField(max_length=50, blank=True)
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
+    action = models.CharField(max_length=20, choices=Action.choices)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
+    ip_address = models.GenericIPAddressField(null=True)
+    user_agent = models.CharField(max_length=300, blank=True)
+    changes = models.JSONField(default=dict, blank=True)  # {"field": {"old": x, "new": y}}
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['company', 'timestamp']),
+            models.Index(fields=['entry', 'timestamp']),
+        ]
+        verbose_name = 'Arhiva Audit Log'
+        verbose_name_plural = 'Arhiva Audit Logovi'
+
+    def __str__(self):
+        return f"{self.action} {self.entry_archive_number} @ {self.timestamp}"
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValueError("ArhivaAuditLog entries cannot be modified")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("ArhivaAuditLog entries cannot be deleted")
+
+
+def log_arhiva_action(entry, action, user=None, request=None, changes=None):
+    """Create an audit log entry. Call this from views/signals."""
+    ArhivaAuditLog.objects.create(
+        entry=entry if entry.pk else None,
+        entry_archive_number=getattr(entry, 'archive_number', '') or '',
+        company=entry.company,
+        action=action,
+        user=user,
+        ip_address=request.META.get('REMOTE_ADDR') if request else None,
+        user_agent=(request.META.get('HTTP_USER_AGENT', '')[:300]) if request else '',
+        changes=changes or {},
+    )
 
 
 # ════════════════════════════════════════════════════════════

@@ -18,19 +18,17 @@ Otvara module u novom tabu. Compliance dot desno.
 </style>
 
 <div class="pos-module-nav">
-  <a class="mn-btn" href="/hr/invoicing/" target="_blank" title="Fakture"><i class="fas fa-file-invoice-dollar"></i><span class="hide-mobile">Fakture</span></a>
-  <a class="mn-btn" href="/hr/documents/arhiva/" target="_blank" title="Arhiva"><i class="fas fa-archive"></i><span class="hide-mobile">Arhiva</span></a>
-  <a class="mn-btn" href="/hr/partners/" target="_blank" title="Partneri"><i class="fas fa-handshake"></i></a>
-  <a class="mn-btn" href="/hr/inventory/" target="_blank" title="Inventar"><i class="fas fa-boxes"></i></a>
-  <a class="mn-btn" href="/hr/worktime/" target="_blank" title="Radni sati"><i class="fas fa-clock"></i></a>
+  <a class="mn-btn" href="{% url 'invoicing:index' %}" target="_blank" title="Fakture"><i class="fas fa-file-invoice-dollar"></i><span class="hide-mobile">Fakture</span></a>
+  <a class="mn-btn" href="{% url 'partners:list' %}" target="_blank" title="Partneri"><i class="fas fa-handshake"></i></a>
+  <a class="mn-btn" href="{% url 'inventory:list' %}" target="_blank" title="Inventar"><i class="fas fa-boxes"></i></a>
   {% if session %}
-  <a class="mn-btn" href="{{ session_report_url }}" target="_blank" title="Izvještaj smjene"><i class="fas fa-chart-pie"></i></a>
+  <a class="mn-btn" href="{{ session_report_url }}" target="_blank" title="Izvjestaj smjene"><i class="fas fa-chart-pie"></i></a>
   {% endif %}
   {% if is_gastro %}
-  <a class="mn-btn" href="/hr/pos/gastro/kitchen/?terminal={{ terminal.pk }}" target="_blank" title="Kuhinja"><i class="fas fa-utensils"></i></a>
+  <a class="mn-btn" href="{% url 'pos:gastro_kitchen' %}" target="_blank" title="Kuhinja"><i class="fas fa-utensils"></i></a>
   {% endif %}
-  <a class="mn-btn" href="/hr/pos/prigovori/" target="_blank" title="Knjiga boljitaka"><i class="fas fa-book-heart"></i></a>
-  <a class="mn-btn" href="/hr/pos/settings/" target="_blank" title="Postavke"><i class="fas fa-cog"></i></a>
+  <a class="mn-btn" href="{% url 'pos:prigovori_list' %}" target="_blank" title="Knjiga boljitaka"><i class="fas fa-book"></i></a>
+  <a class="mn-btn" href="{% url 'pos:pos_settings' %}" target="_blank" title="Postavke"><i class="fas fa-cog"></i></a>
 
   <div class="mn-spacer"></div>
 

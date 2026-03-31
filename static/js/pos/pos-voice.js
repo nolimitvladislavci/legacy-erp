@@ -352,7 +352,7 @@
     var name = btn.dataset.name || btn.querySelector('.prod-name')?.textContent || '?';
     for (var j = 0; j < qty; j++) {
       if (typeof window.addProduct === 'function') {
-        window.addProduct(btn);
+        window.addProduct(btn, true);
       } else {
         btn.click();
       }
