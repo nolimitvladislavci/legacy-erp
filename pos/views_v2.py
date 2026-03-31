@@ -1099,131 +1099,39 @@ def offline_sync(request):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def pos_service_worker(request):
-    """Serve ServiceWorker JS za POS offline background sync."""
+    """SW koji se sam unregistrira i briše cache — CSS rendering fix."""
     sw_js = """
-// POS ServiceWorker — Background Sync + Offline Fallback
-const CACHE_NAME = 'pos-offline-v4';
-const OFFLINE_URL = '/pos/offline.html';
-
+// POS ServiceWorker — SELF DESTRUCT (CSS fix 2026-03-31)
+// Briše sve stare cache i unregistrira se
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll([OFFLINE_URL]))
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
   );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+    .then(() => self.registration.unregister())
+    .then(() => self.clients.matchAll())
+    .then(clients => clients.forEach(c => c.navigate(c.url)))
+  );
+  self.clients.claim();
 });
 
-// Background Sync — retry offline receipts when back online
-self.addEventListener('sync', (e) => {
-  if (e.tag === 'pos-offline-sync') {
-    e.waitUntil(syncOfflineReceipts());
-  }
-});
-
-async function syncOfflineReceipts() {
-  const db = await openIDB();
-  const tx = db.transaction('receipts', 'readonly');
-  const store = tx.objectStore('receipts');
-  const index = store.index('synced');
-  const unsynced = await getAllFromIndex(index, 0);
-
-  if (unsynced.length === 0) return;
-
-  // Batch sync — svi offline bonovi u jednom requestu
-  try {
-    const batch = unsynced.map(r => ({
-      offline_id: r.offline_id,
-      items: r.items,
-      payment_method: r.payment_method,
-      amount_paid: r.amount_paid,
-      tip_amount: r.tip_amount || 0,
-      note: r.note || '',
-      created_at: r.created_at,
-    }));
-    const resp = await fetch('/pos/api/offline-sync/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        session_id: unsynced[0].session_id,
-        receipts: batch,
-      })
-    });
-    if (!resp.ok) return;
-    const data = await resp.json();
-    if (!data.ok) return;
-
-    const utx = db.transaction('receipts', 'readwrite');
-    const ustore = utx.objectStore('receipts');
-    for (const result of (data.results || [])) {
-      if (!result.ok) continue;
-      const match = unsynced.find(r => r.offline_id === result.offline_id);
-      if (match) {
-        match.synced = 1;
-        match.server_receipt_id = result.receipt_id;
-        ustore.put(match);
-      }
-    }
-
-    // Notify all tabs
-    self.clients.matchAll().then(clients => {
-      clients.forEach(c => c.postMessage({
-        type: 'BATCH_SYNC_COMPLETE',
-        synced: data.synced,
-        results: data.results,
-      }));
-    });
-  } catch (err) {
-    console.error('SW batch sync error:', err);
-  }
-}
-
-function openIDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('pos_offline_v2', 1);
-    req.onsuccess = (e) => resolve(e.target.result);
-    req.onerror = (e) => reject(e);
-  });
-}
-
-function getAllFromIndex(index, value) {
-  return new Promise((resolve) => {
-    const results = [];
-    const req = index.openCursor(IDBKeyRange.only(value));
-    req.onsuccess = (e) => {
-      const cursor = e.target.result;
-      if (cursor) { results.push(cursor.value); cursor.continue(); }
-      else resolve(results);
-    };
-  });
-}
-
-// Fetch interceptor — offline fallback
+// Network-only: ne cachira ništa
 self.addEventListener('fetch', (e) => {
-  if (e.request.mode === 'navigate') {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match(OFFLINE_URL))
-    );
-  }
+  e.respondWith(fetch(e.request));
 });
-"""
+""";
+    from django.http import HttpResponse
     response = HttpResponse(sw_js, content_type='application/javascript')
-    response['Service-Worker-Allowed'] = '/pos/'
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Service-Worker-Allowed'] = '/'
     return response
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# POCKET MODE — Mobitel = blagajna, bez papira, bez prostora
-# Jednim klikom: digital receipt, no printer, pokretna prodaja, offline-first
-# ══════════════════════════════════════════════════════════════════════════════
-
-@login_required
-@require_POST
 def pocket_mode_activate(request):
     """
     Aktiviraj Pocket Mode za tvrtku.
