@@ -35,10 +35,10 @@
 
   // ─── Konstante ──────────────────────────────────────────────────
   var ENDPOINT    = '/api/fenix/scan/';
-  var MAX_PX      = { ring: 1200, id_card: 1200, invoice: 1400, golub: 1080, complaint: 1400, general: 1200 };
+  var MAX_PX      = { ring: 1800, id_card: 1800, invoice: 2400, golub: 1800, complaint: 2400, general: 2400 };
   var MAX_IMAGES  = 5;
-  var QUALITY     = 0.82;
-  var MAX_B64_KB  = 2500;  // KB — smanjeno da b64 stane u backend limit (3.7MB decoded)
+  var QUALITY     = 0.92;
+  var MAX_B64_KB  = 5000;  // KB — povećano za bolju kvalitetu
 
   // ─── CSRF helper ────────────────────────────────────────────────
   function csrf() {
