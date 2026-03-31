@@ -66,6 +66,17 @@ def _check_tenant(request, obj):
 @login_required
 def dashboard(request):
     company = get_user_company(request)
+    if company:
+        # Otvorena smjena prvo
+        open_sess = POSSession.objects.filter(
+            terminal__company=company, status='open'
+        ).select_related('terminal').first()
+        if open_sess:
+            return redirect('pos:pos_joker', terminal_id=open_sess.terminal_id)
+        # Inače prvi aktivni terminal
+        t = POSTerminal.objects.filter(company=company, is_active=True).order_by('id').first()
+        if t:
+            return redirect('pos:pos_joker', terminal_id=t.pk)
     terminals = POSTerminal.objects.filter(company=company, is_active=True) if company else POSTerminal.objects.none()
     for t in terminals:
         t.active_session = t.sessions.filter(status=POSSession.Status.OPEN).first()

@@ -82,7 +82,7 @@ def dashboard_router(request):
     role = profile.role
 
     if role in ('company_admin', 'project_manager'):
-        return redirect('pos:quick_pos_redirect')
+        return redirect('pos:dashboard')
     elif role == 'investor' or role == 'partner':
         return redirect('partner_dashboard') # Šaljemo ih oboje u Staklenu sobu
     else:

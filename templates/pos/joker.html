@@ -827,9 +827,9 @@
   </div>
   <div class="qk-overlay-grid">
     {% for item in quick_items %}
-    <button class="prod-btn" onclick="addItem({{ item.id }}, '{{ item.name|escapejs }}', {{ item.selling_price|default:item.price }})">
+    <button class="prod-btn" onclick="addItem({{ item.id }}, '{{ item.name|escapejs }}', {{ item.unit_price }})">
       <div class="prod-name">{{ item.name|truncatewords:3 }}</div>
-      <div class="prod-price">{{ item.selling_price|default:item.price|floatformat:2 }} &euro;</div>
+      <div class="prod-price">{{ item.unit_price|floatformat:2 }} &euro;</div>
     </button>
     {% endfor %}
   </div>
