@@ -461,6 +461,7 @@
 {% endblock %}
 
 {% block content %}
+{% include "pos/includes/module_nav.html" %}
 <div class="qp">
 
   <!-- LEFT: Products -->
@@ -1761,5 +1762,8 @@ function togglePayExpand() {
 }
 
 </script>
+
+{% include "pos/includes/cashier_gate.html" %}
+{% include "pos/includes/compliance_monitor.html" %}
 
 {% endblock %}

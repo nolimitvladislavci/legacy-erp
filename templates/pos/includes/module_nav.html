@@ -1,0 +1,41 @@
+{% comment %}
+Module Navigation Bar — 38px traka ispod headera.
+Otvara module u novom tabu. Compliance dot desno.
+{% endcomment %}
+<style>
+.pos-module-nav{display:flex;align-items:center;height:38px;background:#0d0d12;border-bottom:1px solid rgba(255,255,255,.06);padding:0 8px;gap:2px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.pos-module-nav::-webkit-scrollbar{display:none}
+.mn-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;color:#64748b;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:5px;white-space:nowrap;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.mn-btn:hover{background:rgba(201,168,76,.08);color:#c9a84c}
+.mn-btn i{font-size:.82rem}
+.mn-spacer{flex:1}
+.mn-compliance{position:relative;cursor:pointer;padding:4px 10px;display:flex;align-items:center;gap:5px}
+.mn-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;transition:background .3s}
+.mn-dot.warn{background:#f59e0b;animation:compBlink 1.5s infinite}
+.mn-dot.critical{background:#ef4444;animation:compBlink .7s infinite}
+@keyframes compBlink{0%,100%{opacity:1}50%{opacity:.3}}
+.mn-label{font-size:.65rem;color:#64748b;font-weight:600}
+</style>
+
+<div class="pos-module-nav">
+  <a class="mn-btn" href="/hr/invoicing/" target="_blank" title="Fakture"><i class="fas fa-file-invoice-dollar"></i><span class="hide-mobile">Fakture</span></a>
+  <a class="mn-btn" href="/hr/documents/arhiva/" target="_blank" title="Arhiva"><i class="fas fa-archive"></i><span class="hide-mobile">Arhiva</span></a>
+  <a class="mn-btn" href="/hr/partners/" target="_blank" title="Partneri"><i class="fas fa-handshake"></i></a>
+  <a class="mn-btn" href="/hr/inventory/" target="_blank" title="Inventar"><i class="fas fa-boxes"></i></a>
+  <a class="mn-btn" href="/hr/worktime/" target="_blank" title="Radni sati"><i class="fas fa-clock"></i></a>
+  {% if session %}
+  <a class="mn-btn" href="{{ session_report_url }}" target="_blank" title="Izvještaj smjene"><i class="fas fa-chart-pie"></i></a>
+  {% endif %}
+  {% if is_gastro %}
+  <a class="mn-btn" href="/hr/pos/gastro/kitchen/?terminal={{ terminal.pk }}" target="_blank" title="Kuhinja"><i class="fas fa-utensils"></i></a>
+  {% endif %}
+  <a class="mn-btn" href="/hr/pos/prigovori/" target="_blank" title="Knjiga boljitaka"><i class="fas fa-book-heart"></i></a>
+  <a class="mn-btn" href="/hr/pos/settings/" target="_blank" title="Postavke"><i class="fas fa-cog"></i></a>
+
+  <div class="mn-spacer"></div>
+
+  <div class="mn-compliance" onclick="toggleCompliancePanel()" title="Compliance status">
+    <div class="mn-dot" id="complianceDot"></div>
+    <span class="mn-label" id="complianceDotLabel">OK</span>
+  </div>
+</div>

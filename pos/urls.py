@@ -201,4 +201,8 @@ urlpatterns = [
     # Hash Chain — kriptografski audit trail
     path('chain/verify/',                        views_v2.chain_verify,          name='chain_verify'),
     path('chain/receipt/<int:receipt_id>/',       views_v2.chain_receipt_check,   name='chain_receipt_check'),
+
+    # Cashier Gate API
+    path('api/verify-cashier-pin/',  views.verify_cashier_pin,  name='verify_cashier_pin'),
+    path('api/update-cashier-oib/',  views.update_cashier_oib,  name='update_cashier_oib'),
 ]

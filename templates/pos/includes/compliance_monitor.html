@@ -1,0 +1,211 @@
+{% comment %}
+AI Compliance Monitor — background provjera 7 zakonskih pravila svakih 5 min.
+Nikad ne blokira naplatu — samo obavještava.
+{% endcomment %}
+<style>
+.comp-panel{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:#111214;border-left:2px solid rgba(201,168,76,.3);z-index:9700;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,.6)}
+.comp-panel.show{transform:translateX(0)}
+.comp-head{padding:1rem 1.25rem;border-bottom:1px solid #252830;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.comp-head h3{color:#c9a84c;font-size:.95rem;font-weight:800;margin:0}
+.comp-close{background:none;border:none;color:#64748b;font-size:1.2rem;cursor:pointer;padding:4px}
+.comp-body{flex:1;overflow-y:auto;padding:.75rem}
+.comp-item{background:rgba(255,255,255,.03);border:1px solid #252830;border-radius:10px;padding:.75rem;margin-bottom:.5rem;transition:all .15s}
+.comp-item.ok{border-left:3px solid #22c55e}
+.comp-item.warn{border-left:3px solid #f59e0b;background:rgba(245,158,11,.04)}
+.comp-item.critical{border-left:3px solid #ef4444;background:rgba(239,68,68,.04)}
+.comp-title{font-size:.82rem;font-weight:700;color:#e8e8e8;margin-bottom:.25rem;display:flex;align-items:center;gap:.4rem}
+.comp-title i{font-size:.7rem}
+.comp-desc{font-size:.72rem;color:#94a3b8;line-height:1.4;margin-bottom:.4rem}
+.comp-law{font-size:.62rem;color:#64748b;font-style:italic;margin-bottom:.4rem}
+.comp-action{display:inline-block;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:#c9a84c;border-radius:5px;padding:.25rem .6rem;font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all .12s}
+.comp-action:hover{background:rgba(201,168,76,.25)}
+.comp-footer{padding:.5rem .75rem;border-top:1px solid #252830;font-size:.62rem;color:#475569;text-align:center;flex-shrink:0}
+</style>
+
+<div class="comp-panel" id="compliancePanel">
+  <div class="comp-head">
+    <h3><i class="fas fa-shield-alt" style="margin-right:6px"></i>Compliance Monitor</h3>
+    <button class="comp-close" onclick="toggleCompliancePanel()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="comp-body" id="complianceBody">
+    <div style="text-align:center;padding:2rem;color:#64748b">
+      <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;margin-bottom:.5rem;display:block"></i>
+      Provjera u tijeku...
+    </div>
+  </div>
+  <div class="comp-footer">
+    Automatska provjera svakih 5 minuta | <span id="compLastCheck">—</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var _compInterval = null;
+
+  window.toggleCompliancePanel = function() {
+    var panel = document.getElementById('compliancePanel');
+    panel.classList.toggle('show');
+    if (panel.classList.contains('show')) runComplianceCheck();
+  };
+
+  function runComplianceCheck() {
+    var issues = [];
+    var now = new Date();
+
+    // ── 1. Poslovni prostor (čl. 10 Zakona o fiskalizaciji) ──
+    {% if not terminal.business_location %}
+    issues.push({
+      level: 'critical',
+      icon: 'fa-store',
+      title: 'Nedostaje poslovni prostor',
+      desc: 'Terminal nema dodijeljenu oznaku poslovnog prostora. Svaki bon mora sadržavati oznaku PP.',
+      law: 'Zakon o fiskalizaciji, čl. 10, st. 3 — oznaka poslovnog prostora je obavezan element računa',
+      action: {label: 'Dodaj PP', url: '/admin/invoicing/businesslocation/add/'}
+    });
+    {% endif %}
+
+    // ── 2. OIB operatera (čl. 9) ──
+    var activeCashier = document.querySelector('.cashier-btn.active');
+    if (activeCashier) {
+      var oib = activeCashier.dataset.oib || '';
+      if (!oib || oib.length !== 11) {
+        issues.push({
+          level: 'warn',
+          icon: 'fa-id-card',
+          title: 'OIB blagajnika nedostaje',
+          desc: 'Aktivni blagajnik nema evidentiran OIB. OIB operatera je obavezan za fiskalizaciju.',
+          law: 'Zakon o fiskalizaciji, čl. 9 — OIB operatera naplatnog uređaja',
+          action: {label: 'Uredi blagajnika', url: '/admin/pos/poscashier/'}
+        });
+      }
+    }
+
+    // ── 3. Fiskalizacija aktivna ──
+    {% if terminal.is_training %}
+    issues.push({
+      level: 'warn',
+      icon: 'fa-graduation-cap',
+      title: 'Training modus aktivan',
+      desc: 'Terminal je u OBUKA modu — bonovi se NE fiskaliziraju. Isključite prije prave prodaje.',
+      law: 'Pravilnik o fiskalizaciji — bonovi bez JIR-a nisu zakonski računi',
+      action: {label: 'Isključi training', url: '/admin/pos/posterminal/{{ terminal.pk }}/change/'}
+    });
+    {% endif %}
+
+    // ── 4. Offline bonovi unutar 48h (čl. 14) ──
+    // Check via meta tag or session storage
+    var offlineCount = parseInt(localStorage.getItem('pos_offline_count_{{ terminal.pk }}') || '0');
+    var offlineFirst = localStorage.getItem('pos_offline_first_{{ terminal.pk }}');
+    if (offlineCount > 0 && offlineFirst) {
+      var firstTime = new Date(offlineFirst);
+      var hoursSince = (now - firstTime) / (1000 * 60 * 60);
+      if (hoursSince > 24) {
+        issues.push({
+          level: hoursSince > 40 ? 'critical' : 'warn',
+          icon: 'fa-wifi',
+          title: offlineCount + ' offline bon' + (offlineCount > 1 ? 'ova' : '') + ' čeka fiskalizaciju',
+          desc: 'Prvi offline bon star ' + Math.round(hoursSince) + 'h. Zakonski rok je 48h od izdavanja.',
+          law: 'Zakon o fiskalizaciji, čl. 14 — obveznik mora fiskalizirati račun u roku 48 sati',
+          action: {label: 'Retry sada', onclick: 'retryOfflineFiscal()'}
+        });
+      }
+    }
+
+    // ── 5. Trajanje smjene pod 10h (Zakon o radu) ──
+    {% if session %}
+    var sessionStart = new Date('{{ session.opened_at|date:"c" }}');
+    var sessionHours = (now - sessionStart) / (1000 * 60 * 60);
+    if (sessionHours > 8) {
+      issues.push({
+        level: sessionHours > 10 ? 'critical' : 'warn',
+        icon: 'fa-clock',
+        title: 'Smjena traje ' + Math.round(sessionHours * 10) / 10 + 'h',
+        desc: sessionHours > 10
+          ? 'Prekoračenje zakonskog maksimuma od 10h! Zatvorite smjenu i napravite odmor.'
+          : 'Smjena se približava limitu od 10h. Preporučeno zatvaranje.',
+        law: 'Zakon o radu, čl. 61 — redovni rad max 8h, prekovremeni ukupno do 10h dnevno',
+        action: {label: 'Zatvori smjenu', onclick: 'openShiftClose()'}
+      });
+    }
+    {% endif %}
+
+    // ── 6. Visok gotovinski promet ──
+    var cashTotal = parseFloat('{{ session.total_cash_sales|default:"0" }}');
+    if (cashTotal > 10000) {
+      issues.push({
+        level: 'warn',
+        icon: 'fa-money-bill-wave',
+        title: 'Gotovinski promet > 10.000 €',
+        desc: 'Ukupan gotovinski promet u smjeni iznosi ' + cashTotal.toFixed(2) + ' €. Obveza prijave UZRK-u.',
+        law: 'Zakon o sprječavanju pranja novca (AML), čl. 16 — transakcije iznad 10.000 €',
+        action: {label: 'AML panel', url: '/aml/', target: '_blank'}
+      });
+    }
+
+    // ── 7. Artikli s nultom cijenom ──
+    var zeroPriceItems = document.querySelectorAll('.b-price');
+    var zeroCount = 0;
+    zeroPriceItems.forEach(function(el){
+      if (parseFloat(el.textContent.replace(/[^\d.,]/g,'').replace(',','.')) === 0) zeroCount++;
+    });
+    if (zeroCount > 0) {
+      issues.push({
+        level: 'warn',
+        icon: 'fa-tag',
+        title: zeroCount + ' artikl' + (zeroCount > 1 ? 'a' : '') + ' s cijenom 0 €',
+        desc: 'Na bonu su artikli bez cijene. Provjerite je li to namjerno (uzorak, poklon) ili greška.',
+        law: 'Opći porezni zakon, čl. 54 — račun mora sadržavati iznos naknade',
+        action: {label: 'Pregledaj bon', onclick: 'document.querySelector(".basket-items").scrollIntoView()'}
+      });
+    }
+
+    // Render
+    _renderCompliance(issues, now);
+  }
+
+  function _renderCompliance(issues, checkTime) {
+    var body = document.getElementById('complianceBody');
+    var dot = document.getElementById('complianceDot');
+    var lbl = document.getElementById('complianceDotLabel');
+    var timeStr = checkTime.toLocaleTimeString('hr-HR', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('compLastCheck').textContent = timeStr;
+
+    if (issues.length === 0) {
+      body.innerHTML = '<div style="text-align:center;padding:2rem"><div style="font-size:3rem;margin-bottom:.5rem">✓</div><div style="color:#22c55e;font-weight:700;font-size:1.1rem">Sve u redu</div><div style="color:#64748b;font-size:.82rem;margin-top:.4rem">Nema zakonskih upozorenja</div></div>';
+      dot.className = 'mn-dot';
+      lbl.textContent = 'OK';
+      return;
+    }
+
+    var hasCritical = issues.some(function(i){ return i.level === 'critical'; });
+    var hasWarn = issues.some(function(i){ return i.level === 'warn'; });
+    dot.className = 'mn-dot' + (hasCritical ? ' critical' : hasWarn ? ' warn' : '');
+    lbl.textContent = issues.length;
+
+    var html = '';
+    issues.forEach(function(issue){
+      var actionHtml = '';
+      if (issue.action) {
+        if (issue.action.url) {
+          actionHtml = '<a class="comp-action" href="' + issue.action.url + '" target="' + (issue.action.target||'_blank') + '">' + issue.action.label + ' →</a>';
+        } else if (issue.action.onclick) {
+          actionHtml = '<span class="comp-action" onclick="' + issue.action.onclick + '">' + issue.action.label + ' →</span>';
+        }
+      }
+      html += '<div class="comp-item ' + issue.level + '">' +
+        '<div class="comp-title"><i class="fas ' + issue.icon + '"></i>' + issue.title + '</div>' +
+        '<div class="comp-desc">' + issue.desc + '</div>' +
+        '<div class="comp-law">' + issue.law + '</div>' +
+        actionHtml +
+        '</div>';
+    });
+    body.innerHTML = html;
+  }
+
+  // Auto-run every 5 minutes
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(runComplianceCheck, 2000); // initial after 2s
+    _compInterval = setInterval(runComplianceCheck, 300000); // 5 min
+  });
+})();
+</script>

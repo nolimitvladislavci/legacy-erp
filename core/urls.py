@@ -332,6 +332,8 @@ urlpatterns += [
 # Public booking by company slug
 urlpatterns += [
     path('book/<slug:company_slug>/', __import__('appointments.views', fromlist=['public_booking_by_slug']).public_booking_by_slug, name='public_booking_by_slug'),
+    path('site/<slug:slug>/', __import__('website.views', fromlist=['company_site']).company_site, name='company_site_public'),
+    path('site/<slug:slug>/contact/', __import__('website.views', fromlist=['company_site_contact']).company_site_contact, name='company_site_contact_public'),
 ]
 
 # Health check (no language prefix needed)

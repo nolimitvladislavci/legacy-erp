@@ -1,0 +1,247 @@
+{% comment %}
+Cashier Gate — modal pri pokretanju terminala bez aktivne smjene.
+Koraci: 1) Odabir blagajnika + PIN  2) Poslovni prostor  3) Početna gotovina
+{% endcomment %}
+<style>
+.cg-overlay{position:fixed;inset:0;z-index:9800;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.cg-overlay.show{display:flex}
+.cg-box{background:#111214;border:2px solid rgba(201,168,76,.4);border-radius:16px;width:400px;max-width:95vw;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.cg-head{padding:1rem 1.25rem;background:rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.2);text-align:center}
+.cg-head h3{color:#c9a84c;font-size:1rem;font-weight:800;margin:0;letter-spacing:.02em}
+.cg-head small{color:#64748b;font-size:.72rem}
+.cg-body{padding:1.25rem}
+.cg-step{display:none}
+.cg-step.active{display:block}
+.cg-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin-bottom:.4rem}
+.cg-select{width:100%;background:#0a0a0a;border:1px solid #252830;color:#e8e8e8;border-radius:8px;padding:.6rem .8rem;font-size:.9rem;outline:none;margin-bottom:.8rem;font-family:inherit}
+.cg-select:focus{border-color:#c9a84c}
+.cg-input{width:100%;background:#0a0a0a;border:1px solid #252830;color:#e8e8e8;border-radius:8px;padding:.6rem .8rem;font-size:.9rem;outline:none;margin-bottom:.4rem;font-family:inherit;box-sizing:border-box}
+.cg-input:focus{border-color:#c9a84c}
+.cg-input.pin{text-align:center;font-size:1.5rem;letter-spacing:.5em;font-weight:800}
+.cg-warn{display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:.4rem .6rem;font-size:.72rem;color:#f87171;margin-bottom:.6rem}
+.cg-warn.show{display:flex;align-items:center;gap:.4rem}
+.cg-warn i{flex-shrink:0}
+.cg-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:6px;padding:.4rem .6rem;font-size:.72rem;color:#60a5fa;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.cg-cash-presets{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
+.cg-cash-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e8e8e8;border-radius:6px;padding:.4rem .65rem;font-size:.82rem;cursor:pointer;font-weight:600;font-family:inherit;flex:1;min-width:60px;text-align:center}
+.cg-cash-btn:hover{border-color:#c9a84c;color:#c9a84c}
+.cg-foot{padding:.75rem 1.25rem;border-top:1px solid #252830;display:flex;gap:.5rem}
+.cg-btn{flex:1;border:none;border-radius:8px;padding:.65rem;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit;transition:all .15s}
+.cg-btn-next{background:#c9a84c;color:#000}
+.cg-btn-next:disabled{opacity:.4;cursor:not-allowed}
+.cg-btn-skip{background:rgba(255,255,255,.06);color:#94a3b8}
+.cg-dots{display:flex;gap:6px;justify-content:center;padding:.5rem 0}
+.cg-dot{width:8px;height:8px;border-radius:50%;background:#252830}
+.cg-dot.active{background:#c9a84c}
+</style>
+
+<div class="cg-overlay" id="cashierGate">
+<div class="cg-box">
+  <div class="cg-head">
+    <h3><i class="fas fa-user-shield" style="margin-right:6px"></i>Otvaranje smjene</h3>
+    <small>{{ terminal.name }} — {{ terminal.company.name }}</small>
+  </div>
+  <div class="cg-dots">
+    <div class="cg-dot active" data-step="1"></div>
+    <div class="cg-dot" data-step="2"></div>
+    <div class="cg-dot" data-step="3"></div>
+  </div>
+
+  <div class="cg-body">
+    <!-- STEP 1: Blagajnik + PIN -->
+    <div class="cg-step active" data-step="1">
+      <div class="cg-label">Blagajnik</div>
+      <select class="cg-select" id="cgCashierSelect" onchange="cgCashierChanged()">
+        <option value="">— Odaberite blagajnika —</option>
+        {% for c in cashiers %}
+        <option value="{{ c.pk }}" data-oib="{{ c.oib }}" data-name="{{ c.name }}">{{ c.name }}{% if c.oib %} ({{ c.oib }}){% endif %}</option>
+        {% endfor %}
+      </select>
+
+      <div class="cg-label">PIN</div>
+      <input type="password" class="cg-input pin" id="cgPin" maxlength="6" placeholder="••••" inputmode="numeric" autocomplete="off">
+
+      <div class="cg-warn" id="cgOibWarn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Blagajnik nema OIB! Zakon o fiskalizaciji (čl. 9) zahtijeva OIB operatera.</span>
+      </div>
+      <div id="cgOibFix" style="display:none">
+        <div class="cg-label">Unesite OIB operatera</div>
+        <input type="text" class="cg-input" id="cgOibInput" maxlength="11" placeholder="12345678901" inputmode="numeric">
+      </div>
+    </div>
+
+    <!-- STEP 2: Poslovni prostor -->
+    <div class="cg-step" data-step="2">
+      <div class="cg-label">Poslovni prostor (fiskalizacija)</div>
+      {% if terminal.business_location %}
+      <div class="cg-info">
+        <i class="fas fa-check-circle"></i>
+        <span><strong>{{ terminal.business_location.name }}</strong> — {{ terminal.business_location.location_code }} ({{ terminal.business_location.get_location_type_display }})</span>
+      </div>
+      {% else %}
+      <div class="cg-warn show">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Terminal nema poslovni prostor! Čl. 10 Zakona o fiskalizaciji zahtijeva oznaku PP.</span>
+      </div>
+      <div class="cg-label" style="margin-top:.6rem">Oznaka poslovnog prostora</div>
+      <input type="text" class="cg-input" id="cgLocationCode" placeholder="PP1" maxlength="20">
+      <div style="font-size:.65rem;color:#64748b;margin-bottom:.4rem">
+        Format: PP + broj (npr. PP1, ŠANK1, KIOSK2). AI hint: koristite kratku oznaku bez razmaka.
+      </div>
+      <div class="cg-label">Adresa</div>
+      <input type="text" class="cg-input" id="cgLocationAddr" placeholder="Ilica 1, 10000 Zagreb">
+      {% endif %}
+    </div>
+
+    <!-- STEP 3: Početna gotovina -->
+    <div class="cg-step" data-step="3">
+      <div class="cg-label">Početna gotovina u blagajni</div>
+      <input type="number" class="cg-input" id="cgOpeningCash" value="0" min="0" step="0.01" style="font-size:1.5rem;text-align:center;font-weight:800;color:#c9a84c" inputmode="decimal">
+      <div class="cg-cash-presets">
+        <button class="cg-cash-btn" onclick="document.getElementById('cgOpeningCash').value='0'">0 €</button>
+        <button class="cg-cash-btn" onclick="document.getElementById('cgOpeningCash').value='50'">50 €</button>
+        <button class="cg-cash-btn" onclick="document.getElementById('cgOpeningCash').value='100'">100 €</button>
+        <button class="cg-cash-btn" onclick="document.getElementById('cgOpeningCash').value='200'">200 €</button>
+        <button class="cg-cash-btn" onclick="document.getElementById('cgOpeningCash').value='500'">500 €</button>
+      </div>
+      <div class="cg-info">
+        <i class="fas fa-info-circle"></i>
+        <span>Prebrojajte gotovinu u ladici i unesite iznos. To je osnova za Z-izvješće.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cg-foot">
+    <button class="cg-btn cg-btn-skip" id="cgBackBtn" onclick="cgBack()" style="display:none">
+      <i class="fas fa-arrow-left"></i> Nazad
+    </button>
+    <button class="cg-btn cg-btn-next" id="cgNextBtn" onclick="cgNext()">
+      Dalje <i class="fas fa-arrow-right"></i>
+    </button>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+  var _cgStep = 1;
+  var _cgMaxStep = 3;
+  var _cgCashierId = null;
+  var _cgCashierOib = '';
+
+  // Auto-show if no active session
+  {% if not session %}
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('cashierGate').classList.add('show');
+  });
+  {% endif %}
+
+  window.cgCashierChanged = function() {
+    var sel = document.getElementById('cgCashierSelect');
+    var opt = sel.options[sel.selectedIndex];
+    _cgCashierId = sel.value;
+    _cgCashierOib = opt?.dataset?.oib || '';
+    var warn = document.getElementById('cgOibWarn');
+    var fix = document.getElementById('cgOibFix');
+    if (_cgCashierId && !_cgCashierOib) {
+      warn.classList.add('show');
+      fix.style.display = 'block';
+    } else {
+      warn.classList.remove('show');
+      fix.style.display = 'none';
+    }
+  };
+
+  window.cgNext = function() {
+    // Validation per step
+    if (_cgStep === 1) {
+      if (!document.getElementById('cgCashierSelect').value) {
+        if (typeof fenixToast === 'function') fenixToast('Odaberite blagajnika', 'error');
+        return;
+      }
+      var pin = document.getElementById('cgPin').value.trim();
+      if (!pin) {
+        if (typeof fenixToast === 'function') fenixToast('Unesite PIN', 'error');
+        return;
+      }
+      // PIN check via AJAX
+      var cashierId = document.getElementById('cgCashierSelect').value;
+      fetch('/pos/api/verify-cashier-pin/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-CSRFToken': _getCSRF()},
+        body: JSON.stringify({cashier_id: cashierId, pin: pin})
+      }).then(function(r){ return r.json(); }).then(function(d){
+        if (d.ok) {
+          // Save OIB if newly entered
+          var oibInput = document.getElementById('cgOibInput');
+          if (oibInput && oibInput.value.trim().length === 11) {
+            fetch('/pos/api/update-cashier-oib/', {
+              method: 'POST',
+              headers: {'Content-Type':'application/json', 'X-CSRFToken': _getCSRF()},
+              body: JSON.stringify({cashier_id: cashierId, oib: oibInput.value.trim()})
+            });
+          }
+          _cgGoStep(2);
+        } else {
+          if (typeof fenixToast === 'function') fenixToast('Neispravan PIN', 'error');
+          document.getElementById('cgPin').value = '';
+          document.getElementById('cgPin').focus();
+        }
+      }).catch(function(){
+        // Offline — accept PIN locally
+        _cgGoStep(2);
+      });
+      return;
+    }
+    if (_cgStep === 2) {
+      _cgGoStep(3);
+      return;
+    }
+    if (_cgStep === 3) {
+      // Submit — open session
+      var cash = parseFloat(document.getElementById('cgOpeningCash').value) || 0;
+      var cashierId = document.getElementById('cgCashierSelect').value;
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/hr/pos/terminal/{{ terminal.pk }}/open/';
+      form.innerHTML = '<input type="hidden" name="csrfmiddlewaretoken" value="' + _getCSRF() + '">' +
+        '<input type="hidden" name="opening_cash" value="' + cash + '">' +
+        '<input type="hidden" name="cashier_id" value="' + cashierId + '">';
+      {% if not terminal.business_location %}
+      var locCode = (document.getElementById('cgLocationCode') || {}).value || '';
+      var locAddr = (document.getElementById('cgLocationAddr') || {}).value || '';
+      if (locCode) {
+        form.innerHTML += '<input type="hidden" name="location_code" value="' + locCode + '">';
+        form.innerHTML += '<input type="hidden" name="location_address" value="' + locAddr + '">';
+      }
+      {% endif %}
+      document.body.appendChild(form);
+      form.submit();
+    }
+  };
+
+  window.cgBack = function() {
+    if (_cgStep > 1) _cgGoStep(_cgStep - 1);
+  };
+
+  function _cgGoStep(n) {
+    _cgStep = n;
+    document.querySelectorAll('.cg-step').forEach(function(el){ el.classList.remove('active'); });
+    document.querySelector('.cg-step[data-step="'+n+'"]').classList.add('active');
+    document.querySelectorAll('.cg-dot').forEach(function(el){
+      el.classList.toggle('active', parseInt(el.dataset.step) <= n);
+    });
+    document.getElementById('cgBackBtn').style.display = n > 1 ? '' : 'none';
+    document.getElementById('cgNextBtn').innerHTML = n === _cgMaxStep
+      ? '<i class="fas fa-play"></i> Otvori smjenu'
+      : 'Dalje <i class="fas fa-arrow-right"></i>';
+    if (n === _cgMaxStep) document.getElementById('cgNextBtn').classList.add('cg-btn-next');
+  }
+
+  function _getCSRF() {
+    var c = document.cookie.match(/csrftoken=([^;]+)/);
+    return c ? c[1] : (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || '';
+  }
+})();
+</script>

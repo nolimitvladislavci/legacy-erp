@@ -1122,10 +1122,9 @@ def pos_joker(request, terminal_id):
                     'company': company,
                 })
 
-    # Auto-redirect za unos pologa
-    if not session and request.user.is_authenticated:
-        messages.warning(request, 'Unesite početnu gotovinu prije otvaranja blagajne.')
-        return redirect('pos:terminal_detail', terminal_id=terminal.pk)
+    # Cashier Gate handles session opening — ne redirectamo više
+    # Gate modal se otvara na JS strani kad nema aktivne smjene
+    # (stari redirect uklonjen: 2026-03-31 — pos/includes/cashier_gate.html)
 
     # ── Inventory ──
     try:
@@ -5266,3 +5265,53 @@ def kiosk_view(request, token):
         'items': items,
         'categories': categories,
     })
+
+
+# ── Cashier Gate API ──────────────────────────────────────────────────────────
+
+@login_required
+@require_POST
+def verify_cashier_pin(request):
+    """Verify cashier PIN for Cashier Gate modal."""
+    import json
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+    cashier_id = data.get('cashier_id')
+    pin = str(data.get('pin', '')).strip()
+    if not cashier_id or not pin:
+        return JsonResponse({'ok': False, 'error': 'Missing cashier_id or pin'})
+    from pos.models import POSCashier
+    company = get_user_company(request)
+    try:
+        cashier = POSCashier.objects.get(pk=cashier_id, company=company, is_active=True)
+    except POSCashier.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Cashier not found'})
+    if cashier.check_pin(pin):
+        return JsonResponse({'ok': True, 'name': cashier.name, 'oib': cashier.oib})
+    return JsonResponse({'ok': False, 'error': 'Invalid PIN'})
+
+
+@login_required
+@require_POST
+def update_cashier_oib(request):
+    """Update cashier OIB from Cashier Gate (inline fix for missing OIB)."""
+    import json
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+    cashier_id = data.get('cashier_id')
+    oib = str(data.get('oib', '')).strip()
+    if not cashier_id or len(oib) != 11 or not oib.isdigit():
+        return JsonResponse({'ok': False, 'error': 'Invalid OIB (must be 11 digits)'})
+    from pos.models import POSCashier
+    company = get_user_company(request)
+    try:
+        cashier = POSCashier.objects.get(pk=cashier_id, company=company)
+    except POSCashier.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Cashier not found'})
+    cashier.oib = oib
+    cashier.save(update_fields=['oib'])
+    return JsonResponse({'ok': True})

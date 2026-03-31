@@ -167,6 +167,13 @@ ROUTE_REGISTRY: dict = {
     'eracun:mandate_activate':     AccessLevel.AUTHENTICATED,
     'eracun:mandate_revoke':       AccessLevel.AUTHENTICATED,
     'eracun:mandate_bulk_umbrella': AccessLevel.AUTHENTICATED,
+
+    # Public website & booking
+    'company_site':                AccessLevel.PUBLIC,
+    'company_site_contact':        AccessLevel.PUBLIC,
+    'company_site_public':         AccessLevel.PUBLIC,
+    'company_site_contact_public': AccessLevel.PUBLIC,
+    'public_booking_by_slug':      AccessLevel.PUBLIC,
 }
 
 
