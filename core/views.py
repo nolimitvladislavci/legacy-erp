@@ -759,6 +759,8 @@ def superadmin_users(request):
 
 @login_required
 def company_dashboard(request):
+    # POS korisnici idu direktno na blagajnu
+    return redirect('pos:quick_pos_redirect')
     import datetime
 
     from django.db.models import Sum
