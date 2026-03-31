@@ -1147,6 +1147,29 @@ Zakonski propisi (HR):
 
 ---
 
+## NAPOMENA — RADNO VRIJEME (KRITIČNO)
+
+`pos/worktime_bridge.py` VEĆ POSTOJI s kompletnom implementacijom.
+U `pos_start_session` view NEMOJ direktno upisivati `cashier.clock_in_at` —
+umjesto toga pozovi:
+
+```python
+# ISPRAVNO:
+from pos.worktime_bridge import cashier_clock_in
+cashier_clock_in(cashier)  # Ovo radi: clock_in_at + TimeLog + WaiterShift
+```
+
+Kod zatvaranja smjene (`close_session`) — `session_close_all_cashiers(session)`
+se već poziva u views.py (linija 159). Ne duplicirati.
+
+Što bridge radi automatski:
+  clock_in  → bilježi clock_in_at, zatvara prethodni otvoreni entry
+  clock_out → kreira TimeEntry (datum, start, end, trajanje, projekt "POS Rad")
+  session_close → clock_out svi aktivni blagajnici + konobarske smjene
+  device_login → TimeLog + WaiterShift + cashier (jedan scan = sve)
+
+---
+
 ## NAPOMENE ZA CC
 
 1. **Joker.html je jedini POS template** — sve ostalo su backup ili zastarjelo.
