@@ -343,6 +343,8 @@ urlpatterns += [
     # Panic Button (login required)
     path('panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button'),
     path('panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke'),
+    path('hr/panic/', __import__('core.views_inspector', fromlist=['panic_button']).panic_button, name='panic_button_hr'),
+    path('hr/panic/revoke/<int:token_id>/', __import__('core.views_inspector', fromlist=['panic_revoke']).panic_revoke, name='panic_revoke_hr'),
     path('api/search/', __import__('core.views_search', fromlist=['global_search']).global_search, name='global_search'),
     path('report/synesis-dokaz/', __import__('core.views_search', fromlist=['synesis_report']).synesis_report, name='synesis_report'),
 
