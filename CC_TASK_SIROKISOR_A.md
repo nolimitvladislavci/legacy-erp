@@ -1,188 +1,258 @@
-# CC_TASK_SIROKISOR_A — Široki Šor: Popuni bazu, frontend već postoji
-**Dodjeljeno:** CC Code Instance A
-**Ne dira:** delivery/, gastro_menu/ (ostaje kao je), Task B fajlove
-**Status:** TODO
-**Datum:** 01.04.2026 (revidirano — frontend postoji u pos/)
+# CC_TASK_SIROKISOR_A — QR kodovi + Narudžba flow
+**Dodjeljeno:** CC Code (računalo)
+**Deadline:** ASAP
+**Ne dira:** synesis_compare.py, konto/, kindergarten/
 
 ---
 
-## VAŽNO — PROČITAJ PRVO
+## A1 — QR kod generiranje za 20 stolova
 
-Frontend ZA GOSTE već postoji i funkcionira:
-- Template: `/var/www/fina-connect/templates/pos/gastro/qr_menu.html` (428 linija, mobilni dark UI)
-- View: `pos/views.py` → `gastro_qr(request, qr_code)` — linija ~2333
-- Koristi modele: `pos.Table`, `pos.GastroOrder`, `pos.GastroOrderItem`, `inventory.InventoryItem`
+### Što treba:
+Za svaki TableQR generirati PNG sliku s QR kodom koji vodi na digitalni menu.
 
-NE TREBA graditi novi frontend. Treba samo POPUNITI BAZU za Korpaš d.o.o.
+### URL format:
+```
+https://limit-connect.com/gastro-menu/menu/korpas-doo-siroki-sor/?table={table_number}
+```
 
-Company: Korpaš d.o.o. — id: `0240b7d9-a993-4062-81ff-14b587edbb98`
-Cijenik: `/var/www/fina-connect/Korpa/cijenik.docx` — 66 artikala, 2 stupca: naziv | cijena
+### Skripta:
+Kreirati `scripts/generate_table_qr.py`:
+
+```python
+"""
+Generira QR kod PNG za svaki TableQR Široki Šor.
+Output: media/gastro/table_qr/
+Koristi: qrcode library (pip install qrcode[pil])
+"""
+import os, django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+import sys; sys.path.insert(0, '/var/www/fina-connect')
+django.setup()
+
+import qrcode
+from qrcode.image.styledpil import StyledPilImage
+from PIL import Image, ImageDraw, ImageFont
+from gastro_menu.models import TableQR, DigitalMenu
+
+DOMAIN = 'https://limit-connect.com'
+OUTPUT_DIR = '/var/www/fina-connect/media/gastro/table_qr'
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+menu = DigitalMenu.objects.get(slug='korpas-doo-siroki-sor')
+tables = TableQR.objects.filter(menu=menu).order_by('table_number')
+
+for tqr in tables:
+    url = f'{DOMAIN}/gastro-menu/menu/{menu.slug}/?table={tqr.table_number}'
+    
+    # Generate QR
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H,
+                        box_size=10, border=2)
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='#1a0a06', back_color='white')
+    
+    # Add label below QR
+    # (Pillow: create larger canvas, paste QR, add text)
+    qr_w, qr_h = img.size
+    canvas = Image.new('RGB', (qr_w, qr_h + 60), 'white')
+    canvas.paste(img, (0, 0))
+    draw = ImageDraw.Draw(canvas)
+    
+    label = tqr.table_number
+    try:
+        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 28)
+    except:
+        font = ImageFont.load_default()
+    
+    bbox = draw.textbbox((0, 0), label, font=font)
+    text_w = bbox[2] - bbox[0]
+    draw.text(((qr_w - text_w) / 2, qr_h + 10), label, fill='#1a0a06', font=font)
+    
+    # Save
+    filename = f'qr_{tqr.table_number.replace(" ", "_").lower()}.png'
+    filepath = os.path.join(OUTPUT_DIR, filename)
+    canvas.save(filepath)
+    
+    # Update model
+    tqr.qr_image = f'gastro/table_qr/{filename}'
+    tqr.save(update_fields=['qr_image'])
+    
+    print(f'  ✓ {tqr.table_number} → {filename}')
+
+print(f'\nGenerirano {tables.count()} QR kodova u {OUTPUT_DIR}')
+```
+
+### Preduvjet:
+```bash
+pip install qrcode[pil]
+```
+
+### Provjera:
+```bash
+ls -la media/gastro/table_qr/*.png | wc -l  # treba biti 20
+# Otvori jedan PNG i skeniraj mobitelom — treba otvoriti menu
+```
 
 ---
 
-## ZADATAK A1 — setup_sirokisor.py
+## A2 — Public narudžba flow (gost → kuhinja)
 
-Skripta koja puni bazu. Idempotentna (get_or_create svugdje).
+### Što treba:
+Gost skenira QR → vidi menu → odabere stavke → pošalje narudžbu → kuhar vidi na displayu.
 
-### Korak 1 — Parsiranje cijenik.docx:
+### View: `gastro_menu/views.py` — dodati:
+
 ```python
-import docx
-doc = docx.Document('/var/www/fina-connect/Korpa/cijenik.docx')
-table = doc.tables[0]  # 66 redova, 2 stupca
-# row.cells[0].text = naziv, row.cells[1].text = cijena (zarez → točka)
-```
-
-### Korak 2 — Mapiranje u kategorije za InventoryItem.category:
-| category | ključne riječi u nazivu |
-|---|---|
-| drink | PIVO, GIN, VODKA, WHISKY, JACK, KONJAK, LAVOV, STOCK, LOZOV, MEDICA, PELINKOV, ŠLJIVOV, TRAVAR, VILJAM, VIŠNJEV, BLACKY, JAGER, VINO, DECI, CAPPY, CEDEVITA, COCA, COCKTA, FANTA, HIDRA, RED BULL, SCHWEPPES, ROMER, JANA |
-| food | SIR, KESTEN |
-| dessert | SLADOLED |
-| drink | KAVA, CAPPUCCINO, CAFFA, ČAJ, NESCAFE, TOPLA ČOKO, BIJELA KAVA |
-
-### Korak 3 — Kreiranje InventoryItem za svaki artikal:
-```python
-from inventory.models import InventoryItem
-from companies.models import Company
-
-company = Company.objects.get(id='0240b7d9-a993-4062-81ff-14b587edbb98')
-
-# Za svaki artikal iz docx-a:
-InventoryItem.objects.get_or_create(
-    company=company,
-    sku=f'SS-{i:03d}',
-    defaults={
-        'name': naziv,
-        'category': kategorija,  # 'food', 'drink', 'dessert'
-        'unit_price': Decimal(cijena),
-        'purchase_price': Decimal(cijena) * Decimal('0.4'),  # procjena nabavne
-        'quantity': 50,
-        'min_quantity': 5,
-        'unit': 'kom',
-        'is_active': True,
-        'item_class': 'tangible',
-    }
-)
-```
-
-PAZI: Provjeri točna polja u `inventory/models.py` — posebno `is_active` i `item_class` choices.
-
-### Korak 4 — Kreiranje 20 pos.Table zapisa:
-```python
-from pos.models import Table
-
-stolovi = [
-    # (name, table_type, floor)
-    *[(f'Stol {i}', 'table', 'lokal') for i in range(1, 9)],   # 8 stolova
-    *[(f'Šank {i}', 'bar', 'sank') for i in range(1, 5)],       # 4 šank
-    *[(f'Terasa {i}', 'terrace', 'terasa') for i in range(1, 9)], # 8 terasa
-]
-
-for name, table_type, floor in stolovi:
-    Table.objects.get_or_create(
-        company=company,
-        name=name,
-        defaults={
-            'table_type': table_type,
-            'floor': floor,
-            'capacity': 4,
-            'is_active': True,
-        }
+@require_POST
+def public_order(request, slug):
+    """Gost šalje narudžbu s public menija (bez logina)."""
+    menu = get_object_or_404(DigitalMenu, slug=slug, is_active=True)
+    
+    data = json.loads(request.body)
+    table_number = data.get('table', '')
+    items = data.get('items', [])  # [{id: menuitem_id, qty: 1, notes: ''}]
+    guest_name = data.get('name', '')
+    
+    if not items:
+        return JsonResponse({'ok': False, 'error': 'Nema stavki'}, status=400)
+    
+    # Find or create TableQR
+    table_qr = TableQR.objects.filter(
+        company=menu.company, table_number=table_number
+    ).first()
+    
+    # Create TableOrder
+    from .models import TableOrder
+    order_items = []
+    total = Decimal('0')
+    for item_data in items:
+        mi = MenuItem.objects.filter(pk=item_data['id'], is_available=True).first()
+        if mi:
+            qty = int(item_data.get('qty', 1))
+            order_items.append({
+                'menu_item_id': mi.pk,
+                'name': mi.name,
+                'price': str(mi.price),
+                'qty': qty,
+                'notes': item_data.get('notes', ''),
+            })
+            total += mi.price * qty
+    
+    order = TableOrder.objects.create(
+        table_qr=table_qr,
+        company=menu.company,
+        status='new',
+        items=order_items,
+        total=total,
     )
+    
+    # WhatsApp notifikacija kuharu
+    try:
+        from core.whatsapp import send_text
+        items_text = '\n'.join(f"  {i['qty']}x {i['name']}" + (f" ({i['notes']})" if i['notes'] else '') for i in order_items)
+        send_text(
+            phone='385913912621',  # Kruljac
+            message=f'🍽️ NOVA NARUDŽBA #{order.pk}\n'
+                    f'Stol: {table_number}\n'
+                    f'{items_text}\n'
+                    f'Ukupno: {total} EUR',
+            company_id=str(menu.company.pk),
+        )
+    except Exception:
+        pass
+    
+    return JsonResponse({
+        'ok': True,
+        'order_id': order.pk,
+        'total': str(total),
+        'message': f'Narudžba #{order.pk} primljena! Stol: {table_number}',
+    })
 ```
 
-### Korak 5 — Provjeri URL za QR narudžbu:
+### URL:
 ```python
-from pos.models import Table
-t = Table.objects.filter(company=company).first()
-print(f"QR URL: /pos/gastro/qr/{t.qr_code}/")
-```
-Otvori taj URL u browseru — meni treba raditi odmah.
-
-### Output:
-```
-✓ InventoryItems kreirani: 66
-  - drink: ~58 artikala
-  - food: ~3 artikala
-  - dessert: 1 artikal
-✓ pos.Table zapisi: 20
-  - lokal: 8 stolova
-  - sank: 4 šanka
-  - terasa: 8 terasa
-✓ QR URL za test: /pos/gastro/qr/XXXX/
+path('menu/<slug:slug>/order/', views.public_order, name='public_order'),
 ```
 
----
+### Frontend (dodati u public_menu.html):
+- Košarica (JavaScript, local state)
+- "+" gumb kraj svake stavke
+- Floating košarica button s brojem stavki
+- Modal za potvrdu (ime, stol automatski iz URL ?table=)
+- POST na `/gastro-menu/menu/{slug}/order/`
+- Success screen s brojem narudžbe
 
-## ZADATAK A2 — Gastro Admin Panel (POS admin za Široki Šor)
+### Template: `templates/gastro_menu/public_menu.html` — dodati JS:
 
-Provjeri je li gastro_dashboard view dostupan:
-```bash
-grep -n "gastro_dashboard\|gastro-dashboard" /var/www/fina-connect/pos/urls.py
+```javascript
+// Košarica state
+let cart = [];
+
+function addToCart(itemId, name, price) {
+    const existing = cart.find(i => i.id === itemId);
+    if (existing) existing.qty++;
+    else cart.push({id: itemId, name, price: parseFloat(price), qty: 1, notes: ''});
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    document.getElementById('cart-count').textContent = count;
+    document.getElementById('cart-total').textContent = total.toFixed(2);
+    document.getElementById('cart-btn').style.display = count > 0 ? 'flex' : 'none';
+}
+
+async function submitOrder() {
+    const table = new URLSearchParams(window.location.search).get('table') || '';
+    const name = document.getElementById('guest-name').value || '';
+    const resp = await fetch(window.location.pathname + 'order/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({table, name, items: cart})
+    });
+    const data = await resp.json();
+    if (data.ok) {
+        cart = [];
+        updateCartUI();
+        // Show success
+        document.getElementById('order-success').style.display = 'block';
+        document.getElementById('order-msg').textContent = data.message;
+    }
+}
 ```
 
-Ako postoji URL → provjeri radi li za Korpaš d.o.o.
-Ako ne postoji → dodaj u `pos/urls.py`:
+### Kuhinjski display:
+Kreirati `gastro_menu/views.py` → `kitchen_display(request)`:
+- Login required (samo osoblje)
+- Real-time: HTMX poll svakih 10s ili WebSocket
+- Prikazuje: nove narudžbe, stol, stavke, status
+- Gumb "Gotovo" → status='ready'
+
+### URL:
 ```python
-path('gastro/dashboard/', views.gastro_dashboard, name='gastro_dashboard'),
-path('gastro/kitchen/', views.gastro_kitchen, name='gastro_kitchen'),
-path('gastro/table/<int:table_id>/order/', views.gastro_table_order, name='gastro_table_order'),
-path('gastro/order/<int:order_id>/update/', views.gastro_order_update, name='gastro_order_update'),
-```
-
-Provjeri `pos/views.py` funkciju `gastro_dashboard` (linija ~2029) što prikazuje i je li templateom pokrivena.
-
----
-
-## ZADATAK A3 — Kitchen tablet URL
-
-View `kitchen_tablet` postoji (linija ~3442 u pos/views.py).
-Provjeri URL pattern i osiguraj da radi:
-```bash
-grep -n "kitchen_tablet\|kitchen-tablet" /var/www/fina-connect/pos/urls.py
-```
-
-Ako URL postoji → testiraj. Ako ne → dodaj.
-
----
-
-## PROVJERA FINALNOG STANJA:
-
-```bash
-cd /var/www/fina-connect
-
-# 1. Artikli u bazi
-venv/bin/python manage.py shell -c "
-from inventory.models import InventoryItem
-from companies.models import Company
-c = Company.objects.get(id='0240b7d9-a993-4062-81ff-14b587edbb98')
-qs = InventoryItem.objects.filter(company=c, category__in=['food','drink','dessert'])
-print('InventoryItems Široki Šor:', qs.count())
-for cat in ['food','drink','dessert']:
-    print(f'  {cat}:', qs.filter(category=cat).count())
-"
-
-# 2. Stolovi u bazi
-venv/bin/python manage.py shell -c "
-from pos.models import Table
-from companies.models import Company
-c = Company.objects.get(id='0240b7d9-a993-4062-81ff-14b587edbb98')
-print('Stolovi:', Table.objects.filter(company=c).count())
-t = Table.objects.filter(company=c).first()
-print('QR test URL: /pos/gastro/qr/' + t.qr_code + '/')
-"
-
-# 3. Restart i test
-systemctl restart gunicorn-fina
-curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/pos/gastro/qr/TEST/
+path('kitchen/', views.kitchen_display, name='kitchen'),
 ```
 
 ---
 
-## GIT COMMIT:
+## GIT:
 ```bash
-git add -A
-git commit -m "feat(gastro): Široki Šor seed — 66 artikala, 20 stolova, QR meni aktivan"
-git log --oneline -3
+git add scripts/generate_table_qr.py \
+        gastro_menu/views.py \
+        gastro_menu/urls.py \
+        templates/gastro_menu/public_menu.html \
+        templates/gastro_menu/kitchen_display.html \
+        media/gastro/table_qr/
+git commit -m "feat: Široki Šor QR kodovi + narudžba flow + kuhinjski display"
 ```
-Update FENIX_STATUS.md.
+
+---
+
+## PROVJERA:
+1. `ls media/gastro/table_qr/*.png | wc -l` → 20
+2. Skeniraj QR s mobitelom → otvara se menu
+3. Dodaj stavke u košaricu → pošalji narudžbu
+4. WhatsApp stigne Kruljcu
+5. `/gastro-menu/kitchen/` prikazuje novu narudžbu
+6. Klik "Gotovo" → status=ready
