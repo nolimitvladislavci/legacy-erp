@@ -298,13 +298,48 @@ def api_submit_public_booking(request):
         return JsonResponse({"error": "Invalid request"}, status=400)
     try:
         data = json.loads(request.body)
+
+        # ── VALIDACIJA ────────────────────────────────────────────────────────
+        import re as _re
+        errors = {}
+
+        name = (data.get("name") or "").strip()
+        phone = (data.get("phone") or "").strip()
+        email = (data.get("email") or "").strip()
+
+        # Ime: min 3 znaka, mora imati barem 2 rijeci (ime + prezime)
+        if len(name) < 3:
+            errors["name"] = "Ime mora imati najmanje 3 znaka."
+        elif len(name.split()) < 2:
+            errors["name"] = "Unesite ime i prezime."
+
+        # Telefon: min 8 znamenki (bez razmaka i +)
+        phone_digits = _re.sub(r"[^0-9]", "", phone)
+        if len(phone_digits) < 8:
+            errors["phone"] = "Unesite ispravan broj telefona (min. 8 znamenki)."
+
+        # Email: ako je upisan, mora biti valjan
+        if email and not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+            errors["email"] = "Email adresa nije ispravna."
+
+        # Datum: ne smije biti u prošlosti
+        from django.utils import timezone as _tz
+        target_date = parse_date(data.get("date", ""))
+        if not target_date:
+            errors["date"] = "Datum nije ispravan."
+        elif target_date < _tz.localdate():
+            errors["date"] = "Ne možete rezervirati termin u prošlosti."
+
+        if errors:
+            return JsonResponse({"error": "Greška u unosu.", "fields": errors}, status=400)
+        # ─────────────────────────────────────────────────────────────────────
+
         service = get_object_or_404(BookingService, id=data["service_id"])
-        target_date = parse_date(data["date"])
         start_time = datetime.strptime(f"{data['date']} {data['time']}", "%Y-%m-%d %H:%M")
         end_time = start_time + timedelta(minutes=service.duration.total_seconds() / 60)
-        # Klijent — gost ili prijavljeni korisnik
-        email = data.get("email") or (request.user.email if request.user.is_authenticated else "")
-        name  = data.get("name")  or (request.user.get_full_name() or request.user.username if request.user.is_authenticated else "Gost")
+        # Klijent — gost ili prijavljeni korisnik (validacija je gore odradena)
+        email = email or (request.user.email if request.user.is_authenticated else "")
+        name  = name  or (request.user.get_full_name() or request.user.username if request.user.is_authenticated else "Gost")
         # Get company from the booked service
         import uuid as _uuid
 

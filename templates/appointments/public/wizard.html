@@ -167,7 +167,7 @@
             style="width:100%;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.95rem">
         </div>
         <div style="display:flex;gap:8px;margin-bottom:10px">
-          <input type="tel" id="guestPhone" placeholder="Mobitel (npr. 091...)"
+          <input type="tel" id="guestPhone" placeholder="Mobitel / telefon * (npr. 091 123 4567)" required
             style="flex:1;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.95rem">
           <input type="email" id="guestEmail" placeholder="Email (opcionalno)"
             style="flex:1;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.95rem">
@@ -218,7 +218,93 @@ document.querySelectorAll('.auth-tab').forEach(tab=>{tab.addEventListener('click
 // Step 2 skipped - auth not needed for guest booking
 document.getElementById('btnLogin').addEventListener('click',()=>{const user=document.getElementById('loginUser').value.trim();const pass=document.getElementById('loginPass').value;const err=document.getElementById('loginError');err.style.display='none';const btn=document.getElementById('btnLogin');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin me-1"></i> Prijava...';fetch('/accounts/login/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':CSRF},body:'username='+encodeURIComponent(user)+'&password='+encodeURIComponent(pass)}).then(()=>fetch('/appointments/api/booking/auth-check/').then(r=>r.json())).then(d=>{btn.disabled=false;btn.innerHTML='Prijavi se <i class="fas fa-sign-in-alt ms-1"></i>';if(d.authenticated){authUser=d;showAuthLoggedIn();}else{err.textContent='Neispravno korisnicko ime ili lozinka.';err.style.display='block';}}).catch(()=>{btn.disabled=false;btn.innerHTML='Prijavi se <i class="fas fa-sign-in-alt ms-1"></i>';err.textContent='Greska pri prijavi.';err.style.display='block';});});
 document.getElementById('btnRegister').addEventListener('click',()=>{const err=document.getElementById('regError');err.style.display='none';const btn=document.getElementById('btnRegister');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin me-1"></i> Registracija...';const payload={username:document.getElementById('regUser').value.trim(),email:document.getElementById('regEmail').value.trim(),password:document.getElementById('regPass').value,first_name:document.getElementById('regFirst').value.trim(),last_name:document.getElementById('regLast').value.trim()};fetch('/appointments/api/booking/register/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify(payload)}).then(r=>r.json()).then(d=>{btn.disabled=false;btn.innerHTML='Registriraj se <i class="fas fa-user-plus ms-1"></i>';if(d.success){authUser={full_name:d.full_name,email:d.email,username:d.username,authenticated:true};showAuthLoggedIn();}else{err.textContent=d.error||'Greska pri registraciji.';err.style.display='block';}}).catch(()=>{btn.disabled=false;btn.innerHTML='Registriraj se <i class="fas fa-user-plus ms-1"></i>';err.textContent='Mrezna greska.';err.style.display='block';});});
-document.getElementById('btnConfirm').addEventListener('click',()=>{const btn=document.getElementById('btnConfirm');const err=document.getElementById('confirmError');var gn=document.getElementById('guestName').value.trim();if(!gn){document.getElementById('guestName').focus();document.getElementById('guestName').style.borderColor='#ef4444';return;}btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin me-1"></i> Rezervacija u tijeku...';err.style.display='none';fetch(LANG_PREFIX+'/appointments/api/booking/submit/',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({service_id:SERVICE_ID,date:selectedDate,time:selectedTime,name:document.getElementById('guestName')?.value||'',email:document.getElementById('guestEmail')?.value||'',phone:document.getElementById('guestPhone')?.value||''})}).then(r=>r.json()).then(d=>{if(d.status==='success'){document.getElementById('confirmCard').style.display='none';const sc=document.getElementById('successCard');sc.style.display='block';document.getElementById('successMsg').textContent='Termin zakazan: '+document.getElementById('confirmSlotVal').textContent;if(d.ics_url)document.getElementById('icsLink').href=d.ics_url;else document.getElementById('icsLink').style.display='none';}else{err.textContent=d.error||'Greska pri rezervaciji.';err.style.display='block';btn.disabled=false;btn.innerHTML='Pokusaj ponovo <i class="fas fa-redo ms-1"></i>';}}).catch(()=>{err.textContent='Mrezna greska.';err.style.display='block';btn.disabled=false;btn.innerHTML='Pokusaj ponovo';});});
+document.getElementById('btnConfirm').addEventListener('click',()=>{
+  const btn=document.getElementById('btnConfirm');
+  const err=document.getElementById('confirmError');
+  err.style.display='none';
+
+  // Dohvati vrijednosti
+  const nameEl=document.getElementById('guestName');
+  const phoneEl=document.getElementById('guestPhone');
+  const emailEl=document.getElementById('guestEmail');
+  const name=(nameEl?.value||'').trim();
+  const phone=(phoneEl?.value||'').trim();
+  const email=(emailEl?.value||'').trim();
+
+  // Reset border boja
+  [nameEl,phoneEl,emailEl].forEach(el=>{ if(el) el.style.borderColor=''; });
+
+  // Validacija
+  const fieldErrors=[];
+
+  // Ime i prezime (min 2 riječi, min 3 znaka)
+  if(name.length<3){
+    if(nameEl) nameEl.style.borderColor='#ef4444';
+    fieldErrors.push('Unesite svoje ime (min. 3 znaka).');
+  } else if(name.split(/\s+/).filter(w=>w.length>0).length<2){
+    if(nameEl) nameEl.style.borderColor='#ef4444';
+    fieldErrors.push('Unesite ime i prezime (npr. Ivan Horvat).');
+  }
+
+  // Telefon — min 8 znamenki
+  const phoneDigits=phone.replace(/[^0-9]/g,'');
+  if(phoneDigits.length<8){
+    if(phoneEl) phoneEl.style.borderColor='#ef4444';
+    fieldErrors.push('Unesite ispravan broj telefona (min. 8 znamenki).');
+  }
+
+  // Email — ako je upisan, mora biti valjan
+  if(email && !/^[^@]+@[^@]+\.[^@]+$/.test(email)){
+    if(emailEl) emailEl.style.borderColor='#ef4444';
+    fieldErrors.push('Email adresa nije ispravna.');
+  }
+
+  if(fieldErrors.length>0){
+    err.innerHTML=fieldErrors.map(e=>'<div>⚠ '+e+'</div>').join('');
+    err.style.display='block';
+    // scroll do greške
+    err.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-spinner fa-spin me-1"></i> Rezervacija u tijeku...';
+
+  fetch(LANG_PREFIX+'/appointments/api/booking/submit/',{
+    method:'POST',credentials:'same-origin',
+    headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+    body:JSON.stringify({service_id:SERVICE_ID,date:selectedDate,time:selectedTime,name:name,email:email,phone:phone})
+  }).then(r=>r.json()).then(d=>{
+    if(d.status==='success'){
+      document.getElementById('confirmCard').style.display='none';
+      const sc=document.getElementById('successCard');
+      sc.style.display='block';
+      document.getElementById('successMsg').textContent='Termin zakazan: '+document.getElementById('confirmSlotVal').textContent;
+      if(d.ics_url) document.getElementById('icsLink').href=d.ics_url;
+      else document.getElementById('icsLink').style.display='none';
+    } else {
+      // Prikaži greške polja ako ih backend vrati
+      let msg=d.error||'Greška pri rezervaciji.';
+      if(d.fields){
+        const fldMsgs=Object.values(d.fields);
+        if(fldMsgs.length) msg=fldMsgs.map(e=>'<div>⚠ '+e+'</div>').join('');
+        // Označi crvena polja
+        if(d.fields.name && nameEl) nameEl.style.borderColor='#ef4444';
+        if(d.fields.phone && phoneEl) phoneEl.style.borderColor='#ef4444';
+        if(d.fields.email && emailEl) emailEl.style.borderColor='#ef4444';
+      }
+      err.innerHTML=msg;
+      err.style.display='block';
+      btn.disabled=false;
+      btn.innerHTML='Pokušaj ponovo <i class="fas fa-redo ms-1"></i>';
+    }
+  }).catch(()=>{
+    err.textContent='Mrežna greška. Pokušajte ponovo.';
+    err.style.display='block';
+    btn.disabled=false;
+    btn.innerHTML='Pokušaj ponovo';
+  });
+});
 loadWeek(currentWeekStart);
 </script>
 {% endblock %}
