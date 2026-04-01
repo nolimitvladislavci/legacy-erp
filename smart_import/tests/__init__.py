@@ -775,7 +775,7 @@ class ProcessImportBatchTaskTest(TestCase):
         self.company = _make_company()
         self.tax = _make_tax_rate()
 
-    @patch("smart_import.tasks.parse_xml")
+    @patch("smart_import.services.parse_xml")
     def test_process_xml_batch(self, mock_parse_xml):
         mock_parse_xml.return_value = [
             {"vendor_name": "Item A", "quantity": "10", "purchase_price": "5.00"},
@@ -791,7 +791,7 @@ class ProcessImportBatchTaskTest(TestCase):
         self.assertEqual(batch.items.count(), 2)
         self.assertIn("2 stavki", batch.status_message)
 
-    @patch("smart_import.tasks.parse_pdf")
+    @patch("smart_import.services.parse_pdf")
     def test_process_pdf_batch(self, mock_parse_pdf):
         mock_parse_pdf.return_value = [
             {"vendor_name": "PDF Item", "quantity": "1", "purchase_price": "99.99"},
@@ -805,7 +805,7 @@ class ProcessImportBatchTaskTest(TestCase):
         self.assertEqual(batch.status, "ready")
         self.assertEqual(batch.items.count(), 1)
 
-    @patch("smart_import.tasks.parse_image")
+    @patch("smart_import.services.parse_image")
     def test_process_image_batch(self, mock_parse_image):
         mock_parse_image.return_value = [
             {"vendor_name": "Photo Item", "quantity": "2", "purchase_price": "7.50"},
@@ -818,8 +818,8 @@ class ProcessImportBatchTaskTest(TestCase):
         batch.refresh_from_db()
         self.assertEqual(batch.status, "ready")
 
-    @patch("smart_import.tasks.parse_image_enhanced")
-    @patch("smart_import.tasks.parse_image")
+    @patch("smart_import.services.parse_image_enhanced")
+    @patch("smart_import.services.parse_image")
     def test_image_fallback_to_enhanced(self, mock_parse_image, mock_enhanced):
         """If parse_image returns empty, should try parse_image_enhanced."""
         mock_parse_image.return_value = []
@@ -837,8 +837,8 @@ class ProcessImportBatchTaskTest(TestCase):
         self.assertEqual(batch.items.first().vendor_name, "Enhanced Item")
         mock_enhanced.assert_called_once()
 
-    @patch("smart_import.tasks.parse_image_enhanced")
-    @patch("smart_import.tasks.parse_image")
+    @patch("smart_import.services.parse_image_enhanced")
+    @patch("smart_import.services.parse_image")
     def test_all_parsers_fail_sets_error(self, mock_parse_image, mock_enhanced):
         mock_parse_image.return_value = []
         mock_enhanced.return_value = []
@@ -856,7 +856,7 @@ class ProcessImportBatchTaskTest(TestCase):
         # Should not raise
         process_import_batch(999999)
 
-    @patch("smart_import.tasks.parse_pdf")
+    @patch("smart_import.services.parse_pdf")
     def test_batch_sets_processing_status(self, mock_parse_pdf):
         """Verify batch transitions through processing state."""
         statuses_seen = []
@@ -878,7 +878,7 @@ class ProcessImportBatchTaskTest(TestCase):
         self.assertIn("processing", statuses_seen)
         self.assertIn("ready", statuses_seen)
 
-    @patch("smart_import.tasks.parse_pdf")
+    @patch("smart_import.services.parse_pdf")
     def test_retry_count_increments(self, mock_parse_pdf):
         mock_parse_pdf.return_value = [
             {"vendor_name": "Y", "quantity": "1", "purchase_price": "1"},
@@ -892,7 +892,7 @@ class ProcessImportBatchTaskTest(TestCase):
         batch.refresh_from_db()
         self.assertEqual(batch.retry_count, 1)
 
-    @patch("smart_import.tasks.parse_pdf")
+    @patch("smart_import.services.parse_pdf")
     def test_existing_items_cleared_on_reprocess(self, mock_parse_pdf):
         """When reprocessing, old items should be deleted."""
         batch = _make_batch(self.company, file_type="pdf")
@@ -911,7 +911,7 @@ class ProcessImportBatchTaskTest(TestCase):
         self.assertEqual(batch.items.first().vendor_name, "New Item")
 
     @patch("smart_import.tasks._acquire_lock")
-    @patch("smart_import.tasks.parse_pdf")
+    @patch("smart_import.services.parse_pdf")
     def test_locked_batch_skipped(self, mock_parse_pdf, mock_lock):
         mock_lock.return_value = False  # Lock already held
         batch = _make_batch(self.company, file_type="pdf")
@@ -992,7 +992,7 @@ class MultipageProcessTest(TestCase):
     def setUp(self):
         self.company = _make_company()
 
-    @patch("smart_import.tasks.parse_image")
+    @patch("smart_import.services.parse_image")
     def test_multipage_deduplication(self, mock_parse_image):
         """Multipage processing should deduplicate by vendor name."""
         from smart_import.tasks import _process_multipage
