@@ -69,8 +69,11 @@ def _advisory_lock_slot(company_id, resource_id, slot_epoch):
     pg_try_advisory_xact_lock vraca False odmah ako je slot vec zakljucan
     u drugoj aktivnoj transakciji — sprecava race condition bez cekanja.
     Key je deterministicki hash (company, resource, slot_time).
+    SQLite fallback: uvijek vraca True (nema advisory lock podrsku).
     """
     from django.db import connection
+    if connection.vendor != 'postgresql':
+        return True
     import ctypes
     raw = hash((company_id, resource_id, slot_epoch)) & 0x7FFFFFFFFFFFFFFF
     lock_key = ctypes.c_int64(raw).value

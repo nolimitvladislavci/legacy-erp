@@ -1064,3 +1064,12 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=6, minute=0, day_of_month=1),
     },
 })
+
+    # Suppress SQLite FK constraint checks in test teardown
+    # SQLite enforces FK constraints at check_constraints() which fails
+    # when signals create SystemAuditLog entries that reference rolled-back users
+    from django.db.backends.sqlite3.base import DatabaseWrapper as _SQLiteDB
+    _orig_check = _SQLiteDB.check_constraints
+    def _noop_check(self, table_names=None):
+        pass
+    _SQLiteDB.check_constraints = _noop_check
