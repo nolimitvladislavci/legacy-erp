@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
 # Zadnje azuriranje: 2026-04-01 — Sonnet (Korpaš ekosustav)
-# Git HEAD: 5c4951d4
+# Git HEAD: 9e3a4ed6
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -551,3 +551,4 @@ Podsjetnik: ~25.04.2026.
 | CC_TASK_MCP_SSE_FIX | 7e6f45ef | ✅ DONE — nginx SSE proxy fix, standalone FastMCP |
 
 | BORG_10_PLAN | 3cab19ab | ✅ DONE — 4-fazni plan do 10/10 (bazna ocjena 5.9) |
+| F1_BORG_TEMELJI | 9e3a4ed6 | ✅ DONE — 62/62 PASS, MCP v3, signal dedup 578→53 |
