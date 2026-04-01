@@ -86,7 +86,7 @@ def load_lc(company):
     }
 
 def expected_num(doc_type, doc_id):
-    return DOC_MAP[doc_type]['prefix'] + '-' + doc_id
+    return doc_id  # LC fakture koriste originalni Synesis broj
 
 # ─── USPOREDBA ────────────────────────────────────────
 def compare(syn_docs, lc_invs):
@@ -106,12 +106,39 @@ def compare(syn_docs, lc_invs):
             'syn_amt':  parse_amt(row.get('DOCUMENT_AMMOUNT', '')),
             'doc_type': dt,
         }
-        if exp not in lc_invs:
+        prefixed = DOC_MAP[dt]['prefix'] + '-' + did
+        lc = lc_invs.get(exp) or lc_invs.get(prefixed)
+        # Fallback: fuzzy match by partner name + approximate amount
+        if not lc:
+            syn_partner = clean(row.get('DOCUMENT_PARTNER', '')).lower()[:20]
+            syn_amt_val = base['syn_amt']
+            if syn_partner and syn_amt_val:
+                for num, candidate in lc_invs.items():
+                    if syn_partner in (candidate.client_name or '').lower()[:20]:
+                        c_total = Decimal(str(candidate.total))
+                        c_bruto = c_total + Decimal(str(candidate.tax_amount or 0))
+                        if (abs(syn_amt_val - c_total) <= Decimal('0.02')
+                            or abs(syn_amt_val - c_bruto) <= Decimal('0.02')
+                            or abs(syn_amt_val - c_total * Decimal('1.25')) <= Decimal('0.50')):
+                            lc = candidate
+                            break
+        if not lc:
             missing.append(base)
             continue
-        lc  = lc_invs[exp]
         amt = Decimal(str(lc.total))
-        d   = abs(base['syn_amt'] - amt)
+        tax = Decimal(str(lc.tax_amount or 0))
+        lc_bruto = amt + tax
+        # Synesis DOCUMENT_AMMOUNT = bruto (s PDV)
+        # LC total = neto ili bruto ovisno o importu
+        # Pokušaj match: direktno, bruto, ili neto×PDV stope
+        candidates = [
+            abs(base['syn_amt'] - amt),          # direktan match
+            abs(base['syn_amt'] - lc_bruto),     # LC total+tax
+            abs(base['syn_amt'] - amt * Decimal('1.25')),   # 25% PDV
+            abs(base['syn_amt'] - amt * Decimal('1.13')),   # 13% PDV
+            abs(base['syn_amt'] - amt * Decimal('1.05')),   # 5% PDV
+        ]
+        d = min(candidates)
         rec = dict(base, lc_total=amt, diff=d)
         if d <= TOLERANCE:      ok.append(rec)
         elif d <= Decimal('1'): warn.append(rec)
