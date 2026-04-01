@@ -12,6 +12,11 @@ from .tool_handlers import handle_tool_call
 
 logger = logging.getLogger(__name__)
 
+
+def _get_rag_context(module_context, user_message):
+    return str()
+
+
 def _ai_rate_check(user, max_calls=30, window_seconds=3600):
     """Per-user rate limit for AI API: max_calls per window_seconds.
     Uses Redis cache with DB fallback for reliability."""
