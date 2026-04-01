@@ -30,6 +30,12 @@
 - [ ] test_usage_log_created → AIUsageLog ne nastaje
 - [ ] 8 errora — identificirati i popraviti import/setup
 - [ ] Cilj: **29/29 PASS**
+
+**Detalj grešaka (2026-04-01):**
+- 8 ERRORS: setUpClass u BORGTestBase — svi limit_connect_ai testovi (33 testa blokirano)
+- 4 FAILS: ChatAPITest (chat_returns_response, conversation_persisted, empty_message_rejected, usage_log_created)
+- 17 OK: intelligence testovi (17/17 PASS) + ai_assistant model testovi
+- Prioritet: Fix BORGTestBase.setUpTestData prvo (deblokiraj 33 testa), onda ChatAPI 4 faila
 - Fajlovi: ai_assistant/tests.py, limit_connect_ai/tests.py, intelligence/tests.py
 
 ### F1.2 — MCP Security hardening

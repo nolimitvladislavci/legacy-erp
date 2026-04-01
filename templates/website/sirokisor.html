@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Široki Šor — Restoran · Kušaonica · Sala | Vladislavci</title>
+<meta name="description" content="Široki Šor — slavonska kuhinja, kušaonica domaćeg sira, najam sale do 50 osoba za fešte i slavlja. Vladislavci.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--dark:#1a0a06;--brick:#8b3a2a;--brick2:#a84a38;--wheat:#e8d5a3;--wood:#2d1b0e;--gold:#c9a84c;--white:#fff;--muted:#9a8a7a}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--white)}
+a{text-decoration:none;color:var(--gold)}
+.back{display:inline-flex;align-items:center;gap:.5rem;padding:1.2rem 1.5rem;font-size:.82rem;color:rgba(255,255,255,.5);transition:color .2s}
+.back:hover{color:var(--gold)}
+
+/* HERO */
+.hero{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5rem 1.5rem 3rem;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#1a0a06 0%,#2d1005 50%,#1a0e08 100%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.03) 1px,transparent 1px);background-size:50px 50px}
+.hero-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(139,58,42,.2) 0%,transparent 70%);pointer-events:none}
+.hero-content{position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);padding:.35rem 1rem;border-radius:20px;font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
+.hero h1{font-size:clamp(2.5rem,7vw,4.5rem);font-weight:900;letter-spacing:-1px;margin-bottom:.5rem}
+.hero h1 span{color:var(--gold)}
+.hero-tagline{font-size:1.05rem;color:rgba(255,255,255,.55);font-style:italic;margin-bottom:.75rem}
+.hero-info{font-size:.82rem;color:var(--gold);font-weight:600;letter-spacing:1px}
+
+/* SECTIONS */
+.section{padding:4rem 1.5rem;max-width:960px;margin:0 auto}
+.section-label{font-size:.72rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:3px;margin-bottom:.6rem}
+.section h2{font-size:1.8rem;font-weight:800;margin-bottom:.5rem}
+.section-sub{font-size:.9rem;color:rgba(255,255,255,.5);margin-bottom:2rem;line-height:1.6}
+
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:1.5rem}
+.offer-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.5rem;transition:all .2s}
+.offer-card:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04)}
+.offer-card .icon{font-size:2rem;margin-bottom:.75rem}
+.offer-card h3{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+.offer-card p{font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.6}
+.offer-card.disabled{opacity:.45}
+.coming-soon{display:inline-block;background:rgba(107,114,128,.15);border:1px solid rgba(107,114,128,.25);color:#9ca3af;padding:.2rem .7rem;border-radius:10px;font-size:.7rem;font-weight:700;margin-top:.5rem}
+
+.divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:0}
+
+/* GALLERY */
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:2rem}
+.gallery-item{aspect-ratio:4/3;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem}
+.gallery-item i{font-size:1.8rem;color:rgba(255,255,255,.15)}
+.gallery-item span{font-size:.7rem;color:rgba(255,255,255,.2);text-align:center;padding:0 .5rem}
+.gallery-note{font-size:.75rem;color:rgba(255,255,255,.3);text-align:center;margin-bottom:2rem}
+
+/* FORM */
+.form-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:2rem}
+.form-group{margin-bottom:1.25rem}
+label{display:block;font-size:.75rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem}
+input,select,textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.75rem 1rem;color:var(--white);font-size:.9rem;font-family:inherit;transition:border-color .2s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);background:rgba(201,168,76,.05)}
+select option{background:#2d1b0e;color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.btn-submit{width:100%;padding:1rem;background:linear-gradient(135deg,var(--brick2),var(--brick));border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:.5rem}
+.btn-submit:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,58,42,.4)}
+.success{display:none;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem}
+.success i{font-size:2.5rem;color:var(--gold);margin-bottom:1rem;display:block}
+
+/* MAP */
+.gmap{width:100%;height:220px;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:1.5rem;filter:grayscale(30%) brightness(.7)}
+
+footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 1.5rem;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)}
+footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+<a href="/korpas/" class="back"><i class="fas fa-arrow-left"></i> Korpaš Grupa</a>
+
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fas fa-utensils"></i> Restoran · Kafić · Slavlje</div>
+    <h1>ŠIROKI<br><span>ŠOR</span></h1>
+    <p class="hero-tagline">gdje se Slavonija osjeća kao kod kuće</p>
+    <p class="hero-info"><i class="fas fa-map-marker-alt"></i> Vladislavci &nbsp;·&nbsp; +385 91 391 2621</p>
+  </div>
+</div>
+
+<section class="section">
+  <p class="section-label">Što nudimo</p>
+  <h2>Okusi Slavonije, toplina doma</h2>
+  <p class="section-sub">Domaća kuhinja, svježi sir iz OPG Kruljac Slađana, domaće vino i rakija. Prostor za odmor, degustaciju i slavlje.</p>
+
+  <div class="offer-grid">
+    <div class="offer-card">
+      <div class="icon">🍽️</div>
+      <h3>Restoran & Kafić</h3>
+      <p>Slavonska kuhinja od namirnica s lokalnih farmi. Grah, kulen, čvarci, domaći rezanci. Svaki dan nešto svježe.</p>
+    </div>
+    <div class="offer-card">
+      <div class="icon">🧀</div>
+      <h3>Kušaonica sira</h3>
+      <p>Degustacija domaćih sireva iz OPG Kruljac Slađana. Svježi, polutvrdi, tvrdi. Uz domaće vino i med. Rezerviraj za grupu.</p>
+    </div>
+    <div class="offer-card">
+      <div class="icon">🎉</div>
+      <h3>Najam sale</h3>
+      <p>Sala do <strong>50 osoba</strong> za fešte, rođendane, slavlja, poslovne ručkove. Oprema: stolovi, stolice, razglas. Upit bez obveze.</p>
+    </div>
+    <div class="offer-card disabled">
+      <div class="icon">🛏️</div>
+      <h3>Sobe za noćenje</h3>
+      <p>U pripremi — čekamo dozvole. Uskoro možete prenoćiti usred slavonskog mira.</p>
+      <span class="coming-soon">Uskoro dostupno</span>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section">
+  <p class="section-label">Galerija</p>
+  <h2>Prostori & ugođaj</h2>
+  <div class="gallery">
+    <div class="gallery-item"><i class="fas fa-image"></i><span>Restoran unutra</span></div>
+    <div class="gallery-item"><i class="fas fa-image"></i><span>Kušaonica sira</span></div>
+    <div class="gallery-item"><i class="fas fa-image"></i><span>Terasa</span></div>
+    <div class="gallery-item"><i class="fas fa-image"></i><span>Sala za slavlja</span></div>
+    <div class="gallery-item"><i class="fas fa-image"></i><span>Domaći produkti</span></div>
+    <div class="gallery-item"><i class="fas fa-image"></i><span>Detalji</span></div>
+  </div>
+  <p class="gallery-note">Fotografije uskoro — kontaktirajte nas za rezervaciju.</p>
+</section>
+
+<hr class="divider">
+
+<section class="section">
+  <p class="section-label">Rezervacija</p>
+  <h2>Rezerviraj stol ili salu</h2>
+  <p class="section-sub">Ispunite formu — kontaktirat ćemo vas u roku 2 sata za potvrdu.</p>
+
+  <div class="form-card" id="formCard">
+    <form id="rezervacijaForm">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Ime i prezime</label>
+        <input type="text" name="ime" placeholder="Vaše ime" required>
+      </div>
+      <div class="form-group">
+        <label>Telefon</label>
+        <input type="tel" name="telefon" placeholder="+385..." required>
+      </div>
+      <div class="form-group">
+        <label>Vrsta rezervacije</label>
+        <select name="vrsta" required>
+          <option value="">— odaberi —</option>
+          <option value="stol">Rezervacija stola (restoran)</option>
+          <option value="sala">Najam sale (do 50 osoba)</option>
+          <option value="kusaonica">Kušaonica sira (grupa)</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="form-group">
+          <label>Datum</label>
+          <input type="date" name="datum" required>
+        </div>
+        <div class="form-group">
+          <label>Broj gostiju</label>
+          <input type="number" name="broj_gostiju" min="1" max="50" placeholder="npr. 4" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Napomena</label>
+        <textarea name="napomena" placeholder="Posebni zahtjevi, alergije, povod slavlja..."></textarea>
+      </div>
+      <button type="submit" class="btn-submit"><i class="fas fa-calendar-check"></i> Pošalji rezervaciju</button>
+    </form>
+  </div>
+  <div class="success" id="successMsg">
+    <i class="fas fa-check-circle"></i>
+    <h3>Rezervacija primljena!</h3>
+    <p>Potvrdit ćemo u roku 2 sata. Hvala što ste odabrali Široki Šor!</p>
+  </div>
+
+  <iframe class="gmap" src="https://maps.google.com/maps?q=Vladislavci,Croatia&z=14&output=embed" allowfullscreen loading="lazy"></iframe>
+</section>
+
+<footer>
+  <a href="/korpas/">← Korpaš Grupa</a> &nbsp;·&nbsp; Vladislavci, Osječko-baranjska županija &nbsp;·&nbsp; +385 91 391 2621 &nbsp;·&nbsp; © 2026
+</footer>
+
+<script>
+document.getElementById('rezervacijaForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = new FormData(this);
+  const csrfToken = data.get('csrfmiddlewaretoken');
+  const payload = {};
+  data.forEach((v, k) => { if(k !== 'csrfmiddlewaretoken') payload[k] = v; });
+  try {
+    const r = await fetch('/korpas/sirokisor/', {method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify(payload)});
+    if(r.ok){document.getElementById('formCard').style.display='none';document.getElementById('successMsg').style.display='block';}
+  } catch(err){alert('Greška. Nazovite +385 91 391 2621.');}
+});
+const d = document.querySelector('input[name="datum"]');
+if(d) d.min = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

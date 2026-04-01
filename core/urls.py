@@ -217,6 +217,11 @@ urlpatterns += i18n_patterns(
     path('knjiga-boljitaka/', lambda r: __import__('django.shortcuts', fromlist=['render']).render(r, 'website/knjiga_boljitaka.html')),
 # KORPAŠ — landing + letak
     path("korpas/", lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/landing_korpas.html")),
+    path("korpas/termini/", __import__("website.views", fromlist=["korpas_termini"]).korpas_termini, name="korpas_termini"),
+    path("korpas/sirokisor/", __import__("website.views", fromlist=["sirokisor"]).sirokisor, name="sirokisor"),
+    path("korpas/opg-kruljac/", __import__("website.views", fromlist=["opg_kruljac"]).opg_kruljac, name="opg_kruljac"),
+    path("cro-validator/", __import__("django.views.generic", fromlist=["RedirectView"]).RedirectView.as_view(url="/validator/", permanent=False), name="cro_validator"),
+    path("no-limit/partner/", __import__("website.views", fromlist=["nolimit_partner"]).nolimit_partner, name="nolimit_partner"),
     path("korpas/letak/", lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/letak_a4_korpas.html")),
     path('scan/<str:token>/', include([
         path('', __import__('documents.views', fromlist=['scan_mobile_page']).scan_mobile_page, name='scan_mobile'),

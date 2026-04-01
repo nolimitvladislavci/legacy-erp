@@ -1,301 +1,200 @@
 <!DOCTYPE html>
-<html lang="hr"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OPG KORPAŠ — Domaći sirevi iz Vladislavaca</title>
-<meta name="description" content="OPG Korpaš — domaći sirevi, mlijeko, jogurt i mliječni proizvodi iz Vladislavaca. Svježe s naše farme do vašeg stola.">
-<meta property="og:title" content="OPG KORPAŠ — Domaći sirevi iz Vladislavaca">
-<meta property="og:description" content="Domaći sirevi, mlijeko, jogurt i mliječni proizvodi. Svježe s farme.">
-<meta property="og:type" content="website">
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Korpaš Grupa — Servis · Okus · Zemlja · Zajednica | Vladislavci</title>
+<meta name="description" content="Korpaš Grupa — vulkanizer i servis vozila, Široki Šor restoran, OPG Kruljac Slađana, Udruga No Limit. Vladislavci, Slavonija.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --green:#2d5016;--green-light:#4a7c28;--green-dark:#1e3a0e;
-  --cream:#fdf8ef;--cream-dark:#f5ecd7;--brown:#5c3d1a;--brown-light:#8b6f47;
-  --gold:#c9a84c;--white:#ffffff;--text:#2c2c2c;--muted:#6b6b6b;
+  --dark:#0e1a14;--green:#1a3d2b;--green2:#2d6a47;--gold:#c9a84c;--gold2:#e6c96a;
+  --cream:#fdf8ef;--white:#fff;--muted:#8a9a8e;--text:#1a1a1a;
 }
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--text)}
-a{color:var(--green);text-decoration:none}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--white)}
+a{text-decoration:none;color:inherit}
 
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2rem;
-  background:linear-gradient(160deg,var(--green-dark) 0%,var(--green) 40%,var(--green-light) 100%);position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-30%;right:-20%;width:70vw;height:70vw;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 65%)}
-.hero::after{content:'';position:absolute;bottom:-20%;left:-10%;width:50vw;height:50vw;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.08),transparent 60%)}
-.hero *{position:relative;z-index:1}
-.hero .badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:.4rem 1.2rem;border-radius:20px;font-size:.75rem;color:#fff;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
-.hero h1{font-size:clamp(3rem,10vw,5.5rem);font-weight:900;line-height:1;margin-bottom:.3rem;color:#fff;letter-spacing:-1px}
-.hero .sub{font-size:1.4rem;color:var(--gold);font-weight:700;margin-bottom:.3rem}
-.hero .tagline{font-size:1.1rem;color:rgba(255,255,255,.7);margin-bottom:2.5rem;font-style:italic;max-width:500px}
-.hero .cta-row{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(14,26,20,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.15);padding:0 1.5rem}
+.nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px}
+.nav-logo{font-size:1.1rem;font-weight:900;letter-spacing:1px;color:var(--gold)}
+.nav-logo span{color:var(--white);font-weight:300}
+.nav-links{display:flex;gap:1.5rem}
+.nav-links a{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.5px;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+@media(max-width:640px){.nav-links{display:none}}
 
-.btn-cream{background:var(--cream);color:var(--green-dark);font-weight:700;padding:.8rem 1.8rem;border-radius:12px;font-size:1rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s;border:none}
-.btn-cream:hover{background:#fff;color:var(--green-dark);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.15)}
-.btn-outline{background:transparent;border:2px solid rgba(255,255,255,.4);color:#fff;padding:.75rem 1.6rem;border-radius:12px;font-size:1rem;display:inline-flex;align-items:center;gap:.5rem;transition:all .2s}
-.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,.08);color:#fff}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 1.5rem 4rem;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,var(--dark) 0%,#0a1f14 50%,#0e1a14 100%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);background-size:60px 60px}
+.hero-glow{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(45,106,71,.25) 0%,transparent 70%);pointer-events:none}
+.hero-content{position:relative;z-index:1;max-width:780px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);padding:.4rem 1.2rem;border-radius:20px;font-size:.75rem;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:2rem}
+.hero h1{font-size:clamp(2.8rem,8vw,5rem);font-weight:900;line-height:1;letter-spacing:-2px;margin-bottom:1rem}
+.hero h1 .line2{color:var(--gold)}
+.hero-sub{font-size:1.1rem;color:rgba(255,255,255,.55);margin-bottom:.5rem}
+.hero-loc{font-size:.85rem;color:var(--gold);font-weight:600;letter-spacing:1px;margin-bottom:3rem}
+.hero-loc i{margin-right:.4rem}
+.hero-scroll{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.3);font-size:.75rem;letter-spacing:2px;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.hero-scroll i{animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
-.cheese-deco{position:absolute;opacity:.04;color:#fff;font-size:8rem;z-index:0}
-.cheese-deco.d1{top:15%;left:8%;transform:rotate(-15deg)}
-.cheese-deco.d2{bottom:20%;right:10%;transform:rotate(20deg);font-size:6rem}
-.cheese-deco.d3{top:60%;left:70%;font-size:4rem;transform:rotate(-30deg)}
+/* CARDS GRID */
+.cards-section{padding:5rem 1.5rem;max-width:1100px;margin:0 auto}
+.cards-title{text-align:center;font-size:.8rem;font-weight:700;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:3rem}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem}
 
-section{padding:5rem 1.5rem;max-width:960px;margin:0 auto}
-.section-title{font-size:2rem;font-weight:800;margin-bottom:.4rem;color:var(--green-dark)}
-.section-title i{color:var(--green);margin-right:.4rem}
-.section-sub{color:var(--muted);font-size:1rem;margin-bottom:2.5rem}
+.ent-card{border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);transition:all .3s;cursor:pointer;display:flex;flex-direction:column}
+.ent-card:hover{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.04);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.ent-card-top{padding:2rem 2rem 1.2rem;flex:1}
+.ent-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.2rem}
+.ent-icon.green{background:rgba(45,106,71,.2);color:#4ade80}
+.ent-icon.amber{background:rgba(201,100,30,.2);color:#fb923c}
+.ent-icon.earth{background:rgba(101,163,13,.15);color:#a3e635}
+.ent-icon.blue{background:rgba(99,102,241,.15);color:#818cf8}
+.ent-card h2{font-size:1.25rem;font-weight:800;margin-bottom:.4rem}
+.ent-card .tagline{font-size:.82rem;color:var(--gold);font-weight:600;margin-bottom:.75rem}
+.ent-card p{font-size:.83rem;color:rgba(255,255,255,.55);line-height:1.65}
+.ent-card-cta{padding:1.2rem 2rem;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.ent-card-cta span{font-size:.8rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px}
+.ent-card-cta i{color:rgba(201,168,76,.5);transition:transform .2s}
+.ent-card:hover .ent-card-cta i{transform:translateX(4px);color:var(--gold)}
 
-.about-wrap{background:var(--white);border:1px solid #e8e0d0;border-radius:20px;overflow:hidden}
-.about-inner{padding:2.5rem;line-height:1.8;color:var(--text);font-size:1rem}
-.about-inner strong{color:var(--green)}
-.about-stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--green);color:#fff;text-align:center}
-.about-stat{padding:1.5rem 1rem;border-right:1px solid rgba(255,255,255,.15)}
-.about-stat:last-child{border-right:none}
-.about-stat .num{font-size:2rem;font-weight:900;display:block;color:var(--gold)}
-.about-stat .label{font-size:.78rem;text-transform:uppercase;letter-spacing:1px;opacity:.85}
+/* VALIDATOR BANNER */
+.validator-banner{max-width:1100px;margin:0 auto 5rem;padding:0 1.5rem}
+.validator-inner{background:rgba(15,23,42,.6);border:1px solid rgba(34,197,94,.15);border-radius:16px;padding:1.75rem 2rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.validator-icon{width:48px;height:48px;border-radius:12px;background:rgba(34,197,94,.1);display:flex;align-items:center;justify-content:center;color:#22c55e;font-size:1.3rem;flex-shrink:0}
+.validator-text{flex:1;min-width:200px}
+.validator-text h3{font-size:.95rem;font-weight:700;margin-bottom:.25rem}
+.validator-text p{font-size:.8rem;color:rgba(255,255,255,.5)}
+.validator-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80;padding:.65rem 1.4rem;border-radius:10px;font-size:.8rem;font-weight:700;transition:all .2s;white-space:nowrap}
+.validator-btn:hover{background:rgba(34,197,94,.2);color:#4ade80}
 
-.products-section{background:var(--white);padding:5rem 1.5rem;margin:0;max-width:100%}
-.products-inner{max-width:1100px;margin:0 auto}
-.cat-title{font-size:1.2rem;font-weight:700;color:var(--green);margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:2px solid var(--cream-dark)}
-.cat-title i{margin-right:.4rem}
-.cat-title:first-of-type{margin-top:0}
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
-.prod-card{background:var(--cream);border:1px solid #e8e0d0;border-radius:14px;padding:1.3rem;transition:all .2s;display:flex;flex-direction:column}
-.prod-card:hover{border-color:var(--green);transform:translateY(-3px);box-shadow:0 8px 25px rgba(45,80,22,.1)}
-.prod-icon{font-size:2rem;margin-bottom:.6rem}
-.prod-name{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:.3rem;line-height:1.3}
-.prod-desc{font-size:.8rem;color:var(--muted);line-height:1.5;flex:1;margin-bottom:.75rem}
-.prod-footer{display:flex;align-items:center;justify-content:space-between}
-.prod-price{font-size:1.15rem;font-weight:900;color:var(--green)}
-.prod-unit{font-size:.7rem;color:var(--muted);margin-left:.2rem;font-weight:400}
-.prod-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:.4rem .8rem;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block}
-.prod-btn:hover{background:var(--green-light);color:#fff}
-
-.del-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem}
-.del-card{background:var(--white);border:1px solid #e8e0d0;border-radius:16px;padding:2rem;text-align:center;transition:all .2s}
-.del-card:hover{border-color:var(--green);box-shadow:0 6px 20px rgba(45,80,22,.08)}
-.del-card .icon{font-size:2.5rem;color:var(--green);margin-bottom:1rem}
-.del-card h3{font-size:1.1rem;margin-bottom:.4rem;color:var(--green-dark)}
-.del-card p{color:var(--muted);font-size:.85rem;line-height:1.5;margin-bottom:.5rem}
-.del-card .price-tag{display:inline-block;background:var(--green);color:#fff;padding:.3rem .8rem;border-radius:20px;font-weight:700;font-size:.85rem;margin-top:.5rem}
-.del-card .free{font-size:.75rem;color:var(--green);margin-top:.4rem}
-
-.steps{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
-.step{text-align:center;flex:1;min-width:140px;max-width:200px}
-.step .num{width:48px;height:48px;line-height:48px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:1.2rem;display:inline-block;margin-bottom:.6rem}
-.step .txt{font-size:.88rem;color:var(--text);line-height:1.4}
-.step .txt strong{color:var(--green);display:block;margin-bottom:.2rem}
-
-.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem}
-.contact-card{background:var(--white);border:1px solid #e8e0d0;border-radius:14px;padding:1.5rem;display:flex;align-items:center;gap:1rem;transition:all .2s}
-.contact-card:hover{border-color:var(--green)}
-.contact-card .c-icon{font-size:1.4rem;color:var(--green);min-width:2.5rem;text-align:center;width:2.5rem;height:2.5rem;line-height:2.5rem;background:rgba(45,80,22,.08);border-radius:50%}
-.contact-card h3{font-size:.95rem;margin-bottom:.1rem;color:var(--green-dark)}
-.contact-card p{color:var(--muted);font-size:.82rem}
-
-footer{background:var(--green-dark);padding:3rem 1.5rem 2rem;text-align:center;color:rgba(255,255,255,.7)}
-footer .brand{font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:.3rem}
-footer .sub-brand{color:var(--gold);font-size:.9rem;font-weight:600;margin-bottom:1rem}
-footer .info{font-size:.8rem;line-height:1.8}
-footer .info a{color:var(--gold)}
-footer .social{margin:1.5rem 0}
-footer .social a{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;margin:0 .3rem;transition:all .2s;font-size:1rem}
-footer .social a:hover{background:var(--gold);color:var(--green-dark)}
-footer .copy{margin-top:1.5rem;font-size:.72rem;color:rgba(255,255,255,.4)}
-footer .powered{margin-top:.5rem;font-size:.7rem;color:rgba(255,255,255,.3)}
-footer .powered a{color:rgba(255,255,255,.5)}
-
-@media(max-width:600px){
-  .hero h1{font-size:3rem}
-  .about-stats{grid-template-columns:1fr}
-  .about-stat{border-right:none;border-bottom:1px solid rgba(255,255,255,.15)}
-  .about-stat:last-child{border-bottom:none}
-  .about-inner{padding:1.5rem}
-  .contact-grid{grid-template-columns:1fr}
-  .prod-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-  .steps{flex-direction:column;align-items:center}
-}
-@media print{
-  .hero{min-height:auto;padding:2rem;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-  .btn-cream,.btn-outline,.prod-btn{display:none}
-  body{background:#fff}
-  section{padding:1.5rem 0}
-}
+/* FOOTER */
+footer{border-top:1px solid rgba(255,255,255,.06);padding:3rem 1.5rem;text-align:center}
+footer .foot-inner{max-width:600px;margin:0 auto}
+footer .foot-logo{font-size:1.4rem;font-weight:900;color:var(--gold);margin-bottom:.5rem}
+footer .foot-sub{font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:1.5rem}
+footer .foot-links{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
+footer .foot-links a{font-size:.8rem;color:rgba(255,255,255,.5);transition:color .2s}
+footer .foot-links a:hover{color:var(--gold)}
+footer .foot-copy{font-size:.72rem;color:rgba(255,255,255,.25)}
+.gmap{width:100%;max-width:600px;height:200px;border:1px solid rgba(255,255,255,.08);border-radius:12px;margin:1.5rem auto;display:block;filter:grayscale(40%) brightness(.8)}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <span class="cheese-deco d1">&#x1F9C0;</span>
-  <span class="cheese-deco d2">&#x1F95B;</span>
-  <span class="cheese-deco d3">&#x1F33F;</span>
-  <div class="badge"><i class="fas fa-leaf"></i> &nbsp;Obiteljsko gospodarstvo</div>
-  <h1>KORPA&#352;</h1>
-  <div class="sub">Doma&#263;i sirevi &amp; mlije&#269;ni proizvodi</div>
-  <div class="tagline">Svje&#382;e s na&#353;e farme u Vladislavcima &#8212; do va&#353;eg stola</div>
-  <div class="cta-row">
-    <a href="/hr/webshop/shop/korpas-doo/" class="btn-cream"><i class="fas fa-shopping-basket"></i> Webshop</a>
-    <a href="#proizvodi" class="btn-outline"><i class="fas fa-cheese"></i> Na&#353;i proizvodi</a>
-    <a href="#kontakt" class="btn-outline"><i class="fas fa-phone"></i> Kontakt</a>
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">KORPAŠ <span>GRUPA</span></div>
+    <div class="nav-links">
+      <a href="/korpas/termini/">Servis</a>
+      <a href="/korpas/sirokisor/">Široki Šor</a>
+      <a href="/korpas/opg-kruljac/">OPG Kruljac</a>
+      <a href="/no-limit/">No Limit</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow"><i class="fas fa-map-marker-alt"></i> Vladislavci · Slavonija</div>
+    <h1>KORPAŠ<br><span class="line2">GRUPA</span></h1>
+    <p class="hero-sub">Servis · Okus · Zemlja · Zajednica</p>
+    <p class="hero-loc"><i class="fas fa-map-marker-alt"></i> Vladislavci, Osječko-baranjska županija</p>
+  </div>
+  <div class="hero-scroll"><i class="fas fa-chevron-down"></i> Istraži</div>
+</section>
+
+<section class="cards-section">
+  <p class="cards-title">Što radimo</p>
+  <div class="cards-grid">
+
+    <a href="/korpas/termini/" class="ent-card">
+      <div class="ent-card-top">
+        <div class="ent-icon green"><i class="fas fa-wrench"></i></div>
+        <h2>Korpaš Servis</h2>
+        <p class="tagline">Vulkanizer · Mehaničar · Dijagnostika</p>
+        <p>Servis osobnih i teretnih vozila, vulkanizacija i balansiranje, OBD dijagnostika, zamjena ulja i filtera, priprema za tehnički pregled. Rezerviraj termin online.</p>
+      </div>
+      <div class="ent-card-cta">
+        <span>Rezerviraj termin</span>
+        <i class="fas fa-arrow-right"></i>
+      </div>
+    </a>
+
+    <a href="/korpas/sirokisor/" class="ent-card">
+      <div class="ent-card-top">
+        <div class="ent-icon amber"><i class="fas fa-utensils"></i></div>
+        <h2>Široki Šor</h2>
+        <p class="tagline">Restoran · Kafić · Kušaonica · Sala</p>
+        <p>Slavonska kuhinja, domaći sir iz OPG Kruljac, domaće vino. Kušaonica sira za grupe, najam sale do 50 osoba za fešte, rođendane i slavlja. Sobe uskoro.</p>
+      </div>
+      <div class="ent-card-cta">
+        <span>Rezerviraj stol ili salu</span>
+        <i class="fas fa-arrow-right"></i>
+      </div>
+    </a>
+
+    <a href="/korpas/opg-kruljac/" class="ent-card">
+      <div class="ent-card-top">
+        <div class="ent-icon earth"><i class="fas fa-cow"></i></div>
+        <h2>OPG Kruljac Slađana</h2>
+        <p class="tagline">Farma · Mlijeko · Sir · OPG Burza</p>
+        <p>Farma krava u srcu Slavonije. Svježe mlijeko, domaći sirevi, jogurt. Osnivački član OPG Burze Slavonije — direktna prodaja bez posrednika.</p>
+      </div>
+      <div class="ent-card-cta">
+        <span>Naruči direktno</span>
+        <i class="fas fa-arrow-right"></i>
+      </div>
+    </a>
+
+    <a href="/no-limit/" class="ent-card">
+      <div class="ent-card-top">
+        <div class="ent-icon blue"><i class="fas fa-infinity"></i></div>
+        <h2>Udruga NO LIMIT</h2>
+        <p class="tagline">Digitalna sloboda · AirCash · Lokalna mreža</p>
+        <p>Promičemo pravo na gotovinu u digitalnom obliku. Podržavamo AirCash — uplati novčanicu, plaćaj karticom, bez bankovnog računa. Lokalna mreža slobodnih subjekata.</p>
+      </div>
+      <div class="ent-card-cta">
+        <span>Saznaj više</span>
+        <i class="fas fa-arrow-right"></i>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<div class="validator-banner">
+  <div class="validator-inner">
+    <div class="validator-icon"><i class="fas fa-shield-halved"></i></div>
+    <div class="validator-text">
+      <h3>🔐 CroXML Verify — digitalna sigurnost standarda</h3>
+      <p>Korpaš Grupa koristi CroXML Verify — jedini HR validator za e-Račune, fiskalizaciju i digitalne potpise. Besplatan javni pristup.</p>
+    </div>
+    <a href="/validator/" class="validator-btn"><i class="fas fa-external-link-alt"></i> Otvori Validator</a>
   </div>
 </div>
-
-<section>
-  <div class="section-title"><i class="fas fa-tractor"></i> O nama</div>
-  <div class="section-sub">Tradicija. Kvaliteta. Svje&#382;ina.</div>
-  <div class="about-wrap">
-    <div class="about-inner">
-      <strong>OPG Korpa&#353;</strong> je obiteljsko poljoprivredno gospodarstvo iz <strong>Vladislavaca</strong> (Osje&#269;ko-baranjska &#382;upanija) koje se bavi uzgojem mlije&#269;nih krava i proizvodnjom doma&#263;ih sireva i mlije&#269;nih proizvoda.
-      <br><br>
-      Na&#353;a tradicija proizvodnje sira se&#382;e generacijama unazad. Od svje&#382;eg kravljeg mlijeka s na&#353;e farme &#8212; bez ikakvih konzervansa, umjetnih dodataka ili poja&#269;iva&#269;a okusa &#8212; ru&#269;no izra&#273;ujemo &#353;iroku paletu proizvoda: od klasi&#269;nog svje&#382;eg sira i &#353;kripavca, preko dimljenih i zrelih sireva, do doma&#263;eg jogurta, vrhnja i maslaca.
-      <br><br>
-      Koristimo <strong>tradicionalne recepture</strong> uz <strong>moderne higijenske standarde</strong>, &#353;to garantira vrhunsku kvalitetu svakog proizvoda koji napusti na&#353;u siranu. Sve proizvode mo&#382;ete naru&#269;iti putem na&#353;eg webshopa &#8212; dostavljamo u Vladislavce, &#268;epin, Osijek i okolicu.
-    </div>
-    <div class="about-stats">
-      <div class="about-stat"><span class="num">25+</span><span class="label">Proizvoda</span></div>
-      <div class="about-stat"><span class="num">3</span><span class="label">Zone dostave</span></div>
-      <div class="about-stat"><span class="num">100%</span><span class="label">Doma&#263;e</span></div>
-    </div>
-  </div>
-</section>
-
-<div class="products-section" id="proizvodi">
-  <div class="products-inner">
-    <div class="section-title"><i class="fas fa-cheese"></i> Na&#353;i proizvodi</div>
-    <div class="section-sub">Svje&#382;e s farme &#8212; naru&#269;ite online, dostavimo do vas</div>
-
-    <div class="cat-title"><i class="fas fa-cheese"></i> Sirevi</div>
-    <div class="prod-grid">
-      <div class="prod-card"><div class="prod-icon">&#x1F9C0;</div><div class="prod-name">Svje&#382;i kravlji sir</div><div class="prod-desc">Doma&#263;i svje&#382;i sir od kravljeg mlijeka. Bez konzervansa, ru&#269;na izrada.</div><div class="prod-footer"><span class="prod-price">&#8364;6,00<span class="prod-unit">/500g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F525;</div><div class="prod-name">Dimljeni sir</div><div class="prod-desc">Tradicionalno dimljeni sir na bukovini. Polutvrdi, intenzivnog okusa.</div><div class="prod-footer"><span class="prod-price">&#8364;8,50<span class="prod-unit">/400g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F9C0;</div><div class="prod-name">Polutvrdi sir</div><div class="prod-desc">Zreli polutvrdi sir, min. 30 dana zrenja. Idealan za rezanje.</div><div class="prod-footer"><span class="prod-price">&#8364;7,50<span class="prod-unit">/500g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F9C0;</div><div class="prod-name">Tvrdi sir (zreli)</div><div class="prod-desc">Tvrdi sir, min. 60 dana zrenja. Intenzivan okus za ribanje i degustaciju.</div><div class="prod-footer"><span class="prod-price">&#8364;9,00<span class="prod-unit">/400g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1FAD2;</div><div class="prod-name">Sir u maslinovom ulju</div><div class="prod-desc">Svje&#382;i sir mariniran u maslinovom ulju s za&#269;inskim biljem. Staklenka.</div><div class="prod-footer"><span class="prod-price">&#8364;10,00<span class="prod-unit">/350g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F336;</div><div class="prod-name">Sir s paprikom</div><div class="prod-desc">Svje&#382;i sir s mljevenom slatkom crvenom paprikom.</div><div class="prod-footer"><span class="prod-price">&#8364;7,00<span class="prod-unit">/400g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F33F;</div><div class="prod-name">Sir s vlascem</div><div class="prod-desc">Svje&#382;i sir s doma&#263;im vlascem. Idealan za doru&#269;ak.</div><div class="prod-footer"><span class="prod-price">&#8364;7,00<span class="prod-unit">/400g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F9C4;</div><div class="prod-name">Sir s &#269;e&#353;njakom</div><div class="prod-desc">Svje&#382;i sir s &#269;e&#353;njakom i mediteranskim za&#269;inskim biljem.</div><div class="prod-footer"><span class="prod-price">&#8364;7,00<span class="prod-unit">/400g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F9C0;</div><div class="prod-name">Slavonski &#353;kripavac</div><div class="prod-desc">Tradicionalni slavonski &#353;kripavac &#8212; &#353;kripavo svje&#382;.</div><div class="prod-footer"><span class="prod-price">&#8364;8,00<span class="prod-unit">/500g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F963;</div><div class="prod-name">Cottage cheese</div><div class="prod-desc">Doma&#263;i zrnati sir. Idealan za salate i zdrave obroke.</div><div class="prod-footer"><span class="prod-price">&#8364;5,50<span class="prod-unit">/300g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-    </div>
-
-    <div class="cat-title"><i class="fas fa-glass-water"></i> Mlijeko i vrhnje</div>
-    <div class="prod-grid">
-      <div class="prod-card"><div class="prod-icon">&#x1F95B;</div><div class="prod-name">Svje&#382;e kravlje mlijeko</div><div class="prod-desc">Nepasterizirano svje&#382;e mlijeko. Dnevna isporuka s farme.</div><div class="prod-footer"><span class="prod-price">&#8364;1,80<span class="prod-unit">/1L</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F95B;</div><div class="prod-name">Doma&#263;e gusto vrhnje</div><div class="prod-desc">Gusto doma&#263;e vrhnje za kuhanje i kola&#269;e. Min. 30% m.m.</div><div class="prod-footer"><span class="prod-price">&#8364;3,50<span class="prod-unit">/500ml</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F95B;</div><div class="prod-name">Kiselo vrhnje</div><div class="prod-desc">Doma&#263;e kiselo vrhnje 20% m.m. Za &#269;obanac i salatne prelive.</div><div class="prod-footer"><span class="prod-price">&#8364;2,50<span class="prod-unit">/400g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F95B;</div><div class="prod-name">Doma&#263;a mla&#263;enica</div><div class="prod-desc">Tradicionalna mla&#263;enica &#8212; osvje&#382;avaju&#263;a i probioti&#269;ka.</div><div class="prod-footer"><span class="prod-price">&#8364;2,00<span class="prod-unit">/500ml</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-    </div>
-
-    <div class="cat-title"><i class="fas fa-jar"></i> Jogurt i fermentirani proizvodi</div>
-    <div class="prod-grid">
-      <div class="prod-card"><div class="prod-icon">&#x1F95B;</div><div class="prod-name">Doma&#263;i jogurt</div><div class="prod-desc">Prirodni jogurt bez aditiva i &#353;e&#263;era. Gust i kremast.</div><div class="prod-footer"><span class="prod-price">&#8364;2,50<span class="prod-unit">/500ml</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F95B;</div><div class="prod-name">Kiselo mlijeko</div><div class="prod-desc">Tradicionalno kiselo mlijeko. Blagog okusa.</div><div class="prod-footer"><span class="prod-price">&#8364;2,00<span class="prod-unit">/500ml</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F353;</div><div class="prod-name">Jogurt s vo&#263;em</div><div class="prod-desc">Jogurt s doma&#263;im sezonskim vo&#263;em (jagoda/vi&#353;nja/&#353;ljiva).</div><div class="prod-footer"><span class="prod-price">&#8364;3,00<span class="prod-unit">/400ml</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F9EA;</div><div class="prod-name">Kefir</div><div class="prod-desc">Doma&#263;i kefir bogat probioticima. Za zdravu probavu.</div><div class="prod-footer"><span class="prod-price">&#8364;3,00<span class="prod-unit">/500ml</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-    </div>
-
-    <div class="cat-title"><i class="fas fa-bread-slice"></i> Maslac i namazi</div>
-    <div class="prod-grid">
-      <div class="prod-card"><div class="prod-icon">&#x1F9C8;</div><div class="prod-name">Doma&#263;i maslac</div><div class="prod-desc">Ru&#269;no ra&#273;eni doma&#263;i maslac od svje&#382;eg vrhnja.</div><div class="prod-footer"><span class="prod-price">&#8364;4,50<span class="prod-unit">/250g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F336;</div><div class="prod-name">Sirni namaz s paprikom</div><div class="prod-desc">Kremasti sirni namaz s crvenom paprikom.</div><div class="prod-footer"><span class="prod-price">&#8364;4,00<span class="prod-unit">/200g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F33F;</div><div class="prod-name">Sirni namaz s vlascem</div><div class="prod-desc">Kremasti sirni namaz s vlascem.</div><div class="prod-footer"><span class="prod-price">&#8364;4,00<span class="prod-unit">/200g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F336;</div><div class="prod-name">Ajvar-sir namaz</div><div class="prod-desc">Originalan spoj doma&#263;eg ajvara i svje&#382;eg sira.</div><div class="prod-footer"><span class="prod-price">&#8364;4,50<span class="prod-unit">/200g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-    </div>
-
-    <div class="cat-title"><i class="fas fa-gift"></i> Sezonski &amp; poklon paketi</div>
-    <div class="prod-grid">
-      <div class="prod-card"><div class="prod-icon">&#x1F95A;</div><div class="prod-name">Uskrsni sir s jajima</div><div class="prod-desc">Tradicionalni uskrsni sir s jajima. Dostupan o&#382;ujak-travanj.</div><div class="prod-footer"><span class="prod-price">&#8364;8,00<span class="prod-unit">/600g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F381;</div><div class="prod-name">Kulen-sir poklon paket</div><div class="prod-desc">Dimljeni sir + slavonski kulen. Idealan poklon.</div><div class="prod-footer"><span class="prod-price">&#8364;15,00<span class="prod-unit">/800g</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-      <div class="prod-card"><div class="prod-icon">&#x1F37D;</div><div class="prod-name">Degustacijski paket</div><div class="prod-desc">Izbor od 5 vrsta sira &#8212; idealan poklon za ljubitelje sira.</div><div class="prod-footer"><span class="prod-price">&#8364;20,00<span class="prod-unit">/1kg</span></span><a href="/hr/webshop/shop/korpas-doo/" class="prod-btn">Naru&#269;i</a></div></div>
-    </div>
-
-    <div style="text-align:center;margin-top:2.5rem">
-      <a href="/hr/webshop/shop/korpas-doo/" class="btn-cream" style="background:var(--green);color:#fff;font-size:1.1rem;padding:1rem 2.5rem"><i class="fas fa-shopping-basket"></i> Pogledaj cijeli webshop</a>
-    </div>
-  </div>
-</div>
-
-<section id="dostava">
-  <div class="section-title"><i class="fas fa-truck"></i> Dostava</div>
-  <div class="section-sub">Dostavljamo 3x tjedno &#8212; svje&#382;e do va&#353;ih vrata</div>
-  <div class="del-grid">
-    <div class="del-card">
-      <div class="icon"><i class="fas fa-home"></i></div>
-      <h3>Vladislavci</h3>
-      <p>Vladislavci i neposredna okolica</p>
-      <div class="price-tag">&#8364;2,00</div>
-      <div class="free">Besplatno iznad &#8364;12</div>
-      <p style="margin-top:.5rem;font-size:.78rem;color:var(--muted)">Uto / &#268;et / Sub &#8226; 9-12h</p>
-    </div>
-    <div class="del-card">
-      <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
-      <h3>&#268;epin i okolica</h3>
-      <p>&#268;epin, &#268;eminac, Ivanovac, Josipovac</p>
-      <div class="price-tag">&#8364;3,00</div>
-      <div class="free">Besplatno iznad &#8364;18</div>
-      <p style="margin-top:.5rem;font-size:.78rem;color:var(--muted)">Uto / &#268;et / Sub &#8226; 9-12h</p>
-    </div>
-    <div class="del-card">
-      <div class="icon"><i class="fas fa-city"></i></div>
-      <h3>Osijek</h3>
-      <p>Grad Osijek i prigradska naselja</p>
-      <div class="price-tag">&#8364;4,50</div>
-      <div class="free">Besplatno iznad &#8364;25</div>
-      <p style="margin-top:.5rem;font-size:.78rem;color:var(--muted)">&#268;et / Sub &#8226; 9-12h</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="section-title"><i class="fas fa-clipboard-list"></i> Kako naru&#269;iti?</div>
-  <div class="section-sub">Jednostavno u 4 koraka</div>
-  <div class="steps">
-    <div class="step"><div class="num">1</div><div class="txt"><strong>Odaberite</strong>Izaberite proizvode u webshopu</div></div>
-    <div class="step"><div class="num">2</div><div class="txt"><strong>Ko&#353;arica</strong>Dodajte u ko&#353;aricu i pregledajte</div></div>
-    <div class="step"><div class="num">3</div><div class="txt"><strong>Naru&#269;ite</strong>Unesite podatke za dostavu</div></div>
-    <div class="step"><div class="num">4</div><div class="txt"><strong>U&#382;ivajte</strong>Dostavimo vam svje&#382;e na ku&#263;nu adresu</div></div>
-  </div>
-  <div style="text-align:center;margin-top:1.5rem">
-    <a href="/hr/webshop/shop/korpas-doo/" class="btn-cream" style="background:var(--green);color:#fff"><i class="fas fa-shopping-basket"></i> Otvori webshop</a>
-  </div>
-</section>
-
-<section id="kontakt">
-  <div class="section-title"><i class="fas fa-envelope"></i> Kontakt</div>
-  <div class="section-sub">Javite nam se &#8212; rado &#263;emo vam pomo&#263;i</div>
-  <div class="contact-grid">
-    <a href="tel:+385916035734" class="contact-card">
-      <div class="c-icon"><i class="fas fa-phone"></i></div>
-      <div><h3>Telefon</h3><p>091 603 5734</p></div>
-    </a>
-    <a href="mailto:kruljacmarija1@gmail.com" class="contact-card">
-      <div class="c-icon"><i class="fas fa-envelope"></i></div>
-      <div><h3>Email</h3><p>kruljacmarija1@gmail.com</p></div>
-    </a>
-    <div class="contact-card">
-      <div class="c-icon"><i class="fas fa-map-pin"></i></div>
-      <div><h3>Adresa</h3><p>Kr. Tomislava 291, 31404 Vladislavci</p></div>
-    </div>
-    <a href="https://www.facebook.com/profile.php?id=100064819652795" target="_blank" class="contact-card">
-      <div class="c-icon"><i class="fab fa-facebook"></i></div>
-      <div><h3>Facebook</h3><p>OPG Korpa&#353;</p></div>
-    </a>
-  </div>
-</section>
 
 <footer>
-  <div class="brand">KORPA&#352;</div>
-  <div class="sub-brand">Doma&#263;i sirevi &amp; mlije&#269;ni proizvodi</div>
-  <div class="social">
-    <a href="https://www.facebook.com/profile.php?id=100064819652795" target="_blank"><i class="fab fa-facebook-f"></i></a>
-    <a href="tel:+385916035734"><i class="fas fa-phone"></i></a>
-    <a href="mailto:kruljacmarija1@gmail.com"><i class="fas fa-envelope"></i></a>
+  <div class="foot-inner">
+    <div class="foot-logo">KORPAŠ GRUPA</div>
+    <div class="foot-sub">Vladislavci, Osječko-baranjska županija, Hrvatska</div>
+    <div class="foot-links">
+      <a href="/korpas/termini/">Servis</a>
+      <a href="/korpas/sirokisor/">Široki Šor</a>
+      <a href="/korpas/opg-kruljac/">OPG Kruljac</a>
+      <a href="/no-limit/">No Limit</a>
+      <a href="/validator/">CroXML Verify</a>
+    </div>
+    <iframe class="gmap" src="https://maps.google.com/maps?q=Vladislavci,Croatia&z=13&output=embed" allowfullscreen loading="lazy"></iframe>
+    <div class="foot-copy">© 2026 Korpaš Grupa · Digitalno rješenje: <a href="https://limit-connect.com" style="color:var(--gold)">LIMIT Connect</a></div>
   </div>
-  <div class="info">
-    OPG Korpa&#353; &#8226; Kr. Tomislava 291, 31404 Vladislavci<br>
-    OIB: 92922919857 &#8226; Osje&#269;ko-baranjska &#382;upanija
-  </div>
-  <div class="copy">&#169; 2026 OPG Korpa&#353;. Sva prava pridr&#382;ana.</div>
-  <div class="powered">Powered by <a href="https://limit-connect.com">LIMIT CONNECT</a></div>
 </footer>
 
-</body></html>
+</body>
+</html>

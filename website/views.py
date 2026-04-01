@@ -559,3 +559,107 @@ def feedback_page(request):
 def digitalni_posrednik(request):
     """Public page: Digitalni Posrednik chronicle and status."""
     return render(request, 'website/digitalni_posrednik.html')
+
+
+import json as _json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+
+KRULJAC_WA = "+385913912621"
+
+def _wa_send(telefon, poruka):
+    try:
+        from core.whatsapp import send_text
+        send_text(telefon, poruka)
+    except Exception:
+        pass
+
+def korpas_termini(request):
+    from .models import KorpasTermin
+    if request.method == 'POST':
+        try:
+            d = _json.loads(request.body)
+            t = KorpasTermin.objects.create(
+                ime=d.get('ime',''),
+                telefon=d.get('telefon',''),
+                vrsta_vozila=d.get('vrsta_vozila','ostalo'),
+                usluga=d.get('usluga','ostalo'),
+                datum=d.get('datum'),
+                vrijeme=d.get('vrijeme','08:00'),
+                napomena=d.get('napomena',''),
+            )
+            _wa_send(KRULJAC_WA,
+                f"🔧 NOVI TERMIN KORPAŠ\n{t.ime} | {t.telefon}\n"
+                f"{t.get_usluga_display()} | {t.get_vrsta_vozila_display()}\n"
+                f"{t.datum} u {t.vrijeme}"
+            )
+            return JsonResponse({'ok': True})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+    from django.shortcuts import render
+    return render(request, 'website/korpas_termini.html', {})
+
+
+def sirokisor(request):
+    from .models import KorpasRezervacija
+    if request.method == 'POST':
+        try:
+            d = _json.loads(request.body)
+            r = KorpasRezervacija.objects.create(
+                ime=d.get('ime',''),
+                telefon=d.get('telefon',''),
+                vrsta=d.get('vrsta','stol'),
+                datum=d.get('datum'),
+                broj_gostiju=int(d.get('broj_gostiju', 1)),
+                napomena=d.get('napomena',''),
+            )
+            _wa_send(KRULJAC_WA,
+                f"🍷 REZERVACIJA ŠIROKI ŠOR\n{r.ime} | {r.telefon}\n"
+                f"{r.get_vrsta_display()} | {r.datum} | {r.broj_gostiju} osoba\n"
+                f"{r.napomena or ''}"
+            )
+            return JsonResponse({'ok': True})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+    from django.shortcuts import render
+    return render(request, 'website/sirokisor.html', {})
+
+
+def opg_kruljac(request):
+    if request.method == 'POST':
+        try:
+            d = _json.loads(request.body)
+            _wa_send(KRULJAC_WA,
+                f"🐄 NARUDŽBA OPG KRULJAC\n{d.get('ime','')} | {d.get('telefon','')}\n"
+                f"Proizvod: {d.get('usluga','')}\nKoličina: {d.get('napomena','')}\n"
+                f"Dostava: {d.get('datum','')}"
+            )
+            return JsonResponse({'ok': True})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+    from django.shortcuts import render
+    return render(request, 'website/opg_kruljac.html', {})
+
+
+def nolimit_partner(request):
+    from .models import NoLimitPartner
+    if request.method == 'POST':
+        try:
+            d = _json.loads(request.body)
+            p = NoLimitPartner.objects.create(
+                naziv_firme=d.get('naziv_firme',''),
+                oib=d.get('oib',''),
+                kontakt_osoba=d.get('kontakt_osoba',''),
+                telefon=d.get('telefon',''),
+                adresa=d.get('adresa',''),
+            )
+            _wa_send(KRULJAC_WA,
+                f"🏷️ NOVI NO LIMIT PARTNER\n{p.naziv_firme} | {p.oib}\n"
+                f"{p.kontakt_osoba} | {p.telefon}\n{p.adresa}"
+            )
+            return JsonResponse({'ok': True})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+    from django.shortcuts import render
+    return render(request, 'website/no_limit.html', {})

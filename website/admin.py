@@ -144,3 +144,24 @@ class GrosmarktAnfrageAdmin(admin.ModelAdmin):
         ('Meta',    {'fields': ['created_at','ip_address','user_agent'], 'classes': ['collapse']}),
     ]
     ordering = ['-created_at']
+
+from .models import KorpasTermin, KorpasRezervacija, NoLimitPartner
+
+@admin.register(KorpasTermin)
+class KorpasTerminAdmin(admin.ModelAdmin):
+    list_display = ['ime', 'telefon', 'usluga', 'vrsta_vozila', 'datum', 'vrijeme', 'status', 'created_at']
+    list_filter = ['status', 'usluga', 'vrsta_vozila', 'datum']
+    list_editable = ['status']
+    ordering = ['datum', 'vrijeme']
+
+@admin.register(KorpasRezervacija)
+class KorpasRezervacijaAdmin(admin.ModelAdmin):
+    list_display = ['ime', 'telefon', 'vrsta', 'datum', 'broj_gostiju', 'created_at']
+    list_filter = ['vrsta', 'datum']
+    ordering = ['datum']
+
+@admin.register(NoLimitPartner)
+class NoLimitPartnerAdmin(admin.ModelAdmin):
+    list_display = ['naziv_firme', 'kontakt_osoba', 'telefon', 'adresa', 'status', 'created_at']
+    list_filter = ['status']
+    list_editable = ['status']

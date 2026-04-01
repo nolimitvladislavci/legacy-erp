@@ -53,13 +53,13 @@ class BORGTestBase(TestCase):
             company=cls.company, role='company_admin', totp_enabled=True,
         )
 
-        cls.tax_25 = TaxRate.objects.create(
-            country='HR', name='PDV 25%', rate=Decimal('25.00'),
-            is_default=True, is_active=True,
+        cls.tax_25, _ = TaxRate.objects.get_or_create(
+            country='HR', rate=Decimal('25.00'),
+            defaults={'name': 'PDV 25%', 'is_default': True, 'is_active': True},
         )
-        cls.tax_13 = TaxRate.objects.create(
-            country='HR', name='PDV 13%', rate=Decimal('13.00'),
-            is_active=True,
+        cls.tax_13, _ = TaxRate.objects.get_or_create(
+            country='HR', rate=Decimal('13.00'),
+            defaults={'name': 'PDV 13%', 'is_active': True},
         )
 
 
@@ -565,7 +565,7 @@ class KnowledgeGraphTest(BORGTestBase):
 class NNFeedServiceTest(BORGTestBase):
     """Testovi za NN Feed Service s mockiranim LLM pozivima."""
 
-    def test_sanitize_html(self):
+    def test_fetch_article_markdown(self):
         """HTML sanitizer uklanja script/nav/footer."""
         from limit_connect_ai.services.nn_feed_service import NNFeedScraperService
         service = NNFeedScraperService()
@@ -577,7 +577,12 @@ class NNFeedServiceTest(BORGTestBase):
         <footer>Copyright</footer>
         </body></html>'''
 
-        result = service._sanitize_html(html)
+        from bs4 import BeautifulSoup as _BS
+        soup = _BS(html, 'html.parser')
+        for el in soup(['header', 'footer', 'nav', 'script', 'style']):
+            el.decompose()
+        main = soup.find('div', id='dokument') or soup.find('body')
+        result = service.html_conv.handle(str(main)) if main else ''
         self.assertIn('Zakon', result)
         self.assertIn('Članak 1', result)
         self.assertNotIn('alert', result)
@@ -596,7 +601,7 @@ class NNFeedServiceTest(BORGTestBase):
         import os
         with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key'}):
             service = NNFeedScraperService()
-            result = service._extract_semantics_via_llm('Tekst zakona o PDV-u', 'Test naslov')
+            result = service._extract_via_llm('Tekst zakona o PDV-u', 'Test naslov')
 
         self.assertIsNotNone(result)
         self.assertEqual(result['category'], 'VAT')

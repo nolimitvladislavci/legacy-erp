@@ -18,7 +18,18 @@ from django.urls import reverse
 
 User = get_user_model()
 
-NO_HTTPS = override_settings(SECURE_SSL_REDIRECT=False)
+NO_HTTPS = override_settings(
+    SECURE_SSL_REDIRECT=False,
+    MIDDLEWARE=[
+        'django.middleware.security.SecurityMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
+    ],
+)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -152,7 +163,7 @@ class ChatAPITest(TestCase):
         self.user = make_user(self.company, username="chat_user")
         self.c = Client()
         self.c.login(username="chat_user", password="TestPass2026!")
-        self.url = "/ai/api/chat/"
+        self.url = reverse('ai_assistant:chat_api')
 
     def _mock_claude_response(self, content="Testni odgovor"):
         """Return a mock that makes chat_with_claude return a simple text response."""
@@ -165,6 +176,14 @@ class ChatAPITest(TestCase):
                 "usage": {"input_tokens": 50, "output_tokens": 20},
             },
         )
+
+    def _mock_all(self, content="Testni odgovor"):
+        from contextlib import ExitStack
+        stack = ExitStack()
+        stack.enter_context(self._mock_claude_response(content))
+        stack.enter_context(patch("ai_assistant.views._build_contextual_system_prompt", return_value="Test"))
+        stack.enter_context(patch("ai_assistant.views._get_rag_context", return_value=""))
+        return stack
 
     def test_chat_requires_login(self):
         """Unauthenticated POST → redirect to login."""
@@ -181,7 +200,7 @@ class ChatAPITest(TestCase):
 
     def test_chat_returns_response(self):
         """Valid message → 200 with content and conversation_id."""
-        with self._mock_claude_response("Ja sam vaš AI asistent."):
+        with self._mock_all("Ja sam vaš AI asistent."):
             r = self.c.post(self.url,
                             data='{"message":"Tko si ti?"}',
                             content_type="application/json")
@@ -194,7 +213,7 @@ class ChatAPITest(TestCase):
     def test_conversation_persisted(self):
         """After a chat call, Conversation + 2 Messages are saved in DB."""
         from ai_assistant.models import Conversation, Message
-        with self._mock_claude_response("Bok!"):
+        with self._mock_all("Bok!"):
             self.c.post(self.url,
                         data='{"message":"Zdravo!"}',
                         content_type="application/json")
@@ -205,7 +224,7 @@ class ChatAPITest(TestCase):
     def test_usage_log_created(self):
         """Each chat call creates an AIUsageLog record with cost_estimate."""
         from ai_assistant.models import AIUsageLog
-        with self._mock_claude_response("Test"):
+        with self._mock_all("Test"):
             self.c.post(self.url,
                         data='{"message":"Koliko je racuna danas?"}',
                         content_type="application/json")

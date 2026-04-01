@@ -434,3 +434,88 @@ class GrosmarktAnfrage(models.Model):
 
     def __str__(self):
         return f"{self.company} — {self.name} ({self.created_at.strftime('%d.%m.%Y')})"
+
+
+class KorpasTermin(models.Model):
+    VRSTA = [
+        ('osobno', 'Osobno vozilo'),
+        ('teretno', 'Teretno vozilo'),
+        ('kombi', 'Kombi / Van'),
+        ('ostalo', 'Ostalo'),
+    ]
+    USLUGE = [
+        ('vulkanizacija', 'Vulkanizacija (zamjena / balansiranje)'),
+        ('mehanika', 'Mehanička dijagnostika'),
+        ('obd', 'OBD dijagnostika (skeniranje)'),
+        ('ulje', 'Zamjena ulja i filtera'),
+        ('registracija', 'Priprema za tehnički pregled'),
+        ('ugradnja', 'Ugradnja opreme'),
+        ('ostalo', 'Ostalo'),
+    ]
+    STATUS = [
+        ('novi', 'Novi'),
+        ('potvrdjen', 'Potvrđen'),
+        ('obavljen', 'Obavljen'),
+        ('otkazan', 'Otkazan'),
+    ]
+    ime            = models.CharField(max_length=100, verbose_name='Ime i prezime')
+    telefon        = models.CharField(max_length=20, verbose_name='Telefon')
+    vrsta_vozila   = models.CharField(max_length=20, choices=VRSTA, verbose_name='Vrsta vozila')
+    usluga         = models.CharField(max_length=30, choices=USLUGE, verbose_name='Usluga')
+    datum          = models.DateField(verbose_name='Željeni datum')
+    vrijeme        = models.TimeField(verbose_name='Željeno vrijeme')
+    napomena       = models.TextField(blank=True, verbose_name='Napomena')
+    status         = models.CharField(max_length=20, choices=STATUS, default='novi')
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['datum', 'vrijeme']
+        verbose_name = 'Korpaš — Termin'
+        verbose_name_plural = 'Korpaš — Termini'
+
+    def __str__(self):
+        return f"{self.ime} | {self.get_usluga_display()} | {self.datum} {self.vrijeme}"
+
+
+class KorpasRezervacija(models.Model):
+    """Rezervacije za Široki Šor (stol, sala, kušaonica)"""
+    VRSTA = [
+        ('stol', 'Rezervacija stola'),
+        ('sala', 'Najam sale (do 50 osoba)'),
+        ('kusaonica', 'Kušaonica sira'),
+    ]
+    ime            = models.CharField(max_length=100, verbose_name='Ime i prezime')
+    telefon        = models.CharField(max_length=20, verbose_name='Telefon')
+    vrsta          = models.CharField(max_length=20, choices=VRSTA, verbose_name='Vrsta rezervacije')
+    datum          = models.DateField(verbose_name='Datum')
+    broj_gostiju   = models.PositiveIntegerField(default=1, verbose_name='Broj gostiju')
+    napomena       = models.TextField(blank=True, verbose_name='Napomena / Posebni zahtjevi')
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['datum']
+        verbose_name = 'Široki Šor — Rezervacija'
+        verbose_name_plural = 'Široki Šor — Rezervacije'
+
+    def __str__(self):
+        return f"{self.ime} | {self.get_vrsta_display()} | {self.datum}"
+
+
+class NoLimitPartner(models.Model):
+    """Firme koje se prijavljuju za No Limit / AirCash mrežu"""
+    naziv_firme    = models.CharField(max_length=200, verbose_name='Naziv firme')
+    oib            = models.CharField(max_length=11, blank=True, verbose_name='OIB')
+    kontakt_osoba  = models.CharField(max_length=100, verbose_name='Kontakt osoba')
+    telefon        = models.CharField(max_length=20, verbose_name='Telefon')
+    adresa         = models.CharField(max_length=200, verbose_name='Adresa')
+    status         = models.CharField(max_length=20, default='prijava',
+                        choices=[('prijava','Prijava'),('aktivan','Aktivan'),('odbijen','Odbijen')])
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'No Limit — Partner prijava'
+        verbose_name_plural = 'No Limit — Partner prijave'
+
+    def __str__(self):
+        return f"{self.naziv_firme} | {self.kontakt_osoba}"
