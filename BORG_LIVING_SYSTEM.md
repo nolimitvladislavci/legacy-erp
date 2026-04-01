@@ -147,11 +147,15 @@ TREND_SOURCES = {
 }
 ```
 
-**Radar kategorije:**
-- 🔴 KRITIČNO — zakonska promjena koja utječe na korisnike → instant WhatsApp
-- 🟠 VAŽNO — novi EU fond, nova subvencija → generira FundApplicationDraft
-- 🟡 TREND — tehnološki trend koji LIMIT Connect može iskoristiti → BorgTask
-- 🟢 INFO — arhivira u KnowledgeBase
+**Radar kategorije (gradacija — autonomija samo na CRVENO):**
+- ⚫ SIVA — opća informacija, javno savjetovanje, prijedlog zakona → samo arhiva
+- 🟡 ŽUTA — propis u najavi, usvojen ali još ne na snazi → prikaži korisniku, NE mijenjaj workflow
+- 🔴 CRVENA — zakon NA SNAZI (datum primjene prošao) → BORG smije predlagati promjenu workflowa
+- 🟠 EU FOND — novi natječaj otvoren → generira FundApplicationDraft, obavijesti korisnika
+- 🟢 INFO → arhivira u KnowledgeBase
+
+PRAVILO: BORG nikada ne mijenja poslovnu logiku temeljem SIVE ili ŽUTE vijesti.
+Autonomija se pali isključivo na CRVENO — kada je zakon već na snazi.
 
 **AI analiza trenda:**
 ```
@@ -299,3 +303,60 @@ Cilj: **svaki segment na 10/10 do 15.04.2026.**
 Git HEAD pri kreiranju ovog dokumenta: 74fb67de
 Datum: 2026-04-01
 Potpisuje: Sonnet (LIMIT Connect AI koordinator)
+
+---
+
+## RAZINA 6: PRAVNA ARHITEKTURA I ETIKA (dodano 01.04.2026)
+
+### Temeljno načelo: INFORMIRAJ AGRESIVNO, IZVRŠAVAJ KONZERVATIVNO
+
+### AI Audit Trail
+
+Svaka AI sugestija koja rezultira dokumentom zapisuje:
+- `document_type`, `document_id` — koji dokument
+- `ai_model` + `ai_version` — koji model, koja verzija BORG-a
+- `input_data` (JSONField) — što je AI vidio pri generiranju
+- `sources_used` (JSONField) — ['NN 35/2026', 'VIES 2026-04-01', 'Company.pdv_rate']
+- `suggestion` — što je AI predložio
+- `approved_by` (FK User) + `approved_at` — tko i kada kliknuo OK
+- `override_note` — ako je korisnik promijenio prijedlog
+
+Inspekciji se prikazuje jednim klikom. "Odobrio sam jer mi je sustav pokazao ove izvore."
+
+### Pravilo "3 drafta za novog primatelja"
+
+BORG nikada ne šalje vanjsku komunikaciju novom primatelju bez ljudskog odobrenja
+na prva 3 drafta. `ExternalContact.borg_auto_approved` Boolean, default=False.
+Nakon 3 odobrena drafta → sustav pita: "Omogućiti automatsko slanje?"
+
+### Manual Override — uvijek vidljiv
+
+Na svakoj AI akciji postoji "Uradi ručno" — ne sakriva se ni nakon 100 AI iteracija.
+
+### "Certified by BORG" — ispravna implementacija
+
+Ne ide na PDF. Ide na revizijski trag iza dokumenta — klikabilni badge koji otvara:
+
+    PDV stopa: 25% → Izvor: NN 35/2026, na snazi 01.01.2026 ✓
+    OIB kupca: verificiran VIES, 2026-04-01 14:23 ✓
+    Iznos: matematički provjeren ✓
+    Fiskalizacija: ZKI abc123, JIR xyz789 ✓
+    AI model: Haiku 4.5 | Odobrio: Marija Brtan | 14:24:31
+
+Ovo je moat. FINA zna e-Račun. FINA ne zna da je PDV iz konkretnog NN broja,
+OIB verificiran u realnom vremenu, i da je Marija odobrila u 14:24:31.
+
+### Etički lock-in → lojalnost
+
+Jedan gumb: "Izvezi sve podatke" (CSV/JSON/XML/PDF) — uvijek vidljiv, uvijek funkcionalan.
+Korisnik ostaje jer mu je dobro — ne jer nema kamo.
+
+### Zaključna filozofija
+
+Cilj: "Augmented Intelligence" — korisnik ima super-moći ali razumije vlastito poslovanje.
+Kad LIMIT Connect padne (a jednom će), korisnik mora znati poslati račun ručno.
+
+---
+Autor analize: CC Claude Opus 4.6 (Sonnet) + Haiku review
+Vanjski input: Ivan Brtan — poslovni i pravni kontekst
+Datum: 2026-04-01
