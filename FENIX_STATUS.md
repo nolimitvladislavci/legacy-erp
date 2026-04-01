@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
-# Zadnje azuriranje: 2026-04-01 — CC Code Opus (MCP SSE fix)
-# Git HEAD: 3cab19ab
+# Zadnje azuriranje: 2026-04-01 — Sonnet (Korpaš ekosustav)
+# Git HEAD: 5c4951d4
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -24,6 +24,22 @@
 
 ---
 
+
+
+## ★ DEPLOYAN DANAS (01.04.2026) — Sonnet direktno
+
+| Što | Commit | Opis |
+|-----|--------|------|
+| Korpaš Grupa HUB | 5c4951d4 | landing_korpas.html → hub sa 4 kartice, premium dark green/gold dizajn |
+| KorpasTermin model | 5c4951d4 | Booking model + migracija 0008, Django admin, WA notif Kruljac Ivica |
+| KorpasRezervacija model | 5c4951d4 | Široki Šor rezervacije (stol/sala/kušaonica) |
+| NoLimitPartner model | 5c4951d4 | Partner prijave za No Limit / AirCash mrežu |
+| /korpas/termini/ | 5c4951d4 | Online booking forma, datum picker, WA notif |
+| /korpas/sirokisor/ | 5c4951d4 | Široki Šor — restoran/kušaonica/sala do 50/sobe uskoro |
+| /korpas/opg-kruljac/ | 5c4951d4 | OPG farma + sir + OPG Burza CTA (/pricing/?profile=opg) |
+| No Limit AirCash sekcija | 5c4951d4 | Manifesto "Gotovina nije zastarjela" + partner forma + status badge |
+| /cro-validator/ redirect | 5c4951d4 | Alias → /validator/ (za medije i PC Chip) |
+| /no-limit/partner/ POST | 5c4951d4 | Partner prijava endpoint + WA notif |
 
 ## ★ DEPLOYAN DANAS (27.03.2026) — CC Code Opus sesija
 
