@@ -256,7 +256,9 @@ const PROFILES = {
     features:{'starter':['Fakturiranje + fiskalizacija','Evidencija stoke + zdravstveni kartoni','Vet portal','Burza OPG-ova + sir online','eRačun HR'],'rental-starter':['Sve iz Starter','Sobe + eVisitor prijava','Kafić i kušaonica POS','5 objekata'],'professional':['Sve iz Rental','Robot muzač API','AI ime + PDF rodovnik goluba','Webshop sira + online narudžbe']}}
 };
 
+var currentProfile='';
 function selectProfile(key) {
+  currentProfile=key;
   document.querySelectorAll('.profile-btn').forEach(b=>b.classList.remove('active'));
   const btn=document.querySelector('[data-profile="'+key+'"]');
   if(btn)btn.classList.add('active');
@@ -290,7 +292,7 @@ function selectProfile(key) {
       '</div>'+
       '<div class="plan-divider"></div>'+
       '<ul class="plan-features">'+features.map(function(f){return'<li>'+f+'</li>';}).join('')+'</ul>'+
-      '<a href="/register/?plan='+slug+'" class="btn-plan '+(isRec?'btn-gold':isFree?'btn-green':'btn-outline')+'">'+
+      '<a href="/register/?plan='+slug+'&profile='+currentProfile+'" class="btn-plan '+(isRec?'btn-gold':isFree?'btn-green':'btn-outline')+'">'+
         (isFree?'<i class="fas fa-rocket"></i> Kreni besplatno':isRec?'<i class="fas fa-star"></i> Odaberi':'Odaberi plan')+
       '</a>';
     grid.appendChild(card);

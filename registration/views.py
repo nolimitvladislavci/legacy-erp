@@ -206,9 +206,19 @@ def register_step2_combined(request):
 
     company_data = request.session.get("reg_company", {})
     user_data = request.session.get("reg_user", {})
+    # Pre-fill industry from pricing profile
+    profile = request.session.get("reg_profile", "")
+    PROFILE_INDUSTRY = {
+        "obrtnik": "services", "udruga": "nonprofit", "rental": "services",
+        "firma": "services", "racunovodja": "services", "gastro": "gastro",
+        "opg": "agriculture",
+    }
+    if profile and not company_data.get("industry"):
+        company_data["industry"] = PROFILE_INDUSTRY.get(profile, "other")
     return render(request, "registration/step2_combined.html", {
         "step": 2, "company": company_data, "user": user_data,
         "errors": {}, "industries": INDUSTRY_CHOICES,
+        "profile": profile,
     })
 
 
@@ -283,6 +293,10 @@ def register_step1(request):
     plan_param = request.GET.get("plan", "")
     if plan_param and plans.filter(slug=plan_param).exists():
         request.session["reg_plan"] = plan_param
+        # Profile from pricing page (obrtnik, udruga, gastro, etc.)
+        profile_param = request.GET.get("profile", "")
+        if profile_param:
+            request.session["reg_profile"] = profile_param
         source = request.GET.get("source", "")
         if source:
             request.session["reg_source"] = source
@@ -531,7 +545,7 @@ def register_step4(request):
                 subscription.save(update_fields=["modules_override"])
 
             # Cleanup session
-            for key in ["reg_plan", "reg_company", "reg_user", "reg_password", "reg_promo_code", "reg_source", "reg_invite_code", "reg_invite_umbrella", "reg_invite_relation", "reg_invite_modules", "reg_invite_free_months"]:
+            for key in ["reg_plan", "reg_company", "reg_user", "reg_password", "reg_promo_code", "reg_source", "reg_profile", "reg_invite_code", "reg_invite_umbrella", "reg_invite_relation", "reg_invite_modules", "reg_invite_free_months"]:
                 request.session.pop(key, None)
 
             # Login and redirect
