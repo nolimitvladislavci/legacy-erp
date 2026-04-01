@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KUD Dukat Vladislavci — Tradicija · Glazba · Zajednica</title>
+<meta name="description" content="Kulturno-umjetničko društvo Dukat Vladislavci — folklor, tamburaška škola, nastupi, članstvo.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--dark:#0a0a14;--accent:#c9a84c;--blue:#2563eb;--muted:#8a8a9a;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:#f0f0f0}
+a{text-decoration:none;color:var(--accent)}
+.back{display:inline-flex;align-items:center;gap:.5rem;padding:1rem 1.5rem;font-size:.82rem;color:rgba(255,255,255,.4)}
+
+.hero{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5rem 1.5rem 3rem;position:relative;overflow:hidden;background:linear-gradient(160deg,#0a0a14 0%,#14102a 50%,#0a0a14 100%)}
+.hero-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(37,99,235,.15) 0%,transparent 70%);pointer-events:none}
+.hero-content{position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);padding:.35rem 1rem;border-radius:20px;font-size:.72rem;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
+.hero h1{font-size:clamp(2.5rem,7vw,4.5rem);font-weight:900;letter-spacing:-1px;margin-bottom:.5rem}
+.hero h1 span{color:var(--accent)}
+.hero-tagline{font-size:1.05rem;color:rgba(255,255,255,.5);font-style:italic;margin-bottom:1.5rem}
+
+.section{padding:4rem 1.5rem;max-width:960px;margin:0 auto}
+.section-label{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:3px;margin-bottom:.6rem}
+.section h2{font-size:1.8rem;font-weight:800;margin-bottom:.5rem}
+.section-sub{font-size:.9rem;color:rgba(255,255,255,.5);margin-bottom:2rem;line-height:1.6}
+
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.offer-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:all .2s}
+.offer-card:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04)}
+.offer-card .icon{font-size:2rem;margin-bottom:.75rem}
+.offer-card h3{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+.offer-card p{font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.6}
+
+.pipeline{background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.15);border-radius:16px;padding:2rem;margin:2rem 0}
+.pipeline h3{color:var(--blue);margin-bottom:1rem;font-size:1.2rem}
+.pipeline-steps{display:flex;gap:0;align-items:center;flex-wrap:wrap;justify-content:center}
+.pipeline-step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;flex:1;min-width:140px}
+.pipeline-step .emoji{font-size:1.8rem;display:block;margin-bottom:.5rem}
+.pipeline-step strong{display:block;font-size:.85rem}
+.pipeline-step small{color:var(--muted);font-size:.7rem}
+.pipeline-arrow{color:var(--accent);font-size:1.5rem;padding:0 .3rem}
+
+.cta-section{text-align:center;padding:3rem 1.5rem}
+.btn-cta{display:inline-flex;align-items:center;gap:.6rem;padding:1rem 2rem;background:linear-gradient(135deg,var(--accent),#a08030);border:none;border-radius:12px;color:#1a1a1a;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,168,76,.4)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;margin:2rem 0}
+.stat{text-align:center;padding:1rem}
+.stat h3{font-size:2rem;color:var(--accent);font-weight:900}
+.stat small{color:var(--muted);font-size:.75rem}
+
+.divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:0}
+footer{border-top:1px solid rgba(255,255,255,.06);padding:2rem 1.5rem;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3)}
+</style>
+</head>
+<body>
+<a href="/korpas/" class="back"><i class="fas fa-arrow-left"></i> Korpaš Grupa</a>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fas fa-music"></i> Tradicija · Glazba · Zajednica</div>
+    <h1>KUD<br><span>DUKAT</span></h1>
+    <p class="hero-tagline">Vladislavci — od 1947. čuvamo slavonsku tradiciju</p>
+    <div class="stats">
+      <div class="stat"><h3>77</h3><small>godina tradicije</small></div>
+      <div class="stat"><h3>11</h3><small>instrumenata</small></div>
+      <div class="stat"><h3>8</h3><small>učenika glazbene</small></div>
+    </div>
+  </div>
+</div>
+
+<section class="section">
+  <p class="section-label">Programi</p>
+  <h2>Što nudimo</h2>
+  <p class="section-sub">Tri programa za sve generacije — od najmlađih iz vrtića do odraslih polaznika.</p>
+
+  <div class="offer-grid">
+    <div class="offer-card">
+      <div class="icon">🎵</div>
+      <h3>Glazbena škola</h3>
+      <p>Tambura (5 vrsta), harmonika, gitara, klavir, pjevanje, solfeggio. Individualni sati 45 min, 15€/sat. PDV oslobođeno.</p>
+    </div>
+    <div class="offer-card">
+      <div class="icon">💃</div>
+      <h3>Folklor — ples</h3>
+      <p>Slavonski i šokački plesovi. Grupna nastava, probe ansambla. Nastupi na lokalnim i regionalnim smotrama.</p>
+    </div>
+    <div class="offer-card">
+      <div class="icon">🎭</div>
+      <h3>Nastupi i eventi</h3>
+      <p>Organizacija kulturnih događanja, fešti, priredbi. Najam prostora i opreme. ZAMP prijave automatski.</p>
+    </div>
+    <div class="offer-card">
+      <div class="icon">👶</div>
+      <h3>Vrtić → KUD pipeline</h3>
+      <p>Djeca iz vladislavačkog vrtića dobivaju besplatnu probu instrumenta. Najraniji talent scouting u Slavoniji.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section">
+  <p class="section-label">Talent pipeline</p>
+  <h2>Od vrtića do pozornice</h2>
+  <p class="section-sub">Jedinstven program koji prati dijete od prvih koraka do prvog nastupa.</p>
+
+  <div class="pipeline">
+    <div class="pipeline-steps">
+      <div class="pipeline-step">
+        <span class="emoji">🏫</span>
+        <strong>Vrtić</strong>
+        <small>3-6 godina<br>Ritam + igra</small>
+      </div>
+      <span class="pipeline-arrow">→</span>
+      <div class="pipeline-step">
+        <span class="emoji">🎵</span>
+        <strong>Pripremni</strong>
+        <small>6-7 godina<br>Solfeggio + probe</small>
+      </div>
+      <span class="pipeline-arrow">→</span>
+      <div class="pipeline-step">
+        <span class="emoji">🎸</span>
+        <strong>Osnovna</strong>
+        <small>7-10 godina<br>Instrument + ansambl</small>
+      </div>
+      <span class="pipeline-arrow">→</span>
+      <div class="pipeline-step">
+        <span class="emoji">🎤</span>
+        <strong>Srednja</strong>
+        <small>10-14 godina<br>Solo + nastupi</small>
+      </div>
+      <span class="pipeline-arrow">→</span>
+      <div class="pipeline-step">
+        <span class="emoji">🌟</span>
+        <strong>Napredna</strong>
+        <small>14+ godina<br>Smotre + natjecanja</small>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-sub" style="text-align:center;margin-top:1rem">
+    <strong>Kako funkcionira:</strong> Odgajateljica u vrtiću primijeti da dijete ima osjećaj za ritam →
+    roditelj dobije pozivnicu za besplatnu probu u KUD-u → dijete bira instrument →
+    automatski upis u glazbenu školu → sustav prati napredak, bilježi sate, fakturira roditelju.
+  </p>
+</section>
+
+<hr class="divider">
+
+<section class="section">
+  <p class="section-label">Instrumenti</p>
+  <h2>Tamburaška tradicija + moderno</h2>
+  <div class="offer-grid" style="margin-top:1rem">
+    <div class="offer-card"><div class="icon">🎻</div><h3>Tambura prim</h3><p>Melodija ansambla. Najtraženiji instrument u Slavoniji.</p></div>
+    <div class="offer-card"><div class="icon">🎸</div><h3>Tambura bisernica</h3><p>Virtuozni solistički instrument. Za naprednije učenike.</p></div>
+    <div class="offer-card"><div class="icon">🪗</div><h3>Harmonika</h3><p>Od narodne do klasike. Popularan izbor za sve uzraste.</p></div>
+    <div class="offer-card"><div class="icon">🎹</div><h3>Klavir</h3><p>Osnova glazbenog obrazovanja. Idealan prvi instrument.</p></div>
+    <div class="offer-card"><div class="icon">🎤</div><h3>Pjevanje</h3><p>Solo i zbor. Tehnika disanja, intonacija, nastup.</p></div>
+    <div class="offer-card"><div class="icon">🎼</div><h3>Solfeggio</h3><p>Glazbena teorija. Obavezno za sve učenike 1. godine.</p></div>
+  </div>
+</section>
+
+<div class="cta-section">
+  <h2 style="margin-bottom:1rem">Upiši dijete ili se upiši sam</h2>
+  <p style="color:var(--muted);margin-bottom:1.5rem">Besplatna proba za nove polaznike. Bez obveze.</p>
+  <a href="tel:+385913912621" class="btn-cta"><i class="fas fa-phone"></i> Nazovi +385 91 391 2621</a>
+</div>
+
+<footer>
+  <a href="/korpas/">← Korpaš Grupa</a> · Vladislavci, Osječko-baranjska županija · © 2026 KUD Dukat
+</footer>
+</body>
+</html>
