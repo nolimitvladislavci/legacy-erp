@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
 # Zadnje azuriranje: 2026-04-01 — Sonnet (Korpaš ekosustav)
-# Git HEAD: ea0027d6
+# Git HEAD: 74c7f4b4
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -555,3 +555,4 @@ Podsjetnik: ~25.04.2026.
 | F2_BORG_AKTIVACIJA | 5fb20ab0 | ✅ DONE — KG 1375 matcheva, 8.7M EUR, NN→adaptation signal |
 | F3_BORG_INTELIGENCIJA | 17fac763 | ✅ DONE — 368 intel results, 59 KB articles, 150 anomalies |
 | F4_BORG_PERFEKCIJA | ea0027d6 | ✅ DONE — predictions, self-heal, 93 tests PASS |
+| BORG_OPS_TASKBOARD | 74c7f4b4 | ✅ DONE — BorgTask model, 42 auto-tasks, 6 beat schedules |
