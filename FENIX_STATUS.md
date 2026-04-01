@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
-# Zadnje azuriranje: 2026-03-27 — CC Code Opus (POS Joker sesija)
-# Git HEAD: 4fc8b0ba
+# Zadnje azuriranje: 2026-04-01 — CC Code Opus (MCP SSE fix)
+# Git HEAD: 7e6f45ef
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -527,3 +527,10 @@ CC Code je svjesno ostavio whitelist provjeru umjesto transition_to() za kreiran
 Plaćeno: 01.04.2026. | Ističe: ~01.05.2026.
 Automatska naplata: NIJE uključena
 Podsjetnik: ~25.04.2026.
+
+## ★ DEPLOYAN DANAS (01.04.2026) — CC Code Opus sesija
+
+| Što | Commit | Opis |
+|-----|--------|------|
+| CC_TASK_MCP_SSE_FIX | 7e6f45ef | ✅ DONE — nginx SSE proxy fix, standalone FastMCP |
+
