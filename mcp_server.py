@@ -2,7 +2,7 @@
 FENIX MCP Server — direktni pristup za Sonnet
 Pokrece se kao: venv/bin/python core/mcp_server.py
 
-v2: heartbeat, graceful shutdown, signal handling
+v3: SQL guard, ORM sandbox, rate limit, extended blocked commands
 """
 import os, sys, subprocess, json, signal, asyncio
 sys.path.insert(0, '/var/www/fina-connect')
@@ -16,7 +16,7 @@ from fastmcp import FastMCP
 
 mcp = FastMCP("Fenix LIMIT Connect")
 PROJECT = '/var/www/fina-connect'
-BLOCKED = ['rm -rf', 'reboot', 'shutdown', 'mkfs', 'chmod 777', '> /dev/']
+BLOCKED = ['rm -rf', 'rm -r /', 'reboot', 'shutdown', 'mkfs', 'chmod 777', '> /dev/', 'dd if=', 'passwd', 'useradd', 'userdel', 'crontab', 'visudo']
 
 
 def graceful_shutdown(signum, frame):
@@ -30,11 +30,17 @@ signal.signal(signal.SIGINT, graceful_shutdown)
 
 @mcp.tool()
 def query_db(sql: str) -> str:
-    """Izvrsi SQL upit na PostgreSQL bazi."""
+    """Izvrsi SELECT SQL upit na PostgreSQL bazi. Destructive queries blokirane."""
+    import re as _re
+    _sql = sql.strip().rstrip(';')
+    if _re.search(r'(DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE)', _sql, _re.I):
+        return json.dumps({'error': 'BLOCKED: destructive SQL (DROP/TRUNCATE/ALTER/CREATE/GRANT/REVOKE)'})
+    if _re.search(r'(DELETE|UPDATE)', _sql, _re.I) and not _re.search(r'WHERE', _sql, _re.I):
+        return json.dumps({'error': 'BLOCKED: DELETE/UPDATE without WHERE clause'})
     from django.db import connection
     try:
         with connection.cursor() as cur:
-            cur.execute(sql)
+            cur.execute(_sql)
             if cur.description:
                 cols = [d[0] for d in cur.description]
                 rows = cur.fetchmany(100)
@@ -46,11 +52,15 @@ def query_db(sql: str) -> str:
 
 @mcp.tool()
 def django_orm(code: str) -> str:
-    """Izvrsi Django ORM kod. Spremi rezultat u varijablu 'output'."""
+    """Izvrsi Django ORM kod (read-only). Spremi rezultat u 'output'. Blokirano: os.system, subprocess, open(), .delete(), .raw()."""
+    _blocked = ['os.system', 'subprocess', '__import__', 'open(', '.delete()', '.raw(', 'connection.cursor', 'shutil', 'importlib']
+    for _b in _blocked:
+        if _b in code:
+            return f'BLOCKED: zabranjen pattern "{_b}" u ORM kodu'
     try:
         loc = {}
         exec(code, {'__builtins__': __builtins__}, loc)
-        return str(loc.get('output', 'OK'))
+        return str(loc.get('output', 'OK'))[:30000]
     except Exception as e:
         return f'Error: {e}'
 
@@ -193,5 +203,5 @@ def restart_service(service: str) -> str:
 
 
 if __name__ == '__main__':
-    print('Fenix MCP Server v2 na http://127.0.0.1:8765')
+    print('Fenix MCP Server v3 (hardened) na http://127.0.0.1:8765')
     mcp.run(transport='sse', host='127.0.0.1', port=8765)

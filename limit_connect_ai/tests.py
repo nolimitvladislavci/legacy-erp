@@ -35,20 +35,23 @@ class BORGTestBase(TestCase):
             business_type='doo',
             address='Testna 1',
             city='Zagreb',
+            has_signed_tc_consent=True,
         )
         cls.user = User.objects.create_user(
             username='testborg', password='BorgTest2026!',
             first_name='Test', last_name='Borg',
         )
-        UserProfile.objects.filter(user=cls.user).update(
-            company=cls.company, role='company_admin',
+        UserProfile.objects.get_or_create(
+            user=cls.user,
+            defaults={
+                'company': cls.company,
+                'role': 'company_admin',
+                'totp_enabled': True,
+            },
         )
-        # Ako UserProfile ne postoji (auto-create nije upaljen)
-        if not hasattr(cls.user, 'profile'):
-            UserProfile.objects.get_or_create(
-                user=cls.user,
-                defaults={'company': cls.company, 'role': 'company_admin'},
-            )
+        UserProfile.objects.filter(user=cls.user).update(
+            company=cls.company, role='company_admin', totp_enabled=True,
+        )
 
         cls.tax_25 = TaxRate.objects.create(
             country='HR', name='PDV 25%', rate=Decimal('25.00'),

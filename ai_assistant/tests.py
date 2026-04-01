@@ -29,7 +29,7 @@ def make_company(oib="77766655543"):
     from companies.models import Company
     return Company.objects.get_or_create(
         oib=oib,
-        defaults=dict(name="AI Test GmbH", country="DE",
+        defaults=dict(name="AI Test GmbH", country="DE", has_signed_tc_consent=True,
                       city="Berlin", zip_code="10115"),
     )[0]
 
@@ -41,7 +41,7 @@ def make_user(company, username="ai_user"):
         email=f"{username}@ai-test.de",
         password="TestPass2026!",
     )
-    UserProfile.objects.create(user=user, company=company, role="company_admin")
+    UserProfile.objects.create(user=user, company=company, role="company_admin", totp_enabled=True)
     return user
 
 

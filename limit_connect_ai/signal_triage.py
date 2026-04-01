@@ -122,3 +122,94 @@ def apply_triage(signal, triage_result):
     ])
 
     logger.info("Applied triage to signal %s: P%s → %s", signal.id, signal.priority, signal.assigned_to)
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DEDUP + AUTO-RESOLVE (F1.3)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Known 404s that should be auto-resolved
+KNOWN_404_PATTERNS = [
+    "/push/vapid-public-key/",
+    "/favicon.ico",
+    "/robots.txt",
+    "/apple-touch-icon",
+    "/.well-known/",
+    "/wp-admin",
+    "/wp-login",
+    "/xmlrpc.php",
+    "/phpmyadmin",
+]
+
+
+def auto_resolve_known(signal):
+    """Auto-resolve signals for known benign 404s and bot probes."""
+    msg = (signal.message or "").lower()
+    url = (signal.page_url or "").lower()
+
+    for pattern in KNOWN_404_PATTERNS:
+        if pattern.lower() in msg or pattern.lower() in url:
+            signal.status = "resolved"
+            signal.priority = 4
+            signal.triage_note = json.dumps({
+                "classification": "auto_resolved",
+                "dev_summary": f"Known 404 pattern: {pattern}",
+                "user_response": "",
+                "auto": True,
+            }, ensure_ascii=False)
+            signal.save(update_fields=["status", "priority", "triage_note"])
+            logger.info("Auto-resolved signal %s: known 404 %s", signal.id, pattern)
+            return True
+    return False
+
+
+def dedup_signals(hours=24):
+    """
+    Dedupliciraj identicne signale u zadnjih N sati.
+    Grupira po (message, page_url) i ostavlja samo najnoviji.
+    """
+    from limit_connect_ai.models_signal import FenixSignal
+    from django.db.models import Count, Max
+    from django.utils import timezone
+
+    since = timezone.now() - timezone.timedelta(hours=hours)
+    signals = FenixSignal.objects.filter(created_at__gte=since)
+
+    dupes = (
+        signals
+        .values('message', 'page_url')
+        .annotate(cnt=Count('id'), latest_time=Max('created_at'))
+        .filter(cnt__gt=1)
+        .order_by('-cnt')
+    )
+
+    total_deduped = 0
+    for group in dupes:
+        matching = signals.filter(
+            message=group['message'],
+            page_url=group['page_url'],
+        ).order_by('-created_at')
+        
+        # Keep the first (newest), mark the rest
+        keep_ids = [matching.first().id] if matching.exists() else []
+        older = matching.exclude(id__in=keep_ids)
+        
+        count = older.filter(status='new').update(status='resolved')
+        total_deduped += count
+
+    logger.info('Dedup: %d signals resolved as duplicates', total_deduped)
+    return total_deduped
+
+
+def batch_auto_resolve():
+    """Auto-resolve all known 404s that are still new."""
+    from limit_connect_ai.models_signal import FenixSignal
+
+    new_signals = FenixSignal.objects.filter(status="new")
+    resolved = 0
+    for signal in new_signals.iterator():
+        if auto_resolve_known(signal):
+            resolved += 1
+    logger.info("Batch auto-resolve: %d signals resolved", resolved)
+    return resolved

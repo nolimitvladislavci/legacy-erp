@@ -98,3 +98,16 @@ def daily_signal_digest():
 
     logger.info("Signal digest: %d signals (P1-P2: %d)", total, critical)
     return digest
+
+
+
+@shared_task
+def signal_dedup_and_resolve():
+    """Periodic: auto-resolve known 404s + dedup identical signals."""
+    from limit_connect_ai.signal_triage import batch_auto_resolve, dedup_signals
+
+    resolved = batch_auto_resolve()
+    deduped = dedup_signals(hours=24)
+
+    logger.info("Signal cleanup: auto_resolved=%d, deduped=%d", resolved, deduped)
+    return {"auto_resolved": resolved, "deduped": deduped}
