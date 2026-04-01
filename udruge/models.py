@@ -2657,3 +2657,153 @@ class FlockMortality(models.Model):
 
     def __str__(self):
         return f'{self.flock.naziv} — {self.datum}: {self.broj_uginulih} uginulih'
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GLAZBENA ŠKOLA
+# ═══════════════════════════════════════════════════════════════════════════
+
+class GlazbenaSkola(models.Model):
+    """Konfiguracija glazbene škole unutar udruge/kompanije."""
+    VRSTA_CHOICES = [
+        ('privatna',  'Privatna glazbena škola'),
+        ('udruga',    'Glazbena škola pri udruzi (KUD)'),
+        ('opcinska',  'Općinska / gradska škola'),
+        ('studij',    'Privatni studio / instruktor'),
+    ]
+    company = models.OneToOneField(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='glazbena_skola'
+    )
+    vrsta = models.CharField(max_length=20, choices=VRSTA_CHOICES, default='udruga')
+    naziv_skole = models.CharField(max_length=200, blank=True)
+    instrumenti = models.JSONField(
+        default=list, blank=True,
+        help_text='["Klavir", "Gitara", "Violina", "Pjevanje", "Solfeggio"]'
+    )
+    skolska_godina_start = models.DateField(null=True, blank=True)
+    skolska_godina_end = models.DateField(null=True, blank=True)
+    fakturira_roditelje = models.BooleanField(default=True)
+    pdv_na_nastavu = models.BooleanField(
+        default=False,
+        help_text='Glazbeno obrazovanje je PDV oslobođeno (čl.40 ZPDV) ako je u registru'
+    )
+    objects = CompanyManager()
+
+    class Meta:
+        verbose_name = 'Glazbena škola'
+
+    def __str__(self):
+        return f"{self.company.name} — glazbena škola"
+
+
+class GlazbeniUcenik(models.Model):
+    """Učenik glazbene škole — može biti i Clan udruge."""
+    RAZINA_CHOICES = [
+        ('pripremni',    'Pripremni tečaj'),
+        ('osnovna_1_3',  'Osnovna razina (1-3 god.)'),
+        ('srednja_4_6',  'Srednja razina (4-6 god.)'),
+        ('napredna',     'Napredna razina'),
+        ('odrasli',      'Odrasli polaznik'),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='glazbeni_ucenici'
+    )
+    clan = models.OneToOneField(
+        Clan, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='glazbeni_ucenik'
+    )
+    ime = models.CharField(max_length=100)
+    prezime = models.CharField(max_length=100)
+    datum_rodenja = models.DateField(null=True, blank=True)
+    oib_roditelja = models.CharField(max_length=11, blank=True)
+    kontakt_roditelj = models.CharField(max_length=200, blank=True)
+    telefon = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+
+    instrument = models.CharField(max_length=100, blank=True,
+        help_text='Primarni instrument / predmet')
+    razina = models.CharField(max_length=20, choices=RAZINA_CHOICES, default='osnovna_1_3')
+    instruktor = models.ForeignKey(
+        Clan, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='ucenici'
+    )
+    datum_upisa = models.DateField(auto_now_add=True)
+    je_aktivan = models.BooleanField(default=True)
+    napomene = models.TextField(blank=True)
+
+    objects = CompanyManager()
+
+    class Meta:
+        db_table = 'udruge_glazbeni_ucenik'
+        ordering = ['prezime', 'ime']
+        verbose_name = 'Glazbeni učenik'
+        verbose_name_plural = 'Glazbeni učenici'
+
+    def __str__(self):
+        return f"{self.prezime} {self.ime} ({self.instrument or '—'})"
+
+    @property
+    def puno_ime(self):
+        return f"{self.ime} {self.prezime}"
+
+
+class SatGlazbene(models.Model):
+    """Evidencija održanih sati — napredak + prisutnost."""
+    VRSTA_SATA = [
+        ('individualni', 'Individualni sat'),
+        ('grupni',       'Grupna nastava'),
+        ('nastup',       'Nastup / Ispit'),
+        ('proba',        'Proba ansambla'),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='sati_glazbene'
+    )
+    ucenik = models.ForeignKey(
+        GlazbeniUcenik, on_delete=models.CASCADE,
+        related_name='sati'
+    )
+    instruktor = models.ForeignKey(
+        Clan, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='odrzani_sati'
+    )
+    datum = models.DateField()
+    pocetak = models.TimeField()
+    trajanje_min = models.PositiveSmallIntegerField(default=45)
+    vrsta = models.CharField(max_length=20, choices=VRSTA_SATA, default='individualni')
+    je_odrzan = models.BooleanField(default=True)
+    razlog_izostanka = models.CharField(max_length=200, blank=True)
+
+    gradivo = models.CharField(max_length=500, blank=True,
+        help_text='Što je rađeno: ljestvice, komad, tehnika...')
+    biljeska_instruktora = models.TextField(blank=True)
+    ocjena = models.PositiveSmallIntegerField(null=True, blank=True,
+        help_text='1-5, opcijalno')
+
+    fakturiran = models.BooleanField(default=False)
+    invoice_item = models.ForeignKey(
+        'invoicing.InvoiceItem', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='glazbeni_sati'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = CompanyManager()
+
+    class Meta:
+        db_table = 'udruge_sat_glazbene'
+        ordering = ['-datum', '-pocetak']
+        verbose_name = 'Sat glazbene škole'
+        verbose_name_plural = 'Sati glazbene škole'
+
+    def __str__(self):
+        return (
+            f"{self.ucenik.puno_ime} — {self.datum} "
+            f"({self.trajanje_min}min, {self.get_vrsta_display()})"
+        )

@@ -4214,3 +4214,113 @@ def golubar_ai_prsten(request):
     except Exception as e:
         logger.error("golubar_ai_prsten error: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)[:200]}, status=500)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GLAZBENA ŠKOLA
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def glazbena_skola_dashboard(request):
+    company = get_user_company(request)
+    from .models import GlazbenaSkola, GlazbeniUcenik, SatGlazbene
+    from django.db.models import Count
+    today = timezone.now().date()
+
+    try:
+        skola = GlazbenaSkola.objects.get(company=company)
+    except GlazbenaSkola.DoesNotExist:
+        skola = GlazbenaSkola.objects.create(company=company)
+
+    ucenici = GlazbeniUcenik.objects.filter(company=company, je_aktivan=True)
+    sati_ovaj_tjedan = SatGlazbene.objects.filter(
+        company=company,
+        datum__gte=today - timezone.timedelta(days=7),
+        je_odrzan=True
+    )
+    sati_nefakturirani = SatGlazbene.objects.filter(
+        company=company, je_odrzan=True, fakturiran=False
+    )
+
+    ctx = {
+        'skola': skola,
+        'ucenici_count': ucenici.count(),
+        'ucenici_po_instrumentu': ucenici.values('instrument').annotate(
+            n=Count('id')
+        ).order_by('-n')[:8],
+        'sati_tjedan': sati_ovaj_tjedan.count(),
+        'sati_nefakturirani': sati_nefakturirani.count(),
+        'vrijednost_nefakturirana': sati_nefakturirani.count() * 15,
+        'ucenici_lista': ucenici.select_related('instruktor')[:20],
+        'nedavni_sati': SatGlazbene.objects.filter(
+            company=company
+        ).select_related('ucenik', 'instruktor').order_by('-datum', '-pocetak')[:10],
+    }
+    return render(request, 'udruge/glazbena_skola_dashboard.html', ctx)
+
+
+@login_required
+def glazbena_skola_fakturiraj(request):
+    """Bulk fakturiranje nefakturiranih sati."""
+    company = get_user_company(request)
+    from .models import GlazbeniUcenik, SatGlazbene
+    from invoicing.models import Invoice, InvoiceItem
+    from decimal import Decimal
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+
+    ucenik_id = request.POST.get('ucenik_id')
+    cijena_po_satu = Decimal(request.POST.get('cijena', '15'))
+
+    ucenik = get_object_or_404(GlazbeniUcenik, id=ucenik_id, company=company)
+    sati = SatGlazbene.objects.filter(
+        company=company, ucenik=ucenik,
+        je_odrzan=True, fakturiran=False
+    )
+
+    if not sati.exists():
+        return JsonResponse({'ok': False, 'msg': 'Nema nefakturiranih sati'})
+
+    invoice = Invoice.objects.create(
+        company=company,
+        client_name=ucenik.kontakt_roditelj or ucenik.puno_ime,
+        client_oib=ucenik.oib_roditelja or '',
+        date_issued=timezone.now(),
+        date_due=timezone.now() + timezone.timedelta(days=15),
+        status='DRAFT',
+        doctype='R',
+        note=f'Nastava glazbe — {ucenik.puno_ime}, {sati.count()} sati',
+    )
+
+    pdv = Decimal('0')
+    try:
+        if ucenik.company.glazbena_skola.pdv_na_nastavu:
+            pdv = Decimal('25')
+    except Exception:
+        pass
+
+    count = 0
+    for sat in sati:
+        item = InvoiceItem.objects.create(
+            invoice=invoice,
+            description=f'Sat glazbene nastave — {sat.datum} ({sat.trajanje_min}min)',
+            quantity=1,
+            unit_price=cijena_po_satu,
+            tax_rate=pdv,
+            total_price=cijena_po_satu,
+        )
+        sat.fakturiran = True
+        sat.invoice_item = item
+        sat.save(update_fields=['fakturiran', 'invoice_item'])
+        count += 1
+
+    invoice.recalculate_totals()
+    invoice.save()
+
+    return JsonResponse({
+        'ok': True,
+        'invoice_number': invoice.number,
+        'total': float(invoice.total),
+        'sati_count': count,
+    })

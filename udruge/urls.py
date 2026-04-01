@@ -223,4 +223,8 @@ urlpatterns = [
 
     # Burza Bridge — "Ponudi na tržnicu"
     path('bridge/publish/', views.bridge_publish, name='bridge_publish'),
+
+    # Glazbena škola
+    path('glazbena-skola/', views.glazbena_skola_dashboard, name='glazbena_skola_dashboard'),
+    path('glazbena-skola/fakturiraj/', views.glazbena_skola_fakturiraj, name='glazbena_fakturiraj'),
 ]

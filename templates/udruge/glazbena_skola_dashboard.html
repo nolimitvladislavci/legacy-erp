@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Glazbena škola{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="fas fa-music me-2"></i>Glazbena škola</h4>
+    <span class="badge bg-secondary">{{ skola.get_vrsta_display }}</span>
+</div>
+
+<!-- Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>{{ ucenici_count }}</h3>
+                <small class="text-muted">Aktivnih učenika</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>{{ sati_tjedan }}</h3>
+                <small class="text-muted">Sati ovaj tjedan</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="{% if sati_nefakturirani > 0 %}text-warning{% endif %}">{{ sati_nefakturirani }}</h3>
+                <small class="text-muted">Nefakturirani sati</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="{% if vrijednost_nefakturirana > 0 %}text-warning{% endif %}">{{ vrijednost_nefakturirana }} &euro;</h3>
+                <small class="text-muted">Za fakturirati</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Učenici po instrumentu -->
+{% if ucenici_po_instrumentu %}
+<div class="card mb-4">
+    <div class="card-header"><h6 class="mb-0">Učenici po instrumentu</h6></div>
+    <div class="card-body d-flex flex-wrap gap-2">
+        {% for item in ucenici_po_instrumentu %}
+        <span class="badge bg-primary" style="font-size:.85rem">
+            {{ item.instrument|default:"Nije odabrano" }} <span class="badge bg-light text-dark ms-1">{{ item.n }}</span>
+        </span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Učenici tablica -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between">
+        <h6 class="mb-0">Učenici</h6>
+        <a href="{% url 'udruge:clan_create' %}" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus me-1"></i>Novi učenik
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Ime i prezime</th>
+                    <th>Instrument</th>
+                    <th>Razina</th>
+                    <th>Instruktor</th>
+                    <th style="width:120px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in ucenici_lista %}
+                <tr>
+                    <td><strong>{{ u.puno_ime }}</strong></td>
+                    <td>{{ u.instrument|default:"-" }}</td>
+                    <td><span class="badge bg-secondary">{{ u.get_razina_display }}</span></td>
+                    <td>{{ u.instruktor|default:"-" }}</td>
+                    <td>
+                        {% if sati_nefakturirani > 0 %}
+                        <form method="post" action="{% url 'udruge:glazbena_fakturiraj' %}"
+                              hx-post="{% url 'udruge:glazbena_fakturiraj' %}"
+                              hx-target="#faktura-result"
+                              hx-swap="innerHTML"
+                              style="display:inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="ucenik_id" value="{{ u.pk }}">
+                            <input type="hidden" name="cijena" value="15">
+                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Fakturiraj sate">
+                                <i class="fas fa-file-invoice"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">Nema učenika. Dodajte prvog!</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="faktura-result" class="mb-3"></div>
+
+<!-- Zadnjih 10 sati -->
+{% if nedavni_sati %}
+<div class="card">
+    <div class="card-header"><h6 class="mb-0">Zadnjih 10 sati</h6></div>
+    <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Učenik</th>
+                    <th>Instruktor</th>
+                    <th>Vrsta</th>
+                    <th>Trajanje</th>
+                    <th>Gradivo</th>
+                    <th>Fakt.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in nedavni_sati %}
+                <tr>
+                    <td>{{ s.datum|date:"d.m.Y" }}</td>
+                    <td>{{ s.ucenik.puno_ime }}</td>
+                    <td>{{ s.instruktor|default:"-" }}</td>
+                    <td>{{ s.get_vrsta_display }}</td>
+                    <td>{{ s.trajanje_min }} min</td>
+                    <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.gradivo|default:"-" }}</td>
+                    <td>
+                        {% if s.fakturiran %}
+                        <span class="badge bg-success">Da</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">Ne</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+</div>
+{% endblock %}
