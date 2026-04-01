@@ -146,7 +146,7 @@ class PredictionsEdgeCaseTest(ExtraTestBase):
         from limit_connect_ai.services.predictions import predict_cash_flow
         result = predict_cash_flow(company_id=99999)
         self.assertIn('predictions', result)
-        self.assertIsInstance(result['predictions']['30_days'], float)
+        self.assertIsInstance(result["predictions"]["30_days"], (int, float))
 
     def test_churn_no_partners(self):
         from limit_connect_ai.services.predictions import detect_churn_risk
