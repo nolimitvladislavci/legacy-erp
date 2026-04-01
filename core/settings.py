@@ -1073,3 +1073,12 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=6, minute=0, day_of_month=1),
     },
 })
+
+
+# ── Audit Cleanup — beat schedule ──────────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "cleanup-audit-logs": {
+        "task": "core.tasks.audit_cleanup.cleanup_old_audit_logs",
+        "schedule": crontab(hour=3, minute=0),
+    },
+})
