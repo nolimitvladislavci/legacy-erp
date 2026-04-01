@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
 # Zadnje azuriranje: 2026-04-01 — Sonnet (Korpaš ekosustav)
-# Git HEAD: 5fb20ab0
+# Git HEAD: 17fac763
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -553,3 +553,4 @@ Podsjetnik: ~25.04.2026.
 | BORG_10_PLAN | 3cab19ab | ✅ DONE — 4-fazni plan do 10/10 (bazna ocjena 5.9) |
 | F1_BORG_TEMELJI | 9e3a4ed6 | ✅ DONE — 62/62 PASS, MCP v3, signal dedup 578→53 |
 | F2_BORG_AKTIVACIJA | 5fb20ab0 | ✅ DONE — KG 1375 matcheva, 8.7M EUR, NN→adaptation signal |
+| F3_BORG_INTELIGENCIJA | 17fac763 | ✅ DONE — 368 intel results, 59 KB articles, 150 anomalies |
