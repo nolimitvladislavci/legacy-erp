@@ -185,29 +185,29 @@ def ai_inbox(request):
     # Compute confidence for ALL entries (before confidence filter)
     all_entries = list(qs)
     for e in all_entries:
-        e._confidence_score = _normalize_confidence(e.ai_proposal)
-        e._confidence_level = _confidence_level(e._confidence_score)
-        e._confidence_pct = int(round(e._confidence_score * 100))
+        e.confidence_score = _normalize_confidence(e.ai_proposal)
+        e.confidence_level = _confidence_level(e.confidence_score)
+        e.confidence_pct = int(round(e.confidence_score * 100))
 
     # Confidence counts (before filtering)
     confidence_counts = {
-        'high': sum(1 for e in all_entries if e._confidence_level == 'high'),
-        'medium': sum(1 for e in all_entries if e._confidence_level == 'medium'),
-        'low': sum(1 for e in all_entries if e._confidence_level == 'low'),
+        'high': sum(1 for e in all_entries if e.confidence_level == 'high'),
+        'medium': sum(1 for e in all_entries if e.confidence_level == 'medium'),
+        'low': sum(1 for e in all_entries if e.confidence_level == 'low'),
         'all': len(all_entries),
     }
 
     # Apply confidence filter
     confidence_filter = request.GET.get('confidence', 'all')
     if confidence_filter == 'high':
-        all_entries = [e for e in all_entries if e._confidence_level == 'high']
+        all_entries = [e for e in all_entries if e.confidence_level == 'high']
     elif confidence_filter == 'medium':
-        all_entries = [e for e in all_entries if e._confidence_level == 'medium']
+        all_entries = [e for e in all_entries if e.confidence_level == 'medium']
     elif confidence_filter == 'low':
-        all_entries = [e for e in all_entries if e._confidence_level == 'low']
+        all_entries = [e for e in all_entries if e.confidence_level == 'low']
 
     # Sort by confidence DESC then amount DESC
-    all_entries.sort(key=lambda e: (-e._confidence_score, -float(e.amount or 0)))
+    all_entries.sort(key=lambda e: (-e.confidence_score, -float(e.amount or 0)))
 
     # Stats (from full queryset, not filtered)
     total_pending = confidence_counts['all']
@@ -244,8 +244,8 @@ def ai_inbox(request):
                 'source_type': e.source_type,
                 'ai_proposal': e.ai_proposal,
                 'is_booked': e.is_booked,
-                'confidence_score': e._confidence_score,
-                'confidence_level': e._confidence_level,
+                'confidence_score': e.confidence_score,
+                'confidence_level': e.confidence_level,
             })
         return JsonResponse({'entries': data, 'has_next': has_next, 'page': page, 'total': total_pending})
 

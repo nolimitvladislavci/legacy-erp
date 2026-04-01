@@ -2,7 +2,7 @@
 import datetime
 from decimal import Decimal
 from django.test import TestCase, Client
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from accounts.models import UserProfile
 from companies.models import Company
 from documents.models import (
@@ -11,6 +11,8 @@ from documents.models import (
     OtkupniBlok, OtkupniBlokItem,
     CMR, CMRItem,
 )
+
+User = get_user_model()
 
 
 def _company(name, oib):

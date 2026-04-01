@@ -1,5 +1,5 @@
 """Tests for core.services — dashboard stats unit tests."""
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from core.services import (
@@ -8,6 +8,8 @@ from core.services import (
     start_impersonation,
     stop_impersonation,
 )
+
+User = get_user_model()
 
 
 class TestCompanyDashboardStats(TestCase):

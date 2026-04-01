@@ -137,12 +137,12 @@
             {% endif %}
           </td>
           <td style="padding:.6rem .75rem;text-align:center">
-            {% if e._confidence_level == "high" %}
-              <span title="Visoka sigurnost ({{ e._confidence_pct }}%) — gotovo sigurno tocno" style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e._confidence_pct }}%</span>
-            {% elif e._confidence_level == "medium" %}
-              <span title="Srednja sigurnost ({{ e._confidence_pct }}%) — preporucena provjera" style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e._confidence_pct }}%</span>
-            {% elif e._confidence_level == "low" %}
-              <span title="Niska sigurnost ({{ e._confidence_pct }}%) — obavezno rucno provjeriti" style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e._confidence_pct }}%</span>
+            {% if e.confidence_level == "high" %}
+              <span title="Visoka sigurnost ({{ e.confidence_pct }}%) — gotovo sigurno tocno" style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e.confidence_pct }}%</span>
+            {% elif e.confidence_level == "medium" %}
+              <span title="Srednja sigurnost ({{ e.confidence_pct }}%) — preporucena provjera" style="background:rgba(251,191,36,.15);color:#fbbf24;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e.confidence_pct }}%</span>
+            {% elif e.confidence_level == "low" %}
+              <span title="Niska sigurnost ({{ e.confidence_pct }}%) — obavezno rucno provjeriti" style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.72rem;font-weight:700">{{ e.confidence_pct }}%</span>
             {% else %}
               <span style="color:#475569;font-size:.72rem">—</span>
             {% endif %}
