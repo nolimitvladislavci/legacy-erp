@@ -1,6 +1,6 @@
 # FENIX STATUS — Koordinacijski fajl
 # Zadnje azuriranje: 2026-04-01 — CC Code Opus (MCP SSE fix)
-# Git HEAD: 7e6f45ef
+# Git HEAD: 3cab19ab
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
@@ -534,3 +534,4 @@ Podsjetnik: ~25.04.2026.
 |-----|--------|------|
 | CC_TASK_MCP_SSE_FIX | 7e6f45ef | ✅ DONE — nginx SSE proxy fix, standalone FastMCP |
 
+| BORG_10_PLAN | 3cab19ab | ✅ DONE — 4-fazni plan do 10/10 (bazna ocjena 5.9) |
