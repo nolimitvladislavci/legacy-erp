@@ -48,9 +48,15 @@
 </div>
 
 <div class="stat-card mb-3">
-  <form method="get" class="row g-2">
+  <form method="get" class="row g-2"
+        hx-get="{% url 'partners:list' %}"
+        hx-target="#partner-table"
+        hx-swap="outerHTML"
+        hx-trigger="input changed delay:400ms from:input[name=q], change from:select"
+        hx-push-url="true"
+        hx-indicator="#search-spinner">
     <div class="col-md-4">
-      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, email, OIB, grad...">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, email, OIB, grad..." autocomplete="off">
     </div>
     <div class="col-md-2">
       <select name="type" class="form-select">
@@ -68,7 +74,7 @@
       </select>
     </div>
     <div class="col-md-4 d-flex gap-2">
-      <button type="submit" class="btn btn-primary flex-grow-1">{% trans "Filtriraj" %}</button>
+      <button type="submit" class="btn btn-primary flex-grow-1"><span id="search-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1"></span>{% trans "Filtriraj" %}</button>
       <a href="{% url 'partners:list' %}" class="btn btn-outline-secondary">{% trans "Reset" %}</a>
     </div>
   </form>

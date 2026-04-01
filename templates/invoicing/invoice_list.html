@@ -139,9 +139,15 @@ document.getElementById('cam-input')?.addEventListener('change', function(e) {
 </div>
 
 <div class="stat-card fenix-card mb-3">
-  <form method="get" class="row g-2">
+  <form method="get" class="row g-2"
+        hx-get=""
+        hx-target="#invoice-table"
+        hx-swap="outerHTML"
+        hx-trigger="input changed delay:400ms from:input[name=q], change from:select"
+        hx-push-url="true"
+        hx-indicator="#inv-search-spinner">
     <div class="col-md-4">
-      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Klijent, broj računa...">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Klijent, broj računa..." autocomplete="off">
     </div>
     <div class="col-md-2">
       <select name="status" class="form-select">

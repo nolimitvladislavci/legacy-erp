@@ -15,7 +15,11 @@
   <a href="{% url 'udruge:clan_list' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
 </div>
 
-<form method="post" class="card" style="padding:1.25rem;max-width:700px">
+<form method="post" class="card" style="padding:1.25rem;max-width:700px"
+      hx-post=""
+      hx-target="body"
+      hx-swap="outerHTML"
+      hx-indicator="#clan-spinner">
   {% csrf_token %}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
     <div>
@@ -77,6 +81,6 @@
     <button type="button" onclick="if(window.FenixCamera)FenixCamera.quick('clan-photo-preview',{onReady:function(r){document.getElementById('clan_photo_b64').value=r.b64}})" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold);padding:.5rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem">📷 Fotografiraj dokument</button>
     <input type="hidden" name="photo_b64" id="clan_photo_b64">
   </div>
-  <button type="submit" class="btn btn-gold" style="margin-top:1rem;width:100%">Spremi clana</button>
+  <button type="submit" class="btn btn-gold" style="margin-top:1rem;width:100%"><span id="clan-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1"></span>Spremi clana</button>
 </form>
 {% endblock %}

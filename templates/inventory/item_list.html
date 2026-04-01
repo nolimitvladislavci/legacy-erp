@@ -52,9 +52,15 @@
 </div>
 
 <div class="stat-card mb-3">
-  <form method="get" class="row g-2">
+  <form method="get" class="row g-2"
+        hx-get=""
+        hx-target="#inventory-table"
+        hx-swap="outerHTML"
+        hx-trigger="input changed delay:400ms from:input[name=q], change from:select"
+        hx-push-url="true"
+        hx-indicator="#inv-spinner">
     <div class="col-md-4">
-      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, SKU...">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Naziv, SKU..." autocomplete="off">
     </div>
     <div class="col-md-3">
       <select name="category" class="form-select">
