@@ -155,3 +155,5 @@ def bootstrap_new_company(sender, instance, created, **kwargs):
         pass
 
     logger.info('[BOOTSTRAP] Firma "%s" (OIB %s) bootstrapirana.', instance.name, instance.oib)
+
+import companies.data_quality  # noqa: F401 — Data Quality Guard

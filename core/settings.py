@@ -975,3 +975,11 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=9, minute=0),
     },
 })
+
+# ── Data Quality — nightly patrol ──────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "nightly-data-quality": {
+        "task": "companies.nightly_data_quality",
+        "schedule": crontab(hour=4, minute=15),
+    },
+})
