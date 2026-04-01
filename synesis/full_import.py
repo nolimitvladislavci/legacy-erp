@@ -239,7 +239,7 @@ def import_knjizenja(company, mdb_path, wipe_existing=False):
                     klasa = konto_code[0] if konto_code else '0'
                     type_map = {'0':'asset','1':'asset','2':'liability','3':'asset',
                                 '4':'expense','5':'expense','6':'expense',
-                                '7':'income','8':'income','9':'equity'}
+                                '7':'revenue','8':'equity','9':'equity'}
                     acct, _ = KontoAccount.objects.get_or_create(
                         company=company, code=konto_code,
                         defaults={'name': konto_name[:200] or konto_code, 'account_type': type_map.get(klasa, 'asset')}
