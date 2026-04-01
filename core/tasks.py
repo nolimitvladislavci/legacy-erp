@@ -261,3 +261,66 @@ def _backup_whatsapp(phone, message):
         send_text(phone=phone, message=message)
     except Exception as e:
         logging.getLogger('core.backup').warning(f'WhatsApp backup notif failed: {e}')
+
+
+# ═══════════════════════════════════════════════════════════════
+#  SUBSCRIPTION TRACKER — Podsjetnici za pretplate i račune
+# ═══════════════════════════════════════════════════════════════
+
+@shared_task(name='core.check_subscriptions', bind=True, max_retries=1, soft_time_limit=30)
+def check_subscriptions(self):
+    """
+    Dnevna provjera pretplata — šalje WhatsApp podsjetnike Ivanu.
+    Pokreće se svaki dan u 09:00 preko Celery beat-a.
+    """
+    from datetime import date
+    from core.notify import notify
+
+    SUBSCRIPTIONS = [
+        {
+            'name': 'Claude Max (Nikša)',
+            'renewal_date': date(2026, 4, 27),
+            'remind_days_before': [7, 3, 1, 0],
+            'action': 'Produžiti Max paket prije isteka',
+        },
+        {
+            'name': 'Hetzner server (Marija)',
+            'renewal_date': date(2026, 5, 1),
+            'remind_days_before': [7, 3, 1, 0],
+            'action': 'Marija treba uplatiti server',
+        },
+        {
+            'name': 'Claude Pro (Kruljac)',
+            'renewal_date': date(2026, 4, 27),
+            'remind_days_before': [7, 3, 1, 0],
+            'action': 'Kruljac treba produžiti Pro paket',
+        },
+    ]
+
+    today = date.today()
+    alerts = []
+
+    for sub in SUBSCRIPTIONS:
+        days_left = (sub['renewal_date'] - today).days
+
+        if days_left < 0:
+            alerts.append(
+                f"🔴 *{sub['name']}* — ISTEKLO prije {abs(days_left)} dana!\n"
+                f"   ➜ {sub['action']}"
+            )
+        elif days_left == 0:
+            alerts.append(
+                f"🔴 *{sub['name']}* — ISTIČE DANAS!\n"
+                f"   ➜ {sub['action']}"
+            )
+        elif days_left in sub['remind_days_before']:
+            alerts.append(
+                f"🟡 *{sub['name']}* — još {days_left} dana (istječe {sub['renewal_date'].strftime('%d.%m.')})\n"
+                f"   ➜ {sub['action']}"
+            )
+
+    if alerts:
+        msg = "📋 *Podsjetnik — pretplate i računi*\n\n" + "\n\n".join(alerts)
+        notify('ACTION', msg, urgent=False)
+        return f'Poslano {len(alerts)} podsjetnika'
+    return 'Nema podsjetnika za danas'

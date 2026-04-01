@@ -967,3 +967,11 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=6, minute=0),
     },
 })
+
+# ── Subscription Tracker — pretplate i računi ──────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "check-subscriptions-daily": {
+        "task": "core.check_subscriptions",
+        "schedule": crontab(hour=9, minute=0),
+    },
+})

@@ -1,8 +1,10 @@
 """
 FENIX MCP Server — direktni pristup za Sonnet
 Pokrece se kao: venv/bin/python core/mcp_server.py
+
+v2: heartbeat, graceful shutdown, signal handling
 """
-import os, sys, subprocess, json
+import os, sys, subprocess, json, signal, asyncio
 sys.path.insert(0, '/var/www/fina-connect')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
@@ -15,6 +17,15 @@ from fastmcp import FastMCP
 mcp = FastMCP("Fenix LIMIT Connect")
 PROJECT = '/var/www/fina-connect'
 BLOCKED = ['rm -rf', 'reboot', 'shutdown', 'mkfs', 'chmod 777', '> /dev/']
+
+
+def graceful_shutdown(signum, frame):
+    """Graceful shutdown na SIGTERM/SIGINT."""
+    print(f"Fenix MCP: primljen signal {signum}, gasim se...")
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, graceful_shutdown)
+signal.signal(signal.SIGINT, graceful_shutdown)
 
 
 @mcp.tool()
@@ -182,5 +193,5 @@ def restart_service(service: str) -> str:
 
 
 if __name__ == '__main__':
-    print('Fenix MCP Server na http://127.0.0.1:8765')
+    print('Fenix MCP Server v2 na http://127.0.0.1:8765')
     mcp.run(transport='sse', host='127.0.0.1', port=8765)
