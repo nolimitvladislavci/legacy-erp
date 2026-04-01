@@ -290,3 +290,199 @@ def orphan_data_check(self):
         logger.info('Orphan Data Radar: sve FK relacije čiste')
 
     return {'orphans': orphans}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BORG Morning Briefing — proaktivni dnevni WhatsApp briefing
+# ══════════════════════════════════════════════════════════════════════════════
+
+@shared_task(name='borg_ops.morning_briefing')
+def morning_briefing():
+    """
+    Celery beat: svaki dan 07:45.
+    Za svaki tenant s aktivnim BorgBriefingConfig salje WhatsApp briefing.
+    """
+    from borg_ops.models import BorgBriefingConfig
+    from borg_ops.briefing import collect_briefing_items, format_briefing_message
+    from borg_ops.audit_helpers import log_borg_audit
+
+    configs = BorgBriefingConfig.objects.filter(enabled=True).select_related('company')
+    sent = 0
+    errors = 0
+
+    for config in configs:
+        try:
+            items = collect_briefing_items(config.company, config)
+            message = format_briefing_message(items, config.company.name)
+
+            # Send via WhatsApp
+            from core.whatsapp import send_text
+            send_text(
+                phone=config.phone_number,
+                message=message,
+                company_id=str(config.company.pk),
+            )
+
+            # Update last_sent
+            config.last_sent = timezone.now()
+            config.save(update_fields=['last_sent'])
+
+            # Audit trail
+            log_borg_audit(
+                company=config.company,
+                entry_type='BRIEFING',
+                summary=f'Jutarnji briefing poslan: {len(items)} stavki',
+                metadata={'items_count': len(items), 'phone': config.phone_number},
+            )
+
+            sent += 1
+            logger.info('Morning briefing sent to %s (%d items)', config.company.name, len(items))
+
+        except Exception as e:
+            errors += 1
+            logger.warning('Morning briefing failed for %s: %s', config.company.name, e)
+
+    return {'sent': sent, 'errors': errors, 'total_configs': configs.count()}
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BORG Trust Decay — nightly check
+# ══════════════════════════════════════════════════════════════════════════════
+
+@shared_task(name='borg_ops.check_trust_decay_all')
+def check_trust_decay_all():
+    """Celery beat: svaki dan 23:00 — provjeri trust decay za sve tenante."""
+    from borg_ops.trust import check_trust_decay_all as _check
+    checkpoints = _check()
+    logger.info('Trust decay check: %d checkpoints triggered', checkpoints)
+    return {'checkpoints': checkpoints}
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BORG Collaborative Intelligence — signal aggregation
+# ══════════════════════════════════════════════════════════════════════════════
+
+SIGNAL_THRESHOLD = 5  # Min signals to trigger alert
+
+@shared_task(name='borg_ops.aggregate_signals')
+def aggregate_signals():
+    """
+    Celery beat: svaki dan 04:00.
+    Skenira invoices/procurement za opted-in tenante,
+    emitira apstraktne signale, detektira trendove.
+    """
+    from borg_ops.models import BorgSignal, BorgCollabConfig, BorgInsightAlert
+    from borg_ops.audit_helpers import log_borg_audit
+    from django.db.models import F
+
+    configs = BorgCollabConfig.objects.filter(enabled=True).select_related('company')
+    signals_emitted = 0
+    alerts_created = 0
+
+    current_quarter = f'{timezone.now().year}-Q{(timezone.now().month - 1) // 3 + 1}'
+
+    for config in configs:
+        company = config.company
+        region = getattr(company, 'region_code', 'HR-00') or 'HR-00'
+
+        # Analyze recent procurement/invoices for price trends
+        try:
+            from invoicing.models import Invoice
+            from datetime import timedelta
+
+            recent = timezone.now() - timedelta(days=30)
+            old = timezone.now() - timedelta(days=90)
+
+            # Compare last 30 days vs previous 60 days
+            recent_total = Invoice.objects.filter(
+                company=company, date_issued__gte=recent, status__in=['SENT', 'PAID']
+            ).count()
+
+            old_total = Invoice.objects.filter(
+                company=company, date_issued__gte=old, date_issued__lt=recent,
+                status__in=['SENT', 'PAID']
+            ).count()
+
+            if old_total > 0 and recent_total > 0:
+                # Simple trend detection
+                ratio = recent_total / max(old_total / 2, 1)  # normalize to 30-day period
+                if ratio > 1.1:
+                    direction = 'UP'
+                    magnitude = min((ratio - 1) * 100, 50)
+                elif ratio < 0.9:
+                    direction = 'DOWN'
+                    magnitude = min((1 - ratio) * 100, 50)
+                else:
+                    continue  # Stable, no signal
+
+                # Emit anonymous signal
+                signal, created = BorgSignal.objects.get_or_create(
+                    category='SERVICE',
+                    direction=direction,
+                    region=region,
+                    period=current_quarter,
+                    defaults={'magnitude_pct': magnitude},
+                )
+                if not created:
+                    signal.signal_count = F('signal_count') + 1
+                    signal.magnitude_pct = (signal.magnitude_pct + magnitude) / 2
+                    signal.save(update_fields=['signal_count', 'magnitude_pct', 'last_seen'])
+                    signal.refresh_from_db()
+
+                signals_emitted += 1
+
+                # Check threshold
+                if signal.signal_count >= SIGNAL_THRESHOLD:
+                    existing_alert = BorgInsightAlert.objects.filter(
+                        signal=signal, threshold_reached=SIGNAL_THRESHOLD
+                    ).exists()
+                    if not existing_alert:
+                        alert = BorgInsightAlert.objects.create(
+                            signal=signal,
+                            threshold_reached=SIGNAL_THRESHOLD,
+                            insight_text=(
+                                f'Uocen trend {signal.get_direction_display().lower()} '
+                                f'{signal.get_category_display().lower()} '
+                                f'({signal.magnitude_pct:.0f}%) u regiji {signal.region}. '
+                                f'{signal.signal_count} neovisnih izvora potvrduje trend.'
+                            ),
+                        )
+                        # Notify opted-in companies in same region
+                        notified = _notify_collab_insight(alert, region)
+                        alert.companies_notified = notified
+                        alert.save(update_fields=['companies_notified'])
+                        alerts_created += 1
+
+        except Exception as e:
+            logger.debug('Signal aggregation error for %s: %s', company.name, e)
+
+    logger.info('Signal aggregation: %d signals, %d alerts', signals_emitted, alerts_created)
+    return {'signals': signals_emitted, 'alerts': alerts_created}
+
+
+def _notify_collab_insight(alert, region):
+    """Notify opted-in companies about a collaborative insight."""
+    from borg_ops.models import BorgCollabConfig
+    from borg_ops.audit_helpers import log_borg_audit
+
+    configs = BorgCollabConfig.objects.filter(
+        enabled=True, company__region_code=region
+    ).select_related('company')
+
+    notified = 0
+    for config in configs:
+        try:
+            log_borg_audit(
+                company=config.company,
+                entry_type='REGULATORY',
+                summary=alert.insight_text,
+                severity='INFO',
+                metadata={'signal_id': alert.signal.pk, 'alert_id': alert.pk},
+            )
+            notified += 1
+        except Exception:
+            pass
+
+    return notified

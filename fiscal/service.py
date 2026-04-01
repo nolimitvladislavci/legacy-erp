@@ -56,7 +56,7 @@ def fiscalize_pos_receipt(receipt):
     """
     from .models import FiscalLog
 
-    # IDEMPOTENCY GUARD — ne šalji isti račun dvaput FINA-i
+    # IDEMPOTENCY GUARD — ne salji isti racun dvaput FINA-i
     from .models import FiscalLog
     existing = FiscalLog.objects.filter(
         receipt_type='pos_receipt', receipt_id=receipt.pk, status='success'
@@ -83,6 +83,20 @@ def fiscalize_pos_receipt(receipt):
     # Log success
     if jir:
         _log_pos_fiscal(receipt, success=True, jir=jir)
+        # BORG Audit Entry — fiskalizacija uspjesna
+        try:
+            from borg_ops.audit_helpers import log_borg_audit
+            company = receipt.session.terminal.company
+            log_borg_audit(
+                company=company,
+                entry_type='FISCAL',
+                summary=f'Fiskalizacija POS racuna #{receipt.receipt_number} — JIR: {jir}',
+                document=receipt,
+                verification_type='CIS',
+                verification_result={'jir': jir, 'zki': getattr(receipt, 'zki', '')},
+            )
+        except Exception:
+            pass  # Audit ne smije srusiti fiskalizaciju
 
     return jir
 

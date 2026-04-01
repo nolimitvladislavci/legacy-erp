@@ -426,3 +426,51 @@ class PermanentMigrationAudit(models.Model):
                 f"(ZoRacunovodstvu — 11 godina). Brisanje nije dozvoljeno."
             )
         super().delete(*args, **kwargs)
+
+
+
+# ── Data Sovereignty Export (TIER 5) ──────────────────────────────────────
+
+class ExportManifest(models.Model):
+    """
+    Evidencija izvoza podataka — Data Sovereignty.
+    'Dugme Izvezi sve' = psihologički okidac povjerenja.
+    """
+    FORMAT_CHOICES = [('JSON', 'JSON'), ('XML', 'XML')]
+    STATUS_CHOICES = [
+        ('pending', 'Na cekanju'),
+        ('processing', 'U tijeku'),
+        ('completed', 'Zavrseno'),
+        ('failed', 'Neuspjelo'),
+    ]
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='export_manifests',
+    )
+    requested_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True,
+        related_name='+',
+    )
+    format = models.CharField(max_length=10, choices=FORMAT_CHOICES, default='JSON')
+    include_audit = models.BooleanField(default=True)
+    include_documents = models.BooleanField(default=True)
+    include_contextual_links = models.BooleanField(default=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    file_path = models.CharField(max_length=500, blank=True)
+    file_size_mb = models.FloatField(null=True, blank=True)
+    entity_counts = models.JSONField(default=dict, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True,
+        help_text='Auto-delete after 48h')
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Export Manifest'
+        verbose_name_plural = 'Export Manifests'
+
+    def __str__(self):
+        return f'{self.company.name} — {self.format} export ({self.status})'

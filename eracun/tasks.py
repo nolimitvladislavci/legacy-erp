@@ -9,9 +9,9 @@ logger = logging.getLogger('eracun.tasks')
 @shared_task(bind=True, soft_time_limit=120)
 def fetch_posrednik_inbox(self):
     """
-    Two-Step Fetch: dohvati listu → za svaki dohvati XML → receive_eracun().
-    Step 1: GET /incoming-invoices → JSON lista s ID-jevima
-    Step 2: GET /incoming-invoices/{id}/xml → puni UBL 2.1 XML
+    Two-Step Fetch: dohvati listu -> za svaki dohvati XML -> receive_eracun().
+    Step 1: GET /incoming-invoices -> JSON lista s ID-jevima
+    Step 2: GET /incoming-invoices/{id}/xml -> puni UBL 2.1 XML
     receive_eracun() kreira ERacun + Items + TaxSummary + okida FENIX Interceptor.
     """
     from companies.models import Company
@@ -40,7 +40,7 @@ def fetch_posrednik_inbox(self):
                 inv_number = inv_data.get('invoiceNumber', inv_data.get('invoice_number', str(inv_id)))
                 issuer_oib = inv_data.get('senderOib', inv_data.get('issuer_oib', ''))
 
-                # Duplikat check PRIJE API poziva (štedi bandwidth)
+                # Duplikat check PRIJE API poziva (stedi bandwidth)
                 if ERacun.objects.filter(
                     company=company,
                     invoice_number=inv_number,
@@ -65,6 +65,19 @@ def fetch_posrednik_inbox(self):
                                 eracun.save(update_fields=['fina_uuid'])
                             fetched += 1
                             logger.info('Two-Step fetch OK: %s od %s', inv_number, issuer_oib)
+                            # BORG Audit Entry — e-Racun primljen
+                            try:
+                                from borg_ops.audit_helpers import log_borg_audit
+                                log_borg_audit(
+                                    company=company,
+                                    entry_type='ERACUN',
+                                    summary=f'e-Racun primljen: {inv_number} od {issuer_oib}',
+                                    document=eracun,
+                                    verification_type='FINA',
+                                    verification_result={'fina_uuid': str(inv_id), 'issuer_oib': issuer_oib},
+                                )
+                            except Exception:
+                                pass
                         else:
                             # Duplikat ili parse error — logiramo ali ne pada
                             skipped += 1
@@ -73,7 +86,7 @@ def fetch_posrednik_inbox(self):
                         errors += 1
                         logger.warning('receive_eracun error za %s: %s', inv_number, e)
                 elif xml_string is None:
-                    # XML endpoint nije dostupan — fallback na header-only (stari način)
+                    # XML endpoint nije dostupan — fallback na header-only (stari nacin)
                     ERacun.objects.create(
                         company=company,
                         direction='incoming',
@@ -142,15 +155,15 @@ def check_cert_expiry():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# BORG FENIX: Async e-Račun slanje s XSD-First + Exponential Backoff
+# BORG FENIX: Async e-Racun slanje s XSD-First + Exponential Backoff
 # ══════════════════════════════════════════════════════════════════════════════
 
 @shared_task(bind=True, max_retries=5, soft_time_limit=120)
 def send_eracun_to_fina_async(self, eracun_id):
     """
-    Async slanje e-Računa prema FINA CIS-u.
+    Async slanje e-Racuna prema FINA CIS-u.
 
-    Pravilo 1 (XSDFirst): XSD validacija PRIJE slanja. Ako padne → XSD_ERROR, nema retryja.
+    Pravilo 1 (XSDFirst): XSD validacija PRIJE slanja. Ako padne -> XSD_ERROR, nema retryja.
     Pravilo 2 (Celery Always): Exponential backoff: 1min, 2min, 4min, 8min, 16min.
     Pravilo 3 (Redis Shield): Bonitet check koristi cache.
 
@@ -158,8 +171,8 @@ def send_eracun_to_fina_async(self, eracun_id):
     1. Dohvati ERacun iz baze
     2. validate_xml_against_xsd() — ako padne, XSD_ERROR, STOP
     3. process_eracun() — sign + send to FINA
-    4. Ako FINA timeout/error → retry s exponential backoff
-    5. Ako FINA reject (poslovni razlog) → nema retryja, rejected
+    4. Ako FINA timeout/error -> retry s exponential backoff
+    5. Ako FINA reject (poslovni razlog) -> nema retryja, rejected
     """
     from eracun.models import ERacun, ERacunLog
     from eracun.services.engine import process_eracun, build_fina_xml, get_cert_pem
@@ -179,7 +192,7 @@ def send_eracun_to_fina_async(self, eracun_id):
             validate_xml_against_xsd(eracun.xml_request.encode('utf-8'))
             logger.info('[FINA ASYNC] XSD validacija OK za %s', eracun.invoice_number)
         except XSDValidationError as xsd_err:
-            # XSD greška = STOP, nema retryja
+            # XSD greska = STOP, nema retryja
             eracun.status = 'invalid'
             eracun.error_message = f'XSD validacija: {xsd_err.errors[0]["message_hr"]}'
             eracun.error_code = 'XSD_ERROR'
@@ -201,26 +214,39 @@ def send_eracun_to_fina_async(self, eracun_id):
         success, message = process_eracun(eracun)
 
         if success:
-            logger.info('[FINA ASYNC] Uspješno: %s → %s', eracun.invoice_number, message)
+            logger.info('[FINA ASYNC] Uspjesno: %s -> %s', eracun.invoice_number, message)
+            # BORG Audit Entry — e-Racun poslan uspjesno
+            try:
+                from borg_ops.audit_helpers import log_borg_audit
+                log_borg_audit(
+                    company=eracun.company,
+                    entry_type='ERACUN',
+                    summary=f'e-Racun poslan FINA: {eracun.invoice_number}',
+                    document=eracun,
+                    verification_type='FINA',
+                    verification_result={'status': 'accepted', 'message': message},
+                )
+            except Exception:
+                pass
             return {'status': 'accepted', 'message': message}
 
-        # FINA rejected (poslovni razlog) → nema retryja
+        # FINA rejected (poslovni razlog) -> nema retryja
         if eracun.status == 'rejected':
             logger.warning('[FINA ASYNC] FINA rejected %s: %s', eracun.invoice_number, message)
             return {'status': 'rejected', 'message': message, 'retry': False}
 
-        # Ostale greške → retry
+        # Ostale greske -> retry
         raise Exception(message)
 
     except requests.exceptions.RequestException as e:
         # ── Pravilo 2: Exponential backoff ───────────────────────────
         countdown = 2 ** self.request.retries * 60  # 60s, 120s, 240s, 480s, 960s
         logger.warning(
-            '[FINA ASYNC] Network error za %s (pokušaj %d/%d, retry za %ds): %s',
+            '[FINA ASYNC] Network error za %s (pokusaj %d/%d, retry za %ds): %s',
             eracun.invoice_number, self.request.retries + 1, 5, countdown, e,
         )
         eracun.status = 'error'
-        eracun.error_message = f'FINA nedostupna (pokušaj {self.request.retries + 1}/5): {str(e)[:100]}'
+        eracun.error_message = f'FINA nedostupna (pokusaj {self.request.retries + 1}/5): {str(e)[:100]}'
         eracun.save(update_fields=['status', 'error_message'])
         raise self.retry(countdown=countdown, exc=e)
 
@@ -228,17 +254,17 @@ def send_eracun_to_fina_async(self, eracun_id):
         if self.request.retries < self.max_retries:
             countdown = 2 ** self.request.retries * 60
             logger.warning(
-                '[FINA ASYNC] Error za %s (pokušaj %d/%d, retry za %ds): %s',
+                '[FINA ASYNC] Error za %s (pokusaj %d/%d, retry za %ds): %s',
                 eracun.invoice_number, self.request.retries + 1, 5, countdown, e,
             )
             eracun.status = 'error'
-            eracun.error_message = f'Greška (pokušaj {self.request.retries + 1}/5): {str(e)[:100]}'
+            eracun.error_message = f'Greska (pokusaj {self.request.retries + 1}/5): {str(e)[:100]}'
             eracun.save(update_fields=['status', 'error_message'])
             raise self.retry(countdown=countdown, exc=e)
         else:
             # Max retries exhausted
             eracun.status = 'error'
-            eracun.error_message = f'Svi pokušaji iscrpljeni (5/5): {str(e)[:100]}'
+            eracun.error_message = f'Svi pokusaji iscrpljeni (5/5): {str(e)[:100]}'
             eracun.save(update_fields=['status', 'error_message'])
             ERacunLog.objects.create(
                 eracun=eracun, action='sent', status='error',

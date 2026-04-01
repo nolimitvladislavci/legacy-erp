@@ -418,3 +418,32 @@ class SupplierRiskAlert(models.Model):
     @property
     def needs_immediate_action(self):
         return self.risk_level in ('HIGH', 'CRITICAL') and not self.is_acknowledged
+
+
+
+class TenantRegulatoryImpact(models.Model):
+    """Per-tenant relevantnost regulatorne promjene."""
+
+    company = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE,
+        related_name='regulatory_impacts',
+    )
+    regulatory_update = models.ForeignKey(
+        RegulatoryUpdate, on_delete=models.CASCADE,
+        related_name='tenant_impacts',
+    )
+    is_relevant = models.BooleanField(default=False)
+    severity = models.CharField(max_length=20, default='info',
+        help_text='info, warning, action_required')
+    impact_summary = models.TextField(blank=True)
+    affected_modules = models.JSONField(default=list, blank=True)
+    reviewed_by_user = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['company', 'regulatory_update']
+        verbose_name = 'Tenant Regulatory Impact'
+        verbose_name_plural = 'Tenant Regulatory Impacts'
+
+    def __str__(self):
+        return f'{self.company.name} <- {self.regulatory_update.title[:50]} ({self.severity})'

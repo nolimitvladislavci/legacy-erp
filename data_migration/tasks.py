@@ -264,3 +264,134 @@ def _get_company_admin_phone(company):
     except Exception:
         pass
     return None
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Data Sovereignty — Full Export
+# ══════════════════════════════════════════════════════════════════════════════
+
+@shared_task(bind=True, soft_time_limit=600)
+def generate_full_export(self, manifest_id):
+    """
+    Async generacija kompletnog izvoza podataka za tenanta.
+    Exportira: partners, invoices, receipts, inventory, audit entries.
+    S kontekstualnim linkovima (document -> legal_reference -> verification).
+    """
+    import json
+    import os
+    import tempfile
+    from django.utils import timezone as tz
+
+    logger = logging.getLogger('borg.export')
+
+    try:
+        from data_migration.models import ExportManifest
+        manifest = ExportManifest.objects.select_related('company').get(pk=manifest_id)
+    except ExportManifest.DoesNotExist:
+        return {'error': 'Manifest not found'}
+
+    manifest.status = 'processing'
+    manifest.save(update_fields=['status'])
+
+    company = manifest.company
+    export_data = {
+        '_meta': {
+            'export_date': tz.now().isoformat(),
+            'company': company.name,
+            'company_oib': getattr(company, 'oib', ''),
+            'format_version': '1.0',
+            'generator': 'BORG Data Sovereignty Export',
+        },
+        'partners': [],
+        'invoices': [],
+        'audit_entries': [],
+    }
+    counts = {}
+
+    try:
+        # Partners
+        from partners.models import Partner
+        partners = Partner.objects.filter(company=company).values(
+            'id', 'name', 'oib', 'vat_id', 'address', 'city', 'country',
+            'email', 'phone', 'buyer_type', 'vies_valid', 'created_at',
+        )
+        export_data['partners'] = [
+            {k: str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v
+             for k, v in p.items()}
+            for p in partners
+        ]
+        counts['partners'] = len(export_data['partners'])
+    except Exception as e:
+        logger.debug('Export partners error: %s', e)
+
+    try:
+        # Invoices
+        from invoicing.models import Invoice
+        invoices = Invoice.objects.filter(company=company).values(
+            'id', 'number', 'date_issued', 'date_due', 'client_name',
+            'client_oib', 'total', 'status', 'is_fiscalized', 'zki', 'jir',
+        )
+        export_data['invoices'] = [
+            {k: str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v
+             for k, v in inv.items()}
+            for inv in invoices
+        ]
+        counts['invoices'] = len(export_data['invoices'])
+    except Exception as e:
+        logger.debug('Export invoices error: %s', e)
+
+    try:
+        # Audit entries (contextual links)
+        if manifest.include_audit:
+            from borg_ops.models import BorgAuditEntry
+            entries = BorgAuditEntry.objects.filter(company=company).values(
+                'id', 'entry_type', 'severity', 'summary', 'legal_reference',
+                'verification_type', 'verification_result', 'metadata', 'created_at',
+            )
+            export_data['audit_entries'] = [
+                {k: str(v) if not isinstance(v, (str, int, float, bool, dict, type(None))) else v
+                 for k, v in e.items()}
+                for e in entries
+            ]
+            counts['audit_entries'] = len(export_data['audit_entries'])
+    except Exception as e:
+        logger.debug('Export audit error: %s', e)
+
+    # Write JSON file
+    try:
+        export_dir = os.path.join('/var/www/fina-connect/exports')
+        os.makedirs(export_dir, exist_ok=True)
+        filename = f'export_{company.pk}_{tz.now().strftime("%Y%m%d_%H%M%S")}.json'
+        filepath = os.path.join(export_dir, filename)
+
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(export_data, f, ensure_ascii=False, indent=2, default=str)
+
+        file_size = os.path.getsize(filepath) / (1024 * 1024)
+
+        manifest.status = 'completed'
+        manifest.file_path = filepath
+        manifest.file_size_mb = round(file_size, 2)
+        manifest.entity_counts = counts
+        manifest.completed_at = tz.now()
+        manifest.expires_at = tz.now() + tz.timedelta(hours=48)
+        manifest.save()
+
+        # Audit trail
+        from borg_ops.audit_helpers import log_borg_audit
+        log_borg_audit(
+            company=company,
+            entry_type='EXPORT',
+            summary=f'Full export zavrsen: {sum(counts.values())} entiteta, {file_size:.1f} MB',
+            metadata={'manifest_id': manifest.pk, 'counts': counts, 'file': filename},
+        )
+
+        logger.info('Export completed for %s: %s (%s MB)', company.name, filename, file_size)
+        return {'status': 'completed', 'file': filepath, 'counts': counts}
+
+    except Exception as e:
+        manifest.status = 'failed'
+        manifest.save(update_fields=['status'])
+        logger.error('Export failed for %s: %s', company.name, e)
+        return {'status': 'failed', 'error': str(e)}

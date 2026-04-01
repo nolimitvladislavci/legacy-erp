@@ -1017,3 +1017,33 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=5, minute=0),
     },
 })
+
+
+# ── BORG Proactive Engine — beat schedule ──────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "borg-morning-briefing": {
+        "task": "borg_ops.morning_briefing",
+        "schedule": crontab(hour=7, minute=45),
+    },
+})
+
+CELERY_BEAT_SCHEDULE.update({
+    "borg-nn-classify": {
+        "task": "limit_connect_ai.classify_nn_updates",
+        "schedule": crontab(hour="*/6", minute=30),
+    },
+})
+
+CELERY_BEAT_SCHEDULE.update({
+    "borg-trust-decay-check": {
+        "task": "borg_ops.check_trust_decay_all",
+        "schedule": crontab(hour=23, minute=0),
+    },
+})
+
+CELERY_BEAT_SCHEDULE.update({
+    "borg-aggregate-signals": {
+        "task": "borg_ops.aggregate_signals",
+        "schedule": crontab(hour=4, minute=0),
+    },
+})

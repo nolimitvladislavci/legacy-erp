@@ -454,6 +454,7 @@ def vies_batch_validate(self, batch_size=500):
                 upgraded += 1
 
             partner.save(update_fields=list(set(update_fields)))
+            _log_vies_audit(partner, is_vat_valid, partner.vies_name or '', partner.vies_address or '')
 
             checked += 1
             if is_vat_valid:
@@ -474,3 +475,33 @@ def vies_batch_validate(self, batch_size=500):
         checked, valid, upgraded, errors,
     )
     return {'checked': checked, 'valid': valid, 'upgraded': upgraded, 'errors': errors}
+
+
+
+# ── BORG Audit Hook for VIES ──────────────────────────────────────
+
+def _log_vies_audit(partner, vies_valid, vies_name='', vies_address=''):
+    """Log VIES validation result to BorgAuditEntry."""
+    try:
+        from borg_ops.audit_helpers import log_borg_audit
+        company = partner.company
+        severity = 'INFO' if vies_valid else 'WARNING'
+        summary = (
+            f'VIES provjera partnera {partner.name} (OIB: {partner.oib}) — '
+            f'{"VALIDAN" if vies_valid else "NEVALIDAN"}'
+        )
+        log_borg_audit(
+            company=company,
+            entry_type='VIES_CHECK',
+            summary=summary,
+            severity=severity,
+            document=partner,
+            verification_type='VIES',
+            verification_result={
+                'vies_valid': vies_valid,
+                'vies_name': vies_name,
+                'vies_address': vies_address,
+            },
+        )
+    except Exception:
+        pass

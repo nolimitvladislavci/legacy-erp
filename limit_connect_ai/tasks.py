@@ -839,3 +839,54 @@ def fenix_intercept_incoming(self, eracun_id):
 
     logger.info('[FENIX B2B] %s: %d alertova obrađeno', racun.invoice_number, len(alerts))
     return {'status': 'intercepted', 'alerts': len(alerts), 'details': alerts}
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NN Tenant Classification — per-tenant relevantnost regulatornih promjena
+# ══════════════════════════════════════════════════════════════════════════════
+
+from celery import shared_task
+
+@shared_task(name='limit_connect_ai.classify_nn_updates')
+def classify_nn_updates():
+    """
+    Celery beat: svakih 6h, 30min nakon scrapera.
+    Za svaki novi/neprocesirani RegulatoryUpdate x svaki aktivni tenant:
+    klasificiraj relevantnost i kreiraj BorgTask/BorgAuditEntry ako treba.
+    """
+    import logging
+    from limit_connect_ai.models_knowledge_graph import RegulatoryUpdate, TenantRegulatoryImpact
+    from companies.models import Company
+    from limit_connect_ai.services.nn_classifier import classify_and_store
+
+    logger = logging.getLogger('borg.nn_classifier')
+
+    # Find unclassified updates (processed by scraper but not yet per-tenant)
+    updates = RegulatoryUpdate.objects.filter(
+        is_processed=True,
+        impact_score__gte=3,  # Skip trivial updates
+    ).order_by('-publication_date')[:20]
+
+    companies = Company.objects.filter(is_active=True)[:100]
+    classified = 0
+    relevant = 0
+
+    for update in updates:
+        for company in companies:
+            # Skip if already classified
+            if TenantRegulatoryImpact.objects.filter(
+                company=company, regulatory_update=update
+            ).exists():
+                continue
+
+            try:
+                impact = classify_and_store(update, company)
+                classified += 1
+                if impact and impact.is_relevant:
+                    relevant += 1
+            except Exception as e:
+                logger.debug('Classify error %s x %s: %s', update.pk, company.pk, e)
+
+    logger.info('NN Classification: %d classified, %d relevant', classified, relevant)
+    return {"classified": classified, "relevant": relevant}
