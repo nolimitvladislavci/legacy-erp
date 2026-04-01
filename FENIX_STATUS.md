@@ -1,30 +1,108 @@
 # FENIX STATUS — Koordinacijski fajl
-# Zadnje azuriranje: 2026-04-01 — Sonnet (Korpaš ekosustav)
-# Git HEAD: 74c7f4b4
+# Zadnje azuriranje: 2026-04-02 — Sonnet (Synesis usklađenje + infrastruktura)
+# Git HEAD: b205ac64
 # PRAVILO: Ako nesto pise DONE — NE RADIS PONOVO.
 
 ---
 
-## ★ RATNI RASPORED — 20 DANA DO 15.4.2026
+## ★ RATNI RASPORED — 13 DANA DO 15.4.2026
 
 | Dan | Datum | Zadatak | Odgovorni | Status |
 |-----|-------|---------|-----------|--------|
-| 0 | 25.3. | Race condition, PDV, NKD, alert→toast, BUG-05 | Sonnet | ✅ DONE |
-| 1 | 26.3. | Udruge: Branitelji + Lov + Zadruge | CC Code | ✅ DONE |
-| 1 | 26.3. | Tax Wizard: 6 obrazaca, 7 deadlines, widget global | Sonnet+CC | ✅ DONE |
-| 1 | 26.3. | Worktime /mine/ — mobilna stranica za radnika | CC Code | ✅ DONE |
-| 1 | 26.3. | DNS TTL → 60s (Namecheap) | **IVAN** | ✅ DONE |
-| 2 | 27.3. | POS Joker unified + tax widget + subscription cockpit | CC Code | ✅ DONE |
-| 3 | 28.3. | Unscoped audit finish + GDPR | CC Code | ✅ DONE |
-| 4 | 29.3. | Vatrogasci modul (dnevnik intervencija) | CC Code | ✅ DONE (26.3.) |
-| 10 | 5.4. | Naruči Hetzner CCX33 (Konjik d.o.o.) — 89EUR/mj | **IVAN** | ⏳ ČEKA |
-| 12 | 10.4. | Server priprema + load test | Sonnet+CC | ⏳ ČEKA |
-| 15 | 15.4. | **PRODUKCIJA GO-LIVE** — 0-downtime | Sonnet | ⏳ ČEKA |
-| 15 | 15.4. | **VRATA OTVORENA** — testni korisnici (Marija odobrava) probni pristup | Ivan | ⏳ ČEKA |
+| 0   | 25.3. | Race condition, PDV, NKD, alert→toast, BUG-05 | Sonnet | ✅ DONE |
+| 1   | 26.3. | Udruge: Branitelji + Lov + Zadruge | CC Code | ✅ DONE |
+| 1   | 26.3. | Tax Wizard: 6 obrazaca, 7 deadlines, widget global | Sonnet+CC | ✅ DONE |
+| 1   | 26.3. | Worktime /mine/ — mobilna stranica za radnika | CC Code | ✅ DONE |
+| 1   | 26.3. | DNS TTL → 60s (Namecheap) | **IVAN** | ✅ DONE |
+| 2   | 27.3. | POS Joker unified + tax widget + subscription cockpit | CC Code | ✅ DONE |
+| 3   | 28.3. | Unscoped audit finish + GDPR | CC Code | ✅ DONE |
+| 4   | 29.3. | Vatrogasci modul (dnevnik intervencija) | CC Code | ✅ DONE (26.3.) |
+| 7   | 01.4. | Synesis account_type mapping fix (2,514 konta) | CC Code | ✅ DONE |
+| 7   | 01.4. | Bilanca D=P verifikacija (7.268.444,16 EUR) | CC Code | ✅ DONE |
+| 7   | 01.4. | synesis_compare.py — usklađenje skripta | Sonnet | ✅ DONE |
+| 7   | 01.4. | warm_cache.py — Redis 52%→>90% | CC Code | ✅ DONE |
+| 7   | 01.4. | audit_cleanup.py — Celery beat 03:00 | CC Code | ✅ DONE |
+| 7   | 01.4. | setup_new_server.sh — CCX33 full setup | CC Code | ✅ DONE |
+| 7   | 01.4. | prod_monitor.sh — WhatsApp alarm | CC Code | ✅ DONE |
+| 10  | 05.4. | **IVAN: Naruči Hetzner CCX33** — 89 EUR/mj | **IVAN** | 🔴 ČEKA |
+| 11  | 07.4. | Invoice mapping dijagnoza + fix (synesis_compare > 95%) | CC Code | ⏳ ČEKA |
+| 12  | 08.4. | **Marija: Full usklađenje pregled** (njen dan) | **Marija** | ⏳ ČEKA |
+| 13  | 09.4. | Redis warm_cache deploy + audit cleanup aktivacija | CC Code | ⏳ ČEKA |
+| 14  | 10.4. | MARIJA_BLAGOSLOV.md popunjen + potpisan | Marija | ⏳ ČEKA |
+| 15  | 12.4. | Final load test na CCX33 | Sonnet+CC | ⏳ ČEKA |
+| 17  | 14.4. | DNS cutover priprema (03:00) | Sonnet | ⏳ ČEKA |
+| 18  | 15.4. | **GO/NO-GO odluka** | Ivan + Marija | ⏳ ČEKA |
+| 18  | 15.4. | **PRODUKCIJA — 0-downtime** | Sonnet+CC | ⏳ ČEKA |
+| 30  | 01.5. | Kampanje, 100 firmi, digitalni posrednik zahtjev | Ivan | ⏳ ČEKA |
 
 ---
 
+## ★ STANJE BILANCE — VERIFICIRANO 02.04.2026
 
+```
+Konjik d.o.o. — Konto usklađenje:
+  JournalEntry:    12,840 (svi posted=True)
+  LedgerLine:      50,669
+  Debit (D):    7,268,444.16 EUR
+  Credit (C):   7,268,444.16 EUR
+  D-P diff:             0.00 EUR  ← PERFEKTNO ✅
+  KontoAccount:       563 konta (2,514 ispravljeno)
+  Test suite:      17/17 PASS
+```
+
+---
+
+## ★ SYNESIS COMPARE — TRENUTNO STANJE
+
+```
+Pokreni: venv/bin/python synesis_compare.py --summary
+
+Zadnji rezultat (02.04.2026):
+  Uspoređeno:  772 faktura
+  OK (≤0.02€):   7  (0.9%) ← PROBLEM — treba >95%
+  Razlika >1€: 756         ← Uzrok: invoice mapping kriv (prefiks/PDV)
+  Nema u LC:   238         ← Synesis dokumenti bez LC para
+  Extra u LC: 3182         ← LC fakture iz Storage.mdb (OK — drugačiji izvor)
+  Temeljnice:    0/7344    ← create_journal_entries command spreman, čeka Mariju
+
+Totali:
+  IRA: Synesis 231,403 EUR vs LC 261,497 EUR → diff -30,094 EUR
+  URA: Synesis 122,449 EUR vs LC 170,351 EUR → diff -47,902 EUR
+
+Sljedeći korak (CC Code):
+  1. Dijagnoza: je li mapping SYN-IRA-xxx → XINVOICESB-xxx ispravan?
+  2. Je li DOCUMENT_AMMOUNT neto ili bruto?
+  3. Ispravi → rerun → target OK% > 95%
+```
+
+---
+
+## ★ DEPLOYAN 01-02.04.2026 — CC Code + Sonnet
+
+| Što | Commit | Opis |
+|-----|--------|------|
+| Synesis account_type fix | 595d9722 | 2,514 konta ispravljena (HR RRF + DE SKR03), bilanca D=P |
+| fix_account_types command | 595d9722 | management command, 17/17 test PASS |
+| synesis/full_import.py | 595d9722 | type_map ažuriran za budući import |
+| warm_cache.py | b205ac64 | 29 Redis ključeva (companies, POS, tax, NKD) |
+| audit_cleanup.py | b205ac64 | Batch delete >365d, GDPR/AML/fiscal zaštita, beat 03:00 |
+| setup_new_server.sh | b205ac64 | CCX33: PG tuning, Redis 2GB, Gunicorn 17w, Nginx, UFW |
+| prod_monitor.sh | b205ac64 | Servisi, RAM, DB, Redis, errors, WhatsApp alarm |
+| synesis_compare.py | Sonnet direktno | 434 linije, full usklađenje skripta |
+| CC_TASK_USKLADENJE_A.md | Sonnet direktno | Invoice mapping + temeljnice + MARIJA_BLAGOSLOV |
+| CC_TASK_USKLADENJE_B.md | Sonnet direktno | Produkcijska priprema, load test, monitoring |
+
+---
+
+## ★ IVAN — JEDINA HITNA AKCIJA
+
+| Prioritet | Akcija | Deadline | Napomena |
+|-----------|--------|----------|----------|
+| 🔴 ODMAH | **Naruči Hetzner CCX33** (ili CPX51) — 89/35 EUR/mj | **05.04.2026** | Bez servera nema load testa 12.04. |
+
+setup_new_server.sh je spreman — čim dobiješ IP, CC Code to pokrene za 20 min.
+
+---
 
 ## ★ DEPLOYAN DANAS (01.04.2026) — Sonnet direktno
 
