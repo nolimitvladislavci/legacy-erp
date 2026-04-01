@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block title %}{% if booking_company %}{{ booking_company.name }}{% else %}Viskovic Group{% endif %} — Online rezervacija{% endblock %}</title>
+<title>{% block title %}{% if booking_company %}{{ booking_company.name }}{% else %}Online rezervacija{% endif %}{% endblock %}</title>
 <!-- Anti-FOUC: apply saved theme before CSS loads -->
 <script>(function(){var def='{{ booking_company.booking_theme|default:"dark" }}';var t=localStorage.getItem('booking-theme-{{ booking_company.id|default:"global" }}')||def;document.documentElement.setAttribute('data-theme',t);})();</script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
 <body>
 
 <nav class="booking-nav">
-    <a href="{% url 'dashboard' %}" class="brand">
+    <a href="{% if booking_company and booking_company.booking_slug == 'korpas-doo' %}/korpas/{% elif booking_company and booking_company.booking_slug == 'opg-kruljac-slaana' %}/korpas/opg-kruljac/{% else %}/{% endif %}" class="brand">
       {% if booking_company %}
         {{ booking_company.name }}
       {% else %}

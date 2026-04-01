@@ -1,57 +1,155 @@
 {% extends 'booking_base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Online rezervacija – Viskovic Group" %}{% endblock %}
+{% block title %}{{ company.name|default:"Online rezervacija" }} — Rezerviraj termin{% endblock %}
 
 {% block extra_head %}
 <style>
-.hero { padding: 56px 28px 40px; text-align: center; border-bottom: 1px solid var(--border); }
-.hero h1 { font-family: "Cormorant Garamond", serif; font-size: 2.4rem; font-weight: 300; color: var(--text); margin: 0 0 10px; }
-.hero p { color: var(--muted); font-size: .9rem; }
+.hero {
+  padding: 56px 28px 48px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(201,168,76,.04) 0%, transparent 100%);
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.25);
+  padding: 4px 14px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+  color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 300; color: var(--text); margin: 0 0 10px;
+}
+.hero h1 strong { font-weight: 600; color: var(--gold); }
+.hero-sub { color: var(--muted); font-size: .88rem; margin-bottom: 6px; }
+.hero-info { font-size: .8rem; color: var(--gold); font-weight: 600; letter-spacing: 1px; }
+.hero-steps {
+  display: flex; gap: 0; justify-content: center; margin-top: 28px;
+  border: 1px solid var(--border); max-width: 520px; margin-left: auto; margin-right: auto;
+}
+.hs { flex: 1; padding: 10px 6px; text-align: center; font-size: .72rem; color: var(--muted);
+  border-right: 1px solid var(--border); }
+.hs:last-child { border-right: none; }
+.hs .num { display: block; font-size: 1rem; color: var(--gold); font-weight: 700; margin-bottom: 2px; }
 
-.services-wrap { max-width: 960px; margin: 40px auto; padding: 0 24px 60px; }
+.services-wrap { max-width: 960px; margin: 40px auto 60px; padding: 0 24px; }
+.sw-title { font-size: .72rem; font-weight: 700; color: var(--gold); text-transform: uppercase;
+  letter-spacing: 3px; text-align: center; margin-bottom: 24px; }
 .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; }
 
-.svc-card { background: var(--surface); border: 1px solid var(--border); padding: 22px; display: block; text-decoration: none; color: var(--text); transition: border-color .2s, transform .2s; }
-.svc-card:hover { border-color: var(--gold); transform: translateY(-3px); color: var(--text); }
-.svc-icon { width: 48px; height: 48px; background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 1.4rem; color: var(--gold); }
-.svc-card h5 { font-size: 1rem; font-weight: 600; margin: 0 0 8px; }
-.svc-card p { color: var(--muted); font-size: .82rem; margin: 0 0 14px; line-height: 1.5; }
-.svc-badges { display: flex; flex-wrap: wrap; gap: 6px; }
-.svc-badge { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); padding: 2px 10px; font-size: .72rem; font-weight: 600; }
+.svc-card {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 22px; display: flex; flex-direction: column;
+  text-decoration: none; color: var(--text);
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.svc-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--gold); transform: scaleX(0); transform-origin: left;
+  transition: transform .2s;
+}
+.svc-card:hover { border-color: var(--gold); transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.3); color: var(--text); }
+.svc-card:hover::before { transform: scaleX(1); }
+
+.svc-icon {
+  width: 44px; height: 44px;
+  background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px; font-size: 1.2rem; border-radius: 4px;
+}
+.svc-card h5 { font-size: .97rem; font-weight: 700; margin: 0 0 6px; }
+.svc-card p { color: var(--muted); font-size: .81rem; margin: 0 0 14px; line-height: 1.55; flex: 1; }
+.svc-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; }
+.svc-badge {
+  background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.25);
+  color: var(--gold); padding: 3px 10px; font-size: .7rem; font-weight: 700;
+}
+.svc-badge.time { background: rgba(255,255,255,.04); border-color: var(--border); color: var(--muted); }
+.svc-cta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: .75rem; font-weight: 700; color: var(--gold); text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.svc-cta i { transition: transform .2s; }
+.svc-card:hover .svc-cta i { transform: translateX(4px); }
+
+.info-bar {
+  max-width: 960px; margin: 0 auto 32px; padding: 0 24px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.ib-item {
+  flex: 1; min-width: 180px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+}
+.ib-item i { color: var(--gold); font-size: 1rem; }
+.ib-item span { font-size: .8rem; color: var(--muted); }
+.ib-item strong { display: block; font-size: .85rem; color: var(--text); }
 
 .empty-svc { text-align: center; padding: 80px 0; color: var(--muted); }
-.empty-svc p { margin-top: 12px; font-size: .95rem; }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="hero">
-    <h1>{% if company %}{{ company.name }}{% else %}{% trans "Online rezervacija" %}{% endif %}</h1>
-    <p>{% if company and company.description %}{{ company.description }}{% else %}{% trans "Odaberite uslugu i zakažite termin u nekoliko klikova" %}{% endif %}</p>
+  <div class="hero-badge"><i class="fas fa-calendar-check"></i> Online rezervacija</div>
+  <h1>{% if company %}<strong>{{ company.name }}</strong>{% else %}Rezerviraj termin{% endif %}</h1>
+  <p class="hero-sub">Odaberite uslugu i zakažite termin u nekoliko klikova</p>
+  {% if company %}
+  <p class="hero-info"><i class="fas fa-map-marker-alt"></i> Vladislavci &nbsp;·&nbsp; +385 91 391 2621 &nbsp;·&nbsp; Pon–Pet 08–17h · Sub 08–13h</p>
+  {% endif %}
+  <div class="hero-steps">
+    <div class="hs"><span class="num">1</span>Usluga</div>
+    <div class="hs"><span class="num">2</span>Datum</div>
+    <div class="hs"><span class="num">3</span>Termin</div>
+    <div class="hs"><span class="num">4</span>Podaci</div>
+    <div class="hs"><span class="num">5</span>Potvrda</div>
+  </div>
+</div>
+
+<div class="info-bar">
+  <div class="ib-item"><i class="fas fa-clock"></i><div><strong>Pon – Pet</strong><span>08:00 – 17:00</span></div></div>
+  <div class="ib-item"><i class="fas fa-clock"></i><div><strong>Subota</strong><span>08:00 – 13:00</span></div></div>
+  <div class="ib-item"><i class="fas fa-check-circle"></i><div><strong>Potvrda u 2h</strong><span>WhatsApp / SMS</span></div></div>
+  <div class="ib-item"><i class="fas fa-phone"></i><div><strong>+385 91 391 2621</strong><span>Kruljac Ivica</span></div></div>
 </div>
 
 <div class="services-wrap">
-{% if services %}
-<div class="services-grid">
+  <p class="sw-title">Odaberite uslugu</p>
+  {% if services %}
+  <div class="services-grid">
     {% for s in services %}
     <a href="/appointments/booking/{{ s.id }}/wizard/" class="svc-card">
-        <div class="svc-icon">&#x1F4C5;</div>
-        <h5>{{ s.name }}</h5>
-        <p>{{ s.description|truncatechars:80 }}</p>
-        <div class="svc-badges">
-            {% if s.price %}<span class="svc-badge">{{ s.price }} EUR</span>{% endif %}
-            <span class="svc-badge">{{ s.duration }}</span>
-        </div>
+      <div class="svc-icon">
+        {% if "vulkan" in s.name|lower %}🔧
+        {% elif "ulje" in s.name|lower or "filter" in s.name|lower %}🛢️
+        {% elif "obd" in s.name|lower or "dijagn" in s.name|lower %}🔍
+        {% elif "registr" in s.name|lower or "tehni" in s.name|lower %}📋
+        {% elif "ugradnja" in s.name|lower %}⚙️
+        {% else %}🔩{% endif %}
+      </div>
+      <h5>{{ s.name }}</h5>
+      <p>{{ s.description|default:"Rezervirajte termin online — potvrda stiže u roku 2 sata." }}</p>
+      <div class="svc-badges">
+        {% if s.price %}<span class="svc-badge">{{ s.price }} €</span>{% else %}<span class="svc-badge">Upit</span>{% endif %}
+        <span class="svc-badge time">{{ s.duration_minutes }} min</span>
+      </div>
+      <div class="svc-cta"><span>Rezerviraj</span><i class="fas fa-arrow-right"></i></div>
     </a>
     {% endfor %}
-</div>
-{% else %}
-<div class="empty-svc">
-    <div style="font-size:3rem;color:var(--muted)">&#x1F4C5;</div>
-    <p>{% trans "Trenutno nema dostupnih usluga za online rezervaciju." %}</p>
-    <p style="font-size:.85rem;color:var(--muted)">{% trans "Kontaktirajte nas direktno." %}</p>
-</div>
-{% endif %}
+  </div>
+  {% else %}
+  <div class="empty-svc">
+    <div style="font-size:3rem">📅</div>
+    <p style="margin-top:12px">Trenutno nema dostupnih usluga za online rezervaciju.</p>
+    <p style="font-size:.85rem;color:var(--muted);margin-top:6px">Nazovite +385 91 391 2621</p>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
