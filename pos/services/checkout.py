@@ -41,7 +41,10 @@ class CheckoutService:
 
     @staticmethod
     def _next_receipt_number(session):
+        # select_for_update on session: serializes receipt_number per session (race condition fix)
         from django.db.models import Max
+        from pos.models import POSSession
+        POSSession.objects.select_for_update().filter(pk=session.pk).first()
         max_num = session.receipts.aggregate(m=Max('receipt_number'))['m'] or 0
         return max_num + 1
 

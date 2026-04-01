@@ -309,11 +309,16 @@ class POSReceipt(models.Model):
     def save(self, *args, **kwargs):
         if not self.global_number:
             from django.db.models import Max
+            from django.db import transaction as _tx
             company = self.session.terminal.company
-            last = POSReceipt.objects.filter(
-                session__terminal__company=company
-            ).aggregate(m=Max('global_number'))['m'] or 0
-            self.global_number = last + 1
+            # Atomic global_number: lock company row to serialize (race condition fix)
+            with _tx.atomic():
+                from companies.models import Company
+                Company.objects.select_for_update().filter(pk=company.pk).first()
+                last = POSReceipt.objects.filter(
+                    session__terminal__company=company
+                ).aggregate(m=Max('global_number'))['m'] or 0
+                self.global_number = last + 1
         super().save(*args, **kwargs)
 
     def __str__(self):

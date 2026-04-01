@@ -97,15 +97,18 @@ def terminal_detail(request, terminal_id):
 
 @login_required
 @require_POST
+@transaction.atomic
 def open_session(request, terminal_id):
-    terminal = get_object_or_404(POSTerminal, pk=terminal_id)
+    # select_for_update: serializes session creation per terminal (race condition fix)
+    terminal = get_object_or_404(POSTerminal.objects.select_for_update(), pk=terminal_id)
     company, err = _check_tenant(request, terminal)
     if err: return err
     if terminal.sessions.filter(status=POSSession.Status.OPEN).exists():
         messages.warning(request, 'Terminal already has an open session.')
         return redirect('pos:terminal_detail', terminal_id=terminal_id)
-    last = terminal.sessions.order_by('-session_number').first()
-    next_num = (last.session_number + 1) if last else 1
+    from django.db.models import Max
+    max_num = terminal.sessions.aggregate(m=Max('session_number'))['m'] or 0
+    next_num = max_num + 1
     opening_cash = Decimal(request.POST.get('opening_cash', '0') or '0')
     session = POSSession.objects.create(
         terminal=terminal, operator=request.user,
@@ -183,13 +186,16 @@ def close_session(request, session_id):
 
 @login_required
 @require_POST
+@transaction.atomic
 def new_receipt(request, session_id):
-    session = get_object_or_404(POSSession, pk=session_id)
+    # select_for_update: serializes receipt creation per session (race condition fix)
+    session = get_object_or_404(POSSession.objects.select_for_update(), pk=session_id)
     if session.status != POSSession.Status.OPEN:
         messages.error(request, 'Session is closed.')
         return redirect('pos:session_detail', session_id=session_id)
-    last = session.receipts.order_by('-receipt_number').first()
-    next_num = (last.receipt_number + 1) if last else 1
+    from django.db.models import Max
+    max_num = session.receipts.aggregate(m=Max('receipt_number'))['m'] or 0
+    next_num = max_num + 1
     receipt = POSReceipt.objects.create(
         session=session, receipt_number=next_num,
         table_number=request.POST.get('table_number', ''),
