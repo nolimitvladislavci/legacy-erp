@@ -33,9 +33,11 @@ FINA_ERACUN_URLS = {
 # Backward compat — stari kod koji koristi FINA_URLS
 FINA_URLS = FINA_ERACUN_URLS
 
-# SOAP namespaces for EvidentirajERacunZahtjev
+# SOAP namespaces
 NS_SOAP = 'http://schemas.xmlsoap.org/soap/envelope/'
 NS_EFIS = 'http://www.porezna-uprava.gov.hr/fin/2024/types/eFiskalizacija'
+# UBL 2.1 namespace for eRačun (distinct from eFiskalizacija)
+NS_UBL = 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2'
 
 
 def validate_eracun(eracun):
@@ -210,13 +212,25 @@ def sign_xml(root, cert_pem, key_pem):
 
 
 def wrap_soap(signed_root):
-    """Wrap signed XML in SOAP envelope."""
+    """Wrap signed XML in SOAP envelope (legacy eFiskalizacija format)."""
     envelope = etree.Element(
         f'{{{NS_SOAP}}}Envelope',
         nsmap={'soapenv': NS_SOAP}
     )
     body = etree.SubElement(envelope, f'{{{NS_SOAP}}}Body')
     body.append(signed_root)
+    return etree.tostring(envelope, pretty_print=True, xml_declaration=True, encoding='UTF-8')
+
+
+def wrap_soap_ubl(ubl_xml_bytes):
+    """Wrap UBL 2.1 XML in SOAP envelope for FINA eRačun service."""
+    envelope = etree.Element(
+        f'{{{NS_SOAP}}}Envelope',
+        nsmap={'soapenv': NS_SOAP}
+    )
+    body = etree.SubElement(envelope, f'{{{NS_SOAP}}}Body')
+    ubl_root = etree.fromstring(ubl_xml_bytes)
+    body.append(ubl_root)
     return etree.tostring(envelope, pretty_print=True, xml_declaration=True, encoding='UTF-8')
 
 
@@ -385,13 +399,18 @@ def process_eracun(eracun, config=None, user=None):
     eracun.save(update_fields=['status'])
 
     try:
-        root, req_uuid = build_fina_xml(eracun, config)
+        req_uuid = str(uuid.uuid4())
         eracun.fina_uuid = req_uuid
 
-        # 3. Sign
+        # 2b. Generate UBL 2.1 XML (EN 16931 / CIUS-2025 compliant)
+        from eracun.services.ubl_generator import generate_ubl_xml
+        ubl_xml = generate_ubl_xml(eracun)
+
+        # 3. Sign with XAdES-B
         cert_pem, key_pem = get_cert_pem(config)
         from eracun.services.xades_signer import sign_xades_b
-        signed_root = sign_xades_b(root, cert_pem, key_pem)
+        ubl_root = etree.fromstring(ubl_xml)
+        signed_root = sign_xades_b(ubl_root, cert_pem, key_pem)
         xml_payload = wrap_soap(signed_root)
 
         eracun.xml_request = xml_payload.decode('utf-8', errors='replace')
