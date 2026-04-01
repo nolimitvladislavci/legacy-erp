@@ -1,0 +1,56 @@
+{% if not orders %}
+<div class="text-center text-muted py-5">
+    <i class="fas fa-check-circle fa-3x mb-3" style="color:#28a745"></i>
+    <h5>Nema aktivnih narudzbi</h5>
+</div>
+{% else %}
+<div class="row">
+{% for order in orders %}
+<div class="col-md-4 col-lg-3 mb-3">
+    <div class="card order-card {% if order.status == 'new' %}border-danger{% elif order.status == 'preparing' %}border-warning{% else %}border-info{% endif %}">
+        <div class="card-header d-flex justify-content-between align-items-center py-2">
+            <strong>#{{ order.pk }}</strong>
+            <span class="badge {% if order.status == 'new' %}bg-danger{% elif order.status == 'preparing' %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                {{ order.get_status_display|default:order.status }}
+            </span>
+        </div>
+        <div class="card-body py-2">
+            {% if order.table_qr %}
+            <div class="mb-2"><i class="fas fa-chair me-1"></i><strong>{{ order.table_qr.table_number }}</strong></div>
+            {% endif %}
+            <div class="small text-muted mb-2">{{ order.created_at|timesince }} ago</div>
+
+            {% for item in order.items %}
+            <div class="d-flex justify-content-between py-1 border-bottom">
+                <span>{{ item.qty }}x <strong>{{ item.name }}</strong></span>
+                <span>{{ item.price }}&euro;</span>
+            </div>
+            {% if item.notes %}<div class="small text-warning">{{ item.notes }}</div>{% endif %}
+            {% endfor %}
+
+            <div class="d-flex justify-content-between mt-2 fw-bold">
+                <span>Ukupno</span>
+                <span>{{ order.total }} &euro;</span>
+            </div>
+        </div>
+        <div class="card-footer py-2 d-flex gap-1">
+            {% if order.status == 'new' %}
+            <button class="btn btn-sm btn-warning flex-fill" onclick="updateStatus({{ order.pk }},'preparing')">
+                <i class="fas fa-fire me-1"></i>Pripremam
+            </button>
+            {% elif order.status == 'accepted' or order.status == 'preparing' %}
+            <button class="btn btn-sm btn-success flex-fill" onclick="updateStatus({{ order.pk }},'ready')">
+                <i class="fas fa-check me-1"></i>Gotovo
+            </button>
+            {% endif %}
+            {% if order.status == 'ready' %}
+            <button class="btn btn-sm btn-primary flex-fill" onclick="updateStatus({{ order.pk }},'served')">
+                <i class="fas fa-concierge-bell me-1"></i>Posluzeno
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
