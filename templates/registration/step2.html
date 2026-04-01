@@ -217,7 +217,7 @@ document.getElementById('oibModal').addEventListener('click', function(e) {
     var q = this.value.trim();
     if (q.length < 3) { hintsEl.style.display = 'none'; return; }
     timer = setTimeout(function() {
-      fetch('/hr/register/api/name-search/?q=' + encodeURIComponent(q))
+      fetch('/register/api/name-search/?q=' + encodeURIComponent(q))
         .then(function(r) { return r.json(); })
         .then(function(d) {
           if (d.results && d.results.length > 0) {
@@ -286,7 +286,7 @@ document.getElementById('oibModal').addEventListener('click', function(e) {
     statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Tražim u registru" %}...';
     statusEl.style.color = '#888';
 
-    fetch('/hr/register/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=' + country)
+    fetch('/register/api/oib-lookup/?oib=' + encodeURIComponent(oib) + '&country=' + country)
       .then(function(r) { return r.json(); })
       .then(function(d) {
         if (d.found) {
