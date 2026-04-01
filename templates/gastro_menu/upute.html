@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upute — LIMIT Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --accent: #c9a84c; }
+        body { background: #1a1a1a; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; }
+        .hero { background: linear-gradient(135deg, #2a1a0a, #1a0a00); padding: 3rem 1rem; text-align: center; }
+        .hero h1 { color: var(--accent); font-size: 2rem; }
+        .hero p { color: #999; }
+        .section-title { color: var(--accent); border-left: 4px solid var(--accent); padding-left: 1rem; margin-top: 3rem; margin-bottom: 1rem; }
+        .flow-card { background: #222; border: 1px solid #333; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; }
+        .flow-card h5 { color: var(--accent); }
+        .flow-arrow { text-align: center; font-size: 1.5rem; color: var(--accent); padding: 0.5rem 0; }
+        .account-table { background: #222; }
+        .account-table th { background: #2a1a0a; color: var(--accent); border-color: #444; }
+        .account-table td { border-color: #333; color: #ccc; }
+        .badge-type { font-size: 0.7rem; }
+        code { color: var(--accent); background: #2a2a2a; padding: 2px 6px; border-radius: 3px; }
+        .legal-box { background: #1a2a1a; border: 1px solid #2a4a2a; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .warning-box { background: #2a1a1a; border: 1px solid #4a2a2a; border-radius: 8px; padding: 1rem; }
+        a { color: var(--accent); }
+        .toc a { color: #ccc; text-decoration: none; display: block; padding: 4px 0; }
+        .toc a:hover { color: var(--accent); }
+        footer { background: #111; padding: 2rem; text-align: center; color: #555; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+    <h1>Poslovni procesi — od primke do knjizenja</h1>
+    <p>Kompletni vodic kroz LIMIT Connect za {{ company_name|default:"vasu firmu" }}</p>
+    <p><small>Zadnje azuriranje: {{ generated_date|default:"2026-04-01" }}</small></p>
+</div>
+
+<div class="container py-4" style="max-width: 900px;">
+
+    <!-- TOC -->
+    <div class="flow-card">
+        <h5>Sadrzaj</h5>
+        <div class="toc">
+            <a href="#primka">1. Primka — zaprimanje robe u skladiste</a>
+            <a href="#knjizenje">2. Automatsko knjizenje (temeljnica)</a>
+            <a href="#prodaja">3. Prodaja — POS blagajna</a>
+            <a href="#racun">4. Izlazni racun — fakturiranje</a>
+            <a href="#ura">5. Ulazni racun (URA) — troskovi</a>
+            <a href="#pos-knjizenje">6. POS → Knjizenje (zatvaranje smjene)</a>
+            <a href="#pravne-osobe">7. Razlike po pravnim osobama</a>
+            <a href="#kontni-plan">8. Kontni plan — pregled konta</a>
+            <a href="#faq">9. Cesta pitanja</a>
+        </div>
+    </div>
+
+    <!-- 1. PRIMKA -->
+    <h3 class="section-title" id="primka">1. Primka — zaprimanje robe u skladiste</h3>
+
+    <div class="flow-card">
+        <h5>Sto je primka?</h5>
+        <p>Primka je dokument koji nastaje kad <strong>roba fizicki stize u vase skladiste</strong>.
+        To je ulaz u sustav — bez primke, sustav ne zna da imate robu.</p>
+
+        <h6>Koraci:</h6>
+        <ol>
+            <li><strong>Skladiste → Nova primka</strong> — odaberite dobavljaca i unesite artikle</li>
+            <li>Za svaki artikl unesite: <code>kolicina</code>, <code>nabavna cijena</code>, <code>prodajna cijena (MPC)</code></li>
+            <li>Sustav automatski racuna PDV, marzu i razliku u cijeni (RUC)</li>
+            <li>Kliknite <strong>"Potvrdi primku"</strong></li>
+        </ol>
+
+        <div class="legal-box">
+            <strong>Sto se dogodi kad potvrdite primku:</strong>
+            <ul class="mb-0">
+                <li>Zaliha se <strong>automatski povecava</strong> za unesenu kolicinu</li>
+                <li>Nabavna i prodajna cijena artikla se <strong>azuriraju</strong></li>
+                <li>Kreira se <strong>StockBatch</strong> sa LOT brojem i rokom trajanja (ako unesete)</li>
+                <li>Kreira se <strong>temeljnica</strong> (automatsko knjizenje) — vidi sekciju 2</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="flow-arrow">&#8595;</div>
+
+    <!-- 2. AUTOMATSKO KNJIZENJE -->
+    <h3 class="section-title" id="knjizenje">2. Automatsko knjizenje (temeljnica)</h3>
+
+    <div class="flow-card">
+        <h5>Kako sustav automatski knjizi primku?</h5>
+        <p>Kad potvrdite primku, sustav <strong>sam kreira temeljnicu</strong> u knjizi blagajne.
+        Ne trebate nista rucno knjiziti — sve je automatizirano.</p>
+
+        <h6>Veleprodajno zaduzenje (standardno za d.o.o., obrt):</h6>
+        <table class="table table-sm account-table">
+            <thead><tr><th>Strana</th><th>Konto</th><th>Naziv</th><th>Iznos</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>3000</td><td>Roba u skladistu</td><td>Nabavna cijena</td></tr>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>1400</td><td>Pretporez (ulazni PDV)</td><td>PDV iznos</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>2200</td><td>Dobavljaci (obveze)</td><td>Ukupno s PDV</td></tr>
+            </tbody>
+        </table>
+
+        <h6>Maloprodajno zaduzenje (za ugostiteljstvo, trgovinu):</h6>
+        <table class="table table-sm account-table">
+            <thead><tr><th>Strana</th><th>Konto</th><th>Naziv</th><th>Iznos</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>3000</td><td>Roba u skladistu</td><td>MPC (prodajna cijena)</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>2200</td><td>Dobavljaci</td><td>Nabavna cijena</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>3900</td><td>Razlika u cijeni (RUC)</td><td>Marza</td></tr>
+            </tbody>
+        </table>
+
+        <p class="text-muted small">Temeljnica se automatski oznaci kao "proknizena" i dobiva jedinstveni broj (PRIM-2026-0001).</p>
+    </div>
+
+    <div class="flow-arrow">&#8595;</div>
+
+    <!-- 3. PRODAJA -->
+    <h3 class="section-title" id="prodaja">3. Prodaja — POS blagajna</h3>
+
+    <div class="flow-card">
+        <h5>Sto se dogodi kad prodate artikl na kasi?</h5>
+        <ol>
+            <li>Blagajnik skenira ili odabere artikl</li>
+            <li>Odabere nacin placanja (gotovina, kartica, mobilno...)</li>
+            <li>Sustav <strong>fiskalizira racun</strong> prema FINA CIS-u (ZKI + JIR)</li>
+            <li>Zaliha se <strong>automatski smanjuje</strong> za prodanu kolicinu</li>
+            <li>Ako artikl ima <strong>sastavnicu (BOM)</strong>, smanjuju se i komponente</li>
+            <li>Koristi se <strong>FEFO</strong> (First Expire, First Out) — najstariji LOT ide prvi</li>
+        </ol>
+
+        <div class="warning-box">
+            <strong>Vazno:</strong> Ako je zaliha ispod minimuma, sustav salje upozorenje u
+            <strong>jutarnjem briefingu</strong> (BORG Morning Briefing @ 08:00).
+        </div>
+    </div>
+
+    <div class="flow-arrow">&#8595;</div>
+
+    <!-- 4. IZLAZNI RACUN -->
+    <h3 class="section-title" id="racun">4. Izlazni racun — fakturiranje</h3>
+
+    <div class="flow-card">
+        <h5>Automatsko knjizenje izlaznog racuna:</h5>
+        <p>Kad racun promijeni status u <code>POTVRDEN</code>, <code>FISKALIZIRAN</code>, <code>POSLAN</code> ili <code>PLACEN</code>,
+        sustav automatski kreira temeljnicu:</p>
+
+        <table class="table table-sm account-table">
+            <thead><tr><th>Strana</th><th>Konto</th><th>Naziv</th><th>Iznos</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>1200</td><td>Potrazivanja od kupaca</td><td>Ukupno s PDV</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>7000</td><td>Prihodi od prodaje</td><td>Neto (bez PDV)</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>2400</td><td>Obveze za PDV</td><td>PDV iznos</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flow-arrow">&#8595;</div>
+
+    <!-- 5. URA -->
+    <h3 class="section-title" id="ura">5. Ulazni racun (URA) — troskovi</h3>
+
+    <div class="flow-card">
+        <h5>Automatsko knjizenje ulaznog racuna:</h5>
+        <p>Kad zaprimite racun od dobavljaca (URA), sustav knjizi:</p>
+
+        <table class="table table-sm account-table">
+            <thead><tr><th>Strana</th><th>Konto</th><th>Naziv</th><th>Iznos</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>4000</td><td>Materijalni troskovi</td><td>Neto (bez PDV)</td></tr>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>1400</td><td>Pretporez (ulazni PDV)</td><td>PDV iznos</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>2200</td><td>Dobavljaci</td><td>Ukupno s PDV</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flow-arrow">&#8595;</div>
+
+    <!-- 6. POS KNJIZENJE -->
+    <h3 class="section-title" id="pos-knjizenje">6. POS → Knjizenje (zatvaranje smjene)</h3>
+
+    <div class="flow-card">
+        <h5>Sto se dogodi kad zatvorite POS smjenu?</h5>
+        <p>Sustav automatski agregira sve racune iz smjene i kreira <strong>jednu temeljnicu</strong>:</p>
+
+        <table class="table table-sm account-table">
+            <thead><tr><th>Strana</th><th>Konto</th><th>Naziv</th><th>Iznos</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>1000</td><td>Blagajna (gotovina)</td><td>Gotovinska uplata</td></tr>
+                <tr><td><span class="badge bg-info badge-type">DUGUJE</span></td><td>1210</td><td>Karticni terminal</td><td>Karticne uplate</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>7500</td><td>POS Prihodi</td><td>Neto prihod</td></tr>
+                <tr><td><span class="badge bg-warning text-dark badge-type">POTRAZUJE</span></td><td>2400</td><td>PDV</td><td>PDV iznos</td></tr>
+            </tbody>
+        </table>
+        <p class="text-muted small">Temeljnica se oznacava kao POS-2026-NNNN i automatski je proknizena.</p>
+    </div>
+
+    <!-- 7. PRAVNE OSOBE -->
+    <h3 class="section-title" id="pravne-osobe">7. Razlike po pravnim osobama</h3>
+
+    <div class="flow-card">
+        <h5>d.o.o. / j.d.o.o. / d.d.</h5>
+        <ul>
+            <li>Standardni kontni plan (klase 0-9)</li>
+            <li>Obveza PDV prijave (mjesecna ili kvartalna)</li>
+            <li>Godisnji financijski izvjestaj: <strong>PR-IZ</strong> (Prijava poreza na dobit)</li>
+            <li>Fiskalizacija: <strong>obavezna</strong></li>
+        </ul>
+    </div>
+
+    <div class="flow-card">
+        <h5>Obrt</h5>
+        <ul>
+            <li>Standardni kontni plan</li>
+            <li>Moze biti u sustavu PDV-a ili <strong>izvan sustava PDV-a</strong> (prag 40.000 EUR/god)</li>
+            <li>Porez na dohodak umjesto poreza na dobit</li>
+            <li>Fiskalizacija: <strong>obavezna</strong></li>
+        </ul>
+    </div>
+
+    <div class="flow-card">
+        <h5>OPG (Obiteljsko poljoprivredno gospodarstvo)</h5>
+        <ul>
+            <li>Posebna pravila za amortizaciju poljoprivredne opreme</li>
+            <li>Dopustena negativna zaliha (sezonska berba)</li>
+            <li>Razlicit porezni tretman za voce/povrce</li>
+            <li>Fiskalizacija: ovisi o vrsti prodaje</li>
+        </ul>
+    </div>
+
+    <div class="flow-card">
+        <h5>Udruga / Zadruga / Ustanova (neprofitne)</h5>
+        <ul>
+            <li><strong>Poseban kontni plan</strong> — klase 1-5 (ne standardnih 0-9)</li>
+            <li>Klasa 3 = Prihodi (clanarinom, prodajom, donacijama)</li>
+            <li>Klasa 4 = Rashodi (place, materijal, amortizacija)</li>
+            <li>Godisnji izvjestaj: <strong>PR-RAS-NPF</strong> (ne PR-IZ)</li>
+            <li>Mogu biti <strong>izuzete od fiskalizacije</strong></li>
+            <li>AOP brojevi za automatsko popunjavanje obrazaca</li>
+        </ul>
+    </div>
+
+    <div class="flow-card">
+        <h5>Iznajmljivac</h5>
+        <ul>
+            <li>POS tip: <code>reception</code> (recepcija)</li>
+            <li>Automatska prijava gostiju (eVisitor integracija)</li>
+            <li>Naplata po sobi/nocenju umjesto po artiklu</li>
+        </ul>
+    </div>
+
+    <!-- 8. KONTNI PLAN -->
+    <h3 class="section-title" id="kontni-plan">8. Kontni plan — pregled konta</h3>
+
+    <div class="flow-card">
+        <table class="table table-sm account-table">
+            <thead><tr><th>Konto</th><th>Naziv</th><th>Vrsta</th><th>Koristi se za</th></tr></thead>
+            <tbody>
+                <tr><td><code>1000</code></td><td>Ziro racun / Blagajna</td><td>Imovina</td><td>Gotovinski primici</td></tr>
+                <tr><td><code>1200</code></td><td>Potrazivanja od kupaca</td><td>Imovina</td><td>Izdani racuni</td></tr>
+                <tr><td><code>1210</code></td><td>Karticni terminal</td><td>Imovina</td><td>POS karticne uplate</td></tr>
+                <tr><td><code>1400</code></td><td>Pretporez (ulazni PDV)</td><td>Imovina</td><td>PDV na primke i URA</td></tr>
+                <tr><td><code>2200</code></td><td>Dobavljaci (obveze)</td><td>Obveze</td><td>Primke, ulazni racuni</td></tr>
+                <tr><td><code>2400</code></td><td>Obveze za PDV</td><td>Obveze</td><td>Izlazni PDV</td></tr>
+                <tr><td><code>3000</code></td><td>Roba u skladistu</td><td>Imovina</td><td>Vrijednost zalihe</td></tr>
+                <tr><td><code>3900</code></td><td>Razlika u cijeni (RUC)</td><td>Obveze</td><td>Marza kod maloprodaje</td></tr>
+                <tr><td><code>4000</code></td><td>Materijalni troskovi</td><td>Rashod</td><td>Ulazni racuni</td></tr>
+                <tr><td><code>7000</code></td><td>Prihodi od prodaje</td><td>Prihod</td><td>Izlazni racuni</td></tr>
+                <tr><td><code>7500</code></td><td>POS Prihodi</td><td>Prihod</td><td>Blagajnicki promet</td></tr>
+                <tr><td><code>7900</code></td><td>Ostali prihodi</td><td>Prihod</td><td>Inventurni viskovi</td></tr>
+                <tr><td><code>9100</code></td><td>Roba na konsignaciji</td><td>Izvanbilancno</td><td>Tuda roba kod nas</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 9. FAQ -->
+    <h3 class="section-title" id="faq">9. Cesta pitanja</h3>
+
+    <div class="flow-card">
+        <h6>Moram li rucno knjiziti nakon primke?</h6>
+        <p><strong>Ne.</strong> Sustav automatski kreira temeljnicu kad potvrdite primku. Sve je proknizeno.</p>
+    </div>
+
+    <div class="flow-card">
+        <h6>Sto ako sam pogrijesio cijenu na primci?</h6>
+        <p>Kreirajte novu primku s ispravnom cijenom ili koristite <strong>korekciju zalihe</strong> (Skladiste → Korekcija).</p>
+    </div>
+
+    <div class="flow-card">
+        <h6>Kako znam da mi je zaliha niska?</h6>
+        <p>Postavite <code>min_quantity</code> na svakom artiklu. BORG jutarnji briefing (08:00) ce vas upozoriti WhatsApp porukom ako zaliha padne ispod minimuma.</p>
+    </div>
+
+    <div class="flow-card">
+        <h6>Sto znaci "FEFO" kod prodaje?</h6>
+        <p><strong>First Expire, First Out</strong> — sustav automatski skida zalihu s najstarijeg LOT-a (najraniji rok trajanja). Ovo je zakonska obveza za hranu (EU 178/2002).</p>
+    </div>
+
+    <div class="flow-card">
+        <h6>Trebam li SAF-T?</h6>
+        <p>SAF-T HR je standard za poreznu reviziju. Mozete ga generirati u <strong>Konto → SAF-T Export</strong> za bilo koje razdoblje. XML datoteka sadrzi sve temeljnice, partnere i racune.</p>
+    </div>
+
+</div>
+
+<footer>
+    Powered by <strong>LIMIT Connect</strong> — BORG Proactive Engine<br>
+    <small>Generirano automatski. Svi podaci odgovaraju trenutnoj konfiguraciji sustava.</small>
+</footer>
+
+</body>
+</html>

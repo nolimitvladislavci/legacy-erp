@@ -155,3 +155,17 @@ def update_price(request):
         return JsonResponse({'ok': False, 'error': 'Item not found'}, status=404)
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=400)
+
+
+
+# ── Upute (javno dostupne) ────────────────────────────────────────
+
+def upute(request, slug):
+    """Javna stranica s uputama — od primke do knjizenja."""
+    menu = get_object_or_404(DigitalMenu, slug=slug, is_active=True)
+    from django.utils import timezone
+    return render(request, 'gastro_menu/upute.html', {
+        'menu': menu,
+        'company_name': menu.company.name,
+        'generated_date': timezone.now().strftime('%d.%m.%Y'),
+    })

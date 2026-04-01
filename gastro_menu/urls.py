@@ -11,4 +11,7 @@ urlpatterns = [
     path('admin/', views.admin_dashboard, name='admin_dashboard'),
     path('admin/toggle-availability/', views.toggle_availability, name='toggle_availability'),
     path('admin/update-price/', views.update_price, name='update_price'),
+
+    # Upute (javno)
+    path('menu/<slug:slug>/upute/', views.upute, name='upute'),
 ]
