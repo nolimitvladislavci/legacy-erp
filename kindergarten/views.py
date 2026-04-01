@@ -505,19 +505,11 @@ def bulk_import_children(request):
                                             f'/vrtic/{company.booking_slug or company.pk}/portal/'
                                         )
                                         msg = (
-                                            f'Postovani {g_first},
-
-'
-                                            f'Pristup roditeljskom portalu vrtica:
-'
-                                            f'{portal_url}
-
-'
-                                            f'Email: {g_email}
-'
-                                            f'Lozinka: {password}
-
-'
+                                            f'Postovani {g_first},\n\n'
+                                            f'Pristup roditeljskom portalu vrtica:\n'
+                                            f'{portal_url}\n\n'
+                                            f'Email: {g_email}\n'
+                                            f'Lozinka: {password}\n\n'
                                             f'Molimo promijenite lozinku nakon prvog pristupa.'
                                         )
                                         send_text(phone=g_phone, message=msg,
