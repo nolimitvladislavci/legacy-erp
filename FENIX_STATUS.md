@@ -521,3 +521,9 @@ CC Code je svjesno ostavio whitelist provjeru umjesto transition_to() za kreiran
 **Razlog:** Claude API podržava do 20 slika/pozivu. CCX53 (32 vCPU) može paralelno opsluživati više korisnika s 15 slika istovremeno.
 **Napomena:** Na trenutnom serveru radi za 1 korisnika, za produkciju s više firmi paralelno treba CCX53.
 **Status:** PENDING
+
+---
+## CLAUDE.AI MAX PLAN
+Plaćeno: 01.04.2026. | Ističe: ~01.05.2026.
+Automatska naplata: NIJE uključena
+Podsjetnik: ~25.04.2026.
