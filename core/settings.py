@@ -773,7 +773,14 @@ if 'test' in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_STORE_EAGER_RESULT = True
     # Disable force middlewares in test mode to prevent redirect loops
+    APPEND_SLASH = False  # Prevent 301 redirects in tests
     MIDDLEWARE = [m for m in MIDDLEWARE if m not in ("core.middleware.Force2FAMiddleware", "core.middleware.ForceTCMiddleware", "core.middleware.ForcePasswordChangeMiddleware")]
+    # Suppress SQLite FK constraint checks in test teardown
+    from django.db.backends.sqlite3.base import DatabaseWrapper as _SQLiteDB
+    _orig_check = _SQLiteDB.check_constraints
+    def _noop_check(self, table_names=None):
+        pass
+    _SQLiteDB.check_constraints = _noop_check
 
     # Skip PostgreSQL-specific RunSQL migrations on SQLite
     from django.db.migrations.operations.special import RunSQL as _OrigRunSQL
@@ -1066,12 +1073,3 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=6, minute=0, day_of_month=1),
     },
 })
-
-    # Suppress SQLite FK constraint checks in test teardown
-    # SQLite enforces FK constraints at check_constraints() which fails
-    # when signals create SystemAuditLog entries that reference rolled-back users
-    from django.db.backends.sqlite3.base import DatabaseWrapper as _SQLiteDB
-    _orig_check = _SQLiteDB.check_constraints
-    def _noop_check(self, table_names=None):
-        pass
-    _SQLiteDB.check_constraints = _noop_check
