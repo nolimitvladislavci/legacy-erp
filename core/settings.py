@@ -983,3 +983,37 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=4, minute=15),
     },
 })
+
+# ── BORG FENIX Autonomous Tasks ──────────────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    # Self-heal: every 15 min
+    "borg-self-heal": {
+        "task": "borg_ops.self_heal.health_check_and_heal",
+        "schedule": crontab(minute="*/15"),
+    },
+    # Signal dedup + auto-resolve: every hour
+    "borg-signal-cleanup": {
+        "task": "limit_connect_ai.tasks_signal.signal_dedup_and_resolve",
+        "schedule": crontab(minute=5),  # XX:05
+    },
+    # Ops task sync: every 6 hours
+    "borg-ops-sync": {
+        "task": "borg_ops.connector.sync_ops_tasks",
+        "schedule": crontab(hour="*/6", minute=10),
+    },
+    # Opportunity digest: weekly Monday 07:00
+    "borg-opportunity-digest": {
+        "task": "limit_connect_ai.tasks_opportunity.opportunity_digest",
+        "schedule": crontab(hour=7, minute=0, day_of_week=1),
+    },
+    # Anomaly scan: daily at 04:00
+    "borg-anomaly-scan": {
+        "task": "core.anomaly_detector.detect_cross_company_anomalies",
+        "schedule": crontab(hour=4, minute=0),
+    },
+    # Knowledge from patrols: daily at 05:00
+    "borg-kb-from-patrols": {
+        "task": "ai_assistant.quick_actions.generate_knowledge_from_patrols",
+        "schedule": crontab(hour=5, minute=0),
+    },
+})

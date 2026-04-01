@@ -1,7 +1,6 @@
 """
-BORG FENIX — Ops Connector (F3.3)
-Connects CardActivity workflow to work_orders, invoicing, and POS modules.
-Auto-creates cards from new work orders and invoices.
+BORG FENIX - Ops Connector v2 (F4 - uses BorgTask model)
+Auto-creates BorgTasks from overdue invoices, anomalies, signals, adaptations.
 """
 import logging
 from celery import shared_task
@@ -12,107 +11,159 @@ logger = logging.getLogger('borg.ops')
 
 
 @shared_task
-def sync_ops_cards():
+def sync_ops_tasks():
     """
-    Sync BORG Ops cards with actual business events:
-    1. New overdue invoices → CardActivity (type=followup)
-    2. New work orders → CardActivity (type=work_order)
-    3. Update SLA timestamps
+    Sync BORG tasks with business events:
+    1. Overdue invoices -> followup tasks
+    2. Unresolved signals -> signal tasks
+    3. Pending adaptations -> adaptation tasks
+    4. New opportunity matches -> opportunity tasks
     """
-    from borg_ops.models import CardActivity, StatusTimestamp
+    from borg_ops.models import BorgTask
 
-    stats = {'invoices_synced': 0, 'work_orders_synced': 0}
+    stats = {'invoices': 0, 'signals': 0, 'adaptations': 0, 'opportunities': 0}
 
-    # 1. Overdue invoices → ops cards
+    # 1. Overdue invoices
     try:
         from invoicing.models import Invoice
         overdue = Invoice.objects.filter(
-            status='UNPAID',
+            status__in=['UNPAID', 'OVERDUE'],
             date_due__lt=timezone.now().date(),
-        ).exclude(
-            number__in=CardActivity.objects.values_list('reference_id', flat=True),
-        )[:50]
-
-        for inv in overdue:
-            card = CardActivity.objects.create(
-                card_type='followup',
-                reference_id=inv.number,
-                title=f"Naplata: {inv.number} - {inv.client_name or 'N/A'}",
-                description=f"Faktura {inv.number} dospjela {inv.date_due}. Iznos: {inv.total} EUR.",
-                status='pending',
-                priority='high' if inv.total > 1000 else 'normal',
+        )
+        existing_refs = set(
+            BorgTask.objects.filter(task_type='followup')
+            .values_list('reference_id', flat=True)
+        )
+        for inv in overdue[:50]:
+            ref = str(inv.number or inv.id)
+            if ref in existing_refs:
+                continue
+            BorgTask.objects.create(
+                company=inv.company,
+                task_type='followup',
+                title=f'Naplata: {inv.number} - {inv.client_name or "N/A"}',
+                description=f'Faktura dospjela {inv.date_due}. Iznos: {inv.total} EUR.',
+                priority=2 if float(inv.total or 0) > 1000 else 3,
+                reference_type='invoice',
+                reference_id=ref,
+                due_date=inv.date_due,
             )
-            StatusTimestamp.objects.create(
-                card=card,
-                from_status='',
-                to_status='pending',
-            )
-            stats['invoices_synced'] += 1
+            stats['invoices'] += 1
     except Exception as e:
-        logger.warning('Invoice sync failed: %s', e)
+        logger.warning('Invoice sync: %s', e)
 
-    # 2. Open work orders → ops cards
+    # 2. Unresolved signals (triaged, not resolved)
     try:
-        from work_orders.models import WorkOrder
-        open_wo = WorkOrder.objects.filter(
-            status__in=['draft', 'in_progress'],
-        ).exclude(
-            id__in=[
-                int(ref) for ref in
-                CardActivity.objects.filter(card_type='work_order')
-                .values_list('reference_id', flat=True)
-                if ref.isdigit()
-            ],
-        )[:50]
-
-        for wo in open_wo:
-            card = CardActivity.objects.create(
-                card_type='work_order',
-                reference_id=str(wo.id),
-                title=f"RN: {wo.number or wo.id} - {getattr(wo, 'client', 'N/A')}",
-                description=f"Radni nalog {getattr(wo, 'number', wo.id)}.",
-                status='in_progress',
-                priority='normal',
+        from limit_connect_ai.models_signal import FenixSignal
+        signals = FenixSignal.objects.filter(status='new').order_by('-created_at')[:20]
+        existing_sigs = set(
+            BorgTask.objects.filter(task_type='signal')
+            .values_list('reference_id', flat=True)
+        )
+        for sig in signals:
+            ref = str(sig.id)
+            if ref in existing_sigs:
+                continue
+            BorgTask.objects.create(
+                task_type='signal',
+                title=f'Signal: {sig.message[:80]}',
+                description=f'Page: {sig.page_url or "N/A"}',
+                priority=3,
+                reference_type='signal',
+                reference_id=ref,
             )
-            stats['work_orders_synced'] += 1
+            stats['signals'] += 1
     except Exception as e:
-        logger.warning('Work order sync failed: %s', e)
+        logger.warning('Signal sync: %s', e)
+
+    # 3. Pending adaptation rules
+    try:
+        from limit_connect_ai.models_knowledge_graph import AdaptationRule
+        pending = AdaptationRule.objects.filter(is_executed=False)
+        existing_adapt = set(
+            BorgTask.objects.filter(task_type='adaptation')
+            .values_list('reference_id', flat=True)
+        )
+        for rule in pending:
+            ref = str(rule.id)
+            if ref in existing_adapt:
+                continue
+            BorgTask.objects.create(
+                task_type='adaptation',
+                title=f'Adaptacija: {rule.action_description[:80]}',
+                description=f'Tip: {rule.rule_type}, Modul: {rule.target_module}',
+                priority=2 if rule.can_auto_apply else 3,
+                reference_type='adaptation_rule',
+                reference_id=ref,
+            )
+            stats['adaptations'] += 1
+    except Exception as e:
+        logger.warning('Adaptation sync: %s', e)
+
+    # 4. New opportunity matches (notified but not acted on)
+    try:
+        from limit_connect_ai.models import ClientOpportunityMatch
+        from django.db.models import Sum
+        # Group by company, count matches
+        companies_with_opps = (
+            ClientOpportunityMatch.objects
+            .filter(status='notified')
+            .values('company_id', 'company__name')
+            .annotate(cnt=Count('id'), savings=Sum('calculated_savings'))
+            .filter(cnt__gte=5)
+            .order_by('-savings')[:20]
+        )
+        existing_opp = set(
+            BorgTask.objects.filter(task_type='opportunity')
+            .values_list('reference_id', flat=True)
+        )
+        for co in companies_with_opps:
+            ref = f"opp-{co['company_id']}"
+            if ref in existing_opp:
+                continue
+            BorgTask.objects.create(
+                company_id=co['company_id'],
+                task_type='opportunity',
+                title=f'{co["company__name"]}: {co["cnt"]} prilika ({float(co["savings"] or 0):.0f} EUR)',
+                description=f'{co["cnt"]} neiskoristenih olaksica za {co["company__name"]}.',
+                priority=3,
+                reference_type='opportunity_batch',
+                reference_id=ref,
+            )
+            stats['opportunities'] += 1
+    except Exception as e:
+        logger.warning('Opportunity sync: %s', e)
 
     logger.info('Ops sync: %s', stats)
     return stats
 
 
 @shared_task
-def ops_sla_check():
-    """Check SLA breaches for all active ops cards."""
-    from borg_ops.models import CardActivity, StatusTimestamp
+def ops_dashboard_stats():
+    """Return BORG Ops dashboard statistics."""
+    from borg_ops.models import BorgTask
+    from django.db.models import Count
 
-    active = CardActivity.objects.filter(
-        status__in=['pending', 'in_progress'],
+    total = BorgTask.objects.count()
+    by_status = dict(
+        BorgTask.objects.values_list('status')
+        .annotate(c=Count('id'))
+        .values_list('status', 'c')
+    )
+    by_type = dict(
+        BorgTask.objects.values_list('task_type')
+        .annotate(c=Count('id'))
+        .values_list('task_type', 'c')
+    )
+    by_priority = dict(
+        BorgTask.objects.values_list('priority')
+        .annotate(c=Count('id'))
+        .values_list('priority', 'c')
     )
 
-    sla_breaches = 0
-    now = timezone.now()
-
-    for card in active:
-        # Calculate time in current status
-        last_ts = StatusTimestamp.objects.filter(card=card).order_by('-timestamp').first()
-        if not last_ts:
-            continue
-
-        hours_in_status = (now - last_ts.timestamp).total_seconds() / 3600
-
-        # SLA thresholds
-        sla_hours = {
-            'high': 4,
-            'urgent': 1,
-            'normal': 24,
-            'low': 72,
-        }
-
-        threshold = sla_hours.get(getattr(card, 'priority', 'normal'), 24)
-        if hours_in_status > threshold:
-            sla_breaches += 1
-
-    logger.info('SLA check: %d active cards, %d breaches', active.count(), sla_breaches)
-    return {'active': active.count(), 'sla_breaches': sla_breaches}
+    return {
+        'total': total,
+        'by_status': by_status,
+        'by_type': by_type,
+        'by_priority': by_priority,
+    }
