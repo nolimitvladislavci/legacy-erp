@@ -54,13 +54,13 @@ class SymbiosisBaseTestCase(TestCase):
             country='HR',
             fiscal_system='hr_fiscal',
         )
-        cls.tax25 = TaxRate.objects.create(
+        cls.tax25, _ = TaxRate.objects.get_or_create(
             country='HR', name='PDV 25%', rate=Decimal('25.00'),
         )
-        cls.tax13 = TaxRate.objects.create(
+        cls.tax13, _ = TaxRate.objects.get_or_create(
             country='HR', name='PDV 13%', rate=Decimal('13.00'),
         )
-        cls.tax0 = TaxRate.objects.create(
+        cls.tax0, _ = TaxRate.objects.get_or_create(
             country='HR', name='Oslobodeno', rate=Decimal('0.00'),
         )
 

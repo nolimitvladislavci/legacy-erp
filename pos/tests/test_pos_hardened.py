@@ -623,7 +623,7 @@ class TestRaceCondition(POSTestMixin, TransactionTestCase):
         UserProfile.objects.create(user=user, company=company)
         tax = TaxRate.objects.filter(country='HR', rate=25).first()
         if not tax:
-            tax = TaxRate.objects.create(country='HR', rate=25, name='PDV 25%')
+            tax, _ = TaxRate.objects.get_or_create(country='HR', rate=25, name='PDV 25%')
         from pos.models import POSTerminal
         term = POSTerminal.objects.create(company=company, name='Race T', terminal_code='RC01', pos_type='quick')
         item = InventoryItem.objects.create(

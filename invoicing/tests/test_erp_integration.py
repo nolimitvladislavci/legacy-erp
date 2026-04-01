@@ -624,7 +624,7 @@ class TestModelIntegritet(TestCase):
         make_tax_rate(Decimal('7.00'), 'DE')
         with self.assertRaises(IntegrityError,
                 msg="Dupli TaxRate (DE, 7%) mora podignuti IntegrityError"):
-            TaxRate.objects.create(
+            TaxRate.objects.get_or_create(
                 country='DE', rate=Decimal('7.00'),
                 name='Duplikat', is_default=False, is_active=True,
             )
