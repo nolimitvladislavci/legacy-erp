@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}SAF-T HR Export{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-file-export me-2"></i>SAF-T HR Export</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Generirajte Standard Audit File for Tax (SAF-T) u XML formatu
+                        za odabrano razdoblje. OECD v2.0 HR shema.
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="period_from" class="form-label">Od datuma</label>
+                            <input type="date" class="form-control" id="period_from"
+                                   name="period_from" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="period_to" class="form-label">Do datuma</label>
+                            <input type="date" class="form-control" id="period_to"
+                                   name="period_to" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-download me-2"></i>Generiraj i preuzmi XML
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

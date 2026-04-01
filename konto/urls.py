@@ -80,4 +80,7 @@ urlpatterns = [
     # AI Review Queue
     path('ai-review/', views_ai_review.ai_review_queue, name='ai_review_queue'),
     path('ai-review/<int:pk>/confirm/', views_ai_review.ai_confirm_booking, name='ai_confirm_booking'),
+
+    # SAF-T HR Export
+    path('saft/export/', views.saft_export_view, name='saft_export'),
 ]

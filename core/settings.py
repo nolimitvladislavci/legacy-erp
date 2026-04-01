@@ -1047,3 +1047,20 @@ CELERY_BEAT_SCHEDULE.update({
         "schedule": crontab(hour=4, minute=0),
     },
 })
+
+
+# ── Kindergarten Vertikala — beat schedule ─────────────────────────────────
+CELERY_BEAT_SCHEDULE.update({
+    "kindergarten-absence-alert": {
+        "task": "kindergarten.send_absence_alert",
+        "schedule": crontab(hour=10, minute=0, day_of_week='1-5'),
+    },
+    "kindergarten-billing-reminder": {
+        "task": "kindergarten.send_billing_reminder",
+        "schedule": crontab(hour=8, minute=0),
+    },
+    "kindergarten-monthly-billing": {
+        "task": "kindergarten.generate_monthly_billings",
+        "schedule": crontab(hour=6, minute=0, day_of_month=1),
+    },
+})

@@ -386,3 +386,169 @@ def daily_report_create(request):
     return render(request, 'kindergarten/daily_report_form.html', {
         'groups': groups, 'today': timezone.now().date(),
     })
+
+
+
+# ── Bulk CSV Import ────────────────────────────────────────────────────────
+
+@login_required
+def bulk_import_children(request):
+    """CSV import djece + roditelja. Auto-create User za portal pristup."""
+    import csv
+    import io
+    import secrets
+    from django.contrib.auth import get_user_model
+    from kindergarten.forms import BulkChildImportForm
+
+    User = get_user_model()
+    company = _company(request)
+
+    if request.method == 'POST':
+        form = BulkChildImportForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
+            send_invites = form.cleaned_data.get('send_portal_invites', True)
+
+            decoded = csv_file.read().decode('utf-8-sig')
+            reader = csv.DictReader(io.StringIO(decoded), delimiter=';')
+
+            created_children = 0
+            created_guardians = 0
+            errors = []
+
+            for row_num, row in enumerate(reader, 2):
+                try:
+                    # Parse child
+                    first_name = row.get('ime', '').strip()
+                    last_name = row.get('prezime', '').strip()
+                    dob_str = row.get('datum_rodenja', '').strip()
+                    oib = row.get('oib', '').strip()
+
+                    if not first_name or not last_name:
+                        errors.append(f'Red {row_num}: ime/prezime prazno')
+                        continue
+
+                    # Parse date
+                    from datetime import datetime
+                    try:
+                        dob = datetime.strptime(dob_str, '%d.%m.%Y').date()
+                    except (ValueError, TypeError):
+                        try:
+                            dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+                        except (ValueError, TypeError):
+                            errors.append(f'Red {row_num}: neispravan datum "{dob_str}"')
+                            continue
+
+                    # Find group
+                    group_name = row.get('grupa', '').strip()
+                    group = None
+                    if group_name:
+                        group = KindergartenGroup.objects.filter(
+                            company=company, name__iexact=group_name
+                        ).first()
+
+                    # Create child
+                    child, child_created = Child.objects.get_or_create(
+                        company=company,
+                        first_name=first_name,
+                        last_name=last_name,
+                        date_of_birth=dob,
+                        defaults={
+                            'oib': oib,
+                            'group': group,
+                            'status': 'active',
+                            'gdpr_consent': True,
+                            'gdpr_consent_date': timezone.now(),
+                            'enrolled_date': timezone.now().date(),
+                        },
+                    )
+                    if child_created:
+                        created_children += 1
+
+                    # Parse guardian
+                    g_first = row.get('roditelj_ime', '').strip()
+                    g_last = row.get('roditelj_prezime', '').strip()
+                    g_email = row.get('roditelj_email', '').strip()
+                    g_phone = row.get('roditelj_telefon', '').strip()
+
+                    if g_first and g_last:
+                        guardian, g_created = Guardian.objects.get_or_create(
+                            company=company,
+                            first_name=g_first,
+                            last_name=g_last,
+                            defaults={
+                                'email': g_email,
+                                'phone': g_phone,
+                            },
+                        )
+                        if g_created:
+                            created_guardians += 1
+
+                            # Create User for portal access
+                            if g_email:
+                                password = secrets.token_urlsafe(12)
+                                user = User.objects.create_user(
+                                    username=g_email,
+                                    email=g_email,
+                                    password=password,
+                                    first_name=g_first,
+                                    last_name=g_last,
+                                )
+                                guardian.user = user
+                                guardian.save(update_fields=['user'])
+
+                                # Send portal invite
+                                if send_invites and g_phone:
+                                    try:
+                                        from core.whatsapp import send_text
+                                        portal_url = request.build_absolute_uri(
+                                            f'/vrtic/{company.booking_slug or company.pk}/portal/'
+                                        )
+                                        msg = (
+                                            f'Postovani {g_first},
+
+'
+                                            f'Pristup roditeljskom portalu vrtica:
+'
+                                            f'{portal_url}
+
+'
+                                            f'Email: {g_email}
+'
+                                            f'Lozinka: {password}
+
+'
+                                            f'Molimo promijenite lozinku nakon prvog pristupa.'
+                                        )
+                                        send_text(phone=g_phone, message=msg,
+                                                  company_id=str(company.pk))
+                                    except Exception:
+                                        pass
+
+                        # Link child to guardian
+                        ChildGuardian.objects.get_or_create(
+                            child=child,
+                            guardian=guardian,
+                            defaults={
+                                'is_primary': True,
+                                'is_billing_contact': True,
+                            },
+                        )
+
+                except Exception as e:
+                    errors.append(f'Red {row_num}: {str(e)[:100]}')
+
+            messages.success(
+                request,
+                f'Import zavrsen: {created_children} djece, {created_guardians} roditelja. '
+                f'{len(errors)} gresaka.'
+            )
+            if errors:
+                for err in errors[:10]:
+                    messages.warning(request, err)
+
+            return redirect('kindergarten:child_list')
+    else:
+        form = BulkChildImportForm()
+
+    return render(request, 'kindergarten/bulk_import.html', {'form': form})

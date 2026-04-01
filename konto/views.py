@@ -1534,3 +1534,49 @@ def report_koerperschaftsteuer(request):
         'years': years,
         'company': company,
     })
+
+
+
+# ── SAF-T HR Export ────────────────────────────────────────────────────────
+
+@login_required
+def saft_export_view(request):
+    """SAF-T HR export — form za period selection + trigger generacije."""
+    from konto.saft_generator import SAFTGenerator
+    from django.http import HttpResponse
+    from datetime import date
+
+    if request.method == 'POST':
+        period_from = request.POST.get('period_from', '')
+        period_to = request.POST.get('period_to', '')
+
+        try:
+            pf = date.fromisoformat(period_from)
+            pt = date.fromisoformat(period_to)
+        except (ValueError, TypeError):
+            from django.contrib import messages
+            messages.error(request, 'Neispravan format datuma.')
+            return render(request, 'konto/saft_export.html')
+
+        gen = SAFTGenerator(request.company, pf, pt)
+        xml = gen.generate()
+
+        response = HttpResponse(xml, content_type='application/xml')
+        filename = f'SAFT_{request.company.oib}_{pf}_{pt}.xml'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        # BorgAuditEntry
+        try:
+            from borg_ops.audit_helpers import log_borg_audit
+            log_borg_audit(
+                company=request.company,
+                entry_type='EXPORT',
+                summary=f'SAF-T HR download: {pf} do {pt}',
+                user=request.user,
+            )
+        except Exception:
+            pass
+
+        return response
+
+    return render(request, 'konto/saft_export.html')
