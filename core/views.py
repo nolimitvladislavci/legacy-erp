@@ -769,6 +769,18 @@ def company_dashboard(request):
         company = request.user.profile.company
     except Exception:
         logger.warning("Suppressed error", exc_info=True)
+
+    # Korisnik bez firme — onboarding
+    if not company:
+        messages.info(
+            request,
+            'Dobrodošli! Vaš račun još nema povezanu tvrtku. '
+            'Kontaktirajte administratora ili registrirajte tvrtku.'
+        )
+        return render(request, 'dashboard/no_company.html', {
+            'user': request.user,
+        })
+
     # Umbrella companies go to umbrella dashboard
     if company and company.is_umbrella:
         return redirect("umbrella_dashboard")
@@ -2380,7 +2392,7 @@ def smart_home(request):
     role = getattr(getattr(user, 'profile', None), 'role', None)
 
     if role in ('company_admin', 'project_manager') or (user.is_staff and not user.is_superuser):
-        return redirect('pos:dashboard')
+        return redirect('company_dashboard')
     elif role == 'investor':
         return redirect('investor_dashboard')
     elif role == 'partner':
@@ -2388,7 +2400,7 @@ def smart_home(request):
     elif role == 'worker':
         return redirect('worker_dashboard')
     else:
-        return redirect('pos:dashboard')
+        return redirect('company_dashboard')
 
 
 # ══════════════════════════════════════════════════════════════

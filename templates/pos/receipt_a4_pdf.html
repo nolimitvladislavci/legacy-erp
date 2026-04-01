@@ -160,6 +160,13 @@ td   { padding: 3px 5px; vertical-align: top; }
     <td class="tot-val" style="color:#c0392b">-&euro;{{ receipt.discount|floatformat:2 }}</td>
   </tr>
   {% endif %}
+  {% if consumption_tax %}
+  <tr>
+    <td class="spacer"></td>
+    <td class="tot-lbl">Porez na potrošnju:</td>
+    <td class="tot-val">&euro;{{ consumption_tax|floatformat:2 }}</td>
+  </tr>
+  {% endif %}
   <tr>
     <td class="spacer"></td>
     <td class="tot-grand-lbl">UKUPNO:</td>

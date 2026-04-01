@@ -339,16 +339,22 @@ def classify_buyer_types_batch(company_id=None):
 #  VIES BATCH VALIDACIJA
 # ═══════════════════════════════════════════════════
 
-@shared_task(bind=True, max_retries=2, default_retry_delay=300)
-def vies_batch_validate(self, batch_size=50):
+@shared_task(bind=True, max_retries=2, default_retry_delay=300,
+             time_limit=3600, soft_time_limit=3500)
+def vies_batch_validate(self, batch_size=500):
     """
     Batch VIES validacija partnera s HR OIB-om ili EU VAT ID-om.
     Koristi EU VIES SOAP servis.
     Pokreće se periodično (celery-beat) ili ručno.
+
+    Provjerava SVE buyer_type kategorije uključujući b2b_novat i udruga_novat.
+    Ako je VIES valid → upgradea buyer_type i postavlja is_vat_registered + vat_id.
     """
     import requests
+    import time
     from xml.etree import ElementTree as ET
     from partners.models import Partner
+    from partners.hr_registry import _parse_address
     from django.utils import timezone as tz
     from django.db.models import Q
 
@@ -364,16 +370,24 @@ def vies_batch_validate(self, batch_size=50):
   </soapenv:Body>
 </soapenv:Envelope>"""
 
-    # Dohvati partnere koji trebaju provjeru
+    UPGRADE_MAP = {
+        'b2b_novat': 'b2b_vat',
+        'udruga_novat': 'udruga_vat',
+    }
+
+    # Dohvati partnere koji trebaju provjeru — SVE tipove osim b2c
     stale = tz.now() - tz.timedelta(days=30)
     partners = Partner.objects.filter(
         Q(vies_valid__isnull=True) | Q(vies_checked_at__lt=stale)
     ).filter(
-        Q(is_vat_registered=True) | Q(buyer_type__in=['b2b', 'b2b_vat', 'b2g', 'inozemstvo'])
+        Q(oib__regex=r'^\d{11}$') | Q(vat_id__regex=r'^[A-Z]{2}\d')
+    ).exclude(
+        buyer_type='b2c'
     ).exclude(oib='').order_by('?')[:batch_size]
 
     checked = 0
     valid = 0
+    upgraded = 0
     errors = 0
 
     for partner in partners:
@@ -400,20 +414,49 @@ def vies_batch_validate(self, batch_size=50):
 
             root = ET.fromstring(resp.content)
             ns = {'v': 'urn:ec.europa.eu:taxud:vies:services:checkVat:types'}
-            is_valid = root.find('.//v:valid', ns)
+            is_valid_el = root.find('.//v:valid', ns)
             name_el = root.find('.//v:name', ns)
             addr_el = root.find('.//v:address', ns)
 
-            partner.vies_valid = is_valid is not None and is_valid.text == 'true'
+            is_vat_valid = is_valid_el is not None and is_valid_el.text == 'true'
+
+            update_fields = ['vies_valid', 'vies_checked_at', 'vies_name', 'vies_address']
+
+            partner.vies_valid = is_vat_valid
             partner.vies_checked_at = tz.now()
             if name_el is not None and name_el.text:
                 partner.vies_name = name_el.text[:255]
             if addr_el is not None and addr_el.text:
                 partner.vies_address = addr_el.text[:500]
-            partner.save(update_fields=['vies_valid', 'vies_checked_at', 'vies_name', 'vies_address'])
+                # Popuni adresu/grad ako prazni
+                if not partner.address or not partner.city:
+                    try:
+                        parsed = _parse_address(addr_el.text)
+                        if not partner.address and parsed.get('address'):
+                            partner.address = parsed['address']
+                            update_fields.append('address')
+                        if not partner.city and parsed.get('city'):
+                            partner.city = parsed['city']
+                            update_fields.append('city')
+                        if not partner.zip_code and parsed.get('zip_code'):
+                            partner.zip_code = parsed['zip_code']
+                            update_fields.append('zip_code')
+                    except Exception:
+                        pass
+
+            # Upgrade buyer_type ako je VIES valid
+            if is_vat_valid and partner.buyer_type in UPGRADE_MAP:
+                partner.buyer_type = UPGRADE_MAP[partner.buyer_type]
+                partner.is_vat_registered = True
+                if not partner.vat_id:
+                    partner.vat_id = f'{cc}{vat_num}'
+                update_fields.extend(['buyer_type', 'is_vat_registered', 'vat_id'])
+                upgraded += 1
+
+            partner.save(update_fields=list(set(update_fields)))
 
             checked += 1
-            if partner.vies_valid:
+            if is_vat_valid:
                 valid += 1
 
         except requests.exceptions.Timeout:
@@ -424,9 +467,10 @@ def vies_batch_validate(self, batch_size=50):
             errors += 1
             continue
 
-        # Rate limit: VIES allows ~60 req/min
-        import time
         time.sleep(1.1)
 
-    logger.info("VIES batch: checked=%d, valid=%d, errors=%d", checked, valid, errors)
-    return {'checked': checked, 'valid': valid, 'errors': errors}
+    logger.info(
+        "VIES batch: checked=%d, valid=%d, upgraded=%d, errors=%d",
+        checked, valid, upgraded, errors,
+    )
+    return {'checked': checked, 'valid': valid, 'upgraded': upgraded, 'errors': errors}

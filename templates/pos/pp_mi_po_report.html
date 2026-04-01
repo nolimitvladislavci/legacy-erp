@@ -1,0 +1,132 @@
+{% extends "pos/base_pos.html" %}
+{% load i18n humanize %}
+{% block title %}PP-MI-PO — Porez na potrošnju — {{ month_name }} {{ year }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width:900px;margin:2rem auto">
+
+  <h4 style="color:var(--gold,#d4a843);margin-bottom:.5rem">
+    <i class="fas fa-file-invoice-dollar"></i> PP-MI-PO — Porez na potrošnju
+  </h4>
+  <p class="text-muted" style="font-size:.82rem">
+    Obrazac PP-MI-PO (čl.20-22 Zakona o lokalnim porezima, NN 115/16).<br>
+    Predaje se JLS-u <strong>do 20. u mjesecu</strong> za prethodni mjesec.
+  </p>
+
+  <!-- Navigacija mjesec/godina -->
+  <form method="get" class="d-flex gap-2 mb-4 align-items-end flex-wrap" style="font-size:.85rem">
+    <div>
+      <label class="form-label mb-0" style="font-size:.75rem">Mjesec</label>
+      <select name="month" class="form-select form-select-sm" style="width:auto">
+        {% for m in months %}
+        <option value="{{ m.num }}" {% if m.num == month %}selected{% endif %}>{{ m.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="form-label mb-0" style="font-size:.75rem">Godina</label>
+      <select name="year" class="form-select form-select-sm" style="width:auto">
+        {% for y in years %}
+        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-sm" style="background:var(--gold,#d4a843);color:#000;font-weight:600">
+      <i class="fas fa-search me-1"></i> Prikaži
+    </button>
+  </form>
+
+  <!-- Zaglavlje obrasca -->
+  <div class="card mb-3" style="border:1px solid var(--gold,#d4a843);border-radius:12px">
+    <div class="card-body" style="padding:1.2rem">
+      <div class="row" style="font-size:.85rem">
+        <div class="col-md-6">
+          <strong>Obveznik:</strong> {{ company.name }}<br>
+          <strong>OIB:</strong> {{ company.oib }}<br>
+          <strong>Adresa:</strong> {{ company.address }}, {{ company.zip_code }} {{ company.city }}
+        </div>
+        <div class="col-md-6">
+          <strong>JLS (općina/grad):</strong> {{ jls_name|default:"—" }}<br>
+          <strong>Stopa PP:</strong> {{ tax_rate }}%<br>
+          <strong>Razdoblje:</strong> {{ month_name }} {{ year }}<br>
+          <strong>Rok predaje:</strong> <span style="color:#c0392b;font-weight:600">{{ deadline }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sumarni podaci -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card text-center" style="border-radius:12px;background:#1a1a1a;border:1px solid #333">
+        <div class="card-body">
+          <div style="font-size:.75rem;color:#999;text-transform:uppercase">Osnovica (bez PDV-a)</div>
+          <div style="font-size:1.4rem;font-weight:bold;color:var(--gold,#d4a843)">€{{ total_base|floatformat:2 }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center" style="border-radius:12px;background:#1a1a1a;border:1px solid #333">
+        <div class="card-body">
+          <div style="font-size:.75rem;color:#999;text-transform:uppercase">Porez na potrošnju ({{ tax_rate }}%)</div>
+          <div style="font-size:1.4rem;font-weight:bold;color:#e74c3c">€{{ total_consumption_tax|floatformat:2 }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center" style="border-radius:12px;background:#1a1a1a;border:1px solid #333">
+        <div class="card-body">
+          <div style="font-size:.75rem;color:#999;text-transform:uppercase">Broj računa</div>
+          <div style="font-size:1.4rem;font-weight:bold;color:#fff">{{ receipt_count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dnevna tablica -->
+  {% if daily_breakdown %}
+  <h6 style="color:var(--gold,#d4a843)"><i class="fas fa-table me-1"></i> Dnevni pregled</h6>
+  <table class="table table-sm table-dark" style="font-size:.82rem;border-radius:8px;overflow:hidden">
+    <thead>
+      <tr style="background:#2a2a2a">
+        <th>Datum</th>
+        <th class="text-end">Broj računa</th>
+        <th class="text-end">Osnovica (€)</th>
+        <th class="text-end">PP (€)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in daily_breakdown %}
+      <tr>
+        <td>{{ row.day }}</td>
+        <td class="text-end">{{ row.daily_count }}</td>
+        <td class="text-end">{{ row.daily_base|floatformat:2 }}</td>
+        <td class="text-end">{{ row.daily_tax|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr style="font-weight:bold;border-top:2px solid var(--gold,#d4a843)">
+        <td>UKUPNO</td>
+        <td class="text-end">{{ receipt_count }}</td>
+        <td class="text-end">{{ total_base|floatformat:2 }}</td>
+        <td class="text-end" style="color:#e74c3c">{{ total_consumption_tax|floatformat:2 }}</td>
+      </tr>
+    </tfoot>
+  </table>
+  {% else %}
+  <div class="alert" style="background:#2a2a2a;border:1px solid #444;color:#ccc">
+    <i class="fas fa-info-circle me-1"></i> Nema računa s porezom na potrošnju za {{ month_name }} {{ year }}.
+  </div>
+  {% endif %}
+
+  <!-- Napomene -->
+  <div style="font-size:.75rem;color:#888;margin-top:1rem">
+    <strong>Napomena:</strong> Porez na potrošnju je lokalni porez (čl.20 ZLP, NN 115/16) koji se obračunava
+    na ugostiteljske usluge. Osnovica je ukupan prihod bez PDV-a. Stopa do 3% — propisuje JLS.
+    Obrazac PP-MI-PO predaje se nadležnoj JLS do 20. u mjesecu za prethodni mjesec.
+    Porez plaća ugostitelj, ne kupac.
+  </div>
+
+</div>
+{% endblock %}

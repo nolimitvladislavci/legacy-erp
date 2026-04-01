@@ -143,6 +143,7 @@ td      { padding: 2px 0; vertical-align: top; }
   <div class="tr"><span>Neto (bez PDV):</span><span>&euro;{{ receipt.subtotal|floatformat:2 }}</span></div>
   <div class="tr"><span>PDV:</span><span>&euro;{{ receipt.tax_amount|floatformat:2 }}</span></div>
   {% if receipt.discount %}<div class="tr"><span>Popust:</span><span>-&euro;{{ receipt.discount|floatformat:2 }}</span></div>{% endif %}
+  {% if consumption_tax %}<div class="tr"><span>Porez na potrošnju:</span><span>&euro;{{ consumption_tax|floatformat:2 }}</span></div>{% endif %}
   <div class="tr gr"><span>UKUPNO:</span><span>&euro;{{ receipt.total|floatformat:2 }}</span></div>
 
   <hr class="div">

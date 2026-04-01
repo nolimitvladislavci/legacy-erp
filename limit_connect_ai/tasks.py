@@ -416,7 +416,8 @@ def campaign_suggestions_all(self):
 # BORG FENIX: Narodne Novine RSS Feed — automatska asimilacija zakona
 # ══════════════════════════════════════════════════════════════════════════════
 
-@shared_task(bind=True, max_retries=3, name='limit_connect_ai.fetch_nn_feed')
+@shared_task(bind=True, max_retries=3, name='limit_connect_ai.fetch_nn_feed',
+             time_limit=3600, soft_time_limit=3500)
 def fetch_and_process_nn_feed(self):
     """
     Svakih 6h: dohvati NN RSS, parsiraj zakone, LLM ekstrakcija.

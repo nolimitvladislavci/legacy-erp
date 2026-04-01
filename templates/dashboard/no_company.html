@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}Dobrodošli — LIMIT Connect{% endblock %}
+{% block content %}
+<div class="container" style="max-width:600px;margin:4rem auto;text-align:center">
+  <div style="font-size:3rem;margin-bottom:1rem">👋</div>
+  <h3 style="color:var(--gold,#d4a843);margin-bottom:.5rem">Dobrodošli, {{ user.first_name|default:user.username }}!</h3>
+  <p class="text-muted" style="font-size:.9rem">
+    Vaš račun je kreiran, ali još nema povezanu tvrtku.
+  </p>
+
+  <div class="card mt-4" style="border:1px solid #333;border-radius:12px;background:#1a1a1a;text-align:left;padding:1.5rem">
+    <h5 style="color:var(--gold,#d4a843)"><i class="fas fa-rocket me-2"></i> Sljedeći koraci</h5>
+    <ul style="font-size:.88rem;color:#ccc;line-height:2">
+      <li><strong>Ako ste zaposlenik</strong> — zamolite administratora da vam poveže račun s tvrtkom</li>
+      <li><strong>Ako ste vlasnik</strong> — <a href="{% url 'registration:register_step1' %}" style="color:var(--gold)">registrirajte svoju tvrtku</a></li>
+      <li><strong>Ako ste klijent</strong> — koristite link koji ste dobili od tvrtke za pristup portalu</li>
+    </ul>
+  </div>
+
+  <div class="mt-4" style="font-size:.8rem;color:#666">
+    <a href="{% url 'logout' %}" style="color:#999">Odjava</a> ·
+    <a href="mailto:podrska@limit-connect.com" style="color:var(--gold)">Kontakt podrška</a>
+  </div>
+</div>
+{% endblock %}

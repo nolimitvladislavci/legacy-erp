@@ -8,7 +8,7 @@ Pravila:
 - Sve promjene zaliha, fiskalizacija i placanje u jednoj atomarnoj transakciji
 """
 import logging
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from django.db import models, transaction
 from django.utils import timezone as tz
 
@@ -550,6 +550,19 @@ class CheckoutService:
         receipt.recalculate()
         receipt.save()
 
+        # ── 6a. POREZ NA POTROŠNJU (čl.20 Zakon o lokalnim porezima) ──
+        try:
+            pos_settings = company.pos_settings
+            if pos_settings.consumption_tax_active and pos_settings.consumption_tax_rate > 0:
+                # Osnovica = prihod bez PDV-a (subtotal), stopa do 3%
+                ct_rate = pos_settings.consumption_tax_rate / Decimal('100')
+                receipt.consumption_tax_amount = (receipt.subtotal * ct_rate).quantize(
+                    Decimal('0.01'), rounding=ROUND_HALF_UP
+                )
+                receipt.save(update_fields=['consumption_tax_amount'])
+        except Exception:
+            pass  # POSSettings ne postoji ili nema PP
+
         # ── 6b. BLAGAJNICKI MAKSIMUM (cash_register_limit) ──
         if payment_method == 'CASH':
             limit = getattr(company, 'cash_register_limit', None)
@@ -615,7 +628,7 @@ class CheckoutService:
         # ── 8. FINALIZE ──
         receipt.status = POSReceipt.Status.PAID
         receipt.paid_at = tz.now()
-        receipt.save(update_fields=['status', 'paid_at', 'total', 'subtotal', 'tax_amount'])
+        receipt.save(update_fields=['status', 'paid_at', 'total', 'subtotal', 'tax_amount', 'consumption_tax_amount'])
 
         # ── 9. FISKALIZACIJA ──
         # Hard timeout: fiskalizacija NIKAD ne smije blokirati vise od 5s
@@ -644,6 +657,7 @@ class CheckoutService:
             'pdf_url': '/pos/receipt/%d/pdf/' % receipt.pk,
             'print_url': '/pos/receipt/%d/pdf/?format=thermal' % receipt.pk,
             'items_count': len(items_data),
+            'consumption_tax': str(receipt.consumption_tax_amount) if receipt.consumption_tax_amount else '0',
         }
         if fiscal_error:
             result['fiscal_warning'] = fiscal_error

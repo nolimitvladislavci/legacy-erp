@@ -214,6 +214,9 @@ class POSReceipt(models.Model):
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('PDV'))
     total      = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Ukupno'))
     discount   = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Popust'))
+    consumption_tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+        verbose_name=_('Porez na potrošnju'),
+        help_text=_('Lokalni porez na ugostiteljske usluge (čl.20 ZLP). Osnovica = prihod bez PDV-a.'))
 
     status     = models.CharField(max_length=10, choices=Status.choices,
                                    default=Status.OPEN, verbose_name=_('Status'))
@@ -554,6 +557,22 @@ class POSSettings(models.Model):
         help_text=_('Za čl.28a Zakona o fiskalizaciji'),
     )
 
+
+    # ── POREZ NA POTROŠNJU (Zakon o lokalnim porezima, NN 115/16) ────────
+    consumption_tax_active = models.BooleanField(
+        default=False, verbose_name=_('Porez na potrošnju aktivan'),
+        help_text=_('Lokalni porez za ugostiteljske usluge. JLS propisuje stopu do 3%.'),
+    )
+    consumption_tax_rate = models.DecimalField(
+        max_digits=4, decimal_places=2, default=3,
+        verbose_name=_('Stopa poreza na potrošnju (%)'),
+        help_text=_('Najčešće 3% — provjeriti odluku JLS-a (općina/grad).'),
+    )
+    consumption_tax_jls_name = models.CharField(
+        max_length=100, blank=True, default='',
+        verbose_name=_('Naziv JLS-a'),
+        help_text=_('Općina/grad kojoj se uplaćuje porez (za PP-MI-PO).'),
+    )
     updated_at    = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -1119,6 +1138,10 @@ class POSDailyReport(models.Model):
         default=dict, blank=True, verbose_name=_('PDV razrada'),
         help_text=_('{"25.00": {"base": 100, "tax": 25, "total": 125}, ...}'),
     )
+    consumption_tax_total = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        verbose_name=_('Porez na potrošnju ukupno'),
+    )
     cashier_breakdown = models.JSONField(
         default=dict, blank=True, verbose_name=_('Po blagajnicima'),
         help_text=_('{"Ana": {"count": 10, "total": 500}, ...}'),
@@ -1227,6 +1250,7 @@ class POSDailyReport(models.Model):
                 'cash_difference': (session.closing_cash or Decimal('0')) - session.expected_closing_cash,
                 'tax_breakdown': tax_bd,
                 'cashier_breakdown': cashier_bd,
+                'consumption_tax_total': receipts.aggregate(ct=Sum('consumption_tax_amount'))['ct'] or Decimal('0'),
             },
         )
 

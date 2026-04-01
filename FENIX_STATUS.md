@@ -513,3 +513,11 @@ prolazi bez FSM validacije — radi se o initijalnom statusu, ne tranziciji, št
 CC Code je svjesno ostavio whitelist provjeru umjesto transition_to() za kreiranje.
 
 **Faza 1: DONE. Faza 2 u tijeku (CC Code).**
+
+---
+## TASK — MAX_IMAGES povećati na 15
+**Datoteka:** core/views_scan.py, linija 39
+**Promjena:** `MAX_IMAGES = 5` → `MAX_IMAGES = 15`
+**Razlog:** Claude API podržava do 20 slika/pozivu. CCX53 (32 vCPU) može paralelno opsluživati više korisnika s 15 slika istovremeno.
+**Napomena:** Na trenutnom serveru radi za 1 korisnika, za produkciju s više firmi paralelno treba CCX53.
+**Status:** PENDING

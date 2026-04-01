@@ -73,3 +73,85 @@ def auto_create_invoice_profile(sender, instance, created, **kwargs):
         is_default=True,
         is_active=True,
     )
+
+
+@receiver(post_save, sender='companies.Company')
+def bootstrap_new_company(sender, instance, created, **kwargs):
+    """
+    Auto-bootstrap nova firma — kreira sve potrebne objekte za rad.
+    Zlatni kod: firma mora biti operativna odmah nakon kreiranja.
+    """
+    if not created:
+        return
+
+    import logging
+    logger = logging.getLogger('companies.bootstrap')
+
+    # 1. POS Settings
+    try:
+        from pos.models import POSSettings
+        POSSettings.objects.get_or_create(
+            company=instance,
+            defaults={
+                'printer_type': 'thermal_usb',
+                'receipt_delivery': 'thermal',
+                'fiscal_oib': instance.oib or '',
+            },
+        )
+    except Exception as e:
+        logger.warning('[BOOTSTRAP] POSSettings za %s: %s', instance.name, e)
+
+    # 2. Default POS Terminal
+    try:
+        from pos.models import POSTerminal
+        if not POSTerminal.objects.filter(company=instance).exists():
+            POSTerminal.objects.create(
+                company=instance,
+                name='Blagajna 1',
+                terminal_code='T001',
+                pos_type='quick',
+                is_active=True,
+            )
+    except Exception as e:
+        logger.warning('[BOOTSTRAP] POSTerminal za %s: %s', instance.name, e)
+
+    # 3. Default Tax Rates (HR)
+    try:
+        from companies.models import TaxRate
+        country = getattr(instance, 'country', 'HR') or 'HR'
+        defaults = {
+            'HR': [
+                ('PDV 25%', 25, True),
+                ('PDV 13%', 13, False),
+                ('PDV 5%', 5, False),
+                ('Oslobođeno', 0, False),
+            ],
+            'DE': [
+                ('MwSt 19%', 19, True),
+                ('MwSt 7%', 7, False),
+                ('Steuerfrei', 0, False),
+            ],
+        }
+        for name, rate, is_default in defaults.get(country, defaults['HR']):
+            TaxRate.objects.get_or_create(
+                country=country, rate=rate,
+                defaults={'name': name, 'is_default': is_default, 'is_active': True},
+            )
+    except Exception as e:
+        logger.warning('[BOOTSTRAP] TaxRate za %s: %s', instance.name, e)
+
+    # 4. Onboarding Progress
+    try:
+        from companies.models import OnboardingProgress
+        OnboardingProgress.objects.get_or_create(company=instance)
+    except Exception as e:
+        logger.warning('[BOOTSTRAP] OnboardingProgress za %s: %s', instance.name, e)
+
+    # 5. T&C default (unsigned)
+    try:
+        if not hasattr(instance, 'has_signed_tc_consent'):
+            pass  # Field will be False by default
+    except Exception:
+        pass
+
+    logger.info('[BOOTSTRAP] Firma "%s" (OIB %s) bootstrapirana.', instance.name, instance.oib)

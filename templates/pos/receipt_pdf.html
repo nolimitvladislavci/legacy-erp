@@ -96,6 +96,7 @@
 {% if receipt.discount %}
 <div class="totals-row"><span>Popust:</span><span>-{{ receipt.discount|floatformat:2 }} €</span></div>
 {% endif %}
+{% if consumption_tax %}<div class="totals-row"><span>Porez na potrošnju:</span><span>{{ consumption_tax|floatformat:2 }} €</span></div>{% endif %}
 <div class="totals-row grand"><span>UKUPNO:</span><span>{{ receipt.total|floatformat:2 }} €</span></div>
 
 <hr class="divider">

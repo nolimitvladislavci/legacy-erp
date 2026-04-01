@@ -139,6 +139,7 @@ urlpatterns = [
     # ── Novi endpointi (2026-03-18) ─────────────────────────────────────────────
     path('api/item/<int:item_id>/',        views.pos_item_api,          name='pos_item_api'),
     path('reports/daily/',                 views.daily_reports_list,    name='daily_reports'),
+    path('reports/pp-mi-po/',              views.pp_mi_po_report,      name='pp_mi_po_report'),
     path('gastro/kds/<str:token>/cook-logout/', views.kitchen_cook_logout, name='kitchen_cook_logout'),
     path('device-token/create/',           views.device_token_create,   name='device_token_create'),
     path('device-token/<int:token_id>/panic/', views.device_token_panic, name='device_token_panic'),

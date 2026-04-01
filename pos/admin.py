@@ -10,6 +10,7 @@ from .models import (
     POSReceipt,
     POSReceiptItem,
     POSSession,
+    POSSettings,
     POSTerminal,
     Table,
 )
@@ -128,3 +129,22 @@ class ExpiryBatchAdmin(admin.ModelAdmin):
     list_filter = ('company', 'is_removed')
     search_fields = ('inventory_item__name', 'batch_number')
     date_hierarchy = 'expiry_date'
+
+
+# ── POS Settings (porez na potrošnju) ─────────────────────────────────────
+
+@admin.register(POSSettings)
+class POSSettingsAdmin(admin.ModelAdmin):
+    list_display = ('company', 'fiscal_active', 'consumption_tax_active',
+                    'consumption_tax_rate', 'consumption_tax_jls_name')
+    list_filter = ('consumption_tax_active', 'fiscal_active')
+    fieldsets = (
+        ('Tvrtka', {'fields': ('company',)}),
+        ('Pisač', {'fields': ('printer_type', 'printer_ip', 'printer_port')}),
+        ('Fiskalizacija', {'fields': ('fiscal_cert', 'fiscal_cert_password', 'fiscal_oib', 'fiscal_active')}),
+        ('Dostava računa', {'fields': ('receipt_delivery', 'auto_print', 'drawer_kick')}),
+        ('Porez na potrošnju (čl.20 ZLP)', {
+            'fields': ('consumption_tax_active', 'consumption_tax_rate', 'consumption_tax_jls_name'),
+            'description': 'Lokalni porez na ugostiteljske usluge. JLS propisuje stopu do 3%.',
+        }),
+    )

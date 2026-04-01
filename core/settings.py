@@ -827,7 +827,7 @@ CELERY_BEAT_SCHEDULE.update({
     "vies-batch-validate-daily": {
         "task": "partners.tasks.vies_batch_validate",
         "schedule": 86400.0,  # 1x dnevno
-        "kwargs": {"batch_size": 100},
+        "kwargs": {"batch_size": 500},
     },
 })
 

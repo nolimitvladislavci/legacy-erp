@@ -836,6 +836,7 @@ def receipt_pdf(request, receipt_id):
         'fina_qr_b64': fina_qr_b64,
         'business_location': bl,
         'tax_breakdown': tax_breakdown,
+        'consumption_tax': receipt.consumption_tax_amount if receipt.consumption_tax_amount else None,
     }
 
     if fmt == 'thermal':
@@ -5338,3 +5339,104 @@ def update_cashier_oib(request):
     cashier.oib = oib
     cashier.save(update_fields=['oib'])
     return JsonResponse({'ok': True})
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PP-MI-PO — Mjesečni izvještaj poreza na potrošnju
+# Zakon o lokalnim porezima (NN 115/16, čl.20-22)
+# Predaje se JLS-u do 20. u mjesecu za prethodni mjesec
+# ═══════════════════════════════════════════════════════════════════════════
+
+@login_required
+def pp_mi_po_report(request):
+    """Mjesečni obrazac PP-MI-PO za porez na potrošnju."""
+    from decimal import Decimal
+    from django.db.models import Sum, Count
+    import calendar
+
+    company = get_user_company(request)
+
+    # Provjeri ima li PP aktiviran
+    try:
+        pos_settings = company.pos_settings
+        if not pos_settings.consumption_tax_active:
+            messages.warning(request, 'Porez na potrošnju nije aktiviran za ovu tvrtku.')
+            return redirect('pos_dashboard')
+    except Exception:
+        messages.error(request, 'POS postavke nisu konfigurirane.')
+        return redirect('pos_dashboard')
+
+    # Mjesec/godina iz parametara (default: prethodni mjesec)
+    now = timezone.now()
+    year = int(request.GET.get('year', now.year if now.month > 1 else now.year - 1))
+    month = int(request.GET.get('month', now.month - 1 if now.month > 1 else 12))
+
+    _, last_day = calendar.monthrange(year, month)
+    period_start = timezone.datetime(year, month, 1, tzinfo=timezone.utc)
+    period_end = timezone.datetime(year, month, last_day, 23, 59, 59, tzinfo=timezone.utc)
+
+    # Dohvati sve plaćene račune s PP u tom periodu
+    receipts = POSReceipt.objects.filter(
+        session__terminal__company=company,
+        status='paid',
+        paid_at__gte=period_start,
+        paid_at__lte=period_end,
+        consumption_tax_amount__gt=0,
+    )
+
+    # Agregati
+    agg = receipts.aggregate(
+        total_consumption_tax=Sum('consumption_tax_amount'),
+        total_subtotal=Sum('subtotal'),
+        receipt_count=Count('id'),
+    )
+
+    total_ct = agg['total_consumption_tax'] or Decimal('0')
+    total_base = agg['total_subtotal'] or Decimal('0')
+    receipt_count = agg['receipt_count'] or 0
+
+    # Dnevni breakdown za tablicu
+    daily = (
+        receipts
+        .extra(select={'day': "DATE(paid_at)"})
+        .values('day')
+        .annotate(
+            daily_base=Sum('subtotal'),
+            daily_tax=Sum('consumption_tax_amount'),
+            daily_count=Count('id'),
+        )
+        .order_by('day')
+    )
+
+    # Deadline: 20. sljedećeg mjeseca
+    if month == 12:
+        deadline_month, deadline_year = 1, year + 1
+    else:
+        deadline_month, deadline_year = month + 1, year
+    deadline = f'{deadline_year}-{deadline_month:02d}-20'
+
+    # Mjeseci za navigaciju
+    months = []
+    for m in range(1, 13):
+        months.append({'num': m, 'name': calendar.month_name[m]})
+
+    ctx = {
+        'company': company,
+        'pos_settings': pos_settings,
+        'year': year,
+        'month': month,
+        'month_name': calendar.month_name[month],
+        'period_start': period_start,
+        'period_end': period_end,
+        'total_base': total_base,
+        'total_consumption_tax': total_ct,
+        'receipt_count': receipt_count,
+        'tax_rate': pos_settings.consumption_tax_rate,
+        'jls_name': pos_settings.consumption_tax_jls_name,
+        'daily_breakdown': list(daily),
+        'deadline': deadline,
+        'months': months,
+        'years': list(range(2024, now.year + 1)),
+    }
+
+    return render(request, 'pos/pp_mi_po_report.html', ctx)
