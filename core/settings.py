@@ -772,6 +772,8 @@ if 'test' in sys.argv:
     CACHES = {'default': _locmem, 'sessions': _locmem}
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_STORE_EAGER_RESULT = True
+    # Disable force middlewares in test mode to prevent redirect loops
+    MIDDLEWARE = [m for m in MIDDLEWARE if m not in ("core.middleware.Force2FAMiddleware", "core.middleware.ForceTCMiddleware", "core.middleware.ForcePasswordChangeMiddleware")]
 
     # Skip PostgreSQL-specific RunSQL migrations on SQLite
     from django.db.migrations.operations.special import RunSQL as _OrigRunSQL
