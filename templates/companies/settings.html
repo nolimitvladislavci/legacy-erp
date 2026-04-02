@@ -54,25 +54,27 @@ document.addEventListener('DOMContentLoaded',function(){
           <div id="nameHints" style="display:none;position:absolute;z-index:100;width:100%;max-height:180px;overflow-y:auto;background:#111;border:1px solid #333;border-radius:6px;margin-top:2px"></div>
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <label class="form-label fw-bold f-form-label-sm">OIB / Steuernummer</label>
-        <div class="input-group">
+        <div class="input-group mb-1">
           <input type="text" name="oib" id="coOib" class="form-control" value="{{ company.oib }}" required>
-          <button type="button" class="btn btn-outline-warning btn-sm" onclick="lookupOIB()" title="Traži po OIB-u">🔍</button>
+          <button type="button" class="btn btn-outline-warning btn-sm" onclick="lookupOIB()" title="{% trans 'Traži po OIB-u' %}">🔍</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button type="button" class="btn btn-sm" id="oibScanBtn"
-                  style="background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;border:1px solid rgba(56,189,248,.35);"
+                  style="background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;border:1px solid rgba(56,189,248,.35);flex:1;min-width:100px"
                   onclick="fenixOpenCamera()">
-            <i class="fas fa-camera"></i> Kamera
+            <i class="fas fa-camera"></i> {% trans "Kamera" %}
           </button>
           <button type="button" class="btn btn-sm"
-                  style="background:#1e293b;color:#94a3b8;border:1px solid #334155;"
+                  style="background:#1e293b;color:#94a3b8;border:1px solid #334155;flex:1;min-width:100px"
                   onclick="document.getElementById('oibFileInput').click()">
-            <i class="fas fa-folder-open"></i> Učitaj sliku
+            <i class="fas fa-folder-open"></i> {% trans "Učitaj sliku" %}
           </button>
           <input type="file" id="oibFileInput" accept="image/*"
                  style="display:none;" onchange="fenixGalleryDirect(this)">
         </div>
-        <div id="oibResult" style="font-size:.78rem;margin-top:3px;min-height:16px"></div>
+        <div id="oibResult" style="font-size:.78rem;margin-top:4px;min-height:16px"></div>
       </div>
       <div class="col-md-3">
         <label class="form-label fw-bold f-form-label-sm">Drzava</label>
