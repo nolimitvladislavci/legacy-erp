@@ -59,6 +59,12 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="input-group">
           <input type="text" name="oib" id="coOib" class="form-control" value="{{ company.oib }}" required>
           <button type="button" class="btn btn-outline-warning btn-sm" onclick="lookupOIB()" title="Traži po OIB-u">🔍</button>
+          <button type="button" class="btn btn-sm" id="oibScanBtn"
+                  style="background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;border:1px solid rgba(56,189,248,.35);"
+                  title="Skeniraj osobnu iskaznicu — AI upisuje OIB automatski"
+                  onclick="fenixScanOIB()">
+            <i class="fas fa-camera"></i> Skeniraj osobnu
+          </button>
         </div>
         <div id="oibResult" style="font-size:.78rem;margin-top:3px;min-height:16px"></div>
       </div>

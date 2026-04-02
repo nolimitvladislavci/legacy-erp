@@ -408,6 +408,10 @@ window.FC = {
       return { icon:'fa-id-card', label:'Skeniraj osobnu', color:'#38bdf8',
                border:'rgba(56,189,248,0.35)', bg:'linear-gradient(135deg,#0c4a6e,#082f49)',
                docType:'id_card', hint:'Skenirajte osobnu iskaznicu za automatski unos OIB-a' };
+    if (/\/(companies\/settings|companies\/[\w-]+\/edit|registration\/company)/.test(path))
+      return { icon:'fa-id-card', label:'Skeniraj osobnu / OIB', color:'#38bdf8',
+               border:'rgba(56,189,248,0.35)', bg:'linear-gradient(135deg,#0c4a6e,#082f49)',
+               docType:'id_card', hint:'Skenirajte osobnu iskaznicu — AI automatski upisuje OIB i naziv' };
     if (/\/(complaints|prigovori|helpdesk)\//.test(path))
       return { icon:'fa-exclamation-circle', label:'Priloži foto', color:'#f87171',
                border:'rgba(248,113,113,0.35)', bg:'linear-gradient(135deg,#7f1d1d,#450a0a)',
