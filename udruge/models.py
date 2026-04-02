@@ -2815,3 +2815,241 @@ class SatGlazbene(models.Model):
             f"{self.ucenik.puno_ime} — {self.datum} "
             f"({self.trajanje_min}min, {self.get_vrsta_display()})"
         )
+
+
+# ══════════════════════════════════════════════════════════════════
+# AZIL SEGMENT — dodano Sprint 1 (02.04.2026.)
+# Zakon: ZoZZ (NN 102/17), Pravilnik o sklonistima (NN 99/2019)
+# ══════════════════════════════════════════════════════════════════
+
+class Zivotinja(models.Model):
+    class Vrsta(models.TextChoices):
+        PAS    = 'pas',    'Pas'
+        MACKA  = 'macka',  'Macka'
+        KUNIC  = 'kunic',  'Kunic'
+        PTICA  = 'ptica',  'Ptica'
+        OSTALO = 'ostalo', 'Ostalo'
+
+    class Status(models.TextChoices):
+        KARANTENA  = 'karantena',  'Karantena (0-15 dana)'
+        SLOBODAN   = 'slobodan',   'Slobodan za udomljenje'
+        REZERVIRAN = 'rezerviran', 'Rezerviran'
+        UDOMLJEN   = 'udomljen',   'Udomljen'
+        VRÁCEN     = 'vrácen',     'Vrácen vlasniku'
+        UGINUO     = 'uginuo',     'Uginuo (prirodno)'
+        EUTANAZIJA = 'eutanazija', 'Eutanazija (veterinarska odluka)'
+
+    company          = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE, related_name='azil_zivotinje')
+    evidencijski_br  = models.CharField(max_length=20, unique=True, db_index=True)
+    mikrocip         = models.CharField(max_length=20, blank=True, db_index=True,
+                                        help_text='15-znamenkasti ISO 11784 broj')
+    vrsta            = models.CharField(max_length=10, choices=Vrsta.choices, default='pas')
+    naziv_pasmina    = models.CharField(max_length=100, blank=True)
+    ime              = models.CharField(max_length=100, blank=True)
+    spol             = models.CharField(max_length=1,
+                                        choices=[('M', 'Muski'), ('Z', 'Zenski'), ('N', 'Nepoznat')],
+                                        default='N')
+    dob_procjena     = models.CharField(max_length=50, blank=True)
+    boja_opis        = models.CharField(max_length=200, blank=True)
+    fotografija      = models.ImageField(upload_to='azil/zivotinje/', null=True, blank=True)
+    datum_ulaska     = models.DateField()
+    nacin_primitka   = models.CharField(max_length=20,
+                                        choices=[('pronadjen', 'Pronadjen'),
+                                                 ('priveden', 'Priveden policijom/komunalcem'),
+                                                 ('ostavljen', 'Ostavljeno od vlasnika'),
+                                                 ('premjesten', 'Premjesten iz drugog sklonista')],
+                                        default='pronadjen')
+    lokacija_nalaza  = models.CharField(max_length=300, blank=True)
+    lokacija_gps     = models.CharField(max_length=50, blank=True, help_text='lat,lng')
+    napomena_ulaz    = models.TextField(blank=True)
+    status           = models.CharField(max_length=15, choices=Status.choices, default='karantena')
+    datum_karantena_kraj = models.DateField(null=True, blank=True)
+    javno_oglaseno   = models.BooleanField(default=False,
+                                           help_text='Prikazuje se na burzi za udomljenje')
+    objects          = CompanyManager()
+    created_at       = models.DateTimeField(auto_now_add=True)
+    updated_at       = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.evidencijski_br:
+            last = Zivotinja.objects.filter(company=self.company).order_by('-id').first()
+            br = (int(last.evidencijski_br.split('-')[-1]) + 1) if last else 1
+            self.evidencijski_br = f"AZ-{timezone.now().year}-{br:04d}"
+        if not self.datum_karantena_kraj and self.datum_ulaska:
+            from datetime import timedelta
+            self.datum_karantena_kraj = self.datum_ulaska + timedelta(days=15)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-datum_ulaska']
+        verbose_name = 'Zivotinja'
+        verbose_name_plural = 'Zivotinje'
+
+    def __str__(self):
+        naziv = self.ime or self.naziv_pasmina or self.get_vrsta_display()
+        return f"{self.evidencijski_br} — {naziv}"
+
+
+class KartonZdravlja(models.Model):
+    class VrstaTretmana(models.TextChoices):
+        CIJEPLJENJE = 'cijepljenje', 'Cijepljenje'
+        KASTRACIJA  = 'kastracija',  'Kastracija/Sterilizacija'
+        CIPIRANJE   = 'cipiranje',   'Cipiranje'
+        ANTIPARAZIT = 'antiparazit', 'Antiparazitna terapija'
+        PREGLED     = 'pregled',     'Veterinarski pregled'
+        LIJEK       = 'lijek',       'Lijek/Terapija'
+        OZLJEDA     = 'ozljeda',     'Lijecenje ozljede'
+        OSTALO      = 'ostalo',      'Ostalo'
+
+    zivotinja        = models.ForeignKey(
+        Zivotinja, on_delete=models.CASCADE, related_name='zdravlje')
+    datum            = models.DateField()
+    vrsta_tretmana   = models.CharField(max_length=15, choices=VrstaTretmana.choices)
+    opis             = models.TextField()
+    veterinar        = models.CharField(max_length=200, blank=True)
+    klinika          = models.CharField(max_length=200, blank=True)
+    sljedeci_pregled = models.DateField(null=True, blank=True)
+    trosak_eur       = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    dokument         = models.FileField(upload_to='azil/zdravlje/', null=True, blank=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-datum']
+        verbose_name = 'Karton zdravlja'
+        verbose_name_plural = 'Kartoni zdravlja'
+
+    def __str__(self):
+        return f"{self.zivotinja} — {self.get_vrsta_tretmana_display()} ({self.datum})"
+
+
+class VeterinarskaEutanazija(models.Model):
+    # POSEBNO OSJETLJIV MODEL — samo za neizljecivo bolesne/tesko ozlijedene zivotinje.
+    # Zakon HR (NN 102/17, cl. 55): usmrcivanje zdravih zivotinja u sklonistu je ZABRANJENO.
+    # Ovaj model smije kreirati SAMO korisnik s rolom veterinar (role_check u view-u).
+    zivotinja        = models.OneToOneField(
+        Zivotinja, on_delete=models.CASCADE, related_name='eutanazija')
+    datum            = models.DateField()
+    veterinar_ime    = models.CharField(max_length=200,
+                                        help_text='Puno ime i prezime veterinara')
+    veterinar_oib    = models.CharField(max_length=11,
+                                        help_text='OIB veterinara — zakonski obvezan')
+    klinika          = models.CharField(max_length=200)
+    dijagnoza        = models.TextField(
+        help_text='Obvezna klinicka dijagnoza: neizljeciva bolest ili teska ozljeda')
+    metoda           = models.CharField(max_length=200,
+                                        default='IV barbiturni koktel (standard WSAVA)')
+    potvrda_pdf      = models.FileField(upload_to='azil/eutanazija/', null=True, blank=True,
+                                        help_text='Skenirana veterinarska potvrda (obavezno)')
+    napomena         = models.TextField(blank=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.zivotinja.status = 'eutanazija'
+        self.zivotinja.save(update_fields=['status', 'updated_at'])
+
+    class Meta:
+        verbose_name = 'Veterinarska eutanazija'
+        verbose_name_plural = 'Veterinarska eutanazija (povjerljivo)'
+
+    def __str__(self):
+        return f"Eutanazija — {self.zivotinja} ({self.datum})"
+
+
+class Udomljavanje(models.Model):
+    class Tip(models.TextChoices):
+        TRAJNO     = 'trajno',     'Trajno udomljavanje'
+        PRIVREMENO = 'privremeno', 'Privremeni smjestaj (foster)'
+        POVRAT     = 'povrat',     'Povrat vlasniku'
+
+    zivotinja        = models.ForeignKey(
+        Zivotinja, on_delete=models.CASCADE, related_name='udomljavanja')
+    datum            = models.DateField()
+    ime_prezime      = models.CharField(max_length=200)
+    oib              = models.CharField(max_length=11,
+                                        help_text='OIB udomitelja — zakonski obvezno (ZoZZ)')
+    adresa           = models.CharField(max_length=300)
+    telefon          = models.CharField(max_length=30)
+    email            = models.EmailField(blank=True)
+    tip              = models.CharField(max_length=15, choices=Tip.choices, default='trajno')
+    napomena         = models.TextField(blank=True)
+    ugovor_potpisan  = models.BooleanField(default=False)
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        novi_status = 'vrácen' if self.tip == 'povrat' else 'udomljen'
+        self.zivotinja.status = novi_status
+        self.zivotinja.save(update_fields=['status', 'updated_at'])
+
+    class Meta:
+        ordering = ['-datum']
+        verbose_name = 'Udomljavanje'
+        verbose_name_plural = 'Udomljavanja'
+
+    def __str__(self):
+        return f"{self.zivotinja} -> {self.ime_prezime} ({self.datum})"
+
+
+class AzilIntervencija(models.Model):
+    class Rezultat(models.TextChoices):
+        PREUZETO      = 'preuzeto',      'Preuzeto u skloniste'
+        NIJE_UHVACENO = 'nije_uhvaceno', 'Nije uhvaceno'
+        VRÁCENO       = 'vráceno',       'Vráceno vlasniku na licu mjesta'
+        VETERINAR     = 'veterinar',     'Upuceno veterinaru (hitno)'
+
+    company          = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE, related_name='azil_intervencije')
+    datum_vrijeme    = models.DateTimeField()
+    adresa           = models.CharField(max_length=300)
+    gps              = models.CharField(max_length=50, blank=True, help_text='lat,lng')
+    opis             = models.TextField()
+    djelatnik        = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    km_prijedeno     = models.DecimalField(max_digits=6, decimal_places=1, default=0)
+    broj_zivotinja   = models.PositiveSmallIntegerField(default=1)
+    rezultat         = models.CharField(
+        max_length=20, choices=Rezultat.choices, default='preuzeto')
+    zivotinje        = models.ManyToManyField(
+        Zivotinja, blank=True, related_name='intervencije')
+    objects          = CompanyManager()
+    created_at       = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-datum_vrijeme']
+        verbose_name = 'Intervencija'
+        verbose_name_plural = 'Intervencije (hvatanje napustenih zivotinja)'
+
+    def __str__(self):
+        return f"{self.datum_vrijeme:%d.%m.%Y %H:%M} — {self.adresa[:50]}"
+
+
+class MjesecniIzvjestajAzil(models.Model):
+    # Sluzbeni mjesecni izvjestaj za JLS (Jedinicu lokalne samouprave).
+    # Generira se automatski 1. u mjesecu, PDF salje Celery task.
+    company           = models.ForeignKey(
+        'companies.Company', on_delete=models.CASCADE, related_name='azil_izvjestaji')
+    godina            = models.PositiveSmallIntegerField()
+    mjesec            = models.PositiveSmallIntegerField()
+    primljeno         = models.PositiveSmallIntegerField(default=0)
+    udomljeno         = models.PositiveSmallIntegerField(default=0)
+    vráceno_vlasniku  = models.PositiveSmallIntegerField(default=0)
+    uginulo           = models.PositiveSmallIntegerField(default=0)
+    eutanazirano      = models.PositiveSmallIntegerField(default=0)
+    trenutno_stanje   = models.PositiveSmallIntegerField(default=0)
+    trosak_hrana_eur  = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    trosak_vet_eur    = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    trosak_ostalo_eur = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    pdf_generiran     = models.BooleanField(default=False)
+    pdf_file          = models.FileField(upload_to='azil/izvjestaji/', null=True, blank=True)
+    objects           = CompanyManager()
+
+    class Meta:
+        unique_together = [('company', 'godina', 'mjesec')]
+        ordering = ['-godina', '-mjesec']
+        verbose_name = 'Mjesecni izvjestaj azila'
+        verbose_name_plural = 'Mjesecni izvjestaji azila'
+
+    def __str__(self):
+        return f"Izvjestaj {self.godina}/{self.mjesec:02d} — {self.company.name}"

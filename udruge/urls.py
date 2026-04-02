@@ -229,4 +229,13 @@ urlpatterns = [
     path('glazbena-skola/fakturiraj/', views.glazbena_skola_fakturiraj, name='glazbena_fakturiraj'),
     path('glazbena-skola/dodaj-ucenika/', views.glazbena_dodaj_ucenika, name='glazbena_dodaj_ucenika'),
     path('glazbena-skola/dodaj-sat/', views.glazbena_dodaj_sat, name='glazbena_dodaj_sat'),
+    # Azil / Skloniste
+    path("azil/", views.azil_dashboard, name="azil_dashboard"),
+    path("azil/zivotinja/nova/", views.azil_zivotinja_nova, name="azil_zivotinja_nova"),
+    path("azil/zivotinja/<int:pk>/", views.azil_zivotinja_detalj, name="azil_zivotinja_detalj"),
+    path("azil/zivotinja/<int:pk>/udomljavanje/", views.azil_udomljavanje_nova, name="azil_udomljavanje_nova"),
+    path("azil/terenska/", views.azil_terenska, name="azil_terenska"),
+    path("azil/intervencija/nova/", views.azil_intervencija_nova, name="azil_intervencija_nova"),
+    path("azil/izvjestaj/", views.azil_izvjestaj, name="azil_izvjestaj"),
+    path("azil/api/chip-lookup/", views.azil_chip_lookup, name="azil_chip_lookup"),
 ]

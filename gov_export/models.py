@@ -9,6 +9,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.managers import CompanyManager
 
 class GovInstitution(models.Model):
     """Registar državnih institucija kojima šaljemo podatke."""
@@ -127,6 +128,7 @@ class GovExport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = CompanyManager()
     class Meta:
         verbose_name = _('Državni export')
         verbose_name_plural = _('Državni exporti')

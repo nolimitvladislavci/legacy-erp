@@ -155,7 +155,7 @@ def chat_with_claude(messages, tools=None, system=None, user=None):
     client = get_claude_client()
     kwargs = {
         "model": MODEL,
-        "max_tokens": 2048,
+        "max_tokens": 4096,
         "system": system or SYSTEM_PROMPT,
         "messages": messages,
     }

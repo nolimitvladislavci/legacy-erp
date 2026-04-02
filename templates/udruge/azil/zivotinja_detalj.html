@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ z.evidencijski_br }} — {{ z.ime|default:z.naziv_pasmina }}{% endblock %}
+<style>
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem .75rem;margin-bottom:1.25rem}
+.info-grid .il{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:.3px}
+.info-grid .iv{font-size:.95rem;color:#eee}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.8rem;font-weight:600}
+.status-karantena{background:#e74c3c22;color:#e74c3c;border:1px solid #e74c3c55}
+.status-slobodan{background:#2ecc7122;color:#2ecc71;border:1px solid #2ecc7155}
+.status-rezerviran{background:#f39c1222;color:#f39c12;border:1px solid #f39c1255}
+.status-udomljen{background:#3498db22;color:#3498db;border:1px solid #3498db55}
+.karantena-bar{height:6px;border-radius:3px;background:#333;margin-top:4px}
+.karantena-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#e74c3c,#2ecc71)}
+.chip-badge{background:#333;border:1px solid #555;border-radius:4px;padding:2px 8px;font-family:monospace;font-size:.85rem}
+.timeline{border-left:2px solid var(--gold);padding-left:1rem;margin:.5rem 0}
+.timeline-item{position:relative;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid #222}
+.timeline-item::before{content:'';position:absolute;left:-1.35rem;top:4px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+@media(max-width:600px){
+  .info-grid{grid-template-columns:1fr 1fr}
+  .btn,button{width:100%;margin-bottom:6px}
+  form select,form input,form textarea{width:100% !important;font-size:16px !important}
+}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+  <h4 style="margin:0;color:var(--gold)">{{ z.evidencijski_br }} — {{ z.ime|default:z.naziv_pasmina|default:z.get_vrsta_display }}</h4>
+  <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
+</div>
+
+<div class="card" style="padding:1.25rem;margin-bottom:1rem">
+  {% if z.fotografija %}
+  <div style="text-align:center;margin-bottom:1rem">
+    <img src="{{ z.fotografija.url }}" alt="{{ z.ime }}" style="max-width:300px;max-height:250px;border-radius:8px;object-fit:cover">
+  </div>
+  {% endif %}
+
+  <div style="margin-bottom:.75rem">
+    <span class="status-badge status-{{ z.status }}">{{ z.get_status_display }}</span>
+    {% if z.mikrocip %}<span class="chip-badge" style="margin-left:.5rem">{{ z.mikrocip }}</span>{% endif %}
+  </div>
+
+  {% if z.status == 'karantena' %}
+  <div style="margin-bottom:1rem">
+    <small style="color:#999">Karantena: dan {{ dan_karantene }}/15 — do {{ z.datum_karantena_kraj|date:"d.m.Y" }}</small>
+    <div class="karantena-bar">
+      <div class="karantena-fill" style="width:{% widthratio dan_karantene 15 100 %}%"></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="info-grid">
+    <div><div class="il">Vrsta</div><div class="iv">{{ z.get_vrsta_display }}</div></div>
+    <div><div class="il">Pasmina</div><div class="iv">{{ z.naziv_pasmina|default:"-" }}</div></div>
+    <div><div class="il">Spol</div><div class="iv">{{ z.get_spol_display }}</div></div>
+    <div><div class="il">Dob (procjena)</div><div class="iv">{{ z.dob_procjena|default:"-" }}</div></div>
+    <div><div class="il">Boja</div><div class="iv">{{ z.boja_opis|default:"-" }}</div></div>
+    <div><div class="il">Datum ulaska</div><div class="iv">{{ z.datum_ulaska|date:"d.m.Y" }}</div></div>
+    <div><div class="il">Primitak</div><div class="iv">{{ z.get_nacin_primitka_display }}</div></div>
+    <div><div class="il">Lokacija nalaza</div><div class="iv">{{ z.lokacija_nalaza|default:"-" }}</div></div>
+    <div><div class="il">GPS</div><div class="iv">{% if z.lokacija_gps %}<a href="https://maps.google.com/?q={{ z.lokacija_gps }}" target="_blank" style="color:var(--gold)">Karta</a>{% else %}-{% endif %}</div></div>
+  </div>
+
+  {% if z.napomena_ulaz %}
+  <div style="background:#111;border-radius:6px;padding:.75rem;margin-bottom:.75rem">
+    <small style="color:#888">Napomena:</small><br>{{ z.napomena_ulaz }}
+  </div>
+  {% endif %}
+
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem">
+    {% if z.status == 'karantena' %}
+    <form method="post" style="display:inline">{% csrf_token %}<input type="hidden" name="action" value="status_slobodan">
+      <button type="submit" class="btn btn-sm" style="background:#2ecc71;color:#000">Zavrsi karantenu</button></form>
+    {% endif %}
+    {% if z.status == 'slobodan' %}
+    <form method="post" style="display:inline">{% csrf_token %}<input type="hidden" name="action" value="status_rezerviran">
+      <button type="submit" class="btn btn-sm" style="background:#f39c12;color:#000">Rezerviraj</button></form>
+    {% endif %}
+    {% if z.status != 'udomljen' and z.status != 'eutanazija' and z.status != 'uginuo' %}
+    <a href="{% url 'udruge:azil_udomljavanje_nova' z.pk %}" class="btn btn-gold btn-sm">Udomi</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Karton zdravlja -->
+<div class="card" style="padding:1.25rem;margin-bottom:1rem">
+  <h5 style="color:var(--gold);margin:0 0 .75rem">Karton zdravlja</h5>
+  {% if zdravlje %}
+  <div class="timeline">
+    {% for t in zdravlje %}
+    <div class="timeline-item">
+      <strong>{{ t.get_vrsta_tretmana_display }}</strong> — {{ t.datum|date:"d.m.Y" }}
+      <div style="color:#ccc;font-size:.85rem">{{ t.opis|truncatechars:120 }}</div>
+      {% if t.veterinar %}<small style="color:#888">Vet: {{ t.veterinar }}{% if t.klinika %} ({{ t.klinika }}){% endif %}</small>{% endif %}
+      {% if t.trosak_eur %}<span style="float:right;color:var(--gold);font-size:.85rem">{{ t.trosak_eur }} EUR</span>{% endif %}
+      {% if t.sljedeci_pregled %}<div style="font-size:.75rem;color:#f39c12">Sljedeci: {{ t.sljedeci_pregled|date:"d.m.Y" }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:#666;text-align:center">Nema zapisa u kartonu zdravlja</p>
+  {% endif %}
+
+  <details style="margin-top:1rem">
+    <summary style="cursor:pointer;color:var(--gold);font-size:.9rem">+ Dodaj tretman</summary>
+    <form method="post" style="margin-top:.75rem;display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+      {% csrf_token %}<input type="hidden" name="action" value="add_zdravlje">
+      <div><label style="font-size:.75rem;color:#888">Vrsta tretmana *</label>
+        <select name="vrsta_tretmana" required style="width:100%;padding:6px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee">
+          <option value="cijepljenje">Cijepljenje</option><option value="kastracija">Kastracija/Sterilizacija</option>
+          <option value="cipiranje">Cipiranje</option><option value="antiparazit">Antiparazitna terapija</option>
+          <option value="pregled">Veterinarski pregled</option><option value="lijek">Lijek/Terapija</option>
+          <option value="ozljeda">Lijecenje ozljede</option><option value="ostalo">Ostalo</option>
+        </select></div>
+      <div><label style="font-size:.75rem;color:#888">Datum *</label>
+        <input type="date" name="datum" value="{% now 'Y-m-d' %}" required style="width:100%;padding:6px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee"></div>
+      <div style="grid-column:1/-1"><label style="font-size:.75rem;color:#888">Opis *</label>
+        <textarea name="opis" rows="2" required style="width:100%;padding:6px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee" placeholder="Opis tretmana..."></textarea></div>
+      <div><label style="font-size:.75rem;color:#888">Veterinar</label>
+        <input type="text" name="veterinar" style="width:100%;padding:6px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee"></div>
+      <div><label style="font-size:.75rem;color:#888">Klinika</label>
+        <input type="text" name="klinika" style="width:100%;padding:6px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee"></div>
+      <div><label style="font-size:.75rem;color:#888">Sljedeci pregled</label>
+        <input type="date" name="sljedeci_pregled" style="width:100%;padding:6px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee"></div>
+      <div><label style="font-size:.75rem;color:#888">Trosak (EUR)</label>
+        <input type="number" name="trosak_eur" step="0.01" value="0" style="width:100%;padding:6px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee"></div>
+      <div style="grid-column:1/-1"><button type="submit" class="btn btn-gold btn-sm">Spremi tretman</button></div>
+    </form>
+  </details>
+</div>
+
+{% if udomljavanja %}
+<div class="card" style="padding:1.25rem">
+  <h5 style="color:var(--gold);margin:0 0 .75rem">Povijest udomljavanja</h5>
+  <div class="timeline">
+    {% for u in udomljavanja %}
+    <div class="timeline-item">
+      <strong>{{ u.get_tip_display }}</strong> — {{ u.datum|date:"d.m.Y" }}
+      <div style="color:#ccc;font-size:.85rem">{{ u.ime_prezime }} (OIB: {{ u.oib }})</div>
+      <small style="color:#888">{{ u.adresa }} | {{ u.telefon }}</small>
+      {% if u.ugovor_potpisan %}<span style="color:#2ecc71;font-size:.75rem;margin-left:.5rem">Ugovor potpisan</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

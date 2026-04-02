@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Nova intervencija{% endblock %}
+<style>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-grid label{display:block;font-size:.8rem;color:#999;margin-bottom:4px}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee}
+.form-grid input:focus,.form-grid select:focus{border-color:var(--gold);outline:none}
+.form-full{grid-column:1/-1}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr !important}.btn,button{width:100%;margin-bottom:6px}}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <h4 style="margin:0;color:var(--gold)">Nova terenska intervencija</h4>
+  <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
+</div>
+
+<form method="post" class="card" style="padding:1.25rem;max-width:700px">
+  {% csrf_token %}
+  <div class="form-grid">
+    <div><label>Datum i vrijeme *</label>
+      <input type="datetime-local" name="datum_vrijeme" value="{{ danas|date:'Y-m-d' }}T{{ danas|time:'H:i' }}" required></div>
+    <div><label>Broj zivotinja</label>
+      <input type="number" name="broj_zivotinja" value="1" min="1"></div>
+    <div class="form-full"><label>Adresa *</label>
+      <input type="text" name="adresa" required placeholder="Lokacija intervencije"></div>
+    <div><label>GPS koordinate</label>
+      <input type="text" name="gps" placeholder="lat,lng" id="gpsInput">
+      <button type="button" onclick="getGPS()" style="margin-top:4px;font-size:.75rem;padding:2px 8px;background:var(--gold);border:none;border-radius:4px;cursor:pointer">Moja lokacija</button></div>
+    <div><label>Km prijedeno</label>
+      <input type="number" name="km_prijedeno" step="0.1" value="0"></div>
+    <div class="form-full"><label>Opis situacije *</label>
+      <textarea name="opis" rows="3" required placeholder="Opis prijave, stanje zivotinje, okolnosti..."></textarea></div>
+    <div><label>Rezultat</label>
+      <select name="rezultat">
+        <option value="preuzeto">Preuzeto u skloniste</option>
+        <option value="nije_uhvaceno">Nije uhvaceno</option>
+        <option value="vráceno">Vraceno vlasniku na licu mjesta</option>
+        <option value="veterinar">Upuceno veterinaru (hitno)</option>
+      </select></div>
+  </div>
+  <div style="margin-top:1.25rem;display:flex;gap:.5rem">
+    <button type="submit" class="btn btn-gold">Evidentiraj intervenciju</button>
+    <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost">Odustani</a>
+  </div>
+</form>
+<script>
+function getGPS(){
+  if(!navigator.geolocation) return alert('GPS nije dostupan');
+  navigator.geolocation.getCurrentPosition(function(p){
+    document.getElementById('gpsInput').value=p.coords.latitude.toFixed(6)+','+p.coords.longitude.toFixed(6);
+  }, function(){alert('GPS odbijen')});
+}
+</script>
+{% endblock %}

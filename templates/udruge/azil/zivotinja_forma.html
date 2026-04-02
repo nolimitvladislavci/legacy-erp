@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ naslov }}{% endblock %}
+<style>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-grid label{display:block;font-size:.8rem;color:#999;margin-bottom:4px}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee}
+.form-grid input:focus,.form-grid select:focus,.form-grid textarea:focus{border-color:var(--gold);outline:none}
+.form-full{grid-column:1/-1}
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr !important}
+  form select,form input,form textarea{width:100% !important;font-size:16px !important}
+  .btn,button{width:100%;margin-bottom:6px}
+}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <h4 style="margin:0;color:var(--gold)">{{ naslov }}</h4>
+  <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="card" style="padding:1.25rem;max-width:800px">
+  {% csrf_token %}
+  <div class="form-grid">
+    <div><label>Vrsta *</label>
+      <select name="vrsta" required>
+        <option value="pas">Pas</option><option value="macka">Macka</option>
+        <option value="kunic">Kunic</option><option value="ptica">Ptica</option>
+        <option value="ostalo">Ostalo</option>
+      </select></div>
+    <div><label>Pasmina</label><input type="text" name="naziv_pasmina" placeholder="npr. Njemacki ovcar, mjesanac..."></div>
+    <div><label>Ime (ako je poznato)</label><input type="text" name="ime" placeholder="Ime zivotinje"></div>
+    <div><label>Spol</label>
+      <select name="spol"><option value="N">Nepoznat</option><option value="M">Muski</option><option value="Z">Zenski</option></select></div>
+    <div><label>Procjena dobi</label><input type="text" name="dob_procjena" placeholder="npr. ~3 godine, stenad"></div>
+    <div><label>Boja / opis</label><input type="text" name="boja_opis" placeholder="npr. smeda, kratka dlaka"></div>
+    <div><label>Mikrocip (ISO 11784)</label><input type="text" name="mikrocip" maxlength="20" placeholder="15-znamenkasti broj" id="chipInput"></div>
+    <div><label>Datum ulaska *</label><input type="date" name="datum_ulaska" value="{{ danas|date:'Y-m-d' }}" required></div>
+    <div><label>Nacin primitka</label>
+      <select name="nacin_primitka">
+        <option value="pronadjen">Pronadjen</option><option value="priveden">Priveden policijom/komunalcem</option>
+        <option value="ostavljen">Ostavljeno od vlasnika</option><option value="premjesten">Premjesten iz drugog sklonista</option>
+      </select></div>
+    <div><label>Lokacija nalaza</label><input type="text" name="lokacija_nalaza" placeholder="Ulica, grad"></div>
+    <div><label>GPS koordinate</label><input type="text" name="lokacija_gps" placeholder="lat,lng" id="gpsInput">
+      <button type="button" onclick="getGPS()" style="margin-top:4px;font-size:.75rem;padding:2px 8px;background:var(--gold);border:none;border-radius:4px;cursor:pointer">Moja lokacija</button></div>
+    <div><label>Fotografija</label><input type="file" name="fotografija" accept="image/*" capture="environment"></div>
+    <div class="form-full"><label>Napomena pri ulazu</label><textarea name="napomena_ulaz" rows="3" placeholder="Stanje zivotinje, ozljede, posebnosti..."></textarea></div>
+  </div>
+  <div style="margin-top:1.25rem;display:flex;gap:.5rem">
+    <button type="submit" class="btn btn-gold">Spremi zivotinju</button>
+    <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost">Odustani</a>
+  </div>
+</form>
+<script>
+function getGPS(){
+  if(!navigator.geolocation) return alert('GPS nije dostupan');
+  navigator.geolocation.getCurrentPosition(p=>{
+    document.getElementById('gpsInput').value=p.coords.latitude.toFixed(6)+','+p.coords.longitude.toFixed(6);
+  }, ()=>alert('GPS odbijen'));
+}
+</script>
+{% endblock %}

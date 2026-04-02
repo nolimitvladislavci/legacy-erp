@@ -165,7 +165,7 @@ class Force2FAMiddleware:
         if hasattr(storage, "used"): storage.used = False  # Vrati poruke u storage da se prikazu na iducem ekranu
 
         if not has_message:
-            messages.warning(request, system_message)
+            messages.warning(request, system_message, fail_silently=True)
 
         return redirect('setup_2fa')
 
@@ -221,7 +221,7 @@ class ForceTCMiddleware:
         has_msg = any(m.message == msg for m in storage)
         storage.used = False
         if not has_msg:
-            messages.warning(request, msg)
+            messages.warning(request, msg, fail_silently=True)
 
         return redirect('tc_consent')
 

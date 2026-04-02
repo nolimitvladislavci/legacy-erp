@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Udomljavanje — {{ z.evidencijski_br }}{% endblock %}
+<style>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-grid label{display:block;font-size:.8rem;color:#999;margin-bottom:4px}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee}
+.form-grid input:focus,.form-grid select:focus{border-color:var(--gold);outline:none}
+.form-full{grid-column:1/-1}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr !important}.btn,button{width:100%;margin-bottom:6px}}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <h4 style="margin:0;color:var(--gold)">Udomljavanje — {{ z.evidencijski_br }} {{ z.ime|default:"" }}</h4>
+  <a href="{% url 'udruge:azil_zivotinja_detalj' z.pk %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
+</div>
+
+<form method="post" class="card" style="padding:1.25rem;max-width:700px">
+  {% csrf_token %}
+  <div class="form-grid">
+    <div><label>Ime i prezime udomitelja *</label><input type="text" name="ime_prezime" required></div>
+    <div><label>OIB udomitelja *</label><input type="text" name="oib" maxlength="11" pattern="\d{11}" required placeholder="11 znamenki"></div>
+    <div class="form-full"><label>Adresa *</label><input type="text" name="adresa" required placeholder="Ulica i broj, grad"></div>
+    <div><label>Telefon *</label><input type="tel" name="telefon" required></div>
+    <div><label>Email</label><input type="email" name="email"></div>
+    <div><label>Tip udomljavanja</label>
+      <select name="tip">
+        <option value="trajno">Trajno udomljavanje</option>
+        <option value="privremeno">Privremeni smjestaj (foster)</option>
+        <option value="povrat">Povrat vlasniku</option>
+      </select></div>
+    <div><label>Datum *</label><input type="date" name="datum" value="{{ danas|date:'Y-m-d' }}" required></div>
+    <div class="form-full"><label>Napomena</label><textarea name="napomena" rows="2" placeholder="Posebni uvjeti, dogovor..."></textarea></div>
+    <div class="form-full">
+      <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+        <input type="checkbox" name="ugovor_potpisan" style="width:auto"> Ugovor potpisan
+      </label>
+    </div>
+  </div>
+  <div style="margin-top:1.25rem;display:flex;gap:.5rem">
+    <button type="submit" class="btn btn-gold">Potvrdi udomljavanje</button>
+    <a href="{% url 'udruge:azil_zivotinja_detalj' z.pk %}" class="btn btn-ghost">Odustani</a>
+  </div>
+</form>
+{% endblock %}

@@ -378,6 +378,20 @@ def superadmin_dashboard(request):
     except Exception:
         context['discrepancy_count'] = 0
         context['discrepancy_gap_total'] = 0
+    try:
+        from superadmin_ai.models import PendingAIAction
+        from django.db.models import Count as _Count
+        context['ai_pending_count'] = PendingAIAction.objects.filter(status='pending').count()
+        context['ai_pending_by_module'] = list(
+            PendingAIAction.objects.filter(status='pending')
+            .values('module', 'action_type')
+            .annotate(n=_Count('id'))
+            .order_by('-n')[:5]
+        )
+    except Exception:
+        context['ai_pending_count'] = 0
+        context['ai_pending_by_module'] = []
+
     return render(request, 'dashboards/superadmin.html', context)
 
 

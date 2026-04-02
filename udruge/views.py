@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
 from core.company_utils import get_user_company
 
@@ -4414,3 +4414,215 @@ def glazbena_dodaj_sat(request):
     )
     from django.http import HttpResponse
     return HttpResponse(html)
+
+
+# ══════════════════════════════════════════════════════════════════
+# AZIL VIEWS — Sprint 3 (02.04.2026.)
+# ══════════════════════════════════════════════════════════════════
+
+@login_required
+def azil_dashboard(request):
+    from .models import Zivotinja, AzilIntervencija
+    company = get_user_company(request)
+    if not company:
+        return redirect('company_setup')
+
+    qs = Zivotinja.objects.filter(company=company)
+    ctx = {
+        'ukupno': qs.count(),
+        'karantena': qs.filter(status='karantena').count(),
+        'slobodni': qs.filter(status='slobodan').count(),
+        'rezervirani': qs.filter(status='rezerviran').count(),
+        'udomljeni_ovaj_mj': qs.filter(status='udomljen',
+            updated_at__month=timezone.now().month,
+            updated_at__year=timezone.now().year).count(),
+        'zivotinje': qs.filter(status__in=['karantena', 'slobodan', 'rezerviran'])
+                       .select_related().order_by('datum_karantena_kraj')[:20],
+        'intervencije': AzilIntervencija.objects.filter(company=company)
+                                                .order_by('-datum_vrijeme')[:5],
+    }
+    return render(request, 'udruge/azil/dashboard.html', ctx)
+
+
+@login_required
+def azil_zivotinja_nova(request):
+    from .models import Zivotinja, KartonZdravlja
+    company = get_user_company(request)
+    if not company:
+        return redirect('company_setup')
+
+    if request.method == 'POST':
+        p = request.POST
+        z = Zivotinja(
+            company=company,
+            vrsta=p.get('vrsta', 'pas'),
+            naziv_pasmina=p.get('naziv_pasmina', ''),
+            ime=p.get('ime', ''),
+            spol=p.get('spol', 'N'),
+            dob_procjena=p.get('dob_procjena', ''),
+            boja_opis=p.get('boja_opis', ''),
+            mikrocip=p.get('mikrocip', ''),
+            datum_ulaska=p.get('datum_ulaska') or timezone.now().date(),
+            nacin_primitka=p.get('nacin_primitka', 'pronadjen'),
+            lokacija_nalaza=p.get('lokacija_nalaza', ''),
+            lokacija_gps=p.get('lokacija_gps', ''),
+            napomena_ulaz=p.get('napomena_ulaz', ''),
+        )
+        if request.FILES.get('fotografija'):
+            z.fotografija = request.FILES['fotografija']
+        z.save()
+        messages.success(request, f'Životinja {z.evidencijski_br} upisana.')
+        return redirect('udruge:azil_zivotinja_detalj', pk=z.pk)
+
+    return render(request, 'udruge/azil/zivotinja_forma.html', {
+        'naslov': 'Nova životinja',
+        'danas': timezone.now().date(),
+    })
+
+
+@login_required
+def azil_zivotinja_detalj(request, pk):
+    from .models import Zivotinja, KartonZdravlja, Udomljavanje, VeterinarskaEutanazija
+    company = get_user_company(request)
+    z = get_object_or_404(Zivotinja, pk=pk, company=company)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add_zdravlje':
+            KartonZdravlja.objects.create(
+                zivotinja=z,
+                datum=request.POST.get('datum') or timezone.now().date(),
+                vrsta_tretmana=request.POST.get('vrsta_tretmana'),
+                opis=request.POST.get('opis', ''),
+                veterinar=request.POST.get('veterinar', ''),
+                klinika=request.POST.get('klinika', ''),
+                sljedeci_pregled=request.POST.get('sljedeci_pregled') or None,
+                trosak_eur=request.POST.get('trosak_eur') or 0,
+            )
+            messages.success(request, 'Tretman dodan.')
+        elif action == 'status_slobodan' and z.status == 'karantena':
+            z.status = 'slobodan'
+            z.save(update_fields=['status', 'updated_at'])
+            messages.success(request, 'Status → Slobodan za udomljenje.')
+        elif action == 'status_rezerviran':
+            z.status = 'rezerviran'
+            z.save(update_fields=['status', 'updated_at'])
+            messages.success(request, 'Status → Rezerviran.')
+        return redirect('udruge:azil_zivotinja_detalj', pk=pk)
+
+    ctx = {
+        'z': z,
+        'zdravlje': z.zdravlje.all(),
+        'udomljavanja': z.udomljavanja.all(),
+        'dan_karantene': (timezone.now().date() - z.datum_ulaska).days if z.datum_ulaska else 0,
+    }
+    return render(request, 'udruge/azil/zivotinja_detalj.html', ctx)
+
+
+@login_required
+def azil_terenska(request):
+    company = get_user_company(request)
+    if not company:
+        return redirect('company_setup')
+    return render(request, 'udruge/azil/terenska_forma.html', {
+        'company': company,
+        'danas': timezone.now().date(),
+    })
+
+
+@login_required
+def azil_intervencija_nova(request):
+    from .models import AzilIntervencija
+    company = get_user_company(request)
+    if not company:
+        return redirect('company_setup')
+
+    if request.method == 'POST':
+        p = request.POST
+        interv = AzilIntervencija.objects.create(
+            company=company,
+            datum_vrijeme=p.get('datum_vrijeme') or timezone.now(),
+            adresa=p.get('adresa', ''),
+            gps=p.get('gps', ''),
+            opis=p.get('opis', ''),
+            djelatnik=request.user,
+            km_prijedeno=p.get('km_prijedeno') or 0,
+            broj_zivotinja=p.get('broj_zivotinja') or 1,
+            rezultat=p.get('rezultat', 'preuzeto'),
+        )
+        messages.success(request, 'Intervencija evidentirana.')
+        return redirect('udruge:azil_dashboard')
+
+    return render(request, 'udruge/azil/intervencija_forma.html', {
+        'danas': timezone.now(),
+    })
+
+
+@login_required
+def azil_udomljavanje_nova(request, pk):
+    from .models import Zivotinja, Udomljavanje
+    company = get_user_company(request)
+    z = get_object_or_404(Zivotinja, pk=pk, company=company)
+
+    if request.method == 'POST':
+        p = request.POST
+        Udomljavanje.objects.create(
+            zivotinja=z,
+            datum=p.get('datum') or timezone.now().date(),
+            ime_prezime=p.get('ime_prezime', ''),
+            oib=p.get('oib', ''),
+            adresa=p.get('adresa', ''),
+            telefon=p.get('telefon', ''),
+            email=p.get('email', ''),
+            tip=p.get('tip', 'trajno'),
+            napomena=p.get('napomena', ''),
+            ugovor_potpisan='ugovor_potpisan' in p,
+        )
+        messages.success(request, f'{z.ime or z.evidencijski_br} uspješno udomljena.')
+        return redirect('udruge:azil_zivotinja_detalj', pk=pk)
+
+    return render(request, 'udruge/azil/udomljavanje_forma.html', {
+        'z': z, 'danas': timezone.now().date(),
+    })
+
+
+@login_required
+def azil_izvjestaj(request):
+    from .models import MjesecniIzvjestajAzil, Zivotinja
+    company = get_user_company(request)
+    if not company:
+        return redirect('company_setup')
+
+    izvjestaji = MjesecniIzvjestajAzil.objects.filter(company=company)[:12]
+    return render(request, 'udruge/azil/izvjestaj.html', {
+        'izvjestaji': izvjestaji,
+        'company': company,
+    })
+
+
+@require_GET
+@login_required
+def azil_chip_lookup(request):
+    """Lookup čipa u HROK + lokalnoj bazi."""
+    from django.http import JsonResponse
+    from .models import Zivotinja
+    chip = request.GET.get('chip', '').strip()
+    if not chip or len(chip) != 15 or not chip.isdigit():
+        return JsonResponse({'error': 'Neispravan chip broj (15 znamenki)'}, status=400)
+
+    # Lokalna baza
+    lokalno = Zivotinja.objects.filter(mikrocip=chip).first()
+    if lokalno:
+        return JsonResponse({
+            'found': True,
+            'source': 'lokalna_baza',
+            'evidencijski_br': lokalno.evidencijski_br,
+            'ime': lokalno.ime,
+            'vrsta': lokalno.vrsta,
+            'status': lokalno.status,
+            'company': lokalno.company.name,
+        })
+
+    # TODO: HROK javni registar (https://www.hrok.hr) — API nije javno dostupan,
+    # obuhvatit će se kada HROK objavi API. Za sada: samo lokalna baza.
+    return JsonResponse({'found': False, 'chip': chip, 'note': 'Nije pronađeno u lokalnoj bazi'})

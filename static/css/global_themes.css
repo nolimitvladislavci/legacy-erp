@@ -23,6 +23,11 @@
     --text: #e2e8f0;
     --text-dim: #94a3b8;
     --muted: #4a5060;
+    --muted2: #334155;       /* Srednji muted, između muted i text-dim */
+
+    --border2: #1e2130;      /* Tamniji border za ugniježđene elemente */
+    --surface-deep: #0d0f11; /* Dublja pozadina ispod --surface */
+    --text-muted3: #64748b;  /* Najbljeđi tekst, hints i placeholderi */
     
     --green: #10b981;
     --red: #ef4444;

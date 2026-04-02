@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Azil — Mjesecni izvjestaji{% endblock %}
+<style>
+@media(max-width:600px){
+  table{font-size:.75rem}
+  td,th{padding:4px 6px !important}
+  .btn,button{width:100%;margin-bottom:6px}
+}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <h4 style="margin:0;color:var(--gold)">Mjesecni izvjestaji azila</h4>
+  <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
+</div>
+
+<div class="card" style="padding:1rem">
+  <p style="color:#999;font-size:.85rem;margin-bottom:1rem">Sluzbeni mjesecni izvjestaj za JLS (Jedinicu lokalne samouprave). Generira se automatski 1. u mjesecu.</p>
+  <div style="overflow-x:auto">
+    <table style="width:100%">
+      <thead>
+        <tr>
+          <th>Razdoblje</th>
+          <th>Primljeno</th>
+          <th>Udomljeno</th>
+          <th>Vraceno</th>
+          <th>Uginulo</th>
+          <th>Eutanaz.</th>
+          <th>Stanje</th>
+          <th>Hrana EUR</th>
+          <th>Vet EUR</th>
+          <th>Ostalo EUR</th>
+          <th>PDF</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in izvjestaji %}
+        <tr>
+          <td><strong>{{ i.mjesec|stringformat:"02d" }}/{{ i.godina }}</strong></td>
+          <td>{{ i.primljeno }}</td>
+          <td style="color:#2ecc71">{{ i.udomljeno }}</td>
+          <td>{{ i.vráceno_vlasniku }}</td>
+          <td>{{ i.uginulo }}</td>
+          <td>{{ i.eutanazirano }}</td>
+          <td><strong>{{ i.trenutno_stanje }}</strong></td>
+          <td>{{ i.trosak_hrana_eur }}</td>
+          <td>{{ i.trosak_vet_eur }}</td>
+          <td>{{ i.trosak_ostalo_eur }}</td>
+          <td>
+            {% if i.pdf_file %}
+            <a href="{{ i.pdf_file.url }}" target="_blank" style="color:var(--gold)">PDF</a>
+            {% else %}
+            <span style="color:#666">-</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="11" style="text-align:center;color:#666;padding:2rem">Nema generiranih izvjestaja. Izvjestaj se generira automatski 1. u mjesecu.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

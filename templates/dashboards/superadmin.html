@@ -240,6 +240,25 @@
     </div>
 </div>
 
+<!-- AI Pending Actions Widget -->
+{% if ai_pending_count %}
+<div class="stat-card mt-3" style="border-left:3px solid var(--amber)">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 style="font-weight:700;font-size:0.85rem;margin:0">
+            <i class="fas fa-robot" style="color:var(--amber)"></i> {% trans "AI čekajuće akcije" %}
+            <span class="badge ms-1" style="background:var(--amber);color:#000;font-size:.65rem">{{ ai_pending_count }}</span>
+        </h6>
+        <a href="/hr/superadmin-ai/" class="btn btn-sm" style="font-size:.7rem;padding:2px 8px;border:1px solid var(--amber);color:var(--amber)">{% trans "Pregled" %} &rarr;</a>
+    </div>
+    {% for item in ai_pending_by_module %}
+    <div class="d-flex justify-content-between" style="font-size:.75rem;padding:2px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-dim)"><i class="fas fa-code-branch" style="width:14px"></i> {{ item.module }}.{{ item.action_type }}</span>
+        <span class="badge" style="background:var(--surface2);color:var(--text)">{{ item.n }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <!-- Recent Logins -->
 <div class="stat-card">
     <h6 style="font-weight:700;font-size:0.85rem;margin-bottom:12px">

@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 def _get_rag_context(module_context, user_message):
-    return str()
+    from .claude_client import retrieve_knowledge
+    return retrieve_knowledge(module_context=module_context, query=user_message, limit=5)
 
 
 def _ai_rate_check(user, max_calls=30, window_seconds=3600):

@@ -2,7 +2,7 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 :root {
-  --ink: #0a0f1e; --gold: #c9a84c; --accent: #c9a84c;
+  --ink: #0a0f1e; --gold: var(--gold); --accent: var(--gold);
   --border: #2a2f45; --muted: #64748b; --surface: #111827;
 }
 body {
@@ -88,4 +88,4 @@ body {
 .pwd-wrap{position:relative;display:block}
 .pwd-wrap input{width:100%;padding-right:40px;box-sizing:border-box}
 .pwd-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);
-background:none;border:none;cursor:pointer;color:var(--gold,#c9a84c);font-size:18px;padding:0}
+background:none;border:none;cursor:pointer;color:var(--gold,var(--gold));font-size:18px;padding:0}

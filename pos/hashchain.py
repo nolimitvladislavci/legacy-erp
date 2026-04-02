@@ -24,6 +24,7 @@ from django.db import models
 from django.utils import timezone as tz
 
 logger = logging.getLogger('pos_hashchain')
+from core.managers import CompanyManager
 
 
 class ChainLink(models.Model):
@@ -49,6 +50,7 @@ class ChainLink(models.Model):
     payload_summary = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(default=tz.now)
 
+    objects = CompanyManager()
     class Meta:
         verbose_name = 'Hash Chain Link'
         verbose_name_plural = 'Hash Chain Links'

@@ -634,3 +634,169 @@ def generate_trosarina_report(company_id, godina=None):
         'destilacija_count': destilacije.count(),
         'created': created,
     }
+
+
+@shared_task(bind=True, soft_time_limit=120)
+def generate_azil_monthly_report(self, company_id=None, year=None, month=None):
+    """
+    1. u mjesecu 06:00 — generira mjesecni izvjestaj azila za JLS.
+    Ako company_id=None, generira za sve firme s azil zivotinjama.
+    """
+    from django.db.models import Sum
+    from companies.models import Company
+    from .models import Zivotinja, MjesecniIzvjestajAzil, KartonZdravlja
+
+    now = timezone.now()
+    if not year:
+        prev = now.replace(day=1) - timedelta(days=1)
+        year, month = prev.year, prev.month
+    if not month:
+        month = now.month
+
+    from datetime import date
+    period_start = date(year, month, 1)
+    if month == 12:
+        period_end = date(year + 1, 1, 1) - timedelta(days=1)
+    else:
+        period_end = date(year, month + 1, 1) - timedelta(days=1)
+
+    if company_id:
+        companies = Company.objects.filter(pk=company_id)
+    else:
+        company_ids = Zivotinja.objects.unscoped().values_list(
+            'company_id', flat=True).distinct()
+        companies = Company.objects.filter(pk__in=company_ids)
+
+    results = []
+    for company in companies:
+        qs = Zivotinja.objects.unscoped().filter(company=company)
+
+        primljeno = qs.filter(
+            datum_ulaska__gte=period_start, datum_ulaska__lte=period_end).count()
+        udomljeno = qs.filter(
+            status='udomljen',
+            updated_at__date__gte=period_start, updated_at__date__lte=period_end).count()
+        vraceno = qs.filter(
+            status='vrácen',
+            updated_at__date__gte=period_start, updated_at__date__lte=period_end).count()
+        uginulo = qs.filter(
+            status='uginuo',
+            updated_at__date__gte=period_start, updated_at__date__lte=period_end).count()
+        eutanazirano = qs.filter(
+            status='eutanazija',
+            updated_at__date__gte=period_start, updated_at__date__lte=period_end).count()
+        trenutno = qs.filter(
+            status__in=['karantena', 'slobodan', 'rezerviran']).count()
+
+        zdravlje_qs = KartonZdravlja.objects.filter(
+            zivotinja__company=company,
+            datum__gte=period_start, datum__lte=period_end)
+        trosak_vet = zdravlje_qs.aggregate(s=Sum('trosak_eur'))['s'] or 0
+
+        report, created = MjesecniIzvjestajAzil.objects.update_or_create(
+            company=company, godina=year, mjesec=month,
+            defaults={
+                'primljeno': primljeno,
+                'udomljeno': udomljeno,
+                'vráceno_vlasniku': vraceno,
+                'uginulo': uginulo,
+                'eutanazirano': eutanazirano,
+                'trenutno_stanje': trenutno,
+                'trosak_vet_eur': trosak_vet,
+            })
+
+        try:
+            pdf_bytes = _generate_azil_pdf(report, company, period_start, period_end)
+            from django.core.files.base import ContentFile
+            filename = 'azil_{}_{:d}_{:02d}.pdf'.format(
+                getattr(company, 'slug', company.pk), year, month)
+            report.pdf_file.save(filename, ContentFile(pdf_bytes), save=False)
+            report.pdf_generiran = True
+            report.save()
+            logger.info('Azil report %s %d/%02d: PDF generated', company.name, year, month)
+        except Exception as e:
+            logger.error('Azil PDF %s: %s', company.name, e)
+            report.save()
+
+        results.append({
+            'company': company.name,
+            'period': '{:d}/{:02d}'.format(year, month),
+            'primljeno': primljeno, 'udomljeno': udomljeno,
+            'trenutno': trenutno, 'pdf': report.pdf_generiran,
+            'created': created,
+        })
+
+    return {'reports': results, 'count': len(results)}
+
+
+def _generate_azil_pdf(report, company, period_start, period_end):
+    """WeasyPrint PDF za mjesecni azil izvjestaj."""
+    from weasyprint import HTML
+
+    ukupno_trosak = float(
+        report.trosak_hrana_eur + report.trosak_vet_eur + report.trosak_ostalo_eur)
+
+    html = """<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  body{{font-family:Arial,sans-serif;font-size:11pt;color:#222;margin:2cm}}
+  h1{{font-size:16pt;color:#1a1a1a;border-bottom:2px solid #c9a84c;padding-bottom:8px}}
+  h2{{font-size:13pt;color:#333;margin-top:1.5em}}
+  table{{width:100%;border-collapse:collapse;margin:1em 0}}
+  th,td{{border:1px solid #ccc;padding:6px 10px;text-align:left}}
+  th{{background:#f5f0e0;font-weight:600}}
+  .num{{text-align:right;font-family:monospace}}
+  .footer{{margin-top:3em;font-size:9pt;color:#888;border-top:1px solid #ddd;padding-top:8px}}
+  .highlight{{background:#fff8e1}}
+</style>
+</head><body>
+  <h1>Mjesecni izvjestaj sklonista za zivotinje</h1>
+  <table>
+    <tr><th>Ustanova</th><td>{company_name}</td></tr>
+    <tr><th>OIB</th><td>{oib}</td></tr>
+    <tr><th>Razdoblje</th><td>{ps} &mdash; {pe}</td></tr>
+  </table>
+
+  <h2>Stanje zivotinja</h2>
+  <table>
+    <tr><th>Kategorija</th><th class="num">Broj</th></tr>
+    <tr><td>Primljeno u razdoblju</td><td class="num">{primljeno}</td></tr>
+    <tr><td>Udomljeno</td><td class="num">{udomljeno}</td></tr>
+    <tr><td>Vraceno vlasniku</td><td class="num">{vraceno}</td></tr>
+    <tr><td>Uginulo (prirodno)</td><td class="num">{uginulo}</td></tr>
+    <tr><td>Eutanazirano (vet. odluka)</td><td class="num">{eutanazirano}</td></tr>
+    <tr class="highlight"><td><strong>Trenutno stanje</strong></td><td class="num"><strong>{trenutno}</strong></td></tr>
+  </table>
+
+  <h2>Troskovi</h2>
+  <table>
+    <tr><th>Kategorija</th><th class="num">EUR</th></tr>
+    <tr><td>Hrana i oprema</td><td class="num">{hrana:.2f}</td></tr>
+    <tr><td>Veterinarski troskovi</td><td class="num">{vet:.2f}</td></tr>
+    <tr><td>Ostalo</td><td class="num">{ostalo:.2f}</td></tr>
+    <tr class="highlight"><td><strong>Ukupno</strong></td><td class="num"><strong>{ukupno:.2f}</strong></td></tr>
+  </table>
+
+  <div class="footer">
+    Generirano: {generated} | LIMIT Connect &mdash; limit-connect.com<br>
+    Izvjestaj u skladu sa Zakonom o zastiti zivotinja (NN 102/17, cl. 62)
+  </div>
+</body></html>""".format(
+        company_name=company.name,
+        oib=getattr(company, 'oib', '-'),
+        ps=period_start.strftime('%d.%m.%Y.'),
+        pe=period_end.strftime('%d.%m.%Y.'),
+        primljeno=report.primljeno,
+        udomljeno=report.udomljeno,
+        vraceno=report.vráceno_vlasniku,
+        uginulo=report.uginulo,
+        eutanazirano=report.eutanazirano,
+        trenutno=report.trenutno_stanje,
+        hrana=float(report.trosak_hrana_eur),
+        vet=float(report.trosak_vet_eur),
+        ostalo=float(report.trosak_ostalo_eur),
+        ukupno=ukupno_trosak,
+        generated=timezone.now().strftime('%d.%m.%Y. %H:%M'),
+    )
+
+    return HTML(string=html).write_pdf()

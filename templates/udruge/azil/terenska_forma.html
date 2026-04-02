@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Terenska evidencija{% endblock %}
+<style>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-grid label{display:block;font-size:.8rem;color:#999;margin-bottom:4px}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;color:#eee}
+.form-grid input:focus{border-color:var(--gold);outline:none}
+.form-full{grid-column:1/-1}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr !important}.btn,button{width:100%;margin-bottom:6px}}
+</style>
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+  <h4 style="margin:0;color:var(--gold)">Terenska evidencija</h4>
+  <a href="{% url 'udruge:azil_dashboard' %}" class="btn btn-ghost btn-sm">&larr; Natrag</a>
+</div>
+
+<div class="card" style="padding:1.25rem;max-width:700px">
+  <p style="color:#ccc;margin-bottom:1rem">Terenska aplikacija za evidenciju napustenih zivotinja na terenu. Koristite mobilni uredaj za GPS i fotografiranje.</p>
+
+  <div class="form-grid">
+    <div class="form-full" style="text-align:center;padding:1.5rem;background:#111;border-radius:8px;border:2px dashed #333">
+      <div style="font-size:2rem;margin-bottom:.5rem">NFC / Bluetooth</div>
+      <p style="color:#888;margin:0">Skenirajte mikrocip Web Bluetooth citacem</p>
+      <button type="button" id="scanBtn" onclick="scanChip()" class="btn btn-gold btn-sm" style="margin-top:.75rem">Skeniraj mikrocip</button>
+      <div id="chipResult" style="margin-top:.5rem;font-family:monospace;color:var(--gold)"></div>
+    </div>
+
+    <div class="form-full">
+      <label>GPS lokacija</label>
+      <input type="text" id="gpsField" readonly placeholder="Klikni za dohvat..." style="cursor:pointer" onclick="getGPS()">
+    </div>
+
+    <div class="form-full">
+      <label>Fotografija</label>
+      <input type="file" accept="image/*" capture="environment" id="photoInput">
+    </div>
+  </div>
+
+  <div style="margin-top:1.25rem;display:flex;gap:.5rem">
+    <a href="{% url 'udruge:azil_intervencija_nova' %}" class="btn btn-gold">Nova intervencija</a>
+    <a href="{% url 'udruge:azil_zivotinja_nova' %}" class="btn btn-ghost">Nova zivotinja</a>
+  </div>
+</div>
+
+<script>
+function getGPS(){
+  if(!navigator.geolocation) return alert('GPS nije dostupan');
+  navigator.geolocation.getCurrentPosition(function(p){
+    document.getElementById('gpsField').value=p.coords.latitude.toFixed(6)+','+p.coords.longitude.toFixed(6);
+  }, function(){alert('GPS odbijen')});
+}
+async function scanChip(){
+  var el=document.getElementById('chipResult');
+  if(!navigator.bluetooth){el.textContent='Web Bluetooth nije dostupan';return}
+  try{
+    el.textContent='Trazim uredaj...';
+    var device=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:['generic_access']});
+    el.textContent='Spojen: '+device.name;
+  }catch(e){el.textContent='Greska: '+e.message}
+}
+</script>
+{% endblock %}

@@ -110,6 +110,23 @@ Odgovori ISKLJUČIVO JSON:
   "confidence": 0.85
 }}""",
 
+"azil_zivotinja": """Prikazano je {n} fotografij{suffix} napustene zivotinje pronasene u terenu ili dovedene u skloniste.
+Procijeni sto vidis i popuni polja. Budi konkretan ali oprezan - reci PROCJENA ako nisi siguran.
+Chip broj CITAJ ISKLJUCIVO s naljepnice/dokumenta (ne skeniras implantirani chip).
+Odgovori ISKLJUCIVO JSON:
+{{
+  "vrsta": "pas|macka|kunic|ptica|ostalo",
+  "naziv_pasmina": "procjena pasmine ili null",
+  "spol": "M|Z|N",
+  "dob_procjena": "npr. 2-3 godine (procjena)",
+  "boja_opis": "detaljan opis boje i sare dlake",
+  "mikrocip": "15-znamenkasti broj s dokumenta ili null",
+  "vidljive_ozljede": "opis vidljivih ozljeda ili null",
+  "napomena_ulaz": "kratki opis situacije pronalaska",
+  "confidence": 0.80
+}}
+Polja koja ne mozes procijeniti postavi na null.""",
+
 "general": """\
 Prikazano je {n} fotografij{suffix} dokumenta ili predmeta.
 Izvuci sve relevantne tekstualne i vizualne informacije.
@@ -185,6 +202,13 @@ def _post_process(fields, doc_type):
         nat = fields.get("nacionalnost", "")
         if nat == "HRC":
             fields["nacionalnost"] = "HRV"
+    if doc_type == "azil_zivotinja":
+        # Normaliziraj chip — samo brojevi, 15 znakova
+        chip = str(fields.get("mikrocip") or "").strip().replace(" ", "")
+        fields["mikrocip"] = chip if len(chip) == 15 and chip.isdigit() else ""
+        # Spol: osiguraj M/Z/N
+        spol = str(fields.get("spol") or "N").upper()[:1]
+        fields["spol"] = spol if spol in ("M", "Z") else "N"
     return fields
 
 
