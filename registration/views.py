@@ -108,6 +108,26 @@ def _seed_demo_data(company, user):
         onb.first_item_added = True
         onb.save(update_fields=['first_partner_added', 'first_item_added', 'updated_at'])
 
+        # Auto-kreiraj vlasnika kao blagajnika (PIN 1234 — korisnik mijenja)
+        try:
+            from pos.models import POSCashier
+            cashier_name = (user.get_full_name() or user.username).strip()
+            cashier, _ = POSCashier.objects.get_or_create(
+                company=company, user=user,
+                defaults={
+                    'name': cashier_name,
+                    'can_void': True,
+                    'can_discount': True,
+                    'max_discount_percent': 100,
+                    'is_active': True,
+                    'oib': '',
+                }
+            )
+            cashier.set_pin('1234')
+            cashier.save(update_fields=['pin_hash'])
+        except Exception as _ce:
+            logger.warning("POSCashier seed failed: %s", _ce)
+
         logger.info("Seeded demo data for %s", company.name)
     except Exception as e:
         logger.warning("Demo data seeding failed for %s: %s", company.name, e)
