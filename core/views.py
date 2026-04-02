@@ -562,6 +562,7 @@ def umbrella_dashboard(request):
 
     # Import partners action
     if request.method == 'POST' and request.POST.get('action') == 'import_partners':
+        from partners.models import Partner
         partner_ids = request.POST.getlist('partner_ids')
         imported = 0
         for pid in partner_ids:
@@ -590,9 +591,13 @@ def umbrella_dashboard(request):
     # Available partners for import (have OIB, not already a Company)
     existing_oibs = set(Company.objects.values_list('oib', flat=True))
     existing_oibs.discard('')
-    available_partners = Partner.objects.filter(
-        company=company
-    ).exclude(oib='').exclude(oib__in=existing_oibs).order_by('name')
+    try:
+        from partners.models import Partner
+        available_partners = Partner.objects.filter(
+            company=company
+        ).exclude(oib='').exclude(oib__in=existing_oibs).order_by('name')
+    except Exception:
+        available_partners = []
 
     return render(request, 'dashboards/umbrella.html', {
         'company': company,
