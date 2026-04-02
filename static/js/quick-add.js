@@ -45,7 +45,7 @@
     ].join(';');
 
     box.innerHTML =
-      '<h5 id="qaTitle" style="color:#c9a84c;margin-bottom:18px"></h5>' +
+      '<h5 id="qaTitle" style="color:var(--gold,#c9a84c);margin-bottom:18px"></h5>' +
       '<div id="qaFields"></div>' +
       '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">' +
         '<button id="qaCancel" class="btn btn-sm btn-secondary">Odustani</button>' +

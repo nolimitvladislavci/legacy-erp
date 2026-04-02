@@ -7,7 +7,7 @@
      link   — URL to reviews page (optional, wraps in <a>)
      gold   — use gold color instead of yellow (optional, any truthy value)
 #}
-{% with star_color=gold|yesno:"#c9a84c,#f59e0b" font_size=size|default:"sm" %}
+{% with star_color=gold|yesno:"var(--gold,#c9a84c),#f59e0b" font_size=size|default:"sm" %}
 <span class="review-stars review-stars-{{ font_size }}" style="display:inline-flex;align-items:center;gap:.25rem;{% if font_size == 'lg' %}font-size:1.1rem{% elif font_size == 'md' %}font-size:.9rem{% else %}font-size:.75rem{% endif %}">
   {% if link %}<a href="{{ link }}" style="text-decoration:none;display:inline-flex;align-items:center;gap:.25rem">{% endif %}
 

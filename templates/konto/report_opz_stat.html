@@ -6,7 +6,7 @@
 {% block content %}
 <style>
 .opz-wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
-.opz-title { color: #c9a84c; font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+.opz-title { color: var(--gold,#c9a84c); font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
 .opz-sub { color: #999; font-size: 0.85rem; margin-bottom: 20px; }
 .opz-controls { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
 .opz-select {
@@ -14,13 +14,13 @@
     padding: 8px 14px; border-radius: 6px; font-size: 0.9rem;
 }
 .opz-btn {
-    background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 18px;
+    background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 8px 18px;
     border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;
     text-decoration: none;
 }
 .opz-btn:hover { background: #e0c068; }
 .opz-btn-csv {
-    background: transparent; color: #c9a84c; border: 1px solid #c9a84c;
+    background: transparent; color: var(--gold,#c9a84c); border: 1px solid var(--gold,#c9a84c);
     padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;
     font-size: 0.85rem; text-decoration: none;
 }
@@ -29,12 +29,12 @@
     background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
     border-radius: 10px; padding: 14px 20px; flex: 1; text-align: center;
 }
-.opz-stat .val { font-size: 1.5rem; font-weight: 800; color: #c9a84c; }
+.opz-stat .val { font-size: 1.5rem; font-weight: 800; color: var(--gold,#c9a84c); }
 .opz-stat .lbl { font-size: 0.72rem; color: #999; text-transform: uppercase; letter-spacing: 1px; }
 .opz-section { margin-bottom: 24px; }
 .opz-section-title {
     font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px;
-    color: #c9a84c; font-weight: 700; margin-bottom: 8px; padding-bottom: 6px;
+    color: var(--gold,#c9a84c); font-weight: 700; margin-bottom: 8px; padding-bottom: 6px;
     border-bottom: 1px solid #333;
 }
 .opz-table { width: 100%; border-collapse: collapse; }
@@ -46,7 +46,7 @@
 .opz-table td { padding: 8px 10px; border-bottom: 1px solid #1a1a1a; font-size: 0.88rem; }
 .opz-table tr:hover { background: rgba(201,168,76,0.04); }
 .opz-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.opz-table .total-row { font-weight: 700; border-top: 2px solid #c9a84c; color: #c9a84c; }
+.opz-table .total-row { font-weight: 700; border-top: 2px solid var(--gold,#c9a84c); color: var(--gold,#c9a84c); }
 .oib-badge {
     background: rgba(16,185,129,0.15); color: #10b981; padding: 1px 6px;
     border-radius: 4px; font-size: 0.75em; font-family: monospace;

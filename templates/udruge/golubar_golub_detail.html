@@ -41,7 +41,7 @@
   border: 1px solid rgba(201,168,76,.3);
   padding: 5px 14px; border-radius: 8px;
   font-family: monospace; font-size: .85rem; font-weight: 700;
-  color: #c9a84c;
+  color: var(--gold,#c9a84c);
 }
 .gdet-status-bar {
   display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem;
@@ -66,7 +66,7 @@
   display: flex; justify-content: space-between; align-items: center;
   background: linear-gradient(135deg, rgba(201,168,76,.05), transparent);
 }
-.pedigree-header h3 { font-size: .95rem; font-weight: 700; color: #c9a84c; margin: 0; }
+.pedigree-header h3 { font-size: .95rem; font-weight: 700; color: var(--gold,#c9a84c); margin: 0; }
 .pedigree-body { padding: 1.5rem; overflow-x: auto; }
 
 /* CSS Grid pedigree chart */
@@ -90,7 +90,7 @@
 .ped-node:hover { border-color: rgba(201,168,76,.35); background: rgba(201,168,76,.06); }
 .ped-node a { text-decoration: none; color: inherit; display: block; }
 .ped-node.main-bird {
-  border: 2px solid #c9a84c;
+  border: 2px solid var(--gold,#c9a84c);
   background: linear-gradient(135deg, rgba(201,168,76,.12), rgba(201,168,76,.04));
   grid-row: 2 / 4;
   padding: 1rem;
@@ -98,7 +98,7 @@
 .ped-node.parent { grid-column: 3; }
 .ped-node.grandparent { grid-column: 5; }
 .ped-node.empty { border-style: dashed; opacity: .45; }
-.ped-node .ped-prsten { font-size: .7rem; color: #c9a84c; font-weight: 600; font-family: monospace; }
+.ped-node .ped-prsten { font-size: .7rem; color: var(--gold,#c9a84c); font-weight: 600; font-family: monospace; }
 .ped-node .ped-name { font-size: .78rem; font-weight: 600; color: var(--text); margin-top: 2px; }
 .ped-node .ped-role { font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
 .ped-node .ped-spol-dot {
@@ -130,7 +130,7 @@
   background: rgba(201,168,76,.15);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: #c9a84c; font-size: 1.1rem;
+  color: var(--gold,#c9a84c); font-size: 1.1rem;
   flex-shrink: 0;
 }
 
@@ -227,7 +227,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   font-size: .75rem; font-weight: 800;
 }
-.placement-1 { background: linear-gradient(135deg, #c9a84c, #e8d48b); color: #0a0a0a; }
+.placement-1 { background: linear-gradient(135deg, var(--gold,#c9a84c), #e8d48b); color: #0a0a0a; }
 .placement-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0a0a; }
 .placement-3 { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
 .placement-other { background: var(--border); color: var(--text-muted); }
@@ -304,15 +304,15 @@
 <div class="gdet-seal">
   <div class="gdet-seal-icon"><i class="fas fa-shield-alt"></i></div>
   <div>
-    <div style="font-weight:700;color:#c9a84c;font-size:.9rem">Rodovnik zapečaćen</div>
+    <div style="font-weight:700;color:var(--gold,#c9a84c);font-size:.9rem">Rodovnik zapečaćen</div>
     <div style="font-size:.75rem;color:var(--text-muted)">
       {{ golub.sealed_at|date:"d.m.Y H:i" }}
-      {% if golub.genetics_hash %} | SHA-256: <code style="font-size:.65rem;color:#c9a84c">{{ golub.genetics_hash|truncatechars:24 }}</code>{% endif %}
+      {% if golub.genetics_hash %} | SHA-256: <code style="font-size:.65rem;color:var(--gold,#c9a84c)">{{ golub.genetics_hash|truncatechars:24 }}</code>{% endif %}
     </div>
     {% if golub.sealed_reason %}<div style="font-size:.78rem;color:var(--text-secondary);margin-top:2px">{{ golub.sealed_reason }}</div>{% endif %}
   </div>
   <div style="margin-left:auto;flex-shrink:0">
-    <button type="button" class="btn btn-sm" style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.3);color:#c9a84c;font-weight:700;border-radius:10px;padding:.5rem 1.25rem;font-size:.8rem" onclick="openBridgePublish({model:'Golub',id:{{ golub.pk }},name:'{{ golub.prsten_broj|escapejs }}',price:'',qty:'1',unit:'kom'})">
+    <button type="button" class="btn btn-sm" style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);font-weight:700;border-radius:10px;padding:.5rem 1.25rem;font-size:.8rem" onclick="openBridgePublish({model:'Golub',id:{{ golub.pk }},name:'{{ golub.prsten_broj|escapejs }}',price:'',qty:'1',unit:'kom'})">
       <i class="fas fa-gavel me-1"></i>Ponudi na aukciji
     </button>
   </div>
@@ -321,7 +321,7 @@
 <div style="margin-bottom:1.5rem">
   <form method="post" action="{% url 'udruge:golub_seal' golub.pk %}" onsubmit="return confirm('PAŽNJA: Zapečaćeni rodovnik se ne može mijenjati. Nastaviti?')">
     {% csrf_token %}
-    <button type="submit" class="btn" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;font-weight:600;border-radius:10px;padding:.5rem 1.5rem;font-size:.82rem">
+    <button type="submit" class="btn" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);font-weight:600;border-radius:10px;padding:.5rem 1.5rem;font-size:.82rem">
       <i class="fas fa-shield-alt me-1"></i>Zapečati rodovnik
     </button>
   </form>
@@ -332,7 +332,7 @@
 {% with total_races=golub.broj_utrka|default:0 wins=golub.broj_pobjeda|default:0 %}
 <div class="gdet-perf">
   <div class="gdet-perf-card">
-    <div class="gdet-perf-value" style="color:#c9a84c">{{ total_races }}</div>
+    <div class="gdet-perf-value" style="color:var(--gold,#c9a84c)">{{ total_races }}</div>
     <div class="gdet-perf-label">Ukupno utrka</div>
   </div>
   <div class="gdet-perf-card">
@@ -410,10 +410,10 @@
 
       <!-- Main bird spans rows 2-3 -->
       <div class="ped-node main-bird" style="grid-column:1;grid-row:2/4">
-        <i class="fas fa-dove" style="font-size:1.2rem;color:#c9a84c;margin-bottom:.3rem;display:block"></i>
+        <i class="fas fa-dove" style="font-size:1.2rem;color:var(--gold,#c9a84c);margin-bottom:.3rem;display:block"></i>
         <div class="ped-prsten" style="font-size:.78rem">{{ golub.prsten_broj }}</div>
         <div class="ped-name" style="font-size:.88rem;font-weight:800">{{ golub.naziv|default:"--" }}</div>
-        <div style="font-size:.65rem;color:#c9a84c;margin-top:4px">
+        <div style="font-size:.65rem;color:var(--gold,#c9a84c);margin-top:4px">
           {% if golub.spol == 'M' %}Mužjak{% elif golub.spol == 'F' %}Ženka{% else %}?{% endif %}
         </div>
       </div>
@@ -530,7 +530,7 @@
             </span>
           </td>
           <td>
-            <a href="{% url 'udruge:utrka_detail' r.utrka.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none">{{ r.utrka.naziv }}</a>
+            <a href="{% url 'udruge:utrka_detail' r.utrka.pk %}" style="color:var(--gold,#c9a84c);font-weight:600;text-decoration:none">{{ r.utrka.naziv }}</a>
           </td>
           <td style="font-size:.82rem;color:var(--text-secondary)">{{ r.utrka.datum|date:"d.m.Y" }}</td>
           <td>
@@ -539,7 +539,7 @@
             <span style="font-size:.7rem;color:var(--text-muted)">m/min</span>
             {% else %}--{% endif %}
           </td>
-          <td style="font-weight:600;color:#c9a84c">{{ r.bodovi|default:"0" }}</td>
+          <td style="font-weight:600;color:var(--gold,#c9a84c)">{{ r.bodovi|default:"0" }}</td>
         </tr>
         {% endfor %}
       </tbody>

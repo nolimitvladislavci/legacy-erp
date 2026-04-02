@@ -8,14 +8,14 @@
 .blink { animation: blink 1s infinite; }
 #filterBar select { min-width: 120px; }
 input[name="channel"]:checked + i { font-weight: 900; }
-label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; border-color: #c9a84c !important; }
+label:has(input[name="channel"]:checked) { background: var(--gold,#c9a84c)33 !important; border-color: var(--gold,#c9a84c) !important; }
 </style>
 {% endblock %}
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
   <div>
-    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:#c9a84c"></i>{% trans "Knjiga boljitaka" %}</h2>
+    <h2 class="mb-0"><i class="fas fa-book me-2" style="color:var(--gold,#c9a84c)"></i>{% trans "Knjiga boljitaka" %}</h2>
     <small class="text-muted">{% trans "Zakon o zaštiti potrošača čl. 10 — rok za odgovor: 15 dana (HR) / 14 dana (DE)" %}</small>
   </div>
   <div class="d-flex gap-2 flex-wrap">
@@ -28,7 +28,7 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
 
 <!-- Filters -->
 <div class="d-flex gap-2 mb-3 flex-wrap" id="filterBar">
-  <select id="filterType" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+  <select id="filterType" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Sve vrste</option>
     <option value="prigovor">Prijedlog</option>
     <option value="reklamacija">Reklamacija</option>
@@ -36,7 +36,7 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
     <option value="utisak">Utisak</option>
     <option value="prijedlog">Prijedlog</option>
   </select>
-  <select id="filterSource" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+  <select id="filterSource" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Svi izvori</option>
     <option value="pos">POS</option>
     <option value="qr">QR</option>
@@ -44,14 +44,14 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
     <option value="gastro">Gastro</option>
     <option value="general">Općenito</option>
   </select>
-  <select id="filterStatus" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+  <select id="filterStatus" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Svi statusi</option>
     <option value="pending">Čeka odgovor</option>
     <option value="responded">Odgovoreno</option>
     <option value="overdue">Prekoračen rok</option>
     <option value="escalated">Eskalirano</option>
   </select>
-  <select id="filterPriority" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:#c9a84c44" onchange="loadData()">
+  <select id="filterPriority" class="form-select form-select-sm" style="width:auto;background:#1a1a2e;color:#ccc;border-color:var(--gold,#c9a84c)44" onchange="loadData()">
     <option value="">Svi prioriteti</option>
     <option value="5">Kritičan (5)</option>
     <option value="4">Visok (4)</option>
@@ -83,9 +83,9 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
 <!-- Modal: Novi prigovor -->
 <div class="modal fade" id="createModal" tabindex="-1">
   <div class="modal-dialog">
-    <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #c9a84c">
+    <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid var(--gold,#c9a84c)">
       <div class="modal-header border-0">
-        <h5 class="modal-title" style="color:#c9a84c"><i class="fas fa-edit me-2"></i>{% trans "Novi zapis" %}</h5>
+        <h5 class="modal-title" style="color:var(--gold,#c9a84c)"><i class="fas fa-edit me-2"></i>{% trans "Novi zapis" %}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -190,9 +190,9 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
         <input type="hidden" id="oId">
 
         <!-- AI Suggested Response -->
-        <div id="aiSuggestBox" class="mb-3 p-3" style="background:#c9a84c11;border:1px solid #c9a84c33;border-radius:8px;display:none">
+        <div id="aiSuggestBox" class="mb-3 p-3" style="background:var(--gold,#c9a84c)11;border:1px solid var(--gold,#c9a84c)33;border-radius:8px;display:none">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <small style="color:#c9a84c"><i class="fas fa-robot me-1"></i>AI prijedlog odgovora</small>
+            <small style="color:var(--gold,#c9a84c)"><i class="fas fa-robot me-1"></i>AI prijedlog odgovora</small>
             <button type="button" class="btn btn-sm btn-outline-warning" onclick="acceptAiSuggestion()">
               <i class="fas fa-check me-1"></i>Prihvati
             </button>
@@ -245,9 +245,9 @@ label:has(input[name="channel"]:checked) { background: #c9a84c33 !important; bor
 <!-- Modal: SES Metadata -->
 <div class="modal fade" id="sesModal" tabindex="-1">
   <div class="modal-dialog">
-    <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid #c9a84c">
+    <div class="modal-content" style="background:var(--card-bg,#1a1a2e);border:1px solid var(--gold,#c9a84c)">
       <div class="modal-header border-0">
-        <h5 class="modal-title" style="color:#c9a84c"><i class="fas fa-shield-alt me-2"></i>SES Metadata (eIDAS)</h5>
+        <h5 class="modal-title" style="color:var(--gold,#c9a84c)"><i class="fas fa-shield-alt me-2"></i>SES Metadata (eIDAS)</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body" id="sesBody">
@@ -391,7 +391,7 @@ function initSignature() {
   canvas.width = rect.width * 2;
   canvas.height = rect.height * 2;
   sigCtx.scale(2, 2);
-  sigCtx.strokeStyle = '#c9a84c';
+  sigCtx.strokeStyle = 'var(--gold,#c9a84c)';
   sigCtx.lineWidth = 2.5;
   sigCtx.lineCap = 'round';
 
@@ -469,7 +469,7 @@ async function loadData() {
         <td class="fw-bold text-center">#${p.redni_broj}</td>
         <td>${p.datum_primitka}<br><small class="text-muted">${p.source_module}</small></td>
         <td><span class="badge bg-${typeColors[p.record_type]||'secondary'}"><i class="fas ${typeIcons[p.record_type]||'fa-file'} me-1"></i>${p.record_type}</span>
-          ${p.star_rating ? '<br><span style="color:#c9a84c">' + '★'.repeat(p.star_rating) + '☆'.repeat(5-p.star_rating) + '</span>' : ''}
+          ${p.star_rating ? '<br><span style="color:var(--gold,#c9a84c)">' + '★'.repeat(p.star_rating) + '☆'.repeat(5-p.star_rating) + '</span>' : ''}
           ${p.language !== 'hr' ? '<br><small class="text-muted">' + p.language.toUpperCase() + '</small>' : ''}
         </td>
         <td>${p.ime}<br><small class="text-muted">${p.kontakt || ''}${p.consumer_email ? ' | '+p.consumer_email : ''}${p.consumer_phone ? ' | '+p.consumer_phone : ''}</small>
@@ -636,7 +636,7 @@ function showSES(id) {
   } else {
     var s = p.ses_metadata;
     var html = '<table class="table table-sm" style="color:#ccc">';
-    if (s.gps) html += '<tr><td>GPS</td><td>' + s.gps.lat + ', ' + s.gps.lng + ' <a href="https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng+'" target="_blank" style="color:#c9a84c"><i class="fas fa-map-marker-alt"></i> Mapa</a></td></tr>';
+    if (s.gps) html += '<tr><td>GPS</td><td>' + s.gps.lat + ', ' + s.gps.lng + ' <a href="https://maps.google.com/?q='+s.gps.lat+','+s.gps.lng+'" target="_blank" style="color:var(--gold,#c9a84c)"><i class="fas fa-map-marker-alt"></i> Mapa</a></td></tr>';
     if (s.ip) html += '<tr><td>IP</td><td>' + s.ip + '</td></tr>';
     if (s.device) html += '<tr><td>Uređaj</td><td style="font-size:.8rem">' + s.device + '</td></tr>';
     if (s.signature_time) html += '<tr><td>Potpis</td><td>' + s.signature_time + '</td></tr>';

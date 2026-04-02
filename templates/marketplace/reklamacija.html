@@ -7,11 +7,11 @@
 .rek-header { margin-bottom: 24px; }
 .rek-header h2 { font-weight: 900; font-size: 1.3rem; }
 .rek-order { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
-.rek-order .num { font-weight: 900; font-size: 1.1rem; color: #c9a84c; }
+.rek-order .num { font-weight: 900; font-size: 1.1rem; color: var(--gold,#c9a84c); }
 .rek-order .meta { font-size: .82rem; color: var(--text-muted, #94a3b8); margin-top: 4px; }
 
 .rek-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; }
-.rek-card h3 { font-size: .82rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.rek-card h3 { font-size: .82rem; font-weight: 800; color: var(--gold,#c9a84c); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
 
 .rek-label { font-size: .78rem; font-weight: 600; color: var(--text-muted, #94a3b8); margin-bottom: 4px; display: block; }
 .rek-input { background: var(--bg-main, #0a0a0a); border: 1px solid var(--border, #333); color: #e2e8f0; padding: 10px 14px; border-radius: 8px; font-size: .9rem; width: 100%; }
@@ -35,7 +35,7 @@
 
 /* Photo upload */
 .photo-upload { border: 2px dashed var(--border, #333); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: border-color .2s; }
-.photo-upload:hover { border-color: #c9a84c; }
+.photo-upload:hover { border-color: var(--gold,#c9a84c); }
 .photo-upload input { display: none; }
 .photo-upload .icon { font-size: 2rem; margin-bottom: 8px; }
 .photo-upload .text { font-size: .82rem; color: var(--text-muted); }
@@ -70,7 +70,7 @@
             <span class="item-name">{{ item.product.name }}</span>
             <span class="item-qty">x{{ item.quantity }} {{ item.product.unit|default:"kg" }}</span>
           </div>
-          <span style="font-weight:700;color:#c9a84c;">{{ item.total|floatformat:2 }}&euro;</span>
+          <span style="font-weight:700;color:var(--gold,#c9a84c);">{{ item.total|floatformat:2 }}&euro;</span>
         </label>
       </div>
       {% endfor %}
@@ -116,7 +116,7 @@
 
       <div class="rek-row">
         <label class="rek-label">{% trans "Fotografija dokaza" %}</label>
-        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('rek-photo-preview',{onReady:function(r){document.getElementById('rek_photo_b64').value=r.b64;document.getElementById('photo-label').querySelector('.text').textContent='Fotografirano'}})}else{document.getElementById('rek-file-input').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
+        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('rek-photo-preview',{onReady:function(r){document.getElementById('rek_photo_b64').value=r.b64;document.getElementById('photo-label').querySelector('.text').textContent='Fotografirano'}})}else{document.getElementById('rek-file-input').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold,#c9a84c);padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
         <div id="rek-photo-preview" style="display:none;margin:.5rem 0"></div>
         <input type="hidden" name="photo_b64" id="rek_photo_b64">
         <label class="photo-upload" id="photo-label">

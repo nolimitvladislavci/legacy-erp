@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Racun #{{ receipt.receipt_number }} — {{ company.name }}</title>
 <style>
-:root{--bg:#0a0a0a;--card:#111827;--gold:#c9a84c;--text:#e5e7eb;--muted:#6b7280;--green:#4ade80;--border:#1f2937}
+:root{--bg:#0a0a0a;--card:#111827;--gold: #c9a84c;--text:#e5e7eb;--muted:#6b7280;--green:#4ade80;--border:#1f2937}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:1rem}
 .receipt{max-width:420px;width:100%;background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)}
@@ -96,7 +96,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   {% endif %}
 
   <!-- ═══ REVIEW FIREWALL — 4-5★ → Google, 1-3★ → interni prigovor ═══ -->
-  <div id="reviewBox" style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid #c9a84c33;border-radius:12px;padding:20px;margin:16px 0;text-align:center">
+  <div id="reviewBox" style="background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid var(--gold,#c9a84c)33;border-radius:12px;padding:20px;margin:16px 0;text-align:center">
     <div style="font-size:.85rem;color:#e2e8f0;margin-bottom:10px">Kako ste zadovoljni uslugom?</div>
     <div id="stars" style="font-size:2rem;cursor:pointer;user-select:none">
       <span onclick="rate(1)" data-star="1">&#9734;</span>
@@ -108,7 +108,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     <div id="reviewMsg" style="display:none;margin-top:12px;font-size:.82rem;color:#94a3b8"></div>
     <div id="reviewForm" style="display:none;margin-top:12px">
       <textarea id="reviewText" placeholder="Recite nam sto mozemo poboljsati..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:.85rem;min-height:60px;resize:none"></textarea>
-      <button onclick="submitReview()" style="margin-top:8px;width:100%;padding:10px;background:#c9a84c;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Posalji povratnu informaciju</button>
+      <button onclick="submitReview()" style="margin-top:8px;width:100%;padding:10px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Posalji povratnu informaciju</button>
     </div>
   </div>
 
@@ -119,7 +119,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     var spans = document.querySelectorAll('#stars span');
     spans.forEach(function(s) {
       s.textContent = parseInt(s.dataset.star) <= n ? '★' : '☆';
-      s.style.color = parseInt(s.dataset.star) <= n ? '#c9a84c' : '#64748b';
+      s.style.color = parseInt(s.dataset.star) <= n ? 'var(--gold,#c9a84c)' : '#64748b';
     });
 
     if (n >= 4) {

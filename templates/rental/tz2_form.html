@@ -6,16 +6,16 @@
   @page { size: A4; margin: 18mm 14mm; }
   body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1a1a1a; line-height: 1.35; }
   h1 { font-size: 13pt; text-align: center; margin: 0 0 2px; }
-  h2 { font-size: 10pt; margin: 14px 0 5px; padding-bottom: 2px; border-bottom: 1px solid #c9a84c; }
-  .hdr { border: 2px solid #c9a84c; padding: 10px 14px; margin-bottom: 14px; background: #fdfcf8; text-align: center; }
-  .hdr .org { font-size: 10pt; font-weight: bold; color: #c9a84c; letter-spacing: 1px; }
+  h2 { font-size: 10pt; margin: 14px 0 5px; padding-bottom: 2px; border-bottom: 1px solid var(--gold,#c9a84c); }
+  .hdr { border: 2px solid var(--gold,#c9a84c); padding: 10px 14px; margin-bottom: 14px; background: #fdfcf8; text-align: center; }
+  .hdr .org { font-size: 10pt; font-weight: bold; color: var(--gold,#c9a84c); letter-spacing: 1px; }
   table { width: 100%; border-collapse: collapse; margin: 6px 0; }
   th, td { border: 1px solid #ccc; padding: 4px 7px; font-size: 9pt; }
   th { background: #f5f0e5; font-weight: bold; }
   .r { text-align: right; }
   .b { font-weight: bold; }
   .tot { background: #f5f0e5; font-weight: bold; }
-  .gold { color: #c9a84c; }
+  .gold { color: var(--gold,#c9a84c); }
   .info td:first-child { width: 34%; color: #666; }
   .disc { background: #e8f5e9; }
   .warn { background: #fff8e1; border: 1px solid #ffc107; padding: 5px 8px; font-size: 8.5pt; margin: 6px 0; }
@@ -91,7 +91,7 @@
 
 <h2>5b. Uplatnica s barkodom</h2>
 {% if hub3a_total_base64 %}
-<div style="border:2px solid #c9a84c;padding:12px;margin:8px 0;background:#fdfcf8;">
+<div style="border:2px solid var(--gold,#c9a84c);padding:12px;margin:8px 0;background:#fdfcf8;">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;">
     <div style="flex:1;">
       <div style="font-size:8pt;color:#666;margin-bottom:2px;">PRIMATELJ:</div>

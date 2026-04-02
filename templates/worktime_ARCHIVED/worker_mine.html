@@ -9,9 +9,9 @@
   <div class="col-6">
     <div class="card bg-dark border-secondary p-3 text-center">
       <div class="text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px">Ovaj tjedan</div>
-      <div class="fs-2 fw-bold" style="color:#c9a84c">{{ week_hours|floatformat:1 }}<small style="font-size:.5em;color:#94a3b8">/{{ weekly_target }}h</small></div>
+      <div class="fs-2 fw-bold" style="color:var(--gold,#c9a84c)">{{ week_hours|floatformat:1 }}<small style="font-size:.5em;color:#94a3b8">/{{ weekly_target }}h</small></div>
       <div class="progress mt-2" style="height:6px;background:#1e293b">
-        <div class="progress-bar" style="width:{% widthratio week_hours weekly_target 100 %}%;background:#c9a84c"></div>
+        <div class="progress-bar" style="width:{% widthratio week_hours weekly_target 100 %}%;background:var(--gold,#c9a84c)"></div>
       </div>
     </div>
   </div>
@@ -27,7 +27,7 @@
 </div>
 
 <div class="card bg-dark border-secondary">
-  <div class="card-header"><h6 class="mb-0" style="color:#c9a84c">Ovaj tjedan — dan po dan</h6></div>
+  <div class="card-header"><h6 class="mb-0" style="color:var(--gold,#c9a84c)">Ovaj tjedan — dan po dan</h6></div>
   <div class="card-body p-0"><div class="table-responsive">
     <table class="table table-dark table-sm mb-0">
     <thead><tr>

@@ -10,18 +10,18 @@
     .year-selector select { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); font-size: 0.9rem; }
     .report-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
     .report-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: border-color 0.2s; }
-    .report-card:hover { border-color: var(--gold, #c9a84c); }
-    .report-card .icon { width: 48px; height: 48px; background: #c9a84c15; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-    .report-card .icon i { font-size: 1.3rem; color: var(--gold, #c9a84c); }
+    .report-card:hover { border-color: var(--gold, var(--gold,#c9a84c)); }
+    .report-card .icon { width: 48px; height: 48px; background: var(--gold,#c9a84c)15; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .report-card .icon i { font-size: 1.3rem; color: var(--gold, var(--gold,#c9a84c)); }
     .report-card h3 { margin: 0 0 8px; font-size: 1.1rem; }
     .report-card p { color: var(--text-secondary); font-size: 0.85rem; margin: 0 0 20px; line-height: 1.5; }
     .report-card .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
     .badge-dv { background: #3b82f620; color: #3b82f6; }
-    .badge-jv { background: #c9a84c20; color: #c9a84c; }
-    .btn-download { background: #c9a84c; color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .badge-jv { background: var(--gold,#c9a84c)20; color: var(--gold,#c9a84c); }
+    .btn-download { background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
     .btn-download:hover { background: #b8943f; }
     .btn-disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; pointer-events: none; }
-    .info-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--gold, #c9a84c); border-radius: 8px; padding: 16px 20px; margin-top: 32px; font-size: 0.85rem; color: var(--text-secondary); }
+    .info-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--gold, var(--gold,#c9a84c)); border-radius: 8px; padding: 16px 20px; margin-top: 32px; font-size: 0.85rem; color: var(--text-secondary); }
     .info-box strong { color: var(--text); }
     @media (max-width: 768px) { .report-cards { grid-template-columns: 1fr; } }
 </style>

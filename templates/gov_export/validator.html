@@ -10,15 +10,15 @@
 body{font-family:'Inter',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
 .container{max-width:600px;width:100%}
 .logo{text-align:center;margin-bottom:2rem}
-.logo h1{font-size:1.8rem;font-weight:800;color:#c9a84c}
+.logo h1{font-size:1.8rem;font-weight:800;color:var(--gold,#c9a84c)}
 .logo p{color:#64748b;font-size:.85rem;margin-top:.25rem}
 .card{background:#111827;border:1px solid #1e293b;border-radius:16px;padding:2rem;margin-bottom:1.5rem}
 .upload-zone{border:2px dashed #334155;border-radius:12px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:border-color .2s}
-.upload-zone:hover{border-color:#c9a84c}
+.upload-zone:hover{border-color:var(--gold,#c9a84c)}
 .upload-zone i{font-size:2.5rem;color:#475569;margin-bottom:1rem;display:block}
 .upload-zone p{color:#94a3b8;font-size:.9rem}
 input[type=file]{display:none}
-.btn{background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border:none;padding:.75rem 2rem;border-radius:10px;font-size:.9rem;cursor:pointer;width:100%;margin-top:1rem}
+.btn{background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border:none;padding:.75rem 2rem;border-radius:10px;font-size:.9rem;cursor:pointer;width:100%;margin-top:1rem}
 .result{margin-top:1.5rem}
 .result-row{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid #1e293b;font-size:.85rem}
 .result-row:last-child{border:none}
@@ -57,7 +57,7 @@ input[type=file]{display:none}
 
 {% if result %}
 <div class="card">
-  <h4 style="color:#c9a84c;margin-bottom:1rem"><i class="fas fa-clipboard-check me-2"></i>Rezultat provjere</h4>
+  <h4 style="color:var(--gold,#c9a84c);margin-bottom:1rem"><i class="fas fa-clipboard-check me-2"></i>Rezultat provjere</h4>
   
   <div class="result">
     <div class="result-row"><span class="label">Datoteka</span><span class="value">{{ result.filename }}</span></div>
@@ -100,9 +100,9 @@ input[type=file]{display:none}
 
 <div class="card" style="border-color:rgba(201,168,76,.2)">
   <div style="display:flex;gap:1rem;align-items:start">
-    <i class="fas fa-balance-scale" style="color:#c9a84c;font-size:1.5rem;flex-shrink:0;margin-top:2px"></i>
+    <i class="fas fa-balance-scale" style="color:var(--gold,#c9a84c);font-size:1.5rem;flex-shrink:0;margin-top:2px"></i>
     <div>
-      <h4 style="color:#c9a84c;font-size:.9rem;margin-bottom:.5rem">Neovisna verifikacija</h4>
+      <h4 style="color:var(--gold,#c9a84c);font-size:.9rem;margin-bottom:.5rem">Neovisna verifikacija</h4>
       <p style="font-size:.8rem;color:#94a3b8;line-height:1.5;margin-bottom:.75rem">
         Ovaj XML je usklađen s <strong>EU eIDAS</strong> standardom (Uredba 910/2014). 
         XAdES potpis možete <strong>neovisno verificirati</strong> putem službenih alata:
@@ -126,7 +126,7 @@ input[type=file]{display:none}
 </div>
 
 <div class="footer">
-  CroXML Verify — Javna provjera XML dokumenata &copy; 2026 | <a href="https://limit-connect.com" style="color:#c9a84c">limit-connect.com</a>
+  CroXML Verify — Javna provjera XML dokumenata &copy; 2026 | <a href="https://limit-connect.com" style="color:var(--gold,#c9a84c)">limit-connect.com</a>
 </div>
 
 </div>

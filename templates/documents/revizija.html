@@ -7,7 +7,7 @@
 <div class="container-fluid" style="max-width:700px">
 
   <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:2rem;border:1px solid rgba(201,168,76,.2)">
-    <h2 style="color:#c9a84c;margin:0 0 .5rem">Revizorski paket</h2>
+    <h2 style="color:var(--gold,#c9a84c);margin:0 0 .5rem">Revizorski paket</h2>
     <p style="color:#888;margin:0 0 1.5rem">Generiraj kompletni ZIP za reviziju s INDEX-om, URA, IRA, PDV pregledom i svim PDF fakturama.</p>
 
     <form method="post" action="{% url 'documents:revizija_export' %}" id="revForm">
@@ -35,7 +35,7 @@
       </div>
 
       <div style="background:rgba(201,168,76,.06);border-radius:10px;padding:1rem;margin-bottom:1.5rem;border:1px solid rgba(201,168,76,.15)">
-        <div style="font-weight:600;color:#c9a84c;margin-bottom:.5rem">ZIP paket sadrzi:</div>
+        <div style="font-weight:600;color:var(--gold,#c9a84c);margin-bottom:.5rem">ZIP paket sadrzi:</div>
         <ul style="color:#aaa;font-size:.85rem;margin:0;padding-left:1.2rem;line-height:1.8">
           <li><b>INDEX.csv</b> — kompletni popis svih dokumenata</li>
           <li><b>KNJIGA_URA.csv</b> — ulazni racuni (dobavljaci)</li>
@@ -56,7 +56,7 @@
         </div>
       </div>
 
-      <button type="submit" id="genBtn" style="width:100%;padding:.85rem;background:#c9a84c;color:#000;border:none;border-radius:10px;font-weight:700;font-size:1.1rem;cursor:pointer"
+      <button type="submit" id="genBtn" style="width:100%;padding:.85rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:10px;font-weight:700;font-size:1.1rem;cursor:pointer"
               onclick="this.disabled=true;this.textContent='Generiranje ZIP...';document.getElementById('revForm').submit();">
         Generiraj revizorski paket
       </button>
@@ -66,7 +66,7 @@
   <div style="margin-top:1.5rem;text-align:center">
     <a href="{% url 'documents:arhiva_list' %}" style="color:#888;font-size:.85rem">Natrag na arhivu</a>
     <span style="color:#444;margin:0 .5rem">|</span>
-    <a href="{% url 'documents:ai_inbox' %}" style="color:#c9a84c;font-size:.85rem">AI Inbox ({{ pending_count }} pending)</a>
+    <a href="{% url 'documents:ai_inbox' %}" style="color:var(--gold,#c9a84c);font-size:.85rem">AI Inbox ({{ pending_count }} pending)</a>
   </div>
 
 </div>

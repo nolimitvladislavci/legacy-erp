@@ -90,7 +90,7 @@
     <!-- Offline bar handler now in core.js -->
 
     {% if request.session.umbrella_as_company %}
-    <div style="background:linear-gradient(90deg,#c9a84c,#e8d48b);color:#0a0a0a;text-align:center;padding:8px 16px;font-weight:600;position:relative;z-index:1050;">
+    <div style="background:linear-gradient(90deg,var(--gold,#c9a84c),#e8d48b);color:#0a0a0a;text-align:center;padding:8px 16px;font-weight:600;position:relative;z-index:1050;">
       <i class="fas fa-building"></i>
       Gledate firmu: <strong>{{ request.session.umbrella_home_name|default:"Child" }}</strong> → trenutna
       <a href="{% url 'umbrella_switch_back' %}" class="btn btn-sm btn-dark ms-3">
@@ -103,13 +103,13 @@
 <div id="imp-banner" style="
     position:fixed;top:0;left:0;right:0;z-index:9999;
     background:linear-gradient(90deg,#1a1200,#2a1e00,#1a1200);
-    border-bottom:2px solid #c9a84c;
+    border-bottom:2px solid var(--gold,#c9a84c);
     padding:8px 20px;
     display:flex;align-items:center;justify-content:space-between;
     gap:12px;font-family:'Barlow Condensed','Segoe UI',sans-serif;
     box-shadow:0 2px 20px rgba(201,168,76,.25);">
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="color:#c9a84c;font-size:1rem">⚠</span>
+    <span style="color:var(--gold,#c9a84c);font-size:1rem">⚠</span>
     <span style="color:#e8c96a;font-size:.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase">
       {% trans "Pristupate kao:" %}
     </span>
@@ -118,7 +118,7 @@
     </span>
     <span style="color:#4a5060;font-size:.72rem">|</span>
     <span style="color:#9aa0b0;font-size:.75rem">
-      {% trans "Trajanje:" %} <code id="imp-timer" style="color:#c9a84c;background:rgba(201,168,76,.1);padding:1px 6px;border-radius:3px">--:--:--</code>
+      {% trans "Trajanje:" %} <code id="imp-timer" style="color:var(--gold,#c9a84c);background:rgba(201,168,76,.1);padding:1px 6px;border-radius:3px">--:--:--</code>
     </span>
   </div>
   <a href="/superadmin/impersonate/stop/"
@@ -135,9 +135,9 @@
 <!-- Impersonation timer now in core.js via window.FC.impersonationStart -->
 {% endif %}
 {% if request.user.is_authenticated and request.company and not request.company.has_signed_tc_consent %}
-<div style="background:linear-gradient(90deg,#1a1000,#2a1800);border-bottom:2px solid #c9a84c;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'Barlow Condensed',sans-serif">
+<div style="background:linear-gradient(90deg,#1a1000,#2a1800);border-bottom:2px solid var(--gold,#c9a84c);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'Barlow Condensed',sans-serif">
   <span style="color:#e8c96a;font-size:.85rem"><strong>⚠ Za punu funkcionalnost</strong> potrebno je prihvatiti uvjete korištenja platforme.</span>
-  <a href="/companies/tc-consent/" style="background:#c9a84c;color:#000;padding:6px 16px;border-radius:6px;font-weight:700;font-size:.8rem;text-decoration:none;white-space:nowrap">Prihvati uvjete →</a>
+  <a href="/companies/tc-consent/" style="background:var(--gold,#c9a84c);color:#000;padding:6px 16px;border-radius:6px;font-weight:700;font-size:.8rem;text-decoration:none;white-space:nowrap">Prihvati uvjete →</a>
 </div>
 {% endif %}
 <div class="app-layout">
@@ -167,11 +167,11 @@
         {% if request.company %}
         <div style="padding:8px 12px;background:#0d1526;border-bottom:1px solid #1e293b">
             <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:linear-gradient(135deg,#1a2744,#162040);border-radius:8px;border:1px solid rgba(201,168,76,.15)">
-                <i class="fas fa-building" style="color:#c9a84c;font-size:.75rem"></i>
+                <i class="fas fa-building" style="color:var(--gold,#c9a84c);font-size:.75rem"></i>
                 <div style="flex:1;min-width:0">
                     <div style="font-size:.72rem;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ request.company.name }}</div>
                     {% if active_plan_name %}
-                    <div style="display:inline-block;margin-top:2px;font-size:.55rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:3px;{% if active_plan_slug == 'enterprise' %}background:rgba(201,168,76,.15);color:#c9a84c{% elif active_plan_slug == 'professional' %}background:rgba(59,130,246,.15);color:#60a5fa{% else %}background:rgba(100,116,139,.15);color:#94a3b8{% endif %}">{{ active_plan_name }}</div>
+                    <div style="display:inline-block;margin-top:2px;font-size:.55rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:3px;{% if active_plan_slug == 'enterprise' %}background:rgba(201,168,76,.15);color:var(--gold,#c9a84c){% elif active_plan_slug == 'professional' %}background:rgba(59,130,246,.15);color:#60a5fa{% else %}background:rgba(100,116,139,.15);color:#94a3b8{% endif %}">{{ active_plan_name }}</div>
                     {% endif %}
                 </div>
                 {% if has_multiple_companies %}
@@ -180,13 +180,13 @@
             </div>
         </div>
         {% if has_multiple_companies %}
-        <div id="companySwitcher" style="display:none;position:fixed;top:80px;left:8px;right:8px;max-width:280px;background:#0a1020;border:1px solid #c9a84c44;border-radius:10px;padding:8px;max-height:300px;overflow-y:auto;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.7)">
+        <div id="companySwitcher" style="display:none;position:fixed;top:80px;left:8px;right:8px;max-width:280px;background:#0a1020;border:1px solid var(--gold,#c9a84c)44;border-radius:10px;padding:8px;max-height:300px;overflow-y:auto;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.7)">
             {% for mem in user_memberships %}
             <form method="post" action="{% url 'accounts:switch_company' %}" style="margin:0">
                 {% csrf_token %}
                 {% if mem.pk %}<input type="hidden" name="membership_id" value="{{ mem.id }}">{% else %}<input type="hidden" name="company_id" value="{{ mem.company.id }}">{% endif %}
                 <button type="submit" style="width:100%;text-align:left;background:{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %};border:none;color:#e2e8f0;padding:5px 10px;font-size:.68rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %}'">
-                    {% if mem.company.id == request.company.id %}<i class="fas fa-check" style="color:#c9a84c;font-size:.5rem"></i>{% else %}<i class="fas fa-building" style="color:#475569;font-size:.5rem"></i>{% endif %}
+                    {% if mem.company.id == request.company.id %}<i class="fas fa-check" style="color:var(--gold,#c9a84c);font-size:.5rem"></i>{% else %}<i class="fas fa-building" style="color:#475569;font-size:.5rem"></i>{% endif %}
                     {{ mem.company.name }}
                     <span style="margin-left:auto;opacity:0.4;font-size:.5rem">{{ mem.get_role_display }}</span>
                 </button>
@@ -285,10 +285,10 @@
             {% if request.upgrade_hint %}
             <div style="background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
               <div>
-                <strong style="color:#c9a84c">&#9733; Ovaj modul zahtijeva viši plan</strong>
+                <strong style="color:var(--gold,#c9a84c)">&#9733; Ovaj modul zahtijeva viši plan</strong>
                 <span style="color:#888;font-size:.85rem;margin-left:8px">Koristite ga besplatno — nadogradite kad budete spremni.</span>
               </div>
-              <a href="/register/upgrade/?module={{ request.upgrade_hint }}" style="background:#c9a84c;color:#000;padding:8px 20px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap">Odaberi paket &#8594;</a>
+              <a href="/register/upgrade/?module={{ request.upgrade_hint }}" style="background:var(--gold,#c9a84c);color:#000;padding:8px 20px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap">Odaberi paket &#8594;</a>
             </div>
             {% endif %}
             {% if user.is_authenticated and user.profile and not user.profile.email_verified %}
@@ -302,7 +302,7 @@
               </div>
               <form method="post" action="{% url 'resend_verification' %}" style="margin:0">
                 {% csrf_token %}
-                <button type="submit" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;padding:6px 14px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer">Pošalji ponovo</button>
+                <button type="submit" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);padding:6px 14px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer">Pošalji ponovo</button>
               </form>
             </div>
             {% endif %}
@@ -586,7 +586,7 @@ window.FC = {
       <i class="fas fa-users" style="font-size:1.1rem"></i>
       <span>Partneri</span>
     </a>
-    <button onclick="openSidebar()" style="display:flex;flex-direction:column;align-items:center;background:none;border:none;color:#c9a84c;font-size:.6rem;padding:6px 12px;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent" class="bnav-item">
+    <button onclick="openSidebar()" style="display:flex;flex-direction:column;align-items:center;background:none;border:none;color:var(--gold,#c9a84c);font-size:.6rem;padding:6px 12px;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent" class="bnav-item">
       <i class="fas fa-bars" style="font-size:1.1rem"></i>
       <span>Vise</span>
     </button>
@@ -607,7 +607,7 @@ window.FC = {
     items.forEach(function(a){
       var href = a.getAttribute('href') || '';
       if(href && path.startsWith(href) && href.length > 4) {
-        a.style.color = '#c9a84c';
+        a.style.color = 'var(--gold,#c9a84c)';
       }
     });
   }
@@ -648,7 +648,7 @@ window.FC = {
         var c=document.getElementById('sidebarFavs'); if(!c)return;
         var favs=getFavs(), html='<div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 2px">Favoriti</div>';
         favs.forEach(function(f,i){
-          html+='<a href="'+f.url+'" onclick="closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:7px 12px;color:#e2e8f0;text-decoration:none;border-radius:8px;margin:1px 4px;font-size:.82rem;transition:.15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='none'"><i class="fas '+f.icon+'" style="width:18px;text-align:center;font-size:.8rem;color:#c9a84c"></i>'+f.label+'</a>';
+          html+='<a href="'+f.url+'" onclick="closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:7px 12px;color:#e2e8f0;text-decoration:none;border-radius:8px;margin:1px 4px;font-size:.82rem;transition:.15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='none'"><i class="fas '+f.icon+'" style="width:18px;text-align:center;font-size:.8rem;color:var(--gold,#c9a84c)"></i>'+f.label+'</a>';
         });
         c.innerHTML=html;
       }

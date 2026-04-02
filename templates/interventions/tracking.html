@@ -9,7 +9,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; min-height: 100vh; }
 .header { background: #0f172a; padding: 1.25rem 1.5rem; color: #fff; display: flex; align-items: center; gap: 1rem; }
-.header-brand { font-weight: 700; font-size: 1.1rem; color: #c9a84c; }
+.header-brand { font-weight: 700; font-size: 1.1rem; color: var(--gold,#c9a84c); }
 .header-title { font-size: .85rem; color: #94a3b8; }
 .container { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem; }
 .status-hero { background: #fff; border-radius: 12px; padding: 2rem 1.5rem; text-align: center; margin-bottom: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
@@ -22,7 +22,7 @@ body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; 
 .step:first-child::before { display: none; }
 .step-dot { width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; margin: 0 auto .4rem; display: flex; align-items: center; justify-content: center; font-size: .7rem; position: relative; z-index: 1; }
 .step.done .step-dot { background: #4caf7d; color: #fff; }
-.step.active .step-dot { background: #0f172a; color: #fff; border: 2px solid #c9a84c; }
+.step.active .step-dot { background: #0f172a; color: #fff; border: 2px solid var(--gold,#c9a84c); }
 .step-lbl { font-size: .65rem; color: #94a3b8; line-height: 1.2; }
 .step.done .step-lbl, .step.active .step-lbl { color: #0f172a; font-weight: 600; }
 .info-card { background: #fff; border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); }

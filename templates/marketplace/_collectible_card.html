@@ -21,7 +21,7 @@
 
   <div class="p-3">
     <h6 class="mb-1">
-      <a href="{% if product.is_auction %}{% url 'marketplace:auction_live' product.pk %}{% else %}{% url 'marketplace:product_detail' product.slug %}{% endif %}" class="text-decoration-none" style="color:#c9a84c;font-weight:800;font-size:.95rem">{{ product.name }}</a>
+      <a href="{% if product.is_auction %}{% url 'marketplace:auction_live' product.pk %}{% else %}{% url 'marketplace:product_detail' product.slug %}{% endif %}" class="text-decoration-none" style="color:var(--gold,#c9a84c);font-weight:800;font-size:.95rem">{{ product.name }}</a>
     </h6>
     <small style="color:var(--text-dim)"><i class="fas fa-home me-1"></i>{{ product.seller_company.name }}</small>
 
@@ -33,9 +33,9 @@
     <!-- SHA-256 seal -->
     {% if product.disclaimer_text and 'SHA-256' in product.disclaimer_text or product.source_model == 'Golub' %}
     <div style="margin-top:.6rem;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:.5rem .6rem;display:flex;align-items:center;gap:.5rem">
-      <i class="fas fa-shield-alt" style="color:#c9a84c;font-size:.8rem;flex-shrink:0"></i>
+      <i class="fas fa-shield-alt" style="color:var(--gold,#c9a84c);font-size:.8rem;flex-shrink:0"></i>
       <div>
-        <div style="font-size:.62rem;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.3px">Rodovnik zapecacen</div>
+        <div style="font-size:.62rem;font-weight:700;color:var(--gold,#c9a84c);text-transform:uppercase;letter-spacing:.3px">Rodovnik zapecacen</div>
         <div style="font-size:.6rem;color:var(--text-dim);font-family:monospace">Data Vaulting verificiran</div>
       </div>
     </div>
@@ -44,7 +44,7 @@
     <!-- Price -->
     <div class="mt-2 d-flex justify-content-between align-items-center">
       <div>
-        <span style="font-weight:800;font-size:1.2rem;color:#c9a84c">{{ product.unit_price }}&euro;</span>
+        <span style="font-weight:800;font-size:1.2rem;color:var(--gold,#c9a84c)">{{ product.unit_price }}&euro;</span>
         <small style="color:var(--text-dim)">/{{ product.unit }}</small>
       </div>
     </div>

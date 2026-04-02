@@ -39,13 +39,13 @@
 .k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
 .k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
 .k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.k-btn-gold{background:var(--gold,#c9a84c);color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
 .badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
 .badge-green{background:rgba(34,197,94,.15);color:#22c55e}
 .badge-red{background:rgba(239,68,68,.15);color:#ef4444}
 .badge-yellow{background:rgba(245,158,11,.15);color:#f59e0b}
 .badge-gray{background:rgba(100,116,139,.15);color:#64748b}
-.badge-gold{background:rgba(201,168,76,.15);color:#c9a84c}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)}
 .vat-pos{color:#ef4444}.vat-neg{color:#22c55e}
 </style>
 
@@ -54,7 +54,7 @@
 <!-- SUMMARY STATS -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
   <div class="k-stat">
-    <div><div class="lbl">Firme</div><div class="num" style="color:#c9a84c">{{ company_count }}</div></div>
+    <div><div class="lbl">Firme</div><div class="num" style="color:var(--gold,#c9a84c)">{{ company_count }}</div></div>
   </div>
   <div class="k-stat">
     <div><div class="lbl">Ukupna PDV obveza</div><div class="num {% if totals.obveza > 0 %}vat-pos{% else %}vat-neg{% endif %}">{{ totals.obveza|floatformat:2 }} &euro;</div></div>
@@ -109,7 +109,7 @@
     <tbody>
     {% for row in rows %}
     <tr>
-      <td><a href="{% url 'konto:report_vat' %}?calc=1&year=2026&month=3" style="color:#c9a84c;text-decoration:none;font-weight:600">{{ row.company.name }}</a></td>
+      <td><a href="{% url 'konto:report_vat' %}?calc=1&year=2026&month=3" style="color:var(--gold,#c9a84c);text-decoration:none;font-weight:600">{{ row.company.name }}</a></td>
       <td><span class="badge badge-gray">{{ row.business_type }}</span></td>
       <td>
         {% if row.pdv_status == 'obveznik' %}<span class="badge badge-gold">Obveznik</span>

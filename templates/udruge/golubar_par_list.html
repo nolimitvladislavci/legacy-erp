@@ -54,7 +54,7 @@
 }
 .par-bird-prsten {
   font-size: .68rem; font-family: monospace;
-  color: #c9a84c;
+  color: var(--gold,#c9a84c);
 }
 .par-heart {
   width: 36px; height: 36px;
@@ -102,7 +102,7 @@
       <p style="font-size:.78rem;color:var(--text-muted);margin:0">{{ page_obj.paginator.count }} registrirani{{ page_obj.paginator.count|pluralize:"h" }} par{{ page_obj.paginator.count|pluralize:"a,ova" }}</p>
     </div>
   </div>
-  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
     <i class="fas fa-plus me-1"></i>Novi par
   </a>
 </div>
@@ -125,7 +125,7 @@
       </div>
     </div>
     <div class="par-meta">
-      <span class="par-meta-item" style="background:rgba(201,168,76,.08);color:#c9a84c">
+      <span class="par-meta-item" style="background:rgba(201,168,76,.08);color:var(--gold,#c9a84c)">
         <i class="fas fa-calendar"></i> Sezona {{ p.sezona|default:"--" }}
       </span>
       {% if p.aktivan %}
@@ -142,7 +142,7 @@
       </span>
     </div>
     <div class="par-actions">
-      <a href="{% url 'udruge:leglo_create' p.pk %}" class="btn btn-sm" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:#c9a84c;font-weight:600;border-radius:8px;font-size:.75rem;flex:1">
+      <a href="{% url 'udruge:leglo_create' p.pk %}" class="btn btn-sm" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);color:var(--gold,#c9a84c);font-weight:600;border-radius:8px;font-size:.75rem;flex:1">
         <i class="fas fa-egg me-1"></i>Dodaj leglo
       </a>
     </div>
@@ -167,7 +167,7 @@
   <div style="font-size:3rem;color:#ec4899;opacity:.3;margin-bottom:1rem"><i class="fas fa-heart"></i></div>
   <h3 style="font-weight:700;color:var(--text)">Stvorite prvi uzgojni par</h3>
   <p style="color:var(--text-muted);font-size:.85rem;max-width:400px;margin:0 auto 1.5rem">Spojite mužjaka i ženku za praćenje uzgoja, legala i potomstva</p>
-  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+  <a href="{% url 'udruge:par_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
     <i class="fas fa-plus me-1"></i>Novi par
   </a>
 </div>

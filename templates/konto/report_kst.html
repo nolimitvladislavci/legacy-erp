@@ -11,8 +11,8 @@
 .k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
 .k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
-.k-nav a:hover,.k-nav a.active{border-color:#c9a84c;color:#c9a84c}
-.k-nav a.active{background:#c9a84c;color:#0f172a}
+.k-nav a:hover,.k-nav a.active{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
+.k-nav a.active{background:var(--gold,#c9a84c);color:#0f172a}
 .k-table{width:100%;border-collapse:collapse;font-size:.82rem}
 .k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
 .k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
@@ -22,9 +22,9 @@
 .k-filter .fld label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b}
 .k-filter .fld select{padding:6px 10px;border:1px solid #334155;border-radius:6px;background:#0f172a;color:#e2e8f0;font-size:.82rem}
 .k-btn{padding:8px 18px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
-.k-btn-gold{background:#c9a84c;color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
+.k-btn-gold{background:var(--gold,#c9a84c);color:#0f172a}.k-btn-gold:hover{background:#d4b35c}
 .badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700}
-.badge-gold{background:rgba(201,168,76,.15);color:#c9a84c}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold,#c9a84c)}
 </style>
 
 <div style="margin-bottom:14px"><a href="{% url 'konto:dashboard' %}" style="color:#94a3b8;text-decoration:none;font-size:.82rem">&larr; Dashboard</a></div>
@@ -60,7 +60,7 @@
     <div><div class="lbl">Betriebsausgaben</div><div class="num" style="color:#ef4444">{{ report.total_expenses|floatformat:2 }} &euro;</div></div>
   </div>
   <div class="k-stat">
-    <div><div class="lbl">Zu versteuerndes Einkommen</div><div class="num" style="color:#c9a84c">{{ report.zve|floatformat:2 }} &euro;</div></div>
+    <div><div class="lbl">Zu versteuerndes Einkommen</div><div class="num" style="color:var(--gold,#c9a84c)">{{ report.zve|floatformat:2 }} &euro;</div></div>
   </div>
 </div>
 
@@ -70,7 +70,7 @@
     <tbody>
       <tr><td>Gewinn (Umsatz &minus; Aufwendungen)</td><td class="right mono">{{ report.gewinn|floatformat:2 }} &euro;</td></tr>
       <tr><td>+ Nicht abziehbare Aufwendungen (&sect;10 KStG)</td><td class="right mono">{{ report.nicht_abziehbar|floatformat:2 }} &euro;</td></tr>
-      <tr style="font-weight:700;border-top:2px solid #334155"><td>Zu versteuerndes Einkommen (zvE)</td><td class="right mono" style="color:#c9a84c">{{ report.zve|floatformat:2 }} &euro;</td></tr>
+      <tr style="font-weight:700;border-top:2px solid #334155"><td>Zu versteuerndes Einkommen (zvE)</td><td class="right mono" style="color:var(--gold,#c9a84c)">{{ report.zve|floatformat:2 }} &euro;</td></tr>
       <tr><td colspan="2" style="height:8px"></td></tr>
       <tr><td>K&ouml;rperschaftsteuer ({{ report.kst_rate }})</td><td class="right mono">{{ report.kst|floatformat:2 }} &euro;</td></tr>
       <tr><td>Solidarit&auml;tszuschlag ({{ report.soli_rate }} auf KSt)</td><td class="right mono">{{ report.soli|floatformat:2 }} &euro;</td></tr>
@@ -81,9 +81,9 @@
       <tr><td colspan="2" style="color:#64748b;font-size:.75rem;padding-top:4px">Freibetrag 24.500 &euro; f&uuml;r Personengesellschaften ber&uuml;cksichtigt</td></tr>
       {% endif %}
       <tr><td colspan="2" style="height:12px"></td></tr>
-      <tr style="font-weight:700;border-top:2px solid #c9a84c">
-        <td style="color:#c9a84c">GESAMTE STEUERBELASTUNG</td>
-        <td class="right mono" style="color:#c9a84c;font-size:1.1rem">{{ report.total_tax|floatformat:2 }} &euro;</td>
+      <tr style="font-weight:700;border-top:2px solid var(--gold,#c9a84c)">
+        <td style="color:var(--gold,#c9a84c)">GESAMTE STEUERBELASTUNG</td>
+        <td class="right mono" style="color:var(--gold,#c9a84c);font-size:1.1rem">{{ report.total_tax|floatformat:2 }} &euro;</td>
       </tr>
     </tbody>
   </table>
@@ -92,7 +92,7 @@
 <div class="k-card">
   <div style="padding:20px;text-align:center">
     <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Effektiver Steuersatz</div>
-    <div style="font-size:2rem;font-weight:800;color:#c9a84c">{{ report.effective_rate }}%</div>
+    <div style="font-size:2rem;font-weight:800;color:var(--gold,#c9a84c)">{{ report.effective_rate }}%</div>
     <div style="font-size:.8rem;color:#64748b;margin-top:4px">KSt {{ report.kst_rate }} + Soli {{ report.soli_rate }} + GewSt (Hebesatz {{ report.hebesatz|floatformat:0 }}%)</div>
   </div>
 </div>
@@ -100,7 +100,7 @@
 <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:16px">
   <div style="font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Hinweis</div>
   <div style="font-size:.82rem;color:#94a3b8">
-    Die K&ouml;rperschaftsteuer-Erkl&auml;rung ist bis zum <strong style="color:#c9a84c">31. Juli</strong> des Folgejahres
+    Die K&ouml;rperschaftsteuer-Erkl&auml;rung ist bis zum <strong style="color:var(--gold,#c9a84c)">31. Juli</strong> des Folgejahres
     beim Finanzamt einzureichen (mit Steuerberater: 28./29. Februar des &uuml;bern&auml;chsten Jahres).
     Der Gewerbesteuer-Hebesatz ist gemeindespezifisch und kann im Admin angepasst werden.
   </div>

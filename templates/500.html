@@ -9,12 +9,12 @@
 body{font-family:'Barlow',system-ui,sans-serif;background:#0a0a0a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
 .card{text-align:center;padding:40px;max-width:440px;background:#111827;border:1px solid #1e293b;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.4);margin:16px}
 .icon{width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
-h2{color:#c9a84c;font-size:1.3rem;margin:0 0 12px;font-weight:600}
+h2{color:var(--gold,#c9a84c);font-size:1.3rem;margin:0 0 12px;font-weight:600}
 p{color:#94a3b8;font-size:.9rem;line-height:1.6;margin:0 0 20px}
 .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .btn{display:inline-block;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem;transition:all .2s;border:none;cursor:pointer}
-.btn-gold{background:#c9a84c;color:#000}.btn-gold:hover{background:#d4b55a}
-.btn-ghost{background:transparent;border:1px solid #1e293b;color:#94a3b8}.btn-ghost:hover{border-color:#c9a84c;color:#c9a84c}
+.btn-gold{background:var(--gold,#c9a84c);color:#000}.btn-gold:hover{background:#d4b55a}
+.btn-ghost{background:transparent;border:1px solid #1e293b;color:#94a3b8}.btn-ghost:hover{border-color:var(--gold,#c9a84c);color:var(--gold,#c9a84c)}
 #result{margin-top:12px;font-size:.78rem}
 .sub{margin-top:16px;font-size:.72rem;color:#475569}
 </style>
@@ -26,12 +26,12 @@ p{color:#94a3b8;font-size:.9rem;line-height:1.6;margin:0 0 20px}
   <p>Tim je automatski obavijesten i vec radi na rjesenju. Mozete nastaviti rad na radnoj povrsini.</p>
   <div class="btns">
     <a href="{% url 'dashboard' %}" class="btn btn-gold"><i class="fas fa-home"></i> Radna povrsina</a>
-    <button onclick="borgReport500()" class="btn btn-ghost"><i class="fas fa-flag" style="color:#c9a84c"></i> Prijavi detalje</button>
+    <button onclick="borgReport500()" class="btn btn-ghost"><i class="fas fa-flag" style="color:var(--gold,#c9a84c)"></i> Prijavi detalje</button>
   </div>
   <div id="result"></div>
   <div class="sub">
-    Ako se problem ponavlja: <strong style="color:#c9a84c">info@limit-connect.com</strong>
-    ili <strong style="color:#c9a84c">WhatsApp 097-609-1655</strong>
+    Ako se problem ponavlja: <strong style="color:var(--gold,#c9a84c)">info@limit-connect.com</strong>
+    ili <strong style="color:var(--gold,#c9a84c)">WhatsApp 097-609-1655</strong>
   </div>
 </div>
 <script>

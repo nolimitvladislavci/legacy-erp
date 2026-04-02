@@ -4,13 +4,13 @@
 <style>
     .udruge-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .udruge-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
-    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, #c9a84c); }
+    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, var(--gold,#c9a84c)); }
     .udruge-stat .label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
     .udruge-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
     .udruge-table th { background: var(--table-header-bg); padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
     .udruge-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
     .udruge-table tr:hover { background: var(--table-row-hover); }
-    .btn-gold { background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
+    .btn-gold { background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
     .btn-gold:hover { background: #b8943f; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; text-decoration: none; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }

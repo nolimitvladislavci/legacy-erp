@@ -309,7 +309,7 @@
       cursor: help;
       transition: color 0.2s;
     }
-    .lc-help-icon:hover { color: #c9a84c; }
+    .lc-help-icon:hover { color: var(--gold,#c9a84c); }
 
     /* Field validation */
     .lc-field-error {

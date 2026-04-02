@@ -28,7 +28,7 @@
   border: 2px solid rgba(201,168,76,.3);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem; color: #c9a84c;
+  font-size: 1.8rem; color: var(--gold,#c9a84c);
   margin-bottom: 1rem;
   animation: heroPulse 3s ease-in-out infinite;
 }
@@ -41,7 +41,7 @@
   margin: 0 0 .25rem;
   letter-spacing: -.5px;
 }
-.golubar-hero h1 span { color: #c9a84c; }
+.golubar-hero h1 span { color: var(--gold,#c9a84c); }
 .golubar-hero p { color: #94a3b8; font-size: .9rem; margin: 0; }
 
 /* Stat cards */
@@ -70,7 +70,7 @@
   flex-shrink: 0;
 }
 .g-stat-icon.teal { background: rgba(20,184,166,.12); color: #14b8a6; }
-.g-stat-icon.gold { background: rgba(201,168,76,.12); color: #c9a84c; }
+.g-stat-icon.gold { background: rgba(201,168,76,.12); color: var(--gold,#c9a84c); }
 .g-stat-icon.green { background: rgba(34,197,94,.12); color: #22c55e; }
 .g-stat-icon.pink { background: rgba(236,72,153,.12); color: #ec4899; }
 .g-stat-icon.red { background: rgba(239,68,68,.12); color: #ef4444; }
@@ -93,13 +93,13 @@
   min-height: 110px;
 }
 .g-action-tile:hover {
-  border-color: #c9a84c;
+  border-color: var(--gold,#c9a84c);
   background: rgba(201,168,76,.04);
   transform: translateY(-2px);
   color: var(--text);
 }
 .g-action-tile i {
-  font-size: 1.5rem; color: #c9a84c;
+  font-size: 1.5rem; color: var(--gold,#c9a84c);
   width: 52px; height: 52px;
   display: flex; align-items: center; justify-content: center;
   background: rgba(201,168,76,.08);
@@ -116,7 +116,7 @@
   border-bottom: 1px solid var(--border);
   padding: 1rem 1.25rem;
 }
-.g-race-table .card-header h5 { color: #c9a84c; font-weight: 700; font-size: 1rem; }
+.g-race-table .card-header h5 { color: var(--gold,#c9a84c); font-weight: 700; font-size: 1rem; }
 .g-race-table table thead th {
   background: var(--table-header-bg);
   font-size: .7rem; font-weight: 700;
@@ -134,7 +134,7 @@
 .g-race-table table tbody tr { transition: background .15s; }
 .g-race-table table tbody tr:hover { background: rgba(201,168,76,.03); }
 .g-medal { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; }
-.g-medal-1 { background: linear-gradient(135deg, #c9a84c, #e8d48b); color: #0a0a0a; }
+.g-medal-1 { background: linear-gradient(135deg, var(--gold,#c9a84c), #e8d48b); color: #0a0a0a; }
 .g-medal-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0a0a; }
 .g-medal-3 { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
 
@@ -143,7 +143,7 @@
   text-align: center; padding: 4rem 2rem;
 }
 .g-empty-dove {
-  font-size: 3rem; color: #c9a84c; margin-bottom: 1.5rem;
+  font-size: 3rem; color: var(--gold,#c9a84c); margin-bottom: 1.5rem;
   animation: emptyFloat 4s ease-in-out infinite;
 }
 @keyframes emptyFloat {
@@ -173,7 +173,7 @@
 </div>
 
 <!-- Offline Pending -->
-<div id="offline-pending" style="display:none" class="alert mb-3" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;border-radius:12px;padding:1rem 1.25rem">
+<div id="offline-pending" style="display:none" class="alert mb-3" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);border-radius:12px;padding:1rem 1.25rem">
   <i class="fas fa-cloud-upload-alt"></i> <span id="pending-count">0</span> zapisa ceka sinkronizaciju
   <button onclick="GolubarOffline.syncNow()" class="btn btn-sm btn-warning ms-2" style="font-weight:600;font-size:.78rem">Sinkroniziraj sad</button>
 </div>
@@ -226,7 +226,7 @@
 <div class="g-race-table card" style="background:var(--bg-card)">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Zadnje utrke</h5>
-    <a href="{% url 'udruge:utrka_create' %}" class="btn btn-sm" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:600;font-size:.78rem">
+    <a href="{% url 'udruge:utrka_create' %}" class="btn btn-sm" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:600;font-size:.78rem">
       <i class="fas fa-plus me-1"></i>Nova utrka
     </a>
   </div>
@@ -253,7 +253,7 @@
               </span>
             </td>
             <td>
-              <a href="{% url 'udruge:utrka_detail' u.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none">
+              <a href="{% url 'udruge:utrka_detail' u.pk %}" style="color:var(--gold,#c9a84c);font-weight:600;text-decoration:none">
                 {{ u.naziv }}
               </a>
             </td>
@@ -279,7 +279,7 @@
       <div class="g-empty-dove"><i class="fas fa-dove"></i></div>
       <h3>Dobrodošli u Golubarski Centar!</h3>
       <p>Započnite dodavanjem golubinjaka, registracijom golubova i stvaranjem prvog uzgojnog para.</p>
-      <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px">
+      <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px">
         <i class="fas fa-plus me-1"></i>Dodaj prvi golubinjak
       </a>
     </div>
@@ -297,7 +297,7 @@ GolubarOffline.getPendingCount().then(function(c) {
       el.style.display = 'block';
       el.style.background = 'rgba(201,168,76,.1)';
       el.style.border = '1px solid rgba(201,168,76,.3)';
-      el.style.color = '#c9a84c';
+      el.style.color = 'var(--gold,#c9a84c)';
       el.style.borderRadius = '12px';
       el.style.padding = '1rem 1.25rem';
     }

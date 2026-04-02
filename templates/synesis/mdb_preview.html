@@ -6,14 +6,14 @@
 {% block content %}
 <style>
 .prev-wrap { max-width: 1200px; margin: 0 auto; padding: 20px; }
-.prev-title { color: #c9a84c; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+.prev-title { color: var(--gold,#c9a84c); font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
 .prev-sub { color: #999; font-size: 0.82rem; margin-bottom: 20px; }
 .prev-stats { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 .prev-stat {
     background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
     border-radius: 10px; padding: 14px 18px; flex: 1; min-width: 140px; text-align: center;
 }
-.prev-stat .val { font-size: 1.4rem; font-weight: 800; color: #c9a84c; }
+.prev-stat .val { font-size: 1.4rem; font-weight: 800; color: var(--gold,#c9a84c); }
 .prev-stat .lbl { font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 1px; }
 .prev-tabs { display: flex; gap: 4px; margin-bottom: 0; }
 .prev-tab {
@@ -21,7 +21,7 @@
     background: #111; color: #999; font-size: 0.82rem; font-weight: 600;
     border: 1px solid #222; border-bottom: none; transition: all 0.2s;
 }
-.prev-tab.active { background: #0f172a; color: #c9a84c; border-color: rgba(201,168,76,0.3); }
+.prev-tab.active { background: #0f172a; color: var(--gold,#c9a84c); border-color: rgba(201,168,76,0.3); }
 .prev-tab:hover { color: #e0e0e0; }
 .prev-panel {
     background: #0f172a; border: 1px solid rgba(255,255,255,0.07);
@@ -47,13 +47,13 @@
     align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
 .import-btn {
-    background: #c9a84c; color: #0a0a0a; border: none; padding: 9px 22px;
+    background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 9px 22px;
     border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.85rem;
 }
 .import-btn:hover { background: #e0c068; }
 .import-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .import-btn-outline {
-    background: transparent; color: #c9a84c; border: 1px solid #c9a84c;
+    background: transparent; color: var(--gold,#c9a84c); border: 1px solid var(--gold,#c9a84c);
     padding: 9px 22px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
 }
 .import-btn-outline:hover { background: rgba(201,168,76,0.1); }
@@ -64,7 +64,7 @@
 .import-result.success { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
 .import-result.error { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
 .more-info { color: #666; font-size: 0.78rem; }
-.back-link { color: #c9a84c; text-decoration: none; font-size: 0.85rem; }
+.back-link { color: var(--gold,#c9a84c); text-decoration: none; font-size: 0.85rem; }
 .back-link:hover { text-decoration: underline; }
 </style>
 
@@ -193,7 +193,7 @@
                     <td>{{ inv.customer_name|default:"-" }}</td>
                     <td>{% if inv.customer_oib %}<span class="oib-badge">{{ inv.customer_oib }}</span>{% else %}-{% endif %}</td>
                     <td class="num">{{ inv.lines|length }}</td>
-                    <td class="num" style="color:#c9a84c; font-weight:600;">{{ inv.total|floatformat:2 }}</td>
+                    <td class="num" style="color:var(--gold,#c9a84c); font-weight:600;">{{ inv.total|floatformat:2 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

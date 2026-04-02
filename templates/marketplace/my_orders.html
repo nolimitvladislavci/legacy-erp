@@ -5,7 +5,7 @@
 {% for order in orders %}
 <div class="stat-card p-3 mb-2">
   <div class="d-flex justify-content-between">
-    <div><a href="{% url 'marketplace:order_detail' order.pk %}" style="color:#c9a84c" class="fw-bold">{{ order.order_number }}</a><br><small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</small></div>
+    <div><a href="{% url 'marketplace:order_detail' order.pk %}" style="color:var(--gold,#c9a84c)" class="fw-bold">{{ order.order_number }}</a><br><small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</small></div>
     <div class="text-end"><span class="fw-bold">{{ order.total }}&euro;</span><br>
       {% if order.status == "pending" %}<span class="badge bg-warning text-dark">Ceka</span>
       {% elif order.status == "confirmed" %}<span class="badge bg-primary">Potvrdeno</span>

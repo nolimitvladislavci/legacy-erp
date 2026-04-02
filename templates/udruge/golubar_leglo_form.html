@@ -34,7 +34,7 @@
   display: flex; align-items: center; gap: .6rem;
   font-size: .85rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: .5px;
-  color: #c9a84c; margin-bottom: 1.25rem;
+  color: var(--gold,#c9a84c); margin-bottom: 1.25rem;
 }
 .lf-parent-info {
   background: linear-gradient(135deg, rgba(236,72,153,.05), transparent);
@@ -64,7 +64,7 @@
   font-size: .88rem !important;
   transition: border-color .2s, box-shadow .2s !important;
 }
-.lf-input:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important; }
+.lf-input:focus { border-color: var(--gold,#c9a84c) !important; box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important; }
 .lf-label { font-size: .78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: .4rem; display: block; }
 .lf-footer {
   padding: 1.25rem 1.5rem;
@@ -75,7 +75,7 @@
   display: flex; justify-content: space-between; align-items: center;
 }
 .lf-btn-submit {
-  background: linear-gradient(135deg, #c9a84c, #a78b3d) !important;
+  background: linear-gradient(135deg, var(--gold,#c9a84c), #a78b3d) !important;
   color: #0a0a0a !important; border: none !important;
   font-weight: 700 !important; padding: .6rem 2rem !important;
   border-radius: 10px !important; font-size: .88rem !important;
@@ -95,7 +95,7 @@
 }
 .lf-chick-num {
   width: 24px; height: 24px; border-radius: 50%;
-  background: rgba(201,168,76,.12); color: #c9a84c;
+  background: rgba(201,168,76,.12); color: var(--gold,#c9a84c);
   display: inline-flex; align-items: center; justify-content: center;
   font-size: .7rem; font-weight: 800;
 }
@@ -116,7 +116,7 @@
 <!-- Header -->
 <div class="d-flex align-items-center gap-3 mb-4">
   <div style="width:52px;height:52px;background:rgba(201,168,76,.1);border-radius:14px;display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-egg" style="font-size:1.3rem;color:#c9a84c"></i>
+    <i class="fas fa-egg" style="font-size:1.3rem;color:var(--gold,#c9a84c)"></i>
   </div>
   <div>
     <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Novo leglo</h2>
@@ -130,7 +130,7 @@
     <div class="lf-parent-icon"><i class="fas fa-mars"></i></div>
     <div>
       <div style="font-size:.82rem;font-weight:700;color:var(--text)">{{ par.muzjak.naziv|default:"Mužjak" }}</div>
-      <div style="font-size:.68rem;font-family:monospace;color:#c9a84c">{{ par.muzjak.prsten_broj }}</div>
+      <div style="font-size:.68rem;font-family:monospace;color:var(--gold,#c9a84c)">{{ par.muzjak.prsten_broj }}</div>
     </div>
   </div>
   <i class="fas fa-heart" style="color:#ec4899;font-size:.8rem"></i>
@@ -138,7 +138,7 @@
     <div class="lf-parent-icon"><i class="fas fa-venus"></i></div>
     <div>
       <div style="font-size:.82rem;font-weight:700;color:var(--text)">{{ par.zenka.naziv|default:"Ženka" }}</div>
-      <div style="font-size:.68rem;font-family:monospace;color:#c9a84c">{{ par.zenka.prsten_broj }}</div>
+      <div style="font-size:.68rem;font-family:monospace;color:var(--gold,#c9a84c)">{{ par.zenka.prsten_broj }}</div>
     </div>
   </div>
 </div>

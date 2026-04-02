@@ -7,35 +7,35 @@
 <div id="onboarding-widget" class="onboarding-widget">
   <a href="{% url 'onboarding_wizard' %}" class="onboarding-guide-btn">Vodic</a>
   <button onclick="dismissOnboarding()" class="onboarding-close-btn" title="Zatvori">&times;</button>
-  <h6 style="color:#c9a84c;margin-bottom:4px"><i class="fas fa-rocket me-2"></i>Dobrodosli u LIMIT Connect!</h6>
+  <h6 style="color:var(--gold,#c9a84c);margin-bottom:4px"><i class="fas fa-rocket me-2"></i>Dobrodosli u LIMIT Connect!</h6>
   <p style="color:#999;font-size:.85rem;margin-bottom:14px">Pratedite postavljanje da biste izvukli maksimum iz sustava.</p>
   <div class="onboarding-progress">
     <div class="onboarding-progress-fill" style="width:{{ onboarding.percent }}%"></div>
   </div>
   <div class="onboarding-grid">
     <div class="onboarding-step {% if onboarding.profile_completed %}done{% endif %}">
-      <i class="fas {% if onboarding.profile_completed %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.profile_completed %}#c9a84c{% else %}#555{% endif %}"></i>
+      <i class="fas {% if onboarding.profile_completed %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.profile_completed %}var(--gold,#c9a84c){% else %}#555{% endif %}"></i>
       <div>
         <div class="onboarding-step-title">Profil tvrtke</div>
         <div class="onboarding-step-desc">Popunite naziv, adresu i OIB</div>
       </div>
     </div>
     <div class="onboarding-step {% if onboarding.first_partner_added %}done{% endif %}">
-      <i class="fas {% if onboarding.first_partner_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_partner_added %}#c9a84c{% else %}#555{% endif %}"></i>
+      <i class="fas {% if onboarding.first_partner_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_partner_added %}var(--gold,#c9a84c){% else %}#555{% endif %}"></i>
       <div>
         <div class="onboarding-step-title">Dodaj partnera</div>
         <div class="onboarding-step-desc"><a href="/partners/new/">Dodaj prvog klijenta</a></div>
       </div>
     </div>
     <div class="onboarding-step {% if onboarding.first_invoice_created %}done{% endif %}">
-      <i class="fas {% if onboarding.first_invoice_created %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_invoice_created %}#c9a84c{% else %}#555{% endif %}"></i>
+      <i class="fas {% if onboarding.first_invoice_created %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_invoice_created %}var(--gold,#c9a84c){% else %}#555{% endif %}"></i>
       <div>
         <div class="onboarding-step-title">Kreiraj racun</div>
         <div class="onboarding-step-desc"><a href="/invoicing/wizard/">Novi racun</a></div>
       </div>
     </div>
     <div class="onboarding-step {% if onboarding.bank_account_added %}done{% endif %}">
-      <i class="fas {% if onboarding.bank_account_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.bank_account_added %}#c9a84c{% else %}#555{% endif %}"></i>
+      <i class="fas {% if onboarding.bank_account_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.bank_account_added %}var(--gold,#c9a84c){% else %}#555{% endif %}"></i>
       <div>
         <div class="onboarding-step-title">Bankovni racun</div>
         <div class="onboarding-step-desc"><a href="/konto/">Dodaj IBAN</a></div>
@@ -71,8 +71,8 @@ function dismissOnboarding() {
 {% if ai_insights and ai_insights.total_alerts > 0 or ai_insights and ai_insights.total_suggestions > 0 or ai_insights and ai_insights.total_opportunities > 0 or ai_insights and ai_insights.total_legal_alerts > 0 %}
 <div class="ai-insights-widget">
   <div class="ai-insights-header">
-    <i class="fas fa-brain" style="color:#c9a84c;font-size:1.1rem"></i>
-    <span style="color:#c9a84c;font-weight:700;font-size:.85rem">AI Uvidi</span>
+    <i class="fas fa-brain" style="color:var(--gold,#c9a84c);font-size:1.1rem"></i>
+    <span style="color:var(--gold,#c9a84c);font-weight:700;font-size:.85rem">AI Uvidi</span>
     <span class="ai-insights-meta">{{ ai_insights.total_alerts }} upozorenja &bull; {{ ai_insights.total_suggestions }} prijedloga{% if ai_insights.total_opportunities %} &bull; {{ ai_insights.total_opportunities }} prilika{% endif %}{% if ai_insights.total_legal_alerts %} &bull; {{ ai_insights.total_legal_alerts }} zakona{% endif %}</span>
   </div>
   {% for alert in ai_insights.alerts %}
@@ -495,7 +495,7 @@ function dismissPushBanner(){
 {% endif %}
 
   <!-- Fiskalizacija Summary -->
-  <div style="background:var(--surface);border:1px solid #c9a84c44;border-radius:12px;padding:18px;margin-bottom:16px">
+  <div style="background:var(--surface);border:1px solid var(--gold,#c9a84c)44;border-radius:12px;padding:18px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <span style="color:var(--gold);font-weight:600"><i class="fas fa-receipt me-2"></i>Fiskalizacija</span>
       <a href="{% url 'invoicing:fiscal_certificates' %}" style="color:var(--gold);font-size:.78rem;font-weight:600;text-decoration:none">Certifikati</a>
@@ -520,7 +520,7 @@ function dismissPushBanner(){
       </div>
     </div>
     {% if fiscal_stats.unfiscalized_count > 0 %}
-    <a href="{% url 'invoicing:fiscal_batch_list' %}" style="display:block;margin-top:12px;background:#c9a84c22;border:1px solid #c9a84c77;color:var(--gold);padding:8px;border-radius:8px;text-align:center;text-decoration:none;font-size:.83rem;font-weight:600">
+    <a href="{% url 'invoicing:fiscal_batch_list' %}" style="display:block;margin-top:12px;background:var(--gold,#c9a84c)22;border:1px solid var(--gold,#c9a84c)77;color:var(--gold);padding:8px;border-radius:8px;text-align:center;text-decoration:none;font-size:.83rem;font-weight:600">
       <i class="fas fa-paper-plane me-1"></i>Pokretni batch fiskalizaciju
     </a>
     {% endif %}

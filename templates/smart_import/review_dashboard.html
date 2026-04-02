@@ -34,7 +34,7 @@
     cursor:pointer; transition:all 0.2s; position:relative;
   }
   .review-item:hover { background:#1a1a1a; }
-  .review-item.active { background:#1a1a1a; border-left:3px solid var(--gold, #c9a84c); }
+  .review-item.active { background:#1a1a1a; border-left:3px solid var(--gold, var(--gold,#c9a84c)); }
   .review-item.resolved { opacity:0.4; }
   .review-item .name { font-size:13px; font-weight:500; color:#eee; }
   .review-item .meta { font-size:11px; color:#666; margin-top:2px; }
@@ -52,7 +52,7 @@
     background:#1a1a1a; color:#aaa; display:flex; align-items:center;
     justify-content:center; cursor:pointer; font-size:16px; transition:all 0.2s;
   }
-  .img-btn:hover { border-color:var(--gold, #c9a84c); color:var(--gold, #c9a84c); }
+  .img-btn:hover { border-color:var(--gold, var(--gold,#c9a84c)); color:var(--gold, var(--gold,#c9a84c)); }
 
   /* Form fields */
   .field-group { margin-bottom:14px; }
@@ -65,7 +65,7 @@
     background:#111; color:#eee; font-size:14px; transition:border 0.2s;
   }
   .field-group input:focus, .field-group select:focus {
-    border-color:var(--gold, #c9a84c); outline:none;
+    border-color:var(--gold, var(--gold,#c9a84c)); outline:none;
   }
   .field-group input.low-conf {
     border-color:#f39c12; background:#1a1200;
@@ -91,7 +91,7 @@
   .btn-gold {
     flex:1; padding:12px; border:none; border-radius:8px; cursor:pointer;
     font-weight:bold; font-size:14px; transition:all 0.2s;
-    background:var(--gold, #c9a84c); color:#000;
+    background:var(--gold, var(--gold,#c9a84c)); color:#000;
   }
   .btn-gold:hover { filter:brightness(1.1); }
   .btn-gold:disabled { opacity:0.5; cursor:not-allowed; }
@@ -107,7 +107,7 @@
     background:#0a0a0a; font-size:12px;
   }
   .stats-bar .stat { color:#888; }
-  .stats-bar .stat strong { color:var(--gold, #c9a84c); }
+  .stats-bar .stat strong { color:var(--gold, var(--gold,#c9a84c)); }
 
   /* Responsive */
   @media(max-width:900px) {

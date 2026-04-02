@@ -70,7 +70,7 @@
   display: flex; justify-content: space-between; align-items: center;
   background: linear-gradient(135deg, rgba(201,168,76,.05), transparent);
 }
-.ud-lb-header h3 { font-size: .95rem; font-weight: 700; color: #c9a84c; margin: 0; }
+.ud-lb-header h3 { font-size: .95rem; font-weight: 700; color: var(--gold,#c9a84c); margin: 0; }
 .ud-lb-table { width: 100%; border-collapse: collapse; }
 .ud-lb-table thead th {
   background: var(--table-header-bg);
@@ -105,7 +105,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   font-size: .78rem; font-weight: 800;
 }
-.ud-place-1 { background: linear-gradient(135deg, #c9a84c, #e8d48b); color: #0a0a0a; }
+.ud-place-1 { background: linear-gradient(135deg, var(--gold,#c9a84c), #e8d48b); color: #0a0a0a; }
 .ud-place-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0a0a; }
 .ud-place-3 { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
 .ud-place-other { background: var(--border); color: var(--text-muted); font-size: .72rem; }
@@ -131,7 +131,7 @@
       <div>
         <h1 style="font-size:1.5rem;font-weight:800;color:#fff;margin:0">{{ utrka.naziv }}</h1>
         <div class="ud-meta">
-          <span class="ud-meta-badge" style="background:rgba(201,168,76,.12);color:#c9a84c">
+          <span class="ud-meta-badge" style="background:rgba(201,168,76,.12);color:var(--gold,#c9a84c)">
             <i class="fas fa-calendar"></i> {{ utrka.datum|date:"d.m.Y" }}
           </span>
           {% if utrka.udaljenost_km %}
@@ -152,7 +152,7 @@
         </div>
       </div>
     </div>
-    <a href="{% url 'udruge:rezultat_create' utrka.pk %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.82rem">
+    <a href="{% url 'udruge:rezultat_create' utrka.pk %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.82rem">
       <i class="fas fa-plus me-1"></i>Dodaj rezultat
     </a>
   </div>
@@ -203,7 +203,7 @@
             </span>
           </td>
           <td>
-            <a href="{% url 'udruge:golub_detail' r.golub.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none">
+            <a href="{% url 'udruge:golub_detail' r.golub.pk %}" style="color:var(--gold,#c9a84c);font-weight:600;text-decoration:none">
               {{ r.golub.naziv|default:"--" }}
             </a>
           </td>
@@ -217,7 +217,7 @@
           <td style="font-size:.82rem;color:var(--text-secondary)">{{ r.vrijeme_dolaska|default:"--" }}</td>
           <td>
             {% if r.bodovi %}
-            <span style="font-weight:700;color:#c9a84c">{{ r.bodovi }}</span>
+            <span style="font-weight:700;color:var(--gold,#c9a84c)">{{ r.bodovi }}</span>
             {% else %}<span style="color:var(--text-muted)">0</span>{% endif %}
           </td>
         </tr>
@@ -230,7 +230,7 @@
     <div style="font-size:2.5rem;opacity:.2;margin-bottom:1rem"><i class="fas fa-trophy"></i></div>
     <h4 style="font-weight:700;color:var(--text)">Još nema rezultata</h4>
     <p style="font-size:.85rem;margin-bottom:1.5rem">Dodajte rezultate za ovu utrku</p>
-    <a href="{% url 'udruge:rezultat_create' utrka.pk %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 24px;border-radius:10px">
+    <a href="{% url 'udruge:rezultat_create' utrka.pk %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 24px;border-radius:10px">
       <i class="fas fa-plus me-1"></i>Dodaj rezultat
     </a>
   </div>

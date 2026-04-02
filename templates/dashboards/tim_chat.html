@@ -7,11 +7,11 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0a0a0a;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;padding:1rem}
-.gold{color:#c9a84c}.muted{color:#64748b}
-h1{font-size:1.3rem;font-weight:800;color:#c9a84c;letter-spacing:2px}
+.gold{color:var(--gold,#c9a84c)}.muted{color:#64748b}
+h1{font-size:1.3rem;font-weight:800;color:var(--gold,#c9a84c);letter-spacing:2px}
 .sub{font-size:.7rem;color:#64748b;letter-spacing:1px;text-transform:uppercase}
 .card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
-.card-gold{border-left:3px solid #c9a84c}
+.card-gold{border-left:3px solid var(--gold,#c9a84c)}
 
 /* Okrugli stol — samo za superadmin */
 .table-wrap{display:flex;justify-content:center;margin:1.5rem 0}
@@ -35,8 +35,8 @@ h1{font-size:1.3rem;font-weight:800;color:#c9a84c;letter-spacing:2px}
 .msg-empty{color:#64748b;font-size:.8rem;text-align:center;padding:1rem}
 
 textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:8px;padding:.6rem;font-size:.85rem;resize:vertical;font-family:inherit;min-height:70px}
-textarea:focus{outline:none;border-color:#c9a84c}
-.btn-send{background:#c9a84c;color:#000;border:none;border-radius:8px;padding:.5rem 1.25rem;font-weight:700;cursor:pointer;font-size:.85rem;margin-top:.5rem;width:100%}
+textarea:focus{outline:none;border-color:var(--gold,#c9a84c)}
+.btn-send{background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;padding:.5rem 1.25rem;font-weight:700;cursor:pointer;font-size:.85rem;margin-top:.5rem;width:100%}
 .btn-send:hover{background:#d4a843}
 .status-msg{font-size:.75rem;color:#64748b;margin-top:.4rem;text-align:center}
 
@@ -44,7 +44,7 @@ textarea:focus{outline:none;border-color:#c9a84c}
 .public-form textarea{min-height:100px}
 .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1rem}
 .team-member{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:.75rem;text-align:center;cursor:pointer;transition:all .2s}
-.team-member:hover,.team-member.selected{border-color:#c9a84c;background:#1a1f2e}
+.team-member:hover,.team-member.selected{border-color:var(--gold,#c9a84c);background:#1a1f2e}
 .team-member .avatar{font-size:2rem;margin-bottom:.3rem}
 .team-member .name{font-size:.8rem;font-weight:700}
 .team-member .role{font-size:.65rem;color:#64748b}
@@ -66,22 +66,22 @@ textarea:focus{outline:none;border-color:#c9a84c}
   {% if request.user.is_superuser %}
   <!-- ══ SUPERADMIN PRIKAZ — Okrugli stol ══ -->
   <div class="card card-gold">
-    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin-bottom:1rem">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);margin-bottom:1rem">
       ⬡ Okrugli stol — Odaberi s kim pričaš
     </div>
 
     <div class="table-wrap">
     <svg id="stol-svg" width="260" height="260" viewBox="0 0 260 260">
       <!-- Stol -->
-      <circle cx="130" cy="130" r="55" fill="#1a1a2e" stroke="#c9a84c" stroke-width="1.5"/>
-      <text x="130" y="126" text-anchor="middle" fill="#c9a84c" font-size="10" font-family="monospace" font-weight="700">LIMIT</text>
+      <circle cx="130" cy="130" r="55" fill="#1a1a2e" stroke="var(--gold,#c9a84c)" stroke-width="1.5"/>
+      <text x="130" y="126" text-anchor="middle" fill="var(--gold,#c9a84c)" font-size="10" font-family="monospace" font-weight="700">LIMIT</text>
       <text x="130" y="139" text-anchor="middle" fill="#444" font-size="8" font-family="monospace">tim</text>
 
       <!-- Ivan — gore -->
-      <g class="seat" id="seat-ivan" onclick="selectSeat('ivan')" data-name="Ivan Brtan" data-role="Vlasnik / Enter tipka" data-color="#c9a84c">
-        <circle cx="130" cy="28" r="26" fill="#1a1a2e" stroke="#c9a84c" stroke-width="2"/>
+      <g class="seat" id="seat-ivan" onclick="selectSeat('ivan')" data-name="Ivan Brtan" data-role="Vlasnik / Enter tipka" data-color="var(--gold,#c9a84c)">
+        <circle cx="130" cy="28" r="26" fill="#1a1a2e" stroke="var(--gold,#c9a84c)" stroke-width="2"/>
         <text x="130" y="23" text-anchor="middle" font-size="15">🧑‍💼</text>
-        <text x="130" y="35" text-anchor="middle" fill="#c9a84c" font-size="8" font-weight="700">IVAN</text>
+        <text x="130" y="35" text-anchor="middle" fill="var(--gold,#c9a84c)" font-size="8" font-weight="700">IVAN</text>
         <text x="130" y="44" text-anchor="middle" fill="#555" font-size="7">Vlasnik</text>
       </g>
       <line x1="130" y1="54" x2="130" y2="75" stroke="#333" stroke-width="1" stroke-dasharray="3,2"/>
@@ -106,10 +106,10 @@ textarea:focus{outline:none;border-color:#c9a84c}
 
 
       <!-- Nikša — gore desno -->
-      <g class="seat" id="seat-niksa" onclick="selectSeat('niksa')" data-name="Nikša Višković" data-role="CEO / Inhaber" data-color="#c9a84c">
-        <circle cx="215" cy="50" r="26" fill="#1a1a2e" stroke="#c9a84c" stroke-width="2"/>
+      <g class="seat" id="seat-niksa" onclick="selectSeat('niksa')" data-name="Nikša Višković" data-role="CEO / Inhaber" data-color="var(--gold,#c9a84c)">
+        <circle cx="215" cy="50" r="26" fill="#1a1a2e" stroke="var(--gold,#c9a84c)" stroke-width="2"/>
         <text x="215" y="45" text-anchor="middle" font-size="15">👔</text>
-        <text x="215" y="57" text-anchor="middle" fill="#c9a84c" font-size="8" font-weight="700">NIKŠA</text>
+        <text x="215" y="57" text-anchor="middle" fill="var(--gold,#c9a84c)" font-size="8" font-weight="700">NIKŠA</text>
         <text x="215" y="66" text-anchor="middle" fill="#555" font-size="7">CEO</text>
       </g>
       <g class="seat" id="seat-dragan" onclick="selectSeat('dragan')" data-name="Dragan Jakovljević" data-role="Partner (Strategie)" data-color="#6366f1">
@@ -161,7 +161,7 @@ textarea:focus{outline:none;border-color:#c9a84c}
   {% else %}
   <!-- ══ KORISNIČKI PRIKAZ — Forma za sve ══ -->
   <div class="card card-gold">
-    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin-bottom:1rem">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);margin-bottom:1rem">
       💬 Pošalji poruku timu
     </div>
 

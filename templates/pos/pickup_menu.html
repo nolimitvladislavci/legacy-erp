@@ -7,34 +7,34 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh}
-.header{background:linear-gradient(135deg,#1a1a2e,#0a0a0a);padding:20px;text-align:center;border-bottom:2px solid #c9a84c}
-.header h1{color:#c9a84c;font-size:1.4rem;font-weight:800}
+.header{background:linear-gradient(135deg,#1a1a2e,#0a0a0a);padding:20px;text-align:center;border-bottom:2px solid var(--gold,#c9a84c)}
+.header h1{color:var(--gold,#c9a84c);font-size:1.4rem;font-weight:800}
 .header p{color:#94a3b8;font-size:.8rem;margin-top:4px}
 .cats{display:flex;gap:6px;padding:12px;overflow-x:auto;border-bottom:1px solid #222}
 .cat-btn{padding:6px 14px;border-radius:20px;border:1px solid #333;background:none;color:#94a3b8;font-size:.75rem;cursor:pointer;white-space:nowrap}
-.cat-btn.active{background:#c9a84c;color:#000;border-color:#c9a84c;font-weight:700}
+.cat-btn.active{background:var(--gold,#c9a84c);color:#000;border-color:var(--gold,#c9a84c);font-weight:700}
 .items{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}
 .item{background:#1a1a1a;border:1px solid #222;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s}
 .item:active{transform:scale(.97)}
-.item.in-cart{border-color:#c9a84c;background:#1a1a0a;box-shadow:0 0 12px rgba(201,168,76,.3)}
-.item.in-cart .item-name{color:#c9a84c}
-.item-badge{display:none;position:absolute;top:-6px;right:-6px;width:22px;height:22px;line-height:22px;border-radius:50%;background:#c9a84c;color:#000;font-size:.7rem;font-weight:800;text-align:center}
+.item.in-cart{border-color:var(--gold,#c9a84c);background:#1a1a0a;box-shadow:0 0 12px rgba(201,168,76,.3)}
+.item.in-cart .item-name{color:var(--gold,#c9a84c)}
+.item-badge{display:none;position:absolute;top:-6px;right:-6px;width:22px;height:22px;line-height:22px;border-radius:50%;background:var(--gold,#c9a84c);color:#000;font-size:.7rem;font-weight:800;text-align:center}
 .item.in-cart .item-badge{display:block}
 .item-name{font-size:.85rem;font-weight:600;margin-bottom:4px}
-.item-price{color:#c9a84c;font-weight:800;font-size:1rem}
+.item-price{color:var(--gold,#c9a84c);font-weight:800;font-size:1rem}
 .item-qty{display:flex;align-items:center;gap:8px;margin-top:6px}
-.item-qty button{width:28px;height:28px;border-radius:50%;border:1px solid #c9a84c;background:none;color:#c9a84c;font-size:1rem;cursor:pointer;font-weight:700}
+.item-qty button{width:28px;height:28px;border-radius:50%;border:1px solid var(--gold,#c9a84c);background:none;color:var(--gold,#c9a84c);font-size:1rem;cursor:pointer;font-weight:700}
 .item-qty span{font-weight:800;min-width:20px;text-align:center}
-.cart-bar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(0deg,#1a1a2e,#1a1a2eee);border-top:2px solid #c9a84c;padding:14px 16px;display:none;z-index:100;backdrop-filter:blur(10px)}
+.cart-bar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(0deg,#1a1a2e,#1a1a2eee);border-top:2px solid var(--gold,#c9a84c);padding:14px 16px;display:none;z-index:100;backdrop-filter:blur(10px)}
 .cart-bar.show{display:flex;align-items:center;justify-content:space-between}
-.cart-total{color:#c9a84c;font-size:1.1rem;font-weight:800}
-.cart-btn{background:#c9a84c;color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:800;font-size:.9rem;cursor:pointer}
+.cart-total{color:var(--gold,#c9a84c);font-size:1.1rem;font-weight:800}
+.cart-btn{background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:800;font-size:.9rem;cursor:pointer}
 .modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.9);padding:20px;overflow-y:auto}
 .modal.show{display:block}
-.modal-box{max-width:400px;margin:40px auto;background:#1a1a1a;border:1px solid #c9a84c;border-radius:12px;padding:24px}
-.modal-box h3{color:#c9a84c;margin-bottom:16px}
+.modal-box{max-width:400px;margin:40px auto;background:#1a1a1a;border:1px solid var(--gold,#c9a84c);border-radius:12px;padding:24px}
+.modal-box h3{color:var(--gold,#c9a84c);margin-bottom:16px}
 .modal-box input,.modal-box select{width:100%;padding:10px;margin-bottom:10px;background:#0a0a0a;border:1px solid #333;border-radius:8px;color:#e2e8f0;font-size:.9rem}
-.modal-box button[type=submit]{width:100%;padding:12px;background:#c9a84c;color:#000;border:none;border-radius:8px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:8px}
+.modal-box button[type=submit]{width:100%;padding:12px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:800;font-size:1rem;cursor:pointer;margin-top:8px}
 .bag-opt{display:flex;align-items:center;gap:8px;padding:8px;background:#111;border-radius:8px;margin-bottom:12px;font-size:.85rem}
 .bag-opt input{width:auto}
 @media(min-width:500px){.items{grid-template-columns:repeat(3,1fr)}}
@@ -101,7 +101,7 @@ function getCsrf(){var t=document.querySelector('[name=csrfmiddlewaretoken]');if
         <div style="font-size:3rem;margin-bottom:12px">&#10003;</div>
         <h3>Narudzba primljena!</h3>
         <p style="color:#94a3b8;margin-bottom:16px" id="successMsg">Vasa vrecica ce biti spremna.</p>
-        <button onclick="location.reload()" style="width:100%;padding:12px;background:#c9a84c;color:#000;border:none;border-radius:8px;font-weight:800;cursor:pointer">Nova narudzba</button>
+        <button onclick="location.reload()" style="width:100%;padding:12px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:800;cursor:pointer">Nova narudzba</button>
     </div>
 </div>
 
@@ -187,7 +187,7 @@ function submitOrder() {
 }
 </script>
 <div style="text-align:center;padding:18px 0 12px;border-top:1px solid #222;margin-top:20px;">
-  <span style="font-size:10px;color:#555;">Powered by <a href="https://limit-connect.com/register/" style="color:#c9a84c;text-decoration:none;font-weight:600;">LIMIT Connect</a> · Besplatni POS i e-Račun za poduzetnike</span>
+  <span style="font-size:10px;color:#555;">Powered by <a href="https://limit-connect.com/register/" style="color:var(--gold,#c9a84c);text-decoration:none;font-weight:600;">LIMIT Connect</a> · Besplatni POS i e-Račun za poduzetnike</span>
 </div>
 </body>
 </html>

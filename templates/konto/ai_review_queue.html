@@ -5,7 +5,7 @@
 {% block content %}
 <style>
 .review-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px;transition:border-color .2s}
-.review-card:hover{border-color:#c9a84c}
+.review-card:hover{border-color:var(--gold,#c9a84c)}
 .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .review-header h3{font-size:1rem;color:#e2e8f0;margin:0}
 .badge-confidence{padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
@@ -23,23 +23,23 @@
 .proposal-lines .credit{color:#f59e0b}
 .reasoning{font-size:.8rem;color:#94a3b8;font-style:italic;margin:8px 0}
 .review-actions{display:flex;gap:8px;margin-top:12px}
-.btn-confirm{background:#c9a84c;color:#0a0a0a;border:none;padding:8px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.8rem}
+.btn-confirm{background:var(--gold,#c9a84c);color:#0a0a0a;border:none;padding:8px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.8rem}
 .btn-confirm:hover{background:#d4b85c}
-.btn-edit{background:transparent;color:#c9a84c;border:1px solid #c9a84c;padding:8px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.8rem}
+.btn-edit{background:transparent;color:var(--gold,#c9a84c);border:1px solid var(--gold,#c9a84c);padding:8px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.8rem}
 .btn-edit:hover{background:rgba(201,168,76,.1)}
 .btn-reject{background:transparent;color:#ef4444;border:1px solid #ef4444;padding:7px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.75rem}
 .btn-reject:hover{background:rgba(239,68,68,.1)}
 .stats-bar{display:flex;gap:16px;margin-bottom:24px}
 .stat-box{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px 20px;text-align:center}
-.stat-box .num{font-size:1.5rem;font-weight:800;color:#c9a84c}
+.stat-box .num{font-size:1.5rem;font-weight:800;color:var(--gold,#c9a84c)}
 .stat-box .lbl{font-size:.65rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
 .empty-state{text-align:center;padding:60px 20px;color:#64748b}
-.empty-state h2{color:#c9a84c;font-family:'Cormorant Garamond',serif}
+.empty-state h2{color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif}
 /* Edit modal */
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
 .modal-overlay.active{display:flex}
-.modal-box{background:#1e293b;border:1px solid #c9a84c;border-radius:12px;padding:24px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto}
-.modal-box h3{color:#c9a84c;margin-top:0}
+.modal-box{background:#1e293b;border:1px solid var(--gold,#c9a84c);border-radius:12px;padding:24px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto}
+.modal-box h3{color:var(--gold,#c9a84c);margin-top:0}
 .modal-box label{display:block;color:#94a3b8;font-size:.75rem;margin-top:10px}
 .modal-box input,.modal-box select{width:100%;background:#0f172a;border:1px solid #334155;color:#e2e8f0;padding:8px;border-radius:6px;margin-top:4px}
 .modal-box .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}

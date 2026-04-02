@@ -28,8 +28,8 @@
     background: var(--dark, #1a1a1a); border: 1px solid #333;
     border-radius: 12px; padding: 20px; transition: all 0.3s;
   }
-  .pulse-card:hover { border-color: var(--gold, #c9a84c); transform: translateY(-2px); }
-  .pulse-stat { font-size: 32px; font-weight: bold; color: var(--gold, #c9a84c); }
+  .pulse-card:hover { border-color: var(--gold, var(--gold,#c9a84c)); transform: translateY(-2px); }
+  .pulse-stat { font-size: 32px; font-weight: bold; color: var(--gold, var(--gold,#c9a84c)); }
   .pulse-label { font-size: 13px; color: #888; margin-top: 4px; }
 
   .terminal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin: 16px 0; }
@@ -68,7 +68,7 @@
 
   .chart-bar-row { display: flex; align-items: flex-end; gap: 4px; height: 100px; margin: 20px 0; }
   .chart-bar {
-    flex: 1; background: var(--gold, #c9a84c); border-radius: 4px 4px 0 0;
+    flex: 1; background: var(--gold, var(--gold,#c9a84c)); border-radius: 4px 4px 0 0;
     min-height: 2px; transition: height 0.5s; position: relative;
   }
   .chart-bar:hover { opacity: 0.8; }
@@ -78,12 +78,12 @@
   }
   .chart-bar .value {
     position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
-    font-size: 10px; color: var(--gold, #c9a84c);
+    font-size: 10px; color: var(--gold, var(--gold,#c9a84c));
   }
 
   @keyframes heartbeat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
 
-  .section-title { font-size: 18px; color: var(--gold, #c9a84c); margin: 24px 0 12px; }
+  .section-title { font-size: 18px; color: var(--gold, var(--gold,#c9a84c)); margin: 24px 0 12px; }
   .badge-critical {
     background: #e74c3c; color: #fff; padding: 2px 8px;
     border-radius: 10px; font-size: 11px; margin-left: 8px;
@@ -97,7 +97,7 @@
     padding: 6px 14px; border-radius: 6px; cursor: pointer;
     font-size: 12px;
   }
-  .btn-mark-read:hover { border-color: var(--gold, #c9a84c); color: var(--gold, #c9a84c); }
+  .btn-mark-read:hover { border-color: var(--gold, var(--gold,#c9a84c)); color: var(--gold, var(--gold,#c9a84c)); }
 </style>
 
 <h2 style="display:flex;align-items:center;gap:10px">

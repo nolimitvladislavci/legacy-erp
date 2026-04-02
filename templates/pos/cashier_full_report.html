@@ -6,7 +6,7 @@
 
 <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
   <div>
-    <h2 class="mb-1"><i class="fas fa-file-invoice-dollar me-2" style="color:#c9a84c"></i>Smjena #{{ session.session_number }}</h2>
+    <h2 class="mb-1"><i class="fas fa-file-invoice-dollar me-2" style="color:var(--gold,#c9a84c)"></i>Smjena #{{ session.session_number }}</h2>
     <small class="text-muted">
       {{ session.terminal.name }} | {{ session.opened_at|date:"d.m.Y H:i" }} — {{ session.closed_at|date:"H:i"|default:"još otvorena" }}
       {% if branch %} | {{ branch.name }}{% endif %}

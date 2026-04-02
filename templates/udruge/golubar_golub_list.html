@@ -34,10 +34,10 @@
   transition: border-color .2s, box-shadow .2s;
 }
 .glist-search:focus-within {
-  border-color: #c9a84c;
+  border-color: var(--gold,#c9a84c);
   box-shadow: 0 0 0 3px rgba(201,168,76,.1);
 }
-.glist-search i { color: #c9a84c; font-size: .9rem; }
+.glist-search i { color: var(--gold,#c9a84c); font-size: .9rem; }
 .glist-search input {
   flex: 1; border: none; outline: none;
   background: transparent;
@@ -53,7 +53,7 @@
   background: transparent; color: var(--text-muted);
   cursor: pointer; font-size: .82rem; transition: all .15s;
 }
-.glist-view-btn.active { background: var(--bg-card); color: #c9a84c; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.glist-view-btn.active { background: var(--bg-card); color: var(--gold,#c9a84c); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 
 /* Table */
 .glist-table-wrap {
@@ -120,11 +120,11 @@
 }
 .glist-card-photo img { width: 100%; height: 100%; object-fit: cover; }
 .glist-card-body { padding: .8rem 1rem; }
-.glist-card-prsten { font-size: .7rem; color: #c9a84c; font-weight: 600; font-family: monospace; }
+.glist-card-prsten { font-size: .7rem; color: var(--gold,#c9a84c); font-weight: 600; font-family: monospace; }
 .glist-card-name { font-size: .9rem; font-weight: 700; margin-top: .1rem; }
 .glist-card-meta { display: flex; gap: .5rem; margin-top: .4rem; align-items: center; }
 .glist-card-meta span { font-size: .7rem; color: var(--text-muted); }
-.glist-sealed { display: inline-flex; align-items: center; gap: .2rem; background: rgba(201,168,76,.1); color: #c9a84c; padding: 2px 6px; border-radius: 4px; font-size: .6rem; font-weight: 600; }
+.glist-sealed { display: inline-flex; align-items: center; gap: .2rem; background: rgba(201,168,76,.1); color: var(--gold,#c9a84c); padding: 2px 6px; border-radius: 4px; font-size: .6rem; font-weight: 600; }
 </style>
 {% endblock %}
 {% block content %}
@@ -142,7 +142,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <div class="d-flex align-items-center gap-3">
     <div style="width:48px;height:48px;background:rgba(201,168,76,.1);border-radius:12px;display:flex;align-items:center;justify-content:center">
-      <i class="fas fa-dove" style="font-size:1.2rem;color:#c9a84c"></i>
+      <i class="fas fa-dove" style="font-size:1.2rem;color:var(--gold,#c9a84c)"></i>
     </div>
     <div>
       <h2 style="font-size:1.4rem;font-weight:800;margin:0;color:var(--text)">Registar golubova</h2>
@@ -154,7 +154,7 @@
       <button class="glist-view-btn active" data-view="table" onclick="switchView('table')"><i class="fas fa-list"></i></button>
       <button class="glist-view-btn" data-view="grid" onclick="switchView('grid')"><i class="fas fa-th"></i></button>
     </div>
-    <a href="{% url 'udruge:golub_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+    <a href="{% url 'udruge:golub_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
       <i class="fas fa-plus me-1"></i>Novi golub
     </a>
   </div>
@@ -189,7 +189,7 @@
         {% for g in page_obj %}
         <tr>
           <td>
-            <a href="{% url 'udruge:golub_detail' g.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none;font-family:monospace;font-size:.82rem">
+            <a href="{% url 'udruge:golub_detail' g.pk %}" style="color:var(--gold,#c9a84c);font-weight:600;text-decoration:none;font-family:monospace;font-size:.82rem">
               {{ g.prsten_broj }}
             </a>
           </td>
@@ -282,7 +282,7 @@
 {% else %}
 <!-- Empty -->
 <div style="text-align:center;padding:5rem 2rem;background:var(--bg-card);border:1px solid var(--border);border-radius:14px">
-  <div style="font-size:3rem;color:#c9a84c;opacity:.4;margin-bottom:1rem"><i class="fas fa-dove"></i></div>
+  <div style="font-size:3rem;color:var(--gold,#c9a84c);opacity:.4;margin-bottom:1rem"><i class="fas fa-dove"></i></div>
   {% if q %}
   <h3 style="font-weight:700;color:var(--text)">Nema rezultata za "{{ q }}"</h3>
   <p style="color:var(--text-muted);font-size:.85rem">Pokušajte s drugačijim pojmom pretrage</p>
@@ -290,7 +290,7 @@
   {% else %}
   <h3 style="font-weight:700;color:var(--text)">Registrirajte prvog goluba</h3>
   <p style="color:var(--text-muted);font-size:.85rem;max-width:400px;margin:0 auto 1.5rem">Dodajte golubove s brojem prstena, fotografijom i rodovnikom</p>
-  <a href="{% url 'udruge:golub_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+  <a href="{% url 'udruge:golub_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
     <i class="fas fa-plus me-1"></i>Novi golub
   </a>
   {% endif %}

@@ -7,22 +7,22 @@
 <style>
 .stb-wrap{max-width:720px;margin:0 auto;padding:1.5rem 1rem}
 .stb-header{text-align:center;margin-bottom:2rem;padding:2rem 1rem;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);border-radius:16px;border:1px solid rgba(201,168,76,0.2)}
-.stb-header h1{color:#c9a84c;font-size:1.5rem;font-weight:800;letter-spacing:2px;margin:0 0 .5rem}
+.stb-header h1{color:var(--gold,#c9a84c);font-size:1.5rem;font-weight:800;letter-spacing:2px;margin:0 0 .5rem}
 .stb-header .sub{color:#94a3b8;font-size:.8rem}
 .stb-company{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
 .stb-company .icon{font-size:2rem}
 .stb-company .name{font-weight:700;font-size:1rem;color:#e2e8f0}
 .stb-company .detail{font-size:.75rem;color:#64748b}
 .stb-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
-.stb-card h3{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin:0 0 1rem}
+.stb-card h3{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);margin:0 0 1rem}
 .stb-form .form-group{margin-bottom:1rem}
 .stb-form label{display:block;font-size:.8rem;font-weight:600;color:var(--text-secondary,#475569);margin-bottom:.35rem}
 .stb-form input[type=file]{width:100%;padding:.6rem;border:2px dashed var(--border,#e2e8f0);border-radius:8px;background:var(--input-bg,#fff);cursor:pointer;font-size:.85rem}
-.stb-form input[type=file]:hover{border-color:#c9a84c}
+.stb-form input[type=file]:hover{border-color:var(--gold,#c9a84c)}
 .stb-form select,.stb-form textarea{width:100%;padding:.6rem .75rem;border:1px solid var(--border,#e2e8f0);border-radius:8px;background:var(--input-bg,#fff);font-size:.85rem;font-family:inherit;color:var(--text,#0f172a)}
 .stb-form textarea{min-height:80px;resize:vertical}
-.stb-form select:focus,.stb-form textarea:focus,.stb-form input:focus{outline:none;border-color:#c9a84c}
-.btn-upload{width:100%;padding:.75rem;background:#c9a84c;color:#000;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.5px;transition:all .2s}
+.stb-form select:focus,.stb-form textarea:focus,.stb-form input:focus{outline:none;border-color:var(--gold,#c9a84c)}
+.btn-upload{width:100%;padding:.75rem;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.5px;transition:all .2s}
 .btn-upload:hover{background:#d4a843;transform:translateY(-1px)}
 .btn-upload:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .upload-status{text-align:center;font-size:.8rem;margin-top:.5rem;min-height:1.2rem}
@@ -62,7 +62,7 @@
       {% csrf_token %}
       <div class="form-group">
         <label for="file">Datei (PDF, CSV, XLSX)</label>
-        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('stb-photo-preview',{onReady:function(r){document.getElementById('stb_photo_b64').value=r.b64}})}else{document.getElementById('file').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:#c9a84c;padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
+        <button type="button" onclick="if(window.FenixCamera){FenixCamera.quick('stb-photo-preview',{onReady:function(r){document.getElementById('stb_photo_b64').value=r.b64}})}else{document.getElementById('file').click()}" style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);color:var(--gold,#c9a84c);padding:.5rem 1rem;border-radius:8px;cursor:pointer;margin-bottom:.5rem;font-size:.85rem">📷 Kamera</button>
         <div id="stb-photo-preview" style="display:none;margin:.5rem 0"></div>
         <input type="hidden" name="photo_b64" id="stb_photo_b64">
         <input type="file" id="file" name="file" accept=".pdf,.csv,.xlsx,.xls,.xml,.zip" required>
@@ -128,7 +128,7 @@
 
   <div class="stb-footer">
     LIMIT Connect &mdash; Ihr digitaler Gesch&auml;ftspartner<br>
-    <a href="https://limit-connect.com" style="color:#c9a84c;text-decoration:none">limit-connect.com</a>
+    <a href="https://limit-connect.com" style="color:var(--gold,#c9a84c);text-decoration:none">limit-connect.com</a>
   </div>
 </div>
 

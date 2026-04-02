@@ -26,7 +26,7 @@
             color: white; font-weight: 800; font-size: 1.6rem;
             text-align: center; margin-bottom: 28px; letter-spacing: 1px;
         }
-        .logo-text span { color: #c9a84c; }
+        .logo-text span { color: var(--gold,#c9a84c); }
         .form-control {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255,255,255,0.1);
@@ -34,11 +34,11 @@
             font-size: .95rem;
         }
         .form-control:focus {
-            background: rgba(15, 23, 42, 0.8); border-color: #c9a84c;
+            background: rgba(15, 23, 42, 0.8); border-color: var(--gold,#c9a84c);
             box-shadow: 0 0 0 .2rem rgba(201,168,76,0.2); color: white;
         }
         .btn-gold {
-            background: #c9a84c; border: none; color: #0f172a;
+            background: var(--gold,#c9a84c); border: none; color: #0f172a;
             font-weight: 700; padding: 13px; border-radius: 10px;
             font-size: 1rem; width: 100%; transition: all .2s;
         }
@@ -47,15 +47,15 @@
         .error-box { background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;color:#fca5a5;font-size:.84rem; }
         .success-box { background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;color:#86efac;font-size:.84rem; }
         .pwd-wrap { position: relative; }
-        .pwd-eye { position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#c9a84c;font-size:15px;padding:0; }
-        a { color: #c9a84c; text-decoration: none; font-weight: 600; }
+        .pwd-eye { position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gold,#c9a84c);font-size:15px;padding:0; }
+        a { color: var(--gold,#c9a84c); text-decoration: none; font-weight: 600; }
         a:hover { color: #e8c96a; }
         .footer-links { text-align:center;margin-top:20px;font-size:.82rem;color:#64748b; }
         .footer-links a { color:#64748b;font-weight:400; }
-        .footer-links a:hover { color:#c9a84c; }
+        .footer-links a:hover { color:var(--gold,#c9a84c); }
         .lang-bar { display:flex;gap:4px;justify-content:center;margin-top:16px; }
         .lang-btn { padding:3px 10px;font-size:.7rem;font-weight:700;border-radius:5px;border:1px solid rgba(255,255,255,.1);color:#64748b;background:none;cursor:pointer;letter-spacing:.5px; }
-        .lang-btn.active { background:#c9a84c;color:#0f172a;border-color:#c9a84c; }
+        .lang-btn.active { background:var(--gold,#c9a84c);color:#0f172a;border-color:var(--gold,#c9a84c); }
     </style>
 </head>
 <body>
@@ -96,7 +96,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <label style="color:#94a3b8;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:6px">
-                <input type="checkbox" name="remember" checked style="accent-color:#c9a84c"> {% trans "Zapamti me" %}
+                <input type="checkbox" name="remember" checked style="accent-color:var(--gold,#c9a84c)"> {% trans "Zapamti me" %}
             </label>
         </div>
 
@@ -108,7 +108,7 @@
     <div class="footer-links">
         <div style="margin-top:16px">
             <span style="color:#64748b">{% trans "Nemate račun?" %}</span>
-            <a href="{% url 'accounts:quick_register' %}" style="color:#c9a84c;font-weight:700"> {% trans "Registrirajte se" %}</a>
+            <a href="{% url 'accounts:quick_register' %}" style="color:var(--gold,#c9a84c);font-weight:700"> {% trans "Registrirajte se" %}</a>
         </div>
     </div>
 

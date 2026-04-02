@@ -7,12 +7,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,sans-serif;background:#0a0a0a;color:#e2e8f0;min-height:100vh;padding:20px}
-.card{max-width:500px;margin:0 auto;background:#1a1a1a;border:1px solid #c9a84c;border-radius:12px;padding:24px}
-h2{color:#c9a84c;margin-bottom:16px;font-size:1.2rem}
+.card{max-width:500px;margin:0 auto;background:#1a1a1a;border:1px solid var(--gold,#c9a84c);border-radius:12px;padding:24px}
+h2{color:var(--gold,#c9a84c);margin-bottom:16px;font-size:1.2rem}
 .status-bar{display:flex;gap:4px;margin-bottom:20px}
 .step{flex:1;height:6px;border-radius:3px;background:#222}
 .step.done{background:#22c55e}
-.step.current{background:#c9a84c;animation:pulse 1.5s infinite}
+.step.current{background:var(--gold,#c9a84c);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 .status-text{text-align:center;font-size:1.1rem;font-weight:700;margin-bottom:16px}
 .items-list{border-top:1px solid #222;padding-top:12px}
@@ -48,7 +48,7 @@ h2{color:#c9a84c;margin-bottom:16px;font-size:1.2rem}
         {% for item in items %}
         <div class="item-row">
             <span>{{ item.quantity }}x {{ item.inventory_item.name }}</span>
-            <span style="color:#c9a84c">{{ item.inventory_item.unit_price|floatformat:2 }} EUR</span>
+            <span style="color:var(--gold,#c9a84c)">{{ item.inventory_item.unit_price|floatformat:2 }} EUR</span>
         </div>
         {% endfor %}
     </div>

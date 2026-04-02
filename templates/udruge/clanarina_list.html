@@ -4,7 +4,7 @@
 <style>
     .udruge-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .udruge-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
-    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, #c9a84c); }
+    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, var(--gold,#c9a84c)); }
     .udruge-stat .label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
     .udruge-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
     .udruge-table th { background: var(--table-header-bg); padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
@@ -12,13 +12,13 @@
     .udruge-table tr:hover { background: var(--table-row-hover); }
     .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
     .badge-placena { background: #065f4620; color: #065f46; }
-    .badge-ceka { background: #c9a84c20; color: #c9a84c; }
+    .badge-ceka { background: var(--gold,#c9a84c)20; color: var(--gold,#c9a84c); }
     .badge-kasni { background: #dc262620; color: #dc2626; }
-    .btn-gold { background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+    .btn-gold { background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
     .btn-gold:hover { background: #b8943f; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
     .bulk-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-    .bulk-form h3 { margin: 0 0 16px; font-size: 1rem; color: var(--gold, #c9a84c); }
+    .bulk-form h3 { margin: 0 0 16px; font-size: 1rem; color: var(--gold, var(--gold,#c9a84c)); }
     .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
     .form-group { display: flex; flex-direction: column; gap: 4px; }
     .form-group label { font-size: 0.8rem; color: var(--text-secondary); }
@@ -27,7 +27,7 @@
     .page-header h1 { font-size: 1.5rem; margin: 0; }
     .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; }
     .filter-bar a { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--border); color: var(--text-secondary); }
-    .filter-bar a.active { background: var(--gold, #c9a84c); color: #0a0a0a; border-color: var(--gold, #c9a84c); }
+    .filter-bar a.active { background: var(--gold, var(--gold,#c9a84c)); color: #0a0a0a; border-color: var(--gold, var(--gold,#c9a84c)); }
     @media (max-width: 768px) {
         .udruge-stats { grid-template-columns: repeat(2, 1fr); }
         .udruge-table { font-size: 0.8rem; }

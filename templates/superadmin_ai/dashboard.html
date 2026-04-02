@@ -27,7 +27,7 @@
 .ai-container{max-width:1100px;margin:0 auto}
 .ai-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-bottom:1.2rem}
 .ai-stat{padding:.7rem;background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:10px;text-align:center}
-.ai-stat .num{font-size:1.6rem;font-weight:700;color:#c9a84c;line-height:1.2}
+.ai-stat .num{font-size:1.6rem;font-weight:700;color:var(--gold,#c9a84c);line-height:1.2}
 .ai-stat .lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:1px;color:#64748b}
 .group-card{background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:12px;margin-bottom:.8rem;overflow:hidden}
 .group-header{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;cursor:pointer;user-select:none}
@@ -46,14 +46,14 @@
 .tog span{position:absolute;cursor:pointer;inset:0;background:#2a2f45;border-radius:18px;transition:.2s}
 .tog span:before{position:absolute;content:"";height:12px;width:12px;left:3px;bottom:3px;background:#555;border-radius:50%;transition:.2s}
 .tog input:checked+span{background:rgba(201,168,76,.2)}
-.tog input:checked+span:before{transform:translateX(18px);background:#c9a84c}
+.tog input:checked+span:before{transform:translateX(18px);background:var(--gold,#c9a84c)}
 .bulk-btn{padding:3px 10px;border-radius:16px;font-size:.7rem;font-weight:700;cursor:pointer;border:1px solid;background:transparent;transition:.2s}
 .bulk-on{color:#22c55e;border-color:#22c55e}.bulk-on:hover{background:rgba(34,197,94,.1)}
 .bulk-off{color:#ef4444;border-color:#ef4444}.bulk-off:hover{background:rgba(239,68,68,.1)}
 .master-bar{display:flex;gap:8px;align-items:center;padding:10px 16px;background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:10px;margin-bottom:1rem}
-.master-bar .label{font-size:.82rem;font-weight:700;color:#c9a84c;margin-right:auto}
+.master-bar .label{font-size:.82rem;font-weight:700;color:var(--gold,#c9a84c);margin-right:auto}
 .perm-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;text-align:center;width:36px}
-.action-card{padding:.8rem 1rem;margin-bottom:.6rem;background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:10px;border-left:3px solid #c9a84c}
+.action-card{padding:.8rem 1rem;margin-bottom:.6rem;background:var(--card-bg,#1a1a2e);border:1px solid var(--border-color,#2a2f45);border-radius:10px;border-left:3px solid var(--gold,#c9a84c)}
 #toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
 .toast{padding:10px 16px;border-radius:8px;color:#e8e8e8;background:#1a1a2e;border:1px solid #2a2f45;box-shadow:0 4px 20px rgba(0,0,0,.3);font-size:.82rem;opacity:0;transform:translateY(20px);transition:.3s}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -64,7 +64,7 @@
 
 <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
   <div>
-    <h2 class="mb-0" style="color:#c9a84c"><i class="fas fa-brain me-2"></i>AI Nadzorni Centar</h2>
+    <h2 class="mb-0" style="color:var(--gold,#c9a84c)"><i class="fas fa-brain me-2"></i>AI Nadzorni Centar</h2>
     <small class="text-muted">Ovlasti AI agenata po grupama — jedan klik za sve</small>
   </div>
   <div class="d-flex gap-2">
@@ -75,7 +75,7 @@
 <!-- Live AI Status -->
 <div id="ai-live-status" style="background:#0d1117;border:1px solid #1e293b;border-radius:12px;padding:1rem;margin-bottom:1rem">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
-    <span style="color:#c9a84c;font-weight:700;font-size:.85rem">
+    <span style="color:var(--gold,#c9a84c);font-weight:700;font-size:.85rem">
       <i class="fas fa-circle" style="color:#22c55e;font-size:.6rem;margin-right:.4rem"></i>
       Live AI Aktivnost
     </span>
@@ -120,7 +120,7 @@
 <div class="group-card">
   <div class="group-header" onclick="toggleGroup('g{{ forloop.counter }}')">
     <div class="group-title">
-      {% if 'Financije' in group_name %}<i class="fas fa-coins" style="color:#c9a84c"></i>
+      {% if 'Financije' in group_name %}<i class="fas fa-coins" style="color:var(--gold,#c9a84c)"></i>
       {% elif 'Prodaja' in group_name %}<i class="fas fa-cash-register" style="color:#22c55e"></i>
       {% elif 'Skladiste' in group_name %}<i class="fas fa-boxes" style="color:#3b82f6"></i>
       {% elif 'Dokument' in group_name %}<i class="fas fa-archive" style="color:#f59e0b"></i>
@@ -161,11 +161,11 @@
 <!-- Pending actions -->
 {% if actions %}
 <div style="margin-top:1.2rem">
-  <h5 style="color:#c9a84c"><i class="fas fa-clock me-2"></i>Na cekanju ({{ actions|length }})</h5>
+  <h5 style="color:var(--gold,#c9a84c)"><i class="fas fa-clock me-2"></i>Na cekanju ({{ actions|length }})</h5>
   {% for a in actions %}
   <div class="action-card" id="act-{{ a.id }}">
     <div class="d-flex justify-content-between align-items-center mb-1">
-      <strong style="color:#c9a84c">{{ a.module }}.{{ a.action_type }}</strong>
+      <strong style="color:var(--gold,#c9a84c)">{{ a.module }}.{{ a.action_type }}</strong>
       <small class="text-muted">{{ a.created_at|date:"d.m. H:i" }}</small>
     </div>
     <div style="font-size:.85rem;margin-bottom:.5rem">{{ a.description }}</div>

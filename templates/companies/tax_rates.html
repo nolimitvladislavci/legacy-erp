@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container" style="max-width:700px;margin:30px auto;padding:0 16px;">
-  <h2 style="color:#c9a84c;font-family:'Cormorant Garamond',serif;margin-bottom:20px;">
+  <h2 style="color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;margin-bottom:20px;">
     {% trans "Porezne stope" %} ({{ country }})
   </h2>
 
@@ -27,9 +27,9 @@
       <input type="text" name="name" value="{{ r.name }}"
              style="flex:2;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:8px;color:#e2e8f0;font-family:'Barlow',sans-serif;">
       <input type="number" name="rate" value="{{ r.rate }}" step="0.01" min="0" max="100"
-             style="width:80px;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:8px;color:#c9a84c;text-align:right;font-weight:700;">
+             style="width:80px;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:8px;color:var(--gold,#c9a84c);text-align:right;font-weight:700;">
       <span style="color:#888;font-size:.85rem;">%</span>
-      <button type="submit" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.85rem;">
+      <button type="submit" style="background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:.85rem;">
         {% trans "Spremi" %}
       </button>
     </form>
@@ -48,10 +48,10 @@
   </div>
 
   <!-- Add new -->
-  <form method="post" style="background:#0d1117;border:1px solid #c9a84c33;border-radius:10px;padding:16px;">
+  <form method="post" style="background:#0d1117;border:1px solid var(--gold,#c9a84c)33;border-radius:10px;padding:16px;">
     {% csrf_token %}
     <input type="hidden" name="action" value="add">
-    <h3 style="color:#c9a84c;font-family:'Cormorant Garamond',serif;margin:0 0 12px;font-size:1.1rem;">
+    <h3 style="color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;margin:0 0 12px;font-size:1.1rem;">
       {% trans "Dodaj novu stopu" %}
     </h3>
     <div style="display:flex;gap:8px;align-items:end;">
@@ -63,9 +63,9 @@
       <div style="width:100px;">
         <label style="color:#94a3b8;font-size:.8rem;display:block;margin-bottom:4px;">{% trans "Stopa %" %}</label>
         <input type="number" name="rate" value="25" step="0.01" min="0" max="100"
-               style="width:100%;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;color:#c9a84c;text-align:right;font-weight:700;">
+               style="width:100%;background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px;color:var(--gold,#c9a84c);text-align:right;font-weight:700;">
       </div>
-      <button type="submit" style="background:#c9a84c;color:#000;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700;white-space:nowrap;">
+      <button type="submit" style="background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;font-weight:700;white-space:nowrap;">
         + {% trans "Dodaj" %}
       </button>
     </div>

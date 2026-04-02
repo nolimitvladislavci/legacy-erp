@@ -463,7 +463,7 @@ function renderCmdResults(query){
 
   var html = '';
   if(!q && favs.length){
-    html += '<div style="padding:4px 14px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;">★ Favoriti</div>';
+    html += '<div style="padding:4px 14px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);">★ Favoriti</div>';
     filtered.filter(function(i){ return favs.indexOf(i.href) > -1; }).forEach(function(item){
       html += cmdItemHtml(item, true);
     });
@@ -574,7 +574,7 @@ function loadAiContext(){
       document.getElementById('ai-widget-icon').className = 'fas ' + (d.icon||'fa-robot') + ' me-2';
       var tips = '';
       (d.tips||[]).forEach(function(t){
-        tips += '<div style="padding:6px 0;color:#ccc;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.05)"><i class="fas fa-lightbulb me-2" style="color:#c9a84c"></i>' + t + '</div>';
+        tips += '<div style="padding:6px 0;color:#ccc;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.05)"><i class="fas fa-lightbulb me-2" style="color:var(--gold,#c9a84c)"></i>' + t + '</div>';
       });
       document.getElementById('ai-widget-tips').innerHTML = tips;
       var acts = '';

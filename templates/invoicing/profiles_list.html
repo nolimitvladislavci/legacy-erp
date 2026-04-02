@@ -26,8 +26,8 @@
 <style>
 .profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:16px}
 .profile-card{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;position:relative;transition:all .15s}
-.profile-card:hover{border-color:#c9a84c;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.profile-card.default{border-color:#c9a84c;background:linear-gradient(135deg,#fffbeb 0%,white 100%)}
+.profile-card:hover{border-color:var(--gold,#c9a84c);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.profile-card.default{border-color:var(--gold,#c9a84c);background:linear-gradient(135deg,#fffbeb 0%,white 100%)}
 .pc-badge{position:absolute;top:12px;right:12px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 10px;border-radius:20px}
 .pc-badge.default{background:#fef3c7;color:#92400e}
 .pc-badge.hr{background:#e0f2fe;color:#0369a1}
@@ -39,10 +39,10 @@
 .pc-label{font-weight:600;color:#94a3b8}
 .pc-actions{display:flex;gap:8px;margin-top:14px}
 .btn-edit{background:#f8fafc;border:1px solid #e2e8f0;padding:6px 14px;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;color:#0f172a;transition:all .15s}
-.btn-edit:hover{border-color:#c9a84c;background:#fffbeb}
+.btn-edit:hover{border-color:var(--gold,#c9a84c);background:#fffbeb}
 .btn-del{background:none;border:1px solid #fecaca;padding:6px 14px;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;color:#dc2626;transition:all .15s}
 .btn-del:hover{background:#fef2f2}
-.btn-new{display:inline-flex;align-items:center;gap:6px;background:#c9a84c;color:#0f172a;padding:10px 20px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;border:none;transition:opacity .15s;text-decoration:none}
+.btn-new{display:inline-flex;align-items:center;gap:6px;background:var(--gold,#c9a84c);color:#0f172a;padding:10px 20px;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer;border:none;transition:opacity .15s;text-decoration:none}
 .btn-new:hover{opacity:.85}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-bg.open{opacity:1;pointer-events:all}
@@ -51,11 +51,11 @@
 .fg{margin-bottom:12px}
 .fg label{display:block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:4px}
 .fg input,.fg select,.fg textarea{width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:.85rem;font-family:inherit;color:#0f172a}
-.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#c9a84c}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--gold,#c9a84c)}
 .fg textarea{resize:vertical;min-height:60px}
 .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #f1f5f9}
-.btn-save{background:#c9a84c;color:#0f172a;padding:8px 20px;border-radius:6px;font-weight:700;font-size:.85rem;cursor:pointer;border:none}
+.btn-save{background:var(--gold,#c9a84c);color:#0f172a;padding:8px 20px;border-radius:6px;font-weight:700;font-size:.85rem;cursor:pointer;border:none}
 .btn-cancel{background:#f1f5f9;color:#475569;padding:8px 20px;border-radius:6px;font-weight:600;font-size:.85rem;cursor:pointer;border:none}
 </style>
 {% endblock %}
@@ -109,7 +109,7 @@
 
     <!-- OIB LOOKUP — PRVO POLJE -->
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:16px">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#c9a84c;margin-bottom:10px">Brzi unos po OIB-u</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold,#c9a84c);margin-bottom:10px">Brzi unos po OIB-u</div>
       <div class="fg-row">
         <div class="fg" style="margin-bottom:0">
           <label>Zemlja</label>
@@ -119,7 +119,7 @@
           <label>OIB / Steuernummer *</label>
           <div style="display:flex;gap:6px">
             <input id="fOib" maxlength="20" placeholder="Unesite OIB..." style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();lookupOib()}">
-            <button type="button" onclick="lookupOib()" id="btnLookup" style="background:#c9a84c;color:#0f172a;border:none;border-radius:6px;padding:0 14px;font-weight:700;font-size:.78rem;cursor:pointer;white-space:nowrap"><i class="fas fa-search"></i> Traži</button>
+            <button type="button" onclick="lookupOib()" id="btnLookup" style="background:var(--gold,#c9a84c);color:#0f172a;border:none;border-radius:6px;padding:0 14px;font-weight:700;font-size:.78rem;cursor:pointer;white-space:nowrap"><i class="fas fa-search"></i> Traži</button>
           </div>
         </div>
       </div>

@@ -166,10 +166,10 @@
         if (_refreshBanner) return; // Already showing
 
         _refreshBanner = document.createElement('div');
-        _refreshBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:linear-gradient(135deg,#1e3a5f,#0f172a);border-bottom:2px solid #c9a84c;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:.85rem;color:#e0e0e0;animation:slideDown .3s ease;';
+        _refreshBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:linear-gradient(135deg,#1e3a5f,#0f172a);border-bottom:2px solid var(--gold,#c9a84c);padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:.85rem;color:#e0e0e0;animation:slideDown .3s ease;';
         _refreshBanner.innerHTML =
-            '<span style="color:#c9a84c;font-weight:700">⚡ ' + count + ' promjen' + (count === 1 ? 'a' : 'e') + ' na ploči</span>' +
-            '<button onclick="location.reload()" style="background:#c9a84c;color:#0a0a0a;border:none;border-radius:6px;padding:6px 16px;font-size:.78rem;font-weight:700;cursor:pointer">Osvježi</button>' +
+            '<span style="color:var(--gold,#c9a84c);font-weight:700">⚡ ' + count + ' promjen' + (count === 1 ? 'a' : 'e') + ' na ploči</span>' +
+            '<button onclick="location.reload()" style="background:var(--gold,#c9a84c);color:#0a0a0a;border:none;border-radius:6px;padding:6px 16px;font-size:.78rem;font-weight:700;cursor:pointer">Osvježi</button>' +
             '<button onclick="this.parentElement.remove();window._refreshBanner=null;" style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:1.1rem;padding:4px 8px">✕</button>';
 
         document.body.prepend(_refreshBanner);

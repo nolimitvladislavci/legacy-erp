@@ -10,7 +10,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e2e8f0;line-height:1.7}
-a{color:#c9a84c;text-decoration:none}a:hover{text-decoration:underline}
+a{color:var(--gold,#c9a84c);text-decoration:none}a:hover{text-decoration:underline}
 .container{max-width:900px;margin:0 auto;padding:0 20px}
 
 /* Hero */
@@ -18,12 +18,12 @@ a{color:#c9a84c;text-decoration:none}a:hover{text-decoration:underline}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(34,197,94,.06) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(201,168,76,.06) 0%,transparent 60%)}
 .hero-content{position:relative;z-index:1;max-width:800px;margin:0 auto}
 .hero-icon{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(201,168,76,.08));border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.8rem;color:#22c55e}
-.hero h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}.hero h1 span{color:#22c55e}.hero h1 .gold{color:#c9a84c}
+.hero h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}.hero h1 span{color:#22c55e}.hero h1 .gold{color:var(--gold,#c9a84c)}
 .hero .subtitle{font-size:1.05rem;color:#94a3b8;max-width:640px;margin:0 auto 28px}
 .hero-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:.76rem;font-weight:600}
 .hero-badge.green{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#4ade80}
-.hero-badge.gold{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:#c9a84c}
+.hero-badge.gold{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:var(--gold,#c9a84c)}
 .hero-badge.blue{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#60a5fa}
 
 /* Sections */
@@ -38,7 +38,7 @@ a{color:#c9a84c;text-decoration:none}a:hover{text-decoration:underline}
 .value-card:hover{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03)}
 .value-card .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:14px}
 .value-card .icon.green{background:rgba(34,197,94,.12);color:#22c55e}
-.value-card .icon.gold{background:rgba(201,168,76,.12);color:#c9a84c}
+.value-card .icon.gold{background:rgba(201,168,76,.12);color:var(--gold,#c9a84c)}
 .value-card .icon.blue{background:rgba(59,130,246,.12);color:#60a5fa}
 .value-card .icon.red{background:rgba(239,68,68,.12);color:#ef4444}
 .value-card .icon.purple{background:rgba(168,85,247,.12);color:#a855f7}
@@ -79,11 +79,11 @@ a{color:#c9a84c;text-decoration:none}a:hover{text-decoration:underline}
 .api-block .url{font-size:.85rem;color:#e2e8f0}
 .api-block .desc{font-size:.78rem;color:#94a3b8;margin-top:8px}
 .api-block pre{background:rgba(0,0,0,.3);border-radius:8px;padding:14px;margin-top:12px;font-size:.75rem;color:#94a3b8;overflow-x:auto;line-height:1.5}
-.api-block pre .key{color:#c9a84c}.api-block pre .val{color:#4ade80}.api-block pre .comment{color:#475569}
+.api-block pre .key{color:var(--gold,#c9a84c)}.api-block pre .val{color:#4ade80}.api-block pre .comment{color:#475569}
 
 /* Comparison table */
 .cmp-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:.82rem}
-.cmp-table th{padding:12px 16px;text-align:left;background:rgba(255,255,255,.03);border-bottom:2px solid rgba(201,168,76,.2);color:#c9a84c;font-weight:700;text-transform:uppercase;font-size:.7rem;letter-spacing:1px}
+.cmp-table th{padding:12px 16px;text-align:left;background:rgba(255,255,255,.03);border-bottom:2px solid rgba(201,168,76,.2);color:var(--gold,#c9a84c);font-weight:700;text-transform:uppercase;font-size:.7rem;letter-spacing:1px}
 .cmp-table td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04)}
 .cmp-table tr:hover td{background:rgba(255,255,255,.02)}
 .cmp-check{color:#22c55e;font-weight:700}.cmp-x{color:#475569}
@@ -95,7 +95,7 @@ a{color:#c9a84c;text-decoration:none}a:hover{text-decoration:underline}
 .cta-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;font-size:.95rem;font-weight:700;text-decoration:none;transition:all .2s}
 .cta-btn.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
 .cta-btn.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,197,94,.3)}
-.cta-btn.secondary{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:#c9a84c;margin-left:12px}
+.cta-btn.secondary{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);margin-left:12px}
 
 /* Footer */
 .footer{padding:30px 20px;text-align:center;border-top:1px solid rgba(255,255,255,.04);font-size:.75rem;color:#475569}
@@ -103,7 +103,7 @@ a{color:#c9a84c;text-decoration:none}a:hover{text-decoration:underline}
 
 /* Testimonial */
 .quote-block{background:rgba(201,168,76,.03);border-left:3px solid rgba(201,168,76,.4);border-radius:0 12px 12px 0;padding:20px 24px;margin:24px 0;font-style:italic;color:#cbd5e1;font-size:.9rem}
-.quote-block .author{font-style:normal;font-weight:700;color:#c9a84c;font-size:.8rem;margin-top:8px}
+.quote-block .author{font-style:normal;font-weight:700;color:var(--gold,#c9a84c);font-size:.8rem;margin-top:8px}
 
 /* Rule list */
 .rule-list{list-style:none;padding:0;margin:20px 0}
@@ -359,7 +359,7 @@ TS-04: Fiskalizacija — CIS ping, fiskalni certifikat
 TS-05: Inbox — prijem e-Računa, Posrednik konekcija</pre>
   </div>
 
-  <h3 style="font-size:1.1rem;margin:36px 0 20px"><i class="fas fa-cog" style="color:#c9a84c;margin-right:8px"></i> 3. Automatski (unutar LIMIT Connect)</h3>
+  <h3 style="font-size:1.1rem;margin:36px 0 20px"><i class="fas fa-cog" style="color:var(--gold,#c9a84c);margin-right:8px"></i> 3. Automatski (unutar LIMIT Connect)</h3>
   <div class="value-grid">
     <div class="value-card">
       <div class="icon green"><i class="fas fa-robot"></i></div>

@@ -6,7 +6,7 @@
 <title>Inspekcija — {{ company.name }}</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{--bg:#0f0f0f;--card:#1a1a1a;--gold:#c9a84c;--red:#dc2626;--green:#22c55e;--blue:#3b82f6;--text:#e5e5e5;--muted:#888;--border:#333}
+:root{--bg:#0f0f0f;--card:#1a1a1a;--gold: #c9a84c;--red:#dc2626;--green:#22c55e;--blue:#3b82f6;--text:#e5e5e5;--muted:#888;--border:#333}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .top-bar{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--gold)}
@@ -309,7 +309,7 @@ document.querySelectorAll('.tab').forEach(function(tab) {
     <i class="fas fa-exclamation-triangle"></i> Prijavi problem
   </a>
   <button onclick="window.print()"
-    style="background:linear-gradient(135deg,#c9a84c,#a07830);color:#000;border:none;border-radius:12px;
+    style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a07830);color:#000;border:none;border-radius:12px;
     padding:12px 20px;font-weight:700;font-size:.85rem;cursor:pointer;
     box-shadow:0 4px 16px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px">
     <i class="fas fa-print"></i> Print

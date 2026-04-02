@@ -95,7 +95,7 @@
       <p style="font-size:.78rem;color:var(--text-muted);margin:0">Upravljanje lokacijama za smještaj golubova</p>
     </div>
   </div>
-  <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+  <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
     <i class="fas fa-plus me-1"></i>Novi golubinjak
   </a>
 </div>
@@ -127,7 +127,7 @@
         {% for g in page_obj %}
         <tr>
           <td>
-            <a href="{% url 'udruge:golubinjak_detail' g.pk %}" style="color:#c9a84c;font-weight:600;text-decoration:none">
+            <a href="{% url 'udruge:golubinjak_detail' g.pk %}" style="color:var(--gold,#c9a84c);font-weight:600;text-decoration:none">
               <i class="fas fa-home me-1" style="font-size:.75rem;opacity:.5"></i>{{ g.naziv }}
             </a>
           </td>
@@ -193,7 +193,7 @@
   <p style="color:var(--text-muted);max-width:400px;margin:0 auto 1.5rem;font-size:.88rem">
     Golubinjak je dom vaših golubova. Registrirajte lokaciju, kapacitet i EU broj.
   </p>
-  <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+  <a href="{% url 'udruge:golubinjak_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
     <i class="fas fa-plus me-1"></i>Dodaj golubinjak
   </a>
 </div>

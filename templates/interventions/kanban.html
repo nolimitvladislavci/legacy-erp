@@ -67,7 +67,7 @@
 .iv-assign-form{display:flex;gap:.35rem;margin-top:.5rem;flex-wrap:wrap}
 .iv-assign-form select{font-size:.72rem;padding:.2rem .4rem;border:1px solid #e2e8f0;border-radius:4px;flex:1;min-width:120px}
 .iv-btn-field{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#0f172a;color:#fff;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem}
-.iv-btn-assign{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#c9a84c;color:#000;border:none;cursor:pointer;font-weight:700}
+.iv-btn-assign{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:var(--gold,#c9a84c);color:#000;border:none;cursor:pointer;font-weight:700}
 .iv-btn-escalate{font-size:.7rem;padding:.25rem .65rem;border-radius:5px;background:#ec4899;color:#fff;border:none;cursor:pointer}
 .iv-empty{text-align:center;padding:2rem .5rem;color:#cbd5e1;font-size:.8rem}
 .csrf-token-val{display:none}
@@ -91,7 +91,7 @@
 <div id="kanban-gps-wrap" style="display:none;margin:0 0 16px;padding:0 1.5rem">
   <div style="background:#0f172a;border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:12px 16px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <span style="font-size:.8rem;font-weight:700;color:#c9a84c;letter-spacing:.05em">{% trans "&#128270; GPS RADNICI" %}</span>
+      <span style="font-size:.8rem;font-weight:700;color:var(--gold,#c9a84c);letter-spacing:.05em">{% trans "&#128270; GPS RADNICI" %}</span>
       <span id="kanban-gps-count" style="font-size:.72rem;color:#94a3b8;background:rgba(255,255,255,.06);padding:.1rem .5rem;border-radius:8px"></span>
     </div>
     <div id="kanban-map" style="height:240px;border-radius:8px;overflow:hidden;border:1px solid rgba(201,168,76,.15)"></div>

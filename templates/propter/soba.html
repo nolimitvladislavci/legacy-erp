@@ -5,7 +5,7 @@
 
 {% block content %}
 <style>
-:root { --soba-gold: #c9a84c; --soba-dark: #0a0a0a; --soba-card: #111318; --soba-border: #1e293b; --soba-text: #e2e8f0; --soba-muted: #94a3b8; }
+:root { --soba-gold: var(--gold,#c9a84c); --soba-dark: #0a0a0a; --soba-card: #111318; --soba-border: #1e293b; --soba-text: #e2e8f0; --soba-muted: #94a3b8; }
 
 .soba-layout { display: grid; grid-template-columns: 1fr 360px; gap: 20px; padding: 0; }
 .soba-main { min-width: 0; }
@@ -28,11 +28,11 @@
 .soba-formats { color: var(--soba-muted); font-size: 0.75rem; margin-top: 12px; }
 
 .soba-btn-gold {
-    background: linear-gradient(135deg, #c9a84c, #b8963e); color: #0a0a0a; border: none;
+    background: linear-gradient(135deg, var(--gold,#c9a84c), #b8963e); color: #0a0a0a; border: none;
     padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
     cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
 }
-.soba-btn-gold:hover { background: linear-gradient(135deg, #d4b85c, #c9a84c); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.3); }
+.soba-btn-gold:hover { background: linear-gradient(135deg, #d4b85c, var(--gold,#c9a84c)); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.3); }
 .soba-btn-ghost {
     background: transparent; color: var(--soba-muted); border: 1px solid var(--soba-border);
     padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 0.85rem;

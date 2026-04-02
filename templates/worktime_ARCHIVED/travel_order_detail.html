@@ -41,7 +41,7 @@
 <div>{{ order.departure_date|date:"d.m.Y H:i" }}</div></div>
 <div class="col-md-6"><small class="text-muted">Povratak</small>
 <div>{{ order.return_date|date:"d.m.Y H:i" }}</div></div></div>
-<hr class="border-secondary"><h5 style="color:#c9a84c">Troskovi</h5>
+<hr class="border-secondary"><h5 style="color:var(--gold,#c9a84c)">Troskovi</h5>
 <table class="table table-dark table-sm">
 <tr><td>Kilometrina ({{ order.distance_km }} km x {{ order.mileage_rate }} EUR/km)</td><td class="text-end">{{ order.mileage_total }} EUR</td></tr>
 <tr><td>Dnevnice ({{ order.per_diem_days }} dana x {{ order.per_diem_rate }} EUR/dan)</td><td class="text-end">{{ order.per_diem_total }} EUR</td></tr>
@@ -55,7 +55,7 @@
 <div class="card bg-dark border-secondary mb-4">
 <div class="card-body">
 <div class="d-flex justify-content-between align-items-center mb-3">
-<h5 style="color:#c9a84c;margin:0"><i class="fas fa-receipt"></i> Pojedinacni troskovi</h5>
+<h5 style="color:var(--gold,#c9a84c);margin:0"><i class="fas fa-receipt"></i> Pojedinacni troskovi</h5>
 <span class="badge bg-secondary">{{ expenses.count }} stavki</span>
 </div>
 
@@ -78,7 +78,7 @@
 <td style="font-size:.85rem">{{ exp.description }}</td>
 <td style="font-size:.82rem">{{ exp.receipt_date|date:"d.m.Y"|default:"-" }}</td>
 <td style="font-size:.85rem;font-weight:600" class="text-end text-warning">{{ exp.amount }} EUR</td>
-<td>{% if exp.receipt_file %}<a href="{{ exp.receipt_file.url }}" target="_blank" style="color:#c9a84c;font-size:.82rem"><i class="fas fa-file-download"></i></a>{% endif %}</td>
+<td>{% if exp.receipt_file %}<a href="{{ exp.receipt_file.url }}" target="_blank" style="color:var(--gold,#c9a84c);font-size:.82rem"><i class="fas fa-file-download"></i></a>{% endif %}</td>
 </tr>
 {% endfor %}
 <tr class="border-top border-warning">
@@ -130,7 +130,7 @@
 <input type="text" name="notes" class="form-control form-control-sm bg-dark text-light border-secondary">
 </div>
 </div>
-<button type="submit" class="btn btn-sm" style="background:#c9a84c;color:#000;font-weight:600">Dodaj trosak</button>
+<button type="submit" class="btn btn-sm" style="background:var(--gold,#c9a84c);color:#000;font-weight:600">Dodaj trosak</button>
 </form>
 {% endif %}
 </div></div>

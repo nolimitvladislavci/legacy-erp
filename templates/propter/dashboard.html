@@ -4,7 +4,7 @@
 <!-- Upload & AI Inbox shortcut -->
 <div id="upload-shortcut" style="margin-top:1.5rem;padding:1rem;background:#111827;border:1px solid rgba(201,168,76,.2);border-radius:12px;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
   <span style="color:#94a3b8;font-size:.85rem">Brze akcije:</span>
-  <a href="/hr/documents/arhiva/upload/" style="background:linear-gradient(135deg,#c9a84c,#b8963c);color:#0a0a0a;font-weight:700;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
+  <a href="/hr/documents/arhiva/upload/" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#b8963c);color:#0a0a0a;font-weight:700;padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
     <i class="fas fa-cloud-upload-alt"></i> Upload racuna
   </a>
   <a href="/hr/documents/ai-inbox/" style="background:#1e3a5f;color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;display:inline-flex;align-items:center;gap:.4rem">
@@ -42,7 +42,7 @@
   <!-- ZAGLAVLJE -->
   <div class="row mb-4 align-items-center">
     <div class="col-md-7">
-      <h2 class="fw-bold mb-1" style="color: #c9a84c; letter-spacing: 1px;">
+      <h2 class="fw-bold mb-1" style="color: var(--gold,#c9a84c); letter-spacing: 1px;">
         <i class="fas fa-layer-group me-2"></i> PROPTER DIGITALNA SOBA
       </h2>
       <p class="text-muted mb-0" style="font-size:.95rem;">
@@ -67,7 +67,7 @@
       {% if current_period and current_period.status == 'closed' %}
       <button id="btn-kuhaj"
               class="btn btn-lg px-4 fw-bold"
-              style="background: linear-gradient(135deg, #c9a84c 0%, #a08530 100%); color: #000; border: none; box-shadow: 0 4px 15px rgba(201,168,76,0.3);"
+              style="background: linear-gradient(135deg, var(--gold,#c9a84c) 0%, #a08530 100%); color: #000; border: none; box-shadow: 0 4px 15px rgba(201,168,76,0.3);"
               onclick="kuhajRacun({{ current_period.pk }})">
         <i class="fas fa-fire me-2"></i> KUHAJ ZBIRNI RACUN
       </button>
@@ -111,9 +111,9 @@
     <div class="col-md-3">
       <div class="card h-100" style="background-color: #1e1e1e; border: 1px solid #333;">
         <div class="card-body text-center">
-          <i class="fas fa-file-alt fa-2x mb-2" style="color: #c9a84c;"></i>
+          <i class="fas fa-file-alt fa-2x mb-2" style="color: var(--gold,#c9a84c);"></i>
           <h6 class="text-uppercase text-muted fw-bold mb-1" style="font-size:.75rem;">Otpremnice u baferu</h6>
-          <h2 class="mb-0" style="color: #c9a84c;">
+          <h2 class="mb-0" style="color: var(--gold,#c9a84c);">
             {% if current_period %}{{ current_period.otpremnica_count }}{% else %}0{% endif %}
           </h2>
         </div>
@@ -166,7 +166,7 @@
     <div class="col-12">
       <div class="card" style="background-color: #1e1e1e; border: 1px solid #333;">
         <div class="card-header py-3" style="background-color: #1a1a1a; border-bottom: 1px solid #333;">
-          <h5 class="mb-0 text-white"><i class="fas fa-project-diagram me-2" style="color:#c9a84c;"></i> Tijek procesa</h5>
+          <h5 class="mb-0 text-white"><i class="fas fa-project-diagram me-2" style="color:var(--gold,#c9a84c);"></i> Tijek procesa</h5>
         </div>
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center flex-wrap">
@@ -187,11 +187,11 @@
             </div>
             <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
             <div class="text-center px-3">
-              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:#c9a84c33;border:2px solid #c9a84c;">
-                <i class="fas fa-layer-group fa-lg" style="color:#c9a84c;"></i>
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:60px;height:60px;background:var(--gold,#c9a84c)33;border:2px solid var(--gold,#c9a84c);">
+                <i class="fas fa-layer-group fa-lg" style="color:var(--gold,#c9a84c);"></i>
               </div>
               <div class="small text-muted">Propter Soba</div>
-              <div class="small" style="color:#c9a84c;">Bafer (30 dana)</div>
+              <div class="small" style="color:var(--gold,#c9a84c);">Bafer (30 dana)</div>
             </div>
             <i class="fas fa-arrow-right text-muted fa-lg d-none d-md-block"></i>
             <div class="text-center px-3">
@@ -239,7 +239,7 @@
             {% for otp in recent_otpremnice %}
             <tr>
               <td class="align-middle">
-                <a href="{% url 'propter:otpremnica_detail' otp.pk %}" class="fw-bold" style="color:#c9a84c;">
+                <a href="{% url 'propter:otpremnica_detail' otp.pk %}" class="fw-bold" style="color:var(--gold,#c9a84c);">
                   OTP-{{ otp.number }}
                 </a>
               </td>
@@ -323,9 +323,9 @@
   <!-- BRZI LINKOVI -->
   <div class="row mt-4 g-3">
     <div class="col-md-3">
-      <a href="{% url 'propter:period_list' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#333'">
+      <a href="{% url 'propter:period_list' %}" class="card text-decoration-none h-100" style="background-color: #1e1e1e; border: 1px solid #333; transition: border-color .2s;" onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" onmouseout="this.style.borderColor='#333'">
         <div class="card-body text-center py-4">
-          <i class="fas fa-calendar fa-2x mb-2" style="color:#c9a84c;"></i>
+          <i class="fas fa-calendar fa-2x mb-2" style="color:var(--gold,#c9a84c);"></i>
           <div class="text-white">Svi periodi</div>
         </div>
       </a>
@@ -381,8 +381,8 @@ function showToast(message, type) {
     t.style.borderLeft = "6px solid #8b0000";
   } else {
     t.style.backgroundColor = "#1e1e1e";
-    t.style.border = "1px solid #c9a84c";
-    t.style.borderLeft = "6px solid #c9a84c";
+    t.style.border = "1px solid var(--gold,#c9a84c)";
+    t.style.borderLeft = "6px solid var(--gold,#c9a84c)";
   }
   t.innerHTML = message;
   document.body.appendChild(t);

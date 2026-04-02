@@ -6,7 +6,7 @@
 <title>Pracenje posiljke | Viskovic Premium</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
-:root{--gold:#c9a84c;--dark:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--green:#22c55e;--red:#ef4444;--blue:#3b82f6}
+:root{--gold: #c9a84c;--dark:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--green:#22c55e;--red:#ef4444;--blue:#3b82f6}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--dark);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;display:flex;justify-content:center;min-height:100vh}
 .wrap{width:100%;max-width:480px;background:#111827;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,.5)}
@@ -248,7 +248,7 @@ body{background:var(--dark);color:var(--text);font-family:-apple-system,BlinkMac
         <div class="dot"></div>
         <div class="ev-time">{{ event.created_at|date:"d.m.Y. u H:i" }}</div>
         <div class="ev-name">
-          <i class="{{ event.status.icon|default:'fas fa-circle' }} ev-icon" style="color:{{ event.status.color|default:'#c9a84c' }}"></i>
+          <i class="{{ event.status.icon|default:'fas fa-circle' }} ev-icon" style="color:{{ event.status.color|default:'var(--gold,#c9a84c)' }}"></i>
           {{ event.status.name }}
         </div>
         {% if event.note %}<div class="ev-note">{{ event.note }}</div>{% endif %}
@@ -332,7 +332,7 @@ function refreshStatus() {
         return '<div class="ev ' + (i === 0 ? 'active' : '') + '">' +
           '<div class="dot"></div>' +
           '<div class="ev-time">' + formatDate(e.created_at) + '</div>' +
-          '<div class="ev-name"><i class="' + (e.icon || 'fas fa-circle') + ' ev-icon" style="color:' + (e.color || '#c9a84c') + '"></i> ' + e.status + '</div>' +
+          '<div class="ev-name"><i class="' + (e.icon || 'fas fa-circle') + ' ev-icon" style="color:' + (e.color || 'var(--gold,#c9a84c)') + '"></i> ' + e.status + '</div>' +
           (e.note ? '<div class="ev-note">' + e.note + '</div>' : '') +
           '</div>';
       }).join('');

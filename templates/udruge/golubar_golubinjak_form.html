@@ -45,7 +45,7 @@
   display: flex; align-items: center; gap: .6rem;
   font-size: .85rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: .5px;
-  color: #c9a84c;
+  color: var(--gold,#c9a84c);
   margin-bottom: 1.25rem;
 }
 .gf-section-title i { font-size: .9rem; }
@@ -59,7 +59,7 @@
   transition: border-color .2s, box-shadow .2s !important;
 }
 .gf-input:focus {
-  border-color: #c9a84c !important;
+  border-color: var(--gold,#c9a84c) !important;
   box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important;
 }
 .gf-input::placeholder { color: var(--text-muted) !important; opacity: .6; }
@@ -79,7 +79,7 @@
   display: flex; justify-content: space-between; align-items: center;
 }
 .gf-btn-submit {
-  background: linear-gradient(135deg, #c9a84c, #a78b3d) !important;
+  background: linear-gradient(135deg, var(--gold,#c9a84c), #a78b3d) !important;
   color: #0a0a0a !important;
   border: none !important;
   font-weight: 700 !important;
@@ -245,7 +245,7 @@ document.getElementById('golubinjak-form').addEventListener('submit', function(e
     var form = this;
     GolubarOffline.saveGolubinjak(form).then(function(id) {
       var bar = document.getElementById('offlineBar');
-      if (bar) { bar.style.display='block'; bar.style.background='linear-gradient(135deg,#78350f,#451a03)'; bar.style.borderColor='#c9a84c'; }
+      if (bar) { bar.style.display='block'; bar.style.background='linear-gradient(135deg,#78350f,#451a03)'; bar.style.borderColor='var(--gold,#c9a84c)'; }
       var msg = document.getElementById('offlineMsg');
       if (msg) msg.textContent = 'Golubinjak spremljen offline (#'+id+'). Sinkronizira se automatski.';
       setTimeout(function(){ window.location.href='{% url "udruge:golubinjak_list" %}'; }, 2000);

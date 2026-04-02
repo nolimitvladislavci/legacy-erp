@@ -96,7 +96,7 @@ body {
 .pwd-wrap{position:relative;display:block}
 .pwd-wrap input{width:100%;padding-right:40px;box-sizing:border-box}
 .pwd-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);
-background:none;border:none;cursor:pointer;color:#c9a84c;font-size:18px;padding:0}
+background:none;border:none;cursor:pointer;color:var(--gold,#c9a84c);font-size:18px;padding:0}
 </style>
 </head>
 <body>
@@ -194,7 +194,7 @@ background:none;border:none;cursor:pointer;color:#c9a84c;font-size:18px;padding:
         {% trans "Skeniraj svoj device barcode kamerom ili USB skenerom za instant prijavu." %}
       </p>
       <div style="text-align:center;margin-bottom:16px">
-        <button onclick="startDeviceScan()" id="btnDeviceScan" class="btn-primary" style="background:linear-gradient(135deg,#c9a84c,#d97706)">
+        <button onclick="startDeviceScan()" id="btnDeviceScan" class="btn-primary" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#d97706)">
           {% trans "📷 Pokreni kameru" %}
         </button>
         <button onclick="stopDeviceScan()" id="btnDeviceStop" class="btn-primary" style="display:none;background:#374151">

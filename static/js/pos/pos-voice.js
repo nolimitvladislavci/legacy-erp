@@ -319,10 +319,10 @@
   // ── Sprint 6: Voice Confirmation for low confidence ──────────
   function _showVoiceConfirm(name, qty, btn) {
     var textEl = document.getElementById('voiceText');
-    if (textEl) textEl.innerHTML = 'Jeste li mislili:<br><strong style="color:#c9a84c;font-size:1.5rem">' + qty + '× ' + name + '</strong>?';
+    if (textEl) textEl.innerHTML = 'Jeste li mislili:<br><strong style="color:var(--gold,#c9a84c);font-size:1.5rem">' + qty + '× ' + name + '</strong>?';
     var statusEl = document.getElementById('voiceStatus');
     if (statusEl) {
-      statusEl.innerHTML = '<button onclick="_voiceConfirmYes()" style="background:#c9a84c;color:#000;border:none;padding:8px 24px;border-radius:8px;font-weight:700;margin-right:8px;font-size:1rem;cursor:pointer">DA ✓</button>' +
+      statusEl.innerHTML = '<button onclick="_voiceConfirmYes()" style="background:var(--gold,#c9a84c);color:#000;border:none;padding:8px 24px;border-radius:8px;font-weight:700;margin-right:8px;font-size:1rem;cursor:pointer">DA ✓</button>' +
         '<button onclick="_voiceConfirmNo()" style="background:rgba(255,255,255,.1);color:#94a3b8;border:1px solid rgba(255,255,255,.2);padding:8px 24px;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer">NE ✕</button>';
       statusEl.className = 'voice-status';
     }

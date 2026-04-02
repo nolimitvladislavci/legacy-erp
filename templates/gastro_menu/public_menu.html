@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ menu.name }}</title>
 <style>
-:root{--accent:{{ menu.primary_color|default:"#c9a84c" }}}
+:root{--accent:{{ menu.primary_color|default:"var(--gold,#c9a84c)" }}}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a1a;color:#f0f0f0;font-family:'Segoe UI',sans-serif;padding-bottom:80px}
 .header{background:linear-gradient(135deg,#2a1a0a,#1a0a00);padding:1.5rem;text-align:center}

@@ -26,19 +26,19 @@
 <style>
 .qr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
 .qr-item {
-    background: #1a1a2e; border: 1px solid #c9a84c33; border-radius: 12px;
+    background: #1a1a2e; border: 1px solid var(--gold,#c9a84c)33; border-radius: 12px;
     padding: 1.5rem; text-align: center;
 }
-.qr-item h4 { font-family: 'Cormorant Garamond', serif; color: #c9a84c; margin-bottom: 0.5rem; }
+.qr-item h4 { font-family: 'Cormorant Garamond', serif; color: var(--gold,#c9a84c); margin-bottom: 0.5rem; }
 .qr-item .code { font-size: 0.85rem; color: #888; margin-bottom: 1rem; }
 .qr-item img { width: 160px; height: 160px; border-radius: 8px; background: #fff; padding: 8px; }
 .qr-actions { margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
 .qr-actions a {
     padding: 6px 14px; border-radius: 8px; font-size: 0.85rem;
-    text-decoration: none; border: 1px solid #c9a84c44;
+    text-decoration: none; border: 1px solid var(--gold,#c9a84c)44;
 }
-.qr-actions a.primary { background: #c9a84c; color: #1a1a2e; }
-.qr-actions a.secondary { background: transparent; color: #c9a84c; }
+.qr-actions a.primary { background: var(--gold,#c9a84c); color: #1a1a2e; }
+.qr-actions a.secondary { background: transparent; color: var(--gold,#c9a84c); }
 .top-actions { margin-bottom: 1.5rem; }
 .top-actions a { margin-right: 1rem; }
 </style>

@@ -7,7 +7,7 @@
   body { font-family: Helvetica, Arial, sans-serif; font-size: 9px; color: #1a1a1a; }
   h1 { font-size: 16px; margin: 0 0 2px; color: #1a1a1a; }
   h2 { font-size: 11px; margin: 12px 0 4px; color: #1d4ed8; border-bottom: 1px solid #1d4ed8; padding-bottom: 2px; }
-  .header { border-bottom: 2px solid #c9a84c; padding-bottom: 8px; margin-bottom: 8px; }
+  .header { border-bottom: 2px solid var(--gold,#c9a84c); padding-bottom: 8px; margin-bottom: 8px; }
   .header td { border: none; padding: 1px 4px; font-size: 8.5px; }
   table { width: 100%; border-collapse: collapse; margin: 4px 0; }
   th, td { border: 1px solid #ccc; padding: 3px 5px; font-size: 8.5px; }
@@ -34,7 +34,7 @@
   <tr>
     <td style="width:60%">
       <h1>BLAGAJNIČKI IZVJEŠTAJ</h1>
-      <span style="font-size:10px;color:#c9a84c;font-weight:700">Smjena #{{ session.session_number }}</span>
+      <span style="font-size:10px;color:var(--gold,#c9a84c);font-weight:700">Smjena #{{ session.session_number }}</span>
     </td>
     <td style="text-align:right">
       <strong>{{ company.name }}</strong><br>

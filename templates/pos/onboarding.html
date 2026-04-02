@@ -49,8 +49,8 @@
   {% endfor %}
 
   {% if completed >= 1 and completed < total %}
-  <div style="background:#0d1117;border-radius:12px;padding:1.25rem;margin-bottom:.75rem;border-left:4px solid #c9a84c">
-    <div style="font-weight:700;color:#c9a84c;margin-bottom:.75rem">Brzo dodaj artikl (bez napustanja stranice)</div>
+  <div style="background:#0d1117;border-radius:12px;padding:1.25rem;margin-bottom:.75rem;border-left:4px solid var(--gold,#c9a84c)">
+    <div style="font-weight:700;color:var(--gold,#c9a84c);margin-bottom:.75rem">Brzo dodaj artikl (bez napustanja stranice)</div>
     <div style="display:grid;grid-template-columns:1fr 100px 100px;gap:8px">
       <input type="text" id="oiName" placeholder="Naziv artikla" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:8px;border-radius:6px">
       <input type="number" id="oiPrice" placeholder="Cijena" step="0.01" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:8px;border-radius:6px">
@@ -58,7 +58,7 @@
         <option value="25">25%</option><option value="13">13%</option><option value="5">5%</option><option value="0">0%</option>
       </select>
     </div>
-    <button onclick="quickAddItem()" id="oiBtn" style="margin-top:8px;background:#c9a84c;color:#000;border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer">Dodaj artikl</button>
+    <button onclick="quickAddItem()" id="oiBtn" style="margin-top:8px;background:var(--gold,#c9a84c);color:#000;border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer">Dodaj artikl</button>
     <span id="oiStatus" style="margin-left:10px;font-size:.85rem"></span>
   </div>
   {% endif %}

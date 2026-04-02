@@ -6,9 +6,9 @@
 {% block content %}
 <div style="max-width:480px;margin:2rem auto;padding:0 1rem">
 
-  <div style="background:#111;border:1px solid #c9a84c33;border-radius:16px;padding:2rem">
+  <div style="background:#111;border:1px solid var(--gold,#c9a84c)33;border-radius:16px;padding:2rem">
 
-    <h2 style="color:#c9a84c;font-family:'Cormorant Garamond',serif;font-size:1.6rem;
+    <h2 style="color:var(--gold,#c9a84c);font-family:'Cormorant Garamond',serif;font-size:1.6rem;
                font-weight:700;margin:0 0 .3rem">Novi blagajnik</h2>
     <p style="color:#64748b;font-size:.9rem;margin:0 0 1.5rem">
       Unesite podatke blagajnika. OIB i PIN su zakonska obaveza (NN 133/2015).
@@ -34,7 +34,7 @@
                placeholder="npr. Ana Kovač"
                style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
                       padding:12px 14px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box"
-               onfocus="this.style.borderColor='#c9a84c'"
+               onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="this.style.borderColor='#333'">
       </div>
 
@@ -47,7 +47,7 @@
                placeholder="12345678901"
                style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
                       padding:12px 14px;color:#e2e8f0;font-size:.95rem;box-sizing:border-box"
-               onfocus="this.style.borderColor='#c9a84c'"
+               onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="validateOIBField(this)"
                oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)">
         <div id="oib-error" style="color:#ef4444;font-size:.78rem;margin-top:4px;display:none">
@@ -65,7 +65,7 @@
                style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
                       padding:12px 14px;color:#e2e8f0;font-size:1.2rem;letter-spacing:4px;
                       box-sizing:border-box"
-               onfocus="this.style.borderColor='#c9a84c'"
+               onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="this.style.borderColor='#333'"
                oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
       </div>
@@ -80,7 +80,7 @@
                style="width:100%;background:#0a0a0a;border:1px solid #333;border-radius:8px;
                       padding:12px 14px;color:#e2e8f0;font-size:1.2rem;letter-spacing:4px;
                       box-sizing:border-box"
-               onfocus="this.style.borderColor='#c9a84c'"
+               onfocus="this.style.borderColor='var(--gold,#c9a84c)'"
                onblur="checkPinMatch(this)"
                oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
         <div id="pin-error" style="color:#ef4444;font-size:.78rem;margin-top:4px;display:none">

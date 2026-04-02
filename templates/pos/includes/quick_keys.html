@@ -17,7 +17,7 @@
     background: var(--card, #1a1a1a);
     border: 1px solid var(--border, #333);
     border-radius: 10px;
-    color: var(--gold, #c9a84c);
+    color: var(--gold, var(--gold,#c9a84c));
     padding: 10px 6px;
     font-size: 11px;
     font-weight: 600;
@@ -30,7 +30,7 @@
 }
 .qk-btn i { font-size: 20px; }
 .qk-btn:active { transform: scale(0.95); background: var(--nav-hover, #2a2a1a); }
-.qk-btn:hover { background: var(--nav-hover, #252520); border-color: var(--gold, #c9a84c); }
+.qk-btn:hover { background: var(--nav-hover, #252520); border-color: var(--gold, var(--gold,#c9a84c)); }
 @media (max-width: 900px) {
     .pos-quick-keys { grid-template-columns: repeat(3, 1fr); }
 }

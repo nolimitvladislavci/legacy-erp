@@ -29,11 +29,11 @@
   box-shadow:0 8px 40px rgba(0,0,0,.7);
 }
 .numpad-overlay .numpad-label { color:#94a3b8 !important; font-size:.75rem; margin-bottom:6px; }
-.numpad-overlay .numpad-display { color:#c9a84c !important; font-size:2.2rem !important; margin-bottom:10px; }
+.numpad-overlay .numpad-display { color:var(--gold,#c9a84c) !important; font-size:2.2rem !important; margin-bottom:10px; }
 .numpad-overlay .numpad-btn { color:#e2e8f0 !important; background:rgba(255,255,255,.08) !important; min-height:48px !important; font-size:1.2rem !important; }
 .numpad-overlay .numpad-actions button { min-height:44px !important; }
 .numpad-display {
-  font-size:3.5rem; font-weight:800; color:#c9a84c; margin-bottom:8px;
+  font-size:3.5rem; font-weight:800; color:var(--gold,#c9a84c); margin-bottom:8px;
   font-variant-numeric:tabular-nums; min-width:120px; text-align:center;
 }
 .numpad-label { font-size:.9rem; color:#94a3b8; margin-bottom:24px; }
@@ -48,7 +48,7 @@
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
 .numpad-btn:active { background:rgba(201,168,76,.2); transform:scale(.95); }
-.numpad-btn.gold { background:rgba(201,168,76,.2); border-color:rgba(201,168,76,.4); color:#c9a84c; }
+.numpad-btn.gold { background:rgba(201,168,76,.2); border-color:rgba(201,168,76,.4); color:var(--gold,#c9a84c); }
 .numpad-btn.red { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.3); color:#f87171; }
 .numpad-btn.green { background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.3); color:#4ade80; font-size:1.1rem; }
 .numpad-actions { display:flex; gap:12px; margin-top:16px; width:100%; max-width:300px; }
@@ -70,7 +70,7 @@
     display:flex; flex-direction:column; justify-content:center; padding:24px;
     animation: payFadeIn 0.2s ease;
   }
-  .pay-zone.expanded .pay-title { font-size:1.2rem; color:#c9a84c; text-align:center; margin-bottom:16px; }
+  .pay-zone.expanded .pay-title { font-size:1.2rem; color:var(--gold,#c9a84c); text-align:center; margin-bottom:16px; }
   .pay-zone.expanded .cash-input-row input { font-size:2rem; text-align:center; padding:16px; }
   .pay-zone.expanded .cash-quick .cash-q-btn { min-height:52px; font-size:1rem; }
   .pay-zone.expanded .pay-cash,
@@ -91,15 +91,15 @@
 }
 .ai-suggest::-webkit-scrollbar { display:none; }
 .ai-suggest.show { display:flex; gap:8px; align-items:center; }
-.ai-suggest-label { font-size:.7rem; color:#c9a84c; font-weight:700; white-space:nowrap; margin-right:4px; }
+.ai-suggest-label { font-size:.7rem; color:var(--gold,#c9a84c); font-weight:700; white-space:nowrap; margin-right:4px; }
 .ai-suggest-item {
   display:inline-flex; align-items:center; gap:6px; padding:6px 12px;
   background:rgba(201,168,76,.08); border:1px solid rgba(201,168,76,.2);
   border-radius:20px; font-size:.78rem; color:#e2e8f0; cursor:pointer;
   transition:all .15s; white-space:nowrap; flex-shrink:0;
 }
-.ai-suggest-item:hover { background:rgba(201,168,76,.15); border-color:#c9a84c; }
-.ai-suggest-item .price { color:#c9a84c; font-weight:700; }
+.ai-suggest-item:hover { background:rgba(201,168,76,.15); border-color:var(--gold,#c9a84c); }
+.ai-suggest-item .price { color:var(--gold,#c9a84c); font-weight:700; }
 
 /* ── Sticky totals mobile ── */
 @media(max-width:900px) {
@@ -128,10 +128,10 @@
   padding: 4px 8px; cursor: pointer; font-family: inherit; transition: all 0.15s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
-.mode-btn.active { color: #c9a84c; }
+.mode-btn.active { color: var(--gold,#c9a84c); }
 .mode-btn i { font-size: 20px; }
 .mode-btn-center {
-  width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #c9a84c, #b8973e);
+  width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--gold,#c9a84c), #b8973e);
   display: flex; align-items: center; justify-content: center; border: 3px solid #0a0a0a;
   box-shadow: 0 4px 16px rgba(201,168,76,0.4); margin-top: -16px;
   color: #000; font-size: 22px; cursor: pointer; transition: all 0.2s;
@@ -170,7 +170,7 @@
 .qk-overlay.show { display: block; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .qk-overlay-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.qk-overlay-title { font-size: 1rem; font-weight: 700; color: #c9a84c; }
+.qk-overlay-title { font-size: 1rem; font-weight: 700; color: var(--gold,#c9a84c); }
 .qk-overlay-close { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 4px 8px; }
 .qk-overlay-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .qk-overlay-grid .prod-btn { min-height: 64px; }
@@ -668,7 +668,7 @@
   <div class="success-change" id="sucChange"></div>
   <div class="success-num" id="sucNum"></div>
   <div style="display:flex;flex-direction:column;gap:.5rem;max-width:300px;width:100%">
-    <button class="success-close" id="btnShareReceipt" onclick="shareLastReceipt()" style="background:#c9a84c;border:1px solid #c9a84c;color:#000;padding:.85rem;font-weight:700;font-size:1.05rem;border-radius:10px;width:100%">📤 Spremi i podijeli</button>
+    <button class="success-close" id="btnShareReceipt" onclick="shareLastReceipt()" style="background:var(--gold,#c9a84c);border:1px solid var(--gold,#c9a84c);color:#000;padding:.85rem;font-weight:700;font-size:1.05rem;border-radius:10px;width:100%">📤 Spremi i podijeli</button>
     <button class="success-close" onclick="closeSuccess()" style="background:var(--card);border:1px solid var(--border);color:var(--text);padding:.75rem;font-size:.9rem;border-radius:10px;width:100%">Završi</button>
   </div>
 </div>
@@ -683,20 +683,20 @@
 #fiscal-shield{
   position:fixed; top:8px; right:130px; z-index:2001;
   display:flex; align-items:center; gap:6px;
-  background:rgba(26,26,26,.9); border:1px solid #c9a84c;
+  background:rgba(26,26,26,.9); border:1px solid var(--gold,#c9a84c);
   border-radius:20px; padding:4px 10px 4px 6px;
   cursor:default; text-decoration:none;
 }
 #fiscal-shield a.fs-link{
   display:flex;align-items:center;gap:5px;
-  text-decoration:none;color:#c9a84c;font-size:.72rem;font-weight:700;
+  text-decoration:none;color:var(--gold,#c9a84c);font-size:.72rem;font-weight:700;
 }
 #fiscal-shield a.fs-link:hover{color:#fff}
-#shield-badge-text{font-size:.7rem;font-weight:800;color:#c9a84c}
+#shield-badge-text{font-size:.7rem;font-weight:800;color:var(--gold,#c9a84c)}
 </style>
 <div id="fiscal-shield">
-  <div id="shield-ring" style="width:20px;height:20px;border:2px solid #c9a84c;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s">
-    <span id="shield-dot" style="width:8px;height:8px;background:#c9a84c;border-radius:50%;display:block"></span>
+  <div id="shield-ring" style="width:20px;height:20px;border:2px solid var(--gold,#c9a84c);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s">
+    <span id="shield-dot" style="width:8px;height:8px;background:var(--gold,#c9a84c);border-radius:50%;display:block"></span>
   </div>
   <a href="/pos/fiscal/room/" class="fs-link" title="Fiskalna soba">
     <span id="shield-badge-text">Fiskal</span>
@@ -708,16 +708,16 @@
 <div id="scannerOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);overflow-y:auto">
   <div style="max-width:500px;margin:0 auto;padding:20px;text-align:center">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <span style="color:#c9a84c;font-weight:800;font-size:1.1rem">Skeniraj barkod</span>
+      <span style="color:var(--gold,#c9a84c);font-weight:800;font-size:1.1rem">Skeniraj barkod</span>
       <button onclick="closeScanner()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer">&times;</button>
     </div>
-    <div id="scannerVideo" style="width:100%;border-radius:12px;overflow:hidden;border:3px solid #c9a84c"></div>
+    <div id="scannerVideo" style="width:100%;border-radius:12px;overflow:hidden;border:3px solid var(--gold,#c9a84c)"></div>
     <div id="scannerResult" style="margin-top:12px;color:#22c55e;font-weight:700;font-size:1rem"></div>
     <!-- Novi artikl panel -->
-    <div id="newItemPanel" style="display:none;margin-top:12px;background:#1a1a1a;border:1px solid #c9a84c;border-radius:10px;padding:12px;text-align:left">
-      <div style="font-size:.85rem;font-weight:700;color:#c9a84c;margin-bottom:8px">Novi artikl — barkod: <span id="newItemBarcode"></span></div>
+    <div id="newItemPanel" style="display:none;margin-top:12px;background:#1a1a1a;border:1px solid var(--gold,#c9a84c);border-radius:10px;padding:12px;text-align:left">
+      <div style="font-size:.85rem;font-weight:700;color:var(--gold,#c9a84c);margin-bottom:8px">Novi artikl — barkod: <span id="newItemBarcode"></span></div>
       <div id="newItemLoading" style="text-align:center;padding:8px;color:#888;display:none">
-        <span style="display:inline-block;width:14px;height:14px;border:2px solid #333;border-top-color:#c9a84c;border-radius:50%;animation:spin 1s linear infinite"></span> AI prepoznaje proizvod...
+        <span style="display:inline-block;width:14px;height:14px;border:2px solid #333;border-top-color:var(--gold,#c9a84c);border-radius:50%;animation:spin 1s linear infinite"></span> AI prepoznaje proizvod...
       </div>
       <div id="newItemForm" style="display:none">
         <div style="margin-bottom:6px"><input id="niName" placeholder="Naziv artikla" style="width:100%;background:#111;border:1px solid #333;color:#fff;padding:8px 10px;border-radius:6px;font-size:.88rem"></div>
@@ -732,7 +732,7 @@
         </div>
         <div id="niAiHint" style="font-size:.72rem;color:#888;margin-bottom:8px"></div>
         <div style="display:flex;gap:6px">
-          <button type="button" onclick="confirmNewItem()" style="flex:1;background:#c9a84c;color:#000;border:none;padding:10px;border-radius:8px;font-weight:700;font-size:.88rem;cursor:pointer">Potvrdi i dodaj</button>
+          <button type="button" onclick="confirmNewItem()" style="flex:1;background:var(--gold,#c9a84c);color:#000;border:none;padding:10px;border-radius:8px;font-weight:700;font-size:.88rem;cursor:pointer">Potvrdi i dodaj</button>
           <button type="button" onclick="cancelNewItem()" style="background:transparent;border:1px solid #333;color:#888;padding:10px 16px;border-radius:8px;font-size:.88rem;cursor:pointer">Odustani</button>
         </div>
       </div>
@@ -745,7 +745,7 @@
     </div>
     <div style="margin-top:8px;display:flex;gap:6px">
       <input type="text" id="manualBarcode" placeholder="Ili unesi barkod rucno..." style="flex:1;padding:8px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:.85rem;text-align:center" onkeydown="if(event.key==='Enter')manualLookup()">
-      <button onclick="manualLookup()" style="background:#c9a84c;color:#000;border:none;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:.85rem">OK</button>
+      <button onclick="manualLookup()" style="background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:.85rem">OK</button>
     </div>
   </div>
 </div>

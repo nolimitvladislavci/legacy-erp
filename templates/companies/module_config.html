@@ -37,14 +37,14 @@
     {% endif %}
 
     {% if ai_detected %}
-    <div class="alert border-0 mb-4" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#e2e8f0;border-left:4px solid #c9a84c!important">
+    <div class="alert border-0 mb-4" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#e2e8f0;border-left:4px solid var(--gold,#c9a84c)!important">
         <div class="d-flex align-items-center gap-2 mb-2">
-            <i class="fas fa-brain" style="color:#c9a84c"></i>
+            <i class="fas fa-brain" style="color:var(--gold,#c9a84c)"></i>
             <strong>Auto-detekcija preporučuje:</strong>
         </div>
         <div class="d-flex flex-wrap gap-2">
             {% for mod_key in ai_detected %}
-            <span class="badge" style="background:rgba(201,168,76,.15);color:#c9a84c;font-size:.8rem">
+            <span class="badge" style="background:rgba(201,168,76,.15);color:var(--gold,#c9a84c);font-size:.8rem">
                 <i class="fas {% module_icon mod_key %}"></i> {% module_name mod_key %}
             </span>
             {% endfor %}
@@ -55,7 +55,7 @@
             {% for mod_key in ai_detected %}
             <input type="hidden" name="detected_modules" value="{{ mod_key }}">
             {% endfor %}
-            <button type="submit" class="btn btn-sm" style="background:#c9a84c;color:#000;font-weight:600">
+            <button type="submit" class="btn btn-sm" style="background:var(--gold,#c9a84c);color:#000;font-weight:600">
                 <i class="fas fa-check"></i> Aktiviraj preporučene
             </button>
         </form>
@@ -69,7 +69,7 @@
         {% for cat_key, cat_data in categories.items %}
         <div class="card mb-4" style="background:#0f172a;border:1px solid #1e293b;border-radius:12px">
             <div class="card-header d-flex align-items-center gap-2" style="background:#1a2744;border-bottom:1px solid #1e293b;border-radius:12px 12px 0 0;padding:16px 20px">
-                <i class="fas {{ cat_data.info.icon }}" style="color:#c9a84c;font-size:1.1rem"></i>
+                <i class="fas {{ cat_data.info.icon }}" style="color:var(--gold,#c9a84c);font-size:1.1rem"></i>
                 <h5 class="mb-0" style="color:#e2e8f0">{{ cat_data.info.name }}</h5>
             </div>
             <div class="card-body p-0">
@@ -80,7 +80,7 @@
                         <div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;
                             {% if mod.key in active_keys %}background:rgba(201,168,76,.15){% else %}background:rgba(100,116,139,.1){% endif %}">
                             <i class="fas {{ mod.icon }}" style="font-size:1.1rem;
-                                {% if mod.key in active_keys %}color:#c9a84c{% else %}color:#64748b{% endif %}"></i>
+                                {% if mod.key in active_keys %}color:var(--gold,#c9a84c){% else %}color:#64748b{% endif %}"></i>
                         </div>
                         <div>
                             <div style="font-weight:600;color:#e2e8f0;font-size:.95rem">{{ mod.name }}</div>
@@ -123,7 +123,7 @@
                 <i class="fas fa-info-circle"></i>
                 Aktivni specijalizirani moduli: <strong id="activeCount">{{ active_keys|length }}</strong>
             </div>
-            <button type="submit" class="btn px-4 py-2" style="background:#c9a84c;color:#000;font-weight:700;border-radius:8px">
+            <button type="submit" class="btn px-4 py-2" style="background:var(--gold,#c9a84c);color:#000;font-weight:700;border-radius:8px">
                 <i class="fas fa-save"></i> Spremi konfiguraciju
             </button>
         </div>
@@ -132,7 +132,7 @@
 
 <style>
 .module-row:hover { background: rgba(201,168,76,.03); }
-.form-check-input:checked { background-color: #c9a84c; border-color: #c9a84c; }
+.form-check-input:checked { background-color: var(--gold,#c9a84c); border-color: var(--gold,#c9a84c); }
 .module-toggle { transition: all 0.2s; }
 </style>
 

@@ -5,7 +5,7 @@
 <div id="liveCamModal" style="display:none;position:fixed;inset:0;z-index:10000;background:#000">
   <video id="liveCamVideo" autoplay playsinline style="width:100%;height:calc(100% - 60px);object-fit:cover"></video>
   <div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:#111;display:flex;align-items:center;justify-content:center;gap:20px">
-    <button onclick="liveCamSnap()" style="width:50px;height:50px;border-radius:50%;background:#c9a84c;border:3px solid #fff;cursor:pointer"></button>
+    <button onclick="liveCamSnap()" style="width:50px;height:50px;border-radius:50%;background:var(--gold,#c9a84c);border:3px solid #fff;cursor:pointer"></button>
     <button onclick="liveCamClose()" style="background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;position:absolute;right:16px">&times;</button>
   </div>
 </div>
@@ -53,10 +53,10 @@ function liveCamClose(){
   <div style="background:var(--bg-card);border:1px solid rgba(201,168,76,.4);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:flex-start">
     <span style="font-size:2rem;line-height:1">&#129302;</span>
     <div>
-      <div style="color:#c9a84c;font-weight:700;font-size:1rem;margin-bottom:.25rem">Sustav automatski &#269;ita podatke s ra&#269;una</div>
+      <div style="color:var(--gold,#c9a84c);font-weight:700;font-size:1rem;margin-bottom:.25rem">Sustav automatski &#269;ita podatke s ra&#269;una</div>
       <div style="color:#94a3b8;font-size:.875rem;line-height:1.5">
         Fotografirajte ili prilo&#382;ite PDF &mdash; AI prepoznaje partnera, iznos i datum. Nema ru&#269;nog tipkanja.
-        Rezultat vidite za 30 sekundi u <a href="{% url 'documents:ai_inbox' %}" style="color:#c9a84c">AI Inboxu</a>.
+        Rezultat vidite za 30 sekundi u <a href="{% url 'documents:ai_inbox' %}" style="color:var(--gold,#c9a84c)">AI Inboxu</a>.
       </div>
     </div>
   </div>
@@ -77,7 +77,7 @@ function liveCamClose(){
         <div style="display:flex;flex-direction:column;gap:.75rem;align-items:center;max-width:280px;margin:0 auto">
           <button type="button" id="btnCameraFenix"
                   title="Fotografirajte fizicki racun direktno mobilnim uredajem"
-                  style="background:#c9a84c;color:#0a0a0a;border:none;border-radius:12px;padding:14px 24px;cursor:pointer;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%"
+                  style="background:var(--gold,#c9a84c);color:#0a0a0a;border:none;border-radius:12px;padding:14px 24px;cursor:pointer;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%"
                   onclick="openLiveCamera()">
             <i class="fas fa-camera"></i> Slikaj kamerom
           </button>
@@ -98,7 +98,7 @@ function liveCamClose(){
       <!-- Preview nakon odabira -->
       <div id="filePreview" style="display:none">
         <div id="previewImage" style="margin-bottom:.75rem"></div>
-        <div id="previewName" style="color:#c9a84c;font-weight:700;font-size:1rem"></div>
+        <div id="previewName" style="color:var(--gold,#c9a84c);font-weight:700;font-size:1rem"></div>
         <div id="previewSize" style="color:#64748b;font-size:.8rem;margin-top:.25rem"></div>
         <div style="margin-top:.75rem">
           <button type="button" onclick="clearFile()" style="background:transparent;color:#ef4444;border:1px solid #ef4444;border-radius:6px;padding:.3rem .75rem;cursor:pointer;font-size:.8rem">&#10005; Promijeni fajl</button>
@@ -109,19 +109,19 @@ function liveCamClose(){
     <!-- PROGRESS BAR -->
     <div id="progressSection" style="display:none;margin-bottom:1.5rem">
       <div style="display:flex;justify-content:space-between;margin-bottom:.75rem">
-        <span id="step1" style="color:#c9a84c;font-size:.8rem;font-weight:600">&#9312; Odabir &#10003;</span>
+        <span id="step1" style="color:var(--gold,#c9a84c);font-size:.8rem;font-weight:600">&#9312; Odabir &#10003;</span>
         <span id="step2" style="color:#475569;font-size:.8rem;font-weight:600">&#9313; Prijenos...</span>
         <span id="step3" style="color:#475569;font-size:.8rem;font-weight:600">&#9314; AI cita...</span>
         <span id="step4" style="color:#475569;font-size:.8rem;font-weight:600">&#9315; Spreman!</span>
       </div>
       <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">
-        <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#c9a84c,#f59e0b);width:25%;transition:width .8s ease;border-radius:2px"></div>
+        <div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--gold,#c9a84c),#f59e0b);width:25%;transition:width .8s ease;border-radius:2px"></div>
       </div>
     </div>
 
     <!-- FENIXSCAN: AI Invoice Reader -->
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:#c9a84c;margin-bottom:.75rem;letter-spacing:.5px">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--gold,#c9a84c);margin-bottom:.75rem;letter-spacing:.5px">
         <i class="fas fa-magic" style="margin-right:4px"></i> AI Skeniranje racuna (opcionalno)
       </div>
       <div id="scan-invoice"></div>
@@ -136,7 +136,7 @@ function liveCamClose(){
           <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Tip dokumenta
             <span title="Ulazni racun = sto ste Vi platili dobavljacu. Izlazni = sto ste Vi naplatili kupcu."
-                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <select name="source_type" class="form-select" style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px">
             {% for val, label in source_types %}
@@ -151,7 +151,7 @@ function liveCamClose(){
           <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Broj dokumenta
             <span title="Broj s racuna. Mozete ostaviti prazno, AI ce ga automatski procitati."
-                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="text" name="doc_number" id="doc_number" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
@@ -166,7 +166,7 @@ function liveCamClose(){
           <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Partner (dobavljac / kupac)
             <span title="Naziv firme koja je izdala ili primila racun. Mozete ostaviti prazno."
-                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="text" name="partner_name" id="partner_name" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
@@ -176,7 +176,7 @@ function liveCamClose(){
           <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Iznos (EUR)
             <span title="Ukupni iznos s PDV-om. Mozete ostaviti prazno."
-                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="number" name="amount" id="amount" step="0.01" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px"
@@ -186,7 +186,7 @@ function liveCamClose(){
           <label style="color:var(--text-muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem">
             Datum
             <span title="Datum s racuna. Ako ostavite prazno, koristit ce se danasnji datum."
-                  style="color:#c9a84c;cursor:help;margin-left:.3rem">&#9432;</span>
+                  style="color:var(--gold,#c9a84c);cursor:help;margin-left:.3rem">&#9432;</span>
           </label>
           <input type="date" name="doc_date" id="doc_date" class="form-control"
                  style="background:var(--input-bg);border:1px solid var(--input-border);color:var(--text);border-radius:8px">

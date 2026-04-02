@@ -3,7 +3,7 @@
 <style>
 .pos-sidebar-toggle {
     position: fixed; left: 0; top: 50%; transform: translateY(-50%);
-    z-index: var(--z-sidebar, 10001); background: var(--gold, #c9a84c); color: #0a0a0a;
+    z-index: var(--z-sidebar, 10001); background: var(--gold, var(--gold,#c9a84c)); color: #0a0a0a;
     border: none; border-radius: 0 8px 8px 0;
     padding: 14px 10px; cursor: pointer; font-size: 18px;
     touch-action: manipulation;
@@ -19,7 +19,7 @@
 .pos-sidebar.open { left: 0 !important; }
 .pos-sidebar .ps-header {
     padding: 16px 20px; font-size: 18px; font-weight: 700;
-    color: var(--gold, #c9a84c); border-bottom: 1px solid var(--border, #222); margin-bottom: 8px;
+    color: var(--gold, var(--gold,#c9a84c)); border-bottom: 1px solid var(--border, #222); margin-bottom: 8px;
 }
 .ps-link {
     display: flex; align-items: center; gap: 12px;
@@ -27,8 +27,8 @@
     font-size: 14px; transition: background 0.15s;
     touch-action: manipulation;
 }
-.ps-link:hover, .ps-link:active { background: var(--nav-hover, #1a1a1a); color: var(--gold, #c9a84c); }
-.ps-link i { width: 22px; text-align: center; color: var(--gold, #c9a84c); font-size: 16px; }
+.ps-link:hover, .ps-link:active { background: var(--nav-hover, #1a1a1a); color: var(--gold, var(--gold,#c9a84c)); }
+.ps-link i { width: 22px; text-align: center; color: var(--gold, var(--gold,#c9a84c)); font-size: 16px; }
 .ps-divider { border: none; border-top: 1px solid var(--border, #222); margin: 8px 16px; }
 .pos-sidebar-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);

@@ -56,7 +56,7 @@
   padding: 6px 12px;
   min-width: 60px;
 }
-.ul-date-day { font-size: 1.2rem; font-weight: 800; color: #c9a84c; line-height: 1; }
+.ul-date-day { font-size: 1.2rem; font-weight: 800; color: var(--gold,#c9a84c); line-height: 1; }
 .ul-date-month { font-size: .6rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
 .ul-distance {
   display: inline-flex; align-items: center; gap: .3rem;
@@ -92,7 +92,7 @@
       <p style="font-size:.78rem;color:var(--text-muted);margin:0">{{ page_obj.paginator.count }} utrk{{ page_obj.paginator.count|pluralize:"a,a,i" }} u registru</p>
     </div>
   </div>
-  <a href="{% url 'udruge:utrka_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
+  <a href="{% url 'udruge:utrka_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;border-radius:10px;padding:.55rem 1.5rem;font-size:.85rem">
     <i class="fas fa-plus me-1"></i>Nova utrka
   </a>
 </div>
@@ -122,7 +122,7 @@
             </div>
           </td>
           <td>
-            <a href="{% url 'udruge:utrka_detail' u.pk %}" style="color:#c9a84c;font-weight:700;text-decoration:none;font-size:.9rem">
+            <a href="{% url 'udruge:utrka_detail' u.pk %}" style="color:var(--gold,#c9a84c);font-weight:700;text-decoration:none;font-size:.9rem">
               {{ u.naziv }}
             </a>
             {% if u.uvjeti %}
@@ -170,7 +170,7 @@
   <div style="font-size:3rem;color:#ef4444;opacity:.3;margin-bottom:1rem"><i class="fas fa-flag-checkered"></i></div>
   <h3 style="font-weight:700;color:var(--text)">Dodajte prvu utrku</h3>
   <p style="color:var(--text-muted);font-size:.85rem;max-width:400px;margin:0 auto 1.5rem">Evidentirajte utrke, distance i rezultate vaših golubova</p>
-  <a href="{% url 'udruge:utrka_create' %}" class="btn" style="background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
+  <a href="{% url 'udruge:utrka_create' %}" class="btn" style="background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;font-weight:700;padding:10px 28px;border-radius:10px">
     <i class="fas fa-plus me-1"></i>Nova utrka
   </a>
 </div>

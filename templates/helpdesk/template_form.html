@@ -32,7 +32,7 @@
 </style>
 <a href="{% url 'helpdesk:list' %}" style="font-size:.8rem;color:#64748b;text-decoration:none"><i class="fas fa-arrow-left"></i> Natrag</a>
 <div class="stat-card" style="margin-top:10px;max-width:600px">
-  <div style="font-weight:700;font-size:1rem;margin-bottom:16px"><i class="fas fa-file-alt" style="color:#c9a84c"></i> Novi predlozak</div>
+  <div style="font-weight:700;font-size:1rem;margin-bottom:16px"><i class="fas fa-file-alt" style="color:var(--gold,#c9a84c)"></i> Novi predlozak</div>
   <form method="post">{% csrf_token %}
     <div class="form-group"><label>Naziv *</label><input type="text" name="name" required maxlength="200"></div>
     <div class="form-group"><label>Kategorija</label><select name="category"><option value="delivery">Dostava</option><option value="quality">Kvaliteta robe</option><option value="invoice">Racun/Faktura</option><option value="pos">POS/Blagajna</option><option value="technical">Tehnicki problem</option><option value="complaint">Reklamacija</option><option value="other" selected>Ostalo</option></select></div>

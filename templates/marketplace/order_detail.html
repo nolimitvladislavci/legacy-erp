@@ -43,7 +43,7 @@
       <tr><td>{{ item.product.name }}</td><td>{{ item.seller_company.name }}</td><td>{{ item.quantity }} {{ item.product.unit }}</td><td>{{ item.unit_price }}&euro;</td><td class="text-end fw-bold">{{ item.total }}&euro;</td></tr>
       {% endfor %}
     </tbody>
-    <tfoot><tr><td colspan="4" class="text-end fw-bold">Ukupno:</td><td class="text-end fw-bold" style="color:#c9a84c;font-size:1.1rem">{{ order.total }}&euro;</td></tr></tfoot>
+    <tfoot><tr><td colspan="4" class="text-end fw-bold">Ukupno:</td><td class="text-end fw-bold" style="color:var(--gold,#c9a84c);font-size:1.1rem">{{ order.total }}&euro;</td></tr></tfoot>
   </table>
 </div>
 {% if sub_orders %}

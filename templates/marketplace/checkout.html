@@ -24,11 +24,11 @@
 .zone-item:last-child { border-bottom: none; }
 .zone-item .name { font-weight: 600; }
 .zone-item .qty { color: var(--text-muted, #94a3b8); font-size: .8rem; }
-.zone-item .price { font-weight: 700; color: #c9a84c; }
+.zone-item .price { font-weight: 700; color: var(--gold,#c9a84c); }
 
 /* Form card */
 .sc-card { background: var(--bg-card, #141414); border: 1px solid var(--border, rgba(255,255,255,0.06)); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-.sc-card h3 { font-size: .8rem; font-weight: 800; color: #c9a84c; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+.sc-card h3 { font-size: .8rem; font-weight: 800; color: var(--gold,#c9a84c); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
 
 /* Delivery method cards */
 .dm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
@@ -36,21 +36,21 @@
 .dm-option { position: relative; }
 .dm-option input[type=radio] { position: absolute; opacity: 0; }
 .dm-option label { display: block; padding: 14px; border: 2px solid var(--border, rgba(255,255,255,0.1)); border-radius: 12px; cursor: pointer; transition: border-color .2s; }
-.dm-option input:checked + label { border-color: #c9a84c; background: rgba(201,168,76,0.08); }
+.dm-option input:checked + label { border-color: var(--gold,#c9a84c); background: rgba(201,168,76,0.08); }
 .dm-label { font-weight: 700; font-size: .9rem; }
 .dm-desc { font-size: .75rem; color: var(--text-muted, #94a3b8); margin-top: 2px; }
-.dm-price { font-weight: 900; color: #c9a84c; font-size: .85rem; margin-top: 4px; }
+.dm-price { font-weight: 900; color: var(--gold,#c9a84c); font-size: .85rem; margin-top: 4px; }
 .dm-cold { display: inline-block; font-size: .68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(59,130,246,0.15); color: #3b82f6; margin-top: 4px; }
 
 /* Summary */
-.sc-summary { background: var(--bg-card, #141414); border: 2px solid #c9a84c; border-radius: 16px; padding: 20px; }
+.sc-summary { background: var(--bg-card, #141414); border: 2px solid var(--gold,#c9a84c); border-radius: 16px; padding: 20px; }
 .sc-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: .9rem; }
 .sc-row.total { font-size: 1.2rem; font-weight: 900; border-top: 2px solid var(--border, rgba(255,255,255,0.1)); padding-top: 12px; margin-top: 8px; }
-.sc-row.total .val { color: #c9a84c; }
+.sc-row.total .val { color: var(--gold,#c9a84c); }
 .sc-row.savings { color: #22c55e; font-weight: 600; }
 
 /* Submit */
-.btn-order { background: #c9a84c; color: #000; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 16px; }
+.btn-order { background: var(--gold,#c9a84c); color: #000; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 16px; }
 .btn-order:hover { background: #b8963c; }
 
 /* Form inputs */
@@ -208,7 +208,7 @@
 
         <!-- Summary -->
         <div class="sc-summary">
-          <h3 style="font-size:.8rem;font-weight:800;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">{% trans "Pregled" %}</h3>
+          <h3 style="font-size:.8rem;font-weight:800;color:var(--gold,#c9a84c);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">{% trans "Pregled" %}</h3>
 
           <div class="sc-row">
             <span>{% trans "Stavke" %} ({{ items|length }})</span>

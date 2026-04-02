@@ -66,7 +66,7 @@
             {% get_current_language as CURRENT_LANG %}
             {% for lang in LANGUAGES %}
                 <button type="submit" name="language" value="{{ lang.0 }}" 
-                style="background:none; border:none; padding:0; cursor:pointer; font-family:'Barlow', sans-serif; font-size:14px; font-weight:bold; text-transform:uppercase; transition:0.3s; color:{% if CURRENT_LANG == lang.0 %}#c9a84c{% else %}#888{% endif %};">
+                style="background:none; border:none; padding:0; cursor:pointer; font-family:'Barlow', sans-serif; font-size:14px; font-weight:bold; text-transform:uppercase; transition:0.3s; color:{% if CURRENT_LANG == lang.0 %}var(--gold,#c9a84c){% else %}#888{% endif %};">
                 {{ lang.0 }}
                 </button>
             {% endfor %}

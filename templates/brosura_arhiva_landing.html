@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-  :root { --gold:#c9a84c; --bg:#0a0a0a; --surface:#111827; --text:#e2e8f0; --dim:#94a3b8; }
+  :root { --gold: #c9a84c; --bg:#0a0a0a; --surface:#111827; --text:#e2e8f0; --dim:#94a3b8; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Barlow',sans-serif; background:var(--bg); color:var(--text); }
 
@@ -278,7 +278,7 @@
 <!-- VALIDATOR JS -->
 <script>
 const dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#c9a84c'; dropZone.style.background = 'rgba(201,168,76,.05)'; });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--gold,#c9a84c)'; dropZone.style.background = 'rgba(201,168,76,.05)'; });
 dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'rgba(201,168,76,.3)'; dropZone.style.background = ''; });
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.style.borderColor = 'rgba(201,168,76,.3)'; dropZone.style.background = ''; if(e.dataTransfer.files.length) validateXML(e.dataTransfer.files[0]); });
 

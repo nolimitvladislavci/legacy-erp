@@ -16,7 +16,7 @@
         font-size: 1.4rem; font-weight: 800; color: #0f172a;
         display: flex; align-items: center; gap: 10px;
     }
-    .ct-hero-title i { color: var(--gold, #c9a84c); }
+    .ct-hero-title i { color: var(--gold, var(--gold,#c9a84c)); }
     .ct-hero-sub { font-size: .78rem; color: #94a3b8; margin-top: 2px; }
     .ct-hero-right { display: flex; align-items: center; gap: 10px; }
 
@@ -39,7 +39,7 @@
         padding: 8px 16px; cursor: pointer; font-size: .85rem; color: #94a3b8;
         transition: all .15s; min-width: 220px;
     }
-    .ct-search-trigger:hover { border-color: var(--gold, #c9a84c); background: #fff; }
+    .ct-search-trigger:hover { border-color: var(--gold, var(--gold,#c9a84c)); background: #fff; }
     .ct-search-trigger kbd {
         font-size: .65rem; background: #e2e8f0; padding: 2px 6px;
         border-radius: 4px; font-weight: 700; color: #64748b; margin-left: auto;
@@ -57,9 +57,9 @@
         font-weight: 600; text-decoration: none; transition: all .15s;
         border: 1px solid #e2e8f0; background: #fff; color: #334155;
     }
-    .ct-action-btn:hover { border-color: var(--gold, #c9a84c); color: #0f172a; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.06); text-decoration: none; }
+    .ct-action-btn:hover { border-color: var(--gold, var(--gold,#c9a84c)); color: #0f172a; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.06); text-decoration: none; }
     .ct-action-btn i { font-size: .8rem; }
-    .ct-action-btn.ct-primary { background: var(--gold, #c9a84c); color: #0f172a; border-color: var(--gold, #c9a84c); }
+    .ct-action-btn.ct-primary { background: var(--gold, var(--gold,#c9a84c)); color: #0f172a; border-color: var(--gold, var(--gold,#c9a84c)); }
     .ct-action-btn.ct-primary:hover { opacity: .85; color: #0f172a; }
     .ct-action-btn.ct-danger { color: #dc2626; border-color: #fecaca; }
     .ct-action-btn.ct-danger:hover { background: #fef2f2; border-color: #dc2626; }
@@ -77,7 +77,7 @@
         background: #f1f5f9; border: 1px solid #e2e8f0; transition: all .15s;
     }
     .ct-fav-chip:hover { background: #fff; border-color: var(--gold); color: #0f172a; text-decoration: none; }
-    .ct-fav-chip i { font-size: .7rem; color: var(--gold, #c9a84c); }
+    .ct-fav-chip i { font-size: .7rem; color: var(--gold, var(--gold,#c9a84c)); }
 
     /* Alert Banner */
     .ct-alert-banner {
@@ -103,7 +103,7 @@
     .ct-kpi .kpi-num { font-size: 1.8rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
     .ct-kpi .kpi-label { font-size: .7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .8px; font-weight: 600; margin-top: 4px; }
     .ct-kpi .kpi-sub { font-size: .72rem; color: #64748b; margin-top: 2px; }
-    .kpi-gold { color: var(--gold, #c9a84c); }
+    .kpi-gold { color: var(--gold, var(--gold,#c9a84c)); }
     .kpi-green { color: #16a34a; }
     .kpi-red { color: #dc2626; }
     .kpi-blue { color: #2563eb; }
@@ -147,7 +147,7 @@
     .ct-metric-value.ct-blue { color: #2563eb; }
 
     /* Full-width financial radar */
-    .ct-card-full { grid-column: 1 / -1; border-top: 3px solid var(--gold, #c9a84c); }
+    .ct-card-full { grid-column: 1 / -1; border-top: 3px solid var(--gold, var(--gold,#c9a84c)); }
     .ct-radar-grid {
         display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 16px;
@@ -187,7 +187,7 @@
         font-weight: 800; font-size: 1.1rem; color: #fff; flex-shrink: 0;
     }
     .ct-id-avatar.user-av { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
-    .ct-id-avatar.company-av { background: linear-gradient(135deg, var(--gold, #c9a84c), #d4a843); color: #0a0a0a; }
+    .ct-id-avatar.company-av { background: linear-gradient(135deg, var(--gold, var(--gold,#c9a84c)), #d4a843); color: #0a0a0a; }
     .ct-id-avatar.system-av { background: linear-gradient(135deg, #059669, #10b981); }
     .ct-id-info { flex: 1; }
     .ct-id-name { font-weight: 700; font-size: .95rem; color: #0f172a; }
@@ -279,7 +279,7 @@
         transition: all 0.15s;
     }
     .ct-drill-card:hover { border-color: var(--gold); box-shadow: 0 4px 12px rgba(0,0,0,.08); transform: translateY(-2px); text-decoration: none; color: inherit; }
-    .ct-drill-icon { font-size: 1.8rem; color: var(--gold, #c9a84c); }
+    .ct-drill-icon { font-size: 1.8rem; color: var(--gold, var(--gold,#c9a84c)); }
     .ct-drill-count { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 4px 0; }
     .ct-drill-name { font-size: .72rem; color: #64748b; font-weight: 600; }
 </style>{% block content %}
@@ -820,7 +820,7 @@
 <!-- ═══ Arhiva / AI Inbox Widget ═══════════════════════════════════════ -->
 <div class="ct-card" style="grid-column: span 2">
   <div class="ct-card-header">
-    <span class="ct-card-icon" style="background:rgba(201,168,76,.12);color:#c9a84c"><i class="fa-solid fa-brain"></i></span>
+    <span class="ct-card-icon" style="background:rgba(201,168,76,.12);color:var(--gold,#c9a84c)"><i class="fa-solid fa-brain"></i></span>
     <div>
       <div class="ct-card-title">AI Inbox — Arhiva</div>
       <div class="ct-card-subtitle">Dokumenti s AI prijedlogom za knjiženje</div>
@@ -847,7 +847,7 @@
     </div>
   </div>
   <div style="margin-top:.75rem;display:flex;gap:.5rem">
-    <a href="/hr/documents/ai-inbox/" class="ct-btn" style="background:#c9a84c;color:#000;font-weight:700">Otvori AI Inbox</a>
+    <a href="/hr/documents/ai-inbox/" class="ct-btn" style="background:var(--gold,#c9a84c);color:#000;font-weight:700">Otvori AI Inbox</a>
     <a href="/hr/documents/arhiva/" class="ct-btn" style="background:transparent;border:1px solid #333;color:#ccc">Arhiva</a>
   </div>
 </div>

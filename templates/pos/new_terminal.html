@@ -57,7 +57,7 @@
         {% for r in tax_rates %}
         <span class="tax-chip"><b>{{ r.rate }}%</b> {{ r.name }}</span>
         {% empty %}
-        <p style="color:#e74c3c;">{% trans "Nema poreznih stopa" %} &mdash; <a href="{% url 'companies:tax_rates' %}" style="color:#c9a84c;">{% trans "dodajte ih u postavkama" %}</a>.</p>
+        <p style="color:#e74c3c;">{% trans "Nema poreznih stopa" %} &mdash; <a href="{% url 'companies:tax_rates' %}" style="color:var(--gold,#c9a84c);">{% trans "dodajte ih u postavkama" %}</a>.</p>
         {% endfor %}
       </div>
 

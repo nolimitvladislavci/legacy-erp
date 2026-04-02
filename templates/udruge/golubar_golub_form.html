@@ -22,18 +22,18 @@
 {% endblock %}
 {% block content %}
 <style>
-.gf-section{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#c9a84c;margin-bottom:.75rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.2)}
+.gf-section{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold,#c9a84c);margin-bottom:.75rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.2)}
 .gf-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
 .gf-card-body{padding:1.25rem}
 .gf-input{background:var(--input-bg)!important;color:var(--text)!important;border-color:var(--input-border)!important;border-radius:8px!important}
-.gf-input:focus{border-color:#c9a84c!important;box-shadow:0 0 0 .2rem rgba(201,168,76,.15)!important}
+.gf-input:focus{border-color:var(--gold,#c9a84c)!important;box-shadow:0 0 0 .2rem rgba(201,168,76,.15)!important}
 .gf-input::placeholder{color:var(--text-muted)!important}
-.gf-submit{background:linear-gradient(135deg,#c9a84c,#a78b3d);color:#0a0a0a;border:none;border-radius:8px;padding:12px 28px;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s}
+.gf-submit{background:linear-gradient(135deg,var(--gold,#c9a84c),#a78b3d);color:#0a0a0a;border:none;border-radius:8px;padding:12px 28px;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s}
 .gf-submit:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,168,76,.3);color:#0a0a0a}
 .gf-breadcrumb{font-size:.78rem;color:var(--text-muted);margin-bottom:1rem}
-.gf-breadcrumb a{color:#c9a84c;text-decoration:none}
+.gf-breadcrumb a{color:var(--gold,#c9a84c);text-decoration:none}
 .btn-regen{background:none;border:1px solid var(--input-border);color:var(--text-muted);border-radius:0 8px 8px 0;padding:0 12px;cursor:pointer;transition:color .2s}
-.btn-regen:hover{color:#c9a84c;border-color:#c9a84c}
+.btn-regen:hover{color:var(--gold,#c9a84c);border-color:var(--gold,#c9a84c)}
 .ai-name-hint{font-size:.75rem;margin-top:4px;display:none;padding:5px 10px;border-radius:6px}
 </style>
 
@@ -47,7 +47,7 @@
 
 <div class="d-flex align-items-center gap-3 mb-3">
   <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));display:flex;align-items:center;justify-content:center">
-    <i class="fas fa-dove" style="font-size:1.3rem;color:#c9a84c"></i>
+    <i class="fas fa-dove" style="font-size:1.3rem;color:var(--gold,#c9a84c)"></i>
   </div>
   <div>
     <h4 class="mb-0" style="font-weight:700">{% if golub %}Uredi goluba{% else %}Novi golub{% endif %}</h4>

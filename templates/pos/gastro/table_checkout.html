@@ -8,14 +8,14 @@
 .item-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .item-row:last-child{border:none}
 .item-name{flex:1;font-weight:600}
-.item-qty{width:40px;text-align:center;color:#c9a84c}
+.item-qty{width:40px;text-align:center;color:var(--gold,#c9a84c)}
 .item-price{width:80px;text-align:right;font-weight:700}
 .guest-select{width:30px;text-align:center}
 .guest-pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid;margin:0 2px}
 .bill-card{background:#0a1a0a;border:2px solid #22c55e;border-radius:12px;padding:16px;margin-bottom:12px}
 .method-btn{padding:8px 16px;border-radius:8px;border:2px solid;font-weight:700;cursor:pointer;font-size:.85rem;background:transparent}
-.method-btn.active{background:#c9a84c;color:#000;border-color:#c9a84c}
-.grand-total{font-size:1.8rem;font-weight:800;color:#c9a84c}
+.method-btn.active{background:var(--gold,#c9a84c);color:#000;border-color:var(--gold,#c9a84c)}
+.grand-total{font-size:1.8rem;font-weight:800;color:var(--gold,#c9a84c)}
 </style>
 {% endblock %}
 
@@ -78,10 +78,10 @@
 <!-- Single payment modal -->
 <div class="modal fade" id="payModal" tabindex="-1">
   <div class="modal-dialog modal-sm">
-    <div class="modal-content" style="background:#1a1a2e;border:2px solid #c9a84c">
+    <div class="modal-content" style="background:#1a1a2e;border:2px solid var(--gold,#c9a84c)">
       <div class="modal-body text-center p-4">
         <h4 class="mb-3" id="payModalTitle">Naplata</h4>
-        <h2 class="mb-3" style="color:#c9a84c" id="payModalAmount">0,00 EUR</h2>
+        <h2 class="mb-3" style="color:var(--gold,#c9a84c)" id="payModalAmount">0,00 EUR</h2>
         <div class="d-flex gap-2 justify-content-center mb-3" id="payMethods">
           <button class="method-btn active" onclick="selectMethod(this,'CASH')">Gotovina</button>
           <button class="method-btn" onclick="selectMethod(this,'CARD')">Kartica</button>

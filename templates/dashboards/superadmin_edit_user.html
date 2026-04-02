@@ -5,7 +5,7 @@
 <div style="max-width:700px;margin:0 auto;padding:1rem">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
     <div>
-      <h4 style="margin:0;font-weight:700"><i class="fas fa-user-edit" style="color:#c9a84c"></i> Uredi korisnika</h4>
+      <h4 style="margin:0;font-weight:700"><i class="fas fa-user-edit" style="color:var(--gold,#c9a84c)"></i> Uredi korisnika</h4>
       <p style="color:#6b7280;font-size:.82rem;margin:4px 0 0">{{ target.username }} (ID: {{ target.pk }})</p>
     </div>
     <a href="{% url 'superadmin_users' %}" style="padding:6px 16px;background:#1e293b;color:#94a3b8;border-radius:6px;text-decoration:none;font-size:.82rem"><i class="fas fa-arrow-left"></i> Natrag</a>
@@ -16,7 +16,7 @@
 
     <!-- Osnovni podaci -->
     <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
-      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-id-card"></i> Osnovni podaci</h6>
+      <h6 style="color:var(--gold,#c9a84c);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-id-card"></i> Osnovni podaci</h6>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
         <div>
           <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Ime</label>
@@ -48,7 +48,7 @@
 
     <!-- Tvrtka i rola -->
     <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
-      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-building"></i> Tvrtka i rola</h6>
+      <h6 style="color:var(--gold,#c9a84c);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-building"></i> Tvrtka i rola</h6>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
         <div>
           <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Tvrtka</label>
@@ -80,7 +80,7 @@
 
     <!-- Permisije -->
     <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
-      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-shield-alt"></i> Permisije i status</h6>
+      <h6 style="color:var(--gold,#c9a84c);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-shield-alt"></i> Permisije i status</h6>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem">
         <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#e8e8e8;cursor:pointer">
           <input type="hidden" name="is_active" value="0">
@@ -103,24 +103,24 @@
         <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#94a3b8;cursor:pointer">
           <input type="hidden" name="can_view_financials" value="0">
           <input type="checkbox" name="can_view_financials" value="1" {% if profile.can_view_financials %}checked{% endif %}
-            style="accent-color:#c9a84c;width:16px;height:16px"> Vidi financije
+            style="accent-color:var(--gold,#c9a84c);width:16px;height:16px"> Vidi financije
         </label>
         <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#94a3b8;cursor:pointer">
           <input type="hidden" name="can_approve_timesheets" value="0">
           <input type="checkbox" name="can_approve_timesheets" value="1" {% if profile.can_approve_timesheets %}checked{% endif %}
-            style="accent-color:#c9a84c;width:16px;height:16px"> Odobrava sate
+            style="accent-color:var(--gold,#c9a84c);width:16px;height:16px"> Odobrava sate
         </label>
         <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#94a3b8;cursor:pointer">
           <input type="hidden" name="can_upload_photos" value="0">
           <input type="checkbox" name="can_upload_photos" value="1" {% if profile.can_upload_photos %}checked{% endif %}
-            style="accent-color:#c9a84c;width:16px;height:16px"> Upload slika
+            style="accent-color:var(--gold,#c9a84c);width:16px;height:16px"> Upload slika
         </label>
       </div>
     </div>
 
     <!-- Nova lozinka -->
     <div style="background:#111214;border:1px solid #252830;border-radius:8px;padding:1.2rem">
-      <h6 style="color:#c9a84c;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-key"></i> Promjena lozinke</h6>
+      <h6 style="color:var(--gold,#c9a84c);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin:0 0 1rem"><i class="fas fa-key"></i> Promjena lozinke</h6>
       <div>
         <label style="font-size:.7rem;color:#6b7280;display:block;margin-bottom:4px">Nova lozinka (ostavite prazno ako ne mijenjate)</label>
         <input type="password" name="new_password" autocomplete="new-password"
@@ -142,7 +142,7 @@
       <a href="{% url 'superadmin_users' %}"
         style="padding:10px 24px;background:#1e293b;color:#94a3b8;border-radius:6px;text-decoration:none;font-size:.85rem">Odustani</a>
       <button type="submit"
-        style="padding:10px 24px;background:#c9a84c;color:#000;border:none;border-radius:6px;font-weight:700;font-size:.85rem;cursor:pointer">
+        style="padding:10px 24px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;font-weight:700;font-size:.85rem;cursor:pointer">
         <i class="fas fa-save"></i> Spremi promjene
       </button>
     </div>

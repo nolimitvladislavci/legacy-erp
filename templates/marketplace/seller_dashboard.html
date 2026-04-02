@@ -33,7 +33,7 @@
   </div>
 </div>
 <div class="row g-3 mb-4">
-  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#c9a84c">{{ stats.total_products }}</div><small class="text-muted">Ukupno proizvoda</small></div></div>
+  <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:var(--gold,#c9a84c)">{{ stats.total_products }}</div><small class="text-muted">Ukupno proizvoda</small></div></div>
   <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#28a745">{{ stats.active_products }}</div><small class="text-muted">Aktivnih</small></div></div>
   <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#ffc107">{{ stats.pending_orders }}</div><small class="text-muted">Ceka potvrdu</small></div></div>
   <div class="col-md-3"><div class="stat-card p-3 text-center"><div style="font-size:2rem;color:#28a745">{{ stats.this_month_revenue }}&euro;</div><small class="text-muted">Zarada ovaj mj.</small></div></div>
@@ -47,7 +47,7 @@
       <tbody>
         {% for sub in sub_orders %}
         <tr>
-          <td><a href="{% url 'marketplace:order_detail' sub.marketplace_order.pk %}" style="color:#c9a84c">{{ sub.marketplace_order.order_number }}</a></td>
+          <td><a href="{% url 'marketplace:order_detail' sub.marketplace_order.pk %}" style="color:var(--gold,#c9a84c)">{{ sub.marketplace_order.order_number }}</a></td>
           <td>{{ sub.marketplace_order.buyer_company.name }}</td>
           <td>{{ sub.created_at|date:"d.m.Y H:i" }}</td>
           <td class="fw-bold">{{ sub.seller_payout }}&euro;</td>
@@ -91,7 +91,7 @@
           {% else %}<span class="badge bg-danger" style="font-size:.6rem">Nedostupno</span>{% endif %}
         </div>
         <h6 class="mb-1">{{ p.name }}</h6>
-        <div class="fw-bold" style="color:#c9a84c">{{ p.unit_price }}&euro;/{{ p.unit }}</div>
+        <div class="fw-bold" style="color:var(--gold,#c9a84c)">{{ p.unit_price }}&euro;/{{ p.unit }}</div>
         <small class="text-muted">Skladiste: {{ p.available_qty }} {{ p.unit }}</small>
         {% if p.is_organic %}<br><small class="text-success">Ekoloski</small>{% endif %}
         <div class="mt-2"><a href="{% url 'marketplace:seller_product_edit' p.pk %}" class="btn btn-sm btn-outline-warning w-100"><i class="fas fa-edit me-1"></i>Uredi</a></div>

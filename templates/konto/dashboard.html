@@ -60,17 +60,17 @@
   <a href="{% url 'konto:report_vat' %}"><i class="fas fa-percent"></i> PDV Prijava</a>
   <a href="{% url 'konto:report_annual_tax' %}"><i class="fas fa-file-invoice-dollar"></i> Godišnji porez</a>
   <a href="{% url 'konto:report_euer' %}"><i class="fas fa-receipt"></i> EÜR</a>
-  <a href="/finance/bank-import/" style="background:rgba(201,168,76,.12);border-color:#c9a84c44;color:#c9a84c"><i class="fas fa-upload"></i> CSV Import</a>
+  <a href="/finance/bank-import/" style="background:rgba(201,168,76,.12);border-color:var(--gold,#c9a84c)44;color:var(--gold,#c9a84c)"><i class="fas fa-upload"></i> CSV Import</a>
   <a href="{% url "konto:reconciliation" %}" style="background:rgba(3,218,198,.12);border-color:#03dac644;color:#03dac6"><i class="fas fa-check-double"></i> Rekoncilijacija{% if unmatched_count %} <span class="k-badge" style="background:#03dac6;color:#000;margin-left:4px">{{ unmatched_count }}</span>{% endif %}</a>
   <a href="{% url 'konto:period_management' %}" style="background:rgba(239,68,68,.12);border-color:#ef444444;color:#ef4444"><i class="fas fa-lock"></i> Razdoblja</a>
-  <a href="{% url 'konto:report_opz_stat' %}" style="background:rgba(201,168,76,.12);border-color:#c9a84c44;color:#c9a84c"><i class="fas fa-file-alt"></i> OPZ-STAT-1</a>
+  <a href="{% url 'konto:report_opz_stat' %}" style="background:rgba(201,168,76,.12);border-color:var(--gold,#c9a84c)44;color:var(--gold,#c9a84c)"><i class="fas fa-file-alt"></i> OPZ-STAT-1</a>
 </div>
 
 
 <!-- ── CASHFLOW CHART (lazy-loaded via AJAX) ────────────────────────────── -->
 <div class="k-card" style="padding:18px;margin-bottom:20px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <span style="color:#c9a84c;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em">
+    <span style="color:var(--gold,#c9a84c);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em">
       &#x1F4C8; Cashflow &#x2014; zadnjih 6 mjeseci
     </span>
     <a href="/finance/bank-import/" style="color:#64748b;font-size:.78rem;text-decoration:none;border:1px solid #334155;padding:4px 12px;border-radius:6px">
@@ -117,7 +117,7 @@
   <div class="k-card">
     <div class="k-card-head">
       <h3>{% trans "Žiro računi" %}</h3>
-      <a href="{% url 'konto:bank_accounts' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">{% trans "Svi" %} →</a>
+      <a href="{% url 'konto:bank_accounts' %}" style="color:var(--gold,#c9a84c);font-size:.78rem;text-decoration:none">{% trans "Svi" %} →</a>
     </div>
     <table class="k-table">
       <thead><tr><th>{% trans "Naziv" %}</th><th>{% trans "IBAN" %}</th><th class="right">{% trans "Saldo" %}</th></tr></thead>
@@ -139,14 +139,14 @@
   <div class="k-card">
     <div class="k-card-head">
       <h3>{% trans "Zadnje temeljnice" %}</h3>
-      <a href="{% url 'konto:journal_entries' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">{% trans "Sve" %} →</a>
+      <a href="{% url 'konto:journal_entries' %}" style="color:var(--gold,#c9a84c);font-size:.78rem;text-decoration:none">{% trans "Sve" %} →</a>
     </div>
     <table class="k-table">
       <thead><tr><th>{% trans "Broj" %}</th><th>{% trans "Datum" %}</th><th>{% trans "Opis" %}</th><th class="right">{% trans "Iznos" %}</th></tr></thead>
       <tbody>
       {% for je in recent_entries %}
       <tr>
-        <td><a href="{% url 'konto:journal_entry_detail' je.pk %}" style="color:#c9a84c;text-decoration:none;font-weight:600">{{ je.entry_number }}</a></td>
+        <td><a href="{% url 'konto:journal_entry_detail' je.pk %}" style="color:var(--gold,#c9a84c);text-decoration:none;font-weight:600">{{ je.entry_number }}</a></td>
         <td style="color:#94a3b8;font-size:.78rem">{{ je.date|date:"d.m.Y" }}</td>
         <td>{{ je.description|truncatechars:40 }}</td>
         <td class="right mono" style="font-weight:600">{{ je.total_debit|floatformat:2 }} €</td>
@@ -163,20 +163,20 @@
 <div class="k-card" style="margin-top:16px">
   <div class="k-card-head">
     <h3>PDV / Umsatzsteuer</h3>
-    <a href="{% url 'konto:report_vat' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">Otvori →</a>
+    <a href="{% url 'konto:report_vat' %}" style="color:var(--gold,#c9a84c);font-size:.78rem;text-decoration:none">Otvori →</a>
   </div>
   <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-    <a href="{% url 'konto:report_vat' %}" class="k-tax-card" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
+    <a href="{% url 'konto:report_vat' %}" class="k-tax-card" onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" onmouseout="this.style.borderColor='#334155'">
       <div class="k-tax-card-icon">%</div>
       <div class="k-tax-card-label">PDV Prijava</div>
       <div class="k-tax-card-sub">USt-Voranmeldung</div>
     </a>
-    <a href="{% url 'konto:report_annual_tax' %}" class="k-tax-card" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
+    <a href="{% url 'konto:report_annual_tax' %}" class="k-tax-card" onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" onmouseout="this.style.borderColor='#334155'">
       <div class="k-tax-card-icon">📋</div>
       <div class="k-tax-card-label">Godišnji porez</div>
       <div class="k-tax-card-sub">HR dohodak / DE ESt</div>
     </a>
-    <a href="{% url 'konto:report_euer' %}" class="k-tax-card" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
+    <a href="{% url 'konto:report_euer' %}" class="k-tax-card" onmouseover="this.style.borderColor='var(--gold,#c9a84c)'" onmouseout="this.style.borderColor='#334155'">
       <div class="k-tax-card-icon">🧾</div>
       <div class="k-tax-card-label">EÜR</div>
       <div class="k-tax-card-sub">Einnahmen/Ausgaben</div>
@@ -188,7 +188,7 @@
 <div class="k-card" style="margin-top:16px">
   <div class="k-card-head">
     <h3>{% trans "Račun dobiti i gubitka (YTD)" %}</h3>
-    <a href="{% url 'konto:report_pnl' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">{% trans "Detalji" %} →</a>
+    <a href="{% url 'konto:report_pnl' %}" style="color:var(--gold,#c9a84c);font-size:.78rem;text-decoration:none">{% trans "Detalji" %} →</a>
   </div>
   <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
     <div class="k-pnl-cell">
@@ -201,7 +201,7 @@
     </div>
     <div class="k-pnl-cell">
       <div class="k-pnl-label">{% trans "Rezultat" %}</div>
-      <div class="k-pnl-value" style="color:{% if pnl.profit_loss >= 0 %}#c9a84c{% else %}#ef4444{% endif %}">{{ pnl.profit_loss|floatformat:2 }} €</div>
+      <div class="k-pnl-value" style="color:{% if pnl.profit_loss >= 0 %}var(--gold,#c9a84c){% else %}#ef4444{% endif %}">{{ pnl.profit_loss|floatformat:2 }} €</div>
     </div>
   </div>
 </div>
@@ -210,7 +210,7 @@
 <div class="k-card" style="margin-top:20px">
   <div class="k-card-head">
     <h3>🧾 {% trans "Fiskalizacija" %}</h3>
-    <a href="{% url 'invoicing:fiscal_certificates' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">{% trans "Certifikati" %} →</a>
+    <a href="{% url 'invoicing:fiscal_certificates' %}" style="color:var(--gold,#c9a84c);font-size:.78rem;text-decoration:none">{% trans "Certifikati" %} →</a>
   </div>
   <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
     <div class="k-pnl-cell">
@@ -227,14 +227,14 @@
     </div>
     <div class="k-pnl-cell">
       <div class="k-pnl-label">{% trans "Dana do isteka" %}</div>
-      <div class="k-pnl-value" style="color:{% if fiscal_stats.cert_expiring_soon %}#f59e0b{% else %}#c9a84c{% endif %}">
+      <div class="k-pnl-value" style="color:{% if fiscal_stats.cert_expiring_soon %}#f59e0b{% else %}var(--gold,#c9a84c){% endif %}">
         {% if fiscal_stats.days_until_expiry %}{{ fiscal_stats.days_until_expiry }}{% else %}—{% endif %}
       </div>
     </div>
   </div>
   {% if fiscal_stats.unfiscalized_count > 0 %}
   <div style="padding:0 16px 16px">
-    <a href="{% url 'invoicing:fiscal_batch' %}" style="display:block;text-align:center;padding:8px;background:#c9a84c;color:#000;font-weight:700;border-radius:6px;text-decoration:none;font-size:.85rem">
+    <a href="{% url 'invoicing:fiscal_batch' %}" style="display:block;text-align:center;padding:8px;background:var(--gold,#c9a84c);color:#000;font-weight:700;border-radius:6px;text-decoration:none;font-size:.85rem">
       ✈ {% trans "Pokreni batch fiskalizaciju" %}
     </a>
   </div>
@@ -254,7 +254,7 @@
   <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
     <div class="k-pnl-cell">
       <div class="k-pnl-label">{% trans "Ukupno faktura" %}</div>
-      <div class="k-pnl-value" style="color:#c9a84c">{{ gobd_report.total_invoices }}</div>
+      <div class="k-pnl-value" style="color:var(--gold,#c9a84c)">{{ gobd_report.total_invoices }}</div>
     </div>
     <div class="k-pnl-cell">
       <div class="k-pnl-label">{% trans "Problemi" %}</div>
@@ -302,7 +302,7 @@
       </div>
     </div>
     <div style="display:flex;gap:6px">
-      <a href="{% url 'dashboard' %}" class="btn btn-sm" style="background:#c9a84c;color:#0f172a;font-weight:700;font-size:.75rem">Provjeri integritet</a>
+      <a href="{% url 'dashboard' %}" class="btn btn-sm" style="background:var(--gold,#c9a84c);color:#0f172a;font-weight:700;font-size:.75rem">Provjeri integritet</a>
       {% if audit_hashed > 0 %}
       <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-light" style="font-size:.75rem">PDF certifikat</a>
       {% endif %}

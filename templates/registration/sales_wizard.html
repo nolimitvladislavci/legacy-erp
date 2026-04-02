@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#c9a84c;--gold-light:#e0c97a;--gold-dark:#a8893a;--black:#0a0a0a;--bg:#111;--card:#1a1a1a;--border:#333;--text:#e0e0e0;--text-muted:#888;--success:#2ecc71;--danger:#e74c3c;--radius:12px}
+:root{--gold: #c9a84c;--gold-light:#e0c97a;--gold-dark:#a8893a;--black:#0a0a0a;--bg:#111;--card:#1a1a1a;--border:#333;--text:#e0e0e0;--text-muted:#888;--success:#2ecc71;--danger:#e74c3c;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Barlow',sans-serif;background:var(--black);color:var(--text);min-height:100vh}
 h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
@@ -122,8 +122,8 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif;color:var(--gold)}
 <div class="sw-container">
 
   {% if ref %}
-  <div style="background:rgba(201,168,76,.12);border:1px solid #c9a84c;border-radius:12px;padding:12px 18px;margin-bottom:16px;text-align:center">
-    <span style="color:#c9a84c;font-weight:600;font-size:.95rem">
+  <div style="background:rgba(201,168,76,.12);border:1px solid var(--gold,#c9a84c);border-radius:12px;padding:12px 18px;margin-bottom:16px;text-align:center">
+    <span style="color:var(--gold,#c9a84c);font-weight:600;font-size:.95rem">
       {% if lang == 'de' %}Empfohlen von: {{ ref }}{% else %}Preporuka od: {{ ref }}{% endif %}
     </span>
   </div>

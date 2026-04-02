@@ -4,7 +4,7 @@
 <style>
     .udruge-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .udruge-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
-    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, #c9a84c); }
+    .udruge-stat .value { font-size: 2rem; font-weight: 700; color: var(--gold, var(--gold,#c9a84c)); }
     .udruge-stat .label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
     .udruge-stat.saldo-positive .value { color: #065f46; }
     .udruge-stat.saldo-negative .value { color: #dc2626; }
@@ -14,7 +14,7 @@
     .udruge-table tr:hover { background: var(--table-row-hover); }
     .badge-primitak { background: #065f4620; color: #065f46; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
     .badge-izdatak { background: #dc262620; color: #dc2626; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-    .btn-gold { background: #c9a84c; color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
+    .btn-gold { background: var(--gold,#c9a84c); color: #0a0a0a; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; text-decoration: none; display: inline-block; }
     .btn-gold:hover { background: #b8943f; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
     .page-header h1 { font-size: 1.5rem; margin: 0; }

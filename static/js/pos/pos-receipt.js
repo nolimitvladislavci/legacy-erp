@@ -39,7 +39,7 @@
     if (ov) { ov.style.display='flex'; startCam(); return; }
     ov = document.createElement('div'); ov.id='camOverlay';
     ov.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px';
-    ov.innerHTML = '<div style="color:#fff;font-size:1rem;margin-bottom:12px;font-weight:600">Skeniraj barkod kamerom</div><video id="camVideo" autoplay playsinline style="width:90%;max-width:400px;border-radius:10px;border:2px solid #c9a84c"></video><canvas id="camCanvas" style="display:none"></canvas><div id="camStatus" style="color:#c9a84c;margin-top:10px;font-size:.85rem">Cekam dozvolu kamere...</div><div style="margin-top:12px;display:flex;gap:10px"><button onclick="closeCamScanner()" style="padding:10px 28px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;cursor:pointer">Zatvori</button><button onclick="manualBarcodeInput()" style="padding:10px 28px;border-radius:8px;border:1px solid #c9a84c;background:#1a1a0a;color:#c9a84c;cursor:pointer">Rucni unos</button></div>';
+    ov.innerHTML = '<div style="color:#fff;font-size:1rem;margin-bottom:12px;font-weight:600">Skeniraj barkod kamerom</div><video id="camVideo" autoplay playsinline style="width:90%;max-width:400px;border-radius:10px;border:2px solid var(--gold,#c9a84c)"></video><canvas id="camCanvas" style="display:none"></canvas><div id="camStatus" style="color:var(--gold,#c9a84c);margin-top:10px;font-size:.85rem">Cekam dozvolu kamere...</div><div style="margin-top:12px;display:flex;gap:10px"><button onclick="closeCamScanner()" style="padding:10px 28px;border-radius:8px;border:1px solid #555;background:#222;color:#fff;cursor:pointer">Zatvori</button><button onclick="manualBarcodeInput()" style="padding:10px 28px;border-radius:8px;border:1px solid var(--gold,#c9a84c);background:#1a1a0a;color:var(--gold,#c9a84c);cursor:pointer">Rucni unos</button></div>';
     document.body.appendChild(ov); startCam();
   };
   window.closeCamScanner = function() { var ov=document.getElementById('camOverlay'); if(ov) ov.style.display='none'; if(camStream){camStream.getTracks().forEach(function(t){t.stop();});camStream=null;} };
@@ -124,7 +124,7 @@
 
   window.showToast = function(msg, type) {
     var t = document.getElementById("posToast"); if(!t) return;
-    t.textContent = msg; t.style.borderLeftColor = type==="error" ? "#ef4444" : type==="warn" ? "#f59e0b" : "#c9a84c";
+    t.textContent = msg; t.style.borderLeftColor = type==="error" ? "#ef4444" : type==="warn" ? "#f59e0b" : "var(--gold,#c9a84c)";
     t.style.display = "block"; clearTimeout(window._toastTimer);
     window._toastTimer = setTimeout(function(){ t.style.display="none"; }, 3000);
   };
