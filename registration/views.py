@@ -414,11 +414,13 @@ def register_step4(request):
         from datetime import timedelta
 
         from django.contrib.auth import login
+        from django.db import transaction
 
         from accounts.models import UserProfile
         from companies.models import Company
 
         try:
+          with transaction.atomic():
             # Create user
             email = user_data["email"]
             base_un = email.split("@")[0].lower().replace(".", "_")[:30]

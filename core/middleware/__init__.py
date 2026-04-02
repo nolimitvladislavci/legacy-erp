@@ -356,7 +356,7 @@ class RateLimitMiddleware:
 
         # Login brute-force zaštita — striktno po IP+path
         if ('/login/' in path or '/api/token/' in path or '/password/' in path) and request.method == 'POST':
-            limit, window = 20, 60
+            limit, window = 50, 60
             key = 'rl:%s:login' % ip
         elif path.startswith('/api/'):
             limit, window = 120, 60

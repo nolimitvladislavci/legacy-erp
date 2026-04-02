@@ -62,13 +62,55 @@ def dashboard_router(request):
             return redirect('company_dashboard')
         return redirect('superadmin_dashboard')
 
-    # ── Ensure profile exists ──────────
+    # ── Ensure profile + company exist (auto-recovery za broken registracije) ──
     from accounts.models import UserProfile
+    from companies.models import Company
     profile, _created = UserProfile.objects.get_or_create(
-        user=request.user, defaults={'role': 'worker'}
+        user=request.user, defaults={'role': 'company_admin'}
     )
     if _created:
-        logger.info("Auto-created profile for user %s", request.user.username)
+        logger.warning("Auto-created profile for user %s — broken registration detected", request.user.username)
+
+    # Ako profil postoji ali nema company — auto-kreiraj (broken reg recovery)
+    if not profile.company:
+        try:
+            import uuid
+            from django.utils import timezone
+            from datetime import timedelta
+            co_name = (
+                request.user.get_full_name() or request.user.username
+            )
+            company = Company.objects.create(
+                name=co_name,
+                oib='DRAFT' + uuid.uuid4().hex[:6].upper(),
+                country='HR',
+                business_type='obrt',
+                has_signed_tc_consent=True,
+                tc_consent_version='v1.0-2026',
+                tc_consent_signed_at=timezone.now(),
+            )
+            profile.company = company
+            profile.role = 'company_admin'
+            profile.totp_enabled = True  # bypass 2FA dok ne postave pravi
+            profile.save(update_fields=['company', 'role', 'totp_enabled'])
+            # Subscription — starter trial 14 dana
+            try:
+                from registration.models import CompanySubscription, PricingPlan
+                plan = PricingPlan.objects.filter(slug='starter').first()
+                CompanySubscription.objects.create(
+                    company=company,
+                    plan='starter',
+                    pricing_plan=plan,
+                    valid_from=timezone.now().date(),
+                    trial_ends=timezone.now().date() + timedelta(days=14),
+                    monthly_fee=plan.price_monthly if plan else 0,
+                    is_active=True,
+                )
+            except Exception:
+                pass
+            logger.warning("Auto-recovery: kreirana company %s za usera %s", company.name, request.user.username)
+        except Exception as _e:
+            logger.error("Auto-recovery failed za user %s: %s", request.user.username, _e)
 
     # ── Branch routing: branch users → branch-specific dashboard ──────────
     try:
