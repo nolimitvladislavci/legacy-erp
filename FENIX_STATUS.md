@@ -791,3 +791,25 @@ NISKI RIZIK (ne mijenjati sada):
 | DNS cutover priprema | 14.04. | ⏳ |
 | **GO/NO-GO odluka** | 15.04. | Ivan+Marija |
 
+
+## ★ DRON 1 — ZATVOREN (02.04.2026.)
+
+```
+Synesis import — konačna dijagnoza:
+  22 firme: 10.176 temeljnica, 56.858 stavki importirano ✅
+  36 firmi: ručna knjiženja (bez SYN-) ✅
+  14 firmi: MDB prazan — Marija ih nema u Synesisu
+  10 firmi: bez MDB — DE firme ili novi klijenti
+  Bilanca: -94,18 EUR = BALANCED ✅
+```
+
+Preostalo je na Mariji — nije bug, business reality.
+
+## ★ SEED SKRIPTE — deployane (02.04.2026.)
+
+| Skripta | Pokretanje | Sadržaj |
+|---------|-----------|---------|
+| seed_golubar_petar | manage.py seed_golubar_petar [--wipe] | 20 golubova, 3 utrke, genetski pečati |
+| seed_azil_demo | manage.py seed_azil_demo [--wipe] [--samo-azil] [--samo-ljubeta] | 15 azil životinja + Ljubeta Novak uzgajivačnica |
+| seed_knowledge_base | manage.py seed_knowledge_base [--run] [--update] | 19 compliance/POS/invoicing članaka |
+| seed_azil_compliance | manage.py seed_azil_compliance | 11 azil compliance stavki |
