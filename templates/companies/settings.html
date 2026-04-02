@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <button type="button" class="btn btn-sm" id="oibScanBtn"
                   style="background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;border:1px solid rgba(56,189,248,.35);"
                   title="Skeniraj osobnu iskaznicu — AI upisuje OIB automatski"
-                  onclick="fenixScanOIB()">
+                  onclick="fenixOpenCamera()">
             <i class="fas fa-camera"></i> Skeniraj osobnu
           </button>
         </div>
@@ -838,72 +838,146 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
+
+
+<!-- Fenix OIB Camera Modal -->
+<div id="fenixCamModal" style="display:none;position:fixed;inset:0;z-index:99999;
+     background:rgba(0,0,0,.92);flex-direction:column;align-items:center;justify-content:center;">
+  <div style="width:100%;max-width:480px;padding:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="color:#38bdf8;font-weight:700;font-size:1rem;">
+        <i class="fas fa-id-card me-2"></i>Skeniraj osobnu iskaznicu
+      </span>
+      <button onclick="fenixCloseCamera()" style="background:none;border:none;color:#94a3b8;font-size:1.4rem;cursor:pointer;">✕</button>
+    </div>
+    <video id="fenixCamVideo" autoplay playsinline muted
+           style="width:100%;border-radius:12px;border:2px solid rgba(56,189,248,.4);background:#000;max-height:320px;object-fit:cover;"></video>
+    <canvas id="fenixCamCanvas" style="display:none;"></canvas>
+    <div id="fenixCamHint" style="text-align:center;color:#94a3b8;font-size:.82rem;margin-top:8px;">
+      Usmjerite kameru prema osobnoj iskaznici i pritisnite Snimi
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button onclick="fenixSnapPhoto()"
+              style="flex:1;background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;
+                     border:1px solid rgba(56,189,248,.4);border-radius:8px;
+                     padding:12px;font-weight:700;font-size:.95rem;cursor:pointer;">
+        <i class="fas fa-camera me-2"></i>Snimi
+      </button>
+      <label style="flex:1;background:#1e293b;color:#94a3b8;border:1px solid #334155;
+                    border-radius:8px;padding:12px;font-weight:600;font-size:.85rem;
+                    cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <i class="fas fa-image"></i> Iz galerije
+        <input type="file" accept="image/*" style="display:none;" onchange="fenixFromGallery(this)">
+      </label>
+    </div>
+  </div>
+</div>
+
 <script>
-function fenixScanOIB() {
-  var btn = document.getElementById('oibScanBtn');
-  var input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.setAttribute('capture', 'environment');
-  input.style.display = 'none';
-  document.body.appendChild(input);
+var _fenixStream = null;
 
-  input.onchange = function() {
-    if (!input.files || !input.files[0]) { document.body.removeChild(input); return; }
-    var file = input.files[0];
-    document.body.removeChild(input);
+function fenixOpenCamera() {
+  var modal = document.getElementById('fenixCamModal');
+  modal.style.display = 'flex';
+  var video = document.getElementById('fenixCamVideo');
+  document.getElementById('fenixCamHint').style.color = '#94a3b8';
+  document.getElementById('fenixCamHint').textContent = 'Usmjerite kameru prema osobnoj iskaznici i pritisnite Snimi';
 
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI obrađuje...';
-    btn.disabled = true;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    document.getElementById('fenixCamHint').textContent = 
+      'Kamera nije dostupna u ovom browseru. Koristite "Iz galerije" ili unesite OIB ručno.';
+    return;
+  }
 
-    var fd = new FormData();
-    fd.append('file', file);
-    fd.append('doc_type', 'id_card');
-    fd.append('source_module', 'company_settings');
-
-    var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
-    var csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (csrfEl) csrf = csrfEl.value;
-
-    fetch('/api/fenix/scan/', {
-      method: 'POST',
-      headers: {'X-CSRFToken': csrf},
-      body: fd
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+    .then(function(stream) {
+      _fenixStream = stream;
+      video.srcObject = stream;
     })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var oibField = document.getElementById('coOib');
-      var resultEl = document.getElementById('oibResult');
-      var filled = false;
-
-      if (data.fields) {
-        if (data.fields.oib) {
-          oibField.value = data.fields.oib;
-          resultEl.innerHTML = '<span style="color:#4ade80;font-weight:600">✓ OIB: ' + data.fields.oib + '</span>';
-          filled = true;
-        }
-        if (data.fields.name) {
-          var nameEl = document.getElementById('coName') || document.querySelector('[name=name]');
-          if (nameEl) nameEl.value = data.fields.name;
-        }
-      }
-
-      if (!filled) {
-        resultEl.innerHTML = '<span style="color:#fbbf24">⚠ OIB nije prepoznat — unesite ručno</span>';
-      }
-
-      btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
-      btn.disabled = false;
-    })
-    .catch(function(err){
-      document.getElementById('oibResult').innerHTML =
-        '<span style="color:#f87171">Greška pri skeniranju. Unesite OIB ručno.</span>';
-      btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
-      btn.disabled = false;
+    .catch(function(err) {
+      // Fallback na prednju kameru
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(stream) {
+          _fenixStream = stream;
+          video.srcObject = stream;
+        })
+        .catch(function() {
+          document.getElementById('fenixCamHint').textContent = 
+            'Kamera nije odobrena. Kliknite "Iz galerije" ili unesite OIB ručno ispod.';
+        });
     });
-  };
+}
 
-  input.click();
+function fenixCloseCamera() {
+  if (_fenixStream) { _fenixStream.getTracks().forEach(function(t){ t.stop(); }); _fenixStream = null; }
+  document.getElementById('fenixCamModal').style.display = 'none';
+}
+
+function fenixSnapPhoto() {
+  var video = document.getElementById('fenixCamVideo');
+  var canvas = document.getElementById('fenixCamCanvas');
+  if (!video.videoWidth) {
+    document.getElementById('fenixCamHint').textContent = 'Čekajte da se kamera inicijalizira...';
+    return;
+  }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  canvas.toBlob(function(blob) {
+    fenixCloseCamera();
+    fenixSendToAI(blob, 'snap.jpg');
+  }, 'image/jpeg', 0.88);
+}
+
+function fenixFromGallery(input) {
+  if (!input.files || !input.files[0]) return;
+  fenixCloseCamera();
+  fenixSendToAI(input.files[0], input.files[0].name);
+}
+
+function fenixSendToAI(blob, filename) {
+  var btn = document.getElementById('oibScanBtn');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI obrađuje...';
+  btn.disabled = true;
+
+  var fd = new FormData();
+  fd.append('file', blob, filename);
+  fd.append('doc_type', 'id_card');
+  fd.append('source_module', 'company_settings');
+
+  var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+  var csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (csrfEl) csrf = csrfEl.value;
+
+  fetch('/api/fenix/scan/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': csrf},
+    body: fd
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    var oibField = document.getElementById('coOib');
+    var resultEl = document.getElementById('oibResult');
+
+    if (data.fields && data.fields.oib) {
+      oibField.value = data.fields.oib;
+      resultEl.innerHTML = '<span style="color:#4ade80;font-weight:600">✓ OIB prepoznat: ' + data.fields.oib + '</span>';
+      if (data.fields.name) {
+        var nameEl = document.getElementById('coName') || document.querySelector('[name=name]');
+        if (nameEl) nameEl.value = data.fields.name;
+      }
+    } else {
+      resultEl.innerHTML = '<span style="color:#fbbf24">⚠ OIB nije prepoznat — unesite ručno u polje iznad</span>';
+    }
+    btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
+    btn.disabled = false;
+  })
+  .catch(function() {
+    document.getElementById('oibResult').innerHTML =
+      '<span style="color:#f87171">Greška. Unesite OIB ručno.</span>';
+    btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
+    btn.disabled = false;
+  });
 }
 </script>
 
