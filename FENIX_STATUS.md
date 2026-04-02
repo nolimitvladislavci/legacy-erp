@@ -634,3 +634,16 @@ Podsjetnik: ~25.04.2026.
 | F3_BORG_INTELIGENCIJA | 17fac763 | ✅ DONE — 368 intel results, 59 KB articles, 150 anomalies |
 | F4_BORG_PERFEKCIJA | ea0027d6 | ✅ DONE — predictions, self-heal, 93 tests PASS |
 | BORG_OPS_TASKBOARD | 74c7f4b4 | ✅ DONE — BorgTask model, 42 auto-tasks, 6 beat schedules |
+
+---
+
+## ★ DRONOVI — SONNET ANALIZA 02.04.2026
+
+| Dron | Naziv | Opis | CC_TASK | Rok | Status |
+|------|-------|------|---------|-----|--------|
+| #1 | Računovodstveni Veto | Synesis ID mapping fix (0.9%→70%+) + Marija UBL test | CC_TASK_DRON1_SYNESIS_VETO.md | 07.04. | 🔴 ČEKA |
+| #2 | Lijevak Smrti | Onboarding: 3 polja → wizard, ne 12 polja odjednom | CC_TASK_DRON2_ONBOARDING_WIZARD.md | 10.04. | 🔴 ČEKA |
+| #3 | Frankenstein CSS | CSS token kirurgija — samo CSS, ne HTML predlošci | CC_TASK_DRON3_CSS_KIRURGIJA.md | 12.04. | 🟡 ČEKA |
+
+**Redoslijed:** Dron #1 → #2 → #3. Ne raditi paralelno s go-live sprintom.
+

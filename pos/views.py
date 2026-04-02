@@ -4210,7 +4210,7 @@ def _zlatno_dugme_notify_ivan(suggestion):
             f"Prioritet: {prio}\n"
             f"Naslov: {suggestion.title}\n"
             f"Opis: {suggestion.description[:200]}\n\n"
-            f"Odgovori na: https://limit-connect.com/hr/cockpit/"
+            f"Odgovori na: https://limit-connect.com/hr/superadmin/ivan/"
         )
         send_text(IVAN_PHONE, msg)
     except Exception as e:

@@ -206,4 +206,6 @@ urlpatterns = [
     # Cashier Gate API
     path('api/verify-cashier-pin/',  views.verify_cashier_pin,  name='verify_cashier_pin'),
     path('api/update-cashier-oib/',  views.update_cashier_oib,  name='update_cashier_oib'),
+    # Item Search API — pretraži cijelu bazu (ne samo DOM-300)
+    path('api/item-search/',         views.api_item_search,      name='api_item_search'),
 ]
