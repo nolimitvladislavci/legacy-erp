@@ -739,3 +739,55 @@ NISKI RIZIK (ne mijenjati sada):
 - POS commitovi: SAMO utorak-srijeda
 - Nikad solo push na POS/invoicing/einvoice bez review
 - Feature flags: post-launch sprint
+
+---
+
+## ★ SESIJA 02.04.2026. (večer) — CC Code Sprint + Sonnet commit
+
+### Git HEAD: 7c3c1bb7
+### Zadnje azuriranje: 2026-04-02 — Sonnet
+
+### DEPLOYAN DANAS (kompletna sesija):
+
+| Što | Commit | Status |
+|-----|--------|--------|
+| Azil Sprint 1-2 (modeli + FenixScan) | (uncommitted → 7c3c1bb7) | ✅ DONE |
+| Azil Sprint 3 (7 templates) | 7c3c1bb7 | ✅ DONE |
+| Azil Sprint 4 (Celery PDF, WeasyPrint) | 7c3c1bb7 | ✅ DONE |
+| seed_azil_compliance (11 stavki) | 7c3c1bb7 | ✅ DONE |
+| ChainLink → CompanyManager | 7c3c1bb7 | ✅ DONE |
+| GovExport → CompanyManager | 7c3c1bb7 | ✅ DONE |
+| Force2FAMiddleware superuser bypass | 4bb205fe | ✅ DONE |
+| RAG seed_knowledge_base (19 članaka) | 7cfce31a | ✅ DONE |
+| CC_TASK_CELERY_QUEUE_SPLIT | b382005c | ✅ TASK PISAN |
+
+### Stanje servera kraj dana:
+- gunicorn-fina: active
+- celery-worker: active
+- celery-beat: active
+- pgbouncer: active
+- DB: 888MB | Disk: 36% | RAM: ~44%
+
+### Azil modul — LIVE na serveru:
+```
+/udruge/azil/                    → dashboard
+/udruge/azil/zivotinja/nova/     → FenixScan + GPS
+/udruge/azil/zivotinja/<pk>/     → detalj + kartoni
+/udruge/azil/terenska/           → mobitel-first
+/udruge/azil/intervencija/nova/  → teren
+/udruge/azil/izvjestaj/          → PDF za JLS
+/api/azil/chip-lookup/           → chip provjera
+```
+
+### Preostalo za go-live 15.04.:
+| Zadatak | Rok | Status |
+|---------|-----|--------|
+| CC_TASK_DRON1_SYNESIS_VETO | 07.04. | 🔴 CC Code |
+| CC_TASK_DRON2_ONBOARDING_WIZARD | 10.04. | 🔴 CC Code |
+| CC_TASK_CELERY_QUEUE_SPLIT | 05.04. | 🔴 CC Code |
+| Pricing JLS profil (Ivan+Marija) | 10.04. | 🟡 Ivan |
+| Load test CCX33 | 12.04. | ⏳ |
+| MARIJA_BLAGOSLOV | 08.04. | ⏳ |
+| DNS cutover priprema | 14.04. | ⏳ |
+| **GO/NO-GO odluka** | 15.04. | Ivan+Marija |
+
