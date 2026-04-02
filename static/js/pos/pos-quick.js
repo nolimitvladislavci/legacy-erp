@@ -26,16 +26,63 @@
   window.filterProducts = function(q) {
     currentQ = q.toLowerCase();
     applyFilter();
+    // AJAX fallback: if client-side finds < 2 results and query > 2 chars, search API
+    if (currentQ.length >= 2) {
+      clearTimeout(window._searchTimer);
+      window._searchTimer = setTimeout(function() {
+        var visible = document.querySelectorAll('.prod-btn[style=""], .prod-btn:not([style])');
+        var localCount = 0;
+        document.querySelectorAll('.prod-btn').forEach(function(b) {
+          if (b.style.display !== 'none') localCount++;
+        });
+        if (localCount < 3) _ajaxSearch(currentQ);
+      }, 400);
+    }
   };
 
   function applyFilter() {
+    // Remove any previous AJAX result buttons
+    document.querySelectorAll('.prod-btn-ajax').forEach(function(b) { b.remove(); });
     document.querySelectorAll('.prod-btn').forEach(function(btn) {
       var name = btn.dataset.name.toLowerCase();
+      var sku = (btn.dataset.sku || '').toLowerCase();
       var cat  = btn.dataset.cat;
       var matchCat = !currentCat || cat === currentCat;
-      var matchQ   = !currentQ   || name.includes(currentQ);
+      var matchQ   = !currentQ || name.includes(currentQ) || sku.includes(currentQ);
       btn.style.display = (matchCat && matchQ) ? '' : 'none';
     });
+  }
+
+  function _ajaxSearch(q) {
+    var tid = typeof TERMINAL_ID !== 'undefined' ? TERMINAL_ID : '';
+    fetch('/pos/api/item-search/?q=' + encodeURIComponent(q) + '&terminal_id=' + tid + '&limit=20')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.items || !data.items.length) return;
+        // Remove old AJAX buttons
+        document.querySelectorAll('.prod-btn-ajax').forEach(function(b) { b.remove(); });
+        var grid = document.getElementById('productGrid') || document.querySelector('.product-grid');
+        if (!grid) return;
+        var existingIds = new Set();
+        document.querySelectorAll('.prod-btn').forEach(function(b) { existingIds.add(b.dataset.id); });
+        data.items.forEach(function(item) {
+          if (existingIds.has(String(item.id))) return; // skip if already in DOM
+          var btn = document.createElement('button');
+          btn.className = 'prod-btn prod-btn-ajax';
+          btn.dataset.id = item.id;
+          btn.dataset.name = item.name;
+          btn.dataset.price = item.price || 0;
+          btn.dataset.tax = item.tax_rate || 25;
+          btn.dataset.sku = item.sku || '';
+          btn.dataset.cat = item.category || '';
+          btn.onclick = function() { addProduct(this); };
+          btn.innerHTML = '<div class="prod-name">' + item.name + '</div>' +
+            '<div class="prod-price">' + parseFloat(item.price || 0).toFixed(2) + ' \u20ac</div>';
+          btn.style.borderLeft = '3px solid #22c55e'; // visual hint: from search
+          grid.appendChild(btn);
+        });
+      })
+      .catch(function() {}); // silent fail
   }
 
   var basket = {};

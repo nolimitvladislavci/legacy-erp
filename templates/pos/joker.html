@@ -285,13 +285,6 @@
 {% endif %}
 
 
-{% if is_gastro %}
-<!-- ═══ GASTRO: Table Grid ════════════════════════════════════════════════ -->
-<div id="gastro-tables" style="padding:.6rem;border-bottom:2px solid var(--gold)">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-    <div style="font-size:.85rem;font-weight:700;color:var(--gold)">
-      <i class="fas fa-utensils"></i> Raspored stolova
-      {% if open_receipts %}<span style="font-size:.7rem;color:var(--muted);margin-left:.5rem">{{ open_receipts|length }} aktivni{{ open_receipts|length|pluralize:",h" }}</span>{% endif %}
     </div>
     <button class="btn btn-ghost btn-sm" onclick="openGastroNewBon()" style="font-size:.75rem">+ Novi bon</button>
   </div>
@@ -320,7 +313,7 @@
 
     <!-- Search + Scanner -->
     <div class="prod-search" style="display:flex;gap:6px;align-items:center">
-      <input type="text" id="prodSearch" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="posSearchItems(this.value)" autocomplete="off" style="flex:1" id="prodSearch">
+      <input type="text" id="prodSearch" placeholder="{% trans "Pretrazi proizvode..." %}" oninput="filterProducts(this.value)" autocomplete="off" style="flex:1" id="prodSearch">
       <button type="button" onclick="openSmartCreate(function(d){ if(typeof addItemToBasket==='function'){addItemToBasket(d)} else if(typeof showToast==='function'){showToast('Artikl dodan: '+d.name)} })" title="{% trans 'Dodaj novi artikal' %}" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:1.1rem;cursor:pointer;flex-shrink:0;font-weight:700;line-height:1.2">+</button>
       <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Glasovni unos">
         <i class="fas fa-microphone"></i>
@@ -777,7 +770,7 @@ function selectGastroTable(el) {
   const rid = el.dataset.rid;
   if (rid) {
     // Load existing receipt into basket
-    fetch('/pos/api/receipt/' + rid + '/json/', {headers:{'Accept':'application/json'}})
+    fetch('/pos/receipt/' + rid + '/json/', {headers:{'Accept':'application/json'}})
       .then(r => r.ok ? r.json() : Promise.reject(r))
       .then(data => {
         if (typeof loadReceiptIntoBasket === 'function') loadReceiptIntoBasket(data);
@@ -801,42 +794,6 @@ function openGastroNewBon() {
 </script>
 {% endif %}
 
-{% if is_gastro %}
-<script src="/static/js/pos/pos-restaurant.js"></script>
-<script src="/static/js/pos/pos-pfand.js"></script>
-<script>
-// ── Gastro Table Interaction ──────────────────────────────
-window._gastroSelectedTable = null;
-function selectGastroTable(el) {
-  document.querySelectorAll('.gastro-tbl').forEach(t => t.style.boxShadow = '');
-  el.style.boxShadow = '0 0 0 3px rgba(201,168,76,.4)';
-  window._gastroSelectedTable = el.dataset.table;
-  const rid = el.dataset.rid;
-  if (rid) {
-    // Load existing receipt into basket
-    fetch('/pos/api/receipt/' + rid + '/json/', {headers:{'Accept':'application/json'}})
-      .then(r => r.ok ? r.json() : Promise.reject(r))
-      .then(data => {
-        if (typeof loadReceiptIntoBasket === 'function') loadReceiptIntoBasket(data);
-        fenixToast('Stol ' + el.dataset.table + ' učitan');
-      })
-      .catch(() => fenixToast('Greška pri učitavanju stola', 'error'));
-  } else {
-    // Clear basket for new table
-    if (typeof clearBasket === 'function') clearBasket();
-    fenixToast('Stol ' + el.dataset.table + ' — novi bon');
-  }
-}
-function openGastroNewBon() {
-  const table = prompt('Broj stola (prazno za šank):');
-  if (table !== null) {
-    window._gastroSelectedTable = table || null;
-    if (typeof clearBasket === 'function') clearBasket();
-    fenixToast(table ? 'Stol ' + table + ' — spreman' : 'Šank — spreman');
-  }
-}
-</script>
-{% endif %}
 
 <!-- Zakljucak smjene modal — 3 koraka -->
 <div class="shift-modal" id="shiftModal">
@@ -880,6 +837,25 @@ function openGastroNewBon() {
   </div>
 </div>
 
+
+<script>
+// addItemToBasket: bridge SmartCreate → POS basket
+window.addItemToBasket = function(data) {
+  if (!data || !data.id) return;
+  var id = String(data.id);
+  var name = data.name || 'Artikl';
+  var price = parseFloat(data.price || data.unit_price || 0);
+  var tax = parseFloat(data.tax_rate || data.tax || 25);
+  var sku = data.sku || '';
+  if (typeof basket !== 'undefined') {
+    if (basket[id]) { basket[id].qty += 1; }
+    else { basket[id] = { name: name, price: price, tax: tax, qty: 1, sku: sku }; }
+    if (typeof updateQtyBadge === 'function') updateQtyBadge(id);
+    if (typeof renderBasket === 'function') renderBasket();
+    if (typeof fenixToast === 'function') fenixToast(name + ' dodan');
+  }
+};
+</script>
 {% include "inventory/includes/_smart_create_modal.html" %}
 {% include "includes/_share_modal.html" %}
 <script>

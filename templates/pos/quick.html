@@ -502,6 +502,25 @@
   </div>
 </div>
 
+
+<script>
+// addItemToBasket: bridge SmartCreate → POS basket
+window.addItemToBasket = function(data) {
+  if (!data || !data.id) return;
+  var id = String(data.id);
+  var name = data.name || 'Artikl';
+  var price = parseFloat(data.price || data.unit_price || 0);
+  var tax = parseFloat(data.tax_rate || data.tax || 25);
+  var sku = data.sku || '';
+  if (typeof basket !== 'undefined') {
+    if (basket[id]) { basket[id].qty += 1; }
+    else { basket[id] = { name: name, price: price, tax: tax, qty: 1, sku: sku }; }
+    if (typeof updateQtyBadge === 'function') updateQtyBadge(id);
+    if (typeof renderBasket === 'function') renderBasket();
+    if (typeof fenixToast === 'function') fenixToast(name + ' dodan');
+  }
+};
+</script>
 {% include "inventory/includes/_smart_create_modal.html" %}
 {% include "includes/_share_modal.html" %}
 <script>
