@@ -183,9 +183,9 @@ def register_step2_combined(request):
         elif company_data["country"] == "HR" and not _re.match(r'^\d{11}$', company_data["oib"]):
             errors["oib"] = "Hrvatski OIB mora imati točno 11 znamenki."
 
-        # User validation
-        if not user_data["first_name"]:
-            errors["first_name"] = "Ime je obavezno."
+        # User validation — first_name auto-fill iz email prefiksa ako prazno
+        if not user_data["first_name"] and user_data.get("email"):
+            user_data["first_name"] = user_data["email"].split("@")[0].replace(".", " ").title()
         if not user_data["email"]:
             errors["email"] = "Email je obavezan."
         elif User.objects.filter(email=user_data["email"]).exists():
