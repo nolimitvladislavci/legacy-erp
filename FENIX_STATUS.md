@@ -677,3 +677,42 @@ Podsjetnik: ~25.04.2026.
 P1: CC_TASK_DRON1 → CC_TASK_DRON2 → PgBouncer aktivacija
 P2: T&C middleware aktivirati (core/settings.py MIDDLEWARE)
 P3: Golubar dodati u INSTALLED_APPS
+
+---
+
+## ★ SESIJA 02.04.2026 (popodne) — Sonnet + Ivan
+
+### Git HEAD: 881a3f10
+
+### Deployano ove sesije:
+| Što | Commit | Status |
+|-----|--------|--------|
+| seed_knowledge_base command | 7cfce31a | ✅ DONE — 19 članaka, RAG aktivan |
+| RAG fix (views.py:17) | prethodno | ✅ DONE — retrieve_knowledge() |
+| max_tokens 2048→4096 | prethodno | ✅ DONE |
+| CC_TASK_KUCNI_LJUBIMCI_MASTER.md | 881a3f10 | ✅ PLAN — ZAMRZNUT do svibnja |
+
+### AI Frontend ocjena nakon popravaka: 6.4 → 7.3/10
+Ostaje: RAG KnowledgeBase punjenje ✅ DONE | BORG autonomija suggest_only | Pending 64 akcija
+
+### Strateške odluke (zabetonarane):
+1. **Kućni ljubimci modul — ZAMRZNUT do GO-LIVE 15.4.**
+   - Faza 1 (Azil MVP): travanj/svibanj
+   - Faza 2 (Kinologija): lipanj
+   - Faza 3 (Burza): rujan
+2. **Azil poslovni model:** 1 EUR/mj + 1.5% donacijska provizija + burza štenadi 5 EUR/oglas
+3. **Verified badge:** 3 razine (UNVERIFIED → DOCS_SENT → VERIFIED), nikad automatski
+4. **Chip scanner:** Web Bluetooth + BT RFID čitač emulira tipkovnicu, ne trebamo poseban SDK
+5. **ChatJimmy:** odbačen — Llama 3.1 8B 3-bit kvantiziran, ispod Haiku kvalitete
+6. **Scope creep zaštita:** CC Code ne dira kucni_ljubimci do mog signal post-15.4.
+
+### Dokumentacija koja je nastala:
+- CC_TASK_KUCNI_LJUBIMCI_MASTER.md — 737 linija, svi modeli, tri faze
+- KnowledgeArticle: 78 aktivnih (19 novih: compliance + POS + invoicing + general)
+- Compliance audit: 2 korekcije (PDV kava 25%, JOPPD min 2000 EUR)
+- e-Račun: potvrđen datum 1.1.2026 iz porezna.gov.hr (NN 89/25)
+
+### HITNO — sljedeća akcija (blokira 15.4.):
+**CC_TASK_DRON1_SYNESIS_VETO.md** — invoice mapping (0.9% → 70%+)
+Rok: 07.04.2026.
+
