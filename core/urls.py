@@ -419,4 +419,5 @@ urlpatterns += [
 from core.views_scan import fenix_scan
 urlpatterns += [
     path('api/fenix/scan/', fenix_scan, name='fenix_scan'),
+    path('api/csrf-token/', __import__('core.csrf_handler', fromlist=['csrf_token_view']).csrf_token_view, name='csrf_token'),
 ]

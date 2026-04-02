@@ -695,5 +695,83 @@ function sendReport(){
   }).catch(()=>{document.getElementById("borg-sig-result").textContent="Greska mreze";btn.disabled=false;btn.textContent="Pošalji prijavu";});
 }
 </script>
+
+<script>
+/* ── FENIX CSRF AUTO-REFRESH ─────────────────────────────────────
+   1. Svakih 8 minuta tiho osvježi token (session traje 12h)
+   2. Interceptira fetch() i XMLHttpRequest — pri csrf_error retry
+   3. Na svaki form submit injektira svjež token
+   ──────────────────────────────────────────────────────────────── */
+(function(){
+  function getCsrf(){
+    var m=document.cookie.match(/csrftoken=([^;]+)/);
+    return m?m[1]:'';
+  }
+
+  function setCsrf(token){
+    document.cookie='csrftoken='+token+';path=/;SameSite=Lax';
+    document.querySelectorAll('[name=csrfmiddlewaretoken]').forEach(function(el){
+      el.value=token;
+    });
+  }
+
+  function refreshToken(cb){
+    fetch('/api/csrf-token/',{credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(d){if(d.token){setCsrf(d.token);if(cb)cb(d.token);}})
+      .catch(function(){});
+  }
+
+  // 1. Refresh svakih 8 minuta dok je tab aktivan
+  setInterval(function(){
+    if(!document.hidden) refreshToken();
+  }, 8*60*1000);
+
+  // 2. Na form submit — injektiraj svjež token u hidden input
+  document.addEventListener('submit', function(e){
+    var form = e.target;
+    var csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
+    if(csrfInput){
+      csrfInput.value = getCsrf();
+    }
+  }, true);
+
+  // 3. HTMX — osvježi token prije svakog requesta
+  document.addEventListener('htmx:configRequest', function(e){
+    e.detail.headers['X-CSRFToken'] = getCsrf();
+  });
+
+  // 4. Interceptiraj fetch — pri csrf_error auto-retry
+  var _fetch = window.fetch;
+  window.fetch = function(url, opts){
+    opts = opts || {};
+    if(opts.method && opts.method.toUpperCase() !== 'GET'){
+      opts.headers = opts.headers || {};
+      if(!opts.headers['X-CSRFToken']){
+        opts.headers['X-CSRFToken'] = getCsrf();
+      }
+    }
+    return _fetch(url, opts).then(function(resp){
+      if(resp.status === 200){
+        // Provjeri je li csrf_error JSON
+        var ct = resp.headers.get('content-type')||'';
+        if(ct.includes('application/json')){
+          return resp.clone().json().then(function(d){
+            if(d && d.csrf_error && d.new_token){
+              setCsrf(d.new_token);
+              // Retry isti request s novim tokenom
+              opts.headers['X-CSRFToken'] = d.new_token;
+              return _fetch(url, opts);
+            }
+            return resp;
+          }).catch(function(){ return resp; });
+        }
+      }
+      return resp;
+    });
+  };
+})();
+</script>
+
 </body>
 </html>
