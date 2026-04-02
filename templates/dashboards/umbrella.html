@@ -209,7 +209,21 @@
       </h4>
       <p style="color:var(--text-muted,#64748b);font-size:.82rem;margin:4px 0 0">Umbrella Dashboard</p>
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center">
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <a href="{% url 'pos:dashboard' %}"
+         style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+                background:linear-gradient(135deg,#166534,#14532d);color:#4ade80;
+                border:1px solid rgba(74,222,128,.3);border-radius:8px;
+                font-weight:700;font-size:.85rem;text-decoration:none;">
+        <i class="fas fa-cash-register"></i> Otvori POS
+      </a>
+      <a href="{% url 'companies:settings' %}"
+         style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+                background:var(--bg-card,#fff);color:var(--text-secondary,#475569);
+                border:1px solid var(--border,#e2e8f0);border-radius:8px;
+                font-weight:600;font-size:.85rem;text-decoration:none;">
+        <i class="fas fa-cog"></i> Postavke
+      </a>
       {% if all_umbrellas %}
       <form method="get">
         <select name="umbrella" onchange="this.form.submit()" style="padding:6px 12px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;color:var(--text,#0f172a);font-size:.82rem">
