@@ -1,0 +1,91 @@
+{% load fenix_ai i18n %}
+<div class="fenix-ai-widget" style="background:var(--bg-card);border:1px solid var(--border);
+     border-left:3px solid rgba(139,92,246,.5);border-radius:12px;overflow:hidden;">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;
+              padding:.75rem 1rem;border-bottom:1px solid var(--border);">
+    <span style="font-size:.72rem;font-weight:600;text-transform:uppercase;
+                 letter-spacing:1.5px;color:#7c3aed;">
+      &#x1F916; BORG AI aktivnost
+    </span>
+    {% if unreviewed > 0 %}
+    <span style="background:rgba(139,92,246,.15);color:#7c3aed;padding:.15rem .55rem;
+                 border-radius:12px;font-size:.7rem;font-weight:700;">
+      {{ unreviewed }} na čekanju
+    </span>
+    {% else %}
+    <span style="font-size:.72rem;color:var(--text-muted);">Sve pregledano ✓</span>
+    {% endif %}
+  </div>
+
+  {% if actions %}
+  <div>
+    {% for action in actions %}
+    <div id="ai-action-{{ action.id }}"
+         style="display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 1rem;
+                border-bottom:1px solid var(--border-light);
+                {% if not action.is_reviewed %}background:rgba(139,92,246,.03);{% endif %}">
+
+      <div style="margin-top:.1rem;font-size:1rem;flex-shrink:0;">
+        {% if action.action_type == "booking" %}&#x1F4D2;
+        {% elif action.action_type == "classification" %}&#x1F3F7;
+        {% elif action.action_type == "ocr" %}&#x1F4F7;
+        {% elif action.action_type == "import" %}&#x1F4E5;
+        {% elif action.action_type == "anomaly" %}&#x26A0;
+        {% elif action.action_type == "compliance" %}&#x2705;
+        {% else %}&#x1F916;{% endif %}
+      </div>
+
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.82rem;color:var(--text);line-height:1.3;">
+          {{ action.description }}
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-top:.25rem;flex-wrap:wrap;">
+          <span style="font-size:.7rem;color:var(--text-muted);">
+            {{ action.created_at|timesince }} ago &middot;
+            {{ action.get_ai_model_display }}
+          </span>
+          {% if action.confidence %}
+          <span style="font-size:.68rem;font-weight:700;
+                       color:{{ action.confidence|ai_confidence_color }};">
+            {{ action.confidence }}%
+          </span>
+          {% endif %}
+          {% if action.source_object %}
+          <span style="font-size:.68rem;color:var(--text-muted);
+                       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">
+            ← {{ action.source_object }}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="flex-shrink:0;display:flex;align-items:center;gap:.4rem;">
+        {% if action.is_reviewed %}
+        {% ai_status_pill "done" %}
+        {% else %}
+        <button hx-post="/ai/actions/{{ action.id }}/review/"
+                hx-target="#ai-action-{{ action.id }}"
+                hx-swap="outerHTML"
+                hx-headers='{"X-CSRFToken": "{{ request.META.CSRF_COOKIE }}"}'
+                style="background:transparent;border:1px solid rgba(139,92,246,.3);
+                       color:#7c3aed;padding:.2rem .6rem;border-radius:6px;
+                       font-size:.7rem;font-weight:600;cursor:pointer;
+                       transition:background .15s;"
+                onmouseover="this.style.background='rgba(139,92,246,.1)'"
+                onmouseout="this.style.background='transparent'">
+          Pregledaj
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.82rem;">
+    <div style="font-size:1.5rem;margin-bottom:.5rem;opacity:.3;">&#x1F916;</div>
+    AI još nije poduzeo akciju za ovaj zapis.
+  </div>
+  {% endif %}
+
+</div>

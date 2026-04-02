@@ -11,3 +11,11 @@ urlpatterns = [
     # BORG Signal
     path("api/signal/", __import__("limit_connect_ai.views_signal", fromlist=["submit_signal"]).submit_signal, name="borg_signal"),
 ]
+
+
+# AI Actions review
+from . import views_ai_actions  # noqa: E402
+urlpatterns += [
+    path("actions/<int:action_id>/review/", views_ai_actions.review_action, name="review_ai_action"),
+    path("actions/", views_ai_actions.ai_actions_list, name="ai_actions_list"),
+]

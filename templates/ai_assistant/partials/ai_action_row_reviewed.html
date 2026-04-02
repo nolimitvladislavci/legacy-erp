@@ -1,0 +1,14 @@
+{% load fenix_ai %}
+<div id="ai-action-{{ action.id }}"
+     style="display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 1rem;
+            border-bottom:1px solid var(--border-light);opacity:.6;">
+  <div style="margin-top:.1rem;font-size:1rem;flex-shrink:0;">&#x2705;</div>
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:.82rem;color:var(--text);">{{ action.description }}</div>
+    <div style="font-size:.7rem;color:var(--text-muted);margin-top:.2rem;">
+      Pregledano {{ action.reviewed_at|timesince }} ago
+      {% if action.reviewed_by %} od {{ action.reviewed_by.get_full_name|default:action.reviewed_by.username }}{% endif %}
+    </div>
+  </div>
+  <div>{% ai_status_pill "done" %}</div>
+</div>
