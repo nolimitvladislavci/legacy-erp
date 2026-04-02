@@ -716,3 +716,26 @@ Ostaje: RAG KnowledgeBase punjenje ✅ DONE | BORG autonomija suggest_only | Pen
 **CC_TASK_DRON1_SYNESIS_VETO.md** — invoice mapping (0.9% → 70%+)
 Rok: 07.04.2026.
 
+
+---
+
+## ★ GEMINI STRATOSFERA DRONI — Odluke (02.04.2026.)
+
+### Dron #1 Multi-tenant: 12 modela BEZ CompanyManager (produkcija)
+KRITIČNI (2):
+- pos/hashchain.py:ChainLink → CC Code dodaje CompanyManager ODMAH
+- gov_export/models.py → CC Code dodaje CompanyManager ODMAH
+
+NISKI RIZIK (ne mijenjati sada):
+- einvoice/models/* — komentari potvrđuju tenant-aware, ručni filter u viewovima
+- limit_connect_ai/* — interni AI modeli, korisnik ne vidi
+
+### Dron #2 Javna nabava: IVAN akcija
+- /pricing/?profile=jls — novi profil, godišnji paket ispod 2.388 EUR
+- Ime: "Godišnja usluga digitalnog upravljanja evidencijama"
+- Marija zna pravi prag za OBŽ — konzultirati
+
+### Dron #3 Monolith: POS deploy pravilo (zabetonarano)
+- POS commitovi: SAMO utorak-srijeda
+- Nikad solo push na POS/invoicing/einvoice bez review
+- Feature flags: post-launch sprint
