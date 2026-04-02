@@ -494,7 +494,9 @@ def split_bill(request, receipt_id):
             split_item_ids = split.get('items', [])
             method = str(split.get('method', 'CASH')).upper()
 
-            last = session.receipts.order_by('-receipt_number').first()
+            # select_for_update: row lock na session — race condition fix (split receipt)
+            POSSession.objects.select_for_update().filter(pk=session.pk).get()
+            last = session.receipts.select_for_update().order_by('-receipt_number').first()
             next_num = (last.receipt_number + 1) if last else 1
 
             new_receipt = POSReceipt.objects.create(
