@@ -61,10 +61,17 @@ document.addEventListener('DOMContentLoaded',function(){
           <button type="button" class="btn btn-outline-warning btn-sm" onclick="lookupOIB()" title="Traži po OIB-u">🔍</button>
           <button type="button" class="btn btn-sm" id="oibScanBtn"
                   style="background:linear-gradient(135deg,#0c4a6e,#082f49);color:#38bdf8;border:1px solid rgba(56,189,248,.35);"
-                  title="Skeniraj osobnu iskaznicu — AI upisuje OIB automatski"
                   onclick="fenixOpenCamera()">
-            <i class="fas fa-camera"></i> Skeniraj osobnu
+            <i class="fas fa-camera"></i> Kamera
           </button>
+          <label style="display:inline-flex;align-items:center;gap:5px;
+                        background:#1e293b;color:#94a3b8;border:1px solid #334155;
+                        border-radius:6px;padding:4px 10px;font-size:.82rem;
+                        font-weight:600;cursor:pointer;margin-left:2px;">
+            <i class="fas fa-image"></i> Galerija
+            <input type="file" accept="image/*" style="display:none;"
+                   onchange="fenixGalleryDirect(this)">
+          </label>
         </div>
         <div id="oibResult" style="font-size:.78rem;margin-top:3px;min-height:16px"></div>
       </div>
@@ -875,6 +882,11 @@ document.addEventListener('click', function(e) {
 
 <script>
 var _fenixStream = null;
+
+function fenixGalleryDirect(input) {
+  if (!input.files || !input.files[0]) return;
+  fenixSendToAI(input.files[0], input.files[0].name);
+}
 
 function fenixOpenCamera() {
   var modal = document.getElementById('fenixCamModal');
