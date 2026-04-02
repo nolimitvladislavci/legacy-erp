@@ -26,9 +26,14 @@ class PartnerForm(forms.ModelForm):
         return name
 
     def clean_oib(self):
+        from core.oib_validator import validate_oib_hr
         oib = self.cleaned_data.get("oib", "").strip()
-        if oib and len(oib) == 11 and not oib.isdigit():
-            raise ValidationError(_("OIB mora imati 11 znamenki."))
+        if not oib:
+            return oib
+        if len(oib) != 11 or not oib.isdigit():
+            raise ValidationError(_("OIB mora imati točno 11 znamenki."))
+        if not validate_oib_hr(oib):
+            raise ValidationError(_("OIB nije ispravan (modulo 11 provjera). Provjerite broj."))
         return oib
 
     def clean_email(self):
