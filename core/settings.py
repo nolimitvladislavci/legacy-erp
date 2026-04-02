@@ -745,10 +745,11 @@ if SENTRY_DSN and not DEBUG:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(), CeleryIntegration()],
-        traces_sample_rate=0.2,       # 20% transakcija za performance monitoring
-        send_default_pii=True,         # Šalje user ID za kontekst greške
+        traces_sample_rate=0.0,       # 0% — ne troši kvotu na performance, samo errors
+        send_default_pii=False,        # GDPR: ne šalje PII prema Sentryu
         environment='production',
-        release=f'limit-connect@2026.03.18',
+        release='limit-connect@2026.04.02',
+        before_send=lambda event, hint: None if event.get('level') not in ('error', 'fatal') else event,
     )
 
 
