@@ -397,6 +397,27 @@ CELERY_TASK_REJECT_ON_WORKER_LOST = True
 CELERY_TASK_SOFT_TIME_LIMIT = 300
 CELERY_TASK_TIME_LIMIT = 600
 
+# ── Queue routing: POS = brzo/kritično, heavy = bulk/AI/PDF ──────────────
+CELERY_TASK_ROUTES = {
+    # POS queue — fiskalizacija, hash chain, fiscal deadline
+    'pos.retry_fiscalization': {'queue': 'pos'},
+    'pos.check_fiscal_deadline': {'queue': 'pos'},
+    'pos.generate_missing_daily_reports': {'queue': 'pos'},
+    'pos.cleanup_zombie_sessions': {'queue': 'pos'},
+    'pos.auto_escalate_complaints': {'queue': 'pos'},
+    'pos.weekly_complaints_digest': {'queue': 'pos'},
+    # Heavy queue — bulk import, PDF, AI, synesis
+    'smart_import.tasks.*': {'queue': 'heavy'},
+    'synesis.tasks.*': {'queue': 'heavy'},
+    'udruge.tasks.generate_azil_monthly_report': {'queue': 'heavy'},
+    'udruge.tasks.send_email_campaign': {'queue': 'heavy'},
+    'udruge.tasks.ai_search_eu_funds': {'queue': 'heavy'},
+    'udruge.tasks.generate_trosarina_report': {'queue': 'heavy'},
+    'einvoice.tasks.outbound_tasks.send_einvoice': {'queue': 'heavy'},
+    'einvoice.tasks.outbound_tasks.process_retry_queue': {'queue': 'heavy'},
+}
+CELERY_TASK_DEFAULT_QUEUE = 'default'
+
 from celery.schedules import crontab  # noqa: E402
 
 CELERY_BEAT_SCHEDULE = {
