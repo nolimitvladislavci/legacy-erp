@@ -641,7 +641,7 @@ Podsjetnik: ~25.04.2026.
 
 | Dron | Naziv | Opis | CC_TASK | Rok | Status |
 |------|-------|------|---------|-----|--------|
-| #1 | Računovodstveni Veto | Synesis ID mapping fix (0.9%→70%+) + Marija UBL test | CC_TASK_DRON1_SYNESIS_VETO.md | 07.04. | 🔴 ČEKA |
+| #1 | Računovodstveni Veto | Synesis ID mapping fix | CC_TASK_DRON1_SYNESIS_VETO.md | 07.04. | ✅ DONE |
 | #2 | Lijevak Smrti | Onboarding: 3 polja → wizard, ne 12 polja odjednom | CC_TASK_DRON2_ONBOARDING_WIZARD.md | 10.04. | 🔴 ČEKA |
 | #3 | Frankenstein CSS | CSS token kirurgija — samo CSS, ne HTML predlošci | CC_TASK_DRON3_CSS_KIRURGIJA.md | 12.04. | 🟡 ČEKA |
 
@@ -668,7 +668,7 @@ Podsjetnik: ~25.04.2026.
 ### Git HEAD: 77df536e
 
 ### Otvoreni CC_TASK za go-live 15.04.:
-1. CC_TASK_DRON1_SYNESIS_VETO.md — Synesis invoice mapping (rok 07.04.)
+1. CC_TASK_DRON1_SYNESIS_VETO.md — ✅ ZATVOREN
 2. CC_TASK_DRON2_ONBOARDING_WIZARD.md — 3 polja registracija (rok 10.04.)
 3. CC_TASK_DRON3_CSS_KIRURGIJA.md — CSS token fix (rok 12.04.)
 4. CC_TASK_PIN_ONBOARDING.md — korisnici bez emaila (nakon 15.04.)
@@ -782,8 +782,8 @@ NISKI RIZIK (ne mijenjati sada):
 ### Preostalo za go-live 15.04.:
 | Zadatak | Rok | Status |
 |---------|-----|--------|
-| CC_TASK_DRON1_SYNESIS_VETO | 07.04. | 🔴 CC Code |
-| CC_TASK_DRON2_ONBOARDING_WIZARD | 10.04. | 🔴 CC Code |
+| CC_TASK_DRON1_SYNESIS_VETO | 07.04. | ✅ DONE |
+| CC_TASK_DRON2_ONBOARDING_WIZARD | 10.04. | ✅ DONE |
 | CC_TASK_CELERY_QUEUE_SPLIT | 05.04. | 🔴 CC Code |
 | Pricing JLS profil (Ivan+Marija) | 10.04. | 🟡 Ivan |
 | Load test CCX33 | 12.04. | ⏳ |
@@ -813,3 +813,13 @@ Preostalo je na Mariji — nije bug, business reality.
 | seed_azil_demo | manage.py seed_azil_demo [--wipe] [--samo-azil] [--samo-ljubeta] | 15 azil životinja + Ljubeta Novak uzgajivačnica |
 | seed_knowledge_base | manage.py seed_knowledge_base [--run] [--update] | 19 compliance/POS/invoicing članaka |
 | seed_azil_compliance | manage.py seed_azil_compliance | 11 azil compliance stavki |
+
+---
+
+## ★ TASKOVI SKINUT S PLOČE (02.04.2026. — Ivan potvrda)
+
+| Task | Status | Napomena |
+|------|--------|----------|
+| CC_TASK_DRON1_SYNESIS_VETO | ✅ ZATVOREN | Import maksimalan, ostatak Marija |
+| CC_TASK_DRON2_ONBOARDING_WIZARD | ✅ ZATVOREN | Wizard implementiran |
+
