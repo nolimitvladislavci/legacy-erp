@@ -564,3 +564,13 @@ def partner_signup_api(request):
         pass
 
     return JsonResponse({'ok': True, 'partner_id': str(partner.pk)[:8]})
+
+@login_required
+def feedback_count_api(request):
+    """Vraća broj novih ImprovementSuggestion za badge u sidebaru."""
+    if not request.user.is_superuser:
+        return JsonResponse({'count': 0})
+    from pos.models import ImprovementSuggestion
+    count = ImprovementSuggestion.objects.filter(status='new', source='user').count()
+    return JsonResponse({'count': count})
+

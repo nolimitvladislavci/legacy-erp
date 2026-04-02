@@ -798,6 +798,26 @@ function sendReport(){
 })();
 </script>
 
+
+<script>
+{% if user.is_superuser %}
+(function(){
+  function loadFeedbackBadge(){
+    fetch('/api/feedback/count/',{credentials:'same-origin'})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var b=document.getElementById('sidebar-feedback-badge');
+      if(!b) return;
+      if(d.count>0){b.textContent=d.count;b.style.display='inline';}
+      else{b.style.display='none';}
+    }).catch(function(){});
+  }
+  loadFeedbackBadge();
+  setInterval(loadFeedbackBadge, 60000);
+})();
+{% endif %}
+</script>
+
 <!-- ═══ ZLATNO DUGME — Floating feedback button ═══ -->
 {% if user.is_authenticated %}
 <style>
