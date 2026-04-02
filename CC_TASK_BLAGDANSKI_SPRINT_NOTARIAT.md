@@ -307,3 +307,18 @@ venv/bin/python manage.py migrate
 ---
 *Cilj: Demo spreman 14.04. za Šimašeka i odvjetnike post-Uskrs*
 *Šimašek: toplim kontakt, bivši klijent potrošnog materijala, Osijek*
+
+
+---
+
+## DODATAK — AI asistencija za otvaranje firmi (Ivan 02.04.)
+
+Uz predloške dodati AI wizard koji:
+1. Korisnik odabere vrstu (j.d.o.o., d.o.o., obrt, OPG, udruga)
+2. AI (Haiku) postavlja pitanja jedno po jedno
+3. Automatski popunjava predložak
+4. Validira OIB, MBS, NKD kod
+5. Generira PDF spreman za bilježnika
+
+Posebno: AI predlaže NKD kod na osnovu opisa djelatnosti korisnika
+("prodajem kavu" → 56.10 Restorani i ostali objekti za pripremu hrane)
