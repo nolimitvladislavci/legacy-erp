@@ -199,6 +199,7 @@ TEMPLATES = [{
             "django.template.context_processors.request",
             "django.contrib.auth.context_processors.auth",
             "django.contrib.messages.context_processors.messages",
+                    "core.context_processors.failed_imports_badge",
             "companies.context_processors.sidebar_modules",
             "permissions.context_processors.permissions_context",
             "permissions.context_processors.subscription_context",

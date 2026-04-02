@@ -19,8 +19,8 @@ class OnboardingWizardTests(TestCase):
     def setUp(self):
         self.company = Company.objects.create(name='Test Wizard Firma', oib='12345678901')
         self.user = User.objects.create_user(username='wizard_user', password='test123')
-        from core.models import UserRole
-        UserRole.objects.create(user=self.user, company=self.company, role='admin')
+        from accounts.models import UserProfile
+        UserProfile.objects.create(user=self.user, company=self.company)
         self.client = Client()
         self.client.login(username='wizard_user', password='test123')
 

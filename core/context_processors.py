@@ -130,6 +130,24 @@ def module_context(request):
         return {}
 
 
+def failed_imports_badge(request):
+    """Badge za sidebar/dashboard: neuspjeli uvozi koji čekaju pažnju korisnika."""
+    if not hasattr(request, 'user') or not request.user.is_authenticated:
+        return {}
+    try:
+        from smart_import.models import FailedImport
+        from core.company_utils import get_user_company
+        company = get_user_company(request)
+        if not company:
+            return {}
+        count = FailedImport.objects.filter(
+            company=company, resolved=False
+        ).count()
+        return {'failed_imports_count': count}
+    except Exception:
+        return {'failed_imports_count': 0}
+
+
 def pending_claims_badge(request):
     """Badge za sidebar: broj pending claim zahtjeva."""
     if not hasattr(request, 'user') or not request.user.is_authenticated:
