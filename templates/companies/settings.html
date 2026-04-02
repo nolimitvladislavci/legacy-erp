@@ -837,4 +837,74 @@ document.addEventListener('click', function(e) {
   }
 });
 </script>
+
+<script>
+function fenixScanOIB() {
+  var btn = document.getElementById('oibScanBtn');
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.setAttribute('capture', 'environment');
+  input.style.display = 'none';
+  document.body.appendChild(input);
+
+  input.onchange = function() {
+    if (!input.files || !input.files[0]) { document.body.removeChild(input); return; }
+    var file = input.files[0];
+    document.body.removeChild(input);
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI obrađuje...';
+    btn.disabled = true;
+
+    var fd = new FormData();
+    fd.append('file', file);
+    fd.append('doc_type', 'id_card');
+    fd.append('source_module', 'company_settings');
+
+    var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+    var csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfEl) csrf = csrfEl.value;
+
+    fetch('/api/fenix/scan/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': csrf},
+      body: fd
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var oibField = document.getElementById('coOib');
+      var resultEl = document.getElementById('oibResult');
+      var filled = false;
+
+      if (data.fields) {
+        if (data.fields.oib) {
+          oibField.value = data.fields.oib;
+          resultEl.innerHTML = '<span style="color:#4ade80;font-weight:600">✓ OIB: ' + data.fields.oib + '</span>';
+          filled = true;
+        }
+        if (data.fields.name) {
+          var nameEl = document.getElementById('coName') || document.querySelector('[name=name]');
+          if (nameEl) nameEl.value = data.fields.name;
+        }
+      }
+
+      if (!filled) {
+        resultEl.innerHTML = '<span style="color:#fbbf24">⚠ OIB nije prepoznat — unesite ručno</span>';
+      }
+
+      btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
+      btn.disabled = false;
+    })
+    .catch(function(err){
+      document.getElementById('oibResult').innerHTML =
+        '<span style="color:#f87171">Greška pri skeniranju. Unesite OIB ručno.</span>';
+      btn.innerHTML = '<i class="fas fa-camera"></i> Skeniraj osobnu';
+      btn.disabled = false;
+    });
+  };
+
+  input.click();
+}
+</script>
+
 {% endblock %}
