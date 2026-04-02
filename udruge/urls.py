@@ -227,4 +227,6 @@ urlpatterns = [
     # Glazbena škola
     path('glazbena-skola/', views.glazbena_skola_dashboard, name='glazbena_skola_dashboard'),
     path('glazbena-skola/fakturiraj/', views.glazbena_skola_fakturiraj, name='glazbena_fakturiraj'),
+    path('glazbena-skola/dodaj-ucenika/', views.glazbena_dodaj_ucenika, name='glazbena_dodaj_ucenika'),
+    path('glazbena-skola/dodaj-sat/', views.glazbena_dodaj_sat, name='glazbena_dodaj_sat'),
 ]

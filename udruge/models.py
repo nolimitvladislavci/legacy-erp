@@ -2724,6 +2724,14 @@ class GlazbeniUcenik(models.Model):
     telefon = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
 
+    # Veza na dijete iz vrtića (vrtić→KUD pipeline)
+    child = models.OneToOneField(
+        'kindergarten.Child', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='glazbeni_ucenik',
+        help_text='Ako je ucenik dosao iz vrtica'
+    )
+
     instrument = models.CharField(max_length=100, blank=True,
         help_text='Primarni instrument / predmet')
     razina = models.CharField(max_length=20, choices=RAZINA_CHOICES, default='osnovna_1_3')

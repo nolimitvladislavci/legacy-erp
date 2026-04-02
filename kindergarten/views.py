@@ -544,3 +544,76 @@ def bulk_import_children(request):
         form = BulkChildImportForm()
 
     return render(request, 'kindergarten/bulk_import.html', {'form': form})
+
+
+# ── Vrtić → KUD pipeline ──────────────────────────────────────────
+
+@login_required
+@require_POST
+def preporuci_u_kud(request):
+    """
+    Odgajateljica preporuči dijete za KUD glazbenu školu.
+    Kreira GlazbeniUcenik s vezom na Child + WhatsApp roditelju.
+    """
+    from kindergarten.models import Child, ChildGuardian
+    from udruge.models import GlazbeniUcenik, GlazbenaSkola
+
+    company = _company(request)
+    child_id = request.POST.get('child_id')
+    instrument = request.POST.get('instrument', 'Tambura (prim)')
+    napomena = request.POST.get('napomena', '')
+
+    child = get_object_or_404(Child, pk=child_id, company=company)
+
+    # Check if already recommended
+    if GlazbeniUcenik.objects.filter(child=child).exists():
+        messages.warning(request, f'{child} je već preporučen/a za KUD.')
+        return redirect('kindergarten:child_detail', pk=child.pk)
+
+    # Find KUD company in same umbrella or same location
+    from companies.models import Company
+    kud = Company.objects.filter(name__icontains='KUD', city=company.city).first()
+    if not kud:
+        kud = Company.objects.filter(name__icontains='KUD').first()
+    if not kud:
+        messages.error(request, 'KUD nije pronađen u sustavu.')
+        return redirect('kindergarten:child_detail', pk=child.pk)
+
+    # Create GlazbeniUcenik
+    guardian = child.primary_guardian
+    ucenik = GlazbeniUcenik.objects.create(
+        company=kud,
+        child=child,
+        ime=child.first_name,
+        prezime=child.last_name,
+        datum_rodenja=child.date_of_birth,
+        instrument=instrument,
+        razina='pripremni',
+        kontakt_roditelj=f'{guardian.first_name} {guardian.last_name}' if guardian else '',
+        telefon=guardian.phone if guardian else '',
+        email=guardian.email if guardian else '',
+        je_aktivan=True,
+        napomene=f'Preporuka iz vrtića: {napomena}' if napomena else 'Preporuka iz vrtića',
+    )
+
+    # WhatsApp roditelju
+    if guardian and guardian.phone:
+        try:
+            from core.whatsapp import send_text
+            send_text(
+                phone=guardian.phone,
+                message=(
+                    f'Postovani {guardian.first_name},\n\n'
+                    f'Odgajateljica je preporucila {child.first_name} za '
+                    f'glazbenu skolu pri KUD-u {kud.name}.\n\n'
+                    f'Instrument: {instrument}\n'
+                    f'Besplatna proba — javite se na +385 91 391 2621.\n\n'
+                    f'Srdacan pozdrav!'
+                ),
+                company_id=str(company.pk),
+            )
+        except Exception:
+            pass
+
+    messages.success(request, f'{child} preporučen/a za KUD {kud.name} — {instrument}')
+    return redirect('kindergarten:child_detail', pk=child.pk)

@@ -4324,3 +4324,93 @@ def glazbena_skola_fakturiraj(request):
         'total': float(invoice.total),
         'sati_count': count,
     })
+
+
+# ── Glazbena škola — inline HTMX endpoints ───────────────────────
+
+@login_required
+@require_POST
+def glazbena_dodaj_ucenika(request):
+    """HTMX POST: inline forma za dodavanje učenika."""
+    company = get_user_company(request)
+    from .models import GlazbeniUcenik, GlazbenaSkola
+
+    ime = request.POST.get('ime', '').strip()
+    prezime = request.POST.get('prezime', '').strip()
+    instrument = request.POST.get('instrument', '').strip()
+    razina = request.POST.get('razina', 'osnovna_1_3')
+    telefon = request.POST.get('telefon', '').strip()
+    kontakt = request.POST.get('kontakt_roditelj', '').strip()
+
+    if not ime or not prezime:
+        return JsonResponse({'ok': False, 'error': 'Ime i prezime su obavezni'}, status=400)
+
+    ucenik = GlazbeniUcenik.objects.create(
+        company=company,
+        ime=ime,
+        prezime=prezime,
+        instrument=instrument,
+        razina=razina,
+        telefon=telefon,
+        kontakt_roditelj=kontakt,
+        je_aktivan=True,
+    )
+
+    html = (
+        f'<tr id="ucenik-{ucenik.pk}">'
+        f'<td><strong>{ucenik.puno_ime}</strong></td>'
+        f'<td>{ucenik.instrument or "-"}</td>'
+        f'<td><span class="badge bg-secondary">{ucenik.get_razina_display()}</span></td>'
+        f'<td>-</td><td></td></tr>'
+    )
+    from django.http import HttpResponse
+    return HttpResponse(html)
+
+
+@login_required
+@require_POST
+def glazbena_dodaj_sat(request):
+    """HTMX POST: inline forma za unos sata (mobile-friendly)."""
+    company = get_user_company(request)
+    from .models import GlazbeniUcenik, SatGlazbene
+    from datetime import date, time as dt_time
+
+    ucenik_id = request.POST.get('ucenik_id')
+    datum_str = request.POST.get('datum', '')
+    pocetak_str = request.POST.get('pocetak', '16:00')
+    trajanje = int(request.POST.get('trajanje_min', 45))
+    vrsta = request.POST.get('vrsta', 'individualni')
+    gradivo = request.POST.get('gradivo', '').strip()
+
+    ucenik = get_object_or_404(GlazbeniUcenik, pk=ucenik_id, company=company)
+
+    try:
+        datum = date.fromisoformat(datum_str) if datum_str else date.today()
+        pocetak = dt_time.fromisoformat(pocetak_str) if pocetak_str else dt_time(16, 0)
+    except (ValueError, TypeError):
+        datum = date.today()
+        pocetak = dt_time(16, 0)
+
+    sat = SatGlazbene.objects.create(
+        company=company,
+        ucenik=ucenik,
+        instruktor=ucenik.instruktor,
+        datum=datum,
+        pocetak=pocetak,
+        trajanje_min=trajanje,
+        vrsta=vrsta,
+        je_odrzan=True,
+        gradivo=gradivo,
+    )
+
+    html = (
+        f'<tr><td>{sat.datum.strftime("%d.%m.")}</td>'
+        f'<td>{ucenik.puno_ime}</td>'
+        f'<td>{sat.instruktor or "-"}</td>'
+        f'<td>{sat.get_vrsta_display()}</td>'
+        f'<td>{sat.trajanje_min} min</td>'
+        f'<td class="text-muted">{sat.gradivo or "-"}</td>'
+        f'<td><span class="badge bg-warning text-dark">Ne</span></td></tr>'
+    )
+    from django.http import HttpResponse
+    return HttpResponse(html)

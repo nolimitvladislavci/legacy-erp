@@ -16,4 +16,5 @@ urlpatterns = [
     path('obavijest/nova/', views.announcement_create, name='announcement_create'),
     path('izvjestaj/novi/', views.daily_report_create, name='daily_report_create'),
     path('import/', views.bulk_import_children, name='bulk_import'),
+    path('preporuci-kud/', views.preporuci_u_kud, name='preporuci_kud'),
 ]
