@@ -2,13 +2,7 @@
 {% load i18n l10n %}
 {% block title %}Postavke tvrtke — LIMIT Connect{% endblock %}
 {% block content %}
-<style>
-.lc-toast{position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:10px;font-size:.85rem;font-weight:600;color:#fff;box-shadow:0 6px 25px rgba(0,0,0,.4);animation:toastIn .3s ease;max-width:380px}
-.lc-toast.success{background:linear-gradient(135deg,#065f46,#047857);border:1px solid #10b981}
-.lc-toast.error{background:linear-gradient(135deg,#7f1d1d,#991b1b);border:1px solid #ef4444}
-@keyframes toastIn{from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-15px)}}
-</style>
+<link rel="stylesheet" href="/static/css/apps/dashboard.css">
 <div id="lcToastContainer"></div>
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div class="d-flex align-items-center gap-2">
@@ -53,7 +47,7 @@ document.addEventListener('DOMContentLoaded',function(){
     {% csrf_token %}
     <div class="row g-3">
       <div class="col-md-6">
-        <label class="form-label fw-bold" style="font-size:.8rem">Naziv tvrtke</label>
+        <label class="form-label fw-bold f-form-label-sm">Naziv tvrtke</label>
         <div style="position:relative">
           <input type="text" name="name" id="coName" class="form-control" value="{{ company.name }}" required
                  oninput="searchCompanyName(this.value)" autocomplete="off">
@@ -61,7 +55,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">OIB / Steuernummer</label>
+        <label class="form-label fw-bold f-form-label-sm">OIB / Steuernummer</label>
         <div class="input-group">
           <input type="text" name="oib" id="coOib" class="form-control" value="{{ company.oib }}" required>
           <button type="button" class="btn btn-outline-warning btn-sm" onclick="lookupOIB()" title="Traži po OIB-u">🔍</button>
@@ -69,53 +63,53 @@ document.addEventListener('DOMContentLoaded',function(){
         <div id="oibResult" style="font-size:.78rem;margin-top:3px;min-height:16px"></div>
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">Drzava</label>
+        <label class="form-label fw-bold f-form-label-sm">Drzava</label>
         <select name="country" class="form-select">
           {% for val, label in country_choices %}<option value="{{ val }}"{% if company.country == val %} selected{% endif %}>{{ label }}</option>{% endfor %}
         </select>
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-bold" style="font-size:.8rem">Adresa</label>
+        <label class="form-label fw-bold f-form-label-sm">Adresa</label>
         <input type="text" name="address" class="form-control" value="{{ company.address }}" placeholder="Ulica i kucni broj">
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">Grad</label>
+        <label class="form-label fw-bold f-form-label-sm">Grad</label>
         <input type="text" name="city" class="form-control" value="{{ company.city }}" placeholder="npr. Zagreb">
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">Postanski broj</label>
+        <label class="form-label fw-bold f-form-label-sm">Postanski broj</label>
         <input type="text" name="zip_code" class="form-control" value="{{ company.zip_code }}" placeholder="npr. 10000">
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-bold" style="font-size:.8rem">IBAN</label>
+        <label class="form-label fw-bold f-form-label-sm">IBAN</label>
         <input type="text" name="iban" class="form-control" value="{{ company.iban }}" placeholder="HR12 3456 7890 1234 5678 9">
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-bold" style="font-size:.8rem">Porezni broj</label>
+        <label class="form-label fw-bold f-form-label-sm">Porezni broj</label>
         <input type="text" name="tax_number" class="form-control" value="{{ company.tax_number }}" placeholder="npr. 56447/32919 (DE) ili OIB">
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-bold" style="font-size:.8rem">PDV ID / VAT ID</label>
+        <label class="form-label fw-bold f-form-label-sm">PDV ID / VAT ID</label>
         <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}" placeholder="npr. HR12345678901 ili DE123456789">
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">Telefon</label>
+        <label class="form-label fw-bold f-form-label-sm">Telefon</label>
         <input type="text" name="phone" class="form-control" value="{{ company.phone }}" placeholder="+385 1 234 5678">
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">Mobitel</label>
+        <label class="form-label fw-bold f-form-label-sm">Mobitel</label>
         <input type="text" name="mobile" class="form-control" value="{{ company.mobile }}" placeholder="+385 91 234 5678">
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">E-mail tvrtke</label>
+        <label class="form-label fw-bold f-form-label-sm">E-mail tvrtke</label>
         <input type="email" name="company_email" class="form-control" value="{{ company.email }}" placeholder="info@firma.hr">
       </div>
       <div class="col-md-3">
-        <label class="form-label fw-bold" style="font-size:.8rem">Web stranica</label>
+        <label class="form-label fw-bold f-form-label-sm">Web stranica</label>
         <input type="url" name="website_url" class="form-control" value="{{ company.website_url }}" placeholder="https://www.firma.hr">
       </div>
       <div class="col-12">
-        <label class="form-label fw-bold" style="font-size:.8rem">NKD djelatnost</label>
+        <label class="form-label fw-bold f-form-label-sm">NKD djelatnost</label>
         <div class="position-relative">
           <input type="text" id="nkdSearch" class="form-control"
             placeholder="Pretrazite po sifri ili opisu (npr. 45.20 Popravak motornih vozila)..."
@@ -128,13 +122,13 @@ document.addEventListener('DOMContentLoaded',function(){
         {% if company.nkd_code %}<small class="text-muted">Trenutna sifra: <strong>{{ company.nkd_code.code }}</strong> – {{ company.nkd_code.name_hr }}</small>{% endif %}
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-bold" style="font-size:.8rem">Logo</label>
+        <label class="form-label fw-bold f-form-label-sm">Logo</label>
         <input type="file" name="logo" class="form-control" accept="image/*">
         {% if company.logo %}<div class="mt-1"><img src="{{ company.logo.url }}" style="max-height:40px;border-radius:4px"></div>{% endif %}
       </div>
     </div>
-    <div class="mt-3" style="position:sticky;bottom:0;background:#0a0a0a;padding:12px 0;z-index:50;border-top:1px solid rgba(201,168,76,.15)">
-      <button type="submit" class="btn btn-primary" style="background:#c9a84c;border-color:#c9a84c;color:#000;font-weight:700"><i class="fas fa-save me-1"></i> Spremi</button>
+    <div class="mt-3 sticky-save-bar">
+      <button type="submit" class="btn btn-primary btn-gold-save"><i class="fas fa-save me-1"></i> Spremi</button>
     </div>
   </form>
 </div>
@@ -178,11 +172,11 @@ document.addEventListener('DOMContentLoaded',function(){
   {% csrf_token %}
   <div class="modal-body">
     <div class="row g-2">
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Ime</label><input type="text" name="first_name" class="form-control" required></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Prezime</label><input type="text" name="last_name" class="form-control" required></div>
-      <div class="col-12"><label class="form-label" style="font-size:.8rem">Email</label><input type="email" name="email" class="form-control" required></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Telefon</label><input type="text" name="phone" class="form-control"></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Uloga</label><select name="role" class="form-select">{% for val, label in role_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Ime</label><input type="text" name="first_name" class="form-control" required></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Prezime</label><input type="text" name="last_name" class="form-control" required></div>
+      <div class="col-12"><label class="form-label f-form-label-sm">Email</label><input type="email" name="email" class="form-control" required></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Telefon</label><input type="text" name="phone" class="form-control"></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Uloga</label><select name="role" class="form-select">{% for val, label in role_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
     </div>
   </div>
   <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Odustani</button><button type="submit" class="btn btn-primary btn-sm">Kreiraj</button></div>
@@ -196,11 +190,11 @@ document.addEventListener('DOMContentLoaded',function(){
   {% csrf_token %}
   <div class="modal-body">
     <div class="row g-2">
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Ime</label><input type="text" name="first_name" id="editFirstName" class="form-control" required></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Prezime</label><input type="text" name="last_name" id="editLastName" class="form-control" required></div>
-      <div class="col-12"><label class="form-label" style="font-size:.8rem">Email</label><input type="email" name="email" id="editEmail" class="form-control" required></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Telefon</label><input type="text" name="phone" id="editPhone" class="form-control"></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Uloga</label><select name="role" id="editRole" class="form-select">{% for val, label in role_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Ime</label><input type="text" name="first_name" id="editFirstName" class="form-control" required></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Prezime</label><input type="text" name="last_name" id="editLastName" class="form-control" required></div>
+      <div class="col-12"><label class="form-label f-form-label-sm">Email</label><input type="email" name="email" id="editEmail" class="form-control" required></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Telefon</label><input type="text" name="phone" id="editPhone" class="form-control"></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Uloga</label><select name="role" id="editRole" class="form-select">{% for val, label in role_choices %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
     </div>
   </div>
   <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Odustani</button><button type="submit" class="btn btn-primary btn-sm">Spremi</button></div>
@@ -213,7 +207,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <form id="changePwForm" method="post" onsubmit="return ajaxPost(this)">
   {% csrf_token %}
   <div class="modal-body">
-    <label class="form-label" style="font-size:.8rem">Nova lozinka (min 10 znakova)</label>
+    <label class="form-label f-form-label-sm">Nova lozinka (min 10 znakova)</label>
     <input type="password" name="password" class="form-control" minlength="10" required>
   </div>
   <div class="modal-footer"><button type="submit" class="btn btn-warning btn-sm">Postavi</button></div>
@@ -258,13 +252,13 @@ document.addEventListener('DOMContentLoaded',function(){
   {% csrf_token %}
   <div class="modal-body">
     <div class="row g-2">
-      <div class="col-8"><label class="form-label" style="font-size:.8rem">Naziv</label><input type="text" name="name" id="brName" class="form-control" required></div>
-      <div class="col-4"><label class="form-label" style="font-size:.8rem">Sifra</label><input type="text" name="branch_code" id="brCode" class="form-control"></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Tip</label><select name="branch_type" id="brType" class="form-select">{% for val, label in branch_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Grad</label><input type="text" name="city" id="brCity" class="form-control"></div>
-      <div class="col-12"><label class="form-label" style="font-size:.8rem">Adresa</label><input type="text" name="address" id="brAddr" class="form-control"></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Telefon</label><input type="text" name="phone" id="brPhone" class="form-control"></div>
-      <div class="col-6"><label class="form-label" style="font-size:.8rem">Email</label><input type="email" name="email" id="brEmail" class="form-control"></div>
+      <div class="col-8"><label class="form-label f-form-label-sm">Naziv</label><input type="text" name="name" id="brName" class="form-control" required></div>
+      <div class="col-4"><label class="form-label f-form-label-sm">Sifra</label><input type="text" name="branch_code" id="brCode" class="form-control"></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Tip</label><select name="branch_type" id="brType" class="form-select">{% for val, label in branch_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Grad</label><input type="text" name="city" id="brCity" class="form-control"></div>
+      <div class="col-12"><label class="form-label f-form-label-sm">Adresa</label><input type="text" name="address" id="brAddr" class="form-control"></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Telefon</label><input type="text" name="phone" id="brPhone" class="form-control"></div>
+      <div class="col-6"><label class="form-label f-form-label-sm">Email</label><input type="email" name="email" id="brEmail" class="form-control"></div>
     </div>
   </div>
   <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Odustani</button><button type="submit" class="btn btn-primary btn-sm">Spremi</button></div>
@@ -277,42 +271,42 @@ document.addEventListener('DOMContentLoaded',function(){
   {% if subscription %}
   <div class="row g-3">
     <div class="col-md-4">
-      <div class="p-3 rounded" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2)">
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Plan</div>
-        <div style="font-size:1.2rem;font-weight:700;color:var(--gold)">{{ subscription.get_plan_display }}</div>
+      <div class="p-3 rounded sub-stat sub-stat-dark">
+        <div class="sub-stat-label">Plan</div>
+        <div class="sub-stat-value" style="color:var(--gold)">{{ subscription.get_plan_display }}</div>
         {% if subscription.is_trial %}<span class="badge bg-warning text-dark">Trial do {{ subscription.trial_ends }}</span>{% else %}<span class="badge bg-success">Aktivan</span>{% endif %}
       </div>
     </div>
     <div class="col-md-4">
-      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Korisnici</div>
-        <div style="font-size:1.2rem;font-weight:700">{{ usage.users }}</div>
+      <div class="p-3 rounded sub-stat sub-stat-light">
+        <div class="sub-stat-label">Korisnici</div>
+        <div class="sub-stat-value">{{ usage.users }}</div>
         <div class="progress mt-1" style="height:4px"><div class="progress-bar bg-primary" style="width:{% widthratio usage.users 50 100 %}%"></div></div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Lokacije</div>
-        <div style="font-size:1.2rem;font-weight:700">{{ usage.locations }}</div>
+      <div class="p-3 rounded sub-stat sub-stat-light">
+        <div class="sub-stat-label">Lokacije</div>
+        <div class="sub-stat-value">{{ usage.locations }}</div>
         <div class="progress mt-1" style="height:4px"><div class="progress-bar bg-success" style="width:{% widthratio usage.locations 20 100 %}%"></div></div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Fakture</div>
-        <div style="font-size:1.2rem;font-weight:700">{{ usage.invoices }}</div>
+      <div class="p-3 rounded sub-stat sub-stat-light">
+        <div class="sub-stat-label">Fakture</div>
+        <div class="sub-stat-value">{{ usage.invoices }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Mjesecna naknada</div>
-        <div style="font-size:1.2rem;font-weight:700">{{ subscription.monthly_fee }} EUR</div>
+      <div class="p-3 rounded sub-stat sub-stat-light">
+        <div class="sub-stat-label">Mjesecna naknada</div>
+        <div class="sub-stat-value">{{ subscription.monthly_fee }} EUR</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0">
-        <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;color:#64748b">Vrijedi do</div>
-        <div style="font-size:1.2rem;font-weight:700">{{ subscription.valid_until|default:"Neograniceno" }}</div>
+      <div class="p-3 rounded sub-stat sub-stat-light">
+        <div class="sub-stat-label">Vrijedi do</div>
+        <div class="sub-stat-value">{{ subscription.valid_until|default:"Neograniceno" }}</div>
       </div>
     </div>
   </div>
@@ -331,7 +325,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <h6 class="mb-3"><i class="fas fa-building text-primary me-2"></i>Opće postavke</h6>
   <div class="row g-3">
     <div class="col-md-5">
-      <label class="form-label fw-bold" style="font-size:.8rem">Tip poslovnog subjekta</label>
+      <label class="form-label fw-bold f-form-label-sm">Tip poslovnog subjekta</label>
       <select name="business_type" class="form-select">
         <option value="doo"{% if company.business_type == "doo" %} selected{% endif %}>d.o.o. (Društvo s ograničenom odgovornošću)</option>
         <option value="jdoo"{% if company.business_type == "jdoo" %} selected{% endif %}>j.d.o.o. (Jednostavno d.o.o.)</option>
@@ -344,7 +338,7 @@ document.addEventListener('DOMContentLoaded',function(){
       </select>
     </div>
     <div class="col-md-3">
-      <label class="form-label fw-bold" style="font-size:.8rem">Valuta</label>
+      <label class="form-label fw-bold f-form-label-sm">Valuta</label>
       <select name="currency" class="form-select">
         <option value="EUR"{% if company.currency == "EUR" %} selected{% endif %}>EUR (Euro)</option>
         <option value="USD"{% if company.currency == "USD" %} selected{% endif %}>USD (US Dollar)</option>
@@ -355,15 +349,15 @@ document.addEventListener('DOMContentLoaded',function(){
       </select>
     </div>
     <div class="col-md-2">
-      <label class="form-label fw-bold" style="font-size:.8rem">Zadani PDV %</label>
+      <label class="form-label fw-bold f-form-label-sm">Zadani PDV %</label>
       <input type="number" name="default_tax_pct" class="form-control" value="{{ settings_data.default_tax_pct|default:'25'|unlocalize }}" min="0" max="100" step="0.01">
     </div>
     <div class="col-md-2">
-      <label class="form-label fw-bold" style="font-size:.8rem">Radno vrijeme</label>
+      <label class="form-label fw-bold f-form-label-sm">Radno vrijeme</label>
       <input type="text" name="working_hours" class="form-control" value="{{ settings_data.working_hours|default:'08:00-16:00' }}" placeholder="08:00-16:00">
     </div>
     <div class="col-md-3">
-      <label class="form-label fw-bold" style="font-size:.8rem">Jezik sučelja</label>
+      <label class="form-label fw-bold f-form-label-sm">Jezik sučelja</label>
       <select name="ui_language" class="form-select">
         <option value="hr"{% if settings_data.ui_language == "hr" or not settings_data.ui_language %} selected{% endif %}>Hrvatski</option>
         <option value="de"{% if settings_data.ui_language == "de" %} selected{% endif %}>Deutsch</option>
@@ -378,14 +372,14 @@ document.addEventListener('DOMContentLoaded',function(){
   <h6 class="mb-3"><i class="fas fa-hashtag text-info me-2"></i>Numeracija dokumenata</h6>
   <div class="row g-3">
     <div class="col-md-5">
-      <label class="form-label fw-bold" style="font-size:.8rem">Format broja računa</label>
+      <label class="form-label fw-bold f-form-label-sm">Format broja računa</label>
       <input type="text" name="invoice_number_format" class="form-control"
         value="{{ settings_data.invoice_number_format|default:'{YYYY}-{NUM}' }}"
         placeholder="{YYYY}-{NUM}">
       <div class="form-text" style="font-size:.72rem;color:#888">{YYYY} = godina &nbsp;·&nbsp; {MM} = mjesec &nbsp;·&nbsp; {NUM} = redni broj</div>
     </div>
     <div class="col-md-5">
-      <label class="form-label fw-bold" style="font-size:.8rem">Format broja ponude</label>
+      <label class="form-label fw-bold f-form-label-sm">Format broja ponude</label>
       <input type="text" name="offer_number_format" class="form-control"
         value="{{ settings_data.offer_number_format|default:'PON-{YYYY}-{NUM}' }}"
         placeholder="PON-{YYYY}-{NUM}">
@@ -403,7 +397,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <h6 class="mb-3"><i class="fas fa-envelope text-warning me-2"></i>Email postavke</h6>
   <div class="row g-3">
     <div class="col-md-5">
-      <label class="form-label fw-bold" style="font-size:.8rem">Reply-To adresa</label>
+      <label class="form-label fw-bold f-form-label-sm">Reply-To adresa</label>
       <input type="email" name="email_reply_to" class="form-control"
         value="{{ settings_data.email_reply_to }}"
         placeholder="racuni@moja-tvrtka.hr">
@@ -422,8 +416,8 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
-<div style="position:sticky;bottom:0;background:#0a0a0a;padding:12px 0;z-index:50;border-top:1px solid rgba(201,168,76,.15)">
-  <button type="submit" class="btn btn-primary" style="background:#c9a84c;border-color:#c9a84c;color:#000;font-weight:700"><i class="fas fa-save me-1"></i> Spremi postavke</button>
+<div class="sticky-save-bar">
+  <button type="submit" class="btn btn-primary btn-gold-save"><i class="fas fa-save me-1"></i> Spremi postavke</button>
 </div>
 </form>
 {% endif %}
@@ -479,7 +473,7 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
     {% csrf_token %}
     <div class="row g-3">
       <div class="col-md-6">
-        <label class="form-label fw-bold" style="font-size:.8rem">Fiskalni sustav</label>
+        <label class="form-label fw-bold f-form-label-sm">Fiskalni sustav</label>
         <select name="fiscal_system" class="form-select">
           <option value="hr_fiscal"{% if company.fiscal_system == "hr_fiscal" %} selected{% endif %}>HR Fiskalizacija (CIS)</option>
           <option value="de_gobd"{% if company.fiscal_system == "de_gobd" %} selected{% endif %}>DE GoBD</option>
@@ -488,7 +482,7 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
         </select>
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-bold" style="font-size:.8rem">PDV status</label>
+        <label class="form-label fw-bold f-form-label-sm">PDV status</label>
         <select name="pdv_status" class="form-select">
           <option value="none"{% if company.pdv_status == "none" %} selected{% endif %}>Nije u sustavu PDV-a</option>
           <option value="obveznik"{% if company.pdv_status == "obveznik" %} selected{% endif %}>Obveznik PDV-a</option>
@@ -497,7 +491,7 @@ function editBranch(pk,name,code,type,addr,city,phone,email){
         </select>
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-bold" style="font-size:.8rem">PDV ID / VAT ID</label>
+        <label class="form-label fw-bold f-form-label-sm">PDV ID / VAT ID</label>
         <input type="text" name="vat_id" class="form-control" value="{{ company.vat_id }}" placeholder="HR12345678901">
       </div>
       <div class="col-md-3 d-flex align-items-end pb-1">

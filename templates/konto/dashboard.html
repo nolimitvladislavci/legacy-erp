@@ -3,6 +3,7 @@
 {% block title %}{% trans "Knjigovodstvo" %} – LIMIT CONNECT{% endblock %}
 {% block page_title %}{% trans "Knjigovodstvo" %}{% endblock %}
 {% block extra_css %}
+<link rel="stylesheet" href="/static/css/apps/konto.css">
 <style>
 @media(max-width:768px){
   .container-fluid{padding-left:.5rem;padding-right:.5rem}
@@ -23,46 +24,27 @@
 </style>
 {% endblock %}
 {% block content %}
-<style>
-.k-stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
-.k-stat .num{font-size:1.5rem;font-weight:800}
-.k-stat .lbl{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:1px}
-.k-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden}
-.k-card-head{padding:12px 16px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
-.k-card-head h3{margin:0;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#64748b}
-.k-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-.k-nav a{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;border:1.5px solid #334155;color:#94a3b8;transition:all .15s}
-.k-nav a:hover{border-color:#c9a84c;color:#c9a84c}
-.k-nav a.active{background:#c9a84c;color:#0f172a;border-color:#c9a84c}
-.k-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.k-table th{padding:8px 12px;text-align:left;color:#64748b;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #334155}
-.k-table td{padding:8px 12px;border-bottom:1px solid rgba(51,65,85,.5);color:#e2e8f0}
-.k-table tr:hover{background:rgba(59,130,246,.05)}
-.k-table .mono{font-family:'IBM Plex Mono',monospace;font-size:.8rem}
-.k-table .right{text-align:right}
-.k-badge{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700;display:inline-block}
-</style>
 
 <!-- Stats -->
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px">
   <div class="k-stat">
     <div><div class="num" style="color:#22c55e">{{ total_bank|floatformat:2 }} €</div><div class="lbl">{% trans "Saldo žiro računa" %}</div></div>
-    <div style="width:40px;height:40px;background:#dcfce7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">🏦</div>
+    <div class="k-stat-icon" style="background:#dcfce7">🏦</div>
   </div>
   <div class="k-stat">
     <div><div class="num" style="color:#3b82f6">{{ month_inflow|floatformat:2 }} €</div><div class="lbl">{% trans "Priljevi (ovaj mjesec)" %}</div></div>
-    <div style="width:40px;height:40px;background:#dbeafe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">📥</div>
+    <div class="k-stat-icon" style="background:#dbeafe">📥</div>
   </div>
   <div class="k-stat">
     <div><div class="num" style="color:#ef4444">{{ month_outflow|floatformat:2 }} €</div><div class="lbl">{% trans "Odljevi (ovaj mjesec)" %}</div></div>
-    <div style="width:40px;height:40px;background:#fee2e2;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">📤</div>
+    <div class="k-stat-icon" style="background:#fee2e2">📤</div>
   </div>
   <div class="k-stat">
     <div>
       <div class="num" style="color:{% if pnl.profit_loss >= 0 %}#22c55e{% else %}#ef4444{% endif %}">{{ pnl.profit_loss|floatformat:2 }} €</div>
       <div class="lbl">{% trans "Dobit/Gubitak (YTD)" %}</div>
     </div>
-    <div style="width:40px;height:40px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem">📊</div>
+    <div class="k-stat-icon" style="background:#fef3c7">📊</div>
   </div>
 </div>
 
@@ -86,7 +68,7 @@
 
 
 <!-- ── CASHFLOW CHART (lazy-loaded via AJAX) ────────────────────────────── -->
-<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:18px;margin-bottom:20px">
+<div class="k-card" style="padding:18px;margin-bottom:20px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <span style="color:#c9a84c;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em">
       &#x1F4C8; Cashflow &#x2014; zadnjih 6 mjeseci
@@ -184,20 +166,20 @@
     <a href="{% url 'konto:report_vat' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">Otvori →</a>
   </div>
   <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-    <a href="{% url 'konto:report_vat' %}" style="text-decoration:none;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;text-align:center;transition:border-color .15s" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
-      <div style="font-size:1.3rem;margin-bottom:4px">%</div>
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px">PDV Prijava</div>
-      <div style="font-size:.75rem;color:#94a3b8;margin-top:2px">USt-Voranmeldung</div>
+    <a href="{% url 'konto:report_vat' %}" class="k-tax-card" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
+      <div class="k-tax-card-icon">%</div>
+      <div class="k-tax-card-label">PDV Prijava</div>
+      <div class="k-tax-card-sub">USt-Voranmeldung</div>
     </a>
-    <a href="{% url 'konto:report_annual_tax' %}" style="text-decoration:none;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;text-align:center;transition:border-color .15s" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
-      <div style="font-size:1.3rem;margin-bottom:4px">📋</div>
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px">Godišnji porez</div>
-      <div style="font-size:.75rem;color:#94a3b8;margin-top:2px">HR dohodak / DE ESt</div>
+    <a href="{% url 'konto:report_annual_tax' %}" class="k-tax-card" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
+      <div class="k-tax-card-icon">📋</div>
+      <div class="k-tax-card-label">Godišnji porez</div>
+      <div class="k-tax-card-sub">HR dohodak / DE ESt</div>
     </a>
-    <a href="{% url 'konto:report_euer' %}" style="text-decoration:none;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;text-align:center;transition:border-color .15s" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
-      <div style="font-size:1.3rem;margin-bottom:4px">🧾</div>
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px">EÜR</div>
-      <div style="font-size:.75rem;color:#94a3b8;margin-top:2px">Einnahmen/Ausgaben</div>
+    <a href="{% url 'konto:report_euer' %}" class="k-tax-card" onmouseover="this.style.borderColor='#c9a84c'" onmouseout="this.style.borderColor='#334155'">
+      <div class="k-tax-card-icon">🧾</div>
+      <div class="k-tax-card-label">EÜR</div>
+      <div class="k-tax-card-sub">Einnahmen/Ausgaben</div>
     </a>
   </div>
 </div>
@@ -209,17 +191,17 @@
     <a href="{% url 'konto:report_pnl' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">{% trans "Detalji" %} →</a>
   </div>
   <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Prihodi" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:#22c55e">{{ pnl.income.total|floatformat:2 }} €</div>
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Prihodi" %}</div>
+      <div class="k-pnl-value" style="color:#22c55e">{{ pnl.income.total|floatformat:2 }} €</div>
     </div>
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Rashodi" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:#ef4444">{{ pnl.expenses.total|floatformat:2 }} €</div>
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Rashodi" %}</div>
+      <div class="k-pnl-value" style="color:#ef4444">{{ pnl.expenses.total|floatformat:2 }} €</div>
     </div>
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Rezultat" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:{% if pnl.profit_loss >= 0 %}#c9a84c{% else %}#ef4444{% endif %}">{{ pnl.profit_loss|floatformat:2 }} €</div>
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Rezultat" %}</div>
+      <div class="k-pnl-value" style="color:{% if pnl.profit_loss >= 0 %}#c9a84c{% else %}#ef4444{% endif %}">{{ pnl.profit_loss|floatformat:2 }} €</div>
     </div>
   </div>
 </div>
@@ -231,21 +213,21 @@
     <a href="{% url 'invoicing:fiscal_certificates' %}" style="color:#c9a84c;font-size:.78rem;text-decoration:none">{% trans "Certifikati" %} →</a>
   </div>
   <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Nefiskalizirani" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:{% if fiscal_stats.unfiscalized_count > 0 %}#ef4444{% else %}#22c55e{% endif %}">
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Nefiskalizirani" %}</div>
+      <div class="k-pnl-value" style="color:{% if fiscal_stats.unfiscalized_count > 0 %}#ef4444{% else %}#22c55e{% endif %}">
         {{ fiscal_stats.unfiscalized_count }}
       </div>
     </div>
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Certifikat" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:{% if fiscal_stats.cert_valid %}#22c55e{% else %}#ef4444{% endif %}">
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Certifikat" %}</div>
+      <div class="k-pnl-value" style="color:{% if fiscal_stats.cert_valid %}#22c55e{% else %}#ef4444{% endif %}">
         {% if fiscal_stats.cert_valid %}OK{% else %}—{% endif %}
       </div>
     </div>
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Dana do isteka" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:{% if fiscal_stats.cert_expiring_soon %}#f59e0b{% else %}#c9a84c{% endif %}">
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Dana do isteka" %}</div>
+      <div class="k-pnl-value" style="color:{% if fiscal_stats.cert_expiring_soon %}#f59e0b{% else %}#c9a84c{% endif %}">
         {% if fiscal_stats.days_until_expiry %}{{ fiscal_stats.days_until_expiry }}{% else %}—{% endif %}
       </div>
     </div>
@@ -270,19 +252,19 @@
     </span>
   </div>
   <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Ukupno faktura" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:#c9a84c">{{ gobd_report.total_invoices }}</div>
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Ukupno faktura" %}</div>
+      <div class="k-pnl-value" style="color:#c9a84c">{{ gobd_report.total_invoices }}</div>
     </div>
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Problemi" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:{% if gobd_report.issues_count > 0 %}#ef4444{% else %}#22c55e{% endif %}">
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Problemi" %}</div>
+      <div class="k-pnl-value" style="color:{% if gobd_report.issues_count > 0 %}#ef4444{% else %}#22c55e{% endif %}">
         {{ gobd_report.issues_count }}
       </div>
     </div>
-    <div style="text-align:center">
-      <div style="font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">{% trans "Brojčani niz" %}</div>
-      <div style="font-size:1.3rem;font-weight:800;color:{% if gobd_report.nummer_check.ok %}#22c55e{% else %}#ef4444{% endif %}">
+    <div class="k-pnl-cell">
+      <div class="k-pnl-label">{% trans "Brojčani niz" %}</div>
+      <div class="k-pnl-value" style="color:{% if gobd_report.nummer_check.ok %}#22c55e{% else %}#ef4444{% endif %}">
         {% if gobd_report.nummer_check.ok %}OK{% else %}Pukotine{% endif %}
       </div>
     </div>
@@ -300,10 +282,10 @@
 </div>
 
 <!-- Audit Hash Chain -->
-<div style="background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:10px;padding:16px;margin-top:16px;color:#fff">
+<div class="k-audit-chain">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
     <div>
-      <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:4px">Audit Hash Chain (SHA-256)</div>
+      <div class="k-audit-label">Audit Hash Chain (SHA-256)</div>
       <div style="display:flex;align-items:center;gap:8px">
         {% if audit_hashed > 0 %}
           {% if audit_valid %}

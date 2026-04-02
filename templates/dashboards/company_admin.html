@@ -1,43 +1,44 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}Admin dashboard – LIMIT Connect{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/apps/dashboard.css">{% endblock %}
 {% block content %}
 {% if onboarding %}
-<div id="onboarding-widget" style="background:linear-gradient(135deg,#1a1a1a 0%,#111 100%);border:1px solid #c9a84c44;border-radius:12px;padding:20px 24px;margin-bottom:24px;position:relative">
-  <a href="{% url 'onboarding_wizard' %}" style="position:absolute;top:12px;right:50px;background:#c9a84c;color:#000;border:none;font-size:.75rem;cursor:pointer;padding:4px 12px;border-radius:6px;font-weight:700;text-decoration:none">Vodic</a>
-  <button onclick="dismissOnboarding()" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#666;font-size:1.1rem;cursor:pointer" title="Zatvori">&times;</button>
+<div id="onboarding-widget" class="onboarding-widget">
+  <a href="{% url 'onboarding_wizard' %}" class="onboarding-guide-btn">Vodic</a>
+  <button onclick="dismissOnboarding()" class="onboarding-close-btn" title="Zatvori">&times;</button>
   <h6 style="color:#c9a84c;margin-bottom:4px"><i class="fas fa-rocket me-2"></i>Dobrodosli u LIMIT Connect!</h6>
   <p style="color:#999;font-size:.85rem;margin-bottom:14px">Pratedite postavljanje da biste izvukli maksimum iz sustava.</p>
-  <div style="background:#0a0a0a;border-radius:8px;height:6px;margin-bottom:16px;overflow:hidden">
-    <div style="background:#c9a84c;height:100%;width:{{ onboarding.percent }}%;transition:width .5s ease"></div>
+  <div class="onboarding-progress">
+    <div class="onboarding-progress-fill" style="width:{{ onboarding.percent }}%"></div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
-    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.profile_completed %}#c9a84c55{% else %}#222{% endif %}">
+  <div class="onboarding-grid">
+    <div class="onboarding-step {% if onboarding.profile_completed %}done{% endif %}">
       <i class="fas {% if onboarding.profile_completed %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.profile_completed %}#c9a84c{% else %}#555{% endif %}"></i>
       <div>
-        <div style="font-size:.8rem;color:#ccc">Profil tvrtke</div>
-        <div style="font-size:.7rem;color:#777">Popunite naziv, adresu i OIB</div>
+        <div class="onboarding-step-title">Profil tvrtke</div>
+        <div class="onboarding-step-desc">Popunite naziv, adresu i OIB</div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.first_partner_added %}#c9a84c55{% else %}#222{% endif %}">
+    <div class="onboarding-step {% if onboarding.first_partner_added %}done{% endif %}">
       <i class="fas {% if onboarding.first_partner_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_partner_added %}#c9a84c{% else %}#555{% endif %}"></i>
       <div>
-        <div style="font-size:.8rem;color:#ccc">Dodaj partnera</div>
-        <div style="font-size:.7rem;color:#777"><a href="/partners/new/" style="color:#c9a84c88">Dodaj prvog klijenta</a></div>
+        <div class="onboarding-step-title">Dodaj partnera</div>
+        <div class="onboarding-step-desc"><a href="/partners/new/">Dodaj prvog klijenta</a></div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.first_invoice_created %}#c9a84c55{% else %}#222{% endif %}">
+    <div class="onboarding-step {% if onboarding.first_invoice_created %}done{% endif %}">
       <i class="fas {% if onboarding.first_invoice_created %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_invoice_created %}#c9a84c{% else %}#555{% endif %}"></i>
       <div>
-        <div style="font-size:.8rem;color:#ccc">Kreiraj racun</div>
-        <div style="font-size:.7rem;color:#777"><a href="/invoicing/wizard/" style="color:#c9a84c88">Novi racun</a></div>
+        <div class="onboarding-step-title">Kreiraj racun</div>
+        <div class="onboarding-step-desc"><a href="/invoicing/wizard/">Novi racun</a></div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d0d;border-radius:8px;border:1px solid {% if onboarding.bank_account_added %}#c9a84c55{% else %}#222{% endif %}">
+    <div class="onboarding-step {% if onboarding.bank_account_added %}done{% endif %}">
       <i class="fas {% if onboarding.bank_account_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.bank_account_added %}#c9a84c{% else %}#555{% endif %}"></i>
       <div>
-        <div style="font-size:.8rem;color:#ccc">Bankovni racun</div>
-        <div style="font-size:.7rem;color:#777"><a href="/konto/" style="color:#c9a84c88">Dodaj IBAN</a></div>
+        <div class="onboarding-step-title">Bankovni racun</div>
+        <div class="onboarding-step-desc"><a href="/konto/">Dodaj IBAN</a></div>
       </div>
     </div>
   </div>
@@ -58,54 +59,54 @@ function dismissOnboarding() {
 {% endif %}
 
 <!-- Compliance badge -->
-<div style="background:#0f2318;border:1px solid #16a34a44;border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
-  <div style="font-size:1.8rem">&#128737;</div>
+<div class="compliance-badge">
+  <div class="compliance-badge-icon">&#128737;</div>
   <div>
-    <div style="color:#4ade80;font-weight:700;font-size:.85rem">Uskladjeno s propisima za 2026.</div>
-    <div style="color:#64748b;font-size:.72rem">FINA fiskalizacija &bull; eRacun &bull; PDV &bull; GoBD</div>
+    <div class="compliance-badge-title">Uskladjeno s propisima za 2026.</div>
+    <div class="compliance-badge-desc">FINA fiskalizacija &bull; eRacun &bull; PDV &bull; GoBD</div>
   </div>
 </div>
 
 <!-- AI Uvidi — proactive widget -->
 {% if ai_insights and ai_insights.total_alerts > 0 or ai_insights and ai_insights.total_suggestions > 0 or ai_insights and ai_insights.total_opportunities > 0 or ai_insights and ai_insights.total_legal_alerts > 0 %}
-<div style="background:linear-gradient(135deg,#1a1a0a 0%,#111 100%);border:1px solid #c9a84c44;border-radius:12px;padding:16px 20px;margin-bottom:16px">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+<div class="ai-insights-widget">
+  <div class="ai-insights-header">
     <i class="fas fa-brain" style="color:#c9a84c;font-size:1.1rem"></i>
     <span style="color:#c9a84c;font-weight:700;font-size:.85rem">AI Uvidi</span>
-    <span style="color:#555;font-size:.7rem;margin-left:auto">{{ ai_insights.total_alerts }} upozorenja &bull; {{ ai_insights.total_suggestions }} prijedloga{% if ai_insights.total_opportunities %} &bull; {{ ai_insights.total_opportunities }} prilika{% endif %}{% if ai_insights.total_legal_alerts %} &bull; {{ ai_insights.total_legal_alerts }} zakona{% endif %}</span>
+    <span class="ai-insights-meta">{{ ai_insights.total_alerts }} upozorenja &bull; {{ ai_insights.total_suggestions }} prijedloga{% if ai_insights.total_opportunities %} &bull; {{ ai_insights.total_opportunities }} prilika{% endif %}{% if ai_insights.total_legal_alerts %} &bull; {{ ai_insights.total_legal_alerts }} zakona{% endif %}</span>
   </div>
   {% for alert in ai_insights.alerts %}
-  <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid {% if alert.type == 'danger' %}#ef4444{% elif alert.type == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %}">
+  <div class="ai-insight-row {% if alert.type == 'danger' %}danger{% elif alert.type == 'warning' %}warning{% else %}info{% endif %}">
     <i class="fas fa-{{ alert.icon }}" style="color:{% if alert.type == 'danger' %}#ef4444{% elif alert.type == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %};margin-top:2px;font-size:.85rem"></i>
     <div style="flex:1">
-      <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ alert.title }}</div>
-      {% if alert.detail %}<div style="font-size:.72rem;color:#888">{{ alert.detail }}</div>{% endif %}
+      <div class="ai-insight-title">{{ alert.title }}</div>
+      {% if alert.detail %}<div class="ai-insight-detail">{{ alert.detail }}</div>{% endif %}
     </div>
-    {% if alert.action_url %}<a href="{{ alert.action_url }}" style="color:#c9a84c;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ alert.action_text }}</a>{% endif %}
+    {% if alert.action_url %}<a href="{{ alert.action_url }}" class="ai-insight-action">{{ alert.action_text }}</a>{% endif %}
   </div>
   {% endfor %}
   {% for sug in ai_insights.suggestions %}
-  <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid #22c55e">
+  <div class="ai-insight-row success">
     <i class="fas fa-{{ sug.icon }}" style="color:#22c55e;margin-top:2px;font-size:.85rem"></i>
     <div style="flex:1">
-      <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ sug.title }}</div>
-      {% if sug.detail %}<div style="font-size:.72rem;color:#888">{{ sug.detail }}</div>{% endif %}
+      <div class="ai-insight-title">{{ sug.title }}</div>
+      {% if sug.detail %}<div class="ai-insight-detail">{{ sug.detail }}</div>{% endif %}
     </div>
-    {% if sug.action_url %}<a href="{{ sug.action_url }}" style="color:#c9a84c;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ sug.action_text }}</a>{% endif %}
+    {% if sug.action_url %}<a href="{{ sug.action_url }}" class="ai-insight-action">{{ sug.action_text }}</a>{% endif %}
   </div>
   {% endfor %}
   {% if ai_insights.opportunities %}
-  <div style="margin-top:10px;padding-top:10px;border-top:1px solid #c9a84c22">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+  <div class="ai-insights-section">
+    <div class="ai-insights-section-title">
       <i class="fas fa-gem" style="color:#22c55e;font-size:.8rem"></i>
       <span style="color:#22c55e;font-weight:700;font-size:.78rem">PRILIKE ZA USTEDU</span>
     </div>
     {% for opp in ai_insights.opportunities %}
-    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid {% if opp.type == 'success' %}#22c55e{% else %}#3b82f6{% endif %}">
+    <div class="ai-insight-row {% if opp.type == 'success' %}success{% else %}info{% endif %}">
       <i class="fas fa-{{ opp.icon }}" style="color:{% if opp.type == 'success' %}#22c55e{% else %}#3b82f6{% endif %};margin-top:2px;font-size:.85rem"></i>
       <div style="flex:1">
-        <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ opp.title }}</div>
-        {% if opp.detail %}<div style="font-size:.72rem;color:#888">{{ opp.detail }}</div>{% endif %}
+        <div class="ai-insight-title">{{ opp.title }}</div>
+        {% if opp.detail %}<div class="ai-insight-detail">{{ opp.detail }}</div>{% endif %}
       </div>
       {% if opp.action_url %}<a href="{{ opp.action_url }}" style="color:#22c55e;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ opp.action_text }}</a>{% endif %}
     </div>
@@ -113,17 +114,17 @@ function dismissOnboarding() {
   </div>
   {% endif %}
   {% if ai_insights.legal_alerts %}
-  <div style="margin-top:10px;padding-top:10px;border-top:1px solid #c9a84c22">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+  <div class="ai-insights-section">
+    <div class="ai-insights-section-title">
       <i class="fas fa-gavel" style="color:#a78bfa;font-size:.8rem"></i>
       <span style="color:#a78bfa;font-weight:700;font-size:.78rem">ZAKONSKE PROMJENE (7 DANA)</span>
     </div>
     {% for law in ai_insights.legal_alerts %}
-    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:#0d0d0d;border-radius:8px;border-left:3px solid {% if law.type == 'danger' %}#ef4444{% elif law.type == 'warning' %}#f59e0b{% else %}#a78bfa{% endif %}">
+    <div class="ai-insight-row {% if law.type == 'danger' %}danger{% elif law.type == 'warning' %}warning{% else %}purple{% endif %}">
       <i class="fas fa-{{ law.icon }}" style="color:{% if law.type == 'danger' %}#ef4444{% elif law.type == 'warning' %}#f59e0b{% else %}#a78bfa{% endif %};margin-top:2px;font-size:.85rem"></i>
       <div style="flex:1">
-        <div style="font-size:.82rem;color:#e5e5e5;font-weight:600">{{ law.title }}</div>
-        {% if law.detail %}<div style="font-size:.72rem;color:#888">{{ law.detail }}</div>{% endif %}
+        <div class="ai-insight-title">{{ law.title }}</div>
+        {% if law.detail %}<div class="ai-insight-detail">{{ law.detail }}</div>{% endif %}
       </div>
       {% if law.action_url %}<a href="{{ law.action_url }}" style="color:#a78bfa;font-size:.72rem;white-space:nowrap;text-decoration:none;font-weight:600">{{ law.action_text }}</a>{% endif %}
     </div>
@@ -201,15 +202,15 @@ function dismissOnboarding() {
 {% endif %}
 
 <!-- Push notification opt-in -->
-<div id="push-banner" style="display:none;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid var(--gold-border);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:none">
-  <div style="display:flex;align-items:center;gap:12px">
+<div id="push-banner" class="push-banner">
+  <div class="push-banner-inner">
     <i class="fas fa-bell" style="color:var(--gold);font-size:1.3rem"></i>
     <div style="flex:1">
       <div style="font-size:.85rem;font-weight:600;color:var(--text)">{% trans "Uključi obavijesti" %}</div>
       <div style="font-size:.75rem;color:var(--text-dim)">{% trans "Primajte push obavijesti za odobrenja, fakture i intervencije" %}</div>
     </div>
-    <button onclick="enablePush()" style="background:var(--gold);color:#000;border:none;border-radius:6px;padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer">{% trans "Uključi" %}</button>
-    <button onclick="dismissPushBanner()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem">&times;</button>
+    <button onclick="enablePush()" class="push-banner-enable">{% trans "Uključi" %}</button>
+    <button onclick="dismissPushBanner()" class="push-banner-dismiss">&times;</button>
   </div>
 </div>
 <script>
@@ -236,7 +237,7 @@ function dismissPushBanner(){
 }
 </script>
 
-<div style="display:flex;justify-content:flex-end;margin-bottom:10px;gap:3px;flex-wrap:wrap">
+<div class="lang-switcher">
   {% load i18n %}{% get_current_language as CURRENT_LANG %}{% get_available_languages as LANGUAGES %}
   {% for lang_code, lang_name in LANGUAGES %}
   <form action="/i18n/setlang/" method="post" style="display:inline">
@@ -244,92 +245,13 @@ function dismissPushBanner(){
     <input name="next" type="hidden" value="{{ request.get_full_path }}">
     <input name="language" type="hidden" value="{{ lang_code }}">
     {% if lang_code == CURRENT_LANG %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #3b82f6;background:#3b82f6;color:#fff">{{ lang_code|upper }}</button>
+    <button type="submit" class="lang-btn lang-btn-active">{{ lang_code|upper }}</button>
     {% else %}
-    <button type="submit" style="padding:2px 9px;font-size:0.72rem;font-weight:700;border-radius:4px;cursor:pointer;border:1px solid #cbd5e1;background:#f8fafc;color:#64748b">{{ lang_code|upper }}</button>
+    <button type="submit" class="lang-btn lang-btn-inactive">{{ lang_code|upper }}</button>
     {% endif %}
   </form>
   {% endfor %}
 </div>
-
-<style>
-:root{--gold:#c9a84c;--gold-dim:rgba(201,168,76,.12);--gold-border:rgba(201,168,76,.28);--surface:#0f172a;--surface2:#1e293b;--text:#e2e8f0;--text-dim:#94a3b8;--green:#10b981;--red:#ef4444;--amber:#f59e0b}
-.cd-wrap{padding:20px 24px;max-width:1200px;margin:0 auto}
-.cd-title{font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:8px}
-
-/* KPI row */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-.kpi{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:16px 18px}
-.kpi-val{font-size:1.7rem;font-weight:800;color:var(--text);line-height:1.1}
-.kpi-val.gold{color:var(--gold)}
-.kpi-val.green{color:var(--green)}
-.kpi-val.red{color:var(--red)}
-.kpi-val.amber{color:var(--amber)}
-.kpi-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:6px}
-.kpi-sub{font-size:.72rem;color:var(--text-dim);margin-top:4px}
-.kpi:hover{border-color:var(--gold-border);transition:border-color .2s}
-.t-row:hover{background:rgba(255,255,255,.03)}
-
-/* Workers grid */
-.workers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px}
-.worker-card{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px}
-.worker-card.clocked-in{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.04)}
-.worker-avatar{width:40px;height:40px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:var(--gold);flex-shrink:0}
-.worker-info{flex:1;min-width:0}
-.worker-name{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.worker-status{font-size:.7rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;margin-top:2px}
-.worker-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.worker-hours{font-size:.8rem;font-weight:700;color:var(--gold);white-space:nowrap}
-
-/* Two-col layout */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
-.panel{background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden}
-.panel-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;display:flex;justify-content:space-between;align-items:center}
-.panel-header a{font-size:.72rem;color:var(--text-dim);text-decoration:none}
-.panel-header a:hover{color:var(--gold)}
-
-/* Table rows */
-.t-row{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem;align-items:center}
-.t-row:last-child{border-bottom:none}
-.t-main{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;color:var(--text)}
-.t-sub{font-size:.72rem;color:var(--text-dim)}
-.t-val{font-weight:700;color:var(--gold);white-space:nowrap}
-.t-badge{font-size:.65rem;padding:.15rem .5rem;border-radius:8px;white-space:nowrap}
-.badge-paid{background:#d1fae5;color:#065f46}
-.badge-unpaid{background:#fee2e2;color:#991b1b}
-.badge-draft{background:#f1f5f9;color:#475569}
-.badge-sent{background:#dbeafe;color:#1e40af}
-.empty-row{padding:20px 16px;text-align:center;color:var(--text-dim);font-size:.82rem}
-.empty-state{text-align:center;padding:30px 20px}
-.empty-state-icon{font-size:2.5rem;color:var(--gold);margin-bottom:12px;opacity:.6}
-.empty-state-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:6px}
-.empty-state-message{font-size:.82rem;color:var(--text-dim);margin-bottom:14px}
-.empty-state-action{display:inline-block;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);padding:8px 18px;border-radius:8px;font-size:.8rem;font-weight:700;text-decoration:none;transition:all .2s}
-.empty-state-action:hover{background:var(--gold);color:#000}
-.empty-state-secondary{display:inline-block;color:var(--text-dim);font-size:.78rem;margin-left:12px;text-decoration:none}
-.empty-state-secondary:hover{color:var(--gold)}
-
-/* Interventions */
-.iv-pill{font-size:.68rem;padding:.2rem .6rem;border-radius:8px;white-space:nowrap;font-weight:600}
-
-/* Pending approvals */
-.approve-row{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem;align-items:center}
-.approve-row:last-child{border-bottom:none}
-.approve-btn{background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:.72rem;cursor:pointer;font-weight:700}
-.approve-btn:hover{opacity:.85}
-
-/* Section title standalone */
-.s-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);font-weight:700;margin:0 0 10px}
-
-@media(max-width:900px){
-  .kpi-grid{grid-template-columns:1fr 1fr}
-  .two-col{grid-template-columns:1fr}
-}
-@media(max-width:500px){
-  .kpi-grid{grid-template-columns:1fr 1fr}
-  .cd-wrap{padding:14px}
-}
-</style>
 
 <div class="cd-wrap page-enter">
   <div class="cd-title"><a href="{% url 'dashboard' %}" style="color:var(--text-dim);text-decoration:none;font-size:.78rem;margin-right:8px"><i class="fas fa-arrow-left"></i></a> Admin nadzorna ploča
@@ -363,19 +285,19 @@ function dismissPushBanner(){
 
   <!-- Getting started — shows when no activity yet -->
   {% if not recent_invoices and not active_iv_list and workers_total == 0 %}
-  <div style="background:linear-gradient(135deg,#1a1a1a,#111);border:1px solid var(--gold-border);border-radius:12px;padding:24px;margin-bottom:24px;text-align:center">
+  <div class="getting-started">
     <div style="font-size:2rem;margin-bottom:8px">🚀</div>
     <h6 style="color:var(--gold);font-weight:700;margin-bottom:6px">Pocnite koristiti LIMIT Connect</h6>
     <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:16px">Evo 3 brza koraka za pocetak:</p>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-      <a href="/companies/settings/?tab=info" style="background:var(--surface);border:1px solid var(--gold-border);color:var(--gold);padding:12px 20px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;flex:1;max-width:200px">
-        <i class="fas fa-building" style="font-size:1.2rem;display:block;margin-bottom:6px"></i>1. Postavite firmu
+    <div class="getting-started-actions">
+      <a href="/companies/settings/?tab=info" class="getting-started-card">
+        <i class="fas fa-building"></i>1. Postavite firmu
       </a>
-      <a href="/partners/new/" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:12px 20px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;flex:1;max-width:200px">
-        <i class="fas fa-handshake" style="font-size:1.2rem;display:block;margin-bottom:6px;color:var(--gold)"></i>2. Dodajte partnera
+      <a href="/partners/new/" class="getting-started-card">
+        <i class="fas fa-handshake"></i>2. Dodajte partnera
       </a>
-      <a href="/invoicing/wizard/" style="background:var(--surface);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:12px 20px;border-radius:10px;text-decoration:none;font-size:.82rem;font-weight:600;flex:1;max-width:200px">
-        <i class="fas fa-file-invoice" style="font-size:1.2rem;display:block;margin-bottom:6px;color:var(--gold)"></i>3. Izdajte racun
+      <a href="/invoicing/wizard/" class="getting-started-card">
+        <i class="fas fa-file-invoice"></i>3. Izdajte racun
       </a>
     </div>
   </div>

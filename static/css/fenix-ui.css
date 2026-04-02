@@ -331,3 +331,74 @@ button:active, .btn:active, input[type="submit"]:active { transform: scale(.97);
     body { background: #fff !important; color: #000 !important; padding: 0 !important; }
     .main-content { margin: 0 !important; padding: 0 !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   15. F2 Additions — Design System v2.1 (02.04.2026)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Stat Icon (dashboard stat cards) ──────────────────────────── */
+.f-stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+}
+
+/* ── Action Card (superadmin quick actions) ────────────────────── */
+.f-action-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 10px;
+    background: var(--bg-card, #111827);
+    border: 1px solid var(--border, #252830);
+    text-decoration: none; color: var(--text, #e8e8e8);
+    font-size: .85rem; font-weight: 600;
+    transition: border-color .2s, transform .1s;
+    margin-bottom: 8px;
+}
+.f-action-card:hover { border-color: rgba(201,168,76,.3); transform: translateY(-1px); }
+.f-action-card i:first-child {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; flex-shrink: 0;
+}
+.f-action-card .desc { font-size: .72rem; color: var(--text-muted, #64748b); font-weight: 400; }
+
+/* ── Form Label Compact ────────────────────────────────────────── */
+.f-form-label-sm { font-size: .8rem; font-weight: 600; }
+
+/* ── Inline Quick Grid ─────────────────────────────────────────── */
+.f-quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 5px; padding: 4px 6px 8px; border-bottom: 2px solid var(--gold, #c9a84c); margin-bottom: 6px; }
+
+/* ── Upgrade Banner ────────────────────────────────────────────── */
+.f-upgrade-banner {
+    background: linear-gradient(90deg, #1a1a2e, #16213e);
+    border-bottom: 2px solid var(--gold, #c9a84c);
+    padding: .4rem 1rem; text-align: center;
+    font-size: .78rem; color: #e2e8f0;
+}
+.f-upgrade-banner a { color: var(--gold, #c9a84c); font-weight: 700; text-decoration: underline; margin-left: .5rem; }
+
+/* ── Promo Form ────────────────────────────────────────────────── */
+.f-promo-wrap {
+    background: rgba(201,168,76,.05); border: 1px solid rgba(201,168,76,.15);
+    border-radius: 8px; padding: 16px; margin-bottom: 16px;
+}
+
+/* ── Details Accordion (superadmin modules) ────────────────────── */
+.f-accordion { border: 1px solid var(--border, #252830); margin-bottom: 8px; border-radius: 4px; }
+.f-accordion summary {
+    padding: 10px 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    list-style: none; background: #111214; font-size: 0.82rem;
+}
+.f-accordion summary::-webkit-details-marker { display: none; }
+.f-accordion-body { padding: 16px; background: #0a0a0a; }
+
+/* ── Module Checkbox Grid ──────────────────────────────────────── */
+.f-module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.f-module-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.78rem; color: #9aa0b0; cursor: pointer;
+    padding: 6px 10px; border: 1px solid var(--border, #252830);
+}
+.f-module-label.checked { border-color: rgba(201,168,76,.35); background: rgba(201,168,76,.06); }
+.f-module-label input { accent-color: #c9a84c; }

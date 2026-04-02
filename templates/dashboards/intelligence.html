@@ -1,34 +1,8 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}Intelligence Dashboard - {{ company.name }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/apps/dashboard.css">{% endblock %}
 {% block content %}
-<style>
-.ig-tabs{display:flex;gap:2px;border-bottom:2px solid var(--border,#e2e8f0);margin-bottom:1.5rem;flex-wrap:wrap}
-.ig-tab{padding:.6rem 1.2rem;font-size:.82rem;font-weight:600;color:var(--text-muted,#64748b);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
-.ig-tab:hover{color:var(--text,#0f172a)}
-.ig-tab.active{color:var(--gold,#c9a84c);border-bottom-color:var(--gold,#c9a84c)}
-.ig-panel{display:none}.ig-panel.active{display:block}
-.ig-card{background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:1.2rem;margin-bottom:1rem}
-.ig-card h6{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--gold,#c9a84c);margin:0 0 1rem}
-.ig-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.ig-table th{text-align:left;padding:.5rem .6rem;border-bottom:2px solid var(--border,#e2e8f0);color:var(--text-muted,#64748b);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
-.ig-table td{padding:.5rem .6rem;border-bottom:1px solid var(--border,#e2e8f0)}
-.ig-table tr:hover{background:rgba(201,168,76,.04)}
-.ig-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700}
-.ig-badge-gold{background:rgba(201,168,76,.12);color:#c9a84c}
-.ig-badge-green{background:rgba(40,167,69,.12);color:#28a745}
-.ig-badge-red{background:rgba(220,53,69,.12);color:#dc3545}
-.ig-badge-blue{background:rgba(59,130,246,.12);color:#3b82f6}
-.ig-badge-purple{background:rgba(168,85,247,.12);color:#a855f7}
-.ig-badge-gray{background:rgba(100,116,139,.12);color:#64748b}
-.ig-meter{height:6px;background:var(--border,#e2e8f0);border-radius:3px;overflow:hidden;margin-top:4px}
-.ig-meter-fill{height:100%;border-radius:3px;transition:width .4s}
-.ig-search-box{display:flex;gap:.5rem;margin-bottom:1rem}
-.ig-search-box input{flex:1;padding:10px 14px;background:var(--input-bg,#fff);border:1px solid var(--border,#e2e8f0);border-radius:8px;color:var(--text,#0f172a);font-size:.9rem;font-family:monospace}
-.ig-search-box button{padding:10px 20px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:600;cursor:pointer}
-.ig-anomaly-tag{display:inline-block;padding:1px 6px;margin:1px;border-radius:4px;font-size:.7rem;background:rgba(220,53,69,.08);color:#dc3545}
-@media(max-width:600px){.ig-tabs{gap:0}.ig-tab{padding:.5rem .6rem;font-size:.72rem}}
-</style>
 
 <div style="max-width:1200px;margin:0 auto;padding:1rem">
 
