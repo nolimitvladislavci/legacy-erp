@@ -1,0 +1,14 @@
+{% load camera_tags %}
+<div class="input-group">
+  {{ field }}
+  {% camera_btn field_id=field_id doc_type=doc_type label="Skeniraj" %}
+  {% if show_archive %}
+  {% archive_btn field_id=field_id label="Učitaj iz arhive" %}
+  {% endif %}
+</div>
+{% if field.errors %}
+<div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
+{% endif %}
+{% if field.help_text %}
+<small class="form-text text-muted">{{ field.help_text }}</small>
+{% endif %}
