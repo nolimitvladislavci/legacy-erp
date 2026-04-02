@@ -544,6 +544,26 @@ def split_bill(request, receipt_id):
                 'items_count': len(split_item_ids),
             })
 
+        # Nivelacija zaokruživanja — zadnji split apsorbira cent-razliku
+        # Primjer: 20 EUR / 3 = 6.67+6.67+6.66 = 20.00 (ne 20.01)
+        if results:
+            from django.db.models import Sum as _Sum
+            split_ids = [r['receipt_id'] for r in results]
+            split_sum = POSReceipt.objects.filter(pk__in=split_ids).aggregate(
+                s=_Sum('total'))['s'] or Decimal('0')
+            original_total = receipt.total
+            diff = original_total - split_sum
+            if diff != Decimal('0') and split_ids:
+                last_split = POSReceipt.objects.get(pk=split_ids[-1])
+                last_split.total = (last_split.total + diff).quantize(
+                    Decimal('0.01'), rounding=ROUND_HALF_UP)
+                last_split.save(update_fields=['total'])
+                results[-1]['total'] = str(last_split.total)
+                logger.info(
+                    '[SPLIT NIVELACIJA] Bon #%s: diff %s EUR absorbiran u zadnji split',
+                    receipt.receipt_number, diff
+                )
+
         # Označi original kao cancelled (zamijenjen split bonovima)
         receipt.status = 'cancelled'
         receipt.cancel_reason = f'Split na {len(splits)} bonova'
@@ -1411,4 +1431,57 @@ def offline_catalog(request):
         'categories': sorted(categories),
         'quick_actions': qa,
         'item_count': len(items),
+    })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BLAGAJNIČKI MAKSIMUM — live check API (Dron #6 fix)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+@require_GET
+def cash_limit_status(request):
+    """
+    Real-time provjera blagajničkog maksimuma.
+    Poziva se svake 2 minute s POS UI-a.
+    Vraća: { current: EUR, limit: EUR, pct: %, status: ok|warn|danger }
+    """
+    from pos.models import POSSession
+    session_id = request.GET.get('session_id')
+    if not session_id:
+        return JsonResponse({'status': 'ok', 'current': 0, 'limit': None, 'pct': 0})
+
+    try:
+        session = POSSession.objects.get(pk=session_id, status='open')
+    except POSSession.DoesNotExist:
+        return JsonResponse({'status': 'ok', 'current': 0, 'limit': None, 'pct': 0})
+
+    company = session.terminal.company
+    current = session.current_cash_amount  # opening + gotovinska prodaja + polozi - isplate
+
+    # Limit: iz company profila ili zakonski default (mikro-poduzetnik)
+    limit = getattr(company, 'cash_register_limit', None)
+    if not limit:
+        from django.conf import settings
+        limit = getattr(settings, 'DEFAULT_CASH_REGISTER_LIMIT_EUR', Decimal('1327.00'))
+
+    limit = Decimal(str(limit))
+    pct = int((current / limit * 100)) if limit > 0 else 0
+
+    if pct >= 90:
+        status = 'danger'
+    elif pct >= 75:
+        status = 'warn'
+    else:
+        status = 'ok'
+
+    return JsonResponse({
+        'current': float(current),
+        'limit': float(limit),
+        'pct': pct,
+        'status': status,
+        'message': (
+            f'UPOZORENJE: {float(current):.2f} EUR u blagajni od max {float(limit):.2f} EUR ({pct}%). '
+            f'Unesite polog u sustav.'
+        ) if status != 'ok' else ''
     })

@@ -195,6 +195,7 @@ urlpatterns = [
     path('pocket/activate/',                     views_v2.pocket_mode_activate,  name='pocket_activate'),
     path('pocket/status/',                       views_v2.pocket_mode_status,    name='pocket_status'),
     # Offline Sync (ServiceWorker batch)
+    path('api/cash-limit-status/', views_v2.cash_limit_status, name='cash_limit_status'),
     path('api/offline-sync/',                    views_v2.offline_sync,          name='offline_sync'),
     path('api/offline-catalog/',                 views_v2.offline_catalog,       name='offline_catalog'),
     # B-01: ServiceWorker
