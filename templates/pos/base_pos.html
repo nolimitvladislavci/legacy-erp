@@ -18,106 +18,9 @@ if ('serviceWorker' in navigator) {
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>(function(){var t=localStorage.getItem('fina-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
 <title>{% block title %}POS{% endblock %} -- LIMIT Connect</title>
-<style>
-/* ═══ DARK THEME (default for POS) ═══ */
-:root{
-  --black:#0a0a0a;--dark:#111;--card:#1a1a1a;--border:#2a2a2a;
-  --gold: #c9a84c;--gold2:#e8c96a;--text:#e8e8e8;--muted:#888;
-  --green:#4caf7d;--red:#e05c5c;
-  --topbar-bg:#111;--topbar-border:#2a2a2a;--topbar-text:#e8e8e8;
-  --body-bg:#0a0a0a;--input-bg:#0a0a0a;--input-border:#2a2a2a;
-  --nav-hover:rgba(201,168,76,.12);--nav-active-text:var(--gold);
-  /* ═══ Z-INDEX MAP ═══
-     Dokumentirana hijerarhija — sve POS komponente koriste ove varijable.
-     Dodaj novi layer ovdje, NE hardkodiraj z-index u komponentama.
-  */
-  --z-qmodal:400;         /* Quantity/discount modal */
-  --z-success:500;        /* Payment success overlay */
-  --z-weight:600;         /* Weight input modal */
-  --z-basket-drawer:6000; /* Mobile basket drawer */
-  --z-mode-bar:7000;      /* Mobile bottom nav */
-  --z-quick-keys:7500;    /* Quick keys overlay */
-  --z-shift-modal:8000;   /* Shift close modal */
-  --z-pay-expand:8500;    /* Mobile fullscreen payment */
-  --z-company-menu:9000;  /* Company switcher dropdown */
-  --z-numpad:9500;        /* Fullscreen numpad */
-  --z-voice:9600;         /* Voice input result */
-  --z-offline-sync:9998;  /* Offline sync badge */
-  --z-toast:9999;         /* Toast notifications */
-  --z-sidebar-panel:10000;/* Sidebar nav panel */
-  --z-sidebar:10001;      /* Sidebar toggle button */
-}
-/* ═══ LIGHT THEME ═══ */
-[data-theme="light"]{
-  --black:#ffffff;--dark:#f8fafc;--card:#ffffff;--border:#e2e8f0;
-  --text:#0f172a;--muted:#64748b;
-  --topbar-bg:#ffffff;--topbar-border:#e2e8f0;--topbar-text:#0f172a;
-  --body-bg:#f1f5f9;--input-bg:#ffffff;--input-border:#e2e8f0;
-  --nav-hover:rgba(201,168,76,.08);--nav-active-text:#0f172a;
-  --green:#16a34a;--red:#dc2626;
-}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
-body{background:var(--body-bg);color:var(--text);font-family:system-ui,sans-serif;font-size:14px;display:flex;flex-direction:column;min-height:100vh;transition:background .3s,color .3s}
-a{color:inherit;text-decoration:none}
 
-/* ═══ TOPBAR ═══ */
-.topbar{background:var(--topbar-bg);border-bottom:1px solid var(--topbar-border);padding:.5rem 1rem;display:flex;align-items:center;gap:.5rem;flex-shrink:0;flex-wrap:wrap;transition:background .3s}
-.topbar-brand{font-weight:700;letter-spacing:.06em;color:var(--gold);font-size:1.1rem;white-space:nowrap;text-decoration:none}
-.topbar-brand span{color:var(--text)}
-.topbar-nav{display:flex;align-items:center;gap:.15rem;flex-wrap:wrap}
-.topbar-nav a{padding:.3rem .6rem;border-radius:5px;font-size:.78rem;color:var(--muted);transition:all .2s;white-space:nowrap}
-.topbar-nav a:hover,.topbar-nav a.active{background:var(--nav-hover);color:var(--gold)}
-.topbar-nav .nav-sep{width:1px;height:16px;background:var(--border);margin:0 .25rem}
-.pos-company-menu.show{display:block!important}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:.6rem;font-size:.8rem;color:var(--muted)}
-.theme-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:3px 7px;cursor:pointer;color:var(--gold);font-size:.8rem;transition:all .2s}
-.theme-btn:hover{border-color:var(--gold);background:var(--nav-hover)}
-
-/* ═══ MAIN ═══ */
-.pos-main{flex:1;display:flex;flex-direction:column;overflow:clip}
-.messages{padding:.5rem 1.25rem}
-.msg{padding:.6rem 1rem;border-radius:6px;margin-bottom:.35rem;font-size:.85rem}
-.msg.success{background:rgba(76,175,125,.1);border:1px solid var(--green);color:var(--green)}
-.msg.error{background:rgba(224,92,92,.1);border:1px solid var(--red);color:var(--red)}
-.msg.warning{background:rgba(201,168,76,.1);border:1px solid var(--gold);color:var(--gold)}
-
-/* ═══ COMPONENTS ═══ */
-.card{background:var(--card);border:1px solid var(--border);border-radius:8px;transition:background .3s}
-.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:6px;font-size:.825rem;font-weight:600;border:none;cursor:pointer;transition:all .15s;font-family:inherit;text-decoration:none}
-.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:var(--gold2)}
-.btn-green{background:var(--green);color:#fff}.btn-green:hover{opacity:.85}
-.btn-red{background:transparent;border:1px solid var(--red);color:var(--red)}.btn-red:hover{background:rgba(224,92,92,.1)}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
-.btn-sm{padding:.35rem .7rem;font-size:.775rem}
-.badge{display:inline-block;padding:.15rem .5rem;border-radius:20px;font-size:.7rem;font-weight:700}
-.badge-open{background:rgba(76,175,125,.15);color:var(--green)}
-.badge-closed{background:rgba(136,136,136,.15);color:var(--muted)}
-.badge-paid{background:rgba(76,175,125,.15);color:var(--green)}
-.badge-cancelled{background:rgba(224,92,92,.15);color:var(--red)}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.3rem}
-.dot-green{background:var(--green)}.dot-grey{background:var(--muted)}
-
-/* Light overrides */
-[data-theme="light"] .card{box-shadow:0 1px 3px rgba(0,0,0,.06)}
-[data-theme="light"] .btn-gold{color:#000}
-[data-theme="light"] .btn-green{color:#fff}
-[data-theme="light"] input,[data-theme="light"] select,[data-theme="light"] textarea{
-  background:var(--input-bg);border-color:var(--input-border);color:var(--text);
-}
-[data-theme="light"] table{color:var(--text)}
-[data-theme="light"] th{background:#f8fafc;color:var(--muted)}
-[data-theme="light"] td{border-color:var(--border)}
-
-/* ═══ MOBILE ═══ */
-@media(max-width:768px){
-  .topbar{padding:.4rem .6rem;gap:.3rem}
-  .topbar-nav{gap:.1rem}
-  .topbar-nav a{padding:.25rem .4rem;font-size:.7rem}
-  .topbar-nav .nav-sep{display:none}
-  .topbar-right span.user-name{display:none}
-}
-</style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="/static/css/pos-base.css">
 {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -182,32 +85,7 @@ a{color:inherit;text-decoration:none}
 
 <script src="/static/js/pos/pos-core.js"></script>
 <script src="/static/js/pos/pos-offline.js"></script>
-<style>
-.pos-offline::before {
-  content: 'OFFLINE MOD';
-  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-  z-index: var(--z-toast); background: #f59e0b; color: #000;
-  padding: 4px 20px; font-size: 11px; font-weight: 800;
-  border-radius: 0 0 8px 8px; letter-spacing: 1px;
-}
-.pos-toast {
-  position: fixed; bottom: 20px; right: 20px; z-index: var(--z-toast);
-  padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
-  opacity: 0; transform: translateY(20px); transition: all 0.3s;
-  max-width: 320px;
-}
-.pos-toast.show { opacity: 1; transform: translateY(0); }
-.pos-toast-success { background: #059669; color: #fff; }
-.pos-toast-warning { background: #d97706; color: #fff; }
-.pos-toast-info { background: #2563eb; color: #fff; }
-.pos-toast-error { background: #dc2626; color: #fff; }
-#offlineSyncBadge {
-  display: none; background: #f59e0b; color: #000; padding: 4px 12px;
-  border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;
-  position: fixed; bottom: 20px; left: 20px; z-index: var(--z-offline-sync);
-}
-#offlineSyncBadge:hover { background: #fbbf24; }
-</style>
+
 
 {% block extra_js %}
 <div id="offlineSyncBadge" onclick="window.syncOfflineData && window.syncOfflineData()"></div>
