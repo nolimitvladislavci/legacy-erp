@@ -134,13 +134,17 @@ class Force2FAMiddleware:
         if view_name in ('setup_2fa', 'verify_2fa'):
             return self.get_response(request)
 
+        # Superuseri izuzeti od 2FA enforcement-a
+        if request.user.is_superuser:
+            return self.get_response(request)
+
         # Provjeri samo kriticne uloge
         try:
             profile = request.user.profile
         except Exception:
             return self.get_response(request)
 
-        if profile.role not in self.ENFORCED_ROLES and not request.user.is_superuser:
+        if profile.role not in self.ENFORCED_ROLES:
             return self.get_response(request)
 
         # Ako 2FA vec aktiviran — propusti
