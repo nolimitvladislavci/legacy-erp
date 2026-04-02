@@ -34,6 +34,13 @@
         <div class="onboarding-step-desc"><a href="/invoicing/wizard/">Novi racun</a></div>
       </div>
     </div>
+    <div class="onboarding-step {% if onboarding.first_item_added %}done{% endif %}">
+      <i class="fas {% if onboarding.first_item_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.first_item_added %}var(--gold,#c9a84c){% else %}#555{% endif %}"></i>
+      <div>
+        <div class="onboarding-step-title">Artikl</div>
+        <div class="onboarding-step-desc"><a href="/inventory/">Dodaj prvi artikl</a></div>
+      </div>
+    </div>
     <div class="onboarding-step {% if onboarding.bank_account_added %}done{% endif %}">
       <i class="fas {% if onboarding.bank_account_added %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.bank_account_added %}var(--gold,#c9a84c){% else %}#555{% endif %}"></i>
       <div>
@@ -43,6 +50,13 @@
     </div>
   </div>
 </div>
+    <div class="onboarding-step {% if onboarding.pos_configured %}done{% endif %}">
+      <i class="fas {% if onboarding.pos_configured %}fa-check-circle{% else %}fa-circle{% endif %}" style="color:{% if onboarding.pos_configured %}var(--gold,#c9a84c){% else %}#555{% endif %}"></i>
+      <div>
+        <div class="onboarding-step-title">POS blagajna</div>
+        <div class="onboarding-step-desc"><a href="/pos/">Aktiviraj POS</a></div>
+      </div>
+    </div>
 <script>
 function dismissOnboarding() {
   var csrf = document.querySelector('[name=csrfmiddlewaretoken]');

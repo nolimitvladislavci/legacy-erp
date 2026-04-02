@@ -157,3 +157,17 @@ def bootstrap_new_company(sender, instance, created, **kwargs):
     logger.info('[BOOTSTRAP] Firma "%s" (OIB %s) bootstrapirana.', instance.name, instance.oib)
 
 import companies.data_quality  # noqa: F401 — Data Quality Guard
+
+
+@receiver(post_save, sender='worktime.EmployeeProfile')
+def on_employee_saved(sender, instance, created, **kwargs):
+    if not created:
+        return
+    company = getattr(instance, 'company', None)
+    if not company:
+        return
+    from companies.models import OnboardingProgress
+    ob, _ = OnboardingProgress.objects.get_or_create(company=company)
+    if not ob.first_employee_added:
+        ob.first_employee_added = True
+        ob.save(update_fields=['first_employee_added', 'updated_at'])
