@@ -971,7 +971,7 @@ def _quick_pos_legacy(request, terminal_id):
     is_bookkeeper = False
     try:
         role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
-        is_bookkeeper = role in ('superadmin', 'bookkeeper') or request.user.is_superuser
+        is_bookkeeper = role in ('superadmin', 'bookkeeper', 'company_admin', 'accountant') or request.user.is_superuser
     except Exception:
         pass
 
@@ -1121,7 +1121,7 @@ def pos_joker(request, terminal_id):
     is_bookkeeper = False
     try:
         role = request.user.userprofile.role if hasattr(request.user, 'userprofile') else ''
-        is_bookkeeper = role in ('superadmin', 'bookkeeper') or request.user.is_superuser
+        is_bookkeeper = role in ('superadmin', 'bookkeeper', 'company_admin', 'accountant') or request.user.is_superuser
     except Exception:
         pass
 
@@ -4193,6 +4193,68 @@ def device_token_list(request):
 
 
 # ═══ Knjiga boljitaka ═══
+IVAN_PHONE = '4915771998747'  # WhatsApp DE broj
+
+def _zlatno_dugme_notify_ivan(suggestion):
+    """Notificira Ivana WhatsApp-om kad korisnik pošalje prijedlog."""
+    try:
+        from core.whatsapp import send_text
+        author_name = suggestion.author.get_full_name() if suggestion.author else 'Anonimno'
+        company_name = suggestion.company.name if suggestion.company else '?'
+        priority_labels = {1: '🔴 KRITIČNO', 2: '🟠 Visoko', 3: '🟡 Srednje', 4: '🔵 Nisko', 5: '⚪ Ideja'}
+        prio = priority_labels.get(suggestion.priority, f'P{suggestion.priority}')
+        msg = (
+            f"💡 NOVO ZLATNO DUGME\n"
+            f"Firma: {company_name}\n"
+            f"Autor: {author_name}\n"
+            f"Prioritet: {prio}\n"
+            f"Naslov: {suggestion.title}\n"
+            f"Opis: {suggestion.description[:200]}\n\n"
+            f"Odgovori na: https://limit-connect.com/hr/cockpit/"
+        )
+        send_text(IVAN_PHONE, msg)
+    except Exception as e:
+        import logging
+        logging.getLogger('whatsapp').warning('Zlatno dugme Ivan notify failed: %s', e)
+
+
+def _zlatno_dugme_notify_user(suggestion):
+    """Notificira korisnika WhatsApp-om kad Ivan promijeni status prijedloga."""
+    try:
+        from core.whatsapp import send_text, normalize_phone
+        author = suggestion.author
+        if not author:
+            return
+        phone = ''
+        try:
+            phone = normalize_phone(author.profile.phone or '')
+        except Exception:
+            pass
+        if not phone:
+            return
+        status_labels = {
+            'reviewed':  '👀 Pregledano — obrađujemo vaš prijedlog.',
+            'accepted':  '✅ Prihvaćeno — vaš prijedlog ulazi u razvoj!',
+            'done':      '🚀 Riješeno — poboljšanje je u živom sustavu!',
+            'rejected':  '❌ Odbijeno — hvala na prijedlogu.',
+        }
+        label = status_labels.get(suggestion.status)
+        if not label:
+            return
+        msg = (
+            f"LIMIT Connect — ažuriranje vašeg prijedloga:\n\n"
+            f"📝 {suggestion.title}\n"
+            f"Status: {label}\n"
+        )
+        if suggestion.admin_note:
+            msg += f"Komentar: {suggestion.admin_note}\n"
+        msg += f"\nHvala što pomažete poboljšati sustav!"
+        send_text(phone, msg)
+    except Exception as e:
+        import logging
+        logging.getLogger('whatsapp').warning('Zlatno dugme user notify failed: %s', e)
+
+
 @login_required
 def improvement_list(request):
     from pos.models import ImprovementSuggestion
@@ -4205,12 +4267,13 @@ def improvement_list(request):
         category = request.POST.get('category', 'other')
         priority = int(request.POST.get('priority', '3') or '3')
         if title and desc:
-            ImprovementSuggestion.objects.create(
+            s = ImprovementSuggestion.objects.create(
                 company=company, author=request.user,
                 title=title, description=desc,
                 category=category, priority=priority,
             )
-            messages.success(request, 'Prijedlog spremljen!')
+            _zlatno_dugme_notify_ivan(s)
+            messages.success(request, '✅ Prijedlog zaprimljen! Ivan će ga pregledati i javiti se.')
             return redirect('pos:improvement_list')
 
     return render(request, 'pos/improvement_list.html', {
@@ -4222,12 +4285,18 @@ def improvement_list(request):
 def improvement_update(request, pk):
     from pos.models import ImprovementSuggestion
     company = get_user_company(request)
-    s = get_object_or_404(ImprovementSuggestion, pk=pk, company=company)
+    if request.user.is_superuser:
+        s = get_object_or_404(ImprovementSuggestion, pk=pk)
+    else:
+        s = get_object_or_404(ImprovementSuggestion, pk=pk, company=company)
     if request.method == 'POST':
+        old_status = s.status
         s.status = request.POST.get('status', s.status)
         s.admin_note = request.POST.get('admin_note', s.admin_note)
         s.save(update_fields=['status', 'admin_note', 'updated_at'])
-        return JsonResponse({'ok': True})
+        if s.status != old_status:
+            _zlatno_dugme_notify_user(s)
+        return JsonResponse({'ok': True, 'status': s.status, 'status_display': s.get_status_display()})
     return JsonResponse({'error': 'POST only'}, status=405)
 
 
@@ -5446,3 +5515,63 @@ def pp_mi_po_report(request):
     }
 
     return render(request, 'pos/pp_mi_po_report.html', ctx)
+
+
+# ══════════════════════════════════════════════════════════════
+# API: SEARCH ARTIKALA — pretraži cijelu bazu, ne samo DOM
+# Rješava problem 300-artikal limita na tražilici
+# ══════════════════════════════════════════════════════════════
+
+@login_required
+def api_item_search(request):
+    """
+    GET /pos/api/item-search/?q=QUERY&terminal_id=N&limit=20
+    Pretraži inventory u bazi — vraća JSON za POS tražilicu.
+    """
+    from django.http import JsonResponse
+    from inventory.models import InventoryItem
+
+    q = request.GET.get('q', '').strip()
+    terminal_id = request.GET.get('terminal_id')
+    limit = min(int(request.GET.get('limit', 30)), 100)
+
+    company = get_user_company(request)
+    if not company:
+        return JsonResponse({'items': []})
+
+    qs = InventoryItem.objects.filter(company=company, is_active=True)
+
+    # Filtriraj po kategoriji terminala ako postoji
+    if terminal_id:
+        try:
+            t = POSTerminal.objects.get(pk=terminal_id, company=company)
+            if t.category_filter:
+                cats = [c.strip() for c in t.category_filter.split(',') if c.strip()]
+                if cats:
+                    qs = qs.filter(category__in=cats)
+        except POSTerminal.DoesNotExist:
+            pass
+
+    if q:
+        from django.db.models import Q
+        qs = qs.filter(
+            Q(name__icontains=q) |
+            Q(sku__icontains=q) |
+            Q(barcode__icontains=q)
+        )
+
+    items = []
+    for item in qs.select_related('tax_rate').order_by('name')[:limit]:
+        items.append({
+            'id': item.id,
+            'name': item.name,
+            'sku': item.sku or '',
+            'price': float(item.unit_price),
+            'tax_rate': float(item.tax_rate.rate) if item.tax_rate else 25.0,
+            'category': item.category or '',
+            'unit': getattr(item, 'unit', 'kom'),
+            'barcode': getattr(item, 'barcode', '') or '',
+            'stock': float(getattr(item, 'quantity', 0) or 0),
+        })
+
+    return JsonResponse({'items': items, 'total': qs.count(), 'q': q})

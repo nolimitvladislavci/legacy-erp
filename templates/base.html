@@ -798,5 +798,91 @@ function sendReport(){
 })();
 </script>
 
+<!-- ═══ ZLATNO DUGME — Floating feedback button ═══ -->
+{% if user.is_authenticated %}
+<style>
+#zlatno-fab{position:fixed;bottom:22px;right:22px;z-index:9990;width:52px;height:52px;border-radius:50%;background:var(--gold,#c9a84c);color:#000;border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.3);transition:transform .15s;}
+#zlatno-fab:hover{transform:scale(1.1);}
+#zlatno-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9991;align-items:center;justify-content:center;}
+#zlatno-modal-bg.open{display:flex;}
+#zlatno-modal{background:#111214;border-radius:14px;padding:24px;width:100%;max-width:440px;border:1px solid #333;margin:16px;}
+#zlatno-modal h3{color:var(--gold,#c9a84c);margin:0 0 16px;font-size:1.1rem;}
+#zlatno-modal input,#zlatno-modal textarea,#zlatno-modal select{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff;font-size:.9rem;margin-bottom:10px;box-sizing:border-box;}
+#zlatno-modal textarea{height:90px;resize:vertical;}
+#zlatno-modal .zm-row{display:flex;gap:8px;}
+#zlatno-modal .zm-row select{flex:1;}
+#zlatno-submit{width:100%;padding:10px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:4px;}
+#zlatno-submit:disabled{opacity:.5;cursor:not-allowed;}
+#zlatno-status{display:none;padding:10px;border-radius:8px;text-align:center;margin-top:8px;font-size:.9rem;}
+#zlatno-close{float:right;background:none;border:none;color:#888;font-size:1.3rem;cursor:pointer;line-height:1;}
+</style>
+
+<button id="zlatno-fab" title="Prijavi grešku ili prijedlog" onclick="document.getElementById('zlatno-modal-bg').classList.add('open')">💡</button>
+
+<div id="zlatno-modal-bg" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="zlatno-modal">
+    <button id="zlatno-close" onclick="document.getElementById('zlatno-modal-bg').classList.remove('open')">×</button>
+    <h3>💡 Zlatno dugme</h3>
+    <input id="zd-title" placeholder="Što nije radilo? (kratki naslov)" maxlength="200">
+    <textarea id="zd-desc" placeholder="Opiši problem ili prijedlog — što više detalja, to bolje..."></textarea>
+    <div class="zm-row">
+      <select id="zd-cat">
+        <option value="pos">POS / Blagajna</option>
+        <option value="ux">Sučelje / UX</option>
+        <option value="inventory">Skladište</option>
+        <option value="workflow">Radni tok</option>
+        <option value="other" selected>Ostalo</option>
+      </select>
+      <select id="zd-pri">
+        <option value="1">🔴 Kritično — ne mogu raditi</option>
+        <option value="2">🟠 Visoko — otežava rad</option>
+        <option value="3" selected>🟡 Srednje — prijedlog</option>
+        <option value="5">⚪ Ideja za budućnost</option>
+      </select>
+    </div>
+    <button id="zlatno-submit" onclick="zlatnoPosalji()">Pošalji prijedlog →</button>
+    <div id="zlatno-status"></div>
+  </div>
+</div>
+
+<script>
+function zlatnoPosalji(){
+  var title=document.getElementById('zd-title').value.trim();
+  var desc=document.getElementById('zd-desc').value.trim();
+  if(!title||!desc){alert('Popuni naslov i opis.');return;}
+  var btn=document.getElementById('zlatno-submit');
+  btn.disabled=true; btn.textContent='Šalje se...';
+  var fd=new FormData();
+  fd.append('title',title);
+  fd.append('description',desc);
+  fd.append('category',document.getElementById('zd-cat').value);
+  fd.append('priority',document.getElementById('zd-pri').value);
+  fd.append('csrfmiddlewaretoken','{{ csrf_token }}');
+  fetch('/hr/pos/improvements/',{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}})
+  .then(function(r){
+    var st=document.getElementById('zlatno-status');
+    st.style.display='block';
+    if(r.ok||r.redirected){
+      st.style.background='#065f46';st.style.color='#4ade80';
+      st.textContent='✅ Zaprimljeno! Ivan će se javiti.';
+      document.getElementById('zd-title').value='';
+      document.getElementById('zd-desc').value='';
+      setTimeout(function(){document.getElementById('zlatno-modal-bg').classList.remove('open');st.style.display='none';},2500);
+    } else {
+      st.style.background='#7f1d1d';st.style.color='#f87171';
+      st.textContent='Greška pri slanju. Pokušaj ponovo.';
+    }
+    btn.disabled=false; btn.textContent='Pošalji prijedlog →';
+  })
+  .catch(function(){
+    document.getElementById('zlatno-status').style.display='block';
+    document.getElementById('zlatno-status').textContent='Greška mreže.';
+    btn.disabled=false; btn.textContent='Pošalji prijedlog →';
+  });
+}
+</script>
+{% endif %}
+<!-- ═══ END ZLATNO DUGME ═══ -->
+
 </body>
 </html>
