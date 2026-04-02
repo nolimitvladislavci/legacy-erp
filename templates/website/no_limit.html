@@ -427,6 +427,86 @@ nav.scrolled{
   section{padding:60px 0}
   .clanovi-grid{grid-template-columns:1fr}
 }
+
+/* ── REFACTORED UTILITY CLASSES ── */
+.icon-mr{margin-right:6px}
+.icon-mr-lg{margin-right:8px}
+.icon-gold{color:var(--gold)}
+.misija-footnote{margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08)}
+.misija-footnote p{font-size:.82rem;color:rgba(255,255,255,.4);line-height:1.7}
+.doc-preview-word{background:#1a3a6b}
+.doc-badge-word{background:#2b579a;color:#fff}
+.doc-card-gold{border-color:rgba(201,168,76,.4);cursor:pointer}
+.doc-preview-zip{background:linear-gradient(135deg,#1a1a2e,#2d2d3f)}
+.doc-title-gold{color:#c9a84c}
+.doc-footer-gold{background:rgba(201,168,76,.05)}
+.docx-row{margin-top:16px;padding:16px 20px;background:#f8f6f0;border-radius:4px;border:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.docx-row-label{font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.docx-link{font-size:.78rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:6px}
+.validator-loading-text{color:rgba(255,255,255,.4);font-size:.85rem;margin-top:16px}
+.validator-standards-wrap{margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08)}
+.validator-standards-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.standards-label{font-size:.72rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.std-tag{font-size:.72rem;padding:3px 10px;border-radius:2px}
+.std-tag-gold{border:1px solid rgba(201,168,76,.2);color:rgba(201,168,76,.8)}
+.std-tag-dim{border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+.validator-note{margin-top:16px;font-size:.75rem;color:rgba(255,255,255,.25)}
+.validator-links{text-align:center;margin-top:24px}
+.validator-links .btn-outline{margin-left:12px}
+.text-dim-sm{color:var(--dim)}
+
+/* ── AIRCASH SECTION ── */
+.aircash-section{
+  background:linear-gradient(160deg,#0a0a1e 0%,#0d1128 100%);
+  border-top:1px solid rgba(201,168,76,.12);
+  border-bottom:1px solid rgba(201,168,76,.12);
+  padding:5rem 1.5rem;
+}
+.aircash-inner{max-width:900px;margin:0 auto}
+.aircash-manifesto{text-align:center;margin-bottom:3.5rem}
+.aircash-pill{display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);padding:.4rem 1.2rem;border-radius:20px;font-size:.72rem;font-weight:700;color:#c9a84c;letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
+.aircash-heading{font-size:clamp(1.8rem,5vw,3rem);font-weight:900;letter-spacing:-1px;margin-bottom:1rem;line-height:1.1}
+.aircash-sub{font-size:1rem;color:rgba(255,255,255,.55);max-width:600px;margin:0 auto;line-height:1.7;font-style:italic}
+.aircash-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:3rem}
+.ac-step{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.5rem;text-align:center}
+.ac-step-icon{font-size:2.5rem;margin-bottom:.75rem}
+.ac-step h3{font-size:1rem;font-weight:800;margin-bottom:.5rem;color:#fff}
+.ac-step p{font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.6}
+.ac-status{background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.2);border-radius:16px;padding:1.5rem 2rem;margin-bottom:2.5rem;display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap}
+.ac-status-icon{font-size:1.5rem;flex-shrink:0}
+.ac-status-label{font-size:.72rem;font-weight:700;color:#eab308;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.4rem}
+.ac-status-text{font-size:.87rem;color:rgba(255,255,255,.65);line-height:1.65}
+.ac-status-text strong{color:#fff}
+.ac-status-note{margin-top:.75rem;font-size:.72rem;color:rgba(255,255,255,.35)}
+.ac-network-title{font-size:1.1rem;font-weight:800;margin-bottom:1rem;color:#fff}
+.ac-network-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-bottom:2.5rem}
+.ac-partner{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.75rem}
+.ac-partner-cta{background:rgba(255,255,255,.03);border:1px dashed rgba(201,168,76,.25);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.75rem}
+.ac-partner-emoji{font-size:1.4rem}
+.ac-partner-name{font-size:.88rem;font-weight:700}
+.ac-partner-loc{font-size:.72rem;color:rgba(255,255,255,.4)}
+.ac-partner-cta-name{font-size:.82rem;font-weight:700;color:#c9a84c}
+.ac-partner-cta-sub{font-size:.72rem;color:rgba(255,255,255,.35)}
+.ac-form-title{font-size:1.1rem;font-weight:800;margin-bottom:.4rem;color:#fff}
+.ac-form-sub{font-size:.83rem;color:rgba(255,255,255,.45);margin-bottom:1.5rem}
+.nl-form-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.75rem}
+.nl-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.nl-form-group{margin-bottom:1.25rem}
+.nl-label{display:block;font-size:.72rem;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem}
+.nl-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.65rem .9rem;color:#fff;font-size:.88rem;font-family:inherit}
+.nl-submit{width:100%;padding:.9rem;background:linear-gradient(135deg,#1a3d2b,#2d6a47);border:none;border-radius:10px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.nl-success{display:none;background:rgba(45,106,71,.1);border:1px solid rgba(45,106,71,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem}
+.nl-success-icon{font-size:2rem;margin-bottom:.75rem}
+.nl-success h3{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+.nl-success p{font-size:.82rem;color:rgba(255,255,255,.5)}
+.ac-aircash-link{margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.06);text-align:center}
+.ac-aircash-link a{display:inline-flex;align-items:center;gap:.5rem;color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none;transition:color .2s}
+.ac-aircash-note{font-size:.7rem;color:rgba(255,255,255,.25);margin-top:.5rem;max-width:500px;margin-left:auto;margin-right:auto}
+.ac-arrow{font-size:.6rem}
+.footer-sub{margin-top:8px}
+.footer-link{color:var(--gold);text-decoration:none}
+.validator-result-link{margin-top:16px;text-align:right}
+.validator-result-link a{font-size:.78rem;color:var(--gold);text-decoration:none}
 </style>
 </head>
 <body>
@@ -440,7 +520,7 @@ nav.scrolled{
     <li><a href="#dokumenti">Dokumenti</a></li>
     <li><a href="#validator">Validator</a></li>
     <li><a href="#kontakt">Kontakt</a></li>
-    <li><a href="https://limit-connect.com/hr/login/" class="nav-portal"><i class="fas fa-sign-in-alt" style="margin-right:6px"></i>Portal</a></li>
+    <li><a href="https://limit-connect.com/hr/login/" class="nav-portal"><i class="fas fa-sign-in-alt icon-mr"></i>Portal</a></li>
   </ul>
 </nav>
 
@@ -544,8 +624,8 @@ nav.scrolled{
             "Gotovina nije <span class="hl">arhaizam</span> — ona je sloboda."
           </div>
           <div class="misija-author">— Načelo udruge NO LIMIT, 2026.</div>
-          <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08)">
-            <p style="font-size:.82rem;color:rgba(255,255,255,.4);line-height:1.7">
+          <div class="misija-footnote">
+            <p>
               Prema čl. 31. Zakona o udrugama (NN 74/14, 70/17, 98/19), udruga obavlja 
               gospodarske djelatnosti isključivo radi ostvarenja ciljeva. Dobit se ne 
               raspoređuje osnivačima već se ulaže u misiju.
@@ -560,27 +640,27 @@ nav.scrolled{
 <!-- ── OSNIVAČI ── -->
 <section class="osnivaci" id="osnivaci">
   <div class="container">
-    <span class="section-tag" style="border-color:rgba(201,168,76,.3)">Osnivači</span>
+    <span class="section-tag">Osnivači</span>
     <h2 class="section-title reveal">Tko stoji iza NO LIMIT-a</h2>
     <p class="section-lead reveal">Osnivačka skupština održana 28. ožujka 2026. u Vladislavcima.</p>
     <div class="clanovi-grid reveal">
       <div class="clan-card">
-        <div class="clan-uloga"><i class="fas fa-crown" style="margin-right:6px"></i>Predsjednik</div>
+        <div class="clan-uloga"><i class="fas fa-crown icon-mr"></i>Predsjednik</div>
         <div class="clan-ime">Ivan Brtan</div>
         <div class="clan-oib">OIB: 70086599476</div>
-        <div class="clan-adresa"><i class="fas fa-map-marker-alt" style="margin-right:6px;color:var(--gold)"></i>Kalnička 19, 31000 Čepin</div>
+        <div class="clan-adresa"><i class="fas fa-map-marker-alt icon-mr icon-gold"></i>Kalnička 19, 31000 Čepin</div>
       </div>
       <div class="clan-card">
-        <div class="clan-uloga"><i class="fas fa-user-tie" style="margin-right:6px"></i>Tajnik</div>
+        <div class="clan-uloga"><i class="fas fa-user-tie icon-mr"></i>Tajnik</div>
         <div class="clan-ime">Kruljac Ivica</div>
         <div class="clan-oib">OIB: 82540277049</div>
-        <div class="clan-adresa"><i class="fas fa-map-marker-alt" style="margin-right:6px;color:var(--gold)"></i>Kr. Tomislava 291, 31404 Vladislavci</div>
+        <div class="clan-adresa"><i class="fas fa-map-marker-alt icon-mr icon-gold"></i>Kr. Tomislava 291, 31404 Vladislavci</div>
       </div>
       <div class="clan-card">
-        <div class="clan-uloga"><i class="fas fa-pen" style="margin-right:6px"></i>Zapisničar</div>
+        <div class="clan-uloga"><i class="fas fa-pen icon-mr"></i>Zapisničar</div>
         <div class="clan-ime">Antonio Brtan</div>
         <div class="clan-oib">OIB: 28907401487</div>
-        <div class="clan-adresa"><i class="fas fa-map-marker-alt" style="margin-right:6px;color:var(--gold)"></i>Grabenstrasse 29E, Gärtringen, DE</div>
+        <div class="clan-adresa"><i class="fas fa-map-marker-alt icon-mr icon-gold"></i>Grabenstrasse 29E, Gärtringen, DE</div>
       </div>
     </div>
   </div>
@@ -661,8 +741,8 @@ nav.scrolled{
 
       <!-- STATUT DOCX -->
       <a href="/static/udruga_no_limit/NO_LIMIT_Statut.docx" class="doc-card" download>
-        <div class="doc-preview" style="background:#1a3a6b">
-          <span class="doc-badge" style="background:#2b579a;color:#fff">DOCX</span>
+        <div class="doc-preview doc-preview-word">
+          <span class="doc-badge doc-badge-word">DOCX</span>
           <span class="doc-icon">📘</span>
         </div>
         <div class="doc-body">
@@ -676,29 +756,29 @@ nav.scrolled{
       </a>
 
       <!-- KOMPLETAN PAKET -->
-      <div class="doc-card" style="border-color:rgba(201,168,76,.4);cursor:pointer" onclick="downloadAll()">
-        <div class="doc-preview" style="background:linear-gradient(135deg,#1a1a2e,#2d2d3f)">
-          <span class="doc-badge" style="background:var(--gold);color:var(--ink)">ZIP</span>
+      <div class="doc-card doc-card-gold" onclick="downloadAll()">
+        <div class="doc-preview doc-preview-zip">
+          <span class="doc-badge">ZIP</span>
           <span class="doc-icon">📦</span>
         </div>
         <div class="doc-body">
-          <div class="doc-title" style="color:#c9a84c">Kompletan paket — svi dokumenti</div>
+          <div class="doc-title doc-title-gold">Kompletan paket — svi dokumenti</div>
           <div class="doc-desc">Preuzmi sve dokumente odjednom: 4× PDF + 4× DOCX. Spreman za predaju zahtjeva.</div>
         </div>
-        <div class="doc-footer" style="background:rgba(201,168,76,.05)">
+        <div class="doc-footer doc-footer-gold">
           <span class="doc-size">4 PDF + 4 DOCX</span>
-          <span class="doc-dl" style="color:var(--gold)"><i class="fas fa-archive"></i> Sve odjednom</span>
+          <span class="doc-dl"><i class="fas fa-archive"></i> Sve odjednom</span>
         </div>
       </div>
 
     </div><!-- /docs-grid -->
 
     <!-- DOCX download row -->
-    <div style="margin-top:16px;padding:16px 20px;background:#f8f6f0;border-radius:4px;border:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center" class="reveal">
-      <span style="font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">Word formati:</span>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Zapisnik_osnivacke_skupstine.docx" download style="font-size:.78rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:6px"><i class="fas fa-download"></i>Zapisnik.docx</a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Popis_osnivaca.docx" download style="font-size:.78rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:6px"><i class="fas fa-download"></i>Popis_osnivaca.docx</a>
-      <a href="/static/udruga_no_limit/NO_LIMIT_Zahtjev_RU1.docx" download style="font-size:.78rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:6px"><i class="fas fa-download"></i>Zahtjev_RU1.docx</a>
+    <div class="docx-row reveal">
+      <span class="docx-row-label">Word formati:</span>
+      <a href="/static/udruga_no_limit/NO_LIMIT_Zapisnik_osnivacke_skupstine.docx" download class="docx-link"><i class="fas fa-download"></i>Zapisnik.docx</a>
+      <a href="/static/udruga_no_limit/NO_LIMIT_Popis_osnivaca.docx" download class="docx-link"><i class="fas fa-download"></i>Popis_osnivaca.docx</a>
+      <a href="/static/udruga_no_limit/NO_LIMIT_Zahtjev_RU1.docx" download class="docx-link"><i class="fas fa-download"></i>Zahtjev_RU1.docx</a>
     </div>
   </div>
 </section>
@@ -706,7 +786,7 @@ nav.scrolled{
 <!-- ── CROXML VALIDATOR ── -->
 <section class="validator-section" id="validator">
   <div class="container">
-    <span class="section-tag" style="border-color:rgba(201,168,76,.3)">CroXML Verify</span>
+    <span class="section-tag">CroXML Verify</span>
     <h2 class="section-title reveal">XML Validator</h2>
     <p class="section-lead reveal">Validiraj e-Račune, fiskalizacijske dokumente i XML potpise. UBL 2.1 · EN 16931 · XAdES · PEPPOL BIS 3.0.</p>
 
@@ -728,23 +808,23 @@ nav.scrolled{
 
         <div class="validator-loading" id="validatorLoading">
           <div class="spinner"></div>
-          <p style="color:rgba(255,255,255,.4);font-size:.85rem;margin-top:16px">Validacija u tijeku...</p>
+          <p class="validator-loading-text">Validacija u tijeku...</p>
         </div>
 
         <div class="validator-result" id="validatorResult"></div>
 
-        <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08)">
-          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
-            <span style="font-size:.72rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.3)">Podržani standardi:</span>
-            <span style="font-size:.72rem;padding:3px 10px;border:1px solid rgba(201,168,76,.2);color:rgba(201,168,76,.8);border-radius:2px">UBL 2.1</span>
-            <span style="font-size:.72rem;padding:3px 10px;border:1px solid rgba(201,168,76,.2);color:rgba(201,168,76,.8);border-radius:2px">EN 16931</span>
-            <span style="font-size:.72px;padding:3px 10px;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:2px;font-size:.72rem">PEPPOL BIS 3.0</span>
-            <span style="font-size:.72rem;padding:3px 10px;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:2px">HR CIUS-2025</span>
-            <span style="font-size:.72rem;padding:3px 10px;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:2px">XRechnung</span>
-            <span style="font-size:.72rem;padding:3px 10px;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:2px">XAdES potpis</span>
+        <div class="validator-standards-wrap">
+          <div class="validator-standards-bar">
+            <span class="standards-label">Podržani standardi:</span>
+            <span class="std-tag std-tag-gold">UBL 2.1</span>
+            <span class="std-tag std-tag-gold">EN 16931</span>
+            <span class="std-tag std-tag-dim">PEPPOL BIS 3.0</span>
+            <span class="std-tag std-tag-dim">HR CIUS-2025</span>
+            <span class="std-tag std-tag-dim">XRechnung</span>
+            <span class="std-tag std-tag-dim">XAdES potpis</span>
           </div>
-          <p style="margin-top:16px;font-size:.75rem;color:rgba(255,255,255,.25)">
-            <i class="fas fa-lock" style="margin-right:6px;color:var(--gold)"></i>
+          <p class="validator-note">
+            <i class="fas fa-lock icon-mr icon-gold"></i>
             Vaš XML dokument se obrađuje lokalno — ne šalje se trećim stranama. SHA-256 hash za verifikaciju integriteta.
           </p>
         </div>
@@ -752,11 +832,11 @@ nav.scrolled{
     </div>
 
     <!-- Link na full validator -->
-    <div style="text-align:center;margin-top:24px" class="reveal">
-      <a href="/gov_export/validator/" class="btn-primary" style="display:inline-flex">
+    <div class="validator-links reveal">
+      <a href="/gov_export/validator/" class="btn-primary">
         <i class="fas fa-external-link-alt"></i> Otvori puni CroXML Verify validator
       </a>
-      <a href="/validator/" class="btn-outline" style="display:inline-flex;margin-left:12px">
+      <a href="/validator/" class="btn-outline">
         <i class="fas fa-shield-halved"></i> Brošura i dokumentacija
       </a>
     </div>
@@ -768,23 +848,18 @@ nav.scrolled{
 <!-- ═══════════════════════════════════════════════
      AIRCASH SEKCIJA — dodano 01.04.2026
      ═══════════════════════════════════════════════ -->
-<section class="aircash-section" id="aircash" style="
-  background:linear-gradient(160deg,#0a0a1e 0%,#0d1128 100%);
-  border-top:1px solid rgba(201,168,76,.12);
-  border-bottom:1px solid rgba(201,168,76,.12);
-  padding:5rem 1.5rem;
-">
-<div style="max-width:900px;margin:0 auto">
+<section class="aircash-section" id="aircash">
+<div class="aircash-inner">
 
   <!-- MANIFESTO -->
-  <div style="text-align:center;margin-bottom:3.5rem">
-    <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);padding:.4rem 1.2rem;border-radius:20px;font-size:.72rem;font-weight:700;color:#c9a84c;letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem">
+  <div class="aircash-manifesto">
+    <div class="aircash-pill">
       💳 Gotovina + Digital = Sloboda
     </div>
-    <h2 style="font-size:clamp(1.8rem,5vw,3rem);font-weight:900;letter-spacing:-1px;margin-bottom:1rem;line-height:1.1">
-      Gotovina nije zastarjela.<br><span style="color:#c9a84c">Sustav je zastario.</span>
+    <h2 class="aircash-heading">
+      Gotovina nije zastarjela.<br><span class="doc-title-gold">Sustav je zastario.</span>
     </h2>
-    <p style="font-size:1rem;color:rgba(255,255,255,.55);max-width:600px;margin:0 auto;line-height:1.7;font-style:italic">
+    <p class="aircash-sub">
       Banke tjeraju ljude na digitalno. Gotovina nestaje tiho, bez pitanja.
       Ali što ako netko ne želi bankovni račun? Što ako želi platiti novčanicom,
       a koristiti prednosti digitalne kartice?
@@ -792,108 +867,108 @@ nav.scrolled{
   </div>
 
   <!-- 3 KORAKA -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:3rem">
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.5rem;text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:.75rem">💵</div>
-      <h3 style="font-size:1rem;font-weight:800;margin-bottom:.5rem;color:#fff">1. Uplati gotovinu</h3>
-      <p style="font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.6">Na AirCash prodajnom mjestu — kiosk, trafikа, No Limit partner u tvom gradu.</p>
+  <div class="aircash-steps">
+    <div class="ac-step">
+      <div class="ac-step-icon">💵</div>
+      <h3>1. Uplati gotovinu</h3>
+      <p>Na AirCash prodajnom mjestu — kiosk, trafikа, No Limit partner u tvom gradu.</p>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.5rem;text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:.75rem">📱</div>
-      <h3 style="font-size:1rem;font-weight:800;margin-bottom:.5rem;color:#fff">2. Dobiješ digitalni saldo</h3>
-      <p style="font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.6">Na AirCash kartici ili aplikaciji. Tvoj novac, bez bankovnog računa, bez odobrenja.</p>
+    <div class="ac-step">
+      <div class="ac-step-icon">📱</div>
+      <h3>2. Dobiješ digitalni saldo</h3>
+      <p>Na AirCash kartici ili aplikaciji. Tvoj novac, bez bankovnog računa, bez odobrenja.</p>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.5rem;text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:.75rem">💳</div>
-      <h3 style="font-size:1rem;font-weight:800;margin-bottom:.5rem;color:#fff">3. Plaćaš svugdje</h3>
-      <p style="font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.6">Gdje god Mastercard radi. Bez banke između tebe i tvog novca.</p>
+    <div class="ac-step">
+      <div class="ac-step-icon">💳</div>
+      <h3>3. Plaćaš svugdje</h3>
+      <p>Gdje god Mastercard radi. Bez banke između tebe i tvog novca.</p>
     </div>
   </div>
 
   <!-- STATUS BANNER -->
-  <div style="background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.2);border-radius:16px;padding:1.5rem 2rem;margin-bottom:2.5rem;display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
-    <div style="font-size:1.5rem;flex-shrink:0">⚡</div>
+  <div class="ac-status">
+    <div class="ac-status-icon">⚡</div>
     <div>
-      <div style="font-size:.72rem;font-weight:700;color:#eab308;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.4rem">Status: U pregovorima</div>
-      <p style="font-size:.87rem;color:rgba(255,255,255,.65);line-height:1.65">
+      <div class="ac-status-label">Status: U pregovorima</div>
+      <p class="ac-status-text">
         No Limit udruga u razgovoru je s AirCash timom o formalnom partnerstvu.
         Cilj: sva No Limit mjesta postaju AirCash punjenja i prodajna mjesta.
-        <strong style="color:#fff">Uplati gotovinu kod Korpaša, plati digitalno u Širokom Šoru.</strong>
+        <strong>Uplati gotovinu kod Korpaša, plati digitalno u Širokom Šoru.</strong>
         Lokalno. Bez banke između.
       </p>
-      <div style="margin-top:.75rem;font-size:.72rem;color:rgba(255,255,255,.35)">Pratite novosti na ovoj stranici — potvrdu ćemo objaviti čim bude dogovoreno.</div>
+      <div class="ac-status-note">Pratite novosti na ovoj stranici — potvrdu ćemo objaviti čim bude dogovoreno.</div>
     </div>
   </div>
 
   <!-- MREŽA PARTNERA -->
-  <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:1rem;color:#fff">🏷️ No Limit mreža — lokalni partneri</h3>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-bottom:2.5rem">
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.75rem">
-      <span style="font-size:1.4rem">🔧</span>
-      <div><div style="font-size:.88rem;font-weight:700">Korpaš Servis</div><div style="font-size:.72rem;color:rgba(255,255,255,.4)">Vladislavci</div></div>
+  <h3 class="ac-network-title">🏷️ No Limit mreža — lokalni partneri</h3>
+  <div class="ac-network-grid">
+    <div class="ac-partner">
+      <span class="ac-partner-emoji">🔧</span>
+      <div><div class="ac-partner-name">Korpaš Servis</div><div class="ac-partner-loc">Vladislavci</div></div>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.75rem">
-      <span style="font-size:1.4rem">🍷</span>
-      <div><div style="font-size:.88rem;font-weight:700">Široki Šor</div><div style="font-size:.72rem;color:rgba(255,255,255,.4)">Vladislavci</div></div>
+    <div class="ac-partner">
+      <span class="ac-partner-emoji">🍷</span>
+      <div><div class="ac-partner-name">Široki Šor</div><div class="ac-partner-loc">Vladislavci</div></div>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.75rem">
-      <span style="font-size:1.4rem">🐄</span>
-      <div><div style="font-size:.88rem;font-weight:700">OPG Kruljac Slađana</div><div style="font-size:.72rem;color:rgba(255,255,255,.4)">Vladislavci</div></div>
+    <div class="ac-partner">
+      <span class="ac-partner-emoji">🐄</span>
+      <div><div class="ac-partner-name">OPG Kruljac Slađana</div><div class="ac-partner-loc">Vladislavci</div></div>
     </div>
-    <div style="background:rgba(255,255,255,.03);border:1px dashed rgba(201,168,76,.25);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:.75rem">
-      <span style="font-size:1.4rem">➕</span>
-      <div><div style="font-size:.82rem;font-weight:700;color:#c9a84c">Tvoja firma ovdje</div><div style="font-size:.72rem;color:rgba(255,255,255,.35)">Pridruži se ispod</div></div>
+    <div class="ac-partner-cta">
+      <span class="ac-partner-emoji">➕</span>
+      <div><div class="ac-partner-cta-name">Tvoja firma ovdje</div><div class="ac-partner-cta-sub">Pridruži se ispod</div></div>
     </div>
   </div>
 
   <!-- FORMA: POSTANI PARTNER -->
-  <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:.4rem;color:#fff">Postani No Limit partner</h3>
-  <p style="font-size:.83rem;color:rgba(255,255,255,.45);margin-bottom:1.5rem">Zalijepi naljepnicu. Prihvaćaj gotovinu. Daj kupcima slobodu.</p>
+  <h3 class="ac-form-title">Postani No Limit partner</h3>
+  <p class="ac-form-sub">Zalijepi naljepnicu. Prihvaćaj gotovinu. Daj kupcima slobodu.</p>
 
-  <div id="nlFormCard" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.75rem">
+  <div id="nlFormCard" class="nl-form-card">
     <form id="nlPartnerForm">
       {% csrf_token %}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div class="nl-form-grid">
         <div>
-          <label style="display:block;font-size:.72rem;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Naziv firme</label>
-          <input name="naziv_firme" type="text" placeholder="d.o.o., obrt, OPG..." required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.65rem .9rem;color:#fff;font-size:.88rem;font-family:inherit">
+          <label class="nl-label">Naziv firme</label>
+          <input name="naziv_firme" type="text" placeholder="d.o.o., obrt, OPG..." required class="nl-input">
         </div>
         <div>
-          <label style="display:block;font-size:.72rem;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">OIB</label>
-          <input name="oib" type="text" maxlength="11" placeholder="11 znamenki" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.65rem .9rem;color:#fff;font-size:.88rem;font-family:inherit">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
-        <div>
-          <label style="display:block;font-size:.72rem;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Kontakt osoba</label>
-          <input name="kontakt_osoba" type="text" placeholder="Ime i prezime" required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.65rem .9rem;color:#fff;font-size:.88rem;font-family:inherit">
-        </div>
-        <div>
-          <label style="display:block;font-size:.72rem;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Telefon</label>
-          <input name="telefon" type="tel" placeholder="+385..." required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.65rem .9rem;color:#fff;font-size:.88rem;font-family:inherit">
+          <label class="nl-label">OIB</label>
+          <input name="oib" type="text" maxlength="11" placeholder="11 znamenki" class="nl-input">
         </div>
       </div>
-      <div style="margin-bottom:1.25rem">
-        <label style="display:block;font-size:.72rem;font-weight:700;color:#c9a84c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Adresa</label>
-        <input name="adresa" type="text" placeholder="Ulica, grad" required style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.65rem .9rem;color:#fff;font-size:.88rem;font-family:inherit">
+      <div class="nl-form-grid">
+        <div>
+          <label class="nl-label">Kontakt osoba</label>
+          <input name="kontakt_osoba" type="text" placeholder="Ime i prezime" required class="nl-input">
+        </div>
+        <div>
+          <label class="nl-label">Telefon</label>
+          <input name="telefon" type="tel" placeholder="+385..." required class="nl-input">
+        </div>
       </div>
-      <button type="submit" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#1a3d2b,#2d6a47);border:none;border-radius:10px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">
+      <div class="nl-form-group">
+        <label class="nl-label">Adresa</label>
+        <input name="adresa" type="text" placeholder="Ulica, grad" required class="nl-input">
+      </div>
+      <button type="submit" class="nl-submit">
         <span>🏷️</span> Prijavi se kao No Limit partner
       </button>
     </form>
   </div>
-  <div id="nlSuccess" style="display:none;background:rgba(45,106,71,.1);border:1px solid rgba(45,106,71,.25);border-radius:16px;padding:2rem;text-align:center;margin-top:1rem">
-    <div style="font-size:2rem;margin-bottom:.75rem">✅</div>
-    <h3 style="font-size:1rem;font-weight:700;margin-bottom:.4rem">Prijava primljena!</h3>
-    <p style="font-size:.82rem;color:rgba(255,255,255,.5)">Kontaktirat ćemo te u roku 48 sati.</p>
+  <div id="nlSuccess" class="nl-success">
+    <div class="nl-success-icon">✅</div>
+    <h3>Prijava primljena!</h3>
+    <p>Kontaktirat ćemo te u roku 48 sati.</p>
   </div>
 
   <!-- AIRCASH LINK -->
-  <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.06);text-align:center">
-    <a href="https://aircash.eu" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:.5rem;color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none;transition:color .2s">
-      <span>Saznaj više o AirCash sustavu → aircash.eu</span> <span style="font-size:.6rem">↗</span>
+  <div class="ac-aircash-link">
+    <a href="https://aircash.eu" target="_blank" rel="noopener">
+      <span>Saznaj više o AirCash sustavu → aircash.eu</span> <span class="ac-arrow">↗</span>
     </a>
-    <p style="font-size:.7rem;color:rgba(255,255,255,.25);margin-top:.5rem;max-width:500px;margin-left:auto;margin-right:auto">
+    <p class="ac-aircash-note">
       No Limit nema komercijalnu suradnju s AirCash-om. Podržavamo ih jer vjerujemo u isti princip: financijska sloboda je pravo, ne privilegija.
     </p>
   </div>
@@ -940,14 +1015,14 @@ document.getElementById('nlPartnerForm').addEventListener('submit', async functi
           <div class="kontakt-icon"><i class="fas fa-building"></i></div>
           <div>
             <div class="kontakt-label">Dio sustava</div>
-            <div class="kontakt-val">Korpaš d.o.o. umbrella<br><small style="color:var(--dim)">Upravljano kroz LIMIT Connect ERP</small></div>
+            <div class="kontakt-val">Korpaš d.o.o. umbrella<br><small class="text-dim-sm">Upravljano kroz LIMIT Connect ERP</small></div>
           </div>
         </div>
         <div class="kontakt-item">
           <div class="kontakt-icon"><i class="fas fa-gavel"></i></div>
           <div>
             <div class="kontakt-label">Pravni status</div>
-            <div class="kontakt-val">U postupku upisa<br><small style="color:var(--dim)">Osnivačka skupština: 28.03.2026.</small></div>
+            <div class="kontakt-val">U postupku upisa<br><small class="text-dim-sm">Osnivačka skupština: 28.03.2026.</small></div>
           </div>
         </div>
       </div>
@@ -986,7 +1061,7 @@ document.getElementById('nlPartnerForm').addEventListener('submit', async functi
             </div>
           </div>
           <a href="https://limit-connect.com/hr/login/" class="portal-btn">
-            <i class="fas fa-sign-in-alt" style="margin-right:8px"></i>Prijava u portal
+            <i class="fas fa-sign-in-alt icon-mr-lg"></i>Prijava u portal
           </a>
         </div>
       </div>
@@ -997,7 +1072,7 @@ document.getElementById('nlPartnerForm').addEventListener('submit', async functi
 <!-- ── FOOTER ── -->
 <footer>
   <p><strong>Udruga NO LIMIT</strong> &mdash; Kr. Tomislava 291, 31404 Vladislavci &mdash; nolimit.vladislavci@gmail.com</p>
-  <p style="margin-top:8px">Upravlja: <strong>Korpaš d.o.o.</strong> umbrella kroz <a href="https://limit-connect.com" style="color:var(--gold);text-decoration:none">LIMIT Connect</a> &mdash; &copy; 2026</p>
+  <p class="footer-sub">Upravlja: <strong>Korpaš d.o.o.</strong> umbrella kroz <a href="https://limit-connect.com" class="footer-link">LIMIT Connect</a> &mdash; &copy; 2026</p>
 </footer>
 
 <script>
@@ -1119,8 +1194,8 @@ function renderResult(filename, checks) {
         </li>
       `).join('')}
     </ul>
-    <div style="margin-top:16px;text-align:right">
-      <a href="/gov_export/validator/" style="font-size:.78rem;color:var(--gold);text-decoration:none">
+    <div class="validator-result-link">
+      <a href="/gov_export/validator/" class="docx-link">
         <i class="fas fa-external-link-alt"></i> Otvori puni validator za detaljan izvještaj
       </a>
     </div>

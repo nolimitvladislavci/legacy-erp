@@ -2,7 +2,7 @@
 **Dodjeljeno:** CC Code Instance B
 **Ne dira:** synesis_compare.py, invoicing/, konto/ (to je A)
 **Deadline:** 12.04.2026 (final load test 12.04., GO/NO-GO 15.04.)
-**Status:** TODO
+**Status:** DONE
 
 ---
 
