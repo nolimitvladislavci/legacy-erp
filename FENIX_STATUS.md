@@ -647,3 +647,33 @@ Podsjetnik: ~25.04.2026.
 
 **Redoslijed:** Dron #1 → #2 → #3. Ne raditi paralelno s go-live sprintom.
 
+
+---
+
+## ★ SESIJA 02.04.2026 — DONE (Sonnet)
+
+### Deployano danas:
+- feat: zlatno dugme FAB u base.html — floating 💡 gumb za sve korisnike
+- feat: WhatsApp notify Ivan na svaki user submit + notify user na status promjenu
+- fix: dashboard → login (ne pricing) za nelogirane na limit-connect.com
+- fix: cockpit link u WhatsApp = /hr/login/?next=/hr/superadmin/ivan/
+- fix: sidebar — "Fenix soba 🔥" + "Poruke / Zlatno dugme" s crvenim badge-om
+- fix: feedback_count_api — broj novih poruka, osvježava svakih 60s
+- feat: Viskovic Bau — T57 terminal + Ivan Brtan blagajnik PIN:1234
+- feat: Korpaš arhitektura — Ivica tenant_admin, Katarina tenant_admin, Marija company_admin
+- feat: emailovi poslani Ivici, Katarini, Mariji s pristupnim podacima
+- fix: ImprovementSuggestion — 4 poruke procesuirane, WhatsApp odgovori poslani
+- task: CC_TASK_PIN_ONBOARDING.md — korisnici bez emaila, PIN flow, GDPR
+
+### Git HEAD: 77df536e
+
+### Otvoreni CC_TASK za go-live 15.04.:
+1. CC_TASK_DRON1_SYNESIS_VETO.md — Synesis invoice mapping (rok 07.04.)
+2. CC_TASK_DRON2_ONBOARDING_WIZARD.md — 3 polja registracija (rok 10.04.)
+3. CC_TASK_DRON3_CSS_KIRURGIJA.md — CSS token fix (rok 12.04.)
+4. CC_TASK_PIN_ONBOARDING.md — korisnici bez emaila (nakon 15.04.)
+
+### Prioritet za CC Code dok Ivan nema Sonnet:
+P1: CC_TASK_DRON1 → CC_TASK_DRON2 → PgBouncer aktivacija
+P2: T&C middleware aktivirati (core/settings.py MIDDLEWARE)
+P3: Golubar dodati u INSTALLED_APPS
