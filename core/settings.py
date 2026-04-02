@@ -143,6 +143,7 @@ INSTALLED_APPS = [
     "tax_wizard",
     "borg_ops",
     "komunalno",
+    'vault',
 ]
 
 # ── Django Channels (WebSocket) ───────────────────────────────────────
