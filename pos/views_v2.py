@@ -1099,10 +1099,10 @@ def offline_sync(request):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def pos_service_worker(request):
-    """SW koji se sam unregistrira i briše cache — CSS rendering fix."""
+    """POS ServiceWorker — cache cleanup + sync trigger."""
     sw_js = """
-// POS ServiceWorker — SELF DESTRUCT (CSS fix 2026-03-31)
-// Briše sve stare cache i unregistrira se
+// POS ServiceWorker v2 (2026-04-02)
+// Cache cleanup + sync broadcast — network-only strategy
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
@@ -1113,11 +1113,29 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
-    .then(() => self.registration.unregister())
-    .then(() => self.clients.matchAll())
-    .then(clients => clients.forEach(c => c.navigate(c.url)))
+    .then(() => self.clients.claim())
   );
-  self.clients.claim();
+});
+
+// Sync: broadcast TRIGGER_SYNC to all POS clients
+self.addEventListener('sync', (e) => {
+  if (e.tag === 'pos-sync') {
+    e.waitUntil(
+      self.clients.matchAll().then(clients => {
+        clients.forEach(c => c.postMessage({type: 'TRIGGER_SYNC'}));
+      })
+    );
+  }
+});
+
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'TRIGGER_SYNC') {
+    e.waitUntil(
+      self.clients.matchAll().then(clients => {
+        clients.forEach(c => c.postMessage({type: 'TRIGGER_SYNC'}));
+      })
+    );
+  }
 });
 
 // Network-only: ne cachira ništa, uvijek fetch
