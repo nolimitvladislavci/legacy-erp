@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIMIT Connect — Upute i procesi</title>
+<style>
+:root{--dark:#0f0f1a;--accent:#c9a84c;--blue:#2563eb;--green:#22c55e;--muted:#8a8a9a;--card:rgba(255,255,255,.03);--border:rgba(255,255,255,.07)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:#e0e0e0;line-height:1.7}
+a{color:var(--accent);text-decoration:none}
+.hero{text-align:center;padding:4rem 1.5rem 2rem;background:linear-gradient(160deg,#0f0f1a,#1a1428)}
+.hero h1{font-size:2.2rem;color:var(--accent);margin-bottom:.5rem}
+.hero p{color:var(--muted);font-size:1rem}
+.container{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem}
+.nav-pills{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;padding:1.5rem 0;position:sticky;top:0;background:var(--dark);z-index:10;border-bottom:1px solid var(--border)}
+.nav-pill{background:var(--card);border:1px solid var(--border);padding:.4rem 1rem;border-radius:20px;font-size:.8rem;color:#ccc;cursor:pointer;transition:all .2s}
+.nav-pill:hover,.nav-pill.active{background:rgba(201,168,76,.15);border-color:var(--accent);color:var(--accent)}
+.section{padding-top:3rem}
+.section-title{color:var(--accent);border-left:4px solid var(--accent);padding-left:1rem;font-size:1.4rem;margin-bottom:1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.card h4{color:var(--accent);margin-bottom:.5rem}
+.card p,.card li{font-size:.9rem;color:#ccc}
+.flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;margin:1.5rem 0}
+.flow-step{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center;min-width:110px;flex:1}
+.flow-step .emoji{font-size:1.5rem;display:block}
+.flow-step strong{font-size:.8rem;display:block;margin-top:.3rem}
+.flow-step small{color:var(--muted);font-size:.65rem}
+.flow-arrow{color:var(--accent);font-size:1.2rem;padding:0 .2rem}
+.tag{display:inline-block;background:rgba(37,99,235,.15);border:1px solid rgba(37,99,235,.25);color:#93c5fd;padding:2px 8px;border-radius:8px;font-size:.7rem;margin:2px}
+.tag-green{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.25);color:#86efac}
+.tag-gold{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.25);color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;color:var(--accent);border-bottom:1px solid var(--border);padding:.5rem}
+td{border-bottom:1px solid rgba(255,255,255,.04);padding:.5rem;color:#ccc}
+footer{text-align:center;padding:2rem;color:#555;font-size:.75rem;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>LIMIT Connect — Odakle vjetar puše</h1>
+    <p>Kompletni vodič kroz ekosistem — od vrtića do pozornice, od primke do fakture</p>
+</div>
+
+<div class="container">
+
+<div class="nav-pills">
+    <a href="#ekosistem" class="nav-pill active">Ekosistem</a>
+    <a href="#vrtic" class="nav-pill">Vrtić</a>
+    <a href="#kud" class="nav-pill">KUD / Glazbena</a>
+    <a href="#restoran" class="nav-pill">Restoran</a>
+    <a href="#burza" class="nav-pill">Burza / OPG</a>
+    <a href="#skladiste" class="nav-pill">Skladište</a>
+    <a href="#knjizenje" class="nav-pill">Knjiženje</a>
+    <a href="#borg" class="nav-pill">BORG AI</a>
+    <a href="#pravne" class="nav-pill">Pravne osobe</a>
+</div>
+
+<!-- ═══ EKOSISTEM ═══ -->
+<div class="section" id="ekosistem">
+    <h2 class="section-title">Ekosistem — kako sve radi zajedno</h2>
+
+    <div class="card">
+        <h4>LIMIT Connect nije jedan program — to je mreža</h4>
+        <p>Svaki modul radi samostalno, ali pravi efekt nastaje kad se spoje.
+           OPG proizvodi sir → restoran ga stavlja na meni → gost naručuje → skladište se ažurira →
+           knjiženje ide automatski → BORG ujutro javlja što treba napraviti.</p>
+    </div>
+
+    <div class="flow">
+        <div class="flow-step"><span class="emoji">🌾</span><strong>OPG</strong><small>Proizvodi</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">📦</span><strong>Primka</strong><small>Skladište</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">🍽️</span><strong>Restoran</strong><small>Jelovnik</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">📱</span><strong>Narudžba</strong><small>QR / mobitel</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">🧾</span><strong>Račun</strong><small>Fiskaliziran</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">📊</span><strong>Knjiženje</strong><small>Automatski</small></div>
+    </div>
+
+    <div class="flow">
+        <div class="flow-step"><span class="emoji">👶</span><strong>Vrtić</strong><small>Dijete (3-6)</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">🎵</span><strong>KUD</strong><small>Preporuka</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">🎸</span><strong>Glazbena</strong><small>Instrument</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">🎤</span><strong>Nastup</strong><small>Smotra</small></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><span class="emoji">📝</span><strong>ZAMP</strong><small>Prijava XML</small></div>
+    </div>
+</div>
+
+<!-- ═══ VRTIĆ ═══ -->
+<div class="section" id="vrtic">
+    <h2 class="section-title">Vrtić — od upisa do računa</h2>
+
+    <div class="card">
+        <h4>Kako funkcionira</h4>
+        <ul>
+            <li><strong>Upis djeteta</strong> — GDPR pristanak roditelja OBAVEZAN (čl.8 GDPR)</li>
+            <li><strong>Evidencija dolazaka</strong> — svaki dan: prisutno / bolesno / opravdano / neopravdano</li>
+            <li><strong>Mjesečna naplata</strong> — automatski odbitak obroka za dane izostanka</li>
+            <li><strong>Račun roditelju</strong> — generira se iz MonthlyBilling → invoicing.Invoice</li>
+            <li><strong>Roditeljski portal</strong> — dnevni izvještaj, obavijesti, računi</li>
+            <li><strong>CSV import</strong> — bulk upis 100+ djece iz Excela</li>
+        </ul>
+        <p><span class="tag-green tag">WhatsApp</span> Roditelj dobije alert o izostanku, podsjetnik za plaćanje, dnevni izvještaj</p>
+    </div>
+
+    <div class="card">
+        <h4>Vrtić → KUD pipeline</h4>
+        <p>Odgajateljica vidi da dijete ima osjećaj za ritam → klikne "Preporuči u KUD" →
+           sustav kreira učenika u glazbenoj školi → roditelj dobije WhatsApp s pozivnicom na besplatnu probu.</p>
+        <p><span class="tag-gold tag">Automatski</span> Dijete iz vrtića postaje učenik glazbene škole bez ijednog papira.</p>
+    </div>
+</div>
+
+<!-- ═══ KUD / GLAZBENA ═══ -->
+<div class="section" id="kud">
+    <h2 class="section-title">KUD i Glazbena škola</h2>
+
+    <div class="card">
+        <h4>Glazbena škola — evidencija i fakturiranje</h4>
+        <ul>
+            <li><strong>Učenici</strong> — ime, instrument, razina (pripremni→napredna), instruktor</li>
+            <li><strong>Sati nastave</strong> — datum, trajanje, gradivo, pedagoška bilješka</li>
+            <li><strong>Fakturiranje</strong> — jednim klikom: svi nefakturirani sati → račun roditelju</li>
+            <li><strong>PDV</strong> — glazbeno obrazovanje OSLOBOĐENO PDV-a (čl.40 ZPDV) ako je u registru</li>
+        </ul>
+        <p><span class="tag tag">HTMX</span> Inline dodavanje učenika i sati — bez reloada stranice</p>
+    </div>
+
+    <div class="card">
+        <h4>ZAMP prijava</h4>
+        <p>Za svaki nastup sustav generira strukturirani XML s popisom izvedenih djela.
+           XML se šalje na <code>prijavadj@zamp.hr</code>. Nema API-a — ZAMP prima email.</p>
+    </div>
+
+    <div class="card">
+        <h4>Instrumenti (pilot: KUD Dukat)</h4>
+        <p>Tambura (prim, bisernica, brač, bugarija, bas), harmonika, gitara, klavir, pjevanje, solfeggio, folklor-ples.</p>
+    </div>
+</div>
+
+<!-- ═══ RESTORAN ═══ -->
+<div class="section" id="restoran">
+    <h2 class="section-title">Restoran — od QR-a do kuhinje</h2>
+
+    <div class="card">
+        <h4>Digitalni jelovnik</h4>
+        <ul>
+            <li><strong>QR na stolu</strong> → gost skenira → vidi menu na mobitelu</li>
+            <li><strong>Košarica</strong> → odabere stavke → pošalje narudžbu</li>
+            <li><strong>WhatsApp kuharu</strong> → automatska notifikacija s brojem stola i stavkama</li>
+            <li><strong>Kuhinjski display</strong> → real-time prikaz narudžbi, status gumbi (priprema→gotovo→posluženo)</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h4>Admin panel</h4>
+        <p>Inline promjena cijena (klik → edit → spremi bez reloada). Toggle dostupnosti artikla.
+           Upozorenje kad zaliha padne ispod minimuma.</p>
+    </div>
+</div>
+
+<!-- ═══ BURZA / OPG ═══ -->
+<div class="section" id="burza">
+    <h2 class="section-title">Burza i OPG</h2>
+
+    <div class="card">
+        <h4>Tko je tko</h4>
+        <table>
+            <tr><th>Uloga</th><th>Što radi</th><th>Primjer</th></tr>
+            <tr><td>OPG (proizvođač)</td><td>Stavlja proizvode na burzu</td><td>OPG Kruljac — sir, med</td></tr>
+            <tr><td>Restoran (kupac)</td><td>Naručuje s burze za kuhanju</td><td>Široki Šor — sir za tanjur</td></tr>
+            <tr><td>Gost (krajnji)</td><td>Naručuje jelo ili proizvod</td><td>Sirni tanjur + kulen za doma</td></tr>
+            <tr><td>Udruga</td><td>Community, voucheri, subvencije</td><td>No Limit — "Kupi lokalno" bon</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ═══ SKLADIŠTE ═══ -->
+<div class="section" id="skladiste">
+    <h2 class="section-title">Skladište — primka do prodaje</h2>
+
+    <div class="card">
+        <h4>Tok robe</h4>
+        <div class="flow">
+            <div class="flow-step"><span class="emoji">📋</span><strong>Primka</strong><small>Potvrdi</small></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="emoji">📦</span><strong>Zaliha +</strong><small>StockMovement</small></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="emoji">🏷️</span><strong>LOT / rok</strong><small>StockBatch</small></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="emoji">🛒</span><strong>Prodaja</strong><small>POS / online</small></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step"><span class="emoji">📉</span><strong>Zaliha -</strong><small>FEFO redoslijed</small></div>
+        </div>
+        <p><strong>FEFO</strong> = First Expire, First Out — sustav automatski skida najstariji LOT kod prodaje (EU 178/2002).</p>
+        <p><strong>BOM</strong> = Sastavnica — ako artikl ima komponente (npr. sendvič = kruh + sir + salata), sve se oduzima automatski.</p>
+    </div>
+</div>
+
+<!-- ═══ KNJIŽENJE ═══ -->
+<div class="section" id="knjizenje">
+    <h2 class="section-title">Knjiženje — automatski, bez računovođe</h2>
+
+    <div class="card">
+        <h4>Što sustav automatski knjiži</h4>
+        <table>
+            <tr><th>Događaj</th><th>Duguje</th><th>Potražuje</th></tr>
+            <tr><td>Primka (veleprodaja)</td><td>3000 Roba + 1400 Pretporez</td><td>2200 Dobavljači</td></tr>
+            <tr><td>Izlazni račun</td><td>1200 Kupci</td><td>7000 Prihodi + 2400 PDV</td></tr>
+            <tr><td>Ulazni račun (URA)</td><td>4000 Troškovi + 1400 Pretporez</td><td>2200 Dobavljači</td></tr>
+            <tr><td>POS smjena (zatvaranje)</td><td>1000 Blagajna / 1210 Kartica</td><td>7500 POS Prihodi + 2400 PDV</td></tr>
+        </table>
+        <p>Temeljnica se kreira automatski. Nikad ne morate ručno knjižiti.</p>
+    </div>
+
+    <div class="card">
+        <h4>SAF-T HR</h4>
+        <p>Standard Audit File for Tax — XML export za Poreznu upravu. Generirajte za bilo koje razdoblje u
+           <strong>Konto → SAF-T Export</strong>. Sadrži: kontni plan, partnere, temeljnice, fakture.</p>
+    </div>
+</div>
+
+<!-- ═══ BORG AI ═══ -->
+<div class="section" id="borg">
+    <h2 class="section-title">BORG — proaktivni AI asistent</h2>
+
+    <div class="card">
+        <h4>Što BORG radi svaki dan</h4>
+        <ul>
+            <li><strong>07:45</strong> — Jutarnji briefing na WhatsApp (dospjeli računi, rokovi, niska zaliha)</li>
+            <li><strong>Svaka 6h</strong> — Skenira Narodne novine za regulatorne promjene</li>
+            <li><strong>23:00</strong> — Trust Decay check (da korisnik ne postane previše ovisan o sustavu)</li>
+            <li><strong>03:00</strong> — Čišćenje starih audit logova (štiti bazu od eksplozije)</li>
+            <li><strong>04:00</strong> — Collaborative Intelligence (signali između tenanta)</li>
+        </ul>
+        <p><span class="tag-gold tag">BorgAuditEntry</span> Svaka akcija sustava se bilježi — immutable zapis za Poreznu upravu. Nikad se ne briše, nikad se ne mijenja.</p>
+    </div>
+</div>
+
+<!-- ═══ PRAVNE OSOBE ═══ -->
+<div class="section" id="pravne">
+    <h2 class="section-title">Razlike po pravnim osobama</h2>
+
+    <div class="card">
+        <table>
+            <tr><th>Tip</th><th>Kontni plan</th><th>PDV</th><th>Fiskalizacija</th><th>Izvještaj</th></tr>
+            <tr><td><strong>d.o.o.</strong></td><td>Standard (0-9)</td><td>Da</td><td>Da</td><td>PR-IZ</td></tr>
+            <tr><td><strong>Obrt</strong></td><td>Standard</td><td>Ovisi (prag 40k€)</td><td>Da</td><td>Porez na dohodak</td></tr>
+            <tr><td><strong>OPG</strong></td><td>Standard</td><td>Ovisi</td><td>Ovisi</td><td>Specifičan</td></tr>
+            <tr><td><strong>Udruga</strong></td><td>Neprofitni (1-5)</td><td>Moguće oslobođenje</td><td>Moguće oslobođenje</td><td>PR-RAS-NPF</td></tr>
+            <tr><td><strong>Ustanova</strong></td><td>Neprofitni (1-5)</td><td>Oslobođeno</td><td>Oslobođeno</td><td>PR-RAS-NPF</td></tr>
+            <tr><td><strong>Iznajmljivač</strong></td><td>Standard</td><td>Da</td><td>Da</td><td>eVisitor</td></tr>
+        </table>
+    </div>
+</div>
+
+</div>
+
+<footer>
+    Powered by <strong>LIMIT Connect</strong> — BORG Proactive Engine<br>
+    <small>Generirano 02.04.2026. Svi procesi odgovaraju trenutnoj konfiguraciji sustava.</small>
+</footer>
+
+</body>
+</html>

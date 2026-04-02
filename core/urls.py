@@ -219,6 +219,7 @@ urlpatterns += i18n_patterns(
     path("korpas/", lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/landing_korpas.html")),
     path("korpas/termini/", __import__("django.views.generic", fromlist=["RedirectView"]).RedirectView.as_view(url="/hr/appointments/booking/c/korpas-doo/", permanent=False), name="korpas_termini"),
     path("korpas/sirokisor/", __import__("website.views", fromlist=["sirokisor"]).sirokisor, name="sirokisor"),
+    path("upute/", lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/upute_centralne.html"), name="upute_centralne"),
     path("korpas/kud-dukat/", lambda r: __import__("django.shortcuts", fromlist=["render"]).render(r, "website/kud_dukat.html")),
     path("korpas/opg-kruljac/", __import__("website.views", fromlist=["opg_kruljac"]).opg_kruljac, name="opg_kruljac"),
     path("cro-validator/", __import__("django.views.generic", fromlist=["RedirectView"]).RedirectView.as_view(url="/validator/", permanent=False), name="cro_validator"),
