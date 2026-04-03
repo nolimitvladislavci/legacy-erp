@@ -11,6 +11,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 # Eksplicitni import za apps koje autodiscover ne pokupi automatski
 app.autodiscover_tasks(['smart_import'])
+# core.tasks — database_backup, system_test, ai_health (eksplicitno jer autodiscover ponekad ne pokupi)
+app.autodiscover_tasks(['core.tasks'])
 # Eksplicitni import za nestandardne module
 app.autodiscover_tasks(['core.gemini_tasks', 'core.whatsapp_tasks'])
 
