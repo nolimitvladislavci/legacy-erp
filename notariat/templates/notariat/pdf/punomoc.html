@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Punomoć (Opunomoćenje)</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            font-size: 16pt;
+            margin-bottom: 20mm;
+            text-transform: uppercase;
+        }
+        p {
+            margin-bottom: 5mm;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 10mm;
+        }
+        .footer-section {
+            margin-top: 30mm;
+            font-size: 8pt;
+            color: #555;
+            text-align: center;
+        }
+        .signature-block {
+            margin-top: 40mm;
+            /* For print, direct flexbox layout is complex, using block elements */
+        }
+        .signature-line {
+            width: 45%;
+            border-top: 1px solid #000;
+            padding-top: 5mm;
+            text-align: center;
+            display: inline-block; /* For side-by-side, if possible */
+            margin: 0 2%; /* Spacing */
+        }
+        .date-place {
+            margin-top: 20mm;
+            text-align: right;
+            margin-bottom: 30mm;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-section">
+        <p style="font-size: 12pt; font-weight: bold;">Fina Connect d.o.o.</p>
+        <p style="font-size: 9pt;">Ulica primjer 123, 10000 Zagreb</p>
+        <p style="font-size: 9pt;">Tel: +385 1 123 4567, Email: info@finaconnect.hr</p>
+    </div>
+
+    <h1>PUNOMOĆ (OPUNOMOĆENJE)</h1>
+
+    <p style="text-align: center; font-style: italic; margin-bottom: 20mm;">
+        Sukladno Zakonu o obveznim odnosima (NN XX/YY).
+    </p>
+
+    <p>Ja, niže potpisani/a <strong>{{ punomocitelj.ime_prezime }}</strong>, OIB: {{ punomocitelj.oib }}, s prebivalištem na adresi {{ punomocitelj.adresa }}, {{ punomocitelj.mjesto }},</p>
+    <p>ovime ovlašćujem <strong>{{ opunomocenik.ime_prezime }}</strong>, OIB: {{ opunomocenik.oib }}, s prebivalištem na adresi {{ opunomocenik.adresa }}, {{ opunomocenik.mjesto }},</p>
+    <p>da u moje ime i za moj račun obavlja sljedeće poslove:</p>
+    <p><strong>Predmet punomoći:</strong></p>
+    <div style="padding-left: 15mm; min-height: 50mm; border: 1px solid #ccc; padding: 10mm;">
+        <p>{{ predmet_punomoci|linebreaksbr }}</p>
+    </div>
+
+    <p style="margin-top: 20mm;">Ova punomoć vrijedi do {{ datum_isteka_punomoci|date:"d.m.Y." }} (ako je određena) ili dok se ne opozove.</p>
+
+    <p class="date-place">
+        U {{ mjesto_izdavanja }}, dana {{ datum_izdavanja|date:"d.m.Y." }}.
+    </p>
+
+    <div style="margin-top: 50mm; text-align: center;">
+        <div style="width: 45%; display: inline-block; text-align: center; vertical-align: top;">
+            <p style="border-top: 1px solid #000; padding-top: 5mm;">Potpis punomoćitelja</p>
+        </div>
+        <div style="width: 45%; display: inline-block; text-align: center; vertical-align: top;">
+            <p style="border-top: 1px solid #000; padding-top: 5mm;">Potpis opunomoćenika (prihvaćam)</p>
+        </div>
+    </div>
+
+    <div class="footer-section">
+        <p>Dokument generiran u LIMIT Connect sustavu.</p>
+        {% if pdf_sha256 %}
+        <p>SHA-256 kontrolni broj: {{ pdf_sha256 }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>

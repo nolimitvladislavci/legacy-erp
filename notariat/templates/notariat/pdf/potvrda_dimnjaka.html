@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Potvrda o ispravnosti dimnjaka</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+            @frame header {
+                -weasy-flow-into: header_flow;
+                margin-top: 10mm;
+                height: 20mm;
+            }
+            @frame footer {
+                -weasy-flow-into: footer_flow;
+                margin-bottom: 10mm;
+                height: 20mm;
+            }
+        }
+        body {
+            font-family: 'DejaVu Sans', sans-serif; /* Fallback na Arial */
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 15mm;
+            font-size: 14pt;
+        }
+        .header-content {
+            text-align: center;
+            margin-bottom: 20mm;
+        }
+        .header-content h2 {
+            font-size: 12pt;
+            margin-bottom: 5mm;
+        }
+        .section {
+            margin-bottom: 10mm;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 5mm;
+        }
+        .data-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 150px;
+        }
+        .signature-block {
+            margin-top: 30mm;
+            text-align: right;
+            width: 50%;
+            float: right;
+        }
+        .signature-line {
+            border-top: 1px solid black;
+            padding-top: 5px;
+            margin-top: 20px;
+        }
+        .footer-content {
+            text-align: center;
+            font-size: 8pt;
+            margin-top: 20mm;
+        }
+        .footer-left {
+            float: left;
+            width: 50%;
+            text-align: left;
+        }
+        .footer-right {
+            float: right;
+            width: 50%;
+            text-align: right;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-content">
+        <h2>LIMIT Connect d.o.o.</h2>
+        <h1>POTVRDA O ISPRAVNOSTI DIMNJAKA</h1>
+        <p>Sukladno Zakonu o obavljanju dimnjačarskih poslova (NN 103/15).</p>
+    </div>
+
+    <div class="section">
+        <p><span class="data-label">Adresa pregleda:</span> {{ inspekcija.adresa }}</p>
+        <p><span class="data-label">Broj dimnjaka:</span> {{ inspekcija.broj_dimnjaka }}</p>
+        <p><span class="data-label">Datum pregleda:</span> {{ inspekcija.datum_pregleda|date:"d.m.Y." }}</p>
+        <p><span class="data-label">Status dimnjaka:</span> {{ inspekcija.get_status_dimnjaka_display }}</p>
+    </div>
+
+    <div class="section">
+        <p class="section-title">Opis nalaza:</p>
+        <p>{{ inspekcija.opis_nalaza|default:"Nema posebnog opisa nalaza." }}</p>
+    </div>
+
+    <div class="section">
+        <p class="section-title">Preporuke:</p>
+        <p>{{ inspekcija.preporuke|default:"Nema posebnih preporuka." }}</p>
+    </div>
+
+    <div class="section">
+        <p><span class="data-label">Sljedeći pregled:</span> {{ inspekcija.sljedeci_pregled|date:"d.m.Y." }}</p>
+    </div>
+
+    <div class="signature-block">
+        <p>Mjesto i datum: ______________, {{ inspekcija.datum_pregleda|date:"d.m.Y." }}</p>
+        <p class="signature-line">Potpis dimnjačara i pečat</p>
+    </div>
+
+    <div class="footer-content clearfix">
+        <div class="footer-left">
+            <p>Dokument generiran u LIMIT Connect sustavu.</p>
+        </div>
+        <div class="footer-right">
+            {% if inspekcija.pdf_sha256 %}
+                <p>SHA-256 kontrolni broj: {{ inspekcija.pdf_sha256 }}</p>
+            {% else %}
+                <p>SHA-256 kontrolni broj: N/A</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="f-container">
+    <div class="f-hero">
+        <i class="icon icon-fire"></i>
+        <h1>Dimnjačarski pregledi</h1>
+    </div>
+
+    <div class="f-card f-card-gold mb-4">
+        <div class="f-card-header">
+            <h2>Sljedeći pregledi (u 30 dana)</h2>
+        </div>
+        <div class="f-card-body">
+            {% if nadolazece_inspekcije %}
+            <ul class="list-group">
+                {% for inspekcija in nadolazece_inspekcije %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ inspekcija.adresa }} - {{ inspekcija.sljedeci_pregled|date:"d.m.Y." }}
+                    {% if inspekcija.sljedeci_pregled|date:"U" < 'now'|date:"U" %}
+                    <span class="badge badge-danger badge-pill">Isteklo</span>
+                    {% elif inspekcija.sljedeci_pregled|date:"U" < 'now'|date:"U"|add:"2592000" %}
+                    <span class="badge badge-warning badge-pill">Uskoro</span>
+                    {% else %}
+                    <span class="badge badge-info badge-pill">Nadolazi</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Nema nadolazećih dimnjačarskih pregleda u sljedećih 30 dana.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="f-card">
+        <div class="f-card-header">
+            <h2>Sve dimnjačarske inspekcije</h2>
+        </div>
+        <div class="f-card-body">
+            {% if dimnjacarske_inspekcije %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Adresa</th>
+                            <th>Dimnjak</th>
+                            <th>Status</th>
+                            <th>Datum pregleda</th>
+                            <th>Sljedeći pregled</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inspekcija in dimnjacarske_inspekcije %}
+                        <tr>
+                            <td>{{ inspekcija.adresa }}</td>
+                            <td>{{ inspekcija.broj_dimnjaka }}</td>
+                            <td>
+                                {% if inspekcija.status_dimnjaka == 'ISPRAVAN' %}
+                                <span class="badge badge-success">{{ inspekcija.get_status_dimnjaka_display }}</span>
+                                {% elif inspekcija.status_dimnjaka == 'NEISPRAVAN' %}
+                                <span class="badge badge-danger">{{ inspekcija.get_status_dimnjaka_display }}</span>
+                                {% else %}
+                                <span class="badge badge-warning">{{ inspekcija.get_status_dimnjaka_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ inspekcija.datum_pregleda|date:"d.m.Y." }}</td>
+                            <td>{{ inspekcija.sljedeci_pregled|date:"d.m.Y." }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>Nema unesenih dimnjačarskih inspekcija.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

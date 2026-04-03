@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block page_title %}Odvjetnički dashboard{% endblock %}
+{% block content %}
+<div class="f-container">
+  <div class="f-hero">
+    <h3 class="f-heading f-heading-lg">⚖️ Odvjetnički dashboard</h3>
+    <p class="f-subtitle">Aktivni predmeti i rokovi</p>
+  </div>
+  {% if pred_s_rokom %}
+  <div class="f-card f-card-red mb-3">
+    <div class="f-heading f-heading-sm mb-2">⏰ Rokovi u sljedećih 7 dana</div>
+    {% for p in pred_s_rokom %}
+    <div class="d-flex justify-content-between py-2 border-bottom">
+      <span>{{ p.naziv }}</span>
+      <span class="f-red fw-bold">{{ p.rok }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="f-panel">
+    <div class="f-panel-header">Aktivni predmeti ({{ predmeti.count }})</div>
+    <table class="f-table">
+      <thead><tr><th>Predmet</th><th>Vrsta</th><th>Klijent</th><th>Satnica</th><th>Rok</th></tr></thead>
+      <tbody>
+      {% for p in predmeti %}
+      <tr>
+        <td class="fw-semibold">{{ p.naziv }}</td>
+        <td>{{ p.get_vrsta_display }}</td>
+        <td>{{ p.klijent|default:"—" }}</td>
+        <td>{{ p.satnica_eur }} EUR/h</td>
+        <td>{% if p.rok %}<span class="{% if p.rok < today %}f-red{% endif %}">{{ p.rok }}</span>{% else %}—{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center f-muted py-3">Nema aktivnih predmeta</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
