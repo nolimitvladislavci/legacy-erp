@@ -46,6 +46,7 @@ CATEGORIES = {
     'turizam':        {'name': 'Turizam',        'icon': 'fa-umbrella-beach',    'order': 8},
     'integracije':    {'name': 'Integracije',    'icon': 'fa-plug',              'order': 9},
     'ai':             {'name': 'AI & Automatizacija', 'icon': 'fa-robot',        'order': 10},
+    'pravne_usluge':  {'name': 'Pravne usluge',    'icon': 'fa-gavel',             'order': 11},
 }
 
 
@@ -715,9 +716,44 @@ MODULES = [
         'description': 'Anti-money laundering provjere.',
         'price_addon': 0,
     },
+
+    # ══════════════════════════════════════════════════════════════════════
+    #  PRAVNE USLUGE — Bilježnik + Odvjetnik + Dimnjačar
+    # ══════════════════════════════════════════════════════════════════════
+    {
+        'id': 'odvjetnik',
+        'name': 'Odvjetnički ured',
+        'icon': 'fa-gavel',
+        'url': '/notariat/pravnik/',
+        'url_name': 'notariat:pravnik_dashboard',
+        'category': 'pravne_usluge',
+        'tier': 'vertical',
+        'description': 'Predmeti, billable sati, rokovi, fakturiranje po predmetu.',
+        'price_addon': 19,
+    },
+    {
+        'id': 'biljeznik',
+        'name': 'Javni bilježnik',
+        'icon': 'fa-file-contract',
+        'url': '/notariat/pravnik/',
+        'url_name': 'notariat:pravnik_dashboard',
+        'category': 'pravne_usluge',
+        'tier': 'vertical',
+        'description': '10 predložaka, tarifa kalkulator, PDF ovjera, CroValidator.',
+        'price_addon': 24,
+    },
+    {
+        'id': 'dimnjacari',
+        'name': 'Dimnjačarska služba',
+        'icon': 'fa-fire',
+        'url': '/notariat/dimnjacari/',
+        'url_name': 'notariat:dimnjacari_dashboard',
+        'category': 'pravne_usluge',
+        'tier': 'vertical',
+        'description': 'Evidencija pregleda NN 103/15, PDF potvrde, godišnji plan.',
+        'price_addon': 14,
+    },
 ]
-
-
 # ═══════════════════════════════════════════════════════════════════════════
 #  LOOKUP HELPERS
 # ═══════════════════════════════════════════════════════════════════════════

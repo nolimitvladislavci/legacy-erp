@@ -68,6 +68,9 @@ class Company(models.Model):
         USTANOVA         = 'ustanova',         _('Ustanova')
         IZNAJMLJIVAC     = 'iznajmljivac',     _('Iznajmljivač (fizička osoba)')
         OTHER            = 'other',            _('Ostalo')
+        ODVJETNIK        = 'odvjetnik',        _('Odvjetnički ured')
+        BILJEZNIK        = 'biljeznik',        _('Javni bilježnik')
+        DIMNJACARI       = 'dimnjacari',       _('Dimnjačarska služba')
 
     class Currency(models.TextChoices):
         EUR = 'EUR', 'EUR (Euro)'
