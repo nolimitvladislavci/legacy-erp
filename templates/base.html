@@ -8,907 +8,192 @@
   <meta name="theme-color" content="#c9a84c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="LIMIT Connect">
-  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
-  <script>
-(function(){var t=localStorage.getItem('fina-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
-</script>
-  <title>{% block title %}LIMIT CONNECT{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/base-layout.css">
-    <link rel="stylesheet" href="/static/css/fenix-ui.css">
+  <meta name="apple-mobile-web-app-title" content="FinaConnect">
+  <link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
+
+    <title>{% if title %}{{ title }} - {% endif %}FinaConnect</title>
+    <link rel="stylesheet" href="{% static 'css/global_themes.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fenix-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
+
     {% block extra_css %}{% endblock %}
-    <!-- BORG Faza 2: HTMX + Sortable.js -->
-    <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
-    <!-- HTMX Global CSRF Header — svaki HTMX request šalje X-CSRFToken -->
+
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.body.addEventListener('htmx:configRequest', function(event) {
-            // Pokupi CSRF token iz cookie-ja (Django ga tamo stavlja)
-            var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-            if (!csrfToken) {
-                // Fallback: pokupi iz cookie-ja
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var c = cookies[i].trim();
-                    if (c.startsWith('csrftoken=')) {
-                        csrfToken = c.substring('csrftoken='.length);
-                        break;
-                    }
-                }
+        // Nova funkcija za postavljanje teme
+        function setTheme(themeName) {
+            localStorage.setItem('theme', themeName);
+            document.documentElement.className = themeName;
+        }
+
+        // Funkcija za prebacivanje teme (ako se ipak koristi toggle)
+        function toggleTheme() {
+            if (localStorage.getItem('theme') === 'theme-dark') {
+                setTheme('theme-light');
+            } else {
+                setTheme('theme-dark');
             }
-            if (csrfToken) {
-                event.detail.headers['X-CSRFToken'] = csrfToken;
+        }
+
+        // Init script: Provjeri lokalnu pohranu i primijeni temu pri učitavanju stranice
+        (function () {
+            if (localStorage.getItem('theme') === 'theme-light') {
+                setTheme('theme-light');
+            } else {
+                setTheme('theme-dark');
             }
+        })();
+
+        // Postavke za PWA install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 76 and later from showing the mini-infobar
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            // (You might want to show a custom button here)
+            console.log('beforeinstallprompt event fired');
         });
-    });
+
+        function showInstallPrompt() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                console.log('Install prompt not available');
+                // Fallback for browsers that don't support it, or if already installed
+                alert('Aplikacija se može instalirati putem postavki preglednika (Add to Home Screen).');
+            }
+        }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 
-    <!-- HTMX UX: Loading indicators + button disable -->
-    <div class="toast-container" id="borgToasts"></div>
-    <script>
-    // Global toast notification
-    window.borgToast = function(msg, type) {
-        type = type || 'success';
-        var container = document.getElementById('borgToasts');
-        if (!container) return;
-        var toast = document.createElement('div');
-        toast.className = 'borg-toast ' + type;
-        toast.textContent = msg;
-        container.appendChild(toast);
-        setTimeout(function(){ toast.style.opacity='0'; setTimeout(function(){ toast.remove(); }, 300); }, 4000);
-    };
-
-    // HTMX error handler → toast
-    document.addEventListener('htmx:responseError', function(e) {
-        borgToast('Greška: ' + (e.detail.xhr.status || 'mreža'), 'error');
-    });
-    document.addEventListener('htmx:sendError', function() {
-        borgToast('Mrežna greška — pokušajte ponovo', 'error');
-    });
-
-    // Auto-disable submit buttons during HTMX request
-    document.addEventListener('htmx:beforeRequest', function(e) {
-        var btns = e.target.querySelectorAll('button[type=submit],.btn-submit');
-        btns.forEach(function(b){ b.dataset.origText = b.innerHTML; b.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Obrada...'; b.disabled = true; });
-    });
-    document.addEventListener('htmx:afterRequest', function(e) {
-        var btns = e.target.querySelectorAll('button[type=submit],.btn-submit');
-        btns.forEach(function(b){ if(b.dataset.origText) b.innerHTML = b.dataset.origText; b.disabled = false; });
-    });
-    </script>
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <!-- Offline indikator -->
-    <div id="offlineBar" style="display:none;background:#dc2626;color:#fff;text-align:center;padding:6px 16px;font-weight:700;font-size:.85rem;position:fixed;top:0;left:0;right:0;z-index:9999">
-      <i class="fas fa-wifi" style="margin-right:6px;opacity:.7"></i>
-      <span id="offlineMsg">Nema internetske veze</span>
-      <span id="offlineQueue" style="margin-left:12px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-size:.75rem"></span>
-    </div>
-    <!-- Offline bar handler now in core.js -->
+<body class="{{ body_class|default:'' }}">
 
-    {% if request.session.umbrella_as_company %}
-    <div style="background:linear-gradient(90deg,var(--gold,#c9a84c),#e8d48b);color:#0a0a0a;text-align:center;padding:8px 16px;font-weight:600;position:relative;z-index:1050;">
-      <i class="fas fa-building"></i>
-      Gledate firmu: <strong>{{ request.session.umbrella_home_name|default:"Child" }}</strong> → trenutna
-      <a href="{% url 'umbrella_switch_back' %}" class="btn btn-sm btn-dark ms-3">
-        <i class="fas fa-arrow-left"></i> Natrag na umbrella
-      </a>
-    </div>
-    {% endif %}
+    <div id="body-overlay" class="hidden"></div>
 
-{% if request.impersonation_active %}
-<div id="imp-banner" style="
-    position:fixed;top:0;left:0;right:0;z-index:9999;
-    background:linear-gradient(90deg,#1a1200,#2a1e00,#1a1200);
-    border-bottom:2px solid var(--gold,#c9a84c);
-    padding:8px 20px;
-    display:flex;align-items:center;justify-content:space-between;
-    gap:12px;font-family:'Barlow Condensed','Segoe UI',sans-serif;
-    box-shadow:0 2px 20px rgba(201,168,76,.25);">
-  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="color:var(--gold,#c9a84c);font-size:1rem">⚠</span>
-    <span style="color:#e8c96a;font-size:.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase">
-      {% trans "Pristupate kao:" %}
-    </span>
-    <span style="color:#f0ede8;font-size:.9rem;font-weight:600">
-      {{ request.impersonated_company.name }}
-    </span>
-    <span style="color:#4a5060;font-size:.72rem">|</span>
-    <span style="color:#9aa0b0;font-size:.75rem">
-      {% trans "Trajanje:" %} <code id="imp-timer" style="color:var(--gold,#c9a84c);background:rgba(201,168,76,.1);padding:1px 6px;border-radius:3px">--:--:--</code>
-    </span>
-  </div>
-  <a href="/superadmin/impersonate/stop/"
-     style="background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);
-            color:#fca5a5;padding:5px 14px;font-size:.72rem;letter-spacing:1px;
-            text-transform:uppercase;text-decoration:none;white-space:nowrap;
-            font-weight:600;transition:background .2s"
-     onmouseover="this.style.background='rgba(192,57,43,.35)'"
-     onmouseout="this.style.background='rgba(192,57,43,.15)'">
-    {% trans "✕ Prekini pristup" %}
-  </a>
-</div>
-<div style="height:42px"></div><!-- push content below banner -->
-<!-- Impersonation timer now in core.js via window.FC.impersonationStart -->
-{% endif %}
-{% if request.user.is_authenticated and request.company and not request.company.has_signed_tc_consent %}
-<div style="background:linear-gradient(90deg,#1a1000,#2a1800);border-bottom:2px solid var(--gold,#c9a84c);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'Barlow Condensed',sans-serif">
-  <span style="color:#e8c96a;font-size:.85rem"><strong>⚠ Za punu funkcionalnost</strong> potrebno je prihvatiti uvjete korištenja platforme.</span>
-  <a href="/companies/tc-consent/" style="background:var(--gold,#c9a84c);color:#000;padding:6px 16px;border-radius:6px;font-weight:700;font-size:.8rem;text-decoration:none;white-space:nowrap">Prihvati uvjete →</a>
-</div>
-{% endif %}
-<div class="app-layout">
-    <!-- Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-brand">
-            <div>{% trans "LIMIT" %}<span>{% trans "CONNECT" %}</span></div>
-            <div style="display:flex;gap:6px;align-items:center;">
-                <button onclick="toggleSlimSidebar()" title="Smanji sidebar" style="background:none;border:none;color:#475569;cursor:pointer;font-size:.85rem;padding:4px;" class="slim-toggle-btn"><i class="fas fa-compress-arrows-alt"></i></button>
-                <button class="sidebar-close" onclick="closeSidebar()">✕</button>
-            </div>
-        </div>
-        {% if request.user.is_authenticated %}
-        <div class="sidebar-role">
-            {% if request.user.is_superuser %}SUPERADMIN
-            {% elif request.user.is_staff %}STAFF
-            {% elif request.user.profile.role == 'company_admin' %}ADMIN
-            {% elif request.user.profile.role == 'project_manager' %}VODITELJ
-            {% elif request.user.profile.role == 'investor' %}INVESTITOR
-            {% elif request.user.profile.role == 'partner' %}PARTNER
-            {% else %}RADNIK{% endif %}
-            · {{ request.user.get_full_name|default:request.user.username }}
-        </div>
-        {% if request.company %}
-        <div style="padding:8px 12px;background:#0d1526;border-bottom:1px solid #1e293b">
-            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:linear-gradient(135deg,#1a2744,#162040);border-radius:8px;border:1px solid rgba(201,168,76,.15)">
-                <i class="fas fa-building" style="color:var(--gold,#c9a84c);font-size:.75rem"></i>
-                <div style="flex:1;min-width:0">
-                    <div style="font-size:.72rem;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ request.company.name }}</div>
-                    {% if active_plan_name %}
-                    <div style="display:inline-block;margin-top:2px;font-size:.55rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:3px;{% if active_plan_slug == 'enterprise' %}background:rgba(201,168,76,.15);color:var(--gold,#c9a84c){% elif active_plan_slug == 'professional' %}background:rgba(59,130,246,.15);color:#60a5fa{% else %}background:rgba(100,116,139,.15);color:#94a3b8{% endif %}">{{ active_plan_name }}</div>
-                    {% endif %}
-                </div>
-                {% if has_multiple_companies %}
-                <i class="fas fa-chevron-down" style="cursor:pointer;font-size:.55rem;color:#64748b;transition:transform .2s" onclick="var s=document.getElementById('companySwitcher');var open=s.style.display!=='none';s.style.display=open?'none':'block';this.style.transform=open?'':'rotate(180deg)'" title="Promijeni tvrtku"></i>
-                {% endif %}
-            </div>
-        </div>
-        {% if has_multiple_companies %}
-        <div id="companySwitcher" style="display:none;position:fixed;top:80px;left:8px;right:8px;max-width:280px;background:#0a1020;border:1px solid var(--gold,#c9a84c)44;border-radius:10px;padding:8px;max-height:300px;overflow-y:auto;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,.7)">
-            {% for mem in user_memberships %}
-            <form method="post" action="{% url 'accounts:switch_company' %}" style="margin:0">
-                {% csrf_token %}
-                {% if mem.pk %}<input type="hidden" name="membership_id" value="{{ mem.id }}">{% else %}<input type="hidden" name="company_id" value="{{ mem.company.id }}">{% endif %}
-                <button type="submit" style="width:100%;text-align:left;background:{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %};border:none;color:#e2e8f0;padding:5px 10px;font-size:.68rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='{% if mem.company.id == request.company.id %}rgba(201,168,76,.08){% else %}transparent{% endif %}'">
-                    {% if mem.company.id == request.company.id %}<i class="fas fa-check" style="color:var(--gold,#c9a84c);font-size:.5rem"></i>{% else %}<i class="fas fa-building" style="color:#475569;font-size:.5rem"></i>{% endif %}
-                    {{ mem.company.name }}
-                    <span style="margin-left:auto;opacity:0.4;font-size:.5rem">{{ mem.get_role_display }}</span>
-                </button>
-            </form>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% endif %}
-        {% endif %}
-
-        <!-- ══ DYNAMIC SIDEBAR (from module_registry) ══ -->
-        {% include "includes/_sidebar_modules.html" %}
-
-        <div class="sidebar-footer">
-            {% if pending_claims_count > 0 %}
-            <a href="/hr/firma/zahtjevi/" onclick="closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:7px 12px;color:#facc15;text-decoration:none;border-radius:8px;margin:1px 4px;font-size:.8rem;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.2);margin-bottom:4px">
-              <i class="fas fa-inbox" style="width:18px;text-align:center"></i>
-              <span>Zahtjevi za pristup</span>
-              <span style="background:#facc15;color:#000;font-size:.65rem;font-weight:800;border-radius:10px;padding:1px 7px;margin-left:auto">{{ pending_claims_count }}</span>
+    <div class="top-nav">
+        <div class="logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/finaconnect-logo-white-small.png' %}" alt="FinaConnect Logo">
             </a>
-            {% endif %}
-            <a href="/panic/" onclick="closeSidebar()" style="background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;font-size:.78rem;letter-spacing:1px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;margin-bottom:4px"><i class="fas fa-shield-halved"></i> <span>INSPEKCIJA</span></a>
-            <div style="display:flex;gap:4px">
-              <a href="/hr/companies/modules/" onclick="closeSidebar()" style="flex:1;text-align:center;font-size:.75rem" title="Moduli"><i class="fas fa-th"></i></a>
-              <a href="/hr/companies/settings/" onclick="closeSidebar()" style="flex:1;text-align:center;font-size:.75rem" title="Postavke"><i class="fas fa-cog"></i></a>
-              <a href="/logout/" style="flex:1;text-align:center;font-size:.75rem" title="Odjava"><i class="fas fa-sign-out-alt"></i></a>
-            </div>
         </div>
 
+        <div class="search-bar">
+            <input type="text" placeholder="{% translate 'Pretraga...' %}">
+        </div>
+
+        <div class="nav-actions">
+
+            <!-- Novi 2-way Theme Switcher -->
+            <div class="theme-switcher-container">
+                <button class="theme-switcher-button dark" onclick="setTheme('theme-dark')">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="theme-switcher-button light" onclick="setTheme('theme-light')">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+
+            <a href="{% url 'notifications' %}" class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </a>
+
+            <div class="user-menu">
+                <img src="{% static 'img/avatar.png' %}" alt="User Avatar" class="user-avatar">
+                <span class="username">{{ request.user.first_name }}</span>
+                <i class="fas fa-chevron-down"></i>
+                <div class="dropdown-menu">
+                    <a href="{% url 'profile' %}">{% translate 'Profil' %}</a>
+                    <a href="{% url 'settings' %}">{% translate 'Postavke' %}</a>
+                    <a href="{% url 'password_change' %}">{% translate 'Promijeni lozinku' %}</a>
+                    <hr>
+                    <a href="{% url 'logout' %}">{% translate 'Odjava' %}</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Main -->
-    <div class="main">
-        <div class="topbar">
-            <div class="d-flex align-items-center gap-2">
-                <button class="hamburger" onclick="openSidebar()">☰</button>
-                <div class="topbar-search" onclick="openCmdPalette()">
-                    <i class="fas fa-search"></i>
-                    <span>Pretrazi...</span>
-                    <kbd>Ctrl+K</kbd>
-                </div>
-                <span style="font-weight:600;color:var(--topbar-text);font-size:0.9rem">{% block page_title %}LIMIT CONNECT{% endblock %}</span>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <button id="theme-toggle" onclick="toggleTheme()" title="Tamna/Svijetla tema"
-                    style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--gold);font-size:.85rem;display:flex;align-items:center;transition:all .2s">
-                    <i class="fas fa-moon" id="theme-icon"></i>
-                </button>
-                <div class="lang-switcher">
-                    {% get_current_language as CURRENT_LANG %}
-                    <span style="font-size:.65rem;font-weight:600;color:var(--text-muted);border:1px solid var(--border);padding:2px 7px;border-radius:4px" title="Jezik se bira na login formi">{{ CURRENT_LANG|upper }}</span>
-                    {% if request.user.is_superuser %}
-                    <a href="/accounts/translations/{{ CURRENT_LANG }}/" 
-                       style="border: 1px solid var(--gold); padding: 2px 7px; font-size: 0.65rem; border-radius: 4px; color: var(--gold); text-decoration: none; font-weight: 600; margin-left: 3px;"
-                       title="Uredi prijevode">
-                       <i class="fas fa-language"></i>
-                    </a>
-                    {% endif %}
-                </div>
-                <!-- Notification Bell -->
-                {% if request.user.is_authenticated %}
-                <div class="position-relative" id="notif-bell-wrap" style="cursor:pointer">
-                    <i class="fas fa-bell" style="font-size:1.1rem;color:#475569" onclick="toggleNotifDropdown()"></i>
-                    <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.6rem;display:none">0</span>
-                    <div id="notif-dropdown" style="display:none;position:absolute;right:0;top:32px;width:320px;max-height:400px;overflow-y:auto;background:var(--bg-card);border-radius:10px;box-shadow:0 4px 20px var(--shadow);z-index:9999">
-                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-                            <strong style="font-size:.85rem">Obavijesti</strong>
-                            <div class="d-flex gap-2 align-items-center">
-                                <a href="#" id="notif-mark-all" onclick="markAllNotifsRead();return false;" style="font-size:.7rem;color:#64748b;display:none">Procitano</a>
-                                <a href="/notifications/" style="font-size:.75rem">Sve</a>
-                            </div>
-                        </div>
-                        <div id="notif-list" style="font-size:.82rem"></div>
+    <div class="sidebar">
+        <a href="{% url 'home' %}" class="sidebar-item{% if request.resolver_match.url_name == 'home' %} active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>{% translate 'Početna' %}</span>
+        </a>
+        <a href="{% url 'companies_list' %}" class="sidebar-item{% if 'companies' in request.path %} active{% endif %}">
+            <i class="fas fa-building"></i>
+            <span>{% translate 'Tvrtke' %}</span>
+        </a>
+        <a href="{% url 'invoices_list' %}" class="sidebar-item{% if 'invoices' in request.path %} active{% endif %}">
+            <i class="fas fa-file-invoice"></i>
+            <span>{% translate 'Računi' %}</span>
+        </a>
+        <a href="{% url 'users_list' %}" class="sidebar-item{% if 'users' in request.path %} active{% endif %}">
+            <i class="fas fa-users"></i>
+            <span>{% translate 'Korisnici' %}</span>
+        </a>
+         <a href="{% url 'reports' %}" class="sidebar-item{% if 'reports' in request.path %} active{% endif %}">
+            <i class="fas fa-chart-line"></i>
+            <span>{% translate 'Izvještaji' %}</span>
+        </a>
+        <a href="{% url 'settings' %}" class="sidebar-item{% if 'settings' in request.path %} active{% endif %}">
+            <i class="fas fa-cogs"></i>
+            <span>{% translate 'Postavke' %}</span>
+        </a>
+    </div>
+
+    <div class="main-content">
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} {{ message.tags }}">
+                        {{ message }}
                     </div>
-                </div>
-                {% endif %}
-                <a href="/worktime/profile/" class="text-decoration-none d-flex align-items-center gap-1" style="font-size:0.8rem;color:var(--text-secondary)"><i class="fas fa-user-circle" style="font-size:1.2rem"></i><span class="d-none d-md-inline">{{ request.user.get_full_name|default:request.user.username }}</span></a>
-            </div>
-        </div>
-        <div class="fav-bar" id="favBar"></div>
-        <div class="content">
-            {% if messages %}
-            <div id="toast-container" style="position:fixed;top:60px;right:12px;z-index:9999;width:340px;max-width:90vw">
-                {% for msg in messages %}
-                <div class="toast-msg alert alert-{{ msg.tags }} alert-dismissible fade show shadow py-2 px-3" style="font-size:0.82rem;border-radius:10px;margin-bottom:8px;backdrop-filter:blur(8px);
-                    {% if 'success' in msg.tags %}background:rgba(240,253,244,.95);border:1px solid #bbf7d0;color:#166534;
-                    {% elif 'error' in msg.tags %}background:rgba(254,242,242,.95);border:1px solid #fecaca;color:#991b1b;
-                    {% elif 'warning' in msg.tags %}background:rgba(255,251,235,.95);border:1px solid #fed7aa;color:#92400e;
-                    {% else %}background:rgba(239,246,255,.95);border:1px solid #bfdbfe;color:#1e40af;{% endif %}">
-                    {{ msg }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
-                </div>
                 {% endfor %}
             </div>
-            <!-- Toast auto-dismiss now in core.js -->
-            {% endif %}
-            {% if request.upgrade_hint %}
-            <div style="background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-              <div>
-                <strong style="color:var(--gold,#c9a84c)">&#9733; Ovaj modul zahtijeva viši plan</strong>
-                <span style="color:#888;font-size:.85rem;margin-left:8px">Koristite ga besplatno — nadogradite kad budete spremni.</span>
-              </div>
-              <a href="/register/upgrade/?module={{ request.upgrade_hint }}" style="background:var(--gold,#c9a84c);color:#000;padding:8px 20px;border-radius:8px;font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap">Odaberi paket &#8594;</a>
-            </div>
-            {% endif %}
-            {% if user.is_authenticated and user.profile and not user.profile.email_verified %}
-            <div style="background:linear-gradient(135deg,#422006,#1c1917);border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:1.2rem">📧</span>
-                <div>
-                  <div style="font-size:.82rem;font-weight:600;color:#fbbf24">Potvrdite svoju email adresu</div>
-                  <div style="font-size:.72rem;color:#a8a29e">Provjerite {{ user.email }} za verifikacijski link</div>
-                </div>
-              </div>
-              <form method="post" action="{% url 'resend_verification' %}" style="margin:0">
-                {% csrf_token %}
-                <button type="submit" style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--gold,#c9a84c);padding:6px 14px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer">Pošalji ponovo</button>
-              </form>
-            </div>
-            {% endif %}
-            {% block content %}{% endblock %}
-        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-window.FC = {
-  impersonationStart: {% if request.impersonation_active %}{{ request.impersonation_started_at_ts }}{% else %}0{% endif %},
-  notifMarkReadUrl: "{% url 'notifications:mark_read' pk=99999 %}",
-  notifMarkAllUrl: "{% url 'notifications:mark_all_read' %}",
-  notifApiUrl: "{% url 'notifications:api' %}"
-};
-</script>
-<script src="{% static 'js/core.js' %}"></script>
-<!-- Smart Input Module — globalni glas, kamera, potpis, AI check -->
-<script src="/static/js/html5-qrcode.min.js" defer></script>
-<script src="/static/js/smart-input.js" defer></script>
-
-{% block extra_js %}{% endblock %}
-
-<!-- VAPID Web Push + push opt-in now in core.js -->
-
-<!-- Offline queue + password toggle now in core.js -->
-{% if request.user.is_authenticated %}{% include "ai_assistant/chat_widget.html" %}{% endif %}
-
-<!-- Notification polling now in core.js -->
-<script src="{% static 'js/fina-utils.js' %}"></script>
-<script src="{% static 'js/quick-add.js' %}"></script>
-
-<!-- ═══ COMMAND PALETTE ═══ -->
-<div class="cmd-overlay" id="cmdOverlay" onclick="if(event.target===this)closeCmdPalette()">
-    <div class="cmd-box">
-        <div class="cmd-input-wrap">
-            <i class="fas fa-search"></i>
-            <input class="cmd-input" id="cmdInput" placeholder="Pretrazi stranice, module, postavke..." autocomplete="off" autofocus>
-            <span class="cmd-hint">ESC</span>
-        </div>
-        <div class="cmd-results" id="cmdResults"></div>
-    </div>
-</div>
-
-<!-- Command palette, favorites, slim sidebar now in core.js -->
-
-<div style="text-align:center; padding:.5rem; font-size:.65rem; color:#64748b;">Projekti: <a href="https://viskovic-group.de" style="color:#3b82f6; text-decoration:none;">Višković Group</a> &middot; <a href="https://sati.grosmarkt-online.eu" target="_blank" style="color:#e91e63; text-decoration:none;">SATI</a></div>
-
-<!-- Theme toggle now in core.js -->
-
-
-<!-- ══ GLOBALNI UPLOAD FAB ══ -->
-<!-- ══ FENIX SMART FAB — context-aware kamera ══ -->
-<div id="fenix-smart-fab"
-   title=""
-   style="position:fixed;bottom:80px;right:20px;z-index:9998;
-          display:flex;align-items:center;gap:8px;
-          padding:14px 22px;border-radius:50px;
-          background:linear-gradient(135deg,#1e3a5f,#0f172a);
-          color:#60a5fa;font-weight:700;font-size:0.9rem;
-          cursor:pointer;
-          border:1px solid rgba(96,165,250,0.3);
-          box-shadow:0 4px 20px rgba(0,0,0,0.4);
-          transition:all 0.3s ease;user-select:none">
-  <i id="fenix-fab-icon" class="fas fa-camera" style="font-size:1.1rem"></i>
-  <span id="fenix-fab-label" class="d-none d-md-inline">Skeniraj</span>
-</div>
-
-<!-- FenixScan modal kontejner (dinamički) -->
-<div id="fenix-fab-scan-container" style="display:none;position:fixed;bottom:150px;right:20px;z-index:9999;min-width:280px"></div>
-
-<script src="/static/js/fenix-scan.js"></script>
-<script>
-(function(){
-  var fab = document.getElementById('fenix-smart-fab');
-  var fabIcon = document.getElementById('fenix-fab-icon');
-  var fabLabel = document.getElementById('fenix-fab-label');
-  var scanContainer = document.getElementById('fenix-fab-scan-container');
-  var path = window.location.pathname;
-  var scannerInstance = null;
-  var fabOpen = false;
-
-  // ── Kontekst mapa ──────────────────────────────────────────
-  var ctx = (function() {
-    if (/\/golubar\//.test(path))
-      return { icon:'fa-dove', label:'Skeniraj goluba', color:'#a78bfa',
-               border:'rgba(167,139,250,0.35)', bg:'linear-gradient(135deg,#2e1065,#1e1b4b)',
-               docType:'golub', hint:'Fotografirajte goluba ili prsten za AI prepoznavanje' };
-    if (/\/inventory\//.test(path))
-      return { icon:'fa-barcode', label:'Skeniraj artikl', color:'#34d399',
-               border:'rgba(52,211,153,0.35)', bg:'linear-gradient(135deg,#064e3b,#022c22)',
-               docType:'general', hint:'Skenirajte barcode ili fotografirajte artikl' };
-    if (/\/pos\//.test(path))
-      return { icon:'fa-receipt', label:'Skeniraj račun', color:'#fbbf24',
-               border:'rgba(251,191,36,0.35)', bg:'linear-gradient(135deg,#78350f,#451a03)',
-               docType:'invoice', hint:'Fotografirajte račun za automatski unos' };
-    if (/\/(invoicing|eracun)\//.test(path))
-      return { icon:'fa-file-invoice', label:'Skeniraj fakturu', color:'#fb923c',
-               border:'rgba(251,146,60,0.35)', bg:'linear-gradient(135deg,#7c2d12,#431407)',
-               docType:'invoice', hint:'Skenirajte fakturu za automatsko popunjavanje' };
-    if (/\/partners\//.test(path))
-      return { icon:'fa-id-card', label:'Skeniraj osobnu', color:'#38bdf8',
-               border:'rgba(56,189,248,0.35)', bg:'linear-gradient(135deg,#0c4a6e,#082f49)',
-               docType:'id_card', hint:'Skenirajte osobnu iskaznicu za automatski unos OIB-a' };
-    if (/\/(companies\/settings|companies\/[\w-]+\/edit|registration\/company)/.test(path))
-      return { icon:'fa-id-card', label:'Skeniraj osobnu / OIB', color:'#38bdf8',
-               border:'rgba(56,189,248,0.35)', bg:'linear-gradient(135deg,#0c4a6e,#082f49)',
-               docType:'id_card', hint:'Skenirajte osobnu iskaznicu — AI automatski upisuje OIB i naziv' };
-    if (/\/(complaints|prigovori|helpdesk)\//.test(path))
-      return { icon:'fa-exclamation-circle', label:'Priloži foto', color:'#f87171',
-               border:'rgba(248,113,113,0.35)', bg:'linear-gradient(135deg,#7f1d1d,#450a0a)',
-               docType:'complaint', hint:'Fotografirajte oštećenje ili problem' };
-    // default
-    return { icon:'fa-cloud-upload-alt', label:'Upload', color:'#60a5fa',
-             border:'rgba(96,165,250,0.3)', bg:'linear-gradient(135deg,#1e3a5f,#0f172a)',
-             docType:'general', hint:'Upload dokumenta u arhivu', fallbackUrl:'/hr/documents/arhiva/upload/' };
-  })();
-
-  // Postavi izgled FAB-a prema kontekstu
-  fabIcon.className = 'fas ' + ctx.icon;
-  fabLabel.textContent = ctx.label;
-  fab.style.color = ctx.color;
-  fab.style.borderColor = ctx.border;
-  fab.style.background = ctx.bg;
-  fab.title = ctx.hint;
-
-  // Hover
-  // Sakrij FAB na stranicama gdje kamera nema smisla
-  var _noFab = ['/hr/dashboard','/hr/konto/','/hr/reports','/admin/','/hr/pos/session','/hr/vault/'];
-  if(_noFab.some(function(p){return path.indexOf(p)===0;}) || path==='/hr/' || path==='/') {
-    fab.style.display='none';
-  }
-
-  fab.addEventListener('mouseenter', function(){
-    fab.style.transform = 'scale(1.08)';
-    fab.style.boxShadow = '0 8px 30px rgba(0,0,0,0.5)';
-  });
-  fab.addEventListener('mouseleave', function(){
-    fab.style.transform = 'scale(1)';
-    fab.style.boxShadow = '0 4px 20px rgba(0,0,0,0.4)';
-  });
-
-  // Klik — direktno otvori kameru bez scan panela
-  fab.addEventListener('click', function(){
-    // Default kontekst → arhiva upload
-    if (ctx.fallbackUrl) {
-      window.location.href = ctx.fallbackUrl;
-      return;
-    }
-
-    // Direktno otvori kameru (input file s capture=environment)
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.setAttribute('capture', 'environment'); // stražnja kamera
-    input.style.display = 'none';
-    document.body.appendChild(input);
-
-    input.onchange = function() {
-      if (!input.files || !input.files[0]) return;
-      var file = input.files[0];
-      document.body.removeChild(input);
-
-      // Flash loading
-      fab.style.background = 'linear-gradient(135deg,#1e3a5f,#0f172a)';
-      fabIcon.className = 'fas fa-spinner fa-spin';
-      fabLabel.textContent = 'Obrada...';
-
-      // Pošalji na API
-      var formData = new FormData();
-      formData.append('file', file);
-      formData.append('doc_type', ctx.docType || 'general');
-      formData.append('source_module', window.location.pathname);
-
-      // CSRF
-      var csrf = '';
-      var el = document.querySelector('[name=csrfmiddlewaretoken]');
-      if (el) csrf = el.value;
-      var m = document.cookie.match(/csrftoken=([^;]+)/);
-      if (m) csrf = m[1];
-
-      fetch('/api/fenix/scan/', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrf },
-        body: formData
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        // Success feedback
-        fab.style.background = 'linear-gradient(135deg,#166534,#14532d)';
-        fab.style.color = '#4ade80';
-        fabIcon.className = 'fas fa-check';
-        fabLabel.textContent = 'Dodano!';
-        setTimeout(function(){
-          fabIcon.className = 'fas ' + ctx.icon;
-          fabLabel.textContent = ctx.label;
-          fab.style.background = ctx.bg;
-          fab.style.color = ctx.color;
-        }, 2500);
-
-        // Popuni form na stranici ako postoji
-        if (data.fields) {
-          Object.keys(data.fields).forEach(function(key) {
-            var el = document.querySelector('[name="'+key+'"]') || document.querySelector('#'+key);
-            if (el && data.fields[key]) el.value = data.fields[key];
-          });
-        }
-
-        // Ako je arhiva ili upload stranica — reload
-        if (/\/(documents|arhiva)\//.test(window.location.pathname)) {
-          setTimeout(function(){ window.location.reload(); }, 500);
-        }
-      })
-      .catch(function() {
-        // Fallback — otvori upload stranicu s file-om
-        fab.style.background = ctx.bg;
-        fab.style.color = ctx.color;
-        fabIcon.className = 'fas ' + ctx.icon;
-        fabLabel.textContent = ctx.label;
-        // Spremi u arhivu
-        var uploadForm = document.createElement('form');
-        uploadForm.method = 'POST';
-        uploadForm.action = '/hr/documents/arhiva/upload/';
-        uploadForm.enctype = 'multipart/form-data';
-        var fi = document.createElement('input');
-        fi.type = 'hidden'; fi.name = 'source_module'; fi.value = window.location.pathname;
-        var csrf2 = document.createElement('input');
-        csrf2.type = 'hidden'; csrf2.name = 'csrfmiddlewaretoken'; csrf2.value = csrf;
-        uploadForm.appendChild(fi);
-        uploadForm.appendChild(csrf2);
-        document.body.appendChild(uploadForm);
-        uploadForm.submit();
-      });
-    };
-
-    input.click();
-  });
-
-  // Zatvori na klik izvan
-  document.addEventListener('click', function(e){
-    if (fabOpen && !fab.contains(e.target) && !scanContainer.contains(e.target)) {
-      scanContainer.style.display = 'none';
-      fabOpen = false;
-    }
-  });
-
-  function _fabSetFile(input, b64) {
-    try {
-      var arr = b64.split(',');
-      var mime = arr[0].match(/:(.*?);/)[1];
-      var bstr = atob(arr[1]);
-      var n = bstr.length;
-      var u8 = new Uint8Array(n);
-      while(n--) u8[n] = bstr.charCodeAt(n);
-      var file = new File([u8], 'scan.jpg', {type: mime});
-      var dt = new DataTransfer();
-      dt.items.add(file);
-      input.files = dt.files;
-      // Trigger change event
-      input.dispatchEvent(new Event('change', {bubbles:true}));
-    } catch(e) { console.warn('FenixFAB setFile:', e); }
-  }
-})();
-</script>
-
-<script src="/static/js/fenix-camera.js"></script>
-<script src="/static/js/fenix-permissions.js"></script>
-<script src="/static/js/worktime-offline.js"></script>
-
-<!-- ══ MOBILE BOTTOM NAV ══ -->
-<nav id="mobileBottomNav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:8000;background:#0f172a;border-top:1px solid #1e293b;padding:4px 0 env(safe-area-inset-bottom,4px);box-shadow:0 -2px 10px rgba(0,0,0,.3)">
-  <div style="display:flex;justify-content:space-around;align-items:center;max-width:500px;margin:0 auto">
-    <a href="/hr/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
-      <i class="fas fa-home" style="font-size:1.1rem"></i>
-      <span>Home</span>
-    </a>
-    <a href="/hr/pos/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
-      <i class="fas fa-cash-register" style="font-size:1.1rem"></i>
-      <span>POS</span>
-    </a>
-    <a href="/hr/documents/arhiva/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
-      <i class="fas fa-archive" style="font-size:1.1rem"></i>
-      <span>Arhiva</span>
-    </a>
-    <a href="/hr/partners/" style="display:flex;flex-direction:column;align-items:center;text-decoration:none;color:#94a3b8;font-size:.6rem;padding:6px 12px;gap:2px;-webkit-tap-highlight-color:transparent" class="bnav-item">
-      <i class="fas fa-users" style="font-size:1.1rem"></i>
-      <span>Partneri</span>
-    </a>
-    <button onclick="openSidebar()" style="display:flex;flex-direction:column;align-items:center;background:none;border:none;color:var(--gold,#c9a84c);font-size:.6rem;padding:6px 12px;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent" class="bnav-item">
-      <i class="fas fa-bars" style="font-size:1.1rem"></i>
-      <span>Vise</span>
-    </button>
-  </div>
-</nav>
-<script>
-(function(){
-  // Show bottom nav only on mobile
-  function checkMobile(){
-    var bn = document.getElementById('mobileBottomNav');
-    if(!bn) return;
-    bn.style.display = window.innerWidth <= 768 ? 'block' : 'none';
-    // Add padding to body so content doesn't hide behind nav
-    document.body.style.paddingBottom = window.innerWidth <= 768 ? '60px' : '0';
-    // Highlight current page
-    var path = window.location.pathname;
-    var items = bn.querySelectorAll('.bnav-item');
-    items.forEach(function(a){
-      var href = a.getAttribute('href') || '';
-      if(href && path.startsWith(href) && href.length > 4) {
-        a.style.color = 'var(--gold,#c9a84c)';
-      }
-    });
-  }
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-})();
-</script>
-
-<script src="/static/js/fenix-ui.js"></script>
-{% include "includes/_ai_assist.html" %}
-
-    <!-- ═══ MOBILE BOTTOM TAB BAR ═══ -->
-    {% if request.user.is_authenticated %}
-    <nav class="bottom-tabs">
-      <div class="bottom-tabs-inner">
-        <a href="{% url 'dashboard' %}" class="bottom-tab"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="{% url 'invoicing:index' %}" class="bottom-tab"><i class="fas fa-file-invoice-dollar"></i><span>Fakture</span></a>
-        <a href="{% url 'pos:dashboard' %}" class="bottom-tab" style="position:relative"><i class="fas fa-cash-register" style="font-size:1.4rem;color:#22c55e"></i><span style="color:#22c55e;font-weight:700">POS</span></a>
-        <a href="{% url 'inventory:list' %}" class="bottom-tab"><i class="fas fa-boxes"></i><span>Skladiste</span></a>
-        <button class="bottom-tab" onclick="openSidebar()" style="background:none;border:none;cursor:pointer"><i class="fas fa-bars"></i><span>Vise</span></button>
-      </div>
-    </nav>
-    {% endif %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-    // ═══ SIDEBAR FAVORITES (localStorage) ═══
-    (function(){
-      var FAVS_KEY = 'lc-sidebar-favs';
-      var DEFAULT_FAVS = [
-        {url:'/invoicing/',label:'Fakture',icon:'fa-file-invoice-dollar'},
-        {url:'/pos/',label:'POS',icon:'fa-cash-register'},
-        {url:'/inventory/',label:'Skladiste',icon:'fa-boxes'},
-        {url:'/konto/',label:'Konto',icon:'fa-book'},
-      ];
-      function getFavs(){ try{return JSON.parse(localStorage.getItem(FAVS_KEY))||DEFAULT_FAVS}catch(e){return DEFAULT_FAVS} }
-      function saveFavs(f){ localStorage.setItem(FAVS_KEY, JSON.stringify(f)); }
-      function renderFavs(){
-        var c=document.getElementById('sidebarFavs'); if(!c)return;
-        var favs=getFavs(), html='<div style="font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#475569;padding:6px 8px 2px">Favoriti</div>';
-        favs.forEach(function(f,i){
-          html+='<a href="'+f.url+'" onclick="closeSidebar()" style="display:flex;align-items:center;gap:8px;padding:7px 12px;color:#e2e8f0;text-decoration:none;border-radius:8px;margin:1px 4px;font-size:.82rem;transition:.15s" onmouseover="this.style.background='rgba(201,168,76,.08)'" onmouseout="this.style.background='none'"><i class="fas '+f.icon+'" style="width:18px;text-align:center;font-size:.8rem;color:var(--gold,#c9a84c)"></i>'+f.label+'</a>';
-        });
-        c.innerHTML=html;
-      }
-      // Expose for command palette
-      window._lcFavs={get:getFavs,save:saveFavs,render:renderFavs,add:function(url,label,icon){
-        var f=getFavs();if(f.length>=6)f.pop();if(!f.some(function(x){return x.url===url}))f.unshift({url:url,label:label,icon:icon});saveFavs(f);renderFavs();
-      }};
-      document.addEventListener('DOMContentLoaded',renderFavs);
-    })();
-
-    // ═══ HIGHLIGHT ACTIVE BOTTOM TAB ═══
-    (function(){
-      var path=location.pathname;
-      document.querySelectorAll('.bottom-tab').forEach(function(t){
-        var href=t.getAttribute('href');
-        if(href && path.startsWith(href) && href!=='/') t.classList.add('active');
-        else if(href==='/' && path==='/') t.classList.add('active');
-      });
-    })();
-    </script>
-<!-- Signal gumb — Prijavi gresku gumb -->
-<div id="borg-signal-fab" style="position:fixed;bottom:140px;right:16px;z-index:9998">
-  <button onclick="document.getElementById('borg-signal-modal').style.display='flex'" style="width:44px;height:44px;border-radius:50%;background:var(--gold,#c9a84c);border:none;color:#000;font-size:1.1rem;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center" title="Prijavi problem"><i class="fas fa-flag"></i></button>
-</div>
-<div id="borg-signal-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10001;align-items:center;justify-content:center;padding:16px">
-  <div style="background:var(--bg-card,#1a1a1a);border:1px solid var(--border,#2a2a2a);border-radius:12px;padding:20px;max-width:400px;width:100%">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><strong style="color:var(--gold,#c9a84c)"><i class="fas fa-flag"></i> Prijavi problem</strong><button onclick="document.getElementById('borg-signal-modal').style.display='none'" style="background:none;border:none;color:var(--text,#e8e8e8);font-size:1.2rem;cursor:pointer">&times;</button></div>
-    <select id="borg-sig-type" style="width:100%;padding:8px;margin-bottom:8px;background:var(--input-bg,#0a0a0a);border:1px solid var(--border,#2a2a2a);border-radius:6px;color:var(--text,#e8e8e8)"><option value="bug">Greska / Bug</option><option value="confusion">Nejasno / Zbunjujuce</option><option value="suggestion">Prijedlog</option><option value="ai_bad">AI los odgovor</option><option value="urgent">Hitno</option></select>
-    <textarea id="borg-sig-msg" rows="3" style="width:100%;padding:8px;background:var(--input-bg,#0a0a0a);border:1px solid var(--border,#2a2a2a);border-radius:6px;color:var(--text,#e8e8e8);resize:vertical" placeholder="Opisi problem..."></textarea>
-    <button onclick="sendReport()" style="margin-top:8px;width:100%;padding:10px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:6px;font-weight:700;cursor:pointer">Pošalji prijavu</button>
-    <div id="borg-sig-result" style="margin-top:8px;font-size:.8rem;text-align:center"></div>
-  </div>
-</div>
-<script>
-function sendReport(){
-  var msg=document.getElementById("borg-sig-msg").value.trim();
-  if(!msg){document.getElementById("borg-sig-result").textContent="Poruka je obavezna";return;}
-  var btn=event.target;btn.disabled=true;btn.textContent="Saljem...";
-  fetch("/hr/ai-cockpit/api/signal/",{method:"POST",headers:{"Content-Type":"application/json","X-CSRFToken":document.querySelector("[name=csrfmiddlewaretoken]")?.value||""},body:JSON.stringify({type:document.getElementById("borg-sig-type").value,message:msg,page_url:location.href,screen_width:screen.width,context:{viewport:innerWidth+"x"+innerHeight,theme:document.documentElement.getAttribute("data-theme")||"dark",pos_cart:window._posCart||null,ts:new Date().toISOString()}})})
-  .then(r=>r.json()).then(d=>{
-    document.getElementById("borg-sig-result").innerHTML=d.ok?"<span style=color:#4caf7d>"+d.message+"</span>":"<span style=color:#e05c5c>"+(d.error||"Greska")+"</span>";
-    if(d.ok){document.getElementById("borg-sig-msg").value="";setTimeout(()=>{document.getElementById("borg-signal-modal").style.display="none";btn.disabled=false;btn.textContent="Pošalji prijavu"},2000);}
-    else{btn.disabled=false;btn.textContent="Pošalji prijavu";}
-  }).catch(()=>{document.getElementById("borg-sig-result").textContent="Greska mreze";btn.disabled=false;btn.textContent="Pošalji prijavu";});
-}
-</script>
-
-<script>
-/* ── FENIX CSRF AUTO-REFRESH ─────────────────────────────────────
-   1. Svakih 8 minuta tiho osvježi token (session traje 12h)
-   2. Interceptira fetch() i XMLHttpRequest — pri csrf_error retry
-   3. Na svaki form submit injektira svjež token
-   ──────────────────────────────────────────────────────────────── */
-(function(){
-  function getCsrf(){
-    var m=document.cookie.match(/csrftoken=([^;]+)/);
-    return m?m[1]:'';
-  }
-
-  function setCsrf(token){
-    document.cookie='csrftoken='+token+';path=/;SameSite=Lax';
-    document.querySelectorAll('[name=csrfmiddlewaretoken]').forEach(function(el){
-      el.value=token;
-    });
-  }
-
-  function showTokenToast(){
-    var t=document.createElement('div');
-    t.textContent='✅ Token ponovno učitan';
-    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);'
-      +'background:#166534;color:#4ade80;padding:8px 20px;border-radius:20px;'
-      +'font-size:.78rem;font-weight:600;z-index:99999;opacity:0;'
-      +'transition:all .35s;pointer-events:none;white-space:nowrap;'
-      +'border:1px solid rgba(74,222,128,.3);';
-    document.body.appendChild(t);
-    requestAnimationFrame(function(){
-      t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
-    });
-    setTimeout(function(){
-      t.style.opacity='0';t.style.transform='translateX(-50%) translateY(10px)';
-      setTimeout(function(){document.body.removeChild(t);},400);
-    },2500);
-  }
-
-  function refreshToken(cb,silent){
-    fetch('/api/csrf-token/',{credentials:'same-origin'})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(d.token){
-          setCsrf(d.token);
-          if(!silent) showTokenToast();
-          if(cb) cb(d.token);
-        }
-      })
-      .catch(function(){});
-  }
-
-  // 1. Refresh svakih 8 minuta dok je tab aktivan
-  setInterval(function(){
-    if(!document.hidden) refreshToken(null,true);
-  }, 8*60*1000);
-
-  // 2. Na form submit — injektiraj svjež token u hidden input
-  document.addEventListener('submit', function(e){
-    var form = e.target;
-    var csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
-    if(csrfInput){
-      csrfInput.value = getCsrf();
-    }
-  }, true);
-
-  // 3. HTMX — osvježi token prije svakog requesta
-  document.addEventListener('htmx:configRequest', function(e){
-    e.detail.headers['X-CSRFToken'] = getCsrf();
-  });
-
-  // 4. Interceptiraj fetch — pri csrf_error auto-retry
-  var _fetch = window.fetch;
-  window.fetch = function(url, opts){
-    opts = opts || {};
-    if(opts.method && opts.method.toUpperCase() !== 'GET'){
-      opts.headers = opts.headers || {};
-      if(!opts.headers['X-CSRFToken']){
-        opts.headers['X-CSRFToken'] = getCsrf();
-      }
-    }
-    return _fetch(url, opts).then(function(resp){
-      if(resp.status === 200){
-        // Provjeri je li csrf_error JSON
-        var ct = resp.headers.get('content-type')||'';
-        if(ct.includes('application/json')){
-          return resp.clone().json().then(function(d){
-            if(d && d.csrf_error && d.new_token){
-              setCsrf(d.new_token);
-              showTokenToast();
-              // Retry isti request s novim tokenom
-              opts.headers['X-CSRFToken'] = d.new_token;
-              return _fetch(url, opts);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Activate the correct theme button on load
+            const activeTheme = localStorage.getItem('theme') || 'theme-dark'; // Default to dark if not set
+            document.querySelectorAll('.theme-switcher-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            if (activeTheme === 'theme-light') {
+                document.querySelector('.theme-switcher-button.light').classList.add('active');
+            } else {
+                document.querySelector('.theme-switcher-button.dark').classList.add('active');
             }
-            return resp;
-          }).catch(function(){ return resp; });
-        }
-      }
-      return resp;
-    });
-  };
-})();
-</script>
 
+            // Add active class on click
+            document.querySelectorAll('.theme-switcher-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.theme-switcher-button').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
 
-<script>
-{% if user.is_superuser %}
-(function(){
-  function loadFeedbackBadge(){
-    fetch('/api/feedback/count/',{credentials:'same-origin'})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var b=document.getElementById('sidebar-feedback-badge');
-      if(!b) return;
-      if(d.count>0){b.textContent=d.count;b.style.display='inline';}
-      else{b.style.display='none';}
-    }).catch(function(){});
-  }
-  loadFeedbackBadge();
-  setInterval(loadFeedbackBadge, 60000);
-})();
-{% endif %}
-</script>
+    </script>
 
-<!-- ═══ ZLATNO DUGME — Floating feedback button — samo admini ═══ -->
-{% if user.is_authenticated and user.is_staff or user.is_authenticated and user.is_superuser %}
-<style>
-#zlatno-fab{position:fixed;bottom:22px;right:22px;z-index:9990;width:52px;height:52px;border-radius:50%;background:var(--gold,#c9a84c);color:#000;border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.3);transition:transform .15s;}
-#zlatno-fab:hover{transform:scale(1.1);}
-#zlatno-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9991;align-items:center;justify-content:center;}
-#zlatno-modal-bg.open{display:flex;}
-#zlatno-modal{background:#111214;border-radius:14px;padding:24px;width:100%;max-width:440px;border:1px solid #333;margin:16px;}
-#zlatno-modal h3{color:var(--gold,#c9a84c);margin:0 0 16px;font-size:1.1rem;}
-#zlatno-modal input,#zlatno-modal textarea,#zlatno-modal select{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #444;background:#0d1117;color:#fff;font-size:.9rem;margin-bottom:10px;box-sizing:border-box;}
-#zlatno-modal textarea{height:90px;resize:vertical;}
-#zlatno-modal .zm-row{display:flex;gap:8px;}
-#zlatno-modal .zm-row select{flex:1;}
-#zlatno-submit{width:100%;padding:10px;background:var(--gold,#c9a84c);color:#000;border:none;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:4px;}
-#zlatno-submit:disabled{opacity:.5;cursor:not-allowed;}
-#zlatno-status{display:none;padding:10px;border-radius:8px;text-align:center;margin-top:8px;font-size:.9rem;}
-#zlatno-close{float:right;background:none;border:none;color:#888;font-size:1.3rem;cursor:pointer;line-height:1;}
-</style>
-
-<button id="zlatno-fab" title="Prijavi grešku ili prijedlog" onclick="document.getElementById('zlatno-modal-bg').classList.add('open')">💡</button>
-
-<div id="zlatno-modal-bg" onclick="if(event.target===this)this.classList.remove('open')">
-  <div id="zlatno-modal">
-    <button id="zlatno-close" onclick="document.getElementById('zlatno-modal-bg').classList.remove('open')">×</button>
-    <h3>💡 Zlatno dugme</h3>
-    <input id="zd-title" placeholder="Što nije radilo? (kratki naslov)" maxlength="200">
-    <textarea id="zd-desc" placeholder="Opiši problem ili prijedlog — što više detalja, to bolje..."></textarea>
-    <div class="zm-row">
-      <select id="zd-cat">
-        <option value="pos">POS / Blagajna</option>
-        <option value="ux">Sučelje / UX</option>
-        <option value="inventory">Skladište</option>
-        <option value="workflow">Radni tok</option>
-        <option value="other" selected>Ostalo</option>
-      </select>
-      <select id="zd-pri">
-        <option value="1">🔴 Kritično — ne mogu raditi</option>
-        <option value="2">🟠 Visoko — otežava rad</option>
-        <option value="3" selected>🟡 Srednje — prijedlog</option>
-        <option value="5">⚪ Ideja za budućnost</option>
-      </select>
-    </div>
-    <button id="zlatno-submit" onclick="zlatnoPosalji()">Pošalji prijedlog →</button>
-    <div id="zlatno-status"></div>
-  </div>
-</div>
-
-<script>
-function zlatnoPosalji(){
-  var title=document.getElementById('zd-title').value.trim();
-  var desc=document.getElementById('zd-desc').value.trim();
-  if(!title||!desc){alert('Popuni naslov i opis.');return;}
-  var btn=document.getElementById('zlatno-submit');
-  btn.disabled=true; btn.textContent='Šalje se...';
-  var fd=new FormData();
-  fd.append('title',title);
-  fd.append('description',desc);
-  fd.append('category',document.getElementById('zd-cat').value);
-  fd.append('priority',document.getElementById('zd-pri').value);
-  fd.append('csrfmiddlewaretoken','{{ csrf_token }}');
-  fetch('/hr/pos/improvements/',{method:'POST',body:fd,headers:{'X-Requested-With':'XMLHttpRequest'}})
-  .then(function(r){
-    var st=document.getElementById('zlatno-status');
-    st.style.display='block';
-    if(r.ok||r.redirected){
-      st.style.background='#065f46';st.style.color='#4ade80';
-      st.textContent='✅ Zaprimljeno! Ivan će se javiti.';
-      document.getElementById('zd-title').value='';
-      document.getElementById('zd-desc').value='';
-      setTimeout(function(){document.getElementById('zlatno-modal-bg').classList.remove('open');st.style.display='none';},2500);
-    } else {
-      st.style.background='#7f1d1d';st.style.color='#f87171';
-      st.textContent='Greška pri slanju. Pokušaj ponovo.';
-    }
-    btn.disabled=false; btn.textContent='Pošalji prijedlog →';
-  })
-  .catch(function(){
-    document.getElementById('zlatno-status').style.display='block';
-    document.getElementById('zlatno-status').textContent='Greška mreže.';
-    btn.disabled=false; btn.textContent='Pošalji prijedlog →';
-  });
-}
-</script>
-{% endif %}
-<!-- ═══ END ZLATNO DUGME ═══ -->
+    {% block extra_js %}{% endblock %}
 
 </body>
 </html>

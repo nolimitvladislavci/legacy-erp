@@ -5,59 +5,76 @@
 
 /* 1. DEFAULT THEME (Dark / Gold - Visković Premium) */
 :root {
-    --gold: #c9a84c;
-    --gold2: #e8c96a; /* Svjetlija varijanta za hover */
-    --gold-dim: rgba(201, 168, 76, 0.12);
-    --gold-border: rgba(201, 168, 76, 0.28);
-    
-    --black: #0a0a0a;
-    --white: #f0ede8;
-    --dark: #111214;
-    --surface: #181a1d;
-    --surface2: #1e293b;
-    --surface3: #22222c;
-    
-    --border: #252830;
-    --border-light: rgba(255, 255, 255, 0.08);
-    
-    --text: #e2e8f0;
-    --text-dim: #94a3b8;
-    --muted: #4a5060;
-    --muted2: #334155;       /* Srednji muted, između muted i text-dim */
+    /* Main colors */
+    --primary-color: #c9a84c; /* Gold */
+    --secondary-color: #34495e; /* Dark Blue */
+    --accent-color: #1abc9c; /* Green for success/focus */
 
-    --border2: #1e2130;      /* Tamniji border za ugniježđene elemente */
-    --surface-deep: #0d0f11; /* Dublja pozadina ispod --surface */
-    --text-muted3: #64748b;  /* Najbljeđi tekst, hints i placeholderi */
-    
-    --green: #10b981;
-    --red: #ef4444;
-    --amber: #f59e0b;
-    --blue: #3b82f6;
-    
-    --radius: 10px;
-    --shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
-    
-    /* Fontovi */
-    --font-heading: 'Cormorant Garamond', serif;
-    --font-body: 'Barlow', sans-serif;
-    --font-ui: 'Segoe UI', system-ui, sans-serif;
+    /* Backgrounds */
+    --bg-primary: #1e1e1e; /* Dark background */
+    --bg-secondary: #252526; /* Slightly lighter dark for cards/sections */
+    --bg-tertiary: #2d2d30; /* Even lighter dark for hover/active */
+
+    /* Text colors */
+    --text-primary: #f0f0f0; /* Light text for dark bg */
+    --text-secondary: #aaaaaa; /* Muted light text */
+    --text-accent: #1abc9c; /* Accent text color */
+    --text-inverted: #1e1e1e; /* Dark text on light elements */
+
+    /* Borders & Shadows */
+    --border-color: #3a3a3a;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+
+    /* UI Elements */
+    --input-bg: #2d2d30;
+    --input-border: #444444;
+    --button-bg-primary: var(--primary-color);
+    --button-text-primary: var(--text-inverted);
+    --button-bg-secondary: var(--bg-secondary);
+    --button-text-secondary: var(--text-primary);
+
+    /* Special elements */
+    --link-color: #3498db;
+    --error-color: #e74c3c;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --info-color: #3498db;
 }
 
-/* 2. PRIPREMA ZA BUDUĆE TEME (Može se aktivirati dodavanjem data-theme="light" na <html>) */
-html[data-theme="light"] {
-    --gold: #b8962e;
-    --gold-dim: rgba(184, 150, 46, 0.1);
-    
-    --black: #f8fafc;
-    --dark: #f1f5f9;
-    --surface: #ffffff;
-    --surface2: #f1f5f9;
-    --surface3: #e2e8f0;
-    
-    --border: #cbd5e1;
-    --border-light: rgba(0, 0, 0, 0.1);
-    
-    --text: #0f172a;
-    --text-dim: #475569;
-    --muted: #94a3b8;
+/* 2. LIGHT THEME (White / Client - FINA Connect) */
+:root.light-theme {
+    /* Main colors */
+    --primary-color: #007bff; /* Blue */
+    --secondary-color: #6c757d; /* Gray */
+    --accent-color: #28a745; /* Green for success/focus */
+
+    /* Backgrounds */
+    --bg-primary: #f8f9fa; /* Light background */
+    --bg-secondary: #ffffff; /* White for cards/sections */
+    --bg-tertiary: #e9ecef; /* Slightly darker light for hover/active */
+
+    /* Text colors */
+    --text-primary: #212529; /* Dark text for light bg */
+    --text-secondary: #6c757d; /* Muted dark text */
+    --text-accent: #28a745; /* Accent text color */
+    --text-inverted: #ffffff; /* Light text on dark elements */
+
+    /* Borders & Shadows */
+    --border-color: #dee2e6;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+
+    /* UI Elements */
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --button-bg-primary: var(--primary-color);
+    --button-text-primary: var(--text-inverted);
+    --button-bg-secondary: var(--bg-tertiary);
+    --button-text-secondary: var(--text-primary);
+
+    /* Special elements */
+    --link-color: #007bff;
+    --error-color: #dc3545;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
 }
