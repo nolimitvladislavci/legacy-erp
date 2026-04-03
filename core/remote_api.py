@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 SECRET = os.environ.get('DEV_API_TOKEN', '')
-ALLOWED_IPS = None
+ALLOWED_IPS = {'127.0.0.1', '::1'}
 _log = logging.getLogger('remote_api')
 
 SAFE_PREFIXES = [

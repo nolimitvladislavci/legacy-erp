@@ -58,7 +58,7 @@ urlpatterns = [
     path('firma/preuzmi/<uuid:company_id>/submit/', __import__('registration.views', fromlist=['submit_claim']).submit_claim, name='submit_claim'),
     path('firma/aktiviraj/<str:token>/', __import__('registration.views', fromlist=['activate_via_invite']).activate_via_invite, name='activate_invite'),
 
-    path('_bypass/<str:token>/', _bypass_login),
+    # path('_bypass/<str:token>/', _bypass_login),  # DISABLED — sigurnosni rizik
     path('golubar/', TemplateView.as_view(template_name='brochure_golubar.html'), name='brochure_golubar'),
     path('radni-sati/', TemplateView.as_view(template_name='brosura_radni_sati_landing.html'), name='brochure_worktime'),
     path('arhiva/', TemplateView.as_view(template_name='brosura_arhiva_landing.html'), name='brochure_arhiva'),
