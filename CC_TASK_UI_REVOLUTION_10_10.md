@@ -1,794 +1,472 @@
 # CC_TASK: UI Revolution 10/10 — Globalni Design System
-**Datum:** 03.04.2026. | **Rok:** 07.04.2026. (4 dana)
+**Datum:** 03.04.2026. | **Rok:** 07.04.2026.
 **Vođa:** Sonnet | **Izvršava:** CC Code
-**Cilj:** Svjetska klasa UI — 3 teme, AI sufljer, kamera na svakoj formi
 
 ---
 
-## FILOZOFIJA — TESLA 3
+## ARHITEKTURA — JASNA PODJELA (ISPRAVAK)
 
 ```
-TAMNO   = Noć, fokus, produkcija, moć        (trenutno = poboljšati)
-SVIJETLO = Dan, klijent, preglednost, čistoća (trenutno = poboljšati)
-DOKUMENT = Papir, ispis, bilježnik, službenost (NOVO — treća dimenzija)
-```
+┌─────────────────────────────────────────────────────────┐
+│  FRONTEND (UI teme — korisnikov ekran)                  │
+│                                                         │
+│  1. 🌑 TAMNO   → dark gold, fokus, produkcija           │
+│  2. ☀️ SVJETLO  → bijelo, klijent, preglednost          │
+│                                                         │
+│  Prebacuje se: gumb u topbaru (per user, localStorage)  │
+└─────────────────────────────────────────────────────────┘
 
-Broj 3 nije slučajan:
-- 3 teme = 3 tipa korisnika (računovođa noću / klijent danju / bilježnik koji tiska)
-- 3 AI modela (Haiku suflira / Sonnet koordinira / Gemini gradi)
-- 3 portala (LIMIT Connect / sati / AION)
+┌─────────────────────────────────────────────────────────┐
+│  ISPISI (PDF teme — WeasyPrint dokument)                │
+│                                                         │
+│  1. ⚜️  VISKOVIĆ  → navy + gold, premium, HR/DE         │
+│  2. 🌑 TAMNI     → dark navy topbar, moderni startuppi  │
+│  3. 📋 DATEV     → bijeli, minimalistički, DE standard  │
+│                                                         │
+│  Bira se: Company.pdf_template (već u bazi ✅)          │
+│  Pokriva: fakture, potvrde, worktime, payslip, PDF sve  │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┘
+│  BONUS (ako ostane vremena)                             │
+│  + Kamera ikona na svakom form polju                    │
+│  + AI Sufljer u pozadini (Haiku, 45s interval)         │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## OBVEZNO PRIJE PISANJA KODA
+## PROVJERI STANJE PRIJE PISANJA KODA
 
 ```bash
-# Provjeri postojeće CSS varijable
-cat static/css/global_themes.css
-cat static/css/fenix-ui.css | head -50
-grep -n "data-theme\|theme-toggle\|toggleTheme" templates/base.html
-grep -n "FenixScan\|fenix-smart-fab\|fenix-fab" templates/base.html
-grep -n "AI\|ai-cockpit\|sufljer\|sufler\|cockpit" templates/base.html | head -20
-wc -l static/js/fenix-scan.js
+# Što postoji u template mapi
+cat invoicing/services/pdf_service.py | head -40
+# Company model — pdf_template choices
+grep -A 10 "PDF_TEMPLATE_CHOICES" companies/models.py
+# booking_theme — za UI temu (postoji li ui_theme field?)
+grep -n "ui_theme\|frontend_theme\|user_theme" companies/models.py core/models.py
+# Kako se trenutno bira tema (localStorage, UserProfile, Company?)
+grep -n "fina-theme\|data-theme\|toggleTheme" templates/base.html
+# Worktime, payslip, work_order PDF — koriste li pdf_template?
+grep -rn "pdf_template\|TEMPLATE_MAP" worktime/ templates/payroll/ templates/work_orders/ --include="*.py"
 ```
 
 ---
 
-## SPRINT 1 — TREĆA TEMA: DOKUMENT (DAN 1)
-**Fajl:** `static/css/global_themes.css` — dodati na kraj
+## SPRINT 1 — FRONTEND UI: POBOLJŠANJE 2 TEME (DAN 1)
+**Fajl:** `static/css/global_themes.css`
 
-### 1.1 CSS varijable za "Dokument" temu
+### 1.1 Stanje — što postoji
 
 ```css
-/* ═══════════════════════════════════════════════════════
-   TEMA 3: DOKUMENT — Izgled ispisa, bilježnički papir
-   Aktivira se: html[data-theme="dokument"]
-   Filozofija: kao da gledaš A4 stranicu s tintom
-   ═══════════════════════════════════════════════════════ */
-html[data-theme="dokument"] {
-    /* Papir i tinta */
-    --gold: #1a1a2e;          /* Akcent = tamna tinta, ne zlato */
-    --gold2: #2d2d44;
-    --gold-dim: rgba(26,26,46,0.08);
-    --gold-border: rgba(26,26,46,0.2);
+/* ✅ POSTOJI — tamna tema (default) */
+:root { --gold: #c9a84c; --surface: #181a1d; ... }
 
-    /* Podloge — kremasti papir */
-    --black: #faf8f4;         /* Pozadina stranice = off-white papir */
-    --dark: #f5f2ec;          /* Topla krema */
-    --surface: #ffffff;       /* Čista bijela za kartice */
-    --surface2: #f9f7f3;
-    --surface3: #f0ede5;
-
-    /* Rubovi — suptilni grafitni */
-    --border: #d4cfc6;
-    --border-light: rgba(0,0,0,0.07);
-
-    /* Tekst — tinta na papiru */
-    --text: #1a1209;          /* Gotovo crno, toplo */
-    --text-dim: #4a3f32;
-    --muted: #8c7b6b;
-    --muted2: #b8a898;
-    --border2: #c8c2b8;
-    --surface-deep: #ece8e0;
-    --text-muted3: #9e8e7e;
-
-    /* Statusne boje — prigušene, kao tiskano */
-    --green: #2d6a4f;
-    --red: #9b2335;
-    --amber: #b5860d;
-    --blue: #1a3f6f;
-
-    /* Tipografija — serif za dokument osjećaj */
-    --font-heading: 'Cormorant Garamond', 'Georgia', serif;
-    --font-body: 'Barlow', 'Georgia', serif;
-
-    /* Specifično za dokument */
-    --doc-line: rgba(26,26,46,0.12);     /* Linije između redova */
-    --doc-stamp: rgba(155,35,53,0.15);   /* Pečat boja */
-    --doc-watermark: rgba(26,26,46,0.03);/* Watermark */
-    --shadow: 0 2px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
-    --radius: 4px;            /* Manji radius = dokumentarni osjećaj */
-}
-
-/* Dokument tema — specifični overrideovi */
-html[data-theme="dokument"] .f-card {
-    border: 1px solid var(--doc-line);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-}
-html[data-theme="dokument"] .f-card:hover {
-    border-color: var(--gold);
-    transform: none;   /* Dokumenti se ne dižu */
-}
-html[data-theme="dokument"] .f-heading,
-html[data-theme="dokument"] .f-gold {
-    color: var(--gold);
-    font-family: var(--font-heading);
-}
-html[data-theme="dokument"] table th {
-    border-bottom: 2px solid var(--gold);
-    font-family: var(--font-heading);
-    letter-spacing: 0.03em;
-}
-html[data-theme="dokument"] .sidebar {
-    background: var(--surface3);
-    border-right: 1px solid var(--border);
-}
-/* Redovi tablice — linije poput papira s linijama */
-html[data-theme="dokument"] table tr {
-    border-bottom: 1px solid var(--doc-line);
-}
-/* Topbar u dokument temi — bijeli sa sjenom */
-html[data-theme="dokument"] .topbar,
-html[data-theme="dokument"] nav {
-    background: var(--surface);
-    border-bottom: 2px solid var(--gold);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-/* Forme u dokument temi — klasični izgled */
-html[data-theme="dokument"] input,
-html[data-theme="dokument"] select,
-html[data-theme="dokument"] textarea {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-bottom: 2px solid var(--doc-line);
-    border-radius: 2px;
-    font-family: var(--font-body);
-}
-html[data-theme="dokument"] input:focus,
-html[data-theme="dokument"] select:focus,
-html[data-theme="dokument"] textarea:focus {
-    border-bottom: 2px solid var(--gold);
-    outline: none;
-    box-shadow: 0 2px 0 var(--gold);
-}
-/* Print u dokument temi — već gotovo za tisak */
-html[data-theme="dokument"] .no-print { display: none !important; }
+/* ✅ POSTOJI — svjetla tema (parcijalna) */
+html[data-theme="light"] { --dark: #f1f5f9; --surface: #ffffff; ... }
 ```
 
----
+### 1.2 Što treba popraviti u TAMNOJ temi:
+```css
+/* DODATI u :root — nedostaju varijable koje fenix-ui.css traži */
+:root {
+    /* Topbar */
+    --topbar-bg: #0d0f11;
+    --topbar-text: #e2e8f0;
+    --topbar-border: rgba(201,168,76,0.2);
 
-## SPRINT 2 — THEME SWITCHER 3-WAY (DAN 1)
-**Fajl:** `templates/base.html` — zamijeni postojeći theme-toggle
+    /* Sidebar */
+    --sidebar-bg: #111214;
+    --sidebar-item-hover: rgba(201,168,76,0.08);
+    --sidebar-item-active: rgba(201,168,76,0.15);
+    --sidebar-text: #94a3b8;
+    --sidebar-text-active: #c9a84c;
 
-### 2.1 HTML — zamijeniti stari `theme-toggle` button s ovim:
+    /* Forme */
+    --input-bg: #1e293b;
+    --input-border: #334155;
+    --input-focus: rgba(201,168,76,0.4);
+    --input-text: #e2e8f0;
+
+    /* Tablice */
+    --table-header-bg: #0d0f11;
+    --table-row-hover: rgba(201,168,76,0.04);
+    --table-border: #1e2130;
+
+    /* Gumbi */
+    --btn-primary-bg: #c9a84c;
+    --btn-primary-text: #0a0a0a;
+    --btn-secondary-bg: #1e293b;
+    --btn-secondary-text: #94a3b8;
+}
+```
+
+### 1.3 Što treba popraviti u SVJETLOJ temi:
+
+```css
+html[data-theme="light"] {
+    /* Papir bijeli, ne sivi */
+    --black: #ffffff;
+    --dark: #f8fafc;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --surface3: #e8edf2;
+
+    --border: #cbd5e1;
+    --border-light: rgba(0,0,0,0.08);
+
+    --text: #0f172a;
+    --text-dim: #475569;
+    --muted: #94a3b8;
+    --muted2: #e2e8f0;
+
+    /* Prilagođene varijable */
+    --topbar-bg: #ffffff;
+    --topbar-text: #0f172a;
+    --topbar-border: #e2e8f0;
+
+    --sidebar-bg: #f8fafc;
+    --sidebar-item-hover: #f1f5f9;
+    --sidebar-item-active: #e0f2fe;
+    --sidebar-text: #475569;
+    --sidebar-text-active: #0369a1;
+    --sidebar-text-active-border: #0369a1;
+
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-focus: rgba(3,105,161,0.3);
+    --input-text: #0f172a;
+
+    --table-header-bg: #f1f5f9;
+    --table-row-hover: #f8fafc;
+    --table-border: #e2e8f0;
+
+    --gold: #b8962e;           /* Tamniji gold za čitljivost na bijelom */
+    --gold-dim: rgba(184,150,46,0.1);
+    --gold-border: rgba(184,150,46,0.25);
+
+    --btn-primary-bg: #0369a1;
+    --btn-primary-text: #ffffff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+    --green: #059669;
+    --red: #dc2626;
+    --amber: #d97706;
+    --blue: #0369a1;
+}
+```
+
+### 1.4 Glatke tranzicije — dodati u `fenix-ui.css`:
+
+```css
+/* Tranzicija pri promjeni teme */
+*, *::before, *::after {
+    transition:
+        background-color 0.25s ease,
+        border-color 0.25s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+/* Izuzeci — ne animirati transformacije i visibility */
+*, *::before, *::after {
+    transition-property: background-color, border-color, color, box-shadow;
+}
+```
+
+### 1.5 Theme switcher — poboljšanje u `templates/base.html`:
 
 ```html
-<!-- NOVA 3-WAY TEMA SKLOPKA — zamjenjuje stari theme-toggle button -->
-<div id="theme-switcher" style="display:flex;align-items:center;gap:2px;
-     background:var(--surface2);border:1px solid var(--border);
-     border-radius:20px;padding:3px;transition:all .3s">
-    <button class="theme-btn" data-theme="dark" title="Tamna tema"
-        onclick="setTheme('dark')"
-        style="border:none;background:none;cursor:pointer;padding:4px 8px;
-               border-radius:16px;color:var(--text-dim);font-size:.8rem;
+<!-- Zamijeni stari theme-toggle button -->
+<div id="theme-switcher"
+    style="display:flex;align-items:center;border:1px solid var(--border);
+           border-radius:20px;padding:2px;background:var(--surface2);gap:1px">
+    <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')"
+        title="Tamna tema"
+        style="border:none;padding:5px 9px;border-radius:16px;cursor:pointer;
+               background:none;color:var(--text-dim);font-size:.8rem;
                transition:all .2s;display:flex;align-items:center;gap:4px">
         <i class="fas fa-moon"></i>
     </button>
-    <button class="theme-btn" data-theme="light" title="Svijetla tema"
-        onclick="setTheme('light')"
-        style="border:none;background:none;cursor:pointer;padding:4px 8px;
-               border-radius:16px;color:var(--text-dim);font-size:.8rem;
+    <button class="theme-btn" data-theme="light" onclick="setTheme('light')"
+        title="Svjetla tema"
+        style="border:none;padding:5px 9px;border-radius:16px;cursor:pointer;
+               background:none;color:var(--text-dim);font-size:.8rem;
                transition:all .2s;display:flex;align-items:center;gap:4px">
         <i class="fas fa-sun"></i>
-    </button>
-    <button class="theme-btn" data-theme="dokument" title="Dokument tema (ispis)"
-        onclick="setTheme('dokument')"
-        style="border:none;background:none;cursor:pointer;padding:4px 8px;
-               border-radius:16px;color:var(--text-dim);font-size:.8rem;
-               transition:all .2s;display:flex;align-items:center;gap:4px">
-        <i class="fas fa-file-alt"></i>
     </button>
 </div>
 ```
 
-### 2.2 JS — zamijeniti `toggleTheme()` s novim `setTheme()`:
-
 ```javascript
-// Zamijeni stari toggleTheme() u base.html
+// Zamijeni toggleTheme() s:
 function setTheme(theme) {
-    // theme = 'dark' | 'light' | 'dokument'
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('fina-theme', theme);
-    
-    // Highlight aktivan gumb
     document.querySelectorAll('.theme-btn').forEach(function(btn) {
-        var isActive = btn.getAttribute('data-theme') === theme;
-        btn.style.background = isActive ? 'var(--gold-dim)' : 'none';
-        btn.style.color = isActive ? 'var(--gold)' : 'var(--text-dim)';
-        btn.style.fontWeight = isActive ? '700' : 'normal';
+        var active = btn.dataset.theme === theme;
+        btn.style.background = active ? 'var(--gold-dim)' : 'none';
+        btn.style.color = active ? 'var(--gold)' : 'var(--text-dim)';
+        btn.style.fontWeight = active ? '700' : '400';
     });
-    
-    // FAB boja po temi
-    var fab = document.getElementById('fenix-smart-fab');
-    if (fab) {
-        if (theme === 'dokument') {
-            fab.style.background = 'linear-gradient(135deg,#f5f2ec,#ffffff)';
-            fab.style.color = '#1a1a2e';
-            fab.style.border = '1px solid #d4cfc6';
-        }
-    }
-    
-    // AI Sufljer ažuriraj boju
-    if (window.FenixAI) window.FenixAI.updateTheme(theme);
 }
-
-// Init — čitaj temu iz localStorage (3 opcije)
-(function() {
-    var saved = localStorage.getItem('fina-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', saved);
-    // Highlight aktivan gumb (kad DOM bude spreman)
-    document.addEventListener('DOMContentLoaded', function() {
-        setTheme(saved);
-    });
+// Init (zamijeni stari inline script)
+(function(){
+    var t = localStorage.getItem('fina-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    document.addEventListener('DOMContentLoaded', function(){ setTheme(t); });
 })();
 ```
 
 ---
 
-## SPRINT 3 — KAMERA NA SVAKOJ FORMI (DAN 2)
-**Fajl:** `static/js/fenix-form-camera.js` (NOVI FAJL)
+## SPRINT 2 — ISPISI: PROŠIRITI PDF SUSTAV NA SVE DOKUMENTE (DAN 1-2)
 
-### 3.1 Filozofija
+### Stanje — što postoji ✅
 
-Svaki `<input>` i `<textarea>` koji ima `data-scan` atribut dobiva
-kameru ikonu desno. Klik → otvara kameru → AI čita → popunjava polje.
+```python
+# invoicing/services/pdf_service.py — TEMPLATE_MAP (postoji)
+TEMPLATE_MAP = {
+    'viskovic': {'de': '...invoice_de.html', 'hr': '...invoice_hr.html'},
+    'datev':    {'de': '...invoice_de_datev.html', 'hr': '...invoice_hr_datev.html'},
+    'modern':   {'de': '...invoice_de_modern.html', 'hr': '...invoice_hr_modern.html'},
+}
+# Company.pdf_template = 'viskovic' | 'datev' | 'modern' (postoji)
+```
+
+**PROBLEM:** `TEMPLATE_MAP` koristi samo `invoicing/`. Worktime, payroll, work_orders,
+livestock PDF-ovi ne znaju za `pdf_template`. Svaki tvrdo kodira jedan template.
+
+### 2.1 Globalna PDF helper funkcija — dodati u `core/pdf_utils.py` (novi fajl):
+
+```python
+# core/pdf_utils.py
+"""
+Globalni PDF helper — sve WeasyPrint generacije idu kroz ovu funkciju.
+Čita Company.pdf_template i vraća pravi template.
+"""
+
+from django.template.loader import render_to_string
+from django.conf import settings
+
+# ── Mapa modula → varijante predložaka ─────────────────────────────────────
+# Format: {modul: {pdf_template_key: template_path}}
+# 'viskovic' = HR premium gold
+# 'tamni'    = modern dark navy (koristimo 'modern' ključ iz modela)
+# 'datev'    = minimalistički, monokroman, DATEV kompatibilan
+
+PDF_TEMPLATE_REGISTRY = {
+
+    'invoice': {
+        'viskovic': {'hr': 'invoicing/invoice_hr.html',
+                     'de': 'invoicing/invoice_de.html'},
+        'modern':   {'hr': 'invoicing/invoice_hr_modern.html',
+                     'de': 'invoicing/invoice_de_modern.html'},
+        'datev':    {'hr': 'invoicing/invoice_hr_datev.html',
+                     'de': 'invoicing/invoice_de_datev.html'},
+    },
+
+    'worktime': {
+        'viskovic': 'worktime/templates/worktime/timesheet_pdf.html',
+        'modern':   'worktime/templates/worktime/timesheet_pdf.html',  # TODO: modern
+        'datev':    'worktime/templates/worktime/timesheet_pdf.html',  # TODO: datev
+    },
+
+    'payslip': {
+        'viskovic': 'payroll/payslip_pdf.html',
+        'modern':   'payroll/payslip_pdf.html',  # TODO
+        'datev':    'payroll/payslip_pdf.html',  # TODO
+    },
+
+    'work_order': {
+        'viskovic': 'work_orders/work_order_to_invoice.html',
+        'modern':   'work_orders/work_order_to_invoice.html',  # TODO
+        'datev':    'work_orders/work_order_to_invoice.html',  # TODO
+    },
+
+    'livestock_inspection': {
+        'viskovic': 'livestock/inspection_pdf_viskovic.html',
+        'modern':   'livestock/inspection_pdf_modern.html',
+        'datev':    'livestock/inspection_pdf_datev.html',
+    },
+
+    'notariat': {
+        'viskovic': 'notariat/pdf_viskovic.html',   # Sprint 1 notariat
+        'modern':   'notariat/pdf_modern.html',
+        'datev':    'notariat/pdf_datev.html',
+    },
+
+    'dimnjak': {
+        'viskovic': 'notariat/potvrda_dimnjaka_viskovic.html',
+        'modern':   'notariat/potvrda_dimnjaka_modern.html',
+        'datev':    'notariat/potvrda_dimnjaka_datev.html',
+    },
+}
+
+
+def get_pdf_template(modul: str, company, lang: str = 'hr') -> str:
+    """
+    Vrati template path za dani modul i company.
+
+    Args:
+        modul:   'invoice' | 'worktime' | 'payslip' | 'livestock_inspection' | ...
+        company: Company instanca (ima .pdf_template atribut)
+        lang:    'hr' | 'de'
+
+    Returns:
+        Template path (string)
+    """
+    # Provjeri postoji li field (migracija možda nije primijenjena)
+    pdf_key = getattr(company, 'pdf_template', 'viskovic') or 'viskovic'
+    lang = lang if lang in ('hr', 'de') else 'hr'
+
+    templates = PDF_TEMPLATE_REGISTRY.get(modul, {})
+    if not templates:
+        raise ValueError(f"Nepoznati PDF modul: {modul}")
+
+    variant = templates.get(pdf_key, templates.get('viskovic'))
+
+    if isinstance(variant, dict):
+        # Invoice tip — ima hr/de varijantu
+        return variant.get(lang, variant.get('hr'))
+    else:
+        return variant
+
+
+def render_pdf_html(modul: str, company, context: dict, lang: str = 'hr') -> str:
+    """
+    Renderaj HTML za PDF.
+    Koristi pravi template prema company.pdf_template postavci.
+    """
+    template_path = get_pdf_template(modul, company, lang)
+    return render_to_string(template_path, context)
+
+
+def generate_weasyprint_pdf(modul: str, company, context: dict, lang: str = 'hr') -> bytes:
+    """
+    Generiraj PDF bytes putem WeasyPrint.
+    Pozivaj iz view-a umjesto direktnog render_to_string.
+    """
+    from weasyprint import HTML, CSS
+    from django.templatetags.static import static
+
+    html_string = render_pdf_html(modul, company, context, lang)
+    base_url = getattr(settings, 'WEASYPRINT_BASE_URL', 'https://limit-connect.com')
+
+    return HTML(
+        string=html_string,
+        base_url=base_url
+    ).write_pdf()
+```
+
+### 2.2 Zamjeniti direktni WeasyPrint poziv u `invoicing/views.py`:
+
+```python
+# STARO (u generate_pdf view):
+# html = render_to_string('invoicing/invoice_hr.html', context)
+# pdf = HTML(string=html).write_pdf()
+
+# NOVO:
+from core.pdf_utils import generate_weasyprint_pdf
+company = invoice.company
+lang = 'de' if company.country == 'DE' else 'hr'
+pdf_bytes = generate_weasyprint_pdf('invoice', company, context, lang)
+```
+
+### 2.3 Zamjeniti u `worktime/views.py`, `payroll/views.py`, `work_orders/views.py`:
+
+```python
+# Isto — uvijek:
+from core.pdf_utils import generate_weasyprint_pdf
+pdf_bytes = generate_weasyprint_pdf('worktime', company, context)
+```
+
+### 2.4 PDF stil selector u Company settings UI:
+
+```python
+# Dodati u Company settings formu (gdje god postoji edit forme za Company)
+# Provjeri: grep -rn "CompanyForm\|company_edit\|pdf_template" companies/forms.py companies/views.py
+
+# Ako postoji CompanyForm:
+class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = [..., 'pdf_template', ...]
+        widgets = {
+            'pdf_template': forms.RadioSelect(
+                attrs={'class': 'pdf-style-radio'}
+            )
+        }
+```
+
+HTML preview kartica za radio izbor:
+
+```html
+<!-- U company settings template — vizualni izbor PDF stila -->
+<div class="f-grid-3" style="margin:12px 0">
+    {% for value, label in form.pdf_template.field.choices %}
+    <label style="cursor:pointer">
+        <input type="radio" name="pdf_template" value="{{ value }}"
+               {% if form.pdf_template.value == value %}checked{% endif %}
+               style="display:none">
+        <div class="f-card pdf-style-card {% if form.pdf_template.value == value %}active{% endif %}"
+             style="border-radius:8px;overflow:hidden;border:2px solid var(--border);
+                    transition:border-color .2s;cursor:pointer"
+             onclick="this.closest('label').querySelector('input').checked=true;
+                      document.querySelectorAll('.pdf-style-card').forEach(c=>c.classList.remove('active'));
+                      this.classList.add('active')">
+            <!-- Minijatura ovisno o vrijednosti -->
+            {% if value == 'viskovic' %}
+            <div style="height:80px;background:#1a1a2e;display:flex;align-items:center;
+                        justify-content:center;border-bottom:3px solid #c9a84c">
+                <span style="color:#c9a84c;font-weight:700;font-size:.9rem">⚜ VISKOVIĆ</span>
+            </div>
+            {% elif value == 'modern' %}
+            <div style="height:80px;background:#111827;display:flex;align-items:center;
+                        justify-content:center;border-bottom:3px solid #3b82f6">
+                <span style="color:#60a5fa;font-weight:700;font-size:.9rem">◼ TAMNI</span>
+            </div>
+            {% elif value == 'datev' %}
+            <div style="height:80px;background:#ffffff;display:flex;align-items:center;
+                        justify-content:center;border-bottom:2px solid #000;border:1px solid #ccc">
+                <span style="color:#000;font-weight:700;font-size:.9rem">▣ DATEV</span>
+            </div>
+            {% endif %}
+            <div style="padding:8px 10px;font-size:.8rem;font-weight:600;
+                        color:var(--text)">{{ label }}</div>
+        </div>
+    </label>
+    {% endfor %}
+</div>
+<style>
+.pdf-style-card.active { border-color: var(--gold) !important; }
+</style>
+```
+
+---
+
+## SPRINT 3 — KAMERA NA FORMI (DAN 2-3)
+**Fajl:** `static/js/fenix-form-camera.js`
+
+Svaki `<input>` s ovim imenima automatski dobiva kameru ikonu:
+`oib`, `iban`, `mbs`, `adresa`, `naziv`, `ime`, `prezime`, `iznos`, `broj`
 
 ```javascript
 // static/js/fenix-form-camera.js
-// FenixFormCamera v1 — kamera na svakom polju forme
-
-(function() {
-    'use strict';
-    
-    window.FenixFormCamera = {
-        
-        // Koja polja auto-dobivaju kameru (po name/id/type)
-        AUTO_SCAN_FIELDS: [
-            'oib', 'iban', 'mbs', 'zip', 'postanski',
-            'partner_oib', 'vlasnik_oib', 'duznik_oib',
-            'adresa', 'naziv', 'ime', 'prezime',
-            'broj_racuna', 'iznos', 'datum'
-        ],
-        
-        init: function() {
-            // 1. Polja s data-scan atributom — uvijek
-            document.querySelectorAll('[data-scan]').forEach(function(field) {
-                FenixFormCamera.attachCamera(field, field.dataset.scan);
-            });
-            
-            // 2. Auto-detect po imenu polja
-            document.querySelectorAll('input, textarea').forEach(function(field) {
-                var name = (field.name || field.id || '').toLowerCase();
-                FenixFormCamera.AUTO_SCAN_FIELDS.forEach(function(keyword) {
-                    if (name.includes(keyword) && !field.dataset.cameraAttached) {
-                        FenixFormCamera.attachCamera(field, 'auto');
-                    }
-                });
-            });
-        },
-        
-        attachCamera: function(field, docType) {
-            if (field.dataset.cameraAttached) return;
-            field.dataset.cameraAttached = '1';
-            
-            // Wrapper
-            var parent = field.parentNode;
-            var wrapper = document.createElement('div');
-            wrapper.style.cssText = 'position:relative;display:flex;align-items:center;';
-            parent.insertBefore(wrapper, field);
-            wrapper.appendChild(field);
-            field.style.paddingRight = '36px';
-            
-            // Kamera gumb
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.title = 'Skeniraj kamerom';
-            btn.innerHTML = '<i class="fas fa-camera"></i>';
-            btn.style.cssText = [
-                'position:absolute;right:6px;top:50%;transform:translateY(-50%);',
-                'background:none;border:none;cursor:pointer;',
-                'color:var(--text-dim);font-size:.85rem;',
-                'padding:4px;border-radius:4px;',
-                'transition:color .2s, opacity .2s;opacity:.6;',
-                'z-index:10;'
-            ].join('');
-            btn.onmouseenter = function() { this.style.opacity = '1'; this.style.color = 'var(--gold)'; };
-            btn.onmouseleave = function() { this.style.opacity = '.6'; this.style.color = 'var(--text-dim)'; };
-            wrapper.appendChild(btn);
-            
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                FenixFormCamera.openCamera(field, docType || 'general');
-            });
-        },
-        
-        openCamera: function(targetField, docType) {
-            // Reuse FenixScan ako postoji
-            if (window.FenixScan && window.FenixScan.openForField) {
-                window.FenixScan.openForField(targetField, docType);
-                return;
-            }
-            
-            // Fallback — file input
-            var input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.capture = 'environment';
-            input.onchange = function() {
-                if (!this.files[0]) return;
-                FenixFormCamera.processImage(this.files[0], targetField, docType);
-            };
-            input.click();
-        },
-        
-        processImage: function(file, targetField, docType) {
-            // Pokazi loading stanje na polju
-            targetField.classList.add('scanning');
-            targetField.placeholder = '⏳ AI čita...';
-            
-            var formData = new FormData();
-            formData.append('images', file);
-            formData.append('doc_type', docType);
-            formData.append('target_field', targetField.name || targetField.id);
-            
-            // CSRF
-            var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
-            
-            fetch('/api/fenix/scan/', {
-                method: 'POST',
-                headers: csrf ? {'X-CSRFToken': csrf.value} : {},
-                body: formData
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                targetField.classList.remove('scanning');
-                targetField.placeholder = '';
-                
-                if (data.extracted) {
-                    // Pokušaj mapirati ekstrakciju na ciljno polje
-                    var fieldName = (targetField.name || targetField.id || '').toLowerCase();
-                    var value = data.extracted[fieldName] 
-                             || data.extracted.oib 
-                             || data.extracted.raw_text 
-                             || '';
-                    
-                    if (value) {
-                        targetField.value = value;
-                        targetField.dispatchEvent(new Event('change', {bubbles: true}));
-                        // Flash zeleno
-                        targetField.style.borderColor = 'var(--green)';
-                        setTimeout(function() { targetField.style.borderColor = ''; }, 2000);
-                        // AI Sufljer — obavijesti
-                        if (window.FenixAI) {
-                            window.FenixAI.notify('Polje popunjeno: ' + value);
-                        }
-                    }
-                }
-            })
-            .catch(function() {
-                targetField.classList.remove('scanning');
-                targetField.placeholder = '';
-            });
-        }
-    };
-    
-    // Auto-init kad DOM bude spreman
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            FenixFormCamera.init();
-        });
-    } else {
-        FenixFormCamera.init();
-    }
-    
-})();
-```
-
-### 3.2 Dodati u `templates/base.html` — NAKON fenix-scan.js:
-
-```html
-<script src="/static/js/fenix-form-camera.js"></script>
-```
-
-### 3.3 CSS za scanning stanje — dodati u `fenix-ui.css`:
-
-```css
-/* Polje koje se skenira */
-input.scanning, textarea.scanning {
-    animation: scanPulse 0.8s ease-in-out infinite;
-    border-color: var(--blue) !important;
-}
-@keyframes scanPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
+// Puna implementacija iz prethodnog CC_TASK-a (kopirati)
+// Jedina izmjena: openCamera poziva FenixScan.openForField ako postoji
 ```
 
 ---
 
-## SPRINT 4 — AI SUFLJER (DAN 2-3)
-**Fajl:** `static/js/fenix-ai-sufler.js` (NOVI FAJL)
-**URL:** `/api/fenix/ai-hint/` (NOVI endpoint)
+## SPRINT 4 — AI SUFLJER (DAN 3)
+**Fajl:** `static/js/fenix-ai-sufler.js` + `/api/fenix/ai-hint/`
 
-### 4.1 Što AI Sufljer radi:
-- Prati aktivnu stranicu (URL + formu)
-- Svake 30 sekundi (ili na promjenu forme) pita Haiku za kontekstualni savjet
-- Prikazuje hint kao mali floating panel (ne popup, ne modal)
-- Korisnik može zatvoriti ili prihvatiti sugestiju
-- "Prihvati" → popunjava formu / otvara link / izvršava akciju
-
-### 4.2 Backend endpoint:
-
-```python
-# core/views_ai.py — dodati ovu view
-
-@login_required
-@require_POST
-def ai_hint(request):
-    """
-    POST /api/fenix/ai-hint/
-    Body: {
-        "page_url": "/hr/invoicing/123/",
-        "page_title": "Faktura INV-2026-123",
-        "form_fields": ["partner", "iznos", "datum_valute"],
-        "form_values": {"partner": "Kruljac Ivica", "iznos": ""},
-        "context": {...}
-    }
-    Response: {
-        "hint": "Iznos nije unesen. Zadnji račun Kruljac Ivici bio je 1.250,00 EUR.",
-        "action": {"label": "Kopiraj iznos", "type": "fill_field", 
-                   "field": "iznos", "value": "1250.00"},
-        "confidence": 0.85
-    }
-    """
-    import json
-    from django.http import JsonResponse
-    
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'hint': '', 'action': None}, status=200)
-    
-    page_url = data.get('page_url', '')
-    form_fields = data.get('form_fields', [])
-    form_values = data.get('form_values', {})
-    
-    # Kontekst iz baze — zadnje transakcije, otvorene fakture, itd.
-    # PROVJERI: koje modele imaš za partnera/fakturu
-    context_info = []
-    
-    partner_name = form_values.get('partner', '') or form_values.get('klijent', '')
-    if partner_name:
-        # Zadnji iznos tog partnera
-        from invoicing.models import Invoice  # PROVJERI model name
-        try:
-            last_inv = Invoice.objects.filter(
-                company=request.user.profile.company,
-                buyer_name__icontains=partner_name
-            ).order_by('-date').first()
-            if last_inv:
-                context_info.append(
-                    f"Zadnji račun za '{partner_name}': "
-                    f"{last_inv.total} EUR, datum {last_inv.date}"
-                )
-        except Exception:
-            pass
-    
-    # Haiku prompt
-    import anthropic
-    from django.conf import settings
-    
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    
-    system = """Ti si AI asistent unutar LIMIT Connect ERP sustava.
-Korisnik radi na formi. Daj JEDAN konkretan, kratak savjet (max 2 rečenice).
-Ako možeš predložiti konkretnu akciju (popuni polje, otvori stranicu), predloži je.
-Odgovori SAMO u JSON formatu:
-{"hint": "...", "action": {"label": "...", "type": "fill_field|open_url|none", 
- "field": "...", "value": "..."} | null, "confidence": 0.0-1.0}
-Jezik: hrvatski. Ton: konkretan, kolegijalan. Bez uvoda."""
-    
-    user_msg = f"""Stranica: {page_url}
-Polja forme: {', '.join(form_fields)}
-Popunjeno: {json.dumps(form_values, ensure_ascii=False)}
-Kontekst iz baze: {'; '.join(context_info) if context_info else 'nema'}
-Što savjetuješ?"""
-    
-    try:
-        resp = client.messages.create(
-            model=settings.HAIKU_MODEL,
-            max_tokens=200,
-            system=system,
-            messages=[{'role': 'user', 'content': user_msg}]
-        )
-        result = json.loads(resp.content[0].text)
-    except Exception:
-        result = {'hint': '', 'action': None, 'confidence': 0}
-    
-    return JsonResponse(result)
 ```
-
-### 4.3 URL u `core/urls.py`:
-```python
-path('api/fenix/ai-hint/', views_ai.ai_hint, name='ai_hint'),
-```
-
-### 4.4 Frontend — `static/js/fenix-ai-sufler.js`:
-
-```javascript
-// FenixAI Sufljer v1 — kontekstualni AI asistent
-// Floating panel, ne blokira rad
-
-(function() {
-    'use strict';
-    
-    var HINT_INTERVAL = 45000; // 45 sekundi
-    var MIN_CONFIDENCE = 0.6;
-    var timer = null;
-    var panelEl = null;
-    var lastUrl = '';
-    var enabled = localStorage.getItem('fenix-ai-sufler') !== 'off';
-    
-    window.FenixAI = {
-        
-        notify: function(msg) {
-            showHint(msg, null);
-        },
-        
-        updateTheme: function(theme) {
-            if (!panelEl) return;
-            applyThemeToPanel(theme);
-        },
-        
-        toggle: function() {
-            enabled = !enabled;
-            localStorage.setItem('fenix-ai-sufler', enabled ? 'on' : 'off');
-            if (!enabled && panelEl) hidePanel();
-        }
-    };
-    
-    function buildPanel() {
-        if (panelEl) return;
-        panelEl = document.createElement('div');
-        panelEl.id = 'fenix-ai-sufler-panel';
-        panelEl.style.cssText = [
-            'position:fixed;bottom:160px;right:20px;',
-            'max-width:280px;min-width:220px;',
-            'background:var(--surface);',
-            'border:1px solid var(--border);',
-            'border-left:3px solid var(--blue);',
-            'border-radius:10px;',
-            'padding:12px 14px;',
-            'box-shadow:0 4px 20px rgba(0,0,0,0.25);',
-            'z-index:9990;',
-            'display:none;',
-            'font-size:.82rem;',
-            'transition:all .3s ease;',
-            'animation:slideInRight .3s ease;'
-        ].join('');
-        panelEl.innerHTML = [
-            '<div style="display:flex;justify-content:space-between;',
-                'align-items:center;margin-bottom:8px">',
-                '<span style="font-weight:700;color:var(--blue);font-size:.78rem;',
-                    'letter-spacing:.03em">',
-                    '<i class="fas fa-robot" style="margin-right:4px"></i>',
-                    'AI SUFLJER</span>',
-                '<button onclick="FenixAI.dismiss()" ',
-                    'style="background:none;border:none;cursor:pointer;',
-                    'color:var(--text-dim);font-size:.9rem;padding:0 2px;',
-                    'line-height:1">',
-                    '&times;</button>',
-            '</div>',
-            '<p id="fenix-ai-hint-text" style="margin:0 0 10px;',
-                'color:var(--text);line-height:1.5;"></p>',
-            '<div id="fenix-ai-action-wrap" style="display:none">',
-                '<button id="fenix-ai-action-btn" ',
-                    'style="background:var(--blue);color:#fff;border:none;',
-                    'border-radius:6px;padding:5px 12px;cursor:pointer;',
-                    'font-size:.78rem;font-weight:600;width:100%;',
-                    'transition:opacity .2s" ',
-                    'onmouseenter="this.style.opacity=\'.85\'" ',
-                    'onmouseleave="this.style.opacity=\'1\'">',
-                '</button>',
-            '</div>',
-        ].join('');
-        document.body.appendChild(panelEl);
-        
-        // CSS animacija
-        var style = document.createElement('style');
-        style.textContent = '@keyframes slideInRight{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}';
-        document.head.appendChild(style);
-    }
-    
-    FenixAI.dismiss = function() { hidePanel(); };
-    
-    function showHint(hintText, action) {
-        if (!enabled || !hintText) return;
-        buildPanel();
-        
-        document.getElementById('fenix-ai-hint-text').textContent = hintText;
-        
-        var actionWrap = document.getElementById('fenix-ai-action-wrap');
-        var actionBtn = document.getElementById('fenix-ai-action-btn');
-        
-        if (action && action.type !== 'none' && action.label) {
-            actionWrap.style.display = 'block';
-            actionBtn.textContent = action.label;
-            actionBtn.onclick = function() {
-                executeAction(action);
-                hidePanel();
-            };
-        } else {
-            actionWrap.style.display = 'none';
-        }
-        
-        panelEl.style.display = 'block';
-        panelEl.style.animation = 'none';
-        panelEl.offsetHeight; // reflow
-        panelEl.style.animation = 'slideInRight .3s ease';
-        
-        // Auto-sakrij za 12 sekundi
-        clearTimeout(window._fenixAiHideTimer);
-        window._fenixAiHideTimer = setTimeout(hidePanel, 12000);
-    }
-    
-    function hidePanel() {
-        if (panelEl) panelEl.style.display = 'none';
-    }
-    
-    function executeAction(action) {
-        if (action.type === 'fill_field' && action.field && action.value) {
-            var field = document.querySelector(
-                '[name="' + action.field + '"],[id="' + action.field + '"]'
-            );
-            if (field) {
-                field.value = action.value;
-                field.dispatchEvent(new Event('change', {bubbles: true}));
-                field.style.borderColor = 'var(--green)';
-                setTimeout(function() { field.style.borderColor = ''; }, 2000);
-            }
-        } else if (action.type === 'open_url' && action.value) {
-            window.location.href = action.value;
-        }
-    }
-    
-    function applyThemeToPanel(theme) {
-        if (!panelEl) return;
-        var color = theme === 'dokument' ? '#1a3f6f' : 'var(--blue)';
-        panelEl.style.borderLeftColor = color;
-        var label = panelEl.querySelector('#fenix-ai-sufler-panel span');
-        if (label) label.style.color = color;
-    }
-    
-    function collectFormData() {
-        var fields = [];
-        var values = {};
-        document.querySelectorAll('form input, form select, form textarea').forEach(function(el) {
-            if (el.name && el.type !== 'hidden' && el.type !== 'submit' && el.type !== 'password') {
-                fields.push(el.name);
-                if (el.value) values[el.name] = el.value;
-            }
-        });
-        return {fields: fields, values: values};
-    }
-    
-    function requestHint() {
-        if (!enabled) return;
-        if (location.pathname === lastUrl) {
-            // Ista stranica — provjeri ima li forme
-            var fd = collectFormData();
-            if (fd.fields.length === 0) return; // Nema forme, nema sufliranja
-        }
-        lastUrl = location.pathname;
-        
-        var fd = collectFormData();
-        var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (!csrf) return;
-        
-        fetch('/api/fenix/ai-hint/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrf.value
-            },
-            body: JSON.stringify({
-                page_url: location.pathname,
-                page_title: document.title,
-                form_fields: fd.fields,
-                form_values: fd.values,
-                context: {
-                    theme: document.documentElement.getAttribute('data-theme') || 'dark',
-                    viewport: window.innerWidth + 'x' + window.innerHeight
-                }
-            })
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.hint && data.confidence >= MIN_CONFIDENCE) {
-                showHint(data.hint, data.action);
-            }
-        })
-        .catch(function() {}); // Tiho ignoriraj greške
-    }
-    
-    // Pokretanje
-    document.addEventListener('DOMContentLoaded', function() {
-        buildPanel();
-        
-        // Hint na promjenu stranice
-        setTimeout(requestHint, 3000);
-        
-        // Ponavljanje
-        timer = setInterval(requestHint, HINT_INTERVAL);
-        
-        // Hint na submit forme — provjera prije slanja
-        document.addEventListener('submit', function(e) {
-            clearTimeout(window._fenixAiHideTimer);
-            hidePanel();
-        }, true);
-    });
-    
-})();
-```
-
-### 4.5 Dodati u `templates/base.html` — ZADNJE u `<body>`:
-
-```html
-<script src="/static/js/fenix-ai-sufler.js"></script>
-```
-
----
-
-## SPRINT 5 — POLISH & DETALJI (DAN 3-4)
-
-### 5.1 Sidebar — tema ikona i glatkoća
-
-```css
-/* Dodati u fenix-ui.css */
-
-/* Sidebar glatki tranzicija između tema */
-.sidebar, .topbar, .f-card, input, select, textarea, button {
-    transition: background-color .3s ease, border-color .3s ease, color .3s ease;
-}
-
-/* Dokument tema — sidebar s linijama kao papir */
-html[data-theme="dokument"] .sidebar-item:hover {
-    background: var(--doc-watermark);
-    border-left: 3px solid var(--gold);
-}
-
-/* Fokus ring — vidljiv u svim temama */
-:focus-visible {
-    outline: 2px solid var(--blue);
-    outline-offset: 2px;
-}
-```
-
-### 5.2 Tipografija — Dokument tema
-
-```html
-<!-- Dodati u base.html <head> — Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet">
-```
-
-### 5.3 Print optimizacija (dokument tema)
-
-```css
-/* Dodati u fenix-ui.css */
-@media print {
-    .sidebar, .topbar, .f-fab, #fenix-smart-fab, 
-    #fenix-ai-sufler-panel, #theme-switcher,
-    .no-print { display: none !important; }
-    
-    body { background: white !important; color: black !important; }
-    .f-card { box-shadow: none !important; border: 1px solid #ccc !important; }
-    
-    html[data-theme="dokument"] .f-card {
-        break-inside: avoid;
-    }
-}
+Haiku prati formu (45s interval).
+Čita popunjena i prazna polja.
+Šapće: "Iznos nije unesen. Zadnji račun Kruljac Ivici = 1.250 EUR."
+Gumb: "Kopiraj" → popuni polje.
+Ne smeta. Ne blokira. Tiho nestaje za 12s.
 ```
 
 ---
@@ -796,66 +474,59 @@ html[data-theme="dokument"] .sidebar-item:hover {
 ## COMMIT FORMAT
 
 ```bash
-# Sprint 1+2
-git add static/css/global_themes.css templates/base.html
-git commit -m "feat(ui): tema 3 'Dokument' + 3-way theme switcher (dark/light/dokument)"
+# S1 — UI teme
+git commit -m "feat(ui): dark/light tema polish — CSS varijable, tranzicije, 2-way switcher"
 
-# Sprint 3
-git add static/js/fenix-form-camera.js static/css/fenix-ui.css
-git commit -m "feat(ui): FenixFormCamera — kamera ikona na svakom polju forme, AI auto-fill"
+# S2a — pdf_utils
+git commit -m "feat(pdf): core/pdf_utils.py — globalni PDF template registry"
 
-# Sprint 4
-git add static/js/fenix-ai-sufler.js core/views_ai.py core/urls.py
-git commit -m "feat(ui): AI Sufljer — Haiku u pozadini prati formu i suflira (45s interval)"
+# S2b — invoice refactor
+git commit -m "refactor(invoice): generate_pdf koristi pdf_utils umjesto tvrdog template"
 
-# Sprint 5
-git add static/css/fenix-ui.css templates/base.html
-git commit -m "feat(ui): polish — tranzicije, print, tipografija, fokus ring"
+# S2c — ostali moduli
+git commit -m "refactor(pdf): worktime/payslip/work_order koriste pdf_utils"
+
+# S2d — company settings UI
+git commit -m "feat(company): vizualni PDF stil selector (visković/tamni/datev)"
+
+# S3 — kamera
+git commit -m "feat(ui): FenixFormCamera — kamera ikona na form poljima, AI auto-fill"
+
+# S4 — sufljer
+git commit -m "feat(ui): AI Sufljer — Haiku savjeti u pozadini (45s, dismiss, auto-fill)"
 ```
 
 ---
 
-## DEPLOY REDOSLIJED
+## STATUS TABLICA
 
-```bash
-# Nema migracija — sve CSS/JS/template
-# 1. CSS teme
-# 2. Theme switcher JS
-# 3. fenix-form-camera.js
-# 4. AI hint endpoint + fenix-ai-sufler.js
-# 5. Polish
-systemctl restart gunicorn-fina  # samo jednom na kraju
-```
-
----
-
-## REZULTAT — 10/10 CHECKLIST
-
-| Feature | Status |
-|---------|--------|
-| Tamna tema (poboljšana) | ✅ postojeće + tranzicije |
-| Svijetla tema (poboljšana) | ✅ postojeće + tranzicije |
-| Dokument tema (NOVO) | ⏳ Sprint 1 |
-| 3-way theme switcher | ⏳ Sprint 2 |
-| Kamera na FAB (globalna) | ✅ postoji |
-| Kamera na svakom polju forme | ⏳ Sprint 3 |
-| AI Sufljer u pozadini | ⏳ Sprint 4 |
-| AI auto-fill polja iz kamere | ⏳ Sprint 3+4 |
-| Print / Dokument optimizacija | ⏳ Sprint 5 |
-| Glatke tranzicije tema | ⏳ Sprint 5 |
-| Tipografija — Cormorant serif | ⏳ Sprint 5 |
+| # | Feature | Gdje | Status |
+|---|---------|------|--------|
+| 1 | Tamna tema — polish | global_themes.css | ⏳ |
+| 2 | Svjetla tema — kompletna | global_themes.css | ⏳ |
+| 3 | 2-way switcher (tamna/svjetla) | base.html | ⏳ |
+| 4 | PDF: Visković stil (invoice) | ✅ POSTOJI | ✅ |
+| 5 | PDF: Tamni/Modern stil (invoice) | ✅ POSTOJI | ✅ |
+| 6 | PDF: DATEV stil (invoice) | ✅ POSTOJI | ✅ |
+| 7 | pdf_utils.py — globalni registry | core/pdf_utils.py | ⏳ |
+| 8 | worktime PDF → pdf_utils | worktime/ | ⏳ |
+| 9 | payslip PDF → pdf_utils | payroll/ | ⏳ |
+| 10 | notariat PDF → pdf_utils | notariat/ | ⏳ |
+| 11 | Vizualni PDF selector u settings | company settings | ⏳ |
+| 12 | Kamera ikona na form poljima | fenix-form-camera.js | ⏳ |
+| 13 | AI Sufljer (Haiku, 45s) | fenix-ai-sufler.js | ⏳ |
 
 ---
 
-## TESLA 3-6-9 ZAVRŠNICA
+## NAPOMENA ZA CC CODE
 
 ```
-3 = Tri teme (tamno / svjetlo / dokument)
-6 = Šest sprintova do kraja (S0→S5)
-9 = Devet dana do go-live 15.04.
+NE izmišljaj nove template-e gdje već postoje.
+Visković/DATEV/Modern predlošci za fakture SU GOTOVI.
+Jedino što treba: spojiti ih u jedan sustav (pdf_utils.py)
+i proširiti na sve module (worktime, payroll, notariat...).
 
-Svaka tema = jedna misija:
-  TAMNO    → Računovođa u 23:00 koji zatvara knjige
-  SVIJETLO → Klijent koji gleda ponudu na suncu
-  DOKUMENT → Bilježnik koji tiska akt za potpis
+Redoslijed: S1 → S2 → S3 → S4
+S1 i S2 mogu ići paralelno (različiti fajlovi).
+S3 i S4 su bonus — ako ostane vremena do 07.04.
 ```
