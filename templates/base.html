@@ -4,196 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-      <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#c9a84c">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="FinaConnect">
-  <link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon-180x180.png' %}">
-
-    <title>{% if title %}{{ title }} - {% endif %}FinaConnect</title>
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#c9a84c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FinaConnect">
+    <link rel="apple-touch-icon" href="{% static 'img/icons/icon-192x192.png' %}">
     <link rel="stylesheet" href="{% static 'css/global_themes.css' %}">
     <link rel="stylesheet" href="{% static 'css/fenix-ui.css' %}">
-    <link rel="stylesheet" href="{% static 'css/animations.css' %}">
-
-    {% block extra_css %}{% endblock %}
-
-    <script>
-        // Nova funkcija za postavljanje teme
-        function setTheme(themeName) {
-            localStorage.setItem('theme', themeName);
-            document.documentElement.className = themeName;
-        }
-
-        // Funkcija za prebacivanje teme (ako se ipak koristi toggle)
-        function toggleTheme() {
-            if (localStorage.getItem('theme') === 'theme-dark') {
-                setTheme('theme-light');
-            } else {
-                setTheme('theme-dark');
-            }
-        }
-
-        // Init script: Provjeri lokalnu pohranu i primijeni temu pri učitavanju stranice
-        (function () {
-            if (localStorage.getItem('theme') === 'theme-light') {
-                setTheme('theme-light');
-            } else {
-                setTheme('theme-dark');
-            }
-        })();
-
-        // Postavke za PWA install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome 76 and later from showing the mini-infobar
-            e.preventDefault();
-            // Stash the event so it can be triggered later.
-            deferredPrompt = e;
-            // Update UI to notify the user they can add to home screen
-            // (You might want to show a custom button here)
-            console.log('beforeinstallprompt event fired');
-        });
-
-        function showInstallPrompt() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the A2HS prompt');
-                    } else {
-                        console.log('User dismissed the A2HS prompt');
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                console.log('Install prompt not available');
-                // Fallback for browsers that don't support it, or if already installed
-                alert('Aplikacija se može instalirati putem postavki preglednika (Add to Home Screen).');
-            }
-        }
-    </script>
-
-    {% block extra_head %}{% endblock %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    {% block head_extra %}{% endblock %}
+    <title>{% block title %}FinaConnect{% endblock %}</title>
 </head>
-<body class="{{ body_class|default:'' }}">
-
-    <div id="body-overlay" class="hidden"></div>
-
-    <div class="top-nav">
-        <div class="logo">
-            <a href="{% url 'home' %}">
-                <img src="{% static 'img/finaconnect-logo-white-small.png' %}" alt="FinaConnect Logo">
-            </a>
+<body data-theme="dark"> {# This data-theme will be overwritten by JS init #}
+    <header>
+        {% include 'snippets/header.html' %}
+        <div class="theme-switcher">
+            <button id="dark-theme-btn" class="theme-btn active" onclick="setTheme('dark')">
+                <i class="fa fa-moon"></i> Dark
+            </button>
+            <button id="light-theme-btn" class="theme-btn" onclick="setTheme('light')">
+                <i class="fa fa-sun"></i> Light
+            </button>
         </div>
+    </header>
 
-        <div class="search-bar">
-            <input type="text" placeholder="{% translate 'Pretraga...' %}">
-        </div>
+    <main id="content">
+        {% block content %}{% endblock %}
+    </main>
 
-        <div class="nav-actions">
-
-            <!-- Novi 2-way Theme Switcher -->
-            <div class="theme-switcher-container">
-                <button class="theme-switcher-button dark" onclick="setTheme('theme-dark')">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="theme-switcher-button light" onclick="setTheme('theme-light')">
-                    <i class="fas fa-sun"></i>
-                </button>
-            </div>
-
-            <a href="{% url 'notifications' %}" class="notification-icon">
-                <i class="fas fa-bell"></i>
-                <span class="badge">3</span>
-            </a>
-
-            <div class="user-menu">
-                <img src="{% static 'img/avatar.png' %}" alt="User Avatar" class="user-avatar">
-                <span class="username">{{ request.user.first_name }}</span>
-                <i class="fas fa-chevron-down"></i>
-                <div class="dropdown-menu">
-                    <a href="{% url 'profile' %}">{% translate 'Profil' %}</a>
-                    <a href="{% url 'settings' %}">{% translate 'Postavke' %}</a>
-                    <a href="{% url 'password_change' %}">{% translate 'Promijeni lozinku' %}</a>
-                    <hr>
-                    <a href="{% url 'logout' %}">{% translate 'Odjava' %}</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="sidebar">
-        <a href="{% url 'home' %}" class="sidebar-item{% if request.resolver_match.url_name == 'home' %} active{% endif %}">
-            <i class="fas fa-home"></i>
-            <span>{% translate 'Početna' %}</span>
-        </a>
-        <a href="{% url 'companies_list' %}" class="sidebar-item{% if 'companies' in request.path %} active{% endif %}">
-            <i class="fas fa-building"></i>
-            <span>{% translate 'Tvrtke' %}</span>
-        </a>
-        <a href="{% url 'invoices_list' %}" class="sidebar-item{% if 'invoices' in request.path %} active{% endif %}">
-            <i class="fas fa-file-invoice"></i>
-            <span>{% translate 'Računi' %}</span>
-        </a>
-        <a href="{% url 'users_list' %}" class="sidebar-item{% if 'users' in request.path %} active{% endif %}">
-            <i class="fas fa-users"></i>
-            <span>{% translate 'Korisnici' %}</span>
-        </a>
-         <a href="{% url 'reports' %}" class="sidebar-item{% if 'reports' in request.path %} active{% endif %}">
-            <i class="fas fa-chart-line"></i>
-            <span>{% translate 'Izvještaji' %}</span>
-        </a>
-        <a href="{% url 'settings' %}" class="sidebar-item{% if 'settings' in request.path %} active{% endif %}">
-            <i class="fas fa-cogs"></i>
-            <span>{% translate 'Postavke' %}</span>
-        </a>
-    </div>
-
-    <div class="main-content">
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} {{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        {% block content %}
-        {% endblock %}
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{% static 'js/main.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <footer>
+        {% include 'snippets/footer.html' %}
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Activate the correct theme button on load
-            const activeTheme = localStorage.getItem('theme') || 'theme-dark'; // Default to dark if not set
-            document.querySelectorAll('.theme-switcher-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            if (activeTheme === 'theme-light') {
-                document.querySelector('.theme-switcher-button.light').classList.add('active');
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+
+            document.getElementById('dark-theme-btn').classList.remove('active');
+            document.getElementById('light-theme-btn').classList.remove('active');
+
+            if (theme === 'dark') {
+                document.getElementById('dark-theme-btn').classList.add('active');
             } else {
-                document.querySelector('.theme-switcher-button.dark').classList.add('active');
+                document.getElementById('light-theme-btn').classList.add('active');
             }
+        }
 
-            // Add active class on click
-            document.querySelectorAll('.theme-switcher-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.theme-switcher-button').forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
+        // Init script
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
+            setTheme(storedTheme);
         });
-
     </script>
 
     {% block extra_js %}{% endblock %}
-
 </body>
 </html>
