@@ -191,6 +191,11 @@ class Booking(models.Model):
     # Pricing
     price_per_night = models.DecimalField(max_digits=8, decimal_places=2, verbose_name=_('Cijena/noc'))
     total_nights = models.IntegerField(default=1, verbose_name=_('Broj noci'))
+    vat_rate = models.DecimalField(max_digits=4, decimal_places=1, default=13,
+                                    verbose_name=_('PDV stopa (%)'),
+                                    help_text=_('HR: 13% kratkoročni smještaj, 25% usluge, 0% dugoročni najam'))
+    vat_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0,
+                                     verbose_name=_('PDV iznos'))
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_('Podnos'))
     tourist_tax_total = models.DecimalField(max_digits=8, decimal_places=2, default=0,
                                              verbose_name=_('Boravisna pristojba'))
@@ -246,7 +251,11 @@ class Booking(models.Model):
         self.subtotal = self.price_per_night * nights
         self.tourist_tax_total = self.rental_property.tourist_tax * self.guest_count * nights
         self.cleaning_fee = self.rental_property.cleaning_fee
-        self.total_price = self.subtotal + self.tourist_tax_total + self.cleaning_fee
+        # PDV na smještaj (čl. 38 st. 3 Zakona o PDV-u)
+        from decimal import Decimal as D
+        vat_rate = D(str(self.vat_rate or 13))
+        self.vat_amount = (self.subtotal * vat_rate / D('100')).quantize(D('0.01'))
+        self.total_price = self.subtotal + self.vat_amount + self.tourist_tax_total + self.cleaning_fee
         return self.total_price
 
     @property

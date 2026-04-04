@@ -181,7 +181,7 @@ def generate_pdv_s_from_tax_period(company, year, month, user=None):
         company=company,
         date_issued__year=year,
         date_issued__month=month,
-        doctype__in=['R', 'A', 'FA', 'RN', 'GS']  # Samo porezni dokumenti — PO/P nisu porezni (čl. 78 ZoPDV),
+        doctype__in=['R', 'A', 'S', 'FA', 'RN', 'GS'],  # Porezni dokumenti + storno korekcija (čl. 78+79a ZoPDV)
     ).exclude(status__in=['DRAFT', 'CANCELLED', 'STORNO'])
 
     pdv_data = generate_pdv_s(company, year, month, invoices_in, invoices_out)

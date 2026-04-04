@@ -1275,6 +1275,19 @@ def book_pos_session(session, user=None):
 
     company = session.terminal.company
 
+    # Check period lock (N4 fix)
+    from .models import AccountingPeriod
+    session_date = (session.closed_at or session.opened_at)
+    if hasattr(session_date, 'date'):
+        session_date = session_date.date()
+    if AccountingPeriod.is_period_locked(company, session_date.year, session_date.month):
+        import logging
+        logging.getLogger('konto').warning(
+            'POS booking BLOCKED: period %d/%d is locked for %s (session #%s)',
+            session_date.year, session_date.month, company.name, session.session_number
+        )
+        return None  # Period locked — cannot book
+
     # Check if already booked
     prefix = f"POS-{session.terminal.terminal_code}-{session.session_number}"
     if JournalEntry.objects.filter(company=company, entry_number__startswith=prefix).exists():
@@ -1659,3 +1672,84 @@ def calculate_koerperschaftsteuer(company, year):
         'total_tax': float(total_tax),
         'effective_rate': round(effective_rate, 1),
     }
+
+
+def book_rental_booking(booking, user=None):
+    """Book a rental booking into the ledger.
+
+    Kratkoročni najam 500€ + PDV 65€ + boravišna pristojba 30€:
+      D: 1200 Potraživanja od gostiju        595,00€
+      P: 7100 Prihodi od najma               500,00€
+      P: 2400 Obveze za PDV                   65,00€
+      D: 2500 Obveze za boravišnu pristojbu   30,00€ (prolazna stavka)
+      P: 1200 Potraživanja (pristojba)        30,00€
+    """
+    from .models import KontoAccount, JournalEntry, LedgerLine
+    from decimal import Decimal
+
+    company = booking.rental_property.company if hasattr(booking.rental_property, 'company') else None
+    if not company:
+        return None
+
+    # Check if already booked
+    prefix = f'RNT-{booking.pk}'
+    if JournalEntry.objects.filter(company=company, entry_number__startswith=prefix).exists():
+        return None
+
+    subtotal = Decimal(str(booking.subtotal or 0))
+    vat = Decimal(str(getattr(booking, 'vat_amount', 0) or 0))
+    tourist_tax = Decimal(str(booking.tourist_tax_total or 0))
+    total_guest = subtotal + vat  # What guest pays for accommodation
+
+    if total_guest <= 0:
+        return None
+
+    je = JournalEntry.objects.create(
+        company=company,
+        entry_number=_next_entry_number(company, 'RNT'),
+        date=booking.check_in,
+        description=f'Najam {booking.rental_property.name} — {booking.guest_name} ({booking.check_in}–{booking.check_out})',
+        source_type='manual',
+        is_posted=True,
+        created_by=user,
+    )
+
+    # D: Potraživanja od gostiju
+    recv, _ = KontoAccount.objects.get_or_create(
+        company=company, code='1200',
+        defaults={'name': 'Potraživanja od kupaca', 'account_type': 'asset'})
+    LedgerLine.objects.create(
+        journal_entry=je, account=recv, side='debit',
+        amount=total_guest + tourist_tax,
+        description=f'Gost: {booking.guest_name}')
+
+    # P: Prihodi od najma
+    rev, _ = KontoAccount.objects.get_or_create(
+        company=company, code='7100',
+        defaults={'name': 'Prihodi od najma', 'account_type': 'income'})
+    LedgerLine.objects.create(
+        journal_entry=je, account=rev, side='credit',
+        amount=subtotal,
+        description=f'Najam {booking.check_in}–{booking.check_out}')
+
+    # P: PDV
+    if vat > 0:
+        vat_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code='2400',
+            defaults={'name': 'Obveze za PDV', 'account_type': 'liability'})
+        LedgerLine.objects.create(
+            journal_entry=je, account=vat_acct, side='credit',
+            amount=vat,
+            description=f'PDV najam {booking.guest_name}')
+
+    # Tourist tax: D:2500 / P:2500 (prolazna stavka — naplaćujemo za općinu)
+    if tourist_tax > 0:
+        tax_acct, _ = KontoAccount.objects.get_or_create(
+            company=company, code='2500',
+            defaults={'name': 'Obveze za boravišnu pristojbu', 'account_type': 'liability'})
+        LedgerLine.objects.create(
+            journal_entry=je, account=tax_acct, side='credit',
+            amount=tourist_tax,
+            description=f'Boravišna pristojba {booking.guest_name}')
+
+    return je

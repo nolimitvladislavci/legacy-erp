@@ -643,7 +643,8 @@ class TravelOrder(models.Model):
     per_diem_rate = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal("26.55"))
     per_diem_days = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     per_diem_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    mileage_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.40"))
+    mileage_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.30"),
+                                        help_text='HR: 0.20 EUR/km | DE: 0.30 EUR/km (§9 EStG, >20km: 0.38)')
     mileage_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     other_costs = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -664,8 +665,16 @@ class TravelOrder(models.Model):
         return f"{self.order_number} - {self.destination}"
 
     def calculate_costs(self):
+        from decimal import Decimal as D
         self.per_diem_total = self.per_diem_days * self.per_diem_rate
-        self.mileage_total = self.distance_km * self.mileage_rate
+        # DE tiered mileage: §9 Abs.1 EStG — 0.30 EUR/km (0-20km), 0.38 EUR/km (>20km)
+        country = getattr(self.company, 'country', 'HR') if self.company else 'HR'
+        if country == 'DE' and self.distance_km > 20:
+            first_20 = D('20') * D('0.30')
+            rest = (self.distance_km - D('20')) * D('0.38')
+            self.mileage_total = (first_20 + rest).quantize(D('0.01'))
+        else:
+            self.mileage_total = self.distance_km * self.mileage_rate
         self.total_cost = self.per_diem_total + self.mileage_total + self.other_costs
 
     def save(self, *args, **kwargs):

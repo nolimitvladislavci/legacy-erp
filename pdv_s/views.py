@@ -38,7 +38,7 @@ def pdv_s_report(request):
             company=company,
             date_issued__year=year,
             date_issued__month=month,
-            doctype__in=['R', 'PO', 'P', 'A', 'FA', 'RN', 'IRA'],
+            doctype__in=['R', 'A', 'S', 'FA', 'RN', 'GS'],  # Porezni dokumenti + storno (čl.78+79a ZoPDV)
         ).exclude(status__in=['DRAFT', 'CANCELLED', 'STORNO'])
 
         pdv_data = generate_pdv_s(company, year, month, invoices_in, invoices_out)

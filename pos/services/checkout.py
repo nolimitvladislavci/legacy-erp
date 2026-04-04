@@ -312,6 +312,34 @@ class CheckoutService:
         else:
             split_payments = None  # Legacy mode
 
+        # ── 1a. AML PROVJERA — ZSPNFT NN 108/2017 čl.9 ──
+        # Sve gotovinske transakcije >= 10.000 EUR moraju biti prijavljene URPP-u
+        AML_CASH_THRESHOLD = Decimal('10000')
+        cash_total = Decimal('0')
+        if split_payments:
+            cash_total = sum(p['amount'] for p in split_payments if p['method'] == 'CASH')
+        elif payment_method == 'CASH':
+            cash_total = amount_paid if amount_paid > 0 else Decimal('999999')  # Will be set later
+
+        if cash_total >= AML_CASH_THRESHOLD:
+            # Log AML alert — ne blokiramo naplatu ali logiramo obavezno
+            logger.warning(
+                'AML ALERT: Gotovinska transakcija %.2f EUR >= 10.000 EUR | Firma: %s | User: %s',
+                cash_total, company.name, user.username
+            )
+            try:
+                from core.notify import notify
+                notify('CRITICAL', (
+                    f'🚨 *AML UPOZORENJE*\n\n'
+                    f'Gotovinska transakcija: *{cash_total:.2f} EUR*\n'
+                    f'Firma: {company.name}\n'
+                    f'Blagajnik: {user.get_full_name() or user.username}\n\n'
+                    f'ZSPNFT NN 108/2017 čl.9: Obaveza prijave URPP-u.\n'
+                    f'Kontaktirajte računovođu ODMAH.'
+                ))
+            except Exception:
+                pass
+
         # ── 1b. DE 250 EUR KLEINBETRAGSRECHNUNG LIMIT ──
         # §33 UStDV: Bon > 250 EUR bruto MORA imati podatke kupca
         if (company.country in ('DE', 'AT')
